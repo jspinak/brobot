@@ -4,32 +4,34 @@ import styles from './HomepageFeatures.module.css';
 
 const FeatureList = [
   {
-    title: 'Easy to Use',
+    title: 'Testable',
     Svg: require('../../static/img/undraw_docusaurus_mountain.svg').default,
     description: (
       <>
-        Docusaurus was designed from the ground up to be easily installed and
-        used to get your website up and running quickly.
+          Image-based process automation is usually developed
+          through trial and error. In brobot, stochastic process flows
+          can be mocked and tested.
+
       </>
     ),
   },
   {
-    title: 'Focus on What Matters',
+    title: 'State-based',
     Svg: require('../../static/img/undraw_docusaurus_tree.svg').default,
     description: (
       <>
-        Docusaurus lets you focus on your docs, and we&apos;ll do the chores. Go
-        ahead and move your docs into the <code>docs</code> directory.
+        Graphical environments are classified into <code>states</code>. This
+          allows for navigation of the environment similar to the way in which
+          an html site would be navigated by using its <code>pages</code>.
       </>
     ),
   },
   {
-    title: 'Powered by React',
+    title: 'Powered by Sikuli',
     Svg: require('../../static/img/undraw_docusaurus_react.svg').default,
     description: (
       <>
-        Extend or customize your website layout by reusing React. Docusaurus can
-        be extended while reusing the same header and footer.
+        brobot uses Sikuli to interact with the GUI.
       </>
     ),
   },
