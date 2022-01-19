@@ -11,142 +11,99 @@ and always appear when the state is active. A state image's location on-screen m
 A state has an enum called Name that is used throughout the application to refer to the state. Every state
 starts with an enum declaration:
 
+## Home
 
+The snapshot defined with the StateImageObject toWorldButton gives the location we 
+expect to find this object. Snapshots represent possible locations for the image, and 
+when there is more than one a match will be chosen randomly from all snapshots.   
 
+When a StateImageObject is fixed, it is expected to be found in the same location every time.  
 
-## Front Matter
-
-Markdown documents have metadata at the top called [Front Matter](https://jekyllrb.com/docs/front-matter/):
-
-```text title="my-doc.md"
-// highlight-start
----
-id: my-doc-id
-title: My document title
-description: My document description
-slug: /my-custom-url
----
-// highlight-end
-
-## Markdown heading
-
-Markdown text with [links](./hello.md)
-```
-
-## Links
-
-Regular Markdown links are supported, using url paths or relative file paths.
-
-```md
-Let's see how to [Create a page](/create-a-page).
-```
-
-```md
-Let's see how to [Create a page](./create-a-page.md).
-```
-
-**Result:** Let's see how to [Create a page](./create-a-page.md).
-
-## Images
-
-Regular Markdown images are supported.
-
-Add an image at `static/img/docusaurus.png` and display it in Markdown:
-
-```md
-![Docusaurus logo](/img/docusaurus.png)
-```
-
-![Docusaurus logo](/img/docusaurus.png)
-
-## Code Blocks
-
-Markdown code blocks are supported with Syntax highlighting.
-
-    ```jsx title="src/components/HelloDocusaurus.js"
-    function HelloDocusaurus() {
-        return (
-            <h1>Hello, Docusaurus!</h1>
-        )
+    @Component
+    @Getter
+    public class Home {
+    
+        public enum Name implements StateEnum {
+            HOME
+        }
+    
+        private StateImageObject toWorldButton = new StateImageObject.Builder()
+                .withImage("toWorldButton")
+                .isFixed()
+                .addSnapshot(new MatchSnapshot(220, 600, 20, 20))
+                .build();
+    
+        private State state = new State.Builder(HOME)
+                .withImages(toWorldButton)
+                .build();
+    
+        private Home(StateService stateService) { stateService.save(state); }
     }
-    ```
 
-```jsx title="src/components/HelloDocusaurus.js"
-function HelloDocusaurus() {
-  return <h1>Hello, Docusaurus!</h1>;
-}
-```
+## World
 
-## Admonitions
+If a StateImageObject has no snapshots, the locations of matches will be
+determined using probabilities. 
 
-Docusaurus has a special syntax to create admonitions and callouts:
+    @Component
+    @Getter
+    public class World {
+    
+        public enum Name implements StateEnum {
+            WORLD
+        }
+    
+        private StateImageObject searchButton = new StateImageObject.Builder()
+                .withImage("searchButton")
+                .isFixed()
+                .build();
+    
+        private State state = new State.Builder(Name.WORLD)
+                .withImages(searchButton)
+                .build();
+    
+        public World(StateService stateService) { stateService.save(state); }
+    }
 
-    :::tip My tip
+## Island
 
-    Use this awesome feature option
+Images can be defined with multiple image files.  
 
-    :::
+The action GetText references only GetText snapshots. Every snapshot
+has an action associated with it; default snapshots (without an explicitly defined
+action) are built as the result of Find operations. A GetText snapshot for a StateRegion
+gives the expected text to find when performing a GetText action on the StateRegion. 
+In our GetText snapshot, we have included a few different expected text results. Some of
+them are misspelled to simulate the stochasticity of real execution, in which text is 
+not always found as it appears on-screen.  
 
-    :::danger Take care
-
-    This action is dangerous
-
-    :::
-
-:::tip My tip
-
-Use this awesome feature option
-
-:::
-
-:::danger Take care
-
-This action is dangerous
-
-:::
-
-## MDX and React Components
-
-[MDX](https://mdxjs.com/) can make your documentation more **interactive** and allows using any **React components inside Markdown**:
-
-```jsx
-export const Highlight = ({children, color}) => (
-  <span
-    style={{
-      backgroundColor: color,
-      borderRadius: '20px',
-      color: '#fff',
-      padding: '10px',
-      cursor: 'pointer',
-    }}
-    onClick={() => {
-      alert(`You clicked the color ${color} with label ${children}`)
-    }}>
-    {children}
-  </span>
-);
-
-This is <Highlight color="#25c2a0">Docusaurus green</Highlight> !
-
-This is <Highlight color="#1877F2">Facebook blue</Highlight> !
-```
-
-export const Highlight = ({children, color}) => (
-  <span
-    style={{
-      backgroundColor: color,
-      borderRadius: '20px',
-      color: '#fff',
-      padding: '10px',
-      cursor: 'pointer',
-    }}
-    onClick={() => {
-      alert(`You clicked the color ${color} with label ${children}`);
-    }}>
-    {children}
-  </span>
-);
-
-This is <Highlight color="#25c2a0">Docusaurus green</Highlight> !
-
-This is <Highlight color="#1877F2">Facebook blue</Highlight> !
+    @Component
+    @Getter
+    public class Island {
+    
+        public enum Name implements StateEnum {
+            ISLAND
+        }
+    
+        private StateImageObject islandName = new StateImageObject.Builder()
+                .withImage("castle", "mines", "farms", "forest", "mountains", "lakes")
+                .called("island type text")
+                .isFixed()
+                .build();
+        private StateRegion islandRegion = new StateRegion.Builder()
+                .called("island region")
+                .addSnapshot(new MatchSnapshot.Builder()
+                        .setActionOptions(ActionOptions.Action.GET_TEXT)
+                        .addString("Mines")
+                        .addString("Lakess")
+                        .addString("Farmz")
+                        .build())
+                .build();
+    
+        private State state = new State.Builder(Name.ISLAND)
+                .withImages(islandName)
+                .withRegions(islandRegion)
+                .build();
+    
+        private Island(StateService stateService) { stateService.save(state); }
+    }

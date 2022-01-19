@@ -21,7 +21,7 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * BasicActions, which run for 1 iteration, require <=1 Find operation.
+ * BasicActions, which run for 1 iteration, require 1 or no Find operations.
  * They can be used as building blocks for CompositeActions.
  */
 @Component

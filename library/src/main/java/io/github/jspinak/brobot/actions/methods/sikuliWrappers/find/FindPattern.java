@@ -16,7 +16,7 @@ import java.util.Optional;
 
 /**
  * Contains functions to find one or all Matches given an Image and a Region.
- * Converts Sikuli find operations to Optional<Match> or Matches.
+ * Converts Sikuli find operations to {@code Optional<Match>} or Matches.
  * Does not mock.
  */
 @Component

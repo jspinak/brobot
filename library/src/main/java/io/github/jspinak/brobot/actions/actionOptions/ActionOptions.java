@@ -59,7 +59,7 @@ public class ActionOptions {
      * UNIVERSAL: used for mocking. Initializing an Image with a UNIVERSAL Find allows it
      *   to be accessed by an operation of FIRST, EACH, ALL, and BEST.
      * CUSTOM: user-defined. Must be of type
-     *         BiFunction<ActionOptions, List<StateImageObject>, Matches>>
+     *         {@code BiFunction<ActionOptions, List<StateImageObject>, Matches>>}
      *
      * The options that return multiple Matches allow for overlapping Matches.
      */

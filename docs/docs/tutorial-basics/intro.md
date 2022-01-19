@@ -1,35 +1,41 @@
 ---
-sidebar_position: 2
+sidebar_position: 1
 ---
 
-# Tutorial Intro
+# Intro
 
-Let's discover **Docusaurus in less than 5 minutes**.
+This tutorial should take about **20 minutes**.  
 
-## Getting Started
+We're going to develop a small Brobot application that will:  
+- showcase basic state-based automation
+- automate the creation of a labeled data set  
 
-Get started by **creating a new site**.
+We will control a mobile game in an emulator, and capture regional screenshots at 
+specific times.
+Brobot will know where it is in the game, which will allow it to label the data correctly. 
+In the end we will 
+have a small collection of labeled images that we can use to train and test our 
+machine learning models.
 
-Or **try Docusaurus immediately** with **[docusaurus.new](https://docusaurus.new)**.
+## Requirements
 
-## Generate a new site
+The [Sikuli](http://sikulix.com/) IDE is a great tool for capturing images on your screen. Using the IDE,
+you can toggle an image's similarity score to see how it affects the matches found.
+This will give you a better feeling for the minimum similarity to use in different 
+situations.  
 
-Generate a new Docusaurus site using the **classic template**:
+It is not recommended to call Sikuli functions directly when using Brobot. Doing so
+will bypass Brobot's mocking capabilities and permit your application to execute
+real commands during a mock run.  
 
-```shell
-npm init docusaurus@latest my-website classic
-```
-
-## Start your site
-
-Run the development server:
-
-```shell
-cd my-website
-
-npx docusaurus start
-```
-
-Your site starts at `http://localhost:3000`.
-
-Open `docs/intro.md` and edit some lines: the site **reloads automatically** and displays your changes.
+This demo is meant as an introduction to the Brobot library 
+and as a demonstration of its mocking functionality. It can be run
+in any Java IDE on Windows, Mac, or Linux with mocking enabled. 
+You can see the real execution in the 
+[live automation video](/docs/tutorial-basics/live-automation).
+If you wish to run the demo application with mocking disabled, there are
+a few additional requirements. 
+The emulator, the 64 bit
+version of LDPlayer, works only on Windows machines. The mobile game, Dawn of Titans,
+requires you to go through a game tutorial before you get to the point where you could 
+execute a real run of the demo program.

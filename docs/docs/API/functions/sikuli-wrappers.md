@@ -4,6 +4,9 @@ sidebar_position: 3
 
 # Wrappers
 
+Wrapper classes serve as the interface between Brobot and other libraries that
+perform real operations. The typical Brobot application will not call Wrappers directly. 
+
 All Wrappers handle real and mock operations. If mocking is active, a 
 mock will be performed. When mocking is not active, operations will
 be carried out using modules that perform a real action. If the class is 
