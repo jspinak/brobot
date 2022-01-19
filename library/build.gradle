@@ -1,0 +1,101 @@
+plugins {
+    id 'org.springframework.boot' version '2.6.0' apply false
+    id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+    id 'java-library'
+    id 'maven-publish'
+    id 'signing'
+}
+
+group 'io.github.jspinak'
+version '1.0.1'
+
+repositories {
+    mavenCentral()
+}
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+dependencyManagement {
+    imports {
+        mavenBom org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES
+    }
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter'
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+    implementation('com.sikulix:sikulixapi:2.0.5') {
+        exclude group: 'org.slf4j', module: 'slf4j-nop'
+    }
+}
+
+java {
+    withJavadocJar()
+    withSourcesJar()
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+
+            groupId = 'io.github.jspinak'
+            artifactId = 'brobot'
+            version = '1.0.1'
+            from components.java
+
+            pom {
+                name = 'brobot'
+                description = 'testable state-based automation'
+                url = 'https://github.com/jspinak/brobot'
+                inceptionYear = '2022'
+
+                licenses {
+                    license {
+                        name = 'MIT license'
+                        url = 'http://www.opensource.org/licenses/mit-license.php'
+                    }
+                }
+
+                developers {
+                    developer {
+                        id = 'jspinak'
+                        name = 'Joshua Spinak'
+                        email = 'jspinak@hotmail.com'
+                    }
+                }
+
+                scm {
+                    connection = 'scm:git:git:github.com/jspinak/brobot.git'
+                    developerConnection = 'scm:git"ssh//github.com:jspinak/brobot.git'
+                    url = 'https://github.com/jspinak/brobot'
+                }
+            }
+        }
+    }
+
+    repositories {
+        maven {
+            name = "OSSRH"
+            url = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
+            credentials {
+                username = project.properties["ossrhUsername"]
+                password = project.properties["ossrhPassword"]
+            }
+        }
+    }
+}
+
+signing {
+    sign publishing.publications.mavenJava
+}
+
+javadoc {
+    if(JavaVersion.current().isJava9Compatible()) {
+        options.addBooleanOption('html5', true)
+    }
+}
