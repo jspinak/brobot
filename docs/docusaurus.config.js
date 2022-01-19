@@ -6,13 +6,13 @@ const darkCodeTheme = require('prism-react-renderer/themes/dracula');
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
-  title: 'My Site',
-  tagline: 'Dinosaurs are cool',
+  title: 'Brobot',
+  tagline: 'Testable State-based Automation',
   url: 'https://jspinak.github.io',
   baseUrl: '/brobot/',
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
-  favicon: 'img/favicon.ico',
+  favicon: 'img/brobot-happy.ico',
   organizationName: 'jspinak', // Usually your GitHub org/user name.
   projectName: 'brobot', // Usually your repo name.
 
@@ -23,14 +23,12 @@ const config = {
       ({
         docs: {
           sidebarPath: require.resolve('./sidebars.js'),
-          // Please change this to your repo.
-          editUrl: 'https://github.com/facebook/docusaurus/edit/main/website/',
+          editUrl: 'https://jspinak.github.io/brobot/',
         },
         blog: {
           showReadingTime: true,
-          // Please change this to your repo.
           editUrl:
-            'https://github.com/facebook/docusaurus/edit/main/website/blog/',
+            'https://jspinak.github.io/brobot/blog/',
         },
         theme: {
           customCss: require.resolve('./src/css/custom.css'),
@@ -43,17 +41,29 @@ const config = {
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
       navbar: {
-        title: 'My Site',
+        title: 'Home',
         logo: {
           alt: 'My Site Logo',
-          src: 'img/logo.svg',
+          src: 'img/brobot_logo/brobot-happy-text.svg',
         },
         items: [
           {
             type: 'doc',
-            docId: 'intro',
+            docId: 'introduction/introduction',
+            position: 'left',
+            label: 'Introduction',
+          },
+          {
+            type: 'doc',
+            docId: 'tutorial-basics/intro',
             position: 'left',
             label: 'Tutorial',
+          },
+          {
+            type: 'doc',
+            docId: 'API/overview',
+            position: 'left',
+            label: 'API',
           },
           {to: '/blog', label: 'Blog', position: 'left'},
           {
@@ -71,7 +81,7 @@ const config = {
             items: [
               {
                 label: 'Tutorial',
-                to: '/docs/intro',
+                to: '/docs/tutorial-basics/intro',
               },
             ],
           },
@@ -80,15 +90,11 @@ const config = {
             items: [
               {
                 label: 'Stack Overflow',
-                href: 'https://stackoverflow.com/questions/tagged/docusaurus',
-              },
-              {
-                label: 'Discord',
-                href: 'https://discordapp.com/invite/docusaurus',
+                href: 'https://stackoverflow.com/questions/tagged/brobot',
               },
               {
                 label: 'Twitter',
-                href: 'https://twitter.com/docusaurus',
+                href: 'https://twitter.com/brobotJosh',
               },
             ],
           },
@@ -101,12 +107,12 @@ const config = {
               },
               {
                 label: 'GitHub',
-                href: 'https://github.com/facebook/docusaurus',
+                href: 'https://github.com/jspinak/brobot',
               },
             ],
           },
         ],
-        copyright: `Copyright © ${new Date().getFullYear()} My Project, Inc. Built with Docusaurus.`,
+        copyright: `© ${new Date().getFullYear()} Joshua Spinak`,
       },
       prism: {
         theme: lightCodeTheme,

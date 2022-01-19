@@ -24,9 +24,6 @@ public class DefineHelper {
 
     /**
      * Adjust the defined region according to the ActionOptions.
-     *
-     * @param region
-     * @param actionOptions
      */
     public void adjust(Region region, ActionOptions actionOptions) {
         region.x += actionOptions.getAddX();

@@ -5,11 +5,11 @@ import styles from './HomepageFeatures.module.css';
 const FeatureList = [
   {
     title: 'Testable',
-    Svg: require('../../static/img/undraw_docusaurus_mountain.svg').default,
+    Svg: require('../../static/img/brobot_logo/brobotStanding2.svg').default, //undraw_docusaurus_mountain
     description: (
       <>
           Image-based process automation is usually developed
-          through trial and error. In brobot, stochastic process flows
+          through trial and error. In Brobot, stochastic process flows
           can be mocked and tested.
 
       </>
@@ -17,7 +17,7 @@ const FeatureList = [
   },
   {
     title: 'State-based',
-    Svg: require('../../static/img/undraw_docusaurus_tree.svg').default,
+    Svg: require('../../static/img/brobot_logo/brobot-serious.svg').default, // undraw_docusaurus_tree
     description: (
       <>
         Graphical environments are classified into <code>states</code>. This
@@ -28,10 +28,12 @@ const FeatureList = [
   },
   {
     title: 'Powered by Sikuli',
-    Svg: require('../../static/img/undraw_docusaurus_react.svg').default,
+    Svg: require('../../static/img/brobot_logo/rocket.svg').default, // undraw_docusaurus_react.svg
     description: (
       <>
-        brobot uses Sikuli to interact with the GUI.
+        Brobot uses Sikuli for automation tasks. Sikuli relies on
+          OpenCV for image recognition, the Java Robot class for controlling
+          the mouse and keyboard, and Tesseract for text recognition.
       </>
     ),
   },

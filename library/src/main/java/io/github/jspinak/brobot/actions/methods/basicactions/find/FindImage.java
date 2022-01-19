@@ -22,11 +22,9 @@ import java.util.List;
 public class FindImage implements FindImageObject {
 
     private FindWrapperMethods findWrapperMethods;
-    private AdjustMatches adjustMatches;
 
-    public FindImage(FindWrapperMethods findWrapperMethods, AdjustMatches adjustMatches) {
+    public FindImage(FindWrapperMethods findWrapperMethods) {
         this.findWrapperMethods = findWrapperMethods;
-        this.adjustMatches = adjustMatches;
     }
 
     public boolean stopAfterFound(ActionOptions actionOptions, Matches matches) {

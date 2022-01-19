@@ -32,14 +32,6 @@ public class CommonMultipleActions {
     /**
      * This method is similar to ClickUntil with the ActionOptions set for right clicks
      * and for moving after clicking.
-     * @param timesToClick
-     * @param pauseBetweenClicks
-     * @param pauseBeforeClick
-     * @param pauseAfterMove
-     * @param image
-     * @param xMove
-     * @param yMove
-     * @return
      */
     public boolean rightClickAndMoveUntilVanishes(int timesToClick, double pauseBetweenClicks,
                                                   double pauseBeforeClick, double pauseAfterMove,

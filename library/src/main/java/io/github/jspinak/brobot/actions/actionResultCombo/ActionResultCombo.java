@@ -17,7 +17,7 @@ import java.util.List;
  *          completion. For example, a Find operation is successful when it finds a Match. A Click
  *          operation is successful when it finds a Match and that Match is clickable (on the screen).
  *          Operational success in brobot can be modified; there is a variable in ActionOptions of
- *          type Predicate<Matches> that allows the user to implement her own success evaluation
+ *          type {@code Predicate<Matches>} that allows the user to implement her own success evaluation
  *          method.
  *        Environmental Success: The success of an operation as measured by some result in the
  *          environment. For example, a Click may succeed operationally but not be registered by the

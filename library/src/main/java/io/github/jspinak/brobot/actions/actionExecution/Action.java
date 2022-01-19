@@ -47,9 +47,6 @@ public class Action {
 
     /**
      * The default ActionOptions is a Find Action.
-     *
-     * @param stateImageObjects
-     * @return Matches
      */
     public Matches find(StateImageObject... stateImageObjects) {
         return perform(new ActionOptions(), stateImageObjects);
@@ -57,9 +54,6 @@ public class Action {
 
     /**
      * The default ActionOptions is a Find Action.
-     *
-     * @param objectCollections
-     * @return Matches
      */
     public Matches find(ObjectCollection... objectCollections) {
         return perform(new ActionOptions(), objectCollections);
@@ -67,10 +61,6 @@ public class Action {
 
     /**
      * All StateImageObjects are placed in the first ObjectCollection.
-     *
-     * @param actionOptions
-     * @param stateImageObjects
-     * @return Matches
      */
     public Matches perform(ActionOptions actionOptions, StateImageObject... stateImageObjects) {
         return perform(actionOptions, new ObjectCollection.Builder().withImages(stateImageObjects).build());
@@ -79,9 +69,6 @@ public class Action {
     /**
      * Perform an Action on an empty Object Collections. This method is necessary since there
      * are two different methods that take ActionOptions and a varargs parameter.
-     *
-     * @param actionOptions
-     * @return Matches
      */
     public Matches perform(ActionOptions actionOptions) {
         return perform(actionOptions, new ObjectCollection.Builder().build());
@@ -89,10 +76,6 @@ public class Action {
 
     /**
      * Perform an Action with default options.
-     *
-     * @param action
-     * @param objectCollections
-     * @return Matches
      */
     public Matches perform(ActionOptions.Action action, ObjectCollection... objectCollections) {
         return perform(new ActionOptions.Builder().setAction(action).build(), objectCollections);
@@ -101,10 +84,6 @@ public class Action {
     /**
      * Perform an Action with default options.
      * All StateImageObjects are placed in the first ObjectCollection.
-     *
-     * @param action
-     * @param stateImageObjects
-     * @return Matches
      */
     public Matches perform(ActionOptions.Action action, StateImageObject... stateImageObjects) {
         return perform(new ActionOptions.Builder().setAction(action).build(), stateImageObjects);
@@ -112,9 +91,6 @@ public class Action {
 
     /**
      * Perform an Action with default options and no associated ObjectCollections.
-     *
-     * @param action
-     * @return Matches
      */
     public Matches perform(ActionOptions.Action action) {
         return perform(new ActionOptions.Builder().setAction(action).build(), new ObjectCollection.Builder().build());

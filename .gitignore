@@ -1,1 +1,10 @@
+# IDE
+/**/.idea/*
+/**/shelf/
+
+# Production
+/library/.gradle
+/**/build
+
+# Maven Central
 /library/gradle.properties

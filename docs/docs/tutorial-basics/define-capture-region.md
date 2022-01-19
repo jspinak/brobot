@@ -2,20 +2,44 @@
 sidebar_position: 6
 ---
 
-# Congratulations!
+# Define the Capture Region
 
-You have just learned the **basics of Docusaurus** and made some changes to the **initial template**.
+We now need to define the region where we will capture the image of the island. 
+The island always appears near the search button, so we use the search button's
+location to define our island region.   
 
-Docusaurus has **much more to offer**!
-
-Have **5 more minutes**? Take a look at **[versioning](../tutorial-extras/manage-docs-versions.md)** and **[i18n](../tutorial-extras/translate-your-site.md)**.
-
-Anything **unclear** or **buggy** in this tutorial? [Please report it!](https://github.com/facebook/docusaurus/discussions/4610)
-
-## What's next?
-
-- Read the [official documentation](https://docusaurus.io/).
-- Add a custom [Design and Layout](https://docusaurus.io/docs/styling-layout)
-- Add a [search bar](https://docusaurus.io/docs/search)
-- Find inspirations in the [Docusaurus showcase](https://docusaurus.io/showcase)
-- Get involved in the [Docusaurus Community](https://docusaurus.io/community/support)
+    @Component
+    public class IslandRegion {
+    
+        private final Action action;
+        private final World world;
+        private final Island island;
+    
+        public IslandRegion(Action action, World world, Island island) {
+            this.action = action;
+            this.world = world;
+            this.island = island;
+        }
+    
+        public boolean defined() {
+            if (island.getIslandRegion().defined()) return true;
+            ActionOptions define = new ActionOptions.Builder()
+                    .setAction(ActionOptions.Action.DEFINE)
+                    .setDefineAs(ActionOptions.DefineAs.MATCH)
+                    .setAddX(-50)
+                    .setAddY(-250)
+                    .setAbsoluteWidth(200)
+                    .setAbsoluteHeight(200)
+                    .build();
+            ObjectCollection searchButton = new ObjectCollection.Builder()
+                    .withImages(world.getSearchButton())
+                    .build();
+            Region reg = action.perform(define, searchButton).getDefinedRegion();
+            island.getIslandRegion().setSearchRegion(reg);
+            return island.getIslandRegion().defined();
+        }
+    
+        public Region getRegion() {
+            return island.getIslandRegion().getSearchRegion();
+        }
+    }

@@ -34,10 +34,6 @@ public class CommonDrag {
     /**
      * Allows for dragging to multiple points by performing multiple Drag Actions.
      * This could be converted into a CompositeAction (Action == DRAGS).
-     *
-     * @param from
-     * @param to
-     * @return
      */
     public Matches drag(StateImageObject from, Location... to) {
         Matches matches = new Matches();

@@ -2,13 +2,13 @@
 sidebar_position: 1
 ---
 
-# In a Nutshell
+# Why Brobot?
 
-Brobot makes it easier to develop complex GUI automation. This is why.
+Brobot makes it easier to develop complex GUI automation. 
 
 # GUI Processes
 
-First, a brief introduction of what a GUI automation app is: it is a
+A GUI automation application is a
 program that sees what a human would see and interacts with the
 computer by using the mouse and keyboard. Common examples of GUI automation apps
 are testing applications for other software and bots that play games autonomously.
@@ -65,5 +65,5 @@ automation, potential errors are everywhere. Recognizing the minimize window but
 by mistake could result in a minimized program window and your automation
 app being unable to continue. Another program could pop up a window in front of your
 target program to ask the user to confirm an update. The existence of uncertainty
-is what defines this process as stochastic, and it makes the development of
-an automation app extremely complex. 
+is what defines this process as stochastic, and it adds a lot of complexity to 
+the development of automation applications. 
