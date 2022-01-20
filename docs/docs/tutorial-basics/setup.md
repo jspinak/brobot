@@ -66,14 +66,14 @@ by your Brobot application. This folder holds the output of your application.
 The folder structure should look like this (the build folder will be created
 automatically if using Gradle):  
 
-<img src="https://github.com/jspinak/brobot/tree/main/docs/static/img/demo-project-structure.png" alt="project structure" width="200"/>
+<img src="https://jspinak.github.io/brobot/img/demo-project-structure.png" alt="project structure" width="200"/>
 
 ## Capture Images with the Sikuli IDE
 
 Open the Sikuli IDE and in Sikuli, the folder 'images.sikuli'. Capture
 images from the screen with the following names:
 
-<img src="https://github.com/jspinak/brobot/tree/main/docs/static/img/image-names.png" alt="image names" width="200"/>
+<img src="https://jspinak.github.io/brobot/img/image-names.png" alt="image names" width="200"/>
 
 To follow the tutorial to prepare mock runs, the captured images can be of anything.
 You can play around with the similarity score by clicking on an image
