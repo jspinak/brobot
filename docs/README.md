@@ -1,4 +1,4 @@
-![header](/img/brobot-landscape3.png)
+<img src="https://jspinak.github.io/brobot/img/brobot-landscape3.png" alt="header"/>
 
 ## Introduction
 
