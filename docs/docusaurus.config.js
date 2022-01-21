@@ -109,6 +109,10 @@ const config = {
                 label: 'GitHub',
                 href: 'https://github.com/jspinak/brobot',
               },
+              {
+                label: 'YouTUbe',
+                href: 'https://www.youtube.com/channel/UCgRljq-lHkMLrzRzpJC4HNw',
+              },
             ],
           },
         ],
