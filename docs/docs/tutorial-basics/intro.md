@@ -17,6 +17,9 @@ In the end we will
 have a small collection of labeled images that we can use to train and test our 
 machine learning models.
 
+The complete code can be found in the GitHub repository 
+[brobot-demo-labeled-data-DOTislands](https://github.com/jspinak/brobot-demo-labeled-data-DOTislands).  
+
 ## Requirements
 
 The [Sikuli](http://sikulix.com/) IDE is a great tool for capturing images on your screen. Using the IDE,

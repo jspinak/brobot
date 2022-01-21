@@ -54,6 +54,13 @@ The full build.gradle file should look similar to this:
             annotationProcessor 'org.projectlombok:lombok'
             testImplementation 'org.springframework.boot:spring-boot-starter-test'
             implementation 'io.github.jspinak:brobot:1.0.1'
+            /*
+            There are some settings that can be changed in Sikuli and are not yet
+            replicated in Brobot.  
+             */
+            implementation('com.sikulix:sikulixapi:2.0.5') {
+                exclude group: 'org.slf4j', module: 'slf4j-nop'
+            }
         }
 
 ## Create Folders for Images
