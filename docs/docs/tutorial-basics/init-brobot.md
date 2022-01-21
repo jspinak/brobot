@@ -22,7 +22,7 @@ This needs just one line to specify the folder with images to reference,
 and one line to turn on mocking.
 
         // setup brobot
-        ImagePath.setBundlePath("DOTislands/images.sikuli");
+        ImagePath.setBundlePath("images.sikuli");
         BrobotSettings.mock = true;
 
 ## Set the Active States

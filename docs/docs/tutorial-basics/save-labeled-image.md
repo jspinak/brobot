@@ -32,7 +32,7 @@ type, and save it to file.
         }
     
         public void saveImages(int maxImages) {
-            String directory = "DOTislands/labeledImages/";
+            String directory = "labeledImages/";
             if (!stateTransitionsManagement.openState(ISLAND)) return;
             for (int i=0; i<maxImages; i++) {
                 String newIslandType = getNewIsland.getIsland();
