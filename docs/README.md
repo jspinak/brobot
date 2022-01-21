@@ -1,9 +1,6 @@
-<h1 align="center">
-  <p align="center">Brobot</p>
-  <a href="https://jspinak.github.io/brobot"><img src="https://jspinak.github.io/brobot/img/brobot-landscape4.png" alt="Brobot"></a>
-</h1>
+<a href="https://jspinak.github.io/brobot"><img src="https://jspinak.github.io/brobot/img/brobot-landscape4.png" alt="Brobot"></a>
 
-See the [Brobot website](https://jspinak.github.io/brobot/) for more details.  
+See the [website](https://jspinak.github.io/brobot/) for more details.  
 
 ## Introduction
 
