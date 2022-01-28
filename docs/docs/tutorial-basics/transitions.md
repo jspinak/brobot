@@ -15,7 +15,7 @@ will be accessed needs a StateTransitions class.
         private final Action action;
         private final Home home;
     
-        StateTransitions transitions;
+        private StateTransitions transitions;
     
         public HomeTransitions(StateTransitionsRepository stateTransitionsRepository,
                                Action action, Home home) {
@@ -45,7 +45,7 @@ a special option: in this transition the World state stays visible.
         private final Action action;
         private final World world;
     
-        StateTransitions transitions;
+        private StateTransitions transitions;
     
         public WorldTransitions(StateTransitionsRepository stateTransitionsRepository,
                                 Action action, World world) {
@@ -91,7 +91,7 @@ a special option: in this transition the World state stays visible.
         private final Action action;
         private final Island island;
     
-        StateTransitions transitions;
+        private StateTransitions transitions;
     
         public IslandTransitions(StateTransitionsRepository stateTransitionsRepository,
                                  Action action, Island island) {
