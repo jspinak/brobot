@@ -16,8 +16,8 @@ function HomepageHeader() {
         <div className={styles.buttons}>
           <Link
             className="button button--secondary button--lg"
-            to="/docs/tutorial-basics/intro">
-            Brobot Tutorial - ️20 min ⏱
+            to="https://www.youtube.com/watch?v=aHnVQ8KmOVw">
+            Introduction Video - ️13 min ⏱
           </Link>
         </div>
           <div>Free, open source, and built with care for researchers and the entire AI community.</div>
