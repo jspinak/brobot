@@ -8,7 +8,7 @@ Mocking is used for application testing when making calls to a third-party API t
 developer cannot control. For example, calls to an external database can be mocked in the
 test methods in order to simulate real data. Mocking in brobot is similar to this idea.
 Brobot uses Sikuli for interacting with the GUI and wraps every Sikuli method that it
-calls to be able to produce a mock instead of a real action. A brobot applications can then
+calls to be able to produce a mock instead of a real action. A Brobot application can then
 be mocked to produce text outputs and is run exactly as it would otherwise. The higher level
 code in a brobot application does not know if it is running live or in a mock. The mocks
 happen only at the wrapper level and the wrappers return the same outputs as they would
