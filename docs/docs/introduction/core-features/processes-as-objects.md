@@ -8,9 +8,9 @@ Interacting with the GUI is not as simple as 'find' and 'click'. There are a lot
 parameters involved. For example, a 'find' operation depends on settings such as the
 minimum similarity required for the match to be accepted, the max amount of time to
 search before giving up, and the region in which to search, as well as other parameters.
-Building a library such as brobot while using processes as functions would create either an
+Building a library such as Brobot while using processes as functions would create either an
 exploding web of methods or methods with extremely long parameter lists. It would be
-unwieldly to use and complicated to develop.
+unwieldy to use and complicated to develop.
 
 Processes as objects has an additional advantage in that it allows a interactive process
 to be treated as the combination of building blocks. This is important because brobot
@@ -26,13 +26,13 @@ Including pauses as options and not as a separate action was a deliberate design
 Having a pause method allows the programmer to think in a more procedural manner: for example,
 do A and then wait a bit and then do B. Brobot's design incentivizes the
 programmer to think about the process as discrete process objects that can be combined and
-recombined in many different configurations. Brobot provides a framework for a semi-intelligent
+recombined in different configurations. Brobot provides a framework for a semi-intelligent
 automation and not just for automating a static process flow.
 
 Treating processes as objects also simplifies the creation of new composite actions out of the
 more basic process building blocks. For example, the composite action ClickUntil, which performs
 clicks until a condition is reached, is much simpler to create with the standard process
-objects in brobot.
+objects in Brobot.
 
 The main classes enabling this are:
 - ActionOptions: a collection of options that can be applied to any action (for example, min similarity).
@@ -40,7 +40,7 @@ The main classes enabling this are:
 - ObjectCollection: a collection of state objects that are used with the action.
 - Action: takes ActionOptions and ObjectCollections as parameters and executes the action specified
   in ActionOptions.
-- Matches: contains all of the results of the action linked to the corresponding objects in the
+- Matches: contains all the results of the action linked to the corresponding objects in the
   ObjectCollection.
 
 An example (this defines a region around a match):
