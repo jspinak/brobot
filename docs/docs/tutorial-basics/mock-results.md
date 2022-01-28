@@ -11,24 +11,24 @@ sidebar_position: 9
     Find path: [WORLD] -> ISLAND
     _(score)_Paths Found_
     (2)-> WORLD -> ISLAND
-    |CLICK WORLD.kampfSuchen| Find.FIRST 36:05 found=true <click> wait-0,2 <click> CLICK ✓
+    |CLICK WORLD.searchButton| Find.FIRST 36:05 found=true <click> wait-0,2 <click> CLICK ✓
     states to activate: [ISLAND]
     |FIND ISLAND.island type text| Find.FIRST 36:05 found=true + add ISLAND to active states FIND ✓
     ✓ Transition WORLD->ISLAND successful.
     Active States: [WORLD, ISLAND]
 
-    |CLICK WORLD.kampfSuchen| Find.FIRST 36:05 found=true <click> wait-0,2 <click> CLICK ✓
+    |CLICK WORLD.searchButton| Find.FIRST 36:05 found=true <click> wait-0,2 <click> CLICK ✓
     |GET_TEXT wait-3,0 Find.FIRST GET_TEXT ✓
     text = Mines
     |DEFINE Define as: MATCH| DEFINE ✓
     Save file with base path DOTislands/labeledImages/Mines
     
-    |CLICK WORLD.kampfSuchen| Find.FIRST 36:09 found=true <click> wait-0,2 <click> CLICK ✓
+    |CLICK WORLD.searchButton| Find.FIRST 36:09 found=true <click> wait-0,2 <click> CLICK ✓
     |GET_TEXT wait-3,0 Find.FIRST GET_TEXT ✓
     text = Farms
     Save file with base path DOTislands/labeledImages/Farms
     
-    |CLICK WORLD.kampfSuchen| Find.FIRST 36:12 found=true <click> wait-0,2 <click> CLICK ✓
+    |CLICK WORLD.searchButton| Find.FIRST 36:12 found=true <click> wait-0,2 <click> CLICK ✓
     |GET_TEXT wait-3,0 Find.FIRST GET_TEXT ✓
     text = Lakes
     Save file with base path DOTislands/labeledImages/Lakes

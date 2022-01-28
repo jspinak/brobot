@@ -9,7 +9,7 @@ of static images. The images are static in that they don't change their appearan
 and always appear when the state is active. A state image's location on-screen may or may not change.
 
 A state has an enum called Name that is used throughout the application to refer to the state. Every state
-starts with an enum declaration:
+starts with an enum declaration.
 
 ## Home
 
