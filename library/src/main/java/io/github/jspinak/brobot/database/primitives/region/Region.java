@@ -105,7 +105,7 @@ public class Region extends org.sikuli.script.Region implements Comparable<Regio
     }
 
     public boolean defined() {
-        return x!=0 || y!=0;
+        return x!=0 || y!=0 || w!=new Screen().w || h!=new Screen().h;
     }
 
     public boolean overlaps(Region r) {
