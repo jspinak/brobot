@@ -40,12 +40,11 @@ sidebar_position: 9
 You can now play around with the code to see what mock results you get. 
 As opposed to writing an automation application without mocking capabilities,
 you don't have to wait for real execution to see the effects of any changes. Go 
-ahead and make the following changes:
-
+ahead and make the following changes:  
 1. Comment out StateTransitions, for example IslandTransitions by 
 commenting out the line in the IslandTransitions class that adds 
-its StateTransitions to the repository:
-//stateTransitionsRepository.add(transitions);.
+its StateTransitions to the repository:  
+   //stateTransitionsRepository.add(transitions);  
 Run the code again to see the results. Notice how you get immediate feedback
 that there is a mistake and know that you forgot to include a Transition. 
 Without mocking, you would have to wait until this transition occurs to get
