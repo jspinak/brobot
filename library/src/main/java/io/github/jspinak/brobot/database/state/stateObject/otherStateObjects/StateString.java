@@ -28,7 +28,6 @@ public class StateString {
     public boolean defined() { return string != null && string.length() > 0; }
 
     public static class InNullState {
-
         public StateString withString(String string) {
             StateString stateString = new StateString(string);
             stateString.ownerStateName = NULL;

@@ -28,8 +28,7 @@ public class StateLocation implements StateObject {
     private Anchors anchors; // just one, but defined with Anchors b/c it's a StateObject
     private MatchHistory matchHistory = new MatchHistory(); // not used yet
 
-    private StateLocation() {
-    }
+    private StateLocation() {}
 
     public boolean defined() {
         return location != null;
