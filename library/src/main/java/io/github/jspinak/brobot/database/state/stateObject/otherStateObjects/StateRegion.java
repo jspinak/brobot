@@ -34,8 +34,7 @@ public class StateRegion implements StateObject {
     //sometimes we need to select a region within the searchRegion and act on it. this Region may change frequently.
     private Region actionableRegion;
 
-    private StateRegion() {
-    }
+    private StateRegion() {}
 
     public int x() {
         return searchRegion.x;
