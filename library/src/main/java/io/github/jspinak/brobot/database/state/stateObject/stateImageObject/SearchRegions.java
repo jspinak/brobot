@@ -28,7 +28,12 @@ public class SearchRegions {
     public void setSearchRegions(List<Region> searchRegions) {
         regions = new ArrayList<>();
         addSearchRegions(searchRegions);
-        if (regions.isEmpty()) regions.add(new Region());
+        if (regions.isEmpty()) regions.add(new Region()); // there should be at least one Region
+    }
+
+    public void setSearchRegion(Region searchRegion) {
+        regions = new ArrayList<>();
+        addSearchRegions(searchRegion);
     }
 
     public List<Region> getAllRegions() {

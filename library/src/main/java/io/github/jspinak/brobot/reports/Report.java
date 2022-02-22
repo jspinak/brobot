@@ -50,14 +50,14 @@ public class Report {
         return true;
     }
 
-    public static boolean print(OutputLevel outputLevel, String str, String color) {
+    public static boolean print(OutputLevel outputLevel, String str, String... colors) {
         if (!minReportingLevel(outputLevel)) return false;
-        return print(str, color);
+        return print(str, colors);
     }
 
-    public static boolean print(String str, String color) {
+    public static boolean print(String str, String... colors) {
         if (!minReportingLevel(OutputLevel.HIGH)) return false;
-        Output.printColor(str, color);
+        Output.printColor(str, colors);
         return true;
     }
 
@@ -71,9 +71,9 @@ public class Report {
         return true;
     }
 
-    public static boolean println(String str, String color) {
+    public static boolean println(String str, String... colors) {
         if (!minReportingLevel(OutputLevel.HIGH)) return false;
-        Output.printColorLn(str, color);
+        Output.printColorLn(str, colors);
         return true;
     }
 

@@ -242,7 +242,7 @@ public class ActionOptions {
      */
     public enum DefineAs {
         INSIDE_ANCHORS, OUTSIDE_ANCHORS, MATCH, BELOW_MATCH, ABOVE_MATCH, LEFT_OF_MATCH, RIGHT_OF_MATCH,
-        FOCUSED_WINDOW
+        FOCUSED_WINDOW, INCLUDING_MATCHES
     }
     private DefineAs defineAs = DefineAs.MATCH;
 

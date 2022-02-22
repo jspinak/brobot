@@ -23,4 +23,15 @@ public class BrobotSettings {
     public static double mockTimeClick = 0.05;
     public static double mockTimeMove = 0.1;
     public static double mockTimeGetText = 0.1;
+
+    /**
+     * Capture Settings
+     */
+    public static String screenshotPath = "screenshots/";
+    public static String screenshotFilename = "screen";
+
+    /**
+     * Write Settings
+     */
+    public static String packageName = "com.example";
 }
