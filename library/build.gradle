@@ -7,7 +7,7 @@ plugins {
 }
 
 group 'io.github.jspinak'
-version '1.0.1'
+version '1.0.2'
 
 repositories {
     mavenCentral()
@@ -27,11 +27,13 @@ dependencyManagement {
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter'
+    implementation 'org.junit.jupiter:junit-jupiter:5.7.0'
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
     implementation('com.sikulix:sikulixapi:2.0.5') {
         exclude group: 'org.slf4j', module: 'slf4j-nop'
     }
+    implementation group: 'com.squareup', name: 'javapoet', version: '1.9.0'
 }
 
 java {
@@ -45,7 +47,7 @@ publishing {
 
             groupId = 'io.github.jspinak'
             artifactId = 'brobot'
-            version = '1.0.1'
+            version = '1.0.2'
             from components.java
 
             pom {
