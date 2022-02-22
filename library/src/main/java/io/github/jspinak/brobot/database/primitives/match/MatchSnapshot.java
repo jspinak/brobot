@@ -81,7 +81,9 @@ public class MatchSnapshot {
         text.add(str);
     }
 
-    public void addMatch(Match match) { matchList.add(match); }
+    public void addMatch(Match match) {
+        matchList.add(match);
+    }
 
     public void addMatchList(List<Match> matchList) {
         this.matchList.addAll(matchList);
@@ -97,6 +99,36 @@ public class MatchSnapshot {
         matchList.forEach(match -> System.out.format(" %d.%d,%d.%d", match.x, match.y, match.w, match.h));
         text.getAll().forEach(str -> System.out.format(" %s", str));
         System.out.println();
+    }
+
+    /**
+     * Match objects and Text are compared. If they are the same, true is returned.
+     * @param snapshot the MatchSnapshot to compare
+     * @return true if the Match list and Text are the same.
+     */
+    public boolean hasSameResultsAs(MatchSnapshot snapshot) {
+        boolean matchFound;
+        for (Match match : matchList) {
+            matchFound = false;
+            for (Match match1 : snapshot.matchList) {
+                if (match.equals(match1)) {
+                    matchFound = true;
+                    break;
+                }
+            }
+            if (!matchFound) return false;
+        }
+        for (String str : text.getAll()) {
+            matchFound = false;
+            for (String str1 : snapshot.text.getAll()) {
+                if (str.equals(str1)) {
+                    matchFound = true;
+                    break;
+                }
+            }
+            if (!matchFound) return false;
+        }
+        return true;
     }
 
     /*
@@ -122,6 +154,8 @@ public class MatchSnapshot {
         private Text text = new Text();
         private double duration = 0.0;
         private LocalDateTime timeStamp;
+        private boolean actionSuccess = false; // can be initialized for mocks
+        private boolean resultSuccess = false; // can be initialized for mocks
 
         public Builder setActionOptions(ActionOptions actionOptions) {
             this.actionOptions = actionOptions;
@@ -194,6 +228,16 @@ public class MatchSnapshot {
             return this;
         }
 
+        public Builder setActionSuccess(boolean success) {
+            this.actionSuccess = success;
+            return this;
+        }
+
+        public Builder setResultSuccess(boolean success) {
+            this.resultSuccess = success;
+            return this;
+        }
+
         public MatchSnapshot build() {
             MatchSnapshot matchSnapshot = new MatchSnapshot();
             matchSnapshot.actionOptions = actionOptions;
@@ -201,7 +245,10 @@ public class MatchSnapshot {
             matchSnapshot.matchList = matchList;
             matchSnapshot.duration = duration;
             matchSnapshot.timeStamp = LocalDateTime.now();
+            matchSnapshot.actionSuccess = actionSuccess;
+            matchSnapshot.resultSuccess = resultSuccess;
             return matchSnapshot;
         }
     }
+
 }
