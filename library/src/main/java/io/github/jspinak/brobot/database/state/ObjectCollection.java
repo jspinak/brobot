@@ -11,10 +11,13 @@ import io.github.jspinak.brobot.database.state.stateObject.otherStateObjects.Sta
 import io.github.jspinak.brobot.database.state.stateObject.stateImageObject.StateImageObject;
 import io.github.jspinak.brobot.reports.Report;
 import lombok.Data;
+import org.sikuli.script.Match;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import static io.github.jspinak.brobot.database.state.NullState.Enum.NULL;
 
 /**
  * This class holds all the objects that can be passed to an Action.
@@ -138,6 +141,16 @@ public class ObjectCollection {
 
         public Builder withMatches(Matches... matches) {
             Collections.addAll(this.matches, matches);
+            return this;
+        }
+
+        public Builder withMatches(Match... matches) {
+            for (Match match : matches) {
+                this.stateRegions.add(new StateRegion.Builder()
+                        .withSearchRegion(new Region(match))
+                        .inState(NULL)
+                        .build());
+            }
             return this;
         }
 

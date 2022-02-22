@@ -33,8 +33,8 @@ public class ImageUtils {
     }
 
     private String getFreePath(String path) {
-        if (!fileExists(path + ".png")) {
-            return path;
+        if (!fileExists(path + "0.png")) {
+            return path + 0;
         }
         if (lastFilenumber.containsKey(path)) {
             int l = lastFilenumber.get(path);
