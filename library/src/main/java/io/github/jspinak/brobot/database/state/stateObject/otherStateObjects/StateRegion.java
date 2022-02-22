@@ -6,9 +6,9 @@ import io.github.jspinak.brobot.database.primitives.location.Position;
 import io.github.jspinak.brobot.database.primitives.match.MatchHistory;
 import io.github.jspinak.brobot.database.primitives.match.MatchSnapshot;
 import io.github.jspinak.brobot.database.primitives.region.Region;
+import io.github.jspinak.brobot.database.state.NullState;
 import io.github.jspinak.brobot.database.state.stateObject.StateObject;
 import io.github.jspinak.brobot.primatives.enums.StateEnum;
-import io.github.jspinak.brobot.database.state.NullState;
 import lombok.Data;
 
 /**
@@ -84,6 +84,11 @@ public class StateRegion implements StateObject {
 
         public Builder withSearchRegion(Region searchRegion) {
             this.searchRegion = searchRegion;
+            return this;
+        }
+
+        public Builder withSearchRegion(int x, int y, int w, int h) {
+            this.searchRegion = new Region(x, y, w, h);
             return this;
         }
 

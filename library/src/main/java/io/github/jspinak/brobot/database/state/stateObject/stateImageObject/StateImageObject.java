@@ -1,5 +1,6 @@
 package io.github.jspinak.brobot.database.state.stateObject.stateImageObject;
 
+import io.github.jspinak.brobot.buildStateStructure.buildFromNames.attributes.ImageAttributes;
 import io.github.jspinak.brobot.database.primitives.image.Image;
 import io.github.jspinak.brobot.database.primitives.location.Anchor;
 import io.github.jspinak.brobot.database.primitives.location.Anchors;
@@ -14,7 +15,6 @@ import io.github.jspinak.brobot.primatives.enums.StateEnum;
 import lombok.Data;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -49,6 +49,12 @@ public class StateImageObject implements StateObject {
     private Position position = new Position(50,50); // use to convert a match to a Location
     private boolean shared = false; // also found in other states
     private Anchors anchors = new Anchors(); // for defining regions using this object as input
+    /*
+    Attributes learned from the image filename and initial screenshots of the environment.
+    These values determine MatchHistories, SearchRegions, and other variables when
+    building the initial State structure (States and Transitions) from image filenames and screenshots.
+     */
+    private ImageAttributes attributes = new ImageAttributes();
 
     private StateImageObject() {}
 
@@ -57,7 +63,7 @@ public class StateImageObject implements StateObject {
     }
 
     public void setSearchRegion(Region region) {
-        setSearchRegionsObject(Collections.singletonList(region));
+        searchRegionsObject.setSearchRegion(region);
     }
 
     public List<Region> getAllSearchRegions() {
@@ -122,7 +128,7 @@ public class StateImageObject implements StateObject {
         private StateEnum ownerStateName;
         private MatchHistory matchHistory = new MatchHistory();
         private SearchRegions searchRegions = new SearchRegions();
-        private boolean fixed = false;
+        private boolean fixed = true; // set to true as of 1.0.2
         private Image image = new Image();
         private RegionImagePairs regionImagePairs = new RegionImagePairs();
         private int baseProbabilityExists = 100;
@@ -141,13 +147,18 @@ public class StateImageObject implements StateObject {
             return this;
         }
 
+        public Builder withSearchRegion(int x, int y, int w, int h) {
+            this.searchRegions.addSearchRegions(new Region(x, y, w, h));
+            return this;
+        }
+
         public Builder inState(StateEnum stateName) {
             this.ownerStateName = stateName;
             return this;
         }
 
-        public Builder isFixed() {
-            this.fixed = true;
+        public Builder isFixed(boolean fixed) {
+            this.fixed = fixed;
             return this;
         }
 
@@ -194,8 +205,8 @@ public class StateImageObject implements StateObject {
             return this;
         }
 
-        public Builder isShared() {
-            this.shared = true;
+        public Builder isShared(boolean shared) {
+            this.shared = shared;
             return this;
         }
 
@@ -211,6 +222,12 @@ public class StateImageObject implements StateObject {
 
         public Builder addSnapshot(MatchSnapshot matchSnapshot) {
             this.matchHistory.addSnapshot(matchSnapshot);
+            return this;
+        }
+
+        // new in version 1.1.0
+        public Builder addSnapshot(int x, int y, int w, int h) {
+            this.matchHistory.addSnapshot(new MatchSnapshot(x, y, w, h));
             return this;
         }
 
