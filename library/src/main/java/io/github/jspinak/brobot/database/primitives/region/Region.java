@@ -109,15 +109,19 @@ public class Region extends org.sikuli.script.Region implements Comparable<Regio
     }
 
     public boolean overlaps(Region r) {
-        if (containsPoint(r.getTopLeft())) return true;
-        if (containsPoint(r.getTopRight())) return true;
-        if (containsPoint(r.getBottomLeft())) return true;
-        return containsPoint(r.getBottomRight());
+        if (contains(r.getTopLeft())) return true;
+        if (contains(r.getTopRight())) return true;
+        if (contains(r.getBottomLeft())) return true;
+        return contains(r.getBottomRight());
     }
 
-    public boolean containsPoint(Location point) {
-        return (point.x > this.x && point.x < this.getTopRight().x &&
-                point.y > this.y && point.y < this.getBottomRight().y);
+    public boolean contains(Region r) {
+        return contains(r.getTopLeft()) && contains(r.getTopRight())
+                && contains(r.getBottomLeft()) && contains(r.getBottomRight());
+    }
+
+    public int size() {
+        return w * h;
     }
 
     public Match toMatch() {

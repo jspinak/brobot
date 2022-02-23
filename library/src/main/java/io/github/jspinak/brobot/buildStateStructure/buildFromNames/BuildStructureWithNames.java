@@ -72,7 +72,8 @@ public class BuildStructureWithNames {
 
     private void findImagesInScreenshots() {
         screenshots.forEach(screen -> {
-            Report.println("\n"+screen, ANSI.BLUE);
+            Report.print("\n"+screen, ANSI.BLUE);
+            Report.println(" coordinates in format x.y_w.h", ANSI.WHITE);
             babyStateRepo.getBabyStates().values().forEach(
                     state -> findImagesInScreenshot.findByState(state, screen));
         });
