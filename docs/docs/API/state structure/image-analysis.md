@@ -86,7 +86,7 @@ StateStructure build process.
 
 These regions are very difficult to capture during a real run,
 but can be easily captured when using screenshots. For example, in order to capture 
-this region of a minimap during a real run (SHOW THE IMAGE), I would try to find 
+this region of a minimap during a real run ![minimap](/img/minimap.png), I would try to find 
 the one static image, which is the small circle in the top left with 2D written on it,
 and then adjust the region around this match by guessing and readjusting my guesses.
 If there were no static images, i would try to find static images that
