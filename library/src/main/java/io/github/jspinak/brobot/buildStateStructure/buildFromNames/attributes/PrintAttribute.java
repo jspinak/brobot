@@ -47,10 +47,21 @@ public class PrintAttribute {
             printNames(image);
             Report.print("| Active Attributes: ", ANSI.WHITE);
             Report.println(strB.toString());
-            if (matches.size() > 1) Report.println("| "+matches.size() + " matches", ANSI.WHITE);
-            else if (matches.size() == 1) Report.println("| 1 match", ANSI.WHITE);
+            printMatches(matches);
             printDefinedRegion(image);
         }
+    }
+
+    private void printMatches(List<Match> matches) {
+        if (matches.isEmpty()) return;
+        if (matches.size() > 1) Report.print("| " + matches.size() + " matches", ANSI.WHITE);
+        else Report.print("| 1 match", ANSI.WHITE);
+        matches.forEach(m -> printRegion(new Region(m)));
+        Report.println();
+    }
+
+    private void printRegion(Region r) {
+        Report.print(" | " + r.x + "." + r.y + "_" + r.w + "." + r.h, ANSI.WHITE);
     }
 
     private void printNames(StateImageObject image) {
@@ -61,15 +72,17 @@ public class PrintAttribute {
     }
 
     public void printDefinedRegion(StateImageObject image) {
-        printReg(image.getSearchRegion());
+        printSearchRegion(image.getSearchRegion());
     }
 
     public void printDefinedRegion(Matches matches) {
-        printReg(matches.getDefinedRegion());
+        printSearchRegion(matches.getDefinedRegion());
     }
 
-    private void printReg(Region r) {
+    private void printSearchRegion(Region r) {
         if (!r.defined()) return;
-        Report.println("| SearchRegion x." + r.x + " y." + r.y + " w." + r.w + " h." + r.h, ANSI.WHITE);
+        Report.print("| SearchRegion", ANSI.WHITE);
+        printRegion(r);
+        Report.println();
     }
 }

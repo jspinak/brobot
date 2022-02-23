@@ -40,6 +40,7 @@ public class UseAttribute {
         define(image, matches, page);
         groupDefine(image, matches, page, imageGroup);
         region(image, matches, page);
+        transfer(image, matches, page);
         return activeAttributes;
     }
 
@@ -153,5 +154,9 @@ public class UseAttribute {
     private Match getBestMatch(List<Match> matches) {
         matches.sort(Comparator.comparing(Match::getScore).reversed());
         return matches.get(0);
+    }
+
+    private void transfer(StateImageObject image, List<Match> matches, int page) {
+        defineRegion(image, matches, page, TRANSFER);
     }
 }

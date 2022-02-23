@@ -44,6 +44,7 @@ public class ImageAttributes {
         addAttribute(DEFINE);
         addAttribute(GROUP_DEFINE);
         addAttribute(REGION);
+        addAttribute(TRANSFER);
     }
     
     private void addAttribute(AttributeTypes.Attribute attribute) {
@@ -85,5 +86,9 @@ public class ImageAttributes {
 
     public boolean isStateRegion() {
         return !screenshots.get(REGION).isEmpty();
+    }
+
+    public boolean isStateImage() {
+        return screenshots.get(TRANSFER).isEmpty() && screenshots.get(REGION).isEmpty();
     }
 }

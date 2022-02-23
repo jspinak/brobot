@@ -50,9 +50,8 @@ public class Mock {
     /**
      * Drag succeeds when the images are found, but it still takes time to do the drag.
      */
-    public boolean drag(Location from, Location to) {
+    public boolean drag() {
         timeWrapper.wait(mockTimeDrag);
-        System.out.print("drag:"+from.getX()+"."+from.getY()+">"+to.getX()+"."+to.getY());
         return true;
     }
 
