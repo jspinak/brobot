@@ -41,14 +41,14 @@ public class WriteStateClass {
                 stateObjects.add(regionFieldSpec.getCode(img));
                 regionNames.add(img.getAttributes().getImageName());
             }
-            else {
+            if (img.getAttributes().isStateImage()) {
                 stateObjects.add(imageFieldSpec.getCode(img));
                 imageNames.add(img.getAttributes().getImageName());
             }
         });
         FieldSpec state = stateFieldSpec.getStateField(imageNames, regionNames, enumName);
 
-        TypeSpec stateClass = TypeSpec.classBuilder(baseClassName) //baseClassName+"State")
+        TypeSpec stateClass = TypeSpec.classBuilder(baseClassName)
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(Component.class)
                 .addAnnotation(Getter.class)

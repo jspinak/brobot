@@ -33,9 +33,6 @@ public class DragLocation {
 
     private boolean drag(Location from, Location to) {
         try {
-            if (Report.minReportingLevel(Report.OutputLevel.HIGH))
-                System.out.format("drag %d.%d to %d.%d| ",
-                        from.getX(), from.getY(), to.getX(), to.getY());
             new Region().dragDrop(from.getSikuliLocation(), to.getSikuliLocation());
         } catch (FindFailed findFailed) {
             if (Report.minReportingLevel(Report.OutputLevel.HIGH))
@@ -46,8 +43,9 @@ public class DragLocation {
     }
 
     public boolean drag(Location from, Location to, ActionOptions actionOptions) {
-        //System.out.println("to.getY, drag offset y:"+to.getY()+" "+actionOptions.getDragToOffsetY());
-        if (BrobotSettings.mock) return mock.drag(from, to);
+        Report.format(Report.OutputLevel.HIGH, "drag %d.%d to %d.%d ",
+                from.getX(), from.getY(), to.getX(), to.getY());
+        if (BrobotSettings.mock) return mock.drag();
         Settings.DelayBeforeMouseDown = actionOptions.getPauseBeforeMouseDown();
         Settings.DelayBeforeDrag = actionOptions.getPauseAfterMouseDown();
         Settings.MoveMouseDelay = actionOptions.getMoveMouseDelay();

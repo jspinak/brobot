@@ -18,7 +18,7 @@ public class AttributeTypes {
     public enum Attribute {
         MULTIPLE_MATCHES, SINGLE_MATCH, VARIABLE_LOCATION, FIXED_LOCATION,
         DEFINE, GROUP_DEFINE, APPEARS_EXCLUSIVELY,
-        DOESNT_APPEAR, APPEARS, REGION
+        DOESNT_APPEAR, APPEARS, REGION, TRANSFER
     }
 
     public enum Tag {
@@ -41,5 +41,6 @@ public class AttributeTypes {
         attributes.put('d', DEFINE);
         attributes.put('g', GROUP_DEFINE);
         attributes.put('r', REGION);
+        attributes.put('t', TRANSFER);
     }
 }

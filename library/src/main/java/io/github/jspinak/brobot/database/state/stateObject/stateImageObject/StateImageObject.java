@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.database.state.stateObject.stateImageObject;
 
+import io.github.jspinak.brobot.buildStateStructure.buildFromNames.attributes.AttributeData;
+import io.github.jspinak.brobot.buildStateStructure.buildFromNames.attributes.AttributeTypes;
 import io.github.jspinak.brobot.buildStateStructure.buildFromNames.attributes.ImageAttributes;
 import io.github.jspinak.brobot.database.primitives.image.Image;
 import io.github.jspinak.brobot.database.primitives.location.Anchor;
@@ -121,6 +123,10 @@ public class StateImageObject implements StateObject {
 
     public void addSnapshot(MatchSnapshot matchSnapshot) {
         matchHistory.addSnapshot(matchSnapshot);
+    }
+
+    public AttributeData getAttributeData(AttributeTypes.Attribute attribute) {
+        return attributes.getScreenshots().get(attribute);
     }
 
     public static class Builder {

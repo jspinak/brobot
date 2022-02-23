@@ -3,6 +3,7 @@ package io.github.jspinak.brobot.buildStateStructure.buildFromNames.findImages;
 
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.database.primitives.match.Matches;
+import io.github.jspinak.brobot.database.primitives.region.Region;
 import io.github.jspinak.brobot.database.state.ObjectCollection;
 import io.github.jspinak.brobot.database.state.stateObject.stateImageObject.StateImageObject;
 import io.github.jspinak.brobot.reports.Report;
@@ -21,6 +22,7 @@ import java.util.List;
 @Getter
 public class ImageGroup {
 
+    private Region searchRegion = new Region();
     private List<StateImageObject> images = new ArrayList<>(); // Images in the Group
     private List<Match> matches = new ArrayList<>(); // for defining the Region (best match / image)
     private ActionOptions actionOptions = new ActionOptions.Builder()
@@ -42,16 +44,28 @@ public class ImageGroup {
                 .build();
     }
 
-    public void setSearchRegions(Matches matches) {
-        images.forEach(img -> img.setSearchRegion(matches.getDefinedRegion()));
-    }
-
     public boolean isEmpty() {
         return images.isEmpty();
     }
 
     public boolean allImagesFound() {
         return !isEmpty() && images.size() == matches.size();
+    }
+
+    public boolean processNewRegion(Region newReg) {
+        if (!regionIsLarger(newReg)) return false;
+        setSearchRegions(newReg);
+        return true;
+    }
+
+    public boolean regionIsLarger(Region newReg) {
+        if (!searchRegion.defined()) return true;
+        return newReg.size() > searchRegion.size();
+    }
+
+    public void setSearchRegions(Region region) {
+        searchRegion = new Region(region);
+        images.forEach(img -> img.setSearchRegion(searchRegion));
     }
 
     public void print() {
