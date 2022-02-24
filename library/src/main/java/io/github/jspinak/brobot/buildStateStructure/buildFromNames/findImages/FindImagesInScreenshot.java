@@ -2,13 +2,11 @@ package io.github.jspinak.brobot.buildStateStructure.buildFromNames.findImages;
 
 import io.github.jspinak.brobot.actions.BrobotSettings;
 import io.github.jspinak.brobot.actions.actionExecution.Action;
-import io.github.jspinak.brobot.buildStateStructure.buildFromNames.attributes.GetAttribute;
-import io.github.jspinak.brobot.buildStateStructure.buildFromNames.babyStates.BabyState;
 import io.github.jspinak.brobot.buildStateStructure.buildFromNames.attributes.AttributeTypes;
 import io.github.jspinak.brobot.buildStateStructure.buildFromNames.attributes.PrintAttribute;
 import io.github.jspinak.brobot.buildStateStructure.buildFromNames.attributes.UseAttribute;
+import io.github.jspinak.brobot.buildStateStructure.buildFromNames.babyStates.BabyState;
 import io.github.jspinak.brobot.database.primitives.match.Matches;
-import io.github.jspinak.brobot.database.primitives.region.Region;
 import io.github.jspinak.brobot.database.state.stateObject.stateImageObject.StateImageObject;
 import org.sikuli.script.Finder;
 import org.sikuli.script.Match;
@@ -17,9 +15,6 @@ import org.springframework.stereotype.Component;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
-
-import static io.github.jspinak.brobot.buildStateStructure.buildFromNames.attributes.AttributeTypes.Attribute.TRANSFER;
 
 /**
  * Works with all Images in a State for a specific screenshot/page
@@ -34,15 +29,15 @@ public class FindImagesInScreenshot {
     private Action action;
     private AddSnapshots addSnapshots;
     private PrintAttribute printAttribute;
-    private GetAttribute getAttribute;
+    private TransferRegion transferRegion;
 
     public FindImagesInScreenshot(UseAttribute useAttribute, Action action, AddSnapshots addSnapshots,
-                                  PrintAttribute printAttribute, GetAttribute getAttribute) {
+                                  PrintAttribute printAttribute, TransferRegion transferRegion) {
         this.useAttribute = useAttribute;
         this.action = action;
         this.addSnapshots = addSnapshots;
         this.printAttribute = printAttribute;
-        this.getAttribute = getAttribute;
+        this.transferRegion = transferRegion;
     }
 
     public void findByState(BabyState babyState, String screenshot) {
@@ -52,7 +47,7 @@ public class FindImagesInScreenshot {
         int page = Integer.parseInt(screenshot.substring(beginIndex, endIndex));
         babyState.getImages().forEach(image -> findIn(image, screenshot, page, imageGroup));
         processImageGroup(babyState, imageGroup);
-        processRegionTransfer(babyState.getImages(), page);
+        transferRegion.processRegionTransfer(babyState.getImages(), page, babyState);
         babyState.getImages().forEach(image -> printAttribute.byImageAndPage(image, page));
     }
 
@@ -86,15 +81,4 @@ public class FindImagesInScreenshot {
         return true;
     }
 
-    private void processRegionTransfer(Set<StateImageObject> images, int page) {
-        for (StateImageObject img : images) {
-            if (getAttribute.isPresent(img, page, TRANSFER) && img.getSearchRegion().defined()) {
-                Region transferReg = img.getSearchRegion();
-                images.forEach(stateImage -> {
-                    if (transferReg.size() > stateImage.getSearchRegion().size())
-                        stateImage.setSearchRegion(transferReg);
-                });
-            }
-        }
-    }
 }

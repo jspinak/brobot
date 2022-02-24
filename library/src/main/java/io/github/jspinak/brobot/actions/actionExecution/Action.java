@@ -47,6 +47,8 @@ public class Action {
 
     /**
      * The default ActionOptions is a Find Action.
+     * @param stateImageObjects the images to include in the ObjectCollection
+     * @return the results of the Find Action
      */
     public Matches find(StateImageObject... stateImageObjects) {
         return perform(new ActionOptions(), stateImageObjects);
@@ -54,6 +56,8 @@ public class Action {
 
     /**
      * The default ActionOptions is a Find Action.
+     * @param objectCollections the objects to find
+     * @return the results of the Find Action on the objectCollections
      */
     public Matches find(ObjectCollection... objectCollections) {
         return perform(new ActionOptions(), objectCollections);
