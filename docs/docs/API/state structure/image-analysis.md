@@ -8,43 +8,45 @@ How carefully you select your images and define your regions
 will be key to the robustness and 
 effectiveness of your automation application. Identifying 
 the optimal images to use early on will save you lots of time and frustration. 
-Ideally, you should analyse and optimize your images before writing any code. 
-Brobot has functionality that is dedicated to pre-app image analysis. It works together
-with the StateStructure builder to give you an idea of which images may cause 
+Ideally, you should analyze and optimize your images before writing any code. 
+Brobot has functionality that is dedicated to pre-code image analysis. It works together
+with the State Structure builder to give you an idea of which images may cause 
 problems and what you may want to change.
 
 ## Common issues with images and regions 
 
 Adjusting the minimum similarity of images is a common technique for situations
-where an image may vary slightly but still needs to be found with high certainty. 
-Min similarity is also adjusted in the opposite scenario, where similar images 
+where an image is not recognized as we expect. The image may vary slightly but still 
+needs to be found with high certainty, in which case the minimum similarity would
+be lowered. Minimum similarity is also adjusted upwards, in scenarios where similar images 
 exist on the screen, and it's important to find only the one we want. Both scenarios
-are a consequence of trial-and-error programming, something that we want to avoid when
+involve trial-and-error programming, a technique that we want to avoid when
 developing automation software. Ideally, we will choose images that don't require 
-adjusting the min similarity at some point down the line. 
+adjusting the minimum similarity at some point down the line. 
 
 Sometimes we can't choose an image that is unique. For example, we have a 
-'close' button like the 'X' at the top right of a window that is the same for 
-all windows in the environment we are controlling. In this case, it is best to 
-set the SearchRegion, when possible, to look for only the window we want to close. 
-In addition, the 'close' image should be set to `shared` so that it is not 
+close button like the 'X' at the top right of a window that is the same for 
+all windows in the environment. In this case, it is best to 
+set the SearchRegion to look for only the button we want to press.  
+In addition, the close image should be defined as `shared` so that it is not 
 used to find a State in the case that Brobot gets lost.   
 
-Defining SearchRegions can be difficult during execution. If we are working with
-images that don't always appear in the same location, we will want to identify the
-potential area where they could appear and limit our search to this area. Even if 
+Defining regions can be difficult during execution. If we are working with
+images that don't always appear in the same location, we may want to identify the
+area where they could appear and limit our search to this area. Even if 
 we know in advance where this area is, identifying the exact coordinates on the 
-screen is not always precise or easy to do. In addition, finding regions during 
+screen is not always easy to do and the results can be imprecise. 
+Finding regions during 
 execution is especially difficult when the regions contain few or no static 
-images. 
+images.  
 
 ## Brobot's image analysis
 
 During the process that builds the StateStructure, an analysis of each screenshot
-is output to the console, and contains information on GROUP_DEFINE operations as
-well as images and their matches under the following conditions:
+is output to the console. This analysis contains information on GROUP_DEFINE and 
+TRANSFER operations as well as images and their matches under the following conditions:
 - at least one match is found
-- the image has an active attribute on this screenshot whose operation fails  
+- an active attribute fails
 
 ## Using the image analysis
 
@@ -52,7 +54,7 @@ Errors in the attribute operations give us valuable information about our images
 
 ### Multiple matches found
 
-If an image should only be found once but is found multiple times in a screenshot,
+If an image should be found only once but is found multiple times in a screenshot,
 we know that this is either a shared image or that it should be changed or replaced.
 Shared images are sometimes necessary, but should include a defined SearchRegion 
 when possible. When an image does not have an active MULTIPLE_MATCHES attribute and
@@ -60,8 +62,8 @@ appears multiple times, it is initialized with the field `.isShared(true)`. Imag
 that are meant to be unique and appear once but are found multiple times are problems.
 You should check out the screenshot and try to find the matches from the coordinates 
 given in the image analysis. If changing or replacing the image is not possible, think
-about either defining the image's SearchArea
-to get rid of the other matches or using a different strategy to achieve you goal.  
+about either defining the image's SearchRegion
+to exclude the other matches or using a different strategy to achieve your goal.  
 
 ### Image not found  
 
@@ -80,34 +82,40 @@ to the console along with information about images and matches.
 
 Having well-defined SearchRegions will make your process flow more robust, 
 and many regions can and should be defined before execution by the 
-StateStructure build process. 
+State Structure build process.  
 
 ### Defining regions without static images  
 
-These regions are very difficult to capture during a real run,
-but can be easily captured when using screenshots. For example, in order to capture 
-this region of a minimap during a real run ![minimap](/img/minimap.png), I would try to find 
-the one static image, which is the small circle in the top left with 2D written on it,
-and then adjust the region around this match by guessing and readjusting my guesses.
-If there were no static images, i would try to find static images that
-appear outside the minimap and adjust the region. 
+Static images are ones that do not change their appearance. Fixed-location images are
+ones that do not change their location. Finding regions without static, fixed-location 
+images is very difficult during a real run, but can be easily captured when using 
+screenshots. Take, for example, the minimap portrayed here after this paragraph. 
+To find the region of the minimap during a real run, I would try to find 
+the one static and fixed-location image, the small circle in the top left with 
+2D written on it,
+and then adjust the region around this match by guessing and readjusting my guesses
+through trial and error.
+If there were no static, fixed-location images, I would try to find 
+such images outside the minimap and adjust the region accordingly.   
+<img src="https://jspinak.github.io/brobot/img/minimap.png" alt="minimap" width="200"/>  
 
 The attribute to use in this situation is REGION. When the filename of an image
-contains the String '_r', it will search for the image and write a StateRegion
+contains the String `_r`, it will search for the image and write a StateRegion
 with a pre-defined SearchRegion to the corresponding State. In order not to 
 receive error messages in the image analysis for every other screenshot, make 
-sure to specify the screenshot to use after the '_r' (i.e. '_r28').  
+sure to specify the screenshot to use after the `_r` (i.e. `_r28`).  
 
-### Defining regions with non-static images
+### Defining regions with variable-location images
 
-These are regions that have a variable number of images, each with 
-variable locations, and we want to find the region that includes all of them. 
+There are regions that have a variable number of images, each with 
+variable locations. We may want to find the region that includes all of them, 
+in order to make our searches faster and more effective. 
 There are two ways to do this. The first is to take an image of the area you 
 think you need and give 
 it the TRANSFER attribute for this screenshot. The TRANSFER attribute will 
 transfer the match to the SearchRegions of all images in the State.  
 Another option is to use GROUP_DEFINE, which will set the SearchRegions of each
-image in the group to be the region that combines all of their matches.
+image in the group to be the union of their matches.
 
 ### Defining the region of a State
 
