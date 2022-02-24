@@ -25,7 +25,7 @@ Naming these files is very important as it helps to determine your State Structu
 Automating the building of a State Structure allows you to:  
 - automate the creation of folders, State and StateTransitions classes
 - automate writing Java code for StateImageObjects, StateRegions, and Transitions
-- include accurate MatchHistories with real matches
+- include accurate MatchHistories with real matches, making mock runs more realistic
 - create StateRegions of otherwise difficult to capture regions 
 (usually due to variable imagery)
 - work directly with the client's environment by using screenshots from their computer
