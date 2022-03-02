@@ -42,11 +42,11 @@ public class FindImagesInScreenshot {
 
     public void findByState(BabyState babyState, String screenshot) {
         ImageGroup imageGroup = new ImageGroup();
-        int beginIndex = screenshot.indexOf('n') + 1;
-        int endIndex = screenshot.indexOf('.');
+        int beginIndex = screenshot.indexOf('n') + 1; // n in screen
+        int endIndex = screenshot.indexOf('.'); // . in .png
         int page = Integer.parseInt(screenshot.substring(beginIndex, endIndex));
         babyState.getImages().forEach(image -> findIn(image, screenshot, page, imageGroup));
-        processImageGroup(babyState, imageGroup);
+        processImageGroup(imageGroup);
         transferRegion.processRegionTransfer(babyState.getImages(), page, babyState);
         babyState.getImages().forEach(image -> printAttribute.byImageAndPage(image, page));
     }
@@ -63,15 +63,17 @@ public class FindImagesInScreenshot {
     private List<Match> getMatches(StateImageObject image, String filename) {
         File file = new File(BrobotSettings.screenshotPath + filename);
         String path = file.getAbsolutePath();
-        Finder f = new Finder(path);
-        f.findAll(image.getImage().getAllPatterns().get(0));
         List<Match> matches = new ArrayList<>();
-        while (f.hasNext()) matches.add(f.next());
-        f.destroy();
+        image.getImage().getAllPatterns().forEach(p -> {
+            Finder f = new Finder(path);
+            f.findAll(p);
+            while (f.hasNext()) matches.add(f.next());
+            f.destroy();
+        });
         return matches;
     }
 
-    private boolean processImageGroup(BabyState babyState, ImageGroup imageGroup) {
+    private boolean processImageGroup(ImageGroup imageGroup) {
         if (!imageGroup.allImagesFound()) return false;
         imageGroup.print();
         Matches matches = action.perform(imageGroup.getActionOptions(), imageGroup.getObjectCollection());

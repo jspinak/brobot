@@ -36,6 +36,10 @@ public class Image {
         return imageNames;
     }
 
+    public void addImage(String filename) {
+        imageNames.add(filename);
+    }
+
     public List<String> getFilenames() {
         List<String> filenames = new ArrayList<>();
         getImageNames().forEach(name -> filenames.add(name+".png"));

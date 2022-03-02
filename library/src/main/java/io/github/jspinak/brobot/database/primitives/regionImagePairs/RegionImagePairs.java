@@ -31,6 +31,12 @@ public class RegionImagePairs {
         }
     }
 
+    public void addImage(String filename) {
+        RegionImagePair newRegImgPair = new RegionImagePair();
+        newRegImgPair.setImage(new Image(filename));
+        pairs.add(newRegImgPair);
+    }
+
     public boolean defined() {
         return lastPairFound != null;
     }

@@ -2,7 +2,11 @@ package io.github.jspinak.brobot.buildStateStructure.buildFromNames;
 
 import io.github.jspinak.brobot.actions.BrobotSettings;
 import io.github.jspinak.brobot.buildStateStructure.buildFromNames.attributes.SetAttributes;
+import io.github.jspinak.brobot.buildStateStructure.buildFromNames.babyStates.BabyState;
+import io.github.jspinak.brobot.buildStateStructure.buildFromNames.babyStates.BabyStateRepo;
 import io.github.jspinak.brobot.database.state.stateObject.stateImageObject.StateImageObject;
+import io.github.jspinak.brobot.reports.ANSI;
+import io.github.jspinak.brobot.reports.Report;
 import org.sikuli.script.ImagePath;
 import org.springframework.stereotype.Component;
 
@@ -22,9 +26,11 @@ import java.util.stream.Stream;
 public class GetFiles {
 
     private SetAttributes setAttributes;
+    private BabyStateRepo babyStateRepo;
 
-    public GetFiles(SetAttributes setAttributes) {
+    public GetFiles(SetAttributes setAttributes, BabyStateRepo babyStateRepo) {
         this.setAttributes = setAttributes;
+        this.babyStateRepo = babyStateRepo;
     }
 
     public List<String> getScreenshots() {
@@ -40,23 +46,31 @@ public class GetFiles {
     /**
      * 1 letter or all-caps names may cause problems with the naming conventions
      * for classes, variables, enums, etc.
-     * @return the images in the designated folder as a set of StateImageObjects
      */
-    public Set<StateImageObject> getStateImages() {
-        Set<StateImageObject> stateImageObjects = new HashSet<>();
-        getImages().forEach(str -> {
-            if (str.substring(str.length() - 3).contains("png")) {
-                String str_ = str.replace(".png","");
-                StateImageObject newSIO = new StateImageObject.Builder()
-                                .withImage(str_)
-                                .isFixed(!str_.contains("_v"))
-                                .build();
-                setAttributes.processName(newSIO);
-                newSIO.getAttributes().print();
-                stateImageObjects.add(newSIO);
-            }
+    public void addImagesToRepo() {
+        getImages().forEach(filename -> {
+            if (filename.substring(filename.length() - 3).contains("png")) addNewImageToRepo(filename);
         });
-        return stateImageObjects;
+    }
+
+    private void addNewImageToRepo(String filename) {
+        filename = filename.replace(".png","");
+        StateImageObject newSIO = new StateImageObject.Builder()
+                .withImage(filename)
+                .isFixed(!filename.contains("_v"))
+                .build();
+        newSIO.getAttributes().addFilename(filename);
+        setAttributes.processName(newSIO);
+        Optional<StateImageObject> optBaseImg = babyStateRepo.getBaseImage(newSIO);
+        if (optBaseImg.isEmpty()) {
+            babyStateRepo.addImage(newSIO);
+            newSIO.getAttributes().print();
+        }
+        else {
+            StateImageObject baseImg = optBaseImg.get();
+            baseImg.merge(newSIO);
+            baseImg.getAttributes().print();
+        }
     }
 
     public List<String> getImages() {

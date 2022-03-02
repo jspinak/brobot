@@ -22,31 +22,30 @@ public class PrintAttribute {
         List<AttributeTypes.Attribute> activeAttributes = image.getAttributes().getActiveAttributes(page);
         String color;
         Map<Integer, Boolean> pageResults;
-        boolean isActive, failedAttribute;
+        boolean isActive;
         boolean atLeastOneFailedAttribute = false;
-        StringBuilder strB = new StringBuilder();
-        for (AttributeTypes.Attribute attribute : AttributeTypes.Attribute.values()) {
-            pageResults = image.getAttributes().getScreenshots().get(attribute).getPageResults();
+        StringBuilder activeAttributesStr = new StringBuilder();
+        for (Map.Entry<AttributeTypes.Attribute, AttributeData> att :
+                image.getAttributes().getScreenshots().entrySet()) {
+            pageResults = att.getValue().getPageResults();
+            AttributeTypes.Attribute attribute = att.getKey();
             /* almost every image has an active Attribute on every page.
                printing all images with active Attributes would give a lot of information,
                usually too much information (maybe make this an option for detailed debugging)
              */
             isActive = activeAttributes.contains(attribute);
-            failedAttribute = pageResults.containsKey(page) && !pageResults.get(page);
-            if (failedAttribute) atLeastOneFailedAttribute = true;
-            // there may be failed attributes (such as DOESNT_APPEAR) that are not active
-            // in the case of DOESNT_APPEAR, the attribute APPEARS_EXCLUSIVELY is active on another page
-            // MULTIPLE_MATCHES will be false in pages where it is not active
-            if (isActive || failedAttribute) {
-                if (failedAttribute) color = ANSI.RED;
-                else color = ANSI.WHITE;
-                strB.append(color + attribute.toString() + " " + ANSI.RESET);
+            if (isActive) {
+                if (!pageResults.get(page)) {
+                    color = ANSI.RED;
+                    atLeastOneFailedAttribute = true;
+                } else color = ANSI.WHITE;
+                activeAttributesStr.append(color + attribute.toString() + " " + ANSI.RESET);
             }
         }
         if (!matches.isEmpty() || atLeastOneFailedAttribute) {
             printNames(image);
             Report.print("| Active Attributes: ", ANSI.WHITE);
-            Report.println(strB.toString());
+            Report.println(activeAttributesStr.toString());
             printMatches(matches);
             printDefinedRegion(image);
         }
@@ -67,8 +66,9 @@ public class PrintAttribute {
     private void printNames(StateImageObject image) {
         Report.print(image.getAttributes().getStateName());
         Report.print("."+image.getAttributes().getImageName());
-        Report.print(" ");
-        Report.println("("+image.getName()+")");
+        Report.print(" | ", ANSI.WHITE);
+        image.getAttributes().getFilenames().forEach(f -> Report.print(f+" ", ANSI.WHITE));
+        Report.println("");
     }
 
     public void printDefinedRegion(StateImageObject image) {

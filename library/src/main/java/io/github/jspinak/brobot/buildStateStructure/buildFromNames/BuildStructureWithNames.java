@@ -4,13 +4,11 @@ import io.github.jspinak.brobot.buildStateStructure.buildFromNames.babyStates.Ba
 import io.github.jspinak.brobot.buildStateStructure.buildFromNames.findImages.FindImagesInScreenshot;
 import io.github.jspinak.brobot.buildStateStructure.buildFromNames.write.writeFiles.WriteFiles;
 import io.github.jspinak.brobot.buildStateStructure.buildFromNames.write.writeFiles.WriteStateAndTransitions;
-import io.github.jspinak.brobot.database.state.stateObject.stateImageObject.StateImageObject;
 import io.github.jspinak.brobot.reports.ANSI;
 import io.github.jspinak.brobot.reports.Report;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.Set;
 
 /**
  * Builds a StateStructure using labeled images and screenshots of the automation environment.
@@ -50,7 +48,6 @@ public class BuildStructureWithNames {
     private final WriteFiles writeFiles;
     private final WriteStateAndTransitions writeStateAndTransitions;
 
-    private Set<StateImageObject> images;
     private List<String> screenshots;
 
     public BuildStructureWithNames(GetFiles getFiles, BabyStateRepo babyStateRepo,
@@ -64,8 +61,7 @@ public class BuildStructureWithNames {
     }
 
     public void getFiles() {
-        images = getFiles.getStateImages();
-        Report.println("\nnumber of images = "+images.size());
+        getFiles.addImagesToRepo();
         screenshots = getFiles.getScreenshots();
         Report.println("number of screenshots = "+screenshots.size());
     }
@@ -81,7 +77,6 @@ public class BuildStructureWithNames {
 
     public void build() {
         getFiles();
-        images.forEach(babyStateRepo::addImage);
         babyStateRepo.printStatesAndImages();
         findImagesInScreenshots();
         writeFiles.preparePath();
