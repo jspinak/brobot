@@ -33,7 +33,8 @@ public class TransferRegion {
         Region transferRegion = getLargestTransferRegion(babyState, page);
         if (!transferRegion.defined()) return false;
         List<StateImageObject> imagesToUpdate = images.stream()
-                .filter(img -> img.getSearchRegion().size() < transferRegion.size())
+                .filter(img -> !img.getSearchRegion().defined() ||
+                        img.getSearchRegion().size() < transferRegion.size())
                 .collect(Collectors.toList());
         if (imagesToUpdate.isEmpty()) return false;
         Report.format("TRANSFER: SearchRegions updated to %d.%d_%d.%d for images: ",

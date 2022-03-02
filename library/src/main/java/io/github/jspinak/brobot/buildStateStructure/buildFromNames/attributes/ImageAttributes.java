@@ -1,15 +1,13 @@
 package io.github.jspinak.brobot.buildStateStructure.buildFromNames.attributes;
 
+import io.github.jspinak.brobot.database.primitives.image.Image;
 import io.github.jspinak.brobot.reports.ANSI;
 import io.github.jspinak.brobot.reports.Report;
 import lombok.Getter;
 import lombok.Setter;
 import org.sikuli.script.Match;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static io.github.jspinak.brobot.buildStateStructure.buildFromNames.attributes.AttributeTypes.Attribute.*;
 
@@ -24,7 +22,8 @@ public class ImageAttributes {
 
     private String stateName;
     private String imageName;
-    private List<String> transitionsTo = new ArrayList<>();
+    private List<String> filenames = new ArrayList<>();
+    private Set<String> transitionsTo = new HashSet<>();
     private Map<Integer, List<Match>> matches = new HashMap<>();
 
     /*
@@ -59,8 +58,17 @@ public class ImageAttributes {
         transitionsTo.add(stateName);
     }
 
+    public void addFilename(String filename) {
+        filenames.add(filename);
+    }
+
     public void print() {
         Report.println("State."+stateName+" Image."+imageName, ANSI.BLUE);
+        filenames.forEach(f -> {
+            Image i = new Image(f);
+            Report.print(f+"["+i.getWidth(0)+","+i.getHeight(0)+"] ");
+        });
+        Report.println();
         if (!transitionsTo.isEmpty()) {
             Report.print("Transitions");
             transitionsTo.forEach(tr -> Report.print("."+tr));
@@ -78,8 +86,8 @@ public class ImageAttributes {
 
     public List<AttributeTypes.Attribute> getActiveAttributes(int page) {
         List<AttributeTypes.Attribute> attributes = new ArrayList<>();
-        for (AttributeTypes.Attribute attribute : AttributeTypes.Attribute.values()) {
-            if (screenshots.get(attribute).getPageResults().containsKey(page)) attributes.add(attribute);
+        for (Map.Entry<AttributeTypes.Attribute, AttributeData> attData : screenshots.entrySet()) {
+            if (attData.getValue().hasPage(page)) attributes.add(attData.getKey());
         }
         return attributes;
     }
@@ -91,4 +99,24 @@ public class ImageAttributes {
     public boolean isStateImage() {
         return screenshots.get(TRANSFER).isEmpty() && screenshots.get(REGION).isEmpty();
     }
+
+    public void merge(ImageAttributes imageAttributes) {
+        transitionsTo.addAll(imageAttributes.transitionsTo);
+        filenames.addAll(imageAttributes.filenames);
+        imageAttributes.matches.forEach((key, value) -> matches.get(key).addAll(value));
+        screenshots.keySet().forEach(
+                att -> screenshots.get(att).merge(imageAttributes.screenshots.get(att)));
+    }
+
+    public String getWithImagesLineInBuilder() {
+        StringBuilder withImages = new StringBuilder();
+        withImages.append("\n.withImages(");
+        for (int i=0; i<filenames.size(); i++) {
+            withImages.append("$S");
+            if (i+1 < filenames.size()) withImages.append(", ");
+        }
+        withImages.append(")");
+        return withImages.toString();
+    }
+
 }

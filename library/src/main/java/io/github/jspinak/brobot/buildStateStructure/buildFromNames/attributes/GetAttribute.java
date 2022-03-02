@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -21,8 +22,9 @@ public class GetAttribute {
      */
     public Set<AttributeTypes.Attribute> getAttributes(StateImageObject image, int page) {
         Set<AttributeTypes.Attribute> attributes = new HashSet<>();
-        AttributeTypes.attributes.values().forEach(att -> {
-            List<Integer> pages = image.getAttributes().getScreenshots().get(att).getPagesActive();
+        Map<AttributeTypes.Attribute, AttributeData> screenshots = image.getAttributes().getScreenshots();
+        screenshots.keySet().forEach(att -> {
+            Set<Integer> pages = screenshots.get(att).getPagesActive();
             if (pages.contains(page) || pages.contains(-1))
                 attributes.add(att);
         });
