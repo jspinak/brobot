@@ -3,10 +3,7 @@ package io.github.jspinak.brobot.buildStateStructure.buildFromNames.attributes;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * AttributeData keeps track of the following info:
@@ -23,7 +20,7 @@ import java.util.Map;
 public class AttributeData {
 
     private AttributeTypes.Attribute attribute;
-    private List<Integer> pagesActive = new ArrayList<>();
+    private Set<Integer> pagesActive = new HashSet<>();
     /*
     Some attributes such as MultipleMatches require setting a false flag on pages
     where there is no active MultipleMatches attribute. This is why we need a separate Map
@@ -45,5 +42,11 @@ public class AttributeData {
 
     public void setPageResult(int page, boolean result) {
         pageResults.put(page, result);
+    }
+
+    public boolean hasPage(int page) { return pagesActive.contains(page) || pagesActive.contains(-1); }
+
+    public void merge(AttributeData aData) {
+        pagesActive.addAll(aData.pagesActive);
     }
 }

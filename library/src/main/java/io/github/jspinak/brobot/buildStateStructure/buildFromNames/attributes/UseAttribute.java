@@ -3,13 +3,12 @@ package io.github.jspinak.brobot.buildStateStructure.buildFromNames.attributes;
 import io.github.jspinak.brobot.buildStateStructure.buildFromNames.findImages.ImageGroup;
 import io.github.jspinak.brobot.database.primitives.region.Region;
 import io.github.jspinak.brobot.database.state.stateObject.stateImageObject.StateImageObject;
+import io.github.jspinak.brobot.reports.ANSI;
+import io.github.jspinak.brobot.reports.Report;
 import org.sikuli.script.Match;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static io.github.jspinak.brobot.buildStateStructure.buildFromNames.attributes.AttributeTypes.Attribute.*;
 
@@ -52,7 +51,7 @@ public class UseAttribute {
     }
 
     private void appearsExclusively(StateImageObject image, List<Match> matches, int page) {
-        List<Integer> pages = image.getAttributes().getScreenshots().
+        Set<Integer> pages = image.getAttributes().getScreenshots().
                 get(APPEARS_EXCLUSIVELY).getPagesActive();
         // no pages are set for the image to appear exclusively
         if (pages.isEmpty()) return;

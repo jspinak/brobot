@@ -39,15 +39,15 @@ public class ImageFieldSpec {
         Region sReg = img.getSearchRegion();
         String searchRegion = !sReg.defined()? "" : "\n.withSearchRegion("+
                 sReg.x+", "+sReg.y+", "+sReg.w+", "+sReg.h+")";
-        String fullBody = "new $T()\n" +
-                ".withImages($S)" +
+        String fullBody = "new $T()" +
+                img.getAttributes().getWithImagesLineInBuilder() +
                 fixed +
                 shared +
                 searchRegion +
                 snapshotsAsCode.getBody() +
                 "\n.build()";
         initializerArgs.add(StateImageObject.Builder.class);
-        initializerArgs.add(img.getName());
+        initializerArgs.addAll(img.getAttributes().getFilenames());
         if (snapshotsAsCode.isAddClass()) {
             initializerArgs.add(MatchSnapshot.Builder.class);
             initializerArgs.add(ActionOptions.Find.class);
