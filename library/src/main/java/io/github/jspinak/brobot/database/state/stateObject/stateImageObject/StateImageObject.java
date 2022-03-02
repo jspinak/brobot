@@ -14,11 +14,10 @@ import io.github.jspinak.brobot.database.primitives.regionImagePairs.RegionImage
 import io.github.jspinak.brobot.database.state.ObjectCollection;
 import io.github.jspinak.brobot.database.state.stateObject.StateObject;
 import io.github.jspinak.brobot.primatives.enums.StateEnum;
+import io.github.jspinak.brobot.reports.Report;
 import lombok.Data;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * StateImageObject represents an Image that exists in the owner State. Unless
@@ -127,6 +126,25 @@ public class StateImageObject implements StateObject {
 
     public AttributeData getAttributeData(AttributeTypes.Attribute attribute) {
         return attributes.getScreenshots().get(attribute);
+    }
+
+    public void addImage(String filename) {
+        regionImagePairs.addImage(filename);
+        image.addImage(filename);
+    }
+
+    /**
+     * adds the Images, Snapshots, and Attributes of the parameter to this StateImageObject
+     * @param img the StateImageObject with the values to add
+     */
+    public void merge(StateImageObject img) {
+        // add images
+        img.attributes.getFilenames().forEach(this::addImage);
+        // add snapshots
+        img.matchHistory.getSnapshots().forEach(snp -> matchHistory.addSnapshot(snp));
+        // add attributes
+        attributes.merge(img.attributes);
+        if (!img.fixed) fixed = false;
     }
 
     public static class Builder {

@@ -1,15 +1,13 @@
 package io.github.jspinak.brobot.buildStateStructure.buildFromNames.babyStates;
 
+import io.github.jspinak.brobot.buildStateStructure.buildFromNames.attributes.SetAttributes;
 import io.github.jspinak.brobot.database.state.stateObject.stateImageObject.StateImageObject;
 import io.github.jspinak.brobot.reports.ANSI;
 import io.github.jspinak.brobot.reports.Report;
 import lombok.Getter;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Repository of BabyStates.
@@ -19,7 +17,13 @@ import java.util.Map;
 @Getter
 public class BabyStateRepo {
 
+    private SetAttributes setAttributes;
+
     private Map<String, BabyState> babyStates = new HashMap<>();
+
+    public BabyStateRepo(SetAttributes setAttributes) {
+        this.setAttributes = setAttributes;
+    }
 
     public void addImage(StateImageObject img) {
         String stateName = img.getAttributes().getStateName();
@@ -30,9 +34,9 @@ public class BabyStateRepo {
     public void printStatesAndImages() {
         Report.println("Total number of States = " + babyStates.size());
         babyStates.forEach((name, state) -> {
-            Report.print(name+" ", ANSI.BLACK, ANSI.BLUE_BACKGROUND);
+            Report.print(name, ANSI.BLACK, ANSI.BLUE_BACKGROUND);
             state.getImages().forEach(img ->
-                    Report.print(img.getAttributes().getImageName() +" ", ANSI.BLUE));
+                    Report.print(" "+img.getAttributes().getImageName(), ANSI.BLUE));
             Report.println();
         });
     }
@@ -57,4 +61,32 @@ public class BabyStateRepo {
             Report.println("error: more than 1 State matching this substring: "+nameSubstring, ANSI.RED);
         return "";
     }
+
+    public Optional<BabyState> getState(String state) {
+        if (!babyStates.containsKey(state)) return Optional.empty();
+        return Optional.of(babyStates.get(state));
+    }
+
+    /**
+     * Searches for an image in the repository that has the same base name as the parameter.
+     * The base name is the text that comes before numbers at the end of the String.
+     * For example, 'image' is the base name for 'image2'.
+     * If there is a StateImageObject with the same base name, add this filename to the
+     * StateImageObject.
+     * @param newImg the new StateImageObject
+     * @return true if the image was added to an existing StateImageObject
+     */
+    public Optional<StateImageObject> getBaseImage(StateImageObject newImg) {
+        if (!babyStates.containsKey(newImg.getAttributes().getStateName())) return Optional.empty();
+        BabyState babyState = babyStates.get(newImg.getAttributes().getStateName());
+        for (StateImageObject img : babyState.getImages()) {
+            String existingName = img.getAttributes().getImageName();
+            String newName = newImg.getAttributes().getImageName();
+            if (existingName.equals(newName)) {
+                return Optional.of(img);
+            }
+        }
+        return Optional.empty();
+    }
+
 }

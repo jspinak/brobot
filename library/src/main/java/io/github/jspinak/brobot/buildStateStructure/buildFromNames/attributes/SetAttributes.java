@@ -1,6 +1,7 @@
 package io.github.jspinak.brobot.buildStateStructure.buildFromNames.attributes;
 
 import io.github.jspinak.brobot.database.state.stateObject.stateImageObject.StateImageObject;
+import io.github.jspinak.brobot.stringUtils.CommonRegex;
 import org.springframework.stereotype.Component;
 
 import static io.github.jspinak.brobot.buildStateStructure.buildFromNames.attributes.AttributeTypes.Attribute.APPEARS;
@@ -52,6 +53,10 @@ public class SetAttributes {
     }
 
     private boolean setAttribute() {
+        if (pos >= filename.length()) {
+            attribute = APPEARS;
+            return true;
+        }
         char c = filename.charAt(pos);
         if (Character.isDigit(c)) {
             attribute = APPEARS;
@@ -81,15 +86,11 @@ public class SetAttributes {
     }
 
     private void addPage(String page) {
-        if (isNumeric(page)) attributes.addPage(attribute, Integer.valueOf(page));
-    }
-
-    private static boolean isNumeric(String str){
-        return str != null && str.matches("[0-9.]+");
+        if (CommonRegex.isNumeric(page)) attributes.addPage(attribute, Integer.valueOf(page));
     }
 
     private void saveName() {
-        String name = getName();
+        String name = getBaseName(getName());
         if (tag == AttributeTypes.Tag.TRANSITION) attributes.addTransition(name);
         if (tag == STATE_NAME) attributes.setStateName(name);
         if (tag == AttributeTypes.Tag.IMAGE_NAME) attributes.setImageName(name);
@@ -106,5 +107,16 @@ public class SetAttributes {
         return str.toString();
     }
 
+    public String getBaseName(String name) {
+        int startPos = name.length() - 1;
+        int endPos = 0;
+        for (int i=startPos; i>=0; i--) {
+            if (!CommonRegex.isNumeric(name.substring(i))) {
+                endPos = i + 1;
+                break;
+            }
+        }
+        return name.substring(0, endPos);
+    }
 
 }
