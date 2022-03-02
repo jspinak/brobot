@@ -12,6 +12,9 @@ import org.springframework.stereotype.Component;
 
 import javax.lang.model.element.Modifier;
 import java.util.*;
+import java.util.stream.Collectors;
+
+import static io.github.jspinak.brobot.buildStateStructure.buildFromNames.attributes.AttributeTypes.Tag.TRANSITION;
 
 /**
  * Writes Java code for methods in the StateTransitions class.
@@ -21,11 +24,13 @@ import java.util.*;
 public class TransitionMethods {
 
     private final BabyStateRepo babyStateRepo;
+    private final ToTransitions toTransitions;
 
     private Map<String, ClassName> enumNames;
 
-    public TransitionMethods(BabyStateRepo babyStateRepo) {
+    public TransitionMethods(BabyStateRepo babyStateRepo, ToTransitions toTransitions) {
         this.babyStateRepo = babyStateRepo;
+        this.toTransitions = toTransitions;
     }
 
     /* __example__
@@ -80,50 +85,16 @@ public class TransitionMethods {
     private String getTransitionsAsString(Set<StateImageObject> imgs, String stateClassVar,
                                           String packageName) {
         enumNames = new HashMap<>();
-        StringBuilder str = new StringBuilder();
-        for (StateImageObject img : imgs) {
-            String imgName = img.getAttributes().getImageName();
-            String toTransition = getToTransitionStateName(img);
-            Optional<ClassName> toEnumClassName =
-                    getTransitionClassName(toTransition, packageName);
-            if (toEnumClassName.isPresent()) { // if there is a transition
-                String toEnumName = toTransition.toUpperCase();
-                str.append(getTransitionAsString(stateClassVar, imgName, toEnumName));
-                enumNames.put(toEnumName, toEnumClassName.get());
-            }
+        StringBuilder transitionBuilder = new StringBuilder();
+        Set<StateImageObject> imgsWithTransitions = imgs.stream()
+                        .filter(img -> !img.getAttributes().getTransitionsTo().isEmpty())
+                        .collect(Collectors.toSet());
+        for (StateImageObject img : imgsWithTransitions) {
+            toTransitions.setTransitions(img, packageName);
+            transitionBuilder.append(toTransitions.getTransitionCode(stateClassVar));
+            enumNames.putAll(toTransitions.getEnumNames());
         }
-        return str.toString();
-    }
-
-    /* __example__
-      .addTransition(() -> commonActions.click(1, fromState.getImage()), TO_STATE)
-     */
-    public String getTransitionAsString(String stateClassVar, String imageName, String targetEnumName) {
-        String imageNameCap = Character.toUpperCase(imageName.charAt(0)) + imageName.substring(1);
-        return "\n.addTransition(() -> commonActions.click(1, " + stateClassVar +
-                ".get" + imageNameCap + "()), " + targetEnumName + ")";
-    }
-
-    /* __example__
-      import static io.github.jspinak.brobot.manageStates.StateMemory.Enum.PREVIOUS;
-     */
-    public ClassName getPreviousClassName() {
-        return ClassName.get("io.github.jspinak.brobot.manageStates.StateMemory","Enum");
-    }
-
-    private String getToTransitionStateName(StateImageObject image) {
-        List<String> toTransitions = image.getAttributes().getTransitionsTo();
-        if (toTransitions.isEmpty()) return "";
-        return babyStateRepo.getTransitionStateName(toTransitions.get(0)); // find the full State name
-    }
-
-    public Optional<ClassName> getTransitionClassName(String toTransition, String packageName) {
-        if (toTransition.equals("")) return Optional.empty(); // State doesn't exist
-        if (toTransition.equals("previous")) return Optional.of(getPreviousClassName());
-        String toTransitionCap; // make 1-char State names longer, and then simplify these lines
-        if (toTransition.length() == 1) toTransitionCap = toTransition.toUpperCase();
-        else toTransitionCap = Character.toUpperCase(toTransition.charAt(0)) + toTransition.substring(1);
-        return Optional.of(ClassName.get(packageName+"."+toTransition+"."+toTransitionCap,"Name"));
+        return transitionBuilder.toString();
     }
 
 }
