@@ -24,7 +24,7 @@ public class ImageUtils {
         }
         try {
             String newPath = getFreePath(path);
-            System.out.println(path + " " + newPath);
+            System.out.println(newPath);
             ImageIO.write(new Screen().capture(region).getImage(),
                     "png", new File("" + newPath + ".png"));
         } catch (IOException e) {
