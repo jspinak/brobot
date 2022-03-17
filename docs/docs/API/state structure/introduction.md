@@ -3,7 +3,7 @@ sidebar_position: 1
 ---
 
 # Building The State Structure
-Brobot version 1.0.2+  
+Brobot version 1.0.3+    
 Requires the dependency JavaPoet, which writes Java code.  
 `implementation group: 'com.squareup', name: 'javapoet', version: '1.9.0'`
 
