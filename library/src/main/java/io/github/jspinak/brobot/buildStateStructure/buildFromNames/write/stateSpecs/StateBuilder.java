@@ -11,7 +11,7 @@ import java.util.List;
 @Component
 public class StateBuilder {
 
-    public String getCode(List<String> imageNames, List<String> regionNames) {
+    public String getCode(List<String> imageNames, List<String> regionNames, List<String> locationNames) {
         StringBuilder str = new StringBuilder();
         str.append("new $T($L)");
         if (!imageNames.isEmpty()) {
@@ -20,15 +20,25 @@ public class StateBuilder {
                 str.append(name);
                 if (imageNames.indexOf(name) < imageNames.size() - 1) str.append(", ");
             }
+            str.append(")");
         }
         if (!regionNames.isEmpty()) {
             str.append("\n\t.withRegions(");
             for (String name : regionNames) {
                 str.append(name);
-                if (regionNames.indexOf(name) < imageNames.size() - 1) str.append(", ");
+                if (regionNames.indexOf(name) < regionNames.size() - 1) str.append(", ");
             }
+            str.append(")");
         }
-        str.append(")\n\t.build()");
+        if (!locationNames.isEmpty()) {
+            str.append("\n\t.withLocations(");
+            for (String name : locationNames) {
+                str.append(name);
+                if (locationNames.indexOf(name) < locationNames.size() - 1) str.append(", ");
+            }
+            str.append(")");
+        }
+        str.append("\n\t.build()");
         return str.toString();
     }
 

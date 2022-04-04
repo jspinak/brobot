@@ -59,6 +59,11 @@ public class StateLocation implements StateObject {
             return this;
         }
 
+        public Builder withLocation(int x, int y) {
+            this.location = new Location(x, y);
+            return this;
+        }
+
         public Builder inState(StateEnum stateName) {
             this.ownerStateName = stateName;
             return this;

@@ -7,7 +7,7 @@ plugins {
 }
 
 group 'io.github.jspinak'
-version '1.0.3'
+version '1.0.4'
 
 repositories {
     mavenCentral()
@@ -47,7 +47,7 @@ publishing {
 
             groupId = 'io.github.jspinak'
             artifactId = 'brobot'
-            version = '1.0.3'
+            version = '1.0.4'
             from components.java
 
             pom {

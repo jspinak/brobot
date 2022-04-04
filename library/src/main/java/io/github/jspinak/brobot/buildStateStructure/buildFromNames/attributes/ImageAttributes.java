@@ -44,6 +44,7 @@ public class ImageAttributes {
         addAttribute(GROUP_DEFINE);
         addAttribute(REGION);
         addAttribute(TRANSFER);
+        addAttribute(LOCATION);
     }
     
     private void addAttribute(AttributeTypes.Attribute attribute) {
@@ -96,8 +97,12 @@ public class ImageAttributes {
         return !screenshots.get(REGION).isEmpty();
     }
 
+    public boolean isStateLocation() { return !screenshots.get(LOCATION).isEmpty(); }
+
     public boolean isStateImage() {
-        return screenshots.get(TRANSFER).isEmpty() && screenshots.get(REGION).isEmpty();
+        return screenshots.get(TRANSFER).isEmpty() &&
+                screenshots.get(REGION).isEmpty() &&
+                screenshots.get(LOCATION).isEmpty();
     }
 
     public void merge(ImageAttributes imageAttributes) {

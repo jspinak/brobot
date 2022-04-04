@@ -33,11 +33,11 @@ public class ImageFieldSpec {
         initializerArgs = new ArrayList<>();
         String imageName = img.getAttributes().getImageName();
         snapshotsAsCode.processSnapshots(img);
-        String fixed = img.isFixed() ? "" : "\n.isFixed(false)";
+        String fixed = img.isFixed() ? "" : "\n\t.isFixed(false)";
         String shared = img.getAttributeData(SINGLE_MATCH).getPageResults().containsValue(false)?
-                "\n.isShared(true)" : "";
+                "\n\t.isShared(true)" : "";
         Region sReg = img.getSearchRegion();
-        String searchRegion = !sReg.defined()? "" : "\n.withSearchRegion("+
+        String searchRegion = !sReg.defined()? "" : "\n\t.withSearchRegion("+
                 sReg.x+", "+sReg.y+", "+sReg.w+", "+sReg.h+")";
         String fullBody = "new $T()" +
                 img.getAttributes().getWithImagesLineInBuilder() +
@@ -45,7 +45,7 @@ public class ImageFieldSpec {
                 shared +
                 searchRegion +
                 snapshotsAsCode.getBody() +
-                "\n.build()";
+                "\n\t.build()";
         initializerArgs.add(StateImageObject.Builder.class);
         initializerArgs.addAll(img.getAttributes().getFilenames());
         if (snapshotsAsCode.isAddClass()) {
