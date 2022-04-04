@@ -141,6 +141,10 @@ public class UseAttribute {
      the StateRegion.
      */
     private void region(StateImageObject image, List<Match> matches, int page) {
+        defineRegion(image, matches, page, LOCATION);
+    }
+
+    private void location(StateImageObject image, List<Match> matches, int page) {
         defineRegion(image, matches, page, REGION);
     }
 

@@ -4,6 +4,7 @@ import io.github.jspinak.brobot.database.primitives.region.Region;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -14,21 +15,17 @@ import java.util.List;
 public class SearchRegions {
 
     List<Region> regions = new ArrayList<>();
-    {
-        regions.add(new Region());  // initialize with an undefined region (representing the screen)
-    }
 
     public Region getSearchRegion() {
         for (Region region : regions) {
             if (region.defined()) return region;
         }
-        return regions.get(0);
+        return new Region();
     }
 
     public void setSearchRegions(List<Region> searchRegions) {
         regions = new ArrayList<>();
         addSearchRegions(searchRegions);
-        if (regions.isEmpty()) regions.add(new Region()); // there should be at least one Region
     }
 
     public void setSearchRegion(Region searchRegion) {
@@ -37,7 +34,8 @@ public class SearchRegions {
     }
 
     public List<Region> getAllRegions() {
-        return regions;
+        if (!regions.isEmpty()) return regions;
+        return Collections.singletonList(new Region());
     }
 
     public void addSearchRegions(Region... searchRegions) {
