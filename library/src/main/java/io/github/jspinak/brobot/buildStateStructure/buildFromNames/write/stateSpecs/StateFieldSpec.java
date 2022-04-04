@@ -42,10 +42,12 @@ public class StateFieldSpec {
                 .build();
     }
 
-    public FieldSpec getStateField(List<String> imageNames, List<String> regionNames, String enumName) {
+    public FieldSpec getStateField(List<String> imageNames, List<String> regionNames,
+                                   List<String> locationNames, String enumName) {
         return FieldSpec.builder(State.class, "state")
                 .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
-                .initializer(stateBuilder.getCode(imageNames, regionNames), State.Builder.class, enumName)
+                .initializer(stateBuilder.getCode(imageNames, regionNames, locationNames),
+                        State.Builder.class, enumName)
                 .build();
     }
 }

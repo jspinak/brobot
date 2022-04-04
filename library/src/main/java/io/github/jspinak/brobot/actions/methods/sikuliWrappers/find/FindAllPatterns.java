@@ -24,14 +24,11 @@ public class FindAllPatterns implements FindPatternInterface {
     private final ImagePatterns imagePatterns;
     private final Mock mock;
     private final FindPattern findPattern;
-    private UseDefinedRegion useDefinedRegion;
 
-    public FindAllPatterns(ImagePatterns imagePatterns, Mock mock, FindPattern findPattern,
-                           UseDefinedRegion useDefinedRegion) {
+    public FindAllPatterns(ImagePatterns imagePatterns, Mock mock, FindPattern findPattern) {
         this.imagePatterns = imagePatterns;
         this.mock = mock;
         this.findPattern = findPattern;
-        this.useDefinedRegion = useDefinedRegion;
     }
 
     @Override
