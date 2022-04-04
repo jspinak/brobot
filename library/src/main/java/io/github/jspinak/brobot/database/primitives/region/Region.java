@@ -108,6 +108,9 @@ public class Region extends org.sikuli.script.Region implements Comparable<Regio
         return x!=0 || y!=0 || w!=new Screen().w || h!=new Screen().h;
     }
 
+    /*
+    Match is also allowed as a param since Match extends Region
+    */
     public boolean overlaps(Region r) {
         if (contains(r.getTopLeft())) return true;
         if (contains(r.getTopRight())) return true;
@@ -115,6 +118,9 @@ public class Region extends org.sikuli.script.Region implements Comparable<Regio
         return contains(r.getBottomRight());
     }
 
+    /*
+    Match is also allowed as a param since Match extends Region
+     */
     public boolean contains(Region r) {
         return contains(r.getTopLeft()) && contains(r.getTopRight())
                 && contains(r.getBottomLeft()) && contains(r.getBottomRight());
@@ -147,7 +153,7 @@ public class Region extends org.sikuli.script.Region implements Comparable<Regio
     }
 
     public void print() {
-        System.out.println("gameRegion: XYWH="+x+"."+y+"."+w+"."+h+"| ");
+        System.out.println("region: XYWH="+x+"."+y+"."+w+"."+h+"| ");
     }
 
     // sikuli is unable to process this class even though it is a child of the sikuli Region

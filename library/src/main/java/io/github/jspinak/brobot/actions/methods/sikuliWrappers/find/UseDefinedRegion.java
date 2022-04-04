@@ -10,6 +10,9 @@ import org.springframework.stereotype.Component;
 
 import java.util.Optional;
 
+/**
+ * Use the defined regions (if they exist) of objects as MatchObjects
+ */
 @Component
 public class UseDefinedRegion {
 
