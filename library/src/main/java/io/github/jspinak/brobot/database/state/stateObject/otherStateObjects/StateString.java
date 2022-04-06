@@ -60,6 +60,7 @@ public class StateString {
             return this;
         }
 
+        // String as param because it shouldn't be created without a string
         public StateString build(String string) {
             StateString stateString = new StateString(string);
             stateString.name = name;

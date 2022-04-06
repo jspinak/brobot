@@ -20,6 +20,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import static io.github.jspinak.brobot.actions.actionOptions.ActionOptions.Action.*;
+
 /**
  * BasicActions, which run for 1 iteration, require 1 or no Find operations.
  * They can be used as building blocks for CompositeActions.
@@ -33,19 +35,19 @@ public class BasicAction {
                        MouseDown mouseDown, MouseUp mouseUp, DefineRegion defineRegion, TypeText typeText,
                        MoveMouse moveMouse, WaitVanish waitVanish, GetText getText, Highlight highlight,
                        ScrollMouseWheel scrollMouseWheel, KeyDown keyDown, KeyUp keyUp) {
-        actions.put(ActionOptions.Action.FIND, find);
-        actions.put(ActionOptions.Action.CLICK, click);
-        actions.put(ActionOptions.Action.MOUSE_DOWN, mouseDown);
-        actions.put(ActionOptions.Action.MOUSE_UP, mouseUp);
-        actions.put(ActionOptions.Action.DEFINE, defineRegion);
-        actions.put(ActionOptions.Action.TYPE, typeText);
-        actions.put(ActionOptions.Action.MOVE, moveMouse);
-        actions.put(ActionOptions.Action.VANISH, waitVanish);
-        actions.put(ActionOptions.Action.GET_TEXT, getText);
-        actions.put(ActionOptions.Action.HIGHLIGHT, highlight);
-        actions.put(ActionOptions.Action.SCROLL_MOUSE_WHEEL, scrollMouseWheel);
-        //actions.put(KEY_DOWN, keyDown);
-        //actions.put(KEY_UP, keyUp);
+        actions.put(FIND, find);
+        actions.put(CLICK, click);
+        actions.put(MOUSE_DOWN, mouseDown);
+        actions.put(MOUSE_UP, mouseUp);
+        actions.put(DEFINE, defineRegion);
+        actions.put(TYPE, typeText);
+        actions.put(MOVE, moveMouse);
+        actions.put(VANISH, waitVanish);
+        actions.put(GET_TEXT, getText);
+        actions.put(HIGHLIGHT, highlight);
+        actions.put(SCROLL_MOUSE_WHEEL, scrollMouseWheel);
+        actions.put(KEY_DOWN, keyDown);
+        actions.put(KEY_UP, keyUp);
     }
 
     public Optional<ActionInterface> getAction(ActionOptions.Action action) {

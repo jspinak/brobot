@@ -100,4 +100,18 @@ public class Action {
         return perform(new ActionOptions.Builder().setAction(action).build(), new ObjectCollection.Builder().build());
     }
 
+    /**
+     * Perform an Action with default options.
+     * All Strings are placed in the first ObjectCollection.
+     */
+    public Matches perform(ActionOptions.Action action, String... strings) {
+        ObjectCollection strColl = new ObjectCollection.Builder().withStrings(strings).build();
+        return perform(action, strColl);
+    }
+
+    public Matches perform(ActionOptions actionOptions, String... strings) {
+        ObjectCollection strColl = new ObjectCollection.Builder().withStrings(strings).build();
+        return perform(actionOptions, strColl);
+    }
+
 }
