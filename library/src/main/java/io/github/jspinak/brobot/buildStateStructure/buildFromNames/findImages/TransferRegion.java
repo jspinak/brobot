@@ -29,12 +29,16 @@ public class TransferRegion {
         return largestTransferRegion;
     }
 
+    /*
+    Only transfers to images, not to regions or locations.
+     */
     public boolean processRegionTransfer(Set<StateImageObject> images, int page, BabyState babyState) {
         Region transferRegion = getLargestTransferRegion(babyState, page);
         if (!transferRegion.defined()) return false;
         List<StateImageObject> imagesToUpdate = images.stream()
                 .filter(img -> !img.getSearchRegion().defined() ||
-                        img.getSearchRegion().size() < transferRegion.size())
+                        img.getSearchRegion().size() < transferRegion.size() &&
+                        img.getAttributes().isStateImage())
                 .collect(Collectors.toList());
         if (imagesToUpdate.isEmpty()) return false;
         Report.format("TRANSFER: SearchRegions updated to %d.%d_%d.%d for images: ",

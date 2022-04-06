@@ -7,6 +7,7 @@ import io.github.jspinak.brobot.actions.methods.sikuliWrappers.text.KeyDownWrapp
 import io.github.jspinak.brobot.database.primitives.match.Matches;
 import io.github.jspinak.brobot.database.state.ObjectCollection;
 import io.github.jspinak.brobot.database.state.stateObject.otherStateObjects.StateString;
+import io.github.jspinak.brobot.reports.Report;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -18,7 +19,6 @@ import java.util.List;
  */
 @Component
 public class KeyDown implements ActionInterface {
-
 
     private KeyDownWrapper keyDownWrapper;
     private Wait wait;

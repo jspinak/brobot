@@ -3,8 +3,6 @@ package io.github.jspinak.brobot.buildStateStructure.buildFromNames.attributes;
 import io.github.jspinak.brobot.buildStateStructure.buildFromNames.findImages.ImageGroup;
 import io.github.jspinak.brobot.database.primitives.region.Region;
 import io.github.jspinak.brobot.database.state.stateObject.stateImageObject.StateImageObject;
-import io.github.jspinak.brobot.reports.ANSI;
-import io.github.jspinak.brobot.reports.Report;
 import org.sikuli.script.Match;
 import org.springframework.stereotype.Component;
 
@@ -40,6 +38,7 @@ public class UseAttribute {
         groupDefine(image, matches, page, imageGroup);
         region(image, matches, page);
         transfer(image, matches, page);
+        location(image, matches, page);
         return activeAttributes;
     }
 

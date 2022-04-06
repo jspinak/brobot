@@ -59,17 +59,19 @@ public class Location {
 
     public Location(Region region, org.sikuli.script.Location sikuliLocation) {
         this.region = region;
-        int percentOfW, percentOfH;
-        percentOfW = (sikuliLocation.x - region.x) * 100 / region.w;
-        percentOfH = (sikuliLocation.y - region.y) * 100 / region.h;
-        position = new Position(percentOfW, percentOfH);
+        setPosition(sikuliLocation.x, sikuliLocation.y);
     }
 
     public Location(Region region) {
         this.region = region;
+        setPosition(region.getTarget().x, region.getTarget().y);
+    }
+
+    private void setPosition(int newX, int newY) {
         int percentOfW, percentOfH;
-        percentOfW = (region.getTarget().x - region.x) / region.w;
-        percentOfH = (region.getTarget().y - region.y) / region.y;
+        percentOfW = (newX - region.x) * 100 / region.w;
+        percentOfH = (newY - region.y) * 100 / region.h;
+        System.out.println("percent of W,H: "+percentOfW+" "+percentOfH);
         position = new Position(percentOfW, percentOfH);
     }
 
@@ -157,8 +159,10 @@ public class Location {
     }
 
     private org.sikuli.script.Location getSikuliLocationFromRegion() {
-        int locX = region.x + Math.max(0, region.w * position.getPercentW() / 100 - 1);
-        int locY = region.y + Math.max(0, region.h * position.getPercentH() / 100 - 1);
+        //int locX = region.x + Math.max(0, region.w * position.getPercentW() / 100 - 1);
+        //int locY = region.y + Math.max(0, region.h * position.getPercentH() / 100 - 1);
+        int locX = region.x + (region.w * position.getPercentW() / 100 - 1);
+        int locY = region.y + (region.h * position.getPercentH() / 100 - 1);
         return new org.sikuli.script.Location(locX, locY);
     }
 
@@ -207,4 +211,32 @@ public class Location {
     private boolean isDefinedByXY() {
         return definedByXY || region == null;
     }
+
+    /*
+    Java treats angles like this:
+    0 degrees is straight right, or (1,0)
+    -90 degrees is straight down, or (0,-1)
+    90 degrees is straight up, or (1,0)
+    both positive and negative continue until -179 meets 180 (-1,0)
+    This is the opposite relationship for y-values on the screen (smaller values are up).
+     */
+    public void setFromCenter(double angle, double distance) {
+        double rad = Math.toRadians(angle);
+        // move from current point if not defined with a region
+        int plusX = (int)(distance * Math.cos(rad));
+        int minusY = (int)(distance * Math.sin(rad)); // the angle is the cartesian angle
+        if (definedByXY) {
+            x += plusX;
+            y -= minusY;
+        } else {// if defined by a region move from the center of the region
+            Location center = new Location(region, Position.Name.MIDDLEMIDDLE);
+            System.out.println("current location: "+getX()+"."+getY()+" angle.distance: "+angle+"."+distance);
+            System.out.println("center.getX() + plusX: "+center.getX() +" "+ plusX+" center.getY() - minusY: "+center.getY() +" "+ minusY);
+            setPosition(center.getX() + plusX, center.getY() - minusY);
+            System.out.println("current location: "+getX()+"."+getY());
+            System.out.println("angle = "+Math.round(angle)+ " distance = "+Math.round(distance)+" radians="+Math.toRadians(angle)+
+                    " plusX="+plusX+" minusY="+minusY+" click position = "+getX()+"."+getY());
+        }
+    }
+
 }
