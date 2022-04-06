@@ -16,18 +16,14 @@ public class KeyUpWrapper {
      * When no parameters, it releases all keys
      */
     public void release() {
-        if (BrobotSettings.mock) {
-            Report.format("release all keys| ");
-            return;
-        }
+        Report.format("release all keys| ");
+        if (BrobotSettings.mock) return;
         new Region().keyUp();
     }
 
     public void release(String key) {
-        if (BrobotSettings.mock) {
-            Report.format("release %s| ", key);
-            return;
-        }
+        Report.format("release %s| ", key);
+        if (BrobotSettings.mock) return;
         new Region().keyUp(key);
     }
 
