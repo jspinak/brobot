@@ -1,5 +1,6 @@
 package io.github.jspinak.brobot.actions.methods.basicactions.textOps;
 
+import io.github.jspinak.brobot.actions.actionExecution.Action;
 import io.github.jspinak.brobot.actions.actionExecution.ActionInterface;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.actions.methods.sikuliWrappers.text.KeyUpWrapper;
@@ -24,12 +25,20 @@ public class KeyUp implements ActionInterface {
 
     public Matches perform(ActionOptions actionOptions, ObjectCollection... objectCollections) {
         Matches matches = new Matches();
-        if (objectCollections == null) keyUpWrapper.release(); // releases all keys
-        else for (StateString stateString : objectCollections[0].getStateStrings()) {
-            keyUpWrapper.release(stateString.getString());
+        if (nothingToRelease(actionOptions, objectCollections)) keyUpWrapper.release(); // releases all keys
+        else {
+            for (StateString stateString : objectCollections[0].getStateStrings()) {
+                keyUpWrapper.release(stateString.getString());
+            }
+            if (!actionOptions.getModifiers().isEmpty()) keyUpWrapper.release(actionOptions.getModifiers());
         }
-        keyUpWrapper.release(actionOptions.getModifiers());
         return matches;
+    }
+
+    private boolean nothingToRelease(ActionOptions actionOptions, ObjectCollection... objectCollections) {
+        if (objectCollections == null) return true;
+        return objectCollections[0].getStateStrings().isEmpty() &&
+                actionOptions.getModifiers().isEmpty();
     }
 
 }
