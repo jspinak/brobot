@@ -19,7 +19,7 @@ public class Distance {
         distPair.add(loc2.getX() - loc1.getX());
         // the y difference is the opposite on the computer screen as in a cartesian plane
         distPair.add(loc1.getY() - loc2.getY());
-        System.out.print("|cartesian dist x.y "+distPair.get(0)+"."+distPair.get(1)+" ");
+        //System.out.print("|cartesian dist x.y "+distPair.get(0)+"."+distPair.get(1)+" ");
         return distPair;
     }
 
