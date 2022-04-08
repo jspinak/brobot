@@ -6,6 +6,7 @@ import io.github.jspinak.brobot.database.primitives.location.Location;
 import io.github.jspinak.brobot.database.primitives.location.Position;
 import io.github.jspinak.brobot.database.primitives.match.MatchHistory;
 import io.github.jspinak.brobot.database.primitives.match.MatchSnapshot;
+import io.github.jspinak.brobot.database.state.ObjectCollection;
 import io.github.jspinak.brobot.database.state.stateObject.StateObject;
 import io.github.jspinak.brobot.primatives.enums.StateEnum;
 import lombok.Data;
@@ -40,6 +41,12 @@ public class StateLocation implements StateObject {
 
     public void addSnapshot(MatchSnapshot matchSnapshot) {
         matchHistory.addSnapshot(matchSnapshot);
+    }
+
+    public ObjectCollection asObjectCollection() {
+        return new ObjectCollection.Builder()
+                .withLocations(this)
+                .build();
     }
 
     public static class Builder {

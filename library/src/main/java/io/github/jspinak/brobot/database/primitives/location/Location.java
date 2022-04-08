@@ -1,6 +1,7 @@
 package io.github.jspinak.brobot.database.primitives.location;
 
 import io.github.jspinak.brobot.database.primitives.region.Region;
+import io.github.jspinak.brobot.database.state.ObjectCollection;
 import io.github.jspinak.brobot.database.state.stateObject.otherStateObjects.StateLocation;
 import lombok.Data;
 import org.sikuli.script.Match;
@@ -194,6 +195,12 @@ public class Location {
                 .build();
     }
 
+    public ObjectCollection asObjectCollection() {
+        return new ObjectCollection.Builder()
+                .withLocations(this)
+                .build();
+    }
+
     public Location getOpposite() {
         if (region == null) return this;
         return new Location(this.region,
@@ -225,17 +232,14 @@ public class Location {
         // move from current point if not defined with a region
         int plusX = (int)(distance * Math.cos(rad));
         int minusY = (int)(distance * Math.sin(rad)); // the angle is the cartesian angle
+        int ang = (int)Math.round(angle);
+        int dist = (int)Math.round(distance);
         if (definedByXY) {
             x += plusX;
             y -= minusY;
         } else {// if defined by a region move from the center of the region
             Location center = new Location(region, Position.Name.MIDDLEMIDDLE);
-            System.out.println("current location: "+getX()+"."+getY()+" angle.distance: "+angle+"."+distance);
-            System.out.println("center.getX() + plusX: "+center.getX() +" "+ plusX+" center.getY() - minusY: "+center.getY() +" "+ minusY);
             setPosition(center.getX() + plusX, center.getY() - minusY);
-            System.out.println("current location: "+getX()+"."+getY());
-            System.out.println("angle = "+Math.round(angle)+ " distance = "+Math.round(distance)+" radians="+Math.toRadians(angle)+
-                    " plusX="+plusX+" minusY="+minusY+" click position = "+getX()+"."+getY());
         }
     }
 
