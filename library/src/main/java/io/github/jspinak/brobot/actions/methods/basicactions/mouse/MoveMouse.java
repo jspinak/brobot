@@ -8,6 +8,7 @@ import io.github.jspinak.brobot.actions.methods.sikuliWrappers.mouse.MoveMouseWr
 import io.github.jspinak.brobot.database.primitives.location.Location;
 import io.github.jspinak.brobot.database.primitives.match.Matches;
 import io.github.jspinak.brobot.database.state.ObjectCollection;
+import io.github.jspinak.brobot.reports.Report;
 import org.sikuli.script.Mouse;
 import org.springframework.stereotype.Component;
 
@@ -42,6 +43,7 @@ public class MoveMouse implements ActionInterface {
         for (ObjectCollection objColl : collections) {
             Matches newMatches = find.perform(actionOptions, objColl);
             newMatches.getMatchLocations().forEach(moveMouseWrapper::move);
+            Report.println("finished move");
             matches.addAll(newMatches);
             if (newMatches.isSuccess()) matches.setSuccess(true);
             if (collections.indexOf(objColl) < collections.size() - 1)
