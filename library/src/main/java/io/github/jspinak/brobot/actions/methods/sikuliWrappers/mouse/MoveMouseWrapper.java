@@ -16,6 +16,7 @@ public class MoveMouseWrapper {
 
     private boolean sikuliMove(Location location) {
         try {
+            Report.println("->location:"+location.getSikuliLocation());
             return new Region().mouseMove(location.getSikuliLocation()) != 0;
         } catch (FindFailed findFailed) {
             findFailed.printStackTrace();
