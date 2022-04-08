@@ -17,31 +17,37 @@ public class ImageUtils {
 
     private Map<String, Integer> lastFilenumber = new HashMap<>();
 
-    public void saveRegionToFile(Region region, String path) {
-        if (BrobotSettings.mock) {
-            Report.format("Save file with base path %s \n", path);
-            return;
-        }
+    /**
+     * Saves the region to file as a .png file.
+     * @param region The region to save
+     * @param path The base path name: the first free filename will be used based on the base path name
+     *             and an available number.
+     * @return The path name used to save the file.
+     */
+    public String saveRegionToFile(Region region, String path) {
         try {
             String newPath = getFreePath(path);
+            if (BrobotSettings.mock) {
+                Report.format("Save file as %s \n", newPath);
+                return newPath;
+            }
             System.out.println(newPath);
             ImageIO.write(new Screen().capture(region).getImage(),
                     "png", new File("" + newPath + ".png"));
+            return newPath;
         } catch (IOException e) {
             e.printStackTrace();
+            return null;
         }
     }
 
+    /**
+     * Searches for the first free filename with the given base path name.
+     * @param path the base path name
+     * @return the path name with the first free filename
+     */
     private String getFreePath(String path) {
-        if (!fileExists(path + "0.png")) {
-            return path + 0;
-        }
-        if (lastFilenumber.containsKey(path)) {
-            int l = lastFilenumber.get(path);
-            lastFilenumber.put(path, ++l);
-            return path + lastFilenumber.get(path);
-        }
-        int i = 1;
+        int i = lastFilenumber.containsKey(path)? lastFilenumber.get(path) + 1 : 0;
         while (fileExists(path + i + ".png")) {
             i++;
         }
