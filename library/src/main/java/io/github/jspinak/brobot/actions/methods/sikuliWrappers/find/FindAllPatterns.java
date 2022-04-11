@@ -34,7 +34,8 @@ public class FindAllPatterns implements FindPatternInterface {
     @Override
     public Matches find(Region region, StateImageObject stateImageObject, Image image,
                         ActionOptions actionOptions) {
-        if (BrobotSettings.mock) return mock.getMatches(stateImageObject, region, actionOptions);
+        if (BrobotSettings.mock && BrobotSettings.screenshot.isEmpty())
+            return mock.getMatches(stateImageObject, region, actionOptions);
         List<Pattern> patterns = imagePatterns.getPatterns(image, actionOptions);
         Matches matches = new Matches();
         for (Pattern pattern : patterns) {
