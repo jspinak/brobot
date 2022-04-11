@@ -68,7 +68,7 @@ public class Location {
         setPosition(region.getTarget().x, region.getTarget().y);
     }
 
-    private void setPosition(int newX, int newY) {
+    public void setPosition(int newX, int newY) {
         int percentOfW, percentOfH;
         percentOfW = (newX - region.x) * 100 / region.w;
         percentOfH = (newY - region.y) * 100 / region.h;
