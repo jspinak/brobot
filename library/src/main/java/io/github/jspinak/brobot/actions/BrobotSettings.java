@@ -23,11 +23,23 @@ public class BrobotSettings {
     public static double mockTimeClick = 0.05;
     public static double mockTimeMove = 0.1;
     public static double mockTimeGetText = 0.1;
+    /**
+     * Unit Tests
+     */
+    /*
+    When this has a value, it is used instead of the screen for Find and Highlight operations.
+    It uses the screenshotPath and then this value as the filename.
+    The name does not have to start with the value in 'screenshotFilename'.
+     */
+    public static String screenshot = "";
 
     /**
      * Capture Settings
      */
     public static String screenshotPath = "screenshots/";
+    /*
+    Files that do not start with this variable's value will not be used for the StateStructure builder.
+     */
     public static String screenshotFilename = "screen";
 
     /**
