@@ -39,11 +39,39 @@ public class Distance {
         return getDist(getDistPair(loc, new Location(match)));
     }
 
+    public double getAngle(Location loc) {
+        return getAngle(new Location(0,0), loc);
+    }
+
+    public double getAngle(Match match) {
+        return getAngle(new Location(0,0), match);
+    }
+
     public double getAngle(Location loc1, Location loc2) {
         return getDegree(getDistPair(loc1, loc2));
     }
 
     public double getAngle(Location loc, Match match) {
         return getDegree(getDistPair(loc, new Location(match)));
+    }
+
+    /**
+     * Calculates the difference between the angles of 2 vectors.
+     * Vector 1: start->loc1
+     * Vector 2: start->loc2
+     *
+     * @param start the start point for both vectors
+     * @param loc1 the end point for vector1
+     * @param loc2 the end point for vector2
+     * @return the angle to go from vector1 to vector2
+     */
+    public double getAngleBetween(Location start, Location loc1, Location loc2) {
+        double angle1 = euclidean(start, loc1);
+        double angle2 = euclidean(start, loc2);
+        return angle2 - angle1;
+    }
+
+    public double getAngleBetween(Location loc1, Location loc2) {
+        return getAngleBetween(new Location(0,0), loc1, loc2);
     }
 }
