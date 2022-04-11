@@ -40,9 +40,10 @@ public class FindFirstPattern implements FindPatternInterface {
     public Matches find(Region region, StateImageObject stateImageObject, Image image,
                         ActionOptions actionOptions) {
         Matches matches = new Matches();
-        if (BrobotSettings.mock) return mock.getMatches(stateImageObject, region, actionOptions);
+        if (BrobotSettings.mock && BrobotSettings.screenshot.isEmpty())
+            return mock.getMatches(stateImageObject, region, actionOptions);
         else for (Pattern pattern : imagePatterns.getPatterns(image, actionOptions)) {
-            Optional<Match> matchOptional = findPattern.findSikuli(region, pattern);
+            Optional<Match> matchOptional = findPattern.findBest(region, pattern);
             if (matchOptional.isPresent()) {
                 matches.addMatchObjects(stateImageObject, Collections.singletonList(matchOptional.get()),
                         time.getDuration(actionOptions.getAction()).getSeconds());
