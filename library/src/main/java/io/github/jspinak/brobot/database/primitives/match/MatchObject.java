@@ -70,4 +70,8 @@ public class MatchObject {
                 timeStamp.format(DateTimeFormatter.ofPattern("MM-dd HH:mm:ss")),
                 match.x, match.y, match.w, match.h, selectedText);
     }
+
+    public void printXY() {
+        System.out.print(match.x+"."+match.y);
+    }
 }
