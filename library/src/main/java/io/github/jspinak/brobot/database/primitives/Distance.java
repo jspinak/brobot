@@ -39,14 +39,6 @@ public class Distance {
         return getDist(getDistPair(loc, new Location(match)));
     }
 
-    public double getAngle(Location loc) {
-        return getAngle(new Location(0,0), loc);
-    }
-
-    public double getAngle(Match match) {
-        return getAngle(new Location(0,0), match);
-    }
-
     public double getAngle(Location loc1, Location loc2) {
         return getDegree(getDistPair(loc1, loc2));
     }
@@ -73,5 +65,43 @@ public class Distance {
 
     public double getAngleBetween(Location loc1, Location loc2) {
         return getAngleBetween(new Location(0,0), loc1, loc2);
+    }
+
+    /**
+     * On a circular scale there must be a jump from one value to another.
+     * The normal scale has this break at 180/-179 degrees.
+     * This function assumes that the parameter values are clustered in one region, and makes sure that
+     * these values do not include a break.
+     *
+     * @param angles the values to convert
+     * @return a list of values without a break
+     */
+    public List<Double> convertAnglesToSameScale(List<Double> angles) {
+        // Find the median value. Make the break at the opposite point in the circle.
+        double average = angles.stream().mapToDouble(a->a).average().orElse(0);
+        double aveOpposite = average > 0 ? average - 180 : average + 180;
+        List<Double> newAngles = new ArrayList<>();
+        angles.forEach(a -> {
+            if (aveOpposite >= 0) {
+                if (a > aveOpposite) newAngles.add(a - 360);
+                else newAngles.add(a);
+            } else {
+                if (a < aveOpposite) newAngles.add(a + 360);
+                else newAngles.add(a);
+            }
+        });
+        return newAngles;
+    }
+
+    public List<Double> undueConversion(List<Double> angles) {
+        List<Double> originalList = new ArrayList<>();
+        angles.forEach(a -> originalList.add(undueConversion(a)));
+        return originalList;
+    }
+
+    public double undueConversion(double a) {
+        if (a < -179) return a + 360;
+        else if (a > 180) return a - 360;
+        return a;
     }
 }

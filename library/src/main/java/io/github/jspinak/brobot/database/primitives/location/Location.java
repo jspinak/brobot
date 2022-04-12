@@ -3,6 +3,7 @@ package io.github.jspinak.brobot.database.primitives.location;
 import io.github.jspinak.brobot.database.primitives.region.Region;
 import io.github.jspinak.brobot.database.state.ObjectCollection;
 import io.github.jspinak.brobot.database.state.stateObject.otherStateObjects.StateLocation;
+import io.github.jspinak.brobot.database.state.stateObject.otherStateObjects.StateRegion;
 import lombok.Data;
 import org.sikuli.script.Match;
 
@@ -19,6 +20,7 @@ import static io.github.jspinak.brobot.database.state.NullState.Enum.NULL;
 @Data
 public class Location {
 
+    private String name;
     private boolean definedByXY = false;
     private int x = -1;
     private int y = -1;
@@ -208,6 +210,12 @@ public class Location {
                 100 - position.getPercentH());
     }
 
+    public Location getOppositeTo(Location location) {
+        int addX = 2 * (location.getX() - getX());
+        int addY = 2 * (location.getY() - getY());
+        return new Location(getX() + addX, getY() + addY);
+    }
+
     public void adjustToRegion() {
         int percentOfW, percentOfH;
         percentOfW = Math.max(Math.min(100, position.getPercentW()), 0);
@@ -240,6 +248,100 @@ public class Location {
         } else {// if defined by a region move from the center of the region
             Location center = new Location(region, Position.Name.MIDDLEMIDDLE);
             setPosition(center.getX() + plusX, center.getY() - minusY);
+        }
+    }
+
+    public static class Builder {
+        private String name;
+        private boolean definedByXY = false;
+        private int x = -1;
+        private int y = -1;
+        private Region region;
+        private Position position = new Position(Position.Name.MIDDLEMIDDLE);
+        private Position.Name anchor = Position.Name.MIDDLEMIDDLE;
+
+        public Builder called(String name) {
+            this.name = name;
+            return this;
+        }
+
+        public Builder setXY(int x, int y) {
+            this.x = x;
+            this.y = y;
+            return this;
+        }
+
+        public Builder setXY(org.sikuli.script.Location sikuliLocation) {
+            this.x = sikuliLocation.x;
+            this.y = sikuliLocation.y;
+            return this;
+        }
+
+        public Builder copy(Location location) {
+            this.anchor = location.anchor;
+            this.definedByXY = location.definedByXY;
+            x = location.x;
+            y = location.y;
+            if (location.isDefinedByXY()) return this;
+            int percentOfW, percentOfH;
+            if (location.getRegion().isPresent()) this.region = location.getRegion().get();
+            if (location.getPercentOfW().isPresent()) percentOfW = location.getPercentOfW().get();
+            else percentOfW = 50;
+            if (location.getPercentOfH().isPresent()) percentOfH = location.getPercentOfH().get();
+            else percentOfH = 50;
+            position = new Position(percentOfW, percentOfH);
+            return this;
+        }
+
+        public Builder setRegion(Region region) {
+            this.region = region;
+            return this;
+        }
+
+        public Builder setRegion(StateRegion region) {
+            this.region = region.getSearchRegion();
+            return this;
+        }
+
+        public Builder setPosition(Position position) {
+            this.position = position;
+            return this;
+        }
+
+        public Builder setPosition(Position.Name positionName) {
+            this.position = new Position(positionName);
+            return this;
+        }
+
+        public Builder setPosition(int percentOfW, int percentOfH) {
+            this.position = new Position(percentOfW, percentOfH);
+            return this;
+        }
+
+        public Builder fromMatch(Match match) {
+            this.region = new Region(match);
+            int percentOfW, percentOfH;
+            percentOfW = (match.getTarget().x - match.x) / match.w;
+            percentOfH = (match.getTarget().y - match.y) / match.y;
+            position = new Position(percentOfW, percentOfH);
+            return this;
+        }
+
+        public Builder setAnchor(Position.Name anchor) {
+            this.anchor = anchor;
+            return this;
+        }
+
+        public Location build() {
+            Location location = new Location();
+            location.setName(name);
+            location.setX(x);
+            location.setY(y);
+            location.setRegion(region);
+            location.setPosition(position);
+            location.setAnchor(anchor);
+            definedByXY = region == null;
+            return location;
         }
     }
 
