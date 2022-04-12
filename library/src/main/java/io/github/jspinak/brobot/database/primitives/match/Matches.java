@@ -2,8 +2,10 @@ package io.github.jspinak.brobot.database.primitives.match;
 
 import io.github.jspinak.brobot.actions.BrobotSettings;
 import io.github.jspinak.brobot.database.primitives.location.Location;
+import io.github.jspinak.brobot.database.primitives.location.Position;
 import io.github.jspinak.brobot.database.primitives.region.Region;
 import io.github.jspinak.brobot.database.primitives.text.Text;
+import io.github.jspinak.brobot.database.state.ObjectCollection;
 import io.github.jspinak.brobot.database.state.stateObject.stateImageObject.StateImageObject;
 import io.github.jspinak.brobot.primatives.enums.StateEnum;
 import lombok.Data;
@@ -162,8 +164,80 @@ public class Matches {
         }
     }
 
+    public ObjectCollection asObjectCollection() {
+        return new ObjectCollection.Builder()
+                .withMatches(this)
+                .build();
+    }
+
     public void print() {
         matchObjects.forEach(MatchObject::print);
+    }
+
+    /**
+     * Returns a new Region with the median x,y,w,h of all Match objects.
+     * @return Optional.empty() if no Match objects; otherwise an Optional of the new Region.
+     */
+    public Optional<Region> getMedian() {
+        if (matchObjects.isEmpty()) return Optional.empty();
+        int cumX = 0, cumY = 0, cumW = 0, cumH = 0;
+        for (MatchObject mO : matchObjects) {
+            cumX += mO.getMatch().x;
+            cumY += mO.getMatch().y;
+            cumW += mO.getMatch().w;
+            cumH += mO.getMatch().h;
+        }
+        int size = matchObjects.size();
+        return Optional.of(new Region(cumX/size, cumY/size, cumW/size, cumH/size));
+    }
+
+    public Optional<Location> getMedianLocation() {
+        Optional<Region> regOpt = getMedian();
+        if (regOpt.isEmpty()) return Optional.empty();
+        return Optional.of(new Location(regOpt.get(), Position.Name.MIDDLEMIDDLE));
+    }
+
+    public Optional<MatchObject> getClosestTo(Location location) {
+        if (matchObjects.isEmpty()) return Optional.empty();
+        double closest = getDist(matchObjects.get(0), location);
+        MatchObject closestMO = matchObjects.get(0);
+        for (MatchObject mO : matchObjects) {
+            double dist = getDist(mO, location);
+            if (dist <= closest) {
+                closest = dist;
+                closestMO = mO;
+            }
+        }
+        return Optional.of(closestMO);
+    }
+
+    private double getDist(MatchObject matchObject, Location location) {
+        int xDist = matchObject.getMatch().x - location.getX();
+        int yDist = matchObject.getMatch().y - location.getY();
+        return Math.pow(xDist, 2) + Math.pow(yDist, 2);
+    }
+
+    /**
+     * Returns the matches in this Matches object that are not in the parameter Matches object.
+     * @param matches The Matches to subtract.
+     * @return
+     */
+    public Matches minus(Matches matches) {
+        Matches rest = new Matches();
+        matchObjects.forEach(matchObject -> {
+            if (!matches.containsMatch(matchObject.getMatch())) rest.add(matchObject);
+        });
+        return rest;
+    }
+
+    public boolean containsMatch(Match match) {
+        Match m;
+        for (MatchObject matchObject : matchObjects) {
+            m = matchObject.getMatch();
+            //if (match.equals(matchObject.getMatch())) return true;
+            if (match.x == m.x && match.y == m.y && match.w == m.w && match.h == m.h) return true;
+        }
+        return false;
     }
 
 }

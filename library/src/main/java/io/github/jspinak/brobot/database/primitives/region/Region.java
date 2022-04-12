@@ -1,5 +1,6 @@
 package io.github.jspinak.brobot.database.primitives.region;
 
+import io.github.jspinak.brobot.database.state.ObjectCollection;
 import io.github.jspinak.brobot.database.state.stateObject.otherStateObjects.StateRegion;
 import io.github.jspinak.brobot.database.state.NullState;
 import lombok.Data;
@@ -162,5 +163,11 @@ public class Region extends org.sikuli.script.Region implements Comparable<Regio
     // this should be ok, images with fixed regions should be defined as RegionImagePairs
     public org.sikuli.script.Region sikuli() {
         return new org.sikuli.script.Region(x,y,w,h);
+    }
+
+    public ObjectCollection asObjectCollection() {
+        return new ObjectCollection.Builder()
+                .withRegions(this)
+                .build();
     }
 }
