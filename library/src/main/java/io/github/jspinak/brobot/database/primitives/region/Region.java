@@ -1,24 +1,27 @@
 package io.github.jspinak.brobot.database.primitives.region;
 
+import io.github.jspinak.brobot.database.primitives.location.Location;
 import io.github.jspinak.brobot.database.state.ObjectCollection;
 import io.github.jspinak.brobot.database.state.stateObject.otherStateObjects.StateRegion;
 import io.github.jspinak.brobot.database.state.NullState;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import org.sikuli.script.Location;
+import lombok.Getter;
+import lombok.Setter;
 import org.sikuli.script.Match;
 import org.sikuli.script.Screen;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 
 /**
  * Region extends the Sikuli class Region and adds, among other functionality, new
  * initializers, analysis tools, and points x2 and y2.
  */
-@Data
-@EqualsAndHashCode(callSuper=false)
+@Getter
+@Setter
 public class Region extends org.sikuli.script.Region implements Comparable<Region> {
 
     private int x2 = -1; // x + w
@@ -127,12 +130,16 @@ public class Region extends org.sikuli.script.Region implements Comparable<Regio
                 && contains(r.getBottomLeft()) && contains(r.getBottomRight());
     }
 
+    public boolean contains(Location l) {
+        return contains(l.getSikuliLocation());
+    }
+
     public int size() {
         return w * h;
     }
 
     public Match toMatch() {
-        return new Match(this, 1);
+        return new Match(x, y, w, h, 1, new Screen());
     }
 
     public List<Region> getGridRegions(int rows, int columns) {
@@ -144,6 +151,43 @@ public class Region extends org.sikuli.script.Region implements Comparable<Regio
             }
         }
         return regions;
+    }
+
+    public Optional<Integer> getGridNumber(Location location) {
+        if (!contains(location)) return Optional.empty();
+        if (!isRasterValid()) return Optional.of(-1);
+        Region firstCell = new Region(getCell(0,0));
+        int row = gridNumber(firstCell.h, firstCell.y, location.getY());
+        int col = gridNumber(firstCell.w, firstCell.x, location.getX());
+        return Optional.of(toGridNumber(row, col));
+    }
+
+    private int toGridNumber(int row, int col) {
+       return row * this.getCols() + col;
+    }
+
+    private int toRow(int gridNumber) {
+        return gridNumber / this.getCols();
+    }
+
+    private int toCol(int gridNumber) {
+        return gridNumber % this.getCols();
+    }
+
+    public Region getGridRegion(int gridNumber) {
+        if (gridNumber == -1) return this;
+        return new Region(getCell(toRow(gridNumber), toCol(gridNumber)));
+    }
+
+    public Optional<Region> getGridRegion(Location location) {
+        Optional<Integer> gridNumber = getGridNumber(location);
+        if (gridNumber.isEmpty()) return Optional.empty();
+        return Optional.of(getGridRegion(gridNumber.get()));
+    }
+
+    private int gridNumber(int oneGridSize, int regionStart, int locationValue) {
+        int distFromEdge = locationValue - regionStart;
+        return distFromEdge / oneGridSize;
     }
 
     public io.github.jspinak.brobot.database.primitives.location.Location getRandomLocation() {
@@ -169,5 +213,9 @@ public class Region extends org.sikuli.script.Region implements Comparable<Regio
         return new ObjectCollection.Builder()
                 .withRegions(this)
                 .build();
+    }
+
+    public boolean equals(Region r) {
+        return x == r.x && y == r.y && w == r.w && h == r.h;
     }
 }
