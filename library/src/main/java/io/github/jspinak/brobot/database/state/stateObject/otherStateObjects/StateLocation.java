@@ -43,6 +43,14 @@ public class StateLocation implements StateObject {
         matchHistory.addSnapshot(matchSnapshot);
     }
 
+    public void setPosition(Position.Name positionName) {
+        this.position = new Position(positionName);
+    }
+
+    public void setPosition(int percentW, int percentH) {
+        this.position = new Position(percentW, percentH);
+    }
+
     public ObjectCollection asObjectCollection() {
         return new ObjectCollection.Builder()
                 .withLocations(this)
@@ -78,6 +86,16 @@ public class StateLocation implements StateObject {
 
         public Builder setAnchor(Position.Name cornerOfRegionToDefine) {
             this.anchors.add(new Anchor(cornerOfRegionToDefine, position));
+            return this;
+        }
+
+        public Builder setPosition(Position.Name locationPosition) {
+            this.position = new Position(locationPosition);
+            return this;
+        }
+
+        public Builder setPosition(int percentW, int percentH) {
+            this.position = new Position(percentW, percentH);
             return this;
         }
 

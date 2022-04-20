@@ -1,11 +1,13 @@
 package io.github.jspinak.brobot.database.primitives;
 
 import io.github.jspinak.brobot.database.primitives.location.Location;
+import io.github.jspinak.brobot.reports.Report;
 import org.sikuli.script.Match;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+
+import static java.util.stream.Collectors.toMap;
 
 @Component
 public class Distance {
@@ -31,6 +33,8 @@ public class Distance {
         return Math.toDegrees(Math.atan2((double)distPair.get(1), (double)distPair.get(0)));
     }
 
+    public double getDistance(Location loc1, Location loc2) { return euclidean(loc1, loc2); }
+
     public double euclidean(Location loc1, Location loc2) {
         return getDist(getDistPair(loc1, loc2));
     }
@@ -47,8 +51,12 @@ public class Distance {
         return getDegree(getDistPair(loc, new Location(match)));
     }
 
+    public double getAngleFrom00(Location loc) {
+        return getAngle(new Location(0,0), loc);
+    }
     /**
      * Calculates the difference between the angles of 2 vectors.
+     * The return value is the concave angle between the 2 vectors (i.e. 30 instead of 330).
      * Vector 1: start->loc1
      * Vector 2: start->loc2
      *
@@ -57,14 +65,15 @@ public class Distance {
      * @param loc2 the end point for vector2
      * @return the angle to go from vector1 to vector2
      */
-    public double getAngleBetween(Location start, Location loc1, Location loc2) {
-        double angle1 = euclidean(start, loc1);
-        double angle2 = euclidean(start, loc2);
-        return angle2 - angle1;
+    public double getDegreesBetween(Location start, Location loc1, Location loc2) {
+        double angle1 = getAngle(start, loc1);
+        double angle2 = getAngle(start, loc2);
+        return getDegreesBetween(angle1, angle2);
     }
 
-    public double getAngleBetween(Location loc1, Location loc2) {
-        return getAngleBetween(new Location(0,0), loc1, loc2);
+    public double getDegreesBetween(double angle1, double angle2) {
+        List<Double> adjustedAngles = convertAnglesToSameScale(angle1, angle2);
+        return adjustedAngles.get(1) - adjustedAngles.get(0);
     }
 
     /**
@@ -77,20 +86,84 @@ public class Distance {
      * @return a list of values without a break
      */
     public List<Double> convertAnglesToSameScale(List<Double> angles) {
-        // Find the median value. Make the break at the opposite point in the circle.
-        double average = angles.stream().mapToDouble(a->a).average().orElse(0);
-        double aveOpposite = average > 0 ? average - 180 : average + 180;
+        double medianAngle = getMedianAngle(angles);
+        double oppositeMedian = getOppositeAngle(medianAngle);
         List<Double> newAngles = new ArrayList<>();
         angles.forEach(a -> {
-            if (aveOpposite >= 0) {
-                if (a > aveOpposite) newAngles.add(a - 360);
-                else newAngles.add(a);
-            } else {
-                if (a < aveOpposite) newAngles.add(a + 360);
-                else newAngles.add(a);
-            }
+            if (oppositeMedian > 0 && a > oppositeMedian) newAngles.add(a - 360);
+            else if (oppositeMedian < 0 && a < oppositeMedian) newAngles.add(a + 360);
+            else newAngles.add(a);
         });
         return newAngles;
+    }
+
+    public double getOppositeAngle(double angle) {
+        return angle > 0 ? angle - 180 : angle + 180;
+    }
+
+    public List<Double> convertAnglesToSameScale(Double... angles) {
+        return convertAnglesToSameScale(Arrays.asList(angles));
+    }
+
+    public double getMedianAngle(List<Double> angles) {
+        List<Location> standardLocations = new ArrayList<>();
+        angles.forEach(angle -> standardLocations.add(getStandardLocation(angle)));
+        return getMedianAngle(new Location(0,0), standardLocations.toArray(new Location[0]));
+    }
+
+    public double getMedianAngle(Double... angles) {
+        return getMedianAngle(Arrays.asList(angles));
+    }
+
+    /**
+     * Sums the x and y points and calculates the angle to this new summed Location
+     * @param startLocation the start point
+     * @param locations the locations
+     * @return the median angle to all locations from the start point
+     */
+    public double getMedianAngle(Location startLocation, List<Location> locations) {
+        int x = locations.stream().mapToInt(Location::getX).sum();
+        int y = locations.stream().mapToInt(Location::getY).sum();
+        return getAngle(startLocation, new Location(x,y));
+    }
+
+    public double getMedianAngle(Location startLocation, Location... locations) {
+        return getMedianAngle(startLocation, Arrays.asList(locations));
+    }
+
+    /**
+     * Returns a Location based on the starting point of (0,0) and a distance of 1000.
+     * @param angle The angle of the desired Location.
+     * @return a standard Location.
+     */
+    public Location getStandardLocation(double angle) {
+        return getLocation(angle, 1000, new Location(0,0));
+    }
+
+    /**
+     * Returns a Location given a starting point, an angle, and a distance.
+     * The returned Location is not the exact location since it must be
+     * converted to (int,int) for pixel space.
+     * @param angle angle of the desired Location
+     * @param distance distance from the starting Location to the desired Location
+     * @param startingLocation the starting point
+     * @return a new Location that approximates the desired location in pixel space.
+     */
+    public Location getLocation(double angle, double distance, Location startingLocation) {
+        double addX = distance * Math.cos(Math.toRadians(angle));
+        double addY = - distance * Math.sin(Math.toRadians(angle));
+        return new Location((int)Math.round(startingLocation.getX() + addX),
+                (int)Math.round(startingLocation.getY() + addY));
+    }
+
+    /**
+     * Returns the distance from location1 to location2 as a Location object.
+     * @param location1 start location
+     * @param location2 end location
+     * @return a Location representing the vector from location1 to location2
+     */
+    public Location getLocation(Location location1, Location location2) {
+        return new Location(location2.getX() - location1.getX(), location2.getY() - location1.getY());
     }
 
     public List<Double> undueConversion(List<Double> angles) {
@@ -104,4 +177,45 @@ public class Distance {
         else if (a > 180) return a - 360;
         return a;
     }
+
+    /**
+     * Returns the leftmost angle from a list of angles. The leftmost angle is defined as the
+     * angle bordering on the largest gap in the angle list when moving counterclockwise.
+     * @param angles a list of angles
+     * @return the leftmost angle
+     */
+    public double getLeftmostAngle(List<Double> angles) {
+        Sector largestSector = getLargestSector(angles);
+        return largestSector.getRightAngle();
+    }
+
+    public double getRightmostAngle(List<Double> angles) {
+        Sector largestSector = getLargestSector(angles);
+        return largestSector.getLeftAngle();
+    }
+
+    public double getSpan(List<Double> angles) {
+        if (angles.isEmpty()) return 0.0;
+        return 360 - getLargestSector(angles).getSpan();
+    }
+
+    public double getMiddleAngle(List<Double> angles) {
+        Sector largestSector = getLargestSector(angles);
+        double angleBetween = getMedianAngle(largestSector.getLeftAngle(), largestSector.getRightAngle());
+        if (largestSector.getSpan() < 180) angleBetween *= -1;
+        return angleBetween;
+    }
+
+    public Sector getLargestSector(List<Double> angles) {
+        Sector largestSector = new Sector(angles.get(0), angles.get(0));
+        double largestGap = 0.0;
+        angles.sort(Comparator.naturalOrder());
+        angles.add(angles.get(0)); // add the first one more time to the end
+        for (int i=0; i<angles.size()-1; i++) {
+            Sector sector = new Sector(angles.get(i), angles.get(i+1));
+            if (sector.getSpan() > largestGap) largestSector = sector;
+        }
+        return largestSector;
+    }
+
 }
