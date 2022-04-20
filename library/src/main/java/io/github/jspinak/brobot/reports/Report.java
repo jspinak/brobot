@@ -89,9 +89,17 @@ public class Report {
         return true;
     }
 
+    public static boolean formatln(String format, Object ... args) {
+        if (!format(format, args)) return false;
+        System.out.println();
+        return true;
+    }
+
     public static boolean format(OutputLevel outputLevel, String format, Object ... args) {
         if (!minReportingLevel(outputLevel)) return false;
         System.out.format(format, args);
         return true;
     }
+
+
 }

@@ -2,9 +2,7 @@ package io.github.jspinak.brobot.actions.methods.sikuliWrappers.mouse;
 
 import io.github.jspinak.brobot.actions.BrobotSettings;
 import io.github.jspinak.brobot.database.primitives.location.Location;
-import io.github.jspinak.brobot.database.primitives.region.Region;
 import io.github.jspinak.brobot.reports.Report;
-import org.sikuli.script.FindFailed;
 import org.springframework.stereotype.Component;
 
 /**
@@ -15,13 +13,10 @@ import org.springframework.stereotype.Component;
 public class MoveMouseWrapper {
 
     private boolean sikuliMove(Location location) {
-        try {
-            Report.println("->location:"+location.getSikuliLocation());
-            return new Region().mouseMove(location.getSikuliLocation()) != 0;
-        } catch (FindFailed findFailed) {
-            findFailed.printStackTrace();
-            return false;
-        }
+        org.sikuli.script.Location sikuliLocation = location.getSikuliLocation();
+        Report.print("-> "+sikuliLocation+" ");
+        //return new Region().mouseMove(location.getSikuliLocation()) != 0; // this can cause the script to freeze for unknown reasons
+        return location.getSikuliLocation().hover() != null;
     }
 
     public boolean move(Location location) {
@@ -30,7 +25,10 @@ public class MoveMouseWrapper {
                     location.getX(), location.getY());
             return true;
         }
-        return sikuliMove(location);
+        boolean success = sikuliMove(location);
+        if (!success) Report.print("move failed. ");
+        //else Report.print("move succeeded. ");
+        return success;
     }
 
 }

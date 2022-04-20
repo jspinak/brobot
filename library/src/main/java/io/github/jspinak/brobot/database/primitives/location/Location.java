@@ -4,8 +4,12 @@ import io.github.jspinak.brobot.database.primitives.region.Region;
 import io.github.jspinak.brobot.database.state.ObjectCollection;
 import io.github.jspinak.brobot.database.state.stateObject.otherStateObjects.StateLocation;
 import io.github.jspinak.brobot.database.state.stateObject.otherStateObjects.StateRegion;
+import io.github.jspinak.brobot.reports.Report;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.sikuli.script.Match;
+import org.sikuli.script.Screen;
 
 import java.util.Optional;
 
@@ -17,7 +21,8 @@ import static io.github.jspinak.brobot.database.state.NullState.Enum.NULL;
  * The relative position is used unless the Region is not defined
  * or the boolean 'definedByXY' is explicitly set to true;
  */
-@Data
+@Getter
+@Setter
 public class Location {
 
     private String name;
@@ -187,7 +192,9 @@ public class Location {
     }
 
     public Match toMatch() {
-        return new Match(new Region(getX(), getY(), 0, 0), 100);
+        Match match = new Match(getX(), getY(), 1, 1,1, new Screen());
+        match.setTarget(getX(), getY());
+        return match;
     }
 
     public StateLocation inNullState() {
@@ -198,8 +205,13 @@ public class Location {
     }
 
     public ObjectCollection asObjectCollection() {
+        StateLocation stateLocation = new StateLocation.Builder()
+                .withLocation(this)
+                .inState(NULL)
+                .setPosition(Position.Name.TOPLEFT)
+                .build();
         return new ObjectCollection.Builder()
-                .withLocations(this)
+                .withLocations(stateLocation)
                 .build();
     }
 
@@ -249,6 +261,16 @@ public class Location {
             Location center = new Location(region, Position.Name.MIDDLEMIDDLE);
             setPosition(center.getX() + plusX, center.getY() - minusY);
         }
+    }
+
+    public boolean equals(Location l) {
+        return (x == l.x && y == l.y &&
+                //region.equals(l.region) && position == l.position &&
+                definedByXY == l.definedByXY);
+    }
+
+    public void print() {
+        Report.format("%d.%d ",x,y);
     }
 
     public static class Builder {

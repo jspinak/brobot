@@ -72,11 +72,20 @@ public class Find implements ActionInterface {
         matches.setMaxMatches(actionOptions.getMaxMatchesToActOn());
         if (objectCollections.length == 0) return matches;
         ObjectCollection objectCollection = objectCollections[0];
-        getImageMatches(actionOptions, matches, objectCollection);
-        stateMemory.adjustActiveStatesWithMatches(matches);
+        if (containsImages(objectCollections)) {
+            getImageMatches(actionOptions, matches, objectCollection);
+            stateMemory.adjustActiveStatesWithMatches(matches);
+        }
         matches.addAll(addNonImageObjects.getOtherObjectsDirectlyAsMatchObjects(objectCollection));
         matches.getMatches().forEach(m -> adjustMatches.adjust(m, actionOptions));
         return matches;
+    }
+
+    private boolean containsImages(ObjectCollection... objectCollections) {
+        for (ObjectCollection objColl : objectCollections) {
+            if (!objColl.getStateImages().isEmpty()) return true;
+        }
+        return false;
     }
 
     private void getImageMatches(ActionOptions actionOptions, Matches matches,
