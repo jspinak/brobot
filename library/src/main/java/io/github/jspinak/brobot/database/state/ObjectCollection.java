@@ -2,6 +2,7 @@ package io.github.jspinak.brobot.database.state;
 
 import io.github.jspinak.brobot.database.primitives.image.Image;
 import io.github.jspinak.brobot.database.primitives.location.Location;
+import io.github.jspinak.brobot.database.primitives.location.Position;
 import io.github.jspinak.brobot.database.primitives.match.Matches;
 import io.github.jspinak.brobot.database.primitives.region.Region;
 import io.github.jspinak.brobot.database.state.state.State;
@@ -17,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static io.github.jspinak.brobot.database.primitives.location.Position.Name.TOPLEFT;
 import static io.github.jspinak.brobot.database.state.NullState.Enum.NULL;
 
 /**
@@ -64,7 +66,11 @@ public class ObjectCollection {
         private List<Matches> matches = new ArrayList<>();
 
         public Builder withLocations(Location... locations) {
-            for (Location location : locations) this.stateLocations.add(location.inNullState());
+            for (Location location : locations) {
+                StateLocation stateLocation = location.inNullState();
+                stateLocation.setPosition(TOPLEFT);
+                this.stateLocations.add(stateLocation);
+            }
             return this;
         }
 
