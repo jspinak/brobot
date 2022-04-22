@@ -6,6 +6,7 @@ import io.github.jspinak.brobot.actions.methods.sikuliWrappers.find.UseDefinedRe
 import io.github.jspinak.brobot.actions.methods.time.Time;
 import io.github.jspinak.brobot.database.primitives.match.Matches;
 import io.github.jspinak.brobot.database.state.ObjectCollection;
+import io.github.jspinak.brobot.illustratedHistory.IllustrateScreenshot;
 import io.github.jspinak.brobot.manageStates.StateMemory;
 import io.github.jspinak.brobot.mock.MockStatus;
 import org.springframework.stereotype.Component;
@@ -43,10 +44,11 @@ public class Find implements ActionInterface {
     private AddNonImageObjects addNonImageObjects;
     private AdjustMatches adjustMatches;
     private UseDefinedRegion useDefinedRegion;
+    private IllustrateScreenshot illustrateScreenshot;
 
     public Find(FindFunctions findFunctions, StateMemory stateMemory, Time time, MockStatus mockStatus,
                 AddNonImageObjects addNonImageObjects, AdjustMatches adjustMatches,
-                UseDefinedRegion useDefinedRegion) {
+                UseDefinedRegion useDefinedRegion, IllustrateScreenshot illustrateScreenshot) {
         this.findFunctions = findFunctions;
         this.stateMemory = stateMemory;
         this.time = time;
@@ -54,6 +56,7 @@ public class Find implements ActionInterface {
         this.addNonImageObjects = addNonImageObjects;
         this.adjustMatches = adjustMatches;
         this.useDefinedRegion = useDefinedRegion;
+        this.illustrateScreenshot = illustrateScreenshot;
     }
 
     /**
@@ -78,6 +81,7 @@ public class Find implements ActionInterface {
         }
         matches.addAll(addNonImageObjects.getOtherObjectsDirectlyAsMatchObjects(objectCollection));
         matches.getMatches().forEach(m -> adjustMatches.adjust(m, actionOptions));
+        matches.getMatches().forEach(m -> illustrateScreenshot.drawMatch(m));
         return matches;
     }
 

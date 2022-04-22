@@ -26,14 +26,14 @@ public class ImageUtils {
      */
     public String saveRegionToFile(Region region, String path) {
         try {
-            String newPath = getFreePath(path);
+            String newPath = getFreePath(path) + ".png";
             if (BrobotSettings.mock) {
                 Report.format("Save file as %s \n", newPath);
                 return newPath;
             }
-            System.out.println(newPath);
+            if (!BrobotSettings.saveHistory) System.out.println(newPath); // don't print when running live
             ImageIO.write(new Screen().capture(region).getImage(),
-                    "png", new File("" + newPath + ".png"));
+                    "png", new File("" + newPath));
             return newPath;
         } catch (IOException e) {
             e.printStackTrace();

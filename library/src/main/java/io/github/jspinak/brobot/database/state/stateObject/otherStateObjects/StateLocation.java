@@ -58,7 +58,7 @@ public class StateLocation implements StateObject {
     }
 
     public static class Builder {
-        private String name;
+        private String name = "";
         private Location location;
         private StateEnum ownerStateName;
         private Position position = new Position(0, 0);

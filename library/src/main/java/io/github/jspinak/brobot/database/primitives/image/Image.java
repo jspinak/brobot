@@ -3,6 +3,8 @@ package io.github.jspinak.brobot.database.primitives.image;
 import io.github.jspinak.brobot.database.state.stateObject.stateImageObject.StateImageObject;
 import io.github.jspinak.brobot.database.state.NullState;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.sikuli.script.Pattern;
 
 import java.awt.image.BufferedImage;
@@ -10,10 +12,11 @@ import java.util.*;
 
 /**
  * Images can hold multiple Patterns. A Pattern is a concept from Sikuli that is defined
- * primarily by an image file.
+ * primarily by an image file (.png file).
  *
  */
-@Data
+@Getter
+@Setter
 public class Image {
 
     private Set<String> imageNames = new HashSet<>();
@@ -106,6 +109,11 @@ public class Image {
     public int getHeight(int index) {
         Optional<BufferedImage> bufferedImage = getBufferedImage(index);
         return bufferedImage.map(BufferedImage::getHeight).orElse(0);
+    }
+
+    public boolean equals(Image image) {
+        for (String filename : imageNames) if (!image.getImageNames().contains(filename)) return false;
+        return true;
     }
 
 }
