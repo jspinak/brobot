@@ -11,7 +11,8 @@ public class BrobotSettings {
     public static int xMoveAfterMouseDown = 0;
     public static int yMoveAfterMouseDown = 0;
 
-    public static boolean saveSnapshots = false; // should be initialized to false in Brobot 1.0
+    public static boolean saveSnapshots = false; // should be initialized to false in Brobot 1.xx (any version not using a database)
+    public static boolean saveHistory = false; // when set to true, make sure you have a folder corresponding to BrobotSettings.historyPath
 
     /**
      * Mock Settings
@@ -36,11 +37,14 @@ public class BrobotSettings {
     /**
      * Capture Settings
      */
-    public static String screenshotPath = "screenshots/";
+    public static String screenshotPath = "screenshots/"; // screenshots for the StateStructure builder
+    public static String historyPath = "history/"; // where screenshots are saved for the illustrated history
     /*
     Files that do not start with this variable's value will not be used for the StateStructure builder.
+    This field is also used for the filenames in the illustrated history.
      */
     public static String screenshotFilename = "screen";
+    public static String historyFilename = "hist";
 
     /**
      * Write Settings

@@ -3,6 +3,7 @@ package io.github.jspinak.brobot.database.state;
 import io.github.jspinak.brobot.database.primitives.image.Image;
 import io.github.jspinak.brobot.database.primitives.location.Location;
 import io.github.jspinak.brobot.database.primitives.location.Position;
+import io.github.jspinak.brobot.database.primitives.match.MatchObject;
 import io.github.jspinak.brobot.database.primitives.match.Matches;
 import io.github.jspinak.brobot.database.primitives.region.Region;
 import io.github.jspinak.brobot.database.state.state.State;
@@ -11,7 +12,10 @@ import io.github.jspinak.brobot.database.state.stateObject.otherStateObjects.Sta
 import io.github.jspinak.brobot.database.state.stateObject.otherStateObjects.StateString;
 import io.github.jspinak.brobot.database.state.stateObject.stateImageObject.StateImageObject;
 import io.github.jspinak.brobot.reports.Report;
+import io.github.jspinak.brobot.stringUtils.CommonRegex;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.sikuli.script.Match;
 
 import java.util.ArrayList;
@@ -24,7 +28,8 @@ import static io.github.jspinak.brobot.database.state.NullState.Enum.NULL;
 /**
  * This class holds all the objects that can be passed to an Action.
  */
-@Data
+@Getter
+@Setter
 public class ObjectCollection {
 
     private List<StateLocation> stateLocations = new ArrayList<>();
@@ -33,8 +38,7 @@ public class ObjectCollection {
     private List<StateString> stateStrings = new ArrayList<>();
     private List<Matches> matches = new ArrayList<>();
 
-    private ObjectCollection() {
-    }
+    private ObjectCollection() {}
 
     public boolean empty() {
         return stateLocations.isEmpty()
@@ -56,6 +60,76 @@ public class ObjectCollection {
         stateRegions.forEach(sio -> sio.setTimesActedOn(0));
         stateStrings.forEach(sio -> sio.setTimesActedOn(0));
         matches.forEach(m -> m.setTimesActedOn(0));
+    }
+
+    public String getFirstObjectName() {
+        if (!stateImages.isEmpty()) {
+            if (!stateImages.get(0).getName().equals("")) return stateImages.get(0).getName();
+            else return stateImages.get(0).getImage().getFilenames().get(0);
+        }
+        if (!stateLocations.isEmpty() && !stateLocations.get(0).getName().equals(""))
+            return stateLocations.get(0).getName();
+        if (!stateRegions.isEmpty() && !stateRegions.get(0).getName().equals(""))
+            return stateRegions.get(0).getName();
+        if (!stateStrings.isEmpty()) return stateStrings.get(0).getString();
+        return "";
+    }
+
+    public boolean contains(StateImageObject stateImageObject) {
+        for (StateImageObject sio : stateImages) {
+            if (stateImageObject.equals(sio)) return true;
+        }
+        return false;
+    }
+
+    public boolean contains(StateRegion stateRegion) {
+        return stateRegions.contains(stateRegion);
+    }
+
+    public boolean contains(StateLocation stateLocation) {
+        return stateLocations.contains(stateLocation);
+    }
+
+    public boolean contains(StateString stateString) {
+        return stateStrings.contains(stateString);
+    }
+
+    public boolean contains(Matches m) {
+        return matches.contains(m);
+    }
+
+    public boolean equals(ObjectCollection objectCollection) {
+        for (StateImageObject sio : stateImages) {
+            if (!objectCollection.contains(sio)) {
+                //Report.println(sio.getName()+" is not in the objectCollection. ");
+                return false;
+            }
+        }
+        for (StateRegion sr : stateRegions) {
+            if (!objectCollection.contains(sr)) {
+                //Report.println(" regions different ");
+                return false;
+            }
+        }
+        for (StateLocation sl : stateLocations) {
+            if (!objectCollection.contains(sl)) {
+                //Report.println(" locations different ");
+                return false;
+            }
+        }
+        for (StateString ss : stateStrings) {
+            if (!objectCollection.contains(ss)) {
+                //Report.println(" strings different ");
+                return false;
+            }
+        }
+        for (Matches m : matches) {
+            if (!objectCollection.contains(m)) {
+                //Report.println(" matches different ");
+                return false;
+            }
+        }
+        return true;
     }
 
     public static class Builder {
@@ -95,13 +169,18 @@ public class ObjectCollection {
         }
 
         public Builder withAllStateImages(State state) {
-            if (state == null) Report.print("null state passed| ");
-            stateImages.addAll(state.getStateImages());
+            if (state == null) {
+                Report.print("null state passed| ");
+                return this;
+            } else stateImages.addAll(state.getStateImages());
             return this;
         }
 
         public Builder withNonSharedImages(State state) {
-            if (state == null) Report.print("null state passed| ");
+            if (state == null) {
+                Report.print("null state passed| ");
+                return this;
+            }
             for (StateImageObject stateImageObject : state.getStateImages()) {
                 if (!stateImageObject.isShared()) stateImages.add(stateImageObject);
             }

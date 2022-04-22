@@ -16,11 +16,14 @@ public class ClickLocationOnce {
 
     private MouseDownWrapper mouseDownWrapper;
     private MouseUpWrapper mouseUpWrapper;
+    private MoveMouseWrapper moveMouseWrapper;
 
     public ClickLocationOnce(MouseDownWrapper mouseDownWrapper,
-                             MouseUpWrapper mouseUpWrapper) {
+                             MouseUpWrapper mouseUpWrapper,
+                             MoveMouseWrapper moveMouseWrapper) {
         this.mouseDownWrapper = mouseDownWrapper;
         this.mouseUpWrapper = mouseUpWrapper;
+        this.moveMouseWrapper = moveMouseWrapper;
     }
 
     public boolean click(Location location, ActionOptions actionOptions) {
@@ -34,7 +37,8 @@ public class ClickLocationOnce {
     }
 
     private boolean doClick(Location location, ActionOptions actionOptions) {
-        if (Mouse.move(location.getSikuliLocation()) == 0) return false;
+        if (!moveMouseWrapper.move(location)) return false;
+        //if (Mouse.move(location.getSikuliLocation()) == 0) return false;
         double pauseBeforeDown = actionOptions.getPauseBeforeMouseDown();
         double pauseAfterDown = actionOptions.getPauseAfterMouseDown();
         mouseDownWrapper.press(pauseBeforeDown, pauseAfterDown, actionOptions.getClickType());

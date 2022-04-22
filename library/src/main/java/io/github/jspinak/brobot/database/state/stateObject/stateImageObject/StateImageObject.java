@@ -16,6 +16,8 @@ import io.github.jspinak.brobot.database.state.stateObject.StateObject;
 import io.github.jspinak.brobot.primatives.enums.StateEnum;
 import io.github.jspinak.brobot.reports.Report;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.*;
 
@@ -28,7 +30,8 @@ import java.util.*;
  * StateImageObjects can have either an Image or a RegionImagePairs. RegionImagePairs are for
  * Images with fixed locations and are specified by the 'isFixed' option in the Builder.
  */
-@Data
+@Getter
+@Setter
 public class StateImageObject implements StateObject {
 
     // common StateObject fields (too few fields and too few StateObject classes for composition or hierarchy)
@@ -147,8 +150,13 @@ public class StateImageObject implements StateObject {
         if (!img.fixed) fixed = false;
     }
 
+    public boolean equals(StateImageObject stateImageObject) {
+        return image.equals(stateImageObject.getImage()) &&
+                regionImagePairs.equals(stateImageObject.getRegionImagePairs());
+    }
+
     public static class Builder {
-        private String name;
+        private String name = "";
         private StateEnum ownerStateName;
         private MatchHistory matchHistory = new MatchHistory();
         private SearchRegions searchRegions = new SearchRegions();
@@ -189,7 +197,11 @@ public class StateImageObject implements StateObject {
         public Builder withImage(String... imageNames) {
             this.image = new Image(imageNames);
             this.regionImagePairs = new RegionImagePairs(imageNames);
-            this.name = imageNames[0];
+            if (this.name.equals("")) {
+                int iend = imageNames[0].indexOf('_');
+                if (iend == -1) this.name = imageNames[0];
+                else this.name = imageNames[0].substring(0, iend);
+            }
             return this;
         }
 

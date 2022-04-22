@@ -56,4 +56,16 @@ public class RegionImagePairs {
         return names;
     }
 
+    public boolean contains(Image image) {
+        for (RegionImagePair rip : pairs) if (rip.getImage().equals(image)) return true;
+        return false;
+    }
+
+    public boolean equals(RegionImagePairs regionImagePairs) {
+        for (RegionImagePair rip : pairs) {
+            if (!regionImagePairs.contains(rip.getImage())) return false;
+        }
+        return true;
+    }
+
 }
