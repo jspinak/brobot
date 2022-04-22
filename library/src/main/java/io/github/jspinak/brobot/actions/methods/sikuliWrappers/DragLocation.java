@@ -4,6 +4,7 @@ import io.github.jspinak.brobot.actions.BrobotSettings;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.database.primitives.location.Location;
 import io.github.jspinak.brobot.database.primitives.region.Region;
+import io.github.jspinak.brobot.illustratedHistory.IllustrateScreenshot;
 import io.github.jspinak.brobot.mock.Mock;
 import io.github.jspinak.brobot.reports.Report;
 import org.sikuli.basics.Settings;
@@ -25,10 +26,12 @@ import org.springframework.stereotype.Component;
 public class DragLocation {
     private Mock mock;
     private Wait wait;
+    private IllustrateScreenshot illustrateScreenshot;
 
-    public DragLocation(Mock mock, Wait wait) {
+    public DragLocation(Mock mock, Wait wait, IllustrateScreenshot illustrateScreenshot) {
         this.mock = mock;
         this.wait = wait;
+        this.illustrateScreenshot = illustrateScreenshot;
     }
 
     private boolean drag(Location from, Location to) {
@@ -51,6 +54,7 @@ public class DragLocation {
         Settings.MoveMouseDelay = actionOptions.getMoveMouseDelay();
         Settings.DelayBeforeDrop = actionOptions.getPauseBeforeMouseUp();
         if (!drag(from, to)) return false;
+        illustrateScreenshot.drawDrag(from, to);
         wait.wait(actionOptions.getPauseAfterMouseUp());
         return true;
     }
