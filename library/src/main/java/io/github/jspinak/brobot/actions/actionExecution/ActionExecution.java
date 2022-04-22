@@ -8,6 +8,7 @@ import io.github.jspinak.brobot.actions.methods.time.Time;
 import io.github.jspinak.brobot.database.primitives.match.Matches;
 import io.github.jspinak.brobot.database.state.ObjectCollection;
 import io.github.jspinak.brobot.database.state.stateObject.stateImageObject.StateImageObject;
+import io.github.jspinak.brobot.illustratedHistory.IllustrateScreenshot;
 import io.github.jspinak.brobot.reports.Output;
 import io.github.jspinak.brobot.reports.Report;
 import org.springframework.stereotype.Component;
@@ -31,12 +32,15 @@ public class ActionExecution {
     private Time time;
     private Success success;
     private ExitSequences exitSequences;
+    private IllustrateScreenshot illustrateScreenshot;
 
-    public ActionExecution(Wait wait, Time time, Success success, ExitSequences exitSequences) {
+    public ActionExecution(Wait wait, Time time, Success success, ExitSequences exitSequences,
+                           IllustrateScreenshot illustrateScreenshot) {
         this.wait = wait;
         this.time = time;
         this.success = success;
         this.exitSequences = exitSequences;
+        this.illustrateScreenshot = illustrateScreenshot;
     }
 
     /**
@@ -51,6 +55,7 @@ public class ActionExecution {
         printAction(actionOptions, objectCollections);
         time.setStartTime(actionOptions.getAction());
         wait.wait(actionOptions.getPauseBeforeBegin());
+        illustrateScreenshot.prepareScreenshot(actionOptions, objectCollections);
         Matches matches = new Matches();
         for (int i=0; i<actionOptions.getMaxTimesToRepeatActionSequence(); i++) {
             matches = actionMethod.perform(actionOptions, objectCollections);
@@ -62,6 +67,7 @@ public class ActionExecution {
         matches.saveSnapshots();
         char symbol = matches.isSuccess()? Output.check : Output.fail;
         Report.println(actionOptions.getAction()+" "+symbol);
+        illustrateScreenshot.saveToFile(actionOptions);
         return matches;
     }
 

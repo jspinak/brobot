@@ -9,6 +9,7 @@ import io.github.jspinak.brobot.database.primitives.location.Location;
 import io.github.jspinak.brobot.database.primitives.match.MatchObject;
 import io.github.jspinak.brobot.database.primitives.match.Matches;
 import io.github.jspinak.brobot.database.state.ObjectCollection;
+import io.github.jspinak.brobot.illustratedHistory.IllustrateScreenshot;
 import org.springframework.stereotype.Component;
 
 /**
@@ -25,12 +26,15 @@ public class Click implements ActionInterface {
     private ClickLocationOnce clickLocationOnce;
     private Wait wait;
     private AfterClick afterClick;
+    private IllustrateScreenshot illustrateScreenshot;
 
-    public Click(Find find, ClickLocationOnce clickLocationOnce, Wait wait, AfterClick afterClick) {
+    public Click(Find find, ClickLocationOnce clickLocationOnce, Wait wait, AfterClick afterClick,
+                 IllustrateScreenshot illustrateScreenshot) {
         this.find = find;
         this.clickLocationOnce = clickLocationOnce;
         this.wait = wait;
         this.afterClick = afterClick;
+        this.illustrateScreenshot = illustrateScreenshot;
     }
 
     public Matches perform(ActionOptions actionOptions, ObjectCollection... objectCollections) {
@@ -39,6 +43,7 @@ public class Click implements ActionInterface {
         for (MatchObject matchObject : matches.getMatchObjects()) {
             Location location = getClickLocation(matchObject, actionOptions);
             click(location, actionOptions, matchObject);
+            illustrateScreenshot.drawClick(location);
             i++;
             if (i == actionOptions.getMaxMatchesToActOn()) break;
             // pause only between clicks, not after the last click
