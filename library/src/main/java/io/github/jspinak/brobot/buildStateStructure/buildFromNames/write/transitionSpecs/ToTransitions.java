@@ -2,7 +2,7 @@ package io.github.jspinak.brobot.buildStateStructure.buildFromNames.write.transi
 
 import com.squareup.javapoet.ClassName;
 import io.github.jspinak.brobot.buildStateStructure.buildFromNames.babyStates.BabyStateRepo;
-import io.github.jspinak.brobot.database.state.stateObject.stateImageObject.StateImageObject;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
 import lombok.Getter;
 import org.springframework.stereotype.Component;
 

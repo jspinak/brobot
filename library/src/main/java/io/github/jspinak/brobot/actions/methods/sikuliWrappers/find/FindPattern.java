@@ -3,10 +3,10 @@ package io.github.jspinak.brobot.actions.methods.sikuliWrappers.find;
 import io.github.jspinak.brobot.actions.BrobotSettings;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.actions.methods.time.Time;
-import io.github.jspinak.brobot.database.primitives.match.MatchObject;
-import io.github.jspinak.brobot.database.primitives.match.Matches;
-import io.github.jspinak.brobot.database.primitives.region.Region;
-import io.github.jspinak.brobot.database.state.stateObject.stateImageObject.StateImageObject;
+import io.github.jspinak.brobot.datatypes.primitives.match.MatchObject;
+import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
+import io.github.jspinak.brobot.datatypes.primitives.region.Region;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
 import org.sikuli.script.FindFailed;
 import org.sikuli.script.Finder;
 import org.sikuli.script.Match;
@@ -15,7 +15,6 @@ import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Optional;
 
 /**

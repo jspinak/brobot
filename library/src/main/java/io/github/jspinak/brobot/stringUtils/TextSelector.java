@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.stringUtils;
 
-import io.github.jspinak.brobot.database.primitives.text.Text;
+import io.github.jspinak.brobot.datatypes.primitives.text.Text;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;

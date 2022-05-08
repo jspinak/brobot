@@ -2,7 +2,7 @@ package io.github.jspinak.brobot.actions.composites.multipleActions;
 
 import io.github.jspinak.brobot.actions.actionExecution.ActionInterface;
 import io.github.jspinak.brobot.actions.actionExecution.BasicAction;
-import io.github.jspinak.brobot.database.primitives.match.Matches;
+import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;

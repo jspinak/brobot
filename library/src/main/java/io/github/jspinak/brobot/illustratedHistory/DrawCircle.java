@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.illustratedHistory;
 
-import io.github.jspinak.brobot.database.primitives.location.Location;
+import io.github.jspinak.brobot.datatypes.primitives.location.Location;
 import org.springframework.stereotype.Component;
 
 import java.awt.*;

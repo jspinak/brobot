@@ -1,8 +1,8 @@
 package io.github.jspinak.brobot.mock;
 
 import io.github.jspinak.brobot.actions.methods.time.TimeWrapper;
-import io.github.jspinak.brobot.database.primitives.match.MatchHistory;
-import io.github.jspinak.brobot.database.state.stateObject.StateObject;
+import io.github.jspinak.brobot.datatypes.primitives.match.MatchHistory;
+import io.github.jspinak.brobot.datatypes.state.stateObject.StateObject;
 import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;

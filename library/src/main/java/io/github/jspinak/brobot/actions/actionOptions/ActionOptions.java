@@ -2,11 +2,12 @@ package io.github.jspinak.brobot.actions.actionOptions;
 
 import io.github.jspinak.brobot.actions.BrobotSettings;
 import io.github.jspinak.brobot.actions.methods.sikuliWrappers.mouse.ClickType;
-import io.github.jspinak.brobot.database.primitives.location.Location;
-import io.github.jspinak.brobot.database.primitives.match.Matches;
-import io.github.jspinak.brobot.database.primitives.region.Region;
-import io.github.jspinak.brobot.database.state.stateObject.stateImageObject.SearchRegions;
-import io.github.jspinak.brobot.database.state.stateObject.stateImageObject.StateImageObject;
+import io.github.jspinak.brobot.datatypes.primitives.location.Location;
+import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
+import io.github.jspinak.brobot.datatypes.primitives.region.Region;
+import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.StateRegion;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.SearchRegions;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
 import lombok.Data;
 import org.sikuli.basics.Settings;
 
@@ -64,7 +65,7 @@ public class ActionOptions {
      * The options that return multiple Matches allow for overlapping Matches.
      */
     public enum Find {
-        FIRST, EACH, ALL, BEST, UNIVERSAL, CUSTOM
+        FIRST, EACH, ALL, BEST, UNIVERSAL, CUSTOM, HISTOGRAM
     }
     private Find find = Find.FIRST;
     /**
@@ -74,6 +75,7 @@ public class ActionOptions {
 
     /**
      * Specifies how similar the found Match must be to the original Image.
+     * Specifies the minimum score for a histogram to be considered a Match.
      */
     private double similarity = Settings.MinSimilarity;
 
@@ -226,7 +228,8 @@ public class ActionOptions {
     private double pauseBetweenActionSequences = 0;
 
     /**
-     * maxMatchesToActOn limits the number of Matches used when working with Find.ALL or Find.EACH.
+     * maxMatchesToActOn limits the number of Matches used when working with Find.ALL, Find.EACH, and
+     * Find.HISTOGRAM.
      * When <=0 it is not used.
      */
     private int maxMatchesToActOn = -1;
@@ -427,6 +430,11 @@ public class ActionOptions {
 
         public Builder addSearchRegion(Region searchRegion) {
             this.searchRegions.addSearchRegions(searchRegion);
+            return this;
+        }
+
+        public Builder addSearchRegion(StateRegion searchRegion) {
+            this.searchRegions.addSearchRegions(searchRegion.getSearchRegion());
             return this;
         }
 

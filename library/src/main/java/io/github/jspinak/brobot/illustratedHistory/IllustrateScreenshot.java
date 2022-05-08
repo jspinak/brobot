@@ -2,9 +2,9 @@ package io.github.jspinak.brobot.illustratedHistory;
 
 import io.github.jspinak.brobot.actions.BrobotSettings;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
-import io.github.jspinak.brobot.database.primitives.location.Location;
-import io.github.jspinak.brobot.database.primitives.region.Region;
-import io.github.jspinak.brobot.database.state.ObjectCollection;
+import io.github.jspinak.brobot.datatypes.primitives.location.Location;
+import io.github.jspinak.brobot.datatypes.primitives.region.Region;
+import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import io.github.jspinak.brobot.imageUtils.GetBufferedImage;
 import io.github.jspinak.brobot.imageUtils.ImageUtils;
 import io.github.jspinak.brobot.reports.Report;
@@ -16,7 +16,6 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -63,7 +62,8 @@ public class IllustrateScreenshot {
         if (action != ActionOptions.Action.FIND &&
                 action != ActionOptions.Action.CLICK &&
                 action != ActionOptions.Action.DRAG &&
-                action != ActionOptions.Action.MOVE) return false;
+                action != ActionOptions.Action.MOVE &&
+                action != ActionOptions.Action.HIGHLIGHT) return false;
         if (action != ActionOptions.Action.FIND) {
             //Report.println(" action is not FIND. it is " + action);
             return true;
@@ -97,7 +97,7 @@ public class IllustrateScreenshot {
             outputPath = currentPath.replace(BrobotSettings.screenshotFilename, BrobotSettings.historyFilename);
             outputPath = outputPath.replace(".png", "-"+actionOptions.getAction()+
                     "-"+name+".png");
-            bufferedImage = getBufferedImage.getBufferedImage(currentPath);
+            bufferedImage = getBufferedImage.fromFile(currentPath);
             okToSave = true;
             lastAction = actionOptions.getAction();
             lastCollections = new ArrayList<>();
@@ -124,7 +124,12 @@ public class IllustrateScreenshot {
 
     public void drawMatch(Match match) {
         if (!okToIllustrate()) return;
-        draw.match(match, bufferedImage.getGraphics());
+        draw.match(match, bufferedImage.getGraphics(), Color.blue);
+    }
+
+    public void drawHighlight(Match match) {
+        if (!okToIllustrate()) return;
+        draw.match(match, bufferedImage.getGraphics(), Color.yellow);
     }
 
     public void drawClick(Location location) {

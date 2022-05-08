@@ -1,7 +1,7 @@
 package io.github.jspinak.brobot.actions.composites.multipleActions;
 
 import io.github.jspinak.brobot.actions.actionExecution.Action;
-import io.github.jspinak.brobot.database.primitives.match.Matches;
+import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import org.springframework.stereotype.Component;
 
 @Component

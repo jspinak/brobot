@@ -1,8 +1,6 @@
 package io.github.jspinak.brobot.illustratedHistory;
 
-import io.github.jspinak.brobot.actions.BrobotSettings;
-import io.github.jspinak.brobot.database.primitives.location.Location;
-import io.github.jspinak.brobot.database.primitives.region.Region;
+import io.github.jspinak.brobot.datatypes.primitives.location.Location;
 import lombok.Getter;
 import lombok.Setter;
 import org.sikuli.script.Match;
@@ -26,10 +24,10 @@ public class Draw {
         this.drawRectangle = drawRectangle;
     }
 
-    public void match(Match m, Graphics g) {
-        drawRectangle.draw(m.x, m.y, m.w, m.h, 4, Color.lightGray, false, g);
-        drawRectangle.draw(m.x, m.y, m.w, m.h, 3, Color.blue, false, g);
-        drawRectangle.draw(m.x, m.y, m.w, m.h, 1, Color.white, false, g);
+    public void match(Match m, Graphics g, Color color) {
+        //drawRectangle.draw(m.x, m.y, m.w, m.h, 4, Color.lightGray, false, g);
+        drawRectangle.draw(m.x, m.y, m.w, m.h, 2, color, false, g);
+        drawRectangle.draw(m.x, m.y, m.w-1, m.h-1, 1, Color.white, false, g);
         g.dispose();
     }
 
