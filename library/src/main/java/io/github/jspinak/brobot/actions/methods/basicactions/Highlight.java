@@ -5,9 +5,10 @@ import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.Find;
 import io.github.jspinak.brobot.actions.methods.sikuliWrappers.HighlightMatch;
 import io.github.jspinak.brobot.actions.methods.sikuliWrappers.Wait;
-import io.github.jspinak.brobot.database.primitives.match.MatchObject;
-import io.github.jspinak.brobot.database.primitives.match.Matches;
-import io.github.jspinak.brobot.database.state.ObjectCollection;
+import io.github.jspinak.brobot.datatypes.primitives.match.MatchObject;
+import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
+import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
+import io.github.jspinak.brobot.illustratedHistory.IllustrateScreenshot;
 import org.springframework.stereotype.Component;
 
 /**
@@ -19,17 +20,21 @@ public class Highlight implements ActionInterface {
     private Find find;
     private HighlightMatch highlightMatch;
     private Wait wait;
+    private IllustrateScreenshot illustrateScreenshot;
 
-    public Highlight(Find find, HighlightMatch highlightMatch, Wait wait) {
+    public Highlight(Find find, HighlightMatch highlightMatch, Wait wait,
+                     IllustrateScreenshot illustrateScreenshot) {
         this.find = find;
         this.highlightMatch = highlightMatch;
         this.wait = wait;
+        this.illustrateScreenshot = illustrateScreenshot;
     }
 
     public Matches perform(ActionOptions actionOptions, ObjectCollection... objectCollections) {
         Matches matches = find.perform(actionOptions, objectCollections);
         if (actionOptions.isHighlightAllAtOnce()) highlightAllAtOnce(matches, actionOptions);
         else highlightOneAtATime(matches, actionOptions);
+        matches.getMatches().forEach(m -> illustrateScreenshot.drawHighlight(m));
         return matches;
     }
 

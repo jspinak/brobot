@@ -6,10 +6,10 @@ import io.github.jspinak.brobot.actions.methods.basicactions.find.Find;
 import io.github.jspinak.brobot.actions.methods.sikuliWrappers.Wait;
 import io.github.jspinak.brobot.actions.methods.sikuliWrappers.text.GetTextWrapper;
 import io.github.jspinak.brobot.actions.methods.time.Time;
-import io.github.jspinak.brobot.database.primitives.match.MatchObject;
-import io.github.jspinak.brobot.database.primitives.match.Matches;
-import io.github.jspinak.brobot.database.primitives.text.Text;
-import io.github.jspinak.brobot.database.state.ObjectCollection;
+import io.github.jspinak.brobot.datatypes.primitives.match.MatchObject;
+import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
+import io.github.jspinak.brobot.datatypes.primitives.text.Text;
+import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import io.github.jspinak.brobot.stringUtils.TextSelector;
 import org.springframework.stereotype.Component;
 

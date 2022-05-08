@@ -1,7 +1,7 @@
 package io.github.jspinak.brobot.actions.methods.sikuliWrappers;
 
 import io.github.jspinak.brobot.actions.BrobotSettings;
-import io.github.jspinak.brobot.database.primitives.region.Region;
+import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.mock.Mock;
 import org.springframework.stereotype.Component;
 

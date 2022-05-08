@@ -1,7 +1,7 @@
 package io.github.jspinak.brobot.mock;
 
-import io.github.jspinak.brobot.database.primitives.image.Image;
-import io.github.jspinak.brobot.database.primitives.region.Region;
+import io.github.jspinak.brobot.datatypes.primitives.image.Image;
+import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import org.sikuli.script.Match;
 import org.sikuli.script.Pattern;
 import org.sikuli.script.Screen;

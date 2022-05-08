@@ -1,7 +1,7 @@
 package io.github.jspinak.brobot.actions.methods.sikuliWrappers.mouse;
 
 import io.github.jspinak.brobot.actions.BrobotSettings;
-import io.github.jspinak.brobot.database.primitives.location.Location;
+import io.github.jspinak.brobot.datatypes.primitives.location.Location;
 import io.github.jspinak.brobot.reports.Report;
 import org.springframework.stereotype.Component;
 

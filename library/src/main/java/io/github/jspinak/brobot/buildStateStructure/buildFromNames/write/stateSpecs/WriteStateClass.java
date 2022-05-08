@@ -4,7 +4,7 @@ import com.squareup.javapoet.*;
 import io.github.jspinak.brobot.buildStateStructure.buildFromNames.write.locationSpecs.LocationFieldSpec;
 import io.github.jspinak.brobot.buildStateStructure.buildFromNames.write.regionSpecs.RegionFieldSpec;
 import io.github.jspinak.brobot.buildStateStructure.buildFromNames.write.imageSpecs.ImageFieldSpec;
-import io.github.jspinak.brobot.database.state.stateObject.stateImageObject.StateImageObject;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
 import lombok.Getter;
 import org.springframework.stereotype.Component;
 

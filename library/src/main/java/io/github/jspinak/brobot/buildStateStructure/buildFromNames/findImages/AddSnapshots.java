@@ -1,8 +1,8 @@
 package io.github.jspinak.brobot.buildStateStructure.buildFromNames.findImages;
 
 import io.github.jspinak.brobot.buildStateStructure.buildFromNames.attributes.AttributeTypes;
-import io.github.jspinak.brobot.database.primitives.match.MatchSnapshot;
-import io.github.jspinak.brobot.database.state.stateObject.stateImageObject.StateImageObject;
+import io.github.jspinak.brobot.datatypes.primitives.match.MatchSnapshot;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
 import org.sikuli.script.Match;
 import org.springframework.stereotype.Component;
 

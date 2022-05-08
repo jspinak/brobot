@@ -5,10 +5,10 @@ import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.actions.composites.multipleActions.MultipleActions;
 import io.github.jspinak.brobot.actions.composites.multipleActions.MultipleActionsObject;
 import io.github.jspinak.brobot.actions.methods.sikuliWrappers.mouse.ClickType;
-import io.github.jspinak.brobot.database.primitives.match.Matches;
-import io.github.jspinak.brobot.database.primitives.region.Region;
-import io.github.jspinak.brobot.database.state.ObjectCollection;
-import io.github.jspinak.brobot.database.state.stateObject.stateImageObject.StateImageObject;
+import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
+import io.github.jspinak.brobot.datatypes.primitives.region.Region;
+import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
 import org.springframework.stereotype.Component;
 
 import static io.github.jspinak.brobot.actions.actionOptions.ActionOptions.Action.*;

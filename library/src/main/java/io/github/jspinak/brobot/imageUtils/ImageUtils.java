@@ -1,7 +1,7 @@
 package io.github.jspinak.brobot.imageUtils;
 
 import io.github.jspinak.brobot.actions.BrobotSettings;
-import io.github.jspinak.brobot.database.primitives.region.Region;
+import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.reports.Report;
 import org.sikuli.script.Screen;
 import org.springframework.stereotype.Component;
@@ -16,6 +16,11 @@ import java.util.Map;
 public class ImageUtils {
 
     private Map<String, Integer> lastFilenumber = new HashMap<>();
+    private GetBufferedImage getBufferedImage;
+
+    public ImageUtils(GetBufferedImage getBufferedImage) {
+        this.getBufferedImage = getBufferedImage;
+    }
 
     /**
      * Saves the region to file as a .png file.
@@ -32,7 +37,7 @@ public class ImageUtils {
                 return newPath;
             }
             if (!BrobotSettings.saveHistory) System.out.println(newPath); // don't print when running live
-            ImageIO.write(new Screen().capture(region).getImage(),
+            ImageIO.write(getBufferedImage.fromScreen(region),
                     "png", new File("" + newPath));
             return newPath;
         } catch (IOException e) {

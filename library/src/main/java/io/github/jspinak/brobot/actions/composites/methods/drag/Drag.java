@@ -3,10 +3,10 @@ package io.github.jspinak.brobot.actions.composites.methods.drag;
 import io.github.jspinak.brobot.actions.actionExecution.ActionInterface;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.actions.methods.sikuliWrappers.DragLocation;
-import io.github.jspinak.brobot.database.primitives.location.Location;
-import io.github.jspinak.brobot.database.primitives.match.Matches;
-import io.github.jspinak.brobot.database.primitives.region.Region;
-import io.github.jspinak.brobot.database.state.ObjectCollection;
+import io.github.jspinak.brobot.datatypes.primitives.location.Location;
+import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
+import io.github.jspinak.brobot.datatypes.primitives.region.Region;
+import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
