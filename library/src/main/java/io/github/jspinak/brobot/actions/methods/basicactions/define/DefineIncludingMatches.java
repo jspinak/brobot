@@ -2,17 +2,11 @@ package io.github.jspinak.brobot.actions.methods.basicactions.define;
 
 import io.github.jspinak.brobot.actions.actionExecution.ActionInterface;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
-import io.github.jspinak.brobot.database.primitives.location.Location;
-import io.github.jspinak.brobot.database.primitives.location.Position;
-import io.github.jspinak.brobot.database.primitives.match.MatchObject;
-import io.github.jspinak.brobot.database.primitives.match.Matches;
-import io.github.jspinak.brobot.database.primitives.region.Region;
-import io.github.jspinak.brobot.database.state.ObjectCollection;
-import io.github.jspinak.brobot.database.state.stateObject.otherStateObjects.StateLocation;
+import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
+import io.github.jspinak.brobot.datatypes.primitives.region.Region;
+import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import org.sikuli.script.Match;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 /**
  * Defines a Region as the largest rectangle including all Matches and Locations.

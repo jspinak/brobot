@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.actions.methods.basicactions.define;
 
-import io.github.jspinak.brobot.database.primitives.location.Position;
+import io.github.jspinak.brobot.datatypes.primitives.location.Position;
 
 import java.util.HashMap;
 import java.util.Map;

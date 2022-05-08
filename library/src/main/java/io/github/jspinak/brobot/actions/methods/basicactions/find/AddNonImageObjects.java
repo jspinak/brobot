@@ -1,10 +1,10 @@
 package io.github.jspinak.brobot.actions.methods.basicactions.find;
 
-import io.github.jspinak.brobot.database.primitives.match.MatchObject;
-import io.github.jspinak.brobot.database.primitives.match.Matches;
-import io.github.jspinak.brobot.database.state.ObjectCollection;
-import io.github.jspinak.brobot.database.state.stateObject.otherStateObjects.StateLocation;
-import io.github.jspinak.brobot.database.state.stateObject.otherStateObjects.StateRegion;
+import io.github.jspinak.brobot.datatypes.primitives.match.MatchObject;
+import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
+import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
+import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.StateLocation;
+import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.StateRegion;
 import lombok.Setter;
 import org.sikuli.script.Match;
 import org.springframework.stereotype.Component;

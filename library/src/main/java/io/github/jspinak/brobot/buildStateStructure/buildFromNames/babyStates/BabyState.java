@@ -1,7 +1,7 @@
 package io.github.jspinak.brobot.buildStateStructure.buildFromNames.babyStates;
 
 import io.github.jspinak.brobot.buildStateStructure.buildFromNames.attributes.AttributeTypes;
-import io.github.jspinak.brobot.database.state.stateObject.stateImageObject.StateImageObject;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
 import lombok.Getter;
 
 import java.util.HashSet;

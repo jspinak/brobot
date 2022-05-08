@@ -1,7 +1,7 @@
 package io.github.jspinak.brobot.actions.actionConfigurations;
 
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
-import io.github.jspinak.brobot.database.primitives.match.Matches;
+import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;

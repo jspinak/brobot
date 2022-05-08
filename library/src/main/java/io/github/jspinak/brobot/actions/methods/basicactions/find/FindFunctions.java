@@ -1,8 +1,9 @@
 package io.github.jspinak.brobot.actions.methods.basicactions.find;
 
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
-import io.github.jspinak.brobot.database.primitives.match.Matches;
-import io.github.jspinak.brobot.database.state.stateObject.stateImageObject.StateImageObject;
+import io.github.jspinak.brobot.actions.methods.basicactions.find.histogram.FindHistogram;
+import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
@@ -21,11 +22,12 @@ public class FindFunctions {
             BiFunction<ActionOptions, List<StateImageObject>, Matches>
             > findFunction = new HashMap<>();
 
-    public FindFunctions(FindImageOrRIP findImageOrRIP) {
+    public FindFunctions(FindImageOrRIP findImageOrRIP, FindHistogram findHistogram) {
         findFunction.put(ActionOptions.Find.FIRST, findImageOrRIP::find);
         findFunction.put(ActionOptions.Find.BEST, findImageOrRIP::best);
         findFunction.put(ActionOptions.Find.EACH, findImageOrRIP::each);
         findFunction.put(ActionOptions.Find.ALL, findImageOrRIP::find);
+        findFunction.put(ActionOptions.Find.HISTOGRAM, findHistogram::getMatches);
     }
 
     public void addCustomFind(BiFunction<ActionOptions, List<StateImageObject>, Matches> customFind) {

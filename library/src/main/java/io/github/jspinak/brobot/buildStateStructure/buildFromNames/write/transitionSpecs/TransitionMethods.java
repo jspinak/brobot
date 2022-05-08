@@ -4,7 +4,7 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.MethodSpec;
 import io.github.jspinak.brobot.actions.customActions.CommonActions;
 import io.github.jspinak.brobot.buildStateStructure.buildFromNames.babyStates.BabyStateRepo;
-import io.github.jspinak.brobot.database.state.stateObject.stateImageObject.StateImageObject;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
 import io.github.jspinak.brobot.manageStates.StateTransitions;
 import io.github.jspinak.brobot.services.StateTransitionsRepository;
 import lombok.Getter;
@@ -13,8 +13,6 @@ import org.springframework.stereotype.Component;
 import javax.lang.model.element.Modifier;
 import java.util.*;
 import java.util.stream.Collectors;
-
-import static io.github.jspinak.brobot.buildStateStructure.buildFromNames.attributes.AttributeTypes.Tag.TRANSITION;
 
 /**
  * Writes Java code for methods in the StateTransitions class.

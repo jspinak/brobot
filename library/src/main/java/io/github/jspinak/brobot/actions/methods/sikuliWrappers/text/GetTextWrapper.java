@@ -1,8 +1,8 @@
 package io.github.jspinak.brobot.actions.methods.sikuliWrappers.text;
 
 import io.github.jspinak.brobot.actions.BrobotSettings;
-import io.github.jspinak.brobot.database.primitives.match.MatchObject;
-import io.github.jspinak.brobot.database.primitives.match.Matches;
+import io.github.jspinak.brobot.datatypes.primitives.match.MatchObject;
+import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.mock.MockText;
 import org.springframework.stereotype.Component;
 
