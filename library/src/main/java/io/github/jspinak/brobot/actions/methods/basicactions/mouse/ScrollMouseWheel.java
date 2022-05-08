@@ -3,8 +3,8 @@ package io.github.jspinak.brobot.actions.methods.basicactions.mouse;
 import io.github.jspinak.brobot.actions.actionExecution.ActionInterface;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.actions.methods.sikuliWrappers.mouse.MouseWheel;
-import io.github.jspinak.brobot.database.primitives.match.Matches;
-import io.github.jspinak.brobot.database.state.ObjectCollection;
+import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
+import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import org.springframework.stereotype.Component;
 
 /**

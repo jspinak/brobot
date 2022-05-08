@@ -11,7 +11,7 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
-import static io.github.jspinak.brobot.database.state.NullState.Enum.NULL;
+import static io.github.jspinak.brobot.datatypes.state.NullState.Enum.NULL;
 
 /**
  * Finds the correct Transition from one State to another,

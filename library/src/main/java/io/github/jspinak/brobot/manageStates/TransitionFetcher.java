@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.manageStates;
 
-import io.github.jspinak.brobot.database.state.state.State;
+import io.github.jspinak.brobot.datatypes.state.state.State;
 import io.github.jspinak.brobot.primatives.enums.StateEnum;
 import io.github.jspinak.brobot.services.StateService;
 import io.github.jspinak.brobot.services.StateTransitionsService;
@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 import java.util.Optional;
 import java.util.function.BooleanSupplier;
 
-import static io.github.jspinak.brobot.database.state.NullState.Enum.NULL;
+import static io.github.jspinak.brobot.datatypes.state.NullState.Enum.NULL;
 
 /**
  * This class returns an object containing the StateTransitions objects and StateTransition objects that

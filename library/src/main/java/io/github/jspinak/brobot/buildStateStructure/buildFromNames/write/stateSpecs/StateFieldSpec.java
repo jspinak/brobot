@@ -3,7 +3,7 @@ package io.github.jspinak.brobot.buildStateStructure.buildFromNames.write.stateS
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeSpec;
-import io.github.jspinak.brobot.database.state.state.State;
+import io.github.jspinak.brobot.datatypes.state.state.State;
 import io.github.jspinak.brobot.primatives.enums.StateEnum;
 import io.github.jspinak.brobot.services.StateService;
 import org.springframework.stereotype.Component;

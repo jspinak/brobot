@@ -6,8 +6,8 @@ import io.github.jspinak.brobot.buildStateStructure.buildFromNames.attributes.At
 import io.github.jspinak.brobot.buildStateStructure.buildFromNames.attributes.PrintAttribute;
 import io.github.jspinak.brobot.buildStateStructure.buildFromNames.attributes.UseAttribute;
 import io.github.jspinak.brobot.buildStateStructure.buildFromNames.babyStates.BabyState;
-import io.github.jspinak.brobot.database.primitives.match.Matches;
-import io.github.jspinak.brobot.database.state.stateObject.stateImageObject.StateImageObject;
+import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
 import org.sikuli.script.Finder;
 import org.sikuli.script.Match;
 import org.springframework.stereotype.Component;

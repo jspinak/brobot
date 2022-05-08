@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.manageStates;
 
-import io.github.jspinak.brobot.database.state.state.State;
+import io.github.jspinak.brobot.datatypes.state.state.State;
 import io.github.jspinak.brobot.primatives.enums.StateEnum;
 import lombok.Getter;
 import org.springframework.stereotype.Component;

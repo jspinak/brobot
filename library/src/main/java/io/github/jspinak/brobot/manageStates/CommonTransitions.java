@@ -1,7 +1,7 @@
 package io.github.jspinak.brobot.manageStates;
 
 import io.github.jspinak.brobot.actions.customActions.CommonActions;
-import io.github.jspinak.brobot.database.state.stateObject.stateImageObject.StateImageObject;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
 import io.github.jspinak.brobot.primatives.enums.StateEnum;
 import org.springframework.stereotype.Component;
 

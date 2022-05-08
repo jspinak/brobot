@@ -2,17 +2,15 @@ package io.github.jspinak.brobot.buildStateStructure.buildFromNames.write.imageS
 
 import com.squareup.javapoet.FieldSpec;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
-import io.github.jspinak.brobot.buildStateStructure.buildFromNames.attributes.AttributeTypes;
-import io.github.jspinak.brobot.database.primitives.match.MatchSnapshot;
-import io.github.jspinak.brobot.database.primitives.region.Region;
-import io.github.jspinak.brobot.database.state.stateObject.stateImageObject.StateImageObject;
+import io.github.jspinak.brobot.datatypes.primitives.match.MatchSnapshot;
+import io.github.jspinak.brobot.datatypes.primitives.region.Region;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
 import org.springframework.stereotype.Component;
 
 import javax.lang.model.element.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 
-import static io.github.jspinak.brobot.buildStateStructure.buildFromNames.attributes.AttributeTypes.Attribute.MULTIPLE_MATCHES;
 import static io.github.jspinak.brobot.buildStateStructure.buildFromNames.attributes.AttributeTypes.Attribute.SINGLE_MATCH;
 
 /**

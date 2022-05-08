@@ -1,15 +1,13 @@
 package io.github.jspinak.brobot.buildStateStructure.buildFromNames.findImages;
 
 import io.github.jspinak.brobot.buildStateStructure.buildFromNames.babyStates.BabyState;
-import io.github.jspinak.brobot.database.primitives.region.Region;
-import io.github.jspinak.brobot.database.state.stateObject.stateImageObject.StateImageObject;
-import io.github.jspinak.brobot.reports.ANSI;
+import io.github.jspinak.brobot.datatypes.primitives.region.Region;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
 import io.github.jspinak.brobot.reports.Report;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import static io.github.jspinak.brobot.buildStateStructure.buildFromNames.attributes.AttributeTypes.Attribute.TRANSFER;

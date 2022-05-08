@@ -1,7 +1,7 @@
 package io.github.jspinak.brobot.buildStateStructure.buildFromNames.write.transitionSpecs;
 
 import com.squareup.javapoet.*;
-import io.github.jspinak.brobot.database.state.stateObject.stateImageObject.StateImageObject;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
 import org.springframework.stereotype.Component;
 
 import javax.lang.model.element.Modifier;
