@@ -1,8 +1,8 @@
 package io.github.jspinak.brobot.buildStateStructure.buildFromNames.attributes;
 
-import io.github.jspinak.brobot.database.primitives.match.Matches;
-import io.github.jspinak.brobot.database.primitives.region.Region;
-import io.github.jspinak.brobot.database.state.stateObject.stateImageObject.StateImageObject;
+import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
+import io.github.jspinak.brobot.datatypes.primitives.region.Region;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
 import io.github.jspinak.brobot.reports.ANSI;
 import io.github.jspinak.brobot.reports.Report;
 import org.sikuli.script.Match;

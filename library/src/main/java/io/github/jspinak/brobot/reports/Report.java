@@ -1,7 +1,7 @@
 package io.github.jspinak.brobot.reports;
 
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
-import io.github.jspinak.brobot.database.state.stateObject.StateObject;
+import io.github.jspinak.brobot.datatypes.state.stateObject.StateObject;
 import org.sikuli.script.Match;
 
 import java.util.HashMap;

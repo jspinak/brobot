@@ -1,7 +1,7 @@
 package io.github.jspinak.brobot.actions.composites.multipleActions;
 
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
-import io.github.jspinak.brobot.database.state.ObjectCollection;
+import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import lombok.Getter;
 
 import java.util.ArrayList;

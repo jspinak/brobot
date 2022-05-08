@@ -2,7 +2,7 @@ package io.github.jspinak.brobot.actions.methods.sikuliWrappers;
 
 import io.github.jspinak.brobot.actions.BrobotSettings;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
-import io.github.jspinak.brobot.database.state.stateObject.StateObject;
+import io.github.jspinak.brobot.datatypes.state.stateObject.StateObject;
 import io.github.jspinak.brobot.reports.Report;
 import org.sikuli.script.Match;
 import org.sikuli.script.Region;

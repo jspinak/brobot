@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.buildStateStructure.buildFromNames.attributes;
 
-import io.github.jspinak.brobot.database.primitives.image.Image;
+import io.github.jspinak.brobot.datatypes.primitives.image.Image;
 import io.github.jspinak.brobot.reports.ANSI;
 import io.github.jspinak.brobot.reports.Report;
 import lombok.Getter;

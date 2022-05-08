@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.buildStateStructure.buildFromNames.attributes;
 
-import io.github.jspinak.brobot.database.state.stateObject.stateImageObject.StateImageObject;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
 import io.github.jspinak.brobot.stringUtils.CommonRegex;
 import org.springframework.stereotype.Component;
 

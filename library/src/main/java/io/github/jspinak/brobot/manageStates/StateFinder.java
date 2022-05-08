@@ -1,8 +1,8 @@
 package io.github.jspinak.brobot.manageStates;
 
 import io.github.jspinak.brobot.actions.actionExecution.Action;
-import io.github.jspinak.brobot.database.state.ObjectCollection;
-import io.github.jspinak.brobot.database.state.state.State;
+import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
+import io.github.jspinak.brobot.datatypes.state.state.State;
 import io.github.jspinak.brobot.primatives.enums.StateEnum;
 import io.github.jspinak.brobot.reports.Report;
 import io.github.jspinak.brobot.services.StateService;

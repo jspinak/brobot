@@ -2,11 +2,8 @@ package io.github.jspinak.brobot.buildStateStructure.buildFromNames;
 
 import io.github.jspinak.brobot.actions.BrobotSettings;
 import io.github.jspinak.brobot.buildStateStructure.buildFromNames.attributes.SetAttributes;
-import io.github.jspinak.brobot.buildStateStructure.buildFromNames.babyStates.BabyState;
 import io.github.jspinak.brobot.buildStateStructure.buildFromNames.babyStates.BabyStateRepo;
-import io.github.jspinak.brobot.database.state.stateObject.stateImageObject.StateImageObject;
-import io.github.jspinak.brobot.reports.ANSI;
-import io.github.jspinak.brobot.reports.Report;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
 import org.sikuli.script.ImagePath;
 import org.springframework.stereotype.Component;
 

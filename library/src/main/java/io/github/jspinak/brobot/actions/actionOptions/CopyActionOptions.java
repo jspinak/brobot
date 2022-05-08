@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.actions.actionOptions;
 
-import io.github.jspinak.brobot.database.primitives.location.Location;
+import io.github.jspinak.brobot.datatypes.primitives.location.Location;
 
 /**
  * This class creates a deep copy of most of the fields in ActionOptions.

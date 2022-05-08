@@ -1,12 +1,11 @@
 package io.github.jspinak.brobot.buildStateStructure.buildFromNames.write.locationSpecs;
 
 import com.squareup.javapoet.FieldSpec;
-import io.github.jspinak.brobot.database.primitives.location.Location;
-import io.github.jspinak.brobot.database.primitives.location.Position;
-import io.github.jspinak.brobot.database.primitives.region.Region;
-import io.github.jspinak.brobot.database.state.stateObject.otherStateObjects.StateLocation;
-import io.github.jspinak.brobot.database.state.stateObject.otherStateObjects.StateRegion;
-import io.github.jspinak.brobot.database.state.stateObject.stateImageObject.StateImageObject;
+import io.github.jspinak.brobot.datatypes.primitives.location.Location;
+import io.github.jspinak.brobot.datatypes.primitives.location.Position;
+import io.github.jspinak.brobot.datatypes.primitives.region.Region;
+import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.StateLocation;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
 import org.springframework.stereotype.Component;
 
 import javax.lang.model.element.Modifier;

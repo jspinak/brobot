@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Optional;
 
-import static io.github.jspinak.brobot.database.state.NullState.Enum.NULL;
+import static io.github.jspinak.brobot.datatypes.state.NullState.Enum.NULL;
 
 /**
  * Moves through the Paths to reach the target State.

@@ -3,9 +3,9 @@ package io.github.jspinak.brobot.actions.composites.methods.drag;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.actions.composites.multipleActions.MultipleActions;
 import io.github.jspinak.brobot.actions.composites.multipleActions.MultipleActionsObject;
-import io.github.jspinak.brobot.database.primitives.location.Location;
-import io.github.jspinak.brobot.database.primitives.match.Matches;
-import io.github.jspinak.brobot.database.state.ObjectCollection;
+import io.github.jspinak.brobot.datatypes.primitives.location.Location;
+import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
+import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
