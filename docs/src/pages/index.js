@@ -19,6 +19,11 @@ function HomepageHeader() {
             to="https://www.youtube.com/watch?v=aHnVQ8KmOVw">
             Introduction Video - ️13 min ⏱
           </Link>
+            <Link
+                className="button button--secondary button--lg"
+                to="visualAPI">
+                The Visual API - ️white paper
+            </Link>
         </div>
           <div>Free, open source, and built with care for researchers and the entire AI community.</div>
       </div>

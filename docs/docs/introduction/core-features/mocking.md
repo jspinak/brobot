@@ -2,7 +2,16 @@
 sidebar_position: 3
 ---
 
-# Mocking
+# Integration Testing (Mocking)
+
+Integration testing is performed by simulating the environment the application runs in 
+and the results of actions taken on objects in this environment. The model of the environment
+is represented by a sample distribution of action-results pairs for state objects, as well
+as probabilities that determine the success or failure of state transitions when the
+application is run as a test. Running the app as a test is typically referred to as 
+mocking. Mocking is the process of simulating actions instead of executing them in a real run. 
+An integration test in Brobot runs the entire application in a mock run, and is 
+done by simply setting the variable `BrobotSettings.mock` to true.  
 
 Mocking is used for application testing when making calls to a third-party API that the
 developer cannot control. For example, calls to an external database can be mocked in the
@@ -13,7 +22,8 @@ be mocked to produce text outputs and is run exactly as it would otherwise. The 
 code in a brobot application does not know if it is running live or in a mock. The mocks
 happen only at the wrapper level and the wrappers return the same outputs as they would
 during a real run (plus some additional logging when enabled). Stochastisticity is modeled
-by specifying probabilities in state objects and transitions.
+by sampling from the potential outcomes saved with state objects, and from the
+probabilities given to the success or failure of state transitions. 
 
 Mocking can uncover errors in the code in the same way that traditional testing, for
 example JUnit testing, does. You don't have to wait 30 minutes to realize that you
