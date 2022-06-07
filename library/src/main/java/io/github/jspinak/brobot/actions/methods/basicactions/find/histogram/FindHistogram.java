@@ -67,7 +67,7 @@ public class FindHistogram {
         HistogramMatches histMatches = new HistogramMatches();
         histMatches.setStateImageObject(image);
         searchRegions.forEach(reg -> histMatches.addRegions(findAllHistograms.find(reg, image.getImage())));
-        histMatches.printFirst(50);
+        //histMatches.printFirst(50);
         return histMatches;
     }
 
