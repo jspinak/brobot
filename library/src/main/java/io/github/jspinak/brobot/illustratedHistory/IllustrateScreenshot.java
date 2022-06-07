@@ -5,7 +5,7 @@ import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.datatypes.primitives.location.Location;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
-import io.github.jspinak.brobot.imageUtils.GetBufferedImage;
+import io.github.jspinak.brobot.imageUtils.GetImage;
 import io.github.jspinak.brobot.imageUtils.ImageUtils;
 import io.github.jspinak.brobot.reports.Report;
 import org.sikuli.script.Match;
@@ -20,11 +20,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static io.github.jspinak.brobot.actions.actionOptions.ActionOptions.Action.FIND;
+
 @Component
 public class IllustrateScreenshot {
 
     private ImageUtils imageUtils;
-    private GetBufferedImage getBufferedImage;
+    private GetImage getImage;
     private Draw draw;
 
     private BufferedImage bufferedImage;
@@ -34,11 +36,12 @@ public class IllustrateScreenshot {
     private boolean okToSave = false;
     private List<ObjectCollection> lastCollections = new ArrayList<>();
     private ActionOptions.Action lastAction = ActionOptions.Action.TYPE;
+    private ActionOptions.Find lastFind = ActionOptions.Find.UNIVERSAL;
     private Location lastMove;
 
-    public IllustrateScreenshot(ImageUtils imageUtils, GetBufferedImage getBufferedImage, Draw draw) {
+    public IllustrateScreenshot(ImageUtils imageUtils, GetImage getImage, Draw draw) {
         this.imageUtils = imageUtils;
-        this.getBufferedImage = getBufferedImage;
+        this.getImage = getImage;
         this.draw = draw;
     }
 
@@ -59,15 +62,16 @@ public class IllustrateScreenshot {
     public boolean okToIllustrate(ActionOptions actionOptions, ObjectCollection... objectCollections) {
         if (!okToIllustrate()) return false;
         ActionOptions.Action action = actionOptions.getAction();
-        if (action != ActionOptions.Action.FIND &&
+        if (action != FIND &&
                 action != ActionOptions.Action.CLICK &&
                 action != ActionOptions.Action.DRAG &&
                 action != ActionOptions.Action.MOVE &&
                 action != ActionOptions.Action.HIGHLIGHT) return false;
-        if (action != ActionOptions.Action.FIND) {
+        if (action != FIND) {
             //Report.println(" action is not FIND. it is " + action);
             return true;
         }
+        if (lastFind != actionOptions.getFind()) return true;
         if (lastAction != action) {
             //Report.println(" action is different ");
             return true;
@@ -92,14 +96,22 @@ public class IllustrateScreenshot {
         if (objectCollections.length > 0) name = objectCollections[0].getFirstObjectName();
         if (!okToIllustrate(actionOptions, objectCollections)) return false;
         try {
+            // first, save a screenshot of the region to file using the screenshot filename.
             currentPath = imageUtils.saveRegionToFile(new Region(),
                     BrobotSettings.historyPath + BrobotSettings.screenshotFilename);
+            // then, prepare the name of the illustrated file to be saved
+            String filename = "-" + actionOptions.getAction();
+            if (actionOptions.getAction() == FIND) filename = filename + "-" + actionOptions.getFind();
+            filename = filename + "-" + name + ".png";
             outputPath = currentPath.replace(BrobotSettings.screenshotFilename, BrobotSettings.historyFilename);
-            outputPath = outputPath.replace(".png", "-"+actionOptions.getAction()+
-                    "-"+name+".png");
-            bufferedImage = getBufferedImage.fromFile(currentPath);
+            outputPath = outputPath.replace(".png", filename);
+                    //if (actionOptions.getAction() == FIND) outputPath = outputPath + "-" + actionOptions.getFind();
+            //outputPath = outputPath.replace(".png", "-"+actionOptions.getAction()+
+            //        "-"+name+".png");
+            bufferedImage = getImage.getBuffImgFromFile(currentPath);
             okToSave = true;
             lastAction = actionOptions.getAction();
+            if (lastAction == FIND) lastFind = actionOptions.getFind();
             lastCollections = new ArrayList<>();
             lastCollections = Arrays.asList(objectCollections);
             return true;

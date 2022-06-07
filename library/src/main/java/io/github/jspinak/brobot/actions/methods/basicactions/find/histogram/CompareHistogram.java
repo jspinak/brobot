@@ -1,18 +1,11 @@
 package io.github.jspinak.brobot.actions.methods.basicactions.find.histogram;
 
 import io.github.jspinak.brobot.datatypes.primitives.image.Image;
-import io.github.jspinak.brobot.reports.Report;
 import org.opencv.core.Mat;
-import org.opencv.core.MatOfFloat;
-import org.opencv.core.MatOfInt;
 import org.opencv.imgproc.Imgproc;
 import org.springframework.stereotype.Component;
 
 import java.awt.image.BufferedImage;
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.opencv.imgproc.Imgproc.*;
 
 @Component
 public class CompareHistogram {
@@ -32,10 +25,10 @@ public class CompareHistogram {
      * fails.
      */
     public double compareHist(Image image1, Image image2) {
-        Mat mat1 = histogram.getHistogram(image1.getFilenames().get(0));
-        Mat mat2 = histogram.getHistogram(image2.getFilenames().get(0));
-        if (mat1.empty() || mat2.empty()) return 0;
-        return Imgproc.compareHist(mat1, mat2, 0);
+        Mat hist1 = histogram.getHistogram(image1.getFilenames().get(0));
+        Mat hist2 = histogram.getHistogram(image2.getFilenames().get(0));
+        if (hist1.empty() || hist2.empty()) return 0;
+        return Imgproc.compareHist(hist1, hist2, 0);
     }
 
     /**
@@ -45,37 +38,12 @@ public class CompareHistogram {
      * @return a double from 0.0 to 1.0
      */
     public double compareHist(BufferedImage image1, BufferedImage image2) {
-        Mat mat1 = histogram.getHistogram(image1);
-        Mat hist1 = new Mat();
-        setHist(mat1, hist1);
-        //mat1.convertTo(mat1, CV_32F);
-        Mat mat2 = histogram.getHistogram(image2);
-        Mat hist2 = new Mat();
-        setHist(mat2, hist2);
-        //mat2.convertTo(mat2, CV_32F);
-        if (mat1.empty() || mat2.empty()) return 0;
-        double result = Imgproc.compareHist(hist1, hist2, 0);
-        //Report.print(" "+result);
-        //if (new Random().nextInt(100) < 10) System.out.println(mat1);
-        return result;
+        Mat hist1 = histogram.getHistogram(image1);
+        Mat hist2 = histogram.getHistogram(image2);
+        if (hist1.empty() || hist2.empty()) return 0;
+        return Imgproc.compareHist(hist1, hist2, 0);
     }
 
-    private Mat convertToHSV(Mat mat) {
-        Mat hsv = new Mat();
-        cvtColor(mat, hsv, COLOR_BGR2HSV );
-        return hsv;
-    }
 
-    private void setHist(Mat mat, Mat hist) {
-        int hbins = 50;
-        int sbins = 60;
-        MatOfInt histSize = new MatOfInt(hbins, sbins);
-        // hue varies from 0 to 179, saturation from 0 to 255
-        MatOfFloat histRange = new MatOfFloat(0f, 180f, 0f, 256f);
-        Mat hsv = convertToHSV(mat);
-        List<Mat> matList = new ArrayList<>();
-        matList.add(hsv);
-        calcHist(matList, new MatOfInt(0, 1), new Mat(), hist, histSize, histRange);
-    }
 
 }
