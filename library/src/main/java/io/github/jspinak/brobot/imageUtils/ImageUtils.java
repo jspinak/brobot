@@ -3,7 +3,6 @@ package io.github.jspinak.brobot.imageUtils;
 import io.github.jspinak.brobot.actions.BrobotSettings;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.reports.Report;
-import org.sikuli.script.Screen;
 import org.springframework.stereotype.Component;
 
 import javax.imageio.ImageIO;
@@ -16,10 +15,10 @@ import java.util.Map;
 public class ImageUtils {
 
     private Map<String, Integer> lastFilenumber = new HashMap<>();
-    private GetBufferedImage getBufferedImage;
+    private GetImage getImage;
 
-    public ImageUtils(GetBufferedImage getBufferedImage) {
-        this.getBufferedImage = getBufferedImage;
+    public ImageUtils(GetImage getImage) {
+        this.getImage = getImage;
     }
 
     /**
@@ -37,7 +36,7 @@ public class ImageUtils {
                 return newPath;
             }
             if (!BrobotSettings.saveHistory) System.out.println(newPath); // don't print when running live
-            ImageIO.write(getBufferedImage.fromScreen(region),
+            ImageIO.write(getImage.getBuffImgFromScreen(region),
                     "png", new File("" + newPath));
             return newPath;
         } catch (IOException e) {
