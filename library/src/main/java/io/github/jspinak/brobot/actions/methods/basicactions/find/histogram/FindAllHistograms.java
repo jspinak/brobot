@@ -4,7 +4,7 @@ import io.github.jspinak.brobot.datatypes.primitives.grid.Grid;
 import io.github.jspinak.brobot.datatypes.primitives.grid.OverlappingGrids;
 import io.github.jspinak.brobot.datatypes.primitives.image.Image;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
-import io.github.jspinak.brobot.imageUtils.GetBufferedImage;
+import io.github.jspinak.brobot.imageUtils.GetImage;
 import io.github.jspinak.brobot.reports.Report;
 import org.sikuli.script.ImagePath;
 import org.springframework.stereotype.Component;
@@ -19,13 +19,13 @@ public class FindAllHistograms {
 
     private Histogram histogram;
     private CompareHistogram compareHistogram;
-    private GetBufferedImage getBufferedImage;
+    private GetImage getImage;
 
     public FindAllHistograms(Histogram histogram, CompareHistogram compareHistogram,
-                             GetBufferedImage getBufferedImage) {
+                             GetImage getImage) {
         this.histogram = histogram;
         this.compareHistogram = compareHistogram;
-        this.getBufferedImage = getBufferedImage;
+        this.getImage = getImage;
     }
 
     /**
@@ -52,7 +52,6 @@ public class FindAllHistograms {
     }
 
     public LinkedHashMap<Region, Double> find(Region region, int width, int height, String filename) {
-        Report.println("get hist for filename "+filename);
         OverlappingGrids overlappingGrids = new OverlappingGrids(new Grid.Builder()
                 .setRegion(region)
                 .setCellWidth(width)
@@ -64,12 +63,11 @@ public class FindAllHistograms {
     public LinkedHashMap<Region, Double> find(OverlappingGrids grids, String filename) {
         try {
             String pathName = ImagePath.getBundlePath()+"/"+filename;
-            BufferedImage bufferedImage = getBufferedImage.fromFile(pathName);
-            System.out.println(pathName);
+            BufferedImage bufferedImage = getImage.getBuffImgFromFile(pathName);
             Map<Region, Double> regionScores = new HashMap<>();
             grids.getAllRegions().forEach(reg ->
                 regionScores.put(reg, compareHistogram.compareHist(
-                        bufferedImage, getBufferedImage.fromScreen(reg))));
+                        bufferedImage, getImage.getBuffImgFromScreen(reg))));
             return regionScores.entrySet().stream()
                     .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue,

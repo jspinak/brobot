@@ -65,7 +65,7 @@ public class ActionOptions {
      * The options that return multiple Matches allow for overlapping Matches.
      */
     public enum Find {
-        FIRST, EACH, ALL, BEST, UNIVERSAL, CUSTOM, HISTOGRAM
+        FIRST, EACH, ALL, BEST, UNIVERSAL, CUSTOM, HISTOGRAM, COLOR
     }
     private Find find = Find.FIRST;
     /**
@@ -281,6 +281,16 @@ public class ActionOptions {
     private double typeDelay = Settings.TypeDelay;
     private String modifiers = ""; // not used when ""
 
+    /**
+     * Specifies the width and height of color boxes to find (used with FIND.COLOR).
+     */
+    private int diameter = 1;
+
+    /**
+     * The number of k-means to use for finding color.
+     */
+    private int kmeans = 1;
+
     public static class Builder {
         private Action action = Action.FIND;
         private BiFunction<ActionOptions, List<StateImageObject>, Matches> tempFind;
@@ -324,6 +334,8 @@ public class ActionOptions {
         private double typeDelay = Settings.TypeDelay;
         private String modifiers = "";
         private ScrollDirection scrollDirection = ScrollDirection.UP;
+        private int diameter = 5;
+        private int kmeans = 2;
 
         public Builder() {}
         //public Builder(Action action) { this.action = action; }
@@ -558,6 +570,16 @@ public class ActionOptions {
             return this;
         }
 
+        public Builder setDiameter(int diameter) {
+            this.diameter = diameter;
+            return this;
+        }
+
+        public Builder setKmeans(int kmeans) {
+            this.kmeans = kmeans;
+            return this;
+        }
+
         public ActionOptions build() {
             ActionOptions actionOptions = new ActionOptions();
             actionOptions.action = action;
@@ -602,6 +624,8 @@ public class ActionOptions {
             actionOptions.typeDelay = typeDelay;
             actionOptions.modifiers = modifiers;
             actionOptions.scrollDirection = scrollDirection;
+            actionOptions.diameter = diameter;
+            actionOptions.kmeans = kmeans;
             return actionOptions;
         }
     }

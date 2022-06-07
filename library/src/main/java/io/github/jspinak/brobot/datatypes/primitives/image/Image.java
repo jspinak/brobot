@@ -38,6 +38,11 @@ public class Image {
         return imageNames;
     }
 
+    public String getFirstFilename() {
+        String name = imageNames.stream().iterator().next();
+        return name + ".png";
+    }
+
     public void addImage(String imageName) {
         this.imageNames.add(imageName);
     }
@@ -135,4 +140,7 @@ public class Image {
         return true;
     }
 
+    public Pattern getFirstPattern() {
+        return getPattern(0).get(); // Empty Images are not common.
+    }
 }

@@ -56,20 +56,22 @@ public class Grid {
         }
 
         private void setGrid() {
-            if (region == null) return;
+            if (region == null) region = new Region();
+            if ((cols <= 0 || rows <= 0) && (cellHeight <= 0 || cellWidth <= 0)) {
+                cols = 1;
+                rows = 1;
+            }
             if (cols > 0 && rows > 0) {
                 gridRegions = region.getGridRegions(rows, cols);
                 cellWidth = gridRegions.get(0).w;
                 cellHeight = gridRegions.get(0).h;
                 return;
             }
-            if (cellHeight > 0 && cellWidth > 0) {
-                cols = region.w / cellWidth;
-                rows = region.h / cellHeight;
-                // shrink the region to fit a grid with the cell width and height
-                region = new Region(region.x, region.y, cols * cellWidth, rows * cellHeight);
-                gridRegions = region.getGridRegions(rows, cols);
-            }
+            cols = region.w / cellWidth;
+            rows = region.h / cellHeight;
+            // shrink the region to fit a grid with the cell width and height
+            region = new Region(region.x, region.y, cols * cellWidth, rows * cellHeight);
+            gridRegions = region.getGridRegions(rows, cols);
         }
 
         public Grid build() {
