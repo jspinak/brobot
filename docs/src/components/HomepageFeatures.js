@@ -27,12 +27,12 @@ const FeatureList = [
     ),
   },
   {
-    title: 'Powered by Sikuli',
+    title: 'Powered by Sikuli & OpenCV',
     Svg: require('../../static/img/brobot_logo/rocket.svg').default, // undraw_docusaurus_react.svg
     description: (
       <>
-        Brobot uses Sikuli for automation tasks. Sikuli relies on
-          OpenCV for image recognition, the Java Robot class for controlling
+        Brobot uses Sikuli and OpenCV for automation tasks. Sikuli relies on
+          the Java Robot class for controlling
           the mouse and keyboard, and Tesseract for text recognition.
       </>
     ),

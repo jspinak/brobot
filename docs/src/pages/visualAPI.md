@@ -101,10 +101,10 @@ Stochasticity is especially dangerous for automation applications because of the
 interdependency of actions. If A1 fails then A2 and A3 are also likely to fail.
 If an automation program is a series of actions, the probability of the program
 failing will be related directly to the number of actions. If each action is
-given a probability p of succeedi   ng, and there are n actions, we can calculate
-the overall probability of success as a function of n and p: $\color{blue}{f(n,p) = p^n}$   .
+given a probability p of succeeding, and there are n actions, we can calculate
+the overall probability of success as a function of n and p: $f(n,p) = p^n$.   
 
-$\f(n,p)$ looks like this when setting p to 90%: at just 7 actions the process 
+$f(n,p)$ looks like this when setting p to 90%: at just 7 actions the process 
 is more likely to fail than succeed, and the chances of success with a large 
 number of actions is extremely low.   
 
@@ -248,7 +248,11 @@ after A is clicked. The model of the environment, because it is conceptual and n
 explicitly stated, remains difficult to visualize and impossible to work with. It 
 is also a reason why many automation applications written as process flows will fail: 
 the model environment defined by the assumptions often contains inconsistencies not 
-found in the real environment: $\widehat...env... \neq env$.  
+found in the real environment.  
+
+$$
+\widehat{env} \neq env
+$$
 
 In changing our focus from processes to environments we have changed our focus from 
 writing an automation process to developing a model of the environment. A good model 
@@ -369,7 +373,7 @@ developers of the game provide an API to programmers and AI researchers. The
 [StarCraft API](https://news.blizzard.com/en-us/starcraft2/20944009/the-starcraft-ii-api-has-arrived) 
 provides detailed information about the pieces in the game and 
 their positions, as well as allowing a program to manipulate these pieces 
-according to the game rules. In both Go and StarCraft, $\widehat...env... = env$ since 
+according to the game rules. In both Go and StarCraft, $\widehat{env} = env$ since 
 the game environments are converted to a digital representation without information 
 loss. Having such a realistic model of the environment allows the researchers to 
 focus on the reinforcement learning algorithms and not worry about the accuracy 
@@ -382,12 +386,12 @@ be manipulated by the automation application. This allows the automation
 instructions to focus on business logic and ignore the details of manipulating 
 the environment. The visual API differs from a traditional API in that its functions 
 produce stochastic results. With a visual API, the model of the environment is not 
-equal to the real environment $\widehat...env... \neq env$ but is an approximation of 
-the real environment $\widehat...env... \thickapprox env$. An important objective when 
-creating a visual API is to reduce the stochasticity of its functions. There 
-
-are many ways to do this, and a comprehensive tutorial on building a visual API with 
-Brobot can be found in [this video series](https://www.youtube.com/watch?v=SmeIc06_GUg&list=PLC2shVr9gxdneSx0AuEv_YXwQsvUd9DuX).
+equal to the real environment $\widehat{env} \neq env$ but is an approximation of 
+the real environment $\widehat{env} \thickapprox env$. An important objective when 
+creating a visual API is to reduce the stochasticity of its functions. There are 
+many ways to do this, and a comprehensive tutorial on building a visual API with 
+Brobot can be found in 
+[this video series](https://www.youtube.com/watch?v=SmeIc06_GUg&list=PLC2shVr9gxdneSx0AuEv_YXwQsvUd9DuX).
 
 <p align="center" width="200">
 
@@ -480,7 +484,7 @@ retrieval operation on the region, which can be Farms, Mines, Lakes,
 Mountains, Forest, or Castle. The categories of the random variable 
 include additionally the entries Forms and Minez to simulate the imperfect 
 retrieval of data during visual automation. This example is taken from the 
-[basic tutorial](../../docs/introduction/tutorial-basics), which shows how to automate 
+[basic tutorial](/brobot/docs/tutorial-basics/intro), which shows how to automate 
 the creation of a labeled image dataset.   
 
 <p align="center">
