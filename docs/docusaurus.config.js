@@ -24,12 +24,17 @@ const config = {
     [
       '@docusaurus/preset-classic',
       /** @type {import('@docusaurus/preset-classic').Options} */
-      ({
-        docs: {
-          sidebarPath: require.resolve('./sidebars.js'),
-          editUrl: 'https://jspinak.github.io/brobot/',
+      {
+        pages: {
           remarkPlugins: [math],
           rehypePlugins: [katex],
+        },
+        docs: {
+          path: 'docs',
+          remarkPlugins: [math],
+          rehypePlugins: [katex],
+          sidebarPath: require.resolve('./sidebars.js'),
+          editUrl: 'https://jspinak.github.io/brobot/',
         },
         blog: {
           showReadingTime: true,
@@ -39,7 +44,7 @@ const config = {
         theme: {
           customCss: require.resolve('./src/css/custom.css'),
         },
-      }),
+      },
     ],
   ],
   stylesheets: [
