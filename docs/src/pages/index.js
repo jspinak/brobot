@@ -14,18 +14,19 @@ function HomepageHeader() {
         <h1 className="hero__title">{siteConfig.title}</h1>
         <p className="hero__subtitle">{siteConfig.tagline}</p>
         <div className={styles.buttons}>
-          <Link
-            className="button button--secondary button--lg"
-            to="https://www.youtube.com/watch?v=aHnVQ8KmOVw">
-            Introduction Video - ️13 min ⏱
+          <Link className="button button--secondary button--lg"
+                to="https://www.youtube.com/watch?v=aHnVQ8KmOVw"
+                style={{border: '2px dotted red'}}>
+              <div>Introductory Video ️<i>13 min</i> ⏱</div>
           </Link>
-            <Link
-                className="button button--secondary button--lg"
-                to="visualAPI">
-                The Visual API - ️white paper
-            </Link>
         </div>
-          <div>Free, open source, and built with care for researchers and the entire AI community.</div>
+        <div>
+          <Link className="button button--secondary button--lg" to="visualAPI"
+                style={{border: '2px dotted red'}}>
+              <div>The Visual API ️<i>white paper</i> </div>
+          </Link>
+        </div>
+        <div><br />Free, open source, and built with care for researchers and the entire AI community.</div>
       </div>
     </header>
   );
