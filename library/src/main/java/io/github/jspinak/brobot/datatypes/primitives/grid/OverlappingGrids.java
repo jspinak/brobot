@@ -1,6 +1,7 @@
 package io.github.jspinak.brobot.datatypes.primitives.grid;
 
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
+import io.github.jspinak.brobot.reports.Report;
 import lombok.Getter;
 
 import java.util.ArrayList;
@@ -22,9 +23,10 @@ public class OverlappingGrids {
                 grid.getRegion().h - grid.getCellHeight());
         innerGrid = new Grid.Builder()
                 .setRegion(overlapReg)
-                .setCellWidth(grid.getRegion().w)
-                .setCellHeight(grid.getRegion().h)
+                .setCellWidth(grid.getCellWidth())
+                .setCellHeight(grid.getCellHeight())
                 .build();
+        innerGrid.getRegion().print();
     }
 
     public List<Region> getAllRegions() {
@@ -32,5 +34,13 @@ public class OverlappingGrids {
         regions.addAll(innerGrid.getGridRegions());
         regions.sort(Comparator.comparing(Region::getY));
         return regions;
+    }
+
+    public void print() {
+        Region g = grid.getRegion();
+        Region i = innerGrid.getRegion();
+        Report.formatln("cell w.h = %d.%d", grid.getCellWidth(), grid.getCellHeight());
+        Report.formatln("main grid x.y.w.h = %d.%d.%d.%d", g.x, g.y, g.w, g.h);
+        Report.formatln("inner grid x.y.w.h = %d.%d.%d.%d", i.x, i.y, i.w, i.h);
     }
 }

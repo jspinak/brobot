@@ -1,13 +1,15 @@
 package io.github.jspinak.brobot.datatypes.primitives.image;
 
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
+import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.NullState;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
 import lombok.Getter;
 import lombok.Setter;
 import org.sikuli.script.Pattern;
 
 import java.awt.image.BufferedImage;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Images can hold multiple Patterns. A Pattern is a concept from Sikuli that is defined
@@ -18,7 +20,7 @@ import java.util.*;
 @Setter
 public class Image {
 
-    private Set<String> imageNames = new HashSet<>();
+    private List<String> imageNames = new ArrayList<>();
 
     public Image() {}
 
@@ -34,15 +36,6 @@ public class Image {
         for (Image image : images) imageNames.addAll(image.getImageNames());
     }
 
-    public Set<String> getImageNames() {
-        return imageNames;
-    }
-
-    public String getFirstFilename() {
-        String name = imageNames.stream().iterator().next();
-        return name + ".png";
-    }
-
     public void addImage(String imageName) {
         this.imageNames.add(imageName);
     }
@@ -55,6 +48,14 @@ public class Image {
         List<String> filenames = new ArrayList<>();
         getImageNames().forEach(name -> filenames.add(name+".png"));
         return filenames;
+    }
+
+    public String getFilename(int filenameIndex) {
+        return imageNames.get(filenameIndex) + ".png";
+    }
+
+    public String getFirstFilename() {
+        return imageNames.get(0) + ".png";
     }
 
     public boolean contains(String... images) {
@@ -90,33 +91,38 @@ public class Image {
         return patterns;
     }
 
-    public Optional<Pattern> getPattern(int indexOfFilename) {
-        if (indexOfFilename >= imageNames.size()) return Optional.empty();
-        return Optional.of(new Pattern(getFilenames().get(indexOfFilename)));
+    /**
+     * Returns a Pattern for the selected filename.
+     * The index is bounded by the number of filenames in the Image.
+     * @param indexOfFilename The index corresponding to the filename to use.
+     *                        If negative, uses 0; if too large, uses the last filename.
+     * @return the corresponding Pattern.
+     */
+    public Pattern getPattern(int indexOfFilename) {
+        indexOfFilename = Math.min(indexOfFilename, imageNames.size() - 1);
+        indexOfFilename = Math.max(indexOfFilename, 0);
+        return new Pattern(getFilenames().get(indexOfFilename));
     }
 
     public List<BufferedImage> getAllBufferedImages() {
         List<BufferedImage> bufferedImages = new ArrayList<>();
         for (int i=0; i<getFilenames().size(); i++) {
-            Optional<BufferedImage> bufferedImage = getBufferedImage(i);
-            bufferedImage.ifPresent(bufferedImages::add);
+            bufferedImages.add(getBufferedImage(i));
         }
         return bufferedImages;
     }
 
-    public Optional<BufferedImage> getBufferedImage(int indexOfFilename) {
-        Optional<Pattern> pattern = getPattern(indexOfFilename);
-        return pattern.map(value -> value.getImage().get());
+    public BufferedImage getBufferedImage(int indexOfFilename) {
+        Pattern pattern = getPattern(indexOfFilename);
+        return pattern.getImage().get();
     }
 
     public int getWidth(int index) {
-        Optional<BufferedImage> bufferedImage = getBufferedImage(index);
-        return bufferedImage.map(BufferedImage::getWidth).orElse(0);
+        return getBufferedImage(index).getWidth();
     }
 
     public int getHeight(int index) {
-        Optional<BufferedImage> bufferedImage = getBufferedImage(index);
-        return bufferedImage.map(BufferedImage::getHeight).orElse(0);
+        return getBufferedImage(index).getHeight();
     }
 
     public int getMaxWidth() {
@@ -141,6 +147,10 @@ public class Image {
     }
 
     public Pattern getFirstPattern() {
-        return getPattern(0).get(); // Empty Images are not common.
+        return getPattern(0); // Empty Images are not common.
+    }
+
+    public Region getRegion(int filenameIndex) {
+        return new Region(0, 0, getWidth(filenameIndex), getHeight(filenameIndex));
     }
 }

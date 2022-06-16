@@ -240,4 +240,19 @@ public class Matches {
         return false;
     }
 
+    /**
+     * Matches are confirmed when they contain one of the matches in the
+     * parameter insideMatches.
+     * @param insideMatches When found inside the region of a MatchObject, keep the MatchObject.
+     * @return only MatchObjects that are confirmed.
+     */
+    public Matches getConfirmedMatches(Matches insideMatches) {
+        Matches matches = new Matches();
+        matches.setMaxMatches(this.maxMatches);
+        matchObjects.forEach(mO -> {
+            if (mO.contains(insideMatches)) matches.add(mO);
+        });
+        return matches;
+    }
+
 }
