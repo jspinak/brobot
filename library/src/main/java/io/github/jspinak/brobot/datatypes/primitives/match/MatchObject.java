@@ -74,4 +74,11 @@ public class MatchObject {
     public void printXY() {
         System.out.print(match.x+"."+match.y);
     }
+
+    public boolean contains(Matches matches) {
+        for (Match match : matches.getMatches()) {
+            if (this.match.contains(match)) return true;
+        }
+        return false;
+    }
 }

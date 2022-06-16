@@ -11,7 +11,7 @@ import java.util.*;
 import static java.util.stream.Collectors.toMap;
 
 /**
- * Meant as a quick and dirty alternative to k-means clustering. It divides a region into
+ * It divides a region into
  * grid cells, some overlapping, and counts the points that are within the cells. The
  * median location is returned. For more accuracy, the process can be run more than once,
  * with each successive iteration selecting one of the cells as the area to divide.

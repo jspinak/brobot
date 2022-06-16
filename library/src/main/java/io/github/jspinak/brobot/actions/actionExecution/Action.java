@@ -37,7 +37,7 @@ public class Action {
      */
     public Matches perform(ActionOptions actionOptions, ObjectCollection... objectCollections) {
         for (ObjectCollection objColl : objectCollections) objColl.resetTimesActedOn();
-        Optional<ActionInterface> action = actionService.getAction(actionOptions.getAction());
+        Optional<ActionInterface> action = actionService.getAction(actionOptions);
         if (action.isEmpty()) {
             Report.println("Not a valid Action.");
             return new Matches();
