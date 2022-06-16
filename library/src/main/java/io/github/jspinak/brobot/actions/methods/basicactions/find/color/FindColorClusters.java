@@ -12,6 +12,18 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+/**
+ * The overall strategy should be:
+ * 1. read the image(s) from file as hsv (all filenames)
+ * 2. get the main color(s) to search for based on k-means
+ * 3. find the range of this color in the image
+ * 4. construct a min-max-mean-stdev object for this color (similarity will be a function of stdev)
+ * 5. get a Mat of the screen region as hsv
+ * 6. create a mask of the color range
+ * 7. use Canny to get contours from the mask, use findContours to get a List of MatOfPoint
+ * 8. convert the contours from the MatOfPoint objects to MatchObjects
+ *
+ */
 @Component
 public class FindColorClusters {
 

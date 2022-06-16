@@ -19,7 +19,7 @@ public class MockHistogram {
     }
 
     /*
-    Converts mock matches into HistogramMatches by adding a random correlation.
+    Converts mock matches into HistogramMatches by adding a random score.
     */
     public HistogramMatches getMockHistogramMatches(ActionOptions actionOptions, StateImageObject image,
                                                     List<Region> searchRegions) {

@@ -27,10 +27,12 @@ public class ActionService {
         this.findFunctions = findFunctions;
     }
 
-    public Optional<ActionInterface> getAction(ActionOptions.Action action) {
-        Optional<ActionInterface> actOpt = basicAction.getAction(action);
+    public Optional<ActionInterface> getAction(ActionOptions actionOptions) {
+        if (actionOptions.getFindActions().size() > 1)
+            return compositeAction.getAction(ActionOptions.Action.FIND);
+        Optional<ActionInterface> actOpt = basicAction.getAction(actionOptions.getAction());
         if (actOpt.isPresent()) return actOpt;
-        return compositeAction.getAction(action);
+        return compositeAction.getAction(actionOptions.getAction());
     }
 
     public void setCustomFind(BiFunction<ActionOptions, List<StateImageObject>, Matches> customFind) {

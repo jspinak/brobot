@@ -36,8 +36,7 @@ public class ColorComposition {
     }
 
     public void showKmeans(Image image, int centers) {
-        image.getBufferedImage(0).ifPresent(
-                bi -> kmeans(getImage.getMatFromBufferedImage(bi), centers));
+        kmeans(getImage.getMatFromBufferedImage(image.getBufferedImage(0)), centers);
     }
 
     public DistanceMatrices getDistanceMatrices(StateImageObject stateImageObject, Region region, int means) {
@@ -46,7 +45,7 @@ public class ColorComposition {
                 name -> distanceMatrices.addMatrix(
                         name, getColorDifference(stateImageObject, region,
                                 kmeans(getImage.getMatFromFilename(
-                                                ImagePath.getBundlePath()+"/"+name),
+                                                ImagePath.getBundlePath()+"/"+name, false),
                                         means)
                 )));
         return distanceMatrices;
