@@ -24,7 +24,7 @@ public class MockColor {
      */
     public Mat getMockMat(Image image, Region region) {
         Mat mat = Mat.zeros(region.h, region.w, CvType.CV_32F);
-        Mat img = getImage.getMatFromFilename(BrobotSettings.packageName+"/"+image.getFirstFilename());
+        Mat img = getImage.getMatFromFilename(BrobotSettings.packageName+"/"+image.getFirstFilename(), false);
         int n = new Random().nextInt(10);
         for (int i=0; i<n; i++) {
             int row = new Random().nextInt(region.h);

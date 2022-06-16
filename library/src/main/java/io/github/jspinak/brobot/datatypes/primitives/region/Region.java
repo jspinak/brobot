@@ -140,8 +140,16 @@ public class Region extends org.sikuli.script.Region implements Comparable<Regio
         return new Match(x, y, w, h, 1, new Screen());
     }
 
+    /**
+     * Region uses the SikuliX raster (setRaster), which has a min cell size of 5x5.
+     * For smaller cell sizes, or more in-depth work with grids, use the
+     * Brobot Grid classes.
+     * @param rows the y-partitions
+     * @param columns the x-partitions
+     * @return a list of regions (cells of the grid), added in order of left to right and then up to down
+     */
     public List<Region> getGridRegions(int rows, int columns) {
-        setRaster(rows, columns);
+        setRaster(rows, columns); // SikuliX raster (setRaster) has a min cell size of 5x5
         List<Region> regions = new ArrayList<>();
         for (int i=0; i<rows; i++) {
             for (int j=0; j<columns; j++) {
