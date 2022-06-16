@@ -3,6 +3,7 @@ package io.github.jspinak.brobot.imageUtils;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.imgproc.Imgproc;
 import org.sikuli.script.Pattern;
 import org.sikuli.script.Screen;
 import org.springframework.stereotype.Component;
@@ -14,9 +15,10 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Objects;
 
+import static org.opencv.highgui.HighGui.imshow;
+import static org.opencv.highgui.HighGui.waitKey;
 import static org.opencv.imgcodecs.Imgcodecs.imread;
-import static org.opencv.imgproc.Imgproc.COLOR_BGR2HSV;
-import static org.opencv.imgproc.Imgproc.cvtColor;
+import static org.opencv.imgproc.Imgproc.*;
 
 @Component
 public class GetImage {
@@ -30,9 +32,22 @@ public class GetImage {
         return new Screen().capture(region).getImage();
     }
 
-    public Mat getMatFromFilename(String imageName) {
-        new Pattern(); // make sure OpenCV is loaded (SikuliX does this)
-        return imread(imageName); // reads a file and returns a Mat object.
+    public Mat BGRtoHSV(Mat bgr) {
+        Imgproc.cvtColor(bgr, bgr, Imgproc.COLOR_BGR2HSV);
+        return bgr;
+    }
+
+    public Mat getMatFromFilename(String imageName, boolean hsv) {
+        //if (hsv) return imread(imageName, COLOR_BGR2HSV); // this returns a 1x1 Mat for some strange reason. Mat [ 1*1*CV_8UC4 ...
+        Mat mat = imread(imageName); // Mat [ 7*7*CV_8UC3 ...
+        if (!hsv) return mat;
+        return BGRtoHSV(mat);
+    }
+
+    public Mat getMatFromScreen(Region region, boolean hsv) {
+        Mat img = getMatFromScreen(region);
+        if (!hsv) return img;
+        return BGRtoHSV(img);
     }
 
     public Mat getMatFromScreen(Region region) {

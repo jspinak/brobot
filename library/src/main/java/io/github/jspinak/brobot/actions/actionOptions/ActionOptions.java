@@ -11,6 +11,7 @@ import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.Sta
 import lombok.Data;
 import org.sikuli.basics.Settings;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Predicate;
@@ -72,6 +73,21 @@ public class ActionOptions {
      * tempFind is a user defined Find method that is not meant to be reused.
      */
     private BiFunction<ActionOptions, List<StateImageObject>, Matches> tempFind;
+
+    /**
+     * Find actions are performed in the order they appear in the list.
+     * Actions are performed only on the match regions found in the previous action.
+     * Matching ObjectCollections are used (i.e. ObejctCollection #2 for Find #2),
+     *   unless the matching ObjectCollection is empty, in which case the last
+     *   non-empty ObjectCollection will be used.
+     */
+    private List<Find> findActions = new ArrayList<>();
+    /**
+     * When set to true, subsequent Find operations will act as confirmations of the initial matches.
+     * AN initial match from the first Find operation will be returned if the subsequent
+     * Find operations all find matches within its region.
+     */
+    private boolean keepLargerMatches = false;
 
     /**
      * Specifies how similar the found Match must be to the original Image.
@@ -285,17 +301,25 @@ public class ActionOptions {
      * Specifies the width and height of color boxes to find (used with FIND.COLOR).
      */
     private int diameter = 1;
-
     /**
      * The number of k-means to use for finding color.
      */
     private int kmeans = 1;
+
+    /**
+     * The number of bins to use for an HSV color histogram.
+     */
+    private int hueBins = 12;
+    private int saturationBins = 2;
+    private int valueBins = 1;
 
     public static class Builder {
         private Action action = Action.FIND;
         private BiFunction<ActionOptions, List<StateImageObject>, Matches> tempFind;
         private ClickUntil clickUntil = ClickUntil.OBJECTS_APPEAR;
         private Find find = Find.FIRST;
+        private List<Find> findActions = new ArrayList<>();
+        private boolean keepLargerMatches = false;
         private DoOnEach doOnEach = DoOnEach.FIRST;
         private boolean useDefinedRegion = false;
         private Predicate<Matches> successCriteria;
@@ -317,7 +341,7 @@ public class ActionOptions {
         private int maxTimesToRepeatActionSequence = 1;
         private double pauseBetweenActionRepetitions = 0; // action group: rename these to differentiate better between for example, clicks on different matches, and the repetition of clicks on different matches multiple times
         private double maxWait = 0;
-        private int maxMatchesToActOn = -1;
+        private int maxMatchesToActOn = 100;
         private int dragToOffsetX;
         private int dragToOffsetY;
         private DefineAs defineAs = DefineAs.MATCH;
@@ -336,6 +360,9 @@ public class ActionOptions {
         private ScrollDirection scrollDirection = ScrollDirection.UP;
         private int diameter = 5;
         private int kmeans = 2;
+        private int hueBins = 12;
+        private int saturationBins = 2;
+        private int valueBins = 1;
 
         public Builder() {}
         //public Builder(Action action) { this.action = action; }
@@ -362,6 +389,19 @@ public class ActionOptions {
 
         public Builder setFind(Find find) {
             this.find = find;
+            return this;
+        }
+
+        // adds this Find to the list if the list has been initialized, or adds both the current Find
+        // and this Find to the list.
+        public Builder addFind(Find find) {
+            if (findActions.isEmpty()) findActions.add(this.find);
+            findActions.add(find);
+            return this;
+        }
+
+        public Builder keepLargerMatches(boolean keepLargerMatches) {
+            this.keepLargerMatches = keepLargerMatches;
             return this;
         }
 
@@ -580,12 +620,29 @@ public class ActionOptions {
             return this;
         }
 
+        public Builder setHueBins(int hueBins) {
+            this.hueBins = hueBins;
+            return this;
+        }
+
+        public Builder setSaturationBins(int saturationBins) {
+            this.saturationBins = saturationBins;
+            return this;
+        }
+
+        public Builder setValueBins(int valueBins) {
+            this.valueBins = valueBins;
+            return this;
+        }
+
         public ActionOptions build() {
             ActionOptions actionOptions = new ActionOptions();
             actionOptions.action = action;
             actionOptions.tempFind = tempFind;
             actionOptions.clickUntil = clickUntil;
             actionOptions.find = find;
+            actionOptions.findActions = findActions;
+            actionOptions.keepLargerMatches = keepLargerMatches;
             actionOptions.doOnEach = doOnEach;
             actionOptions.useDefinedRegion = useDefinedRegion;
             actionOptions.successCriteria = successCriteria;
@@ -626,6 +683,9 @@ public class ActionOptions {
             actionOptions.scrollDirection = scrollDirection;
             actionOptions.diameter = diameter;
             actionOptions.kmeans = kmeans;
+            actionOptions.hueBins = hueBins;
+            actionOptions.saturationBins = saturationBins;
+            actionOptions.valueBins = valueBins;
             return actionOptions;
         }
     }
