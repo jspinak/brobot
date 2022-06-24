@@ -44,8 +44,8 @@ public class Drag implements ActionInterface {
         dragLocation.drag(optStartLoc.get(), optEndLoc.get(), actionOptions);
         dragToMatches.addDefinedRegion(new Region(
                 optStartLoc.get().getX(), optStartLoc.get().getY(),
-                optEndLoc.get().getX() - optStartLoc.get().getX() + 1,
-                optEndLoc.get().getY() - optStartLoc.get().getY() + 1));
+                optEndLoc.get().getX() - optStartLoc.get().getX(),
+                optEndLoc.get().getY() - optStartLoc.get().getY()));
         return dragToMatches;
     }
 

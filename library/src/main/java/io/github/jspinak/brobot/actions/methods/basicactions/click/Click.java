@@ -9,7 +9,6 @@ import io.github.jspinak.brobot.datatypes.primitives.location.Location;
 import io.github.jspinak.brobot.datatypes.primitives.match.MatchObject;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
-import io.github.jspinak.brobot.illustratedHistory.IllustrateScreenshot;
 import org.springframework.stereotype.Component;
 
 /**
@@ -26,24 +25,20 @@ public class Click implements ActionInterface {
     private ClickLocationOnce clickLocationOnce;
     private Wait wait;
     private AfterClick afterClick;
-    private IllustrateScreenshot illustrateScreenshot;
 
-    public Click(Find find, ClickLocationOnce clickLocationOnce, Wait wait, AfterClick afterClick,
-                 IllustrateScreenshot illustrateScreenshot) {
+    public Click(Find find, ClickLocationOnce clickLocationOnce, Wait wait, AfterClick afterClick) {
         this.find = find;
         this.clickLocationOnce = clickLocationOnce;
         this.wait = wait;
         this.afterClick = afterClick;
-        this.illustrateScreenshot = illustrateScreenshot;
     }
 
     public Matches perform(ActionOptions actionOptions, ObjectCollection... objectCollections) {
         Matches matches = find.perform(actionOptions, objectCollections); // find performs only on 1st collection
         int i = 0;
         for (MatchObject matchObject : matches.getMatchObjects()) {
-            Location location = getClickLocation(matchObject, actionOptions);
+            Location location = setClickLocation(matchObject, actionOptions);
             click(location, actionOptions, matchObject);
-            illustrateScreenshot.drawClick(location);
             i++;
             if (i == actionOptions.getMaxMatchesToActOn()) break;
             // pause only between clicks, not after the last click
@@ -52,10 +47,11 @@ public class Click implements ActionInterface {
         return matches;
     }
 
-    private Location getClickLocation(MatchObject matchObject, ActionOptions actionOptions) {
+    private Location setClickLocation(MatchObject matchObject, ActionOptions actionOptions) {
         Location location = new Location(matchObject.getMatch(), matchObject.getStateObject().getPosition());
         location.setX(location.getX() + actionOptions.getAddX());
         location.setY(location.getY() + actionOptions.getAddY());
+        matchObject.getMatch().setTarget(location.getX(), location.getY());
         return location;
     }
 
@@ -75,10 +71,12 @@ public class Click implements ActionInterface {
         for (int i = 0; i < actionOptions.getTimesToRepeatIndividualAction(); i++) {
             clickLocationOnce.click(location, actionOptions);
             matchObject.getStateObject().addTimesActedOn();
+            if (actionOptions.isMoveMouseAfterClick()) {
+                wait.wait(actionOptions.getPauseBetweenIndividualActions());
+                afterClick.moveMouseAfterClick(actionOptions);
+            }
             if (i < actionOptions.getTimesToRepeatIndividualAction() - 1) {
                 wait.wait(actionOptions.getPauseBetweenIndividualActions());
-                if (afterClick.moveMouseAfterClick(actionOptions))
-                    wait.wait(actionOptions.getPauseBetweenIndividualActions());;
             }
         }
     }

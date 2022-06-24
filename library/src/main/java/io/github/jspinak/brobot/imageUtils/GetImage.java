@@ -55,6 +55,14 @@ public class GetImage {
         return getMatFromBufferedImage(bi);
     }
 
+    public Mat getMatFromScreen(boolean hsv) {
+        return getMatFromScreen(new Region(), hsv);
+    }
+
+    public Mat getMatFromScreen() {
+        return getMatFromScreen(new Region());
+    }
+
     /*
     the following 2 methods are from https://stackoverflow.com/questions/14958643/converting-bufferedimage-to-mat-in-opencv
     */

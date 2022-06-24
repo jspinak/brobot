@@ -23,9 +23,12 @@ public class HistComparison {
     }
 
     /**
-     * A ChiSqr score of 0 means a perfect match.
-     * @param hist1 the first histogram to compare.
-     * @param hist2 the second histogram to compare.
+     * Returns the Wasserstein metric (Earth Mover's Distance) as
+     * a measure of histogram similarity.
+     * @param hist1 the first collection of histogram to compare.
+     * @param hist2 the second collection of histogram to compare.
+     * @param indexedColumn This is a column of 1,2,3... to size of the histogram, used
+     *                      to construct a Mat necessary for the OpenCV EMD function.
      * @return the ChiSqr score.
      */
     public double compare(List<Mat> hist1, List<Mat> hist2, Mat indexedColumn) {
@@ -33,13 +36,8 @@ public class HistComparison {
         //int cells = 0;
         for (int i=0; i<hist1.size(); i++) {
             Mat h1 = addIndexedColumn(hist1.get(i), indexedColumn);
-            //System.out.println("h1 with indices: \n"+h1);
-            //System.out.println(h1.dump());
-            //System.out.println("h1 without indices: \n"+hist1.get(i));
-            //System.out.println(hist1.get(i).dump());
             Mat h2 = addIndexedColumn(hist2.get(i), indexedColumn);
             sim += Imgproc.EMD(h1, h2, CV_DIST_L2);
-            //sim += Imgproc.compareHist(hist1.get(i), hist2.get(i), HISTCMP_CHISQR);
             //cells += hist1.get(i).height();
         }
         //sim /= cells;

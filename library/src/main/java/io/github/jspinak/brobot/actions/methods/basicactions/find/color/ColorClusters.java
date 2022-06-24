@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.actions.methods.basicactions.find.color;
 
+import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
+import io.github.jspinak.brobot.reports.Report;
 import lombok.Getter;
 
 import java.util.ArrayList;
@@ -20,8 +22,20 @@ public class ColorClusters {
     }
 
     // sort primarily by number of matching pixels, then by score
-    public void sort() {
-        clusters.sort(Comparator.comparing(ColorCluster::getScore).reversed());
-        clusters.sort(Comparator.comparing(ColorCluster::getMatchingPixels).reversed());
+    public void sort(ActionOptions.Color color) {
+        //if (color == ActionOptions.Color.KMEANS) {
+        //    clusters.sort(Comparator.comparing(ColorCluster::getScore).reversed());
+        //    clusters.sort(Comparator.comparing(ColorCluster::getMatchingPixels).reversed());
+        //}
+        //if (color == ActionOptions.Color.MU)
+            clusters.sort(Comparator.comparing(ColorCluster::getScore));
+        /*
+        for (int i=0; i<Math.min(50,clusters.size()); i++) {
+            ColorCluster cc = clusters.get(i);
+            Report.println("score#"+i+" = "+cc.getScore()+" pixel = "+cc.getImage().dump());
+        }
+        if (!clusters.isEmpty()) Report.println("worst score = "+clusters.get(clusters.size()-1).getScore());
+        */
     }
+
 }

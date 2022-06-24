@@ -54,7 +54,6 @@ public class DragLocation {
         Settings.MoveMouseDelay = actionOptions.getMoveMouseDelay();
         Settings.DelayBeforeDrop = actionOptions.getPauseBeforeMouseUp();
         if (!drag(from, to)) return false;
-        illustrateScreenshot.drawDrag(from, to);
         wait.wait(actionOptions.getPauseAfterMouseUp());
         return true;
     }

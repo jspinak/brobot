@@ -7,6 +7,7 @@ import io.github.jspinak.brobot.datatypes.primitives.match.MatchObject;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
+import io.github.jspinak.brobot.reports.Report;
 import org.sikuli.script.Match;
 import org.springframework.stereotype.Component;
 
@@ -45,10 +46,9 @@ public class FindColorClusters {
         ColorClusters colorClusters = new ColorClusters();
         if (actionOptions.getDiameter() < 0) return new Matches();
         images.forEach(img -> colorClusters.addAllClusters(forOneImage(actionOptions, img)));
-        colorClusters.sort();
+        colorClusters.sort(actionOptions.getColor());
         int maxMatchObjects = actionOptions.getMaxMatchesToActOn();
         Matches matches = new Matches();
-
         colorClusters.getClusters().forEach(cc -> {
             if (maxMatchObjects <= 0 || matches.size() < maxMatchObjects) {
                 try {
@@ -61,6 +61,12 @@ public class FindColorClusters {
                     e.printStackTrace();
                 }
         }});
+        Report.println("cluster size = "+colorClusters.getClusters().size());
+        for (int i=0; i<Math.min(colorClusters.getClusters().size(), 10); i++) {
+            ColorCluster cc = colorClusters.getClusters().get(i);
+            Report.print(cc.getImage().dump());
+            Report.formatln(" score=%.1f x.y=%d.%d", cc.getScore(), cc.getRegion().x, cc.getRegion().y);
+        }
         return matches;
     }
 
@@ -80,14 +86,21 @@ public class FindColorClusters {
     private void onePixelClusters(List<Region> searchRegions, ColorClusters colorClusters,
                                            ActionOptions actionOptions, StateImageObject image) {
         /*
-        Each search region may create a different size Mat.
+        Each search region will create a different Mat (if HSV) or set of Mats (if BGR).
         To find minimum distances, all Mats for the same search region should be compared for
         minimum values.
          */
         searchRegions.forEach(sr -> {
-            DistanceMatrices dms = colorComposition.getDistanceMatrices(image, sr, actionOptions.getKmeans());
-            colorClusters.addAllClusters(dms.getPixels(
-                    DistSimConversion.convertToDistance(actionOptions.getSimilarity())));
+            if (actionOptions.getColor() == ActionOptions.Color.KMEANS) {
+                DistanceMatrices dms = colorComposition.getDistanceMatrices(image, sr, actionOptions.getKmeans());
+                colorClusters.addAllClusters(dms.getPixels(
+                        DistSimConversion.convertToDistance(actionOptions.getSimilarity())));
+            }
+            if (actionOptions.getColor() == ActionOptions.Color.MU) {
+                ScoresMat scoresMat = selectColors.getScoresMatHSV(image, sr);
+                colorClusters.addAllClusters(
+                        scoresMat.getPixels(DistSimConversion.convertToScoreHSV(actionOptions.getMinScore())));
+            }
         });
     }
 
@@ -97,8 +110,6 @@ public class FindColorClusters {
     private void multiPixelClusters(List<Region> searchRegions, ColorClusters colorClusters,
                                              ActionOptions actionOptions, StateImageObject image) {
         searchRegions.forEach(reg -> colorClusters.addAllClusters(
-                selectColors.findRegions(image, reg, actionOptions.getDiameter(),
-                        DistSimConversion.convertToDistance(actionOptions.getSimilarity()),
-                        actionOptions.getKmeans())));
+                selectColors.findRegions(actionOptions, image, reg)));
     }
 }
