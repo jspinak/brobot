@@ -34,7 +34,6 @@ public class Highlight implements ActionInterface {
         Matches matches = find.perform(actionOptions, objectCollections);
         if (actionOptions.isHighlightAllAtOnce()) highlightAllAtOnce(matches, actionOptions);
         else highlightOneAtATime(matches, actionOptions);
-        matches.getMatches().forEach(m -> illustrateScreenshot.drawHighlight(m));
         return matches;
     }
 

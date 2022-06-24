@@ -33,7 +33,7 @@ public class ColorCluster {
         this.colorDeltas = colorDeltas;
         this.matchingPixels = matchingPixels;
         setAverageDistance();
-        score = DistSimConversion.convertToSimilarity(colorDistance);
+        score = colorDistance; //DistSimConversion.convertToSimilarity(colorDistance);
         this.stateImageObject = stateImageObject; // for creating MatchObjects
     }
 
