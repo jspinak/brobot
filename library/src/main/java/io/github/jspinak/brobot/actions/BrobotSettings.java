@@ -35,19 +35,30 @@ public class BrobotSettings {
     public static String screenshot = "";
 
     /**
-     * Capture Settings
+     * Screenshot Capture Settings
      */
     public static String screenshotPath = "screenshots/"; // screenshots for the StateStructure builder
-    public static String historyPath = "history/"; // where screenshots are saved for the illustrated history
     /*
     Files that do not start with this variable's value will not be used for the StateStructure builder.
-    This field is also used for the filenames in the illustrated history.
      */
     public static String screenshotFilename = "screen";
-    public static String historyFilename = "hist";
 
     /**
      * Write Settings
      */
     public static String packageName = "com.example";
+
+    /**
+     * Illustrated Screenshots Settings (for displaying Action results)
+     */
+    public static String historyPath = "history/"; // where screenshots are saved for the illustrated history
+    public static String historyFilename = "hist";
+    public static boolean drawFind = true;
+    public static boolean drawClick = false;
+    public static boolean drawDrag = false;
+    public static boolean drawMove = false;
+    public static boolean drawHighlight = false;
+    public static boolean drawRepeatedActions = true;
+
+
 }

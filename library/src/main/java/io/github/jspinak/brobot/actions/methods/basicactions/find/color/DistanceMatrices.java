@@ -8,17 +8,21 @@ import java.util.*;
  * Contains a list of DistanceMatrix objects for each Pattern in the Image.
  * Each DistanceMatrix is a comparison of the pixel colors in the region with one of the
  * Pattern's color centers (obtained by running k-means on the Pattern's colors).
+ * DistanceMatrices can be used with images that have different colors. You could have
+ *   an image with both red and yellow and by choosing 2 k-means you would find both of those
+ *   colors. This is not the case with the ColorProfile, which in this case would give the best scores
+ *   to colors between red and yellow (some variation of orange).
  */
 public class DistanceMatrices {
 
-    private Map<String, List<DistanceMatrix>> colorDifferences = new HashMap<>();
+    private Map<String, List<ScoresMat>> colorDifferences = new HashMap<>();
 
-    public void addMatrix(String name, List<DistanceMatrix> matrices) {
+    public void addMatrices(String name, List<ScoresMat> matrices) {
         colorDifferences.put(name, matrices);
     }
 
-    public List<DistanceMatrix> getAll() {
-        List<DistanceMatrix> allMatrices = new ArrayList<>();
+    public List<ScoresMat> getAll() {
+        List<ScoresMat> allMatrices = new ArrayList<>();
         colorDifferences.values().forEach(allMatrices::addAll);
         return allMatrices;
     }
@@ -30,13 +34,13 @@ public class DistanceMatrices {
         });
     }
 
-    private Optional<DistanceMatrix> getMinimumAt(String key, int row, int col) {
+    private Optional<ScoresMat> getMinimumAt(String key, int row, int col) {
         if (!colorDifferences.containsKey(key)) return Optional.empty();
-        List<DistanceMatrix> allMatrices = colorDifferences.get(key);
-        DistanceMatrix minMatrix = allMatrices.get(0);
+        List<ScoresMat> allMatrices = colorDifferences.get(key);
+        ScoresMat minMatrix = allMatrices.get(0);
         int i = 1;
         while (i < allMatrices.size()) {
-            if (allMatrices.get(i).getDistance().get(row, col)[0] < minMatrix.getDistance().get(row, col)[0])
+            if (allMatrices.get(i).getScores().get(row, col)[0] < minMatrix.getScores().get(row, col)[0])
                 minMatrix = allMatrices.get(i);
             i++;
         }
@@ -48,11 +52,11 @@ public class DistanceMatrices {
         if (colorDifferences.isEmpty()) return colorClusters;
         // compare for each String, since different Patterns will most likely have different sized Mats.
         colorDifferences.keySet().forEach(kS -> {
-            Mat dist = colorDifferences.get(kS).get(0).getDistance();
+            Mat dist = colorDifferences.get(kS).get(0).getScores();
             for (int i=0; i<dist.rows(); i++) {
                 for (int j=0; j<dist.cols(); j++) {
-                    Optional<DistanceMatrix> dm = getMinimumAt(kS, i, j);
-                    if (dm.isPresent() && dm.get().getDistance().get(i,j)[0] <= minDistance)
+                    Optional<ScoresMat> dm = getMinimumAt(kS, i, j);
+                    if (dm.isPresent() && dm.get().getScores().get(i,j)[0] <= minDistance)
                             colorClusters.addCluster(dm.get().getCluster(i,j,1, 1));
                 }
             }

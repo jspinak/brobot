@@ -12,4 +12,8 @@ public class DistSimConversion {
         return (1 - similarity) * maxDistance;
     }
 
+    public static double convertToScoreHSV(double similarity) {
+        return (1 - similarity) * 300;
+    }
+
 }

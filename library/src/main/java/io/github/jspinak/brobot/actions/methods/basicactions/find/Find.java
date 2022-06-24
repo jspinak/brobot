@@ -45,10 +45,12 @@ public class Find implements ActionInterface {
     private AdjustMatches adjustMatches;
     private UseDefinedRegion useDefinedRegion;
     private IllustrateScreenshot illustrateScreenshot;
+    private SelectRegions selectRegions;
 
     public Find(FindFunctions findFunctions, StateMemory stateMemory, Time time, MockStatus mockStatus,
                 AddNonImageObjects addNonImageObjects, AdjustMatches adjustMatches,
-                UseDefinedRegion useDefinedRegion, IllustrateScreenshot illustrateScreenshot) {
+                UseDefinedRegion useDefinedRegion, IllustrateScreenshot illustrateScreenshot,
+                SelectRegions selectRegions) {
         this.findFunctions = findFunctions;
         this.stateMemory = stateMemory;
         this.time = time;
@@ -57,6 +59,7 @@ public class Find implements ActionInterface {
         this.adjustMatches = adjustMatches;
         this.useDefinedRegion = useDefinedRegion;
         this.illustrateScreenshot = illustrateScreenshot;
+        this.selectRegions = selectRegions;
     }
 
     /**
@@ -81,7 +84,6 @@ public class Find implements ActionInterface {
         }
         matches.addAll(addNonImageObjects.getOtherObjectsDirectlyAsMatchObjects(objectCollection));
         matches.getMatches().forEach(m -> adjustMatches.adjust(m, actionOptions));
-        matches.getMatches().forEach(m -> illustrateScreenshot.drawMatch(m));
         return matches;
     }
 
