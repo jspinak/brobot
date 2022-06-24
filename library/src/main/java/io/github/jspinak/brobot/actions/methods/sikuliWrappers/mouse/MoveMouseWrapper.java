@@ -14,7 +14,7 @@ public class MoveMouseWrapper {
 
     private boolean sikuliMove(Location location) {
         org.sikuli.script.Location sikuliLocation = location.getSikuliLocation();
-        Report.print("-> "+sikuliLocation+" ");
+        Report.print("move mouse to "+sikuliLocation+" ");
         //return new Region().mouseMove(location.getSikuliLocation()) != 0; // this can cause the script to freeze for unknown reasons
         return location.getSikuliLocation().hover() != null;
     }

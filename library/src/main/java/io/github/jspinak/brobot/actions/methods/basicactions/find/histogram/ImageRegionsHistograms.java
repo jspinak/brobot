@@ -34,6 +34,7 @@ public class ImageRegionsHistograms {
         this.hueBins = hueBins;
         this.satBins = satBins;
         this.valBins = valBins;
+        totalBins = hueBins * satBins * valBins;
     }
 
     /**

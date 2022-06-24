@@ -3,58 +3,55 @@ package io.github.jspinak.brobot.illustratedHistory;
 import io.github.jspinak.brobot.datatypes.primitives.location.Location;
 import lombok.Getter;
 import lombok.Setter;
+import org.opencv.core.Mat;
+import org.opencv.core.Point;
+import org.opencv.core.Rect;
+import org.opencv.core.Scalar;
 import org.sikuli.script.Match;
 import org.springframework.stereotype.Component;
 
-import java.awt.*;
 import java.util.List;
 
+import static org.opencv.imgproc.Imgproc.*;
+
 @Component
-@Setter
-@Getter
 public class Draw {
 
-    private DrawArrow drawArrow;
-    private DrawCircle drawCircle;
-    private DrawRectangle drawRectangle;
-
-    public Draw(DrawArrow drawArrow, DrawCircle drawCircle, DrawRectangle drawRectangle) {
-        this.drawArrow = drawArrow;
-        this.drawCircle = drawCircle;
-        this.drawRectangle = drawRectangle;
+    public void drawRect(Mat screen, Match match, Scalar color) {
+        int drawX = Math.max(0, match.x-1);
+        int drawY = Math.max(0, match.y-1);
+        int drawX2 = Math.min(screen.cols(), match.x + match.w + 1);
+        int drawY2 = Math.min(screen.rows(), match.y + match.h + 1);
+        Rect aroundMatch = new Rect(drawX, drawY, drawX2-drawX, drawY2-drawY);
+        rectangle(screen, aroundMatch, color, 1);
     }
 
-    public void match(Match m, Graphics g, Color color) {
-        //drawRectangle.draw(m.x, m.y, m.w, m.h, 4, Color.lightGray, false, g);
-        drawRectangle.draw(m.x, m.y, m.w, m.h, 2, color, false, g);
-        drawRectangle.draw(m.x, m.y, m.w-1, m.h-1, 1, Color.white, false, g);
-        g.dispose();
+    public void drawPoint(Mat screen, Match match, Scalar color) {
+        org.sikuli.script.Location loc = match.getTarget();
+        org.opencv.core.Point center = new Point(loc.x, loc.y);
+        circle(screen, center, 6, color, -1); //fill
+        circle(screen, center, 8, new Scalar(255,255,255));
+        circle(screen, center, 10, new Scalar(255,255,255));
     }
 
-    public void click(Location l, Graphics g) {
-        drawCircle.drawPoint(l, Color.green, g);
-        g.dispose();
-    }
-
-    public void drag(Location from, Location to, Graphics g) {
-        drawArrow.drawStandardArrow(from, to, Color.green, g);
-        g.dispose();
+    public void drawArrow(Mat screen, Location start, Location end, Scalar color) {
+        Point startPoint = new Point(start.getX(), start.getY());
+        Point endPoint = new Point(end.getX(), end.getY());
+        arrowedLine(screen, startPoint, endPoint, color);
     }
 
     /**
-     * The first location in the parameter location list gives the ending position.
+     * The first location in the parameter location list gives the first position.
      * If there is only one Location, it will show up as a dot. If there are more than
      * one, a line(s) will be drawn. If the previous action was a Move action, it will be
-     * included at the end of the locations list to show the movement from one point to another.
+     * included at the beginning of the locations list to show the movement from one point to another.
      *
-     * @param locations All Locations that describe a move. Most recent first.
+     * @param locations All Locations that describe a move.
      */
-    public void move(List<Location> locations, Graphics g) {
-        if (locations.size() == 1) drawCircle.drawPoint(locations.get(0), Color.blue, g);
+    public void move(Mat screen, List<Location> locations, Scalar color) {
+        if (locations.size() == 1) drawPoint(screen, locations.get(0).toMatch(), color);
         else for (int i=0; i<locations.size()-1; i++)
-            drawArrow.drawStandardArrow(locations.get(i+1), locations.get(i), Color.blue, g);
-        g.dispose();
+            drawArrow(screen, locations.get(i), locations.get(i+1), color);
     }
-
 
 }

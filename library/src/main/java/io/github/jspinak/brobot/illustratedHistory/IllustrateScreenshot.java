@@ -2,85 +2,68 @@ package io.github.jspinak.brobot.illustratedHistory;
 
 import io.github.jspinak.brobot.actions.BrobotSettings;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
-import io.github.jspinak.brobot.datatypes.primitives.location.Location;
+import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import io.github.jspinak.brobot.imageUtils.GetImage;
 import io.github.jspinak.brobot.imageUtils.ImageUtils;
-import io.github.jspinak.brobot.reports.Report;
-import org.sikuli.script.Match;
+import lombok.Getter;
 import org.springframework.stereotype.Component;
 
-import javax.imageio.ImageIO;
-import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
-import static io.github.jspinak.brobot.actions.actionOptions.ActionOptions.Action.FIND;
+import static io.github.jspinak.brobot.actions.actionOptions.ActionOptions.Action.*;
 
 @Component
+@Getter
 public class IllustrateScreenshot {
 
     private ImageUtils imageUtils;
     private GetImage getImage;
     private Draw draw;
+    private IllustrationManager illustrationManager;
 
-    private BufferedImage bufferedImage;
-    private String currentPath;
-    private String outputPath;
-
-    private boolean okToSave = false;
     private List<ObjectCollection> lastCollections = new ArrayList<>();
     private ActionOptions.Action lastAction = ActionOptions.Action.TYPE;
     private ActionOptions.Find lastFind = ActionOptions.Find.UNIVERSAL;
-    private Location lastMove;
 
-    public IllustrateScreenshot(ImageUtils imageUtils, GetImage getImage, Draw draw) {
+    private Map<ActionOptions.Action, Boolean> actionPermissions = new HashMap<>();
+    {
+        actionPermissions.put(FIND, BrobotSettings.drawFind);
+        actionPermissions.put(CLICK, BrobotSettings.drawClick);
+        actionPermissions.put(DRAG, BrobotSettings.drawDrag);
+        actionPermissions.put(MOVE, BrobotSettings.drawMove);
+        actionPermissions.put(HIGHLIGHT, BrobotSettings.drawHighlight);
+    }
+
+    public IllustrateScreenshot(ImageUtils imageUtils, GetImage getImage, Draw draw,
+                                IllustrationManager illustrationManager) {
         this.imageUtils = imageUtils;
         this.getImage = getImage;
         this.draw = draw;
-    }
-
-    public boolean okToIllustrate() {
-        return BrobotSettings.saveHistory && !BrobotSettings.mock;
+        this.illustrationManager = illustrationManager;
     }
 
     /**
-     * Brobot currently only illustrates Find, Click, and Drag actions.
-     * We generally do not want to illustrate an action every time it repeats, particularly
+     * We might not want to illustrate an action every time it repeats, particularly
      * for Find operations. If the action is a Find and the previous action was also a Find,
-     * and the Collections are the same, don't illustrate the screenshot.
+     * and the Collections are the same, it is a repeated action. Repeated actions are not
+     * illustrated if BrobotSettings.drawRepeatedActions is set to false.
      *
      * @param actionOptions
      * @param objectCollections
      * @return
      */
     public boolean okToIllustrate(ActionOptions actionOptions, ObjectCollection... objectCollections) {
-        if (!okToIllustrate()) return false;
+        if (!BrobotSettings.saveHistory || BrobotSettings.mock) return false;
         ActionOptions.Action action = actionOptions.getAction();
-        if (action != FIND &&
-                action != ActionOptions.Action.CLICK &&
-                action != ActionOptions.Action.DRAG &&
-                action != ActionOptions.Action.MOVE &&
-                action != ActionOptions.Action.HIGHLIGHT) return false;
-        if (action != FIND) {
-            //Report.println(" action is not FIND. it is " + action);
-            return true;
-        }
-        if (lastFind != actionOptions.getFind()) return true;
-        if (lastAction != action) {
-            //Report.println(" action is different ");
-            return true;
-        }
-        if (!sameCollections(Arrays.asList(objectCollections))) {
-            //Report.println(" collections are different ");
-            return true;
-        }
-        return false;
+        if (!actionPermissions.containsKey(action)) return false;
+        if (!actionPermissions.get(action)) return false;
+        if (BrobotSettings.drawRepeatedActions) return true;
+        // otherwise, if the action is a repeat (same Action, same ObjectCollections), false
+        return lastFind != actionOptions.getFind() ||
+                lastAction != action ||
+                !sameCollections(Arrays.asList(objectCollections));
     }
 
     private boolean sameCollections(List<ObjectCollection> objectCollections) {
@@ -91,74 +74,14 @@ public class IllustrateScreenshot {
         return true;
     }
 
-    public boolean prepareScreenshot(ActionOptions actionOptions, ObjectCollection... objectCollections) {
-        String name = "";
-        if (objectCollections.length > 0) name = objectCollections[0].getFirstObjectName();
+    public boolean illustrateWhenAllowed(Matches matches, List<Region> searchRegions, ActionOptions actionOptions,
+                                         ObjectCollection... objectCollections) {
         if (!okToIllustrate(actionOptions, objectCollections)) return false;
-        try {
-            // first, save a screenshot of the region to file using the screenshot filename.
-            currentPath = imageUtils.saveRegionToFile(new Region(),
-                    BrobotSettings.historyPath + BrobotSettings.screenshotFilename);
-            // then, prepare the name of the illustrated file to be saved
-            String filename = "-" + actionOptions.getAction();
-            if (actionOptions.getAction() == FIND) filename = filename + "-" + actionOptions.getFind();
-            filename = filename + "-" + name + ".png";
-            outputPath = currentPath.replace(BrobotSettings.screenshotFilename, BrobotSettings.historyFilename);
-            outputPath = outputPath.replace(".png", filename);
-                    //if (actionOptions.getAction() == FIND) outputPath = outputPath + "-" + actionOptions.getFind();
-            //outputPath = outputPath.replace(".png", "-"+actionOptions.getAction()+
-            //        "-"+name+".png");
-            bufferedImage = getImage.getBuffImgFromFile(currentPath);
-            okToSave = true;
-            lastAction = actionOptions.getAction();
-            if (lastAction == FIND) lastFind = actionOptions.getFind();
-            lastCollections = new ArrayList<>();
-            lastCollections = Arrays.asList(objectCollections);
-            return true;
-        } catch (IOException e) {
-            e.printStackTrace();
-            return false;
-        }
+        lastAction = actionOptions.getAction();
+        if (lastAction == FIND) lastFind = actionOptions.getFind();
+        lastCollections = Arrays.asList(objectCollections);
+        illustrationManager.draw(matches, searchRegions, actionOptions, objectCollections);
+        return true;
     }
 
-    public boolean saveToFile(ActionOptions actionOptions) {
-        if (!okToIllustrate(actionOptions) || !okToSave) return false;
-        try {
-            File outputfile = new File(outputPath);
-            ImageIO.write(bufferedImage, "png", outputfile);
-            okToSave = false;
-            return true;
-        } catch (IOException e) {
-            Report.println(currentPath + " not saved. ");
-            return false;
-        }
-    }
-
-    public void drawMatch(Match match) {
-        if (!okToIllustrate()) return;
-        draw.match(match, bufferedImage.getGraphics(), Color.blue);
-    }
-
-    public void drawHighlight(Match match) {
-        if (!okToIllustrate()) return;
-        draw.match(match, bufferedImage.getGraphics(), Color.yellow);
-    }
-
-    public void drawClick(Location location) {
-        if (!okToIllustrate()) return;
-        draw.click(location, bufferedImage.getGraphics());
-    }
-
-    public void drawDrag(Location from, Location to) {
-        if (!okToIllustrate()) return;
-        draw.drag(from, to, bufferedImage.getGraphics());
-    }
-
-    public void drawMove(List<Location> moveTo) {
-        if (!okToIllustrate() || moveTo.isEmpty()) return;
-        List<Location> moves = new ArrayList<>(moveTo);
-        if (lastAction == ActionOptions.Action.MOVE && lastMove != null) moves.add(lastMove);
-        draw.move(moves, bufferedImage.getGraphics());
-        lastMove = moveTo.get(0);
-    }
 }

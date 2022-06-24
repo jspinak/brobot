@@ -50,7 +50,7 @@ public class ImageUtils {
      * @param path the base path name
      * @return the path name with the first free filename
      */
-    private String getFreePath(String path) {
+    public String getFreePath(String path) {
         int i = lastFilenumber.containsKey(path)? lastFilenumber.get(path) + 1 : 0;
         while (fileExists(path + i + ".png")) {
             i++;
