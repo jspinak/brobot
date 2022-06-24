@@ -298,6 +298,15 @@ public class ActionOptions {
     private String modifiers = ""; // not used when ""
 
     /**
+     * KMEANS finds a selected number of RGB color cluster centers for each image.
+     * MU takes all pixels from all images and finds the min, max, mean, and standard deviation
+     *   of the HSV values.
+     */
+    public enum Color {
+        KMEANS, MU
+    }
+    private Color color = Color.MU;
+    /**
      * Specifies the width and height of color boxes to find (used with FIND.COLOR).
      */
     private int diameter = 1;
@@ -312,6 +321,16 @@ public class ActionOptions {
     private int hueBins = 12;
     private int saturationBins = 2;
     private int valueBins = 1;
+
+    /**
+     * In case of multiple Find operations that include a Find.COLOR,
+     * it's necessary to be able to specify a MinSimilarity for the Pattern matching Find,
+     * and a different minScore for the Color Find.
+     * Scale is the same as for MinSimilarity (0-1).
+     * This value is converted for the different methods (BGR, HSV, etc) in
+     * the class DistSimConversion.
+     */
+    private double minScore = .9;
 
     public static class Builder {
         private Action action = Action.FIND;
@@ -358,11 +377,13 @@ public class ActionOptions {
         private double typeDelay = Settings.TypeDelay;
         private String modifiers = "";
         private ScrollDirection scrollDirection = ScrollDirection.UP;
+        private Color color = Color.MU;
         private int diameter = 5;
         private int kmeans = 2;
         private int hueBins = 12;
         private int saturationBins = 2;
         private int valueBins = 1;
+        private double minScore = .9;
 
         public Builder() {}
         //public Builder(Action action) { this.action = action; }
@@ -610,6 +631,11 @@ public class ActionOptions {
             return this;
         }
 
+        public Builder setColor(Color color) {
+            this.color = color;
+            return this;
+        }
+
         public Builder setDiameter(int diameter) {
             this.diameter = diameter;
             return this;
@@ -632,6 +658,11 @@ public class ActionOptions {
 
         public Builder setValueBins(int valueBins) {
             this.valueBins = valueBins;
+            return this;
+        }
+
+        public Builder setMinScore(double minScore) {
+            this.minScore = minScore;
             return this;
         }
 
@@ -681,11 +712,13 @@ public class ActionOptions {
             actionOptions.typeDelay = typeDelay;
             actionOptions.modifiers = modifiers;
             actionOptions.scrollDirection = scrollDirection;
+            actionOptions.color = color;
             actionOptions.diameter = diameter;
             actionOptions.kmeans = kmeans;
             actionOptions.hueBins = hueBins;
             actionOptions.saturationBins = saturationBins;
             actionOptions.valueBins = valueBins;
+            actionOptions.minScore = minScore;
             return actionOptions;
         }
     }

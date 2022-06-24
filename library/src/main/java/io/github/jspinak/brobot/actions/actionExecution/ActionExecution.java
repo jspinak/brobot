@@ -3,6 +3,7 @@ package io.github.jspinak.brobot.actions.actionExecution;
 import io.github.jspinak.brobot.actions.actionConfigurations.ExitSequences;
 import io.github.jspinak.brobot.actions.actionConfigurations.Success;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
+import io.github.jspinak.brobot.actions.methods.basicactions.find.SelectRegions;
 import io.github.jspinak.brobot.actions.methods.sikuliWrappers.Wait;
 import io.github.jspinak.brobot.actions.methods.time.Time;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
@@ -33,14 +34,16 @@ public class ActionExecution {
     private Success success;
     private ExitSequences exitSequences;
     private IllustrateScreenshot illustrateScreenshot;
+    private SelectRegions selectRegions;
 
     public ActionExecution(Wait wait, Time time, Success success, ExitSequences exitSequences,
-                           IllustrateScreenshot illustrateScreenshot) {
+                           IllustrateScreenshot illustrateScreenshot, SelectRegions selectRegions) {
         this.wait = wait;
         this.time = time;
         this.success = success;
         this.exitSequences = exitSequences;
         this.illustrateScreenshot = illustrateScreenshot;
+        this.selectRegions = selectRegions;
     }
 
     /**
@@ -55,19 +58,20 @@ public class ActionExecution {
         printAction(actionOptions, objectCollections);
         time.setStartTime(actionOptions.getAction());
         wait.wait(actionOptions.getPauseBeforeBegin());
-        illustrateScreenshot.prepareScreenshot(actionOptions, objectCollections);
         Matches matches = new Matches();
         for (int i=0; i<actionOptions.getMaxTimesToRepeatActionSequence(); i++) {
             matches = actionMethod.perform(actionOptions, objectCollections);
             success.set(actionOptions, matches);
             if (exitSequences.okToExit(actionOptions, matches)) break;
         }
+        illustrateScreenshot.illustrateWhenAllowed(matches,
+                selectRegions.getRegionsForAllImages(actionOptions, objectCollections),
+                actionOptions, objectCollections);
         wait.wait(actionOptions.getPauseAfterEnd());
         matches.setDuration(time.getDuration(actionOptions.getAction()));
         matches.saveSnapshots();
         char symbol = matches.isSuccess()? Output.check : Output.fail;
         Report.println(actionOptions.getAction()+" "+symbol);
-        illustrateScreenshot.saveToFile(actionOptions);
         return matches;
     }
 

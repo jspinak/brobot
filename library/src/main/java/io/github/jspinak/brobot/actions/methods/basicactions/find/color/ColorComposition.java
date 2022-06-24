@@ -25,10 +25,12 @@ public class ColorComposition {
 
     private GetImage getImage;
     private MockColor mockColor;
+    private GetDistancesBGR getDistancesBGR;
 
-    public ColorComposition(GetImage getImage, MockColor mockColor) {
+    public ColorComposition(GetImage getImage, MockColor mockColor, GetDistancesBGR getDistancesBGR) {
         this.getImage = getImage;
         this.mockColor = mockColor;
+        this.getDistancesBGR = getDistancesBGR;
     }
 
     public void showKmeans(Region region, int centers) {
@@ -42,7 +44,7 @@ public class ColorComposition {
     public DistanceMatrices getDistanceMatrices(StateImageObject stateImageObject, Region region, int means) {
         DistanceMatrices distanceMatrices = new DistanceMatrices();
         stateImageObject.getImage().getFilenames().forEach(
-                name -> distanceMatrices.addMatrix(
+                name -> distanceMatrices.addMatrices(
                         name, getColorDifference(stateImageObject, region,
                                 kmeans(getImage.getMatFromFilename(
                                                 ImagePath.getBundlePath()+"/"+name, false),
@@ -69,14 +71,14 @@ public class ColorComposition {
      * @return a list of DistanceMatrix objects, each with the color difference to one of
      * the k-means colors.
      */
-    public List<DistanceMatrix> getColorDifference(StateImageObject stateImageObject, Region region, Mat centers) {
+    public List<ScoresMat> getColorDifference(StateImageObject stateImageObject, Region region, Mat centers) {
         Mat onScreen;
         if (BrobotSettings.mock) onScreen = mockColor.getMockMat(stateImageObject.getImage(), region);
         else onScreen = getImage.getMatFromScreen(region);
-        List<DistanceMatrix> dists = new ArrayList<>();
+        List<ScoresMat> dists = new ArrayList<>();
         // for each k-means color from the Image, get the difference to the colors in the region
         for (int i=0; i<centers.rows(); i++)
-            dists.add(new DistanceMatrix(onScreen, centers.row(i), region, stateImageObject));
+            dists.add(getDistancesBGR.getScores(onScreen, centers.row(i), region, stateImageObject));
         return dists;
     }
 
