@@ -35,6 +35,7 @@ public class AfterClick {
      * If the offset is defined we move there; otherwise we move to the fixed location.
      *
      * @param actionOptions contains all details of the action, including moving the mouse after a click
+     * @return true if the mouse is moved after a click.
      */
     public boolean moveMouseAfterClick(ActionOptions actionOptions) {
         if (!actionOptions.isMoveMouseAfterClick()) return false;

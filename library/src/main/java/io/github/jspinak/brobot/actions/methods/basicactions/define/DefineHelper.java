@@ -24,6 +24,8 @@ public class DefineHelper {
 
     /**
      * Adjust the defined region according to the ActionOptions.
+     * @param region is adjusted depending on the action configuration.
+     * @param actionOptions holds the action configuration.
      */
     public void adjust(Region region, ActionOptions actionOptions) {
         region.x += actionOptions.getAddX();
@@ -45,6 +47,9 @@ public class DefineHelper {
      *
      * Uses Find.EACH, which returns 1 Match per object in the first ObjectCollection
      *
+     * @param actionOptions holds the action configuration.
+     * @param objectCollections holds the objects to find.
+     * @return a Matches object containing all matches found.
      */
     public Matches findMatches(ActionOptions actionOptions, ObjectCollection... objectCollections) {
         ActionOptions findOptions = CopyActionOptions.copyImmutableOptions(actionOptions);

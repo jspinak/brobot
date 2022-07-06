@@ -23,6 +23,10 @@ public class FindAllHistograms {
      * Returns a sorted Map with the regions from best match to worst match.
      * The Map's key is the Region and the value is the score as a Double.
      * TODO: Train a neural net using this method to find these areas much more quickly (YOLO).
+     *
+     * @param region the overall region in which to search
+     * @param image the image to use
+     * @return a sortable list of regions contained in the overall region and similarity scores
      */
     public LinkedHashMap<Region, Double> find(Region region, Image image) {
         OverlappingGrids overlappingGrids = new OverlappingGrids(new Grid.Builder()

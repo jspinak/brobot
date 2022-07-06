@@ -38,4 +38,13 @@ public class ColorClusters {
         */
     }
 
+    void printClusters() {
+        Report.println("cluster size = "+ clusters.size());
+        for (int i=0; i<Math.min(clusters.size(), 10); i++) {
+            ColorCluster cc = clusters.get(i);
+            Report.print(cc.getImage().dump());
+            Report.formatln(" score=%.1f x.y=%d.%d", cc.getScore(), cc.getRegion().x, cc.getRegion().y);
+        }
+    }
+
 }

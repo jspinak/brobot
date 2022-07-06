@@ -14,7 +14,7 @@ import java.util.Map;
  * Cases where DanglingSnapshots are not added:
  * - Mock runs
  * - Snapshots are disabled. Running a process for a long period of time could accumulate
- *   a lot of Snapshots. Snapshots are disabled by default in Brobot 1.0 since Brobot 1.0 doesn't
+ *   a lot of Snapshots. Snapshots are disabled by default in Brobot 1.x since Brobot 1.x doesn't
  *   do anything with them yet (they are meant to be saved in a database for later mock runs).
  *
  * Transferring to existing Matches objects:
@@ -36,6 +36,9 @@ public class DanglingSnapshots {
      * If there are no Match objects,
      * the operation was unsuccessful. A failed MatchSnapshot will become successful if
      * a Match is found later during the same Action.
+     *
+     * @param actionOptions holds the action configuration.
+     * @param matches is the Matches object that will receive the MatchSnapshots.
      */
     public void addAllMatches(ActionOptions actionOptions, Matches matches) {
         matches.getMatchObjects().forEach(matchObject -> addMatch(actionOptions, matchObject));
@@ -56,6 +59,10 @@ public class DanglingSnapshots {
     /**
      * Successful MatchSnapshots are always created with a Match.
      * If text is found, the Snapshot is successful. Text cannot be found without a Match.
+     *
+     * @param stateObject is the StateObject that resulted in found text.
+     * @param string is the text found.
+     * @return true if the text was successfully added to a MatchSnapshot.
      */
     public boolean addString(StateObject stateObject, String string) {
         if (snapshots.containsKey(stateObject)) {
@@ -67,6 +74,9 @@ public class DanglingSnapshots {
 
     /**
      * For transferring a Snapshot to an existing Matches object.
+     *
+     * @param stateObject is the StateObject that resulted in the MatchSnapshot.
+     * @param matchSnapshot is the new MatchSnapshot to be added.
      */
     public void addSnapshot(StateObject stateObject, MatchSnapshot matchSnapshot) {
         if (!snapshots.containsKey(stateObject)) snapshots.put(stateObject, matchSnapshot);
@@ -80,10 +90,9 @@ public class DanglingSnapshots {
         danglingSnapshots.snapshots.forEach(this::addSnapshot);
     }
 
-    /**
+    /*
      * Adds as new Snapshots only those with unique Match objects. If the Snapshot is
      * not unique, Strings are added to its Text when they are unique.
-     * @param danglingSnapshots
      */
     public void mergeAllSnapshots(DanglingSnapshots danglingSnapshots) {
         // need to implement

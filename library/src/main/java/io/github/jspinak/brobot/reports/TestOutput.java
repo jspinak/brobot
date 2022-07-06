@@ -31,9 +31,9 @@ public class TestOutput {
 
     /**
      *
-     * @param message
+     * @param message A message to show what is being compared.
      * @param valuesToCompare Actual values should follow expected values.
-     * @return
+     * @return true if the results match the expected values.
      */
     public static boolean assertTrue(String message, int... valuesToCompare) {
         String[] values = new String[valuesToCompare.length];
