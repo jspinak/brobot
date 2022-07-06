@@ -84,7 +84,7 @@ public class ActionOptions {
     private List<Find> findActions = new ArrayList<>();
     /**
      * When set to true, subsequent Find operations will act as confirmations of the initial matches.
-     * AN initial match from the first Find operation will be returned if the subsequent
+     * An initial match from the first Find operation will be returned if the subsequent
      * Find operations all find matches within its region.
      */
     private boolean keepLargerMatches = false;

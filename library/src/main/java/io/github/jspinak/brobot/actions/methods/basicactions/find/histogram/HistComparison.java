@@ -63,8 +63,8 @@ public class HistComparison {
 
     /**
      * Compare all Patterns in the Image with all regions.
-     * @param image
-     * @param regions
+     * @param image the image to use for histogram comparison
+     * @param regions the regions in which to search
      * @return the best score per region.
      */
     public LinkedHashMap<Region, Double> compareAll(Image image, List<Region> regions) {

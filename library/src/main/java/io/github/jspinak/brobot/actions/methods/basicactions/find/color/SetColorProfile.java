@@ -44,7 +44,7 @@ public class SetColorProfile {
         reshape = reshapeToOneD(vals);
         values = getMinMaxMeanStddev(reshape);
         colorProfile.setV(values.get(0), values.get(1), values.get(2), values.get(3));
-        colorProfile.print(); //-----------------------
+        //colorProfile.print();
         return colorProfile;
     }
 

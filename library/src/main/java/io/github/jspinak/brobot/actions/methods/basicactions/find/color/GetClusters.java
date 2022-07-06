@@ -18,9 +18,11 @@ public class GetClusters {
      * Returns clusters of pixels with colors similar to the target color.
      * ColorDiff is a 2d Mat.
      *
-     * @param minDiameter
-     * @param maxColorDifference
-     * @return
+     * @param scor the Mat with the color distance per pixel
+     * @param minDiameter the diameter of clusters to find (a diameter of 2 gives a 2x2 region)
+     * @param maxColorDifference the maximum distance allowed for a successful match
+     * @param image the StateImageObject providing the target colors
+     * @return a ColorClusters object, which contains all matching clusters.
      */
     public ColorClusters getClusters(ScoresMat scor, int minDiameter,
                                      double maxColorDifference, StateImageObject image) {

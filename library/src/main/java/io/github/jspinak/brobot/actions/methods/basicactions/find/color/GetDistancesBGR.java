@@ -56,7 +56,7 @@ public class GetDistancesBGR {
     /**
      * Returns a Mat that is a 3d representation of the difference between the colors of
      * pixels in a region and a specific k-means color in rgb. The returned Mat will have the difference
-     * for r & g & b for each pixel.
+     * for r, g, b for each pixel.
      * @param onScreen The Mat from the Region
      * @param color The rgb values of one of the k-means selected from the Image
      * @return the difference in rgb for each pixel
@@ -77,8 +77,8 @@ public class GetDistancesBGR {
     /**
      * Takes a 3-dimensional color tensor (a 2d image with 3 color channels) and for each pixel,
      * calculates the euclidean distance to the target color. The resulting Mat is 2d.
-     * @param colorDiff
-     * @return
+     * @param colorDiff the difference between the target color and the actual color.
+     * @return a Mat with one channel.
      */
     public Mat convertRGBdistanceToOneDistance(Mat colorDiff) {
         // sum up the channels of the image:
