@@ -61,12 +61,7 @@ public class FindColorClusters {
                     e.printStackTrace();
                 }
         }});
-        Report.println("cluster size = "+colorClusters.getClusters().size());
-        for (int i=0; i<Math.min(colorClusters.getClusters().size(), 10); i++) {
-            ColorCluster cc = colorClusters.getClusters().get(i);
-            Report.print(cc.getImage().dump());
-            Report.formatln(" score=%.1f x.y=%d.%d", cc.getScore(), cc.getRegion().x, cc.getRegion().y);
-        }
+        //colorClusters.printClusters();
         return matches;
     }
 
@@ -94,7 +89,7 @@ public class FindColorClusters {
             if (actionOptions.getColor() == ActionOptions.Color.KMEANS) {
                 DistanceMatrices dms = colorComposition.getDistanceMatrices(image, sr, actionOptions.getKmeans());
                 colorClusters.addAllClusters(dms.getPixels(
-                        DistSimConversion.convertToDistance(actionOptions.getSimilarity())));
+                        DistSimConversion.convertToDistance(actionOptions.getMinScore())));
             }
             if (actionOptions.getColor() == ActionOptions.Color.MU) {
                 ScoresMat scoresMat = selectColors.getScoresMatHSV(image, sr);
@@ -112,4 +107,6 @@ public class FindColorClusters {
         searchRegions.forEach(reg -> colorClusters.addAllClusters(
                 selectColors.findRegions(actionOptions, image, reg)));
     }
+
+
 }

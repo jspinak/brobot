@@ -57,8 +57,8 @@ public class Distance {
     /**
      * Calculates the difference between the angles of 2 vectors.
      * The return value is the concave angle between the 2 vectors (i.e. 30 instead of 330).
-     * Vector 1: start->loc1
-     * Vector 2: start->loc2
+     * Vector 1: start to loc1
+     * Vector 2: start to loc2
      *
      * @param start the start point for both vectors
      * @param loc1 the end point for vector1
