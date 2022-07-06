@@ -87,7 +87,7 @@ const config = {
           {to: 'visualAPI', label: 'The Visual API', position: 'left'},
           {to: '/blog', label: 'Blog', position: 'left'},
           {
-            href: 'https://github.com/facebook/docusaurus',
+            href: 'https://github.com/jspinak/brobot',
             label: 'GitHub',
             position: 'right',
           },
