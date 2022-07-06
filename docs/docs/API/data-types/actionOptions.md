@@ -247,9 +247,12 @@ Default value: 0
 
 ## maxMatchesToActOn
 Type: `int`  
-Default value: -1
+Default value: 100
 
-maxMatchesToActOn limits the number of Matches used when working with Find.ALL or Find.EACH.
+maxMatchesToActOn limits the number of Matches used when working with Find.ALL, Find.EACH,
+Find.HISTOGRAM, and Find.COLOR. It is especially useful for working with HISTOGRAM and COLOR
+Find operations since there could be potentially hundreds of thousands of matches.  
+
 When <=0 it is not used.
 
 ## defineAs
