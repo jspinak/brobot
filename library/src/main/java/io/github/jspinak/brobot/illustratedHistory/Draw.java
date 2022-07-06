@@ -37,7 +37,7 @@ public class Draw {
     public void drawArrow(Mat screen, Location start, Location end, Scalar color) {
         Point startPoint = new Point(start.getX(), start.getY());
         Point endPoint = new Point(end.getX(), end.getY());
-        arrowedLine(screen, startPoint, endPoint, color);
+        arrowedLine(screen, startPoint, endPoint, color, 5);
     }
 
     /**
@@ -46,7 +46,9 @@ public class Draw {
      * one, a line(s) will be drawn. If the previous action was a Move action, it will be
      * included at the beginning of the locations list to show the movement from one point to another.
      *
-     * @param locations All Locations that describe a move.
+     * @param screen is a Mat representing the screenshot.
+     * @param locations are all Locations that describe a move.
+     * @param color is the color in which to draw.
      */
     public void move(Mat screen, List<Location> locations, Scalar color) {
         if (locations.size() == 1) drawPoint(screen, locations.get(0).toMatch(), color);

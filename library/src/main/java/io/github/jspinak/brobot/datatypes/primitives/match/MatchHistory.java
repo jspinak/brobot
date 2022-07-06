@@ -86,6 +86,9 @@ public class MatchHistory {
      * Most Actions succeed or fail based on a Find operation.
      * VANISH has different criteria and its Snapshots are separated.
      * Return the Snapshots of the specific Find type.
+     *
+     * @param actionOptions holds the action configuration.
+     * @return an empty Optional if there are no snapshots; otherwise, a random Snapshot.
      */
     public Optional<MatchSnapshot> getRandomSnapshot(ActionOptions actionOptions) {
         return getRandomSnapshot(getSimilarSnapshots(actionOptions));
@@ -119,7 +122,7 @@ public class MatchHistory {
         return Optional.of(snapshots.get(new Random().nextInt(snapshots.size())));
     }
 
-    /**
+    /*
      * Select a random Snapshot from a list of Snapshots of the same Action.
      * For Find Actions, restrict the list of Snapshots to the Find type.
      */

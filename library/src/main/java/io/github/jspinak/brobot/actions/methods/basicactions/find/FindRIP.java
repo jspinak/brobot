@@ -43,6 +43,9 @@ public class FindRIP implements FindImageObject {
 
     /**
      * First search the defined pairs, then the undefined pairs.
+     * @param actionOptions holds the action configuration.
+     * @param stateImageObject is the StateImageObject to find.
+     * @return a Matches object will all matches found.
      */
     @Override
     public Matches find(ActionOptions actionOptions, StateImageObject stateImageObject) {
@@ -61,6 +64,11 @@ public class FindRIP implements FindImageObject {
      * For Find.FIRST, the first Image found will return its Matches.
      * For Find.ALL, Find.EACH, and Find.BEST, each RegionImagePair will be searched.
      * When a Pair is found, its Region is defined.
+     * @param actionOptions holds the action configuration.
+     * @param stateImageObject is the StateImageObject containing the RegionImagePairs.
+     * @param pairs is the RegionImagePairs to find.
+     * @param filter selects pairs in the RegionImagePairs object.
+     * @return a Matches object will all matches found.
      */
     public Matches findAndDefineRegions(ActionOptions actionOptions, StateImageObject stateImageObject,
                                         RegionImagePairs pairs,

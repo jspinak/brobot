@@ -20,6 +20,11 @@ public class SelectRegions {
      * 2. If the StateImageObject is using its RegionImagePairs, and the specific Image's Region
      *    is defined (meaning it's been found already), then use that Region. Otherwise, in this order:
      * 3. Use the SearchRegions on the StateImageObject.
+     *
+     * @param actionOptions holds the action configuration, which can contain search regions.
+     * @param stateImage can also contain search regions.
+     * @param ripRegion is a region from a RegionImagePairs object.
+     * @return a list of regions to use in an Action.
      */
     public List<Region> getRegions(ActionOptions actionOptions, StateImageObject stateImage,
                                     Region... ripRegion) {

@@ -1,6 +1,5 @@
 package io.github.jspinak.brobot.actions.methods.basicactions.find.color;
 
-import io.github.jspinak.brobot.datatypes.primitives.image.Image;
 import io.github.jspinak.brobot.reports.Report;
 import lombok.Getter;
 import lombok.Setter;
@@ -53,7 +52,7 @@ public class ColorProfile {
     }
 
     public void print() {
-        Report.println("Color Profile");
+        Report.println("\nColor Profile");
         Report.formatln("Hue min.max.mean.stddev = %,.0f %,.0f %,.1f %,.1f",minH,maxH,meanH,stdDevH);
         Report.formatln("Sat min.max.mean.stddev = %,.0f %,.0f %,.1f %,.1f",minS,maxS,meanS,stdDevS);
         Report.formatln("Val min.max.mean.stddev = %,.0f %,.0f %,.1f %,.1f",minV,maxV,meanV,stdDevV);

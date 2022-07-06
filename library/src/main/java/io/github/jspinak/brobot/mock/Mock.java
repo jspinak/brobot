@@ -48,6 +48,7 @@ public class Mock {
 
     /**
      * Drag succeeds when the images are found, but it still takes time to do the drag.
+     * @return true
      */
     public boolean drag() {
         timeWrapper.wait(mockTimeDrag);

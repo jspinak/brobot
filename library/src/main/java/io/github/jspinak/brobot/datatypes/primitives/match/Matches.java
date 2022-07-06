@@ -220,7 +220,7 @@ public class Matches {
     /**
      * Returns the matches in this Matches object that are not in the parameter Matches object.
      * @param matches The Matches to subtract.
-     * @return
+     * @return a new Matches object with the remaining matches.
      */
     public Matches minus(Matches matches) {
         Matches rest = new Matches();

@@ -65,6 +65,9 @@ public class Action {
 
     /**
      * All StateImageObjects are placed in the first ObjectCollection.
+     * @param actionOptions holds the configuration of the action.
+     * @param stateImageObjects these will be added to a new ObjectCollection.
+     * @return a Matches object with the results of the operation.
      */
     public Matches perform(ActionOptions actionOptions, StateImageObject... stateImageObjects) {
         return perform(actionOptions, new ObjectCollection.Builder().withImages(stateImageObjects).build());
@@ -73,6 +76,8 @@ public class Action {
     /**
      * Perform an Action on an empty Object Collections. This method is necessary since there
      * are two different methods that take ActionOptions and a varargs parameter.
+     * @param actionOptions holds the configuration of the action.
+     * @return a Matches object with the results of the operation.
      */
     public Matches perform(ActionOptions actionOptions) {
         return perform(actionOptions, new ObjectCollection.Builder().build());
@@ -80,6 +85,9 @@ public class Action {
 
     /**
      * Perform an Action with default options.
+     * @param action the action to perform
+     * @param objectCollections contains all objects to be acted on.
+     * @return a Matches object with the results of the operation.
      */
     public Matches perform(ActionOptions.Action action, ObjectCollection... objectCollections) {
         return perform(new ActionOptions.Builder().setAction(action).build(), objectCollections);
@@ -88,6 +96,9 @@ public class Action {
     /**
      * Perform an Action with default options.
      * All StateImageObjects are placed in the first ObjectCollection.
+     * @param action the action to perform
+     * @param stateImageObjects these will be added to a new ObjectCollection.
+     * @return a Matches object with the results of the operation.
      */
     public Matches perform(ActionOptions.Action action, StateImageObject... stateImageObjects) {
         return perform(new ActionOptions.Builder().setAction(action).build(), stateImageObjects);
@@ -95,6 +106,8 @@ public class Action {
 
     /**
      * Perform an Action with default options and no associated ObjectCollections.
+     * @param action the action to perform
+     * @return a Matches object with the results of the operation.
      */
     public Matches perform(ActionOptions.Action action) {
         return perform(new ActionOptions.Builder().setAction(action).build(), new ObjectCollection.Builder().build());
@@ -103,6 +116,9 @@ public class Action {
     /**
      * Perform an Action with default options.
      * All Strings are placed in the first ObjectCollection.
+     * @param action the action to perform
+     * @param strings are added to a new ObjectCollection.
+     * @return a Matches object with the results of the operation.
      */
     public Matches perform(ActionOptions.Action action, String... strings) {
         ObjectCollection strColl = new ObjectCollection.Builder().withStrings(strings).build();

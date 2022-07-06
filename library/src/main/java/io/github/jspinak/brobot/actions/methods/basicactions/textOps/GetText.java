@@ -50,8 +50,8 @@ public class GetText implements ActionInterface {
      * of failure, we need to search again for matches. If text retrieval is the problem, we should
      * keep the MatchObjects and look again for text.
      *
-     * @param actionOptions
-     * @param objectCollections
+     * @param actionOptions holds the action configuration
+     * @param objectCollections holds the objects to act on
      * @return a Matches object with MatchObjects and Text
      */
     public Matches perform(ActionOptions actionOptions, ObjectCollection... objectCollections) {

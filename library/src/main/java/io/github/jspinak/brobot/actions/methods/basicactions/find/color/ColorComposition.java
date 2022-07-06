@@ -66,6 +66,7 @@ public class ColorComposition {
     }
 
     /**
+     * @param stateImageObject The StateImageObject that produced the k-means colors.
      * @param region The Region on the screen to use
      * @param centers The k-means colors from the Image
      * @return a list of DistanceMatrix objects, each with the color difference to one of

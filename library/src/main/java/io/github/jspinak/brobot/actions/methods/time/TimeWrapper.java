@@ -24,6 +24,7 @@ public class TimeWrapper {
 
     /**
      * LocalDateTime is immutable, so the 'now' variable can be directly referenced for a deep copy.
+     * @return the current time, either as the real current time or the mocked current time.
      */
     public LocalDateTime now() {
         if (BrobotSettings.mock) return now;

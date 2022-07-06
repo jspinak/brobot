@@ -28,13 +28,6 @@ public class IllustrateScreenshot {
     private ActionOptions.Find lastFind = ActionOptions.Find.UNIVERSAL;
 
     private Map<ActionOptions.Action, Boolean> actionPermissions = new HashMap<>();
-    {
-        actionPermissions.put(FIND, BrobotSettings.drawFind);
-        actionPermissions.put(CLICK, BrobotSettings.drawClick);
-        actionPermissions.put(DRAG, BrobotSettings.drawDrag);
-        actionPermissions.put(MOVE, BrobotSettings.drawMove);
-        actionPermissions.put(HIGHLIGHT, BrobotSettings.drawHighlight);
-    }
 
     public IllustrateScreenshot(ImageUtils imageUtils, GetImage getImage, Draw draw,
                                 IllustrationManager illustrationManager) {
@@ -44,17 +37,26 @@ public class IllustrateScreenshot {
         this.illustrationManager = illustrationManager;
     }
 
+    private void setActionPermissions() {
+        actionPermissions.put(FIND, BrobotSettings.drawFind);
+        actionPermissions.put(CLICK, BrobotSettings.drawClick);
+        actionPermissions.put(DRAG, BrobotSettings.drawDrag);
+        actionPermissions.put(MOVE, BrobotSettings.drawMove);
+        actionPermissions.put(HIGHLIGHT, BrobotSettings.drawHighlight);
+    }
+
     /**
      * We might not want to illustrate an action every time it repeats, particularly
      * for Find operations. If the action is a Find and the previous action was also a Find,
      * and the Collections are the same, it is a repeated action. Repeated actions are not
      * illustrated if BrobotSettings.drawRepeatedActions is set to false.
      *
-     * @param actionOptions
-     * @param objectCollections
-     * @return
+     * @param actionOptions holds the action configuration.
+     * @param objectCollections are the objects acted on.
+     * @return true if illustration is allowed.
      */
     public boolean okToIllustrate(ActionOptions actionOptions, ObjectCollection... objectCollections) {
+        setActionPermissions();
         if (!BrobotSettings.saveHistory || BrobotSettings.mock) return false;
         ActionOptions.Action action = actionOptions.getAction();
         if (!actionPermissions.containsKey(action)) return false;
