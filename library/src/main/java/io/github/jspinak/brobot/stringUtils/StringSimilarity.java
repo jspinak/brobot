@@ -12,6 +12,10 @@ public class StringSimilarity {
 
     /**
      * Calculates the similarity (a number within 0 and 1) between two strings.
+     *
+     * @param s1 the first String to compare
+     * @param s2 the second String to compare
+     * @return the similarity score
      */
     public static double similarity(String s1, String s2) {
         String longer = s1, shorter = s2;

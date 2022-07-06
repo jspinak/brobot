@@ -39,6 +39,11 @@ public class MatchObject {
 
     /**
      * It shouldn't be possible to create a MatchObject with Match == null.
+     *
+     * @param match the match found
+     * @param stateObject the StateObject resulting in the Match
+     * @param duration the time it took to find the Match
+     * @throws Exception if the Match or the StateObject is null
      */
     public MatchObject(Match match, StateObject stateObject, double duration) throws Exception {
         if (match == null || stateObject == null)

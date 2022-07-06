@@ -26,7 +26,7 @@ public class StateTransitionsJointTable {
      * Hidden States can be accessed by closing the State hiding them. There may be multiple States
      * hiding different hidden States. When a new State is activated that hides States, these
      * transitions are added here.
-     * @param activeState
+     * @param activeState is a newly active State.
      */
     public void addTransitionsToHiddenStates(State activeState) {
         activeState.getHidden().forEach(hiddenState -> {
@@ -40,7 +40,7 @@ public class StateTransitionsJointTable {
     /**
      * When a State is exited, its hidden State transitions are removed.
      * This may leave some Map entries with empty Lists.
-     * @param exitedState
+     * @param exitedState is a State that is no longer active.
      */
     public void removeTransitionsToHiddenStates(State exitedState) {
         exitedState.getHidden().forEach(hiddenState -> {

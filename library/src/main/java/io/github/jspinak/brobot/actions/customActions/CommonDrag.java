@@ -31,7 +31,7 @@ public class CommonDrag {
         this.drag = drag;
     }
 
-    /**
+    /*
      * Allows for dragging to multiple points by performing multiple Drag Actions.
      * This could be converted into a CompositeAction (Action == DRAGS).
      */

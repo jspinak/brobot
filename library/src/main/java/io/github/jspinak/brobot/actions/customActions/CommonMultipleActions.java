@@ -29,7 +29,7 @@ public class CommonMultipleActions {
         this.commonActions = commonActions;
     }
 
-    /**
+    /*
      * This method is similar to ClickUntil with the ActionOptions set for right clicks
      * and for moving after clicking.
      */

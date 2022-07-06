@@ -49,8 +49,8 @@ public class ClickUntil implements ActionInterface {
     /**
      * Performs a Click and a Find operation.
      *
-     * @param actionOptions
-     * @param objectCollections
+     * @param actionOptions holds the action configuration
+     * @param objectCollections holds the objects to act on
      * @return Matches from the last Find operation.
      */
     public Matches perform(ActionOptions actionOptions, ObjectCollection... objectCollections) {
@@ -72,8 +72,8 @@ public class ClickUntil implements ActionInterface {
      * Success criteria is set in the Success class, but this is another way of setting
      * it. Setting the success criteria inside the method gives more flexibility,
      * and could be useful for more complex Actions.
-     * @param actionOptions
-     * @param objectCollections
+     * @param actionOptions holds the action configuration
+     * @param objectCollections holds the objects to act on
      */
     private void setSuccessEvaluation(ActionOptions actionOptions, ObjectCollection... objectCollections) {
         if (objectCollections.length < 1) {

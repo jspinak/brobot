@@ -27,6 +27,9 @@ public class FindImageOrRIP {
 
     /**
      * For Find.FIRST or Find.ALL, depending on the ActionOptions.
+     * @param actionOptions holds the action configuration.
+     * @param images are the images to find.
+     * @return a Matches object with all matches found.
      */
     public Matches find(ActionOptions actionOptions, List<StateImageObject> images) {
         if (Report.minReportingLevel(Report.OutputLevel.LOW)) {
@@ -41,6 +44,9 @@ public class FindImageOrRIP {
 
     /**
      * Searches all patterns and returns the Match with the best Score.
+     * @param actionOptions holds the action configuration.
+     * @param images are the images to find.
+     * @return a Matches object with either the best match or no matches.
      */
     public Matches best(ActionOptions actionOptions, List<StateImageObject> images) {
         Matches matches = new Matches();
@@ -50,6 +56,9 @@ public class FindImageOrRIP {
 
     /**
      * Searches each Pattern separately and returns one Match per Pattern if found.
+     * @param actionOptions holds the action configuration.
+     * @param images are the images to find.
+     * @return a Matches object with all matches found.
      */
     public Matches each(ActionOptions actionOptions, List<StateImageObject> images) {
         Matches matches = new Matches();

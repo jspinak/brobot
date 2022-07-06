@@ -69,8 +69,8 @@ public class Path {
      * If the Path contains a failed Transition, an empty Path will be returned. Otherwise,
      * the Path returned will begin at one of the activeStates.
      *
-     * @param activeStates
-     * @param failedTransitionStartState
+     * @param activeStates states that are currently visible.
+     * @param failedTransitionStartState is a state corresponding to a path where the transition failed.
      * @return a Path object
      */
     public Path cleanPath(Set<StateEnum> activeStates, StateEnum failedTransitionStartState) {

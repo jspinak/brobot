@@ -31,6 +31,8 @@ public class ActionDurations {
 
     /**
      * Returns the mock duration of a Find operation.
+     *
+     * @param find the type of Find operation
      * @return a double, which can be converted later to an int if necessary.
      */
     public double getFindDuration(ActionOptions.Find find) {

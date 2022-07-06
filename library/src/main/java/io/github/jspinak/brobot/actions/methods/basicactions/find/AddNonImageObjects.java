@@ -33,6 +33,9 @@ public class AddNonImageObjects {
     /**
      * Finding Text in Regions doesn't happen in the Find Action.
      * Find is specific to finding Image matches.
+     *
+     * @param matches is the Matches object created at the beginning of the Find Action.
+     * @param objectCollection StateRegions in the ObjectCollection are converted to MatchObjects.
      */
     public void addRegions(Matches matches, ObjectCollection objectCollection) {
         for (StateRegion r : objectCollection.getStateRegions()) {

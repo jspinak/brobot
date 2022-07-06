@@ -33,6 +33,9 @@ public class FindPattern {
 
     /**
      * The Sikuli function 'find' finds the best Match for a Sikuli Pattern.
+     * @param region the region in which to search
+     * @param pattern the pattern to search for
+     * @return a Match if found
      */
     public Optional<Match> findBest(Region region, Pattern pattern) {
         if (BrobotSettings.screenshot.isEmpty()) return findLive(region, pattern);
