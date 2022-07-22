@@ -1,5 +1,5 @@
 ---
-sidebar_position: 4
+sidebar_position: 3
 ---
 
 # Unit Testing
@@ -8,8 +8,7 @@ In unit testing, it's important that
 the results are reproducible since they will be measured against pre-determined,
 expected results. This is achieved in Brobot by using screenshots to represent 
 an unchanging model of the environment. Unit testing is performed in Brobot as a 
-combination of a mock and a real run,  
-and uses screenshots instead of a 
+combination of a mock and a real run, and uses screenshots instead of a 
 live environment. Find operations are performed with real execution on the specified
 screenshots. Setting `BrobotSettings.mock` to `true` will make sure that all other 
 actions will be mocked. The screenshots do not have to be on screen to be used with

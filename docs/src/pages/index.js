@@ -26,7 +26,9 @@ function HomepageHeader() {
               <div>The Visual API ️<i>white paper</i> </div>
           </Link>
         </div>
-        <div><br />Free, open source, and built with care for researchers and the entire AI community.</div>
+        <div>
+            <br />Free & open source. The latest version is 1.0.4.
+        </div>
       </div>
     </header>
   );
