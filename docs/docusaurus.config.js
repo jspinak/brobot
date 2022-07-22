@@ -133,6 +133,10 @@ const config = {
                 label: 'YouTube',
                 href: 'https://www.youtube.com/channel/UCgRljq-lHkMLrzRzpJC4HNw',
               },
+              {
+                label: 'Maven Central',
+                href: 'https://search.maven.org/artifact/io.github.jspinak/brobot'
+              }
             ],
           },
         ],
