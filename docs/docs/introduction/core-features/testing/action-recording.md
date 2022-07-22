@@ -1,18 +1,8 @@
 ---
-sidebar_position: 8
+sidebar_position: 4
 ---
 
 # Action Recording
-
-Brobot has 3 types of testing: integration testing, unit testing, and
-action recording. Their primary strengths are the following:
-
-- Integration testing: making the application more robust in an inherently stochastic 
-environment (reducing the variability of results).  
-- Unit testing: making sure that parts of the application work as expected (increasing
-the accuracy of results).  
-- Action recording: similar to unit testing, focused on the accuracy of results, but 
-performed visually.  
 
 Action recording takes care of a weakness inherent in unit testing. Unit testing requires 
 an exact calculation of the expected results, which can be very time-consuming.

@@ -4,6 +4,8 @@ sidebar_position: 1
 
 # Using Color
 
+Color requires version 1.0.4 or greater.  
+
 Color can be used in a variety of ways to locate objects in a Brobot automation application.
 The two main color detection methods are 'average color' and 'k-Means'. They are selected
 by the ActionOptions variable `Color`, where `MU` corresponds to 'average color' and
