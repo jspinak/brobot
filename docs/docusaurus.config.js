@@ -25,6 +25,12 @@ const config = {
       '@docusaurus/preset-classic',
       /** @type {import('@docusaurus/preset-classic').Options} */
       {
+        // Will be passed to @docusaurus/plugin-google-analytics
+        googleAnalytics: {
+            trackingID: 'G-6WY1S6ZWEY',
+            // Optional fields.
+            anonymizeIP: true, // Should IPs be anonymized?
+        }
         pages: {
           remarkPlugins: [math],
           rehypePlugins: [katex],
