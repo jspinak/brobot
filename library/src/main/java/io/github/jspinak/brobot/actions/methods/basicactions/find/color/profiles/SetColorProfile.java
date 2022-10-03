@@ -1,4 +1,4 @@
-package io.github.jspinak.brobot.actions.methods.basicactions.find.color;
+package io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles;
 
 import io.github.jspinak.brobot.datatypes.primitives.image.Image;
 import io.github.jspinak.brobot.imageUtils.GetImage;

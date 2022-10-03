@@ -6,7 +6,7 @@ sidebar_position: 4
 
 Action recording takes care of a weakness inherent in unit testing. Unit testing requires 
 an exact calculation of the expected results, which can be very time-consuming.
-Imaging having a Find.ALL operation that returns 20 results. Finding the correct 
+Imagine having a Find.ALL operation that returns 20 results. Finding the correct 
 locations of all 20 matches can take a while, and doing it for an entire series of 
 operations can take too long for it to be considered a productive activity. Action 
 recording, on the other hand, requires no preparation and gives a visual representation of 
