@@ -9,7 +9,6 @@ import org.sikuli.script.Pattern;
 
 import java.awt.image.BufferedImage;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Images can hold multiple Patterns. A Pattern is a concept from Sikuli that is defined
@@ -72,6 +71,10 @@ public class Image {
         return false;
     }
 
+    public boolean isEmpty() {
+        return imageNames.isEmpty();
+    }
+
     public void print() {
         for (String imageName : getImageNames()) {
             System.out.print(imageName+" ");
@@ -80,7 +83,7 @@ public class Image {
 
     public StateImageObject inNullState() {
         return new StateImageObject.Builder()
-                .inState(NullState.Enum.NULL)
+                .inState(NullState.Name.NULL)
                 .withImage(getImageNames().toArray(new String[0]))
                 .build();
     }
@@ -139,6 +142,22 @@ public class Image {
             maxH = Math.max(maxH, bufferedImage.getHeight());
         }
         return maxH;
+    }
+
+    public int getAverageWidth() {
+        int sumW = 0;
+        for (BufferedImage bufferedImage : getAllBufferedImages()) {
+            sumW += bufferedImage.getWidth();
+        }
+        return sumW / getFilenames().size();
+    }
+
+    public int getAverageHeight() {
+        int sumH = 0;
+        for (BufferedImage bufferedImage : getAllBufferedImages()) {
+            sumH += bufferedImage.getHeight();
+        }
+        return sumH / getFilenames().size();
     }
 
     public boolean equals(Image image) {

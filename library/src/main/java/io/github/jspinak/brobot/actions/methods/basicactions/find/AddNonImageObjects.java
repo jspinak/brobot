@@ -26,7 +26,7 @@ public class AddNonImageObjects {
 
     public void addMatches(Matches matches, ObjectCollection objectCollection) {
         for (Matches m : objectCollection.getMatches()) {
-            matches.addAll(m);
+            matches.addAllResults(m);
         }
     }
 

@@ -2,6 +2,9 @@ package io.github.jspinak.brobot.actions.composites.methods.drag;
 
 import io.github.jspinak.brobot.actions.actionExecution.ActionInterface;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
+import io.github.jspinak.brobot.actions.methods.basicactions.find.OffsetOps;
+import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.GetSceneAnalysisCollection;
+import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.SceneAnalysisCollection;
 import io.github.jspinak.brobot.actions.methods.sikuliWrappers.DragLocation;
 import io.github.jspinak.brobot.datatypes.primitives.location.Location;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
@@ -9,6 +12,8 @@ import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -20,10 +25,15 @@ public class Drag implements ActionInterface {
 
     private DragLocation dragLocation;
     private GetDragLocation getDragLocation;
+    private GetSceneAnalysisCollection getSceneAnalysisCollection;
+    private OffsetOps offsetOps;
 
-    public Drag(DragLocation dragLocation, GetDragLocation getDragLocation) {
+    public Drag(DragLocation dragLocation, GetDragLocation getDragLocation,
+                GetSceneAnalysisCollection getSceneAnalysisCollection, OffsetOps offsetOps) {
         this.dragLocation = dragLocation;
         this.getDragLocation = getDragLocation;
+        this.getSceneAnalysisCollection = getSceneAnalysisCollection;
+        this.offsetOps = offsetOps;
     }
 
     /**
@@ -38,8 +48,12 @@ public class Drag implements ActionInterface {
      */
     public Matches perform(ActionOptions actionOptions, ObjectCollection... objectCollections) {
         Matches dragToMatches = new Matches();
+        SceneAnalysisCollection sceneAnalysisCollection = getSceneAnalysisCollection.
+                get(Arrays.asList(objectCollections), actionOptions);
+        dragToMatches.setSceneAnalysisCollection(sceneAnalysisCollection);
         Optional<Location> optStartLoc = getDragLocation.getFromLocation(actionOptions, objectCollections);
         Optional<Location> optEndLoc = getDragLocation.getToLocation(actionOptions, objectCollections);
+        offsetOps.addOffset(List.of(objectCollections), dragToMatches, actionOptions);
         if (optStartLoc.isEmpty() || optEndLoc.isEmpty()) return dragToMatches;
         dragLocation.drag(optStartLoc.get(), optEndLoc.get(), actionOptions);
         dragToMatches.addDefinedRegion(new Region(

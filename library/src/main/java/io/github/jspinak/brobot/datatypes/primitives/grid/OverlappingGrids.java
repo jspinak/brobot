@@ -26,7 +26,6 @@ public class OverlappingGrids {
                 .setCellWidth(grid.getCellWidth())
                 .setCellHeight(grid.getCellHeight())
                 .build();
-        innerGrid.getRegion().print();
     }
 
     public List<Region> getAllRegions() {

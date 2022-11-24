@@ -1,18 +1,19 @@
 package io.github.jspinak.brobot.illustratedHistory;
 
 import io.github.jspinak.brobot.datatypes.primitives.location.Location;
-import lombok.Getter;
-import lombok.Setter;
-import org.opencv.core.Mat;
-import org.opencv.core.Point;
-import org.opencv.core.Rect;
-import org.opencv.core.Scalar;
+import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
+import io.github.jspinak.brobot.reports.Report;
+import org.bytedeco.opencv.opencv_core.Mat;
+import org.bytedeco.opencv.opencv_core.Point;
+import org.bytedeco.opencv.opencv_core.Rect;
+import org.bytedeco.opencv.opencv_core.Scalar;
 import org.sikuli.script.Match;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 
-import static org.opencv.imgproc.Imgproc.*;
+import static org.bytedeco.opencv.global.opencv_imgproc.*;
 
 @Component
 public class Draw {
@@ -23,21 +24,37 @@ public class Draw {
         int drawX2 = Math.min(screen.cols(), match.x + match.w + 1);
         int drawY2 = Math.min(screen.rows(), match.y + match.h + 1);
         Rect aroundMatch = new Rect(drawX, drawY, drawX2-drawX, drawY2-drawY);
-        rectangle(screen, aroundMatch, color, 1);
+        rectangle(screen, aroundMatch, color);
     }
 
     public void drawPoint(Mat screen, Match match, Scalar color) {
         org.sikuli.script.Location loc = match.getTarget();
-        org.opencv.core.Point center = new Point(loc.x, loc.y);
-        circle(screen, center, 6, color, -1); //fill
-        circle(screen, center, 8, new Scalar(255,255,255));
-        circle(screen, center, 10, new Scalar(255,255,255));
+        Point center = new Point(loc.x, loc.y);
+        circle(screen, center, 6, color, FILLED, LINE_8, 0); //fill
+        circle(screen, center, 8, new Scalar(255));
+        circle(screen, center, 10, new Scalar(255));
+    }
+
+    public void drawClick(Illustrations illustrations, Matches matches) {
+        for (Match match : matches.getMatches()) {
+            drawPoint(illustrations.getMatchesOnScene(), match, new Scalar(255, 150, 255, 0));
+        }
     }
 
     public void drawArrow(Mat screen, Location start, Location end, Scalar color) {
         Point startPoint = new Point(start.getX(), start.getY());
         Point endPoint = new Point(end.getX(), end.getY());
-        arrowedLine(screen, startPoint, endPoint, color, 5);
+        arrowedLine(screen, startPoint, endPoint, color, 5, 8, 0, .04);
+    }
+
+    public void drawDrag(Illustrations illustrations, Matches matches) {
+        if (matches.size() < 2) return;
+        List<Match> matchList = new ArrayList<>(matches.getMatches());
+        for (int i = 0; i < matchList.size() - 1; i++) {
+            Match match = matchList.get(i);
+            Match nextMatch = matchList.get(i + 1);
+            drawArrow(illustrations.getMatchesOnScene(), new Location(match), new Location(nextMatch), new Scalar(255, 150, 255, 0));
+        }
     }
 
     /**
@@ -54,6 +71,12 @@ public class Draw {
         if (locations.size() == 1) drawPoint(screen, locations.get(0).toMatch(), color);
         else for (int i=0; i<locations.size()-1; i++)
             drawArrow(screen, locations.get(i), locations.get(i+1), color);
+    }
+
+    public void drawMove(Illustrations illustrations, Matches matches, Location... startingPositions) {
+        List<Location> locations = new ArrayList<>(List.of(startingPositions));
+        locations.addAll(matches.getMatchLocations());
+        move(illustrations.getMatchesOnScene(), locations, new Scalar(255, 150, 255, 0));
     }
 
 }

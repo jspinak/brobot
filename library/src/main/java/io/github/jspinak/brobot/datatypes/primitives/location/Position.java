@@ -10,27 +10,27 @@ import java.util.Map;
  */
 public class Position {
 
-    private int percentW;
-    private int percentH;
+    private double percentW;
+    private double percentH;
 
     public enum Name {
         TOPLEFT, TOPMIDDLE, TOPRIGHT, MIDDLELEFT, MIDDLEMIDDLE, MIDDLERIGHT, BOTTOMLEFT, BOTTOMMIDDLE, BOTTOMRIGHT
     }
 
-    private Map<Name, Pair<Integer,Integer>> positions = new HashMap<>();
+    private final Map<Name, Pair<Double,Double>> positions = new HashMap<>();
     {
-        positions.put(Name.TOPLEFT, Pair.of(0,0));
-        positions.put(Name.TOPMIDDLE, Pair.of(50, 0));
-        positions.put(Name.TOPRIGHT, Pair.of(100, 0));
-        positions.put(Name.MIDDLELEFT, Pair.of(0, 50));
-        positions.put(Name.MIDDLEMIDDLE, Pair.of(50, 50));
-        positions.put(Name.MIDDLERIGHT, Pair.of(100, 50));
-        positions.put(Name.BOTTOMLEFT, Pair.of(0, 100));
-        positions.put(Name.BOTTOMMIDDLE, Pair.of(50, 100));
-        positions.put(Name.BOTTOMRIGHT, Pair.of(100, 100));
+        positions.put(Name.TOPLEFT, Pair.of(0.0,0.0));
+        positions.put(Name.TOPMIDDLE, Pair.of(.5, 0.0));
+        positions.put(Name.TOPRIGHT, Pair.of(1.0, 0.0));
+        positions.put(Name.MIDDLELEFT, Pair.of(0.0, .5));
+        positions.put(Name.MIDDLEMIDDLE, Pair.of(.5, .5));
+        positions.put(Name.MIDDLERIGHT, Pair.of(1.0, .5));
+        positions.put(Name.BOTTOMLEFT, Pair.of(0.0, 1.0));
+        positions.put(Name.BOTTOMMIDDLE, Pair.of(.5, 1.0));
+        positions.put(Name.BOTTOMRIGHT, Pair.of(1.0, 1.0));
     }
 
-    public Position(int percentW, int percentH) {
+    public Position(double percentW, double percentH) {
         this.percentW = percentW;
         this.percentH = percentH;
     }
@@ -40,33 +40,33 @@ public class Position {
         this.percentH = positions.get(positionName).getValue();
     }
 
-    public Position(Name positionName, int addPercentW, int addPercentH) {
+    public Position(Name positionName, double addPercentW, double addPercentH) {
         this.percentW = positions.get(positionName).getKey() + addPercentW;
         this.percentH = positions.get(positionName).getValue() + addPercentH;
     }
 
-    public int getPercentW() {
+    public double getPercentW() {
         return percentW;
     }
 
-    public int getPercentH() {
+    public double getPercentH() {
         return percentH;
     }
 
-    public void addPercentW(int addW) {
+    public void addPercentW(double addW) {
         percentW += addW;
     }
 
-    public void addPercentH(int addH) {
+    public void addPercentH(double addH) {
         percentH += addH;
     }
 
     public void multiplyPercentW(double mult) {
-        percentW = (int) (percentW * mult);
+        percentW = percentW * mult;
     }
 
     public void multiplyPercentH(double mult) {
-        percentH = (int) (percentH * mult);
+        percentH = percentH * mult;
     }
 
 }

@@ -2,6 +2,7 @@ package io.github.jspinak.brobot.actions.actionExecution;
 
 import io.github.jspinak.brobot.actions.actionConfigurations.ExitSequences;
 import io.github.jspinak.brobot.actions.actionConfigurations.Success;
+import io.github.jspinak.brobot.actions.actionExecution.actionLifecycle.ActionLifecycleManagement;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.SelectRegions;
 import io.github.jspinak.brobot.actions.methods.sikuliWrappers.Wait;
@@ -14,6 +15,7 @@ import io.github.jspinak.brobot.reports.Output;
 import io.github.jspinak.brobot.reports.Report;
 import org.springframework.stereotype.Component;
 
+import java.time.Duration;
 import java.util.List;
 
 /**
@@ -35,15 +37,18 @@ public class ActionExecution {
     private ExitSequences exitSequences;
     private IllustrateScreenshot illustrateScreenshot;
     private SelectRegions selectRegions;
+    private ActionLifecycleManagement actionLifecycleManagement;
 
     public ActionExecution(Wait wait, Time time, Success success, ExitSequences exitSequences,
-                           IllustrateScreenshot illustrateScreenshot, SelectRegions selectRegions) {
+                           IllustrateScreenshot illustrateScreenshot, SelectRegions selectRegions,
+                           ActionLifecycleManagement actionLifecycleManagement) {
         this.wait = wait;
         this.time = time;
         this.success = success;
         this.exitSequences = exitSequences;
         this.illustrateScreenshot = illustrateScreenshot;
         this.selectRegions = selectRegions;
+        this.actionLifecycleManagement = actionLifecycleManagement;
     }
 
     /**
@@ -57,6 +62,7 @@ public class ActionExecution {
                            ObjectCollection... objectCollections) {
         printAction(actionOptions, objectCollections);
         time.setStartTime(actionOptions.getAction());
+        //int actionId = actionLifecycleManagement.newActionLifecycle(actionOptions);
         wait.wait(actionOptions.getPauseBeforeBegin());
         Matches matches = new Matches();
         for (int i=0; i<actionOptions.getMaxTimesToRepeatActionSequence(); i++) {
@@ -68,10 +74,11 @@ public class ActionExecution {
                 selectRegions.getRegionsForAllImages(actionOptions, objectCollections),
                 actionOptions, objectCollections);
         wait.wait(actionOptions.getPauseAfterEnd());
+        //Duration duration = actionLifecycleManagement.getAndSetDuration(actionId);
         matches.setDuration(time.getDuration(actionOptions.getAction()));
         matches.saveSnapshots();
-        char symbol = matches.isSuccess()? Output.check : Output.fail;
-        Report.println(actionOptions.getAction()+" "+symbol);
+        String symbol = matches.isSuccess() ? Output.check : Output.fail;
+        Report.println(actionOptions.getAction() + " " + symbol);
         return matches;
     }
 

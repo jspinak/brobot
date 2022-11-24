@@ -43,14 +43,13 @@ public class FindImage implements FindImageObject {
      * @param actionOptions holds the action configuration.
      * @param stateImageObject the StateImageObject containing the Image in focus
      * @param image the Image to find
-     * @param ripRegion can be left out if not using an RIP
      * @return a Matches object with all matches found.
      */
     public Matches find(ActionOptions actionOptions, StateImageObject stateImageObject,
-                        Image image, Region... ripRegion) {
+                        Image image) {
         Matches matches = new Matches();
-        for (Region region : selectRegions.getRegions(actionOptions, stateImageObject, ripRegion)) {
-            matches.addAll(
+        for (Region region : selectRegions.getRegions(actionOptions, stateImageObject)) {
+            matches.addAllResults(
                     findWrapperMethods.get(actionOptions.getFind()).find(
                     region, stateImageObject, image, actionOptions));
             if (stopAfterFound(actionOptions, matches)) break;

@@ -34,6 +34,7 @@ public class Success {
         criteria.put(ActionOptions.Action.KEY_UP, matches -> true);
         criteria.put(ActionOptions.Action.DRAG, matches -> matches.getDefinedRegion().defined());
         criteria.put(ActionOptions.Action.VANISH, Matches::isEmpty);
+        criteria.put(ActionOptions.Action.CLASSIFY, matches -> !matches.isEmpty());
     }
 
     public Predicate<Matches> getCriteria(ActionOptions actionOptions) {
