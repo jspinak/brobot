@@ -12,7 +12,7 @@ import org.sikuli.script.Screen;
 
 import java.util.Optional;
 
-import static io.github.jspinak.brobot.datatypes.state.NullState.Enum.NULL;
+import static io.github.jspinak.brobot.datatypes.state.NullState.Name.NULL;
 
 /**
  * Location can be an absolute position (x,y) on the screen,
@@ -25,7 +25,7 @@ import static io.github.jspinak.brobot.datatypes.state.NullState.Enum.NULL;
 public class Location {
 
     private String name;
-    private boolean definedByXY = false;
+    private boolean definedByXY = true;
     private int x = -1;
     private int y = -1;
     private Region region;
@@ -48,18 +48,18 @@ public class Location {
     }
 
     public Location(Location loc) {
-        int percentOfW, percentOfH;
+        double percentOfW, percentOfH;
         if (loc.getRegion().isPresent()) {
             this.region = loc.getRegion().get();
             if (loc.getPercentOfW().isPresent()) percentOfW = loc.getPercentOfW().get();
-            else percentOfW = 50;
+            else percentOfW = .5;
             if (loc.getPercentOfH().isPresent()) percentOfH = loc.getPercentOfH().get();
-            else percentOfH = 50;
+            else percentOfH = .5;
             position = new Position(percentOfW, percentOfH);
+            definedByXY = false;
         } else {
             x = loc.x;
             y = loc.y;
-            definedByXY = true;
         }
         anchor = loc.anchor;
     }
@@ -76,48 +76,61 @@ public class Location {
 
     public void setPosition(int newX, int newY) {
         int percentOfW, percentOfH;
-        percentOfW = (newX - region.x) * 100 / region.w;
-        percentOfH = (newY - region.y) * 100 / region.h;
+        percentOfW = (newX - region.x) / region.w;
+        percentOfH = (newY - region.y) / region.h;
         System.out.println("percent of W,H: "+percentOfW+" "+percentOfH);
         position = new Position(percentOfW, percentOfH);
+        definedByXY = false;
     }
 
     public Location(Region region, Position position) {
         this.region = region;
         this.position = position;
+        definedByXY = false;
     }
 
     public Location(Region region, Position.Name position) {
         this.region = region;
         this.position = new Position(position);
+        definedByXY = false;
     }
 
     public Location(Position.Name position) {
         this.region = new Region();
         this.position = new Position(position);
+        definedByXY = false;
     }
 
-    public Location(Region region, int percentOfW, int percentOfH) {
+    public Location(Region region, double percentOfW, double percentOfH) {
         this.region = region;
         this.position = new Position(percentOfW, percentOfH);
+        definedByXY = false;
     }
 
     public Location(Match match) {
         this.region = new Region(match);
-        int percentOfW, percentOfH;
-        percentOfW = (match.getTarget().x - match.x) / match.w;
-        percentOfH = (match.getTarget().y - match.y) / match.y;
+        double percentOfW, percentOfH;
+        Report.println("target of match: "+match.getTarget().x + " " + match.getTarget().y);
+        Report.println("region of match: "+region.x + " " + region.y + " " + region.w + " " + region.h);
+        Report.println((double)match.getTarget().x + " " + (double)region.x + " " + (double)region.w);
+        Report.println((double)match.getTarget().y + " " + (double)region.y + " " + (double)region.h);
+        percentOfW = ((double)match.getTarget().x - (double)region.x) / (double)region.w;
+        percentOfH = ((double)match.getTarget().y - (double)region.y) / (double)region.h;
+        Report.println("percent of W,H: "+percentOfW+" "+percentOfH);
         position = new Position(percentOfW, percentOfH);
+        definedByXY = false;
     }
 
     public Location(Match match, Position position) {
         this.region = new Region(match);
         this.position = position;
+        definedByXY = false;
     }
 
     public Location(Match match, int percentOfW, int percentOfH) {
         this.region = new Region(match);
         this.position = new Position(percentOfW, percentOfH);
+        definedByXY = false;
     }
 
     public Location(Location location, int addX, int addY) {
@@ -130,12 +143,12 @@ public class Location {
         this.y = location.y + addY;
     }
 
-    public Optional<Integer> getPercentOfW() {
+    public Optional<Double> getPercentOfW() {
         if (isDefinedByXY()) return Optional.empty();
         return Optional.of(position.getPercentW());
     }
 
-    public Optional<Integer> getPercentOfH() {
+    public Optional<Double> getPercentOfH() {
         if (isDefinedByXY()) return Optional.empty();
         return Optional.of(position.getPercentH());
     }
@@ -166,10 +179,9 @@ public class Location {
     }
 
     private org.sikuli.script.Location getSikuliLocationFromRegion() {
-        //int locX = region.x + Math.max(0, region.w * position.getPercentW() / 100 - 1);
-        //int locY = region.y + Math.max(0, region.h * position.getPercentH() / 100 - 1);
-        int locX = region.x + (region.w * position.getPercentW() / 100 - 1);
-        int locY = region.y + (region.h * position.getPercentH() / 100 - 1);
+        Report.println("region: "+region.x + " " + region.y + " " + region.w + " " + region.h + " " + position.getPercentW());
+        double locX = region.x + (region.w * position.getPercentW());
+        double locY = region.y + (region.h * position.getPercentH());
         return new org.sikuli.script.Location(locX, locY);
     }
 
@@ -184,6 +196,16 @@ public class Location {
 
     public int getY() {
         return getSikuliLocation().y;
+    }
+
+    public int getRegionW() {
+        if (isDefinedByXY()) return 1;
+        return region.w;
+    }
+
+    public int getRegionH() {
+        if (isDefinedByXY()) return 1;
+        return region.h;
     }
 
     public boolean defined() {
@@ -217,8 +239,8 @@ public class Location {
     public Location getOpposite() {
         if (region == null) return this;
         return new Location(this.region,
-                100 - position.getPercentW(),
-                100 - position.getPercentH());
+                1 - position.getPercentW(),
+                1 - position.getPercentH());
     }
 
     public Location getOppositeTo(Location location) {
@@ -228,9 +250,9 @@ public class Location {
     }
 
     public void adjustToRegion() {
-        int percentOfW, percentOfH;
-        percentOfW = Math.max(Math.min(100, position.getPercentW()), 0);
-        percentOfH = Math.max(Math.min(100, position.getPercentH()), 0);
+        double percentOfW, percentOfH;
+        percentOfW = Math.max(Math.min(1, position.getPercentW()), 0);
+        percentOfH = Math.max(Math.min(1, position.getPercentH()), 0);
         position = new Position(percentOfW, percentOfH);
     }
 
@@ -266,6 +288,40 @@ public class Location {
         return (x == l.x && y == l.y &&
                 //region.equals(l.region) && position == l.position &&
                 definedByXY == l.definedByXY);
+    }
+
+    /**
+     * If the locations are mixed (defined by region and by xy) then it is converted to 'defined by xy'.
+     * @param loc the location to add to this one
+     */
+    public void add(Location loc) {
+        if (definedByXY && loc.definedByXY) {
+            Report.println("Adding x,y locations " + loc.x + " " + loc.y);
+            x += loc.x;
+            y += loc.y;
+            return;
+        }
+        if (!definedByXY && !loc.definedByXY) {
+            position.addPercentW(loc.position.getPercentW());
+            position.addPercentH(loc.position.getPercentH());
+            return;
+        }
+        if (definedByXY) {
+            x += loc.position.getPercentW() * region.w;
+            y += loc.position.getPercentH() * region.h;
+            return;
+        }
+        Report.println("percent W,H " + position.getPercentW() + " " + position.getPercentH());
+        Report.println("region W,H " + region.w + " " + region.h);
+        Report.println("x,y " + x + " " + y);
+        x = getX() + loc.x;
+        y = getY() + loc.y;
+        definedByXY = true;
+        //position.addPercentW((double)loc.x / region.w);
+        //position.addPercentH((double)loc.y / region.h);
+        Report.println("percent W,H " + position.getPercentW() + " " + position.getPercentH());
+        Report.println("region W,H " + region.w + " " + region.h);
+        Report.println("x,y " + x + " " + y);
     }
 
     public void print() {
@@ -304,12 +360,12 @@ public class Location {
             x = location.x;
             y = location.y;
             if (location.isDefinedByXY()) return this;
-            int percentOfW, percentOfH;
+            double percentOfW, percentOfH;
             if (location.getRegion().isPresent()) this.region = location.getRegion().get();
             if (location.getPercentOfW().isPresent()) percentOfW = location.getPercentOfW().get();
-            else percentOfW = 50;
+            else percentOfW = .5;
             if (location.getPercentOfH().isPresent()) percentOfH = location.getPercentOfH().get();
-            else percentOfH = 50;
+            else percentOfH = .5;
             position = new Position(percentOfW, percentOfH);
             return this;
         }

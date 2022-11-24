@@ -54,12 +54,6 @@ public class GetDragLocation {
     private ObjectCollection getDragToObjColl(ActionOptions actionOptions, ObjectCollection... objectCollections) {
         if (objectCollections.length >= 2) return objectCollections[1];
         if (objectCollections.length == 1) return objectCollections[0];
-        if (actionOptions.getAddX() != actionOptions.getDragToOffsetX() ||
-                actionOptions.getAddY() != actionOptions.getDragToOffsetY()) {
-            return new ObjectCollection.Builder()
-                    .withLocations(new Location(Mouse.at()))
-                    .build();
-        }
         return new ObjectCollection.Builder().build();
     }
 

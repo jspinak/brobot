@@ -1,18 +1,25 @@
 package io.github.jspinak.brobot.datatypes.primitives.match;
 
 import io.github.jspinak.brobot.actions.BrobotSettings;
+import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
+import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.SceneAnalysis;
+import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.SceneAnalysisCollection;
 import io.github.jspinak.brobot.datatypes.primitives.location.Location;
 import io.github.jspinak.brobot.datatypes.primitives.location.Position;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.primitives.text.Text;
+import io.github.jspinak.brobot.datatypes.state.NullState;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
 import io.github.jspinak.brobot.primatives.enums.StateEnum;
 import lombok.Data;
+import org.bytedeco.opencv.opencv_core.Mat;
 import org.sikuli.script.Match;
 
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -38,16 +45,30 @@ import java.util.stream.Collectors;
 public class Matches {
 
     private List<MatchObject> matchObjects = new ArrayList<>();
+
+    // the first set of matches in a composite find operation. it may be useful to see these matches in illustrations.
+    private List<MatchObject> initialMatchObjects = new ArrayList<>();
     private List<MatchObject> nonoverlappingMatches = new ArrayList<>();
     private MatchObject bestMatch = null; // query returns an Optional in case there are no matches
+    private ActionOptions actionOptions; // the action options used to find the matches
     private List<StateEnum> activeStates = new ArrayList<>();
     private Text text = new Text();
     private String selectedText = ""; // the String selected from the Text object as the most accurate representation of the text on-screen
-    private Duration duration;
+    private Duration duration = Duration.ZERO;
+    private LocalDateTime startTime = LocalDateTime.now();
+    private LocalDateTime endTime;
     private boolean success = false; // for boolean queries (i.e. true for 'find', false for 'vanish' when not empty)
     private List<Region> definedRegions = new ArrayList<>();
     private int maxMatches = -1; // not used when <= 0
     private DanglingSnapshots danglingSnapshots = new DanglingSnapshots();
+    private SceneAnalysisCollection sceneAnalysisCollection = new SceneAnalysisCollection();
+    private Mat pixelMatches; // for motion detection
+
+    public Matches() {}
+
+    public Matches(ActionOptions actionOptions) {
+        this.actionOptions = actionOptions;
+    }
 
     public void add(MatchObject match) {
         if (maxMatches > 0 && matchObjects.size() >= maxMatches) return;
@@ -55,6 +76,10 @@ public class Matches {
         addNonoverlappingMatch(match);
         setBestMatch(match);
         addActiveState(match);
+    }
+
+    public void addSceneAnalysis(SceneAnalysis sceneAnalysis) {
+        sceneAnalysisCollection.add(sceneAnalysis);
     }
 
     public void addMatchObjects(StateImageObject stateImageObject, List<Match> matchList, double duration) {
@@ -67,11 +92,22 @@ public class Matches {
         });
     }
 
-    public void addAll(Matches matches) {
+    public void addMatchObjects(Matches matches) {
         for (MatchObject match : matches.getMatchObjects()) {
             add(match);
         }
+    }
+
+    public void addAllResults(Matches matches) {
+        addMatchObjects(matches);
+        addNonMatchResults(matches);
+    }
+
+    public void addNonMatchResults(Matches matches) {
         text.addAll(matches.text);
+        activeStates.addAll(matches.activeStates);
+        duration = duration.plus(matches.duration);
+        sceneAnalysisCollection.getSceneAnalyses().addAll(matches.sceneAnalysisCollection.getSceneAnalyses()); // = matches.sceneAnalysisCollection;
         danglingSnapshots.addAllSnapshots(matches.getDanglingSnapshots());
     }
 
@@ -87,6 +123,14 @@ public class Matches {
         return matchObjects.stream()
                 .map(MatchObject::getMatch)
                 .collect(Collectors.toList());
+    }
+
+    public void sortMatchObjects() {
+        matchObjects.sort(Comparator.comparingDouble(MatchObject::getScore));
+    }
+
+    public void sortMatchObjectsDescending() {
+        matchObjects.sort(Comparator.comparingDouble(MatchObject::getScore).reversed());
     }
 
     public List<Region> getMatchRegions() {
@@ -155,6 +199,14 @@ public class Matches {
     public void setDuration(Duration duration) {
         this.duration = duration;
         danglingSnapshots.setDuration((double) duration.getSeconds());
+    }
+
+    public void sortByMatchScoreDecending() {
+        matchObjects.sort(Comparator.comparingDouble(mO -> mO.getMatch().getScore()));
+    }
+
+    public void sortBySizeDecending() {
+        matchObjects.sort(Comparator.comparing(MatchObject::getMatchArea).reversed());
     }
 
     public void saveSnapshots() {
@@ -248,11 +300,30 @@ public class Matches {
      */
     public Matches getConfirmedMatches(Matches insideMatches) {
         Matches matches = new Matches();
-        matches.setMaxMatches(this.maxMatches);
+        //matches.setMaxMatches(this.maxMatches);
         matchObjects.forEach(mO -> {
-            if (mO.contains(insideMatches)) matches.add(mO);
+            if (mO.contains(insideMatches)) {
+                matches.add(mO);
+                //Report.println("adding inside match: " + mO.getMatch().x + " " + mO.getMatch().y);
+            }
         });
         return matches;
+    }
+
+    public void removeNonConfirmedMatches(Matches insideMatches) {
+        matchObjects.removeIf(mO -> !mO.contains(insideMatches));
+    }
+
+    public void keepOnlyConfirmedMatches(Matches insideMatches) {
+        Matches confirmedMatches = getConfirmedMatches(insideMatches);
+        matchObjects = confirmedMatches.matchObjects;
+    }
+
+    public boolean hasImageMatches() {
+        for (MatchObject matchObject : matchObjects) {
+            if (matchObject.getStateObject().getOwnerStateName() != NullState.Name.NULL) return true;
+        }
+        return false;
     }
 
 }

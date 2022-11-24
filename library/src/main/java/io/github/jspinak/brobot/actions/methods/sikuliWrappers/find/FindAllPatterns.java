@@ -39,7 +39,7 @@ public class FindAllPatterns implements FindPatternInterface {
         List<Pattern> patterns = imagePatterns.getPatterns(image, actionOptions);
         Matches matches = new Matches();
         for (Pattern pattern : patterns) {
-            matches.addAll(findPattern.findAll(region, pattern, stateImageObject, actionOptions));
+            matches.addAllResults(findPattern.findAll(region, pattern, stateImageObject, actionOptions));
         }
         /*
          * Store Snapshots before adjusting the Match. This makes it easier to reuse.

@@ -6,6 +6,8 @@ import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.St
 import io.github.jspinak.brobot.datatypes.state.NullState;
 import lombok.Getter;
 import lombok.Setter;
+import org.bytedeco.opencv.opencv_core.Mat;
+import org.bytedeco.opencv.opencv_core.Rect;
 import org.sikuli.script.Match;
 import org.sikuli.script.Screen;
 
@@ -52,9 +54,17 @@ public class Region extends org.sikuli.script.Region implements Comparable<Regio
         setXY2();
     }
 
+    public Region(Rect rect) {
+        x = rect.x();
+        y = rect.y();
+        w = rect.width();
+        h = rect.height();
+        setXY2();
+    }
+
     public StateRegion inNullState() {
         return new StateRegion.Builder()
-                .inState(NullState.Enum.NULL)
+                .inState(NullState.Name.NULL)
                 .withSearchRegion(this)
                 .build();
     }
@@ -103,7 +113,7 @@ public class Region extends org.sikuli.script.Region implements Comparable<Regio
 
     @Override
     public String toString() {
-        return "x = "+x+" y = "+y;
+        return "x.y.w.h = "+x+"."+y+"."+w+"."+h;
     }
 
     public boolean defined() {
@@ -114,10 +124,13 @@ public class Region extends org.sikuli.script.Region implements Comparable<Regio
     Match is also allowed as a param since Match extends Region
     */
     public boolean overlaps(Region r) {
-        if (contains(r.getTopLeft())) return true;
-        if (contains(r.getTopRight())) return true;
-        if (contains(r.getBottomLeft())) return true;
-        return contains(r.getBottomRight());
+        Optional<Region> overlap = getOverlappingRegion(r);
+        return overlap.isPresent();
+    }
+
+    public boolean overlaps(Rect rect) {
+        Region r = new Region(rect);
+        return overlaps(r);
     }
 
     /*
@@ -223,5 +236,32 @@ public class Region extends org.sikuli.script.Region implements Comparable<Regio
 
     public boolean equals(Region r) {
         return x == r.x && y == r.y && w == r.w && h == r.h;
+    }
+
+    public Rect getJavaCVRect() {
+        return new Rect(x, y, w, h);
+    }
+
+    public boolean contains(Rect rect) {
+        return contains(new Region(rect));
+    }
+
+    public Optional<Rect> getOverlappingRect(Rect rect) {
+        int x = Math.max(this.x, rect.x());
+        int y = Math.max(this.y, rect.y());
+        int x2 = Math.min(this.x+this.w, rect.x()+rect.width());
+        int y2 = Math.min(this.y+this.h, rect.y()+rect.height());
+        if (x2 <= x || y2 <= y) return Optional.empty();
+        return Optional.of(new Rect(x, y, x2-x, y2-y));
+    }
+
+    public Optional<Region> getOverlappingRegion(Region r) {
+        Optional<Rect> rect = getOverlappingRect(r.getJavaCVRect());
+        if (rect.isEmpty()) return Optional.empty();
+        return Optional.of(new Region(rect.get()));
+    }
+
+    public Location getLocation() {
+        return new Location(getTarget().x, getTarget().y);
     }
 }

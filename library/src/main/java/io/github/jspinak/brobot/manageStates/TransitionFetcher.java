@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 import java.util.Optional;
 import java.util.function.BooleanSupplier;
 
-import static io.github.jspinak.brobot.datatypes.state.NullState.Enum.NULL;
+import static io.github.jspinak.brobot.datatypes.state.NullState.Name.NULL;
 
 /**
  * This class returns an object containing the StateTransitions objects and StateTransition objects that

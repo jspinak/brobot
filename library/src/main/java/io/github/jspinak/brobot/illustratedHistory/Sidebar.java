@@ -1,41 +1,100 @@
 package io.github.jspinak.brobot.illustratedHistory;
 
+import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
+import io.github.jspinak.brobot.datatypes.primitives.match.MatchObject;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
-import org.opencv.core.Mat;
-import org.opencv.core.Rect;
-import org.opencv.core.Scalar;
-import org.opencv.core.Size;
+import io.github.jspinak.brobot.illustratedHistory.draw.DrawHistogram;
+import io.github.jspinak.brobot.imageUtils.MatBuilder;
+import io.github.jspinak.brobot.imageUtils.MatVisualize;
+import org.bytedeco.opencv.opencv_core.Mat;
+import org.bytedeco.opencv.opencv_core.Rect;
+import org.bytedeco.opencv.opencv_core.Size;
 import org.sikuli.script.Match;
 import org.springframework.stereotype.Component;
 
-import static org.opencv.imgproc.Imgproc.resize;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.bytedeco.opencv.global.opencv_imgproc.resize;
 
 @Component
 public class Sidebar {
 
-    private int sidebarEntryW = 50, sidebarEntryH = 50;
-    int matchesPerColumn;
+    private DrawHistogram drawHistogram;
+    private MatVisualize matVisualize;
+    private ColumnMatOps columnMatOps;
 
-    private Mat initSidebar(Mat screen, int matchesSize) {
-        matchesPerColumn = screen.rows() / sidebarEntryH;
-        int sidebarW = (matchesSize / matchesPerColumn + 1) * sidebarEntryW;
-        return new Mat(screen.rows(), sidebarW, screen.type(), new Scalar(255, 255, 255));
+    private int sidebarEntryW = 50, sidebarEntryH = 50;
+    private int spacesBetweenEntries = 4;
+    private int matchesPerColumn;
+    private int columns;
+
+    public Sidebar(DrawHistogram drawHistogram, MatVisualize matVisualize, ColumnMatOps columnMatOps) {
+        this.drawHistogram = drawHistogram;
+        this.matVisualize = matVisualize;
+        this.columnMatOps = columnMatOps;
     }
 
-    public Mat draw(Mat screen, Matches matches) {
-        Mat sidebar = initSidebar(screen, matches.size());
-        int i=0;
-        int x,y;
-        for (Match match : matches.getMatches()) {
-            x = (i / matchesPerColumn) * sidebarEntryW + 1;
-            y = (i % matchesPerColumn) * sidebarEntryH + 1;
-            Rect onScreen = new Rect(match.x, match.y, match.w, match.h);
-            Mat matchMat = screen.submat(onScreen);
-            resize(matchMat, matchMat, new Size(sidebarEntryW-2, sidebarEntryH-2));
-            Mat targetInSidebar = sidebar.submat(new Rect(x, y, sidebarEntryW-2, sidebarEntryH-2));
-            matchMat.copyTo(targetInSidebar);
-            i++;
+    public void drawSidebars(Illustrations illustrations, Matches matches, ActionOptions actionOptions) {
+        if (illustrations.getScene() == null) return;
+        List<Mat> sidebarEntries = getEntriesForSceneSidebar(illustrations, matches, actionOptions);
+        Mat sidebar = getSidebar(illustrations.getScene(), sidebarEntries, matches);
+        illustrations.setSidebar(sidebar);
+    }
+
+    public void mergeSceneAndSidebar(Illustrations illustrations) {
+        if (illustrations.getMatchesOnScene() == null) return;
+        Mat sceneAndSidebar = new MatBuilder()
+                .addHorizontalSubmats(illustrations.getMatchesOnScene(), illustrations.getSidebar())
+                .setSpaceBetween(spacesBetweenEntries)
+                .build();
+        illustrations.setSceneWithMatchesAndSidebar(sceneAndSidebar);
+    }
+
+    public void initSidebar(Mat scene, int matchesSize) {
+        matchesPerColumn = scene.rows() / (sidebarEntryH + spacesBetweenEntries);
+        columns = (int) Math.ceil((double) matchesSize / matchesPerColumn);
+    }
+
+    private Mat getSidebar(Mat scene, List<Mat> sidebarEntries, Matches matches) {
+        initSidebar(scene, matches.size());
+        List<Mat> sidebarColumns = new ArrayList<>();
+        for (int i = 0; i < columns; i++) {
+            List<Mat> columnEntries = columnMatOps.getColumnEntries(sidebarEntries, i, matchesPerColumn);
+            Mat columnMat = columnMatOps.getColumnMat(columnEntries);
+            sidebarColumns.add(columnMat);
         }
-        return sidebar;
+        return columnMatOps.mergeColumnMats(sidebarColumns, spacesBetweenEntries);
+    }
+
+
+    private List<Mat> getEntriesForSceneSidebar(Illustrations illustrations, Matches matches, ActionOptions actionOptions) {
+        List<Mat> sidebarEntries = new ArrayList<>();
+        matches.getMatchObjects().forEach(m -> sidebarEntries.add(getEntryForSceneSidebar(illustrations, m, actionOptions)));
+        return sidebarEntries;
+    }
+
+    private Mat getEntryForSceneSidebar(Illustrations illustrations, MatchObject matchObject, ActionOptions actionOptions) {
+        Mat matchOnScene = getMatchForSidebar(illustrations, matchObject);
+        if (actionOptions.getFind() != ActionOptions.Find.HISTOGRAM) return matchOnScene;
+        return getMatchAndHistogram(matchOnScene, matchObject);
+    }
+
+    private Mat getMatchForSidebar(Illustrations illustrations, MatchObject matchObject) {
+        Match match = matchObject.getMatch();
+        Rect rect = new Rect(match.x, match.y, match.w, match.h);
+        Mat matchFromScene = illustrations.getScene().apply(rect);
+        resize(matchFromScene, matchFromScene, new Size(sidebarEntryW, sidebarEntryH));
+        return matchFromScene;
+    }
+
+    private Mat getMatchAndHistogram(Mat matchFromScene, MatchObject matchObject) {
+        Mat histMat = drawHistogram.draw(sidebarEntryW, sidebarEntryH, matchObject.getHistogram());
+        Mat entryAndHist = new MatBuilder()
+                .setName("matchAndHist")
+                .setSpaceBetween(spacesBetweenEntries)
+                .addHorizontalSubmats(matchFromScene, histMat)
+                .build();
+        return entryAndHist;
     }
 }

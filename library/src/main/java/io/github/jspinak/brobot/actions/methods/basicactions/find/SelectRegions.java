@@ -18,27 +18,19 @@ public class SelectRegions {
      * Select regions by the following methods, in this order:
      * 1. If the ActionOptions has SearchRegions defined, use those Regions.
      * 2. If the StateImageObject is using its RegionImagePairs, and the specific Image's Region
-     *    is defined (meaning it's been found already), then use that Region. Otherwise, in this order:
+     *    is defined (meaning it's been found already), then use that Region.
      * 3. Use the SearchRegions on the StateImageObject.
      *
      * @param actionOptions holds the action configuration, which can contain search regions.
      * @param stateImage can also contain search regions.
-     * @param ripRegion is a region from a RegionImagePairs object.
      * @return a list of regions to use in an Action.
      */
-    public List<Region> getRegions(ActionOptions actionOptions, StateImageObject stateImage,
-                                    Region... ripRegion) {
-        List<Region> regions = new ArrayList<>();
+    public List<Region> getRegions(ActionOptions actionOptions, StateImageObject stateImage) {
         if (actionOptions.getSearchRegions().defined())
             return actionOptions.getSearchRegions().getAllRegions();
-        if (ripRegion.length > 0 && ripRegion[0].defined()) {
-            regions.add(ripRegion[0]);
-            return regions; // This is an RIP and it's defined.
-        }
-        return stateImage.getAllSearchRegions();
+        return getRegionsOnImage(stateImage);
     }
 
-    // this can replace passing the RIP regions as a parameter
     private List<Region> getRegionsOnImage(StateImageObject image) {
         List<Region> regions = new ArrayList<>();
         if (image.isFixed()) { //it's an RIP

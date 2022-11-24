@@ -8,8 +8,8 @@ import java.util.Arrays;
 public class Output {
 
     // special characters
-    public static char check = '\u2713';
-    public static char fail = '\u2718';
+    public static String check = "✓"; //'\u2713';
+    public static String fail = "✘"; //'\u2718';
 
     public static void printColor(String message, String... colors) {
         //System.out.print("| ");

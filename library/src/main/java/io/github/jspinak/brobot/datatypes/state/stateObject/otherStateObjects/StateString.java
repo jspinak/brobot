@@ -4,7 +4,7 @@ import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.primatives.enums.StateEnum;
 import lombok.Data;
 
-import static io.github.jspinak.brobot.datatypes.state.NullState.Enum.NULL;
+import static io.github.jspinak.brobot.datatypes.state.NullState.Name.NULL;
 
 /**
  * A State String belongs to a State and usually has a String that
