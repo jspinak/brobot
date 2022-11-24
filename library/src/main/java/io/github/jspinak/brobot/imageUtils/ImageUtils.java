@@ -3,13 +3,18 @@ package io.github.jspinak.brobot.imageUtils;
 import io.github.jspinak.brobot.actions.BrobotSettings;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.reports.Report;
+import org.bytedeco.opencv.opencv_core.Mat;
 import org.springframework.stereotype.Component;
 
 import javax.imageio.ImageIO;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+
+import static org.bytedeco.opencv.global.opencv_imgcodecs.imwrite;
 
 @Component
 public class ImageUtils {
@@ -59,8 +64,58 @@ public class ImageUtils {
         return path + i;
     }
 
-    private boolean fileExists(String filePath) {
+    public String getFreePath(String prefix, String suffix) {
+        int i = lastFilenumber.containsKey(prefix) ? lastFilenumber.get(prefix) + 1 : 0;
+        String filename = prefix + i + "_" + suffix + ".png";
+        while (fileExists(filename)) {
+            i++;
+            filename = prefix + i + "_" + suffix + ".png";
+        }
+        return filename;
+    }
+
+    public String getFreePath() {
+        return getFreePath(BrobotSettings.historyPath + BrobotSettings.historyFilename);
+    }
+
+    boolean fileExists(String filePath) {
         File f = new File(filePath);
         return f.exists() && !f.isDirectory();
+    }
+
+    public int getFreeNumber() {
+        return getFreeNumber(BrobotSettings.historyPath + BrobotSettings.historyFilename);
+    }
+
+    public int getFreeNumber(String path) {
+        getFreePath(path);
+        return lastFilenumber.get(path);
+    }
+
+    public boolean writeWithUniqueFilename(Mat mat, String nameWithoutFiletype) {
+        nameWithoutFiletype = getFreePath(nameWithoutFiletype) + ".png";
+        return imwrite(nameWithoutFiletype, mat);
+    }
+
+    public boolean writeAllWithUniqueFilename(List<Mat> mats, List<String> filenames) {
+        if (mats.size() != filenames.size()) {
+            Report.println("Error: number of mats and filenames must be equal.");
+            return false;
+        }
+        List<Mat> nonNullMats = new ArrayList<>();
+        List<String> nonNullFilenames = new ArrayList<>();
+        for (int i=0; i<mats.size(); i++) {
+            if (mats.get(i) != null) {
+                nonNullMats.add(mats.get(i));
+                nonNullFilenames.add(filenames.get(i));
+            }
+            else Report.println("Mat at index " + i + " is null.");
+        }
+        for (int i=0; i<nonNullMats.size(); i++) {
+            if (!writeWithUniqueFilename(nonNullMats.get(i), nonNullFilenames.get(i))) {
+                return false;
+            }
+        }
+        return true;
     }
 }

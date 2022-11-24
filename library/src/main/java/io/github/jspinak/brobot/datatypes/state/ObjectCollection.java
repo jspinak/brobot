@@ -1,5 +1,6 @@
 package io.github.jspinak.brobot.datatypes.state;
 
+import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.Scene;
 import io.github.jspinak.brobot.datatypes.primitives.image.Image;
 import io.github.jspinak.brobot.datatypes.primitives.location.Location;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
@@ -19,7 +20,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static io.github.jspinak.brobot.datatypes.primitives.location.Position.Name.TOPLEFT;
-import static io.github.jspinak.brobot.datatypes.state.NullState.Enum.NULL;
+import static io.github.jspinak.brobot.datatypes.state.NullState.Name.NULL;
 
 /**
  * This class holds all the objects that can be passed to an Action.
@@ -33,6 +34,7 @@ public class ObjectCollection {
     private List<StateRegion> stateRegions = new ArrayList<>();
     private List<StateString> stateStrings = new ArrayList<>();
     private List<Matches> matches = new ArrayList<>();
+    private List<Image> scenes = new ArrayList<>();
 
     private ObjectCollection() {}
 
@@ -41,7 +43,8 @@ public class ObjectCollection {
                 && stateImages.isEmpty()
                 && stateRegions.isEmpty()
                 && stateStrings.isEmpty()
-                && matches.isEmpty();
+                && matches.isEmpty()
+                && scenes.isEmpty();
     }
 
     /**
@@ -94,6 +97,8 @@ public class ObjectCollection {
         return matches.contains(m);
     }
 
+    public boolean contains(Image sc) { return scenes.contains(sc); }
+
     public boolean equals(ObjectCollection objectCollection) {
         for (StateImageObject sio : stateImages) {
             if (!objectCollection.contains(sio)) {
@@ -125,6 +130,12 @@ public class ObjectCollection {
                 return false;
             }
         }
+        for (Image sc : scenes) {
+            if (!objectCollection.contains(sc)) {
+                //Report.println(" matches different ");
+                return false;
+            }
+        }
         return true;
     }
 
@@ -134,6 +145,7 @@ public class ObjectCollection {
         private List<StateRegion> stateRegions = new ArrayList<>();
         private List<StateString> stateStrings = new ArrayList<>();
         private List<Matches> matches = new ArrayList<>();
+        private List<Image> scenes = new ArrayList<>();
 
         public Builder withLocations(Location... locations) {
             for (Location location : locations) {
@@ -235,6 +247,11 @@ public class ObjectCollection {
             return this;
         }
 
+        public Builder withScenes(Image... scenes) {
+            Collections.addAll(this.scenes, scenes);
+            return this;
+        }
+
         public ObjectCollection build() {
             ObjectCollection objectCollection = new ObjectCollection();
             objectCollection.stateLocations = stateLocations;
@@ -242,6 +259,7 @@ public class ObjectCollection {
             objectCollection.stateRegions = stateRegions;
             objectCollection.stateStrings = stateStrings;
             objectCollection.matches = matches;
+            objectCollection.scenes = scenes;
             return objectCollection;
         }
     }

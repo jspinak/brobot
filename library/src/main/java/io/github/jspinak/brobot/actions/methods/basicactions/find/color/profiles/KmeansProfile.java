@@ -1,37 +1,37 @@
 package io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles;
 
 import lombok.Getter;
-import org.opencv.core.Mat;
+import org.bytedeco.opencv.opencv_core.Mat;
 
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+/**
+ * KmeansProfile represents a k-means analysis for one number of means and one color schema (BGR, HSV, etc.).
+ * It holds a list of clusters, each of which describes, for each channel, the points associated with one of the centers.
+ */
 @Getter
 public class KmeansProfile {
 
-    private Mat data;
-    private Mat labels;
-    private Mat centers;
-    private double compactness;
-    private List<KmeansCluster> clusters = new ArrayList<>();
+    private ColorCluster.ColorSchemaName colorSchemaName;
+    private int numberOfCenters;
+    private Mat labels; // 3 channels, shows which cluster each cell belongs to
+    private Mat centers; // 3 channels
+    private double[] compactness; // one for each channel
+    private List<KmeansCluster> clusters; // one per center
 
-    public KmeansProfile(Mat data, Mat labels, Mat centers, double compactness) {
-        this.data = data;
+    public KmeansProfile(ColorCluster.ColorSchemaName colorSchemaName, int numberOfCenters, Mat labels, Mat centers,
+                         double[] compactness, List<KmeansCluster> clusters) {
+        this.colorSchemaName = colorSchemaName;
+        this.numberOfCenters = numberOfCenters;
         this.labels = labels;
         this.centers = centers;
         this.compactness = compactness;
-        setClusters();
-    }
-
-    private void setClusters() {
-        for (int i=0; i<centers.rows(); i++) {
-            clusters.add(new KmeansCluster(centers.get(i,0), i, labels, data));
-        }
+        this.clusters = clusters;
     }
 
     public KmeansCluster getDominantCluster() {
-        clusters.sort(Comparator.comparing(KmeansCluster::getPercentOfTotalPoints).reversed());
+        clusters.sort(Comparator.comparing(KmeansCluster::getPercentOfPointsOverall).reversed());
         return clusters.get(0);
     }
 }

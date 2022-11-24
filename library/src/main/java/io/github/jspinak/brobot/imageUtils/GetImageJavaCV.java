@@ -1,106 +1,182 @@
 package io.github.jspinak.brobot.imageUtils;
 
+import io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles.ColorCluster;
+import io.github.jspinak.brobot.datatypes.primitives.image.Image;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
-import org.opencv.core.CvType;
-import org.opencv.core.Mat;
-import org.opencv.imgproc.Imgproc;
-import org.sikuli.script.Pattern;
-import org.sikuli.script.Screen;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
+import org.bytedeco.javacv.*;
+import org.bytedeco.opencv.opencv_core.Mat;
+import org.opencv.core.MatOfByte;
+import org.sikuli.script.ImagePath;
 import org.springframework.stereotype.Component;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
-import java.io.File;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.Objects;
+import java.util.ArrayList;
+import java.util.List;
 
-import static org.opencv.highgui.HighGui.imshow;
-import static org.opencv.highgui.HighGui.waitKey;
-import static org.opencv.imgcodecs.Imgcodecs.imread;
-import static org.opencv.imgproc.Imgproc.*;
+import static org.bytedeco.opencv.global.opencv_core.add;
+import static org.bytedeco.opencv.global.opencv_imgcodecs.*;
+import static org.bytedeco.opencv.global.opencv_imgproc.COLOR_BGR2HSV;
+import static org.bytedeco.opencv.global.opencv_imgproc.cvtColor;
 
+/**
+ * The same methods as in GetImage, but for JavaCV.
+ * JavaCV is compatible with the DL4J libraries, making it a better choice for Brobot than OpenCV.
+ * It would be cleaner to migrate all OpenCV code to JavaCV, but this is a lower priority.
+ */
 @Component
-public class GetImage {
+public class GetImageJavaCV {
 
-    public BufferedImage getBuffImgFromFile(String path) throws IOException {
-        File f = new File(path);
-        return ImageIO.read(Objects.requireNonNull(f));
+    private GetBufferedImage getBufferedImage;
+
+    public GetImageJavaCV(GetBufferedImage getBufferedImage) {
+        this.getBufferedImage = getBufferedImage;
     }
 
-    public BufferedImage getBuffImgFromScreen(Region region) {
-        return new Screen().capture(region).getImage();
-    }
-
-    public Mat BGRtoHSV(Mat bgr) {
-        Imgproc.cvtColor(bgr, bgr, Imgproc.COLOR_BGR2HSV);
+    public Mat convertToHSV(Mat bgr) {
+        cvtColor(bgr, bgr, COLOR_BGR2HSV);
         return bgr;
     }
 
-    public Mat getMatFromFilename(String imageName, boolean hsv) {
-        //if (hsv) return imread(imageName, COLOR_BGR2HSV); // this returns a 1x1 Mat for some strange reason. Mat [ 1*1*CV_8UC4 ...
+    public Mat getHSV(Mat bgr) {
+        Mat hsv = new Mat();
+        cvtColor(bgr, hsv, COLOR_BGR2HSV );
+        return hsv;
+    }
+
+    public Mat getMatFromFilename(String imageName, ColorCluster.ColorSchemaName colorSchemaName) {
         Mat mat = imread(imageName); // Mat [ 7*7*CV_8UC3 ...
-        if (!hsv) return mat;
-        return BGRtoHSV(mat);
+        if (colorSchemaName == ColorCluster.ColorSchemaName.BGR) return mat;
+        if (colorSchemaName == ColorCluster.ColorSchemaName.HSV) return getHSV(mat);
+        throw new RuntimeException("ColorSchemaName not supported: " + colorSchemaName);
     }
 
-    public Mat getMatFromScreen(Region region, boolean hsv) {
+    public Mat getMat(String imageName, ColorCluster.ColorSchemaName colorSchemaName) {
+        String path = ImagePath.getBundlePath()+"/"+imageName;
+        Mat mat = getMatFromFilename(path, colorSchemaName);
+        return mat;
+    }
+
+    public List<Mat> getMats(List<String> filenames, ColorCluster.ColorSchemaName colorSchemaName) {
+        List<Mat> mats = new ArrayList<>();
+        for (String filename : filenames) {
+            mats.add(getMat(filename, colorSchemaName));
+        }
+        return mats;
+    }
+
+    public List<Mat> getMatsFromImage(StateImageObject img, ColorCluster.ColorSchemaName colorSchemaName) {
+        if (img.isDynamic()) return getMatsFromDynamicInsideImage(img, colorSchemaName);
+        return getMats(img.getImage(), colorSchemaName);
+    }
+
+    public List<Mat> getMatsFromDynamicInsideImage(StateImageObject img, ColorCluster.ColorSchemaName colorSchemaName) {
+        return getMats(img.getDynamicImage().getInside(), colorSchemaName);
+    }
+
+    public List<Mat> getMats(Image image, ColorCluster.ColorSchemaName colorSchemaName) {
+        return getMats(image.getFilenames(), colorSchemaName);
+    }
+
+    /**
+     * Returns one Mat masked by the regions.
+     * @param imageName the name of the image to load
+     * @param regions the regions to add to the Mat
+     * @param colorSchemaName the color schema to use
+     * @return a Mat with only the given regions selected
+     */
+    public Mat getMat(String imageName, List<Region> regions, ColorCluster.ColorSchemaName colorSchemaName) {
+        Mat image = getMat(imageName, colorSchemaName);
+        Mat mask = new Mat();
+        for (Region region : regions) {
+            add(mask, image, mask, new Mat(region.getJavaCVRect()), -1);
+        }
+        return mask;
+    }
+
+    /**
+     * Returns one Mat per region.
+     * @param imageName the name of the image to load
+     * @param regions each region corresponds to a Mat
+     * @param colorSchemaName the color schema to use
+     * @return a List of Mats corresponding to the regions
+     */
+    public List<Mat> getMats(String imageName, List<Region> regions, ColorCluster.ColorSchemaName colorSchemaName) {
+        List<Mat> mats = new ArrayList<>();
+        Mat scene = getMat(imageName, colorSchemaName);
+        if (regions.isEmpty()) {
+            mats.add(scene);
+            return mats;
+        }
+        for (Region region : regions) {
+            mats.add(scene.apply(region.getJavaCVRect()));
+        }
+        return mats;
+    }
+
+    public Mat getMatFromScreen(Region region, ColorCluster.ColorSchemaName colorSchemaName) {
         Mat img = getMatFromScreen(region);
-        if (!hsv) return img;
-        return BGRtoHSV(img);
-    }
-
-    public org.bytedeco.opencv.opencv_core.Mat getJavaCVMatFromScreen(Region region, boolean hsv) {
-        org.bytedeco.opencv.opencv_core.Mat img =
+        if (colorSchemaName == ColorCluster.ColorSchemaName.BGR) return img;
+        if (colorSchemaName == ColorCluster.ColorSchemaName.HSV) return getHSV(img);
+        throw new RuntimeException("ColorSchemaName not supported: " + colorSchemaName);
     }
 
     public Mat getMatFromScreen(Region region) {
-        BufferedImage bi = getBuffImgFromScreen(region);
-        return getMatFromBufferedImage(bi);
+        BufferedImage bi = getBufferedImage.getBuffImgFromScreen(region);
+        return getMat(bi, false);
     }
 
-    public org.bytedeco.opencv.opencv_core.Mat getJavaCVMatFromScreen(Region region) {
-        BufferedImage bi = getBuffImgFromScreen(region);
-        return
-    }
-
-    public Mat getMatFromScreen(boolean hsv) {
-        return getMatFromScreen(new Region(), hsv);
+    public Mat getMatFromScreen(ColorCluster.ColorSchemaName colorSchemaName) {
+        return getMatFromScreen(new Region(), colorSchemaName);
     }
 
     public Mat getMatFromScreen() {
         return getMatFromScreen(new Region());
     }
 
-    /*
-    the following 2 methods are from https://stackoverflow.com/questions/14958643/converting-bufferedimage-to-mat-in-opencv
-    */
-    public Mat getMatFromBufferedImage(BufferedImage image) {
-        image = convertTo3ByteBGRType(image);
-        byte[] data = ((DataBufferByte) image.getRaster().getDataBuffer()).getData();
-        Mat mat = new Mat(image.getHeight(), image.getWidth(), CvType.CV_8UC3);
-        mat.put(0, 0, data);
+    public Mat getMat(BufferedImage image, boolean hsv) {
+        image = getBufferedImage.convertTo3ByteBGRType(image);
+        //byte[] data = ((DataBufferByte) image.getRaster().getDataBuffer()).getData();
+        Mat mat = bufferedImage2Mat(image); //new Mat(data);
+        if (hsv) return convertToHSV(mat);
         return mat;
     }
 
-    public org.bytedeco.opencv.opencv_core.Mat getJavaCVMatFromBufferedImage(BufferedImage image) {
-        image = convertTo3ByteBGRType(image);
-        byte[] data = ((DataBufferByte) image.getRaster().getDataBuffer()).getData();
-        org.bytedeco.opencv.opencv_core.Mat mat = new org.bytedeco.opencv.opencv_core.Mat(image.getHeight(), image.getWidth(), CvType.CV_8UC3);
-        mat.put(data);
-        return mat;
+    public List<Mat> getMatsFromScreen(List<Region> regions, boolean hsv) {
+        List<BufferedImage> bufferedImages = getBufferedImage.getBuffImgsFromScreen(regions);
+        List<Mat> mats = new ArrayList<>();
+        bufferedImages.forEach(bI -> mats.add(getMat(bI, hsv)));
+        return mats;
     }
 
-    private BufferedImage convertTo3ByteBGRType(BufferedImage image) {
-        BufferedImage convertedImage = new BufferedImage(image.getWidth(), image.getHeight(),
-                BufferedImage.TYPE_3BYTE_BGR);
-        convertedImage.getGraphics().drawImage(image, 0, 0, null);
-        return convertedImage;
+    public Mat bufferedImage2Mat(BufferedImage image) {
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        try {
+            ImageIO.write(image, "jpg", byteArrayOutputStream);
+            byteArrayOutputStream.flush();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return imdecode(new Mat(byteArrayOutputStream.toByteArray()), IMREAD_UNCHANGED);
     }
 
-    public Mat convertToHSV(Mat mat) {
-        Mat hsv = new Mat();
-        cvtColor(mat, hsv, COLOR_BGR2HSV );
-        return hsv;
+    public Mat getMatFromScreenWithJavaCV() {
+        OpenCVFrameConverter.ToMat converter = new OpenCVFrameConverter.ToMat();
+        FrameGrabber grabber = new FFmpegFrameGrabber("desktop");
+        grabber.setFormat("gdigrab");
+        grabber.setFrameRate(30);
+        try {
+            grabber.start();
+            Frame frame = grabber.grab();
+            grabber.stop();
+            return converter.convert(frame);
+        } catch (FrameGrabber.Exception e) {
+            throw new RuntimeException(e);
+        }
     }
+
 }

@@ -2,7 +2,7 @@ package io.github.jspinak.brobot.actions.methods.basicactions.find;
 
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
+import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import io.github.jspinak.brobot.reports.Report;
 import org.springframework.stereotype.Component;
 
@@ -28,16 +28,17 @@ public class FindImageOrRIP {
     /**
      * For Find.FIRST or Find.ALL, depending on the ActionOptions.
      * @param actionOptions holds the action configuration.
-     * @param images are the images to find.
+     * @param objectCollections images are taken from the first ObjectCollection.
      * @return a Matches object with all matches found.
      */
-    public Matches find(ActionOptions actionOptions, List<StateImageObject> images) {
+    public Matches find(ActionOptions actionOptions, List<ObjectCollection> objectCollections) {
         if (Report.minReportingLevel(Report.OutputLevel.LOW)) {
             System.out.format("Find.%s ", actionOptions.getFind());
         }
         Matches matches = new Matches();
-        images.forEach(image -> {
-            matches.addAll(findMethod.get(image.isFixed()).find(actionOptions, image));
+        objectCollections.get(0).getStateImages().forEach(image -> {
+            matches.addAllResults(findMethod.get(image.isFixed()).
+                    find(actionOptions, image));
         });
         return matches;
     }
@@ -45,25 +46,26 @@ public class FindImageOrRIP {
     /**
      * Searches all patterns and returns the Match with the best Score.
      * @param actionOptions holds the action configuration.
-     * @param images are the images to find.
+     * @param objectCollections images are taken from the first ObjectCollection.
      * @return a Matches object with either the best match or no matches.
      */
-    public Matches best(ActionOptions actionOptions, List<StateImageObject> images) {
+    public Matches best(ActionOptions actionOptions, List<ObjectCollection> objectCollections) {
         Matches matches = new Matches();
-        find(actionOptions, images).getBestMatch().ifPresent(matches::add);
+        find(actionOptions, objectCollections).getBestMatch().ifPresent(matches::add);
         return matches;
     }
 
     /**
      * Searches each Pattern separately and returns one Match per Pattern if found.
      * @param actionOptions holds the action configuration.
-     * @param images are the images to find.
+     * @param objectCollections images are taken from the first ObjectCollection.
      * @return a Matches object with all matches found.
      */
-    public Matches each(ActionOptions actionOptions, List<StateImageObject> images) {
+    public Matches each(ActionOptions actionOptions, List<ObjectCollection> objectCollections) {
         Matches matches = new Matches();
-        images.forEach(image ->
-                find(actionOptions, Collections.singletonList(image)).getBestMatch().ifPresent(matches::add));
+        objectCollections.get(0).getStateImages().forEach(image ->
+                find(actionOptions, Collections.singletonList(image.asObjectCollection())).
+                        getBestMatch().ifPresent(matches::add));
         return matches;
     }
 }

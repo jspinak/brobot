@@ -3,6 +3,7 @@ package io.github.jspinak.brobot.actions.actionExecution;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.FindFunctions;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
+import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
 import org.springframework.stereotype.Component;
 
@@ -35,7 +36,7 @@ public class ActionService {
         return compositeAction.getAction(actionOptions.getAction());
     }
 
-    public void setCustomFind(BiFunction<ActionOptions, List<StateImageObject>, Matches> customFind) {
+    public void setCustomFind(BiFunction<ActionOptions, List<ObjectCollection>, Matches> customFind) {
         findFunctions.addCustomFind(customFind);
     }
 
