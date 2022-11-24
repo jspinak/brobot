@@ -13,6 +13,8 @@ import org.sikuli.script.Match;
 import org.sikuli.script.Pattern;
 import org.springframework.stereotype.Component;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Optional;
 
@@ -46,7 +48,7 @@ public class FindFirstPattern implements FindPatternInterface {
             Optional<Match> matchOptional = findPattern.findBest(region, pattern);
             if (matchOptional.isPresent()) {
                 matches.addMatchObjects(stateImageObject, Collections.singletonList(matchOptional.get()),
-                        time.getDuration(actionOptions.getAction()).getSeconds());
+                        Duration.between(matches.getStartTime(), LocalDateTime.now()).toSeconds()); //time.getDuration(actionOptions.getAction()).getSeconds());
                 break;
             }
         }

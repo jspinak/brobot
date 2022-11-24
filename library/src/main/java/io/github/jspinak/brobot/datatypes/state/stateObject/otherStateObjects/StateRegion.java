@@ -22,7 +22,7 @@ public class StateRegion implements StateObject {
 
     private String name = "";
     private Region searchRegion = new Region();
-    private StateEnum ownerStateName = NullState.Enum.NULL;
+    private StateEnum ownerStateName = NullState.Name.NULL;
     private int staysVisibleAfterClicked = 100;
     private int probabilityExists = 100; // probability something can be acted on in this region
     private int timesActedOn = 0;
@@ -74,7 +74,7 @@ public class StateRegion implements StateObject {
     public static class Builder {
         private String name = "";
         private Region searchRegion = new Region();
-        private StateEnum ownerStateName = NullState.Enum.NULL;
+        private StateEnum ownerStateName = NullState.Name.NULL;
         private Position position = new Position(50, 50);
 
         // Positions.Name: the border of the region to define

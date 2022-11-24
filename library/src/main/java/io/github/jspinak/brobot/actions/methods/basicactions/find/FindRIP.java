@@ -50,11 +50,11 @@ public class FindRIP implements FindImageObject {
     @Override
     public Matches find(ActionOptions actionOptions, StateImageObject stateImageObject) {
         Matches matches = new Matches();
-        matches.addAll(
+        matches.addAllResults(
                 findAndDefineRegions(actionOptions, stateImageObject, stateImageObject.getRegionImagePairs(),
                         this::getDefinedPairs));
         if (breakCondition(matches, actionOptions)) return matches;
-        matches.addAll(
+        matches.addAllResults(
                 findAndDefineRegions(actionOptions, stateImageObject, stateImageObject.getRegionImagePairs(),
                         this::getUndefinedPairs));
         return matches;
@@ -76,8 +76,8 @@ public class FindRIP implements FindImageObject {
         Matches matches = new Matches();
         for (RegionImagePair pair : filter.apply(pairs)) {
             Matches newMatches =
-                    findImage.find(actionOptions, stateImageObject, pair.getImage(), pair.getRegion());
-            matches.addAll(newMatches);
+                    findImage.find(actionOptions, stateImageObject, pair.getImage());
+            matches.addAllResults(newMatches);
             newMatches.getBestMatch().ifPresent(matchObject -> {
                 pair.setRegion(new Region(matchObject.getMatch()));
                 pairs.setLastPairFound(pair);

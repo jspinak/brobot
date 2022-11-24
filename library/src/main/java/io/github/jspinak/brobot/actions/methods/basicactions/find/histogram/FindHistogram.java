@@ -1,80 +1,88 @@
 package io.github.jspinak.brobot.actions.methods.basicactions.find.histogram;
 
 import io.github.jspinak.brobot.actions.BrobotSettings;
+import io.github.jspinak.brobot.actions.actionExecution.actionLifecycle.ActionLifecycleManagement;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.SelectRegions;
-import io.github.jspinak.brobot.actions.methods.time.Time;
+import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.GetScenes;
+import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.Scene;
+import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.SceneAnalysis;
+import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.SceneAnalysisCollection;
 import io.github.jspinak.brobot.datatypes.primitives.match.MatchObject;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
+import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
+import org.bytedeco.opencv.opencv_core.Mat;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
+import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @Component
 public class FindHistogram {
 
-    private FindAllHistograms findAllHistograms;
+    private FindHistogramsOneRegionOneImage findHistogramsOneRegionOneImage;
     private SelectRegions selectRegions;
-    private ImageRegionsHistograms imageRegionsHistograms;
-    private Time time;
+    private GetHistograms getHistograms;
     private MockHistogram mockHistogram;
+    private GetScenes getScenes;
+    private ActionLifecycleManagement actionLifecycleManagement;
 
-    public FindHistogram(FindAllHistograms findAllHistograms, SelectRegions selectRegions,
-                         ImageRegionsHistograms imageRegionsHistograms, Time time,
-                         MockHistogram mockHistogram) {
-        this.findAllHistograms = findAllHistograms;
+    public FindHistogram(FindHistogramsOneRegionOneImage findHistogramsOneRegionOneImage, SelectRegions selectRegions,
+                         GetHistograms getHistograms,
+                         MockHistogram mockHistogram, GetScenes getScenes,
+                         ActionLifecycleManagement actionLifecycleManagement) {
+        this.findHistogramsOneRegionOneImage = findHistogramsOneRegionOneImage;
         this.selectRegions = selectRegions;
-        this.imageRegionsHistograms = imageRegionsHistograms;
-        this.time = time;
+        this.getHistograms = getHistograms;
         this.mockHistogram = mockHistogram;
+        this.getScenes = getScenes;
+        this.actionLifecycleManagement = actionLifecycleManagement;
     }
 
-    public Matches getMatches(ActionOptions actionOptions, List<StateImageObject> images) {
-        imageRegionsHistograms.setBins(
+    /**
+     * The first ObjectCollection contains the images to find.
+     * @param actionOptions the action configuration
+     * @param objectCollections the images to search for
+     * @return histogram matches
+     */
+    public Matches find(ActionOptions actionOptions, List<ObjectCollection> objectCollections) {
+        if (actionOptions.getMaxMatchesToActOn() <= 0) actionOptions.setMaxMatchesToActOn(1); // default for histogram
+        int actionId = actionLifecycleManagement.newActionLifecycle(actionOptions);
+        getHistograms.setBins(
                 actionOptions.getHueBins(), actionOptions.getSaturationBins(), actionOptions.getValueBins());
+        List<Scene> scenes = getScenes.getScenes(objectCollections);
+        SceneAnalysisCollection sceneAnalysisCollection = new SceneAnalysisCollection();
         Matches matches = new Matches();
-        List<HistogramMatches> histMatches = new ArrayList<>(); // holds the reg-scores for each Image
-        images.forEach(img -> histMatches.add(forOneImage(actionOptions, img)));
-        int maxRegs = actionOptions.getMaxMatchesToActOn();
-        LinkedHashMap<MatchObject, Double> matchObjectsAndScore = new LinkedHashMap<>();
-        // add maxRegs MatchObjects from each HistogramMatches object
-        histMatches.forEach(histM -> histM.getFirstEntries(maxRegs).forEach((reg, score) -> {
-            try {
-                matchObjectsAndScore.put(
-                        new MatchObject(reg.toMatch(), histM.getStateImageObject(),
-                                time.getDuration(actionOptions.getAction()).getSeconds()),
-                        score);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }));
+        List<MatchObject> matchObjects = new ArrayList<>();
+        objectCollections.get(0).getStateImages().forEach(img ->
+                scenes.forEach(scene -> {
+                    matchObjects.addAll(forOneImage(actionOptions, img, scene.getHsv(), actionId));
+                    sceneAnalysisCollection.add(new SceneAnalysis(new ArrayList<>(), scene));
+                }));
+        int maxMatches = actionOptions.getMaxMatchesToActOn();
         // sort the MatchObjects and add the best ones (up to maxRegs) to matches
-        matchObjectsAndScore.entrySet().stream()
-                .sorted(Map.Entry.comparingByValue())
-                .limit(maxRegs)
-                .map(Map.Entry::getKey)
-                .collect(Collectors.toList())
+        matchObjects.stream()
+                .sorted(Comparator.comparingDouble(MatchObject::getScore))
+                .limit(maxMatches)
                 .forEach(matches::add);
+        matches.setSceneAnalysisCollection(sceneAnalysisCollection);
         return matches;
     }
 
-    private HistogramMatches forOneImage(ActionOptions actionOptions, StateImageObject image) {
+    private List<MatchObject> forOneImage(ActionOptions actionOptions, StateImageObject image, Mat sceneHSV, int actionId) {
         List<Region> searchRegions = selectRegions.getRegions(actionOptions, image);
-        //System.out.println("searchRegions: "+searchRegions);
-        if (BrobotSettings.mock)
-            return mockHistogram.getMockHistogramMatches(actionOptions, image, searchRegions);
-        HistogramMatches histMatches = new HistogramMatches();
-        histMatches.setStateImageObject(image);
-        searchRegions.forEach(reg -> histMatches.addRegions(findAllHistograms.find(reg, image.getImage())));
-        histMatches.sortLowToHigh();
-        histMatches.printFirst(50);
-        return histMatches;
+        if (BrobotSettings.mock && BrobotSettings.screenshot.isEmpty())
+            return mockHistogram.getMockHistogramMatches(image, searchRegions);
+        List<MatchObject> matchObjects = new ArrayList<>();
+        for (Region reg : searchRegions) {
+            List<MatchObject> matchObjectsForOneRegion = findHistogramsOneRegionOneImage.find(reg, image, sceneHSV, actionId);
+            matchObjects.addAll(matchObjectsForOneRegion);
+        }
+        matchObjects = matchObjects.stream().sorted(Comparator.comparing(MatchObject::getScore)).toList();
+        return matchObjects;
     }
 
 }

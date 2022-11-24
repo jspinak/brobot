@@ -4,6 +4,7 @@ import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.imgproc.Imgproc;
+import org.sikuli.script.ImagePath;
 import org.sikuli.script.Pattern;
 import org.sikuli.script.Screen;
 import org.springframework.stereotype.Component;
@@ -42,6 +43,10 @@ public class GetImage {
         Mat mat = imread(imageName); // Mat [ 7*7*CV_8UC3 ...
         if (!hsv) return mat;
         return BGRtoHSV(mat);
+    }
+
+    public Mat getMatFromBundlePath(String imageName, boolean hsv) {
+        return getMatFromFilename(ImagePath.getBundlePath()+"/"+imageName, hsv);
     }
 
     public Mat getMatFromScreen(Region region, boolean hsv) {

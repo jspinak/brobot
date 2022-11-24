@@ -6,6 +6,7 @@ import io.github.jspinak.brobot.datatypes.primitives.text.Text;
 import io.github.jspinak.brobot.datatypes.state.stateObject.StateObject;
 import io.github.jspinak.brobot.primatives.enums.StateEnum;
 import lombok.Data;
+import org.bytedeco.opencv.opencv_core.Mat;
 import org.sikuli.script.Match;
 
 import java.time.LocalDateTime;
@@ -28,7 +29,7 @@ import java.util.List;
  *       multiple Match objects.
  */
 @Data
-public class MatchObject {
+public class MatchObject implements Comparable<MatchObject> {
 
     private Match match;
     private Text text = new Text();
@@ -36,6 +37,8 @@ public class MatchObject {
     private StateObject stateObject;
     private LocalDateTime timeStamp;
     private double duration;
+    private Mat histogram;
+    private double score; // The score in Match cannot be set publicly. This score is used for scoring with Mats.
 
     /**
      * It shouldn't be possible to create a MatchObject with Match == null.
@@ -86,4 +89,21 @@ public class MatchObject {
         }
         return false;
     }
+
+    public int getMatchArea() {
+        return match.w * match.h;
+    }
+
+    /**
+     * The compareTo for Match can lead to this error: 'Comparison method violates its general contract!'
+     * Match uses simScore as well as xywh in its compareTo function.
+     * MatchObject is not as interested in xywh, so we use only score here to simplify the compareTo.
+     *
+     * @param m the object to be compared.
+     * @return the relation to the parameter MatchObject as an int.
+     */
+    public int compareTo(MatchObject m) {
+        return (int)(this.getMatch().getScore() - m.getMatch().getScore());
+    }
+
 }

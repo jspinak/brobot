@@ -1,82 +1,39 @@
 package io.github.jspinak.brobot.illustratedHistory;
 
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
-import io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles.KmeansCluster;
-import io.github.jspinak.brobot.actions.methods.basicactions.find.color.classification.SparseMatrix;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
-import org.bytedeco.opencv.global.opencv_imgproc;
+import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.SceneAnalysis;
+import io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles.ColorCluster;
+import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.MatVector;
-import org.bytedeco.opencv.opencv_core.Scalar;
-import org.datavec.image.loader.NativeImageLoader;
-import org.nd4j.linalg.api.ndarray.INDArray;
-import org.opencv.imgproc.Imgproc;
 import org.springframework.stereotype.Component;
 
-import static org.bytedeco.opencv.global.opencv_core.*;
+import static io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.SceneAnalysis.Analysis.BGR_FROM_INDICES_2D;
+import static org.bytedeco.opencv.global.opencv_core.hconcat;
 import static org.bytedeco.opencv.global.opencv_imgcodecs.imwrite;
-import static org.nd4j.linalg.indexing.BooleanIndexing.replaceWhere;
-import static org.opencv.core.Core.add;
 
 @Component
-public class DrawSparseMatrix {
+public class DrawClasses {
 
     private IllustrationFilename illustrationFilename;
     private ClassificationLegend classificationLegend;
 
-    public DrawSparseMatrix(IllustrationFilename illustrationFilename, ClassificationLegend classificationLegend) {
+    public DrawClasses(IllustrationFilename illustrationFilename, ClassificationLegend classificationLegend) {
         this.illustrationFilename = illustrationFilename;
         this.classificationLegend = classificationLegend;
     }
 
-    public void paintClasses(SparseMatrix sparseMatrix) {
-        ActionOptions actionOptions = new ActionOptions.Builder().setAction(ActionOptions.Action.CLASSIFY).build();
-        String outputPath = illustrationFilename.getFilename(actionOptions);
-        //Mat bgr = convertIndicesToColors(sparseMatrix);
-        writeImage(sparseMatrix.getResultsAsColorsBGR(), outputPath, sparseMatrix);
+    public void paintClasses(Matches matches, ActionOptions actionOptions) {
+        // CLASSIFY produces only one SceneAnalysisCollection, so we can use the first one
+        matches.getSceneAnalysisCollection().getSceneAnalyses().forEach(sceneAnalysis -> {
+            String outputPath = illustrationFilename.getFilenameFromMatchObjects(matches, actionOptions);
+            writeImage(outputPath, sceneAnalysis);
+        });
     }
 
-    private Mat convertIndicesToColors(SparseMatrix sparseMatrix) {
-        INDArray indices = sparseMatrix.getResults();
-        Mat indMat = new NativeImageLoader().asMat(indices);
-        /*
-        for (StateImageObject img : sparseMatrix.getStateImageObjects()) {
-            System.out.println(img.getName()+" index is "+img.getIndex());
-            replaceIndexWithColorValue(hue, sat, val, img.getKmeans().get(0), img.getIndex());
-        }
-         */
-        Mat hFinal = new Mat();
-        Mat sFinal = new Mat();
-        Mat vFinal = new Mat();
-        for (StateImageObject img : sparseMatrix.getStateImageObjects()) {
-            replaceAllIndexMatsWithColor(hFinal, sFinal, vFinal, indMat, img.getKmeans().get(0), img.getIndex());
-        }
-        MatVector hsv = new MatVector(hFinal, sFinal, vFinal);
-        Mat hsvMat = new Mat();
-        merge(hsv, hsvMat);
-        Mat bgr = new Mat();
-        opencv_imgproc.cvtColor(hsvMat, bgr, Imgproc.COLOR_HSV2BGR);
-        return bgr;
-    }
-
-    private void replaceAllIndexMatsWithColor(Mat hDst, Mat sDst, Mat vDst, Mat indices,
-                                              KmeansCluster replaceWith, int index) {
-        replaceIndexWithColor(hDst, indices, replaceWith.getHue(), index);
-        replaceIndexWithColor(sDst, indices, replaceWith.getSaturation(), index);
-        replaceIndexWithColor(vDst, indices, replaceWith.getValue(), index);
-    }
-
-    private void replaceIndexWithColor(Mat dst, Mat src, double replaceWith, int index) {
-        Mat mask = new Mat();
-        System.out.println("index = "+index);
-        inRange(src, new Mat(new Scalar(index)), new Mat(new Scalar(index)), mask);
-        bitwise_and(src, new Mat(new Scalar(replaceWith)), dst, mask);
-    }
-
-    private void writeImage(Mat screen, String file, SparseMatrix sparseMatrix) {
-        Mat legend = classificationLegend.draw(screen, sparseMatrix);
-        //System.out.println("mat: "+screen.rows()+"."+screen.cols()+"."+screen.channels()+" array: "+ "."+array.shapeInfo());
-        Mat fused = fuseScreenAndLegend(screen, legend);
+    private void writeImage(String file, SceneAnalysis sceneAnalysis) {
+        Mat legend = classificationLegend.draw(sceneAnalysis.getAnalysis(ColorCluster.ColorSchemaName.BGR, BGR_FROM_INDICES_2D), sceneAnalysis);
+        Mat fused = fuseScreenAndLegend(sceneAnalysis.getAnalysis(ColorCluster.ColorSchemaName.BGR, BGR_FROM_INDICES_2D), legend);
         imwrite(file, fused);
     }
 
