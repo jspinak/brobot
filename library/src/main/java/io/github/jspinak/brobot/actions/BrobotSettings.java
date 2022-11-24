@@ -24,6 +24,9 @@ public class BrobotSettings {
     public static double mockTimeClick = 0.05;
     public static double mockTimeMove = 0.1;
     public static double mockTimeGetText = 0.1;
+    public static double mockTimeFindHistogram = 0.3;
+    public static double mockTimeFindColor = 0.3;
+    public static double mockTimeClassify = 0.4;
     /**
      * Unit Tests
      */
@@ -54,11 +57,31 @@ public class BrobotSettings {
     public static String historyPath = "history/"; // where screenshots are saved for the illustrated history
     public static String historyFilename = "hist";
     public static boolean drawFind = true;
-    public static boolean drawClick = false;
-    public static boolean drawDrag = false;
-    public static boolean drawMove = false;
-    public static boolean drawHighlight = false;
+    public static boolean drawClick = true;
+    public static boolean drawDrag = true;
+    public static boolean drawMove = true;
+    public static boolean drawHighlight = true;
     public static boolean drawRepeatedActions = true;
+    public static boolean drawClassify = true;
+
+    /**
+     * kMeans Settings
+     */
+    public static int kMeansInProfile = 5;
+
+    /*
+    When a Brobot application is run, kMeans profiles for means = {2, ..., maxKMeansToStoreInProfile} are stored
+    with StateImageObjects that have DynamicImages.
+     */
+    public static int maxKMeansToStoreInProfile = 10;
+
+    /**
+     * Color Settings
+     */
+    public static boolean initProfilesForStaticfImages = false;
+    public static boolean initProfilesForDynamicImages = true;
+
+    public static boolean includeStateImageObjectsFromActiveStatesInAnalysis = true;
 
 
 }

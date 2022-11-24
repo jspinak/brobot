@@ -32,6 +32,7 @@ public class ExitSequences {
         criteria.put(ActionOptions.Action.DRAG, matches -> false);
         criteria.put(ActionOptions.Action.VANISH, Matches::isSuccess);
         criteria.put(ActionOptions.Action.CLICK_UNTIL, Matches::isSuccess);
+        criteria.put(ActionOptions.Action.CLASSIFY, Matches::isSuccess);
     }
 
     public boolean okToExit(ActionOptions actionOptions, Matches matches) {

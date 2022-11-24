@@ -18,11 +18,11 @@ public class NullState {
 
     // convert simple objects to state objects
 
-    public enum Enum implements StateEnum {
+    public enum Name implements StateEnum {
         NULL
     }
 
-    private State state = new State.Builder(Enum.NULL)
+    private State state = new State.Builder(Name.NULL)
             .build();
 
     public NullState(StateService stateService) {

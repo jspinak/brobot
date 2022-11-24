@@ -3,6 +3,8 @@ package io.github.jspinak.brobot.actions.methods.basicactions.click;
 import io.github.jspinak.brobot.actions.actionExecution.ActionInterface;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.Find;
+import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.GetSceneAnalysisCollection;
+import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.SceneAnalysisCollection;
 import io.github.jspinak.brobot.actions.methods.sikuliWrappers.Wait;
 import io.github.jspinak.brobot.actions.methods.sikuliWrappers.mouse.ClickLocationOnce;
 import io.github.jspinak.brobot.datatypes.primitives.location.Location;
@@ -10,6 +12,8 @@ import io.github.jspinak.brobot.datatypes.primitives.match.MatchObject;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import org.springframework.stereotype.Component;
+
+import java.util.Arrays;
 
 /**
  * Clicks on an Image Match, Region, or Location.
@@ -25,16 +29,22 @@ public class Click implements ActionInterface {
     private ClickLocationOnce clickLocationOnce;
     private Wait wait;
     private AfterClick afterClick;
+    private GetSceneAnalysisCollection getSceneAnalysisCollection;
 
-    public Click(Find find, ClickLocationOnce clickLocationOnce, Wait wait, AfterClick afterClick) {
+    public Click(Find find, ClickLocationOnce clickLocationOnce, Wait wait, AfterClick afterClick,
+                 GetSceneAnalysisCollection getSceneAnalysisCollection) {
         this.find = find;
         this.clickLocationOnce = clickLocationOnce;
         this.wait = wait;
         this.afterClick = afterClick;
+        this.getSceneAnalysisCollection = getSceneAnalysisCollection;
     }
 
     public Matches perform(ActionOptions actionOptions, ObjectCollection... objectCollections) {
+        SceneAnalysisCollection sceneAnalysisCollection = getSceneAnalysisCollection.
+                get(Arrays.asList(objectCollections), actionOptions);
         Matches matches = find.perform(actionOptions, objectCollections); // find performs only on 1st collection
+        matches.setSceneAnalysisCollection(sceneAnalysisCollection);
         int i = 0;
         for (MatchObject matchObject : matches.getMatchObjects()) {
             Location location = setClickLocation(matchObject, actionOptions);

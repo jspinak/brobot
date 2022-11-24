@@ -2,8 +2,6 @@ package io.github.jspinak.brobot.actions.methods.basicactions.click;
 
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.actions.methods.sikuliWrappers.mouse.MoveMouseWrapper;
-import io.github.jspinak.brobot.reports.Report;
-import io.github.jspinak.brobot.services.StateService;
 import org.springframework.stereotype.Component;
 
 /**
@@ -18,12 +16,9 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class AfterClick {
-
-    private final StateService stateService;
     private final MoveMouseWrapper moveMouseWrapper;
 
-    public AfterClick(StateService stateService, MoveMouseWrapper moveMouseWrapper) {
-        this.stateService = stateService;
+    public AfterClick(MoveMouseWrapper moveMouseWrapper) {
         this.moveMouseWrapper = moveMouseWrapper;
     }
 
@@ -39,9 +34,8 @@ public class AfterClick {
      */
     public boolean moveMouseAfterClick(ActionOptions actionOptions) {
         if (!actionOptions.isMoveMouseAfterClick()) return false;
-        Report.print("after click, ");
         if (actionOptions.getOffsetLocationBy().defined())
             return moveMouseWrapper.move(actionOptions.getOffsetLocationBy());
-        return moveMouseWrapper.move(actionOptions.getLocationAfterClick());
+        return moveMouseWrapper.move(actionOptions.getLocationAfterAction());
     }
 }

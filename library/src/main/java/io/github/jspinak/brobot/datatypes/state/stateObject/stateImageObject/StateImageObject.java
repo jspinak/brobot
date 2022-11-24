@@ -1,8 +1,10 @@
 package io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject;
 
+import io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles.ColorCluster;
 import io.github.jspinak.brobot.buildStateStructure.buildFromNames.attributes.AttributeData;
 import io.github.jspinak.brobot.buildStateStructure.buildFromNames.attributes.AttributeTypes;
 import io.github.jspinak.brobot.buildStateStructure.buildFromNames.attributes.ImageAttributes;
+import io.github.jspinak.brobot.datatypes.primitives.dynamicImage.DynamicImage;
 import io.github.jspinak.brobot.datatypes.primitives.image.Image;
 import io.github.jspinak.brobot.datatypes.primitives.location.Anchor;
 import io.github.jspinak.brobot.datatypes.primitives.location.Anchors;
@@ -11,11 +13,14 @@ import io.github.jspinak.brobot.datatypes.primitives.match.MatchHistory;
 import io.github.jspinak.brobot.datatypes.primitives.match.MatchSnapshot;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.primitives.regionImagePairs.RegionImagePairs;
+import io.github.jspinak.brobot.datatypes.state.NullState;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import io.github.jspinak.brobot.datatypes.state.stateObject.StateObject;
 import io.github.jspinak.brobot.primatives.enums.StateEnum;
+import io.github.jspinak.brobot.reports.Report;
 import lombok.Getter;
 import lombok.Setter;
+import org.bytedeco.opencv.opencv_core.Mat;
 
 import java.util.*;
 
@@ -35,6 +40,8 @@ public class StateImageObject implements StateObject {
     // common StateObject fields (too few fields and too few StateObject classes for composition or hierarchy)
     // hierarchy would make builders much more complex
     private String name;
+    // the index is a unique identifier used for classification matrices
+    private int index;
     // ownerStateName is set by the State when the object is added
     private StateEnum ownerStateName;
     //private int staysVisibleAfterClicked = 100; //probability
@@ -44,11 +51,20 @@ public class StateImageObject implements StateObject {
     // unique fields
     private SearchRegions searchRegionsObject = new SearchRegions();
     private boolean fixed = false; // RIPs are fixed. the image always appears in the same spot.
+    private boolean dynamic = false; // dynamic images cannot be found using pattern matching
     private Image image = new Image();
+    public Image getImage() {
+        if (dynamic) {
+            return dynamicImage.getInside();
+        } else {
+            return image;
+        }
+    }
     private RegionImagePairs regionImagePairs = new RegionImagePairs();
+    private DynamicImage dynamicImage = new DynamicImage();
     private int baseProbabilityExists = 100;
     private int probabilityExists = 100; // probability that the image exists given that the state exists.
-    private Position position = new Position(50,50); // use to convert a match to a Location
+    private Position position = new Position(.5,.5); // use to convert a match to a Location
     private boolean shared = false; // also found in other states
     private Anchors anchors = new Anchors(); // for defining regions using this object as input
     /*
@@ -134,6 +150,10 @@ public class StateImageObject implements StateObject {
         image.addImage(filename);
     }
 
+    public ColorCluster getColorCluster() {
+        return getDynamicImage().getInsideColorCluster();
+    }
+
     /**
      * adds the Images, Snapshots, and Attributes of the parameter to this StateImageObject
      * @param img the StateImageObject with the values to add
@@ -155,20 +175,28 @@ public class StateImageObject implements StateObject {
 
     public static class Builder {
         private String name = "";
+        private int index;
         private StateEnum ownerStateName;
         private MatchHistory matchHistory = new MatchHistory();
         private SearchRegions searchRegions = new SearchRegions();
         private boolean fixed = true; // set to true as of 1.0.2
+        private boolean dynamic = false;
         private Image image = new Image();
         private RegionImagePairs regionImagePairs = new RegionImagePairs();
+        private DynamicImage dynamicImage = new DynamicImage();
         private int baseProbabilityExists = 100;
         private int probabilityExists = 100;
-        private Position position = new Position(50, 50);
+        private Position position = new Position(.5, .5);
         private boolean shared = false;
         private Anchors anchors = new Anchors();
 
         public Builder called(String name) {
             this.name = name;
+            return this;
+        }
+
+        public Builder setIndex(int index) {
+            this.index = index;
             return this;
         }
 
@@ -189,6 +217,17 @@ public class StateImageObject implements StateObject {
 
         public Builder isFixed(boolean fixed) {
             this.fixed = fixed;
+            return this;
+        }
+
+        public Builder setDynamicImage(DynamicImage dynamicImage) {
+            this.dynamicImage = dynamicImage;
+            this.dynamic = true;
+            return this;
+        }
+
+        public Builder isDynamic() {
+            this.dynamic = true;
             return this;
         }
 
@@ -258,20 +297,43 @@ public class StateImageObject implements StateObject {
             return this;
         }
 
+        /*
+        When no dynamic inside image exists, set the inside image of the dynamic image to the static image provided.
+        This makes it easier to initialize images, as a dynamic image is not required. Instead, the user can just
+        toggle a boolean stating that the image is dynamic.
+         */
+        private void setDynamicInsideImage(StateImageObject stateImageObject) {
+            if (stateImageObject.getDynamicImage().getInside().isEmpty()) {
+                //Report.println("Setting dynamic inside image to static image for " + stateImageObject.getName());
+                this.dynamicImage.setInside(stateImageObject.image);
+            }
+        }
+
         public StateImageObject build() {
             StateImageObject stateImageObject = new StateImageObject();
             stateImageObject.name = name;
+            stateImageObject.index = index;
             stateImageObject.matchHistory = matchHistory;
             stateImageObject.searchRegionsObject = searchRegions;
             stateImageObject.ownerStateName = ownerStateName;
             stateImageObject.fixed = fixed;
+            stateImageObject.dynamic = dynamic;
             stateImageObject.image = image;
             stateImageObject.regionImagePairs = regionImagePairs;
+            stateImageObject.dynamicImage = dynamicImage;
+            setDynamicInsideImage(stateImageObject);
             stateImageObject.baseProbabilityExists = baseProbabilityExists;
             stateImageObject.probabilityExists = probabilityExists;
             stateImageObject.position = position;
             stateImageObject.shared = shared;
             stateImageObject.anchors = anchors;
+            return stateImageObject;
+        }
+
+        public StateImageObject generic() {
+            StateImageObject stateImageObject = new StateImageObject();
+            stateImageObject.name = "generic";
+            stateImageObject.ownerStateName = NullState.Name.NULL;
             return stateImageObject;
         }
 

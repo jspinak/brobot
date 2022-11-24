@@ -19,6 +19,8 @@ public class ActionDurations {
         findDurations.put(ActionOptions.Find.EACH, BrobotSettings.mockTimeFindFirst);
         findDurations.put(ActionOptions.Find.ALL, BrobotSettings.mockTimeFindAll);
         findDurations.put(ActionOptions.Find.BEST, BrobotSettings.mockTimeFindAll);
+        findDurations.put(ActionOptions.Find.HISTOGRAM, BrobotSettings.mockTimeFindHistogram);
+        findDurations.put(ActionOptions.Find.COLOR, BrobotSettings.mockTimeFindColor);
     }
 
     private Map<ActionOptions.Action, Double> actionDurations = new HashMap<>();
@@ -27,6 +29,7 @@ public class ActionDurations {
         actionDurations.put(ActionOptions.Action.DRAG, BrobotSettings.mockTimeDrag);
         actionDurations.put(ActionOptions.Action.MOVE, BrobotSettings.mockTimeMove);
         actionDurations.put(ActionOptions.Action.GET_TEXT, BrobotSettings.mockTimeGetText);
+        actionDurations.put(ActionOptions.Action.CLASSIFY, BrobotSettings.mockTimeClassify);
     }
 
     /**
