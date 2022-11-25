@@ -27,10 +27,9 @@ const config = {
       {
         // Will be passed to @docusaurus/plugin-google-analytics
         googleAnalytics: {
-            trackingID: 'G-6WY1S6ZWEY',
-            // Optional fields.
-            anonymizeIP: true, // Should IPs be anonymized?
-        }
+          trackingID: 'G-6WY1S6ZWEY',
+          anonymizeIP: true,
+        },
         pages: {
           remarkPlugins: [math],
           rehypePlugins: [katex],
