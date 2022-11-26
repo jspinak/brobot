@@ -26,8 +26,8 @@ const config = {
       /** @type {import('@docusaurus/preset-classic').Options} */
       {
         // Will be passed to @docusaurus/plugin-google-analytics
-        googleAnalytics: {
-          trackingID: 'G-6WY1S6ZWEY',
+        gtag: {
+          trackingID: 'G-6WY2S6ZWEY',
           anonymizeIP: true,
         },
         pages: {
@@ -105,8 +105,16 @@ const config = {
             title: 'Docs',
             items: [
               {
+              label: 'Introductory Video',
+              to: 'https://www.youtube.com/watch?v=aHnVQ8KmOVw',
+              },
+              {
                 label: 'Tutorial',
                 to: '/docs/tutorial-basics/intro',
+              },
+              {
+                label: 'The Visual API white paper',
+                to: 'visualAPI',
               },
             ],
           },
