@@ -15,15 +15,15 @@ function HomepageHeader() {
         <p className="hero__subtitle">{siteConfig.tagline}</p>
         <div className={styles.buttons}>
           <Link className="button button--secondary button--lg"
-                to="https://www.youtube.com/watch?v=aHnVQ8KmOVw"
+                to="https://jspinak.github.io/brobot/docs/labeling/labeling-intro.md"
                 style={{border: '2px dotted red'}}>
-              <div>Introductory Video ️<i>13 min</i> ⏱</div>
+              <div>Image Labeling</div>
           </Link>
         </div>
         <div>
-          <Link className="button button--secondary button--lg" to="visualAPI"
+          <Link className="button button--secondary button--lg" to="https://www.youtube.com/watch?v=aHnVQ8KmOVw"
                 style={{border: '2px dotted red'}}>
-              <div>The Visual API ️<i>white paper</i> </div>
+              <div>Next-Gen GUI Automation - Introductory Video</div>
           </Link>
         </div>
         <div>
