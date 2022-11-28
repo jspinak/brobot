@@ -12,6 +12,8 @@ import org.springframework.stereotype.Component;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.PixelAnalysisCollection.Analysis.SCORE_DIST_BELOW_THRESHHOLD;
 import static io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.SceneAnalysis.Analysis.*;
@@ -60,11 +62,24 @@ public class GetSceneAnalysisScores {
         sceneAnalysis.addAnalysis(HSV, INDICES_2D, indices2D);
     }
 
-    public void setBGRVisualizationMat(SceneAnalysis sceneAnalysis) {
+    public void setSceneAnalysisIndicesTargetsOnly(SceneAnalysis sceneAnalysis, Set<StateImageObject> targets) {
+        Set<Integer> targetIndices = targets.stream().map(StateImageObject::getIndex).collect(Collectors.toSet());
+        Mat indicesHSV3D = sceneAnalysis.getAnalysis(HSV, INDICES_3D);
+        Mat indicesBGR3D = sceneAnalysis.getAnalysis(BGR, INDICES_3D);
+        Mat indicesHSV3Dtargets = matOps3d.getMatWithOnlyTheseIndices(indicesHSV3D, targetIndices);
+        Mat indicesBGR3Dtargets = matOps3d.getMatWithOnlyTheseIndices(indicesBGR3D, targetIndices);
+        sceneAnalysis.addAnalysis(HSV, INDICES_3D_TARGETS, indicesHSV3Dtargets);
+        sceneAnalysis.addAnalysis(BGR, INDICES_3D_TARGETS, indicesBGR3Dtargets);
+    }
+
+    public void setBGRVisualizationMats(SceneAnalysis sceneAnalysis) {
         Map<Integer, Scalar> hueList = getHueMap(sceneAnalysis);
         Mat hsv3D = sceneAnalysis.getAnalysis(HSV, INDICES_3D);
-        Mat bgr3d = matVisualize.getBGRColorMatFromHSV2dIndexMat(hsv3D, hueList);
-        sceneAnalysis.addAnalysis(BGR, BGR_FROM_INDICES_2D, bgr3d);
+        Mat bgrColorMatFromHSV2dIndexMat = matVisualize.getBGRColorMatFromHSV2dIndexMat(hsv3D, hueList);
+        Mat hsv3Dtargets = sceneAnalysis.getAnalysis(HSV, INDICES_3D_TARGETS);
+        Mat hsvTargetsColorMat = matVisualize.getBGRColorMatFromHSV2dIndexMat(hsv3Dtargets, hueList);
+        sceneAnalysis.addAnalysis(BGR, BGR_FROM_INDICES_2D, bgrColorMatFromHSV2dIndexMat);
+        sceneAnalysis.addAnalysis(BGR, BGR_FROM_INDICES_2D_TARGETS, hsvTargetsColorMat);
     }
 
     private Map<Integer, Scalar> getHueMap(SceneAnalysis sceneAnalysis) {
