@@ -40,6 +40,9 @@ public class GetScenes {
             scenes.add(new Scene(name, getImageJavaCV.getMat(name, BGR)));
             return scenes;
         }
+        /*
+        Take screenshots
+         */
         if (objectCollections.isEmpty() || objectCollections.get(0).getScenes().isEmpty()) {
             Report.println("Taking screenshot");
             for (int i=0; i<scenesToCapture; i++) {

@@ -117,18 +117,19 @@ public class AnalyzePixels {
      * Having a PixelAnalysisCollection for each StateImageObject, we can then compare the scores
      * for each pixel to determine which StateImageObject the pixel belongs to.
      * @param scene the scene to analyze
-     * @param imgs the images to match with the pixels in the scene
+     * @param allImgs the images to match with the pixels in the scene
      * @param actionOptions the action configuration
      * @return a SceneAnalysis, containing a PixelsAnalysisCollection for each StateImageObject
      */
-    public SceneAnalysis getAnalysisForOneScene(Scene scene, Set<StateImageObject> imgs,
+    public SceneAnalysis getAnalysisForOneScene(Scene scene, Set<StateImageObject> targetImgs, Set<StateImageObject> allImgs,
                                                 ActionOptions actionOptions) {
-        setKMeansProfiles.addKMeansIfNeeded(imgs, actionOptions.getKmeans());
+        setKMeansProfiles.addKMeansIfNeeded(allImgs, actionOptions.getKmeans());
         List<PixelAnalysisCollection> pixelAnalysisCollections = new ArrayList<>();
-        imgs.forEach(img -> pixelAnalysisCollections.add(getPixelAnalysisCollection(scene, img, actionOptions)));
+        allImgs.forEach(img -> pixelAnalysisCollections.add(getPixelAnalysisCollection(scene, img, actionOptions)));
         SceneAnalysis sceneAnalysis = new SceneAnalysis(pixelAnalysisCollections, scene);
         getSceneAnalysisScores.setSceneAnalysisIndices(sceneAnalysis);
-        getSceneAnalysisScores.setBGRVisualizationMat(sceneAnalysis);
+        getSceneAnalysisScores.setSceneAnalysisIndicesTargetsOnly(sceneAnalysis, targetImgs);
+        getSceneAnalysisScores.setBGRVisualizationMats(sceneAnalysis);
         return sceneAnalysis;
     }
 

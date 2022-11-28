@@ -5,15 +5,18 @@ import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.actions.methods.MatchOps;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.GetSceneAnalysisCollection;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.SceneAnalysisCollection;
+import io.github.jspinak.brobot.datatypes.primitives.match.MatchObject;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
+import io.github.jspinak.brobot.reports.Report;
 import org.sikuli.script.Match;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 
 /**
  * The steps for color classification are:
@@ -66,10 +69,12 @@ public class FindColor implements ActionInterface {
         if (actionOptions.getDiameter() < 0) return new Matches();
         SceneAnalysisCollection sceneAnalysisCollection = getSceneAnalysisCollection.
                 get(objColls, 1, 0, actionOptions);
-        List<StateImageObject> targetImages = getSceneAnalysisCollection.getTargetImages(objColls);
+        Set<StateImageObject> targetImages = getSceneAnalysisCollection.getTargetImages(objColls);
         Matches matches = getClassMatches.getMatches(sceneAnalysisCollection, targetImages, actionOptions);
         matches.setSceneAnalysisCollection(sceneAnalysisCollection);
-        matches.getMatches().sort(Comparator.comparingDouble(Match::getScore).reversed());
+        if (actionOptions.getAction() == ActionOptions.Action.CLASSIFY)
+            matches.getMatchObjects().sort(Comparator.comparing(MatchObject::size).reversed());
+        else matches.getMatches().sort(Comparator.comparingDouble(Match::getScore).reversed());
         matchOps.limitNumberOfMatches(matches, actionOptions);
         return matches;
     }
