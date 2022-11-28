@@ -71,7 +71,7 @@ public class IllustrationManager {
             and in the case of a 'confirmed FIND' action, they may represent initial matches that are not confirmed.
             It is useful to see them, but we don't want them to paint over the confirmed matches displayed in pink.
              */
-            drawRect.drawRectAroundMatch(ill, searchRegions, new Scalar(200, 0, 0, 0)); // the search regions
+            drawRect.drawRectAroundMatch(ill, searchRegions, new Scalar(235, 206, 135, 0)); // the search regions
             drawContours.draw(sceneAnalysis);
             drawMatch.drawMatches(ill, matches); // draw the matches on the scenes
             if (actionOptions.getAction() == MOVE) draw.drawMove(ill, matches); // draw the move on the scenes
