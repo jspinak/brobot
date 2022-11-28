@@ -5,6 +5,7 @@ import io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles.SetKMeansProfiles;
 import io.github.jspinak.brobot.datatypes.state.state.State;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
+import io.github.jspinak.brobot.reports.Report;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -28,12 +29,15 @@ public class Init {
      */
     public void setBundlePathAndPreProcessImages(String path) {
         org.sikuli.script.ImagePath.setBundlePath(path);
+        Report.println("Saving indices for images in states: ");
         stateService.findAllStates().forEach(this::preProcessImages);
+        Report.println();
     }
 
     private void preProcessImages(State state) {
+        if (state.getStateImages().size() > 0) Report.print(state.getName() + ": ");
         for (StateImageObject stateImageObject : state.getStateImages()) {
-            System.out.println("saving index " + lastImageIndex + " to " + stateImageObject.getName());
+            Report.print("[" + lastImageIndex + "," + stateImageObject.getName() + "] ");
             stateImageObject.setIndex(lastImageIndex);
             setAllProfiles.setMatsAndColorProfiles(stateImageObject);
             lastImageIndex++;
@@ -42,6 +46,7 @@ public class Init {
                 setKMeansProfiles.setProfiles(stateImageObject);
             }
         }
+        if (state.getStateImages().size() > 0) Report.println();
     }
 
     public void add(String path) {

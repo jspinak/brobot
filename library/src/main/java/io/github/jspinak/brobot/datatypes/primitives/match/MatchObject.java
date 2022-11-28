@@ -106,4 +106,7 @@ public class MatchObject implements Comparable<MatchObject> {
         return (int)(this.getMatch().getScore() - m.getMatch().getScore());
     }
 
+    public int size() {
+        return match.w * match.h;
+    }
 }

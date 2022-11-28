@@ -1,10 +1,12 @@
 package io.github.jspinak.brobot.imageUtils;
 
+import io.github.jspinak.brobot.reports.Report;
 import org.bytedeco.javacpp.DoublePointer;
 import org.bytedeco.opencv.opencv_core.*;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Set;
 
 import static org.bytedeco.opencv.global.opencv_core.*;
 
@@ -223,6 +225,42 @@ public class MatOps3d {
         cOmpare(maxValues, challenger, challengerWinsMask, CMP_LT); // mask = challenger > maxValues
         challenger.copyTo(maxValues, challengerWinsMask);
         scalarMat.copyTo(indices, challengerWinsMask);
+    }
+
+    /**
+     * The inRange function of OpenCV will return a 1 channel mask, in which each cell is 255 if the
+     * corresponding cell in every channel of the source Mat matches the lower and upper bounds.
+     * This function will return a 3 channel mask where each cell is 255 if
+     * the cell in that channel matches the lower and upper bounds.
+     * @param src the source Mat
+     * @param dst the destination Mat
+     * @param lowerb the lower bound
+     * @param upperb the upper bound
+     */
+    public void inrange(Mat src, Mat dst, int lowerb, int upperb) {
+        MatVector channels = new MatVector(3);
+        split(src, channels);
+        MatVector masks = new MatVector(3);
+        for (int i=0; i<3; i++) {
+            Mat mask = new Mat(src.size(), CV_8UC1);
+            inRange(channels.get(i), new Mat(new Scalar(lowerb)), new Mat(new Scalar(upperb)), mask);
+            masks.put(i, mask);
+        }
+        merge(masks, dst);
+    }
+
+    public Mat getMatWithOnlyTheseIndices(Mat indices, Set<Integer> indicesToKeep) {
+        Mat mask = new Mat(indices.size(), indices.type());
+        for (int i : indicesToKeep) {
+            Mat mask2 = new Mat(indices.size(), indices.type());
+            inrange(indices, mask2, i, i);
+            bitwise_or(mask, mask2, mask);
+        }
+        // the mask will have 255 for the indices to keep and 0 for the others
+        Mat onlyIndicesToKeep = new Mat(indices.size(), indices.type());
+        Report.println();
+        bitwise_and(indices, mask, onlyIndicesToKeep);
+        return onlyIndicesToKeep;
     }
 
 }

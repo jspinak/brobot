@@ -17,8 +17,8 @@ import java.util.Set;
 @Component
 public class GetSceneAnalysisCollection {
 
-    private GetScenes getScenes;
-    private AnalyzePixels analyzePixels;
+    private final GetScenes getScenes;
+    private final AnalyzePixels analyzePixels;
     private final StateService stateService;
     private final StateMemory stateMemory;
 
@@ -39,34 +39,39 @@ public class GetSceneAnalysisCollection {
                                        ActionOptions actionOptions) {
         SceneAnalysisCollection sceneAnalysisCollection = new SceneAnalysisCollection();
         List<Scene> scenes = getScenes.getScenes(objectCollections, scenesToCapture, secondsBetweenCaptures);
-        List<StateImageObject> targetImages = getTargetImages(objectCollections);
-        List<StateImageObject> additionalImagesForClassification = getAdditionalImagesForClassification(objectCollections);
+        Set<StateImageObject> targetImages = getTargetImages(objectCollections);
+        Set<StateImageObject> additionalImagesForClassification = getAdditionalImagesForClassification(objectCollections);
         Set<StateImageObject> allImages = new HashSet<>();
         allImages.addAll(targetImages);
         allImages.addAll(additionalImagesForClassification);
         for (Scene scene : scenes) {
-            SceneAnalysis sceneAnalysis = analyzePixels.getAnalysisForOneScene(scene, allImages, actionOptions);
+            SceneAnalysis sceneAnalysis = analyzePixels.getAnalysisForOneScene(scene, targetImages, allImages, actionOptions);
             sceneAnalysisCollection.add(sceneAnalysis);
         }
         return sceneAnalysisCollection;
     }
 
-    private List<StateImageObject> getAdditionalImagesForClassification(List<ObjectCollection> images) {
-        List<StateImageObject> toClassify = new ArrayList<>();
-        if (!BrobotSettings.includeStateImageObjectsFromActiveStatesInAnalysis) return toClassify;
-        if (images.size() < 2 || // there is no second ObjectCollection
-                images.get(1).empty()) { // the second ObjectCollection exists but is empty
-            Report.println("Adding all active state images to classification. Active states are " + stateMemory.getActiveStates());
+    /**
+     * These images will be used for classification but not for matching. Only the target images
+     * will be used to find matches. Having additional images for classification, when they are in
+     * the scene, can make matching the target images more accurate.
+     * @param images all object collection for this action
+     * @return a set of additional images that will be used for classification
+     */
+    private Set<StateImageObject> getAdditionalImagesForClassification(List<ObjectCollection> images) {
+        Set<StateImageObject> toClassify = new HashSet<>();
+        if (BrobotSettings.includeStateImageObjectsFromActiveStatesInAnalysis) {
             stateService.findSetByName(stateMemory.getActiveStates()).forEach(
                     state -> toClassify.addAll(state.getStateImages()));
-        } else {
-            toClassify.addAll(images.get(0).getStateImages());
+        }
+        if (images.size() > 1 && !images.get(1).empty()) {
+            toClassify.addAll(images.get(1).getStateImages());
         }
         return toClassify;
     }
 
-    public List<StateImageObject> getTargetImages(List<ObjectCollection> images) {
-        List<StateImageObject> toClassify = new ArrayList<>();
+    public Set<StateImageObject> getTargetImages(List<ObjectCollection> images) {
+        Set<StateImageObject> toClassify = new HashSet<>();
         if (images.size() > 0 && !images.get(0).empty()) {
             toClassify.addAll(images.get(0).getStateImages());
         }

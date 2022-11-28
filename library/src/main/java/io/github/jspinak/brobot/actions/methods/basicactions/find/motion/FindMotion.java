@@ -2,7 +2,7 @@ package io.github.jspinak.brobot.actions.methods.basicactions.find.motion;
 
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.actions.methods.MatchOps;
-import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.GetSceneAnalysis;
+import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.GetSceneAnalysisCollection;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.SceneAnalysis;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.SceneAnalysisCollection;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.contours.Contours;
@@ -29,13 +29,14 @@ import static org.bytedeco.opencv.global.opencv_core.multiply;
 public class FindMotion {
 
     private DetectMotion detectMotion;
-    private GetSceneAnalysis getSceneAnalysis;
     private MatchOps matchOps;
+    private GetSceneAnalysisCollection getSceneAnalysisCollection;
 
-    public FindMotion(DetectMotion detectMotion, GetSceneAnalysis getSceneAnalysis, MatchOps matchOps) {
+    public FindMotion(DetectMotion detectMotion, MatchOps matchOps,
+                      GetSceneAnalysisCollection getSceneAnalysisCollection) {
         this.detectMotion = detectMotion;
-        this.getSceneAnalysis = getSceneAnalysis;
         this.matchOps = matchOps;
+        this.getSceneAnalysisCollection = getSceneAnalysisCollection;
     }
 
     /**
@@ -48,8 +49,8 @@ public class FindMotion {
      */
     public Matches find(ActionOptions actionOptions, List<ObjectCollection> objectCollections) {
         Matches matches = new Matches();
-        SceneAnalysisCollection sceneAnalysisCollection = getSceneAnalysis.getSceneAnalysisCollection(
-                actionOptions, objectCollections, 2);
+        SceneAnalysisCollection sceneAnalysisCollection = getSceneAnalysisCollection.get(
+                objectCollections, 2, 1, actionOptions);
         matches.setSceneAnalysisCollection(sceneAnalysisCollection);
         if (sceneAnalysisCollection.getSceneAnalyses().size() < 2) return matches; // nothing to compare
         // the following code finds movement, but not necessarily the images provided

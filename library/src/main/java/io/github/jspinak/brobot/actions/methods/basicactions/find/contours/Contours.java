@@ -1,6 +1,8 @@
 package io.github.jspinak.brobot.actions.methods.basicactions.find.contours;
 
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
+import io.github.jspinak.brobot.imageUtils.MatOps;
+import io.github.jspinak.brobot.reports.Report;
 import lombok.Getter;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.MatVector;
@@ -36,6 +38,8 @@ public class Contours {
         unmodifiedContours = new ArrayList<>();
         opencvContours = new MatVector();
         for (Region region : searchRegions) {
+            region.w = Math.min(region.w, bgrFromClassification2d.cols() - region.x); // prevent out of bounds
+            region.h = Math.min(region.h, bgrFromClassification2d.rows() - region.y); // prevent out of bounds
             contours.addAll(getContoursInRegion(region));
         }
         return contours;
@@ -121,10 +125,9 @@ public class Contours {
     }
 
     /*
-    Scores are determined by 2 factors:
-    1. The size of the contour. The larger the contour, the higher the score.
-    2. The average distance to the threshold values, for all pixels in the contour
-    The average is most important but a bonus is given for size.
+    Scores are determined by the average distance to the threshold values,
+    for all pixels in the contour. The size is most important for CLASSIFY actions, but
+    for FIND actions, the score is most important.
 
     The best results are obtained when the minScore is set to 0. This creates a match for all areas of the Mat
     and takes a lot longer to process, but looks at the score of every pixel in the Mat.
@@ -137,12 +140,9 @@ public class Contours {
             double sum = score.get(i);
             long totalCellsInContour = boundingMat.total();
             double average = sum / totalCellsInContour;
-            long totalInScene = scoreThresholdDist.total();
-            double percentOfScene = totalCellsInContour / (double) totalInScene;
-            double channelScore = average * (1 + percentOfScene);
-            if (i==0) channelScore *= 2; // hue weight relative to saturation and value
-            if (channelScore == 0) return 0; // if any channel is 0, the contour is not a match
-            totalScore += channelScore;
+            if (i==0) average *= 2; // hue weight relative to saturation and value
+            if (average == 0) return 0; // if any channel is 0, the contour is not a match
+            totalScore += average;
         }
         return totalScore;
     }

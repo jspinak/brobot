@@ -16,9 +16,11 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.PixelAnalysisCollection.Analysis.SCORE_DIST_BELOW_THRESHHOLD;
 import static io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.SceneAnalysis.Analysis.BGR_FROM_INDICES_2D;
+import static io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.SceneAnalysis.Analysis.BGR_FROM_INDICES_2D_TARGETS;
 import static io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles.ColorCluster.ColorSchemaName.BGR;
 
 @Component
@@ -40,7 +42,7 @@ public class GetClassMatches {
      * @param actionOptions the action configuration
      * @return
      */
-    public Matches getMatches(SceneAnalysisCollection sceneAnalysisCollection, List<StateImageObject> targetImages,
+    public Matches getMatches(SceneAnalysisCollection sceneAnalysisCollection, Set<StateImageObject> targetImages,
                               ActionOptions actionOptions) {
         Matches matches = new Matches();
         List<SceneAnalysis> sceneAnalyses = sceneAnalysisCollection.getSceneAnalyses();
@@ -49,8 +51,6 @@ public class GetClassMatches {
             Matches matchesForScene = getMatchesForOneScene(sceneAnalysis, targetImages, actionOptions);
             matches.addAllResults(matchesForScene);
         }
-        matches.sortMatchObjectsDescending(); // the scores are the distances from the threshold. higher are better.
-        matchOps.limitNumberOfMatches(matches, actionOptions);
         return matches;
     }
 
@@ -60,14 +60,13 @@ public class GetClassMatches {
      * @param sceneAnalysis contains the scene and StateImageObjects with results matrixes
      * @param actionOptions are needed for creating MatchObjects and may contain the search regions
      */
-    private Matches getMatchesForOneScene(SceneAnalysis sceneAnalysis, List<StateImageObject> targetImages,
+    private Matches getMatchesForOneScene(SceneAnalysis sceneAnalysis, Set<StateImageObject> targetImages,
                                           ActionOptions actionOptions) {
         Matches matches = new Matches();
         for (StateImageObject sio : targetImages) {
             List<Region> searchRegions = selectRegions.getRegions(actionOptions, sio);
-            Mat resultsInColor = sceneAnalysis.getAnalysis(BGR, BGR_FROM_INDICES_2D);
-            Optional<Mat> scores = sceneAnalysis.getScores(sio);
-            Mat scoresMat = scores.orElse(new Mat());
+            Mat resultsInColor = sceneAnalysis.getAnalysis(BGR, BGR_FROM_INDICES_2D_TARGETS);
+            Mat scoresMat = sceneAnalysis.getScoresMat(sio);
             Optional<PixelAnalysisCollection> pixelAnalysisCollection = sceneAnalysis.getPixelAnalysisCollection(sio);
             if (pixelAnalysisCollection.isPresent()) {
                 Contours contours = new Contours.Builder()
