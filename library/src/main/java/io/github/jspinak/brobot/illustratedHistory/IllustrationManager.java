@@ -59,7 +59,6 @@ public class IllustrationManager {
      * Initializes the illustrations with matches, regions, and filenames.
      * @param matches the matches to be illustrated
      * @param actionOptions the action to be illustrated
-     * @return an initialized illustration object
      */
     public void drawIllustrations(Matches matches, List<Region> searchRegions, ActionOptions actionOptions) {
         for (SceneAnalysis sceneAnalysis : matches.getSceneAnalysisCollection().getSceneAnalyses()) {

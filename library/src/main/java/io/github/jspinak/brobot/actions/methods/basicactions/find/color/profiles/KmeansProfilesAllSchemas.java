@@ -45,11 +45,11 @@ public class KmeansProfilesAllSchemas {
     }
 
     /**
-     * Creates ColorProfiles from the ColorSchemas from the BGR and HSV KmeansProfile objects.
-     * Each KmeansProfile has only one ColorSchema and not a full ColorProfile with both BGR and HSV.
+     * Creates ColorClusters from the ColorSchemas from the BGR and HSV KmeansProfile objects.
+     * Each KmeansProfile has only one ColorSchema and not a full ColorCluster with both BGR and HSV.
      *
      * @param means number of means to use
-     * @return ColorProfile with BGR & HSV ColorSchemas
+     * @return a list of both BGR and HSV ColorClusters
      */
     public List<ColorCluster> getColorProfiles(int means) {
         if (!containsAll(means)) {
