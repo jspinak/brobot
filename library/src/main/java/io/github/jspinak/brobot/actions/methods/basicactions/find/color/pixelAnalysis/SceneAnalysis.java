@@ -35,7 +35,7 @@ public class SceneAnalysis {
      SCENE is a 3d Mat of the scene (BGR, HSV).
      INDICES_3D mats have the corresponding indices for each cell in each channel (i.e. the value at (0,0) for HUE
         can be a different index than that at (0,0) for SATURATION).
-     INDICES_3D_TARGETS is the same as INDICES_3D, but only for the target images in the scene (any cell that was
+     INDICES_3D_TARGETS is the same as INDICES_3D, but only has data for the target images in the scene (any cell that was
         classified as one of the additional images is here shown as 'no match').
      INDICES_2D are results Mats containing the selected class indices for each pixel. The selected indices
         are chosen from the INDICES_3D Mat. The HSV format is used as default for this analysis,
