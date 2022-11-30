@@ -67,7 +67,8 @@ public class ActionOptions {
      * The options that return multiple Matches allow for overlapping Matches.
      */
     public enum Find {
-        FIRST, EACH, ALL, BEST, UNIVERSAL, CUSTOM, HISTOGRAM, COLOR, MOTION
+        FIRST, EACH, ALL, BEST, UNIVERSAL, CUSTOM, HISTOGRAM, COLOR
+        //, MOTION
     }
     private Find find;
     /**
