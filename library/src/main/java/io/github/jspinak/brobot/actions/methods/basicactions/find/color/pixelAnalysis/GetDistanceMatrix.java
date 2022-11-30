@@ -17,7 +17,7 @@ public class GetDistanceMatrix {
 
     /**
      * Returns a Mat that has the per-cell absolute distance to a target color.
-     * It can have multiple channels and each channel has a target value. (HSV & BGR = 3d)
+     * It can have multiple channels and each channel has a target value. (HSV and BGR are both 3d)
      * The target is usually a k-means center or the average color in an image. This is determined by the
      * parameter ColorStat.
      *
@@ -86,8 +86,8 @@ public class GetDistanceMatrix {
     /**
      * Calculates the distance to the nearest of the given colorStats. The distance can be negative in this
      * calculation, and the value with the nearest absolute distance will be kept. For example, if min and max
-     * are used, and the min is 20 and max 60, a value of 10 would give min -10 and max -70. Since abs(-10) < abs(-70),
-     * -10 will be kept.
+     * are used, and the min is 20 and max 60, a value of 10 would give min -10 and max -70. Since abs(-10) is
+     * less than abs(-70), -10 will be kept.
      *
      * @param scene the Mat to analyze
      * @param colorCluster contains the target colors
