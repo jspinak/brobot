@@ -138,7 +138,7 @@ public class MatOps3d {
      * OpenCV's meanStdDev works with 3 channel images but only 1 channel masks (CV_8UC1)
      * @param src the image to compute the mean and standard deviation of
      * @param mask the 3 channel mask to use
-     * @retirm the mean (index 0) and standard deviation (index 1) of the image
+     * @return the mean (index 0) and standard deviation (index 1) of the image
      */
     public MatVector mEanStdDev(Mat src, Mat mask) {
         MatVector meanStddev = new MatVector(2);

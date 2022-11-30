@@ -1,3 +1,5 @@
+import org.springframework.boot.gradle.plugin.SpringBootPlugin
+
 plugins {
     id 'org.springframework.boot' version '2.6.0' apply false
     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
@@ -7,7 +9,7 @@ plugins {
 }
 
 group 'io.github.jspinak'
-version '1.0.4'
+version '1.0.5'
 
 repositories {
     mavenCentral()
@@ -21,19 +23,22 @@ configurations {
 
 dependencyManagement {
     imports {
-        mavenBom org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES
+        mavenBom SpringBootPlugin.BOM_COORDINATES
     }
 }
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter'
-    implementation 'org.junit.jupiter:junit-jupiter:5.7.0'
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
+    // for local debugging of SikuliX
+    //implementation files('../../brobot parent directory/SikuliX1/SikuliX1/API/target/sikulixapi-2.1.0-SNAPSHOT.jar')
     implementation('com.sikulix:sikulixapi:2.0.5') {
         exclude group: 'org.slf4j', module: 'slf4j-nop'
     }
     implementation group: 'com.squareup', name: 'javapoet', version: '1.9.0'
+    implementation group: 'org.deeplearning4j', name: 'deeplearning4j-core', version: '1.0.0-M2'
+
 }
 
 java {
@@ -47,7 +52,7 @@ publishing {
 
             groupId = 'io.github.jspinak'
             artifactId = 'brobot'
-            version = '1.0.4'
+            version = '1.0.5-SNAPSHOT'
             from components.java
 
             pom {
