@@ -9,7 +9,7 @@ plugins {
 }
 
 group 'io.github.jspinak'
-version '1.0.5'
+version '1.0.5-SNAPSHOT'
 
 repositories {
     mavenCentral()
