@@ -9,6 +9,8 @@ It reduces the complexity of automating an inherently stochastic process
 and allows developers to focus on business logic. Complex automation applications
 are possible with Brobot.  
 
+Automating the creation of labeled image datasets is the main focus of the Brobot project.
+
 ## License
 
 Brobot is [MIT licensed](./LICENSE).
