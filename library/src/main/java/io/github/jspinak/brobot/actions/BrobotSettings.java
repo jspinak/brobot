@@ -1,5 +1,8 @@
 package io.github.jspinak.brobot.actions;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Global settings
  * Some Brobot settings override Sikuli settings.
@@ -35,7 +38,7 @@ public class BrobotSettings {
     It uses the screenshotPath and then this value as the filename.
     The name does not have to start with the value in 'screenshotFilename'.
      */
-    public static String screenshot = "";
+    public static List<String> screenshots = new ArrayList<>();
 
     /**
      * Screenshot Capture Settings
@@ -79,7 +82,7 @@ public class BrobotSettings {
      * Color Settings
      */
     public static boolean initProfilesForStaticfImages = false;
-    public static boolean initProfilesForDynamicImages = true;
+    public static boolean initProfilesForDynamicImages = false;
 
     public static boolean includeStateImageObjectsFromActiveStatesInAnalysis = true;
 

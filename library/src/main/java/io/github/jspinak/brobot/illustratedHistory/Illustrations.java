@@ -18,6 +18,7 @@ public class Illustrations {
         SCENE_MATCHES_SIDEBAR, CLASSES_LEGEND
     }
 
+    private String sceneName = "";
     private Mat sceneWithMatchesAndSidebar; // matches drawn on the scene together with the sidebar
     private Mat matchesOnScene; // matches and search regions drawn on the scene
     private Mat scene; // the scene

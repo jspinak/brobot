@@ -5,6 +5,8 @@ import io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles.ColorSchema;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles.ColorStatProfile;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.contours.Contours;
+import io.github.jspinak.brobot.datatypes.primitives.match.MatchObject;
+import io.github.jspinak.brobot.datatypes.state.stateObject.StateObject;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
 import io.github.jspinak.brobot.illustratedHistory.Illustrations;
 import lombok.Getter;
@@ -18,6 +20,7 @@ import static io.github.jspinak.brobot.actions.methods.basicactions.find.color.p
 import static io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.SceneAnalysis.Analysis.BGR_FROM_INDICES_2D;
 import static io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.SceneAnalysis.Analysis.SCENE;
 import static io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles.ColorCluster.ColorSchemaName.BGR;
+import static io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles.ColorCluster.ColorSchemaName.HSV;
 
 /**
  * A collection of PixelAnalysisCollection objects, each of which contains all analysis of a {scene, StateImageObject} pair.
@@ -51,14 +54,29 @@ public class SceneAnalysis {
     private Map<ColorCluster.ColorSchemaName, Map<Analysis, Mat>> analysis = new HashMap<>();
     {
         analysis.put(BGR, new HashMap<>());
-        analysis.put(ColorCluster.ColorSchemaName.HSV, new HashMap<>());
+        analysis.put(HSV, new HashMap<>());
     }
 
     public SceneAnalysis(List<PixelAnalysisCollection> pixelAnalysisCollections, Scene scene) {
         this.pixelAnalysisCollections = pixelAnalysisCollections;
         this.scene = scene;
         addAnalysis(BGR, SCENE, scene.getBgr());
-        addAnalysis(ColorCluster.ColorSchemaName.HSV, SCENE, scene.getHsv());
+        addAnalysis(HSV, SCENE, scene.getHsv());
+        illustrations = new Illustrations();
+        illustrations.setScene(scene.getBgr());
+    }
+
+    /**
+     * This constructor is for a SceneAnalysis that does not require a PixelAnalysisCollection.
+     * Usually, this would be used for an Action that can be fulfilled by Sikuli.
+     * No color analysis is required.
+     * @param scene
+     */
+    public SceneAnalysis(Scene scene) {
+        pixelAnalysisCollections = new ArrayList<>();
+        this.scene = scene;
+        addAnalysis(BGR, SCENE, scene.getBgr());
+        addAnalysis(HSV, SCENE, scene.getHsv());
         illustrations = new Illustrations();
         illustrations.setScene(scene.getBgr());
     }
