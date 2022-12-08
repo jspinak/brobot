@@ -1,8 +1,8 @@
 package io.github.jspinak.brobot.actions.methods.basicactions.find;
 
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
+import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.Scene;
 import io.github.jspinak.brobot.actions.methods.sikuliWrappers.find.FindWrapperMethods;
-import io.github.jspinak.brobot.datatypes.primitives.image.Image;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
@@ -33,25 +33,19 @@ public class FindImage implements FindImageObject {
         return !matches.isEmpty();
     }
 
-    @Override
-    public Matches find(ActionOptions actionOptions, StateImageObject stateImageObject) {
-        return find(actionOptions, stateImageObject, stateImageObject.getImage());
-    }
-
     /**
      * Creates MatchObjects and sets a new Snapshot for a single Image
      * @param actionOptions holds the action configuration.
      * @param stateImageObject the StateImageObject containing the Image in focus
-     * @param image the Image to find
      * @return a Matches object with all matches found.
      */
-    public Matches find(ActionOptions actionOptions, StateImageObject stateImageObject,
-                        Image image) {
+    @Override
+    public Matches find(ActionOptions actionOptions, StateImageObject stateImageObject, Scene scene) {
         Matches matches = new Matches();
         for (Region region : selectRegions.getRegions(actionOptions, stateImageObject)) {
             matches.addAllResults(
                     findWrapperMethods.get(actionOptions.getFind()).find(
-                    region, stateImageObject, image, actionOptions));
+                    region, stateImageObject, actionOptions, scene));
             if (stopAfterFound(actionOptions, matches)) break;
         }
         return matches;

@@ -34,30 +34,16 @@ public class GetScenes {
      */
     public List<Scene> getScenes(List<ObjectCollection> objectCollections,
                                  int scenesToCapture, double secondsBetweenCaptures) {
-        List<Scene> scenes = new ArrayList<>();
-        if (BrobotSettings.mock && !BrobotSettings.screenshot.equals("")) {
-            String name = BrobotSettings.screenshot;
-            scenes.add(new Scene(name, getImageJavaCV.getMat(name, BGR)));
-            return scenes;
-        }
+        List<Scene> scenes = getScenesNoScrenshots(objectCollections);
         /*
         Take screenshots
          */
-        if (objectCollections.isEmpty() || objectCollections.get(0).getScenes().isEmpty()) {
+        if (scenes.isEmpty()) {
             Report.println("Taking screenshot");
             for (int i=0; i<scenesToCapture; i++) {
-                scenes.add(new Scene("screenshot.png", getImageJavaCV.getMatFromScreen()));
+                scenes.add(new Scene("screenshot" + i + ".png", getImageJavaCV.getMatFromScreen()));
                 if (i<scenesToCapture-1) wait.wait(secondsBetweenCaptures);
             }
-        }
-        /*
-        If scenes are passed as parameters, use them.
-        */
-        else for (Image image : objectCollections.get(0).getScenes()) {
-            image.getFilenames().forEach(filename -> {
-                Mat mat = getImageJavaCV.getMat(filename, BGR);
-                scenes.add(new Scene(filename, mat));
-            });
         }
         return scenes;
     }
@@ -69,6 +55,28 @@ public class GetScenes {
      */
     public List<Scene> getScenes(List<ObjectCollection> objectCollections) {
         return getScenes(objectCollections, 1, 0);
+    }
+
+    public List<Scene> getScenesNoScrenshots(List<ObjectCollection> objectCollections) {
+        List<Scene> scenes = new ArrayList<>();
+        /*
+        If scenes are listed in the settings, use them.
+        */
+        if (BrobotSettings.mock && !BrobotSettings.screenshots.isEmpty()) {
+            BrobotSettings.screenshots.forEach(
+                    filename -> scenes.add(new Scene(filename, getImageJavaCV.getMat(filename, BGR))));
+            return scenes;
+        }
+        /*
+        If scenes are passed as parameters, use them.
+        */
+        else for (Image image : objectCollections.get(0).getScenes()) {
+            image.getFilenames().forEach(filename -> {
+                Mat mat = getImageJavaCV.getMat(filename, BGR);
+                scenes.add(new Scene(filename, mat));
+            });
+        }
+        return scenes;
     }
 
 }
