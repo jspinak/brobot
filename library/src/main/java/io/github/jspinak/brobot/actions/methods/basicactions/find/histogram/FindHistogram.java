@@ -74,7 +74,7 @@ public class FindHistogram {
 
     private List<MatchObject> forOneImage(ActionOptions actionOptions, StateImageObject image, Mat sceneHSV, int actionId) {
         List<Region> searchRegions = selectRegions.getRegions(actionOptions, image);
-        if (BrobotSettings.mock && BrobotSettings.screenshot.isEmpty())
+        if (BrobotSettings.mock && BrobotSettings.screenshots.isEmpty())
             return mockHistogram.getMockHistogramMatches(image, searchRegions);
         List<MatchObject> matchObjects = new ArrayList<>();
         for (Region reg : searchRegions) {

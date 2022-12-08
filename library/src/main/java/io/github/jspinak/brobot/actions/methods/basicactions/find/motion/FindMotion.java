@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 import static io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.SceneAnalysis.Analysis.BGR_FROM_INDICES_2D;
+import static io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.SceneAnalysis.Analysis.SCENE;
 import static io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles.ColorCluster.ColorSchemaName.BGR;
 import static org.bytedeco.opencv.global.opencv_core.add;
 import static org.bytedeco.opencv.global.opencv_core.multiply;
@@ -42,6 +43,8 @@ public class FindMotion {
     /**
      * When images are passed, motion between the images will be returned. Images must be of the same size.
      * To find motion on the screen, call Find.MOTION without an ObjectCollection or with an empty ObjectCollection.
+     * A minimum of 3 scenes are needed to show the object that is moving. WIth 2 scenes, movement can be
+     * detected, but it is unclear what is the object and what is the background.
      *
      * @param actionOptions The action's configuration
      * @param objectCollections holds the images to analyze for motion in the first collection
@@ -50,15 +53,13 @@ public class FindMotion {
     public Matches find(ActionOptions actionOptions, List<ObjectCollection> objectCollections) {
         Matches matches = new Matches();
         SceneAnalysisCollection sceneAnalysisCollection = getSceneAnalysisCollection.get(
-                objectCollections, 2, 1, actionOptions);
+                objectCollections, 3, 0.1, actionOptions);
         matches.setSceneAnalysisCollection(sceneAnalysisCollection);
         if (sceneAnalysisCollection.getSceneAnalyses().size() < 2) return matches; // nothing to compare
         // the following code finds movement, but not necessarily the images provided
         Mat absdiff = detectMotion.getAbsdiff(
-                sceneAnalysisCollection.getSceneAnalyses().get(0)
-                        .getAnalysis(BGR, SceneAnalysis.Analysis.SCENE),
-                sceneAnalysisCollection.getSceneAnalyses().get(1)
-                        .getAnalysis(BGR, SceneAnalysis.Analysis.SCENE));
+                sceneAnalysisCollection.getSceneAnalyses().get(0).getAnalysis(BGR, SCENE),
+                sceneAnalysisCollection.getSceneAnalyses().get(1).getAnalysis(BGR, SCENE));
         matches.setPixelMatches(absdiff);
         Mat scores = new Mat();
         multiply(new Mat(new Scalar(-1)), absdiff, scores);

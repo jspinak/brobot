@@ -1,6 +1,7 @@
 package io.github.jspinak.brobot.actions.methods.basicactions.find;
 
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
+import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.Scene;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.primitives.regionImagePairs.RegionImagePair;
@@ -48,15 +49,15 @@ public class FindRIP implements FindImageObject {
      * @return a Matches object will all matches found.
      */
     @Override
-    public Matches find(ActionOptions actionOptions, StateImageObject stateImageObject) {
+    public Matches find(ActionOptions actionOptions, StateImageObject stateImageObject, Scene scene) {
         Matches matches = new Matches();
         matches.addAllResults(
                 findAndDefineRegions(actionOptions, stateImageObject, stateImageObject.getRegionImagePairs(),
-                        this::getDefinedPairs));
+                        this::getDefinedPairs, scene));
         if (breakCondition(matches, actionOptions)) return matches;
         matches.addAllResults(
                 findAndDefineRegions(actionOptions, stateImageObject, stateImageObject.getRegionImagePairs(),
-                        this::getUndefinedPairs));
+                        this::getUndefinedPairs, scene));
         return matches;
     }
 
@@ -72,11 +73,11 @@ public class FindRIP implements FindImageObject {
      */
     public Matches findAndDefineRegions(ActionOptions actionOptions, StateImageObject stateImageObject,
                                         RegionImagePairs pairs,
-                                        Function<RegionImagePairs, Set<RegionImagePair>> filter) {
+                                        Function<RegionImagePairs, Set<RegionImagePair>> filter, Scene scene) {
         Matches matches = new Matches();
         for (RegionImagePair pair : filter.apply(pairs)) {
             Matches newMatches =
-                    findImage.find(actionOptions, stateImageObject, pair.getImage());
+                    findImage.find(actionOptions, stateImageObject, scene);
             matches.addAllResults(newMatches);
             newMatches.getBestMatch().ifPresent(matchObject -> {
                 pair.setRegion(new Region(matchObject.getMatch()));

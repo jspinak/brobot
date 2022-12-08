@@ -55,17 +55,17 @@ public class GetSceneAnalysisCollection {
      * These images will be used for classification but not for matching. Only the target images
      * will be used to find matches. Having additional images for classification, when they are in
      * the scene, can make matching the target images more accurate.
-     * @param images all object collection for this action
+     * @param objColls all object collection for this action
      * @return a set of additional images that will be used for classification
      */
-    private Set<StateImageObject> getAdditionalImagesForClassification(List<ObjectCollection> images) {
+    private Set<StateImageObject> getAdditionalImagesForClassification(List<ObjectCollection> objColls) {
         Set<StateImageObject> toClassify = new HashSet<>();
         if (BrobotSettings.includeStateImageObjectsFromActiveStatesInAnalysis) {
             stateService.findSetByName(stateMemory.getActiveStates()).forEach(
                     state -> toClassify.addAll(state.getStateImages()));
         }
-        if (images.size() > 1 && !images.get(1).empty()) {
-            toClassify.addAll(images.get(1).getStateImages());
+        for (int i=1; i<objColls.size(); i++) {
+            toClassify.addAll(objColls.get(i).getStateImages());
         }
         return toClassify;
     }

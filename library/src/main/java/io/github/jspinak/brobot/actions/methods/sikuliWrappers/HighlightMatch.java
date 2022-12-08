@@ -15,18 +15,18 @@ import org.springframework.stereotype.Component;
 public class HighlightMatch {
 
     public void turnOn(Match match, StateObject stateObject, ActionOptions actionOptions) {
-        if (BrobotSettings.mock && BrobotSettings.screenshot.isEmpty())
+        if (BrobotSettings.mock && BrobotSettings.screenshots.isEmpty())
             Report.print(match, stateObject, actionOptions);
         else match.highlightOn(actionOptions.getHighlightColor());
     }
 
     public void turnOff(Match match) {
-        if (!BrobotSettings.mock || !BrobotSettings.screenshot.isEmpty()) match.highlightOff();
+        if (!BrobotSettings.mock || !BrobotSettings.screenshots.isEmpty()) match.highlightOff();
     }
 
     // matches don't highlight, only regions (this seems to be a sikuli bug).
     public boolean highlight(Match match, StateObject stateObject, ActionOptions actionOptions) {
-        if (BrobotSettings.mock && BrobotSettings.screenshot.isEmpty())
+        if (BrobotSettings.mock && BrobotSettings.screenshots.isEmpty())
             return Report.print(match, stateObject, actionOptions);
         match.highlight(1);
         Region highlightReg = new Region(match.x,match.y,match.w,match.h);
