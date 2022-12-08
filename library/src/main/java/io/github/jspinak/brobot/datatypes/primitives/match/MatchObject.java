@@ -38,6 +38,7 @@ public class MatchObject implements Comparable<MatchObject> {
     private LocalDateTime timeStamp;
     private double duration;
     private Mat histogram;
+    private String sceneName = "";
     private double score; // The score in Match cannot be set publicly. This score is used for scoring with Mats.
 
     /**

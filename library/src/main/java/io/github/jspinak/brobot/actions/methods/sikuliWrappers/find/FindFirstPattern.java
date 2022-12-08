@@ -2,6 +2,7 @@ package io.github.jspinak.brobot.actions.methods.sikuliWrappers.find;
 
 import io.github.jspinak.brobot.actions.BrobotSettings;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
+import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.Scene;
 import io.github.jspinak.brobot.actions.methods.time.Time;
 import io.github.jspinak.brobot.datatypes.primitives.image.Image;
 import io.github.jspinak.brobot.datatypes.primitives.image.ImagePatterns;
@@ -39,13 +40,12 @@ public class FindFirstPattern implements FindPatternInterface {
     }
 
     @Override
-    public Matches find(Region region, StateImageObject stateImageObject, Image image,
-                        ActionOptions actionOptions) {
+    public Matches find(Region region, StateImageObject stateImageObject, ActionOptions actionOptions, Scene scene) {
         Matches matches = new Matches();
-        if (BrobotSettings.mock && BrobotSettings.screenshot.isEmpty())
+        if (BrobotSettings.mock && BrobotSettings.screenshots.isEmpty())
             return mock.getMatches(stateImageObject, region, actionOptions);
-        else for (Pattern pattern : imagePatterns.getPatterns(image, actionOptions)) {
-            Optional<Match> matchOptional = findPattern.findBest(region, pattern);
+        else for (Pattern pattern : imagePatterns.getPatterns(stateImageObject.getImage(), actionOptions)) {
+            Optional<Match> matchOptional = findPattern.findBest(region, pattern, scene);
             if (matchOptional.isPresent()) {
                 matches.addMatchObjects(stateImageObject, Collections.singletonList(matchOptional.get()),
                         Duration.between(matches.getStartTime(), LocalDateTime.now()).toSeconds()); //time.getDuration(actionOptions.getAction()).getSeconds());
