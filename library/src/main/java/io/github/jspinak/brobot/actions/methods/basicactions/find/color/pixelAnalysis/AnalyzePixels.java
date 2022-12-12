@@ -128,7 +128,7 @@ public class AnalyzePixels {
         allImgs.forEach(img -> pixelAnalysisCollections.add(getPixelAnalysisCollection(scene, img, actionOptions)));
         SceneAnalysis sceneAnalysis = new SceneAnalysis(pixelAnalysisCollections, scene);
         getSceneAnalysisScores.setSceneAnalysisIndices(sceneAnalysis);
-        getSceneAnalysisScores.setSceneAnalysisIndicesTargetsOnly(sceneAnalysis, targetImgs);
+        if (targetImgs.size() > 0) getSceneAnalysisScores.setSceneAnalysisIndicesTargetsOnly(sceneAnalysis, targetImgs);
         getSceneAnalysisScores.setBGRVisualizationMats(sceneAnalysis);
         return sceneAnalysis;
     }
