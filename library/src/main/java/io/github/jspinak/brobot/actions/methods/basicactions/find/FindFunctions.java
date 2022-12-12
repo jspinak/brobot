@@ -30,7 +30,7 @@ public class FindFunctions {
         findFunction.put(ActionOptions.Find.ALL, findImageOrRIP::find);
         findFunction.put(ActionOptions.Find.HISTOGRAM, findHistogram::find);
         findFunction.put(ActionOptions.Find.COLOR, findColor::find);
-        //findFunction.put(ActionOptions.Find.MOTION, findMotion::find);
+        findFunction.put(ActionOptions.Find.MOTION, findMotion::find);
     }
 
     public void addCustomFind(BiFunction<ActionOptions, List<ObjectCollection>, Matches> customFind) {

@@ -12,6 +12,7 @@ import io.github.jspinak.brobot.illustratedHistory.Illustrations;
 import lombok.Getter;
 import lombok.Setter;
 import org.bytedeco.opencv.opencv_core.Mat;
+import org.sikuli.script.Match;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -50,6 +51,8 @@ public class SceneAnalysis {
     private List<PixelAnalysisCollection> pixelAnalysisCollections;
     private Scene scene;
     private Contours contours;
+    // these matches are scene specific. for example, the matches from motion from the previous scene to this one.
+    private List<Match> matchList = new ArrayList<>();
     private Illustrations illustrations; // the results in a writeable format
     private Map<ColorCluster.ColorSchemaName, Map<Analysis, Mat>> analysis = new HashMap<>();
     {

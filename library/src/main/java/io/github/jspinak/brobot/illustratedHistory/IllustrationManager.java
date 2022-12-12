@@ -14,8 +14,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 import static io.github.jspinak.brobot.actions.actionOptions.ActionOptions.Action.*;
-import static io.github.jspinak.brobot.actions.actionOptions.ActionOptions.Find.COLOR;
-import static io.github.jspinak.brobot.actions.actionOptions.ActionOptions.Find.HISTOGRAM;
+import static io.github.jspinak.brobot.actions.actionOptions.ActionOptions.Find.*;
 
 @Component
 public class IllustrationManager {
@@ -72,11 +71,12 @@ public class IllustrationManager {
              */
             drawRect.drawRectAroundMatch(ill, searchRegions, new Scalar(235, 206, 135, 0)); // the search regions
             drawContours.draw(sceneAnalysis);
-            drawMatch.drawMatches(ill, matches); // draw the matches on the scenes
+            if (actionOptions.getFind() == MOTION) drawMatch.drawMatches(ill.getMatchesOnScene(), sceneAnalysis.getMatchList());
+            else drawMatch.drawMatches(ill, matches); // draw the matches on the scenes
             if (actionOptions.getAction() == MOVE) draw.drawMove(ill, matches); // draw the move on the scenes
             if (actionOptions.getAction() == DRAG) draw.drawDrag(ill, matches); // draw the drag on the scenes
             if (actionOptions.getAction() == CLICK) draw.drawClick(ill, matches); // draw the click on the scenes
-            sidebar.drawSidebars(ill, matches, actionOptions); // draw the sidebars
+            sidebar.drawSidebars(ill, matches, actionOptions, sceneAnalysis.getMatchList()); // draw the sidebars
             sidebar.mergeSceneAndSidebar(ill); // merge the scene and the sidebar
             if (showClassesMat(actionOptions)) {
                 drawClassesLegend.drawLegend(ill, sceneAnalysis.getStateImageObjects(), actionOptions); // draw the legend

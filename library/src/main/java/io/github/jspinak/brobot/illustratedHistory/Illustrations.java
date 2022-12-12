@@ -15,7 +15,7 @@ import static org.bytedeco.opencv.global.opencv_imgcodecs.imwrite;
 public class Illustrations {
 
     public enum Type {
-        SCENE_MATCHES_SIDEBAR, CLASSES_LEGEND
+        SCENE_MATCHES_SIDEBAR, CLASSES_LEGEND, MOTION
     }
 
     private String sceneName = "";
@@ -29,6 +29,8 @@ public class Illustrations {
     private Mat classes; // the scene with classes drawn on it (segmentation by image)
     private Mat legend; // shows the classes: their underlying images and kMeans centers
     private String filenameClasses;
+    private Mat motion; // pixels that have changed between scenes
+    private Mat motionWithMatches; // matches depend on minSize and other parameters
 
     public Mat getMat(Type type) {
         switch (type) {

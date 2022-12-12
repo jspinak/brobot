@@ -37,6 +37,7 @@ public class Draw {
 
     public void drawClick(Illustrations illustrations, Matches matches) {
         for (Match match : matches.getMatches()) {
+            Report.println("Drawing click on " + match.getTarget().x + ", " + match.getTarget().y);
             drawPoint(illustrations.getMatchesOnScene(), match, new Scalar(255, 150, 255, 0));
         }
     }
