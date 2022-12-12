@@ -78,7 +78,7 @@ public class Location {
         int percentOfW, percentOfH;
         percentOfW = (newX - region.x) / region.w;
         percentOfH = (newY - region.y) / region.h;
-        System.out.println("percent of W,H: "+percentOfW+" "+percentOfH);
+        //System.out.println("percent of W,H: "+percentOfW+" "+percentOfH);
         position = new Position(percentOfW, percentOfH);
         definedByXY = false;
     }
@@ -110,13 +110,13 @@ public class Location {
     public Location(Match match) {
         this.region = new Region(match);
         double percentOfW, percentOfH;
-        Report.println("target of match: "+match.getTarget().x + " " + match.getTarget().y);
-        Report.println("region of match: "+region.x + " " + region.y + " " + region.w + " " + region.h);
-        Report.println((double)match.getTarget().x + " " + (double)region.x + " " + (double)region.w);
-        Report.println((double)match.getTarget().y + " " + (double)region.y + " " + (double)region.h);
+        //Report.println("target of match: "+match.getTarget().x + " " + match.getTarget().y);
+        //Report.println("region of match: "+region.x + " " + region.y + " " + region.w + " " + region.h);
+        //Report.println((double)match.getTarget().x + " " + (double)region.x + " " + (double)region.w);
+        //Report.println((double)match.getTarget().y + " " + (double)region.y + " " + (double)region.h);
         percentOfW = ((double)match.getTarget().x - (double)region.x) / (double)region.w;
         percentOfH = ((double)match.getTarget().y - (double)region.y) / (double)region.h;
-        Report.println("percent of W,H: "+percentOfW+" "+percentOfH);
+        //Report.println("percent of W,H: "+percentOfW+" "+percentOfH);
         position = new Position(percentOfW, percentOfH);
         definedByXY = false;
     }
@@ -179,7 +179,7 @@ public class Location {
     }
 
     private org.sikuli.script.Location getSikuliLocationFromRegion() {
-        Report.println("region: "+region.x + " " + region.y + " " + region.w + " " + region.h + " " + position.getPercentW());
+        //Report.println("region: "+region.x + " " + region.y + " " + region.w + " " + region.h + " " + position.getPercentW());
         double locX = region.x + (region.w * position.getPercentW());
         double locY = region.y + (region.h * position.getPercentH());
         return new org.sikuli.script.Location(locX, locY);
@@ -296,7 +296,7 @@ public class Location {
      */
     public void add(Location loc) {
         if (definedByXY && loc.definedByXY) {
-            Report.println("Adding x,y locations " + loc.x + " " + loc.y);
+            //Report.println("Adding x,y locations " + loc.x + " " + loc.y);
             x += loc.x;
             y += loc.y;
             return;
@@ -311,17 +311,17 @@ public class Location {
             y += loc.position.getPercentH() * region.h;
             return;
         }
-        Report.println("percent W,H " + position.getPercentW() + " " + position.getPercentH());
-        Report.println("region W,H " + region.w + " " + region.h);
-        Report.println("x,y " + x + " " + y);
+        //Report.println("percent W,H " + position.getPercentW() + " " + position.getPercentH());
+        //Report.println("region W,H " + region.w + " " + region.h);
+        //Report.println("x,y " + x + " " + y);
         x = getX() + loc.x;
         y = getY() + loc.y;
         definedByXY = true;
         //position.addPercentW((double)loc.x / region.w);
         //position.addPercentH((double)loc.y / region.h);
-        Report.println("percent W,H " + position.getPercentW() + " " + position.getPercentH());
-        Report.println("region W,H " + region.w + " " + region.h);
-        Report.println("x,y " + x + " " + y);
+        //Report.println("percent W,H " + position.getPercentW() + " " + position.getPercentH());
+        //Report.println("region W,H " + region.w + " " + region.h);
+        //Report.println("x,y " + x + " " + y);
     }
 
     public void print() {

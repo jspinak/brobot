@@ -9,7 +9,7 @@ plugins {
 }
 
 group 'io.github.jspinak'
-version '1.0.5-SNAPSHOT'
+version '1.0.6'
 
 repositories {
     mavenCentral()
@@ -52,7 +52,7 @@ publishing {
 
             groupId = 'io.github.jspinak'
             artifactId = 'brobot'
-            version = '1.0.5-SNAPSHOT'
+            version = '1.0.6'
             from components.java
 
             pom {
@@ -88,7 +88,8 @@ publishing {
     repositories {
         maven {
             name = "OSSRH"
-            url = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
+            //url = "https://s01.oss.sonatype.org/content/repositories/snapshots/" // for snapshots
+            url = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/" // for releases
             credentials {
                 username = project.properties["ossrhUsername"]
                 password = project.properties["ossrhPassword"]

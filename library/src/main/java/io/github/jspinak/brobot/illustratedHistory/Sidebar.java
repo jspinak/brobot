@@ -35,10 +35,10 @@ public class Sidebar {
         this.columnMatOps = columnMatOps;
     }
 
-    public void drawSidebars(Illustrations illustrations, Matches matches, ActionOptions actionOptions) {
+    public void drawSidebars(Illustrations illustrations, Matches matches, ActionOptions actionOptions, List<Match> matchList) {
         if (illustrations.getScene() == null) return;
-        List<Mat> sidebarEntries = getEntriesForSceneSidebar(illustrations, matches, actionOptions);
-        Mat sidebar = getSidebar(illustrations.getScene(), sidebarEntries, matches);
+        List<Mat> sidebarEntries = getEntriesForSceneSidebar(illustrations, matches, actionOptions, matchList);
+        Mat sidebar = getSidebar(illustrations.getScene(), sidebarEntries, matches, matchList);
         illustrations.setSidebar(sidebar);
     }
 
@@ -56,7 +56,7 @@ public class Sidebar {
         columns = (int) Math.ceil((double) matchesSize / matchesPerColumn);
     }
 
-    private Mat getSidebar(Mat scene, List<Mat> sidebarEntries, Matches matches) {
+    private Mat getSidebar(Mat scene, List<Mat> sidebarEntries, Matches matches, List<Match> matchList) {
         initSidebar(scene, matches.size());
         List<Mat> sidebarColumns = new ArrayList<>();
         for (int i = 0; i < columns; i++) {
@@ -67,21 +67,24 @@ public class Sidebar {
         return columnMatOps.mergeColumnMats(sidebarColumns, spacesBetweenEntries);
     }
 
-
-    private List<Mat> getEntriesForSceneSidebar(Illustrations illustrations, Matches matches, ActionOptions actionOptions) {
+    private List<Mat> getEntriesForSceneSidebar(Illustrations illustrations, Matches matches, ActionOptions actionOptions, List<Match> matchList) {
         List<Mat> sidebarEntries = new ArrayList<>();
-        matches.getMatchObjects().forEach(m -> sidebarEntries.add(getEntryForSceneSidebar(illustrations, m, actionOptions)));
+        if (actionOptions.getFind() == ActionOptions.Find.MOTION) {
+            matchList.forEach(m -> sidebarEntries.add(getMatchForSidebar(illustrations, m)));
+            return sidebarEntries;
+        }
+        if (actionOptions.getFind() == ActionOptions.Find.HISTOGRAM) {
+            matches.getMatchObjects().forEach(mO -> {
+                Mat matchOnScene = getMatchForSidebar(illustrations, mO.getMatch());
+                sidebarEntries.add(getMatchAndHistogram(matchOnScene, mO));
+            });
+            return sidebarEntries;
+        }
+        matches.getMatches().forEach(m -> sidebarEntries.add(getMatchForSidebar(illustrations, m)));
         return sidebarEntries;
     }
 
-    private Mat getEntryForSceneSidebar(Illustrations illustrations, MatchObject matchObject, ActionOptions actionOptions) {
-        Mat matchOnScene = getMatchForSidebar(illustrations, matchObject);
-        if (actionOptions.getFind() != ActionOptions.Find.HISTOGRAM) return matchOnScene;
-        return getMatchAndHistogram(matchOnScene, matchObject);
-    }
-
-    private Mat getMatchForSidebar(Illustrations illustrations, MatchObject matchObject) {
-        Match match = matchObject.getMatch();
+    private Mat getMatchForSidebar(Illustrations illustrations, Match match) {
         Rect rect = new Rect(match.x, match.y, match.w, match.h);
         Mat matchFromScene = illustrations.getScene().apply(rect);
         resize(matchFromScene, matchFromScene, new Size(sidebarEntryW, sidebarEntryH));
