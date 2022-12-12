@@ -75,10 +75,12 @@ public class GetSceneAnalysisScores {
     public void setBGRVisualizationMats(SceneAnalysis sceneAnalysis) {
         Map<Integer, Scalar> hueList = getHueMap(sceneAnalysis);
         Mat hsv3D = sceneAnalysis.getAnalysis(HSV, INDICES_3D);
+        if (hsv3D == null) return; // no indices to visualize
         Mat bgrColorMatFromHSV2dIndexMat = matVisualize.getBGRColorMatFromHSV2dIndexMat(hsv3D, hueList);
-        Mat hsv3Dtargets = sceneAnalysis.getAnalysis(HSV, INDICES_3D_TARGETS);
-        Mat hsvTargetsColorMat = matVisualize.getBGRColorMatFromHSV2dIndexMat(hsv3Dtargets, hueList);
         sceneAnalysis.addAnalysis(BGR, BGR_FROM_INDICES_2D, bgrColorMatFromHSV2dIndexMat);
+        Mat hsv3Dtargets = sceneAnalysis.getAnalysis(HSV, INDICES_3D_TARGETS);
+        if (hsv3Dtargets == null) return; // no targets
+        Mat hsvTargetsColorMat = matVisualize.getBGRColorMatFromHSV2dIndexMat(hsv3Dtargets, hueList);
         sceneAnalysis.addAnalysis(BGR, BGR_FROM_INDICES_2D_TARGETS, hsvTargetsColorMat);
     }
 

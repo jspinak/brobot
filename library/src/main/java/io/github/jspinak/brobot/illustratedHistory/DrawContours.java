@@ -35,8 +35,9 @@ public class DrawContours {
 
     public void draw(SceneAnalysis sceneAnalysis) {
         Mat matchesOnClasses = sceneAnalysis.getIllustrations().getMatchesOnClasses();
-        if (matchesOnClasses != null) draw(
-                sceneAnalysis.getIllustrations().getMatchesOnClasses(),
-                sceneAnalysis.getContours().getUnmodifiedContours());
+        if (sceneAnalysis.getContours() == null) return;
+        List<Rect> unmodifiedContours = sceneAnalysis.getContours().getUnmodifiedContours();
+        if (matchesOnClasses == null || unmodifiedContours.isEmpty()) return;
+        draw(matchesOnClasses, unmodifiedContours);
     }
 }

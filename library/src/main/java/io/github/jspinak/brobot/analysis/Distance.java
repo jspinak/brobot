@@ -35,6 +35,11 @@ public class Distance {
 
     public double getDistance(Location loc1, Location loc2) { return euclidean(loc1, loc2); }
 
+    public double getDistance(Match match1, Match match2) {
+        return Math.sqrt(Math.pow(match1.getCenter().getX() - match2.getCenter().getX(), 2) +
+                Math.pow(match1.getCenter().getY() - match2.getCenter().getY(), 2));
+    }
+
     public double euclidean(Location loc1, Location loc2) {
         return getDist(getDistPair(loc1, loc2));
     }
@@ -60,15 +65,19 @@ public class Distance {
      * Vector 1: start to loc1
      * Vector 2: start to loc2
      *
-     * @param start the start point for both vectors
+     * @param center the start point for both vectors
      * @param loc1 the end point for vector1
      * @param loc2 the end point for vector2
      * @return the angle to go from vector1 to vector2
      */
-    public double getDegreesBetween(Location start, Location loc1, Location loc2) {
-        double angle1 = getAngle(start, loc1);
-        double angle2 = getAngle(start, loc2);
+    public double getDegreesBetween(Location center, Location loc1, Location loc2) {
+        double angle1 = getAngle(center, loc1);
+        double angle2 = getAngle(center, loc2);
         return getDegreesBetween(angle1, angle2);
+    }
+
+    public double getDegreesBetween(Match center, Match match1, Match match2) {
+        return getDegreesBetween(new Location(center), new Location(match1), new Location(match2));
     }
 
     public double getDegreesBetween(double angle1, double angle2) {
