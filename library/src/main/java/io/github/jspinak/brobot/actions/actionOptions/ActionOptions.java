@@ -67,8 +67,7 @@ public class ActionOptions {
      * The options that return multiple Matches allow for overlapping Matches.
      */
     public enum Find {
-        FIRST, EACH, ALL, BEST, UNIVERSAL, CUSTOM, HISTOGRAM, COLOR
-        //, MOTION
+        FIRST, EACH, ALL, BEST, UNIVERSAL, CUSTOM, HISTOGRAM, COLOR, MOTION
     }
     private Find find;
     /**
@@ -291,6 +290,8 @@ public class ActionOptions {
      * addX and addY are used to adjust the dragFrom Location, and addX2 and addY2 are used to adjust
      * the dragTo Location. Dragging to or from the current mouse position then can be done by setting
      * addX2 and addY2 or addX and addY, respectively, without including any objects in the ObjectCollection.
+     * AddX2 and addY2 add an additional Match to the results by adding X2 to the x value of the last Match and
+     * Y2 to the y value of the last Match, and creating a new Match with these coordinates.
      */
     private int addX2;
     private int addY2;

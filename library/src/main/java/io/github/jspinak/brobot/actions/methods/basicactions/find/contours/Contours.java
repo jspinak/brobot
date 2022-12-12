@@ -1,8 +1,6 @@
 package io.github.jspinak.brobot.actions.methods.basicactions.find.contours;
 
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
-import io.github.jspinak.brobot.imageUtils.MatOps;
-import io.github.jspinak.brobot.reports.Report;
 import lombok.Getter;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.MatVector;
@@ -25,13 +23,13 @@ public class Contours {
     With a Find.COLOR action, only the target images are classified and appear in this Mat.
      */
     private Mat bgrFromClassification2d;
-    private List<Region> searchRegions;
+    private List<Region> searchRegions = new ArrayList<>();
     private int minArea;
     private int maxArea;
     private MatVector opencvContours;
-    private List<Rect> unmodifiedContours;
-    private List<Rect> contours;
-    private Map<Integer, Match> matchMap;
+    private List<Rect> unmodifiedContours = new ArrayList<>();
+    private List<Rect> contours = new ArrayList<>();
+    private Map<Integer, Match> matchMap = new HashMap<>();
 
     public List<Rect> getContours() {
         contours = new ArrayList<>();
@@ -48,8 +46,9 @@ public class Contours {
     public List<Rect> getContoursInRegion(Region region) {
         List<Rect> rectsInRegion = new ArrayList<>();
         Mat regionalClassMat = new Mat(bgrFromClassification2d, region.getJavaCVRect());
-        Mat gray = new Mat();
-        cvtColor(regionalClassMat, gray, COLOR_BGR2GRAY);
+        Mat gray = new Mat(regionalClassMat.size(), regionalClassMat.type());
+        if (bgrFromClassification2d.channels() == 3) cvtColor(regionalClassMat, gray, COLOR_BGR2GRAY);
+        else gray = regionalClassMat;
         MatVector regionalContours = new MatVector();
         findContours(gray, regionalContours, RETR_EXTERNAL, CHAIN_APPROX_SIMPLE);
         opencvContours.put(regionalContours);
@@ -126,13 +125,14 @@ public class Contours {
 
     /*
     Scores are determined by the average distance to the threshold values,
-    for all pixels in the contour. The size is most important for CLASSIFY actions, but
+    for all pixels in the contour. The size is most important for CLASSIFY and MOTION actions, but
     for FIND actions, the score is most important.
 
     The best results are obtained when the minScore is set to 0. This creates a match for all areas of the Mat
     and takes a lot longer to process, but looks at the score of every pixel in the Mat.
      */
     private double getContourScore(Rect rect) {
+        if (scoreThresholdDist == null) return rect.area(); // with the Motion action, there is no scoreThresholdDist
         Mat boundingMat = new Mat(scoreThresholdDist, rect);
         double totalScore = 0;
         for (int i=0; i<3; i++) {

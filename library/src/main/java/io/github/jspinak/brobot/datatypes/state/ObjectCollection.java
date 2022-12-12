@@ -16,8 +16,10 @@ import lombok.Setter;
 import org.sikuli.script.Match;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static io.github.jspinak.brobot.datatypes.primitives.location.Position.Name.TOPLEFT;
 import static io.github.jspinak.brobot.datatypes.state.NullState.Name.NULL;
@@ -249,6 +251,11 @@ public class ObjectCollection {
 
         public Builder withScenes(Image... scenes) {
             Collections.addAll(this.scenes, scenes);
+            return this;
+        }
+
+        public Builder withScenes(StateImageObject... scenes) {
+            this.scenes.addAll(Arrays.stream(scenes).map(StateImageObject::getImage).toList());
             return this;
         }
 

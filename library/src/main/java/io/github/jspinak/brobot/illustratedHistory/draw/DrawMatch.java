@@ -23,6 +23,10 @@ public class DrawMatch {
         matchList.forEach(m -> drawRect.drawRectAroundMatch(scene, m, new Scalar(255, 150, 255, 0)));
     }
 
+    public void drawMatches(Mat scene, List<Match> matchList, Scalar color) {
+        matchList.forEach(m -> drawRect.drawRectAroundMatch(scene, m, color));
+    }
+
     public void drawMatches(Illustrations illScn, Matches matches) {
         List<Match> matchList = new ArrayList<>();
         matches.getMatchObjects().forEach(mO -> {

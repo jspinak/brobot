@@ -109,7 +109,7 @@ public class ImageUtils {
                 nonNullMats.add(mats.get(i));
                 nonNullFilenames.add(filenames.get(i));
             }
-            else Report.println("Mat at index " + i + " is null.");
+            //else Report.println("Mat at index " + i + " is null.");
         }
         for (int i=0; i<nonNullMats.size(); i++) {
             if (!writeWithUniqueFilename(nonNullMats.get(i), nonNullFilenames.get(i))) {
