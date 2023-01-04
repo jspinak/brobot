@@ -1,5 +1,6 @@
 package io.github.jspinak.brobot.actions.methods.basicactions.click;
 
+import io.github.jspinak.brobot.actions.BrobotSettings;
 import io.github.jspinak.brobot.actions.actionExecution.ActionInterface;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.Find;
@@ -41,10 +42,12 @@ public class Click implements ActionInterface {
     }
 
     public Matches perform(ActionOptions actionOptions, ObjectCollection... objectCollections) {
-        SceneAnalysisCollection sceneAnalysisCollection = getSceneAnalysisCollection.
-                get(Arrays.asList(objectCollections), actionOptions);
         Matches matches = find.perform(actionOptions, objectCollections); // find performs only on 1st collection
-        matches.setSceneAnalysisCollection(sceneAnalysisCollection);
+        if (BrobotSettings.saveHistory) {
+            SceneAnalysisCollection sceneAnalysisCollection = getSceneAnalysisCollection.
+                    get(Arrays.asList(objectCollections), actionOptions);
+            matches.setSceneAnalysisCollection(sceneAnalysisCollection);
+        }
         int i = 0;
         for (MatchObject matchObject : matches.getMatchObjects()) {
             Location location = setClickLocation(matchObject, actionOptions);

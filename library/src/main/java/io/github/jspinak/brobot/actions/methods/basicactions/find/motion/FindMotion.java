@@ -81,7 +81,7 @@ public class FindMotion {
         List<Region> searchRegions = selectRegions.getRegionsForAllImages(actionOptions, objectCollections.toArray(new ObjectCollection[0]));
         List<Match> matchList1 = getRegionsOfChange(sceneAnalysisCollection, 0, 1, actionOptions, searchRegions);
         List<Match> matchList2 = getRegionsOfChange(sceneAnalysisCollection, 1, 2, actionOptions, searchRegions);
-        List<List<Match>> movingObjects = selectMovingObject.select(matchList1, matchList2, 100);
+        List<List<Match>> movingObjects = selectMovingObject.select(matchList1, matchList2, actionOptions.getMaxMovement());
         matches.getSceneAnalysisCollection().getSceneAnalyses().get(0).setMatchList(movingObjects.get(0));
         matches.getSceneAnalysisCollection().getSceneAnalyses().get(1).setMatchList(movingObjects.get(1));
         matches.getSceneAnalysisCollection().getSceneAnalyses().get(2).setMatchList(movingObjects.get(2));
@@ -99,11 +99,7 @@ public class FindMotion {
                                            ActionOptions actionOptions, List<Region> searchRegions) {
         Mat scene1 = sceneAnalysisCollection.getSceneAnalyses().get(index1).getAnalysis(BGR, SCENE);
         Mat scene2 = sceneAnalysisCollection.getSceneAnalyses().get(index2).getAnalysis(BGR, SCENE);
-        if (searchRegions.isEmpty()) {
-            int width = scene1.cols();
-            int height = scene1.rows();
-            searchRegions.add(new Region(0, 0, Math.min(new Region().w, width), Math.min(new Region().h, height)));
-        }
+        if (searchRegions.isEmpty()) searchRegions.add(new Region(0, 0, scene1.cols(), scene1.rows()));
         Mat absdiff = detectMotion.getAbsdiff(scene1, scene2);
         Contours contours = new Contours.Builder()
                 .setBgrFromClassification2d(absdiff) // absdiff works just as well for contours as the BGR_CLASSIFICATION_2D Mat would
@@ -117,14 +113,6 @@ public class FindMotion {
         drawMatch.drawMatches(motionWithMatches, contours.getMatches(), new Scalar(254, 183, 146, 0));
         matVisulize.writeMatToHistory(motionWithMatches, "motionWithMatches");
         return contours.getMatches();
-    }
-
-    private double convertScoreToMovement(double score) {
-        return 100 * (1 - score); // a high score is more selective, and will capture only where there is a lot of movement
-    }
-
-    private double convertMovementToScore(double movement) {
-        return 1 - movement / 100;
     }
 
 }

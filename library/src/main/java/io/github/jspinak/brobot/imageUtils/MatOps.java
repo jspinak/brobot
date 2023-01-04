@@ -28,6 +28,53 @@ public class MatOps {
         printPartOfMat(mat, rows, cols, channels, "");
     }
 
+    public static void putInt(Mat mat, int row, int col, int... values) {
+        if (mat.channels() != 1) {
+            Report.println("MatOps.putInt: Mat has more than 1 channel");
+            return;
+        }
+        if (mat.rows() <= row || mat.cols() <= col) {
+            Report.println("MatOps.putInt: Mat is too small");
+            return;
+        }
+        if (values.length > mat.cols() - col) {
+            Report.println("MatOps.putInt: Mat is too small");
+            return;
+        }
+        //printPartOfMat(mat, 5, 5, 1, "mat in putInt");
+        IntRawIndexer indexer32s = mat.createIndexer();
+        for (int i = 0; i < values.length; i++) {
+            indexer32s.put(row, col + i, values[i]);
+        }
+/*
+        int zeroRows = mat.rows() - row - 1;
+        if (zeroRows > 0) {
+            Mat zeroMat = new Mat(zeroRows, mat.cols(), mat.type(), Scalar.ZERO);
+            Report.println("Zero rows: " + zeroRows);
+            mat.push_back(zeroMat);
+        }
+        Mat addRow = new Mat(1, mat.cols(), mat.type(), Scalar.ZERO);
+        if (mat.rows() <= row) {
+            Report.println("MatOps: putInt: mat.rows() <= row: push_back");
+            mat.push_back(addRow);
+            //vconcat(mat, addRow, mat);
+        }
+        if (mat.rows() <= row) {
+            Report.println("MatOps: putInt: mat.rows() <= row: vconcat");
+            //mat.push_back(addRow);
+            vconcat(mat, addRow, mat);
+        }
+        /*
+        if (mat.rows() <= row) {
+            mat.resize(row + 1);
+        }
+        IntRawIndexer indexer32s = mat.createIndexer();
+        indexer32s.put(row, col, value);
+
+         */
+
+    }
+
     public static double getDouble(int x, int y, int z, Mat mat) {
         UByteRawIndexer indexer8u; IntRawIndexer indexer32s; FloatIndexer indexer32f;
         if (mat.type() % 8 == 0) { // 8 bits = 1 byte
@@ -102,7 +149,7 @@ public class MatOps {
             for (int y = 0; y < Math.min(rows, mat.rows()); y++) {
                 Report.format("[%d] ", y);
                 double[] row = getDoubleRow(y, mat);
-                getNonConsecutiveZeros(row).forEach((key, value) -> Report.format("%3.3s ", value));
+                getNonConsecutiveZeros(row).forEach((key, value) -> Report.format("%-2.12s ", value));
                 Report.println();
             }
         }

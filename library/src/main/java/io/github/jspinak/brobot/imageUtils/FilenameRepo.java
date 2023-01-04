@@ -40,7 +40,7 @@ public class FilenameRepo {
         String filename = prefix + suffix;
         while (imageUtils.fileExists(filename) || filenameExists(filename)) {
             i++;
-            filename = prefix + suffix;
+            filename = prefix + suffix + "_" + i;
         }
         indices.put(prefix, i);
         filenames.add(filename);
