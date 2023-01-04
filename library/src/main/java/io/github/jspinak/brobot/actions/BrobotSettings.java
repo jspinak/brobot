@@ -86,5 +86,11 @@ public class BrobotSettings {
 
     public static boolean includeStateImageObjectsFromActiveStatesInAnalysis = true;
 
+    /**
+     * Capture Settings
+     * These are used for both capture and replay, so it's best to have them in a central location.
+     */
+    public static int secondsToCapture = 1000;
+    public static int captureFrequency = 1;
 
 }

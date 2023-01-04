@@ -87,7 +87,7 @@ public class IllustrateScreenshot {
     public boolean illustrateWhenAllowed(Matches matches, List<Region> searchRegions, ActionOptions actionOptions,
                                          ObjectCollection... objectCollections) {
         if (!okToIllustrate(actionOptions, objectCollections)) {
-            Report.println("Illustration turned off for " + actionOptions.getAction());
+            //Report.println("Illustration turned off for " + actionOptions.getAction());
             return false;
         }
         lastAction = actionOptions.getAction();

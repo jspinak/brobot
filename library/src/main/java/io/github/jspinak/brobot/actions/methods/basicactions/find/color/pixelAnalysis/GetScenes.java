@@ -26,7 +26,7 @@ public class GetScenes {
     }
 
     /**
-     * If the ObjectCollection is empty, a screenshot will be taken.
+     * If the ObjectCollection is empty and saving history is enabled, a screenshot will be taken.
      * The search regions do not affect the scene. The scene is the entire screen.
      * Taking a screenshot produces one scene, but multiple scenes can be passed in the ObjectCollection.
      * If passed as a parameter, the scenes to use are in the 1st ObjectCollection (index 0) in the Scene list.
@@ -38,7 +38,7 @@ public class GetScenes {
         /*
         Take screenshots
          */
-        if (scenes.isEmpty()) {
+        if (scenes.isEmpty() && BrobotSettings.saveHistory) {
             Report.println("Taking screenshot");
             for (int i=0; i<scenesToCapture; i++) {
                 scenes.add(new Scene("screenshot" + i + ".png", getImageJavaCV.getMatFromScreen()));
@@ -64,7 +64,7 @@ public class GetScenes {
         */
         if (BrobotSettings.mock && !BrobotSettings.screenshots.isEmpty()) {
             BrobotSettings.screenshots.forEach(
-                    filename -> scenes.add(new Scene(filename, getImageJavaCV.getMat(filename, BGR))));
+                    filename -> scenes.add(new Scene(filename, getImageJavaCV.getMatFromBundlePath(filename, BGR))));
             return scenes;
         }
         /*
@@ -72,7 +72,7 @@ public class GetScenes {
         */
         else for (Image image : objectCollections.get(0).getScenes()) {
             image.getFilenames().forEach(filename -> {
-                Mat mat = getImageJavaCV.getMat(filename, BGR);
+                Mat mat = getImageJavaCV.getMatFromBundlePath(filename, BGR);
                 scenes.add(new Scene(filename, mat));
             });
         }

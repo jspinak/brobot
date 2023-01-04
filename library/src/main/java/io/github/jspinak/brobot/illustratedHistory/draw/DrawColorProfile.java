@@ -62,7 +62,7 @@ public class DrawColorProfile {
         int amountOfFiles = img.getImage().getFilenames().size();
         for (int i=0; i<amountOfFiles; i++) {
             String filename = img.getImage().getFilenames().get(i);
-            Mat imgFile = getImage.getMat(filename, BGR);
+            Mat imgFile = getImage.getMatFromBundlePath(filename, BGR);
             Mat resizedDown = new Mat();
             double scaleDown = (double) imgsWH / Math.max(imgFile.cols(), imgFile.rows());
             int newWidth = (int) (imgFile.cols() * scaleDown);
