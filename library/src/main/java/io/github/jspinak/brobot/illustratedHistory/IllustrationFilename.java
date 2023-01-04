@@ -7,6 +7,7 @@ import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
 import io.github.jspinak.brobot.imageUtils.FilenameRepo;
+import io.github.jspinak.brobot.reports.Report;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -67,6 +68,7 @@ public class IllustrationFilename {
         String imageNames = sceneAnalysis.getImageNames();
         String names = String.join("_", imageNames);
         String suffix = action.toString() + "_in-" + sceneName + "_" + names + String.join("_", additionalDescription);
+        Report.println("Filename: " + prefix + suffix);
         return filenameRepo.reserveFreePath(prefix, suffix);
     }
 

@@ -1,5 +1,6 @@
 package io.github.jspinak.brobot.actions.methods.basicactions.mouse;
 
+import io.github.jspinak.brobot.actions.BrobotSettings;
 import io.github.jspinak.brobot.actions.actionExecution.ActionInterface;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.Find;
@@ -54,10 +55,11 @@ public class MoveMouse implements ActionInterface {
     public Matches perform(ActionOptions actionOptions, ObjectCollection... objectCollections) {
         Matches matches = new Matches();
         List<ObjectCollection> collections = Arrays.asList(objectCollections);
-        SceneAnalysisCollection sceneAnalysisCollection = getSceneAnalysisCollection.
-                get(Arrays.asList(objectCollections), actionOptions);
-        matches.setSceneAnalysisCollection(sceneAnalysisCollection);
-        Report.println("scene analysis collection size: " + sceneAnalysisCollection.getSceneAnalyses().size());
+        if (BrobotSettings.saveHistory) {
+            SceneAnalysisCollection sceneAnalysisCollection = getSceneAnalysisCollection.
+                    get(Arrays.asList(objectCollections), actionOptions);
+            matches.setSceneAnalysisCollection(sceneAnalysisCollection);
+        }
         for (ObjectCollection objColl : collections) {
             Matches newMatches = find.perform(actionOptions, objColl);
             newMatches.getMatchLocations().forEach(moveMouseWrapper::move);

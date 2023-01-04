@@ -6,13 +6,11 @@ import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
 import org.bytedeco.javacv.*;
 import org.bytedeco.opencv.opencv_core.Mat;
-import org.opencv.core.MatOfByte;
 import org.sikuli.script.ImagePath;
 import org.springframework.stereotype.Component;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.awt.image.DataBufferByte;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -55,7 +53,7 @@ public class GetImageJavaCV {
         throw new RuntimeException("ColorSchemaName not supported: " + colorSchemaName);
     }
 
-    public Mat getMat(String imageName, ColorCluster.ColorSchemaName colorSchemaName) {
+    public Mat getMatFromBundlePath(String imageName, ColorCluster.ColorSchemaName colorSchemaName) {
         String path = ImagePath.getBundlePath()+"/"+imageName;
         Mat mat = getMatFromFilename(path, colorSchemaName);
         return mat;
@@ -64,7 +62,7 @@ public class GetImageJavaCV {
     public List<Mat> getMats(List<String> filenames, ColorCluster.ColorSchemaName colorSchemaName) {
         List<Mat> mats = new ArrayList<>();
         for (String filename : filenames) {
-            mats.add(getMat(filename, colorSchemaName));
+            mats.add(getMatFromBundlePath(filename, colorSchemaName));
         }
         return mats;
     }
@@ -90,7 +88,7 @@ public class GetImageJavaCV {
      * @return a Mat with only the given regions selected
      */
     public Mat getMat(String imageName, List<Region> regions, ColorCluster.ColorSchemaName colorSchemaName) {
-        Mat image = getMat(imageName, colorSchemaName);
+        Mat image = getMatFromBundlePath(imageName, colorSchemaName);
         Mat mask = new Mat();
         for (Region region : regions) {
             add(mask, image, mask, new Mat(region.getJavaCVRect()), -1);
@@ -107,7 +105,7 @@ public class GetImageJavaCV {
      */
     public List<Mat> getMats(String imageName, List<Region> regions, ColorCluster.ColorSchemaName colorSchemaName) {
         List<Mat> mats = new ArrayList<>();
-        Mat scene = getMat(imageName, colorSchemaName);
+        Mat scene = getMatFromBundlePath(imageName, colorSchemaName);
         if (regions.isEmpty()) {
             mats.add(scene);
             return mats;
