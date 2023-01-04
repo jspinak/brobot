@@ -38,6 +38,7 @@ dependencies {
     }
     implementation group: 'com.squareup', name: 'javapoet', version: '1.9.0'
     implementation group: 'org.deeplearning4j', name: 'deeplearning4j-core', version: '1.0.0-M2'
+    implementation 'com.github.kwhat:jnativehook:2.2.2'
 
 }
 

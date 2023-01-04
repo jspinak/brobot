@@ -359,6 +359,11 @@ public class ActionOptions {
     private int minArea;
     private int maxArea;
 
+    /**
+     * For Find.MOTION, this is the maximum distance an object can move between frames.
+     */
+    private int maxMovement;
+
     public static class Builder {
         private Action action = Action.FIND;
         private BiFunction<ActionOptions, List<ObjectCollection>, Matches> tempFind;
@@ -415,6 +420,7 @@ public class ActionOptions {
         private double minScore = .7;
         private int minArea = 1;
         private int maxArea = -1;
+        private int maxMovement = 300;
 
         public Builder() {}
         //public Builder(Action action) { this.action = action; }
@@ -717,6 +723,11 @@ public class ActionOptions {
             return this;
         }
 
+        public Builder setMaxMovement(int maxMovement) {
+            this.maxMovement = maxMovement;
+            return this;
+        }
+
         public ActionOptions build() {
             ActionOptions actionOptions = new ActionOptions();
             actionOptions.action = action;
@@ -774,6 +785,7 @@ public class ActionOptions {
             actionOptions.minScore = minScore;
             actionOptions.minArea = minArea;
             actionOptions.maxArea = maxArea;
+            actionOptions.maxMovement = maxMovement;
             return actionOptions;
         }
     }

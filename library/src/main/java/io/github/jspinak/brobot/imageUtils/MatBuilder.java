@@ -1,6 +1,8 @@
 package io.github.jspinak.brobot.imageUtils;
 
 import io.github.jspinak.brobot.datatypes.primitives.location.Location;
+import io.github.jspinak.brobot.reports.Report;
+import org.bytedeco.javacpp.indexer.IntRawIndexer;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Rect;
 import org.bytedeco.opencv.opencv_core.Scalar;
@@ -45,6 +47,17 @@ public class MatBuilder {
         this.mat = mat.clone();
         x2 = mat.cols();
         y2 = mat.rows();
+        return this;
+    }
+
+    public MatBuilder newOneChannelRowMat(int... values) {
+        x2 = values.length;
+        y2 = 1;
+        mat = new Mat(y2, x2, 4);
+        IntRawIndexer indexer32s = mat.createIndexer();
+        for (int i = 0; i < values.length; i++) {
+            indexer32s.put(0, i, values[i]);
+        }
         return this;
     }
 
@@ -155,7 +168,7 @@ public class MatBuilder {
         }
         Rect oldLoc = new Rect(0, 0, mat.cols(), mat.rows());
         Mat oldMat = mat.clone();
-        mat = new Mat(h, w, 0);
+        mat = new Mat(h, w, mat.type()); //ok
         Mat insertOld = mat.apply(oldLoc);
         oldMat.copyTo(insertOld);
     }
@@ -196,9 +209,9 @@ public class MatBuilder {
 
     private void insertMat(Location location, Mat subMat) {
         Rect rect = new Rect(location.getX(), location.getY(), subMat.cols(), subMat.rows());
-        Mat placeHere = mat.apply(rect);
-        subMat.convertTo(subMat, placeHere.type());
-        subMat.copyTo(placeHere);
+        subMat.convertTo(subMat, mat.type());
+        Mat target = mat.apply(rect);
+        subMat.copyTo(target);
     }
 
     public Mat build() {
