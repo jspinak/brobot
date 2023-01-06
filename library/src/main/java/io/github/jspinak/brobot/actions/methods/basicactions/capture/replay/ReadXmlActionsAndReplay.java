@@ -26,6 +26,7 @@ public class ReadXmlActionsAndReplay {
 
     public ReplayCollection getActionsBetweenTimes(double startTime, double endTime) {
         ReplayCollection replayCollection = getAllActions();
+        Report.println("ReplayCollection size: " + replayCollection.getReplayObjects().size());
         return replayCollectionOrganizer.getActionsBetweenTimes(replayCollection, startTime, endTime);
     }
 

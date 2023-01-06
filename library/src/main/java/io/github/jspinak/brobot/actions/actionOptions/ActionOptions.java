@@ -18,9 +18,16 @@ import java.util.function.Predicate;
 
 /**
  * ActionOptions provides options for configuring an action.
+ * Since an Action can be performed without selecting and building an ActionOptions object,
+ *   the variables need to be initialized with default values.
  */
 @Data
 public class ActionOptions {
+
+    /**
+     * Identifies the action.
+     */
+    private int actionId;
 
     /**
      * BasicActions:
@@ -48,7 +55,7 @@ public class ActionOptions {
         MOUSE_DOWN, MOUSE_UP, KEY_DOWN, KEY_UP, CLASSIFY,
         CLICK_UNTIL, DRAG
     }
-    private Action action;
+    private Action action = Action.FIND;
 
     /**
      * Keep in mind:
@@ -69,7 +76,7 @@ public class ActionOptions {
     public enum Find {
         FIRST, EACH, ALL, BEST, UNIVERSAL, CUSTOM, HISTOGRAM, COLOR, MOTION
     }
-    private Find find;
+    private Find find = Find.FIRST;
     /**
      * tempFind is a user defined Find method that is not meant to be reused.
      */
@@ -82,19 +89,19 @@ public class ActionOptions {
      *   unless the matching ObjectCollection is empty, in which case the last
      *   non-empty ObjectCollection will be used.
      */
-    private List<Find> findActions;
+    private List<Find> findActions = new ArrayList<>();
     /**
      * When set to true, subsequent Find operations will act as confirmations of the initial matches.
      * An initial match from the first Find operation will be returned if the subsequent
      * Find operations all find matches within its region.
      */
-    private boolean keepLargerMatches;
+    private boolean keepLargerMatches = false;
 
     /**
      * Specifies how similar the found Match must be to the original Image.
      * Specifies the minimum score for a histogram to be considered a Match.
      */
-    private double similarity;
+    private double similarity = Settings.MinSimilarity;
 
     /**
      * Images can contain multiple Patterns.
@@ -106,14 +113,14 @@ public class ActionOptions {
     public enum DoOnEach {
         FIRST, BEST
     }
-    private DoOnEach doOnEach;
+    private DoOnEach doOnEach = DoOnEach.FIRST;
 
     /**
      * Instead of searching for a StateImageObject, use its defined Region to create a Match.
      * This is either the first found region if the StateImageObject uses a
      * RegionImagePairs object, or the first defined Region in SearchRegions.
      */
-    private boolean useDefinedRegion;
+    private boolean useDefinedRegion = false;
 
     /**
      * For scrolling with the mouse wheel
@@ -121,7 +128,7 @@ public class ActionOptions {
     public enum ScrollDirection {
         UP, DOWN
     }
-    private ScrollDirection scrollDirection;
+    private ScrollDirection scrollDirection = ScrollDirection.UP;
 
     /**
      * Specifies the condition to fulfill after a Click.
@@ -136,7 +143,7 @@ public class ActionOptions {
     public enum ClickUntil {
         OBJECTS_APPEAR, OBJECTS_VANISH
     }
-    private ClickUntil clickUntil;
+    private ClickUntil clickUntil = ClickUntil.OBJECTS_APPEAR;
 
     /**
      * TEXT_APPEARS: Keep searching for text until some text appears.
@@ -145,7 +152,7 @@ public class ActionOptions {
     public enum GetTextUntil {
         NONE, TEXT_APPEARS, TEXT_VANISHES
     }
-    GetTextUntil getTextUntil;
+    GetTextUntil getTextUntil = GetTextUntil.TEXT_APPEARS;
 
     /**
      * successEvaluation defines the success criteria for the Find operation.
@@ -164,12 +171,12 @@ public class ActionOptions {
      *   7. pauseAfterMouseUp
      *   8. pauseAfterEnd
      */
-    private double pauseBeforeMouseDown;
+    private double pauseBeforeMouseDown = Settings.DelayBeforeMouseDown;
     // pauseAfterMouseDown replaces Sikuli settings var DelayBeforeDrag for Drags and ClickDelay for Clicks.
-    private double pauseAfterMouseDown;
-    private float moveMouseDelay;
-    private double pauseBeforeMouseUp;
-    private double pauseAfterMouseUp;
+    private double pauseAfterMouseDown = BrobotSettings.delayAfterMouseDown;
+    private float moveMouseDelay = Settings.MoveMouseDelay;
+    private double pauseBeforeMouseUp = Settings.DelayBeforeDrag;
+    private double pauseAfterMouseUp = 0;
 
     /**
      * These values provide an offset to the Match for the dragTo Location.
@@ -179,10 +186,10 @@ public class ActionOptions {
      *
      * Other variables are used to adjust the dragFrom Location
      */
-    private int dragToOffsetX;
-    private int dragToOffsetY;
+    private int dragToOffsetX = 0;
+    private int dragToOffsetY = 0;
 
-    private ClickType.Type clickType;
+    private ClickType.Type clickType = ClickType.Type.LEFT;
 
     /**
      * We have 2 options for moving the mouse after a click:
@@ -192,16 +199,16 @@ public class ActionOptions {
      *
      * These options are also used for drags, and can move the mouse once the drag is finished.
      */
-    private boolean moveMouseAfterClick;
-    private Location locationAfterAction; // disabled by default (x = -1)
-    private Location offsetLocationBy;
+    private boolean moveMouseAfterClick = false;
+    private Location locationAfterAction = new Location(-1, 0); // disabled by default (x = -1)
+    private Location offsetLocationBy = new Location(-1, 0);
 
     /**
      * Sets temporary SearchRegions for Images, and also for RegionImagePairs when the
      * SearchRegion is not already defined. It will not change the SearchRegion of RegionImagePairs
      * that have already been defined. For more information on RegionImagePairs, see the class.
      */
-    private SearchRegions searchRegions;
+    private SearchRegions searchRegions = new SearchRegions();
 
     /**
      * pauseBeforeBegin and pauseAfterEnd occur at the very beginning and very end of an action.
@@ -217,13 +224,13 @@ public class ActionOptions {
      * that apply them to every click (pauseBeforeMouseDown & pauseAfterMouseUp), but the below
      * options give more granular control.
      */
-    private double pauseBeforeBegin;
-    private double pauseAfterEnd;
+    private double pauseBeforeBegin = 0;
+    private double pauseAfterEnd = 0;
 
     /**
      * maxWait is used with FIND, and gives the max number of seconds to search.
      */
-    private double maxWait;
+    private double maxWait = 0;
 
     /**
      * IndividualAction refers to individual activities, such as clicking on a single Match.
@@ -237,12 +244,12 @@ public class ActionOptions {
      *   to repeat the Action until it is successful, or with CompositeActions to repeat the Action
      *   until the last Action is successful. An example of this with a CompositeAction is ClickUntil.
      *   ClickUntil has two Actions, Click and Find. It will register success when the last action, Find,
-     *   is successful.
+     *   is successful. This variable is not used with Find because Find relies solely on the maxWait variable.
      */
-    private int timesToRepeatIndividualAction;
-    private int maxTimesToRepeatActionSequence;
-    private double pauseBetweenIndividualActions;
-    private double pauseBetweenActionSequences;
+    private int timesToRepeatIndividualAction = 1;
+    private int maxTimesToRepeatActionSequence = 1;
+    private double pauseBetweenIndividualActions = 0;
+    private double pauseBetweenActionSequences = 0;
 
     /**
      * maxMatchesToActOn limits the number of Matches used when working with Find.ALL, Find.EACH, and
@@ -250,7 +257,7 @@ public class ActionOptions {
      * When <=0 it is not used.
      * The default value for HISTOGRAM is 1.
      */
-    private int maxMatchesToActOn;
+    private int maxMatchesToActOn = -1;
 
     /**
      * Anchors define Locations in Matches and specify how these Locations should be used
@@ -265,7 +272,7 @@ public class ActionOptions {
         INSIDE_ANCHORS, OUTSIDE_ANCHORS, MATCH, BELOW_MATCH, ABOVE_MATCH, LEFT_OF_MATCH, RIGHT_OF_MATCH,
         FOCUSED_WINDOW, INCLUDING_MATCHES
     }
-    private DefineAs defineAs;
+    private DefineAs defineAs = DefineAs.MATCH;
 
     /**
      * The following variables make adjustments to the final results of many actions.
@@ -278,12 +285,12 @@ public class ActionOptions {
      *
      * These variables are used for the dragFrom Location but not for the dragTo Location.
      */
-    private int addW;
-    private int addH;
-    private int absoluteW;
-    private int absoluteH;
-    private int addX;
-    private int addY;
+    private int addW = 0;
+    private int addH = 0;
+    private int absoluteW = -1;
+    private int absoluteH = -1;
+    private int addX = 0;
+    private int addY = 0;
 
     /**
      * These variables are useful with composite actions, such as Drag.
@@ -293,22 +300,22 @@ public class ActionOptions {
      * AddX2 and addY2 add an additional Match to the results by adding X2 to the x value of the last Match and
      * Y2 to the y value of the last Match, and creating a new Match with these coordinates.
      */
-    private int addX2;
-    private int addY2;
+    private int addX2 = 0;
+    private int addY2 = 0;
 
     /**
      * Highlighting
      */
-    private boolean highlightAllAtOnce;
-    private double highlightSeconds;
-    private String highlightColor; // see sikuli region.highlight() for more info
+    private boolean highlightAllAtOnce = false;
+    private double highlightSeconds = 1;
+    private String highlightColor = "red"; // see sikuli region.highlight() for more info
 
     /**
      * The below options are for typing characters to the active window.
      * Modifiers are used for key combinations such as 'SHIFT a' or 'CTRL ALT DEL'
      */
-    private double typeDelay;
-    private String modifiers; // not used when ""
+    private double typeDelay = Settings.TypeDelay;
+    private String modifiers = ""; // not used when ""
 
     /**
      * KMEANS finds a selected number of RGB color cluster centers for each image.
@@ -318,22 +325,22 @@ public class ActionOptions {
     public enum Color {
         KMEANS, MU, CLASSIFICATION
     }
-    private Color color;
+    private Color color = Color.MU;
     /**
      * Specifies the width and height of color boxes to find (used with FIND.COLOR).
      */
-    private int diameter;
+    private int diameter = 5;
     /**
      * The number of k-means to use for finding color.
      */
-    private int kmeans;
+    private int kmeans = 2;
 
     /**
      * The number of bins to use for an HSV color histogram.
      */
-    private int hueBins;
-    private int saturationBins;
-    private int valueBins;
+    private int hueBins = 12;
+    private int saturationBins = 2;
+    private int valueBins = 1;
 
     /**
      * In case of multiple Find operations that include a Find.COLOR,
@@ -343,7 +350,7 @@ public class ActionOptions {
      * This value is converted for the different methods (BGR, HSV, etc) in
      * the class DistSimConversion.
      */
-    private double minScore;
+    private double minScore = 0.7;
 
     /**
      * Used with color finds and motion detection.
@@ -356,13 +363,13 @@ public class ActionOptions {
      * For color finds:
      * This is the minimum number of pixels needed to identify a match.
      */
-    private int minArea;
-    private int maxArea;
+    private int minArea = 1;
+    private int maxArea = -1;
 
     /**
      * For Find.MOTION, this is the maximum distance an object can move between frames.
      */
-    private int maxMovement;
+    private int maxMovement = 300;
 
     public static class Builder {
         private Action action = Action.FIND;
@@ -376,7 +383,7 @@ public class ActionOptions {
         private Predicate<Matches> successCriteria;
         private double similarity = Settings.MinSimilarity;
         private double pauseBeforeMouseDown = Settings.DelayBeforeMouseDown;
-        private double delayAfterMouseDown = BrobotSettings.delayAfterMouseDown; // Sikuli = Settings.DelayBeforeDrag
+        private double pauseAfterMouseDown = BrobotSettings.delayAfterMouseDown; // Sikuli = Settings.DelayBeforeDrag
         private float moveMouseDelay = Settings.MoveMouseDelay;
         private double pauseBeforeMouseUp = Settings.DelayBeforeDrop;
         private double pauseAfterMouseUp = 0;
@@ -387,10 +394,10 @@ public class ActionOptions {
         private SearchRegions searchRegions = new SearchRegions();
         private double pauseBeforeBegin = 0;
         private double pauseAfterEnd = 0;
-        private double pauseBetweenActions = 0;
+        private double pauseBetweenIndividualActions = 0;
         private int timesToRepeatIndividualAction = 1; // for example, clicks per match
         private int maxTimesToRepeatActionSequence = 1;
-        private double pauseBetweenActionRepetitions = 0; // action group: rename these to differentiate better between for example, clicks on different matches, and the repetition of clicks on different matches multiple times
+        private double pauseBetweenActionSequences = 0; // action group: rename these to differentiate better between for example, clicks on different matches, and the repetition of clicks on different matches multiple times
         private double maxWait = 0;
         private int maxMatchesToActOn = -1;
         private int dragToOffsetX = 0;
@@ -400,9 +407,9 @@ public class ActionOptions {
         private int addH = 0;
         private int absoluteW = -1; // when negative, not used (addW is used)
         private int absoluteH = -1;
-        private int addX = -1;
+        private int addX = 0;
         private int addY = 0;
-        private int addX2 = -1;
+        private int addX2 = 0;
         private int addY2 = 0;
         private boolean highlightAllAtOnce = false;
         private double highlightSeconds = 1;
@@ -499,7 +506,7 @@ public class ActionOptions {
         }
 
         public Builder setPauseAfterMouseDown(double delayAfterMouseDown) {
-            this.delayAfterMouseDown = delayAfterMouseDown;
+            this.pauseAfterMouseDown = delayAfterMouseDown;
             return this;
         }
 
@@ -558,8 +565,8 @@ public class ActionOptions {
             return this;
         }
 
-        public Builder setPauseBetweenActions(double pause) {
-            this.pauseBetweenActions = pause;
+        public Builder setPauseBetweenIndividualActions(double pause) {
+            this.pauseBetweenIndividualActions = pause;
             return this;
         }
 
@@ -574,7 +581,7 @@ public class ActionOptions {
         }
 
         public Builder setPauseBetweenActionSequences(double seconds) {
-            this.pauseBetweenActionRepetitions = seconds;
+            this.pauseBetweenActionSequences = seconds;
             return this;
         }
 
@@ -749,13 +756,13 @@ public class ActionOptions {
             actionOptions.searchRegions = searchRegions;
             actionOptions.pauseBeforeBegin = pauseBeforeBegin;
             actionOptions.pauseAfterEnd = pauseAfterEnd;
-            actionOptions.pauseBetweenIndividualActions = pauseBetweenActions;
+            actionOptions.pauseBetweenIndividualActions = pauseBetweenIndividualActions;
             actionOptions.timesToRepeatIndividualAction = timesToRepeatIndividualAction;
             actionOptions.maxTimesToRepeatActionSequence = maxTimesToRepeatActionSequence;
-            actionOptions.pauseBetweenActionSequences = pauseBetweenActionRepetitions;
+            actionOptions.pauseBetweenActionSequences = pauseBetweenActionSequences;
             actionOptions.maxWait = maxWait;
             actionOptions.maxMatchesToActOn = maxMatchesToActOn;
-            actionOptions.pauseAfterMouseDown = delayAfterMouseDown;
+            actionOptions.pauseAfterMouseDown = pauseAfterMouseDown;
             actionOptions.pauseBeforeMouseUp = pauseBeforeMouseUp;
             actionOptions.moveMouseDelay = moveMouseDelay;
             actionOptions.dragToOffsetX = dragToOffsetX;

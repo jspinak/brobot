@@ -9,6 +9,7 @@ import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.StateLocation;
+import io.github.jspinak.brobot.reports.Report;
 import org.sikuli.script.Match;
 import org.springframework.stereotype.Component;
 
@@ -35,7 +36,7 @@ public class DefineInsideAnchors implements ActionInterface {
         Region region = new Region();
         definedBorders = new DefinedBorders();
         Matches matches = defineHelper.findMatches(actionOptions, objectCollections);
-        // DefinedBorders keep track of defined borders as the region is being defined
+        // The DefinedBorders object keeps track of defined borders as the region is being defined
         fitRegionToAnchors(region, matches);
         //fitRegionToLocations(region, objectCollections[0].getStateLocations()); // locations are converted to Match objects in a Find operation
         defineHelper.adjust(region, actionOptions);

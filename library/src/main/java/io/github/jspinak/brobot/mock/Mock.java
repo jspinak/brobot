@@ -6,6 +6,7 @@ import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.state.State;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
+import io.github.jspinak.brobot.reports.Report;
 import io.github.jspinak.brobot.services.StateService;
 import org.springframework.stereotype.Component;
 
@@ -35,9 +36,13 @@ public class Mock {
 
     public Matches getMatches(StateImageObject stateImageObject, Region searchRegion,
                               ActionOptions actionOptions) {
+        Report.println("Finding " + stateImageObject.getName() + "in mock");
         timeWrapper.wait(actionOptions.getFind());
         timeWrapper.printNow();
-        if (!stateExists(stateImageObject)) return new Matches(); // assuming no shared state images
+        if (!stateExists(stateImageObject)) {
+            Report.print("Owner State not found. ");
+            return new Matches(); // assuming no shared state images
+        }
         return mockFind.getMatches(stateImageObject, searchRegion, actionOptions);
     }
 

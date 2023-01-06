@@ -6,6 +6,7 @@ import io.github.jspinak.brobot.actions.methods.basicactions.find.histogram.Find
 import io.github.jspinak.brobot.actions.methods.basicactions.find.motion.FindMotion;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
+import io.github.jspinak.brobot.reports.Report;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
