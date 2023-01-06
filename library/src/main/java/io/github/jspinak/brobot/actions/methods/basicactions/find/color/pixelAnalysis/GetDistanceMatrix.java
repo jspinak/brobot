@@ -3,6 +3,7 @@ package io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAn
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles.ColorCluster;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles.ColorInfo;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
+import io.github.jspinak.brobot.imageUtils.MatOps;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.MatVector;
 import org.bytedeco.opencv.opencv_core.Scalar;
@@ -29,10 +30,10 @@ public class GetDistanceMatrix {
     public Mat getAbsDist(Mat scene, ColorCluster.ColorSchemaName colorSchemaName,
                           ColorCluster colorCluster, ColorInfo.ColorStat colorStat) {
         Mat targetColor = colorCluster.getMat(colorSchemaName, colorStat, scene.size());
-        targetColor.convertTo(targetColor, CV_64F);
-        Mat scene64 = new Mat();
-        scene.convertTo(scene64, CV_64F);
-        Mat dist = new Mat(scene.size(), CV_64FC(scene.channels())); // CV_8UC(scene.channels())
+        targetColor.convertTo(targetColor, CV_64F); // convert to double; convertTo() does not change the # of channels
+        Mat scene64 = scene.clone();
+        scene64.convertTo(scene64, CV_64FC3);
+        Mat dist = new Mat(scene.size(), CV_64FC3);
         absdiff(scene64, targetColor, dist);
         return dist;
     }

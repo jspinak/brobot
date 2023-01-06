@@ -11,7 +11,10 @@ import io.github.jspinak.brobot.analysis.Distance;
 import io.github.jspinak.brobot.datatypes.primitives.location.Location;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
+import io.github.jspinak.brobot.reports.Report;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 @Component
 public class FindClosest {
@@ -47,8 +50,9 @@ public class FindClosest {
         if (!scenesContainObject(scenesObjects, stateImageObject)) return false;
         SceneAndObjectsForXML closestMatch = getClosestScene(matches, scenesObjects, stateImageObject);
         if (closestMatch == null) return false;
-        int start = Integer.parseInt(closestMatch.getSceneName());
-        ReplayCollection replayCollection = readXmlActionsAndReplay.getActionsBetweenTimes(start, start + 1);
+        int start = Integer.parseInt(closestMatch.getSceneName()) * 1000;
+        ReplayCollection replayCollection = readXmlActionsAndReplay.getActionsBetweenTimes(start, start + 5000);
+        Report.println(replayCollection.getReplayObjects().size() + " actions found from " + start + " to " + (start + 5));
         readXmlActionsAndReplay.replay(replayCollection);
         return true;
     }
@@ -66,17 +70,21 @@ public class FindClosest {
     private SceneAndObjectsForXML getClosestScene(Matches matches, SceneObjectCollectionForXML scenesObjects, StateImageObject stateImageObject) {
         if (matches.getBestLocation().isEmpty()) return null; // this should never happen, we've already checked if matches are empty
         Location bestLocation = matches.getBestLocation().get();
+        Report.println("Best match: " + bestLocation.getX() + ", " + bestLocation.getY());
         SceneAndObjectsForXML firstScene = scenesObjects.getScenes().get(0);
         int matchingStateImageObjectIndex = getMatchingStateImageObjectIndex(firstScene, stateImageObject);
         double closestScene = 1000000;
         SceneAndObjectsForXML closestSceneObject = null;
         for (SceneAndObjectsForXML scObj : scenesObjects.getScenes()) {
-            double dist = distance.getDistance(bestLocation, scObj.getObjectsLocations().get(matchingStateImageObjectIndex));
+            List<Location> locations = scObj.getObjectsLocations();
+            if (locations.isEmpty()) continue;
+            double dist = distance.getDistance(bestLocation, locations.get(matchingStateImageObjectIndex));
             if (dist < closestScene) {
                 closestScene = dist;
                 closestSceneObject = scObj;
             }
         }
+        Report.println("Closest scene: " + closestSceneObject.getSceneName());
         return closestSceneObject;
     }
 }

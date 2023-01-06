@@ -36,7 +36,7 @@ public class GetSceneAnalysisCollection {
                                        int scenesToCapture, double secondsBetweenCaptures,
                                        ActionOptions actionOptions) {
         SceneAnalysisCollection sceneAnalysisCollection = new SceneAnalysisCollection();
-        List<Scene> scenes = getScenes.getScenes(objectCollections, scenesToCapture, secondsBetweenCaptures);
+        List<Scene> scenes = getScenes.getScenes(actionOptions, objectCollections, scenesToCapture, secondsBetweenCaptures);
         Set<StateImageObject> targetImages = getTargetImages(objectCollections);
         Set<StateImageObject> additionalImagesForClassification = getAdditionalImagesForClassification(objectCollections);
         Set<StateImageObject> allImages = new HashSet<>();

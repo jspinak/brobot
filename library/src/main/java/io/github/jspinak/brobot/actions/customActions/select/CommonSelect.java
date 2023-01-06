@@ -51,7 +51,7 @@ public class CommonSelect {
         ActionOptions clickActionOptions = new ActionOptions.Builder()
                 .setAction(ActionOptions.Action.CLICK)
                 .setTimesToRepeatIndividualAction(clicksPerImage)
-                .setPauseBetweenActions(.7)
+                .setPauseBetweenIndividualActions(.7)
                 .build();
         ObjectCollection confirmationObjectCollection = new ObjectCollection.Builder()
                 .withImages(confirmationImages)

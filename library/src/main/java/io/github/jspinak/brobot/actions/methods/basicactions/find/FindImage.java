@@ -6,6 +6,7 @@ import io.github.jspinak.brobot.actions.methods.sikuliWrappers.find.FindWrapperM
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
+import io.github.jspinak.brobot.reports.Report;
 import org.springframework.stereotype.Component;
 
 /**

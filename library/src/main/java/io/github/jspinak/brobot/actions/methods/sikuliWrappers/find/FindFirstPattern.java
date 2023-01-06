@@ -10,6 +10,7 @@ import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
 import io.github.jspinak.brobot.mock.Mock;
+import io.github.jspinak.brobot.reports.Report;
 import org.sikuli.script.Match;
 import org.sikuli.script.Pattern;
 import org.springframework.stereotype.Component;
