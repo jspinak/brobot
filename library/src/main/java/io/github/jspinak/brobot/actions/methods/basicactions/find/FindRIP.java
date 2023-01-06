@@ -7,6 +7,7 @@ import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.primitives.regionImagePairs.RegionImagePair;
 import io.github.jspinak.brobot.datatypes.primitives.regionImagePairs.RegionImagePairs;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
+import io.github.jspinak.brobot.reports.Report;
 import org.springframework.stereotype.Component;
 
 import java.util.Set;
@@ -68,14 +69,14 @@ public class FindRIP implements FindImageObject {
      * @param actionOptions holds the action configuration.
      * @param stateImageObject is the StateImageObject containing the RegionImagePairs.
      * @param pairs is the RegionImagePairs to find.
-     * @param filter selects pairs in the RegionImagePairs object.
+     * @param definedOrUndefined selects pairs in the RegionImagePairs object.
      * @return a Matches object will all matches found.
      */
     public Matches findAndDefineRegions(ActionOptions actionOptions, StateImageObject stateImageObject,
                                         RegionImagePairs pairs,
-                                        Function<RegionImagePairs, Set<RegionImagePair>> filter, Scene scene) {
+                                        Function<RegionImagePairs, Set<RegionImagePair>> definedOrUndefined, Scene scene) {
         Matches matches = new Matches();
-        for (RegionImagePair pair : filter.apply(pairs)) {
+        for (RegionImagePair pair : definedOrUndefined.apply(pairs)) {
             Matches newMatches =
                     findImage.find(actionOptions, stateImageObject, scene);
             matches.addAllResults(newMatches);

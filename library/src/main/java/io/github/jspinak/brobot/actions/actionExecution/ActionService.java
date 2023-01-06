@@ -31,6 +31,8 @@ public class ActionService {
     public Optional<ActionInterface> getAction(ActionOptions actionOptions) {
         if (actionOptions.getFindActions().size() > 1)
             return compositeAction.getAction(ActionOptions.Action.FIND);
+        if (actionOptions.getFindActions().isEmpty() && actionOptions.getAction() == ActionOptions.Action.FIND)
+            return basicAction.getAction(ActionOptions.Action.FIND);
         Optional<ActionInterface> actOpt = basicAction.getAction(actionOptions.getAction());
         if (actOpt.isPresent()) return actOpt;
         return compositeAction.getAction(actionOptions.getAction());

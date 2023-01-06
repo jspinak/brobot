@@ -16,8 +16,7 @@ public class ReplayAction {
         this.action = action;
     }
 
-    public void replay(String actionString, int x, int y, String key, double delayInMillis) {
-        ActionOptions.Action actionEnum = ActionOptions.Action.valueOf(actionString);
+    public void replay(ActionOptions.Action actionEnum, int x, int y, String key, double delayInMillis) {
         ActionOptions actionOptions = new ActionOptions.Builder()
                 .setAction(actionEnum)
                 //.setPauseBeforeBegin(delayInMillis)
@@ -25,6 +24,7 @@ public class ReplayAction {
         Location mouseLocation = new Location(x, y);
         ObjectCollection objectCollection = new ObjectCollection.Builder()
                 .withLocations(mouseLocation)
+                .withStrings(key)
                 .build();
         Report.println("Replaying action: " + actionOptions.getAction().toString() + " @ x=" + x + " y=" + y + " key:" + key + " millis:" + delayInMillis);
         action.perform(actionOptions, objectCollection);

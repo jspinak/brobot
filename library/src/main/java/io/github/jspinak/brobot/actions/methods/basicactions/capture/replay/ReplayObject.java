@@ -1,13 +1,15 @@
 package io.github.jspinak.brobot.actions.methods.basicactions.capture.replay;
 
+import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import lombok.Getter;
 import lombok.Setter;
 import org.w3c.dom.NamedNodeMap;
 
+
 @Getter
 @Setter
 public class ReplayObject {
-    private String action;
+    private ActionOptions.Action action;
     private int x;
     private int y;
     private String key;
@@ -24,10 +26,21 @@ public class ReplayObject {
     }
 
     public ReplayObject(NamedNodeMap nodeMap) {
-        action = nodeMap.getNamedItem("action").getNodeValue();
+        action = ActionOptions.Action.valueOf(nodeMap.getNamedItem("action").getNodeValue());
         x = Integer.parseInt(nodeMap.getNamedItem("x").getNodeValue());
         y = Integer.parseInt(nodeMap.getNamedItem("y").getNodeValue());
-        key = nodeMap.getNamedItem("key").getNodeValue();
+        String keyString = nodeMap.getNamedItem("key").getNodeValue();
+        if (keyString.equals("")) {
+            key = null;
+        } else {
+            int asciiInt = Integer.parseInt(nodeMap.getNamedItem("key").getNodeValue());
+            if (asciiInt <= 127 && asciiInt >= 32) {
+                key = String.valueOf((char) asciiInt);
+            } else {
+                key = null;
+            }
+        }
         timelapseFromStartOfRecording = Double.parseDouble(nodeMap.getNamedItem("millis").getNodeValue());
     }
+
 }

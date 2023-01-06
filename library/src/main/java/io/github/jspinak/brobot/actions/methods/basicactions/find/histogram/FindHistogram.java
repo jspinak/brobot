@@ -53,7 +53,7 @@ public class FindHistogram {
         int actionId = actionLifecycleManagement.newActionLifecycle(actionOptions);
         getHistograms.setBins(
                 actionOptions.getHueBins(), actionOptions.getSaturationBins(), actionOptions.getValueBins());
-        List<Scene> scenes = getScenes.getScenes(objectCollections);
+        List<Scene> scenes = getScenes.getScenes(actionOptions, objectCollections);
         SceneAnalysisCollection sceneAnalysisCollection = new SceneAnalysisCollection();
         Matches matches = new Matches();
         List<MatchObject> matchObjects = new ArrayList<>();

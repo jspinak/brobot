@@ -34,6 +34,7 @@ public class MockFind {
 
     public Matches getMatches(StateImageObject stateImageObject, Region searchRegion,
                               ActionOptions actionOptions) {
+        Report.println("Finding " + stateImageObject.getName() + "in mock");
         List<Match> matchList;
         Optional<MatchSnapshot> randomSnapshot =
                 stateImageObject.getMatchHistory().getRandomSnapshot(actionOptions);
