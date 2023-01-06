@@ -58,7 +58,7 @@ public class CommonActions {
         ActionOptions actionOptions = new ActionOptions.Builder()
                 .setAction(CLICK_UNTIL)
                 .setClickUntil(ActionOptions.ClickUntil.OBJECTS_VANISH)
-                .setPauseBetweenActions(pauseBetweenClicks)
+                .setPauseBetweenIndividualActions(pauseBetweenClicks)
                 .setPauseBetweenActionSequences(pauseBetweenClicks)
                 .setMaxTimesToRepeatActionSequence(timesToClick)
                 .build();
@@ -74,7 +74,7 @@ public class CommonActions {
                 .setAction(CLICK_UNTIL)
                 .setClickType(ClickType.Type.RIGHT)
                 .setClickUntil(ActionOptions.ClickUntil.OBJECTS_VANISH)
-                .setPauseBetweenActions(pauseBetweenClicks)
+                .setPauseBetweenIndividualActions(pauseBetweenClicks)
                 .setPauseBetweenActionSequences(pauseBetweenClicks)
                 .setMaxTimesToRepeatActionSequence(timesToClick)
                 .setMoveMouseAfterClick(true)
@@ -172,7 +172,7 @@ public class CommonActions {
                 .setAction(ActionOptions.Action.CLICK)
                 .setClickUntil(ActionOptions.ClickUntil.OBJECTS_APPEAR)
                 .setMaxTimesToRepeatActionSequence(repeatClickTimes)
-                .setPauseBetweenActions(pauseBetweenClicks)
+                .setPauseBetweenIndividualActions(pauseBetweenClicks)
                 .build();
         ObjectCollection objectsToClick = new ObjectCollection.Builder()
                 .withImages(objectToClick)
@@ -189,7 +189,7 @@ public class CommonActions {
                 .setAction(ActionOptions.Action.CLICK)
                 .setClickUntil(ActionOptions.ClickUntil.OBJECTS_APPEAR)
                 .setMaxTimesToRepeatActionSequence(repeatClickTimes)
-                .setPauseBetweenActions(pauseBetweenClicks)
+                .setPauseBetweenIndividualActions(pauseBetweenClicks)
                 .build();
         ObjectCollection objectsToClick = new ObjectCollection.Builder()
                 .withImages(toClick)
@@ -273,7 +273,7 @@ public class CommonActions {
         ActionOptions click = new ActionOptions.Builder()
                 .setAction(CLICK)
                 .setTimesToRepeatIndividualAction(times)
-                .setPauseBetweenActions(pause)
+                .setPauseBetweenIndividualActions(pause)
                 .build();
         return action.perform(click, objectToClick).isSuccess();
     }
@@ -282,7 +282,7 @@ public class CommonActions {
         ActionOptions click = new ActionOptions.Builder()
                 .setAction(CLICK)
                 .setTimesToRepeatIndividualAction(times)
-                .setPauseBetweenActions(pause)
+                .setPauseBetweenIndividualActions(pause)
                 .build();
         ObjectCollection regs = new ObjectCollection.Builder()
                 .withRegions(reg)

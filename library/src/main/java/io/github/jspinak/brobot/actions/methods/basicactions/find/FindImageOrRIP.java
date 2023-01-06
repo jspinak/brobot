@@ -1,5 +1,6 @@
 package io.github.jspinak.brobot.actions.methods.basicactions.find;
 
+import io.github.jspinak.brobot.actions.actionExecution.actionLifecycle.ActionLifecycleManagement;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.GetScenes;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.Scene;
@@ -19,11 +20,14 @@ import java.util.*;
 public class FindImageOrRIP {
 
     private GetScenes getScenes;
+    private ActionLifecycleManagement actionLifecycleManagement;
 
     private final Map<Boolean, FindImageObject> findMethod = new HashMap<>();
 
-    public FindImageOrRIP(FindImage findImage, FindRIP findRIP, GetScenes getScenes) {
+    public FindImageOrRIP(FindImage findImage, FindRIP findRIP, GetScenes getScenes,
+                          ActionLifecycleManagement actionLifecycleManagement) {
         this.getScenes = getScenes;
+        this.actionLifecycleManagement = actionLifecycleManagement;
         findMethod.put(false, findImage);
         findMethod.put(true, findRIP);
     }
@@ -36,11 +40,10 @@ public class FindImageOrRIP {
      * @return a Matches object with all matches found.
      */
     public Matches find(ActionOptions actionOptions, List<ObjectCollection> objectCollections) {
-        if (Report.minReportingLevel(Report.OutputLevel.LOW)) {
-            System.out.format("Find.%s ", actionOptions.getFind());
-        }
+        actionLifecycleManagement.printActionOnce(actionOptions.getActionId());
         Matches matches = new Matches();
-        List<Scene> scenes = getScenes.getScenesNoScrenshots(objectCollections);
+        List<Scene> scenes = getScenes.getScenes(actionOptions, objectCollections);
+        //Report.println(scenes.size() + " scenes found");
         /*
         There won't be scenes if the action is performed on a screenshot. However, we need to give
         any MatchObjects an associated scene name. Screenshots have names "screenshot0.png", "screenshot1.png", etc.
@@ -56,7 +59,7 @@ public class FindImageOrRIP {
             });
         });
         // add each SceneAnalysis to Matches without doing a color analysis of the scene
-        List<Scene> scenesWithScreenshots = getScenes.getScenes(objectCollections);
+        List<Scene> scenesWithScreenshots = getScenes.getScenes(actionOptions, objectCollections);
         List<SceneAnalysis> sceneAnalyses = new ArrayList<>();
         scenesWithScreenshots.forEach(scene -> sceneAnalyses.add(new SceneAnalysis(scene)));
         matches.getSceneAnalysisCollection().setSceneAnalyses(sceneAnalyses);

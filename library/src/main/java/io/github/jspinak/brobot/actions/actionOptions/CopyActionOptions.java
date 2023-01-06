@@ -38,7 +38,7 @@ public class CopyActionOptions {
                 .setMaxWait(orig.getMaxWait())
                 .setTimesToRepeatIndividualAction(orig.getTimesToRepeatIndividualAction())
                 .setMaxTimesToRepeatActionSequence(orig.getMaxTimesToRepeatActionSequence())
-                .setPauseBetweenActions(orig.getPauseBetweenIndividualActions())
+                .setPauseBetweenIndividualActions(orig.getPauseBetweenIndividualActions())
                 .setPauseBetweenActionSequences(orig.getPauseBetweenActionSequences())
                 .setMaxMatchesToActOn(orig.getMaxMatchesToActOn())
                 .setDefineAs(orig.getDefineAs())

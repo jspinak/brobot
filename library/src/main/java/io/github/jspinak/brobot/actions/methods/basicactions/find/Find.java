@@ -123,6 +123,7 @@ public class Find implements ActionInterface {
             return;
         }
         while (actionLifecycleManagement.continueActionIfNotFound(actionId, matches)) {
+            //Report.println(""+ actionLifecycleManagement.getCompletedRepetitions(actionId));
             mockStatus.addMockPerformed();
             Matches matches1 = findFunctions.get(actionOptions).apply(actionOptions, List.of(objectCollections));
             matches.addAllResults(matches1);
