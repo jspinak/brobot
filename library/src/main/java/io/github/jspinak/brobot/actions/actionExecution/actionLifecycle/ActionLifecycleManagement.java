@@ -27,7 +27,9 @@ public class ActionLifecycleManagement {
      */
     public int newActionLifecycle(ActionOptions actionOptions) {
         ActionLifecycle actionLifecycle = new ActionLifecycle(actionOptions, timeWrapper.now());
-        return actionLifecylceRepo.add(actionLifecycle);
+        int id = actionLifecylceRepo.add(actionLifecycle);
+        actionOptions.setActionId(id);
+        return id;
     }
 
     /**
@@ -42,12 +44,12 @@ public class ActionLifecycleManagement {
      * Sets the end time of the action.
      * @param id id of the ActionLifecycle object
      */
-    public void setEndTime(int id) {
-        actionLifecylceRepo.getActionLifecycles().get(id).setEndTime(timeWrapper.now());
+    public void setEndTime(int id, double maxWait) {
+        actionLifecylceRepo.getActionLifecycles().get(id).setEndTime(timeWrapper.now().plusSeconds((long) maxWait));
     }
 
-    public Duration getAndSetDuration(int id) {
-        actionLifecylceRepo.getActionLifecycles().get(id).setEndTime(timeWrapper.now());
+    public Duration getAndSetDuration(int id, double maxWait) {
+        //setEndTime(id, maxWait);
         LocalDateTime start = actionLifecylceRepo.getActionLifecycles().get(id).getStartTime();
         LocalDateTime end = actionLifecylceRepo.getActionLifecycles().get(id).getEndTime();
         return Duration.between(start, end);
@@ -71,15 +73,48 @@ public class ActionLifecycleManagement {
         return actionLifecylceRepo.getActionLifecycles().get(id).getActionOptions();
     }
 
+    /**
+     * Continue the action if
+     * - the max repetitions has not been reached
+     * - the time has not expired
+     * @param id id of the ActionLifecycle object
+     * @return true if the action should be continued, false otherwise
+     */
     public boolean continueAction(int id) {
-        if (getCompletedRepetitions(id) >= getActionOptions(id).getMaxTimesToRepeatActionSequence()) {
+        int completedReps = getCompletedRepetitions(id);
+        int maxReps = getActionOptions(id).getMaxTimesToRepeatActionSequence();
+        ActionOptions.Action action = getActionOptions(id).getAction();
+        if (action != ActionOptions.Action.FIND && completedReps >= maxReps) {
             return false;
         }
-        return getAndSetDuration(id).compareTo(Duration.ofSeconds((long) getActionOptions(id).getMaxWait())) <= 0;
+        double maxWait = getActionOptions(id).getMaxWait();
+        Duration duration = getCurrentDuration(id);
+        return duration.getSeconds() <= maxWait;
     }
 
     public boolean continueActionIfNotFound(int id, Matches matches) {
-        if (!continueAction(id)) return false;
-        return matches.isEmpty();
+        if (!continueAction(id)) {
+            //Report.println("continue action id is false");
+            return false;
+        }
+        if (!matches.isEmpty()) {
+            //Report.println("Found the element, stopping find");
+            return false;
+        }
+        return true;
+    }
+
+    public boolean printActionOnce(int id) {
+        if (actionLifecylceRepo.getActionLifecycles().get(id).isPrinted()) {
+            return false;
+        }
+        actionLifecylceRepo.getActionLifecycles().get(id).setPrinted(true);
+        if (Report.minReportingLevel(Report.OutputLevel.LOW)) {
+            if (getActionOptions(id).getAction() == ActionOptions.Action.FIND)
+                System.out.format("Find.%s ", getActionOptions(id).getFind());
+            else
+                System.out.format("%s ", getActionOptions(id).getAction());
+        }
+        return true;
     }
 }

@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.actions.methods.basicactions.capture.replay;
 
-import io.github.jspinak.brobot.datatypes.primitives.location.Location;
+import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.reports.Report;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.NamedNodeMap;
@@ -8,6 +8,9 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import java.util.List;
+
+import static io.github.jspinak.brobot.actions.actionOptions.ActionOptions.Action.CLICK;
+import static io.github.jspinak.brobot.actions.actionOptions.ActionOptions.Action.TYPE;
 
 @Component
 public class ReplayCollectionOrganizer {
@@ -35,7 +38,7 @@ public class ReplayCollectionOrganizer {
             }
         }
         setDelays(replayCollection);
-        setPivotsByDelay(replayCollection);
+        setPivotsByDelayAndType(replayCollection);
         replayCollection.sortByTimelapseFromBeginning();
         setStartAndEndPivots(replayCollection);
         return replayCollection;
@@ -60,11 +63,14 @@ public class ReplayCollectionOrganizer {
         }
     }
 
-    private void setPivotsByDelay(ReplayCollection replayCollection) {
+    private void setPivotsByDelayAndType(ReplayCollection replayCollection) {
         List<ReplayObject> replayObjects = replayCollection.getReplayObjects();
         for (int i = 0; i < replayObjects.size() - 1; i++) {
-            if (replayObjects.get(i).getDelayAfterLastPoint() > 40) {
-                replayObjects.get(i).setPivotPoint(true);
+            ReplayObject rO = replayObjects.get(i);
+            if (rO.getDelayAfterLastPoint() > 40 ||
+                rO.getAction() == CLICK ||
+                rO.getAction() == TYPE) {
+                    replayObjects.get(i).setPivotPoint(true);
             }
         }
     }

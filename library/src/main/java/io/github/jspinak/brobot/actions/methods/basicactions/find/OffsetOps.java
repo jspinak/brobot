@@ -34,7 +34,7 @@ public class OffsetOps {
      */
     public boolean addOffsetAsOnlyMatch(List<ObjectCollection> objectCollections, Matches matches, ActionOptions actionOptions,
                                         boolean doOnlyWhenCollectionsAreEmpty) {
-        if (actionOptions.getAddX() == -1) return false;
+        if (actionOptions.getAddX() == 0) return false;
         if (!areCollectionsEmpty(objectCollections) && doOnlyWhenCollectionsAreEmpty) return false;
         Location location = new Location(Mouse.at(), actionOptions.getAddX(), actionOptions.getAddY());
         double duration = Duration.between(LocalDateTime.now(), matches.getStartTime()).toSeconds();
@@ -58,7 +58,7 @@ public class OffsetOps {
      * @return true if the offset was added.
      */
     public boolean addOffsetAsLastMatch(Matches matches, ActionOptions actionOptions) {
-        if (actionOptions.getAddX2() == -1) return false;
+        if (actionOptions.getAddX2() == 0) return false;
         if (matches.isEmpty()) return false;
         Match lastMatch = matches.getMatches().get(matches.getMatches().size() - 1);
         Location offsetLocation = new Location(
