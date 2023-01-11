@@ -371,6 +371,18 @@ public class ActionOptions {
      */
     private int maxMovement = 300;
 
+    /**
+     * Used with recording and playback.
+     *
+     * startPlayback is the point in the recording, in seconds, to start the playback sequence.
+     * When set to -1, the start point will be found by comparing the location of a match to
+     * matches of objects in the recorded scenes, or by other methods.
+     *
+     * playbackDuration is the length of the playback sequence, in seconds.
+     */
+    private double startPlayback = -1;
+    private double playbackDuration = 5;
+
     public static class Builder {
         private Action action = Action.FIND;
         private BiFunction<ActionOptions, List<ObjectCollection>, Matches> tempFind;
