@@ -1,4 +1,4 @@
-package io.github.jspinak.brobot.actions.methods.basicactions.capture.replay;
+package io.github.jspinak.brobot.actions.methods.basicactions.captureAndReplay.replay;
 
 import lombok.Getter;
 
