@@ -32,7 +32,7 @@ public class Success {
         criteria.put(ActionOptions.Action.MOUSE_UP, matches -> true);
         criteria.put(ActionOptions.Action.KEY_DOWN, matches -> true);
         criteria.put(ActionOptions.Action.KEY_UP, matches -> true);
-        criteria.put(ActionOptions.Action.DRAG, matches -> matches.getDefinedRegion().defined());
+        criteria.put(ActionOptions.Action.DRAG, matches -> matches.size() == 2); // <- for DragSimple. for Drag, matches.getDefinedRegion().defined());
         criteria.put(ActionOptions.Action.VANISH, Matches::isEmpty);
         criteria.put(ActionOptions.Action.CLASSIFY, matches -> !matches.isEmpty());
     }

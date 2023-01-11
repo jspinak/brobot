@@ -36,7 +36,7 @@ public class Mock {
 
     public Matches getMatches(StateImageObject stateImageObject, Region searchRegion,
                               ActionOptions actionOptions) {
-        Report.println("Finding " + stateImageObject.getName() + "in mock");
+        Report.println("Finding " + stateImageObject.getName() + " in mock");
         timeWrapper.wait(actionOptions.getFind());
         timeWrapper.printNow();
         if (!stateExists(stateImageObject)) {

@@ -1,4 +1,4 @@
-package io.github.jspinak.brobot.actions.methods.basicactions.capture.replay;
+package io.github.jspinak.brobot.actions.methods.basicactions.captureAndReplay.replay;
 
 import io.github.jspinak.brobot.reports.Report;
 import org.springframework.stereotype.Component;
@@ -14,12 +14,12 @@ import java.io.IOException;
 import java.nio.file.Path;
 
 @Component
-public class ReadXmlActionsAndReplay {
+public class GetXmlActions {
 
     private ReplayAction replayAction;
     private ReplayCollectionOrganizer replayCollectionOrganizer;
 
-    public ReadXmlActionsAndReplay(ReplayAction replayAction, ReplayCollectionOrganizer replayCollectionOrganizer) {
+    public GetXmlActions(ReplayAction replayAction, ReplayCollectionOrganizer replayCollectionOrganizer) {
         this.replayAction = replayAction;
         this.replayCollectionOrganizer = replayCollectionOrganizer;
     }
@@ -27,7 +27,7 @@ public class ReadXmlActionsAndReplay {
     public ReplayCollection getActionsBetweenTimes(double startTime, double endTime) {
         ReplayCollection replayCollection = getAllActions();
         Report.println("ReplayCollection size: " + replayCollection.getReplayObjects().size());
-        return replayCollectionOrganizer.getActionsBetweenTimes(replayCollection, startTime, endTime);
+        return replayCollectionOrganizer.getActionsBetweenTimes(replayCollection, startTime * 1000, endTime * 1000);
     }
 
     public ReplayCollection getActionsAfterTime(double startTime) {
@@ -52,21 +52,6 @@ public class ReadXmlActionsAndReplay {
             throw new RuntimeException(e);
         }
         return new ReplayCollection();
-    }
-
-    public void replayAllActionsFromFile() {
-        ReplayCollection replayCollection = getAllActions();
-        replay(replayCollection);
-    }
-
-    public void replay(ReplayCollection replayCollection) {
-        //Report.println("size of replay collection: " + replayCollection.getReplayObjects().size());
-        int i =0 ;
-        for (ReplayObject replayObject : replayCollection.getReplayObjects()) {
-            if (replayObject.isObjectReady() && replayObject.isPivotPoint()) replayAction.replay(replayObject);
-            //Report.println("node number " + i + " delay: " + replayObject.getDelayAfterLastPoint() + " timeLapse: " + replayObject.getTimelapseFromStartOfRecording());
-            i++;
-        }
     }
 
 }

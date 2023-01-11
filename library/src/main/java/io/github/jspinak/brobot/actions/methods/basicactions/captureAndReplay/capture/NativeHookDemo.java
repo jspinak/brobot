@@ -1,6 +1,8 @@
-package io.github.jspinak.brobot.actions.methods.basicactions.capture;
+package io.github.jspinak.brobot.actions.methods.basicactions.captureAndReplay.capture;
 
-/* JNativeHook: Global keyboard and mouse listeners for Java.
+/* This class is modified from a demo on the Web. The comments header from the original file is the following:
+ *
+ * JNativeHook: Global keyboard and mouse listeners for Java.
  * Copyright (C) 2006-2021 Alexander Barker.  All Rights Reserved.
  * https://github.com/kwhat/jnativehook/
  *
@@ -70,8 +72,6 @@ public class NativeHookDemo extends JFrame implements ActionListener, ItemListen
      * Logging
      */
     private static final Logger log = Logger.getLogger(GlobalScreen.class.getPackage().getName());
-
-    private CaptureMatrix captureMatrix;
 
     private boolean windowClosed = false;
 
@@ -183,7 +183,6 @@ public class NativeHookDemo extends JFrame implements ActionListener, ItemListen
         setVisible(true);
 
         writeXmlDomActions.initDocument();
-        captureMatrix = new CaptureMatrix();
     }
 
     /**
@@ -257,7 +256,7 @@ public class NativeHookDemo extends JFrame implements ActionListener, ItemListen
      * @see NativeKeyListener#nativeKeyPressed(NativeKeyEvent)
      */
     public void nativeKeyPressed(NativeKeyEvent e) {
-        //appendDisplay(e.paramString());
+        appendDisplay(e.paramString());
         String key = StringUtils.substringAfterLast(e.paramString(),"rawCode=");
         writeXmlDomActions.addElement("input", "KEY_DOWN", "key-pressed", key, e.paramString());
     }
@@ -266,7 +265,7 @@ public class NativeHookDemo extends JFrame implements ActionListener, ItemListen
      * @see NativeKeyListener#nativeKeyReleased(NativeKeyEvent)
      */
     public void nativeKeyReleased(NativeKeyEvent e) {
-        //appendDisplay(e.paramString());
+        appendDisplay(e.paramString());
         String key = StringUtils.substringAfterLast(e.paramString(),"rawCode=");
         writeXmlDomActions.addElement("input", "KEY_UP", "key-released", key, e.paramString());
     }
@@ -275,19 +274,17 @@ public class NativeHookDemo extends JFrame implements ActionListener, ItemListen
      * @see NativeKeyListener#nativeKeyTyped(NativeKeyEvent)
      */
     public void nativeKeyTyped(NativeKeyEvent e) {
-        //appendDisplay(e.paramString());
+        appendDisplay(e.paramString());
         String keyPressedAsNumber = StringUtils.substringAfterLast(e.paramString(),"rawCode=");
         writeXmlDomActions.addElement("input", "TYPE", "key-tyoed", keyPressedAsNumber, e.paramString());
-        captureMatrix.addRow(3, Integer.parseInt(keyPressedAsNumber), getMillis(e.paramString()));
     }
 
     /**
      * @see NativeMouseListener#nativeMouseClicked(NativeMouseEvent)
      */
     public void nativeMouseClicked(NativeMouseEvent e) {
-        //appendDisplay(e.paramString());
+        appendDisplay(e.paramString());
         writeXmlDomActions.addElement("input", "CLICK", "mouse-clicked", "", e.paramString());
-        captureMatrix.addRow(4, 0, getMillis(e.paramString())); // 7 is the mouse moved event, 0 is null in ASCII
     }
 
     /**
@@ -295,7 +292,7 @@ public class NativeHookDemo extends JFrame implements ActionListener, ItemListen
      */
     public void nativeMousePressed(NativeMouseEvent e) {
         writeXmlDomActions.addElement("input", "MOUSE_DOWN", "mouse-pressed", "", e.paramString());
-        //appendDisplay(e.paramString());
+        appendDisplay(e.paramString());
     }
 
     /**
@@ -303,25 +300,23 @@ public class NativeHookDemo extends JFrame implements ActionListener, ItemListen
      */
     public void nativeMouseReleased(NativeMouseEvent e) {
         writeXmlDomActions.addElement("input", "MOUSE_UP", "mouse-released", "", e.paramString());
-        //appendDisplay(e.paramString());
+        appendDisplay(e.paramString());
     }
 
     /**
      * @see NativeMouseMotionListener#nativeMouseMoved(NativeMouseEvent)
      */
     public void nativeMouseMoved(NativeMouseEvent e) {
-        //appendDisplay(e.paramString());
+        appendDisplay(e.paramString());
         writeXmlDomActions.addElement("input", "MOVE", "mouse-moved", "", e.paramString());
-        captureMatrix.addRow(7, 0, getMillis(e.paramString())); // 7 is the mouse moved event, 0 is null in ASCII
     }
 
     /**
      * @see NativeMouseMotionListener#nativeMouseDragged(NativeMouseEvent)
      */
     public void nativeMouseDragged(NativeMouseEvent e) {
-        //appendDisplay(e.paramString());
+        appendDisplay(e.paramString());
         writeXmlDomActions.addElement("input", "DRAG", "mouse-dragged", "", e.paramString());
-        captureMatrix.addRow(8, 0, getMillis(e.paramString())); // 7 is the mouse moved event, 0 is null in ASCII
     }
 
     /**
@@ -413,7 +408,7 @@ public class NativeHookDemo extends JFrame implements ActionListener, ItemListen
             txtEventInfo.setCaretPosition(txtEventInfo.getDocument().getLength());
         }
 
-        // Enable all of the listeners.
+        // Enable all listeners.
         menuItemKeyboardEvents.setSelected(true);
         menuItemButtonEvents.setSelected(true);
         menuItemMotionEvents.setSelected(true);
@@ -441,40 +436,6 @@ public class NativeHookDemo extends JFrame implements ActionListener, ItemListen
         return Integer.parseInt(secondCut);
     }
 
-    /**
-     * The demo project entry point.
-     *
-     * @param args unused.
-     */
-    /*
-    public static void main(String[] args) {
-        String copyright = "\n"
-                + "JNativeHook: Global keyboard and mouse listeners for Java.\n"
-                + "Copyright (C) 2006-2021 Alexander Barker.  All Rights Reserved.\n"
-                + "https://github.com/kwhat/jnativehook/\n"
-                + "\n"
-                + "JNativeHook is free software: you can redistribute it and/or modify\n"
-                + "it under the terms of the GNU Lesser General Public License as published\n"
-                + "by the Free Software Foundation, either version 3 of the License, or\n"
-                + "(at your option) any later version.\n"
-                + "\n"
-                + "JNativeHook is distributed in the hope that it will be useful,\n"
-                + "but WITHOUT ANY WARRANTY; without even the implied warranty of\n"
-                + "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n"
-                + "GNU General Public License for more details.\n"
-                + "\n"
-                + "You should have received a copy of the GNU Lesser General Public License\n"
-                + "along with this program.  If not, see <http://www.gnu.org/licenses/>.\n";
-        System.out.println(copyright);
-
-        SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                new NativeHookDemo();
-            }
-        });
-    }
-
-     */
     public boolean isWindowClosed() {
         return windowClosed;
     }
