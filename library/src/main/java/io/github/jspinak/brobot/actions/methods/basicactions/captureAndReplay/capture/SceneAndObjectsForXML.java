@@ -1,4 +1,4 @@
-package io.github.jspinak.brobot.actions.methods.basicactions.capture;
+package io.github.jspinak.brobot.actions.methods.basicactions.captureAndReplay.capture;
 
 import io.github.jspinak.brobot.datatypes.primitives.location.Location;
 import lombok.Getter;

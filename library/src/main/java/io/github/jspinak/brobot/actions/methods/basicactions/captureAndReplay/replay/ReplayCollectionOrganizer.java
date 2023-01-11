@@ -1,6 +1,5 @@
-package io.github.jspinak.brobot.actions.methods.basicactions.capture.replay;
+package io.github.jspinak.brobot.actions.methods.basicactions.captureAndReplay.replay;
 
-import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.reports.Report;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.NamedNodeMap;

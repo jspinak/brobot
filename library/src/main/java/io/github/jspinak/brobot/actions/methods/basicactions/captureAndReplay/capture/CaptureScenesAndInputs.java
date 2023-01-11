@@ -1,4 +1,4 @@
-package io.github.jspinak.brobot.actions.methods.basicactions.capture;
+package io.github.jspinak.brobot.actions.methods.basicactions.captureAndReplay.capture;
 
 import io.github.jspinak.brobot.actions.BrobotSettings;
 import io.github.jspinak.brobot.actions.actionExecution.Action;
@@ -10,8 +10,6 @@ import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
 import io.github.jspinak.brobot.imageUtils.GetImage;
-import io.github.jspinak.brobot.imageUtils.ImageUtils;
-import io.github.jspinak.brobot.imageUtils.MatOps;
 import io.github.jspinak.brobot.reports.Report;
 import org.springframework.stereotype.Component;
 
@@ -52,9 +50,15 @@ public class CaptureScenesAndInputs {
         this.writeXmlDomScenes = writeXmlDomScenes;
     }
 
-    public void captureAndFindObjects(StateImageObject... stateImageObjects) {
+    /**
+     * Captures scenes, object locations, and mouse and keyboard input and saves it to the 'capture' directory.
+     * Make sure to use the same ActionOptions when using the saved data in a live automation.
+     * @param actionOptions
+     * @param stateImageObjects
+     */
+    public void captureAndFindObjects(ActionOptions actionOptions, StateImageObject... stateImageObjects) {
         capture();
-        SceneObjectCollectionForXML sceneObjectCollectionForXML = findObjects(stateImageObjects);
+        SceneObjectCollectionForXML sceneObjectCollectionForXML = findObjects(actionOptions, stateImageObjects);
         saveSceneObjectCollectionForXML(sceneObjectCollectionForXML);
         System.runFinalization();
         System.exit(0);
@@ -93,7 +97,7 @@ public class CaptureScenesAndInputs {
         writeXmlDomActions.writeXmlToFile();
     }
 
-    private SceneObjectCollectionForXML findObjects(StateImageObject... stateImageObjects) {
+    private SceneObjectCollectionForXML findObjects(ActionOptions actionOptions, StateImageObject... stateImageObjects) {
         SceneObjectCollectionForXML sceneObjectCollectionForXML = new SceneObjectCollectionForXML();
         for (int i=0; i<screensSaved; i++) {
             SceneAndObjectsForXML sceneAndObjectsForXML = new SceneAndObjectsForXML(i);
@@ -102,7 +106,7 @@ public class CaptureScenesAndInputs {
                         .withScenes(new Image("../capture/scene" + i))
                         .withImages(stateImageObject)
                         .build();
-                Matches matches = action.perform(ActionOptions.Action.FIND, objects);
+                Matches matches = action.perform(actionOptions, objects);
                 if (matches.getBestLocation().isPresent()) {
                     sceneAndObjectsForXML.addObject(stateImageObject.getName(), matches.getBestLocation().get());
                 }
