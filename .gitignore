@@ -8,3 +8,8 @@
 
 # Maven Central
 /library/gradle.properties
+
+.DS_Store
+._.DS_Store
+**/.DS_Store
+**/._.DS_Store
