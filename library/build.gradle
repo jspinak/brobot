@@ -9,7 +9,7 @@ plugins {
 }
 
 group 'io.github.jspinak'
-version '1.0.6'
+version '1.0.7'
 
 repositories {
     mavenCentral()
@@ -28,7 +28,9 @@ dependencyManagement {
 }
 
 dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'com.h2database:h2:2.1.212'
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
     // for local debugging of SikuliX
@@ -53,7 +55,7 @@ publishing {
 
             groupId = 'io.github.jspinak'
             artifactId = 'brobot'
-            version = '1.0.6'
+            version = '1.0.7'
             from components.java
 
             pom {
