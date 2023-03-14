@@ -4,7 +4,26 @@ sidebar_position: 1
 
 # Why Brobot?
 
-Brobot makes it easier to develop complex GUI automation. 
+The goal of Brobot is to allow for the creation of a Visual API using both static and dynamic images.
+A Visual API is a representation of the environment that can be used to control it. Similar to a
+programmatic API, a Visual API can be accessed with code and manipulated with the GUI automation tools
+provided by Brobot. To give an example, Starcraft made a programmatic API available to AI researchers
+to test reinforcement learning techniques. What if Starcraft hadn't made an API available yet you
+wanted to use the game to test your AI? Brobot attempts to solve this problem by converting visual cues
+into a programmatic API.  
+
+This is, however, not the only use for Brobot. Brobot builds a model of the underlying environment, which
+allows you to test your automation application's codebase. Previous to Brobot, this was not possible,
+making the development of large automation applications very difficult due to the highly stochastic nature
+of automation. Think about it like this: You have a written an application that
+depends on an external API in almost every single function of your program, and the output of the external
+API is highly variable. How do you test your codebase in this case? Well, traditionally, you would write
+a mock test for each call to the external API, simulating the variability available in its output. While
+different functions of the API are called in almost every single function call in your program, the test
+code would quickly outgrow the underlying program code. This is also true for testing an automation application.
+Without Brobot, to test an automation app, the environment's output would need to be simulated at every step,
+making the test code larger and more complex than the automation application. Brobot takes care of
+this for you, thus allowing for testing without this level of complexity.
 
 # GUI Processes
 
