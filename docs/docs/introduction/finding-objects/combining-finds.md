@@ -26,18 +26,24 @@ the bars would also be found in other places, including on the character's weapo
 interspersed throughout the grass. One way to narrow down our search is to look for 
 both a pattern and a color.  
 
-![yellowBars](/img/yellowBars.png)
-
 ## Nested Finds
 
 Nested Finds find objects inside the matches from the previous Find operation. Given 
 the example above, we would have many matches inside the four yellow bars. The 
-ActionOptions in the example uses the default diameter of 1 for the Find.COLOR operation.
-Therefore, the matches returned would all have a size of 1x1.  
+ActionOptions in the example does not specify the diameter, so the matches can be of 
+varying sizes.
 
 The ActionOptions variable `keepLargerMatches` controls whether the Find operations
 should be Nested Finds or ConfirmedFinds. The default value of `false` will execute a 
 Nested Find.  
+
+In the below example, all pattern matches from the Find.ALL operation are drawn in 
+blue bounding boxes, and the color matches are drawn in pink bounding boxes. To the 
+right of the scene are the contents of the color matches. As expected, all color matches 
+are some variation of yellow, showing that they are taken only from the pattern matches of
+yellow bars and not from the red or green bars.  
+
+![nestedFind](/img/color/nestedFind.png)  
 
 ## Confirmed Finds
 
@@ -59,3 +65,8 @@ To set the Find operations to Confirmed Finds, the ActionOptions variable
                 .keepLargerMatches(true)
                 .build();
 
+In the below example, the pattern matches from the Find.ALL operation are drawn in
+blue and the color matches are drawn in pink. To the right of the scene are the contents of the 
+color matches. The pattern match is selected in its original size. Only the yellow bars are selected.  
+
+![confirmedFind](/img/color/confirmedFind.png)  
