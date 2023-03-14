@@ -13,21 +13,21 @@ function HomepageHeader() {
       <div className="container">
         <h1 className="hero__title">{siteConfig.title}</h1>
         <p className="hero__subtitle">{siteConfig.tagline}</p>
-        <div className={styles.buttons}>
-          <Link className="button button--secondary button--lg"
-                to="https://jspinak.github.io/brobot/docs/labeling/labeling-intro.md"
-                style={{border: '2px dotted red'}}>
-              <div>Image Labeling</div>
-          </Link>
-        </div>
         <div>
           <Link className="button button--secondary button--lg" to="https://www.youtube.com/watch?v=aHnVQ8KmOVw"
                 style={{border: '2px dotted red'}}>
-              <div>Next-Gen GUI Automation - Introductory Video</div>
+              <div>Introductory Video</div>
+          </Link>
+        </div>
+        <div className={styles.buttons}>
+          <Link className="button button--secondary button--lg"
+                to="../brobot/docs/tutorial-state-structure-builder/intro"
+                style={{border: '2px dotted red'}}>
+              <div>Get Started</div>
           </Link>
         </div>
         <div>
-            <br />Free & open source. The latest version is 1.0.4.
+            <br />Free & open source. The latest version is 1.0.6.
         </div>
       </div>
     </header>
