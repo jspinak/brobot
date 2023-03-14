@@ -12,7 +12,7 @@ or [Spring Tools 4](https://marketplace.eclipse.org/content/spring-tools-4-aka-s
 which works with Eclipse, Visual Studio Code, and Atom IDE.
 
 ## Add the Brobot Library
-Version 1.0.3 is needed.  
+Version 1.0.3 or higher is needed.  
 
 Maven:
 
@@ -26,10 +26,18 @@ Gradle:
 
         implementation 'io.github.jspinak:brobot:1.0.3' 
 
-Note that Brobot works with Java version 14 or later.  
-Don't forget to add JavaPoet as a dependency. JavaPoet writes the files in your 
-State Structure.  
-The full build.gradle file should look similar to this:
+Some tips: 
+- Note that Brobot works with Java version 14 or lower.
+- Don't forget to add JavaPoet as a dependency. JavaPoet writes the files in your 
+State Structure.
+- The latest version of Brobot, which you would need to find images based on color, compare histograms, 
+perform image segmentation and classification, detect motion, and other advanced features,
+requires that you have an installation of OpenCV. If you are working on a Windows machine, happy days! 
+OpenCV is already installed for you. If you are on a Mac or Linux machine, you will need to install OpenCV. 
+OpenCV is notoriously difficult to install. If you have problems with the installation or don't need the 
+more advanced features of Brobot, you can use Brobot version 1.0.3.  
+
+If you are using gradle, the full build.gradle file should look similar to this:
 
         plugins {
             id 'org.springframework.boot' version '2.6.2'
