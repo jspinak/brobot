@@ -9,12 +9,13 @@ sidebar_position: 3
 In the executable class, we need to add the following lines for
 Brobot to be able to execute real runs:
 
-        SpringApplicationBuilder builder = new SpringApplicationBuilder(Run.class);
+        SpringApplicationBuilder builder = new SpringApplicationBuilder(TheNameOfThisClass.class);
         builder.headless(false);
         ConfigurableApplicationContext context = builder.run(args);
 
 These lines should replace any other code involving SpringApplicationBuilder and
-the ConfigurableApplicationContext.
+the ConfigurableApplicationContext. Replace TheNameOfThisClass with the name of
+the class.
 
 ## Setup Brobot
 
@@ -32,5 +33,30 @@ mocking set here for testing your application later.
         BrobotSettings.packageName = "com.example.bdodemo";
         BrobotSettings.mock = false;
 
+## Sample Application Class Code
 
+Your code should now look similar to this:
+
+        package com.example.bdodemo;
+
+        import org.springframework.boot.autoconfigure.SpringBootApplication;
+        import org.springframework.boot.builder.SpringApplicationBuilder;
+        import org.springframework.context.ConfigurableApplicationContext;
+        import org.sikuli.script.ImagePath;
+        import io.github.jspinak.brobot.BrobotSettings;
+
+        @SpringBootApplication
+        public class BdodemoApplication {
+
+            public static void main(String[] args) {
+                SpringApplicationBuilder builder = new SpringApplicationBuilder(BdodemoApplication.class);
+                builder.headless(false);
+                ConfigurableApplicationContext context = builder.run(args);
+
+                // setup brobot
+                ImagePath.setBundlePath("images");
+                BrobotSettings.packageName = "com.example.bdodemo";
+                BrobotSettings.mock = false;
+            }
+        }
 
