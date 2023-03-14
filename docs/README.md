@@ -4,13 +4,8 @@ See the [website](https://jspinak.github.io/brobot/) for more details.
 
 ## Introduction
 
-Brobot is a framework for building testable GUI automation applications. 
-It reduces the complexity of automating an inherently stochastic process
-and allows developers to focus on business logic. Complex automation applications
-are possible with Brobot. 
-
-Complex applications such as image-based testing and automated game playing
-are possible using the Brobot framework. Brobot is a Java-SikuliX-OpenCV framework.
+Brobot is a Java-SikuliX-OpenCV framework. It makes is possible to develop 
+complex automation applications in areas such as game playing and image-based testing. 
 
 ## License
 
