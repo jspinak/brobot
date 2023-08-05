@@ -1,5 +1,6 @@
 package io.github.jspinak.brobot.services;
 
+import io.github.jspinak.brobot.manageStates.StateTransition;
 import io.github.jspinak.brobot.manageStates.StateTransitions;
 import io.github.jspinak.brobot.manageStates.StateTransitionsJointTable;
 import io.github.jspinak.brobot.primatives.enums.StateEnum;
@@ -53,5 +54,11 @@ public class StateTransitionsService {
 
     public Optional<StateTransitions> getTransitions(StateEnum stateEnum) {
         return stateTransitionsRepository.get(stateEnum);
+    }
+
+    public Optional<StateTransition> getTransition(StateEnum fromState, StateEnum toState) {
+        Optional<StateTransitions> transitions = getTransitions(fromState);
+        if (transitions.isEmpty()) return Optional.empty();
+        return transitions.get().getStateTransition(toState);
     }
 }
