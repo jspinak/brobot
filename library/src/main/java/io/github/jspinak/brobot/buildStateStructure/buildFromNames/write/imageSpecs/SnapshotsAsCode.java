@@ -25,6 +25,7 @@ public class SnapshotsAsCode {
     private boolean addClass;
 
     public void processSnapshots(StateImageObject image) {
+        System.out.println("add snapshot: "+image.getName()+" "+image.getMatchHistory().getSnapshots().size());
         StringBuilder str = new StringBuilder();
         addClass = false;
         int identicalAdded = 0;

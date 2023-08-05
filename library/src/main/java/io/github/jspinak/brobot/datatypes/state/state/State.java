@@ -72,7 +72,7 @@ public class State {
      * a variable StateEnum).
      */
     private Set<StateEnum> hidden = new HashSet<>();
-    private int pathScore = 1; // larger path scores prohibit taking a path with this state
+    private int pathScore = 1; // larger path scores discourage taking a path with this state
     private LocalDateTime lastAccessed;
     /**
      * The base probability that a State exists is transfered to the active variable 'probabilityExists',

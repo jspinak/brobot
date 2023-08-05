@@ -30,6 +30,7 @@ public class StateTransition {
     private StaysVisible staysVisibleAfterTransition;
     private Set<StateEnum> activate;
     private Set<StateEnum> exit;
+    private int pathScore = 0; // larger path scores discourage taking a path with this transition
 
     public boolean getAsBoolean() {
         return transitionFunction.getAsBoolean();
