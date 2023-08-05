@@ -25,7 +25,7 @@ public class PathManager {
 
     public void updateScore(Path path) {
         int score = 0;
-        for (StateEnum stateEnum : path.getPath()) {
+        for (StateEnum stateEnum : path.getStates()) {
             Optional<State> optState = stateService.findByName(stateEnum);
             if (optState.isPresent()) score += optState.get().getPathScore();
         }

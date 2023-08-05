@@ -56,7 +56,7 @@ public class FindMotion {
      * To find motion on the screen, call Find.MOTION without an ObjectCollection or with an empty ObjectCollection.
      * A minimum of 3 scenes are needed to show the object that is moving. WIth 2 scenes, movement can be
      * detected, but it is unclear what is the object and what is the background. Capturing movement entails
-     * finding changed pixels from scenes 1&2 in a different place in scene 3. Changed pixels from scenes 1&2
+     * finding changed pixels from scenes 1 and 2 in a different place in scene 3. Changed pixels from scenes 1 and 2
      * that are in the same place as in scene 1 or 2 are considered part of the background, and are not moving objects.
      * The background is assumed to be the same in all 3 scenes. The tricky part is identifying the moving object,
      * since the moving object may change it's color, shape, or size. A moving object can be identified by having a

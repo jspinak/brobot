@@ -1,6 +1,7 @@
 package io.github.jspinak.brobot.buildStateStructure.buildFromNames.attributes;
 
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
+import io.github.jspinak.brobot.reports.Report;
 import io.github.jspinak.brobot.stringUtils.CommonRegex;
 import org.springframework.stereotype.Component;
 
@@ -21,14 +22,18 @@ public class SetAttributes {
 
     public void processName(StateImageObject image) {
         attributes = image.getAttributes();
-        filename = image.getName();
+        filename = attributes.getFilenames().get(0); //image.getName();
         pos = 0;
         while (pos < filename.length()) {
             processOneValue();
         }
     }
 
+    /**
+     * The tag is the category of value: STATE_NAME, IMAGE_NAME, ATTRIBUTE, or TRANSITION
+     */
     private void setTag() {
+        //Report.println(filename+" "+pos+" "+filename.charAt(pos));
         if (pos == 0) {
             tag = STATE_NAME;
             return;
@@ -39,12 +44,19 @@ public class SetAttributes {
         pos++;
     }
 
+    /**
+     * Find and save the next value
+     */
     private void processOneValue() {
-        setTag();
+        //Report.print("processOneValue");
+        setTag(); // find the tag
+        //Report.print(tag.name());
+        // save the tag name if it's not an ATTRIBUTE
         if (tag != ATTRIBUTE) {
             saveName();
             return;
         }
+        // Find and save the next attribute given the position of the pointer (pos)
         if (setAttribute()) {
             saveValues();
         } else {
@@ -53,24 +65,27 @@ public class SetAttributes {
     }
 
     private boolean setAttribute() {
+        // if we're at the end of the filename, the attribute looks like a single _
         if (pos >= filename.length()) {
             attribute = APPEARS;
             return true;
         }
+        // otherwise, if the current char is a digit, save it
         char c = filename.charAt(pos);
+        //Report.print("attDig:"+c);
         if (Character.isDigit(c)) {
             attribute = APPEARS;
             return true;
         }
-        if (!AttributeTypes.attributes.containsKey(c)) return false;
-        attribute = AttributeTypes.attributes.get(c);
+        if (!AttributeTypes.attributes.containsKey(c)) return false; // if the char is not a valid attribute, move the counter
+        attribute = AttributeTypes.attributes.get(c); // otherwise, set the next attribute
         pos++;
         return true;
     }
 
     private void saveValues() {
         String str = getName();
-        if (str.length() == 0) {
+        if (str.length() == 0) { // the attribute is for all pages
             attributes.addPage(attribute, -1);
             return;
         }
@@ -83,6 +98,7 @@ public class SetAttributes {
             } else pageBuilder.append(c);
         }
         addPage(pageBuilder.toString());
+        //Report.print(" new attribute -> "+pageBuilder.toString());
     }
 
     private void addPage(String page) {

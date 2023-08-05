@@ -17,51 +17,56 @@ import java.util.Set;
 @Setter
 public class Path {
 
-    private List<StateEnum> path = new ArrayList<>();
+    private List<StateEnum> states = new ArrayList<>(); // all states in the path
+    private List<StateTransition> transitions = new ArrayList<>(); // transitions between the states in the path
     private int score; // lower scores are chosen first when selecting a path
 
     public boolean equals(Path path) {
-        return this.path.equals(path.getPath());
+        return this.states.equals(path.getStates());
     }
 
     public int size() {
-        return path.size();
+        return states.size();
     }
 
     public boolean isEmpty() {
-        return path.isEmpty();
+        return states.isEmpty();
     }
 
     public StateEnum get(int i) {
-        return path.get(i);
+        return states.get(i);
     }
 
     public void add(StateEnum stateEnum) {
-        path.add(stateEnum);
+        states.add(stateEnum);
+    }
+
+    public void add(StateTransition transition) {
+        transitions.add(transition);
     }
 
     public boolean contains(StateEnum stateEnum) {
-        return path.contains(stateEnum);
+        return states.contains(stateEnum);
     }
 
     public void reverse() {
-        Collections.reverse(path);
+        Collections.reverse(states);
     }
 
     public boolean remove(StateEnum stateEnum) {
-        return path.remove(stateEnum);
+        return states.remove(stateEnum);
     }
 
     public Path getCopy() {
         Path p = new Path();
-        p.setPath(new ArrayList<>(path));
+        p.setStates(new ArrayList<>(states));
         p.setScore(score);
         return p;
     }
 
     public void print() {
         System.out.format("(%d)", score);
-        path.forEach(stateEnum -> System.out.format("-> %s ", stateEnum));
+        states.forEach(stateEnum -> System.out.format("-> %s ", stateEnum));
         System.out.println();
     }
 
@@ -74,16 +79,22 @@ public class Path {
      * @return a Path object
      */
     public Path cleanPath(Set<StateEnum> activeStates, StateEnum failedTransitionStartState) {
-        if (path.contains(failedTransitionStartState)) return new Path();
+        if (states.contains(failedTransitionStartState)) return new Path();
         return trimPath(activeStates);
     }
 
     public Path trimPath(Set<StateEnum> activeStates) {
         Path trimmedPath = new Path();
         boolean addState = false;
-        for (StateEnum stateEnum : path) {
+        int i=0;
+        for (StateEnum stateEnum : states) {
+            // start adding states at an active state
             if (activeStates.contains(stateEnum)) addState = true;
-            if (addState) trimmedPath.add(stateEnum);
+            if (addState) {
+                trimmedPath.add(stateEnum);
+                trimmedPath.add(transitions.get(i));
+            }
+            i++;
         }
         return trimmedPath;
     }
