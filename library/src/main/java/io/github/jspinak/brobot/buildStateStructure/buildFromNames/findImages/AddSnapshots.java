@@ -3,6 +3,7 @@ package io.github.jspinak.brobot.buildStateStructure.buildFromNames.findImages;
 import io.github.jspinak.brobot.buildStateStructure.buildFromNames.attributes.AttributeTypes;
 import io.github.jspinak.brobot.datatypes.primitives.match.MatchSnapshot;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
+import io.github.jspinak.brobot.reports.Report;
 import org.sikuli.script.Match;
 import org.springframework.stereotype.Component;
 
@@ -30,8 +31,19 @@ public class AddSnapshots {
         imageShouldExist.add(GROUP_DEFINE);
     }
 
+    /**
+     * Snapshots are not added if the image should not be found on this screenshot. In a mock run, if the
+     * image's state is not active, the image is assumed not to exist. Mocks currently don't allow for false
+     * positives.
+     * If there are no matches, add an empty snapshot. This signifies that the image exists but was not found.
+     * Otherwise, add all matches as snapshots.
+     * @param image the image searched for
+     * @param matches matches found
+     * @param attributes image attributes (tells us if the image should be found on this screen)
+     */
     public void ifNeededAddSnapshot(StateImageObject image, List<Match> matches,
                                     List<AttributeTypes.Attribute> attributes) {
+        //Report.println("size of matches = "+matches.size());
         if (!imageShouldExist(attributes)) return;
         if (matches.isEmpty()) image.addSnapshot(new MatchSnapshot());
         else image.addSnapshot(getSnapshot(matches));
@@ -44,7 +56,14 @@ public class AddSnapshots {
         return snapshot;
     }
 
+    /**
+     * The image should exist when the image attribute for this page is either
+     *   APPEARS, APPEARS_EXCLUSIVELY, DEFINE, or GROUP_DEFINE.
+     * @param attributes the image attributes for this page
+     * @return yes if one of the image's attributes for this page is APPEARS, APPEARS_EXCLUSIVELY, DEFINE, or GROUP_DEFINE.
+     */
     private boolean imageShouldExist(List<AttributeTypes.Attribute> attributes) {
+        //Report.println("attributes: "+attributes+" imageShouldExist: "+imageShouldExist);
         boolean shouldExist = false;
         for (AttributeTypes.Attribute attribute : attributes) {
             if (imageShouldExist.contains(attribute)) {

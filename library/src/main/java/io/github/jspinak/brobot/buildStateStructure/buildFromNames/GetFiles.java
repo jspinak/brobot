@@ -63,7 +63,7 @@ public class GetFiles {
             babyStateRepo.addImage(newSIO);
             newSIO.getAttributes().print();
         }
-        else {
+        else { // this image is part of a group of images that make up 1 Brobot Image
             StateImageObject baseImg = optBaseImg.get();
             baseImg.merge(newSIO);
             baseImg.getAttributes().print();

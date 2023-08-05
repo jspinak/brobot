@@ -60,7 +60,7 @@ public class WriteStateClass {
         TypeSpec stateClass = TypeSpec.classBuilder(baseClassName)
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(Component.class)
-                .addAnnotation(Getter.class)
+                .addAnnotation(ClassName.get("lombok","Getter"))
                 .addType(enumType)
                 .addFields(stateObjects)
                 .addField(state)

@@ -1,15 +1,15 @@
-import org.springframework.boot.gradle.plugin.SpringBootPlugin
-
 plugins {
-    id 'org.springframework.boot' version '2.6.0' apply false
-    id 'io.spring.dependency-management' version '1.0.11.RELEASE'
-    id 'java-library'
+    id 'org.springframework.boot' version '2.7.14'
+    id("io.spring.dependency-management") version "1.1.2"
+    id 'java'
+    id 'io.freefair.lombok' version '6.2.0'
     id 'maven-publish'
     id 'signing'
 }
 
 group 'io.github.jspinak'
-version '1.0.6'
+version '1.0.7'
+sourceCompatibility = '17'
 
 repositories {
     mavenCentral()
@@ -21,25 +21,19 @@ configurations {
     }
 }
 
-dependencyManagement {
-    imports {
-        mavenBom SpringBootPlugin.BOM_COORDINATES
-    }
-}
-
 dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter'
-    compileOnly 'org.projectlombok:lombok'
-    annotationProcessor 'org.projectlombok:lombok'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.projectlombok:lombok:1.18.28'
     // for local debugging of SikuliX
     //implementation files('../../brobot parent directory/SikuliX1/SikuliX1/API/target/sikulixapi-2.1.0-SNAPSHOT.jar')
     implementation('com.sikulix:sikulixapi:2.0.5') {
         exclude group: 'org.slf4j', module: 'slf4j-nop'
     }
     implementation group: 'com.squareup', name: 'javapoet', version: '1.9.0'
-    implementation group: 'org.deeplearning4j', name: 'deeplearning4j-core', version: '1.0.0-M2'
+    implementation "org.deeplearning4j:deeplearning4j-core:1.0.0-M1"
+    implementation "org.nd4j:nd4j-native-platform:1.0.0-M1"
     implementation 'com.github.kwhat:jnativehook:2.2.2'
-
+    implementation('com.innoventsolutions.birt.runtime:org.eclipse.birt.runtime_4.8.0-20180626:4.8.0')
 }
 
 java {
@@ -53,7 +47,7 @@ publishing {
 
             groupId = 'io.github.jspinak'
             artifactId = 'brobot'
-            version = '1.0.6'
+            version = '1.0.7'
             from components.java
 
             pom {
