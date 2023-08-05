@@ -5,6 +5,7 @@ import io.github.jspinak.brobot.primatives.enums.StateEnum;
 import io.github.jspinak.brobot.reports.Output;
 import io.github.jspinak.brobot.reports.Report;
 import io.github.jspinak.brobot.services.StateService;
+import io.github.jspinak.brobot.services.StateTransitionsService;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -16,15 +17,18 @@ import java.util.*;
 @Component
 public class PathFinder {
 
-    private StateTransitionsJointTable stateTransitionsJointTable;
-    private StateService stateService;
+    private final StateTransitionsJointTable stateTransitionsJointTable;
+    private final StateService stateService;
+    private final StateTransitionsService stateTransitionsService;
 
     private Set<StateEnum> startStates;
     private List<Path> pathList;
 
-    public PathFinder(StateTransitionsJointTable stateTransitionsJointTable, StateService stateService) {
+    public PathFinder(StateTransitionsJointTable stateTransitionsJointTable, StateService stateService,
+                      StateTransitionsService stateTransitionsService) {
         this.stateTransitionsJointTable = stateTransitionsJointTable;
         this.stateService = stateService;
+        this.stateTransitionsService = stateTransitionsService;
     }
 
     public Paths getPathsToState(Set<StateEnum> startStates, StateEnum targetState) {
@@ -42,6 +46,7 @@ public class PathFinder {
     private void recursePath(Path path, StateEnum stateInFocus) {
         if (!path.contains(stateInFocus)) {
             path.add(stateInFocus);
+            addTransition(path);
             if (startStates.contains(stateInFocus)) { // a path is found
                 Path successfulPath = path.getCopy();
                 successfulPath.reverse();
@@ -57,11 +62,22 @@ public class PathFinder {
         if (path.get(path.size() - 1) == stateInFocus) path.remove(stateInFocus); // otherwise it's circular
     }
 
+    private void addTransition(Path path) {
+        if (path.size() <= 1) return; // no transitions if only one state
+        StateEnum fromState = path.get(path.size() - 1);
+        StateEnum toState = path.get(path.size() - 2);
+        Optional<StateTransition> transition = stateTransitionsService.getTransition(fromState, toState);
+        transition.ifPresent(path::add);
+    }
+
     private void setPathScore(Path path) {
         int score = 0;
-        for (StateEnum stateEnum : path.getPath()) {
+        for (StateEnum stateEnum : path.getStates()) {
             Optional<State> state = stateService.findByName(stateEnum);
             if (state.isPresent()) score += state.get().getPathScore();
+        }
+        for (StateTransition stateTrans : path.getTransitions()) {
+            score += stateTrans.getPathScore();
         }
         path.setScore(score);
     }

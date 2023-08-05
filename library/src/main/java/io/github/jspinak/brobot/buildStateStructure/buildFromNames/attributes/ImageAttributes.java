@@ -75,14 +75,26 @@ public class ImageAttributes {
             transitionsTo.forEach(tr -> Report.print("."+tr));
             Report.println();
         }
-        screenshots.keySet().forEach(this::printPages);
+        printPages();
     }
 
-    private void printPages(AttributeTypes.Attribute attribute) {
-        if (screenshots.get(attribute).isEmpty()) return;
-        Report.print(attribute.name());
-        screenshots.get(attribute).getPagesActive().forEach(page -> Report.print("."+page));
-        Report.println();
+    /**
+     * Print each {attribute, pages} for all attributes with pages.
+     * Otherwise, print "no attributes".
+     * SINGLE_MATCH is an attribute but since it's a default we don't print it here.
+     */
+    private void printPages() {
+        boolean noAttributes = true;
+        for (AttributeTypes.Attribute attribute : screenshots.keySet()) {
+            //Report.println(attribute.toString());
+            if (attribute != SINGLE_MATCH && !screenshots.get(attribute).isEmpty()) {
+                noAttributes = false;
+                Report.print(attribute.name());
+                screenshots.get(attribute).getPagesActive().forEach(page -> Report.print("." + page));
+                Report.println();
+            }
+        }
+        if (noAttributes) Report.println(" no attributes");
     }
 
     public List<AttributeTypes.Attribute> getActiveAttributes(int page) {
