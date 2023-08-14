@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.bytedeco.opencv.opencv_core.Mat;
 
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -36,12 +37,12 @@ public class SceneAnalysisCollection {
     For motion analysis, the last scene is used.
     */
     public Optional<Scene> getLastScene() {
-        if (sceneAnalyses.size() == 0) return Optional.empty();
+        if (sceneAnalyses.isEmpty()) return Optional.empty();
         return Optional.of(sceneAnalyses.get(sceneAnalyses.size() - 1).getScene());
     }
 
     public Optional<SceneAnalysis> getLastSceneAnalysis() {
-        if (sceneAnalyses.size() == 0) return Optional.empty();
+        if (sceneAnalyses.isEmpty()) return Optional.empty();
         return Optional.of(sceneAnalyses.get(sceneAnalyses.size() - 1));
     }
 
