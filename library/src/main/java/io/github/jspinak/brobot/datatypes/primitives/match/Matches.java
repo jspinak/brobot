@@ -44,10 +44,9 @@ import java.util.stream.Collectors;
 @Data
 public class Matches {
 
+    private String actionDescription = "";
     private List<MatchObject> matchObjects = new ArrayList<>();
-
-    // the first set of matches in a composite find operation. it may be useful to see these matches in illustrations.
-    private List<MatchObject> initialMatchObjects = new ArrayList<>();
+    private List<MatchObject> initialMatchObjects = new ArrayList<>(); // the first set of matches in a composite find operation. it may be useful to see these matches in illustrations.
     private List<MatchObject> nonoverlappingMatches = new ArrayList<>();
     private MatchObject bestMatch = null; // query returns an Optional in case there are no matches
     private ActionOptions actionOptions; // the action options used to find the matches

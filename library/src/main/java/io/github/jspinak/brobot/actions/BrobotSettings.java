@@ -93,4 +93,16 @@ public class BrobotSettings {
     public static int secondsToCapture = 1000;
     public static int captureFrequency = 1;
 
+    /**
+     * AI Settings
+     */
+    /*
+    This will save
+    - the 'before' screenshot
+    - the action as a vector
+    - a text description of the action
+    - the 'after' screenshot
+     */
+    public static boolean buildDataset = false;
+    public static String datasetPath = "dataset/";
 }
