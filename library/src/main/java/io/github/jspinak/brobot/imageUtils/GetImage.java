@@ -33,6 +33,10 @@ public class GetImage {
         return new Screen().capture(region).getImage();
     }
 
+    public BufferedImage getScreenshot() {
+        return new Screen().capture().getImage();
+    }
+
     public Mat BGRtoHSV(Mat bgr) {
         Imgproc.cvtColor(bgr, bgr, Imgproc.COLOR_BGR2HSV);
         return bgr;
