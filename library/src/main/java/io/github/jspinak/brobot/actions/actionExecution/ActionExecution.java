@@ -3,6 +3,7 @@ package io.github.jspinak.brobot.actions.actionExecution;
 import io.github.jspinak.brobot.actions.actionConfigurations.ExitSequences;
 import io.github.jspinak.brobot.actions.actionConfigurations.Success;
 import io.github.jspinak.brobot.actions.actionExecution.actionLifecycle.ActionLifecycleManagement;
+import io.github.jspinak.brobot.actions.actionExecution.manageTrainingData.DatasetManager;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.SelectRegions;
 import io.github.jspinak.brobot.actions.methods.sikuliWrappers.Wait;
@@ -38,10 +39,11 @@ public class ActionExecution {
     private IllustrateScreenshot illustrateScreenshot;
     private SelectRegions selectRegions;
     private ActionLifecycleManagement actionLifecycleManagement;
+    private final DatasetManager datasetManager;
 
     public ActionExecution(Wait wait, Time time, Success success, ExitSequences exitSequences,
                            IllustrateScreenshot illustrateScreenshot, SelectRegions selectRegions,
-                           ActionLifecycleManagement actionLifecycleManagement) {
+                           ActionLifecycleManagement actionLifecycleManagement, DatasetManager datasetManager) {
         this.wait = wait;
         this.time = time;
         this.success = success;
@@ -49,6 +51,7 @@ public class ActionExecution {
         this.illustrateScreenshot = illustrateScreenshot;
         this.selectRegions = selectRegions;
         this.actionLifecycleManagement = actionLifecycleManagement;
+        this.datasetManager = datasetManager;
     }
 
     /**
@@ -58,13 +61,15 @@ public class ActionExecution {
      * @param objectCollections contains the objects on which to perform the Action.
      * @return Matches
      */
-    public Matches perform(ActionInterface actionMethod, ActionOptions actionOptions,
+    public Matches perform(ActionInterface actionMethod, String actionDescription, ActionOptions actionOptions,
                            ObjectCollection... objectCollections) {
         printAction(actionOptions, objectCollections);
         time.setStartTime(actionOptions.getAction());
         //int actionId = actionLifecycleManagement.newActionLifecycle(actionOptions);
         wait.wait(actionOptions.getPauseBeforeBegin());
+
         Matches matches = new Matches();
+        matches.setActionDescription(actionDescription);
         for (int i=0; i<actionOptions.getMaxTimesToRepeatActionSequence(); i++) {
             matches = actionMethod.perform(actionOptions, objectCollections);
             success.set(actionOptions, matches);
@@ -78,7 +83,9 @@ public class ActionExecution {
         matches.setDuration(time.getDuration(actionOptions.getAction()));
         matches.saveSnapshots();
         String symbol = matches.isSuccess() ? Output.check : Output.fail;
+        datasetManager.addSetOfData(matches);
         Report.println(actionOptions.getAction() + " " + symbol);
+        datasetManager.addSetOfData(matches);
         return matches;
     }
 

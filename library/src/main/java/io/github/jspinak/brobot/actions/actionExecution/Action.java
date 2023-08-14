@@ -29,20 +29,25 @@ public class Action {
     }
 
     /**
-     * All other methods in this class return this method.
-     *
      * @param actionOptions     contains all information about the action.
      * @param objectCollections contains all objects to be acted on.
      * @return a Matches object with all results of the action.
      */
     public Matches perform(ActionOptions actionOptions, ObjectCollection... objectCollections) {
+        return perform("", actionOptions, objectCollections);
+    }
+
+    public Matches perform(String actionDescription, ActionOptions actionOptions, ObjectCollection... objectCollections) {
         for (ObjectCollection objColl : objectCollections) objColl.resetTimesActedOn();
         Optional<ActionInterface> action = actionService.getAction(actionOptions);
         if (action.isEmpty()) {
             Report.println("Not a valid Action.");
-            return new Matches();
+            Matches matches = new Matches();
+            matches.setActionDescription(actionDescription);
+            matches.setActionOptions(actionOptions);
+            return matches;
         }
-        return actionExecution.perform(action.get(), actionOptions, objectCollections);
+        return actionExecution.perform(action.get(), actionDescription, actionOptions, objectCollections);
     }
 
     /**
