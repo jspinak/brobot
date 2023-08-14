@@ -7,6 +7,7 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import org.springframework.stereotype.Component;
 
 import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -42,12 +43,27 @@ public class ImageUtils {
             }
             if (!BrobotSettings.saveHistory) System.out.println(newPath); // don't print when running live
             ImageIO.write(getImage.getBuffImgFromScreen(region),
-                    "png", new File("" + newPath));
+                    "png", new File(newPath));
             return newPath;
         } catch (IOException e) {
             e.printStackTrace();
             return null;
         }
+    }
+
+    public String saveBuffImgToFile(BufferedImage bufferedImage, String path) {
+        try {
+            String newPath = getFreePath(path) + ".png";
+            ImageIO.write(bufferedImage,"png", new File(newPath));
+            return newPath;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public String saveScreenshotToFile(String path) {
+        return saveRegionToFile(new Region(), path);
     }
 
     /**

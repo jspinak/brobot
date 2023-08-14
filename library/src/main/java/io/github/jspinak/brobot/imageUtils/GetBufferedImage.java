@@ -1,9 +1,9 @@
 package io.github.jspinak.brobot.imageUtils;
 
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
-import org.bytedeco.javacv.*;
-import org.bytedeco.javacv.Frame;
-import org.bytedeco.opencv.opencv_core.Mat;
+import org.opencv.core.Mat;
+import org.opencv.core.MatOfByte;
+import org.opencv.imgcodecs.Imgcodecs;
 import org.sikuli.script.Screen;
 import org.sikuli.script.ScreenImage;
 import org.springframework.stereotype.Component;
@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -43,6 +44,24 @@ public class GetBufferedImage {
                 BufferedImage.TYPE_3BYTE_BGR);
         convertedImage.getGraphics().drawImage(image, 0, 0, null);
         return convertedImage;
+    }
+
+    public BufferedImage convert(org.bytedeco.opencv.opencv_core.Mat mat) {
+        Mat cvMat = MatOps.convertToOpenCVmat(mat);
+        return convert(cvMat);
+    }
+
+    public BufferedImage convert(Mat mat) {
+        MatOfByte mob = new MatOfByte();
+        Imgcodecs.imencode(".jpg", mat, mob);
+        byte ba[] = mob.toArray();
+        BufferedImage bi = null;
+        try {
+            bi = ImageIO.read(new ByteArrayInputStream(ba));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return bi;
     }
 
 }
