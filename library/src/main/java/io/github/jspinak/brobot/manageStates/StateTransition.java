@@ -31,6 +31,7 @@ public class StateTransition {
     private Set<StateEnum> activate;
     private Set<StateEnum> exit;
     private int pathScore = 0; // larger path scores discourage taking a path with this transition
+    private int timesSuccessful = 0;
 
     public boolean getAsBoolean() {
         return transitionFunction.getAsBoolean();
