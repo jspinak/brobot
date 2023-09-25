@@ -83,6 +83,7 @@ public class State {
      */
     private int baseProbabilityExists = 100;
     private int probabilityExists = 0; // probability that the state exists. used for mocks.
+    private int timesVisited = 0;
 
     public void setSearchRegionForAllImages(Region searchRegion) {
         stateImages.forEach(imageObj -> imageObj.setSearchRegion(searchRegion));
@@ -106,6 +107,10 @@ public class State {
 
     public void resetHidden() {
         hidden = new HashSet<>();
+    }
+
+    public void addVisit() {
+        timesVisited++;
     }
 
     public static class Builder {

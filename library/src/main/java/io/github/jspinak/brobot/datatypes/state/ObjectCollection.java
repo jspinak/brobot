@@ -10,15 +10,13 @@ import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.St
 import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.StateRegion;
 import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.StateString;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
+import io.github.jspinak.brobot.primatives.enums.StateEnum;
 import io.github.jspinak.brobot.reports.Report;
 import lombok.Getter;
 import lombok.Setter;
 import org.sikuli.script.Match;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static io.github.jspinak.brobot.datatypes.primitives.location.Position.Name.TOPLEFT;
@@ -139,6 +137,21 @@ public class ObjectCollection {
             }
         }
         return true;
+    }
+
+    public Set<String> getAllImageFilenames() {
+        Set<String> filenames = new HashSet<>();
+        stateImages.forEach(sI -> filenames.addAll(sI.getImage().getFilenames()));
+        return filenames;
+    }
+
+    public Set<StateEnum> getAllOwnerStates() {
+        Set<StateEnum> states = new HashSet<>();
+        stateImages.forEach(sio -> states.add(sio.getOwnerStateName()));
+        stateLocations.forEach(sio -> states.add(sio.getOwnerStateName()));
+        stateRegions.forEach(sio -> states.add(sio.getOwnerStateName()));
+        stateStrings.forEach(sio -> states.add(sio.getOwnerStateName()));
+        return states;
     }
 
     public static class Builder {
