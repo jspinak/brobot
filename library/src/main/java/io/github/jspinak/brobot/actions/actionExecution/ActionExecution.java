@@ -1,5 +1,6 @@
 package io.github.jspinak.brobot.actions.actionExecution;
 
+import co.elastic.clients.elasticsearch.core.IndexResponse;
 import io.github.jspinak.brobot.actions.actionConfigurations.ExitSequences;
 import io.github.jspinak.brobot.actions.actionConfigurations.Success;
 import io.github.jspinak.brobot.actions.actionExecution.actionLifecycle.ActionLifecycleManagement;
@@ -14,8 +15,15 @@ import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.Sta
 import io.github.jspinak.brobot.illustratedHistory.IllustrateScreenshot;
 import io.github.jspinak.brobot.reports.Output;
 import io.github.jspinak.brobot.reports.Report;
+import io.github.jspinak.brobot.testingAUTs.ActionLogInfo;
+import io.github.jspinak.brobot.testingAUTs.ElasticClient;
+import io.github.jspinak.brobot.testingAUTs.TestRunner;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.time.Duration;
 import java.util.List;
 
@@ -40,10 +48,14 @@ public class ActionExecution {
     private SelectRegions selectRegions;
     private ActionLifecycleManagement actionLifecycleManagement;
     private final DatasetManager datasetManager;
+    private ElasticClient elasticClient;
+
+    private int actionId = 0;
 
     public ActionExecution(Wait wait, Time time, Success success, ExitSequences exitSequences,
                            IllustrateScreenshot illustrateScreenshot, SelectRegions selectRegions,
-                           ActionLifecycleManagement actionLifecycleManagement, DatasetManager datasetManager) {
+                           ActionLifecycleManagement actionLifecycleManagement, DatasetManager datasetManager,
+                           ElasticClient elasticClient) {
         this.wait = wait;
         this.time = time;
         this.success = success;
@@ -52,6 +64,7 @@ public class ActionExecution {
         this.selectRegions = selectRegions;
         this.actionLifecycleManagement = actionLifecycleManagement;
         this.datasetManager = datasetManager;
+        this.elasticClient = elasticClient;
     }
 
     /**
@@ -63,26 +76,29 @@ public class ActionExecution {
      */
     public Matches perform(ActionInterface actionMethod, String actionDescription, ActionOptions actionOptions,
                            ObjectCollection... objectCollections) {
+        actionId++;
         printAction(actionOptions, objectCollections);
         time.setStartTime(actionOptions.getAction());
         //int actionId = actionLifecycleManagement.newActionLifecycle(actionOptions);
         wait.wait(actionOptions.getPauseBeforeBegin());
-
         Matches matches = new Matches();
-        matches.setActionDescription(actionDescription);
         for (int i=0; i<actionOptions.getMaxTimesToRepeatActionSequence(); i++) {
             matches = actionMethod.perform(actionOptions, objectCollections);
             success.set(actionOptions, matches);
             if (exitSequences.okToExit(actionOptions, matches)) break;
         }
+        matches.setActionDescription(actionDescription);
+        matches.setActionOptions(actionOptions);
         illustrateScreenshot.illustrateWhenAllowed(matches,
                 selectRegions.getRegionsForAllImages(actionOptions, objectCollections),
                 actionOptions, objectCollections);
         wait.wait(actionOptions.getPauseAfterEnd());
         //Duration duration = actionLifecycleManagement.getAndSetDuration(actionId);
+        time.setEndTime(actionOptions.getAction());
         matches.setDuration(time.getDuration(actionOptions.getAction()));
         matches.saveSnapshots();
-        String symbol = matches.isSuccess() ? Output.check : Output.fail;
+        elasticClient.indexAction(actionId, matches, actionOptions, objectCollections);
+        String symbol = matches.isSuccess()? Output.check : Output.fail;
         datasetManager.addSetOfData(matches);
         Report.println(actionOptions.getAction() + " " + symbol);
         datasetManager.addSetOfData(matches);

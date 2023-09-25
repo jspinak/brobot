@@ -69,4 +69,8 @@ public class StateService {
         stateRepository.put(state.getName(), state);
     }
 
+    public void resetTimesVisited() {
+        stateRepository.values().forEach(state -> state.setTimesVisited(0));
+    }
+
 }
