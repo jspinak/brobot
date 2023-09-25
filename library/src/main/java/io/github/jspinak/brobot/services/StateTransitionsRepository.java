@@ -1,14 +1,12 @@
 package io.github.jspinak.brobot.services;
 
+import io.github.jspinak.brobot.manageStates.StateTransition;
 import io.github.jspinak.brobot.manageStates.StateTransitions;
 import io.github.jspinak.brobot.manageStates.StateTransitionsJointTable;
 import io.github.jspinak.brobot.primatives.enums.StateEnum;
 import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Manages the StateTransitions repository and retrieves
@@ -37,6 +35,19 @@ public class StateTransitionsRepository {
 
     public Set<StateEnum> getAllStates() {
         return repo.keySet();
+    }
+
+    /**
+     * Returns all StateTransition objects, including ToTransitions.
+     * @return a list of StateTransition objects in the model.
+     */
+    public List<StateTransition> getAllTransitions() {
+        List<StateTransition> allTransitions = new ArrayList<>();
+        repo.values().forEach(trs -> {
+            allTransitions.addAll(trs.getTransitions().values());
+            allTransitions.add(trs.getTransitionFinish());
+        });
+        return allTransitions;
     }
 
 }

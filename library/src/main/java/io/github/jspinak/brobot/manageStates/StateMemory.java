@@ -43,7 +43,10 @@ public class StateMemory {
         Report.print("+ add "+activeState+" to active states ");
         if (newLine) Report.println();
         activeStates.add(activeState);
-        stateService.findByName(activeState).ifPresent(state -> state.setProbabilityExists(100));
+        stateService.findByName(activeState).ifPresent(state -> {
+            state.setProbabilityExists(100);
+            state.addVisit();
+        });
     }
 
     public void removeInactiveStates(Set<StateEnum> inactiveStates) {
