@@ -49,6 +49,16 @@ public class Paths {
         return newPaths;
     }
 
+    public int getBestScore() {
+        if (paths.isEmpty()) return 0;
+        int best = paths.get(0).getScore();
+        for (int i = 1; i<paths.size(); i++) {
+            int newScore = paths.get(i).getScore();
+            if (newScore > best) best = newScore;
+        }
+        return best;
+    }
+
     public void print() {
         if (paths.isEmpty()) return;
         Report.println("_(score)_Paths Found_");
