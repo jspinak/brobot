@@ -1,6 +1,5 @@
 package io.github.jspinak.brobot.testingAUTs;
 
-import org.apache.http.HttpHost;
 import org.elasticsearch.client.Request;
 import org.elasticsearch.client.RestClient;
 import org.springframework.stereotype.Component;
@@ -8,13 +7,16 @@ import org.springframework.stereotype.Component;
 @Component
 public class IndexTemplateCreator {
 
-    public void create() throws Exception {
-        // Create a connection to your Elasticsearch cluster
-        RestClient client = RestClient.builder(new HttpHost("localhost", 9200, "http")).build();
+    private final RestClientConnection restClientConnection;
 
-        try {
-            // Define the index template JSON
-            String indexTemplateJson = """
+    public IndexTemplateCreator(RestClientConnection restClientConnection) {
+        this.restClientConnection = restClientConnection;
+    }
+
+    public void create() throws Exception {
+        RestClient client = restClientConnection.getRestClient(); // Create a connection to the Elasticsearch cluster
+        // Define the index template JSON
+        String indexTemplateJson = """
                 {
                   "index_patterns": ["action-*"],  // Match indices with names starting with "action-"
                   "settings": {
@@ -49,17 +51,13 @@ public class IndexTemplateCreator {
                 }
                 """;
 
-            // Create a PUT request to create the index template
-            Request request = new Request("PUT", "/_template/action_template");
-            request.setJsonEntity(indexTemplateJson);
+        // Create a PUT request to create the index template
+        Request request = new Request("PUT", "/_template/action_template");
+        request.setJsonEntity(indexTemplateJson);
 
-            // Execute the request
-            client.performRequest(request);
+        // Execute the request
+        client.performRequest(request);
 
-            System.out.println("Index template created successfully.");
-        } finally {
-            // Close the Elasticsearch client when done
-            client.close();
-        }
+        System.out.println("Index template created successfully.");
     }
 }
