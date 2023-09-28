@@ -1,6 +1,5 @@
 package io.github.jspinak.brobot.actions.actionExecution;
 
-import co.elastic.clients.elasticsearch.core.IndexResponse;
 import io.github.jspinak.brobot.actions.actionConfigurations.ExitSequences;
 import io.github.jspinak.brobot.actions.actionConfigurations.Success;
 import io.github.jspinak.brobot.actions.actionExecution.actionLifecycle.ActionLifecycleManagement;
@@ -15,16 +14,9 @@ import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.Sta
 import io.github.jspinak.brobot.illustratedHistory.IllustrateScreenshot;
 import io.github.jspinak.brobot.reports.Output;
 import io.github.jspinak.brobot.reports.Report;
-import io.github.jspinak.brobot.testingAUTs.ActionLogInfo;
-import io.github.jspinak.brobot.testingAUTs.ElasticClient;
-import io.github.jspinak.brobot.testingAUTs.TestRunner;
-import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import io.github.jspinak.brobot.testingAUTs.ActionLogSender;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
-import java.time.Duration;
 import java.util.List;
 
 /**
@@ -48,14 +40,14 @@ public class ActionExecution {
     private SelectRegions selectRegions;
     private ActionLifecycleManagement actionLifecycleManagement;
     private final DatasetManager datasetManager;
-    private ElasticClient elasticClient;
+    private ActionLogSender actionLogSender;
 
     private int actionId = 0;
 
     public ActionExecution(Wait wait, Time time, Success success, ExitSequences exitSequences,
                            IllustrateScreenshot illustrateScreenshot, SelectRegions selectRegions,
                            ActionLifecycleManagement actionLifecycleManagement, DatasetManager datasetManager,
-                           ElasticClient elasticClient) {
+                           ActionLogSender actionLogSender) {
         this.wait = wait;
         this.time = time;
         this.success = success;
@@ -64,7 +56,7 @@ public class ActionExecution {
         this.selectRegions = selectRegions;
         this.actionLifecycleManagement = actionLifecycleManagement;
         this.datasetManager = datasetManager;
-        this.elasticClient = elasticClient;
+        this.actionLogSender = actionLogSender;
     }
 
     /**
@@ -97,7 +89,7 @@ public class ActionExecution {
         time.setEndTime(actionOptions.getAction());
         matches.setDuration(time.getDuration(actionOptions.getAction()));
         matches.saveSnapshots();
-        elasticClient.indexAction(actionId, matches, actionOptions, objectCollections);
+        actionLogSender.indexAction(actionId, matches, actionOptions, objectCollections);
         String symbol = matches.isSuccess()? Output.check : Output.fail;
         datasetManager.addSetOfData(matches);
         Report.println(actionOptions.getAction() + " " + symbol);
