@@ -23,9 +23,10 @@ configurations {
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.14'
+    //implementation group: 'org.postgresql', name: 'postgresql', version: '42.6.0'
     implementation 'org.projectlombok:lombok:1.18.28'
-    // for local debugging of SikuliX
-    //implementation files('../../brobot parent directory/SikuliX1/SikuliX1/API/target/sikulixapi-2.1.0-SNAPSHOT.jar')
     implementation('com.sikulix:sikulixapi:2.0.5') {
         exclude group: 'org.slf4j', module: 'slf4j-nop'
     }
@@ -33,7 +34,17 @@ dependencies {
     implementation "org.deeplearning4j:deeplearning4j-core:1.0.0-M1"
     implementation "org.nd4j:nd4j-native-platform:1.0.0-M1"
     implementation 'com.github.kwhat:jnativehook:2.2.2'
-    implementation('com.innoventsolutions.birt.runtime:org.eclipse.birt.runtime_4.8.0-20180626:4.8.0')
+    implementation 'ch.qos.logback:logback-classic:1.4.7'
+    implementation 'net.logstash.logback:logstash-logback-encoder:7.3'
+
+    implementation group: 'org.elasticsearch.gradle', name: 'build-tools', version: '8.10.0'
+    implementation group: 'org.elasticsearch.client', name: 'elasticsearch-rest-client', version: '8.10.0'
+    implementation group: 'org.springframework.data', name: 'spring-data-elasticsearch', version: '5.1.4'
+    implementation 'jakarta.json:jakarta.json-api:2.1.1'
+    implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: '2.15.2'
+    implementation group: 'org.elasticsearch.client', name: 'elasticsearch-rest-high-level-client', version: '8.0.0-alpha2'
+    //compile 'org.elasticsearch.client:elasticsearch-rest-high-level-client:7.17.13'
+    //implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.15.2'
 }
 
 java {
