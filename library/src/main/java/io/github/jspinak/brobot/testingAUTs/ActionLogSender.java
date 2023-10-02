@@ -8,6 +8,8 @@ import io.github.jspinak.brobot.actions.methods.time.Time;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import io.github.jspinak.brobot.reports.Report;
+import io.github.jspinak.brobot.testingAUTs.model.ActionLog;
+import io.github.jspinak.brobot.testingAUTs.service.ActionLogServiceImpl;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -22,24 +24,26 @@ import java.util.List;
 public class ActionLogSender {
     private final RestClientConnection restClientConnection;
     private final Time time;
+    private final ActionLogServiceImpl actionLogService;
 
-    private List<ActionLogInfo> logBuffer = new ArrayList<>(); // Create a buffer to collect ActionLogInfo instances
+    private List<ActionLog> logBuffer = new ArrayList<>(); // Create a buffer to collect ActionLogInfo instances
 
-    public ActionLogSender(RestClientConnection restClientConnection, Time time) {
+    public ActionLogSender(RestClientConnection restClientConnection, Time time, ActionLogServiceImpl actionLogService) {
         this.restClientConnection = restClientConnection;
         this.time = time;
+        this.actionLogService = actionLogService;
     }
 
-    public void indexAction(int actionId, Matches matches, ActionOptions actionOptions,
-                            ObjectCollection... objectCollections) {
-        ActionLogInfo actionLogInfo = new ActionLogInfo(actionId,
+    public void indexAction(Matches matches, ActionOptions actionOptions, ObjectCollection... objectCollections) {
+        ActionLog actionLog = new ActionLog(
                 time.getStartTime(actionOptions.getAction()),
                 time.getEndTime(actionOptions.getAction()),
                 matches, actionOptions, objectCollections);
         // Log the action info to the buffer
-        logBuffer.add(actionLogInfo);
+        //logBuffer.add(actionLog);
+        actionLogService.createActionLog(actionLog);
         // Log the instance to a file or console
-        log.info("Logged ActionLogInfo: {}", actionLogInfo.toJson());
+        log.info("Logged ActionLogInfo: {}", actionLog.toJson());
     }
 
     // Method to send logs to Elasticsearch in batches
@@ -47,13 +51,13 @@ public class ActionLogSender {
         Report.println("send logs");
         if (!logBuffer.isEmpty()) {
             BulkRequest.Builder br = new BulkRequest.Builder();
-            for (ActionLogInfo logInfo : logBuffer) {
+            for (ActionLog logInfo : logBuffer) {
                 String jsonLogInfo = logInfo.toJson();
                 System.out.println(jsonLogInfo); // Print the JSON content
                 br.operations(op -> op
                         .index(idx -> idx
                             .index("actions")
-                            .id(String.valueOf(logInfo.getActionId()))
+                            .id(logInfo.getId())
                             .document(logInfo.toJson()))); // toJson is necessary because of the LocalDateTime field
             }
 
