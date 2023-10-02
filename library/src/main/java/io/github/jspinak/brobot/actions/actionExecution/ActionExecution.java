@@ -62,13 +62,11 @@ public class ActionExecution {
      * @return Matches
      */
     public Matches perform(ActionInterface actionMethod, String actionDescription, ActionOptions actionOptions,
-                           ObjectCollection... objectCollections) {
+                           Matches matches, ObjectCollection... objectCollections) {
         printAction(actionOptions, objectCollections);
         time.setStartTime(actionOptions.getAction());
         //int actionId = actionLifecycleManagement.newActionLifecycle(actionOptions);
         wait.wait(actionOptions.getPauseBeforeBegin());
-
-        Matches matches = new Matches();
         matches.setActionDescription(actionDescription);
         for (int i=0; i<actionOptions.getMaxTimesToRepeatActionSequence(); i++) {
             matches = actionMethod.perform(actionOptions, objectCollections);
@@ -85,7 +83,6 @@ public class ActionExecution {
         String symbol = matches.isSuccess() ? Output.check : Output.fail;
         datasetManager.addSetOfData(matches);
         Report.println(actionOptions.getAction() + " " + symbol);
-        datasetManager.addSetOfData(matches);
         return matches;
     }
 

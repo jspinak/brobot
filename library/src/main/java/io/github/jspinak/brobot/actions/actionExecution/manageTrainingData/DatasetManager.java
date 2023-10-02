@@ -41,19 +41,30 @@ public class DatasetManager {
     }
 
     private boolean isValidAction(ActionOptions actionOptions) {
+        if (actionOptions == null) {
+            System.out.println("ActionOptions is null");
+            return false;
+        }
         return allowed.contains(actionOptions.getAction());
     }
 
     public boolean addSetOfData(Matches matches) {
-        if (!isValidAction(matches.getActionOptions())) return false;
+        if (!isValidAction(matches.getActionOptions())) {
+            System.out.println("action is not valid for dataset");
+            return false;
+        }
         Optional<Mat> optBGR = matches.getSceneAnalysisCollection().getLastSceneBGR();
-        if (optBGR.isEmpty()) return false;
+        if (optBGR.isEmpty()) {
+            System.out.println("a screenshot was not saved for this action");
+            return false;
+        }
         ActionVector actionVector = actionVectorTranslation.toVector(matches);
         String actionText = matches.getActionDescription();
         ArrayList<BufferedImage> screenshots = new ArrayList<>();
         screenshots.add(getBufferedImage.convert(optBGR.get()));
         screenshots.add(getImage.getScreenshot());
         saveTrainingData.addData(actionVector, actionText, screenshots);
+        System.out.println("data saved");
         return true;
     }
 
