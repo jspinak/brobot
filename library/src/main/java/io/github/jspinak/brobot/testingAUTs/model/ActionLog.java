@@ -1,4 +1,4 @@
-package io.github.jspinak.brobot.testingAUTs;
+package io.github.jspinak.brobot.testingAUTs.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -10,15 +10,21 @@ import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import io.github.jspinak.brobot.primatives.enums.StateEnum;
 import lombok.Getter;
+import lombok.Setter;
+import org.springframework.data.elasticsearch.annotations.Document;
 
+import javax.persistence.Id;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
+@Document(indexName = "actionLog")
 @Getter
-public class ActionLogInfo {
+@Setter
+public class ActionLog {
 
-    private int actionId;
+    @Id
+    private String id;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private ActionOptions.Action action;
@@ -27,13 +33,11 @@ public class ActionLogInfo {
     private Set<StateEnum> ownerStates = new HashSet<>(); // states that own the objects used for the action (all objects, not just images)
 
     @JsonCreator
-    public ActionLogInfo(@JsonProperty("actionId") int actionId,
-                         @JsonProperty("startTime") LocalDateTime startTime,
-                         @JsonProperty("endTime") LocalDateTime endTime,
-                         @JsonProperty("matches") Matches matches,
-                         @JsonProperty("actionOptions") ActionOptions actionOptions,
-                         @JsonProperty("objectCollections") ObjectCollection... objectCollections) {
-        this.actionId = actionId;
+    public ActionLog(@JsonProperty("startTime") LocalDateTime startTime,
+                     @JsonProperty("endTime") LocalDateTime endTime,
+                     @JsonProperty("matches") Matches matches,
+                     @JsonProperty("actionOptions") ActionOptions actionOptions,
+                     @JsonProperty("objectCollections") ObjectCollection... objectCollections) {
         this.startTime = startTime;
         this.endTime = endTime;
         this.action = actionOptions.getAction();
