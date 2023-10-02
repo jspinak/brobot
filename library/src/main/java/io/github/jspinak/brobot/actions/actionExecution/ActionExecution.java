@@ -14,6 +14,7 @@ import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.Sta
 import io.github.jspinak.brobot.illustratedHistory.IllustrateScreenshot;
 import io.github.jspinak.brobot.reports.Output;
 import io.github.jspinak.brobot.reports.Report;
+import io.github.jspinak.brobot.testingAUTs.ActionLogSender;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
@@ -40,10 +41,12 @@ public class ActionExecution {
     private SelectRegions selectRegions;
     private ActionLifecycleManagement actionLifecycleManagement;
     private final DatasetManager datasetManager;
+    private ActionLogSender actionLogSender;
 
     public ActionExecution(Wait wait, Time time, Success success, ExitSequences exitSequences,
                            IllustrateScreenshot illustrateScreenshot, SelectRegions selectRegions,
-                           ActionLifecycleManagement actionLifecycleManagement, DatasetManager datasetManager) {
+                           ActionLifecycleManagement actionLifecycleManagement, DatasetManager datasetManager,
+                           ActionLogSender actionLogSender) {
         this.wait = wait;
         this.time = time;
         this.success = success;
@@ -52,6 +55,7 @@ public class ActionExecution {
         this.selectRegions = selectRegions;
         this.actionLifecycleManagement = actionLifecycleManagement;
         this.datasetManager = datasetManager;
+        this.actionLogSender = actionLogSender;
     }
 
     /**
@@ -67,20 +71,23 @@ public class ActionExecution {
         time.setStartTime(actionOptions.getAction());
         //int actionId = actionLifecycleManagement.newActionLifecycle(actionOptions);
         wait.wait(actionOptions.getPauseBeforeBegin());
-        matches.setActionDescription(actionDescription);
         for (int i=0; i<actionOptions.getMaxTimesToRepeatActionSequence(); i++) {
             matches = actionMethod.perform(actionOptions, objectCollections);
             success.set(actionOptions, matches);
             if (exitSequences.okToExit(actionOptions, matches)) break;
         }
+        matches.setActionDescription(actionDescription);
+        matches.setActionOptions(actionOptions);
         illustrateScreenshot.illustrateWhenAllowed(matches,
                 selectRegions.getRegionsForAllImages(actionOptions, objectCollections),
                 actionOptions, objectCollections);
         wait.wait(actionOptions.getPauseAfterEnd());
         //Duration duration = actionLifecycleManagement.getAndSetDuration(actionId);
+        time.setEndTime(actionOptions.getAction());
         matches.setDuration(time.getDuration(actionOptions.getAction()));
         matches.saveSnapshots();
-        String symbol = matches.isSuccess() ? Output.check : Output.fail;
+        actionLogSender.indexAction(matches, actionOptions, objectCollections);
+        String symbol = matches.isSuccess()? Output.check : Output.fail;
         datasetManager.addSetOfData(matches);
         Report.println(actionOptions.getAction() + " " + symbol);
         return matches;
