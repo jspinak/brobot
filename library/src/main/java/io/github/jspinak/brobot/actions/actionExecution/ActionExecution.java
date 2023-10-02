@@ -42,8 +42,6 @@ public class ActionExecution {
     private final DatasetManager datasetManager;
     private ActionLogSender actionLogSender;
 
-    private int actionId = 0;
-
     public ActionExecution(Wait wait, Time time, Success success, ExitSequences exitSequences,
                            IllustrateScreenshot illustrateScreenshot, SelectRegions selectRegions,
                            ActionLifecycleManagement actionLifecycleManagement, DatasetManager datasetManager,
@@ -68,7 +66,6 @@ public class ActionExecution {
      */
     public Matches perform(ActionInterface actionMethod, String actionDescription, ActionOptions actionOptions,
                            ObjectCollection... objectCollections) {
-        actionId++;
         printAction(actionOptions, objectCollections);
         time.setStartTime(actionOptions.getAction());
         //int actionId = actionLifecycleManagement.newActionLifecycle(actionOptions);
@@ -89,7 +86,7 @@ public class ActionExecution {
         time.setEndTime(actionOptions.getAction());
         matches.setDuration(time.getDuration(actionOptions.getAction()));
         matches.saveSnapshots();
-        actionLogSender.indexAction(actionId, matches, actionOptions, objectCollections);
+        actionLogSender.indexAction(matches, actionOptions, objectCollections);
         String symbol = matches.isSuccess()? Output.check : Output.fail;
         datasetManager.addSetOfData(matches);
         Report.println(actionOptions.getAction() + " " + symbol);
