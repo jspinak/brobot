@@ -1,5 +1,6 @@
 package io.github.jspinak.brobot.services;
 
+import io.github.jspinak.brobot.datatypes.state.state.State;
 import io.github.jspinak.brobot.manageStates.StateTransition;
 import io.github.jspinak.brobot.manageStates.StateTransitions;
 import io.github.jspinak.brobot.manageStates.StateTransitionsJointTable;
@@ -13,6 +14,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import static io.github.jspinak.brobot.datatypes.state.NullState.Name.NULL;
+import static io.github.jspinak.brobot.manageStates.StateMemory.Enum.PREVIOUS;
 
 /**
  * Finds the correct Transition from one State to another,
@@ -49,7 +51,7 @@ public class StateTransitionsService {
         if (!stateTransitionsJointTable.getIncomingTransitionsToPREVIOUS().containsKey(to) ||
             !stateTransitionsJointTable.getIncomingTransitionsToPREVIOUS().get(to).contains(from))
             return NULL; // it is not a hidden state transition either
-        return StateMemory.Enum.PREVIOUS; // it is a hidden state transition
+        return PREVIOUS; // it is a hidden state transition
     }
 
     public Optional<StateTransitions> getTransitions(StateEnum stateEnum) {
@@ -61,4 +63,10 @@ public class StateTransitionsService {
         if (transitions.isEmpty()) return Optional.empty();
         return transitions.get().getStateTransition(toState);
     }
+
+    public void resetTimesSuccessful() {
+        stateTransitionsRepository.getAllTransitions().forEach(transition ->
+                transition.setTimesSuccessful(0));
+    }
+
 }

@@ -37,8 +37,8 @@ public class PathFinder {
         pathList = new ArrayList<>();
         recursePath(new Path(), targetState);
         if (pathList.isEmpty()) Report.println(Output.fail + "Path to state not found.");
-        pathList.sort(Comparator.comparing(Path::getScore));
         Paths paths = new Paths(pathList);
+        paths.sort();
         paths.print();
         return paths;
     }
