@@ -43,8 +43,11 @@ public class Time {
      * The startTime field is used for miscellaneous operations and is set by the user.
      */
     private Map<ActionOptions.Action, LocalDateTime> startTimes = new HashMap<>();
-    private LocalDateTime findStartTime = LocalDateTime.now();
+    private LocalDateTime findStartTime = LocalDateTime.now(); // for FIND action
     private LocalDateTime startTime = LocalDateTime.now(); // when not using Actions
+    private Map<ActionOptions.Action, LocalDateTime> endTimes = new HashMap<>();
+    private LocalDateTime findEndTime; // for FIND action
+    private LocalDateTime endTime; // when not using Actions
 
     public Time(TimeWrapper timeWrapper) {
         this.timeWrapper = timeWrapper;
@@ -52,6 +55,10 @@ public class Time {
 
     public void setStartTime(ActionOptions.Action action) {
         startTimes.put(action, timeWrapper.now());
+    }
+
+    public void setEndTime(ActionOptions.Action action) {
+        endTimes.put(action, timeWrapper.now());
     }
 
     public void setFindStartTime() {
@@ -79,15 +86,26 @@ public class Time {
     }
 
     public Duration getDuration(ActionOptions.Action action) {
-        return Duration.between(startTimes.get(action), timeWrapper.now());
+        if (!endTimes.containsKey(action) || endTimes.get(action) == null)
+            return Duration.between(startTimes.get(action), timeWrapper.now());
+        return Duration.between(startTimes.get(action), endTimes.get(action));
     }
 
     public Duration getDuration() {
-        return Duration.between(startTime, timeWrapper.now());
+        if (endTime == null) return Duration.between(startTime, timeWrapper.now());
+        return Duration.between(startTime, endTime);
     }
 
     public void printNow() {
         timeWrapper.printNow();
+    }
+
+    public LocalDateTime getStartTime(ActionOptions.Action action) {
+        return startTimes.get(action);
+    }
+
+    public LocalDateTime getEndTime(ActionOptions.Action action) {
+        return endTimes.get(action);
     }
 
 }
