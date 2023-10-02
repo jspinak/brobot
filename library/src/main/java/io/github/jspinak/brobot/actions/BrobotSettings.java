@@ -105,4 +105,9 @@ public class BrobotSettings {
      */
     public static boolean buildDataset = false;
     public static String datasetPath = "dataset/";
+
+    /**
+     * AUT Testing
+     */
+    public static int testIteration = 1;
 }
