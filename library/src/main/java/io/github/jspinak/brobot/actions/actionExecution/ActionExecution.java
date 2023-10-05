@@ -14,10 +14,9 @@ import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.Sta
 import io.github.jspinak.brobot.illustratedHistory.IllustrateScreenshot;
 import io.github.jspinak.brobot.reports.Output;
 import io.github.jspinak.brobot.reports.Report;
-import io.github.jspinak.brobot.testingAUTs.ActionLogSender;
+import io.github.jspinak.brobot.testingAUTs.zFridge.ActionLogSender;
 import org.springframework.stereotype.Component;
 
-import java.time.Duration;
 import java.util.List;
 
 /**
@@ -86,9 +85,9 @@ public class ActionExecution {
         time.setEndTime(actionOptions.getAction());
         matches.setDuration(time.getDuration(actionOptions.getAction()));
         matches.saveSnapshots();
-        actionLogSender.indexAction(matches, actionOptions, objectCollections);
+        actionLogSender.indexAction(matches, actionOptions, objectCollections); // to send to elasticsearch for testing AUTs
         String symbol = matches.isSuccess()? Output.check : Output.fail;
-        datasetManager.addSetOfData(matches);
+        datasetManager.addSetOfData(matches); // for the neural net training dataset
         Report.println(actionOptions.getAction() + " " + symbol);
         return matches;
     }
