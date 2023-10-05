@@ -1,4 +1,4 @@
-package io.github.jspinak.brobot.testingAUTs;
+package io.github.jspinak.brobot.testingAUTs.zFridge;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.json.jackson.JacksonJsonpMapper;
@@ -10,7 +10,6 @@ import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.ssl.SSLContexts;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestClientBuilder;
-import org.elasticsearch.client.RestHighLevelClient;
 import org.springframework.stereotype.Component;
 
 import javax.net.ssl.SSLContext;

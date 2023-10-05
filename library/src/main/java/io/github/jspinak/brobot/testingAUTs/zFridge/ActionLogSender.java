@@ -1,4 +1,4 @@
-package io.github.jspinak.brobot.testingAUTs;
+package io.github.jspinak.brobot.testingAUTs.zFridge;
 
 import co.elastic.clients.elasticsearch.core.BulkRequest;
 import co.elastic.clients.elasticsearch.core.BulkResponse;
