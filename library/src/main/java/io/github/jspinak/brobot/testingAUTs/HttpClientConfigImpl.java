@@ -8,6 +8,7 @@ import org.apache.http.impl.nio.client.HttpAsyncClientBuilder;
 import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.http.ssl.SSLContexts;
 import org.elasticsearch.client.RestClientBuilder;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
 import javax.net.ssl.SSLContext;
@@ -15,6 +16,9 @@ import java.io.File;
 
 @Configuration
 public class HttpClientConfigImpl implements RestClientBuilder.HttpClientConfigCallback {
+    @Value("${elasticsearch.truststore.location}") // Assuming this property exists in your application.properties or application.yml
+    private String trustStoreLocation;
+
     @Override
     public HttpAsyncClientBuilder customizeHttpClient(HttpAsyncClientBuilder httpClientBuilder) {
         String elasticUsername = System.getProperty("elastic.username");
@@ -24,13 +28,9 @@ public class HttpClientConfigImpl implements RestClientBuilder.HttpClientConfigC
             UsernamePasswordCredentials usernamePasswordCredentials = new UsernamePasswordCredentials(elasticUsername, elasticPassword);
             credentialsProvider.setCredentials(AuthScope.ANY, usernamePasswordCredentials);
             httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider);
-            String trustStoreLocation = "/tmp/ca.crt";
-            File trustStoreLocationFile = new File(trustStoreLocation);
-            SSLContext sslContext = SSLContexts.custom()
-                    .loadTrustMaterial(trustStoreLocationFile, null) // No trust store password
-                    .build();
-            //SSLContextBuilder sslContextBuilder = SSLContexts.custom().loadTrustMaterial(trustStoreLocationFile, "password".toCharArray());
-            //SSLContext sslContext = sslContextBuilder.build();
+            File trustStoreLocationFile = new File("C:\\tmp\\truststore.p12");
+            SSLContextBuilder sslContextBuilder = SSLContexts.custom().loadTrustMaterial(trustStoreLocationFile, "password".toCharArray());
+            SSLContext sslContext = sslContextBuilder.build();
             httpClientBuilder.setSSLContext(sslContext);
         } catch (Exception e) {
             e.printStackTrace();
