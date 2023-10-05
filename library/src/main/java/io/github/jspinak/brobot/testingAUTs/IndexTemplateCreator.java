@@ -1,5 +1,6 @@
 package io.github.jspinak.brobot.testingAUTs;
 
+import io.github.jspinak.brobot.testingAUTs.zFridge.RestClientConnection;
 import org.elasticsearch.client.Request;
 import org.elasticsearch.client.RestClient;
 import org.springframework.stereotype.Component;
