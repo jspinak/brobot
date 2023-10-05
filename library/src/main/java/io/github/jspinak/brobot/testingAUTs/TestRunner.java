@@ -3,6 +3,7 @@ package io.github.jspinak.brobot.testingAUTs;
 import io.github.jspinak.brobot.manageStates.StateMemory;
 import io.github.jspinak.brobot.manageStates.StateTransitionsManagement;
 import io.github.jspinak.brobot.primatives.enums.StateEnum;
+import io.github.jspinak.brobot.testingAUTs.zFridge.DataSender;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
