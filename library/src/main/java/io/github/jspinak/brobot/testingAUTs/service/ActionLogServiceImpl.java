@@ -2,6 +2,8 @@ package io.github.jspinak.brobot.testingAUTs.service;
 
 import io.github.jspinak.brobot.testingAUTs.model.ActionLog;
 import io.github.jspinak.brobot.testingAUTs.repository.ActionLogRepo;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -10,11 +12,8 @@ import java.util.Optional;
 @Service
 public class ActionLogServiceImpl implements ActionLogService {
 
-    private final ActionLogRepo actionLogRepo;
-
-    public ActionLogServiceImpl(ActionLogRepo actionLogRepo) {
-        this.actionLogRepo = actionLogRepo;
-    }
+    @Autowired
+    private ActionLogRepo actionLogRepo;
 
     @Override
     public ActionLog createActionLog(ActionLog actionLog) {

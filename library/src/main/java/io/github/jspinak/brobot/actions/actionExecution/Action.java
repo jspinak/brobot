@@ -40,14 +40,14 @@ public class Action {
     public Matches perform(String actionDescription, ActionOptions actionOptions, ObjectCollection... objectCollections) {
         for (ObjectCollection objColl : objectCollections) objColl.resetTimesActedOn();
         Optional<ActionInterface> action = actionService.getAction(actionOptions);
+        Matches matches = new Matches();
+        matches.setActionDescription(actionDescription);
+        matches.setActionOptions(actionOptions);
         if (action.isEmpty()) {
             Report.println("Not a valid Action.");
-            Matches matches = new Matches();
-            matches.setActionDescription(actionDescription);
-            matches.setActionOptions(actionOptions);
             return matches;
         }
-        return actionExecution.perform(action.get(), actionDescription, actionOptions, objectCollections);
+        return actionExecution.perform(action.get(), actionDescription, actionOptions, matches, objectCollections);
     }
 
     /**
