@@ -97,7 +97,7 @@ public class BrobotSettings {
      * AI Settings
      */
     /*
-    This will save
+    Setting buildDataset to true will save
     - the 'before' screenshot
     - the action as a vector
     - a text description of the action

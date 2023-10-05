@@ -14,7 +14,7 @@ import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.Sta
 import io.github.jspinak.brobot.illustratedHistory.IllustrateScreenshot;
 import io.github.jspinak.brobot.reports.Output;
 import io.github.jspinak.brobot.reports.Report;
-import io.github.jspinak.brobot.testingAUTs.ActionLogSender;
+import io.github.jspinak.brobot.testingAUTs.zFridge.ActionLogSender;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -65,12 +65,11 @@ public class ActionExecution {
      * @return Matches
      */
     public Matches perform(ActionInterface actionMethod, String actionDescription, ActionOptions actionOptions,
-                           ObjectCollection... objectCollections) {
+                           Matches matches, ObjectCollection... objectCollections) {
         printAction(actionOptions, objectCollections);
         time.setStartTime(actionOptions.getAction());
         //int actionId = actionLifecycleManagement.newActionLifecycle(actionOptions);
         wait.wait(actionOptions.getPauseBeforeBegin());
-        Matches matches = new Matches();
         for (int i=0; i<actionOptions.getMaxTimesToRepeatActionSequence(); i++) {
             matches = actionMethod.perform(actionOptions, objectCollections);
             success.set(actionOptions, matches);
@@ -86,11 +85,10 @@ public class ActionExecution {
         time.setEndTime(actionOptions.getAction());
         matches.setDuration(time.getDuration(actionOptions.getAction()));
         matches.saveSnapshots();
-        actionLogSender.indexAction(matches, actionOptions, objectCollections);
+        actionLogSender.indexAction(matches, actionOptions, objectCollections); // to send to elasticsearch for testing AUTs
         String symbol = matches.isSuccess()? Output.check : Output.fail;
-        datasetManager.addSetOfData(matches);
+        datasetManager.addSetOfData(matches); // for the neural net training dataset
         Report.println(actionOptions.getAction() + " " + symbol);
-        datasetManager.addSetOfData(matches);
         return matches;
     }
 
