@@ -1,21 +1,13 @@
 package io.github.jspinak.brobot.testingAUTs;
 
-import io.github.jspinak.brobot.testingAUTs.zFridge.RestClientConnection;
 import org.elasticsearch.client.Request;
-import org.elasticsearch.client.RestClient;
 import org.springframework.stereotype.Component;
 
 @Component
 public class IndexTemplateCreator {
 
-    private final RestClientConnection restClientConnection;
-
-    public IndexTemplateCreator(RestClientConnection restClientConnection) {
-        this.restClientConnection = restClientConnection;
-    }
-
     public void create() throws Exception {
-        RestClient client = restClientConnection.getRestClient(); // Create a connection to the Elasticsearch cluster
+        //RestClient client = elasticsearchClient.getRestClient(); // Create a connection to the Elasticsearch cluster
         // Define the index template JSON
         String indexTemplateJson = """
                 {
@@ -57,7 +49,7 @@ public class IndexTemplateCreator {
         request.setJsonEntity(indexTemplateJson);
 
         // Execute the request
-        client.performRequest(request);
+        //client.performRequest(request);
 
         System.out.println("Index template created successfully.");
     }
