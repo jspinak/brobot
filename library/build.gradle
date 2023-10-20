@@ -21,12 +21,10 @@ configurations {
 }
 
 dependencies {
-    implementation 'org.apache.httpcomponents:httpclient:4.5.14'
     implementation('com.sikulix:sikulixapi:2.0.5') {
         exclude group: 'org.slf4j', module: 'slf4j-nop'
     }
-    implementation 'ch.qos.logback:logback-classic' //:1.4.7'
-    implementation 'net.logstash.logback:logstash-logback-encoder:7.4'
+    implementation 'ch.qos.logback:logback-classic'
 
     implementation 'com.squareup:javapoet:1.9.0'
     implementation "org.deeplearning4j:deeplearning4j-core:1.0.0-M1"
