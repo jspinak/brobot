@@ -1,4 +1,4 @@
-package io.github.jspinak.brobot.testingAUTs;
+package io.github.jspinak.brobot.testingAUTs.configuration;
 
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -16,23 +16,27 @@ import java.io.File;
 
 @Configuration
 public class HttpClientConfigImpl implements RestClientBuilder.HttpClientConfigCallback {
-    @Value("${elasticsearch.truststore.location}") // Assuming this property exists in your application.properties or application.yml
-    private String trustStoreLocation;
+    //@Value("${elasticsearch.truststore.location}") // Assuming this property exists in your application.properties or application.yml
+    //private String trustStoreLocation;
 
     @Override
     public HttpAsyncClientBuilder customizeHttpClient(HttpAsyncClientBuilder httpClientBuilder) {
-        String elasticUsername = System.getProperty("elastic.username");
-        String elasticPassword = System.getProperty("elastic.password");
+        //String elasticUsername = System.getProperty("elastic.username");
+        //String elasticPassword = System.getProperty("elastic.password");
+        //String truststoreLocation = System.getProperty("spring.elasticsearch.rest.ssl.trust-store-location");
+        //String truststorePassword = System.getProperty("spring.elasticsearch.rest.ssl.trust-store-password");
         try {
             final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
-            UsernamePasswordCredentials usernamePasswordCredentials = new UsernamePasswordCredentials(elasticUsername, elasticPassword);
+            UsernamePasswordCredentials usernamePasswordCredentials = new UsernamePasswordCredentials("elastic", "q6MXQ2zTW7Abf_LS7f_W");
             credentialsProvider.setCredentials(AuthScope.ANY, usernamePasswordCredentials);
             httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider);
-            File trustStoreLocationFile = new File("C:\\tmp\\truststore.p12");
+            String trustStoreLocation = "C:\\Users\\jspin\\Documents\\brobot_parent\\elasticsearch\\certs\\truststore.p12";
+            File trustStoreLocationFile = new File(trustStoreLocation);
             SSLContextBuilder sslContextBuilder = SSLContexts.custom().loadTrustMaterial(trustStoreLocationFile, "password".toCharArray());
             SSLContext sslContext = sslContextBuilder.build();
             httpClientBuilder.setSSLContext(sslContext);
         } catch (Exception e) {
+            System.out.println("connection failed");
             e.printStackTrace();
         }
         return httpClientBuilder;

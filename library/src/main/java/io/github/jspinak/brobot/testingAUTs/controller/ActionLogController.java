@@ -1,5 +1,5 @@
 package io.github.jspinak.brobot.testingAUTs.controller;
-
+/*
 import io.github.jspinak.brobot.testingAUTs.service.ActionLogServiceImpl;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -15,3 +15,6 @@ public class ActionLogController {
     }
 
 }
+
+
+ */

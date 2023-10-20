@@ -1,7 +1,5 @@
 package io.github.jspinak.brobot.testingAUTs.model;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -11,14 +9,14 @@ import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import io.github.jspinak.brobot.primatives.enums.StateEnum;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
 
-import javax.persistence.Id;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
-@Document(indexName = "actionLog")
+@Document(indexName = "actionlog")
 @Getter
 @Setter
 public class ActionLog {
@@ -32,12 +30,11 @@ public class ActionLog {
     private Set<String> images = new HashSet<>();
     private Set<StateEnum> ownerStates = new HashSet<>(); // states that own the objects used for the action (all objects, not just images)
 
-    @JsonCreator
-    public ActionLog(@JsonProperty("startTime") LocalDateTime startTime,
-                     @JsonProperty("endTime") LocalDateTime endTime,
-                     @JsonProperty("matches") Matches matches,
-                     @JsonProperty("actionOptions") ActionOptions actionOptions,
-                     @JsonProperty("objectCollections") ObjectCollection... objectCollections) {
+    public ActionLog(LocalDateTime startTime,
+                     LocalDateTime endTime,
+                     Matches matches,
+                     ActionOptions actionOptions,
+                     ObjectCollection... objectCollections) {
         this.startTime = startTime;
         this.endTime = endTime;
         this.action = actionOptions.getAction();

@@ -1,4 +1,4 @@
-package io.github.jspinak.brobot.testingAUTs;
+package io.github.jspinak.brobot.testingAUTs.configuration;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.json.jackson.JacksonJsonpMapper;
