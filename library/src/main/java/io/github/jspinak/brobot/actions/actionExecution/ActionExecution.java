@@ -14,9 +14,9 @@ import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.Sta
 import io.github.jspinak.brobot.illustratedHistory.IllustrateScreenshot;
 import io.github.jspinak.brobot.reports.Output;
 import io.github.jspinak.brobot.reports.Report;
-import io.github.jspinak.brobot.testingAUTs.model.ActionLog;
-import io.github.jspinak.brobot.testingAUTs.service.ActionLogService;
-//import io.github.jspinak.brobot.testingAUTs.service.ActionLogServiceImpl;
+import io.github.jspinak.brobot.testingAUTs.ActionLog;
+import io.github.jspinak.brobot.testingAUTs.ActionLogCreator;
+import io.github.jspinak.brobot.testingAUTs.ActionLogSender;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -44,12 +44,13 @@ public class ActionExecution {
     private SelectRegions selectRegions;
     private ActionLifecycleManagement actionLifecycleManagement;
     private final DatasetManager datasetManager;
-    //private final ActionLogService actionLogService;
+    private final ActionLogCreator actionLogCreator;
+    private final ActionLogSender actionLogSender;
 
     public ActionExecution(Wait wait, Time time, Success success, ExitSequences exitSequences,
                            IllustrateScreenshot illustrateScreenshot, SelectRegions selectRegions,
-                           ActionLifecycleManagement actionLifecycleManagement, DatasetManager datasetManager) {//,
-                           //ActionLogServiceImpl actionLogService) {
+                           ActionLifecycleManagement actionLifecycleManagement, DatasetManager datasetManager,
+                           ActionLogCreator actionLogCreator, ActionLogSender actionLogSender) {
         this.wait = wait;
         this.time = time;
         this.success = success;
@@ -58,7 +59,8 @@ public class ActionExecution {
         this.selectRegions = selectRegions;
         this.actionLifecycleManagement = actionLifecycleManagement;
         this.datasetManager = datasetManager;
-        //this.actionLogService = actionLogService;
+        this.actionLogCreator = actionLogCreator;
+        this.actionLogSender = actionLogSender;
     }
 
     /**
@@ -89,14 +91,14 @@ public class ActionExecution {
         time.setEndTime(actionOptions.getAction());
         matches.setDuration(time.getDuration(actionOptions.getAction()));
         matches.saveSnapshots();
-        ActionLog actionLog = new ActionLog(
-                time.getStartTime(actionOptions.getAction()),
-                time.getEndTime(actionOptions.getAction()),
+        ActionLog actionLog = actionLogCreator.create(
+                //time.getStartTime(actionOptions.getAction()),
+                //time.getEndTime(actionOptions.getAction()),
                 matches, actionOptions, objectCollections);
-       // actionLogService.createActionLog(actionLog); // to send to elasticsearch for testing AUTs
+        actionLogSender.sendActionLogToElastic(actionLog);
         String symbol = matches.isSuccess()? Output.check : Output.fail;
         datasetManager.addSetOfData(matches); // for the neural net training dataset
-        log.info("Logged ActionLogInfo: {}", actionLog.toJson());
+        //log.info("Logged ActionLogInfo: {}", actionLog.toJson());
         Report.println(actionOptions.getAction() + " " + symbol);
         return matches;
     }
