@@ -41,6 +41,7 @@ public class UnvisitedStates {
             int score = paths.getBestScore();
             if (score > 0) unvisitedDistance.put(score, state);
         });
+        if (unvisitedDistance.isEmpty()) return Optional.empty();
         return Optional.ofNullable(unvisitedDistance.firstEntry().getValue());
     }
 
