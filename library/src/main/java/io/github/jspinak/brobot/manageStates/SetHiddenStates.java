@@ -29,11 +29,11 @@ public class SetHiddenStates {
      * @param stateToSet the State to add to the list of active States.
      * @return true when the stateToSet is a valid State
      */
-    public boolean set(StateEnum stateToSet) {
+    public boolean set(String stateToSet) {
         Optional<State> optStateToSet = stateService.findByName(stateToSet);
         if (optStateToSet.isEmpty()) return false;
         State state = optStateToSet.get();
-        for (StateEnum activeState : new ArrayList<>(stateMemory.getActiveStates())) {
+        for (String activeState : new ArrayList<>(stateMemory.getActiveStates())) {
             if (state.getCanHide().contains(activeState)) {
                 state.addHiddenState(activeState);
                 stateMemory.removeInactiveState(activeState);

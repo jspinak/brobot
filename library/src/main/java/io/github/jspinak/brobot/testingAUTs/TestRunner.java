@@ -2,7 +2,6 @@ package io.github.jspinak.brobot.testingAUTs;
 
 import io.github.jspinak.brobot.manageStates.StateMemory;
 import io.github.jspinak.brobot.manageStates.StateTransitionsManagement;
-import io.github.jspinak.brobot.primatives.enums.StateEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -29,10 +28,9 @@ public class TestRunner {
     /*
     basic implementation for testing communication with the backend application
      */
-    public void runTest(StateEnum destination) {
+    public void runTest(String destination) {
         LocalDateTime startTime = LocalDateTime.now();
-        TestRun testRun = new TestRun("test", startTime,
-                stateMemory.getActiveStates());
+        TestRun testRun = new TestRun("test", startTime, stateMemory.getActiveStates());
         Logger logger = LoggerFactory.getLogger(TestRunner.class);
         logger.info("Test started at" + startTime);
         recordScreen.startRecording("recording/test.mp4", 10000000);

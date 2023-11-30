@@ -110,4 +110,5 @@ public class BrobotSettings {
      * AUT Testing
      */
     public static int testIteration = 1;
+    public static boolean sendLogsToElasticContainer = false;
 }

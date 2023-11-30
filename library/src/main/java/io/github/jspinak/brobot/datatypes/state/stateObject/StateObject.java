@@ -14,7 +14,7 @@ import io.github.jspinak.brobot.primatives.enums.StateEnum;
 public interface StateObject {
 
     String getName();
-    StateEnum getOwnerStateName();
+    String getOwnerStateName();
     Position getPosition();
     Anchors getAnchors();
     int getTimesActedOn(); // times per action. resets to 0 when action is complete.

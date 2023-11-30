@@ -1,7 +1,6 @@
 package io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects;
 
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
-import io.github.jspinak.brobot.primatives.enums.StateEnum;
 import lombok.Data;
 
 import static io.github.jspinak.brobot.datatypes.state.NullState.Name.NULL;
@@ -16,7 +15,7 @@ public class StateString {
 
     private String name;
     private Region searchRegion; // sometimes we need to hover over or click on a region before typing the string
-    private StateEnum ownerStateName;
+    private String ownerStateName;
     private int timesActedOn = 0;
 
     private String string;
@@ -30,7 +29,7 @@ public class StateString {
     public static class InNullState {
         public StateString withString(String string) {
             StateString stateString = new StateString(string);
-            stateString.ownerStateName = NULL;
+            stateString.ownerStateName = NULL.toString();
             return stateString;
         }
     }
@@ -42,7 +41,7 @@ public class StateString {
     public static class Builder {
         private String name;
         private Region searchRegion;
-        private StateEnum ownerStateName;
+        private String ownerStateName;
         private String string;
 
         public Builder called(String name) {
@@ -55,7 +54,7 @@ public class StateString {
             return this;
         }
 
-        public Builder inState(StateEnum stateName) {
+        public Builder inState(String stateName) {
             this.ownerStateName = stateName;
             return this;
         }

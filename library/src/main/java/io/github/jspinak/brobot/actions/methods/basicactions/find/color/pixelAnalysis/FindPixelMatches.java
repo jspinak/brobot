@@ -54,7 +54,7 @@ public class FindPixelMatches {
                 .setMaxArea(actionOptions.getMaxArea())
                 .build();
         List<Match> matchList = contours.getMatches();
-        if (contours.getContours().size() > 0) showScoring(contours, sceneAnalysis);
+        if (!contours.getContours().isEmpty()) showScoring(contours, sceneAnalysis);
         Matches matches = new Matches();
         sceneAnalysis.setContours(contours);
         matchOps.addMatchListToMatches(matchList, matches, sceneAnalysis.getStateImageObjects().get(0), actionOptions); //the matches will not have the correct StateImageObject if there is more than one

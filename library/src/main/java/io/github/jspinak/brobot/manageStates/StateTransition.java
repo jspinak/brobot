@@ -18,6 +18,7 @@ import java.util.function.BooleanSupplier;
 @Setter
 public class StateTransition {
 
+    // when set to NONE, the StaysVisible variable in the corresponding StateTransitions object will be used.
     public enum StaysVisible {
         NONE, TRUE, FALSE
     }
@@ -28,8 +29,8 @@ public class StateTransition {
      * Only applies to FromTransitions.
      */
     private StaysVisible staysVisibleAfterTransition;
-    private Set<StateEnum> activate;
-    private Set<StateEnum> exit;
+    private Set<String> activate;
+    private Set<String> exit;
     private int pathScore = 0; // larger path scores discourage taking a path with this transition
     private int timesSuccessful = 0;
 
@@ -40,8 +41,8 @@ public class StateTransition {
     public static class Builder {
         private BooleanSupplier transitionFunction = () -> false;
         private StaysVisible staysVisibleAfterTransition = StaysVisible.NONE;
-        private Set<StateEnum> activate = new HashSet<>();
-        private Set<StateEnum> exit = new HashSet<>();
+        private Set<String> activate = new HashSet<>();
+        private Set<String> exit = new HashSet<>();
 
         public Builder setFunction(BooleanSupplier booleanSupplier) {
             this.transitionFunction = booleanSupplier;
@@ -53,13 +54,19 @@ public class StateTransition {
             return this;
         }
 
-        public Builder addToActivate(StateEnum... stateEnums) {
-            this.activate.addAll(List.of(stateEnums));
+        public Builder setStaysVisibleAfterTransition(boolean staysVisibleAfterTransition) {
+            if (staysVisibleAfterTransition) this.staysVisibleAfterTransition = StaysVisible.TRUE;
+            else this.staysVisibleAfterTransition = StaysVisible.FALSE;
             return this;
         }
 
-        public Builder addToExit(StateEnum... stateEnums) {
-            this.exit.addAll(List.of(stateEnums));
+        public Builder addToActivate(String... stateNames) {
+            this.activate.addAll(List.of(stateNames));
+            return this;
+        }
+
+        public Builder addToExit(String... stateNames) {
+            this.exit.addAll(List.of(stateNames));
             return this;
         }
 

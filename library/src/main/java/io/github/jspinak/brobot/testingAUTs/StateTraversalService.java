@@ -3,7 +3,6 @@ package io.github.jspinak.brobot.testingAUTs;
 import io.github.jspinak.brobot.datatypes.state.state.State;
 import io.github.jspinak.brobot.manageStates.AdjacentStates;
 import io.github.jspinak.brobot.manageStates.StateTransitionsManagement;
-import io.github.jspinak.brobot.primatives.enums.StateEnum;
 import io.github.jspinak.brobot.services.StateService;
 import org.springframework.stereotype.Component;
 
@@ -31,9 +30,9 @@ public class StateTraversalService {
      * are available, it returns unvisited states that are farther away.
      * @return states to visit
      */
-    public Set<StateEnum> getAdjacentUnvisited() {
-        Set<StateEnum> adjacentUnvisited = new HashSet<>();
-        Set<StateEnum> adjacent = adjacentStates.getAdjacentStates();
+    public Set<String> getAdjacentUnvisited() {
+        Set<String> adjacentUnvisited = new HashSet<>();
+        Set<String> adjacent = adjacentStates.getAdjacentStates();
         adjacent.forEach(stateName -> {
             Optional<State> stateOpt = stateService.findByName(stateName);
             stateOpt.ifPresent(state -> {
@@ -44,15 +43,15 @@ public class StateTraversalService {
     }
 
     public void traverseAllStates() {
-        Optional<StateEnum> closestUnvisitedState = getNextState();
+        Optional<String> closestUnvisitedState = getNextState();
         while (closestUnvisitedState.isPresent()) {
             stateTransitionsManagement.openState(closestUnvisitedState.get());
             closestUnvisitedState = getNextState();
         }
     }
 
-    private Optional<StateEnum> getNextState() {
-        Optional<StateEnum> closestUnvisitedState = getAdjacentUnvisited().stream().findFirst();
+    private Optional<String> getNextState() {
+        Optional<String> closestUnvisitedState = getAdjacentUnvisited().stream().findFirst();
         if (closestUnvisitedState.isPresent()) return closestUnvisitedState;
         return unvisitedStates.getClosestUnvisited();
     }

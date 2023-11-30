@@ -1,7 +1,6 @@
 package io.github.jspinak.brobot.manageStates;
 
 import io.github.jspinak.brobot.datatypes.state.state.State;
-import io.github.jspinak.brobot.primatives.enums.StateEnum;
 import io.github.jspinak.brobot.services.StateService;
 import org.springframework.stereotype.Component;
 
@@ -25,8 +24,8 @@ public class PathManager {
 
     public void updateScore(Path path) {
         int score = 0;
-        for (StateEnum stateEnum : path.getStates()) {
-            Optional<State> optState = stateService.findByName(stateEnum);
+        for (String stateName : path.getStates()) {
+            Optional<State> optState = stateService.findByName(stateName);
             if (optState.isPresent()) score += optState.get().getPathScore();
         }
         path.setScore(score);
@@ -37,7 +36,7 @@ public class PathManager {
         paths.sort();
     }
 
-    public Paths getCleanPaths(Set<StateEnum> activeStates, Paths paths, StateEnum failedTransitionStart) {
+    public Paths getCleanPaths(Set<String> activeStates, Paths paths, String failedTransitionStart) {
         Paths cleanPaths = paths.cleanPaths(activeStates, failedTransitionStart);
         updateScores(cleanPaths);
         return cleanPaths;
