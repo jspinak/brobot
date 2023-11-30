@@ -23,7 +23,7 @@ public class StateMemory {
         PREVIOUS, CURRENT, EXPECTED
     }
 
-    private Set<StateEnum> activeStates = new HashSet<>();
+    private Set<String> activeStates = new HashSet<>();
 
     public StateMemory(StateService stateService) {
         this.stateService = stateService;
@@ -34,11 +34,11 @@ public class StateMemory {
                 mO -> addActiveState(mO.getStateObject().getOwnerStateName()));
     }
 
-    public void addActiveState(StateEnum activeState) {
+    public void addActiveState(String activeState) {
         addActiveState(activeState, false);
     }
 
-    public void addActiveState(StateEnum activeState, boolean newLine) {
+    public void addActiveState(String activeState, boolean newLine) {
         if (activeStates.contains(activeState)) return;
         Report.print("+ add "+activeState+" to active states ");
         if (newLine) Report.println();
@@ -49,15 +49,19 @@ public class StateMemory {
         });
     }
 
-    public void removeInactiveStates(Set<StateEnum> inactiveStates) {
+    public void removeInactiveStates(Set<String> inactiveStates) {
         inactiveStates.forEach(this::removeInactiveState);
     }
 
-    public void removeInactiveState(StateEnum inactiveState) {
+    public void removeInactiveState(String inactiveState) {
         if (!activeStates.contains(inactiveState)) return;
         Report.println("- remove "+inactiveState+" from active states");
         activeStates.remove(inactiveState);
         stateService.findByName(inactiveState).ifPresent(state -> state.setProbabilityExists(0));
+    }
+
+    public void removeAllStates() {
+        activeStates = new HashSet<>();
     }
 
 }

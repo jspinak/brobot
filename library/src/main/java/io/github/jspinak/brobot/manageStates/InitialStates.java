@@ -2,7 +2,6 @@ package io.github.jspinak.brobot.manageStates;
 
 import io.github.jspinak.brobot.actions.BrobotSettings;
 import io.github.jspinak.brobot.datatypes.state.state.State;
-import io.github.jspinak.brobot.primatives.enums.StateEnum;
 import io.github.jspinak.brobot.reports.Report;
 import io.github.jspinak.brobot.services.StateService;
 import org.springframework.stereotype.Component;
@@ -30,7 +29,7 @@ public class InitialStates {
     as it will be used to rescale the individual probabilities when choosing an
     initial State.
      */
-    private Map<Set<StateEnum>, Integer> potentialActiveStates = new HashMap<>();
+    private Map<Set<String>, Integer> potentialActiveStates = new HashMap<>();
 
     public InitialStates(StateFinder stateFinder, StateMemory stateMemory, StateService stateService) {
         this.stateFinder = stateFinder;
@@ -38,10 +37,10 @@ public class InitialStates {
         this.stateService = stateService;
     }
 
-    public void addStateSet(int probability, StateEnum... stateEnums) {
+    public void addStateSet(int probability, String... stateNames) {
         if (probability <= 0) return;
         sumOfProbabilities += probability;
-        potentialActiveStates.put(Set.of(stateEnums), sumOfProbabilities);
+        potentialActiveStates.put(Set.of(stateNames), sumOfProbabilities);
     }
 
     public void findIntialStates() {
@@ -55,19 +54,19 @@ public class InitialStates {
 
     private void mockInitialStates() {
         int rand = new Random().nextInt(sumOfProbabilities);
-        for (Map.Entry<Set<StateEnum>, Integer> entry : potentialActiveStates.entrySet()) {
+        for (Map.Entry<Set<String>, Integer> entry : potentialActiveStates.entrySet()) {
             if (entry.getValue() >= rand) {
-                Set<StateEnum> initialStates = entry.getKey();
+                Set<String> initialStates = entry.getKey();
                 initialStates.forEach(state -> stateMemory.addActiveState(state, true));
-                initialStates.forEach(stateEnum ->
-                        stateService.findByName(stateEnum).ifPresent(State::setProbabilityToBaseProbability));
+                initialStates.forEach(name ->
+                        stateService.findByName(name).ifPresent(State::setProbabilityToBaseProbability));
                 return;
             }
         }
     }
 
     private void searchForInitialStates() {
-        Set<StateEnum> allPotentialStates = new HashSet<>();
+        Set<String> allPotentialStates = new HashSet<>();
         potentialActiveStates.forEach((pot, prob) -> allPotentialStates.addAll(pot));
         allPotentialStates.forEach(pot -> stateFinder.findState(pot));
     }

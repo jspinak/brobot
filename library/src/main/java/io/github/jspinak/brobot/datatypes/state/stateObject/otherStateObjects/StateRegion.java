@@ -2,6 +2,7 @@ package io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects;
 
 import io.github.jspinak.brobot.datatypes.primitives.location.Anchor;
 import io.github.jspinak.brobot.datatypes.primitives.location.Anchors;
+import io.github.jspinak.brobot.datatypes.primitives.location.Location;
 import io.github.jspinak.brobot.datatypes.primitives.location.Position;
 import io.github.jspinak.brobot.datatypes.primitives.match.MatchHistory;
 import io.github.jspinak.brobot.datatypes.primitives.match.MatchSnapshot;
@@ -9,7 +10,6 @@ import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.NullState;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import io.github.jspinak.brobot.datatypes.state.stateObject.StateObject;
-import io.github.jspinak.brobot.primatives.enums.StateEnum;
 import lombok.Data;
 
 /**
@@ -22,7 +22,7 @@ public class StateRegion implements StateObject {
 
     private String name = "";
     private Region searchRegion = new Region();
-    private StateEnum ownerStateName = NullState.Name.NULL;
+    private String ownerStateName = NullState.Name.NULL.toString();
     private int staysVisibleAfterClicked = 100;
     private int probabilityExists = 100; // probability something can be acted on in this region
     private int timesActedOn = 0;
@@ -74,7 +74,7 @@ public class StateRegion implements StateObject {
     public static class Builder {
         private String name = "";
         private Region searchRegion = new Region();
-        private StateEnum ownerStateName = NullState.Name.NULL;
+        private String ownerStateName = NullState.Name.NULL.toString();
         private Position position = new Position(50, 50);
 
         // Positions.Name: the border of the region to define
@@ -99,13 +99,18 @@ public class StateRegion implements StateObject {
             return this;
         }
 
-        public Builder inState(StateEnum stateName) {
+        public Builder inState(String stateName) {
             this.ownerStateName = stateName;
             return this;
         }
 
         public Builder setPointLocation(Position position) {
             this.position = position;
+            return this;
+        }
+
+        public Builder addAnchor(Position.Name definedRegionBorder, Position.Name positionInThisRegion) {
+            this.anchors.add(new Anchor(definedRegionBorder, new Position(positionInThisRegion)));
             return this;
         }
 
