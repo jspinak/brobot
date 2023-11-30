@@ -1,5 +1,6 @@
 package io.github.jspinak.brobot.actions.actionExecution;
 
+import io.github.jspinak.brobot.actions.BrobotSettings;
 import io.github.jspinak.brobot.actions.actionConfigurations.ExitSequences;
 import io.github.jspinak.brobot.actions.actionConfigurations.Success;
 import io.github.jspinak.brobot.actions.actionExecution.actionLifecycle.ActionLifecycleManagement;
@@ -91,16 +92,21 @@ public class ActionExecution {
         time.setEndTime(actionOptions.getAction());
         matches.setDuration(time.getDuration(actionOptions.getAction()));
         matches.saveSnapshots();
+        sendActionLog(matches, actionOptions, objectCollections);
+        String symbol = matches.isSuccess()? Output.check : Output.fail;
+        if (BrobotSettings.buildDataset) datasetManager.addSetOfData(matches); // for the neural net training dataset
+        //log.info("Logged ActionLogInfo: {}", actionLog.toJson());
+        Report.println(actionOptions.getAction() + " " + matches.getOutputText() + " " + symbol);
+        return matches;
+    }
+
+    private void sendActionLog(Matches matches, ActionOptions actionOptions, ObjectCollection... objectCollections) {
+        if (!BrobotSettings.sendLogsToElasticContainer) return;
         ActionLog actionLog = actionLogCreator.create(
                 //time.getStartTime(actionOptions.getAction()),
                 //time.getEndTime(actionOptions.getAction()),
                 matches, actionOptions, objectCollections);
         actionLogSender.sendActionLogToElastic(actionLog);
-        String symbol = matches.isSuccess()? Output.check : Output.fail;
-        datasetManager.addSetOfData(matches); // for the neural net training dataset
-        //log.info("Logged ActionLogInfo: {}", actionLog.toJson());
-        Report.println(actionOptions.getAction() + " " + symbol);
-        return matches;
     }
 
     private void printAction(ActionOptions actionOptions, ObjectCollection... objectCollections) {

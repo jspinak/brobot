@@ -1,7 +1,6 @@
 package io.github.jspinak.brobot.manageStates;
 
 import io.github.jspinak.brobot.datatypes.state.state.State;
-import io.github.jspinak.brobot.primatives.enums.StateEnum;
 import io.github.jspinak.brobot.reports.Output;
 import io.github.jspinak.brobot.reports.Report;
 import io.github.jspinak.brobot.services.StateService;
@@ -41,15 +40,15 @@ public class DoTransition {
     }
 
     // previous State should be set with the Transition
-    // toStateEnum will never be PREVIOUS here: FindPath needs to know which state PREVIOUS stands for when
+    // toStateName will never be PREVIOUS here: FindPath needs to know which state PREVIOUS stands for when
     // it makes the path. in order for the transition to occur, the named previous state must be
     // given as PREVIOUS to the transitionFrom method.
-    public boolean go(StateEnum fromStateEnum, StateEnum toStateEnum) {
-        if (doTransitions(fromStateEnum, toStateEnum)) {
-            Report.format(Output.check+" Transition %s->%s successful. \n", fromStateEnum, toStateEnum);
+    public boolean go(String fromStateName, String toStateName) {
+        if (doTransitions(fromStateName, toStateName)) {
+            Report.format(Output.check+" Transition %s->%s successful. \n", fromStateName, toStateName);
             return true;
         }
-        Report.format(Output.fail+" Transition %s->%s not successful. \n", fromStateEnum, toStateEnum);
+        Report.format(Output.fail+" Transition %s->%s not successful. \n", fromStateName, toStateName);
         return false;
     }
 
@@ -110,15 +109,15 @@ public class DoTransition {
      * @param to a target State
      * @return true when both the FromTransition and the ToTransition for the target State are successful.
      */
-    private boolean doTransitions(StateEnum from, StateEnum to) {
+    private boolean doTransitions(String from, String to) {
         if (!stateMemory.getActiveStates().contains(from)) return false; // the 'from' State is not active
         Optional<TransitionFetcher> transitionsOpt = transitionFetcher.getTransitions(from, to);
         if (transitionsOpt.isEmpty()) return false; // couldn't find one of the needed Transitions
         TransitionFetcher transitions = transitionsOpt.get();
         if (!transitions.getFromTransitionFunction().getAsBoolean()) return false; // the FromTransition didn't succeed
-        Set<StateEnum> statesToActivate = getStatesToActivate(transitions, to);
-        statesToActivate.forEach(stateEnum ->
-                stateService.findByName(stateEnum).ifPresent(State::setProbabilityToBaseProbability));
+        Set<String> statesToActivate = getStatesToActivate(transitions, to);
+        statesToActivate.forEach(stateName ->
+                stateService.findByName(stateName).ifPresent(State::setProbabilityToBaseProbability));
         StateTransition fromTrsn = transitions.getFromTransition();
         statesToActivate.forEach(this::doTransitionTo); // do all ToTransitions
         fromTrsn.getExit().forEach(this::exitState); // exit all States to exit
@@ -127,9 +126,9 @@ public class DoTransition {
         return true;
     }
 
-    private Set<StateEnum> getStatesToActivate(TransitionFetcher transitions, StateEnum to) {
+    private Set<String> getStatesToActivate(TransitionFetcher transitions, String to) {
         // initialize the States to activate with the States to activate in the FromTransition
-        Set<StateEnum> statesToActivate = new HashSet<>(transitions.getFromTransition().getActivate());
+        Set<String> statesToActivate = new HashSet<>(transitions.getFromTransition().getActivate());
         // if the 'from' State exits, add its hidden States to the States to activate
         if (!transitions.getFromTransitions().stateStaysVisible(to))
             statesToActivate.addAll(transitions.getFromState().getHidden());
@@ -138,13 +137,13 @@ public class DoTransition {
         return statesToActivate;
     }
 
-    private boolean doTransitionTo(StateEnum toStateEnum) {
-        if (stateMemory.getActiveStates().contains(toStateEnum)) return true; // State is already active
-        Optional<State> toStateOpt = stateService.findByName(toStateEnum);
+    private boolean doTransitionTo(String toStateName) {
+        if (stateMemory.getActiveStates().contains(toStateName)) return true; // State is already active
+        Optional<State> toStateOpt = stateService.findByName(toStateName);
         if (toStateOpt.isEmpty()) return false; // State doesn't exist
         State toState = toStateOpt.get();
         toState.setProbabilityToBaseProbability();
-        Optional<StateTransitions> stateTransitions = stateTransitionsService.getTransitions(toStateEnum);
+        Optional<StateTransitions> stateTransitions = stateTransitionsService.getTransitions(toStateName);
         if (stateTransitions.isEmpty()) return false; // transition doesn't exist
         StateTransition transition = stateTransitions.get().getTransitionFinish();
         if (!transition.getAsBoolean()) { // transition failed
@@ -152,15 +151,15 @@ public class DoTransition {
             return false;
         }
         toState.setProbabilityExists(100); // State found
-        setHiddenStates.set(toStateEnum);
+        setHiddenStates.set(toStateName);
         stateTransitionsJointTable.addTransitionsToHiddenStates(toState);
         transition.getActivate().forEach(this::doTransitionTo);
         transition.getExit().forEach(this::exitState);
-        return stateMemory.getActiveStates().contains(toStateEnum);
+        return stateMemory.getActiveStates().contains(toStateName);
     }
 
     // THIS SHOULD INCLUDE A CHECK WITH THE VANISH OPERATION
-    private boolean exitState(StateEnum stateToExit) {
+    private boolean exitState(String stateToExit) {
         Optional<State> stateOpt = stateService.findByName(stateToExit);
         if (stateOpt.isEmpty()) return false; // state doesn't exist
         stateTransitionsJointTable.removeTransitionsToHiddenStates(stateOpt.get());

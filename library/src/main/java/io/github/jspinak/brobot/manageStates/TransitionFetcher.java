@@ -1,12 +1,12 @@
 package io.github.jspinak.brobot.manageStates;
 
 import io.github.jspinak.brobot.datatypes.state.state.State;
-import io.github.jspinak.brobot.primatives.enums.StateEnum;
 import io.github.jspinak.brobot.services.StateService;
 import io.github.jspinak.brobot.services.StateTransitionsService;
 import lombok.Getter;
 import org.springframework.stereotype.Component;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.BooleanSupplier;
 
@@ -24,7 +24,7 @@ public class TransitionFetcher {
     private final StateService stateService;
     private final StateTransitionsService stateTransitionsService;
 
-    private StateEnum transitionToEnum; // may be PREVIOUS
+    private String transitionToEnum; // may be PREVIOUS
     private StateTransitions fromTransitions;
     private StateTransition fromTransition;
     private State fromState;
@@ -40,7 +40,7 @@ public class TransitionFetcher {
         this.stateTransitionsService = stateTransitionsService;
     }
 
-    public Optional<TransitionFetcher> getTransitions(StateEnum from, StateEnum to) {
+    public Optional<TransitionFetcher> getTransitions(String from, String to) {
         reset();
         setFromTransitions(from, to);
         setToTransitions(to);
@@ -49,7 +49,7 @@ public class TransitionFetcher {
     }
 
     private void reset() {
-        transitionToEnum = NULL;
+        transitionToEnum = NULL.toString();
         fromTransitions = null;
         fromTransition = null;
         fromState = null;
@@ -61,7 +61,7 @@ public class TransitionFetcher {
 
     private boolean isComplete() {
         return
-                transitionToEnum != NULL &&
+                !Objects.equals(transitionToEnum, NULL.toString()) &&
                 fromTransitions != null &&
                 fromTransition != null &&
                 fromState != null &&
@@ -71,7 +71,7 @@ public class TransitionFetcher {
                 toState != null;
     }
 
-    private void setFromTransitions(StateEnum from, StateEnum to) {
+    private void setFromTransitions(String from, String to) {
         Optional<StateTransitions> fromTransitions = stateTransitionsService.getTransitions(from);
         stateService.findByName(from).ifPresent(state -> fromState = state);
         fromTransitions.ifPresent(transitions -> {
@@ -83,7 +83,7 @@ public class TransitionFetcher {
         });
     }
 
-    private void setToTransitions(StateEnum to) {
+    private void setToTransitions(String to) {
         Optional<StateTransitions> fromTransitions = stateTransitionsService.getTransitions(to);
         stateService.findByName(to).ifPresent(state -> toState = state);
         fromTransitions.ifPresent(transitions -> {

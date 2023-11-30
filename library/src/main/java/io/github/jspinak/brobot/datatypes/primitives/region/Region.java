@@ -6,7 +6,6 @@ import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.St
 import io.github.jspinak.brobot.datatypes.state.NullState;
 import lombok.Getter;
 import lombok.Setter;
-import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Rect;
 import org.sikuli.script.Match;
 import org.sikuli.script.Screen;
@@ -64,7 +63,7 @@ public class Region extends org.sikuli.script.Region implements Comparable<Regio
 
     public StateRegion inNullState() {
         return new StateRegion.Builder()
-                .inState(NullState.Name.NULL)
+                .inState(NullState.Name.NULL.toString())
                 .withSearchRegion(this)
                 .build();
     }
@@ -109,11 +108,6 @@ public class Region extends org.sikuli.script.Region implements Comparable<Regio
         int xDiff = this.x - comparesTo.x;
         if (yDiff != 0) return yDiff;
         return xDiff;
-    }
-
-    @Override
-    public String toString() {
-        return "x.y.w.h = "+x+"."+y+"."+w+"."+h;
     }
 
     public boolean defined() {
