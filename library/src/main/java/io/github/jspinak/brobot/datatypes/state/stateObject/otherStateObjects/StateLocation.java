@@ -8,7 +8,6 @@ import io.github.jspinak.brobot.datatypes.primitives.match.MatchHistory;
 import io.github.jspinak.brobot.datatypes.primitives.match.MatchSnapshot;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import io.github.jspinak.brobot.datatypes.state.stateObject.StateObject;
-import io.github.jspinak.brobot.primatives.enums.StateEnum;
 import lombok.Data;
 
 /**
@@ -21,7 +20,7 @@ public class StateLocation implements StateObject {
 
     private String name;
     private Location location;
-    private StateEnum ownerStateName;
+    private String ownerStateName;
     private int staysVisibleAfterClicked = 100;
     private int probabilityExists = 100; // probability something can be acted on at this location
     private int timesActedOn = 0;
@@ -60,7 +59,7 @@ public class StateLocation implements StateObject {
     public static class Builder {
         private String name = "";
         private Location location;
-        private StateEnum ownerStateName;
+        private String ownerStateName;
         private Position position = new Position(0, 0);
         private Anchors anchors = new Anchors();
 
@@ -79,7 +78,7 @@ public class StateLocation implements StateObject {
             return this;
         }
 
-        public Builder inState(StateEnum stateName) {
+        public Builder inState(String stateName) {
             this.ownerStateName = stateName;
             return this;
         }

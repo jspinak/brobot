@@ -31,6 +31,8 @@ import java.util.Set;
 @Setter
 public class State {
 
+    private String nameAsString = "";
+
     private StateEnum name;
     /**
      * StateText is text that appears on the screen and is a clue to look for images in this state.
@@ -60,7 +62,7 @@ public class State {
      * 'canHide' States is active when this State becomes active, these now hidden
      * States are added to the 'hidden' set.
      */
-    private Set<StateEnum> canHide = new HashSet<>();
+    private Set<String> canHide = new HashSet<>();
     /**
      * Hiding a State means that this State covers the hidden State, and when this State is exited
      * the hidden State becomes visible again. For example, opening a menu
@@ -71,7 +73,7 @@ public class State {
      * The hidden set is used by StateTransitions when there is a PREVIOUS Transition (PREVIOUS is
      * a variable StateEnum).
      */
-    private Set<StateEnum> hidden = new HashSet<>();
+    private Set<String> hidden = new HashSet<>();
     private int pathScore = 1; // larger path scores discourage taking a path with this state
     private LocalDateTime lastAccessed;
     /**
@@ -84,6 +86,11 @@ public class State {
     private int baseProbabilityExists = 100;
     private int probabilityExists = 0; // probability that the state exists. used for mocks.
     private int timesVisited = 0;
+
+    public String getName() {
+        if (!nameAsString.isEmpty()) return nameAsString;
+        return name.toString();
+    }
 
     public void setSearchRegionForAllImages(Region searchRegion) {
         stateImages.forEach(imageObj -> imageObj.setSearchRegion(searchRegion));
@@ -101,8 +108,8 @@ public class State {
         probabilityExists = baseProbabilityExists;
     }
 
-    public void addHiddenState(StateEnum stateEnum) {
-        hidden.add(stateEnum);
+    public void addHiddenState(String stateName) {
+        hidden.add(stateName);
     }
 
     public void resetHidden() {
@@ -113,8 +120,14 @@ public class State {
         timesVisited++;
     }
 
+    public String getNameAsString() {
+        if (!nameAsString.isEmpty()) return nameAsString;
+        return name.toString();
+    }
+
     public static class Builder {
 
+        private String nameAsString;
         private StateEnum name;
         private Set<String> stateText = new HashSet<>();
         private Set<StateImageObject> stateImages = new HashSet<>();
@@ -122,14 +135,19 @@ public class State {
         private Set<StateRegion> stateRegions = new HashSet<>();
         private Set<StateLocation> stateLocations = new HashSet<>();
         private boolean blocking = false;
-        private Set<StateEnum> canHide = new HashSet<>();
-        private Set<StateEnum> hidden = new HashSet<>();
+        private Set<String> canHide = new HashSet<>();
+        private Set<String> hidden = new HashSet<>();
         private int pathScore = 1;
         private LocalDateTime lastAccessed;
         private int baseProbabilityExists = 100;
 
-        public Builder(StateEnum stateEnum) {
-            this.name = stateEnum;
+        public Builder(StateEnum stateName) {
+            this.name = stateName;
+            this.nameAsString = stateName.toString();
+        }
+
+        public Builder(String nameAsString) {
+            this.nameAsString = nameAsString;
         }
 
         public Builder withText(String... stateText) {
@@ -140,6 +158,10 @@ public class State {
         public Builder withImages(StateImageObject... stateImageObjects) {
             Collections.addAll(this.stateImages, stateImageObjects);
             return this;
+        }
+
+        public Builder withImages(List<StateImageObject> stateImageObjects) {
+            return withImages(stateImageObjects.toArray(new StateImageObject[0]));
         }
 
         public Builder withStrings(StateString... stateStrings) {
@@ -162,8 +184,8 @@ public class State {
             return this;
         }
 
-        public Builder canHide(StateEnum... stateEnums) {
-            this.canHide.addAll(List.of(stateEnums));
+        public Builder canHide(String... stateNames) {
+            this.canHide.addAll(List.of(stateNames));
             return this;
         }
 
@@ -179,11 +201,12 @@ public class State {
 
         public State build() {
             State state = new State();
+            state.nameAsString = nameAsString;
             state.name = name;
             state.stateText = stateText;
-            for (StateImageObject image : stateImages) image.setOwnerStateName(name);
-            for (StateString string : stateStrings) string.setOwnerStateName(name);
-            for (StateRegion region : stateRegions) region.setOwnerStateName(name);
+            for (StateImageObject image : stateImages) image.setOwnerStateName(nameAsString);
+            for (StateString string : stateStrings) string.setOwnerStateName(nameAsString);
+            for (StateRegion region : stateRegions) region.setOwnerStateName(nameAsString);
             state.stateImages = stateImages;
             state.stateStrings = stateStrings;
             state.stateRegions = stateRegions;

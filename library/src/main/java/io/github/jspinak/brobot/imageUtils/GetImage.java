@@ -21,6 +21,7 @@ import static org.opencv.highgui.HighGui.waitKey;
 import static org.opencv.imgcodecs.Imgcodecs.imread;
 import static org.opencv.imgproc.Imgproc.*;
 
+// Consider using GetImageJavaCV for better compatibility.
 @Component
 public class GetImage {
 

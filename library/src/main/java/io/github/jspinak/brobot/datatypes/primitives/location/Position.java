@@ -69,4 +69,9 @@ public class Position {
         percentH = percentH * mult;
     }
 
+    @Override
+    public String toString() {
+        return String.format("P[%.1f.%.1f]", percentW, percentH);
+    }
+
 }

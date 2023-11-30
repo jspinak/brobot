@@ -2,7 +2,6 @@ package io.github.jspinak.brobot.manageStates;
 
 import io.github.jspinak.brobot.actions.customActions.CommonActions;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
-import io.github.jspinak.brobot.primatives.enums.StateEnum;
 import org.springframework.stereotype.Component;
 
 /**
@@ -17,9 +16,9 @@ public class CommonTransitions {
         this.commonActions = commonActions;
     }
 
-    public StateTransitions basicTransition(StateEnum stateEnum, StateEnum toState, StateImageObject toStateImage) {
-        return new StateTransitions.Builder(stateEnum)
-                .addTransitionFinish(() -> commonActions.findState(1, stateEnum))
+    public StateTransitions basicTransition(String stateName, String toState, StateImageObject toStateImage) {
+        return new StateTransitions.Builder(stateName)
+                .addTransitionFinish(() -> commonActions.findState(1, stateName))
                 .addTransition(() -> commonActions.find(1, toStateImage), toState)
                 .build();
     }
