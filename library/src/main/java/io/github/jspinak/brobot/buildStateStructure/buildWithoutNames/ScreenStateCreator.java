@@ -4,10 +4,12 @@ import io.github.jspinak.brobot.actions.customActions.CommonActions;
 import io.github.jspinak.brobot.datatypes.primitives.image.Image;
 import io.github.jspinak.brobot.datatypes.state.state.State;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
+import io.github.jspinak.brobot.imageUtils.ImageUtils;
 import io.github.jspinak.brobot.manageStates.StateTransition;
 import io.github.jspinak.brobot.manageStates.StateTransitions;
 import io.github.jspinak.brobot.services.StateService;
 import io.github.jspinak.brobot.services.StateTransitionsRepository;
+import org.bytedeco.opencv.opencv_core.Mat;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -20,15 +22,17 @@ public class ScreenStateCreator {
     private final StateService stateService;
     private final CommonActions commonActions;
     private final StateTransitionsRepository stateTransitionsRepository;
+    private final ImageUtils imageUtils;
 
     public ScreenStateCreator(TransitionImageRepo transitionImageRepo, ScreenObservations screenObservations,
                               StateService stateService, CommonActions commonActions,
-                              StateTransitionsRepository stateTransitionsRepository) {
+                              StateTransitionsRepository stateTransitionsRepository, ImageUtils imageUtils) {
         this.transitionImageRepo = transitionImageRepo;
         this.screenObservations = screenObservations;
         this.stateService = stateService;
         this.commonActions = commonActions;
         this.stateTransitionsRepository = stateTransitionsRepository;
+        this.imageUtils = imageUtils;
     }
 
     /**
@@ -41,9 +45,9 @@ public class ScreenStateCreator {
      */
     public List<ImageSetsAndAssociatedScreens> defineStatesWithImages() {
         List<ImageSetsAndAssociatedScreens> imagesScreens = new ArrayList<>();
-        int size = transitionImageRepo.images.size();
+        int size = transitionImageRepo.getImages().size();
         for (int i = 0; i < size; i++) {
-            TransitionImage img = transitionImageRepo.images.get(i);
+            TransitionImage img = transitionImageRepo.getImages().get(i);
             addToImageSet(imagesScreens, img, i);
         }
         return imagesScreens;
@@ -62,7 +66,7 @@ public class ScreenStateCreator {
      *      should be ok in most situations.
      */
     private void setScreenStates(List<ImageSetsAndAssociatedScreens> imgSetsList) {
-        for (ScreenObservation screenObservation : screenObservations.getAll().values()) {
+        for (ScreenObservation screenObservation : screenObservations.getAll()) {
             for (ImageSetsAndAssociatedScreens imgSets : imgSetsList) {
                 // if the screen is part of the ImageSets, include it as a state in the screen
                 if (imgSets.getScreens().contains(screenObservation.getId())) {
@@ -118,19 +122,32 @@ public class ScreenStateCreator {
         transitionImage.setOwnerState(imagesScreens.size()-1); // the state name is the last index added
     }
 
+    /**
+     * Saves state images to file, creates a state with these images.
+     * @param imageSets used to identify which images belong to the state.
+     * @param name state name
+     * @return the newly created state
+     */
     public State createState(ImageSetsAndAssociatedScreens imageSets, String name) {
         List<StateImageObject> stateImages = new ArrayList<>();
         imageSets.getImages().forEach(imgIndex -> {
-            Image newImage = new Image(transitionImageRepo.images.get(imgIndex).getMatch().getImage());
-            StateImageObject sio = new StateImageObject.Builder()
-                    .withImage(newImage)
-                    /*
-                    This gives us the transition to the screenshot, not to specific states.
-                    To get the states, compare the states in the from-screenshot and the to-screenshot.
-                    State differences between the two can be recorded in the transition function.
-                     */
-                    .withTransitionImage(transitionImageRepo.images.get(imgIndex))
-                    .build();
+            if (transitionImageRepo.getImages().size() <= imgIndex || imgIndex < 0) {
+                System.out.println("image index not in transitionImageRepo: " + imgIndex);
+            } else {
+                Mat matchImage = transitionImageRepo.getImages().get(imgIndex).getImage();
+                String imageName = Integer.toString(transitionImageRepo.getImages().get(imgIndex).getIndexInRepo());
+                Image image = imageUtils.matToImage(matchImage, imageName);
+                StateImageObject sio = new StateImageObject.Builder()
+                        .withImage(image)
+                        /*
+                        This gives us the transition to the screenshot, not to specific states.
+                        To get the states, compare the states in the from-screenshot and the to-screenshot.
+                        State differences between the two can be recorded in the transition function.
+                         */
+                        .withTransitionImage(transitionImageRepo.getImages().get(imgIndex))
+                        .build();
+                stateImages.add(sio);
+            }
         });
         return new State.Builder(name)
                 .withImages(stateImages)

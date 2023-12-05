@@ -25,7 +25,7 @@ public class UncheckedImageHunter {
      */
     public Set<String> getUncheckedStates() {
         Set<String> uncheckedStates = new HashSet<>();
-        for (ScreenObservation screenObservation : screenObservations.getAll().values()) {
+        for (ScreenObservation screenObservation : screenObservations.getAll()) {
             if (screenObservation.hasUnvisitedImages()) {
                 screenObservation.getStates().forEach(state -> uncheckedStates.add(Integer.toString(state)));
             }
@@ -51,7 +51,7 @@ public class UncheckedImageHunter {
         Set<String> activeStates = stateMemory.getActiveStates();
         List<Integer> statesAsInt = new ArrayList<>();
         activeStates.forEach(s -> statesAsInt.add(Integer.getInteger(s)));
-        for (ScreenObservation screenObservation : screenObservations.getAll().values()) {
+        for (ScreenObservation screenObservation : screenObservations.getAll()) {
             if (isScreen(screenObservation, statesAsInt)) return screenObservation.getId();
         }
         return -1;

@@ -29,7 +29,7 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.0'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.0'
     // Spring Boot Starter Test for Spring Boot testing support
-    testImplementation 'org.springframework.boot:spring-boot-starter-test:3.1.2'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test:3.2.0' //3.1.2
 
     implementation('com.sikulix:sikulixapi:2.0.5') {
         exclude group: 'org.slf4j', module: 'slf4j-nop'
@@ -47,10 +47,10 @@ dependencies {
     implementation 'org.springframework:spring-context:6.0.11'
     implementation 'org.springframework:spring-beans:6.0.11'
 
-    implementation 'co.elastic.clients:elasticsearch-java:8.9.0'
+    implementation 'co.elastic.clients:elasticsearch-java:8.11.1' //8.9.0
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.12.3'
-    implementation 'org.springframework.boot:spring-boot-starter-web:3.1.2'
-    implementation 'org.springframework.boot:spring-boot-starter-data-elasticsearch:3.1.2'
+    implementation 'org.springframework.boot:spring-boot-starter-web:3.2.0' //3.1.2
+    implementation 'org.springframework.boot:spring-boot-starter-data-elasticsearch:3.2.0' //3.1.2
 }
 
 test {
