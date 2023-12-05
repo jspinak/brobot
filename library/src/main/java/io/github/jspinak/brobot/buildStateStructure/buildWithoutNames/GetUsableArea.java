@@ -33,7 +33,7 @@ public class GetUsableArea {
      * @param bottomright sets the bottom right boundary of the usable area.
      * @return the usable area.
      */
-    public Region getBoundariesFromExcludedImages(String topleft, String bottomright) {
+    public Region getBoundariesFromExcludedImages(Image topleft, Image bottomright) {
         ObjectCollection exteriorImages = new ObjectCollection.Builder()
                 .withImages(
                         new StateImageObject.Builder()

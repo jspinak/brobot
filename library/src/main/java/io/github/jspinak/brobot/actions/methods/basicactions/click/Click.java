@@ -62,8 +62,7 @@ public class Click implements ActionInterface {
 
     private Location setClickLocation(MatchObject matchObject, ActionOptions actionOptions) {
         // Define the location by the match region and the position of the StateObject
-        System.out.println(matchObject.getMatch());
-        Location location = matchObject.getLocation(); // new Location(matchObject.getMatch(), matchObject.getStateObject().getPosition());
+        Location location = matchObject.getLocation();
         location.setX(location.getX() + actionOptions.getAddX());
         location.setY(location.getY() + actionOptions.getAddY());
         matchObject.getMatch().setTarget(location.getX(), location.getY());

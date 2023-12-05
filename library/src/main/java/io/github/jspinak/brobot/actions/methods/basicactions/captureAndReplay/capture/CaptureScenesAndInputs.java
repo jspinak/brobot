@@ -27,6 +27,9 @@ import java.time.LocalDateTime;
  * to find the most similar scene, which allows us to find the sequence of actions to be performed.
  * The sequence of actions to be performed is saved in a Mat called 'actions.png'.
  */
+
+// todo: I added the code I wrote for SikuliX in the recorder folder. This code should be able to replace this class and NativeHookDemo.
+
 @Component
 public class CaptureScenesAndInputs {
 

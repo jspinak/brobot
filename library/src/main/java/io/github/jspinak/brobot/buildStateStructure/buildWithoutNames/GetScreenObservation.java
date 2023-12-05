@@ -1,15 +1,13 @@
 package io.github.jspinak.brobot.buildStateStructure.buildWithoutNames;
 
-import io.github.jspinak.brobot.actions.actionExecution.Action;
-import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
-import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import io.github.jspinak.brobot.imageUtils.GetImageJavaCV;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.sikuli.script.Match;
 import org.sikuli.script.Screen;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -22,23 +20,29 @@ import java.util.List;
 public class GetScreenObservation {
 
     private final GetImageJavaCV getImageJavaCV;
-    private final Action action;
+    private final DynamicPixelFinder dynamicPixelFinder;
 
-    Region usableArea = new Region();
+    private Region usableArea = new Region();
 
-    public GetScreenObservation(GetImageJavaCV getImageJavaCV, Action action) {
+    public GetScreenObservation(GetImageJavaCV getImageJavaCV, DynamicPixelFinder dynamicPixelFinder) {
         this.getImageJavaCV = getImageJavaCV;
-        this.action = action;
+        this.dynamicPixelFinder = dynamicPixelFinder;
     }
 
-    /* Add only match(es) within the usable area.
+    /*
+    Only add match(es) within the usable area.
      */
     public ScreenObservation takeScreenshotAndGetImages(int id) {
         ScreenObservation obs = initNewScreenObservation(id);
-        List<Match> wordLocations = getWordLocations();
-        for (Match match : wordLocations) {
+        List<Match> wordLocations = new Screen().findWords();
+        List<Mat> images = getImagesFromLocations(wordLocations);
+        for (int i=0; i<Math.min(wordLocations.size(), images.size()); i++) {
+            Match match = wordLocations.get(i);
             if (usableArea.contains(match)) {
-                obs.getImages().add(new TransitionImage(match));
+                TransitionImage transitionImage = new TransitionImage(match);
+                Mat image = getImageJavaCV.getMatFromScreen(new Region(match)); // save the image
+                transitionImage.setImage(image);
+                obs.getImages().add(transitionImage);
             }
         }
         return obs;
@@ -47,18 +51,27 @@ public class GetScreenObservation {
     public ScreenObservation initNewScreenObservation(int id) {
         ScreenObservation screenObservation = new ScreenObservation();
         screenObservation.setId(id);
+        // todo wait a few seconds. make getMatFromScreen() an action.
         Mat screenshot = getImageJavaCV.getMatFromScreen();
         screenObservation.setScreenshot(screenshot);
+        Mat dynamicPixelMask = dynamicPixelFinder.getDynamicPixelMask(new Region(), .1, 5);
+        screenObservation.setDynamicPixelMask(dynamicPixelMask);
         return screenObservation;
     }
 
-    /*
-    One method of finding transition images is to locate and click on words. This works especially well for webpages.
+    /**
+     * Match objects contain Image objects, but these Image objects are null when the Match objects are created.
+     * A Brobot Image can be added to the TransitionImage.
+     * @param matches the Match objects found with screen.findWords().
+     * @return the Image inside the match
      */
-    public List<Match> getWordLocations() {
-        Screen screen = new Screen();
-        List<Match> wordLocations = screen.findWords();
-        return wordLocations;
+    public List<Mat> getImagesFromLocations(List<Match> matches) {
+        List<Mat> images = new ArrayList<>();
+        for (Match match : matches) {
+            Mat mat = getImageJavaCV.getMatFromScreen(new Region(match));
+            images.add(mat);
+        }
+        return images;
     }
 
     public void setUsableArea(Region region) {

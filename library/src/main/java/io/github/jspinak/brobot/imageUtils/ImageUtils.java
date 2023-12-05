@@ -1,12 +1,14 @@
 package io.github.jspinak.brobot.imageUtils;
 
 import io.github.jspinak.brobot.actions.BrobotSettings;
+import io.github.jspinak.brobot.datatypes.primitives.image.Image;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.reports.Report;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.springframework.stereotype.Component;
 
 import javax.imageio.ImageIO;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -106,6 +108,17 @@ public class ImageUtils {
     public int getFreeNumber(String path) {
         getFreePath(path);
         return lastFilenumber.get(path);
+    }
+
+    /**
+     * Will overwrite a file with the same name.
+     * @param mat mat to save as image
+     * @param name name without filetype
+     * @return an image of the saved png file
+     */
+    public Image matToImage(Mat mat, String name) {
+        imwrite(name + ".png", mat);
+        return new Image(name);
     }
 
     public boolean writeWithUniqueFilename(Mat mat, String nameWithoutFiletype) {

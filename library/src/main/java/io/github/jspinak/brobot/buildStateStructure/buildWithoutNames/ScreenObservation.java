@@ -4,10 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.bytedeco.opencv.opencv_core.Mat;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * The previous ScreenObservation contains the screenshot and the image providing the transition.
@@ -19,6 +16,8 @@ public class ScreenObservation {
 
     private int id;
     private Mat screenshot;
+    private Mat dynamicPixelMask;
+
     private List<TransitionImage> images = new ArrayList<>();
     private Set<Integer> states = new HashSet<>(); // the names of included states
 
@@ -36,5 +35,6 @@ public class ScreenObservation {
     public void addState(Integer state) {
         states.add(state);
     }
+
 
 }
