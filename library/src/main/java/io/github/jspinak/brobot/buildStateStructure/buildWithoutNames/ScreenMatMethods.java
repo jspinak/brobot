@@ -41,7 +41,7 @@ public class ScreenMatMethods {
      * @return a mask of the shared pixels
      */
     public Mat getSharedPixels(ScreenObservations screenObservations) {
-        List<ScreenObservation> observations = screenObservations.getAll().values().stream().toList();
+        List<ScreenObservation> observations = screenObservations.getAll().stream().toList();
         if (observations.size() < 2) return new Mat();
         Mat sharedPixels = observations.get(0).getScreenshot();
         for (int i=1; i<observations.size(); i++) {
@@ -74,8 +74,8 @@ public class ScreenMatMethods {
      * @return
      */
     public List<ObservedState> getObservedStates(ScreenObservation screen, ScreenObservations observations) {
-        for (Map.Entry<Integer, ScreenObservation> screenObservation : observations.getAll().entrySet()) {
-            Mat dist = compareMats(screen.getScreenshot(), screenObservation.getValue().getScreenshot());
+        for (ScreenObservation screenObservation : observations.getAll()) {
+            Mat dist = compareMats(screen.getScreenshot(), screenObservation.getScreenshot());
             //ObservedState newObservedState = new ObservedState();
         }
 

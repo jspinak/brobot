@@ -92,6 +92,7 @@ public class BrobotSettings {
      */
     public static int secondsToCapture = 1000;
     public static int captureFrequency = 1;
+    public static String recordingFolder = "recording";
 
     /**
      * AI Settings

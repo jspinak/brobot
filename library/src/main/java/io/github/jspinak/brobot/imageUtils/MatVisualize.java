@@ -192,4 +192,6 @@ public class MatVisualize {
     public void writeMatToHistory(Mat mat, String filename) {
         imwrite("history/" + filename + new Random().nextInt(1000) + ".png", mat);
     }
+
+
 }

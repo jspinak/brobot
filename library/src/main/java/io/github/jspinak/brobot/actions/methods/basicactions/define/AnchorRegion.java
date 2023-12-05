@@ -25,7 +25,7 @@ public class AnchorRegion {
             // MatchObjects can have one or more anchors
             matchObject.getAnchorList().forEach(anchor -> {
                 definedBorders.setAsDefined(anchor.getAnchorInNewDefinedRegion());
-                Location locationInMatch = new Location(match, anchor.getLocationInMatch());
+                Location locationInMatch = new Location(match, anchor.getPositionInMatch());
                 adjustDefinedRegion(region, locationInMatch, anchor.getAnchorInNewDefinedRegion());
             });
         }
