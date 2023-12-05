@@ -69,8 +69,8 @@ public class Region extends org.sikuli.script.Region implements Comparable<Regio
     }
 
     private void setXY2() {
-        x2 = x + w - 1;
-        y2 = y + h - 1;
+        x2 = x + w;
+        y2 = y + h;
     }
 
     public void setXYWH(int x, int y, int w, int h) {
@@ -93,12 +93,12 @@ public class Region extends org.sikuli.script.Region implements Comparable<Regio
 
     public void setX2(int x2) {
         this.x2 = x2;
-        w = x2 - x + 1;
+        w = x2 - x;
     }
 
     public void setY2(int y2) {
         this.y2 = y2;
-        h = y2 - y + 1;
+        h = y2 - y;
     }
 
     @Override

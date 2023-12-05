@@ -8,12 +8,6 @@ import org.springframework.context.annotation.Import;
 @SpringBootApplication
 @Import(BrobotSpringBeanConfig.class)
 public class BrobotTestApplication {
-    public static void main(String[] args) {
-        /*
-        SpringApplicationBuilder builder = new SpringApplicationBuilder(BrobotTestApplication.class);
-        builder.headless(false);
-        ConfigurableApplicationContext context = builder.run(args);
-         */
-    }
+    public static void main(String[] args) {}
 }
 

@@ -5,10 +5,13 @@ import org.bytedeco.javacpp.DoublePointer;
 import org.bytedeco.opencv.opencv_core.*;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
 import static org.bytedeco.opencv.global.opencv_core.*;
+import static org.bytedeco.opencv.opencv_core.Mat.ones;
 
 /**
  * 3d versions of common OpenCV operations that only accept one channel.
@@ -122,10 +125,29 @@ public class MatOps3d {
         return dst;
     }
 
+    /**
+     * Returns a 3-channel mask of a comparison of the src and cmpTo Mat(s).
+     * @param src first Mat to compare
+     * @param cmpTo second Mat to compare
+     * @param cmpop the comparison operator
+     * @return a 3-channel mask
+     */
+    public Mat cOmpare(Mat src, Mat cmpTo, int cmpop) {
+        Mat mat = new Mat();
+        cOmpare(src, cmpTo, mat, cmpop);
+        return mat;
+    }
+
     public MatVector sPlit(Mat src) {
         MatVector channels = new MatVector(src.channels());
         split(src, channels);
         return channels;
+    }
+
+    public Mat getFirstChannel(Mat src) {
+        MatVector matVector = sPlit(src);
+        Mat firstChannel = matVector.get(0);
+        return firstChannel;
     }
 
     public Mat mErge(MatVector matVector) {
@@ -261,6 +283,72 @@ public class MatOps3d {
         Report.println();
         bitwise_and(indices, mask, onlyIndicesToKeep);
         return onlyIndicesToKeep;
+    }
+
+    public List<Integer> cOuntNonZero(Mat mat) {
+        MatVector matVector = sPlit(mat);
+        List<Integer> counts = new ArrayList<>();
+        for (Mat m : matVector.get()) {
+            counts.add(countNonZero(m));
+        }
+        return counts;
+    }
+
+    public int getMaxNonZeroCellsByChannel(Mat mat) {
+        List<Integer> counts = cOuntNonZero(mat);
+        return Collections.max(counts);
+    }
+
+    public Mat bItwise_and(Mat mat1, Mat mat2) {
+        MatVector vec1 = sPlit(mat1);
+        MatVector vec2 = sPlit(mat2);
+        MatVector andVec = sPlit(new Mat(mat1.size(), mat1.type()));
+        for (int i=0; i<Math.min(vec1.size(),vec2.size()); i++) {
+            if (vec1.get(i).rows() != vec2.get(i).rows()) { // print out mismatch. program will end.
+                System.out.println("rows: " + vec1.get(i).rows() + " " + vec2.get(i).rows());
+                System.out.println("cols: " + vec1.get(i).cols() + " " + vec2.get(i).cols());
+            }
+            bitwise_and(vec1.get(i), vec2.get(i), andVec.get(i));
+        }
+        return mErge(andVec);
+    }
+
+    public Mat bItwise_or(Mat mat1, Mat mat2) {
+        MatVector vec1 = sPlit(mat1);
+        MatVector vec2 = sPlit(mat2);
+        MatVector vec = sPlit(new Mat(mat1.size(), mat1.type()));
+        for (int i=0; i<Math.min(vec1.size(),vec2.size()); i++) {
+            if (vec1.get(i).rows() != vec2.get(i).rows()) { // print out mismatch. program will end.
+                System.out.println("rows: " + vec1.get(i).rows() + " " + vec2.get(i).rows());
+                System.out.println("cols: " + vec1.get(i).cols() + " " + vec2.get(i).cols());
+            }
+            bitwise_or(vec1.get(i), vec2.get(i), vec.get(i));
+        }
+        return mErge(vec);
+    }
+
+    public Mat bItwise_not(Mat mat1) {
+        MatVector vec1 = sPlit(mat1);
+        MatVector vec = sPlit(new Mat(mat1.size(), mat1.type()));
+        for (int i=0; i<vec1.get().length; i++) {
+            bitwise_not(vec1.get(i), vec.get(i));
+        }
+        return mErge(vec);
+    }
+
+    public static Mat createColorMat(Size size, Scalar colorScalar) {
+        return new Mat(size, CV_8UC3, colorScalar);
+    }
+
+    /**
+     * Add the color to the original Mat where the mask is turned on (255).
+     * @param original the base Mat
+     * @param mask shows where to color the base Mat
+     * @param colorToAdd the color to use
+     */
+    public void addColorToMat(Mat original, Mat mask, Scalar colorToAdd) {
+        Mat colorMat = createColorMat(original.size(), colorToAdd);
+        colorMat.copyTo(original, mask);
     }
 
 }
