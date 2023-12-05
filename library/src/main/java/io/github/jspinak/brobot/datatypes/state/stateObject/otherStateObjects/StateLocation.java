@@ -60,7 +60,7 @@ public class StateLocation implements StateObject {
         private String name = "";
         private Location location;
         private String ownerStateName;
-        private Position position = new Position(0, 0);
+        private Position position = new Position(.5, .5);
         private Anchors anchors = new Anchors();
 
         public Builder called(String name) {

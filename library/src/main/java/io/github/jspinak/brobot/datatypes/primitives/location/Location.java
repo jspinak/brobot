@@ -78,7 +78,6 @@ public class Location {
         int percentOfW, percentOfH;
         percentOfW = (newX - region.x) / region.w;
         percentOfH = (newY - region.y) / region.h;
-        //System.out.println("percent of W,H: "+percentOfW+" "+percentOfH);
         position = new Position(percentOfW, percentOfH);
         definedByXY = false;
     }
@@ -179,8 +178,8 @@ public class Location {
     }
 
     private org.sikuli.script.Location getSikuliLocationFromRegion() {
-        double locX = region.x + (region.w * position.getPercentW() / 100);
-        double locY = region.y + (region.h * position.getPercentH() / 100);
+        double locX = region.x + (region.w * position.getPercentW());
+        double locY = region.y + (region.h * position.getPercentH());
         return new org.sikuli.script.Location(locX, locY);
     }
 

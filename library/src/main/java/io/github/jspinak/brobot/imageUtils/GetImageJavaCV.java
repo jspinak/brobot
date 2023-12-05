@@ -6,6 +6,7 @@ import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
 import org.bytedeco.javacv.*;
 import org.bytedeco.opencv.opencv_core.Mat;
+import org.bytedeco.opencv.opencv_core.MatVector;
 import org.sikuli.script.ImagePath;
 import org.springframework.stereotype.Component;
 
@@ -175,6 +176,32 @@ public class GetImageJavaCV {
         } catch (FrameGrabber.Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    /**
+     * Get a Mat from the screen at regular intervals.
+     * @param region the region to capture
+     * @param intervalSeconds how often to capture the screen
+     * @param totalSecondsToRun total time to capture screenshots
+     * @return a collection of Mat objects
+     */
+    public MatVector getMatsFromScreen(Region region, double intervalSeconds, double totalSecondsToRun) {
+        MatVector matVector = new MatVector();
+        int totalIterations = (int) (totalSecondsToRun / intervalSeconds);
+        for (int i = 0; i < totalIterations; i++) {
+            long startTime = System.currentTimeMillis();
+            Mat mat = getMatFromScreen(region); // take a screenshot
+            matVector.push_back(mat);
+            long elapsedTime = System.currentTimeMillis() - startTime;
+            long sleepTime = Math.max(0, (long) (intervalSeconds * 1000 - elapsedTime));
+            try {
+                Thread.sleep(sleepTime); // Sleep for the adjusted sleep time
+            } catch (InterruptedException e) {
+                // Handle interrupted exception if needed
+                e.printStackTrace();
+            }
+        }
+        return matVector;
     }
 
 }

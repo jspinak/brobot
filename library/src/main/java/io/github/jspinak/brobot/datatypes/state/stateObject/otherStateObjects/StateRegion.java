@@ -26,7 +26,7 @@ public class StateRegion implements StateObject {
     private int staysVisibleAfterClicked = 100;
     private int probabilityExists = 100; // probability something can be acted on in this region
     private int timesActedOn = 0;
-    private Position position = new Position(50, 50);
+    private Position position = new Position(.5, .5); // click position within region
     private Anchors anchors = new Anchors();
     private String mockText = "mock text";
     private MatchHistory matchHistory = new MatchHistory();
@@ -75,7 +75,7 @@ public class StateRegion implements StateObject {
         private String name = "";
         private Region searchRegion = new Region();
         private String ownerStateName = NullState.Name.NULL.toString();
-        private Position position = new Position(50, 50);
+        private Position position = new Position(.5, .5);
 
         // Positions.Name: the border of the region to define
         // Position: the location in the region to use as a defining point
