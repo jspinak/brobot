@@ -9,12 +9,8 @@ import io.github.jspinak.brobot.actions.methods.basicactions.find.contours.Conto
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
-import io.github.jspinak.brobot.illustratedHistory.Illustrations;
-import io.github.jspinak.brobot.illustratedHistory.draw.DrawMatch;
-import io.github.jspinak.brobot.imageUtils.MatVisualize;
 import io.github.jspinak.brobot.reports.Report;
 import org.bytedeco.opencv.opencv_core.Mat;
-import org.bytedeco.opencv.opencv_core.Scalar;
 import org.sikuli.script.Match;
 import org.springframework.stereotype.Component;
 
@@ -35,20 +31,18 @@ public class FindMotion {
     private MatchOps matchOps;
     private GetSceneAnalysisCollection getSceneAnalysisCollection;
     private SelectMovingObject selectMovingObject;
-    private MatVisualize matVisulize;
     private SelectRegions selectRegions;
-    private DrawMatch drawMatch;
+    private final IllustrateMotion illustrateMotion;
 
-    public FindMotion(DetectMotion detectMotion, MatchOps matchOps,
-                      GetSceneAnalysisCollection getSceneAnalysisCollection, SelectMovingObject selectMovingObject,
-                      MatVisualize matVisulize, SelectRegions selectRegions, DrawMatch drawMatch) {
+    public FindMotion(DetectMotion detectMotion, MatchOps matchOps, GetSceneAnalysisCollection getSceneAnalysisCollection,
+                      SelectMovingObject selectMovingObject, SelectRegions selectRegions,
+                      IllustrateMotion illustrateMotion) {
         this.detectMotion = detectMotion;
         this.matchOps = matchOps;
         this.getSceneAnalysisCollection = getSceneAnalysisCollection;
         this.selectMovingObject = selectMovingObject;
-        this.matVisulize = matVisulize;
         this.selectRegions = selectRegions;
-        this.drawMatch = drawMatch;
+        this.illustrateMotion = illustrateMotion;
     }
 
     /**
@@ -95,24 +89,31 @@ public class FindMotion {
         return matches;
     }
 
-    private List<Match> getRegionsOfChange(SceneAnalysisCollection sceneAnalysisCollection, int index1, int index2,
+    /**
+     * Detects motion, draws contours around the areas of motion, and returns these contours as Match objects.
+     * @param sceneAnalysisCollection the scenes to analyze
+     * @param index1 the first scene index
+     * @param index2 the second scene index
+     * @param actionOptions gives us the min and max areas for contours
+     * @param searchRegions sets the region for acceptable contours
+     * @return a list of Match objects representing areas of motion
+     */
+    public List<Match> getRegionsOfChange(SceneAnalysisCollection sceneAnalysisCollection, int index1, int index2,
                                            ActionOptions actionOptions, List<Region> searchRegions) {
         Mat scene1 = sceneAnalysisCollection.getSceneAnalyses().get(index1).getAnalysis(BGR, SCENE);
         Mat scene2 = sceneAnalysisCollection.getSceneAnalyses().get(index2).getAnalysis(BGR, SCENE);
         if (searchRegions.isEmpty()) searchRegions.add(new Region(0, 0, scene1.cols(), scene1.rows()));
-        Mat absdiff = detectMotion.getAbsdiff(scene1, scene2);
+        Mat absdiff = detectMotion.getDynamicPixelMask(scene1, scene2);
         Contours contours = new Contours.Builder()
                 .setBgrFromClassification2d(absdiff) // absdiff works just as well for contours as the BGR_CLASSIFICATION_2D Mat would
                 .setMinArea(actionOptions.getMinArea())
                 .setMaxArea(actionOptions.getMaxArea())
                 .setSearchRegions(searchRegions)
                 .build();
-        Illustrations illustrations = sceneAnalysisCollection.getSceneAnalyses().get(index2).getIllustrations();
-        illustrations.setMotion(absdiff);
-        Mat motionWithMatches = absdiff.clone();
-        drawMatch.drawMatches(motionWithMatches, contours.getMatches(), new Scalar(254, 183, 146, 0));
-        matVisulize.writeMatToHistory(motionWithMatches, "motionWithMatches");
+        illustrateMotion.illustrateMotion(sceneAnalysisCollection, index2, absdiff, contours);
         return contours.getMatches();
     }
+
+
 
 }
