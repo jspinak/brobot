@@ -1,5 +1,6 @@
 package io.github.jspinak.brobot.buildStateStructure.buildWithoutNames;
 
+import io.github.jspinak.brobot.imageUtils.MatOps;
 import io.github.jspinak.brobot.imageUtils.MatVisualize;
 import org.springframework.stereotype.Component;
 
@@ -14,7 +15,7 @@ public class FindScreen {
     private final MatVisualize matVisualize;
     private final DecisionMatBuilder decisionMatBuilder;
 
-    private final int minimumChangedPixelsForNewScreen = 1000000;
+    private final int minimumChangedPixelsForNewScreen = 200000;
 
     public FindScreen(GetScreenObservation getScreenObservation, ScreenObservations screenObservations,
                       TransitionImageRepo transitionImageRepo, MatVisualize matVisualize,

@@ -54,6 +54,14 @@ public class SceneAnalysisCollection {
         return sceneAnalyses.stream().map(SceneAnalysis::getScene).toList();
     }
 
+    public List<Mat> getAllScenesAsBGR() {
+        List<Mat> mats = new ArrayList<>();
+        for (SceneAnalysis sceneAnalysis : sceneAnalyses) {
+            mats.add(sceneAnalysis.getScene().getBgr());
+        }
+        return mats;
+    }
+
     public Optional<Mat> getLastSceneBGR() {
         List<Scene> scenes = getScenes();
         if (scenes.isEmpty()) {

@@ -4,18 +4,9 @@ import io.github.jspinak.brobot.actions.actionExecution.Action;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.datatypes.primitives.image.Image;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
-import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
-import io.github.jspinak.brobot.imageUtils.MatVisualize;
-import io.github.jspinak.brobot.imageUtils.PixelSimilarity;
-import org.bytedeco.opencv.global.opencv_core;
-import org.bytedeco.opencv.opencv_core.Mat;
-import org.bytedeco.opencv.opencv_core.Scalar;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
-
-import static org.bytedeco.opencv.global.opencv_core.absdiff;
-import static org.bytedeco.opencv.global.opencv_core.countNonZero;
+import java.util.Set;
 
 @Component
 public class GetScreenObservations {

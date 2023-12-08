@@ -71,7 +71,8 @@ public class IllustrationManager {
              */
             drawRect.drawRectAroundMatch(ill, searchRegions, new Scalar(235, 206, 135, 0)); // the search regions
             drawContours.draw(sceneAnalysis);
-            if (actionOptions.getFind() == MOTION) drawMatch.drawMatches(ill.getMatchesOnScene(), sceneAnalysis.getMatchList());
+            if (actionOptions.getFind() == MOTION || actionOptions.getFind() == REGIONS_OF_MOTION)
+                drawMatch.drawMatches(ill.getMatchesOnScene(), sceneAnalysis.getMatchList());
             else drawMatch.drawMatches(ill, matches); // draw the matches on the scenes
             if (actionOptions.getAction() == MOVE) draw.drawMove(ill, matches); // draw the move on the scenes
             if (actionOptions.getAction() == DRAG) draw.drawDrag(ill, matches); // draw the drag on the scenes

@@ -69,7 +69,7 @@ public class Sidebar {
 
     private List<Mat> getEntriesForSceneSidebar(Illustrations illustrations, Matches matches, ActionOptions actionOptions, List<Match> matchList) {
         List<Mat> sidebarEntries = new ArrayList<>();
-        if (actionOptions.getFind() == ActionOptions.Find.MOTION) {
+        if (actionOptions.getFind() == ActionOptions.Find.MOTION || actionOptions.getFind() == ActionOptions.Find.REGIONS_OF_MOTION) {
             matchList.forEach(m -> sidebarEntries.add(getMatchForSidebar(illustrations, m)));
             return sidebarEntries;
         }
