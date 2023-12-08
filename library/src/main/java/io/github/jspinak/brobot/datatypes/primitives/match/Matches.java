@@ -105,6 +105,7 @@ public class Matches {
         duration = duration.plus(matches.duration);
         sceneAnalysisCollection.getSceneAnalyses().addAll(matches.sceneAnalysisCollection.getSceneAnalyses()); // = matches.sceneAnalysisCollection;
         danglingSnapshots.addAllSnapshots(matches.getDanglingSnapshots());
+        pixelMatches = matches.pixelMatches;
     }
 
     public void addString(String str) {

@@ -2,6 +2,8 @@ package io.github.jspinak.brobot.imageUtils;
 
 import io.github.jspinak.brobot.reports.Report;
 import org.bytedeco.javacpp.DoublePointer;
+import org.bytedeco.opencv.global.opencv_core;
+import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.*;
 import org.springframework.stereotype.Component;
 
@@ -11,6 +13,7 @@ import java.util.List;
 import java.util.Set;
 
 import static org.bytedeco.opencv.global.opencv_core.*;
+import static org.bytedeco.opencv.global.opencv_imgproc.cvtColor;
 import static org.bytedeco.opencv.opencv_core.Mat.ones;
 
 /**
@@ -102,21 +105,21 @@ public class MatOps3d {
 
     /**
      * Compare each channel of the source Mat to each channel of the comparison Mat.
-     * The 3 channel mask of the comparison is updated and returned.
      *
      * @param src the source Mat
      * @param cmpTo the comparison Mat
-     * @param dst the 3 channel mask to update
+     * @param dst the mask to set
      * @param cmpop the comparison operator
-     * @return the updated 3 channel mask
+     * @return the comparison mask
      */
     public Mat cOmpare(Mat src, Mat cmpTo, Mat dst, int cmpop) {
-        MatVector channels = new MatVector(3);
+        int numberOfChannels = Math.min(src.channels(), cmpTo.channels());
+        MatVector channels = new MatVector(numberOfChannels);
         split(src, channels);
-        MatVector cmpToChannels = new MatVector(3);
+        MatVector cmpToChannels = new MatVector(numberOfChannels);
         split(cmpTo, cmpToChannels);
-        MatVector maskVector = new MatVector(3);
-        for (int i=0; i<3; i++) {
+        MatVector maskVector = new MatVector(numberOfChannels);
+        for (int i=0; i<numberOfChannels; i++) {
             Mat channelMask = new Mat(src.size(), CV_8UC1);
             compare(channels.get(i), cmpToChannels.get(i), channelMask, cmpop);
             maskVector.put(i, channelMask);
@@ -349,6 +352,27 @@ public class MatOps3d {
     public void addColorToMat(Mat original, Mat mask, Scalar colorToAdd) {
         Mat colorMat = createColorMat(original.size(), colorToAdd);
         colorMat.copyTo(original, mask);
+    }
+
+    /**
+     * All channel get the same values.
+     * @param values Max of 9 cell values.
+     * @return the new Mat
+     */
+    public Mat makeTestMat3D(short[] values) {
+        Mat channel1 = MatOps.makeTestMat(values);
+        Mat channel2 = MatOps.makeTestMat(values);
+        Mat channel3 = MatOps.makeTestMat(values);
+        MatVector matVector = new MatVector(channel1, channel2, channel3);
+        return mErge(matVector);
+    }
+
+    public Mat makeTestMat3D(short[] channel1, short[] channel2, short[] channel3) {
+        Mat ch1 = MatOps.makeTestMat(channel1);
+        Mat ch2 = MatOps.makeTestMat(channel2);
+        Mat ch3 = MatOps.makeTestMat(channel3);
+        MatVector matVector = new MatVector(ch1, ch2, ch3);
+        return mErge(matVector);
     }
 
 }
