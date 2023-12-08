@@ -1,25 +1,23 @@
-package io.github.jspinak.brobot.buildStateStructure.buildWithoutNames;
+package io.github.jspinak.brobot.actions.methods.basicactions.find.motion;
 
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.imageUtils.GetImageJavaCV;
 import io.github.jspinak.brobot.imageUtils.MatOps3d;
-import io.github.jspinak.brobot.imageUtils.PixelSimilarity;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.MatVector;
 import org.springframework.stereotype.Component;
 
-import static org.bytedeco.opencv.global.opencv_core.*;
+import static org.bytedeco.opencv.global.opencv_core.CMP_NE;
+import static org.bytedeco.opencv.global.opencv_core.bitwise_not;
 
 @Component
-public class DynamicPixelFinder {
+public class DynamicPixelFinder implements FindDynamicPixels {
 
     private final MatOps3d matOps3d;
-    private final PixelSimilarity pixelSimilarity;
     private final GetImageJavaCV getImage;
 
-    public DynamicPixelFinder(MatOps3d matOps3d, PixelSimilarity pixelSimilarity, GetImageJavaCV getImage) {
+    public DynamicPixelFinder(MatOps3d matOps3d, GetImageJavaCV getImage) {
         this.matOps3d = matOps3d;
-        this.pixelSimilarity = pixelSimilarity;
         this.getImage = getImage;
     }
 
@@ -34,7 +32,7 @@ public class DynamicPixelFinder {
         MatVector masks = new MatVector();
         Mat firstMat = matVector.get(0);
         for (int i=1; i<size; i++) {
-            Mat dynamicPixels = pixelSimilarity.getDynamicPixelMask(firstMat, matVector.get(i));
+            Mat dynamicPixels = matOps3d.cOmpare(firstMat, matVector.get(i), CMP_NE); // find pixels with different values
             masks.push_back(dynamicPixels);
         }
         Mat combinedMask = new Mat();
@@ -70,6 +68,5 @@ public class DynamicPixelFinder {
         bitwise_not(dynamic, fixed);
         return fixed;
     }
-
 
 }
