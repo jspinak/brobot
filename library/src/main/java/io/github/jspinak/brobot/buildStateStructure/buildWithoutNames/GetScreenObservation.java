@@ -1,5 +1,10 @@
 package io.github.jspinak.brobot.buildStateStructure.buildWithoutNames;
 
+import io.github.jspinak.brobot.actions.actionExecution.Action;
+import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
+import io.github.jspinak.brobot.actions.methods.basicactions.find.motion.DynamicPixelFinder;
+import io.github.jspinak.brobot.actions.methods.sikuliWrappers.Wait;
+import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.imageUtils.GetImageJavaCV;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -9,6 +14,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * The goal of this class is to find all images that lead to transitions. These are images that can be acted on
@@ -21,12 +27,14 @@ public class GetScreenObservation {
 
     private final GetImageJavaCV getImageJavaCV;
     private final DynamicPixelFinder dynamicPixelFinder;
+    private final Action action;
 
     private Region usableArea = new Region();
 
-    public GetScreenObservation(GetImageJavaCV getImageJavaCV, DynamicPixelFinder dynamicPixelFinder) {
+    public GetScreenObservation(GetImageJavaCV getImageJavaCV, DynamicPixelFinder dynamicPixelFinder, Action action) {
         this.getImageJavaCV = getImageJavaCV;
         this.dynamicPixelFinder = dynamicPixelFinder;
+        this.action = action;
     }
 
     /*
@@ -51,11 +59,21 @@ public class GetScreenObservation {
     public ScreenObservation initNewScreenObservation(int id) {
         ScreenObservation screenObservation = new ScreenObservation();
         screenObservation.setId(id);
-        // todo wait a few seconds. make getMatFromScreen() an action.
-        Mat screenshot = getImageJavaCV.getMatFromScreen();
-        screenObservation.setScreenshot(screenshot);
-        Mat dynamicPixelMask = dynamicPixelFinder.getDynamicPixelMask(new Region(), .1, 5);
-        screenObservation.setDynamicPixelMask(dynamicPixelMask);
+        ActionOptions observation = new ActionOptions.Builder()
+                .setAction(ActionOptions.Action.FIND)
+                .setFind(ActionOptions.Find.REGIONS_OF_MOTION)
+                .setTimesToRepeatIndividualAction(20)
+                .setPauseBetweenIndividualActions(.2)
+                .setPauseBeforeBegin(3.0)
+                .build();
+        Matches matches = action.perform(observation);
+        Optional<Mat> optScreenshot = matches.getSceneAnalysisCollection().getLastSceneBGR();
+        if (optScreenshot.isEmpty()) screenObservation.setScreenshot(new Mat());
+        else screenObservation.setScreenshot(optScreenshot.get());
+        screenObservation.setMatches(matches);
+        screenObservation.setDynamicPixelMask(matches.getPixelMatches());
+        //Mat dynamicPixelMask = dynamicPixelFinder.getDynamicPixelMask(new Region(), .1, 5);
+        //screenObservation.setDynamicPixelMask(dynamicPixelMask);
         return screenObservation;
     }
 

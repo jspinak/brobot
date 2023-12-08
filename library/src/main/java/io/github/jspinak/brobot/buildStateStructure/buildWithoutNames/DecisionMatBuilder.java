@@ -1,6 +1,7 @@
 package io.github.jspinak.brobot.buildStateStructure.buildWithoutNames;
 
 import io.github.jspinak.brobot.imageUtils.MatBuilder;
+import io.github.jspinak.brobot.imageUtils.MatOps;
 import io.github.jspinak.brobot.imageUtils.MatOps3d;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Scalar;
