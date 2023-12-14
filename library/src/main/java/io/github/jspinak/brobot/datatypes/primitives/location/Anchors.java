@@ -15,4 +15,8 @@ public class Anchors {
     public void add(Anchor anchor) {
         anchors.add(anchor);
     }
+
+    public int size() {
+        return anchors.size();
+    }
 }

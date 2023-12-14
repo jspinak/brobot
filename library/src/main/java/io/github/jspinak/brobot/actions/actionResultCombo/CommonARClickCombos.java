@@ -7,12 +7,12 @@ import io.github.jspinak.brobot.actions.parameterTuning.ParameterThresholds;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.state.state.State;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
-import io.github.jspinak.brobot.primatives.enums.StateEnum;
 import io.github.jspinak.brobot.services.StateService;
 import io.github.jspinak.brobot.manageStates.UnknownState;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -57,19 +57,19 @@ public class CommonARClickCombos {
         return matches.size() > 1 && matches.get(1).isSuccess();
     }
 
-    public boolean clickAndFindState(StateImageObject toClick, StateEnum stateEnum, int numberOfClicks) {
-        return clickAndStateAction(toClick, stateEnum, 1, ActionOptions.Action.FIND, numberOfClicks);
+    public boolean clickAndFindState(StateImageObject toClick, String stateName, int numberOfClicks) {
+        return clickAndStateAction(toClick, stateName, 1, ActionOptions.Action.FIND, numberOfClicks);
     }
 
-    public boolean clickAndVanishState(StateImageObject toClick, StateEnum stateEnum, double maxWait, int numberOfClicks) {
-        return clickAndStateAction(toClick, stateEnum, maxWait, ActionOptions.Action.VANISH, numberOfClicks);
+    public boolean clickAndVanishState(StateImageObject toClick, String stateName, double maxWait, int numberOfClicks) {
+        return clickAndStateAction(toClick, stateName, maxWait, ActionOptions.Action.VANISH, numberOfClicks);
     }
 
-    public boolean clickAndStateAction(StateImageObject toClick, StateEnum stateEnum,
+    public boolean clickAndStateAction(StateImageObject toClick, String stateName,
                                        double maxWait, ActionOptions.Action actionType,
                                        int numberOfClicks) {
-        if (stateEnum == UnknownState.Enum.UNKNOWN) return false; // this could be true but requires additional coding
-        Optional<State> state = stateService.findByName(stateEnum);
+        if (Objects.equals(stateName, UnknownState.Enum.UNKNOWN.toString())) return false; // this could be true but requires additional coding
+        Optional<State> state = stateService.findByName(stateName);
         if (state.isEmpty()) return false;
         ActionResultCombo arCombo = new ActionResultCombo();
         ActionOptions actionOptions1 = commonActionOptions.findAndMultipleClicks(maxWait, numberOfClicks);

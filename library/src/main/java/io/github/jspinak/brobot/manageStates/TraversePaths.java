@@ -1,6 +1,5 @@
 package io.github.jspinak.brobot.manageStates;
 
-import io.github.jspinak.brobot.primatives.enums.StateEnum;
 import io.github.jspinak.brobot.reports.ANSI;
 import io.github.jspinak.brobot.reports.Report;
 import io.github.jspinak.brobot.services.StateTransitionsService;
@@ -21,7 +20,7 @@ public class TraversePaths {
     private DoTransition doTransition;
     private StateTransitionsService stateTransitionsService;
 
-    private StateEnum failedTransitionStartState = NULL;
+    private String failedTransitionStartState = NULL.toString();
 
     public TraversePaths(DoTransition doTransition, StateTransitionsService stateTransitionsService) {
         this.doTransition = doTransition;
@@ -38,7 +37,7 @@ public class TraversePaths {
         return true;
     }
 
-    boolean finishTransition(StateEnum stateToOpen) {
+    boolean finishTransition(String stateToOpen) {
         Optional<StateTransitions> optToStateTransitions = stateTransitionsService.getTransitions(stateToOpen);
         if (optToStateTransitions.isEmpty()) {
             Report.print(Report.OutputLevel.HIGH,"'to state' " + stateToOpen + " not a valid transition", ANSI.RED);

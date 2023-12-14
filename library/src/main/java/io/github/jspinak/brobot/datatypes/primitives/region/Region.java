@@ -6,7 +6,6 @@ import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.St
 import io.github.jspinak.brobot.datatypes.state.NullState;
 import lombok.Getter;
 import lombok.Setter;
-import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Rect;
 import org.sikuli.script.Match;
 import org.sikuli.script.Screen;
@@ -64,14 +63,14 @@ public class Region extends org.sikuli.script.Region implements Comparable<Regio
 
     public StateRegion inNullState() {
         return new StateRegion.Builder()
-                .inState(NullState.Name.NULL)
+                .inState(NullState.Name.NULL.toString())
                 .withSearchRegion(this)
                 .build();
     }
 
     private void setXY2() {
-        x2 = x + w - 1;
-        y2 = y + h - 1;
+        x2 = x + w;
+        y2 = y + h;
     }
 
     public void setXYWH(int x, int y, int w, int h) {
@@ -94,12 +93,12 @@ public class Region extends org.sikuli.script.Region implements Comparable<Regio
 
     public void setX2(int x2) {
         this.x2 = x2;
-        w = x2 - x + 1;
+        w = x2 - x;
     }
 
     public void setY2(int y2) {
         this.y2 = y2;
-        h = y2 - y + 1;
+        h = y2 - y;
     }
 
     @Override
@@ -109,11 +108,6 @@ public class Region extends org.sikuli.script.Region implements Comparable<Regio
         int xDiff = this.x - comparesTo.x;
         if (yDiff != 0) return yDiff;
         return xDiff;
-    }
-
-    @Override
-    public String toString() {
-        return "x.y.w.h = "+x+"."+y+"."+w+"."+h;
     }
 
     public boolean defined() {
@@ -259,6 +253,22 @@ public class Region extends org.sikuli.script.Region implements Comparable<Regio
         Optional<Rect> rect = getOverlappingRect(r.getJavaCVRect());
         if (rect.isEmpty()) return Optional.empty();
         return Optional.of(new Region(rect.get()));
+    }
+
+    public Region getUnion(Region r) {
+        int x = Math.min(this.x, r.x);
+        int y = Math.min(this.y, r.y);
+        int x2 = Math.max(this.x + this.w, r.x + r.w);
+        int y2 = Math.max(this.y + this.h, r.y + r.h);
+        return new Region(x, y, x2-x, y2-y);
+    }
+
+    public void setAsUnion(Region r) {
+        Region union = getUnion(r);
+        this.x = union.x;
+        this.y = union.y;
+        this.w = union.w;
+        this.h = union.h;
     }
 
     public Location getLocation() {

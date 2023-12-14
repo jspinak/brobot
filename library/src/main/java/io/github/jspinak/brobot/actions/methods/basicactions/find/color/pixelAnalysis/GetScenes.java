@@ -94,7 +94,7 @@ public class GetScenes {
      * - scenes are passed as parameters
      *
      * If these conditions don't exclude taking a screenshot, it's ok to take one when either
-     * - the action is FIND.Color, FIND.Histogram, or CLASSIFY (it's necessary for execution)
+     * - the action is FIND.Color, FIND.Histogram, FIND.REGIONS_OF_MOTION, or CLASSIFY (it's necessary for execution)
      * - illustration is allowed for this action (it's necessary for illustration)
      *
      * Otherwise, it's not ok to take a screenshot. The other methods use Sikuli for execution.
@@ -108,7 +108,8 @@ public class GetScenes {
         if (!objectCollections[0].getScenes().isEmpty()) return false;
         ActionOptions.Action action = actionOptions.getAction();
         ActionOptions.Find find = actionOptions.getFind();
-        if (find == ActionOptions.Find.COLOR || find == ActionOptions.Find.HISTOGRAM || action == ActionOptions.Action.CLASSIFY) return true;
+        if (find == ActionOptions.Find.COLOR || find == ActionOptions.Find.HISTOGRAM
+                || action == ActionOptions.Action.CLASSIFY || find == ActionOptions.Find.REGIONS_OF_MOTION) return true;
         if (illustrateScreenshot.okToIllustrate(actionOptions, objectCollections)) return true;
         return false;
     }

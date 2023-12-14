@@ -1,6 +1,7 @@
 package io.github.jspinak.brobot.imageUtils;
 
 import io.github.jspinak.brobot.actions.BrobotSettings;
+import io.github.jspinak.brobot.datatypes.primitives.image.Image;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.reports.Report;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -72,12 +73,15 @@ public class ImageUtils {
      * @return the path name with the first free filename
      */
     public String getFreePath(String path) {
-        int i = lastFilenumber.containsKey(path)? lastFilenumber.get(path) + 1 : 0;
-        while (fileExists(path + i + ".png")) {
+        int i = lastFilenumber.containsKey(path) ? lastFilenumber.get(path) + 1 : 0;
+        String addToEnd = i==0 ? "" : " -" + i;
+        // there may be files existing before the program was run, check to make sure it's unique
+        while (fileExists(path + addToEnd + ".png")) {
             i++;
+            addToEnd = i==0 ? "" : " -" + i;
         }
         lastFilenumber.put(path, i);
-        return path + i;
+        return path + addToEnd;
     }
 
     public String getFreePath(String prefix, String suffix) {
@@ -106,6 +110,17 @@ public class ImageUtils {
     public int getFreeNumber(String path) {
         getFreePath(path);
         return lastFilenumber.get(path);
+    }
+
+    /**
+     * Will overwrite a file with the same name.
+     * @param mat mat to save as image
+     * @param name name without filetype
+     * @return an image of the saved png file
+     */
+    public Image matToImage(Mat mat, String name) {
+        imwrite(name + ".png", mat);
+        return new Image(name);
     }
 
     public boolean writeWithUniqueFilename(Mat mat, String nameWithoutFiletype) {
