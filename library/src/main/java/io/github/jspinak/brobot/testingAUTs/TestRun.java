@@ -1,14 +1,9 @@
 package io.github.jspinak.brobot.testingAUTs;
 
 import com.google.gson.Gson;
-import io.github.jspinak.brobot.datatypes.primitives.image.Image;
-import io.github.jspinak.brobot.primatives.enums.StateEnum;
 import lombok.Getter;
 import lombok.Setter;
-
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -37,15 +32,15 @@ public class TestRun {
     private String description;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
-    private Set<StateEnum> startStates;
-    private Set<StateEnum> endStates;
+    private Set<String> startStates;
+    private Set<String> endStates;
     private String recordingFilename;
 
     /*
     Each Image can have various png files. This should be specified in the backend
     Spring Boot application along with the locations of the files in the cloud.
      */
-    public TestRun(String description, LocalDateTime startTime, Set<StateEnum> startStates) {
+    public TestRun(String description, LocalDateTime startTime, Set<String> startStates) {
         this.description = description;
         this.startTime = startTime;
         this.startStates = startStates;

@@ -2,13 +2,19 @@ package io.github.jspinak.brobot.imageUtils;
 
 import io.github.jspinak.brobot.reports.Report;
 import org.bytedeco.javacpp.DoublePointer;
+import org.bytedeco.opencv.global.opencv_core;
+import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.*;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
 import static org.bytedeco.opencv.global.opencv_core.*;
+import static org.bytedeco.opencv.global.opencv_imgproc.cvtColor;
+import static org.bytedeco.opencv.opencv_core.Mat.ones;
 
 /**
  * 3d versions of common OpenCV operations that only accept one channel.
@@ -99,21 +105,21 @@ public class MatOps3d {
 
     /**
      * Compare each channel of the source Mat to each channel of the comparison Mat.
-     * The 3 channel mask of the comparison is updated and returned.
      *
      * @param src the source Mat
      * @param cmpTo the comparison Mat
-     * @param dst the 3 channel mask to update
+     * @param dst the mask to set
      * @param cmpop the comparison operator
-     * @return the updated 3 channel mask
+     * @return the comparison mask
      */
     public Mat cOmpare(Mat src, Mat cmpTo, Mat dst, int cmpop) {
-        MatVector channels = new MatVector(3);
+        int numberOfChannels = Math.min(src.channels(), cmpTo.channels());
+        MatVector channels = new MatVector(numberOfChannels);
         split(src, channels);
-        MatVector cmpToChannels = new MatVector(3);
+        MatVector cmpToChannels = new MatVector(numberOfChannels);
         split(cmpTo, cmpToChannels);
-        MatVector maskVector = new MatVector(3);
-        for (int i=0; i<3; i++) {
+        MatVector maskVector = new MatVector(numberOfChannels);
+        for (int i=0; i<numberOfChannels; i++) {
             Mat channelMask = new Mat(src.size(), CV_8UC1);
             compare(channels.get(i), cmpToChannels.get(i), channelMask, cmpop);
             maskVector.put(i, channelMask);
@@ -122,10 +128,29 @@ public class MatOps3d {
         return dst;
     }
 
+    /**
+     * Returns a 3-channel mask of a comparison of the src and cmpTo Mat(s).
+     * @param src first Mat to compare
+     * @param cmpTo second Mat to compare
+     * @param cmpop the comparison operator
+     * @return a 3-channel mask
+     */
+    public Mat cOmpare(Mat src, Mat cmpTo, int cmpop) {
+        Mat mat = new Mat();
+        cOmpare(src, cmpTo, mat, cmpop);
+        return mat;
+    }
+
     public MatVector sPlit(Mat src) {
         MatVector channels = new MatVector(src.channels());
         split(src, channels);
         return channels;
+    }
+
+    public Mat getFirstChannel(Mat src) {
+        MatVector matVector = sPlit(src);
+        Mat firstChannel = matVector.get(0);
+        return firstChannel;
     }
 
     public Mat mErge(MatVector matVector) {
@@ -261,6 +286,93 @@ public class MatOps3d {
         Report.println();
         bitwise_and(indices, mask, onlyIndicesToKeep);
         return onlyIndicesToKeep;
+    }
+
+    public List<Integer> cOuntNonZero(Mat mat) {
+        MatVector matVector = sPlit(mat);
+        List<Integer> counts = new ArrayList<>();
+        for (Mat m : matVector.get()) {
+            counts.add(countNonZero(m));
+        }
+        return counts;
+    }
+
+    public int getMaxNonZeroCellsByChannel(Mat mat) {
+        List<Integer> counts = cOuntNonZero(mat);
+        return Collections.max(counts);
+    }
+
+    public Mat bItwise_and(Mat mat1, Mat mat2) {
+        MatVector vec1 = sPlit(mat1);
+        MatVector vec2 = sPlit(mat2);
+        MatVector andVec = sPlit(new Mat(mat1.size(), mat1.type()));
+        for (int i=0; i<Math.min(vec1.size(),vec2.size()); i++) {
+            if (vec1.get(i).rows() != vec2.get(i).rows()) { // print out mismatch. program will end.
+                System.out.println("rows: " + vec1.get(i).rows() + " " + vec2.get(i).rows());
+                System.out.println("cols: " + vec1.get(i).cols() + " " + vec2.get(i).cols());
+            }
+            bitwise_and(vec1.get(i), vec2.get(i), andVec.get(i));
+        }
+        return mErge(andVec);
+    }
+
+    public Mat bItwise_or(Mat mat1, Mat mat2) {
+        MatVector vec1 = sPlit(mat1);
+        MatVector vec2 = sPlit(mat2);
+        MatVector vec = sPlit(new Mat(mat1.size(), mat1.type()));
+        for (int i=0; i<Math.min(vec1.size(),vec2.size()); i++) {
+            if (vec1.get(i).rows() != vec2.get(i).rows()) { // print out mismatch. program will end.
+                System.out.println("rows: " + vec1.get(i).rows() + " " + vec2.get(i).rows());
+                System.out.println("cols: " + vec1.get(i).cols() + " " + vec2.get(i).cols());
+            }
+            bitwise_or(vec1.get(i), vec2.get(i), vec.get(i));
+        }
+        return mErge(vec);
+    }
+
+    public Mat bItwise_not(Mat mat1) {
+        MatVector vec1 = sPlit(mat1);
+        MatVector vec = sPlit(new Mat(mat1.size(), mat1.type()));
+        for (int i=0; i<vec1.get().length; i++) {
+            bitwise_not(vec1.get(i), vec.get(i));
+        }
+        return mErge(vec);
+    }
+
+    public static Mat createColorMat(Size size, Scalar colorScalar) {
+        return new Mat(size, CV_8UC3, colorScalar);
+    }
+
+    /**
+     * Add the color to the original Mat where the mask is turned on (255).
+     * @param original the base Mat
+     * @param mask shows where to color the base Mat
+     * @param colorToAdd the color to use
+     */
+    public void addColorToMat(Mat original, Mat mask, Scalar colorToAdd) {
+        Mat colorMat = createColorMat(original.size(), colorToAdd);
+        colorMat.copyTo(original, mask);
+    }
+
+    /**
+     * All channel get the same values.
+     * @param values Max of 9 cell values.
+     * @return the new Mat
+     */
+    public Mat makeTestMat3D(short[] values) {
+        Mat channel1 = MatOps.makeTestMat(values);
+        Mat channel2 = MatOps.makeTestMat(values);
+        Mat channel3 = MatOps.makeTestMat(values);
+        MatVector matVector = new MatVector(channel1, channel2, channel3);
+        return mErge(matVector);
+    }
+
+    public Mat makeTestMat3D(short[] channel1, short[] channel2, short[] channel3) {
+        Mat ch1 = MatOps.makeTestMat(channel1);
+        Mat ch2 = MatOps.makeTestMat(channel2);
+        Mat ch3 = MatOps.makeTestMat(channel3);
+        MatVector matVector = new MatVector(ch1, ch2, ch3);
+        return mErge(matVector);
     }
 
 }

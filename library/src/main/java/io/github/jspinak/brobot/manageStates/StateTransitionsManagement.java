@@ -1,6 +1,5 @@
 package io.github.jspinak.brobot.manageStates;
 
-import io.github.jspinak.brobot.primatives.enums.StateEnum;
 import io.github.jspinak.brobot.reports.Output;
 import io.github.jspinak.brobot.reports.Report;
 import io.github.jspinak.brobot.services.StateTransitionsService;
@@ -26,7 +25,7 @@ public class StateTransitionsManagement {
     private TraversePaths traversePaths;
     private PathManager pathManager;
 
-    Set<StateEnum> activeStates;
+    Set<String> activeStates;
 
     public StateTransitionsManagement(StateTransitionsService stateTransitionsService, PathFinder pathFinder,
                                       StateMemory stateMemory, TraversePaths traversePaths, PathManager pathManager) {
@@ -37,7 +36,7 @@ public class StateTransitionsManagement {
         this.pathManager = pathManager;
     }
 
-    public boolean openState(StateEnum stateToOpen) {
+    public boolean openState(String stateToOpen) {
         Report.format("Open State %s\n", stateToOpen);
         activeStates = stateMemory.getActiveStates();
         // we find the paths once, and then reuse these paths when needed
@@ -64,7 +63,7 @@ public class StateTransitionsManagement {
      * Here, a failed Transition is assumed to always fail, and therefore Path objects with this Transition
      * are removed from the available Paths and not tried again.
      */
-    private boolean recursePaths(Paths paths, StateEnum stateToOpen) {
+    private boolean recursePaths(Paths paths, String stateToOpen) {
         if (paths.isEmpty()) return false;
         if (activeStates.contains(stateToOpen) && traversePaths.finishTransition(stateToOpen)) return true;
         if (traversePaths.traverse(paths.getPaths().get(0))) return true; // false if a transition fails

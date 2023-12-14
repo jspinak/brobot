@@ -58,15 +58,20 @@ public class DrawRect {
     }
 
     public void drawRectAroundMatch(Illustrations illScn, List<Region> searchRegions, Scalar color) {
-        drawRectAroundMatch(illScn.getMatchesOnScene(), searchRegions, color);
-        drawRectAroundMatch(illScn.getMatchesOnClasses(), searchRegions, color);
+        drawRectAroundRegions(illScn.getMatchesOnScene(), searchRegions, color);
+        drawRectAroundRegions(illScn.getMatchesOnClasses(), searchRegions, color);
     }
 
-    public void drawRectAroundMatch(Mat mat, List<Region> searchRegions, Scalar color) {
+    public void drawRectAroundRegions(Mat mat, List<Region> searchRegions, Scalar color) {
         if (mat == null) return;
         for (Region searchRegion : searchRegions) {
             Match match = searchRegion.toMatch();
             drawRectAroundMatch(mat, match, color);
         }
+    }
+
+    public void drawRectAroundRegion(Mat mat, Region region, Scalar color) {
+        if (mat == null) return;
+        drawRectAroundMatch(mat, region.toMatch(), color);
     }
 }

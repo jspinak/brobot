@@ -122,6 +122,10 @@ public class Find implements ActionInterface {
             matches.addAllResults(useDefinedRegion.useRegion(objectCollections[0]));
             return;
         }
+        /*
+        Execute the find until the exit condition is achieved. For example, a Find.VANISH will execute until
+        the images are no longer found. The results for each execution are added to the Matches object.
+         */
         while (actionLifecycleManagement.continueActionIfNotFound(actionId, matches)) {
             //Report.println(""+ actionLifecycleManagement.getCompletedRepetitions(actionId));
             mockStatus.addMockPerformed();

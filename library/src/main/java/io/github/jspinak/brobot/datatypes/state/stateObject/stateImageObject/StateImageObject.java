@@ -4,6 +4,7 @@ import io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles
 import io.github.jspinak.brobot.buildStateStructure.buildFromNames.attributes.AttributeData;
 import io.github.jspinak.brobot.buildStateStructure.buildFromNames.attributes.AttributeTypes;
 import io.github.jspinak.brobot.buildStateStructure.buildFromNames.attributes.ImageAttributes;
+import io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.screenObservations.TransitionImage;
 import io.github.jspinak.brobot.datatypes.primitives.dynamicImage.DynamicImage;
 import io.github.jspinak.brobot.datatypes.primitives.image.Image;
 import io.github.jspinak.brobot.datatypes.primitives.location.Anchor;
@@ -16,11 +17,8 @@ import io.github.jspinak.brobot.datatypes.primitives.regionImagePairs.RegionImag
 import io.github.jspinak.brobot.datatypes.state.NullState;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import io.github.jspinak.brobot.datatypes.state.stateObject.StateObject;
-import io.github.jspinak.brobot.primatives.enums.StateEnum;
-import io.github.jspinak.brobot.reports.Report;
 import lombok.Getter;
 import lombok.Setter;
-import org.bytedeco.opencv.opencv_core.Mat;
 
 import java.util.*;
 
@@ -43,7 +41,7 @@ public class StateImageObject implements StateObject {
     // the index is a unique identifier used for classification matrices
     private int index;
     // ownerStateName is set by the State when the object is added
-    private StateEnum ownerStateName;
+    private String ownerStateName;
     //private int staysVisibleAfterClicked = 100; //probability
     private int timesActedOn = 0;
     private MatchHistory matchHistory = new MatchHistory();
@@ -73,6 +71,11 @@ public class StateImageObject implements StateObject {
     building the initial State structure (States and Transitions) from image filenames and screenshots.
      */
     private ImageAttributes attributes = new ImageAttributes();
+
+    // primarily used when creating state structures without names
+    private TransitionImage transitionImage;
+    private Set<String> statesToEnter = new HashSet<>();
+    private Set<String> statesToExit = new HashSet<>();
 
     private StateImageObject() {}
 
@@ -176,7 +179,7 @@ public class StateImageObject implements StateObject {
     public static class Builder {
         private String name = "";
         private int index;
-        private StateEnum ownerStateName;
+        private String ownerStateName;
         private MatchHistory matchHistory = new MatchHistory();
         private SearchRegions searchRegions = new SearchRegions();
         private boolean fixed = true; // set to true as of 1.0.2
@@ -189,6 +192,7 @@ public class StateImageObject implements StateObject {
         private Position position = new Position(.5, .5);
         private boolean shared = false;
         private Anchors anchors = new Anchors();
+        private TransitionImage transitionImage;
 
         public Builder called(String name) {
             this.name = name;
@@ -210,7 +214,7 @@ public class StateImageObject implements StateObject {
             return this;
         }
 
-        public Builder inState(StateEnum stateName) {
+        public Builder inState(String stateName) {
             this.ownerStateName = stateName;
             return this;
         }
@@ -256,6 +260,10 @@ public class StateImageObject implements StateObject {
             return withImage(images);
         }
 
+        public Builder withImages(List<Image> images) {
+            return withImage(images.toArray(new Image[0]));
+        }
+
         public Builder setBaseProbabilityExists(int prob) {
             baseProbabilityExists = prob;
             return this;
@@ -297,6 +305,11 @@ public class StateImageObject implements StateObject {
             return this;
         }
 
+        public Builder withTransitionImage(TransitionImage transitionImage) {
+            this.transitionImage = transitionImage;
+            return this;
+        }
+
         /*
         When no dynamic inside image exists, set the inside image of the dynamic image to the static image provided.
         This makes it easier to initialize images, as a dynamic image is not required. Instead, the user can just
@@ -327,13 +340,14 @@ public class StateImageObject implements StateObject {
             stateImageObject.position = position;
             stateImageObject.shared = shared;
             stateImageObject.anchors = anchors;
+            stateImageObject.transitionImage = transitionImage;
             return stateImageObject;
         }
 
         public StateImageObject generic() {
             StateImageObject stateImageObject = new StateImageObject();
             stateImageObject.name = "generic";
-            stateImageObject.ownerStateName = NullState.Name.NULL;
+            stateImageObject.ownerStateName = NullState.Name.NULL.toString();
             return stateImageObject;
         }
 

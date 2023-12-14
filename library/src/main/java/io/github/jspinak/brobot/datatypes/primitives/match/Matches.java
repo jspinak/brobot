@@ -11,17 +11,13 @@ import io.github.jspinak.brobot.datatypes.primitives.text.Text;
 import io.github.jspinak.brobot.datatypes.state.NullState;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
-import io.github.jspinak.brobot.primatives.enums.StateEnum;
 import lombok.Data;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.sikuli.script.Match;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -50,7 +46,7 @@ public class Matches {
     private List<MatchObject> nonoverlappingMatches = new ArrayList<>();
     private MatchObject bestMatch = null; // query returns an Optional in case there are no matches
     private ActionOptions actionOptions; // the action options used to find the matches
-    private List<StateEnum> activeStates = new ArrayList<>();
+    private List<String> activeStates = new ArrayList<>();
     private Text text = new Text();
     private String selectedText = ""; // the String selected from the Text object as the most accurate representation of the text on-screen
     private Duration duration = Duration.ZERO;
@@ -62,6 +58,7 @@ public class Matches {
     private DanglingSnapshots danglingSnapshots = new DanglingSnapshots();
     private SceneAnalysisCollection sceneAnalysisCollection = new SceneAnalysisCollection();
     private Mat pixelMatches; // for motion detection
+    private String outputText = "";
 
     public Matches() {}
 
@@ -106,8 +103,9 @@ public class Matches {
         text.addAll(matches.text);
         activeStates.addAll(matches.activeStates);
         duration = duration.plus(matches.duration);
-        sceneAnalysisCollection.getSceneAnalyses().addAll(matches.sceneAnalysisCollection.getSceneAnalyses()); // = matches.sceneAnalysisCollection;
+        sceneAnalysisCollection.merge(matches.sceneAnalysisCollection);
         danglingSnapshots.addAllSnapshots(matches.getDanglingSnapshots());
+        pixelMatches = matches.pixelMatches;
     }
 
     public void addString(String str) {
@@ -244,8 +242,7 @@ public class Matches {
 
     public Optional<Location> getMedianLocation() {
         Optional<Region> regOpt = getMedian();
-        if (regOpt.isEmpty()) return Optional.empty();
-        return Optional.of(new Location(regOpt.get(), Position.Name.MIDDLEMIDDLE));
+        return regOpt.map(region -> new Location(region, Position.Name.MIDDLEMIDDLE));
     }
 
     public Optional<MatchObject> getClosestTo(Location location) {
@@ -320,7 +317,7 @@ public class Matches {
 
     public boolean hasImageMatches() {
         for (MatchObject matchObject : matchObjects) {
-            if (matchObject.getStateObject().getOwnerStateName() != NullState.Name.NULL) return true;
+            if (!Objects.equals(matchObject.getStateObject().getOwnerStateName(), NullState.Name.NULL.toString())) return true;
         }
         return false;
     }

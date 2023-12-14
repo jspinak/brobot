@@ -70,11 +70,14 @@ public class ActionOptions {
      *   to be accessed by an operation of FIRST, EACH, ALL, and BEST.
      * CUSTOM: user-defined. Must be of type
      *         {@code BiFunction<ActionOptions, List<StateImageObject>, Matches>>}
+     * HISTOGRAM: match the histogram from the input image(s)
+     * MOTION: find the locations of a moving object across screens
+     * REGIONS_OF_MOTION: find all dynamic pixel regions from a series of screens
      *
      * The options that return multiple Matches allow for overlapping Matches.
      */
     public enum Find {
-        FIRST, EACH, ALL, BEST, UNIVERSAL, CUSTOM, HISTOGRAM, COLOR, MOTION
+        FIRST, EACH, ALL, BEST, UNIVERSAL, CUSTOM, HISTOGRAM, COLOR, MOTION, REGIONS_OF_MOTION
     }
     private Find find = Find.FIRST;
     /**
