@@ -1,6 +1,5 @@
 package io.github.jspinak.brobot.manageStates;
 
-import io.github.jspinak.brobot.primatives.enums.StateEnum;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -17,7 +16,7 @@ import java.util.Set;
 @Setter
 public class Path {
 
-    private List<StateEnum> states = new ArrayList<>(); // all states in the path
+    private List<String> states = new ArrayList<>(); // all states in the path
     private List<StateTransition> transitions = new ArrayList<>(); // transitions between the states in the path
     private int score; // lower scores are chosen first when selecting a path
 
@@ -33,28 +32,28 @@ public class Path {
         return states.isEmpty();
     }
 
-    public StateEnum get(int i) {
+    public String get(int i) {
         return states.get(i);
     }
 
-    public void add(StateEnum stateEnum) {
-        states.add(stateEnum);
+    public void add(String stateName) {
+        states.add(stateName);
     }
 
     public void add(StateTransition transition) {
         transitions.add(transition);
     }
 
-    public boolean contains(StateEnum stateEnum) {
-        return states.contains(stateEnum);
+    public boolean contains(String stateName) {
+        return states.contains(stateName);
     }
 
     public void reverse() {
         Collections.reverse(states);
     }
 
-    public boolean remove(StateEnum stateEnum) {
-        return states.remove(stateEnum);
+    public boolean remove(String stateName) {
+        return states.remove(stateName);
     }
 
     public Path getCopy() {
@@ -66,7 +65,7 @@ public class Path {
 
     public void print() {
         System.out.format("(%d)", score);
-        states.forEach(stateEnum -> System.out.format("-> %s ", stateEnum));
+        states.forEach(String -> System.out.format("-> %s ", states));
         System.out.println();
     }
 
@@ -78,20 +77,20 @@ public class Path {
      * @param failedTransitionStartState is a state corresponding to a path where the transition failed.
      * @return a Path object
      */
-    public Path cleanPath(Set<StateEnum> activeStates, StateEnum failedTransitionStartState) {
+    public Path cleanPath(Set<String> activeStates, String failedTransitionStartState) {
         if (states.contains(failedTransitionStartState)) return new Path();
         return trimPath(activeStates);
     }
 
-    public Path trimPath(Set<StateEnum> activeStates) {
+    public Path trimPath(Set<String> activeStates) {
         Path trimmedPath = new Path();
         boolean addState = false;
         int i=0;
-        for (StateEnum stateEnum : states) {
+        for (String stateName : states) {
             // start adding states at an active state
-            if (activeStates.contains(stateEnum)) addState = true;
+            if (activeStates.contains(stateName)) addState = true;
             if (addState) {
-                trimmedPath.add(stateEnum);
+                trimmedPath.add(stateName);
                 trimmedPath.add(transitions.get(i));
             }
             i++;

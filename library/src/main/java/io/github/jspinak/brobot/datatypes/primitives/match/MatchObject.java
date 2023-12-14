@@ -4,7 +4,6 @@ import io.github.jspinak.brobot.datatypes.primitives.location.Anchor;
 import io.github.jspinak.brobot.datatypes.primitives.location.Location;
 import io.github.jspinak.brobot.datatypes.primitives.text.Text;
 import io.github.jspinak.brobot.datatypes.state.stateObject.StateObject;
-import io.github.jspinak.brobot.primatives.enums.StateEnum;
 import lombok.Data;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.sikuli.script.Match;
@@ -58,7 +57,7 @@ public class MatchObject implements Comparable<MatchObject> {
         this.duration = duration;
     }
 
-    public StateEnum getState() {
+    public String getState() {
         return stateObject.getOwnerStateName();
     }
 

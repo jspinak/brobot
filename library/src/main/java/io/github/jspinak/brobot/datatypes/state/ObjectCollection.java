@@ -1,6 +1,5 @@
 package io.github.jspinak.brobot.datatypes.state;
 
-import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.Scene;
 import io.github.jspinak.brobot.datatypes.primitives.image.Image;
 import io.github.jspinak.brobot.datatypes.primitives.location.Location;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
@@ -10,7 +9,6 @@ import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.St
 import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.StateRegion;
 import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.StateString;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
-import io.github.jspinak.brobot.primatives.enums.StateEnum;
 import io.github.jspinak.brobot.reports.Report;
 import lombok.Getter;
 import lombok.Setter;
@@ -145,8 +143,8 @@ public class ObjectCollection {
         return filenames;
     }
 
-    public Set<StateEnum> getAllOwnerStates() {
-        Set<StateEnum> states = new HashSet<>();
+    public Set<String> getAllOwnerStates() {
+        Set<String> states = new HashSet<>();
         stateImages.forEach(sio -> states.add(sio.getOwnerStateName()));
         stateLocations.forEach(sio -> states.add(sio.getOwnerStateName()));
         stateRegions.forEach(sio -> states.add(sio.getOwnerStateName()));
@@ -256,7 +254,7 @@ public class ObjectCollection {
             for (Match match : matches) {
                 this.stateRegions.add(new StateRegion.Builder()
                         .withSearchRegion(new Region(match))
-                        .inState(NULL)
+                        .inState(NULL.toString())
                         .build());
             }
             return this;

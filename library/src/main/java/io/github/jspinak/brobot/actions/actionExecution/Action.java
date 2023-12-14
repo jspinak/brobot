@@ -2,6 +2,7 @@ package io.github.jspinak.brobot.actions.actionExecution;
 
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
+import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
 import io.github.jspinak.brobot.reports.Report;
@@ -133,6 +134,11 @@ public class Action {
     public Matches perform(ActionOptions actionOptions, String... strings) {
         ObjectCollection strColl = new ObjectCollection.Builder().withStrings(strings).build();
         return perform(actionOptions, strColl);
+    }
+
+    public Matches perform(ActionOptions.Action action, Region... regions) {
+        ObjectCollection strColl = new ObjectCollection.Builder().withRegions(regions).build();
+        return perform(action, strColl);
     }
 
 }
