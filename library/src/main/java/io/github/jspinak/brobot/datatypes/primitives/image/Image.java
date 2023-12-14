@@ -35,6 +35,10 @@ public class Image {
         for (Image image : images) imageNames.addAll(image.getImageNames());
     }
 
+    public Image(org.sikuli.script.Image sikuliImage) {
+        imageNames.add(sikuliImage.getName());
+    }
+
     public void addImage(String imageName) {
         this.imageNames.add(imageName);
     }
@@ -83,7 +87,7 @@ public class Image {
 
     public StateImageObject inNullState() {
         return new StateImageObject.Builder()
-                .inState(NullState.Name.NULL)
+                .inState(NullState.Name.NULL.toString())
                 .withImage(getImageNames().toArray(new String[0]))
                 .build();
     }

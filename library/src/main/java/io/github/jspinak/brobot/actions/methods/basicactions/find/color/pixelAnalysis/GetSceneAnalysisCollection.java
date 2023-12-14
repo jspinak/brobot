@@ -70,7 +70,7 @@ public class GetSceneAnalysisCollection {
 
     public Set<StateImageObject> getTargetImages(List<ObjectCollection> images) {
         Set<StateImageObject> toClassify = new HashSet<>();
-        if (images.size() > 0 && !images.get(0).empty()) {
+        if (!images.isEmpty() && !images.get(0).empty()) {
             toClassify.addAll(images.get(0).getStateImages());
         }
         return toClassify;

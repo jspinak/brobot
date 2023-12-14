@@ -1,6 +1,5 @@
 package io.github.jspinak.brobot.manageStates;
 
-import io.github.jspinak.brobot.primatives.enums.StateEnum;
 import io.github.jspinak.brobot.reports.Report;
 import lombok.Getter;
 
@@ -43,7 +42,7 @@ public class Paths {
         return true;
     }
 
-    public Paths cleanPaths(Set<StateEnum> activeStates, StateEnum failedTransitionStartState) {
+    public Paths cleanPaths(Set<String> activeStates, String failedTransitionStartState) {
         Paths newPaths = new Paths();
         paths.forEach(path -> newPaths.addPath(path.cleanPath(activeStates, failedTransitionStartState)));
         return newPaths;
