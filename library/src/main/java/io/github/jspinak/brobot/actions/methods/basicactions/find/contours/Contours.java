@@ -10,6 +10,7 @@ import org.sikuli.script.Match;
 
 import java.util.*;
 
+import static org.bytedeco.opencv.global.opencv_core.max;
 import static org.bytedeco.opencv.global.opencv_core.sumElems;
 import static org.bytedeco.opencv.global.opencv_imgproc.*;
 
@@ -24,41 +25,63 @@ public class Contours {
      */
     private Mat bgrFromClassification2d;
     private List<Region> searchRegions = new ArrayList<>();
-    private int minArea;
-    private int maxArea;
-    private MatVector opencvContours;
-    private List<Rect> unmodifiedContours = new ArrayList<>();
-    private List<Rect> contours = new ArrayList<>();
-    private Map<Integer, Match> matchMap = new HashMap<>();
+    private int minArea; // the smallest area allowed for a contour
+    private int maxArea; // the largest area allowed for a contour. The default of -1 allows for all sizes.
+    private MatVector opencvContours; // the original contours, saved as Mat masks of the specified regions. Rect coordinates are region specific.
+    private List<Rect> screenAdjustedContours = new ArrayList<>(); // the original contours with screen coordinates (instead of region coordinates).
+    private List<Rect> contours = new ArrayList<>(); // contours contained in other contours are removed, too small or too large contours are removed or modified, etc.
+    private Map<Integer, Match> matchMap = new HashMap<>(); // score and match. score is the area when not comparing pixels.
 
-    public List<Rect> getContours() {
-        contours = new ArrayList<>();
-        unmodifiedContours = new ArrayList<>();
+    public void setContours() {
+        screenAdjustedContours = new ArrayList<>();
         opencvContours = new MatVector();
         for (Region region : searchRegions) {
             region.w = Math.min(region.w, bgrFromClassification2d.cols() - region.x); // prevent out of bounds
             region.h = Math.min(region.h, bgrFromClassification2d.rows() - region.y); // prevent out of bounds
-            contours.addAll(getContoursInRegion(region));
+            MatVector regionalContours = getRegionalContourMats(region);
+            opencvContours.put(regionalContours);
+            screenAdjustedContours.addAll(getScreenCoordinateRects(region, opencvContours));
         }
-        return contours;
+        contours = new ArrayList<>();
+        screenAdjustedContours.forEach(rect -> contours.add(new Rect(rect)));
+        contours = getContoursNotContained(contours);
+        matchMap = getMatchMap(contours, minArea, maxArea);
+        //System.out.println("Contours: setContours. sizes of lists = " + opencvContours.size() + " " + screenAdjustedContours.size() + " " + contours.size());
     }
 
-    public List<Rect> getContoursInRegion(Region region) {
-        List<Rect> rectsInRegion = new ArrayList<>();
+    private List<Rect> getContoursNotContained(List<Rect> contours) {
+        List<Rect> notContainedRects = new ArrayList<>();
+        for (Rect rect : contours) {
+            if (isUniqueRect(rect)) notContainedRects.add(rect);
+        }
+        return notContainedRects;
+    }
+
+    private boolean isUniqueRect(Rect rect) {
+        for (Rect contour : contours) {
+            if (rect != contour && new Region(contour).contains(rect)) return false;
+        }
+        return true;
+    }
+
+    private MatVector getRegionalContourMats(Region region) {
         Mat regionalClassMat = new Mat(bgrFromClassification2d, region.getJavaCVRect());
         Mat gray = new Mat(regionalClassMat.size(), regionalClassMat.type());
         if (bgrFromClassification2d.channels() == 3) cvtColor(regionalClassMat, gray, COLOR_BGR2GRAY);
         else gray = regionalClassMat;
         MatVector regionalContours = new MatVector();
         findContours(gray, regionalContours, RETR_EXTERNAL, CHAIN_APPROX_SIMPLE);
-        opencvContours.put(regionalContours);
+        return regionalContours;
+    }
+
+    public List<Rect> getScreenCoordinateRects(Region region, MatVector regionalContours) {
+        List<Rect> rectsWithScreenCoordinates = new ArrayList<>();
         for (int i = 0; i < regionalContours.size(); i++) {
             Rect baseRect = boundingRect(regionalContours.get(i));
             Rect rect = new Rect(baseRect.x() + region.getX(), baseRect.y() + region.getY(), baseRect.width(), baseRect.height());
-            rectsInRegion.add(rect);
-            unmodifiedContours.add(rect);
+            rectsWithScreenCoordinates.add(rect);
         }
-        return rectsInRegion;
+        return rectsWithScreenCoordinates;
     }
 
     private boolean minAreaOK(Rect contour, int minArea) {
@@ -72,13 +95,13 @@ public class Contours {
      */
     private boolean maxAreaOK(Rect contour, int maxArea) {
         if (maxArea < 0) return true;
-        if (maxArea == 0) return false;
         return contour.width() * contour.height() <= maxArea;
     }
 
     private List<Rect> partitionLargeContour(Rect rect, int maxArea) {
         List<Rect> contours = new ArrayList<>();
-        if (maxAreaOK(rect, maxArea)) {
+        if (maxArea == 0) return contours;
+        if (maxAreaOK(rect, maxArea)) { // if ok, just return the Rect
             contours.add(rect);
             return contours;
         }
@@ -104,10 +127,20 @@ public class Contours {
         return contours;
     }
 
-    public List<Match> getMatches() {
+    /**
+     * Sorts by largest score. Score can include pixel comparisons, or look at size only. The largest score, or
+     * largest size Match, is returned first.
+     * @return a list of Match objects.
+     */
+    public List<Match> getMatchList() {
+        return matchMap.values().stream().sorted(Comparator.comparing(Match::getScore).reversed()).toList();
+    }
+
+    public Map<Integer, Match> getMatchMap(List<Rect> contours, int minArea, int maxArea) {
+        Map<Integer, Match> matchMap = new HashMap<>();
+        if (maxArea == 0) return matchMap;
         int m = 0;
-        for (int i=0; i<contours.size(); i++) {
-            Rect contour = contours.get(i);
+        for (Rect contour : contours) {
             if (minAreaOK(contour, minArea)) {
                 List<Rect> partitionedContours = partitionLargeContour(contour, maxArea);
                 for (Rect partitionedContour : partitionedContours) {
@@ -120,7 +153,7 @@ public class Contours {
                 }
             }
         }
-        return matchMap.values().stream().sorted(Comparator.comparing(Match::getScore).reversed()).toList();
+        return matchMap;
     }
 
     /*
@@ -165,7 +198,7 @@ public class Contours {
         private Mat bgrFromClassification2d;
         private List<Region> searchRegions = new ArrayList<>();
         private int minArea;
-        private int maxArea;
+        private int maxArea = -1;
         private MatVector opencvContours;
         private final List<Rect> unmodifiedContours = new ArrayList<>();
         private final List<Rect> contours = new ArrayList<>();
@@ -191,6 +224,11 @@ public class Contours {
             return this;
         }
 
+        public Builder setSearchRegions(Region... regions) {
+            this.searchRegions.addAll(List.of(regions));
+            return this;
+        }
+
         public Builder setMinArea(int minArea) {
             this.minArea = minArea;
             return this;
@@ -210,10 +248,10 @@ public class Contours {
             contours.minArea = minArea;
             contours.maxArea = maxArea;
             contours.opencvContours = opencvContours;
-            contours.unmodifiedContours = unmodifiedContours;
+            contours.screenAdjustedContours = unmodifiedContours;
             contours.contours = this.contours;
             contours.matchMap = matchMap;
-            contours.getContours();
+            contours.setContours();
             return contours;
         }
     }

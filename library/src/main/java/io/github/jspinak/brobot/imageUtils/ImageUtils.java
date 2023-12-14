@@ -8,7 +8,6 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import org.springframework.stereotype.Component;
 
 import javax.imageio.ImageIO;
-import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -74,12 +73,15 @@ public class ImageUtils {
      * @return the path name with the first free filename
      */
     public String getFreePath(String path) {
-        int i = lastFilenumber.containsKey(path)? lastFilenumber.get(path) + 1 : 0;
-        while (fileExists(path + i + ".png")) {
+        int i = lastFilenumber.containsKey(path) ? lastFilenumber.get(path) + 1 : 0;
+        String addToEnd = i==0 ? "" : " -" + i;
+        // there may be files existing before the program was run, check to make sure it's unique
+        while (fileExists(path + addToEnd + ".png")) {
             i++;
+            addToEnd = i==0 ? "" : " -" + i;
         }
         lastFilenumber.put(path, i);
-        return path + i;
+        return path + addToEnd;
     }
 
     public String getFreePath(String prefix, String suffix) {

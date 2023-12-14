@@ -1,5 +1,6 @@
 package io.github.jspinak.brobot.imageUtils;
 
+import io.github.jspinak.brobot.actions.BrobotSettings;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles.ColorStatProfile;
 import io.github.jspinak.brobot.reports.Report;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -21,6 +22,14 @@ import static org.bytedeco.opencv.global.opencv_imgproc.*;
  */
 @Component
 public class MatVisualize {
+
+    private final ImageUtils imageUtils;
+
+    int uniqueNumber = 0; // used to make filenames unique
+
+    public MatVisualize(ImageUtils imageUtils) {
+        this.imageUtils = imageUtils;
+    }
 
     /**
      * The color should be very bright when there is high confidence and very dark when there is low confidence.
@@ -190,8 +199,8 @@ public class MatVisualize {
     }
 
     public void writeMatToHistory(Mat mat, String filename) {
-        imwrite("history/" + filename + new Random().nextInt(1000) + ".png", mat);
+        String path = imageUtils.getFreePath(BrobotSettings.historyPath + filename);
+        imwrite(path + ".png", mat);
     }
-
 
 }

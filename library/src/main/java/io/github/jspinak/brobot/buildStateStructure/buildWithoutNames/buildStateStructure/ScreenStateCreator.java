@@ -1,20 +1,29 @@
-package io.github.jspinak.brobot.buildStateStructure.buildWithoutNames;
+package io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.buildStateStructure;
 
 import io.github.jspinak.brobot.actions.customActions.CommonActions;
+import io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.screenObservations.ScreenObservation;
+import io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.screenObservations.ScreenObservations;
+import io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.screenObservations.TransitionImage;
+import io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.screenObservations.TransitionImageRepo;
 import io.github.jspinak.brobot.datatypes.primitives.image.Image;
+import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.state.State;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
 import io.github.jspinak.brobot.imageUtils.ImageUtils;
+import io.github.jspinak.brobot.imageUtils.MatVisualize;
 import io.github.jspinak.brobot.manageStates.StateTransition;
 import io.github.jspinak.brobot.manageStates.StateTransitions;
 import io.github.jspinak.brobot.services.StateService;
 import io.github.jspinak.brobot.services.StateTransitionsRepository;
+import lombok.Setter;
 import org.bytedeco.opencv.opencv_core.Mat;
+import org.sikuli.basics.Settings;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
 
 @Component
+@Setter
 public class ScreenStateCreator {
 
     private final TransitionImageRepo transitionImageRepo;
@@ -23,16 +32,23 @@ public class ScreenStateCreator {
     private final CommonActions commonActions;
     private final StateTransitionsRepository stateTransitionsRepository;
     private final ImageUtils imageUtils;
+    private final StateIllustrator stateIllustrator;
+    private final MatVisualize matVisualize;
+
+    private boolean saveStateIllustrations;
 
     public ScreenStateCreator(TransitionImageRepo transitionImageRepo, ScreenObservations screenObservations,
                               StateService stateService, CommonActions commonActions,
-                              StateTransitionsRepository stateTransitionsRepository, ImageUtils imageUtils) {
+                              StateTransitionsRepository stateTransitionsRepository, ImageUtils imageUtils,
+                              StateIllustrator stateIllustrator, MatVisualize matVisualize) {
         this.transitionImageRepo = transitionImageRepo;
         this.screenObservations = screenObservations;
         this.stateService = stateService;
         this.commonActions = commonActions;
         this.stateTransitionsRepository = stateTransitionsRepository;
         this.imageUtils = imageUtils;
+        this.stateIllustrator = stateIllustrator;
+        this.matVisualize = matVisualize;
     }
 
     /**
@@ -136,7 +152,9 @@ public class ScreenStateCreator {
             } else {
                 Mat matchImage = transitionImageRepo.getImages().get(imgIndex).getImage();
                 String imageName = Integer.toString(transitionImageRepo.getImages().get(imgIndex).getIndexInRepo());
-                Image image = imageUtils.matToImage(matchImage, imageName);
+                Image image = imageUtils.matToImage(matchImage, Settings.BundlePath + "/" + imageName);
+                TransitionImage transitionImage = transitionImageRepo.getImages().get(imgIndex);
+                Region reg = transitionImage.getRegion();
                 StateImageObject sio = new StateImageObject.Builder()
                         .withImage(image)
                         /*
@@ -144,14 +162,28 @@ public class ScreenStateCreator {
                         To get the states, compare the states in the from-screenshot and the to-screenshot.
                         State differences between the two can be recorded in the transition function.
                          */
-                        .withTransitionImage(transitionImageRepo.getImages().get(imgIndex))
+                        .withTransitionImage(transitionImage)
+                        .addSnapshot(reg.x, reg.y, reg.w, reg.h)
                         .build();
                 stateImages.add(sio);
             }
         });
-        return new State.Builder(name)
+        List<Mat> screens = new ArrayList<>();
+        for (int id : imageSets.getScreens()) {
+            Optional<ScreenObservation> screenOptional = screenObservations.get(id);
+            screenOptional.ifPresent(screenObservation -> screens.add(screenObservation.getScreenshot()));
+        }
+        State newState = new State.Builder(name)
                 .withImages(stateImages)
+                .withScreens(screens)
+                .addIllustrations()
                 .build();
+        for (Mat screen : screens) {
+            StateIllustration stateIllustration = stateIllustrator.drawState(newState, screen);
+            newState.addIllustrations(stateIllustration);
+            matVisualize.writeMatToHistory(stateIllustration.getIllustratedScreenshot(), "illustration of state " + newState.getName());
+        }
+        return newState;
     }
 
     /**

@@ -9,6 +9,7 @@ import io.github.jspinak.brobot.actions.methods.basicactions.find.contours.Conto
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
+import io.github.jspinak.brobot.imageUtils.MatVisualize;
 import io.github.jspinak.brobot.reports.Report;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.MatVector;
@@ -30,15 +31,17 @@ public class FindRegionsOfMotion {
     private final FindDynamicPixels findDynamicPixels;
     private final IllustrateMotion illustrateMotion;
     private final MatchOps matchOps;
+    private final MatVisualize matVisualize;
 
     public FindRegionsOfMotion(GetSceneAnalysisCollection getSceneAnalysisCollection,
                                SelectRegions selectRegions, FindDynamicPixels findDynamicPixels,
-                               IllustrateMotion illustrateMotion, MatchOps matchOps) {
+                               IllustrateMotion illustrateMotion, MatchOps matchOps, MatVisualize matVisualize) {
         this.getSceneAnalysisCollection = getSceneAnalysisCollection;
         this.selectRegions = selectRegions;
         this.findDynamicPixels = findDynamicPixels;
         this.illustrateMotion = illustrateMotion;
         this.matchOps = matchOps;
+        this.matVisualize = matVisualize;
     }
 
     public Matches find(ActionOptions actionOptions, List<ObjectCollection> objectCollections) {
@@ -51,16 +54,16 @@ public class FindRegionsOfMotion {
             Report.println("Not enough scenes to detect motion");
             return matches;
         }
+        //System.out.println("FindRegionsOfMotion: # scenes = " + sceneAnalysisCollection.getSceneAnalyses().size());
         matches.setSceneAnalysisCollection(sceneAnalysisCollection);
         List<Region> searchRegions = selectRegions.getRegionsForAllImages(actionOptions, objectCollections.toArray(new ObjectCollection[0]));
         List<Match> dynamicPixelRegions = getDynamicRegions(sceneAnalysisCollection, actionOptions, searchRegions);
         matches.getSceneAnalysisCollection().getSceneAnalyses().forEach(sA -> {
             sA.setMatchList(dynamicPixelRegions);
-            sA.getIllustrations().setMotion(sceneAnalysisCollection.getResults().clone());
+            sA.getIllustrations().setMotion(sceneAnalysisCollection.getResults());
             sA.getIllustrations().setMotionWithMatches(sA.getScene().getBgr());
         });
         matchOps.addGenericMatchObjects(dynamicPixelRegions, matches, actionOptions); // this is for the last scene
-        matches.sortByMatchScoreDecending();
         matchOps.limitNumberOfMatches(matches, actionOptions);
         matches.setPixelMatches(sceneAnalysisCollection.getResults()); // pixelMatches = dynamic pixels
         return matches;
@@ -76,19 +79,23 @@ public class FindRegionsOfMotion {
      */
     public List<Match> getDynamicRegions(SceneAnalysisCollection sceneAnalysisCollection,
                                           ActionOptions actionOptions, List<Region> searchRegions) {
+        //System.out.println("FindRegionsOfMotion: beginning of getDynamicRegions");
         List<Mat> scenes = sceneAnalysisCollection.getAllScenesAsBGR();
+        //System.out.println("FindRegionsOfMotion: number of scenes = " + scenes.size());
         MatVector scenesVector = new MatVector(scenes.toArray(new Mat[0]));
-        //scenes.forEach(scenesVector::push_back);
         if (searchRegions.isEmpty()) searchRegions.add(new Region(0, 0, scenes.get(0).cols(), scenes.get(0).rows()));
         Mat dynamicPixels = findDynamicPixels.getDynamicPixelMask(scenesVector);
-        sceneAnalysisCollection.setResults(dynamicPixels.clone());
+        matVisualize.writeMatToHistory(dynamicPixels, "dynamicPixels");
+        sceneAnalysisCollection.setResults(dynamicPixels); //.clone()
+        //System.out.println("FindRegionsOfMotion: minArea = " + actionOptions.getMinArea() + " maxArea = " + actionOptions.getMaxArea() + " searchRegions: " + searchRegions);
         Contours contours = new Contours.Builder()
                 .setBgrFromClassification2d(dynamicPixels)
                 .setMinArea(actionOptions.getMinArea())
                 .setMaxArea(actionOptions.getMaxArea())
                 .setSearchRegions(searchRegions)
                 .build();
-        illustrateMotion.illustrateMotion(sceneAnalysisCollection, scenes.size()-1, dynamicPixels, contours);
-        return contours.getMatches();
+        //System.out.println("FindRegionsOfMotion: # of contours = " + contours.getContours().size());
+        sceneAnalysisCollection.setContours(contours);
+        return contours.getMatchList();
     }
 }
