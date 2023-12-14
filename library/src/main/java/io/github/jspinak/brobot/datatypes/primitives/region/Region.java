@@ -255,6 +255,22 @@ public class Region extends org.sikuli.script.Region implements Comparable<Regio
         return Optional.of(new Region(rect.get()));
     }
 
+    public Region getUnion(Region r) {
+        int x = Math.min(this.x, r.x);
+        int y = Math.min(this.y, r.y);
+        int x2 = Math.max(this.x + this.w, r.x + r.w);
+        int y2 = Math.max(this.y + this.h, r.y + r.h);
+        return new Region(x, y, x2-x, y2-y);
+    }
+
+    public void setAsUnion(Region r) {
+        Region union = getUnion(r);
+        this.x = union.x;
+        this.y = union.y;
+        this.w = union.w;
+        this.h = union.h;
+    }
+
     public Location getLocation() {
         return new Location(getTarget().x, getTarget().y);
     }

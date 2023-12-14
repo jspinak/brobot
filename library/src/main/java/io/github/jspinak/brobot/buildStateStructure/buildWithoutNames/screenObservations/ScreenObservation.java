@@ -1,6 +1,7 @@
-package io.github.jspinak.brobot.buildStateStructure.buildWithoutNames;
+package io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.screenObservations;
 
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
+import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import lombok.Getter;
 import lombok.Setter;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -18,8 +19,7 @@ public class ScreenObservation {
     private int id;
     private Mat screenshot;
     private Mat dynamicPixelMask;
-    private Matches matches; // all screenshots taken when evaluating dynamic pixels
-
+    private Matches matches; // includes the SceneAnalysisCollection and all screenshots taken when evaluating dynamic pixels
     private List<TransitionImage> images = new ArrayList<>();
     private Set<Integer> states = new HashSet<>(); // the names of included states
 
@@ -38,5 +38,22 @@ public class ScreenObservation {
         states.add(state);
     }
 
+    public List<Region> getImageRegions() {
+        List<Region> imageMatches = new ArrayList<>();
+        images.forEach(ti -> imageMatches.add(ti.getRegion()));
+        return imageMatches;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder stateNames = new StringBuilder();
+        int i = 0;
+        for (Integer integer : states) {
+            stateNames.append(integer.toString());
+            i++;
+            if (i<states.size()) stateNames.append(",");
+        }
+        return "id=" + id + " | images=" + images.size() + " | states=" + stateNames;
+    }
 
 }

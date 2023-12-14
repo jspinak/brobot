@@ -1,13 +1,13 @@
-package io.github.jspinak.brobot.buildStateStructure.buildWithoutNames;
+package io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.screenTtansitions;
 
+import io.github.jspinak.brobot.actions.methods.basicactions.find.motion.FindDynamicPixels;
 import io.github.jspinak.brobot.imageUtils.MatBuilder;
-import io.github.jspinak.brobot.imageUtils.MatOps;
 import io.github.jspinak.brobot.imageUtils.MatOps3d;
 import org.bytedeco.opencv.opencv_core.Mat;
+import org.bytedeco.opencv.opencv_core.MatVector;
 import org.bytedeco.opencv.opencv_core.Scalar;
 import org.springframework.stereotype.Component;
 
-import static org.bytedeco.opencv.global.opencv_core.CMP_EQ;
 import static org.bytedeco.opencv.global.opencv_core.CMP_NE;
 
 /**
@@ -19,14 +19,13 @@ import static org.bytedeco.opencv.global.opencv_core.CMP_NE;
  * 3. When attempting to transition to another state, the non-dynamic pixels are compared. If the dynamic
  *    regions are vastly different, the screen most likely correspond to different states. Since only non-dynamic
  *    pixels are compared, a fixed pixel on one screen compared to a dynamic pixel on another screen should always
- *    produce a mismatch. Pixels that don't match can be given a different color to mark them visually. This can
- *    be done by subtracting the values of one Mat from another. The differences in matching Mat(s) will be 0 and
- *    produce an entirely black Mat.
+ *    produce a mismatch. Pixels that don't match can be given a different color to mark them visually.
  */
 @Component
 public class DecisionMatBuilder {
 
     private final MatOps3d matOps3d;
+    private final FindDynamicPixels findDynamicPixels;
 
     private int compareId;
     private Mat analysisMat;
@@ -35,8 +34,9 @@ public class DecisionMatBuilder {
     private final Scalar pink = new Scalar(147, 20, 255, 255);
     private final Scalar black = new Scalar(0, 0, 0, 255);
 
-    public DecisionMatBuilder(MatOps3d matOps3d) {
+    public DecisionMatBuilder(MatOps3d matOps3d, FindDynamicPixels findDynamicPixels) {
         this.matOps3d = matOps3d;
+        this.findDynamicPixels = findDynamicPixels;
     }
 
     /**
@@ -55,9 +55,11 @@ public class DecisionMatBuilder {
         analysisMat = newScreen.clone();
         /*
          cOmpare(,,CMP_NE) returns a 3D mask of changed pixels.
-         All changed pixels are marked pink.
+         FindDynamicPixels.getDynamicPixelMask() returns a 1D mask of changed pixels.
+         All changed pixels in the analysis Mat are marked pink.
          */
-        Mat changedMask = matOps3d.cOmpare(newScreen, compareScreen, CMP_NE);
+        MatVector matVector = new MatVector(newScreen, compareScreen);
+        Mat changedMask = findDynamicPixels.getDynamicPixelMask(matVector); //matOps3d.cOmpare(newScreen, compareScreen, CMP_NE);
         matOps3d.addColorToMat(analysisMat, changedMask, pink);
         // color all non-matching mask pixels pink
         Mat diffMask = matOps3d.cOmpare(dynamicPixelMask, compareDynamicMask, CMP_NE);
@@ -65,8 +67,9 @@ public class DecisionMatBuilder {
         // pixels marked as dynamic in both masks get black
         Mat dynamic = matOps3d.bItwise_and(dynamicPixelMask, compareDynamicMask);
         matOps3d.addColorToMat(analysisMat, dynamic, black);
+        Mat changedPixelsInDynamicMask = matOps3d.bItwise_and(changedMask, dynamicPixelMask);
         numberOfChangedPixels = matOps3d.getMaxNonZeroCellsByChannel(changedMask) -
-                                matOps3d.getMaxNonZeroCellsByChannel(dynamicPixelMask);
+                                matOps3d.getMaxNonZeroCellsByChannel(changedPixelsInDynamicMask);
         combineMats(newScreen, compareScreen, analysisMat);
         return this;
     }

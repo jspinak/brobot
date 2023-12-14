@@ -1,20 +1,17 @@
-package io.github.jspinak.brobot.buildStateStructure.buildWithoutNames;
+package io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.buildStateStructure;
 
-import io.github.jspinak.brobot.datatypes.primitives.region.Region;
-import org.bytedeco.opencv.global.opencv_core;
+import io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.screenObservations.ScreenObservation;
+import io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.screenObservations.ScreenObservations;
 import org.bytedeco.opencv.opencv_core.Mat;
-import org.bytedeco.opencv.opencv_core.Scalar;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import static org.bytedeco.opencv.global.opencv_core.absdiff;
 
 @Component
 public class ScreenMatMethods {
-
 
     /**
      * Compare the target screen with every other screen. The first time, you will get a region that is

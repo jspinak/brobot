@@ -1,7 +1,13 @@
-package io.github.jspinak.brobot.buildStateStructure.buildWithoutNames;
+package io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.screenObservations;
 
+import io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.screenObservations.ScreenObservation;
+import io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.screenObservations.TransitionImage;
+import io.github.jspinak.brobot.imageUtils.MatBuilder;
 import io.github.jspinak.brobot.imageUtils.MatImageRecognition;
+import io.github.jspinak.brobot.imageUtils.MatVisualize;
 import lombok.Getter;
+import lombok.Setter;
+import org.bytedeco.opencv.opencv_core.Mat;
 import org.sikuli.script.Match;
 import org.springframework.stereotype.Component;
 
@@ -15,30 +21,45 @@ import java.util.Optional;
  */
 @Component
 @Getter
+@Setter
 public class TransitionImageRepo {
 
     private final MatImageRecognition matImageRecognition;
+    private final MatVisualize matVisualize;
+    private final ScreenObservationManager screenObservationManager;
 
     private List<TransitionImage> images = new ArrayList<>();
+    private boolean saveMatchingImages;
 
-    public TransitionImageRepo(MatImageRecognition matImageRecognition) {
+    public TransitionImageRepo(MatImageRecognition matImageRecognition, MatVisualize matVisualize,
+                               ScreenObservationManager screenObservationManager) {
         this.matImageRecognition = matImageRecognition;
+        this.matVisualize = matVisualize;
+        this.screenObservationManager = screenObservationManager;
     }
 
     /**
      * After finding images on the screen, check to see if any exist in the repo.
      * Save the unique images to the repo and return a list of unique images on the screen.
      */
-    public List<TransitionImage> addUniqueImagesToRepo(ScreenObservation screenObservation, double minSimilarity) {
+    public List<TransitionImage> addUniqueImagesToRepo(ScreenObservation screenObservation) {
         List<TransitionImage> uniqueImages = new ArrayList<>();
         for (TransitionImage img : screenObservation.getImages()) {
-            Optional<TransitionImage> optImg = getMatchingImage(img, minSimilarity, images);
+            Optional<TransitionImage> optImg = getMatchingImage(
+                    img, screenObservationManager.getMaxSimilarityForUniqueImage(), images);
             if (optImg.isEmpty()) {
                 img.setIndexInRepo(images.size());
                 uniqueImages.add(img);
                 images.add(img);
             } else {
                 optImg.get().getScreensFound().add(screenObservation.getId());
+                Mat matchingImages = new MatBuilder()
+                        .addHorizontalSubmats(img.getImage(), optImg.get().getImage())
+                        .setSpaceBetween(4)
+                        .setName("matchingImages")
+                        .build();
+                if (saveMatchingImages) matVisualize.writeMatToHistory(matchingImages, "matching images, screens "+
+                        screenObservation.getId() + ","+optImg.get().getOwnerState());
             }
         }
         return uniqueImages;

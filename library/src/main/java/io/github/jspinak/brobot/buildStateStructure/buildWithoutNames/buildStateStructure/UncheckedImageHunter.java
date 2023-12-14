@@ -1,5 +1,8 @@
-package io.github.jspinak.brobot.buildStateStructure.buildWithoutNames;
+package io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.buildStateStructure;
 
+import io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.screenObservations.ScreenObservation;
+import io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.screenObservations.ScreenObservationManager;
+import io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.screenObservations.ScreenObservations;
 import io.github.jspinak.brobot.manageStates.StateMemory;
 import io.github.jspinak.brobot.manageStates.StateTransitionsManagement;
 import org.springframework.stereotype.Component;
@@ -12,12 +15,15 @@ public class UncheckedImageHunter {
     private final ScreenObservations screenObservations;
     private final StateMemory stateMemory;
     private final StateTransitionsManagement stateTransitionsManagement;
+    private final ScreenObservationManager screenObservationManager;
 
     public UncheckedImageHunter(ScreenObservations screenObservations, StateMemory stateMemory,
-                                StateTransitionsManagement stateTransitionsManagement) {
+                                StateTransitionsManagement stateTransitionsManagement,
+                                ScreenObservationManager screenObservationManager) {
         this.screenObservations = screenObservations;
         this.stateMemory = stateMemory;
         this.stateTransitionsManagement = stateTransitionsManagement;
+        this.screenObservationManager = screenObservationManager;
     }
 
     /**
@@ -41,8 +47,8 @@ public class UncheckedImageHunter {
         states.forEach(state -> stateMemory.addActiveState(Integer.toString(state)));
     }
 
-    public boolean setActiveStatesAndGoToUncheckedState(int currentScreenId, Set<String> uncheckedStates) {
-        setActiveStates(currentScreenId);
+    public boolean setActiveStatesAndGoToUncheckedState(Set<String> uncheckedStates) {
+        setActiveStates(screenObservationManager.getCurrentScreenId());
         for (String state : uncheckedStates) if (stateTransitionsManagement.openState(state)) return true;
         return false;
     }

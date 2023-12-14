@@ -77,6 +77,9 @@ public class ActionExecution {
         time.setStartTime(actionOptions.getAction());
         //int actionId = actionLifecycleManagement.newActionLifecycle(actionOptions);
         wait.wait(actionOptions.getPauseBeforeBegin());
+        /*
+        When the action sequence is repeated, the Matches object will hold the results of the last action.
+         */
         for (int i=0; i<actionOptions.getMaxTimesToRepeatActionSequence(); i++) {
             matches = actionMethod.perform(actionOptions, objectCollections);
             success.set(actionOptions, matches);
