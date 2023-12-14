@@ -7,10 +7,7 @@ import io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles
 import io.github.jspinak.brobot.actions.methods.basicactions.find.contours.Contours;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
-import io.github.jspinak.brobot.imageUtils.MatOps;
-import io.github.jspinak.brobot.imageUtils.MatVisualize;
 import io.github.jspinak.brobot.imageUtils.ShowScoring;
-import io.github.jspinak.brobot.reports.Report;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Rect;
 import org.sikuli.script.Match;
@@ -53,7 +50,7 @@ public class FindPixelMatches {
                 .setMinArea(actionOptions.getMinArea())
                 .setMaxArea(actionOptions.getMaxArea())
                 .build();
-        List<Match> matchList = contours.getMatches();
+        List<Match> matchList = contours.getMatchList();
         if (!contours.getContours().isEmpty()) showScoring(contours, sceneAnalysis);
         Matches matches = new Matches();
         sceneAnalysis.setContours(contours);

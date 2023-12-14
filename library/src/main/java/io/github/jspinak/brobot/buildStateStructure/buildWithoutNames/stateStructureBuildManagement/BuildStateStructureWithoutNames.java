@@ -1,7 +1,13 @@
-package io.github.jspinak.brobot.buildStateStructure.buildWithoutNames;
+package io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.stateStructureBuildManagement;
 
 import io.github.jspinak.brobot.actions.actionExecution.Action;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
+import io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.buildStateStructure.ScreenStateCreator;
+import io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.buildStateStructure.StateStructureInfo;
+import io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.buildStateStructure.UncheckedImageHunter;
+import io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.screenObservations.*;
+import io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.screenTtansitions.FindScreen;
+import io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.screenTtansitions.FindTransition;
 import io.github.jspinak.brobot.datatypes.primitives.image.Image;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import org.springframework.stereotype.Component;
@@ -9,7 +15,7 @@ import org.springframework.stereotype.Component;
 import java.util.Set;
 
 @Component
-public class GetScreenObservations {
+public class BuildStateStructureWithoutNames {
 
     private final GetScreenObservation getScreenObservation;
     private final ScreenObservations screenObservations;
@@ -22,14 +28,10 @@ public class GetScreenObservations {
     private final FindTransition findTransition;
     private final FindScreen findScreen;
 
-    private int currentScreenId = 0;
-    private int nextId = 0; // the id represents the next id number used to initialize an observation
-    private double minSimilarityImages = .95;
-
-    public GetScreenObservations(GetScreenObservation getScreenObservation, ScreenObservations screenObservations,
-                                 Action action, TransitionImageRepo transitionImageRepo, ScreenStateCreator screenStateCreator,
-                                 UncheckedImageHunter uncheckedImageHunter, StateStructureInfo stateStructureInfo,
-                                 GetUsableArea getUsableArea, FindTransition findTransition, FindScreen findScreen) {
+    public BuildStateStructureWithoutNames(GetScreenObservation getScreenObservation, ScreenObservations screenObservations,
+                                           Action action, TransitionImageRepo transitionImageRepo, ScreenStateCreator screenStateCreator,
+                                           UncheckedImageHunter uncheckedImageHunter, StateStructureInfo stateStructureInfo,
+                                           GetUsableArea getUsableArea, FindTransition findTransition, FindScreen findScreen) {
         this.getScreenObservation = getScreenObservation;
         this.screenObservations = screenObservations;
         this.action = action;
@@ -52,15 +54,13 @@ public class GetScreenObservations {
         Region usableArea = getUsableArea.getBoundariesFromExcludedImages(topLeftBoundary, bottomRightBoundary);
         action.perform(ActionOptions.Action.HIGHLIGHT, usableArea);
         getScreenObservation.setUsableArea(usableArea);
-        ScreenObservation startingObservation = getScreenObservation.takeScreenshotAndGetImages(nextId);
-        screenObservations.addScreenObservation(startingObservation);
-        transitionImageRepo.addUniqueImagesToRepo(startingObservation, .7);
-        currentScreenId = nextId; // currentScreenId is the id of the active screen
-        nextId++;
+        System.out.println("BuildStateStructureWithoutNames: before findScreen");
+        findScreen.findCurrentScreenAndSaveIfNew(); // get the first ScreenObservation
+        System.out.println("BuildStateStructureWithoutNames: after findScreen");
         boolean uncheckedImages = true;
         // keep going, adding new observations and associated images, as long as you find a transition to a new, unique screen
         while (true) {
-            findTransition.transitionAndObserve(currentScreenId, nextId, minSimilarityImages);
+            findTransition.transitionAndObserve();
             /* Once we've exhausted all images and not reached a new screen, we should check to see if there are
             unchecked images. If there are no unchecked images, we're finished traversing the application. If there are
             unchecked images, we should try to reach those screens with unchecked images and click them. In both cases,
@@ -81,14 +81,9 @@ public class GetScreenObservations {
                 System.out.println("all images in all states have been checked.");
                 return; // we should probably write the state structure in java or save it with persistence.
             }
-            if (!uncheckedImageHunter.setActiveStatesAndGoToUncheckedState(currentScreenId, uncheckedStates)) {
+            if (!uncheckedImageHunter.setActiveStatesAndGoToUncheckedState(uncheckedStates)) {
                 System.out.println("couldn't reach a state with unchecked images.");
                 return;
-            }
-            currentScreenId = uncheckedImageHunter.getScreenIdFromActiveStates();
-            if (currentScreenId < 0) {
-                currentScreenId = findScreen.findCurrentScreen(nextId, minSimilarityImages); // if the state list didn't give a valid screen, try to recognize the screen visually
-                if (currentScreenId == nextId) nextId++;
             }
         }
     }

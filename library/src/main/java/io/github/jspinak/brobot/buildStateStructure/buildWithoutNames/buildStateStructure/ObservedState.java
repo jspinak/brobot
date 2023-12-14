@@ -1,4 +1,4 @@
-package io.github.jspinak.brobot.buildStateStructure.buildWithoutNames;
+package io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.buildStateStructure;
 
 import lombok.Getter;
 import org.bytedeco.opencv.opencv_core.Mat;
