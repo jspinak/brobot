@@ -110,8 +110,9 @@ public class FindMotion {
                 .setMaxArea(actionOptions.getMaxArea())
                 .setSearchRegions(searchRegions)
                 .build();
-        illustrateMotion.illustrateMotion(sceneAnalysisCollection, index2, absdiff, contours);
-        return contours.getMatches();
+        sceneAnalysisCollection.setContours(contours);
+        illustrateMotion.setMotionMatAndWriteIllustration(sceneAnalysisCollection, index2, absdiff);
+        return contours.getMatchList();
     }
 
 
