@@ -1,10 +1,6 @@
 package io.github.jspinak.brobot.services;
 
-import io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles.SetAllProfiles;
-import io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles.SetKMeansProfiles;
 import io.github.jspinak.brobot.datatypes.state.state.State;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
-import io.github.jspinak.brobot.primatives.enums.StateEnum;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -12,7 +8,9 @@ import java.util.stream.Stream;
 
 /**
  * Manages the State repository.
- * Saves new States and retrieves States given StateEnums.
+ * Saves new States and retrieves States given the state name. StateEnums are typically used for state structures
+ *   built with named image files, or manually built state structures. Strings are used for state structures
+ *   created at run-time or dynamically evolving state structures.
  * Assigns index values to each StateImageObject that are unique to the entire application.
  *   These indices are used with sparse matrices for classification.
  *   If a StateImageObject is not added to the State variable, it will not receive an index and not be
@@ -21,38 +19,38 @@ import java.util.stream.Stream;
 @Component
 public class StateService {
 
-    private Map<StateEnum, State> stateRepository = new HashMap<>();
+    private Map<String, State> stateRepository = new HashMap<>();
 
     public Set<State> findAllStates() {
         return new HashSet<>(stateRepository.values());
     }
 
-    public Set<StateEnum> findAllStateEnums() {
+    public Set<String> findAllStateNames() {
         return stateRepository.keySet();
     }
 
-    public Optional<State> findByName(StateEnum stateName) {
+    public Optional<State> findByName(String stateName) {
         if (stateName == null) return Optional.empty();
         return Optional.ofNullable(stateRepository.get(stateName));
     }
 
-    public Set<State> findSetByName(StateEnum... stateEnums) {
+    public Set<State> findSetByName(String... stateNames) {
         Set<State> states = new HashSet<>();
-        Stream.of(stateEnums).forEach(stateEnum -> findByName(stateEnum).ifPresent(states::add));
+        Stream.of(stateNames).forEach(name -> findByName(name).ifPresent(states::add));
         return states;
     }
 
-    public Set<State> findSetByName(Set<StateEnum> stateEnums) {
-        return findSetByName(stateEnums.toArray(new StateEnum[0]));
+    public Set<State> findSetByName(Set<String> stateNames) {
+        return findSetByName(stateNames.toArray(new String[0]));
     }
 
-    public State[] findArrayByName(Set<StateEnum> stateEnums) {
-        return findArrayByName(stateEnums.toArray(new StateEnum[0]));
+    public State[] findArrayByName(Set<String> stateNames) {
+        return findArrayByName(stateNames.toArray(new String[0]));
     }
 
-    public State[] findArrayByName(StateEnum... stateEnums) {
+    public State[] findArrayByName(String... stateNames) {
         List<State> states = new ArrayList<>();
-        Stream.of(stateEnums).forEach(stateEnum -> findByName(stateEnum).ifPresent(states::add));
+        Stream.of(stateNames).forEach(name -> findByName(name).ifPresent(states::add));
         return states.toArray(new State[0]);
     }
 
@@ -66,11 +64,15 @@ public class StateService {
      */
     public void save(State state) {
         if (state == null) return;
-        stateRepository.put(state.getName(), state);
+        stateRepository.put(state.getNameAsString(), state);
     }
 
     public void resetTimesVisited() {
         stateRepository.values().forEach(state -> state.setTimesVisited(0));
+    }
+
+    public void deleteAllStates() {
+        stateRepository = new HashMap<>();
     }
 
 }

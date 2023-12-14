@@ -28,6 +28,17 @@ public class SceneAnalysisCollection {
     private Mat results;
     private Contours contours;
 
+    /**
+     * Add the SceneAnalysis objects to sceneAnalyses.
+     * The result Mat and the Contours objects are overwritten.
+     * @param sceneAnalysisCollection the SceneAnalysisCollection to merge.
+     */
+    public void merge(SceneAnalysisCollection sceneAnalysisCollection) {
+        this.sceneAnalyses.addAll(sceneAnalysisCollection.getSceneAnalyses());
+        this.results = sceneAnalysisCollection.results;
+        this.contours = sceneAnalysisCollection.contours;
+    }
+
     public void add(SceneAnalysis sceneAnalysis) {
         sceneAnalyses.add(sceneAnalysis);
     }
@@ -52,6 +63,14 @@ public class SceneAnalysisCollection {
 
     public List<Scene> getScenes() {
         return sceneAnalyses.stream().map(SceneAnalysis::getScene).toList();
+    }
+
+    public List<Mat> getAllScenesAsBGR() {
+        List<Mat> mats = new ArrayList<>();
+        for (SceneAnalysis sceneAnalysis : sceneAnalyses) {
+            mats.add(sceneAnalysis.getScene().getBgr());
+        }
+        return mats;
     }
 
     public Optional<Mat> getLastSceneBGR() {

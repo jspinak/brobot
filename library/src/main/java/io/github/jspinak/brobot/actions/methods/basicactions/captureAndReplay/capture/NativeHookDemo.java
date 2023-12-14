@@ -46,31 +46,31 @@ import java.util.logging.Logger;
  * @see GlobalScreen
  * @see NativeKeyListener
  */
-
+// todo: see class CaptureScenesAndInputs
 @Component
 public class NativeHookDemo extends JFrame implements ActionListener, ItemListener,
         NativeKeyListener, NativeMouseInputListener, NativeMouseWheelListener, WindowListener {
     private WriteXmlDomActions writeXmlDomActions;
     /**
      * The Constant serialVersionUID.
-     */
+    **/
     private static final long serialVersionUID = 1541183202160543102L;
 
     /**
      * Menu Items
-     */
+     **/
     private JMenu menuSubListeners;
     private JMenuItem menuItemQuit, menuItemClear;
     private JCheckBoxMenuItem menuItemEnable, menuItemKeyboardEvents, menuItemButtonEvents, menuItemMotionEvents, menuItemWheelEvents;
 
     /**
      * The text area to display event info.
-     */
+     **/
     private JTextArea txtEventInfo;
 
     /**
      * Logging
-     */
+     **/
     private static final Logger log = Logger.getLogger(GlobalScreen.class.getPackage().getName());
 
     private boolean windowClosed = false;
@@ -81,7 +81,7 @@ public class NativeHookDemo extends JFrame implements ActionListener, ItemListen
 
     /**
      * Instantiates a new native hook demo.
-     */
+     **/
     public void start() {
         // Setup the main window.
         setTitle("JNativeHook Demo");
@@ -177,7 +177,7 @@ public class NativeHookDemo extends JFrame implements ActionListener, ItemListen
          * Because Swing components must be accessed on the event dispatching
          * thread, you *MUST* wrap access to Swing components using the
          * SwingUtilities.invokeLater() or EventQueue.invokeLater() methods.
-         */
+        */
         GlobalScreen.setEventDispatcher(new SwingDispatchService());
 
         setVisible(true);
@@ -187,7 +187,7 @@ public class NativeHookDemo extends JFrame implements ActionListener, ItemListen
 
     /**
      * @see ActionListener#actionPerformed(ActionEvent)
-     */
+    **/
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == menuItemQuit) {
             this.dispose();
@@ -198,7 +198,7 @@ public class NativeHookDemo extends JFrame implements ActionListener, ItemListen
 
     /**
      * @see ItemListener#itemStateChanged(ItemEvent)
-     */
+     **/
     public void itemStateChanged(ItemEvent e) {
         ItemSelectable item = e.getItemSelectable();
 
@@ -254,7 +254,7 @@ public class NativeHookDemo extends JFrame implements ActionListener, ItemListen
 
     /**
      * @see NativeKeyListener#nativeKeyPressed(NativeKeyEvent)
-     */
+     **/
     public void nativeKeyPressed(NativeKeyEvent e) {
         appendDisplay(e.paramString());
         String key = StringUtils.substringAfterLast(e.paramString(),"rawCode=");
@@ -263,7 +263,7 @@ public class NativeHookDemo extends JFrame implements ActionListener, ItemListen
 
     /**
      * @see NativeKeyListener#nativeKeyReleased(NativeKeyEvent)
-     */
+     **/
     public void nativeKeyReleased(NativeKeyEvent e) {
         appendDisplay(e.paramString());
         String key = StringUtils.substringAfterLast(e.paramString(),"rawCode=");
@@ -272,7 +272,7 @@ public class NativeHookDemo extends JFrame implements ActionListener, ItemListen
 
     /**
      * @see NativeKeyListener#nativeKeyTyped(NativeKeyEvent)
-     */
+     **/
     public void nativeKeyTyped(NativeKeyEvent e) {
         appendDisplay(e.paramString());
         String keyPressedAsNumber = StringUtils.substringAfterLast(e.paramString(),"rawCode=");
@@ -281,7 +281,7 @@ public class NativeHookDemo extends JFrame implements ActionListener, ItemListen
 
     /**
      * @see NativeMouseListener#nativeMouseClicked(NativeMouseEvent)
-     */
+     **/
     public void nativeMouseClicked(NativeMouseEvent e) {
         appendDisplay(e.paramString());
         writeXmlDomActions.addElement("input", "CLICK", "mouse-clicked", "", e.paramString());
@@ -289,7 +289,7 @@ public class NativeHookDemo extends JFrame implements ActionListener, ItemListen
 
     /**
      * @see NativeMouseListener#nativeMousePressed(NativeMouseEvent)
-     */
+     **/
     public void nativeMousePressed(NativeMouseEvent e) {
         writeXmlDomActions.addElement("input", "MOUSE_DOWN", "mouse-pressed", "", e.paramString());
         appendDisplay(e.paramString());
@@ -297,7 +297,7 @@ public class NativeHookDemo extends JFrame implements ActionListener, ItemListen
 
     /**
      * @see NativeMouseListener#nativeMouseReleased(NativeMouseEvent)
-     */
+     **/
     public void nativeMouseReleased(NativeMouseEvent e) {
         writeXmlDomActions.addElement("input", "MOUSE_UP", "mouse-released", "", e.paramString());
         appendDisplay(e.paramString());
@@ -305,7 +305,7 @@ public class NativeHookDemo extends JFrame implements ActionListener, ItemListen
 
     /**
      * @see NativeMouseMotionListener#nativeMouseMoved(NativeMouseEvent)
-     */
+     **/
     public void nativeMouseMoved(NativeMouseEvent e) {
         appendDisplay(e.paramString());
         writeXmlDomActions.addElement("input", "MOVE", "mouse-moved", "", e.paramString());
@@ -313,7 +313,7 @@ public class NativeHookDemo extends JFrame implements ActionListener, ItemListen
 
     /**
      * @see NativeMouseMotionListener#nativeMouseDragged(NativeMouseEvent)
-     */
+     **/
     public void nativeMouseDragged(NativeMouseEvent e) {
         appendDisplay(e.paramString());
         writeXmlDomActions.addElement("input", "DRAG", "mouse-dragged", "", e.paramString());
@@ -321,7 +321,7 @@ public class NativeHookDemo extends JFrame implements ActionListener, ItemListen
 
     /**
      * @see NativeMouseWheelListener#nativeMouseWheelMoved(NativeMouseWheelEvent)
-     */
+     **/
     public void nativeMouseWheelMoved(NativeMouseWheelEvent e) {
         appendDisplay(e.paramString());
     }
@@ -330,7 +330,7 @@ public class NativeHookDemo extends JFrame implements ActionListener, ItemListen
      * Write information about the <code>NativeInputEvent</code> to the text window.
      *
      * @param output appended to textEventInfo
-     */
+     **/
     private void appendDisplay(final String output) {
         txtEventInfo.append("\n" + output);
 
@@ -350,35 +350,35 @@ public class NativeHookDemo extends JFrame implements ActionListener, ItemListen
      * Unimplemented
      *
      * @see WindowListener#windowActivated(WindowEvent)
-     */
+     **/
     public void windowActivated(WindowEvent e) { /* Do Nothing */ }
 
     /**
      * Unimplemented
      *
      * @see WindowListener#windowClosing(WindowEvent)
-     */
+     **/
     public void windowClosing(WindowEvent e) { /* Do Nothing */ }
 
     /**
      * Unimplemented
      *
      * @see WindowListener#windowDeactivated(WindowEvent)
-     */
+    **/
     public void windowDeactivated(WindowEvent e) { /* Do Nothing */ }
 
     /**
      * Unimplemented
      *
      * @see WindowListener#windowDeiconified(WindowEvent)
-     */
+    **/
     public void windowDeiconified(WindowEvent e) { /* Do Nothing */ }
 
     /**
      * Unimplemented
      *
      * @see WindowListener#windowIconified(WindowEvent)
-     */
+     **/
     public void windowIconified(WindowEvent e) { /* Do Nothing */ }
 
     /**
@@ -386,7 +386,7 @@ public class NativeHookDemo extends JFrame implements ActionListener, ItemListen
      * occurred.
      *
      * @see WindowListener#windowOpened(WindowEvent)
-     */
+     **/
     public void windowOpened(WindowEvent e) {
         // Return the focus to the window.
         requestFocusInWindow();
@@ -419,7 +419,7 @@ public class NativeHookDemo extends JFrame implements ActionListener, ItemListen
      * Finalize and exit the program.
      *
      * @see WindowListener#windowClosed(WindowEvent)
-     */
+     **/
     public void windowClosed(WindowEvent e) {
         try {
             GlobalScreen.unregisterNativeHook();

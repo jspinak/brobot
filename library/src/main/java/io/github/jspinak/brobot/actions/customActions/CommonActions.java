@@ -12,11 +12,11 @@ import io.github.jspinak.brobot.datatypes.state.state.State;
 import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.StateRegion;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
 import io.github.jspinak.brobot.manageStates.StateMemory;
-import io.github.jspinak.brobot.primatives.enums.StateEnum;
 import io.github.jspinak.brobot.services.StateService;
 import io.github.jspinak.brobot.manageStates.UnknownState;
 import org.springframework.stereotype.Component;
 
+import java.util.Objects;
 import java.util.Optional;
 
 import static io.github.jspinak.brobot.actions.actionOptions.ActionOptions.Action.*;
@@ -124,9 +124,9 @@ public class CommonActions {
                 .isSuccess();
     }
 
-    public boolean waitState(double maxWait, StateEnum stateEnum, ActionOptions.Action actionType) {
-        if (stateEnum == UnknownState.Enum.UNKNOWN) return true;
-        Optional<State> state = stateService.findByName(stateEnum);
+    public boolean waitState(double maxWait, String stateName, ActionOptions.Action actionType) {
+        if (Objects.equals(stateName, UnknownState.Enum.UNKNOWN.toString())) return true;
+        Optional<State> state = stateService.findByName(stateName);
         if (state.isEmpty()) return false;
         return action.perform(
                 new ActionOptions.Builder()
@@ -139,16 +139,16 @@ public class CommonActions {
                 .isSuccess();
     }
 
-    public boolean findState(double maxWait, StateEnum stateEnum) {
-        System.out.print("\n__findState:"+stateEnum+"__ ");
-        stateService.findByName(stateEnum).ifPresent(
+    public boolean findState(double maxWait, String stateName) {
+        System.out.print("\n__findState:"+stateName+"__ ");
+        stateService.findByName(stateName).ifPresent(
                 state -> System.out.println("prob="+state.getProbabilityExists()));
-        return waitState(maxWait, stateEnum, FIND);
+        return waitState(maxWait, stateName, FIND);
     }
 
-    public boolean waitVanishState(double maxWait, StateEnum stateEnum) {
-        System.out.print("\n__waitVanishState:"+stateEnum+"__ ");
-        return waitState(maxWait, stateEnum, VANISH);
+    public boolean waitVanishState(double maxWait, String stateName) {
+        System.out.print("\n__waitVanishState:"+stateName+"__ ");
+        return waitState(maxWait, stateName, VANISH);
     }
 
     public void highlightRegion(double seconds, StateRegion region) {
@@ -166,7 +166,7 @@ public class CommonActions {
     }
 
     public boolean clickUntilStateAppears(int repeatClickTimes, double pauseBetweenClicks,
-                                          StateImageObject objectToClick, StateEnum state) {
+                                          StateImageObject objectToClick, String state) {
         if (!stateService.findByName(state).isPresent()) return false;
         ActionOptions actionOptions = new ActionOptions.Builder()
                 .setAction(ActionOptions.Action.CLICK)

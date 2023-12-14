@@ -21,11 +21,11 @@ import lombok.Setter;
 public class Anchor {
 
     private Position.Name anchorInNewDefinedRegion; // the border of the region to define
-    private Position locationInMatch; // the location in the match to use as a defining point
+    private Position positionInMatch; // the location in the match to use as a defining point
 
-    public Anchor(Position.Name anchorInNewDefinedRegion, Position locationInMatch) {
+    public Anchor(Position.Name anchorInNewDefinedRegion, Position positionInMatch) {
         this.anchorInNewDefinedRegion = anchorInNewDefinedRegion;
-        this.locationInMatch = locationInMatch;
+        this.positionInMatch = positionInMatch;
     }
 
 }

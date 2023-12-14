@@ -78,7 +78,6 @@ public class Location {
         int percentOfW, percentOfH;
         percentOfW = (newX - region.x) / region.w;
         percentOfH = (newY - region.y) / region.h;
-        //System.out.println("percent of W,H: "+percentOfW+" "+percentOfH);
         position = new Position(percentOfW, percentOfH);
         definedByXY = false;
     }
@@ -179,7 +178,6 @@ public class Location {
     }
 
     private org.sikuli.script.Location getSikuliLocationFromRegion() {
-        //Report.println("region: "+region.x + " " + region.y + " " + region.w + " " + region.h + " " + position.getPercentW());
         double locX = region.x + (region.w * position.getPercentW());
         double locY = region.y + (region.h * position.getPercentH());
         return new org.sikuli.script.Location(locX, locY);
@@ -220,7 +218,7 @@ public class Location {
 
     public StateLocation inNullState() {
         return new StateLocation.Builder()
-                .inState(NULL)
+                .inState(NULL.toString())
                 .withLocation(this)
                 .build();
     }
@@ -228,7 +226,7 @@ public class Location {
     public ObjectCollection asObjectCollection() {
         StateLocation stateLocation = new StateLocation.Builder()
                 .withLocation(this)
-                .inState(NULL)
+                .inState(NULL.toString())
                 .setPosition(Position.Name.TOPLEFT)
                 .build();
         return new ObjectCollection.Builder()
@@ -326,6 +324,11 @@ public class Location {
 
     public void print() {
         Report.format("%d.%d ",x,y);
+    }
+
+    @Override
+    public String toString() {
+        return String.format("L[%d.%d]", getX(), getY());
     }
 
     public static class Builder {
