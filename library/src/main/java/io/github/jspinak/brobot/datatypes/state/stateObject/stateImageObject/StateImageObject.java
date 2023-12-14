@@ -4,7 +4,7 @@ import io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles
 import io.github.jspinak.brobot.buildStateStructure.buildFromNames.attributes.AttributeData;
 import io.github.jspinak.brobot.buildStateStructure.buildFromNames.attributes.AttributeTypes;
 import io.github.jspinak.brobot.buildStateStructure.buildFromNames.attributes.ImageAttributes;
-import io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.TransitionImage;
+import io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.screenObservations.TransitionImage;
 import io.github.jspinak.brobot.datatypes.primitives.dynamicImage.DynamicImage;
 import io.github.jspinak.brobot.datatypes.primitives.image.Image;
 import io.github.jspinak.brobot.datatypes.primitives.location.Anchor;

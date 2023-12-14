@@ -1,12 +1,14 @@
-package io.github.jspinak.brobot.buildStateStructure.buildWithoutNames;
+package io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.screenTtansitions;
 
-import io.github.jspinak.brobot.imageUtils.MatOps;
+import io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.screenObservations.*;
 import io.github.jspinak.brobot.imageUtils.MatVisualize;
+import lombok.Setter;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
 
 @Component
+@Setter
 public class FindScreen {
 
     private final GetScreenObservation getScreenObservation;
@@ -14,17 +16,20 @@ public class FindScreen {
     private final TransitionImageRepo transitionImageRepo;
     private final MatVisualize matVisualize;
     private final DecisionMatBuilder decisionMatBuilder;
+    private final ScreenObservationManager screenObservationManager;
 
-    private final int minimumChangedPixelsForNewScreen = 200000;
+    private int minimumChangedPixelsForNewScreen = 20000;
+    private boolean saveDecisionMat;
 
     public FindScreen(GetScreenObservation getScreenObservation, ScreenObservations screenObservations,
                       TransitionImageRepo transitionImageRepo, MatVisualize matVisualize,
-                      DecisionMatBuilder decisionMatBuilder) {
+                      DecisionMatBuilder decisionMatBuilder, ScreenObservationManager screenObservationManager) {
         this.getScreenObservation = getScreenObservation;
         this.screenObservations = screenObservations;
         this.transitionImageRepo = transitionImageRepo;
         this.matVisualize = matVisualize;
         this.decisionMatBuilder = decisionMatBuilder;
+        this.screenObservationManager = screenObservationManager;
     }
 
     /**
@@ -33,15 +38,21 @@ public class FindScreen {
      *
      * @return the id of the current screen
      */
-    public int findCurrentScreen(int nextId, double minSimilarityImages) {
-        ScreenObservation newObservation = getScreenObservation.takeScreenshotAndGetImages(nextId); // get a new screenshot, set the screenshot and fixed-pixel-mask
+    public void findCurrentScreenAndSaveIfNew() {
+        int nextUnassignedId = screenObservationManager.getNextUnassignedScreenId();
+        /*
+        Get a new screenshot and its images. If the screen is new, add it to the repo and update the current id.
+         */
+        ScreenObservation newObservation = getScreenObservation.takeScreenshotAndGetImages();
         int screenId = getScreenId(newObservation); // compare to previous screenshots
-        if (screenId < 0) { // screen hasn't been seen before
+        screenObservationManager.setCurrentScreenId(screenId);
+        if (screenId == nextUnassignedId) { // screen hasn't been seen before
             screenObservations.addScreenObservation(newObservation); // add screen to repo
-            transitionImageRepo.addUniqueImagesToRepo(newObservation, minSimilarityImages);
-            return newObservation.getId();
+            transitionImageRepo.addUniqueImagesToRepo(newObservation);
+            screenObservationManager.setNextUnassignedScreenId(screenId+1);
+            System.out.println("FindScreen: new screen = " + screenId);
         }
-        return screenId; // screen is not new
+        screenObservations.get(screenId).ifPresent(screenObservationManager::setCurrentScreenObservation);
     }
 
     /**
@@ -50,9 +61,7 @@ public class FindScreen {
      * @return active screen's id if found; otherwise -1
      */
     private int getScreenId(ScreenObservation newObservation) {
-        Optional<ScreenObservation> optObs = screenObservations.get(0);
-        if (optObs.isEmpty()) return -1; // there are no screens in the repo
-        int mostSimilarScreen = -1;
+        int mostSimilarScreen = newObservation.getId();
         int leastChangedPixels = -1;
         int changedPixels;
         for (ScreenObservation screenObservation : screenObservations.getAll()) {
@@ -62,12 +71,12 @@ public class FindScreen {
                     .build();
             changedPixels = decisionMat.getNumberOfChangedPixels();
             if (leastChangedPixels < 0 || changedPixels < leastChangedPixels) {
-                mostSimilarScreen = optObs.get().getId();
+                mostSimilarScreen = screenObservation.getId();
                 leastChangedPixels = changedPixels;
             }
-            matVisualize.writeMatToHistory(decisionMat.getCombinedMats(), decisionMat.getFilename());
+            if (saveDecisionMat) matVisualize.writeMatToHistory(decisionMat.getCombinedMats(), decisionMat.getFilename());
         }
         if (leastChangedPixels < minimumChangedPixelsForNewScreen) return mostSimilarScreen;
-        return -1; // screen is new
+        return newObservation.getId(); // screen is new
     }
 }

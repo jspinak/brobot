@@ -1,4 +1,4 @@
-package io.github.jspinak.brobot.buildStateStructure.buildWithoutNames;
+package io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.buildStateStructure;
 
 import io.github.jspinak.brobot.datatypes.state.state.State;
 import io.github.jspinak.brobot.manageStates.StateTransitions;
@@ -25,7 +25,7 @@ public class StateStructureInfo {
 
     public void printStateStructure() {
         for (State state : stateService.findAllStates()) {
-            System.out.println(state.getName());
+            System.out.println("State: " + state.getName());
             System.out.println("images:");
             state.getStateImages().forEach(img -> System.out.print(" " + img.getName()));
             System.out.println();

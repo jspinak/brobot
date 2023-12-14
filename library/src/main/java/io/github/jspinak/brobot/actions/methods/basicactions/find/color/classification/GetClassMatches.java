@@ -19,7 +19,6 @@ import java.util.Optional;
 import java.util.Set;
 
 import static io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.PixelAnalysisCollection.Analysis.SCORE_DIST_BELOW_THRESHHOLD;
-import static io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.SceneAnalysis.Analysis.BGR_FROM_INDICES_2D;
 import static io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.SceneAnalysis.Analysis.BGR_FROM_INDICES_2D_TARGETS;
 import static io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles.ColorCluster.ColorSchemaName.BGR;
 
@@ -79,7 +78,7 @@ public class GetClassMatches {
                         .build();
                 sceneAnalysis.setContours(contours);
                 matches.addSceneAnalysis(sceneAnalysis);
-                List<Match> matchList = contours.getMatches();
+                List<Match> matchList = contours.getMatchList();
                 matchOps.addMatchListToMatches(matchList, matches, sio, actionOptions);
             }
         }
