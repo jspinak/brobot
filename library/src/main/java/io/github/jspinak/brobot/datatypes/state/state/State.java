@@ -170,6 +170,22 @@ public class State {
         illustrations.addAll(stateIllustrations);
     }
 
+    @Override
+    public String toString() {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("State:");
+        stringBuilder.append(" name=").append(name);
+        stringBuilder.append(" stateImages=");
+        stateImages.forEach(stringBuilder::append);
+        stringBuilder.append(" stateRegions=");
+        stateRegions.forEach(stringBuilder::append);
+        stringBuilder.append(" stateLocations=");
+        stateLocations.forEach(stringBuilder::append);
+        stringBuilder.append(" stateStrings=");
+        stateStrings.forEach(stringBuilder::append);
+        return stringBuilder.toString();
+    }
+
     public static class Builder {
 
         private String nameAsString;

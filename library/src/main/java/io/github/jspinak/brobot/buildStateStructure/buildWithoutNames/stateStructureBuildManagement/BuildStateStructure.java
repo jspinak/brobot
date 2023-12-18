@@ -5,7 +5,7 @@ import io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.screenObse
 import io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.screenObservations.GetTransitionImages;
 import io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.screenObservations.ScreenObservations;
 import io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.screenObservations.TransitionImageRepo;
-import io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.screenTtansitions.FindScreen;
+import io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.screenTransitions.FindScreen;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -18,11 +18,13 @@ public class BuildStateStructure {
     private final ScreenObservations screenObservations;
     private final TransitionImageRepo transitionImageRepo;
     private final FindScreen findScreen;
+    private final BuildStateStructureFromScreenshots buildStateStructureFromScreenshots;
 
     public BuildStateStructure(BuildStateStructureWithoutNames buildStateStructureWithoutNames,
                                GetTransitionImages getTransitionImages, ScreenStateCreator screenStateCreator,
                                GetScreenObservation getScreenObservation, ScreenObservations screenObservations,
-                               TransitionImageRepo transitionImageRepo, FindScreen findScreen) {
+                               TransitionImageRepo transitionImageRepo, FindScreen findScreen,
+                               BuildStateStructureFromScreenshots buildStateStructureFromScreenshots) {
         this.buildStateStructureWithoutNames = buildStateStructureWithoutNames;
         this.getTransitionImages = getTransitionImages;
         this.screenStateCreator = screenStateCreator;
@@ -30,6 +32,7 @@ public class BuildStateStructure {
         this.screenObservations = screenObservations;
         this.transitionImageRepo = transitionImageRepo;
         this.findScreen = findScreen;
+        this.buildStateStructureFromScreenshots = buildStateStructureFromScreenshots;
     }
 
     public void execute(StateStructureTemplate stateStructureTemplate) {
@@ -40,7 +43,14 @@ public class BuildStateStructure {
         transitionImageRepo.setSaveMatchingImages(stateStructureTemplate.isSaveMatchingImages());
         findScreen.setSaveDecisionMat(stateStructureTemplate.isSaveDecisionMats());
         findScreen.setMinimumChangedPixelsForNewScreen(stateStructureTemplate.getMinimumChangedPixelsForNewScreen());
-        buildStateStructureWithoutNames.automateStateStructure(
-                stateStructureTemplate.getTopLeftBoundary(), stateStructureTemplate.getBottomRightBoundary());
+        if (stateStructureTemplate.getScreenshots().isEmpty()) {
+            buildStateStructureWithoutNames.automateStateStructure(
+                    stateStructureTemplate.getTopLeftBoundary(), stateStructureTemplate.getBottomRightBoundary());
+        } else {
+            buildStateStructureFromScreenshots.build(
+                    stateStructureTemplate.getScreenshots(),
+                    stateStructureTemplate.getTopLeftBoundary(), stateStructureTemplate.getBottomRightBoundary()
+            );
+        }
     }
 }

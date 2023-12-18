@@ -61,6 +61,14 @@ public class Region extends org.sikuli.script.Region implements Comparable<Regio
         setXY2();
     }
 
+    public Region(Location location1, Location location2) {
+        int x = Math.min(location1.getX(), location2.getY());
+        int y = Math.min(location1.getY(), location2.getY());
+        int x2 = Math.max(location1.getX(), location2.getY());
+        int y2 = Math.max(location1.getY(), location2.getY());
+        setXYWH(x, y, x2-x, y2-y);
+    }
+
     public StateRegion inNullState() {
         return new StateRegion.Builder()
                 .inState(NullState.Name.NULL.toString())
