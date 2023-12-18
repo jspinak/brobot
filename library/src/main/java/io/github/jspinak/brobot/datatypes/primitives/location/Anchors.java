@@ -19,4 +19,12 @@ public class Anchors {
     public int size() {
         return anchors.size();
     }
+
+    @Override
+    public String toString() {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("Anchors:");
+        anchors.forEach(anchor -> stringBuilder.append(" ").append(anchor));
+        return stringBuilder.toString();
+    }
 }

@@ -1,4 +1,4 @@
-package io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.screenTtansitions;
+package io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.screenTransitions;
 
 import io.github.jspinak.brobot.actions.actionExecution.Action;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;

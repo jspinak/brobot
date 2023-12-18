@@ -3,9 +3,13 @@ package io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.stateStru
 import io.github.jspinak.brobot.datatypes.primitives.image.Image;
 import lombok.Getter;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Getter
 public class StateStructureTemplate {
 
+    private List<Image> screenshots = new ArrayList<>(); // when not empty, will be used instead of scraping
     private Image topLeftBoundary;
     private Image bottomRightBoundary;
     private int minWidthBetweenImages;
@@ -17,6 +21,7 @@ public class StateStructureTemplate {
     private int minimumChangedPixelsForNewScreen = 20000;
 
     public static class Builder {
+        private final List<Image> screenshots = new ArrayList<>();
         private Image topLeftBoundary;
         private Image bottomRightBoundary;
         private int minWidthBetweenImages;
@@ -26,6 +31,14 @@ public class StateStructureTemplate {
         private boolean saveDecisionMats;
         private boolean saveStateIllustrations;
         private int minimumChangedPixelsForNewScreen = 20000;
+
+        public Builder addScreenshots(String... names) {
+            for (String name : names) {
+                Image image = new Image(name);
+                this.screenshots.add(image);
+            }
+            return this;
+        }
 
         public Builder setBoundaryImages(Image topLeft, Image bottomRight) {
             this.topLeftBoundary = topLeft;
@@ -70,6 +83,7 @@ public class StateStructureTemplate {
 
         public StateStructureTemplate build() {
             StateStructureTemplate stateStructureTemplate = new StateStructureTemplate();
+            stateStructureTemplate.screenshots = screenshots;
             stateStructureTemplate.topLeftBoundary = topLeftBoundary;
             stateStructureTemplate.bottomRightBoundary = bottomRightBoundary;
             stateStructureTemplate.minWidthBetweenImages = minWidthBetweenImages;

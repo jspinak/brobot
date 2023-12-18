@@ -1,4 +1,4 @@
-package io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.screenTtansitions;
+package io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.screenTransitions;
 
 import io.github.jspinak.brobot.actions.methods.basicactions.find.motion.FindDynamicPixels;
 import io.github.jspinak.brobot.imageUtils.MatBuilder;
