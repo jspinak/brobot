@@ -56,6 +56,16 @@ public class StateLocation implements StateObject {
                 .build();
     }
 
+    @Override
+    public String toString() {
+        return "StateLocation:" +
+                " name=" + name +
+                " ownerStateName=" + ownerStateName +
+                " location=" + location +
+                " position=" + position +
+                " anchors=" + anchors;
+    }
+
     public static class Builder {
         private String name = "";
         private Location location;

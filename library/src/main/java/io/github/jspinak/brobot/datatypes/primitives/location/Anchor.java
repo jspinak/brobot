@@ -28,4 +28,11 @@ public class Anchor {
         this.positionInMatch = positionInMatch;
     }
 
+    @Override
+    public String toString() {
+        return "Anchor:" +
+                " anchorInNewDefinedRegion=" + anchorInNewDefinedRegion +
+                " positionInMatch=" + positionInMatch;
+    }
+
 }

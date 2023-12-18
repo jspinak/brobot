@@ -69,7 +69,7 @@ public class GetTransitionImages {
     /*
     Returns the index of the last image included in the TransitionImage.
      */
-    private TransitionImageHelper createTransitionImage(int startIndex, List<Match> links) {
+    TransitionImageHelper createTransitionImage(int startIndex, List<Match> links) {
         TransitionImageHelper helper = new TransitionImageHelper(startIndex, links.get(startIndex));
         for (int i=startIndex+1; i<links.size(); i++) {
             if (!helper.getTransitionImage().isSameWordGroup(links.get(i), minWidthBetweenImages)) return helper;

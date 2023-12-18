@@ -176,6 +176,20 @@ public class StateImageObject implements StateObject {
                 regionImagePairs.equals(stateImageObject.getRegionImagePairs());
     }
 
+    @Override
+    public String toString() {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("StateImageObject:");
+        stringBuilder.append(" name=").append(name);
+        stringBuilder.append(" ownerState=").append(ownerStateName);
+        stringBuilder.append(" searchRegions=");
+        searchRegionsObject.getAllRegions().forEach(stringBuilder::append);
+        stringBuilder.append(" snapshotRegions=");
+        matchHistory.getSnapshots().forEach(snapshot ->
+                snapshot.getMatchList().forEach(stringBuilder::append));
+        return stringBuilder.toString();
+    }
+
     public static class Builder {
         private String name = "";
         private int index;

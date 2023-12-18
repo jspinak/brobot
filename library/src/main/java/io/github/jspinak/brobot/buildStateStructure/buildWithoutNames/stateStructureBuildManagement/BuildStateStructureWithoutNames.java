@@ -6,8 +6,8 @@ import io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.buildState
 import io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.buildStateStructure.StateStructureInfo;
 import io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.buildStateStructure.UncheckedImageHunter;
 import io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.screenObservations.*;
-import io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.screenTtansitions.FindScreen;
-import io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.screenTtansitions.FindTransition;
+import io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.screenTransitions.FindScreen;
+import io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.screenTransitions.FindTransition;
 import io.github.jspinak.brobot.datatypes.primitives.image.Image;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import org.springframework.stereotype.Component;
@@ -18,9 +18,7 @@ import java.util.Set;
 public class BuildStateStructureWithoutNames {
 
     private final GetScreenObservation getScreenObservation;
-    private final ScreenObservations screenObservations;
     private final Action action;
-    private final TransitionImageRepo transitionImageRepo;
     private final ScreenStateCreator screenStateCreator;
     private final UncheckedImageHunter uncheckedImageHunter;
     private final StateStructureInfo stateStructureInfo;
@@ -28,14 +26,12 @@ public class BuildStateStructureWithoutNames {
     private final FindTransition findTransition;
     private final FindScreen findScreen;
 
-    public BuildStateStructureWithoutNames(GetScreenObservation getScreenObservation, ScreenObservations screenObservations,
-                                           Action action, TransitionImageRepo transitionImageRepo, ScreenStateCreator screenStateCreator,
+    public BuildStateStructureWithoutNames(GetScreenObservation getScreenObservation,
+                                           Action action, ScreenStateCreator screenStateCreator,
                                            UncheckedImageHunter uncheckedImageHunter, StateStructureInfo stateStructureInfo,
                                            GetUsableArea getUsableArea, FindTransition findTransition, FindScreen findScreen) {
         this.getScreenObservation = getScreenObservation;
-        this.screenObservations = screenObservations;
         this.action = action;
-        this.transitionImageRepo = transitionImageRepo;
         this.screenStateCreator = screenStateCreator;
         this.uncheckedImageHunter = uncheckedImageHunter;
         this.stateStructureInfo = stateStructureInfo;
@@ -54,10 +50,8 @@ public class BuildStateStructureWithoutNames {
         Region usableArea = getUsableArea.getBoundariesFromExcludedImages(topLeftBoundary, bottomRightBoundary);
         action.perform(ActionOptions.Action.HIGHLIGHT, usableArea);
         getScreenObservation.setUsableArea(usableArea);
-        System.out.println("BuildStateStructureWithoutNames: before findScreen");
         findScreen.findCurrentScreenAndSaveIfNew(); // get the first ScreenObservation
-        System.out.println("BuildStateStructureWithoutNames: after findScreen");
-        boolean uncheckedImages = true;
+        boolean uncheckedImages;
         // keep going, adding new observations and associated images, as long as you find a transition to a new, unique screen
         while (true) {
             findTransition.transitionAndObserve();

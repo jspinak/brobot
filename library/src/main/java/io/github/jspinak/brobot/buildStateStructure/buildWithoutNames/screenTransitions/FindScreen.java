@@ -1,11 +1,9 @@
-package io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.screenTtansitions;
+package io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.screenTransitions;
 
 import io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.screenObservations.*;
 import io.github.jspinak.brobot.imageUtils.MatVisualize;
 import lombok.Setter;
 import org.springframework.stereotype.Component;
-
-import java.util.Optional;
 
 @Component
 @Setter
