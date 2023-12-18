@@ -117,6 +117,11 @@ public class GetImageJavaCV {
         return mats;
     }
 
+    public Mat getMatFromFile(String patternName, Region region, ColorCluster.ColorSchemaName colorSchemaName) {
+        Mat scene = getMatFromBundlePath(patternName, colorSchemaName);
+        return scene.apply(region.getJavaCVRect());
+    }
+
     public Mat getMatFromScreen(Region region, ColorCluster.ColorSchemaName colorSchemaName) {
         Mat img = getMatFromScreen(region);
         if (colorSchemaName == ColorCluster.ColorSchemaName.BGR) return img;

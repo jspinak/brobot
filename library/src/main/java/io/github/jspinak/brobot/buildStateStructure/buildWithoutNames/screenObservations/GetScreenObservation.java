@@ -6,6 +6,7 @@ import io.github.jspinak.brobot.actions.methods.basicactions.find.motion.Dynamic
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.imageUtils.GetImageJavaCV;
+import lombok.Getter;
 import lombok.Setter;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.springframework.stereotype.Component;
@@ -21,6 +22,7 @@ import java.util.Optional;
  */
 @Component
 @Setter
+@Getter
 public class GetScreenObservation {
     private final Action action;
     private final IllustrateScreenObservation illustrateScreenObservation;
@@ -46,9 +48,7 @@ public class GetScreenObservation {
     public ScreenObservation takeScreenshotAndGetImages() {
         ScreenObservation obs = initNewScreenObservation();
         List<Region> dynamicRegions = obs.getMatches().getMatchRegions();
-        System.out.println("GetScreenObservation: after getting matches, # of regions = " + dynamicRegions.size());
         List<TransitionImage> transitionImages = getTransitionImages.findAndCapturePotentialLinks(usableArea, dynamicRegions);
-        System.out.println("GetScreenObservation: after finding words, # of TransitionImage(s) = " + transitionImages.size());
         obs.setImages(transitionImages);
         if (saveScreensWithMotionAndImages) illustrateScreenObservation.writeIllustratedSceneToHistory(obs);
         return obs;

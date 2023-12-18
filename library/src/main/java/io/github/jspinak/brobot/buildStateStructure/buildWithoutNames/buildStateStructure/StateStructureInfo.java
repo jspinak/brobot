@@ -25,9 +25,7 @@ public class StateStructureInfo {
 
     public void printStateStructure() {
         for (State state : stateService.findAllStates()) {
-            System.out.println("State: " + state.getName());
-            System.out.println("images:");
-            state.getStateImages().forEach(img -> System.out.print(" " + img.getName()));
+            System.out.println(state);
             System.out.println();
 
             Optional<StateTransitions> optTrs = stateTransitionsService.getTransitions(state.getName());
