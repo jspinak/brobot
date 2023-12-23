@@ -10,7 +10,7 @@ import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.primitives.text.Text;
 import io.github.jspinak.brobot.datatypes.state.NullState;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import lombok.Data;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.sikuli.script.Match;
@@ -41,10 +41,12 @@ import java.util.stream.Collectors;
 public class Matches {
 
     private String actionDescription = "";
+    private int actionId; // a unique id also stored in the class ActionLifecycleManagement
+    private List<MatchObject_> matchObject_s = new ArrayList<>();
     private List<MatchObject> matchObjects = new ArrayList<>();
     private List<MatchObject> initialMatchObjects = new ArrayList<>(); // the first set of matches in a composite find operation. it may be useful to see these matches in illustrations.
     private List<MatchObject> nonoverlappingMatches = new ArrayList<>();
-    private MatchObject bestMatch = null; // query returns an Optional in case there are no matches
+    private MatchObject_ bestMatch = null; // query returns an Optional in case there are no matches
     private ActionOptions actionOptions; // the action options used to find the matches
     private List<String> activeStates = new ArrayList<>();
     private Text text = new Text();
@@ -70,18 +72,23 @@ public class Matches {
         if (maxMatches > 0 && matchObjects.size() >= maxMatches) return;
         matchObjects.add(match);
         addNonoverlappingMatch(match);
-        setBestMatch(match);
+        //setBestMatch(match);
         addActiveState(match);
+    }
+
+    public void add(MatchObject_ match) {
+        matchObject_s.add(match);
+        setBestMatch(match);
     }
 
     public void addSceneAnalysis(SceneAnalysis sceneAnalysis) {
         sceneAnalysisCollection.add(sceneAnalysis);
     }
 
-    public void addMatchObjects(StateImageObject stateImageObject, List<Match> matchList, double duration) {
+    public void addMatchObjects(StateImage stateImage, List<Match> matchList, double duration) {
         matchList.forEach(match -> {
             try {
-                matchObjects.add(new MatchObject(match, stateImageObject, duration));
+                matchObjects.add(new MatchObject(match, stateImage, duration));
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -117,8 +124,8 @@ public class Matches {
     }
 
     public List<Match> getMatches() {
-        return matchObjects.stream()
-                .map(MatchObject::getMatch)
+        return matchObject_s.stream()
+                .map(MatchObject_::getMatch)
                 .collect(Collectors.toList());
     }
 
@@ -158,7 +165,7 @@ public class Matches {
         return true;
     }
 
-    private boolean setBestMatch(MatchObject newMatch) {
+    private boolean setBestMatch(MatchObject_ newMatch) {
         if (bestMatch == null ||
                 newMatch.getMatch().getScore() > bestMatch.getMatch().getScore()) {
             bestMatch = newMatch;
@@ -172,7 +179,7 @@ public class Matches {
         return true;
     }
 
-    public Optional<MatchObject> getBestMatch() {
+    public Optional<MatchObject_> getBestMatch() {
         return Optional.ofNullable(bestMatch);
     }
 
@@ -186,7 +193,7 @@ public class Matches {
     }
 
     public boolean isEmpty() {
-        return matchObjects.isEmpty();
+        return matchObject_s.isEmpty();
     }
 
     public void setTimesActedOn(int timesActedOn) {

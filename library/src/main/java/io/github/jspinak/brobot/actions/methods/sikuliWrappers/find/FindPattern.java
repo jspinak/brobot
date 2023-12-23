@@ -7,15 +7,13 @@ import io.github.jspinak.brobot.actions.methods.time.Time;
 import io.github.jspinak.brobot.datatypes.primitives.match.MatchObject;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.reports.Report;
-import org.sikuli.basics.Settings;
 import org.sikuli.script.*;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Optional;
 
 /**
@@ -43,12 +41,12 @@ public class FindPattern {
         return findInSceneFromFile(region, pattern, scene);
     }
 
-    private Finder getFinder(Scene scene) {
-        String filename = ImagePath.getBundlePath() + "/" + scene.getFilename();
-        File file = new File(filename);
-        String path = file.getAbsolutePath();
-        Report.println(path);
-        return new Finder(path);
+    Finder getFinder(Scene scene) {
+        //String filename = ImagePath.getBundlePath() + "/" + scene.getFilename();
+        //File file = new File(filename);
+        //String path = file.getAbsolutePath();
+        //Report.println(path);
+        return new Finder(scene.getAbsolutePath());
     }
 
     private Optional<Match> findInSceneFromFile(Region region, Pattern pattern, Scene scene) {
@@ -71,17 +69,17 @@ public class FindPattern {
         return Optional.empty();
     }
 
-    public Matches findAll(Region region, Pattern pattern, StateImageObject stateImageObject,
+    public Matches findAll(Region region, Pattern pattern, StateImage stateImage,
                            ActionOptions actionOptions, Scene scene) {
         if (BrobotSettings.screenshots.isEmpty())
-            return findAllLive(region, pattern, stateImageObject, actionOptions);
-        return findAllInSceneFromFile(region, pattern, stateImageObject, actionOptions, scene);
+            return findAllLive(region, pattern, stateImage, actionOptions);
+        return findAllInSceneFromFile(region, pattern, stateImage, actionOptions, scene);
     }
 
-    private void addMatch(Matches matches, Match match, StateImageObject stateImageObject,
+    private void addMatch(Matches matches, Match match, StateImage stateImage,
                      ActionOptions actionOptions, String sceneName) {
         try {
-            MatchObject matchObject = new MatchObject(match, stateImageObject,
+            MatchObject matchObject = new MatchObject(match, stateImage,
                     time.getDuration(actionOptions.getAction()).getSeconds());
             matchObject.setSceneName(sceneName);
             matches.add(matchObject);
@@ -90,7 +88,7 @@ public class FindPattern {
         }
     }
 
-    public Matches findAllInSceneFromFile(Region region, Pattern pattern, StateImageObject stateImageObject,
+    public Matches findAllInSceneFromFile(Region region, Pattern pattern, StateImage stateImage,
                                           ActionOptions actionOptions, Scene scene) {
         Finder f = getFinder(scene);
         f.findAll(pattern);
@@ -98,13 +96,13 @@ public class FindPattern {
         while (f.hasNext()) {
             Match nextMatch = f.next();
             if (region.contains(nextMatch))
-                addMatch(matches, nextMatch, stateImageObject, actionOptions, scene.getName());
+                addMatch(matches, nextMatch, stateImage, actionOptions, scene.getName());
         }
         f.destroy();
         return matches;
     }
 
-    public Matches findAllLive(Region region, Pattern pattern, StateImageObject stateImageObject,
+    public Matches findAllLive(Region region, Pattern pattern, StateImage stateImage,
                            ActionOptions actionOptions) {
         Region adjustedRegion = getRegion(region, pattern);
         Matches matches = new Matches();
@@ -112,7 +110,7 @@ public class FindPattern {
         try {
             newMatches = adjustedRegion.sikuli().findAll(pattern);
             while (newMatches.hasNext()) {
-                addMatch(matches, newMatches.next(), stateImageObject, actionOptions, "screenshot0");
+                addMatch(matches, newMatches.next(), stateImage, actionOptions, "screenshot0");
             }
         } catch (FindFailed ignored) {}
         return matches;

@@ -66,6 +66,7 @@ public class BrobotSettings {
     public static boolean drawHighlight = true;
     public static boolean drawRepeatedActions = true;
     public static boolean drawClassify = true;
+    public static boolean drawDefine = true;
 
     /**
      * kMeans Settings
@@ -74,7 +75,7 @@ public class BrobotSettings {
 
     /*
     When a Brobot application is run, kMeans profiles for means = {2, ..., maxKMeansToStoreInProfile} are stored
-    with StateImageObjects that have DynamicImages.
+    with StateImages that have DynamicImages.
      */
     public static int maxKMeansToStoreInProfile = 10;
 

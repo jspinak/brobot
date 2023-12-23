@@ -5,13 +5,18 @@ import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles.ColorCluster;
 import io.github.jspinak.brobot.actions.methods.sikuliWrappers.Wait;
 import io.github.jspinak.brobot.datatypes.primitives.image.Image;
+import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import io.github.jspinak.brobot.illustratedHistory.IllustrateScreenshot;
+import io.github.jspinak.brobot.imageUtils.GetBufferedImage;
 import io.github.jspinak.brobot.imageUtils.GetImageJavaCV;
+import io.github.jspinak.brobot.imageUtils.ImageUtils;
 import io.github.jspinak.brobot.reports.Report;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.springframework.stereotype.Component;
 
+import java.awt.image.BufferedImage;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,11 +36,16 @@ public class GetScenes {
     private GetImageJavaCV getImageJavaCV;
     private Wait wait;
     private IllustrateScreenshot illustrateScreenshot;
+    private final GetBufferedImage getBufferedImage;
+    private final ImageUtils imageUtils;
 
-    public GetScenes(GetImageJavaCV getImageJavaCV, Wait wait, IllustrateScreenshot illustrateScreenshot) {
+    public GetScenes(GetImageJavaCV getImageJavaCV, Wait wait, IllustrateScreenshot illustrateScreenshot,
+                     GetBufferedImage getBufferedImage, ImageUtils imageUtils) {
         this.getImageJavaCV = getImageJavaCV;
         this.wait = wait;
         this.illustrateScreenshot = illustrateScreenshot;
+        this.getBufferedImage = getBufferedImage;
+        this.imageUtils = imageUtils;
     }
 
     /**
@@ -52,7 +62,9 @@ public class GetScenes {
             // take a screenshot
             Report.println("Taking screenshot");
             for (int i=0; i<scenesToCapture; i++) {
-                scenes.add(new Scene("screenshot" + i + ".png", getImageJavaCV.getMatFromScreen()));
+                Mat bgr = getImageJavaCV.getMatFromScreen();
+                BufferedImage bi = getBufferedImage.convert(bgr);
+                scenes.add(new Scene("screenshot" + i + ".png", bgr, bi));
                 if (i<scenesToCapture-1) wait.wait(secondsBetweenCaptures);
             }
             return scenes;
@@ -61,18 +73,24 @@ public class GetScenes {
             // If scenes are listed in the settings, use them.
             if (!BrobotSettings.screenshots.isEmpty()) {
                 BrobotSettings.screenshots.forEach(
-                        filename -> scenes.add(new Scene(filename, getImageJavaCV.getMatFromBundlePath(filename, BGR))));
+                        filename -> {
+                            String absolutePath = new File(BrobotSettings.screenshotPath+filename).getAbsolutePath();
+                            Mat bgr = getImageJavaCV.getMatFromBundlePath(filename, BGR);
+                            BufferedImage bi = getBufferedImage.convert(bgr);
+                            scenes.add(new Scene(filename, absolutePath, bgr, bi));
+                        });
             }
             // If no scenes are listed in the settings, use a randomly generated scene.
             else scenes.add(new Scene());
             return scenes;
         }
         // If scenes are passed as parameters, use them.
-        else for (Image image : objectCollections.get(0).getScenes()) {
-            image.getFilenames().forEach(filename -> {
-                Mat mat = getImageJavaCV.getMatFromBundlePath(filename, BGR);
-                scenes.add(new Scene(filename, mat));
-            });
+        else for (Pattern pattern : objectCollections.get(0).getScene_s()) {
+            String filename = pattern.getFilename();
+            String absolutePath = new File(filename).getAbsolutePath();
+            Mat bgr = getImageJavaCV.getMatFromFilename(absolutePath, BGR);
+            BufferedImage bi = getBufferedImage.convert(bgr);
+            scenes.add(new Scene(filename, absolutePath, bgr, bi));
             return scenes;
         }
         scenes.add(new Scene());
@@ -105,7 +123,7 @@ public class GetScenes {
     private boolean isOkToTakeScreenshot(ActionOptions actionOptions, ObjectCollection... objectCollections) {
         if (BrobotSettings.mock) return false;
         if (objectCollections.length == 0) return false;
-        if (!objectCollections[0].getScenes().isEmpty()) return false;
+        if (!objectCollections[0].getScene_s().isEmpty()) return false;
         ActionOptions.Action action = actionOptions.getAction();
         ActionOptions.Find find = actionOptions.getFind();
         if (find == ActionOptions.Find.COLOR || find == ActionOptions.Find.HISTOGRAM

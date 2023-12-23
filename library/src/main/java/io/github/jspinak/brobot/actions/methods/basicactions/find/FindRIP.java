@@ -6,8 +6,7 @@ import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.primitives.regionImagePairs.RegionImagePair;
 import io.github.jspinak.brobot.datatypes.primitives.regionImagePairs.RegionImagePairs;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
-import io.github.jspinak.brobot.reports.Report;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import org.springframework.stereotype.Component;
 
 import java.util.Set;
@@ -46,18 +45,18 @@ public class FindRIP implements FindImageObject {
     /**
      * First search the defined pairs, then the undefined pairs.
      * @param actionOptions holds the action configuration.
-     * @param stateImageObject is the StateImageObject to find.
+     * @param stateImage is the StateImage to find.
      * @return a Matches object will all matches found.
      */
     @Override
-    public Matches find(ActionOptions actionOptions, StateImageObject stateImageObject, Scene scene) {
+    public Matches find(ActionOptions actionOptions, StateImage stateImage, Scene scene) {
         Matches matches = new Matches();
         matches.addAllResults(
-                findAndDefineRegions(actionOptions, stateImageObject, stateImageObject.getRegionImagePairs(),
+                findAndDefineRegions(actionOptions, stateImage, stateImage.getRegionImagePairs(),
                         this::getDefinedPairs, scene));
         if (breakCondition(matches, actionOptions)) return matches;
         matches.addAllResults(
-                findAndDefineRegions(actionOptions, stateImageObject, stateImageObject.getRegionImagePairs(),
+                findAndDefineRegions(actionOptions, stateImage, stateImage.getRegionImagePairs(),
                         this::getUndefinedPairs, scene));
         return matches;
     }
@@ -67,18 +66,18 @@ public class FindRIP implements FindImageObject {
      * For Find.ALL, Find.EACH, and Find.BEST, each RegionImagePair will be searched.
      * When a Pair is found, its Region is defined.
      * @param actionOptions holds the action configuration.
-     * @param stateImageObject is the StateImageObject containing the RegionImagePairs.
+     * @param stateImage is the StateImage containing the RegionImagePairs.
      * @param pairs is the RegionImagePairs to find.
      * @param definedOrUndefined selects pairs in the RegionImagePairs object.
      * @return a Matches object will all matches found.
      */
-    public Matches findAndDefineRegions(ActionOptions actionOptions, StateImageObject stateImageObject,
+    public Matches findAndDefineRegions(ActionOptions actionOptions, StateImage stateImage,
                                         RegionImagePairs pairs,
                                         Function<RegionImagePairs, Set<RegionImagePair>> definedOrUndefined, Scene scene) {
         Matches matches = new Matches();
         for (RegionImagePair pair : definedOrUndefined.apply(pairs)) {
             Matches newMatches =
-                    findImage.find(actionOptions, stateImageObject, scene);
+                    findImage.find(actionOptions, stateImage, scene);
             matches.addAllResults(newMatches);
             newMatches.getBestMatch().ifPresent(matchObject -> {
                 pair.setRegion(new Region(matchObject.getMatch()));

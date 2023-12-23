@@ -4,7 +4,7 @@ import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.trainingData.ActionVector;
 import io.github.jspinak.brobot.imageUtils.GetBufferedImage;
-import io.github.jspinak.brobot.imageUtils.GetImage;
+import io.github.jspinak.brobot.imageUtils.GetImageOpenCV;
 import io.github.jspinak.brobot.imageUtils.ImageUtils;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.springframework.stereotype.Component;
@@ -19,7 +19,7 @@ import java.util.Set;
 public class DatasetManager {
 
     private final ImageUtils imageUtils;
-    private final GetImage getImage;
+    private final GetImageOpenCV getImageOpenCV;
     private final SaveTrainingData saveTrainingData;
     private final GetBufferedImage getBufferedImage;
     private final ActionVectorTranslation actionVectorTranslation;
@@ -31,10 +31,10 @@ public class DatasetManager {
             ActionOptions.Action.SCROLL_MOUSE_WHEEL,
             ActionOptions.Action.HIGHLIGHT);
 
-    public DatasetManager(ImageUtils imageUtils, GetImage getImage, SaveTrainingData saveTrainingData,
+    public DatasetManager(ImageUtils imageUtils, GetImageOpenCV getImageOpenCV, SaveTrainingData saveTrainingData,
                           GetBufferedImage getBufferedImage, ActionVectorOneHot actionVectorTranslation) {
         this.imageUtils = imageUtils;
-        this.getImage = getImage;
+        this.getImageOpenCV = getImageOpenCV;
         this.saveTrainingData = saveTrainingData;
         this.getBufferedImage = getBufferedImage;
         this.actionVectorTranslation = actionVectorTranslation;
@@ -62,7 +62,7 @@ public class DatasetManager {
         String actionText = matches.getActionDescription();
         ArrayList<BufferedImage> screenshots = new ArrayList<>();
         screenshots.add(getBufferedImage.convert(optBGR.get()));
-        screenshots.add(getImage.getScreenshot());
+        screenshots.add(getImageOpenCV.getScreenshot());
         saveTrainingData.addData(actionVector, actionText, screenshots);
         System.out.println("data saved");
         return true;

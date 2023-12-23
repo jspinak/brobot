@@ -2,7 +2,7 @@ package io.github.jspinak.brobot.datatypes.primitives.image;
 
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.NullState;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import lombok.Getter;
 import lombok.Setter;
 import org.sikuli.script.Pattern;
@@ -85,8 +85,8 @@ public class Image {
         }
     }
 
-    public StateImageObject inNullState() {
-        return new StateImageObject.Builder()
+    public StateImage inNullState() {
+        return new StateImage.Builder()
                 .inState(NullState.Name.NULL.toString())
                 .withImage(getImageNames().toArray(new String[0]))
                 .build();
@@ -175,5 +175,15 @@ public class Image {
 
     public Region getRegion(int filenameIndex) {
         return new Region(0, 0, getWidth(filenameIndex), getHeight(filenameIndex));
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder stringBuilder = new StringBuilder();
+        for (int i=0; i<imageNames.size(); i++) {
+            stringBuilder.append(imageNames.get(i)).append(":");
+            stringBuilder.append(getWidth(i)).append(".").append(getHeight(i)).append(" ");
+        }
+        return stringBuilder.toString();
     }
 }

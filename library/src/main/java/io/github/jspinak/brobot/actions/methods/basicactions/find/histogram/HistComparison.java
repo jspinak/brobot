@@ -4,7 +4,7 @@ import io.github.jspinak.brobot.actions.actionExecution.actionLifecycle.ActionLi
 import io.github.jspinak.brobot.datatypes.primitives.image.Image;
 import io.github.jspinak.brobot.datatypes.primitives.match.MatchObject;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.reports.Report;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.MatVector;
@@ -69,15 +69,15 @@ public class HistComparison {
 
     /**
      * Compare the Image histogram with the histograms of the regions.
-     * @param stateImageObject the image to use for histogram comparison
+     * @param stateImage the image to use for histogram comparison
      * @param regions the regions in which to search
      * @param sceneHSV the HSV version of the scene
      * @param actionId the action id, used to determine the action duration
      * @return the best score per region.
      */
-    public List<MatchObject> compareAll(StateImageObject stateImageObject, List<Region> regions,
-                                                    Mat sceneHSV, int actionId) {
-        Image image = stateImageObject.getImage();
+    public List<MatchObject> compareAll(StateImage stateImage, List<Region> regions,
+                                        Mat sceneHSV, int actionId) {
+        Image image = stateImage.getImage();
         HistogramRegions histogramRegions = getHistograms.getHistogramsHSV(image);
         Mat indexedColumn = setIndexedColumn(getHistograms.getHueBins()); // only the hue bins are considered //imageRegionsHistograms.getTotalBins());
         List<MatchObject> matchObjects = new ArrayList<>();
@@ -89,7 +89,7 @@ public class HistComparison {
             if (bestScore == -1) bestScore = score;
             if (score < bestScore) bestScore = score;
             try {
-                MatchObject matchObject = new MatchObject(reg.toMatch(), stateImageObject,
+                MatchObject matchObject = new MatchObject(reg.toMatch(), stateImage,
                         actionLifecycleManagement.getCurrentDuration(actionId).getSeconds());
                 matchObject.setHistogram(sceneHistRegs.getCombined().getHistogram());
                 matchObject.setScore(score);

@@ -5,7 +5,7 @@ import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
-import io.github.jspinak.brobot.imageUtils.GetImage;
+import io.github.jspinak.brobot.imageUtils.GetImageOpenCV;
 import io.github.jspinak.brobot.imageUtils.ImageUtils;
 import io.github.jspinak.brobot.reports.Report;
 import lombok.Getter;
@@ -20,7 +20,7 @@ import static io.github.jspinak.brobot.actions.actionOptions.ActionOptions.Actio
 public class IllustrateScreenshot {
 
     private ImageUtils imageUtils;
-    private GetImage getImage;
+    private GetImageOpenCV getImageOpenCV;
     private Draw draw;
     private IllustrationManager illustrationManager;
 
@@ -30,10 +30,10 @@ public class IllustrateScreenshot {
 
     private Map<ActionOptions.Action, Boolean> actionPermissions = new HashMap<>();
 
-    public IllustrateScreenshot(ImageUtils imageUtils, GetImage getImage, Draw draw,
+    public IllustrateScreenshot(ImageUtils imageUtils, GetImageOpenCV getImageOpenCV, Draw draw,
                                 IllustrationManager illustrationManager) {
         this.imageUtils = imageUtils;
-        this.getImage = getImage;
+        this.getImageOpenCV = getImageOpenCV;
         this.draw = draw;
         this.illustrationManager = illustrationManager;
     }
@@ -45,6 +45,7 @@ public class IllustrateScreenshot {
         actionPermissions.put(MOVE, BrobotSettings.drawMove);
         actionPermissions.put(HIGHLIGHT, BrobotSettings.drawHighlight);
         actionPermissions.put(CLASSIFY, BrobotSettings.drawClassify);
+        actionPermissions.put(DEFINE, BrobotSettings.drawDefine);
     }
 
     /**
@@ -59,14 +60,15 @@ public class IllustrateScreenshot {
      */
     public boolean okToIllustrate(ActionOptions actionOptions, ObjectCollection... objectCollections) {
         setActionPermissions();
-        if (!BrobotSettings.saveHistory) return false;
+        if (!BrobotSettings.saveHistory && actionOptions.getIllustrate() != ActionOptions.Illustrate.YES) return false;
+        if (actionOptions.getIllustrate() == ActionOptions.Illustrate.NO) return false;
         ActionOptions.Action action = actionOptions.getAction();
         if (!actionPermissions.containsKey(action)) {
-            Report.println(actionOptions.getAction() + "not available to illustrate in BrobotSettings.");
+            Report.println(actionOptions.getAction() + " not available to illustrate in BrobotSettings.");
             return false;
         }
         if (!actionPermissions.get(action)) {
-            Report.println(actionOptions.getAction() + "not set to illustrate in BrobotSettings.");
+            Report.println(actionOptions.getAction() + " not set to illustrate in BrobotSettings.");
             return false;
         }
         if (BrobotSettings.drawRepeatedActions) return true;
@@ -86,10 +88,7 @@ public class IllustrateScreenshot {
 
     public boolean illustrateWhenAllowed(Matches matches, List<Region> searchRegions, ActionOptions actionOptions,
                                          ObjectCollection... objectCollections) {
-        if (!okToIllustrate(actionOptions, objectCollections)) {
-            //Report.println("Illustration turned off for " + actionOptions.getAction());
-            return false;
-        }
+        if (!okToIllustrate(actionOptions, objectCollections)) return false;
         lastAction = actionOptions.getAction();
         if (lastAction == FIND) lastFind = actionOptions.getFind();
         lastCollections = Arrays.asList(objectCollections);

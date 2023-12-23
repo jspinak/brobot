@@ -62,8 +62,8 @@ public class DynamicImage {
     // for illustration
     private Mat oneColumnBGRMat; // initialized when program is run
     private Mat oneColumnHSVMat; // initialized when program is run
-    private Mat imagesMat; // initialized when program is run, shows the images in the StateImageObject
-    private Mat profilesMat; // initialized when program is run, shows the color profiles in the StateImageObject
+    private Mat imagesMat; // initialized when program is run, shows the images in the StateImage
+    private Mat profilesMat; // initialized when program is run, shows the color profiles in the StateImage
 
     /*
     The full image contains the complete image and some background. This type of image is the most common

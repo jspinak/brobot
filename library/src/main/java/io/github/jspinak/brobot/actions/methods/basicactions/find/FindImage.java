@@ -2,11 +2,11 @@ package io.github.jspinak.brobot.actions.methods.basicactions.find;
 
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.Scene;
+import io.github.jspinak.brobot.actions.methods.sikuliWrappers.find.FindAll;
 import io.github.jspinak.brobot.actions.methods.sikuliWrappers.find.FindWrapperMethods;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
-import io.github.jspinak.brobot.reports.Report;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import org.springframework.stereotype.Component;
 
 /**
@@ -21,11 +21,14 @@ public class FindImage implements FindImageObject {
 
     private FindWrapperMethods findWrapperMethods;
     private SelectRegions selectRegions;
+    private final FindAll findAll;
 
     public FindImage(FindWrapperMethods findWrapperMethods,
-                     SelectRegions selectRegions) {
+                     SelectRegions selectRegions,
+                     FindAll findAll) {
         this.findWrapperMethods = findWrapperMethods;
         this.selectRegions = selectRegions;
+        this.findAll = findAll;
     }
 
     public boolean stopAfterFound(ActionOptions actionOptions, Matches matches) {
@@ -37,16 +40,16 @@ public class FindImage implements FindImageObject {
     /**
      * Creates MatchObjects and sets a new Snapshot for a single Image
      * @param actionOptions holds the action configuration.
-     * @param stateImageObject the StateImageObject containing the Image in focus
+     * @param stateImage the StateImage containing the Image in focus
      * @return a Matches object with all matches found.
      */
     @Override
-    public Matches find(ActionOptions actionOptions, StateImageObject stateImageObject, Scene scene) {
+    public Matches find(ActionOptions actionOptions, StateImage stateImage, Scene scene) {
         Matches matches = new Matches();
-        for (Region region : selectRegions.getRegions(actionOptions, stateImageObject)) {
+        for (Region region : selectRegions.getRegions(actionOptions, stateImage)) {
             matches.addAllResults(
                     findWrapperMethods.get(actionOptions.getFind()).find(
-                    region, stateImageObject, actionOptions, scene));
+                    region, stateImage, actionOptions, scene));
             if (stopAfterFound(actionOptions, matches)) break;
         }
         return matches;

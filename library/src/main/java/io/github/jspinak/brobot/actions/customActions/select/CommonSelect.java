@@ -5,7 +5,7 @@ import io.github.jspinak.brobot.datatypes.primitives.location.Location;
 import io.github.jspinak.brobot.datatypes.primitives.location.Position;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -21,14 +21,14 @@ public class CommonSelect {
     }
 
     public SelectActionObject select(Region swipeRegion, ActionOptions.Find findType, int clicksPerImage,
-                                     Position swipeDirection, int maxSwipes, StateImageObject... images) {
+                                     Position swipeDirection, int maxSwipes, StateImage... images) {
         return select(List.of(images), new ArrayList<>(), swipeRegion, findType, clicksPerImage,
                 swipeDirection, maxSwipes);
     }
 
-    public SelectActionObject select(List<StateImageObject> images, List<StateImageObject> confirmationImages,
-                          Region swipeRegion, ActionOptions.Find findType, int clicksPerImage,
-                          Position swipeDirection, int maxSwipes) {
+    public SelectActionObject select(List<StateImage> images, List<StateImage> confirmationImages,
+                                     Region swipeRegion, ActionOptions.Find findType, int clicksPerImage,
+                                     Position swipeDirection, int maxSwipes) {
         Location swipeTo = new Location(swipeRegion, swipeDirection);
         Location swipeFrom = swipeTo.getOpposite();
         ObjectCollection swipeFromObjColl = new ObjectCollection.Builder()

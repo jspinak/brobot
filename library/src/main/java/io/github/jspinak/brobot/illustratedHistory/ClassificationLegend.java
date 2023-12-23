@@ -3,7 +3,7 @@ package io.github.jspinak.brobot.illustratedHistory;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.SceneAnalysis;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles.ColorCluster;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles.ColorInfo;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import org.bytedeco.opencv.opencv_core.*;
 import org.springframework.stereotype.Component;
 
@@ -25,11 +25,11 @@ public class ClassificationLegend {
     }
 
     public Mat draw(Mat screen, SceneAnalysis sceneAnalysis) {
-        List<StateImageObject> imgs = sceneAnalysis.getStateImageObjects();
+        List<StateImage> imgs = sceneAnalysis.getStateImageObjects();
         Mat sidebar = initSidebar(screen, imgs.size());
         int i=0;
         int x,y;
-        for (StateImageObject img : imgs) {
+        for (StateImage img : imgs) {
             x = (i / labelsPerColumn) * sidebarEntryW + 1;
             y = (i % labelsPerColumn) * sidebarEntryH + 1;
             int labelWidth = sidebarEntryW - 2;
@@ -45,7 +45,7 @@ public class ClassificationLegend {
         return sidebar;
     }
 
-    private void addLabel(StateImageObject img, Mat mat) {
+    private void addLabel(StateImage img, Mat mat) {
         String text = img.getName();
         Point position = new Point(170, 280);
         Scalar color = new Scalar(255);

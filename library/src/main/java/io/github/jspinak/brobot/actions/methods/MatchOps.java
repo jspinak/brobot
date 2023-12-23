@@ -4,12 +4,11 @@ import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.actions.methods.time.Time;
 import io.github.jspinak.brobot.datatypes.primitives.match.MatchObject;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.reports.Report;
 import org.sikuli.script.Match;
 import org.springframework.stereotype.Component;
 
-import java.util.Comparator;
 import java.util.List;
 
 @Component
@@ -21,11 +20,11 @@ public class MatchOps {
         this.time = time;
     }
 
-    public void addMatchListToMatches(List<Match> matchList, Matches matches, StateImageObject stateImageObject,
+    public void addMatchListToMatches(List<Match> matchList, Matches matches, StateImage stateImage,
                                       ActionOptions actionOptions) {
         matchList.forEach(match -> {
             try {
-                matches.add(new MatchObject(match, stateImageObject, time.getDuration(actionOptions.getAction()).getSeconds()));
+                matches.add(new MatchObject(match, stateImage, time.getDuration(actionOptions.getAction()).getSeconds()));
             } catch (Exception e) {
                 Report.println("Failed to create MatchObject.");
             }
@@ -33,7 +32,7 @@ public class MatchOps {
     }
 
     /**
-     * Adds a generic StateImageObject to the MatchObject
+     * Adds a generic StateImage to the MatchObject
      *
      * @param matches the Matches to add to
      * @param matchList the MatchList to add to the Matches
@@ -41,7 +40,7 @@ public class MatchOps {
     public void addGenericMatchObjects(List<Match> matchList, Matches matches, ActionOptions actionOptions) {
         for (Match match : matchList) {
             try {
-                matches.add(new MatchObject(match, new StateImageObject.Builder().generic(),
+                matches.add(new MatchObject(match, new StateImage.Builder().generic(),
                         time.getDuration(actionOptions.getAction()).getSeconds()));
             } catch (Exception e) {
                 Report.println("Failed to create MatchObject.");

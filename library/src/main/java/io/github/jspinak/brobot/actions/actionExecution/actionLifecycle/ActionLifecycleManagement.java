@@ -4,6 +4,8 @@ import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.actions.methods.time.TimeWrapper;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.reports.Report;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
@@ -13,7 +15,7 @@ import java.time.LocalDateTime;
 public class ActionLifecycleManagement {
 
     private final ActionLifecylceRepo actionLifecylceRepo;
-    private TimeWrapper timeWrapper;
+    private final TimeWrapper timeWrapper;
 
     public ActionLifecycleManagement(ActionLifecylceRepo actionLifecylceRepo, TimeWrapper timeWrapper) {
         this.actionLifecylceRepo = actionLifecylceRepo;
@@ -25,10 +27,10 @@ public class ActionLifecycleManagement {
      * @param actionOptions ActionOptions object that contains all the information about the action.
      * @return id of the created ActionLifecycle object
      */
-    public int newActionLifecycle(ActionOptions actionOptions) {
+    public int newActionLifecycle(ActionOptions actionOptions, Matches matches) {
         ActionLifecycle actionLifecycle = new ActionLifecycle(actionOptions, timeWrapper.now());
         int id = actionLifecylceRepo.add(actionLifecycle);
-        actionOptions.setActionId(id);
+        matches.setActionId(id);
         return id;
     }
 
@@ -82,6 +84,7 @@ public class ActionLifecycleManagement {
      */
     public boolean continueAction(int id) {
         int completedReps = getCompletedRepetitions(id);
+        if (completedReps == 0) return true;
         int maxReps = getActionOptions(id).getMaxTimesToRepeatActionSequence();
         ActionOptions.Action action = getActionOptions(id).getAction();
         if (action != ActionOptions.Action.FIND && completedReps >= maxReps) {
@@ -92,16 +95,30 @@ public class ActionLifecycleManagement {
         return duration.getSeconds() <= maxWait;
     }
 
-    public boolean continueActionIfNotFound(int id, Matches matches) {
+    public boolean continueActionIfNotFound(Matches matches) {
+        int id = matches.getActionId();
         if (!continueAction(id)) {
             //Report.println("continue action id is false");
             return false;
         }
-        if (!matches.isEmpty()) {
+        if (!matches.isEmpty() && getActionOptions(id).getFind() == ActionOptions.Find.FIRST) {
             //Report.println("Found the element, stopping find");
             return false;
         }
+        if (getAllImagesFound(id) &&
+                getActionOptions(id).getFind() == ActionOptions.Find.EACH &&
+                getActionOptions(id).getDoOnEach() == ActionOptions.DoOnEach.FIRST) {
+            return false;
+        }
         return true;
+    }
+
+    public boolean getAllImagesFound(int id) {
+        return actionLifecylceRepo.getActionLifecycles().get(id).isAllImagesFound();
+    }
+
+    public void setAllImagesFound(int id) {
+        actionLifecylceRepo.getActionLifecycles().get(id).setAllImagesFound(true);
     }
 
     public boolean printActionOnce(int id) {

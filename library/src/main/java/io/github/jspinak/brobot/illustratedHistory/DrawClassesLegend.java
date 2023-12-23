@@ -2,7 +2,7 @@ package io.github.jspinak.brobot.illustratedHistory;
 
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles.SetProfileMats;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.imageUtils.MatBuilder;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.springframework.stereotype.Component;
@@ -35,7 +35,7 @@ public class DrawClassesLegend {
     /*
     The classes legend shows the images files comprising each Brobot Image and the Image's kMeans centers.
      */
-    public void drawLegend(Illustrations illustrations, List<StateImageObject> imgs, ActionOptions actionOptions) {
+    public void drawLegend(Illustrations illustrations, List<StateImage> imgs, ActionOptions actionOptions) {
         if (illustrations.getScene() == null) return;
         initSidebar(illustrations.getScene(), imgs.size());
         List<Mat> imgEntries = getAllImageEntries(imgs);
@@ -70,16 +70,16 @@ public class DrawClassesLegend {
         return columnMatOps.mergeColumnMats(imgKmeansColumns, spacesBetweenEntries * 2);
     }
 
-    private List<Mat> getAllImageEntries(List<StateImageObject> imgs) {
+    private List<Mat> getAllImageEntries(List<StateImage> imgs) {
         List<Mat> sidebarEntries = new ArrayList<>();
-        for (StateImageObject img : imgs) {
+        for (StateImage img : imgs) {
             Mat entry = getImagesEntryForClassesLegend(img);
             sidebarEntries.add(entry);
         }
         return sidebarEntries;
     }
 
-    private Mat getImagesEntryForClassesLegend(StateImageObject img) {
+    private Mat getImagesEntryForClassesLegend(StateImage img) {
         return new MatBuilder()
                 .setName("classes legend")
                 .addHorizontalSubmats(setProfileMats.getImagesMat(img))
@@ -87,16 +87,16 @@ public class DrawClassesLegend {
                 .build();
     }
 
-    private List<Mat> getAllColorEntries(List<StateImageObject> imgs, ActionOptions actionOptions) {
+    private List<Mat> getAllColorEntries(List<StateImage> imgs, ActionOptions actionOptions) {
         List<Mat> sidebarEntries = new ArrayList<>();
-        for (StateImageObject img : imgs) {
+        for (StateImage img : imgs) {
             Mat entry = getKmeansCenterEntry(img, actionOptions);
             sidebarEntries.add(entry);
         }
         return sidebarEntries;
     }
 
-    private Mat getKmeansCenterEntry(StateImageObject img, ActionOptions actionOptions) {
+    private Mat getKmeansCenterEntry(StateImage img, ActionOptions actionOptions) {
         return new MatBuilder()
                 .setName("classes legend")
                 .addHorizontalSubmats(setProfileMats.getProfilesMat(img, actionOptions))

@@ -3,7 +3,7 @@ package io.github.jspinak.brobot.buildStateStructure.buildFromNames;
 import io.github.jspinak.brobot.actions.BrobotSettings;
 import io.github.jspinak.brobot.buildStateStructure.buildFromNames.attributes.SetAttributes;
 import io.github.jspinak.brobot.buildStateStructure.buildFromNames.babyStates.BabyStateRepo;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import org.sikuli.script.ImagePath;
 import org.springframework.stereotype.Component;
 
@@ -17,7 +17,7 @@ import java.util.stream.Stream;
 
 /**
  * Retrieves files as Strings (in the case of screenshots) or
- * as StateImageObjects (in the case of images).
+ * as StateImages (in the case of images).
  */
 @Component
 public class GetFiles {
@@ -52,19 +52,19 @@ public class GetFiles {
 
     private void addNewImageToRepo(String filename) {
         filename = filename.replace(".png","");
-        StateImageObject newSIO = new StateImageObject.Builder()
+        StateImage newSIO = new StateImage.Builder()
                 .withImage(filename)
                 .isFixed(!filename.contains("_v"))
                 .build();
         newSIO.getAttributes().addFilename(filename);
         setAttributes.processName(newSIO);
-        Optional<StateImageObject> optBaseImg = babyStateRepo.getBaseImage(newSIO);
+        Optional<StateImage> optBaseImg = babyStateRepo.getBaseImage(newSIO);
         if (optBaseImg.isEmpty()) {
             babyStateRepo.addImage(newSIO);
             newSIO.getAttributes().print();
         }
         else { // this image is part of a group of images that make up 1 Brobot Image
-            StateImageObject baseImg = optBaseImg.get();
+            StateImage baseImg = optBaseImg.get();
             baseImg.merge(newSIO);
             baseImg.getAttributes().print();
         }

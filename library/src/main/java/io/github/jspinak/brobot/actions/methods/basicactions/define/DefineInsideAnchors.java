@@ -33,10 +33,10 @@ public class DefineInsideAnchors implements ActionInterface {
         this.anchorRegion = anchorRegion;
     }
 
-    public Matches perform(ActionOptions actionOptions, ObjectCollection... objectCollections) {
+    public void perform(Matches matches, ActionOptions actionOptions, ObjectCollection... objectCollections) {
         Region region = new Region();
         definedBorders = new DefinedBorders();
-        Matches matches = defineHelper.findMatches(actionOptions, objectCollections);
+        defineHelper.findMatches(matches, actionOptions, objectCollections);
         // The DefinedBorders object keeps track of defined borders as the region is being defined
         anchorRegion.fitRegionToAnchors(definedBorders, region, matches);
         //fitRegionToLocations(region, objectCollections[0].getStateLocations()); // locations are converted to Match objects in a Find operation
@@ -45,8 +45,6 @@ public class DefineInsideAnchors implements ActionInterface {
             matches.addDefinedRegion(region);
         } // else return an undefined region instead of a partially defined region
         matches.setOutputText(region.toString());
-        return matches;
     }
-
 
 }

@@ -2,8 +2,7 @@ package io.github.jspinak.brobot.buildStateStructure.buildFromNames.findImages;
 
 import io.github.jspinak.brobot.buildStateStructure.buildFromNames.attributes.AttributeTypes;
 import io.github.jspinak.brobot.datatypes.primitives.match.MatchSnapshot;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
-import io.github.jspinak.brobot.reports.Report;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import org.sikuli.script.Match;
 import org.springframework.stereotype.Component;
 
@@ -41,7 +40,7 @@ public class AddSnapshots {
      * @param matches matches found
      * @param attributes image attributes (tells us if the image should be found on this screen)
      */
-    public void ifNeededAddSnapshot(StateImageObject image, List<Match> matches,
+    public void ifNeededAddSnapshot(StateImage image, List<Match> matches,
                                     List<AttributeTypes.Attribute> attributes) {
         //Report.println("size of matches = "+matches.size());
         if (!imageShouldExist(attributes)) return;

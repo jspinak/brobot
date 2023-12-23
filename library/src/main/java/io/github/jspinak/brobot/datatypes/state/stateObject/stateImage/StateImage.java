@@ -1,4 +1,4 @@
-package io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject;
+package io.github.jspinak.brobot.datatypes.state.stateObject.stateImage;
 
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles.ColorCluster;
 import io.github.jspinak.brobot.buildStateStructure.buildFromNames.attributes.AttributeData;
@@ -23,17 +23,17 @@ import lombok.Setter;
 import java.util.*;
 
 /**
- * StateImageObject represents an Image that exists in the owner State. Unless
- * it has a shared Image, this StateImageObject is representative of the State and will be
- * used to find it in case Brobot is lost. All StateImageObjects, including those with shared
+ * StateImage represents an Image that exists in the owner State. Unless
+ * it has a shared Image, this StateImage is representative of the State and will be
+ * used to find it in case Brobot is lost. All StateImages, including those with shared
  * Images, are used to find a State during StateTransitions and with Find Actions.
  *
- * StateImageObjects can have either an Image or a RegionImagePairs. RegionImagePairs are for
+ * StateImages can have either an Image or a RegionImagePairs. RegionImagePairs are for
  * Images with fixed locations and are specified by the 'isFixed' option in the Builder.
  */
 @Getter
 @Setter
-public class StateImageObject implements StateObject {
+public class StateImage implements StateObject {
 
     // common StateObject fields (too few fields and too few StateObject classes for composition or hierarchy)
     // hierarchy would make builders much more complex
@@ -77,7 +77,7 @@ public class StateImageObject implements StateObject {
     private Set<String> statesToEnter = new HashSet<>();
     private Set<String> statesToExit = new HashSet<>();
 
-    private StateImageObject() {}
+    private StateImage() {}
 
     public Region getSearchRegion() {
         return searchRegionsObject.getSearchRegion();
@@ -158,10 +158,10 @@ public class StateImageObject implements StateObject {
     }
 
     /**
-     * adds the Images, Snapshots, and Attributes of the parameter to this StateImageObject
-     * @param img the StateImageObject with the values to add
+     * adds the Images, Snapshots, and Attributes of the parameter to this StateImage
+     * @param img the StateImage with the values to add
      */
-    public void merge(StateImageObject img) {
+    public void merge(StateImage img) {
         // add images
         img.attributes.getFilenames().forEach(this::addImage);
         // add snapshots
@@ -171,15 +171,15 @@ public class StateImageObject implements StateObject {
         if (!img.fixed) fixed = false;
     }
 
-    public boolean equals(StateImageObject stateImageObject) {
-        return image.equals(stateImageObject.getImage()) &&
-                regionImagePairs.equals(stateImageObject.getRegionImagePairs());
+    public boolean equals(StateImage stateImage) {
+        return image.equals(stateImage.getImage()) &&
+                regionImagePairs.equals(stateImage.getRegionImagePairs());
     }
 
     @Override
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("StateImageObject:");
+        stringBuilder.append("StateImage:");
         stringBuilder.append(" name=").append(name);
         stringBuilder.append(" ownerState=").append(ownerStateName);
         stringBuilder.append(" searchRegions=");
@@ -329,40 +329,40 @@ public class StateImageObject implements StateObject {
         This makes it easier to initialize images, as a dynamic image is not required. Instead, the user can just
         toggle a boolean stating that the image is dynamic.
          */
-        private void setDynamicInsideImage(StateImageObject stateImageObject) {
-            if (stateImageObject.getDynamicImage().getInside().isEmpty()) {
-                //Report.println("Setting dynamic inside image to static image for " + stateImageObject.getName());
-                this.dynamicImage.setInside(stateImageObject.image);
+        private void setDynamicInsideImage(StateImage stateImage) {
+            if (stateImage.getDynamicImage().getInside().isEmpty()) {
+                //Report.println("Setting dynamic inside image to static image for " + stateImage.getName());
+                this.dynamicImage.setInside(stateImage.image);
             }
         }
 
-        public StateImageObject build() {
-            StateImageObject stateImageObject = new StateImageObject();
-            stateImageObject.name = name;
-            stateImageObject.index = index;
-            stateImageObject.matchHistory = matchHistory;
-            stateImageObject.searchRegionsObject = searchRegions;
-            stateImageObject.ownerStateName = ownerStateName;
-            stateImageObject.fixed = fixed;
-            stateImageObject.dynamic = dynamic;
-            stateImageObject.image = image;
-            stateImageObject.regionImagePairs = regionImagePairs;
-            stateImageObject.dynamicImage = dynamicImage;
-            setDynamicInsideImage(stateImageObject);
-            stateImageObject.baseProbabilityExists = baseProbabilityExists;
-            stateImageObject.probabilityExists = probabilityExists;
-            stateImageObject.position = position;
-            stateImageObject.shared = shared;
-            stateImageObject.anchors = anchors;
-            stateImageObject.transitionImage = transitionImage;
-            return stateImageObject;
+        public StateImage build() {
+            StateImage stateImage = new StateImage();
+            stateImage.name = name;
+            stateImage.index = index;
+            stateImage.matchHistory = matchHistory;
+            stateImage.searchRegionsObject = searchRegions;
+            stateImage.ownerStateName = ownerStateName;
+            stateImage.fixed = fixed;
+            stateImage.dynamic = dynamic;
+            stateImage.image = image;
+            stateImage.regionImagePairs = regionImagePairs;
+            stateImage.dynamicImage = dynamicImage;
+            setDynamicInsideImage(stateImage);
+            stateImage.baseProbabilityExists = baseProbabilityExists;
+            stateImage.probabilityExists = probabilityExists;
+            stateImage.position = position;
+            stateImage.shared = shared;
+            stateImage.anchors = anchors;
+            stateImage.transitionImage = transitionImage;
+            return stateImage;
         }
 
-        public StateImageObject generic() {
-            StateImageObject stateImageObject = new StateImageObject();
-            stateImageObject.name = "generic";
-            stateImageObject.ownerStateName = NullState.Name.NULL.toString();
-            return stateImageObject;
+        public StateImage generic() {
+            StateImage stateImage = new StateImage();
+            stateImage.name = "generic";
+            stateImage.ownerStateName = NullState.Name.NULL.toString();
+            return stateImage;
         }
 
     }

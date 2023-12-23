@@ -19,12 +19,11 @@ public class MouseDown implements ActionInterface {
         this.mouseDownWrapper = mouseDownWrapper;
     }
 
-    public Matches perform(ActionOptions actionOptions, ObjectCollection... objectCollections) {
+    public void perform(Matches matches, ActionOptions actionOptions, ObjectCollection... objectCollections) {
         mouseDownWrapper.press(
                 actionOptions.getPauseBeforeMouseDown(),
                 actionOptions.getPauseAfterMouseDown(),
                 actionOptions.getClickType());
-        return new Matches();
     }
 
 }

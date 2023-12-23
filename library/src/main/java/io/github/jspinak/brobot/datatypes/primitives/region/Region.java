@@ -10,10 +10,7 @@ import org.bytedeco.opencv.opencv_core.Rect;
 import org.sikuli.script.Match;
 import org.sikuli.script.Screen;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Random;
+import java.util.*;
 
 /**
  * Region extends the Sikuli class Region and adds, among other functionality, new
@@ -107,6 +104,14 @@ public class Region extends org.sikuli.script.Region implements Comparable<Regio
     public void setY2(int y2) {
         this.y2 = y2;
         h = y2 - y;
+    }
+
+    public int getX2() {
+        return x + w;
+    }
+
+    public int getY2() {
+        return y + h;
     }
 
     @Override
@@ -259,8 +264,7 @@ public class Region extends org.sikuli.script.Region implements Comparable<Regio
 
     public Optional<Region> getOverlappingRegion(Region r) {
         Optional<Rect> rect = getOverlappingRect(r.getJavaCVRect());
-        if (rect.isEmpty()) return Optional.empty();
-        return Optional.of(new Region(rect.get()));
+        return rect.map(Region::new);
     }
 
     public Region getUnion(Region r) {
@@ -281,5 +285,122 @@ public class Region extends org.sikuli.script.Region implements Comparable<Regio
 
     public Location getLocation() {
         return new Location(getTarget().x, getTarget().y);
+    }
+
+    /**
+     * Finds the areas of this region that do not overlap with the parameter region.
+     * Non-overlapping areas of the parameter region are not considered.
+     * @param b the region that may overlap
+     * @return a collection of Region objects comprising the non-overlapping areas.
+     */
+    public List<Region> minus(Region b) {
+        setXY2();
+        Optional<Region> overlapOpt = getOverlappingRegion(b);
+        if (overlapOpt.isEmpty()) return List.of(this); // no overlap
+        Region overlap = overlapOpt.get();
+        List<Integer> xPoints = xPoints(b); // between 2 and 4 points
+        List<Integer> yPoints = yPoints(b); // between 2 and 4 points
+        List<Region> subRegions = getSubRegions(xPoints, yPoints);
+        List<Region> uniqueRegions = removeRegion(subRegions, overlap);
+        List<Region> merged = mergeAdjacent(uniqueRegions);
+        return merged;
+    }
+
+    private List<Integer> xPoints(Region b) {
+        List<Integer> points = new ArrayList<>();
+        boolean allXExposedAtSomeY = b.y > y || b.y2 < y2;
+        if (allXExposedAtSomeY) {
+            points.add(x);
+            points.add(x2);
+        }
+        if (b.x > x) {
+            points.add(b.x);
+        }
+        if (x2 > b.x2) {
+            points.add(b.x2);
+        }
+        Collections.sort(points);
+        return points;
+    }
+
+    private List<Integer> yPoints(Region b) {
+        List<Integer> points = new ArrayList<>();
+        boolean allYExposedAtSomeX = b.x > x || b.x2 < x2;
+        if (allYExposedAtSomeX) {
+            points.add(y);
+            points.add(y2);
+        }
+        if (b.y > y) {
+            points.add(b.y);
+        }
+        if (y2 > b.y2) {
+            points.add(b.y2);
+        }
+        Collections.sort(points);
+        return points;
+    }
+
+    /**
+     * Return a list of all subregions created by the x and y points.
+     * @param xPoints points along the x-axis
+     * @param yPoints points along the y-axis
+     * @return all regions created with these points as edges
+     */
+    public static List<Region> getSubRegions(List<Integer> xPoints, List<Integer> yPoints) {
+        if (xPoints.size() < 2 || yPoints.size() < 2) return new ArrayList<>();
+        List<Region> subRegions = new ArrayList<>();
+        for (int i=0; i<xPoints.size()-1; i++) {
+            for (int j=0; j<yPoints.size()-1; j++) {
+                int x1 = xPoints.get(i);
+                int x2 = xPoints.get(i+1);
+                int y1 = yPoints.get(j);
+                int y2 = yPoints.get(j+1);
+                subRegions.add(new Region(x1, y1, x2-x1, y2-y1));
+            }
+        }
+        return subRegions;
+    }
+
+    public static List<Region> removeRegion(List<Region> regions, Region toRemove) {
+        List<Region> newRegions = new ArrayList<>();
+        regions.forEach(region -> {
+            if (!region.equals(toRemove)) newRegions.add(region);
+        });
+        return newRegions;
+    }
+
+    public static List<Region> mergeAdjacent(List<Region> regions) {
+        if (regions.size() <= 1) return regions;
+        regions.forEach(Region::setXY2); // update the x2 and y2 values
+        boolean listIsSmaller = true;
+        List<Region> merged = regions;
+        while (listIsSmaller) {
+            List<Region> newMerge = mergeIteration(merged);
+            listIsSmaller = newMerge.size() < merged.size();
+            merged = newMerge;
+        }
+        return merged;
+    }
+
+    private static List<Region> mergeIteration(List<Region> regions) {
+        if (regions.size() <= 1) return regions;
+        List<Region> merged = new ArrayList<>();
+        Region m = new Region(regions.get(0));
+        for (int i=1; i<=regions.size(); i++) {
+            if (i==regions.size()) { // we've checked all regions
+                merged.add(m);
+                break;
+            }
+            Region r = regions.get(i);
+            boolean horizontalMatch = m.x2 == r.x && m.y == r.y && m.y2 == r.y2;
+            boolean verticalMatch = m.y2 == r.y && m.x == r.x && m.x2 == r.x2;
+            if (horizontalMatch) m.setX2(r.x2);
+            else if (verticalMatch) m.setY2(r.y2);
+            else { // no match
+                merged.add(m);
+                m = new Region(r);
+            }
+        }
+        return merged;
     }
 }

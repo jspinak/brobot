@@ -28,10 +28,9 @@ public class MultipleDrags {
     }
 
     // not working. mouseMove is somehow frozen after mouseDown
-    private Matches doMultipleDrags(ActionOptions actionOptions, ObjectCollection... objectCollections) {
-        Matches matches = new Matches();
-        ObjectCollection startColl = getStartingPoint(actionOptions, objectCollections);
-        if (startColl.empty()) return matches;
+    private void doMultipleDrags(Matches matches, ActionOptions actionOptions, ObjectCollection... objectCollections) {
+        ObjectCollection startColl = getStartingPoint(matches, actionOptions, objectCollections);
+        if (startColl.isEmpty()) return;
         MultipleActionsObject mao = new MultipleActionsObject();
         mao.addActionOptionsObjectCollectionPair(actionOptionsForDrag.getMove(actionOptions), startColl);
         mao.addActionOptionsObjectCollectionPair(
@@ -44,12 +43,12 @@ public class MultipleDrags {
         mao.addActionOptionsObjectCollectionPair(
                 actionOptionsForDrag.getMouseUp(actionOptions), objectCollections[len - 1]);
         //mao.print();
-        return multipleActions.perform(mao);
+        multipleActions.perform(mao);
     }
 
-    private ObjectCollection getStartingPoint(ActionOptions actionOptions,
+    private ObjectCollection getStartingPoint(Matches matches, ActionOptions actionOptions,
                                               ObjectCollection... objectCollections) {
-        Optional<Location> optStartLoc = getDragLocation.getFromLocation(actionOptions, objectCollections);
+        Optional<Location> optStartLoc = getDragLocation.getFromLocation(matches, actionOptions, objectCollections);
         if (optStartLoc.isEmpty()) return new ObjectCollection.Builder().build();
         return new ObjectCollection.Builder()
                 .withLocations(optStartLoc.get())
