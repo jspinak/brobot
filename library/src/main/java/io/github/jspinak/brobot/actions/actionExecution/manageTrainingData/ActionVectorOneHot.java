@@ -2,6 +2,7 @@ package io.github.jspinak.brobot.actions.actionExecution.manageTrainingData;
 
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.datatypes.primitives.match.MatchObject;
+import io.github.jspinak.brobot.datatypes.primitives.match.MatchObject_;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import io.github.jspinak.brobot.datatypes.trainingData.ActionVector;
@@ -48,7 +49,7 @@ public class ActionVectorOneHot implements ActionVectorTranslation {
     }
 
     private void setCoordinates(short[] vec, Matches matches) {
-        Optional<MatchObject> optMatch = matches.getBestMatch();
+        Optional<MatchObject_> optMatch = matches.getBestMatch();
         if (optMatch.isEmpty()) return;
         Match match = optMatch.get().getMatch();
         vec[6] = (short) match.x;

@@ -1,5 +1,6 @@
 package io.github.jspinak.brobot.actions.actionOptions;
 
+import co.elastic.clients.util.TriConsumer;
 import io.github.jspinak.brobot.actions.BrobotSettings;
 import io.github.jspinak.brobot.actions.methods.sikuliWrappers.mouse.ClickType;
 import io.github.jspinak.brobot.datatypes.primitives.location.Location;
@@ -7,7 +8,7 @@ import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.StateRegion;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.SearchRegions;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.SearchRegions;
 import lombok.Data;
 import org.sikuli.basics.Settings;
 
@@ -69,7 +70,7 @@ public class ActionOptions {
      * UNIVERSAL: used for mocking. Initializing an Image with a UNIVERSAL Find allows it
      *   to be accessed by an operation of FIRST, EACH, ALL, and BEST.
      * CUSTOM: user-defined. Must be of type
-     *         {@code BiFunction<ActionOptions, List<StateImageObject>, Matches>>}
+     *         {@code BiFunction<ActionOptions, List<StateImage>, Matches>>}
      * HISTOGRAM: match the histogram from the input image(s)
      * MOTION: find the locations of a moving object across screens
      * REGIONS_OF_MOTION: find all dynamic pixel regions from a series of screens
@@ -83,7 +84,7 @@ public class ActionOptions {
     /**
      * tempFind is a user defined Find method that is not meant to be reused.
      */
-    private BiFunction<ActionOptions, List<ObjectCollection>, Matches> tempFind;
+    private TriConsumer<Matches, ActionOptions, List<ObjectCollection>> tempFind;
 
     /**
      * Find actions are performed in the order they appear in the list.
@@ -119,8 +120,8 @@ public class ActionOptions {
     private DoOnEach doOnEach = DoOnEach.FIRST;
 
     /**
-     * Instead of searching for a StateImageObject, use its defined Region to create a Match.
-     * This is either the first found region if the StateImageObject uses a
+     * Instead of searching for a StateImage, use its defined Region to create a Match.
+     * This is either the first found region if the StateImage uses a
      * RegionImagePairs object, or the first defined Region in SearchRegions.
      */
     private boolean useDefinedRegion = false;
@@ -386,9 +387,18 @@ public class ActionOptions {
     private double startPlayback = -1;
     private double playbackDuration = 5;
 
+    /**
+     * Overrides the global illustration setting for this action.
+     * Maybe is the default and does not override the global setting.
+     */
+    public enum Illustrate {
+        YES, NO, MAYBE
+    }
+    private Illustrate illustrate = Illustrate.MAYBE;
+
     public static class Builder {
         private Action action = Action.FIND;
-        private BiFunction<ActionOptions, List<ObjectCollection>, Matches> tempFind;
+        private TriConsumer<Matches, ActionOptions, List<ObjectCollection>> tempFind;
         private ClickUntil clickUntil = ClickUntil.OBJECTS_APPEAR;
         private Find find = Find.FIRST;
         private List<Find> findActions = new ArrayList<>();
@@ -429,7 +439,7 @@ public class ActionOptions {
         private boolean highlightAllAtOnce = false;
         private double highlightSeconds = 1;
         private String highlightColor = "red";
-        GetTextUntil getTextUntil = GetTextUntil.TEXT_APPEARS;
+        private GetTextUntil getTextUntil = GetTextUntil.TEXT_APPEARS;
         private double typeDelay = Settings.TypeDelay;
         private String modifiers = "";
         private ScrollDirection scrollDirection = ScrollDirection.UP;
@@ -443,6 +453,7 @@ public class ActionOptions {
         private int minArea = 1;
         private int maxArea = -1;
         private int maxMovement = 300;
+        private Illustrate illustrate = Illustrate.MAYBE;
 
         public Builder() {}
         //public Builder(Action action) { this.action = action; }
@@ -452,7 +463,7 @@ public class ActionOptions {
             return this;
         }
 
-        public Builder useTempFind(BiFunction<ActionOptions, List<ObjectCollection>, Matches> tempFind) {
+        public Builder useTempFind(TriConsumer<Matches, ActionOptions, List<ObjectCollection>> tempFind) {
             this.tempFind = tempFind;
             return this;
         }
@@ -750,6 +761,11 @@ public class ActionOptions {
             return this;
         }
 
+        public Builder setIllustrate(Illustrate illustrate) {
+            this.illustrate = illustrate;
+            return this;
+        }
+
         public ActionOptions build() {
             ActionOptions actionOptions = new ActionOptions();
             actionOptions.action = action;
@@ -808,6 +824,7 @@ public class ActionOptions {
             actionOptions.minArea = minArea;
             actionOptions.maxArea = maxArea;
             actionOptions.maxMovement = maxMovement;
+            actionOptions.illustrate = illustrate;
             return actionOptions;
         }
     }

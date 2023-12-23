@@ -1,7 +1,6 @@
 package io.github.jspinak.brobot.buildStateStructure.buildFromNames.attributes;
 
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
-import io.github.jspinak.brobot.reports.Report;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.stringUtils.CommonRegex;
 import org.springframework.stereotype.Component;
 
@@ -20,7 +19,7 @@ public class SetAttributes {
     private AttributeTypes.Tag tag;
     private AttributeTypes.Attribute attribute;
 
-    public void processName(StateImageObject image) {
+    public void processName(StateImage image) {
         attributes = image.getAttributes();
         filename = attributes.getFilenames().get(0); //image.getName();
         pos = 0;

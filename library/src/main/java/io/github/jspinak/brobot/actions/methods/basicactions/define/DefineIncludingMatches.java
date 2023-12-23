@@ -22,12 +22,11 @@ public class DefineIncludingMatches implements ActionInterface {
         this.defineHelper = defineHelper;
     }
 
-    public Matches perform(ActionOptions actionOptions, ObjectCollection... objectCollections) {
-        Matches matches = defineHelper.findMatches(actionOptions, objectCollections);
+    public void perform(Matches matches, ActionOptions actionOptions, ObjectCollection... objectCollections) {
+        defineHelper.findMatches(matches, actionOptions, objectCollections);
         Region region = fitRegionToMatches(matches);
         defineHelper.adjust(region, actionOptions);
         matches.addDefinedRegion(region);
-        return matches;
     }
 
     private Region fitRegionToMatches(Matches matches) {

@@ -25,14 +25,12 @@ public class WaitVanish implements ActionInterface {
         this.time = time;
     }
 
-    public Matches perform(ActionOptions actionOptions, ObjectCollection[] objectCollections) {
+    public void perform(Matches matches, ActionOptions actionOptions, ObjectCollection[] objectCollections) {
         actionOptions.setFind(ActionOptions.Find.EACH);
-        Matches matches = new Matches();
         time.setStartTime(ActionOptions.Action.VANISH); // this method shouldn't be called directly, but just in case...
         while (!time.expired(ActionOptions.Action.VANISH, actionOptions.getMaxWait()) && !matches.isEmpty()) {
-            matches = find.perform(actionOptions, objectCollections[0]);
+            find.perform(matches, actionOptions, objectCollections[0]);
         }
-        return matches;
     }
 
 }

@@ -25,7 +25,7 @@ import java.util.List;
  *   class that include Java files for both the State and the StateTransitions.
  * - State classes are fully written and include enums, imports, all State object definitions,
  *   the State variable definition, and the constructor which adds the state to the StateService.
- * - StateImageObjects are defined with MatchSnapshots from matches found in the screenshots. In
+ * - StateImages are defined with MatchSnapshots from matches found in the screenshots. In
  *   addition, they may be initialized with SearchRegions defined from a match or from the matches
  *   of a group of images in the same State.
  * - StateTransitions classes are also fully written and include all enums, imports, dependency

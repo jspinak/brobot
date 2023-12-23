@@ -72,6 +72,11 @@ public class MatchSnapshot {
      * the best settings for an application.
      */
     private boolean resultSuccess = false;
+    /**
+     * The state in which the image is found gives important information about where and when the state can be found.
+     * Mock operations can query this information when an action is carried out in a particular state.
+     */
+    private String state = "null";
 
     public boolean wasFound() {
         return !matchList.isEmpty() || text.size() > 0;
@@ -156,6 +161,7 @@ public class MatchSnapshot {
         private LocalDateTime timeStamp;
         private boolean actionSuccess = false; // can be initialized for mocks
         private boolean resultSuccess = false; // can be initialized for mocks
+        private String state = "null"; // the state in which it was found
 
         public Builder setActionOptions(ActionOptions actionOptions) {
             this.actionOptions = actionOptions;
@@ -238,6 +244,11 @@ public class MatchSnapshot {
             return this;
         }
 
+        public Builder setState(String state) {
+            this.state = state;
+            return this;
+        }
+
         public MatchSnapshot build() {
             MatchSnapshot matchSnapshot = new MatchSnapshot();
             matchSnapshot.actionOptions = actionOptions;
@@ -247,6 +258,7 @@ public class MatchSnapshot {
             matchSnapshot.timeStamp = LocalDateTime.now();
             matchSnapshot.actionSuccess = actionSuccess;
             matchSnapshot.resultSuccess = resultSuccess;
+            matchSnapshot.state = state;
             return matchSnapshot;
         }
     }

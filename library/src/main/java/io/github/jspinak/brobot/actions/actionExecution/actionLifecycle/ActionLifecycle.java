@@ -15,6 +15,7 @@ public class ActionLifecycle {
     private LocalDateTime endTime;
     private int completedRepetitions = 0;
     private boolean printed = false;
+    private boolean allImagesFound = false;
 
     public ActionLifecycle(ActionOptions actionOptions, LocalDateTime now) {
         this.actionOptions = actionOptions;

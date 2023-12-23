@@ -1,9 +1,8 @@
 package io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles;
 
 import io.github.jspinak.brobot.actions.BrobotSettings;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.imageUtils.MatOps3d;
-import io.github.jspinak.brobot.reports.Report;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.TermCriteria;
 import org.springframework.stereotype.Component;
@@ -32,7 +31,7 @@ public class SetKMeansProfiles {
      * Sets the kmeans profiles for the given image, for means from 1 to the max means as specified in the settings.
      * @param img the image to set the profiles for
      */
-    public void setProfiles(StateImageObject img) {
+    public void setProfiles(StateImage img) {
         KmeansProfilesAllSchemas kmeansProfilesAllSchemas = new KmeansProfilesAllSchemas();
         for (int i=1; i<=BrobotSettings.maxKMeansToStoreInProfile; i++) {
             addNewProfiles(kmeansProfilesAllSchemas, img, i);
@@ -40,7 +39,7 @@ public class SetKMeansProfiles {
         img.getDynamicImage().setInsideKmeansProfiles(kmeansProfilesAllSchemas);
     }
 
-    public void addNewProfiles(KmeansProfilesAllSchemas kmeansProfiles, StateImageObject img, int means) {
+    public void addNewProfiles(KmeansProfilesAllSchemas kmeansProfiles, StateImage img, int means) {
         for (int i=1; i<=BrobotSettings.maxKMeansToStoreInProfile; i++) {
             KmeansProfile kmeansProfilesForBGR = getProfile(
                     img.getDynamicImage().getOneColumnBGRMat(), means, ColorCluster.ColorSchemaName.BGR);
@@ -85,7 +84,7 @@ public class SetKMeansProfiles {
         return clusters;
     }
 
-    public void addKMeansIfNeeded(Set<StateImageObject> allImages, int kMeans) {
+    public void addKMeansIfNeeded(Set<StateImage> allImages, int kMeans) {
         allImages.forEach(img -> {
             KmeansProfilesAllSchemas profiles = img.getDynamicImage().getInsideKmeansProfiles();
             if (profiles == null) profiles = new KmeansProfilesAllSchemas();

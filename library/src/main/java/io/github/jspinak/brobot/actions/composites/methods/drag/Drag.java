@@ -1,10 +1,10 @@
 package io.github.jspinak.brobot.actions.composites.methods.drag;
 
 import io.github.jspinak.brobot.actions.actionExecution.ActionInterface;
+import io.github.jspinak.brobot.actions.actionExecution.MatchesInitializer;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.OffsetOps;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.GetSceneAnalysisCollection;
-import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.SceneAnalysisCollection;
 import io.github.jspinak.brobot.actions.methods.sikuliWrappers.DragLocation;
 import io.github.jspinak.brobot.datatypes.primitives.location.Location;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
@@ -12,7 +12,6 @@ import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import org.springframework.stereotype.Component;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -27,13 +26,16 @@ public class Drag implements ActionInterface {
     private GetDragLocation getDragLocation;
     private GetSceneAnalysisCollection getSceneAnalysisCollection;
     private OffsetOps offsetOps;
+    private final MatchesInitializer matchesInitializer;
 
     public Drag(DragLocation dragLocation, GetDragLocation getDragLocation,
-                GetSceneAnalysisCollection getSceneAnalysisCollection, OffsetOps offsetOps) {
+                GetSceneAnalysisCollection getSceneAnalysisCollection, OffsetOps offsetOps,
+                MatchesInitializer matchesInitializer) {
         this.dragLocation = dragLocation;
         this.getDragLocation = getDragLocation;
         this.getSceneAnalysisCollection = getSceneAnalysisCollection;
         this.offsetOps = offsetOps;
+        this.matchesInitializer = matchesInitializer;
     }
 
     /**
@@ -46,21 +48,17 @@ public class Drag implements ActionInterface {
      * returns a DefinedRegion with x,y as the DragFrom Location and x2,y2 as the
      * DragTo Location.
      */
-    public Matches perform(ActionOptions actionOptions, ObjectCollection... objectCollections) {
-        Matches dragToMatches = new Matches();
-        SceneAnalysisCollection sceneAnalysisCollection = getSceneAnalysisCollection.
-                get(Arrays.asList(objectCollections), actionOptions);
-        dragToMatches.setSceneAnalysisCollection(sceneAnalysisCollection);
-        Optional<Location> optStartLoc = getDragLocation.getFromLocation(actionOptions, objectCollections);
-        Optional<Location> optEndLoc = getDragLocation.getToLocation(actionOptions, objectCollections);
-        offsetOps.addOffset(List.of(objectCollections), dragToMatches, actionOptions);
-        if (optStartLoc.isEmpty() || optEndLoc.isEmpty()) return dragToMatches;
+    public void perform(Matches matches, ActionOptions actionOptions, ObjectCollection... objectCollections) {
+        matches = matchesInitializer.init(actionOptions, objectCollections);
+        Optional<Location> optStartLoc = getDragLocation.getFromLocation(matches, actionOptions, objectCollections);
+        Optional<Location> optEndLoc = getDragLocation.getToLocation(matches, actionOptions, objectCollections);
+        offsetOps.addOffset(List.of(objectCollections), matches, actionOptions);
+        if (optStartLoc.isEmpty() || optEndLoc.isEmpty()) return;
         dragLocation.drag(optStartLoc.get(), optEndLoc.get(), actionOptions);
-        dragToMatches.addDefinedRegion(new Region(
+        matches.addDefinedRegion(new Region(
                 optStartLoc.get().getX(), optStartLoc.get().getY(),
                 optEndLoc.get().getX() - optStartLoc.get().getX(),
                 optEndLoc.get().getY() - optStartLoc.get().getY()));
-        return dragToMatches;
     }
 
 }

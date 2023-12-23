@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles;
 
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -17,21 +17,21 @@ public class SetAllProfiles {
         this.initProfileMats = initProfileMats;
     }
 
-    public void setMatsAndColorProfiles(StateImageObject stateImageObject) {
-            initProfileMats.setOneColumnMats(stateImageObject);
-            setColorProfile(stateImageObject);
+    public void setMatsAndColorProfiles(StateImage stateImage) {
+            initProfileMats.setOneColumnMats(stateImage);
+            setColorProfile(stateImage);
     }
 
     /**
-     * Sets the average color profile for the StateImageObject.
+     * Sets the average color profile for the StateImage.
      * All images are processed, regardless of whether they are dynamic or not.
      * Non-dynamic images can also be used with color searches and thus need an average color profile.
-     * @param stateImageObject StateImageObject to be processed.
+     * @param stateImage StateImage to be processed.
      */
-    public void setColorProfile(StateImageObject stateImageObject) {
-        ColorCluster colorCluster = setColorCluster.getColorProfile(stateImageObject.getDynamicImage().getOneColumnBGRMat());
-        stateImageObject.getDynamicImage().setInsideColorCluster(colorCluster);
-        setProfileMats.setMats(stateImageObject);
+    public void setColorProfile(StateImage stateImage) {
+        ColorCluster colorCluster = setColorCluster.getColorProfile(stateImage.getDynamicImage().getOneColumnBGRMat());
+        stateImage.getDynamicImage().setInsideColorCluster(colorCluster);
+        setProfileMats.setMats(stateImage);
     }
 
 }

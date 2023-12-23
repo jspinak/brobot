@@ -1,17 +1,24 @@
 package io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.stateStructureBuildManagement;
 
 import io.github.jspinak.brobot.datatypes.primitives.image.Image;
+import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
+import io.github.jspinak.brobot.datatypes.primitives.location.Position;
 import lombok.Getter;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Getter
 public class StateStructureTemplate {
 
-    private List<Image> screenshots = new ArrayList<>(); // when not empty, will be used instead of scraping
-    private Image topLeftBoundary;
-    private Image bottomRightBoundary;
+    /*
+    When not empty, will be used instead of scraping.
+    Stored in the directory BrobotSettings.screenshotPath.
+     */
+    private List<String> screenshots = new ArrayList<>(); //
+    private Pattern topLeftBoundary;
+    private Pattern bottomRightBoundary;
     private int minWidthBetweenImages;
     private boolean saveScreensWithMotionAndImages;
     private boolean saveScreenshots;
@@ -21,9 +28,9 @@ public class StateStructureTemplate {
     private int minimumChangedPixelsForNewScreen = 20000;
 
     public static class Builder {
-        private final List<Image> screenshots = new ArrayList<>();
-        private Image topLeftBoundary;
-        private Image bottomRightBoundary;
+        private final List<String> screenshots = new ArrayList<>();
+        private Pattern topLeftBoundary;
+        private Pattern bottomRightBoundary;
         private int minWidthBetweenImages;
         private boolean saveScreensWithMotionAndImages;
         private boolean saveScreenshots;
@@ -33,16 +40,19 @@ public class StateStructureTemplate {
         private int minimumChangedPixelsForNewScreen = 20000;
 
         public Builder addScreenshots(String... names) {
-            for (String name : names) {
-                Image image = new Image(name);
-                this.screenshots.add(image);
-            }
+            this.screenshots.addAll(Arrays.asList(names));
             return this;
         }
 
-        public Builder setBoundaryImages(Image topLeft, Image bottomRight) {
-            this.topLeftBoundary = topLeft;
-            this.bottomRightBoundary = bottomRight;
+        public Builder setBoundaryImages(String topLeft, String bottomRight) {
+            this.topLeftBoundary = new Pattern.Builder()
+                    .setFilename(topLeft)
+                    .addAnchor(Position.Name.TOPLEFT, Position.Name.BOTTOMLEFT)
+                    .build();
+            this.bottomRightBoundary = new Pattern.Builder()
+                    .setFilename(bottomRight)
+                    .addAnchor(Position.Name.BOTTOMRIGHT, Position.Name.TOPRIGHT)
+                    .build();
             return this;
         }
 

@@ -8,10 +8,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.sikuli.script.Match;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Random;
+import java.util.*;
 
 import static io.github.jspinak.brobot.actions.actionOptions.ActionOptions.Action.GET_TEXT;
 import static java.util.stream.Collectors.toList;
@@ -80,6 +77,30 @@ public class MatchHistory {
                 .filter(snapshot -> snapshot.getActionOptions().getAction() == action)
                 .collect(toList());
         return getRandomSnapshot(selectedSnapshots);
+    }
+
+    /**
+     * Brobot 1.0.7 uses Snapshots that record the action and the state.
+     * @param action the Action taken
+     * @return an Optional of a Snapshot
+     */
+    public Optional<MatchSnapshot> getRandomSnapshot(ActionOptions.Action action, String state) {
+        List<MatchSnapshot> selectedSnapshots = snapshots.stream()
+                .filter(snapshot -> snapshot.getActionOptions().getAction() == action && snapshot.getState().equals(state))
+                .collect(toList());
+        return getRandomSnapshot(selectedSnapshots);
+    }
+
+    public Optional<MatchSnapshot> getRandomSnapshot(ActionOptions.Action action, String... states) {
+        for (String state : states) {
+            Optional<MatchSnapshot> optMS = getRandomSnapshot(action, state);
+            if (optMS.isPresent()) return optMS;
+        }
+        return Optional.empty();
+    }
+
+    public Optional<MatchSnapshot> getRandomSnapshot(ActionOptions.Action action, Set<String> states) {
+        return getRandomSnapshot(action, states.toArray(new String[0]));
     }
 
     /**

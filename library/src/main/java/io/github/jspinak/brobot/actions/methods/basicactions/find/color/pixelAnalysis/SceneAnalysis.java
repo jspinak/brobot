@@ -5,9 +5,7 @@ import io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles.ColorSchema;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles.ColorStatProfile;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.contours.Contours;
-import io.github.jspinak.brobot.datatypes.primitives.match.MatchObject;
-import io.github.jspinak.brobot.datatypes.state.stateObject.StateObject;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.illustratedHistory.Illustrations;
 import lombok.Getter;
 import lombok.Setter;
@@ -24,8 +22,8 @@ import static io.github.jspinak.brobot.actions.methods.basicactions.find.color.p
 import static io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles.ColorCluster.ColorSchemaName.HSV;
 
 /**
- * A collection of PixelAnalysisCollection objects, each of which contains all analysis of a {scene, StateImageObject} pair.
- * SceneAnalysis is most commonly used to store the analysis of a scene with all of its StateImageObjects.
+ * A collection of PixelAnalysisCollection objects, each of which contains all analysis of a {scene, StateImage} pair.
+ * SceneAnalysis is most commonly used to store the analysis of a scene with all of its StateImages.
  * The IllustratedScene is a writeable BGR image with the scene and analysis drawn on it (matches, regions, etc).
  */
 @Getter
@@ -93,8 +91,8 @@ public class SceneAnalysis {
         return this.analysis.get(colorSchemaName).get(analysis);
     }
 
-    public List<StateImageObject> getStateImageObjects() {
-        return pixelAnalysisCollections.stream().map(PixelAnalysisCollection::getStateImageObject).collect(Collectors.toList());
+    public List<StateImage> getStateImageObjects() {
+        return pixelAnalysisCollections.stream().map(PixelAnalysisCollection::getStateImage).collect(Collectors.toList());
     }
 
     public String getImageNames() {
@@ -110,7 +108,7 @@ public class SceneAnalysis {
     }
 
     public int getLastIndex() {
-        OptionalInt maxOpt = pixelAnalysisCollections.stream().mapToInt(pic -> pic.getStateImageObject().getIndex()).max();
+        OptionalInt maxOpt = pixelAnalysisCollections.stream().mapToInt(pic -> pic.getStateImage().getIndex()).max();
         return maxOpt.isPresent() ? maxOpt.getAsInt() : 0;
     }
 
@@ -118,7 +116,7 @@ public class SceneAnalysis {
                                                        ColorInfo.ColorStat colorStat) {
         List<ColorStatProfile> colorStatProfiles = new ArrayList<>();
         for (PixelAnalysisCollection pixelAnalysisCollection : pixelAnalysisCollections) {
-            ColorCluster colorCluster = pixelAnalysisCollection.getStateImageObject().getColorCluster();
+            ColorCluster colorCluster = pixelAnalysisCollection.getStateImage().getColorCluster();
             ColorStatProfile colorStatProfile = colorCluster.getSchema(colorSchemaName).getColorStatProfile(colorStat);
             colorStatProfiles.add(colorStatProfile);
         }
@@ -132,21 +130,21 @@ public class SceneAnalysis {
                 .mapToInt(Double::intValue).boxed().toList();
     }
 
-    public Optional<PixelAnalysisCollection> getPixelAnalysisCollection(StateImageObject stateImageObject) {
+    public Optional<PixelAnalysisCollection> getPixelAnalysisCollection(StateImage stateImage) {
         return pixelAnalysisCollections.stream()
-                .filter(pic -> pic.getStateImageObject().equals(stateImageObject)).findFirst();
+                .filter(pic -> pic.getStateImage().equals(stateImage)).findFirst();
     }
 
-    public Optional<Mat> getScores(StateImageObject stateImageObject) {
+    public Optional<Mat> getScores(StateImage stateImage) {
         Optional<PixelAnalysisCollection> coll = pixelAnalysisCollections.stream()
-                .filter(pic -> pic.getStateImageObject().equals(stateImageObject))
+                .filter(pic -> pic.getStateImage().equals(stateImage))
                 .findFirst();
         if (coll.isEmpty()) return Optional.empty();
         return Optional.of(coll.get().getAnalysis(SCORE, BGR));
     }
 
-    public Mat getScoresMat(StateImageObject stateImageObject) {
-        return getScores(stateImageObject).orElse(new Mat());
+    public Mat getScoresMat(StateImage stateImage) {
+        return getScores(stateImage).orElse(new Mat());
     }
 
 }

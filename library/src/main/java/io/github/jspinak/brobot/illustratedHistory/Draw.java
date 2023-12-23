@@ -2,6 +2,7 @@ package io.github.jspinak.brobot.illustratedHistory;
 
 import io.github.jspinak.brobot.datatypes.primitives.location.Location;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
+import io.github.jspinak.brobot.illustratedHistory.draw.DrawRect;
 import io.github.jspinak.brobot.reports.Report;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Point;
@@ -17,6 +18,12 @@ import static org.bytedeco.opencv.global.opencv_imgproc.*;
 
 @Component
 public class Draw {
+
+    private final DrawRect drawRect;
+
+    public Draw(DrawRect drawRect) {
+        this.drawRect = drawRect;
+    }
 
     public void drawRect(Mat screen, Match match, Scalar color) {
         int drawX = Math.max(0, match.x-1);
@@ -56,6 +63,11 @@ public class Draw {
             Match nextMatch = matchList.get(i + 1);
             drawArrow(illustrations.getMatchesOnScene(), new Location(match), new Location(nextMatch), new Scalar(255, 150, 255, 0));
         }
+    }
+
+    public void drawDefinedRegion(Illustrations illustrations, Matches matches) {
+        System.out.println("illustrations.getScene() rows = " + illustrations.getScene().rows());
+        drawRect.drawRectAroundRegion(illustrations.getScene(), matches.getDefinedRegion(), new Scalar(10, 10, 10, 255)); // draw defined region
     }
 
     /**

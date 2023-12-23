@@ -14,11 +14,11 @@ public class FindWrapperMethods {
 
     private Map<ActionOptions.Find, FindPatternInterface> methods = new HashMap<>();
 
-    public FindWrapperMethods(FindFirstPattern findFirstPattern, FindAllPatterns findAllPatterns) {
+    public FindWrapperMethods(FindFirstPattern findFirstPattern, FindAll findAll) {
         methods.put(ActionOptions.Find.FIRST, findFirstPattern);
-        methods.put(ActionOptions.Find.ALL, findAllPatterns);
+        methods.put(ActionOptions.Find.ALL, findAll);
         methods.put(ActionOptions.Find.EACH, findFirstPattern);
-        methods.put(ActionOptions.Find.BEST, findAllPatterns);
+        methods.put(ActionOptions.Find.BEST, findAll);
     }
 
     public FindPatternInterface get(ActionOptions.Find findType) {

@@ -28,16 +28,14 @@ public class KeyDown implements ActionInterface {
     }
 
     // uses the first objectCollection, but this can have multiple keys
-    public Matches perform(ActionOptions actionOptions, ObjectCollection... objectCollections) {
-        Matches matches = new Matches();
-        if (objectCollections == null) return new Matches();
+    public void perform(Matches matches, ActionOptions actionOptions, ObjectCollection... objectCollections) {
+        if (objectCollections == null) return;
         List<StateString> strings = objectCollections[0].getStateStrings();
         for (StateString str : strings) {
             keyDownWrapper.press(str.getString(), actionOptions.getModifiers());
             if (strings.indexOf(str) < strings.size()-1)
                 wait.wait(actionOptions.getPauseBetweenIndividualActions());
         }
-        return matches;
     }
 
 }

@@ -2,7 +2,7 @@ package io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.buildStat
 
 import io.github.jspinak.brobot.datatypes.primitives.match.MatchSnapshot;
 import io.github.jspinak.brobot.datatypes.state.state.State;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.illustratedHistory.draw.DrawRect;
 import io.github.jspinak.brobot.imageUtils.OpenCVColor;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -24,8 +24,8 @@ public class StateIllustrator {
         StateIllustration stateIllustration = new StateIllustration(screenshot);
         Mat illustration = stateIllustration.getScreenshot().clone();
         drawRect.drawRectAroundRegion(illustration, state.getBoundaries(), OpenCVColor.BLUE.getScalar());
-        Set<StateImageObject> sios = state.getStateImages();
-        for (StateImageObject sio : sios) {
+        Set<StateImage> sios = state.getStateImages();
+        for (StateImage sio : sios) {
             boolean isTransition = !sio.getTransitionImage().getTransitionsTo().isEmpty();
             List<MatchSnapshot> snapshots = sio.getMatchHistory().getSnapshots();
             if (!snapshots.isEmpty()) {

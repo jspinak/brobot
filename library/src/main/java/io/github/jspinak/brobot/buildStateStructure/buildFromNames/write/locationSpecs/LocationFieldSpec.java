@@ -5,7 +5,7 @@ import io.github.jspinak.brobot.datatypes.primitives.location.Location;
 import io.github.jspinak.brobot.datatypes.primitives.location.Position;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.StateLocation;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import org.springframework.stereotype.Component;
 
 import javax.lang.model.element.Modifier;
@@ -20,7 +20,7 @@ public class LocationFieldSpec {
 
     private List<Object> initializerArgs;
 
-    public FieldSpec getCode(StateImageObject img) {
+    public FieldSpec getCode(StateImage img) {
         initializerArgs = new ArrayList<>();
         String locationName = img.getAttributes().getImageName();
         Region sReg = img.getSearchRegion();

@@ -4,7 +4,7 @@ package io.github.jspinak.brobot.buildStateStructure.buildFromNames.findImages;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.reports.Report;
 import lombok.Getter;
 import org.sikuli.script.Match;
@@ -22,14 +22,14 @@ import java.util.List;
 public class ImageGroup {
 
     private Region searchRegion = new Region();
-    private List<StateImageObject> images = new ArrayList<>(); // Images in the Group
+    private List<StateImage> images = new ArrayList<>(); // Images in the Group
     private List<Match> matches = new ArrayList<>(); // for defining the Region (best match / image)
     private ActionOptions actionOptions = new ActionOptions.Builder()
             .setAction(ActionOptions.Action.DEFINE)
             .setDefineAs(ActionOptions.DefineAs.INCLUDING_MATCHES)
             .build();
 
-    public void addImage(StateImageObject image) {
+    public void addImage(StateImage image) {
         images.add(image);
     }
 

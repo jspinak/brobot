@@ -60,11 +60,11 @@ public class KmeansProfilesAllSchemas {
         List<ColorSchema> bgrSchemas = kmeansProfiles.get(BGR)
                 .get(means).get().getClusters().stream()
                 .map(KmeansCluster::getColorSchema)
-                .collect(Collectors.toList());
+                .toList();
         List<ColorSchema> hsvSchemas = kmeansProfiles.get(ColorCluster.ColorSchemaName.HSV)
                 .get(means).get().getClusters().stream()
                 .map(KmeansCluster::getColorSchema)
-                .collect(Collectors.toList());
+                .toList();
         for (int i=0; i<means; i++) {
             ColorCluster colorCluster = new ColorCluster();
             colorCluster.put(BGR, bgrSchemas.get(i));

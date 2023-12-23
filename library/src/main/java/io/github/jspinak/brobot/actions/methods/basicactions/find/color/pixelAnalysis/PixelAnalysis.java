@@ -18,7 +18,7 @@ import static io.github.jspinak.brobot.actions.methods.basicactions.find.color.p
  * For example, a k-Means of 3 will produce 3 color profiles for one image, and each of these
  * profiles will engender a separate PixelAnalysis object.
  * Scores can also correspond to histogram analysis, where each pixel is treated as the top left point of the
- * region used for the histogram and given a score based on its similarity to the histogram of the StateImageObject.
+ * region used for the histogram and given a score based on its similarity to the histogram of the StateImage.
  */
 @Getter
 public class PixelAnalysis {

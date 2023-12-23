@@ -1,7 +1,7 @@
 package io.github.jspinak.brobot.buildStateStructure.buildFromNames.babyStates;
 
 import io.github.jspinak.brobot.buildStateStructure.buildFromNames.attributes.SetAttributes;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.reports.ANSI;
 import io.github.jspinak.brobot.reports.Report;
 import lombok.Getter;
@@ -25,7 +25,7 @@ public class BabyStateRepo {
         this.setAttributes = setAttributes;
     }
 
-    public void addImage(StateImageObject img) {
+    public void addImage(StateImage img) {
         String stateName = img.getAttributes().getStateName();
         if (babyStates.containsKey(stateName)) babyStates.get(stateName).addImage(img);
         else babyStates.put(stateName, new BabyState(stateName, img));
@@ -71,15 +71,15 @@ public class BabyStateRepo {
      * Searches for an image in the repository that has the same base name as the parameter.
      * The base name is the text that comes before numbers at the end of the String.
      * For example, 'image' is the base name for 'image2'.
-     * If there is a StateImageObject with the same base name, add this filename to the
-     * StateImageObject.
-     * @param newImg the new StateImageObject
-     * @return true if the image was added to an existing StateImageObject
+     * If there is a StateImage with the same base name, add this filename to the
+     * StateImage.
+     * @param newImg the new StateImage
+     * @return true if the image was added to an existing StateImage
      */
-    public Optional<StateImageObject> getBaseImage(StateImageObject newImg) {
+    public Optional<StateImage> getBaseImage(StateImage newImg) {
         if (!babyStates.containsKey(newImg.getAttributes().getStateName())) return Optional.empty();
         BabyState babyState = babyStates.get(newImg.getAttributes().getStateName());
-        for (StateImageObject img : babyState.getImages()) {
+        for (StateImage img : babyState.getImages()) {
             String existingName = img.getAttributes().getImageName();
             String newName = newImg.getAttributes().getImageName();
             if (existingName.equals(newName)) {

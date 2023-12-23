@@ -5,7 +5,6 @@ import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.imgproc.Imgproc;
 import org.sikuli.script.ImagePath;
-import org.sikuli.script.Pattern;
 import org.sikuli.script.Screen;
 import org.springframework.stereotype.Component;
 
@@ -16,14 +15,13 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Objects;
 
-import static org.opencv.highgui.HighGui.imshow;
 import static org.opencv.highgui.HighGui.waitKey;
 import static org.opencv.imgcodecs.Imgcodecs.imread;
 import static org.opencv.imgproc.Imgproc.*;
 
 // Consider using GetImageJavaCV for better compatibility.
 @Component
-public class GetImage {
+public class GetImageOpenCV {
 
     public BufferedImage getBuffImgFromFile(String path) throws IOException {
         File f = new File(path);

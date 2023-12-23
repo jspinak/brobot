@@ -22,10 +22,10 @@ import static org.bytedeco.opencv.global.opencv_imgcodecs.imwrite;
 public class ImageUtils {
 
     private Map<String, Integer> lastFilenumber = new HashMap<>();
-    private GetImage getImage;
+    private GetImageOpenCV getImageOpenCV;
 
-    public ImageUtils(GetImage getImage) {
-        this.getImage = getImage;
+    public ImageUtils(GetImageOpenCV getImageOpenCV) {
+        this.getImageOpenCV = getImageOpenCV;
     }
 
     /**
@@ -43,7 +43,7 @@ public class ImageUtils {
                 return newPath;
             }
             if (!BrobotSettings.saveHistory) System.out.println(newPath); // don't print when running live
-            ImageIO.write(getImage.getBuffImgFromScreen(region),
+            ImageIO.write(getImageOpenCV.getBuffImgFromScreen(region),
                     "png", new File(newPath));
             return newPath;
         } catch (IOException e) {

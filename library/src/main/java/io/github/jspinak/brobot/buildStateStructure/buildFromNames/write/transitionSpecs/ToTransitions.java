@@ -2,7 +2,7 @@ package io.github.jspinak.brobot.buildStateStructure.buildFromNames.write.transi
 
 import com.squareup.javapoet.ClassName;
 import io.github.jspinak.brobot.buildStateStructure.buildFromNames.babyStates.BabyStateRepo;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import lombok.Getter;
 import org.springframework.stereotype.Component;
 
@@ -25,7 +25,7 @@ public class ToTransitions {
         this.babyStateRepo = babyStateRepo;
     }
 
-    public void setTransitions(StateImageObject img, String packageName) {
+    public void setTransitions(StateImage img, String packageName) {
         transitions = new ArrayList<>();
         enumNames = new HashMap<>();
         imgName = img.getAttributes().getImageName();

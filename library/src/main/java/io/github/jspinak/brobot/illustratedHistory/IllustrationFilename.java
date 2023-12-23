@@ -5,7 +5,7 @@ import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.SceneAnalysis;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.imageUtils.FilenameRepo;
 import io.github.jspinak.brobot.reports.Report;
 import org.springframework.stereotype.Component;
@@ -85,7 +85,7 @@ public class IllustrationFilename {
         ActionOptions.Action action = actionOptions.getAction();
         List<String> names = new ArrayList<>();
         for (ObjectCollection objectCollection : objectCollections) {
-            names.addAll(objectCollection.getStateImages().stream().map(StateImageObject::getName).toList());
+            names.addAll(objectCollection.getStateImages().stream().map(StateImage::getName).toList());
         }
         String allNames = String.join("", names);
         String suffix = action.toString();
