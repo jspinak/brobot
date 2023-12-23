@@ -9,7 +9,7 @@ import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAna
 import io.github.jspinak.brobot.actions.methods.basicactions.find.contours.Contours;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.sikuli.script.Match;
 import org.springframework.stereotype.Component;
@@ -34,14 +34,14 @@ public class GetClassMatches {
     }
 
     /**
-     * The SceneAnalyses contain classifications with a set of StateImageObjects. We specify which of
+     * The SceneAnalyses contain classifications with a set of StateImages. We specify which of
      * these objects we are interested in and find their matches.
      * @param sceneAnalysisCollection the SceneAnalyses to search
-     * @param targetImages the StateImageObjects to search for
+     * @param targetImages the StateImages to search for
      * @param actionOptions the action configuration
      * @return
      */
-    public Matches getMatches(SceneAnalysisCollection sceneAnalysisCollection, Set<StateImageObject> targetImages,
+    public Matches getMatches(SceneAnalysisCollection sceneAnalysisCollection, Set<StateImage> targetImages,
                               ActionOptions actionOptions) {
         Matches matches = new Matches();
         List<SceneAnalysis> sceneAnalyses = sceneAnalysisCollection.getSceneAnalyses();
@@ -54,15 +54,15 @@ public class GetClassMatches {
     }
 
     /**
-     * Get all matches for all StateImageObjects for one scene.
+     * Get all matches for all StateImages for one scene.
      * We use HSV as the default color schema.
-     * @param sceneAnalysis contains the scene and StateImageObjects with results matrixes
+     * @param sceneAnalysis contains the scene and StateImages with results matrixes
      * @param actionOptions are needed for creating MatchObjects and may contain the search regions
      */
-    private Matches getMatchesForOneScene(SceneAnalysis sceneAnalysis, Set<StateImageObject> targetImages,
+    private Matches getMatchesForOneScene(SceneAnalysis sceneAnalysis, Set<StateImage> targetImages,
                                           ActionOptions actionOptions) {
         Matches matches = new Matches();
-        for (StateImageObject sio : targetImages) {
+        for (StateImage sio : targetImages) {
             List<Region> searchRegions = selectRegions.getRegions(actionOptions, sio);
             Mat resultsInColor = sceneAnalysis.getAnalysis(BGR, BGR_FROM_INDICES_2D_TARGETS);
             Mat scoresMat = sceneAnalysis.getScoresMat(sio);

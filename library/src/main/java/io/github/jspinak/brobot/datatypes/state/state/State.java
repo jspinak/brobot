@@ -1,14 +1,13 @@
 package io.github.jspinak.brobot.datatypes.state.state;
 
 import io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.buildStateStructure.StateIllustration;
-import io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.buildStateStructure.StateIllustrator;
 import io.github.jspinak.brobot.datatypes.primitives.location.Location;
 import io.github.jspinak.brobot.datatypes.primitives.match.MatchSnapshot;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.StateLocation;
 import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.StateRegion;
 import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.StateString;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.primatives.enums.StateEnum;
 import lombok.Getter;
 import lombok.Setter;
@@ -23,8 +22,8 @@ import java.util.*;
  * the State and following StateTransitions. If it gets lost, it will try to find its
  * way by identifying its current State and following a new Path to the desired State.
  *
- * States are identified by their StateImageObjects. Some StateImageObjects contain
- * Images that are found in other States. These StateImageObjects identify themselves
+ * States are identified by their StateImages. Some StateImages contain
+ * Images that are found in other States. These StateImages identify themselves
  * as 'shared' and are not including in searches for the current State when Brobot is lost.
  * The shared Images are used for all other State searches.
  *
@@ -41,7 +40,7 @@ public class State {
      * Text search is a lot faster than image search, but cannot be used without an image search to identify a state.
      */
     private Set<String> stateText = new HashSet<>();
-    private Set<StateImageObject> stateImages = new HashSet<>();
+    private Set<StateImage> stateImages = new HashSet<>();
     /**
      * StateStrings can change the expected state.
      * They have associated regions where typing the string has an effect.
@@ -90,7 +89,7 @@ public class State {
     private int timesVisited = 0;
     /**
      * Screenshots where the state is found. These can be used for realistic simulations or for
-     * illustrating the state to display it visually. Not all StateImageObjects need to be present.
+     * illustrating the state to display it visually. Not all StateImages need to be present.
      */
     private List<Mat> screens = new ArrayList<>();
     private List<StateIllustration> illustrations = new ArrayList<>();
@@ -134,13 +133,13 @@ public class State {
     }
 
     /**
-     * Get the boundaries of the state using StateRegion, StateImageObject, and StateLocation objects.
-     * Snapshots and SearchRegion(s) are used for StateImageObjects.
+     * Get the boundaries of the state using StateRegion, StateImage, and StateLocation objects.
+     * Snapshots and SearchRegion(s) are used for StateImages.
      * @return the boundaries of the state.
      */
     public Region getBoundaries() {
         List<Region> imageRegions = new ArrayList<>();
-        for (StateImageObject sio : stateImages.toArray(new StateImageObject[0])) {
+        for (StateImage sio : stateImages.toArray(new StateImage[0])) {
             imageRegions.addAll(sio.getAllSearchRegions());
             List<MatchSnapshot> snapshots = sio.getMatchHistory().getSnapshots();
             for (MatchSnapshot snapshot : snapshots) {
@@ -191,7 +190,7 @@ public class State {
         private String nameAsString;
         private StateEnum name;
         private Set<String> stateText = new HashSet<>();
-        private Set<StateImageObject> stateImages = new HashSet<>();
+        private Set<StateImage> stateImages = new HashSet<>();
         private Set<StateString> stateStrings = new HashSet<>();
         private Set<StateRegion> stateRegions = new HashSet<>();
         private Set<StateLocation> stateLocations = new HashSet<>();
@@ -218,13 +217,13 @@ public class State {
             return this;
         }
 
-        public Builder withImages(StateImageObject... stateImageObjects) {
-            Collections.addAll(this.stateImages, stateImageObjects);
+        public Builder withImages(StateImage... stateImages) {
+            Collections.addAll(this.stateImages, stateImages);
             return this;
         }
 
-        public Builder withImages(List<StateImageObject> stateImageObjects) {
-            return withImages(stateImageObjects.toArray(new StateImageObject[0]));
+        public Builder withImages(List<StateImage> stateImages) {
+            return withImages(stateImages.toArray(new StateImage[0]));
         }
 
         public Builder withStrings(StateString... stateStrings) {
@@ -277,7 +276,7 @@ public class State {
             state.nameAsString = nameAsString;
             state.name = name;
             state.stateText = stateText;
-            for (StateImageObject image : stateImages) image.setOwnerStateName(nameAsString);
+            for (StateImage image : stateImages) image.setOwnerStateName(nameAsString);
             for (StateString string : stateStrings) string.setOwnerStateName(nameAsString);
             for (StateRegion region : stateRegions) region.setOwnerStateName(nameAsString);
             state.stateImages = stateImages;

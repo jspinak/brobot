@@ -24,8 +24,7 @@ public class MultipleBasicActions {
         for (int i=0; i<mao.getTimesToRepeat(); i++) {
             for (ActionOptionsObjectCollectionPair aooc : mao.getAoocs()) {
                 Optional<ActionInterface> action = basicAction.getAction(aooc.getActionOptions().getAction());
-                if (action.isPresent())
-                    matches = action.get().perform(aooc.getActionOptions(), aooc.getObjectCollection());
+                action.ifPresent(actionInterface -> actionInterface.perform(matches, aooc.getActionOptions(), aooc.getObjectCollection()));
             }
         }
         return matches; // we should return the last Matches object

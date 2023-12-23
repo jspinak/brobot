@@ -2,7 +2,7 @@ package io.github.jspinak.brobot.buildStateStructure.buildFromNames.attributes;
 
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.reports.ANSI;
 import io.github.jspinak.brobot.reports.Report;
 import org.sikuli.script.Match;
@@ -17,7 +17,7 @@ import java.util.Map;
 @Component
 public class PrintAttribute {
 
-    public void byImageAndPage(StateImageObject image, int page) {
+    public void byImageAndPage(StateImage image, int page) {
         List<Match> matches = image.getAttributes().getMatches().get(page);
         List<AttributeTypes.Attribute> activeAttributes = image.getAttributes().getActiveAttributes(page);
         String color;
@@ -63,7 +63,7 @@ public class PrintAttribute {
         Report.print(" | " + r.x + "." + r.y + "_" + r.w + "." + r.h, ANSI.WHITE);
     }
 
-    private void printNames(StateImageObject image) {
+    private void printNames(StateImage image) {
         Report.print(image.getAttributes().getStateName());
         Report.print("."+image.getAttributes().getImageName());
         Report.print(" | ", ANSI.WHITE);
@@ -71,7 +71,7 @@ public class PrintAttribute {
         Report.println("");
     }
 
-    public void printDefinedRegion(StateImageObject image) {
+    public void printDefinedRegion(StateImage image) {
         printSearchRegion(image.getSearchRegion());
     }
 

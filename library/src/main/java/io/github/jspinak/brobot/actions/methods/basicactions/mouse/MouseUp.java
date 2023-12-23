@@ -19,12 +19,11 @@ public class MouseUp implements ActionInterface {
         this.mouseUpWrapper = mouseUpWrapper;
     }
 
-    public Matches perform(ActionOptions actionOptions, ObjectCollection... objectCollections) {
+    public void perform(Matches matches, ActionOptions actionOptions, ObjectCollection... objectCollections) {
         mouseUpWrapper.press(
                 actionOptions.getPauseBeforeMouseUp(),
                 actionOptions.getPauseAfterMouseUp(),
                 actionOptions.getClickType());
-        return new Matches();
     }
 
 }

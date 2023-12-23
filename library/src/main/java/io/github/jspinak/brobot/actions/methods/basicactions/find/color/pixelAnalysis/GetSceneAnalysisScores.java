@@ -1,7 +1,7 @@
 package io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis;
 
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles.ColorStatProfile;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.imageUtils.MatOps;
 import io.github.jspinak.brobot.imageUtils.MatOps3d;
 import io.github.jspinak.brobot.imageUtils.MatVisualize;
@@ -34,10 +34,10 @@ public class GetSceneAnalysisScores {
 
     /**
      * Each PixelAnalysisCollection has a Mat with the score distance below the threshold. The largest
-     * score below the threshold for a given pixel gets the corresponding index (from the StateImageObject).
+     * score below the threshold for a given pixel gets the corresponding index (from the StateImage).
      * If all scores below the threshold are 0, there is no match and the index remains 0.
      *
-     * @param sceneAnalysis the analysis of a scene with all of its StateImageObjects
+     * @param sceneAnalysis the analysis of a scene with all of its StateImages
      */
     public void setSceneAnalysisIndices(SceneAnalysis sceneAnalysis) {
         List<PixelAnalysisCollection> pixelAnalysisCollections = sceneAnalysis.getPixelAnalysisCollections();
@@ -52,7 +52,7 @@ public class GetSceneAnalysisScores {
             PixelAnalysisCollection pixelAnalysisCollection = pixelAnalysisCollections.get(i);
             Mat scoresBelowThresholdHSV = pixelAnalysisCollection.getAnalysis(SCORE_DIST_BELOW_THRESHHOLD, HSV);
             Mat scoreBelowThresholdBGR = pixelAnalysisCollection.getAnalysis(SCORE_DIST_BELOW_THRESHHOLD, BGR);
-            int index = pixelAnalysisCollection.getStateImageObject().getIndex();
+            int index = pixelAnalysisCollection.getStateImage().getIndex();
             matOps3d.getIndicesOfMax(bestScoresHSV, scoresBelowThresholdHSV, indicesHSV, index);
             matOps3d.getIndicesOfMax(bestScoresBGR, scoreBelowThresholdBGR, indicesBGR, index);
         }
@@ -62,8 +62,8 @@ public class GetSceneAnalysisScores {
         sceneAnalysis.addAnalysis(HSV, INDICES_2D, indices2D);
     }
 
-    public void setSceneAnalysisIndicesTargetsOnly(SceneAnalysis sceneAnalysis, Set<StateImageObject> targets) {
-        Set<Integer> targetIndices = targets.stream().map(StateImageObject::getIndex).collect(Collectors.toSet());
+    public void setSceneAnalysisIndicesTargetsOnly(SceneAnalysis sceneAnalysis, Set<StateImage> targets) {
+        Set<Integer> targetIndices = targets.stream().map(StateImage::getIndex).collect(Collectors.toSet());
         Mat indicesHSV3D = sceneAnalysis.getAnalysis(HSV, INDICES_3D);
         Mat indicesBGR3D = sceneAnalysis.getAnalysis(BGR, INDICES_3D);
         Mat indicesHSV3Dtargets = matOps3d.getMatWithOnlyTheseIndices(indicesHSV3D, targetIndices);
@@ -87,7 +87,7 @@ public class GetSceneAnalysisScores {
     private Map<Integer, Scalar> getHueMap(SceneAnalysis sceneAnalysis) {
         Map<Integer, Scalar> hueList = new HashMap<>();
         Mat indicesHSV = sceneAnalysis.getAnalysis(HSV, INDICES_2D);
-        for (StateImageObject img : sceneAnalysis.getStateImageObjects()) {
+        for (StateImage img : sceneAnalysis.getStateImageObjects()) {
             if (MatOps.firstChannelContains(indicesHSV, img.getIndex())) {
                 ColorStatProfile colorInfo = img.getColorCluster().getSchema(HSV).getColorStatProfile(MEAN);
                 Scalar meanHSV = colorInfo.getMeanScalarHSV();

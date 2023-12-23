@@ -11,7 +11,7 @@ import io.github.jspinak.brobot.actions.methods.sikuliWrappers.Wait;
 import io.github.jspinak.brobot.actions.methods.time.Time;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.illustratedHistory.IllustrateScreenshot;
 import io.github.jspinak.brobot.reports.Output;
 import io.github.jspinak.brobot.reports.Report;
@@ -37,21 +37,23 @@ import java.util.List;
 @Slf4j
 public class ActionExecution {
 
-    private Wait wait;
-    private Time time;
-    private Success success;
-    private ExitSequences exitSequences;
-    private IllustrateScreenshot illustrateScreenshot;
-    private SelectRegions selectRegions;
-    private ActionLifecycleManagement actionLifecycleManagement;
+    private final Wait wait;
+    private final Time time;
+    private final Success success;
+    private final ExitSequences exitSequences;
+    private final IllustrateScreenshot illustrateScreenshot;
+    private final SelectRegions selectRegions;
+    private final ActionLifecycleManagement actionLifecycleManagement;
     private final DatasetManager datasetManager;
     private final ActionLogCreator actionLogCreator;
     private final ActionLogSender actionLogSender;
+    private final MatchesInitializer matchesInitializer;
 
     public ActionExecution(Wait wait, Time time, Success success, ExitSequences exitSequences,
                            IllustrateScreenshot illustrateScreenshot, SelectRegions selectRegions,
                            ActionLifecycleManagement actionLifecycleManagement, DatasetManager datasetManager,
-                           ActionLogCreator actionLogCreator, ActionLogSender actionLogSender) {
+                           ActionLogCreator actionLogCreator, ActionLogSender actionLogSender,
+                           MatchesInitializer matchesInitializer) {
         this.wait = wait;
         this.time = time;
         this.success = success;
@@ -62,6 +64,7 @@ public class ActionExecution {
         this.datasetManager = datasetManager;
         this.actionLogCreator = actionLogCreator;
         this.actionLogSender = actionLogSender;
+        this.matchesInitializer = matchesInitializer;
     }
 
     /**
@@ -72,21 +75,20 @@ public class ActionExecution {
      * @return Matches
      */
     public Matches perform(ActionInterface actionMethod, String actionDescription, ActionOptions actionOptions,
-                           Matches matches, ObjectCollection... objectCollections) {
+                           ObjectCollection... objectCollections) {
         printAction(actionOptions, objectCollections);
         time.setStartTime(actionOptions.getAction());
-        //int actionId = actionLifecycleManagement.newActionLifecycle(actionOptions);
+        Matches matches = matchesInitializer.init(actionOptions, actionDescription, objectCollections);
+        actionLifecycleManagement.newActionLifecycle(actionOptions, matches);
         wait.wait(actionOptions.getPauseBeforeBegin());
         /*
         When the action sequence is repeated, the Matches object will hold the results of the last action.
          */
         for (int i=0; i<actionOptions.getMaxTimesToRepeatActionSequence(); i++) {
-            matches = actionMethod.perform(actionOptions, objectCollections);
+            actionMethod.perform(matches, actionOptions, objectCollections);
             success.set(actionOptions, matches);
             if (exitSequences.okToExit(actionOptions, matches)) break;
         }
-        matches.setActionDescription(actionDescription);
-        matches.setActionOptions(actionOptions);
         illustrateScreenshot.illustrateWhenAllowed(matches,
                 selectRegions.getRegionsForAllImages(actionOptions, objectCollections),
                 actionOptions, objectCollections);
@@ -116,9 +118,9 @@ public class ActionExecution {
         if (Report.minReportingLevel(Report.OutputLevel.LOW)) {
             Report.format("|%s ", actionOptions.getAction());
             if (objectCollections.length == 0) return;
-            List<StateImageObject> stImgs = objectCollections[0].getStateImages();
+            List<StateImage> stImgs = objectCollections[0].getStateImages();
             int lastIndex = stImgs.size() - 1;
-            for (StateImageObject sio : objectCollections[0].getStateImages()) {
+            for (StateImage sio : objectCollections[0].getStateImages()) {
                 Report.format("%s.%s", sio.getOwnerStateName(), sio.getName());
                 String ending = stImgs.indexOf(sio) != lastIndex? "," : "|";
                 Report.print(ending+" ");

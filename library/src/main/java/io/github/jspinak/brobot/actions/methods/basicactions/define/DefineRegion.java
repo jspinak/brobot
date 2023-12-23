@@ -33,9 +33,9 @@ public class DefineRegion implements ActionInterface {
         actions.put(ActionOptions.DefineAs.INCLUDING_MATCHES, defineIncludingMatches);
     }
 
-    public Matches perform(ActionOptions actionOptions, ObjectCollection... objectCollections) {
+    public void perform(Matches matches, ActionOptions actionOptions, ObjectCollection... objectCollections) {
         System.out.print("Define as: " + actionOptions.getDefineAs()+"| ");
-        return actions.get(actionOptions.getDefineAs()).perform(actionOptions, objectCollections);
+        actions.get(actionOptions.getDefineAs()).perform(matches, actionOptions, objectCollections);
     }
 
 }

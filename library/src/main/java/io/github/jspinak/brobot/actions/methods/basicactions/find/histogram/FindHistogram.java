@@ -12,7 +12,7 @@ import io.github.jspinak.brobot.datatypes.primitives.match.MatchObject;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.springframework.stereotype.Component;
 
@@ -48,14 +48,13 @@ public class FindHistogram {
      * @param objectCollections the images to search for
      * @return histogram matches
      */
-    public Matches find(ActionOptions actionOptions, List<ObjectCollection> objectCollections) {
+    public Matches find(Matches matches, ActionOptions actionOptions, List<ObjectCollection> objectCollections) {
         if (actionOptions.getMaxMatchesToActOn() <= 0) actionOptions.setMaxMatchesToActOn(1); // default for histogram
-        int actionId = actionLifecycleManagement.newActionLifecycle(actionOptions);
+        int actionId = actionLifecycleManagement.newActionLifecycle(actionOptions, matches);
         getHistograms.setBins(
                 actionOptions.getHueBins(), actionOptions.getSaturationBins(), actionOptions.getValueBins());
         List<Scene> scenes = getScenes.getScenes(actionOptions, objectCollections);
         SceneAnalysisCollection sceneAnalysisCollection = new SceneAnalysisCollection();
-        Matches matches = new Matches();
         List<MatchObject> matchObjects = new ArrayList<>();
         objectCollections.get(0).getStateImages().forEach(img ->
                 scenes.forEach(scene -> {
@@ -72,7 +71,7 @@ public class FindHistogram {
         return matches;
     }
 
-    private List<MatchObject> forOneImage(ActionOptions actionOptions, StateImageObject image, Mat sceneHSV, int actionId) {
+    private List<MatchObject> forOneImage(ActionOptions actionOptions, StateImage image, Mat sceneHSV, int actionId) {
         List<Region> searchRegions = selectRegions.getRegions(actionOptions, image);
         if (BrobotSettings.mock && BrobotSettings.screenshots.isEmpty())
             return mockHistogram.getMockHistogramMatches(image, searchRegions);

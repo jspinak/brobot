@@ -61,15 +61,13 @@ public class FindMotion {
      *
      * @param actionOptions The action's configuration
      * @param objectCollections holds the images to analyze for motion in the first collection
-     * @return a Matches object with matches for objects that have moved.
      */
-    public Matches find(ActionOptions actionOptions, List<ObjectCollection> objectCollections) {
-        Matches matches = new Matches();
+    public void find(Matches matches, ActionOptions actionOptions, List<ObjectCollection> objectCollections) {
         SceneAnalysisCollection sceneAnalysisCollection = getSceneAnalysisCollection.get(
                 objectCollections, 3, 0.1, actionOptions);
         if (sceneAnalysisCollection.getSceneAnalyses().size() < 3) {
             Report.println("Not enough scenes to detect motion");
-            return matches;
+            return;
         }
         matches.setSceneAnalysisCollection(sceneAnalysisCollection);
         List<Region> searchRegions = selectRegions.getRegionsForAllImages(actionOptions, objectCollections.toArray(new ObjectCollection[0]));
@@ -86,7 +84,6 @@ public class FindMotion {
         matchOps.addGenericMatchObjects(movingObjects.get(2), matches, actionOptions); // this is for the last scene
         matches.sortByMatchScoreDecending();
         matchOps.limitNumberOfMatches(matches, actionOptions);
-        return matches;
     }
 
     /**

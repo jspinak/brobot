@@ -7,7 +7,7 @@ import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAna
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.SceneAnalysisCollection;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.SearchRegions;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.SearchRegions;
 import io.github.jspinak.brobot.reports.Report;
 import org.springframework.stereotype.Component;
 
@@ -33,26 +33,26 @@ public class ConfirmedFinds implements ActionInterface {
         this.getSceneAnalysisCollection = getSceneAnalysisCollection;
     }
 
-    public Matches perform(ActionOptions actionOptions, ObjectCollection... objectCollections) {
-        if (objectCollections.length == 0) return new Matches();
+    public void perform(Matches matches, ActionOptions actionOptions, ObjectCollection... objectCollections) {
+        if (objectCollections.length == 0) return;
         SceneAnalysisCollection sceneAnalysisCollection = getSceneAnalysisCollection.
                 get(Arrays.asList(objectCollections),1, 0, actionOptions);
-        Matches matches = find.perform(actionOptions, objectCollections);
+        find.perform(matches, actionOptions, objectCollections);
         matches.setSceneAnalysisCollection(sceneAnalysisCollection);
         if (matches.isEmpty()) {
             Report.println("no matches.");
-            return matches;
+            return;
         }
         for (int i=1; i<actionOptions.getFindActions().size(); i++) {
             setSearchRegions(matches, actionOptions);
             actionOptions.setFind(actionOptions.getFindActions().get(i));
-            Matches matches2 = find.perform(actionOptions, objectCollections);
+            Matches matches2 = new Matches();
+            find.perform(matches2, actionOptions, objectCollections);
             matches = matches.getConfirmedMatches(matches2);
             matches.addNonMatchResults(matches2);
             Report.println("# confirmed finds: " + matches.size());
             if (matches.isEmpty()) break; // no need to go further
         }
-        return matches;
     }
 
     private ObjectCollection getObjColl(int findIndex, ObjectCollection... objectCollections) {

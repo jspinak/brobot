@@ -4,7 +4,7 @@ import io.github.jspinak.brobot.actions.BrobotSettings;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles.SetAllProfiles;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles.SetKMeansProfiles;
 import io.github.jspinak.brobot.datatypes.state.state.State;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.reports.Report;
 import org.springframework.stereotype.Component;
 
@@ -36,14 +36,14 @@ public class Init {
 
     private void preProcessImages(State state) {
         if (state.getStateImages().size() > 0) Report.print(state.getName() + ": ");
-        for (StateImageObject stateImageObject : state.getStateImages()) {
-            Report.print("[" + lastImageIndex + "," + stateImageObject.getName() + "] ");
-            stateImageObject.setIndex(lastImageIndex);
-            setAllProfiles.setMatsAndColorProfiles(stateImageObject);
+        for (StateImage stateImage : state.getStateImages()) {
+            Report.print("[" + lastImageIndex + "," + stateImage.getName() + "] ");
+            stateImage.setIndex(lastImageIndex);
+            setAllProfiles.setMatsAndColorProfiles(stateImage);
             lastImageIndex++;
-            if (BrobotSettings.initProfilesForDynamicImages && stateImageObject.isDynamic() ||
-                    (BrobotSettings.initProfilesForStaticfImages && !stateImageObject.isDynamic())) {
-                setKMeansProfiles.setProfiles(stateImageObject);
+            if (BrobotSettings.initProfilesForDynamicImages && stateImage.isDynamic() ||
+                    (BrobotSettings.initProfilesForStaticfImages && !stateImage.isDynamic())) {
+                setKMeansProfiles.setProfiles(stateImage);
             }
         }
         if (state.getStateImages().size() > 0) Report.println();

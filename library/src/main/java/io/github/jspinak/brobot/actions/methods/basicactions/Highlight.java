@@ -8,7 +8,6 @@ import io.github.jspinak.brobot.actions.methods.sikuliWrappers.Wait;
 import io.github.jspinak.brobot.datatypes.primitives.match.MatchObject;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
-import io.github.jspinak.brobot.illustratedHistory.IllustrateScreenshot;
 import org.springframework.stereotype.Component;
 
 /**
@@ -20,21 +19,17 @@ public class Highlight implements ActionInterface {
     private Find find;
     private HighlightMatch highlightMatch;
     private Wait wait;
-    private IllustrateScreenshot illustrateScreenshot;
 
-    public Highlight(Find find, HighlightMatch highlightMatch, Wait wait,
-                     IllustrateScreenshot illustrateScreenshot) {
+    public Highlight(Find find, HighlightMatch highlightMatch, Wait wait) {
         this.find = find;
         this.highlightMatch = highlightMatch;
         this.wait = wait;
-        this.illustrateScreenshot = illustrateScreenshot;
     }
 
-    public Matches perform(ActionOptions actionOptions, ObjectCollection... objectCollections) {
-        Matches matches = find.perform(actionOptions, objectCollections);
+    public void perform(Matches matches, ActionOptions actionOptions, ObjectCollection... objectCollections) {
+        find.perform(matches, actionOptions, objectCollections);
         if (actionOptions.isHighlightAllAtOnce()) highlightAllAtOnce(matches, actionOptions);
         else highlightOneAtATime(matches, actionOptions);
-        return matches;
     }
 
     private void highlightAllAtOnce(Matches matches, ActionOptions actionOptions) {
