@@ -3,7 +3,9 @@ package io.github.jspinak.brobot.actions.composites.methods.drag;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.Find;
 import io.github.jspinak.brobot.datatypes.primitives.location.Location;
+import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
+import org.bytedeco.opencv.opencv_core.Mat;
 import org.sikuli.script.Mouse;
 import org.springframework.stereotype.Component;
 
@@ -24,18 +26,14 @@ public class GetDragLocation {
         this.actionOptionsForDrag = actionOptionsForDrag;
     }
 
-    public Optional<Location> getFromLocation(ActionOptions actionOptions, ObjectCollection... objectCollections) {
-        return find.perform(
-                        actionOptionsForDrag.getFindFrom(actionOptions),
-                        getDragFromObjColl(objectCollections))
-                .getBestLocation();
+    public Optional<Location> getFromLocation(Matches matches, ActionOptions actionOptions, ObjectCollection... objectCollections) {
+        find.perform(matches, actionOptionsForDrag.getFindFrom(actionOptions), getDragFromObjColl(objectCollections));
+        return matches.getBestLocation();
     }
 
-    public Optional<Location> getToLocation(ActionOptions actionOptions, ObjectCollection... objectCollections) {
-        return find.perform(
-                        actionOptionsForDrag.getFindTo(actionOptions),
-                        getDragToObjColl(actionOptions, objectCollections))
-                .getBestLocation();
+    public Optional<Location> getToLocation(Matches matches, ActionOptions actionOptions, ObjectCollection... objectCollections) {
+        find.perform(matches, actionOptionsForDrag.getFindTo(actionOptions), getDragToObjColl(actionOptions, objectCollections));
+        return matches.getBestLocation();
     }
 
     /**

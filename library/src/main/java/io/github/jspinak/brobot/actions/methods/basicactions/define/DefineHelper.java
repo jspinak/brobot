@@ -6,6 +6,7 @@ import io.github.jspinak.brobot.actions.methods.basicactions.find.Find;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
+import org.sikuli.script.Match;
 import org.springframework.stereotype.Component;
 
 /**
@@ -49,9 +50,8 @@ public class DefineHelper {
      *
      * @param actionOptions holds the action configuration.
      * @param objectCollections holds the objects to find.
-     * @return a Matches object containing all matches found.
      */
-    public Matches findMatches(ActionOptions actionOptions, ObjectCollection... objectCollections) {
+    public void findMatches(Matches matches, ActionOptions actionOptions, ObjectCollection... objectCollections) {
         ActionOptions findOptions = CopyActionOptions.copyImmutableOptions(actionOptions);
         findOptions.setFind(ActionOptions.Find.EACH);
         findOptions.setAddH(0);
@@ -60,7 +60,7 @@ public class DefineHelper {
         findOptions.setAddX(0);
         findOptions.setAbsoluteH(-1);
         findOptions.setAbsoluteW(-1);
-        return find.perform(findOptions, objectCollections);
+        find.perform(matches, findOptions, objectCollections);
     }
 
 

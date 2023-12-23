@@ -8,8 +8,8 @@ import io.github.jspinak.brobot.datatypes.primitives.image.Image;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
-import io.github.jspinak.brobot.imageUtils.GetImage;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
+import io.github.jspinak.brobot.imageUtils.GetImageOpenCV;
 import io.github.jspinak.brobot.reports.Report;
 import org.springframework.stereotype.Component;
 
@@ -33,7 +33,7 @@ import java.time.LocalDateTime;
 @Component
 public class CaptureScenesAndInputs {
 
-    private GetImage getImage;
+    private GetImageOpenCV getImageOpenCV;
     private final Wait wait;
     private NativeHookDemo nativeHookDemo;
     private WriteXmlDomActions writeXmlDomActions;
@@ -42,10 +42,10 @@ public class CaptureScenesAndInputs {
 
     private int screensSaved = 0;
 
-    public CaptureScenesAndInputs(GetImage getImage, Wait wait,
+    public CaptureScenesAndInputs(GetImageOpenCV getImageOpenCV, Wait wait,
                                   NativeHookDemo nativeHookDemo, WriteXmlDomActions writeXmlDomActions,
                                   Action action, WriteXmlDomScenes writeXmlDomScenes) {
-        this.getImage = getImage;
+        this.getImageOpenCV = getImageOpenCV;
         this.wait = wait;
         this.nativeHookDemo = nativeHookDemo;
         this.writeXmlDomActions = writeXmlDomActions;
@@ -57,11 +57,11 @@ public class CaptureScenesAndInputs {
      * Captures scenes, object locations, and mouse and keyboard input and saves it to the 'capture' directory.
      * Make sure to use the same ActionOptions when using the saved data in a live automation.
      * @param actionOptions
-     * @param stateImageObjects
+     * @param stateImages
      */
-    public void captureAndFindObjects(ActionOptions actionOptions, StateImageObject... stateImageObjects) {
+    public void captureAndFindObjects(ActionOptions actionOptions, StateImage... stateImages) {
         capture();
-        SceneObjectCollectionForXML sceneObjectCollectionForXML = findObjects(actionOptions, stateImageObjects);
+        SceneObjectCollectionForXML sceneObjectCollectionForXML = findObjects(actionOptions, stateImages);
         saveSceneObjectCollectionForXML(sceneObjectCollectionForXML);
         System.runFinalization();
         System.exit(0);
@@ -87,7 +87,7 @@ public class CaptureScenesAndInputs {
             timelapse = (int) Duration.between(startTime, LocalDateTime.now()).toMillis();
             if (timelapse > screensSaved * BrobotSettings.captureFrequency * 1000) {
                 try {
-                    ImageIO.write(getImage.getBuffImgFromScreen(new Region()),
+                    ImageIO.write(getImageOpenCV.getBuffImgFromScreen(new Region()),
                             "png", new File("capture/scene" + screensSaved + ".png"));
                     Report.println("Saved screenshot " + screensSaved);
                     screensSaved++;
@@ -100,18 +100,18 @@ public class CaptureScenesAndInputs {
         writeXmlDomActions.writeXmlToFile();
     }
 
-    private SceneObjectCollectionForXML findObjects(ActionOptions actionOptions, StateImageObject... stateImageObjects) {
+    private SceneObjectCollectionForXML findObjects(ActionOptions actionOptions, StateImage... stateImages) {
         SceneObjectCollectionForXML sceneObjectCollectionForXML = new SceneObjectCollectionForXML();
         for (int i=0; i<screensSaved; i++) {
             SceneAndObjectsForXML sceneAndObjectsForXML = new SceneAndObjectsForXML(i);
-            for (StateImageObject stateImageObject : stateImageObjects) {
+            for (StateImage stateImage : stateImages) {
                 ObjectCollection objects = new ObjectCollection.Builder()
                         .withScenes(new Image("../capture/scene" + i))
-                        .withImages(stateImageObject)
+                        .withImages(stateImage)
                         .build();
                 Matches matches = action.perform(actionOptions, objects);
                 if (matches.getBestLocation().isPresent()) {
-                    sceneAndObjectsForXML.addObject(stateImageObject.getName(), matches.getBestLocation().get());
+                    sceneAndObjectsForXML.addObject(stateImage.getName(), matches.getBestLocation().get());
                 }
             }
             sceneObjectCollectionForXML.addScene(sceneAndObjectsForXML);

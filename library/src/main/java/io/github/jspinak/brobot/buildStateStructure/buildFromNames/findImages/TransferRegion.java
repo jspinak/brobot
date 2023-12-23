@@ -2,7 +2,7 @@ package io.github.jspinak.brobot.buildStateStructure.buildFromNames.findImages;
 
 import io.github.jspinak.brobot.buildStateStructure.buildFromNames.babyStates.BabyState;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.reports.Report;
 import org.springframework.stereotype.Component;
 
@@ -16,7 +16,7 @@ import static io.github.jspinak.brobot.buildStateStructure.buildFromNames.attrib
 public class TransferRegion {
 
     private Region getLargestTransferRegion(BabyState babyState, int page) {
-        List<StateImageObject> transfers = babyState.getImagesByAttributeAndPage(TRANSFER, page);
+        List<StateImage> transfers = babyState.getImagesByAttributeAndPage(TRANSFER, page);
         if (transfers.isEmpty()) return new Region();
         Region largestTransferRegion = transfers.get(0).getSearchRegion();
         for (int i=1; i<transfers.size(); i++) {
@@ -30,10 +30,10 @@ public class TransferRegion {
     /*
     Only transfers to images, not to regions or locations.
      */
-    public boolean processRegionTransfer(Set<StateImageObject> images, int page, BabyState babyState) {
+    public boolean processRegionTransfer(Set<StateImage> images, int page, BabyState babyState) {
         Region transferRegion = getLargestTransferRegion(babyState, page);
         if (!transferRegion.defined()) return false;
-        List<StateImageObject> imagesToUpdate = images.stream()
+        List<StateImage> imagesToUpdate = images.stream()
                 .filter(img -> !img.getSearchRegion().defined() ||
                         img.getSearchRegion().size() < transferRegion.size() &&
                         img.getAttributes().isStateImage())

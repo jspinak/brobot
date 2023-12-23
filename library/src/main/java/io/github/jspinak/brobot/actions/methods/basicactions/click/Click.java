@@ -41,13 +41,8 @@ public class Click implements ActionInterface {
         this.getSceneAnalysisCollection = getSceneAnalysisCollection;
     }
 
-    public Matches perform(ActionOptions actionOptions, ObjectCollection... objectCollections) {
-        Matches matches = find.perform(actionOptions, objectCollections); // find performs only on 1st collection
-        if (BrobotSettings.saveHistory) {
-            SceneAnalysisCollection sceneAnalysisCollection = getSceneAnalysisCollection.
-                    get(Arrays.asList(objectCollections), actionOptions);
-            matches.setSceneAnalysisCollection(sceneAnalysisCollection);
-        }
+    public void perform(Matches matches, ActionOptions actionOptions, ObjectCollection... objectCollections) {
+        find.perform(matches, actionOptions, objectCollections); // find performs only on 1st collection
         int i = 0;
         for (MatchObject matchObject : matches.getMatchObjects()) {
             Location location = setClickLocation(matchObject, actionOptions);
@@ -57,7 +52,6 @@ public class Click implements ActionInterface {
             // pause only between clicks, not after the last click
             if (i < matches.getMatchObjects().size()) wait.wait(actionOptions.getPauseBetweenIndividualActions());
         }
-        return matches;
     }
 
     private Location setClickLocation(MatchObject matchObject, ActionOptions actionOptions) {

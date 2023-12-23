@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.buildStateStructure.buildFromNames.attributes;
 
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import org.springframework.stereotype.Component;
 
 import java.util.HashSet;
@@ -19,7 +19,7 @@ public class GetAttribute {
      * @param page The page, or screenshot, to query
      * @return all Attributes active on this page for this Image
      */
-    public Set<AttributeTypes.Attribute> getAttributes(StateImageObject image, int page) {
+    public Set<AttributeTypes.Attribute> getAttributes(StateImage image, int page) {
         Set<AttributeTypes.Attribute> attributes = new HashSet<>();
         Map<AttributeTypes.Attribute, AttributeData> screenshots = image.getAttributes().getScreenshots();
         screenshots.keySet().forEach(att -> {
@@ -37,7 +37,7 @@ public class GetAttribute {
      * @param attribute The Attribute of interest
      * @return true if the Attribute exists for this Image on the given page
      */
-    public boolean isPresent(StateImageObject image, int page, AttributeTypes.Attribute attribute) {
+    public boolean isPresent(StateImage image, int page, AttributeTypes.Attribute attribute) {
         return getAttributes(image, page).contains(attribute);
     }
 }

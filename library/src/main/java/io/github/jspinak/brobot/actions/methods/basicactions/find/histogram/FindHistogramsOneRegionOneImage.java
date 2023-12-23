@@ -5,7 +5,7 @@ import io.github.jspinak.brobot.datatypes.primitives.grid.OverlappingGrids;
 import io.github.jspinak.brobot.datatypes.primitives.image.Image;
 import io.github.jspinak.brobot.datatypes.primitives.match.MatchObject;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.springframework.stereotype.Component;
 
@@ -27,12 +27,12 @@ public class FindHistogramsOneRegionOneImage {
      * The Map's key is the Region and the value is the score as a Double.
      *
      * @param region the overall region in which to search
-     * @param stateImageObject the image to use
+     * @param stateImage the image to use
      * @param sceneHSV the scene in HSV
      * @return a sortable list of regions contained in the overall region and similarity scores
      */
-    public List<MatchObject> find(Region region, StateImageObject stateImageObject, Mat sceneHSV, int actionId) {
-        Image image = stateImageObject.getImage();
+    public List<MatchObject> find(Region region, StateImage stateImage, Mat sceneHSV, int actionId) {
+        Image image = stateImage.getImage();
         region.setW(Math.min(region.w + region.x, sceneHSV.cols()) - region.x);
         region.setH(Math.min(region.h + region.y, sceneHSV.rows()) - region.y);
         OverlappingGrids overlappingGrids = new OverlappingGrids(new Grid.Builder()
@@ -40,7 +40,7 @@ public class FindHistogramsOneRegionOneImage {
                 .setCellWidth(image.getAverageWidth())
                 .setCellHeight(image.getAverageHeight())
                 .build());
-        return histComparison.compareAll(stateImageObject, overlappingGrids.getAllRegions(), sceneHSV, actionId);
+        return histComparison.compareAll(stateImage, overlappingGrids.getAllRegions(), sceneHSV, actionId);
     }
 
 }

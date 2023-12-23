@@ -8,7 +8,7 @@ import io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.screenObse
 import io.github.jspinak.brobot.datatypes.primitives.image.Image;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.state.State;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.imageUtils.ImageUtils;
 import io.github.jspinak.brobot.imageUtils.MatVisualize;
 import io.github.jspinak.brobot.manageStates.StateTransition;
@@ -94,9 +94,9 @@ public class ScreenStateCreator {
 
     /**
      * 1. get the from and to screens for an image
-     * @param sio StateImageObject
+     * @param sio StateImage
      */
-    private void setTransitionStatesToExitAndEnter(StateImageObject sio) {
+    private void setTransitionStatesToExitAndEnter(StateImage sio) {
         TransitionImage img = sio.getTransitionImage();
         if (img.getTransitionsTo().isEmpty()) return; // no transitions
         int fromIndex = img.getScreensFound().get(0); // get the correct screen number
@@ -145,7 +145,7 @@ public class ScreenStateCreator {
      * @return the newly created state
      */
     public State createState(ImageSetsAndAssociatedScreens imageSets, String name) {
-        List<StateImageObject> stateImages = new ArrayList<>();
+        List<StateImage> stateImages = new ArrayList<>();
         imageSets.getImages().forEach(imgIndex -> {
             if (transitionImageRepo.getImages().size() <= imgIndex || imgIndex < 0) {
                 System.out.println("image index not in transitionImageRepo: " + imgIndex);
@@ -155,7 +155,7 @@ public class ScreenStateCreator {
                 Image image = imageUtils.matToImage(matchImage, Settings.BundlePath + "/" + imageName);
                 TransitionImage transitionImage = transitionImageRepo.getImages().get(imgIndex);
                 Region reg = transitionImage.getRegion();
-                StateImageObject sio = new StateImageObject.Builder()
+                StateImage sio = new StateImage.Builder()
                         .withImage(image)
                         /*
                         This gives us the transition to the screenshot, not to specific states.
@@ -191,10 +191,10 @@ public class ScreenStateCreator {
      * active screen have been checked). After creating the state structure, we can move to states with unchecked
      * images and add to the state structure.
      *
-     * 1. Create StateImageObject(s) with images from the repo.
-     * 2. A StateImageObject might have a transition. At first, just include the transition to the screen.
-     * 3. Make states using the StateImageObject(s).
-     * 3. Identify the pre-transition screenshot for each StateImageObject. Compare the states in the pre-transition
+     * 1. Create StateImage(s) with images from the repo.
+     * 2. A StateImage might have a transition. At first, just include the transition to the screen.
+     * 3. Make states using the StateImage(s).
+     * 3. Identify the pre-transition screenshot for each StateImage. Compare the states in the pre-transition
      *      screenshot with the states in the post transition screenshot.
      * 4. Create transitions based on the change in states in pre- and post-transition screenshots.
      */
@@ -211,7 +211,7 @@ public class ScreenStateCreator {
             StateTransitions newST = new StateTransitions.Builder(state.getName())
                     .addTransitionFinish(() -> commonActions.findState(1, state.getName()))
                     .build();
-            for (StateImageObject img : state.getStateImages()) {
+            for (StateImage img : state.getStateImages()) {
                 if (!img.getStatesToEnter().isEmpty() && !img.getStatesToExit().isEmpty()) {
                     boolean ownerStateStaysVisible =
                             img.getStatesToEnter().contains(Integer.toString(img.getTransitionImage().getOwnerState()));

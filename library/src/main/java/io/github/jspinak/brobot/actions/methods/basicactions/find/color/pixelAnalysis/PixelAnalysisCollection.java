@@ -1,7 +1,7 @@
 package io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis;
 
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles.ColorCluster;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.imageUtils.MatOps;
 import io.github.jspinak.brobot.reports.Report;
 import lombok.Getter;
@@ -19,9 +19,9 @@ import static io.github.jspinak.brobot.actions.methods.basicactions.find.color.p
 import static org.bytedeco.opencv.global.opencv_imgproc.cvtColor;
 
 /**
- * Contains a series of PixelAnalysis objects that comprise all analysis of a {scene, StateImageObject} pair.
+ * Contains a series of PixelAnalysis objects that comprise all analysis of a {scene, StateImage} pair.
  * Each PixelAnalysis object could correspond to the analysis of a k-Means cluster (if k-Means is 3, there would
- * be 3 clusters for the StateImageObject, and each of these clusters would engender a PixelAnalysis).
+ * be 3 clusters for the StateImage, and each of these clusters would engender a PixelAnalysis).
  */
 @Getter
 public class PixelAnalysisCollection {
@@ -37,7 +37,7 @@ public class PixelAnalysisCollection {
 
     private List<PixelAnalysis> pixelAnalyses = new ArrayList<>();
     @Setter
-    private StateImageObject stateImageObject;
+    private StateImage stateImage;
 
     private Map<ColorCluster.ColorSchemaName, Map<Analysis, Mat>> analyses = new HashMap<>();
     {
@@ -63,7 +63,7 @@ public class PixelAnalysisCollection {
     }
 
     public String getImageName() {
-        return stateImageObject.getName();
+        return stateImage.getName();
     }
 
     public void print() {

@@ -10,7 +10,7 @@ import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import io.github.jspinak.brobot.datatypes.state.state.State;
 import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.StateRegion;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.manageStates.StateMemory;
 import io.github.jspinak.brobot.services.StateService;
 import io.github.jspinak.brobot.manageStates.UnknownState;
@@ -40,13 +40,13 @@ public class CommonActions {
         this.stateMemory = stateMemory;
     }
 
-    public boolean click(double maxWait, StateImageObject... stateImageObjects) {
+    public boolean click(double maxWait, StateImage... stateImages) {
         return action.perform(
                 new ActionOptions.Builder()
                         .setAction(ActionOptions.Action.CLICK)
                         .setMaxWait(maxWait)
                         .build(),
-                stateImageObjects).isSuccess();
+                stateImages).isSuccess();
     }
 
     public boolean click(Location location) {
@@ -54,7 +54,7 @@ public class CommonActions {
                 .isSuccess();
     }
 
-    public boolean clickImageUntilItVanishes(int timesToClick, double pauseBetweenClicks, StateImageObject image) {
+    public boolean clickImageUntilItVanishes(int timesToClick, double pauseBetweenClicks, StateImage image) {
         ActionOptions actionOptions = new ActionOptions.Builder()
                 .setAction(CLICK_UNTIL)
                 .setClickUntil(ActionOptions.ClickUntil.OBJECTS_VANISH)
@@ -69,7 +69,7 @@ public class CommonActions {
     }
 
     public boolean rightClickImageUntilItVanishes(int timesToClick, double pauseBetweenClicks,
-                                                  StateImageObject image, int xMove, int yMove) {
+                                                  StateImage image, int xMove, int yMove) {
         ActionOptions actionOptions = new ActionOptions.Builder()
                 .setAction(CLICK_UNTIL)
                 .setClickType(ClickType.Type.RIGHT)
@@ -87,27 +87,27 @@ public class CommonActions {
         return action.perform(actionOptions, objectCollection).isSuccess();
     }
 
-    public boolean doubleClick(double maxWait, StateImageObject... stateImageObjects) {
+    public boolean doubleClick(double maxWait, StateImage... stateImages) {
         return action.perform(
                 new ActionOptions.Builder()
                         .setAction(ActionOptions.Action.CLICK)
                         .setMaxWait(maxWait)
                         .setClickType(ClickType.Type.DOUBLE_LEFT)
                         .build(),
-                stateImageObjects).isSuccess();
+                stateImages).isSuccess();
     }
 
-    public boolean rightClick(double maxWait, StateImageObject... stateImageObjects) {
+    public boolean rightClick(double maxWait, StateImage... stateImages) {
         return action.perform(
                 new ActionOptions.Builder()
                         .setAction(ActionOptions.Action.CLICK)
                         .setMaxWait(maxWait)
                         .setClickType(ClickType.Type.RIGHT)
                         .build(),
-                stateImageObjects).isSuccess();
+                stateImages).isSuccess();
     }
 
-    public boolean waitVanish(double wait, StateImageObject... images) {
+    public boolean waitVanish(double wait, StateImage... images) {
         ActionOptions vanish = new ActionOptions.Builder()
                 .setAction(VANISH)
                 .setMaxWait(wait)
@@ -119,8 +119,8 @@ public class CommonActions {
         return find(maxWait, image.inNullState());
     }
 
-    public boolean find(double maxWait, StateImageObject stateImageObject) {
-        return action.perform(new ActionOptions.Builder().setMaxWait(maxWait).build(), stateImageObject)
+    public boolean find(double maxWait, StateImage stateImage) {
+        return action.perform(new ActionOptions.Builder().setMaxWait(maxWait).build(), stateImage)
                 .isSuccess();
     }
 
@@ -166,7 +166,7 @@ public class CommonActions {
     }
 
     public boolean clickUntilStateAppears(int repeatClickTimes, double pauseBetweenClicks,
-                                          StateImageObject objectToClick, String state) {
+                                          StateImage objectToClick, String state) {
         if (!stateService.findByName(state).isPresent()) return false;
         ActionOptions actionOptions = new ActionOptions.Builder()
                 .setAction(ActionOptions.Action.CLICK)
@@ -184,7 +184,7 @@ public class CommonActions {
     }
 
     public boolean clickUntilImageAppears(int repeatClickTimes, double pauseBetweenClicks,
-                                          StateImageObject toClick, StateImageObject toAppear) {
+                                          StateImage toClick, StateImage toAppear) {
         ActionOptions actionOptions = new ActionOptions.Builder()
                 .setAction(ActionOptions.Action.CLICK)
                 .setClickUntil(ActionOptions.ClickUntil.OBJECTS_APPEAR)
@@ -269,7 +269,7 @@ public class CommonActions {
         return action.perform(getText, textRegion).getSelectedText();
     }
 
-    public boolean clickXTimes(int times, double pause, StateImageObject objectToClick) {
+    public boolean clickXTimes(int times, double pause, StateImage objectToClick) {
         ActionOptions click = new ActionOptions.Builder()
                 .setAction(CLICK)
                 .setTimesToRepeatIndividualAction(times)

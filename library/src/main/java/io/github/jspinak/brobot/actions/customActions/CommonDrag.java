@@ -7,7 +7,7 @@ import io.github.jspinak.brobot.datatypes.primitives.location.Position;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -35,16 +35,14 @@ public class CommonDrag {
      * Allows for dragging to multiple points by performing multiple Drag Actions.
      * This could be converted into a CompositeAction (Action == DRAGS).
      */
-    public Matches drag(StateImageObject from, Location... to) {
-        Matches matches = new Matches();
+    public void drag(Matches matches, StateImage from, Location... to) {
         for (ObjectCollection[] oC : getObjectCollections(from, to)) {
-            matches = drag.perform(actionOptions, oC);
+            drag.perform(matches, actionOptions, oC);
             if (matches.isEmpty()) break;
         }
-        return matches;
     }
 
-    private List<ObjectCollection[]> getObjectCollections(StateImageObject from, Location... to) {
+    private List<ObjectCollection[]> getObjectCollections(StateImage from, Location... to) {
         List<ObjectCollection[]> objectCollectionsList = new ArrayList<>();
         int l = to.length > 0 ? 2 : 1;
         ObjectCollection[] firstColl = new ObjectCollection[l];
@@ -61,19 +59,19 @@ public class CommonDrag {
         return objectCollectionsList;
     }
 
-    public Matches dragInScreen(StateImageObject from, Position.Name... positions) {
+    public void dragInScreen(Matches matches, StateImage from, Position.Name... positions) {
         Location[] locations = new Location[positions.length];
         for (int i=0; i<positions.length; i++)
             locations[i] = new Location(new Region(), positions[i]);
-        return drag(from, locations);
+        drag(matches, from, locations);
     }
 
-    public Matches dragInScreen(StateImageObject from, int xOff, int yOff) {
+    public void dragInScreen(Matches matches, StateImage from, int xOff, int yOff) {
         ActionOptions actionOptions = new ActionOptions.Builder()
                 .setDragToOffsetX(xOff)
                 .setDragToOffsetY(yOff)
                 .build();
-        return drag.perform(actionOptions, from.asObjectCollection());
+        drag.perform(matches, actionOptions, from.asObjectCollection());
     }
 
 

@@ -21,7 +21,7 @@ public class DefineOutsideAnchors implements ActionInterface {
         this.adjustRegion = adjustRegion;
     }
 
-    public Matches perform(ActionOptions actionOptions, ObjectCollection... objectCollections) {
-        return new Matches(); // placeholder
+    public void perform(Matches matches, ActionOptions actionOptions, ObjectCollection... objectCollections) {
+        // code here
     }
 }

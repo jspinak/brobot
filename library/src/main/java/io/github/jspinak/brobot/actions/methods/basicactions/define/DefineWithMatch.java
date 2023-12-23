@@ -21,9 +21,9 @@ public class DefineWithMatch implements ActionInterface {
         this.defineHelper = defineHelper;
     }
 
-    public Matches perform(ActionOptions actionOptions, ObjectCollection... objectCollections) {
-        Matches matches = defineHelper.findMatches(actionOptions, objectCollections);
-        if (matches.getBestMatch().isEmpty()) return matches;
+    public void perform(Matches matches, ActionOptions actionOptions, ObjectCollection... objectCollections) {
+        defineHelper.findMatches(matches, actionOptions, objectCollections);
+        if (matches.getBestMatch().isEmpty()) return;
         Region region = new Region(matches.getBestMatch().get().getMatch());
         if (actionOptions.getDefineAs() == ActionOptions.DefineAs.BELOW_MATCH) region.y += region.h;
         if (actionOptions.getDefineAs() == ActionOptions.DefineAs.ABOVE_MATCH) region.y -= region.h;
@@ -31,6 +31,5 @@ public class DefineWithMatch implements ActionInterface {
         if (actionOptions.getDefineAs() == ActionOptions.DefineAs.RIGHT_OF_MATCH) region.x += region.w;
         defineHelper.adjust(region, actionOptions);
         matches.addDefinedRegion(region);
-        return matches;
     }
 }
