@@ -26,7 +26,7 @@ public class TypeText implements ActionInterface {
         this.wait = wait;
     }
 
-    public Matches perform(ActionOptions actionOptions, ObjectCollection... objectCollections) {
+    public void perform(Matches matches, ActionOptions actionOptions, ObjectCollection... objectCollections) {
         double defaultTypeDelay = Settings.TypeDelay;
         Settings.TypeDelay = actionOptions.getTypeDelay();
         List<StateString> strings = objectCollections[0].getStateStrings();
@@ -36,7 +36,6 @@ public class TypeText implements ActionInterface {
                 wait.wait(actionOptions.getPauseBetweenIndividualActions());
         }
         Settings.TypeDelay = defaultTypeDelay;
-        return new Matches();
     }
 
 }

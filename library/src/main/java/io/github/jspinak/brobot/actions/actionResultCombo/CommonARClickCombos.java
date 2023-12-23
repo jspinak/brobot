@@ -6,7 +6,7 @@ import io.github.jspinak.brobot.actions.parameterTuning.ParameterCollection;
 import io.github.jspinak.brobot.actions.parameterTuning.ParameterThresholds;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.state.state.State;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.services.StateService;
 import io.github.jspinak.brobot.manageStates.UnknownState;
 import org.springframework.stereotype.Component;
@@ -36,15 +36,15 @@ public class CommonARClickCombos {
         this.stateService = stateService;
     }
 
-    public boolean clickAndFind(StateImageObject toClick, StateImageObject toFind) {
+    public boolean clickAndFind(StateImage toClick, StateImage toFind) {
         return clickAndAction(toClick, toFind, ActionOptions.Action.FIND);
     }
 
-    public boolean clickAndVanish(StateImageObject toClick, StateImageObject toVanish) {
+    public boolean clickAndVanish(StateImage toClick, StateImage toVanish) {
         return clickAndAction(toClick, toVanish, ActionOptions.Action.VANISH);
     }
 
-    public boolean clickAndAction(StateImageObject toClick, StateImageObject resultImage, ActionOptions.Action actionType) {
+    public boolean clickAndAction(StateImage toClick, StateImage resultImage, ActionOptions.Action actionType) {
         ActionResultCombo arCombo = new ActionResultCombo();
         ActionOptions actionOptions1 = commonActionOptions.standard(ActionOptions.Action.CLICK, 1);
         arCombo.setActionOptions(actionOptions1);
@@ -57,15 +57,15 @@ public class CommonARClickCombos {
         return matches.size() > 1 && matches.get(1).isSuccess();
     }
 
-    public boolean clickAndFindState(StateImageObject toClick, String stateName, int numberOfClicks) {
+    public boolean clickAndFindState(StateImage toClick, String stateName, int numberOfClicks) {
         return clickAndStateAction(toClick, stateName, 1, ActionOptions.Action.FIND, numberOfClicks);
     }
 
-    public boolean clickAndVanishState(StateImageObject toClick, String stateName, double maxWait, int numberOfClicks) {
+    public boolean clickAndVanishState(StateImage toClick, String stateName, double maxWait, int numberOfClicks) {
         return clickAndStateAction(toClick, stateName, maxWait, ActionOptions.Action.VANISH, numberOfClicks);
     }
 
-    public boolean clickAndStateAction(StateImageObject toClick, String stateName,
+    public boolean clickAndStateAction(StateImage toClick, String stateName,
                                        double maxWait, ActionOptions.Action actionType,
                                        int numberOfClicks) {
         if (Objects.equals(stateName, UnknownState.Enum.UNKNOWN.toString())) return false; // this could be true but requires additional coding

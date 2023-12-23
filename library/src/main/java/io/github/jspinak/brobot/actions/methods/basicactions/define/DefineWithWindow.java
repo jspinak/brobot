@@ -27,14 +27,12 @@ public class DefineWithWindow implements ActionInterface {
     }
 
     // define with focused window
-    public Matches perform(ActionOptions actionOptions, ObjectCollection... objectCollections) {
-        Matches matches = new Matches();
+    public void perform(Matches matches, ActionOptions actionOptions, ObjectCollection... objectCollections) {
         Optional<Region> focusedWindow = app.focusedWindow();
         if (focusedWindow.isPresent()) {
             Region region = focusedWindow.get();
             defineHelper.adjust(region, actionOptions);
             matches.addDefinedRegion(region);
         } else matches.setSuccess(false);
-        return matches;
     }
 }

@@ -17,9 +17,11 @@ public class MultipleFinds implements ActionInterface {
         this.confirmedFinds = confirmedFinds;
     }
 
-    public Matches perform(ActionOptions actionOptions, ObjectCollection... objectCollections) {
-        if (actionOptions.isKeepLargerMatches())
-            return confirmedFinds.perform(actionOptions, objectCollections);
-        return nestedFinds.perform(actionOptions, objectCollections);
+    public void perform(Matches matches, ActionOptions actionOptions, ObjectCollection... objectCollections) {
+        if (actionOptions.isKeepLargerMatches()) {
+            confirmedFinds.perform(matches, actionOptions, objectCollections);
+            return;
+        }
+        nestedFinds.perform(matches, actionOptions, objectCollections);
     }
 }

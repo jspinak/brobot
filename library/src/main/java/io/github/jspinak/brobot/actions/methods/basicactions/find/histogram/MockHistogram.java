@@ -2,7 +2,7 @@ package io.github.jspinak.brobot.actions.methods.basicactions.find.histogram;
 
 import io.github.jspinak.brobot.datatypes.primitives.match.MatchObject;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -18,7 +18,7 @@ public class MockHistogram {
      * @param searchRegions the regions in which to search
      * @return
      */
-    public List<MatchObject> getMockHistogramMatches(StateImageObject image, List<Region> searchRegions) {
+    public List<MatchObject> getMockHistogramMatches(StateImage image, List<Region> searchRegions) {
         List<MatchObject> matchObjects = new ArrayList<>();
         for (Region searchRegion : searchRegions) {
             try {

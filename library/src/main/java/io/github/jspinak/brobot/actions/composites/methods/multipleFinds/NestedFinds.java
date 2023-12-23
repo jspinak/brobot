@@ -6,7 +6,7 @@ import io.github.jspinak.brobot.actions.methods.basicactions.find.Find;
 import io.github.jspinak.brobot.datatypes.primitives.match.MatchObject;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.SearchRegions;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.SearchRegions;
 import io.github.jspinak.brobot.reports.Report;
 import org.springframework.stereotype.Component;
 
@@ -39,20 +39,18 @@ public class NestedFinds implements ActionInterface {
      * @param objectCollections the images and scenes to use
      * @return the image matches
      */
-    public Matches perform(ActionOptions actionOptions, ObjectCollection... objectCollections) {
-        if (objectCollections.length == 0) return new Matches();
+    public void perform(Matches matches, ActionOptions actionOptions, ObjectCollection... objectCollections) {
+        if (objectCollections.length == 0) return;
         List<MatchObject> initialMatches = new ArrayList<>();
-        Matches matches = new Matches();
         for (int i=0; i<actionOptions.getFindActions().size(); i++) {
             Report.println("nested find #" + i + ": " + actionOptions.getFindActions().get(i));
             actionOptions.setFind(actionOptions.getFindActions().get(i));
-            matches = find.perform(actionOptions, objectCollections);
-            if (matches.isEmpty()) return matches; // no need to go further
+            find.perform(matches, actionOptions, objectCollections);
+            if (matches.isEmpty()) return; // no need to go further
             if (i==0) initialMatches.addAll(matches.getMatchObjects());
             if (i<actionOptions.getFindActions().size()-1) setSearchRegions(matches, actionOptions);
         }
         matches.setInitialMatchObjects(initialMatches);
-        return matches;
     }
 
     private ObjectCollection getObjColl(int findIndex, ObjectCollection... objectCollections) {

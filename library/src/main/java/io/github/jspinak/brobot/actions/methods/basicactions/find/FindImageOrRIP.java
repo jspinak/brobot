@@ -5,9 +5,11 @@ import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.GetScenes;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.Scene;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.SceneAnalysis;
+import io.github.jspinak.brobot.actions.methods.sikuliWrappers.find.FindAll;
+import io.github.jspinak.brobot.datatypes.primitives.image.StateImage_;
+import io.github.jspinak.brobot.datatypes.primitives.match.MatchObject_;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
-import io.github.jspinak.brobot.reports.Report;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -21,13 +23,16 @@ public class FindImageOrRIP {
 
     private GetScenes getScenes;
     private ActionLifecycleManagement actionLifecycleManagement;
+    private final FindAll findAll;
 
     private final Map<Boolean, FindImageObject> findMethod = new HashMap<>();
 
     public FindImageOrRIP(FindImage findImage, FindRIP findRIP, GetScenes getScenes,
-                          ActionLifecycleManagement actionLifecycleManagement) {
+                          ActionLifecycleManagement actionLifecycleManagement,
+                          FindAll findAll) {
         this.getScenes = getScenes;
         this.actionLifecycleManagement = actionLifecycleManagement;
+        this.findAll = findAll;
         findMethod.put(false, findImage);
         findMethod.put(true, findRIP);
     }
@@ -39,9 +44,8 @@ public class FindImageOrRIP {
      * @param objectCollections images are taken from the first ObjectCollection.
      * @return a Matches object with all matches found.
      */
-    public Matches find(ActionOptions actionOptions, List<ObjectCollection> objectCollections) {
-        actionLifecycleManagement.printActionOnce(actionOptions.getActionId());
-        Matches matches = new Matches();
+    public void find(Matches matches, ActionOptions actionOptions, List<ObjectCollection> objectCollections) {
+        actionLifecycleManagement.printActionOnce(matches.getActionId());
         List<Scene> scenes = getScenes.getScenes(actionOptions, objectCollections);
         //Report.println(scenes.size() + " scenes found");
         /*
@@ -63,32 +67,56 @@ public class FindImageOrRIP {
         List<SceneAnalysis> sceneAnalyses = new ArrayList<>();
         scenesWithScreenshots.forEach(scene -> sceneAnalyses.add(new SceneAnalysis(scene)));
         matches.getSceneAnalysisCollection().setSceneAnalyses(sceneAnalyses);
-        return matches;
+    }
+
+    /**
+     * If Find.FIRST, it returns the first positive results.
+     * Otherwise, it returns all matches.
+     */
+    public List<MatchObject_> find_(Matches matches, ActionOptions actionOptions, List<StateImage_> stateImages, List<Scene> scenes,
+                                    List<Matches> matchesList) {
+        boolean allImagesFound = true;
+        List<MatchObject_> matchObjects = new ArrayList<>();
+        actionLifecycleManagement.printActionOnce(matches.getActionId());
+        for (Scene scene : scenes) {
+            for (int i=0; i<stateImages.size(); i++) {
+                List<MatchObject_> patternMatches = findAll.find(stateImages.get(i), scene, actionOptions);
+                patternMatches.forEach(matchesList.get(i)::add);
+                matchObjects.addAll(patternMatches);
+                if (patternMatches.isEmpty()) allImagesFound = false;
+                if (stopAfterFound(actionOptions, matches)) return matchObjects;
+            }
+        }
+        if (allImagesFound) actionLifecycleManagement.setAllImagesFound(matches.getActionId());
+        return matchObjects;
+    }
+
+    public boolean stopAfterFound(ActionOptions actionOptions, Matches matches) {
+        if (actionOptions.getFind() == ActionOptions.Find.ALL) return false;
+        return !matches.isEmpty();
     }
 
     /**
      * Searches all patterns and returns the Match with the best Score.
      * @param actionOptions holds the action configuration.
      * @param objectCollections images are taken from the first ObjectCollection.
-     * @return a Matches object with either the best match or no matches.
      */
-    public Matches best(ActionOptions actionOptions, List<ObjectCollection> objectCollections) {
-        Matches matches = new Matches();
-        find(actionOptions, objectCollections).getBestMatch().ifPresent(matches::add);
-        return matches;
+    public void best(Matches matches, ActionOptions actionOptions, List<ObjectCollection> objectCollections) {
+        find(matches, actionOptions, objectCollections);
+        Matches best = new Matches();
+        matches.getBestMatch().ifPresent(best::add);
+        matches = best;
     }
 
     /**
      * Searches each Pattern separately and returns one Match per Pattern if found.
      * @param actionOptions holds the action configuration.
      * @param objectCollections images are taken from the first ObjectCollection.
-     * @return a Matches object with all matches found.
      */
-    public Matches each(ActionOptions actionOptions, List<ObjectCollection> objectCollections) {
-        Matches matches = new Matches();
-        objectCollections.get(0).getStateImages().forEach(image ->
-                find(actionOptions, Collections.singletonList(image.asObjectCollection())).
-                        getBestMatch().ifPresent(matches::add));
-        return matches;
+    public void each(Matches matches, ActionOptions actionOptions, List<ObjectCollection> objectCollections) {
+        objectCollections.get(0).getStateImages().forEach(image -> {
+            find(matches, actionOptions, Collections.singletonList(image.asObjectCollection()));
+            matches.getBestMatch().ifPresent(matches::add);
+        });
     }
 }

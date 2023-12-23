@@ -22,8 +22,7 @@ public class KeyUp implements ActionInterface {
         this.keyUpWrapper = keyUpWrapper;
     }
 
-    public Matches perform(ActionOptions actionOptions, ObjectCollection... objectCollections) {
-        Matches matches = new Matches();
+    public void perform(Matches matches, ActionOptions actionOptions, ObjectCollection... objectCollections) {
         if (nothingToRelease(actionOptions, objectCollections)) keyUpWrapper.release(); // releases all keys
         else {
             for (StateString stateString : objectCollections[0].getStateStrings()) {
@@ -31,7 +30,6 @@ public class KeyUp implements ActionInterface {
             }
             if (!actionOptions.getModifiers().isEmpty()) keyUpWrapper.release(actionOptions.getModifiers());
         }
-        return matches;
     }
 
     private boolean nothingToRelease(ActionOptions actionOptions, ObjectCollection... objectCollections) {

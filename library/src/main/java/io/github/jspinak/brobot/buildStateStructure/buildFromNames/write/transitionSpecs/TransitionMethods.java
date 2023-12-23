@@ -4,7 +4,7 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.MethodSpec;
 import io.github.jspinak.brobot.actions.customActions.CommonActions;
 import io.github.jspinak.brobot.buildStateStructure.buildFromNames.babyStates.BabyStateRepo;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.manageStates.StateTransitions;
 import io.github.jspinak.brobot.services.StateTransitionsRepository;
 import lombok.Getter;
@@ -60,7 +60,7 @@ public class TransitionMethods {
      */
     public MethodSpec getConstructor(ClassName className, String stateClassVar, String enumName,
                                      MethodSpec finishTransition, String packageName,
-                                     Set<StateImageObject> imgs) {
+                                     Set<StateImage> imgs) {
         return MethodSpec.constructorBuilder()
                 .addModifiers(Modifier.PUBLIC)
                 .addParameter(CommonActions.class, "commonActions")
@@ -80,14 +80,14 @@ public class TransitionMethods {
     Gets the Transitions to other States as a String, for use in the getConstructor method.
     Adds target enums to the list of enums. These enums will be added later as static imports.
      */
-    private String getTransitionsAsString(Set<StateImageObject> imgs, String stateClassVar,
+    private String getTransitionsAsString(Set<StateImage> imgs, String stateClassVar,
                                           String packageName) {
         enumNames = new HashMap<>();
         StringBuilder transitionBuilder = new StringBuilder();
-        Set<StateImageObject> imgsWithTransitions = imgs.stream()
+        Set<StateImage> imgsWithTransitions = imgs.stream()
                         .filter(img -> !img.getAttributes().getTransitionsTo().isEmpty())
                         .collect(Collectors.toSet());
-        for (StateImageObject img : imgsWithTransitions) {
+        for (StateImage img : imgsWithTransitions) {
             toTransitions.setTransitions(img, packageName);
             transitionBuilder.append(toTransitions.getTransitionCode(stateClassVar));
             enumNames.putAll(toTransitions.getEnumNames());

@@ -3,7 +3,7 @@ package io.github.jspinak.brobot.buildStateStructure.buildFromNames.write.region
 import com.squareup.javapoet.FieldSpec;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.StateRegion;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import org.springframework.stereotype.Component;
 
 import javax.lang.model.element.Modifier;
@@ -18,7 +18,7 @@ public class RegionFieldSpec {
 
     private List<Object> initializerArgs;
 
-    public FieldSpec getCode(StateImageObject img) {
+    public FieldSpec getCode(StateImage img) {
         initializerArgs = new ArrayList<>();
         String imageName = img.getAttributes().getImageName();
         Region sReg = img.getSearchRegion();

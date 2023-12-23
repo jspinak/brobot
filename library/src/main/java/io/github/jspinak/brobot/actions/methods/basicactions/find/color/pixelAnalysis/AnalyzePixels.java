@@ -3,7 +3,7 @@ package io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAn
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles.ColorCluster;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles.SetKMeansProfiles;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.springframework.stereotype.Component;
 
@@ -39,23 +39,23 @@ public class AnalyzePixels {
     }
 
     /**
-     * First, PixelAnalysis is performed on each scene with the ColorProfiles for the StateImageObject.
+     * First, PixelAnalysis is performed on each scene with the ColorProfiles for the StateImage.
      * This gives us the similarity of each pixel to the color profiles. Using this information, scores are
-     * calculated that tell us how likely the pixel is to belong to this StateImageObject.
+     * calculated that tell us how likely the pixel is to belong to this StateImage.
      *
      * Pixel analysis is done on the entire scene first, without accounting for the search regions.
      * It can then be reused for subsequent searches.
      *
      * @param scene The scene to analyze.
-     * @param stateImageObject The state image object to analyze.
+     * @param stateImage The state image object to analyze.
      * @param actionOptions The action configuration.
      * @return The pixel scores for the scene.
      */
-    public PixelAnalysisCollection getPixelAnalysisCollection(Scene scene, StateImageObject stateImageObject,
+    public PixelAnalysisCollection getPixelAnalysisCollection(Scene scene, StateImage stateImage,
                                                     ActionOptions actionOptions) {
-        List<ColorCluster> colorClusters = getColorProfiles(stateImageObject, actionOptions);
+        List<ColorCluster> colorClusters = getColorProfiles(stateImage, actionOptions);
         PixelAnalysisCollection pixelAnalysisCollection = setPixelAnalyses(scene, colorClusters);
-        pixelAnalysisCollection.setStateImageObject(stateImageObject);
+        pixelAnalysisCollection.setStateImage(stateImage);
         getPixelAnalysisCollectionScores.setScores(pixelAnalysisCollection, actionOptions);
         return pixelAnalysisCollection;
     }
@@ -64,11 +64,11 @@ public class AnalyzePixels {
      * Create ColorProfiles for a single k-means analysis (a specific # of clusters).
      * ColorProfiles comprising both BGR and HSV ColorSchemas are created from separate BGR and HSV k-means analyses,
      * which respectively contain only BGR and HSV Schemas.
-     * @param img the StateImageObject with the k-means profiles
+     * @param img the StateImage with the k-means profiles
      * @param actionOptions the action configuration
      * @return a list of color profiles corresponding to a specific number of means
      */
-    private List<ColorCluster> getColorProfiles(StateImageObject img, ActionOptions actionOptions) {
+    private List<ColorCluster> getColorProfiles(StateImage img, ActionOptions actionOptions) {
         if (actionOptions.getColor() == ActionOptions.Color.KMEANS ||
                 actionOptions.getAction() == ActionOptions.Action.CLASSIFY) {
             int kMeans = actionOptions.getKmeans();
@@ -110,25 +110,25 @@ public class AnalyzePixels {
     }
 
     /**
-     * A SceneAnalysis comprises all analysis of a scene, for which there may be multiple StateImageObjects.
-     * A PixelAnalysisCollection comprises all analysis of a {scene, StateImageObject} pair.
+     * A SceneAnalysis comprises all analysis of a scene, for which there may be multiple StateImages.
+     * A PixelAnalysisCollection comprises all analysis of a {scene, StateImage} pair.
      * A SceneAnalysis therefore can hold a collection of PixelAnalysisCollections. There is a one-to-many
-     * relationship between scenes and StateImageObjects.
-     * Having a PixelAnalysisCollection for each StateImageObject, we can then compare the scores
-     * for each pixel to determine which StateImageObject the pixel belongs to.
+     * relationship between scenes and StateImages.
+     * Having a PixelAnalysisCollection for each StateImage, we can then compare the scores
+     * for each pixel to determine which StateImage the pixel belongs to.
      * @param scene the scene to analyze
      * @param allImgs the images to match with the pixels in the scene
      * @param actionOptions the action configuration
-     * @return a SceneAnalysis, containing a PixelsAnalysisCollection for each StateImageObject
+     * @return a SceneAnalysis, containing a PixelsAnalysisCollection for each StateImage
      */
-    public SceneAnalysis getAnalysisForOneScene(Scene scene, Set<StateImageObject> targetImgs, Set<StateImageObject> allImgs,
+    public SceneAnalysis getAnalysisForOneScene(Scene scene, Set<StateImage> targetImgs, Set<StateImage> allImgs,
                                                 ActionOptions actionOptions) {
         setKMeansProfiles.addKMeansIfNeeded(allImgs, actionOptions.getKmeans());
         List<PixelAnalysisCollection> pixelAnalysisCollections = new ArrayList<>();
         allImgs.forEach(img -> pixelAnalysisCollections.add(getPixelAnalysisCollection(scene, img, actionOptions)));
         SceneAnalysis sceneAnalysis = new SceneAnalysis(pixelAnalysisCollections, scene);
         getSceneAnalysisScores.setSceneAnalysisIndices(sceneAnalysis);
-        if (targetImgs.size() > 0) getSceneAnalysisScores.setSceneAnalysisIndicesTargetsOnly(sceneAnalysis, targetImgs);
+        if (!targetImgs.isEmpty()) getSceneAnalysisScores.setSceneAnalysisIndicesTargetsOnly(sceneAnalysis, targetImgs);
         getSceneAnalysisScores.setBGRVisualizationMats(sceneAnalysis);
         return sceneAnalysis;
     }

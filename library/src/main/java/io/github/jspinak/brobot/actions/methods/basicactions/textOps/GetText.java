@@ -54,8 +54,8 @@ public class GetText implements ActionInterface {
      * @param objectCollections holds the objects to act on
      * @return a Matches object with MatchObjects and Text
      */
-    public Matches perform(ActionOptions actionOptions, ObjectCollection... objectCollections) {
-        Matches matches = find.perform(actionOptions, objectCollections);
+    public void perform(Matches matches, ActionOptions actionOptions, ObjectCollection... objectCollections) {
+        find.perform(matches, actionOptions, objectCollections);
         getTextWrapper.getAllText(matches);
         Text text;
         int repetitions = 0;
@@ -70,7 +70,7 @@ public class GetText implements ActionInterface {
               is the Find operation and not text retrieval.
              */
             if (!matches.getDanglingSnapshots().allImagesFound()) {
-                matches = find.perform(actionOptions, objectCollections);
+                find.perform(matches, actionOptions, objectCollections);
                 /*
                   Ideally, you should merge the old MatchObjects and Snapshots.
                   Duplicate MatchObjects and found Strings should not be copied.
@@ -83,7 +83,6 @@ public class GetText implements ActionInterface {
             else getTextWrapper.getAllText(matches);
         }
         matches.setSelectedText(textSelector.getString(TextSelector.Method.MOST_SIMILAR, matches.getText()));
-        return matches;
     }
 
     private boolean exitIterations(int repetitions, ActionOptions actionOptions, Matches matches) {

@@ -4,7 +4,7 @@ import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.reports.Report;
 import org.springframework.stereotype.Component;
 
@@ -41,23 +41,20 @@ public class Action {
     public Matches perform(String actionDescription, ActionOptions actionOptions, ObjectCollection... objectCollections) {
         for (ObjectCollection objColl : objectCollections) objColl.resetTimesActedOn();
         Optional<ActionInterface> action = actionService.getAction(actionOptions);
-        Matches matches = new Matches();
-        matches.setActionDescription(actionDescription);
-        matches.setActionOptions(actionOptions);
         if (action.isEmpty()) {
             Report.println("Not a valid Action.");
-            return matches;
+            return new Matches();
         }
-        return actionExecution.perform(action.get(), actionDescription, actionOptions, matches, objectCollections);
+        return actionExecution.perform(action.get(), actionDescription, actionOptions, objectCollections);
     }
 
     /**
      * The default ActionOptions is a Find Action.
-     * @param stateImageObjects the images to include in the ObjectCollection
+     * @param stateImages the images to include in the ObjectCollection
      * @return the results of the Find Action
      */
-    public Matches find(StateImageObject... stateImageObjects) {
-        return perform(new ActionOptions(), stateImageObjects);
+    public Matches find(StateImage... stateImages) {
+        return perform(new ActionOptions(), stateImages);
     }
 
     /**
@@ -70,13 +67,13 @@ public class Action {
     }
 
     /**
-     * All StateImageObjects are placed in the first ObjectCollection.
+     * All StateImages are placed in the first ObjectCollection.
      * @param actionOptions holds the configuration of the action.
-     * @param stateImageObjects these will be added to a new ObjectCollection.
+     * @param stateImages these will be added to a new ObjectCollection.
      * @return a Matches object with the results of the operation.
      */
-    public Matches perform(ActionOptions actionOptions, StateImageObject... stateImageObjects) {
-        return perform(actionOptions, new ObjectCollection.Builder().withImages(stateImageObjects).build());
+    public Matches perform(ActionOptions actionOptions, StateImage... stateImages) {
+        return perform(actionOptions, new ObjectCollection.Builder().withImages(stateImages).build());
     }
 
     /**
@@ -101,13 +98,13 @@ public class Action {
 
     /**
      * Perform an Action with default options.
-     * All StateImageObjects are placed in the first ObjectCollection.
+     * All StateImages are placed in the first ObjectCollection.
      * @param action the action to perform
-     * @param stateImageObjects these will be added to a new ObjectCollection.
+     * @param stateImages these will be added to a new ObjectCollection.
      * @return a Matches object with the results of the operation.
      */
-    public Matches perform(ActionOptions.Action action, StateImageObject... stateImageObjects) {
-        return perform(new ActionOptions.Builder().setAction(action).build(), stateImageObjects);
+    public Matches perform(ActionOptions.Action action, StateImage... stateImages) {
+        return perform(new ActionOptions.Builder().setAction(action).build(), stateImages);
     }
 
     /**

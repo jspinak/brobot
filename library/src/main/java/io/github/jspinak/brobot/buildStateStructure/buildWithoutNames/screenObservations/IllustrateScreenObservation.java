@@ -27,8 +27,10 @@ public class IllustrateScreenObservation {
     }
 
     public Mat getScreenWithMotionAndImages(ScreenObservation screenObservation) {
-        Mat illustratedScene = illustrateMotion.getSceneWithMotion(
+        Mat illustratedScene;
+        if (screenObservation.getMatches() != null) illustratedScene = illustrateMotion.getSceneWithMotion(
                 screenObservation.getMatches().getSceneAnalysisCollection(), new Scalar(254, 183, 146, 200));
+        else illustratedScene = screenObservation.getScreenshot().clone();
         drawRect.drawRectAroundRegions(illustratedScene, screenObservation.getImageRegions(), babyBlue);
         return illustratedScene;
     }

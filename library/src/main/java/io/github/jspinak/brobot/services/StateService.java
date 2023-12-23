@@ -11,9 +11,9 @@ import java.util.stream.Stream;
  * Saves new States and retrieves States given the state name. StateEnums are typically used for state structures
  *   built with named image files, or manually built state structures. Strings are used for state structures
  *   created at run-time or dynamically evolving state structures.
- * Assigns index values to each StateImageObject that are unique to the entire application.
+ * Assigns index values to each StateImage that are unique to the entire application.
  *   These indices are used with sparse matrices for classification.
- *   If a StateImageObject is not added to the State variable, it will not receive an index and not be
+ *   If a StateImage is not added to the State variable, it will not receive an index and not be
  *   available for classification.
  */
 @Component

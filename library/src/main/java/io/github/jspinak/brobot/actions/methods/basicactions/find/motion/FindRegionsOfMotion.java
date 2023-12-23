@@ -44,15 +44,14 @@ public class FindRegionsOfMotion {
         this.matVisualize = matVisualize;
     }
 
-    public Matches find(ActionOptions actionOptions, List<ObjectCollection> objectCollections) {
-        Matches matches = new Matches();
+    public void find(Matches matches, ActionOptions actionOptions, List<ObjectCollection> objectCollections) {
         int scenes = actionOptions.getTimesToRepeatIndividualAction();
         double pause = actionOptions.getPauseBetweenIndividualActions();
         SceneAnalysisCollection sceneAnalysisCollection = getSceneAnalysisCollection.get(
                 objectCollections, scenes, pause, actionOptions);
         if (sceneAnalysisCollection.getSceneAnalyses().size() < 2) {
             Report.println("Not enough scenes to detect motion");
-            return matches;
+            return;
         }
         //System.out.println("FindRegionsOfMotion: # scenes = " + sceneAnalysisCollection.getSceneAnalyses().size());
         matches.setSceneAnalysisCollection(sceneAnalysisCollection);
@@ -66,7 +65,6 @@ public class FindRegionsOfMotion {
         matchOps.addGenericMatchObjects(dynamicPixelRegions, matches, actionOptions); // this is for the last scene
         matchOps.limitNumberOfMatches(matches, actionOptions);
         matches.setPixelMatches(sceneAnalysisCollection.getResults()); // pixelMatches = dynamic pixels
-        return matches;
     }
 
     /**

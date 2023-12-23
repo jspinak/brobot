@@ -3,7 +3,7 @@ package io.github.jspinak.brobot.imageUtils;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles.ColorCluster;
 import io.github.jspinak.brobot.datatypes.primitives.image.Image;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import org.bytedeco.javacv.*;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.MatVector;
@@ -23,7 +23,7 @@ import static org.bytedeco.opencv.global.opencv_imgproc.COLOR_BGR2HSV;
 import static org.bytedeco.opencv.global.opencv_imgproc.cvtColor;
 
 /**
- * The same methods as in GetImage, but for JavaCV.
+ * The same methods as in GetImageOpenCV, but for JavaCV.
  * JavaCV is compatible with the DL4J libraries, making it a better choice for Brobot than OpenCV.
  * It would be cleaner to migrate all OpenCV code to JavaCV, but this is a lower priority.
  */
@@ -68,12 +68,12 @@ public class GetImageJavaCV {
         return mats;
     }
 
-    public List<Mat> getMatsFromImage(StateImageObject img, ColorCluster.ColorSchemaName colorSchemaName) {
+    public List<Mat> getMatsFromImage(StateImage img, ColorCluster.ColorSchemaName colorSchemaName) {
         if (img.isDynamic()) return getMatsFromDynamicInsideImage(img, colorSchemaName);
         return getMats(img.getImage(), colorSchemaName);
     }
 
-    public List<Mat> getMatsFromDynamicInsideImage(StateImageObject img, ColorCluster.ColorSchemaName colorSchemaName) {
+    public List<Mat> getMatsFromDynamicInsideImage(StateImage img, ColorCluster.ColorSchemaName colorSchemaName) {
         return getMats(img.getDynamicImage().getInside(), colorSchemaName);
     }
 
@@ -117,8 +117,8 @@ public class GetImageJavaCV {
         return mats;
     }
 
-    public Mat getMatFromFile(String patternName, Region region, ColorCluster.ColorSchemaName colorSchemaName) {
-        Mat scene = getMatFromBundlePath(patternName, colorSchemaName);
+    public Mat getMatFromFile(String path, Region region, ColorCluster.ColorSchemaName colorSchemaName) {
+        Mat scene = getMatFromFilename(path, colorSchemaName);
         return scene.apply(region.getJavaCVRect());
     }
 

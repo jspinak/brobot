@@ -40,7 +40,7 @@ public class StateMemory {
 
     public void addActiveState(String activeState, boolean newLine) {
         if (activeStates.contains(activeState)) return;
-        Report.print("+ add "+activeState+" to active states ");
+        if (!activeState.equals("null")) Report.print("+ add "+activeState+" to active states ");
         if (newLine) Report.println();
         activeStates.add(activeState);
         stateService.findByName(activeState).ifPresent(state -> {

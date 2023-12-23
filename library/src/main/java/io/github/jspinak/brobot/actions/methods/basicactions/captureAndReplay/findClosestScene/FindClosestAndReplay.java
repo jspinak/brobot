@@ -11,7 +11,7 @@ import io.github.jspinak.brobot.actions.methods.basicactions.captureAndReplay.re
 import io.github.jspinak.brobot.analysis.Distance;
 import io.github.jspinak.brobot.datatypes.primitives.location.Location;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.reports.Report;
 import org.springframework.stereotype.Component;
 
@@ -41,9 +41,9 @@ public class FindClosestAndReplay {
      * If found, compare with the saved scenes and found objects.
      * Return the timestamp of the scene with the closest match.
      * This will correspond to a series of actions saved in another xml file.
-     * @param stateImageObject object to find
+     * @param stateImage object to find
      */
-    public boolean findClosestAndPerformActions(ActionOptions actionOptions, StateImageObject stateImageObject) {
+    public boolean findClosestAndPerformActions(ActionOptions actionOptions, StateImage stateImage) {
         // if the start of playback is specified, we don't need to find objects on the screen
         double start = actionOptions.getStartPlayback();
         double duration = actionOptions.getPlaybackDuration();
@@ -53,11 +53,11 @@ public class FindClosestAndReplay {
             return true;
         }
         // otherwise, find the best match and compare it to the recorded matches
-        Matches matches = action.perform(actionOptions, stateImageObject);
+        Matches matches = action.perform(actionOptions, stateImage);
         if (matches.isEmpty()) return false;
         SceneObjectCollectionForXML scenesObjects = readXmlScenes.getSceneAndObjects();
-        if (!scenesContainObject(scenesObjects, stateImageObject)) return false;
-        SceneAndObjectsForXML closestMatch = getClosestScene(matches, scenesObjects, stateImageObject);
+        if (!scenesContainObject(scenesObjects, stateImage)) return false;
+        SceneAndObjectsForXML closestMatch = getClosestScene(matches, scenesObjects, stateImage);
         if (closestMatch == null) return false;
         start = Integer.parseInt(closestMatch.getSceneName());
         ReplayCollection replayCollection = getXmlActions.getActionsBetweenTimes(start, start + duration);
@@ -65,23 +65,23 @@ public class FindClosestAndReplay {
         return true;
     }
 
-    private boolean scenesContainObject(SceneObjectCollectionForXML scenesObjects, StateImageObject stateImageObject) {
+    private boolean scenesContainObject(SceneObjectCollectionForXML scenesObjects, StateImage stateImage) {
         return scenesObjects.getScenes().stream()
                 .anyMatch(scene -> scene.getObjectsNames().stream()
-                        .anyMatch(name -> name.equals(stateImageObject.getName())));
+                        .anyMatch(name -> name.equals(stateImage.getName())));
     }
 
-    private int getMatchingStateImageObjectIndex(SceneAndObjectsForXML scene, StateImageObject stateImageObject) {
-        return scene.getObjectsNames().indexOf(stateImageObject.getName());
+    private int getMatchingStateImageObjectIndex(SceneAndObjectsForXML scene, StateImage stateImage) {
+        return scene.getObjectsNames().indexOf(stateImage.getName());
     }
 
     private SceneAndObjectsForXML getClosestScene(Matches matches, SceneObjectCollectionForXML scenesObjects,
-                                                  StateImageObject stateImageObject) {
+                                                  StateImage stateImage) {
         if (matches.getBestLocation().isEmpty()) return null; // this should never happen, we've already checked if matches are empty
         Location bestLocation = matches.getBestLocation().get();
         Report.println("Best match: " + bestLocation.getX() + ", " + bestLocation.getY());
         SceneAndObjectsForXML firstScene = scenesObjects.getScenes().get(0);
-        int matchingStateImageObjectIndex = getMatchingStateImageObjectIndex(firstScene, stateImageObject);
+        int matchingStateImageObjectIndex = getMatchingStateImageObjectIndex(firstScene, stateImage);
         double closestScene = 1000000;
         SceneAndObjectsForXML closestSceneObject = null;
         for (SceneAndObjectsForXML scObj : scenesObjects.getScenes()) {

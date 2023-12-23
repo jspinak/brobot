@@ -78,7 +78,7 @@ public class OffsetOps {
 
     private boolean areCollectionsEmpty(List<ObjectCollection> objectCollections) {
         for (ObjectCollection objColl : objectCollections) {
-            if (!objColl.empty()) return false;
+            if (!objColl.isEmpty()) return false;
         }
         return true;
     }

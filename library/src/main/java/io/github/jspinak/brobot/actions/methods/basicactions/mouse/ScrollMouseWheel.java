@@ -19,9 +19,7 @@ public class ScrollMouseWheel implements ActionInterface {
         this.mouseWheel = mouseWheel;
     }
 
-    public Matches perform(ActionOptions actionOptions, ObjectCollection... objectCollections) {
-        Matches matches = new Matches();
+    public void perform(Matches matches, ActionOptions actionOptions, ObjectCollection... objectCollections) {
         mouseWheel.scroll(actionOptions);
-        return matches;
     }
 }

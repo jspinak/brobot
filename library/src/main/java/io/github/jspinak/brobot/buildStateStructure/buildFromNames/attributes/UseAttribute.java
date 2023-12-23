@@ -2,7 +2,7 @@ package io.github.jspinak.brobot.buildStateStructure.buildFromNames.attributes;
 
 import io.github.jspinak.brobot.buildStateStructure.buildFromNames.findImages.ImageGroup;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import org.sikuli.script.Match;
 import org.springframework.stereotype.Component;
 
@@ -26,7 +26,7 @@ public class UseAttribute {
         this.getAttribute = getAttribute;
     }
 
-    public List<AttributeTypes.Attribute> processAttributes(StateImageObject image, ImageGroup imageGroup,
+    public List<AttributeTypes.Attribute> processAttributes(StateImage image, ImageGroup imageGroup,
                                                             List<Match> matches, int page) {
         activeAttributes = new ArrayList<>();
         appears(image, matches, page);
@@ -42,14 +42,14 @@ public class UseAttribute {
         return activeAttributes;
     }
 
-    private void appears(StateImageObject image, List<Match> matches, int page) {
+    private void appears(StateImage image, List<Match> matches, int page) {
         if (getAttribute.isPresent(image, page, AttributeTypes.Attribute.APPEARS)) {
             activeAttributes.add(APPEARS);
             setPageResult(image, page, APPEARS, !matches.isEmpty());
         }
     }
 
-    private void appearsExclusively(StateImageObject image, List<Match> matches, int page) {
+    private void appearsExclusively(StateImage image, List<Match> matches, int page) {
         Set<Integer> pages = image.getAttributes().getScreenshots().
                 get(APPEARS_EXCLUSIVELY).getPagesActive();
         // no pages are set for the image to appear exclusively
@@ -65,14 +65,14 @@ public class UseAttribute {
         setPageResult(image, page, DOESNT_APPEAR, matches.isEmpty());
     }
 
-    private void doesntAppear(StateImageObject image, List<Match> matches, int page) {
+    private void doesntAppear(StateImage image, List<Match> matches, int page) {
         if (getAttribute.isPresent(image, page, DOESNT_APPEAR)) {
             activeAttributes.add(DOESNT_APPEAR);
             setPageResult(image, page, DOESNT_APPEAR, matches.isEmpty());
         }
     }
 
-    private void multipleMatches(StateImageObject image, List<Match> matches, int page) {
+    private void multipleMatches(StateImage image, List<Match> matches, int page) {
         if (!getAttribute.isPresent(image, page, MULTIPLE_MATCHES)) {
             activeAttributes.add(SINGLE_MATCH);
             setPageResult(image, page, SINGLE_MATCH, matches.size() < 2);
@@ -82,7 +82,7 @@ public class UseAttribute {
         }
     }
 
-    private void variableLocation(StateImageObject image, List<Match> matches, int page) {
+    private void variableLocation(StateImage image, List<Match> matches, int page) {
         boolean isVariable = getAttribute.isPresent(image, page, VARIABLE_LOCATION);
         if (isVariable) {
             activeAttributes.add(VARIABLE_LOCATION);
@@ -98,7 +98,7 @@ public class UseAttribute {
         setPageResult(image, page, FIXED_LOCATION, sameLocation);
     }
 
-    private void define(StateImageObject image, List<Match> matches, int page) {
+    private void define(StateImage image, List<Match> matches, int page) {
         defineRegion(image, matches, page, DEFINE);
     }
 
@@ -106,7 +106,7 @@ public class UseAttribute {
     Only defines once. Aborts if the Image SearchRegion has already been defined.
     Used with DEFINE and REGION Attributes.
      */
-    private void defineRegion(StateImageObject image, List<Match> matches, int page,
+    private void defineRegion(StateImage image, List<Match> matches, int page,
                               AttributeTypes.Attribute attribute) {
         if (!getAttribute.isPresent(image, page, attribute)) return;
         activeAttributes.add(attribute);
@@ -122,7 +122,7 @@ public class UseAttribute {
      previous one.
      This Image's match is sent to the ImageGroup for further processing.
      */
-    private void groupDefine(StateImageObject image,
+    private void groupDefine(StateImage image,
                              List<Match> matches, int page, ImageGroup imageGroup) {
         if (!getAttribute.isPresent(image, page, GROUP_DEFINE)) return;
         activeAttributes.add(GROUP_DEFINE);
@@ -133,22 +133,22 @@ public class UseAttribute {
 
     /*
      The Region Attribute is meant to create a StateRegion with the match from an image.
-     The StateImageObject will not be written to the State Structure; instead,
+     The StateImage will not be written to the State Structure; instead,
      the StateRegion will be written in the corresponding State.
      This method finds the match and stores the Region as the SearchRegion of the
-     StateImageObject. Later, this SearchRegion will be retrieved in order to write
+     StateImage. Later, this SearchRegion will be retrieved in order to write
      the StateRegion.
      */
-    private void region(StateImageObject image, List<Match> matches, int page) {
+    private void region(StateImage image, List<Match> matches, int page) {
         defineRegion(image, matches, page, LOCATION);
     }
 
-    private void location(StateImageObject image, List<Match> matches, int page) {
+    private void location(StateImage image, List<Match> matches, int page) {
         defineRegion(image, matches, page, REGION);
     }
 
     // sets the Attribute result
-    private void setPageResult(StateImageObject image, int page,
+    private void setPageResult(StateImage image, int page,
                                AttributeTypes.Attribute attribute, boolean result) {
         image.getAttributes().getScreenshots().get(attribute).setPageResult(page, result);
     }
@@ -158,7 +158,7 @@ public class UseAttribute {
         return matches.get(0);
     }
 
-    private void transfer(StateImageObject image, List<Match> matches, int page) {
+    private void transfer(StateImage image, List<Match> matches, int page) {
         defineRegion(image, matches, page, TRANSFER);
     }
 }

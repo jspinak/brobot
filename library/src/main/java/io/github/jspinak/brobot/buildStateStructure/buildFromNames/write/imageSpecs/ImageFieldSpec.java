@@ -4,7 +4,7 @@ import com.squareup.javapoet.FieldSpec;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.datatypes.primitives.match.MatchSnapshot;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import org.springframework.stereotype.Component;
 
 import javax.lang.model.element.Modifier;
@@ -14,7 +14,7 @@ import java.util.List;
 import static io.github.jspinak.brobot.buildStateStructure.buildFromNames.attributes.AttributeTypes.Attribute.SINGLE_MATCH;
 
 /**
- * Writes Java code for a StateImageObject
+ * Writes Java code for a StateImage
  */
 @Component
 public class ImageFieldSpec {
@@ -27,7 +27,7 @@ public class ImageFieldSpec {
         this.snapshotsAsCode = snapshotsAsCode;
     }
 
-    public FieldSpec getCode(StateImageObject img) {
+    public FieldSpec getCode(StateImage img) {
         initializerArgs = new ArrayList<>();
         String imageName = img.getAttributes().getImageName();
         snapshotsAsCode.processSnapshots(img);
@@ -45,14 +45,14 @@ public class ImageFieldSpec {
                 searchRegion +
                 snapshotsAsCode.getBody() +
                 "\n\t.build()";
-        initializerArgs.add(StateImageObject.Builder.class);
+        initializerArgs.add(StateImage.Builder.class);
         initializerArgs.add(imageName);
         initializerArgs.addAll(img.getAttributes().getFilenames());
         if (snapshotsAsCode.isAddClass()) {
             initializerArgs.add(MatchSnapshot.Builder.class);
             initializerArgs.add(ActionOptions.Find.class);
         }
-        return FieldSpec.builder(StateImageObject.class, imageName)
+        return FieldSpec.builder(StateImage.class, imageName)
                 .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
                 .initializer(fullBody, initializerArgs.toArray())
                 .build();

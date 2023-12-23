@@ -53,7 +53,7 @@ public class ClickUntil implements ActionInterface {
      * @param objectCollections holds the objects to act on
      * @return Matches from the last Find operation.
      */
-    public Matches perform(ActionOptions actionOptions, ObjectCollection... objectCollections) {
+    public void perform(Matches matches, ActionOptions actionOptions, ObjectCollection... objectCollections) {
         ObjectCollection coll1 = objectCollections[0]; //the 'click' collection
         ObjectCollection coll2 = objectCollections[0]; //the 'until' collection
         if (objectCollections.length > 1) coll2 = objectCollections[1];
@@ -65,7 +65,7 @@ public class ClickUntil implements ActionInterface {
         MultipleActionsObject mao = new MultipleActionsObject();
         mao.addActionOptionsObjectCollectionPair(click, coll1);
         mao.addActionOptionsObjectCollectionPair(untilAction, coll2);
-        return multipleBasicActions.perform(mao);
+        multipleBasicActions.perform(mao);
     }
 
     /**

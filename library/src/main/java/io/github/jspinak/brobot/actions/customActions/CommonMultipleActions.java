@@ -8,7 +8,7 @@ import io.github.jspinak.brobot.actions.methods.sikuliWrappers.mouse.ClickType;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import org.springframework.stereotype.Component;
 
 import static io.github.jspinak.brobot.actions.actionOptions.ActionOptions.Action.*;
@@ -35,7 +35,7 @@ public class CommonMultipleActions {
      */
     public boolean rightClickAndMoveUntilVanishes(int timesToClick, double pauseBetweenClicks,
                                                   double pauseBeforeClick, double pauseAfterMove,
-                                                  StateImageObject image, int xMove, int yMove) {
+                                                  StateImage image, int xMove, int yMove) {
         ActionOptions moveBeforeClick = new ActionOptions.Builder()
                 .setAction(MOVE)
                 .setPauseAfterEnd(pauseBeforeClick)

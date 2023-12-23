@@ -2,7 +2,7 @@ package io.github.jspinak.brobot.illustratedHistory.draw;
 
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles.ColorInfo;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.illustratedHistory.IllustrationFilename;
 import io.github.jspinak.brobot.imageUtils.GetImageJavaCV;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -31,14 +31,14 @@ public class DrawColorProfile {
         this.illustrationFilename = illustrationFilename;
     }
 
-    public Mat getImagesAndProfileMat(List<StateImageObject> imgs) {
+    public Mat getImagesAndProfileMat(List<StateImage> imgs) {
         int maxFiles = getMaxFilenames(imgs);
         averageColorX = maxFiles * (imgsWH + spaceBetween);
         int frameWidth = averageColorX + imgsWH + spaceBetween;
         int frameHeight = (imgsWH + spaceBetween) * imgs.size();
         Mat frame = new Mat(frameHeight, frameWidth, 16, new Scalar(0, 0, 0, 0));
         int y = 0;
-        for (StateImageObject img : imgs) {
+        for (StateImage img : imgs) {
             drawImage(frame, img, y);
             drawProfiles(frame, img, y);
             y += imgsWH + spaceBetween;
@@ -46,19 +46,19 @@ public class DrawColorProfile {
         return frame;
     }
 
-    public void drawImagesAndProfiles(List<StateImageObject> imgs) {
+    public void drawImagesAndProfiles(List<StateImage> imgs) {
         Mat frame = getImagesAndProfileMat(imgs);
         String savePath = illustrationFilename.getFilename(ActionOptions.Action.CLASSIFY,"colorProfiles");
         imwrite(savePath, frame);
     }
 
-    private int getMaxFilenames(List<StateImageObject> imgs) {
+    private int getMaxFilenames(List<StateImage> imgs) {
         int maxFiles = 1;
-        for (StateImageObject img : imgs) maxFiles = Math.max(maxFiles, img.getImage().getFilenames().size());
+        for (StateImage img : imgs) maxFiles = Math.max(maxFiles, img.getImage().getFilenames().size());
         return maxFiles;
     }
 
-    private void drawImage(Mat frame, StateImageObject img, int y) {
+    private void drawImage(Mat frame, StateImage img, int y) {
         int amountOfFiles = img.getImage().getFilenames().size();
         for (int i=0; i<amountOfFiles; i++) {
             String filename = img.getImage().getFilenames().get(i);
@@ -75,7 +75,7 @@ public class DrawColorProfile {
         }
     }
 
-    private void drawProfiles(Mat frame, StateImageObject img, int y) {
+    private void drawProfiles(Mat frame, StateImage img, int y) {
         Rect rect = new Rect(averageColorX, y, imgsWH, imgsWH);
         Mat imgMat = frame.apply(rect);
         img.getColorCluster().getMat(BGR, ColorInfo.ColorStat.MEAN, rect.size()).copyTo(imgMat);

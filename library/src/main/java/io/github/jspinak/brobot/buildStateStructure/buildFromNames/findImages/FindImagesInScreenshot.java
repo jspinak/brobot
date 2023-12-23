@@ -7,7 +7,7 @@ import io.github.jspinak.brobot.buildStateStructure.buildFromNames.attributes.Pr
 import io.github.jspinak.brobot.buildStateStructure.buildFromNames.attributes.UseAttribute;
 import io.github.jspinak.brobot.buildStateStructure.buildFromNames.babyStates.BabyState;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import org.sikuli.script.Finder;
 import org.sikuli.script.Match;
 import org.springframework.stereotype.Component;
@@ -51,7 +51,7 @@ public class FindImagesInScreenshot {
         babyState.getImages().forEach(image -> printAttribute.byImageAndPage(image, page));
     }
 
-    public List<Match> findIn(StateImageObject image, String filename, int page, ImageGroup imageGroup) {
+    public List<Match> findIn(StateImage image, String filename, int page, ImageGroup imageGroup) {
         List<Match> matches = getMatches(image, filename);
         image.getAttributes().getMatches().put(page, matches);
         List<AttributeTypes.Attribute> activeAttributes =
@@ -60,7 +60,7 @@ public class FindImagesInScreenshot {
         return matches;
     }
 
-    private List<Match> getMatches(StateImageObject image, String filename) {
+    private List<Match> getMatches(StateImage image, String filename) {
         File file = new File(BrobotSettings.screenshotPath + filename);
         String path = file.getAbsolutePath();
         List<Match> matches = new ArrayList<>();

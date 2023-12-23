@@ -4,8 +4,7 @@ import com.squareup.javapoet.*;
 import io.github.jspinak.brobot.buildStateStructure.buildFromNames.write.locationSpecs.LocationFieldSpec;
 import io.github.jspinak.brobot.buildStateStructure.buildFromNames.write.regionSpecs.RegionFieldSpec;
 import io.github.jspinak.brobot.buildStateStructure.buildFromNames.write.imageSpecs.ImageFieldSpec;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
-import lombok.Getter;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import org.springframework.stereotype.Component;
 
 import javax.lang.model.element.Modifier;
@@ -32,7 +31,7 @@ public class WriteStateClass {
         this.locationFieldSpec = locationFieldSpec;
     }
 
-    public JavaFile write(Set<StateImageObject> stateImages,
+    public JavaFile write(Set<StateImage> stateImages,
                           String enumName, String baseClassName, String packageName,
                           ClassName enumClass, String stateClassVar) {
         TypeSpec enumType = stateFieldSpec.getEnum(enumName);

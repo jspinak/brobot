@@ -77,6 +77,7 @@ public class IllustrationManager {
             if (actionOptions.getAction() == MOVE) draw.drawMove(ill, matches); // draw the move on the scenes
             if (actionOptions.getAction() == DRAG) draw.drawDrag(ill, matches); // draw the drag on the scenes
             if (actionOptions.getAction() == CLICK) draw.drawClick(ill, matches); // draw the click on the scenes
+            if (actionOptions.getAction() == DEFINE) draw.drawDefinedRegion(ill, matches);
             sidebar.drawSidebars(ill, matches, actionOptions, sceneAnalysis.getMatchList()); // draw the sidebars
             sidebar.mergeSceneAndSidebar(ill); // merge the scene and the sidebar
             if (showClassesMat(actionOptions)) {

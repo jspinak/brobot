@@ -1,7 +1,7 @@
 package io.github.jspinak.brobot.buildStateStructure.buildFromNames.write.imageSpecs;
 
 import io.github.jspinak.brobot.datatypes.primitives.match.MatchSnapshot;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import lombok.Getter;
 import org.sikuli.script.Match;
 import org.springframework.stereotype.Component;
@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 /**
- * Writes Java code for MatchSnapshots for a single StateImageObject.
+ * Writes Java code for MatchSnapshots for a single StateImage.
  *
  * Snapshots are registered for every screenshot. This could produce a lot
  * of Snapshots, and we don't want to add all of them to our code.
@@ -24,7 +24,7 @@ public class SnapshotsAsCode {
     private String body;
     private boolean addClass;
 
-    public void processSnapshots(StateImageObject image) {
+    public void processSnapshots(StateImage image) {
         System.out.println("add snapshot: "+image.getName()+" "+image.getMatchHistory().getSnapshots().size());
         StringBuilder str = new StringBuilder();
         addClass = false;

@@ -57,9 +57,16 @@ public class TransitionImage {
         addTextFromMatch(match.getText());
     }
 
-    public boolean isSameWordGroup(Match match, int minWidthBetweenImages) {
+    /**
+     * Evaluates the new word match with respect to the current word region.
+     * @param match the new word match
+     * @param minDist a minimum distance measure for various comparison metrics
+     * @return true if the new word match should be part of the current word region.
+     */
+    public boolean isSameWordGroup(Match match, int minDist) {
         if (region == null) return true; // region hasn't been created yet
-        int distance = match.x - region.getX2();
-        return match.x - region.x > 0 && distance < minWidthBetweenImages;
+        int xDist = match.x - region.getX2(); // x-distance between end of the current region and the start of the new word match
+        int yDist = match.y - region.y; // y-distance between the beginning of both region and match
+        return match.x - region.x > 0 && xDist < minDist && Math.abs(yDist) < minDist;
     }
 }

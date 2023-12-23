@@ -1,10 +1,9 @@
 package io.github.jspinak.brobot.actions.composites.methods.drag;
 
 import io.github.jspinak.brobot.actions.actionExecution.ActionInterface;
+import io.github.jspinak.brobot.actions.actionExecution.MatchesInitializer;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.Find;
-import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.GetSceneAnalysisCollection;
-import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.SceneAnalysisCollection;
 import io.github.jspinak.brobot.actions.methods.sikuliWrappers.DragLocation;
 import io.github.jspinak.brobot.datatypes.primitives.location.Location;
 import io.github.jspinak.brobot.datatypes.primitives.match.MatchObject;
@@ -16,19 +15,17 @@ import org.springframework.stereotype.Component;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.Arrays;
 
 @Component
 public class DragSimple implements ActionInterface {
+    private final DragLocation dragLocation;
+    private final Find find;
+    private final MatchesInitializer matchesInitializer;
 
-    private final GetSceneAnalysisCollection getSceneAnalysisCollection;
-    private DragLocation dragLocation;
-    private Find find;
-
-    public DragSimple(GetSceneAnalysisCollection getSceneAnalysisCollection, DragLocation dragLocation, Find find) {
-        this.getSceneAnalysisCollection = getSceneAnalysisCollection;
+    public DragSimple(DragLocation dragLocation, Find find, MatchesInitializer matchesInitializer) {
         this.dragLocation = dragLocation;
         this.find = find;
+        this.matchesInitializer = matchesInitializer;
     }
 
     /**
@@ -41,13 +38,9 @@ public class DragSimple implements ActionInterface {
      * the object is used as the end position.
      * @param actionOptions the options for the drag
      * @param objectCollections the object collections
-     * @return the matches
      */
-    public Matches perform(ActionOptions actionOptions, ObjectCollection... objectCollections) {
-        Matches matches = new Matches();
-        SceneAnalysisCollection sceneAnalysisCollection = getSceneAnalysisCollection.
-                get(Arrays.asList(objectCollections), actionOptions);
-        matches.setSceneAnalysisCollection(sceneAnalysisCollection);
+    public void perform(Matches matches, ActionOptions actionOptions, ObjectCollection... objectCollections) {
+        matchesInitializer.init(actionOptions, objectCollections);
         ActionOptions findFrom = new ActionOptions.Builder()
                 .setAction(ActionOptions.Action.FIND)
                 .setMinSimilarity(actionOptions.getSimilarity())
@@ -64,10 +57,9 @@ public class DragSimple implements ActionInterface {
                 .build();
         setStartLoc(findFrom, matches, objectCollections);
         setEndLoc(findTo, matches, objectCollections);
-        if (matches.size() < 2) return matches;
+        if (matches.size() < 2) return;
         dragLocation.drag(matches.getMatchObjects().get(0).getLocation(),
                 matches.getMatchObjects().get(1).getLocation(), actionOptions);
-        return matches;
     }
 
     /*
@@ -79,19 +71,18 @@ public class DragSimple implements ActionInterface {
             return;
         }
         ObjectCollection objColl = objectCollections[0]; // use only the first object collection
-        if (objColl.getStateImages().size() > 0) { // use only the first object
-            Matches findMatches = find.perform(actionOptions, objColl.getStateImages().get(0).asObjectCollection());
-            if (findMatches.isEmpty()) return;
-            matches.addMatchObjects(findMatches);
+        if (!objColl.getStateImages().isEmpty()) { // use only the first object
+            find.perform(matches, actionOptions, objColl.getStateImages().get(0).asObjectCollection());
+            if (matches.isEmpty()) return;
             return;
         }
-        if (objColl.getStateRegions().size() > 0) {
+        if (!objColl.getStateRegions().isEmpty()) {
             Location loc = objColl.getStateRegions().get(0).getSearchRegion().getLocation();
             loc.setX(loc.getX() + actionOptions.getAddX());
             loc.setY(loc.getY() + actionOptions.getAddY());
             addMatchObject(loc, matches);
         }
-        if (objColl.getStateLocations().size() > 0) {
+        if (!objColl.getStateLocations().isEmpty()) {
             Location loc = objColl.getStateLocations().get(0).getLocation();
             loc.setX(loc.getX() + actionOptions.getAddX());
             loc.setY(loc.getY() + actionOptions.getAddY());
@@ -112,9 +103,8 @@ public class DragSimple implements ActionInterface {
         ObjectCollection objColl = objectCollections[0]; // use only the first object collection
         int objectIndexNeeded = 1;
         if (objColl.getStateImages().size() > 1) { // use only the second object
-            Matches findMatches = find.perform(actionOptions, objColl.getStateImages().get(1).asObjectCollection());
-            if (findMatches.isEmpty()) return;
-            matches.addMatchObjects(findMatches);
+            find.perform(matches, actionOptions, objColl.getStateImages().get(1).asObjectCollection());
+            if (matches.isEmpty()) return;
             return;
         }
         if (objColl.getStateImages().size() == 1) objectIndexNeeded = 0;

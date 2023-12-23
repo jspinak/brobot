@@ -9,7 +9,7 @@ import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
  */
 public interface ActionInterface {
 
-    Matches perform(
+    void perform(Matches matches,
             ActionOptions actionOptions,
             ObjectCollection... objectCollections);
 }

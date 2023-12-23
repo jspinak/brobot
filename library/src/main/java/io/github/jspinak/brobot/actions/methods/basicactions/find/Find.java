@@ -1,16 +1,22 @@
 package io.github.jspinak.brobot.actions.methods.basicactions.find;
 
 import io.github.jspinak.brobot.actions.actionExecution.ActionInterface;
+import io.github.jspinak.brobot.actions.actionExecution.MatchesInitializer;
 import io.github.jspinak.brobot.actions.actionExecution.actionLifecycle.ActionLifecycleManagement;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
+import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.GetScenes;
+import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.Scene;
+import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.SceneAnalysis;
+import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.SceneAnalysisCollection;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles.SetAllProfiles;
 import io.github.jspinak.brobot.actions.methods.sikuliWrappers.find.UseDefinedRegion;
+import io.github.jspinak.brobot.datatypes.primitives.image.StateImage_;
+import io.github.jspinak.brobot.datatypes.primitives.match.MatchObject_;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImageObject.StateImageObject;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.manageStates.StateMemory;
 import io.github.jspinak.brobot.mock.MockStatus;
-import io.github.jspinak.brobot.reports.Report;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -51,13 +57,15 @@ public class Find implements ActionInterface {
     private SetAllProfiles setAllProfiles;
     private ActionLifecycleManagement actionLifecycleManagement;
     private OffsetOps offsetOps;
-
-    int actionId;
+    private final FindImageOrRIP findImageOrRIP;
+    private final GetScenes getScenes;
+    private final MatchesInitializer matchesInitializer;
 
     public Find(FindFunctions findFunctions, StateMemory stateMemory, MockStatus mockStatus,
                 AddNonImageObjects addNonImageObjects, AdjustMatches adjustMatches,
                 UseDefinedRegion useDefinedRegion, SetAllProfiles setAllProfiles,
-                ActionLifecycleManagement actionLifecycleManagement, OffsetOps offsetOps) {
+                ActionLifecycleManagement actionLifecycleManagement, OffsetOps offsetOps,
+                FindImageOrRIP findImageOrRIP, GetScenes getScenes, MatchesInitializer matchesInitializer) {
         this.findFunctions = findFunctions;
         this.stateMemory = stateMemory;
         this.mockStatus = mockStatus;
@@ -67,6 +75,9 @@ public class Find implements ActionInterface {
         this.setAllProfiles = setAllProfiles;
         this.actionLifecycleManagement = actionLifecycleManagement;
         this.offsetOps = offsetOps;
+        this.findImageOrRIP = findImageOrRIP;
+        this.getScenes = getScenes;
+        this.matchesInitializer = matchesInitializer;
     }
 
     /**
@@ -79,29 +90,27 @@ public class Find implements ActionInterface {
      * - Matches.saveSnapshots
      * - Wait.pauseAfterEnd
      */
-    public Matches perform(ActionOptions actionOptions, ObjectCollection... objectCollections) {
-        actionId = actionLifecycleManagement.newActionLifecycle(actionOptions);
+    public void perform(Matches matches, ActionOptions actionOptions, ObjectCollection... objectCollections) {
+        //int actionId = actionLifecycleManagement.newActionLifecycle(actionOptions);
         createColorProfilesWhenNecessary(actionOptions, objectCollections);
-        Matches matches = new Matches();
         matches.setMaxMatches(actionOptions.getMaxMatchesToActOn());
         offsetOps.addOffsetAsOnlyMatch(List.of(objectCollections), matches, actionOptions, true);
-        if (objectCollections.length == 0) return matches;
-        getImageMatches(actionOptions, matches, objectCollections);
+        if (objectCollections.length == 0) return;
+        getImageMatches(matches, actionOptions, objectCollections);
         if (matches.hasImageMatches()) stateMemory.adjustActiveStatesWithMatches(matches);
         Matches nonImageMatches = addNonImageObjects.getOtherObjectsDirectlyAsMatchObjects(objectCollections[0]);
         matches.addMatchObjects(nonImageMatches);
         matches.getMatches().forEach(m -> adjustMatches.adjust(m, actionOptions));
         offsetOps.addOffsetAsLastMatch(matches, actionOptions);
-        return matches;
     }
 
     private void createColorProfilesWhenNecessary(ActionOptions actionOptions, ObjectCollection... objectCollections) {
         if (!actionOptions.getFindActions().contains(ActionOptions.Find.COLOR)) return;
-        List<StateImageObject> imgs = new ArrayList<>();
+        List<StateImage> imgs = new ArrayList<>();
         if (objectCollections.length >= 1) imgs.addAll(objectCollections[0].getStateImages());
         if (objectCollections.length >= 2) imgs.addAll(objectCollections[1].getStateImages());
-        List<StateImageObject> imagesWithoutColorProfiles = new ArrayList<>();
-        for (StateImageObject img : imgs) {
+        List<StateImage> imagesWithoutColorProfiles = new ArrayList<>();
+        for (StateImage img : imgs) {
             if (img.getDynamicImage().getInsideKmeansProfiles() == null) {
                 imagesWithoutColorProfiles.add(img);
             }
@@ -126,13 +135,61 @@ public class Find implements ActionInterface {
         Execute the find until the exit condition is achieved. For example, a Find.VANISH will execute until
         the images are no longer found. The results for each execution are added to the Matches object.
          */
-        while (actionLifecycleManagement.continueActionIfNotFound(actionId, matches)) {
+        while (actionLifecycleManagement.continueActionIfNotFound(matches)) {
             //Report.println(""+ actionLifecycleManagement.getCompletedRepetitions(actionId));
             mockStatus.addMockPerformed();
-            Matches matches1 = findFunctions.get(actionOptions).apply(actionOptions, List.of(objectCollections));
+            Matches matches1 = new Matches();
+            findFunctions.get(actionOptions).accept(matches1, actionOptions, List.of(objectCollections));
             matches.addAllResults(matches1);
-            actionLifecycleManagement.incrementCompletedRepetitions(actionId);
+            actionLifecycleManagement.incrementCompletedRepetitions(matches.getActionId());
         }
+    }
+
+    /**
+     * The ActionLifecycleManagement takes care of the different Find types during execution.
+     * @param actionOptions the action's options
+     * @param objectCollections all objects to use with this action
+     * @return the matches
+     */
+    private Matches getImageMatches(Matches matches, ActionOptions actionOptions,
+                                    ObjectCollection... objectCollections) {
+        if (actionOptions.isUseDefinedRegion()) {
+            matches.addAllResults(useDefinedRegion.useRegion(objectCollections[0]));
+            return matches;
+        }
+        /*
+        Find.EACH requires a Matches object for each image. For example, if there are 3 images, Find.EACH will
+        return 3 MatchObjects.
+         */
+        List<Matches> matchesList = new ArrayList<>();
+        List<StateImage_> stateImages = objectCollections[0].getStateImage_s();
+        stateImages.forEach(sI -> matchesList.add(new Matches()));
+        /*
+        Execute the find until the exit condition is achieved. For example, a Find.VANISH will execute until
+        the images are no longer found. The results for each execution are added to the Matches object.
+         */
+        Matches allMatches = new Matches();
+        while (actionLifecycleManagement.continueActionIfNotFound(matches)) {
+            List<Scene> scenes = getScenes.getScenes(actionOptions, List.of(objectCollections), 1, 0);
+            List<MatchObject_> matchesObjects = findImageOrRIP.find_(matches, actionOptions, stateImages, scenes, matchesList);
+            scenes.forEach(scene -> {
+                SceneAnalysis sceneAnalysis = new SceneAnalysis(scene);
+                sceneAnalysis.setMatchList(matches.getMatches());
+                matches.getSceneAnalysisCollection().add(sceneAnalysis);
+            });
+            matchesObjects.forEach(allMatches::add);
+            actionLifecycleManagement.incrementCompletedRepetitions(matches.getActionId());
+        }
+        if (actionOptions.getFind() == ActionOptions.Find.BEST || actionOptions.getFind() == ActionOptions.Find.FIRST) {
+            allMatches.getBestMatch().ifPresent(matches::add);
+        }
+        if (actionOptions.getFind() == ActionOptions.Find.ALL) {
+            matchesList.forEach(matches::addMatchObjects);
+        }
+        if (actionOptions.getFind() == ActionOptions.Find.EACH) {
+            matchesList.forEach(m -> m.getBestMatch().ifPresent(matches::add));
+        }
+        return matches;
     }
 
 }

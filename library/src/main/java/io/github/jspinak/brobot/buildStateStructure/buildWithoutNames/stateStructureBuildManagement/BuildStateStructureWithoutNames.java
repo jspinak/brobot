@@ -9,6 +9,7 @@ import io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.screenObse
 import io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.screenTransitions.FindScreen;
 import io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.screenTransitions.FindTransition;
 import io.github.jspinak.brobot.datatypes.primitives.image.Image;
+import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import org.springframework.stereotype.Component;
 
@@ -46,7 +47,7 @@ public class BuildStateStructureWithoutNames {
      * all screenshots have been checked.
      * The usable boundary is set by the inner boundaries of the included images.
      */
-    public void automateStateStructure(Image topLeftBoundary, Image bottomRightBoundary) {
+    public void automateStateStructure(Pattern topLeftBoundary, Pattern bottomRightBoundary) {
         Region usableArea = getUsableArea.getBoundariesFromExcludedImages(topLeftBoundary, bottomRightBoundary);
         action.perform(ActionOptions.Action.HIGHLIGHT, usableArea);
         getScreenObservation.setUsableArea(usableArea);
