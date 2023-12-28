@@ -1,0 +1,162 @@
+package io.github.jspinak.brobot.datatypes.primitives.match;
+
+import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.Scene;
+import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
+import io.github.jspinak.brobot.datatypes.primitives.location.Location;
+import io.github.jspinak.brobot.datatypes.primitives.location.Position;
+import io.github.jspinak.brobot.datatypes.primitives.region.Region;
+import io.github.jspinak.brobot.datatypes.state.stateObject.StateObject;
+import lombok.Getter;
+import lombok.Setter;
+import org.bytedeco.opencv.opencv_core.Mat;
+import org.bytedeco.opencv.opencv_core.Rect;
+
+import java.time.LocalDateTime;
+
+/**
+ * Simplified version of the MatchObject of versions 1.0.6 and earlier.
+ * Removed: action duration
+ * Simplified: Text is a String and not a Text object.
+ * Replaced:
+ * - StateImage with Pattern. This is more granular, since a find action searches for Pattern objects.
+ * - sceneName with scene.
+ *
+ *  * Match is used to store information about new Pattern matches. It includes:
+ *  *   The SikuliX Match
+ *  *   The String found during text detection
+ *  *   The StateObject used in the Find operation
+ *  *   The time the MatchObject was created
+ *  *
+ *  *   This object is similar to MatchSnapshot but has the following differences:
+ *  *     Match objects always have successful matches, whereas Snapshots can have failed matches.
+ *  *     Snapshots are contained within Image objects and StateRegions. Match objects include
+ *  *       a StateObject as a variable.
+ *  *     Match objects have only one match, as opposed to Snapshots, which can have
+ *  *       multiple Match objects.
+ */
+@Getter
+@Setter
+public class Match extends org.sikuli.script.Match {
+    /*
+    For simplicity, one String is used to represent text here. While it may be a stochastic variable (text read from
+    the screen may differ at different readings), the processing of the text read can be performed before creating
+    a MatchObject. If an action has multiple iterations, each can be saved as a Match with a single String for text.
+     */
+    private String text;
+    private Pattern pattern;
+    private StateObject stateObject;
+    private Mat histogram;
+    private Scene scene;
+    /*
+    The score is used for classification and other actions that rank Match objects.
+     */
+    private double score;
+    private LocalDateTime timeStamp;
+    // the old MatchObject had `private double duration;`
+
+    public Match() {}
+
+    public Match(org.sikuli.script.Match match) {
+        super(match);
+    }
+
+    public Match(Region region) {
+        super(region.toMatch());
+    }
+
+    public Match(int x, int y, int w, int h) {
+        super(new org.sikuli.script.Match(new org.sikuli.script.Region(x, y, w, h), .99));
+    }
+
+    public Location getLocation() {
+        if (pattern == null) {
+            Position tempPosition = new Position(50,50);
+            return new Location(this, tempPosition);
+        }
+        return new Location(this, pattern.getPosition());
+    }
+
+    public int compareByScore(Match m) {
+        return (int)(this.score - m.getScore());
+    }
+
+    public int size() {
+        if (pattern == null) return 0;
+        return pattern.w()*pattern.h();
+    }
+
+    public static class Builder {
+        private org.sikuli.script.Match match;
+        private String text;
+        private Pattern pattern;
+        private StateObject stateObject;
+        private Mat histogram;
+        private Scene scene;
+        private double score;
+        private LocalDateTime timeStamp;
+
+        public Builder setMatch(org.sikuli.script.Match match) {
+            this.match = match;
+            return this;
+        }
+
+        public Builder setMatch(Region region) {
+            this.match = new org.sikuli.script.Match(region, .99);
+            return this;
+        }
+
+        public Builder setMatch(Rect rect) {
+            this.match = new org.sikuli.script.Match(new Region(rect), .99);
+            return this;
+        }
+
+        public Builder setMatch(int x, int y, int w, int h) {
+            this.match = new org.sikuli.script.Match(new Region(x, y, w, h), .99);
+            return this;
+        }
+
+        public Builder setText(String text) {
+            this.text = text;
+            return this;
+        }
+
+        public Builder setPattern(Pattern pattern) {
+            this.pattern = pattern;
+            return this;
+        }
+
+        public Builder setStateObject(StateObject stateObject) {
+            this.stateObject = stateObject;
+            return this;
+        }
+
+        public Builder setHistogram(Mat histogram) {
+            this.histogram = histogram;
+            return this;
+        }
+
+        public Builder setScene(Scene scene) {
+            this.scene = scene;
+            return this;
+        }
+
+        public Builder setScore(double score) {
+            this.score = score;
+            return this;
+        }
+
+        public Match build() {
+            Match matchObject = new Match(match);
+            matchObject.text = text;
+            matchObject.pattern = pattern;
+            matchObject.stateObject = stateObject;
+            matchObject.histogram = histogram;
+            matchObject.scene = scene;
+            matchObject.score = score;
+            matchObject.timeStamp = LocalDateTime.now();
+            return matchObject;
+        }
+
+    }
+
+}

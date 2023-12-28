@@ -14,6 +14,7 @@ import org.sikuli.basics.Settings;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Predicate;
 
@@ -63,10 +64,10 @@ public class ActionOptions {
      *   ObjectCollections can contain multiple Images.
      *   Images can contain multiple Patterns (or image files).
      *
-     * FIRST: first Match found
-     * EACH: one Match per Image
-     * ALL: all Matches for all Patterns in all Images
-     * BEST: the best match from all Patterns in all Images
+     * FIRST: first Match found. Finds all matches for a given Pattern, but does not continue searching if at least one Pattern finds a match in any iteration.
+     * EACH: one Match per Image. The DoOnEach option determines specifics of how EACH is performed.
+     * ALL: all Matches for all Patterns in all Images for the duration of the find operation.
+     * BEST: the match with the best score from a Find.ALL operation.
      * UNIVERSAL: used for mocking. Initializing an Image with a UNIVERSAL Find allows it
      *   to be accessed by an operation of FIRST, EACH, ALL, and BEST.
      * CUSTOM: user-defined. Must be of type
@@ -74,17 +75,19 @@ public class ActionOptions {
      * HISTOGRAM: match the histogram from the input image(s)
      * MOTION: find the locations of a moving object across screens
      * REGIONS_OF_MOTION: find all dynamic pixel regions from a series of screens
+     * ALL_WORDS: find all words and their regions
      *
      * The options that return multiple Matches allow for overlapping Matches.
      */
     public enum Find {
-        FIRST, EACH, ALL, BEST, UNIVERSAL, CUSTOM, HISTOGRAM, COLOR, MOTION, REGIONS_OF_MOTION
+        FIRST, EACH, ALL, BEST, UNIVERSAL, CUSTOM, HISTOGRAM, COLOR, MOTION, REGIONS_OF_MOTION,
+        ALL_WORDS
     }
     private Find find = Find.FIRST;
     /**
      * tempFind is a user defined Find method that is not meant to be reused.
      */
-    private TriConsumer<Matches, ActionOptions, List<ObjectCollection>> tempFind;
+    private BiConsumer<Matches, List<ObjectCollection>> tempFind;
 
     /**
      * Find actions are performed in the order they appear in the list.
@@ -398,7 +401,7 @@ public class ActionOptions {
 
     public static class Builder {
         private Action action = Action.FIND;
-        private TriConsumer<Matches, ActionOptions, List<ObjectCollection>> tempFind;
+        private BiConsumer<Matches, List<ObjectCollection>> tempFind;
         private ClickUntil clickUntil = ClickUntil.OBJECTS_APPEAR;
         private Find find = Find.FIRST;
         private List<Find> findActions = new ArrayList<>();
@@ -463,7 +466,7 @@ public class ActionOptions {
             return this;
         }
 
-        public Builder useTempFind(TriConsumer<Matches, ActionOptions, List<ObjectCollection>> tempFind) {
+        public Builder useTempFind(BiConsumer<Matches, List<ObjectCollection>> tempFind) {
             this.tempFind = tempFind;
             return this;
         }

@@ -39,9 +39,9 @@ public class AnalyzePixels {
     }
 
     /**
-     * First, PixelAnalysis is performed on each scene with the ColorProfiles for the StateImage.
+     * First, PixelAnalysis is performed on each scene with the ColorProfiles for the StateImage_.
      * This gives us the similarity of each pixel to the color profiles. Using this information, scores are
-     * calculated that tell us how likely the pixel is to belong to this StateImage.
+     * calculated that tell us how likely the pixel is to belong to this StateImage_.
      *
      * Pixel analysis is done on the entire scene first, without accounting for the search regions.
      * It can then be reused for subsequent searches.
@@ -64,7 +64,7 @@ public class AnalyzePixels {
      * Create ColorProfiles for a single k-means analysis (a specific # of clusters).
      * ColorProfiles comprising both BGR and HSV ColorSchemas are created from separate BGR and HSV k-means analyses,
      * which respectively contain only BGR and HSV Schemas.
-     * @param img the StateImage with the k-means profiles
+     * @param img the StateImage_ with the k-means profiles
      * @param actionOptions the action configuration
      * @return a list of color profiles corresponding to a specific number of means
      */
@@ -72,7 +72,7 @@ public class AnalyzePixels {
         if (actionOptions.getColor() == ActionOptions.Color.KMEANS ||
                 actionOptions.getAction() == ActionOptions.Action.CLASSIFY) {
             int kMeans = actionOptions.getKmeans();
-            return img.getDynamicImage().getInsideKmeansProfiles().getColorProfiles(kMeans);
+            return img.getKmeansProfilesAllSchemas().getColorProfiles(kMeans);
         }
         else { // ActionOptions.Color.MU, or some other operation
             return Collections.singletonList(img.getColorCluster());
@@ -110,16 +110,16 @@ public class AnalyzePixels {
     }
 
     /**
-     * A SceneAnalysis comprises all analysis of a scene, for which there may be multiple StateImages.
-     * A PixelAnalysisCollection comprises all analysis of a {scene, StateImage} pair.
+     * A SceneAnalysis comprises all analysis of a scene, for which there may be multiple StateImage_s.
+     * A PixelAnalysisCollection comprises all analysis of a {scene, StateImage_} pair.
      * A SceneAnalysis therefore can hold a collection of PixelAnalysisCollections. There is a one-to-many
-     * relationship between scenes and StateImages.
-     * Having a PixelAnalysisCollection for each StateImage, we can then compare the scores
-     * for each pixel to determine which StateImage the pixel belongs to.
+     * relationship between scenes and StateImage_s.
+     * Having a PixelAnalysisCollection for each StateImage_, we can then compare the scores
+     * for each pixel to determine which StateImage_ the pixel belongs to.
      * @param scene the scene to analyze
      * @param allImgs the images to match with the pixels in the scene
      * @param actionOptions the action configuration
-     * @return a SceneAnalysis, containing a PixelsAnalysisCollection for each StateImage
+     * @return a SceneAnalysis, containing a PixelsAnalysisCollection for each StateImage_
      */
     public SceneAnalysis getAnalysisForOneScene(Scene scene, Set<StateImage> targetImgs, Set<StateImage> allImgs,
                                                 ActionOptions actionOptions) {

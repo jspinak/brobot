@@ -4,7 +4,6 @@ import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.datatypes.primitives.text.Text;
 import lombok.Getter;
 import lombok.Setter;
-import org.sikuli.script.Match;
 import org.sikuli.script.Screen;
 
 import java.time.LocalDateTime;
@@ -58,7 +57,7 @@ public class MatchSnapshot {
             .setFind(UNIVERSAL)
             .build();
     private List<Match> matchList = new ArrayList<>();
-    private Text text = new Text();
+    private String text = "";
     private double duration = 0.0;
     private LocalDateTime timeStamp;
     /**
@@ -79,11 +78,11 @@ public class MatchSnapshot {
     private String state = "null";
 
     public boolean wasFound() {
-        return !matchList.isEmpty() || text.size() > 0;
+        return !matchList.isEmpty() || !text.isEmpty();
     }
 
-    public void addString(String str) {
-        text.add(str);
+    public void setString(String str) {
+        text = str;
     }
 
     public void addMatch(Match match) {
@@ -94,15 +93,11 @@ public class MatchSnapshot {
         this.matchList.addAll(matchList);
     }
 
-    public void addText(Text text) {
-        this.text.addAll(text);
-    }
-
     public void print() {
         System.out.print(timeStamp.format(DateTimeFormatter.ofPattern("MM-dd HH:mm:ss")));
         System.out.format(" %s", actionOptions.getAction());
         matchList.forEach(match -> System.out.format(" %d.%d,%d.%d", match.x, match.y, match.w, match.h));
-        text.getAll().forEach(str -> System.out.format(" %s", str));
+        System.out.format(" %s", text);
         System.out.println();
     }
 
@@ -113,9 +108,9 @@ public class MatchSnapshot {
      */
     public boolean hasSameResultsAs(MatchSnapshot snapshot) {
         boolean matchFound;
-        for (Match match : matchList) {
+        for (org.sikuli.script.Match match : matchList) {
             matchFound = false;
-            for (Match match1 : snapshot.matchList) {
+            for (org.sikuli.script.Match match1 : snapshot.matchList) {
                 if (match.equals(match1)) {
                     matchFound = true;
                     break;
@@ -123,16 +118,7 @@ public class MatchSnapshot {
             }
             if (!matchFound) return false;
         }
-        for (String str : text.getAll()) {
-            matchFound = false;
-            for (String str1 : snapshot.text.getAll()) {
-                if (str.equals(str1)) {
-                    matchFound = true;
-                    break;
-                }
-            }
-            if (!matchFound) return false;
-        }
+        if (!text.equals(snapshot.getText())) return false;
         return true;
     }
 
@@ -150,13 +136,23 @@ public class MatchSnapshot {
 
     public MatchSnapshot() {}
 
+    public boolean equals(MatchSnapshot snapshot) {
+        if (actionOptions.getAction() != snapshot.getActionOptions().getAction()) return false;
+        if (actionOptions.getFind() != snapshot.getActionOptions().getFind()) return false;
+        if (matchList.size() != snapshot.getMatchList().size()) return false;
+        for (int i=0; i<matchList.size(); i++)
+            if (!matchList.get(i).equals(snapshot.getMatchList().get(i))) return false;
+        if (!text.equals(snapshot.getText())) return false;
+        return true;
+    }
+
     public static class Builder {
         private ActionOptions actionOptions = new ActionOptions.Builder()
                 .setAction(ActionOptions.Action.FIND)
                 .setFind(UNIVERSAL)
                 .build();
         private List<Match> matchList = new ArrayList<>();
-        private Text text = new Text();
+        private String text = "";
         private double duration = 0.0;
         private LocalDateTime timeStamp;
         private boolean actionSuccess = false; // can be initialized for mocks
@@ -215,15 +211,8 @@ public class MatchSnapshot {
             return this;
         }
 
-        public Builder setText(Text text) {
+        public Builder setText(String text) {
             this.text = text;
-            if (actionOptions.getAction() == ActionOptions.Action.FIND)
-                actionOptions.setAction(ActionOptions.Action.GET_TEXT);
-            return this;
-        }
-
-        public Builder addString(String str) {
-            this.text.add(str);
             if (actionOptions.getAction() == ActionOptions.Action.FIND)
                 actionOptions.setAction(ActionOptions.Action.GET_TEXT);
             return this;

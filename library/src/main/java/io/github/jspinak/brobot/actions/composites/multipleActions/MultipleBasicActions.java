@@ -13,7 +13,7 @@ import java.util.Optional;
 @Component
 public class MultipleBasicActions {
 
-    private BasicAction basicAction;
+    private final BasicAction basicAction;
 
     public MultipleBasicActions(BasicAction basicAction) {
         this.basicAction = basicAction;
@@ -23,8 +23,9 @@ public class MultipleBasicActions {
         Matches matches = new Matches();
         for (int i=0; i<mao.getTimesToRepeat(); i++) {
             for (ActionOptionsObjectCollectionPair aooc : mao.getAoocs()) {
+                matches.setActionOptions(aooc.getActionOptions());
                 Optional<ActionInterface> action = basicAction.getAction(aooc.getActionOptions().getAction());
-                action.ifPresent(actionInterface -> actionInterface.perform(matches, aooc.getActionOptions(), aooc.getObjectCollection()));
+                action.ifPresent(actionInterface -> actionInterface.perform(matches, aooc.getObjectCollection()));
             }
         }
         return matches; // we should return the last Matches object

@@ -26,7 +26,8 @@ public class TypeText implements ActionInterface {
         this.wait = wait;
     }
 
-    public void perform(Matches matches, ActionOptions actionOptions, ObjectCollection... objectCollections) {
+    public void perform(Matches matches, ObjectCollection... objectCollections) {
+        ActionOptions actionOptions = matches.getActionOptions();
         double defaultTypeDelay = Settings.TypeDelay;
         Settings.TypeDelay = actionOptions.getTypeDelay();
         List<StateString> strings = objectCollections[0].getStateStrings();

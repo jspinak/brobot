@@ -1,7 +1,7 @@
 package io.github.jspinak.brobot.actions.methods.basicactions.find.histogram;
 
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles.ColorCluster;
-import io.github.jspinak.brobot.datatypes.primitives.image.Image;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.imageUtils.GetImageJavaCV;
 import lombok.Getter;
 import org.bytedeco.javacpp.FloatPointer;
@@ -53,7 +53,7 @@ public class GetHistograms {
         return histRegs;
     }
 
-    public HistogramRegions getHistogramsHSV(Image image) {
+    public HistogramRegions getHistogramsHSV(StateImage image) {
         List<Mat> patternsAsMats = getImage.getMats(image, ColorCluster.ColorSchemaName.HSV);
         IntPointer channelsPtr = new IntPointer(channels);
         IntPointer binsPtr = new IntPointer(hueBins, satBins, valBins);

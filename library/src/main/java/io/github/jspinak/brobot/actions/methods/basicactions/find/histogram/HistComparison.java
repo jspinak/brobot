@@ -1,11 +1,8 @@
 package io.github.jspinak.brobot.actions.methods.basicactions.find.histogram;
 
-import io.github.jspinak.brobot.actions.actionExecution.actionLifecycle.ActionLifecycleManagement;
-import io.github.jspinak.brobot.datatypes.primitives.image.Image;
-import io.github.jspinak.brobot.datatypes.primitives.match.MatchObject;
-import io.github.jspinak.brobot.datatypes.primitives.region.Region;
+import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
-import io.github.jspinak.brobot.reports.Report;
+import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.MatVector;
 import org.springframework.stereotype.Component;
@@ -22,12 +19,10 @@ import static org.bytedeco.opencv.global.opencv_imgproc.EMD;
 @Component
 public class HistComparison {
 
-    private GetHistograms getHistograms;
-    private ActionLifecycleManagement actionLifecycleManagement;
+    private final GetHistograms getHistograms;
 
-    public HistComparison(GetHistograms getHistograms, ActionLifecycleManagement actionLifecycleManagement) {
+    public HistComparison(GetHistograms getHistograms) {
         this.getHistograms = getHistograms;
-        this.actionLifecycleManagement = actionLifecycleManagement;
     }
 
     /**
@@ -69,18 +64,15 @@ public class HistComparison {
 
     /**
      * Compare the Image histogram with the histograms of the regions.
-     * @param stateImage the image to use for histogram comparison
+     * @param image the image to use for histogram comparison
      * @param regions the regions in which to search
      * @param sceneHSV the HSV version of the scene
-     * @param actionId the action id, used to determine the action duration
      * @return the best score per region.
      */
-    public List<MatchObject> compareAll(StateImage stateImage, List<Region> regions,
-                                        Mat sceneHSV, int actionId) {
-        Image image = stateImage.getImage();
+    public List<Match> compareAll(StateImage image, List<Region> regions, Mat sceneHSV) {
         HistogramRegions histogramRegions = getHistograms.getHistogramsHSV(image);
         Mat indexedColumn = setIndexedColumn(getHistograms.getHueBins()); // only the hue bins are considered //imageRegionsHistograms.getTotalBins());
-        List<MatchObject> matchObjects = new ArrayList<>();
+        List<Match> matchList = new ArrayList<>();
         double bestScore = -1;
         for (Region reg : regions) {
             Mat maskOnScene = new Mat(sceneHSV, reg.getJavaCVRect());
@@ -88,17 +80,15 @@ public class HistComparison {
             double score = compare(sceneHistRegs, histogramRegions, indexedColumn);
             if (bestScore == -1) bestScore = score;
             if (score < bestScore) bestScore = score;
-            try {
-                MatchObject matchObject = new MatchObject(reg.toMatch(), stateImage,
-                        actionLifecycleManagement.getCurrentDuration(actionId).getSeconds());
-                matchObject.setHistogram(sceneHistRegs.getCombined().getHistogram());
-                matchObject.setScore(score);
-                matchObjects.add(matchObject);
-            } catch (Exception e) {
-                Report.println("Error creating MatchObject: " + e.getMessage());
-            }
+            Match match = new Match.Builder()
+                .setMatch(reg)
+                .setStateObject(image)
+                .setHistogram(sceneHistRegs.getCombined().getHistogram())
+                .setScore(score)
+                .build();
+            matchList.add(match);
         }
-        return matchObjects.stream().sorted(Comparator.comparing(MatchObject::getScore)).toList();
+        return matchList.stream().sorted(Comparator.comparing(Match::getScore)).toList();
     }
 
 }

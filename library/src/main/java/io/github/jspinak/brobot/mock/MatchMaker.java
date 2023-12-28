@@ -1,10 +1,8 @@
 package io.github.jspinak.brobot.mock;
 
-import io.github.jspinak.brobot.datatypes.primitives.image.Image;
+import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
+import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
-import org.sikuli.script.Match;
-import org.sikuli.script.Pattern;
-import org.sikuli.script.Screen;
 import org.springframework.stereotype.Component;
 
 import java.util.Random;
@@ -29,11 +27,10 @@ public class MatchMaker {
             return this;
         }
 
-        public Builder setImage(Image image) {
-            if (image == null) return this;
-            org.sikuli.script.Image img = new Pattern(image.getFilenames().get(0)).getImage();
-            this.w = img.w;
-            this.h = img.h;
+        public Builder setPattern(Pattern pattern) {
+            if (pattern == null) return this;
+            this.w = pattern.w();
+            this.h = pattern.h();
             return this;
         }
 
@@ -65,7 +62,7 @@ public class MatchMaker {
         }
 
         private Match buildWithXYWH() {
-            return new Match(x, y, w, h, .99, new Screen());
+            return new Match(x, y, w, h);
         }
 
         /**
@@ -75,7 +72,7 @@ public class MatchMaker {
         private Match buildInSearchRegion() {
             x = searchRegion.x + new Random().nextInt(Math.max(1, searchRegion.w - w));
             y = searchRegion.y + new Random().nextInt(Math.max(1, searchRegion.h - h));
-            return new Match(x, y, w, h, .99, new Screen());
+            return new Match(x, y, w, h);
         }
     }
 

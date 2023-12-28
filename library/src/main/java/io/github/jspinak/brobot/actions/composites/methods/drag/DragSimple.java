@@ -6,15 +6,11 @@ import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.Find;
 import io.github.jspinak.brobot.actions.methods.sikuliWrappers.DragLocation;
 import io.github.jspinak.brobot.datatypes.primitives.location.Location;
-import io.github.jspinak.brobot.datatypes.primitives.match.MatchObject;
+import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
-import io.github.jspinak.brobot.reports.Report;
 import org.sikuli.script.Mouse;
 import org.springframework.stereotype.Component;
-
-import java.time.Duration;
-import java.time.LocalDateTime;
 
 @Component
 public class DragSimple implements ActionInterface {
@@ -36,10 +32,11 @@ public class DragSimple implements ActionInterface {
      * the options addX and addY are used as the end position.
      * If 1 object is provided, the current mouse position is used as the start position and
      * the object is used as the end position.
-     * @param actionOptions the options for the drag
+     * @param matches holds the options for the drag and match objects already found
      * @param objectCollections the object collections
      */
-    public void perform(Matches matches, ActionOptions actionOptions, ObjectCollection... objectCollections) {
+    public void perform(Matches matches, ObjectCollection... objectCollections) {
+        ActionOptions actionOptions = matches.getActionOptions();
         matchesInitializer.init(actionOptions, objectCollections);
         ActionOptions findFrom = new ActionOptions.Builder()
                 .setAction(ActionOptions.Action.FIND)
@@ -58,8 +55,8 @@ public class DragSimple implements ActionInterface {
         setStartLoc(findFrom, matches, objectCollections);
         setEndLoc(findTo, matches, objectCollections);
         if (matches.size() < 2) return;
-        dragLocation.drag(matches.getMatchObjects().get(0).getLocation(),
-                matches.getMatchObjects().get(1).getLocation(), actionOptions);
+        dragLocation.drag(matches.getMatchList().get(0).getLocation(),
+                matches.getMatchList().get(1).getLocation(), actionOptions);
     }
 
     /*
@@ -71,8 +68,8 @@ public class DragSimple implements ActionInterface {
             return;
         }
         ObjectCollection objColl = objectCollections[0]; // use only the first object collection
-        if (!objColl.getStateImages().isEmpty()) { // use only the first object
-            find.perform(matches, actionOptions, objColl.getStateImages().get(0).asObjectCollection());
+        if (!objColl.getStateImage_s().isEmpty()) { // use only the first object
+            find.perform(matches, objColl.getStateImage_s().get(0).asObjectCollection());
             if (matches.isEmpty()) return;
             return;
         }
@@ -80,13 +77,13 @@ public class DragSimple implements ActionInterface {
             Location loc = objColl.getStateRegions().get(0).getSearchRegion().getLocation();
             loc.setX(loc.getX() + actionOptions.getAddX());
             loc.setY(loc.getY() + actionOptions.getAddY());
-            addMatchObject(loc, matches);
+            addMatch(loc, matches);
         }
         if (!objColl.getStateLocations().isEmpty()) {
             Location loc = objColl.getStateLocations().get(0).getLocation();
             loc.setX(loc.getX() + actionOptions.getAddX());
             loc.setY(loc.getY() + actionOptions.getAddY());
-            addMatchObject(loc, matches);
+            addMatch(loc, matches);
         }
         addStartLocationFromOptions(actionOptions, matches);
     }
@@ -102,24 +99,24 @@ public class DragSimple implements ActionInterface {
         }
         ObjectCollection objColl = objectCollections[0]; // use only the first object collection
         int objectIndexNeeded = 1;
-        if (objColl.getStateImages().size() > 1) { // use only the second object
-            find.perform(matches, actionOptions, objColl.getStateImages().get(1).asObjectCollection());
+        if (objColl.getStateImage_s().size() > 1) { // use only the second object
+            find.perform(matches, objColl.getStateImage_s().get(1).asObjectCollection());
             if (matches.isEmpty()) return;
             return;
         }
-        if (objColl.getStateImages().size() == 1) objectIndexNeeded = 0;
+        if (objColl.getStateImage_s().size() == 1) objectIndexNeeded = 0;
         if (objColl.getStateRegions().size() > objectIndexNeeded) {
             Location loc = objColl.getStateRegions().get(objectIndexNeeded).getSearchRegion().getLocation();
             loc.setX(loc.getX() + actionOptions.getDragToOffsetX());
             loc.setY(loc.getY() + actionOptions.getDragToOffsetY());
-            addMatchObject(loc, matches);
+            addMatch(loc, matches);
         }
         if (objColl.getStateRegions().size() == 1) objectIndexNeeded = 0;
         if (objColl.getStateLocations().size() > objectIndexNeeded) {
             Location loc = objColl.getStateLocations().get(objectIndexNeeded).getLocation();
             loc.setX(loc.getX() + actionOptions.getDragToOffsetX());
             loc.setY(loc.getY() + actionOptions.getDragToOffsetY());
-            addMatchObject(loc, matches);
+            addMatch(loc, matches);
         }
         addEndLocationFromOptions(actionOptions, matches);
     }
@@ -129,23 +126,21 @@ public class DragSimple implements ActionInterface {
         Location loc = new Location(Mouse.at());
         loc.setX(loc.getX() + actionOptions.getAddX());
         loc.setY(loc.getY() + actionOptions.getAddY());
-        addMatchObject(loc, matches);
+        addMatch(loc, matches);
     }
 
     private void addEndLocationFromOptions(ActionOptions actionOptions, Matches matches) {
         Location loc = new Location(Mouse.at());
         loc.setX(loc.getX() + actionOptions.getAddX2());
         loc.setY(loc.getY() + actionOptions.getAddY2());
-        addMatchObject(loc, matches);
+        addMatch(loc, matches);
     }
 
-    private void addMatchObject(Location loc, Matches matches) {
-        try {
-            MatchObject from = new MatchObject(loc.toMatch(), loc.inNullState(),
-                    Duration.between(matches.getStartTime(), LocalDateTime.now()).toSeconds());
-            matches.add(from);
-        } catch (Exception e) {
-            Report.println("location not added to matches");
-        }
+    private void addMatch(Location loc, Matches matches) {
+        Match from = new Match.Builder()
+                .setMatch(loc.toMatch())
+                .setStateObject(loc.asStateLocationInNullState())
+                .build();
+        matches.add(from);
     }
 }

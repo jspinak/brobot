@@ -35,4 +35,9 @@ public class Anchor {
                 " positionInMatch=" + positionInMatch;
     }
 
+    public boolean equals(Anchor anchor) {
+        return anchorInNewDefinedRegion == anchor.getAnchorInNewDefinedRegion() &&
+                positionInMatch.equals(anchor.getPositionInMatch());
+    }
+
 }

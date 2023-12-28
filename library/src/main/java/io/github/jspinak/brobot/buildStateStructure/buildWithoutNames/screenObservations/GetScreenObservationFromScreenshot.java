@@ -1,17 +1,20 @@
 package io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.screenObservations;
 
 import io.github.jspinak.brobot.actions.BrobotSettings;
+import io.github.jspinak.brobot.actions.actionExecution.Action;
+import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles.ColorCluster;
-import io.github.jspinak.brobot.datatypes.primitives.image.Image;
+import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
+import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import io.github.jspinak.brobot.imageUtils.GetImageJavaCV;
 import org.bytedeco.opencv.opencv_core.Mat;
-import org.sikuli.script.*;
 import org.springframework.stereotype.Component;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+
+import static io.github.jspinak.brobot.actions.actionOptions.ActionOptions.Find.ALL_WORDS;
 
 /**
  * Screenshots can be used instead of live scraping to build a state structure. Here, dynamic pixels
@@ -25,20 +28,20 @@ public class GetScreenObservationFromScreenshot {
     private final GetScreenObservation getScreenObservation;
     private final GetTransitionImages getTransitionImages;
     private final IllustrateScreenObservation illustrateScreenObservation;
-    private final GetWordsFromFile getWordsFromFile;
+    private final Action action;
 
     public GetScreenObservationFromScreenshot(ScreenObservationManager screenObservationManager,
                                               GetImageJavaCV getImage,
                                               GetScreenObservation getScreenObservation,
                                               GetTransitionImages getTransitionImages,
                                               IllustrateScreenObservation illustrateScreenObservation,
-                                              GetWordsFromFile getWordsFromFile) {
+                                              Action action) {
         this.screenObservationManager = screenObservationManager;
         this.getImage = getImage;
         this.getScreenObservation = getScreenObservation;
         this.getTransitionImages = getTransitionImages;
         this.illustrateScreenObservation = illustrateScreenObservation;
-        this.getWordsFromFile = getWordsFromFile;
+        this.action = action;
     }
 
     public ScreenObservation getNewScreenObservation(String screenshot) {
@@ -61,9 +64,18 @@ public class GetScreenObservationFromScreenshot {
 
     public List<TransitionImage> findAndCapturePotentialLinks(Region usableArea, String path) {
         List<TransitionImage> transitionImages = new ArrayList<>();
-        List<Match> potentialLinks = getWordsFromFile.getWordMatchesFromFile(usableArea, path);
-        for (int i=0; i<potentialLinks.size(); i++) {
-            TransitionImageHelper transitionImageHelper = getTransitionImages.createTransitionImage(i, potentialLinks);
+        ObjectCollection screens = new ObjectCollection.Builder()
+                .withScene_s(path)
+                .build();
+        ActionOptions findAllWords = new ActionOptions.Builder()
+                .setAction(ActionOptions.Action.FIND)
+                .setFind(ALL_WORDS)
+                .addSearchRegion(usableArea)
+                .build();
+        Matches wordMatches = action.perform(findAllWords, screens);
+
+        for (int i=0; i<wordMatches.size(); i++) {
+            TransitionImageHelper transitionImageHelper = getTransitionImages.createTransitionImage(i, wordMatches.getMatchList());
             TransitionImage transitionImage = transitionImageHelper.getTransitionImage();
             Mat image = getImage.getMatFromFile(path, transitionImage.getRegion(), ColorCluster.ColorSchemaName.BGR);
             transitionImage.setImage(image);

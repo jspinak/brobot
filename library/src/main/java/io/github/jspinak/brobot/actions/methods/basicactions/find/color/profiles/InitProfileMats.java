@@ -30,11 +30,11 @@ public class InitProfileMats {
      * @param stateImage StateImage to be processed.
      */
     public void setOneColumnMats(StateImage stateImage) {
-        List<Mat> imgMatsBGR = getImage.getMatsFromImage(stateImage, BGR);
+        List<Mat> imgMatsBGR = getImage.getMats(stateImage, BGR);
         Mat oneColumnBGRMat = matOps3d.vConcatToSingleColumnPerChannel(imgMatsBGR);
-        stateImage.getDynamicImage().setOneColumnBGRMat(oneColumnBGRMat);
+        stateImage.setOneColumnBGRMat(oneColumnBGRMat);
         Mat oneColumnHSVMat = new Mat();
-        cvtColor(stateImage.getDynamicImage().getOneColumnBGRMat(), oneColumnHSVMat, COLOR_BGR2HSV);
-        stateImage.getDynamicImage().setOneColumnHSVMat(oneColumnHSVMat);
+        cvtColor(stateImage.getOneColumnBGRMat(), oneColumnHSVMat, COLOR_BGR2HSV);
+        stateImage.setOneColumnHSVMat(oneColumnHSVMat);
     }
 }

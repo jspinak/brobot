@@ -1,8 +1,7 @@
 package io.github.jspinak.brobot.datatypes.state;
 
-import io.github.jspinak.brobot.datatypes.primitives.image.Image;
 import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
-import io.github.jspinak.brobot.datatypes.primitives.image.StateImage_;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.datatypes.primitives.location.Location;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
@@ -10,7 +9,6 @@ import io.github.jspinak.brobot.datatypes.state.state.State;
 import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.StateLocation;
 import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.StateRegion;
 import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.StateString;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.reports.Report;
 import lombok.Getter;
 import lombok.Setter;
@@ -36,23 +34,21 @@ import static io.github.jspinak.brobot.datatypes.state.NullState.Name.NULL;
 public class ObjectCollection {
 
     private List<StateLocation> stateLocations = new ArrayList<>();
-    private List<StateImage> stateImages = new ArrayList<>();
-    private List<StateImage_> stateImage_s = new ArrayList<>();
+    private List<StateImage> stateImage_s = new ArrayList<>();
     private List<StateRegion> stateRegions = new ArrayList<>();
     private List<StateString> stateStrings = new ArrayList<>();
     private List<Matches> matches = new ArrayList<>();
-    private List<Image> scenes = new ArrayList<>();
     private List<Pattern> scene_s = new ArrayList<>();
 
     private ObjectCollection() {}
 
     public boolean isEmpty() {
         return stateLocations.isEmpty()
-                && stateImages.isEmpty()
+                && stateImage_s.isEmpty()
                 && stateRegions.isEmpty()
                 && stateStrings.isEmpty()
                 && matches.isEmpty()
-                && scenes.isEmpty();
+                && scene_s.isEmpty();
     }
 
     /**
@@ -62,7 +58,7 @@ public class ObjectCollection {
      * well as for performing mocks.
      */
     public void resetTimesActedOn() {
-        stateImages.forEach(sio -> sio.setTimesActedOn(0));
+        stateImage_s.forEach(sio -> sio.setTimesActedOn(0));
         stateLocations.forEach(sio -> sio.setTimesActedOn(0));
         stateRegions.forEach(sio -> sio.setTimesActedOn(0));
         stateStrings.forEach(sio -> sio.setTimesActedOn(0));
@@ -70,9 +66,10 @@ public class ObjectCollection {
     }
 
     public String getFirstObjectName() {
-        if (!stateImages.isEmpty()) {
-            if (!stateImages.get(0).getName().isEmpty()) return stateImages.get(0).getName();
-            else return stateImages.get(0).getImage().getFilenames().get(0);
+        if (!stateImage_s.isEmpty()) {
+            if (!stateImage_s.get(0).getName().isEmpty()) return stateImage_s.get(0).getName();
+            else if (!stateImage_s.get(0).getPatterns().get(0).getFilename().isEmpty())
+                return stateImage_s.get(0).getPatterns().get(0).getFilename();
         }
         if (!stateLocations.isEmpty() && !stateLocations.get(0).getName().isEmpty())
             return stateLocations.get(0).getName();
@@ -83,8 +80,8 @@ public class ObjectCollection {
     }
 
     public boolean contains(StateImage stateImage) {
-        for (StateImage sio : stateImages) {
-            if (stateImage.equals(sio)) return true;
+        for (StateImage si : stateImage_s) {
+            if (stateImage.equals(si)) return true;
         }
         return false;
     }
@@ -105,12 +102,12 @@ public class ObjectCollection {
         return matches.contains(m);
     }
 
-    public boolean contains(Image sc) { return scenes.contains(sc); }
+    public boolean contains(Pattern sc) { return scene_s.contains(sc); }
 
     public boolean equals(ObjectCollection objectCollection) {
-        for (StateImage sio : stateImages) {
-            if (!objectCollection.contains(sio)) {
-                //Report.println(sio.getName()+" is not in the objectCollection. ");
+        for (StateImage si : stateImage_s) {
+            if (!objectCollection.contains(si)) {
+                //Report.println(si.getName()+" is not in the objectCollection. ");
                 return false;
             }
         }
@@ -138,7 +135,7 @@ public class ObjectCollection {
                 return false;
             }
         }
-        for (Image sc : scenes) {
+        for (Pattern sc : scene_s) {
             if (!objectCollection.contains(sc)) {
                 //Report.println(" matches different ");
                 return false;
@@ -149,32 +146,30 @@ public class ObjectCollection {
 
     public Set<String> getAllImageFilenames() {
         Set<String> filenames = new HashSet<>();
-        stateImages.forEach(sI -> filenames.addAll(sI.getImage().getFilenames()));
+        stateImage_s.forEach(sI -> sI.getPatterns().forEach(p -> filenames.add(p.getFilename())));
         return filenames;
     }
 
     public Set<String> getAllOwnerStates() {
         Set<String> states = new HashSet<>();
-        stateImages.forEach(sio -> states.add(sio.getOwnerStateName()));
-        stateLocations.forEach(sio -> states.add(sio.getOwnerStateName()));
-        stateRegions.forEach(sio -> states.add(sio.getOwnerStateName()));
-        stateStrings.forEach(sio -> states.add(sio.getOwnerStateName()));
+        stateImage_s.forEach(si -> states.add(si.getOwnerStateName()));
+        stateLocations.forEach(si -> states.add(si.getOwnerStateName()));
+        stateRegions.forEach(si -> states.add(si.getOwnerStateName()));
+        stateStrings.forEach(si -> states.add(si.getOwnerStateName()));
         return states;
     }
 
     public static class Builder {
         private List<StateLocation> stateLocations = new ArrayList<>();
-        private List<StateImage> stateImages = new ArrayList<>();
-        private List<StateImage_> stateImage_s = new ArrayList<>();
+        private List<StateImage> stateImage_s = new ArrayList<>();
         private List<StateRegion> stateRegions = new ArrayList<>();
         private List<StateString> stateStrings = new ArrayList<>();
         private List<Matches> matches = new ArrayList<>();
-        private List<Image> scenes = new ArrayList<>();
         private List<Pattern> scene_s = new ArrayList<>();
 
         public Builder withLocations(Location... locations) {
             for (Location location : locations) {
-                StateLocation stateLocation = location.inNullState();
+                StateLocation stateLocation = location.asStateLocationInNullState();
                 stateLocation.setPosition(TOPLEFT);
                 this.stateLocations.add(stateLocation);
             }
@@ -186,23 +181,18 @@ public class ObjectCollection {
             return this;
         }
 
-        public Builder withImage_s(StateImage_... stateImages) {
+        public Builder withImage_s(StateImage... stateImages) {
             this.stateImage_s.addAll(Arrays.asList(stateImages));
             return this;
         }
 
-        public Builder withImages(Image... images) {
-            for (Image image : images) this.stateImages.add(image.inNullState());
+        public Builder withImage_s(List<StateImage> stateImages) {
+            this.stateImage_s.addAll(stateImages);
             return this;
         }
 
-        public Builder withImages(List<StateImage> images) {
-            this.stateImages.addAll(images);
-            return this;
-        }
-
-        public Builder withImages(StateImage... images) {
-            Collections.addAll(this.stateImages, images);
+        public Builder withPatterns(Pattern... patterns) {
+            for (Pattern pattern : patterns) this.stateImage_s.add(pattern.inNullState());
             return this;
         }
 
@@ -210,7 +200,7 @@ public class ObjectCollection {
             if (state == null) {
                 Report.print("null state passed| ");
                 return this;
-            } else stateImages.addAll(state.getStateImages());
+            } else stateImage_s.addAll(state.getStateImages());
             return this;
         }
 
@@ -220,7 +210,7 @@ public class ObjectCollection {
                 return this;
             }
             for (StateImage stateImage : state.getStateImages()) {
-                if (!stateImage.isShared()) stateImages.add(stateImage);
+                if (!stateImage.isShared()) stateImage_s.add(stateImage);
             }
             return this;
         }
@@ -277,16 +267,6 @@ public class ObjectCollection {
             return this;
         }
 
-        public Builder withScenes(Image... scenes) {
-            Collections.addAll(this.scenes, scenes);
-            return this;
-        }
-
-        public Builder withScenes(StateImage... scenes) {
-            this.scenes.addAll(Arrays.stream(scenes).map(StateImage::getImage).toList());
-            return this;
-        }
-
         public Builder withScene_s(String... strings) {
             for (String string : strings) this.scene_s.add(new Pattern(string));
             return this;
@@ -299,13 +279,11 @@ public class ObjectCollection {
 
         public ObjectCollection build() {
             ObjectCollection objectCollection = new ObjectCollection();
-            objectCollection.stateLocations = stateLocations;
-            objectCollection.stateImages = stateImages;
             objectCollection.stateImage_s = stateImage_s;
+            objectCollection.stateLocations = stateLocations;
             objectCollection.stateRegions = stateRegions;
             objectCollection.stateStrings = stateStrings;
             objectCollection.matches = matches;
-            objectCollection.scenes = scenes;
             objectCollection.scene_s = scene_s;
             return objectCollection;
         }

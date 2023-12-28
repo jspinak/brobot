@@ -22,7 +22,7 @@ public class Success {
     {
         criteria.put(ActionOptions.Action.FIND, matches -> !matches.isEmpty());
         criteria.put(ActionOptions.Action.CLICK, matches -> !matches.isEmpty());
-        criteria.put(ActionOptions.Action.DEFINE, matches -> matches.getDefinedRegion().defined());
+        criteria.put(ActionOptions.Action.DEFINE, matches -> matches.getDefinedRegion().isDefined());
         criteria.put(ActionOptions.Action.TYPE, matches -> true);
         criteria.put(ActionOptions.Action.MOVE, matches -> !matches.isEmpty());
         criteria.put(ActionOptions.Action.GET_TEXT, matches -> !matches.getText().isEmpty());

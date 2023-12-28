@@ -5,9 +5,9 @@ import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.GetScenes;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.Scene;
 import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
-import io.github.jspinak.brobot.datatypes.primitives.image.StateImage_;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.datatypes.primitives.location.Position;
-import io.github.jspinak.brobot.datatypes.primitives.match.MatchObject_;
+import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -40,10 +40,10 @@ class FindAllTest {
                 .setFilename("topLeft")
                 .addAnchor(Position.Name.TOPLEFT, Position.Name.BOTTOMLEFT)
                 .build();
-        StateImage_ topLeft = new StateImage_.Builder()
+        StateImage topLeft = new StateImage.Builder()
                 .addPattern(topL)
                 .build();
-        StateImage_ bottomRight = new StateImage_.Builder()
+        StateImage bottomRight = new StateImage.Builder()
                 .addPattern(new Pattern.Builder()
                         .setFilename("bottomRight")
                         .addAnchor(Position.Name.BOTTOMRIGHT, Position.Name.TOPRIGHT)
@@ -59,8 +59,8 @@ class FindAllTest {
                 .build();
         List<Scene> scenes = getScenes.getScenes(actionOptions, List.of(objectCollection));
 
-        List<MatchObject_> matchObject_s = findAll.find(topLeft, scenes.get(0), actionOptions);
-        matchObject_s.forEach(mO -> System.out.println(mO.getMatch()));
-        assertFalse(matchObject_s.isEmpty());
+        List<Match> match_s = findAll.find(topLeft, scenes.get(0), actionOptions);
+        match_s.forEach(System.out::println);
+        assertFalse(match_s.isEmpty());
     }
 }

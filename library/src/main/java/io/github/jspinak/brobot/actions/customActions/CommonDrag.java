@@ -2,12 +2,12 @@ package io.github.jspinak.brobot.actions.customActions;
 
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.actions.composites.methods.drag.Drag;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.datatypes.primitives.location.Location;
 import io.github.jspinak.brobot.datatypes.primitives.location.Position;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -37,7 +37,7 @@ public class CommonDrag {
      */
     public void drag(Matches matches, StateImage from, Location... to) {
         for (ObjectCollection[] oC : getObjectCollections(from, to)) {
-            drag.perform(matches, actionOptions, oC);
+            drag.perform(matches, oC);
             if (matches.isEmpty()) break;
         }
     }
@@ -46,7 +46,7 @@ public class CommonDrag {
         List<ObjectCollection[]> objectCollectionsList = new ArrayList<>();
         int l = to.length > 0 ? 2 : 1;
         ObjectCollection[] firstColl = new ObjectCollection[l];
-        firstColl[0] = new ObjectCollection.Builder().withImages(from).build();
+        firstColl[0] = new ObjectCollection.Builder().withImage_s(from).build();
         if (l == 2) firstColl[1] = new ObjectCollection.Builder().withLocations(to[0]).build();
         objectCollectionsList.add(firstColl);
         for (int i = 0; i < to.length / 2; i++) {
@@ -71,7 +71,8 @@ public class CommonDrag {
                 .setDragToOffsetX(xOff)
                 .setDragToOffsetY(yOff)
                 .build();
-        drag.perform(matches, actionOptions, from.asObjectCollection());
+        matches.setActionOptions(actionOptions);
+        drag.perform(matches, from.asObjectCollection());
     }
 
 

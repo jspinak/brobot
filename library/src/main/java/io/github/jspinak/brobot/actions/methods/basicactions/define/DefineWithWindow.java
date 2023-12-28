@@ -18,8 +18,8 @@ import java.util.Optional;
 @Component
 public class DefineWithWindow implements ActionInterface {
 
-    private App app;
-    private DefineHelper defineHelper;
+    private final App app;
+    private final DefineHelper defineHelper;
 
     public DefineWithWindow(App app, DefineHelper defineHelper) {
         this.app = app;
@@ -27,7 +27,8 @@ public class DefineWithWindow implements ActionInterface {
     }
 
     // define with focused window
-    public void perform(Matches matches, ActionOptions actionOptions, ObjectCollection... objectCollections) {
+    public void perform(Matches matches, ObjectCollection... objectCollections) {
+        ActionOptions actionOptions = matches.getActionOptions();
         Optional<Region> focusedWindow = app.focusedWindow();
         if (focusedWindow.isPresent()) {
             Region region = focusedWindow.get();

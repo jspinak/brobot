@@ -34,7 +34,7 @@ import static io.github.jspinak.brobot.actions.actionOptions.ActionOptions.Actio
 @Component
 public class ClickUntil implements ActionInterface {
 
-    private MultipleBasicActions multipleBasicActions;
+    private final MultipleBasicActions multipleBasicActions;
 
     private Map<ActionOptions.ClickUntil, ActionOptions.Action> clickUntilConversion = new HashMap<>();
     {
@@ -49,11 +49,11 @@ public class ClickUntil implements ActionInterface {
     /**
      * Performs a Click and a Find operation.
      *
-     * @param actionOptions holds the action configuration
+     * @param matches holds the action configuration
      * @param objectCollections holds the objects to act on
-     * @return Matches from the last Find operation.
      */
-    public void perform(Matches matches, ActionOptions actionOptions, ObjectCollection... objectCollections) {
+    public void perform(Matches matches, ObjectCollection... objectCollections) {
+        ActionOptions actionOptions = matches.getActionOptions();
         ObjectCollection coll1 = objectCollections[0]; //the 'click' collection
         ObjectCollection coll2 = objectCollections[0]; //the 'until' collection
         if (objectCollections.length > 1) coll2 = objectCollections[1];

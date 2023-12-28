@@ -3,7 +3,7 @@ package io.github.jspinak.brobot.actions.composites.methods.multipleFinds;
 import io.github.jspinak.brobot.actions.actionExecution.ActionInterface;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.Find;
-import io.github.jspinak.brobot.datatypes.primitives.match.MatchObject;
+import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.SearchRegions;
@@ -23,7 +23,7 @@ import java.util.List;
 @Component
 public class NestedFinds implements ActionInterface {
 
-    private Find find;
+    private final Find find;
 
     public NestedFinds(Find find) {
         this.find = find;
@@ -35,22 +35,22 @@ public class NestedFinds implements ActionInterface {
      * the current implementation of color finds though, which have a collection for target images, a collection
      * for background images, and a collection for scenes.
      *
-     * @param actionOptions the Action's configuration
+     * @param matches holds the ActionOptions variable
      * @param objectCollections the images and scenes to use
-     * @return the image matches
      */
-    public void perform(Matches matches, ActionOptions actionOptions, ObjectCollection... objectCollections) {
+    public void perform(Matches matches, ObjectCollection... objectCollections) {
+        ActionOptions actionOptions = matches.getActionOptions();
         if (objectCollections.length == 0) return;
-        List<MatchObject> initialMatches = new ArrayList<>();
+        List<Match> initialMatches = new ArrayList<>();
         for (int i=0; i<actionOptions.getFindActions().size(); i++) {
             Report.println("nested find #" + i + ": " + actionOptions.getFindActions().get(i));
             actionOptions.setFind(actionOptions.getFindActions().get(i));
-            find.perform(matches, actionOptions, objectCollections);
+            find.perform(matches, objectCollections);
             if (matches.isEmpty()) return; // no need to go further
-            if (i==0) initialMatches.addAll(matches.getMatchObjects());
+            if (i==0) initialMatches.addAll(matches.getMatchList());
             if (i<actionOptions.getFindActions().size()-1) setSearchRegions(matches, actionOptions);
         }
-        matches.setInitialMatchObjects(initialMatches);
+        matches.setInitialMatchList(initialMatches);
     }
 
     private ObjectCollection getObjColl(int findIndex, ObjectCollection... objectCollections) {

@@ -34,10 +34,11 @@ public class MoveMouse implements ActionInterface {
         this.wait = wait;
     }
 
-    public void perform(Matches matches, ActionOptions actionOptions, ObjectCollection... objectCollections) {
+    public void perform(Matches matches, ObjectCollection... objectCollections) {
+        ActionOptions actionOptions = matches.getActionOptions();
         List<ObjectCollection> collections = Arrays.asList(objectCollections);
         for (ObjectCollection objColl : collections) {
-            find.perform(matches, actionOptions, objColl);
+            find.perform(matches, objColl);
             matches.getMatchLocations().forEach(moveMouseWrapper::move);
             Report.print("finished move. ");
             if (collections.indexOf(objColl) < collections.size() - 1)

@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 
 /**
@@ -38,7 +39,7 @@ public class ActionService {
         return compositeAction.getAction(actionOptions.getAction());
     }
 
-    public void setCustomFind(TriConsumer<Matches, ActionOptions, List<ObjectCollection>> customFind) {
+    public void setCustomFind(BiConsumer<Matches, List<ObjectCollection>> customFind) {
         findFunctions.addCustomFind(customFind);
     }
 

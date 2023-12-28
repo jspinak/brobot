@@ -30,7 +30,7 @@ public class StateMemory {
     }
 
     public void adjustActiveStatesWithMatches(Matches matches) {
-        matches.getMatchObjects().forEach(
+        matches.getMatchList().forEach(
                 mO -> addActiveState(mO.getStateObject().getOwnerStateName()));
     }
 
@@ -38,9 +38,16 @@ public class StateMemory {
         addActiveState(activeState, false);
     }
 
+    private boolean isNullState(String state) {
+        if (state.equals("null")) return true;
+        if (state.equals("NULL")) return true;
+        return false;
+    }
+
     public void addActiveState(String activeState, boolean newLine) {
         if (activeStates.contains(activeState)) return;
-        if (!activeState.equals("null")) Report.print("+ add "+activeState+" to active states ");
+        if (isNullState(activeState)) return;
+        Report.print("+ add "+activeState+" to active states ");
         if (newLine) Report.println();
         activeStates.add(activeState);
         stateService.findByName(activeState).ifPresent(state -> {

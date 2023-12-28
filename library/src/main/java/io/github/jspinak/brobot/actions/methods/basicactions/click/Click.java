@@ -1,20 +1,15 @@
 package io.github.jspinak.brobot.actions.methods.basicactions.click;
 
-import io.github.jspinak.brobot.actions.BrobotSettings;
 import io.github.jspinak.brobot.actions.actionExecution.ActionInterface;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.Find;
-import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.GetSceneAnalysisCollection;
-import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.SceneAnalysisCollection;
 import io.github.jspinak.brobot.actions.methods.sikuliWrappers.Wait;
 import io.github.jspinak.brobot.actions.methods.sikuliWrappers.mouse.ClickLocationOnce;
 import io.github.jspinak.brobot.datatypes.primitives.location.Location;
-import io.github.jspinak.brobot.datatypes.primitives.match.MatchObject;
+import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import org.springframework.stereotype.Component;
-
-import java.util.Arrays;
 
 /**
  * Clicks on an Image Match, Region, or Location.
@@ -26,40 +21,38 @@ import java.util.Arrays;
 @Component
 public class Click implements ActionInterface {
 
-    private Find find;
-    private ClickLocationOnce clickLocationOnce;
-    private Wait wait;
-    private AfterClick afterClick;
-    private GetSceneAnalysisCollection getSceneAnalysisCollection;
+    private final Find find;
+    private final ClickLocationOnce clickLocationOnce;
+    private final Wait wait;
+    private final AfterClick afterClick;
 
-    public Click(Find find, ClickLocationOnce clickLocationOnce, Wait wait, AfterClick afterClick,
-                 GetSceneAnalysisCollection getSceneAnalysisCollection) {
+    public Click(Find find, ClickLocationOnce clickLocationOnce, Wait wait, AfterClick afterClick) {
         this.find = find;
         this.clickLocationOnce = clickLocationOnce;
         this.wait = wait;
         this.afterClick = afterClick;
-        this.getSceneAnalysisCollection = getSceneAnalysisCollection;
     }
 
-    public void perform(Matches matches, ActionOptions actionOptions, ObjectCollection... objectCollections) {
-        find.perform(matches, actionOptions, objectCollections); // find performs only on 1st collection
+    public void perform(Matches matches, ObjectCollection... objectCollections) {
+        ActionOptions actionOptions = matches.getActionOptions();
+        find.perform(matches, objectCollections); // find performs only on 1st collection
         int i = 0;
-        for (MatchObject matchObject : matches.getMatchObjects()) {
-            Location location = setClickLocation(matchObject, actionOptions);
-            click(location, actionOptions, matchObject);
+        for (Match match : matches.getMatchList()) {
+            Location location = setClickLocation(match, actionOptions);
+            click(location, actionOptions, match);
             i++;
             if (i == actionOptions.getMaxMatchesToActOn()) break;
             // pause only between clicks, not after the last click
-            if (i < matches.getMatchObjects().size()) wait.wait(actionOptions.getPauseBetweenIndividualActions());
+            if (i < matches.getMatchList().size()) wait.wait(actionOptions.getPauseBetweenIndividualActions());
         }
     }
 
-    private Location setClickLocation(MatchObject matchObject, ActionOptions actionOptions) {
+    private Location setClickLocation(Match match, ActionOptions actionOptions) {
         // Define the location by the match region and the position of the StateObject
-        Location location = matchObject.getLocation();
+        Location location = match.getLocation();
         location.setX(location.getX() + actionOptions.getAddX());
         location.setY(location.getY() + actionOptions.getAddY());
-        matchObject.getMatch().setTarget(location.getX(), location.getY());
+        match.setTarget(location.getX(), location.getY());
         return location;
     }
 
@@ -75,10 +68,10 @@ public class Click implements ActionInterface {
      *                      3) Move mouse after click when selected (handled by AfterClick class)
      *                      4) New StateProbabilities on click (handled by AfterClick class)
      */
-    private void click(Location location, ActionOptions actionOptions, MatchObject matchObject) {
+    private void click(Location location, ActionOptions actionOptions, Match match) {
         for (int i = 0; i < actionOptions.getTimesToRepeatIndividualAction(); i++) {
             clickLocationOnce.click(location, actionOptions);
-            matchObject.getStateObject().addTimesActedOn();
+            match.getStateObject().addTimesActedOn();
             if (actionOptions.isMoveMouseAfterClick()) {
                 wait.wait(actionOptions.getPauseBetweenIndividualActions());
                 afterClick.moveMouseAfterClick(actionOptions);
