@@ -2,11 +2,10 @@ package io.github.jspinak.brobot.actions.methods.basicactions.define;
 
 import io.github.jspinak.brobot.datatypes.primitives.location.Location;
 import io.github.jspinak.brobot.datatypes.primitives.location.Position;
-import io.github.jspinak.brobot.datatypes.primitives.match.MatchObject;
+import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.StateLocation;
-import org.sikuli.script.Match;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -20,10 +19,9 @@ public class AnchorRegion {
      * @param matches the matches that are used to define the new region
      */
     public void fitRegionToAnchors(DefinedBorders definedBorders, Region region, Matches matches) {
-        for (MatchObject matchObject : matches.getMatchObjects()) {
-            Match match = matchObject.getMatch();
-            // MatchObjects can have one or more anchors
-            matchObject.getAnchorList().forEach(anchor -> {
+        for (Match match : matches.getMatchList()) {
+            // Match objects can have one or more anchors
+            match.getPattern().getAnchors().getAnchors().forEach(anchor -> {
                 definedBorders.setAsDefined(anchor.getAnchorInNewDefinedRegion());
                 Location locationInMatch = new Location(match, anchor.getPositionInMatch());
                 adjustDefinedRegion(region, locationInMatch, anchor.getAnchorInNewDefinedRegion());

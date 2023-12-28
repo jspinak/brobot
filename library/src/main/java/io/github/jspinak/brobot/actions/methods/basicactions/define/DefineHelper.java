@@ -60,7 +60,8 @@ public class DefineHelper {
         findOptions.setAddX(0);
         findOptions.setAbsoluteH(-1);
         findOptions.setAbsoluteW(-1);
-        find.perform(matches, findOptions, objectCollections);
+        matches.setActionOptions(findOptions);
+        find.perform(matches, objectCollections);
     }
 
 

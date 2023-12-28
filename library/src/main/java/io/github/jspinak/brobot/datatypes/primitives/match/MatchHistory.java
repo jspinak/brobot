@@ -6,7 +6,6 @@ import io.github.jspinak.brobot.datatypes.primitives.text.Text;
 import io.github.jspinak.brobot.mock.MatchMaker;
 import lombok.Getter;
 import lombok.Setter;
-import org.sikuli.script.Match;
 
 import java.util.*;
 
@@ -115,7 +114,7 @@ public class MatchHistory {
         return getRandomSnapshot(getSimilarSnapshots(actionOptions));
     }
 
-    private List<MatchSnapshot> getSimilarSnapshots(ActionOptions actionOptions) {
+    public List<MatchSnapshot> getSimilarSnapshots(ActionOptions actionOptions) {
         return getSnapshotOfFindType(actionOptions, getFindOrVanishSnapshots(actionOptions));
     }
 
@@ -146,6 +145,7 @@ public class MatchHistory {
     /*
      * Select a random Snapshot from a list of Snapshots of the same Action.
      * For Find Actions, restrict the list of Snapshots to the Find type.
+     * MatchSnapshots can have multiple Match objects (for example, Find.ALL)
      */
     public List<Match> getRandomMatchList(ActionOptions actionOptions) {
         List<Match> matchList = new ArrayList<>();
@@ -154,16 +154,10 @@ public class MatchHistory {
         return randomSnapshot.get().getMatchList();
     }
 
-    public Text getRandomText() {
+    public String getRandomText() {
         Optional<MatchSnapshot> textSnapshot = getRandomSnapshot(GET_TEXT);
-        if (textSnapshot.isEmpty()) return new Text();
+        if (textSnapshot.isEmpty()) return "";
         return textSnapshot.get().getText();
-    }
-
-    public String getRandomString() {
-        Text text = getRandomText();
-        if (text.size() == 0) return "";
-        return text.get(new Random().nextInt(text.size()));
     }
 
     public boolean isEmpty() {
@@ -172,6 +166,22 @@ public class MatchHistory {
 
     public void print() {
         snapshots.forEach(MatchSnapshot::print);
+    }
+
+    public void merge(MatchHistory matchHistory) {
+        this.timesFound += matchHistory.getTimesFound();
+        this.timesSearched += matchHistory.getTimesSearched();
+        this.snapshots.addAll(matchHistory.getSnapshots());
+    }
+
+    public boolean equals(MatchHistory matchHistory) {
+        if (timesSearched != matchHistory.getTimesSearched()) return false;
+        if (timesFound != matchHistory.getTimesFound()) return false;
+        if (snapshots.size() != matchHistory.getSnapshots().size()) return false;
+        for (int i=0; i<snapshots.size(); i++) {
+            if (!snapshots.get(i).equals(matchHistory.getSnapshots().get(i))) return false;
+        }
+        return true;
     }
 
 }

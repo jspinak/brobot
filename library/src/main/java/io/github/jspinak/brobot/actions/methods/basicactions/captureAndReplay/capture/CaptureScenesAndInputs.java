@@ -3,12 +3,11 @@ package io.github.jspinak.brobot.actions.methods.basicactions.captureAndReplay.c
 import io.github.jspinak.brobot.actions.BrobotSettings;
 import io.github.jspinak.brobot.actions.actionExecution.Action;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
-import io.github.jspinak.brobot.actions.methods.sikuliWrappers.Wait;
-import io.github.jspinak.brobot.datatypes.primitives.image.Image;
+import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.imageUtils.GetImageOpenCV;
 import io.github.jspinak.brobot.reports.Report;
 import org.springframework.stereotype.Component;
@@ -34,7 +33,6 @@ import java.time.LocalDateTime;
 public class CaptureScenesAndInputs {
 
     private GetImageOpenCV getImageOpenCV;
-    private final Wait wait;
     private NativeHookDemo nativeHookDemo;
     private WriteXmlDomActions writeXmlDomActions;
     private Action action;
@@ -42,11 +40,10 @@ public class CaptureScenesAndInputs {
 
     private int screensSaved = 0;
 
-    public CaptureScenesAndInputs(GetImageOpenCV getImageOpenCV, Wait wait,
+    public CaptureScenesAndInputs(GetImageOpenCV getImageOpenCV,
                                   NativeHookDemo nativeHookDemo, WriteXmlDomActions writeXmlDomActions,
                                   Action action, WriteXmlDomScenes writeXmlDomScenes) {
         this.getImageOpenCV = getImageOpenCV;
-        this.wait = wait;
         this.nativeHookDemo = nativeHookDemo;
         this.writeXmlDomActions = writeXmlDomActions;
         this.action = action;
@@ -106,8 +103,8 @@ public class CaptureScenesAndInputs {
             SceneAndObjectsForXML sceneAndObjectsForXML = new SceneAndObjectsForXML(i);
             for (StateImage stateImage : stateImages) {
                 ObjectCollection objects = new ObjectCollection.Builder()
-                        .withScenes(new Image("../capture/scene" + i))
-                        .withImages(stateImage)
+                        .withScene_s(new Pattern("../capture/scene" + i))
+                        .withImage_s(stateImage)
                         .build();
                 Matches matches = action.perform(actionOptions, objects);
                 if (matches.getBestLocation().isPresent()) {

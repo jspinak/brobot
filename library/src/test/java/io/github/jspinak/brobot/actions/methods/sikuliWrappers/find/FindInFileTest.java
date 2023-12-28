@@ -5,13 +5,13 @@ import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.GetScenes;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.Scene;
 import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
-import io.github.jspinak.brobot.datatypes.primitives.image.StateImage_;
+import io.github.jspinak.brobot.datatypes.primitives.match.Match;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.datatypes.primitives.location.Position;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.sikuli.script.ImagePath;
-import org.sikuli.script.Match;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -40,10 +40,10 @@ class FindInFileTest {
                 .setFilename("topLeft")
                 .addAnchor(Position.Name.TOPLEFT, Position.Name.BOTTOMLEFT)
                 .build();
-        StateImage_ topLeft = new StateImage_.Builder()
+        StateImage topLeft = new StateImage.Builder()
                 .addPattern(topL)
                 .build();
-        StateImage_ bottomRight = new StateImage_.Builder()
+        StateImage bottomRight = new StateImage.Builder()
                 .addPattern(new Pattern.Builder()
                         .setFilename("bottomRight")
                         .addAnchor(Position.Name.BOTTOMRIGHT, Position.Name.TOPRIGHT)

@@ -13,13 +13,14 @@ import org.springframework.stereotype.Component;
 @Component
 public class ScrollMouseWheel implements ActionInterface {
 
-    private MouseWheel mouseWheel;
+    private final MouseWheel mouseWheel;
 
     public ScrollMouseWheel(MouseWheel mouseWheel) {
         this.mouseWheel = mouseWheel;
     }
 
-    public void perform(Matches matches, ActionOptions actionOptions, ObjectCollection... objectCollections) {
+    public void perform(Matches matches, ObjectCollection... objectCollections) {
+        ActionOptions actionOptions = matches.getActionOptions();
         mouseWheel.scroll(actionOptions);
     }
 }

@@ -8,7 +8,6 @@ import io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.buildState
 import io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.screenObservations.*;
 import io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.screenTransitions.FindScreen;
 import io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.screenTransitions.FindTransition;
-import io.github.jspinak.brobot.datatypes.primitives.image.Image;
 import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import org.springframework.stereotype.Component;

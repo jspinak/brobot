@@ -1,19 +1,14 @@
 package io.github.jspinak.brobot.actions.methods.sikuliWrappers.find;
 
-import io.github.jspinak.brobot.actions.BrobotSettings;
 import io.github.jspinak.brobot.actions.Permissions;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
-import io.github.jspinak.brobot.actions.methods.basicactions.find.SelectRegions;
+import io.github.jspinak.brobot.actions.methods.basicactions.find.matchManagement.MatchProofer;
+import io.github.jspinak.brobot.actions.methods.basicactions.find.matchManagement.SelectRegions;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.Scene;
-import io.github.jspinak.brobot.datatypes.primitives.image.ImagePatterns;
-import io.github.jspinak.brobot.datatypes.primitives.image.StateImage_;
-import io.github.jspinak.brobot.datatypes.primitives.match.MatchObject_;
-import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
-import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
+import io.github.jspinak.brobot.datatypes.primitives.match.Match;
+import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.mock.Mock;
-import org.sikuli.script.Match;
-import org.sikuli.script.Pattern;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -25,40 +20,21 @@ import java.util.List;
  * The Find.BEST option finds all Matches and picks the best Match from these Matches.
  */
 @Component
-public class FindAll implements FindPatternInterface {
+public class FindAll {
 
-    private final ImagePatterns imagePatterns;
     private final Mock mock;
-    private final FindPattern findPattern;
     private final Permissions permissions;
     private final FindInFile findInFile;
     private final SelectRegions selectRegions;
+    private final MatchProofer matchProofer;
 
-    public FindAll(ImagePatterns imagePatterns, Mock mock, FindPattern findPattern,
-                   Permissions permissions, FindInFile findInFile, SelectRegions selectRegions) {
-        this.imagePatterns = imagePatterns;
+    public FindAll(Mock mock, Permissions permissions, FindInFile findInFile, SelectRegions selectRegions,
+                   MatchProofer matchProofer) {
         this.mock = mock;
-        this.findPattern = findPattern;
         this.permissions = permissions;
         this.findInFile = findInFile;
         this.selectRegions = selectRegions;
-    }
-
-    @Override
-    public Matches find(Region region, StateImage stateImage, ActionOptions actionOptions, Scene scene) {
-        if (BrobotSettings.mock && BrobotSettings.screenshots.isEmpty())
-            return mock.getMatches(stateImage, region, actionOptions);
-        List<Pattern> patterns = imagePatterns.getPatterns(stateImage.getImage(), actionOptions);
-        Matches matches = new Matches();
-        for (Pattern pattern : patterns) {
-            matches.addAllResults(findPattern.findAll(region, pattern, stateImage, actionOptions, scene));
-        }
-        /*
-         * Store Snapshots before adjusting the Match. This makes it easier to reuse.
-         * A failed operation will be stored here without a Match.
-         */
-        matches.getDanglingSnapshots().addAllMatches(actionOptions, matches);
-        return matches;
+        this.matchProofer = matchProofer;
     }
 
     /**
@@ -68,16 +44,16 @@ public class FindAll implements FindPatternInterface {
      * @param scene the scene to search
      * @return all MatchObjects found
      */
-    public List<MatchObject_> find(StateImage_ stateImage, Scene scene, ActionOptions actionOptions) {
-        List<MatchObject_> matchObjects = new ArrayList<>();
+    public List<Match> find(StateImage stateImage, Scene scene, ActionOptions actionOptions) {
+        List<Match> matchObjects = new ArrayList<>();
         for (io.github.jspinak.brobot.datatypes.primitives.image.Pattern pattern : stateImage.getPatterns()) {
             // these are unique regions so there won't be any duplicate matches
             List<Region> regions = selectRegions.getRegions(actionOptions, pattern);
             List<Match> matchList = findAll(pattern, scene);
             for (Match match : matchList) {
-                if (matchInRegions(match, regions)) {
+                if (matchProofer.isInSearchRegions(match, regions)) {
                     matchObjects.add(
-                            new MatchObject_.Builder()
+                            new Match.Builder()
                                     .setMatch(match)
                                     .setPattern(pattern)
                                     .setScene(scene)
@@ -99,26 +75,19 @@ public class FindAll implements FindPatternInterface {
         return findInFile.findAllInScene(pattern, scene);
     }
 
-    public List<MatchObject_> findWords(Scene scene, ActionOptions actionOptions) {
+    public List<Match> findWords(Scene scene, ActionOptions actionOptions) {
         List<Match> wordMatches = findInFile.getWordMatches(scene);
         List<Region> regions = selectRegions.getRegions(actionOptions);
-        List<MatchObject_> matchesInRegion = new ArrayList<>();
+        List<Match> matchesInRegion = new ArrayList<>();
         for (Match match : wordMatches) {
-            if (matchInRegions(match, regions)) {
-                matchesInRegion.add(new MatchObject_.Builder()
+            if (matchProofer.isInSearchRegions(match, regions)) {
+                matchesInRegion.add(new Match.Builder()
                         .setMatch(match)
                         .setScene(scene)
                         .build());
             }
         }
         return matchesInRegion;
-    }
-
-    public boolean matchInRegions(Match match, List<Region> regions) {
-        for (Region r : regions) {
-            if (r.contains(match)) return true;
-        }
-        return false;
     }
 
 }

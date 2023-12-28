@@ -29,8 +29,8 @@ public class SetAllProfiles {
      * @param stateImage StateImage to be processed.
      */
     public void setColorProfile(StateImage stateImage) {
-        ColorCluster colorCluster = setColorCluster.getColorProfile(stateImage.getDynamicImage().getOneColumnBGRMat());
-        stateImage.getDynamicImage().setInsideColorCluster(colorCluster);
+        ColorCluster colorCluster = setColorCluster.getColorProfile(stateImage.getOneColumnBGRMat());
+        stateImage.setColorCluster(colorCluster);
         setProfileMats.setMats(stateImage);
     }
 

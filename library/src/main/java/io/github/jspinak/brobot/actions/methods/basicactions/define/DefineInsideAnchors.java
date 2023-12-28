@@ -2,17 +2,10 @@ package io.github.jspinak.brobot.actions.methods.basicactions.define;
 
 import io.github.jspinak.brobot.actions.actionExecution.ActionInterface;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
-import io.github.jspinak.brobot.datatypes.primitives.location.Location;
-import io.github.jspinak.brobot.datatypes.primitives.location.Position;
-import io.github.jspinak.brobot.datatypes.primitives.match.MatchObject;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
-import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.StateLocation;
-import org.sikuli.script.Match;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 /**
  * Defines a Region as the smallest rectangle produced by Matches and Locations.
@@ -23,7 +16,7 @@ import java.util.List;
 @Component
 public class DefineInsideAnchors implements ActionInterface {
 
-    private DefineHelper defineHelper;
+    private final DefineHelper defineHelper;
     private final AnchorRegion anchorRegion;
 
     private DefinedBorders definedBorders;
@@ -33,7 +26,8 @@ public class DefineInsideAnchors implements ActionInterface {
         this.anchorRegion = anchorRegion;
     }
 
-    public void perform(Matches matches, ActionOptions actionOptions, ObjectCollection... objectCollections) {
+    public void perform(Matches matches, ObjectCollection... objectCollections) {
+        ActionOptions actionOptions = matches.getActionOptions();
         Region region = new Region();
         definedBorders = new DefinedBorders();
         defineHelper.findMatches(matches, actionOptions, objectCollections);

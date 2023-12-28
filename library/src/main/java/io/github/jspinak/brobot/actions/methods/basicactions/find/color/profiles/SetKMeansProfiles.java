@@ -36,16 +36,16 @@ public class SetKMeansProfiles {
         for (int i=1; i<=BrobotSettings.maxKMeansToStoreInProfile; i++) {
             addNewProfiles(kmeansProfilesAllSchemas, img, i);
         }
-        img.getDynamicImage().setInsideKmeansProfiles(kmeansProfilesAllSchemas);
+        img.setKmeansProfilesAllSchemas(kmeansProfilesAllSchemas);
     }
 
     public void addNewProfiles(KmeansProfilesAllSchemas kmeansProfiles, StateImage img, int means) {
         for (int i=1; i<=BrobotSettings.maxKMeansToStoreInProfile; i++) {
             KmeansProfile kmeansProfilesForBGR = getProfile(
-                    img.getDynamicImage().getOneColumnBGRMat(), means, ColorCluster.ColorSchemaName.BGR);
+                    img.getOneColumnBGRMat(), means, ColorCluster.ColorSchemaName.BGR);
             kmeansProfiles.addKmeansProfile(ColorCluster.ColorSchemaName.BGR, kmeansProfilesForBGR);
             KmeansProfile kmeansProfilesForHSV = getProfile(
-                    img.getDynamicImage().getOneColumnHSVMat(), means, ColorCluster.ColorSchemaName.HSV);
+                    img.getOneColumnHSVMat(), means, ColorCluster.ColorSchemaName.HSV);
             kmeansProfiles.addKmeansProfile(ColorCluster.ColorSchemaName.HSV, kmeansProfilesForHSV);
         }
     }
@@ -86,13 +86,13 @@ public class SetKMeansProfiles {
 
     public void addKMeansIfNeeded(Set<StateImage> allImages, int kMeans) {
         allImages.forEach(img -> {
-            KmeansProfilesAllSchemas profiles = img.getDynamicImage().getInsideKmeansProfiles();
+            KmeansProfilesAllSchemas profiles = img.getKmeansProfilesAllSchemas();
             if (profiles == null) profiles = new KmeansProfilesAllSchemas();
-            if (img.getDynamicImage().getOneColumnBGRMat() == null) setAllProfiles.setMatsAndColorProfiles(img); //initProfileMats.setOneColumnMats(img);
+            if (img.getOneColumnBGRMat() == null) setAllProfiles.setMatsAndColorProfiles(img); //initProfileMats.setOneColumnMats(img);
             if (!profiles.containsAll(kMeans)) {
                 addNewProfiles(profiles, img, kMeans);
             }
-            img.getDynamicImage().setInsideKmeansProfiles(profiles);
+            img.setKmeansProfilesAllSchemas(profiles);
         });
     }
 }

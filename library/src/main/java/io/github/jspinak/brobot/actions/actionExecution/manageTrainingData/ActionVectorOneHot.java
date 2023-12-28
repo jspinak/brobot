@@ -1,12 +1,10 @@
 package io.github.jspinak.brobot.actions.actionExecution.manageTrainingData;
 
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
-import io.github.jspinak.brobot.datatypes.primitives.match.MatchObject;
-import io.github.jspinak.brobot.datatypes.primitives.match.MatchObject_;
+import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import io.github.jspinak.brobot.datatypes.trainingData.ActionVector;
-import org.sikuli.script.Match;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
@@ -49,9 +47,9 @@ public class ActionVectorOneHot implements ActionVectorTranslation {
     }
 
     private void setCoordinates(short[] vec, Matches matches) {
-        Optional<MatchObject_> optMatch = matches.getBestMatch();
+        Optional<Match> optMatch = matches.getBestMatch();
         if (optMatch.isEmpty()) return;
-        Match match = optMatch.get().getMatch();
+        org.sikuli.script.Match match = optMatch.get();
         vec[6] = (short) match.x;
         vec[7] = (short) match.y;
         vec[8] = (short) match.w;

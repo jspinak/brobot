@@ -18,21 +18,25 @@ import java.util.Optional;
 @Component
 public class GetDragLocation {
 
-    private Find find;
-    private ActionOptionsForDrag actionOptionsForDrag;
+    private final Find find;
+    private final ActionOptionsForDrag actionOptionsForDrag;
 
     public GetDragLocation(Find find, ActionOptionsForDrag actionOptionsForDrag) {
         this.find = find;
         this.actionOptionsForDrag = actionOptionsForDrag;
     }
 
-    public Optional<Location> getFromLocation(Matches matches, ActionOptions actionOptions, ObjectCollection... objectCollections) {
-        find.perform(matches, actionOptionsForDrag.getFindFrom(actionOptions), getDragFromObjColl(objectCollections));
+    public Optional<Location> getFromLocation(Matches matches, ObjectCollection... objectCollections) {
+        ActionOptions dragActionOptions = actionOptionsForDrag.getFindFrom(matches.getActionOptions());
+        Matches matchesForDrag = new Matches(dragActionOptions);
+        find.perform(matchesForDrag, getDragFromObjColl(objectCollections));
         return matches.getBestLocation();
     }
 
-    public Optional<Location> getToLocation(Matches matches, ActionOptions actionOptions, ObjectCollection... objectCollections) {
-        find.perform(matches, actionOptionsForDrag.getFindTo(actionOptions), getDragToObjColl(actionOptions, objectCollections));
+    public Optional<Location> getToLocation(Matches matches, ObjectCollection... objectCollections) {
+        ActionOptions dragActionOptions = actionOptionsForDrag.getFindTo(matches.getActionOptions());
+        Matches matchesForDrag = new Matches(dragActionOptions);
+        find.perform(matchesForDrag, getDragToObjColl(objectCollections));
         return matches.getBestLocation();
     }
 
@@ -45,11 +49,10 @@ public class GetDragLocation {
      * An empty ObjectCollection when there are no ObjectCollections and the offsets are the same.
      *   In this case nothing will happen because the 'from' Location is the same as the 'to' Location.
      *
-     * @param actionOptions has the offsets
      * @param objectCollections contain Images, Regions, and Locations used to find the Drag Locations
      * @return an ObjectCollection to be used in Find operations
      */
-    private ObjectCollection getDragToObjColl(ActionOptions actionOptions, ObjectCollection... objectCollections) {
+    private ObjectCollection getDragToObjColl(ObjectCollection... objectCollections) {
         if (objectCollections.length >= 2) return objectCollections[1];
         if (objectCollections.length == 1) return objectCollections[0];
         return new ObjectCollection.Builder().build();

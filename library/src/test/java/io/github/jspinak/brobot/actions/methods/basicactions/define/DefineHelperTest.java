@@ -4,7 +4,7 @@ import io.github.jspinak.brobot.BrobotTestApplication;
 import io.github.jspinak.brobot.actions.actionExecution.actionLifecycle.ActionLifecycleManagement;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
-import io.github.jspinak.brobot.datatypes.primitives.image.StateImage_;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.datatypes.primitives.location.Position;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
@@ -33,13 +33,13 @@ class DefineHelperTest {
 
     @Test
     void findMatches() {
-        StateImage_ topLeft = new StateImage_.Builder()
+        StateImage topLeft = new StateImage.Builder()
                 .addPattern(new Pattern.Builder()
                         .setFilename("topLeft")
                         .addAnchor(Position.Name.TOPLEFT, Position.Name.BOTTOMLEFT)
                         .build())
                 .build();
-        StateImage_ bottomRight = new StateImage_.Builder()
+        StateImage bottomRight = new StateImage.Builder()
                 .addPattern(new Pattern.Builder()
                         .setFilename("bottomRight")
                         .addAnchor(Position.Name.BOTTOMRIGHT, Position.Name.TOPRIGHT)
@@ -57,7 +57,7 @@ class DefineHelperTest {
         actionLifecycleManagement.newActionLifecycle(actionOptions, matches);
 
         defineHelper.findMatches(matches, actionOptions, objectCollection);
-        System.out.println(matches.getMatches());
+        System.out.println(matches.getMatchList());
         assertFalse(matches.isEmpty());
     }
 }

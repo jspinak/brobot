@@ -1,9 +1,9 @@
 package io.github.jspinak.brobot.imageUtils;
 
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles.ColorCluster;
-import io.github.jspinak.brobot.datatypes.primitives.image.Image;
-import io.github.jspinak.brobot.datatypes.primitives.region.Region;
+import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
+import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import org.bytedeco.javacv.*;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.MatVector;
@@ -60,7 +60,7 @@ public class GetImageJavaCV {
         return mat;
     }
 
-    public List<Mat> getMats(List<String> filenames, ColorCluster.ColorSchemaName colorSchemaName) {
+    public List<Mat> getMatsFromFilenames(List<String> filenames, ColorCluster.ColorSchemaName colorSchemaName) {
         List<Mat> mats = new ArrayList<>();
         for (String filename : filenames) {
             mats.add(getMatFromBundlePath(filename, colorSchemaName));
@@ -68,17 +68,14 @@ public class GetImageJavaCV {
         return mats;
     }
 
-    public List<Mat> getMatsFromImage(StateImage img, ColorCluster.ColorSchemaName colorSchemaName) {
-        if (img.isDynamic()) return getMatsFromDynamicInsideImage(img, colorSchemaName);
-        return getMats(img.getImage(), colorSchemaName);
+    public List<Mat> getMats(StateImage img, ColorCluster.ColorSchemaName colorSchemaName) {
+        return getMats(img.getPatterns(), colorSchemaName);
     }
 
-    public List<Mat> getMatsFromDynamicInsideImage(StateImage img, ColorCluster.ColorSchemaName colorSchemaName) {
-        return getMats(img.getDynamicImage().getInside(), colorSchemaName);
-    }
-
-    public List<Mat> getMats(Image image, ColorCluster.ColorSchemaName colorSchemaName) {
-        return getMats(image.getFilenames(), colorSchemaName);
+    public List<Mat> getMats(List<Pattern> patterns, ColorCluster.ColorSchemaName colorSchemaName) {
+        List<String> filenames = new ArrayList<>();
+        patterns.forEach(p -> filenames.add(p.getFilename()));
+        return getMatsFromFilenames(filenames, colorSchemaName);
     }
 
     /**

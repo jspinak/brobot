@@ -2,16 +2,16 @@ package io.github.jspinak.brobot.actions.methods.basicactions.find.motion;
 
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.actions.methods.MatchOps;
-import io.github.jspinak.brobot.actions.methods.basicactions.find.SelectRegions;
+import io.github.jspinak.brobot.actions.methods.basicactions.find.matchManagement.SelectRegions;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.GetSceneAnalysisCollection;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.SceneAnalysisCollection;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.contours.Contours;
+import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import io.github.jspinak.brobot.reports.Report;
 import org.bytedeco.opencv.opencv_core.Mat;
-import org.sikuli.script.Match;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -27,11 +27,11 @@ import static io.github.jspinak.brobot.actions.methods.basicactions.find.color.p
 @Component
 public class FindMotion {
 
-    private DetectMotion detectMotion;
-    private MatchOps matchOps;
-    private GetSceneAnalysisCollection getSceneAnalysisCollection;
-    private SelectMovingObject selectMovingObject;
-    private SelectRegions selectRegions;
+    private final DetectMotion detectMotion;
+    private final MatchOps matchOps;
+    private final GetSceneAnalysisCollection getSceneAnalysisCollection;
+    private final SelectMovingObject selectMovingObject;
+    private final SelectRegions selectRegions;
     private final IllustrateMotion illustrateMotion;
 
     public FindMotion(DetectMotion detectMotion, MatchOps matchOps, GetSceneAnalysisCollection getSceneAnalysisCollection,
@@ -59,10 +59,11 @@ public class FindMotion {
      * if images are provided, they can be used to select specific objects that have moved. If no images are provided,
      * all moving objects will be returned.
      *
-     * @param actionOptions The action's configuration
+     * @param matches The action's configuration and existing matches
      * @param objectCollections holds the images to analyze for motion in the first collection
      */
-    public void find(Matches matches, ActionOptions actionOptions, List<ObjectCollection> objectCollections) {
+    public void find(Matches matches, List<ObjectCollection> objectCollections) {
+        ActionOptions actionOptions = matches.getActionOptions();
         SceneAnalysisCollection sceneAnalysisCollection = getSceneAnalysisCollection.get(
                 objectCollections, 3, 0.1, actionOptions);
         if (sceneAnalysisCollection.getSceneAnalyses().size() < 3) {
@@ -81,7 +82,7 @@ public class FindMotion {
             sA.getIllustrations().setMotion(sA.getScene().getBgr());
             sA.getIllustrations().setMotionWithMatches(sA.getScene().getBgr());
         });
-        matchOps.addGenericMatchObjects(movingObjects.get(2), matches, actionOptions); // this is for the last scene
+        matchOps.addMatchListToMatches(movingObjects.get(2), matches);
         matches.sortByMatchScoreDecending();
         matchOps.limitNumberOfMatches(matches, actionOptions);
     }

@@ -13,9 +13,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class ClickLocationOnce {
 
-    private MouseDownWrapper mouseDownWrapper;
-    private MouseUpWrapper mouseUpWrapper;
-    private MoveMouseWrapper moveMouseWrapper;
+    private final MouseDownWrapper mouseDownWrapper;
+    private final MouseUpWrapper mouseUpWrapper;
+    private final MoveMouseWrapper moveMouseWrapper;
 
     public ClickLocationOnce(MouseDownWrapper mouseDownWrapper,
                              MouseUpWrapper mouseUpWrapper,

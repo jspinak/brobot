@@ -1,6 +1,5 @@
 package io.github.jspinak.brobot.actions.actionExecution;
 
-import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 
@@ -9,7 +8,5 @@ import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
  */
 public interface ActionInterface {
 
-    void perform(Matches matches,
-            ActionOptions actionOptions,
-            ObjectCollection... objectCollections);
+    void perform(Matches matches, ObjectCollection... objectCollections);
 }

@@ -1,10 +1,10 @@
 package io.github.jspinak.brobot.illustratedHistory.draw;
 
+import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.illustratedHistory.Illustrations;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Scalar;
-import org.sikuli.script.Match;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -29,9 +29,9 @@ public class DrawMatch {
 
     public void drawMatches(Illustrations illScn, Matches matches) {
         List<Match> matchList = new ArrayList<>();
-        matches.getMatchObjects().forEach(mO -> {
-            if (mO.getSceneName().equals(illScn.getSceneName())) {
-                matchList.add(mO.getMatch());
+        matches.getMatchList().forEach(mO -> {
+            if (mO.getScene().getName().equals(illScn.getSceneName())) {
+                matchList.add(mO);
             }
         });
         if (illScn.getMatchesOnScene() != null) drawMatches(illScn.getMatchesOnScene(), matchList);

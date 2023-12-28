@@ -1,11 +1,11 @@
 package io.github.jspinak.brobot.actions.customActions.select;
 
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.datatypes.primitives.location.Location;
 import io.github.jspinak.brobot.datatypes.primitives.location.Position;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -42,7 +42,7 @@ public class CommonSelect {
                 .setPauseBeforeMouseUp(.5)
                 .build();
         ObjectCollection findObjectCollection = new ObjectCollection.Builder()
-                .withImages(images)
+                .withImage_s(images)
                 .build();
         ActionOptions findActionOptions = new ActionOptions.Builder()
                 .setAction(ActionOptions.Action.FIND)
@@ -54,7 +54,7 @@ public class CommonSelect {
                 .setPauseBetweenIndividualActions(.7)
                 .build();
         ObjectCollection confirmationObjectCollection = new ObjectCollection.Builder()
-                .withImages(confirmationImages)
+                .withImage_s(confirmationImages)
                 .build();
         ActionOptions confirmActionOptions = new ActionOptions.Builder()
                 .setAction(ActionOptions.Action.FIND)

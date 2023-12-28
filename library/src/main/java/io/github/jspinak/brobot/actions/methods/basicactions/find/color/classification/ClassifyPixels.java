@@ -7,7 +7,6 @@ import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAna
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles.ColorCluster;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.imageUtils.MatOps3d;
-import io.github.jspinak.brobot.imageUtils.MatVisualize;
 import io.github.jspinak.brobot.reports.Report;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.MatVector;
@@ -33,12 +32,10 @@ import static org.bytedeco.opencv.global.opencv_core.*;
 @Component
 public class ClassifyPixels {
 
-    private MatOps3d matOps3d;
-    private MatVisualize matVisualize;
+    private final MatOps3d matOps3d;
 
-    public ClassifyPixels(MatOps3d matOps3d, MatVisualize matVisualize) {
+    public ClassifyPixels(MatOps3d matOps3d) {
         this.matOps3d = matOps3d;
-        this.matVisualize = matVisualize;
     }
 
     public SceneAnalysis getSceneAnalysis(List<PixelAnalysisCollection> pixelAnalysisCollections, Scene scene) {

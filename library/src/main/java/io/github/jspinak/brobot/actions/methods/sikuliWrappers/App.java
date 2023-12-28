@@ -13,7 +13,7 @@ import java.util.Optional;
 @Component
 public class App {
 
-    private Mock mock;
+    private final Mock mock;
 
     public App(Mock mock) {
         this.mock = mock;

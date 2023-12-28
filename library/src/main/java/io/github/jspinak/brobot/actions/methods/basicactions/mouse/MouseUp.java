@@ -13,13 +13,14 @@ import org.springframework.stereotype.Component;
 @Component
 public class MouseUp implements ActionInterface {
 
-    private MouseUpWrapper mouseUpWrapper;
+    private final MouseUpWrapper mouseUpWrapper;
 
     public MouseUp(MouseUpWrapper mouseUpWrapper) {
         this.mouseUpWrapper = mouseUpWrapper;
     }
 
-    public void perform(Matches matches, ActionOptions actionOptions, ObjectCollection... objectCollections) {
+    public void perform(Matches matches, ObjectCollection... objectCollections) {
+        ActionOptions actionOptions = matches.getActionOptions();
         mouseUpWrapper.press(
                 actionOptions.getPauseBeforeMouseUp(),
                 actionOptions.getPauseAfterMouseUp(),

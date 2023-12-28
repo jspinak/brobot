@@ -27,4 +27,11 @@ public class Anchors {
         anchors.forEach(anchor -> stringBuilder.append(" ").append(anchor));
         return stringBuilder.toString();
     }
+
+    public boolean equals(Anchors a) {
+        if (anchors.size() != a.getAnchors().size()) return false;
+        for (int i=0; i<anchors.size(); i++)
+            if (!anchors.get(i).equals(a.getAnchors().get(i))) return false;
+        return true;
+    }
 }

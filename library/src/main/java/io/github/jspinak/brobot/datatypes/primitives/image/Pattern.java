@@ -1,17 +1,17 @@
 package io.github.jspinak.brobot.datatypes.primitives.image;
 
+import io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles.ColorCluster;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles.KmeansProfilesAllSchemas;
 import io.github.jspinak.brobot.datatypes.primitives.location.Anchor;
 import io.github.jspinak.brobot.datatypes.primitives.location.Anchors;
-import io.github.jspinak.brobot.datatypes.primitives.location.Location;
 import io.github.jspinak.brobot.datatypes.primitives.location.Position;
 import io.github.jspinak.brobot.datatypes.primitives.match.MatchHistory;
 import io.github.jspinak.brobot.datatypes.primitives.match.MatchSnapshot;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.SearchRegions;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import lombok.Getter;
 import lombok.Setter;
-import org.bytedeco.opencv.opencv_core.Mat;
 
 import java.awt.image.BufferedImage;
 import java.net.URL;
@@ -32,6 +32,7 @@ public class Pattern extends org.sikuli.script.Pattern {
     private SearchRegions searchRegions = new SearchRegions();
     private boolean setKmeansColorProfiles = false; // this is an expensive operation and should be done only when needed
     private KmeansProfilesAllSchemas kmeansProfilesAllSchemas = new KmeansProfilesAllSchemas();
+    private ColorCluster colorCluster = new ColorCluster();
     private MatchHistory matchHistory = new MatchHistory();
     private int index; // a unique identifier used for classification matrices
     private boolean dynamic = false; // dynamic images cannot be found using pattern matching
@@ -88,7 +89,7 @@ public class Pattern extends org.sikuli.script.Pattern {
      * @return a region
      */
     public Region getRegion() {
-        return searchRegions.getRegion(fixed);
+        return searchRegions.getFixedIfDefinedOrRandomRegion(fixed);
     }
 
     /**
@@ -114,6 +115,37 @@ public class Pattern extends org.sikuli.script.Pattern {
 
     public void addMatchSnapshot(MatchSnapshot matchSnapshot) {
         matchHistory.addSnapshot(matchSnapshot);
+    }
+
+    public void addMatchSnapshot(int x, int y, int w, int h) {
+        MatchSnapshot matchSnapshot = new MatchSnapshot(x, y, w, h);
+        addMatchSnapshot(matchSnapshot);
+    }
+
+    public StateImage inNullState() {
+        return new StateImage.Builder()
+                .addPattern(this)
+                .setOwnerStateName("null")
+                .build();
+    }
+
+    public boolean isDefined() {
+        return getSearchRegions().isDefined(fixed);
+    }
+
+    public boolean isEmpty() {
+        return getImage() == null;
+    }
+
+    public boolean equals(Pattern pattern) {
+        if (!getFilename().equals(pattern.getFilename())) return false;
+        if (fixed != pattern.isFixed()) return false;
+        if (!searchRegions.equals(pattern.getSearchRegions())) return false;
+        if (matchHistory.equals(pattern.getMatchHistory())) return false;
+        if (dynamic != pattern.isDynamic()) return false;
+        if (!position.equals(pattern.getPosition())) return false;
+        if (!anchors.equals(pattern.getAnchors())) return false;
+        return true;
     }
 
     public static class Builder {

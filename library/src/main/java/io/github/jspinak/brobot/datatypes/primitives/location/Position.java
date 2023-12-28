@@ -30,9 +30,14 @@ public class Position {
         positions.put(Name.BOTTOMRIGHT, Pair.of(1.0, 1.0));
     }
 
-    public Position(double percentW, double percentH) {
-        this.percentW = percentW;
-        this.percentH = percentH;
+    public Position(double w, double h) {
+        this.percentW = w;
+        this.percentH = h;
+    }
+
+    public Position(int percentW, int percentH) {
+        this.percentW = (double) percentW / 100;
+        this.percentH = (double) percentH / 100;
     }
 
     public Position(Name positionName) {
@@ -72,6 +77,10 @@ public class Position {
     @Override
     public String toString() {
         return String.format("P[%.1f.%.1f]", percentW, percentH);
+    }
+
+    public boolean equals(Position position) {
+        return percentW == position.getPercentW() && percentH == position.getPercentH();
     }
 
 }

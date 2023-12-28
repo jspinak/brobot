@@ -3,22 +3,18 @@ package io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.screenObs
 import io.github.jspinak.brobot.actions.BrobotSettings;
 import io.github.jspinak.brobot.actions.actionExecution.Action;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
-import io.github.jspinak.brobot.datatypes.primitives.image.Image;
 import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
-import io.github.jspinak.brobot.datatypes.primitives.image.StateImage_;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.datatypes.primitives.location.Location;
 import io.github.jspinak.brobot.datatypes.primitives.location.Position;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
-import org.sikuli.script.Finder;
 import org.sikuli.script.Match;
 import org.sikuli.script.Screen;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -53,10 +49,10 @@ public class GetUsableArea {
     private ObjectCollection getObjectCollection(Pattern topleft, Pattern bottomright, Pattern... scenes) {
         return new ObjectCollection.Builder()
                 .withImage_s(
-                        new StateImage_.Builder()
+                        new StateImage.Builder()
                                 .addPattern(topleft)
                                 .build(),
-                        new StateImage_.Builder()
+                        new StateImage.Builder()
                                 .addPattern(bottomright)
                                 .build())
                 .withScene_s(scenes)
@@ -71,26 +67,14 @@ public class GetUsableArea {
                 .build();
     }
 
-    public Region getFromFile(String patternName, Pattern topLeft, Pattern bottomRight) {
+    public Region defineInFile(String patternName, Pattern topLeft, Pattern bottomRight) {
         File file = new File(BrobotSettings.screenshotPath + patternName);
         String path = file.getAbsolutePath();
         Pattern screen = new Pattern(path);
-        ObjectCollection objectCollection = getObjectCollection(topLeft, bottomRight, screen);
-        ActionOptions actionOptions = getActionOptions(ActionOptions.Illustrate.YES);
-        Matches matches = action.perform(actionOptions, objectCollection);
+        ObjectCollection boundaryImages = getObjectCollection(topLeft, bottomRight, screen);
+        ActionOptions defineInsideAnchors = getActionOptions(ActionOptions.Illustrate.YES);
+        Matches matches = action.perform(defineInsideAnchors, boundaryImages);
         return matches.getDefinedRegion();
-    }
-
-    public Region getFromFileOld(String patternName, Image topLeft, Image bottomRight) {
-        File file = new File(BrobotSettings.screenshotPath + patternName);
-        String path = file.getAbsolutePath();
-        List<Match> topLeftMatches = getMatchesInFile(path, topLeft);
-        List<Match> bottomRightMatches = getMatchesInFile(path, bottomRight);
-        Location topLeftLocation = getLocationFromMatches(topLeftMatches, Position.Name.TOPLEFT);
-        Location bottomRightLocation = getLocationFromMatches(bottomRightMatches, Position.Name.BOTTOMRIGHT);
-        Region region = new Region(topLeftLocation, bottomRightLocation);
-        System.out.println(region); //--------------------------
-        return region;
     }
 
     private Location getLocationFromMatches(List<Match> matchList, Position.Name position) {
@@ -104,17 +88,6 @@ public class GetUsableArea {
             }
         }
         return new Location(region, position);
-    }
-
-    private List<Match> getMatchesInFile(String path, Image image) {
-        List<Match> matchList = new ArrayList<>();
-        image.getAllPatterns().forEach(p -> {
-            Finder f = new Finder(path);
-            f.findAll(p);
-            while (f.hasNext()) matchList.add(f.next());
-            f.destroy();
-        });
-        return matchList;
     }
 
 }

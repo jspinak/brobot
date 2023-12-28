@@ -2,12 +2,10 @@ package io.github.jspinak.brobot.analysis;
 
 import io.github.jspinak.brobot.datatypes.primitives.angles.Sector;
 import io.github.jspinak.brobot.datatypes.primitives.location.Location;
-import org.sikuli.script.Match;
+import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
-
-import static java.util.stream.Collectors.toMap;
 
 @Component
 public class Distance {

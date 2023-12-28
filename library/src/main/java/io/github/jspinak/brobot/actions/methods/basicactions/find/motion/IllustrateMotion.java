@@ -2,13 +2,13 @@ package io.github.jspinak.brobot.actions.methods.basicactions.find.motion;
 
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.SceneAnalysis;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.SceneAnalysisCollection;
+import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import io.github.jspinak.brobot.illustratedHistory.Illustrations;
 import io.github.jspinak.brobot.illustratedHistory.draw.DrawMatch;
 import io.github.jspinak.brobot.imageUtils.MatOps3d;
 import io.github.jspinak.brobot.imageUtils.MatVisualize;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Scalar;
-import org.sikuli.script.Match;
 import org.springframework.stereotype.Component;
 
 import java.util.List;

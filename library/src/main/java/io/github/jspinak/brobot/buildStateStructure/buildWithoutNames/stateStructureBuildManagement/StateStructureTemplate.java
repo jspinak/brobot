@@ -1,6 +1,5 @@
 package io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.stateStructureBuildManagement;
 
-import io.github.jspinak.brobot.datatypes.primitives.image.Image;
 import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
 import io.github.jspinak.brobot.datatypes.primitives.location.Position;
 import lombok.Getter;

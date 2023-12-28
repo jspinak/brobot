@@ -28,27 +28,26 @@ public class MultipleDrags {
     }
 
     // not working. mouseMove is somehow frozen after mouseDown
-    private void doMultipleDrags(Matches matches, ActionOptions actionOptions, ObjectCollection... objectCollections) {
-        ObjectCollection startColl = getStartingPoint(matches, actionOptions, objectCollections);
+    private void doMultipleDrags(Matches matches, ObjectCollection... objectCollections) {
+        ObjectCollection startColl = getStartingPoint(matches, objectCollections);
         if (startColl.isEmpty()) return;
         MultipleActionsObject mao = new MultipleActionsObject();
-        mao.addActionOptionsObjectCollectionPair(actionOptionsForDrag.getMove(actionOptions), startColl);
+        mao.addActionOptionsObjectCollectionPair(actionOptionsForDrag.getMove(matches.getActionOptions()), startColl);
         mao.addActionOptionsObjectCollectionPair(
-                actionOptionsForDrag.getMouseDown(actionOptions), startColl);
+                actionOptionsForDrag.getMouseDown(matches.getActionOptions()), startColl);
         int len = objectCollections.length;
         for (int i = 1; i < len; i++) {
             mao.addActionOptionsObjectCollectionPair(
-                    actionOptionsForDrag.getMove(actionOptions), objectCollections[i]);
+                    actionOptionsForDrag.getMove(matches.getActionOptions()), objectCollections[i]);
         }
         mao.addActionOptionsObjectCollectionPair(
-                actionOptionsForDrag.getMouseUp(actionOptions), objectCollections[len - 1]);
+                actionOptionsForDrag.getMouseUp(matches.getActionOptions()), objectCollections[len - 1]);
         //mao.print();
         multipleActions.perform(mao);
     }
 
-    private ObjectCollection getStartingPoint(Matches matches, ActionOptions actionOptions,
-                                              ObjectCollection... objectCollections) {
-        Optional<Location> optStartLoc = getDragLocation.getFromLocation(matches, actionOptions, objectCollections);
+    private ObjectCollection getStartingPoint(Matches matches, ObjectCollection... objectCollections) {
+        Optional<Location> optStartLoc = getDragLocation.getFromLocation(matches, objectCollections);
         if (optStartLoc.isEmpty()) return new ObjectCollection.Builder().build();
         return new ObjectCollection.Builder()
                 .withLocations(optStartLoc.get())

@@ -25,29 +25,29 @@ import java.util.Arrays;
 @Component
 public class ConfirmedFinds implements ActionInterface {
 
-    private Find find;
-    private GetSceneAnalysisCollection getSceneAnalysisCollection;
+    private final Find find;
+    private final GetSceneAnalysisCollection getSceneAnalysisCollection;
 
     public ConfirmedFinds(Find find, GetSceneAnalysisCollection getSceneAnalysisCollection) {
         this.find = find;
         this.getSceneAnalysisCollection = getSceneAnalysisCollection;
     }
 
-    public void perform(Matches matches, ActionOptions actionOptions, ObjectCollection... objectCollections) {
+    public void perform(Matches matches, ObjectCollection... objectCollections) {
         if (objectCollections.length == 0) return;
         SceneAnalysisCollection sceneAnalysisCollection = getSceneAnalysisCollection.
-                get(Arrays.asList(objectCollections),1, 0, actionOptions);
-        find.perform(matches, actionOptions, objectCollections);
+                get(Arrays.asList(objectCollections),1, 0, matches.getActionOptions());
+        find.perform(matches, objectCollections);
         matches.setSceneAnalysisCollection(sceneAnalysisCollection);
         if (matches.isEmpty()) {
             Report.println("no matches.");
             return;
         }
-        for (int i=1; i<actionOptions.getFindActions().size(); i++) {
-            setSearchRegions(matches, actionOptions);
-            actionOptions.setFind(actionOptions.getFindActions().get(i));
+        for (int i=1; i<matches.getActionOptions().getFindActions().size(); i++) {
+            setSearchRegions(matches);
+            matches.getActionOptions().setFind(matches.getActionOptions().getFindActions().get(i));
             Matches matches2 = new Matches();
-            find.perform(matches2, actionOptions, objectCollections);
+            find.perform(matches2, objectCollections);
             matches = matches.getConfirmedMatches(matches2);
             matches.addNonMatchResults(matches2);
             Report.println("# confirmed finds: " + matches.size());
@@ -60,9 +60,9 @@ public class ConfirmedFinds implements ActionInterface {
         return objectCollections[index];
     }
 
-    private void setSearchRegions(Matches matches, ActionOptions actionOptions) {
+    private void setSearchRegions(Matches matches) {
         SearchRegions searchRegions = new SearchRegions();
         searchRegions.addSearchRegions(matches.getMatchRegions());
-        actionOptions.setSearchRegions(searchRegions);
+        matches.getActionOptions().setSearchRegions(searchRegions);
     }
 }

@@ -2,10 +2,11 @@ package io.github.jspinak.brobot.actions.methods.basicactions.find.motion;
 
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.actions.methods.MatchOps;
-import io.github.jspinak.brobot.actions.methods.basicactions.find.SelectRegions;
+import io.github.jspinak.brobot.actions.methods.basicactions.find.matchManagement.SelectRegions;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.GetSceneAnalysisCollection;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.SceneAnalysisCollection;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.contours.Contours;
+import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
@@ -13,7 +14,6 @@ import io.github.jspinak.brobot.imageUtils.MatVisualize;
 import io.github.jspinak.brobot.reports.Report;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.MatVector;
-import org.sikuli.script.Match;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -29,22 +29,21 @@ public class FindRegionsOfMotion {
     private final GetSceneAnalysisCollection getSceneAnalysisCollection;
     private final SelectRegions selectRegions;
     private final FindDynamicPixels findDynamicPixels;
-    private final IllustrateMotion illustrateMotion;
     private final MatchOps matchOps;
     private final MatVisualize matVisualize;
 
     public FindRegionsOfMotion(GetSceneAnalysisCollection getSceneAnalysisCollection,
                                SelectRegions selectRegions, FindDynamicPixels findDynamicPixels,
-                               IllustrateMotion illustrateMotion, MatchOps matchOps, MatVisualize matVisualize) {
+                               MatchOps matchOps, MatVisualize matVisualize) {
         this.getSceneAnalysisCollection = getSceneAnalysisCollection;
         this.selectRegions = selectRegions;
         this.findDynamicPixels = findDynamicPixels;
-        this.illustrateMotion = illustrateMotion;
         this.matchOps = matchOps;
         this.matVisualize = matVisualize;
     }
 
-    public void find(Matches matches, ActionOptions actionOptions, List<ObjectCollection> objectCollections) {
+    public void find(Matches matches, List<ObjectCollection> objectCollections) {
+        ActionOptions actionOptions = matches.getActionOptions();
         int scenes = actionOptions.getTimesToRepeatIndividualAction();
         double pause = actionOptions.getPauseBetweenIndividualActions();
         SceneAnalysisCollection sceneAnalysisCollection = getSceneAnalysisCollection.get(
@@ -62,7 +61,7 @@ public class FindRegionsOfMotion {
             sA.getIllustrations().setMotion(sceneAnalysisCollection.getResults());
             sA.getIllustrations().setMotionWithMatches(sA.getScene().getBgr());
         });
-        matchOps.addGenericMatchObjects(dynamicPixelRegions, matches, actionOptions); // this is for the last scene
+        matchOps.addMatchListToMatches(dynamicPixelRegions, matches); // this is for the last scene
         matchOps.limitNumberOfMatches(matches, actionOptions);
         matches.setPixelMatches(sceneAnalysisCollection.getResults()); // pixelMatches = dynamic pixels
     }

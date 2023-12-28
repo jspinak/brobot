@@ -15,13 +15,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class DefineOutsideAnchors implements ActionInterface {
 
-    private DefineHelper adjustRegion;
-
-    public DefineOutsideAnchors(DefineHelper adjustRegion) {
-        this.adjustRegion = adjustRegion;
-    }
-
-    public void perform(Matches matches, ActionOptions actionOptions, ObjectCollection... objectCollections) {
+    public void perform(Matches matches, ObjectCollection... objectCollections) {
         // code here
     }
 }
