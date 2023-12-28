@@ -11,6 +11,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ *
+ * Last used in version 1.0.6. In version 1.0.7, color analysis is done on Pattern objects.
+ *
  * A DynamicImage is an image that does not have a fixed pattern, and thus cannot be accurately found
  * with SikuliX or OpenCV pattern matching. These are images that represent objects, such as cats or dogs,
  * in the real world or in 3d environments such as role-playing-games. These objects are typically

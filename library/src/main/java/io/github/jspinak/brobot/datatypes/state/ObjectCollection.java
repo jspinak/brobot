@@ -34,21 +34,21 @@ import static io.github.jspinak.brobot.datatypes.state.NullState.Name.NULL;
 public class ObjectCollection {
 
     private List<StateLocation> stateLocations = new ArrayList<>();
-    private List<StateImage> stateImage_s = new ArrayList<>();
+    private List<StateImage> stateImages = new ArrayList<>();
     private List<StateRegion> stateRegions = new ArrayList<>();
     private List<StateString> stateStrings = new ArrayList<>();
     private List<Matches> matches = new ArrayList<>();
-    private List<Pattern> scene_s = new ArrayList<>();
+    private List<Pattern> scenes = new ArrayList<>();
 
     private ObjectCollection() {}
 
     public boolean isEmpty() {
         return stateLocations.isEmpty()
-                && stateImage_s.isEmpty()
+                && stateImages.isEmpty()
                 && stateRegions.isEmpty()
                 && stateStrings.isEmpty()
                 && matches.isEmpty()
-                && scene_s.isEmpty();
+                && scenes.isEmpty();
     }
 
     /**
@@ -58,7 +58,7 @@ public class ObjectCollection {
      * well as for performing mocks.
      */
     public void resetTimesActedOn() {
-        stateImage_s.forEach(sio -> sio.setTimesActedOn(0));
+        stateImages.forEach(sio -> sio.setTimesActedOn(0));
         stateLocations.forEach(sio -> sio.setTimesActedOn(0));
         stateRegions.forEach(sio -> sio.setTimesActedOn(0));
         stateStrings.forEach(sio -> sio.setTimesActedOn(0));
@@ -66,10 +66,10 @@ public class ObjectCollection {
     }
 
     public String getFirstObjectName() {
-        if (!stateImage_s.isEmpty()) {
-            if (!stateImage_s.get(0).getName().isEmpty()) return stateImage_s.get(0).getName();
-            else if (!stateImage_s.get(0).getPatterns().get(0).getFilename().isEmpty())
-                return stateImage_s.get(0).getPatterns().get(0).getFilename();
+        if (!stateImages.isEmpty()) {
+            if (!stateImages.get(0).getName().isEmpty()) return stateImages.get(0).getName();
+            else if (!stateImages.get(0).getPatterns().get(0).getFilename().isEmpty())
+                return stateImages.get(0).getPatterns().get(0).getFilename();
         }
         if (!stateLocations.isEmpty() && !stateLocations.get(0).getName().isEmpty())
             return stateLocations.get(0).getName();
@@ -80,7 +80,7 @@ public class ObjectCollection {
     }
 
     public boolean contains(StateImage stateImage) {
-        for (StateImage si : stateImage_s) {
+        for (StateImage si : stateImages) {
             if (stateImage.equals(si)) return true;
         }
         return false;
@@ -102,10 +102,10 @@ public class ObjectCollection {
         return matches.contains(m);
     }
 
-    public boolean contains(Pattern sc) { return scene_s.contains(sc); }
+    public boolean contains(Pattern sc) { return scenes.contains(sc); }
 
     public boolean equals(ObjectCollection objectCollection) {
-        for (StateImage si : stateImage_s) {
+        for (StateImage si : stateImages) {
             if (!objectCollection.contains(si)) {
                 //Report.println(si.getName()+" is not in the objectCollection. ");
                 return false;
@@ -135,7 +135,7 @@ public class ObjectCollection {
                 return false;
             }
         }
-        for (Pattern sc : scene_s) {
+        for (Pattern sc : scenes) {
             if (!objectCollection.contains(sc)) {
                 //Report.println(" matches different ");
                 return false;
@@ -146,13 +146,13 @@ public class ObjectCollection {
 
     public Set<String> getAllImageFilenames() {
         Set<String> filenames = new HashSet<>();
-        stateImage_s.forEach(sI -> sI.getPatterns().forEach(p -> filenames.add(p.getFilename())));
+        stateImages.forEach(sI -> sI.getPatterns().forEach(p -> filenames.add(p.getFilename())));
         return filenames;
     }
 
     public Set<String> getAllOwnerStates() {
         Set<String> states = new HashSet<>();
-        stateImage_s.forEach(si -> states.add(si.getOwnerStateName()));
+        stateImages.forEach(si -> states.add(si.getOwnerStateName()));
         stateLocations.forEach(si -> states.add(si.getOwnerStateName()));
         stateRegions.forEach(si -> states.add(si.getOwnerStateName()));
         stateStrings.forEach(si -> states.add(si.getOwnerStateName()));
@@ -279,12 +279,12 @@ public class ObjectCollection {
 
         public ObjectCollection build() {
             ObjectCollection objectCollection = new ObjectCollection();
-            objectCollection.stateImage_s = stateImage_s;
+            objectCollection.stateImages = stateImage_s;
             objectCollection.stateLocations = stateLocations;
             objectCollection.stateRegions = stateRegions;
             objectCollection.stateStrings = stateStrings;
             objectCollection.matches = matches;
-            objectCollection.scene_s = scene_s;
+            objectCollection.scenes = scene_s;
             return objectCollection;
         }
     }
