@@ -118,9 +118,9 @@ public class ActionExecution {
         if (Report.minReportingLevel(Report.OutputLevel.LOW)) {
             Report.format("|%s ", actionOptions.getAction());
             if (objectCollections.length == 0) return;
-            List<StateImage> stImgs = objectCollections[0].getStateImage_s();
+            List<StateImage> stImgs = objectCollections[0].getStateImages();
             int lastIndex = stImgs.size() - 1;
-            for (StateImage sio : objectCollections[0].getStateImage_s()) {
+            for (StateImage sio : objectCollections[0].getStateImages()) {
                 Report.format("%s.%s", sio.getOwnerStateName(), sio.getName());
                 String ending = stImgs.indexOf(sio) != lastIndex? "," : "|";
                 Report.print(ending+" ");
