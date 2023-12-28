@@ -85,7 +85,7 @@ public class IllustrationFilename {
         ActionOptions.Action action = actionOptions.getAction();
         List<String> names = new ArrayList<>();
         for (ObjectCollection objectCollection : objectCollections) {
-            names.addAll(objectCollection.getStateImage_s().stream().map(StateImage::getName).toList());
+            names.addAll(objectCollection.getStateImages().stream().map(StateImage::getName).toList());
         }
         String allNames = String.join("", names);
         String suffix = action.toString();

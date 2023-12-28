@@ -80,7 +80,7 @@ public class GetScenes {
             return scenes;
         }
         // If scenes are passed as parameters, use them.
-        else for (Pattern pattern : objectCollections.get(0).getScene_s()) {
+        else for (Pattern pattern : objectCollections.get(0).getScenes()) {
             String filename = pattern.getFilename();
             String absolutePath = new File(filename).getAbsolutePath();
             Mat bgr = getImageJavaCV.getMatFromFilename(absolutePath, BGR);
@@ -119,7 +119,7 @@ public class GetScenes {
     private boolean isOkToTakeScreenshot(ActionOptions actionOptions, ObjectCollection... objectCollections) {
         if (BrobotSettings.mock) return false;
         if (objectCollections.length == 0) return false;
-        if (!objectCollections[0].getScene_s().isEmpty()) return false;
+        if (!objectCollections[0].getScenes().isEmpty()) return false;
         ActionOptions.Action action = actionOptions.getAction();
         ActionOptions.Find find = actionOptions.getFind();
         if (find == ActionOptions.Find.COLOR || find == ActionOptions.Find.HISTOGRAM

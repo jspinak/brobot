@@ -26,7 +26,7 @@ public class StateText {
 
     private StateText() {}
 
-    public boolean defined() { return text != null && text.length() > 0; }
+    public boolean defined() { return text != null && !text.isEmpty(); }
 
     public static class Builder {
         private String name;

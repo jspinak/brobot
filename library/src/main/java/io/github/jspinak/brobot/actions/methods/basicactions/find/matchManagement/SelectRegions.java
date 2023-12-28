@@ -62,7 +62,7 @@ public class SelectRegions {
         if (actionOptions.getSearchRegions().isDefined())
             return actionOptions.getSearchRegions().getAllRegions();
         for (ObjectCollection objColl : objectCollections) {
-            for (StateImage stateImage : objColl.getStateImage_s()) {
+            for (StateImage stateImage : objColl.getStateImages()) {
                 regions.addAll(stateImage.getAllSearchRegions());
             }
         }

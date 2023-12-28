@@ -76,7 +76,7 @@ public class GetSceneAnalysisCollection {
                     state -> toClassify.addAll(state.getStateImages()));
         }
         for (int i=1; i<objColls.size(); i++) {
-            toClassify.addAll(objColls.get(i).getStateImage_s());
+            toClassify.addAll(objColls.get(i).getStateImages());
         }
         return toClassify;
     }
@@ -84,7 +84,7 @@ public class GetSceneAnalysisCollection {
     public Set<StateImage> getTargetImages(List<ObjectCollection> images) {
         Set<StateImage> toClassify = new HashSet<>();
         if (!images.isEmpty() && !images.get(0).isEmpty()) {
-            toClassify.addAll(images.get(0).getStateImage_s());
+            toClassify.addAll(images.get(0).getStateImages());
         }
         return toClassify;
     }

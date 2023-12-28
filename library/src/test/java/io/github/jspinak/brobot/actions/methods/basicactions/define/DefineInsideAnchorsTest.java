@@ -68,7 +68,7 @@ class DefineInsideAnchorsTest {
         defineInsideAnchors.perform(matches, objectCollection);
         System.out.println(matches.getMatchList());
         System.out.println(matches.getDefinedRegion());
-        System.out.println(objectCollection.getScene_s().get(0));
+        System.out.println(objectCollection.getScenes().get(0));
         assertFalse(matches.isEmpty());
     }
 }

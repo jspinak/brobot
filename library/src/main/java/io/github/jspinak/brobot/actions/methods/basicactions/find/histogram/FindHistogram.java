@@ -56,7 +56,7 @@ public class FindHistogram {
         List<Scene> scenes = getScenes.getScenes(actionOptions, objectCollections);
         SceneAnalysisCollection sceneAnalysisCollection = new SceneAnalysisCollection();
         List<Match> matchObjects = new ArrayList<>();
-        objectCollections.get(0).getStateImage_s().forEach(img ->
+        objectCollections.get(0).getStateImages().forEach(img ->
                 scenes.forEach(scene -> {
                     matchObjects.addAll(forOneImage(actionOptions, img, scene.getHsv(), actionId));
                     sceneAnalysisCollection.add(new SceneAnalysis(new ArrayList<>(), scene));

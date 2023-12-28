@@ -68,8 +68,8 @@ public class DragSimple implements ActionInterface {
             return;
         }
         ObjectCollection objColl = objectCollections[0]; // use only the first object collection
-        if (!objColl.getStateImage_s().isEmpty()) { // use only the first object
-            find.perform(matches, objColl.getStateImage_s().get(0).asObjectCollection());
+        if (!objColl.getStateImages().isEmpty()) { // use only the first object
+            find.perform(matches, objColl.getStateImages().get(0).asObjectCollection());
             if (matches.isEmpty()) return;
             return;
         }
@@ -99,12 +99,12 @@ public class DragSimple implements ActionInterface {
         }
         ObjectCollection objColl = objectCollections[0]; // use only the first object collection
         int objectIndexNeeded = 1;
-        if (objColl.getStateImage_s().size() > 1) { // use only the second object
-            find.perform(matches, objColl.getStateImage_s().get(1).asObjectCollection());
+        if (objColl.getStateImages().size() > 1) { // use only the second object
+            find.perform(matches, objColl.getStateImages().get(1).asObjectCollection());
             if (matches.isEmpty()) return;
             return;
         }
-        if (objColl.getStateImage_s().size() == 1) objectIndexNeeded = 0;
+        if (objColl.getStateImages().size() == 1) objectIndexNeeded = 0;
         if (objColl.getStateRegions().size() > objectIndexNeeded) {
             Location loc = objColl.getStateRegions().get(objectIndexNeeded).getSearchRegion().getLocation();
             loc.setX(loc.getX() + actionOptions.getDragToOffsetX());
