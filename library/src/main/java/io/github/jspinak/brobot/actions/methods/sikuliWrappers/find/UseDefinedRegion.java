@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 public class UseDefinedRegion {
 
     public Matches useRegion(Matches matches, ObjectCollection objectCollection) {
-        for (StateImage si : objectCollection.getStateImage_s()) {
+        for (StateImage si : objectCollection.getStateImages()) {
             for (Pattern pattern : si.getPatterns()) {
                 for (Region region : pattern.getRegions()) {
                     matches.add(

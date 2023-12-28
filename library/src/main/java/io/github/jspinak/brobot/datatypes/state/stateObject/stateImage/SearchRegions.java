@@ -28,10 +28,6 @@ public class SearchRegions {
         return fixedRegion.isDefined();
     }
 
-    public void setFixedRegion(Region region) {
-        fixedRegion = region;
-    }
-
     public void resetFixedRegion() {
         fixedRegion = new Region();
     }
