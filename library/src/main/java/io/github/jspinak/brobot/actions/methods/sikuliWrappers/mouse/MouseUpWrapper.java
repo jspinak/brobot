@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class MouseUpWrapper {
 
-    private ClickType clickType;
+    private final ClickType clickType;
     private final Wait wait;
 
     public MouseUpWrapper(ClickType clickType, Wait wait) {

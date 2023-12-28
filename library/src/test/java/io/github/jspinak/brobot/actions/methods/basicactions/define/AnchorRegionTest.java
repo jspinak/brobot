@@ -2,7 +2,7 @@ package io.github.jspinak.brobot.actions.methods.basicactions.define;
 
 import io.github.jspinak.brobot.BrobotTestApplication;
 import io.github.jspinak.brobot.datatypes.primitives.location.Position;
-import io.github.jspinak.brobot.datatypes.primitives.match.MatchObject;
+import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.StateRegion;
@@ -37,14 +37,16 @@ class AnchorRegionTest {
                 .withSearchRegion(1800,900,100,20)
                 .addAnchor(Position.Name.BOTTOMRIGHT, Position.Name.TOPRIGHT)
                 .build();
-        MatchObject m1;
-        MatchObject m2;
-        try {
-            m1 = new MatchObject(reg1.getSearchRegion().toMatch(), reg1, 0);
-            m2 = new MatchObject(reg2.getSearchRegion().toMatch(), reg2, 0);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        Match m1;
+        Match m2;
+        m1 = new Match.Builder()
+                .setMatch(reg1.getSearchRegion())
+                .setStateObject(reg1)
+                .build();
+        m2 = new Match.Builder()
+                .setMatch(reg2.getSearchRegion())
+                .setStateObject(reg2)
+                .build();
         matches.add(m1);
         matches.add(m2);
         anchorRegion.fitRegionToAnchors(definedBorders, region, matches);

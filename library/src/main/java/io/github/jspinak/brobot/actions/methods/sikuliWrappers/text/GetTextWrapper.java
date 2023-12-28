@@ -1,7 +1,7 @@
 package io.github.jspinak.brobot.actions.methods.sikuliWrappers.text;
 
 import io.github.jspinak.brobot.actions.BrobotSettings;
-import io.github.jspinak.brobot.datatypes.primitives.match.MatchObject;
+import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.mock.MockText;
 import org.springframework.stereotype.Component;
@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class GetTextWrapper {
 
-    private MockText mockText;
+    private final MockText mockText;
 
     public GetTextWrapper(MockText mockText) {
         this.mockText = mockText;
@@ -28,19 +28,19 @@ public class GetTextWrapper {
       thus rendering the inherent probability in the MatchHistory irrelevant.
     */
     public void getAllText(Matches matches) {
-        matches.getMatchObjects().forEach(mO -> addString(matches, mO));
+        matches.getMatchList().forEach(mO -> setText(matches, mO));
     }
 
-    private void addString(Matches matches, MatchObject matchObject) {
-        String str = getTextFromMatch(matchObject);
+    private void setText(Matches matches, Match match) {
+        String str = getTextFromMatch(match);
         if (str.isEmpty()) return;
         matches.addString(str);
-        matchObject.addString(str);
-        matches.getDanglingSnapshots().addString(matchObject.getStateObject(), str);
+        match.setText(str);
+        matches.getDanglingSnapshots().setString(match, str);
     }
 
-    public String getTextFromMatch(MatchObject matchObject) {
-        if (BrobotSettings.mock) return mockText.getString(matchObject.getStateObject());
-        return matchObject.getMatch().text();
+    public String getTextFromMatch(Match match) {
+        if (BrobotSettings.mock) return mockText.getString(match);
+        return match.getText();
     }
 }

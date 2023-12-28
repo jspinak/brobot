@@ -1,5 +1,6 @@
 package io.github.jspinak.brobot.datatypes.primitives.location;
 
+import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.StateLocation;
@@ -7,8 +8,6 @@ import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.St
 import io.github.jspinak.brobot.reports.Report;
 import lombok.Getter;
 import lombok.Setter;
-import org.sikuli.script.Match;
-import org.sikuli.script.Screen;
 
 import java.util.Optional;
 
@@ -109,13 +108,8 @@ public class Location {
     public Location(Match match) {
         this.region = new Region(match);
         double percentOfW, percentOfH;
-        //Report.println("target of match: "+match.getTarget().x + " " + match.getTarget().y);
-        //Report.println("region of match: "+region.x + " " + region.y + " " + region.w + " " + region.h);
-        //Report.println((double)match.getTarget().x + " " + (double)region.x + " " + (double)region.w);
-        //Report.println((double)match.getTarget().y + " " + (double)region.y + " " + (double)region.h);
         percentOfW = ((double)match.getTarget().x - (double)region.x) / (double)region.w;
         percentOfH = ((double)match.getTarget().y - (double)region.y) / (double)region.h;
-        //Report.println("percent of W,H: "+percentOfW+" "+percentOfH);
         position = new Position(percentOfW, percentOfH);
         definedByXY = false;
     }
@@ -211,12 +205,12 @@ public class Location {
     }
 
     public Match toMatch() {
-        Match match = new Match(getX(), getY(), 1, 1,1, new Screen());
+        Match match = new Match(getX(), getY(), 1, 1);
         match.setTarget(getX(), getY());
         return match;
     }
 
-    public StateLocation inNullState() {
+    public StateLocation asStateLocationInNullState() {
         return new StateLocation.Builder()
                 .inState(NULL.toString())
                 .withLocation(this)

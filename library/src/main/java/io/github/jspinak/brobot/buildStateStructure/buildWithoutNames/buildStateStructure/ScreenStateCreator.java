@@ -5,10 +5,10 @@ import io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.screenObse
 import io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.screenObservations.ScreenObservations;
 import io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.screenObservations.TransitionImage;
 import io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.screenObservations.TransitionImageRepo;
-import io.github.jspinak.brobot.datatypes.primitives.image.Image;
+import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.state.State;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.imageUtils.ImageUtils;
 import io.github.jspinak.brobot.imageUtils.MatVisualize;
 import io.github.jspinak.brobot.manageStates.StateTransition;
@@ -94,10 +94,10 @@ public class ScreenStateCreator {
 
     /**
      * 1. get the from and to screens for an image
-     * @param sio StateImage
+     * @param stateImage StateImage
      */
-    private void setTransitionStatesToExitAndEnter(StateImage sio) {
-        TransitionImage img = sio.getTransitionImage();
+    private void setTransitionStatesToExitAndEnter(StateImage stateImage) {
+        TransitionImage img = stateImage.getTransitionImage();
         if (img.getTransitionsTo().isEmpty()) return; // no transitions
         int fromIndex = img.getScreensFound().get(0); // get the correct screen number
         Optional<ScreenObservation> fromScreen = screenObservations.get(fromIndex); // for simplicity, i'm using the first screen the image was recorded on
@@ -114,7 +114,7 @@ public class ScreenStateCreator {
         elementsInFromOnly.remove(fromIndex); // it's exited automatically unless specified otherwise
         Set<String> toExit = new HashSet<>();
         for (Integer i : elementsInFromOnly) toExit.add(Integer.toString(i));
-        sio.setStatesToExit(toExit);
+        stateImage.setStatesToExit(toExit);
 
         // Find elements in b that are not in a
         Set<Integer> elementsInToOnly = new HashSet<>(to.getStates());
@@ -122,7 +122,7 @@ public class ScreenStateCreator {
         if (to.getStates().contains(fromIndex)) elementsInToOnly.add(fromIndex); // if the owner state doesn't disappear, you need to specify this in the transition (it's not the default)
         Set<String> toEnter = new HashSet<>();
         for (Integer i : elementsInToOnly) toEnter.add(Integer.toString(i));
-        sio.setStatesToEnter(toEnter);
+        stateImage.setStatesToEnter(toEnter);
     }
 
     private void addToImageSet(List<ImageSetsAndAssociatedScreens> imagesScreens,
@@ -150,20 +150,20 @@ public class ScreenStateCreator {
             if (transitionImageRepo.getImages().size() <= imgIndex || imgIndex < 0) {
                 System.out.println("image index not in transitionImageRepo: " + imgIndex);
             } else {
-                Mat matchImage = transitionImageRepo.getImages().get(imgIndex).getImage();
+                Mat matchMat = transitionImageRepo.getImages().get(imgIndex).getImage();
                 String imageName = Integer.toString(transitionImageRepo.getImages().get(imgIndex).getIndexInRepo());
-                Image image = imageUtils.matToImage(matchImage, Settings.BundlePath + "/" + imageName);
                 TransitionImage transitionImage = transitionImageRepo.getImages().get(imgIndex);
                 Region reg = transitionImage.getRegion();
+                Pattern pattern = imageUtils.matToPattern(matchMat, Settings.BundlePath + "/" + imageName);
+                pattern.addMatchSnapshot(reg.x, reg.y, reg.w, reg.h);
                 StateImage sio = new StateImage.Builder()
-                        .withImage(image)
+                        .addPattern(pattern)
                         /*
                         This gives us the transition to the screenshot, not to specific states.
                         To get the states, compare the states in the from-screenshot and the to-screenshot.
                         State differences between the two can be recorded in the transition function.
                          */
-                        .withTransitionImage(transitionImage)
-                        .addSnapshot(reg.x, reg.y, reg.w, reg.h)
+                        .setTransitionImage(transitionImage)
                         .build();
                 stateImages.add(sio);
             }

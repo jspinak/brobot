@@ -1,10 +1,10 @@
 package io.github.jspinak.brobot.actions.actionExecution;
 
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.reports.Report;
 import org.springframework.stereotype.Component;
 
@@ -73,7 +73,7 @@ public class Action {
      * @return a Matches object with the results of the operation.
      */
     public Matches perform(ActionOptions actionOptions, StateImage... stateImages) {
-        return perform(actionOptions, new ObjectCollection.Builder().withImages(stateImages).build());
+        return perform(actionOptions, new ObjectCollection.Builder().withImage_s(stateImages).build());
     }
 
     /**

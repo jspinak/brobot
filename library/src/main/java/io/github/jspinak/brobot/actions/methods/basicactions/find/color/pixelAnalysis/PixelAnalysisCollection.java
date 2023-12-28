@@ -16,7 +16,6 @@ import java.util.Map;
 import static io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.PixelAnalysisCollection.Analysis.*;
 import static io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles.ColorCluster.ColorSchemaName.BGR;
 import static io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles.ColorCluster.ColorSchemaName.HSV;
-import static org.bytedeco.opencv.global.opencv_imgproc.cvtColor;
 
 /**
  * Contains a series of PixelAnalysis objects that comprise all analysis of a {scene, StateImage} pair.

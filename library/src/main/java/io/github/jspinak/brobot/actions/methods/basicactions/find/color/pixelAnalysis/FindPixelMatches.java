@@ -2,15 +2,15 @@ package io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAn
 
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.actions.methods.MatchOps;
-import io.github.jspinak.brobot.actions.methods.basicactions.find.SelectRegions;
+import io.github.jspinak.brobot.actions.methods.basicactions.find.matchManagement.SelectRegions;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles.ColorSchema;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.contours.Contours;
+import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.imageUtils.ShowScoring;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Rect;
-import org.sikuli.script.Match;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -19,14 +19,13 @@ import java.util.List;
 import static io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.SceneAnalysis.Analysis.BGR_FROM_INDICES_2D;
 import static io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles.ColorCluster.ColorSchemaName.BGR;
 import static io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles.ColorCluster.ColorSchemaName.HSV;
-import static org.bytedeco.opencv.global.opencv_imgproc.boundingRect;
 
 @Component
 public class FindPixelMatches {
 
-    private SelectRegions selectRegions;
-    private MatchOps matchOps;
-    private ShowScoring showScoring;
+    private final SelectRegions selectRegions;
+    private final MatchOps matchOps;
+    private final ShowScoring showScoring;
 
     public FindPixelMatches(SelectRegions selectRegions, MatchOps matchOps, ShowScoring showScoring) {
         this.selectRegions = selectRegions;
@@ -54,7 +53,7 @@ public class FindPixelMatches {
         if (!contours.getContours().isEmpty()) showScoring(contours, sceneAnalysis);
         Matches matches = new Matches();
         sceneAnalysis.setContours(contours);
-        matchOps.addMatchListToMatches(matchList, matches, sceneAnalysis.getStateImageObjects().get(0), actionOptions); //the matches will not have the correct StateImage if there is more than one
+        matchOps.addMatchListToMatches(matchList, matches);
         return matches;
     }
 

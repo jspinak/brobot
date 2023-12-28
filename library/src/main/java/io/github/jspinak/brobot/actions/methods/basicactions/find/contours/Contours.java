@@ -1,16 +1,15 @@
 package io.github.jspinak.brobot.actions.methods.basicactions.find.contours;
 
+import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import lombok.Getter;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.MatVector;
 import org.bytedeco.opencv.opencv_core.Rect;
 import org.bytedeco.opencv.opencv_core.Scalar;
-import org.sikuli.script.Match;
 
 import java.util.*;
 
-import static org.bytedeco.opencv.global.opencv_core.max;
 import static org.bytedeco.opencv.global.opencv_core.sumElems;
 import static org.bytedeco.opencv.global.opencv_imgproc.*;
 
@@ -146,7 +145,8 @@ public class Contours {
                 for (Rect partitionedContour : partitionedContours) {
                     double score = getContourScore(partitionedContour);
                     if (score > 0) { // score is 0 if the contour is not a match
-                        Match match = new Match(new Region(partitionedContour), score);
+                        Match match = new Match(new Region(partitionedContour));
+                        match.setScore(score);
                         matchMap.put(m, match);
                         m++;
                     }
@@ -189,7 +189,10 @@ public class Contours {
     public Match getContourAsMatch(Mat contour) {
         Rect rect = boundingRect(contour);
         double score = getContourScore(rect);
-        return new Match(new Region(rect), score);
+        return new Match.Builder()
+                .setMatch(rect)
+                .setScore(score)
+                .build();
     }
 
     public static class Builder {

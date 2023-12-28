@@ -2,8 +2,8 @@ package io.github.jspinak.brobot.actions.methods.basicactions.find.color.profile
 
 import io.github.jspinak.brobot.actions.BrobotSettings;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
-import io.github.jspinak.brobot.datatypes.primitives.location.Location;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
+import io.github.jspinak.brobot.datatypes.primitives.location.Location;
 import io.github.jspinak.brobot.imageUtils.GetImageJavaCV;
 import io.github.jspinak.brobot.imageUtils.MatBuilder;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -36,7 +36,7 @@ public class SetProfileMats {
      * @return Mat with the image files shown horizontally
      */
     public Mat getImagesMat(StateImage img) {
-        List<Mat> imgMats = getImage.getMatsFromImage(img, ColorCluster.ColorSchemaName.BGR);
+        List<Mat> imgMats = getImage.getMats(img, ColorCluster.ColorSchemaName.BGR);
         return new MatBuilder()
                 .setName(img.getName() + "_imgMats")
                 .setSubmatMaxHeight(imgsWH)
@@ -57,7 +57,7 @@ public class SetProfileMats {
     }
 
     public Mat getKmeansProfilesMat(StateImage img, int kMeans) {
-        List<Mat> profiles = img.getDynamicImage().getInsideKmeansProfiles().getColorProfileMats(
+        List<Mat> profiles = img.getKmeansProfilesAllSchemas().getColorProfileMats(
                 kMeans, new Size(imgsWH, imgsWH));
         return new MatBuilder()
                 .setName(img.getName() + "_kmeansProfile")
@@ -76,7 +76,7 @@ public class SetProfileMats {
     }
 
     public void setMats(StateImage img) {
-        img.getDynamicImage().setImagesMat(getImagesMat(img));
-        img.getDynamicImage().setProfilesMat(getProfilesMat(img));
+        img.setImagesMat(getImagesMat(img));
+        img.setProfilesMat(getProfilesMat(img));
     }
 }

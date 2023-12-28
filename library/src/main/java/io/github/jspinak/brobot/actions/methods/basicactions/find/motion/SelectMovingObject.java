@@ -1,8 +1,8 @@
 package io.github.jspinak.brobot.actions.methods.basicactions.find.motion;
 
 import io.github.jspinak.brobot.analysis.Distance;
+import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
-import org.sikuli.script.Match;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -11,7 +11,7 @@ import java.util.List;
 @Component
 public class SelectMovingObject {
 
-    private Distance distance;
+    private final Distance distance;
 
     public SelectMovingObject(Distance distance) {
         this.distance = distance;

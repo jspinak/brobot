@@ -16,13 +16,14 @@ import org.springframework.stereotype.Component;
 @Component
 public class DefineIncludingMatches implements ActionInterface {
 
-    private DefineHelper defineHelper;
+    private final DefineHelper defineHelper;
 
     public DefineIncludingMatches(DefineHelper defineHelper) {
         this.defineHelper = defineHelper;
     }
 
-    public void perform(Matches matches, ActionOptions actionOptions, ObjectCollection... objectCollections) {
+    public void perform(Matches matches, ObjectCollection... objectCollections) {
+        ActionOptions actionOptions = matches.getActionOptions();
         defineHelper.findMatches(matches, actionOptions, objectCollections);
         Region region = fitRegionToMatches(matches);
         defineHelper.adjust(region, actionOptions);
@@ -31,13 +32,13 @@ public class DefineIncludingMatches implements ActionInterface {
 
     private Region fitRegionToMatches(Matches matches) {
         if (matches.isEmpty()) return new Region();
-        Match firstMatch = matches.getMatches().get(0);
+        Match firstMatch = matches.getMatchList().get(0);
         int x = firstMatch.x;
         int y = firstMatch.y;
         int x2 = firstMatch.getTopRight().x;
         int y2 = firstMatch.getBottomLeft().y;
-        for (int i=1; i<matches.getMatches().size(); i++) {
-            Match match = matches.getMatches().get(i);
+        for (int i = 1; i<matches.getMatchList().size(); i++) {
+            Match match = matches.getMatchList().get(i);
             x = Math.min(x, match.x);
             y = Math.min(y, match.y);
             x2 = Math.max(x2, match.getTopRight().x);

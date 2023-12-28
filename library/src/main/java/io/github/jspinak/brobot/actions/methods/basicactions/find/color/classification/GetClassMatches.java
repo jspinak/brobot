@@ -2,16 +2,16 @@ package io.github.jspinak.brobot.actions.methods.basicactions.find.color.classif
 
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.actions.methods.MatchOps;
-import io.github.jspinak.brobot.actions.methods.basicactions.find.SelectRegions;
+import io.github.jspinak.brobot.actions.methods.basicactions.find.matchManagement.SelectRegions;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.PixelAnalysisCollection;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.SceneAnalysis;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.SceneAnalysisCollection;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.contours.Contours;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
+import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import org.bytedeco.opencv.opencv_core.Mat;
-import org.sikuli.script.Match;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -79,7 +79,7 @@ public class GetClassMatches {
                 sceneAnalysis.setContours(contours);
                 matches.addSceneAnalysis(sceneAnalysis);
                 List<Match> matchList = contours.getMatchList();
-                matchOps.addMatchListToMatches(matchList, matches, sio, actionOptions);
+                matchOps.addMatchListToMatches(matchList, matches);
             }
         }
         return matches;

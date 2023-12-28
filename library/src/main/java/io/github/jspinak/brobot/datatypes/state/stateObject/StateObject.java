@@ -15,13 +15,9 @@ public interface StateObject {
 
     String getName();
     String getOwnerStateName();
-    Position getPosition();
-    Anchors getAnchors();
     int getTimesActedOn(); // times per action. resets to 0 when action is complete.
     void addTimesActedOn();
     void setTimesActedOn(int times);
-    void setProbabilityExists(int probabilityExists);
     MatchHistory getMatchHistory();
-    void addSnapshot(MatchSnapshot matchSnapshot);
 
 }

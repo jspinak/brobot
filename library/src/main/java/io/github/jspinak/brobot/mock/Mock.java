@@ -1,20 +1,17 @@
 package io.github.jspinak.brobot.mock;
 
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
-import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.Scene;
 import io.github.jspinak.brobot.actions.methods.time.TimeWrapper;
 import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
-import io.github.jspinak.brobot.datatypes.primitives.match.MatchObject;
-import io.github.jspinak.brobot.datatypes.primitives.match.MatchObject_;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
+import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import io.github.jspinak.brobot.datatypes.primitives.match.MatchSnapshot;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.state.State;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.manageStates.StateMemory;
 import io.github.jspinak.brobot.reports.Report;
 import io.github.jspinak.brobot.services.StateService;
-import org.sikuli.script.Match;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -33,9 +30,9 @@ import static io.github.jspinak.brobot.actions.BrobotSettings.mockTimeDrag;
 @Component
 public class Mock {
 
-    private StateService stateService;
-    private MockFind mockFind;
-    private TimeWrapper timeWrapper;
+    private final StateService stateService;
+    private final MockFind mockFind;
+    private final TimeWrapper timeWrapper;
     private final StateMemory stateMemory;
 
     public Mock(StateService stateService, MockFind mockFind, TimeWrapper timeWrapper, StateMemory stateMemory) {
@@ -45,8 +42,7 @@ public class Mock {
         this.stateMemory = stateMemory;
     }
 
-    public Matches getMatches(StateImage stateImage, Region searchRegion,
-                              ActionOptions actionOptions) {
+    public Matches getMatches(StateImage stateImage, Region searchRegion, ActionOptions actionOptions) {
         Report.println("Finding " + stateImage.getName() + " in mock");
         timeWrapper.wait(actionOptions.getFind());
         timeWrapper.printNow();

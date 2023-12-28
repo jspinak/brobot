@@ -37,7 +37,7 @@ public class ClassificationLegend {
             Size sidebarEntrySize = new Size(labelWidth, labelHeight);
             Rect sidebarEntry = new Rect(x, y, labelWidth, labelHeight);
             Mat targetInSidebar = sidebar.apply(sidebarEntry);
-            Mat entryBGR = img.getDynamicImage().getInsideColorCluster().getMat(
+            Mat entryBGR = img.getColorCluster().getMat(
                     ColorCluster.ColorSchemaName.BGR, ColorInfo.ColorStat.MEAN, sidebarEntrySize);
             entryBGR.copyTo(targetInSidebar);
             i++;

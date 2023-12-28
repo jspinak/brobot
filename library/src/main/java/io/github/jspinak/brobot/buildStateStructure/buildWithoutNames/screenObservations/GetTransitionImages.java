@@ -1,10 +1,10 @@
 package io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.screenObservations;
 
+import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.imageUtils.GetImageJavaCV;
 import lombok.Setter;
 import org.bytedeco.opencv.opencv_core.Mat;
-import org.sikuli.script.Match;
 import org.sikuli.script.Screen;
 import org.springframework.stereotype.Component;
 
@@ -37,7 +37,8 @@ public class GetTransitionImages {
      */
     public List<TransitionImage> findAndCapturePotentialLinks(Region usableArea, List<Region> dynamicRegions) {
         List<TransitionImage> transitionImages = new ArrayList<>();
-        List<Match> potentialLinks = new Screen().findWords();
+        List<Match> potentialLinks = new ArrayList<>();
+        new Screen().findWords().forEach(match -> potentialLinks.add(new Match(match)));
         List<Match> usableLinks = getUsableLinks(potentialLinks, usableArea, dynamicRegions);
         for (int i=0; i<usableLinks.size(); i++) {
             TransitionImageHelper transitionImageHelper = createTransitionImage(i, usableLinks);

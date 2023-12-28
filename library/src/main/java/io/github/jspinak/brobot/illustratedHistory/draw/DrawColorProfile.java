@@ -19,8 +19,8 @@ import static org.bytedeco.opencv.global.opencv_imgproc.resize;
 
 @Component
 public class DrawColorProfile {
-    private GetImageJavaCV getImage;
-    private IllustrationFilename illustrationFilename;
+    private final GetImageJavaCV getImage;
+    private final IllustrationFilename illustrationFilename;
 
     private int imgsWH = 40;
     private int averageColorX = 42;
@@ -54,14 +54,14 @@ public class DrawColorProfile {
 
     private int getMaxFilenames(List<StateImage> imgs) {
         int maxFiles = 1;
-        for (StateImage img : imgs) maxFiles = Math.max(maxFiles, img.getImage().getFilenames().size());
+        for (StateImage img : imgs) maxFiles = Math.max(maxFiles, img.getPatterns().size());
         return maxFiles;
     }
 
     private void drawImage(Mat frame, StateImage img, int y) {
-        int amountOfFiles = img.getImage().getFilenames().size();
+        int amountOfFiles = img.getPatterns().size();
         for (int i=0; i<amountOfFiles; i++) {
-            String filename = img.getImage().getFilenames().get(i);
+            String filename = img.getPatterns().get(i).getFilename();
             Mat imgFile = getImage.getMatFromBundlePath(filename, BGR);
             Mat resizedDown = new Mat();
             double scaleDown = (double) imgsWH / Math.max(imgFile.cols(), imgFile.rows());

@@ -9,9 +9,9 @@ import io.github.jspinak.brobot.actions.methods.basicactions.captureAndReplay.re
 import io.github.jspinak.brobot.actions.methods.basicactions.captureAndReplay.replay.ReplayActionsXml;
 import io.github.jspinak.brobot.actions.methods.basicactions.captureAndReplay.replay.ReplayCollection;
 import io.github.jspinak.brobot.analysis.Distance;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.datatypes.primitives.location.Location;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.reports.Report;
 import org.springframework.stereotype.Component;
 
@@ -20,11 +20,11 @@ import java.util.List;
 @Component
 public class FindClosestAndReplay {
 
-    private Action action;
-    private Distance distance;
-    private ReadXmlScenes readXmlScenes;
-    private GetXmlActions getXmlActions;
-    private ReplayActionsXml replayActionsXml;
+    private final Action action;
+    private final Distance distance;
+    private final ReadXmlScenes readXmlScenes;
+    private final GetXmlActions getXmlActions;
+    private final ReplayActionsXml replayActionsXml;
 
     public FindClosestAndReplay(Action action, Distance distance, ReadXmlScenes readXmlScenes,
                                 GetXmlActions getXmlActions, ReplayActionsXml replayActionsXml) {

@@ -16,13 +16,14 @@ import org.springframework.stereotype.Component;
 @Component
 public class KeyUp implements ActionInterface {
 
-    private KeyUpWrapper keyUpWrapper;
+    private final KeyUpWrapper keyUpWrapper;
 
     public KeyUp(KeyUpWrapper keyUpWrapper) {
         this.keyUpWrapper = keyUpWrapper;
     }
 
-    public void perform(Matches matches, ActionOptions actionOptions, ObjectCollection... objectCollections) {
+    public void perform(Matches matches, ObjectCollection... objectCollections) {
+        ActionOptions actionOptions = matches.getActionOptions();
         if (nothingToRelease(actionOptions, objectCollections)) keyUpWrapper.release(); // releases all keys
         else {
             for (StateString stateString : objectCollections[0].getStateStrings()) {
