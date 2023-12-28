@@ -2,8 +2,8 @@ package io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAn
 
 import io.github.jspinak.brobot.actions.BrobotSettings;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
-import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
+import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import io.github.jspinak.brobot.manageStates.StateMemory;
 import io.github.jspinak.brobot.services.StateService;
 import org.springframework.stereotype.Component;
@@ -76,7 +76,7 @@ public class GetSceneAnalysisCollection {
                     state -> toClassify.addAll(state.getStateImages()));
         }
         for (int i=1; i<objColls.size(); i++) {
-            toClassify.addAll(objColls.get(i).getStateImages());
+            toClassify.addAll(objColls.get(i).getStateImage_s());
         }
         return toClassify;
     }
@@ -84,7 +84,7 @@ public class GetSceneAnalysisCollection {
     public Set<StateImage> getTargetImages(List<ObjectCollection> images) {
         Set<StateImage> toClassify = new HashSet<>();
         if (!images.isEmpty() && !images.get(0).isEmpty()) {
-            toClassify.addAll(images.get(0).getStateImages());
+            toClassify.addAll(images.get(0).getStateImage_s());
         }
         return toClassify;
     }

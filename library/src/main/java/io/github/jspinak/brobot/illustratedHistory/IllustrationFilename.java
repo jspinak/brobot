@@ -3,9 +3,9 @@ package io.github.jspinak.brobot.illustratedHistory;
 import io.github.jspinak.brobot.actions.BrobotSettings;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.SceneAnalysis;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.imageUtils.FilenameRepo;
 import io.github.jspinak.brobot.reports.Report;
 import org.springframework.stereotype.Component;
@@ -20,7 +20,7 @@ import static io.github.jspinak.brobot.actions.actionOptions.ActionOptions.Actio
 @Component
 public class IllustrationFilename {
 
-    private FilenameRepo filenameRepo;
+    private final FilenameRepo filenameRepo;
 
     public IllustrationFilename(FilenameRepo filenameRepo) {
         this.filenameRepo = filenameRepo;
@@ -54,7 +54,7 @@ public class IllustrationFilename {
     public String getFilenameFromMatchObjects(Matches matches, ActionOptions actionOptions) {
         String prefix = BrobotSettings.historyPath + BrobotSettings.historyFilename;
         ActionOptions.Action action = actionOptions.getAction();
-        Set<String> imageNames = matches.getMatchObjects().stream().map(
+        Set<String> imageNames = matches.getMatchList().stream().map(
                 m -> m.getStateObject().getName()).collect(Collectors.toSet());
         String names = String.join("", imageNames);
         String suffix = action.toString() + "_" + names;
@@ -85,7 +85,7 @@ public class IllustrationFilename {
         ActionOptions.Action action = actionOptions.getAction();
         List<String> names = new ArrayList<>();
         for (ObjectCollection objectCollection : objectCollections) {
-            names.addAll(objectCollection.getStateImages().stream().map(StateImage::getName).toList());
+            names.addAll(objectCollection.getStateImage_s().stream().map(StateImage::getName).toList());
         }
         String allNames = String.join("", names);
         String suffix = action.toString();

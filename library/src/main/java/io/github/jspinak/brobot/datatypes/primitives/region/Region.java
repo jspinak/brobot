@@ -11,6 +11,7 @@ import org.sikuli.script.Match;
 import org.sikuli.script.Screen;
 
 import java.util.*;
+import java.util.List;
 
 /**
  * Region extends the Sikuli class Region and adds, among other functionality, new
@@ -123,7 +124,7 @@ public class Region extends org.sikuli.script.Region implements Comparable<Regio
         return xDiff;
     }
 
-    public boolean defined() {
+    public boolean isDefined() {
         return x!=0 || y!=0 || w!=new Screen().w || h!=new Screen().h;
     }
 
@@ -268,11 +269,7 @@ public class Region extends org.sikuli.script.Region implements Comparable<Regio
     }
 
     public Region getUnion(Region r) {
-        int x = Math.min(this.x, r.x);
-        int y = Math.min(this.y, r.y);
-        int x2 = Math.max(this.x + this.w, r.x + r.w);
-        int y2 = Math.max(this.y + this.h, r.y + r.h);
-        return new Region(x, y, x2-x, y2-y);
+        return new Region(this.union(r));
     }
 
     public void setAsUnion(Region r) {

@@ -3,15 +3,14 @@ package io.github.jspinak.brobot.actions.customActions;
 import io.github.jspinak.brobot.actions.actionExecution.Action;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.actions.methods.sikuliWrappers.mouse.ClickType;
-import io.github.jspinak.brobot.datatypes.primitives.image.Image;
+import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.datatypes.primitives.location.Location;
 import io.github.jspinak.brobot.datatypes.primitives.location.Position;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import io.github.jspinak.brobot.datatypes.state.state.State;
 import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.StateRegion;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
-import io.github.jspinak.brobot.manageStates.StateMemory;
 import io.github.jspinak.brobot.services.StateService;
 import io.github.jspinak.brobot.manageStates.UnknownState;
 import org.springframework.stereotype.Component;
@@ -32,12 +31,10 @@ public class CommonActions {
 
     private Action action;
     private StateService stateService;
-    private StateMemory stateMemory;
 
-    public CommonActions(Action action, StateService stateService, StateMemory stateMemory) {
+    public CommonActions(Action action, StateService stateService) {
         this.action = action;
         this.stateService = stateService;
-        this.stateMemory = stateMemory;
     }
 
     public boolean click(double maxWait, StateImage... stateImages) {
@@ -63,7 +60,7 @@ public class CommonActions {
                 .setMaxTimesToRepeatActionSequence(timesToClick)
                 .build();
         ObjectCollection objectCollection = new ObjectCollection.Builder()
-                .withImages(image)
+                .withImage_s(image)
                 .build();
         return action.perform(actionOptions, objectCollection).isSuccess();
     }
@@ -82,7 +79,7 @@ public class CommonActions {
                 .setAddY(yMove)
                 .build();
         ObjectCollection objectCollection = new ObjectCollection.Builder()
-                .withImages(image)
+                .withImage_s(image)
                 .build();
         return action.perform(actionOptions, objectCollection).isSuccess();
     }
@@ -115,7 +112,7 @@ public class CommonActions {
         return action.perform(vanish, images).isSuccess();
     }
 
-    public boolean find(double maxWait, Image image) {
+    public boolean find(double maxWait, Pattern image) {
         return find(maxWait, image.inNullState());
     }
 
@@ -175,7 +172,7 @@ public class CommonActions {
                 .setPauseBetweenIndividualActions(pauseBetweenClicks)
                 .build();
         ObjectCollection objectsToClick = new ObjectCollection.Builder()
-                .withImages(objectToClick)
+                .withImage_s(objectToClick)
                 .build();
         ObjectCollection objectsToAppear = new ObjectCollection.Builder()
                 .withAllStateImages(stateService.findByName(state).get())
@@ -192,10 +189,10 @@ public class CommonActions {
                 .setPauseBetweenIndividualActions(pauseBetweenClicks)
                 .build();
         ObjectCollection objectsToClick = new ObjectCollection.Builder()
-                .withImages(toClick)
+                .withImage_s(toClick)
                 .build();
         ObjectCollection objectsToAppear = new ObjectCollection.Builder()
-                .withImages(toAppear)
+                .withImage_s(toAppear)
                 .build();
         return action.perform(actionOptions, objectsToClick, objectsToAppear).isSuccess();
     }

@@ -5,10 +5,10 @@ import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.actions.composites.multipleActions.MultipleActions;
 import io.github.jspinak.brobot.actions.composites.multipleActions.MultipleActionsObject;
 import io.github.jspinak.brobot.actions.methods.sikuliWrappers.mouse.ClickType;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import org.springframework.stereotype.Component;
 
 import static io.github.jspinak.brobot.actions.actionOptions.ActionOptions.Action.*;
@@ -46,7 +46,7 @@ public class CommonMultipleActions {
                 .setPauseBeforeMouseDown(pauseBeforeClick)
                 .build();
         ObjectCollection objectCollection = new ObjectCollection.Builder()
-                .withImages(image)
+                .withImage_s(image)
                 .build();
         ActionOptions moveAfterClick = new ActionOptions.Builder()
                 .setAction(MOVE)
@@ -67,8 +67,8 @@ public class CommonMultipleActions {
             matches = multipleActions.perform(mao);
             if (matches.isSuccess()) {
                 action.perform(moveAfterClick);
-                matches.getBestMatch().ifPresent(matchObject ->
-                        commonActions.highlightRegion(1, new Region(matchObject.getMatch())));
+                matches.getBestMatch().ifPresent(match ->
+                        commonActions.highlightRegion(1, new Region(match)));
             }
             if (action.perform(vanish, image).isSuccess()) {
                 System.out.println("object vanished, min sim = "+vanish.getSimilarity());

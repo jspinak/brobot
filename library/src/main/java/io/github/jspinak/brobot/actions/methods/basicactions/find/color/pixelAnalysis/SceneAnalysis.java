@@ -6,11 +6,11 @@ import io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles.ColorStatProfile;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.contours.Contours;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
+import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import io.github.jspinak.brobot.illustratedHistory.Illustrations;
 import lombok.Getter;
 import lombok.Setter;
 import org.bytedeco.opencv.opencv_core.Mat;
-import org.sikuli.script.Match;
 
 import java.util.*;
 import java.util.stream.Collectors;

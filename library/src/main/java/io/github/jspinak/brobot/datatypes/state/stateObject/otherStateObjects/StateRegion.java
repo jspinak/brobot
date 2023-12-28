@@ -2,7 +2,6 @@ package io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects;
 
 import io.github.jspinak.brobot.datatypes.primitives.location.Anchor;
 import io.github.jspinak.brobot.datatypes.primitives.location.Anchors;
-import io.github.jspinak.brobot.datatypes.primitives.location.Location;
 import io.github.jspinak.brobot.datatypes.primitives.location.Position;
 import io.github.jspinak.brobot.datatypes.primitives.match.MatchHistory;
 import io.github.jspinak.brobot.datatypes.primitives.match.MatchSnapshot;
@@ -54,7 +53,7 @@ public class StateRegion implements StateObject {
     }
 
     public boolean defined() {
-        return getSearchRegion().defined();
+        return getSearchRegion().isDefined();
     }
 
     public void addTimesActedOn() {

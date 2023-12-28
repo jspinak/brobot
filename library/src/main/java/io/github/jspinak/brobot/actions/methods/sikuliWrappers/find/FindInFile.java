@@ -1,12 +1,9 @@
 package io.github.jspinak.brobot.actions.methods.sikuliWrappers.find;
 
-import io.github.jspinak.brobot.actions.methods.basicactions.find.SelectRegions;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.Scene;
 import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
-import io.github.jspinak.brobot.datatypes.primitives.match.MatchObject_;
-import io.github.jspinak.brobot.datatypes.primitives.region.Region;
+import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import org.sikuli.script.Finder;
-import org.sikuli.script.Match;
 import org.sikuli.script.OCR;
 import org.springframework.stereotype.Component;
 
@@ -21,20 +18,16 @@ import java.util.List;
 @Component
 public class FindInFile {
 
-    private final FindPattern findPattern;
-    private final SelectRegions selectRegions;
-
-    public FindInFile(FindPattern findPattern, SelectRegions selectRegions) {
-        this.findPattern = findPattern;
-        this.selectRegions = selectRegions;
+    private Finder getFinder(Scene scene) {
+        return new Finder(scene.getAbsolutePath());
     }
 
     public List<Match> findAllInScene(Pattern pattern, Scene scene) {
-        Finder f = findPattern.getFinder(scene);
+        Finder f = getFinder(scene);
         f.findAll(pattern);
         List<Match> matchList = new ArrayList<>();
         while (f.hasNext()) {
-            Match nextMatch = f.next();
+            Match nextMatch = new Match(f.next());
             matchList.add(nextMatch);
         }
         f.destroy();
@@ -49,7 +42,9 @@ public class FindInFile {
      * @return a list of Match objects in the specified region
      */
     public List<Match> getWordMatches(Scene scene) {
-        return OCR.readWords(scene.getBufferedImageBGR());
+        List<Match> wordMatches = new ArrayList<>();
+        OCR.readWords(scene.getBufferedImageBGR()).forEach(match -> wordMatches.add(new Match(match)));
+        return wordMatches;
     }
 
 }

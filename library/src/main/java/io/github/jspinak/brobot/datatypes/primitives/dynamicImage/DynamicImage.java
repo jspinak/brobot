@@ -2,7 +2,7 @@ package io.github.jspinak.brobot.datatypes.primitives.dynamicImage;
 
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles.ColorCluster;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles.KmeansProfilesAllSchemas;
-import io.github.jspinak.brobot.datatypes.primitives.image.Image;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import lombok.Getter;
 import lombok.Setter;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -56,7 +56,7 @@ public class DynamicImage {
     /*
     Inside images are cut from within the boundaries of the object.
      */
-    private Image inside = new Image();
+    private StateImage inside = new StateImage();
     private ColorCluster insideColorCluster = new ColorCluster();
     private KmeansProfilesAllSchemas insideKmeansProfiles;
     // for illustration
@@ -70,32 +70,32 @@ public class DynamicImage {
     type of image representation found in image classification or detection datasets.
     The ousideColorCluster is the ColorCluster resulting from the full colors minus the inside colors.
      */
-    private Image full = new Image();
+    private StateImage full = new StateImage();
     private ColorCluster outsideColorCluster = new ColorCluster(); // only colors that are not in the inside profile
 
     /*
     The context is a larger image showing important aspects of the background.
      */
-    private Image context = new Image();
+    private StateImage context = new StateImage();
     private List<List<Mat>> contextHistograms = new ArrayList<>();
 
     public static class Builder {
-        private Image inside = new Image();
-        private Image full = new Image();
-        private Image context = new Image();
+        private StateImage inside = new StateImage();
+        private StateImage full = new StateImage();
+        private StateImage context = new StateImage();
 
         public Builder addInsideImages(String... filenames) {
-            inside.addImages(filenames);
+            inside.addPatterns(filenames);
             return this;
         }
 
         public Builder addFullImages(String... filenames) {
-            full.addImages(filenames);
+            full.addPatterns(filenames);
             return this;
         }
 
         public Builder addContextImages(String... filenames) {
-            context.addImages(filenames);
+            context.addPatterns(filenames);
             return this;
         }
 

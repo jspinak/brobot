@@ -1,6 +1,7 @@
 package io.github.jspinak.brobot.illustratedHistory;
 
 import io.github.jspinak.brobot.datatypes.primitives.location.Location;
+import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.illustratedHistory.draw.DrawRect;
 import io.github.jspinak.brobot.reports.Report;
@@ -8,7 +9,6 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Point;
 import org.bytedeco.opencv.opencv_core.Rect;
 import org.bytedeco.opencv.opencv_core.Scalar;
-import org.sikuli.script.Match;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -43,7 +43,7 @@ public class Draw {
     }
 
     public void drawClick(Illustrations illustrations, Matches matches) {
-        for (Match match : matches.getMatches()) {
+        for (Match match : matches.getMatchList()) {
             Report.println("Drawing click on " + match.getTarget().x + ", " + match.getTarget().y);
             drawPoint(illustrations.getMatchesOnScene(), match, new Scalar(255, 150, 255, 0));
         }
@@ -57,7 +57,7 @@ public class Draw {
 
     public void drawDrag(Illustrations illustrations, Matches matches) {
         if (matches.size() < 2) return;
-        List<Match> matchList = new ArrayList<>(matches.getMatches());
+        List<Match> matchList = new ArrayList<>(matches.getMatchList());
         for (int i = 0; i < matchList.size() - 1; i++) {
             Match match = matchList.get(i);
             Match nextMatch = matchList.get(i + 1);

@@ -15,16 +15,17 @@ import org.springframework.stereotype.Component;
 @Component
 public class DefineWithMatch implements ActionInterface {
 
-    private DefineHelper defineHelper;
+    private final DefineHelper defineHelper;
 
     public DefineWithMatch(DefineHelper defineHelper) {
         this.defineHelper = defineHelper;
     }
 
-    public void perform(Matches matches, ActionOptions actionOptions, ObjectCollection... objectCollections) {
+    public void perform(Matches matches, ObjectCollection... objectCollections) {
+        ActionOptions actionOptions = matches.getActionOptions();
         defineHelper.findMatches(matches, actionOptions, objectCollections);
         if (matches.getBestMatch().isEmpty()) return;
-        Region region = new Region(matches.getBestMatch().get().getMatch());
+        Region region = new Region(matches.getBestMatch().get());
         if (actionOptions.getDefineAs() == ActionOptions.DefineAs.BELOW_MATCH) region.y += region.h;
         if (actionOptions.getDefineAs() == ActionOptions.DefineAs.ABOVE_MATCH) region.y -= region.h;
         if (actionOptions.getDefineAs() == ActionOptions.DefineAs.LEFT_OF_MATCH) region.x -= region.w;

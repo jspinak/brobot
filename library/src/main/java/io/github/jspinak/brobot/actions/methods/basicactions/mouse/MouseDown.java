@@ -13,13 +13,14 @@ import org.springframework.stereotype.Component;
 @Component
 public class MouseDown implements ActionInterface {
 
-    private MouseDownWrapper mouseDownWrapper;
+    private final MouseDownWrapper mouseDownWrapper;
 
     public MouseDown(MouseDownWrapper mouseDownWrapper) {
         this.mouseDownWrapper = mouseDownWrapper;
     }
 
-    public void perform(Matches matches, ActionOptions actionOptions, ObjectCollection... objectCollections) {
+    public void perform(Matches matches, ObjectCollection... objectCollections) {
+        ActionOptions actionOptions = matches.getActionOptions();
         mouseDownWrapper.press(
                 actionOptions.getPauseBeforeMouseDown(),
                 actionOptions.getPauseAfterMouseDown(),

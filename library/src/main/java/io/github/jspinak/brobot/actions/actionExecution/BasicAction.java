@@ -6,6 +6,7 @@ import io.github.jspinak.brobot.actions.methods.basicactions.WaitVanish;
 import io.github.jspinak.brobot.actions.methods.basicactions.click.Click;
 import io.github.jspinak.brobot.actions.methods.basicactions.define.DefineRegion;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.Find;
+import io.github.jspinak.brobot.actions.methods.basicactions.find.color.classification.Classify;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.classification.FindColor;
 import io.github.jspinak.brobot.actions.methods.basicactions.mouse.MouseDown;
 import io.github.jspinak.brobot.actions.methods.basicactions.mouse.MouseUp;
@@ -30,12 +31,12 @@ import static io.github.jspinak.brobot.actions.actionOptions.ActionOptions.Actio
 @Component
 public class BasicAction {
 
-    private Map<ActionOptions.Action, ActionInterface> actions = new HashMap<>();
+    private final Map<ActionOptions.Action, ActionInterface> actions = new HashMap<>();
 
     public BasicAction(Find find, Click click,
                        MouseDown mouseDown, MouseUp mouseUp, DefineRegion defineRegion, TypeText typeText,
                        MoveMouse moveMouse, WaitVanish waitVanish, GetText getText, Highlight highlight,
-                       ScrollMouseWheel scrollMouseWheel, KeyDown keyDown, KeyUp keyUp, FindColor findColor) {
+                       ScrollMouseWheel scrollMouseWheel, KeyDown keyDown, KeyUp keyUp, Classify classify) {
         actions.put(FIND, find);
         actions.put(CLICK, click);
         actions.put(MOUSE_DOWN, mouseDown);
@@ -49,7 +50,7 @@ public class BasicAction {
         actions.put(SCROLL_MOUSE_WHEEL, scrollMouseWheel);
         actions.put(KEY_DOWN, keyDown);
         actions.put(KEY_UP, keyUp);
-        actions.put(CLASSIFY, findColor);
+        actions.put(CLASSIFY, classify);
     }
 
     public Optional<ActionInterface> getAction(ActionOptions.Action action) {

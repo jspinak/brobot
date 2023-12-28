@@ -2,15 +2,12 @@ package io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAn
 
 import io.github.jspinak.brobot.actions.BrobotSettings;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
-import io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles.ColorCluster;
 import io.github.jspinak.brobot.actions.methods.sikuliWrappers.Wait;
-import io.github.jspinak.brobot.datatypes.primitives.image.Image;
 import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import io.github.jspinak.brobot.illustratedHistory.IllustrateScreenshot;
 import io.github.jspinak.brobot.imageUtils.GetBufferedImage;
 import io.github.jspinak.brobot.imageUtils.GetImageJavaCV;
-import io.github.jspinak.brobot.imageUtils.ImageUtils;
 import io.github.jspinak.brobot.reports.Report;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.springframework.stereotype.Component;
@@ -37,15 +34,13 @@ public class GetScenes {
     private Wait wait;
     private IllustrateScreenshot illustrateScreenshot;
     private final GetBufferedImage getBufferedImage;
-    private final ImageUtils imageUtils;
 
     public GetScenes(GetImageJavaCV getImageJavaCV, Wait wait, IllustrateScreenshot illustrateScreenshot,
-                     GetBufferedImage getBufferedImage, ImageUtils imageUtils) {
+                     GetBufferedImage getBufferedImage) {
         this.getImageJavaCV = getImageJavaCV;
         this.wait = wait;
         this.illustrateScreenshot = illustrateScreenshot;
         this.getBufferedImage = getBufferedImage;
-        this.imageUtils = imageUtils;
     }
 
     /**
@@ -117,8 +112,9 @@ public class GetScenes {
      *
      * Otherwise, it's not ok to take a screenshot. The other methods use Sikuli for execution.
      *
-     * @param objectCollections
-     * @return
+     * @param actionOptions has the action and other relevant options
+     * @param objectCollections may contain scenes
+     * @return true if a screenshot is required
      */
     private boolean isOkToTakeScreenshot(ActionOptions actionOptions, ObjectCollection... objectCollections) {
         if (BrobotSettings.mock) return false;

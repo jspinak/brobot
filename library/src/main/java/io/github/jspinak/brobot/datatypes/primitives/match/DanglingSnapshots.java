@@ -1,7 +1,7 @@
 package io.github.jspinak.brobot.datatypes.primitives.match;
 
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
-import io.github.jspinak.brobot.datatypes.state.stateObject.StateObject;
+import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -30,7 +30,7 @@ import java.util.Map;
  */
 public class DanglingSnapshots {
 
-    private Map<StateObject, MatchSnapshot> snapshots = new HashMap<>();
+    private final Map<Pattern, MatchSnapshot> snapshots = new HashMap<>();
 
     /**
      * If there are no Match objects,
@@ -41,17 +41,17 @@ public class DanglingSnapshots {
      * @param matches is the Matches object that will receive the MatchSnapshots.
      */
     public void addAllMatches(ActionOptions actionOptions, Matches matches) {
-        matches.getMatchObjects().forEach(matchObject -> addMatch(actionOptions, matchObject));
+        matches.getMatchList().forEach(match -> addMatch(actionOptions, match));
     }
 
-    public void addMatch(ActionOptions actionOptions, MatchObject matchObject) {
-        StateObject stObj = matchObject.getStateObject();
-        if (snapshots.containsKey(stObj)) {
-            snapshots.get(stObj).addMatch(matchObject.getMatch());
+    public void addMatch(ActionOptions actionOptions, Match match) {
+        Pattern pattern = match.getPattern();
+        if (snapshots.containsKey(pattern)) {
+            snapshots.get(pattern).addMatch(match);
         } else {
-            snapshots.put(stObj, new MatchSnapshot.Builder()
+            snapshots.put(pattern, new MatchSnapshot.Builder()
                     .setActionOptions(actionOptions)
-                    .addMatch(matchObject.getMatch())
+                    .addMatch(match)
                     .build());
         }
     }
@@ -60,13 +60,14 @@ public class DanglingSnapshots {
      * Successful MatchSnapshots are always created with a Match.
      * If text is found, the Snapshot is successful. Text cannot be found without a Match.
      *
-     * @param stateObject is the StateObject that resulted in found text.
+     * @param match the match contains the text found.
      * @param string is the text found.
      * @return true if the text was successfully added to a MatchSnapshot.
      */
-    public boolean addString(StateObject stateObject, String string) {
-        if (snapshots.containsKey(stateObject)) {
-            snapshots.get(stateObject).addString(string);
+    public boolean setString(Match match, String string) {
+        Pattern pattern = match.getPattern();
+        if (snapshots.containsKey(pattern)) {
+            snapshots.get(pattern).setString(string);
             return true;
         }
         return false;
@@ -75,14 +76,14 @@ public class DanglingSnapshots {
     /**
      * For transferring a Snapshot to an existing Matches object.
      *
-     * @param stateObject is the StateObject that resulted in the MatchSnapshot.
+     * @param pattern is the Pattern that resulted in the MatchSnapshot.
      * @param matchSnapshot is the new MatchSnapshot to be added.
      */
-    public void addSnapshot(StateObject stateObject, MatchSnapshot matchSnapshot) {
-        if (!snapshots.containsKey(stateObject)) snapshots.put(stateObject, matchSnapshot);
+    public void addSnapshot(Pattern pattern, MatchSnapshot matchSnapshot) {
+        if (!snapshots.containsKey(pattern)) snapshots.put(pattern, matchSnapshot);
         else {
-            snapshots.get(stateObject).addMatchList(matchSnapshot.getMatchList());
-            snapshots.get(stateObject).addText(matchSnapshot.getText());
+            snapshots.get(pattern).addMatchList(matchSnapshot.getMatchList());
+            snapshots.get(pattern).setText(matchSnapshot.getText());
         }
     }
 
@@ -108,7 +109,7 @@ public class DanglingSnapshots {
     }
 
     public void save() {
-        snapshots.forEach(StateObject::addSnapshot);
+        snapshots.forEach((pattern, matchSnapshot) -> pattern.getMatchHistory().addSnapshot(matchSnapshot));
     }
 
     public int totalSnapshots() {

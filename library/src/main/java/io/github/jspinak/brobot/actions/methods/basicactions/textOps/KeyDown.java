@@ -19,8 +19,8 @@ import java.util.List;
 @Component
 public class KeyDown implements ActionInterface {
 
-    private KeyDownWrapper keyDownWrapper;
-    private Wait wait;
+    private final KeyDownWrapper keyDownWrapper;
+    private final Wait wait;
 
     public KeyDown(KeyDownWrapper keyDownWrapper, Wait wait) {
         this.keyDownWrapper = keyDownWrapper;
@@ -28,7 +28,8 @@ public class KeyDown implements ActionInterface {
     }
 
     // uses the first objectCollection, but this can have multiple keys
-    public void perform(Matches matches, ActionOptions actionOptions, ObjectCollection... objectCollections) {
+    public void perform(Matches matches, ObjectCollection... objectCollections) {
+        ActionOptions actionOptions = matches.getActionOptions();
         if (objectCollections == null) return;
         List<StateString> strings = objectCollections[0].getStateStrings();
         for (StateString str : strings) {

@@ -2,10 +2,9 @@ package io.github.jspinak.brobot.actions.methods.basicactions.find.histogram;
 
 import io.github.jspinak.brobot.datatypes.primitives.grid.Grid;
 import io.github.jspinak.brobot.datatypes.primitives.grid.OverlappingGrids;
-import io.github.jspinak.brobot.datatypes.primitives.image.Image;
-import io.github.jspinak.brobot.datatypes.primitives.match.MatchObject;
-import io.github.jspinak.brobot.datatypes.primitives.region.Region;
+import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
+import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.springframework.stereotype.Component;
 
@@ -14,7 +13,7 @@ import java.util.List;
 @Component
 public class FindHistogramsOneRegionOneImage {
 
-    private HistComparison histComparison;
+    private final HistComparison histComparison;
 
     public FindHistogramsOneRegionOneImage(HistComparison histComparison) {
         this.histComparison = histComparison;
@@ -31,16 +30,15 @@ public class FindHistogramsOneRegionOneImage {
      * @param sceneHSV the scene in HSV
      * @return a sortable list of regions contained in the overall region and similarity scores
      */
-    public List<MatchObject> find(Region region, StateImage stateImage, Mat sceneHSV, int actionId) {
-        Image image = stateImage.getImage();
+    public List<Match> find(Region region, StateImage stateImage, Mat sceneHSV, int actionId) {
         region.setW(Math.min(region.w + region.x, sceneHSV.cols()) - region.x);
         region.setH(Math.min(region.h + region.y, sceneHSV.rows()) - region.y);
         OverlappingGrids overlappingGrids = new OverlappingGrids(new Grid.Builder()
                 .setRegion(region)
-                .setCellWidth(image.getAverageWidth())
-                .setCellHeight(image.getAverageHeight())
+                .setCellWidth((int)stateImage.getAverageWidth())
+                .setCellHeight((int)stateImage.getAverageHeight())
                 .build());
-        return histComparison.compareAll(stateImage, overlappingGrids.getAllRegions(), sceneHSV, actionId);
+        return histComparison.compareAll(stateImage, overlappingGrids.getAllRegions(), sceneHSV);
     }
 
 }

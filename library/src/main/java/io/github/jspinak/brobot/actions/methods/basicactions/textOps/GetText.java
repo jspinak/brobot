@@ -6,7 +6,7 @@ import io.github.jspinak.brobot.actions.methods.basicactions.find.Find;
 import io.github.jspinak.brobot.actions.methods.sikuliWrappers.Wait;
 import io.github.jspinak.brobot.actions.methods.sikuliWrappers.text.GetTextWrapper;
 import io.github.jspinak.brobot.actions.methods.time.Time;
-import io.github.jspinak.brobot.datatypes.primitives.match.MatchObject;
+import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.primitives.text.Text;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
@@ -29,11 +29,11 @@ import static io.github.jspinak.brobot.actions.actionOptions.ActionOptions.GetTe
 @Component
 public class GetText implements ActionInterface {
 
-    private Find find;
-    private Wait wait;
-    private TextSelector textSelector;
-    private Time time;
-    private GetTextWrapper getTextWrapper;
+    private final Find find;
+    private final Wait wait;
+    private final TextSelector textSelector;
+    private final Time time;
+    private final GetTextWrapper getTextWrapper;
 
     public GetText(Find find, Wait wait, TextSelector textSelector, Time time,
                    GetTextWrapper getTextWrapper) {
@@ -50,12 +50,12 @@ public class GetText implements ActionInterface {
      * of failure, we need to search again for matches. If text retrieval is the problem, we should
      * keep the MatchObjects and look again for text.
      *
-     * @param actionOptions holds the action configuration
+     * @param matches has the ActionOptions and existing matches
      * @param objectCollections holds the objects to act on
-     * @return a Matches object with MatchObjects and Text
      */
-    public void perform(Matches matches, ActionOptions actionOptions, ObjectCollection... objectCollections) {
-        find.perform(matches, actionOptions, objectCollections);
+    public void perform(Matches matches, ObjectCollection... objectCollections) {
+        ActionOptions actionOptions = matches.getActionOptions();
+        find.perform(matches, objectCollections);
         getTextWrapper.getAllText(matches);
         Text text;
         int repetitions = 0;
@@ -70,7 +70,7 @@ public class GetText implements ActionInterface {
               is the Find operation and not text retrieval.
              */
             if (!matches.getDanglingSnapshots().allImagesFound()) {
-                find.perform(matches, actionOptions, objectCollections);
+                find.perform(matches, objectCollections);
                 /*
                   Ideally, you should merge the old MatchObjects and Snapshots.
                   Duplicate MatchObjects and found Strings should not be copied.
@@ -93,15 +93,15 @@ public class GetText implements ActionInterface {
     }
 
     private boolean allMatchesHaveText(Matches matches) {
-        for (MatchObject matchObject : matches.getMatchObjects()) {
-            if (matchObject.getText().isEmpty()) return false;
+        for (Match match : matches.getMatchList()) {
+            if (match.getText().isEmpty()) return false;
         }
         return true;
     }
 
     private boolean noMatchesHaveText(Matches matches) {
-        for (MatchObject matchObject : matches.getMatchObjects()) {
-            if (!matchObject.getText().isEmpty()) return false;
+        for (Match match : matches.getMatchList()) {
+            if (!match.getText().isEmpty()) return false;
         }
         return true;
     }

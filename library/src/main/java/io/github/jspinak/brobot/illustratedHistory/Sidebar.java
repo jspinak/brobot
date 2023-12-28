@@ -1,7 +1,7 @@
 package io.github.jspinak.brobot.illustratedHistory;
 
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
-import io.github.jspinak.brobot.datatypes.primitives.match.MatchObject;
+import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.illustratedHistory.draw.DrawHistogram;
 import io.github.jspinak.brobot.imageUtils.MatBuilder;
@@ -9,7 +9,6 @@ import io.github.jspinak.brobot.imageUtils.MatVisualize;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Rect;
 import org.bytedeco.opencv.opencv_core.Size;
-import org.sikuli.script.Match;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -74,13 +73,13 @@ public class Sidebar {
             return sidebarEntries;
         }
         if (actionOptions.getFind() == ActionOptions.Find.HISTOGRAM) {
-            matches.getMatchObjects().forEach(mO -> {
-                Mat matchOnScene = getMatchForSidebar(illustrations, mO.getMatch());
+            matches.getMatchList().forEach(mO -> {
+                Mat matchOnScene = getMatchForSidebar(illustrations, mO);
                 sidebarEntries.add(getMatchAndHistogram(matchOnScene, mO));
             });
             return sidebarEntries;
         }
-        matches.getMatches().forEach(m -> sidebarEntries.add(getMatchForSidebar(illustrations, m)));
+        matches.getMatchList().forEach(m -> sidebarEntries.add(getMatchForSidebar(illustrations, m)));
         return sidebarEntries;
     }
 
@@ -92,13 +91,12 @@ public class Sidebar {
         return matchFromScene;
     }
 
-    private Mat getMatchAndHistogram(Mat matchFromScene, MatchObject matchObject) {
-        Mat histMat = drawHistogram.draw(sidebarEntryW, sidebarEntryH, matchObject.getHistogram());
-        Mat entryAndHist = new MatBuilder()
+    private Mat getMatchAndHistogram(Mat matchFromScene, Match match) {
+        Mat histMat = drawHistogram.draw(sidebarEntryW, sidebarEntryH, match.getHistogram());
+        return new MatBuilder()
                 .setName("matchAndHist")
                 .setSpaceBetween(spacesBetweenEntries)
                 .addHorizontalSubmats(matchFromScene, histMat)
                 .build();
-        return entryAndHist;
     }
 }

@@ -1,0 +1,53 @@
+package io.github.jspinak.brobot.actions.methods.basicactions.find;
+
+import io.github.jspinak.brobot.actions.actionExecution.actionLifecycle.ActionLifecycleManagement;
+import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.Scene;
+import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.SceneAnalysis;
+import io.github.jspinak.brobot.actions.methods.sikuliWrappers.find.FindAll;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
+import io.github.jspinak.brobot.datatypes.primitives.match.Match;
+import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
+import org.springframework.stereotype.Component;
+
+import java.util.*;
+
+/**
+ * Sends the Image object to either FindImage or FindRIP depending on whether the Image location can vary.
+ * Contains methods for Find options FIRST, EACH, ALL, BEST
+ */
+@Component
+public class FindPatternsIteration {
+
+    private final ActionLifecycleManagement actionLifecycleManagement;
+    private final FindAll findAll;
+
+    public FindPatternsIteration(ActionLifecycleManagement actionLifecycleManagement, FindAll findAll) {
+        this.actionLifecycleManagement = actionLifecycleManagement;
+        this.findAll = findAll;
+    }
+
+    /**
+     * If Find.FIRST, it returns the first positive results.
+     * Otherwise, it returns all matches.
+     */
+    public void find(Matches matches, List<StateImage> stateImages, List<Scene> scenes) {
+        List<Matches> patternMatches = new ArrayList<>();
+        scenes.forEach(scene -> patternMatches.add(new Matches()));
+        actionLifecycleManagement.printActionOnce(matches.getActionId());
+        for (Scene scene : scenes) {
+            List<Match> sceneMatches = new ArrayList<>(); // holds finds for a specific scene
+            for (int i=0; i<stateImages.size(); i++) {
+                List<Match> newMatches = findAll.find(stateImages.get(i), scene, matches.getActionOptions());
+                newMatches.forEach(patternMatches.get(i)::add); // holds finds for a specific Pattern
+                sceneMatches.addAll(newMatches);
+                matches.addAll(newMatches); // holds all matches found
+                actionLifecycleManagement.setAllImagesFound(matches, patternMatches);
+                if (actionLifecycleManagement.isFindEachFirstAndEachPatternFound(matches)) return;
+            }
+            SceneAnalysis sceneAnalysis = new SceneAnalysis(scene);
+            sceneAnalysis.setMatchList(sceneMatches);
+            matches.getSceneAnalysisCollection().add(sceneAnalysis);
+        }
+    }
+
+}

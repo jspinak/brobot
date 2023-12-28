@@ -6,12 +6,12 @@ import io.github.jspinak.brobot.actions.actionConfigurations.Success;
 import io.github.jspinak.brobot.actions.actionExecution.actionLifecycle.ActionLifecycleManagement;
 import io.github.jspinak.brobot.actions.actionExecution.manageTrainingData.DatasetManager;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
-import io.github.jspinak.brobot.actions.methods.basicactions.find.SelectRegions;
+import io.github.jspinak.brobot.actions.methods.basicactions.find.matchManagement.SelectRegions;
 import io.github.jspinak.brobot.actions.methods.sikuliWrappers.Wait;
 import io.github.jspinak.brobot.actions.methods.time.Time;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.illustratedHistory.IllustrateScreenshot;
 import io.github.jspinak.brobot.reports.Output;
 import io.github.jspinak.brobot.reports.Report;
@@ -85,7 +85,7 @@ public class ActionExecution {
         When the action sequence is repeated, the Matches object will hold the results of the last action.
          */
         for (int i=0; i<actionOptions.getMaxTimesToRepeatActionSequence(); i++) {
-            actionMethod.perform(matches, actionOptions, objectCollections);
+            actionMethod.perform(matches, objectCollections);
             success.set(actionOptions, matches);
             if (exitSequences.okToExit(actionOptions, matches)) break;
         }
@@ -118,9 +118,9 @@ public class ActionExecution {
         if (Report.minReportingLevel(Report.OutputLevel.LOW)) {
             Report.format("|%s ", actionOptions.getAction());
             if (objectCollections.length == 0) return;
-            List<StateImage> stImgs = objectCollections[0].getStateImages();
+            List<StateImage> stImgs = objectCollections[0].getStateImage_s();
             int lastIndex = stImgs.size() - 1;
-            for (StateImage sio : objectCollections[0].getStateImages()) {
+            for (StateImage sio : objectCollections[0].getStateImage_s()) {
                 Report.format("%s.%s", sio.getOwnerStateName(), sio.getName());
                 String ending = stImgs.indexOf(sio) != lastIndex? "," : "|";
                 Report.print(ending+" ");

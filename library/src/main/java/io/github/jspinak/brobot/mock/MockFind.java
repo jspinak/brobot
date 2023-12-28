@@ -2,19 +2,17 @@ package io.github.jspinak.brobot.mock;
 
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.actions.methods.time.Time;
-import io.github.jspinak.brobot.datatypes.primitives.image.Image;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
+import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import io.github.jspinak.brobot.datatypes.primitives.match.MatchSnapshot;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.reports.Report;
-import org.sikuli.script.Match;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.Random;
 
 /**
  * Mock Matches can be found with 1 of 2 methods:
@@ -35,16 +33,11 @@ public class MockFind {
     public Matches getMatches(StateImage stateImage, Region searchRegion,
                               ActionOptions actionOptions) {
         Report.println("Finding " + stateImage.getName() + " in mock");
-        List<Match> matchList;
-        Optional<MatchSnapshot> randomSnapshot =
-                stateImage.getMatchHistory().getRandomSnapshot(actionOptions);
-        if (randomSnapshot.isEmpty())
-            matchList = getProbabilityMatches(stateImage, searchRegion, stateImage.getImage(),
-                    actionOptions);
-        else matchList = getHistoryMatches(randomSnapshot.get(), searchRegion);
+        List<io.github.jspinak.brobot.datatypes.primitives.match.Match> matchList = new ArrayList<>();
+        Optional<MatchSnapshot> randomSnapshot = stateImage.getRandomSnapshot(actionOptions);
+        if (randomSnapshot.isPresent()) matchList = getHistoryMatches(randomSnapshot.get(), searchRegion);
         Matches matches = new Matches();
-        matches.addMatchObjects(stateImage, matchList,
-                time.getDuration(actionOptions.getAction()).getSeconds());
+        matches.getMatchList().addAll(matchList);
         return matches;
     }
 
@@ -69,31 +62,4 @@ public class MockFind {
         return time.findExpired(matchSnapshot.getDuration());
     }
 
-    private List<Match> getProbabilityMatches(StateImage stateImage, Region searchRegion,
-                                              Image image, ActionOptions actionOptions) {
-        List<Match> foundMatches = new ArrayList<>();
-        if (!isFound(stateImage)) return foundMatches;
-        int maxMatches = 10;
-        if (actionOptions.getMaxMatchesToActOn() > 0) maxMatches = actionOptions.getMaxMatchesToActOn();
-        if (actionOptions.getFind() == ActionOptions.Find.FIRST ||
-            actionOptions.getFind() == ActionOptions.Find.EACH)
-            maxMatches = 1;
-        int numberOfMatches = new Random().nextInt(maxMatches) + 1; // at least 1 Match
-        for (int i = 0; i < numberOfMatches; i++) {
-            Match match = new MatchMaker.Builder().setImage(image).setSearchRegion(searchRegion).build();
-            foundMatches.add(match);
-        }
-        //Report.format(Report.OutputLevel.HIGH,"%s: %s: #matches=%s| \n", "getAllMatches",
-        //            image.getImageNames().toString(), foundMatches.size());
-        return foundMatches;
-    }
-
-    private boolean isFound(StateImage stateImage) {
-        int randomProbability = new Random().nextInt(100);
-        int probObj = stateImage.getProbabilityExists();
-        boolean found = probObj > randomProbability;
-        Report.format(Report.OutputLevel.HIGH,"found=%s ", found);
-        //if (!found) Report.format(Report.OutputLevel.HIGH,"%d<%d ", probObj, randomProbability);
-        return found;
-    }
 }

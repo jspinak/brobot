@@ -1,6 +1,7 @@
 package io.github.jspinak.brobot.mock;
 
 import io.github.jspinak.brobot.actions.methods.time.TimeWrapper;
+import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import io.github.jspinak.brobot.datatypes.primitives.match.MatchHistory;
 import io.github.jspinak.brobot.datatypes.state.stateObject.StateObject;
 import org.springframework.stereotype.Component;
@@ -24,11 +25,11 @@ public class MockText {
         this.timeWrapper = timeWrapper;
     }
 
-    public String getString(StateObject stateObject) {
+    public String getString(Match match) {
         timeWrapper.wait(GET_TEXT);
-        MatchHistory matchHistory = stateObject.getMatchHistory();
+        MatchHistory matchHistory = match.getPattern().getMatchHistory();
         if (matchHistory.getRandomSnapshot(GET_TEXT).isEmpty()) return getRandomString();
-        return matchHistory.getRandomString();
+        return matchHistory.getRandomText();
     }
 
     public String getRandomString() {
