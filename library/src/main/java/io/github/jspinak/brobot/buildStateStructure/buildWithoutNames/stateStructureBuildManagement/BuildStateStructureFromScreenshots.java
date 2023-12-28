@@ -1,12 +1,10 @@
 package io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.stateStructureBuildManagement;
 
-import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.buildStateStructure.ScreenStateCreator;
 import io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.buildStateStructure.StateStructureInfo;
 import io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.screenObservations.GetScreenObservation;
 import io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.screenObservations.GetScreenObservationFromScreenshot;
 import io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.screenObservations.GetUsableArea;
-import io.github.jspinak.brobot.datatypes.primitives.image.Image;
 import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import org.springframework.stereotype.Component;
@@ -36,7 +34,7 @@ public class BuildStateStructureFromScreenshots {
 
     public void build(List<String> screenshots, Pattern topLeftBoundary, Pattern bottomRightBoundary) {
         if (screenshots.isEmpty()) return;
-        Region usableArea = getUsableArea.getFromFile(
+        Region usableArea = getUsableArea.defineInFile(
                 screenshots.get(0), topLeftBoundary, bottomRightBoundary);
         getScreenObservation.setUsableArea(usableArea);
         screenshots.forEach(getScreenObservationFromScreenshot::getNewScreenObservation);

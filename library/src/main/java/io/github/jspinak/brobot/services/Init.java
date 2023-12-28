@@ -3,8 +3,8 @@ package io.github.jspinak.brobot.services;
 import io.github.jspinak.brobot.actions.BrobotSettings;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles.SetAllProfiles;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles.SetKMeansProfiles;
-import io.github.jspinak.brobot.datatypes.state.state.State;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
+import io.github.jspinak.brobot.datatypes.state.state.State;
 import io.github.jspinak.brobot.reports.Report;
 import org.springframework.stereotype.Component;
 
@@ -13,7 +13,7 @@ public class Init {
 
     private final StateService stateService;
     private final SetAllProfiles setAllProfiles;
-    private SetKMeansProfiles setKMeansProfiles;
+    private final SetKMeansProfiles setKMeansProfiles;
 
     private int lastImageIndex = 1; // 0 should correspond to "no class" since matrices are typically initialized with 0s
 
@@ -35,7 +35,7 @@ public class Init {
     }
 
     private void preProcessImages(State state) {
-        if (state.getStateImages().size() > 0) Report.print(state.getName() + ": ");
+        if (!state.getStateImages().isEmpty()) Report.print(state.getName() + ": ");
         for (StateImage stateImage : state.getStateImages()) {
             Report.print("[" + lastImageIndex + "," + stateImage.getName() + "] ");
             stateImage.setIndex(lastImageIndex);
@@ -46,7 +46,7 @@ public class Init {
                 setKMeansProfiles.setProfiles(stateImage);
             }
         }
-        if (state.getStateImages().size() > 0) Report.println();
+        if (!state.getStateImages().isEmpty()) Report.println();
     }
 
     public void add(String path) {

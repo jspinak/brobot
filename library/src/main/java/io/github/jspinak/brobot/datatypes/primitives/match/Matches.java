@@ -8,17 +8,13 @@ import io.github.jspinak.brobot.datatypes.primitives.location.Location;
 import io.github.jspinak.brobot.datatypes.primitives.location.Position;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.primitives.text.Text;
-import io.github.jspinak.brobot.datatypes.state.NullState;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import lombok.Data;
 import org.bytedeco.opencv.opencv_core.Mat;
-import org.sikuli.script.Match;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * The results object for all actions.
@@ -42,11 +38,10 @@ public class Matches {
 
     private String actionDescription = "";
     private int actionId; // a unique id also stored in the class ActionLifecycleManagement
-    private List<MatchObject_> matchObject_s = new ArrayList<>();
-    private List<MatchObject> matchObjects = new ArrayList<>();
-    private List<MatchObject> initialMatchObjects = new ArrayList<>(); // the first set of matches in a composite find operation. it may be useful to see these matches in illustrations.
-    private List<MatchObject> nonoverlappingMatches = new ArrayList<>();
-    private MatchObject_ bestMatch = null; // query returns an Optional in case there are no matches
+    private List<Match> matchList = new ArrayList<>();
+    private List<Match> initialMatchList = new ArrayList<>(); // the first set of matches in a composite find operation. it may be useful to see these matches in illustrations.
+    private List<Match> nonoverlappingMatchList = new ArrayList<>();
+    private Match bestMatch = null; // query returns an Optional in case there are no matches
     private ActionOptions actionOptions; // the action options used to find the matches
     private List<String> activeStates = new ArrayList<>();
     private Text text = new Text();
@@ -68,35 +63,22 @@ public class Matches {
         this.actionOptions = actionOptions;
     }
 
-    public void add(MatchObject match) {
-        if (maxMatches > 0 && matchObjects.size() >= maxMatches) return;
-        matchObjects.add(match);
-        addNonoverlappingMatch(match);
-        //setBestMatch(match);
-        addActiveState(match);
-    }
-
-    public void add(MatchObject_ match) {
-        matchObject_s.add(match);
-        setBestMatch(match);
+    public void add(Match... matches) {
+        matchList.addAll(List.of(matches));
+        for (Match m : matches) {
+            matchList.add(m);
+            compareAndSetBestMatch(m);
+            addNonoverlappingMatch(m);
+            addActiveState(m);
+        }
     }
 
     public void addSceneAnalysis(SceneAnalysis sceneAnalysis) {
         sceneAnalysisCollection.add(sceneAnalysis);
     }
 
-    public void addMatchObjects(StateImage stateImage, List<Match> matchList, double duration) {
-        matchList.forEach(match -> {
-            try {
-                matchObjects.add(new MatchObject(match, stateImage, duration));
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
-    }
-
     public void addMatchObjects(Matches matches) {
-        for (MatchObject match : matches.getMatchObjects()) {
+        for (Match match : matches.getMatchList()) {
             add(match);
         }
     }
@@ -123,29 +105,31 @@ public class Matches {
         definedRegions.add(region);
     }
 
-    public List<Match> getMatches() {
-        return matchObject_s.stream()
-                .map(MatchObject_::getMatch)
-                .collect(Collectors.toList());
-    }
-
     public void sortMatchObjects() {
-        matchObjects.sort(Comparator.comparingDouble(MatchObject::getScore));
+        matchList.sort(Comparator.comparingDouble(Match::getScore));
     }
 
     public void sortMatchObjectsDescending() {
-        matchObjects.sort(Comparator.comparingDouble(MatchObject::getScore).reversed());
+        matchList.sort(Comparator.comparingDouble(Match::getScore).reversed());
     }
 
+    /**
+     * Gets the matches as regions
+     * @return a list of regions
+     */
     public List<Region> getMatchRegions() {
         List<Region> regions = new ArrayList<>();
-        matchObjects.forEach(mO -> regions.add(new Region(mO.getMatch())));
+        matchList.forEach(mO -> regions.add(new Region(mO)));
         return regions;
     }
 
+    /**
+     * Gets the matches as locations
+     * @return a list of locations
+     */
     public List<Location> getMatchLocations() {
         List<Location> locations = new ArrayList<>();
-        matchObjects.forEach(mO -> locations.add(mO.getLocation()));
+        matchList.forEach(mO -> locations.add(mO.getLocation()));
         return locations;
     }
 
@@ -154,32 +138,36 @@ public class Matches {
         return Optional.of(getBestMatch().get().getLocation());
     }
 
-    private boolean addNonoverlappingMatch(MatchObject m) {
-        Region match = new Region(m.getMatch());
+    /**
+     * Overlapping matches shouldn't be an issue since all search regions are unique.
+     * @param m the match object to add
+     * @return true if added to the non-overlapping matches
+     */
+    private boolean addNonoverlappingMatch(Match m) {
+        Region match = new Region(m);
         Region nonoverlap;
-        for (MatchObject n : nonoverlappingMatches) {
-            nonoverlap = new Region(n.getMatch());
+        for (Match n : nonoverlappingMatchList) {
+            nonoverlap = new Region(n);
             if (match.overlaps(nonoverlap)) return false;
         }
-        nonoverlappingMatches.add(m);
+        nonoverlappingMatchList.add(m);
         return true;
     }
 
-    private boolean setBestMatch(MatchObject_ newMatch) {
+    private boolean compareAndSetBestMatch(Match newMatch) {
         if (bestMatch == null ||
-                newMatch.getMatch().getScore() > bestMatch.getMatch().getScore()) {
+                newMatch.getScore() > bestMatch.getScore()) {
             bestMatch = newMatch;
             return true;
         }
         return false;
     }
 
-    private boolean addActiveState(MatchObject newMatch) {
-        activeStates.add(newMatch.getState());
-        return true;
+    private void addActiveState(Match newMatch) {
+        activeStates.add(newMatch.getStateObject().getOwnerStateName());
     }
 
-    public Optional<MatchObject_> getBestMatch() {
+    public Optional<Match> getBestMatch() {
         return Optional.ofNullable(bestMatch);
     }
 
@@ -189,15 +177,15 @@ public class Matches {
     }
 
     public int size() {
-        return matchObjects.size();
+        return matchList.size();
     }
 
     public boolean isEmpty() {
-        return matchObject_s.isEmpty();
+        return matchList.isEmpty();
     }
 
     public void setTimesActedOn(int timesActedOn) {
-        matchObjects.forEach(mO -> mO.getStateObject().setTimesActedOn(timesActedOn));
+        matchList.forEach(m -> m.getStateObject().setTimesActedOn(timesActedOn));
     }
 
     public void setDuration(Duration duration) {
@@ -206,11 +194,11 @@ public class Matches {
     }
 
     public void sortByMatchScoreDecending() {
-        matchObjects.sort(Comparator.comparingDouble(mO -> mO.getMatch().getScore()));
+        matchList.sort(Comparator.comparingDouble(Match::getScore));
     }
 
     public void sortBySizeDecending() {
-        matchObjects.sort(Comparator.comparing(MatchObject::getMatchArea).reversed());
+        matchList.sort(Comparator.comparing(Match::size).reversed());
     }
 
     public void saveSnapshots() {
@@ -227,7 +215,7 @@ public class Matches {
     }
 
     public void print() {
-        matchObjects.forEach(MatchObject::print);
+        matchList.forEach(System.out::println);
     }
 
     /**
@@ -235,15 +223,15 @@ public class Matches {
      * @return Optional.empty() if no Match objects; otherwise an Optional of the new Region.
      */
     public Optional<Region> getMedian() {
-        if (matchObjects.isEmpty()) return Optional.empty();
+        if (matchList.isEmpty()) return Optional.empty();
         int cumX = 0, cumY = 0, cumW = 0, cumH = 0;
-        for (MatchObject mO : matchObjects) {
-            cumX += mO.getMatch().x;
-            cumY += mO.getMatch().y;
-            cumW += mO.getMatch().w;
-            cumH += mO.getMatch().h;
+        for (Match m : matchList) {
+            cumX += m.x;
+            cumY += m.y;
+            cumW += m.w;
+            cumH += m.h;
         }
-        int size = matchObjects.size();
+        int size = matchList.size();
         return Optional.of(new Region(cumX/size, cumY/size, cumW/size, cumH/size));
     }
 
@@ -252,11 +240,11 @@ public class Matches {
         return regOpt.map(region -> new Location(region, Position.Name.MIDDLEMIDDLE));
     }
 
-    public Optional<MatchObject> getClosestTo(Location location) {
-        if (matchObjects.isEmpty()) return Optional.empty();
-        double closest = getDist(matchObjects.get(0), location);
-        MatchObject closestMO = matchObjects.get(0);
-        for (MatchObject mO : matchObjects) {
+    public Optional<Match> getClosestTo(Location location) {
+        if (matchList.isEmpty()) return Optional.empty();
+        double closest = getDist(matchList.get(0), location);
+        Match closestMO = matchList.get(0);
+        for (Match mO : matchList) {
             double dist = getDist(mO, location);
             if (dist <= closest) {
                 closest = dist;
@@ -266,9 +254,9 @@ public class Matches {
         return Optional.of(closestMO);
     }
 
-    private double getDist(MatchObject matchObject, Location location) {
-        int xDist = matchObject.getMatch().x - location.getX();
-        int yDist = matchObject.getMatch().y - location.getY();
+    private double getDist(Match match, Location location) {
+        int xDist = match.x - location.getX();
+        int yDist = match.y - location.getY();
         return Math.pow(xDist, 2) + Math.pow(yDist, 2);
     }
 
@@ -279,54 +267,42 @@ public class Matches {
      */
     public Matches minus(Matches matches) {
         Matches rest = new Matches();
-        matchObjects.forEach(matchObject -> {
-            if (!matches.containsMatch(matchObject.getMatch())) rest.add(matchObject);
+        matchList.forEach(match -> {
+            if (!matches.containsMatch(match)) rest.add(match);
         });
         return rest;
     }
 
     public boolean containsMatch(Match match) {
-        Match m;
-        for (MatchObject matchObject : matchObjects) {
-            m = matchObject.getMatch();
-            //if (match.equals(matchObject.getMatch())) return true;
-            if (match.x == m.x && match.y == m.y && match.w == m.w && match.h == m.h) return true;
+        for (Match m : matchList) {
+            if (match.equals(m)) return true;
         }
         return false;
     }
 
     /**
-     * Matches are confirmed when they contain one of the matches in the
-     * parameter insideMatches.
+     * Matches are confirmed when they contain one of the matches in the parameter insideMatches.
      * @param insideMatches When found inside the region of a MatchObject, keep the MatchObject.
      * @return only MatchObjects that are confirmed.
      */
     public Matches getConfirmedMatches(Matches insideMatches) {
         Matches matches = new Matches();
-        //matches.setMaxMatches(this.maxMatches);
-        matchObjects.forEach(mO -> {
-            if (mO.contains(insideMatches)) {
-                matches.add(mO);
-                //Report.println("adding inside match: " + mO.getMatch().x + " " + mO.getMatch().y);
-            }
+        matchList.forEach(m -> {
+            if (insideMatches.getMatchList().contains(m)) matches.add(m);
         });
         return matches;
     }
 
     public void removeNonConfirmedMatches(Matches insideMatches) {
-        matchObjects.removeIf(mO -> !mO.contains(insideMatches));
+        matchList.removeIf(m -> !insideMatches.getMatchList().contains(m));
     }
 
     public void keepOnlyConfirmedMatches(Matches insideMatches) {
         Matches confirmedMatches = getConfirmedMatches(insideMatches);
-        matchObjects = confirmedMatches.matchObjects;
+        matchList = confirmedMatches.getMatchList();
     }
 
-    public boolean hasImageMatches() {
-        for (MatchObject matchObject : matchObjects) {
-            if (!Objects.equals(matchObject.getStateObject().getOwnerStateName(), NullState.Name.NULL.toString())) return true;
-        }
-        return false;
+    public void addAll(List<Match> newMatches) {
+        matchList.addAll(newMatches);
     }
-
 }

@@ -1,13 +1,13 @@
 package io.github.jspinak.brobot.datatypes.state.state;
 
 import io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.buildStateStructure.StateIllustration;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.datatypes.primitives.location.Location;
 import io.github.jspinak.brobot.datatypes.primitives.match.MatchSnapshot;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.StateLocation;
 import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.StateRegion;
 import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.StateString;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.primatives.enums.StateEnum;
 import lombok.Getter;
 import lombok.Setter;
@@ -100,15 +100,7 @@ public class State {
     }
 
     public void setSearchRegionForAllImages(Region searchRegion) {
-        stateImages.forEach(imageObj -> imageObj.setSearchRegion(searchRegion));
-    }
-
-    public void setProbabilitiesForAllImages(int probabilityExists) {
-        stateImages.forEach(imageObj -> imageObj.setProbabilityExists(probabilityExists));
-    }
-
-    public void setProbabilitiesForAllImages() {
-        stateImages.forEach(imageObj -> imageObj.setProbabilityExists(this.probabilityExists));
+        stateImages.forEach(imageObj -> imageObj.setSearchRegions(searchRegion));
     }
 
     public void setProbabilityToBaseProbability() {
@@ -139,9 +131,14 @@ public class State {
      */
     public Region getBoundaries() {
         List<Region> imageRegions = new ArrayList<>();
-        for (StateImage sio : stateImages.toArray(new StateImage[0])) {
-            imageRegions.addAll(sio.getAllSearchRegions());
-            List<MatchSnapshot> snapshots = sio.getMatchHistory().getSnapshots();
+        for (StateImage stateImage : stateImages.toArray(new StateImage[0])) {
+            // if the image has a fixed location and has been found, add this location
+            stateImage.getPatterns().forEach(pattern -> {
+                        Region fixedRegion = pattern.getSearchRegions().getFixedRegion();
+                        if (fixedRegion.isDefined()) imageRegions.add(fixedRegion);
+                    });
+            // otherwise, add the snapshot locations
+            List<MatchSnapshot> snapshots = stateImage.getAllMatchSnapshots();
             for (MatchSnapshot snapshot : snapshots) {
                 snapshot.getMatchList().forEach(match -> imageRegions.add(new Region(match)));
             }

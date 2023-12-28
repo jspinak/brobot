@@ -1,7 +1,7 @@
 package io.github.jspinak.brobot.imageUtils;
 
 import io.github.jspinak.brobot.actions.BrobotSettings;
-import io.github.jspinak.brobot.datatypes.primitives.image.Image;
+import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.reports.Report;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -113,14 +113,14 @@ public class ImageUtils {
     }
 
     /**
-     * Will overwrite a file with the same name.
-     * @param mat mat to save as image
-     * @param name name without filetype
-     * @return an image of the saved png file
+     * Saves the Mat as a .png to file and creates a Pattern object.
+     * @param mat the Mat to save
+     * @param name name without filetype, saved as .png, overwrites a file with the same name
+     * @return a Pattern object
      */
-    public Image matToImage(Mat mat, String name) {
+    public Pattern matToPattern(Mat mat, String name) {
         imwrite(name + ".png", mat);
-        return new Image(name);
+        return new Pattern(name);
     }
 
     public boolean writeWithUniqueFilename(Mat mat, String nameWithoutFiletype) {

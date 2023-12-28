@@ -4,12 +4,11 @@ import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.actions.methods.time.TimeWrapper;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.reports.Report;
-import lombok.Getter;
-import lombok.Setter;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Component
 public class ActionLifecycleManagement {
@@ -82,7 +81,7 @@ public class ActionLifecycleManagement {
      * @param id id of the ActionLifecycle object
      * @return true if the action should be continued, false otherwise
      */
-    public boolean continueAction(int id) {
+    private boolean isTimeLeftAndMoreRepsAllowed(int id) {
         int completedReps = getCompletedRepetitions(id);
         if (completedReps == 0) return true;
         int maxReps = getActionOptions(id).getMaxTimesToRepeatActionSequence();
@@ -95,30 +94,38 @@ public class ActionLifecycleManagement {
         return duration.getSeconds() <= maxWait;
     }
 
-    public boolean continueActionIfNotFound(Matches matches) {
+    public boolean isOkToContinueAction(Matches matches) {
         int id = matches.getActionId();
-        if (!continueAction(id)) {
-            //Report.println("continue action id is false");
-            return false;
-        }
-        if (!matches.isEmpty() && getActionOptions(id).getFind() == ActionOptions.Find.FIRST) {
-            //Report.println("Found the element, stopping find");
-            return false;
-        }
-        if (getAllImagesFound(id) &&
-                getActionOptions(id).getFind() == ActionOptions.Find.EACH &&
-                getActionOptions(id).getDoOnEach() == ActionOptions.DoOnEach.FIRST) {
-            return false;
-        }
+        if (!isTimeLeftAndMoreRepsAllowed(id)) return false;
+        if (isFindFirstAndAtLeastOneMatchFound(matches)) return false;
+        if (isFindEachFirstAndEachPatternFound(matches)) return false;
         return true;
+    }
+
+    public boolean isFindFirstAndAtLeastOneMatchFound(Matches matches) {
+        return !matches.isEmpty() && getActionOptions(matches.getActionId()).getFind() == ActionOptions.Find.FIRST;
+    }
+
+    public boolean isFindEachFirstAndEachPatternFound(Matches matches) {
+        if (matches.getActionOptions().getFind() != ActionOptions.Find.EACH) return false;
+        if (matches.getActionOptions().getDoOnEach() != ActionOptions.DoOnEach.FIRST) return false;
+        return getAllImagesFound(matches.getActionId());
     }
 
     public boolean getAllImagesFound(int id) {
         return actionLifecylceRepo.getActionLifecycles().get(id).isAllImagesFound();
     }
 
-    public void setAllImagesFound(int id) {
+    public boolean setAllImagesFound(Matches matches, List<Matches> patternMatches) {
+        int id = matches.getActionId();
+        for (Matches onePatternMatch : patternMatches) {
+            if (onePatternMatch.isEmpty()) {
+                actionLifecylceRepo.getActionLifecycles().get(id).setAllImagesFound(false);
+                return false;
+            }
+        }
         actionLifecylceRepo.getActionLifecycles().get(id).setAllImagesFound(true);
+        return true;
     }
 
     public boolean printActionOnce(int id) {

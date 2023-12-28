@@ -1,6 +1,7 @@
 package io.github.jspinak.brobot.datatypes.state.stateObject.stateImage;
 
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
+import lombok.Getter;
 
 import java.util.*;
 
@@ -9,6 +10,7 @@ import java.util.*;
  * could be useful when you are not sure where an Image may be but want to exclude
  * an area, or when the desired search area cannot be described by one rectangle.
  */
+@Getter
 public class SearchRegions {
 
     private List<Region> regions = new ArrayList<>();
@@ -23,7 +25,7 @@ public class SearchRegions {
      * @return true if set.
      */
     public boolean isFixedRegionSet() {
-        return fixedRegion.defined();
+        return fixedRegion.isDefined();
     }
 
     public void setFixedRegion(Region region) {
@@ -34,9 +36,17 @@ public class SearchRegions {
         fixedRegion = new Region();
     }
 
-    public Region getSearchRegion() {
+    /**
+     * Return the fixed region if defined.
+     * Otherwise, return the first defined region.
+     * If no regions are defined, return an undefined region.
+     * @return one region.
+     */
+    public Region getOneRegion() {
+        List<Region> regions = getRegions(true);
+        if (regions.size() == 1) return regions.get(0);
         for (Region region : regions) {
-            if (region.defined()) return region;
+            if (region.isDefined()) return region;
         }
         return new Region();
     }
@@ -48,7 +58,7 @@ public class SearchRegions {
      * @param fixed if the image has a fixed location
      * @return the search region
      */
-    public Region getRegion(boolean fixed) {
+    public Region getFixedIfDefinedOrRandomRegion(boolean fixed) {
         List<Region> regions = getRegions(fixed);
         Random rand = new Random(regions.size());
         return regions.get(rand.nextInt());
@@ -63,7 +73,7 @@ public class SearchRegions {
      */
     public List<Region> getRegions(boolean fixed) {
         if (!fixed) return regions;
-        if (fixedRegion.defined()) return List.of(fixedRegion);
+        if (fixedRegion.isDefined()) return List.of(fixedRegion);
         return regions;
     }
 
@@ -93,11 +103,24 @@ public class SearchRegions {
         regions = Region.mergeAdjacent(regions);
     }
 
-    public boolean defined() {
+    /**
+     * @return true if fixed region or any search region is defined.
+     */
+    public boolean isDefined() {
+        if (fixedRegion.isDefined()) return true;
         for (Region region : regions) {
-            if (region.defined()) return true;
+            if (region.isDefined()) return true;
         }
         return false;
+    }
+
+    /**
+     * @param fixed does the pattern have a fixed position
+     * @return true if fixed and has been found, or if not fixed and one of the search regions is defined
+     */
+    public boolean isDefined(boolean fixed) {
+        if (fixed) return fixedRegion.isDefined();
+        return isDefined();
     }
 
     public boolean isEmpty() {
@@ -120,5 +143,16 @@ public class SearchRegions {
             if (region.overlaps(newRegion)) return newRegion.minus(region);
         }
         return List.of(newRegion);
+    }
+
+    public boolean equals(SearchRegions searchRegions) {
+        int size = regions.size();
+        int size2 = searchRegions.getRegions().size();
+        if (size != size2) return false;
+        for (int i=0; i<size; i++) {
+            if (!regions.get(i).equals(searchRegions.getRegions().get(i))) return false;
+        }
+        if (!fixedRegion.equals(searchRegions.getFixedRegion())) return false;
+        return true;
     }
 }

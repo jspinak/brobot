@@ -3,8 +3,7 @@ package io.github.jspinak.brobot.actions.composites.methods.drag;
 import io.github.jspinak.brobot.actions.actionExecution.ActionInterface;
 import io.github.jspinak.brobot.actions.actionExecution.MatchesInitializer;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
-import io.github.jspinak.brobot.actions.methods.basicactions.find.OffsetOps;
-import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.GetSceneAnalysisCollection;
+import io.github.jspinak.brobot.actions.methods.basicactions.find.matchManagement.OffsetOps;
 import io.github.jspinak.brobot.actions.methods.sikuliWrappers.DragLocation;
 import io.github.jspinak.brobot.datatypes.primitives.location.Location;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
@@ -22,18 +21,15 @@ import java.util.Optional;
 @Component
 public class Drag implements ActionInterface {
 
-    private DragLocation dragLocation;
-    private GetDragLocation getDragLocation;
-    private GetSceneAnalysisCollection getSceneAnalysisCollection;
-    private OffsetOps offsetOps;
+    private final DragLocation dragLocation;
+    private final GetDragLocation getDragLocation;
+    private final OffsetOps offsetOps;
     private final MatchesInitializer matchesInitializer;
 
-    public Drag(DragLocation dragLocation, GetDragLocation getDragLocation,
-                GetSceneAnalysisCollection getSceneAnalysisCollection, OffsetOps offsetOps,
+    public Drag(DragLocation dragLocation, GetDragLocation getDragLocation, OffsetOps offsetOps,
                 MatchesInitializer matchesInitializer) {
         this.dragLocation = dragLocation;
         this.getDragLocation = getDragLocation;
-        this.getSceneAnalysisCollection = getSceneAnalysisCollection;
         this.offsetOps = offsetOps;
         this.matchesInitializer = matchesInitializer;
     }
@@ -41,17 +37,18 @@ public class Drag implements ActionInterface {
     /**
      * The two Actions used are Find and Drag.
      * Find is used twice, once for the 'from' Match and once for the 'to' Match.
+     * Matches with the 'to' Match. The 'from' Match is not returned. It additionally
+     *   returns a DefinedRegion with x,y as the DragFrom Location and x2,y2 as the
+     *   DragTo Location.
      *
-     * @param actionOptions     has mostly options for Drag but also a few options for Find
+     * @param matches has mostly options for Drag but also a few options for Find
      * @param objectCollections ObjectCollection #1 for the 'from' Match, and #2 for the 'to' Match.
-     * @return Matches with the 'to' Match. The 'from' Match is not returned. It additionally
-     * returns a DefinedRegion with x,y as the DragFrom Location and x2,y2 as the
-     * DragTo Location.
      */
-    public void perform(Matches matches, ActionOptions actionOptions, ObjectCollection... objectCollections) {
+    public void perform(Matches matches, ObjectCollection... objectCollections) {
+        ActionOptions actionOptions = matches.getActionOptions();
         matches = matchesInitializer.init(actionOptions, objectCollections);
-        Optional<Location> optStartLoc = getDragLocation.getFromLocation(matches, actionOptions, objectCollections);
-        Optional<Location> optEndLoc = getDragLocation.getToLocation(matches, actionOptions, objectCollections);
+        Optional<Location> optStartLoc = getDragLocation.getFromLocation(matches, objectCollections);
+        Optional<Location> optEndLoc = getDragLocation.getToLocation(matches, objectCollections);
         offsetOps.addOffset(List.of(objectCollections), matches, actionOptions);
         if (optStartLoc.isEmpty() || optEndLoc.isEmpty()) return;
         dragLocation.drag(optStartLoc.get(), optEndLoc.get(), actionOptions);

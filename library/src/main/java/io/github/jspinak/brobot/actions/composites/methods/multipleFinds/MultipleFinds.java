@@ -9,19 +9,20 @@ import org.springframework.stereotype.Component;
 @Component
 public class MultipleFinds implements ActionInterface {
 
-    private NestedFinds nestedFinds;
-    private ConfirmedFinds confirmedFinds;
+    private final NestedFinds nestedFinds;
+    private final ConfirmedFinds confirmedFinds;
 
     public MultipleFinds(NestedFinds nestedFinds, ConfirmedFinds confirmedFinds) {
         this.nestedFinds = nestedFinds;
         this.confirmedFinds = confirmedFinds;
     }
 
-    public void perform(Matches matches, ActionOptions actionOptions, ObjectCollection... objectCollections) {
+    public void perform(Matches matches, ObjectCollection... objectCollections) {
+        ActionOptions actionOptions = matches.getActionOptions();
         if (actionOptions.isKeepLargerMatches()) {
-            confirmedFinds.perform(matches, actionOptions, objectCollections);
+            confirmedFinds.perform(matches, objectCollections);
             return;
         }
-        nestedFinds.perform(matches, actionOptions, objectCollections);
+        nestedFinds.perform(matches, objectCollections);
     }
 }

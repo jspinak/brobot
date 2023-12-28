@@ -1,18 +1,13 @@
 package io.github.jspinak.brobot.actions.methods.basicactions.find.color.classification;
 
-import io.github.jspinak.brobot.actions.actionExecution.ActionInterface;
-import io.github.jspinak.brobot.actions.actionExecution.MatchesInitializer;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.actions.methods.MatchOps;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.GetSceneAnalysisCollection;
-import io.github.jspinak.brobot.datatypes.primitives.match.MatchObject;
+import io.github.jspinak.brobot.datatypes.primitives.match.Match;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
-import org.sikuli.script.Match;
 import org.springframework.stereotype.Component;
-
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
@@ -29,23 +24,17 @@ import java.util.Set;
  *    - images in the second ObjectCollections are used in the classification, but not selected as matches
  */
 @Component
-public class FindColor implements ActionInterface {
+public class FindColor {
 
-    private GetClassMatches getClassMatches;
-    private MatchOps matchOps;
-    private GetSceneAnalysisCollection getSceneAnalysisCollection;
-    private final MatchesInitializer matchesInitializer;
+    private final GetClassMatches getClassMatches;
+    private final MatchOps matchOps;
+    private final GetSceneAnalysisCollection getSceneAnalysisCollection;
 
     public FindColor(GetClassMatches getClassMatches, MatchOps matchOps,
-                     GetSceneAnalysisCollection getSceneAnalysisCollection, MatchesInitializer matchesInitializer) {
+                     GetSceneAnalysisCollection getSceneAnalysisCollection) {
         this.getClassMatches = getClassMatches;
         this.matchOps = matchOps;
         this.getSceneAnalysisCollection = getSceneAnalysisCollection;
-        this.matchesInitializer = matchesInitializer;
-    }
-
-    public void perform(Matches matches, ActionOptions actionOptions, ObjectCollection... objectCollections) {
-        find(matches, actionOptions, Arrays.asList(objectCollections));
     }
 
     /**
@@ -62,17 +51,18 @@ public class FindColor implements ActionInterface {
      *   When not empty, the images will be read from file.
      *   Keep in mind that matches will be found for all scenes. If you illustrate the action, each scene
      *   will appear with matches for all scenes. Normally you would only want to use one scene.
-     * @param actionOptions The action configuration
-     * @param objColls The images to use for classification
+     * @param matches The action configuration and existing matches
+     * @param objectCollections The images to use for classification
      */
-    public void find(Matches matches, ActionOptions actionOptions, List<ObjectCollection> objColls) {
+    public void find(Matches matches, List<ObjectCollection> objectCollections) {
+        ActionOptions actionOptions = matches.getActionOptions();
         if (actionOptions.getDiameter() < 0) return;
-        Set<StateImage> targetImages = getSceneAnalysisCollection.getTargetImages(objColls);
+        Set<StateImage> targetImages = getSceneAnalysisCollection.getTargetImages(objectCollections);
         Matches classMatches = getClassMatches.getMatches(matches.getSceneAnalysisCollection(), targetImages, actionOptions);
         matches.addAllResults(classMatches);
         if (actionOptions.getAction() == ActionOptions.Action.CLASSIFY)
-            matches.getMatchObjects().sort(Comparator.comparing(MatchObject::size).reversed());
-        else matches.getMatches().sort(Comparator.comparingDouble(Match::getScore).reversed());
+            matches.getMatchList().sort(Comparator.comparing(Match::size).reversed());
+        else matches.getMatchList().sort(Comparator.comparingDouble(Match::getScore).reversed());
         matchOps.limitNumberOfMatches(matches, actionOptions);
     }
 
