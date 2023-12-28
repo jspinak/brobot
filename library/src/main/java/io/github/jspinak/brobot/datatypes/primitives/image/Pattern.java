@@ -57,9 +57,8 @@ public class Pattern extends org.sikuli.script.Pattern {
     }
 
     /**
-     * Creates a generic Pattern without an associated image. Useful for creating MatchObject(s)
+     * Creates a generic Pattern without an associated image. Useful for creating Match objects
      * for operations not requiring a Pattern.
-     * @return a generic Pattern
      */
     public Pattern() {}
 

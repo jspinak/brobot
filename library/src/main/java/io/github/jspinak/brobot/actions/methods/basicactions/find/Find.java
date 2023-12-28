@@ -86,8 +86,8 @@ public class Find implements ActionInterface {
     private void createColorProfilesWhenNecessary(ActionOptions actionOptions, ObjectCollection... objectCollections) {
         if (!actionOptions.getFindActions().contains(ActionOptions.Find.COLOR)) return;
         List<StateImage> imgs = new ArrayList<>();
-        if (objectCollections.length >= 1) imgs.addAll(objectCollections[0].getStateImage_s());
-        if (objectCollections.length >= 2) imgs.addAll(objectCollections[1].getStateImage_s());
+        if (objectCollections.length >= 1) imgs.addAll(objectCollections[0].getStateImages());
+        if (objectCollections.length >= 2) imgs.addAll(objectCollections[1].getStateImages());
         List<StateImage> imagesWithoutColorProfiles = new ArrayList<>();
         for (StateImage img : imgs) {
             if (img.getKmeansProfilesAllSchemas() == null) {
