@@ -3,8 +3,8 @@ package io.github.jspinak.brobot.actions.methods.basicactions.click;
 import io.github.jspinak.brobot.actions.actionExecution.ActionInterface;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.Find;
-import io.github.jspinak.brobot.actions.methods.sikuliWrappers.Wait;
 import io.github.jspinak.brobot.actions.methods.sikuliWrappers.mouse.ClickLocationOnce;
+import io.github.jspinak.brobot.actions.methods.time.Time;
 import io.github.jspinak.brobot.datatypes.primitives.location.Location;
 import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
@@ -23,13 +23,13 @@ public class Click implements ActionInterface {
 
     private final Find find;
     private final ClickLocationOnce clickLocationOnce;
-    private final Wait wait;
+    private final Time time;
     private final AfterClick afterClick;
 
-    public Click(Find find, ClickLocationOnce clickLocationOnce, Wait wait, AfterClick afterClick) {
+    public Click(Find find, ClickLocationOnce clickLocationOnce, Time time, AfterClick afterClick) {
         this.find = find;
         this.clickLocationOnce = clickLocationOnce;
-        this.wait = wait;
+        this.time = time;
         this.afterClick = afterClick;
     }
 
@@ -43,7 +43,7 @@ public class Click implements ActionInterface {
             i++;
             if (i == actionOptions.getMaxMatchesToActOn()) break;
             // pause only between clicks, not after the last click
-            if (i < matches.getMatchList().size()) wait.wait(actionOptions.getPauseBetweenIndividualActions());
+            if (i < matches.getMatchList().size()) time.wait(actionOptions.getPauseBetweenIndividualActions());
         }
     }
 
@@ -73,11 +73,11 @@ public class Click implements ActionInterface {
             clickLocationOnce.click(location, actionOptions);
             match.getStateObject().addTimesActedOn();
             if (actionOptions.isMoveMouseAfterClick()) {
-                wait.wait(actionOptions.getPauseBetweenIndividualActions());
+                time.wait(actionOptions.getPauseBetweenIndividualActions());
                 afterClick.moveMouseAfterClick(actionOptions);
             }
             if (i < actionOptions.getTimesToRepeatIndividualAction() - 1) {
-                wait.wait(actionOptions.getPauseBetweenIndividualActions());
+                time.wait(actionOptions.getPauseBetweenIndividualActions());
             }
         }
     }
