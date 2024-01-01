@@ -55,7 +55,7 @@ public class GetBufferedImage {
         MatOfByte mob = new MatOfByte();
         Imgcodecs.imencode(".jpg", mat, mob);
         byte[] ba = mob.toArray();
-        BufferedImage bi = null;
+        BufferedImage bi;
         try {
             bi = ImageIO.read(new ByteArrayInputStream(ba));
         } catch (IOException e) {

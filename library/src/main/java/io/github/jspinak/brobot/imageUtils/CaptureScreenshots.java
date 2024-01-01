@@ -2,7 +2,7 @@ package io.github.jspinak.brobot.imageUtils;
 
 import io.github.jspinak.brobot.actions.BrobotSettings;
 import io.github.jspinak.brobot.actions.methods.basicactions.captureAndReplay.recorder.SaveToFile;
-import io.github.jspinak.brobot.actions.methods.sikuliWrappers.Wait;
+import io.github.jspinak.brobot.actions.methods.time.Time;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import org.springframework.stereotype.Component;
 
@@ -23,14 +23,14 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 @Component
 public class CaptureScreenshots {
 
-    private ImageUtils imageUtils;
-    private Wait wait;
+    private final ImageUtils imageUtils;
+    private final Time time;
 
     private final ScheduledExecutorService SCHEDULER = Executors.newSingleThreadScheduledExecutor();
 
-    public CaptureScreenshots(ImageUtils imageUtils, Wait wait) {
+    public CaptureScreenshots(ImageUtils imageUtils, Time time) {
         this.imageUtils = imageUtils;
-        this.wait = wait;
+        this.time = time;
     }
 
     /**
@@ -41,7 +41,7 @@ public class CaptureScreenshots {
     public void capture(int secondsToCapture, double captureFrequency) {
         int numberOfScreenshots = (int) (secondsToCapture / captureFrequency);
         for (int i=0; i<numberOfScreenshots; i++) {
-            wait.wait(captureFrequency);
+            time.wait(captureFrequency);
             imageUtils.saveRegionToFile(new Region(),
                     BrobotSettings.screenshotPath + BrobotSettings.screenshotFilename);
         }

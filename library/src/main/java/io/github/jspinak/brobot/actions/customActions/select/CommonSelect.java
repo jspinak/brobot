@@ -42,7 +42,7 @@ public class CommonSelect {
                 .setPauseBeforeMouseUp(.5)
                 .build();
         ObjectCollection findObjectCollection = new ObjectCollection.Builder()
-                .withImage_s(images)
+                .withImages(images)
                 .build();
         ActionOptions findActionOptions = new ActionOptions.Builder()
                 .setAction(ActionOptions.Action.FIND)
@@ -54,7 +54,7 @@ public class CommonSelect {
                 .setPauseBetweenIndividualActions(.7)
                 .build();
         ObjectCollection confirmationObjectCollection = new ObjectCollection.Builder()
-                .withImage_s(confirmationImages)
+                .withImages(confirmationImages)
                 .build();
         ActionOptions confirmActionOptions = new ActionOptions.Builder()
                 .setAction(ActionOptions.Action.FIND)

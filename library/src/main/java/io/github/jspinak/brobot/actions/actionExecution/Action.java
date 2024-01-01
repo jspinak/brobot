@@ -73,7 +73,7 @@ public class Action {
      * @return a Matches object with the results of the operation.
      */
     public Matches perform(ActionOptions actionOptions, StateImage... stateImages) {
-        return perform(actionOptions, new ObjectCollection.Builder().withImage_s(stateImages).build());
+        return perform(actionOptions, new ObjectCollection.Builder().withImages(stateImages).build());
     }
 
     /**

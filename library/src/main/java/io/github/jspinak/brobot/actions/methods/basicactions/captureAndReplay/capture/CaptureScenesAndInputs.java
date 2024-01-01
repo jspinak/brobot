@@ -103,8 +103,8 @@ public class CaptureScenesAndInputs {
             SceneAndObjectsForXML sceneAndObjectsForXML = new SceneAndObjectsForXML(i);
             for (StateImage stateImage : stateImages) {
                 ObjectCollection objects = new ObjectCollection.Builder()
-                        .withScene_s(new Pattern("../capture/scene" + i))
-                        .withImage_s(stateImage)
+                        .withScenes(new Pattern("../capture/scene" + i))
+                        .withImages(stateImage)
                         .build();
                 Matches matches = action.perform(actionOptions, objects);
                 if (matches.getBestLocation().isPresent()) {

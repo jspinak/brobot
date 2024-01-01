@@ -46,7 +46,7 @@ public class CommonDrag {
         List<ObjectCollection[]> objectCollectionsList = new ArrayList<>();
         int l = to.length > 0 ? 2 : 1;
         ObjectCollection[] firstColl = new ObjectCollection[l];
-        firstColl[0] = new ObjectCollection.Builder().withImage_s(from).build();
+        firstColl[0] = new ObjectCollection.Builder().withImages(from).build();
         if (l == 2) firstColl[1] = new ObjectCollection.Builder().withLocations(to[0]).build();
         objectCollectionsList.add(firstColl);
         for (int i = 0; i < to.length / 2; i++) {

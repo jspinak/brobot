@@ -46,7 +46,7 @@ public class CommonMultipleActions {
                 .setPauseBeforeMouseDown(pauseBeforeClick)
                 .build();
         ObjectCollection objectCollection = new ObjectCollection.Builder()
-                .withImage_s(image)
+                .withImages(image)
                 .build();
         ActionOptions moveAfterClick = new ActionOptions.Builder()
                 .setAction(MOVE)

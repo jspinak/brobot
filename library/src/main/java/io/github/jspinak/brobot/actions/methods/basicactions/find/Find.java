@@ -5,6 +5,7 @@ import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles.SetAllProfiles;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.matchManagement.AddNonImageObjects;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.matchManagement.AdjustMatches;
+import io.github.jspinak.brobot.actions.methods.basicactions.find.matchManagement.MatchFusion;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.matchManagement.OffsetOps;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
@@ -16,9 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * All find requests come here first and are then sent to a specific type of find method.
- *
- * <p>Keep in mind that brobot Image objects can contain multiple patterns.
+ * <p>Brobot StateImage objects can contain multiple patterns.
  * Some types of find methods:
  *   First: Returns the first match found per pattern
  *   Best: Returns the best scoring match from all matches
@@ -27,7 +26,7 @@ import java.util.List;
  *   Custom: User-defined
  * </p>
  *
- * <p>In addition to Brobot Image Objects, ObjectCollections can contain:
+ * <p>In addition to StateImage objects, ObjectCollections can contain (this list may not be comprehensive):
  *   Matches
  *   Regions
  *   Locations
@@ -35,6 +34,9 @@ import java.util.List;
  * </p>
  *
  * <p>Uses only objects in the first ObjectCollection</p>
+ *
+ * <p>GET_TEXT is included in Find with version 1.0.7. All Find operations will return text with the
+ * match objects.</p>
  *
  * <p>Author: Joshua Spinak</p>
  */
@@ -47,16 +49,21 @@ public class Find implements ActionInterface {
     private final AdjustMatches adjustMatches;
     private final SetAllProfiles setAllProfiles;
     private final OffsetOps offsetOps;
+    private final MatchFusion matchFusion;
+    private final SetMatAndText setMatAndText;
 
     public Find(FindFunctions findFunctions, StateMemory stateMemory,
                 AddNonImageObjects addNonImageObjects, AdjustMatches adjustMatches,
-                SetAllProfiles setAllProfiles, OffsetOps offsetOps) {
+                SetAllProfiles setAllProfiles, OffsetOps offsetOps, MatchFusion matchFusion,
+                SetMatAndText setMatAndText) {
         this.findFunctions = findFunctions;
         this.stateMemory = stateMemory;
         this.addNonImageObjects = addNonImageObjects;
         this.adjustMatches = adjustMatches;
         this.setAllProfiles = setAllProfiles;
         this.offsetOps = offsetOps;
+        this.matchFusion = matchFusion;
+        this.setMatAndText = setMatAndText;
     }
 
     /**
@@ -79,8 +86,10 @@ public class Find implements ActionInterface {
         stateMemory.adjustActiveStatesWithMatches(matches);
         Matches nonImageMatches = addNonImageObjects.getOtherObjectsDirectlyAsMatchObjects(objectCollections[0]);
         matches.addMatchObjects(nonImageMatches);
+        matchFusion.setFusedMatches(matches);
         matches.getMatchList().forEach(m -> adjustMatches.adjust(m, actionOptions));
         offsetOps.addOffsetAsLastMatch(matches, actionOptions);
+        setMatAndText.set(matches);
     }
 
     private void createColorProfilesWhenNecessary(ActionOptions actionOptions, ObjectCollection... objectCollections) {

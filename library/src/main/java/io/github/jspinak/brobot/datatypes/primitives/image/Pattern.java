@@ -10,8 +10,11 @@ import io.github.jspinak.brobot.datatypes.primitives.match.MatchSnapshot;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.SearchRegions;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
+import io.github.jspinak.brobot.reports.Report;
 import lombok.Getter;
 import lombok.Setter;
+import org.bytedeco.javacv.Java2DFrameUtils;
+import org.bytedeco.opencv.opencv_core.Mat;
 
 import java.awt.image.BufferedImage;
 import java.net.URL;
@@ -28,6 +31,17 @@ import java.util.List;
 @Setter
 public class Pattern extends org.sikuli.script.Pattern {
 
+    /*
+    The SikuliX Image object is part of Pattern. It loads an image from file or the web into memory
+    and provides a BufferedImage object. There are, however, occasions requiring an image to be
+    captured only in memory. For example, when Brobot creates a model of the environment, the images
+    captured can be saved in a database and do not need to be on file. It is also convenient to have
+    the Mat version of an image since Brobot has many functions performing Mat manipulation.
+     */
+    private Mat mat;
+    /*
+    An image that should always appear in the same location has fixed==true.
+     */
     private boolean fixed = false;
     private SearchRegions searchRegions = new SearchRegions();
     private boolean setKmeansColorProfiles = false; // this is an expensive operation and should be done only when needed
@@ -46,14 +60,17 @@ public class Pattern extends org.sikuli.script.Pattern {
 
     public Pattern(String string) {
         super(string);
+        setMatWithBufferedImage();
     }
 
     public Pattern(URL url) {
         super(url);
+        setMatWithBufferedImage();
     }
 
     public Pattern(BufferedImage bimg) {
         super(bimg);
+        setMatWithBufferedImage();
     }
 
     /**
@@ -61,6 +78,13 @@ public class Pattern extends org.sikuli.script.Pattern {
      * for operations not requiring a Pattern.
      */
     public Pattern() {}
+
+    private void setMatWithBufferedImage() {
+        try (Mat mat = Java2DFrameUtils.toMat(getBImage())) {
+            setMat(mat);
+        }
+        Report.println("Unable to convert BufferedImage to Mat for Pattern " + getFilename());
+    }
 
     /**
      * The initial x will be 0. If a sub image is created, x will represent its position in the super image.
@@ -149,6 +173,7 @@ public class Pattern extends org.sikuli.script.Pattern {
 
     public static class Builder {
 
+        private Mat mat;
         private String filename;
         private boolean fixed = false;
         private SearchRegions searchRegions = new SearchRegions();
@@ -159,6 +184,11 @@ public class Pattern extends org.sikuli.script.Pattern {
         private boolean dynamic = false;
         private Position position = new Position(.5,.5);
         private Anchors anchors = new Anchors();
+
+        public Builder setMat(Mat mat) {
+            this.mat = mat;
+            return this;
+        }
 
         public Builder setFilename(String filename) {
             this.filename = filename;
@@ -232,6 +262,7 @@ public class Pattern extends org.sikuli.script.Pattern {
 
         public Pattern build() {
             Pattern pattern = new Pattern(filename);
+            pattern.mat = mat;
             pattern.fixed = fixed;
             pattern.searchRegions = searchRegions;
             pattern.setKmeansColorProfiles = setKmeansColorProfiles;

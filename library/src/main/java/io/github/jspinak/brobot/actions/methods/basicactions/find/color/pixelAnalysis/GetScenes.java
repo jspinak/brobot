@@ -2,7 +2,7 @@ package io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAn
 
 import io.github.jspinak.brobot.actions.BrobotSettings;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
-import io.github.jspinak.brobot.actions.methods.sikuliWrappers.Wait;
+import io.github.jspinak.brobot.actions.methods.time.Time;
 import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import io.github.jspinak.brobot.illustratedHistory.IllustrateScreenshot;
@@ -30,15 +30,15 @@ import static io.github.jspinak.brobot.actions.methods.basicactions.find.color.p
 @Component
 public class GetScenes {
 
-    private GetImageJavaCV getImageJavaCV;
-    private Wait wait;
-    private IllustrateScreenshot illustrateScreenshot;
+    private final GetImageJavaCV getImageJavaCV;
+    private final Time time;
+    private final IllustrateScreenshot illustrateScreenshot;
     private final GetBufferedImage getBufferedImage;
 
-    public GetScenes(GetImageJavaCV getImageJavaCV, Wait wait, IllustrateScreenshot illustrateScreenshot,
+    public GetScenes(GetImageJavaCV getImageJavaCV, Time time, IllustrateScreenshot illustrateScreenshot,
                      GetBufferedImage getBufferedImage) {
         this.getImageJavaCV = getImageJavaCV;
-        this.wait = wait;
+        this.time = time;
         this.illustrateScreenshot = illustrateScreenshot;
         this.getBufferedImage = getBufferedImage;
     }
@@ -60,7 +60,7 @@ public class GetScenes {
                 Mat bgr = getImageJavaCV.getMatFromScreen();
                 BufferedImage bi = getBufferedImage.convert(bgr);
                 scenes.add(new Scene("screenshot" + i + ".png", bgr, bi));
-                if (i<scenesToCapture-1) wait.wait(secondsBetweenCaptures);
+                if (i<scenesToCapture-1) time.wait(secondsBetweenCaptures);
             }
             return scenes;
         }

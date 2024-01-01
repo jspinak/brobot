@@ -4,6 +4,7 @@ import io.github.jspinak.brobot.actions.BrobotSettings;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.SceneAnalysis;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.SceneAnalysisCollection;
+import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
 import io.github.jspinak.brobot.datatypes.primitives.location.Location;
 import io.github.jspinak.brobot.datatypes.primitives.location.Position;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
@@ -15,6 +16,7 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * The results object for all actions.
@@ -64,7 +66,6 @@ public class Matches {
     }
 
     public void add(Match... matches) {
-        matchList.addAll(List.of(matches));
         for (Match m : matches) {
             matchList.add(m);
             compareAndSetBestMatch(m);
@@ -164,7 +165,8 @@ public class Matches {
     }
 
     private void addActiveState(Match newMatch) {
-        activeStates.add(newMatch.getStateObject().getOwnerStateName());
+        if (newMatch.getStateObject() != null)
+            activeStates.add(newMatch.getStateObject().getOwnerStateName());
     }
 
     public Optional<Match> getBestMatch() {
@@ -304,5 +306,17 @@ public class Matches {
 
     public void addAll(List<Match> newMatches) {
         matchList.addAll(newMatches);
+    }
+
+    public Set<Pattern> getUniquePatterns() {
+        return matchList.stream()
+                .map(Match::getPattern)
+                .collect(Collectors.toSet());
+    }
+
+    public List<Match> getMatchObjectsWithTargetPattern(Pattern pattern) {
+        return matchList.stream()
+                .filter(match -> match.getPattern().equals(pattern))
+                .collect(Collectors.toList());
     }
 }

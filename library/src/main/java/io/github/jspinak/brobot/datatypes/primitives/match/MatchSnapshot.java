@@ -44,6 +44,30 @@ import static io.github.jspinak.brobot.actions.actionOptions.ActionOptions.Find.
  *   and not for the Strings in Text.
  *
  * GetText, when used with Find.ALL, returns a series of non-null Strings that are saved in the Text object.
+ *
+ *      * Action start times are set from the Action class, as the Action is called.
+ *      * Many Actions call a Find operation within the Action. These Find operations
+ *      * produce MatchObjects and need to set their start times.
+ *      * This is done with the findStartTime field.
+ *      *
+ *      * Snapshots are set at the end of the Action. For a Vanish Action, for example,
+ *      * we want to know how long it takes for a Vanish to succeed. This will be useful
+ *      * if we perform another Vanish operation and want to know the average wait time,
+ *      * or are using the MatchHistory for mocks. On the other hand, every Find operation
+ *      * gives us useful information about Images, and we could also save this information.
+ *      * Find operation Durations should be measured from the start of the Find operation
+ *      * and not from the start of the Action.
+ *      * On the other hand, we want MatchSnapshots to be representative of how
+ *      * Images will respond in real scenarios, and saving Snapshots in scenarios where
+ *      * we are waiting a while for an Image to appear will skew the distribution of
+ *      * successful and unsuccessful matches. It is sufficient for us to have Snapshots saved
+ *      * for Find Actions and not every individual Find operation, especially if the Duration
+ *      * is also saved. One scenario where this may not be optimal is when we always use
+ *      * an Image with an Action other than Find, meaning that we won't have a Find Action MatchSnapshot
+ *      * for the Image, and we won't have any data with which to mock finding
+ *      * this Image. Of course, if we never use a Find Action on this Image, it is unlikely that
+ *      * a Find Action will occur in real execution. The Image will be used with other Actions,
+ *      * and these Actions will have MatchSnapshots.
  */
 @Getter
 @Setter
