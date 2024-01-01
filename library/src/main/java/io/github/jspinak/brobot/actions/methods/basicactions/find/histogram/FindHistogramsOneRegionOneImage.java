@@ -8,6 +8,7 @@ import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Component
@@ -30,7 +31,7 @@ public class FindHistogramsOneRegionOneImage {
      * @param sceneHSV the scene in HSV
      * @return a sortable list of regions contained in the overall region and similarity scores
      */
-    public List<Match> find(Region region, StateImage stateImage, Mat sceneHSV, int actionId) {
+    public List<Match> find(Region region, StateImage stateImage, Mat sceneHSV) {
         region.setW(Math.min(region.w + region.x, sceneHSV.cols()) - region.x);
         region.setH(Math.min(region.h + region.y, sceneHSV.rows()) - region.y);
         OverlappingGrids overlappingGrids = new OverlappingGrids(new Grid.Builder()
@@ -39,6 +40,12 @@ public class FindHistogramsOneRegionOneImage {
                 .setCellHeight((int)stateImage.getAverageHeight())
                 .build());
         return histComparison.compareAll(stateImage, overlappingGrids.getAllRegions(), sceneHSV);
+    }
+
+    public List<Match> findAll(List<Region> regions, StateImage stateImage, Mat sceneHSV) {
+        List<Match> allMatches = new ArrayList<>();
+        regions.forEach(reg -> allMatches.addAll(find(reg, stateImage, sceneHSV)));
+        return allMatches;
     }
 
 }

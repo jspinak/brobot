@@ -1,6 +1,5 @@
 package io.github.jspinak.brobot.actions.actionOptions;
 
-import co.elastic.clients.util.TriConsumer;
 import io.github.jspinak.brobot.actions.BrobotSettings;
 import io.github.jspinak.brobot.actions.methods.sikuliWrappers.mouse.ClickType;
 import io.github.jspinak.brobot.datatypes.primitives.location.Location;
@@ -15,7 +14,6 @@ import org.sikuli.basics.Settings;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
 import java.util.function.Predicate;
 
 /**
@@ -121,6 +119,11 @@ public class ActionOptions {
         FIRST, BEST
     }
     private DoOnEach doOnEach = DoOnEach.FIRST;
+
+    /**
+     * The Match's Mat can be captured from the match region
+     */
+    private boolean captureImage = true;
 
     /**
      * Instead of searching for a StateImage, use its defined Region to create a Match.
@@ -399,6 +402,22 @@ public class ActionOptions {
     }
     private Illustrate illustrate = Illustrate.MAYBE;
 
+    /**
+     * Match fusion combines matches based on different criteria. The initial application was to combine
+     * words in proximity found after a Find.ALL_WORDS operation. If NONE is selected, no match objects
+     * will be fused and no fusion code will run.
+     */
+    public enum MatchFusionMethod {
+        NONE, WORDS
+    }
+    private MatchFusionMethod fusionMethod = MatchFusionMethod.NONE;
+    private int maxFusionDistanceX = 5;
+    private int maxFusionDistanceY = 5;
+    /**
+     * After fusing matches, this variable decides which scene to use to set the underlying Mat and text.
+     */
+    private int sceneToUseForCaptureAfterFusingMatches = 0;
+
     public static class Builder {
         private Action action = Action.FIND;
         private BiConsumer<Matches, List<ObjectCollection>> tempFind;
@@ -407,6 +426,7 @@ public class ActionOptions {
         private List<Find> findActions = new ArrayList<>();
         private boolean keepLargerMatches = false;
         private DoOnEach doOnEach = DoOnEach.FIRST;
+        private boolean captureImage = true;
         private boolean useDefinedRegion = false;
         private Predicate<Matches> successCriteria;
         private double similarity = Settings.MinSimilarity;
@@ -457,6 +477,9 @@ public class ActionOptions {
         private int maxArea = -1;
         private int maxMovement = 300;
         private Illustrate illustrate = Illustrate.MAYBE;
+        private MatchFusionMethod fusionMethod = MatchFusionMethod.NONE;
+        private int maxFusionDistanceX = 5;
+        private int maxFusionDistanceY = 5;
 
         public Builder() {}
         //public Builder(Action action) { this.action = action; }
@@ -769,6 +792,22 @@ public class ActionOptions {
             return this;
         }
 
+        public Builder setFusionMethod(MatchFusionMethod fusionMethod) {
+            this.fusionMethod = fusionMethod;
+            return this;
+        }
+
+        public Builder setMaxFusionDistances(int x, int y) {
+            this.maxFusionDistanceX = x;
+            this.maxFusionDistanceY = y;
+            return this;
+        }
+
+        public Builder setCaptureImage(boolean capture) {
+            this.captureImage = capture;
+            return this;
+        }
+
         public ActionOptions build() {
             ActionOptions actionOptions = new ActionOptions();
             actionOptions.action = action;
@@ -778,6 +817,7 @@ public class ActionOptions {
             actionOptions.findActions = findActions;
             actionOptions.keepLargerMatches = keepLargerMatches;
             actionOptions.doOnEach = doOnEach;
+            actionOptions.captureImage = captureImage;
             actionOptions.useDefinedRegion = useDefinedRegion;
             actionOptions.successCriteria = successCriteria;
             actionOptions.similarity = similarity;
@@ -828,6 +868,9 @@ public class ActionOptions {
             actionOptions.maxArea = maxArea;
             actionOptions.maxMovement = maxMovement;
             actionOptions.illustrate = illustrate;
+            actionOptions.fusionMethod = fusionMethod;
+            actionOptions.maxFusionDistanceX = maxFusionDistanceX;
+            actionOptions.maxFusionDistanceY = maxFusionDistanceY;
             return actionOptions;
         }
     }

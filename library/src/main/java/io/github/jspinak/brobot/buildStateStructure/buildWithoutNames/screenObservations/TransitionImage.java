@@ -9,25 +9,33 @@ import org.sikuli.script.Match;
 import java.util.*;
 
 /**
- * This image transitions to the screenshot with the given id.
+ * This image may be a transition from one screen to another.
  * In an environment with static states, there may be many images that transition to a given screenshot.
+ * The same image might exist in different screens and transition to different screens.
  */
 @Getter
 @Setter
 public class TransitionImage {
 
     private int indexInRepo; // index in the TransitionImageRepo
-    private boolean checked = false; // when checked, if id == 0 then it doesn't transition anywhere
+    /*
+    The image should be clicked on every new screen, since it can lead to different target screens on different originating
+    screens. TODO: make it a Map.
+     */
+    private boolean checked; // when checked, if fromScreenToScreen is empty then it doesn't transition anywhere
     private Map<Integer, Integer> fromScreenToScreen = new HashMap<>(); // transitions from and to the screenshots with these ids
     private List<Integer> screensFound = new ArrayList<>();
     private Region region; //
     private Mat image; // the underlying image
     private int ownerState; // the owner state. there is only one owner state.
     private Set<Integer> transitionsTo = new HashSet<>(); // all states transitioned to
-    private List<String> textInMatches = new ArrayList<>();
+    private String text; // search again for text after regions have merged
+    private List<String> textInMatches = new ArrayList<>(); // the text found in individual matches fused to form this image
 
-    public TransitionImage() {
-        this.checked = false;
+    public TransitionImage() {}
+
+    public TransitionImage(Match match) {
+        this.region = new Region(match);
     }
 
     private void addTextFromMatch(String text) {
@@ -69,4 +77,5 @@ public class TransitionImage {
         int yDist = match.y - region.y; // y-distance between the beginning of both region and match
         return match.x - region.x > 0 && xDist < minDist && Math.abs(yDist) < minDist;
     }
+
 }

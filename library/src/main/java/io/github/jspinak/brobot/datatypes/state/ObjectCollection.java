@@ -160,12 +160,12 @@ public class ObjectCollection {
     }
 
     public static class Builder {
-        private List<StateLocation> stateLocations = new ArrayList<>();
-        private List<StateImage> stateImage_s = new ArrayList<>();
-        private List<StateRegion> stateRegions = new ArrayList<>();
-        private List<StateString> stateStrings = new ArrayList<>();
-        private List<Matches> matches = new ArrayList<>();
-        private List<Pattern> scene_s = new ArrayList<>();
+        private final List<StateLocation> stateLocations = new ArrayList<>();
+        private final List<StateImage> stateImages = new ArrayList<>();
+        private final List<StateRegion> stateRegions = new ArrayList<>();
+        private final List<StateString> stateStrings = new ArrayList<>();
+        private final List<Matches> matches = new ArrayList<>();
+        private final List<Pattern> scenes = new ArrayList<>();
 
         public Builder withLocations(Location... locations) {
             for (Location location : locations) {
@@ -181,18 +181,18 @@ public class ObjectCollection {
             return this;
         }
 
-        public Builder withImage_s(StateImage... stateImages) {
-            this.stateImage_s.addAll(Arrays.asList(stateImages));
+        public Builder withImages(StateImage... stateImages) {
+            this.stateImages.addAll(Arrays.asList(stateImages));
             return this;
         }
 
-        public Builder withImage_s(List<StateImage> stateImages) {
-            this.stateImage_s.addAll(stateImages);
+        public Builder withImages(List<StateImage> stateImages) {
+            this.stateImages.addAll(stateImages);
             return this;
         }
 
         public Builder withPatterns(Pattern... patterns) {
-            for (Pattern pattern : patterns) this.stateImage_s.add(pattern.inNullState());
+            for (Pattern pattern : patterns) this.stateImages.add(pattern.inNullState());
             return this;
         }
 
@@ -200,7 +200,7 @@ public class ObjectCollection {
             if (state == null) {
                 Report.print("null state passed| ");
                 return this;
-            } else stateImage_s.addAll(state.getStateImages());
+            } else stateImages.addAll(state.getStateImages());
             return this;
         }
 
@@ -210,7 +210,7 @@ public class ObjectCollection {
                 return this;
             }
             for (StateImage stateImage : state.getStateImages()) {
-                if (!stateImage.isShared()) stateImage_s.add(stateImage);
+                if (!stateImage.isShared()) stateImages.add(stateImage);
             }
             return this;
         }
@@ -267,24 +267,24 @@ public class ObjectCollection {
             return this;
         }
 
-        public Builder withScene_s(String... strings) {
-            for (String string : strings) this.scene_s.add(new Pattern(string));
+        public Builder withScenes(String... strings) {
+            for (String string : strings) this.scenes.add(new Pattern(string));
             return this;
         }
 
-        public Builder withScene_s(Pattern... patterns) {
-            this.scene_s.addAll(List.of(patterns));
+        public Builder withScenes(Pattern... patterns) {
+            this.scenes.addAll(List.of(patterns));
             return this;
         }
 
         public ObjectCollection build() {
             ObjectCollection objectCollection = new ObjectCollection();
-            objectCollection.stateImages = stateImage_s;
+            objectCollection.stateImages = stateImages;
             objectCollection.stateLocations = stateLocations;
             objectCollection.stateRegions = stateRegions;
             objectCollection.stateStrings = stateStrings;
             objectCollection.matches = matches;
-            objectCollection.scenes = scene_s;
+            objectCollection.scenes = scenes;
             return objectCollection;
         }
     }

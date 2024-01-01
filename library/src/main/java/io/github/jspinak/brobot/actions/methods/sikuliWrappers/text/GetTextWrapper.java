@@ -1,9 +1,13 @@
 package io.github.jspinak.brobot.actions.methods.sikuliWrappers.text;
 
 import io.github.jspinak.brobot.actions.BrobotSettings;
+import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
 import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
+import io.github.jspinak.brobot.imageUtils.GetBufferedImage;
 import io.github.jspinak.brobot.mock.MockText;
+import org.bytedeco.opencv.opencv_core.Mat;
+import org.sikuli.script.OCR;
 import org.springframework.stereotype.Component;
 
 /**
@@ -15,20 +19,22 @@ import org.springframework.stereotype.Component;
 public class GetTextWrapper {
 
     private final MockText mockText;
+    private final GetBufferedImage getBufferedImage;
 
-    public GetTextWrapper(MockText mockText) {
+    public GetTextWrapper(MockText mockText, GetBufferedImage getBufferedImage) {
         this.mockText = mockText;
+        this.getBufferedImage = getBufferedImage;
     }
 
     /*
-      No new text is added to existing MatchObjects in mocks.
+      No new text is added to existing Match objects in mocks.
       In a mock, the first time text is retrieved for an Image
       has a certain likelihood of finding text based on the Image MatchHistory.
       Repeating this process enough times would make it almost certain to find text,
       thus rendering the inherent probability in the MatchHistory irrelevant.
     */
     public void getAllText(Matches matches) {
-        matches.getMatchList().forEach(mO -> setText(matches, mO));
+        matches.getMatchList().forEach(match -> setText(matches, match));
     }
 
     private void setText(Matches matches, Match match) {
@@ -42,5 +48,25 @@ public class GetTextWrapper {
     public String getTextFromMatch(Match match) {
         if (BrobotSettings.mock) return mockText.getString(match);
         return match.getText();
+    }
+
+    /**
+     * Reads all text in a Mat and returns a String
+     * @param match should contain the Mat to read
+     * @return all text as a String
+     */
+    public String getText(Match match) {
+        Mat mat = match.getMat();
+        if (mat == null) return "";
+        return OCR.readText(getBufferedImage.convert(mat));
+    }
+
+    /**
+     * Reads all text in a Mat and sets the Match object's Text field
+     * @param match should contain the Mat to read
+     */
+    public void setText(Match match) {
+        String text = getText(match);
+        match.setText(text);
     }
 }

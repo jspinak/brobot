@@ -4,6 +4,7 @@ import io.github.jspinak.brobot.actions.actionExecution.actionLifecycle.ActionLi
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.Scene;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.SceneAnalysis;
 import io.github.jspinak.brobot.actions.methods.sikuliWrappers.find.FindAll;
+import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
@@ -31,21 +32,17 @@ public class FindPatternsIteration {
      * Otherwise, it returns all matches.
      */
     public void find(Matches matches, List<StateImage> stateImages, List<Scene> scenes) {
-        List<Matches> patternMatches = new ArrayList<>();
-        scenes.forEach(scene -> patternMatches.add(new Matches()));
         actionLifecycleManagement.printActionOnce(matches.getActionId());
         for (Scene scene : scenes) {
-            List<Match> sceneMatches = new ArrayList<>(); // holds finds for a specific scene
+            List<Match> singleSceneMatchList = new ArrayList<>(); // holds finds for a specific scene
             for (int i=0; i<stateImages.size(); i++) {
                 List<Match> newMatches = findAll.find(stateImages.get(i), scene, matches.getActionOptions());
-                newMatches.forEach(patternMatches.get(i)::add); // holds finds for a specific Pattern
-                sceneMatches.addAll(newMatches);
+                singleSceneMatchList.addAll(newMatches);
                 matches.addAll(newMatches); // holds all matches found
-                actionLifecycleManagement.setAllImagesFound(matches, patternMatches);
-                if (actionLifecycleManagement.isFindEachFirstAndEachPatternFound(matches)) return;
+                if (!actionLifecycleManagement.isOkToContinueAction(matches, stateImages.size())) return;
             }
             SceneAnalysis sceneAnalysis = new SceneAnalysis(scene);
-            sceneAnalysis.setMatchList(sceneMatches);
+            sceneAnalysis.setMatchList(singleSceneMatchList);
             matches.getSceneAnalysisCollection().add(sceneAnalysis);
         }
     }

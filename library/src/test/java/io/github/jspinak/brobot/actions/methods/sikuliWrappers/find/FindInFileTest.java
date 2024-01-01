@@ -54,8 +54,8 @@ class FindInFileTest {
                 .setDefineAs(ActionOptions.DefineAs.INSIDE_ANCHORS)
                 .build();
         ObjectCollection objectCollection = new ObjectCollection.Builder()
-                .withScene_s(new Pattern("../screenshots/FloraNext1"))
-                .withImage_s(topLeft, bottomRight)
+                .withScenes(new Pattern("../screenshots/FloraNext1"))
+                .withImages(topLeft, bottomRight)
                 .build();
         List<Scene> scenes = getScenes.getScenes(actionOptions, List.of(objectCollection));
         List<Match> matches = findInFile.findAllInScene(topL, scenes.get(0));
