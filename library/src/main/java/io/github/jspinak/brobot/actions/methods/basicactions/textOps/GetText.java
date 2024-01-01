@@ -1,9 +1,9 @@
 package io.github.jspinak.brobot.actions.methods.basicactions.textOps;
 
 import io.github.jspinak.brobot.actions.actionExecution.ActionInterface;
+import io.github.jspinak.brobot.actions.actionExecution.actionLifecycle.ActionLifecycleManagement;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.Find;
-import io.github.jspinak.brobot.actions.methods.sikuliWrappers.Wait;
 import io.github.jspinak.brobot.actions.methods.sikuliWrappers.text.GetTextWrapper;
 import io.github.jspinak.brobot.actions.methods.time.Time;
 import io.github.jspinak.brobot.datatypes.primitives.match.Match;
@@ -17,6 +17,9 @@ import static io.github.jspinak.brobot.actions.actionOptions.ActionOptions.GetTe
 import static io.github.jspinak.brobot.actions.actionOptions.ActionOptions.GetTextUntil.TEXT_VANISHES;
 
 /**
+ * Replaced by Find with text search
+ * TODO: text appears, disappears
+ *
  * GetText retrieves text from a Region.
  * Options include:
  *   Waiting for text to appear: the action terminates when all Match regions have text.
@@ -30,18 +33,18 @@ import static io.github.jspinak.brobot.actions.actionOptions.ActionOptions.GetTe
 public class GetText implements ActionInterface {
 
     private final Find find;
-    private final Wait wait;
     private final TextSelector textSelector;
     private final Time time;
     private final GetTextWrapper getTextWrapper;
+    private final ActionLifecycleManagement actionLifecycleManagement;
 
-    public GetText(Find find, Wait wait, TextSelector textSelector, Time time,
-                   GetTextWrapper getTextWrapper) {
+    public GetText(Find find, TextSelector textSelector, Time time,
+                   GetTextWrapper getTextWrapper, ActionLifecycleManagement actionLifecycleManagement) {
         this.find = find;
-        this.wait = wait;
         this.textSelector = textSelector;
         this.time = time;
         this.getTextWrapper = getTextWrapper;
+        this.actionLifecycleManagement = actionLifecycleManagement;
     }
 
     /**
@@ -59,10 +62,10 @@ public class GetText implements ActionInterface {
         getTextWrapper.getAllText(matches);
         Text text;
         int repetitions = 0;
-        while (!time.expired(actionOptions.getAction(), actionOptions.getMaxWait())) {
+        while (actionLifecycleManagement.isOkToContinueAction(matches, objectCollections[0].getStateImages().size())) {
             repetitions++;
             if (exitIterations(repetitions, actionOptions, matches)) break;
-            wait.wait(actionOptions.getPauseBetweenIndividualActions());
+            time.wait(actionOptions.getPauseBetweenIndividualActions());
             text = matches.getText(); // save the text found until this point
             /*
               If not all images are found, create a new Matches object and

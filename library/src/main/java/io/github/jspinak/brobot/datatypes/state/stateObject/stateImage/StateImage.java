@@ -149,7 +149,7 @@ public class StateImage implements StateObject {
 
     public ObjectCollection asObjectCollection() {
         return new ObjectCollection.Builder()
-                .withImage_s(this)
+                .withImages(this)
                 .build();
     }
 

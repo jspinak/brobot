@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 import java.util.Set;
 
 @Component
-public class BuildStateStructureWithoutNames {
+public class BuildStateStructureFromGUI {
 
     private final GetScreenObservation getScreenObservation;
     private final Action action;
@@ -26,10 +26,10 @@ public class BuildStateStructureWithoutNames {
     private final FindTransition findTransition;
     private final FindScreen findScreen;
 
-    public BuildStateStructureWithoutNames(GetScreenObservation getScreenObservation,
-                                           Action action, ScreenStateCreator screenStateCreator,
-                                           UncheckedImageHunter uncheckedImageHunter, StateStructureInfo stateStructureInfo,
-                                           GetUsableArea getUsableArea, FindTransition findTransition, FindScreen findScreen) {
+    public BuildStateStructureFromGUI(GetScreenObservation getScreenObservation,
+                                      Action action, ScreenStateCreator screenStateCreator,
+                                      UncheckedImageHunter uncheckedImageHunter, StateStructureInfo stateStructureInfo,
+                                      GetUsableArea getUsableArea, FindTransition findTransition, FindScreen findScreen) {
         this.getScreenObservation = getScreenObservation;
         this.action = action;
         this.screenStateCreator = screenStateCreator;

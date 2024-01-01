@@ -50,8 +50,8 @@ class DefineHelperTest {
                 .setDefineAs(ActionOptions.DefineAs.INSIDE_ANCHORS)
                 .build();
         ObjectCollection objectCollection = new ObjectCollection.Builder()
-                .withScene_s(new Pattern("../screenshots/FloraNext1"))
-                .withImage_s(topLeft, bottomRight)
+                .withScenes(new Pattern("../screenshots/FloraNext1"))
+                .withImages(topLeft, bottomRight)
                 .build();
         Matches matches = new Matches();
         actionLifecycleManagement.newActionLifecycle(actionOptions, matches);

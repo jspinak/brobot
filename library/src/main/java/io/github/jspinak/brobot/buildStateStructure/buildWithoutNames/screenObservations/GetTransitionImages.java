@@ -3,6 +3,7 @@ package io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.screenObs
 import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.imageUtils.GetImageJavaCV;
+import lombok.Getter;
 import lombok.Setter;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.sikuli.script.Screen;
@@ -13,6 +14,7 @@ import java.util.List;
 
 @Component
 @Setter
+@Getter
 public class GetTransitionImages {
 
     private final GetImageJavaCV getImage;

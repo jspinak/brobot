@@ -8,6 +8,7 @@ import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAna
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.Scene;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.SceneAnalysis;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.SceneAnalysisCollection;
+import io.github.jspinak.brobot.actions.methods.mockOrLiveInterface.MockOrLive;
 import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
@@ -22,24 +23,19 @@ import java.util.List;
 
 @Component
 public class FindHistogram {
-
-    private final FindHistogramsOneRegionOneImage findHistogramsOneRegionOneImage;
     private final SelectRegions selectRegions;
     private final GetHistograms getHistograms;
-    private final MockHistogram mockHistogram;
     private final GetScenes getScenes;
     private final ActionLifecycleManagement actionLifecycleManagement;
+    private final MockOrLive mockOrLive;
 
-    public FindHistogram(FindHistogramsOneRegionOneImage findHistogramsOneRegionOneImage, SelectRegions selectRegions,
-                         GetHistograms getHistograms,
-                         MockHistogram mockHistogram, GetScenes getScenes,
-                         ActionLifecycleManagement actionLifecycleManagement) {
-        this.findHistogramsOneRegionOneImage = findHistogramsOneRegionOneImage;
+    public FindHistogram(SelectRegions selectRegions, GetHistograms getHistograms, GetScenes getScenes,
+                         ActionLifecycleManagement actionLifecycleManagement, MockOrLive mockOrLive) {
         this.selectRegions = selectRegions;
         this.getHistograms = getHistograms;
-        this.mockHistogram = mockHistogram;
         this.getScenes = getScenes;
         this.actionLifecycleManagement = actionLifecycleManagement;
+        this.mockOrLive = mockOrLive;
     }
 
     /**
@@ -58,7 +54,7 @@ public class FindHistogram {
         List<Match> matchObjects = new ArrayList<>();
         objectCollections.get(0).getStateImages().forEach(img ->
                 scenes.forEach(scene -> {
-                    matchObjects.addAll(forOneImage(actionOptions, img, scene.getHsv(), actionId));
+                    matchObjects.addAll(forOneImage(actionOptions, img, scene.getHsv()));
                     sceneAnalysisCollection.add(new SceneAnalysis(new ArrayList<>(), scene));
                 }));
         int maxMatches = actionOptions.getMaxMatchesToActOn();
@@ -70,17 +66,10 @@ public class FindHistogram {
         matches.setSceneAnalysisCollection(sceneAnalysisCollection);
     }
 
-    private List<Match> forOneImage(ActionOptions actionOptions, StateImage image, Mat sceneHSV, int actionId) {
+    private List<Match> forOneImage(ActionOptions actionOptions, StateImage image, Mat sceneHSV) {
         List<Region> searchRegions = selectRegions.getRegions(actionOptions, image);
-        if (BrobotSettings.mock && BrobotSettings.screenshots.isEmpty())
-            return mockHistogram.getMockHistogramMatches(image, searchRegions);
-        List<Match> matchObjects = new ArrayList<>();
-        for (Region reg : searchRegions) {
-            List<Match> matchObjectsForOneRegion = findHistogramsOneRegionOneImage.find(reg, image, sceneHSV, actionId);
-            matchObjects.addAll(matchObjectsForOneRegion);
-        }
-        matchObjects = matchObjects.stream().sorted(Comparator.comparing(Match::getScore)).toList();
-        return matchObjects;
+        List<Match> matchObjects = mockOrLive.findHistogram(image, sceneHSV, searchRegions);
+        return matchObjects.stream().sorted(Comparator.comparing(Match::getScore)).toList();
     }
 
 }

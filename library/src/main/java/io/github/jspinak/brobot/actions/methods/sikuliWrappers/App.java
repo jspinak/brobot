@@ -2,7 +2,7 @@ package io.github.jspinak.brobot.actions.methods.sikuliWrappers;
 
 import io.github.jspinak.brobot.actions.BrobotSettings;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
-import io.github.jspinak.brobot.mock.Mock;
+import io.github.jspinak.brobot.mock.MockFocusedWindow;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
@@ -13,9 +13,9 @@ import java.util.Optional;
 @Component
 public class App {
 
-    private final Mock mock;
+    private final MockFocusedWindow mock;
 
-    public App(Mock mock) {
+    public App(MockFocusedWindow mock) {
         this.mock = mock;
     }
 

@@ -7,7 +7,6 @@ import io.github.jspinak.brobot.actions.actionExecution.actionLifecycle.ActionLi
 import io.github.jspinak.brobot.actions.actionExecution.manageTrainingData.DatasetManager;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.matchManagement.SelectRegions;
-import io.github.jspinak.brobot.actions.methods.sikuliWrappers.Wait;
 import io.github.jspinak.brobot.actions.methods.time.Time;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
@@ -21,6 +20,7 @@ import io.github.jspinak.brobot.testingAUTs.ActionLogSender;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.time.Duration;
 import java.util.List;
 
 /**
@@ -36,8 +36,6 @@ import java.util.List;
 @Component
 @Slf4j
 public class ActionExecution {
-
-    private final Wait wait;
     private final Time time;
     private final Success success;
     private final ExitSequences exitSequences;
@@ -49,12 +47,11 @@ public class ActionExecution {
     private final ActionLogSender actionLogSender;
     private final MatchesInitializer matchesInitializer;
 
-    public ActionExecution(Wait wait, Time time, Success success, ExitSequences exitSequences,
+    public ActionExecution(Time time, Success success, ExitSequences exitSequences,
                            IllustrateScreenshot illustrateScreenshot, SelectRegions selectRegions,
                            ActionLifecycleManagement actionLifecycleManagement, DatasetManager datasetManager,
                            ActionLogCreator actionLogCreator, ActionLogSender actionLogSender,
                            MatchesInitializer matchesInitializer) {
-        this.wait = wait;
         this.time = time;
         this.success = success;
         this.exitSequences = exitSequences;
@@ -77,25 +74,20 @@ public class ActionExecution {
     public Matches perform(ActionInterface actionMethod, String actionDescription, ActionOptions actionOptions,
                            ObjectCollection... objectCollections) {
         printAction(actionOptions, objectCollections);
-        time.setStartTime(actionOptions.getAction());
         Matches matches = matchesInitializer.init(actionOptions, actionDescription, objectCollections);
         actionLifecycleManagement.newActionLifecycle(actionOptions, matches);
-        wait.wait(actionOptions.getPauseBeforeBegin());
-        /*
-        When the action sequence is repeated, the Matches object will hold the results of the last action.
-         */
+        time.wait(actionOptions.getPauseBeforeBegin());
         for (int i=0; i<actionOptions.getMaxTimesToRepeatActionSequence(); i++) {
             actionMethod.perform(matches, objectCollections);
-            success.set(actionOptions, matches);
+            success.set(actionOptions, matches);  // success used to determine if action should be repeated again
             if (exitSequences.okToExit(actionOptions, matches)) break;
         }
         illustrateScreenshot.illustrateWhenAllowed(matches,
                 selectRegions.getRegionsForAllImages(actionOptions, objectCollections),
                 actionOptions, objectCollections);
-        wait.wait(actionOptions.getPauseAfterEnd());
-        //Duration duration = actionLifecycleManagement.getAndSetDuration(actionId);
-        time.setEndTime(actionOptions.getAction());
-        matches.setDuration(time.getDuration(actionOptions.getAction()));
+        time.wait(actionOptions.getPauseAfterEnd());
+        Duration duration = actionLifecycleManagement.getAndSetDuration(matches);
+        matches.setDuration(duration); //time.getDuration(actionOptions.getAction()));
         matches.saveSnapshots();
         sendActionLog(matches, actionOptions, objectCollections);
         String symbol = matches.isSuccess()? Output.check : Output.fail;

@@ -2,10 +2,11 @@ package io.github.jspinak.brobot.actions.methods.sikuliWrappers;
 
 import io.github.jspinak.brobot.actions.BrobotSettings;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
+import io.github.jspinak.brobot.actions.methods.time.Time;
 import io.github.jspinak.brobot.datatypes.primitives.location.Location;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.illustratedHistory.IllustrateScreenshot;
-import io.github.jspinak.brobot.mock.Mock;
+import io.github.jspinak.brobot.mock.MockDrag;
 import io.github.jspinak.brobot.reports.Report;
 import org.sikuli.basics.Settings;
 import org.sikuli.script.FindFailed;
@@ -24,13 +25,13 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class DragLocation {
-    private Mock mock;
-    private Wait wait;
+    private final MockDrag mock;
+    private final Time time;
     private IllustrateScreenshot illustrateScreenshot;
 
-    public DragLocation(Mock mock, Wait wait, IllustrateScreenshot illustrateScreenshot) {
+    public DragLocation(MockDrag mock, Time time, IllustrateScreenshot illustrateScreenshot) {
         this.mock = mock;
-        this.wait = wait;
+        this.time = time;
         this.illustrateScreenshot = illustrateScreenshot;
     }
 
@@ -54,7 +55,7 @@ public class DragLocation {
         Settings.MoveMouseDelay = actionOptions.getMoveMouseDelay();
         Settings.DelayBeforeDrop = actionOptions.getPauseBeforeMouseUp();
         if (!drag(from, to)) return false;
-        wait.wait(actionOptions.getPauseAfterMouseUp());
+        time.wait(actionOptions.getPauseAfterMouseUp());
         return true;
     }
 }

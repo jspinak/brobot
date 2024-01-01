@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class BuildStateStructure {
 
-    private final BuildStateStructureWithoutNames buildStateStructureWithoutNames;
+    private final BuildStateStructureFromGUI buildStateStructureFromGUI;
     private final GetTransitionImages getTransitionImages;
     private final ScreenStateCreator screenStateCreator;
     private final GetScreenObservation getScreenObservation;
@@ -20,12 +20,12 @@ public class BuildStateStructure {
     private final FindScreen findScreen;
     private final BuildStateStructureFromScreenshots buildStateStructureFromScreenshots;
 
-    public BuildStateStructure(BuildStateStructureWithoutNames buildStateStructureWithoutNames,
+    public BuildStateStructure(BuildStateStructureFromGUI buildStateStructureFromGUI,
                                GetTransitionImages getTransitionImages, ScreenStateCreator screenStateCreator,
                                GetScreenObservation getScreenObservation, ScreenObservations screenObservations,
                                TransitionImageRepo transitionImageRepo, FindScreen findScreen,
                                BuildStateStructureFromScreenshots buildStateStructureFromScreenshots) {
-        this.buildStateStructureWithoutNames = buildStateStructureWithoutNames;
+        this.buildStateStructureFromGUI = buildStateStructureFromGUI;
         this.getTransitionImages = getTransitionImages;
         this.screenStateCreator = screenStateCreator;
         this.getScreenObservation = getScreenObservation;
@@ -44,7 +44,7 @@ public class BuildStateStructure {
         findScreen.setSaveDecisionMat(stateStructureTemplate.isSaveDecisionMats());
         findScreen.setMinimumChangedPixelsForNewScreen(stateStructureTemplate.getMinimumChangedPixelsForNewScreen());
         if (stateStructureTemplate.getScreenshots().isEmpty()) {
-            buildStateStructureWithoutNames.automateStateStructure(
+            buildStateStructureFromGUI.automateStateStructure(
                     stateStructureTemplate.getTopLeftBoundary(), stateStructureTemplate.getBottomRightBoundary());
         } else {
             buildStateStructureFromScreenshots.build(

@@ -5,10 +5,11 @@ import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.matchManagement.MatchProofer;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.matchManagement.SelectRegions;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.Scene;
+import io.github.jspinak.brobot.actions.methods.mockOrLiveInterface.MockOrLive;
+import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
-import io.github.jspinak.brobot.mock.Mock;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -21,20 +22,16 @@ import java.util.List;
  */
 @Component
 public class FindAll {
-
-    private final Mock mock;
-    private final Permissions permissions;
     private final FindInFile findInFile;
     private final SelectRegions selectRegions;
     private final MatchProofer matchProofer;
+    private final MockOrLive mockOrLive;
 
-    public FindAll(Mock mock, Permissions permissions, FindInFile findInFile, SelectRegions selectRegions,
-                   MatchProofer matchProofer) {
-        this.mock = mock;
-        this.permissions = permissions;
+    public FindAll(FindInFile findInFile, SelectRegions selectRegions, MatchProofer matchProofer, MockOrLive mockOrLive) {
         this.findInFile = findInFile;
         this.selectRegions = selectRegions;
         this.matchProofer = matchProofer;
+        this.mockOrLive = mockOrLive;
     }
 
     /**
@@ -46,10 +43,10 @@ public class FindAll {
      */
     public List<Match> find(StateImage stateImage, Scene scene, ActionOptions actionOptions) {
         List<Match> matchObjects = new ArrayList<>();
-        for (io.github.jspinak.brobot.datatypes.primitives.image.Pattern pattern : stateImage.getPatterns()) {
+        for (Pattern pattern : stateImage.getPatterns()) {
             // these are unique regions so there won't be any duplicate matches
             List<Region> regions = selectRegions.getRegions(actionOptions, pattern);
-            List<Match> matchList = findAll(pattern, scene);
+            List<Match> matchList = mockOrLive.findAll(pattern, scene);
             for (Match match : matchList) {
                 if (matchProofer.isInSearchRegions(match, regions)) {
                     matchObjects.add(
@@ -62,17 +59,6 @@ public class FindAll {
             }
         }
         return matchObjects;
-    }
-
-    /**
-     * Chooses to mock the action or execute it live.
-     * @param pattern the pattern to find
-     * @param scene the scene used as the template
-     * @return a list of MatchObject
-     */
-    public List<Match> findAll(io.github.jspinak.brobot.datatypes.primitives.image.Pattern pattern, Scene scene) {
-        if (permissions.isMock()) return mock.getMatches(pattern);
-        return findInFile.findAllInScene(pattern, scene);
     }
 
     public List<Match> findWords(Scene scene, ActionOptions actionOptions) {

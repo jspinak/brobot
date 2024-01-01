@@ -28,7 +28,7 @@ public class FindFunctions {
                          FindWords findWords, FindImages findImages) {
         findFunction.put(ActionOptions.Find.FIRST, findImages::findBest);
         findFunction.put(ActionOptions.Find.BEST, findImages::findBest);
-        findFunction.put(ActionOptions.Find.EACH, findImages::findEach);
+        findFunction.put(ActionOptions.Find.EACH, findImages::findEachPattern);
         findFunction.put(ActionOptions.Find.ALL, findImages::findAll);
         findFunction.put(ActionOptions.Find.HISTOGRAM, findHistogram::find);
         findFunction.put(ActionOptions.Find.COLOR, findColor::find);

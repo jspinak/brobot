@@ -38,11 +38,21 @@ import java.time.LocalDateTime;
 @Setter
 public class Match extends org.sikuli.script.Match {
     /*
+    The Mat in a Match object contains the pixels from the match region. This can be different from
+    the image used to search with (similarity may be low, or the match area might be shifted).
+    Also, some operations do not use an image to search, and are interested in the contents of the
+    screen.
+     */
+    private Mat mat;
+    /*
     For simplicity, one String is used to represent text here. While it may be a stochastic variable (text read from
     the screen may differ at different readings), the processing of the text read can be performed before creating
     a MatchObject. If an action has multiple iterations, each can be saved as a Match with a single String for text.
      */
     private String text;
+    /*
+    This is the pattern used to find the match. It may be different from the mat.
+     */
     private Pattern pattern;
     private StateObject stateObject;
     private Mat histogram;
@@ -83,6 +93,12 @@ public class Match extends org.sikuli.script.Match {
     public int size() {
         if (pattern == null) return 0;
         return pattern.w()*pattern.h();
+    }
+
+    public void setMatWithScene() {
+        if (scene == null) return;
+        Rect roi = new Region(this).getJavaCVRect();
+        setMat(scene.getBgr().apply(roi)); //.clone() if you need a copy
     }
 
     public static class Builder {
@@ -154,6 +170,7 @@ public class Match extends org.sikuli.script.Match {
             matchObject.scene = scene;
             matchObject.score = score;
             matchObject.timeStamp = LocalDateTime.now();
+            matchObject.setMatWithScene();
             return matchObject;
         }
 
