@@ -1,7 +1,7 @@
 package io.github.jspinak.brobot.actions.methods.sikuliWrappers.mouse;
 
 import io.github.jspinak.brobot.actions.BrobotSettings;
-import io.github.jspinak.brobot.actions.methods.sikuliWrappers.Wait;
+import io.github.jspinak.brobot.actions.methods.time.Time;
 import io.github.jspinak.brobot.reports.Report;
 import org.sikuli.script.Mouse;
 import org.springframework.stereotype.Component;
@@ -14,11 +14,11 @@ import org.springframework.stereotype.Component;
 public class MouseUpWrapper {
 
     private final ClickType clickType;
-    private final Wait wait;
+    private final Time time;
 
-    public MouseUpWrapper(ClickType clickType, Wait wait) {
+    public MouseUpWrapper(ClickType clickType, Time time) {
         this.clickType = clickType;
-        this.wait = wait;
+        this.time = time;
     }
 
     public boolean press(double pauseBefore, double pauseAfter, ClickType.Type type) {
@@ -28,9 +28,9 @@ public class MouseUpWrapper {
             System.out.print(" ");
             return true;
         }
-        wait.wait(pauseBefore);
+        time.wait(pauseBefore);
         Mouse.up(clickType.getTypeToSikuliButton().get(type));
-        wait.wait(pauseAfter);
+        time.wait(pauseAfter);
         return true;
     }
 

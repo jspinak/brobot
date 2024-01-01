@@ -153,6 +153,14 @@ public class Region extends org.sikuli.script.Region implements Comparable<Regio
         return contains(l.getSikuliLocation());
     }
 
+    public boolean containsX(Location l) {
+        return l.getX() >= x && l.getX() <= x + w;
+    }
+
+    public boolean containsY(Location l) {
+        return l.getY() >= y && l.getY() <= y + h;
+    }
+
     public int size() {
         return w * h;
     }

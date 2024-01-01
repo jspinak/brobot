@@ -60,7 +60,7 @@ public class CommonActions {
                 .setMaxTimesToRepeatActionSequence(timesToClick)
                 .build();
         ObjectCollection objectCollection = new ObjectCollection.Builder()
-                .withImage_s(image)
+                .withImages(image)
                 .build();
         return action.perform(actionOptions, objectCollection).isSuccess();
     }
@@ -79,7 +79,7 @@ public class CommonActions {
                 .setAddY(yMove)
                 .build();
         ObjectCollection objectCollection = new ObjectCollection.Builder()
-                .withImage_s(image)
+                .withImages(image)
                 .build();
         return action.perform(actionOptions, objectCollection).isSuccess();
     }
@@ -172,7 +172,7 @@ public class CommonActions {
                 .setPauseBetweenIndividualActions(pauseBetweenClicks)
                 .build();
         ObjectCollection objectsToClick = new ObjectCollection.Builder()
-                .withImage_s(objectToClick)
+                .withImages(objectToClick)
                 .build();
         ObjectCollection objectsToAppear = new ObjectCollection.Builder()
                 .withAllStateImages(stateService.findByName(state).get())
@@ -189,10 +189,10 @@ public class CommonActions {
                 .setPauseBetweenIndividualActions(pauseBetweenClicks)
                 .build();
         ObjectCollection objectsToClick = new ObjectCollection.Builder()
-                .withImage_s(toClick)
+                .withImages(toClick)
                 .build();
         ObjectCollection objectsToAppear = new ObjectCollection.Builder()
-                .withImage_s(toAppear)
+                .withImages(toAppear)
                 .build();
         return action.perform(actionOptions, objectsToClick, objectsToAppear).isSuccess();
     }

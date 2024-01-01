@@ -5,15 +5,16 @@ import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.GetScenes;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.Scene;
 import io.github.jspinak.brobot.actions.methods.sikuliWrappers.find.UseDefinedRegion;
+import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
+import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
+@Component
 public class FindImages {
 
     private final UseDefinedRegion useDefinedRegion;
@@ -38,7 +39,25 @@ public class FindImages {
         matches.getBestMatch().ifPresent(match -> matches.setMatchList(List.of(match)));
     }
 
-    void findEach(Matches matches, List<ObjectCollection> objectCollections) {
+    void findEachPattern(Matches matches, List<ObjectCollection> objectCollections) {
+        getImageMatches(matches, objectCollections);
+        List<Match> bestMatchPerPattern = new ArrayList<>();
+        Set<Pattern> patterns = matches.getUniquePatterns();
+        for (Pattern pattern : patterns) {
+            List<Match> singlePatternMatchList = matches.getMatchObjectsWithTargetPattern(pattern);
+            Optional<Match> matchWithHighestScore = singlePatternMatchList.stream()
+                    .max(java.util.Comparator.comparingDouble(Match::getScore));
+            matchWithHighestScore.ifPresent(bestMatchPerPattern::add);
+        }
+        matches.setMatchList(bestMatchPerPattern);
+    }
+
+    /**
+     * Finds the best match per scene.
+     * @param matches all Match objects and the action configuration
+     * @param objectCollections the StateObjects and scenes to use
+     */
+    void findEachScene(Matches matches, List<ObjectCollection> objectCollections) {
         getImageMatches(matches, objectCollections);
         matches.setMatchList(new ArrayList<>());
         matches.getSceneAnalysisCollection().getSceneAnalyses().forEach(sceneAnalysis -> {
@@ -65,7 +84,7 @@ public class FindImages {
         the images are no longer found. The results for each execution are added to the Matches object.
          */
         List<StateImage> stateImages = objectCollections.get(0).getStateImages();
-        while (actionLifecycleManagement.isOkToContinueAction(matches)) {
+        while (actionLifecycleManagement.isOkToContinueAction(matches, stateImages.size())) {
             List<Scene> scenes = getScenes.getScenes(actionOptions, objectCollections, 1, 0);
             findPatternsIteration.find(matches, stateImages, scenes);
             actionLifecycleManagement.incrementCompletedRepetitions(matches.getActionId());

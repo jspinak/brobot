@@ -1,9 +1,9 @@
 package io.github.jspinak.brobot.actions.methods.basicactions;
 
 import io.github.jspinak.brobot.actions.actionExecution.ActionInterface;
+import io.github.jspinak.brobot.actions.actionExecution.actionLifecycle.ActionLifecycleManagement;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.Find;
-import io.github.jspinak.brobot.actions.methods.time.Time;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import org.springframework.stereotype.Component;
@@ -17,19 +17,17 @@ import org.springframework.stereotype.Component;
 @Component
 public class WaitVanish implements ActionInterface {
 
-    private Find find;
-    private Time time;
+    private final Find find;
+    private final ActionLifecycleManagement actionLifecycleManagement;
 
-    public WaitVanish(Find find, Time time) {
+    public WaitVanish(Find find, ActionLifecycleManagement actionLifecycleManagement) {
         this.find = find;
-        this.time = time;
+        this.actionLifecycleManagement = actionLifecycleManagement;
     }
 
     public void perform(Matches matches, ObjectCollection[] objectCollections) {
-        ActionOptions actionOptions = matches.getActionOptions();
-        actionOptions.setFind(ActionOptions.Find.EACH);
-        time.setStartTime(ActionOptions.Action.VANISH); // this method shouldn't be called directly, but just in case...
-        while (!time.expired(ActionOptions.Action.VANISH, actionOptions.getMaxWait()) && !matches.isEmpty()) {
+        matches.getActionOptions().setFind(ActionOptions.Find.EACH);
+        while (actionLifecycleManagement.isOkToContinueAction(matches, objectCollections[0].getStateImages().size())) {
             find.perform(matches, objectCollections[0]);
         }
     }

@@ -48,14 +48,14 @@ public class GetUsableArea {
 
     private ObjectCollection getObjectCollection(Pattern topleft, Pattern bottomright, Pattern... scenes) {
         return new ObjectCollection.Builder()
-                .withImage_s(
+                .withImages(
                         new StateImage.Builder()
                                 .addPattern(topleft)
                                 .build(),
                         new StateImage.Builder()
                                 .addPattern(bottomright)
                                 .build())
-                .withScene_s(scenes)
+                .withScenes(scenes)
                 .build();
     }
 

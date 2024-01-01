@@ -65,14 +65,17 @@ public class GetScreenObservationFromScreenshot {
     public List<TransitionImage> findAndCapturePotentialLinks(Region usableArea, String path) {
         List<TransitionImage> transitionImages = new ArrayList<>();
         ObjectCollection screens = new ObjectCollection.Builder()
-                .withScene_s(path)
+                .withScenes(path)
                 .build();
         ActionOptions findAllWords = new ActionOptions.Builder()
                 .setAction(ActionOptions.Action.FIND)
                 .setFind(ALL_WORDS)
                 .addSearchRegion(usableArea)
+                .setFusionMethod(ActionOptions.MatchFusionMethod.WORDS)
+                .setMaxFusionDistances(getTransitionImages.getMinWidthBetweenImages(), 10)
                 .build();
         Matches wordMatches = action.perform(findAllWords, screens);
+        wordMatches.getMatchList().forEach(match -> transitionImages.add(new TransitionImage(match)));
 
         for (int i=0; i<wordMatches.size(); i++) {
             TransitionImageHelper transitionImageHelper = getTransitionImages.createTransitionImage(i, wordMatches.getMatchList());

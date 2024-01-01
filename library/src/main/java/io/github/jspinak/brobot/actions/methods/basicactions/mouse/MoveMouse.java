@@ -3,8 +3,8 @@ package io.github.jspinak.brobot.actions.methods.basicactions.mouse;
 import io.github.jspinak.brobot.actions.actionExecution.ActionInterface;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.Find;
-import io.github.jspinak.brobot.actions.methods.sikuliWrappers.Wait;
 import io.github.jspinak.brobot.actions.methods.sikuliWrappers.mouse.MoveMouseWrapper;
+import io.github.jspinak.brobot.actions.methods.time.Time;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import io.github.jspinak.brobot.reports.Report;
@@ -26,12 +26,12 @@ public class MoveMouse implements ActionInterface {
 
     private final Find find;
     private final MoveMouseWrapper moveMouseWrapper;
-    private final Wait wait;
+    private final Time time;
 
-    public MoveMouse(Find find, MoveMouseWrapper moveMouseWrapper, Wait wait) {
+    public MoveMouse(Find find, MoveMouseWrapper moveMouseWrapper, Time time) {
         this.find = find;
         this.moveMouseWrapper = moveMouseWrapper;
-        this.wait = wait;
+        this.time = time;
     }
 
     public void perform(Matches matches, ObjectCollection... objectCollections) {
@@ -42,7 +42,7 @@ public class MoveMouse implements ActionInterface {
             matches.getMatchLocations().forEach(moveMouseWrapper::move);
             Report.print("finished move. ");
             if (collections.indexOf(objColl) < collections.size() - 1)
-                wait.wait(actionOptions.getPauseBetweenIndividualActions());
+                time.wait(actionOptions.getPauseBetweenIndividualActions());
         }
     }
 

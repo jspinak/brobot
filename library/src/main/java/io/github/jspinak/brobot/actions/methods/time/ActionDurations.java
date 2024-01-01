@@ -13,7 +13,7 @@ import java.util.Map;
 @Component
 public class ActionDurations {
 
-    private Map<ActionOptions.Find, Double> findDurations = new HashMap<>();
+    private final Map<ActionOptions.Find, Double> findDurations = new HashMap<>();
     {
         findDurations.put(ActionOptions.Find.FIRST, BrobotSettings.mockTimeFindFirst);
         findDurations.put(ActionOptions.Find.EACH, BrobotSettings.mockTimeFindFirst);
@@ -23,7 +23,7 @@ public class ActionDurations {
         findDurations.put(ActionOptions.Find.COLOR, BrobotSettings.mockTimeFindColor);
     }
 
-    private Map<ActionOptions.Action, Double> actionDurations = new HashMap<>();
+    private final Map<ActionOptions.Action, Double> actionDurations = new HashMap<>();
     {
         actionDurations.put(ActionOptions.Action.CLICK, BrobotSettings.mockTimeClick);
         actionDurations.put(ActionOptions.Action.DRAG, BrobotSettings.mockTimeDrag);

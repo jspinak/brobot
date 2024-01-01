@@ -12,7 +12,14 @@ public class ActionLifecycle {
 
     private ActionOptions actionOptions;
     private LocalDateTime startTime;
+    /**
+     * This is the time the action was completed, not necessarily the allowed finish time.
+     */
     private LocalDateTime endTime;
+    /**
+     * Allowed end time is the start time plus the max wait in seconds.
+     */
+    private LocalDateTime allowedEndTime;
     private int completedRepetitions = 0;
     private boolean printed = false;
     private boolean allImagesFound = false;
@@ -20,15 +27,12 @@ public class ActionLifecycle {
     public ActionLifecycle(ActionOptions actionOptions, LocalDateTime now) {
         this.actionOptions = actionOptions;
         this.startTime = now;
-        this.endTime = now.plusSeconds((long) actionOptions.getMaxWait());
+        long nanos = (long) (actionOptions.getMaxWait() * Math.pow(10, 9));
+        this.allowedEndTime = startTime.plusNanos(nanos);
     }
 
     public void incrementCompletedRepetitions() {
         completedRepetitions++;
-    }
-
-    public void setEndTime(LocalDateTime endTime) {
-        this.endTime = endTime;
     }
 
 }

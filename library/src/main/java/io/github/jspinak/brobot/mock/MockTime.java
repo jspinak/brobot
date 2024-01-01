@@ -1,24 +1,21 @@
-package io.github.jspinak.brobot.actions.methods.time;
+package io.github.jspinak.brobot.mock;
 
-import io.github.jspinak.brobot.actions.BrobotSettings;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
+import io.github.jspinak.brobot.actions.methods.time.ActionDurations;
+import io.github.jspinak.brobot.reports.Report;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 
 /**
- * Wraps the Time functions to allow for mocking actions.
  * Keeps track of the mocked value of 'now' and performs mocked pauses.
  */
 @Component
-public class TimeWrapper {
-
-    private ActionDurations actionDurations;
-
+public class MockTime {
+    private final ActionDurations actionDurations;
     private LocalDateTime now = LocalDateTime.now(); // keeps track of mock time
 
-    public TimeWrapper(ActionDurations actionDurations) {
+    public MockTime(ActionDurations actionDurations) {
         this.actionDurations = actionDurations;
     }
 
@@ -27,11 +24,13 @@ public class TimeWrapper {
      * @return the current time, either as the real current time or the mocked current time.
      */
     public LocalDateTime now() {
-        if (BrobotSettings.mock) return now;
-        return LocalDateTime.now();
+        return now;
     }
 
     public void wait(double seconds) {
+        if (seconds <= 0) return;
+        if (Report.minReportingLevel(Report.OutputLevel.HIGH))
+            System.out.format("%s-%.1f ", "wait", seconds);
         long nanoTimeout = (long) (seconds * Math.pow(10, 9));
         now = now.plusNanos(nanoTimeout);
     }
@@ -44,12 +43,4 @@ public class TimeWrapper {
         wait(actionDurations.getFindDuration(find));
     }
 
-    public void printNow() {
-        System.out.print(now().format(DateTimeFormatter.ofPattern("mm:ss"))+" ");
-    }
-
-    public void goBackInTime(double years, Object thingsYouWishYouCouldChange) {
-        now = now.minusYears((long)years);
-        //change(thingsYouWishYouCouldChange); // seems difficult, maybe replace with an 'accept' method
-    }
 }

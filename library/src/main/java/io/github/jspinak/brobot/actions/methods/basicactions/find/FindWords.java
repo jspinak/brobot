@@ -26,7 +26,7 @@ public class FindWords {
     }
 
     void findAllWordMatches(Matches matches, List<ObjectCollection> objectCollections) {
-        while (actionLifecycleManagement.isOkToContinueAction(matches)) {
+        while (actionLifecycleManagement.isOkToContinueAction(matches, objectCollections.get(0).getStateImages().size())) {
             List<Scene> scenes = getScenes.getScenes(matches.getActionOptions(), objectCollections, 1, 0);
             findWordsSetSceneAnalyses(matches, scenes);
             actionLifecycleManagement.incrementCompletedRepetitions(matches.getActionId());
