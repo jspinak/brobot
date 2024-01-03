@@ -3,6 +3,7 @@ package io.github.jspinak.brobot.actions.methods.basicactions.define;
 import io.github.jspinak.brobot.BrobotTestApplication;
 import io.github.jspinak.brobot.actions.actionExecution.actionLifecycle.ActionLifecycleManagement;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
+import io.github.jspinak.brobot.actions.methods.basicactions.TestData;
 import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.datatypes.primitives.location.Position;
@@ -28,35 +29,12 @@ class DefineHelperTest {
     @Autowired
     DefineHelper defineHelper;
 
-    @Autowired
-    ActionLifecycleManagement actionLifecycleManagement;
-
     @Test
     void findMatches() {
-        StateImage topLeft = new StateImage.Builder()
-                .addPattern(new Pattern.Builder()
-                        .setFilename("topLeft")
-                        .addAnchor(Position.Name.TOPLEFT, Position.Name.BOTTOMLEFT)
-                        .build())
-                .build();
-        StateImage bottomRight = new StateImage.Builder()
-                .addPattern(new Pattern.Builder()
-                        .setFilename("bottomRight")
-                        .addAnchor(Position.Name.BOTTOMRIGHT, Position.Name.TOPRIGHT)
-                        .build())
-                .build();
-        ActionOptions actionOptions = new ActionOptions.Builder()
-                .setAction(ActionOptions.Action.DEFINE)
-                .setDefineAs(ActionOptions.DefineAs.INSIDE_ANCHORS)
-                .build();
-        ObjectCollection objectCollection = new ObjectCollection.Builder()
-                .withScenes(new Pattern("../screenshots/FloraNext1"))
-                .withImages(topLeft, bottomRight)
-                .build();
+        TestData testData = new TestData();
         Matches matches = new Matches();
-        actionLifecycleManagement.newActionLifecycle(actionOptions, matches);
-
-        defineHelper.findMatches(matches, actionOptions, objectCollection);
+        matches.setActionOptions(testData.getDefineInsideAnchors());
+        defineHelper.findMatches(matches, testData.getInsideAnchorObjects());
         System.out.println(matches.getMatchList());
         assertFalse(matches.isEmpty());
     }

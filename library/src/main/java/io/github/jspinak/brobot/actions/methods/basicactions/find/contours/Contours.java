@@ -146,7 +146,6 @@ public class Contours {
                     double score = getContourScore(partitionedContour);
                     if (score > 0) { // score is 0 if the contour is not a match
                         Match match = new Match(new Region(partitionedContour));
-                        match.setScore(score);
                         matchMap.put(m, match);
                         m++;
                     }
@@ -191,7 +190,7 @@ public class Contours {
         double score = getContourScore(rect);
         return new Match.Builder()
                 .setMatch(rect)
-                .setScore(score)
+                .setSimScore(score)
                 .build();
     }
 

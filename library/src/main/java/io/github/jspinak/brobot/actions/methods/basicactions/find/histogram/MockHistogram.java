@@ -24,7 +24,7 @@ public class MockHistogram {
                 new Match.Builder()
                         .setMatch(region)
                         .setStateObject(image)
-                        .setScore(new Random().nextInt(100))
+                        .setSimScore(new Random().nextInt(100))
                         .build()
         ));
         return matchObjects;

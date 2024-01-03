@@ -24,7 +24,7 @@ public class DefineIncludingMatches implements ActionInterface {
 
     public void perform(Matches matches, ObjectCollection... objectCollections) {
         ActionOptions actionOptions = matches.getActionOptions();
-        defineHelper.findMatches(matches, actionOptions, objectCollections);
+        defineHelper.findMatches(matches, objectCollections);
         Region region = fitRegionToMatches(matches);
         defineHelper.adjust(region, actionOptions);
         matches.addDefinedRegion(region);

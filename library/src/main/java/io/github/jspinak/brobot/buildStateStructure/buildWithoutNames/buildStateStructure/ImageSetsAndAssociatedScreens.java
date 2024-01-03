@@ -45,4 +45,14 @@ public class ImageSetsAndAssociatedScreens {
         return true;
     }
 
+    @Override
+    public String toString() {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("Images: ");
+        images.forEach(img -> stringBuilder.append(img).append(","));
+        stringBuilder.append(" ").append("Screens: ");
+        screens.forEach(scr -> stringBuilder.append(scr).append(","));
+        return stringBuilder.toString();
+    }
+
 }
