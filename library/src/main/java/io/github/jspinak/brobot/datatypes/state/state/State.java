@@ -1,6 +1,7 @@
 package io.github.jspinak.brobot.datatypes.state.state;
 
 import io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.buildStateStructure.StateIllustration;
+import io.github.jspinak.brobot.datatypes.primitives.match.MatchHistory;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.datatypes.primitives.location.Location;
 import io.github.jspinak.brobot.datatypes.primitives.match.MatchSnapshot;
@@ -93,6 +94,11 @@ public class State {
      */
     private List<Mat> screens = new ArrayList<>();
     private List<StateIllustration> illustrations = new ArrayList<>();
+    /**
+     * Some actions take place without an associated Pattern or StateImage. These actions are store in their
+     * corresponding state.
+     */
+    private MatchHistory matchHistory = new MatchHistory();
 
     public String getName() {
         if (!nameAsString.isEmpty()) return nameAsString;

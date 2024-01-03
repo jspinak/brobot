@@ -23,7 +23,7 @@ public class DefineWithMatch implements ActionInterface {
 
     public void perform(Matches matches, ObjectCollection... objectCollections) {
         ActionOptions actionOptions = matches.getActionOptions();
-        defineHelper.findMatches(matches, actionOptions, objectCollections);
+        defineHelper.findMatches(matches, objectCollections);
         if (matches.getBestMatch().isEmpty()) return;
         Region region = new Region(matches.getBestMatch().get());
         if (actionOptions.getDefineAs() == ActionOptions.DefineAs.BELOW_MATCH) region.y += region.h;

@@ -1,6 +1,7 @@
 package io.github.jspinak.brobot.datatypes.primitives.match;
 
 import io.github.jspinak.brobot.actions.BrobotSettings;
+import io.github.jspinak.brobot.actions.actionExecution.actionLifecycle.ActionLifecycle;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.SceneAnalysis;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.SceneAnalysisCollection;
@@ -12,6 +13,7 @@ import io.github.jspinak.brobot.datatypes.primitives.text.Text;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import lombok.Data;
 import org.bytedeco.opencv.opencv_core.Mat;
+import org.python.antlr.ast.Str;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -43,7 +45,6 @@ public class Matches {
     private List<Match> matchList = new ArrayList<>();
     private List<Match> initialMatchList = new ArrayList<>(); // the first set of matches in a composite find operation. it may be useful to see these matches in illustrations.
     private List<Match> nonoverlappingMatchList = new ArrayList<>();
-    private Match bestMatch = null; // query returns an Optional in case there are no matches
     private ActionOptions actionOptions; // the action options used to find the matches
     private List<String> activeStates = new ArrayList<>();
     private Text text = new Text();
@@ -58,6 +59,7 @@ public class Matches {
     private SceneAnalysisCollection sceneAnalysisCollection = new SceneAnalysisCollection();
     private Mat pixelMatches; // for motion detection
     private String outputText = "";
+    private ActionLifecycle actionLifecycle;
 
     public Matches() {}
 
@@ -68,7 +70,6 @@ public class Matches {
     public void add(Match... matches) {
         for (Match m : matches) {
             matchList.add(m);
-            compareAndSetBestMatch(m);
             addNonoverlappingMatch(m);
             addActiveState(m);
         }
@@ -139,6 +140,11 @@ public class Matches {
         return Optional.of(getBestMatch().get().getLocation());
     }
 
+    public Optional<Match> getBestMatch() {
+        return matchList.stream()
+                .max(Comparator.comparingDouble(org.sikuli.script.Match::getScore));
+    }
+
     /**
      * Overlapping matches shouldn't be an issue since all search regions are unique.
      * @param m the match object to add
@@ -155,22 +161,9 @@ public class Matches {
         return true;
     }
 
-    private boolean compareAndSetBestMatch(Match newMatch) {
-        if (bestMatch == null ||
-                newMatch.getScore() > bestMatch.getScore()) {
-            bestMatch = newMatch;
-            return true;
-        }
-        return false;
-    }
-
     private void addActiveState(Match newMatch) {
         if (newMatch.getStateObject() != null)
             activeStates.add(newMatch.getStateObject().getOwnerStateName());
-    }
-
-    public Optional<Match> getBestMatch() {
-        return Optional.ofNullable(bestMatch);
     }
 
     public Region getDefinedRegion() {
@@ -318,5 +311,14 @@ public class Matches {
         return matchList.stream()
                 .filter(match -> match.getPattern().equals(pattern))
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder stringBuilder = new StringBuilder();
+        for (Match match : matchList) {
+            stringBuilder.append(match).append(" ");
+        }
+        return stringBuilder.toString();
     }
 }

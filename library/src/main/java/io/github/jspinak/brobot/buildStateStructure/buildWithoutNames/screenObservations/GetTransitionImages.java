@@ -1,7 +1,12 @@
 package io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.screenObservations;
 
+import io.github.jspinak.brobot.actions.actionExecution.Action;
+import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
+import io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.stateStructureBuildManagement.StateStructureTemplate;
 import io.github.jspinak.brobot.datatypes.primitives.match.Match;
+import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
+import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import io.github.jspinak.brobot.imageUtils.GetImageJavaCV;
 import lombok.Getter;
 import lombok.Setter;
@@ -18,11 +23,13 @@ import java.util.List;
 public class GetTransitionImages {
 
     private final GetImageJavaCV getImage;
+    private final Action action;
 
-    private int minWidthBetweenImages = 6; // when images are closer together, they get merged into one image
+    private int minWidthBetweenImages = 20; // when images are closer together, they get merged into one image
 
-    public GetTransitionImages(GetImageJavaCV getImage) {
+    public GetTransitionImages(GetImageJavaCV getImage, Action action) {
         this.getImage = getImage;
+        this.action = action;
     }
 
     /**
@@ -37,48 +44,39 @@ public class GetTransitionImages {
      * @param usableArea images are only used if they are within this region
      * @return a list of TransitionImage objects
      */
-    public List<TransitionImage> findAndCapturePotentialLinks(Region usableArea, List<Region> dynamicRegions) {
+    public List<TransitionImage> findAndCapturePotentialLinks(Region usableArea, ScreenObservation screenObservation,
+                                                              StateStructureTemplate stateStructureTemplate) {
         List<TransitionImage> transitionImages = new ArrayList<>();
-        List<Match> potentialLinks = new ArrayList<>();
-        new Screen().findWords().forEach(match -> potentialLinks.add(new Match(match)));
-        List<Match> usableLinks = getUsableLinks(potentialLinks, usableArea, dynamicRegions);
-        for (int i=0; i<usableLinks.size(); i++) {
-            TransitionImageHelper transitionImageHelper = createTransitionImage(i, usableLinks);
-            TransitionImage transitionImage = transitionImageHelper.getTransitionImage();
-            Mat image = getImage.getMatFromScreen(transitionImage.getRegion());
-            transitionImage.setImage(image);
+
+        ActionOptions actionOptions = new ActionOptions.Builder()
+                .setAction(ActionOptions.Action.FIND)
+                .setFind(ActionOptions.Find.ALL_WORDS)
+                .setFusionMethod(ActionOptions.MatchFusionMethod.RELATIVE)
+                .setMaxFusionDistances(getMinWidthBetweenImages(), 10)
+                .build();
+        if (stateStructureTemplate.isLive()) setActionOptionsLive(screenObservation, actionOptions);
+        else setActionOptionsData(actionOptions, usableArea);
+
+        ObjectCollection objectCollection = new ObjectCollection.Builder()
+                .withScenes(screenObservation.getPattern())
+                .build();
+        Matches matches = action.perform(actionOptions, objectCollection);
+
+        matches.getMatchList().forEach(match -> {
+            TransitionImage transitionImage = new TransitionImage(match);
+            transitionImage.setImage(match.getMat());
             transitionImages.add(transitionImage);
-            i = transitionImageHelper.getLastIndex();
-        }
+        });
         return transitionImages;
     }
 
-    private List<Match> getUsableLinks(List<Match> allMatches, Region usableArea, List<Region> dynamicRegions) {
-        List<Match> fixedAndUsableLinks = new ArrayList<>();
-        List<Match> usableLinks = allMatches.stream().filter(usableArea::contains).toList();
-        for (Match link : usableLinks) {
-            if (isLinkInFixedRegion(dynamicRegions, link)) fixedAndUsableLinks.add(link);
-        }
-        return fixedAndUsableLinks;
+    private void setActionOptionsLive(ScreenObservation screenObservation, ActionOptions actionOptions) {
+        List<Region> dynamicRegions = screenObservation.getMatches().getMatchRegions();
+        actionOptions.getSearchRegions().addSearchRegions(dynamicRegions);
     }
 
-    private boolean isLinkInFixedRegion(List<Region> dynamicRegions, Match link) {
-        for (Region dynamicRegion : dynamicRegions) {
-            if (dynamicRegion.contains(link.getCenter())) return false;
-        }
-        return true;
-    }
-
-    /*
-    Returns the index of the last image included in the TransitionImage.
-     */
-    TransitionImageHelper createTransitionImage(int startIndex, List<Match> links) {
-        TransitionImageHelper helper = new TransitionImageHelper(startIndex, links.get(startIndex));
-        for (int i=startIndex+1; i<links.size(); i++) {
-            if (!helper.getTransitionImage().isSameWordGroup(links.get(i), minWidthBetweenImages)) return helper;
-            helper.addPotentialLink(i, links.get(i));
-        }
-        return helper;
+    private void setActionOptionsData(ActionOptions actionOptions, Region usableArea) {
+        actionOptions.getSearchRegions().addSearchRegions(usableArea);
     }
 
 }

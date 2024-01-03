@@ -30,10 +30,9 @@ public class DefineInsideAnchors implements ActionInterface {
         ActionOptions actionOptions = matches.getActionOptions();
         Region region = new Region();
         definedBorders = new DefinedBorders();
-        defineHelper.findMatches(matches, actionOptions, objectCollections);
+        defineHelper.findMatches(matches, objectCollections);
         // The DefinedBorders object keeps track of defined borders as the region is being defined
         anchorRegion.fitRegionToAnchors(definedBorders, region, matches);
-        //fitRegionToLocations(region, objectCollections[0].getStateLocations()); // locations are converted to Match objects in a Find operation
         defineHelper.adjust(region, actionOptions);
         if (definedBorders.allBordersDefined()) {
             matches.addDefinedRegion(region);

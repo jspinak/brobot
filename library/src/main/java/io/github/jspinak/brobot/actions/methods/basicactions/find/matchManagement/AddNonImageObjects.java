@@ -41,6 +41,7 @@ public class AddNonImageObjects {
             Match match = new Match.Builder()
                     .setMatch(r.getSearchRegion())
                     .setStateObject(r)
+                    .setAnchors(r.getAnchors())
                     .build();
             matches.add(match);
         }

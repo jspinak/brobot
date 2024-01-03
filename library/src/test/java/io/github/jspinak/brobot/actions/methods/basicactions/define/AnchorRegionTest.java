@@ -42,10 +42,12 @@ class AnchorRegionTest {
         m1 = new Match.Builder()
                 .setMatch(reg1.getSearchRegion())
                 .setStateObject(reg1)
+                .setAnchors(reg1.getAnchors())
                 .build();
         m2 = new Match.Builder()
                 .setMatch(reg2.getSearchRegion())
                 .setStateObject(reg2)
+                .setAnchors(reg2.getAnchors())
                 .build();
         matches.add(m1);
         matches.add(m2);

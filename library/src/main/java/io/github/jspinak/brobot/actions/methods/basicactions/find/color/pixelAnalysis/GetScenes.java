@@ -76,7 +76,7 @@ public class GetScenes {
                         });
             }
             // If no scenes are listed in the settings, use a randomly generated scene.
-            else scenes.add(new Scene());
+            else scenes.add(Scene.getEmptyScene());
             return scenes;
         }
         // If scenes are passed as parameters, use them.
@@ -88,7 +88,7 @@ public class GetScenes {
             scenes.add(new Scene(filename, absolutePath, bgr, bi));
             return scenes;
         }
-        scenes.add(new Scene());
+        scenes.add(Scene.getEmptyScene());
         return scenes;
     }
 

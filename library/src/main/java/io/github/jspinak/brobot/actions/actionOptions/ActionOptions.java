@@ -74,12 +74,14 @@ public class ActionOptions {
      * MOTION: find the locations of a moving object across screens
      * REGIONS_OF_MOTION: find all dynamic pixel regions from a series of screens
      * ALL_WORDS: find all words and their regions
+     * SIMILAR_IMAGES: finds the images in the 2nd ObjectCollection that are above a similarity threshold
+     *   to the images in the 1st ObjectCollection.
      *
      * The options that return multiple Matches allow for overlapping Matches.
      */
     public enum Find {
         FIRST, EACH, ALL, BEST, UNIVERSAL, CUSTOM, HISTOGRAM, COLOR, MOTION, REGIONS_OF_MOTION,
-        ALL_WORDS
+        ALL_WORDS, SIMILAR_IMAGES
     }
     private Find find = Find.FIRST;
     /**
@@ -408,7 +410,7 @@ public class ActionOptions {
      * will be fused and no fusion code will run.
      */
     public enum MatchFusionMethod {
-        NONE, WORDS
+        NONE, ABSOLUTE, RELATIVE
     }
     private MatchFusionMethod fusionMethod = MatchFusionMethod.NONE;
     private int maxFusionDistanceX = 5;

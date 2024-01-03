@@ -1,5 +1,6 @@
 package io.github.jspinak.brobot;
 
+import org.sikuli.script.ImagePath;
 import org.sikuli.script.Pattern;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -10,5 +11,6 @@ public class BrobotSpringBeanConfig {
 
     public BrobotSpringBeanConfig() {
         new Pattern(); // loads OpenCV from SikuliX
+        ImagePath.setBundlePath("images"); // Brobot's default bundle path
     }
 }

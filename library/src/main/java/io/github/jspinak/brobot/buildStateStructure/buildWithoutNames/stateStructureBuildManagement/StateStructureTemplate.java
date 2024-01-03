@@ -1,7 +1,9 @@
 package io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.stateStructureBuildManagement;
 
+import io.github.jspinak.brobot.actions.BrobotSettings;
 import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
 import io.github.jspinak.brobot.datatypes.primitives.location.Position;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import lombok.Getter;
 
 import java.util.ArrayList;
@@ -15,7 +17,7 @@ public class StateStructureTemplate {
     When not empty, will be used instead of scraping.
     Stored in the directory BrobotSettings.screenshotPath.
      */
-    private List<String> screenshots = new ArrayList<>(); //
+    private List<Pattern> screenshots = new ArrayList<>(); //
     private Pattern topLeftBoundary;
     private Pattern bottomRightBoundary;
     private int minWidthBetweenImages;
@@ -26,8 +28,20 @@ public class StateStructureTemplate {
     private boolean saveStateIllustrations;
     private int minimumChangedPixelsForNewScreen = 20000;
 
+    public boolean isLive() {
+        return screenshots.isEmpty();
+    }
+
+    public List<StateImage> getAllScreenshotsExcept_asStateImages(Pattern excludePattern) {
+        List<StateImage> stateImages = new ArrayList<>();
+        for (Pattern pattern : screenshots) {
+            if (excludePattern != pattern) stateImages.add(pattern.inNullState());
+        }
+        return stateImages;
+    }
+
     public static class Builder {
-        private final List<String> screenshots = new ArrayList<>();
+        private final List<Pattern> screenshots = new ArrayList<>();
         private Pattern topLeftBoundary;
         private Pattern bottomRightBoundary;
         private int minWidthBetweenImages;
@@ -38,8 +52,13 @@ public class StateStructureTemplate {
         private boolean saveStateIllustrations;
         private int minimumChangedPixelsForNewScreen = 20000;
 
-        public Builder addScreenshots(String... names) {
-            this.screenshots.addAll(Arrays.asList(names));
+        public Builder addImagesInScreenshotsFolder(String... names) {
+            for (String name : names) {
+                Pattern pattern = new Pattern.Builder()
+                        .setFilename("../"+ BrobotSettings.screenshotPath + name)
+                        .build();
+                this.screenshots.add(pattern);
+            }
             return this;
         }
 

@@ -16,7 +16,7 @@ public class ScreenObservationManager {
     private int currentScreenId = -1; // initially, there are no saved screens
     private ScreenObservation currentScreenObservation;
     private int nextUnassignedScreenId = 0;
-
+    private int screenIndex = 0; // this is the screenshot index to retrieve when not running live
     private double maxSimilarityForUniqueImage = .95; // images matching below this similarity as considered unique
 
 

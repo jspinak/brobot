@@ -20,27 +20,40 @@ import static io.github.jspinak.brobot.actions.actionOptions.ActionOptions.Match
 public class MatchFusion {
     private final Map<ActionOptions.MatchFusionMethod, MatchFusionDecider> fusionMethods = new HashMap<>();
 
-    public MatchFusion(MatchFusionDeciderWords matchFusionDeciderWords) {
-        fusionMethods.put(ActionOptions.MatchFusionMethod.WORDS, matchFusionDeciderWords);
+    public MatchFusion(MatchFusionDeciderAbsoluteSize matchFusionDeciderAbsoluteSize,
+                       MatchFusionDeciderRelativeSize matchFusionDeciderRelativeSize) {
+        fusionMethods.put(ActionOptions.MatchFusionMethod.ABSOLUTE, matchFusionDeciderAbsoluteSize);
+        fusionMethods.put(ActionOptions.MatchFusionMethod.RELATIVE, matchFusionDeciderRelativeSize);
     }
 
     public void setFusedMatches(Matches matches) {
         if (matches.getActionOptions().getFusionMethod() == NONE) return;
-        matches.setMatchList(getFusedMatchObjects(matches));
+        matches.setMatchList(getFinalFusedMatchObjects(matches));
+    }
+
+    public List<Match> getFinalFusedMatchObjects(Matches matches) {
+        List<Match> fusedMatches = new ArrayList<>(matches.getMatchList());
+        int size = 0;
+        while (fusedMatches.size() != size) {
+            size = fusedMatches.size();
+            fusedMatches = getFusedMatchObjects(fusedMatches, matches.getActionOptions());
+        }
+        return fusedMatches;
     }
 
     /**
      * Match objects are fused, and the image and text are captured from the scene(s).
-     * @param matches holds the match objects to fuse, the scene(s), and the action configuration.
+     * @param matchList holds the match objects to fuse
+     * @param actionOptions the action configuration.
      * @return the new Match list.
      */
-    public List<Match> getFusedMatchObjects(Matches matches) {
-        MatchFusionDecider decider = fusionMethods.get(matches.getActionOptions().getFusionMethod());
-        int maxXDistance = matches.getActionOptions().getMaxFusionDistanceX();
-        int maxYDistance = matches.getActionOptions().getMaxFusionDistanceY();
+    public List<Match> getFusedMatchObjects(List<Match> matchList, ActionOptions actionOptions) {
+        MatchFusionDecider decider = fusionMethods.get(actionOptions.getFusionMethod());
+        int maxXDistance = actionOptions.getMaxFusionDistanceX();
+        int maxYDistance = actionOptions.getMaxFusionDistanceY();
         List<Match> fusedMatches = new ArrayList<>();
-        if (matches.isEmpty()) return fusedMatches;
-        List<Match> originalMatches = matches.getMatchList();
+        if (matchList.isEmpty()) return fusedMatches;
+        List<Match> originalMatches = matchList;
         List<Integer> toCheck = new ArrayList<>();
         for (int i=0; i<originalMatches.size(); i++) toCheck.add(i);
         while (!toCheck.isEmpty()) {

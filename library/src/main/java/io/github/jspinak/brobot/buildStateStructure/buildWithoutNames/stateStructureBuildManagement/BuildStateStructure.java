@@ -19,12 +19,14 @@ public class BuildStateStructure {
     private final TransitionImageRepo transitionImageRepo;
     private final FindScreen findScreen;
     private final BuildStateStructureFromScreenshots buildStateStructureFromScreenshots;
+    private final GlobalStateStructureOptions globalStateStructureOptions;
 
     public BuildStateStructure(BuildStateStructureFromGUI buildStateStructureFromGUI,
                                GetTransitionImages getTransitionImages, ScreenStateCreator screenStateCreator,
                                GetScreenObservation getScreenObservation, ScreenObservations screenObservations,
                                TransitionImageRepo transitionImageRepo, FindScreen findScreen,
-                               BuildStateStructureFromScreenshots buildStateStructureFromScreenshots) {
+                               BuildStateStructureFromScreenshots buildStateStructureFromScreenshots,
+                               GlobalStateStructureOptions globalStateStructureOptions) {
         this.buildStateStructureFromGUI = buildStateStructureFromGUI;
         this.getTransitionImages = getTransitionImages;
         this.screenStateCreator = screenStateCreator;
@@ -33,9 +35,12 @@ public class BuildStateStructure {
         this.transitionImageRepo = transitionImageRepo;
         this.findScreen = findScreen;
         this.buildStateStructureFromScreenshots = buildStateStructureFromScreenshots;
+        this.globalStateStructureOptions = globalStateStructureOptions;
     }
 
     public void execute(StateStructureTemplate stateStructureTemplate) {
+        globalStateStructureOptions.setStateStructureTemplate(stateStructureTemplate);
+
         getTransitionImages.setMinWidthBetweenImages(stateStructureTemplate.getMinWidthBetweenImages());
         screenStateCreator.setSaveStateIllustrations(stateStructureTemplate.isSaveStateIllustrations());
         getScreenObservation.setSaveScreensWithMotionAndImages(stateStructureTemplate.isSaveScreensWithMotionAndImages());
@@ -43,14 +48,6 @@ public class BuildStateStructure {
         transitionImageRepo.setSaveMatchingImages(stateStructureTemplate.isSaveMatchingImages());
         findScreen.setSaveDecisionMat(stateStructureTemplate.isSaveDecisionMats());
         findScreen.setMinimumChangedPixelsForNewScreen(stateStructureTemplate.getMinimumChangedPixelsForNewScreen());
-        if (stateStructureTemplate.getScreenshots().isEmpty()) {
-            buildStateStructureFromGUI.automateStateStructure(
-                    stateStructureTemplate.getTopLeftBoundary(), stateStructureTemplate.getBottomRightBoundary());
-        } else {
-            buildStateStructureFromScreenshots.build(
-                    stateStructureTemplate.getScreenshots(),
-                    stateStructureTemplate.getTopLeftBoundary(), stateStructureTemplate.getBottomRightBoundary()
-            );
-        }
+        buildStateStructureFromGUI.automateStateStructure(stateStructureTemplate);
     }
 }

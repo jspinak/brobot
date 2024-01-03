@@ -3,6 +3,7 @@ package io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.screenObs
 import io.github.jspinak.brobot.actions.BrobotSettings;
 import io.github.jspinak.brobot.actions.actionExecution.Action;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
+import io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.stateStructureBuildManagement.StateStructureTemplate;
 import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.datatypes.primitives.location.Location;
@@ -36,12 +37,13 @@ public class GetUsableArea {
      * bottomright match will be used to define the usable area region.
      * Images need to be StateImage(s) because only StateObject(s) have anchors. Anchors are added
      * to the StateImage(s).
-     * @param topleft sets the top left boundary of the usable area.
-     * @param bottomright sets the bottom right boundary of the usable area.
+     * @param stateStructureTemplate holds the images and scenes
      * @return the usable area.
      */
-    public Region getBoundariesFromExcludedImages(Pattern topleft, Pattern bottomright) {
-        ObjectCollection exteriorImages = getObjectCollection(topleft, bottomright);
+    public Region getBoundariesFromExcludedImages(StateStructureTemplate stateStructureTemplate) {
+        ObjectCollection exteriorImages = getObjectCollection(
+                stateStructureTemplate.getTopLeftBoundary(), stateStructureTemplate.getBottomRightBoundary());
+        if (!stateStructureTemplate.isLive()) exteriorImages.setScenes(stateStructureTemplate.getScreenshots());
         ActionOptions define = getActionOptions(ActionOptions.Illustrate.NO);
         return action.perform(define, exteriorImages).getDefinedRegion();
     }
@@ -67,10 +69,7 @@ public class GetUsableArea {
                 .build();
     }
 
-    public Region defineInFile(String patternName, Pattern topLeft, Pattern bottomRight) {
-        File file = new File(BrobotSettings.screenshotPath + patternName);
-        String path = file.getAbsolutePath();
-        Pattern screen = new Pattern(path);
+    public Region defineInFile(Pattern screen, Pattern topLeft, Pattern bottomRight) {
         ObjectCollection boundaryImages = getObjectCollection(topLeft, bottomRight, screen);
         ActionOptions defineInsideAnchors = getActionOptions(ActionOptions.Illustrate.YES);
         Matches matches = action.perform(defineInsideAnchors, boundaryImages);
