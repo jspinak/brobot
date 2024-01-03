@@ -19,8 +19,15 @@ import java.util.List;
  * The next layer specifies whether an application should run a mock or live function.
  */
 @Component
-public class FindInFile {
+public class FindInScene {
+
+    /**
+     * Creates a Finder. Tries first with the scene's BufferedImage, and then with the filename.
+     * @param scene the scene to use as the background for find operations.
+     * @return the Finder.
+     */
     private Finder getFinder(Scene scene) {
+        if (scene.getBufferedImageBGR() != null) return new Finder(scene.getBufferedImageBGR());
         return new Finder(scene.getAbsolutePath());
     }
 
@@ -44,7 +51,7 @@ public class FindInFile {
      * @param scene can be created from a screenshot or file
      * @return a list of Match objects in the specified region
      */
-    List<Match> getWordMatches(Scene scene) {
+    public List<Match> getWordMatches(Scene scene) {
         List<Match> wordMatches = new ArrayList<>();
         OCR.readWords(scene.getBufferedImageBGR()).forEach(match -> {
             Match m = new Match.Builder()

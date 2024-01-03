@@ -3,6 +3,8 @@ package io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.screenObs
 import io.github.jspinak.brobot.actions.actionExecution.Action;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.motion.DynamicPixelFinder;
+import io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.stateStructureBuildManagement.StateStructureTemplate;
+import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.imageUtils.GetImageJavaCV;
@@ -45,18 +47,33 @@ public class GetScreenObservation {
      * and save potential transition images in the usable area.
      * @return the newly created screenshot
      */
-    public ScreenObservation takeScreenshotAndGetImages() {
-        ScreenObservation obs = initNewScreenObservation();
-        List<Region> dynamicRegions = obs.getMatches().getMatchRegions();
-        List<TransitionImage> transitionImages = getTransitionImages.findAndCapturePotentialLinks(usableArea, dynamicRegions);
+    public ScreenObservation takeScreenshotAndGetImages(StateStructureTemplate stateStructureTemplate) {
+        ScreenObservation obs = initNewScreenObservation(stateStructureTemplate);
+        List<TransitionImage> transitionImages = getTransitionImages.findAndCapturePotentialLinks(
+                usableArea, obs, stateStructureTemplate);
         obs.setImages(transitionImages);
         if (saveScreensWithMotionAndImages) illustrateScreenObservation.writeIllustratedSceneToHistory(obs);
         return obs;
     }
 
-    public ScreenObservation initNewScreenObservation() {
+    public ScreenObservation initNewScreenObservation(StateStructureTemplate stateStructureTemplate) {
         ScreenObservation screenObservation = new ScreenObservation();
         screenObservation.setId(screenObservationManager.getNextUnassignedScreenId());
+        if (stateStructureTemplate.isLive()) setScreenObservationLive(screenObservation);
+        else setScreenObservationData(screenObservation, stateStructureTemplate);
+        return screenObservation;
+    }
+
+    private void setScreenObservationData(ScreenObservation screenObservation, StateStructureTemplate stateStructureTemplate) {
+        int index = getScreenObservationManager().getScreenIndex();
+        Pattern screen = stateStructureTemplate.getScreenshots().get(index);
+        getScreenObservationManager().setScreenIndex(index + 1);
+        screenObservation.setPattern(screen);
+        screenObservation.setScreenshot(screen.getMat());
+        //there are no regions of motion when not running live
+    }
+
+    private void setScreenObservationLive(ScreenObservation screenObservation) {
         ActionOptions observation = new ActionOptions.Builder()
                 .setAction(ActionOptions.Action.FIND)
                 .setFind(ActionOptions.Find.REGIONS_OF_MOTION)
@@ -65,15 +82,12 @@ public class GetScreenObservation {
                 .setPauseBeforeBegin(3.0)
                 .build();
         Matches matches = action.perform(observation);
+        matches.getSceneAnalysisCollection().getLastScene().ifPresent(scene -> screenObservation.setPattern(scene.getPatternBGR()));
         Optional<Mat> optScreenshot = matches.getSceneAnalysisCollection().getLastSceneBGR();
         if (optScreenshot.isEmpty()) screenObservation.setScreenshot(new Mat());
         else screenObservation.setScreenshot(optScreenshot.get());
         screenObservation.setMatches(matches);
         screenObservation.setDynamicPixelMask(matches.getPixelMatches());
-        return screenObservation;
     }
 
-    public void setUsableArea(Region region) {
-        this.usableArea = region;
-    }
 }

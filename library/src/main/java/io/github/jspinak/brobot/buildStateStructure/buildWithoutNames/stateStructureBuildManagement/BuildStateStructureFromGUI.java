@@ -46,15 +46,15 @@ public class BuildStateStructureFromGUI {
      * all screenshots have been checked.
      * The usable boundary is set by the inner boundaries of the included images.
      */
-    public void automateStateStructure(Pattern topLeftBoundary, Pattern bottomRightBoundary) {
-        Region usableArea = getUsableArea.getBoundariesFromExcludedImages(topLeftBoundary, bottomRightBoundary);
-        action.perform(ActionOptions.Action.HIGHLIGHT, usableArea);
+    public void automateStateStructure(StateStructureTemplate stateStructureTemplate) {
+        Region usableArea = getUsableArea.getBoundariesFromExcludedImages(stateStructureTemplate);
+        //action.perform(ActionOptions.Action.HIGHLIGHT, usableArea);
         getScreenObservation.setUsableArea(usableArea);
-        findScreen.findCurrentScreenAndSaveIfNew(); // get the first ScreenObservation
+        findScreen.findCurrentScreenAndSaveIfNew(stateStructureTemplate); // get the first ScreenObservation
         boolean uncheckedImages;
         // keep going, adding new observations and associated images, as long as you find a transition to a new, unique screen
         while (true) {
-            findTransition.transitionAndObserve();
+            findTransition.transitionAndObserve(stateStructureTemplate);
             /* Once we've exhausted all images and not reached a new screen, we should check to see if there are
             unchecked images. If there are no unchecked images, we're finished traversing the application. If there are
             unchecked images, we should try to reach those screens with unchecked images and click them. In both cases,

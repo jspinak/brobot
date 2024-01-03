@@ -2,16 +2,20 @@ package io.github.jspinak.brobot.datatypes.primitives.match;
 
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.Scene;
 import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
+import io.github.jspinak.brobot.datatypes.primitives.location.Anchors;
 import io.github.jspinak.brobot.datatypes.primitives.location.Location;
 import io.github.jspinak.brobot.datatypes.primitives.location.Position;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.stateObject.StateObject;
+import io.github.jspinak.brobot.imageUtils.MatOps;
 import lombok.Getter;
 import lombok.Setter;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Rect;
 
+import java.lang.reflect.Field;
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 /**
  * Simplified version of the MatchObject of versions 1.0.6 and earlier.
@@ -37,6 +41,8 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 public class Match extends org.sikuli.script.Match {
+
+    private String name = "";
     /*
     The Mat in a Match object contains the pixels from the match region. This can be different from
     the image used to search with (similarity may be low, or the match area might be shifted).
@@ -54,20 +60,20 @@ public class Match extends org.sikuli.script.Match {
     This is the pattern used to find the match. It may be different from the mat.
      */
     private Pattern pattern;
+    /*
+    The match may have come from a Region, in which case it won't have a Pattern object. The anchors are recorded here,
+    regardless of which object created the match.
+     */
+    private Anchors anchors;
     private StateObject stateObject;
     private Mat histogram;
     private Scene scene;
-    /*
-    The score is used for classification and other actions that rank Match objects.
-     */
-    private double score;
     private LocalDateTime timeStamp;
     // the old MatchObject had `private double duration;`
 
-    public Match() {}
-
     public Match(org.sikuli.script.Match match) {
         super(match);
+        this.setName(match.getName());
     }
 
     public Match(Region region) {
@@ -87,7 +93,7 @@ public class Match extends org.sikuli.script.Match {
     }
 
     public int compareByScore(Match m) {
-        return (int)(this.score - m.getScore());
+        return (int)(this.getScore() - m.getScore());
     }
 
     public int size() {
@@ -97,19 +103,56 @@ public class Match extends org.sikuli.script.Match {
 
     public void setMatWithScene() {
         if (scene == null) return;
-        Rect roi = new Region(this).getJavaCVRect();
-        setMat(scene.getBgr().apply(roi)); //.clone() if you need a copy
+        Optional<Mat> mat = MatOps.applyIfOk(scene.getBgr(), new Region(this).getJavaCVRect());
+        mat.ifPresent(this::setMat);
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("M[");
+        String nameText = "";
+        if (name != null && !name.isEmpty()) {
+            nameText = "#" + name + "# ";
+        }
+        stringBuilder.append(String.format("%sR[%d,%d %dx%d] simScore:%.1f", nameText, this.x, this.y, this.w, this.h, super.getScore()));
+        if (text != null && !text.isEmpty()) stringBuilder.append(" text:").append(text);
+        stringBuilder.append("]");
+        return stringBuilder.toString();
+    }
+
+
+    /*
+    This is a workaround. It is generally a bad idea to set variables like this.
+    TODO: ask Raimund to code a setter for simScore
+     */
+    public void setSimScore(double simScore) {
+        try {
+            // Get the "simScore" field from the superclass (Match)
+            Field simScoreField = org.sikuli.script.Match.class.getDeclaredField("simScore");
+
+            // Make the field accessible, even if it is private
+            simScoreField.setAccessible(true);
+
+            // Set the value of the field in this instance
+            simScoreField.set(this, simScore);
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            // Handle exceptions (e.g., NoSuchFieldException, IllegalAccessException)
+            e.printStackTrace();
+        }
     }
 
     public static class Builder {
         private org.sikuli.script.Match match;
+        private String name;
         private String text;
         private Pattern pattern;
+        private Anchors anchors;
         private StateObject stateObject;
         private Mat histogram;
         private Scene scene;
-        private double score;
         private LocalDateTime timeStamp;
+        private double simScore;
 
         public Builder setMatch(org.sikuli.script.Match match) {
             this.match = match;
@@ -131,6 +174,11 @@ public class Match extends org.sikuli.script.Match {
             return this;
         }
 
+        public Builder setName(String name) {
+            this.name = name;
+            return this;
+        }
+
         public Builder setText(String text) {
             this.text = text;
             return this;
@@ -138,6 +186,12 @@ public class Match extends org.sikuli.script.Match {
 
         public Builder setPattern(Pattern pattern) {
             this.pattern = pattern;
+            if (this.name == null || this.name.isEmpty()) this.name = pattern.getName();
+            return this;
+        }
+
+        public Builder setAnchors(Anchors anchors) {
+            this.anchors = anchors;
             return this;
         }
 
@@ -156,21 +210,23 @@ public class Match extends org.sikuli.script.Match {
             return this;
         }
 
-        public Builder setScore(double score) {
-            this.score = score;
+        public Builder setSimScore(double simScore) {
+            this.simScore = simScore;
             return this;
         }
 
         public Match build() {
             Match matchObject = new Match(match);
+            matchObject.name = name;
             matchObject.text = text;
             matchObject.pattern = pattern;
+            matchObject.anchors = anchors;
             matchObject.stateObject = stateObject;
             matchObject.histogram = histogram;
             matchObject.scene = scene;
-            matchObject.score = score;
             matchObject.timeStamp = LocalDateTime.now();
             matchObject.setMatWithScene();
+            matchObject.setSimScore(simScore);
             return matchObject;
         }
 

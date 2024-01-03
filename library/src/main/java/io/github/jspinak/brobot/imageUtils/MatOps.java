@@ -3,11 +3,13 @@ package io.github.jspinak.brobot.imageUtils;
 import io.github.jspinak.brobot.reports.Report;
 import org.bytedeco.javacpp.DoublePointer;
 import org.bytedeco.javacpp.indexer.*;
+import org.bytedeco.javacv.Java2DFrameUtils;
 import org.bytedeco.javacv.OpenCVFrameConverter;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.*;
 
+import java.awt.image.BufferedImage;
 import java.util.*;
 import java.util.Arrays;
 
@@ -357,6 +359,27 @@ public class MatOps {
             if (operation == REDUCE_MAX) max(results, matVector.get(i), results);
         }
         return results;
+    }
+
+    public static Optional<Mat> applyIfOk(Mat mat, Rect roi) {
+        boolean matIsNull = mat == null;
+        boolean smallX = roi.x() < 0;
+        boolean smallY = roi.y() < 0;
+        boolean smallW = roi.width() < 0;
+        boolean smallH = roi.height() < 0;
+        boolean outsideMatX = false;
+        boolean outsideMatY = false;
+        if (!matIsNull) {
+            outsideMatX = roi.x() + roi.width() > mat.cols();
+            outsideMatY = roi.y() + roi.height() > mat.rows();
+        }
+        if (matIsNull || smallX || smallY || smallW || smallH || outsideMatX || outsideMatY) return Optional.empty();
+        return Optional.of(mat.apply(roi));
+    }
+
+    public static Optional<Mat> bufferedImageToMat(BufferedImage bufferedImage) {
+        if (bufferedImage == null) return Optional.empty();
+        return Optional.of(Java2DFrameUtils.toMat(bufferedImage));
     }
 
 }

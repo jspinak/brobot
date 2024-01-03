@@ -4,6 +4,7 @@ import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.datatypes.primitives.text.Text;
 import lombok.Getter;
 import lombok.Setter;
+import org.sikuli.script.Region;
 import org.sikuli.script.Screen;
 
 import java.time.LocalDateTime;
@@ -150,11 +151,7 @@ public class MatchSnapshot {
     The most common Snapshot added directly to a State is a Match (x,y,w,h) with a Find operation.
      */
     public MatchSnapshot(int x, int y, int w, int h) {
-        Match match = new Match();
-        match.x = x;
-        match.y = y;
-        match.w = w;
-        match.h = h;
+        Match match = new Match(new org.sikuli.script.Match(new Region(x,y,w,h), 0));
         this.matchList.add(match);
     }
 
@@ -214,22 +211,16 @@ public class MatchSnapshot {
         }
 
         public Builder addMatch(int x, int y, int w, int h) {
-            Match match = new Match();
-            match.x = x;
-            match.y = y;
-            match.w = w;
-            match.h = h;
+            Match match = new Match(new org.sikuli.script.Match(new Region(x,y,w,h), 0));
             this.matchList.add(match);
             return this;
         }
 
         public Builder addMatches(int numberOfMatches, int w, int h) {
             for (int i=0; i<numberOfMatches; i++) {
-                Match match = new Match();
-                match.x = new Random().nextInt(new Screen().w);
-                match.y = new Random().nextInt(new Screen().h);
-                match.w = w;
-                match.h = h;
+                int x = new Random().nextInt(new Screen().w);
+                int y = new Random().nextInt(new Screen().h);
+                Match match = new Match(new org.sikuli.script.Match(new Region(x,y,w,h), 0));
                 this.matchList.add(match);
             }
             return this;
