@@ -21,7 +21,7 @@ public class AnchorRegion {
     public void fitRegionToAnchors(DefinedBorders definedBorders, Region region, Matches matches) {
         for (Match match : matches.getMatchList()) {
             // Match objects can have one or more anchors
-            match.getPattern().getAnchors().getAnchors().forEach(anchor -> {
+            match.getAnchors().getAnchors().forEach(anchor -> {
                 definedBorders.setAsDefined(anchor.getAnchorInNewDefinedRegion());
                 Location locationInMatch = new Location(match, anchor.getPositionInMatch());
                 adjustDefinedRegion(region, locationInMatch, anchor.getAnchorInNewDefinedRegion());

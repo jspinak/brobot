@@ -75,7 +75,6 @@ public class ActionExecution {
                            ObjectCollection... objectCollections) {
         printAction(actionOptions, objectCollections);
         Matches matches = matchesInitializer.init(actionOptions, actionDescription, objectCollections);
-        actionLifecycleManagement.newActionLifecycle(actionOptions, matches);
         time.wait(actionOptions.getPauseBeforeBegin());
         for (int i=0; i<actionOptions.getMaxTimesToRepeatActionSequence(); i++) {
             actionMethod.perform(matches, objectCollections);
@@ -86,7 +85,7 @@ public class ActionExecution {
                 selectRegions.getRegionsForAllImages(actionOptions, objectCollections),
                 actionOptions, objectCollections);
         time.wait(actionOptions.getPauseAfterEnd());
-        Duration duration = actionLifecycleManagement.getAndSetDuration(matches);
+        Duration duration = actionLifecycleManagement.getCurrentDuration(matches);
         matches.setDuration(duration); //time.getDuration(actionOptions.getAction()));
         matches.saveSnapshots();
         sendActionLog(matches, actionOptions, objectCollections);

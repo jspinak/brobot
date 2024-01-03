@@ -1,7 +1,14 @@
 package io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.screenObservations;
 
+import io.github.jspinak.brobot.actions.actionExecution.Action;
+import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.screenObservations.ScreenObservation;
 import io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.screenObservations.TransitionImage;
+import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
+import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
+import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
+import io.github.jspinak.brobot.imageUtils.GetBufferedImage;
 import io.github.jspinak.brobot.imageUtils.MatBuilder;
 import io.github.jspinak.brobot.imageUtils.MatImageRecognition;
 import io.github.jspinak.brobot.imageUtils.MatVisualize;
@@ -11,6 +18,8 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import org.sikuli.script.Match;
 import org.springframework.stereotype.Component;
 
+import javax.xml.parsers.SAXParser;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -27,15 +36,20 @@ public class TransitionImageRepo {
     private final MatImageRecognition matImageRecognition;
     private final MatVisualize matVisualize;
     private final ScreenObservationManager screenObservationManager;
+    private final GetBufferedImage getBufferedImage;
+    private final Action action;
 
     private List<TransitionImage> images = new ArrayList<>();
     private boolean saveMatchingImages;
 
     public TransitionImageRepo(MatImageRecognition matImageRecognition, MatVisualize matVisualize,
-                               ScreenObservationManager screenObservationManager) {
+                               ScreenObservationManager screenObservationManager, GetBufferedImage getBufferedImage,
+                               Action action) {
         this.matImageRecognition = matImageRecognition;
         this.matVisualize = matVisualize;
         this.screenObservationManager = screenObservationManager;
+        this.getBufferedImage = getBufferedImage;
+        this.action = action;
     }
 
     /**
@@ -44,6 +58,30 @@ public class TransitionImageRepo {
      */
     public List<TransitionImage> addUniqueImagesToRepo(ScreenObservation screenObservation) {
         List<TransitionImage> uniqueImages = new ArrayList<>();
+        ActionOptions actionOptions = new ActionOptions.Builder()
+                .setAction(ActionOptions.Action.FIND)
+                .setFind(ActionOptions.Find.SIMILAR_IMAGES)
+                .build();
+        ObjectCollection objectCollection2 = new ObjectCollection.Builder()
+                .withImages(getStateImages())
+                .build();
+
+        for (TransitionImage img : screenObservation.getImages()) {
+            ObjectCollection objectCollection1 = new ObjectCollection.Builder()
+                    .withImages(getStateImage(img))
+                    .build();
+            Matches matches = action.perform(actionOptions, objectCollection1, objectCollection2);
+            matches.getBestMatch().ifPresent(match -> {
+                if (match.getScore() < .95) {
+                    img.setIndexInRepo(images.size());
+                    uniqueImages.add(img);
+                    images.add(img);
+                }
+            });
+        }
+        return uniqueImages;
+        /*
+
         for (TransitionImage img : screenObservation.getImages()) {
             Optional<TransitionImage> optImg = getMatchingImage(
                     img, screenObservationManager.getMaxSimilarityForUniqueImage(), images);
@@ -63,6 +101,22 @@ public class TransitionImageRepo {
             }
         }
         return uniqueImages;
+
+         */
+    }
+
+    private List<StateImage> getStateImages() {
+        List<StateImage> stateImages = new ArrayList<>();
+        for (TransitionImage transitionImage : images) {
+            stateImages.add(getStateImage(transitionImage));
+        }
+        return stateImages;
+    }
+
+    private StateImage getStateImage(TransitionImage transitionImage) {
+        BufferedImage bufferedImage = getBufferedImage.convert(transitionImage.getImage());
+        Pattern pattern = new Pattern(bufferedImage);
+        return pattern.inNullState();
     }
 
     private Optional<TransitionImage> getMatchingImage(TransitionImage img, double threshold, List<TransitionImage> compareList) {

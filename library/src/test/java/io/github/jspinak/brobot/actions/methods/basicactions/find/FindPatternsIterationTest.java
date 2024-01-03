@@ -1,8 +1,10 @@
 package io.github.jspinak.brobot.actions.methods.basicactions.find;
 
 import io.github.jspinak.brobot.BrobotTestApplication;
+import io.github.jspinak.brobot.actions.actionExecution.MatchesInitializer;
 import io.github.jspinak.brobot.actions.actionExecution.actionLifecycle.ActionLifecycleManagement;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
+import io.github.jspinak.brobot.actions.methods.basicactions.TestData;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.GetScenes;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.Scene;
 import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
@@ -38,41 +40,18 @@ class FindPatternsIterationTest {
     GetScenes getScenes;
 
     @Autowired
-    ActionLifecycleManagement actionLifecycleManagement;
+    MatchesInitializer matchesInitializer;
 
     @Test
     void find_() {
-        Pattern topL = new Pattern.Builder()
-                .setFilename("topLeft")
-                .addAnchor(Position.Name.TOPLEFT, Position.Name.BOTTOMLEFT)
-                .build();
-        StateImage topLeft = new StateImage.Builder()
-                .addPattern(topL)
-                .build();
-        StateImage bottomRight = new StateImage.Builder()
-                .addPattern(new Pattern.Builder()
-                        .setFilename("bottomRight")
-                        .addAnchor(Position.Name.BOTTOMRIGHT, Position.Name.TOPRIGHT)
-                        .build())
-                .build();
-        ActionOptions actionOptions = new ActionOptions.Builder()
-                .setAction(ActionOptions.Action.DEFINE)
-                .setDefineAs(ActionOptions.DefineAs.INSIDE_ANCHORS)
-                .build();
-        ObjectCollection objectCollection = new ObjectCollection.Builder()
-                .withScenes(new Pattern("../screenshots/FloraNext1"))
-                .withImages(topLeft, bottomRight)
-                .build();
-        List<Scene> scenes = getScenes.getScenes(actionOptions, List.of(objectCollection));
-        List<StateImage> stateImages = new ArrayList<>();
-        stateImages.add(topLeft);
-        stateImages.add(bottomRight);
+        TestData testData = new TestData();
 
-        Matches matches = new Matches();
-        matches.setActionOptions(actionOptions);
-        int id = actionLifecycleManagement.newActionLifecycle(actionOptions, matches);
-        System.out.println("actionId = " + matches.getActionId());
-        assertEquals(id, matches.getActionId());
+        List<Scene> scenes = getScenes.getScenes(testData.getDefineInsideAnchors(), List.of(testData.getInsideAnchorObjects()));
+        List<StateImage> stateImages = new ArrayList<>();
+        stateImages.add(testData.getTopLeft());
+        stateImages.add(testData.getBottomRight());
+
+        Matches matches = matchesInitializer.init(testData.getDefineInsideAnchors(), testData.getInsideAnchorObjects());
 
         findPatternsIteration.find(matches, stateImages, scenes);
         for (Match matchObject : matches.getMatchList()) {

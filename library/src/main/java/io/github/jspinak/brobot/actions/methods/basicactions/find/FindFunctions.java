@@ -2,6 +2,7 @@ package io.github.jspinak.brobot.actions.methods.basicactions.find;
 
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.classification.FindColor;
+import io.github.jspinak.brobot.actions.methods.basicactions.find.compareImages.FindSimilarImages;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.histogram.FindHistogram;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.motion.FindMotion;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.motion.FindRegionsOfMotion;
@@ -25,7 +26,7 @@ public class FindFunctions {
 
     public FindFunctions(FindHistogram findHistogram,
                          FindColor findColor, FindMotion findMotion, FindRegionsOfMotion findRegionsOfMotion,
-                         FindWords findWords, FindImages findImages) {
+                         FindWords findWords, FindImages findImages, FindSimilarImages findSimilarImages) {
         findFunction.put(ActionOptions.Find.FIRST, findImages::findBest);
         findFunction.put(ActionOptions.Find.BEST, findImages::findBest);
         findFunction.put(ActionOptions.Find.EACH, findImages::findEachPattern);
@@ -35,6 +36,7 @@ public class FindFunctions {
         findFunction.put(ActionOptions.Find.MOTION, findMotion::find);
         findFunction.put(ActionOptions.Find.REGIONS_OF_MOTION, findRegionsOfMotion::find);
         findFunction.put(ActionOptions.Find.ALL_WORDS, findWords::findAllWordMatches);
+        findFunction.put(ActionOptions.Find.SIMILAR_IMAGES, findSimilarImages::perform);
     }
 
     public void addCustomFind(BiConsumer<Matches, List<ObjectCollection>> customFind) {

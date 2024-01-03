@@ -1,8 +1,10 @@
 package io.github.jspinak.brobot.actions.actionExecution;
 
+import io.github.jspinak.brobot.actions.actionExecution.actionLifecycle.ActionLifecycle;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.GetSceneAnalysisCollection;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.SceneAnalysisCollection;
+import io.github.jspinak.brobot.actions.methods.time.Time;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import lombok.Getter;
@@ -23,9 +25,11 @@ import java.util.List;
 public class MatchesInitializer {
 
     private final GetSceneAnalysisCollection getSceneAnalysisCollection;
+    private final Time time;
 
-    public MatchesInitializer(GetSceneAnalysisCollection getSceneAnalysisCollection) {
+    public MatchesInitializer(GetSceneAnalysisCollection getSceneAnalysisCollection, Time time) {
         this.getSceneAnalysisCollection = getSceneAnalysisCollection;
+        this.time = time;
     }
 
     /**
@@ -36,6 +40,7 @@ public class MatchesInitializer {
      */
     public Matches init(ActionOptions actionOptions, String actionDescription, ObjectCollection... objectCollections) {
         Matches matches = new Matches();
+        matches.setActionLifecycle(new ActionLifecycle(time.now(), actionOptions.getMaxWait()));
         matches.setActionOptions(actionOptions);
         matches.setActionDescription(actionDescription);
         SceneAnalysisCollection sceneAnalysisCollection = new SceneAnalysisCollection();

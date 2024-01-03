@@ -34,8 +34,8 @@ class MatchFusionTest {
         Match match4 = new Match(30,34,30,20);
         Matches matches = new Matches();
         matches.add(match1, match2, match3, match4);
-        matches.setActionOptions(new ActionOptions.Builder().setFusionMethod(ActionOptions.MatchFusionMethod.WORDS).build());
-        List<Match> fusedMatches = matchFusion.getFusedMatchObjects(matches);
+        matches.setActionOptions(new ActionOptions.Builder().setFusionMethod(ActionOptions.MatchFusionMethod.ABSOLUTE).build());
+        List<Match> fusedMatches = matchFusion.getFusedMatchObjects(matches.getMatchList(), matches.getActionOptions());
         fusedMatches.forEach(System.out::println);
         assertEquals(2, fusedMatches.size());
         Match fusedMatch = fusedMatches.get(0);

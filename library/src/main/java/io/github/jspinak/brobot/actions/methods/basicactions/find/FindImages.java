@@ -87,7 +87,7 @@ public class FindImages {
         while (actionLifecycleManagement.isOkToContinueAction(matches, stateImages.size())) {
             List<Scene> scenes = getScenes.getScenes(actionOptions, objectCollections, 1, 0);
             findPatternsIteration.find(matches, stateImages, scenes);
-            actionLifecycleManagement.incrementCompletedRepetitions(matches.getActionId());
+            actionLifecycleManagement.incrementCompletedRepetitions(matches);
         }
     }
 

@@ -84,7 +84,7 @@ public class HistComparison {
                 .setMatch(reg)
                 .setStateObject(image)
                 .setHistogram(sceneHistRegs.getCombined().getHistogram())
-                .setScore(score)
+                .setSimScore(score)
                 .build();
             matchList.add(match);
         }
