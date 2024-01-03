@@ -4,7 +4,6 @@ import io.github.jspinak.brobot.actions.actionExecution.actionLifecycle.ActionLi
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.GetScenes;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.Scene;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.SceneAnalysis;
-import io.github.jspinak.brobot.actions.methods.sikuliWrappers.find.FindAll;
 import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
@@ -29,7 +28,7 @@ public class FindWords {
         while (actionLifecycleManagement.isOkToContinueAction(matches, objectCollections.get(0).getStateImages().size())) {
             List<Scene> scenes = getScenes.getScenes(matches.getActionOptions(), objectCollections, 1, 0);
             findWordsSetSceneAnalyses(matches, scenes);
-            actionLifecycleManagement.incrementCompletedRepetitions(matches.getActionId());
+            actionLifecycleManagement.incrementCompletedRepetitions(matches);
         }
     }
 
@@ -39,7 +38,7 @@ public class FindWords {
      * @param scenes the scenes to search
      */
     public void findWordsSetSceneAnalyses(Matches matches, List<Scene> scenes) {
-        actionLifecycleManagement.printActionOnce(matches.getActionId());
+        actionLifecycleManagement.printActionOnce(matches);
         for (Scene scene : scenes) {
             List<Match> sceneMatches = findAll.findWords(scene, matches.getActionOptions());
             matches.addAll(sceneMatches); // holds all matches found

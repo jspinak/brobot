@@ -16,6 +16,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.bytedeco.opencv.opencv_core.Mat;
 
+import java.io.File;
 import java.util.*;
 
 /**
@@ -218,12 +219,18 @@ public class StateImage implements StateObject {
 
         public Builder setPatterns(List<Pattern> patterns) {
             this.patterns = patterns;
+            if (!patterns.isEmpty()) setNameFromPatternIfEmpty(patterns.get(0));
             return this;
         }
 
         public Builder addPattern(Pattern pattern) {
             this.patterns.add(pattern);
+            setNameFromPatternIfEmpty(pattern);
             return this;
+        }
+
+        private void setNameFromPatternIfEmpty(Pattern pattern) {
+            if (name.isEmpty() && pattern != null) name = pattern.getName();
         }
 
         public Builder setKmeansProfilesAllSchemas(KmeansProfilesAllSchemas kmeansProfilesAllSchemas) {

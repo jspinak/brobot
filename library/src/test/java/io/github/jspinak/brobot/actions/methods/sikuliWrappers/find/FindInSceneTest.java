@@ -20,7 +20,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
 @SpringBootTest(classes = BrobotTestApplication.class)
-class FindInFileTest {
+class FindInSceneTest {
 
     @BeforeAll
     public static void setupHeadlessMode() {
@@ -29,7 +29,7 @@ class FindInFileTest {
     }
 
     @Autowired
-    FindInFile findInFile;
+    FindInScene findInScene;
 
     @Autowired
     GetScenes getScenes;
@@ -58,7 +58,7 @@ class FindInFileTest {
                 .withImages(topLeft, bottomRight)
                 .build();
         List<Scene> scenes = getScenes.getScenes(actionOptions, List.of(objectCollection));
-        List<Match> matches = findInFile.findAllInScene(topL, scenes.get(0));
+        List<Match> matches = findInScene.findAllInScene(topL, scenes.get(0));
         System.out.println(matches);
         assertFalse(matches.isEmpty());
     }

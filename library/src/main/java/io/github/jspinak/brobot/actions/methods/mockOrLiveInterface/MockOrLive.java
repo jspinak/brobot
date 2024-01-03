@@ -5,7 +5,7 @@ import io.github.jspinak.brobot.actions.methods.basicactions.find.color.MockColo
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.Scene;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.histogram.FindHistogramsOneRegionOneImage;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.histogram.MockHistogram;
-import io.github.jspinak.brobot.actions.methods.sikuliWrappers.find.FindInFile;
+import io.github.jspinak.brobot.actions.methods.sikuliWrappers.find.FindInScene;
 import io.github.jspinak.brobot.actions.methods.sikuliWrappers.text.GetTextWrapper;
 import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
 import io.github.jspinak.brobot.datatypes.primitives.match.Match;
@@ -28,14 +28,14 @@ public class MockOrLive {
     private final MockColor mockColor; // TODO
     private final MockHistogram mockHistogram;
     private final MockTime mockTime;
-    private final FindInFile findInFile;
+    private final FindInScene findInScene;
     private final GetTextWrapper getTextWrapper;
     private final FindHistogramsOneRegionOneImage findHistogramsOneRegionOneImage;
 
     public MockOrLive(Permissions permissions,
                       MockFind mockFind, MockText mockText, MockColor mockColor, MockHistogram mockHistogram,
                       MockTime mockTime,
-                      FindInFile findInFile, GetTextWrapper getTextWrapper,
+                      FindInScene findInScene, GetTextWrapper getTextWrapper,
                       FindHistogramsOneRegionOneImage findHistogramsOneRegionOneImage) {
         this.permissions = permissions;
         this.mockFind = mockFind;
@@ -43,7 +43,7 @@ public class MockOrLive {
         this.mockColor = mockColor;
         this.mockHistogram = mockHistogram;
         this.mockTime = mockTime;
-        this.findInFile = findInFile;
+        this.findInScene = findInScene;
         this.getTextWrapper = getTextWrapper;
         this.findHistogramsOneRegionOneImage = findHistogramsOneRegionOneImage;
     }
@@ -57,7 +57,12 @@ public class MockOrLive {
      */
     public List<Match> findAll(Pattern pattern, Scene scene) {
         if (permissions.isMock()) return mockFind.getMatches(pattern);
-        return findInFile.findAllInScene(pattern, scene);
+        return findInScene.findAllInScene(pattern, scene);
+    }
+
+    public List<Match> findAllWords(Scene scene) {
+        if (permissions.isMock()) return mockFind.getWordMatches();
+        return findInScene.getWordMatches(scene);
     }
 
     public void setText(Match match) {

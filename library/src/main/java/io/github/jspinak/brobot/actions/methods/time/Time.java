@@ -12,6 +12,10 @@ public class Time {
         this.mockOrLive = mockOrLive;
     }
 
+    public LocalDateTime now() {
+        return mockOrLive.now();
+    }
+
     public void wait(double seconds) {
         mockOrLive.wait(seconds);
     }

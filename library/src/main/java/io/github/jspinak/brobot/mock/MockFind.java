@@ -5,7 +5,9 @@ import io.github.jspinak.brobot.actions.methods.time.ActionDurations;
 import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
 import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import io.github.jspinak.brobot.datatypes.primitives.match.MatchSnapshot;
+import io.github.jspinak.brobot.datatypes.state.state.State;
 import io.github.jspinak.brobot.manageStates.StateMemory;
+import io.github.jspinak.brobot.services.StateService;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -19,11 +21,13 @@ import java.util.Optional;
 public class MockFind {
     private final ActionDurations actionDurations;
     private final StateMemory stateMemory;
+    private final StateService stateService;
     private final MockTime mockTime;
 
-    public MockFind(ActionDurations actionDurations, StateMemory stateMemory, MockTime mockTime) {
+    public MockFind(ActionDurations actionDurations, StateMemory stateMemory, StateService stateService, MockTime mockTime) {
         this.actionDurations = actionDurations;
         this.stateMemory = stateMemory;
+        this.stateService = stateService;
         this.mockTime = mockTime;
     }
 
@@ -40,4 +44,22 @@ public class MockFind {
         return optionalMatchSnapshot.get().getMatchList();
     }
 
+    /**
+     * These matches are from searching a region for all words. As with image matches, all matches should be returned
+     * and the matches falling within the regions will be selected at a higher level. Words are likely to be state
+     * specific and are thus stored in the State variable MatchHistory.
+     * @return a list of Match objects for the corresponding states.
+     */
+    public List<Match> getWordMatches() {
+        mockTime.wait(actionDurations.getFindDuration(ActionOptions.Find.ALL_WORDS));
+        List<Match> allMatches = new ArrayList<>();
+        for (String stateName : stateMemory.getActiveStates()) {
+            Optional<State> state = stateService.findByName(stateName);
+            state.ifPresent(st -> {
+                Optional<MatchSnapshot> snapshot = st.getMatchHistory().getRandomSnapshot(ActionOptions.Action.FIND, stateName);
+                snapshot.ifPresent(snap -> allMatches.addAll(snap.getMatchList()));
+            });
+        }
+        return allMatches;
+    }
 }

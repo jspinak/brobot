@@ -10,15 +10,20 @@ import io.github.jspinak.brobot.datatypes.primitives.match.MatchSnapshot;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.SearchRegions;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
+import io.github.jspinak.brobot.imageUtils.MatOps;
 import io.github.jspinak.brobot.reports.Report;
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.commons.codec.language.bm.Rule;
 import org.bytedeco.javacv.Java2DFrameUtils;
 import org.bytedeco.opencv.opencv_core.Mat;
+import org.python.antlr.ast.Str;
 
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.net.URL;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Pattern and StateImage_ (to replace StateImage) are for a code restructuring that gets rid of RegionImagePairs.
@@ -31,6 +36,7 @@ import java.util.List;
 @Setter
 public class Pattern extends org.sikuli.script.Pattern {
 
+    private String name;
     /*
     The SikuliX Image object is part of Pattern. It loads an image from file or the web into memory
     and provides a BufferedImage object. There are, however, occasions requiring an image to be
@@ -60,6 +66,7 @@ public class Pattern extends org.sikuli.script.Pattern {
 
     public Pattern(String string) {
         super(string);
+        setNameFromFilenameIfEmpty(string);
         setMatWithBufferedImage();
     }
 
@@ -79,11 +86,17 @@ public class Pattern extends org.sikuli.script.Pattern {
      */
     public Pattern() {}
 
-    private void setMatWithBufferedImage() {
-        try (Mat mat = Java2DFrameUtils.toMat(getBImage())) {
-            setMat(mat);
+    private void setNameFromFilenameIfEmpty(String filename) {
+        if (name == null || name.isEmpty()) {
+            File file = new File(filename); // Create a File object from the image path
+            name = file.getName().replaceFirst("[.][^.]+$", ""); // the file name without extension
         }
-        Report.println("Unable to convert BufferedImage to Mat for Pattern " + getFilename());
+    }
+
+    private void setMatWithBufferedImage() {
+        BufferedImage bImage = getBImage();
+        Optional<Mat> optionalMat = MatOps.bufferedImageToMat(bImage);
+        optionalMat.ifPresent(this::setMat);
     }
 
     /**
@@ -161,18 +174,26 @@ public class Pattern extends org.sikuli.script.Pattern {
     }
 
     public boolean equals(Pattern pattern) {
-        if (!getFilename().equals(pattern.getFilename())) return false;
-        if (fixed != pattern.isFixed()) return false;
-        if (!searchRegions.equals(pattern.getSearchRegions())) return false;
-        if (matchHistory.equals(pattern.getMatchHistory())) return false;
-        if (dynamic != pattern.isDynamic()) return false;
-        if (!position.equals(pattern.getPosition())) return false;
-        if (!anchors.equals(pattern.getAnchors())) return false;
+        boolean sameFilename = getFilename().equals(pattern.getFilename());
+        boolean bothFixedOrBothNot = fixed == pattern.isFixed();
+        boolean sameSearchRegions = searchRegions.equals(pattern.getSearchRegions());
+        boolean sameMatchHistory = matchHistory.equals(pattern.getMatchHistory());
+        boolean bothDynamicOrBothNot = dynamic == pattern.isDynamic();
+        boolean samePosition = position.equals(pattern.getPosition());
+        boolean sameAnchors = anchors.equals(pattern.getAnchors());
+        if (!sameFilename) return false;
+        if (!bothFixedOrBothNot) return false;
+        if (!sameSearchRegions) return false;
+        if (!sameMatchHistory) return false;
+        if (!bothDynamicOrBothNot) return false;
+        if (!samePosition) return false;
+        if (!sameAnchors) return false;
         return true;
     }
 
     public static class Builder {
 
+        private String name;
         private Mat mat;
         private String filename;
         private boolean fixed = false;
@@ -184,6 +205,11 @@ public class Pattern extends org.sikuli.script.Pattern {
         private boolean dynamic = false;
         private Position position = new Position(.5,.5);
         private Anchors anchors = new Anchors();
+
+        public Builder setName(String name) {
+            this.name = name;
+            return this;
+        }
 
         public Builder setMat(Mat mat) {
             this.mat = mat;
@@ -262,7 +288,9 @@ public class Pattern extends org.sikuli.script.Pattern {
 
         public Pattern build() {
             Pattern pattern = new Pattern(filename);
-            pattern.mat = mat;
+            // new Pattern(filename) should set the mat and name, only overwrite if explicitly set
+            if (mat != null) pattern.mat = mat;
+            if (name != null) pattern.name = name;
             pattern.fixed = fixed;
             pattern.searchRegions = searchRegions;
             pattern.setKmeansColorProfiles = setKmeansColorProfiles;

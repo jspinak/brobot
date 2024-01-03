@@ -1,19 +1,17 @@
 package io.github.jspinak.brobot.actions.methods.basicactions.find.histogram;
 
-import io.github.jspinak.brobot.actions.BrobotSettings;
-import io.github.jspinak.brobot.actions.actionExecution.actionLifecycle.ActionLifecycleManagement;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
-import io.github.jspinak.brobot.actions.methods.basicactions.find.matchManagement.SelectRegions;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.GetScenes;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.Scene;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.SceneAnalysis;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.SceneAnalysisCollection;
+import io.github.jspinak.brobot.actions.methods.basicactions.find.matchManagement.SelectRegions;
 import io.github.jspinak.brobot.actions.methods.mockOrLiveInterface.MockOrLive;
 import io.github.jspinak.brobot.datatypes.primitives.match.Match;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.springframework.stereotype.Component;
 
@@ -26,15 +24,13 @@ public class FindHistogram {
     private final SelectRegions selectRegions;
     private final GetHistograms getHistograms;
     private final GetScenes getScenes;
-    private final ActionLifecycleManagement actionLifecycleManagement;
     private final MockOrLive mockOrLive;
 
     public FindHistogram(SelectRegions selectRegions, GetHistograms getHistograms, GetScenes getScenes,
-                         ActionLifecycleManagement actionLifecycleManagement, MockOrLive mockOrLive) {
+                         MockOrLive mockOrLive) {
         this.selectRegions = selectRegions;
         this.getHistograms = getHistograms;
         this.getScenes = getScenes;
-        this.actionLifecycleManagement = actionLifecycleManagement;
         this.mockOrLive = mockOrLive;
     }
 
@@ -46,7 +42,6 @@ public class FindHistogram {
     public void find(Matches matches, List<ObjectCollection> objectCollections) {
         ActionOptions actionOptions = matches.getActionOptions();
         if (actionOptions.getMaxMatchesToActOn() <= 0) actionOptions.setMaxMatchesToActOn(1); // default for histogram
-        int actionId = actionLifecycleManagement.newActionLifecycle(actionOptions, matches);
         getHistograms.setBins(
                 actionOptions.getHueBins(), actionOptions.getSaturationBins(), actionOptions.getValueBins());
         List<Scene> scenes = getScenes.getScenes(actionOptions, objectCollections);

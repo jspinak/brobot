@@ -1,7 +1,7 @@
 package io.github.jspinak.brobot.actions.actionExecution.actionLifecycle;
 
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
-import io.github.jspinak.brobot.actions.methods.mockOrLiveInterface.MockOrLive;
+import io.github.jspinak.brobot.actions.methods.time.Time;
 import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
 import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
@@ -15,100 +15,63 @@ import java.util.List;
 
 @Component
 public class ActionLifecycleManagement {
+    private final Time time;
 
-    private final ActionLifecylceRepo actionLifecylceRepo;
-    private final MockOrLive mockOrLive;
-
-    public ActionLifecycleManagement(ActionLifecylceRepo actionLifecylceRepo, MockOrLive mockOrLive) {
-        this.actionLifecylceRepo = actionLifecylceRepo;
-        this.mockOrLive = mockOrLive;
-    }
-
-    /**
-     * Creates a new ActionLifecycle object and adds it to the repo.
-     * @param actionOptions ActionOptions object that contains all the information about the action.
-     * @return id of the created ActionLifecycle object
-     */
-    public int newActionLifecycle(ActionOptions actionOptions, Matches matches) {
-        ActionLifecycle actionLifecycle = new ActionLifecycle(actionOptions, mockOrLive.now());
-        int id = actionLifecylceRepo.add(actionLifecycle);
-        matches.setActionId(id);
-        return id;
+    public ActionLifecycleManagement(Time time) {
+        this.time = time;
     }
 
     /**
      * Increments the number of completed repetitions of the action.
-     * @param id id of the ActionLifecycle object
+     * @param matches holds the ActionLifecycle object
      */
-    public void incrementCompletedRepetitions(int id) {
-        actionLifecylceRepo.getActionLifecycles().get(id).incrementCompletedRepetitions();
+    public void incrementCompletedRepetitions(Matches matches) {
+        matches.getActionLifecycle().incrementCompletedRepetitions();
     }
 
-    /**
-     * Sets the end time of the action.
-     * @param id id of the ActionLifecycle object
-     */
-    public void setEndTime(int id, double maxWait) {
-        actionLifecylceRepo.getActionLifecycles().get(id).setEndTime(mockOrLive.now().plusSeconds((long) maxWait));
-    }
-
-    public Duration getAndSetDuration(Matches matches) {
-        int id = matches.getActionId();
-        double maxWait = matches.getActionOptions().getMaxWait();
-        setEndTime(id, maxWait);
-        LocalDateTime start = actionLifecylceRepo.getActionLifecycles().get(id).getStartTime();
-        LocalDateTime end = actionLifecylceRepo.getActionLifecycles().get(id).getEndTime();
+    public Duration getCurrentDuration(Matches matches) {
+        LocalDateTime start = matches.getActionLifecycle().getStartTime();
+        LocalDateTime end = time.now();
         return Duration.between(start, end);
     }
 
-    public Duration getCurrentDuration(int id) {
-        LocalDateTime start = actionLifecylceRepo.getActionLifecycles().get(id).getStartTime();
-        LocalDateTime end = mockOrLive.now();
-        return Duration.between(start, end);
-    }
-
-    public boolean actionCompleted(int id) {
-        return actionLifecylceRepo.getActionLifecycles().get(id).getEndTime() != null;
-    }
-
-    public int getCompletedRepetitions(int id) {
-        return actionLifecylceRepo.getActionLifecycles().get(id).getCompletedRepetitions();
-    }
-
-    public ActionOptions getActionOptions(int id) {
-        return actionLifecylceRepo.getActionLifecycles().get(id).getActionOptions();
+    public int getCompletedRepetitions(Matches matches) {
+        return matches.getActionLifecycle().getCompletedRepetitions();
     }
 
     /**
      * Continue the action if
      * - the max repetitions has not been reached
      * - the time has not expired
-     * @param id id of the ActionLifecycle object
+     * @param matches holds the ActionLifecycle
      * @return true if the action should be continued, false otherwise
      */
-    private boolean isTimeLeftAndMoreRepsAllowed(int id) {
-        int completedReps = getCompletedRepetitions(id);
+    private boolean isTimeLeftAndMoreRepsAllowed(Matches matches) {
+        ActionOptions actionOptions = matches.getActionOptions();
+        int completedReps = getCompletedRepetitions(matches);
         if (completedReps == 0) return true;
-        int maxReps = getActionOptions(id).getMaxTimesToRepeatActionSequence();
-        ActionOptions.Action action = getActionOptions(id).getAction();
+        int maxReps = actionOptions.getMaxTimesToRepeatActionSequence();
+        ActionOptions.Action action = actionOptions.getAction();
         if (action != ActionOptions.Action.FIND && completedReps >= maxReps) {
             return false;
         }
-        double maxWait = getActionOptions(id).getMaxWait();
-        Duration duration = getCurrentDuration(id);
+        double maxWait = actionOptions.getMaxWait();
+        Duration duration = getCurrentDuration(matches);
         return duration.getSeconds() <= maxWait;
     }
 
     public boolean isOkToContinueAction(Matches matches, int numberOfImages) {
-        int id = matches.getActionId();
-        if (!isTimeLeftAndMoreRepsAllowed(id)) return false;
-        if (isFindFirstAndAtLeastOneMatchFound(matches)) return false;
-        if (isFindEachFirstAndEachPatternFound(matches, numberOfImages)) return false;
+        boolean timeLeftAndMoreRepsAllowed = isTimeLeftAndMoreRepsAllowed(matches);
+        boolean findFirstAndAtLeastOneMatchFound = isFindFirstAndAtLeastOneMatchFound(matches);
+        boolean findEachFirstAndEachPatternFound = isFindEachFirstAndEachPatternFound(matches, numberOfImages);
+        if (!timeLeftAndMoreRepsAllowed) return false;
+        if (findFirstAndAtLeastOneMatchFound) return false;
+        if (findEachFirstAndEachPatternFound) return false;
         return true;
     }
 
     public boolean isFindFirstAndAtLeastOneMatchFound(Matches matches) {
-        return !matches.isEmpty() && getActionOptions(matches.getActionId()).getFind() == ActionOptions.Find.FIRST;
+        return !matches.isEmpty() && matches.getActionOptions().getFind() == ActionOptions.Find.FIRST;
     }
 
     public boolean isFindEachFirstAndEachPatternFound(Matches matches, int numberOfPatterns) {
@@ -129,16 +92,18 @@ public class ActionLifecycleManagement {
         return patternsFound == numberOfPatterns;
     }
 
-    public boolean printActionOnce(int id) {
-        if (actionLifecylceRepo.getActionLifecycles().get(id).isPrinted()) {
+    public boolean printActionOnce(Matches matches) {
+        ActionLifecycle actionLifecycle = matches.getActionLifecycle();
+        if (actionLifecycle.isPrinted()) {
             return false;
         }
-        actionLifecylceRepo.getActionLifecycles().get(id).setPrinted(true);
+        actionLifecycle.setPrinted(true);
+        ActionOptions actionOptions = matches.getActionOptions();
         if (Report.minReportingLevel(Report.OutputLevel.LOW)) {
-            if (getActionOptions(id).getAction() == ActionOptions.Action.FIND)
-                System.out.format("Find.%s ", getActionOptions(id).getFind());
+            if (actionOptions.getAction() == ActionOptions.Action.FIND)
+                System.out.format("Find.%s ", actionOptions.getFind());
             else
-                System.out.format("%s ", getActionOptions(id).getAction());
+                System.out.format("%s ", actionOptions.getAction());
         }
         return true;
     }

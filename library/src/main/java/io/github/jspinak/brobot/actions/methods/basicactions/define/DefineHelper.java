@@ -1,5 +1,6 @@
 package io.github.jspinak.brobot.actions.methods.basicactions.define;
 
+import io.github.jspinak.brobot.actions.actionExecution.MatchesInitializer;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.actions.actionOptions.CopyActionOptions;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.Find;
@@ -18,9 +19,11 @@ import org.springframework.stereotype.Component;
 public class DefineHelper {
 
     private Find find;
+    private final MatchesInitializer matchesInitializer;
 
-    public DefineHelper(Find find) {
+    public DefineHelper(Find find, MatchesInitializer matchesInitializer) {
         this.find = find;
+        this.matchesInitializer = matchesInitializer;
     }
 
     /**
@@ -48,11 +51,11 @@ public class DefineHelper {
      *
      * Uses Find.EACH, which returns 1 Match per object in the first ObjectCollection
      *
-     * @param actionOptions holds the action configuration.
+     * @param matches holds the action configuration.
      * @param objectCollections holds the objects to find.
      */
-    public void findMatches(Matches matches, ActionOptions actionOptions, ObjectCollection... objectCollections) {
-        ActionOptions findOptions = CopyActionOptions.copyImmutableOptions(actionOptions);
+    public void findMatches(Matches matches, ObjectCollection... objectCollections) {
+        ActionOptions findOptions = CopyActionOptions.copyImmutableOptions(matches.getActionOptions());
         findOptions.setFind(ActionOptions.Find.EACH);
         findOptions.setAddH(0);
         findOptions.setAddW(0);
@@ -60,9 +63,9 @@ public class DefineHelper {
         findOptions.setAddX(0);
         findOptions.setAbsoluteH(-1);
         findOptions.setAbsoluteW(-1);
-        matches.setActionOptions(findOptions);
-        find.perform(matches, objectCollections);
+        Matches findMatches = matchesInitializer.init(findOptions, objectCollections);
+        find.perform(findMatches, objectCollections);
+        matches.addMatchObjects(findMatches);
     }
-
 
 }

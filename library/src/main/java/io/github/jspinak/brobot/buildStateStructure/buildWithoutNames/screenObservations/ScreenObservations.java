@@ -1,6 +1,8 @@
 package io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.screenObservations;
 
 import io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.screenObservations.ScreenObservation;
+import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.imageUtils.MatVisualize;
 import lombok.Setter;
 import org.springframework.stereotype.Component;
@@ -28,6 +30,20 @@ public class ScreenObservations {
 
     public List<ScreenObservation> getAll() {
         return observations;
+    }
+
+    public List<StateImage> getAllAsImages() {
+        List<StateImage> stateImages = new ArrayList<>();
+        for (int i=0; i<observations.size(); i++) {
+            Pattern p = observations.get(i).getPattern();
+            p.setIndex(i);
+            stateImages.add(
+                    new StateImage.Builder()
+                            .addPattern(p)
+                            .setIndex(i)
+                            .build());
+        }
+        return stateImages;
     }
 
     public Optional<ScreenObservation> get(int id) {
