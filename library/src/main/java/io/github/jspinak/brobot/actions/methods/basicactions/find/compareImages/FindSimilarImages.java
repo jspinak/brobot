@@ -22,7 +22,7 @@ public class FindSimilarImages {
         this.compareImages = compareImages;
     }
 
-    public void perform(Matches matches, List<ObjectCollection> objectCollections) {
+    public void find(Matches matches, List<ObjectCollection> objectCollections) {
         if (objectCollections.size() < 2) return;
         if (objectCollections.get(0).getStateImages().isEmpty() || objectCollections.get(1).getStateImages().isEmpty()) return;
         /*

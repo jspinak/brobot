@@ -17,6 +17,6 @@ public class DrawMotion {
 
     public void draw(Matches matches) {
         String outputPath = illustrationFilename.getFilename(ActionOptions.Action.FIND, "motion");
-        imwrite(outputPath, matches.getPixelMatches());
+        imwrite(outputPath, matches.getMask());
     }
 }

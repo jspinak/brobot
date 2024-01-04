@@ -24,8 +24,8 @@ class PixelChangeDetectorTest {
 
     @Test
     void getFinalMat() {
-        Mat mat1 = matOps3d.makeTestMat3D(new short[]{0, 255, 255, 255, 0, 0, 255, 255});
-        Mat mat2 = matOps3d.makeTestMat3D(new short[]{0, 0,   255, 255, 0, 0, 0,   255, 255});
+        Mat mat1 = matOps3d.makeMat3D(new short[]{0, 255, 255, 255, 0, 0, 255, 255});
+        Mat mat2 = matOps3d.makeMat3D(new short[]{0, 0,   255, 255, 0, 0, 0,   255, 255});
         PixelChangeDetector pixelChangeDetector = new PixelChangeDetector.Builder()
                 .addMats(mat1, mat2)
                 .useGrayscale()

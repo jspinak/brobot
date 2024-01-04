@@ -268,7 +268,7 @@ public class MatOps {
      * Makes a 3x3, 1-channel Mat with random values (0-255).
      * @return a 3x3 Mat with random values.
      */
-    public static Mat makeTestMat() {
+    public static Mat make3x3Mat() {
         Mat mat = makeMat(new Size(3,3), CV_8U, 0);
         Random rand = new Random();
         for (short row=0; row<3; row++) {
@@ -285,11 +285,27 @@ public class MatOps {
      * @param values the cell values for a 3x3 Mat
      * @return the new Mat
      */
-    public static Mat makeTestMat(short[] values) {
+    public static Mat make3x3Mat(short[] values) {
         Mat mat = makeMat(new Size(3,3), CV_8U, 0);
         for (short row=0; row<3; row++) {
             for (short col=0; col<3; col++) {
                 short index = (short)(row*3 + col);
+                short value = values.length > index ? values[index] : 0;
+                putInt(mat, row, col, value);
+            }
+        }
+        return mat;
+    }
+
+    public static Mat makeMat(short... values) {
+        short length = 1;
+        for (short i = 1; values.length > Math.pow(i, 2); i++) {
+            length = (short)(i+1);
+        }
+        Mat mat = makeMat(new Size(length,length), CV_8U, 0);
+        for (short row=0; row<length; row++) {
+            for (short col=0; col<length; col++) {
+                short index = (short)(row*length + col);
                 short value = values.length > index ? values[index] : 0;
                 putInt(mat, row, col, value);
             }

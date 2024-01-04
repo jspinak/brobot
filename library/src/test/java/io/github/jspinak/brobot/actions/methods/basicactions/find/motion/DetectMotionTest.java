@@ -27,12 +27,12 @@ class DetectMotionTest {
     MatOps3d matOps3d;
 
     @Autowired
-    DetectMotion findDynamicPixels;
+    DetectMotion detectMotion;
 
     private Mat getDynamicPixels() {
-        mat1 = matOps3d.makeTestMat3D(new short[]{0, 255, 255, 255, 0, 0, 255, 255});
-        mat2 = matOps3d.makeTestMat3D(new short[]{0, 0,   255, 255, 0, 0, 0,   255, 255});
-        Mat dynamicPixels = findDynamicPixels.getDynamicPixelMask(new MatVector(mat1, mat2));
+        mat1 = matOps3d.makeMat3D(new short[]{0, 255, 255, 255, 0, 0, 255, 255});
+        mat2 = matOps3d.makeMat3D(new short[]{0, 0,   255, 255, 0, 0, 0,   255, 255});
+        Mat dynamicPixels = detectMotion.getDynamicPixelMask(new MatVector(mat1, mat2));
         MatOps.printPartOfMat(dynamicPixels, 3, 3, "dynamic");
         System.out.println();
         return dynamicPixels;
@@ -40,9 +40,9 @@ class DetectMotionTest {
 
     @Test
     void getDynamicPixelsFromTopMethod() {
-        mat1 = matOps3d.makeTestMat3D(new short[]{0, 255, 255, 255, 0, 0, 255, 255});
-        mat2 = matOps3d.makeTestMat3D(new short[]{0, 0,   255, 255, 0, 0, 0,   255, 255});
-        Mat absdiff = findDynamicPixels.getDynamicPixelMask(mat1, mat2);
+        mat1 = matOps3d.makeMat3D(new short[]{0, 255, 255, 255, 0, 0, 255, 255});
+        mat2 = matOps3d.makeMat3D(new short[]{0, 0,   255, 255, 0, 0, 0,   255, 255});
+        Mat absdiff = detectMotion.getDynamicPixelMask(mat1, mat2);
         MatOps.printPartOfMat(absdiff, 3, 3, "absdiff");
         assertEquals(255, MatOps.getDouble(0,0,0, absdiff));
     }

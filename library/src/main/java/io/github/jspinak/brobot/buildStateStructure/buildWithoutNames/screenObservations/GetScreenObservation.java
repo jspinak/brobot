@@ -2,12 +2,10 @@ package io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.screenObs
 
 import io.github.jspinak.brobot.actions.actionExecution.Action;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
-import io.github.jspinak.brobot.actions.methods.basicactions.find.motion.DynamicPixelFinder;
 import io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.stateStructureBuildManagement.StateStructureTemplate;
 import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
-import io.github.jspinak.brobot.imageUtils.GetImageJavaCV;
 import lombok.Getter;
 import lombok.Setter;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -87,7 +85,7 @@ public class GetScreenObservation {
         if (optScreenshot.isEmpty()) screenObservation.setScreenshot(new Mat());
         else screenObservation.setScreenshot(optScreenshot.get());
         screenObservation.setMatches(matches);
-        screenObservation.setDynamicPixelMask(matches.getPixelMatches());
+        screenObservation.setDynamicPixelMask(matches.getMask());
     }
 
 }

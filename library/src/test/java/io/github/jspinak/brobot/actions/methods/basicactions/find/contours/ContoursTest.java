@@ -14,8 +14,8 @@ class ContoursTest {
     private static Contours contours;
 
     @BeforeAll
-    private static void setVars() {
-        mat = MatOps.makeTestMat(new short[]{0, 255, 255, 0, 0,     0, 0,
+    public static void setVars() {
+        mat = MatOps.make3x3Mat(new short[]{0, 255, 255, 0, 0,     0, 0,
                                              0, 255, 255, 0, 0,     0, 0,
                                              0, 0,     0, 0, 255, 255, 0,
                                              0, 0,     0, 0, 255, 255, 0,

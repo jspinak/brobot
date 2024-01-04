@@ -24,7 +24,7 @@ public class DynamicPixelFinder implements FindDynamicPixels {
     /**
      * From a collection of Mat(s), returns a mask of pixels that change in any of the Mat(s).
      * @param matVector a collection of Mat objects
-     * @return a mask of changing pixels
+     * @return a 1D mask of changing pixels
      */
     public Mat getDynamicPixelMask(MatVector matVector) {
         int size = (int) matVector.size();
@@ -40,6 +40,10 @@ public class DynamicPixelFinder implements FindDynamicPixels {
             combinedMask = matOps3d.bItwise_or(mask, combinedMask);
         }
         return combinedMask;
+    }
+
+    public Mat getFixedPixelMask(MatVector matVector) {
+        return matOps3d.bItwise_not(getDynamicPixelMask(matVector));
     }
 
     /**
