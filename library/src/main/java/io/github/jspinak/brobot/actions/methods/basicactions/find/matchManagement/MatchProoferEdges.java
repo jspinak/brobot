@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.actions.methods.basicactions.find.matchManagement;
 
+import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
+import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
 import io.github.jspinak.brobot.datatypes.primitives.location.Location;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import org.sikuli.script.Match;
@@ -11,6 +13,18 @@ import java.util.List;
 @Primary
 @Component
 public class MatchProoferEdges implements MatchProofer {
+
+    private final SelectRegions selectRegions;
+
+    public MatchProoferEdges(SelectRegions selectRegions) {
+        this.selectRegions = selectRegions;
+    }
+
+    public boolean isInSearchRegions(Match match, ActionOptions actionOptions, Pattern pattern) {
+        // these are unique regions so there won't be any duplicate matches
+        List<Region> regions = selectRegions.getRegions(actionOptions, pattern);
+        return isInSearchRegions(match, regions);
+    }
 
     /**
      * Check if each of the 4 edges are contained within search regions. The downside is that there may be spaces
