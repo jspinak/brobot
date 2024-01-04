@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.actions.methods.basicactions.find.matchManagement;
 
+import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
+import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import org.sikuli.script.Match;
 
@@ -18,4 +20,5 @@ public interface MatchProofer {
      * @return true if in the search regions
      */
     boolean isInSearchRegions(Match match, List<Region> regions);
+    boolean isInSearchRegions(Match match, ActionOptions actionOptions, Pattern pattern);
 }

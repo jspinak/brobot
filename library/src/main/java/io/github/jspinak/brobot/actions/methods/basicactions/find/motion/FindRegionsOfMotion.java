@@ -63,7 +63,7 @@ public class FindRegionsOfMotion {
         });
         matchOps.addMatchListToMatches(dynamicPixelRegions, matches); // this is for the last scene
         matchOps.limitNumberOfMatches(matches, actionOptions);
-        matches.setPixelMatches(sceneAnalysisCollection.getResults()); // pixelMatches = dynamic pixels
+        matches.setMask(sceneAnalysisCollection.getResults()); // pixelMatches = dynamic pixels
     }
 
     /**

@@ -44,11 +44,9 @@ public class FindAll {
     public List<Match> find(StateImage stateImage, Scene scene, ActionOptions actionOptions) {
         List<Match> matchObjects = new ArrayList<>();
         for (Pattern pattern : stateImage.getPatterns()) {
-            // these are unique regions so there won't be any duplicate matches
-            List<Region> regions = selectRegions.getRegions(actionOptions, pattern);
             List<Match> matchList = mockOrLive.findAll(pattern, scene);
             for (Match match : matchList) {
-                if (matchProofer.isInSearchRegions(match, regions)) {
+                if (matchProofer.isInSearchRegions(match, actionOptions, pattern)) {
                     matchObjects.add(
                             new Match.Builder()
                                     .setMatch(match)

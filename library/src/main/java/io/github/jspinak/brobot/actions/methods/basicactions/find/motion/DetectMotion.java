@@ -84,4 +84,8 @@ public class DetectMotion implements FindDynamicPixels {
         return dynamicMask;
     }
 
+    public Mat getFixedPixelMask(MatVector matVector) {
+        return matOps3d.bItwise_not(getDynamicPixelMask(matVector));
+    }
+
 }

@@ -1,12 +1,12 @@
 package io.github.jspinak.brobot.imageUtils;
 
+import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
 import io.github.jspinak.brobot.reports.Report;
 import org.bytedeco.javacpp.DoublePointer;
-import org.bytedeco.opencv.global.opencv_core;
-import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.*;
 import org.springframework.stereotype.Component;
 
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -21,6 +21,12 @@ import static org.bytedeco.opencv.opencv_core.Mat.ones;
  */
 @Component
 public class MatOps3d {
+
+    private final GetBufferedImage getBufferedImage;
+
+    public MatOps3d(GetBufferedImage getBufferedImage) {
+        this.getBufferedImage = getBufferedImage;
+    }
 
     /**
      * Combine a list of 3 channel Mats into a single 3 channel Mat with one column per channel.
@@ -359,20 +365,26 @@ public class MatOps3d {
      * @param values Max of 9 cell values.
      * @return the new Mat
      */
-    public Mat makeTestMat3D(short[] values) {
-        Mat channel1 = MatOps.makeTestMat(values);
-        Mat channel2 = MatOps.makeTestMat(values);
-        Mat channel3 = MatOps.makeTestMat(values);
+    public Mat makeMat3D(short... values) {
+        Mat channel1 = MatOps.makeMat(values);
+        Mat channel2 = MatOps.makeMat(values);
+        Mat channel3 = MatOps.makeMat(values);
         MatVector matVector = new MatVector(channel1, channel2, channel3);
         return mErge(matVector);
     }
 
-    public Mat makeTestMat3D(short[] channel1, short[] channel2, short[] channel3) {
-        Mat ch1 = MatOps.makeTestMat(channel1);
-        Mat ch2 = MatOps.makeTestMat(channel2);
-        Mat ch3 = MatOps.makeTestMat(channel3);
+    public Mat makeMat3D(short[] channel1, short[] channel2, short[] channel3) {
+        Mat ch1 = MatOps.makeMat(channel1);
+        Mat ch2 = MatOps.makeMat(channel2);
+        Mat ch3 = MatOps.makeMat(channel3);
         MatVector matVector = new MatVector(ch1, ch2, ch3);
         return mErge(matVector);
+    }
+
+    public Pattern makeTestPattern(short[] values) {
+        Mat mat = makeMat3D(values);
+        BufferedImage bufferedImage = getBufferedImage.convert(mat);
+        return new Pattern(bufferedImage);
     }
 
 }

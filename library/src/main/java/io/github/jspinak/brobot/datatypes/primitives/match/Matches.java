@@ -13,7 +13,6 @@ import io.github.jspinak.brobot.datatypes.primitives.text.Text;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import lombok.Data;
 import org.bytedeco.opencv.opencv_core.Mat;
-import org.python.antlr.ast.Str;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -57,7 +56,7 @@ public class Matches {
     private int maxMatches = -1; // not used when <= 0
     private DanglingSnapshots danglingSnapshots = new DanglingSnapshots();
     private SceneAnalysisCollection sceneAnalysisCollection = new SceneAnalysisCollection();
-    private Mat pixelMatches; // for motion detection
+    private Mat mask; // for motion detection and other pixel-based analysis
     private String outputText = "";
     private ActionLifecycle actionLifecycle;
 
@@ -96,7 +95,7 @@ public class Matches {
         duration = duration.plus(matches.duration);
         sceneAnalysisCollection.merge(matches.sceneAnalysisCollection);
         danglingSnapshots.addAllSnapshots(matches.getDanglingSnapshots());
-        pixelMatches = matches.pixelMatches;
+        mask = matches.mask;
     }
 
     public void addString(String str) {

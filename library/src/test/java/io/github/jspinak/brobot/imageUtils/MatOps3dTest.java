@@ -22,7 +22,7 @@ class MatOps3dTest {
 
     @Test
     void makeTestMat3D() {
-        Mat mat = matOps3d.makeTestMat3D(new short[]{0, 200, 200, 200});
+        Mat mat = matOps3d.makeMat3D(new short[]{0, 200, 200, 200});
         MatOps.printPartOfMat(mat, 3, 3, "test Mat");
         assertEquals(0, MatOps.getDouble(0,0,0, mat));
         assertEquals(200, MatOps.getDouble(0,1,0, mat));
@@ -32,7 +32,7 @@ class MatOps3dTest {
 
     @Test
     void makeTestMat2() {
-        Mat mat = matOps3d.makeTestMat3D(new short[]{0, 0,   255, 255, 0, 0, 0,   255, 255});
+        Mat mat = matOps3d.makeMat3D(new short[]{0, 0,   255, 255, 0, 0, 0,   255, 255});
         MatOps.printPartOfMat(mat, 3, 3, "test Mat");
         assertEquals(0, MatOps.getDouble(0,0,0, mat));
         assertEquals(0, MatOps.getDouble(0,1,0, mat));
@@ -47,7 +47,7 @@ class MatOps3dTest {
 
     @Test
     void getGrayscale() {
-        Mat mat = matOps3d.makeTestMat3D(new short[]{0, 200, 200, 200}, new short[]{0, 100, 100, 100}, new short[]{0, 100, 100, 200});
+        Mat mat = matOps3d.makeMat3D(new short[]{0, 200, 200, 200}, new short[]{0, 100, 100, 100}, new short[]{0, 100, 100, 200});
         mat = MatOps.getGrayscale(mat);
         MatOps.printPartOfMat(mat, 3, 3, "grayscale Mat");
         assertEquals(0, MatOps.getDouble(0,0,0, mat));
