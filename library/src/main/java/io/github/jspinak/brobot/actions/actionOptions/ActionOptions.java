@@ -78,11 +78,15 @@ public class ActionOptions {
      *   to the images in the 1st ObjectCollection.
      * FIXED_PIXELS: returns a mask of all pixels that are the same and a corresponding Match list from the contours.
      * DYNAMIC_PIXELS: returns a mask of all pixels that are changed and a corresponding Match list from the contours.
+     * STATES: each ObjectCollection contains the images found on a screen and the screenshot (as a scene). All
+     *   ObjectCollection(s) are analyzed to produce states with StateImage objects. The Match objects returned
+     *   hold the state owner's name and a Pattern, and this data is all that's needed to create the state
+     *   structure (without transitions).
      *
      */
     public enum Find {
         FIRST, EACH, ALL, BEST, UNIVERSAL, CUSTOM, HISTOGRAM, COLOR, MOTION, REGIONS_OF_MOTION,
-        ALL_WORDS, SIMILAR_IMAGES, FIXED_PIXELS, DYNAMIC_PIXELS
+        ALL_WORDS, SIMILAR_IMAGES, FIXED_PIXELS, DYNAMIC_PIXELS, STATES
     }
     private Find find = Find.FIRST;
     /**

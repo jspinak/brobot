@@ -64,4 +64,18 @@ public class GetBufferedImage {
         return bi;
     }
 
+    public static BufferedImage fromMat(org.bytedeco.opencv.opencv_core.Mat mat) {
+        Mat cvMat = MatOps.convertToOpenCVmat(mat);
+        MatOfByte mob = new MatOfByte();
+        Imgcodecs.imencode(".jpg", cvMat, mob);
+        byte[] ba = mob.toArray();
+        BufferedImage bi;
+        try {
+            bi = ImageIO.read(new ByteArrayInputStream(ba));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return bi;
+    }
+
 }

@@ -257,12 +257,22 @@ public class ObjectCollection {
             return this;
         }
 
-        public Builder withMatches(Match... matches) {
+        public Builder withMatchObjectsAsRegions(io.github.jspinak.brobot.datatypes.primitives.match.Match... matches) {
             for (Match match : matches) {
                 this.stateRegions.add(new StateRegion.Builder()
                         .withSearchRegion(new Region(match))
                         .inState(NULL.toString())
                         .build());
+            }
+            return this;
+        }
+
+        public Builder withMatchObjectsAsStateImages(io.github.jspinak.brobot.datatypes.primitives.match.Match... matches) {
+            for (io.github.jspinak.brobot.datatypes.primitives.match.Match match : matches) {
+                this.stateImages.add(
+                        new StateImage.Builder()
+                                .addPattern(match.getPattern())
+                                .build());
             }
             return this;
         }

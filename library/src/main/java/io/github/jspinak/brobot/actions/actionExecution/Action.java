@@ -21,8 +21,8 @@ import java.util.Optional;
 @Component
 public class Action {
 
-    private ActionExecution actionExecution;
-    private ActionService actionService;
+    private final ActionExecution actionExecution;
+    private final ActionService actionService;
 
     public Action(ActionExecution actionExecution, ActionService actionService) {
         this.actionExecution = actionExecution;

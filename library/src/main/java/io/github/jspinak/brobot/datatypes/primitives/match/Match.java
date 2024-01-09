@@ -7,6 +7,7 @@ import io.github.jspinak.brobot.datatypes.primitives.location.Location;
 import io.github.jspinak.brobot.datatypes.primitives.location.Position;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.stateObject.StateObject;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.imageUtils.MatOps;
 import lombok.Getter;
 import lombok.Setter;
@@ -107,6 +108,37 @@ public class Match extends org.sikuli.script.Match {
         mat.ifPresent(this::setMat);
     }
 
+    public String getOwnerStateName() {
+        return stateObject.getOwnerStateName();
+    }
+
+    /**
+     * If there is a StateObject, we try to recreate it as a StateImage. The StateObject was likely a StateImage itself.
+     * If there is no Pattern, there are no SearchRegions. Since the Match region needs to be saved, a new Pattern
+     * is created and the Match region is saved to the fixed region of the Pattern's SearchRegions.
+     * In an operation like Find.ALL_WORDS, there may not be a StateObject, although Pattern objects should be
+     * created.
+     * @return the StateImage created from the Match
+     */
+    public StateImage toStateImage() {
+        StateImage stateImage = new StateImage();
+        stateImage.setName(name);
+        if (stateObject != null) {
+            stateImage.setOwnerStateName(stateObject.getOwnerStateName());
+            stateImage.setName(stateObject.getName()); // the StateObject name should take priority since it was the original StateImage
+        }
+        if (pattern != null) stateImage.addPatterns(pattern);
+        else {
+            Pattern newPattern = new Pattern.Builder()
+                    .setFixed(true)
+                    .setFixedRegion(new Region(this))
+                    .setName(name)
+                    .build();
+            stateImage.addPatterns(newPattern);
+        }
+        return stateImage;
+    }
+
     @Override
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder();
@@ -120,7 +152,6 @@ public class Match extends org.sikuli.script.Match {
         stringBuilder.append("]");
         return stringBuilder.toString();
     }
-
 
     /*
     This is a workaround. It is generally a bad idea to set variables like this.
