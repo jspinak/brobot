@@ -10,6 +10,7 @@ import io.github.jspinak.brobot.datatypes.primitives.match.MatchSnapshot;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.SearchRegions;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
+import io.github.jspinak.brobot.imageUtils.GetBufferedImage;
 import io.github.jspinak.brobot.imageUtils.MatOps;
 import io.github.jspinak.brobot.reports.Report;
 import lombok.Getter;
@@ -80,6 +81,11 @@ public class Pattern extends org.sikuli.script.Pattern {
         setMatWithBufferedImage();
     }
 
+    public Pattern(Mat mat) {
+        super(GetBufferedImage.fromMat(mat));
+        this.mat = mat;
+    }
+
     /**
      * Creates a generic Pattern without an associated image. Useful for creating Match objects
      * for operations not requiring a Pattern.
@@ -87,6 +93,7 @@ public class Pattern extends org.sikuli.script.Pattern {
     public Pattern() {}
 
     private void setNameFromFilenameIfEmpty(String filename) {
+        if (filename == null) return;
         if (name == null || name.isEmpty()) {
             File file = new File(filename); // Create a File object from the image path
             name = file.getName().replaceFirst("[.][^.]+$", ""); // the file name without extension
@@ -145,8 +152,8 @@ public class Pattern extends org.sikuli.script.Pattern {
         searchRegions.resetFixedRegion();
     }
 
-    public void setSearchRegions(Region... regions) {
-        searchRegions.setSearchRegions(List.of(regions));
+    public void setSearchRegionsTo(Region... regions) {
+        searchRegions.setRegions(List.of(regions));
     }
 
     public void addMatchSnapshot(MatchSnapshot matchSnapshot) {
@@ -223,6 +230,11 @@ public class Pattern extends org.sikuli.script.Pattern {
 
         public Builder setFixed(boolean isFixed) {
             this.fixed = isFixed;
+            return this;
+        }
+
+        public Builder setFixedRegion(Region fixedRegion) {
+            this.searchRegions.setFixedRegion(fixedRegion);
             return this;
         }
 

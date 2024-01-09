@@ -43,14 +43,21 @@ public class StateImage implements StateObject {
     // for color analysis and illustration
     private KmeansProfilesAllSchemas kmeansProfilesAllSchemas = new KmeansProfilesAllSchemas();
     private ColorCluster colorCluster = new ColorCluster();
-    private int index; // a unique identifier used for classification matrices
+    private int index; // a unique identifier. used for classification matrices.
     private boolean dynamic = false; // dynamic images cannot be found using pattern matching
     private Mat oneColumnBGRMat; // initialized when program is run
     private Mat oneColumnHSVMat; // initialized when program is run
     private Mat imagesMat; // initialized when program is run, shows the images in the StateImage
     private Mat profilesMat; // initialized when program is run, shows the color profiles in the StateImage
 
-    // primarily used when creating state structures without names
+    // the following variables are primarily used when creating state structures without names
+    /*
+    Captures the screen to which the image transitions with a click. Used when building the state structure live.
+    When the state structure is built with screenshots, there are no transitions, and transitions need to be determined
+    after the basic state structure is in place. Once there is a basic state structure, observations after clicking
+    new StateImage objects can identify current states (or no states) and do not rely on screens anymore.
+     */
+    private Integer transitionsToScreen;
     private TransitionImage transitionImage;
     private Set<String> statesToEnter = new HashSet<>();
     private Set<String> statesToExit = new HashSet<>();
@@ -86,7 +93,7 @@ public class StateImage implements StateObject {
      * @param regions the regions to set for each Pattern.
      */
     public void setSearchRegions(Region... regions) {
-        patterns.forEach(pattern -> pattern.setSearchRegions(regions));
+        patterns.forEach(pattern -> pattern.setSearchRegionsTo(regions));
     }
 
     /**
@@ -192,6 +199,7 @@ public class StateImage implements StateObject {
         stringBuilder.append(" ownerState=").append(ownerStateName);
         stringBuilder.append(" searchRegions=");
         getAllSearchRegions().forEach(stringBuilder::append);
+        stringBuilder.append(" fixedSearchRegion=").append(getLargestDefinedFixedRegionOrNewRegion());
         stringBuilder.append(" snapshotRegions=");
         getAllMatchSnapshots().forEach(snapshot ->
                 snapshot.getMatchList().forEach(stringBuilder::append));
@@ -200,6 +208,10 @@ public class StateImage implements StateObject {
 
     public void addPatterns(String... filenames) {
         for (String name : filenames) patterns.add(new Pattern(name));
+    }
+
+    public void addPatterns(Pattern... patterns) {
+        Collections.addAll(this.patterns, patterns);
     }
 
     public static class Builder {

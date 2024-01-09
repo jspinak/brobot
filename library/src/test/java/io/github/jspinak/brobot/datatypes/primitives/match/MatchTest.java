@@ -4,6 +4,7 @@ import io.github.jspinak.brobot.datatypes.primitives.location.Location;
 import io.github.jspinak.brobot.datatypes.primitives.location.Position;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.StateRegion;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -30,4 +31,11 @@ class MatchTest {
         assertEquals(match.x + match.w / 2, location.getX());
         assertEquals(match.y + match.h / 2, location.getY());
     }
+
+    @Test
+    void toStateImage() {
+        StateImage stateImage = match.toStateImage();
+        assertEquals(50, stateImage.getLargestDefinedFixedRegionOrNewRegion().y);
+    }
+
 }

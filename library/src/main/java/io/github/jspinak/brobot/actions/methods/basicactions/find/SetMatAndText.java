@@ -32,7 +32,7 @@ public class SetMatAndText {
     }
 
     public void setMat(Matches matches) {
-        if (matches.getActionOptions().getFusionMethod() == NONE) return;
+        //if (matches.getActionOptions().getFusionMethod() == NONE) return; // should always run as match region may have been adjusted; also, we may want to use a different scene
         int sceneIndex = matches.getActionOptions().getSceneToUseForCaptureAfterFusingMatches();
         List<Scene> scenes = matches.getSceneAnalysisCollection().getScenes();
         if (sceneIndex < 0 || sceneIndex >= scenes.size()) return;
