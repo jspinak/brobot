@@ -3,12 +3,13 @@ package io.github.jspinak.brobot.actions.methods.sikuliWrappers.find;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.Scene;
 import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
 import io.github.jspinak.brobot.datatypes.primitives.match.Match;
+import io.github.jspinak.brobot.datatypes.primitives.region.Region;
+import org.sikuli.script.Element;
 import org.sikuli.script.Finder;
 import org.sikuli.script.OCR;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * Searches a scene for pattern and word matches. Scene objects are created at the beginning of an action and
@@ -40,6 +41,8 @@ public class FindInScene {
             matchList.add(nextMatch);
         }
         f.destroy();
+        Match bestMatch = Collections.max(matchList, Comparator.comparingDouble(org.sikuli.script.Match::getScore));
+        if (bestMatch != null && pattern.isFixed()) pattern.getSearchRegions().setFixedRegion(new Region(bestMatch));
         return matchList;
     }
 
@@ -54,11 +57,19 @@ public class FindInScene {
     public List<Match> getWordMatches(Scene scene) {
         List<Match> wordMatches = new ArrayList<>();
         OCR.readWords(scene.getBufferedImageBGR()).forEach(match -> {
+            Pattern p = new Pattern.Builder()
+                    .setName("word")
+                    .setFixed(true)
+                    .setFixedRegion(new Region(match))
+                    .build();
             Match m = new Match.Builder()
+                    .setName("word")
                     .setMatch(match)
                     .setScene(scene)
+                    .setPattern(p)
                     .build();
-            m.setMatWithScene();
+            m.setMatWithScene(); // is set again at the end of Find, as the final match region may have shifted or fused
+            p.setMat(m.getMat());
             wordMatches.add(m);
         });
         return wordMatches;

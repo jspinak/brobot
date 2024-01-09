@@ -2,6 +2,7 @@ package io.github.jspinak.brobot.datatypes.state.stateObject.stateImage;
 
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.*;
 
@@ -11,6 +12,7 @@ import java.util.*;
  * an area, or when the desired search area cannot be described by one rectangle.
  */
 @Getter
+@Setter
 public class SearchRegions {
 
     private List<Region> regions = new ArrayList<>();
@@ -71,11 +73,6 @@ public class SearchRegions {
         if (!fixed) return regions;
         if (fixedRegion.isDefined()) return List.of(fixedRegion);
         return regions;
-    }
-
-    public void setSearchRegions(List<Region> searchRegions) {
-        regions = new ArrayList<>();
-        addSearchRegions(searchRegions);
     }
 
     public void setSearchRegion(Region searchRegion) {

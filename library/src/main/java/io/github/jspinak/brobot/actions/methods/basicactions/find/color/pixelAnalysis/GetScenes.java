@@ -53,8 +53,8 @@ public class GetScenes {
     public List<Scene> getScenes(ActionOptions actionOptions, List<ObjectCollection> objectCollections,
                                  int scenesToCapture, double secondsBetweenCaptures) {
         List<Scene> scenes = new ArrayList<>();
-        if (isOkToTakeScreenshot(actionOptions, objectCollections.toArray(new ObjectCollection[0]))) {
-            // take a screenshot
+        boolean takeScreenshot = isOkToTakeScreenshot(actionOptions, objectCollections.toArray(new ObjectCollection[0]));
+        if (takeScreenshot) {
             Report.println("Taking screenshot");
             for (int i=0; i<scenesToCapture; i++) {
                 Mat bgr = getImageJavaCV.getMatFromScreen();
@@ -85,7 +85,12 @@ public class GetScenes {
             String absolutePath = new File(filename).getAbsolutePath();
             Mat bgr = getImageJavaCV.getMatFromFilename(absolutePath, BGR);
             BufferedImage bi = getBufferedImage.convert(bgr);
-            scenes.add(new Scene(filename, absolutePath, bgr, bi));
+            scenes.add(new Scene.Builder()
+                    .setName(filename)
+                    .setAbsolutePath(absolutePath)
+                    .setBGR(bgr)
+                    .setBufferedImageBGR(bi)
+                    .build());
             return scenes;
         }
         scenes.add(Scene.getEmptyScene());

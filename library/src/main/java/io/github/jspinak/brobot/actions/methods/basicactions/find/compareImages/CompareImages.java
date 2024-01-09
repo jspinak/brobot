@@ -65,19 +65,19 @@ public class CompareImages {
                 .setPattern(p2)
                 .build();
         Pattern biggestPattern = p1;
-        Pattern smallesPattern = p2;
+        Pattern smallestPattern = p2;
         BufferedImage bi1 = p1.getBImage();
         BufferedImage bi2 = p2.getBImage();
         if (bi1 == null || bi2 == null) return match;
         if ((bi1.getHeight()*bi1.getWidth()) < (bi2.getHeight()*bi2.getWidth())) {
             biggestPattern = p2;
-            smallesPattern = p1;
+            smallestPattern = p1;
         }
         Scene scene = new Scene.Builder()
                     .setBufferedImageBGR(biggestPattern.getBImage())
                     .build();
 
-        List<Match> matchList = mockOrLive.findAll(smallesPattern, scene);
+        List<Match> matchList = mockOrLive.findAll(smallestPattern, scene);
         Match bestMatch = Collections.max(matchList, Comparator.comparingDouble(org.sikuli.script.Match::getScore));
         if (bestMatch == null) return match;
         bestMatch.setPattern(p2);
