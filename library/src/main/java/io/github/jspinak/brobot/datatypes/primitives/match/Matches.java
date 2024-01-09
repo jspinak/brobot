@@ -11,8 +11,10 @@ import io.github.jspinak.brobot.datatypes.primitives.location.Position;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.primitives.text.Text;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import lombok.Data;
 import org.bytedeco.opencv.opencv_core.Mat;
+import org.python.antlr.ast.Str;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -312,12 +314,56 @@ public class Matches {
                 .collect(Collectors.toList());
     }
 
+    public List<Pattern> getMatchListAsPatterns() {
+        List<Pattern> patterns = new ArrayList<>();
+        matchList.forEach(match -> patterns.add(match.getPattern()));
+        return patterns;
+    }
+
+    public List<StateImage> getMatchListAsStateImages() {
+        List<StateImage> stateImages = new ArrayList<>();
+        matchList.forEach(match -> stateImages.add(match.toStateImage()));
+        return stateImages;
+    }
+
     @Override
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("Matches: ").append("size=").append(size()).append(" ");
         for (Match match : matchList) {
             stringBuilder.append(match).append(" ");
         }
         return stringBuilder.toString();
     }
+
+    public Set<String> getOwnerStateNames() {
+        Set<String> uniqueOwnerStateNames = new HashSet<>();
+        matchList.forEach(match -> uniqueOwnerStateNames.add(match.getOwnerStateName()));
+        return uniqueOwnerStateNames;
+    }
+
+    public List<Match> getMatchObjectsWithOwnerState(String ownerStateName) {
+        return matchList.stream()
+                .filter(match -> ownerStateName.equals(match.getOwnerStateName()))
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * When building the state structure with automation, the match objects represent state images.
+     * This prints out the match objects in a format that helps visualize the state structure.
+     * @return a string representing a state structure built from match objects
+     */
+    public String toStringAsTempStates() {
+        StringBuilder stringBuilder = new StringBuilder();
+        Set<String> uniqueStates = getOwnerStateNames();
+        stringBuilder.append("State Structure: #states=").append(uniqueStates.size()).append("\n");
+        uniqueStates.forEach(ownerStateName -> {
+            List<Match> stateMatchList = getMatchObjectsWithOwnerState(ownerStateName);
+            stringBuilder.append(ownerStateName).append(": size=").append(stateMatchList.size()).append(" ");
+            stateMatchList.forEach(stringBuilder::append);
+            stringBuilder.append("\n");
+        });
+        return stringBuilder.toString();
+    }
+
 }
