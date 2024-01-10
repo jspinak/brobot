@@ -52,13 +52,8 @@ public class Match extends org.sikuli.script.Match {
      */
     private Mat mat;
     /*
-    For simplicity, one String is used to represent text here. While it may be a stochastic variable (text read from
-    the screen may differ at different readings), the processing of the text read can be performed before creating
-    a MatchObject. If an action has multiple iterations, each can be saved as a Match with a single String for text.
-     */
-    private String text;
-    /*
-    This is the pattern used to find the match. It may be different from the mat.
+    This is the pattern used to find the match. It may be different from the match's mat as the ActionOptions may
+    require shifting or moving the match region.
      */
     private Pattern pattern;
     /*
@@ -75,6 +70,10 @@ public class Match extends org.sikuli.script.Match {
     public Match(org.sikuli.script.Match match) {
         super(match);
         this.setName(match.getName());
+    }
+
+    public void setText(String text) {
+        super.setText(text);
     }
 
     public Match(Region region) {
@@ -106,6 +105,11 @@ public class Match extends org.sikuli.script.Match {
         if (scene == null) return;
         Optional<Mat> mat = MatOps.applyIfOk(scene.getBgr(), new Region(this).getJavaCVRect());
         mat.ifPresent(this::setMat);
+    }
+
+    public void setPatternWithScene() {
+        if (mat == null || mat.empty()) return;
+        this.pattern = new Pattern(mat);
     }
 
     public String getOwnerStateName() {
@@ -148,7 +152,7 @@ public class Match extends org.sikuli.script.Match {
             nameText = "#" + name + "# ";
         }
         stringBuilder.append(String.format("%sR[%d,%d %dx%d] simScore:%.1f", nameText, this.x, this.y, this.w, this.h, super.getScore()));
-        if (text != null && !text.isEmpty()) stringBuilder.append(" text:").append(text);
+        if (getText() != null && !getText().isEmpty()) stringBuilder.append(" text:").append(getText());
         stringBuilder.append("]");
         return stringBuilder.toString();
     }
@@ -183,7 +187,7 @@ public class Match extends org.sikuli.script.Match {
         private Mat histogram;
         private Scene scene;
         private LocalDateTime timeStamp;
-        private double simScore;
+        private double simScore = -1;
 
         public Builder setMatch(org.sikuli.script.Match match) {
             this.match = match;
@@ -249,7 +253,7 @@ public class Match extends org.sikuli.script.Match {
         public Match build() {
             Match matchObject = new Match(match);
             matchObject.name = name;
-            matchObject.text = text;
+            if (text != null) matchObject.setText(text); // otherwise, this erases the SikuliX match text
             matchObject.pattern = pattern;
             matchObject.anchors = anchors;
             matchObject.stateObject = stateObject;
@@ -257,7 +261,7 @@ public class Match extends org.sikuli.script.Match {
             matchObject.scene = scene;
             matchObject.timeStamp = LocalDateTime.now();
             matchObject.setMatWithScene();
-            matchObject.setSimScore(simScore);
+            if (simScore >= 0) matchObject.setSimScore(simScore); // otherwise, this erases the SikuliX match simScore
             return matchObject;
         }
 

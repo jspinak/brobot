@@ -24,7 +24,7 @@ public class SelectRegions {
      * @return a list of regions to use in an Action.
      */
     public List<Region> getRegions(ActionOptions actionOptions, StateImage stateImage) {
-        if (actionOptions.getSearchRegions().isDefined())
+        if (actionOptions.getSearchRegions().isAnyRegionDefined())
             return actionOptions.getSearchRegions().getAllRegions();
         return stateImage.getAllSearchRegions();
     }
@@ -59,7 +59,7 @@ public class SelectRegions {
 
     public List<Region> getRegionsForAllImages(ActionOptions actionOptions, ObjectCollection... objectCollections) {
         List<Region> regions = new ArrayList<>();
-        if (actionOptions.getSearchRegions().isDefined())
+        if (actionOptions.getSearchRegions().isAnyRegionDefined())
             return actionOptions.getSearchRegions().getAllRegions();
         for (ObjectCollection objColl : objectCollections) {
             for (StateImage stateImage : objColl.getStateImages()) {

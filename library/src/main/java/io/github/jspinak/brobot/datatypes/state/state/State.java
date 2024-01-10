@@ -175,16 +175,19 @@ public class State {
     @Override
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("State:");
-        stringBuilder.append(" name=").append(name);
-        stringBuilder.append(" stateImages=");
+        stringBuilder.append("State: ").append(name).append("\n");
+        stringBuilder.append("Images=").append(stateImages.size()).append("\t");
         stateImages.forEach(stringBuilder::append);
-        stringBuilder.append(" stateRegions=");
+        stringBuilder.append("\n");
+        stringBuilder.append("Regions=").append(stateRegions.size()).append("\t");
         stateRegions.forEach(stringBuilder::append);
-        stringBuilder.append(" stateLocations=");
+        stringBuilder.append("\n");
+        stringBuilder.append("Locations=").append(stateLocations.size()).append("\t");
         stateLocations.forEach(stringBuilder::append);
-        stringBuilder.append(" stateStrings=");
+        stringBuilder.append("\n");
+        stringBuilder.append("Strings=").append(stateStrings.size()).append("\t");
         stateStrings.forEach(stringBuilder::append);
+        stringBuilder.append("\n");
         return stringBuilder.toString();
     }
 
