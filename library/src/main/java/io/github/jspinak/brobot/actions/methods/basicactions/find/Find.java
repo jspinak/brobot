@@ -50,12 +50,12 @@ public class Find implements ActionInterface {
     private final SetAllProfiles setAllProfiles;
     private final OffsetOps offsetOps;
     private final MatchFusion matchFusion;
-    private final SetMatAndText setMatAndText;
+    private final SetMatTextPattern setMatTextPattern;
 
     public Find(FindFunctions findFunctions, StateMemory stateMemory,
                 AddNonImageObjects addNonImageObjects, AdjustMatches adjustMatches,
                 SetAllProfiles setAllProfiles, OffsetOps offsetOps, MatchFusion matchFusion,
-                SetMatAndText setMatAndText) {
+                SetMatTextPattern setMatTextPattern) {
         this.findFunctions = findFunctions;
         this.stateMemory = stateMemory;
         this.addNonImageObjects = addNonImageObjects;
@@ -63,7 +63,7 @@ public class Find implements ActionInterface {
         this.setAllProfiles = setAllProfiles;
         this.offsetOps = offsetOps;
         this.matchFusion = matchFusion;
-        this.setMatAndText = setMatAndText;
+        this.setMatTextPattern = setMatTextPattern;
     }
 
     /**
@@ -89,7 +89,7 @@ public class Find implements ActionInterface {
         matchFusion.setFusedMatches(matches);
         matches.getMatchList().forEach(m -> adjustMatches.adjust(m, actionOptions));
         offsetOps.addOffsetAsLastMatch(matches, actionOptions);
-        setMatAndText.set(matches);
+        setMatTextPattern.set(matches);
     }
 
     private void createColorProfilesWhenNecessary(ActionOptions actionOptions, ObjectCollection... objectCollections) {
