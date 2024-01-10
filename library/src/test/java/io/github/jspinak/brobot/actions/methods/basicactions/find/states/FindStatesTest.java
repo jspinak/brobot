@@ -67,11 +67,16 @@ class FindStatesTest {
         return matchesInitializer.init(findStatesOptions, objectCollections);
     }
 
-    @Test
-    void returnsSomething() {
+    public Matches getMatches() {
         List<ObjectCollection> objectCollections = getStateObjectCollections();
         Matches matches = getStatesFromFiveScreens(objectCollections);
         findStates.find(matches, objectCollections);
+        return matches;
+    }
+
+    @Test
+    void returnsSomething() {
+        Matches matches = getMatches();
         System.out.println(matches.toStringAsTempStates());
         assertFalse(matches.isEmpty());
     }
