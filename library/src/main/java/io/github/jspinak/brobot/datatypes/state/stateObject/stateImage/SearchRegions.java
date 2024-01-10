@@ -58,8 +58,8 @@ public class SearchRegions {
      */
     public Region getFixedIfDefinedOrRandomRegion(boolean fixed) {
         List<Region> regions = getRegions(fixed);
-        Random rand = new Random(regions.size());
-        return regions.get(rand.nextInt());
+        Random rand = new Random();
+        return regions.get(rand.nextInt(regions.size()));
     }
 
     /**
@@ -99,7 +99,7 @@ public class SearchRegions {
     /**
      * @return true if fixed region or any search region is defined.
      */
-    public boolean isDefined() {
+    public boolean isAnyRegionDefined() {
         if (fixedRegion.isDefined()) return true;
         for (Region region : regions) {
             if (region.isDefined()) return true;
@@ -112,8 +112,9 @@ public class SearchRegions {
      * @return true if fixed and has been found, or if not fixed and one of the search regions is defined
      */
     public boolean isDefined(boolean fixed) {
-        if (fixed) return fixedRegion.isDefined();
-        return isDefined();
+        if (fixedRegion.isDefined()) return true;
+        if (fixed) return false; // should be fixed but the region is not defined
+        return isAnyRegionDefined();
     }
 
     public boolean isEmpty() {
