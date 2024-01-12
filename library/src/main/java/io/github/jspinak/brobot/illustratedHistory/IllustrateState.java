@@ -28,16 +28,15 @@ public class IllustrateState {
      * @return the illustrated state as a Mat
      */
     public Mat illustrateWithFixedSearchRegions(State state) {
-        Region r = new Region();
-        Mat background = new Mat(r.h, r.w, CV_8UC4); // set the background to the screen size, fill with black
-        MatBuilder matBuilder = new MatBuilder();
-        matBuilder.setMat(background);
+        MatBuilder matBuilder = new MatBuilder().init();
         for (StateImage image : state.getStateImages()) {
             if (!image.isEmpty()) {
                 Pattern p = image.getPatterns().get(0);
                 if (p.isDefined()) {
-                    Location xy = new Location(p.getRegion().x, p.getRegion().y);
-                    matBuilder.addSubMat(xy, p.getMat());
+                    Region r = p.getRegion();
+                    Location xy = new Location(r.x, r.y);
+                    Mat mat = p.getMat();
+                    matBuilder.addSubMat(xy, mat);
                 }
             }
         }

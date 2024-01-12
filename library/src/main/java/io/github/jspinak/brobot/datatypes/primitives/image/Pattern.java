@@ -156,6 +156,10 @@ public class Pattern extends org.sikuli.script.Pattern {
         searchRegions.setRegions(List.of(regions));
     }
 
+    public int size() {
+        return w() * h();
+    }
+
     public void addMatchSnapshot(MatchSnapshot matchSnapshot) {
         matchHistory.addSnapshot(matchSnapshot);
     }
@@ -301,7 +305,11 @@ public class Pattern extends org.sikuli.script.Pattern {
         public Pattern build() {
             Pattern pattern = new Pattern(filename);
             // new Pattern(filename) should set the mat and name, only overwrite if explicitly set
-            if (mat != null) pattern.mat = mat;
+            if (mat != null) {
+                pattern.mat = mat;
+                BufferedImage bufferedImage = GetBufferedImage.fromMat(mat);
+                pattern.setBImage(bufferedImage); // this also sets SikuliX.Image
+            }
             if (name != null) pattern.name = name;
             pattern.fixed = fixed;
             pattern.searchRegions = searchRegions;

@@ -33,14 +33,11 @@ public class GetScenes {
     private final GetImageJavaCV getImageJavaCV;
     private final Time time;
     private final IllustrateScreenshot illustrateScreenshot;
-    private final GetBufferedImage getBufferedImage;
 
-    public GetScenes(GetImageJavaCV getImageJavaCV, Time time, IllustrateScreenshot illustrateScreenshot,
-                     GetBufferedImage getBufferedImage) {
+    public GetScenes(GetImageJavaCV getImageJavaCV, Time time, IllustrateScreenshot illustrateScreenshot) {
         this.getImageJavaCV = getImageJavaCV;
         this.time = time;
         this.illustrateScreenshot = illustrateScreenshot;
-        this.getBufferedImage = getBufferedImage;
     }
 
     /**
@@ -58,7 +55,7 @@ public class GetScenes {
             Report.println("Taking screenshot");
             for (int i=0; i<scenesToCapture; i++) {
                 Mat bgr = getImageJavaCV.getMatFromScreen();
-                BufferedImage bi = getBufferedImage.convert(bgr);
+                BufferedImage bi = GetBufferedImage.fromMat(bgr);
                 scenes.add(new Scene("screenshot" + i + ".png", bgr, bi));
                 if (i<scenesToCapture-1) time.wait(secondsBetweenCaptures);
             }
@@ -71,7 +68,7 @@ public class GetScenes {
                         filename -> {
                             String absolutePath = new File(BrobotSettings.screenshotPath+filename).getAbsolutePath();
                             Mat bgr = getImageJavaCV.getMatFromBundlePath(filename, BGR);
-                            BufferedImage bi = getBufferedImage.convert(bgr);
+                            BufferedImage bi = GetBufferedImage.fromMat(bgr);
                             scenes.add(new Scene(filename, absolutePath, bgr, bi));
                         });
             }
@@ -83,12 +80,11 @@ public class GetScenes {
         else for (Pattern pattern : objectCollections.get(0).getScenes()) {
             String filename = pattern.getFilename();
             String absolutePath = new File(filename).getAbsolutePath();
-            Mat bgr = getImageJavaCV.getMatFromFilename(absolutePath, BGR);
-            BufferedImage bi = getBufferedImage.convert(bgr);
+            BufferedImage bi = GetBufferedImage.fromMat(pattern.getMat());
             scenes.add(new Scene.Builder()
                     .setName(filename)
                     .setAbsolutePath(absolutePath)
-                    .setBGR(bgr)
+                    .setBGR(pattern.getMat())
                     .setBufferedImageBGR(bi)
                     .build());
             return scenes;

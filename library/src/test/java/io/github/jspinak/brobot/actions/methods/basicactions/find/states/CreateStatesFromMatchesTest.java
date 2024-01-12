@@ -5,6 +5,8 @@ import io.github.jspinak.brobot.actions.actionExecution.Action;
 import io.github.jspinak.brobot.actions.actionExecution.MatchesInitializer;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.state.state.State;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
+import io.github.jspinak.brobot.imageUtils.MatOps;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +14,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.List;
 
+import static org.bytedeco.opencv.global.opencv_core.countNonZero;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(classes = BrobotTestApplication.class)
@@ -53,4 +56,20 @@ class CreateStatesFromMatchesTest {
         assertNotEquals("null", states.get(0).getName());
         System.out.println(states.get(0).getName());
     }
+
+    @Test
+    void statesHaveImages() {
+        List<State> states = createStates();
+        assertFalse(states.get(0).getStateImages().isEmpty());
+    }
+
+    @Test
+    void stateImageHasColoredPixels() {
+        List<State> states = createStates();
+        states.get(0).getStateImages().forEach(img -> {
+            img.getPatterns().forEach(pattern ->
+                    assertNotEquals(0, countNonZero(MatOps.toGrayscale(pattern.getMat()))));
+        });
+    }
+
 }

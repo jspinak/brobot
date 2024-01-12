@@ -7,7 +7,7 @@ import io.github.jspinak.brobot.actions.methods.basicactions.TestData;
 import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
-import io.github.jspinak.brobot.imageUtils.MatOps;
+import io.github.jspinak.brobot.imageUtils.ImageUtils;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -33,6 +33,9 @@ class GetSceneCombinationsTest {
     @Autowired
     Action action;
 
+    @Autowired
+    ImageUtils imageUtils;
+
     private ObjectCollection getStateObjectCollection(Pattern scene) {
         ObjectCollection objColl = new ObjectCollection.Builder()
                 .withScenes(scene)
@@ -50,11 +53,11 @@ class GetSceneCombinationsTest {
 
     private List<ObjectCollection> getStateObjectCollections() {
         TestData testData = new TestData();
-        ObjectCollection stateColl1 = getStateObjectCollection(testData.getFloranext1());
-        ObjectCollection stateColl2 = getStateObjectCollection(testData.getFloranext2());
-        ObjectCollection stateColl3 = getStateObjectCollection(testData.getFloranext3());
-        ObjectCollection stateColl4 = getStateObjectCollection(testData.getFloranext4());
-        ObjectCollection stateColl5 = getStateObjectCollection(testData.getFloranext5());
+        ObjectCollection stateColl1 = getStateObjectCollection(testData.getFloranext0());
+        ObjectCollection stateColl2 = getStateObjectCollection(testData.getFloranext1());
+        ObjectCollection stateColl3 = getStateObjectCollection(testData.getFloranext2());
+        ObjectCollection stateColl4 = getStateObjectCollection(testData.getFloranext3());
+        ObjectCollection stateColl5 = getStateObjectCollection(testData.getFloranext4());
         return List.of(stateColl1, stateColl2, stateColl3, stateColl4, stateColl5);
     }
 
@@ -63,10 +66,11 @@ class GetSceneCombinationsTest {
         List<SceneCombination> sceneCombinations = getSceneCombinations.getAllSceneCombinations(getStateObjectCollections());
         sceneCombinations.forEach(System.out::println);
         assertFalse(sceneCombinations.isEmpty());
+        //sceneCombinations.forEach(sc -> imageUtils.writeWithUniqueFilename(sc.getDynamicPixels(), "history/"+sc.getScene1()+"-"+sc.getScene2()));
     }
 
     /**
-     * This tests the difference between the scenes FloraNext1 and FloraNext2. Since these scenes are not the same,
+     * This tests the difference between the scenes FloraNext0 and FloraNext1. Since these scenes are not the same,
      * there should be non-zero cells in the dynamic pixel mask.
      */
     @Test
@@ -77,4 +81,5 @@ class GetSceneCombinationsTest {
         System.out.println("nonzero cells: "+nonzero);
         assertNotEquals(0, nonzero);
     }
+
 }

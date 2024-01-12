@@ -3,10 +3,8 @@ package io.github.jspinak.brobot.actions.actionExecution;
 import io.github.jspinak.brobot.BrobotTestApplication;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.actions.methods.basicactions.TestData;
-import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
-import org.bytedeco.opencv.opencv_core.Mat;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +26,7 @@ class ActionTest {
     Matches getWordMatches() {
         TestData testData = new TestData();
         ObjectCollection objColl = new ObjectCollection.Builder()
-                .withScenes(testData.getFloranext1())
+                .withScenes(testData.getFloranext0())
                 .build();
         ActionOptions findWordsOptions = new ActionOptions.Builder()
                 .setAction(ActionOptions.Action.FIND)
