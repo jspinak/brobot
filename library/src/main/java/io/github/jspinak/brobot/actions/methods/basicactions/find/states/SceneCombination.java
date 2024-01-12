@@ -31,6 +31,10 @@ public class SceneCombination {
         return images.contains(stateImage);
     }
 
+    public boolean contains(int scene) {
+        return scene1 == scene || scene2 == scene;
+    }
+
     @Override
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder();

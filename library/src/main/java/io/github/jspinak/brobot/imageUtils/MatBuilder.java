@@ -1,6 +1,7 @@
 package io.github.jspinak.brobot.imageUtils;
 
 import io.github.jspinak.brobot.datatypes.primitives.location.Location;
+import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.reports.Report;
 import org.bytedeco.javacpp.indexer.IntRawIndexer;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -41,6 +42,16 @@ public class MatBuilder {
         x2 = w;
         y2 = h;
         return this;
+    }
+
+    public MatBuilder init(Region region) {
+        int w = region.w;
+        int h = region.h;
+        return setWH(w,h);
+    }
+
+    public MatBuilder init() {
+        return init(new Region());
     }
 
     public MatBuilder setMat(Mat mat) {

@@ -26,7 +26,7 @@ class CompareImagesTest {
     @Test
     void comparePatterns1() {
         TestData testData = new TestData();
-        Match match = compareImages.compare(testData.getFloranext1(), testData.getFloranext2());
+        Match match = compareImages.compare(testData.getFloranext0(), testData.getFloranext1());
         System.out.println(match.getScore());
         assertTrue(match.getScore() > .996);
     }
@@ -34,7 +34,7 @@ class CompareImagesTest {
     @Test
     void comparePatterns2() {
         TestData testData = new TestData();
-        Match match = compareImages.compare(testData.getFloranext1(), testData.getFloranext3());
+        Match match = compareImages.compare(testData.getFloranext0(), testData.getFloranext2());
         System.out.println(match.getScore());
         assertEquals(0.809767484664917, match.getScore());
     }
@@ -43,10 +43,10 @@ class CompareImagesTest {
     void compareImages1() {
         TestData testData = new TestData();
         StateImage flora1 = new StateImage.Builder()
-                .addPattern(testData.getFloranext1())
+                .addPattern(testData.getFloranext0())
                 .build();
         StateImage flora2 = new StateImage.Builder()
-                .addPattern(testData.getFloranext2())
+                .addPattern(testData.getFloranext1())
                 .build();
         Match match = compareImages.compare(flora1, flora2);
         assertEquals(0.9962218999862671, match.getScore());
@@ -56,11 +56,11 @@ class CompareImagesTest {
     void compareImages2() {
         TestData testData = new TestData();
         StateImage flora1 = new StateImage.Builder()
+                .addPattern(testData.getFloranext0())
                 .addPattern(testData.getFloranext1())
-                .addPattern(testData.getFloranext2())
                 .build();
         StateImage flora2 = new StateImage.Builder()
-                .addPattern(testData.getFloranext2())
+                .addPattern(testData.getFloranext1())
                 .build();
         Match match = compareImages.compare(flora1, flora2);
         System.out.println(match.getScore());

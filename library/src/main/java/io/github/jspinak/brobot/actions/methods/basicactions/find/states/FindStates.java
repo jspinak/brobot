@@ -10,7 +10,8 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Rect;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
 
 import static org.bytedeco.opencv.global.opencv_core.countNonZero;
 
@@ -20,12 +21,17 @@ public class FindStates {
     private final GetSceneCombinations getSceneCombinations;
     private final SceneCombinations sceneCombinations;
     private final TempStateRepo tempStateRepo;
+    private final PopulateTempStateRepo populateTempStateRepo;
+    private final PopulateSceneCombinations populateSceneCombinations;
 
-    public FindStates(GetSceneCombinations getSceneCombinations,
-                      SceneCombinations sceneCombinations, TempStateRepo tempStateRepo) {
+    public FindStates(GetSceneCombinations getSceneCombinations, SceneCombinations sceneCombinations,
+                      TempStateRepo tempStateRepo, PopulateTempStateRepo populateTempStateRepo,
+                      PopulateSceneCombinations populateSceneCombinations) {
         this.getSceneCombinations = getSceneCombinations;
         this.sceneCombinations = sceneCombinations;
         this.tempStateRepo = tempStateRepo;
+        this.populateTempStateRepo = populateTempStateRepo;
+        this.populateSceneCombinations = populateSceneCombinations;
     }
 
     /**
@@ -35,11 +41,10 @@ public class FindStates {
      */
     public void find(Matches matches, List<ObjectCollection> objectCollections) {
         List<SceneCombination> sceneCombinationList = getSceneCombinations.getAllSceneCombinations(objectCollections);
-        populateSceneCombinationsWithImages(sceneCombinationList, objectCollections);
+        populateSceneCombinations.populateSceneCombinationsWithImages(
+                sceneCombinationList, objectCollections, matches.getActionOptions());
         sceneCombinations.addSceneCombinations(sceneCombinationList);
-        for (int i=0; i<objectCollections.size(); i++) {
-            sceneCombinations.createAndAddStatesForSceneToStateRepo(i, objectCollections);
-        }
+        populateTempStateRepo.createAndAddStatesForSceneToStateRepo(objectCollections);
         tempStateRepo.getAllStateImages().forEach(stateImage -> matches.add(
                 new Match.Builder()
                         .setMatch(stateImage.getLargestDefinedFixedRegionOrNewRegion())
@@ -49,32 +54,6 @@ public class FindStates {
                         .setSimScore(.99)
                         .build()
         ));
-    }
-
-    /**
-     * Store StateImage objects in every SceneCombination where they are found.
-     * For example, a StateImage object originating in Scene1, will be included in the SceneCombinations
-     * 1-2 and 1-3 when its location contains only fixed pixels in these combinations.
-     * @param sceneCombinations all SceneCombination objects
-     * @param objectCollections all ObjectCollection objects
-     */
-    private void populateSceneCombinationsWithImages(List<SceneCombination> sceneCombinations,
-                                                     List<ObjectCollection> objectCollections) {
-        for (int i=0; i<objectCollections.size(); i++) {
-            for (StateImage stateImage : objectCollections.get(i).getStateImages()) {
-                for (SceneCombination sceneCombination : sceneCombinations) {
-                    addImageToCombinationIfFound(i, stateImage, sceneCombination);
-                }
-            }
-        }
-    }
-
-    private void addImageToCombinationIfFound(int sceneIndex, StateImage stateImage, SceneCombination sceneCombination) {
-        if (sceneCombination.getScene1() != sceneIndex) return; // only check combinations with the originating scene
-        Region imageRegion = stateImage.getLargestDefinedFixedRegionOrNewRegion(); // there should be only one Pattern
-        Optional<Mat> matCombinationRegion = MatOps.applyIfOk(sceneCombination.getDynamicPixels(),
-                new Rect(imageRegion.x, imageRegion.y, imageRegion.w, imageRegion.h));
-        if (matCombinationRegion.isPresent() && countNonZero(matCombinationRegion.get()) == 0) sceneCombination.addImage(stateImage);
     }
 
 }
