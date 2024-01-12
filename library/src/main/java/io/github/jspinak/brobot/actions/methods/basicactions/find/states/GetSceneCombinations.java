@@ -34,7 +34,8 @@ public class GetSceneCombinations {
         // get the dynamic pixel mat for all screen combinations
         for (int i = 0; i < objectCollections.size(); i++) { // Iterate through each ObjectCollection
             ObjectCollection objectCollection1 = objectCollections.get(i);
-            for (int j = i + 1; j < objectCollections.size(); j++) { // Compare with every other ObjectCollection
+            // Compare with every ObjectCollection, including itself (this is useful for images that are only in one scene)
+            for (int j = i; j < objectCollections.size(); j++) {
                 ObjectCollection objectCollection2 = objectCollections.get(j);
                 Optional<Mat> resultMat = getDynamicPixelMat(objectCollection1, objectCollection2); // Perform the comparison
                 if (resultMat.isPresent()) sceneCombinations.add(new SceneCombination(resultMat.get(), i, j));

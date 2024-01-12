@@ -11,29 +11,16 @@ import java.util.*;
 @Getter
 public class TempStateRepo {
 
-    private List<TempStateWithImages> states = new ArrayList<>();
-
-    private void addState(TempStateWithImages tempStateWithImages) {
-        this.states.add(tempStateWithImages);
-    }
-
-    public void addImage(StateImage stateImage, List<SceneCombination> sceneCombinations) {
-        if (sceneCombinations.isEmpty()) return;
-        Set<Integer> scenes = new HashSet<>();
-        for (SceneCombination sceneCombination : sceneCombinations) {
-            if (sceneCombination.contains(stateImage)) {
-                scenes.add(sceneCombination.getScene1());
-                scenes.add(sceneCombination.getScene2());
-            }
-        }
-        TempStateWithImages state = getState(scenes);
-        state.addImage(stateImage);
-    }
+    private final List<TempStateWithImages> states = new ArrayList<>();
 
     public void addImage(StateImage stateImage, Set<Integer> imageInTheseScenes) {
         TempStateWithImages state = getState(imageInTheseScenes);
         stateImage.setOwnerStateName(state.getName());
         state.addImage(stateImage);
+    }
+
+    public void addImage(ScenesPerImage scenesPerImage) {
+        addImage(scenesPerImage.getStateImage(), scenesPerImage.getScenes());
     }
 
     private TempStateWithImages getState(Set<Integer> scenes) {

@@ -48,6 +48,11 @@ public class DatasetManager {
         return allowed.contains(actionOptions.getAction());
     }
 
+    /**
+     * Adds the screenshot taken before the action, the action vector, action description, and a new screenshot.
+     * @param matches
+     * @return
+     */
     public boolean addSetOfData(Matches matches) {
         if (!isValidAction(matches.getActionOptions())) {
             System.out.println("action is not valid for dataset");

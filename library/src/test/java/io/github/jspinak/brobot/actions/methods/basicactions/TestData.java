@@ -3,7 +3,6 @@ package io.github.jspinak.brobot.actions.methods.basicactions;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
 import io.github.jspinak.brobot.datatypes.primitives.location.Position;
-import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import lombok.Getter;
@@ -12,7 +11,7 @@ import lombok.Getter;
 public class TestData {
 
     Pattern screenshot = new Pattern.Builder()
-            .setFilename("../screenshots/floranext1")
+            .setFilename("../screenshots/floranext0")
             .build();
     Pattern topL = new Pattern.Builder()
             .setFilename("topLeft")
@@ -37,10 +36,10 @@ public class TestData {
             .withImages(topLeft, bottomRight)
             .build();
 
+    Pattern floranext0 = new Pattern("../screenshots/floranext0");
     Pattern floranext1 = new Pattern("../screenshots/floranext1");
     Pattern floranext2 = new Pattern("../screenshots/floranext2");
     Pattern floranext3 = new Pattern("../screenshots/floranext3");
     Pattern floranext4 = new Pattern("../screenshots/floranext4");
-    Pattern floranext5 = new Pattern("../screenshots/floranext5");
 
 }
