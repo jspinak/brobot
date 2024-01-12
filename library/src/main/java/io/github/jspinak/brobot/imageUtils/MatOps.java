@@ -14,6 +14,7 @@ import java.util.*;
 import java.util.Arrays;
 
 import static org.bytedeco.opencv.global.opencv_core.*;
+import static org.bytedeco.opencv.global.opencv_imgproc.COLOR_BGR2GRAY;
 import static org.bytedeco.opencv.global.opencv_imgproc.cvtColor;
 
 public class MatOps {
@@ -396,6 +397,12 @@ public class MatOps {
     public static Optional<Mat> bufferedImageToMat(BufferedImage bufferedImage) {
         if (bufferedImage == null) return Optional.empty();
         return Optional.of(Java2DFrameUtils.toMat(bufferedImage));
+    }
+
+    public static Mat toGrayscale(Mat mat) {
+        Mat grayImage = new Mat();
+        cvtColor(mat, grayImage, COLOR_BGR2GRAY);
+        return grayImage;
     }
 
 }
