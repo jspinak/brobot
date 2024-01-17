@@ -9,25 +9,40 @@ import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.NullState;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import io.github.jspinak.brobot.datatypes.state.stateObject.StateObject;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import lombok.Data;
+import org.springframework.data.annotation.Id;
 
 /**
  * A StateRegion belongs to a State and usually has a Region that
  * has a special meaning for its owner State. For example, there
  * may be text in this Region that doesn't appear in any other State.
  */
+@Entity
 @Data
 public class StateRegion implements StateObject {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
+
+    private StateObject.Type objectType = StateObject.Type.REGION;
     private String name = "";
+    @Embedded
     private Region searchRegion = new Region();
     private String ownerStateName = NullState.Name.NULL.toString();
     private int staysVisibleAfterClicked = 100;
     private int probabilityExists = 100; // probability something can be acted on in this region
     private int timesActedOn = 0;
+    @Embedded
     private Position position = new Position(.5, .5); // click position within region
+    @Embedded
     private Anchors anchors = new Anchors();
     private String mockText = "mock text";
+    @Embedded
     private MatchHistory matchHistory = new MatchHistory();
 
     //think about deleting this field, it may be confusing and can easily be replaced by a separate region

@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.datatypes.primitives.location;
 
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.Embedded;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -16,11 +18,14 @@ import lombok.Setter;
  *   MIDDLELEFT defines the left border of the Region
  *   TOPLEFT defines the left and top borders of the Region
  */
+@Embeddable
 @Getter
 @Setter
 public class Anchor {
 
+    @Embedded
     private Position.Name anchorInNewDefinedRegion; // the border of the region to define
+    @Embedded
     private Position positionInMatch; // the location in the match to use as a defining point
 
     public Anchor(Position.Name anchorInNewDefinedRegion, Position positionInMatch) {

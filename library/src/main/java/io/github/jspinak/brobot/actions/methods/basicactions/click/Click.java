@@ -71,7 +71,7 @@ public class Click implements ActionInterface {
     private void click(Location location, ActionOptions actionOptions, Match match) {
         for (int i = 0; i < actionOptions.getTimesToRepeatIndividualAction(); i++) {
             clickLocationOnce.click(location, actionOptions);
-            match.getStateObject().addTimesActedOn();
+            match.incrementTimesActedOn();
             if (actionOptions.isMoveMouseAfterClick()) {
                 time.wait(actionOptions.getPauseBetweenIndividualActions());
                 afterClick.moveMouseAfterClick(actionOptions);

@@ -13,11 +13,15 @@ import io.github.jspinak.brobot.primatives.enums.StateEnum;
  */
 public interface StateObject {
 
+    public enum Type {
+        IMAGE, REGION, LOCATION, STRING, TEXT
+    }
+
+    Long getId();
+    Type getObjectType();
     String getName();
     String getOwnerStateName();
-    int getTimesActedOn(); // times per action. resets to 0 when action is complete.
     void addTimesActedOn();
     void setTimesActedOn(int times);
-    MatchHistory getMatchHistory();
 
 }

@@ -2,7 +2,7 @@ package io.github.jspinak.brobot.actions.actionExecution.actionLifecycle;
 
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.actions.methods.time.Time;
-import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
+import io.github.jspinak.brobot.datatypes.primitives.image.Image;
 import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.reports.Report;
@@ -82,20 +82,20 @@ public class ActionLifecycleManagement {
 
     private boolean areAllImagesFound(Matches matches, int numberOfPatterns) {
         int patternsFound = 0;
-        List<Pattern> foundPatterns = new ArrayList<>();
+        List<Image> foundImages = new ArrayList<>();
         for (Match m : matches.getMatchList()) {
-            if (!foundPatterns.contains(m.getPattern())) {
-                foundPatterns.add(m.getPattern());
+            if (!foundImages.contains(m.getSearchImage())) {
+                foundImages.add(m.getSearchImage());
                 patternsFound++;
             }
         }
         return patternsFound == numberOfPatterns;
     }
 
-    public boolean printActionOnce(Matches matches) {
+    public void printActionOnce(Matches matches) {
         ActionLifecycle actionLifecycle = matches.getActionLifecycle();
         if (actionLifecycle.isPrinted()) {
-            return false;
+            return;
         }
         actionLifecycle.setPrinted(true);
         ActionOptions actionOptions = matches.getActionOptions();
@@ -105,6 +105,5 @@ public class ActionLifecycleManagement {
             else
                 System.out.format("%s ", actionOptions.getAction());
         }
-        return true;
     }
 }

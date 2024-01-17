@@ -30,10 +30,10 @@ import static org.bytedeco.opencv.global.opencv_imgproc.cvtColor;
 @Component
 public class GetImageJavaCV {
 
-    private GetBufferedImage getBufferedImage;
+    private BufferedImageOps bufferedImageOps;
 
-    public GetImageJavaCV(GetBufferedImage getBufferedImage) {
-        this.getBufferedImage = getBufferedImage;
+    public GetImageJavaCV(BufferedImageOps bufferedImageOps) {
+        this.bufferedImageOps = bufferedImageOps;
     }
 
     public Mat convertToHSV(Mat bgr) {
@@ -127,7 +127,7 @@ public class GetImageJavaCV {
     }
 
     public Mat getMatFromScreen(Region region) {
-        BufferedImage bi = getBufferedImage.getBuffImgFromScreen(region);
+        BufferedImage bi = bufferedImageOps.getBuffImgFromScreen(region);
         return getMat(bi, false);
     }
 
@@ -140,7 +140,7 @@ public class GetImageJavaCV {
     }
 
     public Mat getMat(BufferedImage image, boolean hsv) {
-        image = getBufferedImage.convertTo3ByteBGRType(image);
+        image = bufferedImageOps.convertTo3ByteBGRType(image);
         //byte[] data = ((DataBufferByte) image.getRaster().getDataBuffer()).getData();
         Mat mat = bufferedImage2Mat(image); //new Mat(data);
         if (hsv) return convertToHSV(mat);
@@ -148,7 +148,7 @@ public class GetImageJavaCV {
     }
 
     public List<Mat> getMatsFromScreen(List<Region> regions, boolean hsv) {
-        List<BufferedImage> bufferedImages = getBufferedImage.getBuffImgsFromScreen(regions);
+        List<BufferedImage> bufferedImages = bufferedImageOps.getBuffImgsFromScreen(regions);
         List<Mat> mats = new ArrayList<>();
         bufferedImages.forEach(bI -> mats.add(getMat(bI, hsv)));
         return mats;

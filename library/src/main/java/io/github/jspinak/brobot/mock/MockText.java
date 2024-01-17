@@ -23,9 +23,7 @@ public class MockText {
 
     public String getString(Match match) {
         mockTime.wait(GET_TEXT);
-        MatchHistory matchHistory = match.getPattern().getMatchHistory();
-        if (matchHistory.getRandomSnapshot(GET_TEXT).isEmpty()) return getRandomString();
-        return matchHistory.getRandomText();
+        return match.getText();
     }
 
     public String getRandomString() {

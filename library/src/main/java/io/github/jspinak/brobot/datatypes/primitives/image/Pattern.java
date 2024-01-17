@@ -10,15 +10,17 @@ import io.github.jspinak.brobot.datatypes.primitives.match.MatchSnapshot;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.SearchRegions;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
-import io.github.jspinak.brobot.imageUtils.GetBufferedImage;
+import io.github.jspinak.brobot.imageUtils.BufferedImageOps;
+import io.github.jspinak.brobot.imageUtils.ImageOps;
 import io.github.jspinak.brobot.imageUtils.MatOps;
-import io.github.jspinak.brobot.reports.Report;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import lombok.Getter;
 import lombok.Setter;
-import org.apache.commons.codec.language.bm.Rule;
-import org.bytedeco.javacv.Java2DFrameUtils;
 import org.bytedeco.opencv.opencv_core.Mat;
-import org.python.antlr.ast.Str;
+import org.springframework.data.annotation.Id;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -30,30 +32,58 @@ import java.util.Optional;
  * Pattern and StateImage_ (to replace StateImage) are for a code restructuring that gets rid of RegionImagePairs.
  * This can also replace DynamicImage, which currently only uses KmeansProfiles for one of its Image objects.
  * StateImage, which can hold multiple Pattern objects, is currently used for classification. Pattern could also be used
- * but not all Pattern objects are associated with StateImage objects and some are generic (without an image). If
- * Pattern is never used for classification, you can remove the KMeansProfiles.
+ * but not all Pattern objects are associated with StateImage objects and some are generic (without an image).
+ *
+ * TODO: If Pattern is never used for classification, you can remove the KMeansProfiles.
+ *
+ * <p>Database: Pattern is an @Entity since a single Pattern may be in multiple StateImage objects. All fields in
+ * Pattern should be @Embedded. This is the lowest level of object that should be stored in the database. </p>
  */
+@Entity
 @Getter
 @Setter
 public class Pattern extends org.sikuli.script.Pattern {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
 
     private String name;
     /*
     The SikuliX Image object is part of Pattern. It loads an image from file or the web into memory
     and provides a BufferedImage object. There are, however, occasions requiring an image to be
     captured only in memory. For example, when Brobot creates a model of the environment, the images
-    captured can be saved in a database and do not need to be on file. It is also convenient to have
-    the Mat version of an image since Brobot has many functions performing Mat manipulation.
+    captured can be saved in a database and do not need to be on file. This could be achieved with a
+    SikuliX Image by setting the BufferedImage directly `super(bimg)`.
+
+    It would be possible to use the SikuliX Image within Pattern for working with the physical representation of
+    an image, but this raises architecture concerns in Brobot. Most importantly, Match needs a representation of the
+    image, and having Pattern within Match would create a circular class chain. Pattern also needs a MatchHistory to
+    perform mock runs and MatchHistory contains a list of MatchSnapshot, which itself contains a list of Match objects.
+    For this reason, I've created a Brobot Image object and use this object in Match. The Brobot Image object extends
+    the SikuliX Image object.
      */
     private Mat mat;
+    /*
+    Since Pattern extends SikuliX Pattern, it contains a SikuliX Image object and a BufferedImage. There is no need for
+    a Brobot Image, which extends SikuliX Image and would provide a duplicate BufferedImage. ImageDTO is used to store the
+    BufferedImage in the database as a byte array. Any changes to the BufferedImage should be saved in the byte array before
+    saving the Pattern to the database.
+     */
+    @Embedded
+    private ImageDTO imageDTO;
     /*
     An image that should always appear in the same location has fixed==true.
      */
     private boolean fixed = false;
+    @Embedded
     private SearchRegions searchRegions = new SearchRegions();
     private boolean setKmeansColorProfiles = false; // this is an expensive operation and should be done only when needed
+    @Embedded
     private KmeansProfilesAllSchemas kmeansProfilesAllSchemas = new KmeansProfilesAllSchemas();
+    @Embedded
     private ColorCluster colorCluster = new ColorCluster();
+    @Embedded
     private MatchHistory matchHistory = new MatchHistory();
     private int index; // a unique identifier used for classification matrices
     private boolean dynamic = false; // dynamic images cannot be found using pattern matching
@@ -62,7 +92,9 @@ public class Pattern extends org.sikuli.script.Pattern {
      * point to a location as an offset from the match's center. This is ok when you know the size of the
      * image but less convenient for working with general areas of the image (i.e. top left, bottom right).
      */
+    @Embedded
     private Position position = new Position(.5,.5); // use to convert a match to a location
+    @Embedded
     private Anchors anchors = new Anchors(); // for defining regions using this object as input
 
     public Pattern(String string) {
@@ -82,8 +114,48 @@ public class Pattern extends org.sikuli.script.Pattern {
     }
 
     public Pattern(Mat mat) {
-        super(GetBufferedImage.fromMat(mat));
-        this.mat = mat;
+        super(BufferedImageOps.fromMat(mat));
+    }
+
+    /**
+     * Converts the BufferedImage in Image to a BGR JavaCV Mat.
+     * @return a BGR Mat.
+     */
+    public Mat getMat() {
+        return ImageOps.getMatBGR(getImage());
+    }
+
+    /**
+     * Setting the Mat involves converting the BGR Mat parameter to a BufferedImage and saving it in the SukiliX Image.
+     * Mat objects are not stored explicitly in Pattern but converted to and from BufferedImage objects.
+     * @param matBGR a JavaCV Mat in BGR format.
+     */
+    public void setMat(Mat matBGR) {
+        setBImage(BufferedImageOps.fromMat(matBGR));
+    }
+
+    /**
+     * Converts the BufferedImage in Image to an HSV JavaCV Mat.
+     * @return an HSV Mat.
+     */
+    public Mat getMatHSV() {
+        return ImageOps.getMatHSV(getImage());
+    }
+
+    /**
+     * This is called before the Pattern is saved to the database. It saves the BufferedImage as a byte array in
+     * the imageDTO object.
+     */
+    public void setBytes() {
+        imageDTO.setBytesWithImage(getImage());
+    }
+
+    /**
+     * This is called after the Pattern is retrieved from the database. The byte array in imageDTO is converted
+     * to a BufferedImage and saved in the Image object of the Pattern.
+     */
+    public void setBufferedImage() {
+        setBImage(imageDTO.getBufferedImage());
     }
 
     /**
@@ -307,7 +379,7 @@ public class Pattern extends org.sikuli.script.Pattern {
             // new Pattern(filename) should set the mat and name, only overwrite if explicitly set
             if (mat != null) {
                 pattern.mat = mat;
-                BufferedImage bufferedImage = GetBufferedImage.fromMat(mat);
+                BufferedImage bufferedImage = BufferedImageOps.fromMat(mat);
                 pattern.setBImage(bufferedImage); // this also sets SikuliX.Image
             }
             if (name != null) pattern.name = name;

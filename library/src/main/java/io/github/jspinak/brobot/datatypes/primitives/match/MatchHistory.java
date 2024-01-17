@@ -4,8 +4,10 @@ import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.primitives.text.Text;
 import io.github.jspinak.brobot.mock.MatchMaker;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.data.annotation.Id;
 
 import java.util.*;
 
@@ -22,12 +24,15 @@ import static java.util.stream.Collectors.toList;
  *
  * All Actions except for Vanish are used in mocks for Find operations.
  */
+@Embeddable
 @Getter
 @Setter
 public class MatchHistory {
 
     private int timesSearched = 0;
     private int timesFound = 0;
+    @ElementCollection
+    @CollectionTable(name = "snapshots", joinColumns = @JoinColumn(name = "matchHistory_id"))
     private List<MatchSnapshot> snapshots = new ArrayList<>();
 
     /**

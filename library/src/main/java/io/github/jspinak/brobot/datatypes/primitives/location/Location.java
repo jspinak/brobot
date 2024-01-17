@@ -6,6 +6,8 @@ import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.StateLocation;
 import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.StateRegion;
 import io.github.jspinak.brobot.reports.Report;
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.Embedded;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -19,6 +21,7 @@ import static io.github.jspinak.brobot.datatypes.state.NullState.Name.NULL;
  * The relative position is used unless the Region is not defined
  * or the boolean 'definedByXY' is explicitly set to true;
  */
+@Embeddable
 @Getter
 @Setter
 public class Location {
@@ -27,7 +30,9 @@ public class Location {
     private boolean definedByXY = true;
     private int x = -1;
     private int y = -1;
+    @Embedded
     private Region region;
+    @Embedded
     private Position position;
     private Position.Name anchor;
 
