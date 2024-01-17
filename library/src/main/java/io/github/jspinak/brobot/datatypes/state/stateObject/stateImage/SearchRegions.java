@@ -1,8 +1,10 @@
 package io.github.jspinak.brobot.datatypes.state.stateObject.stateImage;
 
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.data.annotation.Id;
 
 import java.util.*;
 
@@ -11,15 +13,19 @@ import java.util.*;
  * could be useful when you are not sure where an Image may be but want to exclude
  * an area, or when the desired search area cannot be described by one rectangle.
  */
+@Embeddable
 @Getter
 @Setter
 public class SearchRegions {
 
+    @ElementCollection
+    @CollectionTable(name = "regions", joinColumns = @JoinColumn(name = "searchRegions_id"))
     private List<Region> regions = new ArrayList<>();
     /**
      * The fixed region is usually defined when an image with a fixed location is found for the first time.
      * This region is then used in future FIND operations with the associated image.
      */
+    @Embedded
     private Region fixedRegion = new Region();
 
     /**

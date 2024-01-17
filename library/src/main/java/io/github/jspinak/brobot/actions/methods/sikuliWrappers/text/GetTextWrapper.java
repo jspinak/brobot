@@ -1,14 +1,15 @@
 package io.github.jspinak.brobot.actions.methods.sikuliWrappers.text;
 
 import io.github.jspinak.brobot.actions.BrobotSettings;
-import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
 import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
-import io.github.jspinak.brobot.imageUtils.GetBufferedImage;
+import io.github.jspinak.brobot.imageUtils.BufferedImageOps;
 import io.github.jspinak.brobot.mock.MockText;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.sikuli.script.OCR;
 import org.springframework.stereotype.Component;
+
+import java.awt.image.BufferedImage;
 
 /**
  * Wrapper class for GetText, handles real and mock text queries.
@@ -19,11 +20,11 @@ import org.springframework.stereotype.Component;
 public class GetTextWrapper {
 
     private final MockText mockText;
-    private final GetBufferedImage getBufferedImage;
+    private final BufferedImageOps bufferedImageOps;
 
-    public GetTextWrapper(MockText mockText, GetBufferedImage getBufferedImage) {
+    public GetTextWrapper(MockText mockText, BufferedImageOps bufferedImageOps) {
         this.mockText = mockText;
-        this.getBufferedImage = getBufferedImage;
+        this.bufferedImageOps = bufferedImageOps;
     }
 
     /*
@@ -56,9 +57,9 @@ public class GetTextWrapper {
      * @return all text as a String
      */
     public String getText(Match match) {
-        Mat mat = match.getMat();
-        if (mat == null) return "";
-        return OCR.readText(getBufferedImage.convert(mat));
+        BufferedImage bi = match.getImage().get();
+        if (bi == null) return "";
+        return OCR.readText(bi);
     }
 
     /**

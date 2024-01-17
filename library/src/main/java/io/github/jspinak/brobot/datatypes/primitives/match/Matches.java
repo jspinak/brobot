@@ -163,8 +163,8 @@ public class Matches {
     }
 
     private void addActiveState(Match newMatch) {
-        if (newMatch.getStateObject() != null)
-            activeStates.add(newMatch.getStateObject().getOwnerStateName());
+        if (newMatch.getStateObjectData() != null)
+            activeStates.add(newMatch.getStateObjectData().getOwnerStateName());
     }
 
     public Region getDefinedRegion() {
@@ -181,7 +181,7 @@ public class Matches {
     }
 
     public void setTimesActedOn(int timesActedOn) {
-        matchList.forEach(m -> m.getStateObject().setTimesActedOn(timesActedOn));
+        matchList.forEach(m -> m.setTimesActedOn(timesActedOn));
     }
 
     public void setDuration(Duration duration) {
@@ -302,22 +302,16 @@ public class Matches {
         matchList.addAll(newMatches);
     }
 
-    public Set<Pattern> getUniquePatterns() {
+    public Set<Long> getUniqueImageIds() {
         return matchList.stream()
-                .map(Match::getPattern)
+                .map(match -> match.getStateObjectData().getId())
                 .collect(Collectors.toSet());
     }
 
-    public List<Match> getMatchObjectsWithTargetPattern(Pattern pattern) {
+    public List<Match> getMatchObjectsWithTargetStateObject(Long id) {
         return matchList.stream()
-                .filter(match -> match.getPattern().equals(pattern))
+                .filter(match -> Objects.equals(match.getStateObjectData().getId(), id))
                 .collect(Collectors.toList());
-    }
-
-    public List<Pattern> getMatchListAsPatterns() {
-        List<Pattern> patterns = new ArrayList<>();
-        matchList.forEach(match -> patterns.add(match.getPattern()));
-        return patterns;
     }
 
     public List<StateImage> getMatchListAsStateImages() {

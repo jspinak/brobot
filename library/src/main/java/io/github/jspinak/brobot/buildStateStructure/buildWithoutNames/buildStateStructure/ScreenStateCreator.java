@@ -1,6 +1,7 @@
 package io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.buildStateStructure;
 
 import io.github.jspinak.brobot.actions.customActions.CommonActions;
+import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.Scene;
 import io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.screenObservations.ScreenObservation;
 import io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.screenObservations.ScreenObservations;
 import io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.screenObservations.TransitionImage;
@@ -168,18 +169,18 @@ public class ScreenStateCreator {
                 stateImages.add(sio);
             }
         });
-        List<Mat> screens = new ArrayList<>();
+        List<Scene> scenes = new ArrayList<>();
         for (int id : imageSets.getScreens()) {
             Optional<ScreenObservation> screenOptional = screenObservations.get(id);
-            screenOptional.ifPresent(screenObservation -> screens.add(screenObservation.getScreenshot()));
+            screenOptional.ifPresent(screenObservation -> scenes.add(new Scene(screenObservation.getScreenshot())));
         }
         State newState = new State.Builder(name)
                 .withImages(stateImages)
-                .withScreens(screens)
+                .withScenes(scenes)
                 .addIllustrations()
                 .build();
-        for (Mat screen : screens) {
-            StateIllustration stateIllustration = stateIllustrator.drawState(newState, screen);
+        for (Scene scene : scenes) {
+            StateIllustration stateIllustration = stateIllustrator.drawState(newState, scene.getImage().getMatBGR());
             newState.addIllustrations(stateIllustration);
             matVisualize.writeMatToHistory(stateIllustration.getIllustratedScreenshot(), "illustration of state " + newState.getName());
         }

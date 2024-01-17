@@ -51,13 +51,6 @@ class ActionTest {
     }
 
     @Test
-    void matchesHavePatternsWithMats() {
-        Matches matches = getWordMatches();
-        assertNotNull(matches.getMatchList().get(0).getPattern());
-        assertNotNull(matches.getMatchList().get(0).getPattern().getMat());
-    }
-
-    @Test
     void firstMatchHasText() {
         Matches matches = getWordMatches();
         assertNotEquals("", matches.getMatchList().get(0).getText());

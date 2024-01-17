@@ -35,14 +35,14 @@ public class Highlight implements ActionInterface {
 
     private void highlightAllAtOnce(Matches matches, ActionOptions actionOptions) {
         matches.getMatchList().forEach(match ->
-                highlightMatch.turnOn(match, match.getStateObject(), actionOptions));
+                highlightMatch.turnOn(match, match.getStateObjectData(), actionOptions));
         time.wait(actionOptions.getHighlightSeconds());
         matches.getMatchList().forEach(highlightMatch::turnOff);
     }
 
     private void highlightOneAtATime(Matches matches, ActionOptions actionOptions) {
         for (Match match : matches.getMatchList()) {
-            highlightMatch.highlight(match, match.getStateObject(), actionOptions);
+            highlightMatch.highlight(match, match.getStateObjectData(), actionOptions);
             if (matches.getMatchList().indexOf(match) < matches.getMatchList().size() - 1)
                 time.wait(actionOptions.getPauseBetweenIndividualActions());
         }

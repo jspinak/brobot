@@ -55,7 +55,7 @@ public class IllustrationFilename {
         String prefix = BrobotSettings.historyPath + BrobotSettings.historyFilename;
         ActionOptions.Action action = actionOptions.getAction();
         Set<String> imageNames = matches.getMatchList().stream().map(
-                m -> m.getStateObject().getName()).collect(Collectors.toSet());
+                m -> m.getStateObjectData().getName()).collect(Collectors.toSet());
         String names = String.join("", imageNames);
         String suffix = action.toString() + "_" + names;
         return filenameRepo.reserveFreePath(prefix, suffix);

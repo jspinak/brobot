@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.sikuli.script.Region;
 import org.sikuli.script.Screen;
+import org.springframework.data.annotation.Id;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -70,6 +71,7 @@ import static io.github.jspinak.brobot.actions.actionOptions.ActionOptions.Find.
  *      * a Find Action will occur in real execution. The Image will be used with other Actions,
  *      * and these Actions will have MatchSnapshots.
  */
+@Embedded
 @Getter
 @Setter
 public class MatchSnapshot {
@@ -77,10 +79,13 @@ public class MatchSnapshot {
     /**
      * The ActionOptions can be queried to find which settings lead to success.
      */
+    @Embedded
     private ActionOptions actionOptions = new ActionOptions.Builder()
             .setAction(ActionOptions.Action.FIND)
             .setFind(UNIVERSAL)
             .build();
+    @ElementCollection
+    @CollectionTable(name = "matchList", joinColumns = @JoinColumn(name = "matchSnapshot_id"))
     private List<Match> matchList = new ArrayList<>();
     private String text = "";
     private double duration = 0.0;

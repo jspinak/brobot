@@ -2,6 +2,7 @@ package io.github.jspinak.brobot.actions.methods.basicactions.find.compareImages
 
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.Scene;
 import io.github.jspinak.brobot.actions.methods.mockOrLiveInterface.MockOrLive;
+import io.github.jspinak.brobot.datatypes.primitives.image.Image;
 import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
 import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
@@ -57,30 +58,29 @@ public class CompareImages {
      * and will return the best match of one image in another.
      * @param p1 the base image
      * @param p2 the image to compare
-     * @return a Match of p2 with the similarity score
+     * @return a Match with the smaller image as the searchImage and the larger image as the Scene.
      */
     public Match compare(Pattern p1, Pattern p2) {
-        Match match = new Match.Builder()
-                .setMatch(new Region(0,0,1,1)) // the region is not important here
-                .setPattern(p2)
-                .build();
+        if (p1 == null || p2 == null || p1.getBImage() == null || p2.getBImage() == null) return null;
         Pattern biggestPattern = p1;
         Pattern smallestPattern = p2;
         BufferedImage bi1 = p1.getBImage();
         BufferedImage bi2 = p2.getBImage();
-        if (bi1 == null || bi2 == null) return match;
         if ((bi1.getHeight()*bi1.getWidth()) < (bi2.getHeight()*bi2.getWidth())) {
             biggestPattern = p2;
             smallestPattern = p1;
         }
-        Scene scene = new Scene.Builder()
-                    .setBufferedImageBGR(biggestPattern.getBImage())
-                    .build();
-
+        Scene scene = new Scene(biggestPattern.getBImage());
         List<Match> matchList = mockOrLive.findAll(smallestPattern, scene);
         Match bestMatch = Collections.max(matchList, Comparator.comparingDouble(org.sikuli.script.Match::getScore));
-        if (bestMatch == null) return match;
-        bestMatch.setPattern(p2);
+        Match noMatch = new Match.Builder()
+                .setMatch(new Region(0,0,1,1))
+                .setSearchImage(smallestPattern.getBImage())
+                .setScene(new Scene(biggestPattern.getBImage()))
+                .setSimScore(0)
+                .build();
+        if (bestMatch == null) return noMatch;
+        bestMatch.setSearchImage(new Image(smallestPattern));
         return bestMatch;
     }
 }

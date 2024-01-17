@@ -3,7 +3,7 @@ package io.github.jspinak.brobot.actions.actionExecution.manageTrainingData;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.trainingData.ActionVector;
-import io.github.jspinak.brobot.imageUtils.GetBufferedImage;
+import io.github.jspinak.brobot.imageUtils.BufferedImageOps;
 import io.github.jspinak.brobot.imageUtils.GetImageOpenCV;
 import io.github.jspinak.brobot.imageUtils.ImageUtils;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -21,7 +21,7 @@ public class DatasetManager {
     private final ImageUtils imageUtils;
     private final GetImageOpenCV getImageOpenCV;
     private final SaveTrainingData saveTrainingData;
-    private final GetBufferedImage getBufferedImage;
+    private final BufferedImageOps bufferedImageOps;
     private final ActionVectorTranslation actionVectorTranslation;
     private Set<ActionOptions.Action> allowed = EnumSet.of(
             ActionOptions.Action.CLICK,
@@ -32,11 +32,11 @@ public class DatasetManager {
             ActionOptions.Action.HIGHLIGHT);
 
     public DatasetManager(ImageUtils imageUtils, GetImageOpenCV getImageOpenCV, SaveTrainingData saveTrainingData,
-                          GetBufferedImage getBufferedImage, ActionVectorOneHot actionVectorTranslation) {
+                          BufferedImageOps bufferedImageOps, ActionVectorOneHot actionVectorTranslation) {
         this.imageUtils = imageUtils;
         this.getImageOpenCV = getImageOpenCV;
         this.saveTrainingData = saveTrainingData;
-        this.getBufferedImage = getBufferedImage;
+        this.bufferedImageOps = bufferedImageOps;
         this.actionVectorTranslation = actionVectorTranslation;
     }
 
@@ -66,7 +66,7 @@ public class DatasetManager {
         ActionVector actionVector = actionVectorTranslation.toVector(matches);
         String actionText = matches.getActionDescription();
         ArrayList<BufferedImage> screenshots = new ArrayList<>();
-        screenshots.add(getBufferedImage.convert(optBGR.get()));
+        screenshots.add(bufferedImageOps.convert(optBGR.get()));
         screenshots.add(getImageOpenCV.getScreenshot());
         saveTrainingData.addData(actionVector, actionText, screenshots);
         System.out.println("data saved");

@@ -45,8 +45,8 @@ public class PixelAnalysisCollection {
     }
 
     public PixelAnalysisCollection(Scene scene) {
-        analyses.get(BGR).put(SCENE, scene.getBgr());
-        analyses.get(HSV).put(SCENE, scene.getHsv());
+        analyses.get(BGR).put(SCENE, scene.getImage().getMatBGR());
+        analyses.get(HSV).put(SCENE, scene.getImage().getMatHSV());
     }
 
     public void add(PixelAnalysis pixelAnalysis) {

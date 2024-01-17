@@ -42,9 +42,9 @@ public class FindImages {
     void findEachPattern(Matches matches, List<ObjectCollection> objectCollections) {
         getImageMatches(matches, objectCollections);
         List<Match> bestMatchPerPattern = new ArrayList<>();
-        Set<Pattern> patterns = matches.getUniquePatterns();
-        for (Pattern pattern : patterns) {
-            List<Match> singlePatternMatchList = matches.getMatchObjectsWithTargetPattern(pattern);
+        Set<Long> imageIds = matches.getUniqueImageIds();
+        for (Long id : imageIds) {
+            List<Match> singlePatternMatchList = matches.getMatchObjectsWithTargetStateObject(id);
             Optional<Match> matchWithHighestScore = singlePatternMatchList.stream()
                     .max(java.util.Comparator.comparingDouble(Match::getScore));
             matchWithHighestScore.ifPresent(bestMatchPerPattern::add);

@@ -79,8 +79,8 @@ public class FindMotion {
         matches.getSceneAnalysisCollection().getSceneAnalyses().get(1).setMatchList(movingObjects.get(1));
         matches.getSceneAnalysisCollection().getSceneAnalyses().get(2).setMatchList(movingObjects.get(2));
         sceneAnalysisCollection.getSceneAnalyses().forEach(sA -> {
-            sA.getIllustrations().setMotion(sA.getScene().getBgr());
-            sA.getIllustrations().setMotionWithMatches(sA.getScene().getBgr());
+            sA.getIllustrations().setMotion(sA.getScene().getImage().getMatBGR());
+            sA.getIllustrations().setMotionWithMatches(sA.getScene().getImage().getMatBGR());
         });
         matchOps.addMatchListToMatches(movingObjects.get(2), matches);
         matches.sortByMatchScoreDecending();

@@ -1,12 +1,13 @@
 package io.github.jspinak.brobot.datatypes.primitives.match;
 
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
-import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
 
 import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * TODO: deprecated. review code and delete classes.
+ *
  * DanglingSnapshots keep Snapshots with their objects while the operation is in progress.
  * Snapshots are then finalized at the end of the operation and added to their respective objects,
  * or in some cases not added.
@@ -30,7 +31,7 @@ import java.util.Map;
  */
 public class DanglingSnapshots {
 
-    private final Map<Pattern, MatchSnapshot> snapshots = new HashMap<>();
+    private final Map<Long, MatchSnapshot> snapshots = new HashMap<>();
 
     /**
      * If there are no Match objects,
@@ -45,11 +46,11 @@ public class DanglingSnapshots {
     }
 
     public void addMatch(ActionOptions actionOptions, Match match) {
-        Pattern pattern = match.getPattern();
-        if (snapshots.containsKey(pattern)) {
-            snapshots.get(pattern).addMatch(match);
+        Long id = match.getStateObjectData().getId();
+        if (snapshots.containsKey(id)) {
+            snapshots.get(id).addMatch(match);
         } else {
-            snapshots.put(pattern, new MatchSnapshot.Builder()
+            snapshots.put(id, new MatchSnapshot.Builder()
                     .setActionOptions(actionOptions)
                     .addMatch(match)
                     .build());
@@ -60,30 +61,27 @@ public class DanglingSnapshots {
      * Successful MatchSnapshots are always created with a Match.
      * If text is found, the Snapshot is successful. Text cannot be found without a Match.
      *
-     * @param match the match contains the text found.
+     * @param match  the match contains the text found.
      * @param string is the text found.
-     * @return true if the text was successfully added to a MatchSnapshot.
      */
-    public boolean setString(Match match, String string) {
-        Pattern pattern = match.getPattern();
-        if (snapshots.containsKey(pattern)) {
-            snapshots.get(pattern).setString(string);
-            return true;
+    public void setString(Match match, String string) {
+        Long id = match.getStateObjectData().getId();
+        if (snapshots.containsKey(id)) {
+            snapshots.get(id).setString(string);
         }
-        return false;
     }
 
     /**
      * For transferring a Snapshot to an existing Matches object.
      *
-     * @param pattern is the Pattern that resulted in the MatchSnapshot.
+     * @param id is the Id of the StateObject that resulted in the MatchSnapshot.
      * @param matchSnapshot is the new MatchSnapshot to be added.
      */
-    public void addSnapshot(Pattern pattern, MatchSnapshot matchSnapshot) {
-        if (!snapshots.containsKey(pattern)) snapshots.put(pattern, matchSnapshot);
+    public void addSnapshot(Long id, MatchSnapshot matchSnapshot) {
+        if (!snapshots.containsKey(id)) snapshots.put(id, matchSnapshot);
         else {
-            snapshots.get(pattern).addMatchList(matchSnapshot.getMatchList());
-            snapshots.get(pattern).setText(matchSnapshot.getText());
+            snapshots.get(id).addMatchList(matchSnapshot.getMatchList());
+            snapshots.get(id).setText(matchSnapshot.getText());
         }
     }
 
@@ -109,7 +107,8 @@ public class DanglingSnapshots {
     }
 
     public void save() {
-        snapshots.forEach((pattern, matchSnapshot) -> pattern.getMatchHistory().addSnapshot(matchSnapshot));
+        // get the stateobject from the repos and add the snapshot
+        //snapshots.forEach((id, matchSnapshot) -> pattern.getMatchHistory().addSnapshot(matchSnapshot));
     }
 
     public int totalSnapshots() {

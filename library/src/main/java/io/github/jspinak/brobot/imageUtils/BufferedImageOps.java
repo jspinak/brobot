@@ -12,6 +12,7 @@ import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -19,12 +20,16 @@ import java.util.List;
 import java.util.Objects;
 
 @Component
-public class GetBufferedImage {
+public class BufferedImageOps {
 
 
-    public BufferedImage getBuffImgFromFile(String path) throws IOException {
+    public static BufferedImage getBuffImgFromFile(String path) {
         File f = new File(path);
-        return ImageIO.read(Objects.requireNonNull(f));
+        try {
+            return ImageIO.read(Objects.requireNonNull(f));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public BufferedImage getBuffImgFromScreen(Region region) {
@@ -76,6 +81,26 @@ public class GetBufferedImage {
             throw new RuntimeException(e);
         }
         return bi;
+    }
+
+    public static byte[] toByteArray(BufferedImage bufferedImage) {
+        String format = "png";
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try {
+            ImageIO.write(bufferedImage, format, baos);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return baos.toByteArray();
+    }
+
+    public static BufferedImage fromByteArray(byte[] bytes) {
+        ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
+        try {
+            return ImageIO.read(bais);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }

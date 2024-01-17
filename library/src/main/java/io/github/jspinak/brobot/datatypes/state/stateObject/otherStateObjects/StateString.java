@@ -1,7 +1,14 @@
 package io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects;
 
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
+import io.github.jspinak.brobot.datatypes.state.NullState;
+import io.github.jspinak.brobot.datatypes.state.stateObject.StateObject;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import lombok.Data;
+import org.springframework.data.annotation.Id;
 
 import static io.github.jspinak.brobot.datatypes.state.NullState.Name.NULL;
 
@@ -10,12 +17,19 @@ import static io.github.jspinak.brobot.datatypes.state.NullState.Name.NULL;
  * has a special meaning for the owner State. For example, typing this
  * String may be part of a Transition for this State but not for other States.
  */
+@Entity
 @Data
 public class StateString {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
+
+    private StateObject.Type objectType = StateObject.Type.STRING;
     private String name;
+    @Embedded
     private Region searchRegion; // sometimes we need to hover over or click on a region before typing the string
-    private String ownerStateName;
+    private String ownerStateName = NullState.Name.NULL.toString();
     private int timesActedOn = 0;
 
     private String string;

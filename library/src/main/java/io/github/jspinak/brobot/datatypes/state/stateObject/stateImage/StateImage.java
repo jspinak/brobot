@@ -12,9 +12,12 @@ import io.github.jspinak.brobot.datatypes.primitives.match.MatchSnapshot;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import io.github.jspinak.brobot.datatypes.state.stateObject.StateObject;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.bytedeco.opencv.opencv_core.Mat;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.LastModifiedBy;
 
 import java.io.File;
 import java.util.*;
@@ -30,27 +33,54 @@ import java.util.*;
  *   objects.
  * - KmeansProfiles for Image objects use the pixels of all Pattern objects in the Image to determine the ColorProfiles.
  */
+@Entity
 @Getter
 @Setter
 public class StateImage implements StateObject {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
+
+    private StateObject.Type objectType = StateObject.Type.IMAGE;
     private String name = "";
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinTable(name = "stateImage_patterns",
+            joinColumns = @JoinColumn(name = "stateImage_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "pattern_id", referencedColumnName = "id"))
     private List<Pattern> patterns = new ArrayList<>();
     private String ownerStateName = "null"; // ownerStateName is set by the State when the object is added
     private int timesActedOn = 0;
-    private boolean shared = false; // also found in other states
+    private boolean shared = false; // shared means also found in other states
 
     // for color analysis and illustration
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinTable(name = "stateImage_colorProfiles",
+            joinColumns = @JoinColumn (name = "stateImage_id"),
+            inverseJoinColumns = @JoinColumn (name = "colorProfiles_id"))
     private KmeansProfilesAllSchemas kmeansProfilesAllSchemas = new KmeansProfilesAllSchemas();
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinTable(name = "stateImage_colorCluster",
+            joinColumns = @JoinColumn (name = "stateImage_id"),
+            inverseJoinColumns = @JoinColumn (name = "colorCluster_id"))
     private ColorCluster colorCluster = new ColorCluster();
     private int index; // a unique identifier. used for classification matrices.
     private boolean dynamic = false; // dynamic images cannot be found using pattern matching
+
+    /*
+    Persisting Mat objects with JPA is more complex than persisting BufferedImage objects. It requires creating a
+    wrapper object that includes information about the Mat size and type. These Mat objects do not contain unique
+    data: they are here for convenience and can be recreated with the patterns' BufferedImage objects.
+     */
     private Mat oneColumnBGRMat; // initialized when program is run
     private Mat oneColumnHSVMat; // initialized when program is run
     private Mat imagesMat; // initialized when program is run, shows the images in the StateImage
     private Mat profilesMat; // initialized when program is run, shows the color profiles in the StateImage
 
-    // the following variables are primarily used when creating state structures without names
+    /**
+     * The following variables are primarily used when creating state structures without names. They do not need
+     * persistence.
+     */
     /*
     Captures the screen to which the image transitions with a click. Used when building the state structure live.
     When the state structure is built with screenshots, there are no transitions, and transitions need to be determined

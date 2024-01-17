@@ -18,7 +18,7 @@ import static io.github.jspinak.brobot.actions.actionOptions.ActionOptions.GetTe
 
 /**
  * Replaced by Find with text search
- * TODO: text appears, disappears
+ * TODO: text appears, disappears. check code to make sure you don't need it and then delete unused classes.
  *
  * GetText retrieves text from a Region.
  * Options include:

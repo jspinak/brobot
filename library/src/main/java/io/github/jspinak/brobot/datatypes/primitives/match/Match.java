@@ -1,19 +1,27 @@
 package io.github.jspinak.brobot.datatypes.primitives.match;
 
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.Scene;
+import io.github.jspinak.brobot.datatypes.primitives.image.Image;
 import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
 import io.github.jspinak.brobot.datatypes.primitives.location.Anchors;
 import io.github.jspinak.brobot.datatypes.primitives.location.Location;
 import io.github.jspinak.brobot.datatypes.primitives.location.Position;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.stateObject.StateObject;
+import io.github.jspinak.brobot.datatypes.state.stateObject.StateObjectData;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
+import io.github.jspinak.brobot.imageUtils.BufferedImageOps;
+import io.github.jspinak.brobot.imageUtils.ImageOps;
 import io.github.jspinak.brobot.imageUtils.MatOps;
+
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.Embedded;
 import lombok.Getter;
 import lombok.Setter;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Rect;
 
+import java.awt.image.BufferedImage;
 import java.lang.reflect.Field;
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -39,37 +47,47 @@ import java.util.Optional;
  *  *     Match objects have only one match, as opposed to Snapshots, which can have
  *  *       multiple Match objects.
  */
+@Embeddable
 @Getter
 @Setter
 public class Match extends org.sikuli.script.Match {
 
     private String name = "";
     /*
-    The Mat in a Match object contains the pixels from the match region. This can be different from
+    Match.Match(SikuliX).Image(SikuliX).BufferedImage contains the pixels from the match region. This can be different from
     the image used to search with (similarity may be low, or the match area might be shifted).
     Also, some operations do not use an image to search, and are interested in the contents of the
     screen.
+
+    searchImage holds the image used to find the match.
      */
-    private Mat mat;
-    /*
-    This is the pattern used to find the match. It may be different from the match's mat as the ActionOptions may
-    require shifting or moving the match region.
-     */
-    private Pattern pattern;
+    private Image searchImage;
     /*
     The match may have come from a Region, in which case it won't have a Pattern object. The anchors are recorded here,
     regardless of which object created the match.
      */
+    @Embedded
     private Anchors anchors;
-    private StateObject stateObject;
+    @Embedded
+    private StateObjectData stateObjectData;
     private Mat histogram;
+    @Embedded
     private Scene scene;
     private LocalDateTime timeStamp;
     // the old MatchObject had `private double duration;`
+    private int timesActedOn = 0;
 
     public Match(org.sikuli.script.Match match) {
         super(match);
         this.setName(match.getName());
+    }
+
+    public Mat getMat() {
+        return ImageOps.getMatBGR(getImage());
+    }
+
+    public void setMat(Mat mat) {
+        getImage().setBimg(BufferedImageOps.fromMat(mat));
     }
 
     public void setText(String text) {
@@ -85,35 +103,33 @@ public class Match extends org.sikuli.script.Match {
     }
 
     public Location getLocation() {
-        if (pattern == null) {
+        if (getTarget() == null) {
             Position tempPosition = new Position(50,50);
             return new Location(this, tempPosition);
         }
-        return new Location(this, pattern.getPosition());
+        return new Location(getTarget());
     }
 
     public int compareByScore(Match m) {
         return (int)(this.getScore() - m.getScore());
     }
 
-    public int size() {
-        if (pattern == null) return 0;
-        return pattern.w()*pattern.h();
+    public int size() { // TODO: check. this used to refer to the size of the Pattern
+        return w * h;
     }
 
-    public void setMatWithScene() {
+    public void incrementTimesActedOn() {
+        timesActedOn++;
+    }
+
+    public void setImageWithScene() {
         if (scene == null) return;
-        Optional<Mat> mat = MatOps.applyIfOk(scene.getBgr(), new Region(this).getJavaCVRect());
-        mat.ifPresent(this::setMat);
-    }
-
-    public void setPatternWithScene() {
-        if (mat == null || mat.empty()) return;
-        this.pattern = new Pattern(mat);
+        Optional<Mat> mat = MatOps.applyIfOk(scene.getImage().getMatBGR(), new Region(this).getJavaCVRect());
+        mat.ifPresent(m -> setImage(ImageOps.getImage(m)));
     }
 
     public String getOwnerStateName() {
-        return stateObject.getOwnerStateName();
+        return stateObjectData.getOwnerStateName();
     }
 
     /**
@@ -127,11 +143,11 @@ public class Match extends org.sikuli.script.Match {
     public StateImage toStateImage() {
         StateImage stateImage = new StateImage();
         stateImage.setName(name);
-        if (stateObject != null) {
-            stateImage.setOwnerStateName(stateObject.getOwnerStateName());
-            stateImage.setName(stateObject.getName()); // the StateObject name should take priority since it was the original StateImage
+        if (stateObjectData != null) {
+            stateImage.setOwnerStateName(stateObjectData.getOwnerStateName());
+            stateImage.setName(stateObjectData.getName()); // the StateObject name should take priority since it was the original StateImage
         }
-        if (pattern != null) stateImage.addPatterns(pattern);
+        if (searchImage != null) stateImage.addPatterns(new Pattern(searchImage.get()));
         else {
             Pattern newPattern = new Pattern.Builder()
                     .setFixed(true)
@@ -179,11 +195,12 @@ public class Match extends org.sikuli.script.Match {
 
     public static class Builder {
         private org.sikuli.script.Match match;
+        private BufferedImage bufferedImage;
+        private Image searchImage;
         private String name;
         private String text;
-        private Pattern pattern;
         private Anchors anchors;
-        private StateObject stateObject;
+        private StateObjectData stateObjectData;
         private Mat histogram;
         private Scene scene;
         private LocalDateTime timeStamp;
@@ -219,9 +236,23 @@ public class Match extends org.sikuli.script.Match {
             return this;
         }
 
-        public Builder setPattern(Pattern pattern) {
-            this.pattern = pattern;
-            if (this.name == null || this.name.isEmpty()) this.name = pattern.getName();
+        public Builder setBufferedImage(BufferedImage bufferedImage) {
+            this.bufferedImage = bufferedImage;
+            return this;
+        }
+
+        public Builder setBufferedImage(Mat mat) {
+            this.bufferedImage = BufferedImageOps.fromMat(mat);
+            return this;
+        }
+
+        public Builder setSearchImage(BufferedImage bufferedImage) {
+            this.searchImage = new Image(bufferedImage);
+            return this;
+        }
+
+        public Builder setSearchImage(Mat mat) {
+            this.searchImage = new Image(mat);
             return this;
         }
 
@@ -230,8 +261,8 @@ public class Match extends org.sikuli.script.Match {
             return this;
         }
 
-        public Builder setStateObject(StateObject stateObject) {
-            this.stateObject = stateObject;
+        public Builder setStateObjectData(StateObject stateObject) {
+            this.stateObjectData = new StateObjectData(stateObject);
             return this;
         }
 
@@ -254,14 +285,15 @@ public class Match extends org.sikuli.script.Match {
             Match matchObject = new Match(match);
             matchObject.name = name;
             if (text != null) matchObject.setText(text); // otherwise, this erases the SikuliX match text
-            matchObject.pattern = pattern;
             matchObject.anchors = anchors;
-            matchObject.stateObject = stateObject;
+            matchObject.stateObjectData = stateObjectData;
             matchObject.histogram = histogram;
             matchObject.scene = scene;
             matchObject.timeStamp = LocalDateTime.now();
-            matchObject.setMatWithScene();
+            matchObject.setImageWithScene();
+            if (bufferedImage != null) matchObject.setImage(new org.sikuli.script.Image(bufferedImage));
             if (simScore >= 0) matchObject.setSimScore(simScore); // otherwise, this erases the SikuliX match simScore
+            matchObject.searchImage = searchImage;
             return matchObject;
         }
 

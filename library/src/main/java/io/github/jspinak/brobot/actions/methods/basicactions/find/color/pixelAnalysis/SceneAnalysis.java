@@ -61,10 +61,10 @@ public class SceneAnalysis {
     public SceneAnalysis(List<PixelAnalysisCollection> pixelAnalysisCollections, Scene scene) {
         this.pixelAnalysisCollections = pixelAnalysisCollections;
         this.scene = scene;
-        addAnalysis(BGR, SCENE, scene.getBgr());
-        addAnalysis(HSV, SCENE, scene.getHsv());
+        addAnalysis(BGR, SCENE, scene.getImage().getMatBGR());
+        addAnalysis(HSV, SCENE, scene.getImage().getMatHSV());
         illustrations = new Illustrations();
-        illustrations.setScene(scene.getBgr());
+        illustrations.setScene(scene.getImage().getMatBGR());
     }
 
     /**
@@ -76,10 +76,10 @@ public class SceneAnalysis {
     public SceneAnalysis(Scene scene) {
         pixelAnalysisCollections = new ArrayList<>();
         this.scene = scene;
-        addAnalysis(BGR, SCENE, scene.getBgr());
-        addAnalysis(HSV, SCENE, scene.getHsv());
+        addAnalysis(BGR, SCENE, scene.getImage().getMatBGR());
+        addAnalysis(HSV, SCENE, scene.getImage().getMatHSV());
         illustrations = new Illustrations();
-        illustrations.setScene(scene.getBgr());
+        illustrations.setScene(scene.getImage().getMatBGR());
     }
 
     public void addAnalysis(ColorCluster.ColorSchemaName colorSchemaName, Analysis analysis, Mat mat) {

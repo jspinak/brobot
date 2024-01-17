@@ -1,6 +1,8 @@
 package io.github.jspinak.brobot.datatypes.primitives.location;
 
 import io.github.jspinak.brobot.primatives.Pair;
+import jakarta.persistence.Embeddable;
+import lombok.Getter;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -8,6 +10,8 @@ import java.util.Map;
 /**
  * Position is defined by (%w, %h) and can be used to get a location in a Region.
  */
+@Embeddable
+@Getter
 public class Position {
 
     private double percentW;
@@ -48,14 +52,6 @@ public class Position {
     public Position(Name positionName, double addPercentW, double addPercentH) {
         this.percentW = positions.get(positionName).getKey() + addPercentW;
         this.percentH = positions.get(positionName).getValue() + addPercentH;
-    }
-
-    public double getPercentW() {
-        return percentW;
-    }
-
-    public double getPercentH() {
-        return percentH;
     }
 
     public void addPercentW(double addW) {
