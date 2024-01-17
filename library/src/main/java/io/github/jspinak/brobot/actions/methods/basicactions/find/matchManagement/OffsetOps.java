@@ -6,6 +6,7 @@ import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import io.github.jspinak.brobot.datatypes.state.stateObject.StateObject;
+import io.github.jspinak.brobot.datatypes.state.stateObject.StateObjectData;
 import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.StateLocation;
 import org.sikuli.script.Mouse;
 import org.springframework.stereotype.Component;
@@ -57,12 +58,12 @@ public class OffsetOps {
         Location offsetLocation = new Location(
                 lastMatch.getX() + actionOptions.getAddX2(), lastMatch.getY() + actionOptions.getAddY2());
         Match lastMatchObject = matches.getMatchList().get(matches.getMatchList().size() - 1);
-        StateObject stateObject = lastMatchObject.getStateObject();
+        StateObjectData stateObjectData = lastMatchObject.getStateObjectData();
         //double duration = lastMatchObject.getDuration();
         Match offsetMatch = offsetLocation.toMatch();
         Match offsetMatchObject = new Match.Builder()
                 .setMatch(offsetMatch)
-                .setStateObject(stateObject)
+                .setStateObjectData(stateObjectData)
                 .build();
         matches.getMatchList().add(offsetMatchObject);
     }

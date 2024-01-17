@@ -38,28 +38,7 @@ public class SetMatTextPattern {
         Scene scene = matches.getSceneAnalysisCollection().getScenes().get(sceneIndex);
         for (Match m : matches.getMatchList()) {
             m.setScene(scene);
-            m.setMatWithScene();
-            setPattern(m, matches.getActionOptions());
-        }
-    }
-
-    /**
-     * Set the Pattern when
-     *   - it doesn't exist
-     *   - the operation is a text action
-     * Other find operations are passed a Pattern as a parameter and we don't want to overwrite this Pattern.
-     * @param match the match to update
-     * @param actionOptions tells us if we're allowed to set the Pattern
-     */
-    public void setPattern(Match match, ActionOptions actionOptions) {
-        if (match.getPattern() == null || isOkToReset(actionOptions)) {
-            Pattern pattern = new Pattern.Builder()
-                    .setFixedRegion(new Region(match))
-                    .setName(match.getName())
-                    .setMat(match.getMat())
-                    .setFixed(true)
-                    .build();
-            match.setPattern(pattern);
+            m.setImageWithScene();
         }
     }
 

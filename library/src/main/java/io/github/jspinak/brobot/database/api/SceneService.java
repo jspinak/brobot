@@ -1,7 +1,7 @@
-package io.github.jspinak.brobot.desktopBackend.api;
+package io.github.jspinak.brobot.database.api;
 
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.Scene;
-import io.github.jspinak.brobot.desktopBackend.data.SceneRepo;
+import io.github.jspinak.brobot.database.data.SceneRepo;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -9,7 +9,7 @@ import java.util.List;
 @Component
 public class SceneService {
 
-    private SceneRepo sceneRepo;
+    private final SceneRepo sceneRepo;
 
     public SceneService(SceneRepo sceneRepo) {
         this.sceneRepo = sceneRepo;
@@ -20,7 +20,7 @@ public class SceneService {
     }
 
     public List<Scene> getAllScenes() {
-        return sceneRepo.findAll();
+        return sceneRepo.findAllAsList();
     }
 
     public void saveScene(Scene scene) {
