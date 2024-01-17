@@ -1,5 +1,6 @@
 package io.github.jspinak.brobot.datatypes.state.state;
 
+import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.Scene;
 import io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.buildStateStructure.StateIllustration;
 import io.github.jspinak.brobot.datatypes.primitives.match.MatchHistory;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
@@ -10,9 +11,11 @@ import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.St
 import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.StateRegion;
 import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.StateString;
 import io.github.jspinak.brobot.primatives.enums.StateEnum;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.bytedeco.opencv.opencv_core.Mat;
+import org.springframework.data.annotation.Id;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -29,9 +32,14 @@ import java.util.*;
  * The shared Images are used for all other State searches.
  *
  */
+@Entity
 @Getter
 @Setter
 public class State {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
 
     private String nameAsString = "";
 
@@ -40,18 +48,36 @@ public class State {
      * StateText is text that appears on the screen and is a clue to look for images in this state.
      * Text search is a lot faster than image search, but cannot be used without an image search to identify a state.
      */
+    @ElementCollection
+    @CollectionTable(name = "state_stateText", joinColumns = @JoinColumn(name = "state_id", referencedColumnName = "id"))
     private Set<String> stateText = new HashSet<>();
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinTable(name = "state_stateImages",
+            joinColumns = @JoinColumn(name = "state_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "stateImage_id", referencedColumnName = "id"))
     private Set<StateImage> stateImages = new HashSet<>();
     /**
      * StateStrings can change the expected state.
      * They have associated regions where typing the string has an effect.
      */
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinTable(name = "state_stateStrings",
+            joinColumns = @JoinColumn(name = "state_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "stateString_id", referencedColumnName = "id"))
     private Set<StateString> stateStrings = new HashSet<>();
     /**
      * StateRegions can change the expected state when clicked or hovered over.
      * They can also perform text retrieval.
      */
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinTable(name = "state_stateRegions",
+            joinColumns = @JoinColumn(name = "state_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "stateRegion_id", referencedColumnName = "id"))
     private Set<StateRegion> stateRegions = new HashSet<>();
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinTable(name = "state_stateLocations",
+            joinColumns = @JoinColumn(name = "state_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "stateLocation_id", referencedColumnName = "id"))
     private Set<StateLocation> stateLocations = new HashSet<>();
     /**
      * When true, this State needs to be acted on before accessing other States.
@@ -64,6 +90,8 @@ public class State {
      * 'canHide' States is active when this State becomes active, these now hidden
      * States are added to the 'hidden' set.
      */
+    @ElementCollection
+    @CollectionTable(name = "state_canHide", joinColumns = @JoinColumn(name = "state_id", referencedColumnName = "id"))
     private Set<String> canHide = new HashSet<>();
     /**
      * Hiding a State means that this State covers the hidden State, and when this State is exited
@@ -75,8 +103,14 @@ public class State {
      * The hidden set is used by StateTransitions when there is a PREVIOUS Transition (PREVIOUS is
      * a variable StateEnum).
      */
+    @ElementCollection
+    @CollectionTable(name = "state_hidden", joinColumns = @JoinColumn(name = "state_id", referencedColumnName = "id"))
     private Set<String> hidden = new HashSet<>();
     private int pathScore = 1; // larger path scores discourage taking a path with this state
+    /*
+    LocalDateTime, to be persisted with JPA, requires the @Converter annotation and code to convert the value
+    to a format for the database and back to a Java entity.
+     */
     private LocalDateTime lastAccessed;
     /**
      * The base probability that a State exists is transfered to the active variable 'probabilityExists',
@@ -92,12 +126,18 @@ public class State {
      * Screenshots where the state is found. These can be used for realistic simulations or for
      * illustrating the state to display it visually. Not all StateImages need to be present.
      */
-    private List<Mat> screens = new ArrayList<>();
+    @ElementCollection
+    @CollectionTable(name = "state_scene", joinColumns = @JoinColumn(name = "state_id"))
+    private List<Scene> scenes = new ArrayList<>();
     private List<StateIllustration> illustrations = new ArrayList<>();
     /**
-     * Some actions take place without an associated Pattern or StateImage. These actions are store in their
+     * Some actions take place without an associated Pattern or StateImage. These actions are stored in their
      * corresponding state.
      */
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinTable(name = "state_matchHistory",
+            joinColumns = @JoinColumn (name = "state_id"),
+            inverseJoinColumns = @JoinColumn (name = "matchHistory_id"))
     private MatchHistory matchHistory = new MatchHistory();
 
     public String getName() {
@@ -193,21 +233,21 @@ public class State {
 
     public static class Builder {
 
-        private String nameAsString;
+        private final String nameAsString;
         private StateEnum name;
-        private Set<String> stateText = new HashSet<>();
-        private Set<StateImage> stateImages = new HashSet<>();
-        private Set<StateString> stateStrings = new HashSet<>();
-        private Set<StateRegion> stateRegions = new HashSet<>();
-        private Set<StateLocation> stateLocations = new HashSet<>();
+        private final Set<String> stateText = new HashSet<>();
+        private final Set<StateImage> stateImages = new HashSet<>();
+        private final Set<StateString> stateStrings = new HashSet<>();
+        private final Set<StateRegion> stateRegions = new HashSet<>();
+        private final Set<StateLocation> stateLocations = new HashSet<>();
         private boolean blocking = false;
-        private Set<String> canHide = new HashSet<>();
-        private Set<String> hidden = new HashSet<>();
+        private final Set<String> canHide = new HashSet<>();
+        private final Set<String> hidden = new HashSet<>();
         private int pathScore = 1;
         private LocalDateTime lastAccessed;
         private int baseProbabilityExists = 100;
-        private List<Mat> screens = new ArrayList<>();
-        private List<StateIllustration> illustrations = new ArrayList<>();
+        private final List<Scene> scenes = new ArrayList<>();
+        private final List<StateIllustration> illustrations = new ArrayList<>();
 
         public Builder(StateEnum stateName) {
             this.name = stateName;
@@ -267,8 +307,8 @@ public class State {
             return this;
         }
 
-        public Builder withScreens(List<Mat> screens) {
-            this.screens.addAll(screens);
+        public Builder withScenes(List<Scene> scenes) {
+            this.scenes.addAll(scenes);
             return this;
         }
 
@@ -294,7 +334,7 @@ public class State {
             state.hidden = hidden;
             state.pathScore = pathScore;
             state.baseProbabilityExists = baseProbabilityExists;
-            state.screens = screens;
+            state.scenes = scenes;
             state.illustrations = illustrations;
             return state;
         }

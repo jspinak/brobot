@@ -1,8 +1,15 @@
 package io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects;
 
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
+import io.github.jspinak.brobot.datatypes.state.NullState;
+import io.github.jspinak.brobot.datatypes.state.stateObject.StateObject;
 import io.github.jspinak.brobot.primatives.enums.StateEnum;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import lombok.Data;
+import org.springframework.data.annotation.Id;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -13,16 +20,21 @@ import java.util.Map;
  * the set of States to search for in case Brobot is lost.
  * StateText is not yet implemented by Brobot.
  */
+@Entity
 @Data
 public class StateText {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
+
+    private StateObject.Type objectType = StateObject.Type.TEXT;
     private String name;
+    @Embedded
     private Region searchRegion;
-    private StateEnum ownerStateName;
+    private String ownerStateName = NullState.Name.NULL.toString();
 
     private String text;
-    // if a substring is found, set expected state
-    private Map<String, StateEnum> expectedState = new HashMap<>();
 
     private StateText() {}
 
@@ -31,8 +43,7 @@ public class StateText {
     public static class Builder {
         private String name;
         private Region searchRegion;
-        private StateEnum ownerStateName;
-        private Map<String, StateEnum> expectedState;
+        private String ownerStateName;
 
         public Builder called(String name) {
             this.name = name;
@@ -44,13 +55,8 @@ public class StateText {
             return this;
         }
 
-        public Builder inState(StateEnum stateName) {
+        public Builder inState(String stateName) {
             this.ownerStateName = stateName;
-            return this;
-        }
-
-        public Builder addExpectedState(String string, StateEnum stateEnum) {
-            this.expectedState.put(string, stateEnum);
             return this;
         }
 
@@ -59,7 +65,6 @@ public class StateText {
             stateText.name = name;
             stateText.searchRegion = searchRegion;
             stateText.ownerStateName = ownerStateName;
-            stateText.expectedState = expectedState;
             return stateText;
         }
 

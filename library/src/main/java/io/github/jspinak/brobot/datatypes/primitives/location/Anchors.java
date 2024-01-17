@@ -1,15 +1,22 @@
 package io.github.jspinak.brobot.datatypes.primitives.location;
 
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.JoinColumn;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Embeddable
 @Getter
 @Setter
 public class Anchors {
 
+    @ElementCollection
+    @CollectionTable(name = "anchors_anchors", joinColumns = @JoinColumn(name = "anchors_id"))
     private List<Anchor> anchors = new ArrayList<>();
 
     public void add(Anchor anchor) {

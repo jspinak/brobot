@@ -31,7 +31,7 @@ public class StateMemory {
 
     public void adjustActiveStatesWithMatches(Matches matches) {
         matches.getMatchList().forEach(match -> {
-            if (match.getStateObject() != null) addActiveState(match.getStateObject().getOwnerStateName());
+            if (match.getStateObjectData() != null) addActiveState(match.getStateObjectData().getOwnerStateName());
         });
     }
 

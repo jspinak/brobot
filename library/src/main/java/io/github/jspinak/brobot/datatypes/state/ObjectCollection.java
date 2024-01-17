@@ -29,6 +29,7 @@ import static io.github.jspinak.brobot.datatypes.state.NullState.Name.NULL;
  * - Image: these are scenes, or screenshots on file, that are used for the operation instead of the active environment
  *   (what is currently on the monitor).
  */
+@Entity
 @Getter
 @Setter
 public class ObjectCollection {
@@ -269,10 +270,7 @@ public class ObjectCollection {
 
         public Builder withMatchObjectsAsStateImages(io.github.jspinak.brobot.datatypes.primitives.match.Match... matches) {
             for (io.github.jspinak.brobot.datatypes.primitives.match.Match match : matches) {
-                this.stateImages.add(
-                        new StateImage.Builder()
-                                .addPattern(match.getPattern())
-                                .build());
+                this.stateImages.add(match.toStateImage());
             }
             return this;
         }

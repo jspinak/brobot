@@ -6,26 +6,43 @@ import io.github.jspinak.brobot.datatypes.primitives.location.Location;
 import io.github.jspinak.brobot.datatypes.primitives.location.Position;
 import io.github.jspinak.brobot.datatypes.primitives.match.MatchHistory;
 import io.github.jspinak.brobot.datatypes.primitives.match.MatchSnapshot;
+import io.github.jspinak.brobot.datatypes.state.NullState;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
+import io.github.jspinak.brobot.datatypes.state.state.State;
 import io.github.jspinak.brobot.datatypes.state.stateObject.StateObject;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import lombok.Data;
+import org.springframework.data.annotation.Id;
 
 /**
  * A StateLocation belongs to a State and usually has a Location that
  * has a special meaning for its owner State. For example, clicking on
  * this Location has an effect in the owner State but not in other States.
  */
+@Entity
 @Data
 public class StateLocation implements StateObject {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
+
+    private StateObject.Type objectType = StateObject.Type.LOCATION;
     private String name;
+    @Embedded
     private Location location;
-    private String ownerStateName;
+    private String ownerStateName = NullState.Name.NULL.toString();
     private int staysVisibleAfterClicked = 100;
     private int probabilityExists = 100; // probability something can be acted on at this location
     private int timesActedOn = 0;
+    @Embedded
     private Position position;
+    @Embedded
     private Anchors anchors; // just one, but defined with Anchors b/c it's a StateObject
+    @Embedded
     private MatchHistory matchHistory = new MatchHistory(); // not used yet
 
     private StateLocation() {}

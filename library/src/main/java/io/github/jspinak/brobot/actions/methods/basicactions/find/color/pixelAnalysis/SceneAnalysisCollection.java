@@ -68,7 +68,7 @@ public class SceneAnalysisCollection {
     public List<Mat> getAllScenesAsBGR() {
         List<Mat> mats = new ArrayList<>();
         for (SceneAnalysis sceneAnalysis : sceneAnalyses) {
-            mats.add(sceneAnalysis.getScene().getBgr());
+            mats.add(sceneAnalysis.getScene().getImage().getMatBGR());
         }
         return mats;
     }
@@ -78,7 +78,7 @@ public class SceneAnalysisCollection {
         if (scenes.isEmpty()) {
             return Optional.empty();
         }
-        return Optional.of(scenes.get(scenes.size() - 1).getBgr());
+        return Optional.of(scenes.get(scenes.size() - 1).getImage().getMatBGR());
     }
 
     public List<Illustrations> getAllIllustratedScenes() {

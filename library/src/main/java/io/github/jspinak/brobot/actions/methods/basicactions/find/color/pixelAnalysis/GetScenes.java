@@ -6,7 +6,7 @@ import io.github.jspinak.brobot.actions.methods.time.Time;
 import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import io.github.jspinak.brobot.illustratedHistory.IllustrateScreenshot;
-import io.github.jspinak.brobot.imageUtils.GetBufferedImage;
+import io.github.jspinak.brobot.imageUtils.BufferedImageOps;
 import io.github.jspinak.brobot.imageUtils.GetImageJavaCV;
 import io.github.jspinak.brobot.reports.Report;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -54,9 +54,7 @@ public class GetScenes {
         if (takeScreenshot) {
             Report.println("Taking screenshot");
             for (int i=0; i<scenesToCapture; i++) {
-                Mat bgr = getImageJavaCV.getMatFromScreen();
-                BufferedImage bi = GetBufferedImage.fromMat(bgr);
-                scenes.add(new Scene("screenshot" + i + ".png", bgr, bi));
+                scenes.add(new Scene("screenshot" + i + ".png"));
                 if (i<scenesToCapture-1) time.wait(secondsBetweenCaptures);
             }
             return scenes;
@@ -64,29 +62,18 @@ public class GetScenes {
         if (BrobotSettings.mock) {
             // If scenes are listed in the settings, use them.
             if (!BrobotSettings.screenshots.isEmpty()) {
-                BrobotSettings.screenshots.forEach(
-                        filename -> {
-                            String absolutePath = new File(BrobotSettings.screenshotPath+filename).getAbsolutePath();
-                            Mat bgr = getImageJavaCV.getMatFromBundlePath(filename, BGR);
-                            BufferedImage bi = GetBufferedImage.fromMat(bgr);
-                            scenes.add(new Scene(filename, absolutePath, bgr, bi));
-                        });
+                BrobotSettings.screenshots.forEach(filename -> scenes.add(new Scene(filename)));
             }
             // If no scenes are listed in the settings, use a randomly generated scene.
             else scenes.add(Scene.getEmptyScene());
             return scenes;
         }
         // If scenes are passed as parameters, use them.
-        else for (Pattern pattern : objectCollections.get(0).getScenes()) {
-            String filename = pattern.getFilename();
-            String absolutePath = new File(filename).getAbsolutePath();
-            BufferedImage bi = GetBufferedImage.fromMat(pattern.getMat());
-            scenes.add(new Scene.Builder()
-                    .setName(filename)
-                    .setAbsolutePath(absolutePath)
-                    .setBGR(pattern.getMat())
-                    .setBufferedImageBGR(bi)
-                    .build());
+        List<Pattern> scenesInObjectCollection = objectCollections.get(0).getScenes();
+        if (!scenesInObjectCollection.isEmpty()) {
+            for (Pattern pattern : scenesInObjectCollection) {
+                scenes.add(new Scene(pattern.getFilename()));
+            }
             return scenes;
         }
         scenes.add(Scene.getEmptyScene());

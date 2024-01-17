@@ -1,4 +1,4 @@
-package io.github.jspinak.brobot.desktopBackend.api;
+package io.github.jspinak.brobot.database.api;
 
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.Scene;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -11,7 +11,7 @@ import java.util.List;
 @RequestMapping("/api/scenes")
 public class SceneController {
 
-    private SceneService sceneService;
+    private final SceneService sceneService;
 
     public SceneController(SceneService sceneService) {
         this.sceneService = sceneService;

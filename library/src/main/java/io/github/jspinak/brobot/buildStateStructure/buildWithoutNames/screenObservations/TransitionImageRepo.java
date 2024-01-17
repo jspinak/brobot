@@ -2,23 +2,18 @@ package io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.screenObs
 
 import io.github.jspinak.brobot.actions.actionExecution.Action;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
-import io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.screenObservations.ScreenObservation;
-import io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.screenObservations.TransitionImage;
 import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
-import io.github.jspinak.brobot.imageUtils.GetBufferedImage;
-import io.github.jspinak.brobot.imageUtils.MatBuilder;
+import io.github.jspinak.brobot.imageUtils.BufferedImageOps;
 import io.github.jspinak.brobot.imageUtils.MatImageRecognition;
 import io.github.jspinak.brobot.imageUtils.MatVisualize;
 import lombok.Getter;
 import lombok.Setter;
-import org.bytedeco.opencv.opencv_core.Mat;
 import org.sikuli.script.Match;
 import org.springframework.stereotype.Component;
 
-import javax.xml.parsers.SAXParser;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,19 +31,19 @@ public class TransitionImageRepo {
     private final MatImageRecognition matImageRecognition;
     private final MatVisualize matVisualize;
     private final ScreenObservationManager screenObservationManager;
-    private final GetBufferedImage getBufferedImage;
+    private final BufferedImageOps bufferedImageOps;
     private final Action action;
 
     private List<TransitionImage> images = new ArrayList<>();
     private boolean saveMatchingImages;
 
     public TransitionImageRepo(MatImageRecognition matImageRecognition, MatVisualize matVisualize,
-                               ScreenObservationManager screenObservationManager, GetBufferedImage getBufferedImage,
+                               ScreenObservationManager screenObservationManager, BufferedImageOps bufferedImageOps,
                                Action action) {
         this.matImageRecognition = matImageRecognition;
         this.matVisualize = matVisualize;
         this.screenObservationManager = screenObservationManager;
-        this.getBufferedImage = getBufferedImage;
+        this.bufferedImageOps = bufferedImageOps;
         this.action = action;
     }
 
@@ -114,7 +109,7 @@ public class TransitionImageRepo {
     }
 
     private StateImage getStateImage(TransitionImage transitionImage) {
-        BufferedImage bufferedImage = getBufferedImage.convert(transitionImage.getImage());
+        BufferedImage bufferedImage = bufferedImageOps.convert(transitionImage.getImage());
         Pattern pattern = new Pattern(bufferedImage);
         return pattern.inNullState();
     }

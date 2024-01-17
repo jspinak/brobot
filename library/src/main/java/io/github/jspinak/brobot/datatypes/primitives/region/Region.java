@@ -1,25 +1,33 @@
 package io.github.jspinak.brobot.datatypes.primitives.region;
 
 import io.github.jspinak.brobot.datatypes.primitives.location.Location;
+import io.github.jspinak.brobot.datatypes.state.NullState;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.StateRegion;
-import io.github.jspinak.brobot.datatypes.state.NullState;
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import lombok.Getter;
 import lombok.Setter;
 import org.bytedeco.opencv.opencv_core.Rect;
 import org.sikuli.script.Match;
 import org.sikuli.script.Screen;
+import org.springframework.data.annotation.Id;
 
 import java.util.*;
-import java.util.List;
 
 /**
  * Region extends the Sikuli class Region and adds, among other functionality, new
  * initializers, analysis tools, and points x2 and y2.
  */
+@Embeddable
 @Getter
 @Setter
 public class Region extends org.sikuli.script.Region implements Comparable<Region> {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
 
     private int x2 = -1; // x + w
     private int y2 = -1; // y + h

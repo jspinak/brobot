@@ -4,7 +4,6 @@ import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAna
 import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
 import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
-import org.sikuli.script.Element;
 import org.sikuli.script.Finder;
 import org.sikuli.script.OCR;
 import org.springframework.stereotype.Component;
@@ -28,8 +27,8 @@ public class FindInScene {
      * @return the Finder.
      */
     private Finder getFinder(Scene scene) {
-        if (scene.getBufferedImageBGR() != null) return new Finder(scene.getBufferedImageBGR());
-        return new Finder(scene.getAbsolutePath());
+        if (!scene.getImage().isEmpty()) return new Finder(scene.getImage().get());
+        return new Finder(scene.getName());
     }
 
     public List<Match> findAllInScene(Pattern pattern, Scene scene) {
@@ -48,7 +47,9 @@ public class FindInScene {
 
     /**
      * Returns the Match objects corresponding to words. Match objects have an Image variable, but
-     * this is null after an OCR operation. Instead, a Pattern with a Mat is created.
+     * this is null after an OCR operation. This Match Builder sets the Image's BufferedImage automatically
+     * when given a Scene. The BufferedImage is set again at the end of the Find operation, as the final match region
+     * may have shifted or fused.
      *
      * The method Finder.findWords() does not work on a file and cannot be used here.
      * @param scene can be created from a screenshot or file
@@ -56,20 +57,12 @@ public class FindInScene {
      */
     public List<Match> getWordMatches(Scene scene) {
         List<Match> wordMatches = new ArrayList<>();
-        OCR.readWords(scene.getBufferedImageBGR()).forEach(match -> {
-            Pattern p = new Pattern.Builder()
-                    .setName("word")
-                    .setFixed(true)
-                    .setFixedRegion(new Region(match))
-                    .build();
+        OCR.readWords(scene.getImage().get()).forEach(match -> {
             Match m = new Match.Builder()
                     .setName("word")
                     .setMatch(match)
                     .setScene(scene)
-                    .setPattern(p)
                     .build();
-            m.setMatWithScene(); // is set again at the end of Find, as the final match region may have shifted or fused
-            p.setMat(m.getMat());
             wordMatches.add(m);
         });
         return wordMatches;
