@@ -22,10 +22,10 @@ import static org.bytedeco.opencv.opencv_core.Mat.ones;
 @Component
 public class MatOps3d {
 
-    private final GetBufferedImage getBufferedImage;
+    private final BufferedImageOps bufferedImageOps;
 
-    public MatOps3d(GetBufferedImage getBufferedImage) {
-        this.getBufferedImage = getBufferedImage;
+    public MatOps3d(BufferedImageOps bufferedImageOps) {
+        this.bufferedImageOps = bufferedImageOps;
     }
 
     /**
@@ -383,7 +383,7 @@ public class MatOps3d {
 
     public Pattern makeTestPattern(short[] values) {
         Mat mat = makeMat3D(values);
-        BufferedImage bufferedImage = getBufferedImage.convert(mat);
+        BufferedImage bufferedImage = bufferedImageOps.convert(mat);
         return new Pattern(bufferedImage);
     }
 

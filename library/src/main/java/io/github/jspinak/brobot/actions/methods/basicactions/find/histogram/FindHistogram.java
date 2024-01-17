@@ -49,7 +49,7 @@ public class FindHistogram {
         List<Match> matchObjects = new ArrayList<>();
         objectCollections.get(0).getStateImages().forEach(img ->
                 scenes.forEach(scene -> {
-                    matchObjects.addAll(forOneImage(actionOptions, img, scene.getHsv()));
+                    matchObjects.addAll(forOneImage(actionOptions, img, scene.getImage().getMatHSV()));
                     sceneAnalysisCollection.add(new SceneAnalysis(new ArrayList<>(), scene));
                 }));
         int maxMatches = actionOptions.getMaxMatchesToActOn();
