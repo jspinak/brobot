@@ -2,12 +2,11 @@ package io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.stateStru
 
 import io.github.jspinak.brobot.actions.BrobotSettings;
 import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
-import io.github.jspinak.brobot.datatypes.primitives.location.Position;
+import io.github.jspinak.brobot.datatypes.primitives.location.Positions;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import lombok.Getter;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 @Getter
@@ -65,11 +64,11 @@ public class StateStructureTemplate {
         public Builder setBoundaryImages(String topLeft, String bottomRight) {
             this.topLeftBoundary = new Pattern.Builder()
                     .setFilename(topLeft)
-                    .addAnchor(Position.Name.TOPLEFT, Position.Name.BOTTOMLEFT)
+                    .addAnchor(Positions.Name.TOPLEFT, Positions.Name.BOTTOMLEFT)
                     .build();
             this.bottomRightBoundary = new Pattern.Builder()
                     .setFilename(bottomRight)
-                    .addAnchor(Position.Name.BOTTOMRIGHT, Position.Name.TOPRIGHT)
+                    .addAnchor(Positions.Name.BOTTOMRIGHT, Positions.Name.TOPRIGHT)
                     .build();
             return this;
         }

@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.mock;
 
-import io.github.jspinak.brobot.services.StateService;
+import io.github.jspinak.brobot.database.api.StateService;
 import org.springframework.stereotype.Component;
 
 /**
@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class MockStateManagement {
 
-    private StateService stateService;
+    private final StateService stateService;
 
     public MockStateManagement(StateService stateService) {
         this.stateService = stateService;
@@ -17,7 +17,7 @@ public class MockStateManagement {
 
     public void setStateProbabilities(int probability, String... stateNames) {
         for (String stateName : stateNames) {
-            stateService.findByName(stateName).ifPresent(state -> {
+            stateService.getState(stateName).ifPresent(state -> {
                 state.setProbabilityExists(probability);
             });
         }

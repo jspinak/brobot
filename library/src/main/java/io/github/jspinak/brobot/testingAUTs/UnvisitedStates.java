@@ -1,9 +1,9 @@
 package io.github.jspinak.brobot.testingAUTs;
 
+import io.github.jspinak.brobot.database.api.StateService;
 import io.github.jspinak.brobot.manageStates.PathFinder;
 import io.github.jspinak.brobot.manageStates.Paths;
 import io.github.jspinak.brobot.manageStates.StateMemory;
-import io.github.jspinak.brobot.services.StateService;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -13,7 +13,7 @@ public class UnvisitedStates {
 
     private final StateMemory stateMemory;
     private final StateService stateService;
-    private PathFinder pathFinder;
+    private final PathFinder pathFinder;
 
     private TreeMap<Integer, String> unvisitedDistance = new TreeMap<>();
 
@@ -26,7 +26,7 @@ public class UnvisitedStates {
 
     public Set<String> getUnvisitedStates() {
         Set<String> unvisited = new HashSet<>();
-        stateService.findAllStates().forEach(st -> {
+        stateService.getAllStates().forEach(st -> {
             if (st.getTimesVisited() == 0) unvisited.add(st.getName());
         });
         return unvisited;

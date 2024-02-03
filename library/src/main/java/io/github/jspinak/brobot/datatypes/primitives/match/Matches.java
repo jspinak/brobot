@@ -5,16 +5,15 @@ import io.github.jspinak.brobot.actions.actionExecution.actionLifecycle.ActionLi
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.SceneAnalysis;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.SceneAnalysisCollection;
-import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
 import io.github.jspinak.brobot.datatypes.primitives.location.Location;
-import io.github.jspinak.brobot.datatypes.primitives.location.Position;
+import io.github.jspinak.brobot.datatypes.primitives.location.Positions;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.primitives.text.Text;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
+import jakarta.persistence.*;
 import lombok.Data;
 import org.bytedeco.opencv.opencv_core.Mat;
-import org.python.antlr.ast.Str;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -38,28 +37,58 @@ import java.util.stream.Collectors;
  * - definedRegions are saved for Define operations, which define the boundaries of a region or regions.
  * </p>
  */
+@Entity
 @Data
 public class Matches {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
+
     private String actionDescription = "";
     private int actionId; // a unique id also stored in the class ActionLifecycleManagement
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinTable(name = "matches_matchList",
+            joinColumns = @JoinColumn(name = "matches_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "match_id", referencedColumnName = "id"))
     private List<Match> matchList = new ArrayList<>();
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinTable(name = "matches_initialMatchList",
+            joinColumns = @JoinColumn(name = "matches_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "match_id", referencedColumnName = "id"))
     private List<Match> initialMatchList = new ArrayList<>(); // the first set of matches in a composite find operation. it may be useful to see these matches in illustrations.
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinTable(name = "matches_nonoverlappingMatchList",
+            joinColumns = @JoinColumn(name = "matches_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "match_id", referencedColumnName = "id"))
     private List<Match> nonoverlappingMatchList = new ArrayList<>();
+    @OneToOne(cascade = CascadeType.ALL)
     private ActionOptions actionOptions; // the action options used to find the matches
+    @ElementCollection
+    @CollectionTable(name = "activeStates", joinColumns = @JoinColumn(name = "matches_id"))
     private List<String> activeStates = new ArrayList<>();
+    @Transient
     private Text text = new Text();
     private String selectedText = ""; // the String selected from the Text object as the most accurate representation of the text on-screen
+    @Transient
     private Duration duration = Duration.ZERO;
     private LocalDateTime startTime = LocalDateTime.now();
     private LocalDateTime endTime;
     private boolean success = false; // for boolean queries (i.e. true for 'find', false for 'vanish' when not empty)
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinTable(name = "matches_definedRegions",
+            joinColumns = @JoinColumn(name = "matches_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "region_id", referencedColumnName = "id"))
     private List<Region> definedRegions = new ArrayList<>();
     private int maxMatches = -1; // not used when <= 0
+    @Transient
     private DanglingSnapshots danglingSnapshots = new DanglingSnapshots();
+    @Transient
     private SceneAnalysisCollection sceneAnalysisCollection = new SceneAnalysisCollection();
+    @Transient
     private Mat mask; // for motion detection and other pixel-based analysis
     private String outputText = "";
+    @Transient
     private ActionLifecycle actionLifecycle;
 
     public Matches() {}
@@ -122,7 +151,7 @@ public class Matches {
      */
     public List<Region> getMatchRegions() {
         List<Region> regions = new ArrayList<>();
-        matchList.forEach(mO -> regions.add(new Region(mO)));
+        matchList.forEach(mO -> regions.add(mO.getRegion()));
         return regions;
     }
 
@@ -143,7 +172,7 @@ public class Matches {
 
     public Optional<Match> getBestMatch() {
         return matchList.stream()
-                .max(Comparator.comparingDouble(org.sikuli.script.Match::getScore));
+                .max(Comparator.comparingDouble(Match::getScore));
     }
 
     /**
@@ -152,10 +181,10 @@ public class Matches {
      * @return true if added to the non-overlapping matches
      */
     private boolean addNonoverlappingMatch(Match m) {
-        Region match = new Region(m);
+        Region match = m.getRegion();
         Region nonoverlap;
         for (Match n : nonoverlappingMatchList) {
-            nonoverlap = new Region(n);
+            nonoverlap = n.getRegion();
             if (match.overlaps(nonoverlap)) return false;
         }
         nonoverlappingMatchList.add(m);
@@ -222,10 +251,10 @@ public class Matches {
         if (matchList.isEmpty()) return Optional.empty();
         int cumX = 0, cumY = 0, cumW = 0, cumH = 0;
         for (Match m : matchList) {
-            cumX += m.x;
-            cumY += m.y;
-            cumW += m.w;
-            cumH += m.h;
+            cumX += m.x();
+            cumY += m.y();
+            cumW += m.w();
+            cumH += m.h();
         }
         int size = matchList.size();
         return Optional.of(new Region(cumX/size, cumY/size, cumW/size, cumH/size));
@@ -233,7 +262,7 @@ public class Matches {
 
     public Optional<Location> getMedianLocation() {
         Optional<Region> regOpt = getMedian();
-        return regOpt.map(region -> new Location(region, Position.Name.MIDDLEMIDDLE));
+        return regOpt.map(region -> new Location(region, Positions.Name.MIDDLEMIDDLE));
     }
 
     public Optional<Match> getClosestTo(Location location) {
@@ -251,8 +280,8 @@ public class Matches {
     }
 
     private double getDist(Match match, Location location) {
-        int xDist = match.x - location.getX();
-        int yDist = match.y - location.getY();
+        int xDist = match.x() - location.getX();
+        int yDist = match.y() - location.getY();
         return Math.pow(xDist, 2) + Math.pow(yDist, 2);
     }
 
@@ -304,13 +333,13 @@ public class Matches {
 
     public Set<Long> getUniqueImageIds() {
         return matchList.stream()
-                .map(match -> match.getStateObjectData().getId())
+                .map(match -> match.getStateObjectData().getStateObjectId())
                 .collect(Collectors.toSet());
     }
 
     public List<Match> getMatchObjectsWithTargetStateObject(Long id) {
         return matchList.stream()
-                .filter(match -> Objects.equals(match.getStateObjectData().getId(), id))
+                .filter(match -> Objects.equals(match.getStateObjectData().getStateObjectId(), id))
                 .collect(Collectors.toList());
     }
 

@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class RecordScreen {
-    private final FFmpegFrameGrabber grabber;
+/*    private final FFmpegFrameGrabber grabber;
     private final FFmpegFrameRecorder recorder;
     private String outputFilePath;
 
@@ -63,4 +63,6 @@ public class RecordScreen {
             e.printStackTrace();
         }
     }
+
+ */
 }

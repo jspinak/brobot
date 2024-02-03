@@ -4,15 +4,15 @@ import io.github.jspinak.brobot.reports.Report;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Size;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles.ColorCluster.ColorSchemaName.BGR;
 import static io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles.ColorInfo.ColorStat.MEAN;
 
-public class KmeansProfilesAllSchemas {
+public class KmeansProfilesAllSchemas implements Serializable {
 
     private Map<ColorCluster.ColorSchemaName, KmeansProfiles> kmeansProfiles = Map.of(
             BGR, new KmeansProfiles(),

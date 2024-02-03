@@ -18,13 +18,13 @@ public class KeyUpWrapper {
     public void release() {
         Report.format("release all keys| ");
         if (BrobotSettings.mock) return;
-        new Region().keyUp();
+        new Region().sikuli().keyUp();
     }
 
     public void release(String key) {
         Report.format("release %s| ", key);
         if (BrobotSettings.mock) return;
-        new Region().keyUp(key);
+        new Region().sikuli().keyUp(key);
     }
 
     /**
@@ -35,6 +35,6 @@ public class KeyUpWrapper {
             Report.format("release %d| ", key);
             return;
         }
-        new Region().keyUp(key);
+        new Region().sikuli().keyUp(key);
     }
 }

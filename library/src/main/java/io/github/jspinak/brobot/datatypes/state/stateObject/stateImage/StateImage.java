@@ -16,10 +16,6 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.bytedeco.opencv.opencv_core.Mat;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.annotation.LastModifiedBy;
-
-import java.io.File;
 import java.util.*;
 
 /**
@@ -54,15 +50,9 @@ public class StateImage implements StateObject {
     private boolean shared = false; // shared means also found in other states
 
     // for color analysis and illustration
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinTable(name = "stateImage_colorProfiles",
-            joinColumns = @JoinColumn (name = "stateImage_id"),
-            inverseJoinColumns = @JoinColumn (name = "colorProfiles_id"))
+    @Transient
     private KmeansProfilesAllSchemas kmeansProfilesAllSchemas = new KmeansProfilesAllSchemas();
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinTable(name = "stateImage_colorCluster",
-            joinColumns = @JoinColumn (name = "stateImage_id"),
-            inverseJoinColumns = @JoinColumn (name = "colorCluster_id"))
+    @Transient
     private ColorCluster colorCluster = new ColorCluster();
     private int index; // a unique identifier. used for classification matrices.
     private boolean dynamic = false; // dynamic images cannot be found using pattern matching
@@ -72,9 +62,13 @@ public class StateImage implements StateObject {
     wrapper object that includes information about the Mat size and type. These Mat objects do not contain unique
     data: they are here for convenience and can be recreated with the patterns' BufferedImage objects.
      */
+    @Transient
     private Mat oneColumnBGRMat; // initialized when program is run
+    @Transient
     private Mat oneColumnHSVMat; // initialized when program is run
+    @Transient
     private Mat imagesMat; // initialized when program is run, shows the images in the StateImage
+    @Transient
     private Mat profilesMat; // initialized when program is run, shows the color profiles in the StateImage
 
     /**
@@ -87,9 +81,13 @@ public class StateImage implements StateObject {
     after the basic state structure is in place. Once there is a basic state structure, observations after clicking
     new StateImage objects can identify current states (or no states) and do not rely on screens anymore.
      */
+    @Transient
     private Integer transitionsToScreen;
+    @Transient
     private TransitionImage transitionImage;
+    @Transient
     private Set<String> statesToEnter = new HashSet<>();
+    @Transient
     private Set<String> statesToExit = new HashSet<>();
 
     /**
@@ -105,7 +103,7 @@ public class StateImage implements StateObject {
      * @param anchors the Anchor objects to use for each Pattern.
      */
     public void setAnchors(Anchor... anchors) {
-        patterns.forEach(pattern -> pattern.getAnchors().setAnchors(List.of(anchors)));
+        patterns.forEach(pattern -> pattern.getAnchors().setAnchorList(List.of(anchors)));
     }
 
     public void addTimesActedOn() {

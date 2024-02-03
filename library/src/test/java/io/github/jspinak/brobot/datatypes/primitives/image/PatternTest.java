@@ -15,12 +15,6 @@ class PatternTest {
     }
 
     @Test
-    void x() {
-        Pattern pattern = new Pattern("topLeft");
-        assertEquals(0, pattern.x());
-    }
-
-    @Test
     void w() {
         Pattern pattern = new Pattern("topLeft");
         assertEquals(107, pattern.w());

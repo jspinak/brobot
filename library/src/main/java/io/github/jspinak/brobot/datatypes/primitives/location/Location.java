@@ -6,8 +6,7 @@ import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.StateLocation;
 import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.StateRegion;
 import io.github.jspinak.brobot.reports.Report;
-import jakarta.persistence.Embeddable;
-import jakarta.persistence.Embedded;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -21,20 +20,24 @@ import static io.github.jspinak.brobot.datatypes.state.NullState.Name.NULL;
  * The relative position is used unless the Region is not defined
  * or the boolean 'definedByXY' is explicitly set to true;
  */
-@Embeddable
+@Entity
 @Getter
 @Setter
 public class Location {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
 
     private String name;
     private boolean definedByXY = true;
     private int x = -1;
     private int y = -1;
-    @Embedded
+    @OneToOne(cascade = CascadeType.ALL)
     private Region region;
     @Embedded
     private Position position;
-    private Position.Name anchor;
+    private Positions.Name anchor;
 
     public Location() {
         this.x = 0;
@@ -66,6 +69,7 @@ public class Location {
             y = loc.y;
         }
         anchor = loc.anchor;
+        name = loc.name;
     }
 
     public Location(Region region, org.sikuli.script.Location sikuliLocation) {
@@ -75,13 +79,13 @@ public class Location {
 
     public Location(Region region) {
         this.region = region;
-        setPosition(region.getTarget().x, region.getTarget().y);
+        setPosition(region.sikuli().getTarget().x, region.sikuli().getTarget().y);
     }
 
     public void setPosition(int newX, int newY) {
         int percentOfW, percentOfH;
-        percentOfW = (newX - region.x) / region.w;
-        percentOfH = (newY - region.y) / region.h;
+        percentOfW = (newX - region.x()) / region.w();
+        percentOfH = (newY - region.y()) / region.h();
         position = new Position(percentOfW, percentOfH);
         definedByXY = false;
     }
@@ -92,13 +96,13 @@ public class Location {
         definedByXY = false;
     }
 
-    public Location(Region region, Position.Name position) {
+    public Location(Region region, Positions.Name position) {
         this.region = region;
         this.position = new Position(position);
         definedByXY = false;
     }
 
-    public Location(Position.Name position) {
+    public Location(Positions.Name position) {
         this.region = new Region();
         this.position = new Position(position);
         definedByXY = false;
@@ -111,22 +115,22 @@ public class Location {
     }
 
     public Location(Match match) {
-        this.region = new Region(match);
+        this.region = match.getRegion();
         double percentOfW, percentOfH;
-        percentOfW = ((double)match.getTarget().x - (double)region.x) / (double)region.w;
-        percentOfH = ((double)match.getTarget().y - (double)region.y) / (double)region.h;
+        percentOfW = ((double)match.getTarget().x - (double)region.x()) / (double)region.w();
+        percentOfH = ((double)match.getTarget().y - (double)region.y()) / (double)region.h();
         position = new Position(percentOfW, percentOfH);
         definedByXY = false;
     }
 
     public Location(Match match, Position position) {
-        this.region = new Region(match);
+        this.region = match.getRegion();
         this.position = position;
         definedByXY = false;
     }
 
     public Location(Match match, int percentOfW, int percentOfH) {
-        this.region = new Region(match);
+        this.region = match.getRegion();
         this.position = new Position(percentOfW, percentOfH);
         definedByXY = false;
     }
@@ -177,8 +181,8 @@ public class Location {
     }
 
     private org.sikuli.script.Location getSikuliLocationFromRegion() {
-        double locX = region.x + (region.w * position.getPercentW());
-        double locY = region.y + (region.h * position.getPercentH());
+        double locX = region.x() + (region.w() * position.getPercentW());
+        double locY = region.y() + (region.h() * position.getPercentH());
         return new org.sikuli.script.Location(locX, locY);
     }
 
@@ -197,12 +201,12 @@ public class Location {
 
     public int getRegionW() {
         if (isDefinedByXY()) return 1;
-        return region.w;
+        return region.w();
     }
 
     public int getRegionH() {
         if (isDefinedByXY()) return 1;
-        return region.h;
+        return region.h();
     }
 
     public boolean defined() {
@@ -210,8 +214,10 @@ public class Location {
     }
 
     public Match toMatch() {
-        Match match = new Match(getX(), getY(), 1, 1);
-        match.setTarget(getX(), getY());
+        Match match = new Match.Builder()
+                .setRegion(getX(), getY(), 1, 1)
+                .build();
+        match.setTarget(new Location(getX(), getY()));
         return match;
     }
 
@@ -226,7 +232,7 @@ public class Location {
         StateLocation stateLocation = new StateLocation.Builder()
                 .withLocation(this)
                 .inState(NULL.toString())
-                .setPosition(Position.Name.TOPLEFT)
+                .setPosition(Positions.Name.TOPLEFT)
                 .build();
         return new ObjectCollection.Builder()
                 .withLocations(stateLocation)
@@ -276,7 +282,7 @@ public class Location {
             x += plusX;
             y -= minusY;
         } else {// if defined by a region move from the center of the region
-            Location center = new Location(region, Position.Name.MIDDLEMIDDLE);
+            Location center = new Location(region, Positions.Name.MIDDLEMIDDLE);
             setPosition(center.getX() + plusX, center.getY() - minusY);
         }
     }
@@ -304,8 +310,8 @@ public class Location {
             return;
         }
         if (definedByXY) {
-            x += loc.position.getPercentW() * region.w;
-            y += loc.position.getPercentH() * region.h;
+            x += (int)(loc.position.getPercentW() * (double)region.w());
+            y += (int)(loc.position.getPercentH() * (double)region.h());
             return;
         }
         //Report.println("percent W,H " + position.getPercentW() + " " + position.getPercentH());
@@ -336,8 +342,8 @@ public class Location {
         private int x = -1;
         private int y = -1;
         private Region region;
-        private Position position = new Position(Position.Name.MIDDLEMIDDLE);
-        private Position.Name anchor = Position.Name.MIDDLEMIDDLE;
+        private Position position = new Position(Positions.Name.MIDDLEMIDDLE);
+        private Positions.Name anchor = Positions.Name.MIDDLEMIDDLE;
 
         public Builder called(String name) {
             this.name = name;
@@ -387,7 +393,7 @@ public class Location {
             return this;
         }
 
-        public Builder setPosition(Position.Name positionName) {
+        public Builder setPosition(Positions.Name positionName) {
             this.position = new Position(positionName);
             return this;
         }
@@ -400,13 +406,13 @@ public class Location {
         public Builder fromMatch(Match match) {
             this.region = new Region(match);
             int percentOfW, percentOfH;
-            percentOfW = (match.getTarget().x - match.x) / match.w;
-            percentOfH = (match.getTarget().y - match.y) / match.y;
+            percentOfW = (match.getTarget().x - match.x()) / match.w();
+            percentOfH = (match.getTarget().y - match.y()) / match.y();
             position = new Position(percentOfW, percentOfH);
             return this;
         }
 
-        public Builder setAnchor(Position.Name anchor) {
+        public Builder setAnchor(Positions.Name anchor) {
             this.anchor = anchor;
             return this;
         }

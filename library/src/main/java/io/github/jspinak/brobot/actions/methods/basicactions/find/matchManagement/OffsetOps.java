@@ -38,7 +38,7 @@ public class OffsetOps {
         StateLocation stateLocation = new StateLocation.Builder().withLocation(location).build();
         Match offsetMatch = new Match.Builder()
                 .setMatch(location.toMatch())
-                .setStateObject(stateLocation)
+                .setStateObjectData(stateLocation)
                 .build();
         matches.add(offsetMatch);
     }
@@ -56,7 +56,7 @@ public class OffsetOps {
         if (matches.isEmpty()) return;
         Match lastMatch = matches.getMatchList().get(matches.getMatchList().size() - 1);
         Location offsetLocation = new Location(
-                lastMatch.getX() + actionOptions.getAddX2(), lastMatch.getY() + actionOptions.getAddY2());
+                lastMatch.x() + actionOptions.getAddX2(), lastMatch.y() + actionOptions.getAddY2());
         Match lastMatchObject = matches.getMatchList().get(matches.getMatchList().size() - 1);
         StateObjectData stateObjectData = lastMatchObject.getStateObjectData();
         //double duration = lastMatchObject.getDuration();

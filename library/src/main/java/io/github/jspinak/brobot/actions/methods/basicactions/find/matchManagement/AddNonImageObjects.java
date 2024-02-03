@@ -39,8 +39,8 @@ public class AddNonImageObjects {
     public void addRegions(Matches matches, ObjectCollection objectCollection) {
         for (StateRegion r : objectCollection.getStateRegions()) {
             Match match = new Match.Builder()
-                    .setMatch(r.getSearchRegion())
-                    .setStateObject(r)
+                    .setRegion(r.getSearchRegion())
+                    .setStateObjectData(r)
                     .setAnchors(r.getAnchors())
                     .build();
             matches.add(match);
@@ -51,7 +51,7 @@ public class AddNonImageObjects {
         for (StateLocation stateLocation : objectCollection.getStateLocations()) {
             Match match = new Match.Builder()
                     .setMatch(stateLocation.getLocation().toMatch())
-                    .setStateObject(stateLocation)
+                    .setStateObjectData(stateLocation)
                     .build();
             matches.add(match);
         }

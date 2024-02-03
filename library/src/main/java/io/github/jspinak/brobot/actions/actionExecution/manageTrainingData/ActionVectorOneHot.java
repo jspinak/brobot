@@ -49,11 +49,11 @@ public class ActionVectorOneHot implements ActionVectorTranslation {
     private void setCoordinates(short[] vec, Matches matches) {
         Optional<Match> optMatch = matches.getBestMatch();
         if (optMatch.isEmpty()) return;
-        org.sikuli.script.Match match = optMatch.get();
-        vec[6] = (short) match.x;
-        vec[7] = (short) match.y;
-        vec[8] = (short) match.w;
-        vec[9] = (short) match.h;
+        Match match = optMatch.get();
+        vec[6] = (short) match.x();
+        vec[7] = (short) match.y();
+        vec[8] = (short) match.w();
+        vec[9] = (short) match.h();
     }
 
     private void setHighlightOptions(short[] vec, Matches matches) {

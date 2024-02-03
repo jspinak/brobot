@@ -2,16 +2,10 @@ package io.github.jspinak.brobot.actions.methods.basicactions.find.states;
 
 import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
-import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
-import io.github.jspinak.brobot.imageUtils.MatOps;
-import org.bytedeco.opencv.opencv_core.Mat;
-import org.bytedeco.opencv.opencv_core.Rect;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.Optional;
 
 import static org.bytedeco.opencv.global.opencv_core.countNonZero;
 
@@ -47,9 +41,9 @@ public class FindStates {
         populateTempStateRepo.createAndAddStatesForSceneToStateRepo(objectCollections);
         tempStateRepo.getAllStateImages().forEach(stateImage -> matches.add(
                 new Match.Builder()
-                        .setMatch(stateImage.getLargestDefinedFixedRegionOrNewRegion())
-                        .setStateObject(stateImage)
-                        .setPattern(stateImage.getPatterns().get(0))
+                        .setRegion(stateImage.getLargestDefinedFixedRegionOrNewRegion())
+                        .setStateObjectData(stateImage)
+                        .setSearchImage(stateImage.getPatterns().get(0).getBImage())
                         .setName(stateImage.getName())
                         .setSimScore(.99)
                         .build()

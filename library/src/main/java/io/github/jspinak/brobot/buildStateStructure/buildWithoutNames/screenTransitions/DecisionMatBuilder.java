@@ -31,8 +31,6 @@ public class DecisionMatBuilder {
     private Mat analysisMat;
     private int numberOfChangedPixels;
     private Mat combinedMats;
-    private final Scalar pink = new Scalar(147, 20, 255, 255);
-    private final Scalar black = new Scalar(0, 0, 0, 255);
 
     public DecisionMatBuilder(MatOps3d matOps3d, FindDynamicPixels findDynamicPixels) {
         this.matOps3d = matOps3d;
@@ -51,6 +49,8 @@ public class DecisionMatBuilder {
      */
     public DecisionMatBuilder colorChangedPixels(Mat newScreen, Mat dynamicPixelMask, int compareId,
                                                  Mat compareScreen, Mat compareDynamicMask) {
+        Scalar pink = new Scalar(147, 20, 255, 255);
+        Scalar black = new Scalar(0, 0, 0, 255);
         this.compareId = compareId;
         analysisMat = newScreen.clone();
         /*

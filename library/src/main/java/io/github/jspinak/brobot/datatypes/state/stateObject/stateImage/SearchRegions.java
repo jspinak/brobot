@@ -4,8 +4,8 @@ import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.data.annotation.Id;
 
+import java.io.Serializable;
 import java.util.*;
 
 /**
@@ -13,19 +13,25 @@ import java.util.*;
  * could be useful when you are not sure where an Image may be but want to exclude
  * an area, or when the desired search area cannot be described by one rectangle.
  */
-@Embeddable
+@Entity
 @Getter
 @Setter
-public class SearchRegions {
+public class SearchRegions implements Serializable {
 
-    @ElementCollection
-    @CollectionTable(name = "regions", joinColumns = @JoinColumn(name = "searchRegions_id"))
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
+
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinTable(name = "searchRegions_regions",
+            joinColumns = @JoinColumn(name = "searchRegions_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "region_id", referencedColumnName = "id"))
     private List<Region> regions = new ArrayList<>();
     /**
      * The fixed region is usually defined when an image with a fixed location is found for the first time.
      * This region is then used in future FIND operations with the associated image.
      */
-    @Embedded
+    @OneToOne(cascade = CascadeType.ALL)
     private Region fixedRegion = new Region();
 
     /**
@@ -130,7 +136,7 @@ public class SearchRegions {
     public SearchRegions getDeepCopy() {
         SearchRegions searchRegions = new SearchRegions();
         regions.forEach(reg -> searchRegions.addSearchRegions(
-                new Region(reg.getX(), reg.getY(), reg.getW(), reg.getH())));
+                new Region(reg.x(), reg.y(), reg.w(), reg.h())));
         return searchRegions;
     }
 

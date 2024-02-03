@@ -11,7 +11,7 @@ import java.util.List;
 public class MatchOps {
 
     public void addMatchListToMatches(List<Match> matchList, Matches matches) {
-        matchList.forEach(match -> matches.add(new Match(match)));
+        matchList.forEach(matches::add);
     }
 
     /**

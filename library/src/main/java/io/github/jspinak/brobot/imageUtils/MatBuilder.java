@@ -45,8 +45,8 @@ public class MatBuilder {
     }
 
     public MatBuilder init(Region region) {
-        int w = region.w;
-        int h = region.h;
+        int w = region.w();
+        int h = region.h();
         return setWH(w,h);
     }
 

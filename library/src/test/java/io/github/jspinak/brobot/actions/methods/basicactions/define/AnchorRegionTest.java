@@ -1,7 +1,7 @@
 package io.github.jspinak.brobot.actions.methods.basicactions.define;
 
 import io.github.jspinak.brobot.BrobotTestApplication;
-import io.github.jspinak.brobot.datatypes.primitives.location.Position;
+import io.github.jspinak.brobot.datatypes.primitives.location.Positions;
 import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
@@ -31,32 +31,32 @@ class AnchorRegionTest {
         Matches matches = new Matches();
         StateRegion reg1 = new StateRegion.Builder()
                 .withSearchRegion(0,50,100,20)
-                .addAnchor(Position.Name.TOPLEFT, Position.Name.BOTTOMLEFT)
+                .addAnchor(Positions.Name.TOPLEFT, Positions.Name.BOTTOMLEFT)
                 .build();
         StateRegion reg2 = new StateRegion.Builder()
                 .withSearchRegion(1800,900,100,20)
-                .addAnchor(Position.Name.BOTTOMRIGHT, Position.Name.TOPRIGHT)
+                .addAnchor(Positions.Name.BOTTOMRIGHT, Positions.Name.TOPRIGHT)
                 .build();
         Match m1;
         Match m2;
         m1 = new Match.Builder()
-                .setMatch(reg1.getSearchRegion())
-                .setStateObject(reg1)
+                .setRegion(reg1.getSearchRegion())
+                .setStateObjectData(reg1)
                 .setAnchors(reg1.getAnchors())
                 .build();
         m2 = new Match.Builder()
-                .setMatch(reg2.getSearchRegion())
-                .setStateObject(reg2)
+                .setRegion(reg2.getSearchRegion())
+                .setStateObjectData(reg2)
                 .setAnchors(reg2.getAnchors())
                 .build();
         matches.add(m1);
         matches.add(m2);
         anchorRegion.fitRegionToAnchors(definedBorders, region, matches);
 
-        assertEquals(reg1.getSearchRegion().x, region.x);
-        assertEquals(reg1.getSearchRegion().getY2(), region.y);
-        assertEquals(reg2.getSearchRegion().getX2(), region.getX2());
-        assertEquals(reg2.getSearchRegion().y, region.getY2());
+        assertEquals(reg1.getSearchRegion().x(), region.x());
+        assertEquals(reg1.getSearchRegion().y2(), region.y());
+        assertEquals(reg2.getSearchRegion().x2(), region.x2());
+        assertEquals(reg2.getSearchRegion().y(), region.y2());
     }
 
 }

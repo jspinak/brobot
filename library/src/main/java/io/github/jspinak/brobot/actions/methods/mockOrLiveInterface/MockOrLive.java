@@ -81,7 +81,7 @@ public class MockOrLive {
 
     public void wait(double seconds) {
         if (permissions.isMock()) mockTime.wait(seconds);
-        new Region().wait(seconds);
+        new Region().sikuli().wait(seconds);
     }
 
     public List<Match> findHistogram(StateImage stateImage, Mat sceneHSV, List<Region> regions) {

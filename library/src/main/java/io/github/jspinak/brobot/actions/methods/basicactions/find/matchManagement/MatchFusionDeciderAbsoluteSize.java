@@ -19,8 +19,8 @@ public class MatchFusionDeciderAbsoluteSize implements MatchFusionDecider {
      * @return true if the new match should be part of the current combined match region.
      */
     public boolean isSameMatchGroup(Match match1, Match match2, int minXDist, int minYDist) {
-        Region region1 = new Region(match1.x - minXDist, match1.y - minYDist, match1.w + 2 * minXDist, match1.h + 2 * minYDist);
-        Region region2 = new Region(match2.x - minXDist, match2.y - minYDist, match2.w + 2 * minXDist, match2.h + 2 * minYDist);
+        Region region1 = new Region(match1.x() - minXDist, match1.y() - minYDist, match1.w() + 2 * minXDist, match1.h() + 2 * minYDist);
+        Region region2 = new Region(match2.x() - minXDist, match2.y() - minYDist, match2.w() + 2 * minXDist, match2.h() + 2 * minYDist);
         Optional<Region> overlap = region1.getOverlappingRegion(region2);
         return overlap.isPresent();
     }

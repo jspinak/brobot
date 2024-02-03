@@ -1,36 +1,33 @@
 package io.github.jspinak.brobot.datatypes.primitives.region;
 
 import io.github.jspinak.brobot.datatypes.primitives.location.Location;
+import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import io.github.jspinak.brobot.datatypes.state.NullState;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.StateRegion;
-import jakarta.persistence.Embeddable;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import lombok.Getter;
+import jakarta.persistence.*;
 import lombok.Setter;
 import org.bytedeco.opencv.opencv_core.Rect;
-import org.sikuli.script.Match;
 import org.sikuli.script.Screen;
-import org.springframework.data.annotation.Id;
 
+import java.io.Serializable;
 import java.util.*;
 
 /**
- * Region extends the Sikuli class Region and adds, among other functionality, new
- * initializers, analysis tools, and points x2 and y2.
+ * Region uses methods from the SikuliX Region and adds new initializers and analysis tools.
  */
-@Embeddable
-@Getter
+@Entity
 @Setter
-public class Region extends org.sikuli.script.Region implements Comparable<Region> {
+public class Region implements Comparable<Region>, Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    private int x2 = -1; // x + w
-    private int y2 = -1; // y + h
+    int x;
+    int y;
+    int w;
+    int h;
 
     public Region() {
         Screen screen = new Screen();
@@ -45,18 +42,22 @@ public class Region extends org.sikuli.script.Region implements Comparable<Regio
         setTo(match);
     }
 
-    public Region(Region region) {
-        setTo(region);
+    public Region(org.sikuli.script.Match match) {
+        if (match == null) return;
+        setXYWH(match.x, match.y, match.w, match.h);
+    }
+
+    public Region(Region r) {
+        setXYWH(r.x, r.y, r.w, r.h);
     }
 
     public Region(org.sikuli.script.Region region) { setTo(region); }
 
     public Region(Match match, int xAdjust, int yAdjust, int wAdjust, int hAdjust) {
-        x = match.x - xAdjust;
-        y = match.y - yAdjust;
+        x = match.x() - xAdjust;
+        y = match.y() - yAdjust;
         w = wAdjust;
         h = hAdjust;
-        setXY2();
     }
 
     public Region(Rect rect) {
@@ -64,7 +65,6 @@ public class Region extends org.sikuli.script.Region implements Comparable<Regio
         y = rect.y();
         w = rect.width();
         h = rect.height();
-        setXY2();
     }
 
     public Region(Location location1, Location location2) {
@@ -75,16 +75,48 @@ public class Region extends org.sikuli.script.Region implements Comparable<Regio
         setXYWH(x, y, x2-x, y2-y);
     }
 
-    public StateRegion inNullState() {
-        return new StateRegion.Builder()
-                .inState(NullState.Name.NULL.toString())
-                .withSearchRegion(this)
-                .build();
+    public org.sikuli.script.Region sikuli() {
+        return new org.sikuli.script.Region(x, y, w, h);
     }
 
-    private void setXY2() {
-        x2 = x + w;
-        y2 = y + h;
+    public int x() {
+        return x;
+    }
+
+    public int y() {
+        return y;
+    }
+
+    public int w() {
+        return w;
+    }
+
+    public int h() {
+        return h;
+    }
+
+    public int x2() {
+        return x() + w();
+    }
+
+    public int y2() {
+        return y() + h();
+    }
+
+    /**
+     * Sets x2 with respect to x and not to w (adjusts the width)
+     * @param x2 the right boundary of the region
+     */
+    public void setX2(int x2) {
+        this.w = x2 - this.x;
+    }
+
+    /**
+     * Sets y2 with respect to y and not to h (adjusts the height)
+     * @param y2 the lower boundary of the region
+     */
+    public void setY2(int y2) {
+        this.h = y2 - this.y;
     }
 
     public void setXYWH(int x, int y, int w, int h) {
@@ -92,12 +124,11 @@ public class Region extends org.sikuli.script.Region implements Comparable<Regio
         this.y = y;
         this.w = w;
         this.h = h;
-        setXY2();
     }
 
     public void setTo(Match match) {
         if (match == null) return;
-        setXYWH(match.x, match.y, match.w, match.h);
+        setXYWH(match.x(), match.y(), match.w(), match.h());
     }
 
     public void setTo(org.sikuli.script.Region region) {
@@ -105,35 +136,24 @@ public class Region extends org.sikuli.script.Region implements Comparable<Regio
         setXYWH(region.x, region.y, region.w, region.h);
     }
 
-    public void setX2(int x2) {
-        this.x2 = x2;
-        w = x2 - x;
-    }
-
-    public void setY2(int y2) {
-        this.y2 = y2;
-        h = y2 - y;
-    }
-
-    public int getX2() {
-        return x + w;
-    }
-
-    public int getY2() {
-        return y + h;
+    public StateRegion inNullState() {
+        return new StateRegion.Builder()
+                .inState(NullState.Name.NULL.toString())
+                .withSearchRegion(this)
+                .build();
     }
 
     @Override
     public int compareTo(Region comparesTo) {
         /*for ascending order*/
-        int yDiff = this.y - comparesTo.y;
-        int xDiff = this.x - comparesTo.x;
+        int yDiff = this.y - comparesTo.y();
+        int xDiff = this.x - comparesTo.x();
         if (yDiff != 0) return yDiff;
         return xDiff;
     }
 
     public boolean isDefined() {
-        return x!=0 || y!=0 || w!=new Screen().w || h!=new Screen().h;
+        return x()!=0 || y()!=0 || w()!=new Screen().w || h()!=new Screen().h;
     }
 
     /*
@@ -153,28 +173,36 @@ public class Region extends org.sikuli.script.Region implements Comparable<Regio
     Match is also allowed as a param since Match extends Region
      */
     public boolean contains(Region r) {
-        return contains(r.getTopLeft()) && contains(r.getTopRight())
-                && contains(r.getBottomLeft()) && contains(r.getBottomRight());
+        return sikuli().contains(r.sikuli().getTopLeft()) && sikuli().contains(r.sikuli().getTopRight())
+                && sikuli().contains(r.sikuli().getBottomLeft()) && sikuli().contains(r.sikuli().getBottomRight());
+    }
+
+    public boolean contains(Match m) {
+        return contains(new Region(m));
+    }
+
+    public boolean contains(org.sikuli.script.Match m) {
+        return contains(new Region(m));
     }
 
     public boolean contains(Location l) {
-        return contains(l.getSikuliLocation());
+        return sikuli().contains(l.getSikuliLocation());
     }
 
     public boolean containsX(Location l) {
-        return l.getX() >= x && l.getX() <= x + w;
+        return l.getX() >= x() && l.getX() <= x() + w();
     }
 
     public boolean containsY(Location l) {
-        return l.getY() >= y && l.getY() <= y + h;
+        return l.getY() >= y() && l.getY() <= y() + h();
     }
 
     public int size() {
-        return w * h;
+        return w() * h();
     }
 
     public Match toMatch() {
-        return new Match(x, y, w, h, 1, new Screen());
+        return new Match(this);
     }
 
     /**
@@ -186,11 +214,11 @@ public class Region extends org.sikuli.script.Region implements Comparable<Regio
      * @return a list of regions (cells of the grid), added in order of left to right and then up to down
      */
     public List<Region> getGridRegions(int rows, int columns) {
-        setRaster(rows, columns); // SikuliX raster (setRaster) has a min cell size of 5x5
+        sikuli().setRaster(rows, columns); // SikuliX raster (setRaster) has a min cell size of 5x5
         List<Region> regions = new ArrayList<>();
         for (int i=0; i<rows; i++) {
             for (int j=0; j<columns; j++) {
-                regions.add(new Region(getCell(i,j)));
+                regions.add(new Region(sikuli().getCell(i,j)));
             }
         }
         return regions;
@@ -198,34 +226,33 @@ public class Region extends org.sikuli.script.Region implements Comparable<Regio
 
     public Optional<Integer> getGridNumber(Location location) {
         if (!contains(location)) return Optional.empty();
-        if (!isRasterValid()) return Optional.of(-1);
-        Region firstCell = new Region(getCell(0,0));
-        int row = gridNumber(firstCell.h, firstCell.y, location.getY());
-        int col = gridNumber(firstCell.w, firstCell.x, location.getX());
+        if (!sikuli().isRasterValid()) return Optional.of(-1);
+        Region firstCell = new Region(sikuli().getCell(0,0));
+        int row = gridNumber(firstCell.h(), firstCell.y(), location.getY());
+        int col = gridNumber(firstCell.w(), firstCell.x(), location.getX());
         return Optional.of(toGridNumber(row, col));
     }
 
     private int toGridNumber(int row, int col) {
-       return row * this.getCols() + col;
+       return row * sikuli().getCols() + col;
     }
 
     private int toRow(int gridNumber) {
-        return gridNumber / this.getCols();
+        return gridNumber / sikuli().getCols();
     }
 
     private int toCol(int gridNumber) {
-        return gridNumber % this.getCols();
+        return gridNumber % sikuli().getCols();
     }
 
     public Region getGridRegion(int gridNumber) {
         if (gridNumber == -1) return this;
-        return new Region(getCell(toRow(gridNumber), toCol(gridNumber)));
+        return new Region(sikuli().getCell(toRow(gridNumber), toCol(gridNumber)));
     }
 
     public Optional<Region> getGridRegion(Location location) {
         Optional<Integer> gridNumber = getGridNumber(location);
-        if (gridNumber.isEmpty()) return Optional.empty();
-        return Optional.of(getGridRegion(gridNumber.get()));
+        return gridNumber.map(this::getGridRegion);
     }
 
     private int gridNumber(int oneGridSize, int regionStart, int locationValue) {
@@ -237,19 +264,11 @@ public class Region extends org.sikuli.script.Region implements Comparable<Regio
         Random randW = new Random();
         Random randH = new Random();
         return new io.github.jspinak.brobot.datatypes.primitives.location.Location(
-                x + randW.nextInt(w), y + randH.nextInt(h));
+                x() + randW.nextInt(w()), y() + randH.nextInt(h()));
     }
 
     public void print() {
-        System.out.println("region: XYWH="+x+"."+y+"."+w+"."+h+"| ");
-    }
-
-    // sikuli is unable to process this class even though it is a child of the sikuli Region
-    // casting '(org.sikuli.script.Region) this' does not work
-    // returning a new sikuli Region works but eliminates any memory of previously found images
-    // this should be ok, images with fixed regions should be defined as RegionImagePairs
-    public org.sikuli.script.Region sikuli() {
-        return new org.sikuli.script.Region(x,y,w,h);
+        System.out.println("region: XYWH="+x()+"."+y()+"."+w()+"."+h()+"| ");
     }
 
     public ObjectCollection asObjectCollection() {
@@ -259,11 +278,11 @@ public class Region extends org.sikuli.script.Region implements Comparable<Regio
     }
 
     public boolean equals(Region r) {
-        return x == r.x && y == r.y && w == r.w && h == r.h;
+        return x == r.x() && y == r.y() && w == r.w() && h == r.h();
     }
 
     public Rect getJavaCVRect() {
-        return new Rect(x, y, w, h);
+        return new Rect(x(), y(), w(), h());
     }
 
     public boolean contains(Rect rect) {
@@ -285,19 +304,19 @@ public class Region extends org.sikuli.script.Region implements Comparable<Regio
     }
 
     public Region getUnion(Region r) {
-        return new Region(this.union(r));
+        return new Region(sikuli().union(r.sikuli()));
     }
 
     public void setAsUnion(Region r) {
         Region union = getUnion(r);
-        this.x = union.x;
-        this.y = union.y;
-        this.w = union.w;
-        this.h = union.h;
+        x = union.x();
+        y = union.y();
+        w = union.w();
+        h = union.h();
     }
 
     public Location getLocation() {
-        return new Location(getTarget().x, getTarget().y);
+        return new Location(sikuli().getTarget().x, sikuli().getTarget().y);
     }
 
     /**
@@ -307,7 +326,6 @@ public class Region extends org.sikuli.script.Region implements Comparable<Regio
      * @return a collection of Region objects comprising the non-overlapping areas.
      */
     public List<Region> minus(Region b) {
-        setXY2();
         Optional<Region> overlapOpt = getOverlappingRegion(b);
         if (overlapOpt.isEmpty()) return List.of(this); // no overlap
         Region overlap = overlapOpt.get();
@@ -321,16 +339,16 @@ public class Region extends org.sikuli.script.Region implements Comparable<Regio
 
     private List<Integer> xPoints(Region b) {
         List<Integer> points = new ArrayList<>();
-        boolean allXExposedAtSomeY = b.y > y || b.y2 < y2;
+        boolean allXExposedAtSomeY = b.y() > y() || b.y2() < y2();
         if (allXExposedAtSomeY) {
-            points.add(x);
-            points.add(x2);
+            points.add(x());
+            points.add(x2());
         }
-        if (b.x > x) {
-            points.add(b.x);
+        if (b.x() > x()) {
+            points.add(b.x());
         }
-        if (x2 > b.x2) {
-            points.add(b.x2);
+        if (x2() > b.x2()) {
+            points.add(b.x2());
         }
         Collections.sort(points);
         return points;
@@ -338,16 +356,16 @@ public class Region extends org.sikuli.script.Region implements Comparable<Regio
 
     private List<Integer> yPoints(Region b) {
         List<Integer> points = new ArrayList<>();
-        boolean allYExposedAtSomeX = b.x > x || b.x2 < x2;
+        boolean allYExposedAtSomeX = b.x() > x() || b.x2() < x2();
         if (allYExposedAtSomeX) {
-            points.add(y);
-            points.add(y2);
+            points.add(y());
+            points.add(y2());
         }
-        if (b.y > y) {
-            points.add(b.y);
+        if (b.y() > y()) {
+            points.add(b.y());
         }
-        if (y2 > b.y2) {
-            points.add(b.y2);
+        if (y2() > b.y2()) {
+            points.add(b.y2());
         }
         Collections.sort(points);
         return points;
@@ -384,7 +402,6 @@ public class Region extends org.sikuli.script.Region implements Comparable<Regio
 
     public static List<Region> mergeAdjacent(List<Region> regions) {
         if (regions.size() <= 1) return regions;
-        regions.forEach(Region::setXY2); // update the x2 and y2 values
         boolean listIsSmaller = true;
         List<Region> merged = regions;
         while (listIsSmaller) {
@@ -405,10 +422,10 @@ public class Region extends org.sikuli.script.Region implements Comparable<Regio
                 break;
             }
             Region r = regions.get(i);
-            boolean horizontalMatch = m.x2 == r.x && m.y == r.y && m.y2 == r.y2;
-            boolean verticalMatch = m.y2 == r.y && m.x == r.x && m.x2 == r.x2;
-            if (horizontalMatch) m.setX2(r.x2);
-            else if (verticalMatch) m.setY2(r.y2);
+            boolean horizontalMatch = m.x2() == r.x() && m.y() == r.y() && m.y2() == r.y2();
+            boolean verticalMatch = m.y2() == r.y() && m.x() == r.x() && m.x2() == r.x2();
+            if (horizontalMatch) m.setX2(r.x2());
+            else if (verticalMatch) m.setY2(r.y2());
             else { // no match
                 merged.add(m);
                 m = new Region(r);

@@ -3,6 +3,7 @@ package io.github.jspinak.brobot.services;
 import io.github.jspinak.brobot.actions.BrobotSettings;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles.SetAllProfiles;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles.SetKMeansProfiles;
+import io.github.jspinak.brobot.database.api.StateService;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.datatypes.state.state.State;
 import io.github.jspinak.brobot.reports.Report;
@@ -30,7 +31,7 @@ public class Init {
     public void setBundlePathAndPreProcessImages(String path) {
         org.sikuli.script.ImagePath.setBundlePath(path);
         Report.println("Saving indices for images in states: ");
-        stateService.findAllStates().forEach(this::preProcessImages);
+        stateService.getAllStates().forEach(this::preProcessImages);
         Report.println();
     }
 

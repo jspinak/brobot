@@ -49,10 +49,10 @@ public class MatchMaker {
         }
 
         public Builder setImageXYWH(Region region) {
-            this.x = region.x;
-            this.y = region.y;
-            this.w = region.w;
-            this.h = region.h;
+            this.x = region.x();
+            this.y = region.y();
+            this.w = region.w();
+            this.h = region.h();
             return this;
         }
 
@@ -62,7 +62,9 @@ public class MatchMaker {
         }
 
         private Match buildWithXYWH() {
-            return new Match(x, y, w, h);
+            return new Match.Builder()
+                    .setRegion(x, y, w, h)
+                    .build();
         }
 
         /**
@@ -70,9 +72,11 @@ public class MatchMaker {
          * @return a new Match
          */
         private Match buildInSearchRegion() {
-            x = searchRegion.x + new Random().nextInt(Math.max(1, searchRegion.w - w));
-            y = searchRegion.y + new Random().nextInt(Math.max(1, searchRegion.h - h));
-            return new Match(x, y, w, h);
+            x = searchRegion.x() + new Random().nextInt(Math.max(1, searchRegion.w() - w));
+            y = searchRegion.y() + new Random().nextInt(Math.max(1, searchRegion.h() - h));
+            return new Match.Builder()
+                    .setRegion(x, y, w, h)
+                    .build();
         }
     }
 

@@ -24,7 +24,7 @@ public class BufferedImageOps {
 
 
     public static BufferedImage getBuffImgFromFile(String path) {
-        File f = new File(path);
+        File f = new File(FilenameOps.addPngExtensionIfNeeded(path));
         try {
             return ImageIO.read(Objects.requireNonNull(f));
         } catch (IOException e) {
@@ -33,14 +33,14 @@ public class BufferedImageOps {
     }
 
     public BufferedImage getBuffImgFromScreen(Region region) {
-        return new Screen().capture(region).getImage();
+        return new Screen().capture(region.sikuli()).getImage();
     }
 
     public List<BufferedImage> getBuffImgsFromScreen(List<Region> regions) {
         ScreenImage screenImage = new Screen().capture(); // uses IRobot
         List<BufferedImage> bufferedImages = new ArrayList<>();
         regions.forEach(region -> bufferedImages.add(
-                screenImage.getSub(new Rectangle(region.x, region.y, region.w, region.h)).getImage()));
+                screenImage.getSub(new Rectangle(region.x(), region.y(), region.w(), region.h())).getImage()));
         return bufferedImages;
     }
 

@@ -26,10 +26,10 @@ public class DefineWithMatch implements ActionInterface {
         defineHelper.findMatches(matches, objectCollections);
         if (matches.getBestMatch().isEmpty()) return;
         Region region = new Region(matches.getBestMatch().get());
-        if (actionOptions.getDefineAs() == ActionOptions.DefineAs.BELOW_MATCH) region.y += region.h;
-        if (actionOptions.getDefineAs() == ActionOptions.DefineAs.ABOVE_MATCH) region.y -= region.h;
-        if (actionOptions.getDefineAs() == ActionOptions.DefineAs.LEFT_OF_MATCH) region.x -= region.w;
-        if (actionOptions.getDefineAs() == ActionOptions.DefineAs.RIGHT_OF_MATCH) region.x += region.w;
+        if (actionOptions.getDefineAs() == ActionOptions.DefineAs.BELOW_MATCH) region.setY(region.y() + region.h());
+        if (actionOptions.getDefineAs() == ActionOptions.DefineAs.ABOVE_MATCH) region.setY(region.y() - region.h());
+        if (actionOptions.getDefineAs() == ActionOptions.DefineAs.LEFT_OF_MATCH) region.setX(region.x() - region.w());
+        if (actionOptions.getDefineAs() == ActionOptions.DefineAs.RIGHT_OF_MATCH) region.setX(region.x() + region.w());
         defineHelper.adjust(region, actionOptions);
         matches.addDefinedRegion(region);
     }

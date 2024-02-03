@@ -4,9 +4,9 @@ import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.actions.actionOptions.CommonActionOptions;
 import io.github.jspinak.brobot.actions.parameterTuning.ParameterCollection;
 import io.github.jspinak.brobot.actions.parameterTuning.ParameterThresholds;
+import io.github.jspinak.brobot.database.api.StateService;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import io.github.jspinak.brobot.datatypes.state.state.State;
-import io.github.jspinak.brobot.services.StateService;
 import io.github.jspinak.brobot.manageStates.UnknownState;
 import org.springframework.stereotype.Component;
 
@@ -16,14 +16,12 @@ import java.util.Optional;
 @Component
 public class CommonARTypeCombos {
 
-    private RunARCombo runARCombo;
-    private CommonActionOptions commonActionOptions;
-    private CommonResults commonResults;
-    private StateService stateService;
+    private final CommonActionOptions commonActionOptions;
+    private final CommonResults commonResults;
+    private final StateService stateService;
 
-    public CommonARTypeCombos(RunARCombo runARCombo, CommonActionOptions commonActionOptions,
+    public CommonARTypeCombos(CommonActionOptions commonActionOptions,
                               CommonResults commonResults, StateService stateService) {
-        this.runARCombo = runARCombo;
         this.commonActionOptions = commonActionOptions;
         this.commonResults = commonResults;
         this.stateService = stateService;
@@ -44,7 +42,7 @@ public class CommonARTypeCombos {
     public boolean typeAndStateAction(ActionOptions.Action resultAction, String stateName,
                                       String string, String modifier) {
         if (Objects.equals(stateName, UnknownState.Enum.UNKNOWN.toString())) return false; // this could be true but requires additional coding
-        Optional<State> state = stateService.findByName(stateName);
+        Optional<State> state = stateService.getState(stateName);
         if (state.isEmpty()) return false;
         ActionResultCombo arCombo = new ActionResultCombo();
         // add the type action

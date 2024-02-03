@@ -3,12 +3,8 @@ package io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.NullState;
 import io.github.jspinak.brobot.datatypes.state.stateObject.StateObject;
-import jakarta.persistence.Embedded;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
+import jakarta.persistence.*;
 import lombok.Data;
-import org.springframework.data.annotation.Id;
 
 import static io.github.jspinak.brobot.datatypes.state.NullState.Name.NULL;
 
@@ -27,7 +23,7 @@ public class StateString {
 
     private StateObject.Type objectType = StateObject.Type.STRING;
     private String name;
-    @Embedded
+    @OneToOne(cascade = CascadeType.ALL)
     private Region searchRegion; // sometimes we need to hover over or click on a region before typing the string
     private String ownerStateName = NullState.Name.NULL.toString();
     private int timesActedOn = 0;

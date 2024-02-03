@@ -7,16 +7,16 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class LocationTest {
 
-    private Region region = new Region(0, 50, 100, 20);
-    private Location location = new Location(region, Position.Name.BOTTOMLEFT);
+    private final Region region = new Region(0, 50, 100, 20);
+    private final Location location = new Location(region, Positions.Name.BOTTOMLEFT);
 
     @Test
     void getX() {
-        assertEquals(region.getX(), location.getX());
+        assertEquals(region.x(), location.getX());
     }
 
     @Test
     void getY() {
-        assertEquals(region.getY2(), location.getY());
+        assertEquals(region.y2(), location.getY());
     }
 }
