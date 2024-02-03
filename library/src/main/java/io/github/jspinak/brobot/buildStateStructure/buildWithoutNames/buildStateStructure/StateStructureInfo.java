@@ -1,8 +1,8 @@
 package io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.buildStateStructure;
 
+import io.github.jspinak.brobot.database.api.StateService;
 import io.github.jspinak.brobot.datatypes.state.state.State;
 import io.github.jspinak.brobot.manageStates.StateTransitions;
-import io.github.jspinak.brobot.services.StateService;
 import io.github.jspinak.brobot.services.StateTransitionsService;
 import org.springframework.stereotype.Component;
 
@@ -24,7 +24,7 @@ public class StateStructureInfo {
     }
 
     public void printStateStructure() {
-        for (State state : stateService.findAllStates()) {
+        for (State state : stateService.getAllStates()) {
             System.out.println(state);
             System.out.println();
 

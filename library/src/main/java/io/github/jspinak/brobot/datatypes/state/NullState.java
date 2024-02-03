@@ -1,8 +1,8 @@
 package io.github.jspinak.brobot.datatypes.state;
 
+import io.github.jspinak.brobot.database.api.StateService;
 import io.github.jspinak.brobot.datatypes.state.state.State;
 import io.github.jspinak.brobot.primatives.enums.StateEnum;
-import io.github.jspinak.brobot.services.StateService;
 import lombok.Getter;
 import org.springframework.stereotype.Component;
 
@@ -22,7 +22,7 @@ public class NullState {
         NULL
     }
 
-    private State state = new State.Builder(Name.NULL)
+    private final State state = new State.Builder(Name.NULL)
             .build();
 
     public NullState(StateService stateService) {

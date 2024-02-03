@@ -1,14 +1,13 @@
 package io.github.jspinak.brobot.database.api;
 
 import io.github.jspinak.brobot.database.data.PatternRepo;
-import io.github.jspinak.brobot.database.data.StateImageRepo;
 import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
-@Component
+@Service
 public class PatternService {
 
     private final PatternRepo patternRepo;
@@ -24,7 +23,8 @@ public class PatternService {
     }
 
     public List<Pattern> getAllPatterns() {
-        List<Pattern> patterns = patternRepo.findAllAsList();
+        List<Pattern> patterns = new ArrayList<>();
+        patternRepo.findAll().forEach(patterns::add);
         for (Pattern pattern : patterns) {
             pattern.setBufferedImage();
         }

@@ -29,7 +29,7 @@ public class GetImageOpenCV {
     }
 
     public BufferedImage getBuffImgFromScreen(Region region) {
-        return new Screen().capture(region).getImage();
+        return new Screen().capture(region.sikuli()).getImage();
     }
 
     public BufferedImage getScreenshot() {

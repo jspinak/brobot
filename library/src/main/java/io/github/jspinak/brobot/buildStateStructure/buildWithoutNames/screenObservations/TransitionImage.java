@@ -1,10 +1,10 @@
 package io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.screenObservations;
 
+import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import lombok.Getter;
 import lombok.Setter;
 import org.bytedeco.opencv.opencv_core.Mat;
-import org.sikuli.script.Match;
 
 import java.util.*;
 
@@ -73,9 +73,9 @@ public class TransitionImage {
      */
     public boolean isSameWordGroup(Match match, int minDist) {
         if (region == null) return true; // region hasn't been created yet
-        int xDist = match.x - region.getX2(); // x-distance between end of the current region and the start of the new word match
-        int yDist = match.y - region.y; // y-distance between the beginning of both region and match
-        return match.x - region.x > 0 && xDist < minDist && Math.abs(yDist) < minDist;
+        int xDist = match.x() - region.x2(); // x-distance between end of the current region and the start of the new word match
+        int yDist = match.y() - region.y(); // y-distance between the beginning of both region and match
+        return match.x() - region.x() > 0 && xDist < minDist && Math.abs(yDist) < minDist;
     }
 
 }

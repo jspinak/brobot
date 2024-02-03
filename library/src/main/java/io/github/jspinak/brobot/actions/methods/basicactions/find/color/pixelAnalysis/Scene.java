@@ -3,8 +3,8 @@ package io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAn
 import io.github.jspinak.brobot.datatypes.primitives.image.Image;
 import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
-import jakarta.persistence.Embeddable;
-import jakarta.persistence.Embedded;
+import io.github.jspinak.brobot.imageUtils.FilenameOps;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -13,17 +13,21 @@ import java.awt.image.BufferedImage;
 
 import static java.awt.image.BufferedImage.TYPE_BYTE_BINARY;
 
-@Embeddable
+@Entity
 @Getter
 @Setter
 public class Scene {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
+
     private String name = "";
-    @Embedded
+    @OneToOne(cascade = CascadeType.ALL)
     private Image image;
 
     public Scene(String filename) {
-        this.name = filename.substring(0, filename.lastIndexOf("."));
+        this.name = FilenameOps.getFileNameWithoutExtension(filename);
         image = new Image(filename);
     }
 
@@ -36,12 +40,12 @@ public class Scene {
     }
 
     public Pattern getPatternBGR() {
-        return new Pattern(image.get());
+        return new Pattern(image.getBufferedImage());
     }
 
     public static Scene getEmptyScene() {
         Region r = new Region();
-        BufferedImage bufferedImage = new BufferedImage(r.w, r.h, TYPE_BYTE_BINARY);
+        BufferedImage bufferedImage = new BufferedImage(r.w(), r.h(), TYPE_BYTE_BINARY);
         Scene scene = new Scene(bufferedImage);
         scene.name = "empty scene";
         return scene;

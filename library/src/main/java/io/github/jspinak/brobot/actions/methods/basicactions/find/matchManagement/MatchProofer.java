@@ -2,8 +2,8 @@ package io.github.jspinak.brobot.actions.methods.basicactions.find.matchManageme
 
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
+import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
-import org.sikuli.script.Match;
 
 import java.util.List;
 

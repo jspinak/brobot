@@ -24,7 +24,9 @@ public class CompareImages {
     }
 
     public Match compare(List<StateImage> imgs, StateImage img2) {
-        Match bestScoringMatch = new Match(new org.sikuli.script.Match(new Region(), 0));
+        Match bestScoringMatch = new Match.Builder()
+                .setSimScore(0.0)
+                .build();
         for (StateImage img1 : imgs) {
             Match newMatch = compare(img1, img2);
             if (newMatch.getScore() > bestScoringMatch.getScore()) bestScoringMatch = newMatch;
@@ -41,7 +43,9 @@ public class CompareImages {
      * @return a Match of img2 with the similarity score
      */
     public Match compare(StateImage img1, StateImage img2) {
-        Match bestScoringMatch = new Match(new org.sikuli.script.Match(new Region(), 0));
+        Match bestScoringMatch = new Match.Builder()
+                .setSimScore(0.0)
+                .build();
         for (Pattern p1 : img1.getPatterns()) {
             for (Pattern p2 : img2.getPatterns()) {
                 Match newMatch = compare(p1, p2);
@@ -72,9 +76,9 @@ public class CompareImages {
         }
         Scene scene = new Scene(biggestPattern.getBImage());
         List<Match> matchList = mockOrLive.findAll(smallestPattern, scene);
-        Match bestMatch = Collections.max(matchList, Comparator.comparingDouble(org.sikuli.script.Match::getScore));
+        Match bestMatch = Collections.max(matchList, Comparator.comparingDouble(Match::getScore));
         Match noMatch = new Match.Builder()
-                .setMatch(new Region(0,0,1,1))
+                .setRegion(new Region(0,0,1,1))
                 .setSearchImage(smallestPattern.getBImage())
                 .setScene(new Scene(biggestPattern.getBImage()))
                 .setSimScore(0)

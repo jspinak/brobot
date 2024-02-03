@@ -14,19 +14,20 @@ import io.github.jspinak.brobot.imageUtils.BufferedImageOps;
 import io.github.jspinak.brobot.imageUtils.ImageOps;
 import io.github.jspinak.brobot.imageUtils.MatOps;
 
-import jakarta.persistence.Embeddable;
-import jakarta.persistence.Embedded;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Rect;
 
 import java.awt.image.BufferedImage;
-import java.lang.reflect.Field;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
 /**
+ * The SikuliX Match object has many protected fields, making it difficult to work with as a field. Instead,
+ * the important SikuliX Match fields are included here and a constructor with the SikuliX Match is available.
+ *
  * Simplified version of the MatchObject of versions 1.0.6 and earlier.
  * Removed: action duration
  * Simplified: Text is a String and not a Text object.
@@ -47,75 +48,92 @@ import java.util.Optional;
  *  *     Match objects have only one match, as opposed to Snapshots, which can have
  *  *       multiple Match objects.
  */
-@Embeddable
+@Entity
 @Getter
 @Setter
-public class Match extends org.sikuli.script.Match {
+public class Match {
 
-    private String name = "";
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
+
+    // fields in the SikuliX Match
+    private double score = 0.0;
+    @OneToOne(cascade = CascadeType.ALL)
+    private Location target;
+    @OneToOne(cascade = CascadeType.ALL)
+    private Image image;
+    private String text = "";
+    private String name = ""; // in SikuliX Element, extended by many SikuliX object classes, including Match.
+    @OneToOne(cascade = CascadeType.ALL)
+    private Region region; // this region is a Brobot region; SikuliX Match has a SikuliX Region.
+    // ---------------------------
+
     /*
-    Match.Match(SikuliX).Image(SikuliX).BufferedImage contains the pixels from the match region. This can be different from
+    The BufferedImage in `image` contains the pixels from the match region. This can be different from
     the image used to search with (similarity may be low, or the match area might be shifted).
     Also, some operations do not use an image to search, and are interested in the contents of the
     screen.
 
-    searchImage holds the image used to find the match.
+    `searchImage` holds the image used to find the match.
      */
+    @OneToOne(cascade = CascadeType.ALL)
     private Image searchImage;
     /*
     The match may have come from a Region, in which case it won't have a Pattern object. The anchors are recorded here,
     regardless of which object created the match.
      */
-    @Embedded
+    @OneToOne(cascade = CascadeType.ALL)
     private Anchors anchors;
     @Embedded
     private StateObjectData stateObjectData;
+    @Transient
     private Mat histogram;
-    @Embedded
+    @OneToOne(cascade = CascadeType.ALL)
     private Scene scene;
     private LocalDateTime timeStamp;
     // the old MatchObject had `private double duration;`
     private int timesActedOn = 0;
 
-    public Match(org.sikuli.script.Match match) {
-        super(match);
-        this.setName(match.getName());
+    public Match(Region region) {
+        this.region = new Region(region);
+        this.target = new Location(region);
+    }
+
+    public int x() {
+        return region.x();
+    }
+
+    public int y() {
+        return region.y();
+    }
+
+    public int w() {
+        return region.w();
+    }
+
+    public int h() {
+        return region.h();
     }
 
     public Mat getMat() {
-        return ImageOps.getMatBGR(getImage());
-    }
-
-    public void setMat(Mat mat) {
-        getImage().setBimg(BufferedImageOps.fromMat(mat));
-    }
-
-    public void setText(String text) {
-        super.setText(text);
-    }
-
-    public Match(Region region) {
-        super(region.toMatch());
-    }
-
-    public Match(int x, int y, int w, int h) {
-        super(new org.sikuli.script.Match(new org.sikuli.script.Region(x, y, w, h), .99));
+        return image.getMatBGR();
     }
 
     public Location getLocation() {
-        if (getTarget() == null) {
+        if (target == null) {
             Position tempPosition = new Position(50,50);
-            return new Location(this, tempPosition);
+            return new Location(region, tempPosition);
         }
-        return new Location(getTarget());
+        return target;
     }
 
     public int compareByScore(Match m) {
-        return (int)(this.getScore() - m.getScore());
+        return (int)(score - m.getScore());
     }
 
     public int size() { // TODO: check. this used to refer to the size of the Pattern
-        return w * h;
+        return region.w() * region.h();
     }
 
     public void incrementTimesActedOn() {
@@ -124,8 +142,8 @@ public class Match extends org.sikuli.script.Match {
 
     public void setImageWithScene() {
         if (scene == null) return;
-        Optional<Mat> mat = MatOps.applyIfOk(scene.getImage().getMatBGR(), new Region(this).getJavaCVRect());
-        mat.ifPresent(m -> setImage(ImageOps.getImage(m)));
+        Optional<Mat> mat = MatOps.applyIfOk(scene.getImage().getMatBGR(), new Region(region).getJavaCVRect());
+        mat.ifPresent(m -> setImage(new Image(ImageOps.getImage(m))));
     }
 
     public String getOwnerStateName() {
@@ -145,13 +163,13 @@ public class Match extends org.sikuli.script.Match {
         stateImage.setName(name);
         if (stateObjectData != null) {
             stateImage.setOwnerStateName(stateObjectData.getOwnerStateName());
-            stateImage.setName(stateObjectData.getName()); // the StateObject name should take priority since it was the original StateImage
+            stateImage.setName(stateObjectData.getStateObjectName()); // the StateObject name should take priority since it was the original StateImage
         }
-        if (searchImage != null) stateImage.addPatterns(new Pattern(searchImage.get()));
+        if (searchImage != null) stateImage.addPatterns(new Pattern(searchImage.getBufferedImage()));
         else {
             Pattern newPattern = new Pattern.Builder()
                     .setFixed(true)
-                    .setFixedRegion(new Region(this))
+                    .setFixedRegion(region)
                     .setName(name)
                     .build();
             stateImage.addPatterns(newPattern);
@@ -167,62 +185,60 @@ public class Match extends org.sikuli.script.Match {
         if (name != null && !name.isEmpty()) {
             nameText = "#" + name + "# ";
         }
-        stringBuilder.append(String.format("%sR[%d,%d %dx%d] simScore:%.1f", nameText, this.x, this.y, this.w, this.h, super.getScore()));
+        stringBuilder.append(String.format("%sR[%d,%d %dx%d] simScore:%.1f", nameText, region.x(), region.y(), region.w(), region.h(), score));
         if (getText() != null && !getText().isEmpty()) stringBuilder.append(" text:").append(getText());
         stringBuilder.append("]");
         return stringBuilder.toString();
     }
 
-    /*
-    This is a workaround. It is generally a bad idea to set variables like this.
-    TODO: ask Raimund to code a setter for simScore
-     */
-    public void setSimScore(double simScore) {
-        try {
-            // Get the "simScore" field from the superclass (Match)
-            Field simScoreField = org.sikuli.script.Match.class.getDeclaredField("simScore");
-
-            // Make the field accessible, even if it is private
-            simScoreField.setAccessible(true);
-
-            // Set the value of the field in this instance
-            simScoreField.set(this, simScore);
-        } catch (NoSuchFieldException | IllegalAccessException e) {
-            // Handle exceptions (e.g., NoSuchFieldException, IllegalAccessException)
-            e.printStackTrace();
-        }
+    public org.sikuli.script.Match sikuli() {
+        return new org.sikuli.script.Match(region.sikuli(), score);
     }
 
     public static class Builder {
-        private org.sikuli.script.Match match;
+        private org.sikuli.script.Match sikuliMatch;
         private BufferedImage bufferedImage;
         private Image searchImage;
+        private Region region;
         private String name;
         private String text;
         private Anchors anchors;
         private StateObjectData stateObjectData;
         private Mat histogram;
         private Scene scene;
-        private LocalDateTime timeStamp;
         private double simScore = -1;
 
-        public Builder setMatch(org.sikuli.script.Match match) {
-            this.match = match;
+        public Builder setMatch(org.sikuli.script.Match sikuliMatch) {
+            this.sikuliMatch = sikuliMatch;
             return this;
         }
 
-        public Builder setMatch(Region region) {
-            this.match = new org.sikuli.script.Match(region, .99);
+        public Builder setMatch(Match match) {
+            this.bufferedImage = match.getImage().getBufferedImage();
+            this.searchImage = match.getSearchImage();
+            this.region = match.getRegion();
+            this.name = match.getName();
+            this.text = match.getText();
+            this.anchors = match.getAnchors();
+            this.stateObjectData = match.getStateObjectData();
+            this.histogram = match.histogram;
+            this.scene = match.scene;
+            this.simScore = match.score;
             return this;
         }
 
-        public Builder setMatch(Rect rect) {
-            this.match = new org.sikuli.script.Match(new Region(rect), .99);
+        public Builder setRegion(Region region) {
+            this.region = region;
             return this;
         }
 
-        public Builder setMatch(int x, int y, int w, int h) {
-            this.match = new org.sikuli.script.Match(new Region(x, y, w, h), .99);
+        public Builder setRegion(Rect rect) {
+            this.region = new Region(rect);
+            return this;
+        }
+
+        public Builder setRegion(int x, int y, int w, int h) {
+            this.region = new Region(x, y, w, h);
             return this;
         }
 
@@ -266,6 +282,11 @@ public class Match extends org.sikuli.script.Match {
             return this;
         }
 
+        public Builder setStateObjectData(StateObjectData stateObjectData) {
+            this.stateObjectData = stateObjectData;
+            return this;
+        }
+
         public Builder setHistogram(Mat histogram) {
             this.histogram = histogram;
             return this;
@@ -282,19 +303,32 @@ public class Match extends org.sikuli.script.Match {
         }
 
         public Match build() {
-            Match matchObject = new Match(match);
-            matchObject.name = name;
-            if (text != null) matchObject.setText(text); // otherwise, this erases the SikuliX match text
-            matchObject.anchors = anchors;
-            matchObject.stateObjectData = stateObjectData;
-            matchObject.histogram = histogram;
-            matchObject.scene = scene;
-            matchObject.timeStamp = LocalDateTime.now();
-            matchObject.setImageWithScene();
-            if (bufferedImage != null) matchObject.setImage(new org.sikuli.script.Image(bufferedImage));
-            if (simScore >= 0) matchObject.setSimScore(simScore); // otherwise, this erases the SikuliX match simScore
-            matchObject.searchImage = searchImage;
-            return matchObject;
+            Match match = new Match(new Region());
+            if (sikuliMatch != null) {
+                match.setScore(sikuliMatch.getScore());
+                if (sikuliMatch.getTarget() != null) match.target = new Location(sikuliMatch.getTarget());
+                if (sikuliMatch.getImage() != null) match.image = new Image(sikuliMatch.getImage());
+                if (sikuliMatch.getText() != null) text = sikuliMatch.getText();
+                if (sikuliMatch.getName() != null) name = sikuliMatch.getName();
+                region = new Region(sikuliMatch);
+            }
+            if (region != null) {
+                match.region = new Region(region);
+                match.target = new Location(region);
+            }
+            if (name != null) match.name = name;
+            if (text != null) match.setText(text); // otherwise, this erases the SikuliX match text
+            if (bufferedImage != null) match.setImage(new Image(bufferedImage));
+            if (simScore >= 0)
+                match.setScore(simScore); // otherwise, this erases the SikuliX match simScore
+            match.anchors = anchors;
+            match.stateObjectData = stateObjectData;
+            match.histogram = histogram;
+            match.scene = scene;
+            match.setImageWithScene();
+            match.timeStamp = LocalDateTime.now();
+            match.searchImage = searchImage;
+            return match;
         }
 
     }

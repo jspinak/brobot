@@ -1,7 +1,7 @@
 package io.github.jspinak.brobot.manageStates;
 
+import io.github.jspinak.brobot.database.api.StateService;
 import io.github.jspinak.brobot.datatypes.state.state.State;
-import io.github.jspinak.brobot.services.StateService;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
@@ -25,7 +25,7 @@ public class PathManager {
     public void updateScore(Path path) {
         int score = 0;
         for (String stateName : path.getStates()) {
-            Optional<State> optState = stateService.findByName(stateName);
+            Optional<State> optState = stateService.getState(stateName);
             if (optState.isPresent()) score += optState.get().getPathScore();
         }
         path.setScore(score);

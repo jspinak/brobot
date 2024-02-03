@@ -7,7 +7,7 @@ import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAna
 import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
 import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
-import io.github.jspinak.brobot.datatypes.primitives.location.Position;
+import io.github.jspinak.brobot.datatypes.primitives.location.Positions;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -38,7 +38,7 @@ class FindInSceneTest {
     void findAllInScene() {
         Pattern topL = new Pattern.Builder()
                 .setFilename("topLeft")
-                .addAnchor(Position.Name.TOPLEFT, Position.Name.BOTTOMLEFT)
+                .addAnchor(Positions.Name.TOPLEFT, Positions.Name.BOTTOMLEFT)
                 .build();
         StateImage topLeft = new StateImage.Builder()
                 .addPattern(topL)
@@ -46,7 +46,7 @@ class FindInSceneTest {
         StateImage bottomRight = new StateImage.Builder()
                 .addPattern(new Pattern.Builder()
                         .setFilename("bottomRight")
-                        .addAnchor(Position.Name.BOTTOMRIGHT, Position.Name.TOPRIGHT)
+                        .addAnchor(Positions.Name.BOTTOMRIGHT, Positions.Name.TOPRIGHT)
                         .build())
                 .build();
         ActionOptions actionOptions = new ActionOptions.Builder()

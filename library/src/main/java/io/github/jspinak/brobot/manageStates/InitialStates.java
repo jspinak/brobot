@@ -1,9 +1,9 @@
 package io.github.jspinak.brobot.manageStates;
 
 import io.github.jspinak.brobot.actions.BrobotSettings;
+import io.github.jspinak.brobot.database.api.StateService;
 import io.github.jspinak.brobot.datatypes.state.state.State;
 import io.github.jspinak.brobot.reports.Report;
-import io.github.jspinak.brobot.services.StateService;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -18,9 +18,9 @@ import java.util.*;
 @Component
 public class InitialStates {
 
-    private StateFinder stateFinder;
-    private StateMemory stateMemory;
-    private StateService stateService;
+    private final StateFinder stateFinder;
+    private final StateMemory stateMemory;
+    private final StateService stateService;
 
     int sumOfProbabilities = 0;
     /*
@@ -29,7 +29,7 @@ public class InitialStates {
     as it will be used to rescale the individual probabilities when choosing an
     initial State.
      */
-    private Map<Set<String>, Integer> potentialActiveStates = new HashMap<>();
+    private final Map<Set<String>, Integer> potentialActiveStates = new HashMap<>();
 
     public InitialStates(StateFinder stateFinder, StateMemory stateMemory, StateService stateService) {
         this.stateFinder = stateFinder;
@@ -59,7 +59,7 @@ public class InitialStates {
                 Set<String> initialStates = entry.getKey();
                 initialStates.forEach(state -> stateMemory.addActiveState(state, true));
                 initialStates.forEach(name ->
-                        stateService.findByName(name).ifPresent(State::setProbabilityToBaseProbability));
+                        stateService.getState(name).ifPresent(State::setProbabilityToBaseProbability));
                 return;
             }
         }
@@ -68,7 +68,7 @@ public class InitialStates {
     private void searchForInitialStates() {
         Set<String> allPotentialStates = new HashSet<>();
         potentialActiveStates.forEach((pot, prob) -> allPotentialStates.addAll(pot));
-        allPotentialStates.forEach(pot -> stateFinder.findState(pot));
+        allPotentialStates.forEach(stateFinder::findState);
     }
 
 

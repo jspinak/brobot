@@ -3,8 +3,8 @@ package io.github.jspinak.brobot.actions.methods.basicactions.find.matchManageme
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
 import io.github.jspinak.brobot.datatypes.primitives.location.Location;
+import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
-import org.sikuli.script.Match;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
@@ -35,10 +35,10 @@ public class MatchProoferEdges implements MatchProofer {
      */
     public boolean isInSearchRegions(Match match, List<Region> regions) {
         boolean topLeft = false, topRight = false, bottomLeft = false, bottomRight = false;
-        Location tL = new Location(match.x, match.y);
-        Location tR = new Location(match.x+match.w, match.y);
-        Location bL = new Location(match.x, match.y + match.h);
-        Location bR = new Location(match.x+match.w, match.y+match.h);
+        Location tL = new Location(match.x(), match.y());
+        Location tR = new Location(match.x()+match.w(), match.y());
+        Location bL = new Location(match.x(), match.y() + match.h());
+        Location bR = new Location(match.x()+match.w(), match.y()+match.h());
         for (Region region : regions) {
             if (region.contains(tL)) topLeft = true;
             if (region.contains(tR)) topRight = true;

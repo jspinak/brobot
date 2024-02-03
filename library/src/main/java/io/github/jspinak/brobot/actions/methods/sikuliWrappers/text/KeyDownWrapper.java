@@ -22,7 +22,7 @@ public class KeyDownWrapper {
             return;
         }
         Report.print(key+" ");
-        new Region().keyDown(key + modifiers);
+        new Region().sikuli().keyDown(key + modifiers);
     }
 
 }

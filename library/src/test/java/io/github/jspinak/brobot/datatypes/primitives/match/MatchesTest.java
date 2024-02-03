@@ -1,6 +1,5 @@
 package io.github.jspinak.brobot.datatypes.primitives.match;
 
-import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import org.junit.jupiter.api.Test;
@@ -14,7 +13,7 @@ class MatchesTest {
     List<StateImage> getMatchListAsStateImages() {
         Matches matches = new Matches();
         Match match1 = new Match.Builder()
-                .setMatch(new Region(0, 0, 10, 10))
+                .setRegion(new Region(0, 0, 10, 10))
                 .setName("match1")
                 .build();
         matches.add(match1);

@@ -77,7 +77,7 @@ class IllustrateStateTest {
         Region matRegion = optState.get().getPatterns().get(0).getRegion();
         MatBuilder matBuilder = new MatBuilder();
         Mat illustratedMat = matBuilder.init()
-                .addSubMat(new Location(matRegion.x, matRegion.y), mat)
+                .addSubMat(new Location(matRegion.x(), matRegion.y()), mat)
                 .build();
         assertTrue(countNonZero(MatOps.toGrayscale(illustratedMat)) > 0);
         //imageUtils.writeWithUniqueFilename(illustratedMat, "history/illustratedTestMat");
@@ -92,7 +92,7 @@ class IllustrateStateTest {
             Pattern pattern = stateImage.getPatterns().get(0);
             Mat mat = pattern.getMat();
             Region region = pattern.getRegion();
-            matBuilder.addSubMat(new Location(region.x, region.y), mat);
+            matBuilder.addSubMat(new Location(region.x(), region.y()), mat);
         }
         Mat illustratedMat = matBuilder.build();
         assertTrue(countNonZero(MatOps.toGrayscale(illustratedMat)) > 0);

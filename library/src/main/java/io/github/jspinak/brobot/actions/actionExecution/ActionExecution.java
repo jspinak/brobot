@@ -67,6 +67,7 @@ public class ActionExecution {
     /**
      * Performs the Action and certain maintenance functions.
      * @param actionMethod has Action-specific code.
+     * @param actionDescription a description of the action. can be used for training a neural net.
      * @param actionOptions contains information about the Action to be performed.
      * @param objectCollections contains the objects on which to perform the Action.
      * @return Matches

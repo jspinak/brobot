@@ -3,16 +3,8 @@ package io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.NullState;
 import io.github.jspinak.brobot.datatypes.state.stateObject.StateObject;
-import io.github.jspinak.brobot.primatives.enums.StateEnum;
-import jakarta.persistence.Embedded;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
+import jakarta.persistence.*;
 import lombok.Data;
-import org.springframework.data.annotation.Id;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * StateText is text that always appears in its owner State.
@@ -30,7 +22,7 @@ public class StateText {
 
     private StateObject.Type objectType = StateObject.Type.TEXT;
     private String name;
-    @Embedded
+    @OneToOne(cascade = CascadeType.ALL)
     private Region searchRegion;
     private String ownerStateName = NullState.Name.NULL.toString();
 

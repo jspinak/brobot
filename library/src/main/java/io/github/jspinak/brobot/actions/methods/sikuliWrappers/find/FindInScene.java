@@ -3,7 +3,6 @@ package io.github.jspinak.brobot.actions.methods.sikuliWrappers.find;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.Scene;
 import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
 import io.github.jspinak.brobot.datatypes.primitives.match.Match;
-import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import org.sikuli.script.Finder;
 import org.sikuli.script.OCR;
 import org.springframework.stereotype.Component;
@@ -27,21 +26,23 @@ public class FindInScene {
      * @return the Finder.
      */
     private Finder getFinder(Scene scene) {
-        if (!scene.getImage().isEmpty()) return new Finder(scene.getImage().get());
+        if (!scene.getImage().isEmpty()) return new Finder(scene.getImage().getBufferedImage());
         return new Finder(scene.getName());
     }
 
     public List<Match> findAllInScene(Pattern pattern, Scene scene) {
         Finder f = getFinder(scene);
-        f.findAll(pattern);
+        f.findAll(pattern.sikuli());
         List<Match> matchList = new ArrayList<>();
         while (f.hasNext()) {
-            Match nextMatch = new Match(f.next());
+            Match nextMatch = new Match.Builder()
+                    .setMatch(f.next())
+                    .build();
             matchList.add(nextMatch);
         }
         f.destroy();
-        Match bestMatch = Collections.max(matchList, Comparator.comparingDouble(org.sikuli.script.Match::getScore));
-        if (bestMatch != null && pattern.isFixed()) pattern.getSearchRegions().setFixedRegion(new Region(bestMatch));
+        Match bestMatch = Collections.max(matchList, Comparator.comparingDouble(Match::getScore));
+        if (bestMatch != null && pattern.isFixed()) pattern.getSearchRegions().setFixedRegion(bestMatch.getRegion());
         return matchList;
     }
 
@@ -57,7 +58,7 @@ public class FindInScene {
      */
     public List<Match> getWordMatches(Scene scene) {
         List<Match> wordMatches = new ArrayList<>();
-        OCR.readWords(scene.getImage().get()).forEach(match -> {
+        OCR.readWords(scene.getImage().getBufferedImage()).forEach(match -> {
             Match m = new Match.Builder()
                     .setName("word")
                     .setMatch(match)
