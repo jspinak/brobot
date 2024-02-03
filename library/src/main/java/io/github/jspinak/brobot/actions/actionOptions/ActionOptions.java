@@ -8,7 +8,9 @@ import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.StateRegion;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.SearchRegions;
-import lombok.Data;
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 import org.sikuli.basics.Settings;
 
 import java.util.ArrayList;
@@ -21,15 +23,16 @@ import java.util.function.Predicate;
  * Since an Action can be performed without selecting and building an ActionOptions object,
  *   the variables need to be initialized with default values.
  */
-@Data
+@Entity
+@Getter
+@Setter
 public class ActionOptions {
 
-    /**
-     * Identifies the action.
-     */
-    private int actionId;
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
 
-    /**
+    /*
      * BasicActions:
      * FIND
      * CLICK
@@ -57,7 +60,7 @@ public class ActionOptions {
     }
     private Action action = Action.FIND;
 
-    /**
+    /*
      * Keep in mind:
      *   ObjectCollections can contain multiple Images.
      *   Images can contain multiple Patterns (or image files).
@@ -89,33 +92,36 @@ public class ActionOptions {
         ALL_WORDS, SIMILAR_IMAGES, FIXED_PIXELS, DYNAMIC_PIXELS, STATES
     }
     private Find find = Find.FIRST;
-    /**
+    /*
      * tempFind is a user defined Find method that is not meant to be reused.
      */
+    @Transient
     private BiConsumer<Matches, List<ObjectCollection>> tempFind;
 
-    /**
+    /*
      * Find actions are performed in the order they appear in the list.
      * Actions are performed only on the match regions found in the previous action.
      * Matching ObjectCollections are used (i.e. ObejctCollection #2 for Find #2),
      *   unless the matching ObjectCollection is empty, in which case the last
      *   non-empty ObjectCollection will be used.
      */
+    @ElementCollection
+    @CollectionTable(name = "findActions", joinColumns = @JoinColumn(name = "actionOptions_id"))
     private List<Find> findActions = new ArrayList<>();
-    /**
+    /*
      * When set to true, subsequent Find operations will act as confirmations of the initial matches.
      * An initial match from the first Find operation will be returned if the subsequent
      * Find operations all find matches within its region.
      */
     private boolean keepLargerMatches = false;
 
-    /**
+    /*
      * Specifies how similar the found Match must be to the original Image.
      * Specifies the minimum score for a histogram to be considered a Match.
      */
     private double similarity = Settings.MinSimilarity;
 
-    /**
+    /*
      * Images can contain multiple Patterns.
      * DoOnEach specifies how Find.EACH should approach individual Images.
      *
@@ -127,19 +133,19 @@ public class ActionOptions {
     }
     private DoOnEach doOnEach = DoOnEach.FIRST;
 
-    /**
+    /*
      * The Match's Mat can be captured from the match region
      */
     private boolean captureImage = true;
 
-    /**
+    /*
      * Instead of searching for a StateImage, use its defined Region to create a Match.
      * This is either the first found region if the StateImage uses a
      * RegionImagePairs object, or the first defined Region in SearchRegions.
      */
     private boolean useDefinedRegion = false;
 
-    /**
+    /*
      * For scrolling with the mouse wheel
      */
     public enum ScrollDirection {
@@ -147,7 +153,7 @@ public class ActionOptions {
     }
     private ScrollDirection scrollDirection = ScrollDirection.UP;
 
-    /**
+    /*
      * Specifies the condition to fulfill after a Click.
      * The Objects in the 1st ObjectCollection are acted on by the CLICK method.
      * If there is a 2nd ObjectCollection, it is acted on by the FIND method.
@@ -162,21 +168,22 @@ public class ActionOptions {
     }
     private ClickUntil clickUntil = ClickUntil.OBJECTS_APPEAR;
 
-    /**
+    /*
      * TEXT_APPEARS: Keep searching for text until some text appears.
      * TEXT_VANISHES: Keep searching for text until it vanishes.
      */
     public enum GetTextUntil {
         NONE, TEXT_APPEARS, TEXT_VANISHES
     }
-    GetTextUntil getTextUntil = GetTextUntil.TEXT_APPEARS;
+    private GetTextUntil getTextUntil = GetTextUntil.TEXT_APPEARS;
 
-    /**
+    /*
      * successEvaluation defines the success criteria for the Find operation.
      */
+    @Transient
     private Predicate<Matches> successCriteria;
 
-    /**
+    /*
      * A Drag is a good example of how the below options work together.
      * The options work in the following order:
      *   1. pauseBeforeBegin
@@ -195,7 +202,7 @@ public class ActionOptions {
     private double pauseBeforeMouseUp = Settings.DelayBeforeDrag;
     private double pauseAfterMouseUp = 0;
 
-    /**
+    /*
      * These values provide an offset to the Match for the dragTo Location.
      * To select the location to drag to, objects are chosen in this order:
      *   1. Objects in the 2nd ObjectCollection + offsets
@@ -208,7 +215,7 @@ public class ActionOptions {
 
     private ClickType.Type clickType = ClickType.Type.LEFT;
 
-    /**
+    /*
      * We have 2 options for moving the mouse after a click:
      *   1) To an offset of the click point
      *   2) To a fixed location
@@ -217,17 +224,20 @@ public class ActionOptions {
      * These options are also used for drags, and can move the mouse once the drag is finished.
      */
     private boolean moveMouseAfterClick = false;
+    @OneToOne(cascade = CascadeType.ALL)
     private Location locationAfterAction = new Location(-1, 0); // disabled by default (x = -1)
+    @OneToOne(cascade = CascadeType.ALL)
     private Location offsetLocationBy = new Location(-1, 0);
 
-    /**
+    /*
      * Sets temporary SearchRegions for Images, and also for RegionImagePairs when the
      * SearchRegion is not already defined. It will not change the SearchRegion of RegionImagePairs
      * that have already been defined. For more information on RegionImagePairs, see the class.
      */
+    @OneToOne(cascade = CascadeType.ALL)
     private SearchRegions searchRegions = new SearchRegions();
 
-    /**
+    /*
      * pauseBeforeBegin and pauseAfterEnd occur at the very beginning and very end of an action.
      * Including these options and not including a separate 'pause' method was a design choice.
      * Having a pause method allows the programmer to think in a more procedural manner: for example,
@@ -238,18 +248,18 @@ public class ActionOptions {
      *
      * Pauses are always associated with actions: for example, pausing before clicking can increase
      * the chance that the click will be successful. There are also BrobotSettings for these options
-     * that apply them to every click (pauseBeforeMouseDown & pauseAfterMouseUp), but the below
+     * that apply them to every click (pauseBeforeMouseDown, pauseAfterMouseUp), but the below
      * options give more granular control.
      */
     private double pauseBeforeBegin = 0;
     private double pauseAfterEnd = 0;
 
-    /**
+    /*
      * maxWait is used with FIND, and gives the max number of seconds to search.
      */
     private double maxWait = 0;
 
-    /**
+    /*
      * IndividualAction refers to individual activities, such as clicking on a single Match.
      *   When clicking a Match, timesToRepeatIndividualAction gives the number of consecutive clicks
      *   on this Match before moving on to the next Match.
@@ -268,15 +278,15 @@ public class ActionOptions {
     private double pauseBetweenIndividualActions = 0;
     private double pauseBetweenActionSequences = 0;
 
-    /**
+    /*
      * maxMatchesToActOn limits the number of Matches used when working with Find.ALL, Find.EACH, and
      * Find.HISTOGRAM.
-     * When <=0 it is not used.
+     * When negative or zero it is not used.
      * The default value for HISTOGRAM is 1.
      */
     private int maxMatchesToActOn = -1;
 
-    /**
+    /*
      * Anchors define Locations in Matches and specify how these Locations should be used
      * to define a Region (see the Anchor class for more info).
      * INSIDE_ANCHORS defines the region as the smallest rectangle from the anchors found
@@ -291,13 +301,13 @@ public class ActionOptions {
     }
     private DefineAs defineAs = DefineAs.MATCH;
 
-    /**
+    /*
      * The following variables make adjustments to the final results of many actions.
      * For example, a Region defined as x.y.w.h = 10.10.50.50 will be
      *   20.10.60.50 when addX = 10
      *   10.10.60.50 when addW = 10
      *   10.10.20.50 when absoluteW = 10
-     * AbsoluteW and AbsoluteH are not used when set to <0
+     * AbsoluteW and AbsoluteH are not used when set to a negative number.
      * When AbsoluteW is used, addW is not used. Same for H.
      *
      * These variables are used for the dragFrom Location but not for the dragTo Location.
@@ -309,7 +319,7 @@ public class ActionOptions {
     private int addX = 0;
     private int addY = 0;
 
-    /**
+    /*
      * These variables are useful with composite actions, such as Drag.
      * addX and addY are used to adjust the dragFrom Location, and addX2 and addY2 are used to adjust
      * the dragTo Location. Dragging to or from the current mouse position then can be done by setting
@@ -320,21 +330,21 @@ public class ActionOptions {
     private int addX2 = 0;
     private int addY2 = 0;
 
-    /**
+    /*
      * Highlighting
      */
     private boolean highlightAllAtOnce = false;
     private double highlightSeconds = 1;
     private String highlightColor = "red"; // see sikuli region.highlight() for more info
 
-    /**
+    /*
      * The below options are for typing characters to the active window.
      * Modifiers are used for key combinations such as 'SHIFT a' or 'CTRL ALT DEL'
      */
     private double typeDelay = Settings.TypeDelay;
     private String modifiers = ""; // not used when ""
 
-    /**
+    /*
      * KMEANS finds a selected number of RGB color cluster centers for each image.
      * MU takes all pixels from all images and finds the min, max, mean, and standard deviation
      *   of the HSV values.
@@ -343,23 +353,23 @@ public class ActionOptions {
         KMEANS, MU, CLASSIFICATION
     }
     private Color color = Color.MU;
-    /**
+    /*
      * Specifies the width and height of color boxes to find (used with FIND.COLOR).
      */
     private int diameter = 5;
-    /**
+    /*
      * The number of k-means to use for finding color.
      */
     private int kmeans = 2;
 
-    /**
+    /*
      * The number of bins to use for an HSV color histogram.
      */
     private int hueBins = 12;
     private int saturationBins = 2;
     private int valueBins = 1;
 
-    /**
+    /*
      * In case of multiple Find operations that include a Find.COLOR,
      * it's necessary to be able to specify a MinSimilarity for the Pattern matching Find,
      * and a different minScore for the Color Find.
@@ -369,7 +379,7 @@ public class ActionOptions {
      */
     private double minScore = 0.7;
 
-    /**
+    /*
      * Used with color finds and motion detection.
      * Values below 0 disable the condition.
      *
@@ -383,12 +393,12 @@ public class ActionOptions {
     private int minArea = 1;
     private int maxArea = -1;
 
-    /**
+    /*
      * For Find.MOTION, this is the maximum distance an object can move between frames.
      */
     private int maxMovement = 300;
 
-    /**
+    /*
      * Used with recording and playback.
      *
      * startPlayback is the point in the recording, in seconds, to start the playback sequence.
@@ -400,7 +410,7 @@ public class ActionOptions {
     private double startPlayback = -1;
     private double playbackDuration = 5;
 
-    /**
+    /*
      * Overrides the global illustration setting for this action.
      * Maybe is the default and does not override the global setting.
      */
@@ -409,7 +419,7 @@ public class ActionOptions {
     }
     private Illustrate illustrate = Illustrate.MAYBE;
 
-    /**
+    /*
      * Match fusion combines matches based on different criteria. The initial application was to combine
      * words in proximity found after a Find.ALL_WORDS operation. If NONE is selected, no match objects
      * will be fused and no fusion code will run.
@@ -420,7 +430,7 @@ public class ActionOptions {
     private MatchFusionMethod fusionMethod = MatchFusionMethod.NONE;
     private int maxFusionDistanceX = 5;
     private int maxFusionDistanceY = 5;
-    /**
+    /*
      * After fusing matches, this variable decides which scene to use to set the underlying Mat and text.
      */
     private int sceneToUseForCaptureAfterFusingMatches = 0;

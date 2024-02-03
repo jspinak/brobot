@@ -4,10 +4,10 @@ import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.actions.actionOptions.CommonActionOptions;
 import io.github.jspinak.brobot.actions.parameterTuning.ParameterCollection;
 import io.github.jspinak.brobot.actions.parameterTuning.ParameterThresholds;
+import io.github.jspinak.brobot.database.api.StateService;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.state.state.State;
-import io.github.jspinak.brobot.services.StateService;
 import io.github.jspinak.brobot.manageStates.UnknownState;
 import org.springframework.stereotype.Component;
 
@@ -23,10 +23,10 @@ import java.util.Optional;
 @Component
 public class CommonARClickCombos {
 
-    private RunARCombo runARCombo;
-    private CommonActionOptions commonActionOptions;
-    private CommonResults commonResults;
-    private StateService stateService;
+    private final RunARCombo runARCombo;
+    private final CommonActionOptions commonActionOptions;
+    private final CommonResults commonResults;
+    private final StateService stateService;
 
     public CommonARClickCombos(RunARCombo runARCombo, CommonActionOptions commonActionOptions,
                                CommonResults commonResults, StateService stateService) {
@@ -69,7 +69,7 @@ public class CommonARClickCombos {
                                        double maxWait, ActionOptions.Action actionType,
                                        int numberOfClicks) {
         if (Objects.equals(stateName, UnknownState.Enum.UNKNOWN.toString())) return false; // this could be true but requires additional coding
-        Optional<State> state = stateService.findByName(stateName);
+        Optional<State> state = stateService.getState(stateName);
         if (state.isEmpty()) return false;
         ActionResultCombo arCombo = new ActionResultCombo();
         ActionOptions actionOptions1 = commonActionOptions.findAndMultipleClicks(maxWait, numberOfClicks);

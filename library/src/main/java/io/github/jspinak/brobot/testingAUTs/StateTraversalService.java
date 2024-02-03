@@ -1,9 +1,9 @@
 package io.github.jspinak.brobot.testingAUTs;
 
+import io.github.jspinak.brobot.database.api.StateService;
 import io.github.jspinak.brobot.datatypes.state.state.State;
 import io.github.jspinak.brobot.manageStates.AdjacentStates;
 import io.github.jspinak.brobot.manageStates.StateTransitionsManagement;
-import io.github.jspinak.brobot.services.StateService;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -11,10 +11,10 @@ import java.util.*;
 @Component
 public class StateTraversalService {
 
-    private AdjacentStates adjacentStates;
-    private StateService stateService;
-    private UnvisitedStates unvisitedStates;
-    private StateTransitionsManagement stateTransitionsManagement;
+    private final AdjacentStates adjacentStates;
+    private final StateService stateService;
+    private final UnvisitedStates unvisitedStates;
+    private final StateTransitionsManagement stateTransitionsManagement;
 
     public StateTraversalService(AdjacentStates adjacentStates, StateService stateService,
                                  UnvisitedStates unvisitedStates,
@@ -34,7 +34,7 @@ public class StateTraversalService {
         Set<String> adjacentUnvisited = new HashSet<>();
         Set<String> adjacent = adjacentStates.getAdjacentStates();
         adjacent.forEach(stateName -> {
-            Optional<State> stateOpt = stateService.findByName(stateName);
+            Optional<State> stateOpt = stateService.getState(stateName);
             stateOpt.ifPresent(state -> {
                 if (state.getTimesVisited() == 0) adjacentUnvisited.add(stateName);
             });

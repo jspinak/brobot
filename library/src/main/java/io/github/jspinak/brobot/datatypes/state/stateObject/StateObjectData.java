@@ -14,21 +14,21 @@ import lombok.Getter;
 @Getter
 public class StateObjectData {
 
-    private final Long id;
+    private final Long stateObjectId;
     private final StateObject.Type objectType;
-    private final String name;
+    private final String stateObjectName;
     private final String ownerStateName;
 
     public StateObjectData(StateObject stateObject) {
-        this.id = stateObject.getId();
+        this.stateObjectId = stateObject.getId();
         this.objectType = stateObject.getObjectType();
-        this.name = stateObject.getName();
+        this.stateObjectName = stateObject.getName();
         this.ownerStateName = stateObject.getOwnerStateName();
     }
 
     @Override
     public String toString() {
-        return "StateObject: " + name + ", " + objectType + ", ownerState=" + ownerStateName + ", id=" + id;
+        return "StateObject: " + stateObjectName + ", " + objectType + ", ownerState=" + ownerStateName + ", id=" + stateObjectId;
     }
 
 }

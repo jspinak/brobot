@@ -1,32 +1,23 @@
 package io.github.jspinak.brobot.datatypes.primitives.image;
 
-import io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles.ColorCluster;
-import io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles.KmeansProfilesAllSchemas;
 import io.github.jspinak.brobot.datatypes.primitives.location.Anchor;
 import io.github.jspinak.brobot.datatypes.primitives.location.Anchors;
 import io.github.jspinak.brobot.datatypes.primitives.location.Position;
+import io.github.jspinak.brobot.datatypes.primitives.location.Positions;
 import io.github.jspinak.brobot.datatypes.primitives.match.MatchHistory;
 import io.github.jspinak.brobot.datatypes.primitives.match.MatchSnapshot;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.SearchRegions;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.imageUtils.BufferedImageOps;
-import io.github.jspinak.brobot.imageUtils.ImageOps;
-import io.github.jspinak.brobot.imageUtils.MatOps;
-import jakarta.persistence.Embedded;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.bytedeco.opencv.opencv_core.Mat;
-import org.springframework.data.annotation.Id;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.net.URL;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Pattern and StateImage_ (to replace StateImage) are for a code restructuring that gets rid of RegionImagePairs.
@@ -37,16 +28,21 @@ import java.util.Optional;
  * TODO: If Pattern is never used for classification, you can remove the KMeansProfiles.
  *
  * <p>Database: Pattern is an @Entity since a single Pattern may be in multiple StateImage objects. All fields in
- * Pattern should be @Embedded. This is the lowest level of object that should be stored in the database. </p>
+ * Pattern should be @Embedded. This is the lowest level of object that should be stored in the database.
+ * I removed the SikuliX Pattern since it is a non-JPA entity and caused problems with persistence. </p>
  */
 @Entity
 @Getter
 @Setter
-public class Pattern extends org.sikuli.script.Pattern {
+public class Pattern {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
+
+    // fields from SikuliX Pattern
+    private String url; // originally type URL, which requires conversion for use with JPA
+    private String imgpath;
 
     private String name;
     /*
@@ -60,30 +56,24 @@ public class Pattern extends org.sikuli.script.Pattern {
     an image, but this raises architecture concerns in Brobot. Most importantly, Match needs a representation of the
     image, and having Pattern within Match would create a circular class chain. Pattern also needs a MatchHistory to
     perform mock runs and MatchHistory contains a list of MatchSnapshot, which itself contains a list of Match objects.
-    For this reason, I've created a Brobot Image object and use this object in Match. The Brobot Image object extends
-    the SikuliX Image object.
+    For this reason, I've created a Brobot Image object and use this object in Match and in Pattern. ImageDTO is used to store the
+    BufferedImage in the database as a byte array. The most recent BufferedImage is saved in the byte array before
+    the Pattern is sent to the database.
      */
-    private Mat mat;
-    /*
-    Since Pattern extends SikuliX Pattern, it contains a SikuliX Image object and a BufferedImage. There is no need for
-    a Brobot Image, which extends SikuliX Image and would provide a duplicate BufferedImage. ImageDTO is used to store the
-    BufferedImage in the database as a byte array. Any changes to the BufferedImage should be saved in the byte array before
-    saving the Pattern to the database.
-     */
-    @Embedded
-    private ImageDTO imageDTO;
+    @OneToOne(cascade = CascadeType.ALL)
+    private Image image;
     /*
     An image that should always appear in the same location has fixed==true.
      */
     private boolean fixed = false;
-    @Embedded
+    @OneToOne(cascade = CascadeType.ALL)
     private SearchRegions searchRegions = new SearchRegions();
     private boolean setKmeansColorProfiles = false; // this is an expensive operation and should be done only when needed
-    @Embedded
-    private KmeansProfilesAllSchemas kmeansProfilesAllSchemas = new KmeansProfilesAllSchemas();
-    @Embedded
-    private ColorCluster colorCluster = new ColorCluster();
-    @Embedded
+    //@Embedded
+    //private KmeansProfilesAllSchemas kmeansProfilesAllSchemas = new KmeansProfilesAllSchemas();
+    //@Embedded
+    //private ColorCluster colorCluster = new ColorCluster();
+    @OneToOne(cascade = CascadeType.ALL)
     private MatchHistory matchHistory = new MatchHistory();
     private int index; // a unique identifier used for classification matrices
     private boolean dynamic = false; // dynamic images cannot be found using pattern matching
@@ -94,27 +84,20 @@ public class Pattern extends org.sikuli.script.Pattern {
      */
     @Embedded
     private Position position = new Position(.5,.5); // use to convert a match to a location
-    @Embedded
+    @OneToOne(cascade = CascadeType.ALL)
     private Anchors anchors = new Anchors(); // for defining regions using this object as input
 
-    public Pattern(String string) {
-        super(string);
-        setNameFromFilenameIfEmpty(string);
-        setMatWithBufferedImage();
-    }
-
-    public Pattern(URL url) {
-        super(url);
-        setMatWithBufferedImage();
+    public Pattern(String imgPath) {
+        this.imgpath = imgPath;
+        setNameFromFilenameIfEmpty(imgPath);
     }
 
     public Pattern(BufferedImage bimg) {
-        super(bimg);
-        setMatWithBufferedImage();
+        image = new Image(bimg);
     }
 
     public Pattern(Mat mat) {
-        super(BufferedImageOps.fromMat(mat));
+        image = new Image(mat);
     }
 
     /**
@@ -122,7 +105,7 @@ public class Pattern extends org.sikuli.script.Pattern {
      * @return a BGR Mat.
      */
     public Mat getMat() {
-        return ImageOps.getMatBGR(getImage());
+        return image.getMatBGR();
     }
 
     /**
@@ -131,7 +114,7 @@ public class Pattern extends org.sikuli.script.Pattern {
      * @param matBGR a JavaCV Mat in BGR format.
      */
     public void setMat(Mat matBGR) {
-        setBImage(BufferedImageOps.fromMat(matBGR));
+        image.setBufferedImage(BufferedImageOps.fromMat(matBGR));
     }
 
     /**
@@ -139,7 +122,7 @@ public class Pattern extends org.sikuli.script.Pattern {
      * @return an HSV Mat.
      */
     public Mat getMatHSV() {
-        return ImageOps.getMatHSV(getImage());
+        return image.getMatHSV();
     }
 
     /**
@@ -147,7 +130,7 @@ public class Pattern extends org.sikuli.script.Pattern {
      * the imageDTO object.
      */
     public void setBytes() {
-        imageDTO.setBytesWithImage(getImage());
+        image.setBytesForPersistence();
     }
 
     /**
@@ -155,7 +138,7 @@ public class Pattern extends org.sikuli.script.Pattern {
      * to a BufferedImage and saved in the Image object of the Pattern.
      */
     public void setBufferedImage() {
-        setBImage(imageDTO.getBufferedImage());
+        image.setBufferedImageFromBytes();
     }
 
     /**
@@ -172,30 +155,12 @@ public class Pattern extends org.sikuli.script.Pattern {
         }
     }
 
-    private void setMatWithBufferedImage() {
-        BufferedImage bImage = getBImage();
-        Optional<Mat> optionalMat = MatOps.bufferedImageToMat(bImage);
-        optionalMat.ifPresent(this::setMat);
-    }
-
-    /**
-     * The initial x will be 0. If a sub image is created, x will represent its position in the super image.
-     * @return the x-position in the super image.
-     */
-    public int x() {
-        return getImage().x;
-    }
-
-    public int y() {
-        return getImage().y;
-    }
-
     public int w() {
-        return getImage().w;
+        return image.w();
     }
 
     public int h() {
-        return getImage().h;
+        return image.h();
     }
 
     /**
@@ -253,17 +218,17 @@ public class Pattern extends org.sikuli.script.Pattern {
     }
 
     public boolean isEmpty() {
-        return getImage() == null;
+        return image.isEmpty();
     }
 
-    public boolean equals(Pattern pattern) {
-        boolean sameFilename = getFilename().equals(pattern.getFilename());
-        boolean bothFixedOrBothNot = fixed == pattern.isFixed();
-        boolean sameSearchRegions = searchRegions.equals(pattern.getSearchRegions());
-        boolean sameMatchHistory = matchHistory.equals(pattern.getMatchHistory());
-        boolean bothDynamicOrBothNot = dynamic == pattern.isDynamic();
-        boolean samePosition = position.equals(pattern.getPosition());
-        boolean sameAnchors = anchors.equals(pattern.getAnchors());
+    public boolean equals(Pattern comparePattern) {
+        boolean sameFilename = imgpath.equals(comparePattern.getImgpath());
+        boolean bothFixedOrBothNot = fixed == comparePattern.isFixed();
+        boolean sameSearchRegions = searchRegions.equals(comparePattern.getSearchRegions());
+        boolean sameMatchHistory = matchHistory.equals(comparePattern.getMatchHistory());
+        boolean bothDynamicOrBothNot = dynamic == comparePattern.isDynamic();
+        boolean samePosition = position.equals(comparePattern.getPosition());
+        boolean sameAnchors = anchors.equals(comparePattern.getAnchors());
         if (!sameFilename) return false;
         if (!bothFixedOrBothNot) return false;
         if (!sameSearchRegions) return false;
@@ -274,15 +239,28 @@ public class Pattern extends org.sikuli.script.Pattern {
         return true;
     }
 
+    // __convenience functions for the SikuliX Pattern object__
+    /**
+     * Another way to get the SikuliX object.
+     * @return the SikuliX Pattern object.
+     */
+    public org.sikuli.script.Pattern sikuli() {
+        return new org.sikuli.script.Pattern(image.sikuli());
+    }
+
+    public BufferedImage getBImage() {
+        return image.getBufferedImage();
+    }
+
     public static class Builder {
 
         private String name;
-        private Mat mat;
+        private BufferedImage bufferedImage;
         private String filename;
         private boolean fixed = false;
         private SearchRegions searchRegions = new SearchRegions();
         private boolean setKmeansColorProfiles = false;
-        private KmeansProfilesAllSchemas kmeansProfilesAllSchemas = new KmeansProfilesAllSchemas();
+        //private KmeansProfilesAllSchemas kmeansProfilesAllSchemas = new KmeansProfilesAllSchemas();
         private MatchHistory matchHistory = new MatchHistory();
         private int index;
         private boolean dynamic = false;
@@ -295,7 +273,12 @@ public class Pattern extends org.sikuli.script.Pattern {
         }
 
         public Builder setMat(Mat mat) {
-            this.mat = mat;
+            this.bufferedImage = BufferedImageOps.fromMat(mat);
+            return this;
+        }
+
+        public Builder setBufferedImage(BufferedImage bufferedImage) {
+            this.bufferedImage = bufferedImage;
             return this;
         }
 
@@ -329,10 +312,10 @@ public class Pattern extends org.sikuli.script.Pattern {
             return this;
         }
 
-        public Builder setKmeansProfilesAllSchemas(KmeansProfilesAllSchemas kmeansProfilesAllSchemas) {
-            this.kmeansProfilesAllSchemas = kmeansProfilesAllSchemas;
-            return this;
-        }
+        //public Builder setKmeansProfilesAllSchemas(KmeansProfilesAllSchemas kmeansProfilesAllSchemas) {
+        //    this.kmeansProfilesAllSchemas = kmeansProfilesAllSchemas;
+        //    return this;
+        //}
 
         public Builder setMatchHistory(MatchHistory matchHistory) {
             this.matchHistory = matchHistory;
@@ -369,24 +352,31 @@ public class Pattern extends org.sikuli.script.Pattern {
             return this;
         }
 
-        public Builder addAnchor(Position.Name inRegionToDefine, Position.Name inMatch) {
+        public Builder addAnchor(Positions.Name inRegionToDefine, Positions.Name inMatch) {
             this.anchors.add(new Anchor(inRegionToDefine, new Position(inMatch)));
             return this;
         }
 
+        private Pattern makeNewPattern() {
+            if (filename != null) return new Pattern(filename);
+            if (bufferedImage != null) return new Pattern(bufferedImage);
+            return new Pattern();
+        }
+
+        private void setBImageIfAvailable(Pattern pattern) {
+            if (bufferedImage == null) return;
+            if (pattern.getImage() == null) pattern.setImage(new Image(bufferedImage));
+            else if (pattern.getBImage() == null) pattern.getImage().setBufferedImage(bufferedImage);
+        }
+
         public Pattern build() {
-            Pattern pattern = new Pattern(filename);
-            // new Pattern(filename) should set the mat and name, only overwrite if explicitly set
-            if (mat != null) {
-                pattern.mat = mat;
-                BufferedImage bufferedImage = BufferedImageOps.fromMat(mat);
-                pattern.setBImage(bufferedImage); // this also sets SikuliX.Image
-            }
+            Pattern pattern = makeNewPattern();
             if (name != null) pattern.name = name;
+            setBImageIfAvailable(pattern);
             pattern.fixed = fixed;
             pattern.searchRegions = searchRegions;
             pattern.setKmeansColorProfiles = setKmeansColorProfiles;
-            pattern.kmeansProfilesAllSchemas = kmeansProfilesAllSchemas;
+            //pattern.kmeansProfilesAllSchemas = kmeansProfilesAllSchemas;
             pattern.matchHistory = matchHistory;
             pattern.index = index;
             pattern.dynamic = dynamic;

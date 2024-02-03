@@ -1,7 +1,7 @@
 package io.github.jspinak.brobot.manageStates;
 
+import io.github.jspinak.brobot.database.api.StateService;
 import io.github.jspinak.brobot.datatypes.state.state.State;
-import io.github.jspinak.brobot.services.StateService;
 import io.github.jspinak.brobot.services.StateTransitionsService;
 import org.springframework.stereotype.Component;
 
@@ -14,9 +14,9 @@ import static io.github.jspinak.brobot.manageStates.StateMemory.Enum.PREVIOUS;
 @Component
 public class AdjacentStates {
 
-    private StateService stateService;
-    private StateMemory stateMemory;
-    private StateTransitionsService stateTransitionsService;
+    private final StateService stateService;
+    private final StateMemory stateMemory;
+    private final StateTransitionsService stateTransitionsService;
 
     public AdjacentStates(StateService stateService, StateMemory stateMemory,
                           StateTransitionsService stateTransitionsService) {
@@ -33,7 +33,7 @@ public class AdjacentStates {
         adjacent.addAll(statesWithStaticTransitions);
         if (!statesWithStaticTransitions.contains(PREVIOUS.toString())) return adjacent;
         adjacent.remove(PREVIOUS.toString());
-        Optional<State> currentState = stateService.findByName(stateName);
+        Optional<State> currentState = stateService.getState(stateName);
         if (currentState.isEmpty() || currentState.get().getHidden().isEmpty()) return adjacent;
         adjacent.addAll(currentState.get().getHidden());
         return adjacent;

@@ -2,10 +2,10 @@ package io.github.jspinak.brobot.actions.methods.basicactions.define;
 
 import io.github.jspinak.brobot.actions.actionExecution.ActionInterface;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
+import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
-import org.sikuli.script.Match;
 import org.springframework.stereotype.Component;
 
 /**
@@ -33,16 +33,16 @@ public class DefineIncludingMatches implements ActionInterface {
     private Region fitRegionToMatches(Matches matches) {
         if (matches.isEmpty()) return new Region();
         Match firstMatch = matches.getMatchList().get(0);
-        int x = firstMatch.x;
-        int y = firstMatch.y;
-        int x2 = firstMatch.getTopRight().x;
-        int y2 = firstMatch.getBottomLeft().y;
+        int x = firstMatch.x();
+        int y = firstMatch.y();
+        int x2 = firstMatch.getRegion().sikuli().getTopRight().x;
+        int y2 = firstMatch.getRegion().sikuli().getBottomLeft().y;
         for (int i = 1; i<matches.getMatchList().size(); i++) {
             Match match = matches.getMatchList().get(i);
-            x = Math.min(x, match.x);
-            y = Math.min(y, match.y);
-            x2 = Math.max(x2, match.getTopRight().x);
-            y2 = Math.max(y2, match.getBottomLeft().y);
+            x = Math.min(x, match.x());
+            y = Math.min(y, match.y());
+            x2 = Math.max(x2, match.getRegion().sikuli().getTopRight().x);
+            y2 = Math.max(y2, match.getRegion().sikuli().getBottomLeft().y);
         }
         return new Region(x, y, x2-x+1, y2-y+1);
     }

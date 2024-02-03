@@ -1,7 +1,7 @@
 package io.github.jspinak.brobot.actions.methods.basicactions.define;
 
 import io.github.jspinak.brobot.datatypes.primitives.location.Location;
-import io.github.jspinak.brobot.datatypes.primitives.location.Position;
+import io.github.jspinak.brobot.datatypes.primitives.location.Positions;
 import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
@@ -21,7 +21,7 @@ public class AnchorRegion {
     public void fitRegionToAnchors(DefinedBorders definedBorders, Region region, Matches matches) {
         for (Match match : matches.getMatchList()) {
             // Match objects can have one or more anchors
-            match.getAnchors().getAnchors().forEach(anchor -> {
+            match.getAnchors().getAnchorList().forEach(anchor -> {
                 definedBorders.setAsDefined(anchor.getAnchorInNewDefinedRegion());
                 Location locationInMatch = new Location(match, anchor.getPositionInMatch());
                 adjustDefinedRegion(region, locationInMatch, anchor.getAnchorInNewDefinedRegion());
@@ -35,43 +35,40 @@ public class AnchorRegion {
      * This is useful for matches that should define only the top, bottom, left, or right side of the new region
      * and not a specific point with x and y values.
      */
-    private void adjustDefinedRegion(Region region, Location location, Position.Name anchor) {
-        if (anchor == Position.Name.TOPLEFT) {
-            region.x = Math.max(region.x, location.getX());
-            region.y = Math.max(region.y, location.getY());
+    private void adjustDefinedRegion(Region region, Location location, Positions.Name anchor) {
+        if (anchor == Positions.Name.TOPLEFT) {
+            region.setX(Math.max(region.x(), location.getX()));
+            region.setY(Math.max(region.y(), location.getY()));
         }
-        if (anchor == Position.Name.MIDDLELEFT) {
-            region.x = Math.max(region.x, location.getX());
+        if (anchor == Positions.Name.MIDDLELEFT) {
+            region.setX(Math.max(region.x(), location.getX()));
         }
-        if (anchor == Position.Name.BOTTOMLEFT) {
-            region.x = Math.max(region.x, location.getX());
-            region.setY2(Math.min(region.getY2(), location.getY()));
+        if (anchor == Positions.Name.BOTTOMLEFT) {
+            region.setX(Math.max(region.x(), location.getX()));
+            region.setY2(Math.min(region.y2(), location.getY()));
         }
-        if (anchor == Position.Name.TOPMIDDLE) {
-            region.y = Math.max(region.y, location.getY());
+        if (anchor == Positions.Name.TOPMIDDLE) {
+            region.setY(Math.max(region.y(), location.getY()));
         }
-        if (anchor == Position.Name.TOPRIGHT) {
-            region.setX2(Math.min(region.getX2(), location.getX()));
-            region.y = Math.max(region.y, location.getY());
+        if (anchor == Positions.Name.TOPRIGHT) {
+            region.setX2(Math.min(region.x2(), location.getX()));
+            region.setY(Math.max(region.y(), location.getY()));
         }
-        if (anchor == Position.Name.MIDDLERIGHT) {
-            region.setX2(Math.min(region.getX2(), location.getX()));
+        if (anchor == Positions.Name.MIDDLERIGHT) {
+            region.setX2(Math.min(region.x2(), location.getX()));
         }
-        if (anchor == Position.Name.BOTTOMRIGHT) {
-            region.setX2(Math.min(region.getX2(), location.getX()));
-            region.setY2(Math.min(region.getY2(), location.getY()));
+        if (anchor == Positions.Name.BOTTOMRIGHT) {
+            region.setX2(Math.min(region.x2(), location.getX()));
+            region.setY2(Math.min(region.y2(), location.getY()));
         }
-        if (anchor == Position.Name.BOTTOMMIDDLE) {
-            region.setY2(Math.min(region.getY2(), location.getY()));
+        if (anchor == Positions.Name.BOTTOMMIDDLE) {
+            region.setY2(Math.min(region.y2(), location.getY()));
         }
     }
 
     /**
      * Locations can also be used to define boundaries.
      * These are considered the same as anchors with x and y coordinates (not MIDDLE).
-     *
-     * @param region
-     * @param locations
      */
     private void fitRegionToLocations(DefinedBorders definedBorders, Region region, List<StateLocation> locations) {
         for (StateLocation location : locations) {

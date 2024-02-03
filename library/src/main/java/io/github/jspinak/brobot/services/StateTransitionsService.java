@@ -10,9 +10,6 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
-import static io.github.jspinak.brobot.datatypes.state.NullState.Name.NULL;
-import static io.github.jspinak.brobot.manageStates.StateMemory.Enum.PREVIOUS;
-
 /**
  * Finds the correct Transition from one State to another,
  * taking into account the hidden States.
@@ -21,18 +18,15 @@ import static io.github.jspinak.brobot.manageStates.StateMemory.Enum.PREVIOUS;
 @Getter
 public class StateTransitionsService {
 
-    private StateTransitionsRepository stateTransitionsRepository;
-    private StateTransitionsJointTable stateTransitionsJointTable;
-    private StateService stateService;
+    private final StateTransitionsRepository stateTransitionsRepository;
+    private final StateTransitionsJointTable stateTransitionsJointTable;
 
-    private Set<String> statesToActivate = new HashSet<>();
+    private final Set<String> statesToActivate = new HashSet<>();
 
     public StateTransitionsService(StateTransitionsRepository stateTransitionsRepository,
-                                   StateTransitionsJointTable stateTransitionsJointTable,
-                                   StateService stateService) {
+                                   StateTransitionsJointTable stateTransitionsJointTable) {
         this.stateTransitionsRepository = stateTransitionsRepository;
         this.stateTransitionsJointTable = stateTransitionsJointTable;
-        this.stateService = stateService;
     }
 
     /**

@@ -1,6 +1,7 @@
 package io.github.jspinak.brobot.datatypes.state;
 
 import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
+import io.github.jspinak.brobot.datatypes.primitives.location.Position;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.datatypes.primitives.location.Location;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
@@ -10,13 +11,13 @@ import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.St
 import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.StateRegion;
 import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.StateString;
 import io.github.jspinak.brobot.reports.Report;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import org.sikuli.script.Match;
 
 import java.util.*;
 
-import static io.github.jspinak.brobot.datatypes.primitives.location.Position.Name.TOPLEFT;
+import static io.github.jspinak.brobot.datatypes.primitives.location.Positions.Name.TOPLEFT;
 import static io.github.jspinak.brobot.datatypes.state.NullState.Name.NULL;
 
 /**
@@ -34,11 +35,37 @@ import static io.github.jspinak.brobot.datatypes.state.NullState.Name.NULL;
 @Setter
 public class ObjectCollection {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
+
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinTable(name = "objColl_stateLocations",
+            joinColumns = @JoinColumn(name = "objColl_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "stateLocation_id", referencedColumnName = "id"))
     private List<StateLocation> stateLocations = new ArrayList<>();
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinTable(name = "objColl_stateImages",
+            joinColumns = @JoinColumn(name = "objColl_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "stateImage_id", referencedColumnName = "id"))
     private List<StateImage> stateImages = new ArrayList<>();
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinTable(name = "objColl_stateRegions",
+            joinColumns = @JoinColumn(name = "objColl_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "stateRegion_id", referencedColumnName = "id"))
     private List<StateRegion> stateRegions = new ArrayList<>();
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinTable(name = "objColl_stateStrings",
+            joinColumns = @JoinColumn(name = "objColl_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "stateString_id", referencedColumnName = "id"))
     private List<StateString> stateStrings = new ArrayList<>();
+    @ElementCollection
+    @CollectionTable(name = "matches", joinColumns = @JoinColumn(name = "objColl_id"))
     private List<Matches> matches = new ArrayList<>();
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinTable(name = "objColl_scenes",
+            joinColumns = @JoinColumn(name = "objColl_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "scene_id", referencedColumnName = "id"))
     private List<Pattern> scenes = new ArrayList<>();
 
     private ObjectCollection() {}
@@ -69,8 +96,8 @@ public class ObjectCollection {
     public String getFirstObjectName() {
         if (!stateImages.isEmpty()) {
             if (!stateImages.get(0).getName().isEmpty()) return stateImages.get(0).getName();
-            else if (!stateImages.get(0).getPatterns().get(0).getFilename().isEmpty())
-                return stateImages.get(0).getPatterns().get(0).getFilename();
+            else if (!stateImages.get(0).getPatterns().get(0).getImgpath().isEmpty())
+                return stateImages.get(0).getPatterns().get(0).getImgpath();
         }
         if (!stateLocations.isEmpty() && !stateLocations.get(0).getName().isEmpty())
             return stateLocations.get(0).getName();
@@ -147,7 +174,7 @@ public class ObjectCollection {
 
     public Set<String> getAllImageFilenames() {
         Set<String> filenames = new HashSet<>();
-        stateImages.forEach(sI -> sI.getPatterns().forEach(p -> filenames.add(p.getFilename())));
+        stateImages.forEach(sI -> sI.getPatterns().forEach(p -> filenames.add(p.getImgpath())));
         return filenames;
     }
 
@@ -171,7 +198,7 @@ public class ObjectCollection {
         public Builder withLocations(Location... locations) {
             for (Location location : locations) {
                 StateLocation stateLocation = location.asStateLocationInNullState();
-                stateLocation.setPosition(TOPLEFT);
+                stateLocation.setPosition(new Position(TOPLEFT));
                 this.stateLocations.add(stateLocation);
             }
             return this;
@@ -259,9 +286,9 @@ public class ObjectCollection {
         }
 
         public Builder withMatchObjectsAsRegions(io.github.jspinak.brobot.datatypes.primitives.match.Match... matches) {
-            for (Match match : matches) {
+            for (io.github.jspinak.brobot.datatypes.primitives.match.Match match : matches) {
                 this.stateRegions.add(new StateRegion.Builder()
-                        .withSearchRegion(new Region(match))
+                        .withSearchRegion(match.getRegion())
                         .inState(NULL.toString())
                         .build());
             }

@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 public class RegionOps {
 
     public boolean isWithinRegion(Location location, Region region) {
-        return region.contains(location.getSikuliLocation());
+        return region.contains(location);
     }
 
     public boolean matchesOverlap(Match match1, Match match2) {

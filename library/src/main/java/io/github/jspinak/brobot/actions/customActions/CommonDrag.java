@@ -2,12 +2,12 @@ package io.github.jspinak.brobot.actions.customActions;
 
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.actions.composites.methods.drag.Drag;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.datatypes.primitives.location.Location;
-import io.github.jspinak.brobot.datatypes.primitives.location.Position;
+import io.github.jspinak.brobot.datatypes.primitives.location.Positions;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -20,8 +20,8 @@ import java.util.List;
 @Component
 public class CommonDrag {
 
-    private Drag drag;
-    private ActionOptions actionOptions = new ActionOptions.Builder()
+    private final Drag drag;
+    private final ActionOptions actionOptions = new ActionOptions.Builder()
             .setPauseAfterEnd(.3)
             .setPauseBeforeMouseDown(.3)
             .setPauseAfterMouseDown(.5)
@@ -59,7 +59,7 @@ public class CommonDrag {
         return objectCollectionsList;
     }
 
-    public void dragInScreen(Matches matches, StateImage from, Position.Name... positions) {
+    public void dragInScreen(Matches matches, StateImage from, Positions.Name... positions) {
         Location[] locations = new Location[positions.length];
         for (int i=0; i<positions.length; i++)
             locations[i] = new Location(new Region(), positions[i]);

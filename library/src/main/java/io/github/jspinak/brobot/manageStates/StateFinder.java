@@ -1,10 +1,10 @@
 package io.github.jspinak.brobot.manageStates;
 
 import io.github.jspinak.brobot.actions.actionExecution.Action;
+import io.github.jspinak.brobot.database.api.StateService;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import io.github.jspinak.brobot.datatypes.state.state.State;
 import io.github.jspinak.brobot.reports.Report;
-import io.github.jspinak.brobot.services.StateService;
 import org.springframework.stereotype.Component;
 
 import java.util.HashSet;
@@ -26,9 +26,9 @@ import static io.github.jspinak.brobot.actions.actionOptions.ActionOptions.Actio
 @Component
 public class StateFinder {
 
-    private StateService stateService;
-    private StateMemory stateMemory;
-    private Action action;
+    private final StateService stateService;
+    private final StateMemory stateMemory;
+    private final Action action;
 
     public StateFinder(StateService stateService, StateMemory stateMemory, Action action) {
         this.stateService = stateService;
@@ -51,7 +51,7 @@ public class StateFinder {
 
     private void searchAllImagesForCurrentStates() {
         System.out.println("StateFinder: search all states| ");
-        Set<String> allStateEnums = stateService.findAllStateNames();
+        Set<String> allStateEnums = stateService.getAllStateNames();
         allStateEnums.remove("UNKNOWN");
         allStateEnums.forEach(this::findState);
         Report.println("");
@@ -59,7 +59,7 @@ public class StateFinder {
 
     public boolean findState(String stateName) {
         Report.print(stateName + ".");
-        Optional<State> state = stateService.findByName(stateName);
+        Optional<State> state = stateService.getState(stateName);
         return state.filter(value -> action.perform(FIND, new ObjectCollection.Builder().withNonSharedImages(value).build())
                 .isSuccess()).isPresent();
     }

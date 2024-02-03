@@ -34,7 +34,7 @@ public class IllustrateState {
                 Pattern p = image.getPatterns().get(0);
                 if (p.isDefined()) {
                     Region r = p.getRegion();
-                    Location xy = new Location(r.x, r.y);
+                    Location xy = new Location(r.x(), r.y());
                     Mat mat = p.getMat();
                     matBuilder.addSubMat(xy, mat);
                 }

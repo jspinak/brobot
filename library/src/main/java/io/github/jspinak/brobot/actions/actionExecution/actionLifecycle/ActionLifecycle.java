@@ -10,11 +10,11 @@ import java.time.LocalDateTime;
 public class ActionLifecycle {
 
     private LocalDateTime startTime;
-    /**
+    /*
      * This is the time the action was completed, not necessarily the allowed finish time.
      */
     private LocalDateTime endTime;
-    /**
+    /*
      * Allowed end time is the start time plus the max wait in seconds.
      */
     private LocalDateTime allowedEndTime;

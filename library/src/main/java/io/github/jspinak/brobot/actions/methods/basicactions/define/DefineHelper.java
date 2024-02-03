@@ -32,12 +32,12 @@ public class DefineHelper {
      * @param actionOptions holds the action configuration.
      */
     public void adjust(Region region, ActionOptions actionOptions) {
-        region.x += actionOptions.getAddX();
-        region.y += actionOptions.getAddY();
-        if (actionOptions.getAbsoluteW() >= 0) region.w = actionOptions.getAbsoluteW();
-        else region.w += actionOptions.getAddW();
-        if (actionOptions.getAbsoluteH() >= 0) region.h = actionOptions.getAbsoluteH();
-        else region.h += actionOptions.getAddH();
+        region.setX(region.x() + actionOptions.getAddX());
+        region.setY(region.y() + actionOptions.getAddY());
+        if (actionOptions.getAbsoluteW() >= 0) region.setW(actionOptions.getAbsoluteW());
+        else region.setW(region.w() + actionOptions.getAddW());
+        if (actionOptions.getAbsoluteH() >= 0) region.setH(actionOptions.getAbsoluteH());
+        else region.setH(region.h() + actionOptions.getAddH());
     }
 
     /**

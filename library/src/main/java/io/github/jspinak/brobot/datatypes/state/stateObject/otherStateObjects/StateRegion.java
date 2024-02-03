@@ -3,18 +3,15 @@ package io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects;
 import io.github.jspinak.brobot.datatypes.primitives.location.Anchor;
 import io.github.jspinak.brobot.datatypes.primitives.location.Anchors;
 import io.github.jspinak.brobot.datatypes.primitives.location.Position;
+import io.github.jspinak.brobot.datatypes.primitives.location.Positions;
 import io.github.jspinak.brobot.datatypes.primitives.match.MatchHistory;
 import io.github.jspinak.brobot.datatypes.primitives.match.MatchSnapshot;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.NullState;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import io.github.jspinak.brobot.datatypes.state.stateObject.StateObject;
-import jakarta.persistence.Embedded;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
+import jakarta.persistence.*;
 import lombok.Data;
-import org.springframework.data.annotation.Id;
 
 /**
  * A StateRegion belongs to a State and usually has a Region that
@@ -31,7 +28,7 @@ public class StateRegion implements StateObject {
 
     private StateObject.Type objectType = StateObject.Type.REGION;
     private String name = "";
-    @Embedded
+    @OneToOne(cascade = CascadeType.ALL)
     private Region searchRegion = new Region();
     private String ownerStateName = NullState.Name.NULL.toString();
     private int staysVisibleAfterClicked = 100;
@@ -39,32 +36,28 @@ public class StateRegion implements StateObject {
     private int timesActedOn = 0;
     @Embedded
     private Position position = new Position(.5, .5); // click position within region
-    @Embedded
+    @OneToOne(cascade = CascadeType.ALL)
     private Anchors anchors = new Anchors();
     private String mockText = "mock text";
-    @Embedded
+    @OneToOne(cascade = CascadeType.ALL)
     private MatchHistory matchHistory = new MatchHistory();
-
-    //think about deleting this field, it may be confusing and can easily be replaced by a separate region
-    //sometimes we need to select a region within the searchRegion and act on it. this Region may change frequently.
-    private Region actionableRegion;
 
     private StateRegion() {}
 
     public int x() {
-        return searchRegion.x;
+        return searchRegion.x();
     }
 
     public int y() {
-        return searchRegion.y;
+        return searchRegion.y();
     }
 
     public int w() {
-        return searchRegion.w;
+        return searchRegion.w();
     }
 
     public int h() {
-        return searchRegion.h;
+        return searchRegion.h();
     }
 
     public boolean defined() {
@@ -96,8 +89,6 @@ public class StateRegion implements StateObject {
         private Anchors anchors = new Anchors();
         private MatchHistory matchHistory = new MatchHistory();
 
-        private Region actionableRegion = new Region();
-
         public Builder called(String name) {
             this.name = name;
             return this;
@@ -123,12 +114,12 @@ public class StateRegion implements StateObject {
             return this;
         }
 
-        public Builder addAnchor(Position.Name definedRegionBorder, Position.Name positionInThisRegion) {
+        public Builder addAnchor(Positions.Name definedRegionBorder, Positions.Name positionInThisRegion) {
             this.anchors.add(new Anchor(definedRegionBorder, new Position(positionInThisRegion)));
             return this;
         }
 
-        public Builder addAnchor(Position.Name definedRegionBorder, Position location) {
+        public Builder addAnchor(Positions.Name definedRegionBorder, Position location) {
             this.anchors.add(new Anchor(definedRegionBorder, location));
             return this;
         }
@@ -145,7 +136,6 @@ public class StateRegion implements StateObject {
             stateRegion.ownerStateName = ownerStateName;
             stateRegion.position = position;
             stateRegion.anchors = anchors;
-            stateRegion.actionableRegion = actionableRegion;
             stateRegion.matchHistory = matchHistory;
             return stateRegion;
         }

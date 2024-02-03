@@ -1,11 +1,13 @@
 package io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles;
 
 import io.github.jspinak.brobot.reports.Report;
+import jakarta.persistence.Embeddable;
 import lombok.Getter;
 import lombok.Setter;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Size;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;

@@ -35,8 +35,8 @@ public class Contours {
         screenAdjustedContours = new ArrayList<>();
         opencvContours = new MatVector();
         for (Region region : searchRegions) {
-            region.w = Math.min(region.w, bgrFromClassification2d.cols() - region.x); // prevent out of bounds
-            region.h = Math.min(region.h, bgrFromClassification2d.rows() - region.y); // prevent out of bounds
+            region.setW(Math.min(region.w(), bgrFromClassification2d.cols() - region.x())); // prevent out of bounds
+            region.setH(Math.min(region.h(), bgrFromClassification2d.rows() - region.y())); // prevent out of bounds
             MatVector regionalContours = getRegionalContourMats(region);
             opencvContours.put(regionalContours);
             screenAdjustedContours.addAll(getScreenCoordinateRects(region, opencvContours));
@@ -77,7 +77,7 @@ public class Contours {
         List<Rect> rectsWithScreenCoordinates = new ArrayList<>();
         for (int i = 0; i < regionalContours.size(); i++) {
             Rect baseRect = boundingRect(regionalContours.get(i));
-            Rect rect = new Rect(baseRect.x() + region.getX(), baseRect.y() + region.getY(), baseRect.width(), baseRect.height());
+            Rect rect = new Rect(baseRect.x() + region.x(), baseRect.y() + region.y(), baseRect.width(), baseRect.height());
             rectsWithScreenCoordinates.add(rect);
         }
         return rectsWithScreenCoordinates;
@@ -145,7 +145,9 @@ public class Contours {
                 for (Rect partitionedContour : partitionedContours) {
                     double score = getContourScore(partitionedContour);
                     if (score > 0) { // score is 0 if the contour is not a match
-                        Match match = new Match(new Region(partitionedContour));
+                        Match match = new Match.Builder()
+                                .setRegion(new Region(partitionedContour))
+                                .build();
                         matchMap.put(m, match);
                         m++;
                     }
@@ -182,14 +184,14 @@ public class Contours {
     public Mat getMatchAsMatInScene(int index, Mat scene) {
         Match m = matchMap.get(index);
         if (m == null) return null;
-        return new Mat(scene, new Region(m).getJavaCVRect());
+        return new Mat(scene, m.getRegion().getJavaCVRect());
     }
 
     public Match getContourAsMatch(Mat contour) {
         Rect rect = boundingRect(contour);
         double score = getContourScore(rect);
         return new Match.Builder()
-                .setMatch(rect)
+                .setRegion(rect)
                 .setSimScore(score)
                 .build();
     }

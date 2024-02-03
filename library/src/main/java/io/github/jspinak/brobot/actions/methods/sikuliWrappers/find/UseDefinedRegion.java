@@ -20,9 +20,9 @@ public class UseDefinedRegion {
                 for (Region region : pattern.getRegions()) {
                     matches.add(
                             new Match.Builder()
-                                    .setMatch(region)
-                                    .setPattern(pattern)
-                                    .setStateObject(si)
+                                    .setRegion(region)
+                                    .setSearchImage(pattern.getBImage())
+                                    .setStateObjectData(si)
                                     .build()
                     );
                 }

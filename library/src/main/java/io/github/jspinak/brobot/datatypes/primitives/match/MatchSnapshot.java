@@ -1,12 +1,11 @@
 package io.github.jspinak.brobot.datatypes.primitives.match;
 
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
-import io.github.jspinak.brobot.datatypes.primitives.text.Text;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.sikuli.script.Region;
 import org.sikuli.script.Screen;
-import org.springframework.data.annotation.Id;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -71,15 +70,19 @@ import static io.github.jspinak.brobot.actions.actionOptions.ActionOptions.Find.
  *      * a Find Action will occur in real execution. The Image will be used with other Actions,
  *      * and these Actions will have MatchSnapshots.
  */
-@Embedded
+@Entity
 @Getter
 @Setter
 public class MatchSnapshot {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
+
     /**
      * The ActionOptions can be queried to find which settings lead to success.
      */
-    @Embedded
+    @OneToOne(cascade = CascadeType.ALL)
     private ActionOptions actionOptions = new ActionOptions.Builder()
             .setAction(ActionOptions.Action.FIND)
             .setFind(UNIVERSAL)
@@ -89,7 +92,7 @@ public class MatchSnapshot {
     private List<Match> matchList = new ArrayList<>();
     private String text = "";
     private double duration = 0.0;
-    private LocalDateTime timeStamp;
+    private LocalDateTime timeStamp; // JPA can handle LocalDateTime without @Embedded
     /**
      * The Action was successfully performed.
      */
@@ -126,7 +129,7 @@ public class MatchSnapshot {
     public void print() {
         System.out.print(timeStamp.format(DateTimeFormatter.ofPattern("MM-dd HH:mm:ss")));
         System.out.format(" %s", actionOptions.getAction());
-        matchList.forEach(match -> System.out.format(" %d.%d,%d.%d", match.x, match.y, match.w, match.h));
+        matchList.forEach(match -> System.out.format(" %d.%d,%d.%d", match.x(), match.y(), match.w(), match.h()));
         System.out.format(" %s", text);
         System.out.println();
     }
@@ -138,9 +141,9 @@ public class MatchSnapshot {
      */
     public boolean hasSameResultsAs(MatchSnapshot snapshot) {
         boolean matchFound;
-        for (org.sikuli.script.Match match : matchList) {
+        for (Match match : matchList) {
             matchFound = false;
-            for (org.sikuli.script.Match match1 : snapshot.matchList) {
+            for (Match match1 : snapshot.matchList) {
                 if (match.equals(match1)) {
                     matchFound = true;
                     break;
@@ -156,7 +159,9 @@ public class MatchSnapshot {
     The most common Snapshot added directly to a State is a Match (x,y,w,h) with a Find operation.
      */
     public MatchSnapshot(int x, int y, int w, int h) {
-        Match match = new Match(new org.sikuli.script.Match(new Region(x,y,w,h), 0));
+        Match match = new Match.Builder()
+                .setRegion(x,y,w,h)
+                .build();
         this.matchList.add(match);
     }
 
@@ -216,7 +221,9 @@ public class MatchSnapshot {
         }
 
         public Builder addMatch(int x, int y, int w, int h) {
-            Match match = new Match(new org.sikuli.script.Match(new Region(x,y,w,h), 0));
+            Match match = new Match.Builder()
+                    .setRegion(x,y,w,h)
+                    .build();
             this.matchList.add(match);
             return this;
         }
@@ -225,7 +232,9 @@ public class MatchSnapshot {
             for (int i=0; i<numberOfMatches; i++) {
                 int x = new Random().nextInt(new Screen().w);
                 int y = new Random().nextInt(new Screen().h);
-                Match match = new Match(new org.sikuli.script.Match(new Region(x,y,w,h), 0));
+                Match match = new Match.Builder()
+                        .setRegion(x,y,w,h)
+                        .build();
                 this.matchList.add(match);
             }
             return this;
