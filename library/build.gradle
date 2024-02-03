@@ -2,13 +2,13 @@
     ///In a library, you typically want to avoid the org.springframework.boot plugin, as Spring Boot is designed for standalone applications. Your library should not impose Spring Boot's conventions on the projects that use it. So, you can exclude this plugin.
     //id 'io.spring.dependency-management' version '1.1.3' //'1.1.0'
     id 'java'
-    id 'io.freefair.lombok' version '6.6.3' //'8.4'
+    id 'io.freefair.lombok' version '8.4' //'6.6.3' // the lombok version is aligned with the gradle version
     id 'maven-publish'
     id 'signing'
 }
 
 java {
-    sourceCompatibility = '17'
+    sourceCompatibility = '21'
 }
 
 group 'io.github.jspinak'
@@ -25,36 +25,32 @@ configurations {
 }
 
 dependencies {
+    implementation 'org.springframework:spring-core:6.1.3'
+    implementation 'org.springframework:spring-context:6.1.3'
+    implementation 'org.springframework:spring-beans:6.1.3'
+
     // JUnit Jupiter for testing
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.0'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.0'
     // Spring Boot Starter Test for Spring Boot testing support
     testImplementation 'org.springframework.boot:spring-boot-starter-test:3.2.0' //3.1.2
+    testImplementation group: 'com.h2database', name: 'h2', version: '2.2.224'
 
     implementation('com.sikulix:sikulixapi:2.0.5') {
         exclude group: 'org.slf4j', module: 'slf4j-nop'
     }
-    implementation 'ch.qos.logback:logback-classic:1.4.8'
+    implementation 'ch.qos.logback:logback-classic:1.4.12'
 
-    implementation group: 'org.bytedeco', name: 'javacv', version: '1.5.9'
-    implementation "org.deeplearning4j:deeplearning4j-core:1.0.0-M1"
-    implementation "org.nd4j:nd4j-native-platform:1.0.0-M1"
+    implementation group: 'org.bytedeco', name: 'javacv', version: '1.5.10'
+    implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.0'
     implementation 'com.github.kwhat:jnativehook:2.2.2'
 
-    //implementation 'org.springframework.boot:spring-boot-starter'
-    implementation 'org.springframework.boot:spring-boot-autoconfigure:2.7.14'
-    implementation 'org.springframework:spring-core:6.0.11'
-    implementation 'org.springframework:spring-context:6.0.11'
-    implementation 'org.springframework:spring-beans:6.0.11'
-
-    implementation 'co.elastic.clients:elasticsearch-java:8.11.1' //8.9.0
-    implementation 'com.fasterxml.jackson.core:jackson-databind:2.12.3'
-    implementation 'org.springframework.boot:spring-boot-starter-web:3.2.0' //3.1.2
-    implementation 'org.springframework.boot:spring-boot-starter-data-elasticsearch:3.2.0' //3.1.2
+    implementation 'org.springframework.boot:spring-boot-starter-web:3.2.2' //3.1.2
+    implementation 'org.springframework.boot:spring-boot-starter-data-elasticsearch:3.2.2' //3.1.2
 
     // database
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa:3.2.0'
-    implementation 'org.springframework.boot:spring-boot-starter-data-rest:3.2.0'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa:3.2.2'
+    implementation 'org.springframework.boot:spring-boot-starter-data-rest:3.2.2'
     implementation group: 'org.postgresql', name: 'postgresql', version: '42.7.1'
 }
 

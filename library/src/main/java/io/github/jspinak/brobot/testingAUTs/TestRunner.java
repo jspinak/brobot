@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 public class TestRunner {
 
     private StateTransitionsManagement stateTransitionsManagement;
-    private final RecordScreen recordScreen;
+    //private final RecordScreen recordScreen;
     private final RenderFileUploader renderFileUploader;
     private StateMemory stateMemory;
 
@@ -20,7 +20,7 @@ public class TestRunner {
                       RecordScreen recordScreen, RenderFileUploader renderFileUploader,
                       StateMemory stateMemory) {
         this.stateTransitionsManagement = stateTransitionsManagement;
-        this.recordScreen = recordScreen;
+        //this.recordScreen = recordScreen;
         this.renderFileUploader = renderFileUploader;
         this.stateMemory = stateMemory;
     }
@@ -33,9 +33,9 @@ public class TestRunner {
         TestRun testRun = new TestRun("test", startTime, stateMemory.getActiveStates());
         Logger logger = LoggerFactory.getLogger(TestRunner.class);
         logger.info("Test started at" + startTime);
-        recordScreen.startRecording("recording/test.mp4", 10000000);
+        //recordScreen.startRecording("recording/test.mp4", 10000000);
         stateTransitionsManagement.openState(destination);
-        recordScreen.stopRecording();
+        //recordScreen.stopRecording();
         testRun.setEndTime(LocalDateTime.now());
         testRun.setRecordingFilename("test");
         testRun.setEndStates(stateMemory.getActiveStates());

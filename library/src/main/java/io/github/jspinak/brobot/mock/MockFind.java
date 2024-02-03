@@ -2,12 +2,12 @@ package io.github.jspinak.brobot.mock;
 
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.actions.methods.time.ActionDurations;
+import io.github.jspinak.brobot.database.api.StateService;
 import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
 import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import io.github.jspinak.brobot.datatypes.primitives.match.MatchSnapshot;
 import io.github.jspinak.brobot.datatypes.state.state.State;
 import io.github.jspinak.brobot.manageStates.StateMemory;
-import io.github.jspinak.brobot.services.StateService;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -54,7 +54,7 @@ public class MockFind {
         mockTime.wait(actionDurations.getFindDuration(ActionOptions.Find.ALL_WORDS));
         List<Match> allMatches = new ArrayList<>();
         for (String stateName : stateMemory.getActiveStates()) {
-            Optional<State> state = stateService.findByName(stateName);
+            Optional<State> state = stateService.getState(stateName);
             state.ifPresent(st -> {
                 Optional<MatchSnapshot> snapshot = st.getMatchHistory().getRandomSnapshot(ActionOptions.Action.FIND, stateName);
                 snapshot.ifPresent(snap -> allMatches.addAll(snap.getMatchList()));

@@ -2,8 +2,8 @@ package io.github.jspinak.brobot.actions.methods.basicactions.find.matchManageme
 
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
+import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
-import org.sikuli.script.Match;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -32,7 +32,7 @@ public class MatchProoferRegions implements MatchProofer {
      */
     public boolean isInSearchRegions(Match match, List<Region> regions) {
         for (Region r : regions) {
-            if (r.contains(match)) return true;
+            if (r.contains(match.getRegion())) return true;
         }
         return false;
     }

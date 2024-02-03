@@ -1,21 +1,19 @@
 package io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.screenObservations;
 
-import io.github.jspinak.brobot.actions.BrobotSettings;
 import io.github.jspinak.brobot.actions.actionExecution.Action;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.stateStructureBuildManagement.StateStructureTemplate;
 import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.datatypes.primitives.location.Location;
-import io.github.jspinak.brobot.datatypes.primitives.location.Position;
+import io.github.jspinak.brobot.datatypes.primitives.location.Positions;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import org.sikuli.script.Match;
 import org.sikuli.script.Screen;
 import org.springframework.stereotype.Component;
 
-import java.io.File;
 import java.util.List;
 
 /**
@@ -76,9 +74,9 @@ public class GetUsableArea {
         return matches.getDefinedRegion();
     }
 
-    private Location getLocationFromMatches(List<Match> matchList, Position.Name position) {
+    private Location getLocationFromMatches(List<Match> matchList, Positions.Name position) {
         Region region;
-        if (position == Position.Name.TOPLEFT) region = new Region(0,0,0,0);
+        if (position == Positions.Name.TOPLEFT) region = new Region(0,0,0,0);
         else region = new Region(new Screen().x, new Screen().y, 0,0);
         if (!matchList.isEmpty()) {
             region = new Region(matchList.get(0));

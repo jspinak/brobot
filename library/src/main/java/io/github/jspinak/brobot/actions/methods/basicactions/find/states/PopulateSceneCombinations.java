@@ -47,7 +47,7 @@ public class PopulateSceneCombinations {
 
     private boolean regionHasOnlyFixedPixels(Region imageRegion, SceneCombination sceneCombination) {
         Optional<Mat> matCombinationRegion = MatOps.applyIfOk(sceneCombination.getDynamicPixels(),
-                new Rect(imageRegion.x, imageRegion.y, imageRegion.w, imageRegion.h));
+                new Rect(imageRegion.x(), imageRegion.y(), imageRegion.w(), imageRegion.h()));
         return matCombinationRegion.isPresent() && countNonZero(matCombinationRegion.get()) == 0;
     }
 }

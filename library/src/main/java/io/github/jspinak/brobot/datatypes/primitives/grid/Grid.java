@@ -28,7 +28,7 @@ public class Grid {
         for (int r=0; r<rows; r++) {
             for (int c=0; c<cols; c++) {
                 Region reg = gridRegions.get(cols*r+c);
-                Report.format("%d.%d_%d.%d ", reg.x, reg.y, reg.w, reg.h);
+                Report.format("%d.%d_%d.%d ", reg.x(), reg.y(), reg.w(), reg.h());
             }
             Report.println();
         }
@@ -71,25 +71,25 @@ public class Grid {
         private void setGridRegions() {
             if (region == null) region = new Region();
             if (cellHeight > 0 && cellWidth > 0) { // width and height are defined
-                cols = region.w / cellWidth; // there could be a small region at the edges
-                rows = region.h / cellHeight;
+                cols = region.w() / cellWidth; // there could be a small region at the edges
+                rows = region.h() / cellHeight;
             } else { // use rows and columns
-                cellWidth = region.w / cols;
-                cellHeight = region.h / rows;
+                cellWidth = region.w() / cols;
+                cellHeight = region.h() / rows;
             }
             cols = Math.max(cols, 1);
             rows = Math.max(rows, 1);
             // when selected, shrink the region to fit a grid with the cell width and height
             if (adjustRegionToGrids)
-                region = new Region(region.x, region.y, cols * cellWidth, rows * cellHeight);
-            int wRemainder = region.w - cols * cellWidth;
-            int hRemainder = region.h - rows * cellHeight;
+                region = new Region(region.x(), region.y(), cols * cellWidth, rows * cellHeight);
+            int wRemainder = region.w() - cols * cellWidth;
+            int hRemainder = region.h() - rows * cellHeight;
             // if the remainder is larger than half a cell, create a new cell; otherwise, add to the last cell
             if (wRemainder > cellWidth / 2) cols++;
             if (hRemainder > cellHeight / 2) rows++;
-            int rightmostCellWidth = region.w - (cols-1) * cellWidth;
-            int bottommostCellHeight = region.h - (rows-1) * cellHeight;
-            int x = region.x, y = region.y;
+            int rightmostCellWidth = region.w() - (cols-1) * cellWidth;
+            int bottommostCellHeight = region.h() - (rows-1) * cellHeight;
+            int x = region.x(), y = region.y();
             for (int r=0; r<rows-1; r++) {
                 for (int c=0; c<cols-1; c++) {
                     gridRegions.add(new Region(x+c*cellWidth, y+r*cellHeight, cellWidth, cellHeight));

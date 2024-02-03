@@ -32,8 +32,8 @@ public class FindHistogramsOneRegionOneImage {
      * @return a sortable list of regions contained in the overall region and similarity scores
      */
     public List<Match> find(Region region, StateImage stateImage, Mat sceneHSV) {
-        region.setW(Math.min(region.w + region.x, sceneHSV.cols()) - region.x);
-        region.setH(Math.min(region.h + region.y, sceneHSV.rows()) - region.y);
+        region.setW(Math.min(region.w() + region.x(), sceneHSV.cols()) - region.x());
+        region.setH(Math.min(region.h() + region.y(), sceneHSV.rows()) - region.y());
         OverlappingGrids overlappingGrids = new OverlappingGrids(new Grid.Builder()
                 .setRegion(region)
                 .setCellWidth((int)stateImage.getAverageWidth())

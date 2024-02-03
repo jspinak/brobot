@@ -27,7 +27,7 @@ public class MouseWheel {
             Report.format("%s %d %s", "scroll", actionOptions.getTimesToRepeatIndividualAction(), "times. ");
             return true;
         }
-        new Region().wheel(
+        new Region().sikuli().wheel(
                 scrollInt.get(actionOptions.getScrollDirection()),
                 actionOptions.getTimesToRepeatIndividualAction()
         );

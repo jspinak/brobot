@@ -74,7 +74,7 @@ public class GetImageJavaCV {
 
     public List<Mat> getMats(List<Pattern> patterns, ColorCluster.ColorSchemaName colorSchemaName) {
         List<String> filenames = new ArrayList<>();
-        patterns.forEach(p -> filenames.add(p.getFilename()));
+        patterns.forEach(p -> filenames.add(p.getImgpath()));
         return getMatsFromFilenames(filenames, colorSchemaName);
     }
 

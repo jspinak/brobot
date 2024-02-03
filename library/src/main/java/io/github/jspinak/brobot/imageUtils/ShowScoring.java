@@ -1,6 +1,5 @@
 package io.github.jspinak.brobot.imageUtils;
 
-import io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles.ColorInfo;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles.ColorSchema;
 import io.github.jspinak.brobot.reports.Report;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -12,10 +11,8 @@ import org.springframework.stereotype.Component;
 import java.util.Arrays;
 import java.util.List;
 
-import static io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles.ColorCluster.ColorSchemaName.HSV;
 import static io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles.ColorInfo.ColorStat.MEAN;
 import static org.bytedeco.opencv.global.opencv_imgproc.*;
-import static org.nd4j.linalg.factory.Nd4j.image;
 
 @Component
 public class ShowScoring {

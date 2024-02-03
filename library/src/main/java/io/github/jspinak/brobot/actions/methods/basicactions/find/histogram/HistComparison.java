@@ -81,8 +81,8 @@ public class HistComparison {
             if (bestScore == -1) bestScore = score;
             if (score < bestScore) bestScore = score;
             Match match = new Match.Builder()
-                .setMatch(reg)
-                .setStateObject(image)
+                .setRegion(reg)
+                .setStateObjectData(image)
                 .setHistogram(sceneHistRegs.getCombined().getHistogram())
                 .setSimScore(score)
                 .build();

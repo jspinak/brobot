@@ -61,7 +61,9 @@ public class MatchFusion {
             Get the next unallocated Match
              */
             int nextUnallocatedIndex = toCheck.get(0);
-            Match m = new Match(originalMatches.get(nextUnallocatedIndex));
+            Match m = new Match.Builder()
+                    .setRegion(originalMatches.get(nextUnallocatedIndex).getRegion())
+                    .build();
             toCheck.remove(0);
             /*
             Keep looping and checking until no more Match objects can be fused.
@@ -76,7 +78,9 @@ public class MatchFusion {
                 for (int i : new ArrayList<>(toCheck)) {
                     if (decider.isSameMatchGroup(m, originalMatches.get(i), maxXDistance, maxYDistance)) {
                         Region r = new Region(m).getUnion(new Region(originalMatches.get(i)));
-                        m = new Match(r);
+                        m = new Match.Builder()
+                                .setRegion(r)
+                                .build();
                         if (toCheck.contains(i)) toCheck.remove(Integer.valueOf(i));
                         fused = true;
                     }

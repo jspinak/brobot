@@ -6,18 +6,12 @@ import io.github.jspinak.brobot.actions.methods.time.Time;
 import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import io.github.jspinak.brobot.illustratedHistory.IllustrateScreenshot;
-import io.github.jspinak.brobot.imageUtils.BufferedImageOps;
 import io.github.jspinak.brobot.imageUtils.GetImageJavaCV;
 import io.github.jspinak.brobot.reports.Report;
-import org.bytedeco.opencv.opencv_core.Mat;
 import org.springframework.stereotype.Component;
 
-import java.awt.image.BufferedImage;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-
-import static io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles.ColorCluster.ColorSchemaName.BGR;
 
 /**
  * Scenes are used for
@@ -72,7 +66,7 @@ public class GetScenes {
         List<Pattern> scenesInObjectCollection = objectCollections.get(0).getScenes();
         if (!scenesInObjectCollection.isEmpty()) {
             for (Pattern pattern : scenesInObjectCollection) {
-                scenes.add(new Scene(pattern.getFilename()));
+                scenes.add(new Scene(pattern.getImgpath()));
             }
             return scenes;
         }

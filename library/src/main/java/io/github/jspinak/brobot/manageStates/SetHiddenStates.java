@@ -1,8 +1,7 @@
 package io.github.jspinak.brobot.manageStates;
 
+import io.github.jspinak.brobot.database.api.StateService;
 import io.github.jspinak.brobot.datatypes.state.state.State;
-import io.github.jspinak.brobot.primatives.enums.StateEnum;
-import io.github.jspinak.brobot.services.StateService;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -17,7 +16,7 @@ import java.util.Optional;
 public class SetHiddenStates {
 
     private final StateService stateService;
-    private StateMemory stateMemory;
+    private final StateMemory stateMemory;
 
     public SetHiddenStates(StateService stateService, StateMemory stateMemory) {
         this.stateService = stateService;
@@ -30,7 +29,7 @@ public class SetHiddenStates {
      * @return true when the stateToSet is a valid State
      */
     public boolean set(String stateToSet) {
-        Optional<State> optStateToSet = stateService.findByName(stateToSet);
+        Optional<State> optStateToSet = stateService.getState(stateToSet);
         if (optStateToSet.isEmpty()) return false;
         State state = optStateToSet.get();
         for (String activeState : new ArrayList<>(stateMemory.getActiveStates())) {

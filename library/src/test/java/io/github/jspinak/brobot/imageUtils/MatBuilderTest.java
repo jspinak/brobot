@@ -5,7 +5,6 @@ import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Size;
 import org.junit.jupiter.api.Test;
-import org.nd4j.linalg.api.ops.impl.reduce.longer.CountNonZero;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -14,7 +13,7 @@ class MatBuilderTest {
     private MatBuilder getMatBuilder() {
         MatBuilder matBuilder = new MatBuilder();
         Region r = new Region();
-        matBuilder.setMat(new Mat(r.h, r.w, 24));
+        matBuilder.setMat(new Mat(r.h(), r.w(), 24));
         return matBuilder;
     }
 

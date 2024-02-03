@@ -1,13 +1,16 @@
 package io.github.jspinak.brobot.manageStates;
 
+import io.github.jspinak.brobot.database.api.StateService;
 import io.github.jspinak.brobot.datatypes.state.state.State;
 import io.github.jspinak.brobot.reports.Output;
 import io.github.jspinak.brobot.reports.Report;
-import io.github.jspinak.brobot.services.StateService;
 import io.github.jspinak.brobot.services.StateTransitionsService;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 /**
  * Finds all paths from a set of start States to a target State.
@@ -72,7 +75,7 @@ public class PathFinder {
     private void setPathScore(Path path) {
         int score = 0;
         for (String stateName : path.getStates()) {
-            Optional<State> state = stateService.findByName(stateName);
+            Optional<State> state = stateService.getState(stateName);
             if (state.isPresent()) score += state.get().getPathScore();
         }
         for (StateTransition stateTrans : path.getTransitions()) {

@@ -2,6 +2,8 @@ package io.github.jspinak.brobot.imageUtils;
 
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.sikuli.script.Image;
+
+import java.awt.image.BufferedImage;
 import java.util.Optional;
 
 public class ImageOps {
@@ -24,7 +26,11 @@ public class ImageOps {
      * @return the image as a Mat.
      */
     public static Mat getMatBGR(Image image) {
-        Optional<Mat> matOptional = MatOps.bufferedImageToMat(image.get());
+        return getMatBGR(image.get());
+    }
+
+    public static Mat getMatBGR(BufferedImage bufferedImage) {
+        Optional<Mat> matOptional = MatOps.bufferedImageToMat(bufferedImage);
         return matOptional.orElseGet(Mat::new);
     }
 
@@ -34,7 +40,11 @@ public class ImageOps {
      * @return the image as a Mat.
      */
     public static Mat getMatHSV(Image image) {
-        Optional<Mat> matOptional = MatOps.bufferedImageToMat(image.get());
+        return getMatHSV(image.get());
+    }
+
+    public static Mat getMatHSV(BufferedImage bufferedImage) {
+        Optional<Mat> matOptional = MatOps.bufferedImageToMat(bufferedImage);
         Mat HSVmat = new Mat();
         if (matOptional.isPresent()) HSVmat = MatOps.BGRtoHSV(matOptional.get());
         return HSVmat;

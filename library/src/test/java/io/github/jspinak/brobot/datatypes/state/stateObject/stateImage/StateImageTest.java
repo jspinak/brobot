@@ -25,7 +25,7 @@ class StateImageTest {
         StateImage stateImage = getImage();
         Region region = stateImage.getLargestDefinedFixedRegionOrNewRegion();
         System.out.println(region);
-        assertEquals(10, region.w);
+        assertEquals(10, region.w());
     }
 
     @Test

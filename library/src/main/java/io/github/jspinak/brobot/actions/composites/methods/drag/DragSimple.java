@@ -139,7 +139,7 @@ public class DragSimple implements ActionInterface {
     private void addMatch(Location loc, Matches matches) {
         Match from = new Match.Builder()
                 .setMatch(loc.toMatch())
-                .setStateObject(loc.asStateLocationInNullState())
+                .setStateObjectData(loc.asStateLocationInNullState())
                 .build();
         matches.add(from);
     }

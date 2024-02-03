@@ -46,7 +46,7 @@ public class DanglingSnapshots {
     }
 
     public void addMatch(ActionOptions actionOptions, Match match) {
-        Long id = match.getStateObjectData().getId();
+        Long id = match.getStateObjectData().getStateObjectId();
         if (snapshots.containsKey(id)) {
             snapshots.get(id).addMatch(match);
         } else {
@@ -65,7 +65,7 @@ public class DanglingSnapshots {
      * @param string is the text found.
      */
     public void setString(Match match, String string) {
-        Long id = match.getStateObjectData().getId();
+        Long id = match.getStateObjectData().getStateObjectId();
         if (snapshots.containsKey(id)) {
             snapshots.get(id).setString(string);
         }

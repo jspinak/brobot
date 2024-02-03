@@ -23,9 +23,9 @@ public class MatchFusionDeciderRelativeSize implements MatchFusionDecider {
      * @return true if the new match should be part of the current combined match region.
      */
     public boolean isSameMatchGroup(Match match, Match match2, int xDistAsPercentOfMatchHeight, int yDistAsPercentOfMatchHeight) {
-        int averageHeight = (match.h + match2.h) / 2;
-        int maxHeight = Math.max(match.h, match2.h);
-        int minHeight = Math.min(match.h, match2.h);
+        int averageHeight = (match.h() + match2.h()) / 2;
+        int maxHeight = Math.max(match.h(), match2.h());
+        int minHeight = Math.min(match.h(), match2.h());
         int minXDist = minHeight * xDistAsPercentOfMatchHeight / 100;
         int minYDist = minHeight * yDistAsPercentOfMatchHeight / 100;
         return matchFusionDeciderAbsoluteSize.isSameMatchGroup(match, match2, minXDist, minYDist);

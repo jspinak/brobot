@@ -3,6 +3,7 @@ package io.github.jspinak.brobot.actions.customActions;
 import io.github.jspinak.brobot.actions.actionExecution.Action;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.actions.methods.sikuliWrappers.mouse.ClickType;
+import io.github.jspinak.brobot.database.api.StateService;
 import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.datatypes.primitives.location.Location;
@@ -11,7 +12,6 @@ import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import io.github.jspinak.brobot.datatypes.state.state.State;
 import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.StateRegion;
-import io.github.jspinak.brobot.services.StateService;
 import io.github.jspinak.brobot.manageStates.UnknownState;
 import org.springframework.stereotype.Component;
 
@@ -29,8 +29,8 @@ import static io.github.jspinak.brobot.actions.actionOptions.ActionOptions.Actio
 @Component
 public class CommonActions {
 
-    private Action action;
-    private StateService stateService;
+    private final Action action;
+    private final StateService stateService;
 
     public CommonActions(Action action, StateService stateService) {
         this.action = action;
@@ -123,7 +123,7 @@ public class CommonActions {
 
     public boolean waitState(double maxWait, String stateName, ActionOptions.Action actionType) {
         if (Objects.equals(stateName, UnknownState.Enum.UNKNOWN.toString())) return true;
-        Optional<State> state = stateService.findByName(stateName);
+        Optional<State> state = stateService.getState(stateName);
         if (state.isEmpty()) return false;
         return action.perform(
                 new ActionOptions.Builder()
@@ -138,7 +138,7 @@ public class CommonActions {
 
     public boolean findState(double maxWait, String stateName) {
         System.out.print("\n__findState:"+stateName+"__ ");
-        stateService.findByName(stateName).ifPresent(
+        stateService.getState(stateName).ifPresent(
                 state -> System.out.println("prob="+state.getProbabilityExists()));
         return waitState(maxWait, stateName, FIND);
     }
@@ -164,7 +164,7 @@ public class CommonActions {
 
     public boolean clickUntilStateAppears(int repeatClickTimes, double pauseBetweenClicks,
                                           StateImage objectToClick, String state) {
-        if (!stateService.findByName(state).isPresent()) return false;
+        if (stateService.getState(state).isEmpty()) return false;
         ActionOptions actionOptions = new ActionOptions.Builder()
                 .setAction(ActionOptions.Action.CLICK)
                 .setClickUntil(ActionOptions.ClickUntil.OBJECTS_APPEAR)
@@ -175,7 +175,7 @@ public class CommonActions {
                 .withImages(objectToClick)
                 .build();
         ObjectCollection objectsToAppear = new ObjectCollection.Builder()
-                .withAllStateImages(stateService.findByName(state).get())
+                .withAllStateImages(stateService.getState(state).get())
                 .build();
         return action.perform(actionOptions, objectsToClick, objectsToAppear).isSuccess();
     }
@@ -211,7 +211,7 @@ public class CommonActions {
     }
 
     public void dragCenterToOffset(Region region, int plusX, int plusY) {
-        dragCenterOfRegion(region, region.getCenter().x + plusX, region.getCenter().y + plusY);
+        dragCenterOfRegion(region, region.sikuli().getCenter().x + plusX, region.sikuli().getCenter().y + plusY);
     }
 
     public void dragCenterOfRegion(Region region, int toX, int toY) {
@@ -222,13 +222,13 @@ public class CommonActions {
                 .withRegions(region)
                 .build();
         ObjectCollection to = new ObjectCollection.Builder()
-                .withLocations(new Location(region.getCenter(), toX, toY))
+                .withLocations(new Location(region.sikuli().getCenter(), toX, toY))
                 .build();
         action.perform(drag, from, to);
     }
 
     public void dragCenterToOffsetStop(Region region, int plusX, int plusY) {
-        dragCenterStop(region,region.getCenter().x + plusX, region.getCenter().y + plusY);
+        dragCenterStop(region,region.sikuli().getCenter().x + plusX, region.sikuli().getCenter().y + plusY);
     }
 
     public void dragCenterStop(Region region, Location location) {
@@ -244,7 +244,7 @@ public class CommonActions {
                 .withRegions(region)
                 .build();
         ObjectCollection to = new ObjectCollection.Builder()
-                .withLocations(new Location(region.getCenter(), toX, toY))
+                .withLocations(new Location(region.sikuli().getCenter(), toX, toY))
                 .build();
         action.perform(drag, from, to);
     }

@@ -1,9 +1,9 @@
 package io.github.jspinak.brobot.reports;
 
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
+import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import io.github.jspinak.brobot.datatypes.state.stateObject.StateObject;
 import io.github.jspinak.brobot.datatypes.state.stateObject.StateObjectData;
-import org.sikuli.script.Match;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -36,7 +36,7 @@ public class Report {
     }
 
     public static boolean print(Match match, StateObjectData stateObject, ActionOptions actionOptions) {
-        return print(match, stateObject.getName(), actionOptions.getAction().toString());
+        return print(match, stateObject.getStateObjectName(), actionOptions.getAction().toString());
     }
 
     public static boolean print(Match match, String stateObjectName, String action) {

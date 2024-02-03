@@ -17,8 +17,8 @@ public class TypeTextWrapper {
     public boolean type(StateString stateString, ActionOptions actionOptions) {
         if (BrobotSettings.mock) return mockType(stateString, actionOptions);
         if (actionOptions.getModifiers().equals(""))
-            return new Region().type(stateString.getString()) != 0;
-        else return new Region().type(stateString.getString(), actionOptions.getModifiers()) != 0;
+            return new Region().sikuli().type(stateString.getString()) != 0;
+        else return new Region().sikuli().type(stateString.getString(), actionOptions.getModifiers()) != 0;
     }
 
     private boolean mockType(StateString stateString, ActionOptions actionOptions) {

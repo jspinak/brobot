@@ -1,6 +1,5 @@
 package io.github.jspinak.brobot.testingAUTs;
 
-import com.google.gson.Gson;
 import lombok.Getter;
 import lombok.Setter;
 import java.time.LocalDateTime;
@@ -44,11 +43,6 @@ public class TestRun {
         this.description = description;
         this.startTime = startTime;
         this.startStates = startStates;
-    }
-
-    public String toJson() {
-        Gson gson = new Gson();
-        return gson.toJson(this);
     }
 
 }

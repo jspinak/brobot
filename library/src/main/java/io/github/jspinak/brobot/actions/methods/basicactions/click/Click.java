@@ -52,7 +52,7 @@ public class Click implements ActionInterface {
         Location location = match.getLocation();
         location.setX(location.getX() + actionOptions.getAddX());
         location.setY(location.getY() + actionOptions.getAddY());
-        match.setTarget(location.getX(), location.getY());
+        match.setTarget(new Location(location.getX(), location.getY()));
         return location;
     }
 
