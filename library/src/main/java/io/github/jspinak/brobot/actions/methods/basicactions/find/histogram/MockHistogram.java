@@ -22,8 +22,8 @@ public class MockHistogram {
         List<Match> matchObjects = new ArrayList<>();
         searchRegions.forEach(region -> matchObjects.add(
                 new Match.Builder()
-                        .setMatch(region)
-                        .setStateObject(image)
+                        .setRegion(region)
+                        .setStateObjectData(image)
                         .setSimScore(new Random().nextInt(100))
                         .build()
         ));

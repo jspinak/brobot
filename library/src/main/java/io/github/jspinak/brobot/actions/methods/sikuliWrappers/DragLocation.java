@@ -37,7 +37,7 @@ public class DragLocation {
 
     private boolean drag(Location from, Location to) {
         try {
-            new Region().dragDrop(from.getSikuliLocation(), to.getSikuliLocation());
+            new Region().sikuli().dragDrop(from.getSikuliLocation(), to.getSikuliLocation());
         } catch (FindFailed findFailed) {
             if (Report.minReportingLevel(Report.OutputLevel.HIGH))
                 System.out.print("|drag failed| ");

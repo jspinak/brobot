@@ -81,11 +81,11 @@ public class HistogramRegions {
     }
 
     private void setEllipticalMask(Region imageSize) {
-        Point ellipseCenter = new Point(imageSize.getCenter().x, imageSize.getCenter().y);
-        int width = (int) ((imageSize.w * .75) / 2);
-        int height = (int) ((imageSize.h * .75) / 2);
+        Point ellipseCenter = new Point(imageSize.sikuli().getCenter().x, imageSize.sikuli().getCenter().y);
+        int width = (int) ((imageSize.w() * .75) / 2);
+        int height = (int) ((imageSize.h() * .75) / 2);
         Size axes = new Size(width, height);
-        Mat ellipseMask = new Mat(imageSize.h, imageSize.w, CV_8UC1, Scalar.BLACK);
+        Mat ellipseMask = new Mat(imageSize.h(), imageSize.w(), CV_8UC1, Scalar.BLACK);
         Scalar color = new Scalar(255, 255, 255, 0);
         ellipse(ellipseMask, ellipseCenter, axes, 0, 0, 360, color, -1, 0, 0);
         ellipse.getMasks().add(ellipseMask);
@@ -100,8 +100,8 @@ public class HistogramRegions {
     private void setCornerMasksForOneImage(Grid grid, Region imageSize, Mat ellipseMask) {
         List<Mat> cornerMasks = new ArrayList<>();
         grid.getGridRegions().forEach(reg -> {
-            Mat mask = new Mat(imageSize.h, imageSize.w, CV_8UC1, Scalar.BLACK);
-            rectangle(mask, new Point(reg.x, reg.y), new Point(reg.getX2(), reg.getY2()), new Scalar(255));
+            Mat mask = new Mat(imageSize.h(), imageSize.w(), CV_8UC1, Scalar.BLACK);
+            rectangle(mask, new Point(reg.x(), reg.y()), new Point(reg.x2(), reg.y2()), new Scalar(255));
             subtract(mask, ellipseMask, mask);
             cornerMasks.add(mask);
         });

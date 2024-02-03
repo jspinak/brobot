@@ -50,9 +50,9 @@ public class FindAll {
                     matchObjects.add(
                             new Match.Builder()
                                     .setMatch(match)
-                                    .setPattern(pattern)
+                                    .setSearchImage(pattern.getBImage())
                                     .setAnchors(pattern.getAnchors())
-                                    .setStateObject(stateImage)
+                                    .setStateObjectData(stateImage)
                                     .setScene(scene)
                                     .build());
                 }

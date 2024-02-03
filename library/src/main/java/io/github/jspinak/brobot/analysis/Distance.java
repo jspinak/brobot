@@ -34,8 +34,8 @@ public class Distance {
     public double getDistance(Location loc1, Location loc2) { return euclidean(loc1, loc2); }
 
     public double getDistance(Match match1, Match match2) {
-        return Math.sqrt(Math.pow(match1.getCenter().getX() - match2.getCenter().getX(), 2) +
-                Math.pow(match1.getCenter().getY() - match2.getCenter().getY(), 2));
+        return Math.sqrt(Math.pow(match1.getRegion().sikuli().getCenter().getX() - match2.getRegion().sikuli().getCenter().getX(), 2) +
+                Math.pow(match1.getRegion().sikuli().getCenter().getY() - match2.getRegion().sikuli().getCenter().getY(), 2));
     }
 
     public double euclidean(Location loc1, Location loc2) {

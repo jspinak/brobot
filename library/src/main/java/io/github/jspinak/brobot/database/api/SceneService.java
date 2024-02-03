@@ -2,11 +2,12 @@ package io.github.jspinak.brobot.database.api;
 
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.Scene;
 import io.github.jspinak.brobot.database.data.SceneRepo;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
-@Component
+@Service
 public class SceneService {
 
     private final SceneRepo sceneRepo;
@@ -20,7 +21,9 @@ public class SceneService {
     }
 
     public List<Scene> getAllScenes() {
-        return sceneRepo.findAllAsList();
+        List<Scene> scenes = new ArrayList<>();
+        sceneRepo.findAll().forEach(scenes::add);
+        return scenes;
     }
 
     public void saveScene(Scene scene) {

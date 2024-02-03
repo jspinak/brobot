@@ -1,21 +1,13 @@
 package io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects;
 
-import io.github.jspinak.brobot.datatypes.primitives.location.Anchor;
-import io.github.jspinak.brobot.datatypes.primitives.location.Anchors;
-import io.github.jspinak.brobot.datatypes.primitives.location.Location;
-import io.github.jspinak.brobot.datatypes.primitives.location.Position;
+import io.github.jspinak.brobot.datatypes.primitives.location.*;
 import io.github.jspinak.brobot.datatypes.primitives.match.MatchHistory;
-import io.github.jspinak.brobot.datatypes.primitives.match.MatchSnapshot;
 import io.github.jspinak.brobot.datatypes.state.NullState;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
-import io.github.jspinak.brobot.datatypes.state.state.State;
 import io.github.jspinak.brobot.datatypes.state.stateObject.StateObject;
-import jakarta.persistence.Embedded;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import lombok.Data;
-import org.springframework.data.annotation.Id;
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * A StateLocation belongs to a State and usually has a Location that
@@ -23,7 +15,8 @@ import org.springframework.data.annotation.Id;
  * this Location has an effect in the owner State but not in other States.
  */
 @Entity
-@Data
+@Getter
+@Setter
 public class StateLocation implements StateObject {
 
     @Id
@@ -32,7 +25,7 @@ public class StateLocation implements StateObject {
 
     private StateObject.Type objectType = StateObject.Type.LOCATION;
     private String name;
-    @Embedded
+    @OneToOne(cascade = CascadeType.ALL)
     private Location location;
     private String ownerStateName = NullState.Name.NULL.toString();
     private int staysVisibleAfterClicked = 100;
@@ -40,12 +33,10 @@ public class StateLocation implements StateObject {
     private int timesActedOn = 0;
     @Embedded
     private Position position;
-    @Embedded
+    @OneToOne(cascade = CascadeType.ALL)
     private Anchors anchors; // just one, but defined with Anchors b/c it's a StateObject
-    @Embedded
+    @OneToOne(cascade = CascadeType.ALL)
     private MatchHistory matchHistory = new MatchHistory(); // not used yet
-
-    private StateLocation() {}
 
     public boolean defined() {
         return location != null;
@@ -53,18 +44,6 @@ public class StateLocation implements StateObject {
 
     public void addTimesActedOn() {
         timesActedOn++;
-    }
-
-    public void addSnapshot(MatchSnapshot matchSnapshot) {
-        matchHistory.addSnapshot(matchSnapshot);
-    }
-
-    public void setPosition(Position.Name positionName) {
-        this.position = new Position(positionName);
-    }
-
-    public void setPosition(int percentW, int percentH) {
-        this.position = new Position(percentW, percentH);
     }
 
     public ObjectCollection asObjectCollection() {
@@ -110,12 +89,12 @@ public class StateLocation implements StateObject {
             return this;
         }
 
-        public Builder setAnchor(Position.Name cornerOfRegionToDefine) {
+        public Builder setAnchor(Positions.Name cornerOfRegionToDefine) {
             this.anchors.add(new Anchor(cornerOfRegionToDefine, position));
             return this;
         }
 
-        public Builder setPosition(Position.Name locationPosition) {
+        public Builder setPosition(Positions.Name locationPosition) {
             this.position = new Position(locationPosition);
             return this;
         }
@@ -134,6 +113,5 @@ public class StateLocation implements StateObject {
             stateLocation.anchors = anchors;
             return stateLocation;
         }
-
     }
 }

@@ -1,6 +1,7 @@
 package io.github.jspinak.brobot.actions.methods.basicactions.define;
 
 import io.github.jspinak.brobot.datatypes.primitives.location.Position;
+import io.github.jspinak.brobot.datatypes.primitives.location.Positions;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -13,35 +14,35 @@ import java.util.Map;
  */
 public class DefinedBorders {
 
-    private Map<Position.Name, Boolean> defined = new HashMap<>();
+    private Map<Positions.Name, Boolean> defined = new HashMap<>();
     {
-        defined.put(Position.Name.MIDDLELEFT, false);
-        defined.put(Position.Name.BOTTOMMIDDLE, false);
-        defined.put(Position.Name.TOPMIDDLE, false);
-        defined.put(Position.Name.MIDDLERIGHT, false);
+        defined.put(Positions.Name.MIDDLELEFT, false);
+        defined.put(Positions.Name.BOTTOMMIDDLE, false);
+        defined.put(Positions.Name.TOPMIDDLE, false);
+        defined.put(Positions.Name.MIDDLERIGHT, false);
     }
 
-    public void setAsDefined(Position.Name border) {
-        if (border == Position.Name.TOPLEFT) {
-            defined.put(Position.Name.MIDDLELEFT, true);
-            defined.put(Position.Name.TOPMIDDLE, true);
+    public void setAsDefined(Positions.Name border) {
+        if (border == Positions.Name.TOPLEFT) {
+            defined.put(Positions.Name.MIDDLELEFT, true);
+            defined.put(Positions.Name.TOPMIDDLE, true);
         }
-        else if (border == Position.Name.TOPRIGHT) {
-            defined.put(Position.Name.MIDDLERIGHT, true);
-            defined.put(Position.Name.TOPMIDDLE, true);
+        else if (border == Positions.Name.TOPRIGHT) {
+            defined.put(Positions.Name.MIDDLERIGHT, true);
+            defined.put(Positions.Name.TOPMIDDLE, true);
         }
-        else if (border == Position.Name.BOTTOMLEFT) {
-            defined.put(Position.Name.MIDDLELEFT, true);
-            defined.put(Position.Name.BOTTOMMIDDLE, true);
+        else if (border == Positions.Name.BOTTOMLEFT) {
+            defined.put(Positions.Name.MIDDLELEFT, true);
+            defined.put(Positions.Name.BOTTOMMIDDLE, true);
         }
-        else if (border == Position.Name.BOTTOMRIGHT) {
-            defined.put(Position.Name.MIDDLERIGHT, true);
-            defined.put(Position.Name.BOTTOMMIDDLE, true);
+        else if (border == Positions.Name.BOTTOMRIGHT) {
+            defined.put(Positions.Name.MIDDLERIGHT, true);
+            defined.put(Positions.Name.BOTTOMMIDDLE, true);
         }
         else defined.put(border, true);
     }
 
-    public boolean isDefined(Position.Name border) {
+    public boolean isDefined(Positions.Name border) {
         return defined.get(border);
     }
 

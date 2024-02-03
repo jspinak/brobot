@@ -1,9 +1,9 @@
 package io.github.jspinak.brobot.manageStates;
 
+import io.github.jspinak.brobot.database.api.StateService;
 import io.github.jspinak.brobot.datatypes.state.state.State;
 import io.github.jspinak.brobot.reports.Output;
 import io.github.jspinak.brobot.reports.Report;
-import io.github.jspinak.brobot.services.StateService;
 import io.github.jspinak.brobot.services.StateTransitionsService;
 import org.springframework.stereotype.Component;
 
@@ -21,12 +21,12 @@ import java.util.Set;
 @Component
 public class DoTransition {
 
-    private StateTransitionsService stateTransitionsService;
-    private StateTransitionsJointTable stateTransitionsJointTable;
-    private SetHiddenStates setHiddenStates;
-    private StateMemory stateMemory;
-    private StateService stateService;
-    private TransitionFetcher transitionFetcher;
+    private final StateTransitionsService stateTransitionsService;
+    private final StateTransitionsJointTable stateTransitionsJointTable;
+    private final SetHiddenStates setHiddenStates;
+    private final StateMemory stateMemory;
+    private final StateService stateService;
+    private final TransitionFetcher transitionFetcher;
 
     public DoTransition(StateTransitionsService stateTransitionsService, StateTransitionsJointTable stateTransitionsJointTable,
                         SetHiddenStates setHiddenStates, StateMemory stateMemory, StateService stateService,
@@ -117,7 +117,7 @@ public class DoTransition {
         if (!transitions.getFromTransitionFunction().getAsBoolean()) return false; // the FromTransition didn't succeed
         Set<String> statesToActivate = getStatesToActivate(transitions, to);
         statesToActivate.forEach(stateName ->
-                stateService.findByName(stateName).ifPresent(State::setProbabilityToBaseProbability));
+                stateService.getState(stateName).ifPresent(State::setProbabilityToBaseProbability));
         StateTransition fromTrsn = transitions.getFromTransition();
         statesToActivate.forEach(this::doTransitionTo); // do all ToTransitions
         fromTrsn.getExit().forEach(this::exitState); // exit all States to exit
@@ -132,14 +132,14 @@ public class DoTransition {
         // if the 'from' State exits, add its hidden States to the States to activate
         if (!transitions.getFromTransitions().stateStaysVisible(to))
             statesToActivate.addAll(transitions.getFromState().getHidden());
-        statesToActivate.remove(StateMemory.Enum.PREVIOUS); // previous can't be activated, so get rid of it
+        statesToActivate.remove(StateMemory.Enum.PREVIOUS.toString()); // previous can't be activated, so get rid of it
         System.out.println("states to activate: "+statesToActivate);
         return statesToActivate;
     }
 
     private boolean doTransitionTo(String toStateName) {
         if (stateMemory.getActiveStates().contains(toStateName)) return true; // State is already active
-        Optional<State> toStateOpt = stateService.findByName(toStateName);
+        Optional<State> toStateOpt = stateService.getState(toStateName);
         if (toStateOpt.isEmpty()) return false; // State doesn't exist
         State toState = toStateOpt.get();
         toState.setProbabilityToBaseProbability();
@@ -160,7 +160,7 @@ public class DoTransition {
 
     // THIS SHOULD INCLUDE A CHECK WITH THE VANISH OPERATION
     private boolean exitState(String stateToExit) {
-        Optional<State> stateOpt = stateService.findByName(stateToExit);
+        Optional<State> stateOpt = stateService.getState(stateToExit);
         if (stateOpt.isEmpty()) return false; // state doesn't exist
         stateTransitionsJointTable.removeTransitionsToHiddenStates(stateOpt.get());
         stateMemory.removeInactiveState(stateToExit);

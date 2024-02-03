@@ -49,8 +49,6 @@ public class FindScreen {
     /**
      * Takes a new screenshot and compares with the screenshots in the repo. If new, adds it to the repo.
      * If in the repo, returns the screen's id.
-     *
-     * @return the id of the current screen
      */
     public void findCurrentScreenAndSaveIfNew(StateStructureTemplate stateStructureTemplate) {
         int nextUnassignedId = screenObservationManager.getNextUnassignedScreenId();

@@ -1,11 +1,8 @@
 package io.github.jspinak.brobot.datatypes.primitives.location;
 
-import io.github.jspinak.brobot.primatives.Pair;
 import jakarta.persistence.Embeddable;
 import lombok.Getter;
-
-import java.util.HashMap;
-import java.util.Map;
+import java.io.Serializable;
 
 /**
  * Position is defined by (%w, %h) and can be used to get a location in a Region.
@@ -17,21 +14,9 @@ public class Position {
     private double percentW;
     private double percentH;
 
-    public enum Name {
-        TOPLEFT, TOPMIDDLE, TOPRIGHT, MIDDLELEFT, MIDDLEMIDDLE, MIDDLERIGHT, BOTTOMLEFT, BOTTOMMIDDLE, BOTTOMRIGHT
-    }
-
-    private final Map<Name, Pair<Double,Double>> positions = new HashMap<>();
-    {
-        positions.put(Name.TOPLEFT, Pair.of(0.0,0.0));
-        positions.put(Name.TOPMIDDLE, Pair.of(.5, 0.0));
-        positions.put(Name.TOPRIGHT, Pair.of(1.0, 0.0));
-        positions.put(Name.MIDDLELEFT, Pair.of(0.0, .5));
-        positions.put(Name.MIDDLEMIDDLE, Pair.of(.5, .5));
-        positions.put(Name.MIDDLERIGHT, Pair.of(1.0, .5));
-        positions.put(Name.BOTTOMLEFT, Pair.of(0.0, 1.0));
-        positions.put(Name.BOTTOMMIDDLE, Pair.of(.5, 1.0));
-        positions.put(Name.BOTTOMRIGHT, Pair.of(1.0, 1.0));
+    public Position() {
+        this.percentW = 0.5;
+        this.percentH = 0.5;
     }
 
     public Position(double w, double h) {
@@ -44,14 +29,14 @@ public class Position {
         this.percentH = (double) percentH / 100;
     }
 
-    public Position(Name positionName) {
-        this.percentW = positions.get(positionName).getKey();
-        this.percentH = positions.get(positionName).getValue();
+    public Position(Positions.Name positionName) {
+        this.percentW = Positions.getCoordinates(positionName).getKey();
+        this.percentH = Positions.getCoordinates(positionName).getValue();
     }
 
-    public Position(Name positionName, double addPercentW, double addPercentH) {
-        this.percentW = positions.get(positionName).getKey() + addPercentW;
-        this.percentH = positions.get(positionName).getValue() + addPercentH;
+    public Position(Positions.Name positionName, double addPercentW, double addPercentH) {
+        this.percentW = Positions.getCoordinates(positionName).getKey() + addPercentW;
+        this.percentH = Positions.getCoordinates(positionName).getValue() + addPercentH;
     }
 
     public void addPercentW(double addW) {

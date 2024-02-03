@@ -14,8 +14,6 @@ import io.github.jspinak.brobot.primatives.enums.StateEnum;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import org.bytedeco.opencv.opencv_core.Mat;
-import org.springframework.data.annotation.Id;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -43,6 +41,7 @@ public class State {
 
     private String nameAsString = "";
 
+    @Transient // the name as a string is sufficient
     private StateEnum name;
     /**
      * StateText is text that appears on the screen and is a clue to look for images in this state.
@@ -126,18 +125,18 @@ public class State {
      * Screenshots where the state is found. These can be used for realistic simulations or for
      * illustrating the state to display it visually. Not all StateImages need to be present.
      */
-    @ElementCollection
-    @CollectionTable(name = "state_scene", joinColumns = @JoinColumn(name = "state_id"))
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinTable(name = "state_scenes",
+            joinColumns = @JoinColumn(name = "state_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "scene_id", referencedColumnName = "id"))
     private List<Scene> scenes = new ArrayList<>();
+    @Transient
     private List<StateIllustration> illustrations = new ArrayList<>();
     /**
      * Some actions take place without an associated Pattern or StateImage. These actions are stored in their
      * corresponding state.
      */
     @OneToOne(cascade = CascadeType.ALL)
-    @JoinTable(name = "state_matchHistory",
-            joinColumns = @JoinColumn (name = "state_id"),
-            inverseJoinColumns = @JoinColumn (name = "matchHistory_id"))
     private MatchHistory matchHistory = new MatchHistory();
 
     public String getName() {
@@ -186,7 +185,7 @@ public class State {
             // otherwise, add the snapshot locations
             List<MatchSnapshot> snapshots = stateImage.getAllMatchSnapshots();
             for (MatchSnapshot snapshot : snapshots) {
-                snapshot.getMatchList().forEach(match -> imageRegions.add(new Region(match)));
+                snapshot.getMatchList().forEach(match -> imageRegions.add(match.getRegion()));
             }
         }
         for (StateRegion stateRegion : stateRegions) {

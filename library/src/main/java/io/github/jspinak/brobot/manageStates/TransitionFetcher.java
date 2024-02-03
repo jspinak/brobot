@@ -1,7 +1,7 @@
 package io.github.jspinak.brobot.manageStates;
 
+import io.github.jspinak.brobot.database.api.StateService;
 import io.github.jspinak.brobot.datatypes.state.state.State;
-import io.github.jspinak.brobot.services.StateService;
 import io.github.jspinak.brobot.services.StateTransitionsService;
 import lombok.Getter;
 import org.springframework.stereotype.Component;
@@ -73,7 +73,7 @@ public class TransitionFetcher {
 
     private void setFromTransitions(String from, String to) {
         Optional<StateTransitions> fromTransitions = stateTransitionsService.getTransitions(from);
-        stateService.findByName(from).ifPresent(state -> fromState = state);
+        stateService.getState(from).ifPresent(state -> fromState = state);
         fromTransitions.ifPresent(transitions -> {
             this.fromTransitions = transitions;
             transitionToEnum = stateTransitionsService.getTransitionToEnum(from, to);
@@ -85,7 +85,7 @@ public class TransitionFetcher {
 
     private void setToTransitions(String to) {
         Optional<StateTransitions> fromTransitions = stateTransitionsService.getTransitions(to);
-        stateService.findByName(to).ifPresent(state -> toState = state);
+        stateService.getState(to).ifPresent(state -> toState = state);
         fromTransitions.ifPresent(transitions -> {
             this.toTransitions = transitions;
             this.toTransition = transitions.getTransitionFinish();

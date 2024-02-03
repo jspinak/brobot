@@ -6,6 +6,7 @@ import io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.screenObse
 import io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.screenObservations.ScreenObservations;
 import io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.screenObservations.TransitionImage;
 import io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.screenObservations.TransitionImageRepo;
+import io.github.jspinak.brobot.database.api.StateService;
 import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
@@ -14,7 +15,6 @@ import io.github.jspinak.brobot.imageUtils.ImageUtils;
 import io.github.jspinak.brobot.imageUtils.MatVisualize;
 import io.github.jspinak.brobot.manageStates.StateTransition;
 import io.github.jspinak.brobot.manageStates.StateTransitions;
-import io.github.jspinak.brobot.services.StateService;
 import io.github.jspinak.brobot.services.StateTransitionsRepository;
 import lombok.Setter;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -156,7 +156,7 @@ public class ScreenStateCreator {
                 TransitionImage transitionImage = transitionImageRepo.getImages().get(imgIndex);
                 Region reg = transitionImage.getRegion();
                 Pattern pattern = imageUtils.matToPattern(matchMat, Settings.BundlePath + "/" + imageName);
-                pattern.addMatchSnapshot(reg.x, reg.y, reg.w, reg.h);
+                pattern.addMatchSnapshot(reg.x(), reg.y(), reg.w(), reg.h());
                 StateImage sio = new StateImage.Builder()
                         .addPattern(pattern)
                         /*
@@ -208,7 +208,7 @@ public class ScreenStateCreator {
             stateService.save(createState(imgSets, Integer.toString(imageSetsList.indexOf(imgSets))));
         }
         // now that all states are defined, we can define the transitions
-        for (State state : stateService.findAllStates()) {
+        for (State state : stateService.getAllStates()) {
             StateTransitions newST = new StateTransitions.Builder(state.getName())
                     .addTransitionFinish(() -> commonActions.findState(1, state.getName()))
                     .build();

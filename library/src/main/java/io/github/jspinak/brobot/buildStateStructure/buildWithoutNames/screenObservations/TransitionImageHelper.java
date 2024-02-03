@@ -1,8 +1,8 @@
 package io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.screenObservations;
 
+import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import lombok.Getter;
 import lombok.Setter;
-import org.sikuli.script.Match;
 
 /**
  * Helper class for building TransitionImage objects

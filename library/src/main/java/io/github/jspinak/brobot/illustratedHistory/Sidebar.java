@@ -84,8 +84,8 @@ public class Sidebar {
     }
 
     private Mat getMatchForSidebar(Illustrations illustrations, Match match) {
-        if (illustrations.getScene().sizeof() < match.w * match.h) return illustrations.getScene();
-        Rect rect = new Rect(match.x, match.y, match.w, match.h);
+        if (illustrations.getScene().sizeof() < match.w() * match.h()) return illustrations.getScene();
+        Rect rect = new Rect(match.x(), match.y(), match.w(), match.h());
         Mat matchFromScene = illustrations.getScene().apply(rect);
         resize(matchFromScene, matchFromScene, new Size(sidebarEntryW, sidebarEntryH));
         return matchFromScene;

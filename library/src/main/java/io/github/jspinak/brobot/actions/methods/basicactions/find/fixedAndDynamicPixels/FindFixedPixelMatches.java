@@ -3,6 +3,7 @@ package io.github.jspinak.brobot.actions.methods.basicactions.find.fixedAndDynam
 import io.github.jspinak.brobot.actions.methods.basicactions.find.contours.Contours;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.matchManagement.MatchProofer;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.motion.FindDynamicPixels;
+import io.github.jspinak.brobot.datatypes.primitives.image.Image;
 import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
 import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
@@ -56,11 +57,8 @@ public class FindFixedPixelMatches {
                 .build();
         for (Match match : contours.getMatchList()) {
             if (matchProofer.isInSearchRegions(match, matches.getActionOptions(), pattern)) {
-                matches.add(
-                        new Match.Builder()
-                                .setMatch(match)
-                                .setPattern(pattern)
-                                .build());
+                match.setSearchImage(new Image(pattern));
+                matches.add(match);
             }
         }
     }

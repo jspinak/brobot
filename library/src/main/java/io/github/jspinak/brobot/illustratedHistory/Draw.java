@@ -26,17 +26,17 @@ public class Draw {
     }
 
     public void drawRect(Mat screen, Match match, Scalar color) {
-        int drawX = Math.max(0, match.x-1);
-        int drawY = Math.max(0, match.y-1);
-        int drawX2 = Math.min(screen.cols(), match.x + match.w + 1);
-        int drawY2 = Math.min(screen.rows(), match.y + match.h + 1);
+        int drawX = Math.max(0, match.x()-1);
+        int drawY = Math.max(0, match.y()-1);
+        int drawX2 = Math.min(screen.cols(), match.x() + match.w() + 1);
+        int drawY2 = Math.min(screen.rows(), match.y() + match.h() + 1);
         Rect aroundMatch = new Rect(drawX, drawY, drawX2-drawX, drawY2-drawY);
         rectangle(screen, aroundMatch, color);
     }
 
     public void drawPoint(Mat screen, Match match, Scalar color) {
-        org.sikuli.script.Location loc = match.getTarget();
-        Point center = new Point(loc.x, loc.y);
+        Location loc = match.getTarget();
+        Point center = new Point(loc.getX(), loc.getY());
         circle(screen, center, 6, color, FILLED, LINE_8, 0); //fill
         circle(screen, center, 8, new Scalar(255));
         circle(screen, center, 10, new Scalar(255));
@@ -44,7 +44,7 @@ public class Draw {
 
     public void drawClick(Illustrations illustrations, Matches matches) {
         for (Match match : matches.getMatchList()) {
-            Report.println("Drawing click on " + match.getTarget().x + ", " + match.getTarget().y);
+            Report.println("Drawing click on " + match.getTarget().getX() + ", " + match.getTarget().getY());
             drawPoint(illustrations.getMatchesOnScene(), match, new Scalar(255, 150, 255, 0));
         }
     }
