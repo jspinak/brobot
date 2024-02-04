@@ -60,7 +60,7 @@ public class CaptureScenesAndInputs {
         capture();
         SceneObjectCollectionForXML sceneObjectCollectionForXML = findObjects(actionOptions, stateImages);
         saveSceneObjectCollectionForXML(sceneObjectCollectionForXML);
-        System.runFinalization();
+        //System.runFinalization(); //runFinalization has been deprecated
         System.exit(0);
     }
 

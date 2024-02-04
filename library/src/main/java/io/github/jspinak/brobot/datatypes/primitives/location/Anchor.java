@@ -23,10 +23,12 @@ import lombok.Setter;
 @Setter
 public class Anchor {
 
-    @Embedded
     private Positions.Name anchorInNewDefinedRegion; // the border of the region to define
     @Embedded
     private Position positionInMatch; // the location in the match to use as a defining point
+
+    // JPA requires an empty constructor
+    public Anchor() {}
 
     public Anchor(Positions.Name anchorInNewDefinedRegion, Position positionInMatch) {
         this.anchorInNewDefinedRegion = anchorInNewDefinedRegion;
