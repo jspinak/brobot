@@ -1,17 +1,22 @@
 package io.github.jspinak.brobot.actions.methods.basicactions;
 
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
+import io.github.jspinak.brobot.database.api.PatternService;
 import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
 import io.github.jspinak.brobot.datatypes.primitives.location.Positions;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import lombok.Getter;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @Getter
 public class TestData {
 
+    @Autowired
+    private PatternService patternService;
+
     Pattern screenshot = new Pattern.Builder()
-            .setFilename("screenshots/floranext0")
+            .setFilename("../screenshots/floranext0")
             .build();
     Pattern topL = new Pattern.Builder()
             .setFilename("topLeft")
@@ -32,14 +37,14 @@ public class TestData {
             .setDefineAs(ActionOptions.DefineAs.INSIDE_ANCHORS)
             .build();
     ObjectCollection insideAnchorObjects = new ObjectCollection.Builder()
-            .withScenes(new Pattern("screenshots/FloraNext1"))
+            .withScenes(new Pattern("../screenshots/FloraNext1"))
             .withImages(topLeft, bottomRight)
             .build();
 
-    Pattern floranext0 = new Pattern("screenshots/floranext0");
-    Pattern floranext1 = new Pattern("screenshots/floranext1");
-    Pattern floranext2 = new Pattern("screenshots/floranext2");
-    Pattern floranext3 = new Pattern("screenshots/floranext3");
-    Pattern floranext4 = new Pattern("screenshots/floranext4");
+    Pattern floranext0 = new Pattern("../screenshots/floranext0");
+    Pattern floranext1 = new Pattern("../screenshots/floranext1");
+    Pattern floranext2 = new Pattern("../screenshots/floranext2");
+    Pattern floranext3 = new Pattern("../screenshots/floranext3");
+    Pattern floranext4 = new Pattern("../screenshots/floranext4");
 
 }

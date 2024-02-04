@@ -5,7 +5,6 @@ import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.GetScenes;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.Scene;
 import io.github.jspinak.brobot.actions.methods.sikuliWrappers.find.UseDefinedRegion;
-import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
@@ -39,17 +38,17 @@ public class FindImages {
         matches.getBestMatch().ifPresent(match -> matches.setMatchList(List.of(match)));
     }
 
-    void findEachPattern(Matches matches, List<ObjectCollection> objectCollections) {
+    void findEachStateObject(Matches matches, List<ObjectCollection> objectCollections) {
         getImageMatches(matches, objectCollections);
-        List<Match> bestMatchPerPattern = new ArrayList<>();
+        List<Match> bestMatchPerStateObject = new ArrayList<>();
         Set<Long> imageIds = matches.getUniqueImageIds();
         for (Long id : imageIds) {
-            List<Match> singlePatternMatchList = matches.getMatchObjectsWithTargetStateObject(id);
-            Optional<Match> matchWithHighestScore = singlePatternMatchList.stream()
+            List<Match> singleObjectMatchList = matches.getMatchObjectsWithTargetStateObject(id);
+            Optional<Match> matchWithHighestScore = singleObjectMatchList.stream()
                     .max(java.util.Comparator.comparingDouble(Match::getScore));
-            matchWithHighestScore.ifPresent(bestMatchPerPattern::add);
+            matchWithHighestScore.ifPresent(bestMatchPerStateObject::add);
         }
-        matches.setMatchList(bestMatchPerPattern);
+        matches.setMatchList(bestMatchPerStateObject);
     }
 
     /**

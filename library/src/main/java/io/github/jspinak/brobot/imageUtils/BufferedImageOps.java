@@ -4,6 +4,8 @@ import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfByte;
 import org.opencv.imgcodecs.Imgcodecs;
+import org.sikuli.script.Image;
+import org.sikuli.script.Pattern;
 import org.sikuli.script.Screen;
 import org.sikuli.script.ScreenImage;
 import org.springframework.stereotype.Component;
@@ -24,6 +26,18 @@ public class BufferedImageOps {
 
 
     public static BufferedImage getBuffImgFromFile(String path) {
+        Pattern sikuliPattern = new Pattern(path);
+        return sikuliPattern.getBImage();
+    }
+
+    /**
+     * To use this method, you need to deal with paths. In SikuliX, there is a bundle path.
+     * SikuliX has code to abstract the OS. If you want Brobot to be platform independent, it should use SikuliX
+     * as much as possible to retrieve BufferedImages from file.
+     * @param path the path of the image
+     * @return the BufferedImage from an image on file
+     */
+    public static BufferedImage getBuffImgDirectly(String path) {
         File f = new File(FilenameOps.addPngExtensionIfNeeded(path));
         try {
             return ImageIO.read(Objects.requireNonNull(f));
