@@ -41,7 +41,7 @@ dependencies {
     }
     implementation 'ch.qos.logback:logback-classic:1.4.12'
 
-    implementation group: 'org.bytedeco', name: 'javacv', version: '1.5.10'
+    implementation group: 'org.bytedeco', name: 'javacv-platform', version: '1.5.10'
     implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.0'
     implementation 'com.github.kwhat:jnativehook:2.2.2'
 

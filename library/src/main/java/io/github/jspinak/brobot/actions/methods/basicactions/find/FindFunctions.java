@@ -32,7 +32,7 @@ public class FindFunctions {
                          FindFixedPixelMatches findFixedPixelMatches, FindDynamicPixelMatches findDynamicPixelMatches) {
         findFunction.put(ActionOptions.Find.FIRST, findImages::findBest);
         findFunction.put(ActionOptions.Find.BEST, findImages::findBest);
-        findFunction.put(ActionOptions.Find.EACH, findImages::findEachPattern);
+        findFunction.put(ActionOptions.Find.EACH, findImages::findEachStateObject);
         findFunction.put(ActionOptions.Find.ALL, findImages::findAll);
         findFunction.put(ActionOptions.Find.HISTOGRAM, findHistogram::find);
         findFunction.put(ActionOptions.Find.COLOR, findColor::find);
