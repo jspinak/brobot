@@ -3,6 +3,7 @@ package io.github.jspinak.brobot.datatypes.primitives.image;
 import io.github.jspinak.brobot.datatypes.primitives.location.Anchor;
 import io.github.jspinak.brobot.datatypes.primitives.location.Anchors;
 import io.github.jspinak.brobot.datatypes.primitives.location.Position;
+//import io.github.jspinak.brobot.datatypes.primitives.location.Positions;
 import io.github.jspinak.brobot.datatypes.primitives.location.Positions;
 import io.github.jspinak.brobot.datatypes.primitives.match.MatchHistory;
 import io.github.jspinak.brobot.datatypes.primitives.match.MatchSnapshot;
@@ -90,6 +91,8 @@ public class Pattern {
     public Pattern(String imgPath) {
         this.imgpath = imgPath;
         setNameFromFilenameIfEmpty(imgPath);
+        // using SikuliX to get the BufferedImage would make it OS-independent
+        this.image = new Image(BufferedImageOps.getBuffImgFromFile(imgPath));
     }
 
     public Pattern(BufferedImage bimg) {

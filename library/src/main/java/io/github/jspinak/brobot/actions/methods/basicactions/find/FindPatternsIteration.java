@@ -33,7 +33,7 @@ public class FindPatternsIteration {
         actionLifecycleManagement.printActionOnce(matches);
         for (Scene scene : scenes) {
             List<Match> singleSceneMatchList = new ArrayList<>(); // holds finds for a specific scene
-            for (int i=0; i<stateImages.size(); i++) {
+            for (int i=0; i<stateImages.size(); i++) { // run for each StateImage
                 List<Match> newMatches = findAll.find(stateImages.get(i), scene, matches.getActionOptions());
                 singleSceneMatchList.addAll(newMatches);
                 matches.addAll(newMatches); // holds all matches found
