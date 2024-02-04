@@ -42,23 +42,23 @@ public class FindAll {
      * on regions. Snapshots should not be region-specific to make them more universally applicable.
      */
     public List<Match> find(StateImage stateImage, Scene scene, ActionOptions actionOptions) {
-        List<Match> matchObjects = new ArrayList<>();
+        List<Match> allMatchObjects = new ArrayList<>();
         for (Pattern pattern : stateImage.getPatterns()) {
             List<Match> matchList = mockOrLive.findAll(pattern, scene);
             for (Match match : matchList) {
                 if (matchProofer.isInSearchRegions(match, actionOptions, pattern)) {
-                    matchObjects.add(
-                            new Match.Builder()
+                    Match newMatch = new Match.Builder()
                                     .setMatch(match)
                                     .setSearchImage(pattern.getBImage())
                                     .setAnchors(pattern.getAnchors())
                                     .setStateObjectData(stateImage)
                                     .setScene(scene)
-                                    .build());
+                                    .build();
+                    allMatchObjects.add(newMatch);
                 }
             }
         }
-        return matchObjects;
+        return allMatchObjects;
     }
 
     public List<Match> findWords(Scene scene, ActionOptions actionOptions) {
