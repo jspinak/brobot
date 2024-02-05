@@ -21,10 +21,9 @@ public class UnknownState {
         UNKNOWN
     }
 
-    private State state;
+    private State state = new State.Builder("unknown").build();
 
     public UnknownState(StateService stateService) {
-        state = new State.Builder(Enum.UNKNOWN).build();
         stateService.save(state);
     }
 }

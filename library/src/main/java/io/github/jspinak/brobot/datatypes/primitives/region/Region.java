@@ -2,10 +2,12 @@ package io.github.jspinak.brobot.datatypes.primitives.region;
 
 import io.github.jspinak.brobot.datatypes.primitives.location.Location;
 import io.github.jspinak.brobot.datatypes.primitives.match.Match;
-import io.github.jspinak.brobot.datatypes.state.NullState;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.StateRegion;
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import lombok.Setter;
 import org.bytedeco.opencv.opencv_core.Rect;
 import org.sikuli.script.Screen;
@@ -138,7 +140,7 @@ public class Region implements Comparable<Region>, Serializable {
 
     public StateRegion inNullState() {
         return new StateRegion.Builder()
-                .inState(NullState.Name.NULL.toString())
+                .inState("null")
                 .withSearchRegion(this)
                 .build();
     }
@@ -432,5 +434,10 @@ public class Region implements Comparable<Region>, Serializable {
             }
         }
         return merged;
+    }
+
+    @Override
+    public String toString() {
+        return "R[" + x + "." + y + "." + w + "." + h + "]";
     }
 }

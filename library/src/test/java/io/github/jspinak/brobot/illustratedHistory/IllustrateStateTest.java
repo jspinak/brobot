@@ -64,7 +64,9 @@ class IllustrateStateTest {
     @Test
     void getIllustratedState() {
         List<State> states = createStates();
-        Mat state0 = illustrateState.illustrateWithFixedSearchRegions(states.get(0));
+        State first = states.getFirst();
+        System.out.println(first);
+        Mat state0 = illustrateState.illustrateWithFixedSearchRegions(states.getFirst());
         assertTrue(countNonZero(MatOps.toGrayscale(state0)) > 0);
     }
 

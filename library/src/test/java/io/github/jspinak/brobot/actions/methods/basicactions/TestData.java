@@ -9,11 +9,11 @@ import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImag
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Getter
 public class TestData {
-
-    @Autowired
-    private PatternService patternService;
 
     Pattern screenshot = new Pattern.Builder()
             .setFilename("../screenshots/floranext0")
@@ -46,5 +46,32 @@ public class TestData {
     Pattern floranext2 = new Pattern("../screenshots/floranext2");
     Pattern floranext3 = new Pattern("../screenshots/floranext3");
     Pattern floranext4 = new Pattern("../screenshots/floranext4");
+
+    public List<Pattern> getPatterns() {
+        List<Pattern> patterns = new ArrayList<>();
+        patterns.add(floranext0);
+        patterns.add(floranext1);
+        patterns.add(floranext2);
+        patterns.add(floranext3);
+        patterns.add(floranext4);
+        return patterns;
+    }
+
+    public List<Pattern> getPatterns(Integer... indices) {
+        List<Pattern> patterns = new ArrayList<>();
+        if (List.of(indices).contains(0)) patterns.add(floranext0);
+        if (List.of(indices).contains(1)) patterns.add(floranext1);
+        if (List.of(indices).contains(2)) patterns.add(floranext2);
+        if (List.of(indices).contains(3)) patterns.add(floranext3);
+        if (List.of(indices).contains(4)) patterns.add(floranext4);
+        return patterns;
+    }
+
+    public List<StateImage> getStateImages() {
+        List<StateImage> images = new ArrayList<>();
+        images.add(topLeft);
+        images.add(bottomRight);
+        return images;
+    }
 
 }

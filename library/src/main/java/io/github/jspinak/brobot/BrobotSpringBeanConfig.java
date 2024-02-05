@@ -10,7 +10,7 @@ public class BrobotSpringBeanConfig {
 
     public BrobotSpringBeanConfig() {
         // Set the system property to enable debug logging for org.bytedeco.javacpp
-        System.setProperty("org.bytedeco.javacpp.logger.debug", "true");
+        //System.setProperty("org.bytedeco.javacpp.logger.debug", "true");
         //new Pattern(); // loads OpenCV from SikuliX
         ImagePath.setBundlePath("images"); // Brobot's default bundle path
     }
