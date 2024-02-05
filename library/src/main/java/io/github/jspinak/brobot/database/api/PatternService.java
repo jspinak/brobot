@@ -18,7 +18,7 @@ public class PatternService {
 
     public Pattern getPattern(String name) {
         Pattern pattern = patternRepo.findByName(name).orElse(null);
-        if (pattern != null) pattern.setBufferedImage();
+        if (pattern != null) pattern.setBufferedImageFromBytes();
         return pattern;
     }
 
@@ -26,13 +26,19 @@ public class PatternService {
         List<Pattern> patterns = new ArrayList<>();
         patternRepo.findAll().forEach(patterns::add);
         for (Pattern pattern : patterns) {
-            pattern.setBufferedImage();
+            pattern.setBufferedImageFromBytes();
         }
         return patterns;
     }
 
-    public void savePattern(Pattern pattern) {
-        pattern.setBytes();
-        patternRepo.save(pattern);
+    public void savePatterns(Pattern... patterns) {
+        savePatterns(List.of(patterns));
+    }
+
+    public void savePatterns(List<Pattern> patterns) {
+        patterns.forEach(pattern -> {
+            pattern.setBytes();
+            patternRepo.save(pattern);
+        });
     }
 }

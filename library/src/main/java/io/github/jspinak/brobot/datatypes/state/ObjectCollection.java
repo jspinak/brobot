@@ -18,7 +18,6 @@ import lombok.Setter;
 import java.util.*;
 
 import static io.github.jspinak.brobot.datatypes.primitives.location.Positions.Name.TOPLEFT;
-import static io.github.jspinak.brobot.datatypes.state.NullState.Name.NULL;
 
 /**
  * This class holds all the objects that can be passed to an Action, which include:
@@ -224,6 +223,11 @@ public class ObjectCollection {
             return this;
         }
 
+        public Builder withPatterns(List<Pattern> patterns) {
+            for (Pattern pattern : patterns) this.stateImages.add(pattern.inNullState());
+            return this;
+        }
+
         public Builder withAllStateImages(State state) {
             if (state == null) {
                 Report.print("null state passed| ");
@@ -289,7 +293,7 @@ public class ObjectCollection {
             for (io.github.jspinak.brobot.datatypes.primitives.match.Match match : matches) {
                 this.stateRegions.add(new StateRegion.Builder()
                         .withSearchRegion(match.getRegion())
-                        .inState(NULL.toString())
+                        .inState("null")
                         .build());
             }
             return this;

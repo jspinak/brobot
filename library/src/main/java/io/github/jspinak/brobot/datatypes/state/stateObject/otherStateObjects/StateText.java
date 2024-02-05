@@ -1,7 +1,6 @@
 package io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects;
 
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
-import io.github.jspinak.brobot.datatypes.state.NullState;
 import io.github.jspinak.brobot.datatypes.state.stateObject.StateObject;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -24,7 +23,7 @@ public class StateText {
     private String name;
     @OneToOne(cascade = CascadeType.ALL)
     private Region searchRegion;
-    private String ownerStateName = NullState.Name.NULL.toString();
+    private String ownerStateName = "null";
 
     private String text;
 

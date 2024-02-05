@@ -21,7 +21,7 @@ class StateRepoTest {
     }
 
     @Autowired
-    private StateRepo stateRepo;
+    StateRepo stateRepo;
 
     @Test
     void findAllAsList() {
@@ -30,7 +30,7 @@ class StateRepoTest {
         stateList.forEach(states::add);
         System.out.println("# of states = " + states.size());
         states.forEach(System.out::println);
-        assertTrue(states.isEmpty());
+        assertEquals(1, states.size()); // the unknown state is always in the state repo. the null state is not.
     }
 
     @Test

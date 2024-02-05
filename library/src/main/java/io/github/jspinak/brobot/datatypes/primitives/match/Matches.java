@@ -66,7 +66,7 @@ public class Matches {
     private ActionOptions actionOptions; // the action options used to find the matches
     @ElementCollection
     @CollectionTable(name = "activeStates", joinColumns = @JoinColumn(name = "matches_id"))
-    private List<String> activeStates = new ArrayList<>();
+    private Set<String> activeStates = new HashSet<>();
     @Transient
     private Text text = new Text();
     private String selectedText = ""; // the String selected from the Text object as the most accurate representation of the text on-screen

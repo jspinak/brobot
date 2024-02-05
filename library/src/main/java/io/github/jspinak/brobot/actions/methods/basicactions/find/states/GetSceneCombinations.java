@@ -65,4 +65,21 @@ public class GetSceneCombinations {
         findDynamicPixelMatches.find(matches, List.of(objectCollection));
         return Optional.ofNullable(matches.getMask());
     }
+
+    /**
+     * Finds the first SceneCombination with different scenes.
+     * Primarily used in testing. May return null.
+     * @param sceneCombinations The SceneCombinations to query.
+     * @return the first SceneCombination with non-matching scenes.
+     */
+    public SceneCombination getSceneCombinationWithDifferentScenes(List<SceneCombination> sceneCombinations) {
+        SceneCombination sceneCombinationWithDifferentScenes = null;
+        for (SceneCombination sceneCombination : sceneCombinations) {
+            if (sceneCombination.getScene1() != sceneCombination.getScene2()) {
+                sceneCombinationWithDifferentScenes = sceneCombination;
+                break;
+            }
+        }
+        return sceneCombinationWithDifferentScenes;
+    }
 }

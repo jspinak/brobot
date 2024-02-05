@@ -28,7 +28,7 @@ public class SetMatTextPattern {
      */
     public void set(Matches matches) {
         setMat(matches);
-        setText(matches);
+        //setText(matches); // this method always returns "" despite doing OCR on a BufferedImage
     }
 
     public void setMat(Matches matches) {

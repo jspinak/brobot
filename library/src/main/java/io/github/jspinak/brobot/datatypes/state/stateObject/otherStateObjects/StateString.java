@@ -1,12 +1,9 @@
 package io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects;
 
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
-import io.github.jspinak.brobot.datatypes.state.NullState;
 import io.github.jspinak.brobot.datatypes.state.stateObject.StateObject;
 import jakarta.persistence.*;
 import lombok.Data;
-
-import static io.github.jspinak.brobot.datatypes.state.NullState.Name.NULL;
 
 /**
  * A State String belongs to a State and usually has a String that
@@ -25,7 +22,7 @@ public class StateString {
     private String name;
     @OneToOne(cascade = CascadeType.ALL)
     private Region searchRegion; // sometimes we need to hover over or click on a region before typing the string
-    private String ownerStateName = NullState.Name.NULL.toString();
+    private String ownerStateName = "null";
     private int timesActedOn = 0;
 
     private String string;
@@ -39,7 +36,7 @@ public class StateString {
     public static class InNullState {
         public StateString withString(String string) {
             StateString stateString = new StateString(string);
-            stateString.ownerStateName = NULL.toString();
+            stateString.ownerStateName = "null";
             return stateString;
         }
     }

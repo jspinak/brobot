@@ -70,6 +70,7 @@ public class SearchRegions implements Serializable {
      */
     public Region getFixedIfDefinedOrRandomRegion(boolean fixed) {
         List<Region> regions = getRegions(fixed);
+        if (regions.isEmpty()) return new Region();
         Random rand = new Random();
         return regions.get(rand.nextInt(regions.size()));
     }
