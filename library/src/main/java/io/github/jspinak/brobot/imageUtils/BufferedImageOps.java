@@ -24,7 +24,11 @@ import java.util.Objects;
 @Component
 public class BufferedImageOps {
 
-
+    /**
+     * Creates a new SikuliX Pattern and retrieve the BufferedImage from the new Pattern.
+     * @param path the filename of the image
+     * @return the BufferedImage from file
+     */
     public static BufferedImage getBuffImgFromFile(String path) {
         Pattern sikuliPattern = new Pattern(path);
         return sikuliPattern.getBImage();
@@ -115,6 +119,20 @@ public class BufferedImageOps {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static BufferedImage getSubImage(BufferedImage originalImage, Region region) {
+        return getSubImage(originalImage, region.x(), region.y(), region.w(), region.h());
+    }
+
+    public static BufferedImage getSubImage(BufferedImage originalImage, int x, int y, int width, int height) {
+        // Resize the region to be within the bounds of the original image
+        x = Math.max(0, x);
+        y = Math.max(0, y);
+        width = Math.min(originalImage.getWidth() - x, width);
+        height = Math.min(originalImage.getHeight() - y, height);
+        // Get the sub-image using getSubimage method
+        return originalImage.getSubimage(x, y, width, height);
     }
 
 }

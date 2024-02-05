@@ -29,8 +29,9 @@ public class PopulateSceneCombinations {
                                                     ActionOptions actionOptions) {
         for (int i=0; i<objectCollections.size(); i++) {
             for (StateImage stateImage : objectCollections.get(i).getStateImages()) {
-                int patternSize = stateImage.getPatterns().get(0).size();
-                if (actionOptions.getMinArea() <= patternSize) {
+                int patternSize = stateImage.getMinSize();
+                boolean isBigEnough = actionOptions.getMinArea() <= patternSize;
+                if (isBigEnough) {
                     for (SceneCombination sceneCombination : sceneCombinations) {
                         addImageToCombinationIfFound(i, stateImage, sceneCombination);
                     }

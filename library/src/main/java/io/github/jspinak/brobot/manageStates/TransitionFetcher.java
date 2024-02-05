@@ -10,8 +10,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.BooleanSupplier;
 
-import static io.github.jspinak.brobot.datatypes.state.NullState.Name.NULL;
-
 /**
  * This class returns an object containing the StateTransitions objects and StateTransition objects that
  * we are interested in for a specific transition from one State to another.
@@ -49,7 +47,7 @@ public class TransitionFetcher {
     }
 
     private void reset() {
-        transitionToEnum = NULL.toString();
+        transitionToEnum = "null";
         fromTransitions = null;
         fromTransition = null;
         fromState = null;
@@ -61,7 +59,7 @@ public class TransitionFetcher {
 
     private boolean isComplete() {
         return
-                !Objects.equals(transitionToEnum, NULL.toString()) &&
+                !Objects.equals(transitionToEnum, "null") &&
                 fromTransitions != null &&
                 fromTransition != null &&
                 fromState != null &&

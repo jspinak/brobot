@@ -2,7 +2,6 @@ package io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects;
 
 import io.github.jspinak.brobot.datatypes.primitives.location.*;
 import io.github.jspinak.brobot.datatypes.primitives.match.MatchHistory;
-import io.github.jspinak.brobot.datatypes.state.NullState;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import io.github.jspinak.brobot.datatypes.state.stateObject.StateObject;
 import jakarta.persistence.*;
@@ -27,7 +26,7 @@ public class StateLocation implements StateObject {
     private String name;
     @OneToOne(cascade = CascadeType.ALL)
     private Location location;
-    private String ownerStateName = NullState.Name.NULL.toString();
+    private String ownerStateName = "null";
     private int staysVisibleAfterClicked = 100;
     private int probabilityExists = 100; // probability something can be acted on at this location
     private int timesActedOn = 0;

@@ -40,7 +40,7 @@ class FindStatesTest {
     void stateImagesMeetSizeRequirements() {
         Matches matches = new FindStatesData().getMatches(action, findStates, matchesInitializer, 100);
         matches.getMatchList().forEach(match -> {
-            System.out.println(match.size());
+            System.out.println(match);
             assertTrue(matches.getActionOptions().getMinArea() <= match.size());
         });
     }

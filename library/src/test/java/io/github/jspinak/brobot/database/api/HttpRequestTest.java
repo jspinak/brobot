@@ -17,14 +17,14 @@ class HttpRequestTest {
     }
 
     @LocalServerPort
-    private int port;
+    int port;
 
     @Autowired
-    private TestRestTemplate restTemplate;
+    TestRestTemplate restTemplate;
 
     @Test
     void greetingShouldReturnDefaultMessage() throws Exception {
-        assertThat(this.restTemplate.getForObject("http://localhost:" + port + "/",
+        assertThat(this.restTemplate.getForObject("http://localhost:" + port + "/api/states/",
                 String.class)).contains("Hello, World");
     }
 }
