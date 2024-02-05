@@ -212,11 +212,29 @@ public class StateImage implements StateObject {
 
     public int getMaxHeight() {
         if (isEmpty()) return 0;
-        int max = patterns.get(0).h();
+        int max = patterns.getFirst().h();
         for (int i=1; i<patterns.size(); i++) {
             max = Math.max(max, patterns.get(i).h());
         }
         return max;
+    }
+
+    public int getMinSize() {
+        if (patterns.isEmpty()) return 0;
+        int minSize = patterns.getFirst().size();
+        for (int i=1; i<patterns.size(); i++) {
+            minSize = Math.min(minSize, patterns.get(i).size());
+        }
+        return minSize;
+    }
+
+    public int getMaxSize() {
+        if (patterns.isEmpty()) return 0;
+        int maxSize = patterns.getFirst().size();
+        for (int i=1; i<patterns.size(); i++) {
+            maxSize = Math.max(maxSize, patterns.get(i).size());
+        }
+        return maxSize;
     }
 
     @Override
@@ -231,6 +249,8 @@ public class StateImage implements StateObject {
         stringBuilder.append(" snapshotRegions=");
         getAllMatchSnapshots().forEach(snapshot ->
                 snapshot.getMatchList().forEach(stringBuilder::append));
+        if (!patterns.isEmpty()) stringBuilder.append(" pattern sizes =");
+        patterns.forEach(p -> stringBuilder.append(" ").append(p.size()));
         return stringBuilder.toString();
     }
 

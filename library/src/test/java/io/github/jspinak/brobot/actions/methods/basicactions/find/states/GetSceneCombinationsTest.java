@@ -33,9 +33,6 @@ class GetSceneCombinationsTest {
     @Autowired
     Action action;
 
-    @Autowired
-    ImageUtils imageUtils;
-
     private ObjectCollection getStateObjectCollection(Pattern scene) {
         ObjectCollection objColl = new ObjectCollection.Builder()
                 .withScenes(scene)
@@ -76,9 +73,13 @@ class GetSceneCombinationsTest {
     @Test
     void getDynamicPixelMat() {
         List<SceneCombination> sceneCombinations = getSceneCombinations.getAllSceneCombinations(getStateObjectCollections());
-        Mat dynamicPixels = sceneCombinations.get(0).getDynamicPixels();
+        SceneCombination sceneCombinationWithDifferentScenes =
+                getSceneCombinations.getSceneCombinationWithDifferentScenes(sceneCombinations);
+        assertNotNull(sceneCombinationWithDifferentScenes);
+        Mat dynamicPixels = sceneCombinationWithDifferentScenes.getDynamicPixels();
         int nonzero = countNonZero(dynamicPixels);
-        System.out.println("nonzero cells: "+nonzero);
+        System.out.println("nonzero cells: " + nonzero + " between scenes " +
+                sceneCombinationWithDifferentScenes.getScene1() + " and " + sceneCombinationWithDifferentScenes.getScene2());
         assertNotEquals(0, nonzero);
     }
 

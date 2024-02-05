@@ -2,15 +2,13 @@ package io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.screenObs
 
 import io.github.jspinak.brobot.BrobotTestApplication;
 import io.github.jspinak.brobot.actions.methods.basicactions.TestData;
-import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.sikuli.script.ImagePath;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest(classes = BrobotTestApplication.class)
 class GetUsableAreaTest {
@@ -25,7 +23,7 @@ class GetUsableAreaTest {
     @Test
     void defineInFile() {
         TestData testData = new TestData();
-        Region usableArea  = getUsableArea.defineInFile(testData.getScreenshot(), testData.getTopL(), testData.getBottomR());
+        Region usableArea = getUsableArea.defineInFile(testData.getScreenshot(), testData.getTopL(), testData.getBottomR());
         assertTrue(usableArea.isDefined());
     }
 }

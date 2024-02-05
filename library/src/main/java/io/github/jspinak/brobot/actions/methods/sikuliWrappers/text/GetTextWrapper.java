@@ -59,7 +59,8 @@ public class GetTextWrapper {
     public String getText(Match match) {
         BufferedImage bi = match.getImage().getBufferedImage();
         if (bi == null) return "";
-        return OCR.readText(bi);
+        //OCR.Options myOptions = new OCR.Options().asLine();
+        return OCR.readText(bi); //, myOptions);
     }
 
     /**

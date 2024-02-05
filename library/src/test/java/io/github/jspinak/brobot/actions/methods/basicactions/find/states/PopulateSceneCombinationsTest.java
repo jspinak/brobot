@@ -44,7 +44,10 @@ class PopulateSceneCombinationsTest {
         //sceneCombinationList.forEach(System.out::println);
         int images0 = objectCollections.get(0).getStateImages().size();
         int images1 = objectCollections.get(1).getStateImages().size();
-        int imagesInComb01 = sceneCombinationList.get(0).getImages().size();
+        SceneCombination sceneCombinationWithDifferentScenes =
+                getSceneCombinations.getSceneCombinationWithDifferentScenes(sceneCombinationList);
+        assertNotNull(sceneCombinationWithDifferentScenes);
+        int imagesInComb01 = sceneCombinationWithDifferentScenes.getImages().size();
         System.out.println("Obj.Coll.0: " + images0);
         System.out.println("Obj.Coll.1: "+ images1);
         System.out.println("State.0-1: "+ imagesInComb01);

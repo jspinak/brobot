@@ -36,7 +36,8 @@ public class FindInScene {
         List<Match> matchList = new ArrayList<>();
         while (f.hasNext()) {
             Match nextMatch = new Match.Builder()
-                    .setMatch(f.next())
+                    .setSikuliMatch(f.next())
+                    .setName(pattern.getName())
                     .build();
             matchList.add(nextMatch);
         }
@@ -61,7 +62,7 @@ public class FindInScene {
         OCR.readWords(scene.getImage().getBufferedImage()).forEach(match -> {
             Match m = new Match.Builder()
                     .setName("word")
-                    .setMatch(match)
+                    .setSikuliMatch(match)
                     .setScene(scene)
                     .build();
             wordMatches.add(m);

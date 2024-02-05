@@ -26,7 +26,11 @@ public class StateImageService {
         return stateImages;
     }
 
-    public void saveStateImage(StateImage stateImage) {
-        stateImageRepo.save(stateImage);
+    public void saveStateImages(StateImage... stateImages) {
+        List.of(stateImages).forEach(stateImageRepo::save);
+    }
+
+    public void saveStateImages(List<StateImage> stateImages) {
+        stateImages.forEach(stateImageRepo::save);
     }
 }

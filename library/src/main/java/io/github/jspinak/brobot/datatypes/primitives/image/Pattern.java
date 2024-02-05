@@ -99,6 +99,11 @@ public class Pattern {
         image = new Image(bimg);
     }
 
+    public Pattern(Image image) {
+        this.image = image;
+        this.name = image.getName();
+    }
+
     public Pattern(Mat mat) {
         image = new Image(mat);
     }
@@ -140,7 +145,7 @@ public class Pattern {
      * This is called after the Pattern is retrieved from the database. The byte array in imageDTO is converted
      * to a BufferedImage and saved in the Image object of the Pattern.
      */
-    public void setBufferedImage() {
+    public void setBufferedImageFromBytes() {
         image.setBufferedImageFromBytes();
     }
 
@@ -159,10 +164,12 @@ public class Pattern {
     }
 
     public int w() {
+        if (image == null) return 0;
         return image.w();
     }
 
     public int h() {
+        if (image == null) return 0;
         return image.h();
     }
 
@@ -212,6 +219,7 @@ public class Pattern {
     public StateImage inNullState() {
         return new StateImage.Builder()
                 .addPattern(this)
+                .setName(name)
                 .setOwnerStateName("null")
                 .build();
     }
@@ -258,6 +266,7 @@ public class Pattern {
     public static class Builder {
 
         private String name;
+        private Image image;
         private BufferedImage bufferedImage;
         private String filename;
         private boolean fixed = false;
@@ -277,6 +286,11 @@ public class Pattern {
 
         public Builder setMat(Mat mat) {
             this.bufferedImage = BufferedImageOps.fromMat(mat);
+            return this;
+        }
+
+        public Builder setImage(Image image) {
+            this.image = image;
             return this;
         }
 
@@ -366,16 +380,17 @@ public class Pattern {
             return new Pattern();
         }
 
-        private void setBImageIfAvailable(Pattern pattern) {
+        private void createAndSetImage(Pattern pattern) {
+            if (image != null) pattern.setImage(image);
             if (bufferedImage == null) return;
-            if (pattern.getImage() == null) pattern.setImage(new Image(bufferedImage));
-            else if (pattern.getBImage() == null) pattern.getImage().setBufferedImage(bufferedImage);
+            if (pattern.getImage() != null) pattern.getImage().setBufferedImage(bufferedImage);
+            else pattern.setImage(new Image(bufferedImage));
         }
 
         public Pattern build() {
             Pattern pattern = makeNewPattern();
             if (name != null) pattern.name = name;
-            setBImageIfAvailable(pattern);
+            createAndSetImage(pattern);
             pattern.fixed = fixed;
             pattern.searchRegions = searchRegions;
             pattern.setKmeansColorProfiles = setKmeansColorProfiles;
