@@ -7,7 +7,6 @@ import io.github.jspinak.brobot.datatypes.primitives.location.Positions;
 import io.github.jspinak.brobot.datatypes.primitives.match.MatchHistory;
 import io.github.jspinak.brobot.datatypes.primitives.match.MatchSnapshot;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
-import io.github.jspinak.brobot.datatypes.state.NullState;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import io.github.jspinak.brobot.datatypes.state.stateObject.StateObject;
 import jakarta.persistence.*;
@@ -30,7 +29,7 @@ public class StateRegion implements StateObject {
     private String name = "";
     @OneToOne(cascade = CascadeType.ALL)
     private Region searchRegion = new Region();
-    private String ownerStateName = NullState.Name.NULL.toString();
+    private String ownerStateName = "null";
     private int staysVisibleAfterClicked = 100;
     private int probabilityExists = 100; // probability something can be acted on in this region
     private int timesActedOn = 0;
@@ -81,7 +80,7 @@ public class StateRegion implements StateObject {
     public static class Builder {
         private String name = "";
         private Region searchRegion = new Region();
-        private String ownerStateName = NullState.Name.NULL.toString();
+        private String ownerStateName = "null";
         private Position position = new Position(.5, .5);
 
         // Positions.Name: the border of the region to define

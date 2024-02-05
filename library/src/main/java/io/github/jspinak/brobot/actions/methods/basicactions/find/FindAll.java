@@ -67,10 +67,11 @@ public class FindAll {
         List<Match> matchesInRegion = new ArrayList<>();
         for (Match match : wordMatches) {
             if (matchProofer.isInSearchRegions(match, regions)) {
-                matchesInRegion.add(new Match.Builder()
-                        .setMatch(match)
-                        .setScene(scene)
-                        .build());
+                Match newMatch = new Match.Builder()
+                    .setMatch(match)
+                    .setScene(scene)
+                    .build();
+                matchesInRegion.add(newMatch);
             }
         }
         return matchesInRegion;

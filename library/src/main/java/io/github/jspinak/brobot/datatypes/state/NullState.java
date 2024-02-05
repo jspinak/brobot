@@ -1,6 +1,5 @@
 package io.github.jspinak.brobot.datatypes.state;
 
-import io.github.jspinak.brobot.database.api.StateService;
 import io.github.jspinak.brobot.datatypes.state.state.State;
 import io.github.jspinak.brobot.primatives.enums.StateEnum;
 import lombok.Getter;
@@ -11,8 +10,8 @@ import org.springframework.stereotype.Component;
  * (non State objects) to Actions. Simple objects are usually temporary
  * objects that are not associated with any State. These objects can still
  * be acted on by Actions, but no State will become active when they are found.
+ * This state should not be in the state repository.
  */
-@Component
 @Getter
 public class NullState {
 
@@ -22,11 +21,7 @@ public class NullState {
         NULL
     }
 
-    private final State state = new State.Builder(Name.NULL)
+    private final State state = new State.Builder("null")
             .build();
-
-    public NullState(StateService stateService) {
-        stateService.save(state);
-    }
 
 }

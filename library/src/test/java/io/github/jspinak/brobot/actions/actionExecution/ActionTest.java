@@ -54,6 +54,9 @@ class ActionTest {
     @Test
     void firstMatchHasText() {
         Matches matches = getWordMatches();
-        assertNotEquals("", matches.getMatchList().get(0).getText());
+        assertNotEquals(0, matches.size());
+        String text = matches.getMatchList().get(0).getText();
+        System.out.println("Text = " + text);
+        assertNotEquals("", text);
     }
 }

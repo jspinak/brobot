@@ -39,15 +39,17 @@ public class FindStates {
                 sceneCombinationList, objectCollections, matches.getActionOptions());
         sceneCombinations.addSceneCombinations(sceneCombinationList);
         populateTempStateRepo.createAndAddStatesForSceneToStateRepo(objectCollections);
-        tempStateRepo.getAllStateImages().forEach(stateImage -> matches.add(
-                new Match.Builder()
-                        .setRegion(stateImage.getLargestDefinedFixedRegionOrNewRegion())
-                        .setStateObjectData(stateImage)
-                        .setSearchImage(stateImage.getPatterns().get(0).getBImage())
-                        .setName(stateImage.getName())
-                        .setSimScore(.99)
-                        .build()
-        ));
+        tempStateRepo.getAllStateImages().forEach(stateImage -> {
+            Match matchFromPattern = new Match.Builder()
+                .setRegion(stateImage.getLargestDefinedFixedRegionOrNewRegion())
+                .setBufferedImage(stateImage.getPatterns().getFirst().getBImage()) // must be an exact match
+                .setStateObjectData(stateImage)
+                .setSearchImage(stateImage.getPatterns().getFirst().getBImage())
+                .setName(stateImage.getName())
+                .setSimScore(.99)
+                .build();
+            matches.add(matchFromPattern);
+        });
     }
 
 }

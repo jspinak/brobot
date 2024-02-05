@@ -12,8 +12,6 @@ import lombok.Setter;
 
 import java.util.Optional;
 
-import static io.github.jspinak.brobot.datatypes.state.NullState.Name.NULL;
-
 /**
  * Location can be an absolute position (x,y) on the screen,
  * or a relative position (%w, %h) of a Region.
@@ -79,7 +77,8 @@ public class Location {
 
     public Location(Region region) {
         this.region = region;
-        setPosition(region.sikuli().getTarget().x, region.sikuli().getTarget().y);
+        position = new Position(.5, .5);
+        definedByXY = false;
     }
 
     public void setPosition(int newX, int newY) {
@@ -223,7 +222,7 @@ public class Location {
 
     public StateLocation asStateLocationInNullState() {
         return new StateLocation.Builder()
-                .inState(NULL.toString())
+                .inState("null")
                 .withLocation(this)
                 .build();
     }
@@ -231,7 +230,7 @@ public class Location {
     public ObjectCollection asObjectCollection() {
         StateLocation stateLocation = new StateLocation.Builder()
                 .withLocation(this)
-                .inState(NULL.toString())
+                .inState("null")
                 .setPosition(Positions.Name.TOPLEFT)
                 .build();
         return new ObjectCollection.Builder()
