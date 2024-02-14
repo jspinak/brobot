@@ -76,7 +76,7 @@ public class QuickCluster {
     }
 
     private void putLocationInFrequencyMap(Location location, Region reg, Map<Integer, Integer> freqMap) {
-        Optional<Integer> gridNumberOpt = reg.getGridNumber(location);
+        Optional<Integer> gridNumberOpt = reg.getGridNumber(location.sikuli());
         if (gridNumberOpt.isEmpty() || gridNumberOpt.get() == -1) return;
         freqMap.merge(gridNumberOpt.get(), 1, Integer::sum);
     }

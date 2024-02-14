@@ -26,6 +26,13 @@ public class StateObjectData {
         this.ownerStateName = stateObject.getOwnerStateName();
     }
 
+    public StateObjectData() {
+        stateObjectId = 0L;
+        objectType = StateObject.Type.IMAGE;
+        stateObjectName = "";
+        ownerStateName = "";
+    }
+
     @Override
     public String toString() {
         return "StateObject: " + stateObjectName + ", " + objectType + ", ownerState=" + ownerStateName + ", id=" + stateObjectId;

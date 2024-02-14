@@ -2,6 +2,7 @@ package io.github.jspinak.brobot.datatypes.state.state;
 
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.Scene;
 import io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.buildStateStructure.StateIllustration;
+import io.github.jspinak.brobot.datatypes.primitives.image.Image;
 import io.github.jspinak.brobot.datatypes.primitives.match.MatchHistory;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.datatypes.primitives.location.Location;
@@ -37,7 +38,7 @@ public class State {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
+    private Long id = 0L;
 
     private String nameAsString = "";
 
@@ -308,6 +309,11 @@ public class State {
 
         public Builder withScenes(List<Scene> scenes) {
             this.scenes.addAll(scenes);
+            return this;
+        }
+
+        public Builder addScenes(Scene... scenes) {
+            this.scenes.addAll(List.of(scenes));
             return this;
         }
 

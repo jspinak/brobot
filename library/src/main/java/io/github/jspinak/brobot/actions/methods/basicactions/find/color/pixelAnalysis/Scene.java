@@ -1,6 +1,7 @@
 package io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis;
 
 import io.github.jspinak.brobot.datatypes.primitives.image.Image;
+import io.github.jspinak.brobot.datatypes.primitives.image.ImageResponse;
 import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.imageUtils.FilenameOps;
@@ -13,6 +14,7 @@ import java.awt.image.BufferedImage;
 
 import static java.awt.image.BufferedImage.TYPE_BYTE_BINARY;
 
+// todo: think about using Image instead. there's nothing that distinguishes Scene from Image.
 @Entity
 @Getter
 @Setter
@@ -49,6 +51,10 @@ public class Scene {
         Scene scene = new Scene(bufferedImage);
         scene.name = "empty scene";
         return scene;
+    }
+
+    public ImageResponse toImageResponse() {
+        return new ImageResponse(image);
     }
 
 }

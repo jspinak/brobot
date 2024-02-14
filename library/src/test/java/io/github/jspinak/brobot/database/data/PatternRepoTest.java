@@ -34,31 +34,31 @@ class PatternRepoTest {
     void testFindByName() {
         // Save a pattern to the repository
         Pattern pattern = new Pattern();
-        pattern.setName("TestPattern");
+        pattern.getPatternData().setName("TestPattern");
         patternRepo.save(pattern);
 
         // Find the pattern by name
-        Optional<Pattern> foundPatternOptional = patternRepo.findByName("TestPattern");
+        List<Pattern> foundPatternList = patternRepo.findByPatternDataName("TestPattern");
 
         // Assert that the pattern is found and has the correct name
-        assertThat(foundPatternOptional).isPresent();
-        Pattern foundPattern = foundPatternOptional.get();
-        assertThat(foundPattern.getName()).isEqualTo("TestPattern");
+        assertFalse(foundPatternList.isEmpty());
+        Pattern foundPattern = foundPatternList.getFirst();
+        assertThat(foundPattern.getPatternData().getName()).isEqualTo("TestPattern");
     }
 
     @Test
     public void testFindByNameContainingIgnoreCase() {
         // Save patterns to the repository
         Pattern pattern1 = new Pattern();
-        pattern1.setName("TestPattern1");
+        pattern1.getPatternData().setName("TestPattern1");
         patternRepo.save(pattern1);
 
         Pattern pattern2 = new Pattern();
-        pattern2.setName("testPattern2");
+        pattern2.getPatternData().setName("testPattern2");
         patternRepo.save(pattern2);
 
         // Find patterns by name containing "test"
-        List<Pattern> foundPatterns = patternRepo.findByNameContainingIgnoreCase("test");
+        List<Pattern> foundPatterns = patternRepo.findByPatternDataNameContainingIgnoreCase("test");
 
         // Assert that both patterns are found
         assertThat(foundPatterns.size()).isEqualTo(2);
