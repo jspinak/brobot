@@ -4,8 +4,8 @@ import io.github.jspinak.brobot.database.data.PatternRepo;
 import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class PatternService {
@@ -16,19 +16,16 @@ public class PatternService {
         this.patternRepo = patternRepo;
     }
 
-    public Pattern getPattern(String name) {
-        Pattern pattern = patternRepo.findByName(name).orElse(null);
-        if (pattern != null) pattern.setBufferedImageFromBytes();
-        return pattern;
+    public List<Pattern> getPatterns(String name) {
+        return patternRepo.findByPatternDataName(name).stream()
+                .peek(Pattern::setBufferedImageFromBytes)
+                .collect(Collectors.toList());
     }
 
     public List<Pattern> getAllPatterns() {
-        List<Pattern> patterns = new ArrayList<>();
-        patternRepo.findAll().forEach(patterns::add);
-        for (Pattern pattern : patterns) {
-            pattern.setBufferedImageFromBytes();
-        }
-        return patterns;
+        return patternRepo.findAll().stream()
+                .peek(Pattern::setBufferedImageFromBytes)
+                .collect(Collectors.toList());
     }
 
     public void savePatterns(Pattern... patterns) {

@@ -1,18 +1,19 @@
 package io.github.jspinak.brobot.datatypes.primitives.region;
 
-import io.github.jspinak.brobot.datatypes.primitives.location.Location;
 import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.StateRegion;
+import io.github.jspinak.brobot.imageUtils.ScreenOps;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import lombok.Getter;
 import lombok.Setter;
 import org.bytedeco.opencv.opencv_core.Rect;
+import org.sikuli.script.Location;
 import org.sikuli.script.Screen;
 
-import java.io.Serializable;
 import java.util.*;
 
 /**
@@ -20,20 +21,21 @@ import java.util.*;
  */
 @Entity
 @Setter
-public class Region implements Comparable<Region>, Serializable {
+@Getter
+public class Region implements Comparable<Region> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    int x;
-    int y;
-    int w;
-    int h;
+    private int x;
+    private int y;
+    private int w;
+    private int h;
 
     public Region() {
         Screen screen = new Screen();
-        setXYWH(screen.x, screen.y, screen.w, screen.h);
+        setXYWH(0, 0, screen.w, screen.h);
     }
 
     public Region(int x, int y, int w, int h) {
@@ -188,7 +190,7 @@ public class Region implements Comparable<Region>, Serializable {
     }
 
     public boolean contains(Location l) {
-        return sikuli().contains(l.getSikuliLocation());
+        return sikuli().contains(l);
     }
 
     public boolean containsX(Location l) {

@@ -8,7 +8,7 @@ import io.github.jspinak.brobot.datatypes.primitives.location.Positions;
 import io.github.jspinak.brobot.datatypes.primitives.match.MatchHistory;
 import io.github.jspinak.brobot.datatypes.primitives.match.MatchSnapshot;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.SearchRegions;
+import io.github.jspinak.brobot.datatypes.primitives.region.SearchRegions;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.imageUtils.BufferedImageOps;
 import jakarta.persistence.*;
@@ -47,6 +47,26 @@ public class Pattern {
 
     private String name;
     /*
+    An image that should always appear in the same location has fixed==true.
+    */
+    private boolean fixed = false;
+    @OneToOne(cascade = CascadeType.ALL)
+    private SearchRegions searchRegions = new SearchRegions();
+    private boolean setKmeansColorProfiles = false; // this is an expensive operation and should be done only when needed
+    //@Embedded
+    //private KmeansProfilesAllSchemas kmeansProfilesAllSchemas = new KmeansProfilesAllSchemas();
+    //@Embedded
+    //private ColorCluster colorCluster = new ColorCluster();
+    @OneToOne(cascade = CascadeType.ALL)
+    private MatchHistory matchHistory = new MatchHistory();
+    private int index; // a unique identifier used for classification matrices
+    private boolean dynamic = false; // dynamic images cannot be found using pattern matching
+    @Embedded
+    private Position position = new Position(.5,.5); // use to convert a match to a location
+    @OneToOne(cascade = CascadeType.ALL)
+    private Anchors anchors = new Anchors(); // for defining regions using this object as input
+
+    /*
     The SikuliX Image object is part of Pattern. It loads an image from file or the web into memory
     and provides a BufferedImage object. There are, however, occasions requiring an image to be
     captured only in memory. For example, when Brobot creates a model of the environment, the images
@@ -63,36 +83,12 @@ public class Pattern {
      */
     @OneToOne(cascade = CascadeType.ALL)
     private Image image;
-    /*
-    An image that should always appear in the same location has fixed==true.
-     */
-    private boolean fixed = false;
-    @OneToOne(cascade = CascadeType.ALL)
-    private SearchRegions searchRegions = new SearchRegions();
-    private boolean setKmeansColorProfiles = false; // this is an expensive operation and should be done only when needed
-    //@Embedded
-    //private KmeansProfilesAllSchemas kmeansProfilesAllSchemas = new KmeansProfilesAllSchemas();
-    //@Embedded
-    //private ColorCluster colorCluster = new ColorCluster();
-    @OneToOne(cascade = CascadeType.ALL)
-    private MatchHistory matchHistory = new MatchHistory();
-    private int index; // a unique identifier used for classification matrices
-    private boolean dynamic = false; // dynamic images cannot be found using pattern matching
-    /**
-     * Position is used to convert a Match to a Location. The super class has offset.x and offset.y, which
-     * point to a location as an offset from the match's center. This is ok when you know the size of the
-     * image but less convenient for working with general areas of the image (i.e. top left, bottom right).
-     */
-    @Embedded
-    private Position position = new Position(.5,.5); // use to convert a match to a location
-    @OneToOne(cascade = CascadeType.ALL)
-    private Anchors anchors = new Anchors(); // for defining regions using this object as input
 
     public Pattern(String imgPath) {
-        this.imgpath = imgPath;
+        setImgpath(imgPath);
         setNameFromFilenameIfEmpty(imgPath);
         // using SikuliX to get the BufferedImage would make it OS-independent
-        this.image = new Image(BufferedImageOps.getBuffImgFromFile(imgPath));
+        this.image = new Image(BufferedImageOps.getBuffImgFromFile(imgPath), name);
     }
 
     public Pattern(BufferedImage bimg) {
@@ -101,12 +97,17 @@ public class Pattern {
 
     public Pattern(Image image) {
         this.image = image;
-        this.name = image.getName();
+        setName(image.getName());
     }
 
     public Pattern(Mat mat) {
         image = new Image(mat);
     }
+
+    /**
+     * Creates a generic Pattern without an associated image.
+     */
+    public Pattern() {}
 
     /**
      * Converts the BufferedImage in Image to a BGR JavaCV Mat.
@@ -149,17 +150,11 @@ public class Pattern {
         image.setBufferedImageFromBytes();
     }
 
-    /**
-     * Creates a generic Pattern without an associated image. Useful for creating Match objects
-     * for operations not requiring a Pattern.
-     */
-    public Pattern() {}
-
     private void setNameFromFilenameIfEmpty(String filename) {
         if (filename == null) return;
         if (name == null || name.isEmpty()) {
             File file = new File(filename); // Create a File object from the image path
-            name = file.getName().replaceFirst("[.][^.]+$", ""); // the file name without extension
+            setName(file.getName().replaceFirst("[.][^.]+$", "")); // the file name without extension
         }
     }
 
@@ -225,7 +220,7 @@ public class Pattern {
     }
 
     public boolean isDefined() {
-        return getSearchRegions().isDefined(fixed);
+        return searchRegions.isDefined(fixed);
     }
 
     public boolean isEmpty() {
@@ -384,22 +379,22 @@ public class Pattern {
             if (image != null) pattern.setImage(image);
             if (bufferedImage == null) return;
             if (pattern.getImage() != null) pattern.getImage().setBufferedImage(bufferedImage);
-            else pattern.setImage(new Image(bufferedImage));
+            else pattern.setImage(new Image(bufferedImage, pattern.getName()));
         }
 
         public Pattern build() {
             Pattern pattern = makeNewPattern();
-            if (name != null) pattern.name = name;
+            if (name != null) pattern.setName(name);
             createAndSetImage(pattern);
-            pattern.fixed = fixed;
-            pattern.searchRegions = searchRegions;
-            pattern.setKmeansColorProfiles = setKmeansColorProfiles;
-            //pattern.kmeansProfilesAllSchemas = kmeansProfilesAllSchemas;
-            pattern.matchHistory = matchHistory;
-            pattern.index = index;
-            pattern.dynamic = dynamic;
-            pattern.position = position;
-            pattern.anchors = anchors;
+            pattern.setFixed(fixed);
+            pattern.setSearchRegions(searchRegions);
+            pattern.setSetKmeansColorProfiles(setKmeansColorProfiles);
+            //pattern.setKmeansProfilesAllSchemas(kmeansProfilesAllSchemas);
+            pattern.setMatchHistory(matchHistory);
+            pattern.setIndex(index);
+            pattern.setDynamic(dynamic);
+            pattern.setPosition(position);
+            pattern.setAnchors(anchors);
             return pattern;
         }
     }

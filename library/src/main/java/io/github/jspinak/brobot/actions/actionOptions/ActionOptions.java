@@ -7,7 +7,7 @@ import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.StateRegion;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.SearchRegions;
+import io.github.jspinak.brobot.datatypes.primitives.region.SearchRegions;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -497,6 +497,7 @@ public class ActionOptions {
         private MatchFusionMethod fusionMethod = MatchFusionMethod.NONE;
         private int maxFusionDistanceX = 5;
         private int maxFusionDistanceY = 5;
+        private int sceneToUseForCaptureAfterFusingMatches = 0;
 
         public Builder() {}
         //public Builder(Action action) { this.action = action; }
@@ -825,6 +826,11 @@ public class ActionOptions {
             return this;
         }
 
+        public Builder setSceneToUseForCaptureAfterFusingMatches(int sceneIndex) {
+            this.sceneToUseForCaptureAfterFusingMatches = sceneIndex;
+            return this;
+        }
+
         public ActionOptions build() {
             ActionOptions actionOptions = new ActionOptions();
             actionOptions.action = action;
@@ -888,6 +894,7 @@ public class ActionOptions {
             actionOptions.fusionMethod = fusionMethod;
             actionOptions.maxFusionDistanceX = maxFusionDistanceX;
             actionOptions.maxFusionDistanceY = maxFusionDistanceY;
+            actionOptions.sceneToUseForCaptureAfterFusingMatches = sceneToUseForCaptureAfterFusingMatches;
             return actionOptions;
         }
     }

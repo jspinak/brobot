@@ -30,6 +30,11 @@ public class Image {
         this.bufferedImage = bufferedImage;
     }
 
+    public Image(BufferedImage bufferedImage, String name) {
+        this.bufferedImage = bufferedImage;
+        this.name = name;
+    }
+
     public Image(Mat BGRmat) {
         this.bufferedImage = BufferedImageOps.fromMat(BGRmat);
     }

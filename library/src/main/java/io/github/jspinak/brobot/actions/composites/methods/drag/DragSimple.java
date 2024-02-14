@@ -74,7 +74,7 @@ public class DragSimple implements ActionInterface {
             return;
         }
         if (!objColl.getStateRegions().isEmpty()) {
-            Location loc = objColl.getStateRegions().get(0).getSearchRegion().getLocation();
+            Location loc = new Location(objColl.getStateRegions().get(0).getSearchRegion().getLocation());
             loc.setX(loc.getX() + actionOptions.getAddX());
             loc.setY(loc.getY() + actionOptions.getAddY());
             addMatch(loc, matches);
@@ -106,7 +106,7 @@ public class DragSimple implements ActionInterface {
         }
         if (objColl.getStateImages().size() == 1) objectIndexNeeded = 0;
         if (objColl.getStateRegions().size() > objectIndexNeeded) {
-            Location loc = objColl.getStateRegions().get(objectIndexNeeded).getSearchRegion().getLocation();
+            Location loc = new Location(objColl.getStateRegions().get(objectIndexNeeded).getSearchRegion().getLocation());
             loc.setX(loc.getX() + actionOptions.getDragToOffsetX());
             loc.setY(loc.getY() + actionOptions.getDragToOffsetY());
             addMatch(loc, matches);
