@@ -1,6 +1,8 @@
 package io.github.jspinak.brobot;
 
+import io.github.jspinak.brobot.imageUtils.ScreenOps;
 import org.sikuli.script.ImagePath;
+import org.sikuli.script.Screen;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
@@ -13,5 +15,9 @@ public class BrobotSpringBeanConfig {
         //System.setProperty("org.bytedeco.javacpp.logger.debug", "true");
         //new Pattern(); // loads OpenCV from SikuliX
         ImagePath.setBundlePath("images"); // Brobot's default bundle path
+        // set screen dimensions
+        Screen screen = new Screen();
+        ScreenOps.w = screen.w;
+        ScreenOps.h = screen.h;
     }
 }

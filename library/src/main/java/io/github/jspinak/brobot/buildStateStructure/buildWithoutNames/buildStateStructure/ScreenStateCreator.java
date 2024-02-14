@@ -182,7 +182,7 @@ public class ScreenStateCreator {
         for (Scene scene : scenes) {
             StateIllustration stateIllustration = stateIllustrator.drawState(newState, scene.getImage().getMatBGR());
             newState.addIllustrations(stateIllustration);
-            matVisualize.writeMatToHistory(stateIllustration.getIllustratedScreenshot(), "illustration of state " + newState.getName());
+            matVisualize.writeMatToHistory(stateIllustration.getIllustratedScreenshotAsMat(), "illustration of state " + newState.getName());
         }
         return newState;
     }

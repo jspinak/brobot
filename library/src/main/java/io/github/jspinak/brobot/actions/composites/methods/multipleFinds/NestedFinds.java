@@ -6,7 +6,7 @@ import io.github.jspinak.brobot.actions.methods.basicactions.find.Find;
 import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.SearchRegions;
+import io.github.jspinak.brobot.datatypes.primitives.region.SearchRegions;
 import io.github.jspinak.brobot.reports.Report;
 import org.springframework.stereotype.Component;
 

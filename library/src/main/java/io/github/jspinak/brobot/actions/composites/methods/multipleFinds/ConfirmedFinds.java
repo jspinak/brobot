@@ -1,13 +1,12 @@
 package io.github.jspinak.brobot.actions.composites.methods.multipleFinds;
 
 import io.github.jspinak.brobot.actions.actionExecution.ActionInterface;
-import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.Find;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.GetSceneAnalysisCollection;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.SceneAnalysisCollection;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.SearchRegions;
+import io.github.jspinak.brobot.datatypes.primitives.region.SearchRegions;
 import io.github.jspinak.brobot.reports.Report;
 import org.springframework.stereotype.Component;
 
