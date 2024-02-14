@@ -5,7 +5,6 @@ import jakarta.persistence.Embeddable;
 import jakarta.persistence.Lob;
 
 import java.awt.image.BufferedImage;
-import java.io.Serializable;
 
 /**
  * The Image Data Transfer Object converts an Image to a byte array when storing in a database,

@@ -1,11 +1,9 @@
-package io.github.jspinak.brobot.datatypes.state.stateObject.stateImage;
+package io.github.jspinak.brobot.datatypes.primitives.region;
 
-import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.io.Serializable;
 import java.util.*;
 
 /**
@@ -16,7 +14,7 @@ import java.util.*;
 @Entity
 @Getter
 @Setter
-public class SearchRegions implements Serializable {
+public class SearchRegions {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

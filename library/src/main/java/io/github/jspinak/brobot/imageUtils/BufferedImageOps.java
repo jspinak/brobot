@@ -4,11 +4,11 @@ import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfByte;
 import org.opencv.imgcodecs.Imgcodecs;
-import org.sikuli.script.Image;
 import org.sikuli.script.Pattern;
 import org.sikuli.script.Screen;
 import org.sikuli.script.ScreenImage;
 import org.springframework.stereotype.Component;
+import java.util.Base64;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -133,6 +133,23 @@ public class BufferedImageOps {
         height = Math.min(originalImage.getHeight() - y, height);
         // Get the sub-image using getSubimage method
         return originalImage.getSubimage(x, y, width, height);
+    }
+
+    /**
+     * Helper method to convert BufferedImage to Base64 String
+     * @param image the BufferedImage to covert
+     * @return a Base64 String representing the BufferedImage
+     */
+    public static String encodeImage(BufferedImage image) {
+        try {
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            ImageIO.write(image, "png", bos);
+            byte[] imageBytes = bos.toByteArray();
+            return Base64.getEncoder().encodeToString(imageBytes);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
 }
