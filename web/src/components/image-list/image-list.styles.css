@@ -1,0 +1,14 @@
+.image-list {
+    width: flex;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); 
+    grid-gap: 10px;
+    background-color: darkgray;
+    padding: 10px;
+}
+
+.image-list img {
+    max-width: 100%; /* Set maximum width to 100% of the container */
+    max-height: 100%; /* Set maximum height to 100% of the container */
+}
