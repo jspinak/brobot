@@ -2,10 +2,12 @@ package io.github.jspinak.brobot.datatypes.primitives.location;
 
 import jakarta.persistence.Embeddable;
 import lombok.Getter;
-import java.io.Serializable;
 
 /**
- * Position is defined by (%w, %h) and can be used to get a location in a Region.
+ * Position is defined by (%w, %h) and can be used to get a location in a Region or Match.
+ * The SikuliX class has offset.x and offset.y, which
+ *    point to a location as an offset from the match's center. This is ok when you know the size of the
+ *    image but less convenient for working with general areas of an image (i.e. top left, bottom right).
  */
 @Embeddable
 @Getter

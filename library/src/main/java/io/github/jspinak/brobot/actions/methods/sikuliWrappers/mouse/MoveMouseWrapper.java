@@ -13,10 +13,10 @@ import org.springframework.stereotype.Component;
 public class MoveMouseWrapper {
 
     private boolean sikuliMove(Location location) {
-        org.sikuli.script.Location sikuliLocation = location.getSikuliLocation();
+        org.sikuli.script.Location sikuliLocation = location.sikuli();
         Report.print("move mouse to "+sikuliLocation+" ");
         //return new Region().mouseMove(location.getSikuliLocation()) != 0; // this can cause the script to freeze for unknown reasons
-        return location.getSikuliLocation().hover() != null;
+        return location.sikuli().hover() != null;
     }
 
     public boolean move(Location location) {

@@ -185,17 +185,17 @@ public class Location {
         return new org.sikuli.script.Location(locX, locY);
     }
 
-    public org.sikuli.script.Location getSikuliLocation() {
+    public org.sikuli.script.Location sikuli() {
         if (isDefinedByXY()) return getSikuliLocationFromXY();
         return getSikuliLocationFromRegion();
     }
 
     public int getX() {
-        return getSikuliLocation().x;
+        return sikuli().x;
     }
 
     public int getY() {
-        return getSikuliLocation().y;
+        return sikuli().y;
     }
 
     public int getRegionW() {

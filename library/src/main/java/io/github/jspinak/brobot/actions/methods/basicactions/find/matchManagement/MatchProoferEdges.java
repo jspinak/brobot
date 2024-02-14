@@ -40,10 +40,10 @@ public class MatchProoferEdges implements MatchProofer {
         Location bL = new Location(match.x(), match.y() + match.h());
         Location bR = new Location(match.x()+match.w(), match.y()+match.h());
         for (Region region : regions) {
-            if (region.contains(tL)) topLeft = true;
-            if (region.contains(tR)) topRight = true;
-            if (region.contains(bL)) bottomLeft = true;
-            if (region.contains(bR)) bottomRight = true;
+            if (region.contains(tL.sikuli())) topLeft = true;
+            if (region.contains(tR.sikuli())) topRight = true;
+            if (region.contains(bL.sikuli())) bottomLeft = true;
+            if (region.contains(bR.sikuli())) bottomRight = true;
             if (topLeft && topRight && bottomLeft && bottomRight) return true;
         }
         return false;
