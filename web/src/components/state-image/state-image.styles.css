@@ -1,0 +1,25 @@
+.state-image {
+    display: flex;
+    flex-direction: column;
+    background-color: #ffffff;
+    border: 1px solid grey;
+    border-radius: 5pm;
+    padding: 10px;
+    cursor: pointer;
+    -moz-osx-font-smoothing: grayscale;
+    backface-visibility: hidden;
+    transform: translateZ(0);
+    transition: transform 0.25s ease-out;
+}
+
+.state-image:hover {
+    transform: scale(1.05);
+}
+
+.state-image h1 {
+    margin-top: -8px; /* Adjust the vertical spacing between h1 elements */
+    font-size: 12px; /* Adjust the font size of h1 elements */
+    font-weight: normal; /* Optionally, adjust the font weight of h1 elements */
+    text-align: left;
+    white-space: nowrap;
+}
