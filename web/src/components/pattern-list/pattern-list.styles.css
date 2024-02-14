@@ -1,0 +1,7 @@
+.pattern-list {
+    width: flex;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); /* Adjust column width as needed */
+    grid-gap: 15px; /* adds space between patterns */
+}
