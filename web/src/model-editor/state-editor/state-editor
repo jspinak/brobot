@@ -1,0 +1,13 @@
+/* Allow for removing images from the state, adding images from file to the state with a dialog box,
+selecting an image as a transition and selecting the state transitioned to, adding inputs to be used
+during testing to a text box, which other states could be hidden by this state, adding states to 
+other states, removing states.
+
+how do you store the text box inputs in java? StateImage objects can include fields such as textInputs
+to be used during testing. testInputs would be selected randomly. for targeted text inputs, you 
+could write logic in the client app. textInputs and numberInputs. 
+
+how to deal with adding screenshots to the model? there may be states that have been merged or 
+deleted or images that have been removed from the model that will appear again in the screenshots.
+this is a function that can come later since it's not necessary for a MVP. 
+*/
