@@ -11,6 +11,7 @@ import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImag
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import io.github.jspinak.brobot.manageStates.StateMemory;
+import io.github.jspinak.brobot.stringUtils.TextSelector;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -51,11 +52,12 @@ public class Find implements ActionInterface {
     private final OffsetOps offsetOps;
     private final MatchFusion matchFusion;
     private final SetMatTextPattern setMatTextPattern;
+    private final TextSelector textSelector;
 
     public Find(FindFunctions findFunctions, StateMemory stateMemory,
                 AddNonImageObjects addNonImageObjects, AdjustMatches adjustMatches,
                 SetAllProfiles setAllProfiles, OffsetOps offsetOps, MatchFusion matchFusion,
-                SetMatTextPattern setMatTextPattern) {
+                SetMatTextPattern setMatTextPattern, TextSelector textSelector) {
         this.findFunctions = findFunctions;
         this.stateMemory = stateMemory;
         this.addNonImageObjects = addNonImageObjects;
@@ -64,6 +66,7 @@ public class Find implements ActionInterface {
         this.offsetOps = offsetOps;
         this.matchFusion = matchFusion;
         this.setMatTextPattern = setMatTextPattern;
+        this.textSelector = textSelector;
     }
 
     /**
@@ -90,6 +93,7 @@ public class Find implements ActionInterface {
         matches.getMatchList().forEach(m -> adjustMatches.adjust(m, actionOptions));
         offsetOps.addOffsetAsLastMatch(matches, actionOptions);
         setMatTextPattern.set(matches);
+        matches.setSelectedText(textSelector.getString(TextSelector.Method.MOST_SIMILAR, matches.getText()));
     }
 
     private void createColorProfilesWhenNecessary(ActionOptions actionOptions, ObjectCollection... objectCollections) {

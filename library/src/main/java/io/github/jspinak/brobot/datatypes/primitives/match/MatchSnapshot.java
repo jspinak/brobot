@@ -242,8 +242,6 @@ public class MatchSnapshot {
 
         public Builder setText(String text) {
             this.text = text;
-            if (actionOptions.getAction() == ActionOptions.Action.FIND)
-                actionOptions.setAction(ActionOptions.Action.GET_TEXT);
             return this;
         }
 
