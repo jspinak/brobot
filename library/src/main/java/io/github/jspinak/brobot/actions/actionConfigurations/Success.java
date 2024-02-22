@@ -25,7 +25,6 @@ public class Success {
         criteria.put(ActionOptions.Action.DEFINE, matches -> matches.getDefinedRegion().isDefined());
         criteria.put(ActionOptions.Action.TYPE, matches -> true);
         criteria.put(ActionOptions.Action.MOVE, matches -> !matches.isEmpty());
-        criteria.put(ActionOptions.Action.GET_TEXT, matches -> !matches.getText().isEmpty());
         criteria.put(ActionOptions.Action.HIGHLIGHT, matches -> !matches.isEmpty());
         criteria.put(ActionOptions.Action.SCROLL_MOUSE_WHEEL, matches -> true);
         criteria.put(ActionOptions.Action.MOUSE_DOWN, matches -> true);

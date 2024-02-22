@@ -43,7 +43,6 @@ public class BasicAction {
         actions.put(TYPE, typeText);
         actions.put(MOVE, moveMouse);
         actions.put(VANISH, waitVanish);
-        actions.put(GET_TEXT, find);
         actions.put(HIGHLIGHT, highlight);
         actions.put(SCROLL_MOUSE_WHEEL, scrollMouseWheel);
         actions.put(KEY_DOWN, keyDown);

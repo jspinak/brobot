@@ -54,7 +54,7 @@ public class SetMatTextPattern {
     }
 
     private boolean isOkToReset(ActionOptions actionOptions) {
-        return actionOptions.getAction() == ActionOptions.Action.GET_TEXT ||
+        return actionOptions.getAction() == ActionOptions.Action.FIND ||
                 actionOptions.getFind() == ActionOptions.Find.ALL_WORDS;
                 /*
                 The Pattern disappears when match objects are fused, but this will be caught by match.getText() == null

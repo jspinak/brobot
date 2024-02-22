@@ -3,9 +3,7 @@ package io.github.jspinak.brobot.actions.methods.sikuliWrappers.text;
 import io.github.jspinak.brobot.actions.BrobotSettings;
 import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
-import io.github.jspinak.brobot.imageUtils.BufferedImageOps;
 import io.github.jspinak.brobot.mock.MockText;
-import org.bytedeco.opencv.opencv_core.Mat;
 import org.sikuli.script.OCR;
 import org.springframework.stereotype.Component;
 
@@ -20,11 +18,9 @@ import java.awt.image.BufferedImage;
 public class GetTextWrapper {
 
     private final MockText mockText;
-    private final BufferedImageOps bufferedImageOps;
 
-    public GetTextWrapper(MockText mockText, BufferedImageOps bufferedImageOps) {
+    public GetTextWrapper(MockText mockText) {
         this.mockText = mockText;
-        this.bufferedImageOps = bufferedImageOps;
     }
 
     /*
@@ -43,7 +39,6 @@ public class GetTextWrapper {
         if (str.isEmpty()) return;
         matches.addString(str);
         match.setText(str);
-        matches.getDanglingSnapshots().setString(match, str);
     }
 
     public String getTextFromMatch(Match match) {
