@@ -1,6 +1,7 @@
 import ImageList from '../image-list/image-list.component';
 import Pattern from '../pattern/pattern.component';
 import StateImageSet from '../state-image-set/state-image-set.component';
+import StringList from '../helper-functions/string-list.component';
 import './state.styles.css';
 
 const State = ({state}) => {
@@ -14,6 +15,7 @@ const State = ({state}) => {
             <h1>id: {id}</h1>
             <ImageList images={scenes} title="scenes"/>
             <ImageList images={illustrations} title={"illustrations"}/>
+            <StringList strings={canHide} title={"can hide"}/>
             <StateImageSet stateImages={stateImages} />
         </div>
     )
