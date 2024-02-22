@@ -63,7 +63,8 @@ public class ActionOptionsResponse {
     private boolean highlightAllAtOnce = false;
     private double highlightSeconds = 1;
     private String highlightColor = "red";
-    private ActionOptions.GetTextUntil getTextUntil = ActionOptions.GetTextUntil.TEXT_APPEARS;
+    private ActionOptions.GetTextUntil getTextUntil = ActionOptions.GetTextUntil.NONE;
+    private String textToAppearOrVanish = "";
     private double typeDelay = Settings.TypeDelay;
     private String modifiers = "";
     private ActionOptions.ScrollDirection scrollDirection = ActionOptions.ScrollDirection.UP;
@@ -128,6 +129,7 @@ public class ActionOptionsResponse {
         highlightSeconds = actionOptions.getHighlightSeconds();
         highlightColor = actionOptions.getHighlightColor();
         getTextUntil = actionOptions.getGetTextUntil();
+        textToAppearOrVanish = actionOptions.getTextToAppearOrVanish();
         typeDelay = actionOptions.getTypeDelay();
         modifiers = actionOptions.getModifiers();
         scrollDirection = actionOptions.getScrollDirection();

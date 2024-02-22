@@ -26,7 +26,6 @@ public class BrobotSettings {
     public static double mockTimeDrag = 0.3;
     public static double mockTimeClick = 0.05;
     public static double mockTimeMove = 0.1;
-    public static double mockTimeGetText = 0.1;
     public static double mockTimeFindHistogram = 0.3;
     public static double mockTimeFindColor = 0.3;
     public static double mockTimeClassify = 0.4;

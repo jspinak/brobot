@@ -28,7 +28,6 @@ public class ActionDurations {
         actionDurations.put(ActionOptions.Action.CLICK, BrobotSettings.mockTimeClick);
         actionDurations.put(ActionOptions.Action.DRAG, BrobotSettings.mockTimeDrag);
         actionDurations.put(ActionOptions.Action.MOVE, BrobotSettings.mockTimeMove);
-        actionDurations.put(ActionOptions.Action.GET_TEXT, BrobotSettings.mockTimeGetText);
         actionDurations.put(ActionOptions.Action.CLASSIFY, BrobotSettings.mockTimeClassify);
     }
 

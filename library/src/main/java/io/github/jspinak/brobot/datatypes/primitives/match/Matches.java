@@ -1,6 +1,5 @@
 package io.github.jspinak.brobot.datatypes.primitives.match;
 
-import io.github.jspinak.brobot.actions.BrobotSettings;
 import io.github.jspinak.brobot.actions.actionExecution.actionLifecycle.ActionLifecycle;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.SceneAnalysis;
@@ -82,8 +81,6 @@ public class Matches {
     private List<Region> definedRegions = new ArrayList<>();
     private int maxMatches = -1; // not used when <= 0
     @Transient
-    private DanglingSnapshots danglingSnapshots = new DanglingSnapshots();
-    @Transient
     private SceneAnalysisCollection sceneAnalysisCollection = new SceneAnalysisCollection();
     @Transient
     private Mat mask; // for motion detection and other pixel-based analysis
@@ -125,7 +122,6 @@ public class Matches {
         activeStates.addAll(matches.activeStates);
         duration = duration.plus(matches.duration);
         sceneAnalysisCollection.merge(matches.sceneAnalysisCollection);
-        danglingSnapshots.addAllSnapshots(matches.getDanglingSnapshots());
         mask = matches.mask;
     }
 
@@ -213,24 +209,12 @@ public class Matches {
         matchList.forEach(m -> m.setTimesActedOn(timesActedOn));
     }
 
-    public void setDuration(Duration duration) {
-        this.duration = duration;
-        danglingSnapshots.setDuration((double) duration.getSeconds());
-    }
-
     public void sortByMatchScoreDecending() {
         matchList.sort(Comparator.comparingDouble(Match::getScore));
     }
 
     public void sortBySizeDecending() {
         matchList.sort(Comparator.comparing(Match::size).reversed());
-    }
-
-    public void saveSnapshots() {
-        if (BrobotSettings.saveSnapshots && !BrobotSettings.mock) {
-            danglingSnapshots.setSuccess(success);
-            danglingSnapshots.save();
-        }
     }
 
     public ObjectCollection asObjectCollection() {
