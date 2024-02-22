@@ -40,7 +40,6 @@ public class ActionOptions {
      * TYPE sends keyboard input
      * MOVE moves the mouse
      * VANISH is successful when an Image or State disappears
-     * GET_TEXT reads text from a Region
      * HIGHLIGHT highlights a Match, Region, or Location
      * SCROLL_MOUSE_WHEEL
      * MOUSE_DOWN
@@ -54,7 +53,7 @@ public class ActionOptions {
      * DRAG
      */
     public enum Action {
-        FIND, CLICK, DEFINE, TYPE, MOVE, VANISH, GET_TEXT, HIGHLIGHT, SCROLL_MOUSE_WHEEL,
+        FIND, CLICK, DEFINE, TYPE, MOVE, VANISH, HIGHLIGHT, SCROLL_MOUSE_WHEEL,
         MOUSE_DOWN, MOUSE_UP, KEY_DOWN, KEY_UP, CLASSIFY,
         CLICK_UNTIL, DRAG
     }
@@ -76,7 +75,10 @@ public class ActionOptions {
      * HISTOGRAM: match the histogram from the input image(s)
      * MOTION: find the locations of a moving object across screens
      * REGIONS_OF_MOTION: find all dynamic pixel regions from a series of screens
-     * ALL_WORDS: find all words and their regions
+     * ALL_WORDS: find all words and their regions. To find all text in a specific region and have that
+     *   text as part of one Match object, use a normal Find operation.
+     *   Normal find operations, when given a region, will return the text in that region.
+     *   This operation will find words and return each word and its region as a separate Match object.
      * SIMILAR_IMAGES: finds the images in the 2nd ObjectCollection that are above a similarity threshold
      *   to the images in the 1st ObjectCollection.
      * FIXED_PIXELS: returns a mask of all pixels that are the same and a corresponding Match list from the contours.
@@ -169,13 +171,19 @@ public class ActionOptions {
     private ClickUntil clickUntil = ClickUntil.OBJECTS_APPEAR;
 
     /*
+     * NONE: Text is not used as an exit condition. Important in versions >= 1.0.7 where text is saved in all Find operations.
      * TEXT_APPEARS: Keep searching for text until some text appears.
      * TEXT_VANISHES: Keep searching for text until it vanishes.
      */
     public enum GetTextUntil {
         NONE, TEXT_APPEARS, TEXT_VANISHES
     }
-    private GetTextUntil getTextUntil = GetTextUntil.TEXT_APPEARS;
+    private GetTextUntil getTextUntil = GetTextUntil.NONE;
+    /*
+    When empty, TEXT_APPEARS is achieved when any text appears and
+    TEXT_VANISHES is achieved when no text is found.
+     */
+    private String textToAppearOrVanish = "";
 
     /*
      * successEvaluation defines the success criteria for the Find operation.

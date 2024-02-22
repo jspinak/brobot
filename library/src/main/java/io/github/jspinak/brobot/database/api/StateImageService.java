@@ -2,6 +2,7 @@ package io.github.jspinak.brobot.database.api;
 
 import io.github.jspinak.brobot.database.data.StateImageRepo;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImageResponse;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -32,5 +33,17 @@ public class StateImageService {
 
     public void saveStateImages(List<StateImage> stateImages) {
         stateImages.forEach(stateImageRepo::save);
+    }
+
+    public void removeStateImage(StateImage stateImage) {
+        if (stateImageRepo.findByName(stateImage.getName()).isEmpty()) {
+            System.out.println("StateImage does not exist.");
+            return;
+        }
+        stateImageRepo.delete(stateImage);
+    }
+
+    public void removeStateImage(StateImageResponse stateImageResponse) {
+
     }
 }

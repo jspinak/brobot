@@ -13,6 +13,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import static io.github.jspinak.brobot.actions.actionOptions.ActionOptions.GetTextUntil.*;
+
 @Component
 public class ActionLifecycleManagement {
     private final Time time;
@@ -29,6 +31,10 @@ public class ActionLifecycleManagement {
         matches.getActionLifecycle().incrementCompletedRepetitions();
     }
 
+    public void incrementCompletedSequences(Matches matches) {
+        matches.getActionLifecycle().incrementCompletedSequences();
+    }
+
     public Duration getCurrentDuration(Matches matches) {
         LocalDateTime start = matches.getActionLifecycle().getStartTime();
         LocalDateTime end = time.now();
@@ -37,6 +43,11 @@ public class ActionLifecycleManagement {
 
     public int getCompletedRepetitions(Matches matches) {
         return matches.getActionLifecycle().getCompletedRepetitions();
+    }
+
+    public boolean isMoreSequencesAllowed(Matches matches) {
+        return matches.getActionOptions().getMaxTimesToRepeatActionSequence() >
+                matches.getActionLifecycle().getCompletedSequences();
     }
 
     /**
@@ -67,11 +78,31 @@ public class ActionLifecycleManagement {
         if (!timeLeftAndMoreRepsAllowed) return false;
         if (findFirstAndAtLeastOneMatchFound) return false;
         if (findEachFirstAndEachPatternFound) return false;
+        if (isTextConditionAchieved(matches)) return false;
         return true;
     }
 
     public boolean isFindFirstAndAtLeastOneMatchFound(Matches matches) {
         return !matches.isEmpty() && matches.getActionOptions().getFind() == ActionOptions.Find.FIRST;
+    }
+
+    private boolean matchContainsText(Match match, String text) {
+        if (text.isEmpty()) return !match.getText().isEmpty();
+        return match.getText().contains(text);
+    }
+
+    private boolean isTextConditionAchieved(Matches matches) {
+        ActionOptions.GetTextUntil condition = matches.getActionOptions().getGetTextUntil();
+        if (condition == NONE) return false; // text is not used as an exit condition
+        String textToFind = matches.getActionOptions().getTextToAppearOrVanish();
+        boolean containsText;
+        for (Match match : matches.getMatchList()) {
+            containsText = matchContainsText(match, textToFind);
+            if (condition == TEXT_APPEARS && containsText) return true;
+            if (condition == TEXT_VANISHES && containsText) return false;
+        }
+        if (condition == TEXT_APPEARS) return false;
+        return true;
     }
 
     public boolean isFindEachFirstAndEachPatternFound(Matches matches, int numberOfPatterns) {

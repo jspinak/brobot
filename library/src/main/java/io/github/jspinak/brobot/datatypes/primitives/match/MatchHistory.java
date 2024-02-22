@@ -8,8 +8,6 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.*;
-
-import static io.github.jspinak.brobot.actions.actionOptions.ActionOptions.Action.GET_TEXT;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -162,7 +160,7 @@ public class MatchHistory {
     }
 
     public String getRandomText() {
-        Optional<MatchSnapshot> textSnapshot = getRandomSnapshot(GET_TEXT);
+        Optional<MatchSnapshot> textSnapshot = getRandomSnapshot(ActionOptions.Action.FIND);
         if (textSnapshot.isEmpty()) return "";
         return textSnapshot.get().getText();
     }

@@ -1,8 +1,6 @@
 package io.github.jspinak.brobot.actions.actionExecution;
 
 import io.github.jspinak.brobot.actions.BrobotSettings;
-import io.github.jspinak.brobot.actions.actionConfigurations.ExitSequences;
-import io.github.jspinak.brobot.actions.actionConfigurations.Success;
 import io.github.jspinak.brobot.actions.actionExecution.actionLifecycle.ActionLifecycleManagement;
 import io.github.jspinak.brobot.actions.actionExecution.manageTrainingData.DatasetManager;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
@@ -37,8 +35,6 @@ import java.util.List;
 @Slf4j
 public class ActionExecution {
     private final Time time;
-    private final Success success;
-    private final ExitSequences exitSequences;
     private final IllustrateScreenshot illustrateScreenshot;
     private final SelectRegions selectRegions;
     private final ActionLifecycleManagement actionLifecycleManagement;
@@ -47,14 +43,11 @@ public class ActionExecution {
     private final ActionLogSender actionLogSender;
     private final MatchesInitializer matchesInitializer;
 
-    public ActionExecution(Time time, Success success, ExitSequences exitSequences,
-                           IllustrateScreenshot illustrateScreenshot, SelectRegions selectRegions,
+    public ActionExecution(Time time, IllustrateScreenshot illustrateScreenshot, SelectRegions selectRegions,
                            ActionLifecycleManagement actionLifecycleManagement, DatasetManager datasetManager,
                            ActionLogCreator actionLogCreator, ActionLogSender actionLogSender,
                            MatchesInitializer matchesInitializer) {
         this.time = time;
-        this.success = success;
-        this.exitSequences = exitSequences;
         this.illustrateScreenshot = illustrateScreenshot;
         this.selectRegions = selectRegions;
         this.actionLifecycleManagement = actionLifecycleManagement;
@@ -77,10 +70,9 @@ public class ActionExecution {
         printAction(actionOptions, objectCollections);
         Matches matches = matchesInitializer.init(actionOptions, actionDescription, objectCollections);
         time.wait(actionOptions.getPauseBeforeBegin());
-        for (int i=0; i<actionOptions.getMaxTimesToRepeatActionSequence(); i++) {
+        while (actionLifecycleManagement.isMoreSequencesAllowed(matches)) {
             actionMethod.perform(matches, objectCollections);
-            success.set(actionOptions, matches);  // success used to determine if action should be repeated again
-            if (exitSequences.okToExit(actionOptions, matches)) break;
+            actionLifecycleManagement.incrementCompletedSequences(matches);
         }
         illustrateScreenshot.illustrateWhenAllowed(matches,
                 selectRegions.getRegionsForAllImages(actionOptions, objectCollections),
@@ -88,7 +80,6 @@ public class ActionExecution {
         time.wait(actionOptions.getPauseAfterEnd());
         Duration duration = actionLifecycleManagement.getCurrentDuration(matches);
         matches.setDuration(duration); //time.getDuration(actionOptions.getAction()));
-        matches.saveSnapshots();
         sendActionLog(matches, actionOptions, objectCollections);
         String symbol = matches.isSuccess()? Output.check : Output.fail;
         if (BrobotSettings.buildDataset) datasetManager.addSetOfData(matches); // for the neural net training dataset
