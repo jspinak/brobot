@@ -1,13 +1,11 @@
 package io.github.jspinak.brobot.mock;
 
+import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.datatypes.primitives.match.Match;
-import io.github.jspinak.brobot.datatypes.primitives.match.MatchHistory;
 import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Random;
-
-import static io.github.jspinak.brobot.actions.actionOptions.ActionOptions.Action.GET_TEXT;
 
 /**
  * Mock text for GetText Actions using Snapshots.
@@ -22,7 +20,7 @@ public class MockText {
     }
 
     public String getString(Match match) {
-        mockTime.wait(GET_TEXT);
+        mockTime.wait(ActionOptions.Action.FIND);
         return match.getText();
     }
 

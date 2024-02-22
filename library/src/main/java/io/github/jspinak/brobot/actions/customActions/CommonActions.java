@@ -255,7 +255,7 @@ public class CommonActions {
 
     public String getText(StateRegion region) {
         ActionOptions getText = new ActionOptions.Builder()
-                .setAction(ActionOptions.Action.GET_TEXT)
+                .setAction(ActionOptions.Action.FIND)
                 .getTextUntil(ActionOptions.GetTextUntil.TEXT_APPEARS)
                 .setMaxTimesToRepeatActionSequence(3)
                 .setPauseBetweenActionSequences(.5)

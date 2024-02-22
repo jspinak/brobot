@@ -2,6 +2,7 @@ package io.github.jspinak.brobot.database.api;
 
 import io.github.jspinak.brobot.database.data.StateRepo;
 import io.github.jspinak.brobot.datatypes.state.state.State;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -79,5 +80,13 @@ public class StateService {
 
     public void deleteAllStates() {
         stateRepo.deleteAll();
+    }
+
+    public void removeState(State state) {
+        if (stateRepo.findByNameAsString(state.getNameAsString()).isEmpty()) {
+            System.out.println("State does not exist.");
+            return;
+        }
+        stateRepo.delete(state);
     }
 }

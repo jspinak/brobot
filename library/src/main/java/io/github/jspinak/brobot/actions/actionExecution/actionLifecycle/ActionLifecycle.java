@@ -19,6 +19,7 @@ public class ActionLifecycle {
      */
     private LocalDateTime allowedEndTime;
     private int completedRepetitions = 0;
+    private int completedSequences = 0;
     private boolean printed = false;
 
     public ActionLifecycle(LocalDateTime now, double maxWait) {
@@ -30,5 +31,7 @@ public class ActionLifecycle {
     public void incrementCompletedRepetitions() {
         completedRepetitions++;
     }
+
+    public void incrementCompletedSequences() { completedSequences++; }
 
 }
