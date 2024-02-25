@@ -4,7 +4,7 @@ import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.actions.actionOptions.CommonActionOptions;
 import io.github.jspinak.brobot.actions.parameterTuning.ParameterCollection;
 import io.github.jspinak.brobot.actions.parameterTuning.ParameterThresholds;
-import io.github.jspinak.brobot.database.api.StateService;
+import io.github.jspinak.brobot.database.services.StateService;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import io.github.jspinak.brobot.datatypes.state.state.State;
 import io.github.jspinak.brobot.manageStates.UnknownState;

@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.testingAUTs;
 
-import io.github.jspinak.brobot.database.api.StateService;
+import io.github.jspinak.brobot.database.services.StateService;
 import io.github.jspinak.brobot.manageStates.PathFinder;
 import io.github.jspinak.brobot.manageStates.Paths;
 import io.github.jspinak.brobot.manageStates.StateMemory;

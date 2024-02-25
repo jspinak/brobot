@@ -38,6 +38,7 @@ public class StateImage implements StateObject {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
+    private Long projectId = 0L;
     private StateObject.Type objectType = StateObject.Type.IMAGE;
     private String name = "";
     @OneToMany(cascade = CascadeType.ALL)
