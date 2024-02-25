@@ -13,5 +13,6 @@ import java.util.Optional;
 public interface StateRepo extends JpaRepository<State, Long> {
     Optional<State> findByNameAsString(String name);
     List<State> findByNameAsStringContainingIgnoreCase(String name);
+    List<State> findByProjectId(Long projectId);
 
 }

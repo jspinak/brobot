@@ -3,7 +3,7 @@ package io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.screenObs
 import io.github.jspinak.brobot.actions.actionExecution.Action;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.stateStructureBuildManagement.StateStructureTemplate;
-import io.github.jspinak.brobot.database.api.StateImageService;
+import io.github.jspinak.brobot.database.services.StateImageService;
 import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
 import io.github.jspinak.brobot.datatypes.primitives.location.Location;
 import io.github.jspinak.brobot.datatypes.primitives.location.Positions;
@@ -15,7 +15,6 @@ import org.sikuli.script.Match;
 import org.sikuli.script.Screen;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**

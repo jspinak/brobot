@@ -1,4 +1,4 @@
-package io.github.jspinak.brobot.database.api;
+package io.github.jspinak.brobot.database.services;
 
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.Scene;
 import io.github.jspinak.brobot.database.data.SceneRepo;
