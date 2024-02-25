@@ -1,0 +1,15 @@
+<configuration>
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+
+    <!-- Define Elasticsearch appender -->
+    <appender name="ELASTICSEARCH" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
+        <destination>localhost:9300</destination> <!-- Elasticsearch server address -->
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder"/>
+    </appender>
+
+    <!-- Set the root logger to use the Elasticsearch appender -->
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="ELASTICSEARCH"/>
+    </root>
+</configuration>

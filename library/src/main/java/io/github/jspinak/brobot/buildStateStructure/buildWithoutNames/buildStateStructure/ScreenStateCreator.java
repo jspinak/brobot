@@ -6,7 +6,7 @@ import io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.screenObse
 import io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.screenObservations.ScreenObservations;
 import io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.screenObservations.TransitionImage;
 import io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.screenObservations.TransitionImageRepo;
-import io.github.jspinak.brobot.database.api.StateService;
+import io.github.jspinak.brobot.database.services.StateService;
 import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;

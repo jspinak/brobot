@@ -1,5 +1,7 @@
-package io.github.jspinak.brobot.database.api;
+package com.brobot.app.restControllers;
 
+import io.github.jspinak.brobot.database.services.PatternService;
+import io.github.jspinak.brobot.database.services.StateService;
 import io.github.jspinak.brobot.database.data.*;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;

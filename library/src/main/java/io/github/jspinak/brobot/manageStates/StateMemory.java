@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.manageStates;
 
-import io.github.jspinak.brobot.database.api.StateService;
+import io.github.jspinak.brobot.database.services.StateService;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.primatives.enums.StateEnum;
 import io.github.jspinak.brobot.reports.Report;

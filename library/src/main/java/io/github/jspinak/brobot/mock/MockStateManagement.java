@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.mock;
 
-import io.github.jspinak.brobot.database.api.StateService;
+import io.github.jspinak.brobot.database.services.StateService;
 import org.springframework.stereotype.Component;
 
 /**

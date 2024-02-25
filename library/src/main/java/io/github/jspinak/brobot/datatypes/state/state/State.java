@@ -40,6 +40,8 @@ public class State {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id = 0L;
 
+    private Long projectId = 0L;
+
     private String nameAsString = "";
 
     @Transient // the name as a string is sufficient

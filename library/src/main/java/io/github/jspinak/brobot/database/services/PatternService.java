@@ -1,4 +1,4 @@
-package io.github.jspinak.brobot.database.api;
+package io.github.jspinak.brobot.database.services;
 
 import io.github.jspinak.brobot.database.data.PatternRepo;
 import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
@@ -17,7 +17,7 @@ public class PatternService {
     }
 
     public List<Pattern> getPatterns(String name) {
-        return patternRepo.findByPatternDataName(name).stream()
+        return patternRepo.findByName(name).stream()
                 .peek(Pattern::setBufferedImageFromBytes)
                 .collect(Collectors.toList());
     }
