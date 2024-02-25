@@ -1,4 +1,4 @@
-package io.github.jspinak.brobot.database.api;
+package io.github.jspinak.brobot.database.services;
 
 import io.github.jspinak.brobot.database.data.ImageRepo;
 import io.github.jspinak.brobot.datatypes.primitives.image.Image;

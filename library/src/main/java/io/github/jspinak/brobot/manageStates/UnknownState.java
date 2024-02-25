@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.manageStates;
 
-import io.github.jspinak.brobot.database.api.StateService;
+import io.github.jspinak.brobot.database.services.StateService;
 import io.github.jspinak.brobot.datatypes.state.state.State;
 import io.github.jspinak.brobot.primatives.enums.StateEnum;
 import lombok.Getter;

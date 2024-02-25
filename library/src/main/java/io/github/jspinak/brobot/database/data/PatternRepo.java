@@ -12,8 +12,7 @@ import java.util.List;
 @Repository
 @Transactional
 public interface PatternRepo extends JpaRepository<Pattern, Long> {
-    // Define custom query method to find patterns by name in PatternData
-    List<Pattern> findByPatternDataName(String name);
+    List<Pattern> findByName(String name);
     @Query("SELECT p FROM Pattern p WHERE LOWER(p.patternData.name) LIKE LOWER(CONCAT('%', :name, '%'))")
     List<Pattern> findByPatternDataNameContainingIgnoreCase(@Param("name") String name);
 

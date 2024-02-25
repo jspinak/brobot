@@ -3,7 +3,7 @@ package io.github.jspinak.brobot.actions.customActions;
 import io.github.jspinak.brobot.actions.actionExecution.Action;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.actions.methods.sikuliWrappers.mouse.ClickType;
-import io.github.jspinak.brobot.database.api.StateService;
+import io.github.jspinak.brobot.database.services.StateService;
 import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.datatypes.primitives.location.Location;
