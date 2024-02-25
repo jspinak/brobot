@@ -2,7 +2,7 @@ package io.github.jspinak.brobot.actions.methods.basicactions.define;
 
 import io.github.jspinak.brobot.BrobotTestApplication;
 import io.github.jspinak.brobot.actions.methods.basicactions.TestData;
-import io.github.jspinak.brobot.database.api.StateImageService;
+import io.github.jspinak.brobot.database.services.StateImageService;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;

@@ -1,8 +1,7 @@
-package io.github.jspinak.brobot.database.api;
+package io.github.jspinak.brobot.database.services;
 
 import io.github.jspinak.brobot.database.data.StateRepo;
 import io.github.jspinak.brobot.datatypes.state.state.State;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -88,5 +87,9 @@ public class StateService {
             return;
         }
         stateRepo.delete(state);
+    }
+
+    public List<State> getAllInProject(Long projectId) {
+        return stateRepo.findByProjectId(projectId);
     }
 }

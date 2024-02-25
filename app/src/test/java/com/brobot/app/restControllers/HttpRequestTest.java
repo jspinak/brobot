@@ -1,4 +1,4 @@
-package io.github.jspinak.brobot.database.api;
+package com.brobot.app.restControllers;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;

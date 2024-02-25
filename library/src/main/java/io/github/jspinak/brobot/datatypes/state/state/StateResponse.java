@@ -17,6 +17,7 @@ import java.util.Set;
 public class StateResponse {
 
     private Long id = 0L;
+    private Long projectId = 0L;
     private String name = "";
     private Set<String> stateText = new HashSet<>();
     private Set<StateImageResponse> stateImages = new HashSet<>();
@@ -37,6 +38,7 @@ public class StateResponse {
     public StateResponse(State state) {
         if (state == null) return;
         id = state.getId();
+        projectId = state.getProjectId();
         name = state.getNameAsString();
         stateText = state.getStateText();
         state.getStateImages().forEach(image -> stateImages.add(new StateImageResponse(image)));

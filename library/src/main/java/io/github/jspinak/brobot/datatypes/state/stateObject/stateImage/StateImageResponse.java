@@ -10,6 +10,7 @@ import java.util.List;
 public class StateImageResponse {
 
     private Long id = 0L;
+    private Long projectId = 0L;
     private String name = "";
     private List<PatternResponse> patterns = new ArrayList<>();
     private String ownerStateName = "";
@@ -23,6 +24,7 @@ public class StateImageResponse {
     public StateImageResponse(StateImage stateImage) {
         if (stateImage == null) return;
         id = stateImage.getId();
+        projectId = stateImage.getProjectId();
         name = stateImage.getName() != null ? stateImage.getName() : "";
         stateImage.getPatterns().forEach(pattern -> patterns.add(new PatternResponse(pattern)));
         ownerStateName = stateImage.getOwnerStateName();
