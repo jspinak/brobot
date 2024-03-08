@@ -4,7 +4,7 @@ See the [website](https://jspinak.github.io/brobot/) for more details.
 
 ## Introduction
 
-Brobot is a Java-SikuliX-OpenCV framework. It makes is possible to develop 
+Brobot is a Java-SikuliX-OpenCV framework. It makes it possible to develop 
 complex automation applications in areas such as game playing and image-based testing.
 
 ## License
