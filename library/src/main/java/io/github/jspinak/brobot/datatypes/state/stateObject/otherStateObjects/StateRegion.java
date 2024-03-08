@@ -9,7 +9,6 @@ import io.github.jspinak.brobot.datatypes.primitives.match.MatchSnapshot;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import io.github.jspinak.brobot.datatypes.state.stateObject.StateObject;
-import jakarta.persistence.*;
 import lombok.Data;
 
 /**
@@ -17,31 +16,24 @@ import lombok.Data;
  * has a special meaning for its owner State. For example, there
  * may be text in this Region that doesn't appear in any other State.
  */
-@Entity
 @Data
 public class StateRegion implements StateObject {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
-
     private StateObject.Type objectType = StateObject.Type.REGION;
     private String name = "";
-    @OneToOne(cascade = CascadeType.ALL)
     private Region searchRegion = new Region();
     private String ownerStateName = "null";
     private int staysVisibleAfterClicked = 100;
     private int probabilityExists = 100; // probability something can be acted on in this region
     private int timesActedOn = 0;
-    @Embedded
     private Position position = new Position(.5, .5); // click position within region
-    @OneToOne(cascade = CascadeType.ALL)
     private Anchors anchors = new Anchors();
     private String mockText = "mock text";
-    @OneToOne(cascade = CascadeType.ALL)
     private MatchHistory matchHistory = new MatchHistory();
 
-    private StateRegion() {}
+    public String getId() {
+        return objectType.name() + name + searchRegion.getX() + searchRegion.getY() + searchRegion.getW() + searchRegion.getY();
+    }
 
     public int x() {
         return searchRegion.x();
@@ -81,34 +73,50 @@ public class StateRegion implements StateObject {
         private String name = "";
         private Region searchRegion = new Region();
         private String ownerStateName = "null";
+        private int staysVisibleAfterClicked = 100;
+        private int probabilityExists = 100;
+        private int timesActedOn = 0;
         private Position position = new Position(.5, .5);
-
-        // Positions.Name: the border of the region to define
-        // Position: the location in the region to use as a defining point
         private Anchors anchors = new Anchors();
+        private String mockText = "mock text";
         private MatchHistory matchHistory = new MatchHistory();
 
-        public Builder called(String name) {
+        public Builder setName(String name) {
             this.name = name;
             return this;
         }
 
-        public Builder withSearchRegion(Region searchRegion) {
+        public Builder setSearchRegion(Region searchRegion) {
             this.searchRegion = searchRegion;
             return this;
         }
 
-        public Builder withSearchRegion(int x, int y, int w, int h) {
+        public Builder setSearchRegion(int x, int y, int w, int h) {
             this.searchRegion = new Region(x, y, w, h);
             return this;
         }
 
-        public Builder inState(String stateName) {
+        public Builder setOwnerStateName(String stateName) {
             this.ownerStateName = stateName;
             return this;
         }
 
-        public Builder setPointLocation(Position position) {
+        public Builder setStaysVisibleAfterClicked(int staysVisibleAfterClicked) {
+            this.staysVisibleAfterClicked = staysVisibleAfterClicked;
+            return this;
+        }
+
+        public Builder setProbabilityExists(int probabilityExists) {
+            this.setProbabilityExists(probabilityExists);
+            return this;
+        }
+
+        public Builder setTimesActedOn(int timesActedOn) {
+            this.setTimesActedOn(timesActedOn);
+            return this;
+        }
+
+        public Builder setPosition(Position position) {
             this.position = position;
             return this;
         }
@@ -123,8 +131,23 @@ public class StateRegion implements StateObject {
             return this;
         }
 
+        public Builder setAnchors(Anchors anchors) {
+            this.anchors = anchors;
+            return this;
+        }
+
         public Builder addSnapshot(MatchSnapshot matchSnapshot) {
             this.matchHistory.addSnapshot(matchSnapshot);
+            return this;
+        }
+
+        public Builder setMockText(String mockText) {
+            this.mockText = mockText;
+            return this;
+        }
+
+        public Builder setMatchHistory(MatchHistory matchHistory) {
+            this.matchHistory = matchHistory;
             return this;
         }
 
@@ -133,11 +156,14 @@ public class StateRegion implements StateObject {
             stateRegion.name = name;
             stateRegion.searchRegion = searchRegion;
             stateRegion.ownerStateName = ownerStateName;
+            stateRegion.staysVisibleAfterClicked = staysVisibleAfterClicked;
+            stateRegion.probabilityExists = probabilityExists;
+            stateRegion.timesActedOn = timesActedOn;
             stateRegion.position = position;
             stateRegion.anchors = anchors;
+            stateRegion.mockText = mockText;
             stateRegion.matchHistory = matchHistory;
             return stateRegion;
         }
-
     }
 }

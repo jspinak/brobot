@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.manageStates;
 
-import io.github.jspinak.brobot.database.services.StateService;
+import io.github.jspinak.brobot.database.services.AllStatesInProjectService;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.primatives.enums.StateEnum;
 import io.github.jspinak.brobot.reports.Report;
@@ -18,7 +18,7 @@ import java.util.Set;
 @Getter
 public class StateMemory {
 
-    private final StateService stateService;
+    private final AllStatesInProjectService allStatesInProjectService;
 
     public enum Enum implements StateEnum {
         PREVIOUS, CURRENT, EXPECTED
@@ -26,8 +26,8 @@ public class StateMemory {
 
     private Set<String> activeStates = new HashSet<>();
 
-    public StateMemory(StateService stateService) {
-        this.stateService = stateService;
+    public StateMemory(AllStatesInProjectService allStatesInProjectService) {
+        this.allStatesInProjectService = allStatesInProjectService;
     }
 
     public void adjustActiveStatesWithMatches(Matches matches) {
@@ -52,7 +52,7 @@ public class StateMemory {
         Report.print("+ add "+activeState+" to active states ");
         if (newLine) Report.println();
         activeStates.add(activeState);
-        stateService.getState(activeState).ifPresent(state -> {
+        allStatesInProjectService.getState(activeState).ifPresent(state -> {
             state.setProbabilityExists(100);
             state.addVisit();
         });
@@ -66,7 +66,7 @@ public class StateMemory {
         if (!activeStates.contains(inactiveState)) return;
         Report.println("- remove "+inactiveState+" from active states");
         activeStates.remove(inactiveState);
-        stateService.getState(inactiveState).ifPresent(state -> state.setProbabilityExists(0));
+        allStatesInProjectService.getState(inactiveState).ifPresent(state -> state.setProbabilityExists(0));
     }
 
     public void removeAllStates() {

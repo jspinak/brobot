@@ -3,7 +3,7 @@ package io.github.jspinak.brobot.actions.customActions;
 import io.github.jspinak.brobot.actions.actionExecution.Action;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.actions.methods.sikuliWrappers.mouse.ClickType;
-import io.github.jspinak.brobot.database.services.StateService;
+import io.github.jspinak.brobot.database.services.AllStatesInProjectService;
 import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.datatypes.primitives.location.Location;
@@ -30,11 +30,11 @@ import static io.github.jspinak.brobot.actions.actionOptions.ActionOptions.Actio
 public class CommonActions {
 
     private final Action action;
-    private final StateService stateService;
+    private final AllStatesInProjectService allStatesInProjectService;
 
-    public CommonActions(Action action, StateService stateService) {
+    public CommonActions(Action action, AllStatesInProjectService allStatesInProjectService) {
         this.action = action;
-        this.stateService = stateService;
+        this.allStatesInProjectService = allStatesInProjectService;
     }
 
     public boolean click(double maxWait, StateImage... stateImages) {
@@ -123,7 +123,7 @@ public class CommonActions {
 
     public boolean waitState(double maxWait, String stateName, ActionOptions.Action actionType) {
         if (Objects.equals(stateName, UnknownState.Enum.UNKNOWN.toString())) return true;
-        Optional<State> state = stateService.getState(stateName);
+        Optional<State> state = allStatesInProjectService.getState(stateName);
         if (state.isEmpty()) return false;
         return action.perform(
                 new ActionOptions.Builder()
@@ -138,7 +138,7 @@ public class CommonActions {
 
     public boolean findState(double maxWait, String stateName) {
         System.out.print("\n__findState:"+stateName+"__ ");
-        stateService.getState(stateName).ifPresent(
+        allStatesInProjectService.getState(stateName).ifPresent(
                 state -> System.out.println("prob="+state.getProbabilityExists()));
         return waitState(maxWait, stateName, FIND);
     }
@@ -164,7 +164,7 @@ public class CommonActions {
 
     public boolean clickUntilStateAppears(int repeatClickTimes, double pauseBetweenClicks,
                                           StateImage objectToClick, String state) {
-        if (stateService.getState(state).isEmpty()) return false;
+        if (allStatesInProjectService.getState(state).isEmpty()) return false;
         ActionOptions actionOptions = new ActionOptions.Builder()
                 .setAction(ActionOptions.Action.CLICK)
                 .setClickUntil(ActionOptions.ClickUntil.OBJECTS_APPEAR)
@@ -175,7 +175,7 @@ public class CommonActions {
                 .withImages(objectToClick)
                 .build();
         ObjectCollection objectsToAppear = new ObjectCollection.Builder()
-                .withAllStateImages(stateService.getState(state).get())
+                .withAllStateImages(allStatesInProjectService.getState(state).get())
                 .build();
         return action.perform(actionOptions, objectsToClick, objectsToAppear).isSuccess();
     }

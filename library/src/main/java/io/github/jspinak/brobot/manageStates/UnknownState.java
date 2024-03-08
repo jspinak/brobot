@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.manageStates;
 
-import io.github.jspinak.brobot.database.services.StateService;
+import io.github.jspinak.brobot.database.services.AllStatesInProjectService;
 import io.github.jspinak.brobot.datatypes.state.state.State;
 import io.github.jspinak.brobot.primatives.enums.StateEnum;
 import lombok.Getter;
@@ -23,7 +23,7 @@ public class UnknownState {
 
     private State state = new State.Builder("unknown").build();
 
-    public UnknownState(StateService stateService) {
-        stateService.save(state);
+    public UnknownState(AllStatesInProjectService allStatesInProjectService) {
+        allStatesInProjectService.save(state);
     }
 }

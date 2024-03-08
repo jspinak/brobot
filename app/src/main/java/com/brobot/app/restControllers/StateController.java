@@ -1,6 +1,6 @@
 package com.brobot.app.restControllers;
 
-import io.github.jspinak.brobot.database.services.StateService;
+import com.brobot.app.services.StateService;
 import io.github.jspinak.brobot.datatypes.state.state.State;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;

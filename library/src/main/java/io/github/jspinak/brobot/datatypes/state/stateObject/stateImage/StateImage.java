@@ -3,7 +3,6 @@ package io.github.jspinak.brobot.datatypes.state.stateObject.stateImage;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles.ColorCluster;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles.KmeansProfilesAllSchemas;
-import io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.screenObservations.TransitionImage;
 import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
 import io.github.jspinak.brobot.datatypes.primitives.location.Anchor;
 import io.github.jspinak.brobot.datatypes.primitives.location.Position;
@@ -12,7 +11,6 @@ import io.github.jspinak.brobot.datatypes.primitives.match.MatchSnapshot;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import io.github.jspinak.brobot.datatypes.state.stateObject.StateObject;
-import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -29,31 +27,20 @@ import java.util.*;
  *   objects.
  * - KmeansProfiles for Image objects use the pixels of all Pattern objects in the Image to determine the ColorProfiles.
  */
-@Entity
 @Getter
 @Setter
 public class StateImage implements StateObject {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
-
     private Long projectId = 0L;
     private StateObject.Type objectType = StateObject.Type.IMAGE;
     private String name = "";
-    @OneToMany(cascade = CascadeType.ALL)
-    @JoinTable(name = "stateImage_patterns",
-            joinColumns = @JoinColumn(name = "stateImage_id", referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "pattern_id", referencedColumnName = "id"))
     private List<Pattern> patterns = new ArrayList<>();
     private String ownerStateName = "null"; // ownerStateName is set by the State when the object is added
     private int timesActedOn = 0;
     private boolean shared = false; // shared means also found in other states
 
     // for color analysis and illustration
-    @Transient
     private KmeansProfilesAllSchemas kmeansProfilesAllSchemas = new KmeansProfilesAllSchemas();
-    @Transient
     private ColorCluster colorCluster = new ColorCluster();
     private int index; // a unique identifier. used for classification matrices.
     private boolean dynamic = false; // dynamic images cannot be found using pattern matching
@@ -63,13 +50,9 @@ public class StateImage implements StateObject {
     wrapper object that includes information about the Mat size and type. These Mat objects do not contain unique
     data: they are here for convenience and can be recreated with the patterns' BufferedImage objects.
      */
-    @Transient
     private Mat oneColumnBGRMat; // initialized when program is run
-    @Transient
     private Mat oneColumnHSVMat; // initialized when program is run
-    @Transient
     private Mat imagesMat; // initialized when program is run, shows the images in the StateImage
-    @Transient
     private Mat profilesMat; // initialized when program is run, shows the color profiles in the StateImage
 
     /**
@@ -82,14 +65,13 @@ public class StateImage implements StateObject {
     after the basic state structure is in place. Once there is a basic state structure, observations after clicking
     new StateImage objects can identify current states (or no states) and do not rely on screens anymore.
      */
-    @Transient
     private Integer transitionsToScreen;
-    @Transient
-    private TransitionImage transitionImage;
-    @Transient
     private Set<String> statesToEnter = new HashSet<>();
-    @Transient
     private Set<String> statesToExit = new HashSet<>();
+
+    public String getId() {
+        return objectType.name() + name + patterns.toString();
+    }
 
     /**
      * Sets the Position for each Pattern in the Image.
@@ -213,7 +195,7 @@ public class StateImage implements StateObject {
 
     public int getMaxHeight() {
         if (isEmpty()) return 0;
-        int max = patterns.getFirst().h();
+        int max = patterns.get(0).h();
         for (int i=1; i<patterns.size(); i++) {
             max = Math.max(max, patterns.get(i).h());
         }
@@ -222,7 +204,7 @@ public class StateImage implements StateObject {
 
     public int getMinSize() {
         if (patterns.isEmpty()) return 0;
-        int minSize = patterns.getFirst().size();
+        int minSize = patterns.get(0).size();
         for (int i=1; i<patterns.size(); i++) {
             minSize = Math.min(minSize, patterns.get(i).size());
         }
@@ -231,7 +213,7 @@ public class StateImage implements StateObject {
 
     public int getMaxSize() {
         if (patterns.isEmpty()) return 0;
-        int maxSize = patterns.getFirst().size();
+        int maxSize = patterns.get(0).size();
         for (int i=1; i<patterns.size(); i++) {
             maxSize = Math.max(maxSize, patterns.get(i).size());
         }
@@ -269,7 +251,6 @@ public class StateImage implements StateObject {
         private KmeansProfilesAllSchemas kmeansProfilesAllSchemas = new KmeansProfilesAllSchemas();
         private int index;
         private String ownerStateName = "null";
-        private TransitionImage transitionImage;
         private Set<String> statesToEnter = new HashSet<>();
         private Set<String> statesToExit = new HashSet<>();
 
@@ -309,11 +290,6 @@ public class StateImage implements StateObject {
             return this;
         }
 
-        public Builder setTransitionImage(TransitionImage transitionImage) {
-            this.transitionImage = transitionImage;
-            return this;
-        }
-
         public Builder setStatesToEnter(Set<String> statesToEnter) {
             this.statesToEnter = statesToEnter;
             return this;
@@ -331,7 +307,6 @@ public class StateImage implements StateObject {
             stateImage.kmeansProfilesAllSchemas = kmeansProfilesAllSchemas;
             stateImage.index = index;
             stateImage.ownerStateName = ownerStateName;
-            stateImage.transitionImage = transitionImage;
             stateImage.statesToEnter = statesToEnter;
             stateImage.statesToExit = statesToExit;
             return stateImage;

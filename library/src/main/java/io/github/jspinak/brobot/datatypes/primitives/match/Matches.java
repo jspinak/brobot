@@ -10,7 +10,6 @@ import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.primitives.text.Text;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
-import jakarta.persistence.*;
 import lombok.Data;
 import org.bytedeco.opencv.opencv_core.Mat;
 
@@ -36,56 +35,24 @@ import java.util.stream.Collectors;
  * - definedRegions are saved for Define operations, which define the boundaries of a region or regions.
  * </p>
  */
-@Entity
 @Data
 public class Matches {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
-
     private String actionDescription = "";
-    private int actionId; // a unique id also stored in the class ActionLifecycleManagement
-    @OneToMany(cascade = CascadeType.ALL)
-    @JoinTable(name = "matches_matchList",
-            joinColumns = @JoinColumn(name = "matches_id", referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "match_id", referencedColumnName = "id"))
     private List<Match> matchList = new ArrayList<>();
-    @OneToMany(cascade = CascadeType.ALL)
-    @JoinTable(name = "matches_initialMatchList",
-            joinColumns = @JoinColumn(name = "matches_id", referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "match_id", referencedColumnName = "id"))
     private List<Match> initialMatchList = new ArrayList<>(); // the first set of matches in a composite find operation. it may be useful to see these matches in illustrations.
-    @OneToMany(cascade = CascadeType.ALL)
-    @JoinTable(name = "matches_nonoverlappingMatchList",
-            joinColumns = @JoinColumn(name = "matches_id", referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "match_id", referencedColumnName = "id"))
-    private List<Match> nonoverlappingMatchList = new ArrayList<>();
-    @OneToOne(cascade = CascadeType.ALL)
     private ActionOptions actionOptions; // the action options used to find the matches
-    @ElementCollection
-    @CollectionTable(name = "activeStates", joinColumns = @JoinColumn(name = "matches_id"))
     private Set<String> activeStates = new HashSet<>();
-    @Transient
     private Text text = new Text();
     private String selectedText = ""; // the String selected from the Text object as the most accurate representation of the text on-screen
-    @Transient
     private Duration duration = Duration.ZERO;
     private LocalDateTime startTime = LocalDateTime.now();
     private LocalDateTime endTime;
     private boolean success = false; // for boolean queries (i.e. true for 'find', false for 'vanish' when not empty)
-    @OneToMany(cascade = CascadeType.ALL)
-    @JoinTable(name = "matches_definedRegions",
-            joinColumns = @JoinColumn(name = "matches_id", referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "region_id", referencedColumnName = "id"))
     private List<Region> definedRegions = new ArrayList<>();
     private int maxMatches = -1; // not used when <= 0
-    @Transient
     private SceneAnalysisCollection sceneAnalysisCollection = new SceneAnalysisCollection();
-    @Transient
     private Mat mask; // for motion detection and other pixel-based analysis
     private String outputText = "";
-    @Transient
     private ActionLifecycle actionLifecycle;
 
     public Matches() {}
@@ -97,7 +64,6 @@ public class Matches {
     public void add(Match... matches) {
         for (Match m : matches) {
             matchList.add(m);
-            addNonoverlappingMatch(m);
             addActiveState(m);
         }
     }
@@ -169,22 +135,6 @@ public class Matches {
     public Optional<Match> getBestMatch() {
         return matchList.stream()
                 .max(Comparator.comparingDouble(Match::getScore));
-    }
-
-    /**
-     * Overlapping matches shouldn't be an issue since all search regions are unique.
-     * @param m the match object to add
-     * @return true if added to the non-overlapping matches
-     */
-    private boolean addNonoverlappingMatch(Match m) {
-        Region match = m.getRegion();
-        Region nonoverlap;
-        for (Match n : nonoverlappingMatchList) {
-            nonoverlap = n.getRegion();
-            if (match.overlaps(nonoverlap)) return false;
-        }
-        nonoverlappingMatchList.add(m);
-        return true;
     }
 
     private void addActiveState(Match newMatch) {
@@ -315,13 +265,13 @@ public class Matches {
         matchList.addAll(newMatches);
     }
 
-    public Set<Long> getUniqueImageIds() {
+    public Set<String> getUniqueImageIds() {
         return matchList.stream()
                 .map(match -> match.getStateObjectData().getStateObjectId())
                 .collect(Collectors.toSet());
     }
 
-    public List<Match> getMatchObjectsWithTargetStateObject(Long id) {
+    public List<Match> getMatchObjectsWithTargetStateObject(String id) {
         return matchList.stream()
                 .filter(match -> Objects.equals(match.getStateObjectData().getStateObjectId(), id))
                 .collect(Collectors.toList());

@@ -5,7 +5,6 @@ import io.github.jspinak.brobot.datatypes.primitives.location.Location;
 import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
-import io.github.jspinak.brobot.datatypes.state.stateObject.StateObject;
 import io.github.jspinak.brobot.datatypes.state.stateObject.StateObjectData;
 import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.StateLocation;
 import org.sikuli.script.Mouse;
@@ -35,7 +34,7 @@ public class OffsetOps {
         if (!areCollectionsEmpty(objectCollections) && doOnlyWhenCollectionsAreEmpty) return;
         Location location = new Location(Mouse.at(), actionOptions.getAddX(), actionOptions.getAddY());
         double duration = Duration.between(LocalDateTime.now(), matches.getStartTime()).toSeconds();
-        StateLocation stateLocation = new StateLocation.Builder().withLocation(location).build();
+        StateLocation stateLocation = new StateLocation.Builder().setLocation(location).build();
         Match offsetMatch = new Match.Builder()
                 .setMatch(location.toMatch())
                 .setStateObjectData(stateLocation)

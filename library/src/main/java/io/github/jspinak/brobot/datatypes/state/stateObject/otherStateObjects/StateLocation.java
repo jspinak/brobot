@@ -4,7 +4,6 @@ import io.github.jspinak.brobot.datatypes.primitives.location.*;
 import io.github.jspinak.brobot.datatypes.primitives.match.MatchHistory;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import io.github.jspinak.brobot.datatypes.state.stateObject.StateObject;
-import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -13,29 +12,25 @@ import lombok.Setter;
  * has a special meaning for its owner State. For example, clicking on
  * this Location has an effect in the owner State but not in other States.
  */
-@Entity
 @Getter
 @Setter
 public class StateLocation implements StateObject {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
-
     private StateObject.Type objectType = StateObject.Type.LOCATION;
     private String name;
-    @OneToOne(cascade = CascadeType.ALL)
     private Location location;
     private String ownerStateName = "null";
     private int staysVisibleAfterClicked = 100;
     private int probabilityExists = 100; // probability something can be acted on at this location
     private int timesActedOn = 0;
-    @Embedded
     private Position position;
-    @OneToOne(cascade = CascadeType.ALL)
     private Anchors anchors; // just one, but defined with Anchors b/c it's a StateObject
-    @OneToOne(cascade = CascadeType.ALL)
     private MatchHistory matchHistory = new MatchHistory(); // not used yet
+
+
+    public String getId() {
+        return objectType.name() + name + location.getX() + location.getY();
+    }
 
     public boolean defined() {
         return location != null;
@@ -64,32 +59,46 @@ public class StateLocation implements StateObject {
     public static class Builder {
         private String name = "";
         private Location location;
-        private String ownerStateName;
+        private String ownerStateName = "null";
+        private int staysVisibleAfterClicked = 100;
+        private int probabilityExists = 100; // probability something can be acted on at this location
+        private int timesActedOn = 0;
         private Position position = new Position(.5, .5);
         private Anchors anchors = new Anchors();
+        private MatchHistory matchHistory = new MatchHistory(); // not used yet
 
-        public Builder called(String name) {
+        public Builder setName(String name) {
             this.name = name;
             return this;
         }
 
-        public Builder withLocation(Location location) {
+        public Builder setLocation(Location location) {
             this.location = location;
             return this;
         }
 
-        public Builder withLocation(int x, int y) {
+        public Builder setLocation(int x, int y) {
             this.location = new Location(x, y);
             return this;
         }
 
-        public Builder inState(String stateName) {
+        public Builder setOwnerStateName(String stateName) {
             this.ownerStateName = stateName;
             return this;
         }
 
-        public Builder setAnchor(Positions.Name cornerOfRegionToDefine) {
-            this.anchors.add(new Anchor(cornerOfRegionToDefine, position));
+        public Builder setStaysVisibleAfterClicked(int staysVisibleAfterClicked) {
+            this.staysVisibleAfterClicked = staysVisibleAfterClicked;
+            return this;
+        }
+
+        public Builder setProbabilityExists(int probabilityExists) {
+            this.probabilityExists = probabilityExists;
+            return this;
+        }
+
+        public Builder setTimesActedOn(int timesActedOn) {
+            this.timesActedOn = timesActedOn;
             return this;
         }
 
@@ -103,13 +112,37 @@ public class StateLocation implements StateObject {
             return this;
         }
 
+        public Builder setPosition(Position position) {
+            this.position = position;
+            return this;
+        }
+
+        public Builder setAnchor(Positions.Name cornerOfRegionToDefine) {
+            this.anchors.add(new Anchor(cornerOfRegionToDefine, position));
+            return this;
+        }
+
+        public Builder setAnchors(Anchors anchors) {
+            this.anchors = anchors;
+            return this;
+        }
+
+        public Builder setMatchHistory(MatchHistory matchHistory) {
+            this.matchHistory = matchHistory;
+            return this;
+        }
+
         public StateLocation build() {
             StateLocation stateLocation = new StateLocation();
             stateLocation.name = name;
             stateLocation.location = location;
             stateLocation.ownerStateName = ownerStateName;
+            stateLocation.staysVisibleAfterClicked = staysVisibleAfterClicked;
+            stateLocation.probabilityExists = probabilityExists;
+            stateLocation.timesActedOn = timesActedOn;
             stateLocation.position = position;
             stateLocation.anchors = anchors;
+            stateLocation.matchHistory = matchHistory;
             return stateLocation;
         }
     }

@@ -2,8 +2,8 @@ package io.github.jspinak.brobot.actions.methods.basicactions.find;
 
 import io.github.jspinak.brobot.actions.actionExecution.actionLifecycle.ActionLifecycleManagement;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.GetScenes;
-import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.Scene;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.SceneAnalysis;
+import io.github.jspinak.brobot.datatypes.primitives.image.Image;
 import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
@@ -26,7 +26,7 @@ public class FindWords {
 
     void findAllWordMatches(Matches matches, List<ObjectCollection> objectCollections) {
         while (actionLifecycleManagement.isOkToContinueAction(matches, objectCollections.get(0).getStateImages().size())) {
-            List<Scene> scenes = getScenes.getScenes(matches.getActionOptions(), objectCollections, 1, 0);
+            List<Image> scenes = getScenes.getScenes(matches.getActionOptions(), objectCollections, 1, 0);
             findWordsSetSceneAnalyses(matches, scenes);
             actionLifecycleManagement.incrementCompletedRepetitions(matches);
         }
@@ -37,9 +37,9 @@ public class FindWords {
      * @param matches contains ActionOptions
      * @param scenes the scenes to search
      */
-    public void findWordsSetSceneAnalyses(Matches matches, List<Scene> scenes) {
+    public void findWordsSetSceneAnalyses(Matches matches, List<Image> scenes) {
         actionLifecycleManagement.printActionOnce(matches);
-        for (Scene scene : scenes) {
+        for (Image scene : scenes) {
             List<Match> sceneMatches = findAll.findWords(scene, matches.getActionOptions());
             matches.addAll(sceneMatches); // holds all matches found
             SceneAnalysis sceneAnalysis = new SceneAnalysis(scene);

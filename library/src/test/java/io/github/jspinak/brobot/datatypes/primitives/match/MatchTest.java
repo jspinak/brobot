@@ -2,7 +2,6 @@ package io.github.jspinak.brobot.datatypes.primitives.match;
 
 import io.github.jspinak.brobot.datatypes.primitives.location.Location;
 import io.github.jspinak.brobot.datatypes.primitives.location.Positions;
-import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.StateRegion;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import org.junit.jupiter.api.Test;
@@ -15,7 +14,7 @@ class MatchTest {
             .setRegion(0, 50, 100, 20)
             .build();
     private StateRegion stateRegion = new StateRegion.Builder()
-            .withSearchRegion(match.getRegion())
+            .setSearchRegion(match.getRegion())
             .addAnchor(Positions.Name.TOPLEFT, Positions.Name.BOTTOMLEFT)
             .build();
 

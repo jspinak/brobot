@@ -2,7 +2,8 @@ package io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAn
 
 import io.github.jspinak.brobot.actions.BrobotSettings;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
-import io.github.jspinak.brobot.database.services.StateService;
+import io.github.jspinak.brobot.database.services.AllStatesInProjectService;
+import io.github.jspinak.brobot.datatypes.primitives.image.Image;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import io.github.jspinak.brobot.manageStates.StateMemory;
@@ -20,14 +21,14 @@ public class GetSceneAnalysisCollection {
 
     private final GetScenes getScenes;
     private final AnalyzePixels analyzePixels;
-    private final StateService stateService;
+    private final AllStatesInProjectService allStatesInProjectService;
     private final StateMemory stateMemory;
 
     public GetSceneAnalysisCollection(GetScenes getScenes, AnalyzePixels analyzePixels,
-                                      StateService stateService, StateMemory stateMemory) {
+                                      AllStatesInProjectService allStatesInProjectService, StateMemory stateMemory) {
         this.getScenes = getScenes;
         this.analyzePixels = analyzePixels;
-        this.stateService = stateService;
+        this.allStatesInProjectService = allStatesInProjectService;
         this.stateMemory = stateMemory;
     }
 
@@ -42,9 +43,9 @@ public class GetSceneAnalysisCollection {
                                        int scenesToCapture, double secondsBetweenCaptures,
                                        ActionOptions actionOptions) {
         SceneAnalysisCollection sceneAnalysisCollection = new SceneAnalysisCollection();
-        List<Scene> scenes = getScenes.getScenes(actionOptions, objectCollections, scenesToCapture, secondsBetweenCaptures);
+        List<Image> scenes = getScenes.getScenes(actionOptions, objectCollections, scenesToCapture, secondsBetweenCaptures);
         if (!isSceneAnalysisRequired(actionOptions)) {
-            for (Scene scene : scenes) {
+            for (Image scene : scenes) {
                 SceneAnalysis sceneAnalysis = new SceneAnalysis(scene);
                 sceneAnalysisCollection.add(sceneAnalysis);
             }
@@ -55,7 +56,7 @@ public class GetSceneAnalysisCollection {
         Set<StateImage> allImages = new HashSet<>();
         allImages.addAll(targetImages);
         allImages.addAll(additionalImagesForClassification);
-        for (Scene scene : scenes) {
+        for (Image scene : scenes) {
             SceneAnalysis sceneAnalysis = analyzePixels.getAnalysisForOneScene(scene, targetImages, allImages, actionOptions);
             sceneAnalysisCollection.add(sceneAnalysis);
         }
@@ -72,7 +73,7 @@ public class GetSceneAnalysisCollection {
     private Set<StateImage> getAdditionalImagesForClassification(List<ObjectCollection> objColls) {
         Set<StateImage> toClassify = new HashSet<>();
         if (BrobotSettings.includeStateImageObjectsFromActiveStatesInAnalysis) {
-            stateService.findSetByName(stateMemory.getActiveStates()).forEach(
+            allStatesInProjectService.findSetByName(stateMemory.getActiveStates()).forEach(
                     state -> toClassify.addAll(state.getStateImages()));
         }
         for (int i=1; i<objColls.size(); i++) {

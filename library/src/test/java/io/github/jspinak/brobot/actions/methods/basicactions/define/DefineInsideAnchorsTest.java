@@ -2,7 +2,6 @@ package io.github.jspinak.brobot.actions.methods.basicactions.define;
 
 import io.github.jspinak.brobot.BrobotTestApplication;
 import io.github.jspinak.brobot.actions.methods.basicactions.TestData;
-import io.github.jspinak.brobot.database.services.StateImageService;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -22,9 +21,6 @@ class DefineInsideAnchorsTest {
     @Autowired
     DefineInsideAnchors defineInsideAnchors;
 
-    @Autowired
-    StateImageService stateImageService;
-
     /**
      * It was unable to find the bottom right image until I removed a few columns from the right of the image.
      * Apparently, images that are cut at the very right side of the screenshot are not findable.
@@ -32,7 +28,6 @@ class DefineInsideAnchorsTest {
     @Test
     void perform() {
         TestData testData = new TestData();
-        stateImageService.saveStateImages(testData.getStateImages());
         Matches matches = new Matches();
         matches.setActionOptions(testData.getDefineInsideAnchors());
         defineInsideAnchors.perform(matches, testData.getInsideAnchorObjects());

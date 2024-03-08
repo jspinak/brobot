@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.manageStates;
 
-import io.github.jspinak.brobot.database.services.StateService;
+import io.github.jspinak.brobot.database.services.AllStatesInProjectService;
 import io.github.jspinak.brobot.datatypes.state.state.State;
 import io.github.jspinak.brobot.reports.Output;
 import io.github.jspinak.brobot.reports.Report;
@@ -20,16 +20,16 @@ import java.util.Set;
 public class PathFinder {
 
     private final StateTransitionsJointTable stateTransitionsJointTable;
-    private final StateService stateService;
+    private final AllStatesInProjectService allStatesInProjectService;
     private final StateTransitionsService stateTransitionsService;
 
     private Set<String> startStates;
     private List<Path> pathList;
 
-    public PathFinder(StateTransitionsJointTable stateTransitionsJointTable, StateService stateService,
+    public PathFinder(StateTransitionsJointTable stateTransitionsJointTable, AllStatesInProjectService allStatesInProjectService,
                       StateTransitionsService stateTransitionsService) {
         this.stateTransitionsJointTable = stateTransitionsJointTable;
-        this.stateService = stateService;
+        this.allStatesInProjectService = allStatesInProjectService;
         this.stateTransitionsService = stateTransitionsService;
     }
 
@@ -75,7 +75,7 @@ public class PathFinder {
     private void setPathScore(Path path) {
         int score = 0;
         for (String stateName : path.getStates()) {
-            Optional<State> state = stateService.getState(stateName);
+            Optional<State> state = allStatesInProjectService.getState(stateName);
             if (state.isPresent()) score += state.get().getPathScore();
         }
         for (StateTransition stateTrans : path.getTransitions()) {
