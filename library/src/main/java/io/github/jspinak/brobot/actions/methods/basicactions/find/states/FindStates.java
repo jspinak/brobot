@@ -42,9 +42,9 @@ public class FindStates {
         tempStateRepo.getAllStateImages().forEach(stateImage -> {
             Match matchFromPattern = new Match.Builder()
                 .setRegion(stateImage.getLargestDefinedFixedRegionOrNewRegion())
-                .setBufferedImage(stateImage.getPatterns().getFirst().getBImage()) // must be an exact match
+                .setBufferedImage(stateImage.getPatterns().get(0).getBImage()) // must be an exact match
                 .setStateObjectData(stateImage)
-                .setSearchImage(stateImage.getPatterns().getFirst().getBImage())
+                .setSearchImage(stateImage.getPatterns().get(0).getBImage())
                 .setName(stateImage.getName())
                 .setSimScore(.99)
                 .build();

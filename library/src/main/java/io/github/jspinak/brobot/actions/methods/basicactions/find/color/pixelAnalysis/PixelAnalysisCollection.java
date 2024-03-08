@@ -1,6 +1,7 @@
 package io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis;
 
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles.ColorCluster;
+import io.github.jspinak.brobot.datatypes.primitives.image.Image;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.imageUtils.MatOps;
 import io.github.jspinak.brobot.reports.Report;
@@ -44,9 +45,9 @@ public class PixelAnalysisCollection {
         analyses.put(HSV, new HashMap<>());
     }
 
-    public PixelAnalysisCollection(Scene scene) {
-        analyses.get(BGR).put(SCENE, scene.getImage().getMatBGR());
-        analyses.get(HSV).put(SCENE, scene.getImage().getMatHSV());
+    public PixelAnalysisCollection(Image scene) {
+        analyses.get(BGR).put(SCENE, scene.getMatBGR());
+        analyses.get(HSV).put(SCENE, scene.getMatHSV());
     }
 
     public void add(PixelAnalysis pixelAnalysis) {

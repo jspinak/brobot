@@ -2,11 +2,11 @@ package io.github.jspinak.brobot.actions.methods.mockOrLiveInterface;
 
 import io.github.jspinak.brobot.actions.Permissions;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.MockColor;
-import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.Scene;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.histogram.FindHistogramsOneRegionOneImage;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.histogram.MockHistogram;
 import io.github.jspinak.brobot.actions.methods.sikuliWrappers.find.FindInScene;
 import io.github.jspinak.brobot.actions.methods.sikuliWrappers.text.GetTextWrapper;
+import io.github.jspinak.brobot.datatypes.primitives.image.Image;
 import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
 import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
@@ -55,12 +55,12 @@ public class MockOrLive {
      * @param scene the scene used as the template
      * @return a list of MatchObject
      */
-    public List<Match> findAll(Pattern pattern, Scene scene) {
+    public List<Match> findAll(Pattern pattern, Image scene) {
         if (permissions.isMock()) return mockFind.getMatches(pattern);
         return findInScene.findAllInScene(pattern, scene);
     }
 
-    public List<Match> findAllWords(Scene scene) {
+    public List<Match> findAllWords(Image scene) {
         if (permissions.isMock()) return mockFind.getWordMatches();
         return findInScene.getWordMatches(scene);
     }

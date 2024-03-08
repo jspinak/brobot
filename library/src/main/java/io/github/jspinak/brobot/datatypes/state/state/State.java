@@ -1,7 +1,6 @@
 package io.github.jspinak.brobot.datatypes.state.state;
 
-import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.Scene;
-import io.github.jspinak.brobot.buildStateStructure.buildWithoutNames.buildStateStructure.StateIllustration;
+import io.github.jspinak.brobot.illustratedHistory.StateIllustration;
 import io.github.jspinak.brobot.datatypes.primitives.image.Image;
 import io.github.jspinak.brobot.datatypes.primitives.match.MatchHistory;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
@@ -12,7 +11,6 @@ import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.St
 import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.StateRegion;
 import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.StateString;
 import io.github.jspinak.brobot.primatives.enums.StateEnum;
-import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -31,55 +29,29 @@ import java.util.*;
  * The shared Images are used for all other State searches.
  *
  */
-@Entity
 @Getter
 @Setter
 public class State {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id = 0L;
-
     private Long projectId = 0L;
-
     private String nameAsString = "";
-
-    @Transient // the name as a string is sufficient
     private StateEnum name;
     /**
      * StateText is text that appears on the screen and is a clue to look for images in this state.
      * Text search is a lot faster than image search, but cannot be used without an image search to identify a state.
      */
-    @ElementCollection
-    @CollectionTable(name = "state_stateText", joinColumns = @JoinColumn(name = "state_id", referencedColumnName = "id"))
     private Set<String> stateText = new HashSet<>();
-    @OneToMany(cascade = CascadeType.ALL)
-    @JoinTable(name = "state_stateImages",
-            joinColumns = @JoinColumn(name = "state_id", referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "stateImage_id", referencedColumnName = "id"))
     private Set<StateImage> stateImages = new HashSet<>();
     /**
      * StateStrings can change the expected state.
      * They have associated regions where typing the string has an effect.
      */
-    @OneToMany(cascade = CascadeType.ALL)
-    @JoinTable(name = "state_stateStrings",
-            joinColumns = @JoinColumn(name = "state_id", referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "stateString_id", referencedColumnName = "id"))
     private Set<StateString> stateStrings = new HashSet<>();
     /**
      * StateRegions can change the expected state when clicked or hovered over.
      * They can also perform text retrieval.
      */
-    @OneToMany(cascade = CascadeType.ALL)
-    @JoinTable(name = "state_stateRegions",
-            joinColumns = @JoinColumn(name = "state_id", referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "stateRegion_id", referencedColumnName = "id"))
     private Set<StateRegion> stateRegions = new HashSet<>();
-    @OneToMany(cascade = CascadeType.ALL)
-    @JoinTable(name = "state_stateLocations",
-            joinColumns = @JoinColumn(name = "state_id", referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "stateLocation_id", referencedColumnName = "id"))
     private Set<StateLocation> stateLocations = new HashSet<>();
     /**
      * When true, this State needs to be acted on before accessing other States.
@@ -92,8 +64,6 @@ public class State {
      * 'canHide' States is active when this State becomes active, these now hidden
      * States are added to the 'hidden' set.
      */
-    @ElementCollection
-    @CollectionTable(name = "state_canHide", joinColumns = @JoinColumn(name = "state_id", referencedColumnName = "id"))
     private Set<String> canHide = new HashSet<>();
     /**
      * Hiding a State means that this State covers the hidden State, and when this State is exited
@@ -105,8 +75,6 @@ public class State {
      * The hidden set is used by StateTransitions when there is a PREVIOUS Transition (PREVIOUS is
      * a variable StateEnum).
      */
-    @ElementCollection
-    @CollectionTable(name = "state_hidden", joinColumns = @JoinColumn(name = "state_id", referencedColumnName = "id"))
     private Set<String> hidden = new HashSet<>();
     private int pathScore = 1; // larger path scores discourage taking a path with this state
     /*
@@ -128,18 +96,12 @@ public class State {
      * Screenshots where the state is found. These can be used for realistic simulations or for
      * illustrating the state to display it visually. Not all StateImages need to be present.
      */
-    @OneToMany(cascade = CascadeType.ALL)
-    @JoinTable(name = "state_scenes",
-            joinColumns = @JoinColumn(name = "state_id", referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "scene_id", referencedColumnName = "id"))
-    private List<Scene> scenes = new ArrayList<>();
-    @Transient
+    private List<Image> scenes = new ArrayList<>();
     private List<StateIllustration> illustrations = new ArrayList<>();
     /**
      * Some actions take place without an associated Pattern or StateImage. These actions are stored in their
      * corresponding state.
      */
-    @OneToOne(cascade = CascadeType.ALL)
     private MatchHistory matchHistory = new MatchHistory();
 
     public String getName() {
@@ -248,7 +210,7 @@ public class State {
         private int pathScore = 1;
         private LocalDateTime lastAccessed;
         private int baseProbabilityExists = 100;
-        private final List<Scene> scenes = new ArrayList<>();
+        private final List<Image> scenes = new ArrayList<>();
         private final List<StateIllustration> illustrations = new ArrayList<>();
 
         public Builder(StateEnum stateName) {
@@ -309,12 +271,12 @@ public class State {
             return this;
         }
 
-        public Builder withScenes(List<Scene> scenes) {
+        public Builder withScenes(List<Image> scenes) {
             this.scenes.addAll(scenes);
             return this;
         }
 
-        public Builder addScenes(Scene... scenes) {
+        public Builder addScenes(Image... scenes) {
             this.scenes.addAll(List.of(scenes));
             return this;
         }

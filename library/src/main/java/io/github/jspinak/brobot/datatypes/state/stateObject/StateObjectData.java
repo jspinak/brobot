@@ -1,7 +1,7 @@
 package io.github.jspinak.brobot.datatypes.state.stateObject;
 
-import jakarta.persistence.Embeddable;
 import lombok.Getter;
+import lombok.Setter;
 
 /**
  * Provides the essential data fields to store a StateObject in other variables, like Match.
@@ -10,14 +10,14 @@ import lombok.Getter;
  * StateObject implementations such as StateImage have their own repositories and individual StateObjects can be found in the
  * respective repository using the data in this class.
  */
-@Embeddable
 @Getter
+@Setter
 public class StateObjectData {
 
-    private final Long stateObjectId;
-    private final StateObject.Type objectType;
-    private final String stateObjectName;
-    private final String ownerStateName;
+    private String stateObjectId;
+    private StateObject.Type objectType;
+    private String stateObjectName;
+    private String ownerStateName;
 
     public StateObjectData(StateObject stateObject) {
         this.stateObjectId = stateObject.getId();
@@ -27,7 +27,7 @@ public class StateObjectData {
     }
 
     public StateObjectData() {
-        stateObjectId = 0L;
+        stateObjectId = "";
         objectType = StateObject.Type.IMAGE;
         stateObjectName = "";
         ownerStateName = "";

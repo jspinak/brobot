@@ -1,10 +1,8 @@
 package io.github.jspinak.brobot.datatypes.primitives.match;
 
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
-import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import org.sikuli.script.Region;
 import org.sikuli.script.Screen;
 
 import java.time.LocalDateTime;
@@ -70,25 +68,17 @@ import static io.github.jspinak.brobot.actions.actionOptions.ActionOptions.Find.
  *      * a Find Action will occur in real execution. The Image will be used with other Actions,
  *      * and these Actions will have MatchSnapshots.
  */
-@Entity
 @Getter
 @Setter
 public class MatchSnapshot {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
-
     /**
      * The ActionOptions can be queried to find which settings lead to success.
      */
-    @OneToOne(cascade = CascadeType.ALL)
     private ActionOptions actionOptions = new ActionOptions.Builder()
             .setAction(ActionOptions.Action.FIND)
             .setFind(UNIVERSAL)
             .build();
-    @ElementCollection
-    @CollectionTable(name = "matchList", joinColumns = @JoinColumn(name = "matchSnapshot_id"))
     private List<Match> matchList = new ArrayList<>();
     private String text = "";
     private double duration = 0.0;

@@ -3,8 +3,8 @@ package io.github.jspinak.brobot.actions.methods.basicactions.find;
 import io.github.jspinak.brobot.actions.actionExecution.actionLifecycle.ActionLifecycleManagement;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.GetScenes;
-import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.Scene;
 import io.github.jspinak.brobot.actions.methods.sikuliWrappers.find.UseDefinedRegion;
+import io.github.jspinak.brobot.datatypes.primitives.image.Image;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
@@ -41,8 +41,8 @@ public class FindImages {
     void findEachStateObject(Matches matches, List<ObjectCollection> objectCollections) {
         getImageMatches(matches, objectCollections);
         List<Match> bestMatchPerStateObject = new ArrayList<>();
-        Set<Long> imageIds = matches.getUniqueImageIds();
-        for (Long id : imageIds) {
+        Set<String> imageIds = matches.getUniqueImageIds();
+        for (String id : imageIds) {
             List<Match> singleObjectMatchList = matches.getMatchObjectsWithTargetStateObject(id);
             Optional<Match> matchWithHighestScore = singleObjectMatchList.stream()
                     .max(java.util.Comparator.comparingDouble(Match::getScore));
@@ -84,7 +84,7 @@ public class FindImages {
          */
         List<StateImage> stateImages = objectCollections.get(0).getStateImages();
         while (actionLifecycleManagement.isOkToContinueAction(matches, stateImages.size())) {
-            List<Scene> scenes = getScenes.getScenes(actionOptions, objectCollections, 1, 0);
+            List<Image> scenes = getScenes.getScenes(actionOptions, objectCollections, 1, 0);
             findPatternsIteration.find(matches, stateImages, scenes);
             actionLifecycleManagement.incrementCompletedRepetitions(matches);
         }

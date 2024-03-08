@@ -11,7 +11,6 @@ import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.primitives.region.SearchRegions;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.imageUtils.BufferedImageOps;
-import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -32,14 +31,9 @@ import java.util.List;
  * Pattern should be @Embedded. This is the lowest level of object that should be stored in the database.
  * I removed the SikuliX Pattern since it is a non-JPA entity and caused problems with persistence. </p>
  */
-@Entity
 @Getter
 @Setter
 public class Pattern {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
 
     // fields from SikuliX Pattern
     private String url; // originally type URL, which requires conversion for use with JPA
@@ -50,20 +44,16 @@ public class Pattern {
     An image that should always appear in the same location has fixed==true.
     */
     private boolean fixed = false;
-    @OneToOne(cascade = CascadeType.ALL)
     private SearchRegions searchRegions = new SearchRegions();
     private boolean setKmeansColorProfiles = false; // this is an expensive operation and should be done only when needed
     //@Embedded
     //private KmeansProfilesAllSchemas kmeansProfilesAllSchemas = new KmeansProfilesAllSchemas();
     //@Embedded
     //private ColorCluster colorCluster = new ColorCluster();
-    @OneToOne(cascade = CascadeType.ALL)
     private MatchHistory matchHistory = new MatchHistory();
     private int index; // a unique identifier used for classification matrices
     private boolean dynamic = false; // dynamic images cannot be found using pattern matching
-    @Embedded
     private Position position = new Position(.5,.5); // use to convert a match to a location
-    @OneToOne(cascade = CascadeType.ALL)
     private Anchors anchors = new Anchors(); // for defining regions using this object as input
 
     /*
@@ -77,11 +67,8 @@ public class Pattern {
     an image, but this raises architecture concerns in Brobot. Most importantly, Match needs a representation of the
     image, and having Pattern within Match would create a circular class chain. Pattern also needs a MatchHistory to
     perform mock runs and MatchHistory contains a list of MatchSnapshot, which itself contains a list of Match objects.
-    For this reason, I've created a Brobot Image object and use this object in Match and in Pattern. ImageDTO is used to store the
-    BufferedImage in the database as a byte array. The most recent BufferedImage is saved in the byte array before
-    the Pattern is sent to the database.
+    For this reason, I've created a Brobot Image object and use this object in Match and in Pattern.
      */
-    @OneToOne(cascade = CascadeType.ALL)
     private Image image;
 
     public Pattern(String imgPath) {
@@ -132,22 +119,6 @@ public class Pattern {
      */
     public Mat getMatHSV() {
         return image.getMatHSV();
-    }
-
-    /**
-     * This is called before the Pattern is saved to the database. It saves the BufferedImage as a byte array in
-     * the imageDTO object.
-     */
-    public void setBytes() {
-        image.setBytesForPersistence();
-    }
-
-    /**
-     * This is called after the Pattern is retrieved from the database. The byte array in imageDTO is converted
-     * to a BufferedImage and saved in the Image object of the Pattern.
-     */
-    public void setBufferedImageFromBytes() {
-        image.setBufferedImageFromBytes();
     }
 
     private void setNameFromFilenameIfEmpty(String filename) {
@@ -259,7 +230,6 @@ public class Pattern {
     }
 
     public static class Builder {
-
         private String name;
         private Image image;
         private BufferedImage bufferedImage;

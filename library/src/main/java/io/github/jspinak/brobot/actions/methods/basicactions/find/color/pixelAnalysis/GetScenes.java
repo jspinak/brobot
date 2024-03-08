@@ -3,10 +3,10 @@ package io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAn
 import io.github.jspinak.brobot.actions.BrobotSettings;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.actions.methods.time.Time;
+import io.github.jspinak.brobot.datatypes.primitives.image.Image;
 import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import io.github.jspinak.brobot.illustratedHistory.IllustrateScreenshot;
-import io.github.jspinak.brobot.imageUtils.GetImageJavaCV;
 import io.github.jspinak.brobot.reports.Report;
 import org.springframework.stereotype.Component;
 
@@ -23,13 +23,10 @@ import java.util.List;
  */
 @Component
 public class GetScenes {
-
-    private final GetImageJavaCV getImageJavaCV;
     private final Time time;
     private final IllustrateScreenshot illustrateScreenshot;
 
-    public GetScenes(GetImageJavaCV getImageJavaCV, Time time, IllustrateScreenshot illustrateScreenshot) {
-        this.getImageJavaCV = getImageJavaCV;
+    public GetScenes(Time time, IllustrateScreenshot illustrateScreenshot) {
         this.time = time;
         this.illustrateScreenshot = illustrateScreenshot;
     }
@@ -41,14 +38,14 @@ public class GetScenes {
      * If passed as a parameter, the scenes to use are in the 1st ObjectCollection (index 0) in the Scene list.
      * Scenes can also be taken from the field BrobotSettings.screenshot when performing unit tests.
      */
-    public List<Scene> getScenes(ActionOptions actionOptions, List<ObjectCollection> objectCollections,
+    public List<Image> getScenes(ActionOptions actionOptions, List<ObjectCollection> objectCollections,
                                  int scenesToCapture, double secondsBetweenCaptures) {
-        List<Scene> scenes = new ArrayList<>();
+        List<Image> scenes = new ArrayList<>();
         boolean takeScreenshot = isOkToTakeScreenshot(actionOptions, objectCollections.toArray(new ObjectCollection[0]));
         if (takeScreenshot) {
             Report.println("Taking screenshot");
             for (int i=0; i<scenesToCapture; i++) {
-                scenes.add(new Scene("screenshot" + i + ".png"));
+                scenes.add(new Image("screenshot" + i + ".png"));
                 if (i<scenesToCapture-1) time.wait(secondsBetweenCaptures);
             }
             return scenes;
@@ -56,21 +53,21 @@ public class GetScenes {
         if (BrobotSettings.mock) {
             // If scenes are listed in the settings, use them.
             if (!BrobotSettings.screenshots.isEmpty()) {
-                BrobotSettings.screenshots.forEach(filename -> scenes.add(new Scene(filename)));
+                BrobotSettings.screenshots.forEach(filename -> scenes.add(new Image(filename)));
             }
             // If no scenes are listed in the settings, use a randomly generated scene.
-            else scenes.add(Scene.getEmptyScene());
+            else scenes.add(Image.getEmptyImage());
             return scenes;
         }
         // If scenes are passed as parameters, use them.
         List<Pattern> scenesInObjectCollection = objectCollections.get(0).getScenes();
         if (!scenesInObjectCollection.isEmpty()) {
             for (Pattern pattern : scenesInObjectCollection) {
-                scenes.add(new Scene(pattern.getImgpath()));
+                scenes.add(new Image(pattern.getImgpath()));
             }
             return scenes;
         }
-        scenes.add(Scene.getEmptyScene());
+        scenes.add(Image.getEmptyImage());
         return scenes;
     }
 
@@ -79,7 +76,7 @@ public class GetScenes {
      * @param objectCollections these contain scenes as images when passed as parameters
      * @return a list of scenes to use in matrix format
      */
-    public List<Scene> getScenes(ActionOptions actionOptions, List<ObjectCollection> objectCollections) {
+    public List<Image> getScenes(ActionOptions actionOptions, List<ObjectCollection> objectCollections) {
         return getScenes(actionOptions, objectCollections, 1, 0);
     }
 
