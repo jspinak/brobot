@@ -3,11 +3,6 @@ package io.github.jspinak.brobot.datatypes.primitives.region;
 import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.StateRegion;
-import io.github.jspinak.brobot.imageUtils.ScreenOps;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 import lombok.Getter;
 import lombok.Setter;
 import org.bytedeco.opencv.opencv_core.Rect;
@@ -19,14 +14,9 @@ import java.util.*;
 /**
  * Region uses methods from the SikuliX Region and adds new initializers and analysis tools.
  */
-@Entity
 @Setter
 @Getter
 public class Region implements Comparable<Region> {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
 
     private int x;
     private int y;
@@ -142,8 +132,8 @@ public class Region implements Comparable<Region> {
 
     public StateRegion inNullState() {
         return new StateRegion.Builder()
-                .inState("null")
-                .withSearchRegion(this)
+                .setOwnerStateName("null")
+                .setSearchRegion(this)
                 .build();
     }
 

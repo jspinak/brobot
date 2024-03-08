@@ -1,6 +1,5 @@
 package io.github.jspinak.brobot.datatypes.primitives.region;
 
-import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -11,25 +10,15 @@ import java.util.*;
  * could be useful when you are not sure where an Image may be but want to exclude
  * an area, or when the desired search area cannot be described by one rectangle.
  */
-@Entity
 @Getter
 @Setter
 public class SearchRegions {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
-
-    @OneToMany(cascade = CascadeType.ALL)
-    @JoinTable(name = "searchRegions_regions",
-            joinColumns = @JoinColumn(name = "searchRegions_id", referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "region_id", referencedColumnName = "id"))
     private List<Region> regions = new ArrayList<>();
     /**
      * The fixed region is usually defined when an image with a fixed location is found for the first time.
      * This region is then used in future FIND operations with the associated image.
      */
-    @OneToOne(cascade = CascadeType.ALL)
     private Region fixedRegion = new Region();
 
     /**

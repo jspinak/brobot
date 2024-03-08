@@ -1,7 +1,7 @@
 package io.github.jspinak.brobot.manageStates;
 
 import io.github.jspinak.brobot.actions.BrobotSettings;
-import io.github.jspinak.brobot.database.services.StateService;
+import io.github.jspinak.brobot.database.services.AllStatesInProjectService;
 import io.github.jspinak.brobot.datatypes.state.state.State;
 import io.github.jspinak.brobot.reports.Report;
 import org.springframework.stereotype.Component;
@@ -20,7 +20,7 @@ public class InitialStates {
 
     private final StateFinder stateFinder;
     private final StateMemory stateMemory;
-    private final StateService stateService;
+    private final AllStatesInProjectService allStatesInProjectService;
 
     int sumOfProbabilities = 0;
     /*
@@ -31,10 +31,10 @@ public class InitialStates {
      */
     private final Map<Set<String>, Integer> potentialActiveStates = new HashMap<>();
 
-    public InitialStates(StateFinder stateFinder, StateMemory stateMemory, StateService stateService) {
+    public InitialStates(StateFinder stateFinder, StateMemory stateMemory, AllStatesInProjectService allStatesInProjectService) {
         this.stateFinder = stateFinder;
         this.stateMemory = stateMemory;
-        this.stateService = stateService;
+        this.allStatesInProjectService = allStatesInProjectService;
     }
 
     public void addStateSet(int probability, String... stateNames) {
@@ -59,7 +59,7 @@ public class InitialStates {
                 Set<String> initialStates = entry.getKey();
                 initialStates.forEach(state -> stateMemory.addActiveState(state, true));
                 initialStates.forEach(name ->
-                        stateService.getState(name).ifPresent(State::setProbabilityToBaseProbability));
+                        allStatesInProjectService.getState(name).ifPresent(State::setProbabilityToBaseProbability));
                 return;
             }
         }

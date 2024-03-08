@@ -38,7 +38,7 @@ public class IllustrateMotion {
     public Mat getSceneWithMotion(SceneAnalysisCollection sceneAnalysisCollection, Scalar color) {
         Optional<SceneAnalysis> optLastScene = sceneAnalysisCollection.getLastSceneAnalysis();
         if (optLastScene.isEmpty()) return new Mat();
-        Mat sceneMat = optLastScene.get().getScene().getImage().getMatBGR();
+        Mat sceneMat = optLastScene.get().getScene().getMatBGR();
         List<Match> dynamicPixelMatches = sceneAnalysisCollection.getContours().getMatchList();
         return getSceneWithMotion(sceneMat, sceneAnalysisCollection.getResults(), dynamicPixelMatches, color);
     }

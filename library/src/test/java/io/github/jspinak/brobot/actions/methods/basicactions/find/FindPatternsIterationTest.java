@@ -2,17 +2,12 @@ package io.github.jspinak.brobot.actions.methods.basicactions.find;
 
 import io.github.jspinak.brobot.BrobotTestApplication;
 import io.github.jspinak.brobot.actions.actionExecution.MatchesInitializer;
-import io.github.jspinak.brobot.actions.actionExecution.actionLifecycle.ActionLifecycleManagement;
-import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.actions.methods.basicactions.TestData;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.GetScenes;
-import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.Scene;
-import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
+import io.github.jspinak.brobot.datatypes.primitives.image.Image;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
-import io.github.jspinak.brobot.datatypes.primitives.location.Position;
 import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
-import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.sikuli.script.ImagePath;
@@ -46,7 +41,7 @@ class FindPatternsIterationTest {
     void find_() {
         TestData testData = new TestData();
 
-        List<Scene> scenes = getScenes.getScenes(testData.getDefineInsideAnchors(), List.of(testData.getInsideAnchorObjects()));
+        List<Image> scenes = getScenes.getScenes(testData.getDefineInsideAnchors(), List.of(testData.getInsideAnchorObjects()));
         List<StateImage> stateImages = new ArrayList<>();
         stateImages.add(testData.getTopLeft());
         stateImages.add(testData.getBottomRight());

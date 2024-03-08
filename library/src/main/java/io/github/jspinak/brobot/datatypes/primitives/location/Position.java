@@ -1,6 +1,5 @@
 package io.github.jspinak.brobot.datatypes.primitives.location;
 
-import jakarta.persistence.Embeddable;
 import lombok.Getter;
 
 /**
@@ -9,7 +8,6 @@ import lombok.Getter;
  *    point to a location as an offset from the match's center. This is ok when you know the size of the
  *    image but less convenient for working with general areas of an image (i.e. top left, bottom right).
  */
-@Embeddable
 @Getter
 public class Position {
 

@@ -1,30 +1,23 @@
 package io.github.jspinak.brobot.datatypes.primitives.image;
 
+import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.imageUtils.BufferedImageOps;
 import io.github.jspinak.brobot.imageUtils.ImageOps;
-import jakarta.persistence.*;
 import lombok.Getter;
 import org.bytedeco.opencv.opencv_core.Mat;
-
 import java.awt.image.BufferedImage;
+
+import static java.awt.image.BufferedImage.TYPE_BYTE_BINARY;
 
 /**
  * The physical representation of an image, stored as a BufferedImage, sent to the database as a byte array, and
  * retrievable in these forms as well as a JavaCV Mat of BGR or HSV.
  */
-@Entity
 @Getter
 public class Image {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
-
     private String name;
-    @Transient
     private BufferedImage bufferedImage;
-    @Embedded
-    private ImageDTO imageDTO = new ImageDTO();
 
     public Image(BufferedImage bufferedImage) {
         this.bufferedImage = bufferedImage;
@@ -87,26 +80,20 @@ public class Image {
         this.bufferedImage = bufferedImage;
     }
 
-    /**
-     * Convert BufferedImage to a byte array to store in the database.
-     */
-    public void setBytesForPersistence() {
-        imageDTO.setBytesWithBufferedImage(bufferedImage);
-    }
-
-    /**
-     * Set BufferedImage after loading object from database.
-     */
-    public void setBufferedImageFromBytes() {
-        bufferedImage = imageDTO.getBufferedImage();
-    }
-
     public int w() {
         return bufferedImage.getWidth();
     }
 
     public int h() {
         return bufferedImage.getHeight();
+    }
+
+    public static Image getEmptyImage() {
+        Region r = new Region();
+        BufferedImage bufferedImage = new BufferedImage(r.w(), r.h(), TYPE_BYTE_BINARY);
+        Image image = new Image(bufferedImage);
+        image.name = "empty scene";
+        return image;
     }
 
 }

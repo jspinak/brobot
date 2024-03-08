@@ -2,7 +2,6 @@ package io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects;
 
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.stateObject.StateObject;
-import jakarta.persistence.*;
 import lombok.Data;
 
 /**
@@ -10,22 +9,19 @@ import lombok.Data;
  * has a special meaning for the owner State. For example, typing this
  * String may be part of a Transition for this State but not for other States.
  */
-@Entity
 @Data
 public class StateString {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
-
     private StateObject.Type objectType = StateObject.Type.STRING;
     private String name;
-    @OneToOne(cascade = CascadeType.ALL)
     private Region searchRegion; // sometimes we need to hover over or click on a region before typing the string
     private String ownerStateName = "null";
     private int timesActedOn = 0;
-
     private String string;
+
+    public String getId() {
+        return objectType.name() + name + searchRegion.getX() + searchRegion.getY() + searchRegion.getW() + searchRegion.getY() + string;
+    }
 
     private StateString(String string) {
         this.string = string;
@@ -49,20 +45,26 @@ public class StateString {
         private String name;
         private Region searchRegion;
         private String ownerStateName;
-        private String string;
+        private int timesActedOn;
+        private String string; // defined when build is called
 
-        public Builder called(String name) {
+        public Builder setName(String name) {
             this.name = name;
             return this;
         }
 
-        public Builder withSearchRegion(Region searchRegion) {
+        public Builder setSearchRegion(Region searchRegion) {
             this.searchRegion = searchRegion;
             return this;
         }
 
-        public Builder inState(String stateName) {
+        public Builder setOwnerStateName(String stateName) {
             this.ownerStateName = stateName;
+            return this;
+        }
+
+        public Builder setTimesActedOn(int timesActedOn) {
+            this.timesActedOn = timesActedOn;
             return this;
         }
 
@@ -72,6 +74,7 @@ public class StateString {
             stateString.name = name;
             stateString.searchRegion = searchRegion;
             stateString.ownerStateName = ownerStateName;
+            stateString.timesActedOn = timesActedOn;
             return stateString;
         }
 

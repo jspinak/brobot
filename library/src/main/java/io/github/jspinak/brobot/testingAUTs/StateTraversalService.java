@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.testingAUTs;
 
-import io.github.jspinak.brobot.database.services.StateService;
+import io.github.jspinak.brobot.database.services.AllStatesInProjectService;
 import io.github.jspinak.brobot.datatypes.state.state.State;
 import io.github.jspinak.brobot.manageStates.AdjacentStates;
 import io.github.jspinak.brobot.manageStates.StateTransitionsManagement;
@@ -12,15 +12,15 @@ import java.util.*;
 public class StateTraversalService {
 
     private final AdjacentStates adjacentStates;
-    private final StateService stateService;
+    private final AllStatesInProjectService allStatesInProjectService;
     private final UnvisitedStates unvisitedStates;
     private final StateTransitionsManagement stateTransitionsManagement;
 
-    public StateTraversalService(AdjacentStates adjacentStates, StateService stateService,
+    public StateTraversalService(AdjacentStates adjacentStates, AllStatesInProjectService allStatesInProjectService,
                                  UnvisitedStates unvisitedStates,
                                  StateTransitionsManagement stateTransitionsManagement) {
         this.adjacentStates = adjacentStates;
-        this.stateService = stateService;
+        this.allStatesInProjectService = allStatesInProjectService;
         this.unvisitedStates = unvisitedStates;
         this.stateTransitionsManagement = stateTransitionsManagement;
     }
@@ -34,7 +34,7 @@ public class StateTraversalService {
         Set<String> adjacentUnvisited = new HashSet<>();
         Set<String> adjacent = adjacentStates.getAdjacentStates();
         adjacent.forEach(stateName -> {
-            Optional<State> stateOpt = stateService.getState(stateName);
+            Optional<State> stateOpt = allStatesInProjectService.getState(stateName);
             stateOpt.ifPresent(state -> {
                 if (state.getTimesVisited() == 0) adjacentUnvisited.add(stateName);
             });
