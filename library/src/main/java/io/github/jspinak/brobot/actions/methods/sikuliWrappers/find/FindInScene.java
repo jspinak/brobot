@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.actions.methods.sikuliWrappers.find;
 
-import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.Scene;
+import io.github.jspinak.brobot.datatypes.primitives.image.Image;
 import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
 import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import org.sikuli.script.Finder;
@@ -25,12 +25,12 @@ public class FindInScene {
      * @param scene the scene to use as the background for find operations.
      * @return the Finder.
      */
-    private Finder getFinder(Scene scene) {
-        if (!scene.getImage().isEmpty()) return new Finder(scene.getImage().getBufferedImage());
+    private Finder getFinder(Image scene) {
+        if (!scene.isEmpty()) return new Finder(scene.getBufferedImage());
         return new Finder(scene.getName());
     }
 
-    public List<Match> findAllInScene(Pattern pattern, Scene scene) {
+    public List<Match> findAllInScene(Pattern pattern, Image scene) {
         Finder f = getFinder(scene);
         f.findAll(pattern.sikuli());
         List<Match> matchList = new ArrayList<>();
@@ -57,9 +57,9 @@ public class FindInScene {
      * @param scene can be created from a screenshot or file
      * @return a list of Match objects in the specified region
      */
-    public List<Match> getWordMatches(Scene scene) {
+    public List<Match> getWordMatches(Image scene) {
         List<Match> wordMatches = new ArrayList<>();
-        OCR.readWords(scene.getImage().getBufferedImage()).forEach(match -> {
+        OCR.readWords(scene.getBufferedImage()).forEach(match -> {
             Match m = new Match.Builder()
                     .setName("word")
                     .setSikuliMatch(match)

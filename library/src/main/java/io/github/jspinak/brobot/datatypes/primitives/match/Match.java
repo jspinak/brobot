@@ -1,6 +1,5 @@
 package io.github.jspinak.brobot.datatypes.primitives.match;
 
-import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.Scene;
 import io.github.jspinak.brobot.datatypes.primitives.image.Image;
 import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
 import io.github.jspinak.brobot.datatypes.primitives.location.Anchors;
@@ -12,7 +11,6 @@ import io.github.jspinak.brobot.datatypes.state.stateObject.StateObjectData;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.imageUtils.BufferedImageOps;
 
-import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -45,24 +43,16 @@ import java.time.LocalDateTime;
  *  *     Match objects have only one match, as opposed to Snapshots, which can have
  *  *       multiple Match objects.
  */
-@Entity
 @Getter
 @Setter
 public class Match {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
-
     // fields in the SikuliX Match
     private double score = 0.0;
-    @OneToOne(cascade = CascadeType.ALL)
     private Location target;
-    @OneToOne(cascade = CascadeType.ALL)
     private Image image;
     private String text = "";
     private String name = ""; // in SikuliX Element, extended by many SikuliX object classes, including Match.
-    @OneToOne(cascade = CascadeType.ALL)
     private Region region; // this region is a Brobot region; SikuliX Match has a SikuliX Region.
     // ---------------------------
 
@@ -74,20 +64,15 @@ public class Match {
 
     `searchImage` holds the image used to find the match.
      */
-    @OneToOne(cascade = CascadeType.ALL)
     private Image searchImage;
     /*
     The match may have come from a Region, in which case it won't have a Pattern object. The anchors are recorded here,
     regardless of which object created the match.
      */
-    @OneToOne(cascade = CascadeType.ALL)
     private Anchors anchors;
-    @Embedded
     private StateObjectData stateObjectData;
-    @Transient
     private Mat histogram;
-    @OneToOne(cascade = CascadeType.ALL)
-    private Scene scene;
+    private Image scene;
     private LocalDateTime timeStamp;
     // the old MatchObject had `private double duration;`
     private int timesActedOn = 0;
@@ -139,7 +124,7 @@ public class Match {
 
     public void setImageWithScene() {
         if (scene == null) return;
-        BufferedImage bImg = BufferedImageOps.getSubImage(scene.getImage().getBufferedImage(), region);
+        BufferedImage bImg = BufferedImageOps.getSubImage(scene.getBufferedImage(), region);
         if (image == null) image = new Image(bImg);
         else image.setBufferedImage(bImg);
     }
@@ -205,7 +190,7 @@ public class Match {
         private Anchors anchors;
         private StateObjectData stateObjectData;
         private Mat histogram;
-        private Scene scene;
+        private Image scene;
         private double simScore = -1;
 
         public Builder setSikuliMatch(org.sikuli.script.Match sikuliMatch) {
@@ -297,7 +282,7 @@ public class Match {
             return this;
         }
 
-        public Builder setScene(Scene scene) {
+        public Builder setScene(Image scene) {
             this.scene = scene;
             return this;
         }

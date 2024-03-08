@@ -4,7 +4,7 @@ import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.actions.actionOptions.CommonActionOptions;
 import io.github.jspinak.brobot.actions.parameterTuning.ParameterCollection;
 import io.github.jspinak.brobot.actions.parameterTuning.ParameterThresholds;
-import io.github.jspinak.brobot.database.services.StateService;
+import io.github.jspinak.brobot.database.services.AllStatesInProjectService;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.state.state.State;
@@ -26,14 +26,14 @@ public class CommonARClickCombos {
     private final RunARCombo runARCombo;
     private final CommonActionOptions commonActionOptions;
     private final CommonResults commonResults;
-    private final StateService stateService;
+    private final AllStatesInProjectService allStatesInProjectService;
 
     public CommonARClickCombos(RunARCombo runARCombo, CommonActionOptions commonActionOptions,
-                               CommonResults commonResults, StateService stateService) {
+                               CommonResults commonResults, AllStatesInProjectService allStatesInProjectService) {
         this.runARCombo = runARCombo;
         this.commonActionOptions = commonActionOptions;
         this.commonResults = commonResults;
-        this.stateService = stateService;
+        this.allStatesInProjectService = allStatesInProjectService;
     }
 
     public boolean clickAndFind(StateImage toClick, StateImage toFind) {
@@ -69,7 +69,7 @@ public class CommonARClickCombos {
                                        double maxWait, ActionOptions.Action actionType,
                                        int numberOfClicks) {
         if (Objects.equals(stateName, UnknownState.Enum.UNKNOWN.toString())) return false; // this could be true but requires additional coding
-        Optional<State> state = stateService.getState(stateName);
+        Optional<State> state = allStatesInProjectService.getState(stateName);
         if (state.isEmpty()) return false;
         ActionResultCombo arCombo = new ActionResultCombo();
         ActionOptions actionOptions1 = commonActionOptions.findAndMultipleClicks(maxWait, numberOfClicks);

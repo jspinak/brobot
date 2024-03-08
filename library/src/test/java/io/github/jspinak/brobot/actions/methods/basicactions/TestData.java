@@ -15,13 +15,16 @@ public class TestData {
 
     Pattern screenshot = new Pattern.Builder()
             .setFilename("../screenshots/floranext0")
+            .setId(1)
             .build();
     Pattern topL = new Pattern.Builder()
             .setFilename("topLeft")
+            .setId(2)
             .addAnchor(Positions.Name.TOPLEFT, Positions.Name.BOTTOMLEFT)
             .build();
     Pattern bottomR = new Pattern.Builder()
             .setFilename("bottomR2")
+            .setId(3)
             .addAnchor(Positions.Name.BOTTOMRIGHT, Positions.Name.TOPRIGHT)
             .build();
     StateImage topLeft = new StateImage.Builder()

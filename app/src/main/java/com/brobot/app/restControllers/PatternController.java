@@ -1,7 +1,8 @@
 package com.brobot.app.restControllers;
 
-import io.github.jspinak.brobot.database.services.PatternService;
-import io.github.jspinak.brobot.datatypes.primitives.image.PatternResponse;
+import com.brobot.app.responses.PatternResponse;
+import com.brobot.app.responses.PatternResponseMapper;
+import com.brobot.app.services.PatternService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,22 +16,25 @@ import java.util.stream.Collectors;
 public class PatternController {
 
     private final PatternService patternService;
+    private final PatternResponseMapper patternResponseMapper;
 
-    public PatternController(PatternService patternService) {
+    public PatternController(PatternService patternService,
+                             PatternResponseMapper patternResponseMapper) {
         this.patternService = patternService;
+        this.patternResponseMapper = patternResponseMapper;
     }
 
     @GetMapping("/all") // Maps to GET /api/patterns/all
     public List<PatternResponse> getAllPatterns() {
         return patternService.getAllPatterns().stream()
-                .map(PatternResponse::new)
+                .map(patternResponseMapper.INSTANCE::mapToResponse)
                 .collect(Collectors.toList());
     }
 
     @GetMapping("/{name}") // Maps to GET /api/patterns/{name}
     public List<PatternResponse> getPatterns(@PathVariable String name) {
         return patternService.getPatterns(name).stream()
-                .map(PatternResponse::new)
+                .map(patternResponseMapper.INSTANCE::mapToResponse)
                 .collect(Collectors.toList());
     }
 

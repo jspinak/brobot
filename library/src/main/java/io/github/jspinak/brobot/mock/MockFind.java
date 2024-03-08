@@ -2,7 +2,7 @@ package io.github.jspinak.brobot.mock;
 
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.actions.methods.time.ActionDurations;
-import io.github.jspinak.brobot.database.services.StateService;
+import io.github.jspinak.brobot.database.services.AllStatesInProjectService;
 import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
 import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import io.github.jspinak.brobot.datatypes.primitives.match.MatchSnapshot;
@@ -21,13 +21,13 @@ import java.util.Optional;
 public class MockFind {
     private final ActionDurations actionDurations;
     private final StateMemory stateMemory;
-    private final StateService stateService;
+    private final AllStatesInProjectService allStatesInProjectService;
     private final MockTime mockTime;
 
-    public MockFind(ActionDurations actionDurations, StateMemory stateMemory, StateService stateService, MockTime mockTime) {
+    public MockFind(ActionDurations actionDurations, StateMemory stateMemory, AllStatesInProjectService allStatesInProjectService, MockTime mockTime) {
         this.actionDurations = actionDurations;
         this.stateMemory = stateMemory;
-        this.stateService = stateService;
+        this.allStatesInProjectService = allStatesInProjectService;
         this.mockTime = mockTime;
     }
 
@@ -54,7 +54,7 @@ public class MockFind {
         mockTime.wait(actionDurations.getFindDuration(ActionOptions.Find.ALL_WORDS));
         List<Match> allMatches = new ArrayList<>();
         for (String stateName : stateMemory.getActiveStates()) {
-            Optional<State> state = stateService.getState(stateName);
+            Optional<State> state = allStatesInProjectService.getState(stateName);
             state.ifPresent(st -> {
                 Optional<MatchSnapshot> snapshot = st.getMatchHistory().getRandomSnapshot(ActionOptions.Action.FIND, stateName);
                 snapshot.ifPresent(snap -> allMatches.addAll(snap.getMatchList()));

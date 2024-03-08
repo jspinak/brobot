@@ -2,9 +2,9 @@ package io.github.jspinak.brobot.actions.methods.basicactions.find.color.classif
 
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.PixelAnalysis;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.PixelAnalysisCollection;
-import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.Scene;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.SceneAnalysis;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles.ColorCluster;
+import io.github.jspinak.brobot.datatypes.primitives.image.Image;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.imageUtils.MatOps3d;
 import io.github.jspinak.brobot.reports.Report;
@@ -38,7 +38,7 @@ public class ClassifyPixels {
         this.matOps3d = matOps3d;
     }
 
-    public SceneAnalysis getSceneAnalysis(List<PixelAnalysisCollection> pixelAnalysisCollections, Scene scene) {
+    public SceneAnalysis getSceneAnalysis(List<PixelAnalysisCollection> pixelAnalysisCollections, Image scene) {
         SceneAnalysis sceneAnalysis = new SceneAnalysis(pixelAnalysisCollections, scene);
         Mat indices3dBGR = getImageIndices(sceneAnalysis, BGR);
         Mat indices3dHSV = getImageIndices(sceneAnalysis, HSV);

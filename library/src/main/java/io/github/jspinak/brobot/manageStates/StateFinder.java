@@ -1,7 +1,7 @@
 package io.github.jspinak.brobot.manageStates;
 
 import io.github.jspinak.brobot.actions.actionExecution.Action;
-import io.github.jspinak.brobot.database.services.StateService;
+import io.github.jspinak.brobot.database.services.AllStatesInProjectService;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import io.github.jspinak.brobot.datatypes.state.state.State;
 import io.github.jspinak.brobot.reports.Report;
@@ -26,12 +26,12 @@ import static io.github.jspinak.brobot.actions.actionOptions.ActionOptions.Actio
 @Component
 public class StateFinder {
 
-    private final StateService stateService;
+    private final AllStatesInProjectService allStatesInProjectService;
     private final StateMemory stateMemory;
     private final Action action;
 
-    public StateFinder(StateService stateService, StateMemory stateMemory, Action action) {
-        this.stateService = stateService;
+    public StateFinder(AllStatesInProjectService allStatesInProjectService, StateMemory stateMemory, Action action) {
+        this.allStatesInProjectService = allStatesInProjectService;
         this.stateMemory = stateMemory;
         this.action = action;
     }
@@ -51,7 +51,7 @@ public class StateFinder {
 
     private void searchAllImagesForCurrentStates() {
         System.out.println("StateFinder: search all states| ");
-        Set<String> allStateEnums = stateService.getAllStateNames();
+        Set<String> allStateEnums = allStatesInProjectService.getAllStateNames();
         allStateEnums.remove("UNKNOWN");
         allStateEnums.forEach(this::findState);
         Report.println("");
@@ -59,7 +59,7 @@ public class StateFinder {
 
     public boolean findState(String stateName) {
         Report.print(stateName + ".");
-        Optional<State> state = stateService.getState(stateName);
+        Optional<State> state = allStatesInProjectService.getState(stateName);
         return state.filter(value -> action.perform(FIND, new ObjectCollection.Builder().withNonSharedImages(value).build())
                 .isSuccess()).isPresent();
     }

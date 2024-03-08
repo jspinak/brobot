@@ -4,7 +4,7 @@ import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.actions.actionOptions.CommonActionOptions;
 import io.github.jspinak.brobot.actions.parameterTuning.ParameterCollection;
 import io.github.jspinak.brobot.actions.parameterTuning.ParameterThresholds;
-import io.github.jspinak.brobot.database.services.StateService;
+import io.github.jspinak.brobot.database.services.AllStatesInProjectService;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import io.github.jspinak.brobot.datatypes.state.state.State;
 import io.github.jspinak.brobot.manageStates.UnknownState;
@@ -18,13 +18,13 @@ public class CommonARTypeCombos {
 
     private final CommonActionOptions commonActionOptions;
     private final CommonResults commonResults;
-    private final StateService stateService;
+    private final AllStatesInProjectService allStatesInProjectService;
 
     public CommonARTypeCombos(CommonActionOptions commonActionOptions,
-                              CommonResults commonResults, StateService stateService) {
+                              CommonResults commonResults, AllStatesInProjectService allStatesInProjectService) {
         this.commonActionOptions = commonActionOptions;
         this.commonResults = commonResults;
-        this.stateService = stateService;
+        this.allStatesInProjectService = allStatesInProjectService;
     }
 
     public boolean typeAndFindState(String stateName, String string) {
@@ -42,7 +42,7 @@ public class CommonARTypeCombos {
     public boolean typeAndStateAction(ActionOptions.Action resultAction, String stateName,
                                       String string, String modifier) {
         if (Objects.equals(stateName, UnknownState.Enum.UNKNOWN.toString())) return false; // this could be true but requires additional coding
-        Optional<State> state = stateService.getState(stateName);
+        Optional<State> state = allStatesInProjectService.getState(stateName);
         if (state.isEmpty()) return false;
         ActionResultCombo arCombo = new ActionResultCombo();
         // add the type action

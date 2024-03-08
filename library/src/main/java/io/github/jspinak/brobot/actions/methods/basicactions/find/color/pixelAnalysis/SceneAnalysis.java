@@ -5,6 +5,7 @@ import io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles.ColorSchema;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles.ColorStatProfile;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.contours.Contours;
+import io.github.jspinak.brobot.datatypes.primitives.image.Image;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import io.github.jspinak.brobot.illustratedHistory.Illustrations;
@@ -47,7 +48,7 @@ public class SceneAnalysis {
      */
 
     private List<PixelAnalysisCollection> pixelAnalysisCollections;
-    private Scene scene;
+    private Image scene;
     private Contours contours;
     // these matches are scene specific. for example, the matches from motion from the previous scene to this one.
     private List<Match> matchList = new ArrayList<>();
@@ -58,13 +59,13 @@ public class SceneAnalysis {
         analysis.put(HSV, new HashMap<>());
     }
 
-    public SceneAnalysis(List<PixelAnalysisCollection> pixelAnalysisCollections, Scene scene) {
+    public SceneAnalysis(List<PixelAnalysisCollection> pixelAnalysisCollections, Image scene) {
         this.pixelAnalysisCollections = pixelAnalysisCollections;
         this.scene = scene;
-        addAnalysis(BGR, SCENE, scene.getImage().getMatBGR());
-        addAnalysis(HSV, SCENE, scene.getImage().getMatHSV());
+        addAnalysis(BGR, SCENE, scene.getMatBGR());
+        addAnalysis(HSV, SCENE, scene.getMatHSV());
         illustrations = new Illustrations();
-        illustrations.setScene(scene.getImage().getMatBGR());
+        illustrations.setScene(scene.getMatBGR());
     }
 
     /**
@@ -73,13 +74,13 @@ public class SceneAnalysis {
      * No color analysis is required.
      * @param scene
      */
-    public SceneAnalysis(Scene scene) {
+    public SceneAnalysis(Image scene) {
         pixelAnalysisCollections = new ArrayList<>();
         this.scene = scene;
-        addAnalysis(BGR, SCENE, scene.getImage().getMatBGR());
-        addAnalysis(HSV, SCENE, scene.getImage().getMatHSV());
+        addAnalysis(BGR, SCENE, scene.getMatBGR());
+        addAnalysis(HSV, SCENE, scene.getMatHSV());
         illustrations = new Illustrations();
-        illustrations.setScene(scene.getImage().getMatBGR());
+        illustrations.setScene(scene.getMatBGR());
     }
 
     public void addAnalysis(ColorCluster.ColorSchemaName colorSchemaName, Analysis analysis, Mat mat) {

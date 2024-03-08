@@ -30,11 +30,11 @@ class AnchorRegionTest {
         Region region = new Region();
         Matches matches = new Matches();
         StateRegion reg1 = new StateRegion.Builder()
-                .withSearchRegion(0,50,100,20)
+                .setSearchRegion(0,50,100,20)
                 .addAnchor(Positions.Name.TOPLEFT, Positions.Name.BOTTOMLEFT)
                 .build();
         StateRegion reg2 = new StateRegion.Builder()
-                .withSearchRegion(1800,900,100,20)
+                .setSearchRegion(1800,900,100,20)
                 .addAnchor(Positions.Name.BOTTOMRIGHT, Positions.Name.TOPRIGHT)
                 .build();
         Match m1;

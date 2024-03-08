@@ -1,0 +1,20 @@
+package com.brobot.app.responses;
+
+import com.brobot.app.database.entities.StateImageEntity;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.factory.Mappers;
+
+@Mapper(componentModel = "spring")
+public interface StateImageResponseMapper {
+
+    StateImageResponseMapper INSTANCE = Mappers.getMapper(StateImageResponseMapper.class);
+
+    @Mapping(target = "patterns", source = "patterns", qualifiedByName = "mapPatternToPatternResponse")
+    StateImageResponse mapToResponse(StateImage stateImage);
+
+    @Mapping(target = "patterns", source = "patterns", qualifiedByName = "mapPatternResponseToPattern")
+    StateImage mapFromResponse(StateImageResponse stateImageResponse);
+
+}

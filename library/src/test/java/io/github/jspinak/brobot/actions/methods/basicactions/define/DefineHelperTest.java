@@ -2,7 +2,6 @@ package io.github.jspinak.brobot.actions.methods.basicactions.define;
 
 import io.github.jspinak.brobot.BrobotTestApplication;
 import io.github.jspinak.brobot.actions.methods.basicactions.TestData;
-import io.github.jspinak.brobot.database.services.StateImageService;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -24,14 +23,9 @@ class DefineHelperTest {
     @Autowired
     DefineHelper defineHelper;
 
-    @Autowired
-    StateImageService stateImageService;
-
     @Test
     void findMatches() {
         TestData testData = new TestData();
-        stateImageService.saveStateImages(testData.getBottomRight(), testData.getTopLeft());
-        //saveStateImages(testData);
         Matches matches = new Matches();
         matches.setActionOptions(testData.getDefineInsideAnchors());
         defineHelper.findMatches(matches, testData.getInsideAnchorObjects());

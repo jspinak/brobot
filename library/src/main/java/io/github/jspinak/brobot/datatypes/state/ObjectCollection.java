@@ -11,7 +11,6 @@ import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.St
 import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.StateRegion;
 import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.StateString;
 import io.github.jspinak.brobot.reports.Report;
-import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -29,42 +28,14 @@ import static io.github.jspinak.brobot.datatypes.primitives.location.Positions.N
  * - Image: these are scenes, or screenshots on file, that are used for the operation instead of the active environment
  *   (what is currently on the monitor).
  */
-@Entity
 @Getter
 @Setter
 public class ObjectCollection {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
-
-    @OneToMany(cascade = CascadeType.ALL)
-    @JoinTable(name = "objColl_stateLocations",
-            joinColumns = @JoinColumn(name = "objColl_id", referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "stateLocation_id", referencedColumnName = "id"))
     private List<StateLocation> stateLocations = new ArrayList<>();
-    @OneToMany(cascade = CascadeType.ALL)
-    @JoinTable(name = "objColl_stateImages",
-            joinColumns = @JoinColumn(name = "objColl_id", referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "stateImage_id", referencedColumnName = "id"))
     private List<StateImage> stateImages = new ArrayList<>();
-    @OneToMany(cascade = CascadeType.ALL)
-    @JoinTable(name = "objColl_stateRegions",
-            joinColumns = @JoinColumn(name = "objColl_id", referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "stateRegion_id", referencedColumnName = "id"))
     private List<StateRegion> stateRegions = new ArrayList<>();
-    @OneToMany(cascade = CascadeType.ALL)
-    @JoinTable(name = "objColl_stateStrings",
-            joinColumns = @JoinColumn(name = "objColl_id", referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "stateString_id", referencedColumnName = "id"))
     private List<StateString> stateStrings = new ArrayList<>();
-    @ElementCollection
-    @CollectionTable(name = "matches", joinColumns = @JoinColumn(name = "objColl_id"))
     private List<Matches> matches = new ArrayList<>();
-    @OneToMany(cascade = CascadeType.ALL)
-    @JoinTable(name = "objColl_scenes",
-            joinColumns = @JoinColumn(name = "objColl_id", referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "scene_id", referencedColumnName = "id"))
     private List<Pattern> scenes = new ArrayList<>();
 
     private ObjectCollection() {}
@@ -187,12 +158,12 @@ public class ObjectCollection {
     }
 
     public static class Builder {
-        private final List<StateLocation> stateLocations = new ArrayList<>();
-        private final List<StateImage> stateImages = new ArrayList<>();
-        private final List<StateRegion> stateRegions = new ArrayList<>();
-        private final List<StateString> stateStrings = new ArrayList<>();
-        private final List<Matches> matches = new ArrayList<>();
-        private final List<Pattern> scenes = new ArrayList<>();
+        private List<StateLocation> stateLocations = new ArrayList<>();
+        private List<StateImage> stateImages = new ArrayList<>();
+        private List<StateRegion> stateRegions = new ArrayList<>();
+        private List<StateString> stateStrings = new ArrayList<>();
+        private List<Matches> matches = new ArrayList<>();
+        private List<Pattern> scenes = new ArrayList<>();
 
         public Builder withLocations(Location... locations) {
             for (Location location : locations) {
@@ -208,6 +179,11 @@ public class ObjectCollection {
             return this;
         }
 
+        public Builder setLocations(List<StateLocation> locations) {
+            this.stateLocations = locations;
+            return this;
+        }
+
         public Builder withImages(StateImage... stateImages) {
             this.stateImages.addAll(Arrays.asList(stateImages));
             return this;
@@ -215,6 +191,11 @@ public class ObjectCollection {
 
         public Builder withImages(List<StateImage> stateImages) {
             this.stateImages.addAll(stateImages);
+            return this;
+        }
+
+        public Builder setImages(List<StateImage> stateImages) {
+            this.stateImages = stateImages;
             return this;
         }
 
@@ -257,6 +238,11 @@ public class ObjectCollection {
             return this;
         }
 
+        public Builder setRegions(List<StateRegion> regions) {
+            this.stateRegions = regions;
+            return this;
+        }
+
         public Builder withGridSubregions(int rows, int columns, Region... regions) {
             for (Region region : regions) {
                 for (Region gridRegion : region.getGridRegions(rows, columns))
@@ -284,16 +270,26 @@ public class ObjectCollection {
             return this;
         }
 
+        public Builder setStrings(List<StateString> strings) {
+            this.stateStrings = strings;
+            return this;
+        }
+
         public Builder withMatches(Matches... matches) {
             Collections.addAll(this.matches, matches);
+            return this;
+        }
+
+        public Builder setMatches(List<Matches> matches) {
+            this.matches = matches;
             return this;
         }
 
         public Builder withMatchObjectsAsRegions(io.github.jspinak.brobot.datatypes.primitives.match.Match... matches) {
             for (io.github.jspinak.brobot.datatypes.primitives.match.Match match : matches) {
                 this.stateRegions.add(new StateRegion.Builder()
-                        .withSearchRegion(match.getRegion())
-                        .inState("null")
+                        .setSearchRegion(match.getRegion())
+                        .setOwnerStateName("null")
                         .build());
             }
             return this;
@@ -313,6 +309,11 @@ public class ObjectCollection {
 
         public Builder withScenes(Pattern... patterns) {
             this.scenes.addAll(List.of(patterns));
+            return this;
+        }
+
+        public Builder setScenes(List<Pattern> patterns) {
+            this.scenes = patterns;
             return this;
         }
 
