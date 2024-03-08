@@ -6,7 +6,6 @@ import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.StateLocation;
 import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.StateRegion;
 import io.github.jspinak.brobot.reports.Report;
-import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -18,22 +17,15 @@ import java.util.Optional;
  * The relative position is used unless the Region is not defined
  * or the boolean 'definedByXY' is explicitly set to true;
  */
-@Entity
 @Getter
 @Setter
 public class Location {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
 
     private String name;
     private boolean definedByXY = true;
     private int x = -1;
     private int y = -1;
-    @OneToOne(cascade = CascadeType.ALL)
     private Region region;
-    @Embedded
     private Position position;
     private Positions.Name anchor;
 
@@ -222,15 +214,15 @@ public class Location {
 
     public StateLocation asStateLocationInNullState() {
         return new StateLocation.Builder()
-                .inState("null")
-                .withLocation(this)
+                .setOwnerStateName("null")
+                .setLocation(this)
                 .build();
     }
 
     public ObjectCollection asObjectCollection() {
         StateLocation stateLocation = new StateLocation.Builder()
-                .withLocation(this)
-                .inState("null")
+                .setLocation(this)
+                .setOwnerStateName("null")
                 .setPosition(Positions.Name.TOPLEFT)
                 .build();
         return new ObjectCollection.Builder()

@@ -1,13 +1,23 @@
 package io.github.jspinak.brobot.datatypes.state.stateObject.stateImage;
 
+import io.github.jspinak.brobot.BrobotTestApplication;
 import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.imageUtils.MatOps;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+// SpringBootTest is necessary to load the JavaCV dependencies
+@SpringBootTest(classes = BrobotTestApplication.class)
 class StateImageTest {
+
+    @BeforeAll
+    public static void setupHeadlessMode() {
+        System.setProperty("java.awt.headless", "false");
+    }
 
     StateImage getImage() {
         Pattern pattern = new Pattern.Builder()

@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.manageStates;
 
-import io.github.jspinak.brobot.database.services.StateService;
+import io.github.jspinak.brobot.database.services.AllStatesInProjectService;
 import io.github.jspinak.brobot.datatypes.state.state.State;
 import io.github.jspinak.brobot.services.StateTransitionsService;
 import lombok.Getter;
@@ -19,7 +19,7 @@ import java.util.function.BooleanSupplier;
 public class TransitionFetcher {
 
     private final StateMemory stateMemory;
-    private final StateService stateService;
+    private final AllStatesInProjectService allStatesInProjectService;
     private final StateTransitionsService stateTransitionsService;
 
     private String transitionToEnum; // may be PREVIOUS
@@ -31,10 +31,10 @@ public class TransitionFetcher {
     private StateTransition toTransition;
     private State toState;
 
-    public TransitionFetcher(StateMemory stateMemory, StateService stateService,
+    public TransitionFetcher(StateMemory stateMemory, AllStatesInProjectService allStatesInProjectService,
                              StateTransitionsService stateTransitionsService) {
         this.stateMemory = stateMemory;
-        this.stateService = stateService;
+        this.allStatesInProjectService = allStatesInProjectService;
         this.stateTransitionsService = stateTransitionsService;
     }
 
@@ -71,7 +71,7 @@ public class TransitionFetcher {
 
     private void setFromTransitions(String from, String to) {
         Optional<StateTransitions> fromTransitions = stateTransitionsService.getTransitions(from);
-        stateService.getState(from).ifPresent(state -> fromState = state);
+        allStatesInProjectService.getState(from).ifPresent(state -> fromState = state);
         fromTransitions.ifPresent(transitions -> {
             this.fromTransitions = transitions;
             transitionToEnum = stateTransitionsService.getTransitionToEnum(from, to);
@@ -83,7 +83,7 @@ public class TransitionFetcher {
 
     private void setToTransitions(String to) {
         Optional<StateTransitions> fromTransitions = stateTransitionsService.getTransitions(to);
-        stateService.getState(to).ifPresent(state -> toState = state);
+        allStatesInProjectService.getState(to).ifPresent(state -> toState = state);
         fromTransitions.ifPresent(transitions -> {
             this.toTransitions = transitions;
             this.toTransition = transitions.getTransitionFinish();

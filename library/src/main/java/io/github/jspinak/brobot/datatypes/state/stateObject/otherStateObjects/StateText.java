@@ -2,7 +2,6 @@ package io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects;
 
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.stateObject.StateObject;
-import jakarta.persistence.*;
 import lombok.Data;
 
 /**
@@ -11,23 +10,18 @@ import lombok.Data;
  * the set of States to search for in case Brobot is lost.
  * StateText is not yet implemented by Brobot.
  */
-@Entity
 @Data
 public class StateText {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
-
     private StateObject.Type objectType = StateObject.Type.TEXT;
     private String name;
-    @OneToOne(cascade = CascadeType.ALL)
     private Region searchRegion;
     private String ownerStateName = "null";
-
     private String text;
 
-    private StateText() {}
+    public String getId() {
+        return objectType.name() + name + searchRegion.getX() + searchRegion.getY() + searchRegion.getW() + searchRegion.getY() + text;
+    }
 
     public boolean defined() { return text != null && !text.isEmpty(); }
 
@@ -35,19 +29,25 @@ public class StateText {
         private String name;
         private Region searchRegion;
         private String ownerStateName;
+        private String text = "";
 
-        public Builder called(String name) {
+        public Builder setName(String name) {
             this.name = name;
             return this;
         }
 
-        public Builder withSearchRegion(Region searchRegion) {
+        public Builder setSearchRegion(Region searchRegion) {
             this.searchRegion = searchRegion;
             return this;
         }
 
-        public Builder inState(String stateName) {
+        public Builder setOwnerStateName(String stateName) {
             this.ownerStateName = stateName;
+            return this;
+        }
+
+        public Builder setText(String text) {
+            this.text = text;
             return this;
         }
 
@@ -56,6 +56,7 @@ public class StateText {
             stateText.name = name;
             stateText.searchRegion = searchRegion;
             stateText.ownerStateName = ownerStateName;
+            stateText.text = text;
             return stateText;
         }
 

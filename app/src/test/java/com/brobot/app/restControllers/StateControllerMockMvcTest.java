@@ -1,8 +1,8 @@
 package com.brobot.app.restControllers;
 
-import io.github.jspinak.brobot.database.services.PatternService;
-import io.github.jspinak.brobot.database.services.StateService;
-import io.github.jspinak.brobot.database.data.*;
+import com.brobot.app.database.repositories.*;
+import com.brobot.app.services.PatternService;
+import com.brobot.app.services.StateService;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,9 +44,6 @@ class StateControllerMockMvcTest {
     private PatternService patternService;
 
     @MockBean
-    private SceneRepo sceneRepo;
-
-    @MockBean
     private StateImageRepo stateImageRepo;
 
     @MockBean
@@ -60,9 +57,6 @@ class StateControllerMockMvcTest {
 
     @MockBean
     private StateStringRepo stateStringRepo;
-
-    @MockBean
-    private StateTextRepo stateTextRepo;
 
     @Test
     void getAllStates() throws Exception {

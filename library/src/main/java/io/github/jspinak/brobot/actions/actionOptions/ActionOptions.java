@@ -8,7 +8,6 @@ import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.StateRegion;
 import io.github.jspinak.brobot.datatypes.primitives.region.SearchRegions;
-import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.sikuli.basics.Settings;
@@ -23,14 +22,9 @@ import java.util.function.Predicate;
  * Since an Action can be performed without selecting and building an ActionOptions object,
  *   the variables need to be initialized with default values.
  */
-@Entity
 @Getter
 @Setter
 public class ActionOptions {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
 
     /*
      * BasicActions:
@@ -97,7 +91,6 @@ public class ActionOptions {
     /*
      * tempFind is a user defined Find method that is not meant to be reused.
      */
-    @Transient
     private BiConsumer<Matches, List<ObjectCollection>> tempFind;
 
     /*
@@ -107,8 +100,6 @@ public class ActionOptions {
      *   unless the matching ObjectCollection is empty, in which case the last
      *   non-empty ObjectCollection will be used.
      */
-    @ElementCollection
-    @CollectionTable(name = "findActions", joinColumns = @JoinColumn(name = "actionOptions_id"))
     private List<Find> findActions = new ArrayList<>();
     /*
      * When set to true, subsequent Find operations will act as confirmations of the initial matches.
@@ -188,7 +179,6 @@ public class ActionOptions {
     /*
      * successEvaluation defines the success criteria for the Find operation.
      */
-    @Transient
     private Predicate<Matches> successCriteria;
 
     /*
@@ -232,9 +222,7 @@ public class ActionOptions {
      * These options are also used for drags, and can move the mouse once the drag is finished.
      */
     private boolean moveMouseAfterClick = false;
-    @OneToOne(cascade = CascadeType.ALL)
     private Location locationAfterAction = new Location(-1, 0); // disabled by default (x = -1)
-    @OneToOne(cascade = CascadeType.ALL)
     private Location offsetLocationBy = new Location(-1, 0);
 
     /*
@@ -242,7 +230,6 @@ public class ActionOptions {
      * SearchRegion is not already defined. It will not change the SearchRegion of RegionImagePairs
      * that have already been defined. For more information on RegionImagePairs, see the class.
      */
-    @OneToOne(cascade = CascadeType.ALL)
     private SearchRegions searchRegions = new SearchRegions();
 
     /*

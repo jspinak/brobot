@@ -3,7 +3,7 @@ package io.github.jspinak.brobot.services;
 import io.github.jspinak.brobot.actions.BrobotSettings;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles.SetAllProfiles;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles.SetKMeansProfiles;
-import io.github.jspinak.brobot.database.services.StateService;
+import io.github.jspinak.brobot.database.services.AllStatesInProjectService;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.datatypes.state.state.State;
 import io.github.jspinak.brobot.reports.Report;
@@ -12,14 +12,14 @@ import org.springframework.stereotype.Component;
 @Component
 public class Init {
 
-    private final StateService stateService;
+    private final AllStatesInProjectService allStatesInProjectService;
     private final SetAllProfiles setAllProfiles;
     private final SetKMeansProfiles setKMeansProfiles;
 
     private int lastImageIndex = 1; // 0 should correspond to "no class" since matrices are typically initialized with 0s
 
-    public Init(StateService stateService, SetAllProfiles setAllProfiles, SetKMeansProfiles setKMeansProfiles) {
-        this.stateService = stateService;
+    public Init(AllStatesInProjectService allStatesInProjectService, SetAllProfiles setAllProfiles, SetKMeansProfiles setKMeansProfiles) {
+        this.allStatesInProjectService = allStatesInProjectService;
         this.setAllProfiles = setAllProfiles;
         this.setKMeansProfiles = setKMeansProfiles;
     }
@@ -31,7 +31,7 @@ public class Init {
     public void setBundlePathAndPreProcessImages(String path) {
         org.sikuli.script.ImagePath.setBundlePath(path);
         Report.println("Saving indices for images in states: ");
-        stateService.getAllStates().forEach(this::preProcessImages);
+        allStatesInProjectService.getAllStates().forEach(this::preProcessImages);
         Report.println();
     }
 
