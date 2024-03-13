@@ -5,8 +5,10 @@ import io.github.jspinak.brobot.datatypes.primitives.location.Anchor;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
+import org.springframework.stereotype.Component;
 
 @Mapper(componentModel = "spring", uses = PositionMapper.class)
+@Component
 public interface AnchorResponseMapper {
     AnchorResponseMapper INSTANCE = Mappers.getMapper(AnchorResponseMapper.class);
 

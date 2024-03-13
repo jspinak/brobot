@@ -5,8 +5,10 @@ import io.github.jspinak.brobot.datatypes.primitives.location.Location;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
+import org.springframework.stereotype.Component;
 
 @Mapper(componentModel = "spring")
+@Component
 public interface LocationResponseMapper {
 
     LocationResponseMapper INSTANCE = Mappers.getMapper(LocationResponseMapper.class);
