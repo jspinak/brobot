@@ -5,8 +5,10 @@ import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
+import org.springframework.stereotype.Component;
 
 @Mapper(componentModel = "spring")
+@Component
 public interface MatchesMapper {
 
     MatchesMapper INSTANCE = Mappers.getMapper(MatchesMapper.class);
