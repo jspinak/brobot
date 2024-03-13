@@ -4,8 +4,10 @@ import io.github.jspinak.brobot.datatypes.primitives.region.SearchRegions;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
+import org.springframework.stereotype.Component;
 
 @Mapper(componentModel = "spring")
+@Component
 public interface SearchRegionsResponseMapper {
 
     SearchRegionsResponseMapper INSTANCE = Mappers.getMapper(SearchRegionsResponseMapper.class);
