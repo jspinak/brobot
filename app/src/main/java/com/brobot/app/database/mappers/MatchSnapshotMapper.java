@@ -5,8 +5,10 @@ import io.github.jspinak.brobot.datatypes.primitives.match.MatchSnapshot;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
+import org.springframework.stereotype.Component;
 
 @Mapper(componentModel = "spring")
+@Component
 public interface MatchSnapshotMapper {
 
     MatchSnapshotMapper INSTANCE = Mappers.getMapper(MatchSnapshotMapper.class);
