@@ -1,7 +1,8 @@
 package com.brobot.app.buildWithoutNames.screenObservations;
 
 import com.brobot.app.TestData;
-import com.brobot.app.services.ImageService;
+import io.github.jspinak.brobot.app.buildWithoutNames.screenObservations.GetUsableArea;
+import io.github.jspinak.brobot.app.services.ImageService;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;

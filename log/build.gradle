@@ -1,0 +1,40 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '3.2.4'
+	id 'io.spring.dependency-management' version '1.1.4'
+	id 'io.freefair.lombok' version '8.6'
+}
+
+group = 'io.github.jspinak.brobot'
+version = '0.0.1-SNAPSHOT'
+
+java {
+	sourceCompatibility = '20'
+}
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	implementation project(':library') // Dependency on the library module
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+	implementation 'ch.qos.logback:logback-classic:1.4.12'
+
+	implementation 'co.elastic.clients:elasticsearch-java:8.3.3'
+	implementation 'com.fasterxml.jackson.core:jackson-databind:2.12.3'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-data-elasticsearch' //:3.2.2
+	implementation 'org.springframework.data:spring-data-elasticsearch'
+
+	implementation group: 'org.mapstruct', name: 'mapstruct', version: '1.5.5.Final'
+}
