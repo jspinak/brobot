@@ -1,0 +1,45 @@
+// buildscript block is optional if you don't need to apply any plugins or configure repositories
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        // Add any build script dependencies here if needed
+    }
+}
+
+plugins {
+    id 'org.springframework.boot' version '3.2.4' apply false
+    id("io.spring.dependency-management") version "1.1.4" // necessary for using the dependencyManagement tag
+    //id 'java'
+}
+
+allprojects {
+    // Apply plugins or configurations that should be applied to all sub-modules
+    // For example, to apply the Java plugin to all sub-modules:
+    apply plugin: 'java'
+
+    repositories {
+        mavenCentral()
+    }
+
+    // Add the BOM configuration here for centralized management
+    dependencyManagement {
+        imports {
+            mavenBom "org.springframework.boot:spring-boot-dependencies:3.2.4"
+        }
+    }
+}
+
+subprojects {
+    // Add configurations or dependencies that should be applied to all sub-modules
+    // For example, to add a common dependency to all sub-modules:
+    tasks.register("prepareKotlinBuildScriptModel"){}
+
+    dependencies {
+        //implementation 'org.projectlombok:lombok'
+        //annotationProcessor 'org.projectlombok:lombok'
+    }
+}
+
+

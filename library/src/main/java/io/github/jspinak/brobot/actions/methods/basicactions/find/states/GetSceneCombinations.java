@@ -29,7 +29,7 @@ public class GetSceneCombinations {
      * @param objectCollections all scenes and images
      * @return a list of initialized SceneCombination objects without images
      */
-    List<SceneCombination> getAllSceneCombinations(List<ObjectCollection> objectCollections) {
+    public List<SceneCombination> getAllSceneCombinations(List<ObjectCollection> objectCollections) {
         List<SceneCombination> sceneCombinations = new ArrayList<>();
         // get the dynamic pixel mat for all screen combinations
         for (int i = 0; i < objectCollections.size(); i++) { // Iterate through each ObjectCollection
