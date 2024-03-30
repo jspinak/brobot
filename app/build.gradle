@@ -1,15 +1,16 @@
 plugins {
 	id 'java'
-	id 'org.springframework.boot' version '3.2.2'
-	id 'io.freefair.lombok' version '8.4'
-	//id 'io.spring.dependency-management' version '1.1.4'
+	id 'org.springframework.boot' version '3.2.4'
+	id 'io.spring.dependency-management' version '1.1.4'
+	id 'io.freefair.lombok' version '8.6'
 }
 
-group = 'com.brobot'
+// module-specific configurations
+group = 'io.github.jspinak.brobot'
 version = '0.0.1-SNAPSHOT'
 
 java {
-	sourceCompatibility = '21'
+	sourceCompatibility = '20'
 }
 
 configurations {
@@ -23,20 +24,23 @@ repositories {
 }
 
 dependencies {
-	implementation files('../library/build/libs/brobot-1.0.7.jar')
+	//implementation files('../library/build/libs/brobot-1.0.7.jar')
+	implementation project(':library') // Dependency on the library module
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
 
 	// JUnit Jupiter for testing
 	testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.0'
 	testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.0'
 	// Spring Boot Starter Test for Spring Boot testing support
-	testImplementation 'org.springframework.boot:spring-boot-starter-test:3.2.2' //3.1.2
+	implementation 'org.springframework.boot:spring-boot-starter-test' //:3.2.2
 	implementation group: 'com.h2database', name: 'h2', version: '2.2.224'
 
-	implementation 'org.springframework.boot:spring-boot-starter-web:3.2.2' //3.1.2
+	implementation 'org.springframework.boot:spring-boot-starter-web' //:3.2.2
 	//implementation 'jakarta.persistence:jakarta.persistence-api:3.1.0'
 	// database
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa:3.2.2'
-	implementation 'org.springframework.boot:spring-boot-starter-data-rest:3.2.2'
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.springframework.boot:spring-boot-starter-data-rest'
 	//implementation group: 'org.postgresql', name: 'postgresql', version: '42.7.1'
 
 	implementation('com.sikulix:sikulixapi:2.0.5') {
@@ -48,8 +52,4 @@ dependencies {
 	implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.0'
 	implementation 'com.github.kwhat:jnativehook:2.2.2'
 	implementation group: 'org.mapstruct', name: 'mapstruct', version: '1.5.5.Final'
-}
-
-tasks.named('test') {
-	useJUnitPlatform()
 }

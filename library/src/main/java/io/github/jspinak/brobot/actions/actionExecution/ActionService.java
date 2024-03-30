@@ -1,6 +1,5 @@
 package io.github.jspinak.brobot.actions.actionExecution;
 
-import co.elastic.clients.util.TriConsumer;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.FindFunctions;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
@@ -10,7 +9,6 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
 
 /**
  * Returns the corresponding Action class as specified in ActionOptions.

@@ -14,7 +14,7 @@ import io.github.jspinak.brobot.reports.Output;
 import io.github.jspinak.brobot.reports.Report;
 import io.github.jspinak.brobot.testingAUTs.ActionLog;
 import io.github.jspinak.brobot.testingAUTs.ActionLogCreator;
-import io.github.jspinak.brobot.testingAUTs.ActionLogSender;
+import io.github.jspinak.brobot.testingAUTs.LogListener;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -40,21 +40,21 @@ public class ActionExecution {
     private final ActionLifecycleManagement actionLifecycleManagement;
     private final DatasetManager datasetManager;
     private final ActionLogCreator actionLogCreator;
-    private final ActionLogSender actionLogSender;
     private final MatchesInitializer matchesInitializer;
+    private final LogListener logListener;
 
     public ActionExecution(Time time, IllustrateScreenshot illustrateScreenshot, SelectRegions selectRegions,
                            ActionLifecycleManagement actionLifecycleManagement, DatasetManager datasetManager,
-                           ActionLogCreator actionLogCreator, ActionLogSender actionLogSender,
-                           MatchesInitializer matchesInitializer) {
+                           ActionLogCreator actionLogCreator,
+                           MatchesInitializer matchesInitializer, LogListener logListener) {
         this.time = time;
         this.illustrateScreenshot = illustrateScreenshot;
         this.selectRegions = selectRegions;
         this.actionLifecycleManagement = actionLifecycleManagement;
         this.datasetManager = datasetManager;
         this.actionLogCreator = actionLogCreator;
-        this.actionLogSender = actionLogSender;
         this.matchesInitializer = matchesInitializer;
+        this.logListener = logListener;
     }
 
     /**
@@ -94,7 +94,7 @@ public class ActionExecution {
                 //time.getStartTime(actionOptions.getAction()),
                 //time.getEndTime(actionOptions.getAction()),
                 matches, actionOptions, objectCollections);
-        actionLogSender.sendActionLogToElastic(actionLog);
+        logListener.logEvent(actionLog);
     }
 
     private void printAction(ActionOptions actionOptions, ObjectCollection... objectCollections) {
