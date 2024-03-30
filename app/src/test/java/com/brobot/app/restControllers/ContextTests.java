@@ -1,5 +1,6 @@
 package com.brobot.app.restControllers;
 
+import io.github.jspinak.brobot.app.restControllers.StateController;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

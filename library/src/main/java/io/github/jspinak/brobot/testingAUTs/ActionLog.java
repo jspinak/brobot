@@ -2,8 +2,6 @@ package io.github.jspinak.brobot.testingAUTs;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.elasticsearch.annotations.Document;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -13,7 +11,6 @@ import java.util.Set;
 @Setter
 public class ActionLog {
 
-    @Id
     private String id;
     //private LocalDateTime startTime;
     //private LocalDateTime endTime;

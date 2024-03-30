@@ -1,6 +1,7 @@
 package com.brobot.app.database.repositories;
 
-import com.brobot.app.database.entities.StateEntity;
+import io.github.jspinak.brobot.app.database.entities.StateEntity;
+import io.github.jspinak.brobot.app.database.repositories.StateRepo;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
