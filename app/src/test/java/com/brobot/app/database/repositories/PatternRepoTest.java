@@ -1,7 +1,8 @@
 package com.brobot.app.database.repositories;
 
-import com.brobot.app.database.entities.PatternEntity;
-import com.brobot.app.database.mappers.PatternMapper;
+import io.github.jspinak.brobot.app.database.entities.PatternEntity;
+import io.github.jspinak.brobot.app.database.mappers.PatternMapper;
+import io.github.jspinak.brobot.app.database.repositories.PatternRepo;
 import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -44,7 +45,7 @@ class PatternRepoTest {
 
         // Assert that the pattern is found and has the correct name
         assertFalse(foundPatternList.isEmpty());
-        PatternEntity foundPattern = foundPatternList.getFirst();
+        PatternEntity foundPattern = foundPatternList.get(0);
         assertThat(patternMapper.INSTANCE.mapFromEntity(foundPattern).getName()).isEqualTo("TestPattern");
     }
 

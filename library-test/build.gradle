@@ -1,0 +1,32 @@
+plugins {
+    id 'java'
+    id 'io.spring.dependency-management' version '1.1.4'
+    id 'io.freefair.lombok' version '8.6'
+}
+
+java {
+    sourceCompatibility = '20'
+}
+
+group 'io.github.jspinak'
+version '1.0.7'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation project(':library') // Dependency on the library module
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+    // Spring Boot Starter Test for Spring Boot testing support
+    testImplementation 'org.springframework.boot:spring-boot-starter-test:3.2.0'
+    implementation('com.sikulix:sikulixapi:2.0.5') {
+        exclude group: 'org.slf4j', module: 'slf4j-nop'
+    }
+    implementation group: 'org.bytedeco', name: 'javacv-platform', version: '1.5.10'
+}
+
+test {
+    useJUnitPlatform()
+}
