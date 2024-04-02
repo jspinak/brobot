@@ -46,8 +46,8 @@ public class Location {
 
     public Location(Location loc) {
         double percentOfW, percentOfH;
-        if (loc.getRegion().isPresent()) {
-            this.region = loc.getRegion().get();
+        if (isDefinedWithRegion()) {
+            this.region = loc.getRegion();
             if (loc.getPercentOfW().isPresent()) percentOfW = loc.getPercentOfW().get();
             else percentOfW = .5;
             if (loc.getPercentOfH().isPresent()) percentOfH = loc.getPercentOfH().get();
@@ -144,11 +144,6 @@ public class Location {
     public Optional<Double> getPercentOfH() {
         if (isDefinedByXY()) return Optional.empty();
         return Optional.of(position.getPercentH());
-    }
-
-    public Optional<Region> getRegion() {
-        if (isDefinedByXY()) return Optional.empty();
-        return Optional.of(region);
     }
 
     public void addPercentOfW(int addPercent) {
@@ -252,6 +247,10 @@ public class Location {
 
     private boolean isDefinedByXY() {
         return definedByXY || region == null;
+    }
+
+    private boolean isDefinedWithRegion() {
+        return !isDefinedByXY();
     }
 
     /*
@@ -360,7 +359,7 @@ public class Location {
             y = location.y;
             if (location.isDefinedByXY()) return this;
             double percentOfW, percentOfH;
-            if (location.getRegion().isPresent()) this.region = location.getRegion().get();
+            if (location.isDefinedWithRegion()) this.region = location.getRegion();
             if (location.getPercentOfW().isPresent()) percentOfW = location.getPercentOfW().get();
             else percentOfW = .5;
             if (location.getPercentOfH().isPresent()) percentOfH = location.getPercentOfH().get();

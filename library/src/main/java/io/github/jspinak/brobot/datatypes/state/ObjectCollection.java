@@ -38,7 +38,7 @@ public class ObjectCollection {
     private List<Matches> matches = new ArrayList<>();
     private List<Pattern> scenes = new ArrayList<>();
 
-    private ObjectCollection() {}
+    public ObjectCollection() {} // public for mapping
 
     public boolean isEmpty() {
         return stateLocations.isEmpty()
@@ -158,6 +158,7 @@ public class ObjectCollection {
     }
 
     public static class Builder {
+        //private int lastId = 0; // currently id is given only to images
         private List<StateLocation> stateLocations = new ArrayList<>();
         private List<StateImage> stateImages = new ArrayList<>();
         private List<StateRegion> stateRegions = new ArrayList<>();
@@ -183,6 +184,11 @@ public class ObjectCollection {
             this.stateLocations = locations;
             return this;
         }
+
+        //private Builder addImage(StateImage img) {
+        //    img.
+        //    this.stateImages.add()
+        //}
 
         public Builder withImages(StateImage... stateImages) {
             this.stateImages.addAll(Arrays.asList(stateImages));

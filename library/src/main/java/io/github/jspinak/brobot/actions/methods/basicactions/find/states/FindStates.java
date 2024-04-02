@@ -48,7 +48,8 @@ public class FindStates {
                 .setName(stateImage.getName())
                 .setSimScore(.99)
                 .build();
-            matches.add(matchFromPattern);
+            int minSize = matches.getActionOptions().getMinArea();
+            if (minSize <= matchFromPattern.size()) matches.add(matchFromPattern);
         });
     }
 

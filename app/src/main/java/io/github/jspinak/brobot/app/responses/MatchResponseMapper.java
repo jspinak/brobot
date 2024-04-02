@@ -4,26 +4,25 @@ import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
-import org.springframework.stereotype.Component;
 
-@Mapper(componentModel = "spring")
-@Component
+@Mapper(componentModel = "spring", uses = {LocationResponseMapper.class, ImageResponseMapper.class,
+        RegionResponseMapper.class, AnchorsResponseMapper.class})
 public interface MatchResponseMapper {
 
     MatchResponseMapper INSTANCE = Mappers.getMapper(MatchResponseMapper.class);
 
-    @Mapping(source = "Location", target = "LocationResponse")
-    @Mapping(source = "Image", target = "ImageResponse")
-    @Mapping(source = "Region", target = "RegionResponse")
-    @Mapping(source = "Anchors", target = "AnchorsResponse")
-    @Mapping(source = "stateObjectData", target = "stateObjectData", qualifiedByName = "mapToStateObjectData")
-    MatchResponse mapToResponse(Match match);
+    @Mapping(source = "target", target = "target")
+    @Mapping(source = "image", target = "image")
+    @Mapping(source = "region", target = "region")
+    @Mapping(source = "anchors", target = "anchors")
+    //@Mapping(source = "stateObjectData", target = "stateObjectData", qualifiedByName = "mapToStateObjectData")
+    MatchResponse map(Match match);
 
-    @Mapping(source = "LocationResponse", target = "Location")
-    @Mapping(source = "ImageResponse", target = "Image")
-    @Mapping(source = "RegionResponse", target = "Region")
-    @Mapping(source = "AnchorsResponse", target = "Anchors")
-    @Mapping(source = "stateObjectData", target = "stateObjectData", qualifiedByName = "mapFromStateObjectData")
-    Match mapFromResponse(MatchResponse matchResponse);
+    @Mapping(source = "target", target = "target")
+    @Mapping(source = "image", target = "image")
+    @Mapping(source = "region", target = "region")
+    @Mapping(source = "anchors", target = "anchors")
+    //@Mapping(source = "stateObjectData", target = "stateObjectData", qualifiedByName = "mapFromStateObjectData")
+    Match map(MatchResponse matchResponse);
 
 }

@@ -1,6 +1,5 @@
-package com.brobot.app.restControllers;
+package io.github.jspinak.brobot.app.restControllers;
 
-import io.github.jspinak.brobot.app.restControllers.StateController;
 import io.github.jspinak.brobot.app.services.PatternService;
 import io.github.jspinak.brobot.app.services.StateService;
 import io.github.jspinak.brobot.app.database.repositories.*;
@@ -58,6 +57,9 @@ class StateControllerMockMvcTest {
 
     @MockBean
     private StateStringRepo stateStringRepo;
+
+    @MockBean
+    private ImageRepo imageRepo;
 
     @Test
     void getAllStates() throws Exception {

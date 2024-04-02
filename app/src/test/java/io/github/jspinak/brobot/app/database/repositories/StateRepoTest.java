@@ -1,4 +1,4 @@
-package com.brobot.app.database.repositories;
+package io.github.jspinak.brobot.app.database.repositories;
 
 import io.github.jspinak.brobot.app.database.entities.StateEntity;
 import io.github.jspinak.brobot.app.database.repositories.StateRepo;

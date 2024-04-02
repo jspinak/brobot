@@ -4,8 +4,10 @@ import io.github.jspinak.brobot.app.database.embeddable.PositionEmbeddable;
 import io.github.jspinak.brobot.app.database.embeddable.SearchRegionsEmbeddable;
 import io.github.jspinak.brobot.datatypes.primitives.location.Position;
 import jakarta.persistence.*;
+import lombok.Data;
 
 @Entity
+@Data
 public class PatternEntity {
 
     @Id
@@ -32,6 +34,6 @@ public class PatternEntity {
     @OneToOne(cascade = CascadeType.ALL)
     private AnchorsEntity anchors = new AnchorsEntity();
     @OneToOne(cascade = CascadeType.ALL)
-    private ImageEntity imageEntity;
+    private ImageEntity image;
 
 }

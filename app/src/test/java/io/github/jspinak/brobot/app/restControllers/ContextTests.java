@@ -1,6 +1,5 @@
-package com.brobot.app.restControllers;
+package io.github.jspinak.brobot.app.restControllers;
 
-import io.github.jspinak.brobot.app.restControllers.StateController;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +16,7 @@ class ContextTests {
     }
 
     @Autowired
-    private StateController stateController;
+    StateController stateController;
 
     @Test
     void contextLoads() throws Exception {

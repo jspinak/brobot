@@ -7,20 +7,19 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 import org.mapstruct.factory.Mappers;
-import org.springframework.stereotype.Component;
 
 import java.awt.image.BufferedImage;
 
 @Mapper(componentModel = "spring")
-@Component
 public interface ImageMapper {
     ImageMapper INSTANCE = Mappers.getMapper(ImageMapper.class);
 
     @Mapping(source = "bufferedImage", target = "bytes", qualifiedByName = "convertBufferedImageToBytes")
-    ImageEntity mapToEntity(Image image);
+    @Mapping(target = "id", ignore = true)
+    ImageEntity map(Image image);
 
     @Mapping(source = "bytes", target = "bufferedImage", qualifiedByName = "convertBytesToBufferedImage")
-    Image mapFromEntity(ImageEntity imageEntity);
+    Image map(ImageEntity imageEntity);
 
     @Named("convertBufferedImageToBytes")
     default byte[] convertBufferedImageToBytes(BufferedImage bufferedImage) {

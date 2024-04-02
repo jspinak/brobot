@@ -1,11 +1,14 @@
 package io.github.jspinak.brobot.app.database.entities;
 
 import jakarta.persistence.*;
+import lombok.Data;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
+@Data
 public class MatchSnapshotEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

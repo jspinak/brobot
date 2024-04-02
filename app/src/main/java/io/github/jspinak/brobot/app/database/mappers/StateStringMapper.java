@@ -5,17 +5,16 @@ import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.St
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
-import org.springframework.stereotype.Component;
 
-@Mapper(componentModel = "spring")
-@Component
+@Mapper(componentModel = "spring", uses = RegionMapper.class)
 public interface StateStringMapper {
 
     StateStringMapper INSTANCE = Mappers.getMapper(StateStringMapper.class);
 
-    @Mapping(source = "Region", target = "RegionEmbeddable")
-    StateStringEntity mapToEntity(StateString stateString);
-    @Mapping(source = "RegionEmbeddable", target = "Region")
-    StateString mapFromEntity(StateStringEntity stateStringEntity);
+    @Mapping(source = "searchRegion", target = "searchRegion")
+    @Mapping(target = "id", ignore = true)
+    StateStringEntity map(StateString stateString);
+    @Mapping(source = "searchRegion", target = "searchRegion")
+    StateString map(StateStringEntity stateStringEntity);
 
 }
