@@ -34,8 +34,7 @@ import java.util.*;
 public class State {
 
     private Long projectId = 0L;
-    private String nameAsString = "";
-    private StateEnum name;
+    private String name = "";
     /**
      * StateText is text that appears on the screen and is a clue to look for images in this state.
      * Text search is a lot faster than image search, but cannot be used without an image search to identify a state.
@@ -104,11 +103,6 @@ public class State {
      */
     private MatchHistory matchHistory = new MatchHistory();
 
-    public String getName() {
-        if (!nameAsString.isEmpty()) return nameAsString;
-        return name.toString();
-    }
-
     public void setSearchRegionForAllImages(Region searchRegion) {
         stateImages.forEach(imageObj -> imageObj.setSearchRegions(searchRegion));
     }
@@ -127,11 +121,6 @@ public class State {
 
     public void addVisit() {
         timesVisited++;
-    }
-
-    public String getNameAsString() {
-        if (!nameAsString.isEmpty()) return nameAsString;
-        return name.toString();
     }
 
     /**
@@ -197,8 +186,7 @@ public class State {
 
     public static class Builder {
 
-        private final String nameAsString;
-        private StateEnum name;
+        private final String name;
         private final Set<String> stateText = new HashSet<>();
         private final Set<StateImage> stateImages = new HashSet<>();
         private final Set<StateString> stateStrings = new HashSet<>();
@@ -213,13 +201,8 @@ public class State {
         private final List<Image> scenes = new ArrayList<>();
         private final List<StateIllustration> illustrations = new ArrayList<>();
 
-        public Builder(StateEnum stateName) {
+        public Builder(String stateName) {
             this.name = stateName;
-            this.nameAsString = stateName.toString();
-        }
-
-        public Builder(String nameAsString) {
-            this.nameAsString = nameAsString;
         }
 
         public Builder withText(String... stateText) {
@@ -288,12 +271,11 @@ public class State {
 
         public State build() {
             State state = new State();
-            state.nameAsString = nameAsString;
             state.name = name;
             state.stateText = stateText;
-            for (StateImage image : stateImages) image.setOwnerStateName(nameAsString);
-            for (StateString string : stateStrings) string.setOwnerStateName(nameAsString);
-            for (StateRegion region : stateRegions) region.setOwnerStateName(nameAsString);
+            for (StateImage image : stateImages) image.setOwnerStateName(name);
+            for (StateString string : stateStrings) string.setOwnerStateName(name);
+            for (StateRegion region : stateRegions) region.setOwnerStateName(name);
             state.stateImages = stateImages;
             state.stateStrings = stateStrings;
             state.stateRegions = stateRegions;

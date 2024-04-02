@@ -152,4 +152,21 @@ public class BufferedImageOps {
         }
     }
 
+    public static BufferedImage base64StringToImage(String base64String) {
+        byte[] imageBytes = Base64.getDecoder().decode(base64String); // Decode Base64 String to byte array
+        ByteArrayInputStream bis = new ByteArrayInputStream(imageBytes); // Create ByteArrayInputStream from the byte array
+        BufferedImage image = null; // Read image from ByteArrayInputStream and create BufferedImage
+        try {
+            image = ImageIO.read(bis);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        try {
+            bis.close(); // Close the ByteArrayInputStream
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return image;
+    }
+
 }

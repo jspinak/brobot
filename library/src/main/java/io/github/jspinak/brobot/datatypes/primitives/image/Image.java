@@ -3,7 +3,7 @@ package io.github.jspinak.brobot.datatypes.primitives.image;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.imageUtils.BufferedImageOps;
 import io.github.jspinak.brobot.imageUtils.ImageOps;
-import lombok.Getter;
+import lombok.Data;
 import org.bytedeco.opencv.opencv_core.Mat;
 import java.awt.image.BufferedImage;
 
@@ -13,11 +13,13 @@ import static java.awt.image.BufferedImage.TYPE_BYTE_BINARY;
  * The physical representation of an image, stored as a BufferedImage, sent to the database as a byte array, and
  * retrievable in these forms as well as a JavaCV Mat of BGR or HSV.
  */
-@Getter
+@Data
 public class Image {
 
     private String name;
     private BufferedImage bufferedImage;
+
+    public Image() {} // for mapping
 
     public Image(BufferedImage bufferedImage) {
         this.bufferedImage = bufferedImage;

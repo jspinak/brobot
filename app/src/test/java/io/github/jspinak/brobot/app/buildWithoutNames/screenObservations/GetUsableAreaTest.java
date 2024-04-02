@@ -1,20 +1,18 @@
-package com.brobot.app.buildWithoutNames.screenObservations;
+package io.github.jspinak.brobot.app.buildWithoutNames.screenObservations;
 
-import com.brobot.app.TestData;
-import io.github.jspinak.brobot.app.buildWithoutNames.screenObservations.GetUsableArea;
+import io.github.jspinak.brobot.app.TestData;
 import io.github.jspinak.brobot.app.services.ImageService;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Import;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
-@ComponentScan({"com.brobot.app","com.brobot.app.services,com.brobot.app.database.repositories," +
-        "com.brobot.app.database.mappers"})
 class GetUsableAreaTest {
     @BeforeAll
     public static void setupHeadlessMode() {
@@ -24,8 +22,8 @@ class GetUsableAreaTest {
     @Autowired
     GetUsableArea getUsableArea;
 
-    @Autowired
-    ImageService imageService;
+    //@Autowired
+    //ImageService imageService;
 
     @Test
     void defineInFile() {

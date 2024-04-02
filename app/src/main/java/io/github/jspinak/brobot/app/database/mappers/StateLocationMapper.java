@@ -5,23 +5,23 @@ import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.St
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
-import org.springframework.stereotype.Component;
 
-@Mapper(componentModel = "spring")
-@Component
+@Mapper(componentModel = "spring", uses = {LocationMapper.class, PositionMapper.class, AnchorsMapper.class,
+        MatchHistoryMapper.class})
 public interface StateLocationMapper {
 
     StateLocationMapper INSTANCE = Mappers.getMapper(StateLocationMapper.class);
 
-    @Mapping(source = "Location", target = "LocationEntity")
-    @Mapping(source = "Position", target = "PositionEmbeddable")
-    @Mapping(source = "Anchors", target = "AnchorsEntity")
-    @Mapping(source = "MatchHistory", target = "MatchHistoryEntity")
-    StateLocationEntity mapToEntity(StateLocation stateLocation);
-    @Mapping(source = "LocationEntity", target = "Location")
-    @Mapping(source = "PositionEmbeddable", target = "Position")
-    @Mapping(source = "AnchorsEntity", target = "Anchors")
-    @Mapping(source = "MatchHistoryEntity", target = "MatchHistory")
-    StateLocation mapFromEntity(StateLocationEntity stateLocationEntity);
+    @Mapping(source = "location", target = "location")
+    @Mapping(source = "position", target = "position")
+    @Mapping(source = "anchors", target = "anchors")
+    @Mapping(source = "matchHistory", target = "matchHistory")
+    @Mapping(target = "id", ignore = true)
+    StateLocationEntity map(StateLocation stateLocation);
+    @Mapping(source = "location", target = "location")
+    @Mapping(source = "position", target = "position")
+    @Mapping(source = "anchors", target = "anchors")
+    @Mapping(source = "matchHistory", target = "matchHistory")
+    StateLocation map(StateLocationEntity stateLocationEntity);
 
 }

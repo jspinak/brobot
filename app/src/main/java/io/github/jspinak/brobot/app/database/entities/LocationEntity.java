@@ -6,8 +6,10 @@ import io.github.jspinak.brobot.datatypes.primitives.location.Position;
 import io.github.jspinak.brobot.datatypes.primitives.location.Positions;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import jakarta.persistence.*;
+import lombok.Data;
 
 @Entity
+@Data
 public class LocationEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

@@ -4,8 +4,10 @@ import io.github.jspinak.brobot.app.database.embeddable.RegionEmbeddable;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.StateString;
 import jakarta.persistence.*;
+import lombok.Data;
 
 @Entity
+@Data
 public class StateStringEntity {
 
     @Id

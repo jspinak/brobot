@@ -20,22 +20,21 @@ import java.util.stream.Stream;
 public class StateService {
 
     private final StateRepo stateRepo;
-    private final StateMapper stateMapper;
+    private StateMapper stateMapper = StateMapper.INSTANCE;
 
-    public StateService(StateRepo stateRepo, StateMapper stateMapper) {
+    public StateService(StateRepo stateRepo) {
         this.stateRepo = stateRepo;
-        this.stateMapper = stateMapper;
     }
 
     public Optional<State> getState(String name) {
         Optional<StateEntity> state = stateRepo.findByName(name);
-        return state.map(stateMapper.INSTANCE::mapFromEntity);
+        return state.map(stateMapper::map);
     }
 
     public List<State> getAllStates() {
         List<State> stateList = new ArrayList<>();
         for (StateEntity stateEntity : stateRepo.findAll()) {
-            stateList.add(stateMapper.INSTANCE.mapFromEntity(stateEntity));
+            stateList.add(stateMapper.map(stateEntity));
         }
         return stateList;
     }
@@ -76,7 +75,7 @@ public class StateService {
      */
     public void save(State state) {
         if (state == null) return;
-        stateRepo.save(stateMapper.INSTANCE.mapToEntity(state));
+        stateRepo.save(stateMapper.map(state));
     }
 
     public void resetTimesVisited() {getAllStates().forEach(state -> state.setTimesVisited(0));
@@ -103,7 +102,7 @@ public class StateService {
 
     public List<State> getAllInProject(Long projectId) {
         return stateRepo.findByProjectId(projectId).stream()
-                .map(stateMapper.INSTANCE::mapFromEntity)
+                .map(stateMapper::map)
                 .collect(Collectors.toList());
     }
 }

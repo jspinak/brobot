@@ -1,8 +1,10 @@
 package io.github.jspinak.brobot.app.responses;
 
 import lombok.Getter;
+import lombok.Setter;
 
 @Getter
+@Setter
 public class StateStringResponse {
 
     private Long id = 0L;

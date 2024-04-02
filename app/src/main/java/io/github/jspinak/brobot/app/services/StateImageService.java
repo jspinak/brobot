@@ -15,22 +15,20 @@ import java.util.stream.Collectors;
 public class StateImageService {
 
     private final StateImageRepo stateImageRepo;
-    private final StateImageMapper stateImageMapper;
+    private final StateImageMapper stateImageMapper = StateImageMapper.INSTANCE;
 
-    public StateImageService(StateImageRepo stateImageRepo,
-                             StateImageMapper stateImageMapper) {
+    public StateImageService(StateImageRepo stateImageRepo) {
         this.stateImageRepo = stateImageRepo;
-        this.stateImageMapper = stateImageMapper;
     }
 
     public StateImage getStateImage(String name) {
         Optional<StateImageEntity> dto = stateImageRepo.findByName(name);
-        return dto.map(stateImageMapper.INSTANCE::mapFromEntity).orElse(null);
+        return dto.map(stateImageMapper::map).orElse(null);
     }
 
     public List<StateImage> getAllStateImages() {
         return stateImageRepo.findAll().stream()
-                .map(stateImageMapper.INSTANCE::mapFromEntity)
+                .map(stateImageMapper::map)
                 .collect(Collectors.toList());
     }
 
@@ -39,7 +37,7 @@ public class StateImageService {
     }
 
     public void saveStateImages(List<StateImage> stateImages) {
-        stateImages.forEach(stateImage -> stateImageRepo.save(stateImageMapper.INSTANCE.mapToEntity(stateImage)));
+        stateImages.forEach(stateImage -> stateImageRepo.save(stateImageMapper.map(stateImage)));
     }
 
     public boolean removeStateImage(String name) {
@@ -62,7 +60,7 @@ public class StateImageService {
 
     public List<StateImage> getAllInProject(Long projectId) {
         return stateImageRepo.findByProjectId(projectId).stream()
-                .map(stateImageMapper.INSTANCE::mapFromEntity)
+                .map(stateImageMapper::map)
                 .collect(Collectors.toList());
     }
 }

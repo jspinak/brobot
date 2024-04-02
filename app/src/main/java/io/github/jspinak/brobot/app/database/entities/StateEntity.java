@@ -4,6 +4,8 @@ import io.github.jspinak.brobot.datatypes.primitives.match.MatchHistory;
 import io.github.jspinak.brobot.datatypes.state.state.State;
 import io.github.jspinak.brobot.illustratedHistory.StateIllustration;
 import jakarta.persistence.*;
+import lombok.Data;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -11,6 +13,7 @@ import java.util.List;
 import java.util.Set;
 
 @Entity
+@Data
 public class StateEntity {
 
     @Id
