@@ -4,18 +4,16 @@ import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImag
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
-import org.springframework.stereotype.Component;
 
-@Mapper(componentModel = "spring")
-@Component
+@Mapper(componentModel = "spring", uses = {PatternResponseMapper.class})
 public interface StateImageResponseMapper {
 
     StateImageResponseMapper INSTANCE = Mappers.getMapper(StateImageResponseMapper.class);
 
-    @Mapping(target = "patterns", source = "patterns", qualifiedByName = "mapPatternToPatternResponse")
-    StateImageResponse mapToResponse(StateImage stateImage);
+    @Mapping(target = "patterns", source = "patterns")
+    StateImageResponse map(StateImage stateImage);
 
-    @Mapping(target = "patterns", source = "patterns", qualifiedByName = "mapPatternResponseToPattern")
-    StateImage mapFromResponse(StateImageResponse stateImageResponse);
+    @Mapping(target = "patterns", source = "patterns")
+    StateImage map(StateImageResponse stateImageResponse);
 
 }

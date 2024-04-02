@@ -4,19 +4,19 @@ import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
-import org.springframework.stereotype.Component;
 
-@Mapper(componentModel = "spring")
-@Component
+@Mapper(componentModel = "spring", uses = {LocationResponseMapper.class, SearchRegionsResponseMapper.class})
 public interface ActionOptionsResponseMapper {
 
     ActionOptionsResponseMapper INSTANCE = Mappers.getMapper(ActionOptionsResponseMapper.class);
 
-    @Mapping(source = "Location", target = "LocationResponse")
-    @Mapping(source = "SearchRegions", target = "SearchRegionsResponse")
-    ActionOptionsResponse mapToResponse(ActionOptions actionOptions);
-    @Mapping(source = "LocationResponse", target = "Location")
-    @Mapping(source = "SearchRegionsResponse", target = "SearchRegions")
-    ActionOptions mapFromResponse(ActionOptionsResponse actionOptionsResponse);
+    @Mapping(source = "locationAfterAction", target = "locationAfterAction")
+    @Mapping(source = "offsetLocationBy", target = "offsetLocationBy")
+    @Mapping(source = "searchRegions", target = "searchRegions")
+    ActionOptionsResponse map(ActionOptions actionOptions);
+    @Mapping(source = "locationAfterAction", target = "locationAfterAction")
+    @Mapping(source = "offsetLocationBy", target = "offsetLocationBy")
+    @Mapping(source = "searchRegions", target = "searchRegions")
+    ActionOptions map(ActionOptionsResponse actionOptionsResponse);
 
 }

@@ -5,10 +5,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.ComponentScan;
 
 import java.util.Arrays;
 
-@SpringBootApplication(scanBasePackages = {"io.github.jspinak.brobot"})
+@SpringBootApplication//(scanBasePackages = {"io.github.jspinak.brobot"})
+@ComponentScan({"io.github.jspinak.brobot"})
 public class BrobotApplication {
 
 	@Autowired

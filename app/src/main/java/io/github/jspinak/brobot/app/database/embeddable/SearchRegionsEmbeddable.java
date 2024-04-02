@@ -2,11 +2,13 @@ package io.github.jspinak.brobot.app.database.embeddable;
 
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import jakarta.persistence.*;
+import lombok.Data;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Embeddable
+@Data
 public class SearchRegionsEmbeddable {
 
     @ElementCollection

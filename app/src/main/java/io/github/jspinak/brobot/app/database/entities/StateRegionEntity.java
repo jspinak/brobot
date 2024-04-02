@@ -8,8 +8,10 @@ import io.github.jspinak.brobot.datatypes.primitives.match.MatchHistory;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.StateRegion;
 import jakarta.persistence.*;
+import lombok.Data;
 
 @Entity
+@Data
 public class StateRegionEntity {
 
     @Id

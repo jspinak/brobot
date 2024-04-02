@@ -16,12 +16,10 @@ import java.util.stream.Collectors;
 public class ImageController {
 
     private final ImageService imageService;
-    private final ImageResponseMapper imageResponseMapper;
+    private final ImageResponseMapper imageResponseMapper = ImageResponseMapper.INSTANCE;
 
-    public ImageController(ImageService imageService,
-                           ImageResponseMapper imageResponseMapper) {
+    public ImageController(ImageService imageService) {
         this.imageService = imageService;
-        this.imageResponseMapper = imageResponseMapper;
     }
 
     /**
@@ -30,14 +28,14 @@ public class ImageController {
     @GetMapping("/all") // Maps to GET /api/images/all
     public List<ImageResponse> getAllImages() {
         return imageService.getAllImages().stream()
-                .map(imageResponseMapper.INSTANCE::mapToResponse)
+                .map(imageResponseMapper::map)
                 .collect(Collectors.toList());
     }
 
     @GetMapping("/{name}") // Maps to GET /api/images/{name}
     public List<ImageResponse> getImages(@PathVariable String name) {
         return imageService.getImages(name).stream()
-                .map(imageResponseMapper.INSTANCE::mapToResponse)
+                .map(imageResponseMapper::map)
                 .collect(Collectors.toList());
     }
 

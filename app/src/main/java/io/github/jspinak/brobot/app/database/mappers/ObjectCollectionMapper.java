@@ -5,28 +5,28 @@ import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
-import org.springframework.stereotype.Component;
 
-@Mapper(componentModel = "spring")
-@Component
+@Mapper(componentModel = "spring", uses = {StateLocationMapper.class, StateImageMapper.class, StateRegionMapper.class,
+        StateStringMapper.class, MatchesMapper.class, PatternMapper.class})
 public interface ObjectCollectionMapper {
 
     ObjectCollectionMapper INSTANCE = Mappers.getMapper(ObjectCollectionMapper.class);
 
-    @Mapping(target = "stateLocations", source = "stateLocations", qualifiedByName = "mapStateLocationToStateLocationEntity")
-    @Mapping(target = "stateImages", source = "stateImages", qualifiedByName = "mapStateImageToStateImageEntity")
-    @Mapping(target = "stateRegions", source = "stateRegions", qualifiedByName = "mapStateRegionToStateRegionEntity")
-    @Mapping(target = "stateStrings", source = "stateStrings", qualifiedByName = "mapStateStringToStateStringEntity")
-    @Mapping(target = "matches", source = "matches", qualifiedByName = "mapMatchesToMatchesEntity")
-    @Mapping(target = "scenes", source = "scenes", qualifiedByName = "mapPatternToPatternEntity")
-    ObjectCollectionEntity mapToEntity(ObjectCollection objectCollection);
+    @Mapping(target = "stateLocations", source = "stateLocations")
+    @Mapping(target = "stateImages", source = "stateImages")
+    @Mapping(target = "stateRegions", source = "stateRegions")
+    @Mapping(target = "stateStrings", source = "stateStrings")
+    @Mapping(target = "matches", source = "matches")
+    @Mapping(target = "scenes", source = "scenes")
+    @Mapping(target = "id", ignore = true)
+    ObjectCollectionEntity map(ObjectCollection objectCollection);
 
-    @Mapping(target = "stateLocations", source = "stateLocations", qualifiedByName = "mapStateLocationEntityToStateLocation")
-    @Mapping(target = "stateImages", source = "stateImages", qualifiedByName = "mapStateImageEntityToStateImage")
-    @Mapping(target = "stateRegions", source = "stateRegions", qualifiedByName = "mapStateRegionEntityToStateRegion")
-    @Mapping(target = "stateStrings", source = "stateStrings", qualifiedByName = "mapStateStringEntityToStateString")
-    @Mapping(target = "matches", source = "matches", qualifiedByName = "mapMatchesEntityToMatches")
-    @Mapping(target = "scenes", source = "scenes", qualifiedByName = "mapPatternEntityToPattern")
-    ObjectCollection mapFromEntity(ObjectCollectionEntity objectCollectionEntity);
+    @Mapping(target = "stateLocations", source = "stateLocations")
+    @Mapping(target = "stateImages", source = "stateImages")
+    @Mapping(target = "stateRegions", source = "stateRegions")
+    @Mapping(target = "stateStrings", source = "stateStrings")
+    @Mapping(target = "matches", source = "matches")
+    @Mapping(target = "scenes", source = "scenes")
+    ObjectCollection map(ObjectCollectionEntity objectCollectionEntity);
 
 }
