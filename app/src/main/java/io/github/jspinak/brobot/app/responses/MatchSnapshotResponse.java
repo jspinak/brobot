@@ -1,12 +1,12 @@
 package io.github.jspinak.brobot.app.responses;
 
-import lombok.Getter;
+import lombok.Data;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-@Getter
+@Data
 public class MatchSnapshotResponse {
 
     private ActionOptionsResponse actionOptions = new ActionOptionsResponse();

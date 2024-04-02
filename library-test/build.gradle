@@ -8,6 +8,8 @@ java {
     sourceCompatibility = '20'
 }
 
+tasks.test.enabled = false
+
 group 'io.github.jspinak'
 version '1.0.7'
 

@@ -3,8 +3,12 @@ package io.github.jspinak.brobot.app.database.entities;
 import io.github.jspinak.brobot.app.database.embeddable.PositionEmbeddable;
 import io.github.jspinak.brobot.datatypes.primitives.location.Position;
 import jakarta.persistence.*;
+import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 @Entity
+@Data
 public class StateLocationEntity {
 
     @Id

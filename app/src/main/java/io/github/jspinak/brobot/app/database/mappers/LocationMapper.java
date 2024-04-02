@@ -5,23 +5,22 @@ import io.github.jspinak.brobot.datatypes.primitives.location.Location;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
-import org.springframework.stereotype.Component;
 
-@Mapper(componentModel = "spring")
-@Component
+@Mapper(componentModel = "spring", uses = {RegionMapper.class, PositionMapper.class})
 public interface LocationMapper {
 
     LocationMapper INSTANCE = Mappers.getMapper(LocationMapper.class);
 
-    @Mapping(source = "Region", target = "RegionEmbeddable")
-    @Mapping(source = "Position", target = "PositionEmbeddable")
+    @Mapping(source = "region", target = "region")
+    @Mapping(source = "position", target = "position")
     @Mapping(source = "x", target = "locX")
     @Mapping(source = "y", target = "locY")
-    LocationEntity mapToEntity(Location location);
+    @Mapping(target = "id", ignore = true)
+    LocationEntity map(Location location);
 
-    @Mapping(source = "RegionEmbeddable", target = "Region")
-    @Mapping(source = "PositionEmbeddable", target = "Position")
+    @Mapping(source = "region", target = "region")
+    @Mapping(source = "position", target = "position")
     @Mapping(source = "locX", target = "x")
     @Mapping(source = "locY", target = "y")
-    Location mapFromEntity(LocationEntity locationEntity);
+    Location map(LocationEntity locationEntity);
 }

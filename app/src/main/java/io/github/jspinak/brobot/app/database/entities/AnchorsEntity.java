@@ -4,11 +4,13 @@ import io.github.jspinak.brobot.app.database.embeddable.AnchorEmbeddable;
 import io.github.jspinak.brobot.datatypes.primitives.location.Anchor;
 import io.github.jspinak.brobot.datatypes.primitives.location.Anchors;
 import jakarta.persistence.*;
+import lombok.Data;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
+@Data
 public class AnchorsEntity {
 
     @Id

@@ -31,6 +31,8 @@ public class StateIllustration {
         this.screenshot = illustratedScreenshot.getMatBGR();
     }
 
+    public StateIllustration() {} // for mapping
+
     public Mat getIllustratedScreenshotAsMat() {
         return illustratedScreenshot.getMatBGR();
     }

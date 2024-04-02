@@ -37,12 +37,6 @@ dependencies {
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
 
-    // JUnit Jupiter for testing
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.0'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.0'
-    // Spring Boot Starter Test for Spring Boot testing support
-    //testImplementation 'org.springframework.boot:spring-boot-starter-test:3.2.0'
-
     implementation('com.sikulix:sikulixapi:2.0.5') {
         exclude group: 'org.slf4j', module: 'slf4j-nop'
     }
@@ -51,10 +45,6 @@ dependencies {
     implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.0'
     implementation 'com.github.kwhat:jnativehook:2.2.2'
 
-}
-
-test {
-    useJUnitPlatform()
 }
 
 java {

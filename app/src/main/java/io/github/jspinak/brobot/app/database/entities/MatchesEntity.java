@@ -9,6 +9,7 @@ import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.primitives.text.Text;
 import jakarta.persistence.*;
+import lombok.Data;
 import org.bytedeco.opencv.opencv_core.Mat;
 
 import java.time.Duration;
@@ -19,6 +20,7 @@ import java.util.List;
 import java.util.Set;
 
 @Entity
+@Data
 public class MatchesEntity {
 
     @Id

@@ -1,4 +1,4 @@
-package com.brobot.app.database.repositories;
+package io.github.jspinak.brobot.app.database.repositories;
 
 import io.github.jspinak.brobot.app.database.entities.PatternEntity;
 import io.github.jspinak.brobot.app.database.mappers.PatternMapper;
@@ -38,7 +38,7 @@ class PatternRepoTest {
         // Save a pattern to the repository
         Pattern pattern = new Pattern();
         pattern.setName("TestPattern");
-        patternRepo.save(patternMapper.INSTANCE.mapToEntity(pattern));
+        patternRepo.save(patternMapper.INSTANCE.map(pattern));
 
         // Find the pattern by name
         List<PatternEntity> foundPatternList = patternRepo.findByName("TestPattern");
@@ -46,7 +46,7 @@ class PatternRepoTest {
         // Assert that the pattern is found and has the correct name
         assertFalse(foundPatternList.isEmpty());
         PatternEntity foundPattern = foundPatternList.get(0);
-        assertThat(patternMapper.INSTANCE.mapFromEntity(foundPattern).getName()).isEqualTo("TestPattern");
+        assertThat(patternMapper.INSTANCE.map(foundPattern).getName()).isEqualTo("TestPattern");
     }
 
     @Test
@@ -54,11 +54,11 @@ class PatternRepoTest {
         // Save patterns to the repository
         Pattern pattern1 = new Pattern();
         pattern1.setName("TestPattern1");
-        patternRepo.save(patternMapper.INSTANCE.mapToEntity(pattern1));
+        patternRepo.save(patternMapper.INSTANCE.map(pattern1));
 
         Pattern pattern2 = new Pattern();
         pattern2.setName("testPattern2");
-        patternRepo.save(patternMapper.INSTANCE.mapToEntity(pattern2));
+        patternRepo.save(patternMapper.INSTANCE.map(pattern2));
 
         // Find patterns by name containing "test"
         List<PatternEntity> foundPatterns = patternRepo.findByName("test");
