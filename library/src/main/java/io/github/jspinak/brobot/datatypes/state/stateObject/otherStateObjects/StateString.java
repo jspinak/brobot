@@ -19,6 +19,8 @@ public class StateString {
     private int timesActedOn = 0;
     private String string;
 
+    public StateString() {} // for mapping
+
     public String getId() {
         return objectType.name() + name + searchRegion.getX() + searchRegion.getY() + searchRegion.getW() + searchRegion.getY() + string;
     }

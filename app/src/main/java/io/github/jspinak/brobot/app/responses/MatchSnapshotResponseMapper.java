@@ -4,20 +4,18 @@ import io.github.jspinak.brobot.datatypes.primitives.match.MatchSnapshot;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
-import org.springframework.stereotype.Component;
 
-@Mapper(componentModel = "spring")
-@Component
+@Mapper(componentModel = "spring", uses = {ActionOptionsResponseMapper.class, MatchResponseMapper.class})
 public interface MatchSnapshotResponseMapper {
 
     MatchSnapshotResponseMapper INSTANCE = Mappers.getMapper(MatchSnapshotResponseMapper.class);
 
-    @Mapping(source = "ActionOptions", target = "ActionOptionsResponse")
-    @Mapping(target = "matchList", source = "matchList", qualifiedByName = "mapMatchToMatchResponse")
-    MatchSnapshotResponse mapToResponse(MatchSnapshot matchSnapshot);
+    @Mapping(source = "actionOptions", target = "actionOptions")
+    @Mapping(target = "matchList", source = "matchList")
+    MatchSnapshotResponse map(MatchSnapshot matchSnapshot);
 
-    @Mapping(source = "ActionOptionsResponse", target = "ActionOptions")
-    @Mapping(target = "matchList", source = "matchList", qualifiedByName = "mapMatchResponseToMatch")
-    MatchSnapshot mapFromResponse(MatchSnapshotResponse matchSnapshotResponse);
+    @Mapping(source = "actionOptions", target = "actionOptions")
+    @Mapping(target = "matchList", source = "matchList")
+    MatchSnapshot map(MatchSnapshotResponse matchSnapshotResponse);
 
 }

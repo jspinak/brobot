@@ -9,7 +9,9 @@ import org.bytedeco.opencv.opencv_core.Rect;
 import org.sikuli.script.Location;
 import org.sikuli.script.Screen;
 
+import java.awt.*;
 import java.util.*;
+import java.util.List;
 
 /**
  * Region uses methods from the SikuliX Region and adds new initializers and analysis tools.
@@ -24,8 +26,9 @@ public class Region implements Comparable<Region> {
     private int h;
 
     public Region() {
-        Screen screen = new Screen();
-        setXYWH(0, 0, screen.w, screen.h);
+        //Screen screen = new Screen(); // Sikuli showing wrong screen size:
+        //setXYWH(0, 0, screen.w, screen.h);
+        setXYWH(0, 0, 1920, 1080);
     }
 
     public Region(int x, int y, int w, int h) {
@@ -180,7 +183,8 @@ public class Region implements Comparable<Region> {
     }
 
     public boolean contains(Location l) {
-        return sikuli().contains(l);
+        return new Rectangle(x, y, w, h).contains(l.x, l.y);
+        //return sikuli().contains(l); // SikuliX changes the region size to 1536,864
     }
 
     public boolean containsX(Location l) {

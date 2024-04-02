@@ -13,25 +13,23 @@ import java.util.stream.Collectors;
 public class PatternService {
 
     private final PatternRepo patternRepo;
-    private final PatternMapper patternMapper;
+    private final PatternMapper patternMapper = PatternMapper.INSTANCE;
 
-    public PatternService(PatternRepo patternRepo,
-                          PatternMapper patternMapper) {
+    public PatternService(PatternRepo patternRepo) {
         this.patternRepo = patternRepo;
-        this.patternMapper = patternMapper;
     }
 
     public List<Pattern> getPatterns(String name) {
         List<PatternEntity> patternEntities = patternRepo.findByName(name);
         return patternEntities.stream()
-                .map(patternMapper.INSTANCE::mapFromEntity)
+                .map(patternMapper::map)
                 .collect(Collectors.toList());
     }
 
     public List<Pattern> getAllPatterns() {
         List<PatternEntity> patternEntities = patternRepo.findAll();
         return patternEntities.stream()
-                .map(patternMapper.INSTANCE::mapFromEntity)
+                .map(patternMapper::map)
                 .collect(Collectors.toList());
     }
 
@@ -41,7 +39,7 @@ public class PatternService {
 
     public void savePatterns(List<Pattern> patterns) {
         patterns.forEach(pattern -> {
-            patternRepo.save(patternMapper.INSTANCE.mapToEntity(pattern));
+            patternRepo.save(patternMapper.map(pattern));
         });
     }
 }

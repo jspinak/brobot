@@ -6,6 +6,7 @@ import io.github.jspinak.brobot.actions.methods.sikuliWrappers.mouse.ClickType;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import lombok.Getter;
+import lombok.Setter;
 import org.sikuli.basics.Settings;
 
 import java.util.ArrayList;
@@ -14,6 +15,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Predicate;
 
 @Getter
+@Setter
 public class ActionOptionsResponse {
 
     private ActionOptions.Action action = ActionOptions.Action.FIND;

@@ -16,25 +16,23 @@ import java.util.stream.Collectors;
 public class PatternController {
 
     private final PatternService patternService;
-    private final PatternResponseMapper patternResponseMapper;
+    private final PatternResponseMapper patternResponseMapper = PatternResponseMapper.INSTANCE;
 
-    public PatternController(PatternService patternService,
-                             PatternResponseMapper patternResponseMapper) {
+    public PatternController(PatternService patternService) {
         this.patternService = patternService;
-        this.patternResponseMapper = patternResponseMapper;
     }
 
     @GetMapping("/all") // Maps to GET /api/patterns/all
     public List<PatternResponse> getAllPatterns() {
         return patternService.getAllPatterns().stream()
-                .map(patternResponseMapper.INSTANCE::mapToResponse)
+                .map(patternResponseMapper::map)
                 .collect(Collectors.toList());
     }
 
     @GetMapping("/{name}") // Maps to GET /api/patterns/{name}
     public List<PatternResponse> getPatterns(@PathVariable String name) {
         return patternService.getPatterns(name).stream()
-                .map(patternResponseMapper.INSTANCE::mapToResponse)
+                .map(patternResponseMapper::map)
                 .collect(Collectors.toList());
     }
 

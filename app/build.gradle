@@ -24,14 +24,13 @@ repositories {
 }
 
 dependencies {
-	//implementation files('../library/build/libs/brobot-1.0.7.jar')
 	implementation project(':library') // Dependency on the library module
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
 
 	// JUnit Jupiter for testing
-	testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.0'
-	testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.0'
+	testImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.2'
+	testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.10.2'
 	// Spring Boot Starter Test for Spring Boot testing support
 	implementation 'org.springframework.boot:spring-boot-starter-test' //:3.2.2
 	implementation group: 'com.h2database', name: 'h2', version: '2.2.224'
@@ -51,5 +50,22 @@ dependencies {
 	implementation group: 'org.bytedeco', name: 'javacv-platform', version: '1.5.10'
 	implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.0'
 	implementation 'com.github.kwhat:jnativehook:2.2.2'
-	implementation group: 'org.mapstruct', name: 'mapstruct', version: '1.5.5.Final'
+
+	implementation 'org.mapstruct:mapstruct:1.5.5.Final'
+	annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
+	testAnnotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
+	implementation 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
+
+
+}
+
+test {
+	useJUnitPlatform()
+}
+
+// Configure MapStruct compiler arguments
+tasks.withType(JavaCompile) {
+	options.compilerArgs += [
+			'-Amapstruct.defaultComponentModel=spring'
+	]
 }

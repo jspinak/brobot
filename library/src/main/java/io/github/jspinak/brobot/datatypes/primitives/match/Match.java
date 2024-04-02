@@ -11,6 +11,7 @@ import io.github.jspinak.brobot.datatypes.state.stateObject.StateObjectData;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.imageUtils.BufferedImageOps;
 
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -43,8 +44,7 @@ import java.time.LocalDateTime;
  *  *     Match objects have only one match, as opposed to Snapshots, which can have
  *  *       multiple Match objects.
  */
-@Getter
-@Setter
+@Data
 public class Match {
 
     // fields in the SikuliX Match

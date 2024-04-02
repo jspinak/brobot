@@ -2,10 +2,12 @@ package io.github.jspinak.brobot.app.responses;
 
 import io.github.jspinak.brobot.datatypes.state.stateObject.StateObjectData;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 
 @Getter
+@Setter
 public class MatchResponse {
 
     private double score = 0.0;

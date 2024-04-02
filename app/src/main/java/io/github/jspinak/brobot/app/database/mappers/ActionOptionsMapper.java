@@ -1,23 +1,24 @@
 package io.github.jspinak.brobot.app.database.mappers;
 
-import io.github.jspinak.brobot.app.database.entities.ActionOptionsEntity;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
+import io.github.jspinak.brobot.app.database.entities.ActionOptionsEntity;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
-import org.springframework.stereotype.Component;
 
-@Mapper(componentModel = "spring")
-@Component
+@Mapper(componentModel = "spring", uses = {LocationMapper.class, SearchRegionsMapper.class})
 public interface ActionOptionsMapper {
 
     ActionOptionsMapper INSTANCE = Mappers.getMapper(ActionOptionsMapper.class);
 
-    @Mapping(source = "Location", target = "LocationEntity")
-    @Mapping(source = "SearchRegions", target = "SearchRegionsEmbeddable")
-    ActionOptionsEntity mapToEntity(ActionOptions actionOptions);
-    @Mapping(source = "LocationEntity", target = "Location")
-    @Mapping(source = "SearchRegionsEmbeddable", target = "SearchRegions")
-    ActionOptions mapFromEntity(ActionOptionsEntity actionOptionsEntity);
+    @Mapping(source = "locationAfterAction", target = "locationAfterAction")
+    @Mapping(source = "offsetLocationBy", target = "offsetLocationBy")
+    @Mapping(source = "searchRegions", target = "searchRegions")
+    @Mapping(target = "id", ignore = true)
+    ActionOptionsEntity map(ActionOptions actionOptions);
+    @Mapping(source = "locationAfterAction", target = "locationAfterAction")
+    @Mapping(source = "offsetLocationBy", target = "offsetLocationBy")
+    @Mapping(source = "searchRegions", target = "searchRegions")
+    ActionOptions map(ActionOptionsEntity actionOptionsEntity);
 
 }

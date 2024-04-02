@@ -8,11 +8,13 @@ import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.St
 import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.StateString;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import jakarta.persistence.*;
+import lombok.Data;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
+@Data
 public class ObjectCollectionEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
