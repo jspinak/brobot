@@ -1,6 +1,7 @@
 package io.github.jspinak.brobot.datatypes.primitives.location;
 
 import lombok.Getter;
+import lombok.Setter;
 
 /**
  * Position is defined by (%w, %h) and can be used to get a location in a Region or Match.
@@ -9,6 +10,7 @@ import lombok.Getter;
  *    image but less convenient for working with general areas of an image (i.e. top left, bottom right).
  */
 @Getter
+@Setter
 public class Position {
 
     private double percentW;
