@@ -1,5 +1,6 @@
 package io.github.jspinak.brobot.datatypes.primitives.region;
 
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -10,8 +11,7 @@ import java.util.*;
  * could be useful when you are not sure where an Image may be but want to exclude
  * an area, or when the desired search area cannot be described by one rectangle.
  */
-@Getter
-@Setter
+@Data
 public class SearchRegions {
 
     private List<Region> regions = new ArrayList<>();
@@ -139,6 +139,7 @@ public class SearchRegions {
         return List.of(newRegion);
     }
 
+    /* Lombok takes care of this
     public boolean equals(SearchRegions searchRegions) {
         int size = regions.size();
         int size2 = searchRegions.getRegions().size();
@@ -149,4 +150,5 @@ public class SearchRegions {
         if (!fixedRegion.equals(searchRegions.getFixedRegion())) return false;
         return true;
     }
+     */
 }
