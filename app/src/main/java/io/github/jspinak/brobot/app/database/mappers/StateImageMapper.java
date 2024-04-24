@@ -8,7 +8,6 @@ import org.mapstruct.factory.Mappers;
 
 @Mapper(componentModel = "spring", uses = {PatternMapper.class})
 public interface StateImageMapper {
-
     StateImageMapper INSTANCE = Mappers.getMapper(StateImageMapper.class);
 
     @Mapping(target = "patterns", source = "patterns")
@@ -17,5 +16,4 @@ public interface StateImageMapper {
 
     @Mapping(target = "patterns", source = "patterns")
     StateImage map(StateImageEntity stateImageEntity);
-
 }
