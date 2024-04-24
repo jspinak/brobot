@@ -9,7 +9,6 @@ import org.mapstruct.factory.Mappers;
 @Mapper(componentModel = "spring", uses = {SearchRegionsMapper.class, MatchHistoryMapper.class,
         PositionMapper.class, AnchorsMapper.class, ImageMapper.class})
 public interface PatternMapper {
-
     PatternMapper INSTANCE = Mappers.getMapper(PatternMapper.class);
 
     @Mapping(source = "searchRegions", target = "searchRegions")
@@ -19,11 +18,11 @@ public interface PatternMapper {
     @Mapping(source = "image", target = "image")
     @Mapping(target = "id", ignore = true)
     PatternEntity map(Pattern pattern);
+
     @Mapping(source = "searchRegions", target = "searchRegions")
     @Mapping(source = "matchHistory", target = "matchHistory")
     @Mapping(source = "position", target = "position")
     @Mapping(source = "anchors", target = "anchors")
     @Mapping(source = "image", target = "image")
     Pattern map(PatternEntity patternEntity);
-
 }
