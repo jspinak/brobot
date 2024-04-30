@@ -77,6 +77,8 @@ public class Match {
     // the old MatchObject had `private double duration;`
     private int timesActedOn = 0;
 
+    public Match() {}
+
     public Match(Region region) {
         this.region = new Region(region);
         this.target = new Location(region);

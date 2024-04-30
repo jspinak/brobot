@@ -1,7 +1,8 @@
 package io.github.jspinak.brobot.app.services;
 
+import io.github.jspinak.brobot.app.database.databaseMappers.javaMappers.PatternEntityMapper;
 import io.github.jspinak.brobot.app.database.entities.PatternEntity;
-import io.github.jspinak.brobot.app.database.mappers.PatternMapper;
+import io.github.jspinak.brobot.app.database.databaseMappers.mapstructMappers.PatternMapper;
 import io.github.jspinak.brobot.app.database.repositories.PatternRepo;
 import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
 import org.springframework.stereotype.Service;
@@ -13,7 +14,7 @@ import java.util.stream.Collectors;
 public class PatternService {
 
     private final PatternRepo patternRepo;
-    private final PatternMapper patternMapper = PatternMapper.INSTANCE;
+    //private final PatternMapper patternMapper = PatternMapper.INSTANCE;
 
     public PatternService(PatternRepo patternRepo) {
         this.patternRepo = patternRepo;
@@ -22,14 +23,16 @@ public class PatternService {
     public List<Pattern> getPatterns(String name) {
         List<PatternEntity> patternEntities = patternRepo.findByName(name);
         return patternEntities.stream()
-                .map(patternMapper::map)
+                //.map(patternMapper::map)
+                .map(PatternEntityMapper::map)
                 .collect(Collectors.toList());
     }
 
     public List<Pattern> getAllPatterns() {
         List<PatternEntity> patternEntities = patternRepo.findAll();
         return patternEntities.stream()
-                .map(patternMapper::map)
+                //.map(patternMapper::map)
+                .map(PatternEntityMapper::map)
                 .collect(Collectors.toList());
     }
 
@@ -39,7 +42,8 @@ public class PatternService {
 
     public void savePatterns(List<Pattern> patterns) {
         patterns.forEach(pattern -> {
-            patternRepo.save(patternMapper.map(pattern));
+            //patternRepo.save(patternMapper.map(pattern));
+            patternRepo.save(PatternEntityMapper.map(pattern));
         });
     }
 }

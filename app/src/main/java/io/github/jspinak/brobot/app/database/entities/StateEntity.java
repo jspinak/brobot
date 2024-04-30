@@ -61,12 +61,13 @@ public class StateEntity {
     @JoinTable(name = "state_scenes",
             joinColumns = @JoinColumn(name = "state_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "scene_id", referencedColumnName = "id"))
-    private final List<ImageEntity> scenes = new ArrayList<>();
-    @OneToMany(cascade = CascadeType.ALL)
-    @JoinTable(name = "state_illustrastions",
-            joinColumns = @JoinColumn(name = "state_id", referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "illustration_id", referencedColumnName = "id"))
-    private final List<ImageEntity> illustrations = new ArrayList<>();
+    private List<ImageEntity> scenes = new ArrayList<>();
+    //@OneToMany(cascade = CascadeType.ALL)
+    //@JoinTable(name = "state_illustrastions",
+    //        joinColumns = @JoinColumn(name = "state_id", referencedColumnName = "id"),
+    //        inverseJoinColumns = @JoinColumn(name = "illustration_id", referencedColumnName = "id"))
+    @Transient
+    private List<StateIllustration> illustrations = new ArrayList<>();
     @OneToOne(cascade = CascadeType.ALL)
     private MatchHistoryEntity matchHistory = new MatchHistoryEntity();
 }

@@ -150,7 +150,7 @@ public class Region implements Comparable<Region> {
     }
 
     public boolean isDefined() {
-        return x()!=0 || y()!=0 || w()!=new Screen().w || h()!=new Screen().h;
+        return x()!=0 || y()!=0 || (w()!=new Screen().w && w()>=0) || (h()!=new Screen().h && h()>=0);
     }
 
     /*
