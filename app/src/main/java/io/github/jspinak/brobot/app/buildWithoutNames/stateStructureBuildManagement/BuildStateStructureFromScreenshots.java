@@ -46,4 +46,9 @@ public class BuildStateStructureFromScreenshots {
         screenStateCreator.createAndSaveStatesAndTransitions();
         stateStructureInfo.printStateStructure();
     }
+
+    public void build(StateStructureTemplate stateStructureTemplate) {
+        build(stateStructureTemplate.getScreenshots(), stateStructureTemplate.getTopLeftBoundary(),
+                stateStructureTemplate.getBottomRightBoundary());
+    }
 }
