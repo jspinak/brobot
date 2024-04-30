@@ -1,4 +1,4 @@
-package io.github.jspinak.brobot.app.database.mappers;
+package io.github.jspinak.brobot.app.database.databaseMappers.mapstructMappers;
 
 import io.github.jspinak.brobot.app.database.embeddable.SearchRegionsEmbeddable;
 import io.github.jspinak.brobot.datatypes.primitives.region.SearchRegions;

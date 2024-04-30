@@ -1,7 +1,7 @@
 package io.github.jspinak.brobot.app.services;
 
+import io.github.jspinak.brobot.app.database.databaseMappers.javaMappers.StateEntityMapper;
 import io.github.jspinak.brobot.app.database.entities.StateEntity;
-import io.github.jspinak.brobot.app.database.mappers.StateMapper;
 import io.github.jspinak.brobot.app.database.repositories.StateRepo;
 import io.github.jspinak.brobot.datatypes.state.state.State;
 import org.springframework.stereotype.Service;
@@ -20,7 +20,7 @@ import java.util.stream.Stream;
 public class StateService {
 
     private final StateRepo stateRepo;
-    private StateMapper stateMapper = StateMapper.INSTANCE;
+    //private StateMapper stateMapper = StateMapper.INSTANCE;
 
     public StateService(StateRepo stateRepo) {
         this.stateRepo = stateRepo;
@@ -28,13 +28,15 @@ public class StateService {
 
     public Optional<State> getState(String name) {
         Optional<StateEntity> state = stateRepo.findByName(name);
-        return state.map(stateMapper::map);
+        //return state.map(stateMapper::map);
+        return state.map(StateEntityMapper::map);
     }
 
     public List<State> getAllStates() {
         List<State> stateList = new ArrayList<>();
         for (StateEntity stateEntity : stateRepo.findAll()) {
-            stateList.add(stateMapper.map(stateEntity));
+            //stateList.add(stateMapper.map(stateEntity));
+            stateList.add(StateEntityMapper.map(stateEntity));
         }
         return stateList;
     }
@@ -75,7 +77,8 @@ public class StateService {
      */
     public void save(State state) {
         if (state == null) return;
-        stateRepo.save(stateMapper.map(state));
+        //stateRepo.save(stateMapper.map(state));
+        stateRepo.save(StateEntityMapper.map(state));
     }
 
     public void resetTimesVisited() {getAllStates().forEach(state -> state.setTimesVisited(0));
@@ -102,7 +105,8 @@ public class StateService {
 
     public List<State> getAllInProject(Long projectId) {
         return stateRepo.findByProjectId(projectId).stream()
-                .map(stateMapper::map)
+                //.map(stateMapper::map)
+                .map(StateEntityMapper::map)
                 .collect(Collectors.toList());
     }
 }

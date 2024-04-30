@@ -13,7 +13,7 @@ import java.util.List;
 @Transactional
 public interface PatternRepo extends JpaRepository<PatternEntity, Long> {
     List<PatternEntity> findByName(String name);
-    //@Query("SELECT p FROM Pattern p WHERE LOWER(p.patternData.name) LIKE LOWER(CONCAT('%', :name, '%'))")
-    //List<PatternEntity> findByPatternDataNameContainingIgnoreCase(@Param("name") String name);
+    @Query("SELECT p FROM PatternEntity p WHERE LOWER(p.name) LIKE LOWER(CONCAT('%', :name, '%'))")
+    List<PatternEntity> findByPatternDataNameContainingIgnoreCase(@Param("name") String name);
 
 }
