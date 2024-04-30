@@ -1,7 +1,10 @@
 package io.github.jspinak.brobot.app.database.repositories;
 
+import io.github.jspinak.brobot.app.database.databaseMappers.javaMappers.StateEntityMapper;
 import io.github.jspinak.brobot.app.database.entities.StateEntity;
 import io.github.jspinak.brobot.app.database.repositories.StateRepo;
+import io.github.jspinak.brobot.database.data.AllStatesInProject;
+import io.github.jspinak.brobot.database.services.AllStatesInProjectService;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,8 +26,12 @@ class StateRepoTest {
     @Autowired
     StateRepo stateRepo;
 
+    @Autowired
+    AllStatesInProjectService allStatesInProjectService;
+
     @Test
     void findAllAsList() {
+        allStatesInProjectService.getAllStates().forEach(state -> stateRepo.save(StateEntityMapper.map(state)));
         Iterable<StateEntity> stateList = stateRepo.findAll();
         List<StateEntity> states = new ArrayList<>();
         stateList.forEach(states::add);

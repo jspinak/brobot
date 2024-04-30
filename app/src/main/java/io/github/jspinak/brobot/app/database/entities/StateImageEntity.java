@@ -1,5 +1,6 @@
 package io.github.jspinak.brobot.app.database.entities;
 
+import io.github.jspinak.brobot.datatypes.state.stateObject.StateObject;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -15,6 +16,7 @@ public class StateImageEntity {
     private Long id;
 
     private Long projectId = 0L;
+    private StateObject.Type objectType = StateObject.Type.IMAGE;
     private String name = "";
     @OneToMany(cascade = CascadeType.ALL)
     @JoinTable(name = "stateImage_patterns",

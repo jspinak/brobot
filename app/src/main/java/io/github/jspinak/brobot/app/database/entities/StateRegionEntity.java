@@ -6,6 +6,7 @@ import io.github.jspinak.brobot.datatypes.primitives.location.Anchors;
 import io.github.jspinak.brobot.datatypes.primitives.location.Position;
 import io.github.jspinak.brobot.datatypes.primitives.match.MatchHistory;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
+import io.github.jspinak.brobot.datatypes.state.stateObject.StateObject;
 import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.StateRegion;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -18,6 +19,7 @@ public class StateRegionEntity {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
+    private StateObject.Type objectType = StateObject.Type.REGION;
     private String name = "";
     @Embedded
     private RegionEmbeddable searchRegion = new RegionEmbeddable();

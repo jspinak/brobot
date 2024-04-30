@@ -22,7 +22,6 @@ import java.util.Optional;
 public class Location {
 
     private String name;
-    private boolean definedByXY = true;
     private int x = -1;
     private int y = -1;
     private Region region;
@@ -53,7 +52,6 @@ public class Location {
             if (loc.getPercentOfH().isPresent()) percentOfH = loc.getPercentOfH().get();
             else percentOfH = .5;
             position = new Position(percentOfW, percentOfH);
-            definedByXY = false;
         } else {
             x = loc.x;
             y = loc.y;
@@ -70,7 +68,6 @@ public class Location {
     public Location(Region region) {
         this.region = region;
         position = new Position(.5, .5);
-        definedByXY = false;
     }
 
     public void setPosition(int newX, int newY) {
@@ -78,31 +75,26 @@ public class Location {
         percentOfW = (newX - region.x()) / region.w();
         percentOfH = (newY - region.y()) / region.h();
         position = new Position(percentOfW, percentOfH);
-        definedByXY = false;
     }
 
     public Location(Region region, Position position) {
         this.region = region;
         this.position = position;
-        definedByXY = false;
     }
 
     public Location(Region region, Positions.Name position) {
         this.region = region;
         this.position = new Position(position);
-        definedByXY = false;
     }
 
     public Location(Positions.Name position) {
         this.region = new Region();
         this.position = new Position(position);
-        definedByXY = false;
     }
 
     public Location(Region region, double percentOfW, double percentOfH) {
         this.region = region;
         this.position = new Position(percentOfW, percentOfH);
-        definedByXY = false;
     }
 
     public Location(Match match) {
@@ -111,19 +103,16 @@ public class Location {
         percentOfW = ((double)match.getTarget().x - (double)region.x()) / (double)region.w();
         percentOfH = ((double)match.getTarget().y - (double)region.y()) / (double)region.h();
         position = new Position(percentOfW, percentOfH);
-        definedByXY = false;
     }
 
     public Location(Match match, Position position) {
         this.region = match.getRegion();
         this.position = position;
-        definedByXY = false;
     }
 
     public Location(Match match, int percentOfW, int percentOfH) {
         this.region = match.getRegion();
         this.position = new Position(percentOfW, percentOfH);
-        definedByXY = false;
     }
 
     public Location(Location location, int addX, int addY) {
@@ -147,19 +136,19 @@ public class Location {
     }
 
     public void addPercentOfW(int addPercent) {
-        if (!definedByXY) position.addPercentW(addPercent);
+        if (isDefinedWithRegion()) position.addPercentW(addPercent);
     }
 
     public void addPercentOfH(int addPercent) {
-        if (!definedByXY) position.addPercentH(addPercent);
+        if (isDefinedWithRegion()) position.addPercentH(addPercent);
     }
 
     public void multiplyPercentOfW(double multiplyBy) {
-        if (!definedByXY) position.multiplyPercentW(multiplyBy);
+        if (isDefinedWithRegion()) position.multiplyPercentW(multiplyBy);
     }
 
     public void multiplyPercentOfH(double multiplyBy) {
-        if (!definedByXY) position.multiplyPercentH(multiplyBy);
+        if (isDefinedWithRegion()) position.multiplyPercentH(multiplyBy);
     }
 
     private org.sikuli.script.Location getSikuliLocationFromXY() {
@@ -246,7 +235,7 @@ public class Location {
     }
 
     private boolean isDefinedByXY() {
-        return definedByXY || region == null;
+        return region == null;
     }
 
     private boolean isDefinedWithRegion() {
@@ -268,7 +257,7 @@ public class Location {
         int minusY = (int)(distance * Math.sin(rad)); // the angle is the cartesian angle
         int ang = (int)Math.round(angle);
         int dist = (int)Math.round(distance);
-        if (definedByXY) {
+        if (isDefinedByXY()) {
             x += plusX;
             y -= minusY;
         } else {// if defined by a region move from the center of the region
@@ -280,7 +269,7 @@ public class Location {
     public boolean equals(Location l) {
         return (x == l.x && y == l.y &&
                 //region.equals(l.region) && position == l.position &&
-                definedByXY == l.definedByXY);
+                isDefinedByXY() == l.isDefinedByXY());
     }
 
     /**
@@ -288,18 +277,18 @@ public class Location {
      * @param loc the location to add to this one
      */
     public void add(Location loc) {
-        if (definedByXY && loc.definedByXY) {
+        if (isDefinedByXY() && loc.isDefinedByXY()) {
             //Report.println("Adding x,y locations " + loc.x + " " + loc.y);
             x += loc.x;
             y += loc.y;
             return;
         }
-        if (!definedByXY && !loc.definedByXY) {
+        if (isDefinedWithRegion() && loc.isDefinedWithRegion()) {
             position.addPercentW(loc.position.getPercentW());
             position.addPercentH(loc.position.getPercentH());
             return;
         }
-        if (definedByXY) {
+        if (isDefinedByXY()) {
             x += (int)(loc.position.getPercentW() * (double)region.w());
             y += (int)(loc.position.getPercentH() * (double)region.h());
             return;
@@ -309,7 +298,6 @@ public class Location {
         //Report.println("x,y " + x + " " + y);
         x = getX() + loc.x;
         y = getY() + loc.y;
-        definedByXY = true;
         //position.addPercentW((double)loc.x / region.w);
         //position.addPercentH((double)loc.y / region.h);
         //Report.println("percent W,H " + position.getPercentW() + " " + position.getPercentH());
@@ -328,7 +316,6 @@ public class Location {
 
     public static class Builder {
         private String name;
-        private boolean definedByXY = false;
         private int x = -1;
         private int y = -1;
         private Region region;
@@ -354,7 +341,6 @@ public class Location {
 
         public Builder copy(Location location) {
             this.anchor = location.anchor;
-            this.definedByXY = location.definedByXY;
             x = location.x;
             y = location.y;
             if (location.isDefinedByXY()) return this;
@@ -415,7 +401,6 @@ public class Location {
             location.setRegion(region);
             location.setPosition(position);
             location.setAnchor(anchor);
-            definedByXY = region == null;
             return location;
         }
     }
