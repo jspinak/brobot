@@ -30,7 +30,7 @@ class BuildStateStructureFromScreenshotsTest {
     void stateStructureFromScreenshots() {
         StateStructureTemplate stateStructureTemplate = new StateStructureTemplate.Builder()
                 .addImagesInScreenshotsFolder("floranext0", "floranext1", "floranext2")
-                .setBoundaryImages("bottomR", "topleft")
+                .setBoundaryImages("topleft", "bottomR2")
                 .setSaveStateIllustrations(false)
                 .setSaveScreenshots(false)
                 .setSaveDecisionMats(false)
