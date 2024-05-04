@@ -59,7 +59,7 @@ public class Position {
 
     @Override
     public String toString() {
-        return String.format("P[%.1f.%.1f]", percentW, percentH);
+        return String.format("P[%.1f %.1f]", percentW, percentH);
     }
 
     public boolean equals(Position position) {
