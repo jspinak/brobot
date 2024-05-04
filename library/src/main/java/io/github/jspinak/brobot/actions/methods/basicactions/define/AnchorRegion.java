@@ -36,33 +36,37 @@ public class AnchorRegion {
      * and not a specific point with x and y values.
      */
     private void adjustDefinedRegion(Region region, Location location, Positions.Name anchor) {
+        int xDiff = location.getX() - region.x();
+        int x2Diff = location.getX() - region.x2();
+        int yDiff = location.getY() - region.y();
+        int y2Diff = location.getY() - region.y2();
         if (anchor == Positions.Name.TOPLEFT) {
-            region.setX(Math.max(region.x(), location.getX()));
-            region.setY(Math.max(region.y(), location.getY()));
+            if (xDiff > 0) region.adjustX(location.getX());
+            if (yDiff > 0) region.adjustY(location.getY());
         }
         if (anchor == Positions.Name.MIDDLELEFT) {
-            region.setX(Math.max(region.x(), location.getX()));
+            if (xDiff > 0) region.adjustX(location.getX());
         }
         if (anchor == Positions.Name.BOTTOMLEFT) {
-            region.setX(Math.max(region.x(), location.getX()));
-            region.setY2(Math.min(region.y2(), location.getY()));
+            if (xDiff > 0) region.adjustX(location.getX());
+            if (y2Diff < 0) region.adjustY2(location.getY());
         }
         if (anchor == Positions.Name.TOPMIDDLE) {
-            region.setY(Math.max(region.y(), location.getY()));
+            if (yDiff > 0) region.adjustY(location.getY());
         }
         if (anchor == Positions.Name.TOPRIGHT) {
-            region.setX2(Math.min(region.x2(), location.getX()));
-            region.setY(Math.max(region.y(), location.getY()));
+            if (x2Diff < 0) region.adjustX2(location.getX());
+            if (yDiff > 0) region.adjustY(location.getY());
         }
         if (anchor == Positions.Name.MIDDLERIGHT) {
-            region.setX2(Math.min(region.x2(), location.getX()));
+            if (x2Diff < 0) region.adjustX2(location.getX());
         }
         if (anchor == Positions.Name.BOTTOMRIGHT) {
-            region.setX2(Math.min(region.x2(), location.getX()));
-            region.setY2(Math.min(region.y2(), location.getY()));
+            if (x2Diff < 0) region.adjustX2(location.getX());
+            if (y2Diff < 0) region.adjustY2(location.getY());
         }
         if (anchor == Positions.Name.BOTTOMMIDDLE) {
-            region.setY2(Math.min(region.y2(), location.getY()));
+            if (y2Diff < 0) region.adjustY2(location.getY());
         }
     }
 

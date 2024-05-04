@@ -71,6 +71,7 @@ public class GetUsableArea {
         ObjectCollection boundaryImages = getObjectCollection(topLeft, bottomRight, screen);
         ActionOptions defineInsideAnchors = getActionOptions(ActionOptions.Illustrate.YES);
         Matches matches = action.perform(defineInsideAnchors, boundaryImages);
+        System.out.println(matches);
         return matches.getDefinedRegion();
     }
 

@@ -14,7 +14,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(classes = BrobotTestApplication.class)
-class ActionTest {
+class WordMatchesTests {
 
     @BeforeAll
     public static void setupHeadlessMode() {
