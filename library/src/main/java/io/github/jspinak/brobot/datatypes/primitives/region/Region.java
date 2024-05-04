@@ -104,7 +104,7 @@ public class Region implements Comparable<Region> {
      * Sets x2 with respect to x and not to w (adjusts the width)
      * @param x2 the right boundary of the region
      */
-    public void setX2(int x2) {
+    public void adjustX2(int x2) {
         this.w = x2 - this.x;
     }
 
@@ -112,8 +112,20 @@ public class Region implements Comparable<Region> {
      * Sets y2 with respect to y and not to h (adjusts the height)
      * @param y2 the lower boundary of the region
      */
-    public void setY2(int y2) {
+    public void adjustY2(int y2) {
         this.h = y2 - this.y;
+    }
+
+    public void adjustX(int newX) {
+        int xDiff = newX - x;
+        x = newX;
+        w -= xDiff;
+    }
+
+    public void adjustY(int newY) {
+        int yDiff = newY - y;
+        y = newY;
+        h -= yDiff;
     }
 
     public void setXYWH(int x, int y, int w, int h) {
@@ -422,8 +434,8 @@ public class Region implements Comparable<Region> {
             Region r = regions.get(i);
             boolean horizontalMatch = m.x2() == r.x() && m.y() == r.y() && m.y2() == r.y2();
             boolean verticalMatch = m.y2() == r.y() && m.x() == r.x() && m.x2() == r.x2();
-            if (horizontalMatch) m.setX2(r.x2());
-            else if (verticalMatch) m.setY2(r.y2());
+            if (horizontalMatch) m.adjustX2(r.x2());
+            else if (verticalMatch) m.adjustY2(r.y2());
             else { // no match
                 merged.add(m);
                 m = new Region(r);

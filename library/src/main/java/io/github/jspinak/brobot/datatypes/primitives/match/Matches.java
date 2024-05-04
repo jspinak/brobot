@@ -10,6 +10,7 @@ import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.primitives.text.Text;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
+import io.github.jspinak.brobot.reports.Output;
 import lombok.Data;
 import org.bytedeco.opencv.opencv_core.Mat;
 
@@ -303,6 +304,11 @@ public class Matches {
         return matchList.stream()
                 .filter(match -> ownerStateName.equals(match.getOwnerStateName()))
                 .collect(Collectors.toList());
+    }
+
+    public String getSuccessSymbol() {
+        if (success) return Output.check;
+        return Output.fail;
     }
 
     /**
