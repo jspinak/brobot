@@ -34,5 +34,9 @@ class DefineInsideAnchorsTest {
         defineInsideAnchors.perform(matches, testData.getInsideAnchorObjects());
         System.out.println(matches);
         assertEquals(2, matches.getMatchList().size());
+        assertEquals(0, matches.getDefinedRegion().x());
+        assertEquals(77, matches.getDefinedRegion().y());
+        assertEquals(1915, matches.getDefinedRegion().x2());
+        assertEquals(1032, matches.getDefinedRegion().y2());
     }
 }
