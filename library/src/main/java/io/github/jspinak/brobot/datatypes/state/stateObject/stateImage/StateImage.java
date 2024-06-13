@@ -271,6 +271,13 @@ public class StateImage implements StateObject {
             return this;
         }
 
+        public Builder addPattern(String filename) {
+            Pattern pattern = new Pattern(filename);
+            this.patterns.add(pattern);
+            setNameFromPatternIfEmpty(pattern);
+            return this;
+        }
+
         private void setNameFromPatternIfEmpty(Pattern pattern) {
             if (name.isEmpty() && pattern != null) name = pattern.getName();
         }
