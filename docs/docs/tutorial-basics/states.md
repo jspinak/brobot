@@ -37,7 +37,7 @@ When a StateImageObject is fixed, it is expected to be found in the same locatio
                 .withImages(toWorldButton)
                 .build();
     
-        private Home(StateService stateService) { stateService.save(state); }
+        public Home(StateService stateService) { stateService.save(state); }
     }
 
 ## World
@@ -105,5 +105,5 @@ not always found as it appears on-screen.
                 .withRegions(islandRegion)
                 .build();
     
-        private Island(StateService stateService) { stateService.save(state); }
+        public Island(StateService stateService) { stateService.save(state); }
     }
