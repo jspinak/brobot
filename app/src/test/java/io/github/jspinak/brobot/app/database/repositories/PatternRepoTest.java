@@ -1,8 +1,7 @@
 package io.github.jspinak.brobot.app.database.repositories;
 
-import io.github.jspinak.brobot.app.database.databaseMappers.javaMappers.PatternEntityMapper;
+import io.github.jspinak.brobot.app.database.databaseMappers.PatternEntityMapper;
 import io.github.jspinak.brobot.app.database.entities.PatternEntity;
-import io.github.jspinak.brobot.app.database.databaseMappers.mapstructMappers.PatternMapper;
 import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -29,9 +28,6 @@ class PatternRepoTest {
 
     @Autowired
     private PatternRepo patternRepo;
-
-    @Autowired
-    private PatternMapper patternMapper;
 
     @Test
     void testFindByName() {

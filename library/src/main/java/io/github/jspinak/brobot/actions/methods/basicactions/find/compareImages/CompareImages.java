@@ -75,14 +75,14 @@ public class CompareImages {
         }
         Image scene = new Image(biggestPattern.getBImage());
         List<Match> matchList = mockOrLive.findAll(smallestPattern, scene);
-        Match bestMatch = Collections.max(matchList, Comparator.comparingDouble(Match::getScore));
         Match noMatch = new Match.Builder()
                 .setRegion(new Region(0,0,1,1))
                 .setSearchImage(smallestPattern.getBImage())
                 .setScene(new Image(biggestPattern.getBImage()))
                 .setSimScore(0)
                 .build();
-        if (bestMatch == null) return noMatch;
+        if (matchList.isEmpty()) return noMatch;
+        Match bestMatch = Collections.max(matchList, Comparator.comparingDouble(Match::getScore));
         bestMatch.setSearchImage(new Image(smallestPattern));
         return bestMatch;
     }

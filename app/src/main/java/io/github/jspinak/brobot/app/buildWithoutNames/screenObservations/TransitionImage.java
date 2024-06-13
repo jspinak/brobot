@@ -1,7 +1,9 @@
 package io.github.jspinak.brobot.app.buildWithoutNames.screenObservations;
 
+import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
 import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
+import io.github.jspinak.brobot.imageUtils.ImageOps;
 import lombok.Getter;
 import lombok.Setter;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -24,7 +26,7 @@ public class TransitionImage {
      */
     private boolean checked; // when checked, if fromScreenToScreen is empty then it doesn't transition anywhere
     private Map<Integer, Integer> fromScreenToScreen = new HashMap<>(); // transitions from and to the screenshots with these ids
-    private List<Integer> screensFound = new ArrayList<>();
+    private Set<Integer> screensFound = new HashSet<>();
     private Region region; //
     private Mat image; // the underlying image
     private int ownerState; // the owner state. there is only one owner state.
@@ -32,10 +34,9 @@ public class TransitionImage {
     private String text; // search again for text after regions have merged
     private List<String> textInMatches = new ArrayList<>(); // the text found in individual matches fused to form this image
 
-    public TransitionImage() {}
-
-    public TransitionImage(Match match) {
+    public TransitionImage(Match match, int screenshotIndex) {
         this.region = new Region(match);
+        this.screensFound.add(screenshotIndex);
     }
 
     private void addTextFromMatch(String text) {
@@ -76,6 +77,14 @@ public class TransitionImage {
         int xDist = match.x() - region.x2(); // x-distance between end of the current region and the start of the new word match
         int yDist = match.y() - region.y(); // y-distance between the beginning of both region and match
         return match.x() - region.x() > 0 && xDist < minDist && Math.abs(yDist) < minDist;
+    }
+
+    public Pattern asPattern() {
+        return new Pattern(image);
+    }
+
+    public void addScreenFound(int screenId) {
+        screensFound.add(screenId);
     }
 
 }
