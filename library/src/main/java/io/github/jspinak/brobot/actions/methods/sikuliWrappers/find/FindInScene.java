@@ -30,7 +30,14 @@ public class FindInScene {
         return new Finder(scene.getName());
     }
 
+    /**
+     * The image to search must always be smaller in both dimensions than the scene in which to search.
+     * @param pattern the image to search for
+     * @param scene the image to search in
+     * @return all matches of the pattern in the scene
+     */
     public List<Match> findAllInScene(Pattern pattern, Image scene) {
+        if (pattern.w()>scene.w() || pattern.h()>scene.h()) return new ArrayList<>();
         Finder f = getFinder(scene);
         f.findAll(pattern.sikuli());
         List<Match> matchList = new ArrayList<>();
@@ -42,6 +49,7 @@ public class FindInScene {
             matchList.add(nextMatch);
         }
         f.destroy();
+        if (matchList.isEmpty()) return matchList;
         Match bestMatch = Collections.max(matchList, Comparator.comparingDouble(Match::getScore));
         if (bestMatch != null && pattern.isFixed()) pattern.getSearchRegions().setFixedRegion(bestMatch.getRegion());
         return matchList;

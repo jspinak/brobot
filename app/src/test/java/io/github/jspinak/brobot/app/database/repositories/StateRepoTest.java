@@ -1,9 +1,7 @@
 package io.github.jspinak.brobot.app.database.repositories;
 
-import io.github.jspinak.brobot.app.database.databaseMappers.javaMappers.StateEntityMapper;
+import io.github.jspinak.brobot.app.database.databaseMappers.StateEntityMapper;
 import io.github.jspinak.brobot.app.database.entities.StateEntity;
-import io.github.jspinak.brobot.app.database.repositories.StateRepo;
-import io.github.jspinak.brobot.database.data.AllStatesInProject;
 import io.github.jspinak.brobot.database.services.AllStatesInProjectService;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;

@@ -40,25 +40,32 @@ public class GetScreenObservationFromScreenshot {
         this.transitionImageRepo = transitionImageRepo;
     }
 
-    public ScreenObservation getNewScreenObservation(Pattern screenshot) {
-        Region usableArea = getScreenObservation.getUsableArea();
-        ScreenObservation screenObservation = initNewScreenObservation(screenshot);
-        List<TransitionImage> links = findAndCapturePotentialLinks(usableArea, screenshot);
-        screenObservation.setImages(links);
-        if (getScreenObservation.isSaveScreensWithMotionAndImages())
-            illustrateScreenObservation.writeIllustratedSceneToHistory(screenObservation);
+    public ScreenObservation getNewScreenObservationAndAddImagesToRepo(Pattern screenshot, int screenshotIndex) {
+        ScreenObservation screenObservation = getNewScreenObservation(screenshot, screenshotIndex);
         transitionImageRepo.addUniqueImagesToRepo(screenObservation);
         return screenObservation;
     }
 
-    public ScreenObservation initNewScreenObservation(Pattern screenshot) {
+    public ScreenObservation getNewScreenObservation(Pattern screenshot, int screenshotIndex) {
+        Region usableArea = getScreenObservation.getUsableArea();
+        ScreenObservation screenObservation = initNewScreenObservation(screenshot, usableArea);
+        List<TransitionImage> links = findImagesWithWordsOnScreen(usableArea, screenshot, screenshotIndex);
+        screenObservation.setImages(links);
+        if (getScreenObservation.isSaveScreensWithMotionAndImages())
+            illustrateScreenObservation.writeIllustratedSceneToHistory(screenObservation);
+        return screenObservation;
+    }
+
+    public ScreenObservation initNewScreenObservation(Pattern screenshot, Region usableArea) {
         ScreenObservation screenObservation = new ScreenObservation();
+        screenshot.setSearchRegionsTo(usableArea);
+        screenObservation.setPattern(screenshot);
         screenObservation.setId(screenObservationManager.getNextUnassignedScreenId());
         screenObservation.setScreenshot(screenshot.getMat()); //getImage.getMatFromFilename(screenshot, ColorCluster.ColorSchemaName.BGR));
         return screenObservation;
     }
 
-    public List<TransitionImage> findAndCapturePotentialLinks(Region usableArea, Pattern screenshot) {
+    public List<TransitionImage> findImagesWithWordsOnScreen(Region usableArea, Pattern screenshot, int screenshotIndex) {
         List<TransitionImage> transitionImages = new ArrayList<>();
         ObjectCollection screens = new ObjectCollection.Builder()
                 .withScenes(screenshot)
@@ -72,7 +79,7 @@ public class GetScreenObservationFromScreenshot {
                 .build();
         Matches wordMatches = action.perform(findAllWords, screens);
         wordMatches.getMatchList().forEach(match -> {
-            TransitionImage transitionImage = new TransitionImage(match);
+            TransitionImage transitionImage = new TransitionImage(match, screenshotIndex);
             transitionImage.setImage(match.getMat());
             transitionImages.add(transitionImage);
         });

@@ -1,8 +1,7 @@
 package io.github.jspinak.brobot.app.services;
 
-import io.github.jspinak.brobot.app.database.databaseMappers.javaMappers.PatternEntityMapper;
+import io.github.jspinak.brobot.app.database.databaseMappers.PatternEntityMapper;
 import io.github.jspinak.brobot.app.database.entities.PatternEntity;
-import io.github.jspinak.brobot.app.database.databaseMappers.mapstructMappers.PatternMapper;
 import io.github.jspinak.brobot.app.database.repositories.PatternRepo;
 import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
 import org.springframework.stereotype.Service;

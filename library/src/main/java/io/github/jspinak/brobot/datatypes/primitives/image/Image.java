@@ -19,8 +19,6 @@ public class Image {
     private String name;
     private BufferedImage bufferedImage;
 
-    public Image() {} // for mapping
-
     public Image(BufferedImage bufferedImage) {
         this.bufferedImage = bufferedImage;
     }

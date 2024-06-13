@@ -63,24 +63,20 @@ public class ScreenStateCreator {
      */
     public List<ImageSetsAndAssociatedScreens> defineStatesWithImages() {
         List<ImageSetsAndAssociatedScreens> imagesScreens = new ArrayList<>();
-        int size = transitionImageRepo.getImages().size();
-        for (int i = 0; i < size; i++) {
-            TransitionImage img = transitionImageRepo.getImages().get(i);
-            addToImageSet(imagesScreens, img, i);
-        }
+        transitionImageRepo.getImages().forEach(img -> addToImageSet(imagesScreens, img));
         return imagesScreens;
     }
 
     private void addToImageSet(List<ImageSetsAndAssociatedScreens> imagesScreens,
-                               TransitionImage transitionImage, int pos) {
+                               TransitionImage transitionImage) {
         for (ImageSetsAndAssociatedScreens imgScr : imagesScreens) {
-            if (imgScr.ifSameScreensAddImage(transitionImage, pos)) {
+            if (imgScr.ifSameScreensAddImage(transitionImage)) {
                 // ImageSetsAndAssociatedScreens are a preliminary representation of states, and the created state's name will be the imgScr's index
                 transitionImage.setOwnerState(imagesScreens.indexOf(imgScr));
                 return;
             }
         }
-        imagesScreens.add(new ImageSetsAndAssociatedScreens(pos, transitionImage.getScreensFound()));
+        imagesScreens.add(new ImageSetsAndAssociatedScreens(transitionImage.getIndexInRepo(), transitionImage.getScreensFound()));
         transitionImage.setOwnerState(imagesScreens.size()-1); // the state name is the last index added
     }
 
@@ -131,6 +127,8 @@ public class ScreenStateCreator {
      * active screen have been checked). After creating the state structure, we can move to states with unchecked
      * images and add to the state structure.
      *
+     * The TransitionImage(s) should already contain all screens in which they appear.
+     *
      * 1. Create StateImage(s) with images from the repo.
      * 2. A StateImage might have a transition. At first, just include the transition to the screen.
      * 3. Make states using the StateImage(s).
@@ -144,7 +142,8 @@ public class ScreenStateCreator {
         // then, create states and add them to the state structure
         List<ImageSetsAndAssociatedScreens> imageSetsList = defineStatesWithImages();
         for (ImageSetsAndAssociatedScreens imgSets : imageSetsList) {
-            stateService.save(createState(imgSets, Integer.toString(imageSetsList.indexOf(imgSets))));
+            State newState = createState(imgSets, Integer.toString(imageSetsList.indexOf(imgSets)));
+            stateService.save(newState);
         }
         // now that all states are defined, we can define the transitions
         for (State state : stateService.getAllStates()) {

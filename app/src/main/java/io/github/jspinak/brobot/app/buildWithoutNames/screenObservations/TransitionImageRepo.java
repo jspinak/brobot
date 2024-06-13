@@ -57,7 +57,7 @@ public class TransitionImageRepo {
                 .setAction(ActionOptions.Action.FIND)
                 .setFind(ActionOptions.Find.SIMILAR_IMAGES)
                 .build();
-        ObjectCollection objectCollection2 = new ObjectCollection.Builder()
+        ObjectCollection repoImages = new ObjectCollection.Builder()
                 .withImages(getStateImages())
                 .build();
 
@@ -65,39 +65,17 @@ public class TransitionImageRepo {
             ObjectCollection objectCollection1 = new ObjectCollection.Builder()
                     .withImages(getStateImage(img))
                     .build();
-            Matches matches = action.perform(actionOptions, objectCollection1, objectCollection2);
-            matches.getBestMatch().ifPresent(match -> {
-                if (match.getScore() < .95) {
-                    img.setIndexInRepo(images.size());
-                    uniqueImages.add(img);
-                    images.add(img);
-                }
-            });
+            Matches matches = action.perform(actionOptions, objectCollection1, repoImages);
+            if (matches.isEmpty() || matches.getBestMatch().get().getScore() < .95)
+                    addImage(img, uniqueImages);
         }
         return uniqueImages;
-        /*
+    }
 
-        for (TransitionImage img : screenObservation.getImages()) {
-            Optional<TransitionImage> optImg = getMatchingImage(
-                    img, screenObservationManager.getMaxSimilarityForUniqueImage(), images);
-            if (optImg.isEmpty()) {
-                img.setIndexInRepo(images.size());
-                uniqueImages.add(img);
-                images.add(img);
-            } else {
-                optImg.get().getScreensFound().add(screenObservation.getId());
-                Mat matchingImages = new MatBuilder()
-                        .addHorizontalSubmats(img.getImage(), optImg.get().getImage())
-                        .setSpaceBetween(4)
-                        .setName("matchingImages")
-                        .build();
-                if (saveMatchingImages) matVisualize.writeMatToHistory(matchingImages, "matching images, screens "+
-                        screenObservation.getId() + ","+optImg.get().getOwnerState());
-            }
-        }
-        return uniqueImages;
-
-         */
+    private void addImage(TransitionImage img, List<TransitionImage> uniqueImages) {
+        img.setIndexInRepo(images.size());
+        uniqueImages.add(img);
+        images.add(img);
     }
 
     private List<StateImage> getStateImages() {
