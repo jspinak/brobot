@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.app.services;
 
-import io.github.jspinak.brobot.app.database.databaseMappers.javaMappers.StateEntityMapper;
+import io.github.jspinak.brobot.app.database.databaseMappers.StateEntityMapper;
 import io.github.jspinak.brobot.app.database.entities.StateEntity;
 import io.github.jspinak.brobot.app.database.repositories.StateRepo;
 import io.github.jspinak.brobot.datatypes.state.state.State;

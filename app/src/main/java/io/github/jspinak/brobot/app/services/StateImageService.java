@@ -1,10 +1,8 @@
 package io.github.jspinak.brobot.app.services;
 
-import io.github.jspinak.brobot.app.database.databaseMappers.javaMappers.StateImageEntityMapper;
+import io.github.jspinak.brobot.app.database.databaseMappers.StateImageEntityMapper;
 import io.github.jspinak.brobot.app.database.entities.StateImageEntity;
-import io.github.jspinak.brobot.app.database.databaseMappers.mapstructMappers.StateImageMapper;
 import io.github.jspinak.brobot.app.database.repositories.StateImageRepo;
-import io.github.jspinak.brobot.app.responses.StateImageResponse;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import org.springframework.stereotype.Service;
 
@@ -56,10 +54,6 @@ public class StateImageService {
 
     public boolean removeStateImage(StateImage stateImage) {
         return removeStateImage(stateImage.getName());
-    }
-
-    public boolean removeStateImage(StateImageResponse stateImageResponse) {
-        return removeStateImage(stateImageResponse.getName());
     }
 
     public List<StateImage> getAllInProject(Long projectId) {
