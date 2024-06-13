@@ -1,8 +1,8 @@
 package io.github.jspinak.brobot.app.restControllers;
 
-import io.github.jspinak.brobot.app.responses.ImageResponse;
-import io.github.jspinak.brobot.app.responses.ImageResponseMapper;
 import io.github.jspinak.brobot.app.services.ImageService;
+import io.github.jspinak.brobot.app.web.responseMappers.ImageResponseMapper;
+import io.github.jspinak.brobot.app.web.responses.ImageResponse;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,7 +16,6 @@ import java.util.stream.Collectors;
 public class ImageController {
 
     private final ImageService imageService;
-    private final ImageResponseMapper imageResponseMapper = ImageResponseMapper.INSTANCE;
 
     public ImageController(ImageService imageService) {
         this.imageService = imageService;
@@ -28,14 +27,14 @@ public class ImageController {
     @GetMapping("/all") // Maps to GET /api/images/all
     public List<ImageResponse> getAllImages() {
         return imageService.getAllImages().stream()
-                .map(imageResponseMapper::map)
+                .map(ImageResponseMapper::map)
                 .collect(Collectors.toList());
     }
 
     @GetMapping("/{name}") // Maps to GET /api/images/{name}
     public List<ImageResponse> getImages(@PathVariable String name) {
         return imageService.getImages(name).stream()
-                .map(imageResponseMapper::map)
+                .map(ImageResponseMapper::map)
                 .collect(Collectors.toList());
     }
 

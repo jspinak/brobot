@@ -48,7 +48,7 @@ public class GetScreenObservation {
     public ScreenObservation takeScreenshotAndGetImages(StateStructureTemplate stateStructureTemplate) {
         ScreenObservation obs = initNewScreenObservation(stateStructureTemplate);
         List<TransitionImage> transitionImages = getTransitionImages.findAndCapturePotentialLinks(
-                usableArea, obs, stateStructureTemplate);
+                usableArea, obs, obs.getId(), stateStructureTemplate);
         obs.setImages(transitionImages);
         if (saveScreensWithMotionAndImages) illustrateScreenObservation.writeIllustratedSceneToHistory(obs);
         return obs;
