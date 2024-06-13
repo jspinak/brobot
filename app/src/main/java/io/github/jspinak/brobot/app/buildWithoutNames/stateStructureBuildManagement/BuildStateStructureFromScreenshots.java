@@ -2,10 +2,7 @@ package io.github.jspinak.brobot.app.buildWithoutNames.stateStructureBuildManage
 
 import io.github.jspinak.brobot.app.buildWithoutNames.buildStateStructure.ScreenStateCreator;
 import io.github.jspinak.brobot.app.buildWithoutNames.buildStateStructure.StateStructureInfo;
-import io.github.jspinak.brobot.app.buildWithoutNames.screenObservations.GetScreenObservation;
-import io.github.jspinak.brobot.app.buildWithoutNames.screenObservations.GetScreenObservationFromScreenshot;
-import io.github.jspinak.brobot.app.buildWithoutNames.screenObservations.GetUsableArea;
-import io.github.jspinak.brobot.app.buildWithoutNames.screenObservations.ScreenObservations;
+import io.github.jspinak.brobot.app.buildWithoutNames.screenObservations.*;
 import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import org.springframework.stereotype.Component;
@@ -21,19 +18,22 @@ public class BuildStateStructureFromScreenshots {
     private final ScreenStateCreator screenStateCreator;
     private final StateStructureInfo stateStructureInfo;
     private final ScreenObservations screenObservations;
+    private final FindAllScreensForTransitionImages findAllScreensForTransitionImages;
 
     public BuildStateStructureFromScreenshots(GetUsableArea getUsableArea,
                                               GetScreenObservation getScreenObservation,
                                               GetScreenObservationFromScreenshot getScreenObservationFromScreenshot,
                                               ScreenStateCreator screenStateCreator,
                                               StateStructureInfo stateStructureInfo,
-                                              ScreenObservations screenObservations) {
+                                              ScreenObservations screenObservations,
+                                              FindAllScreensForTransitionImages findAllScreensForTransitionImages) {
         this.getUsableArea = getUsableArea;
         this.getScreenObservation = getScreenObservation;
         this.getScreenObservationFromScreenshot = getScreenObservationFromScreenshot;
         this.screenStateCreator = screenStateCreator;
         this.stateStructureInfo = stateStructureInfo;
         this.screenObservations = screenObservations;
+        this.findAllScreensForTransitionImages = findAllScreensForTransitionImages;
     }
 
     public void build(List<Pattern> screenshots, Pattern topLeftBoundary, Pattern bottomRightBoundary) {
@@ -42,7 +42,8 @@ public class BuildStateStructureFromScreenshots {
                 screenshots.get(0), topLeftBoundary, bottomRightBoundary);
         getScreenObservation.setUsableArea(usableArea);
         screenshots.forEach(screenshot -> screenObservations.addScreenObservation(
-                getScreenObservationFromScreenshot.getNewScreenObservation(screenshot)));
+                getScreenObservationFromScreenshot.getNewScreenObservationAndAddImagesToRepo(screenshot, screenshots.indexOf(screenshot))));
+        findAllScreensForTransitionImages.findScreens();
         screenStateCreator.createAndSaveStatesAndTransitions();
         stateStructureInfo.printStateStructure();
     }

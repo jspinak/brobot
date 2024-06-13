@@ -3,45 +3,40 @@ package io.github.jspinak.brobot.app.buildWithoutNames.buildStateStructure;
 import io.github.jspinak.brobot.app.buildWithoutNames.screenObservations.TransitionImage;
 import lombok.Getter;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @Getter
 public class ImageSetsAndAssociatedScreens {
 
     private List<Integer> images = new ArrayList<>(); // the int corresponds to the position in the TransitionImageRepo
-    private List<Integer> screens = new ArrayList<>(); // the screen id. screens are fixed after creation.
+    private Set<Integer> screens = new HashSet<>(); // the screen id. screens are fixed after creation.
 
-    public ImageSetsAndAssociatedScreens(int image, List<Integer> screens) {
-        this.images.add(image);
+    public ImageSetsAndAssociatedScreens(int indexInRepo, Set<Integer> screens) {
+        this.images.add(indexInRepo);
         this.screens = screens;
     }
 
-    public void addImage(int image) {
-        this.images.add(image);
+    public void addImage(int indexInRepo) {
+        this.images.add(indexInRepo);
     }
 
-    public boolean ifSameScreensAddImage(TransitionImage transitionImage, int pos) {
+    public boolean ifSameScreensAddImage(TransitionImage transitionImage) {
         if (hasSameScreens(transitionImage.getScreensFound())) {
-            addImage(pos);
+            addImage(transitionImage.getIndexInRepo());
             return true;
         }
         return false;
     }
 
-    private boolean hasSameScreens(List<Integer> screens) {
+    private boolean hasSameScreens(Set<Integer> screens) {
         // Check if both lists are not null and have the same size
         if (screens == null || this.screens.size() != screens.size()) {
             return false;
         }
         // Compare elements one by one
-        for (int i = 0; i < this.screens.size(); i++) {
-            if (!Objects.equals(this.screens.get(i), screens.get(i))) {
-                return false;
-            }
+        for (int screen : screens) {
+            if (!this.screens.contains(screen)) return false;
         }
-        // All elements match
         return true;
     }
 
@@ -50,8 +45,11 @@ public class ImageSetsAndAssociatedScreens {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("Images: ");
         images.forEach(img -> stringBuilder.append(img).append(","));
-        stringBuilder.append(" ").append("Screens: ");
-        screens.forEach(scr -> stringBuilder.append(scr).append(","));
+        stringBuilder.append(" ").append("Screens: [");
+        for (int i=0; i<screens.size()-1; i++) {
+            stringBuilder.append(screens.toArray()[i]).append(",");
+        }
+        stringBuilder.append(screens.toArray()[screens.size()-1]).append("]");
         return stringBuilder.toString();
     }
 

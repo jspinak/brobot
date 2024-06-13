@@ -1,6 +1,5 @@
 package io.github.jspinak.brobot.app.restControllers;
 
-import io.github.jspinak.brobot.app.responses.StateImageResponse;
 import io.github.jspinak.brobot.app.services.StateImageService;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -27,7 +26,7 @@ public class StateImageController {
         return stateImageService.getStateImage(name);
     }
 
-    public @ResponseBody void removeStateImage(StateImageResponse stateImageResponse) {
-        stateImageService.removeStateImage(stateImageResponse);
-    }
+    //public @ResponseBody void removeStateImage(StateImageResponse stateImageResponse) {
+    //    stateImageService.removeStateImage(stateImageResponse);
+    //}
 }

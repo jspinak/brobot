@@ -42,6 +42,7 @@ public class GetTransitionImages {
      * @return a list of TransitionImage objects
      */
     public List<TransitionImage> findAndCapturePotentialLinks(Region usableArea, ScreenObservation screenObservation,
+                                                              int screenshotIndex,
                                                               StateStructureTemplate stateStructureTemplate) {
         List<TransitionImage> transitionImages = new ArrayList<>();
 
@@ -60,7 +61,7 @@ public class GetTransitionImages {
         Matches matches = action.perform(actionOptions, objectCollection);
 
         matches.getMatchList().forEach(match -> {
-            TransitionImage transitionImage = new TransitionImage(match);
+            TransitionImage transitionImage = new TransitionImage(match, screenshotIndex);
             transitionImage.setImage(match.getMat());
             transitionImages.add(transitionImage);
         });

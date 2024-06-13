@@ -1,8 +1,7 @@
 package io.github.jspinak.brobot.app.services;
 
-import io.github.jspinak.brobot.app.database.databaseMappers.javaMappers.ImageEntityMapper;
+import io.github.jspinak.brobot.app.database.databaseMappers.ImageEntityMapper;
 import io.github.jspinak.brobot.app.database.entities.ImageEntity;
-import io.github.jspinak.brobot.app.database.databaseMappers.mapstructMappers.ImageMapper;
 import io.github.jspinak.brobot.app.database.repositories.ImageRepo;
 import io.github.jspinak.brobot.datatypes.primitives.image.Image;
 import org.springframework.stereotype.Service;
