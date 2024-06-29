@@ -14,9 +14,10 @@ import java.util.List;
 public class SelectRegions {
 
     /**
+     * Since version 1.7, the SearchRegions set in the ActionOptions variable do not replace fixed and defined search regions.
      * Select regions by the following methods, in this order:
-     * 1. If the ActionOptions has SearchRegions defined, use those Regions.
-     * 2. If one of the patterns has a defined, fixed search regions, use that.
+     * 1. If one of the patterns has a defined, fixed search regions, use that.
+     * 2. If the ActionOptions has SearchRegions defined, use those Regions.
      * 3. Use the SearchRegions on the patterns.
      *
      * @param actionOptions holds the action configuration, which can contain search regions.
@@ -24,9 +25,14 @@ public class SelectRegions {
      * @return a list of regions to use in an Action.
      */
     public List<Region> getRegions(ActionOptions actionOptions, StateImage stateImage) {
-        if (actionOptions.getSearchRegions().isAnyRegionDefined())
-            return actionOptions.getSearchRegions().getAllRegions();
-        return stateImage.getAllSearchRegions();
+        List<Region> definedFixed = stateImage.getDefinedFixedRegions();
+        if (!definedFixed.isEmpty()) return definedFixed;
+        List<Region> regions;
+        if (!actionOptions.getSearchRegions().isEmpty())
+            regions = actionOptions.getSearchRegions().getAllRegions();
+        else regions = stateImage.getAllSearchRegions();
+        if (regions.isEmpty()) regions.add(new Region());
+        return regions;
     }
 
     /**
