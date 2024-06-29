@@ -416,6 +416,13 @@ public class MatOps {
      */
     public static Mat BGRtoHSV(Mat bgr) {
         Mat hsv = new Mat();
+        // Check the number of channels in the input image
+        if (bgr.channels() == 1) {
+            // Convert grayscale to BGR
+            Mat bgrImage = new Mat();
+            cvtColor(bgr, bgrImage, COLOR_GRAY2BGR);
+            bgr = bgrImage;
+        }
         cvtColor(bgr, hsv, COLOR_BGR2HSV);
         return hsv;
     }
