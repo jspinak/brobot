@@ -38,4 +38,4 @@ You can see the real execution in the
 [live automation video](/docs/tutorial-basics/live-automation).
 Update: Dawn of Titans has been shut down since 2022, but you can still learn about 
 mocking and model-based GUI automation with this tutorial. If you are interested in a tutorial 
-that allows for live automation, check out the [mrdoob tutorial](/docs/tutorial-mrdoob/intro). 
+that allows for live automation, check out the [mrdoob tutorial](/docs/tutorial-mrdoob/setup). 
