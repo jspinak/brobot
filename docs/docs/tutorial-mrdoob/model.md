@@ -30,6 +30,10 @@ snapshots of the GUI at a particular point in time. We want to model states in c
 The model also needs to capture how to move from one state to another. This is done with transition classes.
 Each directory will have a transitions class along with a state class.  
 
+This simple model can be visualized as a directed graph, with nodes being states
+and edges being transitions.  
+![Directed Graph](../../static/img/mrdoob/mrdoob_model.jpg)
+
 Add the state and transitions classes to the 3 new directories. It should look like this:  
 
 ![Model Filestructure](../../static/img/mrdoob/mrdoob_filestructure_model.png)
