@@ -36,9 +36,6 @@ and as a demonstration of its mocking functionality. It can be run
 in any Java IDE on Windows, Mac, or Linux with mocking enabled. 
 You can see the real execution in the 
 [live automation video](/docs/tutorial-basics/live-automation).
-If you wish to run the demo application with mocking disabled, there are
-a few additional requirements. 
-The emulator, the 64 bit
-version of LDPlayer, works only on Windows machines. The mobile game, Dawn of Titans,
-requires you to go through a game tutorial before you get to the point where you could 
-execute a real run of the demo program.
+Update: Dawn of Titans has been shut down since 2022, but you can still learn about 
+mocking and model-based GUI automation with this tutorial. If you are interested in a tutorial 
+that allows for live automation, check out the [mrdoob tutorial](/docs/tutorial-mrdoob/intro). 
