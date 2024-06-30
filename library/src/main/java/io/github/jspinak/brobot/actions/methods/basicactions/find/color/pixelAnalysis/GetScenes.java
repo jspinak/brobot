@@ -5,9 +5,11 @@ import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.actions.methods.time.Time;
 import io.github.jspinak.brobot.datatypes.primitives.image.Image;
 import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
+import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
-import io.github.jspinak.brobot.illustratedHistory.IllustrateScreenshot;
+import io.github.jspinak.brobot.imageUtils.GetImageJavaCV;
 import io.github.jspinak.brobot.reports.Report;
+import org.bytedeco.opencv.opencv_core.Mat;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -18,17 +20,16 @@ import java.util.List;
  * - finding color
  * - image segmentation (classification)
  * - action illustration
- * When running live, scenes should be taken in every Find iteration.
- * Scenes are not needed for pattern detection when illustrations are turned off.
+ * In Brobot version 1.0.7, scenes are used for all Find operations.
  */
 @Component
 public class GetScenes {
     private final Time time;
-    private final IllustrateScreenshot illustrateScreenshot;
+    private final GetImageJavaCV getImage;
 
-    public GetScenes(Time time, IllustrateScreenshot illustrateScreenshot) {
+    public GetScenes(Time time, GetImageJavaCV getImage) {
         this.time = time;
-        this.illustrateScreenshot = illustrateScreenshot;
+        this.getImage = getImage;
     }
 
     /**
@@ -41,11 +42,11 @@ public class GetScenes {
     public List<Image> getScenes(ActionOptions actionOptions, List<ObjectCollection> objectCollections,
                                  int scenesToCapture, double secondsBetweenCaptures) {
         List<Image> scenes = new ArrayList<>();
-        boolean takeScreenshot = isOkToTakeScreenshot(actionOptions, objectCollections.toArray(new ObjectCollection[0]));
+        boolean takeScreenshot = isOkToTakeScreenshot(objectCollections.toArray(new ObjectCollection[0]));
         if (takeScreenshot) {
-            Report.println("Taking screenshot");
             for (int i=0; i<scenesToCapture; i++) {
-                scenes.add(new Image("screenshot" + i + ".png"));
+                Mat bgr = getImage.getMatFromScreen(new Region());
+                scenes.add(new Image(bgr, "screenshot" + i));
                 if (i<scenesToCapture-1) time.wait(secondsBetweenCaptures);
             }
             return scenes;
@@ -83,28 +84,20 @@ public class GetScenes {
     /**
      * It's not ok to take a screenshot when either
      * - mocking is turned on
-     * - scenes are passed as parameters
+     * - scenes are passed as parameters, since these scenes will be used for GUI operations
      *
-     * If these conditions don't exclude taking a screenshot, it's ok to take one when either
-     * - the action is FIND.Color, FIND.Histogram, FIND.REGIONS_OF_MOTION, or CLASSIFY (it's necessary for execution)
-     * - illustration is allowed for this action (it's necessary for illustration)
+     * In Brobot version 1.0.7, all operations use screenshots. In previous versions, Brobot GUI operations asked
+     *   SikuliX to perform operations on the screen. SikuliX takes a screenshot for pattern matching. This caused
+     *   some actions to require two screenshots (once with SikuliX and once with Brobot).
      *
-     * Otherwise, it's not ok to take a screenshot. The other methods use Sikuli for execution.
-     *
-     * @param actionOptions has the action and other relevant options
      * @param objectCollections may contain scenes
      * @return true if a screenshot is required
      */
-    private boolean isOkToTakeScreenshot(ActionOptions actionOptions, ObjectCollection... objectCollections) {
+    private boolean isOkToTakeScreenshot(ObjectCollection... objectCollections) {
         if (BrobotSettings.mock) return false;
-        if (objectCollections.length == 0) return false;
+        //if (objectCollections.length == 0) return false;
         if (!objectCollections[0].getScenes().isEmpty()) return false;
-        ActionOptions.Action action = actionOptions.getAction();
-        ActionOptions.Find find = actionOptions.getFind();
-        if (find == ActionOptions.Find.COLOR || find == ActionOptions.Find.HISTOGRAM
-                || action == ActionOptions.Action.CLASSIFY || find == ActionOptions.Find.REGIONS_OF_MOTION) return true;
-        if (illustrateScreenshot.okToIllustrate(actionOptions, objectCollections)) return true;
-        return false;
+        return true;
     }
 
 }

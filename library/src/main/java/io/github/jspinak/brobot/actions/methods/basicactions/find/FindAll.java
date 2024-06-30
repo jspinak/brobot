@@ -46,7 +46,8 @@ public class FindAll {
         for (Pattern pattern : stateImage.getPatterns()) {
             List<Match> matchList = mockOrLive.findAll(pattern, scene);
             for (Match match : matchList) {
-                if (matchProofer.isInSearchRegions(match, selectRegions.getRegions(actionOptions, stateImage))) {
+                List<Region> regionsAllowedForMatch = selectRegions.getRegions(actionOptions, stateImage);
+                if (matchProofer.isInSearchRegions(match, regionsAllowedForMatch)) {
                     Match newMatch = new Match.Builder()
                                     .setMatch(match)
                                     .setSearchImage(pattern.getBImage())
