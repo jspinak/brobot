@@ -27,7 +27,7 @@ const config = {
       {
         // Will be passed to @docusaurus/plugin-google-analytics
         gtag: {
-          trackingID: 'G-6WY2S6ZWEY',
+          trackingID: 'G-6WY1S6ZWEY',
           anonymizeIP: true,
         },
         pages: {
