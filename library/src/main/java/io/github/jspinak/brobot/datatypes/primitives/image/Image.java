@@ -32,6 +32,11 @@ public class Image {
         this.bufferedImage = BufferedImageOps.fromMat(BGRmat);
     }
 
+    public Image(Mat BGRmat, String name) {
+        this.bufferedImage = BufferedImageOps.fromMat(BGRmat);
+        this.name = name;
+    }
+
     public Image(String filename) {
         this.bufferedImage = BufferedImageOps.getBuffImgFromFile(filename);
         this.name = filename.replaceFirst("[.][^.]+$", ""); // the filename without extension
