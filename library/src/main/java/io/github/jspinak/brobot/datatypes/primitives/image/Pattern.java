@@ -230,10 +230,10 @@ public class Pattern {
     }
 
     public static class Builder {
-        private String name;
+        private String name = "";
         private Image image;
         private BufferedImage bufferedImage;
-        private String filename;
+        private String filename = "";
         private boolean fixed = false;
         private SearchRegions searchRegions = new SearchRegions();
         private boolean setKmeansColorProfiles = false;
@@ -244,8 +244,14 @@ public class Pattern {
         private Position position = new Position(.5,.5);
         private Anchors anchors = new Anchors();
 
+        /*
+        This method allows you to change the name of the Pattern without changing the filename.
+        If there is no filename, name will also be used as the filename.
+         */
         public Builder setName(String name) {
             this.name = name;
+            if (this.filename.isEmpty()) this.filename = name;
+            if (this.image == null) this.image = new Image(BufferedImageOps.getBuffImgFromFile(filename), name);
             return this;
         }
 
@@ -266,6 +272,8 @@ public class Pattern {
 
         public Builder setFilename(String filename) {
             this.filename = filename;
+            if (name.isEmpty()) name = filename;
+            this.image = new Image(BufferedImageOps.getBuffImgFromFile(filename), name);
             return this;
         }
 
@@ -345,11 +353,16 @@ public class Pattern {
             return new Pattern();
         }
 
+        /*
+        Sets the image in the Builder.
+         */
         private void createAndSetImage(Pattern pattern) {
-            if (image != null) pattern.setImage(image);
-            if (bufferedImage == null) return;
-            if (pattern.getImage() != null) pattern.getImage().setBufferedImage(bufferedImage);
-            else pattern.setImage(new Image(bufferedImage, pattern.getName()));
+            if (image != null) {
+                pattern.setImage(image); //if the Builder has a valid image, use it for the Pattern image
+                return;
+            }
+            // the Builder does not have an image. if there is a buffered image, use it to set the image.
+            if (bufferedImage != null) pattern.setImage(new Image(bufferedImage, pattern.getName()));
         }
 
         public Pattern build() {
