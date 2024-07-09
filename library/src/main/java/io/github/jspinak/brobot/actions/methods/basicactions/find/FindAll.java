@@ -51,7 +51,7 @@ public class FindAll {
                 if (matchProofer.isInSearchRegions(match, regionsAllowedForMatch)) {
                     Match newMatch = new Match.Builder()
                                     .setMatch(match)
-                                    .setTarget(new Location(match, pattern.getPosition()))
+                                    .setPosition(pattern.getPosition())
                                     .setSearchImage(pattern.getBImage())
                                     .setAnchors(pattern.getAnchors())
                                     .setStateObjectData(stateImage)
