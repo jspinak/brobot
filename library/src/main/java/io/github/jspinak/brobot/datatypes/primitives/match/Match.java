@@ -12,8 +12,6 @@ import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImag
 import io.github.jspinak.brobot.imageUtils.BufferedImageOps;
 
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Rect;
 
@@ -183,6 +181,7 @@ public class Match {
 
     public static class Builder {
         private org.sikuli.script.Match sikuliMatch;
+        private Location target;
         private Image image;
         private BufferedImage bufferedImage;
         private Image searchImage;
@@ -202,6 +201,7 @@ public class Match {
 
         public Builder setMatch(Match match) {
             if (match.image != null) image = match.image;
+            if (match.target != null) target = match.target;
             if (match.searchImage != null) this.searchImage = match.getSearchImage();
             if (match.region != null) this.region = match.getRegion();
             if (match.name != null) this.name = match.getName();
@@ -216,6 +216,11 @@ public class Match {
 
         public Builder setRegion(Region region) {
             this.region = region;
+            return this;
+        }
+
+        public Builder setTarget(Location location) {
+            this.target = location;
             return this;
         }
 
@@ -317,9 +322,10 @@ public class Match {
                 if (sikuliMatch.getName() != null) match.name = sikuliMatch.getName();
                 region = new Region(sikuliMatch);
             }
+            if (target != null) match.target = target;
             if (region != null) {
                 match.region = new Region(region);
-                match.target = new Location(region);
+                if (target == null) match.target = new Location(region);
             }
             match.scene = scene;
             setMatchImage(match);
