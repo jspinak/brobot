@@ -3,6 +3,7 @@
 /**/shelf/
 
 # Production
+.gradle
 /library/.gradle
 /**/build
 
