@@ -6,6 +6,7 @@ import io.github.jspinak.brobot.actions.methods.basicactions.find.matchManagemen
 import io.github.jspinak.brobot.actions.methods.mockOrLiveInterface.MockOrLive;
 import io.github.jspinak.brobot.datatypes.primitives.image.Image;
 import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
+import io.github.jspinak.brobot.datatypes.primitives.location.Location;
 import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
@@ -50,6 +51,7 @@ public class FindAll {
                 if (matchProofer.isInSearchRegions(match, regionsAllowedForMatch)) {
                     Match newMatch = new Match.Builder()
                                     .setMatch(match)
+                                    .setTarget(new Location(match, pattern.getPosition()))
                                     .setSearchImage(pattern.getBImage())
                                     .setAnchors(pattern.getAnchors())
                                     .setStateObjectData(stateImage)
