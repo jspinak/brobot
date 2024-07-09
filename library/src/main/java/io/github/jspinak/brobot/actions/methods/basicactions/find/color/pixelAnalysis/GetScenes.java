@@ -52,12 +52,13 @@ public class GetScenes {
             return scenes;
         }
         if (BrobotSettings.mock) {
-            // If scenes are listed in the settings, use them.
-            if (!BrobotSettings.screenshots.isEmpty()) {
-                BrobotSettings.screenshots.forEach(filename -> scenes.add(new Image(filename)));
-            }
             // If no scenes are listed in the settings, use a randomly generated scene.
-            else scenes.add(Image.getEmptyImage());
+            if (BrobotSettings.screenshots.isEmpty()) scenes.add(Image.getEmptyImage());
+            // If scenes are listed in the settings, use them.
+            else for (String filename : BrobotSettings.screenshots){
+                String relativePath = "../" + BrobotSettings.screenshotPath + filename;
+                scenes.add(new Image(relativePath));
+            }
             return scenes;
         }
         // If scenes are passed as parameters, use them.

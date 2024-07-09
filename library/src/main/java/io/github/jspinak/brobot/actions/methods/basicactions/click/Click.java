@@ -38,22 +38,13 @@ public class Click implements ActionInterface {
         find.perform(matches, objectCollections); // find performs only on 1st collection
         int i = 0;
         for (Match match : matches.getMatchList()) {
-            Location location = setClickLocation(match, actionOptions);
+            Location location = match.getLocation();
             click(location, actionOptions, match);
             i++;
             if (i == actionOptions.getMaxMatchesToActOn()) break;
             // pause only between clicks, not after the last click
             if (i < matches.getMatchList().size()) time.wait(actionOptions.getPauseBetweenIndividualActions());
         }
-    }
-
-    private Location setClickLocation(Match match, ActionOptions actionOptions) {
-        // Define the location by the match region and the position of the StateObject
-        Location location = match.getLocation();
-        location.setX(location.getX() + actionOptions.getAddX());
-        location.setY(location.getY() + actionOptions.getAddY());
-        match.setTarget(new Location(location.getX(), location.getY()));
-        return location;
     }
 
     /**
