@@ -100,8 +100,8 @@ public class Location {
     public Location(Match match) {
         this.region = match.getRegion();
         double percentOfW, percentOfH;
-        percentOfW = ((double)match.getTarget().x - (double)region.x()) / (double)region.w();
-        percentOfH = ((double)match.getTarget().y - (double)region.y()) / (double)region.h();
+        percentOfW = ((double)match.getLocation().x - (double)region.x()) / (double)region.w();
+        percentOfH = ((double)match.getLocation().y - (double)region.y()) / (double)region.h();
         position = new Position(percentOfW, percentOfH);
     }
 
@@ -189,11 +189,9 @@ public class Location {
     }
 
     public Match toMatch() {
-        Match match = new Match.Builder()
+        return new Match.Builder()
                 .setRegion(getX(), getY(), 1, 1)
                 .build();
-        match.setTarget(new Location(getX(), getY()));
-        return match;
     }
 
     public StateLocation asStateLocationInNullState() {
@@ -382,8 +380,8 @@ public class Location {
         public Builder fromMatch(Match match) {
             this.region = new Region(match);
             int percentOfW, percentOfH;
-            percentOfW = (match.getTarget().x - match.x()) / match.w();
-            percentOfH = (match.getTarget().y - match.y()) / match.y();
+            percentOfW = (match.getLocation().x - match.x()) / match.w();
+            percentOfH = (match.getLocation().y - match.y()) / match.y();
             position = new Position(percentOfW, percentOfH);
             return this;
         }

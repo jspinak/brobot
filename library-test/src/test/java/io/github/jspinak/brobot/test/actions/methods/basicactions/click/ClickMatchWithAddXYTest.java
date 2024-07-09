@@ -20,16 +20,21 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class ClickMatchWithAddXYTest {
 
     @BeforeAll
-    public static void setupHeadlessMode() {
+    public static void setup() {
         System.setProperty("java.awt.headless", "false");
+        BrobotSettings.mock = true;
     }
 
     @Autowired
     Action action;
 
+    /*
+    Clicking should be a unit test. You don't want to actually click on the screen.
+    Unit tests are performed by adding screenshots to BrobotSettings.screenshots.
+     */
     @Test
     void setPosition() {
-        //BrobotSettings.screenshots.add("../screenshots/floranext0");
+        BrobotSettings.screenshots.add("floranext0");
         StateImage topLeft = new StateImage.Builder()
                 .addPattern(new Pattern.Builder()
                         .setName("topLeft")
@@ -38,7 +43,7 @@ public class ClickMatchWithAddXYTest {
                 .build();
         ObjectCollection objColl = new ObjectCollection.Builder()
                 .withImages(topLeft)
-                .withScenes("../screenshots/floranext0")
+                //.withScenes("../screenshots/floranext0")
                 .build();
         ActionOptions actionOptions = new ActionOptions.Builder()
                 .setAction(ActionOptions.Action.CLICK)
@@ -53,7 +58,7 @@ public class ClickMatchWithAddXYTest {
 
     @Test
     void addXY() {
-        //BrobotSettings.screenshots.add("../screenshots/floranext0");
+        BrobotSettings.screenshots.add("floranext0");
         StateImage topLeft = new StateImage.Builder()
                 .addPattern(new Pattern.Builder()
                         .setName("topLeft")
@@ -62,7 +67,7 @@ public class ClickMatchWithAddXYTest {
                 .build();
         ObjectCollection objColl = new ObjectCollection.Builder()
                 .withImages(topLeft)
-                .withScenes("../screenshots/floranext0")
+                //.withScenes("../screenshots/floranext0")
                 .build();
         ActionOptions actionOptions = new ActionOptions.Builder()
                 .setAction(ActionOptions.Action.CLICK)
