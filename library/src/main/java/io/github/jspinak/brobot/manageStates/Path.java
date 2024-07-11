@@ -65,7 +65,7 @@ public class Path {
 
     public void print() {
         System.out.format("(%d)", score);
-        states.forEach(String -> System.out.format("-> %s ", states));
+        states.forEach(s -> System.out.format("-> %s ", s));
         System.out.println();
     }
 
