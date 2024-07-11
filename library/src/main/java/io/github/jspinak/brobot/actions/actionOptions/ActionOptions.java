@@ -3,6 +3,7 @@ package io.github.jspinak.brobot.actions.actionOptions;
 import io.github.jspinak.brobot.actions.BrobotSettings;
 import io.github.jspinak.brobot.actions.methods.sikuliWrappers.mouse.ClickType;
 import io.github.jspinak.brobot.datatypes.primitives.location.Location;
+import io.github.jspinak.brobot.datatypes.primitives.location.Position;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
@@ -221,9 +222,16 @@ public class ActionOptions {
      *
      * These options are also used for drags, and can move the mouse once the drag is finished.
      */
-    private boolean moveMouseAfterClick = false;
-    private Location locationAfterAction = new Location(-1, 0); // disabled by default (x = -1)
-    private Location offsetLocationBy = new Location(-1, 0);
+    private boolean moveMouseAfterAction = false;
+    private Location moveMouseAfterActionTo = new Location(-1, 0); // disabled by default (x = -1)
+    private Location moveMouseAfterActionBy = new Location(-1, 0);
+
+    /*
+    These options modify the click location for matches.
+    They take precedence over the modifiers in the datatypes (Pattern, StateImage, etc).
+     */
+    private Position targetPosition;
+    private Location targetOffset;
 
     /*
      * Sets temporary SearchRegions for Images, and also for RegionImagePairs when the
@@ -305,7 +313,7 @@ public class ActionOptions {
      * AbsoluteW and AbsoluteH are not used when set to a negative number.
      * When AbsoluteW is used, addW is not used. Same for H.
      *
-     * These variables are used for the dragFrom Location but not for the dragTo Location.
+     * When used with DRAG, they are used for the dragFrom Location but not for the dragTo Location.
      */
     private int addW = 0;
     private int addH = 0;
@@ -448,9 +456,11 @@ public class ActionOptions {
         private double pauseBeforeMouseUp = Settings.DelayBeforeDrop;
         private double pauseAfterMouseUp = 0;
         private ClickType.Type clickType = ClickType.Type.LEFT;
-        private boolean moveMouseAfterClick = false;
-        private Location locationAfterAction = new Location(-1, 0);
-        private Location offsetLocationBy = new Location(-1, 0);
+        private boolean moveMouseAfterAction = false;
+        private Location moveMouseAfterActionTo = new Location(-1, 0);
+        private Location moveMouseAfterActionBy = new Location(-1, 0);
+        private Position targetPosition;
+        private Location targetOffset;
         private SearchRegions searchRegions = new SearchRegions();
         private double pauseBeforeBegin = 0;
         private double pauseAfterEnd = 0;
@@ -590,18 +600,33 @@ public class ActionOptions {
             return this;
         }
 
-        public Builder setMoveMouseAfterClick(boolean setMoveMouse) {
-            this.moveMouseAfterClick = setMoveMouse;
+        public Builder setMoveMouseAfterAction(boolean setMoveMouse) {
+            this.moveMouseAfterAction = setMoveMouse;
             return this;
         }
 
-        public Builder setLocationAfterAction(Location location) {
-            this.locationAfterAction = location;
+        public Builder setMoveMouseAfterActionTo(Location location) {
+            this.moveMouseAfterActionTo = location;
             return this;
         }
 
-        public Builder setOffsetLocation(int offsetX, int offsetY) {
-            this.offsetLocationBy = new Location(offsetX, offsetY);
+        public Builder setMoveMouseAfterActionBy(int offsetX, int offsetY) {
+            this.moveMouseAfterActionBy = new Location(offsetX, offsetY);
+            return this;
+        }
+
+        public Builder setTargetPosition(Position position) {
+            this.targetPosition = position;
+            return this;
+        }
+
+        public Builder setTargetPosition(int w, int h) {
+            this.targetPosition = new Position(w, h);
+            return this;
+        }
+
+        public Builder setTargetOffset(int offsetX, int offsetY) {
+            this.targetOffset = new Location(offsetX, offsetY);
             return this;
         }
 
@@ -842,9 +867,11 @@ public class ActionOptions {
             actionOptions.pauseBeforeMouseDown = pauseBeforeMouseDown;
             actionOptions.pauseAfterMouseUp = pauseAfterMouseUp;
             actionOptions.clickType = clickType;
-            actionOptions.moveMouseAfterClick = moveMouseAfterClick;
-            actionOptions.locationAfterAction = locationAfterAction;
-            actionOptions.offsetLocationBy = offsetLocationBy;
+            actionOptions.moveMouseAfterAction = moveMouseAfterAction;
+            actionOptions.moveMouseAfterActionTo = moveMouseAfterActionTo;
+            actionOptions.moveMouseAfterActionBy = moveMouseAfterActionBy;
+            actionOptions.targetPosition = targetPosition;
+            actionOptions.targetOffset = targetOffset;
             actionOptions.searchRegions = searchRegions;
             actionOptions.pauseBeforeBegin = pauseBeforeBegin;
             actionOptions.pauseAfterEnd = pauseAfterEnd;

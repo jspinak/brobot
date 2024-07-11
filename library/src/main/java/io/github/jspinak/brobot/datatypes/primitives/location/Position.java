@@ -41,6 +41,11 @@ public class Position {
         this.percentH = Positions.getCoordinates(positionName).getValue() + addPercentH;
     }
 
+    public Position(Position clone) {
+        this.percentW = clone.percentW;
+        this.percentH = clone.percentH;
+    }
+
     public void addPercentW(double addW) {
         percentW += addW;
     }

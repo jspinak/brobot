@@ -7,6 +7,7 @@ import io.github.jspinak.brobot.actions.methods.mockOrLiveInterface.MockOrLive;
 import io.github.jspinak.brobot.datatypes.primitives.image.Image;
 import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
 import io.github.jspinak.brobot.datatypes.primitives.location.Location;
+import io.github.jspinak.brobot.datatypes.primitives.location.Position;
 import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
@@ -45,23 +46,34 @@ public class FindAll {
     public List<Match> find(StateImage stateImage, Image scene, ActionOptions actionOptions) {
         List<Match> allMatchObjects = new ArrayList<>();
         for (Pattern pattern : stateImage.getPatterns()) {
+            Position targetPosition = actionOptions.getTargetPosition() == null?
+                    pattern.getTargetPosition() : actionOptions.getTargetPosition();
+            Location xyOffset = actionOptions.getTargetOffset() == null?
+                    pattern.getTargetOffset() : actionOptions.getTargetOffset();
             List<Match> matchList = mockOrLive.findAll(pattern, scene);
-            for (Match match : matchList) {
-                List<Region> regionsAllowedForMatch = selectRegions.getRegions(actionOptions, stateImage);
-                if (matchProofer.isInSearchRegions(match, regionsAllowedForMatch)) {
-                    Match newMatch = new Match.Builder()
-                                    .setMatch(match)
-                                    .setPosition(pattern.getPosition())
-                                    .setSearchImage(pattern.getBImage())
-                                    .setAnchors(pattern.getAnchors())
-                                    .setStateObjectData(stateImage)
-                                    .setScene(scene)
-                                    .build();
-                    allMatchObjects.add(newMatch);
-                }
-            }
+            addMatchObjects(allMatchObjects, matchList, pattern, stateImage, actionOptions, scene, targetPosition, xyOffset);
         }
         return allMatchObjects;
+    }
+
+    private void addMatchObjects(List<Match> allMatchObjects, List<Match> matchList, Pattern pattern,
+                               StateImage stateImage, ActionOptions actionOptions, Image scene,
+                               Position target, Location offset) {
+        for (Match match : matchList) {
+            List<Region> regionsAllowedForMatch = selectRegions.getRegions(actionOptions, stateImage);
+            if (matchProofer.isInSearchRegions(match, regionsAllowedForMatch)) {
+                Match newMatch = new Match.Builder()
+                        .setMatch(match)
+                        .setPosition(target)
+                        .setOffset(offset)
+                        .setSearchImage(pattern.getBImage())
+                        .setAnchors(pattern.getAnchors())
+                        .setStateObjectData(stateImage)
+                        .setScene(scene)
+                        .build();
+                allMatchObjects.add(newMatch);
+            }
+        }
     }
 
     public List<Match> findWords(Image scene, ActionOptions actionOptions) {
