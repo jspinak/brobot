@@ -51,18 +51,8 @@ public class Match {
     private Image image;
     private String text = "";
     private String name = ""; // in SikuliX Element, extended by many SikuliX object classes, including Match.
-    private Region region; // this region is a Brobot region; SikuliX Match has a SikuliX Region.
+    private Location target; // Location has a Brobot region (SikuliX Match has a SikuliX Region) and a Position and offsets.
     // ---------------------------
-
-    /*
-     position and xyOffset replace target (a Location). This is because
-     - If the match region is adjusted, the Location region would need to be adjusted too.
-     Instead, location is returned with a method:
-     1. Find the initial location with new Location(region, position)
-     2. Add xyOffset to the location
-     */
-    private Position position = new Position();
-    private Location xyOffset = new Location(0,0);
 
     /*
     The BufferedImage in `image` contains the pixels from the match region. This can be different from
@@ -88,33 +78,35 @@ public class Match {
     public Match() {} // for mapping
 
     public Match(Region region) {
-        this.region = new Region(region);
+        this.target = new Location(region);
     }
 
     public int x() {
-        return region.x();
+        return getRegion().x();
     }
 
     public int y() {
-        return region.y();
+        return getRegion().y();
     }
 
     public int w() {
-        return region.w();
+        return getRegion().w();
     }
 
     public int h() {
-        return region.h();
+        return getRegion().h();
+    }
+
+    public Region getRegion() {
+        return target.getRegion();
+    }
+
+    public void setRegion(Region region) {
+        target.setRegion(region);
     }
 
     public Mat getMat() {
         return image.getMatBGR();
-    }
-
-    public Location getLocation() {
-        Location location = new Location(region, position);
-        location.add(xyOffset);
-        return location;
     }
 
     public int compareByScore(Match m) {
@@ -122,7 +114,7 @@ public class Match {
     }
 
     public int size() { // TODO: check. this used to refer to the size of the Pattern
-        return region.w() * region.h();
+        return getRegion().w() * getRegion().h();
     }
 
     public void incrementTimesActedOn() {
@@ -131,7 +123,7 @@ public class Match {
 
     public void setImageWithScene() {
         if (scene == null) return;
-        BufferedImage bImg = BufferedImageOps.getSubImage(scene.getBufferedImage(), region);
+        BufferedImage bImg = BufferedImageOps.getSubImage(scene.getBufferedImage(), getRegion());
         if (image == null) image = new Image(bImg);
         else image.setBufferedImage(bImg);
     }
@@ -160,7 +152,7 @@ public class Match {
         else if (searchImage != null) imageToUse = searchImage;
         Pattern newPattern = new Pattern.Builder()
             .setFixed(true)
-            .setFixedRegion(region)
+            .setFixedRegion(target.getRegion())
             .setName(name)
             .setImage(imageToUse)
             .build();
@@ -176,20 +168,23 @@ public class Match {
         if (name != null && !name.isEmpty()) {
             nameText = "#" + name + "# ";
         }
-        stringBuilder.append(String.format("%sR[%d,%d %dx%d] simScore:%.1f", nameText, region.x(), region.y(), region.w(), region.h(), score));
+        stringBuilder.append(String.format("%sR[%d,%d %dx%d] simScore:%.1f", nameText,
+                getRegion().x(), getRegion().y(), getRegion().w(), getRegion().h(), score));
         if (getText() != null && !getText().isEmpty()) stringBuilder.append(" text:").append(getText());
         stringBuilder.append("]");
         return stringBuilder.toString();
     }
 
     public org.sikuli.script.Match sikuli() {
-        return new org.sikuli.script.Match(region.sikuli(), score);
+        return new org.sikuli.script.Match(getRegion().sikuli(), score);
     }
 
     public static class Builder {
         private org.sikuli.script.Match sikuliMatch;
+        private Location target = new Location();
         private Position position = new Position();
-        private Location xyOffset = new Location(0,0);
+        private int offsetX = 0;
+        private int offsetY = 0;
         private Image image;
         private BufferedImage bufferedImage;
         private Image searchImage;
@@ -210,7 +205,7 @@ public class Match {
         public Builder setMatch(Match match) {
             if (match.image != null) image = match.image;
             if (match.searchImage != null) this.searchImage = match.getSearchImage();
-            if (match.region != null) this.region = match.getRegion();
+            if (match.getRegion() != null) this.setRegion(match.getRegion());
             if (match.name != null) this.name = match.getName();
             if (match.text != null) this.text = match.getText();
             if (match.anchors != null) this.anchors = match.getAnchors();
@@ -231,8 +226,19 @@ public class Match {
             return this;
         }
 
-        public Builder setXYoffset(Location xyOffset) {
-            this.xyOffset = xyOffset;
+        public Builder setOffsetX(int offsetX) {
+            this.offsetX = offsetX;
+            return this;
+        }
+
+        public Builder setOffsetY(int offsetY) {
+            this.offsetY = offsetY;
+            return this;
+        }
+
+        public Builder setOffset(Location offset) {
+            this.offsetX = offset.getX();
+            this.offsetY = offset.getY();
             return this;
         }
 
@@ -333,9 +339,14 @@ public class Match {
                 if (sikuliMatch.getName() != null) match.name = sikuliMatch.getName();
                 region = new Region(sikuliMatch);
             }
-            match.position = position;
-            match.xyOffset = xyOffset;
-            if (region != null) match.region = new Region(region);
+
+            // set target location
+            if (region != null) target.setRegion(region);
+            target.setPosition(position);
+            target.setOffsetX(offsetX);
+            target.setOffsetY(offsetY);
+            match.target = target;
+
             match.scene = scene;
             setMatchImage(match);
             if (name != null) match.name = name;

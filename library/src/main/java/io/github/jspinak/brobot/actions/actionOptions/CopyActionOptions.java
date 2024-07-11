@@ -27,11 +27,11 @@ public class CopyActionOptions {
                 .setDragToOffsetX(orig.getDragToOffsetX())
                 .setDragToOffsetY(orig.getDragToOffsetY())
                 .setClickType(orig.getClickType())
-                .setMoveMouseAfterClick(orig.isMoveMouseAfterClick())
-                .setLocationAfterAction(new Location(
-                        orig.getLocationAfterAction().getX(), orig.getLocationAfterAction().getY()))
-                .setOffsetLocation(
-                        orig.getLocationAfterAction().getX(), orig.getLocationAfterAction().getY())
+                .setMoveMouseAfterAction(orig.isMoveMouseAfterAction())
+                .setMoveMouseAfterActionTo(new Location(
+                        orig.getMoveMouseAfterActionTo().getX(), orig.getMoveMouseAfterActionTo().getY()))
+                .setMoveMouseAfterActionBy(
+                        orig.getMoveMouseAfterActionTo().getX(), orig.getMoveMouseAfterActionTo().getY())
                 .setSearchRegions(orig.getSearchRegions().getDeepCopy())
                 .setPauseBeforeBegin(orig.getPauseBeforeBegin())
                 .setPauseAfterEnd(orig.getPauseAfterEnd())

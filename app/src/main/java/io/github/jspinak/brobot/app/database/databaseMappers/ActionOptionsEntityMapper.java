@@ -22,9 +22,9 @@ public class ActionOptionsEntityMapper {
         actionOptionsEntity.setPauseBeforeMouseUp(actionOptions.getPauseBeforeMouseUp());
         actionOptionsEntity.setPauseAfterMouseUp(actionOptions.getPauseAfterMouseUp());
         actionOptionsEntity.setClickType(actionOptions.getClickType());
-        actionOptionsEntity.setMoveMouseAfterClick(actionOptions.isMoveMouseAfterClick());
-        actionOptionsEntity.setLocationAfterAction(LocationEntityMapper.map(actionOptions.getLocationAfterAction()));
-        actionOptionsEntity.setOffsetLocationBy(LocationEntityMapper.map(actionOptions.getOffsetLocationBy()));
+        actionOptionsEntity.setMoveMouseAfterClick(actionOptions.isMoveMouseAfterAction());
+        actionOptionsEntity.setLocationAfterAction(LocationEntityMapper.map(actionOptions.getMoveMouseAfterActionTo()));
+        actionOptionsEntity.setOffsetLocationBy(LocationEntityMapper.map(actionOptions.getMoveMouseAfterActionBy()));
         actionOptionsEntity.setSearchRegions(SearchRegionsEmbeddableMapper.map(actionOptions.getSearchRegions()));
         actionOptionsEntity.setPauseBeforeBegin(actionOptions.getPauseBeforeBegin());
         actionOptionsEntity.setPauseAfterEnd(actionOptions.getPauseAfterEnd());
@@ -88,9 +88,9 @@ public class ActionOptionsEntityMapper {
         actionOptions.setPauseBeforeMouseUp(actionOptionsEntity.getPauseBeforeMouseUp());
         actionOptions.setPauseAfterMouseUp(actionOptionsEntity.getPauseAfterMouseUp());
         actionOptions.setClickType(actionOptionsEntity.getClickType());
-        actionOptions.setMoveMouseAfterClick(actionOptionsEntity.isMoveMouseAfterClick());
-        actionOptions.setLocationAfterAction(LocationEntityMapper.map(actionOptionsEntity.getLocationAfterAction()));
-        actionOptions.setOffsetLocationBy(LocationEntityMapper.map(actionOptionsEntity.getOffsetLocationBy()));
+        actionOptions.setMoveMouseAfterAction(actionOptionsEntity.isMoveMouseAfterClick());
+        actionOptions.setMoveMouseAfterActionTo(LocationEntityMapper.map(actionOptionsEntity.getLocationAfterAction()));
+        actionOptions.setMoveMouseAfterActionBy(LocationEntityMapper.map(actionOptionsEntity.getOffsetLocationBy()));
         actionOptions.setSearchRegions(SearchRegionsEmbeddableMapper.map(actionOptionsEntity.getSearchRegions()));
         actionOptions.setPauseBeforeBegin(actionOptionsEntity.getPauseBeforeBegin());
         actionOptions.setPauseAfterEnd(actionOptionsEntity.getPauseAfterEnd());

@@ -38,7 +38,7 @@ public class ClickMatchWithAddXYTest {
         StateImage topLeft = new StateImage.Builder()
                 .addPattern(new Pattern.Builder()
                         .setName("topLeft")
-                        .setPosition(new Position(100, 100))
+                        .setTargetPosition(new Position(100, 100))
                         .build())
                 .build();
         ObjectCollection objColl = new ObjectCollection.Builder()
