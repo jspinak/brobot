@@ -79,7 +79,7 @@ public class PathFinder {
             if (state.isPresent()) score += state.get().getPathScore();
         }
         for (StateTransition stateTrans : path.getTransitions()) {
-            score += stateTrans.getPathScore();
+            score += stateTrans.getScore();
         }
         path.setScore(score);
     }
