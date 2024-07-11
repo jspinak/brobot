@@ -229,6 +229,9 @@ public class ActionOptions {
     /*
     These options modify the click location for matches.
     They take precedence over the modifiers in the datatypes (Pattern, StateImage, etc).
+    It's best to keep the Position separate from the Location. These values are not used when they are null.
+    Since offsetX and offsetY in Location are int values, they cannot be null when a Location is not null, which
+    would be the case when creating a Position within a Location.
      */
     private Position targetPosition;
     private Location targetOffset;
