@@ -33,9 +33,9 @@ public class AfterClick {
      * @return true if the mouse is moved after a click.
      */
     public boolean moveMouseAfterClick(ActionOptions actionOptions) {
-        if (!actionOptions.isMoveMouseAfterClick()) return false;
-        if (actionOptions.getOffsetLocationBy().defined())
-            return moveMouseWrapper.move(actionOptions.getOffsetLocationBy());
-        return moveMouseWrapper.move(actionOptions.getLocationAfterAction());
+        if (!actionOptions.isMoveMouseAfterAction()) return false;
+        if (actionOptions.getMoveMouseAfterActionBy().defined())
+            return moveMouseWrapper.move(actionOptions.getMoveMouseAfterActionBy());
+        return moveMouseWrapper.move(actionOptions.getMoveMouseAfterActionTo());
     }
 }
