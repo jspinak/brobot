@@ -56,6 +56,14 @@ public class StateTransitions {
         for (String stateName : transition.getActivate()) transitions.put(stateName, transition);
     }
 
+    public void addTransition(BooleanSupplier transition, String... toStates) {
+        StateTransition stateTransition = new StateTransition.Builder()
+                .setFunction(transition)
+                .addToActivate(toStates)
+                .build();
+        addTransition(stateTransition);
+    }
+
     public static class Builder {
 
         private String stateName;
