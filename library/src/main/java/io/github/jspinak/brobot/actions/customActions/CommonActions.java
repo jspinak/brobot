@@ -74,7 +74,7 @@ public class CommonActions {
                 .setPauseBetweenIndividualActions(pauseBetweenClicks)
                 .setPauseBetweenActionSequences(pauseBetweenClicks)
                 .setMaxTimesToRepeatActionSequence(timesToClick)
-                .setMoveMouseAfterClick(true)
+                .setMoveMouseAfterAction(true)
                 .setAddX(xMove)
                 .setAddY(yMove)
                 .build();

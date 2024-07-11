@@ -20,12 +20,12 @@ class MatchTest {
             .build();
 
     @Test
-    void getLocation() {
+    void getTarget() {
         Match newMatch = new Match.Builder()
                 .setMatch(match)
                 .setStateObjectData(stateRegion)
                 .build();
-        Location location = newMatch.getLocation();
+        Location location = newMatch.getTarget();
         System.out.println(newMatch);
         System.out.println(location);
 

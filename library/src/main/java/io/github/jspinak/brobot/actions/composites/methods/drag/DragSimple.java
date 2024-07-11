@@ -55,8 +55,8 @@ public class DragSimple implements ActionInterface {
         setStartLoc(findFrom, matches, objectCollections);
         setEndLoc(findTo, matches, objectCollections);
         if (matches.size() < 2) return;
-        dragLocation.drag(matches.getMatchList().get(0).getLocation(),
-                matches.getMatchList().get(1).getLocation(), actionOptions);
+        dragLocation.drag(matches.getMatchList().get(0).getTarget(),
+                matches.getMatchList().get(1).getTarget(), actionOptions);
     }
 
     /*

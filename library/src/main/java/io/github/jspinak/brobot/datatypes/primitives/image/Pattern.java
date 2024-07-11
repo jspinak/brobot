@@ -1,10 +1,7 @@
 package io.github.jspinak.brobot.datatypes.primitives.image;
 
-import io.github.jspinak.brobot.datatypes.primitives.location.Anchor;
-import io.github.jspinak.brobot.datatypes.primitives.location.Anchors;
-import io.github.jspinak.brobot.datatypes.primitives.location.Position;
+import io.github.jspinak.brobot.datatypes.primitives.location.*;
 //import io.github.jspinak.brobot.datatypes.primitives.location.Positions;
-import io.github.jspinak.brobot.datatypes.primitives.location.Positions;
 import io.github.jspinak.brobot.datatypes.primitives.match.MatchHistory;
 import io.github.jspinak.brobot.datatypes.primitives.match.MatchSnapshot;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
@@ -53,7 +50,8 @@ public class Pattern {
     private MatchHistory matchHistory = new MatchHistory();
     private int index; // a unique identifier used for classification matrices
     private boolean dynamic = false; // dynamic images cannot be found using pattern matching
-    private Position position = new Position(.5,.5); // use to convert a match to a location
+    private Position targetPosition = new Position(.5,.5); // use to convert a match to a location
+    private Location targetOffset = new Location(0,0); // adjusts the match location
     private Anchors anchors = new Anchors(); // for defining regions using this object as input
 
     /*
@@ -204,7 +202,8 @@ public class Pattern {
         boolean sameSearchRegions = searchRegions.equals(comparePattern.getSearchRegions());
         boolean sameMatchHistory = matchHistory.equals(comparePattern.getMatchHistory());
         boolean bothDynamicOrBothNot = dynamic == comparePattern.isDynamic();
-        boolean samePosition = position.equals(comparePattern.getPosition());
+        boolean samePosition = targetPosition.equals(comparePattern.getTargetPosition());
+        boolean sameOffset = targetOffset.equals(comparePattern.getTargetOffset());
         boolean sameAnchors = anchors.equals(comparePattern.getAnchors());
         if (!sameFilename) return false;
         if (!bothFixedOrBothNot) return false;
@@ -212,6 +211,7 @@ public class Pattern {
         if (!sameMatchHistory) return false;
         if (!bothDynamicOrBothNot) return false;
         if (!samePosition) return false;
+        if (!sameOffset) return false;
         if (!sameAnchors) return false;
         return true;
     }
@@ -241,7 +241,8 @@ public class Pattern {
         private MatchHistory matchHistory = new MatchHistory();
         private int index;
         private boolean dynamic = false;
-        private Position position = new Position(.5,.5);
+        private Position targetPosition = new Position(.5,.5);
+        private Location targetOffset = new Location(0, 0);
         private Anchors anchors = new Anchors();
 
         /*
@@ -327,8 +328,36 @@ public class Pattern {
             return this;
         }
 
-        public Builder setPosition(Position position) {
-            this.position = position;
+        public Builder setTargetPosition(Position targetPosition) {
+            this.targetPosition = targetPosition;
+            return this;
+        }
+
+        /**
+         * Set the target position as a percent of the width and height of the image.
+         * For width, 0 is the leftmost point and 100 the rightmost point.
+         * @param w percent of width
+         * @param h percent of height
+         * @return the Builder
+         */
+        public Builder setTargetPosition(int w, int h) {
+            this.targetPosition = new Position(w, h);
+            return this;
+        }
+
+        public Builder setTargetOffset(Location location) {
+            this.targetOffset = location;
+            return this;
+        }
+
+        /**
+         * Move the target location by x and y.
+         * @param x move x by
+         * @param y move y by
+         * @return the Builder
+         */
+        public Builder setTargetOffset(int x, int y) {
+            this.targetOffset = new Location(x,y);
             return this;
         }
 
@@ -376,7 +405,8 @@ public class Pattern {
             pattern.setMatchHistory(matchHistory);
             pattern.setIndex(index);
             pattern.setDynamic(dynamic);
-            pattern.setPosition(position);
+            pattern.setTargetPosition(targetPosition);
+            pattern.setTargetOffset(targetOffset);
             pattern.setAnchors(anchors);
             return pattern;
         }

@@ -12,10 +12,9 @@ import lombok.Setter;
 import java.util.Optional;
 
 /**
- * Location can be an absolute position (x,y) on the screen,
- * or a relative position (%w, %h) of a Region.
- * The relative position is used unless the Region is not defined
- * or the boolean 'definedByXY' is explicitly set to true;
+ * Location is calculated
+ * - when the region is defined, first with the position in the region, then with the offset
+ * - when the region is not defined, with the x,y values, then with the offset
  */
 @Getter
 @Setter
@@ -27,6 +26,8 @@ public class Location {
     private Region region;
     private Position position;
     private Positions.Name anchor;
+    private int offsetX = 0;
+    private int offsetY = 0;
 
     public Location() {
         this.x = 0;
@@ -98,11 +99,12 @@ public class Location {
     }
 
     public Location(Match match) {
-        this.region = match.getRegion();
-        double percentOfW, percentOfH;
-        percentOfW = ((double)match.getLocation().x - (double)region.x()) / (double)region.w();
-        percentOfH = ((double)match.getLocation().y - (double)region.y()) / (double)region.h();
-        position = new Position(percentOfW, percentOfH);
+        if (match.getTarget().region != null) this.region = new Region(match.getRegion());
+        this.position = new Position(match.getTarget().getPosition());
+        this.x = match.getTarget().x;
+        this.y = match.getTarget().y;
+        this.offsetX = match.getTarget().getOffsetX();
+        this.offsetY = match.getTarget().getOffsetY();
     }
 
     public Location(Match match, Position position) {
@@ -152,12 +154,12 @@ public class Location {
     }
 
     private org.sikuli.script.Location getSikuliLocationFromXY() {
-        return new org.sikuli.script.Location(x, y);
+        return new org.sikuli.script.Location(x + offsetX, y + offsetY);
     }
 
     private org.sikuli.script.Location getSikuliLocationFromRegion() {
-        double locX = region.x() + (region.w() * position.getPercentW());
-        double locY = region.y() + (region.h() * position.getPercentH());
+        double locX = region.x() + (region.w() * position.getPercentW()) + offsetX;
+        double locY = region.y() + (region.h() * position.getPercentH()) + offsetY;
         return new org.sikuli.script.Location(locX, locY);
     }
 
@@ -319,6 +321,8 @@ public class Location {
         private Region region;
         private Position position = new Position(Positions.Name.MIDDLEMIDDLE);
         private Positions.Name anchor = Positions.Name.MIDDLEMIDDLE;
+        private int offsetX = 0;
+        private int offsetY = 0;
 
         public Builder called(String name) {
             this.name = name;
@@ -341,14 +345,10 @@ public class Location {
             this.anchor = location.anchor;
             x = location.x;
             y = location.y;
-            if (location.isDefinedByXY()) return this;
-            double percentOfW, percentOfH;
-            if (location.isDefinedWithRegion()) this.region = location.getRegion();
-            if (location.getPercentOfW().isPresent()) percentOfW = location.getPercentOfW().get();
-            else percentOfW = .5;
-            if (location.getPercentOfH().isPresent()) percentOfH = location.getPercentOfH().get();
-            else percentOfH = .5;
-            position = new Position(percentOfW, percentOfH);
+            offsetX = location.offsetX;
+            offsetY = location.offsetY;
+            position = new Position(location.position);
+            if (location.region != null) region = new Region(location.region);
             return this;
         }
 
@@ -378,16 +378,27 @@ public class Location {
         }
 
         public Builder fromMatch(Match match) {
-            this.region = new Region(match);
-            int percentOfW, percentOfH;
-            percentOfW = (match.getLocation().x - match.x()) / match.w();
-            percentOfH = (match.getLocation().y - match.y()) / match.y();
-            position = new Position(percentOfW, percentOfH);
+            this.region = new Region(match.getRegion());
+            this.position = new Position(match.getTarget().getPosition());
+            this.x = match.getTarget().x;
+            this.y = match.getTarget().y;
+            this.offsetX = match.getTarget().getOffsetX();
+            this.offsetY = match.getTarget().getOffsetY();
             return this;
         }
 
         public Builder setAnchor(Positions.Name anchor) {
             this.anchor = anchor;
+            return this;
+        }
+
+        public Builder setOffsetX(int offsetX) {
+            this.offsetX = offsetX;
+            return this;
+        }
+
+        public Builder setOffsetY(int offsetY) {
+            this.offsetY = offsetY;
             return this;
         }
 
@@ -399,6 +410,8 @@ public class Location {
             location.setRegion(region);
             location.setPosition(position);
             location.setAnchor(anchor);
+            location.setOffsetX(offsetX);
+            location.setOffsetY(offsetY);
             return location;
         }
     }

@@ -38,7 +38,7 @@ public class Click implements ActionInterface {
         find.perform(matches, objectCollections); // find performs only on 1st collection
         int i = 0;
         for (Match match : matches.getMatchList()) {
-            Location location = match.getLocation();
+            Location location = match.getTarget();
             click(location, actionOptions, match);
             i++;
             if (i == actionOptions.getMaxMatchesToActOn()) break;
@@ -63,7 +63,7 @@ public class Click implements ActionInterface {
         for (int i = 0; i < actionOptions.getTimesToRepeatIndividualAction(); i++) {
             clickLocationOnce.click(location, actionOptions);
             match.incrementTimesActedOn();
-            if (actionOptions.isMoveMouseAfterClick()) {
+            if (actionOptions.isMoveMouseAfterAction()) {
                 time.wait(actionOptions.getPauseBetweenIndividualActions());
                 afterClick.moveMouseAfterClick(actionOptions);
             }
