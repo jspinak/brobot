@@ -81,7 +81,7 @@ public class FindImageWithOffsetTest {
         StateImage topLeft2 = new StateImage.Builder()
                 .addPattern(new Pattern.Builder()
                         .setName("topLeft")
-                        .setTargetPosition(new Position(0,0))
+                        .setTargetPosition(0,0)
                         .build())
                 .build();
         ObjectCollection objColl2 = new ObjectCollection.Builder()
@@ -101,5 +101,32 @@ public class FindImageWithOffsetTest {
         assertEquals(97, loc1.getX());
         assertEquals(loc1.getX(), loc2.getX());
         assertEquals(loc1.getY(), loc2.getY());
+    }
+
+    /*
+    The position and offset in the pattern should be overwritten with the methods in the StateImage Builder.
+     */
+    @Test
+    void setOffsetWithStateImage() {
+        StateImage topLeft = new StateImage.Builder()
+                .addPattern(new Pattern.Builder()
+                        .setName("topLeft")
+                        .setTargetPosition(100, 100)
+                        .setTargetOffset(-10,0)
+                        .build())
+                .setPositionForAllPatterns(0, 0)
+                .setOffsetForAllPatterns(10, 0)
+                .build();
+        assertEquals(10, topLeft.getPatterns().get(0).getTargetOffset().getX());
+
+        ObjectCollection objColl = new ObjectCollection.Builder()
+                .withImages(topLeft)
+                .withScenes("../screenshots/floranext0")
+                .build();
+        Matches matches = action.perform(ActionOptions.Action.FIND, objColl);
+        Location loc1 = matches.getMatchLocations().get(0);
+
+        System.out.println(loc1);
+        assertEquals(10, loc1.getX());
     }
 }
