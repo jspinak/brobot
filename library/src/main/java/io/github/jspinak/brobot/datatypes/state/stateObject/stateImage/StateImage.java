@@ -5,6 +5,7 @@ import io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles.KmeansProfilesAllSchemas;
 import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
 import io.github.jspinak.brobot.datatypes.primitives.location.Anchor;
+import io.github.jspinak.brobot.datatypes.primitives.location.Location;
 import io.github.jspinak.brobot.datatypes.primitives.location.Position;
 import io.github.jspinak.brobot.datatypes.primitives.match.MatchHistory;
 import io.github.jspinak.brobot.datatypes.primitives.match.MatchSnapshot;
@@ -77,8 +78,12 @@ public class StateImage implements StateObject {
      * Sets the Position for each Pattern in the Image.
      * @param position the Position to use for each Pattern.
      */
-    public void setPositions(Position position) {
+    public void setPositionForAllPatterns(Position position) {
         patterns.forEach(pattern -> pattern.setTargetPosition(position));
+    }
+
+    public void setOffsetForAllPatterns(Location offset) {
+        patterns.forEach(pattern -> pattern.setTargetOffset(offset));
     }
 
     /**
@@ -253,6 +258,8 @@ public class StateImage implements StateObject {
         private String ownerStateName = "null";
         private Set<String> statesToEnter = new HashSet<>();
         private Set<String> statesToExit = new HashSet<>();
+        private Position positionForAllPatterns;
+        private Location offsetForAllPatterns;
 
         public Builder setName(String name) {
             this.name = name;
@@ -307,6 +314,26 @@ public class StateImage implements StateObject {
             return this;
         }
 
+        public Builder setPositionForAllPatterns(Position position) {
+            this.positionForAllPatterns = position;
+            return this;
+        }
+
+        public Builder setPositionForAllPatterns(int percentOfWidth, int percentOfHeight) {
+            this.positionForAllPatterns = new Position(percentOfWidth, percentOfHeight);
+            return this;
+        }
+
+        public Builder setOffsetForAllPatterns(Location offset) {
+            this.offsetForAllPatterns = offset;
+            return this;
+        }
+
+        public Builder setOffsetForAllPatterns(int xOffset, int yOffset) {
+            this.offsetForAllPatterns = new Location(xOffset, yOffset);
+            return this;
+        }
+
         public StateImage build() {
             StateImage stateImage = new StateImage();
             stateImage.name = name;
@@ -316,6 +343,10 @@ public class StateImage implements StateObject {
             stateImage.ownerStateName = ownerStateName;
             stateImage.statesToEnter = statesToEnter;
             stateImage.statesToExit = statesToExit;
+            if (positionForAllPatterns != null) stateImage.getPatterns().forEach(pattern ->
+                    pattern.setTargetPosition(positionForAllPatterns));
+            if (offsetForAllPatterns != null) stateImage.getPatterns().forEach(pattern ->
+                    pattern.setTargetOffset(offsetForAllPatterns));
             return stateImage;
         }
 
