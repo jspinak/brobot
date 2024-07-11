@@ -78,7 +78,7 @@ public class StateImage implements StateObject {
      * @param position the Position to use for each Pattern.
      */
     public void setPositions(Position position) {
-        patterns.forEach(pattern -> pattern.setPosition(position));
+        patterns.forEach(pattern -> pattern.setTargetPosition(position));
     }
 
     /**

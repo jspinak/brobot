@@ -124,13 +124,13 @@ public class Matches {
      */
     public List<Location> getMatchLocations() {
         List<Location> locations = new ArrayList<>();
-        matchList.forEach(mO -> locations.add(mO.getLocation()));
+        matchList.forEach(mO -> locations.add(mO.getTarget()));
         return locations;
     }
 
     public Optional<Location> getBestLocation() {
         if (getBestMatch().isEmpty()) return Optional.empty();
-        return Optional.of(getBestMatch().get().getLocation());
+        return Optional.of(getBestMatch().get().getTarget());
     }
 
     public Optional<Match> getBestMatch() {

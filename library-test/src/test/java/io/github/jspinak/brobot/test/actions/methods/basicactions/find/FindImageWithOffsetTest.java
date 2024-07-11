@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 @SpringBootTest
-public class FindImageWithPositionTest {
+public class FindImageWithOffsetTest {
 
     @BeforeAll
     public static void setupHeadlessMode() {
@@ -28,11 +28,11 @@ public class FindImageWithPositionTest {
     Action action;
 
     @Test
-    void findImageWithPositionTest() {
+    void findImageWithOffsetTest() {
         StateImage topLeft = new StateImage.Builder()
                 .addPattern(new Pattern.Builder()
                         .setName("topLeft")
-                        .setTargetPosition(new Position(100, 100))
+                        .setTargetOffset(10, 10)
                         .build())
                 .build();
         ObjectCollection objColl = new ObjectCollection.Builder()
@@ -45,7 +45,6 @@ public class FindImageWithPositionTest {
         StateImage topLeft2 = new StateImage.Builder()
                 .addPattern(new Pattern.Builder()
                         .setName("topLeft")
-                        .setTargetPosition(new Position(0,0))
                         .build())
                 .build();
         ObjectCollection objColl2 = new ObjectCollection.Builder()
@@ -55,18 +54,21 @@ public class FindImageWithPositionTest {
         Matches matches2 = action.perform(ActionOptions.Action.FIND, objColl2);
         Location loc2 = matches2.getMatchLocations().get(0);
 
-        assertNotEquals(loc1.getX(), loc2.getX());
+        System.out.println(loc1);
+        System.out.println(loc2);
+        assertEquals(loc2.getX() + 10, loc1.getX());
     }
 
     /*
     The Position set in ActionOptions should override the Position in topLeft2.
      */
     @Test
-    void findWithPositionInActionOptions() {
+    void findWithPositionAndOffsetInActionOptions() {
         StateImage topLeft = new StateImage.Builder()
                 .addPattern(new Pattern.Builder()
                         .setName("topLeft")
                         .setTargetPosition(new Position(100, 100))
+                        .setTargetOffset(-10,0)
                         .build())
                 .build();
         ObjectCollection objColl = new ObjectCollection.Builder()
@@ -89,12 +91,14 @@ public class FindImageWithPositionTest {
         ActionOptions actionOptions = new ActionOptions.Builder()
                 .setAction(ActionOptions.Action.FIND)
                 .setTargetPosition(100, 100)
+                .setTargetOffset(-10,0)
                 .build();
         Matches matches2 = action.perform(actionOptions, objColl2);
         Location loc2 = matches2.getMatchLocations().get(0);
 
         System.out.println(loc1);
         System.out.println(loc2);
+        assertEquals(97, loc1.getX());
         assertEquals(loc1.getX(), loc2.getX());
         assertEquals(loc1.getY(), loc2.getY());
     }

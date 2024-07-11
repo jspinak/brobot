@@ -35,7 +35,7 @@ public class Draw {
     }
 
     public void drawPoint(Mat screen, Match match, Scalar color) {
-        Location loc = match.getLocation();
+        Location loc = match.getTarget();
         Point center = new Point(loc.getX(), loc.getY());
         circle(screen, center, 6, color, FILLED, LINE_8, 0); //fill
         circle(screen, center, 8, new Scalar(255));
@@ -44,7 +44,7 @@ public class Draw {
 
     public void drawClick(Illustrations illustrations, Matches matches) {
         for (Match match : matches.getMatchList()) {
-            Report.println("Drawing click on " + match.getLocation().getX() + ", " + match.getLocation().getY());
+            Report.println("Drawing click on " + match.getTarget().getX() + ", " + match.getTarget().getY());
             drawPoint(illustrations.getMatchesOnScene(), match, new Scalar(255, 150, 255, 0));
         }
     }

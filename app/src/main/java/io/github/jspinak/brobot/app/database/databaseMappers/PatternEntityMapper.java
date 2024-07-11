@@ -19,7 +19,7 @@ public class PatternEntityMapper {
         patternEntity.setMatchHistory(MatchHistoryEntityMapper.map(pattern.getMatchHistory()));
         patternEntity.setIndex(pattern.getIndex());
         patternEntity.setDynamic(pattern.isDynamic());
-        patternEntity.setPosition(PositionEmbeddableMapper.map(pattern.getPosition()));
+        patternEntity.setPosition(PositionEmbeddableMapper.map(pattern.getTargetPosition()));
         patternEntity.setAnchors(AnchorsEntityMapper.map(pattern.getAnchors()));
         patternEntity.setImage(ImageEntityMapper.map(pattern.getImage()));
         return patternEntity;
@@ -36,7 +36,7 @@ public class PatternEntityMapper {
         pattern.setMatchHistory(MatchHistoryEntityMapper.map(patternEntity.getMatchHistory()));
         pattern.setIndex(patternEntity.getIndex());
         pattern.setDynamic(patternEntity.isDynamic());
-        pattern.setPosition(PositionEmbeddableMapper.map(patternEntity.getPosition()));
+        pattern.setTargetPosition(PositionEmbeddableMapper.map(patternEntity.getPosition()));
         pattern.setAnchors(AnchorsEntityMapper.map(patternEntity.getAnchors()));
         pattern.setImage(ImageEntityMapper.map(patternEntity.getImage()));
         return pattern;
