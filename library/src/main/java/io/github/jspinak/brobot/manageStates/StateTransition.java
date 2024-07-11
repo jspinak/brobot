@@ -1,6 +1,5 @@
 package io.github.jspinak.brobot.manageStates;
 
-import io.github.jspinak.brobot.primatives.enums.StateEnum;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -31,7 +30,7 @@ public class StateTransition {
     private StaysVisible staysVisibleAfterTransition;
     private Set<String> activate;
     private Set<String> exit;
-    private int pathScore = 0; // larger path scores discourage taking a path with this transition
+    private int score = 0; // larger path scores discourage taking a path with this transition
     private int timesSuccessful = 0;
 
     public boolean getAsBoolean() {
@@ -43,6 +42,7 @@ public class StateTransition {
         private StaysVisible staysVisibleAfterTransition = StaysVisible.NONE;
         private Set<String> activate = new HashSet<>();
         private Set<String> exit = new HashSet<>();
+        private int score = 0;
 
         public Builder setFunction(BooleanSupplier booleanSupplier) {
             this.transitionFunction = booleanSupplier;
@@ -70,12 +70,18 @@ public class StateTransition {
             return this;
         }
 
+        public Builder setScore(int score) {
+            this.score = score;
+            return this;
+        }
+
         public StateTransition build() {
             StateTransition stateTransition = new StateTransition();
             stateTransition.transitionFunction = transitionFunction;
             stateTransition.staysVisibleAfterTransition = staysVisibleAfterTransition;
             stateTransition.activate = activate;
             stateTransition.exit = exit;
+            stateTransition.score = score;
             return stateTransition;
         }
     }
