@@ -18,7 +18,7 @@ public class BuildStateStructureFromScreenshots {
     private final ScreenStateCreator screenStateCreator;
     private final StateStructureInfo stateStructureInfo;
     private final ScreenObservations screenObservations;
-    private final FindAllScreensForTransitionImages findAllScreensForTransitionImages;
+    private final FindAllScreensForStatelessImages findAllScreensForStatelessImages;
 
     public BuildStateStructureFromScreenshots(GetUsableArea getUsableArea,
                                               GetScreenObservation getScreenObservation,
@@ -26,14 +26,14 @@ public class BuildStateStructureFromScreenshots {
                                               ScreenStateCreator screenStateCreator,
                                               StateStructureInfo stateStructureInfo,
                                               ScreenObservations screenObservations,
-                                              FindAllScreensForTransitionImages findAllScreensForTransitionImages) {
+                                              FindAllScreensForStatelessImages findAllScreensForStatelessImages) {
         this.getUsableArea = getUsableArea;
         this.getScreenObservation = getScreenObservation;
         this.getScreenObservationFromScreenshot = getScreenObservationFromScreenshot;
         this.screenStateCreator = screenStateCreator;
         this.stateStructureInfo = stateStructureInfo;
         this.screenObservations = screenObservations;
-        this.findAllScreensForTransitionImages = findAllScreensForTransitionImages;
+        this.findAllScreensForStatelessImages = findAllScreensForStatelessImages;
     }
 
     public void build(List<Pattern> screenshots, Pattern topLeftBoundary, Pattern bottomRightBoundary) {
@@ -43,7 +43,7 @@ public class BuildStateStructureFromScreenshots {
         getScreenObservation.setUsableArea(usableArea);
         screenshots.forEach(screenshot -> screenObservations.addScreenObservation(
                 getScreenObservationFromScreenshot.getNewScreenObservationAndAddImagesToRepo(screenshot, screenshots.indexOf(screenshot))));
-        findAllScreensForTransitionImages.findScreens();
+        findAllScreensForStatelessImages.findScreens();
         screenStateCreator.createAndSaveStatesAndTransitions();
         stateStructureInfo.printStateStructure();
     }

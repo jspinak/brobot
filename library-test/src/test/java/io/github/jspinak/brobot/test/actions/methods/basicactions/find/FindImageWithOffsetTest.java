@@ -31,7 +31,7 @@ public class FindImageWithOffsetTest {
     void findImageWithOffsetTest() {
         StateImage topLeft = new StateImage.Builder()
                 .addPattern(new Pattern.Builder()
-                        .setName("topLeft")
+                        .setFilename("topLeft")
                         .setTargetOffset(10, 10)
                         .build())
                 .build();
@@ -44,7 +44,7 @@ public class FindImageWithOffsetTest {
 
         StateImage topLeft2 = new StateImage.Builder()
                 .addPattern(new Pattern.Builder()
-                        .setName("topLeft")
+                        .setFilename("topLeft")
                         .build())
                 .build();
         ObjectCollection objColl2 = new ObjectCollection.Builder()
@@ -66,7 +66,7 @@ public class FindImageWithOffsetTest {
     void findWithPositionAndOffsetInActionOptions() {
         StateImage topLeft = new StateImage.Builder()
                 .addPattern(new Pattern.Builder()
-                        .setName("topLeft")
+                        .setFilename("topLeft")
                         .setTargetPosition(new Position(100, 100))
                         .setTargetOffset(-10,0)
                         .build())
@@ -80,7 +80,7 @@ public class FindImageWithOffsetTest {
 
         StateImage topLeft2 = new StateImage.Builder()
                 .addPattern(new Pattern.Builder()
-                        .setName("topLeft")
+                        .setFilename("topLeft")
                         .setTargetPosition(0,0)
                         .build())
                 .build();
@@ -110,7 +110,7 @@ public class FindImageWithOffsetTest {
     void setOffsetWithStateImage() {
         StateImage topLeft = new StateImage.Builder()
                 .addPattern(new Pattern.Builder()
-                        .setName("topLeft")
+                        .setFilename("topLeft")
                         .setTargetPosition(100, 100)
                         .setTargetOffset(-10,0)
                         .build())

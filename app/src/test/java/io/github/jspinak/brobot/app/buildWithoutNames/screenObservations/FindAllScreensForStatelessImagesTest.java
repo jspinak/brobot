@@ -1,6 +1,5 @@
 package io.github.jspinak.brobot.app.buildWithoutNames.screenObservations;
 
-import io.github.jspinak.brobot.actions.methods.basicactions.find.FindAll;
 import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
 import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
@@ -9,30 +8,32 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
-class FindAllScreensForTransitionImagesTest {
+class FindAllScreensForStatelessImagesTest {
 
     @BeforeAll
     public static void setupHeadlessMode() {
         System.setProperty("java.awt.headless", "false");
     }
 
-
     @Autowired
     GetScreenObservationFromScreenshot getScreenObservationFromScreenshot;
 
+    @Autowired
+    FindAllScreensForStatelessImages findAllScreensForStatelessImages;
 
     @Autowired
-    FindAllScreensForTransitionImages findAllScreensForTransitionImages;
-
-    @Autowired
-    TransitionImageRepo transitionImageRepo;
+    StatelessImageRepo statelessImageRepo;
 
     @Autowired
     ScreenObservations screenObservations;
 
+    /**
+     * I initialize a new StatelessImage with the "topLeft" Pattern.
+     * This pattern should be found on screens "floranext0" and "floranext1".
+     */
     @Test
     void findScreens() {
         // populate ScreenObservations
@@ -45,14 +46,20 @@ class FindAllScreensForTransitionImagesTest {
         System.out.println("# of screens = "+screenObservations.getAll().size());
 
         // get image to find. this image appears on both screens
-        TransitionImage transitionImage = new TransitionImage(new Match(new Region(0,0,20,50)), 0);
-        transitionImage.setImage(new Pattern("topleft").getMat());
-        transitionImageRepo.getImages().add(transitionImage);
+        Match match = new Match.Builder()
+                .setName("topLeft")
+                .setImage(new Pattern("topleft").getImage())
+                .setRegion(new Region(0,0,20,50))
+                .build();
+        // include the image in screenObservation0
+        StatelessImage statelessTopLeft = new StatelessImage(match, 0);
+        // add the StatelessImage to the repo
+        statelessImageRepo.getStatelessImages().add(statelessTopLeft);
 
-        // find image in screens
-        findAllScreensForTransitionImages.findScreens();
-        System.out.println(transitionImage.getScreensFound());
+        // find all StatelessImages in both screens
+        findAllScreensForStatelessImages.findScreens();
+        System.out.println(statelessTopLeft.getScreensFound());
         assertEquals(2, screenObservations.getAll().size());
-        assertEquals(2, transitionImage.getScreensFound().size());
+        assertEquals(2, statelessTopLeft.getScreensFound().size());
     }
 }

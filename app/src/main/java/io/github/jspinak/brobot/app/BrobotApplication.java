@@ -1,6 +1,7 @@
 package io.github.jspinak.brobot.app;
 
 import jakarta.annotation.PostConstruct;
+import org.sikuli.script.ImagePath;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -30,7 +31,7 @@ public class BrobotApplication {
 		SpringApplicationBuilder builder = new SpringApplicationBuilder(BrobotApplication.class);
 		builder.headless(false);
 		ConfigurableApplicationContext context = builder.run(args);
-		SpringApplication.run(BrobotApplication.class, args);
+		//SpringApplication.run(BrobotApplication.class, args);
 	}
 
 }

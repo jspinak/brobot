@@ -45,7 +45,7 @@ import java.time.LocalDateTime;
 @Data
 public class Match {
 
-    // fields in the SikuliX Match
+    // fields in the SikuliX Match (but Brobot datatypes)
     private double score = 0.0;
     //private Location target; //
     private Image image;
@@ -98,11 +98,15 @@ public class Match {
     }
 
     public Region getRegion() {
+        if (target == null) return null;
         return target.getRegion();
     }
 
     public void setRegion(Region region) {
-        target.setRegion(region);
+        if (target == null) {
+            target = new Location(region);
+        }
+        else target.setRegion(region);
     }
 
     public Mat getMat() {
@@ -147,16 +151,7 @@ public class Match {
             stateImage.setOwnerStateName(stateObjectData.getOwnerStateName());
             stateImage.setName(stateObjectData.getStateObjectName()); // the StateObject name should take priority since it was the original StateImage
         }
-        Image imageToUse = null;
-        if (image != null) imageToUse = image;
-        else if (searchImage != null) imageToUse = searchImage;
-        Pattern newPattern = new Pattern.Builder()
-            .setFixed(true)
-            .setFixedRegion(target.getRegion())
-            .setName(name)
-            .setImage(imageToUse)
-            .build();
-        stateImage.addPatterns(newPattern);
+        stateImage.addPatterns(new Pattern(this));
         return stateImage;
     }
 
@@ -192,7 +187,7 @@ public class Match {
         private String name;
         private String text;
         private Anchors anchors;
-        private StateObjectData stateObjectData;
+        private StateObjectData stateObjectData = new StateObjectData();
         private Mat histogram;
         private Image scene;
         private double simScore = -1;
@@ -287,6 +282,11 @@ public class Match {
             return this;
         }
 
+        public Builder setSearchImage(Image image) {
+            this.searchImage = image;
+            return this;
+        }
+
         public Builder setAnchors(Anchors anchors) {
             this.anchors = anchors;
             return this;
@@ -317,7 +317,7 @@ public class Match {
             return this;
         }
 
-        public void setMatchImage(Match match) {
+        private void setMatchImage(Match match) {
             if (image != null) {
                 match.setImage(image);
                 return;

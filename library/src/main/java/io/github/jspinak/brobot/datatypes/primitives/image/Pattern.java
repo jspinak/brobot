@@ -2,6 +2,7 @@ package io.github.jspinak.brobot.datatypes.primitives.image;
 
 import io.github.jspinak.brobot.datatypes.primitives.location.*;
 //import io.github.jspinak.brobot.datatypes.primitives.location.Positions;
+import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import io.github.jspinak.brobot.datatypes.primitives.match.MatchHistory;
 import io.github.jspinak.brobot.datatypes.primitives.match.MatchSnapshot;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
@@ -83,6 +84,19 @@ public class Pattern {
     public Pattern(Image image) {
         this.image = image;
         setName(image.getName());
+    }
+
+    public Pattern(Match match) {
+        Image imageToUse = null;
+        if (match.getImage() != null) imageToUse = match.getImage();
+        else if (match.getSearchImage() != null) imageToUse = match.getSearchImage();
+        fixed = true;
+        searchRegions.setFixedRegion(match.getRegion());
+        if (imageToUse != null) {
+            image = imageToUse;
+            name = match.getName();
+        }
+        else imgpath = match.getName();
     }
 
     public Pattern(Mat mat) {
@@ -247,12 +261,13 @@ public class Pattern {
 
         /*
         This method allows you to change the name of the Pattern without changing the filename.
-        If there is no filename, name will also be used as the filename.
+        Sometimes there is no filename, as when building the state structure and saving images to a database.
+        Therefore, this method should not set the filename in addition to the name.
          */
         public Builder setName(String name) {
             this.name = name;
-            if (this.filename.isEmpty()) this.filename = name;
-            if (this.image == null) this.image = new Image(BufferedImageOps.getBuffImgFromFile(filename), name);
+            //if (this.filename.isEmpty()) this.filename = name;
+            //if (this.image == null) this.image = new Image(BufferedImageOps.getBuffImgFromFile(filename), name);
             return this;
         }
 
