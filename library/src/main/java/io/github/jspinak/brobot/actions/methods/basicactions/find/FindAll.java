@@ -59,11 +59,14 @@ public class FindAll {
     private void addMatchObjects(List<Match> allMatchObjects, List<Match> matchList, Pattern pattern,
                                StateImage stateImage, ActionOptions actionOptions, Image scene,
                                Position target, Location offset) {
+        int i=0;
+        String name = pattern.getName() != null && !pattern.getName().isEmpty() ? pattern.getName() : scene.getName();
         for (Match match : matchList) {
             List<Region> regionsAllowedForMatch = selectRegions.getRegions(actionOptions, stateImage);
             if (matchProofer.isInSearchRegions(match, regionsAllowedForMatch)) {
                 Match newMatch = new Match.Builder()
                         .setMatch(match)
+                        .setName(name+"-"+i)
                         .setPosition(target)
                         .setOffset(offset)
                         .setSearchImage(pattern.getBImage())
@@ -72,6 +75,7 @@ public class FindAll {
                         .setScene(scene)
                         .build();
                 allMatchObjects.add(newMatch);
+                i++;
             }
         }
     }
@@ -82,11 +86,7 @@ public class FindAll {
         List<Match> matchesInRegion = new ArrayList<>();
         for (Match match : wordMatches) {
             if (matchProofer.isInSearchRegions(match, regions)) {
-                Match newMatch = new Match.Builder()
-                    .setMatch(match)
-                    .setScene(scene)
-                    .build();
-                matchesInRegion.add(newMatch);
+                matchesInRegion.add(match);
             }
         }
         return matchesInRegion;

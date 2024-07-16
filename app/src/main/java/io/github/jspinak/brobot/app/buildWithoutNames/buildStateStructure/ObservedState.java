@@ -1,7 +1,7 @@
 package io.github.jspinak.brobot.app.buildWithoutNames.buildStateStructure;
 
 import io.github.jspinak.brobot.app.buildWithoutNames.screenObservations.ScreenObservation;
-import io.github.jspinak.brobot.app.buildWithoutNames.screenObservations.TransitionImage;
+import io.github.jspinak.brobot.app.buildWithoutNames.screenObservations.StatelessImage;
 import lombok.Getter;
 import org.bytedeco.opencv.opencv_core.Mat;
 
@@ -15,7 +15,7 @@ public class ObservedState {
     private Mat mask;
     private int id;
     private List<ScreenObservation> screens = new ArrayList<>();
-    private List<TransitionImage> images = new ArrayList<>();
+    private List<StatelessImage> images = new ArrayList<>();
 
     public ObservedState(Mat screenshot, Mat mask, int id, ScreenObservation screen) {
         this.screenshot = screenshot;

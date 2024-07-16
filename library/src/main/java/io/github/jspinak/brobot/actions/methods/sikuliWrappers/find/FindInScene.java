@@ -67,14 +67,18 @@ public class FindInScene {
      */
     public List<Match> getWordMatches(Image scene) {
         List<Match> wordMatches = new ArrayList<>();
-        OCR.readWords(scene.getBufferedImage()).forEach(match -> {
+        List<org.sikuli.script.Match> sikuliMatches = OCR.readWords(scene.getBufferedImage());
+        String baseName = scene.getName() == null ? "" : scene.getName();
+        int i=0;
+        for (org.sikuli.script.Match match : sikuliMatches) {
             Match m = new Match.Builder()
-                    .setName("word")
+                    .setName(baseName+"-word"+i)
                     .setSikuliMatch(match)
                     .setScene(scene)
                     .build();
             wordMatches.add(m);
-        });
+            i++;
+        }
         return wordMatches;
     }
 
