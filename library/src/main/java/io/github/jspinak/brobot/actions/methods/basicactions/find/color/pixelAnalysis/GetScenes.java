@@ -65,7 +65,7 @@ public class GetScenes {
         List<Pattern> scenesInObjectCollection = objectCollections.get(0).getScenes();
         if (!scenesInObjectCollection.isEmpty()) {
             for (Pattern pattern : scenesInObjectCollection) {
-                scenes.add(new Image(pattern.getImgpath()));
+                scenes.add(pattern.getImage());
             }
             return scenes;
         }

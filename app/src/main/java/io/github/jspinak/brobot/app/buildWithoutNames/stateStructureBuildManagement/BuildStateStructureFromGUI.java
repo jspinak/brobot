@@ -44,6 +44,7 @@ public class BuildStateStructureFromGUI {
      * will have added screen observations and transitions. This needs to be run again until all images in
      * all screenshots have been checked.
      * The usable boundary is set by the inner boundaries of the included images.
+     * This class can be used for live scraping or building with screenshots.
      */
     public void automateStateStructure(StateStructureTemplate stateStructureTemplate) {
         Region usableArea = getUsableArea.getBoundariesFromExcludedImages(stateStructureTemplate);

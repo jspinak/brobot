@@ -31,7 +31,7 @@ public class FindImageWithPositionTest {
     void findImageWithPositionTest() {
         StateImage topLeft = new StateImage.Builder()
                 .addPattern(new Pattern.Builder()
-                        .setName("topLeft")
+                        .setFilename("topLeft")
                         .setTargetPosition(new Position(100, 100))
                         .build())
                 .build();
@@ -44,7 +44,7 @@ public class FindImageWithPositionTest {
 
         StateImage topLeft2 = new StateImage.Builder()
                 .addPattern(new Pattern.Builder()
-                        .setName("topLeft")
+                        .setFilename("topLeft")
                         .setTargetPosition(new Position(0,0))
                         .build())
                 .build();
@@ -65,7 +65,7 @@ public class FindImageWithPositionTest {
     void findWithPositionInActionOptions() {
         StateImage topLeft = new StateImage.Builder()
                 .addPattern(new Pattern.Builder()
-                        .setName("topLeft")
+                        .setFilename("topLeft")
                         .setTargetPosition(new Position(100, 100))
                         .build())
                 .build();
@@ -78,7 +78,7 @@ public class FindImageWithPositionTest {
 
         StateImage topLeft2 = new StateImage.Builder()
                 .addPattern(new Pattern.Builder()
-                        .setName("topLeft")
+                        .setFilename("topLeft")
                         .setTargetPosition(new Position(0,0))
                         .build())
                 .build();

@@ -26,17 +26,17 @@ import java.util.Optional;
 public class GetScreenObservation {
     private final Action action;
     private final IllustrateScreenObservation illustrateScreenObservation;
-    private final GetTransitionImages getTransitionImages;
+    private final GetStatelessImages getStatelessImages;
     private final ScreenObservationManager screenObservationManager;
 
     private Region usableArea = new Region();
     private boolean saveScreensWithMotionAndImages;
 
     public GetScreenObservation(Action action, IllustrateScreenObservation illustrateScreenObservation,
-                                GetTransitionImages getTransitionImages, ScreenObservationManager screenObservationManager) {
+                                GetStatelessImages getStatelessImages, ScreenObservationManager screenObservationManager) {
         this.action = action;
         this.illustrateScreenObservation = illustrateScreenObservation;
-        this.getTransitionImages = getTransitionImages;
+        this.getStatelessImages = getStatelessImages;
         this.screenObservationManager = screenObservationManager;
     }
 
@@ -47,9 +47,9 @@ public class GetScreenObservation {
      */
     public ScreenObservation takeScreenshotAndGetImages(StateStructureTemplate stateStructureTemplate) {
         ScreenObservation obs = initNewScreenObservation(stateStructureTemplate);
-        List<TransitionImage> transitionImages = getTransitionImages.findAndCapturePotentialLinks(
+        List<StatelessImage> statelessImages = getStatelessImages.findAndCapturePotentialLinks(
                 usableArea, obs, obs.getId(), stateStructureTemplate);
-        obs.setImages(transitionImages);
+        obs.setImages(statelessImages);
         if (saveScreensWithMotionAndImages) illustrateScreenObservation.writeIllustratedSceneToHistory(obs);
         return obs;
     }

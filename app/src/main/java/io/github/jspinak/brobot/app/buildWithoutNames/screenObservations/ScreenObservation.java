@@ -24,17 +24,17 @@ public class ScreenObservation {
     private Mat screenshot;
     private Mat dynamicPixelMask;
     private Matches matches; // includes the SceneAnalysisCollection and all screenshots taken when evaluating dynamic pixels
-    private List<TransitionImage> images = new ArrayList<>();
+    private List<StatelessImage> images = new ArrayList<>();
     private Set<Integer> states = new HashSet<>(); // the names of included states
 
     public boolean hasUnvisitedImages() {
-        for (TransitionImage transitionImage : images) {
-            if (!transitionImage.isChecked()) return true;
+        for (StatelessImage statelessImage : images) {
+            if (!statelessImage.isChecked()) return true;
         }
         return false;
     }
 
-    public List<TransitionImage> getUnvisitedImages() {
+    public List<StatelessImage> getUnvisitedImages() {
         return images.stream().filter(image -> !image.isChecked()).toList();
     }
 

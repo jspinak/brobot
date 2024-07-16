@@ -3,6 +3,7 @@ package io.github.jspinak.brobot.app.buildWithoutNames.screenObservations;
 import io.github.jspinak.brobot.app.buildWithoutNames.stateStructureBuildManagement.StateStructureTemplate;
 import io.github.jspinak.brobot.actions.actionExecution.Action;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
+import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
@@ -17,14 +18,14 @@ import java.util.List;
 @Component
 @Setter
 @Getter
-public class GetTransitionImages {
+public class GetStatelessImages {
 
     private final GetImageJavaCV getImage;
     private final Action action;
 
     private int minWidthBetweenImages = 20; // when images are closer together, they get merged into one image
 
-    public GetTransitionImages(GetImageJavaCV getImage, Action action) {
+    public GetStatelessImages(GetImageJavaCV getImage, Action action) {
         this.getImage = getImage;
         this.action = action;
     }
@@ -41,31 +42,31 @@ public class GetTransitionImages {
      * @param usableArea images are only used if they are within this region
      * @return a list of TransitionImage objects
      */
-    public List<TransitionImage> findAndCapturePotentialLinks(Region usableArea, ScreenObservation screenObservation,
-                                                              int screenshotIndex,
-                                                              StateStructureTemplate stateStructureTemplate) {
-        List<TransitionImage> transitionImages = new ArrayList<>();
+    public List<StatelessImage> findAndCapturePotentialLinks(Region usableArea, ScreenObservation screenObservation,
+                                                             int screenshotIndex,
+                                                             StateStructureTemplate stateStructureTemplate) {
+        List<StatelessImage> statelessImages = new ArrayList<>();
 
-        ActionOptions actionOptions = new ActionOptions.Builder()
+        ActionOptions findAllWords = new ActionOptions.Builder()
                 .setAction(ActionOptions.Action.FIND)
                 .setFind(ActionOptions.Find.ALL_WORDS)
                 .setFusionMethod(ActionOptions.MatchFusionMethod.RELATIVE)
                 .setMaxFusionDistances(getMinWidthBetweenImages(), 10)
                 .build();
-        if (stateStructureTemplate.isLive()) setActionOptionsLive(screenObservation, actionOptions);
-        else setActionOptionsData(actionOptions, usableArea);
+        if (stateStructureTemplate.isLive()) setActionOptionsLive(screenObservation, findAllWords);
+        else setActionOptionsData(findAllWords, usableArea);
 
-        ObjectCollection objectCollection = new ObjectCollection.Builder()
+        ObjectCollection inScene = new ObjectCollection.Builder()
                 .withScenes(screenObservation.getPattern())
                 .build();
-        Matches matches = action.perform(actionOptions, objectCollection);
+        Matches matches = action.perform(findAllWords, inScene);
 
-        matches.getMatchList().forEach(match -> {
-            TransitionImage transitionImage = new TransitionImage(match, screenshotIndex);
-            transitionImage.setImage(match.getMat());
-            transitionImages.add(transitionImage);
-        });
-        return transitionImages;
+        for (int i=0; i<matches.getMatchList().size(); i++) {
+            Match match = matches.getMatchList().get(i);
+            StatelessImage statelessImage = new StatelessImage(match, screenshotIndex);
+            statelessImages.add(statelessImage);
+        }
+        return statelessImages;
     }
 
     private void setActionOptionsLive(ScreenObservation screenObservation, ActionOptions actionOptions) {
