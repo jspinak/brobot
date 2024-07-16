@@ -198,7 +198,7 @@ public class ActionOptions {
     // pauseAfterMouseDown replaces Sikuli settings var DelayBeforeDrag for Drags and ClickDelay for Clicks.
     private double pauseAfterMouseDown = BrobotSettings.delayAfterMouseDown;
     private float moveMouseDelay = Settings.MoveMouseDelay;
-    private double pauseBeforeMouseUp = Settings.DelayBeforeDrag;
+    private double pauseBeforeMouseUp = BrobotSettings.delayBeforeMouseUp;
     private double pauseAfterMouseUp = 0;
 
     /*

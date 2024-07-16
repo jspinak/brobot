@@ -2,8 +2,8 @@ package io.github.jspinak.brobot.app.buildWithoutNames.buildStateStructure;
 
 import io.github.jspinak.brobot.app.buildWithoutNames.screenObservations.ScreenObservation;
 import io.github.jspinak.brobot.app.buildWithoutNames.screenObservations.ScreenObservations;
-import io.github.jspinak.brobot.app.buildWithoutNames.screenObservations.TransitionImage;
-import io.github.jspinak.brobot.app.buildWithoutNames.screenObservations.TransitionImageRepo;
+import io.github.jspinak.brobot.app.buildWithoutNames.screenObservations.StatelessImage;
+import io.github.jspinak.brobot.app.buildWithoutNames.screenObservations.StatelessImageRepo;
 import io.github.jspinak.brobot.app.services.StateService;
 import io.github.jspinak.brobot.actions.customActions.CommonActions;
 import io.github.jspinak.brobot.datatypes.primitives.image.Image;
@@ -28,7 +28,7 @@ import java.util.*;
 @Setter
 public class ScreenStateCreator {
 
-    private final TransitionImageRepo transitionImageRepo;
+    private final StatelessImageRepo statelessImageRepo;
     private final ScreenObservations screenObservations;
     private final StateService stateService;
     private final CommonActions commonActions;
@@ -39,11 +39,11 @@ public class ScreenStateCreator {
 
     private boolean saveStateIllustrations;
 
-    public ScreenStateCreator(TransitionImageRepo transitionImageRepo, ScreenObservations screenObservations,
+    public ScreenStateCreator(StatelessImageRepo statelessImageRepo, ScreenObservations screenObservations,
                               StateService stateService, CommonActions commonActions,
                               StateTransitionsRepository stateTransitionsRepository, ImageUtils imageUtils,
                               StateIllustrator stateIllustrator, MatVisualize matVisualize) {
-        this.transitionImageRepo = transitionImageRepo;
+        this.statelessImageRepo = statelessImageRepo;
         this.screenObservations = screenObservations;
         this.stateService = stateService;
         this.commonActions = commonActions;
@@ -63,25 +63,25 @@ public class ScreenStateCreator {
      */
     public List<ImageSetsAndAssociatedScreens> defineStatesWithImages() {
         List<ImageSetsAndAssociatedScreens> imagesScreens = new ArrayList<>();
-        transitionImageRepo.getImages().forEach(img -> addToImageSet(imagesScreens, img));
+        statelessImageRepo.getStatelessImages().forEach(img -> addToImageSet(imagesScreens, img));
         return imagesScreens;
     }
 
     private void addToImageSet(List<ImageSetsAndAssociatedScreens> imagesScreens,
-                               TransitionImage transitionImage) {
+                               StatelessImage statelessImage) {
         for (ImageSetsAndAssociatedScreens imgScr : imagesScreens) {
-            if (imgScr.ifSameScreensAddImage(transitionImage)) {
+            if (imgScr.ifSameScreensAddImage(statelessImage)) {
                 // ImageSetsAndAssociatedScreens are a preliminary representation of states, and the created state's name will be the imgScr's index
-                transitionImage.setOwnerState(imagesScreens.indexOf(imgScr));
+                statelessImage.setOwnerState(imagesScreens.indexOf(imgScr));
                 return;
             }
         }
-        imagesScreens.add(new ImageSetsAndAssociatedScreens(transitionImage.getIndexInRepo(), transitionImage.getScreensFound()));
-        transitionImage.setOwnerState(imagesScreens.size()-1); // the state name is the last index added
+        imagesScreens.add(new ImageSetsAndAssociatedScreens(statelessImage.getIndexInRepo(), statelessImage.getScreensFound()));
+        statelessImage.setOwnerState(imagesScreens.size()-1); // the state name is the last index added
     }
 
     /**
-     * Saves state images to file, creates a state with these images.
+     * Saves state images to a database, creates a state with these images.
      * @param imageSets used to identify which images belong to the state.
      * @param name state name
      * @return the newly created state
@@ -89,19 +89,11 @@ public class ScreenStateCreator {
     public State createState(ImageSetsAndAssociatedScreens imageSets, String name) {
         List<StateImage> stateImages = new ArrayList<>();
         imageSets.getImages().forEach(imgIndex -> {
-            if (transitionImageRepo.getImages().size() <= imgIndex || imgIndex < 0) {
+            if (statelessImageRepo.getStatelessImages().size() <= imgIndex || imgIndex < 0) {
                 System.out.println("image index not in transitionImageRepo: " + imgIndex);
             } else {
-                Mat matchMat = transitionImageRepo.getImages().get(imgIndex).getImage();
-                String imageName = Integer.toString(transitionImageRepo.getImages().get(imgIndex).getIndexInRepo());
-                TransitionImage transitionImage = transitionImageRepo.getImages().get(imgIndex);
-                Region reg = transitionImage.getRegion();
-                Pattern pattern = imageUtils.matToPattern(matchMat, Settings.BundlePath + "/" + imageName);
-                pattern.addMatchSnapshot(reg.x(), reg.y(), reg.w(), reg.h());
-                StateImage sio = new StateImage.Builder()
-                        .addPattern(pattern)
-                        .build();
-                stateImages.add(sio);
+                StatelessImage statelessImage = statelessImageRepo.getStatelessImages().get(imgIndex);
+                stateImages.add(statelessImage.toStateImage());
             }
         });
         List<Image> scenes = new ArrayList<>();

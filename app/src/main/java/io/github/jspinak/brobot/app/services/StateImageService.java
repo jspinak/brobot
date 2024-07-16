@@ -39,6 +39,7 @@ public class StateImageService {
 
     public void saveStateImages(List<StateImage> stateImages) {
         //stateImages.forEach(stateImage -> stateImageRepo.save(stateImageMapper.map(stateImage)));
+        stateImages.forEach(System.out::println);
         stateImages.forEach(stateImage -> stateImageRepo.save(StateImageEntityMapper.map(stateImage)));
     }
 

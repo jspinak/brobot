@@ -9,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
-class TransitionImageRepoTest {
+class StatelessImageRepoTest {
 
     @BeforeAll
     public static void setupHeadlessMode() {
@@ -17,7 +17,7 @@ class TransitionImageRepoTest {
     }
 
     @Autowired
-    TransitionImageRepo transitionImageRepo;
+    StatelessImageRepo statelessImageRepo;
 
     @Autowired
     GetScreenObservationFromScreenshot getScreenObservationFromScreenshot;
@@ -26,15 +26,15 @@ class TransitionImageRepoTest {
     void addSomeImagesToRepo() {
         getScreenObservationFromScreenshot.getNewScreenObservationAndAddImagesToRepo(
                 new Pattern("../screenshots/floranext0"), 0);
-        System.out.println("images found in screen observation = " + transitionImageRepo.getImages().size());
-        assertFalse(transitionImageRepo.getImages().isEmpty());
+        System.out.println("images found in screen observation = " + statelessImageRepo.getStatelessImages().size());
+        assertFalse(statelessImageRepo.getStatelessImages().isEmpty());
     }
 
     @Test
     void duplicateImagesShouldNotBeAddedToRepo() {
         addImagesToRepo("floranext0", "floranext0");
-        // # of images in floranext0 should be 97
-        assertTrue(transitionImageRepo.getImages().size() == 97);
+        // # of images in floranext0 should be 97 (fused 20,10)
+        assertTrue(statelessImageRepo.getStatelessImages().size() == 97);
     }
 
     @Test
@@ -42,11 +42,10 @@ class TransitionImageRepoTest {
         addImagesToRepo("floranext0", "floranext1");
         // # of images in floranext0 should be 97
         // # of images in floranext1 should be 101
-        assertTrue(transitionImageRepo.getImages().size() >= 101);
-        assertTrue(transitionImageRepo.getImages().size() <= 198);
+        assertTrue(statelessImageRepo.getStatelessImages().size() >= 101);
+        assertTrue(statelessImageRepo.getStatelessImages().size() <= 198);
     }
 
-    @Test
     void addImagesToRepo(String filename1, String filename2) {
         String fullpath1 = "../screenshots/" + filename1;
         String fullpath2 = "../screenshots/" + filename2;
@@ -56,6 +55,6 @@ class TransitionImageRepoTest {
                 new Pattern(fullpath2), 1);
         System.out.println("# of images in screen 0 = " + screenObservation0.getImages().size());
         System.out.println("# of images in screen 1 = " + screenObservation1.getImages().size());
-        System.out.println("# of unique images in the repo = " + transitionImageRepo.getImages().size());
+        System.out.println("# of unique images in the repo = " + statelessImageRepo.getStatelessImages().size());
     }
 }

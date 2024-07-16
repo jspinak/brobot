@@ -19,5 +19,9 @@ public class ScreenObservationManager {
     private int screenIndex = 0; // this is the screenshot index to retrieve when not running live
     private double maxSimilarityForUniqueImage = .95; // images matching below this similarity as considered unique
 
-
+    public int getAndIncrementId() {
+        int id = nextUnassignedScreenId;
+        nextUnassignedScreenId++;
+        return id;
+    }
 }
