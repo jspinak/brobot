@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.app.buildWithoutNames.buildStateStructure;
 
-import io.github.jspinak.brobot.app.buildWithoutNames.screenObservations.TransitionImage;
+import io.github.jspinak.brobot.app.buildWithoutNames.screenObservations.StatelessImage;
 import lombok.Getter;
 
 import java.util.*;
@@ -20,9 +20,9 @@ public class ImageSetsAndAssociatedScreens {
         this.images.add(indexInRepo);
     }
 
-    public boolean ifSameScreensAddImage(TransitionImage transitionImage) {
-        if (hasSameScreens(transitionImage.getScreensFound())) {
-            addImage(transitionImage.getIndexInRepo());
+    public boolean ifSameScreensAddImage(StatelessImage statelessImage) {
+        if (hasSameScreens(statelessImage.getScreensFound())) {
+            addImage(statelessImage.getIndexInRepo());
             return true;
         }
         return false;

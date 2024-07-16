@@ -21,7 +21,7 @@ public class FindScreen {
 
     private final GetScreenObservation getScreenObservation;
     private final ScreenObservations screenObservations;
-    private final TransitionImageRepo transitionImageRepo;
+    private final StatelessImageRepo statelessImageRepo;
     private final MatVisualize matVisualize;
     private final DecisionMatBuilder decisionMatBuilder;
     private final ScreenObservationManager screenObservationManager;
@@ -33,12 +33,12 @@ public class FindScreen {
     private boolean saveDecisionMat;
 
     public FindScreen(GetScreenObservation getScreenObservation, ScreenObservations screenObservations,
-                      TransitionImageRepo transitionImageRepo, MatVisualize matVisualize,
+                      StatelessImageRepo statelessImageRepo, MatVisualize matVisualize,
                       DecisionMatBuilder decisionMatBuilder, ScreenObservationManager screenObservationManager,
                       Action action, GlobalStateStructureOptions stateStructureOptions) {
         this.getScreenObservation = getScreenObservation;
         this.screenObservations = screenObservations;
-        this.transitionImageRepo = transitionImageRepo;
+        this.statelessImageRepo = statelessImageRepo;
         this.matVisualize = matVisualize;
         this.decisionMatBuilder = decisionMatBuilder;
         this.screenObservationManager = screenObservationManager;
@@ -47,7 +47,8 @@ public class FindScreen {
     }
 
     /**
-     * Takes a new screenshot and compares with the screenshots in the repo. If new, adds it to the repo.
+     * If live, takes a new screenshot and compares with the screenshots in the repo. If new, adds it to the repo.
+     * This can also be used with screenshots.
      * If in the repo, returns the screen's id.
      */
     public void findCurrentScreenAndSaveIfNew(StateStructureTemplate stateStructureTemplate) {
@@ -69,7 +70,7 @@ public class FindScreen {
 
     private void processNewScreen(ScreenObservation newObservation) {
         screenObservations.addScreenObservation(newObservation); // add screen to repo
-        transitionImageRepo.addUniqueImagesToRepo(newObservation);
+        statelessImageRepo.addUniqueImagesToRepo(newObservation);
     }
 
     /**

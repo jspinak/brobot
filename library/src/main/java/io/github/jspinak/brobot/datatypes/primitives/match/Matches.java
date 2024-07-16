@@ -138,6 +138,10 @@ public class Matches {
                 .max(Comparator.comparingDouble(Match::getScore));
     }
 
+    public boolean bestMatchSimilarityLessThan(double similarity) {
+        return getBestMatch().isEmpty() || getBestMatch().get().getScore() < similarity;
+    }
+
     private void addActiveState(Match newMatch) {
         if (newMatch.getStateObjectData() != null)
             activeStates.add(newMatch.getStateObjectData().getOwnerStateName());

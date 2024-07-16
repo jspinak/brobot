@@ -2,7 +2,7 @@ package io.github.jspinak.brobot.app.buildWithoutNames.screenTransitions;
 
 import io.github.jspinak.brobot.app.buildWithoutNames.screenObservations.ScreenObservation;
 import io.github.jspinak.brobot.app.buildWithoutNames.screenObservations.ScreenObservationManager;
-import io.github.jspinak.brobot.app.buildWithoutNames.screenObservations.TransitionImage;
+import io.github.jspinak.brobot.app.buildWithoutNames.screenObservations.StatelessImage;
 import io.github.jspinak.brobot.app.buildWithoutNames.stateStructureBuildManagement.GlobalStateStructureOptions;
 import io.github.jspinak.brobot.app.buildWithoutNames.stateStructureBuildManagement.StateStructureTemplate;
 import io.github.jspinak.brobot.actions.actionExecution.Action;
@@ -57,7 +57,7 @@ public class FindTransition {
 
     private boolean checkTransitionImages(int initialScreenId, ScreenObservation currentScreen,
                                           StateStructureTemplate stateStructureTemplate) {
-        for (TransitionImage potentialLink : currentScreen.getUnvisitedImages()) {
+        for (StatelessImage potentialLink : currentScreen.getUnvisitedImages()) {
             clickImage(potentialLink);
             findScreen.findCurrentScreenAndSaveIfNew(stateStructureTemplate);
             int currentScreenId = screenObservationManager.getCurrentScreenId();
@@ -71,7 +71,7 @@ public class FindTransition {
         return false; // all images checked, no transitions
     }
 
-    private void clickImage(TransitionImage image) {
+    private void clickImage(StatelessImage image) {
         ObjectCollection match = new ObjectCollection.Builder()
                 .withRegions(image.getRegion()) // Match(es) get added as Region(s) to an ObjectCollection
                 .build();

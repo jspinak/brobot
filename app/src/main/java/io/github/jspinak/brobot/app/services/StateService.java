@@ -5,6 +5,7 @@ import io.github.jspinak.brobot.app.database.entities.StateEntity;
 import io.github.jspinak.brobot.app.database.repositories.StateRepo;
 import io.github.jspinak.brobot.datatypes.state.state.State;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -26,12 +27,14 @@ public class StateService {
         this.stateRepo = stateRepo;
     }
 
+    @Transactional(readOnly = true)
     public Optional<State> getState(String name) {
         Optional<StateEntity> state = stateRepo.findByName(name);
         //return state.map(stateMapper::map);
         return state.map(StateEntityMapper::map);
     }
 
+    @Transactional(readOnly = true)
     public List<State> getAllStates() {
         List<State> stateList = new ArrayList<>();
         for (StateEntity stateEntity : stateRepo.findAll()) {
@@ -41,26 +44,31 @@ public class StateService {
         return stateList;
     }
 
+    @Transactional(readOnly = true)
     public Set<String> getAllStateNames() {
         return getAllStates().stream()
                 .map(State::getName)
                 .collect(Collectors.toSet());
     }
 
+    @Transactional(readOnly = true)
     public Set<State> findSetByName(String... stateNames) {
         Set<State> states = new HashSet<>();
         Stream.of(stateNames).forEach(name -> getState(name).ifPresent(states::add));
         return states;
     }
 
+    @Transactional(readOnly = true)
     public Set<State> findSetByName(Set<String> stateNames) {
         return findSetByName(stateNames.toArray(new String[0]));
     }
 
+    @Transactional(readOnly = true)
     public State[] findArrayByName(Set<String> stateNames) {
         return findArrayByName(stateNames.toArray(new String[0]));
     }
 
+    @Transactional(readOnly = true)
     public State[] findArrayByName(String... stateNames) {
         List<State> states = new ArrayList<>();
         Stream.of(stateNames).forEach(name -> getState(name).ifPresent(states::add));
@@ -75,19 +83,23 @@ public class StateService {
      *
      * @param state The State to add.
      */
+    @Transactional
     public void save(State state) {
         if (state == null) return;
         //stateRepo.save(stateMapper.map(state));
         stateRepo.save(StateEntityMapper.map(state));
     }
 
+    @Transactional
     public void resetTimesVisited() {getAllStates().forEach(state -> state.setTimesVisited(0));
     }
 
+    @Transactional
     public void deleteAllStates() {
         stateRepo.deleteAll();
     }
 
+    @Transactional
     public boolean removeState(String stateName) {
         Optional<StateEntity> stateDTO = stateRepo.findByName(stateName);
         if (stateDTO.isEmpty()) {
@@ -98,11 +110,13 @@ public class StateService {
         return true;
     }
 
+    @Transactional
     public boolean removeState(State state) {
         if (state == null) return false;
         return removeState(state.getName());
     }
 
+    @Transactional(readOnly = true)
     public List<State> getAllInProject(Long projectId) {
         return stateRepo.findByProjectId(projectId).stream()
                 //.map(stateMapper::map)

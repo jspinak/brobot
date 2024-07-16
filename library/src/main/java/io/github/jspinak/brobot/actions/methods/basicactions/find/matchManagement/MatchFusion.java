@@ -4,6 +4,7 @@ import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
+import io.github.jspinak.brobot.stringUtils.FuseStrings;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -61,8 +62,11 @@ public class MatchFusion {
             Get the next unallocated Match
              */
             int nextUnallocatedIndex = toCheck.get(0);
+            Match originalMatch = originalMatches.get(nextUnallocatedIndex);
+            String name = originalMatch.getName();
             Match m = new Match.Builder()
-                    .setRegion(originalMatches.get(nextUnallocatedIndex).getRegion())
+                    .setRegion(originalMatch.getRegion())
+                    .setName(name)
                     .build();
             toCheck.remove(0);
             /*
@@ -78,8 +82,10 @@ public class MatchFusion {
                 for (int i : new ArrayList<>(toCheck)) {
                     if (decider.isSameMatchGroup(m, originalMatches.get(i), maxXDistance, maxYDistance)) {
                         Region r = new Region(m).getUnion(new Region(originalMatches.get(i)));
+                        name = FuseStrings.fuse(name, originalMatches.get(i).getName());
                         m = new Match.Builder()
                                 .setRegion(r)
+                                .setName(name)
                                 .build();
                         if (toCheck.contains(i)) toCheck.remove(Integer.valueOf(i));
                         fused = true;

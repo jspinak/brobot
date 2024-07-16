@@ -4,6 +4,7 @@ import io.github.jspinak.brobot.actions.methods.mockOrLiveInterface.MockOrLive;
 import io.github.jspinak.brobot.datatypes.primitives.image.Image;
 import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
 import io.github.jspinak.brobot.datatypes.primitives.match.Match;
+import io.github.jspinak.brobot.datatypes.primitives.match.NoMatch;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import org.springframework.stereotype.Component;
@@ -12,20 +13,28 @@ import java.awt.image.BufferedImage;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 
 @Component
 public class CompareImages {
 
     private final MockOrLive mockOrLive;
+    private final CompareSize compareSize;
 
-    public CompareImages(MockOrLive mockOrLive) {
+    public CompareImages(MockOrLive mockOrLive, CompareSize compareSize) {
         this.mockOrLive = mockOrLive;
+        this.compareSize = compareSize;
     }
 
+    /**
+     * Compare all StateImage objects in the 1st parameter with the StateImage in the 2nd parameter.
+     * The Match returned is the best match found, or no match when there are none.
+     * @param imgs a list of images
+     * @param img2 the image to compare
+     * @return the best match
+     */
     public Match compare(List<StateImage> imgs, StateImage img2) {
-        Match bestScoringMatch = new Match.Builder()
-                .setSimScore(0.0)
-                .build();
+        Match bestScoringMatch = new NoMatch();
         for (StateImage img1 : imgs) {
             Match newMatch = compare(img1, img2);
             if (newMatch.getScore() > bestScoringMatch.getScore()) bestScoringMatch = newMatch;
@@ -42,9 +51,7 @@ public class CompareImages {
      * @return a Match of img2 with the similarity score
      */
     public Match compare(StateImage img1, StateImage img2) {
-        Match bestScoringMatch = new Match.Builder()
-                .setSimScore(0.0)
-                .build();
+        Match bestScoringMatch = new NoMatch();
         for (Pattern p1 : img1.getPatterns()) {
             for (Pattern p2 : img2.getPatterns()) {
                 Match newMatch = compare(p1, p2);
@@ -64,26 +71,21 @@ public class CompareImages {
      * @return a Match with the smaller image as the searchImage and the larger image as the Scene.
      */
     public Match compare(Pattern p1, Pattern p2) {
-        if (p1 == null || p2 == null || p1.getBImage() == null || p2.getBImage() == null) return null;
-        Pattern biggestPattern = p1;
-        Pattern smallestPattern = p2;
-        BufferedImage bi1 = p1.getBImage();
-        BufferedImage bi2 = p2.getBImage();
-        if ((bi1.getHeight()*bi1.getWidth()) < (bi2.getHeight()*bi2.getWidth())) {
-            biggestPattern = p2;
-            smallestPattern = p1;
-        }
-        Image scene = new Image(biggestPattern.getBImage());
+        if (p1 == null || p2 == null || p1.getBImage() == null || p2.getBImage() == null) return new NoMatch();
+        List<Pattern> sortedPatterns = compareSize.getEnvelopedFirstOrNone(p1, p2);
+        if (sortedPatterns.isEmpty()) return new NoMatch();
+        Pattern biggestPattern = sortedPatterns.get(1);
+        Pattern smallestPattern = sortedPatterns.get(0);
+        String name = smallestPattern.getName() + " found in " + biggestPattern.getName();
+        Image scene = biggestPattern.getImage();
         List<Match> matchList = mockOrLive.findAll(smallestPattern, scene);
-        Match noMatch = new Match.Builder()
-                .setRegion(new Region(0,0,1,1))
-                .setSearchImage(smallestPattern.getBImage())
-                .setScene(new Image(biggestPattern.getBImage()))
-                .setSimScore(0)
-                .build();
-        if (matchList.isEmpty()) return noMatch;
-        Match bestMatch = Collections.max(matchList, Comparator.comparingDouble(Match::getScore));
-        bestMatch.setSearchImage(new Image(smallestPattern));
-        return bestMatch;
+        if (matchList.isEmpty()) {
+            return new NoMatch.Builder()
+                    .setName(name)
+                    .setSearchImage(smallestPattern.getImage())
+                    .setScene(biggestPattern.getImage())
+                    .build();
+        }
+        return Collections.max(matchList, Comparator.comparingDouble(Match::getScore));
     }
 }

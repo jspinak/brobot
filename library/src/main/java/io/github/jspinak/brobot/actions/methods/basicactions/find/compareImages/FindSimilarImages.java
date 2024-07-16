@@ -33,7 +33,8 @@ public class FindSimilarImages {
         List<Match> matchList = new ArrayList<>();
         List<StateImage> baseImages = objectCollections.get(0).getStateImages();
         for (StateImage image : objectCollections.get(1).getStateImages()) {
-            matchList.add(compareImages.compare(baseImages, image));
+            Match comparisonMatch = compareImages.compare(baseImages, image);
+            matchList.add(comparisonMatch);
         }
         matches.setMatchList(matchList);
     }

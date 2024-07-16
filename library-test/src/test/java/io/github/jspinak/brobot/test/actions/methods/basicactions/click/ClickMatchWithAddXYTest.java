@@ -37,7 +37,7 @@ public class ClickMatchWithAddXYTest {
         BrobotSettings.screenshots.add("floranext0");
         StateImage topLeft = new StateImage.Builder()
                 .addPattern(new Pattern.Builder()
-                        .setName("topLeft")
+                        .setFilename("topLeft")
                         .setTargetPosition(new Position(100, 100))
                         .build())
                 .build();
@@ -61,7 +61,7 @@ public class ClickMatchWithAddXYTest {
         BrobotSettings.screenshots.add("floranext0");
         StateImage topLeft = new StateImage.Builder()
                 .addPattern(new Pattern.Builder()
-                        .setName("topLeft")
+                        .setFilename("topLeft")
                         //.setPosition(new Position(100, 100))
                         .build())
                 .build();
