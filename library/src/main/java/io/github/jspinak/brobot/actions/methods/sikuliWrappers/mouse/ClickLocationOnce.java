@@ -48,7 +48,10 @@ public class ClickLocationOnce {
             new Region(location.getX(), location.getY(), 0, 0).doubleClick();
         } else {
             int i = 1;
-            if (isTwoClicks(actionOptions)) i = 2;
+            if (isTwoClicks(actionOptions)) {
+                i = 2;
+                Report.print("2 clicks ");
+            }
             for (int j=0; j<i; j++) {
                 mouseDownWrapper.press(pauseBeforeDown, pauseAfterDown, actionOptions.getClickType());
                 mouseUpWrapper.press(pauseBeforeUp, pauseAfterUp, actionOptions.getClickType());
