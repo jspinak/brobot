@@ -25,5 +25,8 @@ public class ClickType {
         typeToSikuliButton.put(LEFT, InputEvent.BUTTON1_DOWN_MASK);
         typeToSikuliButton.put(MIDDLE, InputEvent.BUTTON2_DOWN_MASK);
         typeToSikuliButton.put(RIGHT, InputEvent.BUTTON3_DOWN_MASK);
+        typeToSikuliButton.put(DOUBLE_LEFT, InputEvent.BUTTON1_DOWN_MASK);
+        typeToSikuliButton.put(DOUBLE_MIDDLE, InputEvent.BUTTON2_DOWN_MASK);
+        typeToSikuliButton.put(DOUBLE_RIGHT, InputEvent.BUTTON3_DOWN_MASK);
     }
 }
