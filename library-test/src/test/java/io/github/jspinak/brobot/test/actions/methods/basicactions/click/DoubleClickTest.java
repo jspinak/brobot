@@ -23,7 +23,7 @@ public class DoubleClickTest {
     @BeforeAll
     public static void setup() {
         System.setProperty("java.awt.headless", "false");
-        BrobotSettings.mock = true;
+        //BrobotSettings.mock = true;
     }
 
     @Autowired
@@ -47,6 +47,27 @@ public class DoubleClickTest {
                 .setAction(ActionOptions.Action.CLICK)
                 .setClickType(ClickType.Type.DOUBLE_LEFT)
                 .setPauseBeforeBegin(2.0)
+                .build();
+        Matches matches = action.perform(actionOptions, objColl);
+        Location loc1 = matches.getMatchLocations().get(0);
+        System.out.println(loc1);
+        assertEquals(55, loc1.getY());
+    }
+
+    @Test
+    void doubleClickWithPauses() {
+        //BrobotSettings.screenshots.add("floranext0");
+        StateImage topLeft = new StateImage.Builder()
+                .addPattern("topLeft")
+                .build();
+        ObjectCollection objColl = new ObjectCollection.Builder()
+                .withImages(topLeft)
+                .withScenes("../screenshots/floranext0")
+                .build();
+        ActionOptions actionOptions = new ActionOptions.Builder()
+                .setAction(ActionOptions.Action.CLICK)
+                .setClickType(ClickType.Type.DOUBLE_LEFT)
+                .setPauseBeforeMouseDown(2.0)
                 .build();
         Matches matches = action.perform(actionOptions, objColl);
         Location loc1 = matches.getMatchLocations().get(0);
