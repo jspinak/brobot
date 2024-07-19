@@ -17,19 +17,19 @@ const AllStates = () => {
   const [filteredStates, setFilteredStates] = useState(states);
 
   useEffect(() => {
-    fetch('http://localhost:8081/api/test/patterns/all')
+    fetch('http://localhost:8080/api/patterns/all')
       .then((response) => response.json())
       .then((patterns) => setPatterns(patterns));
   }, []);
 
   useEffect(() => {
-    fetch('http://localhost:8081/api/test/images/all')
+    fetch('http://localhost:8080/api/images/all')
       .then((response) => response.json())
       .then((data) => setImages(data));
   }, []);
 
   useEffect(() => {
-    fetch('http://localhost:8081/api/test/states/all')
+    fetch('http://localhost:8080/api/states/all')
     .then((response) => {
       if (!response.ok) {
         throw new Error('Network response was not ok');

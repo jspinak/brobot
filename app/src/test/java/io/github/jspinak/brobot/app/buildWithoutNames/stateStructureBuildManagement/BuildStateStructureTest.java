@@ -1,8 +1,6 @@
 package io.github.jspinak.brobot.app.buildWithoutNames.stateStructureBuildManagement;
 
-import io.github.jspinak.brobot.app.database.entities.StateEntity;
-import io.github.jspinak.brobot.app.services.StateService;
-import io.github.jspinak.brobot.database.data.AllStatesInProject;
+import io.github.jspinak.brobot.app.services.libraryServices.StateService;
 import io.github.jspinak.brobot.database.services.AllStatesInProjectService;
 import io.github.jspinak.brobot.datatypes.state.state.State;
 import org.junit.jupiter.api.BeforeAll;

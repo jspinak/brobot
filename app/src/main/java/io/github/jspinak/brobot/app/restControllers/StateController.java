@@ -1,12 +1,15 @@
 package io.github.jspinak.brobot.app.restControllers;
 
-import io.github.jspinak.brobot.app.services.StateService;
-import io.github.jspinak.brobot.datatypes.state.state.State;
+import io.github.jspinak.brobot.app.database.entities.StateEntity;
+import io.github.jspinak.brobot.app.services.entityServices.StateEntityService;
+import io.github.jspinak.brobot.app.web.responseMappers.StateResponseMapper;
+import io.github.jspinak.brobot.app.web.responses.StateResponse;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -14,21 +17,25 @@ import java.util.Optional;
 @RequestMapping("/api/states") // Base path for all endpoints in this controller
 public class StateController {
 
-    private final StateService stateService;
+    private final StateEntityService stateEntityService;
+    private final StateResponseMapper stateResponseMapper;
 
-    public StateController(StateService stateService) {
-        this.stateService = stateService;
+    public StateController(StateEntityService stateEntityService, StateResponseMapper stateResponseMapper) {
+        this.stateEntityService = stateEntityService;
+        this.stateResponseMapper = stateResponseMapper;
     }
 
     @GetMapping("/all") // Maps to GET /api/states/all
-    public List<State> getAllStates() {
-        return stateService.getAllStates();
+    public List<StateResponse> getAllStates() {
+        List<StateResponse> stateResponses = new ArrayList<>();
+        stateEntityService.getAllStates().forEach(stateResponseMapper::map);
+        return stateResponses;
     }
 
     @GetMapping("/{name}") // Maps to GET /api/states/{name}
-    public State getState(@PathVariable String name) {
-        Optional<State> stateOptional = stateService.getState(name);
-        return stateOptional.orElse(null);
+    public StateResponse getState(@PathVariable String name) {
+        Optional<StateEntity> stateOptional = stateEntityService.getState(name);
+        return stateOptional.map(stateResponseMapper::map).orElse(null);
     }
 
     @GetMapping("/") // Maps to GET /api/states/

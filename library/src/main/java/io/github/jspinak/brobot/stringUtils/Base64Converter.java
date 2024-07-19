@@ -9,7 +9,7 @@ import java.util.Base64;
 @Component
 public class Base64Converter {
 
-    public String convert(String filePath) {
+    public static String convert(String filePath) {
         try {
             // Load the file as bytes
             Path file = Path.of(filePath);
@@ -21,5 +21,9 @@ public class Base64Converter {
             e.printStackTrace();
             return null;
         }
+    }
+
+    public static String convert(byte[] byteArray) {
+        return Base64.getEncoder().encodeToString(byteArray);
     }
 }
