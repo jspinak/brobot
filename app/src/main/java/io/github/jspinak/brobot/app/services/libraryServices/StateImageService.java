@@ -1,4 +1,4 @@
-package io.github.jspinak.brobot.app.services;
+package io.github.jspinak.brobot.app.services.libraryServices;
 
 import io.github.jspinak.brobot.app.database.databaseMappers.StateImageEntityMapper;
 import io.github.jspinak.brobot.app.database.entities.StateImageEntity;
