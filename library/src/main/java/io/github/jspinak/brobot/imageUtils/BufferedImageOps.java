@@ -1,6 +1,7 @@
 package io.github.jspinak.brobot.imageUtils;
 
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
+import io.github.jspinak.brobot.reports.Report;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfByte;
 import org.opencv.imgcodecs.Imgcodecs;
@@ -25,13 +26,15 @@ import java.util.Objects;
 public class BufferedImageOps {
 
     /**
-     * Creates a new SikuliX Pattern and retrieve the BufferedImage from the new Pattern.
+     * Creates a new SikuliX Pattern and retrieves the BufferedImage from this Pattern.
      * @param path the filename of the image
      * @return the BufferedImage from file
      */
     public static BufferedImage getBuffImgFromFile(String path) {
         Pattern sikuliPattern = new Pattern(path);
-        return sikuliPattern.getBImage();
+        BufferedImage bi = sikuliPattern.getBImage();
+        if (bi == null) Report.println(path + " is invalid. The absolute path is: " + new File(path).getAbsolutePath());
+        return bi;
     }
 
     /**

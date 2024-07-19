@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.app.restControllers;
 
-import io.github.jspinak.brobot.app.services.PatternService;
+import io.github.jspinak.brobot.app.services.libraryServices.PatternService;
 import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
