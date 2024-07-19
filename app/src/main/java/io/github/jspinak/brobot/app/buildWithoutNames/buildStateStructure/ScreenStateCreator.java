@@ -4,11 +4,9 @@ import io.github.jspinak.brobot.app.buildWithoutNames.screenObservations.ScreenO
 import io.github.jspinak.brobot.app.buildWithoutNames.screenObservations.ScreenObservations;
 import io.github.jspinak.brobot.app.buildWithoutNames.screenObservations.StatelessImage;
 import io.github.jspinak.brobot.app.buildWithoutNames.screenObservations.StatelessImageRepo;
-import io.github.jspinak.brobot.app.services.StateService;
+import io.github.jspinak.brobot.app.services.libraryServices.StateService;
 import io.github.jspinak.brobot.actions.customActions.CommonActions;
 import io.github.jspinak.brobot.datatypes.primitives.image.Image;
-import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
-import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.state.State;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.illustratedHistory.StateIllustration;
@@ -19,8 +17,6 @@ import io.github.jspinak.brobot.manageStates.StateTransition;
 import io.github.jspinak.brobot.manageStates.StateTransitions;
 import io.github.jspinak.brobot.services.StateTransitionsRepository;
 import lombok.Setter;
-import org.bytedeco.opencv.opencv_core.Mat;
-import org.sikuli.basics.Settings;
 import org.springframework.stereotype.Component;
 import java.util.*;
 

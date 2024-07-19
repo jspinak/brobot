@@ -3,8 +3,9 @@ import './state-list.styles.css';
 
 const StateList = ({ states }) => (
     <div className='state-list'>
-        {states.map((state) => { 
-            return <State state={state} /> 
+        {states.map((state) => {
+            console.log(state.id); // Debugging: check if id is unique and defined
+            return <State key={state.id} state={state} />
         })}
     </div>
 );

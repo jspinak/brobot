@@ -1,14 +1,12 @@
 package io.github.jspinak.brobot.app.buildWithoutNames.stateStructureBuildManagement;
 
-import io.github.jspinak.brobot.app.services.StateService;
-import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
+import io.github.jspinak.brobot.app.services.libraryServices.StateService;
 import io.github.jspinak.brobot.datatypes.state.state.State;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
