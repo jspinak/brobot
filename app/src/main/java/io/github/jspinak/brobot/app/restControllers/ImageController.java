@@ -1,6 +1,7 @@
 package io.github.jspinak.brobot.app.restControllers;
 
-import io.github.jspinak.brobot.app.services.ImageService;
+import io.github.jspinak.brobot.app.database.entities.ImageEntity;
+import io.github.jspinak.brobot.app.services.entityServices.ImageEntityService;
 import io.github.jspinak.brobot.app.web.responseMappers.ImageResponseMapper;
 import io.github.jspinak.brobot.app.web.responses.ImageResponse;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,10 +16,12 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/images") // Base path for all endpoints in this controller
 public class ImageController {
 
-    private final ImageService imageService;
+    private final ImageEntityService imageEntityService;
+    private final ImageResponseMapper imageResponseMapper;
 
-    public ImageController(ImageService imageService) {
-        this.imageService = imageService;
+    public ImageController(ImageEntityService imageEntityService, ImageResponseMapper imageResponseMapper) {
+        this.imageEntityService = imageEntityService;
+        this.imageResponseMapper = imageResponseMapper;
     }
 
     /**
@@ -26,16 +29,14 @@ public class ImageController {
      */
     @GetMapping("/all") // Maps to GET /api/images/all
     public List<ImageResponse> getAllImages() {
-        return imageService.getAllImages().stream()
-                .map(ImageResponseMapper::map)
+        return imageEntityService.getAllImages().stream()
+                .map(imageResponseMapper::map)
                 .collect(Collectors.toList());
     }
 
     @GetMapping("/{name}") // Maps to GET /api/images/{name}
-    public List<ImageResponse> getImages(@PathVariable String name) {
-        return imageService.getImages(name).stream()
-                .map(ImageResponseMapper::map)
-                .collect(Collectors.toList());
+    public List<ImageEntity> getImages(@PathVariable String name) {
+        return imageEntityService.getImage(name);
     }
 
     @GetMapping("/") // Maps to GET /api/images/
