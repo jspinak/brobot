@@ -194,12 +194,12 @@ public class ActionOptions {
      *   7. pauseAfterMouseUp
      *   8. pauseAfterEnd
      */
-    private double pauseBeforeMouseDown = Settings.DelayBeforeMouseDown;
+    private double pauseBeforeMouseDown = BrobotSettings.pauseBeforeMouseDown; //Settings.DelayBeforeMouseDown;
     // pauseAfterMouseDown replaces Sikuli settings var DelayBeforeDrag for Drags and ClickDelay for Clicks.
-    private double pauseAfterMouseDown = BrobotSettings.delayAfterMouseDown;
+    private double pauseAfterMouseDown = BrobotSettings.pauseAfterMouseDown;
     private float moveMouseDelay = Settings.MoveMouseDelay;
-    private double pauseBeforeMouseUp = BrobotSettings.delayBeforeMouseUp;
-    private double pauseAfterMouseUp = 0;
+    private double pauseBeforeMouseUp = BrobotSettings.pauseBeforeMouseUp;
+    private double pauseAfterMouseUp = BrobotSettings.pauseAfterMouseUp;
 
     /*
      * These values provide an offset to the Match for the dragTo Location.
@@ -453,11 +453,11 @@ public class ActionOptions {
         private boolean useDefinedRegion = false;
         private Predicate<Matches> successCriteria;
         private double similarity = Settings.MinSimilarity;
-        private double pauseBeforeMouseDown = Settings.DelayBeforeMouseDown;
-        private double pauseAfterMouseDown = BrobotSettings.delayAfterMouseDown; // Sikuli = Settings.DelayBeforeDrag
+        private double pauseBeforeMouseDown = BrobotSettings.pauseBeforeMouseDown; //Settings.DelayBeforeMouseDown;
+        private double pauseAfterMouseDown = BrobotSettings.pauseAfterMouseDown; // Sikuli = Settings.DelayBeforeDrag
         private float moveMouseDelay = Settings.MoveMouseDelay;
-        private double pauseBeforeMouseUp = Settings.DelayBeforeDrop;
-        private double pauseAfterMouseUp = 0;
+        private double pauseBeforeMouseUp = BrobotSettings.pauseBeforeMouseUp; //Settings.DelayBeforeDrop;
+        private double pauseAfterMouseUp = BrobotSettings.pauseAfterMouseUp;
         private ClickType.Type clickType = ClickType.Type.LEFT;
         private boolean moveMouseAfterAction = false;
         private Location moveMouseAfterActionTo = new Location(-1, 0);
