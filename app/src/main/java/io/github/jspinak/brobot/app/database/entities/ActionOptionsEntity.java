@@ -30,7 +30,7 @@ public class ActionOptionsEntity {
     private boolean useDefinedRegion = false;
     private double similarity = Settings.MinSimilarity;
     private double pauseBeforeMouseDown = Settings.DelayBeforeMouseDown;
-    private double pauseAfterMouseDown = BrobotSettings.delayAfterMouseDown;
+    private double pauseAfterMouseDown = BrobotSettings.pauseAfterMouseDown;
     private float moveMouseDelay = Settings.MoveMouseDelay;
     private double pauseBeforeMouseUp = Settings.DelayBeforeDrop;
     private double pauseAfterMouseUp = 0;
