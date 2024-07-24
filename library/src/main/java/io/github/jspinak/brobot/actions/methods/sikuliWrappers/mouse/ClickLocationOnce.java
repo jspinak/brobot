@@ -44,6 +44,7 @@ public class ClickLocationOnce {
         double pauseBeforeUp = actionOptions.getPauseBeforeMouseUp();
         double pauseAfterUp = actionOptions.getPauseAfterMouseUp();
 
+        if (isSingleClick(actionOptions) && noPauses(actionOptions)) location.sikuli().click();
         if (isSimpleLeftDoubleClick(actionOptions)) {
             new Region(location.getX(), location.getY(), 0, 0).doubleClick();
         } else {
@@ -60,6 +61,13 @@ public class ClickLocationOnce {
         return true;
     }
 
+    private boolean noPauses(ActionOptions actionOptions) {
+        return actionOptions.getPauseAfterMouseDown() == 0
+                && actionOptions.getPauseBeforeMouseUp() == 0
+                && actionOptions.getPauseBeforeMouseDown() == 0
+                && actionOptions.getPauseAfterMouseUp() == 0;
+    }
+
     /**
      * A double-click has a shorter pause between clicks as two separate clicks.
      * If there is a pause, two separate clicks will be used.
@@ -67,11 +75,13 @@ public class ClickLocationOnce {
      * @return true if clicked
      */
     private boolean isSimpleLeftDoubleClick(ActionOptions actionOptions) {
-        return actionOptions.getClickType() == ClickType.Type.DOUBLE_LEFT
-                && actionOptions.getPauseAfterMouseDown() == 0
-                && actionOptions.getPauseBeforeMouseUp() == 0
-                && actionOptions.getPauseBeforeMouseDown() == 0
-                && actionOptions.getPauseAfterMouseUp() == 0;
+        return actionOptions.getClickType() == ClickType.Type.DOUBLE_LEFT && noPauses(actionOptions);
+    }
+
+    private boolean isSingleClick(ActionOptions actionOptions) {
+        return actionOptions.getClickType() == ClickType.Type.LEFT ||
+                actionOptions.getClickType() == ClickType.Type.RIGHT ||
+                actionOptions.getClickType() == ClickType.Type.MIDDLE;
     }
 
     /**
