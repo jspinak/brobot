@@ -44,10 +44,8 @@ public class ClickLocationOnce {
         double pauseBeforeUp = actionOptions.getPauseBeforeMouseUp();
         double pauseAfterUp = actionOptions.getPauseAfterMouseUp();
 
-        if (isSingleClick(actionOptions) && noPauses(actionOptions)) location.sikuli().click();
-        if (isSimpleLeftDoubleClick(actionOptions)) {
-            new Region(location.getX(), location.getY(), 0, 0).doubleClick();
-        } else {
+        if (isSimpleLeftDoubleClick(actionOptions)) location.sikuli().doubleClick();
+        else {
             int i = 1;
             if (isTwoClicks(actionOptions)) {
                 i = 2;
