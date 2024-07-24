@@ -9,8 +9,10 @@ import java.util.List;
  */
 public class BrobotSettings {
 
-    public static double delayAfterMouseDown = 0;
-    public static double delayBeforeMouseUp = 0;
+    public static double pauseBeforeMouseDown = 0;
+    public static double pauseAfterMouseDown = 0;
+    public static double pauseBeforeMouseUp = 0;
+    public static double pauseAfterMouseUp = 0;
     public static int xMoveAfterMouseDown = 0;
     public static int yMoveAfterMouseDown = 0;
 
