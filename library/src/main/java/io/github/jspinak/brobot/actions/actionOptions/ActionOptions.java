@@ -453,11 +453,11 @@ public class ActionOptions {
         private boolean useDefinedRegion = false;
         private Predicate<Matches> successCriteria;
         private double similarity = Settings.MinSimilarity;
-        private double pauseBeforeMouseDown = BrobotSettings.pauseBeforeMouseDown; //Settings.DelayBeforeMouseDown;
-        private double pauseAfterMouseDown = BrobotSettings.pauseAfterMouseDown; // Sikuli = Settings.DelayBeforeDrag
+        private Double pauseBeforeMouseDown; // I want to know if explicitly set to 0.0. // = BrobotSettings.pauseBeforeMouseDown; //Settings.DelayBeforeMouseDown;
+        private Double pauseAfterMouseDown; // = BrobotSettings.pauseAfterMouseDown; // Sikuli = Settings.DelayBeforeDrag
         private float moveMouseDelay = Settings.MoveMouseDelay;
-        private double pauseBeforeMouseUp = BrobotSettings.pauseBeforeMouseUp; //Settings.DelayBeforeDrop;
-        private double pauseAfterMouseUp = BrobotSettings.pauseAfterMouseUp;
+        private Double pauseBeforeMouseUp; // = BrobotSettings.pauseBeforeMouseUp; //Settings.DelayBeforeDrop;
+        private Double pauseAfterMouseUp; // = BrobotSettings.pauseAfterMouseUp;
         private ClickType.Type clickType = ClickType.Type.LEFT;
         private boolean moveMouseAfterAction = false;
         private Location moveMouseAfterActionTo = new Location(-1, 0);
@@ -854,9 +854,21 @@ public class ActionOptions {
             return this;
         }
 
+        /*
+        The defaults for DRAG and CLICK are different.
+        Explicitly set pauses override the defaults.
+         */
+        private void setPauses() {
+            if (pauseBeforeMouseDown == null) pauseBeforeMouseDown = BrobotSettings.pauseBeforeMouseDown;
+            if (pauseAfterMouseDown == null) pauseAfterMouseDown = action == Action.DRAG? Settings.DelayValue : BrobotSettings.pauseAfterMouseDown;
+            if (pauseBeforeMouseUp == null) pauseBeforeMouseUp = action == Action.DRAG? Settings.DelayValue : BrobotSettings.pauseBeforeMouseUp;
+            if (pauseAfterMouseUp == null) pauseAfterMouseUp = BrobotSettings.pauseAfterMouseUp;
+        }
+
         public ActionOptions build() {
             ActionOptions actionOptions = new ActionOptions();
             actionOptions.action = action;
+            setPauses();
             actionOptions.tempFind = tempFind;
             actionOptions.clickUntil = clickUntil;
             actionOptions.find = find;
