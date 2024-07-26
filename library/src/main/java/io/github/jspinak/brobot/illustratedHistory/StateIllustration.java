@@ -41,4 +41,8 @@ public class StateIllustration {
         illustratedScreenshot = new Image(mat);
     }
 
+    public void setIllustratedScreenshot(Image image) {
+        this.illustratedScreenshot = image;
+    }
+
 }

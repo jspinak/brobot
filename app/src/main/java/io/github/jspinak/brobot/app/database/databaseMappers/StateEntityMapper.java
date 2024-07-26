@@ -2,18 +2,44 @@ package io.github.jspinak.brobot.app.database.databaseMappers;
 
 import io.github.jspinak.brobot.app.database.entities.StateEntity;
 import io.github.jspinak.brobot.datatypes.state.state.State;
+import org.springframework.stereotype.Component;
 
+@Component
 public class StateEntityMapper {
+
+    private final StateImageEntityMapper stateImageEntityMapper;
+    private final StateStringEntityMapper stateStringEntityMapper;
+    private final StateRegionEntityMapper stateRegionEntityMapper;
+    private final StateLocationEntityMapper stateLocationEntityMapper;
+    private final ImageEntityMapper imageEntityMapper;
+    private final StateIllustrationEntityMapper stateIllustrationEntityMapper;
+    private final MatchHistoryEntityMapper matchHistoryEntityMapper;
+
+    public StateEntityMapper(StateImageEntityMapper stateImageEntityMapper,
+                             StateStringEntityMapper stateStringEntityMapper,
+                             StateRegionEntityMapper stateRegionEntityMapper,
+                             StateLocationEntityMapper stateLocationEntityMapper,
+                             ImageEntityMapper imageEntityMapper,
+                             StateIllustrationEntityMapper stateIllustrationEntityMapper,
+                             MatchHistoryEntityMapper matchHistoryEntityMapper) {
+        this.stateImageEntityMapper = stateImageEntityMapper;
+        this.stateStringEntityMapper = stateStringEntityMapper;
+        this.stateRegionEntityMapper = stateRegionEntityMapper;
+        this.stateLocationEntityMapper = stateLocationEntityMapper;
+        this.imageEntityMapper = imageEntityMapper;
+        this.stateIllustrationEntityMapper = stateIllustrationEntityMapper;
+        this.matchHistoryEntityMapper = matchHistoryEntityMapper;
+    }
     
-    public static StateEntity map(State state) {
+    public StateEntity map(State state) {
         StateEntity stateEntity = new StateEntity();
         stateEntity.setProjectId(state.getProjectId());
         stateEntity.setName(state.getName());
         stateEntity.setStateText(state.getStateText());
-        stateEntity.setStateImages(StateImageEntityMapper.mapToStateImageEntitySet(state.getStateImages()));
-        stateEntity.setStateStrings(StateStringEntityMapper.mapToStateStringEntitySet(state.getStateStrings()));
-        stateEntity.setStateRegions(StateRegionEntityMapper.mapToStateRegionEntitySet(state.getStateRegions()));
-        stateEntity.setStateLocations(StateLocationEntityMapper.mapToStateLocationEntitySet(state.getStateLocations()));
+        stateEntity.setStateImages(stateImageEntityMapper.mapToStateImageEntitySet(state.getStateImages()));
+        stateEntity.setStateStrings(stateStringEntityMapper.mapToStateStringEntitySet(state.getStateStrings()));
+        stateEntity.setStateRegions(stateRegionEntityMapper.mapToStateRegionEntitySet(state.getStateRegions()));
+        stateEntity.setStateLocations(stateLocationEntityMapper.mapToStateLocationEntitySet(state.getStateLocations()));
         stateEntity.setBlocking(state.isBlocking());
         stateEntity.setCanHide(state.getCanHide());
         stateEntity.setHidden(state.getHidden());
@@ -22,21 +48,21 @@ public class StateEntityMapper {
         stateEntity.setProbabilityExists(state.getProbabilityExists());
         stateEntity.setBaseProbabilityExists(state.getBaseProbabilityExists());
         stateEntity.setTimesVisited(state.getTimesVisited());
-        stateEntity.setScenes(ImageEntityMapper.mapToImageEntityList(state.getScenes()));
-        stateEntity.setIllustrations(state.getIllustrations());
-        stateEntity.setMatchHistory(MatchHistoryEntityMapper.map(state.getMatchHistory()));
+        stateEntity.setScenes(imageEntityMapper.mapToImageEntityList(state.getScenes()));
+        stateEntity.setIllustrations(stateIllustrationEntityMapper.mapToListEntity(state.getIllustrations()));
+        stateEntity.setMatchHistory(matchHistoryEntityMapper.map(state.getMatchHistory()));
         return stateEntity;
     }
 
-    public static State map(StateEntity stateEntity) {
+    public State map(StateEntity stateEntity) {
         State state = new State();
         state.setProjectId(stateEntity.getProjectId());
         state.setName(stateEntity.getName());
         state.setStateText(stateEntity.getStateText());
-        state.setStateImages(StateImageEntityMapper.mapToStateImageSet(stateEntity.getStateImages()));
-        state.setStateStrings(StateStringEntityMapper.mapToStateStringSet(stateEntity.getStateStrings()));
-        state.setStateRegions(StateRegionEntityMapper.mapToStateRegionSet(stateEntity.getStateRegions()));
-        state.setStateLocations(StateLocationEntityMapper.mapToStateLocationSet(stateEntity.getStateLocations()));
+        state.setStateImages(stateImageEntityMapper.mapToStateImageSet(stateEntity.getStateImages()));
+        state.setStateStrings(stateStringEntityMapper.mapToStateStringSet(stateEntity.getStateStrings()));
+        state.setStateRegions(stateRegionEntityMapper.mapToStateRegionSet(stateEntity.getStateRegions()));
+        state.setStateLocations(stateLocationEntityMapper.mapToStateLocationSet(stateEntity.getStateLocations()));
         state.setBlocking(stateEntity.isBlocking());
         state.setCanHide(stateEntity.getCanHide());
         state.setHidden(stateEntity.getHidden());
@@ -45,9 +71,9 @@ public class StateEntityMapper {
         state.setProbabilityExists(stateEntity.getProbabilityExists());
         state.setBaseProbabilityExists(stateEntity.getBaseProbabilityExists());
         state.setTimesVisited(stateEntity.getTimesVisited());
-        state.setScenes(ImageEntityMapper.mapToImageList(stateEntity.getScenes()));
-        state.setIllustrations(stateEntity.getIllustrations());
-        state.setMatchHistory(MatchHistoryEntityMapper.map(stateEntity.getMatchHistory()));
+        state.setScenes(imageEntityMapper.mapToImageList(stateEntity.getScenes()));
+        state.setIllustrations(stateIllustrationEntityMapper.mapToList(stateEntity.getIllustrations()));
+        state.setMatchHistory(matchHistoryEntityMapper.map(stateEntity.getMatchHistory()));
         return state;
     }
 }

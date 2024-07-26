@@ -2,57 +2,80 @@ package io.github.jspinak.brobot.app.database.databaseMappers;
 
 import io.github.jspinak.brobot.app.database.entities.MatchEntity;
 import io.github.jspinak.brobot.datatypes.primitives.match.Match;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Component
 public class MatchEntityMapper {
+
+    private final LocationEntityMapper locationEntityMapper;
+    private final ImageEntityMapper imageEntityMapper;
+    private final RegionEmbeddableMapper regionEmbeddableMapper;
+    private final AnchorsEntityMapper anchorsEntityMapper;
+    private final StateObjectDataEmbeddableMapper stateObjectDataEmbeddableMapper;
+    private final MatchEntityMapper matchEntityMapper;
+
+    public MatchEntityMapper(LocationEntityMapper locationEntityMapper,
+                             ImageEntityMapper imageEntityMapper,
+                             RegionEmbeddableMapper regionEmbeddableMapper,
+                             AnchorsEntityMapper anchorsEntityMapper,
+                             StateObjectDataEmbeddableMapper stateObjectDataEmbeddableMapper,
+                             MatchEntityMapper matchEntityMapper) {
+        this.locationEntityMapper = locationEntityMapper;
+        this.imageEntityMapper = imageEntityMapper;
+        this.regionEmbeddableMapper = regionEmbeddableMapper;
+        this.anchorsEntityMapper = anchorsEntityMapper;
+        this.stateObjectDataEmbeddableMapper = stateObjectDataEmbeddableMapper;
+        this.matchEntityMapper = matchEntityMapper;
+    }
     
-    public static MatchEntity map(Match match) {
+    public MatchEntity map(Match match) {
         MatchEntity matchEntity = new MatchEntity();
         matchEntity.setScore(match.getScore());
-        matchEntity.setTarget(LocationEntityMapper.map(match.getTarget()));
-        if (match.getImage() != null) matchEntity.setImage(ImageEntityMapper.map(match.getImage()));
+        matchEntity.setTarget(locationEntityMapper.map(match.getTarget()));
+        if (match.getImage() != null) matchEntity.setImage(imageEntityMapper.map(match.getImage()));
         matchEntity.setText(match.getText());
         matchEntity.setName(match.getName());
-        matchEntity.setRegion(RegionEmbeddableMapper.map(match.getRegion()));
-        if (match.getSearchImage() != null) matchEntity.setSearchImage(ImageEntityMapper.map(match.getSearchImage()));
-        if (match.getAnchors() != null) matchEntity.setAnchors(AnchorsEntityMapper.map(match.getAnchors()));
-        matchEntity.setStateObjectData(match.getStateObjectData());
+        matchEntity.setRegion(regionEmbeddableMapper.map(match.getRegion()));
+        if (match.getSearchImage() != null) matchEntity.setSearchImage(imageEntityMapper.map(match.getSearchImage()));
+        if (match.getAnchors() != null) matchEntity.setAnchors(anchorsEntityMapper.map(match.getAnchors()));
+        matchEntity.setStateObjectData(stateObjectDataEmbeddableMapper.map(match.getStateObjectData()));
         matchEntity.setHistogram(match.getHistogram());
-        if (match.getScene() != null) matchEntity.setScene(ImageEntityMapper.map(match.getScene()));
+        if (match.getScene() != null) matchEntity.setScene(imageEntityMapper.map(match.getScene()));
         matchEntity.setTimeStamp(match.getTimeStamp());
         matchEntity.setTimesActedOn(match.getTimesActedOn());
         return matchEntity;
     }
 
-    public static Match map(MatchEntity matchEntity) {
+    public Match map(MatchEntity matchEntity) {
         Match match = new Match();
         match.setScore(matchEntity.getScore());
-        match.setTarget(LocationEntityMapper.map(matchEntity.getTarget()));
-        if (matchEntity.getImage() != null) match.setImage(ImageEntityMapper.map(matchEntity.getImage()));
+        match.setTarget(locationEntityMapper.map(matchEntity.getTarget()));
+        if (matchEntity.getImage() != null) match.setImage(imageEntityMapper.map(matchEntity.getImage()));
         match.setText(matchEntity.getText());
         match.setName(matchEntity.getName());
-        match.setRegion(RegionEmbeddableMapper.map(matchEntity.getRegion()));
-        if (matchEntity.getSearchImage() != null) match.setSearchImage(ImageEntityMapper.map(matchEntity.getSearchImage()));
-        if (matchEntity.getAnchors() != null) match.setAnchors(AnchorsEntityMapper.map(matchEntity.getAnchors()));
-        match.setStateObjectData(matchEntity.getStateObjectData());
+        match.setRegion(regionEmbeddableMapper.map(matchEntity.getRegion()));
+        if (matchEntity.getSearchImage() != null) match.setSearchImage(imageEntityMapper.map(matchEntity.getSearchImage()));
+        if (matchEntity.getAnchors() != null) match.setAnchors(anchorsEntityMapper.map(matchEntity.getAnchors()));
+        match.setStateObjectData(stateObjectDataEmbeddableMapper.map(matchEntity.getStateObjectData()));
         match.setHistogram(matchEntity.getHistogram());
-        if (matchEntity.getScene() != null) match.setScene(ImageEntityMapper.map(matchEntity.getScene()));
+        if (matchEntity.getScene() != null) match.setScene(imageEntityMapper.map(matchEntity.getScene()));
         match.setTimeStamp(matchEntity.getTimeStamp());
         match.setTimesActedOn(matchEntity.getTimesActedOn());
         return match;
     }
 
-    public static List<MatchEntity> mapToMatchEntityList(List<Match> matchList) {
+    public List<MatchEntity> mapToMatchEntityList(List<Match> matchList) {
         List<MatchEntity> matchEntityList = new ArrayList<>();
-        matchList.forEach(match -> matchEntityList.add(MatchEntityMapper.map(match)));
+        matchList.forEach(match -> matchEntityList.add(matchEntityMapper.map(match)));
         return matchEntityList;
     }
 
-    public static List<Match> mapToMatchList(List<MatchEntity> matchEntityList) {
+    public List<Match> mapToMatchList(List<MatchEntity> matchEntityList) {
         List<Match> matchList = new ArrayList<>();
-        matchEntityList.forEach(match -> matchList.add(MatchEntityMapper.map(match)));
+        matchEntityList.forEach(match -> matchList.add(matchEntityMapper.map(match)));
         return matchList;
     }
 }

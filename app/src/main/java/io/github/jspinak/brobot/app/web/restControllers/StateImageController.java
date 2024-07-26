@@ -1,6 +1,6 @@
-package io.github.jspinak.brobot.app.restControllers;
+package io.github.jspinak.brobot.app.web.restControllers;
 
-import io.github.jspinak.brobot.app.services.libraryServices.StateImageService;
+import io.github.jspinak.brobot.app.services.StateImageService;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;

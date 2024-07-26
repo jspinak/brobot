@@ -1,4 +1,4 @@
-package io.github.jspinak.brobot.app.services.libraryServices;
+package io.github.jspinak.brobot.app.services;
 
 import io.github.jspinak.brobot.app.database.databaseMappers.StateImageEntityMapper;
 import io.github.jspinak.brobot.app.database.entities.StateImageEntity;
@@ -14,22 +14,24 @@ import java.util.stream.Collectors;
 public class StateImageService {
 
     private final StateImageRepo stateImageRepo;
+    private final StateImageEntityMapper stateImageEntityMapper;
     //private final StateImageMapper stateImageMapper = StateImageMapper.INSTANCE;
 
-    public StateImageService(StateImageRepo stateImageRepo) {
+    public StateImageService(StateImageRepo stateImageRepo, StateImageEntityMapper stateImageEntityMapper) {
         this.stateImageRepo = stateImageRepo;
+        this.stateImageEntityMapper = stateImageEntityMapper;
     }
 
     public StateImage getStateImage(String name) {
         Optional<StateImageEntity> dto = stateImageRepo.findByName(name);
         //return dto.map(stateImageMapper::map).orElse(null);
-        return dto.map(StateImageEntityMapper::map).orElse(null);
+        return dto.map(stateImageEntityMapper::map).orElse(null);
     }
 
     public List<StateImage> getAllStateImages() {
         return stateImageRepo.findAll().stream()
                 //.map(stateImageMapper::map)
-                .map(StateImageEntityMapper::map)
+                .map(stateImageEntityMapper::map)
                 .collect(Collectors.toList());
     }
 
@@ -40,7 +42,7 @@ public class StateImageService {
     public void saveStateImages(List<StateImage> stateImages) {
         //stateImages.forEach(stateImage -> stateImageRepo.save(stateImageMapper.map(stateImage)));
         stateImages.forEach(System.out::println);
-        stateImages.forEach(stateImage -> stateImageRepo.save(StateImageEntityMapper.map(stateImage)));
+        stateImages.forEach(stateImage -> stateImageRepo.save(stateImageEntityMapper.map(stateImage)));
     }
 
     public boolean removeStateImage(String name) {
@@ -60,7 +62,7 @@ public class StateImageService {
     public List<StateImage> getAllInProject(Long projectId) {
         return stateImageRepo.findByProjectId(projectId).stream()
                 //.map(stateImageMapper::map)
-                .map(StateImageEntityMapper::map)
+                .map(stateImageEntityMapper::map)
                 .collect(Collectors.toList());
     }
 }
