@@ -4,7 +4,7 @@ import io.github.jspinak.brobot.app.buildWithoutNames.screenObservations.ScreenO
 import io.github.jspinak.brobot.app.buildWithoutNames.screenObservations.ScreenObservations;
 import io.github.jspinak.brobot.app.buildWithoutNames.screenObservations.StatelessImage;
 import io.github.jspinak.brobot.app.buildWithoutNames.screenObservations.StatelessImageRepo;
-import io.github.jspinak.brobot.app.services.libraryServices.StateService;
+import io.github.jspinak.brobot.app.services.StateService;
 import io.github.jspinak.brobot.actions.customActions.CommonActions;
 import io.github.jspinak.brobot.datatypes.primitives.image.Image;
 import io.github.jspinak.brobot.datatypes.state.state.State;

@@ -2,10 +2,21 @@ package io.github.jspinak.brobot.app.database.databaseMappers;
 
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.app.database.entities.ActionOptionsEntity;
+import org.springframework.stereotype.Component;
 
+@Component
 public class ActionOptionsEntityMapper {
 
-    public static ActionOptionsEntity map(ActionOptions actionOptions) {
+    private final LocationEntityMapper locationEntityMapper;
+    private final SearchRegionsEmbeddableMapper searchRegionsEmbeddableMapper;
+
+    public ActionOptionsEntityMapper(LocationEntityMapper locationEntityMapper,
+                                     SearchRegionsEmbeddableMapper searchRegionsEmbeddableMapper) {
+        this.locationEntityMapper = locationEntityMapper;
+        this.searchRegionsEmbeddableMapper = searchRegionsEmbeddableMapper;
+    }
+
+    public ActionOptionsEntity map(ActionOptions actionOptions) {
         ActionOptionsEntity actionOptionsEntity = new ActionOptionsEntity();
         actionOptionsEntity.setAction(actionOptions.getAction());
         actionOptionsEntity.setClickUntil(actionOptions.getClickUntil());
@@ -23,9 +34,9 @@ public class ActionOptionsEntityMapper {
         actionOptionsEntity.setPauseAfterMouseUp(actionOptions.getPauseAfterMouseUp());
         actionOptionsEntity.setClickType(actionOptions.getClickType());
         actionOptionsEntity.setMoveMouseAfterClick(actionOptions.isMoveMouseAfterAction());
-        actionOptionsEntity.setLocationAfterAction(LocationEntityMapper.map(actionOptions.getMoveMouseAfterActionTo()));
-        actionOptionsEntity.setOffsetLocationBy(LocationEntityMapper.map(actionOptions.getMoveMouseAfterActionBy()));
-        actionOptionsEntity.setSearchRegions(SearchRegionsEmbeddableMapper.map(actionOptions.getSearchRegions()));
+        actionOptionsEntity.setLocationAfterAction(locationEntityMapper.map(actionOptions.getMoveMouseAfterActionTo()));
+        actionOptionsEntity.setOffsetLocationBy(locationEntityMapper.map(actionOptions.getMoveMouseAfterActionBy()));
+        actionOptionsEntity.setSearchRegions(searchRegionsEmbeddableMapper.map(actionOptions.getSearchRegions()));
         actionOptionsEntity.setPauseBeforeBegin(actionOptions.getPauseBeforeBegin());
         actionOptionsEntity.setPauseAfterEnd(actionOptions.getPauseAfterEnd());
         actionOptionsEntity.setPauseBetweenIndividualActions(actionOptions.getPauseBetweenIndividualActions());
@@ -71,7 +82,7 @@ public class ActionOptionsEntityMapper {
         return actionOptionsEntity;
     }
     
-    public static ActionOptions map(ActionOptionsEntity actionOptionsEntity) {
+    public ActionOptions map(ActionOptionsEntity actionOptionsEntity) {
         ActionOptions actionOptions = new ActionOptions();
         actionOptions.setAction(actionOptionsEntity.getAction());
         actionOptions.setClickUntil(actionOptionsEntity.getClickUntil());
@@ -89,9 +100,9 @@ public class ActionOptionsEntityMapper {
         actionOptions.setPauseAfterMouseUp(actionOptionsEntity.getPauseAfterMouseUp());
         actionOptions.setClickType(actionOptionsEntity.getClickType());
         actionOptions.setMoveMouseAfterAction(actionOptionsEntity.isMoveMouseAfterClick());
-        actionOptions.setMoveMouseAfterActionTo(LocationEntityMapper.map(actionOptionsEntity.getLocationAfterAction()));
-        actionOptions.setMoveMouseAfterActionBy(LocationEntityMapper.map(actionOptionsEntity.getOffsetLocationBy()));
-        actionOptions.setSearchRegions(SearchRegionsEmbeddableMapper.map(actionOptionsEntity.getSearchRegions()));
+        actionOptions.setMoveMouseAfterActionTo(locationEntityMapper.map(actionOptionsEntity.getLocationAfterAction()));
+        actionOptions.setMoveMouseAfterActionBy(locationEntityMapper.map(actionOptionsEntity.getOffsetLocationBy()));
+        actionOptions.setSearchRegions(searchRegionsEmbeddableMapper.map(actionOptionsEntity.getSearchRegions()));
         actionOptions.setPauseBeforeBegin(actionOptionsEntity.getPauseBeforeBegin());
         actionOptions.setPauseAfterEnd(actionOptionsEntity.getPauseAfterEnd());
         actionOptions.setPauseBetweenIndividualActions(actionOptionsEntity.getPauseBetweenIndividualActions());

@@ -4,12 +4,14 @@ import io.github.jspinak.brobot.app.database.entities.PatternEntity;
 import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
 class PatternEntityMapperTest {
@@ -19,18 +21,21 @@ class PatternEntityMapperTest {
         System.setProperty("java.awt.headless", "false");
     }
 
+    @Autowired
+    PatternEntityMapper patternEntityMapper;
+
     @Test
     void map() {
         Pattern pattern = new Pattern("topLeft");
-        PatternEntity patternEntity = PatternEntityMapper.map(pattern);
+        PatternEntity patternEntity = patternEntityMapper.map(pattern);
         assertTrue(patternEntity.getName().equals("topLeft"));
     }
 
     @Test
     void testMap() {
         Pattern pattern = new Pattern("topLeft");
-        PatternEntity patternEntity = PatternEntityMapper.map(pattern);
-        Pattern mappedPattern = PatternEntityMapper.map(patternEntity);
+        PatternEntity patternEntity = patternEntityMapper.map(pattern);
+        Pattern mappedPattern = patternEntityMapper.map(patternEntity);
         assertTrue(mappedPattern.getName().equals("topLeft"));
         assertNotNull(mappedPattern.getImage());
     }
@@ -42,7 +47,7 @@ class PatternEntityMapperTest {
         List<Pattern> patternList = new ArrayList<>();
         patternList.add(topLeft);
         patternList.add(bottomRight);
-        List<PatternEntity> patternEntityList = PatternEntityMapper.mapToPatternEntityList(patternList);
+        List<PatternEntity> patternEntityList = patternEntityMapper.mapToPatternEntityList(patternList);
         System.out.println("list size = "+patternEntityList.size());
         assertTrue(patternEntityList.size() == 2);
     }

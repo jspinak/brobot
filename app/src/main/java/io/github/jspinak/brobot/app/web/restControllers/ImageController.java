@@ -1,7 +1,7 @@
-package io.github.jspinak.brobot.app.restControllers;
+package io.github.jspinak.brobot.app.web.restControllers;
 
 import io.github.jspinak.brobot.app.database.entities.ImageEntity;
-import io.github.jspinak.brobot.app.services.entityServices.ImageEntityService;
+import io.github.jspinak.brobot.app.services.ImageService;
 import io.github.jspinak.brobot.app.web.responseMappers.ImageResponseMapper;
 import io.github.jspinak.brobot.app.web.responses.ImageResponse;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,11 +16,11 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/images") // Base path for all endpoints in this controller
 public class ImageController {
 
-    private final ImageEntityService imageEntityService;
+    private final ImageService imageService;
     private final ImageResponseMapper imageResponseMapper;
 
-    public ImageController(ImageEntityService imageEntityService, ImageResponseMapper imageResponseMapper) {
-        this.imageEntityService = imageEntityService;
+    public ImageController(ImageService imageService, ImageResponseMapper imageResponseMapper) {
+        this.imageService = imageService;
         this.imageResponseMapper = imageResponseMapper;
     }
 
@@ -29,14 +29,14 @@ public class ImageController {
      */
     @GetMapping("/all") // Maps to GET /api/images/all
     public List<ImageResponse> getAllImages() {
-        return imageEntityService.getAllImages().stream()
+        return imageService.getAllImageEntities().stream()
                 .map(imageResponseMapper::map)
                 .collect(Collectors.toList());
     }
 
     @GetMapping("/{name}") // Maps to GET /api/images/{name}
     public List<ImageEntity> getImages(@PathVariable String name) {
-        return imageEntityService.getImage(name);
+        return imageService.getImageEntities(name);
     }
 
     @GetMapping("/") // Maps to GET /api/images/

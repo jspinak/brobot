@@ -1,16 +1,15 @@
 package io.github.jspinak.brobot.datatypes.state.state;
 
-import io.github.jspinak.brobot.illustratedHistory.StateIllustration;
 import io.github.jspinak.brobot.datatypes.primitives.image.Image;
-import io.github.jspinak.brobot.datatypes.primitives.match.MatchHistory;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.datatypes.primitives.location.Location;
+import io.github.jspinak.brobot.datatypes.primitives.match.MatchHistory;
 import io.github.jspinak.brobot.datatypes.primitives.match.MatchSnapshot;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.StateLocation;
 import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.StateRegion;
 import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.StateString;
-import io.github.jspinak.brobot.primatives.enums.StateEnum;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
+import io.github.jspinak.brobot.illustratedHistory.StateIllustration;
 import lombok.Getter;
 import lombok.Setter;
 

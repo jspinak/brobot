@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.app.buildWithoutNames.buildStateStructure;
 
-import io.github.jspinak.brobot.app.services.libraryServices.StateService;
+import io.github.jspinak.brobot.app.services.StateService;
 import io.github.jspinak.brobot.datatypes.state.state.State;
 import io.github.jspinak.brobot.manageStates.StateTransitions;
 import io.github.jspinak.brobot.services.StateTransitionsService;
