@@ -1,4 +1,4 @@
-package io.github.jspinak.brobot.app.services.libraryServices;
+package io.github.jspinak.brobot.app.services;
 
 import io.github.jspinak.brobot.app.database.databaseMappers.StateEntityMapper;
 import io.github.jspinak.brobot.app.database.entities.StateEntity;
@@ -21,17 +21,29 @@ import java.util.stream.Stream;
 public class StateService {
 
     private final StateRepo stateRepo;
+    private final StateEntityMapper stateEntityMapper;
     //private StateMapper stateMapper = StateMapper.INSTANCE;
 
-    public StateService(StateRepo stateRepo) {
+    public StateService(StateRepo stateRepo, StateEntityMapper stateEntityMapper) {
         this.stateRepo = stateRepo;
+        this.stateEntityMapper = stateEntityMapper;
     }
 
     @Transactional(readOnly = true)
     public Optional<State> getState(String name) {
         Optional<StateEntity> state = stateRepo.findByName(name);
         //return state.map(stateMapper::map);
-        return state.map(StateEntityMapper::map);
+        return state.map(stateEntityMapper::map);
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<StateEntity> getStateEntity(String name) {
+        return stateRepo.findByName(name);
+    }
+
+    @Transactional(readOnly = true)
+    public List<StateEntity> getAllStateEntities() {
+        return stateRepo.findAll();
     }
 
     @Transactional(readOnly = true)
@@ -39,7 +51,7 @@ public class StateService {
         List<State> stateList = new ArrayList<>();
         for (StateEntity stateEntity : stateRepo.findAll()) {
             //stateList.add(stateMapper.map(stateEntity));
-            stateList.add(StateEntityMapper.map(stateEntity));
+            stateList.add(stateEntityMapper.map(stateEntity));
         }
         return stateList;
     }
@@ -87,7 +99,7 @@ public class StateService {
     public void save(State state) {
         if (state == null) return;
         //stateRepo.save(stateMapper.map(state));
-        stateRepo.save(StateEntityMapper.map(state));
+        stateRepo.save(stateEntityMapper.map(state));
     }
 
     @Transactional
@@ -120,7 +132,7 @@ public class StateService {
     public List<State> getAllInProject(Long projectId) {
         return stateRepo.findByProjectId(projectId).stream()
                 //.map(stateMapper::map)
-                .map(StateEntityMapper::map)
+                .map(stateEntityMapper::map)
                 .collect(Collectors.toList());
     }
 }

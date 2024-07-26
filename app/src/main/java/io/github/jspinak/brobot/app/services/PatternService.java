@@ -1,4 +1,4 @@
-package io.github.jspinak.brobot.app.services.libraryServices;
+package io.github.jspinak.brobot.app.services;
 
 import io.github.jspinak.brobot.app.database.databaseMappers.PatternEntityMapper;
 import io.github.jspinak.brobot.app.database.entities.PatternEntity;
@@ -13,17 +13,19 @@ import java.util.stream.Collectors;
 public class PatternService {
 
     private final PatternRepo patternRepo;
+    private final PatternEntityMapper patternEntityMapper;
     //private final PatternMapper patternMapper = PatternMapper.INSTANCE;
 
-    public PatternService(PatternRepo patternRepo) {
+    public PatternService(PatternRepo patternRepo, PatternEntityMapper patternEntityMapper) {
         this.patternRepo = patternRepo;
+        this.patternEntityMapper = patternEntityMapper;
     }
 
     public List<Pattern> getPatterns(String name) {
         List<PatternEntity> patternEntities = patternRepo.findByName(name);
         return patternEntities.stream()
                 //.map(patternMapper::map)
-                .map(PatternEntityMapper::map)
+                .map(patternEntityMapper::map)
                 .collect(Collectors.toList());
     }
 
@@ -31,7 +33,7 @@ public class PatternService {
         List<PatternEntity> patternEntities = patternRepo.findAll();
         return patternEntities.stream()
                 //.map(patternMapper::map)
-                .map(PatternEntityMapper::map)
+                .map(patternEntityMapper::map)
                 .collect(Collectors.toList());
     }
 
@@ -42,7 +44,7 @@ public class PatternService {
     public void savePatterns(List<Pattern> patterns) {
         patterns.forEach(pattern -> {
             //patternRepo.save(patternMapper.map(pattern));
-            patternRepo.save(PatternEntityMapper.map(pattern));
+            patternRepo.save(patternEntityMapper.map(pattern));
         });
     }
 }

@@ -2,20 +2,28 @@ package io.github.jspinak.brobot.app.database.databaseMappers;
 
 import io.github.jspinak.brobot.app.database.embeddable.SearchRegionsEmbeddable;
 import io.github.jspinak.brobot.datatypes.primitives.region.SearchRegions;
+import org.springframework.stereotype.Component;
 
+@Component
 public class SearchRegionsEmbeddableMapper {
 
-    public static SearchRegionsEmbeddable map(SearchRegions searchRegions) {
+    private final RegionEmbeddableMapper regionEmbeddableMapper;
+
+    public SearchRegionsEmbeddableMapper(RegionEmbeddableMapper regionEmbeddableMapper) {
+        this.regionEmbeddableMapper = regionEmbeddableMapper;
+    }
+
+    public SearchRegionsEmbeddable map(SearchRegions searchRegions) {
         SearchRegionsEmbeddable searchRegionsEmbeddable = new SearchRegionsEmbeddable();
-        searchRegionsEmbeddable.setFixedRegion(RegionEmbeddableMapper.map(searchRegions.getFixedRegion()));
-        searchRegionsEmbeddable.setRegions(RegionEmbeddableMapper.mapToRegionEmbeddableList(searchRegions.getRegions()));
+        searchRegionsEmbeddable.setFixedRegion(regionEmbeddableMapper.map(searchRegions.getFixedRegion()));
+        searchRegionsEmbeddable.setRegions(regionEmbeddableMapper.mapToRegionEmbeddableList(searchRegions.getRegions()));
         return searchRegionsEmbeddable;
     }
 
-    public static SearchRegions map(SearchRegionsEmbeddable searchRegionsEmbeddable) {
+    public SearchRegions map(SearchRegionsEmbeddable searchRegionsEmbeddable) {
         SearchRegions searchRegions = new SearchRegions();
-        searchRegions.setFixedRegion(RegionEmbeddableMapper.map(searchRegionsEmbeddable.getFixedRegion()));
-        searchRegions.setRegions(RegionEmbeddableMapper.mapToRegionList(searchRegionsEmbeddable.getRegions()));
+        searchRegions.setFixedRegion(regionEmbeddableMapper.map(searchRegionsEmbeddable.getFixedRegion()));
+        searchRegions.setRegions(regionEmbeddableMapper.mapToRegionList(searchRegionsEmbeddable.getRegions()));
         return searchRegions;
     }
 }

@@ -29,12 +29,15 @@ class PatternRepoTest {
     @Autowired
     private PatternRepo patternRepo;
 
+    @Autowired
+    PatternEntityMapper patternEntityMapper;
+
     @Test
     void testFindByName() {
         // Save a pattern to the repository
         Pattern pattern = new Pattern("bottomR");
         //patternRepo.save(patternMapper.INSTANCE.map(pattern));
-        patternRepo.save(PatternEntityMapper.map(pattern));
+        patternRepo.save(patternEntityMapper.map(pattern));
 
         // Find the pattern by name
         List<PatternEntity> foundPatternList = patternRepo.findByName("bottomR");
@@ -51,11 +54,11 @@ class PatternRepoTest {
         // Save patterns to the repository
         Pattern pattern1 = new Pattern("bottomR");
         //patternRepo.save(patternMapper.INSTANCE.map(pattern1));
-        patternRepo.save(PatternEntityMapper.map(pattern1));
+        patternRepo.save(patternEntityMapper.map(pattern1));
 
         Pattern pattern2 = new Pattern("bottomR2");
         //patternRepo.save(patternMapper.INSTANCE.map(pattern2));
-        patternRepo.save(PatternEntityMapper.map(pattern2));
+        patternRepo.save(patternEntityMapper.map(pattern2));
 
         // Find patterns by name containing the parameter
         List<PatternEntity> foundPatterns = patternRepo.findByPatternDataNameContainingIgnoreCase("bottom");

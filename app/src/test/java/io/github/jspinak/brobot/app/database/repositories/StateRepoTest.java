@@ -27,9 +27,12 @@ class StateRepoTest {
     @Autowired
     AllStatesInProjectService allStatesInProjectService;
 
+    @Autowired
+    StateEntityMapper stateEntityMapper;
+
     @Test
     void findAllAsList() {
-        allStatesInProjectService.getAllStates().forEach(state -> stateRepo.save(StateEntityMapper.map(state)));
+        allStatesInProjectService.getAllStates().forEach(state -> stateRepo.save(stateEntityMapper.map(state)));
         Iterable<StateEntity> stateList = stateRepo.findAll();
         List<StateEntity> states = new ArrayList<>();
         stateList.forEach(states::add);

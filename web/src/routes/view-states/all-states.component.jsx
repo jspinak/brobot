@@ -15,6 +15,7 @@ const AllStates = () => {
   const [filteredImages, setFilteredImages] = useState(images);
   const [filteredPatterns, setFilteredPatterns] = useState(patterns);
   const [filteredStates, setFilteredStates] = useState(states);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     fetch('http://localhost:8080/api/patterns/all')
@@ -28,26 +29,24 @@ const AllStates = () => {
       .then((data) => setImages(data));
   }, []);
 
-  useEffect(() => {
+useEffect(() => {
+    setIsLoading(true);
     fetch('http://localhost:8080/api/states/all')
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-      return response.json();
-    })
-    .then((data) => {
-      if (data.length === 0) {
-        console.error('No states found');
-        // Handle empty states here
-      } else {
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
+      .then((data) => {
         setStates(data);
-      }
-    })
-    .catch((error) => {
-      console.error('Error fetching states:', error);
-      // Handle error here
-    });
+        setIsLoading(false);
+      })
+      .catch((error) => {
+        console.error('Error fetching states:', error);
+        setIsLoading(false);
+        // Handle error here
+      });
   }, []);
 
   useEffect(() => {
@@ -65,10 +64,14 @@ const AllStates = () => {
 
   return (
     <div className="AllStates">
-        <Outlet />
-        <h1 className='app-title'>States</h1>
-        <SearchBox onChangeHandler={onSearchChange} placeholder='search states' className='search-box'/>
+      <Outlet />
+      <h1 className='app-title'>States</h1>
+      <SearchBox onChangeHandler={onSearchChange} placeholder='search states' className='search-box'/>
+      {isLoading ? (
+        <div>Loading...</div>
+      ) : (
         <StateList states={filteredStates} />
+      )}
     </div>
   );
 };
