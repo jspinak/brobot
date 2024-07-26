@@ -7,6 +7,7 @@ import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
 import io.github.jspinak.brobot.imageUtils.BufferedImageOps;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -19,21 +20,27 @@ class ImageEntityMapperTest {
         System.setProperty("java.awt.headless", "false");
     }
 
+    @Autowired
+    ImageEntityMapper imageEntityMapper;
+
+    @Autowired
+    PatternEntityMapper patternEntityMapper;
+
     @Test
     void map() {
         Pattern pattern = new Pattern("topLeft");
         Image image = pattern.getImage();
-        ImageEntity imageEntity = ImageEntityMapper.map(image);
+        ImageEntity imageEntity = imageEntityMapper.map(image);
         assertNotNull(imageEntity);
     }
 
     @Test
     void testMap() {
         Pattern pattern = new Pattern("topLeft");
-        PatternEntity patternEntity = PatternEntityMapper.map(pattern);
+        PatternEntity patternEntity = patternEntityMapper.map(pattern);
         ImageEntity mappedImage = patternEntity.getImage();
         assertNotNull(mappedImage);
-        Image image = ImageEntityMapper.map(mappedImage);
+        Image image = imageEntityMapper.map(mappedImage);
         assertNotNull(image);
     }
 

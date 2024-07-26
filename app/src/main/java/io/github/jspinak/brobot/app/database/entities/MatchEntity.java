@@ -1,6 +1,7 @@
 package io.github.jspinak.brobot.app.database.entities;
 
 import io.github.jspinak.brobot.app.database.embeddable.RegionEmbeddable;
+import io.github.jspinak.brobot.app.database.embeddable.StateObjectDataEmbeddable;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.stateObject.StateObjectData;
 import jakarta.persistence.*;
@@ -28,7 +29,7 @@ public class MatchEntity {
     @OneToOne(cascade = CascadeType.ALL)
     private AnchorsEntity anchors;
     @Embedded
-    private StateObjectData stateObjectData;
+    private StateObjectDataEmbeddable stateObjectData;
     @Transient
     private Mat histogram;
     @OneToOne(cascade = CascadeType.ALL)
