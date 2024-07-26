@@ -1,8 +1,9 @@
 package io.github.jspinak.brobot.app.restControllers;
 
-import io.github.jspinak.brobot.app.services.libraryServices.PatternService;
-import io.github.jspinak.brobot.app.services.libraryServices.StateService;
+import io.github.jspinak.brobot.app.services.PatternService;
+import io.github.jspinak.brobot.app.services.StateService;
 import io.github.jspinak.brobot.app.database.repositories.*;
+import io.github.jspinak.brobot.app.web.restControllers.StateController;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

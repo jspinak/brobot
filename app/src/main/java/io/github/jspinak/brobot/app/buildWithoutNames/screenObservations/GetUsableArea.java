@@ -1,7 +1,7 @@
 package io.github.jspinak.brobot.app.buildWithoutNames.screenObservations;
 
 import io.github.jspinak.brobot.app.buildWithoutNames.stateStructureBuildManagement.StateStructureTemplate;
-import io.github.jspinak.brobot.app.services.libraryServices.StateImageService;
+import io.github.jspinak.brobot.app.services.StateImageService;
 import io.github.jspinak.brobot.actions.actionExecution.Action;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
