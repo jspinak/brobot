@@ -11,6 +11,8 @@ public class StateIllustrationEntity {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
     @OneToOne(cascade = CascadeType.ALL)
+    private ImageEntity screenshot;
+    @OneToOne(cascade = CascadeType.ALL)
     private ImageEntity illustratedScreenshot;
 
 }
