@@ -13,12 +13,13 @@ public class StateIllustrationResponseMapper {
         this.imageResponseMapper = imageResponseMapper;
     }
 
-    public StateIllustrationResponse map(StateIllustrationEntity stateIllustration) {
-        if (stateIllustration == null) {
+    public StateIllustrationResponse map(StateIllustrationEntity stateIllustrationEntity) {
+        if (stateIllustrationEntity == null) {
             return null;
         }
         StateIllustrationResponse response = new StateIllustrationResponse();
-        response.setIllustratedScreenshot(imageResponseMapper.map(stateIllustration.getIllustratedScreenshot()));
+        response.setScreenshot(imageResponseMapper.map(stateIllustrationEntity.getScreenshot()));
+        response.setIllustratedScreenshot(imageResponseMapper.map(stateIllustrationEntity.getIllustratedScreenshot()));
         return response;
     }
 
@@ -27,6 +28,7 @@ public class StateIllustrationResponseMapper {
             return null;
         }
         StateIllustrationEntity stateIllustrationEntity = new StateIllustrationEntity();
+        stateIllustrationEntity.setScreenshot(imageResponseMapper.map(response.getScreenshot()));
         stateIllustrationEntity.setIllustratedScreenshot(imageResponseMapper.map(response.getIllustratedScreenshot()));
         return stateIllustrationEntity;
     }

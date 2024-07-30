@@ -1,7 +1,10 @@
+/* state-image-set.styles.css */
 .state-image-set {
-    width: auto; /* Set width to auto to expand to fit content */
-    margin: 0 auto;
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr 1fr;
-    grid-gap: 10px;
+  display: flex;
+  flex-direction: column;
+}
+
+.state-image-wrapper {
+  margin-bottom: 10px;
+  cursor: pointer;
 }

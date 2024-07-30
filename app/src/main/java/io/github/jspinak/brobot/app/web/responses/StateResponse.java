@@ -1,7 +1,6 @@
 package io.github.jspinak.brobot.app.web.responses;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import io.github.jspinak.brobot.app.database.entities.MatchHistoryEntity;
 import lombok.Getter;
 import lombok.Setter;
 

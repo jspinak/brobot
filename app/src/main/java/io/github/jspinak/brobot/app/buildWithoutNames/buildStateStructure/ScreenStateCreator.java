@@ -17,6 +17,7 @@ import io.github.jspinak.brobot.manageStates.StateTransition;
 import io.github.jspinak.brobot.manageStates.StateTransitions;
 import io.github.jspinak.brobot.services.StateTransitionsRepository;
 import lombok.Setter;
+import org.bytedeco.opencv.opencv_core.Mat;
 import org.springframework.stereotype.Component;
 import java.util.*;
 
@@ -93,19 +94,22 @@ public class ScreenStateCreator {
             }
         });
         List<Image> scenes = new ArrayList<>();
+        List<StateIllustration> stateIllustrations = new ArrayList<>();
         for (int id : imageSets.getScreens()) {
             Optional<ScreenObservation> screenOptional = screenObservations.get(id);
-            screenOptional.ifPresent(screenObservation -> scenes.add(new Image(screenObservation.getScreenshot())));
+            screenOptional.ifPresent(screenObservation -> {
+                Mat screen = screenObservation.getScreenshot();
+                scenes.add(new Image(screen));
+                stateIllustrations.add(new StateIllustration(screen));
+            });
         }
         State newState = new State.Builder(name)
                 .withImages(stateImages)
                 .withScenes(scenes)
-                .addIllustrations()
+                .addIllustrations(stateIllustrations)
                 .build();
-        for (Image scene : scenes) {
-            StateIllustration stateIllustration = stateIllustrator.drawState(newState, scene.getMatBGR());
-            newState.addIllustrations(stateIllustration);
-            matVisualize.writeMatToHistory(stateIllustration.getIllustratedScreenshotAsMat(), "illustration of state " + newState.getName());
+        for (StateIllustration stateIllustration : newState.getIllustrations()) {
+            stateIllustrator.drawState(newState, stateIllustration);
         }
         return newState;
     }
