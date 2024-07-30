@@ -15,20 +15,17 @@ public class MatchEntityMapper {
     private final RegionEmbeddableMapper regionEmbeddableMapper;
     private final AnchorsEntityMapper anchorsEntityMapper;
     private final StateObjectDataEmbeddableMapper stateObjectDataEmbeddableMapper;
-    private final MatchEntityMapper matchEntityMapper;
 
     public MatchEntityMapper(LocationEntityMapper locationEntityMapper,
                              ImageEntityMapper imageEntityMapper,
                              RegionEmbeddableMapper regionEmbeddableMapper,
                              AnchorsEntityMapper anchorsEntityMapper,
-                             StateObjectDataEmbeddableMapper stateObjectDataEmbeddableMapper,
-                             MatchEntityMapper matchEntityMapper) {
+                             StateObjectDataEmbeddableMapper stateObjectDataEmbeddableMapper) {
         this.locationEntityMapper = locationEntityMapper;
         this.imageEntityMapper = imageEntityMapper;
         this.regionEmbeddableMapper = regionEmbeddableMapper;
         this.anchorsEntityMapper = anchorsEntityMapper;
         this.stateObjectDataEmbeddableMapper = stateObjectDataEmbeddableMapper;
-        this.matchEntityMapper = matchEntityMapper;
     }
     
     public MatchEntity map(Match match) {
@@ -69,13 +66,13 @@ public class MatchEntityMapper {
 
     public List<MatchEntity> mapToMatchEntityList(List<Match> matchList) {
         List<MatchEntity> matchEntityList = new ArrayList<>();
-        matchList.forEach(match -> matchEntityList.add(matchEntityMapper.map(match)));
+        matchList.forEach(match -> matchEntityList.add(map(match)));
         return matchEntityList;
     }
 
     public List<Match> mapToMatchList(List<MatchEntity> matchEntityList) {
         List<Match> matchList = new ArrayList<>();
-        matchEntityList.forEach(match -> matchList.add(matchEntityMapper.map(match)));
+        matchEntityList.forEach(match -> matchList.add(map(match)));
         return matchList;
     }
 }

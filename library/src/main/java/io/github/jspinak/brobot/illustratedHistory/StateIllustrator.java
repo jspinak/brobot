@@ -1,5 +1,6 @@
 package io.github.jspinak.brobot.illustratedHistory;
 
+import io.github.jspinak.brobot.datatypes.primitives.image.Image;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.datatypes.primitives.match.MatchSnapshot;
 import io.github.jspinak.brobot.datatypes.state.state.State;
@@ -20,9 +21,13 @@ public class StateIllustrator {
         this.drawRect = drawRect;
     }
 
-    public StateIllustration drawState(State state, Mat screenshot) {
+    public StateIllustration drawState(State state, Image screenshot) {
         StateIllustration stateIllustration = new StateIllustration(screenshot);
-        Mat illustration = stateIllustration.getScreenshot().clone();
+        return drawState(state, stateIllustration);
+    }
+
+    public StateIllustration drawState(State state, StateIllustration stateIllustration) {
+        Mat illustration = stateIllustration.getScreenshotAsMat().clone();
         drawRect.drawRectAroundRegion(illustration, state.getBoundaries(), OpenCVColor.BLUE.getScalar());
         Set<StateImage> sios = state.getStateImages();
         for (StateImage stateImage : sios) {
@@ -38,4 +43,5 @@ public class StateIllustrator {
         stateIllustration.setIllustratedScreenshot(illustration);
         return stateIllustration;
     }
+
 }
