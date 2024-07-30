@@ -268,6 +268,11 @@ public class State {
             return this;
         }
 
+        public Builder addIllustrations(List<StateIllustration> stateIllustrations) {
+            this.illustrations.addAll(stateIllustrations);
+            return this;
+        }
+
         public State build() {
             State state = new State();
             state.name = name;

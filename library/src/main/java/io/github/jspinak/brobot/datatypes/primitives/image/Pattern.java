@@ -9,6 +9,7 @@ import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.primitives.region.SearchRegions;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.imageUtils.BufferedImageOps;
+import io.github.jspinak.brobot.stringUtils.NameSelector;
 import lombok.Getter;
 import lombok.Setter;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -136,8 +137,7 @@ public class Pattern {
     private void setNameFromFilenameIfEmpty(String filename) {
         if (filename == null) return;
         if (name == null || name.isEmpty()) {
-            File file = new File(filename); // Create a File object from the image path
-            setName(file.getName().replaceFirst("[.][^.]+$", "")); // the file name without extension
+            setName(NameSelector.getFilenameWithoutExtensionAndDirectory(filename));
         }
     }
 
@@ -288,7 +288,7 @@ public class Pattern {
 
         public Builder setFilename(String filename) {
             this.filename = filename;
-            if (name.isEmpty()) name = filename;
+            if (name.isEmpty()) name = NameSelector.getFilenameWithoutExtensionAndDirectory(filename);
             this.image = new Image(BufferedImageOps.getBuffImgFromFile(filename), name);
             return this;
         }

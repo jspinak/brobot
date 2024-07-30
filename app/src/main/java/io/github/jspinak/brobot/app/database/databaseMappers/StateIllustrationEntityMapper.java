@@ -19,12 +19,14 @@ public class StateIllustrationEntityMapper {
 
     public StateIllustrationEntity map(StateIllustration stateIllustration) {
         StateIllustrationEntity stateIllustrationEntity = new StateIllustrationEntity();
+        stateIllustrationEntity.setScreenshot(imageEntityMapper.map(stateIllustration.getScreenshot()));
         stateIllustrationEntity.setIllustratedScreenshot(imageEntityMapper.map(stateIllustration.getIllustratedScreenshot()));
         return stateIllustrationEntity;
     }
 
     public StateIllustration map(StateIllustrationEntity stateIllustrationEntity) {
         StateIllustration stateIllustration = new StateIllustration();
+        stateIllustration.setScreenshot(imageEntityMapper.map(stateIllustrationEntity.getScreenshot()));
         stateIllustration.setIllustratedScreenshot(imageEntityMapper.map(stateIllustrationEntity.getIllustratedScreenshot()));
         return stateIllustration;
     }
