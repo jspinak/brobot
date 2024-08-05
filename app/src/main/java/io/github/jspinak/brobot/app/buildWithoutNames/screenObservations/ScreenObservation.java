@@ -44,7 +44,7 @@ public class ScreenObservation {
 
     public List<Region> getImageRegions() {
         List<Region> imageMatches = new ArrayList<>();
-        images.forEach(ti -> imageMatches.add(ti.getRegion()));
+        images.forEach(image -> imageMatches.addAll(image.getRegions()));
         return imageMatches;
     }
 

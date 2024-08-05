@@ -1,8 +1,8 @@
 package io.github.jspinak.brobot.app.buildWithoutNames.screenObservations;
 
-import io.github.jspinak.brobot.app.buildWithoutNames.stateStructureBuildManagement.StateStructureTemplate;
 import io.github.jspinak.brobot.actions.actionExecution.Action;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
+import io.github.jspinak.brobot.app.buildWithoutNames.stateStructureBuildManagement.StateStructureConfiguration;
 import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
@@ -11,6 +11,7 @@ import lombok.Setter;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -29,9 +30,6 @@ public class GetScreenObservation {
     private final GetStatelessImages getStatelessImages;
     private final ScreenObservationManager screenObservationManager;
 
-    private Region usableArea = new Region();
-    private boolean saveScreensWithMotionAndImages;
-
     public GetScreenObservation(Action action, IllustrateScreenObservation illustrateScreenObservation,
                                 GetStatelessImages getStatelessImages, ScreenObservationManager screenObservationManager) {
         this.action = action;
@@ -45,26 +43,24 @@ public class GetScreenObservation {
      * and save potential transition images in the usable area.
      * @return the newly created screenshot
      */
-    public ScreenObservation takeScreenshotAndGetImages(StateStructureTemplate stateStructureTemplate) {
-        ScreenObservation obs = initNewScreenObservation(stateStructureTemplate);
-        List<StatelessImage> statelessImages = getStatelessImages.findAndCapturePotentialLinks(
-                usableArea, obs, obs.getId(), stateStructureTemplate);
+    public ScreenObservation takeScreenshotAndGetImages(StateStructureConfiguration config) {
+        ScreenObservation obs = initNewScreenObservation(config);
+        List<StatelessImage> statelessImages = getStatelessImages.findAndCapturePotentialLinks(config, obs);
         obs.setImages(statelessImages);
-        if (saveScreensWithMotionAndImages) illustrateScreenObservation.writeIllustratedSceneToHistory(obs);
         return obs;
     }
 
-    public ScreenObservation initNewScreenObservation(StateStructureTemplate stateStructureTemplate) {
+    public ScreenObservation initNewScreenObservation(StateStructureConfiguration stateStructureConfiguration) {
         ScreenObservation screenObservation = new ScreenObservation();
         screenObservation.setId(screenObservationManager.getNextUnassignedScreenId());
-        if (stateStructureTemplate.isLive()) setScreenObservationLive(screenObservation);
-        else setScreenObservationData(screenObservation, stateStructureTemplate);
+        if (stateStructureConfiguration.isLive()) setScreenObservationLive(screenObservation);
+        else setScreenObservationData(screenObservation, stateStructureConfiguration);
         return screenObservation;
     }
 
-    private void setScreenObservationData(ScreenObservation screenObservation, StateStructureTemplate stateStructureTemplate) {
+    private void setScreenObservationData(ScreenObservation screenObservation, StateStructureConfiguration stateStructureConfiguration) {
         int index = getScreenObservationManager().getScreenIndex();
-        Pattern screen = stateStructureTemplate.getScreenshots().get(index);
+        Pattern screen = stateStructureConfiguration.getScreenshots().get(index);
         getScreenObservationManager().setScreenIndex(index + 1);
         screenObservation.setPattern(screen);
         screenObservation.setScreenshot(screen.getMat());

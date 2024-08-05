@@ -67,9 +67,9 @@ const handleStateImageHover = useCallback((stateImage) => {
           />
         </div>
         <div className="state-illustration">
-          {state.scenes[0] && (
+          {state.illustrations[0].screenshotUsableArea && (
             <Image
-              image={state.scenes[0]}
+              image={state.illustrations[0].screenshotUsableArea}
               onLoad={handleImageLoad}
             />
           )}

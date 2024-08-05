@@ -3,9 +3,8 @@ package io.github.jspinak.brobot.app.buildWithoutNames.buildStateStructure;
 import io.github.jspinak.brobot.actions.actionExecution.Action;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.app.buildWithoutNames.stateStructureBuildManagement.BuildStateStructureFromScreenshots;
-import io.github.jspinak.brobot.app.buildWithoutNames.stateStructureBuildManagement.StateStructureTemplate;
+import io.github.jspinak.brobot.app.buildWithoutNames.stateStructureBuildManagement.StateStructureConfiguration;
 import io.github.jspinak.brobot.app.services.StateService;
-import io.github.jspinak.brobot.database.services.AllStatesInProjectService;
 import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
 import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
@@ -40,16 +39,12 @@ public class PatternLocationsTest {
 
     @Test
     void fixedRegionIsSameAsMatch() {
-        StateStructureTemplate stateStructureTemplate = new StateStructureTemplate.Builder()
+        StateStructureConfiguration stateStructureConfiguration = new StateStructureConfiguration.Builder()
                 .addImagesInScreenshotsFolder("floranext0")
                 .setBoundaryImages("topleft", "bottomR2")
-                .setSaveStateIllustrations(false)
-                .setSaveScreenshots(false)
-                .setSaveDecisionMats(false)
-                .setSaveMatchingImages(false)
-                .setSaveScreenWithMotionAndImages(false)
+                .setMinImageArea(25)
                 .build();
-        buildStateStructureFromScreenshots.build(stateStructureTemplate);
+        buildStateStructureFromScreenshots.build(stateStructureConfiguration);
 
         State state = stateService.getAllStates().get(0);
         Set<StateImage> stateImages = state.getStateImages();

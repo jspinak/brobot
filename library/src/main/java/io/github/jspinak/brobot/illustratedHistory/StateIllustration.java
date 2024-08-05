@@ -14,27 +14,27 @@ import org.bytedeco.opencv.opencv_core.Mat;
 @Getter
 @Setter
 public class StateIllustration {
-    private Image screenshot; // the screenshot where the state is found
-    private Image illustratedScreenshot; // the screenshot showing the state boundaries and image locations
+    private Image screenshotUsableArea; // the usable area of the screenshot where the state is found
+    private Image illustratedScreenshot; // the usable area showing the state boundaries and image locations
 
     public StateIllustration(Image image) {
-        this.screenshot = image;
+        this.screenshotUsableArea = image;
         this.illustratedScreenshot = image;
     }
-    public StateIllustration(Mat screenshot) {
-        this.screenshot = new Image(screenshot);
-        this.illustratedScreenshot = new Image(screenshot);
+    public StateIllustration(Mat screenshotUsableArea) {
+        this.screenshotUsableArea = new Image(screenshotUsableArea);
+        this.illustratedScreenshot = new Image(screenshotUsableArea);
     }
 
     public StateIllustration(String illustrationFilename) {
-        this.screenshot = new Image(illustrationFilename);
+        this.screenshotUsableArea = new Image(illustrationFilename);
         this.illustratedScreenshot = new Image(illustrationFilename);
     }
 
     public StateIllustration() {} // for mapping
 
     public Mat getScreenshotAsMat() {
-        return screenshot.getMatBGR();
+        return screenshotUsableArea.getMatBGR();
     }
 
     public Mat getIllustratedScreenshotAsMat() {

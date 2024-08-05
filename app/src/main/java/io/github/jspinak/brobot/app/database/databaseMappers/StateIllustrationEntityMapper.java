@@ -1,7 +1,6 @@
 package io.github.jspinak.brobot.app.database.databaseMappers;
 
 import io.github.jspinak.brobot.app.database.entities.StateIllustrationEntity;
-import io.github.jspinak.brobot.app.web.responses.StateIllustrationResponse;
 import io.github.jspinak.brobot.illustratedHistory.StateIllustration;
 import org.springframework.stereotype.Component;
 
@@ -19,14 +18,14 @@ public class StateIllustrationEntityMapper {
 
     public StateIllustrationEntity map(StateIllustration stateIllustration) {
         StateIllustrationEntity stateIllustrationEntity = new StateIllustrationEntity();
-        stateIllustrationEntity.setScreenshot(imageEntityMapper.map(stateIllustration.getScreenshot()));
+        stateIllustrationEntity.setScreenshot(imageEntityMapper.map(stateIllustration.getScreenshotUsableArea()));
         stateIllustrationEntity.setIllustratedScreenshot(imageEntityMapper.map(stateIllustration.getIllustratedScreenshot()));
         return stateIllustrationEntity;
     }
 
     public StateIllustration map(StateIllustrationEntity stateIllustrationEntity) {
         StateIllustration stateIllustration = new StateIllustration();
-        stateIllustration.setScreenshot(imageEntityMapper.map(stateIllustrationEntity.getScreenshot()));
+        stateIllustration.setScreenshotUsableArea(imageEntityMapper.map(stateIllustrationEntity.getScreenshot()));
         stateIllustration.setIllustratedScreenshot(imageEntityMapper.map(stateIllustrationEntity.getIllustratedScreenshot()));
         return stateIllustration;
     }
