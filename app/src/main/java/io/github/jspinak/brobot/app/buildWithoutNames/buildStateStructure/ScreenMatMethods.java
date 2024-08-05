@@ -1,7 +1,7 @@
 package io.github.jspinak.brobot.app.buildWithoutNames.buildStateStructure;
 
 import io.github.jspinak.brobot.app.buildWithoutNames.screenObservations.ScreenObservation;
-import io.github.jspinak.brobot.app.buildWithoutNames.screenObservations.ScreenObservations;
+import io.github.jspinak.brobot.app.buildWithoutNames.buildLive.ScreenObservations;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.springframework.stereotype.Component;
 import java.util.ArrayList;
@@ -36,8 +36,7 @@ public class ScreenMatMethods {
      * @param screenObservations contain the screens to analyze
      * @return a mask of the shared pixels
      */
-    public Mat getSharedPixels(ScreenObservations screenObservations) {
-        List<ScreenObservation> observations = screenObservations.getAll().stream().toList();
+    public Mat getSharedPixels(ScreenObservations screenObservations, List<ScreenObservation> observations) {
         if (observations.size() < 2) return new Mat();
         Mat sharedPixels = observations.get(0).getScreenshot();
         for (int i=1; i<observations.size(); i++) {
@@ -69,8 +68,8 @@ public class ScreenMatMethods {
      * @param observations
      * @return
      */
-    public List<ObservedState> getObservedStates(ScreenObservation screen, ScreenObservations observations) {
-        for (ScreenObservation screenObservation : observations.getAll()) {
+    public List<ObservedState> getObservedStates(ScreenObservation screen, List<ScreenObservation> observations) {
+        for (ScreenObservation screenObservation : observations) {
             Mat dist = compareMats(screen.getScreenshot(), screenObservation.getScreenshot());
             //ObservedState newObservedState = new ObservedState();
         }

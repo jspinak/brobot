@@ -1,8 +1,10 @@
-package io.github.jspinak.brobot.app.buildWithoutNames.screenObservations;
+package io.github.jspinak.brobot.app.buildWithoutNames.buildLive;
 
+import io.github.jspinak.brobot.app.buildWithoutNames.screenObservations.GetScreenObservationFromScreenshot;
+import io.github.jspinak.brobot.app.buildWithoutNames.screenObservations.ScreenObservation;
+import io.github.jspinak.brobot.app.buildWithoutNames.stateStructureBuildManagement.StateStructureConfiguration;
 import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
-import io.github.jspinak.brobot.imageUtils.MatVisualize;
 import lombok.Setter;
 import org.springframework.stereotype.Component;
 
@@ -13,27 +15,22 @@ import java.util.Optional;
 @Component
 @Setter
 public class ScreenObservations {
-    private final MatVisualize matVisualize;
+    private final GetScreenObservationFromScreenshot getScreenObservationFromScreenshot;
 
-    private List<ScreenObservation> observations = new ArrayList<>();
-    private boolean saveScreenshot;
-
-    public ScreenObservations(MatVisualize matVisualize) {
-        this.matVisualize = matVisualize;
+    public ScreenObservations(GetScreenObservationFromScreenshot getScreenObservationFromScreenshot) {
+        this.getScreenObservationFromScreenshot = getScreenObservationFromScreenshot;
     }
 
-    public void addScreenObservation(ScreenObservation screenObservation) {
+    public ScreenObservation addScreenObservation(Pattern screenshot, List<ScreenObservation> observations,
+                                                  StateStructureConfiguration config) {
         int id = observations.size();
+        ScreenObservation screenObservation = getScreenObservationFromScreenshot.getNewScreenObservation(screenshot, config);
         screenObservation.setId(id);
         observations.add(screenObservation);
-        if (saveScreenshot) matVisualize.writeMatToHistory(screenObservation.getScreenshot(), "Screenshot #"+id);
+        return screenObservation;
     }
 
-    public List<ScreenObservation> getAll() {
-        return observations;
-    }
-
-    public List<StateImage> getAllAsImages() {
+    public List<StateImage> getAllAsImages(List<ScreenObservation> observations) {
         List<StateImage> stateImages = new ArrayList<>();
         for (int i=0; i<observations.size(); i++) {
             Pattern p = observations.get(i).getPattern();
@@ -47,12 +44,12 @@ public class ScreenObservations {
         return stateImages;
     }
 
-    public Optional<ScreenObservation> get(int id) {
+    public Optional<ScreenObservation> get(int id, List<ScreenObservation> observations) {
         if (observations.size() > id && id >= 0) return Optional.of(observations.get(id));
         return Optional.empty();
     }
 
-    public List<Integer> observationsWithUncheckedImages() {
+    public List<Integer> observationsWithUncheckedImages(List<ScreenObservation> observations) {
         List<Integer> uncheckedObs = new ArrayList<>();
         for (ScreenObservation screenObservation : observations) {
             if (screenObservation.hasUnvisitedImages()) uncheckedObs.add(screenObservation.getId());
