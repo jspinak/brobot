@@ -10,14 +10,14 @@ import org.springframework.boot.test.context.SpringBootTest;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
-class GetUsableAreaTest {
+class SetUsableAreaTest {
     @BeforeAll
     public static void setupHeadlessMode() {
         System.setProperty("java.awt.headless", "false");
     }
 
     @Autowired
-    GetUsableArea getUsableArea;
+    SetUsableArea setUsableArea;
 
     //@Autowired
     //ImageService imageService;
@@ -25,7 +25,7 @@ class GetUsableAreaTest {
     @Test
     void defineInFile() {
         TestData testData = new TestData();
-        Region usableArea = getUsableArea.defineInFile(testData.getScreenshot(), testData.getTopL(), testData.getBottomR());
+        Region usableArea = setUsableArea.defineInFile(testData.getScreenshot(), testData.getTopL(), testData.getBottomR());
         usableArea.print();
 
         // top-left image should match at 0,34 107x43

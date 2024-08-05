@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.app.buildWithoutNames.screenObservations;
 
-import io.github.jspinak.brobot.app.buildWithoutNames.stateStructureBuildManagement.StateStructureTemplate;
+import io.github.jspinak.brobot.app.buildWithoutNames.stateStructureBuildManagement.StateStructureConfiguration;
 import io.github.jspinak.brobot.app.services.StateImageService;
 import io.github.jspinak.brobot.actions.actionExecution.Action;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
@@ -22,12 +22,12 @@ import java.util.List;
  * This class provides convenience functions for defining the application boundaries.
  */
 @Component
-public class GetUsableArea {
+public class SetUsableArea {
 
     private final Action action;
     private final StateImageService stateImageService;
 
-    public GetUsableArea(Action action, StateImageService stateImageService) {
+    public SetUsableArea(Action action, StateImageService stateImageService) {
         this.action = action;
         this.stateImageService = stateImageService;
     }
@@ -38,13 +38,13 @@ public class GetUsableArea {
      * bottomright match will be used to define the usable area region.
      * Images need to be StateImage(s) because only StateObject(s) have anchors. Anchors are added
      * to the StateImage(s).
-     * @param stateStructureTemplate holds the images and scenes
+     * @param stateStructureConfiguration holds the images and scenes
      * @return the usable area.
      */
-    public Region getBoundariesFromExcludedImages(StateStructureTemplate stateStructureTemplate) {
+    public Region getBoundariesFromExcludedImages(StateStructureConfiguration stateStructureConfiguration) {
         ObjectCollection exteriorImages = getObjectCollection(
-                stateStructureTemplate.getTopLeftBoundary(), stateStructureTemplate.getBottomRightBoundary());
-        if (!stateStructureTemplate.isLive()) exteriorImages.setScenes(stateStructureTemplate.getScreenshots());
+                stateStructureConfiguration.getTopLeftBoundary(), stateStructureConfiguration.getBottomRightBoundary());
+        if (!stateStructureConfiguration.isLive()) exteriorImages.setScenes(stateStructureConfiguration.getScreenshots());
         ActionOptions define = getActionOptions(ActionOptions.Illustrate.NO);
         return action.perform(define, exteriorImages).getDefinedRegion();
     }
@@ -65,6 +65,13 @@ public class GetUsableArea {
                 .setDefineAs(ActionOptions.DefineAs.INSIDE_ANCHORS)
                 .setIllustrate(illustrate)
                 .build();
+    }
+
+    public Region setArea(StateStructureConfiguration config) {
+        Pattern screen = config.getScreenshots().get(0);
+        Region usableArea = defineInFile(screen, config.getTopLeftBoundary(), config.getBottomRightBoundary());
+        config.setUsableArea(usableArea);
+        return usableArea;
     }
 
     public Region defineInFile(Pattern screen, Pattern topLeft, Pattern bottomRight) {

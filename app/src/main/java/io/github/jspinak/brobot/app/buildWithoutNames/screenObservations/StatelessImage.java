@@ -7,10 +7,8 @@ import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImag
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * This image may be a transition from one screen to another.
@@ -21,47 +19,62 @@ import java.util.Set;
 @Setter
 public class StatelessImage {
 
-    private int indexInRepo; // index in the TransitionImageRepo
+    private int indexInRepo; // index in the StatelessImageRepo
     /*
     The image should be clicked on every new screen, since it can lead to different target screens on different originating
     screens. TODO: make it a Map.
      */
     private boolean checked; // when checked, if fromScreenToScreen is empty then it doesn't transition anywhere
     private Map<Integer, Integer> fromScreenToScreen = new HashMap<>(); // transitions from and to the screenshots with these ids
-    private Set<Integer> screensFound = new HashSet<>();
-    private Match match; // the match found when the image was created
+    private Set<Pattern> screensFound = new HashSet<>();
+    private List<Match> matchList = new ArrayList<>();
     private int ownerState; // the owner state. there is only one owner state.
     private Set<Integer> transitionsTo = new HashSet<>(); // all states transitioned to
     private String text; // search again for text after regions have merged
 
-    public StatelessImage(Match match, int screenshotIndex) {
-        this.match = match;
-        this.screensFound.add(screenshotIndex);
+    public StatelessImage(Match match, Pattern screenshot) {
+        this.matchList.add(match);
+        this.screensFound.add(screenshot);
     }
 
     public String getName() {
-        return match.getName();
+        if (matchList.isEmpty()) return "";
+        return matchList.get(0).getName();
     }
 
-    public Region getRegion() {
-        return match.getRegion();
+    public Region getFirstRegion() {
+        return matchList.get(0).getRegion();
     }
 
+    public List<Region> getRegions() {
+        return matchList.stream()
+                .map(Match::getRegion)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Uses the first Match
+     * @return Pattern from the first Match
+     */
     public Pattern toPattern() {
-        return new Pattern(match);
+        return new Pattern(matchList.get(0));
     }
 
+    /**
+     * Uses the first Match.
+     * @return the StateImage from the first Match.
+     */
     public StateImage toStateImage() {
-        return match.toStateImage();
+        return matchList.get(0).toStateImage();
     }
 
-    public void addScreenFound(int screenId) {
-        screensFound.add(screenId);
+    public void addScreenFound(Pattern screenshot) {
+        screensFound.add(screenshot);
     }
 
     public void setOwnerState(int ownerState) {
         this.ownerState = ownerState;
-        match.getStateObjectData().setOwnerStateName(String.valueOf(ownerState));
+        matchList.forEach(match -> match.getStateObjectData().setOwnerStateName(String.valueOf(ownerState)));
     }
 
 }

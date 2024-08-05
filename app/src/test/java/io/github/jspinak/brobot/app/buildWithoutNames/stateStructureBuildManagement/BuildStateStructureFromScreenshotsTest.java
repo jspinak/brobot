@@ -24,18 +24,15 @@ class BuildStateStructureFromScreenshotsTest {
     @Autowired
     StateService stateService;
 
+    // I limit the amount of images due to heap issues.
     @Test
     void stateStructureFromScreenshots() {
-        StateStructureTemplate stateStructureTemplate = new StateStructureTemplate.Builder()
-                .addImagesInScreenshotsFolder("floranext0", "floranext1", "floranext2")
+        StateStructureConfiguration stateStructureConfiguration = new StateStructureConfiguration.Builder()
+                .addImagesInScreenshotsFolder("floranext0", "floranext1") //, "floranext2")
                 .setBoundaryImages("topleft", "bottomR2")
-                .setSaveStateIllustrations(false)
-                .setSaveScreenshots(false)
-                .setSaveDecisionMats(false)
-                .setSaveMatchingImages(false)
-                .setSaveScreenWithMotionAndImages(false)
+                .setMinImageArea(100)
                 .build();
-        buildStateStructureFromScreenshots.build(stateStructureTemplate);
+        buildStateStructureFromScreenshots.build(stateStructureConfiguration);
 
         System.out.println();
         System.out.println("All states saved in the database:");

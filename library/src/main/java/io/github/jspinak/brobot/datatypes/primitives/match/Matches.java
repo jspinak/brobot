@@ -139,7 +139,10 @@ public class Matches {
     }
 
     public boolean bestMatchSimilarityLessThan(double similarity) {
-        return getBestMatch().isEmpty() || getBestMatch().get().getScore() < similarity;
+        Optional<Match> matchOpt = getBestMatch();
+        double score = 0.0;
+        if (matchOpt.isPresent()) score = matchOpt.get().getScore();
+        return score < similarity;
     }
 
     private void addActiveState(Match newMatch) {

@@ -1,55 +1,40 @@
 package io.github.jspinak.brobot.app.buildWithoutNames.stateStructureBuildManagement;
 
-import io.github.jspinak.brobot.app.buildWithoutNames.buildStateStructure.ScreenStateCreator;
+import io.github.jspinak.brobot.app.buildWithoutNames.buildStateStructure.ReplaceStateStructure;
 import io.github.jspinak.brobot.app.buildWithoutNames.buildStateStructure.StateStructureInfo;
-import io.github.jspinak.brobot.app.buildWithoutNames.screenObservations.*;
-import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
+import io.github.jspinak.brobot.app.buildWithoutNames.screenObservations.GetScreenObservationFromScreenshot;
+import io.github.jspinak.brobot.app.buildWithoutNames.screenObservations.SetUsableArea;
+import io.github.jspinak.brobot.app.buildWithoutNames.screenObservations.StatelessImage;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Component
 public class BuildStateStructureFromScreenshots {
 
-    private final GetUsableArea getUsableArea;
-    private final GetScreenObservation getScreenObservation;
+    private final SetUsableArea setUsableArea;
     private final GetScreenObservationFromScreenshot getScreenObservationFromScreenshot;
-    private final ScreenStateCreator screenStateCreator;
+    private final ReplaceStateStructure replaceStateStructure;
     private final StateStructureInfo stateStructureInfo;
-    private final ScreenObservations screenObservations;
-    private final FindAllScreensForStatelessImages findAllScreensForStatelessImages;
 
-    public BuildStateStructureFromScreenshots(GetUsableArea getUsableArea,
-                                              GetScreenObservation getScreenObservation,
+    public BuildStateStructureFromScreenshots(SetUsableArea setUsableArea,
                                               GetScreenObservationFromScreenshot getScreenObservationFromScreenshot,
-                                              ScreenStateCreator screenStateCreator,
-                                              StateStructureInfo stateStructureInfo,
-                                              ScreenObservations screenObservations,
-                                              FindAllScreensForStatelessImages findAllScreensForStatelessImages) {
-        this.getUsableArea = getUsableArea;
-        this.getScreenObservation = getScreenObservation;
+                                              ReplaceStateStructure replaceStateStructure,
+                                              StateStructureInfo stateStructureInfo) {
+        this.setUsableArea = setUsableArea;
         this.getScreenObservationFromScreenshot = getScreenObservationFromScreenshot;
-        this.screenStateCreator = screenStateCreator;
+        this.replaceStateStructure = replaceStateStructure;
         this.stateStructureInfo = stateStructureInfo;
-        this.screenObservations = screenObservations;
-        this.findAllScreensForStatelessImages = findAllScreensForStatelessImages;
     }
 
-    public void build(List<Pattern> screenshots, Pattern topLeftBoundary, Pattern bottomRightBoundary) {
-        if (screenshots.isEmpty()) return;
-        Region usableArea = getUsableArea.defineInFile(
-                screenshots.get(0), topLeftBoundary, bottomRightBoundary);
-        getScreenObservation.setUsableArea(usableArea);
-        screenshots.forEach(screenshot -> screenObservations.addScreenObservation(
-                getScreenObservationFromScreenshot.getNewScreenObservationAndAddImagesToRepo(screenshot, screenshots.indexOf(screenshot))));
-        findAllScreensForStatelessImages.findScreens();
-        screenStateCreator.createAndSaveStatesAndTransitions();
+    public void build(StateStructureConfiguration config) {
+        if (config.getScreenshots().isEmpty()) return;
+        Region usableArea = setUsableArea.setArea(config);
+        List<StatelessImage> statelessImages = new ArrayList<>();
+        getScreenObservationFromScreenshot.getScreenObservations(config, statelessImages);
+        replaceStateStructure.createNewStateStructure(usableArea, statelessImages);
         stateStructureInfo.printStateStructure();
-    }
-
-    public void build(StateStructureTemplate stateStructureTemplate) {
-        build(stateStructureTemplate.getScreenshots(), stateStructureTemplate.getTopLeftBoundary(),
-                stateStructureTemplate.getBottomRightBoundary());
     }
 }
