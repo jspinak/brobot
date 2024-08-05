@@ -93,8 +93,10 @@ public class State {
     /**
      * Screenshots where the state is found. These can be used for realistic simulations or for
      * illustrating the state to display it visually. Not all StateImages need to be present.
+     * The usable area is the region used to find images. A pattern's fixed region gives its location in the usable area.
      */
     private List<Image> scenes = new ArrayList<>();
+    private Region usableArea = new Region();
     private List<StateIllustration> illustrations = new ArrayList<>();
     /**
      * Some actions take place without an associated Pattern or StateImage. These actions are stored in their

@@ -27,7 +27,7 @@ class PatternRepoTest {
     }
 
     @Autowired
-    private PatternRepo patternRepo;
+    PatternRepo patternRepo;
 
     @Autowired
     PatternEntityMapper patternEntityMapper;
@@ -36,7 +36,6 @@ class PatternRepoTest {
     void testFindByName() {
         // Save a pattern to the repository
         Pattern pattern = new Pattern("bottomR");
-        //patternRepo.save(patternMapper.INSTANCE.map(pattern));
         patternRepo.save(patternEntityMapper.map(pattern));
 
         // Find the pattern by name
@@ -45,7 +44,6 @@ class PatternRepoTest {
         // Assert that the pattern is found and has the correct name
         assertFalse(foundPatternList.isEmpty());
         PatternEntity foundPattern = foundPatternList.get(0);
-        //assertThat(patternMapper.INSTANCE.map(foundPattern).getName()).isEqualTo("TestPattern");
         assertThat(foundPattern.getName()).isEqualTo("bottomR");
     }
 
@@ -53,15 +51,14 @@ class PatternRepoTest {
     public void testFindByNameContainingIgnoreCase() {
         // Save patterns to the repository
         Pattern pattern1 = new Pattern("bottomR");
-        //patternRepo.save(patternMapper.INSTANCE.map(pattern1));
         patternRepo.save(patternEntityMapper.map(pattern1));
-
         Pattern pattern2 = new Pattern("bottomR2");
-        //patternRepo.save(patternMapper.INSTANCE.map(pattern2));
         patternRepo.save(patternEntityMapper.map(pattern2));
 
         // Find patterns by name containing the parameter
         List<PatternEntity> foundPatterns = patternRepo.findByPatternDataNameContainingIgnoreCase("bottom");
+        List<PatternEntity> allPatterns = patternRepo.findAll();
+        allPatterns.forEach(System.out::println);
 
         System.out.println("number of database records = " + patternRepo.findAll().size());
         patternRepo.findAll().forEach(entity -> System.out.println(entity.getName()));

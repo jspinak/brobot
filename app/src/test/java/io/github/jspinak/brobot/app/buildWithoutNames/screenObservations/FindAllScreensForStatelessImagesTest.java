@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.app.buildWithoutNames.screenObservations;
 
+import io.github.jspinak.brobot.app.buildWithoutNames.buildLive.ScreenObservations;
+import io.github.jspinak.brobot.app.buildWithoutNames.stateStructureBuildManagement.StateStructureConfiguration;
 import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
 import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
@@ -8,7 +10,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
 class FindAllScreensForStatelessImagesTest {
@@ -21,45 +27,31 @@ class FindAllScreensForStatelessImagesTest {
     @Autowired
     GetScreenObservationFromScreenshot getScreenObservationFromScreenshot;
 
-    @Autowired
-    FindAllScreensForStatelessImages findAllScreensForStatelessImages;
-
-    @Autowired
-    StatelessImageRepo statelessImageRepo;
-
-    @Autowired
-    ScreenObservations screenObservations;
-
     /**
      * I initialize a new StatelessImage with the "topLeft" Pattern.
      * This pattern should be found on screens "floranext0" and "floranext1".
      */
     @Test
-    void findScreens() {
-        // populate ScreenObservations
-        ScreenObservation screenObservation0 = getScreenObservationFromScreenshot.getNewScreenObservationAndAddImagesToRepo(
-                new Pattern("../screenshots/floranext0"), 0);
-        ScreenObservation screenObservation1 = getScreenObservationFromScreenshot.getNewScreenObservationAndAddImagesToRepo(
-                new Pattern("../screenshots/floranext1"), 1);
-        screenObservations.addScreenObservation(screenObservation0);
-        screenObservations.addScreenObservation(screenObservation1);
-        System.out.println("# of screens = "+screenObservations.getAll().size());
-
-        // get image to find. this image appears on both screens
-        Match match = new Match.Builder()
-                .setName("topLeft")
-                .setImage(new Pattern("topleft").getImage())
-                .setRegion(new Region(0,0,20,50))
+    void getDoubleMatches() {
+        StateStructureConfiguration config = new StateStructureConfiguration.Builder()
+                .setBoundaryImages("topLeft", "BottomRight")
+                .addImagesInScreenshotsFolder("../screenshots/floranext0", "../screenshots/floranext1")
+                .setMaxSimilarityForUniqueImage(.99)
                 .build();
-        // include the image in screenObservation0
-        StatelessImage statelessTopLeft = new StatelessImage(match, 0);
-        // add the StatelessImage to the repo
-        statelessImageRepo.getStatelessImages().add(statelessTopLeft);
+        List<StatelessImage> statelessImages = new ArrayList<>();
+        List<ScreenObservation> observations = getScreenObservationFromScreenshot.getScreenObservations(config, statelessImages);
 
-        // find all StatelessImages in both screens
-        findAllScreensForStatelessImages.findScreens();
-        System.out.println(statelessTopLeft.getScreensFound());
-        assertEquals(2, screenObservations.getAll().size());
-        assertEquals(2, statelessTopLeft.getScreensFound().size());
+        /*
+         Running getScreenObservations twice should make each StatelessImage have at least 2 match objects.
+
+         */
+        getScreenObservationFromScreenshot.getScreenObservations(config, statelessImages);
+
+        System.out.println("# of screens = "+observations.size());
+        assertEquals(2, observations.size());
+        statelessImages.forEach(img -> {
+            System.out.print(img.getMatchList().size()+" ");
+            assertTrue(img.getMatchList().size() > 1);
+        });
     }
 }

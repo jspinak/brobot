@@ -19,6 +19,7 @@ public class ImageEntityMapper {
     }
 
     public Image map(ImageEntity imageEntity) {
+        System.out.println("id: "+imageEntity.getId());
         Image image = new Image(BufferedImageOps.fromByteArray(imageEntity.getBytes()));
         image.setName(imageEntity.getName());
         return image;

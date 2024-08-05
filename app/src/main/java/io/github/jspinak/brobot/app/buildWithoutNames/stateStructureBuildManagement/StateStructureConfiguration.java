@@ -3,14 +3,17 @@ package io.github.jspinak.brobot.app.buildWithoutNames.stateStructureBuildManage
 import io.github.jspinak.brobot.actions.BrobotSettings;
 import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
 import io.github.jspinak.brobot.datatypes.primitives.location.Positions;
+import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Getter
-public class StateStructureTemplate {
+@Setter
+public class StateStructureConfiguration {
 
     /*
     When not empty, will be used instead of scraping.
@@ -19,12 +22,10 @@ public class StateStructureTemplate {
     private List<Pattern> screenshots = new ArrayList<>(); //
     private Pattern topLeftBoundary;
     private Pattern bottomRightBoundary;
+    private Region usableArea = new Region();
     private int minWidthBetweenImages;
-    private boolean saveScreensWithMotionAndImages;
-    private boolean saveScreenshots;
-    private boolean saveMatchingImages;
-    private boolean saveDecisionMats;
-    private boolean saveStateIllustrations;
+    private int minImageArea;
+    private double maxSimilarityForUniqueImage;
     private int minimumChangedPixelsForNewScreen = 20000;
 
     public boolean isLive() {
@@ -43,12 +44,10 @@ public class StateStructureTemplate {
         private final List<Pattern> screenshots = new ArrayList<>();
         private Pattern topLeftBoundary;
         private Pattern bottomRightBoundary;
+        private Region usableArea = new Region();
         private int minWidthBetweenImages;
-        private boolean saveScreensWithMotionAndImages;
-        private boolean saveScreenshots;
-        private boolean saveMatchingImages;
-        private boolean saveDecisionMats;
-        private boolean saveStateIllustrations;
+        private int minImageArea = 25;
+        private double maxSimilarityForUniqueImage = .98;
         private int minimumChangedPixelsForNewScreen = 20000;
 
         public Builder addImagesInScreenshotsFolder(String... names) {
@@ -73,33 +72,23 @@ public class StateStructureTemplate {
             return this;
         }
 
+        public Builder setUsableArea(Region usableArea) {
+            this.usableArea = usableArea;
+            return this;
+        }
+
         public Builder setMinWidthBetweenImages(int minWidthBetweenImages) {
             this.minWidthBetweenImages = minWidthBetweenImages;
             return this;
         }
 
-        public Builder setSaveScreenWithMotionAndImages(boolean saveScreensWithMotionAndImages) {
-            this.saveScreensWithMotionAndImages = saveScreensWithMotionAndImages;
+        public Builder setMinImageArea(int minArea) {
+            this.minImageArea = minArea;
             return this;
         }
 
-        public Builder setSaveScreenshots(boolean saveScreenshots) {
-            this.saveScreenshots = saveScreenshots;
-            return this;
-        }
-
-        public Builder setSaveMatchingImages(boolean saveMatchingImages) {
-            this.saveMatchingImages = saveMatchingImages;
-            return this;
-        }
-
-        public Builder setSaveDecisionMats(boolean saveDecisionMats) {
-            this.saveDecisionMats = saveDecisionMats;
-            return this;
-        }
-
-        public Builder setSaveStateIllustrations(boolean saveStateIllustrations) {
-            this.saveStateIllustrations = saveStateIllustrations;
+        public Builder setMaxSimilarityForUniqueImage(double maxSimilarityForUniqueImage) {
+            this.maxSimilarityForUniqueImage = maxSimilarityForUniqueImage;
             return this;
         }
 
@@ -108,19 +97,17 @@ public class StateStructureTemplate {
             return this;
         }
 
-        public StateStructureTemplate build() {
-            StateStructureTemplate stateStructureTemplate = new StateStructureTemplate();
-            stateStructureTemplate.screenshots = screenshots;
-            stateStructureTemplate.topLeftBoundary = topLeftBoundary;
-            stateStructureTemplate.bottomRightBoundary = bottomRightBoundary;
-            stateStructureTemplate.minWidthBetweenImages = minWidthBetweenImages;
-            stateStructureTemplate.saveScreensWithMotionAndImages = saveScreensWithMotionAndImages;
-            stateStructureTemplate.saveScreenshots = saveScreenshots;
-            stateStructureTemplate.saveMatchingImages = saveMatchingImages;
-            stateStructureTemplate.saveDecisionMats = saveDecisionMats;
-            stateStructureTemplate.saveStateIllustrations = saveStateIllustrations;
-            stateStructureTemplate.minimumChangedPixelsForNewScreen = minimumChangedPixelsForNewScreen;
-            return stateStructureTemplate;
+        public StateStructureConfiguration build() {
+            StateStructureConfiguration stateStructureConfiguration = new StateStructureConfiguration();
+            stateStructureConfiguration.screenshots = screenshots;
+            stateStructureConfiguration.topLeftBoundary = topLeftBoundary;
+            stateStructureConfiguration.bottomRightBoundary = bottomRightBoundary;
+            stateStructureConfiguration.usableArea = usableArea;
+            stateStructureConfiguration.minWidthBetweenImages = minWidthBetweenImages;
+            stateStructureConfiguration.minImageArea = minImageArea;
+            stateStructureConfiguration.maxSimilarityForUniqueImage = maxSimilarityForUniqueImage;
+            stateStructureConfiguration.minimumChangedPixelsForNewScreen = minimumChangedPixelsForNewScreen;
+            return stateStructureConfiguration;
         }
     }
 }
