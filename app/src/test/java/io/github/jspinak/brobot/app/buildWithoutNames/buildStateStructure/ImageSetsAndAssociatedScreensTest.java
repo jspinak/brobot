@@ -1,8 +1,9 @@
 package io.github.jspinak.brobot.app.buildWithoutNames.buildStateStructure;
 
+import io.github.jspinak.brobot.app.buildWithoutNames.preliminaryStates.ImageSetsAndAssociatedScreens;
 import io.github.jspinak.brobot.app.buildWithoutNames.screenObservations.GetScreenObservationFromScreenshot;
 import io.github.jspinak.brobot.app.buildWithoutNames.screenObservations.StatelessImage;
-import io.github.jspinak.brobot.app.buildWithoutNames.screenObservations.StatelessImageRepo;
+import io.github.jspinak.brobot.app.buildWithoutNames.stateStructureBuildManagement.StateStructureConfiguration;
 import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
 import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
@@ -11,10 +12,13 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 @SpringBootTest
 class ImageSetsAndAssociatedScreensTest {
@@ -27,72 +31,83 @@ class ImageSetsAndAssociatedScreensTest {
     @Autowired
     GetScreenObservationFromScreenshot getScreenObservationFromScreenshot;
 
-    @Autowired
-    StatelessImageRepo statelessImageRepo;
+    Pattern flora0 = new Pattern("../screenshots/floranext0");
+    Pattern flora1 = new Pattern("../screenshots/floranext1");
+    Pattern flora2 = new Pattern("../screenshots/floranext2");
+    StatelessImage statelessImageWithTwoScreens = new StatelessImage(new Match(), flora0);
+    {
+        statelessImageWithTwoScreens.addScreenFound(flora1);
+    }
 
-    void populateTransitionImageRepo() {
-        getScreenObservationFromScreenshot.getNewScreenObservationAndAddImagesToRepo(
-                new Pattern("../screenshots/floranext0"), 0);
-        getScreenObservationFromScreenshot.getNewScreenObservationAndAddImagesToRepo(
-                new Pattern("../screenshots/floranext1"), 1);
-        getScreenObservationFromScreenshot.getNewScreenObservationAndAddImagesToRepo(
-                new Pattern("../screenshots/floranext2"), 2);
+    StateStructureConfiguration config = new StateStructureConfiguration.Builder()
+            .setBoundaryImages("topLeft", "BottomRight")
+            .build();
+    List<StatelessImage> statelessImages = new ArrayList<>();
+
+    void populateStatelessImageRepo() {
+        Pattern flora0 = new Pattern("../screenshots/floranext0");
+        Pattern flora1 = new Pattern("../screenshots/floranext1");
+        Pattern flora2 = new Pattern("../screenshots/floranext2");
+        getScreenObservationFromScreenshot.getNewScreenObservationAndProcessImages(flora0, config, statelessImages);
+        getScreenObservationFromScreenshot.getNewScreenObservationAndProcessImages(flora1, config, statelessImages);
+        getScreenObservationFromScreenshot.getNewScreenObservationAndProcessImages(flora2, config, statelessImages);
     }
 
     @Test
     void transitionImagesHaveAssociatedScreens() {
-        populateTransitionImageRepo();
-        statelessImageRepo.getStatelessImages().forEach(img -> System.out.println(img.getScreensFound()));
-        for (StatelessImage statelessImage : statelessImageRepo.getStatelessImages()) {
+        populateStatelessImageRepo();
+        statelessImages.forEach(img -> System.out.println(img.getScreensFound()));
+        for (StatelessImage statelessImage : statelessImages) {
             assertFalse(statelessImage.getScreensFound().isEmpty());
         }
     }
 
-    ImageSetsAndAssociatedScreens createImagesScreens() {
-        Set<Integer> screens = new HashSet<>();
-        screens.add(0);
-        screens.add(1);
-        return new ImageSetsAndAssociatedScreens(0, screens);
-    }
     @Test
     void imageSetsAndAssociatedScreensObjectTest() {
-        ImageSetsAndAssociatedScreens imagesScreens = createImagesScreens();
-        assertTrue(imagesScreens.getImages().size() == 1);
-        assertTrue(imagesScreens.getScreens().size() == 2);
+        ImageSetsAndAssociatedScreens imagesScreens= new ImageSetsAndAssociatedScreens(statelessImageWithTwoScreens);
+        assertEquals(1, imagesScreens.getImages().size());
+        assertEquals(2, imagesScreens.getScreens().size());
     }
 
     @Test
     void ifSameScreensAddImage_imageNotAddedBecauseScreensDoNotMatch() {
-        ImageSetsAndAssociatedScreens imagesScreens = createImagesScreens();
-        populateTransitionImageRepo();
-        imagesScreens.ifSameScreensAddImage(statelessImageRepo.getStatelessImages().get(1));
+        Pattern flora0 = new Pattern("../screenshots/floranext0");
+        Pattern flora1 = new Pattern("../screenshots/floranext1");
+        Pattern flora2 = new Pattern("../screenshots/floranext2");
+        StateStructureConfiguration config = new StateStructureConfiguration.Builder()
+                .setBoundaryImages("topLeft", "BottomRight")
+                .build();
+        List<StatelessImage> statelessImages = new ArrayList<>();
+        getScreenObservationFromScreenshot.getNewScreenObservationAndProcessImages(flora0, config, statelessImages);
+        getScreenObservationFromScreenshot.getNewScreenObservationAndProcessImages(flora1, config, statelessImages);
+        getScreenObservationFromScreenshot.getNewScreenObservationAndProcessImages(flora2, config, statelessImages);
+        ImageSetsAndAssociatedScreens imagesScreens= new ImageSetsAndAssociatedScreens(statelessImageWithTwoScreens);
+        imagesScreens.ifSameScreensAddImage(statelessImages.get(1));
         System.out.println(imagesScreens);
-        assertTrue(imagesScreens.getImages().size() == 1);
-        assertTrue(imagesScreens.getScreens().size() == 2);
+        assertEquals(1, imagesScreens.getImages().size());
+        assertEquals(2, imagesScreens.getScreens().size());
     }
 
     @Test
     void ifSameScreensAddImage_imagesAddedBecauseScreensMatch() {
-        Set<Integer> screens = new HashSet<>();
-        screens.add(0);
-        ImageSetsAndAssociatedScreens imagesScreens = new ImageSetsAndAssociatedScreens(0, screens);
-        populateTransitionImageRepo();
-        imagesScreens.ifSameScreensAddImage(statelessImageRepo.getStatelessImages().get(1));
-        imagesScreens.ifSameScreensAddImage(statelessImageRepo.getStatelessImages().get(4));
+        populateStatelessImageRepo(); // each of these (3 in total) has 1 screen
+        ImageSetsAndAssociatedScreens imagesScreens = new ImageSetsAndAssociatedScreens(statelessImageWithTwoScreens); // has 2 screens
+        imagesScreens.ifSameScreensAddImage(statelessImages.get(0));
+        imagesScreens.ifSameScreensAddImage(statelessImages.get(1));
         System.out.println(imagesScreens);
-        assertTrue(imagesScreens.getImages().size() == 3);
-        assertTrue(imagesScreens.getScreens().size() == 1);
+        assertEquals(1, imagesScreens.getImages().size());
+        assertEquals(2, imagesScreens.getScreens().size());
     }
 
     @Test
     void ifSameScreensAddImage_imageIsFoundOnMultipleScreens() {
-        ImageSetsAndAssociatedScreens imagesScreens = createImagesScreens();
-        StatelessImage statelessImage = new StatelessImage(new Match(new Region(0,0,30,30)), 0);
-        statelessImage.getScreensFound().add(1);
+        ImageSetsAndAssociatedScreens imagesScreens = new ImageSetsAndAssociatedScreens(statelessImageWithTwoScreens);
+        StatelessImage statelessImage = new StatelessImage(new Match(new Region(0,0,30,30)), flora0);
+        statelessImage.getScreensFound().add(flora1);
         imagesScreens.ifSameScreensAddImage(statelessImage);
         System.out.println(imagesScreens);
-        assertTrue(imagesScreens.getImages().size() == 2);
-        assertTrue(imagesScreens.getScreens().size() == 2);
+        assertEquals(2, imagesScreens.getImages().size());
+        assertEquals(2, imagesScreens.getScreens().size());
     }
 
 }

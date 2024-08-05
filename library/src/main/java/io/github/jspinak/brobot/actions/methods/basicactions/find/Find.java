@@ -92,6 +92,7 @@ public class Find implements ActionInterface {
         matchFusion.setFusedMatches(matches);
         matches.getMatchList().forEach(m -> adjustMatches.adjust(m, actionOptions));
         offsetOps.addOffsetAsLastMatch(matches, actionOptions);
+        matches.getMatchList().removeIf(match -> match.size() < actionOptions.getMinArea()); // size is checked after potential match merges and adjustments
         setMatTextPattern.set(matches);
         matches.setSelectedText(textSelector.getString(TextSelector.Method.MOST_SIMILAR, matches.getText()));
     }

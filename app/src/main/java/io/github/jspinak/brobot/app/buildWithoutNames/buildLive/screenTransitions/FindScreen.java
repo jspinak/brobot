@@ -1,18 +1,19 @@
-package io.github.jspinak.brobot.app.buildWithoutNames.screenTransitions;
+package io.github.jspinak.brobot.app.buildWithoutNames.buildLive.screenTransitions;
 
+import io.github.jspinak.brobot.app.buildWithoutNames.buildLive.ScreenObservations;
 import io.github.jspinak.brobot.app.buildWithoutNames.screenObservations.*;
-import io.github.jspinak.brobot.app.buildWithoutNames.stateStructureBuildManagement.GlobalStateStructureOptions;
-import io.github.jspinak.brobot.app.buildWithoutNames.stateStructureBuildManagement.StateStructureTemplate;
+import io.github.jspinak.brobot.app.buildWithoutNames.stateStructureBuildManagement.StateStructureConfiguration;
 import io.github.jspinak.brobot.actions.actionExecution.Action;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
+import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
 import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
-import io.github.jspinak.brobot.imageUtils.MatVisualize;
 import lombok.Setter;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Optional;
 
 @Component
@@ -21,29 +22,20 @@ public class FindScreen {
 
     private final GetScreenObservation getScreenObservation;
     private final ScreenObservations screenObservations;
-    private final StatelessImageRepo statelessImageRepo;
-    private final MatVisualize matVisualize;
-    private final DecisionMatBuilder decisionMatBuilder;
+    private final StatelessImageOps statelessImageOps;
     private final ScreenObservationManager screenObservationManager;
     private final Action action;
-    private final GlobalStateStructureOptions stateStructureOptions;
 
-    private int minimumChangedPixelsForNewScreen = 20000;
     private double maxSimilarityForNewScreen = .95; // below this it's a new screen
-    private boolean saveDecisionMat;
 
     public FindScreen(GetScreenObservation getScreenObservation, ScreenObservations screenObservations,
-                      StatelessImageRepo statelessImageRepo, MatVisualize matVisualize,
-                      DecisionMatBuilder decisionMatBuilder, ScreenObservationManager screenObservationManager,
-                      Action action, GlobalStateStructureOptions stateStructureOptions) {
+                      StatelessImageOps statelessImageOps, ScreenObservationManager screenObservationManager,
+                      Action action) {
         this.getScreenObservation = getScreenObservation;
         this.screenObservations = screenObservations;
-        this.statelessImageRepo = statelessImageRepo;
-        this.matVisualize = matVisualize;
-        this.decisionMatBuilder = decisionMatBuilder;
+        this.statelessImageOps = statelessImageOps;
         this.screenObservationManager = screenObservationManager;
         this.action = action;
-        this.stateStructureOptions = stateStructureOptions;
     }
 
     /**
@@ -51,26 +43,27 @@ public class FindScreen {
      * This can also be used with screenshots.
      * If in the repo, returns the screen's id.
      */
-    public void findCurrentScreenAndSaveIfNew(StateStructureTemplate stateStructureTemplate) {
+    public void findCurrentScreenAndSaveIfNew(StateStructureConfiguration config,
+                                              List<ScreenObservation> observations, List<StatelessImage> statelessImages) {
         int nextUnassignedId = screenObservationManager.getNextUnassignedScreenId();
         /*
         Get a new screenshot and its images. If the screen is new, add it to the repo and update the current id.
          */
-        ScreenObservation newObservation = getScreenObservation.takeScreenshotAndGetImages(stateStructureTemplate);
-        int screenId = getScreenId(newObservation); // compare to previous screenshots
+        ScreenObservation newObservation = getScreenObservation.takeScreenshotAndGetImages(config);
+        int screenId = getScreenId(newObservation, config, observations); // compare to previous screenshots
         screenObservationManager.setCurrentScreenId(screenId);
         if (screenId == nextUnassignedId) { // screen hasn't been seen before
-            processNewScreen(newObservation);
+            processNewScreen(newObservation.getPattern(), observations, config, statelessImages);
             screenObservationManager.setNextUnassignedScreenId(screenId+1);
             System.out.println("FindScreen: new screen = " + screenId);
-            if (saveDecisionMat) matVisualize.writeMatToHistory(newObservation.getScreenshot(), "unique screen");
         }
-        screenObservations.get(screenId).ifPresent(screenObservationManager::setCurrentScreenObservation);
+        screenObservations.get(screenId, observations).ifPresent(screenObservationManager::setCurrentScreenObservation);
     }
 
-    private void processNewScreen(ScreenObservation newObservation) {
-        screenObservations.addScreenObservation(newObservation); // add screen to repo
-        statelessImageRepo.addUniqueImagesToRepo(newObservation);
+    private void processNewScreen(Pattern screenshot, List<ScreenObservation> observations,
+                                  StateStructureConfiguration config, List<StatelessImage> statelessImages) {
+        ScreenObservation sO = screenObservations.addScreenObservation(screenshot, observations, config); // add screen to repo
+        statelessImageOps.addOrMergeStatelessImages(sO, statelessImages, config);
     }
 
     /**
@@ -78,7 +71,8 @@ public class FindScreen {
      * @param newObservation the new screenshot taken, to be analyzed
      * @return active screen's id if found; otherwise -1
      */
-    private int getScreenId(ScreenObservation newObservation) {
+    private int getScreenId(ScreenObservation newObservation, StateStructureConfiguration config,
+                            List<ScreenObservation> observations) {
         StateImage newObs = new StateImage.Builder()
                 .addPattern(newObservation.getPattern())
                 .build();
@@ -86,7 +80,7 @@ public class FindScreen {
                 .withImages(newObs)
                 .build();
         ObjectCollection objColl2 = new ObjectCollection.Builder()
-                .withImages(screenObservations.getAllAsImages())
+                .withImages(screenObservations.getAllAsImages(observations))
                 .build();
         ActionOptions actionOptions = new ActionOptions.Builder()
                 .setAction(ActionOptions.Action.FIND)
@@ -94,7 +88,8 @@ public class FindScreen {
                 .build();
         Matches matches = action.perform(actionOptions, objColl1, objColl2);
         Optional<Match> bestMatch = getBestMatch(newObservation, matches);
-        if (bestMatch.isEmpty() || bestMatch.get().getScore() <= maxSimilarityForNewScreen) return newObservation.getId();
+        if (bestMatch.isEmpty() || bestMatch.get().getScore() <= config.getMaxSimilarityForUniqueImage())
+            return newObservation.getId();
         return matches.getMatchList().indexOf(bestMatch.get());
 
         /*
@@ -125,7 +120,6 @@ public class FindScreen {
             System.out.println("screen: " + newObservation.getId());
             System.out.println("bestMatch: " + match.getScore());
             System.out.println("bestMatchIndex: " + matches.getMatchList().indexOf(match));
-            System.out.println("size of saved screens: " + screenObservations.getAll().size());
         });
         return bestMatch;
     }

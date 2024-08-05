@@ -1,8 +1,8 @@
 package io.github.jspinak.brobot.app.buildWithoutNames.screenObservations;
 
-import io.github.jspinak.brobot.app.buildWithoutNames.stateStructureBuildManagement.StateStructureTemplate;
 import io.github.jspinak.brobot.actions.actionExecution.Action;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
+import io.github.jspinak.brobot.app.buildWithoutNames.stateStructureBuildManagement.StateStructureConfiguration;
 import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
@@ -39,12 +39,10 @@ public class GetStatelessImages {
      * in a TransitionImage object. TransitionImage objects, once created, are stored in the TransitionImage
      * repository.
      *
-     * @param usableArea images are only used if they are within this region
-     * @return a list of TransitionImage objects
+     * @return a list of StatelessImage objects
      */
-    public List<StatelessImage> findAndCapturePotentialLinks(Region usableArea, ScreenObservation screenObservation,
-                                                             int screenshotIndex,
-                                                             StateStructureTemplate stateStructureTemplate) {
+    public List<StatelessImage> findAndCapturePotentialLinks(StateStructureConfiguration config,
+                                                             ScreenObservation screenObservation) {
         List<StatelessImage> statelessImages = new ArrayList<>();
 
         ActionOptions findAllWords = new ActionOptions.Builder()
@@ -53,8 +51,8 @@ public class GetStatelessImages {
                 .setFusionMethod(ActionOptions.MatchFusionMethod.RELATIVE)
                 .setMaxFusionDistances(getMinWidthBetweenImages(), 10)
                 .build();
-        if (stateStructureTemplate.isLive()) setActionOptionsLive(screenObservation, findAllWords);
-        else setActionOptionsData(findAllWords, usableArea);
+        if (config.isLive()) setActionOptionsLive(screenObservation, findAllWords);
+        else setActionOptionsData(findAllWords, config.getUsableArea());
 
         ObjectCollection inScene = new ObjectCollection.Builder()
                 .withScenes(screenObservation.getPattern())
@@ -63,7 +61,7 @@ public class GetStatelessImages {
 
         for (int i=0; i<matches.getMatchList().size(); i++) {
             Match match = matches.getMatchList().get(i);
-            StatelessImage statelessImage = new StatelessImage(match, screenshotIndex);
+            StatelessImage statelessImage = new StatelessImage(match, screenObservation.getPattern());
             statelessImages.add(statelessImage);
         }
         return statelessImages;
