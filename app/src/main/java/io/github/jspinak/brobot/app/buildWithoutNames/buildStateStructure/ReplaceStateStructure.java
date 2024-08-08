@@ -14,6 +14,7 @@ import io.github.jspinak.brobot.services.StateTransitionsRepository;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Optional;
 
 @Component
 public class ReplaceStateStructure {
@@ -54,9 +55,11 @@ public class ReplaceStateStructure {
         // then, create states and add them to the state structure
         List<ImageSetsAndAssociatedScreens> imageSetsList = prepareImageSets.defineStatesWithImages(statelessImages);
         for (ImageSetsAndAssociatedScreens imgSets : imageSetsList) {
-            State newState = createState.createState(imgSets, Integer.toString(imageSetsList.indexOf(imgSets)), usableArea);
+            String stateName = Integer.toString(imageSetsList.indexOf(imgSets));
+            State newState = createState.createState(imgSets, stateName, usableArea);
             stateService.save(newState);
         }
+        List<State> allStates = stateService.getAllStates();
         // now that all states are defined, we can define the transitions
         createTransitionsAndAddToStateStructure();
     }
