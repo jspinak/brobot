@@ -16,6 +16,7 @@ public class StateResponseMapper {
     private final ImageResponseMapper imageResponseMapper;
     private final StateIllustrationResponseMapper stateIllustrationResponseMapper;
     private final MatchHistoryResponseMapper matchHistoryResponseMapper;
+    private final RegionResponseMapper regionResponseMapper;
 
     public StateResponseMapper(StateImageResponseMapper stateImageResponseMapper,
                                StateStringResponseMapper stateStringResponseMapper,
@@ -23,7 +24,8 @@ public class StateResponseMapper {
                                StateLocationResponseMapper stateLocationResponseMapper,
                                ImageResponseMapper imageResponseMapper,
                                StateIllustrationResponseMapper stateIllustrationResponseMapper,
-                               MatchHistoryResponseMapper matchHistoryResponseMapper) {
+                               MatchHistoryResponseMapper matchHistoryResponseMapper,
+                               RegionResponseMapper regionResponseMapper) {
         this.stateImageResponseMapper = stateImageResponseMapper;
         this.stateStringResponseMapper = stateStringResponseMapper;
         this.stateRegionResponseMapper = stateRegionResponseMapper;
@@ -31,6 +33,7 @@ public class StateResponseMapper {
         this.imageResponseMapper = imageResponseMapper;
         this.stateIllustrationResponseMapper = stateIllustrationResponseMapper;
         this.matchHistoryResponseMapper = matchHistoryResponseMapper;
+        this.regionResponseMapper = regionResponseMapper;
     }
 
     public StateResponse map(StateEntity stateEntity) {
@@ -56,8 +59,7 @@ public class StateResponseMapper {
         stateResponse.setTimesVisited(stateEntity.getTimesVisited());
         stateEntity.getScenes().forEach(scene ->
                 stateResponse.getScenes().add(imageResponseMapper.map(scene)));
-        stateEntity.getIllustrations().forEach(illustration ->
-                stateResponse.getIllustrations().add(stateIllustrationResponseMapper.map(illustration)));
+        stateResponse.setUsableArea(regionResponseMapper.map(stateEntity.getUsableArea()));
         stateResponse.setMatchHistory(matchHistoryResponseMapper.map(stateEntity.getMatchHistory()));
         return stateResponse;
     }
@@ -85,8 +87,7 @@ public class StateResponseMapper {
         stateEntity.setTimesVisited(stateResponse.getTimesVisited());
         stateResponse.getScenes().forEach(scene ->
                 stateEntity.getScenes().add(imageResponseMapper.map(scene)));
-        stateResponse.getIllustrations().forEach(illustration ->
-                stateEntity.getIllustrations().add(stateIllustrationResponseMapper.map(illustration)));
+        stateEntity.setUsableArea(regionResponseMapper.map(stateResponse.getUsableArea()));
         stateEntity.setMatchHistory(matchHistoryResponseMapper.map(stateResponse.getMatchHistory()));
         return stateEntity;
     }

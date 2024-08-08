@@ -13,13 +13,6 @@ const Pattern = ({pattern}) => {
             <h3 className="bold-heading"><strong>Pattern: </strong>{name}</h3>
             {fixedRegion && (
                 <div className="fixed-region">
-                    <p>Coordinates:</p>
-                    <ul>
-                        <li>x: {fixedRegion.x}</li>
-                        <li>y: {fixedRegion.y}</li>
-                        <li>width: {fixedRegion.w}</li>
-                        <li>height: {fixedRegion.h}</li>
-                    </ul>
                 </div>
             )}
             {image && <Image image={image} />}

@@ -97,7 +97,6 @@ public class State {
      */
     private List<Image> scenes = new ArrayList<>();
     private Region usableArea = new Region();
-    private List<StateIllustration> illustrations = new ArrayList<>();
     /**
      * Some actions take place without an associated Pattern or StateImage. These actions are stored in their
      * corresponding state.
@@ -158,14 +157,6 @@ public class State {
         return union;
     }
 
-    public void addIllustrations(StateIllustration... stateIllustrations) {
-        illustrations.addAll(List.of(stateIllustrations));
-    }
-
-    public void addIllustrations(List<StateIllustration> stateIllustrations) {
-        illustrations.addAll(stateIllustrations);
-    }
-
     @Override
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder();
@@ -200,7 +191,7 @@ public class State {
         private LocalDateTime lastAccessed;
         private int baseProbabilityExists = 100;
         private final List<Image> scenes = new ArrayList<>();
-        private final List<StateIllustration> illustrations = new ArrayList<>();
+        private Region usableArea = new Region();
 
         public Builder(String stateName) {
             this.name = stateName;
@@ -265,13 +256,8 @@ public class State {
             return this;
         }
 
-        public Builder addIllustrations(StateIllustration... stateIllustrations) {
-            this.illustrations.addAll(List.of(stateIllustrations));
-            return this;
-        }
-
-        public Builder addIllustrations(List<StateIllustration> stateIllustrations) {
-            this.illustrations.addAll(stateIllustrations);
+        public Builder setUsableArea(Region usableArea) {
+            this.usableArea = usableArea;
             return this;
         }
 
@@ -292,7 +278,7 @@ public class State {
             state.pathScore = pathScore;
             state.baseProbabilityExists = baseProbabilityExists;
             state.scenes = scenes;
-            state.illustrations = illustrations;
+            state.usableArea = usableArea;
             return state;
         }
     }
