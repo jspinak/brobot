@@ -1,7 +1,7 @@
 import StateImage from '../state-image/state-image.component';
 import './state-image-set.styles.css';
 
-const StateImageSet = ({ stateImages = [], onHover, onClick }) => {
+const StateImageSet = ({ stateImages = [], onHover, onMouseLeave, onClick }) => {
   console.log('StateImageSet props:', { stateImages, onHover, onClick });
   return (
     <div className='state-image-set'>
@@ -13,6 +13,7 @@ const StateImageSet = ({ stateImages = [], onHover, onClick }) => {
             console.log('Mouse enter, calling onHover with:', stateImage);
             onHover(stateImage);
           }}
+          onMouseLeave={onMouseLeave}
           onClick={() => onClick(stateImage)}
         >
           <StateImage stateImage={stateImage} />

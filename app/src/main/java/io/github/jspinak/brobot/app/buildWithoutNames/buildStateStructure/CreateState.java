@@ -6,9 +6,6 @@ import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.state.State;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
-import io.github.jspinak.brobot.illustratedHistory.StateIllustration;
-import io.github.jspinak.brobot.illustratedHistory.StateIllustrator;
-import org.bytedeco.opencv.opencv_core.Mat;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -16,12 +13,6 @@ import java.util.List;
 
 @Component
 public class CreateState {
-
-    private final StateIllustrator stateIllustrator;
-
-    public CreateState(StateIllustrator stateIllustrator) {
-        this.stateIllustrator = stateIllustrator;
-    }
 
     /**
      * Saves state images to a database, creates a state with these images.
@@ -32,30 +23,15 @@ public class CreateState {
     public State createState(ImageSetsAndAssociatedScreens imageSets, String name, Region usableArea) {
         List<StateImage> stateImages = imageSets.getStateImages();
         List<Image> scenes = new ArrayList<>();
-        List<StateIllustration> stateIllustrations = new ArrayList<>();
-        populateScenesAndIllustrations(imageSets, usableArea, scenes, stateIllustrations);
-        return createState(name, stateImages, scenes, stateIllustrations);
+        for (Pattern screen : imageSets.getScreens()) scenes.add(new Image(screen));
+        return createState(name, stateImages, scenes, usableArea);
     }
 
-    private void populateScenesAndIllustrations(ImageSetsAndAssociatedScreens imageSets, Region usableArea,
-                                               List<Image> scenes, List<StateIllustration> stateIllustrations) {
-        for (Pattern screen : imageSets.getScreens()) {
-            Mat screenMat = screen.getMat();
-            scenes.add(new Image(screenMat));
-            stateIllustrations.add(new StateIllustration(new Mat(screenMat, usableArea.getJavaCVRect())));
-        }
-    }
-
-    private State createState(String stateName, List<StateImage> stateImages, List<Image> scenes,
-                             List<StateIllustration> stateIllustrations) {
-        State newState = new State.Builder(stateName)
+    private State createState(String stateName, List<StateImage> stateImages, List<Image> scenes, Region usableArea) {
+        return new State.Builder(stateName)
                 .withImages(stateImages)
                 .withScenes(scenes)
-                .addIllustrations(stateIllustrations)
+                .setUsableArea(usableArea)
                 .build();
-        for (StateIllustration stateIllustration : newState.getIllustrations()) {
-            stateIllustrator.drawState(newState, stateIllustration);
-        }
-        return newState;
     }
 }

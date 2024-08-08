@@ -1,0 +1,8 @@
+.state-dropdown {
+  margin-bottom: 10px;
+}
+
+.state-dropdown select {
+  padding: 5px;
+  font-size: 16px;
+}

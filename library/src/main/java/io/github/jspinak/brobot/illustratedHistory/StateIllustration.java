@@ -10,6 +10,8 @@ import org.bytedeco.opencv.opencv_core.Mat;
  * 1. Perhaps the easiest way to illustrate a state is to show its boundaries in a screenshot.
  * 2. Place images in their found locations.
  * The state boundaries, transition images, and other images, can all have different colored bounding boxes.
+ * This is no longer part of the State object: the State has a Scene, which is used by the React frontend as
+ *    the background image, over which the state images are highlighted.
  */
 @Getter
 @Setter

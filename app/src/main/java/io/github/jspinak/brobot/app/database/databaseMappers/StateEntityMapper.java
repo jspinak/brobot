@@ -12,23 +12,23 @@ public class StateEntityMapper {
     private final StateRegionEntityMapper stateRegionEntityMapper;
     private final StateLocationEntityMapper stateLocationEntityMapper;
     private final ImageEntityMapper imageEntityMapper;
-    private final StateIllustrationEntityMapper stateIllustrationEntityMapper;
     private final MatchHistoryEntityMapper matchHistoryEntityMapper;
+    private final RegionEmbeddableMapper regionEmbeddableMapper;
 
     public StateEntityMapper(StateImageEntityMapper stateImageEntityMapper,
                              StateStringEntityMapper stateStringEntityMapper,
                              StateRegionEntityMapper stateRegionEntityMapper,
                              StateLocationEntityMapper stateLocationEntityMapper,
                              ImageEntityMapper imageEntityMapper,
-                             StateIllustrationEntityMapper stateIllustrationEntityMapper,
-                             MatchHistoryEntityMapper matchHistoryEntityMapper) {
+                             MatchHistoryEntityMapper matchHistoryEntityMapper,
+                             RegionEmbeddableMapper regionEmbeddableMapper) {
         this.stateImageEntityMapper = stateImageEntityMapper;
         this.stateStringEntityMapper = stateStringEntityMapper;
         this.stateRegionEntityMapper = stateRegionEntityMapper;
         this.stateLocationEntityMapper = stateLocationEntityMapper;
         this.imageEntityMapper = imageEntityMapper;
-        this.stateIllustrationEntityMapper = stateIllustrationEntityMapper;
         this.matchHistoryEntityMapper = matchHistoryEntityMapper;
+        this.regionEmbeddableMapper = regionEmbeddableMapper;
     }
     
     public StateEntity map(State state) {
@@ -49,7 +49,7 @@ public class StateEntityMapper {
         stateEntity.setBaseProbabilityExists(state.getBaseProbabilityExists());
         stateEntity.setTimesVisited(state.getTimesVisited());
         stateEntity.setScenes(imageEntityMapper.mapToImageEntityList(state.getScenes()));
-        stateEntity.setIllustrations(stateIllustrationEntityMapper.mapToListEntity(state.getIllustrations()));
+        stateEntity.setUsableArea(regionEmbeddableMapper.map(state.getUsableArea()));
         stateEntity.setMatchHistory(matchHistoryEntityMapper.map(state.getMatchHistory()));
         return stateEntity;
     }
@@ -72,7 +72,7 @@ public class StateEntityMapper {
         state.setBaseProbabilityExists(stateEntity.getBaseProbabilityExists());
         state.setTimesVisited(stateEntity.getTimesVisited());
         state.setScenes(imageEntityMapper.mapToImageList(stateEntity.getScenes()));
-        state.setIllustrations(stateIllustrationEntityMapper.mapToList(stateEntity.getIllustrations()));
+        state.setUsableArea(regionEmbeddableMapper.map(stateEntity.getUsableArea()));
         state.setMatchHistory(matchHistoryEntityMapper.map(stateEntity.getMatchHistory()));
         return state;
     }
