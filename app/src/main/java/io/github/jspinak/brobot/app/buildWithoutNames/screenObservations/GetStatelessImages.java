@@ -52,7 +52,7 @@ public class GetStatelessImages {
                 .setMaxFusionDistances(getMinWidthBetweenImages(), 10)
                 .build();
         if (config.isLive()) setActionOptionsLive(screenObservation, findAllWords);
-        else setActionOptionsData(findAllWords, config.getUsableArea());
+        else findAllWords.getSearchRegions().addSearchRegions(config.getUsableArea());
 
         ObjectCollection inScene = new ObjectCollection.Builder()
                 .withScenes(screenObservation.getPattern())
@@ -70,10 +70,6 @@ public class GetStatelessImages {
     private void setActionOptionsLive(ScreenObservation screenObservation, ActionOptions actionOptions) {
         List<Region> dynamicRegions = screenObservation.getMatches().getMatchRegions();
         actionOptions.getSearchRegions().addSearchRegions(dynamicRegions);
-    }
-
-    private void setActionOptionsData(ActionOptions actionOptions, Region usableArea) {
-        actionOptions.getSearchRegions().addSearchRegions(usableArea);
     }
 
 }

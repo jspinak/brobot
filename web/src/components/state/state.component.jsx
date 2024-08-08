@@ -9,7 +9,7 @@ import './state.styles.css';
 const State = ({state}) => {
     const { id, name, stateText, stateImages, stateStrings, stateRegions, stateLocations,
     blocking, canHide, hidden, pathScore, lastAccessed, baseProbabilityExists,
-    timesVisited, scenes, illustrations } = state;
+    timesVisited, scenes } = state;
 
     return (
         <div className='state' key={id}>

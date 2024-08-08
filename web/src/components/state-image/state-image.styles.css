@@ -2,7 +2,7 @@
 .state-image {
   border: 1px solid #ccc;
   padding: 10px;
-  font-size: 0.9em;
+  font-size: 8px; /* Adjust the font size of h1 elements */
 }
 
 .state-image h3 {
@@ -12,3 +12,4 @@
 .state-image p {
   margin: 0;
 }
+

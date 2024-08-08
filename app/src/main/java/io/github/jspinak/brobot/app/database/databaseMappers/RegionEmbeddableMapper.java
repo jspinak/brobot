@@ -13,7 +13,7 @@ public class RegionEmbeddableMapper {
     public RegionEmbeddable map(Region region) {
         RegionEmbeddable regionEmbeddable = new RegionEmbeddable();
         regionEmbeddable.setX(region.getX());
-        regionEmbeddable.setY(region.getH());
+        regionEmbeddable.setY(region.getY());
         regionEmbeddable.setW(region.getW());
         regionEmbeddable.setH(region.getH());
         return regionEmbeddable;

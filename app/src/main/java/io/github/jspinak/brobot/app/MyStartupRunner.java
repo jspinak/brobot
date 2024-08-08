@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 @Component
-@Profile("build state structure")
+@Profile("build-state-structure")
 public class MyStartupRunner implements CommandLineRunner {
 
     private final BuildStateStructureFromScreenshots buildStateStructureFromScreenshots;
@@ -23,7 +23,7 @@ public class MyStartupRunner implements CommandLineRunner {
         StateStructureConfiguration stateStructureConfiguration = new StateStructureConfiguration.Builder()
                 .addImagesInScreenshotsFolder("floranext0", "floranext1", "floranext2")
                 .setBoundaryImages("topleft", "bottomR2")
-                .setMinImageArea(25)
+                .setMinImageArea(15)
                 .build();
         buildStateStructureFromScreenshots.build(stateStructureConfiguration);
     }

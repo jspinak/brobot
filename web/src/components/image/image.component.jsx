@@ -5,12 +5,12 @@ const Image = ({ image, onLoad }) => {
 
     return (
     <div className='image' key={id}>
-        <h1 className='image-name'>{name}</h1>
         <img
             src={`data:image/png;base64, ${imageBase64}`}
             alt={name}
             onLoad={onLoad}
         />
+        <h1 className='image-name'>{name}</h1>
     </div>
 )};
 

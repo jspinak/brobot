@@ -31,6 +31,6 @@ public class StateResponse {
     private int probabilityExists;
     private int timesVisited;
     private List<ImageResponse> scenes = new ArrayList<>();
-    private List<StateIllustrationResponse> illustrations = new ArrayList<>();
+    private RegionResponse usableArea;
     private MatchHistoryResponse matchHistory = new MatchHistoryResponse();
 }
