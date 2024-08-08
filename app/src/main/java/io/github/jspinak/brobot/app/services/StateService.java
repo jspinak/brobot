@@ -98,7 +98,6 @@ public class StateService {
     @Transactional
     public void save(State state) {
         if (state == null) return;
-        //stateRepo.save(stateMapper.map(state));
         stateRepo.save(stateEntityMapper.map(state));
     }
 

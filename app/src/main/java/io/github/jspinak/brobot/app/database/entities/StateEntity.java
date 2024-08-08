@@ -1,5 +1,6 @@
 package io.github.jspinak.brobot.app.database.entities;
 
+import io.github.jspinak.brobot.app.database.embeddable.RegionEmbeddable;
 import io.github.jspinak.brobot.datatypes.primitives.match.MatchHistory;
 import io.github.jspinak.brobot.datatypes.state.state.State;
 import io.github.jspinak.brobot.illustratedHistory.StateIllustration;
@@ -62,11 +63,8 @@ public class StateEntity {
             joinColumns = @JoinColumn(name = "state_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "scene_id", referencedColumnName = "id"))
     private List<ImageEntity> scenes = new ArrayList<>();
-    @OneToMany(cascade = CascadeType.ALL)
-    @JoinTable(name = "state_illustrations",
-            joinColumns = @JoinColumn(name = "state_id", referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "illustration_id", referencedColumnName = "id"))
-    private List<StateIllustrationEntity> illustrations = new ArrayList<>();
+    @Embedded
+    private RegionEmbeddable usableArea = new RegionEmbeddable();
     @OneToOne(cascade = CascadeType.ALL)
     private MatchHistoryEntity matchHistory = new MatchHistoryEntity();
 }
