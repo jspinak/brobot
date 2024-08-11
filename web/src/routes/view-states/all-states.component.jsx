@@ -6,7 +6,7 @@ import { Outlet } from 'react-router-dom'
 import ImageList from './../../components/image-list/image-list.component';
 import PatternList from './../../components/pattern-list/pattern-list.component';
 import StateList from './../../components/state-list/state-list.component';
-import StateDetails from './../../components/state/state-details.component';
+import StateDetails from './../state/state-details.component';
 import SearchBox from './../../components/search-box/search-box.component';
 import './all-states.styles.css';
 
@@ -55,8 +55,9 @@ useEffect(() => {
 
   return (
     <div className="AllStates">
-      <h1 className='app-title'>States</h1>
-      <SearchBox onChangeHandler={onSearchChange} placeholder='search states' className='search-box'/>
+      {/*<h1>
+        <SearchBox onChangeHandler={onSearchChange} placeholder='search states' className='search-box'/>
+      </h1>*/}
       <Routes>
         <Route path="/" element={
           isLoading ? (

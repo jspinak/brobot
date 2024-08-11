@@ -1,5 +1,6 @@
 package io.github.jspinak.brobot.app.web.responseMappers;
 
+import io.github.jspinak.brobot.app.database.entities.ImageEntity;
 import io.github.jspinak.brobot.app.database.entities.PatternEntity;
 import io.github.jspinak.brobot.app.web.responses.PatternResponse;
 import org.springframework.stereotype.Component;
@@ -63,7 +64,12 @@ public class PatternResponseMapper {
         patternEntity.setDynamic(patternResponse.isDynamic());
         patternEntity.setPosition(positionResponseMapper.map(patternResponse.getPosition()));
         patternEntity.setAnchors(anchorsResponseMapper.map(patternResponse.getAnchors()));
-        patternEntity.setImage(imageResponseMapper.map(patternResponse.getImage()));
+        if (patternResponse.getImage() != null) {
+            ImageEntity imageEntity = imageResponseMapper.map(patternResponse.getImage());
+            if (imageEntity != null) {
+                patternEntity.setImage(imageEntity);
+            }
+        }
         return patternEntity;
     }
 }

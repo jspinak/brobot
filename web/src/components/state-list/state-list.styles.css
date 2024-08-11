@@ -1,6 +1,12 @@
 .state-list {
-    width: 40vw;
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr 1fr;
-    grid-gap: 10px;
+  display: flex;
+  overflow-x: auto;
+  width: 100%;
+  white-space: nowrap;
+}
+
+.state {
+  flex: 0 0 200px; /* Set a fixed width for each state */
+  box-sizing: border-box;
+  margin-right: 10px; /* Add spacing between states */
 }

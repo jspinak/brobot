@@ -33,7 +33,7 @@ public class PatternEntity {
     private PositionEmbeddable position = new PositionEmbeddable();
     @OneToOne(cascade = CascadeType.ALL)
     private AnchorsEntity anchors = new AnchorsEntity();
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private ImageEntity image;
 
 }

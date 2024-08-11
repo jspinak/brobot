@@ -1,15 +1,13 @@
-/* state-image.styles.css */
 .state-image {
-  border: 1px solid #ccc;
-  padding: 10px;
-  font-size: 8px; /* Adjust the font size of h1 elements */
+  /* ... other styles */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
-.state-image h3 {
-  margin: 0 0 5px 0;
+.state-image img {
+  max-width: 100%;
+  height: auto;
 }
 
-.state-image p {
-  margin: 0;
-}
 

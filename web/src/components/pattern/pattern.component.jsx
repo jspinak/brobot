@@ -10,11 +10,11 @@ const Pattern = ({pattern}) => {
 
     return (
         <div className='pattern' key={id}>
-            <h3 className="bold-heading"><strong>Pattern: </strong>{name}</h3>
+            {/*<h3 className="bold-heading">{name}</h3>
             {fixedRegion && (
                 <div className="fixed-region">
                 </div>
-            )}
+            )}*/}
             {image && <Image image={image} />}
         </div>
     )
