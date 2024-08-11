@@ -1,31 +1,30 @@
 import { Outlet, Link } from 'react-router-dom';
 import { Fragment } from 'react';
-import { ReactComponent as BrobotLogo } from '../../assets/brobot-happy.svg';
+import brobotHappy from '../../components/assets/brobot-happy.svg';
 import Button from '../../components/button/button.component'
 import './navigation.styles.scss';
 
-const Navigation = () => {
-    return (
-        <Fragment>
-            <div className='navigation'>
-                <Link className='logo-container' to='/'>
-                    <BrobotLogo className='logo'/>
-                </Link>
-                <div className='links-container'>
-                    <Link className='nav-link' to='/states'>
-                        <Button>STATES</Button>
-                    </Link>
-                </div>
-                <div>
-                    <Button>TAKE SCREENSHOTS</Button>
-                </div>
-                <div>
-                    <Button>CREATE STATES FROM SCREENSHOTS</Button>
-                </div>
-            </div>
-            <Outlet />
-        </Fragment>
-    );
+const NavigationBar = () => {
+  return (
+    <nav>
+      <ul>
+        <li>
+          <Link to="/">
+            <img src={brobotHappy} alt="Home" />
+          </Link>
+        </li>
+        <li>
+          <Link to="/states">States</Link>
+        </li>
+        <li>
+          <Link to="/states/1">State Details</Link>
+        </li>
+        <li>
+          <Link to="/create-state">Create State</Link>
+        </li>
+      </ul>
+    </nav>
+  );
 };
 
-export default Navigation;
+export default NavigationBar;

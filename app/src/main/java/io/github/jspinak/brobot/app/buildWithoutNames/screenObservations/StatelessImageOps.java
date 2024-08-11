@@ -75,7 +75,7 @@ public class StatelessImageOps {
                         newImage.getRegions().get(0).getW());
         double adjustH = Math.abs((repoImage.getRegions().get(0).getH()- newImage.getRegions().get(0).getH())/
                 newImage.getRegions().get(0).getH());
-        newScore = newScore - adjustW - adjustH;
+        //newScore = newScore - adjustW - adjustH;
         return newScore;
     }
 

@@ -3,6 +3,8 @@ package io.github.jspinak.brobot.app.services;
 import io.github.jspinak.brobot.app.database.databaseMappers.StateEntityMapper;
 import io.github.jspinak.brobot.app.database.entities.StateEntity;
 import io.github.jspinak.brobot.app.database.repositories.StateRepo;
+import io.github.jspinak.brobot.app.web.responseMappers.StateResponseMapper;
+import io.github.jspinak.brobot.app.web.responses.StateResponse;
 import io.github.jspinak.brobot.datatypes.state.state.State;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,11 +24,14 @@ public class StateService {
 
     private final StateRepo stateRepo;
     private final StateEntityMapper stateEntityMapper;
+    private final StateResponseMapper stateResponseMapper;
     //private StateMapper stateMapper = StateMapper.INSTANCE;
 
-    public StateService(StateRepo stateRepo, StateEntityMapper stateEntityMapper) {
+    public StateService(StateRepo stateRepo, StateEntityMapper stateEntityMapper,
+                        StateResponseMapper stateResponseMapper) {
         this.stateRepo = stateRepo;
         this.stateEntityMapper = stateEntityMapper;
+        this.stateResponseMapper = stateResponseMapper;
     }
 
     @Transactional(readOnly = true)
@@ -99,6 +104,14 @@ public class StateService {
     public void save(State state) {
         if (state == null) return;
         stateRepo.save(stateEntityMapper.map(state));
+    }
+
+    @Transactional
+    public StateEntity save(StateResponse stateResponse) {
+        if (stateResponse == null) return null;
+        StateEntity stateEntity = stateResponseMapper.map(stateResponse);
+        stateRepo.save(stateEntity);
+        return stateEntity;
     }
 
     @Transactional

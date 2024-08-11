@@ -1,4 +1,4 @@
-import State from '../state/state.component';
+import State from '../../routes/state/state.component';
 import './state-list.styles.css';
 
 const StateList = ({ states }) => {

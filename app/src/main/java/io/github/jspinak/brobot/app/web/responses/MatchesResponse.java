@@ -6,6 +6,7 @@ import lombok.Setter;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -15,8 +16,8 @@ import java.util.Set;
 public class MatchesResponse {
     private Long id;
     private String actionDescription;
-    private List<MatchResponse> matchList;
-    private List<MatchResponse> initialMatchList;
+    private List<MatchResponse> matchList = new ArrayList<>();
+    private List<MatchResponse> initialMatchList = new ArrayList<>();
     private ActionOptionsResponse actionOptions;
     private Set<String> activeStates;
     private String selectedText;
@@ -24,7 +25,7 @@ public class MatchesResponse {
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private boolean success;
-    private List<RegionResponse> definedRegions;
+    private List<RegionResponse> definedRegions = new ArrayList<>();
     private int maxMatches;
     private String outputText;
 }
