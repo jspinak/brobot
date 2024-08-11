@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Routes, Route } from 'react-router-dom';
-import Navigation from './routes/navigation/navigation.component'
-import Home from './routes/home/home.component'
+import NavigationBar from './routes/navigation/navigation.component';
+import Home from './routes/home/home.component';
 import AllStates from './routes/view-states/all-states.component';
-import StateDetails from './components/state/state-details.component';
-
+import StateDetails from './routes/state/state-details.component';
+import CreateState from './routes/create-state/create-state.component';
 
 function App() {
   const [states, setStates] = useState([]);
@@ -24,10 +24,15 @@ function App() {
   }, []);
 
   return (
+    <>
+      <NavigationBar />
       <Routes>
-        <Route path="/" element={<AllStates states={states} isLoading={isLoading} />} />
+        <Route path="/" element={<Home />} />
+        <Route path="/states/*" element={<AllStates states={states} isLoading={isLoading} />} />
         <Route path="/states/:stateId" element={<StateDetails allStates={states} />} />
+        <Route path="/create-state" element={<CreateState />} />
       </Routes>
+    </>
   );
 }
 

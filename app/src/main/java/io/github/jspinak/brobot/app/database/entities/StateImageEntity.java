@@ -18,7 +18,7 @@ public class StateImageEntity {
     private Long projectId = 0L;
     private StateObject.Type objectType = StateObject.Type.IMAGE;
     private String name = "";
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(name = "stateImage_patterns",
             joinColumns = @JoinColumn(name = "stateImage_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "pattern_id", referencedColumnName = "id"))

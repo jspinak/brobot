@@ -20,7 +20,7 @@ public class PatternResponse {
     private int index;
     private boolean dynamic;
     private PositionResponse position;
-    private AnchorsResponse anchors;
+    private AnchorsResponse anchors = new AnchorsResponse();
     private ImageResponse image;
 
 }
