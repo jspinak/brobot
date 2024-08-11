@@ -173,6 +173,9 @@ public class BufferedImageOps {
     }
 
     public static byte[] base64StringToByteArray(String base64String) {
+        if (base64String == null || base64String.isEmpty()) {
+            return null;
+        }
         return toByteArray(base64StringToImage(base64String));
     }
 

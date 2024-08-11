@@ -26,22 +26,22 @@ public class StateEntity {
     @ElementCollection
     @CollectionTable(name = "state_stateText", joinColumns = @JoinColumn(name = "state_id", referencedColumnName = "id"))
     private Set<String> stateText = new HashSet<>();
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(name = "state_stateImages",
             joinColumns = @JoinColumn(name = "state_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "stateImage_id", referencedColumnName = "id"))
     private Set<StateImageEntity> stateImages = new HashSet<>();
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(name = "state_stateStrings",
             joinColumns = @JoinColumn(name = "state_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "stateString_id", referencedColumnName = "id"))
     private Set<StateStringEntity> stateStrings = new HashSet<>();
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(name = "state_stateRegions",
             joinColumns = @JoinColumn(name = "state_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "stateRegion_id", referencedColumnName = "id"))
     private Set<StateRegionEntity> stateRegions = new HashSet<>();
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(name = "state_stateLocations",
             joinColumns = @JoinColumn(name = "state_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "stateLocation_id", referencedColumnName = "id"))
@@ -58,7 +58,7 @@ public class StateEntity {
     private int baseProbabilityExists = 100;
     private int probabilityExists = 0;
     private int timesVisited = 0;
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(name = "state_scenes",
             joinColumns = @JoinColumn(name = "state_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "scene_id", referencedColumnName = "id"))

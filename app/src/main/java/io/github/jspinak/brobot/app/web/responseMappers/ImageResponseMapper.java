@@ -18,10 +18,16 @@ public class ImageResponseMapper {
     }
 
     public ImageEntity map(ImageResponse imageResponse) {
+        if (imageResponse == null) {
+            return null;
+        }
         ImageEntity imageEntity = new ImageEntity();
         imageEntity.setId(imageResponse.getId());
         imageEntity.setName(imageResponse.getName());
-        imageEntity.setBytes(BufferedImageOps.base64StringToByteArray(imageResponse.getImageBase64()));
+        if (imageResponse.getImageBase64() != null && !imageResponse.getImageBase64().isEmpty()) {
+            byte[] bytes = BufferedImageOps.base64StringToByteArray(imageResponse.getImageBase64());
+            imageEntity.setBytes(bytes);
+        }
         return imageEntity;
     }
 }
