@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import Image from './../../components/image/image.component'; // Adjust the import path as necessary
-import StateImage from './../../components/state-image/state-image.component';
+import ImageSelector from './../../components/image/ImageSelector';
+import NewStateDisplay from './NewStateDisplay';
 import './create-state.styles.css'
 
 const CreateState = () => {
@@ -57,22 +57,21 @@ const CreateState = () => {
           return;
         }
 
-        try {
-          const response = await axios.post('http://localhost:8080/api/states', newStateObj, {
-            headers: {
-              'Content-Type': 'application/json',
-            },
-          });
-          console.log('Server response:', JSON.stringify(response.data, null, 2));
-          setNewState(response.data); // Assuming the server returns the created State object
-        } catch (error) {
-          console.error('Error saving new state:', error);
-          if (error.response) {
-            console.error('Server error response:', error.response.data);
-          }
-          // Maybe show an error message to the user
-        }
-    };
+    try {
+      const response = await axios.post('http://localhost:8080/api/states', newStateObj, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      console.log('Server response:', JSON.stringify(response.data, null, 2));
+      setNewState(response.data);
+    } catch (error) {
+      console.error('Error saving new state:', error);
+      if (error.response) {
+        console.error('Server error response:', error.response.data);
+      }
+    }
+  };
 
   return (
     <div>
@@ -83,34 +82,13 @@ const CreateState = () => {
         onChange={(e) => setStateName(e.target.value)}
         placeholder="Enter state name"
       />
-      <div className="image-grid">
-        {images.map(image => (
-          <div key={image.id} className="image-container">
-            <input
-              type="checkbox"
-              id={`image-${image.id}`}
-              checked={selectedImages.includes(image.id)}
-              onChange={() => handleImageSelect(image.id)}
-            />
-            <label htmlFor={`image-${image.id}`}>
-              <Image image={image} />
-            </label>
-          </div>
-        ))}
-      </div>
+      <ImageSelector
+        images={images}
+        selectedImages={selectedImages}
+        handleImageSelect={handleImageSelect}
+      />
       <button onClick={handleCreateState}>Create State</button>
-
-        {newState && (
-          <div className="new-state-container">  {/* New container class */}
-            <h2>New State Created:</h2>
-            <p>Name: {newState.name}</p>
-            <div className="state-image-grid">
-              {Array.isArray(newState.stateImages) && newState.stateImages.map((stateImage, index) => (
-                <StateImage key={index} stateImage={stateImage} />
-              ))}
-            </div>
-          </div>
-        )}
+      {newState && <NewStateDisplay newState={newState} />}
     </div>
   );
 };
