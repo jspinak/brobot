@@ -2,42 +2,58 @@
   display: flex;
   flex-direction: column;
   height: 100vh;
-  overflow: hidden; /* Ensure the entire viewport is used and overflow is hidden */
+  overflow: hidden;
 }
 
 .state-content {
   display: flex;
   flex: 1;
-  overflow: hidden; /* Prevent the main container from overflowing */
+  overflow: hidden;
 }
 
 .state-image-list {
   width: 300px;
-  overflow-y: auto; /* Scrollable list of state images */
-  max-height: 100%; /* Ensure it does not overflow its container */
+  overflow-y: auto;
+  max-height: 100%;
 }
 
 .state-scenes {
   flex: 1;
-  overflow-y: auto; /* Make the scenes container scrollable */
-  padding-left: 10px; /* Optional padding for better visuals */
+  overflow-y: auto;
+  padding-left: 10px;
 }
 
 .state-scene {
   position: relative;
-  margin-bottom: 20px; /* Add spacing between scenes */
+  margin-bottom: 20px;
 }
 
 .state-scene img {
-  width: 100%; /* Ensure image fits within its container */
+  width: 100%;
   height: auto;
   object-fit: contain;
 }
 
+.image-checkbox {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+}
+
+.image-edit-input {
+  margin-top: 10px;
+}
+
 .highlight {
-  border: 2px solid rgba(255, 255, 255, 0.8); /* White outline */
-  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.8); /* Black outline */
-  background-color: rgba(255, 0, 0, 0.3); /* Semi-transparent red background */
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.8);
+  background-color: rgba(255, 0, 0, 0.3);
   position: absolute;
   pointer-events: none;
+}
+
+.action-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin: 10px 0;
 }
