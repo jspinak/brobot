@@ -1,0 +1,62 @@
+.common-height {
+    height: 36px;
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+}
+
+.state-details-buttons {
+    display: flex;
+    align-items: center; /* Align items vertically */
+    gap: 10px; /* Add space between elements */
+    margin: 10px 0;
+}
+
+.state-dropdown-container {
+    background-color: #f0f0f0; /* Light grey background */
+    padding: 0px;
+    border-radius: 4px; /* Optional: rounded corners */
+}
+
+.state-dropdown-container select {
+    background-color: #f0f0f0; /* Light grey background for the dropdown */
+    border: none;
+    padding: 0px;
+    border-radius: 4px; /* Optional: rounded corners */
+}
+
+.state-dropdown-container option {
+    padding: 5px;
+}
+
+.state-name-edit {
+    display: flex;
+    align-items: center;
+}
+
+.state-name-edit input {
+    margin-right: 10px;
+}
+
+.state-name-edit button {
+    padding: 5px 10px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+.state-name-edit button:hover {
+    background-color: #45a049;
+}
+
+.state-stats {
+    display: flex;
+    gap: 15px;
+}
+
+.state-stats span {
+    font-size: 14px;
+    color: #555;
+}
+

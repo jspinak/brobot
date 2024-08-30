@@ -1,0 +1,32 @@
+.state-image-details {
+    /* Your existing styles */
+}
+
+.state-image-options {
+    display: flex;
+    gap: 2px; /* Space between the dropdown and button */
+    margin-top: 4px; /* Space above the options */
+}
+
+.state-image-options select,
+.state-image-options button {
+    padding: 1px 1px;
+    border-radius: 1px; /* Optional: rounded corners */
+}
+
+.state-image-options select {
+    background-color: #f0f0f0; /* Light grey background for the dropdown */
+    border: 1px solid #ccc;
+}
+
+.state-image-options button {
+    background-color: #007bff; /* Blue background color */
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.state-image-options button:hover {
+    background-color: #0056b3; /* Darker blue on hover */
+}

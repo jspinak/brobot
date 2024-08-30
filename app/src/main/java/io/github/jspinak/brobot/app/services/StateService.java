@@ -1,13 +1,21 @@
 package io.github.jspinak.brobot.app.services;
 
+import io.github.jspinak.brobot.app.database.DatabaseCheckService;
 import io.github.jspinak.brobot.app.database.databaseMappers.StateEntityMapper;
 import io.github.jspinak.brobot.app.database.entities.StateEntity;
 import io.github.jspinak.brobot.app.database.repositories.StateRepo;
+import io.github.jspinak.brobot.app.web.requests.StateRequest;
 import io.github.jspinak.brobot.app.web.responseMappers.StateResponseMapper;
 import io.github.jspinak.brobot.app.web.responses.StateResponse;
 import io.github.jspinak.brobot.datatypes.state.state.State;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -22,16 +30,20 @@ import java.util.stream.Stream;
 @Service
 public class StateService {
 
+    private static final Logger logger = LoggerFactory.getLogger(StateService.class);
+
     private final StateRepo stateRepo;
     private final StateEntityMapper stateEntityMapper;
     private final StateResponseMapper stateResponseMapper;
+    private final DatabaseCheckService databaseCheckService;
     //private StateMapper stateMapper = StateMapper.INSTANCE;
 
     public StateService(StateRepo stateRepo, StateEntityMapper stateEntityMapper,
-                        StateResponseMapper stateResponseMapper) {
+                        StateResponseMapper stateResponseMapper, DatabaseCheckService databaseCheckService) {
         this.stateRepo = stateRepo;
         this.stateEntityMapper = stateEntityMapper;
         this.stateResponseMapper = stateResponseMapper;
+        this.databaseCheckService = databaseCheckService;
     }
 
     @Transactional(readOnly = true)
@@ -42,8 +54,8 @@ public class StateService {
     }
 
     @Transactional(readOnly = true)
-    public Optional<StateEntity> getStateEntity(String name) {
-        return stateRepo.findByName(name);
+    public Optional<StateEntity> getStateEntity(Long stateId) {
+        return stateRepo.findById(stateId);
     }
 
     @Transactional(readOnly = true)
@@ -103,15 +115,15 @@ public class StateService {
     @Transactional
     public void save(State state) {
         if (state == null) return;
-        stateRepo.save(stateEntityMapper.map(state));
+        logger.info("Before save: {}", state);
+        StateEntity stateEntity = stateEntityMapper.map(state);
+        stateRepo.save(stateEntity);
+        logger.info("After save: {}", state);
+        stateEntity.getStateImages().forEach(stateImageEntity -> stateImageEntity.setOwnerStateId(stateEntity.getId()));
     }
 
-    @Transactional
-    public StateEntity save(StateResponse stateResponse) {
-        if (stateResponse == null) return null;
-        StateEntity stateEntity = stateResponseMapper.map(stateResponse);
-        stateRepo.save(stateEntity);
-        return stateEntity;
+    public StateEntity save(StateEntity stateEntity) {
+        return stateRepo.save(stateEntity);
     }
 
     @Transactional

@@ -1,6 +1,7 @@
 package io.github.jspinak.brobot.app.web.responseMappers;
 
 import io.github.jspinak.brobot.app.database.entities.StateStringEntity;
+import io.github.jspinak.brobot.app.web.requests.StateStringRequest;
 import io.github.jspinak.brobot.app.web.responses.StateStringResponse;
 import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.StateString;
 import org.springframework.stereotype.Component;
@@ -61,6 +62,35 @@ public class StateStringResponseMapper {
         return stateStringResponses.stream()
                 .map(this::map)
                 .collect(Collectors.toList());
+    }
+
+
+    public StateStringEntity fromRequest(StateStringRequest request) {
+        if (request == null) return null;
+        StateStringEntity entity = new StateStringEntity();
+        entity.setObjectType(request.getObjectType());
+        entity.setName(request.getName());
+        entity.setSearchRegion(regionResponseMapper.fromRequest(request.getSearchRegion()));
+        entity.setOwnerStateName(request.getOwnerStateName());
+        entity.setTimesActedOn(request.getTimesActedOn());
+        entity.setString(request.getString());
+        return entity;
+    }
+
+    public StateStringRequest toRequest(StateStringEntity entity) {
+        if (entity == null) {
+            return null;
+        }
+
+        StateStringRequest request = new StateStringRequest();
+        request.setObjectType(entity.getObjectType());
+        request.setName(entity.getName());
+        request.setSearchRegion(regionResponseMapper.toRequest(entity.getSearchRegion()));
+        request.setOwnerStateName(entity.getOwnerStateName());
+        request.setTimesActedOn(entity.getTimesActedOn());
+        request.setString(entity.getString());
+
+        return request;
     }
 }
 

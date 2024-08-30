@@ -1,7 +1,7 @@
 package io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis;
 
 import io.github.jspinak.brobot.actions.methods.basicactions.find.contours.Contours;
-import io.github.jspinak.brobot.datatypes.primitives.image.Image;
+import io.github.jspinak.brobot.datatypes.primitives.image.Scene;
 import io.github.jspinak.brobot.illustratedHistory.Illustrations;
 import io.github.jspinak.brobot.reports.Report;
 import lombok.Getter;
@@ -47,7 +47,7 @@ public class SceneAnalysisCollection {
     The scene that represents the collection, and is used for illustration.
     For motion analysis, the last scene is used.
     */
-    public Optional<Image> getLastScene() {
+    public Optional<Scene> getLastScene() {
         if (sceneAnalyses.isEmpty()) return Optional.empty();
         return Optional.of(sceneAnalyses.get(sceneAnalyses.size() - 1).getScene());
     }
@@ -61,24 +61,24 @@ public class SceneAnalysisCollection {
         return getLastSceneAnalysis().map(sceneAnalysis -> sceneAnalysis.getAnalysis(BGR, BGR_FROM_INDICES_2D));
     }
 
-    public List<Image> getScenes() {
+    public List<Scene> getScenes() {
         return sceneAnalyses.stream().map(SceneAnalysis::getScene).toList();
     }
 
     public List<Mat> getAllScenesAsBGR() {
         List<Mat> mats = new ArrayList<>();
         for (SceneAnalysis sceneAnalysis : sceneAnalyses) {
-            mats.add(sceneAnalysis.getScene().getMatBGR());
+            mats.add(sceneAnalysis.getScene().getPattern().getImage().getMatBGR());
         }
         return mats;
     }
 
     public Optional<Mat> getLastSceneBGR() {
-        List<Image> scenes = getScenes();
+        List<Scene> scenes = getScenes();
         if (scenes.isEmpty()) {
             return Optional.empty();
         }
-        return Optional.of(scenes.get(scenes.size() - 1).getMatBGR());
+        return Optional.of(scenes.get(scenes.size() - 1).getPattern().getImage().getMatBGR());
     }
 
     public List<Illustrations> getAllIllustratedScenes() {

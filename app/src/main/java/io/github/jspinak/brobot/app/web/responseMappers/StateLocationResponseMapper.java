@@ -1,6 +1,7 @@
 package io.github.jspinak.brobot.app.web.responseMappers;
 
 import io.github.jspinak.brobot.app.database.entities.StateLocationEntity;
+import io.github.jspinak.brobot.app.web.requests.StateLocationRequest;
 import io.github.jspinak.brobot.app.web.responses.StateLocationResponse;
 import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.StateLocation;
 import org.springframework.stereotype.Component;
@@ -78,6 +79,42 @@ public class StateLocationResponseMapper {
         return stateLocationResponses.stream()
                 .map(this::map)
                 .collect(Collectors.toList());
+    }
+
+    public StateLocationEntity fromRequest(StateLocationRequest request) {
+        if (request == null) return null;
+        StateLocationEntity entity = new StateLocationEntity();
+        entity.setObjectType(request.getObjectType());
+        entity.setName(request.getName());
+        entity.setLocation(locationResponseMapper.fromRequest(request.getLocation()));
+        entity.setOwnerStateName(request.getOwnerStateName());
+        entity.setStaysVisibleAfterClicked(request.getStaysVisibleAfterClicked());
+        entity.setProbabilityExists(request.getProbabilityExists());
+        entity.setTimesActedOn(request.getTimesActedOn());
+        entity.setPosition(positionResponseMapper.fromRequest(request.getPosition()));
+        entity.setAnchors(anchorsResponseMapper.fromRequest(request.getAnchors()));
+        entity.setMatchHistory(matchHistoryResponseMapper.fromRequest(request.getMatchHistory()));
+        return entity;
+    }
+
+    public StateLocationRequest toRequest(StateLocationEntity entity) {
+        if (entity == null) {
+            return null;
+        }
+
+        StateLocationRequest request = new StateLocationRequest();
+        request.setObjectType(entity.getObjectType());
+        request.setName(entity.getName());
+        request.setLocation(locationResponseMapper.toRequest(entity.getLocation()));
+        request.setOwnerStateName(entity.getOwnerStateName());
+        request.setStaysVisibleAfterClicked(entity.getStaysVisibleAfterClicked());
+        request.setProbabilityExists(entity.getProbabilityExists());
+        request.setTimesActedOn(entity.getTimesActedOn());
+        request.setPosition(positionResponseMapper.toRequest(entity.getPosition()));
+        request.setAnchors(anchorsResponseMapper.toRequest(entity.getAnchors()));
+        request.setMatchHistory(matchHistoryResponseMapper.toRequest(entity.getMatchHistory()));
+
+        return request;
     }
 }
 

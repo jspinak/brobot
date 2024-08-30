@@ -30,7 +30,7 @@ public class BuildStateStructureFromScreenshots {
     }
 
     public void build(StateStructureConfiguration config) {
-        if (config.getScreenshots().isEmpty()) return;
+        if (config.getScenes().isEmpty()) return;
         Region usableArea = setUsableArea.setArea(config);
         List<StatelessImage> statelessImages = new ArrayList<>();
         getScreenObservationFromScreenshot.getScreenObservations(config, statelessImages);

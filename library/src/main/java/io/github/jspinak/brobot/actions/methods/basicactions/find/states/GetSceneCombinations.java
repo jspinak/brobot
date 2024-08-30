@@ -3,7 +3,7 @@ package io.github.jspinak.brobot.actions.methods.basicactions.find.states;
 import io.github.jspinak.brobot.actions.actionExecution.MatchesInitializer;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.fixedAndDynamicPixels.FindDynamicPixelMatches;
-import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
+import io.github.jspinak.brobot.datatypes.primitives.image.Scene;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -52,8 +52,8 @@ public class GetSceneCombinations {
      */
     public Optional<Mat> getDynamicPixelMat(ObjectCollection objectCollection1, ObjectCollection objectCollection2) {
         if (objectCollection1.getScenes().isEmpty() || objectCollection2.getScenes().isEmpty()) return Optional.empty();
-        Pattern scene1 = objectCollection1.getScenes().get(0);
-        Pattern scene2 = objectCollection2.getScenes().get(0);
+        Scene scene1 = objectCollection1.getScenes().get(0);
+        Scene scene2 = objectCollection2.getScenes().get(0);
         ObjectCollection objectCollection = new ObjectCollection.Builder()
                 .withScenes(scene1, scene2)
                 .build();

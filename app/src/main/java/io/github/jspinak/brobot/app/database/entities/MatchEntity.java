@@ -2,11 +2,10 @@ package io.github.jspinak.brobot.app.database.entities;
 
 import io.github.jspinak.brobot.app.database.embeddable.RegionEmbeddable;
 import io.github.jspinak.brobot.app.database.embeddable.StateObjectDataEmbeddable;
-import io.github.jspinak.brobot.datatypes.primitives.region.Region;
-import io.github.jspinak.brobot.datatypes.state.stateObject.StateObjectData;
 import jakarta.persistence.*;
 import lombok.Data;
 import org.bytedeco.opencv.opencv_core.Mat;
+
 import java.time.LocalDateTime;
 
 @Entity
@@ -32,8 +31,7 @@ public class MatchEntity {
     private StateObjectDataEmbeddable stateObjectData;
     @Transient
     private Mat histogram;
-    @OneToOne(cascade = CascadeType.ALL)
-    private ImageEntity scene;
+    private Long sceneId; // Scene here would create a circular reference
     private LocalDateTime timeStamp;
     private int timesActedOn = 0;
 }

@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.datatypes.state.state;
 
-import io.github.jspinak.brobot.datatypes.primitives.image.Image;
+import io.github.jspinak.brobot.datatypes.primitives.image.Scene;
 import io.github.jspinak.brobot.datatypes.primitives.location.Location;
 import io.github.jspinak.brobot.datatypes.primitives.match.MatchHistory;
 import io.github.jspinak.brobot.datatypes.primitives.match.MatchSnapshot;
@@ -9,7 +9,6 @@ import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.St
 import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.StateRegion;
 import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.StateString;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
-import io.github.jspinak.brobot.illustratedHistory.StateIllustration;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -33,6 +32,7 @@ import java.util.*;
 public class State {
 
     private Long projectId = 0L;
+    private Long id = null; // set when the state is saved
     private String name = "";
     /**
      * StateText is text that appears on the screen and is a clue to look for images in this state.
@@ -63,6 +63,7 @@ public class State {
      * States are added to the 'hidden' set.
      */
     private Set<String> canHide = new HashSet<>();
+    private Set<Long> canHideIds = new HashSet<>();
     /**
      * Hiding a State means that this State covers the hidden State, and when this State is exited
      * the hidden State becomes visible again. For example, opening a menu
@@ -70,10 +71,11 @@ public class State {
      * When this State becomes active,
      * any active 'canHide' States are deactivated and placed into this State's hidden set.
      * When the State is exited and the hidden States reappear, they are removed from the hidden set.
-     * The hidden set is used by StateTransitions when there is a PREVIOUS Transition (PREVIOUS is
+     * StateTransitions uses the hidden set when there is a PREVIOUS Transition (PREVIOUS is
      * a variable StateEnum).
      */
-    private Set<String> hidden = new HashSet<>();
+    private Set<String> hiddenStateNames = new HashSet<>(); // used when initializing states in code
+    private Set<Long> hiddenStateIds = new HashSet<>(); // used at runtime
     private int pathScore = 1; // larger path scores discourage taking a path with this state
     /*
     LocalDateTime, to be persisted with JPA, requires the @Converter annotation and code to convert the value
@@ -95,7 +97,7 @@ public class State {
      * illustrating the state to display it visually. Not all StateImages need to be present.
      * The usable area is the region used to find images. A pattern's fixed region gives its location in the usable area.
      */
-    private List<Image> scenes = new ArrayList<>();
+    private List<Scene> scenes = new ArrayList<>();
     private Region usableArea = new Region();
     /**
      * Some actions take place without an associated Pattern or StateImage. These actions are stored in their
@@ -111,12 +113,12 @@ public class State {
         probabilityExists = baseProbabilityExists;
     }
 
-    public void addHiddenState(String stateName) {
-        hidden.add(stateName);
+    public void addHiddenState(Long stateId) {
+        hiddenStateIds.add(stateId);
     }
 
     public void resetHidden() {
-        hidden = new HashSet<>();
+        hiddenStateNames = new HashSet<>();
     }
 
     public void addVisit() {
@@ -190,7 +192,7 @@ public class State {
         private int pathScore = 1;
         private LocalDateTime lastAccessed;
         private int baseProbabilityExists = 100;
-        private final List<Image> scenes = new ArrayList<>();
+        private final List<Scene> scenes = new ArrayList<>();
         private Region usableArea = new Region();
 
         public Builder(String stateName) {
@@ -246,13 +248,13 @@ public class State {
             return this;
         }
 
-        public Builder withScenes(List<Image> scenes) {
+        public Builder withScenes(List<Scene> scenes) {
             this.scenes.addAll(scenes);
             return this;
         }
 
-        public Builder addScenes(Image... scenes) {
-            this.scenes.addAll(List.of(scenes));
+        public Builder addScenes(Scene... scenes) {
+            this.scenes.addAll(Arrays.asList(scenes));
             return this;
         }
 
@@ -266,6 +268,7 @@ public class State {
             state.name = name;
             state.stateText = stateText;
             for (StateImage image : stateImages) image.setOwnerStateName(name);
+            for (StateLocation location : stateLocations) location.setOwnerStateName(name);
             for (StateString string : stateStrings) string.setOwnerStateName(name);
             for (StateRegion region : stateRegions) region.setOwnerStateName(name);
             state.stateImages = stateImages;
@@ -274,7 +277,7 @@ public class State {
             state.stateLocations = stateLocations;
             state.blocking = blocking;
             state.canHide = canHide;
-            state.hidden = hidden;
+            state.hiddenStateNames = hidden;
             state.pathScore = pathScore;
             state.baseProbabilityExists = baseProbabilityExists;
             state.scenes = scenes;

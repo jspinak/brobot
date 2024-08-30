@@ -24,8 +24,8 @@ public class PathManager {
 
     public void updateScore(Path path) {
         int score = 0;
-        for (String stateName : path.getStates()) {
-            Optional<State> optState = allStatesInProjectService.getState(stateName);
+        for (Long stateId : path.getStates()) {
+            Optional<State> optState = allStatesInProjectService.getState(stateId);
             if (optState.isPresent()) score += optState.get().getPathScore();
         }
         path.setScore(score);
@@ -36,7 +36,7 @@ public class PathManager {
         paths.sort();
     }
 
-    public Paths getCleanPaths(Set<String> activeStates, Paths paths, String failedTransitionStart) {
+    public Paths getCleanPaths(Set<Long> activeStates, Paths paths, Long failedTransitionStart) {
         Paths cleanPaths = paths.cleanPaths(activeStates, failedTransitionStart);
         updateScores(cleanPaths);
         return cleanPaths;

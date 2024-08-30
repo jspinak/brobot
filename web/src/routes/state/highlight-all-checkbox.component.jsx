@@ -9,7 +9,6 @@ const HighlightAllCheckbox = ({ isChecked, onChange }) => {
           checked={isChecked}
           onChange={onChange}
         />
-        Highlight All StateImages
       </label>
     </div>
   );
