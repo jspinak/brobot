@@ -1,8 +1,7 @@
 package io.github.jspinak.brobot.app.buildWithoutNames.buildStateStructure;
 
 import io.github.jspinak.brobot.app.buildWithoutNames.preliminaryStates.ImageSetsAndAssociatedScreens;
-import io.github.jspinak.brobot.datatypes.primitives.image.Image;
-import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
+import io.github.jspinak.brobot.datatypes.primitives.image.Scene;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.state.State;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
@@ -22,12 +21,11 @@ public class CreateState {
      */
     public State createState(ImageSetsAndAssociatedScreens imageSets, String name, Region usableArea) {
         List<StateImage> stateImages = imageSets.getStateImages();
-        List<Image> scenes = new ArrayList<>();
-        for (Pattern screen : imageSets.getScreens()) scenes.add(new Image(screen));
+        List<Scene> scenes = new ArrayList<>(imageSets.getScenes());
         return createState(name, stateImages, scenes, usableArea);
     }
 
-    private State createState(String stateName, List<StateImage> stateImages, List<Image> scenes, Region usableArea) {
+    private State createState(String stateName, List<StateImage> stateImages, List<Scene> scenes, Region usableArea) {
         return new State.Builder(stateName)
                 .withImages(stateImages)
                 .withScenes(scenes)

@@ -52,7 +52,7 @@ public class FindTransition {
         System.out.println("FindTransition: number of TransitionImage(s) in this screen = " + currentScreen.getImages().size());
         if (isLive) return checkTransitionImages(initialScreenId, currentScreen, config, observations, statelessImages);
         findScreen.findCurrentScreenAndSaveIfNew(config, observations, statelessImages);
-        return screenObservationManager.getScreenIndex() < config.getScreenshots().size(); // there are screenshots left to analyze
+        return screenObservationManager.getScreenIndex() < config.getScenes().size(); // there are screenshots left to analyze
     }
 
     private boolean checkTransitionImages(int initialScreenId, ScreenObservation currentScreen,

@@ -2,6 +2,7 @@ package io.github.jspinak.brobot.app.buildWithoutNames.screenObservations;
 
 import io.github.jspinak.brobot.app.buildWithoutNames.stateStructureBuildManagement.StateStructureConfiguration;
 import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
+import io.github.jspinak.brobot.datatypes.primitives.image.Scene;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -32,7 +33,7 @@ class GetScreenObservationFromScreenshotTest {
 
     @Test
     void findImagesWithWordsOnScreen_allMatchesHaveImages() {
-        Pattern screenshot = new Pattern("../screenshots/floranext0");
+        Scene screenshot = new Scene("../screenshots/floranext0");
         List<StatelessImage> statelessImages = getScreenObservationFromScreenshot.findImagesWithWordsOnScreen(
                 config, screenshot);
         statelessImages.forEach(img -> assertTrue(img.getMatchList().get(0).getImage() != null));

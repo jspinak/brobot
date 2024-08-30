@@ -44,7 +44,7 @@ public class FindFixedPixelMatches {
             objColl.getStateImages().forEach(stateImage -> {
                 allPatterns.addAll(stateImage.getPatterns());
             });
-            allPatterns.addAll(objColl.getScenes());
+            objColl.getScenes().forEach(scene -> allPatterns.add(scene.getPattern()));
         });
         return allPatterns;
     }

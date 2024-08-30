@@ -6,8 +6,12 @@ import io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles
 import io.github.jspinak.brobot.database.services.AllStatesInProjectService;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.datatypes.state.state.State;
+import io.github.jspinak.brobot.manageStates.StateManagementService;
 import io.github.jspinak.brobot.reports.Report;
 import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.Optional;
 
 @Component
 public class Init {
@@ -15,13 +19,20 @@ public class Init {
     private final AllStatesInProjectService allStatesInProjectService;
     private final SetAllProfiles setAllProfiles;
     private final SetKMeansProfiles setKMeansProfiles;
+    private final StateManagementService stateManagementService;
+    private final StateTransitionsInProjectService stateTransitionsInProjectService;
 
     private int lastImageIndex = 1; // 0 should correspond to "no class" since matrices are typically initialized with 0s
 
-    public Init(AllStatesInProjectService allStatesInProjectService, SetAllProfiles setAllProfiles, SetKMeansProfiles setKMeansProfiles) {
+    public Init(AllStatesInProjectService allStatesInProjectService, SetAllProfiles setAllProfiles,
+                SetKMeansProfiles setKMeansProfiles,
+                StateManagementService stateManagementService,
+                StateTransitionsInProjectService stateTransitionsInProjectService) {
         this.allStatesInProjectService = allStatesInProjectService;
         this.setAllProfiles = setAllProfiles;
         this.setKMeansProfiles = setKMeansProfiles;
+        this.stateManagementService = stateManagementService;
+        this.stateTransitionsInProjectService = stateTransitionsInProjectService;
     }
 
     /**
@@ -52,5 +63,27 @@ public class Init {
 
     public void add(String path) {
         org.sikuli.script.ImagePath.add(path);
+    }
+
+    private void populateTransitionsWithStateIds() {
+        // convert all StateTransitions in the repository
+        stateManagementService.convertAllStateTransitions(
+                stateTransitionsInProjectService.getAllStateTransitionsInstances());
+        stateTransitionsInProjectService.setupRepo();
+    }
+
+    private void populateCanHideWithStateIds() {
+        // convert hidden state names to ids
+        allStatesInProjectService.getAllStates().forEach(state -> {
+            state.getCanHide().forEach(canHide -> {
+                Optional<State> canHideState = allStatesInProjectService.getState(canHide);
+                canHideState.ifPresent(value -> state.getCanHideIds().add(value.getId()));
+            });
+        });
+    }
+
+    public void populateStateIds() {
+        populateTransitionsWithStateIds();
+        populateCanHideWithStateIds();
     }
 }

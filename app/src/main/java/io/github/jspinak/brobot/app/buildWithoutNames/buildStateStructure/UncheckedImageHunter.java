@@ -1,11 +1,12 @@
 package io.github.jspinak.brobot.app.buildWithoutNames.buildStateStructure;
 
+import io.github.jspinak.brobot.app.buildWithoutNames.buildLive.ScreenObservations;
 import io.github.jspinak.brobot.app.buildWithoutNames.screenObservations.ScreenObservation;
 import io.github.jspinak.brobot.app.buildWithoutNames.screenObservations.ScreenObservationManager;
-import io.github.jspinak.brobot.app.buildWithoutNames.buildLive.ScreenObservations;
 import io.github.jspinak.brobot.manageStates.StateMemory;
 import io.github.jspinak.brobot.manageStates.StateTransitionsManagement;
 import org.springframework.stereotype.Component;
+
 import java.util.*;
 
 @Component
@@ -43,19 +44,19 @@ public class UncheckedImageHunter {
         if (screenObservation.isEmpty()) return; // this screen id doesn't exist in the repo
         Set<Integer> states = screenObservation.get().getStates();
         stateMemory.removeAllStates();
-        states.forEach(state -> stateMemory.addActiveState(Integer.toString(state)));
+        states.forEach(state -> stateMemory.addActiveState(Long.valueOf(state)));
     }
 
     public boolean setActiveStatesAndGoToUncheckedState(Set<String> uncheckedStates, List<ScreenObservation> observations) {
         setActiveStates(screenObservationManager.getCurrentScreenId(), observations);
-        for (String state : uncheckedStates) if (stateTransitionsManagement.openState(state)) return true;
+        for (String state : uncheckedStates) if (stateTransitionsManagement.openState(Long.parseLong(state))) return true;
         return false;
     }
 
     public int getScreenIdFromActiveStates(List<ScreenObservation> observations) {
-        Set<String> activeStates = stateMemory.getActiveStates();
+        Set<Long> activeStates = stateMemory.getActiveStates();
         List<Integer> statesAsInt = new ArrayList<>();
-        activeStates.forEach(s -> statesAsInt.add(Integer.getInteger(s)));
+        activeStates.forEach(s -> statesAsInt.add(s.intValue()));
         for (ScreenObservation screenObservation : observations) {
             if (isScreen(screenObservation, statesAsInt)) return screenObservation.getId();
         }

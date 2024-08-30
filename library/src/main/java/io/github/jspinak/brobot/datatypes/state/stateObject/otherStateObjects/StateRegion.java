@@ -23,6 +23,7 @@ public class StateRegion implements StateObject {
     private String name = "";
     private Region searchRegion = new Region();
     private String ownerStateName = "null";
+    private Long ownerStateId = 0L;
     private int staysVisibleAfterClicked = 100;
     private int probabilityExists = 100; // probability something can be acted on in this region
     private int timesActedOn = 0;
@@ -73,6 +74,7 @@ public class StateRegion implements StateObject {
         private String name = "";
         private Region searchRegion = new Region();
         private String ownerStateName = "null";
+        private Long ownerStateId = 0L;
         private int staysVisibleAfterClicked = 100;
         private int probabilityExists = 100;
         private int timesActedOn = 0;
@@ -156,6 +158,7 @@ public class StateRegion implements StateObject {
             stateRegion.name = name;
             stateRegion.searchRegion = searchRegion;
             stateRegion.ownerStateName = ownerStateName;
+            stateRegion.ownerStateId = ownerStateId;
             stateRegion.staysVisibleAfterClicked = staysVisibleAfterClicked;
             stateRegion.probabilityExists = probabilityExists;
             stateRegion.timesActedOn = timesActedOn;

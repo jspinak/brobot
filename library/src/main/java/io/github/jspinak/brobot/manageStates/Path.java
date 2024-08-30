@@ -16,8 +16,8 @@ import java.util.Set;
 @Setter
 public class Path {
 
-    private List<String> states = new ArrayList<>(); // all states in the path
-    private List<StateTransition> transitions = new ArrayList<>(); // transitions between the states in the path
+    private List<Long> states = new ArrayList<>(); // all states in the path
+    private List<IStateTransition> transitions = new ArrayList<>(); // transitions between the states in the path
     private int score; // lower scores are chosen first when selecting a path
 
     public boolean equals(Path path) {
@@ -32,28 +32,28 @@ public class Path {
         return states.isEmpty();
     }
 
-    public String get(int i) {
+    public Long get(int i) {
         return states.get(i);
     }
 
-    public void add(String stateName) {
+    public void add(Long stateName) {
         states.add(stateName);
     }
 
-    public void add(StateTransition transition) {
+    public void add(IStateTransition transition) {
         transitions.add(transition);
     }
 
-    public boolean contains(String stateName) {
-        return states.contains(stateName);
+    public boolean contains(Long stateId) {
+        return states.contains(stateId);
     }
 
     public void reverse() {
         Collections.reverse(states);
     }
 
-    public boolean remove(String stateName) {
-        return states.remove(stateName);
+    public boolean remove(Long stateId) {
+        return states.remove(stateId);
     }
 
     public Path getCopy() {
@@ -77,16 +77,16 @@ public class Path {
      * @param failedTransitionStartState is a state corresponding to a path where the transition failed.
      * @return a Path object
      */
-    public Path cleanPath(Set<String> activeStates, String failedTransitionStartState) {
+    public Path cleanPath(Set<Long> activeStates, Long failedTransitionStartState) {
         if (states.contains(failedTransitionStartState)) return new Path();
         return trimPath(activeStates);
     }
 
-    public Path trimPath(Set<String> activeStates) {
+    public Path trimPath(Set<Long> activeStates) {
         Path trimmedPath = new Path();
         boolean addState = false;
         int i=0;
-        for (String stateName : states) {
+        for (Long stateName : states) {
             // start adding states at an active state
             if (activeStates.contains(stateName)) addState = true;
             if (addState) {

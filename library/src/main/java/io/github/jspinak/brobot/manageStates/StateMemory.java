@@ -2,6 +2,7 @@ package io.github.jspinak.brobot.manageStates;
 
 import io.github.jspinak.brobot.database.services.AllStatesInProjectService;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
+import io.github.jspinak.brobot.primatives.enums.SpecialStateType;
 import io.github.jspinak.brobot.primatives.enums.StateEnum;
 import io.github.jspinak.brobot.reports.Report;
 import lombok.Getter;
@@ -24,7 +25,7 @@ public class StateMemory {
         PREVIOUS, CURRENT, EXPECTED
     }
 
-    private Set<String> activeStates = new HashSet<>();
+    private Set<Long> activeStates = new HashSet<>();
 
     public StateMemory(AllStatesInProjectService allStatesInProjectService) {
         this.allStatesInProjectService = allStatesInProjectService;
@@ -32,21 +33,22 @@ public class StateMemory {
 
     public void adjustActiveStatesWithMatches(Matches matches) {
         matches.getMatchList().forEach(match -> {
-            if (match.getStateObjectData() != null) addActiveState(match.getStateObjectData().getOwnerStateName());
+            if (match.getStateObjectData() != null) {
+                Long ownerStateId = match.getStateObjectData().getOwnerStateId();
+                if (ownerStateId != null && ownerStateId > 0) addActiveState(ownerStateId);
+            }
         });
     }
 
-    public void addActiveState(String activeState) {
+    public void addActiveState(Long activeState) {
         addActiveState(activeState, false);
     }
 
-    private boolean isNullState(String state) {
-        if (state.equals("null")) return true;
-        if (state.equals("NULL")) return true;
-        return false;
+    private boolean isNullState(Long state) {
+        return state.equals(SpecialStateType.NULL.getId());
     }
 
-    public void addActiveState(String activeState, boolean newLine) {
+    public void addActiveState(Long activeState, boolean newLine) {
         if (activeStates.contains(activeState)) return;
         if (isNullState(activeState)) return;
         Report.print("+ add "+activeState+" to active states ");
@@ -58,11 +60,11 @@ public class StateMemory {
         });
     }
 
-    public void removeInactiveStates(Set<String> inactiveStates) {
+    public void removeInactiveStates(Set<Long> inactiveStates) {
         inactiveStates.forEach(this::removeInactiveState);
     }
 
-    public void removeInactiveState(String inactiveState) {
+    public void removeInactiveState(Long inactiveState) {
         if (!activeStates.contains(inactiveState)) return;
         Report.println("- remove "+inactiveState+" from active states");
         activeStates.remove(inactiveState);

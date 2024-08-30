@@ -1,26 +1,27 @@
 import React from 'react';
 import './highlight.styles.css';
 
-const Highlight = ({ image, adjustX, adjustY, scaleW, scaleH }) => {
-  const { x, y, w, h } = image;
+const Highlight = ({ imageRegion, adjustX, adjustY, scaleW, scaleH }) => {
+    const { x, y, w, h } = imageRegion || {};
+    const calculatedX = x * scaleW + adjustX;
+    const calculatedY = y * scaleH + adjustY;
+    const calculatedW = w * scaleW;
+    const calculatedH = h * scaleH;
 
-  const calculatedX = x * scaleW + adjustX;
-  const calculatedY = y * scaleH + adjustY;
-  const calculatedW = w * scaleW;
-  const calculatedH = h * scaleH;
+    // Don't render if we have invalid dimensions
+    if (isNaN(calculatedX) || isNaN(calculatedY) || isNaN(calculatedW) || isNaN(calculatedH)) {
+        console.error('Invalid highlight dimensions');
+        return null;
+    }
 
-  console.log('image dimensions:', { x: x, y: y, w: w, h: h });
-  console.log('Highlight dimensions:', { x: calculatedX, y: calculatedY, w: calculatedW, h: calculatedH });
-
-  return (
-    <div className="highlight" style={{
-      left: calculatedX,
-      top: calculatedY,
-      width: calculatedW,
-      height: calculatedH,
-    }} />
-  );
+    return (
+        <div className="highlight" style={{
+            left: calculatedX,
+            top: calculatedY,
+            width: calculatedW,
+            height: calculatedH,
+        }} />
+    );
 };
 
 export default Highlight;
-
