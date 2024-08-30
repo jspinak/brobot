@@ -3,7 +3,7 @@ package io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAn
 import io.github.jspinak.brobot.actions.BrobotSettings;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.database.services.AllStatesInProjectService;
-import io.github.jspinak.brobot.datatypes.primitives.image.Image;
+import io.github.jspinak.brobot.datatypes.primitives.image.Scene;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import io.github.jspinak.brobot.manageStates.StateMemory;
@@ -43,9 +43,9 @@ public class GetSceneAnalysisCollection {
                                        int scenesToCapture, double secondsBetweenCaptures,
                                        ActionOptions actionOptions) {
         SceneAnalysisCollection sceneAnalysisCollection = new SceneAnalysisCollection();
-        List<Image> scenes = getScenes.getScenes(actionOptions, objectCollections, scenesToCapture, secondsBetweenCaptures);
+        List<Scene> scenes = getScenes.getScenes(actionOptions, objectCollections, scenesToCapture, secondsBetweenCaptures);
         if (!isSceneAnalysisRequired(actionOptions)) {
-            for (Image scene : scenes) {
+            for (Scene scene : scenes) {
                 SceneAnalysis sceneAnalysis = new SceneAnalysis(scene);
                 sceneAnalysisCollection.add(sceneAnalysis);
             }
@@ -56,7 +56,7 @@ public class GetSceneAnalysisCollection {
         Set<StateImage> allImages = new HashSet<>();
         allImages.addAll(targetImages);
         allImages.addAll(additionalImagesForClassification);
-        for (Image scene : scenes) {
+        for (Scene scene : scenes) {
             SceneAnalysis sceneAnalysis = analyzePixels.getAnalysisForOneScene(scene, targetImages, allImages, actionOptions);
             sceneAnalysisCollection.add(sceneAnalysis);
         }
@@ -73,7 +73,7 @@ public class GetSceneAnalysisCollection {
     private Set<StateImage> getAdditionalImagesForClassification(List<ObjectCollection> objColls) {
         Set<StateImage> toClassify = new HashSet<>();
         if (BrobotSettings.includeStateImageObjectsFromActiveStatesInAnalysis) {
-            allStatesInProjectService.findSetByName(stateMemory.getActiveStates()).forEach(
+            allStatesInProjectService.findSetById(stateMemory.getActiveStates()).forEach(
                     state -> toClassify.addAll(state.getStateImages()));
         }
         for (int i=1; i<objColls.size(); i++) {

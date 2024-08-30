@@ -46,5 +46,5 @@ public class ObjectCollectionEntity {
     @JoinTable(name = "objColl_scenes",
             joinColumns = @JoinColumn(name = "objColl_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "scene_id", referencedColumnName = "id"))
-    private List<PatternEntity> scenes = new ArrayList<>();
+    private List<SceneEntity> scenes = new ArrayList<>();
 }

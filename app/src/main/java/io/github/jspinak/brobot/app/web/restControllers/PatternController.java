@@ -1,14 +1,13 @@
 package io.github.jspinak.brobot.app.web.restControllers;
 
 import io.github.jspinak.brobot.app.services.PatternService;
-import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
+import io.github.jspinak.brobot.app.web.responses.PatternResponse;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/patterns") // Base path for all endpoints in this controller
@@ -21,17 +20,13 @@ public class PatternController {
     }
 
     @GetMapping("/all") // Maps to GET /api/patterns/all
-    public List<Pattern> getAllPatterns() {
-        return patternService.getAllPatterns().stream()
-                //.map(patternResponseMapper::map)
-                .collect(Collectors.toList());
+    public List<PatternResponse> getAllPatterns() {
+        return patternService.getAllPatternResponses();
     }
 
     @GetMapping("/{name}") // Maps to GET /api/patterns/{name}
-    public List<Pattern> getPatterns(@PathVariable String name) {
-        return patternService.getPatterns(name).stream()
-                //.map(patternResponseMapper::map)
-                .collect(Collectors.toList());
+    public List<PatternResponse> getPatterns(@PathVariable String name) {
+        return patternService.getPatternResponses(name);
     }
 
     @GetMapping("/") // Maps to GET /api/patterns/

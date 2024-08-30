@@ -30,7 +30,7 @@ public class StateResponse {
     private int baseProbabilityExists;
     private int probabilityExists;
     private int timesVisited;
-    private List<ImageResponse> scenes = new ArrayList<>();
+    private List<SceneResponse> scenes = new ArrayList<>();
     private RegionResponse usableArea;
     private MatchHistoryResponse matchHistory = new MatchHistoryResponse();
 }

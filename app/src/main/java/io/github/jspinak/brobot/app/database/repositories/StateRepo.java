@@ -13,8 +13,6 @@ import java.util.Optional;
 @Transactional
 public interface StateRepo extends JpaRepository<StateEntity, Long> {
     Optional<StateEntity> findByName(String name);
-    //@Query("SELECT s FROM StateEntity s WHERE UPPER(s.name) LIKE UPPER(:name)")
-    //List<StateEntity> findByNameIgnoreCase(String name);
     List<StateEntity> findByProjectId(Long projectId);
 
 }

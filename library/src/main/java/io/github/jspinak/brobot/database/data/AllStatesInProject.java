@@ -4,6 +4,7 @@ import io.github.jspinak.brobot.datatypes.state.state.State;
 import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Component
@@ -21,8 +22,30 @@ public class AllStatesInProject {
                 .findFirst();
     }
 
+    public Optional<State> getState(Long id) {
+        return states.stream()
+                .filter(state -> Objects.equals(state.getId(), id))
+                .findFirst();
+    }
+
     public void save(State state) {
         states.add(state);
+        state.setId((long) states.size());
+        state.getStateImages().forEach(image -> {
+            image.setOwnerStateId(state.getId());
+            image.getAllMatchSnapshots().forEach(snapshot -> snapshot.setStateId(state.getId()));
+        });
+        state.getStateLocations().forEach(location -> location.setOwnerStateId(state.getId()));
+        state.getStateLocations().forEach(location -> {
+            location.setOwnerStateId(state.getId());
+            location.getMatchHistory().getSnapshots().forEach(snapshot -> snapshot.setStateId(state.getId()));
+        });
+        state.getStateRegions().forEach(region -> region.setOwnerStateId(state.getId()));
+        state.getStateRegions().forEach(region -> {
+            region.setOwnerStateId(state.getId());
+            region.getMatchHistory().getSnapshots().forEach(snapshot -> snapshot.setStateId(state.getId()));
+        });
+        state.getStateStrings().forEach(string -> string.setOwnerStateId(state.getId()));
     }
 
     public void deleteAll() {

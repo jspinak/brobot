@@ -4,6 +4,7 @@ import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles.ColorCluster;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles.SetKMeansProfiles;
 import io.github.jspinak.brobot.datatypes.primitives.image.Image;
+import io.github.jspinak.brobot.datatypes.primitives.image.Scene;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.springframework.stereotype.Component;
@@ -52,7 +53,7 @@ public class AnalyzePixels {
      * @param actionOptions The action configuration.
      * @return The pixel scores for the scene.
      */
-    public PixelAnalysisCollection getPixelAnalysisCollection(Image scene, StateImage stateImage,
+    public PixelAnalysisCollection getPixelAnalysisCollection(Scene scene, StateImage stateImage,
                                                               ActionOptions actionOptions) {
         List<ColorCluster> colorClusters = getColorProfiles(stateImage, actionOptions);
         PixelAnalysisCollection pixelAnalysisCollection = setPixelAnalyses(scene, colorClusters);
@@ -87,7 +88,7 @@ public class AnalyzePixels {
      * @param colorClusters the color profiles to use
      * @return a PixelAnalysisCollection containing the PixelAnalyses
      */
-    public PixelAnalysisCollection setPixelAnalyses(Image scene, List<ColorCluster> colorClusters) {
+    public PixelAnalysisCollection setPixelAnalyses(Scene scene, List<ColorCluster> colorClusters) {
         PixelAnalysisCollection pixelAnalysisCollection = new PixelAnalysisCollection(scene);
         colorClusters.forEach(colorProfile ->
                 setPixelAnalysisForOneColorProfile(pixelAnalysisCollection, colorProfile));
@@ -122,7 +123,7 @@ public class AnalyzePixels {
      * @param actionOptions the action configuration
      * @return a SceneAnalysis, containing a PixelsAnalysisCollection for each StateImage_
      */
-    public SceneAnalysis getAnalysisForOneScene(Image scene, Set<StateImage> targetImgs, Set<StateImage> allImgs,
+    public SceneAnalysis getAnalysisForOneScene(Scene scene, Set<StateImage> targetImgs, Set<StateImage> allImgs,
                                                 ActionOptions actionOptions) {
         setKMeansProfiles.addKMeansIfNeeded(allImgs, actionOptions.getKmeans());
         List<PixelAnalysisCollection> pixelAnalysisCollections = new ArrayList<>();

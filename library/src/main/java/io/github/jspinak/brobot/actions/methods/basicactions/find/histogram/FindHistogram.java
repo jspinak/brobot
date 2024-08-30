@@ -6,7 +6,7 @@ import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAna
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.SceneAnalysisCollection;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.matchManagement.SelectRegions;
 import io.github.jspinak.brobot.actions.methods.mockOrLiveInterface.MockOrLive;
-import io.github.jspinak.brobot.datatypes.primitives.image.Image;
+import io.github.jspinak.brobot.datatypes.primitives.image.Scene;
 import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
@@ -44,12 +44,12 @@ public class FindHistogram {
         if (actionOptions.getMaxMatchesToActOn() <= 0) actionOptions.setMaxMatchesToActOn(1); // default for histogram
         getHistograms.setBins(
                 actionOptions.getHueBins(), actionOptions.getSaturationBins(), actionOptions.getValueBins());
-        List<Image> scenes = getScenes.getScenes(actionOptions, objectCollections);
+        List<Scene> scenes = getScenes.getScenes(actionOptions, objectCollections);
         SceneAnalysisCollection sceneAnalysisCollection = new SceneAnalysisCollection();
         List<Match> matchObjects = new ArrayList<>();
         objectCollections.get(0).getStateImages().forEach(img ->
                 scenes.forEach(scene -> {
-                    matchObjects.addAll(forOneImage(actionOptions, img, scene.getMatHSV()));
+                    matchObjects.addAll(forOneImage(actionOptions, img, scene.getPattern().getMatHSV()));
                     sceneAnalysisCollection.add(new SceneAnalysis(new ArrayList<>(), scene));
                 }));
         int maxMatches = actionOptions.getMaxMatchesToActOn();

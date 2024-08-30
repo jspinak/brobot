@@ -1,27 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import axios from 'axios';
-import ImageSelector from './../../components/image/ImageSelector';
-import NewStateDisplay from './NewStateDisplay';
+import useFetchImages from './../../hooks/useFetchImages';
+import useFetchScenes from './../../hooks/useFetchScenes';
+import ImageSelector from './../../components/image/image-selector.component';
+import NewStateDisplay from './new-state-display.component';
 import './create-state.styles.css'
 
 const CreateState = () => {
   const [stateName, setStateName] = useState('');
-  const [images, setImages] = useState([]);
+  const images = useFetchImages();
+  const scenes = useFetchScenes();
   const [selectedImages, setSelectedImages] = useState([]);
   const [newState, setNewState] = useState(null);
-
-  useEffect(() => {
-    fetchImages();
-  }, []);
-
-  const fetchImages = async () => {
-    try {
-      const response = await axios.get('http://localhost:8080/api/images/all');
-      setImages(response.data);
-    } catch (error) {
-      console.error('Error fetching images:', error);
-    }
-  };
 
   const handleImageSelect = (imageId) => {
     setSelectedImages(prev =>
@@ -31,31 +21,36 @@ const CreateState = () => {
     );
   };
 
-    const handleCreateState = async () => {
-        const newStateObj = {
-          name: stateName,
-          stateImages: selectedImages.map(imageId => {
-            const image = images.find(img => img.id === imageId);
-            if (!image) {
-              console.error(`Image with id ${imageId} not found`);
-              return null;
-            }
-            return {
-              patterns: [{
-                image: {
-                  name: image.name,
-                  imageBase64: image.imageBase64
-                }
-              }]
-            };
-          }).filter(Boolean) // Remove any null entries
-        };
-
-        if (newStateObj.stateImages.length === 0) {
-          console.error('No valid images selected');
-          // Maybe show an error message to the user
-          return;
+  const handleCreateState = async () => {
+    const newStateObj = {
+      name: stateName,
+      stateImages: selectedImages.map(imageId => {
+        const image = images.find(img => img.id === imageId);
+        if (!image) {
+          console.error(`Image with id ${imageId} not found`);
+          return null;
         }
+        return {
+          patterns: [{
+            image: {
+              name: image.name,
+              imageBase64: image.imageBase64
+            }
+          }]
+        };
+      }).filter(Boolean), // Remove any null entries
+      transitions: [], // Add an empty transitions array
+      canHide: [], // Add an empty canHide array
+      hidden: [], // Add an empty hidden array
+      pathScore: 1, // Add a default pathScore
+      probabilityExists: 100 // Add a default probabilityExists
+    };
+
+    if (newStateObj.stateImages.length === 0) {
+      console.error('No valid images selected');
+      // Maybe show an error message to the user
+      return;
+    }
 
     try {
       const response = await axios.post('http://localhost:8080/api/states', newStateObj, {

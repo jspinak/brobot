@@ -18,12 +18,14 @@ public class StateObjectData {
     private StateObject.Type objectType;
     private String stateObjectName;
     private String ownerStateName;
+    private Long ownerStateId;
 
     public StateObjectData(StateObject stateObject) {
         this.stateObjectId = stateObject.getId();
         this.objectType = stateObject.getObjectType();
         this.stateObjectName = stateObject.getName();
         this.ownerStateName = stateObject.getOwnerStateName();
+        this.ownerStateId = stateObject.getOwnerStateId();
     }
 
     public StateObjectData() {
@@ -31,11 +33,14 @@ public class StateObjectData {
         objectType = StateObject.Type.IMAGE;
         stateObjectName = "";
         ownerStateName = "";
+        ownerStateId = null;
     }
 
     @Override
     public String toString() {
-        return "StateObject: " + stateObjectName + ", " + objectType + ", ownerState=" + ownerStateName + ", id=" + stateObjectId;
+        return "StateObject: " + stateObjectName + ", " + objectType +
+                ", ownerState=" + ownerStateName + ", id=" + stateObjectId +
+                ", owner state id=" + ownerStateId;
     }
 
 }

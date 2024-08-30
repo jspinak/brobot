@@ -53,10 +53,10 @@ public class MockFind {
     public List<Match> getWordMatches() {
         mockTime.wait(actionDurations.getFindDuration(ActionOptions.Find.ALL_WORDS));
         List<Match> allMatches = new ArrayList<>();
-        for (String stateName : stateMemory.getActiveStates()) {
-            Optional<State> state = allStatesInProjectService.getState(stateName);
+        for (Long stateId : stateMemory.getActiveStates()) {
+            Optional<State> state = allStatesInProjectService.getState(stateId);
             state.ifPresent(st -> {
-                Optional<MatchSnapshot> snapshot = st.getMatchHistory().getRandomSnapshot(ActionOptions.Action.FIND, stateName);
+                Optional<MatchSnapshot> snapshot = st.getMatchHistory().getRandomSnapshot(ActionOptions.Action.FIND, stateId);
                 snapshot.ifPresent(snap -> allMatches.addAll(snap.getMatchList()));
             });
         }

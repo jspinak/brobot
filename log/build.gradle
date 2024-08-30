@@ -23,18 +23,23 @@ repositories {
 }
 
 dependencies {
-	implementation project(':library') // Dependency on the library module
+	implementation project(':library')
+
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-data-elasticsearch'
+
+	// Remove these explicit versions and let Spring Boot manage them
+	// implementation 'co.elastic.clients:elasticsearch-java:8.3.3'
+	// implementation 'com.fasterxml.jackson.core:jackson-databind:2.12.3'
+	// implementation 'org.springframework.data:spring-data-elasticsearch'
+
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
+
+	implementation 'ch.qos.logback:logback-classic'
+
+	implementation 'org.mapstruct:mapstruct:1.5.5.Final'
+	annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Field'
+
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-
-	implementation 'ch.qos.logback:logback-classic:1.4.12'
-
-	implementation 'co.elastic.clients:elasticsearch-java:8.3.3'
-	implementation 'com.fasterxml.jackson.core:jackson-databind:2.12.3'
-	implementation 'org.springframework.boot:spring-boot-starter-web'
-	implementation 'org.springframework.boot:spring-boot-starter-data-elasticsearch' //:3.2.2
-	implementation 'org.springframework.data:spring-data-elasticsearch'
-
-	implementation group: 'org.mapstruct', name: 'mapstruct', version: '1.5.5.Final'
 }

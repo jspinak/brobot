@@ -1,6 +1,7 @@
 package io.github.jspinak.brobot.datatypes.primitives.match;
 
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
+import io.github.jspinak.brobot.primatives.enums.SpecialStateType;
 import lombok.Getter;
 import lombok.Setter;
 import org.sikuli.script.Screen;
@@ -20,7 +21,7 @@ import static io.github.jspinak.brobot.actions.actionOptions.ActionOptions.Find.
  * in a similar situation in the future. For this reason, only one Snapshot is created in situations
  * where an Image is searched multiple times. Actions that search multiple times until a condition is
  * met are good examples of such situations. Snapshots are kept in the Matches object as DanglingSnapshots
- * until the Action is finished, and only then saved to the Image or StateRegion.
+ * until the Action finishes, and only then saved to the Image or StateRegion.
  *
  * When mocking, it is best to use Snapshots of the same Action. Otherwise, a FIND operation
  * may have a higher probability of failure if the same Image was used often for a VANISH operation
@@ -98,7 +99,8 @@ public class MatchSnapshot {
      * The state in which the image is found gives important information about where and when the state can be found.
      * Mock operations can query this information when an action is carried out in a particular state.
      */
-    private String state = "null";
+    private String stateName = SpecialStateType.NULL.toString();
+    private Long stateId = SpecialStateType.NULL.getId();
 
     public boolean wasFound() {
         return !matchList.isEmpty() || !text.isEmpty();
@@ -178,7 +180,7 @@ public class MatchSnapshot {
         private LocalDateTime timeStamp;
         private boolean actionSuccess = false; // can be initialized for mocks
         private boolean resultSuccess = false; // can be initialized for mocks
-        private String state = "null"; // the state in which it was found
+        private String state = SpecialStateType.NULL.toString(); // the state in which it was found
 
         public Builder setActionOptions(ActionOptions actionOptions) {
             this.actionOptions = actionOptions;
@@ -264,7 +266,7 @@ public class MatchSnapshot {
             matchSnapshot.timeStamp = LocalDateTime.now();
             matchSnapshot.actionSuccess = actionSuccess;
             matchSnapshot.resultSuccess = resultSuccess;
-            matchSnapshot.state = state;
+            matchSnapshot.stateName = state;
             return matchSnapshot;
         }
     }

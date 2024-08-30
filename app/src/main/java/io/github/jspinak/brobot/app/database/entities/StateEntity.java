@@ -1,9 +1,6 @@
 package io.github.jspinak.brobot.app.database.entities;
 
 import io.github.jspinak.brobot.app.database.embeddable.RegionEmbeddable;
-import io.github.jspinak.brobot.datatypes.primitives.match.MatchHistory;
-import io.github.jspinak.brobot.datatypes.state.state.State;
-import io.github.jspinak.brobot.illustratedHistory.StateIllustration;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -18,7 +15,7 @@ import java.util.Set;
 public class StateEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private Long projectId = 0L;
@@ -51,20 +48,33 @@ public class StateEntity {
     @CollectionTable(name = "state_canHide", joinColumns = @JoinColumn(name = "state_id", referencedColumnName = "id"))
     private Set<String> canHide = new HashSet<>();
     @ElementCollection
+    @CollectionTable(name = "state_canHide_ids", joinColumns = @JoinColumn(name = "state_id", referencedColumnName = "id"))
+    private Set<Long> canHideIds = new HashSet<>();
+    @ElementCollection
     @CollectionTable(name = "state_hidden", joinColumns = @JoinColumn(name = "state_id", referencedColumnName = "id"))
     private Set<String> hidden = new HashSet<>();
+    @ElementCollection
+    @CollectionTable(name = "state_hidden_ids", joinColumns = @JoinColumn(name = "state_id", referencedColumnName = "id"))
+    private Set<Long> hiddenStateIds = new HashSet<>();
     private int pathScore = 1;
     private LocalDateTime lastAccessed = LocalDateTime.now();
     private int baseProbabilityExists = 100;
     private int probabilityExists = 0;
     private int timesVisited = 0;
-    @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @ManyToMany
     @JoinTable(name = "state_scenes",
-            joinColumns = @JoinColumn(name = "state_id", referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "scene_id", referencedColumnName = "id"))
-    private List<ImageEntity> scenes = new ArrayList<>();
+            joinColumns = @JoinColumn(name = "state_id"),
+            inverseJoinColumns = @JoinColumn(name = "scene_id"))
+    private List<SceneEntity> scenes = new ArrayList<>();
     @Embedded
     private RegionEmbeddable usableArea = new RegionEmbeddable();
     @OneToOne(cascade = CascadeType.ALL)
     private MatchHistoryEntity matchHistory = new MatchHistoryEntity();
+
+    public StateEntity() {}
+
+    // Constructor with ID (for mapping from library)
+    public StateEntity(Long id) {
+        this.id = id;
+    }
 }

@@ -4,8 +4,8 @@ import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.matchManagement.MatchProofer;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.matchManagement.SelectRegions;
 import io.github.jspinak.brobot.actions.methods.mockOrLiveInterface.MockOrLive;
-import io.github.jspinak.brobot.datatypes.primitives.image.Image;
 import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
+import io.github.jspinak.brobot.datatypes.primitives.image.Scene;
 import io.github.jspinak.brobot.datatypes.primitives.location.Location;
 import io.github.jspinak.brobot.datatypes.primitives.location.Position;
 import io.github.jspinak.brobot.datatypes.primitives.match.Match;
@@ -43,7 +43,7 @@ public class FindAll {
      * Note: if adding snapshots during execution, they should be added before selected specific Match objects based
      * on regions. Snapshots should not be region-specific to make them more universally applicable.
      */
-    public List<Match> find(StateImage stateImage, Image scene, ActionOptions actionOptions) {
+    public List<Match> find(StateImage stateImage, Scene scene, ActionOptions actionOptions) {
         List<Match> allMatchObjects = new ArrayList<>();
         for (Pattern pattern : stateImage.getPatterns()) {
             Position targetPosition = actionOptions.getTargetPosition() == null?
@@ -57,10 +57,11 @@ public class FindAll {
     }
 
     private void addMatchObjects(List<Match> allMatchObjects, List<Match> matchList, Pattern pattern,
-                               StateImage stateImage, ActionOptions actionOptions, Image scene,
+                               StateImage stateImage, ActionOptions actionOptions, Scene scene,
                                Position target, Location offset) {
         int i=0;
-        String name = pattern.getName() != null && !pattern.getName().isEmpty() ? pattern.getName() : scene.getName();
+        String name = pattern.getName() != null && !pattern.getName().isEmpty() ?
+                pattern.getName() : scene.getPattern().getName();
         for (Match match : matchList) {
             List<Region> regionsAllowedForMatch = selectRegions.getRegions(actionOptions, stateImage);
             if (matchProofer.isInSearchRegions(match, regionsAllowedForMatch)) {
@@ -80,7 +81,7 @@ public class FindAll {
         }
     }
 
-    public List<Match> findWords(Image scene, ActionOptions actionOptions) {
+    public List<Match> findWords(Scene scene, ActionOptions actionOptions) {
         List<Match> wordMatches = mockOrLive.findAllWords(scene);
         List<Region> regions = selectRegions.getRegions(actionOptions);
         List<Match> matchesInRegion = new ArrayList<>();

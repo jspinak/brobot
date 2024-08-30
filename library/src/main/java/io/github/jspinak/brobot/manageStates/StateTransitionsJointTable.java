@@ -17,9 +17,15 @@ import java.util.*;
 @Getter
 public class StateTransitionsJointTable {
 
-    Map<String, Set<String>> incomingTransitions = new HashMap<>();
-    Map<String, Set<String>> outgoingTransitions = new HashMap<>();
-    Map<String, Set<String>> incomingTransitionsToPREVIOUS = new HashMap<>(); // updated dynamically
+    Map<Long, Set<Long>> incomingTransitions = new HashMap<>();
+    Map<Long, Set<Long>> outgoingTransitions = new HashMap<>();
+    Map<Long, Set<Long>> incomingTransitionsToPREVIOUS = new HashMap<>(); // updated dynamically
+
+    public void emptyRepos() {
+        incomingTransitions = new HashMap<>();
+        outgoingTransitions = new HashMap<>();
+        incomingTransitionsToPREVIOUS = new HashMap<>();
+    }
 
     /**
      * Hidden States can be accessed by closing the State hiding them. There may be multiple States
@@ -28,11 +34,11 @@ public class StateTransitionsJointTable {
      * @param activeState is a newly active State.
      */
     public void addTransitionsToHiddenStates(State activeState) {
-        activeState.getHidden().forEach(hiddenState -> {
+        activeState.getHiddenStateIds().forEach(hiddenState -> {
             if (!incomingTransitionsToPREVIOUS.containsKey(hiddenState)) {
                 incomingTransitionsToPREVIOUS.put(hiddenState, new HashSet<>());
             }
-            incomingTransitionsToPREVIOUS.get(hiddenState).add(activeState.getName());
+            incomingTransitionsToPREVIOUS.get(hiddenState).add(activeState.getId());
         });
     }
 
@@ -42,41 +48,41 @@ public class StateTransitionsJointTable {
      * @param exitedState is a State that is no longer active.
      */
     public void removeTransitionsToHiddenStates(State exitedState) {
-        exitedState.getHidden().forEach(hiddenState -> {
+        exitedState.getHiddenStateNames().forEach(hiddenState -> {
             if (incomingTransitionsToPREVIOUS.containsKey(hiddenState))
                 incomingTransitionsToPREVIOUS.get(hiddenState).remove(exitedState.getName());
         });
     }
 
-    public void add(String to, String from) {
+    public void add(Long to, Long from) {
         if (!from.equals(StateMemory.Enum.PREVIOUS.toString())) addIncomingTransition(to, from);
         addOutgoingTransition(to, from);
     }
 
-    private void addIncomingTransition(String child, String parentToAdd) {
+    private void addIncomingTransition(Long child, Long parentToAdd) {
         if (incomingTransitions.containsKey(child)) incomingTransitions.get(child).add(parentToAdd);
         else {
-            Set<String> stateNames = new HashSet<>();
+            Set<Long> stateNames = new HashSet<>();
             stateNames.add(parentToAdd);
             incomingTransitions.put(child, stateNames);
         }
     }
 
-    private void addOutgoingTransition(String childToAdd, String parent) {
+    private void addOutgoingTransition(Long childToAdd, Long parent) {
         if (outgoingTransitions.containsKey(parent)) outgoingTransitions.get(parent).add(childToAdd);
         else {
-            Set<String> stateNames = new HashSet<>();
+            Set<Long> stateNames = new HashSet<>();
             stateNames.add(childToAdd);
             outgoingTransitions.put(parent, stateNames);
         }
     }
 
-    public Set<String> getStatesWithTransitionsTo(String... children) {
+    public Set<Long> getStatesWithTransitionsTo(Long... children) {
         return getStatesWithTransitionsTo(new HashSet<>(Arrays.asList(children.clone())));
     }
 
-    public Set<String> getStatesWithTransitionsTo(Set<String> children) {
-        Set<String> parents = new HashSet<>();
+    public Set<Long> getStatesWithTransitionsTo(Set<Long> children) {
+        Set<Long> parents = new HashSet<>();
         children.forEach(child -> {
             if (incomingTransitions.containsKey(child))
                 parents.addAll(incomingTransitions.get(child));
@@ -86,20 +92,20 @@ public class StateTransitionsJointTable {
         return parents;
     }
 
-    public Set<String> getStatesWithTransitionsFrom(String... parents) {
+    public Set<Long> getStatesWithTransitionsFrom(Long... parents) {
         return getStatesWithTransitionsFrom(new HashSet<>(Arrays.asList(parents.clone())));
     }
 
-    public Set<String> getStatesWithTransitionsFrom(Set<String> parents) {
-        Set<String> children = new HashSet<>();
+    public Set<Long> getStatesWithTransitionsFrom(Set<Long> parents) {
+        Set<Long> children = new HashSet<>();
         parents.forEach(parent -> {
             if (outgoingTransitions.get(parent) != null) children.addAll(outgoingTransitions.get(parent));
         });
         return children;
     }
 
-    public Map<String, Set<String>> getIncomingTransitionsWithHiddenTransitions() {
-        Map<String, Set<String>> allIncoming = new HashMap<>();
+    public Map<Long, Set<Long>> getIncomingTransitionsWithHiddenTransitions() {
+        Map<Long, Set<Long>> allIncoming = new HashMap<>();
         allIncoming.putAll(incomingTransitions);
         incomingTransitionsToPREVIOUS.forEach((stateName, stateNames) -> {
             if (allIncoming.containsKey(stateName)) allIncoming.get(stateName).addAll(stateNames);
@@ -108,7 +114,7 @@ public class StateTransitionsJointTable {
         return allIncoming;
     }
 
-    public Map<String, Set<String>> getOutgoingTransitions() {
+    public Map<Long, Set<Long>> getOutgoingTransitions() {
         return outgoingTransitions;
     }
 }
