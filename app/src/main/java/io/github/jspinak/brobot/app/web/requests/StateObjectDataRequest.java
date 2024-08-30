@@ -10,4 +10,5 @@ public class StateObjectDataRequest {
     private String objectType;
     private String stateObjectName;
     private String ownerStateName;
+    private String ownerStateId;
 }

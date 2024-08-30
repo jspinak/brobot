@@ -34,16 +34,10 @@ public class StateService {
 
     private final StateRepo stateRepo;
     private final StateEntityMapper stateEntityMapper;
-    private final StateResponseMapper stateResponseMapper;
-    private final DatabaseCheckService databaseCheckService;
-    //private StateMapper stateMapper = StateMapper.INSTANCE;
 
-    public StateService(StateRepo stateRepo, StateEntityMapper stateEntityMapper,
-                        StateResponseMapper stateResponseMapper, DatabaseCheckService databaseCheckService) {
+    public StateService(StateRepo stateRepo, StateEntityMapper stateEntityMapper) {
         this.stateRepo = stateRepo;
         this.stateEntityMapper = stateEntityMapper;
-        this.stateResponseMapper = stateResponseMapper;
-        this.databaseCheckService = databaseCheckService;
     }
 
     @Transactional(readOnly = true)
@@ -65,12 +59,9 @@ public class StateService {
 
     @Transactional(readOnly = true)
     public List<State> getAllStates() {
-        List<State> stateList = new ArrayList<>();
-        for (StateEntity stateEntity : stateRepo.findAll()) {
-            //stateList.add(stateMapper.map(stateEntity));
-            stateList.add(stateEntityMapper.map(stateEntity));
-        }
-        return stateList;
+        return stateRepo.findAll().stream()
+                .map(stateEntityMapper::map)
+                .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)

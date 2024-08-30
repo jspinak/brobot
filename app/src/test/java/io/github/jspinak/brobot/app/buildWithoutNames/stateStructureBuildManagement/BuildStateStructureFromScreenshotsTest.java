@@ -1,7 +1,8 @@
 package io.github.jspinak.brobot.app.buildWithoutNames.stateStructureBuildManagement;
 
 import io.github.jspinak.brobot.app.services.StateService;
-import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
+import io.github.jspinak.brobot.app.stateStructureBuilders.buildWithoutNames.stateStructureBuildManagement.BuildStateStructureFromScreenshots;
+import io.github.jspinak.brobot.app.stateStructureBuilders.buildWithoutNames.stateStructureBuildManagement.StateStructureConfiguration;
 import io.github.jspinak.brobot.datatypes.primitives.image.Scene;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.state.State;

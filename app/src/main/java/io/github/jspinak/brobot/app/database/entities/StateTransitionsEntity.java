@@ -1,5 +1,6 @@
 package io.github.jspinak.brobot.app.database.entities;
 
+import io.github.jspinak.brobot.manageStates.IStateTransition;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -26,4 +27,8 @@ public class StateTransitionsEntity {
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "finish_transition_id")
     private TransitionEntity finishTransition;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "stays_visible_after_transition")
+    private IStateTransition.StaysVisible staysVisibleAfterTransition;
 }
