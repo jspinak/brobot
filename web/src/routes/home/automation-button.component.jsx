@@ -1,4 +1,3 @@
-// src/components/AutomationButton.js
 import React, { useState } from 'react';
 import axios from 'axios';
 
@@ -10,7 +9,7 @@ function AutomationButton() {
         setIsRunning(true);
         setResult('');
         try {
-            const response = await axios.post('/api/automation/run-transition-test');
+            const response = await axios.post('http://localhost:8080/api/automation/run-transition-test');
             setResult(response.data);
         } catch (error) {
             setResult('Error occurred while running automation: ' + error.message);
@@ -22,7 +21,7 @@ function AutomationButton() {
     return (
         <div>
             <button onClick={runAutomation} disabled={isRunning}>
-                {isRunning ? 'Running...' : 'Test All Transitions'}
+                {isRunning ? 'Running...' : 'Save state structure'}
             </button>
             {result && <p>{result}</p>}
         </div>
