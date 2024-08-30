@@ -1,7 +1,7 @@
 package io.github.jspinak.brobot.app;
 
-import io.github.jspinak.brobot.app.buildWithoutNames.stateStructureBuildManagement.BuildStateStructureFromScreenshots;
-import io.github.jspinak.brobot.app.buildWithoutNames.stateStructureBuildManagement.StateStructureConfiguration;
+import io.github.jspinak.brobot.app.stateStructureBuilders.buildWithoutNames.stateStructureBuildManagement.BuildStateStructureFromScreenshots;
+import io.github.jspinak.brobot.app.stateStructureBuilders.buildWithoutNames.stateStructureBuildManagement.StateStructureConfiguration;
 import io.github.jspinak.brobot.app.services.SceneService;
 import io.github.jspinak.brobot.datatypes.primitives.image.Scene;
 import io.github.jspinak.brobot.imageUtils.SceneCreator;

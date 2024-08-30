@@ -1,6 +1,7 @@
 package io.github.jspinak.brobot.app.services;
 
 import io.github.jspinak.brobot.app.database.databaseMappers.StateImageEntityMapper;
+import io.github.jspinak.brobot.app.database.databaseMappers.StateTransitionsEntityMapper;
 import io.github.jspinak.brobot.app.database.entities.StateEntity;
 import io.github.jspinak.brobot.app.database.entities.StateImageEntity;
 import io.github.jspinak.brobot.app.database.entities.StateTransitionsEntity;
@@ -14,11 +15,13 @@ import io.github.jspinak.brobot.app.web.responseMappers.TransitionResponseMapper
 import io.github.jspinak.brobot.app.web.responses.StateTransitionsResponse;
 import io.github.jspinak.brobot.app.web.responses.TransitionResponse;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
+import io.github.jspinak.brobot.manageStates.StateTransitions;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class StateTransitionsService {
@@ -31,6 +34,7 @@ public class StateTransitionsService {
     private final StateImageEntityMapper stateImageEntityMapper;
     private final StateImageService stateImageService;
     private final StateImageResponseMapper stateImageResponseMapper;
+    private final StateTransitionsEntityMapper stateTransitionsEntityMapper;
 
     public StateTransitionsService(StateTransitionsRepo stateTransitionsRepo,
                                    StateTransitionsResponseMapper stateTransitionsResponseMapper,
@@ -39,7 +43,8 @@ public class StateTransitionsService {
                                    StateService stateService,
                                    StateImageEntityMapper stateImageEntityMapper,
                                    StateImageService stateImageService,
-                                   StateImageResponseMapper stateImageResponseMapper) {
+                                   StateImageResponseMapper stateImageResponseMapper,
+                                   StateTransitionsEntityMapper stateTransitionsEntityMapper) {
         this.stateTransitionsRepo = stateTransitionsRepo;
         this.stateTransitionsResponseMapper = stateTransitionsResponseMapper;
         this.transitionService = transitionService;
@@ -48,6 +53,13 @@ public class StateTransitionsService {
         this.stateImageEntityMapper = stateImageEntityMapper;
         this.stateImageService = stateImageService;
         this.stateImageResponseMapper = stateImageResponseMapper;
+        this.stateTransitionsEntityMapper = stateTransitionsEntityMapper;
+    }
+
+    public List<StateTransitions> getAllStateTransitions() {
+        return stateTransitionsRepo.findAll().stream()
+                .map(stateTransitionsEntityMapper::map)
+                .collect(Collectors.toList());
     }
 
     public StateTransitionsEntity getStateTransitionsEntity(Long stateId) {

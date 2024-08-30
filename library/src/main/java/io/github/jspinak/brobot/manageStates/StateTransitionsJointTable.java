@@ -21,6 +21,12 @@ public class StateTransitionsJointTable {
     Map<Long, Set<Long>> outgoingTransitions = new HashMap<>();
     Map<Long, Set<Long>> incomingTransitionsToPREVIOUS = new HashMap<>(); // updated dynamically
 
+    public void emptyRepos() {
+        incomingTransitions = new HashMap<>();
+        outgoingTransitions = new HashMap<>();
+        incomingTransitionsToPREVIOUS = new HashMap<>();
+    }
+
     /**
      * Hidden States can be accessed by closing the State hiding them. There may be multiple States
      * hiding different hidden States. When a new State is activated that hides States, these
