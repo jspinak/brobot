@@ -42,7 +42,7 @@ public class Paths {
         return true;
     }
 
-    public Paths cleanPaths(Set<String> activeStates, String failedTransitionStartState) {
+    public Paths cleanPaths(Set<Long> activeStates, Long failedTransitionStartState) {
         Paths newPaths = new Paths();
         paths.forEach(path -> newPaths.addPath(path.cleanPath(activeStates, failedTransitionStartState)));
         return newPaths;

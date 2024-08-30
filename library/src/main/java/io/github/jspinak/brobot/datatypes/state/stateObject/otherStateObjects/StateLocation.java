@@ -20,6 +20,7 @@ public class StateLocation implements StateObject {
     private String name;
     private Location location;
     private String ownerStateName = "null";
+    private Long ownerStateId = null;
     private int staysVisibleAfterClicked = 100;
     private int probabilityExists = 100; // probability something can be acted on at this location
     private int timesActedOn = 0;
@@ -60,6 +61,7 @@ public class StateLocation implements StateObject {
         private String name = "";
         private Location location;
         private String ownerStateName = "null";
+        private Long ownerStateId = 0L;
         private int staysVisibleAfterClicked = 100;
         private int probabilityExists = 100; // probability something can be acted on at this location
         private int timesActedOn = 0;
@@ -137,6 +139,7 @@ public class StateLocation implements StateObject {
             stateLocation.name = name;
             stateLocation.location = location;
             stateLocation.ownerStateName = ownerStateName;
+            stateLocation.ownerStateId = ownerStateId;
             stateLocation.staysVisibleAfterClicked = staysVisibleAfterClicked;
             stateLocation.probabilityExists = probabilityExists;
             stateLocation.timesActedOn = timesActedOn;

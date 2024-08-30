@@ -2,7 +2,7 @@ package io.github.jspinak.brobot.actions.methods.basicactions.find;
 
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.actions.methods.mockOrLiveInterface.MockOrLive;
-import io.github.jspinak.brobot.datatypes.primitives.image.Image;
+import io.github.jspinak.brobot.datatypes.primitives.image.Scene;
 import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import org.springframework.stereotype.Component;
@@ -31,9 +31,9 @@ public class SetMatTextPattern {
 
     public void setMat(Matches matches) {
         int sceneIndex = matches.getActionOptions().getSceneToUseForCaptureAfterFusingMatches();
-        List<Image> scenes = matches.getSceneAnalysisCollection().getScenes();
+        List<Scene> scenes = matches.getSceneAnalysisCollection().getScenes();
         if (sceneIndex < 0 || sceneIndex >= scenes.size()) return;
-        Image scene = matches.getSceneAnalysisCollection().getScenes().get(sceneIndex);
+        Scene scene = matches.getSceneAnalysisCollection().getScenes().get(sceneIndex);
         for (Match m : matches.getMatchList()) {
             m.setScene(scene);
             m.setImageWithScene();

@@ -5,6 +5,7 @@ import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.GetScenes;
 import io.github.jspinak.brobot.actions.methods.sikuliWrappers.find.UseDefinedRegion;
 import io.github.jspinak.brobot.datatypes.primitives.image.Image;
+import io.github.jspinak.brobot.datatypes.primitives.image.Scene;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
@@ -84,7 +85,7 @@ public class FindImages {
          */
         List<StateImage> stateImages = objectCollections.get(0).getStateImages();
         while (actionLifecycleManagement.isOkToContinueAction(matches, stateImages.size())) {
-            List<Image> scenes = getScenes.getScenes(actionOptions, objectCollections, 1, 0);
+            List<Scene> scenes = getScenes.getScenes(actionOptions, objectCollections, 1, 0);
             findPatternsIteration.find(matches, stateImages, scenes);
             actionLifecycleManagement.incrementCompletedRepetitions(matches);
         }

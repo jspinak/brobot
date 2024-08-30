@@ -2,11 +2,16 @@ import React from 'react';
 import './image.styles.css';
 
 const Image = ({ image, onLoad }) => {
+    if (!image) {
+        console.error('No image data provided');
+        return <div className='image error'>Image data missing</div>;
+    }
+
     const { id, name, imageBase64 } = image;
 
     if (!imageBase64) {
         console.error(`Image ${id} (${name}) has no base64 data`);
-        return <div className='image error'>Image data missing</div>;
+        return <div className='image error'>Image data incomplete</div>;
     }
 
     return (
