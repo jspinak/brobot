@@ -3,6 +3,7 @@ package io.github.jspinak.brobot.actions.methods.basicactions.find;
 import io.github.jspinak.brobot.actions.actionExecution.actionLifecycle.ActionLifecycleManagement;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.SceneAnalysis;
 import io.github.jspinak.brobot.datatypes.primitives.image.Image;
+import io.github.jspinak.brobot.datatypes.primitives.image.Scene;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
@@ -29,9 +30,9 @@ public class FindPatternsIteration {
      * If Find.FIRST, it returns the first positive results.
      * Otherwise, it returns all matches.
      */
-    public void find(Matches matches, List<StateImage> stateImages, List<Image> scenes) {
+    public void find(Matches matches, List<StateImage> stateImages, List<Scene> scenes) {
         actionLifecycleManagement.printActionOnce(matches);
-        for (Image scene : scenes) {
+        for (Scene scene : scenes) {
             List<Match> singleSceneMatchList = new ArrayList<>(); // holds finds for a specific scene
             for (int i=0; i<stateImages.size(); i++) { // run for each StateImage
                 List<Match> newMatches = findAll.find(stateImages.get(i), scene, matches.getActionOptions());

@@ -1,11 +1,13 @@
 package io.github.jspinak.brobot.app.database.databaseMappers;
 
 import io.github.jspinak.brobot.app.database.entities.MatchEntity;
+import io.github.jspinak.brobot.app.database.entities.SceneEntity;
 import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Component
 public class MatchEntityMapper {
@@ -40,7 +42,7 @@ public class MatchEntityMapper {
         if (match.getAnchors() != null) matchEntity.setAnchors(anchorsEntityMapper.map(match.getAnchors()));
         matchEntity.setStateObjectData(stateObjectDataEmbeddableMapper.map(match.getStateObjectData()));
         matchEntity.setHistogram(match.getHistogram());
-        if (match.getScene() != null) matchEntity.setScene(imageEntityMapper.map(match.getScene()));
+        matchEntity.setSceneId(match.getScene().getId());
         matchEntity.setTimeStamp(match.getTimeStamp());
         matchEntity.setTimesActedOn(match.getTimesActedOn());
         return matchEntity;
@@ -58,7 +60,7 @@ public class MatchEntityMapper {
         if (matchEntity.getAnchors() != null) match.setAnchors(anchorsEntityMapper.map(matchEntity.getAnchors()));
         match.setStateObjectData(stateObjectDataEmbeddableMapper.map(matchEntity.getStateObjectData()));
         match.setHistogram(matchEntity.getHistogram());
-        if (matchEntity.getScene() != null) match.setScene(imageEntityMapper.map(matchEntity.getScene()));
+        //match.setSceneId()
         match.setTimeStamp(matchEntity.getTimeStamp());
         match.setTimesActedOn(matchEntity.getTimesActedOn());
         return match;

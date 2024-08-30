@@ -3,7 +3,7 @@ package io.github.jspinak.brobot.app.buildWithoutNames.buildStateStructure;
 import io.github.jspinak.brobot.app.services.StateService;
 import io.github.jspinak.brobot.datatypes.state.state.State;
 import io.github.jspinak.brobot.manageStates.StateTransitions;
-import io.github.jspinak.brobot.services.StateTransitionsService;
+import io.github.jspinak.brobot.services.StateTransitionsInProjectService;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
@@ -16,11 +16,11 @@ import java.util.Optional;
 public class StateStructureInfo {
 
     private final StateService stateService;
-    private final StateTransitionsService stateTransitionsService;
+    private final StateTransitionsInProjectService stateTransitionsInProjectService;
 
-    public StateStructureInfo(StateService stateService, StateTransitionsService stateTransitionsService) {
+    public StateStructureInfo(StateService stateService, StateTransitionsInProjectService stateTransitionsInProjectService) {
         this.stateService = stateService;
-        this.stateTransitionsService = stateTransitionsService;
+        this.stateTransitionsInProjectService = stateTransitionsInProjectService;
     }
 
     public void printStateStructure() {
@@ -28,7 +28,7 @@ public class StateStructureInfo {
             System.out.println(state);
             System.out.println();
 
-            Optional<StateTransitions> optTrs = stateTransitionsService.getTransitions(state.getName());
+            Optional<StateTransitions> optTrs = stateTransitionsInProjectService.getTransitions(state.getId());
             if (optTrs.isPresent()) {
                 StateTransitions trs = optTrs.get();
                 System.out.println("transitions:");

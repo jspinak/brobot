@@ -7,6 +7,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.BooleanSupplier;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * After a successful transition (both 'from' and 'to' Transitions):
@@ -15,26 +17,28 @@ import java.util.function.BooleanSupplier;
  */
 @Getter
 @Setter
-public class StateTransition {
-
-    // when set to NONE, the StaysVisible variable in the corresponding StateTransitions object will be used.
-    public enum StaysVisible {
-        NONE, TRUE, FALSE
-    }
-
+public class JavaStateTransition implements IStateTransition {
     private BooleanSupplier transitionFunction;
-    /**
-     * When set, takes precedence over the same variable in StateTransitions.
-     * Only applies to FromTransitions.
-     */
+
     private StaysVisible staysVisibleAfterTransition;
-    private Set<String> activate;
-    private Set<String> exit;
-    private int score = 0; // larger path scores discourage taking a path with this transition
+    /*
+    Use names instead of IDs for coding these by hand since state ids are set at runtime.
+     */
+    private Set<String> activateNames;
+    private Set<String> exitNames;
+    private Set<Long> activate;
+    private Set<Long> exit;
+    private int score = 0;
     private int timesSuccessful = 0;
 
-    public boolean getAsBoolean() {
-        return transitionFunction.getAsBoolean();
+    @Override
+    public void convertNamesToIds(Function<String, Long> nameToIdConverter) {
+        this.activate = activateNames.stream()
+                .map(nameToIdConverter)
+                .collect(Collectors.toSet());
+        this.exit = exitNames.stream()
+                .map(nameToIdConverter)
+                .collect(Collectors.toSet());
     }
 
     public static class Builder {
@@ -75,14 +79,14 @@ public class StateTransition {
             return this;
         }
 
-        public StateTransition build() {
-            StateTransition stateTransition = new StateTransition();
-            stateTransition.transitionFunction = transitionFunction;
-            stateTransition.staysVisibleAfterTransition = staysVisibleAfterTransition;
-            stateTransition.activate = activate;
-            stateTransition.exit = exit;
-            stateTransition.score = score;
-            return stateTransition;
+        public JavaStateTransition build() {
+            JavaStateTransition javaStateTransition = new JavaStateTransition();
+            javaStateTransition.transitionFunction = transitionFunction;
+            javaStateTransition.staysVisibleAfterTransition = staysVisibleAfterTransition;
+            javaStateTransition.activateNames = activate;
+            javaStateTransition.exitNames = exit;
+            javaStateTransition.score = score;
+            return javaStateTransition;
         }
     }
 }

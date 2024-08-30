@@ -1,11 +1,11 @@
 package io.github.jspinak.brobot.app.buildWithoutNames.buildLive.screenTransitions;
 
+import io.github.jspinak.brobot.actions.actionExecution.Action;
+import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.app.buildWithoutNames.buildLive.ScreenObservations;
 import io.github.jspinak.brobot.app.buildWithoutNames.screenObservations.*;
 import io.github.jspinak.brobot.app.buildWithoutNames.stateStructureBuildManagement.StateStructureConfiguration;
-import io.github.jspinak.brobot.actions.actionExecution.Action;
-import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
-import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
+import io.github.jspinak.brobot.datatypes.primitives.image.Scene;
 import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
@@ -53,14 +53,14 @@ public class FindScreen {
         int screenId = getScreenId(newObservation, config, observations); // compare to previous screenshots
         screenObservationManager.setCurrentScreenId(screenId);
         if (screenId == nextUnassignedId) { // screen hasn't been seen before
-            processNewScreen(newObservation.getPattern(), observations, config, statelessImages);
+            processNewScreen(newObservation.getScene(), observations, config, statelessImages);
             screenObservationManager.setNextUnassignedScreenId(screenId+1);
             System.out.println("FindScreen: new screen = " + screenId);
         }
         screenObservations.get(screenId, observations).ifPresent(screenObservationManager::setCurrentScreenObservation);
     }
 
-    private void processNewScreen(Pattern screenshot, List<ScreenObservation> observations,
+    private void processNewScreen(Scene screenshot, List<ScreenObservation> observations,
                                   StateStructureConfiguration config, List<StatelessImage> statelessImages) {
         ScreenObservation sO = screenObservations.addScreenObservation(screenshot, observations, config); // add screen to repo
         statelessImageOps.addOrMergeStatelessImages(sO, statelessImages, config);
@@ -74,7 +74,7 @@ public class FindScreen {
     private int getScreenId(ScreenObservation newObservation, StateStructureConfiguration config,
                             List<ScreenObservation> observations) {
         StateImage newObs = new StateImage.Builder()
-                .addPattern(newObservation.getPattern())
+                .addPattern(newObservation.getScene().getPattern())
                 .build();
         ObjectCollection objColl1 = new ObjectCollection.Builder()
                 .withImages(newObs)
@@ -116,7 +116,7 @@ public class FindScreen {
     private Optional<Match> getBestMatch(ScreenObservation newObservation, Matches matches) {
         Optional<Match> bestMatch = matches.getBestMatch();
         bestMatch.ifPresent(match -> {
-            System.out.println("screenshotName: " + newObservation.getPattern().getName());
+            System.out.println("screenshotName: " + newObservation.getScene().getPattern().getName());
             System.out.println("screen: " + newObservation.getId());
             System.out.println("bestMatch: " + match.getScore());
             System.out.println("bestMatchIndex: " + matches.getMatchList().indexOf(match));

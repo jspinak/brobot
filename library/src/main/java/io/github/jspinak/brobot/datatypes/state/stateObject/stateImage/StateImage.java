@@ -37,6 +37,7 @@ public class StateImage implements StateObject {
     private String name = "";
     private List<Pattern> patterns = new ArrayList<>();
     private String ownerStateName = "null"; // ownerStateName is set by the State when the object is added
+    private Long ownerStateId = null; // set by the State when the object is added
     private int timesActedOn = 0;
     private boolean shared = false; // shared means also found in other states
 
@@ -69,6 +70,11 @@ public class StateImage implements StateObject {
     private Integer transitionsToScreen;
     private Set<String> statesToEnter = new HashSet<>();
     private Set<String> statesToExit = new HashSet<>();
+    /*
+    This stores the ids of transitions to other states for which this StateImage is involved.
+    Transition ids are first recorded when transitions are saved to the database.
+     */
+    private Set<Long> involvedTransitionIds = new HashSet<>();
 
     public String getId() {
         return objectType.name() + name + patterns.toString();
@@ -256,6 +262,7 @@ public class StateImage implements StateObject {
         private KmeansProfilesAllSchemas kmeansProfilesAllSchemas = new KmeansProfilesAllSchemas();
         private int index;
         private String ownerStateName = "null";
+        private Long ownerStateId = null;
         private Set<String> statesToEnter = new HashSet<>();
         private Set<String> statesToExit = new HashSet<>();
         private Position positionForAllPatterns;
@@ -341,6 +348,7 @@ public class StateImage implements StateObject {
             stateImage.kmeansProfilesAllSchemas = kmeansProfilesAllSchemas;
             stateImage.index = index;
             stateImage.ownerStateName = ownerStateName;
+            stateImage.ownerStateId = ownerStateId;
             stateImage.statesToEnter = statesToEnter;
             stateImage.statesToExit = statesToExit;
             if (positionForAllPatterns != null) stateImage.getPatterns().forEach(pattern ->
@@ -354,6 +362,7 @@ public class StateImage implements StateObject {
             StateImage stateImage = new StateImage();
             stateImage.name = "generic";
             stateImage.ownerStateName = "null";
+            stateImage.ownerStateId = null;
             return stateImage;
         }
     }

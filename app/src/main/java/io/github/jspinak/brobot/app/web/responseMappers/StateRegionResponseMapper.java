@@ -1,6 +1,7 @@
 package io.github.jspinak.brobot.app.web.responseMappers;
 
 import io.github.jspinak.brobot.app.database.entities.StateRegionEntity;
+import io.github.jspinak.brobot.app.web.requests.StateRegionRequest;
 import io.github.jspinak.brobot.app.web.responses.StateRegionResponse;
 import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.StateRegion;
 import org.springframework.stereotype.Component;
@@ -80,6 +81,44 @@ public class StateRegionResponseMapper {
         return stateRegionResponses.stream()
                 .map(this::map)
                 .collect(Collectors.toList());
+    }
+
+    public StateRegionEntity fromRequest(StateRegionRequest request) {
+        if (request == null) return null;
+        StateRegionEntity entity = new StateRegionEntity();
+        entity.setObjectType(request.getObjectType());
+        entity.setName(request.getName());
+        entity.setSearchRegion(regionResponseMapper.fromRequest(request.getSearchRegion()));
+        entity.setOwnerStateName(request.getOwnerStateName());
+        entity.setStaysVisibleAfterClicked(request.getStaysVisibleAfterClicked());
+        entity.setProbabilityExists(request.getProbabilityExists());
+        entity.setTimesActedOn(request.getTimesActedOn());
+        entity.setPosition(positionResponseMapper.fromRequest(request.getPosition()));
+        entity.setAnchors(anchorsResponseMapper.fromRequest(request.getAnchors()));
+        entity.setMockText(request.getMockText());
+        entity.setMatchHistory(matchHistoryResponseMapper.fromRequest(request.getMatchHistory()));
+        return entity;
+    }
+
+    public StateRegionRequest toRequest(StateRegionEntity entity) {
+        if (entity == null) {
+            return null;
+        }
+
+        StateRegionRequest request = new StateRegionRequest();
+        request.setObjectType(entity.getObjectType());
+        request.setName(entity.getName());
+        request.setSearchRegion(regionResponseMapper.toRequest(entity.getSearchRegion()));
+        request.setOwnerStateName(entity.getOwnerStateName());
+        request.setStaysVisibleAfterClicked(entity.getStaysVisibleAfterClicked());
+        request.setProbabilityExists(entity.getProbabilityExists());
+        request.setTimesActedOn(entity.getTimesActedOn());
+        request.setPosition(positionResponseMapper.toRequest(entity.getPosition()));
+        request.setAnchors(anchorsResponseMapper.toRequest(entity.getAnchors()));
+        request.setMatchHistory(matchHistoryResponseMapper.toRequest(entity.getMatchHistory()));
+        request.setMockText(entity.getMockText());
+
+        return request;
     }
 }
 

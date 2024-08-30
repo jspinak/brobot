@@ -15,6 +15,7 @@ public interface StateObject {
     Type getObjectType();
     String getName();
     String getOwnerStateName();
+    Long getOwnerStateId();
     void addTimesActedOn();
     void setTimesActedOn(int times);
 
