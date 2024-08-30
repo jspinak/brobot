@@ -11,7 +11,7 @@ const ImageWithHighlights = ({ image, patterns, highlightAll, onImageLoad, calcu
         return (
           <Highlight
             key={pattern.id}
-            image={pattern.searchRegions.fixedRegion}
+            imageRegion={pattern.searchRegions.fixedRegion}
             adjustX={adjustX}
             adjustY={adjustY}
             scaleW={scaleW}

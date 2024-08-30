@@ -80,23 +80,23 @@ public class MatchHistory {
      * @param action the Action taken
      * @return an Optional of a Snapshot
      */
-    public Optional<MatchSnapshot> getRandomSnapshot(ActionOptions.Action action, String state) {
+    public Optional<MatchSnapshot> getRandomSnapshot(ActionOptions.Action action, Long state) {
         List<MatchSnapshot> selectedSnapshots = snapshots.stream()
-                .filter(snapshot -> snapshot.getActionOptions().getAction() == action && snapshot.getState().equals(state))
+                .filter(snapshot -> snapshot.getActionOptions().getAction() == action && snapshot.getStateId().equals(state))
                 .collect(toList());
         return getRandomSnapshot(selectedSnapshots);
     }
 
-    public Optional<MatchSnapshot> getRandomSnapshot(ActionOptions.Action action, String... states) {
-        for (String state : states) {
+    public Optional<MatchSnapshot> getRandomSnapshot(ActionOptions.Action action, Long... states) {
+        for (Long state : states) {
             Optional<MatchSnapshot> optMS = getRandomSnapshot(action, state);
             if (optMS.isPresent()) return optMS;
         }
         return Optional.empty();
     }
 
-    public Optional<MatchSnapshot> getRandomSnapshot(ActionOptions.Action action, Set<String> states) {
-        return getRandomSnapshot(action, states.toArray(new String[0]));
+    public Optional<MatchSnapshot> getRandomSnapshot(ActionOptions.Action action, Set<Long> states) {
+        return getRandomSnapshot(action, states.toArray(new Long[0]));
     }
 
     /**

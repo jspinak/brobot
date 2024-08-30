@@ -4,6 +4,7 @@ import io.github.jspinak.brobot.actions.actionExecution.Action;
 import io.github.jspinak.brobot.database.services.AllStatesInProjectService;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import io.github.jspinak.brobot.datatypes.state.state.State;
+import io.github.jspinak.brobot.primatives.enums.SpecialStateType;
 import io.github.jspinak.brobot.reports.Report;
 import org.springframework.stereotype.Component;
 
@@ -46,7 +47,7 @@ public class StateFinder {
         checkForActiveStates();
         if (!stateMemory.getActiveStates().isEmpty()) return;
         searchAllImagesForCurrentStates();
-        if (stateMemory.getActiveStates().isEmpty()) stateMemory.addActiveState("UNKNOWN");
+        if (stateMemory.getActiveStates().isEmpty()) stateMemory.addActiveState(SpecialStateType.UNKNOWN.getId());
     }
 
     private void searchAllImagesForCurrentStates() {
@@ -60,6 +61,13 @@ public class StateFinder {
     public boolean findState(String stateName) {
         Report.print(stateName + ".");
         Optional<State> state = allStatesInProjectService.getState(stateName);
+        return state.filter(value -> action.perform(FIND, new ObjectCollection.Builder().withNonSharedImages(value).build())
+                .isSuccess()).isPresent();
+    }
+
+    public boolean findState(Long stateId) {
+        Report.print(stateId + ".");
+        Optional<State> state = allStatesInProjectService.getState(stateId);
         return state.filter(value -> action.perform(FIND, new ObjectCollection.Builder().withNonSharedImages(value).build())
                 .isSuccess()).isPresent();
     }

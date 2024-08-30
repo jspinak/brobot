@@ -1,8 +1,9 @@
 package io.github.jspinak.brobot.manageStates;
 
+import io.github.jspinak.brobot.primatives.enums.SpecialStateType;
 import io.github.jspinak.brobot.reports.ANSI;
 import io.github.jspinak.brobot.reports.Report;
-import io.github.jspinak.brobot.services.StateTransitionsService;
+import io.github.jspinak.brobot.services.StateTransitionsInProjectService;
 import lombok.Getter;
 import org.springframework.stereotype.Component;
 
@@ -16,13 +17,16 @@ import java.util.Optional;
 public class TraversePaths {
 
     private DoTransition doTransition;
-    private StateTransitionsService stateTransitionsService;
+    private StateTransitionsInProjectService stateTransitionsInProjectService;
+    private final TransitionBooleanSupplierPackager transitionBooleanSupplierPackager;
 
-    private String failedTransitionStartState = "null";
+    private Long failedTransitionStartState = SpecialStateType.NULL.getId();
 
-    public TraversePaths(DoTransition doTransition, StateTransitionsService stateTransitionsService) {
+    public TraversePaths(DoTransition doTransition, StateTransitionsInProjectService stateTransitionsInProjectService,
+                         TransitionBooleanSupplierPackager transitionBooleanSupplierPackager) {
         this.doTransition = doTransition;
-        this.stateTransitionsService = stateTransitionsService;
+        this.stateTransitionsInProjectService = stateTransitionsInProjectService;
+        this.transitionBooleanSupplierPackager = transitionBooleanSupplierPackager;
     }
 
     public boolean traverse(Path path) {
@@ -35,13 +39,13 @@ public class TraversePaths {
         return true;
     }
 
-    boolean finishTransition(String stateToOpen) {
-        Optional<StateTransitions> optToStateTransitions = stateTransitionsService.getTransitions(stateToOpen);
+    boolean finishTransition(Long stateToOpen) {
+        Optional<StateTransitions> optToStateTransitions = stateTransitionsInProjectService.getTransitions(stateToOpen);
         if (optToStateTransitions.isEmpty()) {
             Report.print(Report.OutputLevel.HIGH,"'to state' " + stateToOpen + " not a valid transition", ANSI.RED);
             return false;
         }
-        return optToStateTransitions.get().getTransitionFinish().getAsBoolean();
+        return transitionBooleanSupplierPackager.getAsBoolean(optToStateTransitions.get().getTransitionFinish());
     }
 
 }

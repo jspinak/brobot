@@ -20,7 +20,7 @@ public class MatchResponse {
     private ImageResponse searchImage;
     private AnchorsResponse anchors;
     private StateObjectDataResponse stateObjectData;
-    private ImageResponse scene;
+    private Long sceneId;
     private LocalDateTime timeStamp;
     private int timesActedOn;
 }

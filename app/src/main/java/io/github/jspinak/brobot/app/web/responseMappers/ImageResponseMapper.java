@@ -1,10 +1,13 @@
 package io.github.jspinak.brobot.app.web.responseMappers;
 
 import io.github.jspinak.brobot.app.database.entities.ImageEntity;
+import io.github.jspinak.brobot.app.web.requests.ImageRequest;
 import io.github.jspinak.brobot.app.web.responses.ImageResponse;
 import io.github.jspinak.brobot.imageUtils.BufferedImageOps;
 import io.github.jspinak.brobot.stringUtils.Base64Converter;
 import org.springframework.stereotype.Component;
+
+import java.util.Base64;
 
 @Component
 public class ImageResponseMapper {
@@ -30,4 +33,25 @@ public class ImageResponseMapper {
         }
         return imageEntity;
     }
+
+    public ImageEntity fromRequest(ImageRequest request) {
+        if (request == null) return null;
+        ImageEntity entity = new ImageEntity();
+        entity.setId(request.getId());
+        entity.setName(request.getName());
+        entity.setBytes(BufferedImageOps.base64StringToByteArray(request.getImageBase64()));
+        return entity;
+    }
+
+    public ImageRequest toRequest(ImageEntity entity) {
+        if (entity == null) {
+            return null;
+        }
+        ImageRequest request = new ImageRequest();
+        request.setId(entity.getId());
+        request.setName(entity.getName());
+        request.setImageBase64(Base64.getEncoder().encodeToString(entity.getBytes()));
+        return request;
+    }
+
 }

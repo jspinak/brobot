@@ -1,35 +1,92 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import axios from 'axios';
 import { useParams } from 'react-router-dom';
-import Image from './../../components/image/image.component';
 import StateImageSet from './../../components/state-image-set/state-image-set.component';
-import StateImageDetails from './../../components/state-image/state-image-details.component';
-import Highlight from './../../components/highlight/highlight.component';
+import Scene from './../../components/scene/scene.component';
+import StateDetailsButtons from "./state-details-buttons.component";
 import './state-details.styles.css';
-import HighlightAllCheckbox from './highlight-all-checkbox.component';
-import StateDropdown from './../../components/state-dropdown/state-dropdown.component';
 
-const StateDetails = ({ allStates, isLoading }) => {
+const StateDetails = ({ allStates: initialAllStates, isLoading }) => {
   const [state, setState] = useState(null);
   const [selectedStateImage, setSelectedStateImage] = useState(null);
   const [highlightedPatterns, setHighlightedPatterns] = useState([]);
   const [imageDimensions, setImageDimensions] = useState({});
-  const [highlightAll, setHighlightAll] = useState(true);
-  const [selectedImages, setSelectedImages] = useState([]);
   const [selectedStateImages, setSelectedStateImages] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
   const { stateId } = useParams();
+  const [highlightAll, setHighlightAll] = useState(true);
+  const [transitions, setTransitions] = useState([]);
+  const [selectedTargetState, setSelectedTargetState] = useState('');
+  const [stateName, setStateName] = useState('');
+  const [allStates, setAllStates] = useState(initialAllStates);
+
+  const fetchTransitions = useCallback(async () => {
+    try {
+      const response = await fetch('http://localhost:8080/api/transitions');
+      if (response.ok) {
+        const data = await response.json();
+        setTransitions(data);
+      } else {
+        console.error('Failed to fetch transitions');
+      }
+    } catch (error) {
+      console.error('Error fetching transitions:', error);
+    }
+  }, []);
 
   useEffect(() => {
     if (!isLoading && allStates.length > 0) {
-      const foundState = allStates.find(s => s.id === parseInt(stateId));
-      setState(foundState || null);
-    }
-    return () => {
-      console.log('StateDetails component is unmounting');
-    };
-  }, [stateId, allStates, isLoading]);
+      console.log('StateId from URL:', stateId);
+      console.log('All States:', allStates);
 
-  const handleImageLoad = (event, sceneId) => {
+      const parsedStateId = parseInt(stateId, 10);
+      const foundState = allStates.find(s => s.id === parsedStateId);
+
+      console.log('Parsed StateId:', parsedStateId);
+      console.log('Found State:', foundState);
+
+      if (foundState) {
+        setState(foundState);
+        fetchTransitions();
+      } else {
+        console.error('State not found');
+      }
+    }
+  }, [stateId, allStates, isLoading, fetchTransitions]);
+
+  const handleCheckboxChange = () => {
+    setHighlightAll(!highlightAll);
+  };
+
+  const handleStateImageHover = useCallback((stateImage) => {
+    if (stateImage && Array.isArray(stateImage.patterns)) {
+      setHighlightedPatterns(stateImage.patterns);
+    } else {
+      console.error('Invalid stateImage or patterns:', stateImage);
+    }
+  }, []);
+
+  const handleStateImageLeave = useCallback(() => {
+    setHighlightedPatterns([]);
+  }, []);
+
+  const handleStateImageClick = useCallback((stateImage) => {
+    setSelectedStateImage(stateImage);
+  }, []);
+
+  const handleStateImageCheckboxChange = useCallback((stateImageId) => {
+    setSelectedStateImages((prevSelected) =>
+        prevSelected.includes(stateImageId)
+            ? prevSelected.filter(id => id !== stateImageId)
+            : [...prevSelected, stateImageId]
+    );
+  }, []);
+
+  const handleEditToggle = useCallback(() => {
+    setIsEditing((prevIsEditing) => !prevIsEditing);
+  }, []);
+
+  const handleImageLoad = useCallback((event, sceneId) => {
     setImageDimensions(prevDimensions => ({
       ...prevDimensions,
       [sceneId]: {
@@ -37,49 +94,9 @@ const StateDetails = ({ allStates, isLoading }) => {
         height: event.target.height
       }
     }));
-  };
-
-  const handleStateImageHover = useCallback((stateImage) => {
-    console.log('handleStateImageHover called with:', stateImage);
-    if (stateImage && Array.isArray(stateImage.patterns)) {
-      setHighlightedPatterns(prevPatterns => {
-        console.log('Updating patterns:', stateImage.patterns);
-        return stateImage.patterns;
-      });
-    } else {
-      console.error('Invalid stateImage or patterns:', stateImage);
-    }
   }, []);
 
-  const handleStateImageLeave = () => {
-    setHighlightedPatterns([]);
-  };
-
-  const handleStateImageClick = (stateImage) => {
-    setSelectedStateImage(stateImage);
-  };
-
-  const handleCheckboxChange = () => {
-    setHighlightAll(!highlightAll);
-  };
-
-  if (isLoading || !state) {
-    return <div>Loading...</div>;
-  }
-
-  const handleStateImageCheckboxChange = (stateImageId) => {
-    setSelectedStateImages((prevSelected) =>
-      prevSelected.includes(stateImageId)
-        ? prevSelected.filter(id => id !== stateImageId)
-        : [...prevSelected, stateImageId]
-    );
-  };
-
-    const handleEditToggle = () => {
-      setIsEditing(!isEditing);
-    };
-
-  const handleDeleteImages = async () => {
+  const handleDeleteImages = useCallback(async () => {
     try {
       const response = await fetch('http://localhost:8080/api/state-images/delete', {
         method: 'DELETE',
@@ -90,11 +107,12 @@ const StateDetails = ({ allStates, isLoading }) => {
       });
 
       if (response.ok) {
-        // Filter out deleted state images from the state
-        const updatedStateImages = state.stateImages.filter((stateImage) =>
-          !selectedStateImages.includes(stateImage.id)
-        );
-        setState({ ...state, stateImages: updatedStateImages });
+        setState((prevState) => ({
+          ...prevState,
+          stateImages: prevState.stateImages.filter((stateImage) =>
+              !selectedStateImages.includes(stateImage.id)
+          ),
+        }));
         setSelectedStateImages([]);
       } else {
         console.error('Failed to delete state images');
@@ -102,33 +120,95 @@ const StateDetails = ({ allStates, isLoading }) => {
     } catch (error) {
       console.error('Error deleting state images:', error);
     }
-  };
+  }, [selectedStateImages]);
 
-    const handleNameChange = async (stateImageId, newName) => {
-        try {
-          const response = await fetch(`http://localhost:8080/api/state-images/${stateImageId}/edit`, {
-            method: 'PUT',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ name: newName }),
-          });
+  const handleStateImageNameChange = useCallback((stateImageId, newName) => {
+    setState(prevState => ({
+      ...prevState,
+      stateImages: prevState.stateImages.map(stateImage =>
+          stateImage.id === stateImageId
+              ? { ...stateImage, name: newName }
+              : stateImage
+      )
+    }));
+  }, []);
 
-          if (response.ok) {
-            // Update the state image name in the state
-            const updatedStateImages = state.stateImages.map((stateImage) =>
-              stateImage.id === stateImageId
-                ? { ...stateImage, name: newName }
-                : stateImage
-            );
-            setState({ ...state, stateImages: updatedStateImages });
-          } else {
-            console.error('Failed to edit state image name');
-          }
-        } catch (error) {
-          console.error('Error editing state image name:', error);
-        }
-    };
+  const handleStateImageUpdate = useCallback((updatedStateImage) => {
+    setState(prevState => ({
+      ...prevState,
+      stateImages: prevState.stateImages.map(stateImage =>
+          stateImage.id === updatedStateImage.id ? updatedStateImage : stateImage
+      )
+    }));
+  }, []);
+
+  const handleCreateTransition = useCallback(async (newTransition, updatedStateImage) => {
+    // Update the state image
+    if (updatedStateImage) {
+      setState(prevState => ({
+        ...prevState,
+        stateImages: prevState.stateImages.map(si =>
+            si.id === updatedStateImage.id ? updatedStateImage : si
+        )
+      }));
+    }
+
+    // Fetch all transitions again to ensure we have the latest data
+    await fetchTransitions();
+  }, [fetchTransitions]);
+
+  const handleDeleteStateImage = useCallback(async (stateImageId) => {
+    try {
+      const response = await fetch(`http://localhost:8080/api/stateimages/${stateImageId}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        setState(prevState => ({
+          ...prevState,
+          stateImages: prevState.stateImages.filter(si => si.id !== stateImageId)
+        }));
+        setSelectedStateImage(null);
+      } else {
+        console.error('Failed to delete state image');
+      }
+    } catch (error) {
+      console.error('Error deleting state image:', error);
+    }
+  }, []);
+
+  const handleMoveStateImage = useCallback(async (stateImageId, newStateId) => {
+    try {
+      const response = await fetch(`http://localhost:8080/api/stateimages/${stateImageId}/move`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ newStateId }),
+      });
+
+      if (response.ok) {
+        const updatedStateImage = await response.json();
+        setState(prevState => ({
+          ...prevState,
+          stateImages: prevState.stateImages.filter(si => si.id !== stateImageId)
+        }));
+        setSelectedStateImage(null);
+      } else {
+        console.error('Failed to move state image');
+      }
+    } catch (error) {
+      console.error('Error moving state image:', error);
+    }
+  }, []);
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (!state) {
+    return <div>State not found</div>;
+  }
 
   const calculateScaledPosition = (pattern, sceneId) => {
     const dimensions = imageDimensions[sceneId] || { width: 1920, height: 1080 };
@@ -139,62 +219,84 @@ const StateDetails = ({ allStates, isLoading }) => {
     return { adjustX, adjustY, scaleW, scaleH };
   };
 
+  const handleStateNameChange = (newName) => {
+    setStateName(newName);
+  };
+
+  const handleStateNameSubmit = async () => {
+    try {
+      const response = await axios.put(`http://localhost:8080/api/states/${state.id}/name`, { name: stateName });
+      if (response.status === 200) {
+        console.log('State name updated successfully');
+        // Update the local state
+        setState(prevState => ({ ...prevState, name: stateName }));
+
+        // Update the allStates array
+        setAllStates(prevAllStates =>
+            prevAllStates.map(s =>
+                s.id === state.id ? { ...s, name: stateName } : s
+            )
+        );
+      } else {
+        console.error('Failed to update state name');
+      }
+    } catch (error) {
+      console.error('Error updating state name:', error);
+    }
+  };
+
   return (
-    <div className="state-details">
-      <StateDropdown states={allStates} currentStateId={stateId} />
-      <div className="action-buttons">
-        <HighlightAllCheckbox
-          isChecked={highlightAll}
-          onChange={handleCheckboxChange}
+      <div className="state-details">
+        <StateDetailsButtons
+            isChecked={highlightAll}
+            onCheckboxChange={handleCheckboxChange}
+            states={allStates}
+            currentStateId={state?.id}
+            currentStateName={stateName}
+            onStateNameChange={handleStateNameChange}
+            onStateNameSubmit={handleStateNameSubmit}
+            stateImageCount={state?.stateImages?.length || 0}
+            transitionCount={transitions.filter(t => t.sourceStateId === state?.id).length}
         />
-        <button onClick={handleEditToggle}>{isEditing ? 'Stop Editing' : 'Edit Selected'}</button>
-        <button onClick={handleDeleteImages} disabled={selectedImages.length === 0}>Delete Selected</button>
-      </div>
-      <div className="state-content">
-        <div className="state-image-list">
-          <StateImageSet
-            stateImages={state.stateImages}  // Ensure this is correctly passed
-            onHover={handleStateImageHover}
-            onMouseLeave={handleStateImageLeave}
-            onClick={handleStateImageClick}
-            onCheckboxChange={handleStateImageCheckboxChange}
-            selectedImages={selectedStateImages}
-            isEditing={isEditing}
-            onNameChange={handleNameChange}
-          />
-        </div>
-        <div className="state-scenes">
-          {state.scenes.map((scene, index) => (
-            <div key={scene.id} className="state-scene">
-              <Image
-                image={scene}
-                onLoad={(event) => handleImageLoad(event, scene.id)}
-              />
-              {(highlightAll ? state.stateImages.flatMap(si => si.patterns) : highlightedPatterns).map((pattern) => {
-                const { adjustX, adjustY, scaleW, scaleH } = calculateScaledPosition(pattern, scene.id);
+        <div className="state-content">
+          <div className="state-image-set">
+            <StateImageSet
+                stateImages={state?.stateImages || []}
+                transitions={transitions}
+                onHover={handleStateImageHover}
+                onMouseLeave={handleStateImageLeave}
+                onClick={handleStateImageClick}
+                selectedStateImage={selectedStateImage}
+                allStates={allStates}
+                onCreateTransition={handleCreateTransition}
+                onNameChange={handleStateImageNameChange}
+                onDelete={handleDeleteStateImage}
+                onMove={handleMoveStateImage}
+                onStateImageUpdate={handleStateImageUpdate}
+            />
+          </div>
+            <div className="state-scenes">
+              {state.scenes && state.scenes.map((scene, index) => {
+                if (!scene || typeof scene !== 'object') {
+                  console.error(`Invalid scene at index ${index}`, scene);
+                  return null;
+                }
                 return (
-                  <Highlight
-                    key={`${pattern.id}-${scene.id}`}
-                    image={pattern.searchRegions.fixedRegion}
-                    adjustX={adjustX}
-                    adjustY={adjustY}
-                    scaleW={scaleW}
-                    scaleH={scaleH}
-                  />
+                    <Scene
+                        key={scene.id} // Use `id` as the key
+                        sceneId={scene.id} // Pass `id` as the `sceneId` prop
+                        highlightAll={highlightAll}
+                        state={state}
+                        highlightedPatterns={highlightedPatterns}
+                        handleImageLoad={handleImageLoad}
+                        calculateScaledPosition={calculateScaledPosition}
+                    />
                 );
               })}
             </div>
-          ))}
+          </div>
         </div>
-      </div>
-      {selectedStateImage && (
-        <StateImageDetails
-          stateImage={selectedStateImage}
-          allStates={allStates}
-        />
-      )}
-    </div>
-  );
-};
+        );
+        };
 
-export default StateDetails;
+        export default StateDetails;

@@ -1,6 +1,7 @@
 package io.github.jspinak.brobot.app.database.databaseMappers;
 
 import io.github.jspinak.brobot.app.database.entities.ImageEntity;
+import io.github.jspinak.brobot.app.database.entities.SceneEntity;
 import io.github.jspinak.brobot.datatypes.primitives.image.Image;
 import io.github.jspinak.brobot.imageUtils.BufferedImageOps;
 import org.springframework.stereotype.Component;

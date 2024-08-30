@@ -11,6 +11,9 @@ import lombok.Setter;
 public class ActionOptionsResponse {
 
     private Long id;
-    private ActionOptions.Action action = ActionOptions.Action.FIND;
+    private ActionOptions.Action action;
+    private ActionOptions.Find find;
+    private boolean keepLargerMatches;
+    private double similarity;
 
 }

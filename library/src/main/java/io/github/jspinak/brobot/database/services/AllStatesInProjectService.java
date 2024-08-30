@@ -26,6 +26,10 @@ public class AllStatesInProjectService {
         return allStatesInProject.getState(name);
     }
 
+    public Optional<State> getState(Long id) {
+        return allStatesInProject.getState(id);
+    }
+
     public List<State> getAllStates() {
         return allStatesInProject.getAllStates();
     }
@@ -36,14 +40,14 @@ public class AllStatesInProjectService {
                 .collect(Collectors.toSet());
     }
 
-    public Set<State> findSetByName(String... stateNames) {
+    public Set<State> findSetById(Long... stateId) {
         Set<State> states = new HashSet<>();
-        Stream.of(stateNames).forEach(name -> getState(name).ifPresent(states::add));
+        Stream.of(stateId).forEach(name -> getState(name).ifPresent(states::add));
         return states;
     }
 
-    public Set<State> findSetByName(Set<String> stateNames) {
-        return findSetByName(stateNames.toArray(new String[0]));
+    public Set<State> findSetById(Set<Long> stateIds) {
+        return findSetById(stateIds.toArray(new Long[0]));
     }
 
     public State[] findArrayByName(Set<String> stateNames) {

@@ -4,13 +4,10 @@ import io.github.jspinak.brobot.database.services.AllStatesInProjectService;
 import io.github.jspinak.brobot.datatypes.state.state.State;
 import io.github.jspinak.brobot.reports.Output;
 import io.github.jspinak.brobot.reports.Report;
-import io.github.jspinak.brobot.services.StateTransitionsService;
+import io.github.jspinak.brobot.services.StateTransitionsInProjectService;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Finds all paths from a set of start States to a target State.
@@ -21,19 +18,19 @@ public class PathFinder {
 
     private final StateTransitionsJointTable stateTransitionsJointTable;
     private final AllStatesInProjectService allStatesInProjectService;
-    private final StateTransitionsService stateTransitionsService;
+    private final StateTransitionsInProjectService stateTransitionsInProjectService;
 
-    private Set<String> startStates;
+    private Set<Long> startStates;
     private List<Path> pathList;
 
     public PathFinder(StateTransitionsJointTable stateTransitionsJointTable, AllStatesInProjectService allStatesInProjectService,
-                      StateTransitionsService stateTransitionsService) {
+                      StateTransitionsInProjectService stateTransitionsInProjectService) {
         this.stateTransitionsJointTable = stateTransitionsJointTable;
         this.allStatesInProjectService = allStatesInProjectService;
-        this.stateTransitionsService = stateTransitionsService;
+        this.stateTransitionsInProjectService = stateTransitionsInProjectService;
     }
 
-    public Paths getPathsToState(Set<String> startStates, String targetState) {
+    public Paths getPathsToState(Set<Long> startStates, Long targetState) {
         Report.println("Find path: " + startStates + " -> " + targetState);
         this.startStates = startStates;
         pathList = new ArrayList<>();
@@ -45,7 +42,7 @@ public class PathFinder {
         return paths;
     }
 
-    private void recursePath(Path path, String stateInFocus) {
+    private void recursePath(Path path, Long stateInFocus) {
         if (!path.contains(stateInFocus)) {
             path.add(stateInFocus);
             addTransition(path);
@@ -55,30 +52,30 @@ public class PathFinder {
                 setPathScore(successfulPath);
                 pathList.add(successfulPath);
             } else { // continue searching
-                Set<String> parentStates = stateTransitionsJointTable.getStatesWithTransitionsTo(stateInFocus);
-                for (String newState : parentStates) {
+                Set<Long> parentStates = stateTransitionsJointTable.getStatesWithTransitionsTo(stateInFocus);
+                for (Long newState : parentStates) {
                     recursePath(path, newState);
                 }
             }
         }
-        if (path.get(path.size() - 1) == stateInFocus) path.remove(stateInFocus); // otherwise it's circular
+        if (Objects.equals(path.get(path.size() - 1), stateInFocus)) path.remove(stateInFocus); // otherwise it's circular
     }
 
     private void addTransition(Path path) {
         if (path.size() <= 1) return; // no transitions if only one state
-        String fromState = path.get(path.size() - 1);
-        String toState = path.get(path.size() - 2);
-        Optional<StateTransition> transition = stateTransitionsService.getTransition(fromState, toState);
+        Long fromState = path.get(path.size() - 1);
+        Long toState = path.get(path.size() - 2);
+        Optional<IStateTransition> transition = stateTransitionsInProjectService.getTransition(fromState, toState);
         transition.ifPresent(path::add);
     }
 
     private void setPathScore(Path path) {
         int score = 0;
-        for (String stateName : path.getStates()) {
-            Optional<State> state = allStatesInProjectService.getState(stateName);
+        for (Long stateId : path.getStates()) {
+            Optional<State> state = allStatesInProjectService.getState(stateId);
             if (state.isPresent()) score += state.get().getPathScore();
         }
-        for (StateTransition stateTrans : path.getTransitions()) {
+        for (IStateTransition stateTrans : path.getTransitions()) {
             score += stateTrans.getScore();
         }
         path.setScore(score);
