@@ -60,9 +60,9 @@ public class GetScreenObservation {
 
     private void setScreenObservationData(ScreenObservation screenObservation, StateStructureConfiguration stateStructureConfiguration) {
         int index = getScreenObservationManager().getScreenIndex();
-        Pattern screen = stateStructureConfiguration.getScreenshots().get(index);
+        Pattern screen = stateStructureConfiguration.getScenes().get(index).getPattern();
         getScreenObservationManager().setScreenIndex(index + 1);
-        screenObservation.setPattern(screen);
+        screenObservation.getScene().setPattern(screen);
         screenObservation.setScreenshot(screen.getMat());
         //there are no regions of motion when not running live
     }
@@ -76,7 +76,7 @@ public class GetScreenObservation {
                 .setPauseBeforeBegin(3.0)
                 .build();
         Matches matches = action.perform(observation);
-        matches.getSceneAnalysisCollection().getLastScene().ifPresent(scene -> screenObservation.setPattern(new Pattern(scene)));
+        matches.getSceneAnalysisCollection().getLastScene().ifPresent(screenObservation::setScene);
         Optional<Mat> optScreenshot = matches.getSceneAnalysisCollection().getLastSceneBGR();
         if (optScreenshot.isEmpty()) screenObservation.setScreenshot(new Mat());
         else screenObservation.setScreenshot(optScreenshot.get());

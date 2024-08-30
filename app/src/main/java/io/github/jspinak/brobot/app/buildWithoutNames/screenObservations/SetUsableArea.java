@@ -44,7 +44,7 @@ public class SetUsableArea {
     public Region getBoundariesFromExcludedImages(StateStructureConfiguration stateStructureConfiguration) {
         ObjectCollection exteriorImages = getObjectCollection(
                 stateStructureConfiguration.getTopLeftBoundary(), stateStructureConfiguration.getBottomRightBoundary());
-        if (!stateStructureConfiguration.isLive()) exteriorImages.setScenes(stateStructureConfiguration.getScreenshots());
+        if (!stateStructureConfiguration.isLive()) exteriorImages.setScenes(stateStructureConfiguration.getScenes());
         ActionOptions define = getActionOptions(ActionOptions.Illustrate.NO);
         return action.perform(define, exteriorImages).getDefinedRegion();
     }
@@ -68,7 +68,7 @@ public class SetUsableArea {
     }
 
     public Region setArea(StateStructureConfiguration config) {
-        Pattern screen = config.getScreenshots().get(0);
+        Pattern screen = config.getScenes().get(0).getPattern();
         Region usableArea = defineInFile(screen, config.getTopLeftBoundary(), config.getBottomRightBoundary());
         config.setUsableArea(usableArea);
         return usableArea;

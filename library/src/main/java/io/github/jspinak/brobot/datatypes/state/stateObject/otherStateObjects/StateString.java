@@ -16,6 +16,7 @@ public class StateString {
     private String name;
     private Region searchRegion; // sometimes we need to hover over or click on a region before typing the string
     private String ownerStateName = "null";
+    private Long ownerStateId = null;
     private int timesActedOn = 0;
     private String string;
 
@@ -47,6 +48,7 @@ public class StateString {
         private String name;
         private Region searchRegion;
         private String ownerStateName;
+        private Long ownerStateId = 0L;
         private int timesActedOn;
         private String string; // defined when build is called
 
@@ -76,6 +78,7 @@ public class StateString {
             stateString.name = name;
             stateString.searchRegion = searchRegion;
             stateString.ownerStateName = ownerStateName;
+            stateString.ownerStateId = ownerStateId;
             stateString.timesActedOn = timesActedOn;
             return stateString;
         }

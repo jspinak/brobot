@@ -1,0 +1,17 @@
+.state-scenes {
+    flex: 1;
+    overflow-y: auto;
+    padding-left: 10px;
+}
+
+.state-scene {
+    position: relative;
+    margin-bottom: 20px;
+    overflow: hidden; /* Ensure the scene can scroll */
+}
+
+.state-scene img {
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+}

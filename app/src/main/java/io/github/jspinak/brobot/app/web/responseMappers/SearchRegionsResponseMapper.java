@@ -1,6 +1,7 @@
 package io.github.jspinak.brobot.app.web.responseMappers;
 
 import io.github.jspinak.brobot.app.database.embeddable.SearchRegionsEmbeddable;
+import io.github.jspinak.brobot.app.web.requests.SearchRegionsRequest;
 import io.github.jspinak.brobot.app.web.responses.SearchRegionsResponse;
 import org.springframework.stereotype.Component;
 
@@ -37,6 +38,28 @@ public class SearchRegionsResponseMapper {
                 .collect(Collectors.toList()));
         searchRegionsEmbeddable.setFixedRegion(regionResponseMapper.map(searchRegionResponse.getFixedRegion()));
         return searchRegionsEmbeddable;
+    }
+
+    public SearchRegionsEmbeddable fromRequest(SearchRegionsRequest request) {
+        if (request == null) return null;
+        SearchRegionsEmbeddable entity = new SearchRegionsEmbeddable();
+        entity.setRegions(request.getRegions().stream()
+                .map(regionResponseMapper::fromRequest)
+                .collect(Collectors.toList()));
+        entity.setFixedRegion(regionResponseMapper.fromRequest(request.getFixedRegion()));
+        return entity;
+    }
+
+    public SearchRegionsRequest toRequest(SearchRegionsEmbeddable embeddable) {
+        if (embeddable == null) {
+            return null;
+        }
+        SearchRegionsRequest request = new SearchRegionsRequest();
+        request.setRegions(embeddable.getRegions().stream()
+                .map(regionResponseMapper::toRequest)
+                .collect(Collectors.toList()));
+        request.setFixedRegion(regionResponseMapper.toRequest(embeddable.getFixedRegion()));
+        return request;
     }
 }
 

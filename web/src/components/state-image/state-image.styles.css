@@ -1,13 +1,65 @@
-.state-image {
-  /* ... other styles */
+.state-image-container {
+  position: relative;
+  background-color: #e0e0e0; /* Grey background for each StateImage container */
+  padding: 5px;
+  margin-bottom: 5px;
   display: flex;
-  flex-direction: column;
+  flex-direction: column; /* Ensure options appear below the image */
   align-items: center;
 }
 
-.state-image img {
-  max-width: 100%;
+.state-image {
+  max-width: calc(100% - 40px); /* Adjust width to fit within the container */
+  max-height: 100px; /* Adjust this value as needed */
+  width: auto;
   height: auto;
+  object-fit: contain;
+  display: block;
+  margin: 0 auto;
+  border: none; /* Remove border */
 }
 
+.state-image-name {
+  margin-top: 5px;
+  text-align: center;
+  font-size: 12px; /* Set the font size to small */
+  color: #333; /* Optional: set the text color */
+}
 
+.state-image-transitions {
+  margin-top: 5px;
+  text-align: center;
+  font-size: 12px; /* Set the font size to small */
+  color: #333; /* Optional: set the text color */
+}
+
+.state-image-edit-input {
+  margin-top: 5px;
+  width: 100%;
+}
+
+.image.error {
+  color: red;
+  padding: 10px;
+  text-align: center;
+}
+
+.state-image-options {
+  display: flex;
+  gap: 10px; /* Space between buttons */
+  margin-top: 10px; /* Space above the options */
+}
+
+.state-image-option {
+  padding: 5px 10px;
+  background-color: #007bff; /* Blue background color */
+  color: white;
+  border: none;
+  border-radius: 4px; /* Optional: rounded corners */
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.state-image-option:hover {
+  background-color: #0056b3; /* Darker blue on hover */
+}

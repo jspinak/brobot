@@ -55,13 +55,13 @@ public class GetStatelessImages {
         else findAllWords.getSearchRegions().addSearchRegions(config.getUsableArea());
 
         ObjectCollection inScene = new ObjectCollection.Builder()
-                .withScenes(screenObservation.getPattern())
+                .withScenes(screenObservation.getScene())
                 .build();
         Matches matches = action.perform(findAllWords, inScene);
 
         for (int i=0; i<matches.getMatchList().size(); i++) {
             Match match = matches.getMatchList().get(i);
-            StatelessImage statelessImage = new StatelessImage(match, screenObservation.getPattern());
+            StatelessImage statelessImage = new StatelessImage(match, screenObservation.getScene());
             statelessImages.add(statelessImage);
         }
         return statelessImages;

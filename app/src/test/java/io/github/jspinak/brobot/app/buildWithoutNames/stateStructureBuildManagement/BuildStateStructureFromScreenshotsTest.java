@@ -2,6 +2,7 @@ package io.github.jspinak.brobot.app.buildWithoutNames.stateStructureBuildManage
 
 import io.github.jspinak.brobot.app.services.StateService;
 import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
+import io.github.jspinak.brobot.datatypes.primitives.image.Scene;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.state.State;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
@@ -31,7 +32,8 @@ class BuildStateStructureFromScreenshotsTest {
     @Test
     void stateStructureFromScreenshots() {
         StateStructureConfiguration stateStructureConfiguration = new StateStructureConfiguration.Builder()
-                .addImagesInScreenshotsFolder("floranext0", "floranext1") //, "floranext2")
+                //.addImagesInScreenshotsFolder("floranext0", "floranext1") //, "floranext2")
+                .addScenes(new Scene("floranext0"), new Scene("floranext1"))
                 .setBoundaryImages("topleft", "bottomR2")
                 .setMinImageArea(100)
                 .build();
@@ -48,7 +50,8 @@ class BuildStateStructureFromScreenshotsTest {
     @Test
     void imagesAreInAllFourQuadrants() {
         StateStructureConfiguration stateStructureConfiguration = new StateStructureConfiguration.Builder()
-                .addImagesInScreenshotsFolder("floranext0", "floranext1") //, "floranext2")
+                //.addImagesInScreenshotsFolder("floranext0", "floranext1") //, "floranext2")
+                .addScenes(new Scene("floranext0"), new Scene("floranext1"))
                 .setBoundaryImages("topleft", "bottomR2")
                 .setMinImageArea(100)
                 .build();

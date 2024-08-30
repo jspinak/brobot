@@ -1,6 +1,7 @@
 package io.github.jspinak.brobot.datatypes.primitives.match;
 
 import io.github.jspinak.brobot.datatypes.primitives.image.Image;
+import io.github.jspinak.brobot.datatypes.primitives.image.Scene;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.stateObject.StateObjectData;
 
@@ -19,7 +20,7 @@ public class NoMatch extends Match {
         private String name = "no match";
         private Region region = new Region(0,0,0,0);
         private Image searchImage;
-        private Image scene;
+        private Scene scene;
         private StateObjectData stateObjectData;
 
         public Builder setName(String name) {
@@ -37,7 +38,7 @@ public class NoMatch extends Match {
             return this;
         }
 
-        public Builder setScene(Image scene) {
+        public Builder setScene(Scene scene) {
             this.scene = scene;
             return this;
         }

@@ -1,15 +1,16 @@
 package io.github.jspinak.brobot.datatypes.state;
 
 import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
-import io.github.jspinak.brobot.datatypes.primitives.location.Position;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
+import io.github.jspinak.brobot.datatypes.primitives.image.Scene;
 import io.github.jspinak.brobot.datatypes.primitives.location.Location;
+import io.github.jspinak.brobot.datatypes.primitives.location.Position;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.state.State;
 import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.StateLocation;
 import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.StateRegion;
 import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.StateString;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.reports.Report;
 import lombok.Getter;
 import lombok.Setter;
@@ -36,7 +37,7 @@ public class ObjectCollection {
     private List<StateRegion> stateRegions = new ArrayList<>();
     private List<StateString> stateStrings = new ArrayList<>();
     private List<Matches> matches = new ArrayList<>();
-    private List<Pattern> scenes = new ArrayList<>();
+    private List<Scene> scenes = new ArrayList<>();
 
     public ObjectCollection() {} // public for mapping
 
@@ -100,7 +101,7 @@ public class ObjectCollection {
         return matches.contains(m);
     }
 
-    public boolean contains(Pattern sc) { return scenes.contains(sc); }
+    public boolean contains(Scene sc) { return scenes.contains(sc); }
 
     public boolean equals(ObjectCollection objectCollection) {
         for (StateImage si : stateImages) {
@@ -133,7 +134,7 @@ public class ObjectCollection {
                 return false;
             }
         }
-        for (Pattern sc : scenes) {
+        for (Scene sc : scenes) {
             if (!objectCollection.contains(sc)) {
                 //Report.println(" matches different ");
                 return false;
@@ -164,7 +165,7 @@ public class ObjectCollection {
         private List<StateRegion> stateRegions = new ArrayList<>();
         private List<StateString> stateStrings = new ArrayList<>();
         private List<Matches> matches = new ArrayList<>();
-        private List<Pattern> scenes = new ArrayList<>();
+        private List<Scene> scenes = new ArrayList<>();
 
         public Builder withLocations(Location... locations) {
             for (Location location : locations) {
@@ -309,17 +310,22 @@ public class ObjectCollection {
         }
 
         public Builder withScenes(String... strings) {
-            for (String string : strings) this.scenes.add(new Pattern(string));
+            for (String string : strings) this.scenes.add(new Scene(string));
             return this;
         }
 
         public Builder withScenes(Pattern... patterns) {
-            this.scenes.addAll(List.of(patterns));
+            for (Pattern pattern : patterns) this.scenes.add(new Scene(pattern));
             return this;
         }
 
-        public Builder setScenes(List<Pattern> patterns) {
-            this.scenes = patterns;
+        public Builder withScenes(Scene... scenes) {
+            this.scenes.addAll(Arrays.asList(scenes));
+            return this;
+        }
+
+        public Builder withScenes(List<Scene> scenes) {
+            this.scenes = scenes;
             return this;
         }
 

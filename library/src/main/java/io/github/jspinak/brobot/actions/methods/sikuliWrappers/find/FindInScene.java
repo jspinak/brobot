@@ -2,12 +2,16 @@ package io.github.jspinak.brobot.actions.methods.sikuliWrappers.find;
 
 import io.github.jspinak.brobot.datatypes.primitives.image.Image;
 import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
+import io.github.jspinak.brobot.datatypes.primitives.image.Scene;
 import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import org.sikuli.script.Finder;
 import org.sikuli.script.OCR;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 /**
  * Searches a scene for pattern and word matches. Scene objects are created at the beginning of an action and
@@ -36,9 +40,9 @@ public class FindInScene {
      * @param scene the image to search in
      * @return all matches of the pattern in the scene
      */
-    public List<Match> findAllInScene(Pattern pattern, Image scene) {
-        if (pattern.w()>scene.w() || pattern.h()>scene.h()) return new ArrayList<>();
-        Finder f = getFinder(scene);
+    public List<Match> findAllInScene(Pattern pattern, Scene scene) {
+        if (pattern.w()>scene.getPattern().w() || pattern.h()>scene.getPattern().h()) return new ArrayList<>();
+        Finder f = getFinder(scene.getPattern().getImage());
         f.findAll(pattern.sikuli());
         List<Match> matchList = new ArrayList<>();
         while (f.hasNext()) {
@@ -65,10 +69,10 @@ public class FindInScene {
      * @param scene can be created from a screenshot or file
      * @return a list of Match objects in the specified region
      */
-    public List<Match> getWordMatches(Image scene) {
+    public List<Match> getWordMatches(Scene scene) {
         List<Match> wordMatches = new ArrayList<>();
-        List<org.sikuli.script.Match> sikuliMatches = OCR.readWords(scene.getBufferedImage());
-        String baseName = scene.getName() == null ? "" : scene.getName();
+        List<org.sikuli.script.Match> sikuliMatches = OCR.readWords(scene.getPattern().getBImage());
+        String baseName = scene.getPattern().getName() == null ? "" : scene.getPattern().getName();
         int i=0;
         for (org.sikuli.script.Match match : sikuliMatches) {
             Match m = new Match.Builder()

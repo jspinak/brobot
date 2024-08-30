@@ -2,6 +2,7 @@ package io.github.jspinak.brobot.app.buildWithoutNames.screenObservations;
 
 import io.github.jspinak.brobot.app.buildWithoutNames.stateStructureBuildManagement.StateStructureConfiguration;
 import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
+import io.github.jspinak.brobot.datatypes.primitives.image.Scene;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +35,7 @@ class StatelessImageOpsTest {
     @Test
     void addSomeImagesToRepo() {
         getScreenObservationFromScreenshot.getNewScreenObservationAndProcessImages(
-                new Pattern("../screenshots/floranext0"), config, statelessImages);
+                new Scene("../screenshots/floranext0"), config, statelessImages);
         System.out.println("images found in screen observation = " + statelessImages.size());
         assertFalse(statelessImages.isEmpty());
     }
@@ -67,9 +68,9 @@ class StatelessImageOpsTest {
         String fullpath1 = "../screenshots/" + filename1;
         String fullpath2 = "../screenshots/" + filename2;
         ScreenObservation screenObservation0 = getScreenObservationFromScreenshot.getNewScreenObservationAndProcessImages(
-                new Pattern(fullpath1), config, statelessImages);
+                new Scene(fullpath1), config, statelessImages);
         ScreenObservation screenObservation1 = getScreenObservationFromScreenshot.getNewScreenObservationAndProcessImages(
-                new Pattern(fullpath2), config, statelessImages);
+                new Scene(fullpath2), config, statelessImages);
         System.out.println("# of images in screen 0 = " + screenObservation0.getImages().size());
         System.out.println("# of images in screen 1 = " + screenObservation1.getImages().size());
         System.out.println("# of unique images in the repo = " + statelessImages.size());
@@ -78,7 +79,7 @@ class StatelessImageOpsTest {
     int addImagesToRepo(String filename) {
         String fullpath = "../screenshots/" + filename;
         ScreenObservation screenObservation = getScreenObservationFromScreenshot.getNewScreenObservationAndProcessImages(
-                new Pattern(fullpath), config, statelessImages);
+                new Scene(fullpath), config, statelessImages);
         return screenObservation.getImages().size();
     }
 }

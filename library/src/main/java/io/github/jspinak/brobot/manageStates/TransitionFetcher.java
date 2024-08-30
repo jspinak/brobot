@@ -2,7 +2,7 @@ package io.github.jspinak.brobot.manageStates;
 
 import io.github.jspinak.brobot.database.services.AllStatesInProjectService;
 import io.github.jspinak.brobot.datatypes.state.state.State;
-import io.github.jspinak.brobot.services.StateTransitionsService;
+import io.github.jspinak.brobot.services.StateTransitionsInProjectService;
 import lombok.Getter;
 import org.springframework.stereotype.Component;
 
@@ -20,25 +20,28 @@ public class TransitionFetcher {
 
     private final StateMemory stateMemory;
     private final AllStatesInProjectService allStatesInProjectService;
-    private final StateTransitionsService stateTransitionsService;
+    private final StateTransitionsInProjectService stateTransitionsInProjectService;
+    private final TransitionBooleanSupplierPackager transitionBooleanSupplierPackager;
 
-    private String transitionToEnum; // may be PREVIOUS
+    private Long transitionToEnum; // may be PREVIOUS
     private StateTransitions fromTransitions;
-    private StateTransition fromTransition;
+    private IStateTransition fromTransition;
     private State fromState;
     private BooleanSupplier fromTransitionFunction;
     private StateTransitions toTransitions;
-    private StateTransition toTransition;
+    private IStateTransition toTransition;
     private State toState;
 
     public TransitionFetcher(StateMemory stateMemory, AllStatesInProjectService allStatesInProjectService,
-                             StateTransitionsService stateTransitionsService) {
+                             StateTransitionsInProjectService stateTransitionsInProjectService,
+                             TransitionBooleanSupplierPackager transitionBooleanSupplierPackager) {
         this.stateMemory = stateMemory;
         this.allStatesInProjectService = allStatesInProjectService;
-        this.stateTransitionsService = stateTransitionsService;
+        this.stateTransitionsInProjectService = stateTransitionsInProjectService;
+        this.transitionBooleanSupplierPackager = transitionBooleanSupplierPackager;
     }
 
-    public Optional<TransitionFetcher> getTransitions(String from, String to) {
+    public Optional<TransitionFetcher> getTransitions(Long from, Long to) {
         reset();
         setFromTransitions(from, to);
         setToTransitions(to);
@@ -47,7 +50,7 @@ public class TransitionFetcher {
     }
 
     private void reset() {
-        transitionToEnum = "null";
+        transitionToEnum = null;
         fromTransitions = null;
         fromTransition = null;
         fromState = null;
@@ -69,20 +72,21 @@ public class TransitionFetcher {
                 toState != null;
     }
 
-    private void setFromTransitions(String from, String to) {
-        Optional<StateTransitions> fromTransitions = stateTransitionsService.getTransitions(from);
+    private void setFromTransitions(Long from, Long to) {
+        Optional<StateTransitions> fromTransitions = stateTransitionsInProjectService.getTransitions(from);
         allStatesInProjectService.getState(from).ifPresent(state -> fromState = state);
         fromTransitions.ifPresent(transitions -> {
             this.fromTransitions = transitions;
-            transitionToEnum = stateTransitionsService.getTransitionToEnum(from, to);
+            transitionToEnum = stateTransitionsInProjectService.getTransitionToEnum(from, to);
             transitions.getStateTransition(transitionToEnum).ifPresent(trsn -> this.fromTransition = trsn);
             transitions.getTransitionFunction(transitionToEnum).ifPresent(
-                    trsFunction -> fromTransitionFunction = trsFunction);
+                    trsFunction -> fromTransitionFunction =
+                            transitionBooleanSupplierPackager.toBooleanSupplier(trsFunction));
         });
     }
 
-    private void setToTransitions(String to) {
-        Optional<StateTransitions> fromTransitions = stateTransitionsService.getTransitions(to);
+    private void setToTransitions(Long to) {
+        Optional<StateTransitions> fromTransitions = stateTransitionsInProjectService.getTransitions(to);
         allStatesInProjectService.getState(to).ifPresent(state -> toState = state);
         fromTransitions.ifPresent(transitions -> {
             this.toTransitions = transitions;

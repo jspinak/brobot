@@ -1,7 +1,7 @@
 package io.github.jspinak.brobot.app.buildWithoutNames.preliminaryStates;
 
 import io.github.jspinak.brobot.app.buildWithoutNames.screenObservations.StatelessImage;
-import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
+import io.github.jspinak.brobot.datatypes.primitives.image.Scene;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import lombok.Getter;
 
@@ -18,30 +18,30 @@ import java.util.stream.Collectors;
 @Getter
 public class ImageSetsAndAssociatedScreens {
 
-    private List<StatelessImage> images = new ArrayList<>();;
+    private final List<StatelessImage> images = new ArrayList<>();;
 
     public ImageSetsAndAssociatedScreens(StatelessImage image) {
         this.images.add(image);
     }
 
-    public Set<Pattern> getScreens() {
+    public Set<Scene> getScenes() {
         if (images.isEmpty()) return new HashSet<>();
-        return images.get(0).getScreensFound();
+        return images.get(0).getScenesFound();
     }
 
     public boolean ifSameScreensAddImage(StatelessImage statelessImage) {
-        if (!hasSameScreens(statelessImage)) return false;
+        if (!hasSameScenes(statelessImage)) return false;
         images.add(statelessImage);
         return true;
     }
 
-    private boolean hasSameScreens(StatelessImage statelessImage) {
+    private boolean hasSameScenes(StatelessImage statelessImage) {
         // Check if both lists are not null and have the same size
-        if (statelessImage.getScreensFound() == null || getScreens().size() != statelessImage.getScreensFound().size()) {
+        if (statelessImage.getScenesFound() == null || getScenes().size() != statelessImage.getScenesFound().size()) {
             return false;
         }
-        for (Pattern pattern : statelessImage.getScreensFound()) {
-            if (!getScreens().contains(pattern)) return false;
+        for (Scene scene : statelessImage.getScenesFound()) {
+            if (!getScenes().contains(scene)) return false;
         }
         return true;
     }
@@ -58,10 +58,10 @@ public class ImageSetsAndAssociatedScreens {
         stringBuilder.append("Images: ");
         images.forEach(img -> stringBuilder.append(img).append(","));
         stringBuilder.append(" ").append("Screens: ");
-        for (int i=0; i<getScreens().size()-1; i++) {
-            stringBuilder.append(getScreens().toArray()[i].toString()).append(",");
+        for (int i = 0; i< getScenes().size()-1; i++) {
+            stringBuilder.append(getScenes().toArray()[i].toString()).append(",");
         }
-        stringBuilder.append(getScreens().toArray()[getScreens().size()-1].toString()).append("]");
+        stringBuilder.append(getScenes().toArray()[getScenes().size()-1].toString()).append("]");
         return stringBuilder.toString();
     }
 
