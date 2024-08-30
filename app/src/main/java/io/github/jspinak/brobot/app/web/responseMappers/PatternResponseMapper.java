@@ -2,8 +2,12 @@ package io.github.jspinak.brobot.app.web.responseMappers;
 
 import io.github.jspinak.brobot.app.database.entities.ImageEntity;
 import io.github.jspinak.brobot.app.database.entities.PatternEntity;
+import io.github.jspinak.brobot.app.web.requests.PatternRequest;
 import io.github.jspinak.brobot.app.web.responses.PatternResponse;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class PatternResponseMapper {
@@ -71,6 +75,53 @@ public class PatternResponseMapper {
             }
         }
         return patternEntity;
+    }
+
+    public PatternEntity fromRequest(PatternRequest request) {
+        if (request == null) return null;
+        PatternEntity entity = new PatternEntity();
+        entity.setId(request.getId());
+        entity.setUrl(request.getUrl());
+        entity.setImgpath(request.getImgpath());
+        entity.setName(request.getName());
+        entity.setFixed(request.isFixed());
+        entity.setSearchRegions(searchRegionsResponseMapper.fromRequest(request.getSearchRegions()));
+        entity.setSetKmeansColorProfiles(request.isSetKmeansColorProfiles());
+        entity.setMatchHistory(matchHistoryResponseMapper.fromRequest(request.getMatchHistory()));
+        entity.setIndex(request.getIndex());
+        entity.setDynamic(request.isDynamic());
+        entity.setPosition(positionResponseMapper.fromRequest(request.getPosition()));
+        entity.setAnchors(anchorsResponseMapper.fromRequest(request.getAnchors()));
+        entity.setImage(imageResponseMapper.fromRequest(request.getImage()));
+        return entity;
+    }
+
+    public PatternRequest toRequest(PatternEntity entity) {
+        if (entity == null) return null;
+        PatternRequest request = new PatternRequest();
+        request.setId(entity.getId());
+        request.setUrl(entity.getUrl());
+        request.setImgpath(entity.getImgpath());
+        request.setName(entity.getName());
+        request.setFixed(entity.isFixed());
+        request.setSearchRegions(searchRegionsResponseMapper.toRequest(entity.getSearchRegions()));
+        request.setSetKmeansColorProfiles(entity.isSetKmeansColorProfiles());
+        request.setMatchHistory(matchHistoryResponseMapper.toRequest(entity.getMatchHistory()));
+        request.setIndex(entity.getIndex());
+        request.setDynamic(entity.isDynamic());
+        request.setPosition(positionResponseMapper.toRequest(entity.getPosition()));
+        request.setAnchors(anchorsResponseMapper.toRequest(entity.getAnchors()));
+        request.setImage(imageResponseMapper.toRequest(entity.getImage()));
+        return request;
+    }
+
+    public List<PatternRequest> toRequestList(List<PatternEntity> entities) {
+        if (entities == null) {
+            return null;
+        }
+        return entities.stream()
+                .map(this::toRequest)
+                .collect(Collectors.toList());
     }
 }
 

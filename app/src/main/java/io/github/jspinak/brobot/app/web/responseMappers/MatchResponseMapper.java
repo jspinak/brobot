@@ -1,6 +1,7 @@
 package io.github.jspinak.brobot.app.web.responseMappers;
 
 import io.github.jspinak.brobot.app.database.entities.MatchEntity;
+import io.github.jspinak.brobot.app.web.requests.MatchRequest;
 import io.github.jspinak.brobot.app.web.responses.MatchResponse;
 import org.springframework.stereotype.Component;
 
@@ -38,7 +39,7 @@ public class MatchResponseMapper {
         matchResponse.setSearchImage(imageResponseMapper.map(matchEntity.getSearchImage()));
         matchResponse.setAnchors(anchorsResponseMapper.map(matchEntity.getAnchors()));
         matchResponse.setStateObjectData(stateObjectDataResponseMapper.map(matchEntity.getStateObjectData()));
-        matchResponse.setScene(imageResponseMapper.map(matchEntity.getScene()));
+        matchResponse.setSceneId(matchEntity.getSceneId());
         matchResponse.setTimeStamp(matchEntity.getTimeStamp());
         matchResponse.setTimesActedOn(matchEntity.getTimesActedOn());
         return matchResponse;
@@ -59,9 +60,51 @@ public class MatchResponseMapper {
         matchEntity.setSearchImage(imageResponseMapper.map(matchResponse.getSearchImage()));
         matchEntity.setAnchors(anchorsResponseMapper.map(matchResponse.getAnchors()));
         matchEntity.setStateObjectData(stateObjectDataResponseMapper.map(matchResponse.getStateObjectData()));
-        matchEntity.setScene(imageResponseMapper.map(matchResponse.getScene()));
+        matchEntity.setSceneId(matchResponse.getSceneId());
         matchEntity.setTimeStamp(matchResponse.getTimeStamp());
         matchEntity.setTimesActedOn(matchResponse.getTimesActedOn());
         return matchEntity;
+    }
+
+    public MatchEntity fromRequest(MatchRequest request) {
+        if (request == null) return null;
+        MatchEntity entity = new MatchEntity();
+        entity.setId(request.getId());
+        entity.setScore(request.getScore());
+        entity.setTarget(locationResponseMapper.fromRequest(request.getTarget()));
+        entity.setImage(imageResponseMapper.fromRequest(request.getImage()));
+        entity.setText(request.getText());
+        entity.setName(request.getName());
+        entity.setRegion(regionResponseMapper.fromRequest(request.getRegion()));
+        entity.setSearchImage(imageResponseMapper.fromRequest(request.getSearchImage()));
+        entity.setAnchors(anchorsResponseMapper.fromRequest(request.getAnchors()));
+        entity.setStateObjectData(stateObjectDataResponseMapper.fromRequest(request.getStateObjectData()));
+        entity.setSceneId(request.getSceneId());
+        entity.setTimeStamp(request.getTimeStamp());
+        entity.setTimesActedOn(request.getTimesActedOn());
+        return entity;
+    }
+
+    public MatchRequest toRequest(MatchEntity entity) {
+        if (entity == null) {
+            return null;
+        }
+
+        MatchRequest request = new MatchRequest();
+        request.setId(entity.getId());
+        request.setScore(entity.getScore());
+        request.setTarget(locationResponseMapper.toRequest(entity.getTarget()));
+        request.setImage(imageResponseMapper.toRequest(entity.getImage()));
+        request.setText(entity.getText());
+        request.setName(entity.getName());
+        request.setRegion(regionResponseMapper.toRequest(entity.getRegion()));
+        request.setSearchImage(imageResponseMapper.toRequest(entity.getSearchImage()));
+        request.setAnchors(anchorsResponseMapper.toRequest(entity.getAnchors()));
+        request.setStateObjectData(stateObjectDataResponseMapper.toRequest(entity.getStateObjectData()));
+        request.setSceneId(entity.getSceneId());
+        request.setTimeStamp(entity.getTimeStamp());
+        request.setTimesActedOn(entity.getTimesActedOn());
+
+        return request;
     }
 }

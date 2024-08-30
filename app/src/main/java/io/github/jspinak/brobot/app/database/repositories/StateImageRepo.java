@@ -12,7 +12,6 @@ import java.util.Optional;
 @Transactional
 public interface StateImageRepo extends JpaRepository<StateImageEntity, Long> {
     Optional<StateImageEntity> findByName(String name);
-    //List<StateImageEntity> findByNameContainingIgnoreCase(String name);
     List<StateImageEntity> findByProjectId(Long projectId);
 
 }
