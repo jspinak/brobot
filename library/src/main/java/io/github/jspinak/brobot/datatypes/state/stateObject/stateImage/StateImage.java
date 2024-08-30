@@ -57,19 +57,6 @@ public class StateImage implements StateObject {
     private Mat imagesMat; // initialized when program is run, shows the images in the StateImage
     private Mat profilesMat; // initialized when program is run, shows the color profiles in the StateImage
 
-    /**
-     * The following variables are primarily used when creating state structures without names. They do not need
-     * persistence.
-     */
-    /*
-    Captures the screen to which the image transitions with a click. Used when building the state structure live.
-    When the state structure is built with screenshots, there are no transitions, and transitions need to be determined
-    after the basic state structure is in place. Once there is a basic state structure, observations after clicking
-    new StateImage objects can identify current states (or no states) and do not rely on screens anymore.
-     */
-    private Integer transitionsToScreen;
-    private Set<String> statesToEnter = new HashSet<>();
-    private Set<String> statesToExit = new HashSet<>();
     /*
     This stores the ids of transitions to other states for which this StateImage is involved.
     Transition ids are first recorded when transitions are saved to the database.
@@ -263,8 +250,6 @@ public class StateImage implements StateObject {
         private int index;
         private String ownerStateName = "null";
         private Long ownerStateId = null;
-        private Set<String> statesToEnter = new HashSet<>();
-        private Set<String> statesToExit = new HashSet<>();
         private Position positionForAllPatterns;
         private Location offsetForAllPatterns;
 
@@ -311,16 +296,6 @@ public class StateImage implements StateObject {
             return this;
         }
 
-        public Builder setStatesToEnter(Set<String> statesToEnter) {
-            this.statesToEnter = statesToEnter;
-            return this;
-        }
-
-        public Builder setStatesToExit(Set<String> statesToExit) {
-            this.statesToExit = statesToExit;
-            return this;
-        }
-
         public Builder setPositionForAllPatterns(Position position) {
             this.positionForAllPatterns = position;
             return this;
@@ -349,8 +324,6 @@ public class StateImage implements StateObject {
             stateImage.index = index;
             stateImage.ownerStateName = ownerStateName;
             stateImage.ownerStateId = ownerStateId;
-            stateImage.statesToEnter = statesToEnter;
-            stateImage.statesToExit = statesToExit;
             if (positionForAllPatterns != null) stateImage.getPatterns().forEach(pattern ->
                     pattern.setTargetPosition(positionForAllPatterns));
             if (offsetForAllPatterns != null) stateImage.getPatterns().forEach(pattern ->

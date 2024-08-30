@@ -67,4 +67,10 @@ public class StateTransitionsRepository {
         return new ArrayList<>(repo.values());
     }
 
+    public void emptyRepos() {
+        preliminaryRepo = new ArrayList<>();
+        repo = new HashMap<>();
+        stateTransitionsJointTable.emptyRepos();
+    }
+
 }
