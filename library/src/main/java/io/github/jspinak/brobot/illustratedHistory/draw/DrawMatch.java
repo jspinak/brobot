@@ -30,7 +30,7 @@ public class DrawMatch {
     public void drawMatches(Illustrations illScn, Matches matches) {
         List<Match> matchList = new ArrayList<>();
         matches.getMatchList().forEach(mO -> {
-            if (mO.getScene().getName().equals(illScn.getSceneName())) {
+            if (mO.getImage().getName().equals(illScn.getSceneName())) {
                 matchList.add(mO);
             }
         });

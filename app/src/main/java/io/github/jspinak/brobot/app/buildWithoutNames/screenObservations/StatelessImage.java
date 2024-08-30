@@ -1,6 +1,7 @@
 package io.github.jspinak.brobot.app.buildWithoutNames.screenObservations;
 
 import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
+import io.github.jspinak.brobot.datatypes.primitives.image.Scene;
 import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
@@ -26,15 +27,15 @@ public class StatelessImage {
      */
     private boolean checked; // when checked, if fromScreenToScreen is empty then it doesn't transition anywhere
     private Map<Integer, Integer> fromScreenToScreen = new HashMap<>(); // transitions from and to the screenshots with these ids
-    private Set<Pattern> screensFound = new HashSet<>();
+    private Set<Scene> scenesFound = new HashSet<>();
     private List<Match> matchList = new ArrayList<>();
     private int ownerState; // the owner state. there is only one owner state.
     private Set<Integer> transitionsTo = new HashSet<>(); // all states transitioned to
     private String text; // search again for text after regions have merged
 
-    public StatelessImage(Match match, Pattern screenshot) {
+    public StatelessImage(Match match, Scene scene) {
         this.matchList.add(match);
-        this.screensFound.add(screenshot);
+        this.scenesFound.add(scene);
     }
 
     public String getName() {
@@ -66,10 +67,6 @@ public class StatelessImage {
      */
     public StateImage toStateImage() {
         return matchList.get(0).toStateImage();
-    }
-
-    public void addScreenFound(Pattern screenshot) {
-        screensFound.add(screenshot);
     }
 
     public void setOwnerState(int ownerState) {

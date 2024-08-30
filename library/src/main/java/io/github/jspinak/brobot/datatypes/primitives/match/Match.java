@@ -2,6 +2,7 @@ package io.github.jspinak.brobot.datatypes.primitives.match;
 
 import io.github.jspinak.brobot.datatypes.primitives.image.Image;
 import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
+import io.github.jspinak.brobot.datatypes.primitives.image.Scene;
 import io.github.jspinak.brobot.datatypes.primitives.location.Anchors;
 import io.github.jspinak.brobot.datatypes.primitives.location.Location;
 import io.github.jspinak.brobot.datatypes.primitives.location.Position;
@@ -10,7 +11,6 @@ import io.github.jspinak.brobot.datatypes.state.stateObject.StateObject;
 import io.github.jspinak.brobot.datatypes.state.stateObject.StateObjectData;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.imageUtils.BufferedImageOps;
-
 import lombok.Data;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Rect;
@@ -70,7 +70,7 @@ public class Match {
     private Anchors anchors;
     private StateObjectData stateObjectData;
     private Mat histogram;
-    private Image scene;
+    private Scene scene;
     private LocalDateTime timeStamp;
     // the old MatchObject had `private double duration;`
     private int timesActedOn = 0;
@@ -127,7 +127,7 @@ public class Match {
 
     public void setImageWithScene() {
         if (scene == null) return;
-        BufferedImage bImg = BufferedImageOps.getSubImage(scene.getBufferedImage(), getRegion());
+        BufferedImage bImg = BufferedImageOps.getSubImage(scene.getPattern().getBImage(), getRegion());
         if (image == null) image = new Image(bImg);
         else image.setBufferedImage(bImg);
     }
@@ -189,7 +189,7 @@ public class Match {
         private Anchors anchors;
         private StateObjectData stateObjectData = new StateObjectData();
         private Mat histogram;
-        private Image scene;
+        private Scene scene;
         private double simScore = -1;
 
         public Builder setSikuliMatch(org.sikuli.script.Match sikuliMatch) {
@@ -307,7 +307,7 @@ public class Match {
             return this;
         }
 
-        public Builder setScene(Image scene) {
+        public Builder setScene(Scene scene) {
             this.scene = scene;
             return this;
         }

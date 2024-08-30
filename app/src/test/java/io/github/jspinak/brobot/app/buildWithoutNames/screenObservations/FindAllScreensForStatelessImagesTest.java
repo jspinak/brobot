@@ -3,6 +3,7 @@ package io.github.jspinak.brobot.app.buildWithoutNames.screenObservations;
 import io.github.jspinak.brobot.app.buildWithoutNames.buildLive.ScreenObservations;
 import io.github.jspinak.brobot.app.buildWithoutNames.stateStructureBuildManagement.StateStructureConfiguration;
 import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
+import io.github.jspinak.brobot.datatypes.primitives.image.Scene;
 import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import org.junit.jupiter.api.BeforeAll;
@@ -35,7 +36,8 @@ class FindAllScreensForStatelessImagesTest {
     void getDoubleMatches() {
         StateStructureConfiguration config = new StateStructureConfiguration.Builder()
                 .setBoundaryImages("topLeft", "BottomRight")
-                .addImagesInScreenshotsFolder("../screenshots/floranext0", "../screenshots/floranext1")
+                .addScenes(new Scene("floranext0"), new Scene("floranext1"))
+                //.addImagesInScreenshotsFolder("../screenshots/floranext0", "../screenshots/floranext1")
                 .setMaxSimilarityForUniqueImage(.99)
                 .build();
         List<StatelessImage> statelessImages = new ArrayList<>();

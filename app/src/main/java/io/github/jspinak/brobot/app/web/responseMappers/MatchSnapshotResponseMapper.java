@@ -1,6 +1,7 @@
 package io.github.jspinak.brobot.app.web.responseMappers;
 
 import io.github.jspinak.brobot.app.database.entities.MatchSnapshotEntity;
+import io.github.jspinak.brobot.app.web.requests.MatchSnapshotRequest;
 import io.github.jspinak.brobot.app.web.responses.MatchSnapshotResponse;
 import org.springframework.stereotype.Component;
 
@@ -53,5 +54,40 @@ public class MatchSnapshotResponseMapper {
         matchSnapshotEntity.setResultSuccess(matchSnapshotResponse.isResultSuccess());
         matchSnapshotEntity.setState(matchSnapshotResponse.getState());
         return matchSnapshotEntity;
+    }
+
+    public MatchSnapshotEntity fromRequest(MatchSnapshotRequest request) {
+        if (request == null) return null;
+        MatchSnapshotEntity entity = new MatchSnapshotEntity();
+        entity.setId(request.getId());
+        entity.setActionOptions(actionOptionsResponseMapper.fromRequest(request.getActionOptions()));
+        entity.setMatchList(request.getMatchList().stream()
+                .map(matchResponseMapper::fromRequest)
+                .collect(Collectors.toList()));
+        entity.setText(request.getText());
+        entity.setDuration(request.getDuration());
+        entity.setTimeStamp(request.getTimeStamp());
+        entity.setActionSuccess(request.isActionSuccess());
+        entity.setResultSuccess(request.isResultSuccess());
+        entity.setState(request.getState());
+        return entity;
+    }
+
+    public MatchSnapshotRequest toRequest(MatchSnapshotEntity entity) {
+        if (entity == null) return null;
+        MatchSnapshotRequest request = new MatchSnapshotRequest();
+        request.setId(entity.getId());
+        request.setActionOptions(actionOptionsResponseMapper.toRequest(entity.getActionOptions()));
+        request.setMatchList(entity.getMatchList().stream()
+                .map(matchResponseMapper::toRequest)
+                .collect(Collectors.toList()));
+        request.setText(entity.getText());
+        request.setDuration(entity.getDuration());
+        request.setTimeStamp(entity.getTimeStamp());
+        request.setActionSuccess(entity.isActionSuccess());
+        request.setResultSuccess(entity.isResultSuccess());
+        request.setState(entity.getState());
+
+        return request;
     }
 }

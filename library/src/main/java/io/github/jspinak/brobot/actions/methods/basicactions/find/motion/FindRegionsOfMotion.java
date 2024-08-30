@@ -59,7 +59,7 @@ public class FindRegionsOfMotion {
         matches.getSceneAnalysisCollection().getSceneAnalyses().forEach(sA -> {
             sA.setMatchList(dynamicPixelRegions);
             sA.getIllustrations().setMotion(sceneAnalysisCollection.getResults());
-            sA.getIllustrations().setMotionWithMatches(sA.getScene().getMatBGR());
+            sA.getIllustrations().setMotionWithMatches(sA.getScene().getPattern().getImage().getMatBGR());
         });
         matchOps.addMatchListToMatches(dynamicPixelRegions, matches); // this is for the last scene
         matchOps.limitNumberOfMatches(matches, actionOptions);

@@ -2,50 +2,49 @@ package io.github.jspinak.brobot.manageStates;
 
 import io.github.jspinak.brobot.database.services.AllStatesInProjectService;
 import io.github.jspinak.brobot.datatypes.state.state.State;
-import io.github.jspinak.brobot.services.StateTransitionsService;
+import io.github.jspinak.brobot.primatives.enums.SpecialStateType;
+import io.github.jspinak.brobot.services.StateTransitionsInProjectService;
 import org.springframework.stereotype.Component;
 
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
-import static io.github.jspinak.brobot.manageStates.StateMemory.Enum.PREVIOUS;
-
 @Component
 public class AdjacentStates {
 
     private final AllStatesInProjectService allStatesInProjectService;
     private final StateMemory stateMemory;
-    private final StateTransitionsService stateTransitionsService;
+    private final StateTransitionsInProjectService stateTransitionsInProjectService;
 
     public AdjacentStates(AllStatesInProjectService allStatesInProjectService, StateMemory stateMemory,
-                          StateTransitionsService stateTransitionsService) {
+                          StateTransitionsInProjectService stateTransitionsInProjectService) {
         this.allStatesInProjectService = allStatesInProjectService;
         this.stateMemory = stateMemory;
-        this.stateTransitionsService = stateTransitionsService;
+        this.stateTransitionsInProjectService = stateTransitionsInProjectService;
     }
 
-    public Set<String> getAdjacentStates(String stateName) {
-        Set<String> adjacent = new HashSet<>();
-        Optional<StateTransitions> trsOpt = stateTransitionsService.getTransitions(stateName);
+    public Set<Long> getAdjacentStates(Long stateId) {
+        Set<Long> adjacent = new HashSet<>();
+        Optional<StateTransitions> trsOpt = stateTransitionsInProjectService.getTransitions(stateId);
         if (trsOpt.isEmpty()) return adjacent;
-        Set<String> statesWithStaticTransitions = trsOpt.get().getTransitions().keySet();
+        Set<Long> statesWithStaticTransitions = trsOpt.get().getTransitions().keySet();
         adjacent.addAll(statesWithStaticTransitions);
-        if (!statesWithStaticTransitions.contains(PREVIOUS.toString())) return adjacent;
-        adjacent.remove(PREVIOUS.toString());
-        Optional<State> currentState = allStatesInProjectService.getState(stateName);
-        if (currentState.isEmpty() || currentState.get().getHidden().isEmpty()) return adjacent;
-        adjacent.addAll(currentState.get().getHidden());
+        if (!statesWithStaticTransitions.contains(SpecialStateType.PREVIOUS.getId())) return adjacent;
+        adjacent.remove(SpecialStateType.PREVIOUS.getId());
+        Optional<State> currentState = allStatesInProjectService.getState(stateId);
+        if (currentState.isEmpty() || currentState.get().getHiddenStateNames().isEmpty()) return adjacent;
+        adjacent.addAll(currentState.get().getHiddenStateIds());
         return adjacent;
     }
 
-    public Set<String> getAdjacentStates(Set<String> stateNames) {
-        Set<String> adjacent = new HashSet<>();
-        stateNames.forEach(sE -> adjacent.addAll(getAdjacentStates(sE)));
+    public Set<Long> getAdjacentStates(Set<Long> stateIds) {
+        Set<Long> adjacent = new HashSet<>();
+        stateIds.forEach(sE -> adjacent.addAll(getAdjacentStates(sE)));
         return adjacent;
     }
 
-    public Set<String> getAdjacentStates() {
+    public Set<Long> getAdjacentStates() {
         return getAdjacentStates(stateMemory.getActiveStates());
     }
 }

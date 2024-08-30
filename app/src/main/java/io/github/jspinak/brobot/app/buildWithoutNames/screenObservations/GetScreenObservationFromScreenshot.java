@@ -4,6 +4,7 @@ import io.github.jspinak.brobot.actions.actionExecution.Action;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.app.buildWithoutNames.stateStructureBuildManagement.StateStructureConfiguration;
 import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
+import io.github.jspinak.brobot.datatypes.primitives.image.Scene;
 import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
@@ -34,15 +35,15 @@ public class GetScreenObservationFromScreenshot {
     public List<ScreenObservation> getScreenObservations(StateStructureConfiguration config,
                                                          List<StatelessImage> statelessImages) {
         List<ScreenObservation> observations = new ArrayList<>();
-        config.getScreenshots().forEach(screen -> {
-            ScreenObservation newObservation = getNewScreenObservationAndProcessImages(screen, config, statelessImages);
+        config.getScenes().forEach(scene -> {
+            ScreenObservation newObservation = getNewScreenObservationAndProcessImages(scene, config, statelessImages);
             newObservation.setId(observations.size());
             observations.add(newObservation);
         });
         return observations;
     }
 
-    public ScreenObservation getNewScreenObservationAndProcessImages(Pattern screenshot,
+    public ScreenObservation getNewScreenObservationAndProcessImages(Scene screenshot,
                                                                      StateStructureConfiguration config,
                                                                      List<StatelessImage> statelessImages) {
         ScreenObservation screenObservation = getNewScreenObservation(screenshot, config);
@@ -55,25 +56,24 @@ public class GetScreenObservationFromScreenshot {
      * @param screenshot the screenshot to search for words.
      * @return the resulting ScreenObservation
      */
-    public ScreenObservation getNewScreenObservation(Pattern screenshot, StateStructureConfiguration config) {
+    public ScreenObservation getNewScreenObservation(Scene screenshot, StateStructureConfiguration config) {
         ScreenObservation screenObservation = initNewScreenObservation(screenshot, config);
         List<StatelessImage> images = findImagesWithWordsOnScreen(config, screenshot);
         screenObservation.setImages(images);
         return screenObservation;
     }
 
-    public ScreenObservation initNewScreenObservation(Pattern screenshot, StateStructureConfiguration config) {
+    public ScreenObservation initNewScreenObservation(Scene scene, StateStructureConfiguration config) {
         ScreenObservation screenObservation = new ScreenObservation();
-        screenshot.setSearchRegionsTo(config.getUsableArea());
-        screenObservation.setPattern(screenshot);
-        screenObservation.setScreenshot(screenshot.getMat()); //getImage.getMatFromFilename(screenshot, ColorCluster.ColorSchemaName.BGR));
+        scene.getPattern().setSearchRegionsTo(config.getUsableArea());
+        screenObservation.setScene(scene);
         return screenObservation;
     }
 
-    public List<StatelessImage> findImagesWithWordsOnScreen(StateStructureConfiguration config, Pattern screenshot) {
+    public List<StatelessImage> findImagesWithWordsOnScreen(StateStructureConfiguration config, Scene scene) {
         List<StatelessImage> statelessImages = new ArrayList<>();
         ObjectCollection screens = new ObjectCollection.Builder()
-                .withScenes(screenshot)
+                .withScenes(scene)
                 .build();
         ActionOptions findAllWords = new ActionOptions.Builder()
                 .setAction(ActionOptions.Action.FIND)
@@ -86,7 +86,7 @@ public class GetScreenObservationFromScreenshot {
         Matches wordMatches = action.perform(findAllWords, screens);
         for (int i=0; i<wordMatches.getMatchList().size(); i++) {
             Match match = wordMatches.getMatchList().get(i);
-            StatelessImage statelessImage = new StatelessImage(match, screenshot);
+            StatelessImage statelessImage = new StatelessImage(match, scene);
             statelessImages.add(statelessImage);
         }
         return statelessImages;

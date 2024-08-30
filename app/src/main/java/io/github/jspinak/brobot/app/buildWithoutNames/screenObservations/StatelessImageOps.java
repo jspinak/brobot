@@ -101,9 +101,9 @@ public class StatelessImageOps {
             addImage(newImage, statelessImages);
         else {
             duplicateImagesFound++;
-            int sizeBefore = bestMatchingFromRepo.getScreensFound().size();
-            newImage.getScreensFound().forEach(bestMatchingFromRepo::addScreenFound); //newImage should only have 1 screen, though
-            if (bestMatchingFromRepo.getScreensFound().size() == sizeBefore) {
+            int sizeBefore = bestMatchingFromRepo.getScenesFound().size();
+            newImage.getScenesFound().forEach(scene -> bestMatchingFromRepo.getScenesFound().add(scene)); //newImage should only have 1 screen, though
+            if (bestMatchingFromRepo.getScenesFound().size() == sizeBefore) {
                 /*
                  The image was found on the same screen. it is an additional match on that screen.
                  Matches are not associated with a specific screen, but Match objects have scene variables.

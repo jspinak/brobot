@@ -1,6 +1,7 @@
 package io.github.jspinak.brobot.app.web.responseMappers;
 
 import io.github.jspinak.brobot.app.database.embeddable.PositionEmbeddable;
+import io.github.jspinak.brobot.app.web.requests.PositionRequest;
 import io.github.jspinak.brobot.app.web.responses.PositionResponse;
 import org.springframework.stereotype.Component;
 
@@ -25,5 +26,23 @@ public class PositionResponseMapper {
         positionEmbeddable.setPercentW(positionResponse.getPercentW());
         positionEmbeddable.setPercentH(positionResponse.getPercentH());
         return positionEmbeddable;
+    }
+
+    public PositionEmbeddable fromRequest(PositionRequest request) {
+        if (request == null) return null;
+        PositionEmbeddable entity = new PositionEmbeddable();
+        entity.setPercentW(request.getPercentW());
+        entity.setPercentH(request.getPercentH());
+        return entity;
+    }
+
+    public PositionRequest toRequest(PositionEmbeddable embeddable) {
+        if (embeddable == null) {
+            return null;
+        }
+        PositionRequest request = new PositionRequest();
+        request.setPercentW(embeddable.getPercentW());
+        request.setPercentH(embeddable.getPercentH());
+        return request;
     }
 }

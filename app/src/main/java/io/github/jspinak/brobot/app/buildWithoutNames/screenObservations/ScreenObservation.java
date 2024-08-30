@@ -1,11 +1,12 @@
 package io.github.jspinak.brobot.app.buildWithoutNames.screenObservations;
 
-import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
+import io.github.jspinak.brobot.datatypes.primitives.image.Scene;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import lombok.Getter;
 import lombok.Setter;
 import org.bytedeco.opencv.opencv_core.Mat;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -20,7 +21,7 @@ import java.util.Set;
 public class ScreenObservation {
 
     private int id;
-    private Pattern pattern;
+    private Scene scene;
     private Mat screenshot;
     private Mat dynamicPixelMask;
     private Matches matches; // includes the SceneAnalysisCollection and all screenshots taken when evaluating dynamic pixels
