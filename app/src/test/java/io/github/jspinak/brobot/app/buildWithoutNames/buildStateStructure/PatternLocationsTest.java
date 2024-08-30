@@ -2,10 +2,10 @@ package io.github.jspinak.brobot.app.buildWithoutNames.buildStateStructure;
 
 import io.github.jspinak.brobot.actions.actionExecution.Action;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
-import io.github.jspinak.brobot.app.buildWithoutNames.stateStructureBuildManagement.BuildStateStructureFromScreenshots;
-import io.github.jspinak.brobot.app.buildWithoutNames.stateStructureBuildManagement.StateStructureConfiguration;
+import io.github.jspinak.brobot.app.stateStructureBuilders.buildWithoutNames.stateStructureBuildManagement.BuildStateStructureFromScreenshots;
+import io.github.jspinak.brobot.app.stateStructureBuilders.buildWithoutNames.stateStructureBuildManagement.StateStructureConfiguration;
 import io.github.jspinak.brobot.app.services.StateService;
-import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
+import io.github.jspinak.brobot.datatypes.primitives.image.Scene;
 import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
@@ -18,7 +18,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.Optional;
 import java.util.Set;
-import static org.junit.jupiter.api.Assertions.*;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
 public class PatternLocationsTest {
@@ -40,7 +41,8 @@ public class PatternLocationsTest {
     @Test
     void fixedRegionIsSameAsMatch() {
         StateStructureConfiguration stateStructureConfiguration = new StateStructureConfiguration.Builder()
-                .addImagesInScreenshotsFolder("floranext0")
+                //.addImagesInScreenshotsFolder("floranext0")
+                .addScenes(new Scene("floranext0"))
                 .setBoundaryImages("topleft", "bottomR2")
                 .setMinImageArea(25)
                 .build();
@@ -53,7 +55,7 @@ public class PatternLocationsTest {
             System.out.println("pattern: "+stateImage.getPatterns().get(0).getSearchRegions().getFixedRegion());
             ObjectCollection objColl = new ObjectCollection.Builder()
                     .withImages(stateImage)
-                    .withScenes(new Pattern(state.getScenes().get(0)))
+                    .withScenes(state.getScenes())
                     .build();
             Matches matches = action.perform(ActionOptions.Action.FIND, objColl);
             Optional<Match> bestMatchOpt = matches.getBestMatch();

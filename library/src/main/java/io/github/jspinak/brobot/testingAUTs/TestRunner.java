@@ -1,5 +1,6 @@
 package io.github.jspinak.brobot.testingAUTs;
 
+import io.github.jspinak.brobot.database.services.AllStatesInProjectService;
 import io.github.jspinak.brobot.manageStates.StateMemory;
 import io.github.jspinak.brobot.manageStates.StateTransitionsManagement;
 import org.slf4j.Logger;
@@ -15,14 +16,16 @@ public class TestRunner {
     //private final RecordScreen recordScreen;
     private final RenderFileUploader renderFileUploader;
     private StateMemory stateMemory;
+    private final AllStatesInProjectService allStatesInProjectService;
 
     public TestRunner(StateTransitionsManagement stateTransitionsManagement,
                       RecordScreen recordScreen, RenderFileUploader renderFileUploader,
-                      StateMemory stateMemory) {
+                      StateMemory stateMemory, AllStatesInProjectService allStatesInProjectService) {
         this.stateTransitionsManagement = stateTransitionsManagement;
         //this.recordScreen = recordScreen;
         this.renderFileUploader = renderFileUploader;
         this.stateMemory = stateMemory;
+        this.allStatesInProjectService = allStatesInProjectService;
     }
 
     /*
@@ -34,7 +37,8 @@ public class TestRunner {
         Logger logger = LoggerFactory.getLogger(TestRunner.class);
         logger.info("Test started at" + startTime);
         //recordScreen.startRecording("recording/test.mp4", 10000000);
-        stateTransitionsManagement.openState(destination);
+        Long destinationId = allStatesInProjectService.getState(destination).get().getId();
+        stateTransitionsManagement.openState(destinationId);
         //recordScreen.stopRecording();
         testRun.setEndTime(LocalDateTime.now());
         testRun.setRecordingFilename("test");

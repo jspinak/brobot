@@ -50,11 +50,11 @@ public class QuickStateAndTransitionsBuilder {
                 .addPattern(imageFilename)
                 .build();
         stateImages.add(stateImage);
-        StateTransition stateTransition = new StateTransition.Builder()
+        JavaStateTransition javaStateTransition = new JavaStateTransition.Builder()
                 .addToActivate(stateTransitionedTo)
                 .setFunction(() -> action.perform(CLICK, stateImage).isSuccess())
                 .build();
-        stateTransitions.addTransition(stateTransition);
+        stateTransitions.addTransition(javaStateTransition);
         return this;
     }
 

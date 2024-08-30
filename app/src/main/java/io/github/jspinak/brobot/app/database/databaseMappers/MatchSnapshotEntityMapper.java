@@ -28,7 +28,7 @@ public class MatchSnapshotEntityMapper {
         matchSnapshotEntity.setTimeStamp(matchSnapshot.getTimeStamp());
         matchSnapshotEntity.setActionSuccess(matchSnapshot.isActionSuccess());
         matchSnapshotEntity.setResultSuccess(matchSnapshot.isResultSuccess());
-        matchSnapshotEntity.setState(matchSnapshot.getState());
+        matchSnapshotEntity.setState(matchSnapshot.getStateName());
         return matchSnapshotEntity;
     }
 
@@ -41,7 +41,7 @@ public class MatchSnapshotEntityMapper {
         matchSnapshot.setTimeStamp(matchSnapshot.getTimeStamp());
         matchSnapshot.setActionSuccess(matchSnapshot.isActionSuccess());
         matchSnapshot.setResultSuccess(matchSnapshot.isResultSuccess());
-        matchSnapshot.setState(matchSnapshot.getState());
+        matchSnapshot.setStateName(matchSnapshot.getStateName());
         return matchSnapshot;
     }
 

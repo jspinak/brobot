@@ -13,19 +13,21 @@ public class ObjectCollectionEntityMapper {
     private final StateStringEntityMapper stateStringEntityMapper;
     private final MatchesEntityMapper matchesEntityMapper;
     private final PatternEntityMapper patternEntityMapper;
+    private final SceneEntityMapper sceneEntityMapper;
 
     public ObjectCollectionEntityMapper(StateLocationEntityMapper stateLocationEntityMapper,
                                         StateImageEntityMapper stateImageEntityMapper,
                                         StateRegionEntityMapper stateRegionEntityMapper,
                                         StateStringEntityMapper stateStringEntityMapper,
                                         MatchesEntityMapper matchesEntityMapper,
-                                        PatternEntityMapper patternEntityMapper) {
+                                        PatternEntityMapper patternEntityMapper, SceneEntityMapper sceneEntityMapper) {
         this.stateLocationEntityMapper = stateLocationEntityMapper;
         this.stateImageEntityMapper = stateImageEntityMapper;
         this.stateRegionEntityMapper = stateRegionEntityMapper;
         this.stateStringEntityMapper = stateStringEntityMapper;
         this.matchesEntityMapper = matchesEntityMapper;
         this.patternEntityMapper = patternEntityMapper;
+        this.sceneEntityMapper = sceneEntityMapper;
     }
     
     public ObjectCollectionEntity map(ObjectCollection objectCollection) {
@@ -35,7 +37,7 @@ public class ObjectCollectionEntityMapper {
         objectCollectionEntity.setStateRegions(stateRegionEntityMapper.mapToStateRegionEntityList(objectCollection.getStateRegions()));
         objectCollectionEntity.setStateStrings(stateStringEntityMapper.mapToStateStringEntityList(objectCollection.getStateStrings()));
         objectCollectionEntity.setMatches(matchesEntityMapper.mapToMatchesEntityList(objectCollection.getMatches()));
-        objectCollectionEntity.setScenes(patternEntityMapper.mapToPatternEntityList(objectCollection.getScenes()));
+        objectCollectionEntity.setScenes(sceneEntityMapper.mapToSceneEntityList(objectCollection.getScenes()));
         return objectCollectionEntity;
     }
 
@@ -46,7 +48,7 @@ public class ObjectCollectionEntityMapper {
         objectCollection.setStateRegions(stateRegionEntityMapper.mapToStateRegionList(objectCollectionEntity.getStateRegions()));
         objectCollection.setStateStrings(stateStringEntityMapper.mapToStateStringList(objectCollectionEntity.getStateStrings()));
         objectCollection.setMatches(matchesEntityMapper.mapToMatchesList(objectCollectionEntity.getMatches()));
-        objectCollection.setScenes(patternEntityMapper.mapToPatternList(objectCollectionEntity.getScenes()));
+        objectCollection.setScenes(sceneEntityMapper.mapToSceneList(objectCollectionEntity.getScenes()));
         return objectCollection;
     }
 }

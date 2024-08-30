@@ -15,7 +15,7 @@ public class UnvisitedStates {
     private final AllStatesInProjectService allStatesInProjectService;
     private final PathFinder pathFinder;
 
-    private TreeMap<Integer, String> unvisitedDistance = new TreeMap<>();
+    private TreeMap<Integer, Long> unvisitedDistance = new TreeMap<>();
 
     public UnvisitedStates(StateMemory stateMemory, AllStatesInProjectService allStatesInProjectService,
                            PathFinder pathFinder) {
@@ -24,16 +24,16 @@ public class UnvisitedStates {
         this.pathFinder = pathFinder;
     }
 
-    public Set<String> getUnvisitedStates() {
-        Set<String> unvisited = new HashSet<>();
+    public Set<Long> getUnvisitedStates() {
+        Set<Long> unvisited = new HashSet<>();
         allStatesInProjectService.getAllStates().forEach(st -> {
-            if (st.getTimesVisited() == 0) unvisited.add(st.getName());
+            if (st.getTimesVisited() == 0) unvisited.add(st.getId());
         });
         return unvisited;
     }
 
-    public Optional<String> getClosestUnvisited(Set<String> startStates) {
-        Set<String> unvisited = getUnvisitedStates();
+    public Optional<Long> getClosestUnvisited(Set<Long> startStates) {
+        Set<Long> unvisited = getUnvisitedStates();
         unvisitedDistance = new TreeMap<>();
         unvisited.forEach(state -> {
             Paths paths = pathFinder.getPathsToState(startStates, state);
@@ -44,7 +44,7 @@ public class UnvisitedStates {
         return Optional.ofNullable(unvisitedDistance.firstEntry().getValue());
     }
 
-    public Optional<String> getClosestUnvisited() {
+    public Optional<Long> getClosestUnvisited() {
         return getClosestUnvisited(stateMemory.getActiveStates());
     }
 }

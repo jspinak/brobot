@@ -64,7 +64,7 @@ public class IllustrationFilename {
     public String getFilenameFromSceneAnalysis(SceneAnalysis sceneAnalysis, ActionOptions actionOptions, String... additionalDescription) {
         String prefix = BrobotSettings.historyPath;
         ActionOptions.Action action = actionOptions.getAction();
-        String sceneName = sceneAnalysis.getScene().getName();
+        String sceneName = sceneAnalysis.getScene().getPattern().getName();
         String imageNames = sceneAnalysis.getImageNames();
         String names = String.join("_", imageNames);
         String suffix = action.toString() + "_in-" + sceneName + "_" + names + String.join("_", additionalDescription);

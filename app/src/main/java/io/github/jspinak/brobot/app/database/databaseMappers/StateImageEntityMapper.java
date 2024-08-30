@@ -29,6 +29,7 @@ public class StateImageEntityMapper {
         stateImageEntity.setShared(stateImageEntity.isShared());
         stateImageEntity.setIndex(stateImage.getIndex());
         stateImageEntity.setDynamic(stateImage.isDynamic());
+        stateImageEntity.setInvolvedTransitionIds(stateImage.getInvolvedTransitionIds());
         return stateImageEntity;
     }
 
@@ -43,6 +44,7 @@ public class StateImageEntityMapper {
         stateImage.setShared(stateImageEntity.isShared());
         stateImage.setIndex(stateImageEntity.getIndex());
         stateImage.setDynamic(stateImageEntity.isDynamic());
+        stateImage.setInvolvedTransitionIds(stateImageEntity.getInvolvedTransitionIds());
         return stateImage;
     }
 

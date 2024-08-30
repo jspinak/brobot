@@ -1,19 +1,16 @@
 package io.github.jspinak.brobot.actions.methods.basicactions.find.compareImages;
 
 import io.github.jspinak.brobot.actions.methods.mockOrLiveInterface.MockOrLive;
-import io.github.jspinak.brobot.datatypes.primitives.image.Image;
 import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
+import io.github.jspinak.brobot.datatypes.primitives.image.Scene;
 import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import io.github.jspinak.brobot.datatypes.primitives.match.NoMatch;
-import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import org.springframework.stereotype.Component;
 
-import java.awt.image.BufferedImage;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 
 @Component
 public class CompareImages {
@@ -77,13 +74,13 @@ public class CompareImages {
         Pattern biggestPattern = sortedPatterns.get(1);
         Pattern smallestPattern = sortedPatterns.get(0);
         String name = smallestPattern.getName() + " found in " + biggestPattern.getName();
-        Image scene = biggestPattern.getImage();
+        Scene scene = new Scene(new Pattern(biggestPattern.getImage()));
         List<Match> matchList = mockOrLive.findAll(smallestPattern, scene);
         if (matchList.isEmpty()) {
             return new NoMatch.Builder()
                     .setName(name)
                     .setSearchImage(smallestPattern.getImage())
-                    .setScene(biggestPattern.getImage())
+                    .setScene(scene)
                     .build();
         }
         return Collections.max(matchList, Comparator.comparingDouble(Match::getScore));

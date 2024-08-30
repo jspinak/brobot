@@ -5,10 +5,10 @@ import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.actions.methods.time.Time;
 import io.github.jspinak.brobot.datatypes.primitives.image.Image;
 import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
+import io.github.jspinak.brobot.datatypes.primitives.image.Scene;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import io.github.jspinak.brobot.imageUtils.GetImageJavaCV;
-import io.github.jspinak.brobot.reports.Report;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.springframework.stereotype.Component;
 
@@ -39,37 +39,38 @@ public class GetScenes {
      * If passed as a parameter, the scenes to use are in the 1st ObjectCollection (index 0) in the Scene list.
      * Scenes can also be taken from the field BrobotSettings.screenshot when performing unit tests.
      */
-    public List<Image> getScenes(ActionOptions actionOptions, List<ObjectCollection> objectCollections,
+    public List<Scene> getScenes(ActionOptions actionOptions, List<ObjectCollection> objectCollections,
                                  int scenesToCapture, double secondsBetweenCaptures) {
-        List<Image> scenes = new ArrayList<>();
+        List<Scene> scenes = new ArrayList<>();
         boolean takeScreenshot = isOkToTakeScreenshot(objectCollections.toArray(new ObjectCollection[0]));
         if (takeScreenshot) {
             for (int i=0; i<scenesToCapture; i++) {
                 Mat bgr = getImage.getMatFromScreen(new Region());
-                scenes.add(new Image(bgr, "screenshot" + i));
+                scenes.add(new Scene(new Pattern(new Image(bgr, "screenshot" + i))));
                 if (i<scenesToCapture-1) time.wait(secondsBetweenCaptures);
             }
             return scenes;
         }
         if (BrobotSettings.mock) {
             // If no scenes are listed in the settings, use a randomly generated scene.
-            if (BrobotSettings.screenshots.isEmpty()) scenes.add(Image.getEmptyImage());
+            if (BrobotSettings.screenshots.isEmpty())
+                scenes.add(new Scene(new Pattern(Image.getEmptyImage())));
             // If scenes are listed in the settings, use them.
             else for (String filename : BrobotSettings.screenshots){
                 String relativePath = "../" + BrobotSettings.screenshotPath + filename;
-                scenes.add(new Image(relativePath));
+                scenes.add(new Scene(new Pattern(new Image(relativePath))));
             }
             return scenes;
         }
         // If scenes are passed as parameters, use them.
-        List<Pattern> scenesInObjectCollection = objectCollections.get(0).getScenes();
+        List<Scene> scenesInObjectCollection = objectCollections.get(0).getScenes();
         if (!scenesInObjectCollection.isEmpty()) {
-            for (Pattern pattern : scenesInObjectCollection) {
-                scenes.add(pattern.getImage());
+            for (Scene scene : scenesInObjectCollection) {
+                scenes.add(scene);
             }
             return scenes;
         }
-        scenes.add(Image.getEmptyImage());
+        scenes.add(new Scene(new Pattern(Image.getEmptyImage())));
         return scenes;
     }
 
@@ -78,7 +79,7 @@ public class GetScenes {
      * @param objectCollections these contain scenes as images when passed as parameters
      * @return a list of scenes to use in matrix format
      */
-    public List<Image> getScenes(ActionOptions actionOptions, List<ObjectCollection> objectCollections) {
+    public List<Scene> getScenes(ActionOptions actionOptions, List<ObjectCollection> objectCollections) {
         return getScenes(actionOptions, objectCollections, 1, 0);
     }
 

@@ -31,15 +31,15 @@ public class TestRun {
     private String description;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
-    private Set<String> startStates;
-    private Set<String> endStates;
+    private Set<Long> startStates;
+    private Set<Long> endStates;
     private String recordingFilename;
 
     /*
     Each Image can have various png files. This should be specified in the backend
     Spring Boot application along with the locations of the files in the cloud.
      */
-    public TestRun(String description, LocalDateTime startTime, Set<String> startStates) {
+    public TestRun(String description, LocalDateTime startTime, Set<Long> startStates) {
         this.description = description;
         this.startTime = startTime;
         this.startStates = startStates;

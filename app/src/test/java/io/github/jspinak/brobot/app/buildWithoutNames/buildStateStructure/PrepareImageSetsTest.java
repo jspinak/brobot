@@ -1,10 +1,11 @@
 package io.github.jspinak.brobot.app.buildWithoutNames.buildStateStructure;
 
-import io.github.jspinak.brobot.app.buildWithoutNames.preliminaryStates.ImageSetsAndAssociatedScreens;
-import io.github.jspinak.brobot.app.buildWithoutNames.screenObservations.GetScreenObservationFromScreenshot;
-import io.github.jspinak.brobot.app.buildWithoutNames.screenObservations.StatelessImage;
-import io.github.jspinak.brobot.app.buildWithoutNames.stateStructureBuildManagement.StateStructureConfiguration;
-import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
+import io.github.jspinak.brobot.app.stateStructureBuilders.buildWithoutNames.buildStateStructure.PrepareImageSets;
+import io.github.jspinak.brobot.app.stateStructureBuilders.buildWithoutNames.preliminaryStates.ImageSetsAndAssociatedScreens;
+import io.github.jspinak.brobot.app.stateStructureBuilders.buildWithoutNames.screenObservations.GetScreenObservationFromScreenshot;
+import io.github.jspinak.brobot.app.stateStructureBuilders.buildWithoutNames.screenObservations.StatelessImage;
+import io.github.jspinak.brobot.app.stateStructureBuilders.buildWithoutNames.stateStructureBuildManagement.StateStructureConfiguration;
+import io.github.jspinak.brobot.datatypes.primitives.image.Scene;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +38,7 @@ class PrepareImageSetsTest {
     @Test
     void defineStatesWithImages_fromOneObservation() {
         getScreenObservationFromScreenshot.getNewScreenObservationAndProcessImages(
-                new Pattern("../screenshots/floranext0"), config, statelessImages);
+                new Scene("../screenshots/floranext0"), config, statelessImages);
         List<ImageSetsAndAssociatedScreens> imageSetsList = prepareImageSets.defineStatesWithImages(statelessImages);
         System.out.println("# of ImageSets = "+imageSetsList.size());
         System.out.println(imageSetsList);
@@ -47,11 +48,11 @@ class PrepareImageSetsTest {
     @Test
     void defineStatesWithImages_fromThreeObservations_oneScreenPerImage() {
         getScreenObservationFromScreenshot.getNewScreenObservationAndProcessImages(
-                new Pattern("../screenshots/floranext0"), config, statelessImages);
+                new Scene("../screenshots/floranext0"), config, statelessImages);
         getScreenObservationFromScreenshot.getNewScreenObservationAndProcessImages(
-                new Pattern("../screenshots/floranext1"), config, statelessImages);
+                new Scene("../screenshots/floranext1"), config, statelessImages);
         getScreenObservationFromScreenshot.getNewScreenObservationAndProcessImages(
-                new Pattern("../screenshots/floranext2"), config, statelessImages);
+                new Scene("../screenshots/floranext2"), config, statelessImages);
         List<ImageSetsAndAssociatedScreens> imageSetsList = prepareImageSets.defineStatesWithImages(statelessImages);
         System.out.println("# of ImageSets = "+imageSetsList.size());
         System.out.println(imageSetsList);

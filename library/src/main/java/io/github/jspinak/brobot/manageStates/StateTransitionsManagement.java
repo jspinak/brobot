@@ -2,7 +2,7 @@ package io.github.jspinak.brobot.manageStates;
 
 import io.github.jspinak.brobot.reports.Output;
 import io.github.jspinak.brobot.reports.Report;
-import io.github.jspinak.brobot.services.StateTransitionsService;
+import io.github.jspinak.brobot.services.StateTransitionsInProjectService;
 import org.springframework.stereotype.Component;
 
 import java.util.Set;
@@ -19,24 +19,24 @@ import java.util.Set;
 @Component
 public class StateTransitionsManagement {
 
-    private StateTransitionsService stateTransitionsService;
+    private StateTransitionsInProjectService stateTransitionsInProjectService;
     private PathFinder pathFinder;
     private StateMemory stateMemory;
     private TraversePaths traversePaths;
     private PathManager pathManager;
 
-    Set<String> activeStates;
+    Set<Long> activeStates;
 
-    public StateTransitionsManagement(StateTransitionsService stateTransitionsService, PathFinder pathFinder,
+    public StateTransitionsManagement(StateTransitionsInProjectService stateTransitionsInProjectService, PathFinder pathFinder,
                                       StateMemory stateMemory, TraversePaths traversePaths, PathManager pathManager) {
-        this.stateTransitionsService = stateTransitionsService;
+        this.stateTransitionsInProjectService = stateTransitionsInProjectService;
         this.pathFinder = pathFinder;
         this.stateMemory = stateMemory;
         this.traversePaths = traversePaths;
         this.pathManager = pathManager;
     }
 
-    public boolean openState(String stateToOpen) {
+    public boolean openState(Long stateToOpen) {
         Report.format("Open State %s\n", stateToOpen);
         activeStates = stateMemory.getActiveStates();
         // we find the paths once, and then reuse these paths when needed
@@ -63,7 +63,7 @@ public class StateTransitionsManagement {
      * Here, a failed Transition is assumed to always fail, and therefore Path objects with this Transition
      * are removed from the available Paths and not tried again.
      */
-    private boolean recursePaths(Paths paths, String stateToOpen) {
+    private boolean recursePaths(Paths paths, Long stateToOpen) {
         if (paths.isEmpty()) return false;
         if (activeStates.contains(stateToOpen) && traversePaths.finishTransition(stateToOpen)) return true;
         if (traversePaths.traverse(paths.getPaths().get(0))) return true; // false if a transition fails

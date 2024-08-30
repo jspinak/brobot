@@ -1,9 +1,11 @@
 package io.github.jspinak.brobot.app.web.responseMappers;
 
 import io.github.jspinak.brobot.app.database.entities.MatchesEntity;
+import io.github.jspinak.brobot.app.web.requests.MatchesRequest;
 import io.github.jspinak.brobot.app.web.responses.MatchesResponse;
 import org.springframework.stereotype.Component;
 
+import java.util.HashSet;
 import java.util.stream.Collectors;
 
 @Component
@@ -74,5 +76,61 @@ public class MatchesResponseMapper {
         matchesEntity.setMaxMatches(matchesResponse.getMaxMatches());
         matchesEntity.setOutputText(matchesResponse.getOutputText());
         return matchesEntity;
+    }
+
+    public MatchesEntity fromRequest(MatchesRequest request) {
+        if (request == null) return null;
+        MatchesEntity entity = new MatchesEntity();
+        entity.setId(request.getId());
+        entity.setActionDescription(request.getActionDescription());
+        entity.setMatchList(request.getMatchList().stream()
+                .map(matchResponseMapper::fromRequest)
+                .collect(Collectors.toList()));
+        entity.setInitialMatchList(request.getInitialMatchList().stream()
+                .map(matchResponseMapper::fromRequest)
+                .collect(Collectors.toList()));
+        entity.setActionOptions(actionOptionsResponseMapper.fromRequest(request.getActionOptions()));
+        entity.setActiveStates(new HashSet<>(request.getActiveStates()));
+        entity.setSelectedText(request.getSelectedText());
+        entity.setDuration(request.getDuration());
+        entity.setStartTime(request.getStartTime());
+        entity.setEndTime(request.getEndTime());
+        entity.setSuccess(request.isSuccess());
+        entity.setDefinedRegions(request.getDefinedRegions().stream()
+                .map(regionResponseMapper::fromRequest)
+                .collect(Collectors.toList()));
+        entity.setMaxMatches(request.getMaxMatches());
+        entity.setOutputText(request.getOutputText());
+        return entity;
+    }
+
+    public MatchesRequest toRequest(MatchesEntity entity) {
+        if (entity == null) {
+            return null;
+        }
+
+        MatchesRequest request = new MatchesRequest();
+        request.setId(entity.getId());
+        request.setActionDescription(entity.getActionDescription());
+        request.setMatchList(entity.getMatchList().stream()
+                .map(matchResponseMapper::toRequest)
+                .collect(Collectors.toList()));
+        request.setInitialMatchList(entity.getInitialMatchList().stream()
+                .map(matchResponseMapper::toRequest)
+                .collect(Collectors.toList()));
+        request.setActionOptions(actionOptionsResponseMapper.toRequest(entity.getActionOptions()));
+        request.setActiveStates(entity.getActiveStates());
+        request.setSelectedText(entity.getSelectedText());
+        request.setDuration(entity.getDuration());
+        request.setStartTime(entity.getStartTime());
+        request.setEndTime(entity.getEndTime());
+        request.setSuccess(entity.isSuccess());
+        request.setDefinedRegions(entity.getDefinedRegions().stream()
+                .map(regionResponseMapper::toRequest)
+                .collect(Collectors.toList()));
+        request.setMaxMatches(entity.getMaxMatches());
+        request.setOutputText(entity.getOutputText());
+
+        return request;
     }
 }
