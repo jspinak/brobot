@@ -53,6 +53,10 @@ public class BufferedImageOps {
         }
     }
 
+    public static BufferedImage getBufferedImageFromScreen(Region region) {
+        return new Screen().capture(region.sikuli()).getImage();
+    }
+
     public BufferedImage getBuffImgFromScreen(Region region) {
         return new Screen().capture(region.sikuli()).getImage();
     }

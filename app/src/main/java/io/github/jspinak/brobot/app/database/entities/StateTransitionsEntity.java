@@ -17,6 +17,10 @@ public class StateTransitionsEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "project_id")
+    private ProjectEntity project;
+
     @Column(name = "state_id", unique = true)
     private Long stateId;
 

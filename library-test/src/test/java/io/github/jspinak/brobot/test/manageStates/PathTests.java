@@ -32,6 +32,6 @@ public class PathTests {
                 .newState("c","bottomRight")
                 .setStartStates("a")
                 .findStartStates();
-        stateTransitionsManagement.openState("c");
+        stateTransitionsManagement.openState(3L);
     }
 }

@@ -11,11 +11,10 @@ import java.util.Set;
 @Setter
 public class TransitionCreateRequest {
     private Long sourceStateId;
-    private Long targetStateId;
     private Long stateImageId;
     private JavaStateTransition.StaysVisible staysVisibleAfterTransition;
-    private Set<Long> activate = new HashSet<>();
-    private Set<Long> exit = new HashSet<>();
+    private Set<Long> statesToEnter = new HashSet<>(); // Renamed from 'activate'
+    private Set<Long> statesToExit = new HashSet<>(); // Renamed from 'exit'
     private int score;
     private int timesSuccessful;
     private ActionDefinitionRequest actionDefinition;

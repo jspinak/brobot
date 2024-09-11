@@ -2,12 +2,11 @@ package io.github.jspinak.brobot.app.web.restControllers;
 
 import io.github.jspinak.brobot.app.services.PatternService;
 import io.github.jspinak.brobot.app.web.responses.PatternResponse;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/patterns") // Base path for all endpoints in this controller
@@ -17,6 +16,12 @@ public class PatternController {
 
     public PatternController(PatternService patternService) {
         this.patternService = patternService;
+    }
+
+    @GetMapping("/") // Maps to GET /api/patterns/
+    public String greeting() {
+        System.out.println("console output: hello world should be in localhost:8080/api/patterns/");
+        return "Hello, World";
     }
 
     @GetMapping("/all") // Maps to GET /api/patterns/all
@@ -29,9 +34,15 @@ public class PatternController {
         return patternService.getPatternResponses(name);
     }
 
-    @GetMapping("/") // Maps to GET /api/patterns/
-    public String greeting() {
-        System.out.println("console output: hello world should be in localhost:8080/api/patterns/");
-        return "Hello, World";
+    @PostMapping("/load-from-bundle")
+    public ResponseEntity<List<PatternResponse>> loadPatternsFromBundle(@RequestBody Map<String, String> request) {
+        String bundlePath = request.get("bundlePath");
+        if (bundlePath == null || bundlePath.isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        List<PatternResponse> patterns = patternService.loadAndSavePatternsFromBundle(bundlePath);
+        return ResponseEntity.ok(patterns);
     }
+
 }

@@ -9,7 +9,7 @@ function AutomationButton() {
         setIsRunning(true);
         setResult('');
         try {
-            const response = await axios.post('http://localhost:8080/api/automation/run-transition-test');
+            const response = await axios.post('${process.env.REACT_APP_BROBOT_API_URL}/api/automation/run-transition-test');
             setResult(response.data);
         } catch (error) {
             setResult('Error occurred while running automation: ' + error.message);
