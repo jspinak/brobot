@@ -16,6 +16,7 @@ public class StateEntityMapper {
     private final MatchHistoryEntityMapper matchHistoryEntityMapper;
     private final RegionEmbeddableMapper regionEmbeddableMapper;
     private final SceneService sceneService;
+    private final ProjectEntityMapper projectEntityMapper;
 
     public StateEntityMapper(StateImageEntityMapper stateImageEntityMapper,
                              StateStringEntityMapper stateStringEntityMapper,
@@ -24,7 +25,8 @@ public class StateEntityMapper {
                              SceneEntityMapper sceneEntityMapper,
                              MatchHistoryEntityMapper matchHistoryEntityMapper,
                              RegionEmbeddableMapper regionEmbeddableMapper,
-                             SceneService sceneService) {
+                             SceneService sceneService,
+                             ProjectEntityMapper projectEntityMapper) {
         this.stateImageEntityMapper = stateImageEntityMapper;
         this.stateStringEntityMapper = stateStringEntityMapper;
         this.stateRegionEntityMapper = stateRegionEntityMapper;
@@ -33,11 +35,12 @@ public class StateEntityMapper {
         this.matchHistoryEntityMapper = matchHistoryEntityMapper;
         this.regionEmbeddableMapper = regionEmbeddableMapper;
         this.sceneService = sceneService;
+        this.projectEntityMapper = projectEntityMapper;
     }
     
     public StateEntity map(State state) {
         StateEntity stateEntity = new StateEntity(state.getId());
-        stateEntity.setProjectId(state.getProjectId());
+        stateEntity.setProject(projectEntityMapper.mapWithoutStates());
         stateEntity.setName(state.getName());
         stateEntity.setStateText(state.getStateText());
         stateEntity.setStateImages(stateImageEntityMapper.mapToStateImageEntitySet(state.getStateImages()));
@@ -62,7 +65,6 @@ public class StateEntityMapper {
 
     public State map(StateEntity stateEntity) {
         State state = new State();
-        state.setProjectId(stateEntity.getProjectId());
         state.setId(stateEntity.getId());
         state.setName(stateEntity.getName());
         state.setStateText(stateEntity.getStateText());

@@ -1,3 +1,5 @@
+// brobot project's app build.gradle
+
 plugins {
 	id 'java'
 	id 'io.freefair.lombok' version '8.6'
@@ -25,6 +27,7 @@ repositories {
 
 dependencies {
 	implementation project(':library') // Dependency on the library module
+	implementation project(':log') // Dependency on the log module
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
 
@@ -33,7 +36,6 @@ dependencies {
 	testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.10.2'
 	// Spring Boot Starter Test for Spring Boot testing support
 	implementation 'org.springframework.boot:spring-boot-starter-test' //:3.2.2
-	implementation group: 'com.h2database', name: 'h2', version: '2.2.224'
 
 	implementation 'org.springframework.boot:spring-boot-starter-web' //:3.2.2
 	implementation 'com.fasterxml.jackson.core:jackson-databind'
@@ -41,8 +43,9 @@ dependencies {
 	// database
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-data-rest'
-	//implementation group: 'org.postgresql', name: 'postgresql', version: '42.7.1'
+	implementation 'org.postgresql:postgresql:42.7.4'
 	testImplementation group: 'com.h2database', name: 'h2', version: '2.2.224'
+	implementation 'org.hibernate:hibernate-core:6.1.0.Final'
 
 	implementation('com.sikulix:sikulixapi:2.0.5') {
 		exclude group: 'org.slf4j', module: 'slf4j-nop'
@@ -50,7 +53,6 @@ dependencies {
 	}
 	//implementation 'ch.qos.logback:logback-classic:1.4.12' //this is part of the Spring Boot starter
 	//implementation ('org.slf4j:slf4j-api:1.7.36') //SpringBoot prefers logback
-
 
 	implementation group: 'org.bytedeco', name: 'javacv-platform', version: '1.5.10'
 	implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.0'
@@ -61,10 +63,9 @@ dependencies {
 	//testImplementation 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
 	implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.14.0' // for mapstruct issue
 
-	implementation 'org.mapstruct:mapstruct:1.5.5.Final'
-	annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
-	testAnnotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
-
+	implementation 'org.springframework.boot:spring-boot-starter-data-elasticsearch'
+	implementation 'org.springframework.boot:spring-boot-starter-websocket'
+	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.2'
 }
 
 test {

@@ -59,7 +59,7 @@ public class TransitionController {
         } catch (Exception e) {
             logger.error("Error in createTransition", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new TransitionResponse()); // Or a custom error response
+                    .body(new TransitionResponse());
         }
     }
 

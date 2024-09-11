@@ -3,7 +3,6 @@ package io.github.jspinak.brobot.app.stateStructureBuilders.buildWithoutNames.bu
 import io.github.jspinak.brobot.actions.actionExecution.Action;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.app.stateStructureBuilders.buildWithoutNames.buildLive.ScreenObservations;
-import io.github.jspinak.brobot.app.buildWithoutNames.screenObservations.*;
 import io.github.jspinak.brobot.app.stateStructureBuilders.buildWithoutNames.screenObservations.*;
 import io.github.jspinak.brobot.app.stateStructureBuilders.buildWithoutNames.stateStructureBuildManagement.StateStructureConfiguration;
 import io.github.jspinak.brobot.datatypes.primitives.image.Scene;

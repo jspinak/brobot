@@ -1,31 +1,39 @@
 package io.github.jspinak.brobot.app.services;
 
 import io.github.jspinak.brobot.app.database.databaseMappers.StateImageEntityMapper;
+import io.github.jspinak.brobot.app.database.entities.PatternEntity;
 import io.github.jspinak.brobot.app.database.entities.StateImageEntity;
 import io.github.jspinak.brobot.app.database.repositories.StateImageRepo;
+import io.github.jspinak.brobot.app.web.requests.StateImageRequest;
 import io.github.jspinak.brobot.app.web.responseMappers.StateImageResponseMapper;
 import io.github.jspinak.brobot.app.web.responses.StateImageResponse;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
 public class StateImageService {
+    private static final Logger logger = LoggerFactory.getLogger(StateImageService.class);
 
     private final StateImageRepo stateImageRepo;
     private final StateImageEntityMapper stateImageEntityMapper;
+    private final PatternService patternService;
     private final StateImageResponseMapper stateImageResponseMapper;
 
     public StateImageService(StateImageRepo stateImageRepo,
                              StateImageEntityMapper stateImageEntityMapper,
-                             StateImageResponseMapper stateImageResponseMapper) {
+                             PatternService patternService, StateImageResponseMapper stateImageResponseMapper) {
         this.stateImageRepo = stateImageRepo;
         this.stateImageEntityMapper = stateImageEntityMapper;
+        this.patternService = patternService;
         this.stateImageResponseMapper = stateImageResponseMapper;
     }
 
@@ -90,4 +98,51 @@ public class StateImageService {
         stateImage.getInvolvedTransitionIds().add(transitionId);
         stateImageRepo.save(stateImage);
     }
+
+    @Transactional
+    public StateImageEntity createStateImage(StateImageRequest request) {
+        logger.info("Creating new StateImage: {}", request);
+
+        // Use the mapper to convert the request to an entity
+        StateImageEntity stateImage = stateImageResponseMapper.fromRequest(request);
+
+        // Handle patterns separately as they need to be created or retrieved
+        List<PatternEntity> patterns = patternService.getOrCreatePatterns(request.getPatterns());
+        stateImage.setPatterns(patterns);
+
+        // Ensure the ownerStateId is set correctly
+        if (stateImage.getOwnerStateId() == null || stateImage.getOwnerStateId() == -1L) {
+            logger.warn("ownerStateId is not set or is invalid. Setting to null.");
+            stateImage.setOwnerStateId(null);
+        }
+
+        StateImageEntity savedStateImage = stateImageRepo.save(stateImage);
+        logger.info("Created StateImage with ID: {}", savedStateImage.getId());
+        return savedStateImage;
+    }
+
+    @Transactional
+    public StateImageEntity updateStateImage(StateImageEntity stateImage) {
+        logger.info("Updating StateImage: {}", stateImage);
+        if (stateImage.getOwnerStateId() == null || stateImage.getOwnerStateId() == -1L) {
+            logger.error("Invalid ownerStateId for StateImage: {}", stateImage.getId());
+            throw new IllegalArgumentException("Invalid ownerStateId for StateImage");
+        }
+        StateImageEntity updatedStateImage = stateImageRepo.save(stateImage);
+        logger.info("Updated StateImage: {}", updatedStateImage);
+        return updatedStateImage;
+    }
+
+    public Set<StateImageEntity> createStateImages(Set<StateImageRequest> requests) {
+        return requests.stream()
+                .map(this::createStateImage)
+                .collect(Collectors.toSet());
+    }
+
+    @Transactional
+    public void deleteStateImagesByStateId(Long stateId) {
+        List<StateImageEntity> stateImages = stateImageRepo.findByOwnerStateId(stateId);
+        stateImageRepo.deleteAll(stateImages);
+    }
+
 }

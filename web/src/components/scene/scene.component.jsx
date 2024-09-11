@@ -1,7 +1,7 @@
-import React, {useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
+import { Box, CircularProgress, Typography } from '@mui/material';
 import Image from './../image/image.component';
 import Highlight from './../highlight/highlight.component';
-import './scene.styles.css';
 
 const sceneCache = new Map();
 
@@ -22,7 +22,7 @@ const Scene = ({ sceneId, highlightAll, state, highlightedPatterns, handleImageL
 
         setIsLoading(true);
         try {
-            const response = await fetch(`http://localhost:8080/api/scenes/${sceneId}`);
+            const response = await fetch(`${process.env.REACT_APP_BROBOT_API_URL}/api/scenes/${sceneId}`);
             if (!response.ok) {
                 throw new Error(`Error fetching scene:${sceneId}`);
             }
@@ -42,23 +42,23 @@ const Scene = ({ sceneId, highlightAll, state, highlightedPatterns, handleImageL
     }, [fetchScene]);
 
     if (isLoading) {
-        return <div>Loading scene...</div>;
+        return <CircularProgress />;
     }
 
     if (error) {
-        return <div>Error: {error}</div>;
+        return <Typography color="error">Error: {error}</Typography>;
     }
 
     if (!scene) {
-        return <div>No scene data available</div>;
+        return <Typography>No scene data available</Typography>;
     }
 
     if (!scene || !scene.pattern || !scene.pattern.image) {
-        return <div>Invalid scene data</div>;
+        return <Typography>Invalid scene data</Typography>;
     }
 
     return (
-        <div key={scene.id} className="state-scene">
+        <Box sx={{ position: 'relative', mb: 2.5, overflow: 'hidden' }}>
             <Image
                 image={scene.pattern.image}
                 onLoad={(event) => handleImageLoad(event, scene.id)}
@@ -78,11 +78,19 @@ const Scene = ({ sceneId, highlightAll, state, highlightedPatterns, handleImageL
                         adjustY={adjustY}
                         scaleW={scaleW}
                         scaleH={scaleH}
-                        className="highlight"
+                        sx={{
+                            border: 2,
+                            borderColor: 'rgba(255, 255, 255, 0.8)',
+                            boxShadow: '0 0 0 2px rgba(0, 0, 0, 0.8)',
+                            backgroundColor: 'rgba(255, 0, 0, 0.3)',
+                            position: 'absolute',
+                            pointerEvents: 'none',
+                            zIndex: 10
+                        }}
                     />
                 );
             })}
-        </div>
+        </Box>
     );
 }
 

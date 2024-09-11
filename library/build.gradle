@@ -1,3 +1,5 @@
+// build.gradle library module
+
  plugins {
     ///In a library, you typically want to avoid the org.springframework.boot plugin, as Spring Boot is designed for standalone applications. Your library should not impose Spring Boot's conventions on the projects that use it. So, you can exclude this plugin.
     id 'java'
@@ -31,6 +33,7 @@ configurations {
 }
 
 dependencies {
+    implementation project(':log')
     implementation 'org.springframework:spring-core:6.1.3'
     implementation 'org.springframework:spring-context:6.1.3'
     implementation 'org.springframework:spring-beans:6.1.3'
@@ -40,6 +43,7 @@ dependencies {
     implementation('com.sikulix:sikulixapi:2.0.5') {
         exclude group: 'org.slf4j', module: 'slf4j-nop'
     }
+    implementation 'com.github.stephenc.monte:monte-screen-recorder:0.7.7.0'
 
     implementation group: 'org.bytedeco', name: 'javacv-platform', version: '1.5.10'
     implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.0'

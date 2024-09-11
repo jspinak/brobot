@@ -1,122 +1,20 @@
 .state-details {
-  display: flex;
-  flex-direction: column;
   height: 100vh;
-  overflow: hidden;
-}
-
-.state-content {
-  display: flex;
-  flex: 1;
-  overflow: hidden;
-}
-
-.state-image-set {
-  width: 300px;
-  overflow-y: auto;
-  padding: 10px;
-  border-right: 1px solid #ccc;
-}
-
-.state-scenes {
-  flex: 1;
-  overflow-y: auto;
-  padding: 10px;
-}
-
-.state-image-wrapper {
-  margin-bottom: 20px;
-}
-
-.state-image-container {
-  background-color: #f0f0f0;
-  padding: 10px;
-  border-radius: 4px;
-}
-
-.state-image-options {
-  background-color: #fffbe6;
-  padding: 10px;
-  margin-top: 10px;
-  border-radius: 4px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
 }
 
-.option-group {
+.state-details .MuiGrid-container {
+  flex-grow: 1;
+  height: calc(100% - 50px); /* Adjust based on the height of StateDetailsButtons */
+}
+
+.state-details .MuiGrid-item {
+  height: 100%;
+}
+
+.state-details .MuiPaper-root {
+  height: 100%;
   display: flex;
-  gap: 5px;
-  align-items: center;
-}
-
-.option-group select,
-.option-group input {
-  flex: 1;
-  padding: 5px;
-}
-
-.option-group button {
-  padding: 5px 10px;
-  white-space: nowrap;
-}
-
-/* Adjust the width of the name input to allow space for the button */
-.name-input {
-  width: 60%;
-}
-
-.update-name-button {
-  width: 40%;
-}
-
-.state-image-edit-input {
-  margin-top: 5px;
-  width: 100%;
-}
-
-.highlight {
-  border: 2px solid rgba(255, 255, 255, 0.8);
-  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.8);
-  background-color: rgba(255, 0, 0, 0.3);
-  position: absolute;
-  pointer-events: none;
-  z-index: 10;
-}
-
-.action-buttons {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  margin: 10px 0;
-}
-
-.state-image-checkbox {
-  position: relative;
-  margin-right: 10px;
-  left: 0px;
-  top: 50%;
-  transform: translateY(-50%);
-}
-
-.highlight-all-container {
-  display: flex;
-  align-items: center;
-  border: 1px solid #ccc;
-  padding: 5px;
-  border-radius: 4px;
-}
-
-.select-target-state,
-.create-transition {
-  padding: 5px 10px;
-  background-color: #f0f0f0;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.select-target-state:hover,
-.create-transition:hover {
-  background-color: #e0e0e0;
+  flex-direction: column;
 }

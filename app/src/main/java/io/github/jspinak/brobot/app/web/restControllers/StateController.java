@@ -1,16 +1,18 @@
 package io.github.jspinak.brobot.app.web.restControllers;
 
-import io.github.jspinak.brobot.app.database.databaseMappers.StateEntityMapper;
 import io.github.jspinak.brobot.app.database.entities.StateEntity;
+import io.github.jspinak.brobot.app.exceptions.EntityNotFoundException;
 import io.github.jspinak.brobot.app.services.StateService;
+import io.github.jspinak.brobot.app.web.requests.MoveStateImageRequest;
+import io.github.jspinak.brobot.app.web.requests.PatternRequest;
 import io.github.jspinak.brobot.app.web.requests.StateImageRequest;
 import io.github.jspinak.brobot.app.web.requests.StateRequest;
 import io.github.jspinak.brobot.app.web.responseMappers.StateResponseMapper;
-import io.github.jspinak.brobot.app.web.responses.StateImageResponse;
 import io.github.jspinak.brobot.app.web.responses.StateResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,24 +24,34 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/states") // Base path for all endpoints in this controller
 public class StateController {
+    private static final Logger logger = LoggerFactory.getLogger(StateController.class);
+
     private final StateService stateService;
     private final StateResponseMapper stateResponseMapper;
 
-    private static final Logger log = LoggerFactory.getLogger(StateController.class);
-    private final StateEntityMapper stateEntityMapper;
-
-    public StateController(StateService stateService, StateResponseMapper stateResponseMapper, StateEntityMapper stateEntityMapper) {
+    public StateController(StateService stateService, StateResponseMapper stateResponseMapper) {
         this.stateService = stateService;
         this.stateResponseMapper = stateResponseMapper;
-        this.stateEntityMapper = stateEntityMapper;
     }
 
     @GetMapping("/all") // Maps to GET /api/states/all
-    public List<StateResponse> getAllStates() {
-        return stateService.getAllStateEntities()
-                .stream()
-                .map(stateResponseMapper::map)
-                .collect(Collectors.toList());
+    public ResponseEntity<?> getAllStates() {
+        try {
+            List<StateResponse> stateEntities = stateService.getAllStateEntities()
+                    .stream()
+                    .map(stateResponseMapper::map)
+                    .toList();
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(stateEntities);
+        } catch (Exception e) {
+            logger.error("Error in /api/states/all", e);
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body("{\"error\": \"An internal server error occurred\"}");
+        }
     }
 
     @GetMapping("/{id}") // Maps to GET /api/states/{name}
@@ -56,28 +68,39 @@ public class StateController {
 
     @PostMapping
     public ResponseEntity<?> createState(@RequestBody StateRequest stateRequest) {
-        log.info("Received POST request to /states");
+        logger.info("Received POST request to create state: {}", stateRequest.getName());
+        logger.info("Received StateRequest: {}", stateRequest);
         try {
+            // Validate request
             if (stateRequest == null || stateRequest.getStateImages() == null || stateRequest.getStateImages().isEmpty()) {
-                return ResponseEntity.badRequest().body("Invalid state data");
+                return ResponseEntity.badRequest().body("Invalid state data: State images are required");
             }
+            if (stateRequest.getProjectRequest() == null || stateRequest.getProjectRequest().getId() == null) {
+                throw new IllegalArgumentException("Project ID is required");
+            }
+
+            // Validate each state image
             for (StateImageRequest stateImage : stateRequest.getStateImages()) {
-                if (stateImage.getPatterns() == null || stateImage.getPatterns().isEmpty() ||
-                        stateImage.getPatterns().get(0).getImage() == null ||
-                        stateImage.getPatterns().get(0).getImage().getImageBase64() == null ||
-                        stateImage.getPatterns().get(0).getImage().getImageBase64().isEmpty()) {
-                    return ResponseEntity.badRequest().body("Invalid image data");
+                if (stateImage.getPatterns() == null || stateImage.getPatterns().isEmpty()) {
+                    return ResponseEntity.badRequest().body("Invalid state image data: Patterns are required");
+                }
+                for (PatternRequest pattern : stateImage.getPatterns()) {
+                    if (pattern.getImage() == null || pattern.getImage().getImageBase64() == null ||
+                            pattern.getImage().getImageBase64().isEmpty()) {
+                        return ResponseEntity.badRequest().body("Invalid pattern data: Image is required");
+                    }
                 }
             }
-            System.out.println("Received state: " + stateRequest.getName());
-            StateEntity stateEntity = stateResponseMapper.fromRequest(stateRequest);
-            StateEntity savedState = stateService.save(stateEntity);
-            return ResponseEntity.ok(stateResponseMapper.map(savedState));
-        } catch (Exception e) {
-            // Log the exception
-            log.error("Error creating state", e);
 
-            // Return an error response
+            // Create the state
+            StateEntity savedState = stateService.createState(stateRequest);
+
+            // Map the saved state to a response and return it
+            StateResponse stateResponse = stateResponseMapper.map(savedState);
+            return ResponseEntity.ok(stateResponse);
+
+        } catch (Exception e) {
+            logger.error("Error creating state", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("An error occurred while creating the state: " + e.getMessage());
         }
@@ -101,9 +124,49 @@ public class StateController {
                 return ResponseEntity.notFound().build();
             }
         } catch (Exception e) {
-            log.error("Error updating state name", e);
+            logger.error("Error updating state name", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("An error occurred while updating the state name: " + e.getMessage());
         }
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteState(@PathVariable Long id) {
+        try {
+            stateService.deleteState(id);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("An error occurred while deleting the state: " + e.getMessage());
+        }
+    }
+
+    @PutMapping("/move-image")
+    public ResponseEntity<?> moveStateImage(@RequestBody MoveStateImageRequest request) {
+        try {
+            StateEntity updatedState = stateService.moveStateImage(request.getStateImageId(), request.getNewStateId());
+            return ResponseEntity.ok(updatedState);
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (Exception e) {
+            // Log the full stack trace
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("An error occurred while moving the state image: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/project/{projectId}")
+    public ResponseEntity<?> getStatesByProject(@PathVariable Long projectId) {
+        logger.info("Fetching states for project: {}", projectId);
+        try {
+            List<StateEntity> states = stateService.getStatesByProject(projectId);
+            logger.info("Retrieved {} states for project {}", states.size(), projectId);
+            return ResponseEntity.ok(states.stream().map(stateResponseMapper::map).collect(Collectors.toList()));
+        } catch (Exception e) {
+            logger.error("Error retrieving states for project {}", projectId, e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error retrieving states: " + e.getMessage());
+        }
+    }
+
 }

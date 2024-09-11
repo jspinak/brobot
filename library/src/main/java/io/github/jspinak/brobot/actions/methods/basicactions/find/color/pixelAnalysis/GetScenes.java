@@ -8,6 +8,7 @@ import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
 import io.github.jspinak.brobot.datatypes.primitives.image.Scene;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
+import io.github.jspinak.brobot.imageUtils.BufferedImageOps;
 import io.github.jspinak.brobot.imageUtils.GetImageJavaCV;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.springframework.stereotype.Component;
@@ -46,7 +47,8 @@ public class GetScenes {
         if (takeScreenshot) {
             for (int i=0; i<scenesToCapture; i++) {
                 Mat bgr = getImage.getMatFromScreen(new Region());
-                scenes.add(new Scene(new Pattern(new Image(bgr, "screenshot" + i))));
+                scenes.add(new Scene(new Pattern(new Image(
+                        BufferedImageOps.getBufferedImageFromScreen(new Region()), "screenshot" + i))));
                 if (i<scenesToCapture-1) time.wait(secondsBetweenCaptures);
             }
             return scenes;

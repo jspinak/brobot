@@ -1,25 +1,20 @@
-// StateImage.jsx
 import React from 'react';
+import { Box, Typography } from '@mui/material';
 import Image from "../image/image.component";
-import './state-image.styles.css'
 
 const StateImage = ({
-                        stateImage,
-                        transitions,
-                        allStates,
-                        onHover = () => {}, // Provide a default no-op function
-                        onMouseLeave = () => {}, // Provide a default no-op function
-                        onClick = () => {}, // Provide a default no-op function
-                        isSelected = false
-                    }) => {
-    // Add a check to ensure stateImage and its properties exist
+    stateImage,
+    transitions = [],
+    allStates = [],
+    isSelected = false
+}) => {
     if (!stateImage || !stateImage.patterns || stateImage.patterns.length === 0) {
-        return <div>No image data available</div>;
+        return <Typography>No image data available</Typography>;
     }
 
     const relevantTransitions = (() => {
-        if (!transitions || !stateImage || !stateImage.involvedTransitionIds) {
-            console.error('Missing required data for transitions', {
+        if (!Array.isArray(transitions) || !stateImage || !Array.isArray(stateImage.involvedTransitionIds)) {
+            console.warn('Missing or invalid data for transitions', {
                 transitions,
                 stateImage,
                 involvedTransitionIds: stateImage?.involvedTransitionIds
@@ -37,25 +32,29 @@ const StateImage = ({
     };
 
     const transitionText = relevantTransitions.length > 0
-        ? `Transitions to state${relevantTransitions.length > 1 ? 's' : ''}: 
-        ${relevantTransitions.map(t => getStateName(t.targetStateId)).join(', ')}`
+        ? `Transitions to states:
+        ${relevantTransitions.map(t =>
+            `${t.statesToEnter.map(getStateName).join(', ')}`
+        ).join(' ')}`
         : 'No transitions';
 
     return (
-        <div
-            className={`state-image-container ${isSelected ? 'selected' : ''}`}
-            onMouseEnter={() => onHover(stateImage)}
-            onMouseLeave={onMouseLeave}
-            onClick={() => onClick(stateImage)}
+        <Box
+            sx={{
+                backgroundColor: isSelected ? '#c0c0c0' : '#e0e0e0',
+                p: 1,
+                borderRadius: 1,
+                width: '100%'
+            }}
         >
             <Image
                 image={stateImage.patterns[0].image}
                 onLoad={() => console.log('Image loaded:', stateImage.id)}
-                className="state-image"
+                sx={{ maxWidth: 'calc(100% - 40px)', maxHeight: 100, objectFit: 'contain', display: 'block', mx: 'auto' }}
             />
-            <div className="state-image-name">{stateImage.name}</div>
-            <div className="state-image-transitions">{transitionText}</div>
-        </div>
+            <Typography variant="subtitle2" align="center" sx={{ mt: 1 }}>{stateImage.name}</Typography>
+            <Typography variant="caption" align="center" sx={{ display: 'block', mt: 0.5 }}>{transitionText}</Typography>
+        </Box>
     );
 };
 

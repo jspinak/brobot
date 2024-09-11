@@ -1,7 +1,11 @@
 package io.github.jspinak.brobot.app.web.responseMappers;
 
+import io.github.jspinak.brobot.app.database.entities.ProjectEntity;
 import io.github.jspinak.brobot.app.database.entities.StateEntity;
+import io.github.jspinak.brobot.app.database.repositories.ProjectRepository;
+import io.github.jspinak.brobot.app.web.requests.ProjectRequest;
 import io.github.jspinak.brobot.app.web.requests.StateRequest;
+import io.github.jspinak.brobot.app.web.responses.ProjectResponse;
 import io.github.jspinak.brobot.app.web.responses.StateResponse;
 import org.springframework.stereotype.Component;
 
@@ -18,13 +22,16 @@ public class StateResponseMapper {
     private final MatchHistoryResponseMapper matchHistoryResponseMapper;
     private final RegionResponseMapper regionResponseMapper;
     private final SceneResponseMapper sceneResponseMapper;
+    private final ProjectRepository projectRepository;
 
     public StateResponseMapper(StateImageResponseMapper stateImageResponseMapper,
                                StateStringResponseMapper stateStringResponseMapper,
                                StateRegionResponseMapper stateRegionResponseMapper,
                                StateLocationResponseMapper stateLocationResponseMapper,
                                MatchHistoryResponseMapper matchHistoryResponseMapper,
-                               RegionResponseMapper regionResponseMapper, SceneResponseMapper sceneResponseMapper) {
+                               RegionResponseMapper regionResponseMapper,
+                               SceneResponseMapper sceneResponseMapper,
+                               ProjectRepository projectRepository) {
         this.stateImageResponseMapper = stateImageResponseMapper;
         this.stateStringResponseMapper = stateStringResponseMapper;
         this.stateRegionResponseMapper = stateRegionResponseMapper;
@@ -32,9 +39,101 @@ public class StateResponseMapper {
         this.matchHistoryResponseMapper = matchHistoryResponseMapper;
         this.regionResponseMapper = regionResponseMapper;
         this.sceneResponseMapper = sceneResponseMapper;
+        this.projectRepository = projectRepository;
     }
 
     public StateResponse map(StateEntity stateEntity) {
+        StateResponse stateResponse = new StateResponse();
+        stateResponse.setId(stateEntity.getId());
+        // just set the ID and name to avoid a circular reference
+        if (stateEntity.getProject() != null) {
+            stateResponse.setProjectId(stateEntity.getProject().getId());
+            stateResponse.setProjectName(stateEntity.getProject().getName());
+        }
+        stateResponse.setName(stateEntity.getName());
+        stateEntity.getStateImages().forEach(image ->
+                stateResponse.getStateImages().add(stateImageResponseMapper.map(image)));
+        stateResponse.setStateText(new HashSet<>(stateEntity.getStateText()));
+        stateEntity.getStateStrings().forEach(string ->
+                stateResponse.getStateStrings().add(stateStringResponseMapper.map(string)));
+        stateEntity.getStateRegions().forEach(region ->
+                stateResponse.getStateRegions().add(stateRegionResponseMapper.map(region)));
+        stateEntity.getStateLocations().forEach(location ->
+                stateResponse.getStateLocations().add(stateLocationResponseMapper.map(location)));
+        stateResponse.setBlocking(stateEntity.isBlocking());
+        stateResponse.setCanHide(new HashSet<>(stateEntity.getCanHide()));
+        stateResponse.setHidden(new HashSet<>(stateEntity.getHidden()));
+        stateResponse.setPathScore(stateEntity.getPathScore());
+        stateResponse.setLastAccessed(stateEntity.getLastAccessed());
+        stateResponse.setBaseProbabilityExists(stateEntity.getBaseProbabilityExists());
+        stateResponse.setProbabilityExists(stateEntity.getProbabilityExists());
+        stateResponse.setTimesVisited(stateEntity.getTimesVisited());
+        stateResponse.setScenes(sceneResponseMapper.mapToSceneResponseList(stateEntity.getScenes()));
+        stateResponse.setUsableArea(regionResponseMapper.map(stateEntity.getUsableArea()));
+        stateResponse.setMatchHistory(matchHistoryResponseMapper.map(stateEntity.getMatchHistory()));
+        return stateResponse;
+    }
+
+    public StateEntity requestToEntity(StateRequest request) {
+        if (request == null) return null;
+        StateEntity entity = new StateEntity();
+        entity.setName(request.getName());
+        // Assuming you have a ProjectRepository to fetch the ProjectEntity
+        if (request.getProjectRequest() != null) {
+            ProjectEntity projectEntity = projectRepository.findById(request.getProjectRequest().getId())
+                    .orElseThrow(() -> new RuntimeException("Project not found"));
+            entity.setProject(projectEntity);
+        }
+        if (request.getStateImages() != null) {
+            entity.setStateImages(request.getStateImages().stream()
+                    .map(stateImageResponseMapper::fromRequest)
+                    .collect(Collectors.toSet()));
+        }
+        if (request.getStateText() != null) {
+            entity.setStateText(new HashSet<>(request.getStateText()));
+        }
+        if (request.getStateStrings() != null) {
+            entity.setStateStrings(request.getStateStrings().stream()
+                    .map(stateStringResponseMapper::fromRequest)
+                    .collect(Collectors.toSet()));
+        }
+        if (request.getStateRegions() != null) {
+            entity.setStateRegions(request.getStateRegions().stream()
+                    .map(stateRegionResponseMapper::fromRequest)
+                    .collect(Collectors.toSet()));
+        }
+        if (request.getStateLocations() != null) {
+            entity.setStateLocations(request.getStateLocations().stream()
+                    .map(stateLocationResponseMapper::fromRequest)
+                    .collect(Collectors.toSet()));
+        }
+        entity.setBlocking(request.isBlocking());
+        if (request.getCanHide() != null) {
+            entity.setCanHide(new HashSet<>(request.getCanHide()));
+        }
+        if (request.getHidden() != null) {
+            entity.setHidden(new HashSet<>(request.getHidden()));
+        }
+        entity.setPathScore(request.getPathScore());
+        entity.setLastAccessed(request.getLastAccessed());
+        entity.setBaseProbabilityExists(request.getBaseProbabilityExists());
+        entity.setProbabilityExists(request.getProbabilityExists());
+        entity.setTimesVisited(request.getTimesVisited());
+        if (request.getScenes() != null) {
+            entity.setScenes(request.getScenes().stream()
+                    .map(sceneResponseMapper::fromRequest)
+                    .collect(Collectors.toList()));
+        }
+        if (request.getUsableArea() != null) {
+            entity.setUsableArea(regionResponseMapper.fromRequest(request.getUsableArea()));
+        }
+        if (request.getMatchHistory() != null) {
+            entity.setMatchHistory(matchHistoryResponseMapper.fromRequest(request.getMatchHistory()));
+        }
+        return entity;
+    }
+
+    public StateResponse mapWithoutProject(StateEntity stateEntity) {
         StateResponse stateResponse = new StateResponse();
         stateResponse.setId(stateEntity.getId());
         stateResponse.setName(stateEntity.getName());
@@ -61,63 +160,4 @@ public class StateResponseMapper {
         return stateResponse;
     }
 
-    public StateEntity map(StateResponse stateResponse) {
-        StateEntity stateEntity = new StateEntity();
-        stateEntity.setId(stateResponse.getId());
-        stateEntity.setName(stateResponse.getName());
-        stateResponse.getStateImages().forEach(image ->
-                stateEntity.getStateImages().add(stateImageResponseMapper.map(image)));
-        stateEntity.setStateText(new HashSet<>(stateResponse.getStateText()));
-        stateResponse.getStateStrings().forEach(string ->
-                stateEntity.getStateStrings().add(stateStringResponseMapper.map(string)));
-        stateResponse.getStateRegions().forEach(region ->
-                stateEntity.getStateRegions().add(stateRegionResponseMapper.map(region)));
-        stateResponse.getStateLocations().forEach(location ->
-                stateEntity.getStateLocations().add(stateLocationResponseMapper.map(location)));
-        stateEntity.setBlocking(stateResponse.isBlocking());
-        stateEntity.setCanHide(new HashSet<>(stateResponse.getCanHide()));
-        stateEntity.setHidden(new HashSet<>(stateResponse.getHidden()));
-        stateEntity.setPathScore(stateResponse.getPathScore());
-        stateEntity.setLastAccessed(stateResponse.getLastAccessed());
-        stateEntity.setBaseProbabilityExists(stateResponse.getBaseProbabilityExists());
-        stateEntity.setProbabilityExists(stateResponse.getProbabilityExists());
-        stateEntity.setTimesVisited(stateResponse.getTimesVisited());
-        stateEntity.setScenes(sceneResponseMapper.mapToSceneEntityList(stateResponse.getScenes()));
-        stateEntity.setUsableArea(regionResponseMapper.map(stateResponse.getUsableArea()));
-        stateEntity.setMatchHistory(matchHistoryResponseMapper.map(stateResponse.getMatchHistory()));
-        return stateEntity;
-    }
-
-    public StateEntity fromRequest(StateRequest request) {
-        if (request == null) return null;
-        StateEntity entity = new StateEntity();
-        entity.setName(request.getName());
-        entity.setStateImages(request.getStateImages().stream()
-                .map(stateImageResponseMapper::fromRequest)
-                .collect(Collectors.toSet()));
-        entity.setStateText(new HashSet<>(request.getStateText()));
-        entity.setStateStrings(request.getStateStrings().stream()
-                .map(stateStringResponseMapper::fromRequest)
-                .collect(Collectors.toSet()));
-        entity.setStateRegions(request.getStateRegions().stream()
-                .map(stateRegionResponseMapper::fromRequest)
-                .collect(Collectors.toSet()));
-        entity.setStateLocations(request.getStateLocations().stream()
-                .map(stateLocationResponseMapper::fromRequest)
-                .collect(Collectors.toSet()));
-        entity.setBlocking(request.isBlocking());
-        entity.setCanHide(new HashSet<>(request.getCanHide()));
-        entity.setHidden(new HashSet<>(request.getHidden()));
-        entity.setPathScore(request.getPathScore());
-        entity.setLastAccessed(request.getLastAccessed());
-        entity.setBaseProbabilityExists(request.getBaseProbabilityExists());
-        entity.setProbabilityExists(request.getProbabilityExists());
-        entity.setTimesVisited(request.getTimesVisited());
-        entity.setScenes(request.getScenes().stream()
-                .map(sceneResponseMapper::fromRequest)
-                .collect(Collectors.toList()));
-        entity.setUsableArea(regionResponseMapper.fromRequest(request.getUsableArea()));
-        entity.setMatchHistory(matchHistoryResponseMapper.fromRequest(request.getMatchHistory()));
-        return entity;
-    }
 }

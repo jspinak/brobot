@@ -1,45 +1,41 @@
-// buildscript block is optional if you don't need to apply any plugins or configure repositories
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-        // Add any build script dependencies here if needed
-    }
-}
+// build.gradle brobot project
 
 plugins {
     id 'org.springframework.boot' version '3.2.4' apply false
-    id("io.spring.dependency-management") version "1.1.4" // necessary for using the dependencyManagement tag
-    //id 'java'
+    id 'io.spring.dependency-management' version '1.1.4' apply false
+    id 'java'
 }
 
+group = 'io.github.jspinak'
+version = '0.0.1-SNAPSHOT' // Add a version if you haven't already
+
 allprojects {
-    // Apply plugins or configurations that should be applied to all sub-modules
-    // For example, to apply the Java plugin to all sub-modules:
-    apply plugin: 'java'
+    group = rootProject.group
+    version = rootProject.version
 
     repositories {
         mavenCentral()
     }
+}
 
-    // Add the BOM configuration here for centralized management
+subprojects {
+    apply plugin: 'java'
+    apply plugin: 'io.spring.dependency-management'
+
     dependencyManagement {
         imports {
             mavenBom "org.springframework.boot:spring-boot-dependencies:3.2.4"
         }
     }
-}
 
-subprojects {
-    // Add configurations or dependencies that should be applied to all sub-modules
-    // For example, to add a common dependency to all sub-modules:
     tasks.register("prepareKotlinBuildScriptModel"){}
 
+    java {
+        sourceCompatibility = JavaVersion.VERSION_21
+    }
+
     dependencies {
-        //implementation 'org.projectlombok:lombok'
-        //annotationProcessor 'org.projectlombok:lombok'
+        implementation 'org.projectlombok:lombok'
+        annotationProcessor 'org.projectlombok:lombok'
     }
 }
-
-
