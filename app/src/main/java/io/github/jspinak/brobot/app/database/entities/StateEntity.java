@@ -1,14 +1,13 @@
 package io.github.jspinak.brobot.app.database.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.github.jspinak.brobot.app.database.embeddable.RegionEmbeddable;
 import jakarta.persistence.*;
 import lombok.Data;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Entity
 @Data
@@ -18,7 +17,11 @@ public class StateEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long projectId = 0L;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "project", nullable = false)
+    @JsonIgnore // Avoids serialization of ProjectEntity in StateEntity
+    private ProjectEntity project = new ProjectEntity();
+
     private String name = "";
     @ElementCollection
     @CollectionTable(name = "state_stateText", joinColumns = @JoinColumn(name = "state_id", referencedColumnName = "id"))
@@ -75,6 +78,32 @@ public class StateEntity {
 
     // Constructor with ID (for mapping from library)
     public StateEntity(Long id) {
+        this();
         this.id = id;
+    }
+
+    @Transient
+    @JsonProperty("projectId")
+    public Long getProjectId() {
+        return project != null ? project.getId() : null;
+    }
+
+    // Remove the project from toString, equals, and hashCode methods
+    @Override
+    public String toString() {
+        return "StateEntity(id=" + id + ", name=" + name + ")";
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof StateEntity)) return false;
+        StateEntity that = (StateEntity) o;
+        return Objects.equals(getId(), that.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getId());
     }
 }

@@ -84,9 +84,4 @@ public class AllStatesInProjectService {
         allStatesInProject.delete(state);
     }
 
-    public List<State> getAllInProject(Long projectId) {
-        return getAllStates().stream()
-                .filter(state -> state.getProjectId().equals(projectId))
-                .collect(Collectors.toList());
-    }
 }

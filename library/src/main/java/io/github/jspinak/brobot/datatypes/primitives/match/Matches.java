@@ -336,4 +336,58 @@ public class Matches {
         return stringBuilder.toString();
     }
 
+    /*
+    The following methods deal with logging.
+     */
+
+    public String getSummary() {
+        StringBuilder summary = new StringBuilder();
+        summary.append("Action: ").append(actionOptions.getAction()).append("\n");
+        summary.append("Success: ").append(success).append("\n");
+        summary.append("Number of matches: ").append(matchList.size()).append("\n");
+        summary.append("Active states: ").append(String.join(", ", activeStates)).append("\n");
+        if (!text.isEmpty()) {
+            summary.append("Extracted text: ").append(text).append("\n");
+        }
+        // Add any other relevant information
+        return summary.toString();
+    }
+
+    public List<StateImageData> getStateImageData() {
+        return matchList.stream()
+                .map(StateImageData::fromMatch)
+                .collect(Collectors.toList());
+    }
+
+    public static class StateImageData {
+        public final String name;
+        public final String stateObjectName;
+        public final boolean found;
+        public final int x;
+        public final int y;
+        public final int expectedX;
+        public final int expectedY;
+
+        private StateImageData(String name, String stateObjectName, boolean found, int x, int y, int expectedX, int expectedY) {
+            this.name = name;
+            this.stateObjectName = stateObjectName;
+            this.found = found;
+            this.x = x;
+            this.y = y;
+            this.expectedX = expectedX;
+            this.expectedY = expectedY;
+        }
+
+        public static StateImageData fromMatch(Match match) {
+            return new StateImageData(
+                    match.getName(),
+                    match.getStateObjectData().getStateObjectName(),
+                    true,
+                    match.x(),
+                    match.y(),
+                    -1, // or calculate expected X if available
+                    -1  // or calculate expected Y if available
+            );
+        }
+    }
 }

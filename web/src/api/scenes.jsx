@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:8080/api/scenes';
+const API_URL = '${process.env.REACT_APP_BROBOT_API_URL}/api/scenes';
 
 export const fetchAllScenes = async () => {
     try {

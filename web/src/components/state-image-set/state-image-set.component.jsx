@@ -1,51 +1,44 @@
 import React from 'react';
+import { Box, Paper, Typography } from '@mui/material';
 import StateImage from './../state-image/state-image.component';
-import StateImageOptions from './../state-image/state-image-options.component';
 
 const StateImageSet = ({
-                           stateImages,
-                           transitions,
-                           onHover,
-                           onMouseLeave,
-                           onClick,
-                           selectedStateImage,
-                           allStates,
-                           onCreateTransition,
-                           onNameChange,
-                           onDelete,
-                           onMove,
-                           onStateImageUpdate
-                       }) => {
+    stateImages,
+    transitions,
+    onHover,
+    onMouseLeave,
+    onClick,
+    selectedStateImage,
+    allStates,
+    currentStateId
+}) => {
     return (
-        <>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             {stateImages.map((stateImage) => (
-                <div key={stateImage.id} className="state-image-wrapper">
-                    <div className="state-image-container">
+                <Paper key={stateImage.id} elevation={3} sx={{ p: 2 }}>
+                    <Box
+                        sx={{
+                            backgroundColor: '#e0e0e0',
+                            p: 1,
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            cursor: 'pointer'
+                        }}
+                        onMouseEnter={() => onHover(stateImage)}
+                        onMouseLeave={onMouseLeave}
+                        onClick={() => onClick(stateImage)}
+                    >
                         <StateImage
                             stateImage={stateImage}
                             transitions={transitions}
                             allStates={allStates}
-                            onHover={() => onHover(stateImage)}
-                            onMouseLeave={onMouseLeave}
-                            onClick={() => onClick(stateImage)}
                             isSelected={selectedStateImage && selectedStateImage.id === stateImage.id}
                         />
-                    </div>
-                    {selectedStateImage && selectedStateImage.id === stateImage.id && (
-                        <StateImageOptions
-                            stateImage={stateImage}
-                            allStates={allStates}
-                            transitions={transitions}
-                            onCreateTransition={onCreateTransition}
-                            onNameChange={onNameChange}
-                            onDelete={onDelete}
-                            onMove={onMove}
-                            onStateImageUpdate={onStateImageUpdate}
-                        />
-                    )}
-                </div>
+                    </Box>
+                </Paper>
             ))}
-        </>
+        </Box>
     );
 };
 

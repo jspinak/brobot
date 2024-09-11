@@ -1,12 +1,19 @@
+import React from 'react';
+import { Grid } from '@mui/material';
 import Pattern from '../pattern/pattern.component';
-import './pattern-list.styles.css';
 
-const PatternList = ({ patterns  = []}) => (
-    <div className='pattern-list'>
-        {patterns.map((pattern) => { 
-            return <Pattern key={pattern.id} pattern={pattern} />
-        })}
-    </div>
+const PatternList = ({ patterns = [], selectedPatterns, onPatternSelect }) => (
+  <Grid container spacing={2}>
+    {patterns.map((pattern) => (
+      <Grid item key={pattern.id} xs={12} sm={6} md={4} lg={3}>
+        <Pattern
+          pattern={pattern}
+          isSelected={selectedPatterns.includes(pattern.id)}
+          onSelect={() => onPatternSelect(pattern.id)}
+        />
+      </Grid>
+    ))}
+  </Grid>
 );
 
 export default PatternList;

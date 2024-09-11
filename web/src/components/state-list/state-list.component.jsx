@@ -1,7 +1,9 @@
 import State from '../../routes/state/state.component';
-import './state-list.styles.css';
 
 const StateList = ({ states }) => {
+      console.log('StateList component rendered');
+      console.log('States in StateList:', states);
+
   // Check if states is undefined or empty
   if (!states || states.length === 0) {
     return <div className='state-list'>No states found</div>;

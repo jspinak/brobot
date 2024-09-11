@@ -21,6 +21,7 @@ public class RegionEmbeddableMapper {
 
     public Region map(RegionEmbeddable regionEmbeddable) {
         Region region = new Region();
+        if (regionEmbeddable == null) return region;
         region.setX(regionEmbeddable.getX());
         region.setY(regionEmbeddable.getY());
         region.setW(regionEmbeddable.getW());

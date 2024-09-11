@@ -64,7 +64,7 @@ public class CaptureScreenshots {
     public synchronized void startCapturing(SaveToFile saveToFile, String baseFilename, int delayInMilliseconds) {
         CaptureScreenshot captureScreenshot = new CaptureScreenshot(saveToFile);
         SCHEDULER.scheduleAtFixedRate((() -> {
-            captureScreenshot.saveScreenshot(baseFilename);
+            captureScreenshot.saveScreenshotWithDate(baseFilename);
         }), 0, delayInMilliseconds, MILLISECONDS);
     }
 

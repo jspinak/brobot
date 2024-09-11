@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.app.web.restControllers;
 
+import io.github.jspinak.brobot.app.database.entities.StateImageEntity;
+import io.github.jspinak.brobot.app.exceptions.EntityNotFoundException;
 import io.github.jspinak.brobot.app.services.StateImageService;
 import io.github.jspinak.brobot.app.web.responseMappers.StateImageResponseMapper;
 import io.github.jspinak.brobot.app.web.responses.StateImageResponse;
@@ -55,8 +57,4 @@ public class StateImageController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
-
-    //public @ResponseBody void removeStateImage(StateImageResponse stateImageResponse) {
-    //    stateImageService.removeStateImage(stateImageResponse);
-    //}
 }

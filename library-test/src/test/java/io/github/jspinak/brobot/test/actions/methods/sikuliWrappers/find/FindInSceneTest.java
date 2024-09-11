@@ -5,6 +5,7 @@ import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAna
 import io.github.jspinak.brobot.actions.methods.sikuliWrappers.find.FindInScene;
 import io.github.jspinak.brobot.datatypes.primitives.image.Image;
 import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
+import io.github.jspinak.brobot.datatypes.primitives.image.Scene;
 import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.datatypes.primitives.location.Positions;
@@ -58,7 +59,7 @@ class FindInSceneTest {
                 .withScenes(new Pattern("../screenshots/FloraNext1"))
                 .withImages(topLeft, bottomRight)
                 .build();
-        List<Image> scenes = getScenes.getScenes(actionOptions, List.of(objectCollection));
+        List<Scene> scenes = getScenes.getScenes(actionOptions, List.of(objectCollection));
         List<Match> matches = findInScene.findAllInScene(topL, scenes.get(0));
         System.out.println(matches);
         assertFalse(matches.isEmpty());

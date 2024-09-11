@@ -14,6 +14,7 @@ import java.util.Set;
 public class StateRequest {
 
     private String name = "";
+    private ProjectRequest projectRequest;
     private Set<StateImageRequest> stateImages = new HashSet<>();
     private Set<String> stateText = new HashSet<>();
     private Set<StateStringRequest> stateStrings = new HashSet<>();

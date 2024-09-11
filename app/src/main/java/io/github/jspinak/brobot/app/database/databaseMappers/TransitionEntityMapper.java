@@ -23,8 +23,8 @@ public class TransitionEntityMapper {
         // Map the StaysVisible enum
         transition.setStaysVisibleAfterTransition(mapStaysVisibleToActionDefinition(transitionEntity.getStaysVisibleAfterTransition()));
 
-        transition.setActivate(transitionEntity.getActivate());
-        transition.setExit(transitionEntity.getExit());
+        transition.setActivate(transitionEntity.getStatesToEnter());
+        transition.setExit(transitionEntity.getStatesToExit());
         transition.setScore(transitionEntity.getScore());
         transition.setTimesSuccessful(transitionEntity.getTimesSuccessful());
 
@@ -52,8 +52,8 @@ public class TransitionEntityMapper {
         // Map the StaysVisible enum
         entity.setStaysVisibleAfterTransition(mapStaysVisibleToIState(actionDefinitionStateTransition.getStaysVisibleAfterTransition()));
 
-        entity.setActivate(actionDefinitionStateTransition.getActivate());
-        entity.setExit(actionDefinitionStateTransition.getExit());
+        entity.setStatesToEnter(actionDefinitionStateTransition.getActivate());
+        entity.setStatesToExit(actionDefinitionStateTransition.getExit());
         entity.setScore(actionDefinitionStateTransition.getScore());
         entity.setTimesSuccessful(actionDefinitionStateTransition.getTimesSuccessful());
 

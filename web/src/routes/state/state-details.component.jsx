@@ -1,12 +1,15 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { useParams } from 'react-router-dom';
+import { Box, Grid, Paper, Typography } from '@mui/material';
 import StateImageSet from './../../components/state-image-set/state-image-set.component';
 import Scene from './../../components/scene/scene.component';
 import StateDetailsButtons from "./state-details-buttons.component";
+import StateImageOptions from './../../components/state-image/state-image-options.component';
+import StateImage from './../../components/state-image/state-image.component';
 import './state-details.styles.css';
 
-const StateDetails = ({ allStates: initialAllStates, isLoading }) => {
+const StateDetails = ({ allStates: initialAllStates = [], isLoading }) => {
   const [state, setState] = useState(null);
   const [selectedStateImage, setSelectedStateImage] = useState(null);
   const [highlightedPatterns, setHighlightedPatterns] = useState([]);
@@ -19,10 +22,113 @@ const StateDetails = ({ allStates: initialAllStates, isLoading }) => {
   const [selectedTargetState, setSelectedTargetState] = useState('');
   const [stateName, setStateName] = useState('');
   const [allStates, setAllStates] = useState(initialAllStates);
+  const navigate = useNavigate();
+  const [selectedTransition, setSelectedTransition] = useState(null);
+
+    const containerStyle = {
+      height: '100%',
+      overflowY: 'scroll',
+      overflowX: 'hidden',
+      padding: '16px',
+      '&::-webkit-scrollbar': {
+        width: '8px',
+      },
+      '&::-webkit-scrollbar-track': {
+        background: '#f1f1f1',
+      },
+      '&::-webkit-scrollbar-thumb': {
+        background: '#888',
+        borderRadius: '4px',
+      },
+      '&::-webkit-scrollbar-thumb:hover': {
+        background: '#555',
+      },
+    };
+
+  const handleStateImageUpdate = useCallback((stateImageId, newStateId) => {
+    console.log('handleStateImageUpdate called with:', { stateImageId, newStateId });
+
+    setAllStates(prevAllStates => {
+      console.log('Previous allStates:', prevAllStates);
+
+      const sourceState = prevAllStates.find(s => s.id === parseInt(stateId));
+      const destState = prevAllStates.find(s => s.id === parseInt(newStateId));
+
+      if (!sourceState || !destState) {
+        console.error('Source or destination state not found');
+        return prevAllStates;
+      }
+
+      const imageToMove = sourceState.stateImages.find(img => img.id === stateImageId);
+
+      if (!imageToMove) {
+        console.error('Image to move not found');
+        return prevAllStates;
+      }
+
+      const updatedStates = prevAllStates.map(stateItem => {
+        if (stateItem.id === parseInt(stateId)) {
+          return {
+            ...stateItem,
+            stateImages: stateItem.stateImages.filter(img => img.id !== stateImageId)
+          };
+        }
+        if (stateItem.id === parseInt(newStateId)) {
+          return {
+            ...stateItem,
+            stateImages: [...stateItem.stateImages, imageToMove]
+          };
+        }
+        return stateItem;
+      });
+
+      console.log('Updated allStates:', updatedStates);
+      return updatedStates;
+    });
+
+    setState(prevState => {
+      if (prevState.id === parseInt(stateId)) {
+        console.log('Updating current state');
+        return {
+          ...prevState,
+          stateImages: prevState.stateImages.filter(img => img.id !== stateImageId)
+        };
+      }
+      if (prevState.id === parseInt(newStateId)) {
+        console.log('Updating new state');
+        const imageToMove = allStates.find(s => s.id === parseInt(stateId))?.stateImages.find(img => img.id === stateImageId);
+        return {
+          ...prevState,
+          stateImages: [...prevState.stateImages, imageToMove]
+        };
+      }
+      return prevState;
+    });
+  }, [stateId, allStates]);
+
+  const handleMoveStateImage = useCallback(async (stateImageId, newStateId) => {
+    console.log('handleMoveStateImage called with:', { stateImageId, newStateId });
+    try {
+      const response = await axios.put(`${process.env.REACT_APP_BROBOT_API_URL}/api/states/move-image`, {
+        stateImageId,
+        newStateId
+      });
+
+      if (response.status === 200) {
+        console.log('API call successful, response:', response.data);
+        handleStateImageUpdate(stateImageId, newStateId);
+        console.log('State image moved successfully');
+      } else {
+        console.error('Failed to move state image, status:', response.status);
+      }
+    } catch (error) {
+      console.error('Error moving state image:', error);
+    }
+  }, [handleStateImageUpdate]);
 
   const fetchTransitions = useCallback(async () => {
     try {
-      const response = await fetch('http://localhost:8080/api/transitions');
+      const response = await fetch('${process.env.REACT_APP_BROBOT_API_URL}/api/transitions');
       if (response.ok) {
         const data = await response.json();
         setTransitions(data);
@@ -35,7 +141,7 @@ const StateDetails = ({ allStates: initialAllStates, isLoading }) => {
   }, []);
 
   useEffect(() => {
-    if (!isLoading && allStates.length > 0) {
+    if (!isLoading && allStates && allStates.length > 0) {
       console.log('StateId from URL:', stateId);
       console.log('All States:', allStates);
 
@@ -96,9 +202,18 @@ const StateDetails = ({ allStates: initialAllStates, isLoading }) => {
     }));
   }, []);
 
+    const handleStateDeleted = (deletedStateId) => {
+      setAllStates(prevStates => prevStates.filter(state => state.id !== deletedStateId));
+      if (allStates && allStates.length > 1) {
+        navigate(`/states/${allStates[0].id}`);
+      } else {
+        navigate('/');
+      }
+    };
+
   const handleDeleteImages = useCallback(async () => {
     try {
-      const response = await fetch('http://localhost:8080/api/state-images/delete', {
+      const response = await fetch('${process.env.REACT_APP_BROBOT_API_URL}/api/state-images/delete', {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -133,15 +248,6 @@ const StateDetails = ({ allStates: initialAllStates, isLoading }) => {
     }));
   }, []);
 
-  const handleStateImageUpdate = useCallback((updatedStateImage) => {
-    setState(prevState => ({
-      ...prevState,
-      stateImages: prevState.stateImages.map(stateImage =>
-          stateImage.id === updatedStateImage.id ? updatedStateImage : stateImage
-      )
-    }));
-  }, []);
-
   const handleCreateTransition = useCallback(async (newTransition, updatedStateImage) => {
     // Update the state image
     if (updatedStateImage) {
@@ -159,7 +265,7 @@ const StateDetails = ({ allStates: initialAllStates, isLoading }) => {
 
   const handleDeleteStateImage = useCallback(async (stateImageId) => {
     try {
-      const response = await fetch(`http://localhost:8080/api/stateimages/${stateImageId}`, {
+      const response = await fetch(`${process.env.REACT_APP_BROBOT_API_URL}/api/stateimages/${stateImageId}`, {
         method: 'DELETE',
       });
 
@@ -174,31 +280,6 @@ const StateDetails = ({ allStates: initialAllStates, isLoading }) => {
       }
     } catch (error) {
       console.error('Error deleting state image:', error);
-    }
-  }, []);
-
-  const handleMoveStateImage = useCallback(async (stateImageId, newStateId) => {
-    try {
-      const response = await fetch(`http://localhost:8080/api/stateimages/${stateImageId}/move`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ newStateId }),
-      });
-
-      if (response.ok) {
-        const updatedStateImage = await response.json();
-        setState(prevState => ({
-          ...prevState,
-          stateImages: prevState.stateImages.filter(si => si.id !== stateImageId)
-        }));
-        setSelectedStateImage(null);
-      } else {
-        console.error('Failed to move state image');
-      }
-    } catch (error) {
-      console.error('Error moving state image:', error);
     }
   }, []);
 
@@ -225,7 +306,7 @@ const StateDetails = ({ allStates: initialAllStates, isLoading }) => {
 
   const handleStateNameSubmit = async () => {
     try {
-      const response = await axios.put(`http://localhost:8080/api/states/${state.id}/name`, { name: stateName });
+      const response = await axios.put(`${process.env.REACT_APP_BROBOT_API_URL}/api/states/${state.id}/name`, { name: stateName });
       if (response.status === 200) {
         console.log('State name updated successfully');
         // Update the local state
@@ -245,9 +326,46 @@ const StateDetails = ({ allStates: initialAllStates, isLoading }) => {
     }
   };
 
+  const handleTransitionSelect = (transition) => {
+    setSelectedTransition(transition);
+  };
+
+  const handleTransitionUpdate = async (updatedTransition) => {
+    try {
+      const response = await axios.put(`${process.env.REACT_APP_BROBOT_API_URL}/api/transitions/${updatedTransition.id}`, updatedTransition);
+      if (response.status === 200) {
+        setTransitions(prevTransitions =>
+          prevTransitions.map(t => t.id === updatedTransition.id ? updatedTransition : t)
+        );
+      }
+    } catch (error) {
+      console.error('Error updating transition:', error);
+    }
+  };
+
+  const handleTransitionDelete = async (transitionId) => {
+    try {
+      const response = await axios.delete(`${process.env.REACT_APP_BROBOT_API_URL}/api/transitions/${transitionId}`);
+      if (response.status === 204) {
+        setTransitions(prevTransitions => prevTransitions.filter(t => t.id !== transitionId));
+        setSelectedTransition(null);
+      }
+    } catch (error) {
+      console.error('Error deleting transition:', error);
+    }
+  };
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (!state) {
+    return <div>State not found</div>;
+  }
+
   return (
-      <div className="state-details">
-        <StateDetailsButtons
+    <Box className="state-details" sx={{ height: 'calc(100vh - 64px)', display: 'flex', flexDirection: 'column' }}>
+      <StateDetailsButtons
             isChecked={highlightAll}
             onCheckboxChange={handleCheckboxChange}
             states={allStates}
@@ -257,46 +375,73 @@ const StateDetails = ({ allStates: initialAllStates, isLoading }) => {
             onStateNameSubmit={handleStateNameSubmit}
             stateImageCount={state?.stateImages?.length || 0}
             transitionCount={transitions.filter(t => t.sourceStateId === state?.id).length}
-        />
-        <div className="state-content">
-          <div className="state-image-set">
-            <StateImageSet
-                stateImages={state?.stateImages || []}
-                transitions={transitions}
-                onHover={handleStateImageHover}
-                onMouseLeave={handleStateImageLeave}
-                onClick={handleStateImageClick}
-                selectedStateImage={selectedStateImage}
-                allStates={allStates}
-                onCreateTransition={handleCreateTransition}
-                onNameChange={handleStateImageNameChange}
-                onDelete={handleDeleteStateImage}
-                onMove={handleMoveStateImage}
-                onStateImageUpdate={handleStateImageUpdate}
-            />
-          </div>
-            <div className="state-scenes">
-              {state.scenes && state.scenes.map((scene, index) => {
-                if (!scene || typeof scene !== 'object') {
-                  console.error(`Invalid scene at index ${index}`, scene);
-                  return null;
-                }
-                return (
-                    <Scene
-                        key={scene.id} // Use `id` as the key
-                        sceneId={scene.id} // Pass `id` as the `sceneId` prop
+            onStateDeleted={handleStateDeleted}
+      />
+      <Grid container spacing={2} sx={{ flexGrow: 1, height: 'calc(100% - 50px)', overflow: 'hidden' }}>
+              <Grid item xs={3} sx={{ height: '100%' }}>
+                <Paper elevation={3} sx={{ height: '100%' }}>
+                  <Box sx={containerStyle}>
+                    <Typography variant="h6" gutterBottom>State Images</Typography>
+                    <StateImageSet
+                      stateImages={state?.stateImages || []}
+                      transitions={transitions}
+                      onHover={handleStateImageHover}
+                      onMouseLeave={handleStateImageLeave}
+                      onClick={handleStateImageClick}
+                      selectedStateImage={selectedStateImage}
+                      allStates={allStates}
+                      currentStateId={state?.id}
+                      onTransitionSelect={handleTransitionSelect}
+                    />
+                  </Box>
+                </Paper>
+              </Grid>
+              <Grid item xs={5} sx={{ height: '100%' }}>
+                <Paper elevation={3} sx={{ height: '100%' }}>
+                  <Box sx={containerStyle}>
+                    <Typography variant="h6" gutterBottom>Options</Typography>
+                    {selectedStateImage ? (
+                      <StateImageOptions
+                        stateImage={selectedStateImage}
+                        allStates={allStates}
+                        transitions={transitions}
+                        onCreateTransition={handleCreateTransition}
+                        onNameChange={handleStateImageNameChange}
+                        onDelete={handleDeleteStateImage}
+                        onMove={handleMoveStateImage}
+                        onStateImageUpdate={handleStateImageUpdate}
+                        currentStateId={state?.id}
+                        selectedTransition={selectedTransition}
+                        onTransitionUpdate={handleTransitionUpdate}
+                        onTransitionDelete={handleTransitionDelete}
+                      />
+                    ) : (
+                      <Typography>Select a state image to view options</Typography>
+                    )}
+                  </Box>
+                </Paper>
+              </Grid>
+              <Grid item xs={4} sx={{ height: '100%' }}>
+                <Paper elevation={3} sx={{ height: '100%' }}>
+                  <Box sx={containerStyle}>
+                    <Typography variant="h6" gutterBottom>Scenes</Typography>
+                    {state.scenes && state.scenes.map((scene, index) => (
+                      <Scene
+                        key={scene.id}
+                        sceneId={scene.id}
                         highlightAll={highlightAll}
                         state={state}
                         highlightedPatterns={highlightedPatterns}
                         handleImageLoad={handleImageLoad}
                         calculateScaledPosition={calculateScaledPosition}
-                    />
-                );
-              })}
-            </div>
-          </div>
-        </div>
+                      />
+                    ))}
+                  </Box>
+                </Paper>
+              </Grid>
+            </Grid>
+          </Box>
         );
-        };
+      };
 
-        export default StateDetails;
+      export default StateDetails;

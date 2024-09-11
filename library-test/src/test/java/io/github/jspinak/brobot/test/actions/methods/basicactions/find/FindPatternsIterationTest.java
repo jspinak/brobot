@@ -4,6 +4,7 @@ import io.github.jspinak.brobot.actions.actionExecution.MatchesInitializer;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.FindPatternsIteration;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.GetScenes;
 import io.github.jspinak.brobot.datatypes.primitives.image.Image;
+import io.github.jspinak.brobot.datatypes.primitives.image.Scene;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
@@ -42,7 +43,7 @@ class FindPatternsIterationTest {
     void find_() {
         TestData testData = new TestData();
 
-        List<Image> scenes = getScenes.getScenes(testData.getDefineInsideAnchors(), List.of(testData.getInsideAnchorObjects()));
+        List<Scene> scenes = getScenes.getScenes(testData.getDefineInsideAnchors(), List.of(testData.getInsideAnchorObjects()));
         List<StateImage> stateImages = new ArrayList<>();
         stateImages.add(testData.getTopLeft());
         stateImages.add(testData.getBottomRight());
