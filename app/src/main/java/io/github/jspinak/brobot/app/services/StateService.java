@@ -1,21 +1,16 @@
 package io.github.jspinak.brobot.app.services;
 
-import io.github.jspinak.brobot.app.database.DatabaseCheckService;
 import io.github.jspinak.brobot.app.database.databaseMappers.StateEntityMapper;
-import io.github.jspinak.brobot.app.database.entities.StateEntity;
-import io.github.jspinak.brobot.app.database.repositories.StateRepo;
+import io.github.jspinak.brobot.app.database.entities.*;
+import io.github.jspinak.brobot.app.database.repositories.*;
+import io.github.jspinak.brobot.app.exceptions.EntityNotFoundException;
 import io.github.jspinak.brobot.app.web.requests.StateRequest;
 import io.github.jspinak.brobot.app.web.responseMappers.StateResponseMapper;
-import io.github.jspinak.brobot.app.web.responses.StateResponse;
 import io.github.jspinak.brobot.datatypes.state.state.State;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -34,10 +29,20 @@ public class StateService {
 
     private final StateRepo stateRepo;
     private final StateEntityMapper stateEntityMapper;
+    private final StateImageService stateImageService;
+    private final ProjectService projectService;
+    private final ProjectRepository projectRepository;
+    private final StateResponseMapper stateResponseMapper;
 
-    public StateService(StateRepo stateRepo, StateEntityMapper stateEntityMapper) {
+    public StateService(StateRepo stateRepo, StateEntityMapper stateEntityMapper,
+                        StateImageService stateImageService, ProjectService projectService,
+                        ProjectRepository projectRepository, StateResponseMapper stateResponseMapper) {
         this.stateRepo = stateRepo;
         this.stateEntityMapper = stateEntityMapper;
+        this.stateImageService = stateImageService;
+        this.projectService = projectService;
+        this.projectRepository = projectRepository;
+        this.stateResponseMapper = stateResponseMapper;
     }
 
     @Transactional(readOnly = true)
@@ -127,20 +132,15 @@ public class StateService {
     }
 
     @Transactional
-    public boolean removeState(String stateName) {
-        Optional<StateEntity> stateDTO = stateRepo.findByName(stateName);
-        if (stateDTO.isEmpty()) {
-            System.out.println("State does not exist.");
-            return false;
-        }
-        stateRepo.delete(stateDTO.get());
-        return true;
-    }
+    public void deleteState(Long stateId) {
+        StateEntity state = stateRepo.findById(stateId)
+                .orElseThrow(() -> new EntityNotFoundException("State not found"));
 
-    @Transactional
-    public boolean removeState(State state) {
-        if (state == null) return false;
-        return removeState(state.getName());
+        // Delete associated StateImages
+        stateImageService.deleteStateImagesByStateId(stateId);
+
+        // Delete the state
+        stateRepo.delete(state);
     }
 
     @Transactional(readOnly = true)
@@ -150,4 +150,73 @@ public class StateService {
                 .map(stateEntityMapper::map)
                 .collect(Collectors.toList());
     }
+
+    @Transactional
+    public StateEntity createState(StateRequest stateRequest) {
+        ProjectEntity projectEntity = projectRepository.findById(stateRequest.getProjectRequest().getId())
+                .orElseThrow(() -> new RuntimeException("Project not found"));
+        StateEntity state = stateResponseMapper.requestToEntity(stateRequest);
+        state.setProject(projectEntity);
+        Set<StateImageEntity> stateImages = stateImageService.createStateImages(stateRequest.getStateImages());
+        state.setStateImages(stateImages);
+        StateEntity savedState = stateRepo.save(state);
+        projectEntity.addState(savedState);
+        projectRepository.save(projectEntity);
+        savedState.getStateImages().forEach(sI -> sI.setOwnerStateId(savedState.getId()));
+        return savedState;
+    }
+
+    @Transactional
+    public StateEntity moveStateImage(Long stateImageId, Long newStateId) {
+        logger.info("Moving state image with ID {} to state with ID {}", stateImageId, newStateId);
+
+        StateImageEntity stateImage = stateImageService.getStateImage(stateImageId);
+        if (stateImage == null) {
+            logger.error("StateImage with ID {} not found", stateImageId);
+            throw new EntityNotFoundException("StateImage not found");
+        }
+
+        Long oldStateId = stateImage.getOwnerStateId();
+        if (oldStateId == null || oldStateId == -1L) {
+            logger.error("Invalid ownerStateId for StateImage: {}", stateImageId);
+            throw new IllegalStateException("Invalid ownerStateId for StateImage");
+        }
+
+        StateEntity oldState = stateRepo.findById(oldStateId)
+                .orElseThrow(() -> {
+                    logger.error("Old State with ID {} not found", oldStateId);
+                    return new EntityNotFoundException("Old State not found");
+                });
+
+        StateEntity newState = stateRepo.findById(newStateId)
+                .orElseThrow(() -> {
+                    logger.error("New State with ID {} not found", newStateId);
+                    return new EntityNotFoundException("New State not found");
+                });
+
+        logger.info("Removing state image from old state (ID: {})", oldState.getId());
+        oldState.getStateImages().remove(stateImage);
+        stateRepo.save(oldState);
+
+        logger.info("Adding state image to new state (ID: {})", newState.getId());
+        stateImage.setOwnerStateId(newStateId);
+        stateImage.setOwnerStateName(newState.getName());
+        newState.getStateImages().add(stateImage);
+
+        logger.info("Saving updated new state");
+        StateEntity updatedState = stateRepo.save(newState);
+
+        logger.info("Updating state image");
+        stateImageService.updateStateImage(stateImage);
+
+        logger.info("State image successfully moved");
+        return updatedState;
+    }
+
+    public List<StateEntity> getStatesByProject(Long projectId) {
+        Long projId = projectId == null ? 0L : projectId;
+        ProjectEntity project = projectService.getProjectById(projId);
+        return new ArrayList<>(project.getStates());
+    }
+
 }

@@ -41,4 +41,8 @@ public class ExtendedStateImageDTO {
      */
     private Set<Long> involvedTransitionIds = new HashSet<>();
 
+    public ExtendedStateImageDTO(StateImage stateImage) {
+        this.stateImage = stateImage;
+    }
+
 }

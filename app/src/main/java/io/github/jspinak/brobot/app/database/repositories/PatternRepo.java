@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 @Transactional
@@ -15,5 +16,5 @@ public interface PatternRepo extends JpaRepository<PatternEntity, Long> {
     List<PatternEntity> findByName(String name);
     @Query("SELECT p FROM PatternEntity p WHERE LOWER(p.name) LIKE LOWER(CONCAT('%', :name, '%'))")
     List<PatternEntity> findByPatternDataNameContainingIgnoreCase(@Param("name") String name);
-
+    Optional<PatternEntity> findByImgpath(String imgpath);
 }

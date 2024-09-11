@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:8080/api/images';
+const API_URL = '${process.env.REACT_APP_BROBOT_API_URL}/api/images';
 
 export const fetchAllImages = async () => {
     try {

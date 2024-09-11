@@ -8,12 +8,14 @@ import org.junit.jupiter.api.Test;
 import org.sikuli.script.Match;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
 @SpringBootTest
+@ActiveProfiles("test")
 //@ComponentScan({"com.brobot.app", "io.github.jspinak.brobot"})
 //@ComponentScan("com.brobot.app.database.mappers")
 class GetWordsFromFileTest {

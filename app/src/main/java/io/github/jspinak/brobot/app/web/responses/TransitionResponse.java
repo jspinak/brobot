@@ -7,20 +7,17 @@ import lombok.Setter;
 
 import java.util.Set;
 
-@JsonInclude(JsonInclude.Include.NON_NULL) // Include non-null properties only
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @Getter
 @Setter
 public class TransitionResponse {
-
     private Long id;
     private Long sourceStateId;
-    private Long targetStateId;
     private Long stateImageId;
     private JavaStateTransition.StaysVisible staysVisibleAfterTransition;
-    private Set<Long> activate;
-    private Set<Long> exit;
+    private Set<Long> statesToEnter; // Renamed from 'activate'
+    private Set<Long> statesToExit; // Renamed from 'exit'
     private int score;
     private int timesSuccessful;
     private ActionDefinitionResponse actionDefinition;
-
 }

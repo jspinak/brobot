@@ -7,6 +7,7 @@ import io.github.jspinak.brobot.actions.methods.basicactions.find.matchManagemen
 import io.github.jspinak.brobot.actions.methods.basicactions.find.matchManagement.AdjustMatches;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.matchManagement.MatchFusion;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.matchManagement.OffsetOps;
+import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
@@ -92,7 +93,9 @@ public class Find implements ActionInterface {
         matchFusion.setFusedMatches(matches);
         matches.getMatchList().forEach(m -> adjustMatches.adjust(m, actionOptions));
         offsetOps.addOffsetAsLastMatch(matches, actionOptions);
-        matches.getMatchList().removeIf(match -> match.size() < actionOptions.getMinArea()); // size is checked after potential match merges and adjustments
+        List<Match> mutableMatchList = new ArrayList<>(matches.getMatchList());
+        mutableMatchList.removeIf(match -> match.size() < actionOptions.getMinArea()); // size is checked after potential match merges and adjustments
+        matches.setMatchList(mutableMatchList);
         setMatTextPattern.set(matches);
         matches.setSelectedText(textSelector.getString(TextSelector.Method.MOST_SIMILAR, matches.getText()));
     }

@@ -2,10 +2,8 @@ package io.github.jspinak.brobot.app.services;
 
 import io.github.jspinak.brobot.app.database.databaseMappers.StateImageEntityMapper;
 import io.github.jspinak.brobot.app.database.databaseMappers.StateTransitionsEntityMapper;
-import io.github.jspinak.brobot.app.database.entities.StateEntity;
-import io.github.jspinak.brobot.app.database.entities.StateImageEntity;
-import io.github.jspinak.brobot.app.database.entities.StateTransitionsEntity;
-import io.github.jspinak.brobot.app.database.entities.TransitionEntity;
+import io.github.jspinak.brobot.app.database.entities.*;
+import io.github.jspinak.brobot.app.database.repositories.ProjectRepository;
 import io.github.jspinak.brobot.app.database.repositories.StateTransitionsRepo;
 import io.github.jspinak.brobot.app.exceptions.StateTransitionsNotFoundException;
 import io.github.jspinak.brobot.app.web.requests.*;
@@ -35,6 +33,7 @@ public class StateTransitionsService {
     private final StateImageService stateImageService;
     private final StateImageResponseMapper stateImageResponseMapper;
     private final StateTransitionsEntityMapper stateTransitionsEntityMapper;
+    private final ProjectRepository projectRepository;
 
     public StateTransitionsService(StateTransitionsRepo stateTransitionsRepo,
                                    StateTransitionsResponseMapper stateTransitionsResponseMapper,
@@ -44,7 +43,8 @@ public class StateTransitionsService {
                                    StateImageEntityMapper stateImageEntityMapper,
                                    StateImageService stateImageService,
                                    StateImageResponseMapper stateImageResponseMapper,
-                                   StateTransitionsEntityMapper stateTransitionsEntityMapper) {
+                                   StateTransitionsEntityMapper stateTransitionsEntityMapper,
+                                   ProjectRepository projectRepository) {
         this.stateTransitionsRepo = stateTransitionsRepo;
         this.stateTransitionsResponseMapper = stateTransitionsResponseMapper;
         this.transitionService = transitionService;
@@ -54,6 +54,7 @@ public class StateTransitionsService {
         this.stateImageService = stateImageService;
         this.stateImageResponseMapper = stateImageResponseMapper;
         this.stateTransitionsEntityMapper = stateTransitionsEntityMapper;
+        this.projectRepository = projectRepository;
     }
 
     public List<StateTransitions> getAllStateTransitions() {
@@ -139,11 +140,10 @@ public class StateTransitionsService {
     private TransitionCreateRequest convertToCreateRequest(TransitionUpdateRequest updateRequest) {
         TransitionCreateRequest createRequest = new TransitionCreateRequest();
         createRequest.setSourceStateId(updateRequest.getSourceStateId());
-        createRequest.setTargetStateId(updateRequest.getTargetStateId());
         createRequest.setStateImageId(updateRequest.getStateImageId());
         createRequest.setStaysVisibleAfterTransition(updateRequest.getStaysVisibleAfterTransition());
-        createRequest.setActivate(updateRequest.getActivateStateIds());
-        createRequest.setExit(updateRequest.getExitStateIds());
+        createRequest.setStatesToEnter(updateRequest.getStatesToEnter());
+        createRequest.setStatesToExit(updateRequest.getStatesToExit());
         createRequest.setScore(updateRequest.getScore() != null ? updateRequest.getScore() : 0);
         createRequest.setTimesSuccessful(updateRequest.getTimesSuccessful() != null ? updateRequest.getTimesSuccessful() : 0);
         createRequest.setActionDefinition(updateRequest.getActionDefinition());
@@ -197,7 +197,6 @@ public class StateTransitionsService {
     private TransitionCreateRequest createFinishTransitionRequest(Long stateId) {
         TransitionCreateRequest request = new TransitionCreateRequest();
         request.setSourceStateId(stateId);
-        request.setTargetStateId(stateId);
 
         // Get all StateImageEntity objects for the state
         List<StateImageEntity> stateImageEntities = stateImageService.getAllStateImageEntities();
@@ -230,5 +229,14 @@ public class StateTransitionsService {
         stateEntity.getStateImages().forEach(stateImage ->
                 stateImages.add(stateImageEntityMapper.map(stateImage)));
         return stateImages;
+    }
+
+    public List<StateTransitionsEntity> getAllStateTransitionsForProject(Long projectId) {
+        ProjectEntity project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new RuntimeException("Project not found with id: " + projectId));
+
+        return stateTransitionsRepo.findByStateIdIn(
+                project.getStates().stream().map(StateEntity::getId).collect(Collectors.toList())
+        );
     }
 }
