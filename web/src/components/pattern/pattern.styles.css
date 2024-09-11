@@ -2,18 +2,32 @@
     display: flex;
     flex-direction: column;
     background-color: lightblue;
-    border: 1px solid grey;
+    border: 3px solid transparent;
     border-radius: 5px;
     padding: 2px;
     cursor: pointer;
     -moz-osx-font-smoothing: grayscale;
     backface-visibility: hidden;
     transform: translateZ(0);
-    transition: transform 0.25s ease-out;
+    transition: transform 0.25s ease-out, border-color 0.25s ease-out, box-shadow 0.25s ease-out;
+}
+
+.pattern.selected {
+    border-color: green;
+    box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
 }
 
 .pattern h1 {
-    margin-top: -8px; /* Adjust the vertical spacing between h1 elements */
-    font-size: 10px; /* Adjust the font size of h1 elements */
-    font-weight: normal; /* Optionally, adjust the font weight of h1 elements */
+    margin-top: -8px;
+    font-size: 10px;
+    font-weight: normal;
+}
+
+.pattern:hover {
+    transform: scale(1.05);
+}
+
+.pattern.selected:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 15px rgba(0, 255, 0, 0.7);
 }

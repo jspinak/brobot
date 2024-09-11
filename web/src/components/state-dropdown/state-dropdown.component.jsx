@@ -1,6 +1,5 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import './state-dropdown.styles.css';
 
 const StateDropdown = ({ states, currentStateId }) => {
     const navigate = useNavigate();

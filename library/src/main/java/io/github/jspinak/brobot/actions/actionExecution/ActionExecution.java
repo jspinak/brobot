@@ -7,19 +7,21 @@ import io.github.jspinak.brobot.actions.actionExecution.manageTrainingData.Datas
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.matchManagement.SelectRegions;
 import io.github.jspinak.brobot.actions.methods.time.Time;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.illustratedHistory.IllustrateScreenshot;
-import io.github.jspinak.brobot.reports.Output;
+import io.github.jspinak.brobot.imageUtils.CaptureScreenshot;
+import io.github.jspinak.brobot.log.entities.LogEntry;
+import io.github.jspinak.brobot.logging.ActionLogger;
+import io.github.jspinak.brobot.logging.AutomationSession;
+import io.github.jspinak.brobot.logging.LogUpdateSender;
 import io.github.jspinak.brobot.reports.Report;
-import io.github.jspinak.brobot.testingAUTs.ActionLog;
-import io.github.jspinak.brobot.testingAUTs.ActionLogCreator;
-import io.github.jspinak.brobot.testingAUTs.LogListener;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -40,24 +42,29 @@ public class ActionExecution {
     private final SelectRegions selectRegions;
     private final ActionLifecycleManagement actionLifecycleManagement;
     private final DatasetManager datasetManager;
-    private final ActionLogCreator actionLogCreator;
     private final Success success;
     private final MatchesInitializer matchesInitializer;
-    private final LogListener logListener;
+    private final ActionLogger actionLogger;
+    private final CaptureScreenshot captureScreenshot;
+    private final AutomationSession automationSession;
+    private final LogUpdateSender logUpdateSender;
 
     public ActionExecution(Time time, IllustrateScreenshot illustrateScreenshot, SelectRegions selectRegions,
                            ActionLifecycleManagement actionLifecycleManagement, DatasetManager datasetManager,
-                           ActionLogCreator actionLogCreator, Success success,
-                           MatchesInitializer matchesInitializer, LogListener logListener) {
+                           Success success, MatchesInitializer matchesInitializer, ActionLogger actionLogger,
+                           CaptureScreenshot captureScreenshot, AutomationSession automationSession,
+                           LogUpdateSender logUpdateSender) {
         this.time = time;
         this.illustrateScreenshot = illustrateScreenshot;
         this.selectRegions = selectRegions;
         this.actionLifecycleManagement = actionLifecycleManagement;
         this.datasetManager = datasetManager;
-        this.actionLogCreator = actionLogCreator;
         this.success = success;
         this.matchesInitializer = matchesInitializer;
-        this.logListener = logListener;
+        this.actionLogger = actionLogger;
+        this.captureScreenshot = captureScreenshot;
+        this.automationSession = automationSession;
+        this.logUpdateSender = logUpdateSender;
     }
 
     /**
@@ -70,6 +77,7 @@ public class ActionExecution {
      */
     public Matches perform(ActionInterface actionMethod, String actionDescription, ActionOptions actionOptions,
                            ObjectCollection... objectCollections) {
+        String sessionId = automationSession.getCurrentSessionId();
         printAction(actionOptions, objectCollections);
         Matches matches = matchesInitializer.init(actionOptions, actionDescription, objectCollections);
         time.wait(actionOptions.getPauseBeforeBegin());
@@ -84,20 +92,15 @@ public class ActionExecution {
         time.wait(actionOptions.getPauseAfterEnd());
         Duration duration = actionLifecycleManagement.getCurrentDuration(matches);
         matches.setDuration(duration); //time.getDuration(actionOptions.getAction()));
-        sendActionLog(matches, actionOptions, objectCollections);
         if (BrobotSettings.buildDataset) datasetManager.addSetOfData(matches); // for the neural net training dataset
-        //log.info("Logged ActionLogInfo: {}", actionLog.toJson());
         Report.println(actionOptions.getAction() + " " + matches.getOutputText() + " " + matches.getSuccessSymbol());
+        LogEntry logEntry = actionLogger.logAction(sessionId, matches); // log the action after it's finished
+        if (!matches.isSuccess()) {
+            String screenshotPath = captureScreenshot.captureScreenshot("action_failed_" + sessionId);
+            actionLogger.logError(sessionId, "Action failed: " + actionOptions.getAction(), screenshotPath);
+        }
+        logUpdateSender.sendLogUpdate(Collections.singletonList(logEntry));
         return matches;
-    }
-
-    private void sendActionLog(Matches matches, ActionOptions actionOptions, ObjectCollection... objectCollections) {
-        if (!BrobotSettings.sendLogsToElasticContainer) return;
-        ActionLog actionLog = actionLogCreator.create(
-                //time.getStartTime(actionOptions.getAction()),
-                //time.getEndTime(actionOptions.getAction()),
-                matches, actionOptions, objectCollections);
-        logListener.logEvent(actionLog);
     }
 
     private void printAction(ActionOptions actionOptions, ObjectCollection... objectCollections) {

@@ -16,6 +16,8 @@ import java.util.Set;
 public class StateResponse {
 
     private Long id;
+    private Long projectId;
+    private String projectName;
     private String name = "";
     private Set<StateImageResponse> stateImages = new HashSet<>();
     private Set<String> stateText = new HashSet<>();
