@@ -5,5 +5,7 @@ import io.github.jspinak.brobot.log.entities.LogEntry;
 import java.util.List;
 
 public interface LogUpdateSender {
-    void sendLogUpdate(List<LogEntry> logEntries);
+    default void sendLogUpdate(List<LogEntry> logEntries) {
+        // No-op implementation
+    }
 }
