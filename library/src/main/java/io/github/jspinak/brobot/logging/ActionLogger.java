@@ -11,11 +11,38 @@ import java.io.IOException;
  * Interface for creating different types of logs.
  */
 public interface ActionLogger {
-    LogEntry logAction(String sessionId, Matches results, ObjectCollection objectCollection);
-    LogEntry logObservation(String sessionId, String observationType, String description, String severity);
-    LogEntry logStateTransition(String sessionId, String fromState, String toState, boolean success, long transitionTime);
-    LogEntry logPerformanceMetrics(String sessionId, long actionDuration, long pageLoadTime, long totalTestDuration);
-    LogEntry logError(String sessionId, String errorMessage, String screenshotPath);
-    LogEntry startVideoRecording(String sessionId) throws IOException, AWTException;
-    LogEntry stopVideoRecording(String sessionId) throws IOException;
+    default LogEntry logAction(String sessionId, Matches results, ObjectCollection objectCollection) {
+        // No-op implementation
+        return null;
+    }
+
+    default LogEntry logObservation(String sessionId, String observationType, String description, String severity) {
+        // No-op implementation
+        return null;
+    }
+
+    default LogEntry logStateTransition(String sessionId, String fromState, String toState, boolean success, long transitionTime) {
+        // No-op implementation
+        return null;
+    }
+
+    default LogEntry logPerformanceMetrics(String sessionId, long actionDuration, long pageLoadTime, long totalTestDuration) {
+        // No-op implementation
+        return null;
+    }
+
+    default LogEntry logError(String sessionId, String errorMessage, String screenshotPath) {
+        // No-op implementation
+        return null;
+    }
+
+    default LogEntry startVideoRecording(String sessionId) throws IOException, AWTException {
+        // No-op implementation
+        return null;
+    }
+
+    default LogEntry stopVideoRecording(String sessionId) throws IOException {
+        // No-op implementation
+        return null;
+    }
 }
