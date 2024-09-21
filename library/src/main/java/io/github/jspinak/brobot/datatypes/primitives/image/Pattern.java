@@ -236,11 +236,33 @@ public class Pattern {
      * @return the SikuliX Pattern object.
      */
     public org.sikuli.script.Pattern sikuli() {
+        if (image == null) {
+            System.out.println("Image is null for pattern: " + name);
+            return new org.sikuli.script.Pattern();
+        }
         return new org.sikuli.script.Pattern(image.sikuli());
     }
 
     public BufferedImage getBImage() {
         return image.getBufferedImage();
+    }
+
+    @Override
+    public String toString() {
+        return "Pattern{" +
+                "name='" + name + '\'' +
+                ", imgpath='" + imgpath + '\'' +
+                ", fixed=" + fixed +
+                ", dynamic=" + dynamic +
+                ", index=" + index +
+                ", image=" + (image != null ? image.toString() : "null") +
+                ", searchRegions=" + searchRegions +
+                ", targetPosition=" + targetPosition +
+                ", targetOffset=" + targetOffset +
+                ", anchors=" + anchors +
+                ", w=" + w() +
+                ", h=" + h() +
+                '}';
     }
 
     public static class Builder {

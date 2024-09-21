@@ -34,6 +34,12 @@ public class AllStatesInProjectService {
         return allStatesInProject.getAllStates();
     }
 
+    public List<Long> getAllStateIds() {
+        return allStatesInProject.getAllStates().stream()
+                .map(State::getId)
+                .collect(Collectors.toList());
+    }
+
     public Set<String> getAllStateNames() {
         return getAllStates().stream()
                 .map(State::getName)

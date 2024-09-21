@@ -101,4 +101,13 @@ public class Image {
         return image;
     }
 
+    @Override
+    public String toString() {
+        return "Image{" +
+                "name='" + name + '\'' +
+                ", width=" + (bufferedImage != null ? bufferedImage.getWidth() : "N/A") +
+                ", height=" + (bufferedImage != null ? bufferedImage.getHeight() : "N/A") +
+                '}';
+    }
+
 }

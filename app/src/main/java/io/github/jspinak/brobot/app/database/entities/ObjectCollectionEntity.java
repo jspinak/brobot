@@ -17,32 +17,38 @@ import java.util.List;
 @Data
 public class ObjectCollectionEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @OneToMany(cascade = CascadeType.ALL)
+
+    @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(name = "objColl_stateLocations",
             joinColumns = @JoinColumn(name = "objColl_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "stateLocation_id", referencedColumnName = "id"))
     private List<StateLocationEntity> stateLocations = new ArrayList<>();
-    @OneToMany(cascade = CascadeType.ALL)
+
+    @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(name = "objColl_stateImages",
             joinColumns = @JoinColumn(name = "objColl_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "stateImage_id", referencedColumnName = "id"))
     private List<StateImageEntity> stateImages = new ArrayList<>();
-    @OneToMany(cascade = CascadeType.ALL)
+
+    @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(name = "objColl_stateRegions",
             joinColumns = @JoinColumn(name = "objColl_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "stateRegion_id", referencedColumnName = "id"))
     private List<StateRegionEntity> stateRegions = new ArrayList<>();
-    @OneToMany(cascade = CascadeType.ALL)
+
+    @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(name = "objColl_stateStrings",
             joinColumns = @JoinColumn(name = "objColl_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "stateString_id", referencedColumnName = "id"))
     private List<StateStringEntity> stateStrings = new ArrayList<>();
+
     @ElementCollection
     @CollectionTable(name = "matches", joinColumns = @JoinColumn(name = "objColl_id"))
     private List<MatchesEntity> matches = new ArrayList<>();
-    @OneToMany(cascade = CascadeType.ALL)
+
+    @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(name = "objColl_scenes",
             joinColumns = @JoinColumn(name = "objColl_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "scene_id", referencedColumnName = "id"))

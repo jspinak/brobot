@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { Box, CircularProgress, Typography } from '@mui/material';
 import Image from './../image/image.component';
 import Highlight from './../highlight/highlight.component';
+import api from './../../services/api'
 
 const sceneCache = new Map();
 
@@ -22,7 +23,7 @@ const Scene = ({ sceneId, highlightAll, state, highlightedPatterns, handleImageL
 
         setIsLoading(true);
         try {
-            const response = await fetch(`${process.env.REACT_APP_BROBOT_API_URL}/api/scenes/${sceneId}`);
+            const response = await api.post(`/api/scenes/${sceneId}`);
             if (!response.ok) {
                 throw new Error(`Error fetching scene:${sceneId}`);
             }

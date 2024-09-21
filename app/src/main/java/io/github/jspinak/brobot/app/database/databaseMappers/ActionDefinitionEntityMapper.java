@@ -15,20 +15,15 @@ public class ActionDefinitionEntityMapper {
         this.actionStepEntityMapper = actionStepEntityMapper;
     }
 
-    public ActionDefinition map(ActionDefinitionEntity entity) {
+    public ActionDefinition mapWithoutImages(ActionDefinitionEntity entity) {
         if (entity == null) return null;
 
         ActionDefinition actionDefinition = new ActionDefinition();
-        entity.getSteps().forEach(stepEntity ->
-                actionDefinition.addStep(
-                        actionStepEntityMapper.mapOptions(stepEntity.getActionOptions()),
-                        actionStepEntityMapper.mapObjectCollection(stepEntity.getObjectCollection())
-                )
-        );
+        actionDefinition.setSteps(actionStepEntityMapper.mapFromEntityListToActionStepListWithoutImages(entity.getSteps()));
         return actionDefinition;
     }
 
-    public ActionDefinitionEntity map(ActionDefinition actionDefinition) {
+    public ActionDefinitionEntity mapWithoutImages(ActionDefinition actionDefinition) {
         if (actionDefinition == null) return null;
 
         ActionDefinitionEntity entity = new ActionDefinitionEntity();

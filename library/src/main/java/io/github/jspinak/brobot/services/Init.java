@@ -21,18 +21,21 @@ public class Init {
     private final SetKMeansProfiles setKMeansProfiles;
     private final StateManagementService stateManagementService;
     private final StateTransitionsInProjectService stateTransitionsInProjectService;
+    private final StateTransitionsRepository stateTransitionsRepository;
 
     private int lastImageIndex = 1; // 0 should correspond to "no class" since matrices are typically initialized with 0s
 
     public Init(AllStatesInProjectService allStatesInProjectService, SetAllProfiles setAllProfiles,
                 SetKMeansProfiles setKMeansProfiles,
                 StateManagementService stateManagementService,
-                StateTransitionsInProjectService stateTransitionsInProjectService) {
+                StateTransitionsInProjectService stateTransitionsInProjectService,
+                StateTransitionsRepository stateTransitionsRepository) {
         this.allStatesInProjectService = allStatesInProjectService;
         this.setAllProfiles = setAllProfiles;
         this.setKMeansProfiles = setKMeansProfiles;
         this.stateManagementService = stateManagementService;
         this.stateTransitionsInProjectService = stateTransitionsInProjectService;
+        this.stateTransitionsRepository = stateTransitionsRepository;
     }
 
     /**
@@ -85,5 +88,10 @@ public class Init {
     public void populateStateIds() {
         populateTransitionsWithStateIds();
         populateCanHideWithStateIds();
+    }
+
+    public void init() {
+        populateStateIds();
+        stateTransitionsRepository.populateRepoWithPreliminaryStateTransitions();
     }
 }

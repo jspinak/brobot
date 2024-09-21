@@ -6,6 +6,7 @@ import io.github.jspinak.brobot.app.database.databaseMappers.StateEntityMapper;
 import io.github.jspinak.brobot.app.database.entities.ProjectEntity;
 import io.github.jspinak.brobot.app.database.repositories.StateRepo;
 import io.github.jspinak.brobot.app.models.BuildModel;
+import io.github.jspinak.brobot.app.models.Model;
 import io.github.jspinak.brobot.app.web.requests.ProjectRequest;
 import io.github.jspinak.brobot.datatypes.primitives.location.Location;
 import io.github.jspinak.brobot.datatypes.state.state.State;
@@ -44,7 +45,7 @@ public class AutomationService {
     }
 
     public String integrateModelIntoFramework(ProjectRequest projectRequest) {
-        buildModel.build(projectRequest.getId(), projectRequest.getName());
+        buildModel.build(projectRequest.getId());
         return "Model built and integrating into the Brobot framework.";
     }
 

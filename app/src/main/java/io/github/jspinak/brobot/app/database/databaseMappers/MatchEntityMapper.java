@@ -35,15 +35,15 @@ public class MatchEntityMapper {
         matchEntity.setScore(match.getScore());
         matchEntity.setTarget(locationEntityMapper.map(match.getTarget()));
         if (match.getImage() != null) matchEntity.setImage(imageEntityMapper.map(match.getImage()));
-        matchEntity.setText(match.getText());
-        matchEntity.setName(match.getName());
+        if (match.getText() != null) matchEntity.setText(match.getText());
+        if (match.getName() != null) matchEntity.setName(match.getName());
         matchEntity.setRegion(regionEmbeddableMapper.map(match.getRegion()));
         if (match.getSearchImage() != null) matchEntity.setSearchImage(imageEntityMapper.map(match.getSearchImage()));
         if (match.getAnchors() != null) matchEntity.setAnchors(anchorsEntityMapper.map(match.getAnchors()));
-        matchEntity.setStateObjectData(stateObjectDataEmbeddableMapper.map(match.getStateObjectData()));
-        matchEntity.setHistogram(match.getHistogram());
-        matchEntity.setSceneId(match.getScene().getId());
-        matchEntity.setTimeStamp(match.getTimeStamp());
+        if (match.getStateObjectData() != null) matchEntity.setStateObjectData(stateObjectDataEmbeddableMapper.map(match.getStateObjectData()));
+        if (match.getHistogram() != null) matchEntity.setHistogram(match.getHistogram());
+        if (match.getScene() != null) matchEntity.setSceneId(match.getScene().getId());
+        if (match.getTimeStamp() != null) matchEntity.setTimeStamp(match.getTimeStamp());
         matchEntity.setTimesActedOn(match.getTimesActedOn());
         return matchEntity;
     }
@@ -58,10 +58,10 @@ public class MatchEntityMapper {
         match.setRegion(regionEmbeddableMapper.map(matchEntity.getRegion()));
         if (matchEntity.getSearchImage() != null) match.setSearchImage(imageEntityMapper.map(matchEntity.getSearchImage()));
         if (matchEntity.getAnchors() != null) match.setAnchors(anchorsEntityMapper.map(matchEntity.getAnchors()));
-        match.setStateObjectData(stateObjectDataEmbeddableMapper.map(matchEntity.getStateObjectData()));
-        match.setHistogram(matchEntity.getHistogram());
-        //match.setSceneId()
-        match.setTimeStamp(matchEntity.getTimeStamp());
+        if (matchEntity.getStateObjectData() != null) match.setStateObjectData(stateObjectDataEmbeddableMapper.map(matchEntity.getStateObjectData()));
+        if (matchEntity.getHistogram() != null) match.setHistogram(matchEntity.getHistogram());
+        //if (matchEntity.getSceneId() != null)
+        if (matchEntity.getTimeStamp() != null) match.setTimeStamp(matchEntity.getTimeStamp());
         match.setTimesActedOn(matchEntity.getTimesActedOn());
         return match;
     }

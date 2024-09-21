@@ -7,15 +7,19 @@ import io.github.jspinak.brobot.app.exceptions.EntityNotFoundException;
 import io.github.jspinak.brobot.app.web.requests.ImageRequest;
 import io.github.jspinak.brobot.app.web.responseMappers.ImageResponseMapper;
 import io.github.jspinak.brobot.datatypes.primitives.image.Image;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.Base64;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
 public class ImageService {
+    private static final Logger log = LoggerFactory.getLogger(ImageService.class);
 
     private final ImageRepo imageRepo;
     private final ImageEntityMapper imageEntityMapper;
@@ -26,6 +30,15 @@ public class ImageService {
         this.imageRepo = imageRepo;
         this.imageEntityMapper = imageEntityMapper;
         this.imageResponseMapper = imageResponseMapper;
+    }
+
+    public Optional<ImageEntity> getImageEntity(Long id) {
+        return imageRepo.findById(id);
+    }
+
+    public Optional<Image> getImage(Long id) {
+        Optional<ImageEntity> imageEntity = getImageEntity(id);
+        return imageEntity.map(imageEntityMapper::map);
     }
 
     @Transactional(readOnly = true)
@@ -72,8 +85,16 @@ public class ImageService {
 
     @Transactional
     public ImageEntity saveImage(Image image) {
-        ImageEntity imageEntity = imageEntityMapper.map(image);
-        return imageRepo.save(imageEntity);
+        try {
+            log.debug("Saving image: name={}, bufferedImage={}", image.getName(), image.getBufferedImage());
+            ImageEntity imageEntity = imageEntityMapper.map(image);
+            log.debug("Mapped to entity: name={}, imageData.length={}", imageEntity.getName(),
+                    imageEntity.getImageData() != null ? imageEntity.getImageData().length : "null");
+            return imageRepo.save(imageEntity);
+        } catch (Exception e) {
+            log.error("Failed to save image: " + image.getName(), e);
+            throw e;
+        }
     }
 
     @Transactional
@@ -89,10 +110,6 @@ public class ImageService {
 
     private void updateImageFromRequest(ImageEntity image, ImageRequest request) {
         image.setName(request.getName());
-        if (request.getImageBase64() != null && !request.getImageBase64().isEmpty()) {
-            image.setBytes(Base64.getDecoder().decode(request.getImageBase64()));
-        }
-        // Set other fields as necessary...
     }
 
     @Transactional

@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import axios from 'axios';
 import NavigationBar from './routes/navigation/navigation.component';
 import Home from './routes/home/home.component';
-import StateDetails from './routes/state/state-details.component';
+import StateDetailsContainer from './routes/state/StateDetailsContainer';
 import CreateState from './routes/create-state/create-state.component';
 import AllStates from './routes/view-states/all-states.component';
+import TransitionGraph from './routes/transition-graph/TransitionGraph';
 import { ProjectContext } from './components/ProjectContext';
+import api from './services/api'
 
 function App() {
   const [states, setStates] = useState([]);
@@ -26,7 +27,7 @@ function App() {
       setIsLoading(true);
       try {
         console.log(`App: Fetching states for project ${selectedProject.id}`);
-        const response = await axios.get(`http://localhost:8080/api/states/project/${selectedProject.id}`);
+        const response = await api.get(`/api/states/project/${selectedProject.id}`);
         console.log('App: Fetched states:', response.data);
         setStates(response.data);
       } catch (error) {
@@ -47,8 +48,18 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/states/*" element={<AllStates states={states} isLoading={isLoading} />} />
-        <Route path="/states/:stateId" element={<StateDetails allStates={states} isLoading={isLoading} />} />
+        <Route path="/states/:stateId" element={<StateDetailsContainer allStates={states} isLoading={isLoading} />} />
         <Route path="/create-state" element={<CreateState />} />
+        <Route
+          path="/transition-graph"
+          element={
+            <TransitionGraph
+              states={states}
+              isLoading={isLoading}
+              selectedProject={selectedProject}
+            />
+          }
+        />
       </Routes>
     </>
   );

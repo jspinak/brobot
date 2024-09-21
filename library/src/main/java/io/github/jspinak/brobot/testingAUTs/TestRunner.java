@@ -103,7 +103,7 @@ public class TestRunner {
     // Helper method to log individual actions
     private void logAction(String sessionId, ActionOptions actionOptions, ObjectCollection... objectCollections) {
         Matches results = performAction(actionOptions, objectCollections);
-        actionLogger.logAction(sessionId, results);
+        actionLogger.logAction(sessionId, results, objectCollections[0]);
         if (!results.isSuccess()) {
             String screenshotPath = captureScreenshot.captureScreenshot("action_failed_" + sessionId);
             actionLogger.logError(sessionId, "Action failed: " + actionOptions.getAction(), screenshotPath);

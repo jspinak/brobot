@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import api from './../../services/api'
 
 function VisitAllStates() {
     const [isRunning, setIsRunning] = useState(false);
@@ -9,7 +9,7 @@ function VisitAllStates() {
         setIsRunning(true);
         setResult('');
         try {
-            const response = await axios.post('${process.env.REACT_APP_BROBOT_API_URL}/api/automation/visit-all-states');
+            const response = await api.post('/api/automation/visit-all-states');
             setResult(response.data);
         } catch (error) {
             setResult('Error occurred while running automation: ' + error.message);

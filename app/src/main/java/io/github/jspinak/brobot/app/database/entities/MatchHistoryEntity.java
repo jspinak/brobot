@@ -13,7 +13,7 @@ import java.util.List;
 public class MatchHistoryEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private int timesSearched = 0;

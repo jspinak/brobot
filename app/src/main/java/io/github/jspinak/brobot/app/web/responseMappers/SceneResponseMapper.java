@@ -55,15 +55,4 @@ public class SceneResponseMapper {
         return entity;
     }
 
-    public SceneRequest toRequest(SceneEntity entity) {
-        if (entity == null) {
-            return null;
-        }
-
-        SceneRequest request = new SceneRequest();
-        request.setId(entity.getId());
-        request.setPattern(patternResponseMapper.toRequest(entity.getPattern()));
-
-        return request;
-    }
 }

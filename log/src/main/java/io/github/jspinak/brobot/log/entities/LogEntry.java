@@ -31,7 +31,7 @@ public class LogEntry {
     private String description;
     private Instant timestamp;
     private String applicationUnderTest;
-    private String currentStateName;
+    private String currentStateName;  // TODO: change to stateInFocus, representing the state acted on
     private boolean passed;
     private String actionPerformed;
     private long duration; // in milliseconds
@@ -43,6 +43,7 @@ public class LogEntry {
     private List<Observation> observations = new ArrayList<>();
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "log_entry_id")
     private List<StateImageLog> stateImages = new ArrayList<>();
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
@@ -66,4 +67,27 @@ public class LogEntry {
         this.stateImages.add(stateImageLog);
     }
 
+    @Override
+    public String toString() {
+        return "LogEntry{" +
+                "id=" + id +
+                ", projectId=" + projectId +
+                ", sessionId='" + sessionId + '\'' +
+                ", type='" + type + '\'' +
+                ", description='" + description + '\'' +
+                ", timestamp=" + timestamp +
+                ", applicationUnderTest='" + applicationUnderTest + '\'' +
+                ", currentStateName='" + currentStateName + '\'' +
+                ", passed=" + passed +
+                ", actionPerformed='" + actionPerformed + '\'' +
+                ", duration=" + duration +
+                ", errorMessage='" + errorMessage + '\'' +
+                ", screenshotPath='" + screenshotPath + '\'' +
+                ", videoClipPath='" + videoClipPath + '\'' +
+                ", observations=" + observations +
+                ", stateImages=" + stateImages +
+                ", transitions=" + transitions +
+                ", performance=" + performance +
+                '}';
+    }
 }

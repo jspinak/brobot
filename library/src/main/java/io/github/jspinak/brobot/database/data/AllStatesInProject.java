@@ -30,7 +30,7 @@ public class AllStatesInProject {
 
     public void save(State state) {
         states.add(state);
-        state.setId((long) states.size());
+        if (state.getId() == null) state.setId((long) states.size()); // don't change it if it was set in StateEntity
         state.getStateImages().forEach(image -> {
             image.setOwnerStateId(state.getId());
             image.getAllMatchSnapshots().forEach(snapshot -> snapshot.setStateId(state.getId()));

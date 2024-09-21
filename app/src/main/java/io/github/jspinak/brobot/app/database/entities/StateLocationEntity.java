@@ -13,7 +13,7 @@ import lombok.Setter;
 public class StateLocationEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private StateObject.Type objectType = StateObject.Type.LOCATION;
     private String name = "";

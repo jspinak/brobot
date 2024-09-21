@@ -1,10 +1,11 @@
-// brobot project's app build.gradle
+// brobot app build.gradle
 
 plugins {
 	id 'java'
 	id 'io.freefair.lombok' version '8.6'
 	id 'org.springframework.boot' version '3.2.4'
 	id 'io.spring.dependency-management' version '1.1.4'
+	id("org.flywaydb.flyway") version "10.18.0"
 }
 
 // module-specific configurations
@@ -66,6 +67,18 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-elasticsearch'
 	implementation 'org.springframework.boot:spring-boot-starter-websocket'
 	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.2'
+
+	// https://mvnrepository.com/artifact/org.flywaydb/flyway-core
+	implementation 'org.flywaydb:flyway-core:10.18.0'
+	// https://mvnrepository.com/artifact/org.flywaydb/flyway-database-postgresql
+	runtimeOnly 'org.flywaydb:flyway-database-postgresql:10.18.0'
+
+}
+
+flyway {
+	url = 'jdbc:postgresql://localhost:5432/Brobot'
+	user = System.getenv('ADMIN_USERNAME') ?: 'default_username'
+	password = System.getenv('ADMIN_PASSWORD') ?: 'default_username'
 }
 
 test {
