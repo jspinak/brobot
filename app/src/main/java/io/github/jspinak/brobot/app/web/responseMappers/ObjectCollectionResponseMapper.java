@@ -87,32 +87,4 @@ public class ObjectCollectionResponseMapper {
         return entity;
     }
 
-    public ObjectCollectionRequest toRequest(ObjectCollectionEntity entity) {
-        if (entity == null) {
-            return null;
-        }
-
-        ObjectCollectionRequest request = new ObjectCollectionRequest();
-        request.setId(entity.getId());
-        request.setStateLocations(entity.getStateLocations().stream()
-                .map(stateLocationResponseMapper::toRequest)
-                .collect(Collectors.toList()));
-        request.setStateImages(entity.getStateImages().stream()
-                .map(stateImageResponseMapper::toRequest)
-                .collect(Collectors.toList()));
-        request.setStateRegions(entity.getStateRegions().stream()
-                .map(stateRegionResponseMapper::toRequest)
-                .collect(Collectors.toList()));
-        request.setStateStrings(entity.getStateStrings().stream()
-                .map(stateStringResponseMapper::toRequest)
-                .collect(Collectors.toList()));
-        request.setMatches(entity.getMatches().stream()
-                .map(matchesResponseMapper::toRequest)
-                .collect(Collectors.toList()));
-        request.setScenes(entity.getScenes().stream()
-                .map(sceneResponseMapper::toRequest)
-                .collect(Collectors.toList()));
-
-        return request;
-    }
 }

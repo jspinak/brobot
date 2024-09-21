@@ -66,7 +66,7 @@ public class DSLParser {
 
         // Encode steps
         for (int i = 0; i < actionDefinition.getSteps().size(); i++) {
-            ActionDefinition.ActionStep step = actionDefinition.getSteps().get(i);
+            ActionStep step = actionDefinition.getSteps().get(i);
             dslBuilder.append("STEP ").append(i + 1).append(":\n");
 
             // Encode options

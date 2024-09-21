@@ -1,7 +1,6 @@
 package io.github.jspinak.brobot.app.database.databaseMappers;
 
 import io.github.jspinak.brobot.app.database.entities.ImageEntity;
-import io.github.jspinak.brobot.app.database.entities.SceneEntity;
 import io.github.jspinak.brobot.datatypes.primitives.image.Image;
 import io.github.jspinak.brobot.imageUtils.BufferedImageOps;
 import org.springframework.stereotype.Component;
@@ -13,15 +12,17 @@ import java.util.List;
 public class ImageEntityMapper {
 
     public ImageEntity map(Image image) {
+        if (image == null) return null;
         ImageEntity imageEntity = new ImageEntity();
         imageEntity.setName(image.getName());
-        imageEntity.setBytes(BufferedImageOps.toByteArray(image.getBufferedImage()));
+        imageEntity.setImageData(BufferedImageOps.toByteArray(image.getBufferedImage()));
         return imageEntity;
     }
 
     public Image map(ImageEntity imageEntity) {
+        if (imageEntity == null) return null;
         System.out.println("id: "+imageEntity.getId());
-        Image image = new Image(BufferedImageOps.fromByteArray(imageEntity.getBytes()));
+        Image image = new Image(BufferedImageOps.fromByteArray(imageEntity.getImageData()));
         image.setName(imageEntity.getName());
         return image;
     }

@@ -1,7 +1,7 @@
 package io.github.jspinak.brobot.app.web.responseMappers;
 
-import io.github.jspinak.brobot.app.database.databaseMappers.ActionDefinitionEntityMapper;
 import io.github.jspinak.brobot.app.database.entities.TransitionEntity;
+import io.github.jspinak.brobot.app.services.ProjectService;
 import io.github.jspinak.brobot.app.web.requests.TransitionCreateRequest;
 import io.github.jspinak.brobot.app.web.requests.TransitionUpdateRequest;
 import io.github.jspinak.brobot.app.web.responses.TransitionResponse;
@@ -11,9 +11,12 @@ import org.springframework.stereotype.Component;
 public class TransitionResponseMapper {
 
     private final ActionDefinitionResponseMapper actionDefinitionResponseMapper;
+    private final ProjectService projectService;
 
-    public TransitionResponseMapper(ActionDefinitionResponseMapper actionDefinitionResponseMapper) {
+    public TransitionResponseMapper(ActionDefinitionResponseMapper actionDefinitionResponseMapper,
+                                    ProjectService projectService) {
         this.actionDefinitionResponseMapper = actionDefinitionResponseMapper;
+        this.projectService = projectService;
     }
 
     public TransitionResponse toResponse(TransitionEntity entity) {
@@ -37,6 +40,7 @@ public class TransitionResponseMapper {
     }
 
     public void updateEntityFromRequest(TransitionEntity entity, TransitionCreateRequest request) {
+        entity.setProject(projectService.getProjectById(request.getProjectId()));
         entity.setSourceStateId(request.getSourceStateId());
         entity.setStateImageId(request.getStateImageId());
         entity.setStaysVisibleAfterTransition(request.getStaysVisibleAfterTransition());

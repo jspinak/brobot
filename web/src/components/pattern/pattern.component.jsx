@@ -1,10 +1,36 @@
-import React from 'react';
-import { Box, Typography } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { Box, Typography, CircularProgress } from '@mui/material';
 import Image from '../image/image.component';
+import api from '../../services/api';
 
 const Pattern = ({ pattern, isSelected, onSelect }) => {
-  if (!pattern || !pattern.image) {
-    console.error('Pattern or pattern image is missing');
+  const [imageData, setImageData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchImage = async () => {
+      if (!pattern || !pattern.imageId) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        const response = await api.get(`/api/images/${pattern.imageId}`);
+        setImageData(response.data);
+      } catch (error) {
+        console.error('Error fetching image:', error);
+        setError('Failed to load image');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchImage();
+  }, [pattern]);
+
+  if (!pattern) {
     return null;
   }
 
@@ -33,7 +59,13 @@ const Pattern = ({ pattern, isSelected, onSelect }) => {
         }),
       }}
     >
-      <Image image={pattern.image} />
+      {loading ? (
+        <CircularProgress />
+      ) : error ? (
+        <Typography color="error">{error}</Typography>
+      ) : (
+        imageData && <Image image={imageData} />
+      )}
       <Typography variant="caption" sx={{ mt: -1, fontSize: '10px' }}>
         {pattern.id} {pattern.name}
       </Typography>

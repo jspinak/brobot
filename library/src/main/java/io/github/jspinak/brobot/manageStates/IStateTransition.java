@@ -1,5 +1,8 @@
 package io.github.jspinak.brobot.manageStates;
 
+import io.github.jspinak.brobot.dsl.ActionDefinition;
+
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -9,6 +12,8 @@ public interface IStateTransition {
     enum StaysVisible {
         NONE, TRUE, FALSE
     }
+
+    Optional<ActionDefinition> getActionDefinition();
 
     /**
      * When set, takes precedence over the same variable in StateTransitions.

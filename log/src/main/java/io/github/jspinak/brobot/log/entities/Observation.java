@@ -18,4 +18,14 @@ public class Observation {
     private String observationType;
     private String description;
     private String severity;
+
+    @Override
+    public String toString() {
+        return "Observation{" +
+                "id=" + id +
+                ", observationType='" + observationType + '\'' +
+                ", description='" + description + '\'' +
+                ", severity='" + severity + '\'' +
+                '}';
+    }
 }

@@ -97,24 +97,5 @@ public class StateLocationResponseMapper {
         return entity;
     }
 
-    public StateLocationRequest toRequest(StateLocationEntity entity) {
-        if (entity == null) {
-            return null;
-        }
-
-        StateLocationRequest request = new StateLocationRequest();
-        request.setObjectType(entity.getObjectType());
-        request.setName(entity.getName());
-        request.setLocation(locationResponseMapper.toRequest(entity.getLocation()));
-        request.setOwnerStateName(entity.getOwnerStateName());
-        request.setStaysVisibleAfterClicked(entity.getStaysVisibleAfterClicked());
-        request.setProbabilityExists(entity.getProbabilityExists());
-        request.setTimesActedOn(entity.getTimesActedOn());
-        request.setPosition(positionResponseMapper.toRequest(entity.getPosition()));
-        request.setAnchors(anchorsResponseMapper.toRequest(entity.getAnchors()));
-        request.setMatchHistory(matchHistoryResponseMapper.toRequest(entity.getMatchHistory()));
-
-        return request;
-    }
 }
 

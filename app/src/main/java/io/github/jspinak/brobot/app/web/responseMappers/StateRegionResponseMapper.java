@@ -99,26 +99,5 @@ public class StateRegionResponseMapper {
         entity.setMatchHistory(matchHistoryResponseMapper.fromRequest(request.getMatchHistory()));
         return entity;
     }
-
-    public StateRegionRequest toRequest(StateRegionEntity entity) {
-        if (entity == null) {
-            return null;
-        }
-
-        StateRegionRequest request = new StateRegionRequest();
-        request.setObjectType(entity.getObjectType());
-        request.setName(entity.getName());
-        request.setSearchRegion(regionResponseMapper.toRequest(entity.getSearchRegion()));
-        request.setOwnerStateName(entity.getOwnerStateName());
-        request.setStaysVisibleAfterClicked(entity.getStaysVisibleAfterClicked());
-        request.setProbabilityExists(entity.getProbabilityExists());
-        request.setTimesActedOn(entity.getTimesActedOn());
-        request.setPosition(positionResponseMapper.toRequest(entity.getPosition()));
-        request.setAnchors(anchorsResponseMapper.toRequest(entity.getAnchors()));
-        request.setMatchHistory(matchHistoryResponseMapper.toRequest(entity.getMatchHistory()));
-        request.setMockText(entity.getMockText());
-
-        return request;
-    }
 }
 

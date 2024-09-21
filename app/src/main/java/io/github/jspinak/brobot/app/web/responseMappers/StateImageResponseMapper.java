@@ -98,34 +98,5 @@ public class StateImageResponseMapper {
         entity.setInvolvedTransitionIds(request.getInvolvedTransitionIds());
         return entity;
     }
-
-    public StateImageRequest toRequest(StateImageEntity entity) {
-        if (entity == null) {
-            return null;
-        }
-        StateImageRequest request = new StateImageRequest();
-        request.setId(entity.getId());
-        request.setProjectId(entity.getProjectId());
-        request.setObjectType(entity.getObjectType());
-        request.setName(entity.getName());
-        request.setPatterns(entity.getPatterns().stream()
-                .map(patternResponseMapper::toRequest)
-                .collect(Collectors.toList()));
-        request.setOwnerStateId(entity.getOwnerStateId());
-        request.setOwnerStateName(entity.getOwnerStateName());
-        request.setTimesActedOn(entity.getTimesActedOn());
-        request.setShared(entity.isShared());
-        request.setIndex(entity.getIndex());
-        request.setDynamic(entity.isDynamic());
-        request.setInvolvedTransitionIds(entity.getInvolvedTransitionIds());
-        return request;
-    }
-
-    public List<StateImageRequest> toRequestList(List<StateImageEntity> entities) {
-        if (entities == null) return null;
-        return entities.stream()
-                .map(this::toRequest)
-                .collect(Collectors.toList());
-    }
 }
 

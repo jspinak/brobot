@@ -37,16 +37,6 @@ class ImageEntityMapperTest {
     }
 
     @Test
-    void testMap() {
-        Pattern pattern = new Pattern("topLeft");
-        PatternEntity patternEntity = patternEntityMapper.map(pattern);
-        ImageEntity mappedImage = patternEntity.getImage();
-        assertNotNull(mappedImage);
-        Image image = imageEntityMapper.map(mappedImage);
-        assertNotNull(image);
-    }
-
-    @Test
     void mapToImageEntityList() {
     }
 

@@ -18,4 +18,14 @@ public class TransitionLog {
     private String fromState;
     private String toState;
     private boolean success;
+
+    @Override
+    public String toString() {
+        return "TransitionLog{" +
+                "id=" + id +
+                ", fromState='" + fromState + '\'' +
+                ", toState='" + toState + '\'' +
+                ", success=" + success +
+                '}';
+    }
 }

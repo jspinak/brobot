@@ -18,7 +18,7 @@ public class TransitionEntityMapper {
 
     public ActionDefinitionStateTransition map(TransitionEntity transitionEntity) {
         ActionDefinitionStateTransition transition = new ActionDefinitionStateTransition();
-        transition.setActionDefinition(actionDefinitionEntityMapper.map(transitionEntity.getActionDefinition()));
+        transition.setActionDefinition(actionDefinitionEntityMapper.mapWithoutImages(transitionEntity.getActionDefinition()));
 
         // Map the StaysVisible enum
         transition.setStaysVisibleAfterTransition(mapStaysVisibleToActionDefinition(transitionEntity.getStaysVisibleAfterTransition()));
@@ -28,6 +28,16 @@ public class TransitionEntityMapper {
         transition.setScore(transitionEntity.getScore());
         transition.setTimesSuccessful(transitionEntity.getTimesSuccessful());
 
+        return transition;
+    }
+
+    public ActionDefinitionStateTransition mapExceptActionDefinition(TransitionEntity transitionEntity) {
+        ActionDefinitionStateTransition transition = new ActionDefinitionStateTransition();
+        transition.setStaysVisibleAfterTransition(mapStaysVisibleToActionDefinition(transitionEntity.getStaysVisibleAfterTransition()));
+        transition.setActivate(transitionEntity.getStatesToEnter());
+        transition.setExit(transitionEntity.getStatesToExit());
+        transition.setScore(transitionEntity.getScore());
+        transition.setTimesSuccessful(transitionEntity.getTimesSuccessful());
         return transition;
     }
 
@@ -47,7 +57,8 @@ public class TransitionEntityMapper {
 
     public TransitionEntity map(ActionDefinitionStateTransition actionDefinitionStateTransition) {
         TransitionEntity entity = new TransitionEntity();
-        entity.setActionDefinition(actionDefinitionEntityMapper.map(actionDefinitionStateTransition.getActionDefinition()));
+        actionDefinitionStateTransition.getActionDefinition().ifPresent(actionDef ->
+                entity.setActionDefinition(actionDefinitionEntityMapper.mapWithoutImages(actionDef)));
 
         // Map the StaysVisible enum
         entity.setStaysVisibleAfterTransition(mapStaysVisibleToIState(actionDefinitionStateTransition.getStaysVisibleAfterTransition()));

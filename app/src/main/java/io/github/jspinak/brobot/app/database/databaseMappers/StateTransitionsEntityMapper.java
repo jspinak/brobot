@@ -22,7 +22,6 @@ public class StateTransitionsEntityMapper {
 
     public StateTransitions map(StateTransitionsEntity entity) {
         StateTransitions stateTransitions = new StateTransitions();
-
         stateTransitions.setStateId(entity.getStateId());
 
         // Map transitions

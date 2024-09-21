@@ -16,7 +16,7 @@ import java.util.List;
 public class ActionOptionsEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private ActionOptions.Action action = ActionOptions.Action.FIND;
     private ActionOptions.ClickUntil clickUntil = ActionOptions.ClickUntil.OBJECTS_APPEAR;
