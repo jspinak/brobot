@@ -63,6 +63,7 @@ public class StateEntityMapper {
         return stateEntity;
     }
 
+    // Image needs to be added to Pattern, which only contains the imageId. this is done in StateService.
     public State map(StateEntity stateEntity) {
         State state = new State();
         state.setId(stateEntity.getId());

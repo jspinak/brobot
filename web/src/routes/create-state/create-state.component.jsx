@@ -1,12 +1,12 @@
-import React, { useState, useContext, useEffect     } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import { Box, TextField, Button, Typography, Container } from '@mui/material';
 import useFetchImages from './../../hooks/useFetchImages';
 import useFetchScenes from './../../hooks/useFetchScenes';
 import NewStateDisplay from './new-state-display.component';
 import PatternList from './../../components/pattern-list/pattern-list.component';
 import { ProjectContext } from './../../components/ProjectContext';
+import api from './../../services/api';
 
 const CreateState = () => {
   const { selectedProject } = useContext(ProjectContext);
@@ -15,9 +15,9 @@ const CreateState = () => {
   const [bundlePath, setBundlePath] = useState('C:\\Users\\jspin\\Documents\\brobot_parent\\FloraNext\\website-images');
   const [loadedPatterns, setLoadedPatterns] = useState([]);
   const [selectedPatterns, setSelectedPatterns] = useState([]);
-  const images = useFetchImages();
-  const scenes = useFetchScenes();
   const [newState, setNewState] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   console.log('Selected Project:', selectedProject);
 
@@ -28,24 +28,26 @@ const CreateState = () => {
     console.log('CreateState: Current selected project:', selectedProject);
   }, [newState, selectedProject]);
 
-    const handleLoadPatterns = async () => {
-      try {
-        const response = await axios.post('${process.env.REACT_APP_BROBOT_API_URL}/api/patterns/load-from-bundle', { bundlePath });
-        console.log('Loaded patterns:', response.data);
+const handleLoadPatterns = async () => {
+  setLoading(true);
+  setError(null);
+  try {
+    const response = await api.post(`/api/patterns/load-from-bundle`, { bundlePath });
+    console.log('Loaded patterns:', response.data);
 
-        setLoadedPatterns(prevPatterns => {
-          // Combine previous and new patterns
-          const allPatterns = [...prevPatterns, ...response.data];
-
-          // Remove duplicates based on id
-          const uniquePatterns = Array.from(new Map(allPatterns.map(pattern => [pattern.id, pattern])).values());
-
-          return uniquePatterns;
-        });
-      } catch (error) {
-        console.error('Error loading patterns:', error);
-      }
-    };
+    setLoadedPatterns(prevPatterns => {
+      const allPatterns = [...prevPatterns, ...response.data];
+      const uniquePatterns = Array.from(new Map(allPatterns.map(pattern => [pattern.id, pattern])).values());
+      console.log('Unique patterns:', uniquePatterns);
+      return uniquePatterns;
+    });
+  } catch (error) {
+    console.error('Error loading patterns:', error);
+    setError('Failed to load patterns. Please try again.');
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handlePatternSelect = (patternId) => {
     setSelectedPatterns(prev =>
@@ -55,57 +57,55 @@ const CreateState = () => {
     );
   };
 
-  const handleCreateState = async () => {
-    if (!selectedProject) {
-      console.error('No project selected');
-      return;
-    }
+const handleCreateState = async () => {
+  if (!selectedProject) {
+    setError('No project selected');
+    return;
+  }
 
-    const newStateObj = {
-      name: stateName,
-      projectRequest: { id: selectedProject.id },
-      stateImages: selectedPatterns.map(patternId => {
-        const pattern = loadedPatterns.find(p => p.id === patternId);
-        console.log('Creating state image from pattern:', pattern);
-        return {
-          patterns: [{
-            id: pattern.id,
-            name: pattern.name,
-            image: pattern.image
-          }]
-        };
-      }),
-      transitions: [],
-      canHide: [],
-      hidden: [],
-      pathScore: 1,
-      probabilityExists: 100
-    };
+  if (selectedPatterns.length === 0) {
+    setError('No patterns selected');
+    return;
+  }
 
-    console.log('Sending state object:', newStateObj);
+  setLoading(true);
+  setError(null);
 
-    if (newStateObj.stateImages.length === 0) {
-      console.error('No patterns selected');
-      return;
-    }
-
-    try {
-      const response = await axios.post(`${process.env.REACT_APP_BROBOT_API_URL}/api/states`, newStateObj, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-      console.log('Server response:', JSON.stringify(response.data, null, 2));
-      setNewState(response.data);
-      // Don't navigate away, so we can display the new state
-      // navigate('/home');
-    } catch (error) {
-      console.error('Error saving new state:', error);
-      if (error.response) {
-        console.error('Server error response:', error.response.data);
-      }
-    }
+  const newStateObj = {
+    name: stateName,
+    projectRequest: { id: selectedProject.id },
+    stateImages: selectedPatterns.map(patternId => ({
+      patterns: [{ id: patternId }]
+    })),
+    transitions: [],
+    canHide: [],
+    hidden: [],
+    pathScore: 1,
+    probabilityExists: 100
   };
+
+  console.log('Sending state object:', newStateObj);
+
+  try {
+    const response = await api.post(`/api/states`, newStateObj, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    console.log('Server response:', JSON.stringify(response.data, null, 2));
+    setNewState(response.data);
+  } catch (error) {
+    console.error('Error saving new state:', error);
+    if (error.response) {
+      console.error('Server error response:', error.response.data);
+      setError(`Failed to create state: ${error.response.data.message || 'Unknown error'}`);
+    } else {
+      setError('Failed to create state. Please try again.');
+    }
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <Container maxWidth="md">
@@ -127,16 +127,31 @@ const CreateState = () => {
             value={bundlePath}
             onChange={(e) => setBundlePath(e.target.value)}
           />
-          <Button variant="contained" onClick={handleLoadPatterns}>
-            Load Patterns
+          <Button variant="contained" onClick={handleLoadPatterns} disabled={loading}>
+            {loading ? 'Loading...' : 'Load Patterns'}
           </Button>
         </Box>
-        <Button variant="contained" color="primary" onClick={handleCreateState} sx={{ mt: 2 }}>
-          Create State
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={handleCreateState}
+          disabled={loading || selectedPatterns.length === 0}
+          sx={{ mt: 2 }}
+        >
+          {loading ? 'Creating...' : 'Create State'}
         </Button>
+        {error && (
+          <Typography color="error" sx={{ mt: 2 }}>
+            {error}
+          </Typography>
+        )}
         {newState && <NewStateDisplay newState={newState} />}
       </Box>
-      <PatternList patterns={loadedPatterns} selectedPatterns={selectedPatterns} onPatternSelect={handlePatternSelect} />
+      <PatternList
+        patterns={loadedPatterns}
+        selectedPatterns={selectedPatterns}
+        onPatternSelect={handlePatternSelect}
+      />
     </Container>
   );
 };

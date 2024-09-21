@@ -84,27 +84,4 @@ public class MatchResponseMapper {
         entity.setTimesActedOn(request.getTimesActedOn());
         return entity;
     }
-
-    public MatchRequest toRequest(MatchEntity entity) {
-        if (entity == null) {
-            return null;
-        }
-
-        MatchRequest request = new MatchRequest();
-        request.setId(entity.getId());
-        request.setScore(entity.getScore());
-        request.setTarget(locationResponseMapper.toRequest(entity.getTarget()));
-        request.setImage(imageResponseMapper.toRequest(entity.getImage()));
-        request.setText(entity.getText());
-        request.setName(entity.getName());
-        request.setRegion(regionResponseMapper.toRequest(entity.getRegion()));
-        request.setSearchImage(imageResponseMapper.toRequest(entity.getSearchImage()));
-        request.setAnchors(anchorsResponseMapper.toRequest(entity.getAnchors()));
-        request.setStateObjectData(stateObjectDataResponseMapper.toRequest(entity.getStateObjectData()));
-        request.setSceneId(entity.getSceneId());
-        request.setTimeStamp(entity.getTimeStamp());
-        request.setTimesActedOn(entity.getTimesActedOn());
-
-        return request;
-    }
 }

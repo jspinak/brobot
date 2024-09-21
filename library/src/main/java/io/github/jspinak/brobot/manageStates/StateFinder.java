@@ -50,10 +50,10 @@ public class StateFinder {
         if (stateMemory.getActiveStates().isEmpty()) stateMemory.addActiveState(SpecialStateType.UNKNOWN.getId());
     }
 
-    private void searchAllImagesForCurrentStates() {
-        System.out.println("StateFinder: search all states| ");
+    public void searchAllImagesForCurrentStates() {
+        System.out.println("StateFinder: search all states. ");
         Set<String> allStateEnums = allStatesInProjectService.getAllStateNames();
-        allStateEnums.remove("UNKNOWN");
+        allStateEnums.remove(SpecialStateType.UNKNOWN.toString());
         allStateEnums.forEach(this::findState);
         Report.println("");
     }
@@ -66,7 +66,7 @@ public class StateFinder {
     }
 
     public boolean findState(Long stateId) {
-        Report.print(stateId + ".");
+        Report.print(stateId + " ");
         Optional<State> state = allStatesInProjectService.getState(stateId);
         return state.filter(value -> action.perform(FIND, new ObjectCollection.Builder().withNonSharedImages(value).build())
                 .isSuccess()).isPresent();

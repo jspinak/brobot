@@ -11,4 +11,5 @@ import java.util.Optional;
 public interface StateTransitionsRepo extends JpaRepository<StateTransitionsEntity, Long> {
     Optional<StateTransitionsEntity> findByStateId(Long stateId);
     List<StateTransitionsEntity> findByStateIdIn(List<Long> projectIds);
+    List<StateTransitionsEntity> findByProjectId(Long projectId);
 }

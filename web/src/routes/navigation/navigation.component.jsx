@@ -2,27 +2,47 @@ import React, { useContext, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AppBar, Toolbar, Typography, Button, Box } from '@mui/material';
 import { ProjectContext } from '../../components/ProjectContext';
+import api from './../../services/api'
 
 const NavigationBar = () => {
-  const { selectedProject } = useContext(ProjectContext);
-  const [firstStateId, setFirstStateId] = useState(null);
+    const [states, setStates] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const { selectedProject } = useContext(ProjectContext);
+    const [firstStateId, setFirstStateId] = useState(null);
 
   useEffect(() => {
-    fetch('${process.env.REACT_APP_BROBOT_API_URL}/api/states/all', {
-          headers: {
-            'Cache-Control': 'no-cache, no-store, must-revalidate',
-            'Pragma': 'no-cache',
-            'Expires': '0'
-          }
-        })
-      .then(response => response.json())
-      .then(states => {
-        if (states.length > 0) {
-          setFirstStateId(states[0].id);
-        }
-      })
-      .catch(error => console.error('Error fetching states:', error));
-  }, []);
+    if (!selectedProject) {
+      setStates([]);
+      setIsLoading(false);
+      return;
+    }
+
+    const fetchStates = async () => {
+      setIsLoading(true);
+      try {
+        console.log(`NavigationBar: Fetching states for project ${selectedProject.id}`);
+        const response = await api.get(`/api/states/project/${selectedProject.id}`);
+        if (response.status === 200) {
+            setStates(response.data);
+              if (response.data.length > 0) {
+                setFirstStateId(response.data[0].id);
+              }
+            } else {
+              throw new Error('Failed to fetch states');
+            }
+      } catch (error) {
+        console.error('NavigationBar: Error fetching states:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchStates();
+  }, [selectedProject]);
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <AppBar position="static">
@@ -50,6 +70,9 @@ const NavigationBar = () => {
               Edit State
             </Button>
           )}
+          <Button color="inherit" component={Link} to="/transition-graph">
+            Transition Graph
+          </Button>
         </Box>
       </Toolbar>
     </AppBar>

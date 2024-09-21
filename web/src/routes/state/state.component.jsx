@@ -7,9 +7,13 @@ import SceneImageList from '../../components/scene/scene-image-list.component';
 const State = ({ state }) => {
   const { id, name, stateImages, scenes } = state;
 
-  const images = stateImages.flatMap(stateImage =>
-    stateImage.patterns.map(pattern => pattern.image)
+  console.log('stateImages:', stateImages);
+
+  const imageIds = stateImages.flatMap(stateImage =>
+    stateImage.patterns.map(pattern => pattern.imageId)
   );
+
+  console.log('imageIds:', imageIds);
 
   return (
     <Paper
@@ -33,7 +37,7 @@ const State = ({ state }) => {
         <SceneImageList scenes={scenes} title="Scenes" />
       </Box>
       <Box sx={{ mt: 2 }}>
-        <ImageList images={images} title="Images" />
+        <ImageList imageIds={imageIds || []} title="Images" />
       </Box>
     </Paper>
   );

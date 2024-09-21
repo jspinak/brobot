@@ -51,4 +51,13 @@ public class ObjectCollectionEntityMapper {
         objectCollection.setScenes(sceneEntityMapper.mapToSceneList(objectCollectionEntity.getScenes()));
         return objectCollection;
     }
+
+    public ObjectCollection mapWithoutStateImagesAndScenes(ObjectCollectionEntity objectCollectionEntity) {
+        ObjectCollection objectCollection = new ObjectCollection();
+        objectCollection.setStateLocations(stateLocationEntityMapper.mapToStateLocationList(objectCollectionEntity.getStateLocations()));
+        objectCollection.setStateRegions(stateRegionEntityMapper.mapToStateRegionList(objectCollectionEntity.getStateRegions()));
+        objectCollection.setStateStrings(stateStringEntityMapper.mapToStateStringList(objectCollectionEntity.getStateStrings()));
+        objectCollection.setMatches(matchesEntityMapper.mapToMatchesList(objectCollectionEntity.getMatches()));
+        return objectCollection;
+    }
 }

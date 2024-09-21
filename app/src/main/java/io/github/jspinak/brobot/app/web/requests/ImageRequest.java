@@ -8,5 +8,5 @@ import lombok.Setter;
 public class ImageRequest {
     private Long id;
     private String name = "";
-    private String imageBase64 = "";
+    private Long imageId;
 }

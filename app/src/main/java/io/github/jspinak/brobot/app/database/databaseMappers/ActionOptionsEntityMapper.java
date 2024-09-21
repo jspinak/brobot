@@ -4,6 +4,8 @@ import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.app.database.entities.ActionOptionsEntity;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+
 @Component
 public class ActionOptionsEntityMapper {
 
@@ -87,7 +89,7 @@ public class ActionOptionsEntityMapper {
         actionOptions.setAction(actionOptionsEntity.getAction());
         actionOptions.setClickUntil(actionOptionsEntity.getClickUntil());
         actionOptions.setFind(actionOptionsEntity.getFind());
-        actionOptions.setFindActions(actionOptionsEntity.getFindActions());
+        actionOptions.setFindActions(new ArrayList<>(actionOptionsEntity.getFindActions()));
         actionOptions.setKeepLargerMatches(actionOptionsEntity.isKeepLargerMatches());
         actionOptions.setDoOnEach(actionOptionsEntity.getDoOnEach());
         actionOptions.setCaptureImage(actionOptionsEntity.isCaptureImage());

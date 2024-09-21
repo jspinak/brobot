@@ -58,17 +58,4 @@ public class MatchHistoryResponseMapper {
         return entity;
     }
 
-    public MatchHistoryRequest toRequest(MatchHistoryEntity entity) {
-        if (entity == null) {
-            return null;
-        }
-        MatchHistoryRequest request = new MatchHistoryRequest();
-        request.setId(entity.getId());
-        request.setTimesSearched(entity.getTimesSearched());
-        request.setTimesFound(entity.getTimesFound());
-        request.setSnapshots(entity.getSnapshots().stream()
-                .map(matchSnapshotResponseMapper::toRequest)
-                .collect(Collectors.toList()));
-        return request;
-    }
 }

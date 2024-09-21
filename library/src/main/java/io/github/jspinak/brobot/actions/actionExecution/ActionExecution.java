@@ -94,10 +94,10 @@ public class ActionExecution {
         matches.setDuration(duration); //time.getDuration(actionOptions.getAction()));
         if (BrobotSettings.buildDataset) datasetManager.addSetOfData(matches); // for the neural net training dataset
         Report.println(actionOptions.getAction() + " " + matches.getOutputText() + " " + matches.getSuccessSymbol());
-        LogEntry logEntry = actionLogger.logAction(sessionId, matches); // log the action after it's finished
+        LogEntry logEntry = actionLogger.logAction(sessionId, matches, objectCollections[0]); // log the action after it's finished
         if (!matches.isSuccess()) {
             String screenshotPath = captureScreenshot.captureScreenshot("action_failed_" + sessionId);
-            actionLogger.logError(sessionId, "Action failed: " + actionOptions.getAction(), screenshotPath);
+            //actionLogger.logError(sessionId, "Action failed: " + actionOptions.getAction(), screenshotPath);
         }
         logUpdateSender.sendLogUpdate(Collections.singletonList(logEntry));
         return matches;

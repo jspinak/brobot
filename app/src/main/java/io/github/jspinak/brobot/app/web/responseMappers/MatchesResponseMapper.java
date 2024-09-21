@@ -104,33 +104,4 @@ public class MatchesResponseMapper {
         return entity;
     }
 
-    public MatchesRequest toRequest(MatchesEntity entity) {
-        if (entity == null) {
-            return null;
-        }
-
-        MatchesRequest request = new MatchesRequest();
-        request.setId(entity.getId());
-        request.setActionDescription(entity.getActionDescription());
-        request.setMatchList(entity.getMatchList().stream()
-                .map(matchResponseMapper::toRequest)
-                .collect(Collectors.toList()));
-        request.setInitialMatchList(entity.getInitialMatchList().stream()
-                .map(matchResponseMapper::toRequest)
-                .collect(Collectors.toList()));
-        request.setActionOptions(actionOptionsResponseMapper.toRequest(entity.getActionOptions()));
-        request.setActiveStates(entity.getActiveStates());
-        request.setSelectedText(entity.getSelectedText());
-        request.setDuration(entity.getDuration());
-        request.setStartTime(entity.getStartTime());
-        request.setEndTime(entity.getEndTime());
-        request.setSuccess(entity.isSuccess());
-        request.setDefinedRegions(entity.getDefinedRegions().stream()
-                .map(regionResponseMapper::toRequest)
-                .collect(Collectors.toList()));
-        request.setMaxMatches(entity.getMaxMatches());
-        request.setOutputText(entity.getOutputText());
-
-        return request;
-    }
 }

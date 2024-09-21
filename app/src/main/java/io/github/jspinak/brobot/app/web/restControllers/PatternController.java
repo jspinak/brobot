@@ -36,11 +36,11 @@ public class PatternController {
 
     @PostMapping("/load-from-bundle")
     public ResponseEntity<List<PatternResponse>> loadPatternsFromBundle(@RequestBody Map<String, String> request) {
+        System.out.println("getting patterns from bundle path: "+request.get("bundlePath"));
         String bundlePath = request.get("bundlePath");
         if (bundlePath == null || bundlePath.isEmpty()) {
             return ResponseEntity.badRequest().build();
         }
-
         List<PatternResponse> patterns = patternService.loadAndSavePatternsFromBundle(bundlePath);
         return ResponseEntity.ok(patterns);
     }

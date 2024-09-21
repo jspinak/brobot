@@ -17,4 +17,12 @@ public class Scene {
     public Scene(String filename) {
         this.pattern = new Pattern(filename);
     }
+
+    @Override
+    public String toString() {
+        return "Scene{" +
+                "id=" + id +
+                ", pattern=" + (pattern != null ? pattern.getName() : "null") +
+                '}';
+    }
 }

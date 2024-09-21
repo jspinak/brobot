@@ -5,6 +5,7 @@ import io.github.jspinak.brobot.app.database.databaseMappers.ObjectCollectionEnt
 import io.github.jspinak.brobot.app.database.entities.ActionDefinitionEntity;
 import io.github.jspinak.brobot.app.database.entities.ActionStepEntity;
 import io.github.jspinak.brobot.dsl.ActionDefinition;
+import io.github.jspinak.brobot.dsl.ActionStep;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,11 +17,14 @@ public class ActionDefinitionService {
 
     private final ActionOptionsEntityMapper actionOptionsEntityMapper;
     private final ObjectCollectionEntityMapper objectCollectionEntityMapper;
+    private final ActionStepService actionStepService;
 
     public ActionDefinitionService(ActionOptionsEntityMapper actionOptionsEntityMapper,
-                                   ObjectCollectionEntityMapper objectCollectionEntityMapper) {
+                                   ObjectCollectionEntityMapper objectCollectionEntityMapper,
+                                   ActionStepService actionStepService) {
         this.actionOptionsEntityMapper = actionOptionsEntityMapper;
         this.objectCollectionEntityMapper = objectCollectionEntityMapper;
+        this.actionStepService = actionStepService;
     }
 
     public ActionDefinitionEntity createActionDefinitionEntity(ActionDefinition actionDefinition) {
@@ -35,10 +39,17 @@ public class ActionDefinitionService {
         return entity;
     }
 
-    private ActionStepEntity createActionStepEntity(ActionDefinition.ActionStep step) {
+    private ActionStepEntity createActionStepEntity(ActionStep step) {
         ActionStepEntity entity = new ActionStepEntity();
-        entity.setActionOptions(actionOptionsEntityMapper.map(step.getOptions()));
-        entity.setObjectCollection(objectCollectionEntityMapper.map(step.getObjects()));
+        entity.setActionOptionsEntity(actionOptionsEntityMapper.map(step.getOptions()));
+        entity.setObjectCollectionEntity(objectCollectionEntityMapper.map(step.getObjects()));
         return entity;
     }
+
+    public ActionDefinition mapFromEntityToLibraryClass(ActionDefinitionEntity actionDefinitionEntity) {
+        ActionDefinition actionDefinition = new ActionDefinition();
+        actionDefinition.setSteps(actionStepService.mapFromEntitiesToActionSteps(actionDefinitionEntity.getSteps()));
+        return actionDefinition;
+    }
+
 }

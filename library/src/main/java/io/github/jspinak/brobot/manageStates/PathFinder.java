@@ -30,6 +30,12 @@ public class PathFinder {
         this.stateTransitionsInProjectService = stateTransitionsInProjectService;
     }
 
+    public Paths getPathsToState(List<State> startStates, State targetState) {
+        Set<Long> startStateIds = new HashSet<>();
+        startStates.forEach(ss -> startStateIds.add(ss.getId()));
+        return getPathsToState(startStateIds, targetState.getId());
+    }
+
     public Paths getPathsToState(Set<Long> startStates, Long targetState) {
         Report.println("Find path: " + startStates + " -> " + targetState);
         this.startStates = startStates;
@@ -43,22 +49,30 @@ public class PathFinder {
     }
 
     private void recursePath(Path path, Long stateInFocus) {
+        System.out.println("Recursing for state: " + stateInFocus);
+        System.out.println("Current path: " + path.getStates());
+        System.out.println("Start states: " + startStates);
+
         if (!path.contains(stateInFocus)) {
             path.add(stateInFocus);
             addTransition(path);
-            if (startStates.contains(stateInFocus)) { // a path is found
+            if (startStates.contains(stateInFocus)) {
+                System.out.println("Found a path: " + path.getStates());
                 Path successfulPath = path.getCopy();
                 successfulPath.reverse();
                 setPathScore(successfulPath);
                 pathList.add(successfulPath);
-            } else { // continue searching
+                System.out.println("Added path to pathList. pathList size: " + pathList.size());
+            } else {
                 Set<Long> parentStates = stateTransitionsJointTable.getStatesWithTransitionsTo(stateInFocus);
+                System.out.println("Parent states for " + stateInFocus + ": " + parentStates);
                 for (Long newState : parentStates) {
                     recursePath(path, newState);
                 }
             }
         }
-        if (Objects.equals(path.get(path.size() - 1), stateInFocus)) path.remove(stateInFocus); // otherwise it's circular
+        if (Objects.equals(path.get(path.size() - 1), stateInFocus)) path.remove(stateInFocus);
+        System.out.println("Finished recursing for state: " + stateInFocus);
     }
 
     private void addTransition(Path path) {

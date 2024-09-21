@@ -41,7 +41,7 @@ public class PatternEntityMapper {
         patternEntity.setDynamic(pattern.isDynamic());
         patternEntity.setPosition(positionEmbeddableMapper.map(pattern.getTargetPosition()));
         patternEntity.setAnchors(anchorsEntityMapper.map(pattern.getAnchors()));
-        patternEntity.setImage(imageEntityMapper.map(pattern.getImage()));
+        // the image id need to be saved separately before the pattern is saved (first, save image to get the image id).
         return patternEntity;
     }
 
@@ -58,7 +58,7 @@ public class PatternEntityMapper {
         pattern.setDynamic(patternEntity.isDynamic());
         pattern.setTargetPosition(positionEmbeddableMapper.map(patternEntity.getPosition()));
         pattern.setAnchors(anchorsEntityMapper.map(patternEntity.getAnchors()));
-        pattern.setImage(imageEntityMapper.map(patternEntity.getImage()));
+        // image needs to be retrieved from the image repo
         return pattern;
     }
 

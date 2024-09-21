@@ -2,6 +2,8 @@ package io.github.jspinak.brobot.app.log;
 
 import io.github.jspinak.brobot.actions.BrobotSettings;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
+import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.imageUtils.VideoRecorderService;
 import io.github.jspinak.brobot.log.entities.LogEntry;
 import io.github.jspinak.brobot.log.entities.PerformanceMetrics;
@@ -13,6 +15,7 @@ import org.springframework.stereotype.Component;
 import java.awt.*;
 import java.io.IOException;
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -24,12 +27,14 @@ public class HttpActionLogger implements ActionLogger, TestSessionLogger {
     private final LogSender logSender;
     private final LogEntryService logEntryService;
     private final VideoRecorderService videoRecorderService;
+    private final LogEntryStateImageMapper logEntryStateImageMapper;
 
     public HttpActionLogger(LogSender logSender, LogEntryService logEntryService,
-                            VideoRecorderService videoRecorderService) {
+                            VideoRecorderService videoRecorderService, LogEntryStateImageMapper logEntryStateImageMapper) {
         this.logSender = logSender;
         this.logEntryService = logEntryService;
         this.videoRecorderService = videoRecorderService;
+        this.logEntryStateImageMapper = logEntryStateImageMapper;
     }
 
     private Long getCurrentProjectId() {
@@ -37,17 +42,38 @@ public class HttpActionLogger implements ActionLogger, TestSessionLogger {
     }
 
     @Override
-    public LogEntry logAction(String sessionId, Matches results) {
+    public LogEntry logAction(String sessionId, Matches matches, ObjectCollection objectCollection) {
         LogEntry logEntry = new LogEntry();
         logEntry.setProjectId(getCurrentProjectId());
         logEntry.setSessionId(sessionId);
-        logEntry.setType("ACTION");
-        logEntry.setDescription(results.getActionDescription());
+        logEntry.setType(matches.getActionOptions().getAction().toString());
+        logEntry.setDescription(getStateImageDescription(objectCollection, matches)); //matches.getActionDescription());
         logEntry.setTimestamp(Instant.now());
-        logEntry.setActionPerformed(results.getActionOptions().getAction().toString());
-        logEntry.setDuration(results.getDuration().toMillis());
-        logEntry.setPassed(results.isSuccess());
+        logEntry.setActionPerformed(matches.getActionOptions().getAction().toString());
+        logEntry.setDuration(matches.getDuration().toMillis());
+        logEntry.setPassed(matches.isSuccess());
+        logEntry.setCurrentStateName(getStateInFocus(objectCollection));
+        objectCollection.getStateImages().forEach(sI -> logEntry.addStateImageLog(logEntryStateImageMapper.toLog(sI, matches)));
+
         return logEntryService.saveLog(logEntry);
+    }
+
+    private String getStateImageDescription(ObjectCollection objectCollection, Matches matches) {
+        List<StateImage> stateImages = objectCollection.getStateImages();
+        if (stateImages.isEmpty()) return "No StateImage";
+        StateImage stateImage = stateImages.get(0);
+        boolean found = matches.getMatchList().stream()
+                .anyMatch(match -> match.getStateObjectData().getStateObjectId().equals(stateImage.getId()));
+        return String.format("StateImage: %s (Found: %s)", stateImage.getName(), found);
+    }
+
+    private String getStateInFocus(ObjectCollection objectCollection) {
+        List<StateImage> stateImages = objectCollection.getStateImages();
+        if (stateImages.isEmpty()) return "";
+        for (StateImage stateImage : stateImages) {
+            if (!stateImage.getOwnerStateName().isEmpty()) return stateImage.getOwnerStateName();
+        }
+        return "";
     }
 
     @Override
