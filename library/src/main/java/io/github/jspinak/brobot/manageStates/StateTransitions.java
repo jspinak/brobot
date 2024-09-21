@@ -1,5 +1,6 @@
 package io.github.jspinak.brobot.manageStates;
 
+import io.github.jspinak.brobot.dsl.ActionDefinition;
 import lombok.Data;
 
 import java.util.HashMap;
@@ -24,6 +25,7 @@ public class StateTransitions {
     private String stateName; // for reference
     private Long stateId;
     private IStateTransition transitionFinish;
+    private Map<Long, ActionDefinitionStateTransition> actionDefinitionTransitions = new HashMap<>();
     private Map<String, IStateTransition> transitionsByName = new HashMap<>(); // for initial setup
     private Map<Long, IStateTransition> transitions = new HashMap<>(); // for use at runtime
     /**
@@ -65,12 +67,37 @@ public class StateTransitions {
         for (String stateName : transition.getActivateNames()) transitionsByName.put(stateName, transition);
     }
 
+    public void addTransition(ActionDefinitionStateTransition transition) {
+        for (Long id : transition.getActivate()) {
+            transitions.put(id, transition);
+            actionDefinitionTransitions.put(id, transition);
+        }
+    }
+
     public void addTransition(BooleanSupplier transition, String... toStates) {
         JavaStateTransition javaStateTransition = new JavaStateTransition.Builder()
                 .setFunction(transition)
                 .addToActivate(toStates)
                 .build();
         addTransition(javaStateTransition);
+    }
+
+    public Optional<ActionDefinition> getActionDefinition(Long toState) {
+        IStateTransition transition = transitions.get(toState);
+        if (transition instanceof ActionDefinitionStateTransition) {
+            return transition.getActionDefinition();
+        }
+        return Optional.empty();
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("id=").append(stateId);
+        stringBuilder.append(" name=").append(stateName);
+        stringBuilder.append(" transitions-to:");
+        transitions.forEach((id, transition) -> stringBuilder.append(id.toString()));
+        return stringBuilder.toString();
     }
 
     public static class Builder {

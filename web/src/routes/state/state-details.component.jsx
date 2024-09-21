@@ -1,13 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import { Box, Grid, Paper, Typography } from '@mui/material';
 import StateImageSet from './../../components/state-image-set/state-image-set.component';
 import Scene from './../../components/scene/scene.component';
 import StateDetailsButtons from "./state-details-buttons.component";
 import StateImageOptions from './../../components/state-image/state-image-options.component';
 import StateImage from './../../components/state-image/state-image.component';
-import './state-details.styles.css';
+import api from './../../services/api'
 
 const StateDetails = ({ allStates: initialAllStates = [], isLoading }) => {
   const [state, setState] = useState(null);
@@ -109,7 +108,7 @@ const StateDetails = ({ allStates: initialAllStates = [], isLoading }) => {
   const handleMoveStateImage = useCallback(async (stateImageId, newStateId) => {
     console.log('handleMoveStateImage called with:', { stateImageId, newStateId });
     try {
-      const response = await axios.put(`${process.env.REACT_APP_BROBOT_API_URL}/api/states/move-image`, {
+      const response = await api.put(`/api/states/move-image`, {
         stateImageId,
         newStateId
       });
@@ -126,19 +125,22 @@ const StateDetails = ({ allStates: initialAllStates = [], isLoading }) => {
     }
   }, [handleStateImageUpdate]);
 
-  const fetchTransitions = useCallback(async () => {
-    try {
-      const response = await fetch('${process.env.REACT_APP_BROBOT_API_URL}/api/transitions');
-      if (response.ok) {
-        const data = await response.json();
-        setTransitions(data);
-      } else {
-        console.error('Failed to fetch transitions');
-      }
-    } catch (error) {
-      console.error('Error fetching transitions:', error);
+const fetchTransitions = useCallback(async () => {
+  try {
+    const response = await api.get('/api/transitions');
+    if (response.status === 200) {
+      setTransitions(response.data);
+    } else {
+      console.error('Failed to fetch transitions. Status:', response.status);
     }
-  }, []);
+  } catch (error) {
+    console.error('Error fetching transitions:', error.message);
+    if (error.response) {
+      console.error('Response data:', error.response.data);
+      console.error('Response status:', error.response.status);
+    }
+  }
+}, []);
 
   useEffect(() => {
     if (!isLoading && allStates && allStates.length > 0) {
@@ -202,18 +204,23 @@ const StateDetails = ({ allStates: initialAllStates = [], isLoading }) => {
     }));
   }, []);
 
-    const handleStateDeleted = (deletedStateId) => {
-      setAllStates(prevStates => prevStates.filter(state => state.id !== deletedStateId));
-      if (allStates && allStates.length > 1) {
-        navigate(`/states/${allStates[0].id}`);
-      } else {
-        navigate('/');
-      }
-    };
+const handleStateDeleted = (deletedStateId) => {
+  setAllStates(prevStates => prevStates.filter(state => state.id !== deletedStateId));
+  if (allStates.length > 1) {
+    const nextState = allStates.find(state => state.id !== deletedStateId);
+    if (nextState) {
+      navigate(`/states/${nextState.id}`);
+    } else {
+      navigate('/');
+    }
+  } else {
+    navigate('/');
+  }
+};
 
   const handleDeleteImages = useCallback(async () => {
     try {
-      const response = await fetch('${process.env.REACT_APP_BROBOT_API_URL}/api/state-images/delete', {
+      const response = await api.get('/api/state-images/delete', {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -265,7 +272,7 @@ const StateDetails = ({ allStates: initialAllStates = [], isLoading }) => {
 
   const handleDeleteStateImage = useCallback(async (stateImageId) => {
     try {
-      const response = await fetch(`${process.env.REACT_APP_BROBOT_API_URL}/api/stateimages/${stateImageId}`, {
+      const response = await api.get(`/api/stateimages/${stateImageId}`, {
         method: 'DELETE',
       });
 
@@ -306,7 +313,7 @@ const StateDetails = ({ allStates: initialAllStates = [], isLoading }) => {
 
   const handleStateNameSubmit = async () => {
     try {
-      const response = await axios.put(`${process.env.REACT_APP_BROBOT_API_URL}/api/states/${state.id}/name`, { name: stateName });
+      const response = await api.put(`/api/states/${state.id}/name`, { name: stateName });
       if (response.status === 200) {
         console.log('State name updated successfully');
         // Update the local state
@@ -332,7 +339,7 @@ const StateDetails = ({ allStates: initialAllStates = [], isLoading }) => {
 
   const handleTransitionUpdate = async (updatedTransition) => {
     try {
-      const response = await axios.put(`${process.env.REACT_APP_BROBOT_API_URL}/api/transitions/${updatedTransition.id}`, updatedTransition);
+      const response = await api.put(`/api/transitions/${updatedTransition.id}`, updatedTransition);
       if (response.status === 200) {
         setTransitions(prevTransitions =>
           prevTransitions.map(t => t.id === updatedTransition.id ? updatedTransition : t)
@@ -345,7 +352,7 @@ const StateDetails = ({ allStates: initialAllStates = [], isLoading }) => {
 
   const handleTransitionDelete = async (transitionId) => {
     try {
-      const response = await axios.delete(`${process.env.REACT_APP_BROBOT_API_URL}/api/transitions/${transitionId}`);
+      const response = await api.delete(`/api/transitions/${transitionId}`);
       if (response.status === 204) {
         setTransitions(prevTransitions => prevTransitions.filter(t => t.id !== transitionId));
         setSelectedTransition(null);

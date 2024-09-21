@@ -24,8 +24,8 @@ public class ActionStepResponseMapper {
 
         ActionStepResponse response = new ActionStepResponse();
         response.setId(entity.getId());
-        response.setActionOptions(actionOptionsResponseMapper.map(entity.getActionOptions()));
-        response.setObjectCollection(objectCollectionResponseMapper.toResponse(entity.getObjectCollection()));
+        response.setActionOptions(actionOptionsResponseMapper.map(entity.getActionOptionsEntity()));
+        response.setObjectCollection(objectCollectionResponseMapper.toResponse(entity.getObjectCollectionEntity()));
 
         return response;
     }
@@ -37,8 +37,8 @@ public class ActionStepResponseMapper {
 
         ActionStepEntity entity = new ActionStepEntity();
         entity.setId(response.getId());
-        entity.setActionOptions(actionOptionsResponseMapper.map(response.getActionOptions()));
-        entity.setObjectCollection(objectCollectionResponseMapper.toEntity(response.getObjectCollection()));
+        entity.setActionOptionsEntity(actionOptionsResponseMapper.map(response.getActionOptions()));
+        entity.setObjectCollectionEntity(objectCollectionResponseMapper.toEntity(response.getObjectCollection()));
 
         return entity;
     }
@@ -46,8 +46,8 @@ public class ActionStepResponseMapper {
     public ActionStepEntity fromRequest(ActionStepRequest request) {
         if (request == null) return null;
         ActionStepEntity entity = new ActionStepEntity();
-        entity.setActionOptions(actionOptionsResponseMapper.fromRequest(request.getActionOptions()));
-        entity.setObjectCollection(objectCollectionResponseMapper.fromRequest(request.getObjectCollection()));
+        entity.setActionOptionsEntity(actionOptionsResponseMapper.fromRequest(request.getActionOptions()));
+        entity.setObjectCollectionEntity(objectCollectionResponseMapper.fromRequest(request.getObjectCollection()));
         return entity;
     }
 

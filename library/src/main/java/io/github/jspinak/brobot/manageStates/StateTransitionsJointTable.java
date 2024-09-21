@@ -1,7 +1,9 @@
 package io.github.jspinak.brobot.manageStates;
 
 import io.github.jspinak.brobot.datatypes.state.state.State;
+import io.github.jspinak.brobot.primatives.enums.SpecialStateType;
 import lombok.Getter;
+import org.python.antlr.ast.Str;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -48,14 +50,15 @@ public class StateTransitionsJointTable {
      * @param exitedState is a State that is no longer active.
      */
     public void removeTransitionsToHiddenStates(State exitedState) {
-        exitedState.getHiddenStateNames().forEach(hiddenState -> {
+        exitedState.getHiddenStateIds().forEach(hiddenState -> {
             if (incomingTransitionsToPREVIOUS.containsKey(hiddenState))
-                incomingTransitionsToPREVIOUS.get(hiddenState).remove(exitedState.getName());
+                incomingTransitionsToPREVIOUS.get(hiddenState).remove(exitedState.getId());
         });
     }
 
     public void add(Long to, Long from) {
-        if (!from.equals(StateMemory.Enum.PREVIOUS.toString())) addIncomingTransition(to, from);
+        if (!from.equals(SpecialStateType.PREVIOUS.getId()))
+            addIncomingTransition(to, from);
         addOutgoingTransition(to, from);
     }
 
@@ -78,7 +81,24 @@ public class StateTransitionsJointTable {
     }
 
     public Set<Long> getStatesWithTransitionsTo(Long... children) {
-        return getStatesWithTransitionsTo(new HashSet<>(Arrays.asList(children.clone())));
+        System.out.println("Getting states with transitions to: " + Arrays.toString(children));
+        Set<Long> parents = new HashSet<>();
+        for (Long child : children) {
+            if (incomingTransitions.containsKey(child)) {
+                parents.addAll(incomingTransitions.get(child));
+                System.out.println("Found incoming transitions for " + child + ": " + incomingTransitions.get(child));
+            } else {
+                System.out.println("No incoming transitions found for " + child);
+            }
+            if (incomingTransitionsToPREVIOUS.containsKey(child)) {
+                parents.addAll(incomingTransitionsToPREVIOUS.get(child));
+                System.out.println("Found incoming PREVIOUS transitions for " + child + ": " + incomingTransitionsToPREVIOUS.get(child));
+            } else {
+                System.out.println("No incoming PREVIOUS transitions found for " + child);
+            }
+        }
+        System.out.println("Returning parent states: " + parents);
+        return parents;
     }
 
     public Set<Long> getStatesWithTransitionsTo(Set<Long> children) {
@@ -105,8 +125,7 @@ public class StateTransitionsJointTable {
     }
 
     public Map<Long, Set<Long>> getIncomingTransitionsWithHiddenTransitions() {
-        Map<Long, Set<Long>> allIncoming = new HashMap<>();
-        allIncoming.putAll(incomingTransitions);
+        Map<Long, Set<Long>> allIncoming = new HashMap<>(incomingTransitions);
         incomingTransitionsToPREVIOUS.forEach((stateName, stateNames) -> {
             if (allIncoming.containsKey(stateName)) allIncoming.get(stateName).addAll(stateNames);
             else allIncoming.put(stateName, stateNames);
@@ -114,7 +133,25 @@ public class StateTransitionsJointTable {
         return allIncoming;
     }
 
-    public Map<Long, Set<Long>> getOutgoingTransitions() {
-        return outgoingTransitions;
+    public String print() {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("StateTransitionsJointTable\n");
+        for (Long incomingStateId : incomingTransitions.keySet()) {
+            stringBuilder.append("incoming transitions to state ").append(incomingStateId.toString()).append(": ");
+            incomingTransitions.get(incomingStateId).forEach(fromStateId -> stringBuilder.append(fromStateId).append(" "));
+        }
+        stringBuilder.append("\n");
+        for (Long outgoingStateId : outgoingTransitions.keySet()) {
+            stringBuilder.append("outgoing transitions to state ").append(outgoingStateId.toString()).append(": ");
+            outgoingTransitions.get(outgoingStateId).forEach(fromStateId -> stringBuilder.append(fromStateId).append(" "));
+        }
+        stringBuilder.append("\n");
+        for (Long previousStateId : incomingTransitionsToPREVIOUS.keySet()) {
+            stringBuilder.append("incoming transitions to PREVIOUS ").append(previousStateId.toString()).append(": ");
+            incomingTransitionsToPREVIOUS.get(previousStateId).forEach(fromStateId -> stringBuilder.append(fromStateId).append(" "));
+        }
+        System.out.println(stringBuilder);
+        return stringBuilder.toString();
     }
+
 }

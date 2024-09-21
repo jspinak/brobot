@@ -441,6 +441,77 @@ public class ActionOptions {
      */
     private int sceneToUseForCaptureAfterFusingMatches = 0;
 
+    @Override
+    public String toString() {
+        return "ActionOptions{" +
+                "action=" + action +
+                ", find=" + find +
+                ", findActions=" + findActions +
+                ", keepLargerMatches=" + keepLargerMatches +
+                ", similarity=" + similarity +
+                ", doOnEach=" + doOnEach +
+                ", captureImage=" + captureImage +
+                ", useDefinedRegion=" + useDefinedRegion +
+                ", scrollDirection=" + scrollDirection +
+                ", clickUntil=" + clickUntil +
+                ", getTextUntil=" + getTextUntil +
+                ", textToAppearOrVanish='" + textToAppearOrVanish + '\'' +
+                ", pauseBeforeMouseDown=" + pauseBeforeMouseDown +
+                ", pauseAfterMouseDown=" + pauseAfterMouseDown +
+                ", moveMouseDelay=" + moveMouseDelay +
+                ", pauseBeforeMouseUp=" + pauseBeforeMouseUp +
+                ", pauseAfterMouseUp=" + pauseAfterMouseUp +
+                ", dragToOffsetX=" + dragToOffsetX +
+                ", dragToOffsetY=" + dragToOffsetY +
+                ", clickType=" + clickType +
+                ", moveMouseAfterAction=" + moveMouseAfterAction +
+                ", moveMouseAfterActionTo=" + moveMouseAfterActionTo +
+                ", moveMouseAfterActionBy=" + moveMouseAfterActionBy +
+                ", targetPosition=" + targetPosition +
+                ", targetOffset=" + targetOffset +
+                ", searchRegions=" + searchRegions +
+                ", pauseBeforeBegin=" + pauseBeforeBegin +
+                ", pauseAfterEnd=" + pauseAfterEnd +
+                ", maxWait=" + maxWait +
+                ", timesToRepeatIndividualAction=" + timesToRepeatIndividualAction +
+                ", maxTimesToRepeatActionSequence=" + maxTimesToRepeatActionSequence +
+                ", pauseBetweenIndividualActions=" + pauseBetweenIndividualActions +
+                ", pauseBetweenActionSequences=" + pauseBetweenActionSequences +
+                ", maxMatchesToActOn=" + maxMatchesToActOn +
+                ", defineAs=" + defineAs +
+                ", addW=" + addW +
+                ", addH=" + addH +
+                ", absoluteW=" + absoluteW +
+                ", absoluteH=" + absoluteH +
+                ", addX=" + addX +
+                ", addY=" + addY +
+                ", addX2=" + addX2 +
+                ", addY2=" + addY2 +
+                ", highlightAllAtOnce=" + highlightAllAtOnce +
+                ", highlightSeconds=" + highlightSeconds +
+                ", highlightColor='" + highlightColor + '\'' +
+                ", typeDelay=" + typeDelay +
+                ", modifiers='" + modifiers + '\'' +
+                ", color=" + color +
+                ", diameter=" + diameter +
+                ", kmeans=" + kmeans +
+                ", hueBins=" + hueBins +
+                ", saturationBins=" + saturationBins +
+                ", valueBins=" + valueBins +
+                ", minScore=" + minScore +
+                ", minArea=" + minArea +
+                ", maxArea=" + maxArea +
+                ", maxMovement=" + maxMovement +
+                ", startPlayback=" + startPlayback +
+                ", playbackDuration=" + playbackDuration +
+                ", illustrate=" + illustrate +
+                ", fusionMethod=" + fusionMethod +
+                ", maxFusionDistanceX=" + maxFusionDistanceX +
+                ", maxFusionDistanceY=" + maxFusionDistanceY +
+                ", sceneToUseForCaptureAfterFusingMatches=" + sceneToUseForCaptureAfterFusingMatches +
+                '}';
+    }
+
     public static class Builder {
         private Action action = Action.FIND;
         private BiConsumer<Matches, List<ObjectCollection>> tempFind;

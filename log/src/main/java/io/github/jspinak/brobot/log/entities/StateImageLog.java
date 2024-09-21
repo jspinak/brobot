@@ -16,7 +16,17 @@ public class StateImageLog {
     private Long id;
 
     private String name;
-    private String stateObjectName;
+    private String stateOwnerName;
     private boolean found;
+
+    @Override
+    public String toString() {
+        return "StateImageLog{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", stateOwnerName='" + stateOwnerName + '\'' +
+                ", found=" + found +
+                '}';
+    }
 
 }

@@ -1,10 +1,12 @@
 package io.github.jspinak.brobot.manageStates;
 
+import io.github.jspinak.brobot.dsl.ActionDefinition;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.BooleanSupplier;
 import java.util.function.Function;
@@ -39,6 +41,11 @@ public class JavaStateTransition implements IStateTransition {
         this.exit = exitNames.stream()
                 .map(nameToIdConverter)
                 .collect(Collectors.toSet());
+    }
+
+    @Override
+    public Optional<ActionDefinition> getActionDefinition() {
+        return Optional.empty();
     }
 
     public static class Builder {

@@ -128,7 +128,7 @@ public class ActionDSL {
         StringBuilder dsl = new StringBuilder();
 
         for (int i = 0; i < actionDefinition.getSteps().size(); i++) {
-            ActionDefinition.ActionStep step = actionDefinition.getSteps().get(i);
+            ActionStep step = actionDefinition.getSteps().get(i);
             dsl.append(STEP_KEYWORD).append(i + 1).append(KEY_VALUE_SEPARATOR).append(LINE_SEPARATOR);
 
             dsl.append(OPTIONS_KEYWORD).append(KEY_VALUE_SEPARATOR).append(LINE_SEPARATOR);

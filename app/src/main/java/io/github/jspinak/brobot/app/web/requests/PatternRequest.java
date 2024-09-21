@@ -18,5 +18,5 @@ public class PatternRequest {
     private boolean dynamic;
     private PositionRequest position;
     private AnchorsRequest anchors = new AnchorsRequest();
-    private ImageRequest image;
+    private Long imageId;
 }

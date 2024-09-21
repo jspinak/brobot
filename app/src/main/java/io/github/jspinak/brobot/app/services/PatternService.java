@@ -1,5 +1,6 @@
 package io.github.jspinak.brobot.app.services;
 
+import io.github.jspinak.brobot.app.database.databaseMappers.ImageEntityMapper;
 import io.github.jspinak.brobot.app.database.databaseMappers.PatternEntityMapper;
 import io.github.jspinak.brobot.app.database.entities.ImageEntity;
 import io.github.jspinak.brobot.app.database.entities.PatternEntity;
@@ -8,7 +9,9 @@ import io.github.jspinak.brobot.app.stateStructureBuilders.GetPatternsFromBundle
 import io.github.jspinak.brobot.app.web.requests.PatternRequest;
 import io.github.jspinak.brobot.app.web.responseMappers.PatternResponseMapper;
 import io.github.jspinak.brobot.app.web.responses.PatternResponse;
+import io.github.jspinak.brobot.datatypes.primitives.image.Image;
 import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
+import io.github.jspinak.brobot.datatypes.state.state.State;
 import jakarta.transaction.Transactional;
 import org.sikuli.script.ImagePath;
 import org.slf4j.Logger;
@@ -29,23 +32,41 @@ public class PatternService {
     private final PatternResponseMapper patternResponseMapper;
     private final GetPatternsFromBundlePath getPatternsFromBundlePath;
     private final ImageService imageService;
+    private final ImageEntityMapper imageEntityMapper;
 
     public PatternService(PatternRepo patternRepo, PatternEntityMapper patternEntityMapper,
                           PatternResponseMapper patternResponseMapper,
                           GetPatternsFromBundlePath getPatternsFromBundlePath,
-                          ImageService imageService) {
+                          ImageService imageService, ImageEntityMapper imageEntityMapper) {
         this.patternRepo = patternRepo;
         this.patternEntityMapper = patternEntityMapper;
         this.patternResponseMapper = patternResponseMapper;
         this.getPatternsFromBundlePath = getPatternsFromBundlePath;
         this.imageService = imageService;
+        this.imageEntityMapper = imageEntityMapper;
     }
 
     public List<Pattern> getPatterns(String name) {
         List<PatternEntity> patternEntities = patternRepo.findByName(name);
         return patternEntities.stream()
-                .map(patternEntityMapper::map)
+                .map(this::mapWithImage)  // Use a method that handles image fetching
                 .collect(Collectors.toList());
+    }
+
+    public List<PatternEntity> getPatternEntities(List<Long> patternIds) {
+        return new ArrayList<>(patternRepo.findAllById(patternIds));
+    }
+
+    public Pattern mapWithImage(PatternEntity patternEntity) {
+        // Map the PatternEntity to a Pattern
+        Pattern pattern = patternEntityMapper.map(patternEntity);
+
+        // Fetch image using ImageService and set it
+        imageService.getImageEntity(patternEntity.getImageId()).ifPresent(imageEntity -> {
+            pattern.setImage(imageEntityMapper.map(imageEntity));
+        });
+
+        return pattern;
     }
 
     public List<Pattern> getAllPatterns() {
@@ -100,8 +121,10 @@ public class PatternService {
                 log.info("Pattern with imgpath {} already exists, skipping", pattern.getImgpath());
                 savedEntities.add(existingPattern.get());
             } else {
-                PatternEntity entity = patternEntityMapper.map(pattern);
-                PatternEntity saved = patternRepo.save(entity);
+                PatternEntity patternEntity = patternEntityMapper.map(pattern);
+                ImageEntity imageEntity = imageService.saveImage(pattern.getImage());
+                patternEntity.setImageId(imageEntity.getId());
+                PatternEntity saved = patternRepo.save(patternEntity);
                 log.info("Saved new pattern: id={}, name={}, imgpath={}", saved.getId(), saved.getName(), saved.getImgpath());
                 savedEntities.add(saved);
             }
@@ -115,9 +138,16 @@ public class PatternService {
         return responses;
     }
 
+    public PatternEntity saveRequestAsEntity(PatternRequest patternRequest) {
+        PatternEntity patternEntity = patternResponseMapper.fromRequest(patternRequest);
+        Optional<ImageEntity> imageEntity = imageService.getImageEntity(patternRequest.getImageId());
+        imageEntity.ifPresent(image -> patternEntity.setImageId(image.getId())); // no image is passed, just an id. it should be in the image repo.
+        return patternRepo.save(patternEntity);
+    }
+
     @Transactional
     public PatternEntity createOrUpdatePattern(PatternRequest request) {
-        log.info("Creating or updating pattern: id={}, name={}, imgpath={}", request.getId(), request.getName(), request.getImgpath());
+        log.info("Creating or updating pattern: id={}, name={}, imageId={}", request.getId(), request.getName(), request.getImageId());
         PatternEntity pattern;
         if (request.getId() != null) {
             pattern = patternRepo.findById(request.getId())
@@ -137,18 +167,8 @@ public class PatternService {
                     });
         }
 
-        // Update pattern fields
-        pattern.setName(request.getName());
-        pattern.setImgpath(request.getImgpath());
-        // Set other fields...
-
-        if (request.getImage() != null) {
-            ImageEntity image = imageService.createOrUpdateImage(request.getImage());
-            pattern.setImage(image);
-        }
-
-        PatternEntity savedPattern = patternRepo.save(pattern);
-        log.info("Saved pattern: id={}, name={}, imgpath={}", savedPattern.getId(), savedPattern.getName(), savedPattern.getImgpath());
+        PatternEntity savedPattern = saveRequestAsEntity(request);
+        log.info("Saved pattern: id={}, name={}", savedPattern.getId(), savedPattern.getName());
         return savedPattern;
     }
 

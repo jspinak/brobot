@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @Data
 public class MatchEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private double score = 0.0;
     @OneToOne(cascade = CascadeType.ALL)
@@ -32,6 +32,6 @@ public class MatchEntity {
     @Transient
     private Mat histogram;
     private Long sceneId; // Scene here would create a circular reference
-    private LocalDateTime timeStamp;
+    private LocalDateTime timeStamp = LocalDateTime.now();
     private int timesActedOn = 0;
 }

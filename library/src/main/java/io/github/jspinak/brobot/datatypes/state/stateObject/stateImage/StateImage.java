@@ -316,6 +316,16 @@ public class StateImage implements StateObject {
             return this;
         }
 
+        @Override
+        public String toString() {
+            StringBuilder stringBuilder = new StringBuilder();
+            stringBuilder.append("StateImage\n");
+            stringBuilder.append("images\n");
+            stringBuilder.append(this.name).append("\n");
+            patterns.forEach(pattern -> stringBuilder.append(pattern.getName()).append(" "));
+            return stringBuilder.toString();
+        }
+
         public StateImage build() {
             StateImage stateImage = new StateImage();
             stateImage.name = name;

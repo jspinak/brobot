@@ -1,10 +1,10 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { Typography, Container, Grid, Paper, Box, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, TextField } from '@mui/material';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
 import ProjectSelector from './project-selector.component';
 import CreateProjectDialog from './create-project-dialog.component';
 import { ProjectContext } from './../../components/ProjectContext';
+import api from './../../services/api'
 
 const Home = () => {
     const { selectedProject, setSelectedProject } = useContext(ProjectContext);
@@ -24,7 +24,7 @@ const Home = () => {
 
     const handleCreateProject = async (projectName) => {
         try {
-            const response = await axios.post('${process.env.REACT_APP_BROBOT_API_URL}/api/projects', { name: projectName });
+            const response = await api.post(`/api/projects`, { name: projectName });
             console.log('Project created:', response.data);
             setSelectedProject(response.data);
             setOpenDialog(false);
@@ -37,7 +37,7 @@ const Home = () => {
     const handleDeleteProject = async () => {
         if (!selectedProject) return;
         try {
-            await axios.delete(`${process.env.REACT_APP_BROBOT_API_URL}/api/projects/${selectedProject.id}`);
+            await api.delete(`/api/projects/${selectedProject.id}`);
             setSelectedProject(null);
             setTriggerRefresh(prev => prev + 1);
             setOpenDeleteDialog(false);
@@ -52,7 +52,7 @@ const Home = () => {
             return;
         }
         try {
-            const response = await axios.post(`${process.env.REACT_APP_BROBOT_API_URL}/api/automation/save-to-library/${selectedProject.id}`);
+            const response = await api.post(`/api/automation/save-to-library/${selectedProject.id}`);
             setAutomationResult(response.data);
         } catch (error) {
             setAutomationResult('Error saving to library: ' + error.message);
@@ -66,7 +66,7 @@ const Home = () => {
         }
         setAutomationResult('Running...');
         try {
-            const response = await axios.post(`${process.env.REACT_APP_BROBOT_API_URL}/api/automation/${endpoint}`);
+            const response = await api.post(`/api/automation/${endpoint}`);
             setAutomationResult(response.data);
         } catch (error) {
             setAutomationResult('Error occurred: ' + error.message);
