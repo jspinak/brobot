@@ -11,7 +11,7 @@ import lombok.Data;
 public class PatternEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String url; // originally type URL, which requires conversion for use with JPA
@@ -33,7 +33,8 @@ public class PatternEntity {
     private PositionEmbeddable position = new PositionEmbeddable();
     @OneToOne(cascade = CascadeType.ALL)
     private AnchorsEntity anchors = new AnchorsEntity();
-    @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    private ImageEntity image;
+
+    @Column(name = "image_id")
+    private Long imageId;
 
 }

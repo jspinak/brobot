@@ -8,6 +8,7 @@ import org.python.antlr.ast.Str;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Given sets of possible active States, this class searches for these States
@@ -38,6 +39,13 @@ public class InitialStates {
         this.allStatesInProjectService = allStatesInProjectService;
     }
 
+    public void addStateSet(int probability, State... states) {
+        if (probability <= 0) return;
+        sumOfProbabilities += probability;
+        Set<Long> stateIds = Arrays.stream(states).map(State::getId).collect(Collectors.toSet());
+        potentialActiveStates.put(stateIds, sumOfProbabilities);
+    }
+
     public void addStateSet(int probability, String... stateNames) {
         if (probability <= 0) return;
         sumOfProbabilities += probability;
@@ -49,7 +57,7 @@ public class InitialStates {
     }
 
     public void findIntialStates() {
-        Report.println();
+        Report.println("find initial states");
         if (BrobotSettings.mock) {
             mockInitialStates();
             return;
@@ -71,10 +79,18 @@ public class InitialStates {
     }
 
     private void searchForInitialStates() {
-        Set<Long> allPotentialStates = new HashSet<>();
-        potentialActiveStates.forEach((pot, prob) -> allPotentialStates.addAll(pot));
-        allPotentialStates.forEach(stateFinder::findState);
+        searchForStates(potentialActiveStates);
+        if (stateMemory.getActiveStates().isEmpty()) {
+            Map<Set<Long>, Integer> potential = new HashMap<>();
+            allStatesInProjectService.getAllStateIds().forEach(id -> potential.put(Collections.singleton(id), 1));
+            searchForStates(potential);
+        }
     }
 
+    private void searchForStates(Map<Set<Long>, Integer> potentialActiveStatesAndProbabilities) {
+        Set<Long> allPotentialStates = new HashSet<>();
+        potentialActiveStatesAndProbabilities.forEach((pot, prob) -> allPotentialStates.addAll(pot));
+        allPotentialStates.forEach(stateFinder::findState);
+    }
 
 }

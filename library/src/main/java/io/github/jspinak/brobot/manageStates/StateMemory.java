@@ -2,14 +2,14 @@ package io.github.jspinak.brobot.manageStates;
 
 import io.github.jspinak.brobot.database.services.AllStatesInProjectService;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
+import io.github.jspinak.brobot.datatypes.state.state.State;
 import io.github.jspinak.brobot.primatives.enums.SpecialStateType;
 import io.github.jspinak.brobot.primatives.enums.StateEnum;
 import io.github.jspinak.brobot.reports.Report;
 import lombok.Getter;
 import org.springframework.stereotype.Component;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * StateMemory keeps track of which States are currently active.
@@ -29,6 +29,15 @@ public class StateMemory {
 
     public StateMemory(AllStatesInProjectService allStatesInProjectService) {
         this.allStatesInProjectService = allStatesInProjectService;
+    }
+
+    public List<State> getActiveStateList() {
+        List<State> activeStateList = new ArrayList<>();
+        for (Long stateId : activeStates) {
+            Optional<State> stateOpt = allStatesInProjectService.getState(stateId);
+            stateOpt.ifPresent(activeStateList::add);
+        }
+        return activeStateList;
     }
 
     public void adjustActiveStatesWithMatches(Matches matches) {

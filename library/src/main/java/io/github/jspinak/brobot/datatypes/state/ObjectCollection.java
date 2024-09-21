@@ -158,6 +158,18 @@ public class ObjectCollection {
         return states;
     }
 
+    @Override
+    public String toString() {
+        return "ObjectCollection{" +
+                "stateLocations=" + stateLocations.size() +
+                ", stateImages=" + stateImages.size() +
+                ", stateRegions=" + stateRegions.size() +
+                ", stateStrings=" + stateStrings.size() +
+                ", matches=" + matches.size() +
+                ", scenes=" + scenes.size() +
+                '}';
+    }
+
     public static class Builder {
         //private int lastId = 0; // currently id is given only to images
         private List<StateLocation> stateLocations = new ArrayList<>();

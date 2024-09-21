@@ -12,7 +12,7 @@ import lombok.Data;
 public class StateStringEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private StateObject.Type objectType = StateObject.Type.STRING;

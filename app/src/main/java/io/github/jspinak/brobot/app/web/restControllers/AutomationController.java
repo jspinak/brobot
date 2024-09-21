@@ -77,7 +77,7 @@ public class AutomationController {
         try {
             Optional<ProjectEntity> optionalProjectEntity = projectRepository.findById(projectId);
             if (optionalProjectEntity.isPresent()) {
-                buildModel.build(optionalProjectEntity.get().getId(), optionalProjectEntity.get().getName());
+                buildModel.build(optionalProjectEntity.get().getId());
                 return ResponseEntity.ok("State structure saved to library successfully");
             }
             return ResponseEntity.badRequest().body("No such project.");

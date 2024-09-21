@@ -21,13 +21,17 @@ public class TransitionEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "project_id")
+    private ProjectEntity project;
+
     @Column(name = "source_state_id")
     private Long sourceStateId;
 
     @Column(name = "state_image_id")
     private Long stateImageId;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE}, orphanRemoval = true)
     private ActionDefinitionEntity actionDefinition;
 
     @Enumerated(EnumType.STRING)

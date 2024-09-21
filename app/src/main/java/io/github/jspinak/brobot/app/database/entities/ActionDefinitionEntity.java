@@ -20,8 +20,13 @@ public class ActionDefinitionEntity {
     @Column(name = "action_type")
     private String actionType;
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE}, orphanRemoval = true)
     @JoinColumn(name = "action_definition_id")
     private List<ActionStepEntity> steps = new ArrayList<>();
+
+    public void addStepEntity(ActionOptionsEntity actionOptionsEntity,
+                              ObjectCollectionEntity objectCollectionEntity) {
+        steps.add(new ActionStepEntity(actionOptionsEntity, objectCollectionEntity));
+    }
 
 }

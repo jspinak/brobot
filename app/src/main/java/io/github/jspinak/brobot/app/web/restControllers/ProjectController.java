@@ -24,6 +24,7 @@ public class ProjectController {
 
     @GetMapping
     public ResponseEntity<List<ProjectResponse>> getAllProjects() {
+        System.out.println("Current working directory: " + System.getProperty("user.dir"));
         List<ProjectResponse> projects = projectService.getAllProjects()
                 .stream()
                 .map(projectResponseMapper::entityToResponse)

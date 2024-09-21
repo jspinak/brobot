@@ -17,7 +17,7 @@ public class StateEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "project", nullable = false)
     @JsonIgnore // Avoids serialization of ProjectEntity in StateEntity
     private ProjectEntity project = new ProjectEntity();
@@ -26,51 +26,64 @@ public class StateEntity {
     @ElementCollection
     @CollectionTable(name = "state_stateText", joinColumns = @JoinColumn(name = "state_id", referencedColumnName = "id"))
     private Set<String> stateText = new HashSet<>();
-    @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+
+    @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE})
     @JoinTable(name = "state_stateImages",
             joinColumns = @JoinColumn(name = "state_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "stateImage_id", referencedColumnName = "id"))
     private Set<StateImageEntity> stateImages = new HashSet<>();
+
     @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(name = "state_stateStrings",
             joinColumns = @JoinColumn(name = "state_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "stateString_id", referencedColumnName = "id"))
     private Set<StateStringEntity> stateStrings = new HashSet<>();
+
     @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(name = "state_stateRegions",
             joinColumns = @JoinColumn(name = "state_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "stateRegion_id", referencedColumnName = "id"))
     private Set<StateRegionEntity> stateRegions = new HashSet<>();
+
     @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(name = "state_stateLocations",
             joinColumns = @JoinColumn(name = "state_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "stateLocation_id", referencedColumnName = "id"))
     private Set<StateLocationEntity> stateLocations = new HashSet<>();
+
     private boolean blocking = false;
-    @ElementCollection
+
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "state_canHide", joinColumns = @JoinColumn(name = "state_id", referencedColumnName = "id"))
     private Set<String> canHide = new HashSet<>();
-    @ElementCollection
+
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "state_canHide_ids", joinColumns = @JoinColumn(name = "state_id", referencedColumnName = "id"))
     private Set<Long> canHideIds = new HashSet<>();
-    @ElementCollection
+
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "state_hidden", joinColumns = @JoinColumn(name = "state_id", referencedColumnName = "id"))
     private Set<String> hidden = new HashSet<>();
-    @ElementCollection
+
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "state_hidden_ids", joinColumns = @JoinColumn(name = "state_id", referencedColumnName = "id"))
     private Set<Long> hiddenStateIds = new HashSet<>();
+
     private int pathScore = 1;
     private LocalDateTime lastAccessed = LocalDateTime.now();
     private int baseProbabilityExists = 100;
     private int probabilityExists = 0;
     private int timesVisited = 0;
+
     @ManyToMany
     @JoinTable(name = "state_scenes",
             joinColumns = @JoinColumn(name = "state_id"),
             inverseJoinColumns = @JoinColumn(name = "scene_id"))
     private List<SceneEntity> scenes = new ArrayList<>();
+
     @Embedded
     private RegionEmbeddable usableArea = new RegionEmbeddable();
+
     @OneToOne(cascade = CascadeType.ALL)
     private MatchHistoryEntity matchHistory = new MatchHistoryEntity();
 

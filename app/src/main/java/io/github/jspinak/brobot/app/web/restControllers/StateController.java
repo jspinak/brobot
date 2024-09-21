@@ -84,12 +84,6 @@ public class StateController {
                 if (stateImage.getPatterns() == null || stateImage.getPatterns().isEmpty()) {
                     return ResponseEntity.badRequest().body("Invalid state image data: Patterns are required");
                 }
-                for (PatternRequest pattern : stateImage.getPatterns()) {
-                    if (pattern.getImage() == null || pattern.getImage().getImageBase64() == null ||
-                            pattern.getImage().getImageBase64().isEmpty()) {
-                        return ResponseEntity.badRequest().body("Invalid pattern data: Image is required");
-                    }
-                }
             }
 
             // Create the state
@@ -130,12 +124,15 @@ public class StateController {
         }
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteState(@PathVariable Long id) {
+    @DeleteMapping("/{stateId}")
+    public ResponseEntity<?> deleteState(@PathVariable Long stateId) {
         try {
-            stateService.deleteState(id);
+            stateService.deleteState(stateId);
             return ResponseEntity.ok().build();
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         } catch (Exception e) {
+            logger.error("Error deleting state with id {}: ", stateId, e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("An error occurred while deleting the state: " + e.getMessage());
         }
@@ -160,9 +157,7 @@ public class StateController {
     public ResponseEntity<?> getStatesByProject(@PathVariable Long projectId) {
         logger.info("Fetching states for project: {}", projectId);
         try {
-            List<StateEntity> states = stateService.getStatesByProject(projectId);
-            logger.info("Retrieved {} states for project {}", states.size(), projectId);
-            return ResponseEntity.ok(states.stream().map(stateResponseMapper::map).collect(Collectors.toList()));
+            return ResponseEntity.ok(stateService.getStateResponsesByProject(projectId));
         } catch (Exception e) {
             logger.error("Error retrieving states for project {}", projectId, e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error retrieving states: " + e.getMessage());

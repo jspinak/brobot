@@ -28,6 +28,7 @@ dependencies {
         exclude group: 'org.slf4j', module: 'slf4j-nop'
     }
     implementation group: 'org.bytedeco', name: 'javacv-platform', version: '1.5.10'
+    implementation 'com.github.kwhat:jnativehook:2.2.2'
 }
 
 test {

@@ -72,22 +72,4 @@ public class MatchSnapshotResponseMapper {
         entity.setState(request.getState());
         return entity;
     }
-
-    public MatchSnapshotRequest toRequest(MatchSnapshotEntity entity) {
-        if (entity == null) return null;
-        MatchSnapshotRequest request = new MatchSnapshotRequest();
-        request.setId(entity.getId());
-        request.setActionOptions(actionOptionsResponseMapper.toRequest(entity.getActionOptions()));
-        request.setMatchList(entity.getMatchList().stream()
-                .map(matchResponseMapper::toRequest)
-                .collect(Collectors.toList()));
-        request.setText(entity.getText());
-        request.setDuration(entity.getDuration());
-        request.setTimeStamp(entity.getTimeStamp());
-        request.setActionSuccess(entity.isActionSuccess());
-        request.setResultSuccess(entity.isResultSuccess());
-        request.setState(entity.getState());
-
-        return request;
-    }
 }

@@ -22,6 +22,9 @@ public class LocalLogEntryService implements LogEntryService {
 
     @Override
     public LogEntry saveLog(LogEntry logEntry) {
+        System.out.println("Saving LogEntry: " + logEntry);
+        System.out.println("StateImages: " + logEntry.getStateImages());
+
         LogEntry savedLogEntry = logEntryRepository.save(logEntry);
         logSender.sendLog(logEntry);  // Send to client app
         return savedLogEntry;

@@ -11,6 +11,7 @@ import java.util.Set;
 @Setter
 public class TransitionCreateRequest {
     private Long sourceStateId;
+    private Long projectId;
     private Long stateImageId;
     private JavaStateTransition.StaysVisible staysVisibleAfterTransition;
     private Set<Long> statesToEnter = new HashSet<>(); // Renamed from 'activate'

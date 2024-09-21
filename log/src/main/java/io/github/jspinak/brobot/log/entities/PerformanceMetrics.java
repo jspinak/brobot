@@ -12,4 +12,14 @@ public class PerformanceMetrics {
     private long pageLoadTime;
     private long transitionTime;
     private long totalTestDuration;
+
+    @Override
+    public String toString() {
+        return "PerformanceMetrics{" +
+                "actionDuration=" + actionDuration +
+                ", pageLoadTime=" + pageLoadTime +
+                ", transitionTime=" + transitionTime +
+                ", totalTestDuration=" + totalTestDuration +
+                '}';
+    }
 }

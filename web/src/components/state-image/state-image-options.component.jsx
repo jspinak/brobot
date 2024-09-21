@@ -1,9 +1,7 @@
-import React, { useState, useCallback, useEffect } from 'react';
-import axios from 'axios';
-import { ActionOptions } from '../../constants/action-options';
-import { Box, Typography, TextField, Button, Select, MenuItem, FormControl, InputLabel, List, ListItem,
-    ListItemText, ListItemSecondaryAction, IconButton } from '@mui/material';
-import DeleteIcon from '@mui/icons-material/Delete';
+import React, { useState, useCallback, useEffect, useContext } from 'react';
+import { Box, Typography, TextField, Button, Select, MenuItem, FormControl, InputLabel, List, ListItem, ListItemText, ListItemSecondaryAction, Divider } from '@mui/material';
+import { ProjectContext } from './../ProjectContext';
+import api from './../../services/api';
 
 const StateImageOptions = ({
     stateImage,
@@ -17,8 +15,10 @@ const StateImageOptions = ({
     currentStateId,
     selectedTransition,
     onTransitionUpdate,
-    onTransitionDelete
+    onTransitionDelete,
+    fetchTransitions
 }) => {
+    const { selectedProject } = useContext(ProjectContext);
     const [transitionOptions, setTransitionOptions] = useState({
         staysVisibleAfterTransition: 'NONE',
         statesToEnter: [],
@@ -26,25 +26,25 @@ const StateImageOptions = ({
         score: 0
     });
     const [moveToState, setMoveToState] = useState('');
-    const [newName, setNewName] = useState(stateImage.name);
+    const [newName, setNewName] = useState('');
     const [stateImageTransitions, setStateImageTransitions] = useState([]);
 
     useEffect(() => {
-        // Filter transitions for the current state image
-        const relevantTransitions = transitions.filter(t => t.stateImageId === stateImage.id);
-        setStateImageTransitions(relevantTransitions);
-    }, [transitions, stateImage.id]);
+        if (stateImage) {
+            setNewName(stateImage.name);
+            setStateImageTransitions(transitions.filter(t => t.stateImageId === stateImage.id));
+        }
+    }, [stateImage, transitions]);
 
     const handleMove = useCallback(async () => {
-        if (moveToState) {
+        if (moveToState && stateImage) {
             try {
-                const response = await axios.put(`${process.env.REACT_APP_BROBOT_API_URL}/api/states/move-image`, {
+                const response = await api.put(`/api/states/move-image`, {
                     stateImageId: stateImage.id,
                     newStateId: parseInt(moveToState)
                 });
 
                 if (response.status === 200) {
-                    console.log('Move successful:', response.data);
                     onStateImageUpdate(stateImage.id, parseInt(moveToState));
                     setMoveToState('');
                 } else {
@@ -54,45 +54,36 @@ const StateImageOptions = ({
                 console.error('Error moving state image:', error);
             }
         }
-    }, [stateImage.id, moveToState, onStateImageUpdate]);
+    }, [stateImage, moveToState, onStateImageUpdate]);
 
     const handleNameChange = async () => {
-        try {
-            const response = await fetch(
-                `${process.env.REACT_APP_BROBOT_API_URL}/api/stateimages/${stateImage.id}/edit`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ name: newName }),
-            });
-
-            if (response.ok) {
-                const updatedStateImage = await response.json();
-                onStateImageUpdate(updatedStateImage);
-                onNameChange(stateImage.id, newName);
-                console.log('name changed');
-            } else {
-                console.error('Failed to update state image name');
+        if (stateImage) {
+            try {
+                const response = await api.put(`/api/stateimages/${stateImage.id}/edit`, { name: newName });
+                if (response.ok) {
+                    const updatedStateImage = await response.json();
+                    onStateImageUpdate(updatedStateImage);
+                    onNameChange(stateImage.id, newName);
+                } else {
+                    console.error('Failed to update state image name');
+                }
+            } catch (error) {
+                console.error('Error updating state image name:', error);
             }
-        } catch (error) {
-            console.error('Error updating state image name:', error);
         }
     };
 
     const handleCreateTransition = async () => {
-        if (transitionOptions.statesToEnter.length === 0) {
-            console.error('No states to enter selected');
+        if (transitionOptions.statesToEnter.length === 0 || !selectedProject) {
+            console.error('No states to enter selected or no project selected');
             return;
         }
 
         const transitionRequest = {
+            projectId: selectedProject.id,
             sourceStateId: stateImage.ownerStateId,
             stateImageId: stateImage.id,
-            staysVisibleAfterTransition: transitionOptions.staysVisibleAfterTransition,
-            statesToEnter: transitionOptions.statesToEnter,
-            statesToExit: transitionOptions.statesToExit,
-            score: transitionOptions.score,
+            ...transitionOptions,
             timesSuccessful: 0,
             actionDefinition: {
                 steps: [{
@@ -110,12 +101,13 @@ const StateImageOptions = ({
         };
 
         try {
-            const response = await axios.post('${process.env.REACT_APP_BROBOT_API_URL}/api/transitions', transitionRequest);
+            console.log('stateImage:', stateImage);
+            console.log('ownerStateId:', stateImage.ownerStateId);
+            console.log('currentStateId:', currentStateId);
+            const response = await api.post('/api/transitions', transitionRequest);
             if (response.status === 200 || response.status === 201) {
-                const data = response.data;
-                onCreateTransition(data.transition);
-                onStateImageUpdate(data.updatedStateImage);
-                // Reset transition options
+                onCreateTransition(response.data.transition);
+                onStateImageUpdate(response.data.updatedStateImage);
                 setTransitionOptions({
                     staysVisibleAfterTransition: 'NONE',
                     statesToEnter: [],
@@ -128,44 +120,37 @@ const StateImageOptions = ({
         }
     };
 
-    const handleDelete = () => {
-        if (window.confirm(`Are you sure you want to delete the state image "${stateImage.name}"?`)) {
-            onDelete(stateImage.id);
-        }
-    };
-
     const handleTransitionOptionChange = (option, value) => {
         setTransitionOptions(prev => ({ ...prev, [option]: value }));
     };
 
-    const handleTransitionUpdate = () => {
-        if (selectedTransition) {
-            const updatedTransition = {
-                ...selectedTransition,
-                ...transitionOptions
-            };
-            onTransitionUpdate(updatedTransition);
+const handleTransitionDelete = async (transitionId) => {
+    try {
+        const response = await api.delete(`/api/transitions/${transitionId}`);
+        if (response.status === 204) {
+            setStateImageTransitions(prev => prev.filter(t => t.id !== transitionId));
+            onTransitionDelete(transitionId);
         }
-    };
-
-    const handleTransitionDelete = async (transitionId) => {
-        try {
-            const response = await axios.delete(`${process.env.REACT_APP_BROBOT_API_URL}/api/transitions/${transitionId}`);
-            if (response.status === 204) {
-                // Remove the deleted transition from the state
-                setStateImageTransitions(prev => prev.filter(t => t.id !== transitionId));
-                // Notify parent component
-                onTransitionDelete(transitionId);
-            }
-        } catch (error) {
-            console.error('Error deleting transition:', error);
+    } catch (error) {
+        console.error('Error deleting transition:', error);
+        if (error.response) {
+            console.error('Error response:', error.response.data);
+            // You can show this error to the user
+            // For example: setErrorMessage(error.response.data);
         }
-    };
+        // Optionally, refresh the transitions list to ensure it's up-to-date
+        fetchTransitions();
+    }
+};
 
     const getStateName = (stateId) => {
         const state = allStates.find(s => s.id === stateId);
         return state ? state.name : 'Unknown State';
     };
+
+    if (!stateImage) {
+        return <Typography>No state image selected</Typography>;
+    }
 
     return (
         <Box>
@@ -177,10 +162,12 @@ const StateImageOptions = ({
                 onChange={(e) => setNewName(e.target.value)}
                 margin="normal"
             />
-            <Button onClick={() => onNameChange(stateImage.id, newName)}>Update Name</Button>
+            <Button onClick={handleNameChange}>Update Name</Button>
             <Button onClick={() => onDelete(stateImage.id)}>Delete State Image</Button>
 
-            <Typography variant="h6" sx={{ mt: 2 }}>Existing Transitions</Typography>
+            <Divider sx={{ my: 2 }} />
+
+            <Typography variant="h6">Existing Transitions</Typography>
             <List>
                 {stateImageTransitions.map((transition) => (
                     <ListItem key={transition.id}>
@@ -203,15 +190,15 @@ const StateImageOptions = ({
                             }
                         />
                         <ListItemSecondaryAction>
-                            <Button onClick={() => handleTransitionDelete(transition.id)} >
-                                Delete
-                            </Button>
+                            <Button onClick={() => handleTransitionDelete(transition.id)}>Delete</Button>
                         </ListItemSecondaryAction>
                     </ListItem>
                 ))}
             </List>
 
-            <Typography variant="h6" sx={{ mt: 2 }}>Create Transition</Typography>
+            <Divider sx={{ my: 2 }} />
+
+            <Typography variant="h6">Create Transition</Typography>
             <FormControl fullWidth margin="normal">
                 <InputLabel>Stays Visible After Transition</InputLabel>
                 <Select
@@ -231,9 +218,7 @@ const StateImageOptions = ({
                     onChange={(e) => handleTransitionOptionChange('statesToEnter', e.target.value)}
                 >
                     {allStates.map((state) => (
-                        <MenuItem key={state.id} value={state.id}>
-                            {state.name}
-                        </MenuItem>
+                        <MenuItem key={state.id} value={state.id}>{state.name}</MenuItem>
                     ))}
                 </Select>
             </FormControl>
@@ -245,9 +230,7 @@ const StateImageOptions = ({
                     onChange={(e) => handleTransitionOptionChange('statesToExit', e.target.value)}
                 >
                     {allStates.map((state) => (
-                        <MenuItem key={state.id} value={state.id}>
-                            {state.name}
-                        </MenuItem>
+                        <MenuItem key={state.id} value={state.id}>{state.name}</MenuItem>
                     ))}
                 </Select>
             </FormControl>
@@ -261,16 +244,9 @@ const StateImageOptions = ({
             />
             <Button onClick={handleCreateTransition}>Create Transition</Button>
 
-            {selectedTransition && (
-                <Box sx={{ mt: 2 }}>
-                    <Typography variant="h6">Modify Transition</Typography>
-                    {/* Add fields to modify the selected transition */}
-                    <Button onClick={handleTransitionUpdate}>Update Transition</Button>
-                    <Button onClick={handleTransitionDelete}>Delete Transition</Button>
-                </Box>
-            )}
+            <Divider sx={{ my: 2 }} />
 
-            <Typography variant="h6" sx={{ mt: 2 }}>Move State Image</Typography>
+            <Typography variant="h6">Move State Image</Typography>
             <FormControl fullWidth margin="normal">
                 <InputLabel>Move to State</InputLabel>
                 <Select
@@ -280,13 +256,11 @@ const StateImageOptions = ({
                     {allStates
                         .filter(state => state.id !== currentStateId)
                         .map((state) => (
-                            <MenuItem key={state.id} value={state.id}>
-                                {state.name}
-                            </MenuItem>
+                            <MenuItem key={state.id} value={state.id}>{state.name}</MenuItem>
                         ))}
                 </Select>
             </FormControl>
-            <Button onClick={() => onMove(stateImage.id, moveToState)}>Move</Button>
+            <Button onClick={handleMove}>Move</Button>
         </Box>
     );
 };

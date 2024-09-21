@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import axios from 'axios';
 import StateDropdown from "../../components/state-dropdown/state-dropdown.component";
 import HighlightAllContainer from './highlight-all-container.component';
 import {
@@ -13,6 +12,7 @@ import {
   DialogTitle,
   Typography
 } from '@mui/material';
+import api from './../../services/api'
 
 const StateDetailsButtons = ({
   isChecked,
@@ -32,15 +32,31 @@ const StateDetailsButtons = ({
     setShowConfirmDialog(true);
   };
 
-  const handleConfirmDelete = async () => {
-    try {
-      await axios.delete(`${process.env.REACT_APP_BROBOT_API_URL}/api/states/${currentStateId}`);
-      setShowConfirmDialog(false);
-      onStateDeleted(currentStateId);
-    } catch (error) {
-      console.error('Error deleting state:', error);
+const handleConfirmDelete = async () => {
+  try {
+    console.log('Deleting state with ID:', currentStateId); // Add this log
+    await api.delete(`/api/states/${currentStateId}`);
+    onStateDeleted(currentStateId);
+    setShowConfirmDialog(false); // Close the dialog after successful deletion
+  } catch (error) {
+    console.error('Error deleting state:', error);
+
+    if (error.response) {
+      console.error('Error response:', error.response); // Add this log
+      if (error.response.status === 404) {
+        alert('The state you are trying to delete no longer exists.');
+      } else if (error.response.status === 500) {
+        alert(`An error occurred while deleting the state: ${error.response.data}`);
+      } else {
+        alert('An unexpected error occurred. Please try again.');
+      }
+    } else if (error.request) {
+      alert('No response received from the server. Please check your connection and try again.');
+    } else {
+      alert('An error occurred while setting up the request. Please try again.');
     }
-  };
+  }
+};
 
   const handleCancelDelete = () => {
     setShowConfirmDialog(false);

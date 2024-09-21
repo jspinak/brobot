@@ -21,6 +21,6 @@ public class PatternResponse {
     private boolean dynamic;
     private PositionResponse position;
     private AnchorsResponse anchors = new AnchorsResponse();
-    private ImageResponse image;
+    private Long imageId;
 
 }

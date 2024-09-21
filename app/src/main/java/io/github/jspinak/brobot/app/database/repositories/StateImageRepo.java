@@ -14,4 +14,5 @@ public interface StateImageRepo extends JpaRepository<StateImageEntity, Long> {
     Optional<StateImageEntity> findByName(String name);
     List<StateImageEntity> findByProjectId(Long projectId);
     List<StateImageEntity> findByOwnerStateId(Long stateId);
+    void deleteByOwnerStateId(Long stateId);
 }

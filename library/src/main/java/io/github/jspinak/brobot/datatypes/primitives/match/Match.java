@@ -149,7 +149,7 @@ public class Match {
         stateImage.setName(name);
         if (stateObjectData != null) {
             stateImage.setOwnerStateName(stateObjectData.getOwnerStateName());
-            stateImage.setName(stateObjectData.getStateObjectName()); // the StateObject name should take priority since it was the original StateImage
+            if (!stateObjectData.getStateObjectName().isEmpty()) stateImage.setName(stateObjectData.getStateObjectName()); // the StateObject name should take priority since it was the original StateImage
         }
         stateImage.addPatterns(new Pattern(this));
         return stateImage;
