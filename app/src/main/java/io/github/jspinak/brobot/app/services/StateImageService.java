@@ -10,6 +10,7 @@ import io.github.jspinak.brobot.app.web.responseMappers.StateImageResponseMapper
 import io.github.jspinak.brobot.app.web.responses.StateImageResponse;
 import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
+import io.github.jspinak.brobot.app.services.ImageService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
@@ -27,20 +28,24 @@ public class StateImageService {
     private final StateImageEntityMapper stateImageEntityMapper;
     private final PatternService patternService;
     private final StateImageResponseMapper stateImageResponseMapper;
+    private final ImageService imageService;
 
     public StateImageService(StateImageRepo stateImageRepo,
-                             StateImageEntityMapper stateImageEntityMapper,
-                             PatternService patternService, StateImageResponseMapper stateImageResponseMapper) {
+            StateImageEntityMapper stateImageEntityMapper,
+            PatternService patternService, StateImageResponseMapper stateImageResponseMapper,
+            ImageService imageService) {
         this.stateImageRepo = stateImageRepo;
         this.stateImageEntityMapper = stateImageEntityMapper;
         this.patternService = patternService;
         this.stateImageResponseMapper = stateImageResponseMapper;
+        this.imageService = imageService;
     }
 
     public StateImage mapWithImage(StateImageEntity stateImageEntity) {
         StateImage stateImage = stateImageEntityMapper.map(stateImageEntity); // Patterns do not have Image
         List<Pattern> patterns = new ArrayList<>();
-        stateImageEntity.getPatterns().forEach(patternEntity -> patterns.add(patternService.mapWithImage(patternEntity)));
+        stateImageEntity.getPatterns()
+                .forEach(patternEntity -> patterns.add(patternService.mapWithImage(patternEntity)));
         stateImage.setPatterns(patterns);
         return stateImage;
     }
@@ -58,13 +63,13 @@ public class StateImageService {
 
     public StateImage getStateImage(String name) {
         Optional<StateImageEntity> dto = stateImageRepo.findByName(name);
-        //return dto.map(stateImageMapper::map).orElse(null);
+        // return dto.map(stateImageMapper::map).orElse(null);
         return dto.map(stateImageEntityMapper::map).orElse(null);
     }
 
     public List<StateImage> getAllStateImages() {
         return stateImageRepo.findAll().stream()
-                //.map(stateImageMapper::map)
+                // .map(stateImageMapper::map)
                 .map(stateImageEntityMapper::map)
                 .collect(Collectors.toList());
     }
@@ -74,7 +79,8 @@ public class StateImageService {
     }
 
     public void saveStateImages(List<StateImage> stateImages) {
-        //stateImages.forEach(stateImage -> stateImageRepo.save(stateImageMapper.map(stateImage)));
+        // stateImages.forEach(stateImage ->
+        // stateImageRepo.save(stateImageMapper.map(stateImage)));
         stateImages.forEach(System.out::println);
         stateImages.forEach(stateImage -> stateImageRepo.save(stateImageEntityMapper.map(stateImage)));
     }
@@ -123,8 +129,8 @@ public class StateImageService {
         // Handle patterns separately as they need to be retrieved
         List<PatternEntity> patterns = patternService.getPatternEntities(
                 request.getPatterns().stream()
-                    .map(PatternRequest::getId)
-                    .collect(Collectors.toList()));
+                        .map(PatternRequest::getId)
+                        .collect(Collectors.toList()));
         stateImage.setPatterns(patterns);
 
         // Ensure the ownerStateId is set correctly
