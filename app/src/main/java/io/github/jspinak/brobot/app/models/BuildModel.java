@@ -3,6 +3,7 @@ package io.github.jspinak.brobot.app.models;
 import io.github.jspinak.brobot.actions.BrobotSettings;
 import io.github.jspinak.brobot.app.database.databaseMappers.StateEntityMapper;
 import io.github.jspinak.brobot.app.database.databaseMappers.StateTransitionsEntityMapper;
+import io.github.jspinak.brobot.app.log.StateImageDTO;
 import io.github.jspinak.brobot.app.services.ProjectService;
 import io.github.jspinak.brobot.app.services.StateService;
 import io.github.jspinak.brobot.app.services.StateTransitionsService;
@@ -65,6 +66,7 @@ public class BuildModel {
 
         Model model = new Model(projectStates, projectTransitions);
         System.out.println("Built model\n" + model);
+
         return model;
     }
 

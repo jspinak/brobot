@@ -2,12 +2,13 @@ package io.github.jspinak.brobot.log.service;
 
 import io.github.jspinak.brobot.log.entities.LogEntry;
 
+import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
 
 public interface LogEntryService {
     default LogEntry saveLog(LogEntry logEntry) {
-        // No-op implementation, returning null
+        // No-op implementation
         return null;
     }
 
@@ -22,6 +23,11 @@ public interface LogEntryService {
     }
 
     default List<LogEntry> getRecentLogs(int limit) {
+        // No-op implementation, returning an empty list
+        return Collections.emptyList();
+    }
+
+    default List<LogEntry> getRecentLogsByProjectId(Long projectId, int limit) {
         // No-op implementation, returning an empty list
         return Collections.emptyList();
     }
@@ -42,6 +48,11 @@ public interface LogEntryService {
     }
 
     default List<LogEntry> getLogEntriesByType(String type) {
+        // No-op implementation, returning an empty list
+        return Collections.emptyList();
+    }
+
+    default List<LogEntry> getLogEntriesBetween(Instant startTime, Instant endTime) {
         // No-op implementation, returning an empty list
         return Collections.emptyList();
     }

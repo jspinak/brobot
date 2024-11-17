@@ -9,13 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "log_entries", indexes = {
-        @Index(name = "idx_session_id", columnList = "sessionId"),
-        @Index(name = "idx_passed", columnList = "passed"),
-        @Index(name = "idx_current_state_name", columnList = "currentStateName"),
-        @Index(name = "idx_type", columnList = "type"),
-        @Index(name = "idx_project_id", columnList = "projectId")
-})
 @Getter
 @Setter
 public class LogEntry {
@@ -23,71 +16,49 @@ public class LogEntry {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private Long projectId;
-
+    private Long projectId = 0L;
     private String sessionId;
-    private String type;
+
+    @Enumerated(EnumType.STRING)
+    private LogType type;
+    private String actionType;
     private String description;
-    private Instant timestamp;
+    private Instant timestamp = Instant.now();
+    private boolean success;
+    private long duration;
+
+    // Action-specific fields
     private String applicationUnderTest;
-    private String currentStateName;  // TODO: change to stateInFocus, representing the state acted on
-    private boolean passed;
     private String actionPerformed;
-    private long duration; // in milliseconds
     private String errorMessage;
     private String screenshotPath;
     private String videoClipPath;
+    private String currentStateName;
+
+    // Transition-specific fields
+    private String fromStateName; // the transition starts from this state
+    private Long fromStateId;
+    private List<String> toStateNames = new ArrayList<>(); // the transition activates these states
+    private List<Long> toStateIds = new ArrayList<>();
+    private List<String> beforeStateNames = new ArrayList<>(); // the active states before the transition
+    private List<Long> beforeStateIds = new ArrayList<>();
+    private List<String> afterStateNames = new ArrayList<>(); // the actives states after the transition
+        private List<Long> afterStateIds = new ArrayList<>();
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Observation> observations = new ArrayList<>();
-
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "log_entry_id")
+    @JoinColumn(name = "log_entry_id", nullable = false)  // This creates the foreign key
     private List<StateImageLog> stateImages = new ArrayList<>();
-
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<TransitionLog> transitions = new ArrayList<>();
 
     @Embedded
     private PerformanceMetrics performance;
 
+    // Constructors
     public LogEntry() {
-        this.projectId = 0L; // Default project ID
     }
 
-    public LogEntry(String sessionId, String type, String description) {
+    public LogEntry(String sessionId, LogType logType, String description) {
         this.sessionId = sessionId;
-        this.type = type;
+        this.type = logType;
         this.description = description;
-        this.projectId = 0L;
-    }
-
-    public void addStateImageLog(StateImageLog stateImageLog) {
-        this.stateImages.add(stateImageLog);
-    }
-
-    @Override
-    public String toString() {
-        return "LogEntry{" +
-                "id=" + id +
-                ", projectId=" + projectId +
-                ", sessionId='" + sessionId + '\'' +
-                ", type='" + type + '\'' +
-                ", description='" + description + '\'' +
-                ", timestamp=" + timestamp +
-                ", applicationUnderTest='" + applicationUnderTest + '\'' +
-                ", currentStateName='" + currentStateName + '\'' +
-                ", passed=" + passed +
-                ", actionPerformed='" + actionPerformed + '\'' +
-                ", duration=" + duration +
-                ", errorMessage='" + errorMessage + '\'' +
-                ", screenshotPath='" + screenshotPath + '\'' +
-                ", videoClipPath='" + videoClipPath + '\'' +
-                ", observations=" + observations +
-                ", stateImages=" + stateImages +
-                ", transitions=" + transitions +
-                ", performance=" + performance +
-                '}';
     }
 }
