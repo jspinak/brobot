@@ -1,6 +1,7 @@
 package io.github.jspinak.brobot.app.log;
 
 import io.github.jspinak.brobot.log.entities.LogEntry;
+import io.github.jspinak.brobot.log.entities.LogType;
 import io.github.jspinak.brobot.log.service.LogEntryService;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -11,23 +12,20 @@ import java.util.List;
 
 @Service
 public class LocalLogEntryService implements LogEntryService {
-
     private final LogEntryRepository logEntryRepository;
     private final LogSender logSender;
 
-    public LocalLogEntryService(LogEntryRepository logEntryRepository, LogSender logSender) {
+    public LocalLogEntryService(LogEntryRepository logEntryRepository,
+            LogSender logSender) {
         this.logEntryRepository = logEntryRepository;
         this.logSender = logSender;
     }
 
     @Override
     public LogEntry saveLog(LogEntry logEntry) {
-        System.out.println("Saving LogEntry: " + logEntry);
-        System.out.println("StateImages: " + logEntry.getStateImages());
-
-        LogEntry savedLogEntry = logEntryRepository.save(logEntry);
-        logSender.sendLog(logEntry);  // Send to client app
-        return savedLogEntry;
+        LogEntry savedLog = logEntryRepository.save(logEntry);
+        logSender.sendLog(savedLog);
+        return savedLog;
     }
 
     @Override
@@ -37,7 +35,8 @@ public class LocalLogEntryService implements LogEntryService {
 
     @Override
     public LogEntry getLogById(String id) {
-        return logEntryRepository.findById(id).orElseThrow(() -> new RuntimeException("Log not found"));
+        return logEntryRepository.findById(Long.parseLong(id))
+                .orElseThrow(() -> new RuntimeException("Log not found"));
     }
 
     @Override
@@ -53,7 +52,7 @@ public class LocalLogEntryService implements LogEntryService {
 
     @Override
     public List<LogEntry> getFailedLogEntries() {
-        return logEntryRepository.findByPassedFalse();
+        return logEntryRepository.findBySuccessFalse();
     }
 
     @Override
@@ -63,9 +62,10 @@ public class LocalLogEntryService implements LogEntryService {
 
     @Override
     public List<LogEntry> getLogEntriesByType(String type) {
-        return logEntryRepository.findByType(type);
+        return logEntryRepository.findByType(LogType.valueOf(type));
     }
 
+    @Override
     public List<LogEntry> getLogEntriesBetween(Instant startTime, Instant endTime) {
         return logEntryRepository.findByTimestampBetween(startTime, endTime);
     }

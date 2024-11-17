@@ -1,6 +1,5 @@
 package io.github.jspinak.brobot.testingAUTs;
 
-import io.github.jspinak.brobot.actions.BrobotSettings;
 import io.github.jspinak.brobot.database.services.AllStatesInProjectService;
 import io.github.jspinak.brobot.datatypes.state.state.State;
 import io.github.jspinak.brobot.log.entities.LogEntry;

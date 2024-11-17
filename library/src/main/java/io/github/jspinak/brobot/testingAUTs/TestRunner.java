@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Collections;
 import java.util.UUID;
 
 @Component
@@ -65,8 +66,13 @@ public class TestRunner {
             long transitionDuration = Duration.between(transitionStart, Instant.now()).toMillis();
 
             // Log the transition
-            actionLogger.logStateTransition(sessionId, stateMemory.getActiveStates().toString(), destination,
-                    transitionSuccess, transitionDuration);
+            actionLogger.logStateTransition(
+                    sessionId,
+                    null,
+                    allStatesInProjectService.findSetById(stateMemory.getActiveStates()),
+                    Collections.singleton(allStatesInProjectService.getState(destination).get()),
+                    transitionSuccess,
+                    transitionDuration);
 
             // If transition failed, capture a screenshot
             if (!transitionSuccess) {

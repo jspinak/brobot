@@ -1,11 +1,11 @@
 package io.github.jspinak.brobot.log.entities;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -17,6 +17,12 @@ public class StateImageLog {
 
     private String name;
     private String stateOwnerName;
+
+    @ElementCollection
+    @CollectionTable(name = "state_image_log_images", joinColumns = @JoinColumn(name = "state_image_log_id"))
+    @Column(name = "image_base64", columnDefinition = "TEXT")
+    private List<String> imagesBase64 = new ArrayList<>();
+
     private boolean found;
 
     @Override
@@ -28,5 +34,4 @@ public class StateImageLog {
                 ", found=" + found +
                 '}';
     }
-
 }

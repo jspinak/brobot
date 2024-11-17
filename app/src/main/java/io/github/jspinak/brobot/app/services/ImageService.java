@@ -6,6 +6,7 @@ import io.github.jspinak.brobot.app.database.repositories.ImageRepo;
 import io.github.jspinak.brobot.app.exceptions.EntityNotFoundException;
 import io.github.jspinak.brobot.app.web.requests.ImageRequest;
 import io.github.jspinak.brobot.app.web.responseMappers.ImageResponseMapper;
+import io.github.jspinak.brobot.app.web.responses.ImageResponse;
 import io.github.jspinak.brobot.datatypes.primitives.image.Image;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -115,5 +116,15 @@ public class ImageService {
     @Transactional
     public ImageEntity getOrCreate(ImageRequest request) {
         return request != null ? createOrUpdateImage(request) : null;
+    }
+
+    public ImageResponse getImageResponse(Long imageId) {
+        Optional<ImageEntity> imageOpt = imageRepo.findById(imageId);
+        if (imageOpt.isPresent()) {
+            ImageEntity image = imageOpt.get();
+            return imageResponseMapper.map(image);
+        }
+        log.warn("Image not found with id: {}", imageId);
+        return null;
     }
 }

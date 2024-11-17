@@ -57,4 +57,23 @@ public class StateImageController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getStateImageById(@PathVariable Long id) {
+        logger.info("Fetching StateImage with id: {}", id);
+        try {
+            StateImageEntity stateImage = stateImageService.getStateImage(id);
+            if (stateImage == null) {
+                logger.warn("StateImage not found with id: {}", id);
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(Map.of("error", "StateImage not found"));
+            }
+            return ResponseEntity.ok(stateImageResponseMapper.map(stateImage));
+        } catch (Exception e) {
+            logger.error("Error fetching StateImage with id: {}", id, e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Failed to fetch StateImage"));
+        }
+    }
+
 }
