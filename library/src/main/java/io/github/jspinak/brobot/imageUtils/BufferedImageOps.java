@@ -147,7 +147,7 @@ public class BufferedImageOps {
      * @param image the BufferedImage to covert
      * @return a Base64 String representing the BufferedImage
      */
-    public static String encodeImage(BufferedImage image) {
+    public static String bufferedImageToStringBase64(BufferedImage image) {
         try {
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
             ImageIO.write(image, "png", bos);
