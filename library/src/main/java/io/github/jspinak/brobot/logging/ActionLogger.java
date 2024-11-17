@@ -2,10 +2,12 @@ package io.github.jspinak.brobot.logging;
 
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
+import io.github.jspinak.brobot.datatypes.state.state.State;
 import io.github.jspinak.brobot.log.entities.LogEntry;
 
 import java.awt.*;
 import java.io.IOException;
+import java.util.Set;
 
 /**
  * Interface for creating different types of logs.
@@ -21,7 +23,8 @@ public interface ActionLogger {
         return null;
     }
 
-    default LogEntry logStateTransition(String sessionId, String fromState, String toState, boolean success, long transitionTime) {
+    default LogEntry logStateTransition(String sessionId, State fromState, Set<State> toStates,
+                                        Set<State> beforeStates, boolean success, long transitionTime) {
         // No-op implementation
         return null;
     }
