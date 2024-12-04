@@ -1,5 +1,6 @@
 package io.github.jspinak.brobot.app.services;
 
+import io.github.jspinak.brobot.app.DTOs.ProjectDTO;
 import io.github.jspinak.brobot.app.database.entities.ProjectEntity;
 import io.github.jspinak.brobot.app.database.repositories.ProjectRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,5 +50,11 @@ public class ProjectService {
 
     public Optional<ProjectEntity> findByName(String name) {
         return projectRepository.findByName(name);
+    }
+
+    public List<ProjectDTO> getAllProjectDTOs() {
+        return projectRepository.findAll().stream()
+                .map(ProjectDTO::fromEntity)
+                .toList();
     }
 }

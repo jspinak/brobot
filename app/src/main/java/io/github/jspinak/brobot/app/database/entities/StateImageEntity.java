@@ -17,7 +17,7 @@ public class StateImageEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long projectId = 0L;
+    private Long projectId = 1L; // TODO: change this! this is only for testing
     private StateObject.Type objectType = StateObject.Type.IMAGE;
     private String name = "";
 

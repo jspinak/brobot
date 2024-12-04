@@ -23,6 +23,7 @@ public class StateImageDTOMapper {
     public StateImageDTO toDTO(StateImageEntity entity) {
         StateImageDTO dto = new StateImageDTO();
         dto.setId(entity.getId());
+        dto.setProjectId(entity.getProjectId());
         dto.setName(entity.getName());
         dto.setStateOwnerName(entity.getOwnerStateName());
 

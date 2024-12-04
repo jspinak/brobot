@@ -52,26 +52,27 @@ const Home = () => {
             return;
         }
         try {
+            setAutomationResult('Transferring state structure to library...');
             const response = await api.post(`/api/automation/save-to-library/${selectedProject.id}`);
-            setAutomationResult(response.data);
+            setAutomationResult(`${response.data.message} Project images have been synced.`);
         } catch (error) {
-            setAutomationResult('Error saving to library: ' + error.message);
+            setAutomationResult('Error: ' + (error.response?.data?.message || error.message));
         }
     };
 
-    const runAutomation = async (endpoint) => {
-        if (!selectedProject) {
-            setAutomationResult('No project selected');
-            return;
-        }
-        setAutomationResult('Running...');
-        try {
-            const response = await api.post(`/api/automation/${endpoint}`);
-            setAutomationResult(response.data);
-        } catch (error) {
-            setAutomationResult('Error occurred: ' + error.message);
-        }
-    };
+const runAutomation = async (endpoint) => {
+    if (!selectedProject) {
+        setAutomationResult('No project selected');
+        return;
+    }
+    setAutomationResult('Running...');
+    try {
+        const response = await api.post(`/api/automation/${endpoint}`);
+        setAutomationResult(response.data.message || response.data || 'Operation completed');
+    } catch (error) {
+        setAutomationResult('Error occurred: ' + error.message);
+    }
+};
 
     return (
         <Container>
