@@ -39,6 +39,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-test' //:3.2.2
 
 	implementation 'org.springframework.boot:spring-boot-starter-web' //:3.2.2
+	implementation 'org.springframework.boot:spring-boot-starter-websocket'
 	implementation 'com.fasterxml.jackson.core:jackson-databind'
 	//implementation 'jakarta.persistence:jakarta.persistence-api:3.1.0'
 	// database
@@ -72,7 +73,6 @@ dependencies {
 	implementation 'org.flywaydb:flyway-core:10.18.0'
 	// https://mvnrepository.com/artifact/org.flywaydb/flyway-database-postgresql
 	runtimeOnly 'org.flywaydb:flyway-database-postgresql:10.18.0'
-
 }
 
 flyway {

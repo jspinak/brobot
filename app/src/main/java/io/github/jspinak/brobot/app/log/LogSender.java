@@ -33,4 +33,5 @@ public class LogSender {
             logger.error("Error sending log entry", e);
         }
     }
+
 }

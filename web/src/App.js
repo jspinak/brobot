@@ -7,6 +7,7 @@ import CreateState from './routes/create-state/create-state.component';
 import AllStates from './routes/view-states/all-states.component';
 import TransitionGraph from './routes/transition-graph/TransitionGraph';
 import { ProjectContext } from './components/ProjectContext';
+import StateDebugInfo from './routes/debug/StateDebugInfo';
 import api from './services/api'
 
 function App() {
@@ -60,6 +61,7 @@ function App() {
             />
           }
         />
+        <Route path="/debug" element={<StateDebugInfo />} />
       </Routes>
     </>
   );
