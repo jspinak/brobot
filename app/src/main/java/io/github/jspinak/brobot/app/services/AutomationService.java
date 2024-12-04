@@ -15,6 +15,7 @@ import io.github.jspinak.brobot.testingAUTs.StateTraversalService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class AutomationService {
@@ -62,9 +63,17 @@ public class AutomationService {
 
     public String visitAllStates() {
         String sessionId = automationSession.startNewSession();
-        stateTraversalService.traverseAllStates();
+        Set<Long> visitedStates = stateTraversalService.traverseAllStates();
         processAndSendLogs(sessionId);
-        return "Visited all states. Session ID: " + sessionId;
+        StringBuilder response = new StringBuilder();
+        response.append("Visited states: ");
+        visitedStates.forEach(stateId -> {
+            response.append(stateRepo.findById(stateId).get().getName());
+            response.append(", ");
+        });
+        response.append("\nSession ID: ");
+        response.append(sessionId);
+        return response.toString();
     }
 
     // Retrieve and send all logs for this session

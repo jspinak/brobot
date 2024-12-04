@@ -32,6 +32,7 @@ import java.util.*;
 @Setter
 public class StateImage implements StateObject {
 
+    private Long id; // set by the StateImageEntity in the App module and important for creating StateImageLogs.
     private Long projectId = 0L;
     private StateObject.Type objectType = StateObject.Type.IMAGE;
     private String name = "";
