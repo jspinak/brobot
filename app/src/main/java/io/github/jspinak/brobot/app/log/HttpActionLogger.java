@@ -56,7 +56,7 @@ public class HttpActionLogger implements ActionLogger, TestSessionLogger {
         logEntry.setSuccess(matches.isSuccess());
         logEntry.setCurrentStateName(getStateInFocus(objectCollection));
         objectCollection.getStateImages().forEach(
-                sI -> logEntry.getStateImages().add(logEntryStateImageMapper.toLog(sI, matches)));
+                sI -> logEntry.getStateImageLogs().add(logEntryStateImageMapper.toLog(sI, matches)));
         return logEntryService.saveLog(logEntry);
     }
 
@@ -88,8 +88,10 @@ public class HttpActionLogger implements ActionLogger, TestSessionLogger {
         LogEntry logEntry = new LogEntry();
         logEntry.setSessionId(sessionId);
         logEntry.setProjectId(getCurrentProjectId());
-        logEntry.setFromStateName(fromState.getName());
-        logEntry.setFromStateId(fromState.getId());
+        if (fromState != null) {
+            logEntry.setFromStateName(fromState.getName());
+            logEntry.setFromStateId(fromState.getId());
+        }
         beforeStates.forEach(state -> {
             logEntry.getBeforeStateNames().add(state.getName());
             logEntry.getBeforeStateIds().add(state.getId());

@@ -43,11 +43,10 @@ public class LogEntry {
     private List<String> beforeStateNames = new ArrayList<>(); // the active states before the transition
     private List<Long> beforeStateIds = new ArrayList<>();
     private List<String> afterStateNames = new ArrayList<>(); // the actives states after the transition
-        private List<Long> afterStateIds = new ArrayList<>();
+    private List<Long> afterStateIds = new ArrayList<>();
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "log_entry_id", nullable = false)  // This creates the foreign key
-    private List<StateImageLog> stateImages = new ArrayList<>();
+    @ElementCollection
+    private List<StateImageLog> stateImageLogs = new ArrayList<>();
 
     @Embedded
     private PerformanceMetrics performance;

@@ -15,11 +15,15 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
-                .allowedOrigins("http://localhost:3001") // Specify your React app's origin
+                // Allow both React frontend and Client app backend
+                .allowedOrigins(
+                        "http://localhost:3001",  // React frontend
+                        "http://localhost:8081"   // Client app backend
+                )
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
                 .allowCredentials(true)
                 .exposedHeaders("Authorization")
-                .maxAge(3600); // 1 hour
+                .maxAge(3600);
     }
 }

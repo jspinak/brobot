@@ -62,8 +62,14 @@ public class StateTraversalService {
     }
 
     public Set<Long> traverseAllStates() {
+        // Reset state at start of each traversal
+        visitedStates = new HashSet<>();
+        unvisitedStateSet = new HashSet<>();
+        unreachableStates = new HashSet<>();
+
         System.out.println("traversing all states");
         unvisitedStateSet = new HashSet<>(allStatesInProjectService.getAllStateIds());
+        System.out.println("unvisited states = " + unvisitedStateSet);
         int failedAttempt = 0;
         initialStates.findIntialStates();
         visitedStates = new HashSet<>(stateMemory.getActiveStates());

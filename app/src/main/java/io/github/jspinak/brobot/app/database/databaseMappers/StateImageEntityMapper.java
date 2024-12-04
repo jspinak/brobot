@@ -35,6 +35,7 @@ public class StateImageEntityMapper {
 
     public StateImage map(StateImageEntity stateImageEntity) {
         StateImage stateImage = new StateImage();
+        stateImage.setId(stateImageEntity.getId());
         stateImage.setProjectId(stateImageEntity.getProjectId());
         stateImage.setObjectType(stateImageEntity.getObjectType());
         stateImage.setName(stateImageEntity.getName());

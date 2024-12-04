@@ -59,8 +59,4 @@ public class DataSourceConfig {
         return transactionManager;
     }
 
-    @Bean
-    public RestTemplate restTemplate() {
-        return new RestTemplate();
-    }
 }

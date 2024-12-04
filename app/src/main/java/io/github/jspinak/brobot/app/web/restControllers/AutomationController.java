@@ -6,11 +6,13 @@ import io.github.jspinak.brobot.app.models.BuildModel;
 import io.github.jspinak.brobot.app.services.AutomationService;
 import io.github.jspinak.brobot.app.web.requests.ProjectRequest;
 import io.github.jspinak.brobot.datatypes.Project;
+import lombok.Data;
 import org.sikuli.script.ImagePath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -32,10 +34,33 @@ public class AutomationController {
         this.projectRepository = projectRepository;
     }
 
+    @Data
+    public static class ApiError {
+        private final String message;
+        private final String details;
+
+        public ApiError(String message, String details) {
+            this.message = message;
+            this.details = details;
+        }
+    }
+
     @PostMapping("/visit-all-states")
-    public ResponseEntity<String> visitAllStates() {
-        String result = automationService.visitAllStates();
-        return ResponseEntity.ok(result);
+    public ResponseEntity<?> visitAllStates() {
+        try {
+            String result = automationService.visitAllStates();
+            return ResponseEntity.ok(Map.of(
+                    "message", result,
+                    "status", "SUCCESS"
+            ));
+        } catch (Exception e) {
+            log.error("Error in visit-all-states: ", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of(
+                            "error", "Failed to execute automation",
+                            "message", e.getMessage()
+                    ));
+        }
     }
 
     @PostMapping("/run-transition-test")
@@ -77,14 +102,20 @@ public class AutomationController {
         try {
             Optional<ProjectEntity> optionalProjectEntity = projectRepository.findById(projectId);
             if (optionalProjectEntity.isPresent()) {
-                buildModel.build(optionalProjectEntity.get().getId());
-                return ResponseEntity.ok("State structure saved to library successfully");
+                buildModel.build(projectId);
+                return ResponseEntity.ok(Map.of(
+                        "message", "State structure saved to library successfully",
+                        "projectId", projectId
+                ));
             }
             return ResponseEntity.badRequest().body("No such project.");
         } catch (Exception e) {
             log.error("Error saving state structure to library", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("An error occurred while saving the state structure: " + e.getMessage());
+                    .body(new ApiError(
+                            "Failed to save state structure",
+                            e.getMessage()
+                    ));
         }
     }
 

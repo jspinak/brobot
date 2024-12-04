@@ -273,4 +273,16 @@ public class StateService {
                 .toList();
     }
 
+    public void populateStateOwnerNamesIfEmpty() {
+        List<StateEntity> states = stateRepo.findAll();
+        states.forEach(state -> {
+            state.getStateImages().forEach(stateImage -> {
+                if (stateImage.getOwnerStateName() == null || stateImage.getOwnerStateName().isEmpty()) {
+                    stateImage.setOwnerStateName(state.getName());
+                }
+            });
+        });
+        stateRepo.saveAll(states);
+    }
+
 }

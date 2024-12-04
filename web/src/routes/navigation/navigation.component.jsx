@@ -44,7 +44,7 @@ const NavigationBar = () => {
     return <div>Loading...</div>;
   }
 
-  return (
+return (
     <AppBar position="static">
       <Toolbar>
         <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
@@ -72,6 +72,9 @@ const NavigationBar = () => {
           )}
           <Button color="inherit" component={Link} to="/transition-graph">
             Transition Graph
+          </Button>
+          <Button color="inherit" component={Link} to="/debug">
+            Debug Info
           </Button>
         </Box>
       </Toolbar>
