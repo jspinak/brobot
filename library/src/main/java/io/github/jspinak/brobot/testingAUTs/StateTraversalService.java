@@ -63,6 +63,7 @@ public class StateTraversalService {
 
     public Set<Long> traverseAllStates() {
         // Reset state at start of each traversal
+        stateMemory.removeAllStates();
         visitedStates = new HashSet<>();
         unvisitedStateSet = new HashSet<>();
         unreachableStates = new HashSet<>();
