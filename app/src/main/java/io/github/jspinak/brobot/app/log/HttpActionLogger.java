@@ -6,10 +6,14 @@ import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import io.github.jspinak.brobot.datatypes.state.state.State;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.imageUtils.VideoRecorderService;
-import io.github.jspinak.brobot.log.entities.*;
+import io.github.jspinak.brobot.log.entities.LogEntry;
+import io.github.jspinak.brobot.log.entities.LogType;
+import io.github.jspinak.brobot.log.entities.PerformanceMetrics;
 import io.github.jspinak.brobot.log.service.LogEntryService;
 import io.github.jspinak.brobot.logging.ActionLogger;
 import io.github.jspinak.brobot.logging.TestSessionLogger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.awt.*;
@@ -24,15 +28,14 @@ import java.util.UUID;
  */
 @Component
 public class HttpActionLogger implements ActionLogger, TestSessionLogger {
+    private static final Logger log = LoggerFactory.getLogger(HttpActionLogger.class);
 
-    private final LogSender logSender;
     private final LogEntryService logEntryService;
     private final VideoRecorderService videoRecorderService;
     private final LogEntryStateImageMapper logEntryStateImageMapper;
 
-    public HttpActionLogger(LogSender logSender, LogEntryService logEntryService,
-            VideoRecorderService videoRecorderService, LogEntryStateImageMapper logEntryStateImageMapper) {
-        this.logSender = logSender;
+    public HttpActionLogger(LogEntryService logEntryService,
+                            VideoRecorderService videoRecorderService, LogEntryStateImageMapper logEntryStateImageMapper) {
         this.logEntryService = logEntryService;
         this.videoRecorderService = videoRecorderService;
         this.logEntryStateImageMapper = logEntryStateImageMapper;
@@ -44,8 +47,12 @@ public class HttpActionLogger implements ActionLogger, TestSessionLogger {
 
     @Override
     public LogEntry logAction(String sessionId, Matches matches, ObjectCollection objectCollection) {
+        log.debug("Creating log entry - sessionId: {}, action: {}",
+                sessionId, matches.getActionOptions().getAction());
+
         LogEntry logEntry = new LogEntry();
         logEntry.setProjectId(getCurrentProjectId());
+        log.debug("Set projectId: {}", getCurrentProjectId());
         logEntry.setSessionId(sessionId);
         logEntry.setType(LogType.ACTION);
         logEntry.setActionType(matches.getActionOptions().getAction().toString());
@@ -57,7 +64,9 @@ public class HttpActionLogger implements ActionLogger, TestSessionLogger {
         logEntry.setCurrentStateName(getStateInFocus(objectCollection));
         objectCollection.getStateImages().forEach(
                 sI -> logEntry.getStateImageLogs().add(logEntryStateImageMapper.toLog(sI, matches)));
-        return logEntryService.saveLog(logEntry);
+        LogEntry savedLog = logEntryService.saveLog(logEntry);
+        log.debug("Saved log entry with id: {}", savedLog.getId());
+        return savedLog;
     }
 
     private String getStateImageDescription(ObjectCollection objectCollection, Matches matches) {
@@ -171,29 +180,23 @@ public class HttpActionLogger implements ActionLogger, TestSessionLogger {
         LogEntry logEntry = new LogEntry();
         logEntry.setType(LogType.SESSION);
         logEntry.setDescription("Started session for " + applicationUnderTest);
-        sendLogToClient(logEntry);
+        logEntry.setSessionId(sessionId);
+        logEntry.setProjectId(getCurrentProjectId());
+        logEntry.setTimestamp(Instant.now());
+        logEntryService.saveLog(logEntry);
         return sessionId;
     }
 
     @Override
     public void endSession(String sessionId) {
         LogEntry logEntry = new LogEntry(sessionId, LogType.SESSION, "Ended session");
-        sendLogToClient(logEntry);
+        logEntryService.saveLog(logEntry);
     }
 
     @Override
     public void setCurrentState(String sessionId, String stateName, String stateDescription) {
         String description = String.format("Current State: %s - %s", stateName, stateDescription);
         LogEntry logEntry = new LogEntry(sessionId, LogType.SESSION, description);
-        sendLogToClient(logEntry);
-    }
-
-    private void sendLogToClient(LogEntry logEntry) {
-        try {
-            logSender.sendLog(logEntry);
-        } catch (Exception e) {
-            // Handle exception (e.g., log to local file, retry mechanism, etc.)
-            System.err.println("Failed to send log to client app: " + e.getMessage());
-        }
+        logEntryService.saveLog(logEntry);
     }
 }
