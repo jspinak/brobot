@@ -1,10 +1,14 @@
 package io.github.jspinak.brobot.log.service;
 
 import io.github.jspinak.brobot.log.entities.LogEntry;
+import io.github.jspinak.brobot.log.entities.LogType;
+import org.springframework.data.domain.Page;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 public interface LogEntryService {
     default LogEntry saveLog(LogEntry logEntry) {
@@ -55,5 +59,37 @@ public interface LogEntryService {
     default List<LogEntry> getLogEntriesBetween(Instant startTime, Instant endTime) {
         // No-op implementation, returning an empty list
         return Collections.emptyList();
+    }
+
+    /**
+     * Find a log entry by its ID
+     * @param id the ID of the log entry
+     * @return Optional containing the log entry if found
+     */
+    default Optional<LogEntry> findById(Long id) {
+        // No-op implementation
+        return Optional.empty();
+    }
+
+    /**
+     * Get paginated logs with optional filtering
+     * @param page page number (0-based)
+     * @param size number of items per page
+     * @param projectId optional project ID filter
+     * @param type optional log type filter
+     * @param sessionId optional session ID filter
+     * @param startDate optional start date filter
+     * @param endDate optional end date filter
+     * @return Page of LogEntry objects
+     */
+    default Page<LogEntry> getLogs(int page,
+                                   int size,
+                                   Long projectId,
+                                   LogType type,
+                                   String sessionId,
+                                   LocalDateTime startDate,
+                                   LocalDateTime endDate) {
+        // No-op implementation
+        return Page.empty();
     }
 }
