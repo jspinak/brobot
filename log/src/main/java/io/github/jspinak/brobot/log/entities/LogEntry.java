@@ -1,5 +1,6 @@
 package io.github.jspinak.brobot.log.entities;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -11,6 +12,7 @@ import java.util.List;
 @Entity
 @Getter
 @Setter
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class LogEntry {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
