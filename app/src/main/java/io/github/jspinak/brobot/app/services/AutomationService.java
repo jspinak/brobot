@@ -12,6 +12,8 @@ import io.github.jspinak.brobot.log.entities.LogEntry;
 import io.github.jspinak.brobot.log.service.LogEntryService;
 import io.github.jspinak.brobot.logging.AutomationSession;
 import io.github.jspinak.brobot.testingAUTs.StateTraversalService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -19,27 +21,28 @@ import java.util.Set;
 
 @Service
 public class AutomationService {
+    private static final Logger logger = LoggerFactory.getLogger(AutomationService.class);
 
     private final BuildModel buildModel;
     private final Action action;
     private final StateRepo stateRepo;
     private final StateEntityMapper stateEntityMapper;
     private final StateTraversalService stateTraversalService;
-    private final WebSocketService webSocketService;
     private final LogEntryService logEntryService;
+    private final LogSenderService logSenderService;
     private final AutomationSession automationSession;
 
     public AutomationService(BuildModel buildModel, Action action, StateRepo stateRepo,
                              StateEntityMapper stateEntityMapper, StateTraversalService stateTraversalService,
-                             WebSocketService webSocketService, LogEntryService logEntryService,
+                             LogEntryService logEntryService, LogSenderService logSenderService,
                              AutomationSession automationSession) {
         this.buildModel = buildModel;
         this.action = action;
         this.stateRepo = stateRepo;
         this.stateEntityMapper = stateEntityMapper;
         this.stateTraversalService = stateTraversalService;
-        this.webSocketService = webSocketService;
         this.logEntryService = logEntryService;
+        this.logSenderService = logSenderService;
         this.automationSession = automationSession;
     }
 
@@ -65,22 +68,30 @@ public class AutomationService {
         String sessionId = automationSession.startNewSession();
         Set<Long> visitedStates = stateTraversalService.traverseAllStates();
         processAndSendLogs(sessionId);
+
         StringBuilder response = new StringBuilder();
         response.append("Visited states: ");
         visitedStates.forEach(stateId -> {
-            response.append(stateRepo.findById(stateId).get().getName());
-            response.append(", ");
+            stateRepo.findById(stateId).ifPresent(state ->
+                    response.append(state.getName()).append(", "));
         });
-        response.append("\nSession ID: ");
-        response.append(sessionId);
+        response.append("\nSession ID: ").append(sessionId);
         return response.toString();
     }
 
-    // Retrieve and send all logs for this session
-    public void processAndSendLogs(String sessionId) {
-        List<LogEntry> logs = logEntryService.getLogEntriesBySessionId(sessionId);
-        webSocketService.sendLogUpdate(logs);
+    private void processAndSendLogs(String sessionId) {
+        try {
+            List<LogEntry> logs = logEntryService.getLogEntriesBySessionId(sessionId);
+            if (!logs.isEmpty()) {
+                logger.info("Sending {} logs for session {}", logs.size(), sessionId);
+                logSenderService.sendLogEntries(logs);
+            } else {
+                logger.info("No logs found for session {}", sessionId);
+            }
+        } catch (Exception e) {
+            logger.error("Error processing and sending logs for session {}", sessionId, e);
+            throw new RuntimeException("Failed to process and send logs for session: " + sessionId, e);
+        }
     }
-
 
 }
