@@ -11,7 +11,7 @@ public interface StateObject {
         IMAGE, REGION, LOCATION, STRING, TEXT
     }
 
-    String getId();
+    String getIdAsString();
     Type getObjectType();
     String getName();
     String getOwnerStateName();

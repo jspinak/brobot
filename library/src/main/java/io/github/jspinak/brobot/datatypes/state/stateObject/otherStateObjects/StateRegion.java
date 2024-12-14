@@ -32,7 +32,7 @@ public class StateRegion implements StateObject {
     private String mockText = "mock text";
     private MatchHistory matchHistory = new MatchHistory();
 
-    public String getId() {
+    public String getIdAsString() {
         return objectType.name() + name + searchRegion.getX() + searchRegion.getY() + searchRegion.getW() + searchRegion.getY();
     }
 

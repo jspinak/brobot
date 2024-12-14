@@ -13,18 +13,14 @@ import java.util.List;
 @Service
 public class LocalLogEntryService implements LogEntryService {
     private final LogEntryRepository logEntryRepository;
-    private final WebSocketLogUpdateSender webSocketSender;
 
-    public LocalLogEntryService(LogEntryRepository logEntryRepository,
-                                WebSocketLogUpdateSender webSocketSender) {
+    public LocalLogEntryService(LogEntryRepository logEntryRepository) {
         this.logEntryRepository = logEntryRepository;
-        this.webSocketSender = webSocketSender;
     }
 
     @Override
     public LogEntry saveLog(LogEntry logEntry) {
         LogEntry savedLog = logEntryRepository.save(logEntry);
-        webSocketSender.sendSingleLogUpdate(savedLog);
         return savedLog;
     }
 

@@ -20,7 +20,7 @@ public class ActionStep {
         sb.append("Action: ").append(options.getAction()).append(", ");
         sb.append("StateImages: [");
         objects.getStateImages().forEach(si ->
-                sb.append("(id=").append(si.getId())
+                sb.append("(id=").append(si.getIdAsString())
                         .append(", name=").append(si.getName())
                         .append(", patterns=").append(si.getPatterns().size())
                         .append("), ")

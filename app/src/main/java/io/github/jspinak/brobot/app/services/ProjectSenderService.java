@@ -17,7 +17,7 @@ import java.util.List;
 public class ProjectSenderService {
     private final RestTemplate restTemplate;
     private final String clientAppUrl;
-    private final String apiKey;
+    private final AuthenticationService authService;
     private static final int MAX_ATTEMPTS = 3;
     private static final long DELAY_MS = 1000;
     private static final Logger logger = LoggerFactory.getLogger(ProjectSenderService.class);
@@ -25,24 +25,10 @@ public class ProjectSenderService {
     public ProjectSenderService(
             RestTemplate restTemplate,
             @Value("${client.app.url}") String clientAppUrl,
-            @Value("${client.app.api-key}") String apiKey) {
+            AuthenticationService authService) {
         this.restTemplate = restTemplate;
         this.clientAppUrl = clientAppUrl;
-        this.apiKey = apiKey;
-    }
-
-    public void sendProject(ProjectDTO projectDTO) {
-        executeWithRetry(() -> {
-            HttpHeaders headers = createHeaders();
-            HttpEntity<ProjectDTO> request = new HttpEntity<>(projectDTO, headers);
-            ResponseEntity<Void> response = restTemplate.postForEntity(
-                    clientAppUrl + "/api/projects/sync",
-                    request,
-                    Void.class
-            );
-            logger.info("Sent project: {} with status: {}", projectDTO.getName(), response.getStatusCode());
-            return null;
-        });
+        this.authService = authService;
     }
 
     public void sendProjects(List<ProjectDTO> projects) {
@@ -54,14 +40,14 @@ public class ProjectSenderService {
                     request,
                     Void.class
             );
-            logger.info("Sent {} projects", projects.size());
+            logger.info("Successfully sent {} projects", projects.size());
             return null;
         });
     }
 
     private HttpHeaders createHeaders() {
         HttpHeaders headers = new HttpHeaders();
-        headers.set("X-API-KEY", apiKey);
+        headers.setBearerAuth(authService.getJwtToken());
         headers.setContentType(MediaType.APPLICATION_JSON);
         return headers;
     }
