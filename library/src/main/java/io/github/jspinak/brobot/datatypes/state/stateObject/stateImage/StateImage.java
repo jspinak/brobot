@@ -64,7 +64,7 @@ public class StateImage implements StateObject {
      */
     private Set<Long> involvedTransitionIds = new HashSet<>();
 
-    public String getId() {
+    public String getIdAsString() {
         return objectType.name() + name + patterns.toString();
     }
 
@@ -224,6 +224,7 @@ public class StateImage implements StateObject {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("StateImage:");
         stringBuilder.append(" name=").append(name);
+        stringBuilder.append(" id=").append(id);
         stringBuilder.append(" ownerState=").append(ownerStateName);
         stringBuilder.append(" searchRegions=");
         getAllSearchRegions().forEach(stringBuilder::append);

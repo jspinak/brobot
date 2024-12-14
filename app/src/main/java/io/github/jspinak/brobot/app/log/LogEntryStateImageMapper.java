@@ -15,12 +15,12 @@ public class LogEntryStateImageMapper {
 
     public StateImageLog toLog(StateImage stateImage, Matches matches) {
         StateImageLog stateImageLog = new StateImageLog();
-        stateImageLog.setStateImageId(Long.getLong(stateImage.getId()));
+        stateImageLog.setStateImageId(stateImage.getId());
         // Set found status
         List<Match> matchList = matches.getMatchList();
         if (!matchList.isEmpty() && Objects.equals(
                 matchList.get(0).getStateObjectData().getStateObjectId(),
-                stateImage.getId())) {
+                stateImage.getIdAsString())) {
             stateImageLog.setFound(true);
         }
         return stateImageLog;
