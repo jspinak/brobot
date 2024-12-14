@@ -84,7 +84,7 @@ public class AutomationService {
             List<LogEntry> logs = logEntryService.getLogEntriesBySessionId(sessionId);
             if (!logs.isEmpty()) {
                 logger.info("Sending {} logs for session {}", logs.size(), sessionId);
-                logSenderService.sendLogEntries(logs);
+                logSenderService.sendLogUpdate(logs);
             } else {
                 logger.info("No logs found for session {}", sessionId);
             }

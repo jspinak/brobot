@@ -5,14 +5,21 @@ import io.github.jspinak.brobot.datatypes.state.state.State;
 import io.github.jspinak.brobot.log.entities.LogEntry;
 import io.github.jspinak.brobot.logging.ActionLogger;
 import io.github.jspinak.brobot.logging.AutomationSession;
-import io.github.jspinak.brobot.logging.LogUpdateSender;
-import io.github.jspinak.brobot.manageStates.*;
+import io.github.jspinak.brobot.manageStates.AdjacentStates;
+import io.github.jspinak.brobot.manageStates.InitialStates;
+import io.github.jspinak.brobot.manageStates.StateMemory;
+import io.github.jspinak.brobot.manageStates.StateTransitionsManagement;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
 
 @Component
 public class StateTraversalService {
+    private static final Logger logger = LoggerFactory.getLogger(StateTraversalService.class);
 
     private final AdjacentStates adjacentStates;
     private final AllStatesInProjectService allStatesInProjectService;
@@ -20,7 +27,6 @@ public class StateTraversalService {
     private final StateTransitionsManagement stateTransitionsManagement;
     private final InitialStates initialStates;
     private final StateMemory stateMemory;
-    private final LogUpdateSender logUpdateSender;
     private final ActionLogger actionLogger;
     private final AutomationSession automationSession;
 
@@ -31,15 +37,13 @@ public class StateTraversalService {
     public StateTraversalService(AdjacentStates adjacentStates, AllStatesInProjectService allStatesInProjectService,
                                  UnvisitedStates unvisitedStates, StateMemory stateMemory,
                                  StateTransitionsManagement stateTransitionsManagement,
-                                 InitialStates initialStates, LogUpdateSender logUpdateSender,
-                                 ActionLogger actionLogger, AutomationSession automationSession) {
+                                 InitialStates initialStates, ActionLogger actionLogger, AutomationSession automationSession) {
         this.adjacentStates = adjacentStates;
         this.allStatesInProjectService = allStatesInProjectService;
         this.unvisitedStates = unvisitedStates;
         this.stateTransitionsManagement = stateTransitionsManagement;
         this.initialStates = initialStates;
         this.stateMemory = stateMemory;
-        this.logUpdateSender = logUpdateSender;
         this.actionLogger = actionLogger;
         this.automationSession = automationSession;
     }
@@ -73,6 +77,8 @@ public class StateTraversalService {
         System.out.println("unvisited states = " + unvisitedStateSet);
         int failedAttempt = 0;
         initialStates.findIntialStates();
+        actionLogger.logObservation(automationSession.getCurrentSessionId(),
+                "Initial states: " + stateMemory.getActiveStateNamesAsString(), "", "info");
         visitedStates = new HashSet<>(stateMemory.getActiveStates());
         visitedStates.forEach(unvisitedStateSet::remove);
         Optional<Long> closestUnvisitedState = getNextState();
@@ -82,10 +88,8 @@ public class StateTraversalService {
             System.out.println("visited states = " + visitedStates);
             StringBuilder unvisitedStatesString = new StringBuilder();
             unvisitedStateSet.forEach(unvisitedStatesString::append);
-            LogEntry logEntry = actionLogger.logObservation(automationSession.getCurrentSessionId(),
+            if (failedAttempt > 0) actionLogger.logObservation(automationSession.getCurrentSessionId(),
                     "unvisited: failed attempts = " + failedAttempt, unvisitedStatesString.toString(), "info");
-            logUpdateSender.sendLogUpdate(Collections.singletonList(logEntry));
-
             if (stateTransitionsManagement.openState(closestStateId)) {
                 visitedStates.add(closestStateId);
             } else {

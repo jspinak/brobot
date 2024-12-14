@@ -21,7 +21,7 @@ public class StateObjectData {
     private Long ownerStateId;
 
     public StateObjectData(StateObject stateObject) {
-        this.stateObjectId = stateObject.getId();
+        this.stateObjectId = stateObject.getIdAsString();
         this.objectType = stateObject.getObjectType();
         this.stateObjectName = stateObject.getName();
         this.ownerStateName = stateObject.getOwnerStateName();

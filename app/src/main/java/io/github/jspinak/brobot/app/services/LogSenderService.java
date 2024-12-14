@@ -3,6 +3,7 @@ package io.github.jspinak.brobot.app.services;
 import io.github.jspinak.brobot.log.entities.LogEntry;
 import io.github.jspinak.brobot.log.entities.LogEntryDTO;
 import io.github.jspinak.brobot.log.entities.LogEntryMapper;
+import io.github.jspinak.brobot.logging.LogUpdateSender;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,56 +14,48 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-public class LogSenderService {
+public class LogSenderService implements LogUpdateSender {
     private static final Logger logger = LoggerFactory.getLogger(LogSenderService.class);
-
-    private final RestTemplate restTemplate;
-    private final String clientAppUrl;
-    private final String apiKey;
-    private final LogEntryMapper logEntryMapper;
     private static final int MAX_ATTEMPTS = 3;
     private static final long DELAY_MS = 1000;
 
+    private final RestTemplate restTemplate;
+    private final String clientAppUrl;
+    private final AuthenticationService authService;
+    private final LogEntryMapper logEntryMapper;
+
     public LogSenderService(
             RestTemplate restTemplate,
-            LogEntryMapper logEntryMapper,
             @Value("${client.app.url}") String clientAppUrl,
-            @Value("${client.app.api-key}") String apiKey) {
+            AuthenticationService authService,
+            LogEntryMapper logEntryMapper) {
         this.restTemplate = restTemplate;
-        this.logEntryMapper = logEntryMapper;
         this.clientAppUrl = clientAppUrl;
-        this.apiKey = apiKey;
-
-        // Log configuration on startup
-        logger.info("Initialized LogSenderService with URL: {}", clientAppUrl);
-        logger.debug("Using API key: {}", apiKey != null ? "[PRESENT]" : "[MISSING]");
-        logger.info("API Key configured: {}", apiKey != null ? "YES" : "NO");
-        if (apiKey == null || apiKey.trim().isEmpty()) {
-            logger.error("API Key is not configured! Set client.app.api-key in application.properties");
-        }
+        this.authService = authService;
+        this.logEntryMapper = logEntryMapper;
     }
 
-    public void sendLogEntries(List<LogEntry> logs) {
-        List<LogEntryDTO> dtos = logs.stream()
-                .map(logEntryMapper::toDTO)
-                .collect(Collectors.toList());
-
-        logger.info("Attempting to send {} log entries to {}", dtos.size(), clientAppUrl + "/api/logs/sync/bulk");
+    @Override
+    public void sendLogUpdate(List<LogEntry> logEntries) {
+        if (logEntries == null || logEntries.isEmpty()) {
+            logger.warn("Received null or empty log entries list");
+            return;
+        }
+        logger.debug("Received log entries: {}", logEntries.stream()
+                .map(entry -> entry == null ? "null" : entry.getId())
+                .collect(Collectors.toList()));
 
         executeWithRetry(() -> {
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            headers.set("X-API-KEY", apiKey);
+            List<LogEntryDTO> dtos = logEntries.stream()
+                    .map(logEntryMapper::toDTO)
+                    .toList();
 
-            // Log the request details for debugging
-            logger.debug("Request headers: {}", headers);
-            logger.debug("First log entry session ID: {}",
-                    !dtos.isEmpty() ? dtos.get(0).getSessionId() : "N/A");
-
+            HttpHeaders headers = createHeaders();
             HttpEntity<List<LogEntryDTO>> request = new HttpEntity<>(dtos, headers);
 
             ResponseEntity<Void> response = restTemplate.postForEntity(
@@ -71,9 +64,21 @@ public class LogSenderService {
                     Void.class
             );
 
-            logger.info("Response status: {}", response.getStatusCode());
+            logger.info("Successfully sent {} log entries", logEntries.size());
             return null;
         });
+    }
+
+    // Convenience method for single log entries
+    public void sendSingleLogUpdate(LogEntry logEntry) {
+        sendLogUpdate(Collections.singletonList(logEntry));
+    }
+
+    private HttpHeaders createHeaders() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(authService.getJwtToken());
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        return headers;
     }
 
     private <T> T executeWithRetry(RetryableOperation<T> operation) {
@@ -86,13 +91,10 @@ public class LogSenderService {
             } catch (Exception e) {
                 lastException = e;
                 attempts++;
-                logger.error("Attempt {} failed: {}", attempts, e.getMessage());
-
                 if (attempts < MAX_ATTEMPTS) {
                     try {
-                        long delay = DELAY_MS * attempts;
-                        logger.info("Waiting {}ms before retry...", delay);
-                        Thread.sleep(delay);
+                        Thread.sleep(DELAY_MS * attempts); // Exponential backoff
+                        logger.warn("Retry attempt {} after error: {}", attempts, e.getMessage());
                     } catch (InterruptedException ie) {
                         Thread.currentThread().interrupt();
                         throw new RuntimeException("Retry interrupted", ie);
@@ -100,8 +102,6 @@ public class LogSenderService {
                 }
             }
         }
-
-        logger.error("All {} attempts failed. Last error: {}", MAX_ATTEMPTS, lastException.getMessage());
         throw new RuntimeException("Operation failed after " + MAX_ATTEMPTS + " attempts", lastException);
     }
 
