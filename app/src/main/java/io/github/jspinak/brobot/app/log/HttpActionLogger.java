@@ -63,7 +63,10 @@ public class HttpActionLogger implements ActionLogger, TestSessionLogger {
         logEntry.setSuccess(matches.isSuccess());
         logEntry.setCurrentStateName(getStateInFocus(objectCollection));
         objectCollection.getStateImages().forEach(
-                sI -> logEntry.getStateImageLogs().add(logEntryStateImageMapper.toLog(sI, matches)));
+                sI -> {
+                    logEntry.getStateImageLogs().add(logEntryStateImageMapper.toLog(sI, matches));
+                    System.out.println(logEntry.getStateImageLogs());
+                });
         LogEntry savedLog = logEntryService.saveLog(logEntry);
         log.debug("Saved log entry with id: {}", savedLog.getId());
         return savedLog;
@@ -96,6 +99,7 @@ public class HttpActionLogger implements ActionLogger, TestSessionLogger {
                                        Set<State> beforeStates, boolean success, long transitionTime) {
         LogEntry logEntry = new LogEntry();
         logEntry.setSessionId(sessionId);
+        logEntry.setType(LogType.TRANSITION);
         logEntry.setProjectId(getCurrentProjectId());
         if (fromState != null) {
             logEntry.setFromStateName(fromState.getName());
@@ -113,7 +117,29 @@ public class HttpActionLogger implements ActionLogger, TestSessionLogger {
             logEntry.setDuration(transitionTime);
             logEntry.setSuccess(success);
         }
-        return logEntryService.saveLog(logEntry);
+        LogEntry savedLog = logEntryService.saveLog(logEntry);
+        log.debug("Saved transition log with id: {} from {} to {}",
+                savedLog.getId(), savedLog.getFromStateName(), savedLog.getToStateNames());
+        return savedLog;
+    }
+
+    @Override
+    public LogEntry logObservation(String sessionId, String observationType, String description, String severity) {
+        log.debug("Creating observation log entry - sessionId: {}, type: {}, description: {}, severity: {}",
+                sessionId, observationType, description, severity);
+
+        LogEntry logEntry = new LogEntry();
+        logEntry.setProjectId(getCurrentProjectId());
+        logEntry.setSessionId(sessionId);
+        logEntry.setType(LogType.OBSERVATION);
+        logEntry.setActionType(observationType);
+        logEntry.setDescription(description);
+        logEntry.setTimestamp(Instant.now());
+        //logEntry.setSeverity(severity);
+
+        LogEntry savedLog = logEntryService.saveLog(logEntry);
+        log.debug("Saved observation log entry with id: {}", savedLog.getId());
+        return savedLog;
     }
 
     @Override

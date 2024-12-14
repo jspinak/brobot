@@ -17,7 +17,7 @@ import java.util.List;
 public class StateImageSenderService {
     private final RestTemplate restTemplate;
     private final String clientAppUrl;
-    private final String apiKey;
+    private final AuthenticationService authService;
     private static final int MAX_ATTEMPTS = 3;
     private static final long DELAY_MS = 1000;
     private static final Logger logger = LoggerFactory.getLogger(StateImageSenderService.class);
@@ -25,10 +25,10 @@ public class StateImageSenderService {
     public StateImageSenderService(
             RestTemplate restTemplate,
             @Value("${client.app.url}") String clientAppUrl,
-            @Value("${client.app.api-key}") String apiKey) {
+            AuthenticationService authService) {
         this.restTemplate = restTemplate;
         this.clientAppUrl = clientAppUrl;
-        this.apiKey = apiKey;
+        this.authService = authService;
     }
 
     public void sendStateImage(StateImageDTO stateImageDTO) {
@@ -40,30 +40,29 @@ public class StateImageSenderService {
                     request,
                     Void.class
             );
-            logger.info("Sent state image: {} with status: {}", stateImageDTO.getName(), response.getStatusCode());
+            logger.info("Sent state image: {} with status: {}",
+                    stateImageDTO.getName(), response.getStatusCode());
             return null;
         });
     }
 
     public void sendStateImages(List<StateImageDTO> stateImages) {
         executeWithRetry(() -> {
-            HttpHeaders headers = new HttpHeaders();
-            headers.set("X-API-KEY", apiKey);
-            logger.debug("Sending request with API Key: {}", apiKey);
+            HttpHeaders headers = createHeaders();
             HttpEntity<List<StateImageDTO>> request = new HttpEntity<>(stateImages, headers);
-            logger.debug("Request URL: {}", clientAppUrl + "/api/state-images/sync/bulk");
             ResponseEntity<Void> response = restTemplate.postForEntity(
                     clientAppUrl + "/api/state-images/sync/bulk",
                     request,
                     Void.class
             );
+            logger.info("Successfully sent {} state images", stateImages.size());
             return null;
         });
     }
 
     private HttpHeaders createHeaders() {
         HttpHeaders headers = new HttpHeaders();
-        headers.set("X-API-KEY", apiKey);
+        headers.setBearerAuth(authService.getJwtToken());
         headers.setContentType(MediaType.APPLICATION_JSON);
         return headers;
     }

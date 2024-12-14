@@ -39,7 +39,7 @@ public class Model {
             for (StateImage stateImage : state.getStateImages()) {
                 indentation = "    ";
                 sb.append(indentation).append(stateImage.getName())
-                        .append(" (id=").append(stateImage.getId())
+                        .append(" (id=").append(stateImage.getIdAsString())
                         .append(", patterns=").append(stateImage.getPatterns().size())
                         .append(")\n");
             }
