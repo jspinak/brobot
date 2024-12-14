@@ -29,7 +29,7 @@ public class StateLocation implements StateObject {
     private MatchHistory matchHistory = new MatchHistory(); // not used yet
 
 
-    public String getId() {
+    public String getIdAsString() {
         return objectType.name() + name + location.getX() + location.getY();
     }
 

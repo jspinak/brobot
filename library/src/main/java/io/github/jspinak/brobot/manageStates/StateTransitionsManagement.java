@@ -5,7 +5,6 @@ import io.github.jspinak.brobot.datatypes.state.state.State;
 import io.github.jspinak.brobot.log.entities.LogEntry;
 import io.github.jspinak.brobot.logging.ActionLogger;
 import io.github.jspinak.brobot.logging.AutomationSession;
-import io.github.jspinak.brobot.logging.LogUpdateSender;
 import io.github.jspinak.brobot.reports.Output;
 import io.github.jspinak.brobot.reports.Report;
 import org.springframework.stereotype.Component;
@@ -35,14 +34,12 @@ public class StateTransitionsManagement {
     private final PathManager pathManager;
     private final ActionLogger actionLogger;
     private final AutomationSession automationSession;
-    private final LogUpdateSender logUpdateSender;
 
     Set<Long> activeStates;
 
     public StateTransitionsManagement(PathFinder pathFinder, AllStatesInProjectService allStatesInProjectService,
                                       StateMemory stateMemory, TraversePaths traversePaths, PathManager pathManager,
-                                      ActionLogger actionLogger, AutomationSession automationSession,
-                                      LogUpdateSender logUpdateSender) {
+                                      ActionLogger actionLogger, AutomationSession automationSession) {
         this.pathFinder = pathFinder;
         this.allStatesInProjectService = allStatesInProjectService;
         this.stateMemory = stateMemory;
@@ -50,7 +47,6 @@ public class StateTransitionsManagement {
         this.pathManager = pathManager;
         this.actionLogger = actionLogger;
         this.automationSession = automationSession;
-        this.logUpdateSender = logUpdateSender;
     }
 
     public boolean openState(Long stateToOpen) {
@@ -65,15 +61,9 @@ public class StateTransitionsManagement {
             return false;
         }
         // Log transition attempt start
-        LogEntry startLogEntry = actionLogger.logStateTransition(
-                sessionId, // no duration for start log
-                null,
-                allStatesInProjectService.findSetById(activeStates),
-                Collections.singleton(targetState.get()),
-                false,
-                0
-        );
-        logUpdateSender.sendLogUpdate(Collections.singletonList(startLogEntry));
+        String transitionDescription = "Transition from " + stateMemory.getActiveStateNamesAsString() +
+                " to " + targetState.get().getName();
+        actionLogger.logObservation(automationSession.getCurrentSessionId(), transitionDescription, "", "info");
 
         // we find the paths once, and then reuse these paths when needed
         Paths paths = pathFinder.getPathsToState(activeStates, stateToOpen);
@@ -81,15 +71,14 @@ public class StateTransitionsManagement {
         Duration duration = Duration.between(startTime, Instant.now());
 
         // Log transition attempt end
-        LogEntry endLogEntry = actionLogger.logStateTransition(
+        actionLogger.logStateTransition(
                 sessionId, // no duration for start log
                 null,
-                allStatesInProjectService.findSetById(activeStates),
                 Collections.singleton(targetState.get()),
+                allStatesInProjectService.findSetById(activeStates),
                 success,
                 duration.toMillis()
         );
-        logUpdateSender.sendLogUpdate(Collections.singletonList(endLogEntry));
 
         if (!success) Report.println(Output.fail+" All paths tried, open failed.");
         Report.println("Active States: " + activeStates +"\n");

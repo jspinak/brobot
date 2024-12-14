@@ -40,6 +40,19 @@ public class StateMemory {
         return activeStateList;
     }
 
+    public List<String> getActiveStateNames() {
+        List<String> activeStateNames = new ArrayList<>();
+        for (Long stateId : activeStates) {
+            Optional<State> stateOpt = allStatesInProjectService.getState(stateId);
+            stateOpt.ifPresent(state -> activeStateNames.add(state.getName()));
+        }
+        return activeStateNames;
+    }
+
+    public String getActiveStateNamesAsString() {
+        return String.join(", ", getActiveStateNames());
+    }
+
     public void adjustActiveStatesWithMatches(Matches matches) {
         matches.getMatchList().forEach(match -> {
             if (match.getStateObjectData() != null) {

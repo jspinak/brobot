@@ -15,13 +15,11 @@ import io.github.jspinak.brobot.imageUtils.CaptureScreenshot;
 import io.github.jspinak.brobot.log.entities.LogEntry;
 import io.github.jspinak.brobot.logging.ActionLogger;
 import io.github.jspinak.brobot.logging.AutomationSession;
-import io.github.jspinak.brobot.logging.LogUpdateSender;
 import io.github.jspinak.brobot.reports.Report;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -47,13 +45,11 @@ public class ActionExecution {
     private final ActionLogger actionLogger;
     private final CaptureScreenshot captureScreenshot;
     private final AutomationSession automationSession;
-    private final LogUpdateSender logUpdateSender;
 
     public ActionExecution(Time time, IllustrateScreenshot illustrateScreenshot, SelectRegions selectRegions,
                            ActionLifecycleManagement actionLifecycleManagement, DatasetManager datasetManager,
                            Success success, MatchesInitializer matchesInitializer, ActionLogger actionLogger,
-                           CaptureScreenshot captureScreenshot, AutomationSession automationSession,
-                           LogUpdateSender logUpdateSender) {
+                           CaptureScreenshot captureScreenshot, AutomationSession automationSession) {
         this.time = time;
         this.illustrateScreenshot = illustrateScreenshot;
         this.selectRegions = selectRegions;
@@ -64,7 +60,6 @@ public class ActionExecution {
         this.actionLogger = actionLogger;
         this.captureScreenshot = captureScreenshot;
         this.automationSession = automationSession;
-        this.logUpdateSender = logUpdateSender;
     }
 
     /**
@@ -99,7 +94,6 @@ public class ActionExecution {
             String screenshotPath = captureScreenshot.captureScreenshot("action_failed_" + sessionId);
             //actionLogger.logError(sessionId, "Action failed: " + actionOptions.getAction(), screenshotPath);
         }
-        logUpdateSender.sendLogUpdate(Collections.singletonList(logEntry));
         return matches;
     }
 
