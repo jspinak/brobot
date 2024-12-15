@@ -13,9 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 @Component
 public class StateTraversalService {
@@ -30,6 +28,7 @@ public class StateTraversalService {
     private final ActionLogger actionLogger;
     private final AutomationSession automationSession;
 
+    private final List<StateVisit> stateVisits = new ArrayList<>();
     private Set<Long> visitedStates = new HashSet<>();
     private Set<Long> unvisitedStateSet = new HashSet<>();
     private Set<Long> unreachableStates = new HashSet<>();
@@ -77,8 +76,15 @@ public class StateTraversalService {
         System.out.println("unvisited states = " + unvisitedStateSet);
         int failedAttempt = 0;
         initialStates.findIntialStates();
+
+        // Record initial states
+        stateMemory.getActiveStates().forEach(stateId -> {
+            Optional<State> state = allStatesInProjectService.getState(stateId);
+            state.ifPresent(s -> stateVisits.add(new StateVisit(stateId, s.getName(), true)));
+        });
+
         actionLogger.logObservation(automationSession.getCurrentSessionId(),
-                "Initial states: " + stateMemory.getActiveStateNamesAsString(), "", "info");
+                "Initial states:", stateMemory.getActiveStateNamesAsString(), "info");
         visitedStates = new HashSet<>(stateMemory.getActiveStates());
         visitedStates.forEach(unvisitedStateSet::remove);
         Optional<Long> closestUnvisitedState = getNextState();
@@ -90,16 +96,23 @@ public class StateTraversalService {
             unvisitedStateSet.forEach(unvisitedStatesString::append);
             if (failedAttempt > 0) actionLogger.logObservation(automationSession.getCurrentSessionId(),
                     "unvisited: failed attempts = " + failedAttempt, unvisitedStatesString.toString(), "info");
-            if (stateTransitionsManagement.openState(closestStateId)) {
+
+            Optional<State> state = allStatesInProjectService.getState(closestStateId);
+            boolean success = stateTransitionsManagement.openState(closestStateId);
+            state.ifPresent(s -> stateVisits.add(new StateVisit(closestStateId, s.getName(), success)));
+
+            if (success) {
                 visitedStates.add(closestStateId);
+                unreachableStates.remove(closestStateId);
             } else {
                 failedAttempt++;
-                unreachableStates.add(closestStateId);
+                unreachableStates.add(closestStateId); // this is a temporary solution since the state may be reachable from another state
             }
             unvisitedStateSet.remove(closestStateId);
             closestUnvisitedState = getNextState();
         }
         System.out.println("finished traversing all states");
+        logTraversalSummary();
         return visitedStates;
     }
 
@@ -107,5 +120,44 @@ public class StateTraversalService {
         Optional<Long> closestUnvisitedState = getAdjacentUnvisited(visitedStates).stream().findFirst();
         if (closestUnvisitedState.isPresent()) return closestUnvisitedState;
         return unvisitedStates.getClosestUnvisited();
+    }
+
+    private void logTraversalSummary() {
+        StringBuilder summary = new StringBuilder();
+
+        summary.append("\nStates visited in order:\n");
+        for (StateVisit visit : stateVisits) {
+            summary.append(String.format("- %s (ID: %d) - %s\n",
+                    visit.getStateName(),
+                    visit.getStateId(),
+                    visit.isSuccessful() ? "Success" : "Failed"));
+        }
+
+        summary.append("\nSuccessfully visited states:\n");
+        stateVisits.stream()
+                .filter(StateVisit::isSuccessful)
+                .forEach(visit -> summary.append(String.format("- %s (ID: %d)\n", visit.getStateName(), visit.getStateId())));
+
+        summary.append("\nUnreachable states:\n");
+        unreachableStates.forEach(stateId -> {
+            Optional<State> state = allStatesInProjectService.getState(stateId);
+            state.ifPresent(s -> summary.append(String.format("- %s (ID: %d)\n", s.getName(), s.getId())));
+        });
+
+        logger.info(summary.toString());
+        actionLogger.logObservation(automationSession.getCurrentSessionId(), "State Traversal Summary:", summary.toString(), "info");
+    }
+
+    // Getters for traversal results
+    public List<StateVisit> getStateVisits() {
+        return new ArrayList<>(stateVisits);
+    }
+
+    public Set<Long> getUnreachableStates() {
+        return new HashSet<>(unreachableStates);
+    }
+
+    public Set<Long> getSuccessfullyVisitedStates() {
+        return new HashSet<>(visitedStates);
     }
 }
