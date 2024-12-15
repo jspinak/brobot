@@ -63,7 +63,7 @@ public class StateTransitionsManagement {
         // Log transition attempt start
         String transitionDescription = "Transition from " + stateMemory.getActiveStateNamesAsString() +
                 " to " + targetState.get().getName();
-        actionLogger.logObservation(automationSession.getCurrentSessionId(), transitionDescription, "", "info");
+        actionLogger.logObservation(automationSession.getCurrentSessionId(), "Transition start:", transitionDescription, "info");
 
         // we find the paths once, and then reuse these paths when needed
         Paths paths = pathFinder.getPathsToState(activeStates, stateToOpen);
