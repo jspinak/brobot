@@ -12,3 +12,9 @@ complex automation applications in areas such as game playing and image-based te
 Brobot is [MIT licensed](./LICENSE).
 
 The Brobot documentation (e.g., `.md` files in the `/docs` folder) is [Creative Commons licensed](./LICENSE-docs).
+
+## Notes on deploying the React app
+
+The React app allows you to build a state structure and basic transitions visually. It requires a local
+database, and the .env.example file provides the necessary environment variables. This file should be
+filled out with your own database information and renamed to .env before running the app.
