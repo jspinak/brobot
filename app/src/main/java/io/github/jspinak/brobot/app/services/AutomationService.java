@@ -2,6 +2,7 @@ package io.github.jspinak.brobot.app.services;
 
 import io.github.jspinak.brobot.actions.actionExecution.Action;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
+import io.github.jspinak.brobot.actions.methods.basicactions.captureAndReplay.recorder.Recorder;
 import io.github.jspinak.brobot.app.database.databaseMappers.StateEntityMapper;
 import io.github.jspinak.brobot.app.database.repositories.StateRepo;
 import io.github.jspinak.brobot.app.models.BuildModel;
@@ -31,11 +32,12 @@ public class AutomationService {
     private final LogEntryService logEntryService;
     private final LogSenderService logSenderService;
     private final AutomationSession automationSession;
+    private final Recorder recorder;
 
     public AutomationService(BuildModel buildModel, Action action, StateRepo stateRepo,
                              StateEntityMapper stateEntityMapper, StateTraversalService stateTraversalService,
                              LogEntryService logEntryService, LogSenderService logSenderService,
-                             AutomationSession automationSession) {
+                             AutomationSession automationSession, Recorder recorder) {
         this.buildModel = buildModel;
         this.action = action;
         this.stateRepo = stateRepo;
@@ -44,6 +46,7 @@ public class AutomationService {
         this.logEntryService = logEntryService;
         this.logSenderService = logSenderService;
         this.automationSession = automationSession;
+        this.recorder = recorder;
     }
 
     public String integrateModelIntoFramework(ProjectRequest projectRequest) {
@@ -94,4 +97,12 @@ public class AutomationService {
         }
     }
 
+    public void captureScreenshots(int secondsToCapture, double captureFrequency) {
+        recorder.setScreenshotDelay((int)(captureFrequency * 1000));
+        recorder.startRecording();
+    }
+
+    public void stopCaptureScreenshots() {
+        recorder.stopRecording();
+    }
 }

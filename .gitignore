@@ -16,3 +16,6 @@
 **/._.DS_Store
 
 /**/application.properties
+
+# Exclude all .env files
+**/*.env
