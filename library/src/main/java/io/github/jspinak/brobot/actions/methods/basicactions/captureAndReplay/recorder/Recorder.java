@@ -40,7 +40,7 @@ public class Recorder {
 
     /**
      * Starts capturing screenshots and recording the user's actions<br>
-     * The screenshots are saved in the directory defined below as sikuliximage_TIMESTAMP.png.
+     * The screenshots are saved in the directory defined below as screenshot_TIMESTAMP.png.
      */
     public void startRecording() {
         if (recording) return;
@@ -48,14 +48,14 @@ public class Recorder {
 
         // todo: not in Sikuli 2.0.5 -> //Commons.asFolder(new File(recordingFolder, "recording"  + "-" + new Date().getTime()).getAbsolutePath());
 
-        captureScreenshots.startCapturing(saveToFile, "sikuliximage", screenshotDelay);
+        captureScreenshots.startCapturing(saveToFile, "screenshot", screenshotDelay);
         captureUserInputs.startRecording();
     }
 
     /**
      * Stops recording the user's actions and capturing screenshots.<br>
-     * The user's actions raw data are saved in the path defined below as: sikulixrawinputs.xml<br>
-     * Finally the raw actions are reduced to relevant actions: sikulixinputs.xml
+     * The user's actions raw data are saved in the path defined below as: rawinputs.xml<br>
+     * Finally the raw actions are reduced to relevant actions: inputs.xml
      */
     public void stopRecording() {
         if (!recording) return;
@@ -64,9 +64,9 @@ public class Recorder {
         captureScreenshots.stopCapturing();
 
         Document rawDoc = captureUserInputs.finalizeRecording();
-        saveToFile.saveXML(rawDoc, "sikulixrawinputs.xml");
+        saveToFile.saveXML(rawDoc, "rawinputs.xml");
         Document simplifiedDoc = processRecording.process(rawDoc);
-        saveToFile.saveXML(simplifiedDoc, "sikulixinputs.xml");
+        saveToFile.saveXML(simplifiedDoc, "inputs.xml");
     }
 
     public boolean setRecordingDirectory(String directory) {

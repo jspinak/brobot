@@ -24,7 +24,7 @@ public class ProjectSenderService {
 
     public ProjectSenderService(
             RestTemplate restTemplate,
-            @Value("${client.app.url}") String clientAppUrl,
+            @Value("${client.app.base-url}") String clientAppUrl,
             AuthenticationService authService) {
         this.restTemplate = restTemplate;
         this.clientAppUrl = clientAppUrl;

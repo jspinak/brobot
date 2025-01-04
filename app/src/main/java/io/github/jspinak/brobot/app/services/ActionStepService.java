@@ -2,10 +2,10 @@ package io.github.jspinak.brobot.app.services;
 
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.app.database.databaseMappers.ActionOptionsEntityMapper;
-import io.github.jspinak.brobot.app.database.databaseMappers.ObjectCollectionEntityMapper;
-import io.github.jspinak.brobot.app.database.entities.ActionOptionsEntity;
 import io.github.jspinak.brobot.app.database.entities.ActionStepEntity;
-import io.github.jspinak.brobot.app.database.entities.ObjectCollectionEntity;
+import io.github.jspinak.brobot.app.web.requests.ActionStepRequest;
+import io.github.jspinak.brobot.app.web.responseMappers.ActionOptionsResponseMapper;
+import io.github.jspinak.brobot.app.web.responseMappers.ObjectCollectionResponseMapper;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import io.github.jspinak.brobot.dsl.ActionStep;
 import org.springframework.stereotype.Service;
@@ -17,17 +17,17 @@ import java.util.List;
 public class ActionStepService {
 
     private final ActionOptionsEntityMapper actionOptionsEntityMapper;
-    private final ObjectCollectionEntityMapper objectCollectionEntityMapper;
-    private final StateImageService stateImageService;
+    private final ActionOptionsResponseMapper actionOptionsResponseMapper;
+    private final ObjectCollectionResponseMapper objectCollectionResponseMapper;
     private final ObjectCollectionService objectCollectionService;
 
     public ActionStepService(ActionOptionsEntityMapper actionOptionsEntityMapper,
-                             ObjectCollectionEntityMapper objectCollectionEntityMapper,
-                             StateImageService stateImageService,
+                             ActionOptionsResponseMapper actionOptionsResponseMapper,
+                             ObjectCollectionResponseMapper objectCollectionResponseMapper,
                              ObjectCollectionService objectCollectionService) {
         this.actionOptionsEntityMapper = actionOptionsEntityMapper;
-        this.objectCollectionEntityMapper = objectCollectionEntityMapper;
-        this.stateImageService = stateImageService;
+        this.actionOptionsResponseMapper = actionOptionsResponseMapper;
+        this.objectCollectionResponseMapper = objectCollectionResponseMapper;
         this.objectCollectionService = objectCollectionService;
     }
 
@@ -41,5 +41,12 @@ public class ActionStepService {
         List<ActionStep> steps = new ArrayList<>();
         stepEntites.forEach(entity -> steps.add(mapFromEntityToActionStep(entity)));
         return steps;
+    }
+
+    public Object createActionStepEntity(ActionStepRequest actionStepRequest) {
+        ActionStepEntity entity = new ActionStepEntity();
+        entity.setActionOptionsEntity(actionOptionsResponseMapper.fromRequest(actionStepRequest.getActionOptions()));
+        entity.setObjectCollectionEntity(objectCollectionResponseMapper.fromRequest(actionStepRequest.getObjectCollection()));
+        return entity;
     }
 }
