@@ -4,6 +4,8 @@ import io.github.jspinak.brobot.app.database.databaseMappers.ActionOptionsEntity
 import io.github.jspinak.brobot.app.database.databaseMappers.ObjectCollectionEntityMapper;
 import io.github.jspinak.brobot.app.database.entities.ActionDefinitionEntity;
 import io.github.jspinak.brobot.app.database.entities.ActionStepEntity;
+import io.github.jspinak.brobot.app.database.repositories.ActionDefinitionRepo;
+import io.github.jspinak.brobot.app.web.requests.ActionStepRequest;
 import io.github.jspinak.brobot.dsl.ActionDefinition;
 import io.github.jspinak.brobot.dsl.ActionStep;
 import org.springframework.stereotype.Service;
@@ -18,13 +20,15 @@ public class ActionDefinitionService {
     private final ActionOptionsEntityMapper actionOptionsEntityMapper;
     private final ObjectCollectionEntityMapper objectCollectionEntityMapper;
     private final ActionStepService actionStepService;
+    private final ActionDefinitionRepo actionDefinitionRepo;
 
     public ActionDefinitionService(ActionOptionsEntityMapper actionOptionsEntityMapper,
                                    ObjectCollectionEntityMapper objectCollectionEntityMapper,
-                                   ActionStepService actionStepService) {
+                                   ActionStepService actionStepService, ActionDefinitionRepo actionDefinitionRepo) {
         this.actionOptionsEntityMapper = actionOptionsEntityMapper;
         this.objectCollectionEntityMapper = objectCollectionEntityMapper;
         this.actionStepService = actionStepService;
+        this.actionDefinitionRepo = actionDefinitionRepo;
     }
 
     public ActionDefinitionEntity createActionDefinitionEntity(ActionDefinition actionDefinition) {
@@ -52,4 +56,33 @@ public class ActionDefinitionService {
         return actionDefinition;
     }
 
+    public ActionDefinitionEntity save(ActionDefinitionEntity entity) {
+        return actionDefinitionRepo.save(entity);
+    }
+
+    public ActionDefinitionEntity findById(Long id) {
+        return actionDefinitionRepo.findById(id).orElse(null);
+    }
+
+    public List<ActionDefinitionEntity> findByProjectId(Long projectId) {
+        return actionDefinitionRepo.findByProjectId(projectId);
+    }
+
+    public void delete(Long id) {
+        actionDefinitionRepo.deleteById(id);
+    }
+
+    public ActionDefinitionEntity updateSteps(Long id, List<ActionStepRequest> steps) {
+        ActionDefinitionEntity entity = actionDefinitionRepo.findById(id).orElse(null);
+        if (entity == null) {
+            return null;
+        }
+
+        List<ActionStepEntity> stepEntities = steps.stream()
+                .map(actionStepService::createActionStepEntity)
+                .collect(Collectors.toList());
+
+        entity.setSteps(stepEntities);
+        return actionDefinitionRepo.save(entity);
+    }
 }
