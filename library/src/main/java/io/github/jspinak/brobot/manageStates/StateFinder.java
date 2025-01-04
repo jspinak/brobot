@@ -9,6 +9,7 @@ import io.github.jspinak.brobot.reports.Report;
 import org.springframework.stereotype.Component;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -72,4 +73,9 @@ public class StateFinder {
                 .isSuccess()).isPresent();
     }
 
+    public Set<Long> refreshActiveStates() {
+        stateMemory.removeAllStates();
+        searchAllImagesForCurrentStates();
+        return stateMemory.getActiveStates();
+    }
 }

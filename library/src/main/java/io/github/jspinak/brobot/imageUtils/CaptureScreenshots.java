@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
@@ -25,6 +26,8 @@ public class CaptureScreenshots {
 
     private final ImageUtils imageUtils;
     private final Time time;
+
+    private volatile boolean isCapturing = false;
 
     private final ScheduledExecutorService SCHEDULER = Executors.newSingleThreadScheduledExecutor();
 
@@ -69,7 +72,14 @@ public class CaptureScreenshots {
     }
 
     public synchronized void stopCapturing() {
-        SCHEDULER.shutdown();
+        try {
+            SCHEDULER.shutdown();
+            if (!SCHEDULER.awaitTermination(1, TimeUnit.SECONDS)) {
+                SCHEDULER.shutdownNow();
+            }
+        } catch (InterruptedException e) {
+            SCHEDULER.shutdownNow();
+        }
     }
 
 }
