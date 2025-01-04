@@ -5,6 +5,7 @@ import ProjectSelector from './project-selector.component';
 import CreateProjectDialog from './create-project-dialog.component';
 import { ProjectContext } from './../../components/ProjectContext';
 import api from './../../services/api'
+import ScreenshotCapture from './ScreenshotCapture';
 
 const Home = () => {
     const { selectedProject, setSelectedProject } = useContext(ProjectContext);
@@ -12,6 +13,10 @@ const Home = () => {
     const [triggerRefresh, setTriggerRefresh] = useState(0);
     const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
     const [automationResult, setAutomationResult] = useState('');
+    const [secondsToCapture, setSecondsToCapture] = useState('');
+    const [captureFrequency, setCaptureFrequency] = useState('');
+    const [automationDuration, setAutomationDuration] = useState('');
+    const [isAutomationRunning, setIsAutomationRunning] = useState(false);
 
     useEffect(() => {
         console.log('Home: Current selected project:', selectedProject);
@@ -60,19 +65,74 @@ const Home = () => {
         }
     };
 
-const runAutomation = async (endpoint) => {
-    if (!selectedProject) {
-        setAutomationResult('No project selected');
-        return;
-    }
-    setAutomationResult('Running...');
-    try {
-        const response = await api.post(`/api/automation/${endpoint}`);
-        setAutomationResult(response.data.message || response.data || 'Operation completed');
-    } catch (error) {
-        setAutomationResult('Error occurred: ' + error.message);
-    }
-};
+    const runAutomation = async (endpoint) => {
+        if (!selectedProject) {
+            setAutomationResult('No project selected');
+            return;
+        }
+        setAutomationResult('Running...');
+        try {
+            const response = await api.post(`/api/automation/${endpoint}`);
+            setAutomationResult(response.data.message || response.data || 'Operation completed');
+        } catch (error) {
+            setAutomationResult('Error occurred: ' + error.message);
+        }
+    };
+
+    const handleCaptureScreenshots = async () => {
+        if (!selectedProject) {
+            setAutomationResult('No project selected');
+            return;
+        }
+        try {
+            const response = await api.post(`/api/automation/capture-screenshots`, {
+                secondsToCapture: parseInt(secondsToCapture, 10),
+                captureFrequency: parseFloat(captureFrequency)
+            });
+            setAutomationResult(response.data.message || 'Screenshots captured successfully');
+        } catch (error) {
+            setAutomationResult('Error occurred: ' + error.message);
+        }
+    };
+
+    const startTimedAutomation = async () => {
+        if (!selectedProject) {
+            setAutomationResult('No project selected');
+            return;
+        }
+
+        const seconds = parseInt(automationDuration, 10);
+        if (isNaN(seconds) || seconds <= 0) {
+            setAutomationResult('Please enter a valid duration in seconds');
+            return;
+        }
+
+        try {
+            setAutomationResult('Starting timed automation...');
+            const response = await api.post('/api/automation/start-timed', { seconds });
+            setIsAutomationRunning(true);
+            setAutomationResult(response.data.message);
+
+            // Automatically update status when automation should complete
+            setTimeout(() => {
+                setIsAutomationRunning(false);
+                setAutomationResult('Automation completed');
+            }, seconds * 1000);
+        } catch (error) {
+            setAutomationResult('Error: ' + (error.response?.data?.message || error.message));
+            setIsAutomationRunning(false);
+        }
+    };
+
+    const stopAutomation = async () => {
+        try {
+            const response = await api.post('/api/automation/stop');
+            setIsAutomationRunning(false);
+            setAutomationResult(response.data.message);
+        } catch (error) {
+            setAutomationResult('Error stopping automation: ' + (error.response?.data?.message || error.message));
+        }
+    };
 
     return (
         <Container>
@@ -138,6 +198,42 @@ const runAutomation = async (endpoint) => {
                             </Button>
                         </Box>
                     </Paper>
+                    <Paper elevation={3} sx={{ p: 3 }}>
+                        <Typography variant="h5" gutterBottom>Timed Automation</Typography>
+                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                            <TextField
+                                label="Duration (seconds)"
+                                type="number"
+                                value={automationDuration}
+                                onChange={(e) => setAutomationDuration(e.target.value)}
+                                disabled={isAutomationRunning}
+                                sx={{ mb: 2 }}
+                            />
+                            <Button
+                                variant="contained"
+                                color="primary"
+                                onClick={startTimedAutomation}
+                                disabled={isAutomationRunning}
+                            >
+                                Start Timed Automation
+                            </Button>
+                            <Button
+                                variant="contained"
+                                color="secondary"
+                                onClick={stopAutomation}
+                                disabled={!isAutomationRunning}
+                            >
+                                Stop Automation
+                            </Button>
+                        </Box>
+                    </Paper>
+                </Grid>
+
+            </Grid>
+
+            <Grid container spacing={3} mt={3}>
+                <Grid item xs={12}>
+                    <ScreenshotCapture onResultChange={setAutomationResult} />
                 </Grid>
             </Grid>
 
