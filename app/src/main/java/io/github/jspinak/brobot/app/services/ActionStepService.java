@@ -43,7 +43,7 @@ public class ActionStepService {
         return steps;
     }
 
-    public Object createActionStepEntity(ActionStepRequest actionStepRequest) {
+    public ActionStepEntity createActionStepEntity(ActionStepRequest actionStepRequest) {
         ActionStepEntity entity = new ActionStepEntity();
         entity.setActionOptionsEntity(actionOptionsResponseMapper.fromRequest(actionStepRequest.getActionOptions()));
         entity.setObjectCollectionEntity(objectCollectionResponseMapper.fromRequest(actionStepRequest.getObjectCollection()));
