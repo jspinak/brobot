@@ -17,6 +17,8 @@ public class ActionDefinitionEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    private Long projectId;
+
     @Column(name = "action_type")
     private String actionType;
 
