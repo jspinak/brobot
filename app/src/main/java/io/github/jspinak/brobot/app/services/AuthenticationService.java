@@ -35,6 +35,9 @@ public class AuthenticationService {
         if (jwtToken == null) {
             logger.debug("No JWT token found, initiating authentication");
             authenticate();
+        } else {
+            logger.debug("Using existing token (first 10 chars): {}...",
+                    jwtToken.substring(0, Math.min(10, jwtToken.length())));
         }
         return jwtToken;
     }

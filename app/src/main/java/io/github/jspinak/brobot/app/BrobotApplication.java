@@ -5,6 +5,7 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import java.io.File;
 
 @SpringBootApplication
 @ComponentScan(basePackages = {"io.github.jspinak.brobot", "io.github.jspinak.brobot.app"})
