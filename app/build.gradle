@@ -69,10 +69,8 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-websocket'
 	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.2'
 
-	// https://mvnrepository.com/artifact/org.flywaydb/flyway-core
-	implementation 'org.flywaydb:flyway-core:10.18.0'
-	// https://mvnrepository.com/artifact/org.flywaydb/flyway-database-postgresql
-	runtimeOnly 'org.flywaydb:flyway-database-postgresql:10.18.0'
+	implementation 'me.paulschwarz:spring-dotenv:4.0.0'
+	implementation 'jakarta.annotation:jakarta.annotation-api:2.1.1'
 }
 
 flyway {
