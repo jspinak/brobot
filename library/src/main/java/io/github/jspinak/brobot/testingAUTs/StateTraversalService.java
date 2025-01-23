@@ -144,6 +144,7 @@ public class StateTraversalService {
             state.ifPresent(s -> summary.append(String.format("- %s (ID: %d)\n", s.getName(), s.getId())));
         });
 
+        logger.info("State Traversal Summary:");
         logger.info(summary.toString());
         actionLogger.logObservation(automationSession.getCurrentSessionId(), "State Traversal Summary:", summary.toString(), "info");
     }
