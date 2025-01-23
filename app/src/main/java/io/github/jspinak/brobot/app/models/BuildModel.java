@@ -85,7 +85,7 @@ public class BuildModel {
         // After building the model, sync state images to client app
         stateService.populateStateOwnerNamesIfEmpty();
         stateImageSenderService.sendStateImages(stateImageService.getAllStateImageDTOsForProject(projectId));
-        //projectSenderService.sendProjects(projectService.getAllProjectDTOs());
+        projectSenderService.sendProjects(projectService.getAllProjectDTOs());
 
         return model;
     }
