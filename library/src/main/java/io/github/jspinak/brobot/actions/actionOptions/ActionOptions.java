@@ -9,6 +9,7 @@ import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.StateRegion;
 import io.github.jspinak.brobot.datatypes.primitives.region.SearchRegions;
+import io.github.jspinak.brobot.log.entities.LogType;
 import lombok.Getter;
 import lombok.Setter;
 import org.sikuli.basics.Settings;
@@ -441,6 +442,8 @@ public class ActionOptions {
      */
     private int sceneToUseForCaptureAfterFusingMatches = 0;
 
+    private LogType logType = LogType.ACTION;
+
     @Override
     public String toString() {
         return "ActionOptions{" +
@@ -509,6 +512,7 @@ public class ActionOptions {
                 ", maxFusionDistanceX=" + maxFusionDistanceX +
                 ", maxFusionDistanceY=" + maxFusionDistanceY +
                 ", sceneToUseForCaptureAfterFusingMatches=" + sceneToUseForCaptureAfterFusingMatches +
+                ", logType=" + logType +
                 '}';
     }
 
@@ -577,6 +581,7 @@ public class ActionOptions {
         private int maxFusionDistanceX = 5;
         private int maxFusionDistanceY = 5;
         private int sceneToUseForCaptureAfterFusingMatches = 0;
+        private LogType logType = LogType.ACTION;
 
         public Builder() {}
         //public Builder(Action action) { this.action = action; }
@@ -925,6 +930,11 @@ public class ActionOptions {
             return this;
         }
 
+        public Builder setLogType(LogType logType) {
+            this.logType = logType;
+            return this;
+        }
+
         /*
         The defaults for DRAG and CLICK are different.
         Explicitly set pauses override the defaults.
@@ -1003,6 +1013,7 @@ public class ActionOptions {
             actionOptions.maxFusionDistanceX = maxFusionDistanceX;
             actionOptions.maxFusionDistanceY = maxFusionDistanceY;
             actionOptions.sceneToUseForCaptureAfterFusingMatches = sceneToUseForCaptureAfterFusingMatches;
+            actionOptions.logType = logType;
             return actionOptions;
         }
     }
