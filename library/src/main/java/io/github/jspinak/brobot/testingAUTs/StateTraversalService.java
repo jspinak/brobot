@@ -27,6 +27,7 @@ public class StateTraversalService {
     private final StateMemory stateMemory;
     private final ActionLogger actionLogger;
     private final AutomationSession automationSession;
+    private final VisitAllStateImages visitAllStateImages;
 
     private final List<StateVisit> stateVisits = new ArrayList<>();
     private Set<Long> visitedStates = new HashSet<>();
@@ -36,7 +37,8 @@ public class StateTraversalService {
     public StateTraversalService(AdjacentStates adjacentStates, AllStatesInProjectService allStatesInProjectService,
                                  UnvisitedStates unvisitedStates, StateMemory stateMemory,
                                  StateTransitionsManagement stateTransitionsManagement,
-                                 InitialStates initialStates, ActionLogger actionLogger, AutomationSession automationSession) {
+                                 InitialStates initialStates, ActionLogger actionLogger, AutomationSession automationSession,
+                                 VisitAllStateImages visitAllStateImages) {
         this.adjacentStates = adjacentStates;
         this.allStatesInProjectService = allStatesInProjectService;
         this.unvisitedStates = unvisitedStates;
@@ -45,6 +47,7 @@ public class StateTraversalService {
         this.stateMemory = stateMemory;
         this.actionLogger = actionLogger;
         this.automationSession = automationSession;
+        this.visitAllStateImages = visitAllStateImages;
     }
 
     /**
@@ -64,7 +67,7 @@ public class StateTraversalService {
         return adjacentUnvisited;
     }
 
-    public Set<Long> traverseAllStates() {
+    public Set<Long> traverseAllStates(boolean visitAllImages) {
         // Reset state at start of each traversal
         stateMemory.removeAllStates();
         visitedStates = new HashSet<>();
@@ -80,13 +83,20 @@ public class StateTraversalService {
         // Record initial states
         stateMemory.getActiveStates().forEach(stateId -> {
             Optional<State> state = allStatesInProjectService.getState(stateId);
-            state.ifPresent(s -> stateVisits.add(new StateVisit(stateId, s.getName(), true)));
+            state.ifPresent(s -> {
+                stateVisits.add(new StateVisit(stateId, s.getName(), true));
+            });
         });
 
         actionLogger.logObservation(automationSession.getCurrentSessionId(),
                 "Initial states:", stateMemory.getActiveStateNamesAsString(), "info");
         visitedStates = new HashSet<>(stateMemory.getActiveStates());
-        visitedStates.forEach(unvisitedStateSet::remove);
+        visitedStates.forEach(initialState -> {
+            unvisitedStateSet.remove(initialState);
+            allStatesInProjectService.getState(initialState).ifPresent(s -> {
+                if (visitAllImages) visitAllStateImages.visitAllStateImages(s);
+            });
+        });
         Optional<Long> closestUnvisitedState = getNextState();
         while (closestUnvisitedState.isPresent() && failedAttempt < 10 && !unvisitedStateSet.isEmpty()) {
             Long closestStateId = closestUnvisitedState.get();
@@ -104,6 +114,9 @@ public class StateTraversalService {
             if (success) {
                 visitedStates.add(closestStateId);
                 unreachableStates.remove(closestStateId);
+                state.ifPresent(s -> {
+                    if (visitAllImages) visitAllStateImages.visitAllStateImages(s);
+                });
             } else {
                 failedAttempt++;
                 unreachableStates.add(closestStateId); // this is a temporary solution since the state may be reachable from another state
