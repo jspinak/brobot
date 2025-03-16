@@ -196,6 +196,9 @@ const Home = () => {
                             <Button variant="contained" onClick={() => runAutomation('visit-all-states')}>
                                 Visit All States
                             </Button>
+                            <Button variant="contained" onClick={() => runAutomation('visit-all-images')}>
+                                Visit All Images
+                            </Button>
                         </Box>
                     </Paper>
                     <Paper elevation={3} sx={{ p: 3 }}>

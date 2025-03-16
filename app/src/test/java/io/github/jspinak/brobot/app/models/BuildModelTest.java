@@ -129,7 +129,7 @@ class BuildModelTest {
 
         Model model = buildModel.build(savedProject.getId());
         initialStates.addStateSet(100, model.getStates().get(0));
-        Set<Long> statesTraversed = stateTraversalService.traverseAllStates();
+        Set<Long> statesTraversed = stateTraversalService.traverseAllStates(false);
         assertEquals(2, statesTraversed.size());
     }
 
