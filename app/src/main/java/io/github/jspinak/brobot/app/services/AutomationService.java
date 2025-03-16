@@ -67,9 +67,9 @@ public class AutomationService {
         return "Moved mouse to all StateImages.";
     }
 
-    public String visitAllStates() {
+    public String visitAllStates(boolean visitAllImages) {
         String sessionId = automationSession.startNewSession();
-        Set<Long> visitedStates = stateTraversalService.traverseAllStates();
+        Set<Long> visitedStates = stateTraversalService.traverseAllStates(visitAllImages);
         processAndSendLogs(sessionId);
 
         StringBuilder response = new StringBuilder();
