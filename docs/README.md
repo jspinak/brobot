@@ -23,7 +23,7 @@ filled out with your own database information and renamed to .env before running
 
 ## Test Modules
 
-The project's tests are organized into two modules:
+The library's tests are organized into two modules:
 
 ### Library Module (`library/`)
 - Contains unit tests that verify individual components in isolation

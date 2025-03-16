@@ -47,10 +47,28 @@ public class AutomationController {
         }
     }
 
+    @PostMapping("/visit-all-images")
+    public ResponseEntity<?> visitAllImages() {
+        try {
+            String result = automationService.visitAllStates(true);
+            return ResponseEntity.ok(Map.of(
+                    "message", result,
+                    "status", "SUCCESS"
+            ));
+        } catch (Exception e) {
+            log.error("Error in visit-all-images: ", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of(
+                            "error", "Failed to execute automation",
+                            "message", e.getMessage()
+                    ));
+        }
+    }
+
     @PostMapping("/visit-all-states")
     public ResponseEntity<?> visitAllStates() {
         try {
-            String result = automationService.visitAllStates();
+            String result = automationService.visitAllStates(false);
             return ResponseEntity.ok(Map.of(
                     "message", result,
                     "status", "SUCCESS"
