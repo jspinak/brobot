@@ -7,7 +7,7 @@ plugins {
 }
 
 group = 'io.github.jspinak'
-version = '0.0.1-SNAPSHOT' // Add a version if you haven't already
+version '1.0.7'
 
 allprojects {
     group = rootProject.group
