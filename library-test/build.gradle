@@ -8,11 +8,10 @@ plugins {
 }
 
 java {
-    sourceCompatibility = '20'
+    sourceCompatibility = '21'
 }
 
 group 'io.github.jspinak'
-version '1.0.7'
 
 repositories {
     mavenCentral()
@@ -23,7 +22,7 @@ dependencies {
     implementation project(':log')
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
-    testImplementation 'org.springframework.boot:spring-boot-starter-test:3.2.0'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test:3.2.4'
     implementation('com.sikulix:sikulixapi:2.0.5') {
         exclude group: 'org.slf4j', module: 'slf4j-nop'
     }

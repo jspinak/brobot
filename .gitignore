@@ -19,3 +19,31 @@
 
 # Exclude all .env files
 **/*.env
+
+# Exclude all .bat files
+**/*.bat
+
+# JavaFX specific
+**/out/
+**/dist/
+**/fxml_generated/
+# Scene Builder backup files
+**/*.fxml.bak
+
+# JavaFX runtime components
+*.jlink
+*.jpackage
+
+# Additional general patterns for Java projects
+*.class
+*.log
+hs_err_pid*
+.attach_pid*
+
+# Eclipse if you ever use it
+**/.classpath
+**/.project
+**/.settings/
+
+# VS Code if you ever use it
+**/.vscode/
