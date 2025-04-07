@@ -1,4 +1,4 @@
 // settings.gradle for the brobot project
 
 rootProject.name = 'brobot'
-include ':app', ':library', ':log', ':library-test'
+include ':app', ':library', ':log', ':library-test', ':brobot-runner'
