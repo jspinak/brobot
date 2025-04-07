@@ -21,7 +21,6 @@ configurations {
 }
 
 group 'io.github.jspinak.brobot'
-version '1.0.7'
 
 repositories {
     mavenCentral()

@@ -1,0 +1,43 @@
+plugins {
+	id 'java'
+	id 'application'
+	id 'org.openjfx.javafxplugin' version '0.0.13'
+}
+
+description = 'Brobot Runner - JavaFX UI for Brobot Automation'
+
+javafx {
+	version = '17'
+	modules = ['javafx.controls', 'javafx.fxml']
+}
+
+dependencies {
+	// Brobot module dependencies
+	implementation project(':library')
+	implementation project(':log')
+
+	// JavaFX dependencies are managed by the JavaFX plugin
+
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
+
+	// JSON parsing
+	implementation 'com.fasterxml.jackson.core:jackson-databind'
+
+	// Spring Boot dependencies (minimal for integration with Brobot)
+	implementation 'org.springframework.boot:spring-boot-starter'
+
+	// Testing
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.junit.jupiter:junit-jupiter-api'
+	testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
+	testImplementation 'org.testfx:testfx-junit5:4.0.16-alpha'
+}
+
+application {
+	mainClass = 'io.github.jspinak.brobot.runner.BrobotRunnerApp'
+}
+
+test {
+	useJUnitPlatform()
+}
