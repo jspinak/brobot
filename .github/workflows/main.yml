@@ -1,0 +1,219 @@
+name: Brobot CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up JDK 21.0.1
+        uses: actions/setup-java@v3
+        with:
+          java-version: "21"
+          distribution: "temurin"
+          cache: "gradle"
+
+      - name: Make Gradle wrapper executable
+        run: chmod +x ./gradlew
+
+      - name: Setup environment variables
+        run: |
+          echo "${{ secrets.ENV_FILE_CONTENT }}" > .env
+
+      - name: Build with Gradle
+        run: ./gradlew build -x test
+
+      - name: Run unit tests
+        run: ./gradlew test --exclude-tag manual -x :library-test:test
+
+      - name: Run integration tests
+        run: ./gradlew :library-test:test
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-results
+          path: "**/build/test-results/test"
+
+      - name: Cache build artifacts
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+  # Web build job commented out as we're focusing on desktop first
+  #  build-web:
+  #    runs-on: ubuntu-latest
+  #    needs: build-and-test
+  #
+  #    steps:
+  #      - uses: actions/checkout@v3
+  #
+  #      - name: Set up Node.js
+  #        uses: actions/setup-node@v3
+  #        with:
+  #          node-version: "18"
+  #          cache: "npm"
+  #          cache-dependency-path: "web/package-lock.json"
+  #
+  #      - name: Install web dependencies
+  #        working-directory: ./web
+  #        run: npm ci
+  #
+  #      - name: Build web app
+  #        working-directory: ./web
+  #        run: npm run build
+  #
+  #      - name: Cache web build artifacts
+  #        uses: actions/upload-artifact@v3
+  #        with:
+  #          name: web-build
+  #          path: web/build
+
+  # App module is now used as a dependency, not a standalone application
+
+  # AWS deployment jobs commented out
+  #  deploy-web-amplify:
+  #    runs-on: ubuntu-latest
+  #    needs: [build-web]
+  #    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+  #
+  #    steps:
+  #      - uses: actions/checkout@v3
+  #
+  #      - name: Download web build artifacts
+  #        uses: actions/download-artifact@v3
+  #        with:
+  #          name: web-build
+  #          path: web-build
+  #
+  #      - name: Configure AWS credentials
+  #        uses: aws-actions/configure-aws-credentials@v2
+  #        with:
+  #          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  #          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  #          aws-region: ${{ secrets.AWS_REGION }}
+  #
+  #      - name: Deploy to AWS Amplify
+  #        run: |
+  #          # Install AWS Amplify CLI
+  #          npm install -g @aws-amplify/cli
+  #
+  #          # Deploy the built web app to Amplify
+  #          # Instead of using the Action, we'll use the AWS CLI directly
+  #          aws amplify start-job \
+  #            --app-id ${{ secrets.AMPLIFY_APP_ID }} \
+  #            --branch-name ${{ secrets.AMPLIFY_BRANCH }} \
+  #            --job-type RELEASE
+  #
+  #          # Optional: Upload build artifacts if using manual deployment
+  #          # aws s3 sync web-build/ s3://${AMPLIFY_DEPLOYMENT_BUCKET}/ --delete
+  #        env:
+  #          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  #          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  #          AWS_REGION: ${{ secrets.AWS_REGION }}
+  #
+  #  deploy-backend:
+  #    runs-on: ubuntu-latest
+  #    needs: [build-app-jar]
+  #    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+  #
+  #    steps:
+  #      - uses: actions/checkout@v3
+  #
+  #      - name: Download app JAR
+  #        uses: actions/download-artifact@v3
+  #        with:
+  #          name: app-jar
+  #          path: app-jar
+  #
+  #      - name: Configure AWS credentials
+  #        uses: aws-actions/configure-aws-credentials@v2
+  #        with:
+  #          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  #          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  #          aws-region: ${{ secrets.AWS_REGION }}
+  #
+  #      - name: Deploy backend to Elastic Beanstalk
+  #        run: |
+  #          # Create application version zip file
+  #          mkdir -p deploy
+  #          cp app-jar/*.jar deploy/application.jar
+  #          cp -r .ebextensions deploy/ || true
+  #          cp Procfile deploy/ || true
+  #          cd deploy && zip -r ../deploy.zip .
+  #
+  #          # Get current time for version label
+  #          VERSION_LABEL="v-$(date +'%Y%m%d-%H%M%S')"
+  #
+  #          # Upload the deployment package
+  #          aws s3 cp deploy.zip s3://${{ secrets.EB_S3_BUCKET }}/deploy.zip
+  #
+  #          # Create new application version
+  #          aws elasticbeanstalk create-application-version \
+  #            --application-name ${{ secrets.EB_APPLICATION_NAME }} \
+  #            --version-label $VERSION_LABEL \
+  #            --source-bundle S3Bucket="${{ secrets.EB_S3_BUCKET }}",S3Key="deploy.zip" \
+  #            --description "Automated deployment from GitHub Actions"
+  #
+  #          # Update the environment to use the new version
+  #          aws elasticbeanstalk update-environment \
+  #            --environment-name ${{ secrets.EB_ENVIRONMENT_NAME }} \
+  #            --version-label $VERSION_LABEL
+
+  package-desktop:
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up JDK 21.0.1
+        uses: actions/setup-java@v3
+        with:
+          java-version: "21"
+          distribution: "temurin"
+          cache: "gradle"
+
+      - name: Make Gradle wrapper executable
+        run: chmod +x ./gradlew
+
+      - name: Build desktop application
+        run: ./gradlew :runner:build
+
+      - name: Package desktop application with jpackage
+        run: |
+          # Install required dependencies for jpackage
+          sudo apt-get update
+          sudo apt-get install -y fakeroot
+
+          # Create a distribution using jpackage
+          ./gradlew :runner:jpackage
+
+      - name: Upload desktop application package
+        uses: actions/upload-artifact@v3
+        with:
+          name: runner-package
+          path: runner/build/jpackage
+
+      - name: Create GitHub release with desktop app
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v1
+        with:
+          files: runner/build/jpackage/**/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
