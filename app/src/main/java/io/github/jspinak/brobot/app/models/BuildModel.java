@@ -1,9 +1,6 @@
 package io.github.jspinak.brobot.app.models;
 
 import io.github.jspinak.brobot.actions.BrobotSettings;
-import io.github.jspinak.brobot.app.database.databaseMappers.StateEntityMapper;
-import io.github.jspinak.brobot.app.database.databaseMappers.StateTransitionsEntityMapper;
-import io.github.jspinak.brobot.app.log.StateImageDTO;
 import io.github.jspinak.brobot.app.services.*;
 import io.github.jspinak.brobot.database.services.AllStatesInProjectService;
 import io.github.jspinak.brobot.datatypes.state.state.State;
@@ -29,11 +26,11 @@ public class BuildModel {
     private final ProjectSenderService projectSenderService;
 
     public BuildModel(StateService stateService, StateTransitionsRepository stateTransitionsRepository,
-                      AllStatesInProjectService allStatesInProjectService,
-                      StateTransitionsService stateTransitionsService, Init init,
-                      ProjectService projectService, TransitionService transitionService,
-                      StateImageSenderService stateImageSenderService,
-                      StateImageService stateImageService, ProjectSenderService projectSenderService) {
+            AllStatesInProjectService allStatesInProjectService,
+            StateTransitionsService stateTransitionsService, Init init,
+            ProjectService projectService, TransitionService transitionService,
+            StateImageSenderService stateImageSenderService,
+            StateImageService stateImageService, ProjectSenderService projectSenderService) {
         this.stateService = stateService;
         this.stateTransitionsRepository = stateTransitionsRepository;
         this.allStatesInProjectService = allStatesInProjectService;
@@ -58,9 +55,9 @@ public class BuildModel {
             throw new IllegalStateException("Failed to clear all states. " +
                     allStatesInProjectService.getAllStateIds().size() + " states remaining.");
         }
-        if (!stateTransitionsRepository.getAllStateTransitions().isEmpty()) {
+        if (!stateTransitionsRepository.getAllStateTransitionsAsCopy().isEmpty()) {
             throw new IllegalStateException("Failed to clear all transitions. " +
-                    stateTransitionsRepository.getAllStateTransitions().size() + " transitions remaining.");
+                    stateTransitionsRepository.getAllStateTransitionsAsCopy().size() + " transitions remaining.");
         }
 
         List<State> projectStates = stateService.getStatesByProject(projectId);
@@ -71,22 +68,27 @@ public class BuildModel {
             System.out.println("Saved state: " + state.getName() + " stateId = " + state.getId());
         });
 
-        List<StateTransitions> projectTransitions = transitionService.buildStateTransitionsForProject(projectStates, projectId);
+        List<StateTransitions> projectTransitions = transitionService.buildStateTransitionsForProject(
+                projectStates, projectId);
         System.out.println("Built " + projectTransitions.size() + " StateTransitions for project " + projectId);
         projectTransitions.forEach(transition -> {
-            stateTransitionsRepository.add(transition); // this goes to a preliminary repo until init.init() is called
-            System.out.println("Added StateTransition for state: " + transition.getStateName() + " has " + transition.getTransitions().size() + " toTransitions.");
+            stateTransitionsRepository.add(transition); // the state structure is not yet initialized.
+            System.out.println("Added StateTransition for state: " + transition.getStateName() + " has "
+                    + transition.getTransitions().size() + " toTransitions.");
         });
-        init.init();
-        System.out.println("Total StateTransitions in repository: " + stateTransitionsRepository.getAllStateTransitions().size());
+        init.initializeStateStructure();
+        System.out.println(
+                "Total StateTransitions in repository: " + stateTransitionsRepository.getAllStateTransitionsAsCopy().size());
 
         Model model = new Model(projectStates, projectTransitions);
         System.out.println("Built model\n" + model);
         // After building the model, sync state images to client app
         stateService.populateStateOwnerNamesIfEmpty();
-        stateImageSenderService.sendStateImages(stateImageService.getAllStateImageDTOsForProject(projectId));
-        projectSenderService.sendProjects(projectService.getAllProjectDTOs());
-
+        if (BrobotSettings.sendLogs) {
+            System.out.println("Sending state images to client app");
+            stateImageSenderService.sendStateImages(stateImageService.getAllStateImageDTOsForProject(projectId));
+            projectSenderService.sendProjects(projectService.getAllProjectDTOs());
+        }
         return model;
     }
 

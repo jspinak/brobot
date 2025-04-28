@@ -1,91 +1,110 @@
 // brobot app build.gradle
 
 plugins {
-	id 'java'
-	id 'io.freefair.lombok' version '8.6'
-	id 'org.springframework.boot' version '3.2.4'
-	id 'io.spring.dependency-management' version '1.1.4'
-	id("org.flywaydb.flyway") version "10.18.0"
+    id 'java'
+    id 'org.springframework.boot' version '3.2.4'
+    id 'io.freefair.lombok'
+    id 'io.spring.dependency-management' 
+    id 'org.flywaydb.flyway' version '10.18.0'
 }
 
-// module-specific configurations
-group = 'io.github.jspinak.brobot'
+// Keep the version separate from parent as this is a standalone application
 version = '0.0.1-SNAPSHOT'
 
 java {
-	sourceCompatibility = '21'
+    sourceCompatibility = JavaVersion.VERSION_21
 }
 
 configurations {
-	compileOnly {
-		extendsFrom annotationProcessor
-	}
-}
-
-repositories {
-	mavenCentral()
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
 }
 
 dependencies {
-	implementation project(':library') // Dependency on the library module
-	implementation project(':log') // Dependency on the log module
-	compileOnly 'org.projectlombok:lombok'
-	annotationProcessor 'org.projectlombok:lombok'
+    implementation project(':library') 
+    implementation project(':log')
+    
+    // Spring Boot
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-websocket'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-data-rest'
+    implementation 'org.springframework.boot:spring-boot-starter-data-elasticsearch'
 
-	// JUnit Jupiter for testing
-	testImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.2'
-	testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.10.2'
-	// Spring Boot Starter Test for Spring Boot testing support
-	implementation 'org.springframework.boot:spring-boot-starter-test' //:3.2.2
-
-	implementation 'org.springframework.boot:spring-boot-starter-web' //:3.2.2
-	implementation 'org.springframework.boot:spring-boot-starter-websocket'
-	implementation 'com.fasterxml.jackson.core:jackson-databind'
-	//implementation 'jakarta.persistence:jakarta.persistence-api:3.1.0'
-	// database
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-	implementation 'org.springframework.boot:spring-boot-starter-data-rest'
-	implementation 'org.postgresql:postgresql:42.7.4'
-	testImplementation group: 'com.h2database', name: 'h2', version: '2.2.224'
-	implementation 'org.hibernate:hibernate-core:6.1.0.Final'
-
-	implementation('com.sikulix:sikulixapi:2.0.5') {
-		exclude group: 'org.slf4j', module: 'slf4j-nop'
-		exclude group: 'org.slf4j', module: 'slf4j-api'
-	}
-	//implementation 'ch.qos.logback:logback-classic:1.4.12' //this is part of the Spring Boot starter
-	//implementation ('org.slf4j:slf4j-api:1.7.36') //SpringBoot prefers logback
-
-	implementation group: 'org.bytedeco', name: 'javacv-platform', version: '1.5.10'
-	implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.0'
-	implementation 'com.github.kwhat:jnativehook:2.2.2'
-
-	//testAnnotationProcessor 'org.projectlombok:lombok'
-	implementation 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
-	//testImplementation 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
-	implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.14.0' // for mapstruct issue
-
-	implementation 'org.springframework.boot:spring-boot-starter-data-elasticsearch'
-	implementation 'org.springframework.boot:spring-boot-starter-websocket'
-	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.2'
-
-	implementation 'me.paulschwarz:spring-dotenv:4.0.0'
-	implementation 'jakarta.annotation:jakarta.annotation-api:2.1.1'
+    // Database
+    implementation 'org.postgresql:postgresql:42.7.4'
+    implementation 'org.hibernate:hibernate-core:6.1.0.Final'
+    testImplementation 'com.h2database:h2:2.2.224'
+    
+    // JSON
+    implementation 'com.fasterxml.jackson.core:jackson-databind'
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.2'
+    
+    // Core dependencies - same as in library but with slf4j exclusions
+    implementation('com.sikulix:sikulixapi:2.0.5') {
+        exclude group: 'org.slf4j', module: 'slf4j-nop'
+        exclude group: 'org.slf4j', module: 'slf4j-api'
+    }
+    implementation 'org.bytedeco:javacv-platform:1.5.10'
+    implementation 'org.apache.commons:commons-lang3:3.14.0'
+    implementation 'com.github.kwhat:jnativehook:2.2.2'
+    
+    // Other utilities
+    implementation 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
+    implementation 'me.paulschwarz:spring-dotenv:4.0.0'
+    implementation 'jakarta.annotation:jakarta.annotation-api:2.1.1'
 }
 
 flyway {
-	url = 'jdbc:postgresql://localhost:5432/Brobot'
-	user = System.getenv('ADMIN_USERNAME') ?: 'default_username'
-	password = System.getenv('ADMIN_PASSWORD') ?: 'default_username'
+    url = 'jdbc:postgresql://localhost:5432/Brobot'
+    user = System.getenv('ADMIN_USERNAME') ?: 'default_username'
+    password = System.getenv('ADMIN_PASSWORD') ?: 'default_username'
+}
+
+tasks.withType(JavaCompile) {
+    options.compilerArgs += [
+        '-Amapstruct.defaultComponentModel=spring',
+        '--add-opens=jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED',
+        '--add-opens=jdk.compiler/com.sun.tools.javac.comp=ALL-UNNAMED',
+        '--add-opens=jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED',
+        '--add-opens=jdk.compiler/com.sun.tools.javac.main=ALL-UNNAMED',
+        '--add-opens=jdk.compiler/com.sun.tools.javac.model=ALL-UNNAMED',
+        '--add-opens=jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED',
+        '--add-opens=jdk.compiler/com.sun.tools.javac.processing=ALL-UNNAMED',
+        '--add-opens=jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED',
+        '--add-opens=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED'
+    ]
 }
 
 test {
-	useJUnitPlatform()
+    useJUnitPlatform {
+        excludeTags 'manual'
+    }
+    
+    // JVM args
+    jvmArgs = [
+        '--add-opens', 'java.base/java.lang=ALL-UNNAMED',
+        '--add-opens', 'java.desktop/java.awt=ALL-UNNAMED',
+        '--add-opens', 'java.desktop/java.awt.image=ALL-UNNAMED',
+        '--add-opens', 'java.desktop/javax.imageio=ALL-UNNAMED'
+    ]
 }
 
-// Configure MapStruct compiler arguments
-tasks.withType(JavaCompile) {
-	options.compilerArgs += [
-			'-Amapstruct.defaultComponentModel=spring'
-	]
+// A separate task for manual tests
+tasks.register('manualTest', Test) {
+    useJUnitPlatform {
+        includeTags 'manual'
+    }
+    
+    // Same JVM args as regular tests
+    jvmArgs = [
+        '--add-opens', 'java.base/java.lang=ALL-UNNAMED',
+        '--add-opens', 'java.desktop/java.awt=ALL-UNNAMED',
+        '--add-opens', 'java.desktop/java.awt.image=ALL-UNNAMED',
+        '--add-opens', 'java.desktop/javax.imageio=ALL-UNNAMED'
+    ]
+    
+    group = 'verification'
+    description = 'Runs manual tests that require user interaction'
 }

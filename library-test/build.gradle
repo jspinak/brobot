@@ -1,28 +1,18 @@
 //brobot project's library-test module build.gradle
 
 plugins {
-    id 'java'
     id 'org.springframework.boot' version '3.2.4'
-    id 'io.spring.dependency-management' version '1.1.4'
-    id 'io.freefair.lombok' version '8.6'
+    id 'io.freefair.lombok'
 }
 
 java {
-    sourceCompatibility = '21'
-}
-
-group 'io.github.jspinak'
-
-repositories {
-    mavenCentral()
+    sourceCompatibility = JavaVersion.VERSION_21
 }
 
 dependencies {
     implementation project(':library')
     implementation project(':log')
-    compileOnly 'org.projectlombok:lombok'
-    annotationProcessor 'org.projectlombok:lombok'
-    testImplementation 'org.springframework.boot:spring-boot-starter-test:3.2.4'
+
     implementation('com.sikulix:sikulixapi:2.0.5') {
         exclude group: 'org.slf4j', module: 'slf4j-nop'
     }
@@ -30,16 +20,6 @@ dependencies {
     implementation 'com.github.kwhat:jnativehook:2.2.2'
 }
 
-test {
-    useJUnitPlatform()
-}
-
 tasks.named('bootJar') {
-    mainClass = 'io.github.jspinak.brobot.test.BrobotTestApplication' // Adjust this line
-}
-
-dependencyManagement {
-    imports {
-        mavenBom org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES
-    }
+    enabled = false
 }

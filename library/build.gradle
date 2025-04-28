@@ -1,102 +1,95 @@
 // build.gradle library module
 
-///In a library, you typically want to avoid the org.springframework.boot plugin, as Spring Boot is designed for standalone applications. Your library should not impose Spring Boot's conventions on the projects that use it. So, you can exclude this plugin.
 plugins {
-    id 'java'
-    id 'io.spring.dependency-management' version '1.1.4'
-    id 'io.freefair.lombok' version '8.6' //'6.6.3' // the lombok version is aligned with the gradle version
+    id 'java-library'
+    id 'io.freefair.lombok'
+    id 'io.spring.dependency-management'
     id 'maven-publish'
     id 'signing'
-    id 'org.jetbrains.kotlin.jvm' version '2.1.20-Beta2'
 }
 
 java {
-    sourceCompatibility = '21'
+    sourceCompatibility = JavaVersion.VERSION_21
+    withJavadocJar()
+    withSourcesJar()
 }
 
-configurations {
- compileOnly {
-     extendsFrom annotationProcessor
- }
-}
-
-group 'io.github.jspinak.brobot'
-
-repositories {
-    mavenCentral()
-}
-
-configurations {
-    compileOnly {
-        extendsFrom annotationProcessor
-    }
-}
+group = 'io.github.jspinak.brobot'
+version = '1.0.7'
 
 dependencies {
     implementation project(':log')
+    
+    // Spring dependencies
     implementation 'org.springframework:spring-core:6.1.3'
     implementation 'org.springframework:spring-context:6.1.3'
     implementation 'org.springframework:spring-beans:6.1.3'
-    compileOnly 'org.projectlombok:lombok'
-    annotationProcessor 'org.projectlombok:lombok'
-
+    
+    // Core dependencies
     implementation('com.sikulix:sikulixapi:2.0.5') {
         exclude group: 'org.slf4j', module: 'slf4j-nop'
+        exclude group: 'commons-logging', module: 'commons-logging'
+        exclude group: 'org.opencv', module: 'opencv'
+        exclude group: 'org.openpnp', module: 'opencv' 
     }
     implementation 'com.github.stephenc.monte:monte-screen-recorder:0.7.7.0'
-
-    implementation group: 'org.bytedeco', name: 'javacv-platform', version: '1.5.10'
-    implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.0'
+    implementation 'org.bytedeco:javacv-platform:1.5.10'
+    implementation 'org.apache.commons:commons-lang3:3.0'
     implementation 'com.github.kwhat:jnativehook:2.2.2'
-
-    implementation platform('org.jetbrains.kotlin:kotlin-bom')
-    implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8'
-
-    // Kotlin test dependencies
-    testImplementation 'org.jetbrains.kotlin:kotlin-test'
-    testImplementation 'org.jetbrains.kotlin:kotlin-test-junit5'
+    
+    // Added SLF4J explicitly
+    implementation 'org.slf4j:slf4j-api:2.0.9'
 
     // JUnit 5 dependencies
-    testImplementation(platform('org.junit:junit-bom:5.10.1'))
-    testImplementation('org.junit.jupiter:junit-jupiter')
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.1'
-    testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.10.1'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.10.1'
-
-    // mockito
+    testImplementation platform('org.junit:junit-bom:5.10.1')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    
+    // Mockito
     testImplementation 'org.mockito:mockito-junit-jupiter:5.8.0'
-    testImplementation("org.mockito.kotlin:mockito-kotlin:4.1.0") // new tests are written in Kotlin
 
     testImplementation 'org.assertj:assertj-core:3.24.2'
+
+    implementation 'com.fasterxml.jackson.core:jackson-annotations:2.15.4'
+    implementation 'jakarta.persistence:jakarta.persistence-api:3.1.0'
 }
 
 test {
     useJUnitPlatform()
 }
 
-java {
-    withJavadocJar()
-    withSourcesJar()
+javadoc {
+    exclude "**/module-info.java.disabled"
 }
 
-// This configures Kotlin to work with Java
-kotlin {
-    jvmToolchain(21)  // Use the Java version here
+// Add JVM arguments for reflective access
+tasks.withType(JavaCompile).configureEach {
+    options.compilerArgs += [
+            '--add-opens', 'java.desktop/java.awt=ALL-UNNAMED',
+            '--add-opens', 'java.desktop/java.awt.image=ALL-UNNAMED',
+            '--add-opens', 'java.desktop/javax.imageio=ALL-UNNAMED'
+    ]
 }
 
-// This tells Gradle where to find Kotlin source files
-sourceSets {
-    test {
-        kotlin {
-            srcDirs += 'src/test/kotlin'
-        }
+tasks.withType(JavaExec).configureEach {
+    jvmArgs += [
+            '--add-opens', 'java.desktop/java.awt=ALL-UNNAMED',
+            '--add-opens', 'java.desktop/java.awt.image=ALL-UNNAMED',
+            '--add-opens', 'java.desktop/javax.imageio=ALL-UNNAMED'
+    ]
+}
+
+// Task to see Java settings
+tasks.register('showJavaInfo') {
+    doLast {
+        println "Java version: ${System.getProperty('java.version')}"
+        println "Java home: ${System.getProperty('java.home')}"
+        println "JVM arguments: ${jvmArgs}"
     }
 }
 
 publishing {
     publications {
         mavenJava(MavenPublication) {
-
             groupId = 'io.github.jspinak'
             artifactId = 'brobot'
             version = '1.0.7'
@@ -135,11 +128,10 @@ publishing {
     repositories {
         maven {
             name = "OSSRH"
-            //url = "https://s01.oss.sonatype.org/content/repositories/snapshots/" // for snapshots
-            url = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/" // for releases
+            url = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
             credentials {
-                username = project.properties["ossrhUsername"]
-                password = project.properties["ossrhPassword"]
+                username = project.findProperty("ossrhUsername") ?: ""
+                password = project.findProperty("ossrhPassword") ?: ""
             }
         }
     }

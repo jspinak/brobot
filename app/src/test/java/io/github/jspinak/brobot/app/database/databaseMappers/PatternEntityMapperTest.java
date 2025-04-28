@@ -1,6 +1,7 @@
 package io.github.jspinak.brobot.app.database.databaseMappers;
 
 import io.github.jspinak.brobot.app.database.entities.PatternEntity;
+import io.github.jspinak.brobot.app.services.ImageService;
 import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -11,8 +12,7 @@ import org.springframework.test.context.ActiveProfiles;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -26,18 +26,21 @@ class PatternEntityMapperTest {
     @Autowired
     PatternEntityMapper patternEntityMapper;
 
+    @Autowired
+    ImageService imageService;
+
     @Test
     void map() {
         Pattern pattern = new Pattern("topLeft");
-        PatternEntity patternEntity = patternEntityMapper.map(pattern);
+        PatternEntity patternEntity = patternEntityMapper.map(pattern, imageService);
         assertTrue(patternEntity.getName().equals("topLeft"));
     }
 
     @Test
     void testMap() {
         Pattern pattern = new Pattern("topLeft");
-        PatternEntity patternEntity = patternEntityMapper.map(pattern);
-        Pattern mappedPattern = patternEntityMapper.map(patternEntity);
+        PatternEntity patternEntity = patternEntityMapper.map(pattern, imageService);
+        Pattern mappedPattern = patternEntityMapper.map(patternEntity, imageService);
         assertTrue(mappedPattern.getName().equals("topLeft"));
         assertNotNull(mappedPattern.getImage());
     }
@@ -49,9 +52,9 @@ class PatternEntityMapperTest {
         List<Pattern> patternList = new ArrayList<>();
         patternList.add(topLeft);
         patternList.add(bottomRight);
-        List<PatternEntity> patternEntityList = patternEntityMapper.mapToPatternEntityList(patternList);
+        List<PatternEntity> patternEntityList = patternEntityMapper.mapToPatternEntityList(patternList, imageService);
         System.out.println("list size = "+patternEntityList.size());
-        assertTrue(patternEntityList.size() == 2);
+        assertEquals(2, patternEntityList.size());
     }
 
     @Test

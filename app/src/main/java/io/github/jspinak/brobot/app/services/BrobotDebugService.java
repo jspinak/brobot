@@ -22,7 +22,7 @@ public class BrobotDebugService {
         Map<String, Object> info = new HashMap<>();
         info.put("stateCount", allStatesInProjectService.getAllStateIds().size());
         info.put("stateNames", allStatesInProjectService.getAllStateNames());
-        info.put("transitionCount", stateTransitionsRepository.getAllStateTransitions().size());
+        info.put("transitionCount", stateTransitionsRepository.getAllStateTransitionsAsCopy().size());
         return info;
     }
 }

@@ -32,7 +32,7 @@ public class StateStructureInfo {
             if (optTrs.isPresent()) {
                 StateTransitions trs = optTrs.get();
                 System.out.println("transitions:");
-                trs.getTransitions().values().forEach(tr -> {
+                trs.getTransitions().forEach(tr -> {
                     System.out.print(" enter: ");
                     tr.getActivate().forEach(st -> System.out.print(st + " "));
                     System.out.println();

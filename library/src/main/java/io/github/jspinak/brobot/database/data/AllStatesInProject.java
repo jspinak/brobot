@@ -30,7 +30,11 @@ public class AllStatesInProject {
 
     public void save(State state) {
         states.add(state);
-        if (state.getId() == null) state.setId((long) states.size()); // don't change it if it was set in StateEntity
+        /*
+        If already set in the StateEntity, don't change it.
+        There is always the Unknown State, which has an id of 0.
+         */
+        if (state.getId() == null) state.setId((long) states.size()-1);
         state.getStateImages().forEach(image -> {
             image.setOwnerStateId(state.getId());
             image.getAllMatchSnapshots().forEach(snapshot -> snapshot.setStateId(state.getId()));
