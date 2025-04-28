@@ -32,7 +32,7 @@ jobs:
         run: ./gradlew build -x test
 
       - name: Run unit tests
-        run: ./gradlew test --exclude-tag manual -x :library-test:test
+        run: ./gradlew test -x :library-test:test
 
       - name: Run integration tests
         run: ./gradlew :library-test:test
