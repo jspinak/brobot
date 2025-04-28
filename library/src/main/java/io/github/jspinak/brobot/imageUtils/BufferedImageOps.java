@@ -2,9 +2,9 @@ package io.github.jspinak.brobot.imageUtils;
 
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.reports.Report;
-import org.opencv.core.Mat;
-import org.opencv.core.MatOfByte;
-import org.opencv.imgcodecs.Imgcodecs;
+
+import org.bytedeco.opencv.global.opencv_imgcodecs;
+import org.bytedeco.opencv.opencv_core.Mat;
 import org.sikuli.script.Pattern;
 import org.sikuli.script.Screen;
 import org.sikuli.script.ScreenImage;
@@ -76,36 +76,47 @@ public class BufferedImageOps {
         return convertedImage;
     }
 
-    public BufferedImage convert(org.bytedeco.opencv.opencv_core.Mat mat) {
-        Mat cvMat = MatOps.convertToOpenCVmat(mat);
-        return convert(cvMat);
-    }
-
     public BufferedImage convert(Mat mat) {
-        MatOfByte mob = new MatOfByte();
-        Imgcodecs.imencode(".jpg", mat, mob);
-        byte[] ba = mob.toArray();
-        BufferedImage bi;
         try {
-            bi = ImageIO.read(new ByteArrayInputStream(ba));
+            // Create a temporary file to hold the image
+            java.io.File temp = java.io.File.createTempFile("javacv", ".png");
+            temp.deleteOnExit();
+            
+            // Use JavaCV's imwrite to save the Mat to a file
+            org.bytedeco.opencv.global.opencv_imgcodecs.imwrite(temp.getAbsolutePath(), mat);
+            
+            // Read the file back as a BufferedImage
+            BufferedImage bufferedImage = ImageIO.read(temp);
+            
+            // Delete the temp file (may fail if file is still in use, but that's acceptable for temp files)
+            temp.delete();
+            
+            return bufferedImage;
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Failed to convert JavaCV Mat to BufferedImage", e);
         }
-        return bi;
     }
-
-    public static BufferedImage fromMat(org.bytedeco.opencv.opencv_core.Mat mat) {
-        Mat cvMat = MatOps.convertToOpenCVmat(mat);
-        MatOfByte mob = new MatOfByte();
-        Imgcodecs.imencode(".jpg", cvMat, mob);
-        byte[] ba = mob.toArray();
-        BufferedImage bi;
+    
+    public static BufferedImage fromMat(Mat mat) {
+        // Most reliable method - use a temporary file
         try {
-            bi = ImageIO.read(new ByteArrayInputStream(ba));
+            // Create a temporary file
+            java.io.File temp = java.io.File.createTempFile("javacv", ".png");
+            String tempPath = temp.getAbsolutePath();
+            
+            // Save the mat to the temporary file
+            opencv_imgcodecs.imwrite(tempPath, mat);
+            
+            // Read it back as a BufferedImage
+            BufferedImage image = ImageIO.read(temp);
+            
+            // Delete the temporary file
+            temp.delete();
+            
+            return image;
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Failed to convert JavaCV Mat to BufferedImage", e);
         }
-        return bi;
     }
 
     public static byte[] toByteArray(BufferedImage bufferedImage) {

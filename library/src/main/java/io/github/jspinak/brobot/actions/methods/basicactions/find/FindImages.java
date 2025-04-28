@@ -83,7 +83,7 @@ public class FindImages {
         Execute the find until the exit condition is achieved. For example, a Find.VANISH will execute until
         the images are no longer found. The results for each execution are added to the Matches object.
          */
-        List<StateImage> stateImages = objectCollections.get(0).getStateImages();
+        List<StateImage> stateImages = objectCollections.getFirst().getStateImages();
         while (actionLifecycleManagement.isOkToContinueAction(matches, stateImages.size())) {
             List<Scene> scenes = getScenes.getScenes(actionOptions, objectCollections, 1, 0);
             findPatternsIteration.find(matches, stateImages, scenes);

@@ -35,6 +35,8 @@ public class StateTransitionsService {
     private final StateImageEntityMapper stateImageEntityMapper;
     private final StateTransitionsEntityMapper stateTransitionsEntityMapper;
     private final ProjectRepository projectRepository;
+    private final SceneService sceneService;
+    private final PatternService patternService;
 
     public StateTransitionsService(StateTransitionsRepo stateTransitionsRepo,
                                    StateTransitionsResponseMapper stateTransitionsResponseMapper,
@@ -43,7 +45,8 @@ public class StateTransitionsService {
                                    @Lazy StateService stateService,
                                    StateImageEntityMapper stateImageEntityMapper,
                                    StateTransitionsEntityMapper stateTransitionsEntityMapper,
-                                   ProjectRepository projectRepository) {
+                                   ProjectRepository projectRepository,
+                                   SceneService sceneService, PatternService patternService) {
         this.stateTransitionsRepo = stateTransitionsRepo;
         this.stateTransitionsResponseMapper = stateTransitionsResponseMapper;
         this.transitionService = transitionService;
@@ -52,11 +55,14 @@ public class StateTransitionsService {
         this.stateImageEntityMapper = stateImageEntityMapper;
         this.stateTransitionsEntityMapper = stateTransitionsEntityMapper;
         this.projectRepository = projectRepository;
+        this.sceneService = sceneService;
+        this.patternService = patternService;
     }
 
     public List<StateTransitions> getAllStateTransitions() {
         return stateTransitionsRepo.findAll().stream()
-                .map(stateTransitionsEntityMapper::map)
+                .map(stateTransitionsEntity -> stateTransitionsEntityMapper.map(
+                        stateTransitionsEntity, sceneService, patternService))
                 .collect(Collectors.toList());
     }
 
@@ -221,13 +227,14 @@ public class StateTransitionsService {
         if (stateEntityOptional.isEmpty()) return stateImages;
         StateEntity stateEntity = stateEntityOptional.get();
         stateEntity.getStateImages().forEach(stateImage ->
-                stateImages.add(stateImageEntityMapper.map(stateImage)));
+                stateImages.add(stateImageEntityMapper.map(stateImage, patternService)));
         return stateImages;
     }
 
     public List<StateTransitions> getAllStateTransitionsForProject(Long projectId) {
         return stateTransitionsRepo.findByProjectId(projectId).stream()
-                .map(stateTransitionsEntityMapper::map)
+                .map(stateTransitionsEntity -> stateTransitionsEntityMapper.map(
+                        stateTransitionsEntity, sceneService, patternService))
                 .toList();
     }
 

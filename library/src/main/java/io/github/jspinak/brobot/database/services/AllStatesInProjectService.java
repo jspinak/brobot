@@ -30,8 +30,21 @@ public class AllStatesInProjectService {
         return allStatesInProject.getState(id);
     }
 
+    public String getStateName(Long id) {
+        return allStatesInProject.getState(id).map(State::getName).orElse(null);
+    }
+
+    public Long getStateId(String name) {
+        return allStatesInProject.getState(name).map(State::getId).orElse(null);
+    }
+
     public List<State> getAllStates() {
         return allStatesInProject.getAllStates();
+    }
+
+    public boolean onlyTheUnknownStateExists() {
+        return allStatesInProject.getAllStates().size() == 1 &&
+                allStatesInProject.getAllStates().getFirst().getName().equals("unknown");
     }
 
     public List<Long> getAllStateIds() {
@@ -88,6 +101,11 @@ public class AllStatesInProjectService {
 
     public void removeState(State state) {
         allStatesInProject.delete(state);
+    }
+
+    public void printAllStates() {
+        System.out.println("All States in Project:");
+        getAllStates().forEach(state -> System.out.println(state.getName()));
     }
 
 }

@@ -4,6 +4,7 @@ import io.github.jspinak.brobot.app.TestData;
 import io.github.jspinak.brobot.app.stateStructureBuilders.buildWithoutNames.screenObservations.SetUsableArea;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -13,6 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
 @ActiveProfiles("test")
+@Tag("manual")
 class SetUsableAreaTest {
     @BeforeAll
     public static void setupHeadlessMode() {

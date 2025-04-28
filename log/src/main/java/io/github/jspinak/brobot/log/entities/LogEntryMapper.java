@@ -28,8 +28,8 @@ public class LogEntryMapper {
         log.setCurrentStateName(dto.getCurrentStateName());
 
         // Map transition fields
-        log.setFromStateName(dto.getFromStateName());
-        log.setFromStateId(dto.getFromStateId());
+        log.setFromStates(dto.getFromStateName());
+        log.setFromStateIds(dto.getFromStateIds());
         log.setToStateNames(new ArrayList<>(dto.getToStateNames()));
         log.setToStateIds(new ArrayList<>(dto.getToStateIds()));
         log.setBeforeStateNames(new ArrayList<>(dto.getBeforeStateNames()));
@@ -89,8 +89,8 @@ public class LogEntryMapper {
         dto.setCurrentStateName(log.getCurrentStateName());
 
         // Map transition fields
-        dto.setFromStateName(log.getFromStateName());
-        dto.setFromStateId(log.getFromStateId());
+        dto.setFromStateName(log.getFromStates());
+        dto.setFromStateIds(log.getFromStateIds());
         dto.setToStateNames(new ArrayList<>(log.getToStateNames()));
         dto.setToStateIds(new ArrayList<>(log.getToStateIds()));
         dto.setBeforeStateNames(new ArrayList<>(log.getBeforeStateNames()));

@@ -17,7 +17,7 @@ import java.util.*;
 public class PathFinder {
 
     private final StateTransitionsJointTable stateTransitionsJointTable;
-    private final AllStatesInProjectService allStatesInProjectService;
+    private final AllStatesInProjectService allStates;
     private final StateTransitionsInProjectService stateTransitionsInProjectService;
 
     private Set<Long> startStates;
@@ -26,7 +26,7 @@ public class PathFinder {
     public PathFinder(StateTransitionsJointTable stateTransitionsJointTable, AllStatesInProjectService allStatesInProjectService,
                       StateTransitionsInProjectService stateTransitionsInProjectService) {
         this.stateTransitionsJointTable = stateTransitionsJointTable;
-        this.allStatesInProjectService = allStatesInProjectService;
+        this.allStates = allStatesInProjectService;
         this.stateTransitionsInProjectService = stateTransitionsInProjectService;
     }
 
@@ -37,7 +37,11 @@ public class PathFinder {
     }
 
     public Paths getPathsToState(Set<Long> startStates, Long targetState) {
-        Report.println("Find path: " + startStates + " -> " + targetState);
+        String targetStateName = allStates.getStateName(targetState);
+        String startStatesString = startStates.stream()
+                .map(allStates::getStateName)
+                .reduce("", (s, s2) -> s + ", " + s2);
+        Report.println("Find path: " + startStatesString + " -> " + targetStateName);
         this.startStates = startStates;
         pathList = new ArrayList<>();
         recursePath(new Path(), targetState);
@@ -49,15 +53,18 @@ public class PathFinder {
     }
 
     private void recursePath(Path path, Long stateInFocus) {
-        System.out.println("Recursing for state: " + stateInFocus);
-        System.out.println("Current path: " + path.getStates());
-        System.out.println("Start states: " + startStates);
+        System.out.println("Recursing for state: " + allStates.getStateName(stateInFocus));
+        System.out.println("Current path: " + path.getStatesAsString());
+        String startStatesString = startStates.stream()
+                .map(allStates::getStateName)
+                .reduce("", (s, s2) -> s + ", " + s2);
+        System.out.println("Start states: " + startStatesString);
 
         if (!path.contains(stateInFocus)) {
             path.add(stateInFocus);
             addTransition(path);
             if (startStates.contains(stateInFocus)) {
-                System.out.println("Found a path: " + path.getStates());
+                System.out.println("Found a path: " + path.getStatesAsString());
                 Path successfulPath = path.getCopy();
                 successfulPath.reverse();
                 setPathScore(successfulPath);
@@ -65,14 +72,17 @@ public class PathFinder {
                 System.out.println("Added path to pathList. pathList size: " + pathList.size());
             } else {
                 Set<Long> parentStates = stateTransitionsJointTable.getStatesWithTransitionsTo(stateInFocus);
-                System.out.println("Parent states for " + stateInFocus + ": " + parentStates);
+                String parentStatesAsString = parentStates.stream()
+                        .map(allStates::getStateName)
+                        .reduce("", (s, s2) -> s + ", " + s2);
+                System.out.println("Parent states for " + allStates.getStateName(stateInFocus) + ": " + parentStatesAsString);
                 for (Long newState : parentStates) {
                     recursePath(path, newState);
                 }
             }
         }
         if (Objects.equals(path.get(path.size() - 1), stateInFocus)) path.remove(stateInFocus);
-        System.out.println("Finished recursing for state: " + stateInFocus);
+        System.out.println("Finished recursing for state: " + allStates.getStateName(stateInFocus));
     }
 
     private void addTransition(Path path) {
@@ -86,7 +96,7 @@ public class PathFinder {
     private void setPathScore(Path path) {
         int score = 0;
         for (Long stateId : path.getStates()) {
-            Optional<State> state = allStatesInProjectService.getState(stateId);
+            Optional<State> state = allStates.getState(stateId);
             if (state.isPresent()) score += state.get().getPathScore();
         }
         for (IStateTransition stateTrans : path.getTransitions()) {

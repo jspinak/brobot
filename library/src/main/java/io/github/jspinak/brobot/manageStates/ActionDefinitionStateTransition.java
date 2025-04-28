@@ -28,13 +28,16 @@ public class ActionDefinitionStateTransition implements IStateTransition {
     private int score = 0;
     private int timesSuccessful = 0;
 
-    // this class does not use state names
-    @Override
-    public void convertNamesToIds(Function<String, Long> nameToIdConverter) {
-    }
-
     @Override
     public Optional<ActionDefinition> getActionDefinition() {
         return Optional.ofNullable(actionDefinition);
+    }
+
+    @Override
+    public String toString() {
+        return "ActionDefinitionStateTransition{" +
+                ", activate=" + activate +
+                ", exit=" + exit +
+                '}';
     }
 }

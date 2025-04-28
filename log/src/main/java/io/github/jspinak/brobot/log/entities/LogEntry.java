@@ -38,8 +38,8 @@ public class LogEntry {
     private String currentStateName;
 
     // Transition-specific fields
-    private String fromStateName; // the transition starts from this state
-    private Long fromStateId;
+    private String fromStates; // the transition starts from this state
+    private List<Long> fromStateIds;
     private List<String> toStateNames = new ArrayList<>(); // the transition activates these states
     private List<Long> toStateIds = new ArrayList<>();
     private List<String> beforeStateNames = new ArrayList<>(); // the active states before the transition

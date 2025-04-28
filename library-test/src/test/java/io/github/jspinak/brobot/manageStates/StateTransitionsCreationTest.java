@@ -60,7 +60,7 @@ public class StateTransitionsCreationTest {
 
         // Create and save the transition
         createTransition(stateA, stateB, stateImage, "Click Button");
-        init.init();
+        init.initializeStateStructure();
 
         // Test path finding
         Paths paths = pathFinder.getPathsToState(Collections.singletonList(stateA), stateB);

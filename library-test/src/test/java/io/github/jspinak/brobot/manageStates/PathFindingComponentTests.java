@@ -63,7 +63,7 @@ public class PathFindingComponentTests {
         State stateA = createState("StateA");
         State stateB = createState("StateB");
         createTransition(stateA, stateB, createStateImage("Button", "topLeft"), "Click Button");
-        init.init();
+        init.initializeStateStructure();
 
         Optional<StateTransitions> transitions = stateTransitionsService.getTransitions(stateA.getId());
         assertTrue(transitions.isPresent());
@@ -75,7 +75,7 @@ public class PathFindingComponentTests {
         State stateA = createState("StateA");
         State stateB = createState("StateB");
         createTransition(stateA, stateB, createStateImage("Button", "topLeft"), "Click Button");
-        init.init();
+        init.initializeStateStructure();
         Set<Long> statesWithTransitionsTo = stateTransitionsJointTable.getStatesWithTransitionsTo(stateB.getId());
         assertTrue(statesWithTransitionsTo.contains(stateA.getId()));
     }
@@ -85,7 +85,7 @@ public class PathFindingComponentTests {
         State stateA = createState("StateA");
         State stateB = createState("StateB");
         createTransition(stateA, stateB, createStateImage("Button", "topLeft"), "Click Button");
-        init.init();
+        init.initializeStateStructure();
 
         Set<Long> startStates = new HashSet<>();
         startStates.add(stateA.getId());

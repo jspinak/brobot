@@ -1,14 +1,13 @@
 package io.github.jspinak.brobot.automationScripts;
 
 import io.github.jspinak.brobot.datatypes.state.state.State;
-import io.github.jspinak.brobot.manageStates.StateTransitions;
 import io.github.jspinak.brobot.manageStates.IStateTransition;
+import io.github.jspinak.brobot.manageStates.StateTransitions;
 import io.github.jspinak.brobot.manageStates.StateTransitionsManagement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import java.util.Map;
 import java.util.Optional;
 
 @Component
@@ -28,10 +27,10 @@ public class DefaultStateHandler implements StateHandler {
         }
 
         // Get first available transition
-        Optional<Map.Entry<Long, IStateTransition>> transition = stateTransitions.getTransitions().entrySet().stream()
+        Optional<IStateTransition> transition = stateTransitions.getTransitions().stream()
                 .findFirst();
 
-        IStateTransition stateTransition = transition.get().getValue();
+        IStateTransition stateTransition = transition.get();
         try {
             // Execute the transition
             if (!stateTransition.getActivate().isEmpty())

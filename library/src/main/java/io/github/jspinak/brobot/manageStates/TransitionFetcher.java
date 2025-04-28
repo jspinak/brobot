@@ -78,8 +78,8 @@ public class TransitionFetcher {
         fromTransitions.ifPresent(transitions -> {
             this.fromTransitions = transitions;
             transitionToEnum = stateTransitionsInProjectService.getTransitionToEnum(from, to);
-            transitions.getStateTransition(transitionToEnum).ifPresent(trsn -> this.fromTransition = trsn);
-            transitions.getTransitionFunction(transitionToEnum).ifPresent(
+            transitions.getTransitionFunctionByActivatedStateId(transitionToEnum).ifPresent(trsn -> this.fromTransition = trsn);
+            transitions.getTransitionFunctionByActivatedStateId(transitionToEnum).ifPresent(
                     trsFunction -> fromTransitionFunction =
                             transitionBooleanSupplierPackager.toBooleanSupplier(trsFunction));
         });
