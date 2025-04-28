@@ -1,5 +1,13 @@
 package io.github.jspinak.brobot.manageStates;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+
+import org.springframework.stereotype.Component;
+
 import io.github.jspinak.brobot.database.services.AllStatesInProjectService;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.state.state.State;
@@ -7,9 +15,6 @@ import io.github.jspinak.brobot.primatives.enums.SpecialStateType;
 import io.github.jspinak.brobot.primatives.enums.StateEnum;
 import io.github.jspinak.brobot.reports.Report;
 import lombok.Getter;
-import org.springframework.stereotype.Component;
-
-import java.util.*;
 
 /**
  * StateMemory keeps track of which States are currently active.
@@ -19,7 +24,7 @@ import java.util.*;
 @Getter
 public class StateMemory {
 
-    private final AllStatesInProjectService allStatesInProjectService;
+    private final AllStatesInProjectService allStates;
 
     public enum Enum implements StateEnum {
         PREVIOUS, CURRENT, EXPECTED
@@ -28,13 +33,13 @@ public class StateMemory {
     private Set<Long> activeStates = new HashSet<>();
 
     public StateMemory(AllStatesInProjectService allStatesInProjectService) {
-        this.allStatesInProjectService = allStatesInProjectService;
+        this.allStates = allStatesInProjectService;
     }
 
     public List<State> getActiveStateList() {
         List<State> activeStateList = new ArrayList<>();
         for (Long stateId : activeStates) {
-            Optional<State> stateOpt = allStatesInProjectService.getState(stateId);
+            Optional<State> stateOpt = allStates.getState(stateId);
             stateOpt.ifPresent(activeStateList::add);
         }
         return activeStateList;
@@ -43,7 +48,7 @@ public class StateMemory {
     public List<String> getActiveStateNames() {
         List<String> activeStateNames = new ArrayList<>();
         for (Long stateId : activeStates) {
-            Optional<State> stateOpt = allStatesInProjectService.getState(stateId);
+            Optional<State> stateOpt = allStates.getState(stateId);
             stateOpt.ifPresent(state -> activeStateNames.add(state.getName()));
         }
         return activeStateNames;
@@ -73,10 +78,10 @@ public class StateMemory {
     public void addActiveState(Long activeState, boolean newLine) {
         if (activeStates.contains(activeState)) return;
         if (isNullState(activeState)) return;
-        Report.print("+ add "+activeState+" to active states ");
+        Report.print("+ add state "+allStates.getStateName(activeState)+" to active states ");
         if (newLine) Report.println();
         activeStates.add(activeState);
-        allStatesInProjectService.getState(activeState).ifPresent(state -> {
+        allStates.getState(activeState).ifPresent(state -> {
             state.setProbabilityExists(100);
             state.addVisit();
         });
@@ -90,7 +95,7 @@ public class StateMemory {
         if (!activeStates.contains(inactiveState)) return;
         Report.println("- remove "+inactiveState+" from active states");
         activeStates.remove(inactiveState);
-        allStatesInProjectService.getState(inactiveState).ifPresent(state -> state.setProbabilityExists(0));
+        allStates.getState(inactiveState).ifPresent(state -> state.setProbabilityExists(0));
     }
 
     public void removeAllStates() {

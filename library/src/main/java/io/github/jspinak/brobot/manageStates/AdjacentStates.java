@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Component
 public class AdjacentStates {
@@ -28,7 +29,10 @@ public class AdjacentStates {
         Set<Long> adjacent = new HashSet<>();
         Optional<StateTransitions> trsOpt = stateTransitionsInProjectService.getTransitions(stateId);
         if (trsOpt.isEmpty()) return adjacent;
-        Set<Long> statesWithStaticTransitions = trsOpt.get().getTransitions().keySet();
+        Set<Long> statesWithStaticTransitions = trsOpt.get().getTransitions().stream()
+                .filter(t -> t.getActivate() != null && !t.getActivate().isEmpty())
+                .flatMap(t -> t.getActivate().stream())
+                .collect(Collectors.toSet());
         adjacent.addAll(statesWithStaticTransitions);
         if (!statesWithStaticTransitions.contains(SpecialStateType.PREVIOUS.getId())) return adjacent;
         adjacent.remove(SpecialStateType.PREVIOUS.getId());

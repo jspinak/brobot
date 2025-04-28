@@ -3,11 +3,8 @@ package io.github.jspinak.brobot.manageStates;
 import io.github.jspinak.brobot.dsl.ActionDefinition;
 import lombok.Data;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.BooleanSupplier;
-import java.util.function.Function;
 
 /**
  * StateTransitions hold all the Transitions for a State.
@@ -22,54 +19,47 @@ import java.util.function.Function;
 @Data
 public class StateTransitions {
 
-    private String stateName; // for reference
-    private Long stateId;
+    private String stateName; // for setup, must be unique
+    private Long stateId; // for runtime
     private IStateTransition transitionFinish;
     private Map<Long, ActionDefinitionStateTransition> actionDefinitionTransitions = new HashMap<>();
-    private Map<String, IStateTransition> transitionsByName = new HashMap<>(); // for initial setup
-    private Map<Long, IStateTransition> transitions = new HashMap<>(); // for use at runtime
+    private List<IStateTransition> transitions = new ArrayList<>(); // for use at runtime
     /**
      * When set, the same variable in a Transition takes precedence over this one.
      * Only applies to FromTransitions.
      */
     private boolean staysVisibleAfterTransition = false; // the same variable in a Transition takes precedence
 
-    public void convertNamesToIds(Function<String, Long> nameToIdConverter) {
-        this.stateId = nameToIdConverter.apply(stateName);
-        this.transitions = new HashMap<>();
-        for (Map.Entry<String, IStateTransition> entry : transitionsByName.entrySet()) {
-            Long toStateId = nameToIdConverter.apply(entry.getKey());
-            IStateTransition transition = entry.getValue();
-            if (transition instanceof JavaStateTransition) {
-                ((JavaStateTransition) transition).convertNamesToIds(nameToIdConverter);
-            }
-            transitions.put(toStateId, transition);
+    public Optional<IStateTransition> getTransitionFunctionByActivatedStateId(Long to) {
+        if (to == null)
+            return Optional.empty();
+        if (to.equals(stateId))
+            return Optional.of(transitionFinish);
+        for (IStateTransition transition : transitions) {
+            if (transition.getActivate().contains(to))
+                return Optional.of(transition);
         }
-    }
-
-    public Optional<IStateTransition> getStateTransition(Long to) {
-        return Optional.ofNullable(transitions.get(to));
-    }
-
-    public Optional<IStateTransition> getTransitionFunction(Long to) {
-        return Optional.ofNullable(transitions.get(to));
+        return Optional.empty();
     }
 
     public boolean stateStaysVisible(Long toState) {
-        Optional<IStateTransition> stateTransition = getStateTransition(toState);
-        if (stateTransition.isEmpty()) return false; // couldn't find the Transition, return value not important
+        Optional<IStateTransition> stateTransition = getTransitionFunctionByActivatedStateId(toState);
+        if (stateTransition.isEmpty())
+            return false; // couldn't find the Transition, return value not important
         IStateTransition.StaysVisible localStaysVisible = stateTransition.get().getStaysVisibleAfterTransition();
-        if (localStaysVisible == IStateTransition.StaysVisible.NONE) return staysVisibleAfterTransition;
-        else return localStaysVisible == IStateTransition.StaysVisible.TRUE;
+        if (localStaysVisible == IStateTransition.StaysVisible.NONE)
+            return staysVisibleAfterTransition;
+        else
+            return localStaysVisible == IStateTransition.StaysVisible.TRUE;
     }
 
     public void addTransition(JavaStateTransition transition) {
-        for (String stateName : transition.getActivateNames()) transitionsByName.put(stateName, transition);
+        transitions.add(transition);
     }
 
     public void addTransition(ActionDefinitionStateTransition transition) {
         for (Long id : transition.getActivate()) {
-            transitions.put(id, transition);
+            transitions.add(transition);
             actionDefinitionTransitions.put(id, transition);
         }
     }
@@ -83,20 +73,26 @@ public class StateTransitions {
     }
 
     public Optional<ActionDefinition> getActionDefinition(Long toState) {
-        IStateTransition transition = transitions.get(toState);
-        if (transition instanceof ActionDefinitionStateTransition) {
-            return transition.getActionDefinition();
-        }
-        return Optional.empty();
+        Optional<IStateTransition> transition = getTransitionFunctionByActivatedStateId(toState);
+        if (transition.isEmpty() || !(transition.get() instanceof ActionDefinitionStateTransition))
+            return Optional.empty();
+        return transition.get().getActionDefinition();
     }
 
     @Override
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("id=").append(stateId);
-        stringBuilder.append(" name=").append(stateName);
-        stringBuilder.append(" transitions-to:");
-        transitions.forEach((id, transition) -> stringBuilder.append(id.toString()));
+        if (stateId != null) stringBuilder.append("id=").append(stateId).append(", ");
+        if (stateName != null) stringBuilder.append("from=").append(stateName).append(" ");
+        stringBuilder.append("to=");
+        transitions.forEach(transition -> {
+            if (transition instanceof ActionDefinitionStateTransition) {
+                stringBuilder.append(transition.getActivate());
+            } else {
+                stringBuilder.append(((JavaStateTransition) transition).getActivateNames());
+                stringBuilder.append(",");
+            }
+        });
         return stringBuilder.toString();
     }
 
@@ -104,7 +100,7 @@ public class StateTransitions {
 
         private final String stateName;
         private IStateTransition transitionFinish = new JavaStateTransition.Builder().build();
-        private final Map<String, IStateTransition> transitionsByName = new HashMap<>();
+        private final List<IStateTransition> transitions = new ArrayList<>();
         private boolean staysVisibleAfterTransition = false;
 
         public Builder(String stateName) {
@@ -120,7 +116,7 @@ public class StateTransitions {
         }
 
         public Builder addTransition(JavaStateTransition transition) {
-            for (String stateName : transition.getActivateNames()) transitionsByName.put(stateName, transition);
+            transitions.add(transition);
             return this;
         }
 
@@ -143,7 +139,7 @@ public class StateTransitions {
             StateTransitions stateTransitions = new StateTransitions();
             stateTransitions.stateName = stateName;
             stateTransitions.transitionFinish = transitionFinish;
-            stateTransitions.transitionsByName = transitionsByName;
+            stateTransitions.transitions = transitions;
             stateTransitions.staysVisibleAfterTransition = staysVisibleAfterTransition;
             return stateTransitions;
         }

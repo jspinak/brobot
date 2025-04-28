@@ -4,6 +4,7 @@ import io.github.jspinak.brobot.manageStates.IStateTransition;
 import io.github.jspinak.brobot.manageStates.StateTransitions;
 import io.github.jspinak.brobot.manageStates.StateTransitionsJointTable;
 import io.github.jspinak.brobot.primatives.enums.SpecialStateType;
+import io.github.jspinak.brobot.reports.Report;
 import lombok.Getter;
 import org.springframework.stereotype.Component;
 
@@ -32,11 +33,15 @@ public class StateTransitionsInProjectService {
     }
 
     public List<StateTransitions> getAllStateTransitionsInstances() {
-        return stateTransitionsRepository.getAllStateTransitions();
+        return stateTransitionsRepository.getAllStateTransitionsAsCopy();
+    }
+
+    public List<StateTransitions> getAllStateTransitions() {
+        return stateTransitionsRepository.getRepo();
     }
 
     public void setupRepo() {
-        stateTransitionsRepository.populateRepoWithPreliminaryStateTransitions();
+        stateTransitionsRepository.populateStateTransitionsJointTable();
     }
 
     public List<IStateTransition> getAllIndividualTransitions() {
@@ -66,12 +71,19 @@ public class StateTransitionsInProjectService {
     public Optional<IStateTransition> getTransition(Long fromState, Long toState) {
         Optional<StateTransitions> transitions = getTransitions(fromState);
         if (transitions.isEmpty()) return Optional.empty();
-        return transitions.get().getStateTransition(toState);
+        return transitions.get().getTransitionFunctionByActivatedStateId(toState);
     }
 
     public void resetTimesSuccessful() {
         stateTransitionsRepository.getAllTransitions().forEach(transition ->
                 transition.setTimesSuccessful(0));
+    }
+
+    public void printAllTransitions() {
+        Report.print("State Transitions in Project:\n");
+        stateTransitionsRepository.getAllTransitions().forEach(transition ->
+                Report.println(transition.toString()));
+        Report.println();
     }
 
 }

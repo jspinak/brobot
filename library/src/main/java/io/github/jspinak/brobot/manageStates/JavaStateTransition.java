@@ -26,26 +26,21 @@ public class JavaStateTransition implements IStateTransition {
     /*
     Use names instead of IDs for coding these by hand since state ids are set at runtime.
      */
-    private Set<String> activateNames;
-    private Set<String> exitNames;
-    private Set<Long> activate;
-    private Set<Long> exit;
+    private Set<String> activateNames = new HashSet<>();
+    private Set<String> exitNames = new HashSet<>();;
+    private Set<Long> activate = new HashSet<>();;
+    private Set<Long> exit = new HashSet<>();;
     private int score = 0;
     private int timesSuccessful = 0;
 
     @Override
-    public void convertNamesToIds(Function<String, Long> nameToIdConverter) {
-        this.activate = activateNames.stream()
-                .map(nameToIdConverter)
-                .collect(Collectors.toSet());
-        this.exit = exitNames.stream()
-                .map(nameToIdConverter)
-                .collect(Collectors.toSet());
+    public Optional<ActionDefinition> getActionDefinition() {
+        return Optional.empty();
     }
 
     @Override
-    public Optional<ActionDefinition> getActionDefinition() {
-        return Optional.empty();
+    public String toString() {
+        return "activate=" + activateNames + ", exit=" + exitNames + '}';
     }
 
     public static class Builder {

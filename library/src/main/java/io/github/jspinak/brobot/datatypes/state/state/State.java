@@ -1,6 +1,5 @@
 package io.github.jspinak.brobot.datatypes.state.state;
 
-import io.github.jspinak.brobot.datatypes.Project;
 import io.github.jspinak.brobot.datatypes.primitives.image.Scene;
 import io.github.jspinak.brobot.datatypes.primitives.location.Location;
 import io.github.jspinak.brobot.datatypes.primitives.match.MatchHistory;

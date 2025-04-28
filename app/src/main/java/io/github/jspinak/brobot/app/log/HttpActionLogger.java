@@ -95,16 +95,21 @@ public class HttpActionLogger implements ActionLogger, TestSessionLogger {
     }
 
     @Override
-    public LogEntry logStateTransition(String sessionId, State fromState, Set<State> toStates,
+    public LogEntry logStateTransition(String sessionId, Set<State> fromStates, Set<State> toStates,
                                        Set<State> beforeStates, boolean success, long transitionTime) {
         LogEntry logEntry = new LogEntry();
         logEntry.setSessionId(sessionId);
         logEntry.setType(LogType.TRANSITION);
         logEntry.setProjectId(getCurrentProjectId());
-        if (fromState != null) {
-            logEntry.setFromStateName(fromState.getName());
-            logEntry.setFromStateId(fromState.getId());
-        }
+        String fromStatesString = fromStates.stream()
+                .map(State::getName)
+                .reduce((a, b) -> a + ", " + b)
+                .orElse("None");
+        logEntry.setFromStates(fromStatesString);
+        List<Long> fromStateIds = fromStates.stream()
+                .map(State::getId)
+                .toList();
+        logEntry.setFromStateIds(fromStateIds);
         beforeStates.forEach(state -> {
             logEntry.getBeforeStateNames().add(state.getName());
             logEntry.getBeforeStateIds().add(state.getId());
@@ -119,7 +124,7 @@ public class HttpActionLogger implements ActionLogger, TestSessionLogger {
         }
         LogEntry savedLog = logEntryService.saveLog(logEntry);
         log.debug("Saved transition log with id: {} from {} to {}",
-                savedLog.getId(), savedLog.getFromStateName(), savedLog.getToStateNames());
+                savedLog.getId(), savedLog.getFromStates(), savedLog.getToStateNames());
         return savedLog;
     }
 

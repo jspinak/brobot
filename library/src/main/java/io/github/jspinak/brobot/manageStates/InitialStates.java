@@ -1,14 +1,20 @@
 package io.github.jspinak.brobot.manageStates;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Random;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Component;
+
 import io.github.jspinak.brobot.actions.BrobotSettings;
 import io.github.jspinak.brobot.database.services.AllStatesInProjectService;
 import io.github.jspinak.brobot.datatypes.state.state.State;
 import io.github.jspinak.brobot.reports.Report;
-import org.python.antlr.ast.Str;
-import org.springframework.stereotype.Component;
-
-import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Given sets of possible active States, this class searches for these States
@@ -26,7 +32,7 @@ public class InitialStates {
 
     int sumOfProbabilities = 0;
     /*
-    The probability of a State existing is added to the sumOfProbabilities
+    The probability of a set of States existing is added to the sumOfProbabilities
     to give the Integer value here. The sumOfProbabilities can be greater than 1
     as it will be used to rescale the individual probabilities when choosing an
     initial State.
@@ -66,16 +72,37 @@ public class InitialStates {
     }
 
     private void mockInitialStates() {
-        int rand = new Random().nextInt(sumOfProbabilities);
+        if (potentialActiveStates.isEmpty()) {
+            Report.println("No potential active states defined");
+            return;
+        }
+        
+        // Generate a random number between 1 and sumOfProbabilities
+        int randomValue = new Random().nextInt(sumOfProbabilities) + 1;
+        Report.println("Randomly selected value: " + randomValue + " out of " + sumOfProbabilities);
+        
+        // Find the state set whose probability range contains the random value
         for (Map.Entry<Set<Long>, Integer> entry : potentialActiveStates.entrySet()) {
-            if (entry.getValue() >= rand) {
-                Set<Long> initialStates = entry.getKey();
-                initialStates.forEach(state -> stateMemory.addActiveState(state, true));
-                initialStates.forEach(name ->
-                        allStatesInProjectService.getState(name).ifPresent(State::setProbabilityToBaseProbability));
+            if (randomValue <= entry.getValue()) {
+                Set<Long> selectedStates = entry.getKey();
+                
+                // Activate the selected states
+                Report.println("Selected " + selectedStates.size() + " initial states");
+                selectedStates.forEach(stateId -> {
+                    stateMemory.addActiveState(stateId, true);
+                    allStatesInProjectService.getState(stateId).ifPresent(state -> {
+                        state.setProbabilityToBaseProbability();
+                        Report.println("Activated state: " + state.getName() + " (ID: " + stateId + ")");
+                    });
+                });
+                Report.print("Initial States are ");
+                stateMemory.getActiveStateNames().forEach(state -> System.out.println(state + ", "));
                 return;
             }
         }
+        
+        // This should never happen if potentialActiveStates is properly populated
+        Report.println("Failed to select any initial states");
     }
 
     private void searchForInitialStates() {

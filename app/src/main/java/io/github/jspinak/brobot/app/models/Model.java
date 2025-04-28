@@ -64,9 +64,9 @@ public class Model {
             indentation = "  ";
             sb.append(indentation).append("transitions={\n");
             indentation = "    ";
-            for (Map.Entry<Long, IStateTransition> entry : stTrs.getTransitions().entrySet()) {
-                sb.append(indentation).append(entry.getKey()).append(" -> ")
-                        .append(transitionToString(entry.getValue(), "  ")).append(",\n");
+            for (IStateTransition transition : stTrs.getTransitions()) {
+                sb.append(indentation).append(stTrs.getStateName()).append(" -> ")
+                        .append(transitionToString(transition, "  ")).append(",\n");
             }
             indentation = "  ";
             sb.append(indentation).append("},\n");

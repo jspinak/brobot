@@ -49,8 +49,18 @@ public class StateTransitionsManagement {
         this.automationSession = automationSession;
     }
 
+    public boolean openState(String stateName) {
+        Report.format("Open State %s\n", stateName);
+        Long stateToOpen = allStatesInProjectService.getStateId(stateName);
+        if (stateToOpen == null) {
+            Report.println(Output.fail+" Target state not found.");
+            return false;
+        }
+        return openState(stateToOpen);
+    }
+
     public boolean openState(Long stateToOpen) {
-        Report.format("Open State %s\n", stateToOpen);
+        Report.format("Open State %s\n", allStatesInProjectService.getStateName(stateToOpen));
         String sessionId = automationSession.getCurrentSessionId();
         Instant startTime = Instant.now();
         activeStates = stateMemory.getActiveStates();
@@ -71,9 +81,10 @@ public class StateTransitionsManagement {
         Duration duration = Duration.between(startTime, Instant.now());
 
         // Log transition attempt end
+        Set<State> activeStatesSet = allStatesInProjectService.findSetById(activeStates);
         actionLogger.logStateTransition(
                 sessionId, // no duration for start log
-                null,
+                activeStatesSet,
                 Collections.singleton(targetState.get()),
                 allStatesInProjectService.findSetById(activeStates),
                 success,
@@ -104,7 +115,7 @@ public class StateTransitionsManagement {
     private boolean recursePaths(Paths paths, Long stateToOpen, String sessionId) {
         if (paths.isEmpty()) return false;
         if (activeStates.contains(stateToOpen) && traversePaths.finishTransition(stateToOpen)) return true;
-        if (traversePaths.traverse(paths.getPaths().get(0))) return true; // false if a transition fails
+        if (traversePaths.traverse(paths.getPaths().getFirst())) return true; // false if a transition fails
         activeStates = stateMemory.getActiveStates(); // may have changed after traversal
         return recursePaths(
                 pathManager.getCleanPaths(activeStates, paths, traversePaths.getFailedTransitionStartState()),

@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import java.awt.*;
 import java.io.IOException;
 import java.time.Instant;
+import java.util.List;
 import java.util.Set;
 
 @Component
@@ -25,10 +26,14 @@ public class MockActionLogger implements ActionLogger {
     }
 
     @Override
-    public LogEntry logStateTransition(String sessionId, State fromState, Set<State> toStates,
-            Set<State> beforeStates, boolean success, long transitionTime) {
+    public LogEntry logStateTransition(String sessionId, Set<State> fromStates, Set<State> toStates,
+                                       Set<State> beforeStates, boolean success, long transitionTime) {
+        String fromStatesString = fromStates.stream()
+                .map(State::getName)
+                .reduce((a, b) -> a + ", " + b)
+                .orElse("None");
         System.out.println("Mock logStateTransition: SessionId=" + sessionId +
-                ", From State=" + fromState.getName() +
+                ", From State=" + fromStatesString +
                 ", To States=[" + String.join(", ", toStates.stream().map(State::getName).toList()) + "]" +
                 ", Success=" + success +
                 ", Time=" + transitionTime + "ms");
