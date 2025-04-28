@@ -1,0 +1,20 @@
+module log {
+    // Required modules with their automatic module names
+    requires static lombok;
+    requires com.fasterxml.jackson.annotation;
+    requires com.fasterxml.jackson.databind;
+    requires com.fasterxml.jackson.datatype.jsr310;
+    requires jakarta.persistence;
+    requires java.sql;
+    
+    // Spring modules
+    requires spring.beans;
+    requires spring.context;
+    requires spring.core;
+    requires spring.data.commons;
+    requires spring.data.jpa;
+    
+    // Export packages that need to be accessible to other modules
+    exports io.github.jspinak.brobot.log.entities;
+    exports io.github.jspinak.brobot.log.service;
+}

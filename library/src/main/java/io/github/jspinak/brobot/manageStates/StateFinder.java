@@ -67,7 +67,7 @@ public class StateFinder {
     }
 
     public boolean findState(Long stateId) {
-        Report.print(stateId + " ");
+        Report.print(allStatesInProjectService.getStateName(stateId));
         Optional<State> state = allStatesInProjectService.getState(stateId);
         return state.filter(value -> action.perform(FIND, new ObjectCollection.Builder().withNonSharedImages(value).build())
                 .isSuccess()).isPresent();

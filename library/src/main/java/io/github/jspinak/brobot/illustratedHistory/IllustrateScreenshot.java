@@ -5,7 +5,6 @@ import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
-import io.github.jspinak.brobot.imageUtils.GetImageOpenCV;
 import io.github.jspinak.brobot.imageUtils.ImageUtils;
 import io.github.jspinak.brobot.reports.Report;
 import lombok.Getter;
@@ -20,7 +19,6 @@ import static io.github.jspinak.brobot.actions.actionOptions.ActionOptions.Actio
 public class IllustrateScreenshot {
 
     private ImageUtils imageUtils;
-    private GetImageOpenCV getImageOpenCV;
     private Draw draw;
     private IllustrationManager illustrationManager;
 
@@ -30,10 +28,9 @@ public class IllustrateScreenshot {
 
     private Map<ActionOptions.Action, Boolean> actionPermissions = new HashMap<>();
 
-    public IllustrateScreenshot(ImageUtils imageUtils, GetImageOpenCV getImageOpenCV, Draw draw,
+    public IllustrateScreenshot(ImageUtils imageUtils, Draw draw,
                                 IllustrationManager illustrationManager) {
         this.imageUtils = imageUtils;
-        this.getImageOpenCV = getImageOpenCV;
         this.draw = draw;
         this.illustrationManager = illustrationManager;
     }

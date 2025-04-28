@@ -1,12 +1,12 @@
 package io.github.jspinak.brobot.manageStates;
 
-import lombok.Getter;
-import lombok.Setter;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * A single path from a start State to a target State.
@@ -96,6 +96,15 @@ public class Path {
             i++;
         }
         return trimmedPath;
+    }
+
+    public String getStatesAsString() {
+        StringBuilder sb = new StringBuilder();
+        for (Long state : states) {
+            sb.append(state).append(" -> ");
+        }
+        if (sb.length() > 0) sb.delete(sb.length() - 4, sb.length()); // remove last " -> "
+        return sb.toString();
     }
 
 }

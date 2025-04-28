@@ -7,6 +7,7 @@ import io.github.jspinak.brobot.log.entities.LogEntry;
 
 import java.awt.*;
 import java.io.IOException;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -23,7 +24,7 @@ public interface ActionLogger {
         return null;
     }
 
-    default LogEntry logStateTransition(String sessionId, State fromState, Set<State> toStates,
+    default LogEntry logStateTransition(String sessionId, Set<State> fromStates, Set<State> toStates,
                                         Set<State> beforeStates, boolean success, long transitionTime) {
         // No-op implementation
         return null;

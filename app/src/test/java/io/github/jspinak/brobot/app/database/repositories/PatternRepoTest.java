@@ -2,6 +2,7 @@ package io.github.jspinak.brobot.app.database.repositories;
 
 import io.github.jspinak.brobot.app.database.databaseMappers.PatternEntityMapper;
 import io.github.jspinak.brobot.app.database.entities.PatternEntity;
+import io.github.jspinak.brobot.app.services.ImageService;
 import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -32,11 +33,14 @@ class PatternRepoTest {
     @Autowired
     PatternEntityMapper patternEntityMapper;
 
+    @Autowired
+    ImageService imageService;
+
     @Test
     void testFindByName() {
         // Save a pattern to the repository
         Pattern pattern = new Pattern("bottomR");
-        patternRepo.save(patternEntityMapper.map(pattern));
+        patternRepo.save(patternEntityMapper.map(pattern, imageService));
 
         // Find the pattern by name
         List<PatternEntity> foundPatternList = patternRepo.findByName("bottomR");
@@ -51,9 +55,9 @@ class PatternRepoTest {
     public void testFindByNameContainingIgnoreCase() {
         // Save patterns to the repository
         Pattern pattern1 = new Pattern("bottomR");
-        patternRepo.save(patternEntityMapper.map(pattern1));
+        patternRepo.save(patternEntityMapper.map(pattern1, imageService));
         Pattern pattern2 = new Pattern("bottomR2");
-        patternRepo.save(patternEntityMapper.map(pattern2));
+        patternRepo.save(patternEntityMapper.map(pattern2, imageService));
 
         // Find patterns by name containing the parameter
         List<PatternEntity> foundPatterns = patternRepo.findByPatternDataNameContainingIgnoreCase("bottom");

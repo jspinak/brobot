@@ -1,6 +1,7 @@
 package io.github.jspinak.brobot.app.database.databaseMappers;
 
 import io.github.jspinak.brobot.app.database.entities.SceneEntity;
+import io.github.jspinak.brobot.app.services.PatternService;
 import io.github.jspinak.brobot.datatypes.primitives.image.Scene;
 import org.springframework.stereotype.Component;
 
@@ -10,32 +11,25 @@ import java.util.List;
 @Component
 public class SceneEntityMapper {
 
-
-    private final PatternEntityMapper patternEntityMapper;
-
-    public SceneEntityMapper(PatternEntityMapper patternEntityMapper) {
-        this.patternEntityMapper = patternEntityMapper;
-    }
-
-    public SceneEntity map(Scene scene) {
+    public SceneEntity map(Scene scene, PatternService patternService) {
         SceneEntity sceneEntity = new SceneEntity();
-        sceneEntity.setPattern(patternEntityMapper.map(scene.getPattern()));
+        sceneEntity.setPattern(patternService.map(scene.getPattern()));
         return sceneEntity;
     }
 
-    public Scene map(SceneEntity sceneEntity) {
-        return new Scene(patternEntityMapper.map(sceneEntity.getPattern()));
+    public Scene map(SceneEntity sceneEntity, PatternService patternService) {
+        return new Scene(patternService.map(sceneEntity.getPattern()));
     }
 
-    public List<Scene> mapToSceneList(List<SceneEntity> sceneEntities) {
+    public List<Scene> mapToSceneList(List<SceneEntity> sceneEntities, PatternService patternService) {
         List<Scene> scenes = new ArrayList<>();
-        sceneEntities.forEach(sceneEntity -> scenes.add(map(sceneEntity)));
+        sceneEntities.forEach(sceneEntity -> scenes.add(map(sceneEntity, patternService)));
         return scenes;
     }
 
-    public List<SceneEntity> mapToSceneEntityList(List<Scene> sceneEntities) {
+    public List<SceneEntity> mapToSceneEntityList(List<Scene> scenes, PatternService patternService) {
         List<SceneEntity> sceneEntitiesList = new ArrayList<>();
-        sceneEntities.forEach(sceneEntity -> sceneEntitiesList.add(map(sceneEntity)));
+        scenes.forEach(scene -> sceneEntitiesList.add(map(scene, patternService)));
         return sceneEntitiesList;
     }
 }

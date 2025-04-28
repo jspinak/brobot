@@ -23,7 +23,7 @@ public class LogEntryDTO {
     private String videoClipPath;
     private String currentStateName;
     private String fromStateName;
-    private Long fromStateId;
+    private List<Long> fromStateIds;
     private List<String> toStateNames;
     private List<Long> toStateIds;
     private List<String> beforeStateNames;

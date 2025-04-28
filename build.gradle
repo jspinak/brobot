@@ -4,6 +4,7 @@ plugins {
     id 'org.springframework.boot' version '3.2.4' apply false
     id 'io.spring.dependency-management' version '1.1.4' apply false
     id 'java'
+    id("io.freefair.lombok") version "8.6" apply false
 }
 
 group = 'io.github.jspinak'
@@ -21,6 +22,7 @@ allprojects {
 subprojects {
     apply plugin: 'java'
     apply plugin: 'io.spring.dependency-management'
+    apply plugin: 'io.freefair.lombok'
 
     dependencyManagement {
         imports {
@@ -28,14 +30,306 @@ subprojects {
         }
     }
 
-    tasks.register("prepareKotlinBuildScriptModel"){}
-
     java {
         sourceCompatibility = JavaVersion.VERSION_21
     }
 
+    // This is important for JavaFX modules
+    compileJava {
+        options.compilerArgs += [
+            '--add-exports', 'javafx.graphics/com.sun.javafx.application=ALL-UNNAMED',
+            '--add-opens', 'java.base/java.lang=ALL-UNNAMED',
+            '--add-opens', 'java.desktop/java.awt=ALL-UNNAMED',
+            '--add-opens', 'java.desktop/java.awt.image=ALL-UNNAMED',
+            '--add-opens', 'java.desktop/javax.imageio=ALL-UNNAMED'
+        ]
+    }
+
     dependencies {
-        implementation 'org.projectlombok:lombok'
-        annotationProcessor 'org.projectlombok:lombok'
+        // Core Spring dependencies for DI
+        implementation 'org.springframework:spring-context'
+        implementation 'org.springframework:spring-beans'
+        implementation 'org.springframework:spring-core'
+        
+        // Spring Boot autoconfigure for modules that need it
+        implementation 'org.springframework.boot:spring-boot-starter'
+        implementation 'org.springframework.boot:spring-boot-autoconfigure'
+
+        // Test dependencies
+        testImplementation 'org.springframework.boot:spring-boot-starter-test'
+        testImplementation 'org.junit.jupiter:junit-jupiter-api'
+        testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
+
+        configurations.all {
+            exclude group: 'com.vaadin.external.google', module: 'android-json'
+        }
+    }
+    
+    // Add this to help with Java reflection issues
+    tasks.withType(JavaCompile) {
+        options.compilerArgs += [
+            '--add-opens', 'java.base/java.lang=ALL-UNNAMED',
+            '--add-opens', 'java.desktop/java.awt=ALL-UNNAMED',
+            '--add-opens', 'java.desktop/java.awt.image=ALL-UNNAMED',
+            '--add-opens', 'java.desktop/javax.imageio=ALL-UNNAMED'
+        ]
+        options.fork = true
+        options.forkOptions.jvmArgs += [
+            '-Xlog:jni+resolve=info',
+            '-Dlombok.disableClassLoaderCheck=true'  
+        ]
+        logging.captureStandardOutput LogLevel.INFO
+        options.verbose = true
+    }
+
+    tasks.register('lombokDiagnostics') {
+        doLast {
+            println "Java Version: ${System.getProperty('java.version')}"
+            println "Java Home: ${System.getProperty('java.home')}"
+            println "Lombok version: ${project.extensions.getByName('lombok').version}"
+            println "Class path entries:"
+            configurations.compileClasspath.files.each { file ->
+                println "  $file"
+            }
+        }
+    }
+
+    tasks.withType(JavaCompile) {
+        options.annotationProcessorPath.each { entry ->
+            println "Annotation processor path entry: $entry"
+        }
+    }
+
+    tasks.register('checkJdkCompatibility', JavaExec) {
+        classpath = configurations.compileClasspath
+        mainClass = 'lombok.launch.Main'
+        args = ['--debug']
+    }
+
+    if (project.hasProperty('debugBytecode') && project.debugBytecode.toBoolean()) {
+        tasks.withType(JavaCompile) { JavaCompile task ->
+            task.options.compilerArgs << "-XprintProcessorInfo" << "-XprintRounds"
+        }
+    }
+
+    tasks.register('findDuplicateClasses') {
+        doLast {
+            def classesByJar = [:]
+            configurations.runtimeClasspath.files.each { file ->
+                if (file.name.endsWith('.jar')) {
+                    def jar = file
+                    def zipFile = new java.util.zip.ZipFile(jar)
+                    zipFile.entries().each { entry ->
+                        if (!entry.isDirectory() && entry.name.endsWith('.class')) {
+                            def className = entry.name
+                            if (!classesByJar.containsKey(className)) {
+                                classesByJar[className] = []
+                            }
+                            classesByJar[className] << jar.name
+                        }
+                    }
+                    zipFile.close()
+                }
+            }
+            
+            def duplicates = classesByJar.findAll { className, jars -> jars.size() > 1 }
+            if (duplicates) {
+                println "Found duplicate classes:"
+                duplicates.each { className, jars ->
+                    println "$className found in: $jars"
+                }
+            } else {
+                println "No duplicate classes found."
+            }
+        }
+    }
+
+    test {
+        useJUnitPlatform()
+        
+        jvmArgs = [
+            '--add-opens', 'java.base/java.lang=ALL-UNNAMED',
+            '--add-opens', 'java.desktop/java.awt=ALL-UNNAMED',
+            '--add-opens', 'java.desktop/java.awt.image=ALL-UNNAMED',
+            '--add-opens', 'java.desktop/javax.imageio=ALL-UNNAMED'
+        ]
+    }
+}
+
+// Task to find packages matching a pattern across all modules
+tasks.register('findPackages') {
+    description = 'Find Java packages matching a pattern across all modules'
+    
+    doLast {
+        // Default pattern to search for
+        def packagePattern = project.hasProperty('pattern') ? project.property('pattern') : 'io.github.jspinak.brobot.library'
+        // Module to search in
+        def moduleToSearch = project.hasProperty('module') ? project.property('module') : 'library'
+        
+        println "Searching for packages matching: $packagePattern"
+        println "In module: $moduleToSearch"
+        
+        // Get the specified module
+        def targetModule = project.findProject(":$moduleToSearch")
+        
+        if (!targetModule) {
+            println "ERROR: Module '$moduleToSearch' not found"
+            println "Available modules: ${subprojects.collect { it.name }}"
+            return
+        }
+        
+        def packageSet = new HashSet<String>()
+        def packageRegex = ~/package\s+([\w\.]+)\s*;/
+        def matchRegex = ~/${packagePattern}/
+        
+        // Get the source directories from the target module
+        def sourceDirectories = targetModule.sourceSets.main.java.srcDirs
+        
+        println "Searching in directories: ${sourceDirectories}"
+        
+        sourceDirectories.each { srcDir ->
+            if (srcDir.exists()) {
+                srcDir.eachFileRecurse { file ->
+                    if (file.name.endsWith('.java')) {
+                        try {
+                            def fileContent = file.text
+                            def matcher = fileContent =~ packageRegex
+                            if (matcher.find()) {
+                                def packageName = matcher.group(1)
+                                if (packageName =~ matchRegex) {
+                                    packageSet.add(packageName)
+                                }
+                            }
+                        } catch (Exception e) {
+                            println "ERROR reading file ${file}: ${e.message}"
+                        }
+                    }
+                }
+            } else {
+                println "WARNING: Source directory does not exist: $srcDir"
+            }
+        }
+        
+        println "\nFound ${packageSet.size()} matching packages:"
+        println "============================================"
+        packageSet.each { pkg ->
+            println pkg
+        }
+        
+        println "\nModule exports statements for these packages:"
+        println "============================================"
+        packageSet.each { pkg ->
+            println "exports $pkg;"
+        }
+        
+        // Generate a module-info.java snippet
+        def moduleInfoSnippet = new File("$moduleToSearch-module-info-exports.txt")
+        moduleInfoSnippet.text = "// Package exports for module: $moduleToSearch\n"
+        packageSet.each { pkg ->
+            moduleInfoSnippet.append("exports $pkg;\n")
+        }
+        println "\nExport statements saved to: ${moduleInfoSnippet.absolutePath}"
+    }
+}
+
+// Task to find packages containing a specific variable across the entire project
+tasks.register('findPackagesWithVariable') {
+    description = 'Find Java packages in any file containing a specific variable across all modules'
+    
+    doLast {
+        // Variable to search for
+        def variableName = project.hasProperty('variable') ? project.property('variable') : 'library'
+        // Package pattern (optional, can be used to filter packages)
+        def packagePattern = project.hasProperty('pattern') ? project.property('pattern') : '.*'
+        
+        println "Searching for Java files containing variable: $variableName"
+        println "Filtering packages by pattern: $packagePattern"
+        
+        def packageSet = new HashSet<String>()
+        def packageRegex = ~/package\s+([\w\.]+)\s*;/
+        def matchRegex = ~/${packagePattern}/
+        def variableRegex = ~/${variableName}/
+        
+        // Search in all modules including the root project
+        def allProjects = [project] + project.subprojects
+        
+        println "Searching across all modules in the project"
+        
+        allProjects.each { proj ->
+            println "Searching in module: ${proj.name}"
+            
+            // Get all source directories from the project
+            def sourceDirectories = []
+            try {
+                sourceDirectories = proj.sourceSets.main.java.srcDirs
+            } catch (Exception e) {
+                println "No source sets found in ${proj.name}"
+            }
+            
+            sourceDirectories.each { srcDir ->
+                if (srcDir.exists()) {
+                    println "  Checking directory: $srcDir"
+                    
+                    // Find all Java files recursively
+                    srcDir.eachFileRecurse { file ->
+                        if (file.name.endsWith('.java')) {
+                            try {
+                                def fileContent = file.text
+                                
+                                // Check if the file contains the variable
+                                if (fileContent =~ variableRegex) {
+                                    // Extract the package declaration
+                                    def matcher = fileContent =~ packageRegex
+                                    if (matcher.find()) {
+                                        def packageName = matcher.group(1)
+                                        if (packageName =~ matchRegex) {
+                                            packageSet.add(packageName)
+                                            println "    Found in file: ${file.path}"
+                                        }
+                                    }
+                                }
+                            } catch (Exception e) {
+                                println "    ERROR reading file ${file}: ${e.message}"
+                            }
+                        }
+                    }
+                } else {
+                    println "  WARNING: Source directory does not exist: $srcDir"
+                }
+            }
+        }
+        
+        println "\nFound ${packageSet.size()} matching packages:"
+        println "============================================"
+        packageSet.each { pkg ->
+            println pkg
+        }
+        
+        println "\nModule exports statements for these packages:"
+        println "============================================"
+        packageSet.each { pkg ->
+            println "exports $pkg;"
+        }
+        
+        // Generate a module-info snippet file
+        def outputFileName = "packages-with-${variableName}.txt"
+        def moduleInfoSnippet = new File(outputFileName)
+        moduleInfoSnippet.text = "// Package exports for files containing: $variableName\n"
+        packageSet.each { pkg ->
+            moduleInfoSnippet.append("exports $pkg;\n")
+        }
+        println "\nExport statements saved to: ${moduleInfoSnippet.absolutePath}"
+    }
+}
+
+tasks.register('checkModules') {
+    doLast {
+        println "==== Module Path ===="
+        def moduleFiles = configurations.runtimeClasspath.files.findAll { file ->
+            file.name.contains('javafx') || file.name.contains('spring')
+        }
+        moduleFiles.each { file ->
+            println file
+        }
     }
 }

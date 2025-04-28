@@ -1,9 +1,6 @@
 package io.github.jspinak.brobot.manageStates;
 
 import io.github.jspinak.brobot.datatypes.state.state.State;
-import io.github.jspinak.brobot.manageStates.ActionDefinitionStateTransition;
-import io.github.jspinak.brobot.manageStates.StateTransitions;
-import io.github.jspinak.brobot.manageStates.StateTransitionsJointTable;
 import io.github.jspinak.brobot.services.StateTransitionsRepository;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -49,7 +46,7 @@ public class StateTransitionsJointTableTest {
         transition.setActivate(Collections.singleton(stateB));
         stateTransitions.addTransition(transition);
         stateTransitionsRepository.add(stateTransitions);
-        stateTransitionsRepository.populateRepoWithPreliminaryStateTransitions();
+        stateTransitionsRepository.populateStateTransitionsJointTable();
         System.out.println(stateTransitions);
 
         // Now retrieve states with transitions to B

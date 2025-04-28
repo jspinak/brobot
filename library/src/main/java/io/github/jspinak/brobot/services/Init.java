@@ -1,17 +1,19 @@
 package io.github.jspinak.brobot.services;
 
+import java.util.List;
+import java.util.Optional;
+
+import io.github.jspinak.brobot.manageStates.StateTransitions;
+import org.springframework.stereotype.Component;
+
 import io.github.jspinak.brobot.actions.BrobotSettings;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles.SetAllProfiles;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles.SetKMeansProfiles;
 import io.github.jspinak.brobot.database.services.AllStatesInProjectService;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.datatypes.state.state.State;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.manageStates.StateManagementService;
 import io.github.jspinak.brobot.reports.Report;
-import org.springframework.stereotype.Component;
-
-import java.util.ArrayList;
-import java.util.Optional;
 
 @Component
 public class Init {
@@ -23,13 +25,14 @@ public class Init {
     private final StateTransitionsInProjectService stateTransitionsInProjectService;
     private final StateTransitionsRepository stateTransitionsRepository;
 
-    private int lastImageIndex = 1; // 0 should correspond to "no class" since matrices are typically initialized with 0s
+    private int lastImageIndex = 1; // 0 should correspond to "no class" since matrices are typically initialized
+                                    // with 0s
 
     public Init(AllStatesInProjectService allStatesInProjectService, SetAllProfiles setAllProfiles,
-                SetKMeansProfiles setKMeansProfiles,
-                StateManagementService stateManagementService,
-                StateTransitionsInProjectService stateTransitionsInProjectService,
-                StateTransitionsRepository stateTransitionsRepository) {
+            SetKMeansProfiles setKMeansProfiles,
+            StateManagementService stateManagementService,
+            StateTransitionsInProjectService stateTransitionsInProjectService,
+            StateTransitionsRepository stateTransitionsRepository) {
         this.allStatesInProjectService = allStatesInProjectService;
         this.setAllProfiles = setAllProfiles;
         this.setKMeansProfiles = setKMeansProfiles;
@@ -39,7 +42,9 @@ public class Init {
     }
 
     /**
-     * This method is called from the client app after all beans have been initialized.
+     * This method is called from the client app after all beans have been
+     * initialized.
+     * 
      * @param path Path to the directory containing the images.
      */
     public void setBundlePathAndPreProcessImages(String path) {
@@ -50,7 +55,8 @@ public class Init {
     }
 
     private void preProcessImages(State state) {
-        if (!state.getStateImages().isEmpty()) Report.print(state.getName() + ": ");
+        if (!state.getStateImages().isEmpty())
+            Report.print(state.getName() + ": ");
         for (StateImage stateImage : state.getStateImages()) {
             Report.print("[" + lastImageIndex + "," + stateImage.getName() + "] ");
             stateImage.setIndex(lastImageIndex);
@@ -61,7 +67,8 @@ public class Init {
                 setKMeansProfiles.setProfiles(stateImage);
             }
         }
-        if (!state.getStateImages().isEmpty()) Report.println();
+        if (!state.getStateImages().isEmpty())
+            Report.println();
     }
 
     public void add(String path) {
@@ -70,8 +77,8 @@ public class Init {
 
     private void populateTransitionsWithStateIds() {
         // convert all StateTransitions in the repository
-        stateManagementService.convertAllStateTransitions(
-                stateTransitionsInProjectService.getAllStateTransitionsInstances());
+        List<StateTransitions> allStateTransitions = stateTransitionsInProjectService.getAllStateTransitions();
+        stateManagementService.convertAllStateTransitions(allStateTransitions);
         stateTransitionsInProjectService.setupRepo();
     }
 
@@ -90,8 +97,13 @@ public class Init {
         populateCanHideWithStateIds();
     }
 
-    public void init() {
-        populateStateIds();
-        stateTransitionsRepository.populateRepoWithPreliminaryStateTransitions();
+    public void initializeStateStructure() {
+        if (allStatesInProjectService.onlyTheUnknownStateExists()) {
+            Report.println("No states found to initialize.");
+        } else {
+            Report.println("Initializing state structure...");
+            populateStateIds();
+            stateTransitionsRepository.populateStateTransitionsJointTable();
+        }
     }
 }

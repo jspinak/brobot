@@ -56,7 +56,7 @@ public class PathFindingWithActionDefinitionTests {
 
         createTransition(stateA, stateB, createStateImage("Button1", "topLeft"), "Click Button 1");
         createTransition(stateB, stateC, createStateImage("Button2", "topLeft"), "Click Button 2");
-        init.init();
+        init.initializeStateStructure();
 
         Set<Long> startStates = new HashSet<>();
         startStates.add(stateA.getId());
@@ -81,7 +81,7 @@ public class PathFindingWithActionDefinitionTests {
         createTransition(stateB, stateD, createStateImage("Button2", "button2.png"), "Path 1 - Step 2");
         createTransition(stateA, stateC, createStateImage("Button3", "button3.png"), "Path 2 - Step 1");
         createTransition(stateC, stateD, createStateImage("Button4", "button4.png"), "Path 2 - Step 2");
-        init.init();
+        init.initializeStateStructure();
 
         Set<Long> startStates = new HashSet<>();
         startStates.add(stateA.getId());
@@ -101,7 +101,7 @@ public class PathFindingWithActionDefinitionTests {
         State stateC = createState("StateC");
 
         createTransition(stateA, stateB, createStateImage("Button", "button.png"), "Click Button");
-        init.init();
+        init.initializeStateStructure();
 
         Set<Long> startStates = new HashSet<>();
         startStates.add(stateA.getId());

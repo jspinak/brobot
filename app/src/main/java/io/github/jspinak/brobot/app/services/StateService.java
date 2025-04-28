@@ -35,27 +35,29 @@ public class StateService {
     private final StateImageService stateImageService;
     private final ProjectRepository projectRepository;
     private final StateResponseMapper stateResponseMapper;
-    private final StateTransitionsService stateTransitionsService;
+    private final SceneService sceneService;
+    private final PatternService patternService;
     private final TransitionService transitionService;
 
     public StateService(StateRepo stateRepo, StateEntityMapper stateEntityMapper,
                         StateImageService stateImageService,
                         ProjectRepository projectRepository, StateResponseMapper stateResponseMapper,
-                        @Lazy StateTransitionsService stateTransitionsService, TransitionService transitionService) {
+                        SceneService sceneService, PatternService patternService,
+                        TransitionService transitionService) {
         this.stateRepo = stateRepo;
         this.stateEntityMapper = stateEntityMapper;
         this.stateImageService = stateImageService;
         this.projectRepository = projectRepository;
         this.stateResponseMapper = stateResponseMapper;
-        this.stateTransitionsService = stateTransitionsService;
+        this.sceneService = sceneService;
+        this.patternService = patternService;
         this.transitionService = transitionService;
     }
 
     @Transactional(readOnly = true)
     public Optional<State> getState(String name) {
-        Optional<StateEntity> state = stateRepo.findByName(name);
-        //return state.map(stateMapper::map);
-        return state.map(stateEntityMapper::map);
+        Optional<StateEntity> stateEntityOptional = stateRepo.findByName(name);
+        return stateEntityOptional.map(stateEntity -> stateEntityMapper.map(stateEntity, sceneService, patternService));
     }
 
     @Transactional(readOnly = true)
@@ -71,7 +73,7 @@ public class StateService {
     @Transactional(readOnly = true)
     public List<State> getAllStates() {
         return stateRepo.findAll().stream()
-                .map(stateEntityMapper::map)
+                .map(stateEntity -> stateEntityMapper.map(stateEntity, sceneService, patternService))
                 .collect(Collectors.toList());
     }
 
@@ -118,7 +120,7 @@ public class StateService {
     public StateEntity save(State state) {
         if (state == null) return null;
         logger.info("Before save: {}", state);
-        StateEntity stateEntity = stateEntityMapper.map(state);
+        StateEntity stateEntity = stateEntityMapper.map(state, sceneService, patternService);
         return save(stateEntity);
     }
 
@@ -173,7 +175,7 @@ public class StateService {
     public List<State> getAllInProject(Long projectId) {
         return stateRepo.findByProjectId(projectId).stream()
                 //.map(stateMapper::map)
-                .map(stateEntityMapper::map)
+                .map(stateEntity -> stateEntityMapper.map(stateEntity, sceneService, patternService))
                 .collect(Collectors.toList());
     }
 
@@ -258,7 +260,7 @@ public class StateService {
         List<StateEntity> stateEntities = stateRepo.findByProjectId(projectId);
         List<State> states = new ArrayList<>();
         stateEntities.forEach(entity -> {
-            State state = stateEntityMapper.map(entity);
+            State state = stateEntityMapper.map(entity, sceneService, patternService);
             Set<StateImage> stateImages = new HashSet<>();
             entity.getStateImages().forEach(stateImageEntity -> stateImages.add(stateImageService.mapWithImage(stateImageEntity)));
             state.setStateImages(stateImages);

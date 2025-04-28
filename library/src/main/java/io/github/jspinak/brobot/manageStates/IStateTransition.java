@@ -34,6 +34,6 @@ public interface IStateTransition {
     int getTimesSuccessful();
     void setTimesSuccessful(int timesSuccessful);
 
-    void convertNamesToIds(Function<String, Long> nameToIdConverter);
+    String toString(); // for debugging purposes
 
 }

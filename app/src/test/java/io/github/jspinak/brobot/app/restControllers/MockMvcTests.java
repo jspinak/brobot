@@ -29,7 +29,7 @@ public class MockMvcTests {
 
     @Test
     void shouldReturnDefaultMessage() throws Exception {
-        this.mockMvc.perform(get("/api/states/")) // Accessing the root endpoint of StateController
+        this.mockMvc.perform(get("/api/states")) // Accessing the root endpoint of StateController
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("Hello, World")));

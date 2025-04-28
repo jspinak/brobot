@@ -21,14 +21,19 @@ public class ActionDefinitionService {
     private final ObjectCollectionEntityMapper objectCollectionEntityMapper;
     private final ActionStepService actionStepService;
     private final ActionDefinitionRepo actionDefinitionRepo;
+    private final SceneService sceneService;
+    private final PatternService patternService;
 
     public ActionDefinitionService(ActionOptionsEntityMapper actionOptionsEntityMapper,
                                    ObjectCollectionEntityMapper objectCollectionEntityMapper,
-                                   ActionStepService actionStepService, ActionDefinitionRepo actionDefinitionRepo) {
+                                   ActionStepService actionStepService, ActionDefinitionRepo actionDefinitionRepo,
+                                   SceneService sceneService, PatternService patternService) {
         this.actionOptionsEntityMapper = actionOptionsEntityMapper;
         this.objectCollectionEntityMapper = objectCollectionEntityMapper;
         this.actionStepService = actionStepService;
         this.actionDefinitionRepo = actionDefinitionRepo;
+        this.sceneService = sceneService;
+        this.patternService = patternService;
     }
 
     public ActionDefinitionEntity createActionDefinitionEntity(ActionDefinition actionDefinition) {
@@ -46,7 +51,7 @@ public class ActionDefinitionService {
     private ActionStepEntity createActionStepEntity(ActionStep step) {
         ActionStepEntity entity = new ActionStepEntity();
         entity.setActionOptionsEntity(actionOptionsEntityMapper.map(step.getOptions()));
-        entity.setObjectCollectionEntity(objectCollectionEntityMapper.map(step.getObjects()));
+        entity.setObjectCollectionEntity(objectCollectionEntityMapper.map(step.getObjects(), sceneService, patternService));
         return entity;
     }
 

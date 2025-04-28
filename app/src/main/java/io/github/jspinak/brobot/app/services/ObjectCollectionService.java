@@ -10,16 +10,21 @@ public class ObjectCollectionService {
 
     private final ObjectCollectionEntityMapper objectCollectionEntityMapper;
     private final StateImageService stateImageService;
+    private final SceneService sceneService;
+    private final PatternService patternService;
 
     public ObjectCollectionService(ObjectCollectionEntityMapper objectCollectionEntityMapper,
-                                   StateImageService stateImageService) {
+                                   StateImageService stateImageService, SceneService sceneService,
+                                   PatternService patternService) {
         this.objectCollectionEntityMapper = objectCollectionEntityMapper;
         this.stateImageService = stateImageService;
+        this.sceneService = sceneService;
+        this.patternService = patternService;
     }
 
     // TODO: map scenes
     public ObjectCollection mapObjectCollection(ObjectCollectionEntity entity) {
-        ObjectCollection objectCollection = objectCollectionEntityMapper.mapWithoutStateImagesAndScenes(entity);
+        ObjectCollection objectCollection = objectCollectionEntityMapper.map(entity, sceneService, patternService);
         objectCollection.setStateImages(stateImageService.mapWithImages(entity.getStateImages()));
         return objectCollection;
     }

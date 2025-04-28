@@ -37,18 +37,23 @@ public class TransitionService {
     private final TransitionEntityMapper transitionEntityMapper;
     private final StateImageService stateImageService;
     private final ActionDefinitionService actionDefinitionService;
+    private final SceneService sceneService;
+    private final PatternService patternService;
 
     private static final Logger logger = LoggerFactory.getLogger(TransitionService.class);
 
     public TransitionService(TransitionRepo transitionRepo,
                              TransitionResponseMapper transitionResponseMapper,
                              TransitionEntityMapper transitionEntityMapper,
-                             StateImageService stateImageService, ActionDefinitionService actionDefinitionService) {
+                             StateImageService stateImageService, ActionDefinitionService actionDefinitionService,
+                             SceneService sceneService, PatternService patternService) {
         this.transitionRepo = transitionRepo;
         this.transitionResponseMapper = transitionResponseMapper;
         this.transitionEntityMapper = transitionEntityMapper;
         this.stateImageService = stateImageService;
         this.actionDefinitionService = actionDefinitionService;
+        this.sceneService = sceneService;
+        this.patternService = patternService;
     }
 
     public List<TransitionResponse> getAllTransitionsAsResponses() {
@@ -191,7 +196,7 @@ public class TransitionService {
     }
 
     public ActionDefinitionStateTransition transitionEntityToADST(TransitionEntity transitionEntity) {
-        ActionDefinitionStateTransition adst = transitionEntityMapper.mapExceptActionDefinition(transitionEntity);
+        ActionDefinitionStateTransition adst = transitionEntityMapper.map(transitionEntity, sceneService, patternService);
         adst.setActionDefinition(actionDefinitionService.mapFromEntityToLibraryClass(transitionEntity.getActionDefinition()));
         return adst;
     }

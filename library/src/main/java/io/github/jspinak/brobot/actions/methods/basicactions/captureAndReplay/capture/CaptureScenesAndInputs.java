@@ -8,15 +8,18 @@ import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImag
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
-import io.github.jspinak.brobot.imageUtils.GetImageOpenCV;
 import io.github.jspinak.brobot.reports.Report;
+
 import org.springframework.stereotype.Component;
 
 import javax.imageio.ImageIO;
+
 import java.io.File;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
+
+import io.github.jspinak.brobot.imageUtils.BufferedImageOps;
 
 /**
  * The scene is captured along with the time of the capture.
@@ -32,18 +35,18 @@ import java.time.LocalDateTime;
 @Component
 public class CaptureScenesAndInputs {
 
-    private GetImageOpenCV getImageOpenCV;
     private NativeHookDemo nativeHookDemo;
     private WriteXmlDomActions writeXmlDomActions;
     private Action action;
     private WriteXmlDomScenes writeXmlDomScenes;
+    private BufferedImageOps bufferedImageOps;
 
     private int screensSaved = 0;
 
-    public CaptureScenesAndInputs(GetImageOpenCV getImageOpenCV,
+    public CaptureScenesAndInputs(BufferedImageOps bufferedImageOps,
                                   NativeHookDemo nativeHookDemo, WriteXmlDomActions writeXmlDomActions,
                                   Action action, WriteXmlDomScenes writeXmlDomScenes) {
-        this.getImageOpenCV = getImageOpenCV;
+        this.bufferedImageOps = bufferedImageOps;
         this.nativeHookDemo = nativeHookDemo;
         this.writeXmlDomActions = writeXmlDomActions;
         this.action = action;
@@ -84,7 +87,7 @@ public class CaptureScenesAndInputs {
             timelapse = (int) Duration.between(startTime, LocalDateTime.now()).toMillis();
             if (timelapse > screensSaved * BrobotSettings.captureFrequency * 1000) {
                 try {
-                    ImageIO.write(getImageOpenCV.getBuffImgFromScreen(new Region()),
+                    ImageIO.write(bufferedImageOps.getBuffImgFromScreen(new Region()),
                             "png", new File("capture/scene" + screensSaved + ".png"));
                     Report.println("Saved screenshot " + screensSaved);
                     screensSaved++;

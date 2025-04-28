@@ -15,7 +15,8 @@ import static io.github.jspinak.brobot.actions.actionOptions.ActionOptions.Actio
 /**
  * This class is meant mostly for testing state structures and state management,
  * although it can also be used for bootstrapping simple projects.
- * It sets up a state and transitions classes and add them to the repos. Only simple click transitions are used.
+ * It sets up a state and transitions classes and add them to the repos. Only
+ * simple click transitions are used.
  */
 @Component
 public class QuickStateAndTransitionsBuilder {
@@ -29,8 +30,8 @@ public class QuickStateAndTransitionsBuilder {
     private StateTransitions stateTransitions;
 
     public QuickStateAndTransitionsBuilder(AllStatesInProjectService stateService,
-                                           StateTransitionsRepository transitionsRepository,
-                                           Action action) {
+            StateTransitionsRepository transitionsRepository,
+            Action action) {
         this.stateService = stateService;
         this.transitionsRepository = transitionsRepository;
         this.action = action;
@@ -68,10 +69,11 @@ public class QuickStateAndTransitionsBuilder {
 
     public void build() {
         State state = new State.Builder(stateName)
-                .withImages(stateImages.toArray(new StateImage[0]))
+                .withImages(stateImages)
                 .build();
         stateService.save(state);
         transitionsRepository.add(stateTransitions);
+        //transitionsRepository.print();
     }
 
 }

@@ -2,13 +2,15 @@ package io.github.jspinak.brobot.app.database.databaseMappers;
 
 import io.github.jspinak.brobot.app.database.entities.StateTransitionsEntity;
 import io.github.jspinak.brobot.app.database.entities.TransitionEntity;
+import io.github.jspinak.brobot.app.services.PatternService;
+import io.github.jspinak.brobot.app.services.SceneService;
+import io.github.jspinak.brobot.manageStates.ActionDefinitionStateTransition;
 import io.github.jspinak.brobot.manageStates.IStateTransition;
 import io.github.jspinak.brobot.manageStates.StateTransitions;
-import io.github.jspinak.brobot.manageStates.ActionDefinitionStateTransition;
 import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
@@ -20,21 +22,21 @@ public class StateTransitionsEntityMapper {
         this.transitionEntityMapper = transitionEntityMapper;
     }
 
-    public StateTransitions map(StateTransitionsEntity entity) {
+    public StateTransitions map(StateTransitionsEntity entity, SceneService sceneService, PatternService patternService) {
         StateTransitions stateTransitions = new StateTransitions();
         stateTransitions.setStateId(entity.getStateId());
 
         // Map transitions
-        Map<Long, IStateTransition> transitions = new HashMap<>();
+        List<IStateTransition> transitions = new ArrayList<>();
         for (TransitionEntity transitionEntity : entity.getTransitions()) {
-            ActionDefinitionStateTransition transition = transitionEntityMapper.map(transitionEntity);
-            transitions.put(transitionEntity.getId(), transition);
+            ActionDefinitionStateTransition transition = transitionEntityMapper.map(transitionEntity, sceneService, patternService);
+            transitions.add(transition);
         }
         stateTransitions.setTransitions(transitions);
 
         // Map finish transition
         if (entity.getFinishTransition() != null) {
-            stateTransitions.setTransitionFinish(transitionEntityMapper.map(entity.getFinishTransition()));
+            stateTransitions.setTransitionFinish(transitionEntityMapper.map(entity.getFinishTransition(), sceneService, patternService));
         }
 
         stateTransitions.setStaysVisibleAfterTransition(
@@ -44,19 +46,20 @@ public class StateTransitionsEntityMapper {
         return stateTransitions;
     }
 
-    public StateTransitionsEntity map(StateTransitions stateTransitions) {
+    public StateTransitionsEntity map(StateTransitions stateTransitions, SceneService sceneService, PatternService patternService) {
         StateTransitionsEntity entity = new StateTransitionsEntity();
 
         entity.setStateId(stateTransitions.getStateId());
 
         // Map transitions
-        entity.setTransitions(stateTransitions.getTransitions().values().stream()
-                .map(transition -> transitionEntityMapper.map((ActionDefinitionStateTransition) transition))
+        entity.setTransitions(stateTransitions.getTransitions().stream()
+                .map(transition -> transitionEntityMapper.map((ActionDefinitionStateTransition) transition, sceneService, patternService))
                 .collect(Collectors.toList()));
 
         // Map finish transition
         if (stateTransitions.getTransitionFinish() != null) {
-            entity.setFinishTransition(transitionEntityMapper.map((ActionDefinitionStateTransition) stateTransitions.getTransitionFinish()));
+            entity.setFinishTransition(transitionEntityMapper.map(
+                    (ActionDefinitionStateTransition) stateTransitions.getTransitionFinish(), sceneService, patternService));
         }
 
         entity.setStaysVisibleAfterTransition(

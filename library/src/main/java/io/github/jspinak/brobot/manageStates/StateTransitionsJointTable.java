@@ -56,6 +56,18 @@ public class StateTransitionsJointTable {
         });
     }
 
+    /**
+     * Each transition can activate multiple states. All pairs of (originating state/activated state)
+     * are added to the joint table.
+     */
+    public void addToJointTable(StateTransitions stateTransitions) {
+        for (IStateTransition transition : stateTransitions.getTransitions()) {
+            for (Long child : transition.getActivate()) {
+                add(child, stateTransitions.getStateId());
+            }
+        }
+    }
+
     public void add(Long to, Long from) {
         if (!from.equals(SpecialStateType.PREVIOUS.getId()))
             addIncomingTransition(to, from);
