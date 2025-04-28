@@ -2,20 +2,24 @@ package io.github.jspinak.brobot.manageStates;
 
 import org.springframework.stereotype.Component;
 
+import io.github.jspinak.brobot.services.Init;
+
 @Component
 public class QuickStateStructureBuilder {
 
-    private final QuickStateAndTransitionsBuilder stateBuilder;
+    private final QuickStateAndTransitionsBuilder stateAndTransitionBuilder;
     private final InitialStates initialStates;
+    private final Init init;
 
     public QuickStateStructureBuilder(QuickStateAndTransitionsBuilder stateBuilder,
-                                      InitialStates initialStates) {
-        this.stateBuilder = stateBuilder;
+            InitialStates initialStates, Init init) {
+        this.stateAndTransitionBuilder = stateBuilder;
         this.initialStates = initialStates;
+        this.init = init;
     }
 
     public QuickStateStructureBuilder newState(String name, String image, String toState) {
-        stateBuilder
+        stateAndTransitionBuilder
                 .init(name)
                 .addTransitionImage(image, toState)
                 .build();
@@ -23,7 +27,7 @@ public class QuickStateStructureBuilder {
     }
 
     public QuickStateStructureBuilder newState(String name, String image) {
-        stateBuilder
+        stateAndTransitionBuilder
                 .init(name)
                 .addImage(image)
                 .build();
@@ -35,7 +39,8 @@ public class QuickStateStructureBuilder {
         return this;
     }
 
-    public void findStartStates() {
+    public void build() {
+        init.initializeStateStructure();
         initialStates.findIntialStates();
     }
 }

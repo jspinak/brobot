@@ -11,7 +11,10 @@ import javax.sql.DataSource;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-@SpringBootTest
+@SpringBootTest(
+    classes = BrobotApplication.class,
+    webEnvironment = SpringBootTest.WebEnvironment.NONE
+)
 @ActiveProfiles("test")  // Loads application-test.properties
 public class TestDatabase {
 

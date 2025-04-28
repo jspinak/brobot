@@ -4,6 +4,12 @@ import io.github.jspinak.brobot.services.Init;
 import org.springframework.context.SmartLifecycle;
 import org.springframework.stereotype.Component;
 
+/**
+ * This class implements the SmartLifecycle interface to perform actions after
+ * the Spring context is initialized.
+ * It sets up the initial state structure and processes images for the Brobot
+ * library.
+ */
 @Component
 public class BrobotStartupLifecycle implements SmartLifecycle {
 
@@ -19,7 +25,7 @@ public class BrobotStartupLifecycle implements SmartLifecycle {
     public void start() {
         String imagePath = "images"; // Customize the path
         initService.setBundlePathAndPreProcessImages(imagePath);
-        initService.init();
+        initService.initializeStateStructure();
         System.out.println("Brobot library: All beans initialized, BrobotStartupLifecycle executed.");
         running = true;
     }
@@ -50,4 +56,3 @@ public class BrobotStartupLifecycle implements SmartLifecycle {
         callback.run();
     }
 }
-

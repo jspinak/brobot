@@ -29,6 +29,8 @@ public class AutomationService {
     private final StateRepo stateRepo;
     private final StateEntityMapper stateEntityMapper;
     private final StateTraversalService stateTraversalService;
+    private final SceneService sceneService;
+    private final PatternService patternService;
     private final LogEntryService logEntryService;
     private final LogSenderService logSenderService;
     private final AutomationSession automationSession;
@@ -36,6 +38,7 @@ public class AutomationService {
 
     public AutomationService(BuildModel buildModel, Action action, StateRepo stateRepo,
                              StateEntityMapper stateEntityMapper, StateTraversalService stateTraversalService,
+                             SceneService sceneService, PatternService patternService,
                              LogEntryService logEntryService, LogSenderService logSenderService,
                              AutomationSession automationSession, Recorder recorder) {
         this.buildModel = buildModel;
@@ -43,6 +46,8 @@ public class AutomationService {
         this.stateRepo = stateRepo;
         this.stateEntityMapper = stateEntityMapper;
         this.stateTraversalService = stateTraversalService;
+        this.sceneService = sceneService;
+        this.patternService = patternService;
         this.logEntryService = logEntryService;
         this.logSenderService = logSenderService;
         this.automationSession = automationSession;
@@ -61,7 +66,7 @@ public class AutomationService {
 
     public String testVisitAllImages() {
         stateRepo.findAll().forEach(stateEntity -> {
-                State state = stateEntityMapper.map(stateEntity);
+                State state = stateEntityMapper.map(stateEntity, sceneService, patternService);
                 state.getStateImages().forEach(sI -> action.perform(ActionOptions.Action.MOVE, sI.asObjectCollection()));
         });
         return "Moved mouse to all StateImages.";

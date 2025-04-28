@@ -3,7 +3,6 @@ package io.github.jspinak.brobot.app.services;
 import io.github.jspinak.brobot.app.database.databaseMappers.SceneEntityMapper;
 import io.github.jspinak.brobot.app.database.entities.SceneEntity;
 import io.github.jspinak.brobot.app.database.repositories.SceneRepo;
-import io.github.jspinak.brobot.app.web.responseMappers.ImageResponseMapper;
 import io.github.jspinak.brobot.app.web.responseMappers.SceneResponseMapper;
 import io.github.jspinak.brobot.app.web.responses.SceneResponse;
 import io.github.jspinak.brobot.datatypes.primitives.image.Scene;
@@ -19,15 +18,15 @@ public class SceneService {
     private final SceneRepo sceneRepo;
     private final SceneEntityMapper sceneEntityMapper;
     private final SceneResponseMapper sceneResponseMapper;
-    private final ImageResponseMapper imageResponseMapper;
+    private final PatternService patternService;
 
     public SceneService(SceneRepo sceneRepo, SceneEntityMapper sceneEntityMapper,
                         SceneResponseMapper sceneResponseMapper,
-                        ImageResponseMapper imageResponseMapper) {
+                        PatternService patternService) {
         this.sceneRepo = sceneRepo;
         this.sceneEntityMapper = sceneEntityMapper;
         this.sceneResponseMapper = sceneResponseMapper;
-        this.imageResponseMapper = imageResponseMapper;
+        this.patternService = patternService;
     }
 
     public List<SceneEntity> getSceneEntities() {
@@ -59,7 +58,7 @@ public class SceneService {
     }
 
     public SceneEntity saveScene(Scene scene) {
-        SceneEntity sceneEntity = sceneEntityMapper.map(scene);
+        SceneEntity sceneEntity = sceneEntityMapper.map(scene, patternService);
         sceneRepo.save(sceneEntity);
         scene.setId(sceneEntity.getId());
         return sceneEntity;
@@ -82,9 +81,17 @@ public class SceneService {
     public List<SceneEntity> mapToSceneEntityList(List<Scene> scenes) {
         List<SceneEntity> sceneEntities = new ArrayList<>();
         for (Scene scene : scenes) {
-            Optional<SceneEntity> sceneEntity = getSceneById(scene.getId());
-            sceneEntity.ifPresent(sceneEntities::add);
+            SceneEntity sceneEntity = sceneEntityMapper.map(scene, patternService);
+            sceneEntities.add(sceneEntity);
         }
         return sceneEntities;
+    }
+
+    public List<Scene> mapToSceneList(List<SceneEntity> sceneEntities) {
+        List<Scene> scenes = new ArrayList<>();
+        for (SceneEntity sceneEntity : sceneEntities) {
+            scenes.add(sceneEntityMapper.map(sceneEntity, patternService));
+        }
+        return scenes;
     }
 }

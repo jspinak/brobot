@@ -16,8 +16,8 @@ import java.util.Optional;
 @Getter
 public class TraversePaths {
 
-    private DoTransition doTransition;
-    private StateTransitionsInProjectService stateTransitionsInProjectService;
+    private final DoTransition doTransition;
+    private final StateTransitionsInProjectService stateTransitionsInProjectService;
     private final TransitionBooleanSupplierPackager transitionBooleanSupplierPackager;
 
     private Long failedTransitionStartState = SpecialStateType.NULL.getId();

@@ -1,6 +1,8 @@
 package io.github.jspinak.brobot.app.database.databaseMappers;
 
 import io.github.jspinak.brobot.app.database.entities.TransitionEntity;
+import io.github.jspinak.brobot.app.services.PatternService;
+import io.github.jspinak.brobot.app.services.SceneService;
 import io.github.jspinak.brobot.manageStates.ActionDefinitionStateTransition;
 import io.github.jspinak.brobot.manageStates.IStateTransition;
 import org.springframework.stereotype.Component;
@@ -16,23 +18,11 @@ public class TransitionEntityMapper {
         this.actionDefinitionEntityMapper = actionDefinitionEntityMapper;
     }
 
-    public ActionDefinitionStateTransition map(TransitionEntity transitionEntity) {
+    public ActionDefinitionStateTransition map(TransitionEntity transitionEntity,
+                                               SceneService sceneService, PatternService patternService) {
         ActionDefinitionStateTransition transition = new ActionDefinitionStateTransition();
-        transition.setActionDefinition(actionDefinitionEntityMapper.mapWithoutImages(transitionEntity.getActionDefinition()));
-
-        // Map the StaysVisible enum
-        transition.setStaysVisibleAfterTransition(mapStaysVisibleToActionDefinition(transitionEntity.getStaysVisibleAfterTransition()));
-
-        transition.setActivate(transitionEntity.getStatesToEnter());
-        transition.setExit(transitionEntity.getStatesToExit());
-        transition.setScore(transitionEntity.getScore());
-        transition.setTimesSuccessful(transitionEntity.getTimesSuccessful());
-
-        return transition;
-    }
-
-    public ActionDefinitionStateTransition mapExceptActionDefinition(TransitionEntity transitionEntity) {
-        ActionDefinitionStateTransition transition = new ActionDefinitionStateTransition();
+        transition.setActionDefinition(actionDefinitionEntityMapper.map(
+                transitionEntity.getActionDefinition(), sceneService, patternService));
         transition.setStaysVisibleAfterTransition(mapStaysVisibleToActionDefinition(transitionEntity.getStaysVisibleAfterTransition()));
         transition.setActivate(transitionEntity.getStatesToEnter());
         transition.setExit(transitionEntity.getStatesToExit());
@@ -55,10 +45,11 @@ public class TransitionEntityMapper {
         }
     }
 
-    public TransitionEntity map(ActionDefinitionStateTransition actionDefinitionStateTransition) {
+    public TransitionEntity map(ActionDefinitionStateTransition actionDefinitionStateTransition,
+                                SceneService sceneService, PatternService patternService) {
         TransitionEntity entity = new TransitionEntity();
         actionDefinitionStateTransition.getActionDefinition().ifPresent(actionDef ->
-                entity.setActionDefinition(actionDefinitionEntityMapper.mapWithoutImages(actionDef)));
+                entity.setActionDefinition(actionDefinitionEntityMapper.map(actionDef, sceneService, patternService)));
 
         // Map the StaysVisible enum
         entity.setStaysVisibleAfterTransition(mapStaysVisibleToIState(actionDefinitionStateTransition.getStaysVisibleAfterTransition()));

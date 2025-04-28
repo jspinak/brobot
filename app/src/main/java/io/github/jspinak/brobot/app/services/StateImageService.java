@@ -16,7 +16,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -28,6 +27,7 @@ public class StateImageService {
     private final StateImageRepo stateImageRepo;
     private final StateImageEntityMapper stateImageEntityMapper;
     private final PatternService patternService;
+
     private final StateImageResponseMapper stateImageResponseMapper;
     private final StateImageDTOMapper stateImageDTOMapper;
     private final StateImageSenderService stateImageSenderService;
@@ -166,10 +166,10 @@ public class StateImageService {
     }
 
     public StateImage mapWithImage(StateImageEntity stateImageEntity) {
-        StateImage stateImage = stateImageEntityMapper.map(stateImageEntity);
+        StateImage stateImage = stateImageEntityMapper.map(stateImageEntity, patternService);
         List<Pattern> patterns = new ArrayList<>();
         stateImageEntity.getPatterns()
-                .forEach(patternEntity -> patterns.add(patternService.mapWithImage(patternEntity)));
+                .forEach(patternEntity -> patterns.add(patternService.map(patternEntity)));
         stateImage.setPatterns(patterns);
         return stateImage;
     }
@@ -186,13 +186,13 @@ public class StateImageService {
 
     public StateImage getStateImage(String name) {
         return stateImageRepo.findByName(name)
-                .map(stateImageEntityMapper::map)
+                .map(stateImageEntity -> stateImageEntityMapper.map(stateImageEntity, patternService))
                 .orElse(null);
     }
 
     public List<StateImage> getAllStateImages() {
         return stateImageRepo.findAll().stream()
-                .map(stateImageEntityMapper::map)
+                .map(stateImageEntity -> stateImageEntityMapper.map(stateImageEntity, patternService))
                 .collect(Collectors.toList());
     }
 
@@ -202,8 +202,8 @@ public class StateImageService {
 
     public void saveStateImages(List<StateImage> stateImages) {
         stateImages.forEach(stateImage -> {
-            StateImageEntity entity = stateImageEntityMapper.map(stateImage);
-            StateImageEntity savedEntity = stateImageRepo.save(entity);
+            StateImageEntity entity = stateImageEntityMapper.map(stateImage, patternService);
+            stateImageRepo.save(entity);
         });
     }
 

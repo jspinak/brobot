@@ -4,6 +4,7 @@ import io.github.jspinak.brobot.actions.BrobotSettings;
 import io.github.jspinak.brobot.app.stateStructureBuilders.buildWithoutNames.screenObservations.GetWordsFromFile;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.sikuli.script.Match;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 
 @SpringBootTest
 @ActiveProfiles("test")
+@Tag("manual")
 //@ComponentScan({"com.brobot.app", "io.github.jspinak.brobot"})
 //@ComponentScan("com.brobot.app.database.mappers")
 class GetWordsFromFileTest {
