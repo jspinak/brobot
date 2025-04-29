@@ -24,7 +24,7 @@ jobs:
       - name: Make Gradle wrapper executable
         run: chmod +x ./gradlew
 
-      # Create a test environment setup that matches your configuration
+      # Create a test environment setup for Brobot's image files
       - name: Setup test environment
         run: |
           # Backup original application.properties
@@ -89,6 +89,11 @@ jobs:
           spring.jpa.properties.hibernate.order_inserts=true
           spring.jpa.properties.hibernate.order_updates=true
           spring.flyway.enabled=false
+          
+          # Brobot library path settings
+          brobot.screenshots.path=/home/runner/work/brobot/brobot/library-test/screenshots
+          brobot.images.path=/home/runner/work/brobot/brobot/library-test/images
+          brobot.history.path=/home/runner/work/brobot/brobot/history
           EOF
           
           # Also set environment variables to match your .env structure
@@ -120,43 +125,32 @@ jobs:
           MESSAGING_LOG_LEVEL=INFO
           SECURITY_LOG_LEVEL=INFO
           SERVICES_LOG_LEVEL=INFO
+          
+          # Brobot paths
+          BROBOT_SCREENSHOTS_PATH=/home/runner/work/brobot/brobot/library-test/screenshots
+          BROBOT_IMAGES_PATH=/home/runner/work/brobot/brobot/library-test/images
+          BROBOT_HISTORY_PATH=/home/runner/work/brobot/brobot/history
           EOF
           
-          # Create screenshots and images directories in the correct location for GitHub Actions
-          mkdir -p screenshots images
+          # Create necessary directory for history
+          mkdir -p history
           
-          # Copy screenshots from library-test to the root directories
-          if [ -d "library-test/screenshots" ]; then
-            echo "Copying files from library-test/screenshots to root screenshots directory"
-            cp -r library-test/screenshots/* screenshots/ || true
-          fi
+          # CRITICAL: Create a symlink from '../screenshots' to the actual location
+          # This allows relative paths like '../screenshots/FloraNext1.png' to work
+          cd library-test
+          ln -sf screenshots ../screenshots
+          ln -sf images ../images
+          cd ..
           
-          if [ -d "library-test/images" ]; then
-            echo "Copying files from library-test/images to root images directory"
-            cp -r library-test/images/* images/ || true
-          fi
+          # Also ensure the directories have proper permissions
+          chmod -R 755 library-test/screenshots library-test/images history
           
-          # Also create screenshots and images directories in the library folder
-          # in case the code expects them there
-          mkdir -p library/screenshots library/images
+          # Let's print where all images are for debugging
+          echo "ABSOLUTE PATHS: All image files in the repository:"
+          find /home/runner/work/brobot/brobot -type f \( -name "*.png" -o -name "*.jpg" -o -name "*.jpeg" -o -name "*.gif" \) | sort
           
-          if [ -d "library-test/screenshots" ]; then
-            echo "Copying files from library-test/screenshots to library/screenshots directory"
-            cp -r library-test/screenshots/* library/screenshots/ || true
-          fi
-          
-          if [ -d "library-test/images" ]; then
-            echo "Copying files from library-test/images to library/images directory"
-            cp -r library-test/images/* library/images/ || true
-          fi
-          
-          # Set up xvfb for headless GUI tests
-          sudo apt-get update
-          sudo apt-get install -y xvfb
-          
-          # Debug directory structure
-          echo "Directory structure - all image files:"
-          find . -type f \( -name "*.png" -o -name "*.jpg" -o -name "*.jpeg" -o -name "*.gif" \) | sort
+          echo "SYMLINKS: Checking if symbolic links were created correctly:"
+          ls -la screenshots images library-test
 
       - name: Build with Gradle
         run: ./gradlew build -x test
@@ -167,15 +161,16 @@ jobs:
           Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
           export DISPLAY=:99
           
-          # Run tests with image path set
+          # Run tests with absolute paths to the images
           ./gradlew test -x :library-test:test --info
         env:
           # Activate CI profile
           SPRING_PROFILES_ACTIVE: "ci"
 
-          # Image paths (for your code to use)
-          SCREENSHOTS_PATH: "/home/runner/work/brobot/brobot/screenshots"
-          IMAGES_PATH: "/home/runner/work/brobot/brobot/images"
+          # Brobot path environment variables - use absolute paths
+          BROBOT_SCREENSHOTS_PATH: "/home/runner/work/brobot/brobot/library-test/screenshots"
+          BROBOT_IMAGES_PATH: "/home/runner/work/brobot/brobot/library-test/images"
+          BROBOT_HISTORY_PATH: "/home/runner/work/brobot/brobot/history"
 
           # Database variables
           DATABASE_URL: "jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH"
@@ -207,23 +202,24 @@ jobs:
           SHOW_SQL: "true"
           FORMAT_SQL: "true"
 
-          # Headless mode with paths
-          _JAVA_OPTIONS: "-Djava.awt.headless=true -Dscreenshots.path=/home/runner/work/brobot/brobot/screenshots -Dimages.path=/home/runner/work/brobot/brobot/images"
+          # Headless mode with Brobot paths as system properties
+          _JAVA_OPTIONS: "-Djava.awt.headless=true -Dio.github.jspinak.brobot.actions.BrobotSettings.screenshotPath=/home/runner/work/brobot/brobot/library-test/screenshots/ -Dio.github.jspinak.brobot.actions.BrobotSettings.screenshotFilename=screen"
 
       - name: Run integration tests
         run: |
           # Use the same display from Xvfb
           export DISPLAY=:99
           
-          # Run integration tests
+          # Run integration tests with absolute paths
           ./gradlew :library-test:test --info
         env:
           # Activate CI profile
           SPRING_PROFILES_ACTIVE: "ci"
 
-          # Image paths (for your code to use)
-          SCREENSHOTS_PATH: "/home/runner/work/brobot/brobot/screenshots"
-          IMAGES_PATH: "/home/runner/work/brobot/brobot/images"
+          # Brobot path environment variables - use absolute paths
+          BROBOT_SCREENSHOTS_PATH: "/home/runner/work/brobot/brobot/library-test/screenshots"
+          BROBOT_IMAGES_PATH: "/home/runner/work/brobot/brobot/library-test/images"
+          BROBOT_HISTORY_PATH: "/home/runner/work/brobot/brobot/history"
 
           # Database variables
           DATABASE_URL: "jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH"
@@ -255,8 +251,8 @@ jobs:
           SHOW_SQL: "true"
           FORMAT_SQL: "true"
 
-          # Headless mode with paths
-          _JAVA_OPTIONS: "-Djava.awt.headless=true -Dscreenshots.path=/home/runner/work/brobot/brobot/screenshots -Dimages.path=/home/runner/work/brobot/brobot/images"
+          # Headless mode with Brobot paths as system properties
+          _JAVA_OPTIONS: "-Djava.awt.headless=true -Dio.github.jspinak.brobot.actions.BrobotSettings.screenshotPath=/home/runner/work/brobot/brobot/library-test/screenshots/ -Dio.github.jspinak.brobot.actions.BrobotSettings.screenshotFilename=screen"
 
       - name: Upload test results
         if: always() && (success() || failure())
