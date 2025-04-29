@@ -122,9 +122,41 @@ jobs:
           SERVICES_LOG_LEVEL=INFO
           EOF
           
+          # Create screenshots and images directories in the correct location for GitHub Actions
+          mkdir -p screenshots images
+          
+          # Copy screenshots from library-test to the root directories
+          if [ -d "library-test/screenshots" ]; then
+            echo "Copying files from library-test/screenshots to root screenshots directory"
+            cp -r library-test/screenshots/* screenshots/ || true
+          fi
+          
+          if [ -d "library-test/images" ]; then
+            echo "Copying files from library-test/images to root images directory"
+            cp -r library-test/images/* images/ || true
+          fi
+          
+          # Also create screenshots and images directories in the library folder
+          # in case the code expects them there
+          mkdir -p library/screenshots library/images
+          
+          if [ -d "library-test/screenshots" ]; then
+            echo "Copying files from library-test/screenshots to library/screenshots directory"
+            cp -r library-test/screenshots/* library/screenshots/ || true
+          fi
+          
+          if [ -d "library-test/images" ]; then
+            echo "Copying files from library-test/images to library/images directory"
+            cp -r library-test/images/* library/images/ || true
+          fi
+          
           # Set up xvfb for headless GUI tests
           sudo apt-get update
           sudo apt-get install -y xvfb
+          
+          # Debug directory structure
+          echo "Directory structure - all image files:"
+          find . -type f \( -name "*.png" -o -name "*.jpg" -o -name "*.jpeg" -o -name "*.gif" \) | sort
 
       - name: Build with Gradle
         run: ./gradlew build -x test
@@ -135,11 +167,15 @@ jobs:
           Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
           export DISPLAY=:99
           
-          # Run tests with direct environment variables
+          # Run tests with image path set
           ./gradlew test -x :library-test:test --info
         env:
           # Activate CI profile
           SPRING_PROFILES_ACTIVE: "ci"
+
+          # Image paths (for your code to use)
+          SCREENSHOTS_PATH: "/home/runner/work/brobot/brobot/screenshots"
+          IMAGES_PATH: "/home/runner/work/brobot/brobot/images"
 
           # Database variables
           DATABASE_URL: "jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH"
@@ -171,8 +207,8 @@ jobs:
           SHOW_SQL: "true"
           FORMAT_SQL: "true"
 
-          # Headless mode
-          _JAVA_OPTIONS: "-Djava.awt.headless=true"
+          # Headless mode with paths
+          _JAVA_OPTIONS: "-Djava.awt.headless=true -Dscreenshots.path=/home/runner/work/brobot/brobot/screenshots -Dimages.path=/home/runner/work/brobot/brobot/images"
 
       - name: Run integration tests
         run: |
@@ -185,6 +221,10 @@ jobs:
           # Activate CI profile
           SPRING_PROFILES_ACTIVE: "ci"
 
+          # Image paths (for your code to use)
+          SCREENSHOTS_PATH: "/home/runner/work/brobot/brobot/screenshots"
+          IMAGES_PATH: "/home/runner/work/brobot/brobot/images"
+
           # Database variables
           DATABASE_URL: "jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH"
           DATABASE_USERNAME: "sa"
@@ -215,8 +255,8 @@ jobs:
           SHOW_SQL: "true"
           FORMAT_SQL: "true"
 
-          # Headless mode
-          _JAVA_OPTIONS: "-Djava.awt.headless=true"
+          # Headless mode with paths
+          _JAVA_OPTIONS: "-Djava.awt.headless=true -Dscreenshots.path=/home/runner/work/brobot/brobot/screenshots -Dimages.path=/home/runner/work/brobot/brobot/images"
 
       - name: Upload test results
         if: always() && (success() || failure())
