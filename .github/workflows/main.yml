@@ -33,9 +33,19 @@ jobs:
 
       - name: Run unit tests
         run: ./gradlew test -x :library-test:test
+        env:
+          # Set headless mode for Java AWT
+          JAVA_OPTS: "-Djava.awt.headless=true"
+          # Spring configuration
+          SPRING_PROFILES_ACTIVE: "test"
 
       - name: Run integration tests
         run: ./gradlew :library-test:test
+        env:
+          # Set headless mode for Java AWT
+          JAVA_OPTS: "-Djava.awt.headless=true"
+          # Spring configuration
+          SPRING_PROFILES_ACTIVE: "test"
 
       - name: Upload test results
         if: always()
