@@ -45,8 +45,7 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter'
     
     // Mockito
-    testImplementation("org.mockito:mockito-junit-jupiter:5.17.0")
-    testImplementation("org.mockito:mockito-core:5.17.0")
+    implementation("org.mockito:mockito-junit-jupiter:5.17.0") // mockito is used in CiTestConfig, which is not a test
     testImplementation 'org.assertj:assertj-core:3.24.2'
 
     implementation 'com.fasterxml.jackson.core:jackson-annotations:2.15.4'
