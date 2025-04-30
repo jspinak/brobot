@@ -1,0 +1,124 @@
+// build.gradle for Brobot Runner module
+// This module provides a JavaFX UI for the Brobot automation framework
+
+plugins {
+    id 'java'
+    id 'application'
+    id 'io.freefair.lombok'
+    id 'io.spring.dependency-management'
+    id 'org.springframework.boot' version '3.2.4'
+    id 'org.openjfx.javafxplugin' version '0.0.13'
+}
+
+description = 'Brobot Runner - JavaFX UI for Brobot Automation'
+version = '0.0.1-SNAPSHOT'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_21
+}
+
+javafx {
+    version = '21'
+    modules = ['javafx.controls', 'javafx.fxml', 'javafx.graphics', 'javafx.base']
+}
+
+dependencies {
+    // Standard project dependencies - vscode handles these better than file references
+    implementation project(':library') 
+    implementation project(':log')
+
+    // Spring Boot dependencies
+    implementation 'org.springframework.boot:spring-boot-starter'
+    implementation 'org.springframework.boot:spring-boot-autoconfigure'
+    
+    // Spring core dependencies
+    implementation 'org.springframework:spring-context'
+    implementation 'org.springframework:spring-beans'
+    implementation 'org.springframework:spring-core'
+
+    // Explicit JavaFX dependencies 
+    // javafx-base is included as a transitive dependency
+    implementation "org.openjfx:javafx-controls:21"
+    implementation "org.openjfx:javafx-fxml:21"
+    implementation "org.openjfx:javafx-graphics:21"
+    
+    // JSON parsing with specific version
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.4'
+
+    // Testing with specific versions
+    testImplementation 'org.testfx:testfx-junit5:4.0.16-alpha'
+    testImplementation 'org.testfx:testfx-core:4.0.16-alpha'
+}
+
+test {
+    enabled = false // Disable the default test task
+}
+
+application {
+    mainClass = 'io.github.jspinak.brobot.runner.BrobotRunnerApplication'
+    mainModule = 'runner'  // when using modules for JavaFX
+}
+
+// Runtime configuration for JavaFX
+tasks.withType(JavaExec).configureEach {
+    jvmArgs += [
+            '--add-modules', 'javafx.controls,javafx.fxml,javafx.graphics,javafx.base',
+            '--add-reads', 'runner=ALL-UNNAMED',
+            '--add-opens', 'java.base/java.lang=ALL-UNNAMED',
+            '--add-opens', 'java.desktop/java.awt=ALL-UNNAMED',
+            '--add-opens', 'java.desktop/java.awt.image=ALL-UNNAMED',
+            '--add-opens', 'java.desktop/javax.imageio=ALL-UNNAMED',
+            '--add-opens', 'javafx.graphics/javafx.scene=ALL-UNNAMED',
+            '--add-opens', 'javafx.graphics/com.sun.javafx.application=ALL-UNNAMED'
+    ]
+}
+
+// For packaging the application
+bootJar {
+    mainClass = 'io.github.jspinak.brobot.runner.BrobotRunnerApplication'
+    manifest {
+        attributes(
+            'Implementation-Title': project.name,
+            'Implementation-Version': project.version,
+            'Main-Class': 'io.github.jspinak.brobot.runner.BrobotRunnerApplication'
+        )
+    }
+}
+
+// For VS Code Java extension to properly recognize JavaFX
+tasks.register('vscodeJavaConfig') {
+    doLast {
+        def vscodeDir = file('.vscode')
+        if (!vscodeDir.exists()) {
+            vscodeDir.mkdirs()
+        }
+        
+        def javaConfig = new File(vscodeDir, 'settings.json')
+        if (!javaConfig.exists()) {
+            javaConfig.text = """{
+    "java.configuration.updateBuildConfiguration": "automatic",
+    "java.project.referencedLibraries": [
+        "lib/**/*.jar"
+    ],
+    "java.configuration.runtimes": [
+        {
+            "name": "JavaSE-21",
+            "path": "${System.getProperty('java.home')}",
+            "default": true
+        }
+    ]
+}"""
+        }
+    }
+}
+
+// Diagnostic task to help with VS Code configuration
+tasks.register('printClasspath') {
+    doLast {
+        println "\n=== RUNTIME CLASSPATH ==="
+        runtimeClasspath.files.each { file ->
+            println file
+        }
+    }
+}
+
