@@ -45,8 +45,8 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter'
     
     // Mockito
-    testImplementation 'org.mockito:mockito-junit-jupiter:5.8.0'
-
+    testImplementation("org.mockito:mockito-junit-jupiter:5.17.0")
+    testImplementation("org.mockito:mockito-core:5.17.0")
     testImplementation 'org.assertj:assertj-core:3.24.2'
 
     implementation 'com.fasterxml.jackson.core:jackson-annotations:2.15.4'
