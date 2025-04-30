@@ -8,6 +8,7 @@ plugins {
     id 'io.spring.dependency-management'
     id 'org.springframework.boot' version '3.2.4'
     id 'org.openjfx.javafxplugin' version '0.0.13'
+    id 'org.beryx.jlink' version '2.26.0'  // Add jlink plugin for jpackage support
 }
 
 description = 'Brobot Runner - JavaFX UI for Brobot Automation'
@@ -24,24 +25,24 @@ javafx {
 
 dependencies {
     // Standard project dependencies - vscode handles these better than file references
-    implementation project(':library') 
+    implementation project(':library')
     implementation project(':log')
 
     // Spring Boot dependencies
     implementation 'org.springframework.boot:spring-boot-starter'
     implementation 'org.springframework.boot:spring-boot-autoconfigure'
-    
+
     // Spring core dependencies
     implementation 'org.springframework:spring-context'
     implementation 'org.springframework:spring-beans'
     implementation 'org.springframework:spring-core'
 
-    // Explicit JavaFX dependencies 
+    // Explicit JavaFX dependencies
     // javafx-base is included as a transitive dependency
     implementation "org.openjfx:javafx-controls:21"
     implementation "org.openjfx:javafx-fxml:21"
     implementation "org.openjfx:javafx-graphics:21"
-    
+
     // JSON parsing with specific version
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.4'
 
@@ -78,41 +79,163 @@ bootJar {
     mainClass = 'io.github.jspinak.brobot.runner.BrobotRunnerApplication'
     manifest {
         attributes(
-            'Implementation-Title': project.name,
-            'Implementation-Version': project.version,
-            'Main-Class': 'io.github.jspinak.brobot.runner.BrobotRunnerApplication'
+                'Implementation-Title': project.name,
+                'Implementation-Version': project.version,
+                'Main-Class': 'io.github.jspinak.brobot.runner.BrobotRunnerApplication'
         )
     }
 }
 
-// For VS Code Java extension to properly recognize JavaFX
-tasks.register('vscodeJavaConfig') {
-    doLast {
-        def vscodeDir = file('.vscode')
-        if (!vscodeDir.exists()) {
-            vscodeDir.mkdirs()
-        }
-        
-        def javaConfig = new File(vscodeDir, 'settings.json')
-        if (!javaConfig.exists()) {
-            javaConfig.text = """{
-    "java.configuration.updateBuildConfiguration": "automatic",
-    "java.project.referencedLibraries": [
-        "lib/**/*.jar"
-    ],
-    "java.configuration.runtimes": [
-        {
-            "name": "JavaSE-21",
-            "path": "${System.getProperty('java.home')}",
-            "default": true
-        }
-    ]
-}"""
+// Configure jlink task for modular JavaFX application
+jlink {
+    options = ['--strip-debug', '--compress', '2', '--no-header-files', '--no-man-pages']
+    launcher {
+        name = 'brobot'
+        mainClass = 'io.github.jspinak.brobot.runner.BrobotRunnerApplication'
+        jvmArgs = [
+                '--add-modules', 'javafx.controls,javafx.fxml,javafx.graphics,javafx.base',
+                '--add-reads', 'runner=ALL-UNNAMED',
+                '--add-opens', 'java.base/java.lang=ALL-UNNAMED',
+                '--add-opens', 'java.desktop/java.awt=ALL-UNNAMED',
+                '--add-opens', 'java.desktop/java.awt.image=ALL-UNNAMED',
+                '--add-opens', 'java.desktop/javax.imageio=ALL-UNNAMED',
+                '--add-opens', 'javafx.graphics/javafx.scene=ALL-UNNAMED',
+                '--add-opens', 'javafx.graphics/com.sun.javafx.application=ALL-UNNAMED'
+        ]
+    }
+
+    // Set jpackage-specific options
+    jpackage {
+        // The jpackage configuration differs between versions of the plugin
+        // Some properties must be set via installer options
+
+        // Set application version (using project version)
+        imageOptions = ['--app-version', project.version]
+
+        installerOptions = []
+
+        // Set platform-specific installer settings
+        if (org.gradle.internal.os.OperatingSystem.current().isWindows()) {
+            installerType = 'exe'
+            installerOptions.addAll([
+                    '--win-per-user-install',
+                    '--win-dir-chooser',
+                    '--win-menu',
+                    '--win-shortcut',
+                    '--name', 'Brobot', // Set app name
+                    '--vendor', 'io.github.jspinak', // Set vendor
+                    '--description', 'Brobot Automation Desktop Application'
+            ])
+        } else if (org.gradle.internal.os.OperatingSystem.current().isMacOsX()) {
+            installerType = 'dmg'
+            installerOptions.addAll([
+                    '--name', 'Brobot', // Set app name
+                    '--vendor', 'io.github.jspinak', // Set vendor
+                    '--mac-package-name', 'Brobot',
+                    '--description', 'Brobot Automation Desktop Application'
+            ])
+        } else {
+            installerType = 'deb'
+            installerOptions.addAll([
+                    '--name', 'Brobot', // Set app name
+                    '--vendor', 'io.github.jspinak', // Set vendor
+                    '--linux-shortcut',
+                    '--linux-package-name', 'brobot',
+                    '--linux-app-category', 'Development',
+                    '--description', 'Brobot Automation Desktop Application'
+            ])
         }
     }
 }
 
-// Diagnostic task to help with VS Code configuration
+// Create a direct jpackage task (with a DIFFERENT name to avoid conflicts)
+task directJpackage(type: Exec) {
+    group = 'packaging'
+    description = 'Package the application using jpackage command line tool directly'
+    dependsOn bootJar
+
+    def jpackageHome = System.getProperty('java.home')
+    def jpackageExe = "${jpackageHome}/bin/jpackage"
+    if (org.gradle.internal.os.OperatingSystem.current().isWindows()) {
+        jpackageExe += '.exe'
+    }
+
+    workingDir = file("${buildDir}")
+
+    doFirst {
+        // Create a directory for resources and prepare files
+        def resourcesDir = file("${buildDir}/jpackage-resources")
+        resourcesDir.mkdirs()
+
+        // Create the command line based on the OS
+        commandLine = [
+                jpackageExe,
+                '--type', 'app-image',
+                '--input', "${buildDir}/libs",
+                '--dest', "${buildDir}/jpackage",
+                '--name', 'Brobot',
+                '--main-jar', bootJar.archiveFileName.get(),
+                '--main-class', 'io.github.jspinak.brobot.runner.BrobotRunnerApplication',
+                '--app-version', project.version,
+                '--vendor', 'io.github.jspinak'
+        ]
+
+        if (org.gradle.internal.os.OperatingSystem.current().isWindows()) {
+            commandLine += ['--win-menu', '--win-shortcut']
+        } else if (org.gradle.internal.os.OperatingSystem.current().isMacOsX()) {
+            commandLine += ['--mac-package-name', 'Brobot']
+        } else {
+            commandLine += ['--linux-shortcut']
+        }
+
+        println "Running jpackage command: ${commandLine.join(' ')}"
+    }
+
+    // Make sure that bootJar is executed before this task
+    mustRunAfter bootJar
+}
+
+// Task to create distribution zip (fallback option)
+tasks.register('createDistributionZip', Zip) {
+    dependsOn bootJar
+
+    archiveFileName = "brobot-runner-${project.version}.zip"
+    destinationDirectory = file("${buildDir}/distributions")
+
+    from("${buildDir}/libs") {
+        include "*.jar"
+    }
+
+    from("${projectDir}/src/main/resources") {
+        include "application.properties"
+        into "config"
+    }
+
+    // Check if LICENSE.txt exists, if not try LICENSE
+    def licenseFile = rootProject.file("LICENSE.txt")
+    if (!licenseFile.exists()) {
+        licenseFile = rootProject.file("LICENSE")
+    }
+    if (licenseFile.exists()) {
+        from(licenseFile) {
+            into "."
+        }
+    }
+
+    // Add README.md if it exists
+    def readmeFile = rootProject.file("README.md")
+    if (readmeFile.exists()) {
+        from(readmeFile) {
+            into "."
+        }
+    }
+
+    doLast {
+        println "Distribution zip created at: ${archiveFile.get().asFile.absolutePath}"
+    }
+}
+
+// Diagnostic tasks
 tasks.register('printClasspath') {
     doLast {
         println "\n=== RUNTIME CLASSPATH ==="
@@ -122,3 +245,31 @@ tasks.register('printClasspath') {
     }
 }
 
+tasks.register('printJavaHome') {
+    doLast {
+        println "\n=== JAVA HOME ==="
+        println System.getProperty('java.home')
+        println "\n=== JPackage Executable ==="
+        def jpackage = new File("${System.getProperty('java.home')}/bin/jpackage")
+        if (org.gradle.internal.os.OperatingSystem.current().isWindows()) {
+            jpackage = new File("${System.getProperty('java.home')}/bin/jpackage.exe")
+        }
+        println "Path: ${jpackage.absolutePath}"
+        println "Exists: ${jpackage.exists()}"
+        println "Executable: ${jpackage.canExecute()}"
+    }
+}
+
+// Print available tasks to help with debugging
+tasks.register('listJpackageTasks') {
+    doLast {
+        println "\n=== Available Packaging Tasks ==="
+        tasks.findAll { task ->
+            task.name.toLowerCase().contains('pack') ||
+                    task.name.toLowerCase().contains('jlink') ||
+                    task.name.toLowerCase().contains('jar')
+        }.each { task ->
+            println "${task.name}: ${task.group ?: 'no group'} - ${task.description ?: 'no description'}"
+        }
+    }
+}
