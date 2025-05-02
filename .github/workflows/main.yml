@@ -69,6 +69,9 @@ jobs:
 
       - name: Build with Gradle
         run: ./gradlew build -x test
+        env:
+          SPRING_PROFILES_ACTIVE: "ci"
+          _JAVA_OPTIONS: "-Djava.awt.headless=true"
 
       - name: Run tests with path diagnostics
         run: |
@@ -128,6 +131,7 @@ jobs:
       - name: Build runner module
         run: ./gradlew :runner:build -x test
         env:
+          SPRING_PROFILES_ACTIVE: "ci"
           _JAVA_OPTIONS: "-Djava.awt.headless=true"
 
       - name: List available packaging tasks
