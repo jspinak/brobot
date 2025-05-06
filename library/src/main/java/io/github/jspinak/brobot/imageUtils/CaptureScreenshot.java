@@ -1,6 +1,5 @@
 package io.github.jspinak.brobot.imageUtils;
 
-import io.github.jspinak.brobot.actions.methods.basicactions.captureAndReplay.recorder.SaveToFile;
 import org.sikuli.script.Image;
 import org.sikuli.script.Mouse;
 import org.sikuli.script.Screen;
@@ -19,7 +18,7 @@ import java.io.File;
 @Component
 public class CaptureScreenshot {
 
-    private SaveToFile saveToFile;
+    private final SaveToFile saveToFile;
 
     public CaptureScreenshot(SaveToFile saveToFile) {
         this.saveToFile = saveToFile;
