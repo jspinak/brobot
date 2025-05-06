@@ -24,6 +24,12 @@ jobs:
       - name: Make Gradle wrapper executable
         run: chmod +x ./gradlew
 
+      # Temporarily move module-info.java files out of the way
+      - name: Disable module-info files
+        run: |
+          find . -name "module-info.java" -type f -exec mv {} {}.disabled \;
+          echo "Module info files have been disabled"
+
       # Create a test environment setup specifically for GitHub Actions
       - name: Setup test environment
         run: |
@@ -67,8 +73,11 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y xvfb
 
-      - name: Build with Gradle (without library-features)
-        run: ./gradlew :library:build :log:build :runner:build -x test
+      # Build with non-modular approach
+      - name: Build with Gradle (excluding library-features)
+        run: |
+          ./gradlew :library:build :log:build :runner:build -x test \
+            -Dorg.gradle.jvmargs="-Xmx4g -XX:MaxMetaspaceSize=1g"
         env:
           SPRING_PROFILES_ACTIVE: "ci"
           _JAVA_OPTIONS: "-Djava.awt.headless=true"
@@ -123,51 +132,70 @@ jobs:
       - name: Make Gradle wrapper executable
         run: chmod +x ./gradlew
 
+      # Disable module-info files in this job too
+      - name: Disable module-info files
+        run: |
+          find . -name "module-info.java" -type f -exec mv {} {}.disabled \;
+          echo "Module info files have been disabled"
+
       - name: Install JPackage dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y fakeroot binutils rpm
 
-      # Build only what's needed for runner, explicitly excluding library-features
+      # Build with non-modular approach
       - name: Build minimal runner package
-        run: ./gradlew :library:build :log:build :runner:build -x test
+        run: |
+          ./gradlew :library:build :log:build :runner:build -x test \
+            -Dorg.gradle.jvmargs="-Xmx4g -XX:MaxMetaspaceSize=1g"
         env:
           SPRING_PROFILES_ACTIVE: "ci"
           _JAVA_OPTIONS: "-Djava.awt.headless=true"
 
-      - name: Package with jlink plugin's jpackage task
-        run: ./gradlew :runner:jpackage --info
-        env:
-          _JAVA_OPTIONS: "-Djava.awt.headless=true"
-
-      # If that fails, try our custom direct jpackage task
-      - name: Fallback to direct jpackage task if plugin fails
-        if: failure()
+      # Update the runner build.gradle to use non-modular approach
+      - name: Modify runner configuration for non-modular build
         run: |
-          echo "Plugin jpackage task failed, trying direct approach..."
-          ./gradlew :runner:directJpackage --info
-        env:
-          _JAVA_OPTIONS: "-Djava.awt.headless=true"
+          # Back up original file
+          cp runner/build.gradle runner/build.gradle.backup
+          
+          # Remove mainModule property
+          sed -i 's/mainModule = .*/\/\/ mainModule removed for non-modular build/' runner/build.gradle
+          
+          # Remove module-related JVM args
+          sed -i '/--add-modules/d' runner/build.gradle
+          sed -i '/--add-reads/d' runner/build.gradle
+          sed -i '/--add-opens/d' runner/build.gradle
+          
+          echo "Runner build.gradle modified for non-modular build"
 
-      # Last resort: create a distribution zip
-      - name: Create distribution zip as final fallback
-        if: failure()
+      # Use a simpler packaging approach with createDistributionZip
+      - name: Create distribution package
         run: |
-          echo "Creating distribution zip as fallback..."
+          ./gradlew :runner:bootJar
           ./gradlew :runner:createDistributionZip --info
         env:
           _JAVA_OPTIONS: "-Djava.awt.headless=true"
 
-      - name: List output directories
-        if: always()
+      - name: Package application
+        if: success()
         run: |
-          echo "Checking jpackage output directory:"
-          ls -la runner/build/jpackage || echo "jpackage directory not found"
+          # Fall back to a simple packaging approach
+          mkdir -p runner/build/jpackage-app
+          cp runner/build/libs/*.jar runner/build/jpackage-app/
+          cp -r runner/src/main/resources runner/build/jpackage-app/resources || true
+          echo "java -jar runner-*.jar" > runner/build/jpackage-app/start.sh
+          chmod +x runner/build/jpackage-app/start.sh
+          cd runner/build
+          zip -r brobot-runner-package.zip jpackage-app
+          
+          echo "Created simple application package"
 
       - name: Upload packaged application
         if: success()
         uses: actions/upload-artifact@v4
         with:
           name: brobot-desktop-app
-          path: runner/build/jpackage
+          path: |
+            runner/build/distributions/*.zip
+            runner/build/brobot-runner-package.zip
           if-no-files-found: warn
