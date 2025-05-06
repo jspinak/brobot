@@ -6,7 +6,10 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
-@ComponentScan(basePackages = {"io.github.jspinak.brobot", "io.github.jspinak.brobot.app"})
+@ComponentScan(basePackages = {
+		"io.github.jspinak.brobot",
+		"io.github.jspinak.brobot.library-features",
+		"io.github.jspinak.brobot.app"})
 @EnableScheduling
 public class BrobotApplication {
 

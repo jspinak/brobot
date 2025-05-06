@@ -1,21 +1,29 @@
 module runner {
+
     // Spring modules
     requires spring.boot;
     requires spring.boot.autoconfigure;
     requires spring.context;
+    requires spring.beans;
+    requires spring.core;
     
     // JavaFX modules
     requires javafx.controls;
     requires javafx.fxml;
     requires transitive javafx.graphics;
+    requires javafx.base;
+
+    // Other dependencies
+    requires com.fasterxml.jackson.databind;
     
     // Open packages to Spring for reflection
-    opens io.github.jspinak.brobot.runner to 
-        spring.core, 
-        spring.beans, 
-        spring.context, 
+    opens io.github.jspinak.brobot.runner to
+        spring.core,
+        spring.beans,
+        spring.context,
         spring.boot.autoconfigure,
-        javafx.graphics;
+        javafx.graphics,
+        javafx.fxml;
     
     // General export
     exports io.github.jspinak.brobot.runner;

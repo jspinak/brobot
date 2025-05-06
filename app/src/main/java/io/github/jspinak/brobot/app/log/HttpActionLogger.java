@@ -5,13 +5,13 @@ import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import io.github.jspinak.brobot.datatypes.state.state.State;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
-import io.github.jspinak.brobot.imageUtils.VideoRecorderService;
 import io.github.jspinak.brobot.log.entities.LogEntry;
 import io.github.jspinak.brobot.log.entities.LogType;
 import io.github.jspinak.brobot.log.entities.PerformanceMetrics;
 import io.github.jspinak.brobot.log.service.LogEntryService;
 import io.github.jspinak.brobot.logging.ActionLogger;
 import io.github.jspinak.brobot.logging.TestSessionLogger;
+import io.github.jspinak.brobot.libraryfeatures.recording.VideoRecorderService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -35,7 +35,8 @@ public class HttpActionLogger implements ActionLogger, TestSessionLogger {
     private final LogEntryStateImageMapper logEntryStateImageMapper;
 
     public HttpActionLogger(LogEntryService logEntryService,
-                            VideoRecorderService videoRecorderService, LogEntryStateImageMapper logEntryStateImageMapper) {
+                            VideoRecorderService videoRecorderService,
+                            LogEntryStateImageMapper logEntryStateImageMapper) {
         this.logEntryService = logEntryService;
         this.videoRecorderService = videoRecorderService;
         this.logEntryStateImageMapper = logEntryStateImageMapper;

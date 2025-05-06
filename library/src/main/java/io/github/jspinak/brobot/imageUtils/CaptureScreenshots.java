@@ -1,7 +1,6 @@
 package io.github.jspinak.brobot.imageUtils;
 
 import io.github.jspinak.brobot.actions.BrobotSettings;
-import io.github.jspinak.brobot.actions.methods.basicactions.captureAndReplay.recorder.SaveToFile;
 import io.github.jspinak.brobot.actions.methods.time.Time;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import org.springframework.stereotype.Component;

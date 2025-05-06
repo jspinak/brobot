@@ -2,7 +2,6 @@ package io.github.jspinak.brobot.app.services;
 
 import io.github.jspinak.brobot.actions.actionExecution.Action;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
-import io.github.jspinak.brobot.actions.methods.basicactions.captureAndReplay.recorder.Recorder;
 import io.github.jspinak.brobot.app.database.databaseMappers.StateEntityMapper;
 import io.github.jspinak.brobot.app.database.repositories.StateRepo;
 import io.github.jspinak.brobot.app.models.BuildModel;
@@ -13,6 +12,7 @@ import io.github.jspinak.brobot.log.entities.LogEntry;
 import io.github.jspinak.brobot.log.service.LogEntryService;
 import io.github.jspinak.brobot.logging.AutomationSession;
 import io.github.jspinak.brobot.testingAUTs.StateTraversalService;
+import io.github.jspinak.brobot.libraryfeatures.captureAndReplay.recorder.Recorder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;

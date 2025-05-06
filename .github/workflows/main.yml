@@ -67,8 +67,8 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y xvfb
 
-      - name: Build with Gradle
-        run: ./gradlew build -x test
+      - name: Build with Gradle (without library-features)
+        run: ./gradlew :library:build :log:build :runner:build -x test
         env:
           SPRING_PROFILES_ACTIVE: "ci"
           _JAVA_OPTIONS: "-Djava.awt.headless=true"
@@ -128,23 +128,13 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y fakeroot binutils rpm
 
-      - name: Build runner module
-        run: ./gradlew :runner:build -x test
+      # Build only what's needed for runner, explicitly excluding library-features
+      - name: Build minimal runner package
+        run: ./gradlew :library:build :log:build :runner:build -x test
         env:
           SPRING_PROFILES_ACTIVE: "ci"
           _JAVA_OPTIONS: "-Djava.awt.headless=true"
 
-      - name: List available packaging tasks
-        run: ./gradlew :runner:listJpackageTasks --info
-        env:
-          _JAVA_OPTIONS: "-Djava.awt.headless=true"
-
-      - name: Verify Java and JPackage installation
-        run: ./gradlew :runner:printJavaHome --info
-        env:
-          _JAVA_OPTIONS: "-Djava.awt.headless=true"
-
-      # Try the plugin's jpackage task first
       - name: Package with jlink plugin's jpackage task
         run: ./gradlew :runner:jpackage --info
         env:
@@ -173,3 +163,11 @@ jobs:
         run: |
           echo "Checking jpackage output directory:"
           ls -la runner/build/jpackage || echo "jpackage directory not found"
+
+      - name: Upload packaged application
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: brobot-desktop-app
+          path: runner/build/jpackage
+          if-no-files-found: warn
