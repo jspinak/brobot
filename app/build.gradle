@@ -22,7 +22,8 @@ configurations {
 }
 
 dependencies {
-    implementation project(':library') 
+    implementation project(':library')
+    implementation project(':library-features')
     implementation project(':log')
     
     // Spring Boot
