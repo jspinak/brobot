@@ -13,6 +13,7 @@ module log {
     requires spring.core;
     requires spring.data.commons;
     requires spring.data.jpa;
+    requires spring.boot.autoconfigure;
     
     // Export packages that need to be accessible to other modules
     exports io.github.jspinak.brobot.log.entities;

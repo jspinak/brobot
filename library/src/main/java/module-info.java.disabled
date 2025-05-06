@@ -12,9 +12,10 @@ module library {
     requires spring.context;
     requires spring.beans;
     
-    // ByteDeco's OpenCV and JavaCV - these have proper module names
-    requires org.bytedeco.opencv;
+    // Core dependencies
+    requires sikulixapi;
     requires org.bytedeco.javacv;
+    requires commons.lang3;
     
     // Logging
     requires org.slf4j;

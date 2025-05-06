@@ -1,12 +1,12 @@
 package io.github.jspinak.brobot.app.web.restControllers;
 
-import io.github.jspinak.brobot.actions.methods.basicactions.captureAndReplay.recorder.Recorder;
 import io.github.jspinak.brobot.app.database.entities.ProjectEntity;
 import io.github.jspinak.brobot.app.database.repositories.ProjectRepository;
 import io.github.jspinak.brobot.app.models.BuildModel;
 import io.github.jspinak.brobot.app.services.AutomationService;
 import io.github.jspinak.brobot.app.web.requests.CaptureScreenshotsRequest;
 import io.github.jspinak.brobot.app.web.requests.ProjectRequest;
+import io.github.jspinak.brobot.libraryfeatures.captureAndReplay.recorder.Recorder;
 import lombok.Data;
 import org.sikuli.script.ImagePath;
 import org.slf4j.Logger;

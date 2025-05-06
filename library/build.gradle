@@ -32,10 +32,9 @@ dependencies {
         exclude group: 'org.opencv', module: 'opencv'
         exclude group: 'org.openpnp', module: 'opencv' 
     }
-    implementation 'com.github.stephenc.monte:monte-screen-recorder:0.7.7.0'
+
     implementation 'org.bytedeco:javacv-platform:1.5.10'
     implementation 'org.apache.commons:commons-lang3:3.0'
-    implementation 'com.github.kwhat:jnativehook:2.2.2'
     
     // Added SLF4J explicitly
     implementation 'org.slf4j:slf4j-api:2.0.9'
@@ -45,11 +44,10 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter'
     
     // Mockito
-    implementation("org.mockito:mockito-junit-jupiter:5.17.0") // mockito is used in CiTestConfig, which is not a test
     testImplementation 'org.assertj:assertj-core:3.24.2'
 
-    implementation 'com.fasterxml.jackson.core:jackson-annotations:2.15.4'
-    implementation 'jakarta.persistence:jakarta.persistence-api:3.1.0'
+    //implementation 'com.fasterxml.jackson.core:jackson-annotations:2.15.4'
+    //implementation 'jakarta.persistence:jakarta.persistence-api:3.1.0'
 }
 
 test {
