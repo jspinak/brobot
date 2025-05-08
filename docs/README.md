@@ -13,11 +13,20 @@ Brobot is [MIT licensed](./LICENSE).
 
 The Brobot documentation (e.g., `.md` files in the `/docs` folder) is [Creative Commons licensed](./LICENSE-docs).
 
-# Notes on deploying the React app
+# The Desktop Runner
 
-The React app allows you to build a state structure and basic transitions visually. It requires a local
-database, and the .env.example file provides the necessary environment variables. This file should be
-filled out with your own database information and renamed to .env before running the app.
+The runner will allow for importing model based automation applications from configuration files.
+After importing a configuration, the runner will have a state structure and automation controls that 
+appear in its GUI.
+
+It is currently in development. The runner module has a README with more details.
+
+# The Configuration Website
+
+The website will allow you to create state structures and automation instructions and controls visually. 
+It will generate a configuration file that can be imported into the desktop runner. 
+
+Work on the website will begin once the runner is in a stable state.
 
 # Brobot Test Organization
 
