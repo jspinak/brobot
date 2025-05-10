@@ -1,0 +1,701 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Brobot Runner Project Metadata",
+  "description": "Schema for Brobot Runner project configuration files",
+  "type": "object",
+  "required": ["id", "name", "states", "stateTransitions"],
+  "properties": {
+    "id": {
+      "type": "integer",
+      "description": "Unique identifier for the project"
+    },
+    "name": {
+      "type": "string",
+      "description": "Name of the project"
+    },
+    "description": {
+      "type": "string",
+      "description": "Optional description of the project"
+    },
+    "version": {
+      "type": "string",
+      "description": "Version of the project configuration",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "created": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the project was created"
+    },
+    "updated": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the project was last updated"
+    },
+    "states": {
+      "type": "array",
+      "description": "States defined in the project",
+      "items": {
+        "$ref": "#/definitions/state"
+      }
+    },
+    "stateTransitions": {
+      "type": "array",
+      "description": "Transitions between states",
+      "items": {
+        "$ref": "#/definitions/stateTransition"
+      }
+    },
+    "automation": {
+      "type": "object",
+      "description": "Automation configuration",
+      "properties": {
+        "buttons": {
+          "type": "array",
+          "description": "UI buttons for the desktop runner that call automation functions",
+          "items": {
+            "$ref": "#/definitions/button"
+          }
+        }
+      }
+    },
+    "configuration": {
+      "$ref": "#/definitions/configuration"
+    }
+  },
+  "definitions": {
+    "state": {
+      "type": "object",
+      "required": ["id", "name"],
+      "properties": {
+        "id": {
+          "type": "integer",
+          "description": "Unique identifier for the state"
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the state"
+        },
+        "stateText": {
+          "type": "array",
+          "description": "Text associated with this state",
+          "items": {
+            "type": "string"
+          }
+        },
+        "blocking": {
+          "type": "boolean",
+          "description": "If true, this state needs to be acted on before accessing other states",
+          "default": false
+        },
+        "canHide": {
+          "type": "array",
+          "description": "States that this state can hide when it becomes active",
+          "items": {
+            "type": "integer"
+          }
+        },
+        "pathScore": {
+          "type": "integer",
+          "description": "Larger path scores discourage taking a path with this state",
+          "default": 1
+        },
+        "baseProbabilityExists": {
+          "type": "integer",
+          "description": "Base probability that the state exists",
+          "default": 100,
+          "minimum": 0,
+          "maximum": 100
+        },
+        "usableArea": {
+          "$ref": "#/definitions/region"
+        },
+        "stateImages": {
+          "type": "array",
+          "description": "Images associated with this state",
+          "items": {
+            "$ref": "#/definitions/stateImage"
+          }
+        },
+        "stateStrings": {
+          "type": "array",
+          "description": "Strings associated with this state",
+          "items": {
+            "$ref": "#/definitions/stateString"
+          }
+        },
+        "stateRegions": {
+          "type": "array",
+          "description": "Regions associated with this state",
+          "items": {
+            "$ref": "#/definitions/stateRegion"
+          }
+        },
+        "stateLocations": {
+          "type": "array",
+          "description": "Locations associated with this state",
+          "items": {
+            "$ref": "#/definitions/stateLocation"
+          }
+        }
+      }
+    },
+    "stateImage": {
+      "type": "object",
+      "required": ["name", "patterns"],
+      "properties": {
+        "id": {
+          "type": "integer",
+          "description": "Unique identifier for the state image"
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the state image"
+        },
+        "shared": {
+          "type": "boolean",
+          "description": "If true, this image is also found in other states",
+          "default": false
+        },
+        "dynamic": {
+          "type": "boolean",
+          "description": "If true, this image cannot be found using pattern matching",
+          "default": false
+        },
+        "patterns": {
+          "type": "array",
+          "description": "Patterns associated with this state image",
+          "items": {
+            "$ref": "#/definitions/pattern"
+          }
+        }
+      }
+    },
+    "pattern": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Name of the pattern"
+        },
+        "imgPath": {
+          "type": "string",
+          "description": "Path to the image file"
+        },
+        "fixed": {
+          "type": "boolean",
+          "description": "If true, this image should always appear in the same location",
+          "default": false
+        },
+        "dynamic": {
+          "type": "boolean",
+          "description": "If true, this pattern cannot be found using pattern matching",
+          "default": false
+        },
+        "searchRegions": {
+          "type": "array",
+          "description": "Regions to search for this pattern",
+          "items": {
+            "$ref": "#/definitions/region"
+          }
+        },
+        "fixedRegion": {
+          "$ref": "#/definitions/region"
+        },
+        "targetPosition": {
+          "$ref": "#/definitions/position"
+        },
+        "targetOffset": {
+          "$ref": "#/definitions/location"
+        },
+        "anchors": {
+          "type": "array",
+          "description": "Anchors for defining regions using this pattern",
+          "items": {
+            "$ref": "#/definitions/anchor"
+          }
+        }
+      }
+    },
+    "stateString": {
+      "type": "object",
+      "required": ["string"],
+      "properties": {
+        "id": {
+          "type": "integer",
+          "description": "Unique identifier for the state string"
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the state string"
+        },
+        "string": {
+          "type": "string",
+          "description": "The string content"
+        },
+        "searchRegion": {
+          "$ref": "#/definitions/region"
+        }
+      }
+    },
+    "stateRegion": {
+      "type": "object",
+      "required": ["searchRegion"],
+      "properties": {
+        "id": {
+          "type": "integer",
+          "description": "Unique identifier for the state region"
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the state region"
+        },
+        "searchRegion": {
+          "$ref": "#/definitions/region"
+        },
+        "staysVisibleAfterClicked": {
+          "type": "integer",
+          "description": "How long the region stays visible after being clicked",
+          "default": 100
+        },
+        "probabilityExists": {
+          "type": "integer",
+          "description": "Probability that something can be acted on in this region",
+          "default": 100,
+          "minimum": 0,
+          "maximum": 100
+        },
+        "position": {
+          "$ref": "#/definitions/position"
+        },
+        "mockText": {
+          "type": "string",
+          "description": "Text to use for mocking"
+        },
+        "anchors": {
+          "type": "array",
+          "description": "Anchors for defining regions using this region",
+          "items": {
+            "$ref": "#/definitions/anchor"
+          }
+        }
+      }
+    },
+    "stateLocation": {
+      "type": "object",
+      "required": ["location"],
+      "properties": {
+        "id": {
+          "type": "integer",
+          "description": "Unique identifier for the state location"
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the state location"
+        },
+        "location": {
+          "$ref": "#/definitions/location"
+        },
+        "staysVisibleAfterClicked": {
+          "type": "integer",
+          "description": "How long the location stays visible after being clicked",
+          "default": 100
+        },
+        "probabilityExists": {
+          "type": "integer",
+          "description": "Probability that something can be acted on at this location",
+          "default": 100,
+          "minimum": 0,
+          "maximum": 100
+        },
+        "position": {
+          "$ref": "#/definitions/position"
+        },
+        "anchors": {
+          "type": "array",
+          "description": "Anchors for defining regions using this location",
+          "items": {
+            "$ref": "#/definitions/anchor"
+          }
+        }
+      }
+    },
+    "location": {
+      "type": "object",
+      "properties": {
+        "x": {
+          "type": "integer",
+          "description": "X coordinate"
+        },
+        "y": {
+          "type": "integer",
+          "description": "Y coordinate"
+        },
+        "region": {
+          "$ref": "#/definitions/region"
+        },
+        "position": {
+          "$ref": "#/definitions/position"
+        },
+        "anchor": {
+          "type": "string",
+          "enum": ["TOPLEFT", "TOPMIDDLE", "TOPRIGHT", "MIDDLELEFT", "MIDDLEMIDDLE", "MIDDLERIGHT", "BOTTOMLEFT", "BOTTOMMIDDLE", "BOTTOMRIGHT"],
+          "description": "Anchor position"
+        }
+      }
+    },
+    "region": {
+      "type": "object",
+      "required": ["x", "y", "w", "h"],
+      "properties": {
+        "x": {
+          "type": "integer",
+          "description": "X coordinate"
+        },
+        "y": {
+          "type": "integer",
+          "description": "Y coordinate"
+        },
+        "w": {
+          "type": "integer",
+          "description": "Width"
+        },
+        "h": {
+          "type": "integer",
+          "description": "Height"
+        }
+      }
+    },
+    "position": {
+      "type": "object",
+      "properties": {
+        "percentW": {
+          "type": "number",
+          "description": "Percentage of width (0.0 to 1.0)",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "percentH": {
+          "type": "number",
+          "description": "Percentage of height (0.0 to 1.0)",
+          "minimum": 0,
+          "maximum": 1
+        }
+      }
+    },
+    "anchor": {
+      "type": "object",
+      "required": ["anchorInNewDefinedRegion", "positionInMatch"],
+      "properties": {
+        "anchorInNewDefinedRegion": {
+          "type": "string",
+          "enum": ["TOPLEFT", "TOPMIDDLE", "TOPRIGHT", "MIDDLELEFT", "MIDDLEMIDDLE", "MIDDLERIGHT", "BOTTOMLEFT", "BOTTOMMIDDLE", "BOTTOMRIGHT"],
+          "description": "The border of the region to define"
+        },
+        "positionInMatch": {
+          "$ref": "#/definitions/position"
+        }
+      }
+    },
+    "stateTransition": {
+      "type": "object",
+      "required": ["sourceStateId", "actionDefinition"],
+      "properties": {
+        "id": {
+          "type": "integer",
+          "description": "Unique identifier for the transition"
+        },
+        "sourceStateId": {
+          "type": "integer",
+          "description": "The state from which the transition starts"
+        },
+        "stateImageId": {
+          "type": "integer",
+          "description": "Optional state image associated with the transition"
+        },
+        "actionDefinition": {
+          "$ref": "#/definitions/actionDefinition"
+        },
+        "staysVisibleAfterTransition": {
+          "type": "string",
+          "enum": ["NONE", "TRUE", "FALSE"],
+          "description": "Whether the source state stays visible after the transition",
+          "default": "NONE"
+        },
+        "statesToEnter": {
+          "type": "array",
+          "description": "States to enter after the transition",
+          "items": {
+            "type": "integer"
+          }
+        },
+        "statesToExit": {
+          "type": "array",
+          "description": "States to exit after the transition",
+          "items": {
+            "type": "integer"
+          }
+        },
+        "score": {
+          "type": "integer",
+          "description": "Score for path planning",
+          "default": 0
+        }
+      }
+    },
+    "actionDefinition": {
+      "type": "object",
+      "required": ["steps"],
+      "properties": {
+        "steps": {
+          "type": "array",
+          "description": "Steps to perform in the action",
+          "items": {
+            "$ref": "#/definitions/actionStep"
+          }
+        }
+      }
+    },
+    "actionStep": {
+      "type": "object",
+      "required": ["actionOptions", "objectCollection"],
+      "properties": {
+        "actionOptions": {
+          "$ref": "#/definitions/actionOptions"
+        },
+        "objectCollection": {
+          "$ref": "#/definitions/objectCollection"
+        }
+      }
+    },
+    "actionOptions": {
+      "type": "object",
+      "properties": {
+        "action": {
+          "type": "string",
+          "enum": ["FIND", "CLICK", "VANISH", "DEFINE", "WAITVANISH", "MOVE", "DRAG", "TYPE", "MOUSE_DOWN", "MOUSE_UP", "GET_TEXT", "HIGHLIGHT", "SCROLL", "COUNT", "CLASSIFY", "ILLUSTRATE"],
+          "description": "The action to perform"
+        },
+        "clickUntil": {
+          "type": "string",
+          "enum": ["OBJECTS_APPEAR", "OBJECTS_VANISH", "FIND_ALL", "TIME_ELAPSED", "NONE"],
+          "description": "When to stop clicking"
+        },
+        "find": {
+          "type": "string",
+          "enum": ["FIRST", "BEST", "ALL", "EACH", "ALL_SORTED", "EACH_WORD", "ALL_WORDS", "UNIVERSAL"],
+          "description": "How to find objects"
+        },
+        "doOnEach": {
+          "type": "string",
+          "enum": ["FIRST", "BEST", "ALL", "EACH"],
+          "description": "What to do on each find"
+        },
+        "similarity": {
+          "type": "number",
+          "description": "Match similarity threshold",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "clickType": {
+          "type": "string",
+          "enum": ["LEFT", "RIGHT", "MIDDLE", "DOUBLE_LEFT", "DOUBLE_RIGHT", "TRIPLE_LEFT", "TRIPLE_RIGHT"],
+          "description": "Type of click to perform"
+        }
+      }
+    },
+    "objectCollection": {
+      "type": "object",
+      "properties": {
+        "stateImages": {
+          "type": "array",
+          "description": "State images to use",
+          "items": {
+            "type": "integer"
+          }
+        },
+        "stateStrings": {
+          "type": "array",
+          "description": "State strings to use",
+          "items": {
+            "type": "integer"
+          }
+        },
+        "stateRegions": {
+          "type": "array",
+          "description": "State regions to use",
+          "items": {
+            "type": "integer"
+          }
+        },
+        "stateLocations": {
+          "type": "array",
+          "description": "State locations to use",
+          "items": {
+            "type": "integer"
+          }
+        }
+      }
+    },
+    "button": {
+      "type": "object",
+      "required": ["id", "label", "functionName"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the button"
+        },
+        "label": {
+          "type": "string",
+          "description": "Button text to display in the UI"
+        },
+        "tooltip": {
+          "type": "string",
+          "description": "Tooltip text to show when hovering over the button"
+        },
+        "functionName": {
+          "type": "string",
+          "description": "Name of the automation function to call when clicked"
+        },
+        "parameters": {
+          "type": "object",
+          "description": "Parameters to pass to the function when called",
+          "additionalProperties": true
+        },
+        "category": {
+          "type": "string",
+          "description": "Category to group this button with others in the UI"
+        },
+        "icon": {
+          "type": "string",
+          "description": "Optional icon name to display on the button"
+        },
+        "position": {
+          "type": "object",
+          "description": "Optional position information for the button in the UI",
+          "properties": {
+            "row": {
+              "type": "integer",
+              "description": "Row position in a grid layout"
+            },
+            "column": {
+              "type": "integer",
+              "description": "Column position in a grid layout"
+            },
+            "order": {
+              "type": "integer",
+              "description": "Display order among buttons"
+            }
+          }
+        },
+        "styling": {
+          "type": "object",
+          "description": "Optional styling information for the button",
+          "properties": {
+            "backgroundColor": {
+              "type": "string",
+              "description": "Background color of the button (CSS color name or hex)"
+            },
+            "textColor": {
+              "type": "string",
+              "description": "Text color of the button (CSS color name or hex)"
+            },
+            "size": {
+              "type": "string",
+              "enum": ["small", "medium", "large"],
+              "description": "Size of the button"
+            },
+            "customClass": {
+              "type": "string",
+              "description": "Custom CSS class to apply to the button"
+            }
+          }
+        },
+        "confirmationRequired": {
+          "type": "boolean",
+          "description": "Whether to require confirmation before executing the function",
+          "default": false
+        },
+        "confirmationMessage": {
+          "type": "string",
+          "description": "Message to display in the confirmation dialog"
+        }
+      }
+    },
+    "configuration": {
+      "type": "object",
+      "properties": {
+        "minSimilarity": {
+          "type": "number",
+          "description": "Default minimum similarity for pattern matching",
+          "minimum": 0,
+          "maximum": 1,
+          "default": 0.7
+        },
+        "moveMouseDelay": {
+          "type": "number",
+          "description": "Default delay when moving the mouse",
+          "minimum": 0,
+          "default": 0.5
+        },
+        "delayBeforeMouseDown": {
+          "type": "number",
+          "description": "Default delay before mouse down",
+          "minimum": 0,
+          "default": 0.3
+        },
+        "delayAfterMouseDown": {
+          "type": "number",
+          "description": "Default delay after mouse down",
+          "minimum": 0,
+          "default": 0.3
+        },
+        "delayBeforeMouseUp": {
+          "type": "number",
+          "description": "Default delay before mouse up",
+          "minimum": 0,
+          "default": 0.3
+        },
+        "delayAfterMouseUp": {
+          "type": "number",
+          "description": "Default delay after mouse up",
+          "minimum": 0,
+          "default": 0.3
+        },
+        "typeDelay": {
+          "type": "number",
+          "description": "Default delay between key presses when typing",
+          "minimum": 0,
+          "default": 0.3
+        },
+        "pauseBetweenActions": {
+          "type": "number",
+          "description": "Default pause between individual actions",
+          "minimum": 0,
+          "default": 0.5
+        },
+        "maxWait": {
+          "type": "number",
+          "description": "Default maximum wait time for operations",
+          "minimum": 0,
+          "default": 10
+        },
+        "imageDirectory": {
+          "type": "string",
+          "description": "Directory containing image files"
+        },
+        "logLevel": {
+          "type": "string",
+          "enum": ["OFF", "ERROR", "WARN", "INFO", "DEBUG", "TRACE", "ALL"],
+          "description": "Logging level",
+          "default": "INFO"
+        },
+        "illustrationEnabled": {
+          "type": "boolean",
+          "description": "Whether to generate illustrations",
+          "default": true
+        }
+      }
+    }
+  }
+}
