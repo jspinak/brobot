@@ -1,5 +1,6 @@
 package io.github.jspinak.brobot.datatypes.state.state;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.github.jspinak.brobot.datatypes.primitives.image.Scene;
 import io.github.jspinak.brobot.datatypes.primitives.location.Location;
 import io.github.jspinak.brobot.datatypes.primitives.match.MatchHistory;
@@ -29,6 +30,7 @@ import java.util.*;
  */
 @Getter
 @Setter
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class State {
 
     private Long id = null; // set when the state is saved
