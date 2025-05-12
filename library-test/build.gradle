@@ -18,6 +18,21 @@ dependencies {
     }
     implementation group: 'org.bytedeco', name: 'javacv-platform', version: '1.5.10'
     implementation 'com.github.kwhat:jnativehook:2.2.2'
+
+    // Mockito
+    testImplementation 'org.assertj:assertj-core:3.24.2'
+
+    // JSON processing
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.2'
+    // core and annotation modules are included in the databind module but need to be specified explicitly to avoid version conflicts
+    implementation 'com.fasterxml.jackson.core:jackson-core:2.15.2'
+    implementation 'com.fasterxml.jackson.core:jackson-annotations:2.15.2'
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.2'
+    //implementation("com.fasterxml.jackson.core:jackson-databind:2.19.0") // converting JSON to Java objects
+    implementation("com.github.erosb:everit-json-schema:1.14.5") // JSON schema validation
+    implementation("org.json:json:20250107") // JSON parsing,
+    implementation("com.networknt:json-schema-validator:1.5.6") // NetworkNT JSON schema validation
+
 }
 
 tasks.named('bootJar') {

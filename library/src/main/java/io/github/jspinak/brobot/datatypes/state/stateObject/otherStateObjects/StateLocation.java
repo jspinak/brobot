@@ -1,5 +1,6 @@
 package io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.github.jspinak.brobot.datatypes.primitives.location.*;
 import io.github.jspinak.brobot.datatypes.primitives.match.MatchHistory;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
@@ -14,6 +15,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class StateLocation implements StateObject {
 
     private StateObject.Type objectType = StateObject.Type.LOCATION;

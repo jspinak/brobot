@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.actions;
 
-import io.github.jspinak.brobot.datatypes.Project;
+import io.github.jspinak.brobot.datatypes.project.Project;
 
 import java.util.ArrayList;
 import java.util.List;

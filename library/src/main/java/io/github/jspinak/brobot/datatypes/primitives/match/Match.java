@@ -1,5 +1,6 @@
 package io.github.jspinak.brobot.datatypes.primitives.match;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.github.jspinak.brobot.datatypes.primitives.image.Image;
 import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
 import io.github.jspinak.brobot.datatypes.primitives.image.Scene;
@@ -43,6 +44,7 @@ import java.time.LocalDateTime;
  *  *       multiple Match objects.
  */
 @Data
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Match {
 
     // fields in the SikuliX Match (but Brobot datatypes)

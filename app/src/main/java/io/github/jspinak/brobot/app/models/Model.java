@@ -11,7 +11,6 @@ import io.github.jspinak.brobot.manageStates.StateTransitions;
 import lombok.Getter;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 @Getter
@@ -104,8 +103,8 @@ public class Model {
         sb.append(indentation).append("steps=[");
         for (ActionStep step : actionDef.getSteps()) {
             sb.append("Step{");
-            sb.append("options=").append(step.getOptions()).append(", ");
-            sb.append("objects=").append(objectCollectionToString(step.getObjects(), "  "));
+            sb.append("options=").append(step.getActionOptions()).append(", ");
+            sb.append("objects=").append(objectCollectionToString(step.getObjectCollection(), "  "));
             sb.append("}, ");
         }
         if (!actionDef.getSteps().isEmpty()) {

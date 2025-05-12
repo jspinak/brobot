@@ -1,5 +1,6 @@
 package io.github.jspinak.brobot.manageStates;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.github.jspinak.brobot.dsl.ActionDefinition;
 import lombok.Data;
 
@@ -17,6 +18,7 @@ import java.util.function.BooleanSupplier;
  * but this can be changed with the variable 'staysVisibleAfterTransition'.
  */
 @Data
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class StateTransitions {
 
     private String stateName; // for setup, must be unique

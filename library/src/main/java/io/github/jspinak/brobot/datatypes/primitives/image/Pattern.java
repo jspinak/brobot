@@ -1,5 +1,6 @@
 package io.github.jspinak.brobot.datatypes.primitives.image;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.github.jspinak.brobot.datatypes.primitives.location.*;
 //import io.github.jspinak.brobot.datatypes.primitives.location.Positions;
 import io.github.jspinak.brobot.datatypes.primitives.match.Match;
@@ -32,6 +33,7 @@ import java.util.List;
  */
 @Getter
 @Setter
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Pattern {
 
     // fields from SikuliX Pattern
