@@ -55,15 +55,15 @@ public class TransitionBooleanSupplierPackager {
             for (int i = 0; i < steps.size() - 1; i++) {
                 ActionStep step = steps.get(i);
                 System.out.println("Executing step " + (i+1) + " of " + steps.size());
-                action.perform(step.getOptions(), step.getObjects());
+                action.perform(step.getActionOptions(), step.getObjectCollection());
             }
 
             // Evaluate only the last step
             ActionStep lastStep = steps.get(steps.size() - 1);
             System.out.println("Executing final step " + steps.size() + " of " + steps.size());
-            System.out.println("Last step options: " + lastStep.getOptions());
-            System.out.println("Last step objects: " + lastStep.getObjects());
-            return action.perform(lastStep.getOptions(), lastStep.getObjects()).isSuccess();
+            System.out.println("Last step options: " + lastStep.getActionOptions());
+            System.out.println("Last step objects: " + lastStep.getObjectCollection());
+            return action.perform(lastStep.getActionOptions(), lastStep.getObjectCollection()).isSuccess();
         };
     }
 

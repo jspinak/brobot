@@ -1,5 +1,6 @@
 package io.github.jspinak.brobot.datatypes.primitives.region;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
@@ -12,6 +13,7 @@ import java.util.*;
  * an area, or when the desired search area cannot be described by one rectangle.
  */
 @Data
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class SearchRegions {
 
     private List<Region> regions = new ArrayList<>();

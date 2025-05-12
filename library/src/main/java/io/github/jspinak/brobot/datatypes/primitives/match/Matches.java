@@ -1,5 +1,6 @@
 package io.github.jspinak.brobot.datatypes.primitives.match;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.github.jspinak.brobot.actions.actionExecution.actionLifecycle.ActionLifecycle;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.SceneAnalysis;
@@ -37,6 +38,7 @@ import java.util.stream.Collectors;
  * </p>
  */
 @Data
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Matches {
     private String actionDescription = "";
     private List<Match> matchList = new ArrayList<>();

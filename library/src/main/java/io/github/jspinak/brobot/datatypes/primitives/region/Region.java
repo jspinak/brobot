@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.datatypes.primitives.region;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.StateRegion;
@@ -18,6 +20,7 @@ import java.util.List;
  */
 @Setter
 @Getter
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Region implements Comparable<Region> {
 
     private int x;
@@ -135,11 +138,13 @@ public class Region implements Comparable<Region> {
         this.h = h;
     }
 
+    @JsonIgnore
     public void setTo(Match match) {
         if (match == null) return;
         setXYWH(match.x(), match.y(), match.w(), match.h());
     }
 
+    @JsonIgnore
     public void setTo(org.sikuli.script.Region region) {
         if (region == null) return;
         setXYWH(region.x, region.y, region.w, region.h);

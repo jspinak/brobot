@@ -1,5 +1,6 @@
 package io.github.jspinak.brobot.datatypes.primitives.location;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
@@ -7,6 +8,7 @@ import lombok.Setter;
 import java.util.ArrayList;
 import java.util.List;
 @Data
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Anchors {
 
     private List<Anchor> anchorList = new ArrayList<>();

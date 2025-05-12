@@ -1,5 +1,6 @@
 package io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.stateObject.StateObject;
 import lombok.Data;
@@ -10,6 +11,7 @@ import lombok.Data;
  * String may be part of a Transition for this State but not for other States.
  */
 @Data
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class StateString {
 
     private StateObject.Type objectType = StateObject.Type.STRING;

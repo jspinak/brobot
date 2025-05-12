@@ -1,5 +1,6 @@
 package io.github.jspinak.brobot.datatypes.primitives.match;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.mock.MatchMaker;
@@ -21,6 +22,7 @@ import static java.util.stream.Collectors.toList;
  */
 @Getter
 @Setter
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class MatchHistory {
 
     private int timesSearched = 0;
