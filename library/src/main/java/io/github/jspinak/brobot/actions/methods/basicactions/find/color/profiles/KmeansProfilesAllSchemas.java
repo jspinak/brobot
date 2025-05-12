@@ -1,6 +1,8 @@
 package io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles;
 
 import io.github.jspinak.brobot.reports.Report;
+import lombok.Getter;
+import lombok.Setter;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Size;
 
@@ -11,6 +13,8 @@ import java.util.Map;
 import static io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles.ColorCluster.ColorSchemaName.BGR;
 import static io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles.ColorInfo.ColorStat.MEAN;
 
+@Getter
+@Setter
 public class KmeansProfilesAllSchemas {
 
     private Map<ColorCluster.ColorSchemaName, KmeansProfiles> kmeansProfiles = Map.of(

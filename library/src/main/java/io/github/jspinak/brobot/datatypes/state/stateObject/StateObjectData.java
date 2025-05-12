@@ -1,5 +1,6 @@
 package io.github.jspinak.brobot.datatypes.state.stateObject;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -12,6 +13,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class StateObjectData {
 
     private String stateObjectId;

@@ -1,14 +1,10 @@
 package io.github.jspinak.brobot.app.web.responseMappers;
 
 import io.github.jspinak.brobot.app.database.entities.ActionDefinitionEntity;
-import io.github.jspinak.brobot.app.database.entities.ActionStepEntity;
 import io.github.jspinak.brobot.app.web.requests.ActionDefinitionRequest;
 import io.github.jspinak.brobot.app.web.responses.ActionDefinitionResponse;
-import io.github.jspinak.brobot.app.web.responses.ActionStepResponse;
-import io.github.jspinak.brobot.dsl.ActionDefinition;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
 import java.util.stream.Collectors;
 
 @Component

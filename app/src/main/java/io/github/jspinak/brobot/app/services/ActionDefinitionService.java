@@ -50,8 +50,8 @@ public class ActionDefinitionService {
 
     private ActionStepEntity createActionStepEntity(ActionStep step) {
         ActionStepEntity entity = new ActionStepEntity();
-        entity.setActionOptionsEntity(actionOptionsEntityMapper.map(step.getOptions()));
-        entity.setObjectCollectionEntity(objectCollectionEntityMapper.map(step.getObjects(), sceneService, patternService));
+        entity.setActionOptionsEntity(actionOptionsEntityMapper.map(step.getActionOptions()));
+        entity.setObjectCollectionEntity(objectCollectionEntityMapper.map(step.getObjectCollection(), sceneService, patternService));
         return entity;
     }
 

@@ -1,5 +1,6 @@
 package io.github.jspinak.brobot.dsl;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import lombok.Getter;
@@ -10,6 +11,7 @@ import java.util.List;
 
 @Getter
 @Setter
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ActionDefinition {
     private List<ActionStep> steps = new ArrayList<>();
 

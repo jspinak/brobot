@@ -1,5 +1,6 @@
 package io.github.jspinak.brobot.datatypes.primitives.image;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.imageUtils.BufferedImageOps;
 import io.github.jspinak.brobot.imageUtils.ImageOps;
@@ -14,6 +15,7 @@ import static java.awt.image.BufferedImage.TYPE_BYTE_BINARY;
  * retrievable in these forms as well as a JavaCV Mat of BGR or HSV.
  */
 @Data
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Image {
 
     private String name;

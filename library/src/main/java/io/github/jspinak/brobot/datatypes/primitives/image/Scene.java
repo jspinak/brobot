@@ -1,10 +1,12 @@
 package io.github.jspinak.brobot.datatypes.primitives.image;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Scene {
 
     private Long id = -1L;

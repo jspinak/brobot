@@ -4,7 +4,6 @@ import io.github.jspinak.brobot.dsl.ActionDefinition;
 
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Function;
 
 public interface IStateTransition {
 

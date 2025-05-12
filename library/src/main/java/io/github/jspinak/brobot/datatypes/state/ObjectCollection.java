@@ -1,5 +1,6 @@
 package io.github.jspinak.brobot.datatypes.state;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
 import io.github.jspinak.brobot.datatypes.primitives.image.Scene;
 import io.github.jspinak.brobot.datatypes.primitives.location.Location;
@@ -31,6 +32,7 @@ import static io.github.jspinak.brobot.datatypes.primitives.location.Positions.N
  */
 @Getter
 @Setter
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ObjectCollection {
     private List<StateLocation> stateLocations = new ArrayList<>();
     private List<StateImage> stateImages = new ArrayList<>();
