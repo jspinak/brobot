@@ -1,5 +1,6 @@
 package io.github.jspinak.brobot.datatypes.state.stateObject.stateImage;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles.ColorCluster;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles.KmeansProfilesAllSchemas;
@@ -30,6 +31,7 @@ import java.util.*;
  */
 @Getter
 @Setter
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class StateImage implements StateObject {
 
     private Long id; // set by the StateImageEntity in the App module and important for creating StateImageLogs.

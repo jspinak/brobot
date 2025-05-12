@@ -1,5 +1,6 @@
 package io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.github.jspinak.brobot.datatypes.primitives.location.Anchor;
 import io.github.jspinak.brobot.datatypes.primitives.location.Anchors;
 import io.github.jspinak.brobot.datatypes.primitives.location.Position;
@@ -17,6 +18,7 @@ import lombok.Data;
  * may be text in this Region that doesn't appear in any other State.
  */
 @Data
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class StateRegion implements StateObject {
 
     private StateObject.Type objectType = StateObject.Type.REGION;

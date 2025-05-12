@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.datatypes.primitives.text;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -8,6 +10,7 @@ import java.util.List;
  * The results of different read iterations will not always be the same.
  * To account for this variability, Text stores a list of Strings corresponding to each read.
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Text {
 
     List<String> strings = new ArrayList<>();

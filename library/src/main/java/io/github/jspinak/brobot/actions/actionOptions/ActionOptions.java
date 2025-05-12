@@ -1,5 +1,6 @@
 package io.github.jspinak.brobot.actions.actionOptions;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.github.jspinak.brobot.actions.BrobotSettings;
 import io.github.jspinak.brobot.actions.methods.sikuliWrappers.mouse.ClickType;
 import io.github.jspinak.brobot.datatypes.primitives.location.Location;
@@ -26,6 +27,7 @@ import java.util.function.Predicate;
  */
 @Getter
 @Setter
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ActionOptions {
 
     /*

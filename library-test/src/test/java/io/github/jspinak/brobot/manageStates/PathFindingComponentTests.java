@@ -6,7 +6,6 @@ import io.github.jspinak.brobot.datatypes.state.state.State;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
 import io.github.jspinak.brobot.dsl.ActionDefinition;
-import io.github.jspinak.brobot.manageStates.*;
 import io.github.jspinak.brobot.services.Init;
 import io.github.jspinak.brobot.services.StateTransitionsInProjectService;
 import io.github.jspinak.brobot.database.services.AllStatesInProjectService;

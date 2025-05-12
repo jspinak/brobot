@@ -1,5 +1,6 @@
 package io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.stateObject.StateObject;
 import lombok.Data;
@@ -11,6 +12,7 @@ import lombok.Data;
  * StateText is not yet implemented by Brobot.
  */
 @Data
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class StateText {
 
     private StateObject.Type objectType = StateObject.Type.TEXT;

@@ -1,0 +1,11 @@
+{
+  "id": 1,
+  "name": "Valid Project",
+  "states": [
+    {
+      "id": 1,
+      "name": "State1"
+    }
+  ],
+  "stateTransitions": []
+}

@@ -1,5 +1,6 @@
 package io.github.jspinak.brobot.datatypes.primitives.match;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.primatives.enums.SpecialStateType;
 import lombok.Getter;
@@ -71,6 +72,7 @@ import static io.github.jspinak.brobot.actions.actionOptions.ActionOptions.Find.
  */
 @Getter
 @Setter
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class MatchSnapshot {
 
     /**
