@@ -28,8 +28,8 @@ public class ActionStepEntityMapper {
         if (step == null) return null;
 
         ActionStepEntity entity = new ActionStepEntity();
-        entity.setActionOptionsEntity(actionOptionsMapper.map(step.getOptions()));
-        entity.setObjectCollectionEntity(objectCollectionMapper.map(step.getObjects(), sceneService, patternService));
+        entity.setActionOptionsEntity(actionOptionsMapper.map(step.getActionOptions()));
+        entity.setObjectCollectionEntity(objectCollectionMapper.map(step.getObjectCollection(), sceneService, patternService));
         return entity;
     }
 

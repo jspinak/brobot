@@ -1,0 +1,6 @@
+{
+  "id": "one",
+  "name": 123,
+  "states": "invalid",
+  "stateTransitions": {}
+}

@@ -7,7 +7,6 @@ import lombok.Setter;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Function;
 
 /**
  * This method is equivalent of TransitionEntity in the library module.

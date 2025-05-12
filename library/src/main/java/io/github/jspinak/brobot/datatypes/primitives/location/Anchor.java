@@ -1,5 +1,6 @@
 package io.github.jspinak.brobot.datatypes.primitives.location;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -18,6 +19,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Anchor {
 
     private Positions.Name anchorInNewDefinedRegion; // the border of the region to define
