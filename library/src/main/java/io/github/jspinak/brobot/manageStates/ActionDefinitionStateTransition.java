@@ -19,9 +19,10 @@ import java.util.Set;
 @Getter
 @Setter
 public class ActionDefinitionStateTransition implements IStateTransition {
+    private String type = "actionDefinition";
     private ActionDefinition actionDefinition;
 
-    private StaysVisible staysVisibleAfterTransition;
+    private StaysVisible staysVisibleAfterTransition = StaysVisible.NONE;
     private Set<Long> activate = new HashSet<>();
     private Set<Long> exit = new HashSet<>();
     private int score = 0;

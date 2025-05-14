@@ -19,7 +19,7 @@ class RegionTest {
         ys.add(2);
         ys.add(5);
         ys.add(10);
-        return Region.getSubRegions(xs, ys);
+        return RegionUtils.getSubRegions(xs, ys);
     }
 
     @Test
@@ -60,22 +60,22 @@ class RegionTest {
     @Test
     void removeRegion() {
         List<Region> regions = getRegions();
-        List<Region> removed = Region.removeRegion(regions, new Region(2,5,3,5));
+        List<Region> removed = RegionUtils.removeRegion(regions, new Region(2,5,3,5));
         assertEquals(3, removed.size());
     }
 
     @Test
     void mergeAdjacent() {
         List<Region> regions = getRegions();
-        List<Region> merged = Region.mergeAdjacent(regions);
-        assertTrue(new Region(2,2,8,8).equals(merged.get(0))); // all subregions should merge
+        List<Region> merged = RegionUtils.mergeAdjacent(regions);
+        assertTrue(new Region(2,2,8,8).equals(merged.getFirst())); // all subregions should merge
     }
 
     @Test
     void mergeAdjacent2() {
         List<Region> regions = getRegions();
-        regions = Region.removeRegion(regions, new Region(2,2,3,3));
-        List<Region> merged = Region.mergeAdjacent(regions);
+        regions = RegionUtils.removeRegion(regions, new Region(2,2,3,3));
+        List<Region> merged = RegionUtils.mergeAdjacent(regions);
         System.out.println(regions);
         System.out.println(merged);
         assertEquals(2, merged.size());
