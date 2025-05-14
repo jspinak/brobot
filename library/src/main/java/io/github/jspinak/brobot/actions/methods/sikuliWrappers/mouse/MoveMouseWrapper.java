@@ -22,7 +22,7 @@ public class MoveMouseWrapper {
     public boolean move(Location location) {
         if (BrobotSettings.mock) {
             Report.format(Report.OutputLevel.HIGH, "%s: %d.%d| ", "mouseMove to",
-                    location.getX(), location.getY());
+                    location.getCalculatedX(), location.getCalculatedY());
             return true;
         }
         boolean success = sikuliMove(location);

@@ -234,8 +234,8 @@ public class Match {
         }
 
         public Builder setOffset(Location offset) {
-            this.offsetX = offset.getX();
-            this.offsetY = offset.getY();
+            this.offsetX = offset.getCalculatedX();
+            this.offsetY = offset.getCalculatedY();
             return this;
         }
 

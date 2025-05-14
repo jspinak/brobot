@@ -2,6 +2,7 @@ package io.github.jspinak.brobot.json.parsing;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.networknt.schema.JsonSchema;
 import com.networknt.schema.ValidationMessage;
 import io.github.jspinak.brobot.json.parsing.exception.ConfigurationException;
 import org.junit.jupiter.api.BeforeEach;
@@ -33,12 +34,22 @@ class SchemaManagerTest {
         schemaManager.clearCache();
     }
 
+    // Group 1: Schema retrieval tests
     @Test
     void testGetSchema() throws ConfigurationException {
-        assertNotNull(schemaManager.getProjectSchema());
-        assertNotNull(schemaManager.getAutomationDslSchema());
+        assertNotNull(schemaManager.getProjectSchema(), "Project schema should not be null");
+        assertNotNull(schemaManager.getAutomationDslSchema(), "Automation DSL schema should not be null");
     }
 
+    @Test
+    void testInvalidSchemaPath() {
+        ConfigurationException exception = assertThrows(ConfigurationException.class, () -> {
+            schemaManager.getSchema("/nonexistent-schema.json");
+        });
+        assertTrue(exception.getMessage().contains("Failed to load schema"), "Exception message should indicate schema loading failure");
+    }
+
+    // Group 2: Validation tests for project schema
     @Test
     void testValidateValidProjectJson() throws IOException, ConfigurationException {
         JsonNode validJson = objectMapper.readTree(getClass().getResourceAsStream(VALID_PROJECT_JSON));
@@ -54,6 +65,24 @@ class SchemaManagerTest {
     }
 
     @Test
+    void testIsValidForProjectSchema() throws IOException, ConfigurationException {
+        JsonNode validJson = objectMapper.readTree(getClass().getResourceAsStream(VALID_PROJECT_JSON));
+        assertTrue(schemaManager.isValid(validJson, schemaManager.PROJECT_SCHEMA_PATH), "Valid project JSON should return true");
+
+        JsonNode invalidJson = objectMapper.readTree(getClass().getResourceAsStream(INVALID_PROJECT_JSON));
+        assertFalse(schemaManager.isValid(invalidJson, schemaManager.PROJECT_SCHEMA_PATH), "Invalid project JSON should return false");
+    }
+
+    @Test
+    void testValidateWithErrorsForProjectSchema() throws IOException {
+        JsonNode invalidJson = objectMapper.readTree(getClass().getResourceAsStream(INVALID_PROJECT_JSON));
+        ConfigurationException exception = assertThrows(ConfigurationException.class, () ->
+                schemaManager.validateWithErrors(invalidJson, schemaManager.PROJECT_SCHEMA_PATH, "Project"));
+        assertTrue(exception.getMessage().contains("Invalid Project configuration"), "Exception message should indicate invalid project configuration");
+    }
+
+    // Group 3: Validation tests for automation DSL schema
+    @Test
     void testValidateValidAutomationJson() throws IOException, ConfigurationException {
         JsonNode validJson = objectMapper.readTree(getClass().getResourceAsStream(VALID_AUTOMATION_JSON));
         Set<ValidationMessage> errors = schemaManager.validate(validJson, schemaManager.AUTOMATION_DSL_SCHEMA_PATH);
@@ -68,26 +97,24 @@ class SchemaManagerTest {
     }
 
     @Test
-    void testIsValid() throws IOException, ConfigurationException {
-        JsonNode validJson = objectMapper.readTree(getClass().getResourceAsStream(VALID_PROJECT_JSON));
-        assertTrue(schemaManager.isValid(validJson, schemaManager.PROJECT_SCHEMA_PATH));
+    void testIsValidForAutomationSchema() throws IOException, ConfigurationException {
+        JsonNode validJson = objectMapper.readTree(getClass().getResourceAsStream(VALID_AUTOMATION_JSON));
+        assertTrue(schemaManager.isValid(validJson, schemaManager.AUTOMATION_DSL_SCHEMA_PATH), "Valid automation JSON should return true");
 
-        JsonNode invalidJson = objectMapper.readTree(getClass().getResourceAsStream(INVALID_PROJECT_JSON));
-        assertFalse(schemaManager.isValid(invalidJson, schemaManager.PROJECT_SCHEMA_PATH));
+        JsonNode invalidJson = objectMapper.readTree(getClass().getResourceAsStream(INVALID_AUTOMATION_JSON));
+        assertFalse(schemaManager.isValid(invalidJson, schemaManager.AUTOMATION_DSL_SCHEMA_PATH), "Invalid automation JSON should return false");
     }
 
-    @Test
-    void testValidateWithErrors() throws IOException {
-        JsonNode invalidJson = objectMapper.readTree(getClass().getResourceAsStream(INVALID_PROJECT_JSON));
-        ConfigurationException exception = assertThrows(ConfigurationException.class, () ->
-                schemaManager.validateWithErrors(invalidJson, schemaManager.PROJECT_SCHEMA_PATH, "Project"));
-        assertTrue(exception.getMessage().contains("Invalid Project configuration"));
-    }
-
+    // Group 4: Cache management tests
     @Test
     void testClearCache() throws ConfigurationException {
-        schemaManager.getProjectSchema();
+        JsonSchema schema1 = schemaManager.getSchema(schemaManager.PROJECT_SCHEMA_PATH);
+        assertNotNull(schema1, "First schema retrieval should not return null");
+
         schemaManager.clearCache();
-        assertDoesNotThrow(schemaManager::getProjectSchema);
+
+        JsonSchema schema2 = schemaManager.getSchema(schemaManager.PROJECT_SCHEMA_PATH);
+        assertNotNull(schema2, "Second schema retrieval after cache clear should not return null");
+        assertNotSame(schema1, schema2, "Schemas should be different objects after cache clearing");
     }
 }

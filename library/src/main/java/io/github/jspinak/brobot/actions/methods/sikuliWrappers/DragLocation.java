@@ -48,7 +48,7 @@ public class DragLocation {
 
     public boolean drag(Location from, Location to, ActionOptions actionOptions) {
         Report.format(Report.OutputLevel.HIGH, "drag %d.%d to %d.%d ",
-                from.getX(), from.getY(), to.getX(), to.getY());
+                from.getCalculatedX(), from.getCalculatedY(), to.getCalculatedX(), to.getCalculatedY());
         if (BrobotSettings.mock) return mock.drag();
         Settings.DelayBeforeMouseDown = actionOptions.getPauseBeforeMouseDown();
         Settings.DelayBeforeDrag = actionOptions.getPauseAfterMouseDown();

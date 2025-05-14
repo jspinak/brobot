@@ -79,7 +79,7 @@ public class FindClosestAndReplay {
                                                   StateImage stateImage) {
         if (matches.getBestLocation().isEmpty()) return null; // this should never happen, we've already checked if matches are empty
         Location bestLocation = matches.getBestLocation().get();
-        Report.println("Best match: " + bestLocation.getX() + ", " + bestLocation.getY());
+        Report.println("Best match: " + bestLocation.getCalculatedX() + ", " + bestLocation.getCalculatedY());
         SceneAndObjectsForXML firstScene = scenesObjects.getScenes().get(0);
         int matchingStateImageObjectIndex = getMatchingStateImageObjectIndex(firstScene, stateImage);
         double closestScene = 1000000;

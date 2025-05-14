@@ -16,9 +16,9 @@ public class Distance {
 
     private List<Integer> getDistPair(Location loc1, Location loc2) {
         List<Integer> distPair = new ArrayList<>();
-        distPair.add(loc2.getX() - loc1.getX());
+        distPair.add(loc2.getCalculatedX() - loc1.getCalculatedX());
         // the y difference is the opposite on the computer screen as in a cartesian plane
-        distPair.add(loc1.getY() - loc2.getY());
+        distPair.add(loc1.getCalculatedY() - loc2.getCalculatedY());
         //System.out.print("|cartesian dist x.y "+distPair.get(0)+"."+distPair.get(1)+" ");
         return distPair;
     }
@@ -129,8 +129,8 @@ public class Distance {
      * @return the median angle to all locations from the start point
      */
     public double getMedianAngle(Location startLocation, List<Location> locations) {
-        int x = locations.stream().mapToInt(Location::getX).sum();
-        int y = locations.stream().mapToInt(Location::getY).sum();
+        int x = locations.stream().mapToInt(Location::getCalculatedX).sum();
+        int y = locations.stream().mapToInt(Location::getCalculatedY).sum();
         return getAngle(startLocation, new Location(x,y));
     }
 
@@ -159,8 +159,8 @@ public class Distance {
     public Location getLocation(double angle, double distance, Location startingLocation) {
         double addX = distance * Math.cos(Math.toRadians(angle));
         double addY = - distance * Math.sin(Math.toRadians(angle));
-        return new Location((int)Math.round(startingLocation.getX() + addX),
-                (int)Math.round(startingLocation.getY() + addY));
+        return new Location((int)Math.round(startingLocation.getCalculatedX() + addX),
+                (int)Math.round(startingLocation.getCalculatedY() + addY));
     }
 
     /**
@@ -170,7 +170,7 @@ public class Distance {
      * @return a Location representing the vector from location1 to location2
      */
     public Location getLocation(Location location1, Location location2) {
-        return new Location(location2.getX() - location1.getX(), location2.getY() - location1.getY());
+        return new Location(location2.getCalculatedX() - location1.getCalculatedX(), location2.getCalculatedY() - location1.getCalculatedY());
     }
 
     public List<Double> undueConversion(List<Double> angles) {

@@ -118,7 +118,7 @@ class JsonParserTest {
         obj.setImage(new BufferedImage(10, 10, BufferedImage.TYPE_INT_RGB));
 
         Path file = tempDir.resolve("image-config.json");
-        jsonUtils.writeToFileSafe(obj, file);
+        jsonUtils.toJsonSafe(obj);
 
         assertTrue(Files.exists(file));
         String content = Files.readString(file);

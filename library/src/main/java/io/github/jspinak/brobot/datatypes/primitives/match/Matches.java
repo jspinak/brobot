@@ -1,5 +1,6 @@
 package io.github.jspinak.brobot.datatypes.primitives.match;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.github.jspinak.brobot.actions.actionExecution.actionLifecycle.ActionLifecycle;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
@@ -22,40 +23,40 @@ import java.util.stream.Collectors;
 
 /**
  * The results object for all actions.
- * <p>
- * - matchObjects contain the MatchObjects found during the operation.
- * - nonoverlappingMatches is a subset of matchObjects where overlapping MatchObjects are removed.
- * - bestMatch is updated every time a MatchObject is added.
- * - activeStates is a list of State names containing objects found during the associated Action.
- * The Find action updates the State Memory with these States.
- * Shared Images are treated the same as non-shared Images in normal operation, since it is assumed that
- * Brobot knows where it is. Shared Images are treated differently when the active State is lost
- * and Images are searched with the StateFinder. With the StateFinder, shared Images are not used
- * to find active States.
- * - duration is the overall time elapsed during the operation.
- * - success is determined differently for different operations and the user can modify the success condition.
- * - definedRegions are saved for Define operations, which define the boundaries of a region or regions.
- * </p>
  */
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Matches {
     private String actionDescription = "";
     private List<Match> matchList = new ArrayList<>();
-    private List<Match> initialMatchList = new ArrayList<>(); // the first set of matches in a composite find operation. it may be useful to see these matches in illustrations.
-    private ActionOptions actionOptions; // the action options used to find the matches
+    private List<Match> initialMatchList = new ArrayList<>();
+
+    // ActionOptions may contain fields that can't be easily serialized
+    @JsonIgnore
+    private ActionOptions actionOptions;
+
     private Set<String> activeStates = new HashSet<>();
     private Text text = new Text();
-    private String selectedText = ""; // the String selected from the Text object as the most accurate representation of the text on-screen
+    private String selectedText = "";
     private Duration duration = Duration.ZERO;
     private LocalDateTime startTime = LocalDateTime.now();
     private LocalDateTime endTime;
-    private boolean success = false; // for boolean queries (i.e. true for 'find', false for 'vanish' when not empty)
+    private boolean success = false;
     private List<Region> definedRegions = new ArrayList<>();
-    private int maxMatches = -1; // not used when <= 0
+    private int maxMatches = -1;
+
+    // SceneAnalysisCollection contains complex objects that may cause issues with serialization
+    @JsonIgnore
     private SceneAnalysisCollection sceneAnalysisCollection = new SceneAnalysisCollection();
-    private Mat mask; // for motion detection and other pixel-based analysis
+
+    // Mat objects from OpenCV can't be serialized with standard JSON
+    @JsonIgnore
+    private Mat mask;
+
     private String outputText = "";
+
+    // ActionLifecycle may contain circular references
+    @JsonIgnore
     private ActionLifecycle actionLifecycle;
 
     public Matches() {}
@@ -224,8 +225,8 @@ public class Matches {
     }
 
     private double getDist(Match match, Location location) {
-        int xDist = match.x() - location.getX();
-        int yDist = match.y() - location.getY();
+        int xDist = match.x() - location.getCalculatedX();
+        int yDist = match.y() - location.getCalculatedY();
         return Math.pow(xDist, 2) + Math.pow(yDist, 2);
     }
 
@@ -344,14 +345,15 @@ public class Matches {
 
     public String getSummary() {
         StringBuilder summary = new StringBuilder();
-        summary.append("Action: ").append(actionOptions.getAction()).append("\n");
+        if (actionOptions != null) {
+            summary.append("Action: ").append(actionOptions.getAction()).append("\n");
+        }
         summary.append("Success: ").append(success).append("\n");
         summary.append("Number of matches: ").append(matchList.size()).append("\n");
         summary.append("Active states: ").append(String.join(", ", activeStates)).append("\n");
         if (!text.isEmpty()) {
             summary.append("Extracted text: ").append(text).append("\n");
         }
-        // Add any other relevant information
         return summary.toString();
     }
 
@@ -383,7 +385,7 @@ public class Matches {
         public static StateImageData fromMatch(Match match) {
             return new StateImageData(
                     match.getName(),
-                    match.getStateObjectData().getStateObjectName(),
+                    match.getStateObjectData() != null ? match.getStateObjectData().getStateObjectName() : "",
                     true,
                     match.x(),
                     match.y(),

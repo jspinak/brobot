@@ -56,7 +56,7 @@ public class FindImageWithOffsetTest {
 
         System.out.println(loc1);
         System.out.println(loc2);
-        assertEquals(loc2.getX() + 10, loc1.getX());
+        assertEquals(loc2.getCalculatedX() + 10, loc1.getCalculatedX());
     }
 
     /*
@@ -98,9 +98,9 @@ public class FindImageWithOffsetTest {
 
         System.out.println(loc1);
         System.out.println(loc2);
-        assertEquals(97, loc1.getX());
-        assertEquals(loc1.getX(), loc2.getX());
-        assertEquals(loc1.getY(), loc2.getY());
+        assertEquals(97, loc1.getCalculatedX());
+        assertEquals(loc1.getCalculatedX(), loc2.getCalculatedX());
+        assertEquals(loc1.getCalculatedY(), loc2.getCalculatedY());
     }
 
     /*
@@ -117,7 +117,7 @@ public class FindImageWithOffsetTest {
                 .setPositionForAllPatterns(0, 0)
                 .setOffsetForAllPatterns(10, 0)
                 .build();
-        assertEquals(10, topLeft.getPatterns().get(0).getTargetOffset().getX());
+        assertEquals(10, topLeft.getPatterns().get(0).getTargetOffset().getCalculatedX());
 
         ObjectCollection objColl = new ObjectCollection.Builder()
                 .withImages(topLeft)
@@ -127,6 +127,6 @@ public class FindImageWithOffsetTest {
         Location loc1 = matches.getMatchLocations().get(0);
 
         System.out.println(loc1);
-        assertEquals(10, loc1.getX());
+        assertEquals(10, loc1.getCalculatedX());
     }
 }

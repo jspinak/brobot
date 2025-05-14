@@ -1,5 +1,6 @@
 package io.github.jspinak.brobot.actions.actionOptions;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.github.jspinak.brobot.actions.BrobotSettings;
 import io.github.jspinak.brobot.actions.methods.sikuliWrappers.mouse.ClickType;
@@ -95,6 +96,7 @@ public class ActionOptions {
     /*
      * tempFind is a user defined Find method that is not meant to be reused.
      */
+    @JsonIgnore
     private BiConsumer<Matches, List<ObjectCollection>> tempFind;
 
     /*
@@ -183,6 +185,7 @@ public class ActionOptions {
     /*
      * successEvaluation defines the success criteria for the Find operation.
      */
+    @JsonIgnore
     private Predicate<Matches> successCriteria;
 
     /*

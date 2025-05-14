@@ -1,17 +1,17 @@
 package io.github.jspinak.brobot.app.log;
 
-import io.github.jspinak.brobot.actions.BrobotSettings;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
+import io.github.jspinak.brobot.datatypes.project.Project;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import io.github.jspinak.brobot.datatypes.state.state.State;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
+import io.github.jspinak.brobot.libraryfeatures.recording.VideoRecorderService;
 import io.github.jspinak.brobot.log.entities.LogEntry;
 import io.github.jspinak.brobot.log.entities.LogType;
 import io.github.jspinak.brobot.log.entities.PerformanceMetrics;
 import io.github.jspinak.brobot.log.service.LogEntryService;
 import io.github.jspinak.brobot.logging.ActionLogger;
 import io.github.jspinak.brobot.logging.TestSessionLogger;
-import io.github.jspinak.brobot.libraryfeatures.recording.VideoRecorderService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -31,19 +31,21 @@ public class HttpActionLogger implements ActionLogger, TestSessionLogger {
     private static final Logger log = LoggerFactory.getLogger(HttpActionLogger.class);
 
     private final LogEntryService logEntryService;
+    private final Project project;
     private final VideoRecorderService videoRecorderService;
     private final LogEntryStateImageMapper logEntryStateImageMapper;
 
-    public HttpActionLogger(LogEntryService logEntryService,
+    public HttpActionLogger(LogEntryService logEntryService, Project project,
                             VideoRecorderService videoRecorderService,
                             LogEntryStateImageMapper logEntryStateImageMapper) {
         this.logEntryService = logEntryService;
+        this.project = project;
         this.videoRecorderService = videoRecorderService;
         this.logEntryStateImageMapper = logEntryStateImageMapper;
     }
 
     private Long getCurrentProjectId() {
-        return BrobotSettings.getCurrentProjectId();
+        return project.getId();
     }
 
     @Override
