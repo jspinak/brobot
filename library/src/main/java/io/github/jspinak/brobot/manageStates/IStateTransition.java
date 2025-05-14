@@ -1,10 +1,21 @@
 package io.github.jspinak.brobot.manageStates;
 
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import io.github.jspinak.brobot.dsl.ActionDefinition;
 
 import java.util.Optional;
 import java.util.Set;
 
+@JsonTypeInfo(
+        use = JsonTypeInfo.Id.NAME,
+        include = JsonTypeInfo.As.PROPERTY,
+        property = "type"
+)
+@JsonSubTypes({
+        @JsonSubTypes.Type(value = ActionDefinitionStateTransition.class, name = "actionDefinition"),
+        @JsonSubTypes.Type(value = JavaStateTransition.class, name = "java")
+})
 public interface IStateTransition {
 
     // when set to NONE, the StaysVisible variable in the corresponding StateTransitions object will be used.

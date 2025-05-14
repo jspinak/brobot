@@ -53,7 +53,7 @@ public class ClickMatchWithAddXYTest {
         Matches matches = action.perform(actionOptions, objColl);
         Location loc1 = matches.getMatchLocations().get(0);
         System.out.println(loc1);
-        assertEquals(77, loc1.getY());
+        assertEquals(77, loc1.getCalculatedY());
     }
 
     @Test
@@ -77,7 +77,7 @@ public class ClickMatchWithAddXYTest {
         Matches matches = action.perform(actionOptions, objColl);
         Location loc1 = matches.getMatchLocations().get(0);
         System.out.println(loc1);
-        assertEquals(85, loc1.getY());
+        assertEquals(85, loc1.getCalculatedY());
     }
 
 }

@@ -47,8 +47,8 @@ public class Movement {
         locations.forEach(locList -> locList.forEach(loc -> {
             boolean found = false;
             for (Location locInMap : timesAppearing.keySet()) {
-                if (Math.abs(loc.getX() - locInMap.getX()) <= measurementAccuracy &&
-                        Math.abs(loc.getY() - locInMap.getY()) <= measurementAccuracy)
+                if (Math.abs(loc.getCalculatedX() - locInMap.getCalculatedX()) <= measurementAccuracy &&
+                        Math.abs(loc.getCalculatedY() - locInMap.getCalculatedY()) <= measurementAccuracy)
                 {
                     timesAppearing.put(locInMap, timesAppearing.get(locInMap) + 1);
                     found = true;

@@ -117,22 +117,4 @@ public class BrobotSettings {
     public static int testIteration = 1;
     public static boolean sendLogs = true;
 
-    /**
-     * Project
-     */
-    public static void setCurrentProject(Long id, String name) {
-        Project.getInstance().setProject(id, name);
-    }
-
-    public static Long getCurrentProjectId() {
-        return Project.getInstance().getId();
-    }
-
-    public static String getCurrentProjectName() {
-        return Project.getInstance().getName();
-    }
-
-    public static void resetCurrentProject() {
-        Project.getInstance().reset();
-    }
 }

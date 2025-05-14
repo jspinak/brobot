@@ -1,5 +1,6 @@
 package io.github.jspinak.brobot.datatypes.state.stateObject.stateImage;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles.ColorCluster;
@@ -55,9 +56,13 @@ public class StateImage implements StateObject {
     wrapper object that includes information about the Mat size and type. These Mat objects do not contain unique
     data: they are here for convenience and can be recreated with the patterns' BufferedImage objects.
      */
+    @JsonIgnore
     private Mat oneColumnBGRMat; // initialized when program is run
+    @JsonIgnore
     private Mat oneColumnHSVMat; // initialized when program is run
+    @JsonIgnore
     private Mat imagesMat; // initialized when program is run, shows the images in the StateImage
+    @JsonIgnore
     private Mat profilesMat; // initialized when program is run, shows the color profiles in the StateImage
 
     /*
@@ -152,6 +157,7 @@ public class StateImage implements StateObject {
         return regions;
     }
 
+    @JsonIgnore
     public List<Region> getDefinedFixedRegions() {
         List<Region> definedFixed = new ArrayList<>();
         for (Pattern pattern : patterns) {
@@ -161,6 +167,7 @@ public class StateImage implements StateObject {
         return definedFixed;
     }
 
+    @JsonIgnore
     public Region getLargestDefinedFixedRegionOrNewRegion() {
         return getDefinedFixedRegions().stream()
                 .max(Comparator.comparingInt(Region::size))

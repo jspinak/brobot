@@ -5,6 +5,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 /**
  * Mixin for SearchRegions to prevent circular references.
  */
-@JsonIgnoreProperties({"regions", "deepCopy"})
+@JsonIgnoreProperties({"deepCopy"})
 public abstract class SearchRegionsMixin {
 }

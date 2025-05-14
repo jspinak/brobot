@@ -36,7 +36,7 @@ public class Draw {
 
     public void drawPoint(Mat screen, Match match, Scalar color) {
         Location loc = match.getTarget();
-        Point center = new Point(loc.getX(), loc.getY());
+        Point center = new Point(loc.getCalculatedX(), loc.getCalculatedY());
         circle(screen, center, 6, color, FILLED, LINE_8, 0); //fill
         circle(screen, center, 8, new Scalar(255));
         circle(screen, center, 10, new Scalar(255));
@@ -44,14 +44,14 @@ public class Draw {
 
     public void drawClick(Illustrations illustrations, Matches matches) {
         for (Match match : matches.getMatchList()) {
-            Report.println("Drawing click on " + match.getTarget().getX() + ", " + match.getTarget().getY());
+            Report.println("Drawing click on " + match.getTarget().getCalculatedX() + ", " + match.getTarget().getCalculatedY());
             drawPoint(illustrations.getMatchesOnScene(), match, new Scalar(255, 150, 255, 0));
         }
     }
 
     public void drawArrow(Mat screen, Location start, Location end, Scalar color) {
-        Point startPoint = new Point(start.getX(), start.getY());
-        Point endPoint = new Point(end.getX(), end.getY());
+        Point startPoint = new Point(start.getCalculatedX(), start.getCalculatedY());
+        Point endPoint = new Point(end.getCalculatedX(), end.getCalculatedY());
         arrowedLine(screen, startPoint, endPoint, color, 5, 8, 0, .04);
     }
 

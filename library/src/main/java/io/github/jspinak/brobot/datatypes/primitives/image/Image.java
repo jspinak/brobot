@@ -1,5 +1,6 @@
 package io.github.jspinak.brobot.datatypes.primitives.image;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.imageUtils.BufferedImageOps;
@@ -19,6 +20,8 @@ import static java.awt.image.BufferedImage.TYPE_BYTE_BINARY;
 public class Image {
 
     private String name;
+
+    @JsonIgnore
     private BufferedImage bufferedImage;
 
     public Image(BufferedImage bufferedImage) {
@@ -58,6 +61,7 @@ public class Image {
      * If there is a conversion issue, an empty Mat is returned.
      * @return the image as a Mat.
      */
+    @JsonIgnore
     public Mat getMatBGR() {
         return ImageOps.getMatBGR(bufferedImage);
     }
@@ -67,6 +71,7 @@ public class Image {
      * If there is a conversion issue, an empty Mat is returned.
      * @return the image as a Mat.
      */
+    @JsonIgnore
     public Mat getMatHSV() {
         return ImageOps.getMatHSV(bufferedImage);
     }
@@ -75,6 +80,7 @@ public class Image {
         return bufferedImage == null;
     }
 
+    @JsonIgnore
     public org.sikuli.script.Image sikuli() {
         return new org.sikuli.script.Image(bufferedImage);
     }

@@ -53,9 +53,9 @@ public class Drag implements ActionInterface {
         if (optStartLoc.isEmpty() || optEndLoc.isEmpty()) return;
         dragLocation.drag(optStartLoc.get(), optEndLoc.get(), actionOptions);
         matches.addDefinedRegion(new Region(
-                optStartLoc.get().getX(), optStartLoc.get().getY(),
-                optEndLoc.get().getX() - optStartLoc.get().getX(),
-                optEndLoc.get().getY() - optStartLoc.get().getY()));
+                optStartLoc.get().getCalculatedX(), optStartLoc.get().getCalculatedY(),
+                optEndLoc.get().getCalculatedX() - optStartLoc.get().getCalculatedX(),
+                optEndLoc.get().getCalculatedY() - optStartLoc.get().getCalculatedY()));
     }
 
 }

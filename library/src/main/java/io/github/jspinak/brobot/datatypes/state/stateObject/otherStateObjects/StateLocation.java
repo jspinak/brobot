@@ -32,7 +32,7 @@ public class StateLocation implements StateObject {
 
 
     public String getIdAsString() {
-        return objectType.name() + name + location.getX() + location.getY();
+        return objectType.name() + name + location.getCalculatedX() + location.getCalculatedY();
     }
 
     public boolean defined() {

@@ -2,7 +2,6 @@ package io.github.jspinak.brobot.imageUtils;
 
 import io.github.jspinak.brobot.datatypes.primitives.location.Location;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
-import io.github.jspinak.brobot.reports.Report;
 import org.bytedeco.javacpp.indexer.IntRawIndexer;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Rect;
@@ -219,7 +218,7 @@ public class MatBuilder {
     }
 
     private void insertMat(Location location, Mat subMat) {
-        Rect rect = new Rect(location.getX(), location.getY(), subMat.cols(), subMat.rows());
+        Rect rect = new Rect(location.getCalculatedX(), location.getCalculatedY(), subMat.cols(), subMat.rows());
         subMat.convertTo(subMat, mat.type());
         Mat target = mat.apply(rect);
         subMat.copyTo(target);

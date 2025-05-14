@@ -1,9 +1,8 @@
 package io.github.jspinak.brobot.datatypes.primitives.region;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
 
 import java.util.*;
 
@@ -27,6 +26,7 @@ public class SearchRegions {
      * If the fixed region has been set.
      * @return true if set.
      */
+    @JsonIgnore
     public boolean isFixedRegionSet() {
         return fixedRegion.isDefined();
     }
@@ -41,10 +41,11 @@ public class SearchRegions {
      * If no regions are defined, return an undefined region.
      * @return one region.
      */
+    @JsonIgnore
     public Region getOneRegion() {
-        List<Region> regions = getRegions(true);
-        if (regions.size() == 1) return regions.get(0);
-        for (Region region : regions) {
+        List<Region> regionList = getRegions(true);
+        if (regionList.size() == 1) return regionList.getFirst();
+        for (Region region : regionList) {
             if (region.isDefined()) return region;
         }
         return new Region();
@@ -57,11 +58,11 @@ public class SearchRegions {
      * @param fixed if the image has a fixed location
      * @return the search region
      */
+    @JsonIgnore
     public Region getFixedIfDefinedOrRandomRegion(boolean fixed) {
-        List<Region> regions = getRegions(fixed);
-        if (regions.isEmpty()) return new Region();
-        Random rand = new Random();
-        return regions.get(rand.nextInt(regions.size()));
+        List<Region> regionList = getRegions(fixed);
+        if (regionList.isEmpty()) return new Region();
+        return SearchRegionsUtils.getRandomRegion(regionList);
     }
 
     /**
@@ -77,30 +78,53 @@ public class SearchRegions {
         return regions;
     }
 
+    @JsonIgnore
     public void setSearchRegion(Region searchRegion) {
         regions = new ArrayList<>();
         addSearchRegions(searchRegion);
     }
 
+    /**
+     * Returns all regions, or a list with one empty region if no regions exist.
+     * Using a mutable ArrayList instead of Collections.singletonList to avoid
+     * serialization issues.
+     *
+     * @return a list of all regions, or a list with one empty region
+     */
+    @JsonIgnore
     public List<Region> getAllRegions() {
         if (!regions.isEmpty()) return regions;
-        return Collections.singletonList(new Region());
+        List<Region> list = new ArrayList<>();
+        list.add(new Region());
+        return list;
+    }
+
+    /**
+     * Access regions in a way that's safe for serialization/deserialization.
+     * @return A mutable list containing all regions
+     */
+    @JsonIgnore
+    public List<Region> getRegionsMutable() {
+        return SearchRegionsUtils.getMutableRegionsCopy(this);
     }
 
     public void addSearchRegions(Region... searchRegions) {
-        addSearchRegions(List.of(searchRegions));
+        addSearchRegions(Arrays.asList(searchRegions));
     }
 
     public void addSearchRegions(List<Region> searchRegions) {
         for (Region region : searchRegions) {
-            regions.addAll(trimRegion(region));
+            if (region != null) {
+                regions.addAll(trimRegion(region));
+            }
         }
-        regions = Region.mergeAdjacent(regions);
+        regions = RegionUtils.mergeAdjacent(regions);
     }
 
     /**
      * @return true if fixed region or any search region is defined.
      */
+    @JsonIgnore
     public boolean isAnyRegionDefined() {
         if (fixedRegion.isDefined()) return true;
         for (Region region : regions) {
@@ -113,21 +137,40 @@ public class SearchRegions {
      * @param fixed does the pattern have a fixed position
      * @return true if fixed and has been found, or if not fixed and one of the search regions is defined
      */
+    @JsonIgnore
     public boolean isDefined(boolean fixed) {
         if (fixedRegion.isDefined()) return true;
         if (fixed) return false; // should be fixed but the region is not defined
         return isAnyRegionDefined();
     }
 
+    @JsonIgnore
     public boolean isEmpty() {
         return regions.isEmpty();
     }
 
+    /**
+     * Create a deep copy by manually copying each field.
+     * Avoid calling SearchRegionsUtils to prevent circular reference.
+     */
+    @JsonIgnore
     public SearchRegions getDeepCopy() {
-        SearchRegions searchRegions = new SearchRegions();
-        regions.forEach(reg -> searchRegions.addSearchRegions(
-                new Region(reg.x(), reg.y(), reg.w(), reg.h())));
-        return searchRegions;
+        SearchRegions copy = new SearchRegions();
+
+        // Copy regular regions
+        for (Region region : this.regions) {
+            if (region != null) {
+                copy.regions.add(new Region(region.x(), region.y(), region.w(), region.h()));
+            }
+        }
+
+        // Copy fixed region if defined
+        if (this.isFixedRegionSet()) {
+            Region fixed = this.fixedRegion;
+            copy.fixedRegion = new Region(fixed.x(), fixed.y(), fixed.w(), fixed.h());
+        }
+
+        return copy;
     }
 
     /**
@@ -138,19 +181,26 @@ public class SearchRegions {
         for (Region region : regions) {
             if (region.overlaps(newRegion)) return newRegion.minus(region);
         }
-        return List.of(newRegion);
+        // Use ArrayList instead of List.of for better serialization compatibility
+        List<Region> result = new ArrayList<>();
+        result.add(newRegion);
+        return result;
     }
 
-    /* Lombok takes care of this
-    public boolean equals(SearchRegions searchRegions) {
-        int size = regions.size();
-        int size2 = searchRegions.getRegions().size();
-        if (size != size2) return false;
-        for (int i=0; i<size; i++) {
-            if (!regions.get(i).equals(searchRegions.getRegions().get(i))) return false;
-        }
-        if (!fixedRegion.equals(searchRegions.getFixedRegion())) return false;
-        return true;
-    }
+    /**
+     * Use utility class to create a string representation
      */
+    @Override
+    public String toString() {
+        return SearchRegionsUtils.toString(this);
+    }
+
+    /**
+     * Merges this SearchRegions with another one
+     * @param other The other SearchRegions to merge with
+     * @return A new SearchRegions containing regions from both
+     */
+    public SearchRegions merge(SearchRegions other) {
+        return SearchRegionsUtils.merge(this, other);
+    }
 }

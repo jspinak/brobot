@@ -1,7 +1,5 @@
 package io.github.jspinak.brobot.datatypes.primitives.location;
 
-import io.github.jspinak.brobot.datatypes.primitives.location.Location;
-import io.github.jspinak.brobot.datatypes.primitives.location.Positions;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import org.junit.jupiter.api.Test;
 
@@ -15,18 +13,18 @@ class LocationTest {
     @Test
     void getSikuliLocationFromLocationDefinedByRegion() {
         org.sikuli.script.Location sikuliLocation = locationDefinedByRegion.sikuli();
-        System.out.format("%d %d %d %d", sikuliLocation.x, sikuliLocation.y, locationDefinedByRegion.getX(), locationDefinedByRegion.getY());
-        assertEquals(sikuliLocation.x, locationDefinedByRegion.getX());
-        assertEquals(sikuliLocation.y, locationDefinedByRegion.getY());
+        System.out.format("%d %d %d %d", sikuliLocation.x, sikuliLocation.y, locationDefinedByRegion.getCalculatedX(), locationDefinedByRegion.getCalculatedY());
+        assertEquals(sikuliLocation.x, locationDefinedByRegion.getCalculatedX());
+        assertEquals(sikuliLocation.y, locationDefinedByRegion.getCalculatedY());
     }
 
     @Test
-    void getX() {
-        assertEquals(region.x(), locationDefinedByRegion.getX());
+    void getCalculatedX() {
+        assertEquals(region.x(), locationDefinedByRegion.getCalculatedX());
     }
 
     @Test
-    void getY() {
-        assertEquals(region.y2(), locationDefinedByRegion.getY());
+    void getCalculatedY() {
+        assertEquals(region.y2(), locationDefinedByRegion.getCalculatedY());
     }
 }

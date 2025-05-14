@@ -232,7 +232,7 @@ public class CommonActions {
     }
 
     public void dragCenterStop(Region region, Location location) {
-        dragCenterStop(region, location.getX(), location.getY());
+        dragCenterStop(region, location.getCalculatedX(), location.getCalculatedY());
     }
 
     public void dragCenterStop(Region region, int toX, int toY) {

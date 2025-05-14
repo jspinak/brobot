@@ -22,8 +22,8 @@ public class DrawLine {
      * @param shift is the number of fractional bits in the point coordinates.
      */
     public void draw(Mat scene, Location start, Location end, Scalar color, int thickness, int lineType, int shift) {
-        Point startPoint = new Point(start.getX(), start.getY());
-        Point endPoint = new Point(end.getX(), end.getY());
+        Point startPoint = new Point(start.getCalculatedX(), start.getCalculatedY());
+        Point endPoint = new Point(end.getCalculatedX(), end.getCalculatedY());
         line(scene, startPoint, endPoint, color, thickness, lineType, shift);
     }
 

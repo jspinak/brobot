@@ -29,9 +29,9 @@ public class CopyActionOptions {
                 .setClickType(orig.getClickType())
                 .setMoveMouseAfterAction(orig.isMoveMouseAfterAction())
                 .setMoveMouseAfterActionTo(new Location(
-                        orig.getMoveMouseAfterActionTo().getX(), orig.getMoveMouseAfterActionTo().getY()))
+                        orig.getMoveMouseAfterActionTo().getCalculatedX(), orig.getMoveMouseAfterActionTo().getCalculatedY()))
                 .setMoveMouseAfterActionBy(
-                        orig.getMoveMouseAfterActionTo().getX(), orig.getMoveMouseAfterActionTo().getY())
+                        orig.getMoveMouseAfterActionTo().getCalculatedX(), orig.getMoveMouseAfterActionTo().getCalculatedY())
                 .setSearchRegions(orig.getSearchRegions().getDeepCopy())
                 .setPauseBeforeBegin(orig.getPauseBeforeBegin())
                 .setPauseAfterEnd(orig.getPauseAfterEnd())

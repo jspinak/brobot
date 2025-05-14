@@ -106,6 +106,30 @@ public class State {
      */
     private MatchHistory matchHistory = new MatchHistory();
 
+    public void addStateImage(StateImage stateImage) {
+        stateImage.setOwnerStateName(name);
+        stateImages.add(stateImage);
+    }
+
+    public void addStateRegion(StateRegion stateRegion) {
+        stateRegion.setOwnerStateName(name);
+        stateRegions.add(stateRegion);
+    }
+
+    public void addStateLocation(StateLocation stateLocation) {
+        stateLocation.setOwnerStateName(name);
+        stateLocations.add(stateLocation);
+    }
+
+    public void addStateString(StateString stateString) {
+        stateString.setOwnerStateName(name);
+        stateStrings.add(stateString);
+    }
+
+    public void addStateText(String stateText) {
+        this.stateText.add(stateText);
+    }
+
     public void setSearchRegionForAllImages(Region searchRegion) {
         stateImages.forEach(imageObj -> imageObj.setSearchRegions(searchRegion));
     }
@@ -150,7 +174,7 @@ public class State {
         }
         for (StateLocation stateLocation : stateLocations) {
             Location loc = stateLocation.getLocation();
-            imageRegions.add(new Region(loc.getX(), loc.getY(), 0, 0));
+            imageRegions.add(new Region(loc.getCalculatedX(), loc.getCalculatedY(), 0, 0));
         }
         if (imageRegions.isEmpty()) return new Region(); // the region is not defined
         Region union = imageRegions.get(0);
