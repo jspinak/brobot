@@ -64,8 +64,8 @@ public class WriteXmlDomScenes {
             Element object = doc.createElement("object");
             child.appendChild(object);
             object.setAttribute("name", objectNames.get(i));
-            object.setAttribute("x", String.valueOf(objectLocations.get(i).getX()));
-            object.setAttribute("y", String.valueOf(objectLocations.get(i).getY()));
+            object.setAttribute("x", String.valueOf(objectLocations.get(i).getCalculatedX()));
+            object.setAttribute("y", String.valueOf(objectLocations.get(i).getCalculatedY()));
         }
     }
 

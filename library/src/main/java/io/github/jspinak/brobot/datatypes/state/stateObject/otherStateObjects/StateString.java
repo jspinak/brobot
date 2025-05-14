@@ -24,9 +24,12 @@ public class StateString {
 
     public StateString() {} // for mapping
 
-    public String getId() {
-        return objectType.name() + name + searchRegion.getX() + searchRegion.getY() + searchRegion.getW() + searchRegion.getY() + string;
-    }
+public String getId() {
+    String regionId = (searchRegion != null)
+        ? searchRegion.getX() + "" + searchRegion.getY() + "" + searchRegion.getW() + "" + searchRegion.getH()
+        : "nullRegion";
+    return objectType.name() + name + regionId + string;
+}
 
     private StateString(String string) {
         this.string = string;

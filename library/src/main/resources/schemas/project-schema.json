@@ -39,11 +39,11 @@
         "$ref": "#/definitions/state"
       }
     },
-    "stateTransitions": {
+    "stateTransitionsContainer": {
       "type": "array",
-      "description": "Transitions between states",
+      "description": "Container objects that hold all transitions for a state",
       "items": {
-        "$ref": "#/definitions/stateTransition"
+        "$ref": "#/definitions/stateTransitionsContainer"
       }
     },
     "automation": {
@@ -136,6 +136,180 @@
           "description": "Locations associated with this state",
           "items": {
             "$ref": "#/definitions/stateLocation"
+          }
+        }
+      }
+    },
+    "stateTransitionsContainer": {
+      "type": "object",
+      "required": ["stateName"],
+      "description": "Container for all transitions associated with a state",
+      "properties": {
+        "stateName": {
+          "type": "string",
+          "description": "Name of the state, must be unique"
+        },
+        "stateId": {
+          "type": "integer",
+          "description": "ID of the state, used at runtime"
+        },
+        "transitionFinish": {
+          "$ref": "#/definitions/actionDefinitionStateTransition",
+          "description": "ToTransition performed after a successful FromTransition to this state"
+        },
+        "actionDefinitionTransitions": {
+          "type": "object",
+          "description": "Map of state IDs to ActionDefinitionStateTransition objects",
+          "additionalProperties": {
+            "$ref": "#/definitions/actionDefinitionStateTransition"
+          }
+        },
+        "transitions": {
+          "type": "array",
+          "description": "List of transitions used at runtime",
+          "items": {
+            "$ref": "#/definitions/actionDefinitionStateTransition"
+          }
+        },
+        "staysVisibleAfterTransition": {
+          "type": "boolean",
+          "description": "Whether this state stays visible after a transition (can be overridden by the same property in a Transition)",
+          "default": false
+        }
+      }
+    },
+
+    "actionDefinitionStateTransition": {
+      "type": "object",
+      "description": "State transition implemented via an ActionDefinition",
+      "properties": {
+        "actionDefinition": {
+          "$ref": "#/definitions/actionDefinition",
+          "description": "The action definition that implements this transition"
+        },
+        "staysVisibleAfterTransition": {
+          "type": "string",
+          "enum": ["NONE", "TRUE", "FALSE"],
+          "description": "Whether the source state stays visible after the transition (takes precedence over the same property in StateTransitions)",
+          "default": "NONE"
+        },
+        "activate": {
+          "type": "array",
+          "description": "States to activate after a successful transition",
+          "items": {
+            "type": "integer"
+          }
+        },
+        "exit": {
+          "type": "array",
+          "description": "States to exit after a successful transition",
+          "items": {
+            "type": "integer"
+          }
+        },
+        "score": {
+          "type": "integer",
+          "description": "Larger path scores discourage taking a path with this transition",
+          "default": 0
+        },
+        "timesSuccessful": {
+          "type": "integer",
+          "description": "Number of times this transition has been successfully executed",
+          "default": 0
+        }
+      }
+    },
+
+    "actionDefinition": {
+      "type": "object",
+      "required": ["steps"],
+      "properties": {
+        "steps": {
+          "type": "array",
+          "description": "Steps to perform in the action",
+          "items": {
+            "$ref": "#/definitions/actionStep"
+          }
+        }
+      }
+    },
+    "actionStep": {
+      "type": "object",
+      "required": ["actionOptions", "objectCollection"],
+      "properties": {
+        "actionOptions": {
+          "$ref": "#/definitions/actionOptions"
+        },
+        "objectCollection": {
+          "$ref": "#/definitions/objectCollection"
+        }
+      }
+    },
+    "actionOptions": {
+      "type": "object",
+      "properties": {
+        "action": {
+          "type": "string",
+          "enum": ["FIND", "CLICK", "VANISH", "DEFINE", "WAITVANISH", "MOVE", "DRAG", "TYPE", "MOUSE_DOWN", "MOUSE_UP", "GET_TEXT", "HIGHLIGHT", "SCROLL", "COUNT", "CLASSIFY", "ILLUSTRATE"],
+          "description": "The action to perform"
+        },
+        "clickUntil": {
+          "type": "string",
+          "enum": ["OBJECTS_APPEAR", "OBJECTS_VANISH", "FIND_ALL", "TIME_ELAPSED", "NONE"],
+          "description": "When to stop clicking"
+        },
+        "find": {
+          "type": "string",
+          "enum": ["FIRST", "BEST", "ALL", "EACH", "ALL_SORTED", "EACH_WORD", "ALL_WORDS", "UNIVERSAL"],
+          "description": "How to find objects"
+        },
+        "doOnEach": {
+          "type": "string",
+          "enum": ["FIRST", "BEST", "ALL", "EACH"],
+          "description": "What to do on each find"
+        },
+        "similarity": {
+          "type": "number",
+          "description": "Match similarity threshold",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "clickType": {
+          "type": "string",
+          "enum": ["LEFT", "RIGHT", "MIDDLE", "DOUBLE_LEFT", "DOUBLE_RIGHT", "TRIPLE_LEFT", "TRIPLE_RIGHT"],
+          "description": "Type of click to perform"
+        }
+      }
+    },
+    "objectCollection": {
+      "type": "object",
+      "properties": {
+        "stateImages": {
+          "type": "array",
+          "description": "State images to use",
+          "items": {
+            "type": "integer"
+          }
+        },
+        "stateStrings": {
+          "type": "array",
+          "description": "State strings to use",
+          "items": {
+            "type": "integer"
+          }
+        },
+        "stateRegions": {
+          "type": "array",
+          "description": "State regions to use",
+          "items": {
+            "type": "integer"
+          }
+        },
+        "stateLocations": {
+          "type": "array",
+          "description": "State locations to use",
+          "items": {
+            "type": "integer"
           }
         }
       }
@@ -394,146 +568,6 @@
         },
         "positionInMatch": {
           "$ref": "#/definitions/position"
-        }
-      }
-    },
-    "stateTransition": {
-      "type": "object",
-      "required": ["sourceStateId", "actionDefinition"],
-      "properties": {
-        "id": {
-          "type": "integer",
-          "description": "Unique identifier for the transition"
-        },
-        "sourceStateId": {
-          "type": "integer",
-          "description": "The state from which the transition starts"
-        },
-        "stateImageId": {
-          "type": "integer",
-          "description": "Optional state image associated with the transition"
-        },
-        "actionDefinition": {
-          "$ref": "#/definitions/actionDefinition"
-        },
-        "staysVisibleAfterTransition": {
-          "type": "string",
-          "enum": ["NONE", "TRUE", "FALSE"],
-          "description": "Whether the source state stays visible after the transition",
-          "default": "NONE"
-        },
-        "statesToEnter": {
-          "type": "array",
-          "description": "States to enter after the transition",
-          "items": {
-            "type": "integer"
-          }
-        },
-        "statesToExit": {
-          "type": "array",
-          "description": "States to exit after the transition",
-          "items": {
-            "type": "integer"
-          }
-        },
-        "score": {
-          "type": "integer",
-          "description": "Score for path planning",
-          "default": 0
-        }
-      }
-    },
-    "actionDefinition": {
-      "type": "object",
-      "required": ["steps"],
-      "properties": {
-        "steps": {
-          "type": "array",
-          "description": "Steps to perform in the action",
-          "items": {
-            "$ref": "#/definitions/actionStep"
-          }
-        }
-      }
-    },
-    "actionStep": {
-      "type": "object",
-      "required": ["actionOptions", "objectCollection"],
-      "properties": {
-        "actionOptions": {
-          "$ref": "#/definitions/actionOptions"
-        },
-        "objectCollection": {
-          "$ref": "#/definitions/objectCollection"
-        }
-      }
-    },
-    "actionOptions": {
-      "type": "object",
-      "properties": {
-        "action": {
-          "type": "string",
-          "enum": ["FIND", "CLICK", "VANISH", "DEFINE", "WAITVANISH", "MOVE", "DRAG", "TYPE", "MOUSE_DOWN", "MOUSE_UP", "GET_TEXT", "HIGHLIGHT", "SCROLL", "COUNT", "CLASSIFY", "ILLUSTRATE"],
-          "description": "The action to perform"
-        },
-        "clickUntil": {
-          "type": "string",
-          "enum": ["OBJECTS_APPEAR", "OBJECTS_VANISH", "FIND_ALL", "TIME_ELAPSED", "NONE"],
-          "description": "When to stop clicking"
-        },
-        "find": {
-          "type": "string",
-          "enum": ["FIRST", "BEST", "ALL", "EACH", "ALL_SORTED", "EACH_WORD", "ALL_WORDS", "UNIVERSAL"],
-          "description": "How to find objects"
-        },
-        "doOnEach": {
-          "type": "string",
-          "enum": ["FIRST", "BEST", "ALL", "EACH"],
-          "description": "What to do on each find"
-        },
-        "similarity": {
-          "type": "number",
-          "description": "Match similarity threshold",
-          "minimum": 0,
-          "maximum": 1
-        },
-        "clickType": {
-          "type": "string",
-          "enum": ["LEFT", "RIGHT", "MIDDLE", "DOUBLE_LEFT", "DOUBLE_RIGHT", "TRIPLE_LEFT", "TRIPLE_RIGHT"],
-          "description": "Type of click to perform"
-        }
-      }
-    },
-    "objectCollection": {
-      "type": "object",
-      "properties": {
-        "stateImages": {
-          "type": "array",
-          "description": "State images to use",
-          "items": {
-            "type": "integer"
-          }
-        },
-        "stateStrings": {
-          "type": "array",
-          "description": "State strings to use",
-          "items": {
-            "type": "integer"
-          }
-        },
-        "stateRegions": {
-          "type": "array",
-          "description": "State regions to use",
-          "items": {
-            "type": "integer"
-          }
-        },
-        "stateLocations": {
-          "type": "array",
-          "description": "State locations to use",
-          "items": {
-            "type": "integer"
-          }
         }
       }
     },

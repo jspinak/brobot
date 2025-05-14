@@ -111,12 +111,12 @@ public class StateRegion implements StateObject {
         }
 
         public Builder setProbabilityExists(int probabilityExists) {
-            this.setProbabilityExists(probabilityExists);
+            this.probabilityExists = probabilityExists;
             return this;
         }
 
         public Builder setTimesActedOn(int timesActedOn) {
-            this.setTimesActedOn(timesActedOn);
+            this.timesActedOn = timesActedOn;
             return this;
         }
 

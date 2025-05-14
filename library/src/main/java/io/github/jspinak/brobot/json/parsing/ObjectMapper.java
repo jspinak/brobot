@@ -1,5 +1,6 @@
 package io.github.jspinak.brobot.json.parsing;
 
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -12,7 +13,9 @@ import io.github.jspinak.brobot.datatypes.primitives.location.Location;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.primitives.region.SearchRegions;
 import io.github.jspinak.brobot.json.mixins.*;
+import io.github.jspinak.brobot.json.module.BrobotJsonModule;
 import org.bytedeco.opencv.opencv_core.Rect;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.awt.*;
@@ -25,20 +28,25 @@ import java.io.InputStream;
 @Component
 public class ObjectMapper {
 
-    private final com.fasterxml.jackson.databind.ObjectMapper mapper = configureObjectMapper();
+    private final com.fasterxml.jackson.databind.ObjectMapper mapper;
 
-    public ObjectMapper() {
-        configureObjectMapper();
+    @Autowired
+    public ObjectMapper(BrobotJsonModule brobotJsonModule) {
+        this.mapper = configureObjectMapper(brobotJsonModule);
     }
 
     /**
-     * Configure the ObjectMapper with standard settings
+     * Configure the ObjectMapper with standard settings and the BrobotJsonModule
      */
-    private com.fasterxml.jackson.databind.ObjectMapper configureObjectMapper() {
+    private com.fasterxml.jackson.databind.ObjectMapper configureObjectMapper(BrobotJsonModule brobotJsonModule) {
         com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         mapper.enable(SerializationFeature.INDENT_OUTPUT);
         mapper.registerModule(new JavaTimeModule()); // For Java 8 date/time support
+        mapper.configure(JsonParser.Feature.ALLOW_COMMENTS, true);
+
+        // Register the BrobotJsonModule for custom serializers
+        mapper.registerModule(brobotJsonModule);
 
         // Add mixins to handle problematic classes
         mapper.addMixIn(Location.class, LocationMixin.class);
@@ -50,6 +58,7 @@ public class ObjectMapper {
         mapper.addMixIn(org.sikuli.script.Screen.class, SikuliScreenMixin.class);
         mapper.addMixIn(Region.class, RegionMixin.class);
         mapper.addMixIn(SearchRegions.class, SearchRegionsMixin.class);
+        mapper.addMixIn(io.github.jspinak.brobot.datatypes.primitives.match.Match.class, MatchMixin.class);
 
         // Add mixins for image-related classes
         mapper.addMixIn(BufferedImage.class, BufferedImageMixin.class);
