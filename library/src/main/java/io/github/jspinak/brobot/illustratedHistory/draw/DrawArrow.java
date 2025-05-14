@@ -19,8 +19,8 @@ public class DrawArrow {
      * @param color is the color in which to draw.
      */
     public void drawArrow(Mat scene, Location start, Location end, Scalar color) {
-        Point startPoint = new Point(start.getX(), start.getY());
-        Point endPoint = new Point(end.getX(), end.getY());
+        Point startPoint = new Point(start.getCalculatedX(), start.getCalculatedY());
+        Point endPoint = new Point(end.getCalculatedX(), end.getCalculatedY());
         arrowedLine(scene, startPoint, endPoint, color, 5, 8, 0, .1);
     }
 }

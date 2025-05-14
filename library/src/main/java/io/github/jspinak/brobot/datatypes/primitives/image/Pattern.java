@@ -1,5 +1,6 @@
 package io.github.jspinak.brobot.datatypes.primitives.image;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.github.jspinak.brobot.datatypes.primitives.location.*;
 //import io.github.jspinak.brobot.datatypes.primitives.location.Positions;
@@ -115,6 +116,7 @@ public class Pattern {
      * Converts the BufferedImage in Image to a BGR JavaCV Mat.
      * @return a BGR Mat.
      */
+    @JsonIgnore
     public Mat getMat() {
         return image.getMatBGR();
     }
@@ -132,6 +134,7 @@ public class Pattern {
      * Converts the BufferedImage in Image to an HSV JavaCV Mat.
      * @return an HSV Mat.
      */
+    @JsonIgnore
     public Mat getMatHSV() {
         return image.getMatHSV();
     }
@@ -237,6 +240,7 @@ public class Pattern {
      * Another way to get the SikuliX object.
      * @return the SikuliX Pattern object.
      */
+    @JsonIgnore
     public org.sikuli.script.Pattern sikuli() {
         if (image == null) {
             System.out.println("Image is null for pattern: " + name);
@@ -245,6 +249,7 @@ public class Pattern {
         return new org.sikuli.script.Pattern(image.sikuli());
     }
 
+    @JsonIgnore
     public BufferedImage getBImage() {
         return image.getBufferedImage();
     }

@@ -20,6 +20,10 @@ public class Scene {
         this.pattern = new Pattern(filename);
     }
 
+    public Scene() { // for JSON deserialization
+        this.pattern = new Pattern();
+    }
+
     @Override
     public String toString() {
         return "Scene{" +

@@ -75,14 +75,14 @@ public class DragSimple implements ActionInterface {
         }
         if (!objColl.getStateRegions().isEmpty()) {
             Location loc = new Location(objColl.getStateRegions().get(0).getSearchRegion().getLocation());
-            loc.setX(loc.getX() + actionOptions.getAddX());
-            loc.setY(loc.getY() + actionOptions.getAddY());
+            loc.setX(loc.getCalculatedX() + actionOptions.getAddX());
+            loc.setY(loc.getCalculatedY() + actionOptions.getAddY());
             addMatch(loc, matches);
         }
         if (!objColl.getStateLocations().isEmpty()) {
             Location loc = objColl.getStateLocations().get(0).getLocation();
-            loc.setX(loc.getX() + actionOptions.getAddX());
-            loc.setY(loc.getY() + actionOptions.getAddY());
+            loc.setX(loc.getCalculatedX() + actionOptions.getAddX());
+            loc.setY(loc.getCalculatedY() + actionOptions.getAddY());
             addMatch(loc, matches);
         }
         addStartLocationFromOptions(actionOptions, matches);
@@ -107,15 +107,15 @@ public class DragSimple implements ActionInterface {
         if (objColl.getStateImages().size() == 1) objectIndexNeeded = 0;
         if (objColl.getStateRegions().size() > objectIndexNeeded) {
             Location loc = new Location(objColl.getStateRegions().get(objectIndexNeeded).getSearchRegion().getLocation());
-            loc.setX(loc.getX() + actionOptions.getDragToOffsetX());
-            loc.setY(loc.getY() + actionOptions.getDragToOffsetY());
+            loc.setX(loc.getCalculatedX() + actionOptions.getDragToOffsetX());
+            loc.setY(loc.getCalculatedY() + actionOptions.getDragToOffsetY());
             addMatch(loc, matches);
         }
         if (objColl.getStateRegions().size() == 1) objectIndexNeeded = 0;
         if (objColl.getStateLocations().size() > objectIndexNeeded) {
             Location loc = objColl.getStateLocations().get(objectIndexNeeded).getLocation();
-            loc.setX(loc.getX() + actionOptions.getDragToOffsetX());
-            loc.setY(loc.getY() + actionOptions.getDragToOffsetY());
+            loc.setX(loc.getCalculatedX() + actionOptions.getDragToOffsetX());
+            loc.setY(loc.getCalculatedY() + actionOptions.getDragToOffsetY());
             addMatch(loc, matches);
         }
         addEndLocationFromOptions(actionOptions, matches);
@@ -124,15 +124,15 @@ public class DragSimple implements ActionInterface {
 
     private void addStartLocationFromOptions(ActionOptions actionOptions, Matches matches) {
         Location loc = new Location(Mouse.at());
-        loc.setX(loc.getX() + actionOptions.getAddX());
-        loc.setY(loc.getY() + actionOptions.getAddY());
+        loc.setX(loc.getCalculatedX() + actionOptions.getAddX());
+        loc.setY(loc.getCalculatedY() + actionOptions.getAddY());
         addMatch(loc, matches);
     }
 
     private void addEndLocationFromOptions(ActionOptions actionOptions, Matches matches) {
         Location loc = new Location(Mouse.at());
-        loc.setX(loc.getX() + actionOptions.getAddX2());
-        loc.setY(loc.getY() + actionOptions.getAddY2());
+        loc.setX(loc.getCalculatedX() + actionOptions.getAddX2());
+        loc.setY(loc.getCalculatedY() + actionOptions.getAddY2());
         addMatch(loc, matches);
     }
 

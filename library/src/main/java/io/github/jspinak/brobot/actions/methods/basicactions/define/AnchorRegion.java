@@ -36,37 +36,37 @@ public class AnchorRegion {
      * and not a specific point with x and y values.
      */
     private void adjustDefinedRegion(Region region, Location location, Positions.Name anchor) {
-        int xDiff = location.getX() - region.x();
-        int x2Diff = location.getX() - region.x2();
-        int yDiff = location.getY() - region.y();
-        int y2Diff = location.getY() - region.y2();
+        int xDiff = location.getCalculatedX() - region.x();
+        int x2Diff = location.getCalculatedX() - region.x2();
+        int yDiff = location.getCalculatedY() - region.y();
+        int y2Diff = location.getCalculatedY() - region.y2();
         if (anchor == Positions.Name.TOPLEFT) {
-            if (xDiff > 0) region.adjustX(location.getX());
-            if (yDiff > 0) region.adjustY(location.getY());
+            if (xDiff > 0) region.adjustX(location.getCalculatedX());
+            if (yDiff > 0) region.adjustY(location.getCalculatedY());
         }
         if (anchor == Positions.Name.MIDDLELEFT) {
-            if (xDiff > 0) region.adjustX(location.getX());
+            if (xDiff > 0) region.adjustX(location.getCalculatedX());
         }
         if (anchor == Positions.Name.BOTTOMLEFT) {
-            if (xDiff > 0) region.adjustX(location.getX());
-            if (y2Diff < 0) region.adjustY2(location.getY());
+            if (xDiff > 0) region.adjustX(location.getCalculatedX());
+            if (y2Diff < 0) region.adjustY2(location.getCalculatedY());
         }
         if (anchor == Positions.Name.TOPMIDDLE) {
-            if (yDiff > 0) region.adjustY(location.getY());
+            if (yDiff > 0) region.adjustY(location.getCalculatedY());
         }
         if (anchor == Positions.Name.TOPRIGHT) {
-            if (x2Diff < 0) region.adjustX2(location.getX());
-            if (yDiff > 0) region.adjustY(location.getY());
+            if (x2Diff < 0) region.adjustX2(location.getCalculatedX());
+            if (yDiff > 0) region.adjustY(location.getCalculatedY());
         }
         if (anchor == Positions.Name.MIDDLERIGHT) {
-            if (x2Diff < 0) region.adjustX2(location.getX());
+            if (x2Diff < 0) region.adjustX2(location.getCalculatedX());
         }
         if (anchor == Positions.Name.BOTTOMRIGHT) {
-            if (x2Diff < 0) region.adjustX2(location.getX());
-            if (y2Diff < 0) region.adjustY2(location.getY());
+            if (x2Diff < 0) region.adjustX2(location.getCalculatedX());
+            if (y2Diff < 0) region.adjustY2(location.getCalculatedY());
         }
         if (anchor == Positions.Name.BOTTOMMIDDLE) {
-            if (y2Diff < 0) region.adjustY2(location.getY());
+            if (y2Diff < 0) region.adjustY2(location.getCalculatedY());
         }
     }
 

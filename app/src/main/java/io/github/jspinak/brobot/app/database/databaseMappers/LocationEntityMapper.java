@@ -20,7 +20,7 @@ public class LocationEntityMapper {
     public LocationEntity map(Location location) {
         LocationEntity locationEntity = new LocationEntity();
         locationEntity.setName(location.getName());
-        locationEntity.setLocX(location.getX());
+        locationEntity.setLocX(location.getCalculatedX());
         if (location.getRegion() != null) locationEntity.setRegion(regionEmbeddableMapper.map(location.getRegion()));
         if (location.getPosition() != null) locationEntity.setPosition(positionEmbeddableMapper.map(location.getPosition()));
         if (location.getAnchor() != null) locationEntity.setAnchor(location.getAnchor());

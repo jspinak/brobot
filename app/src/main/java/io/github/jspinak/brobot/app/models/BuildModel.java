@@ -3,6 +3,7 @@ package io.github.jspinak.brobot.app.models;
 import io.github.jspinak.brobot.actions.BrobotSettings;
 import io.github.jspinak.brobot.app.services.*;
 import io.github.jspinak.brobot.database.services.AllStatesInProjectService;
+import io.github.jspinak.brobot.datatypes.project.Project;
 import io.github.jspinak.brobot.datatypes.state.state.State;
 import io.github.jspinak.brobot.manageStates.StateTransitions;
 import io.github.jspinak.brobot.services.Init;
@@ -19,6 +20,7 @@ public class BuildModel {
     private final AllStatesInProjectService allStatesInProjectService;
     private final StateTransitionsService stateTransitionsService;
     private final Init init;
+    private final Project project;
     private final ProjectService projectService;
     private final TransitionService transitionService;
     private final StateImageSenderService stateImageSenderService;
@@ -27,7 +29,7 @@ public class BuildModel {
 
     public BuildModel(StateService stateService, StateTransitionsRepository stateTransitionsRepository,
             AllStatesInProjectService allStatesInProjectService,
-            StateTransitionsService stateTransitionsService, Init init,
+            StateTransitionsService stateTransitionsService, Init init, Project project,
             ProjectService projectService, TransitionService transitionService,
             StateImageSenderService stateImageSenderService,
             StateImageService stateImageService, ProjectSenderService projectSenderService) {
@@ -36,6 +38,7 @@ public class BuildModel {
         this.allStatesInProjectService = allStatesInProjectService;
         this.stateTransitionsService = stateTransitionsService;
         this.init = init;
+        this.project = project;
         this.projectService = projectService;
         this.transitionService = transitionService;
         this.stateImageSenderService = stateImageSenderService;
@@ -44,7 +47,8 @@ public class BuildModel {
     }
 
     public Model build(Long projectId) {
-        BrobotSettings.setCurrentProject(projectId, projectService.getProjectById(projectId).getName());
+        project.setId(projectId);
+        project.setName(projectService.getProjectById(projectId).getName());
 
         // Clear all states and transitions
         allStatesInProjectService.deleteAllStates();

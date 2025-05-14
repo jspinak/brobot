@@ -1,12 +1,12 @@
 package io.github.jspinak.brobot.datatypes.primitives.location;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.StateLocation;
 import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.StateRegion;
-import io.github.jspinak.brobot.reports.Report;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -48,7 +48,7 @@ public class Location {
 
     public Location(Location loc) {
         double percentOfW, percentOfH;
-        if (isDefinedWithRegion()) {
+        if (LocationUtils.isDefinedWithRegion(loc)) {
             this.region = loc.getRegion();
             if (loc.getPercentOfW().isPresent()) percentOfW = loc.getPercentOfW().get();
             else percentOfW = .5;
@@ -130,148 +130,124 @@ public class Location {
     }
 
     public Optional<Double> getPercentOfW() {
-        if (isDefinedByXY()) return Optional.empty();
+        if (LocationUtils.isDefinedByXY(this)) return Optional.empty();
         return Optional.of(position.getPercentW());
     }
 
     public Optional<Double> getPercentOfH() {
-        if (isDefinedByXY()) return Optional.empty();
+        if (LocationUtils.isDefinedByXY(this)) return Optional.empty();
         return Optional.of(position.getPercentH());
     }
 
     public void addPercentOfW(int addPercent) {
-        if (isDefinedWithRegion()) position.addPercentW(addPercent);
+        if (LocationUtils.isDefinedWithRegion(this)) position.addPercentW(addPercent);
     }
 
     public void addPercentOfH(int addPercent) {
-        if (isDefinedWithRegion()) position.addPercentH(addPercent);
+        if (LocationUtils.isDefinedWithRegion(this)) position.addPercentH(addPercent);
     }
 
     public void multiplyPercentOfW(double multiplyBy) {
-        if (isDefinedWithRegion()) position.multiplyPercentW(multiplyBy);
+        if (LocationUtils.isDefinedWithRegion(this)) position.multiplyPercentW(multiplyBy);
     }
 
     public void multiplyPercentOfH(double multiplyBy) {
-        if (isDefinedWithRegion()) position.multiplyPercentH(multiplyBy);
+        if (LocationUtils.isDefinedWithRegion(this)) position.multiplyPercentH(multiplyBy);
     }
 
+    @JsonIgnore
     private org.sikuli.script.Location getSikuliLocationFromXY() {
-        return new org.sikuli.script.Location(x + offsetX, y + offsetY);
+        return LocationUtils.getSikuliLocationFromXY(x, y, offsetX, offsetY);
     }
 
+    @JsonIgnore
     private org.sikuli.script.Location getSikuliLocationFromRegion() {
-        double locX = region.x() + (region.w() * position.getPercentW()) + offsetX;
-        double locY = region.y() + (region.h() * position.getPercentH()) + offsetY;
-        return new org.sikuli.script.Location(locX, locY);
+        return LocationUtils.getSikuliLocationFromRegion(region, position, offsetX, offsetY);
     }
 
+    @JsonIgnore
     public org.sikuli.script.Location sikuli() {
-        if (isDefinedByXY()) return getSikuliLocationFromXY();
-        return getSikuliLocationFromRegion();
+        return LocationUtils.getSikuliLocation(this);
     }
 
-    public int getX() {
-        return sikuli().x;
-    }
-
-    public int getY() {
-        return sikuli().y;
-    }
-
-    public int getRegionW() {
-        if (isDefinedByXY()) return 1;
-        return region.w();
-    }
-
-    public int getRegionH() {
-        if (isDefinedByXY()) return 1;
-        return region.h();
-    }
-
-    public boolean defined() {
-        return !isDefinedByXY() || getX() > 0 || getY() > 0;
-    }
-
-    public Match toMatch() {
-        return new Match.Builder()
-                .setRegion(getX(), getY(), 1, 1)
-                .build();
-    }
-
-    public StateLocation asStateLocationInNullState() {
-        return new StateLocation.Builder()
-                .setOwnerStateName("null")
-                .setLocation(this)
-                .build();
-    }
-
-    public ObjectCollection asObjectCollection() {
-        StateLocation stateLocation = new StateLocation.Builder()
-                .setLocation(this)
-                .setOwnerStateName("null")
-                .setPosition(Positions.Name.TOPLEFT)
-                .build();
-        return new ObjectCollection.Builder()
-                .withLocations(stateLocation)
-                .build();
-    }
-
-    public Location getOpposite() {
-        if (region == null) return this;
-        return new Location(this.region,
-                1 - position.getPercentW(),
-                1 - position.getPercentH());
-    }
-
-    public Location getOppositeTo(Location location) {
-        int addX = 2 * (location.getX() - getX());
-        int addY = 2 * (location.getY() - getY());
-        return new Location(getX() + addX, getY() + addY);
-    }
-
-    public void adjustToRegion() {
-        double percentOfW, percentOfH;
-        percentOfW = Math.max(Math.min(1, position.getPercentW()), 0);
-        percentOfH = Math.max(Math.min(1, position.getPercentH()), 0);
-        position = new Position(percentOfW, percentOfH);
-    }
-
-    private boolean isDefinedByXY() {
-        return region == null;
-    }
-
-    private boolean isDefinedWithRegion() {
-        return !isDefinedByXY();
-    }
-
-    /*
-    Java treats angles like this:
-    0 degrees is straight right, or (1,0)
-    -90 degrees is straight down, or (0,-1)
-    90 degrees is straight up, or (1,0)
-    both positive and negative continue until -179 meets 180 (-1,0)
-    This is the opposite relationship for y-values on the screen (smaller values are up).
-     */
-    public void setFromCenter(double angle, double distance) {
-        double rad = Math.toRadians(angle);
-        // move from current point if not defined with a region
-        int plusX = (int)(distance * Math.cos(rad));
-        int minusY = (int)(distance * Math.sin(rad)); // the angle is the cartesian angle
-        int ang = (int)Math.round(angle);
-        int dist = (int)Math.round(distance);
-        if (isDefinedByXY()) {
-            x += plusX;
-            y -= minusY;
-        } else {// if defined by a region move from the center of the region
-            Location center = new Location(region, Positions.Name.MIDDLEMIDDLE);
-            setPosition(center.getX() + plusX, center.getY() - minusY);
+    @JsonIgnore
+    public int getCalculatedX() {
+        if (region == null) {
+            return x + offsetX;
         }
+        return (int) (region.x() + (region.w() * position.getPercentW()) + offsetX);
+    }
+
+    @JsonIgnore
+    public int getCalculatedY() {
+        if (region == null) {
+            return y + offsetY;
+        }
+        return (int) (region.y() + (region.h() * position.getPercentH()) + offsetY);
+    }
+
+    @JsonIgnore
+    public int getRegionW() {
+        return LocationUtils.getRegionW(this);
+    }
+
+    @JsonIgnore
+    public int getRegionH() {
+        return LocationUtils.getRegionH(this);
+    }
+
+    @JsonIgnore
+    public boolean defined() {
+        return LocationUtils.isDefined(this);
+    }
+
+    @JsonIgnore
+    public Match toMatch() {
+        return LocationUtils.toMatch(this);
+    }
+
+    @JsonIgnore
+    public StateLocation asStateLocationInNullState() {
+        return LocationUtils.asStateLocationInNullState(this);
+    }
+
+    @JsonIgnore
+    public ObjectCollection asObjectCollection() {
+        return LocationUtils.asObjectCollection(this);
+    }
+
+    @JsonIgnore
+    public Location getOpposite() {
+        return LocationUtils.getOpposite(this);
+    }
+
+    @JsonIgnore
+    public Location getOppositeTo(Location location) {
+        return LocationUtils.getOppositeTo(this, location);
+    }
+
+    @JsonIgnore
+    public void adjustToRegion() {
+        LocationUtils.adjustToRegion(this);
+    }
+
+    @JsonIgnore
+    private boolean isDefinedByXY() {
+        return LocationUtils.isDefinedByXY(this);
+    }
+
+    @JsonIgnore
+    private boolean isDefinedWithRegion() {
+        return LocationUtils.isDefinedWithRegion(this);
+    }
+
+    @JsonIgnore
+    public void setFromCenter(double angle, double distance) {
+        LocationUtils.setFromCenter(this, angle, distance);
     }
 
     public boolean equals(Location l) {
-        return (x == l.x && y == l.y &&
-                //region.equals(l.region) && position == l.position &&
-                isDefinedByXY() == l.isDefinedByXY());
+        return LocationUtils.equals(this, l);
     }
 
     /**
@@ -279,41 +255,16 @@ public class Location {
      * @param loc the location to add to this one
      */
     public void add(Location loc) {
-        if (isDefinedByXY() && loc.isDefinedByXY()) {
-            //Report.println("Adding x,y locations " + loc.x + " " + loc.y);
-            x += loc.x;
-            y += loc.y;
-            return;
-        }
-        if (isDefinedWithRegion() && loc.isDefinedWithRegion()) {
-            position.addPercentW(loc.position.getPercentW());
-            position.addPercentH(loc.position.getPercentH());
-            return;
-        }
-        if (isDefinedByXY()) {
-            x += (int)(loc.position.getPercentW() * (double)region.w());
-            y += (int)(loc.position.getPercentH() * (double)region.h());
-            return;
-        }
-        //Report.println("percent W,H " + position.getPercentW() + " " + position.getPercentH());
-        //Report.println("region W,H " + region.w + " " + region.h);
-        //Report.println("x,y " + x + " " + y);
-        x = getX() + loc.x;
-        y = getY() + loc.y;
-        //position.addPercentW((double)loc.x / region.w);
-        //position.addPercentH((double)loc.y / region.h);
-        //Report.println("percent W,H " + position.getPercentW() + " " + position.getPercentH());
-        //Report.println("region W,H " + region.w + " " + region.h);
-        //Report.println("x,y " + x + " " + y);
+        LocationUtils.add(this, loc);
     }
 
     public void print() {
-        Report.format("%d.%d ",x,y);
+        LocationUtils.print(this);
     }
 
     @Override
     public String toString() {
-        return String.format("L[%d.%d]", getX(), getY());
+        return LocationUtils.toString(this);
     }
 
     public static class Builder {
@@ -417,5 +368,4 @@ public class Location {
             return location;
         }
     }
-
 }

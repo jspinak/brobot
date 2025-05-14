@@ -27,6 +27,10 @@ public class ActionDefinition {
         steps.add(new ActionStep(options, objects));
     }
 
+    public void addStep(ActionStep step) {
+        steps.add(step);
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();

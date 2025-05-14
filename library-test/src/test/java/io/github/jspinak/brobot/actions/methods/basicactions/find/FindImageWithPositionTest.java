@@ -55,7 +55,7 @@ public class FindImageWithPositionTest {
         Matches matches2 = action.perform(ActionOptions.Action.FIND, objColl2);
         Location loc2 = matches2.getMatchLocations().get(0);
 
-        assertNotEquals(loc1.getX(), loc2.getX());
+        assertNotEquals(loc1.getCalculatedX(), loc2.getCalculatedX());
     }
 
     /*
@@ -95,7 +95,7 @@ public class FindImageWithPositionTest {
 
         System.out.println(loc1);
         System.out.println(loc2);
-        assertEquals(loc1.getX(), loc2.getX());
-        assertEquals(loc1.getY(), loc2.getY());
+        assertEquals(loc1.getCalculatedX(), loc2.getCalculatedX());
+        assertEquals(loc1.getCalculatedY(), loc2.getCalculatedY());
     }
 }

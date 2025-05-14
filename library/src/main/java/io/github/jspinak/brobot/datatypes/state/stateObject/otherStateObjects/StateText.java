@@ -22,7 +22,10 @@ public class StateText {
     private String text;
 
     public String getId() {
-        return objectType.name() + name + searchRegion.getX() + searchRegion.getY() + searchRegion.getW() + searchRegion.getY() + text;
+        String regionId = (searchRegion != null)
+            ? searchRegion.getX() + "" + searchRegion.getY() + "" + searchRegion.getW() + "" + searchRegion.getH()
+            : "nullRegion";
+        return objectType.name() + name + regionId + text;
     }
 
     public boolean defined() { return text != null && !text.isEmpty(); }

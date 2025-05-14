@@ -18,6 +18,7 @@ import java.util.function.BooleanSupplier;
 @Getter
 @Setter
 public class JavaStateTransition implements IStateTransition {
+    private String type = "java";
     private BooleanSupplier transitionFunction;
 
     private StaysVisible staysVisibleAfterTransition;
