@@ -1,6 +1,7 @@
 package io.github.jspinak.brobot.datatypes.primitives.location;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -17,8 +18,7 @@ import lombok.Setter;
  *   MIDDLELEFT defines the left border of the Region
  *   TOPLEFT defines the left and top borders of the Region
  */
-@Getter
-@Setter
+@Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Anchor {
 
@@ -38,11 +38,6 @@ public class Anchor {
         return "Anchor:" +
                 " anchorInNewDefinedRegion=" + anchorInNewDefinedRegion +
                 " positionInMatch=" + positionInMatch;
-    }
-
-    public boolean equals(Anchor anchor) {
-        return anchorInNewDefinedRegion == anchor.getAnchorInNewDefinedRegion() &&
-                positionInMatch.equals(anchor.getPositionInMatch());
     }
 
 }

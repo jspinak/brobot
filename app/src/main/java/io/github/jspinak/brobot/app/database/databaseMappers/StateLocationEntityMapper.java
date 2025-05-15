@@ -33,7 +33,7 @@ public class StateLocationEntityMapper {
         stateLocationEntity.setName(stateLocation.getName());
         stateLocationEntity.setLocation(locationEntityMapper.map(stateLocation.getLocation()));
         stateLocationEntity.setOwnerStateName(stateLocation.getOwnerStateName());
-        stateLocationEntity.setStaysVisibleAfterClicked(stateLocation.getStaysVisibleAfterClicked());
+        stateLocationEntity.setStaysVisibleAfterClicked(stateLocation.getProbabilityStaysVisibleAfterClicked());
         stateLocationEntity.setProbabilityExists(stateLocationEntity.getProbabilityExists());
         stateLocationEntity.setTimesActedOn(stateLocation.getTimesActedOn());
         stateLocationEntity.setPosition(positionEmbeddableMapper.map(stateLocation.getPosition()));
@@ -48,7 +48,7 @@ public class StateLocationEntityMapper {
         stateLocation.setName(stateLocationEntity.getName());
         stateLocation.setLocation(locationEntityMapper.map(stateLocationEntity.getLocation()));
         stateLocation.setOwnerStateName(stateLocationEntity.getOwnerStateName());
-        stateLocation.setStaysVisibleAfterClicked(stateLocationEntity.getStaysVisibleAfterClicked());
+        stateLocation.setProbabilityStaysVisibleAfterClicked(stateLocationEntity.getStaysVisibleAfterClicked());
         stateLocation.setProbabilityExists(stateLocationEntity.getProbabilityExists());
         stateLocation.setTimesActedOn(stateLocationEntity.getTimesActedOn());
         stateLocation.setPosition(positionEmbeddableMapper.map(stateLocationEntity.getPosition()));

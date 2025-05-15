@@ -42,8 +42,8 @@ public class LocationJsonParserTest {
 
         assertNotNull(location);
         assertEquals("XYLocation", location.getName());
-        assertEquals(100, location.getCalculatedX());
-        assertEquals(200, location.getCalculatedY());
+        assertEquals(105, location.getCalculatedX());
+        assertEquals(210, location.getCalculatedY());
         assertEquals(5, location.getOffsetX());
         assertEquals(10, location.getOffsetY());
         assertNull(location.getRegion());
@@ -109,8 +109,8 @@ public class LocationJsonParserTest {
         // Verify
         assertNotNull(deserializedLocation);
         assertEquals("SerializedXYLocation", deserializedLocation.getName());
-        assertEquals(150, deserializedLocation.getCalculatedX());
-        assertEquals(250, deserializedLocation.getCalculatedY());
+        assertEquals(165, deserializedLocation.getCalculatedX());
+        assertEquals(275, deserializedLocation.getCalculatedY());
         assertEquals(15, deserializedLocation.getOffsetX());
         assertEquals(25, deserializedLocation.getOffsetY());
     }
@@ -278,8 +278,8 @@ public class LocationJsonParserTest {
         // Verify
         assertNotNull(deserializedLocation);
         assertEquals("BuilderLocation", deserializedLocation.getName());
-        assertEquals(100, deserializedLocation.getCalculatedX());
-        assertEquals(200, deserializedLocation.getCalculatedY());
+        assertEquals(110, deserializedLocation.getCalculatedX());
+        assertEquals(220, deserializedLocation.getCalculatedY());
         assertEquals(10, deserializedLocation.getOffsetX());
         assertEquals(20, deserializedLocation.getOffsetY());
         assertEquals(Positions.Name.TOPLEFT, deserializedLocation.getAnchor());

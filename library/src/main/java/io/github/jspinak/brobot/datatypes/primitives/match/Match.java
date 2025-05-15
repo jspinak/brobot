@@ -115,8 +115,8 @@ public class Match {
         return image.getMatBGR();
     }
 
-    public int compareByScore(Match m) {
-        return (int)(score - m.getScore());
+    public double compareByScore(Match m) {
+        return score - m.getScore();
     }
 
     public int size() { // TODO: check. this used to refer to the size of the Pattern

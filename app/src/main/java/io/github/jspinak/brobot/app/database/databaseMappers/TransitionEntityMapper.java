@@ -48,7 +48,7 @@ public class TransitionEntityMapper {
     public TransitionEntity map(ActionDefinitionStateTransition actionDefinitionStateTransition,
                                 SceneService sceneService, PatternService patternService) {
         TransitionEntity entity = new TransitionEntity();
-        actionDefinitionStateTransition.getActionDefinition().ifPresent(actionDef ->
+        actionDefinitionStateTransition.getActionDefinitionOptional().ifPresent(actionDef ->
                 entity.setActionDefinition(actionDefinitionEntityMapper.map(actionDef, sceneService, patternService)));
 
         // Map the StaysVisible enum

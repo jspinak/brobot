@@ -43,9 +43,9 @@ public class StateImageJsonParserTest {
         System.out.println("Serialized StateImage: " + json);
 
         // Verify JSON contains expected fields
-        assertTrue(json.contains("\"name\":\"TestImage\""));
-        assertTrue(json.contains("\"ownerStateName\":\"TestState\""));
-        assertTrue(json.contains("\"objectType\":\"IMAGE\""));
+        assertTrue(json.contains("\"name\" : \"TestImage\""));
+        assertTrue(json.contains("\"ownerStateName\" : \"TestState\""));
+        assertTrue(json.contains("\"objectType\" : \"IMAGE\""));
 
         // Deserialize back to StateImage
         JsonNode jsonNode = jsonParser.parseJson(json);

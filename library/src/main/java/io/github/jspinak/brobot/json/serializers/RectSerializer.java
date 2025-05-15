@@ -4,12 +4,14 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import org.bytedeco.opencv.opencv_core.Rect;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
 /**
  * Custom serializer for JavaCV Rect objects to prevent circular references.
  */
+@Component
 public class RectSerializer extends JsonSerializer<Rect> {
     @Override
     public void serialize(Rect rect, JsonGenerator gen, SerializerProvider provider) throws IOException {

@@ -1,9 +1,11 @@
 package io.github.jspinak.brobot.datatypes.primitives.match;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.mock.MatchMaker;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -20,14 +22,23 @@ import static java.util.stream.Collectors.toList;
  *
  * All Actions except for Vanish are used in mocks for Find operations.
  */
-@Getter
-@Setter
+@Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MatchHistory {
 
     private int timesSearched = 0;
     private int timesFound = 0;
     private List<MatchSnapshot> snapshots = new ArrayList<>();
+
+    @JsonProperty
+    private void setTimesSearched(int timesSearched) {
+        this.timesSearched = timesSearched;
+    }
+
+    @JsonProperty
+    private void setTimesFound(int timesFound) {
+        this.timesFound = timesFound;
+    }
 
     /**
      * A Snapshot is either:
@@ -173,14 +184,13 @@ public class MatchHistory {
         this.snapshots.addAll(matchHistory.getSnapshots());
     }
 
-    public boolean equals(MatchHistory matchHistory) {
-        if (timesSearched != matchHistory.getTimesSearched()) return false;
-        if (timesFound != matchHistory.getTimesFound()) return false;
-        if (snapshots.size() != matchHistory.getSnapshots().size()) return false;
-        for (int i=0; i<snapshots.size(); i++) {
-            if (!snapshots.get(i).equals(matchHistory.getSnapshots().get(i))) return false;
-        }
-        return true;
+    @Override
+    public String toString() {
+        return "MatchHistory{" +
+                "timesSearched=" + timesSearched +
+                ", timesFound=" + timesFound +
+                ", snapshots=" + snapshots +
+                '}';
     }
 
 }

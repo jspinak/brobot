@@ -1,6 +1,7 @@
 package io.github.jspinak.brobot.datatypes.primitives.location;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -10,8 +11,7 @@ import lombok.Setter;
  *    point to a location as an offset from the match's center. This is ok when you know the size of the
  *    image but less convenient for working with general areas of an image (i.e. top left, bottom right).
  */
-@Getter
-@Setter
+@Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Position {
 
@@ -67,10 +67,6 @@ public class Position {
     @Override
     public String toString() {
         return String.format("P[%.1f %.1f]", percentW, percentH);
-    }
-
-    public boolean equals(Position position) {
-        return percentW == position.getPercentW() && percentH == position.getPercentH();
     }
 
 }

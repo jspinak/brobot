@@ -7,6 +7,7 @@ import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.StateLocation;
 import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.StateRegion;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -17,8 +18,7 @@ import java.util.Optional;
  * - when the region is defined, first with the position in the region, then with the offset
  * - when the region is not defined, with the x,y values, then with the offset
  */
-@Getter
-@Setter
+@Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Location {
 
@@ -244,10 +244,6 @@ public class Location {
     @JsonIgnore
     public void setFromCenter(double angle, double distance) {
         LocationUtils.setFromCenter(this, angle, distance);
-    }
-
-    public boolean equals(Location l) {
-        return LocationUtils.equals(this, l);
     }
 
     /**

@@ -9,25 +9,20 @@ import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.St
 import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.StateRegion;
 import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.StateString;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
-import io.github.jspinak.brobot.json.config.BrobotJsonTestConfig;
 import io.github.jspinak.brobot.json.parsing.JsonParser;
 import io.github.jspinak.brobot.json.parsing.exception.ConfigurationException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.sikuli.script.ImagePath;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
-@Import(BrobotJsonTestConfig.class)
 class ObjectCollectionJsonParserTest {
 
     @Autowired
-    @Qualifier("testJsonParser")
     private JsonParser jsonParser;
 
     @BeforeAll
@@ -129,7 +124,7 @@ class ObjectCollectionJsonParserTest {
 
         // Verify scenes
         assertEquals(1, deserializedCollection.getScenes().size());
-        assertEquals("bottomR", deserializedCollection.getScenes().getFirst().getPattern().getName());
+        assertEquals("bottomR", deserializedCollection.getScenes().getFirst().getPattern().getImgpath());
     }
 
     @Test

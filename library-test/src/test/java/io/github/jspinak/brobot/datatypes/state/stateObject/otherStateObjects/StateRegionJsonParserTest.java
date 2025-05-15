@@ -42,14 +42,14 @@ public class StateRegionJsonParserTest {
         System.out.println("Serialized StateRegion: " + json);
 
         // Verify JSON contains expected fields
-        assertTrue(json.contains("\"name\":\"TestRegion\""));
-        assertTrue(json.contains("\"ownerStateName\":\"TestState\""));
-        assertTrue(json.contains("\"objectType\":\"REGION\""));
+        assertTrue(json.contains("\"name\" : \"TestRegion\""));
+        assertTrue(json.contains("\"ownerStateName\" : \"TestState\""));
+        assertTrue(json.contains("\"objectType\" : \"REGION\""));
         assertTrue(json.contains("\"searchRegion\""));
-        assertTrue(json.contains("\"x\":10"));
-        assertTrue(json.contains("\"y\":20"));
-        assertTrue(json.contains("\"w\":100"));
-        assertTrue(json.contains("\"h\":200"));
+        assertTrue(json.contains("\"x\" : 10"));
+        assertTrue(json.contains("\"y\" : 20"));
+        assertTrue(json.contains("\"w\" : 100"));
+        assertTrue(json.contains("\"h\" : 200"));
 
         // Deserialize back to StateRegion
         JsonNode jsonNode = jsonParser.parseJson(json);
@@ -98,10 +98,10 @@ public class StateRegionJsonParserTest {
         System.out.println("Serialized StateRegion with properties: " + json);
 
         // Verify JSON contains additional properties
-        assertTrue(json.contains("\"staysVisibleAfterClicked\":500"));
-        assertTrue(json.contains("\"probabilityExists\":75"));
+        assertTrue(json.contains("\"staysVisibleAfterClicked\" : 500"));
+        assertTrue(json.contains("\"probabilityExists\" : 75"));
         assertTrue(json.contains("\"position\""));
-        assertTrue(json.contains("\"mockText\":\"Mock region text\""));
+        assertTrue(json.contains("\"mockText\" : \"Mock region text\""));
 
         // Deserialize back to StateRegion
         JsonNode jsonNode = jsonParser.parseJson(json);

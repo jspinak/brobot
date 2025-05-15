@@ -81,7 +81,7 @@ public class StateTransitionsJsonParserTest {
         assertNotNull(transition);
         assertTrue(transition.getActivate().contains(2L));
         assertTrue(transition.getExit().contains(1L));
-        assertTrue(transition.getActionDefinition().isPresent());
+        assertTrue(transition.getActionDefinitionOptional().isPresent());
     }
 
     /**
@@ -125,9 +125,9 @@ public class StateTransitionsJsonParserTest {
 
         ActionDefinitionStateTransition finishTransition =
                 (ActionDefinitionStateTransition) stateTransitions.getTransitionFinish();
-        assertTrue(finishTransition.getActionDefinition().isPresent());
+        assertTrue(finishTransition.getActionDefinitionOptional().isPresent());
         assertEquals(ActionOptions.Action.FIND,
-                finishTransition.getActionDefinition().get().getSteps().get(0).getActionOptions().getAction());
+                finishTransition.getActionDefinitionOptional().get().getSteps().getFirst().getActionOptions().getAction());
     }
 
     @Test
@@ -140,8 +140,6 @@ public class StateTransitionsJsonParserTest {
 
         // Create transition finish
         ActionDefinitionStateTransition finishTransition = new ActionDefinitionStateTransition();
-        // Make sure it has the type field set
-        finishTransition.setType("actionDefinition");
 
         ActionDefinition finishActionDef = new ActionDefinition();
         ActionStep finishStep = new ActionStep();
@@ -156,8 +154,6 @@ public class StateTransitionsJsonParserTest {
         // Create actionDefinitionTransitions
         Map<Long, ActionDefinitionStateTransition> actionDefinitionTransitions = new HashMap<>();
         ActionDefinitionStateTransition transition = new ActionDefinitionStateTransition();
-        // Make sure it has the type field set
-        transition.setType("actionDefinition");
 
         ActionDefinition actionDef = new ActionDefinition();
         ActionStep step = new ActionStep();
@@ -195,9 +191,9 @@ public class StateTransitionsJsonParserTest {
         assertInstanceOf(ActionDefinitionStateTransition.class, deserializedTransitions.getTransitionFinish());
         ActionDefinitionStateTransition deserializedFinish =
                 (ActionDefinitionStateTransition) deserializedTransitions.getTransitionFinish();
-        assertTrue(deserializedFinish.getActionDefinition().isPresent());
+        assertTrue(deserializedFinish.getActionDefinitionOptional().isPresent());
         assertEquals(ActionOptions.Action.HIGHLIGHT,
-                deserializedFinish.getActionDefinition().get().getSteps().getFirst().getActionOptions().getAction());
+                deserializedFinish.getActionDefinitionOptional().get().getSteps().getFirst().getActionOptions().getAction());
 
         // Verify actionDefinitionTransitions
         assertNotNull(deserializedTransitions.getActionDefinitionTransitions());
@@ -220,12 +216,10 @@ public class StateTransitionsJsonParserTest {
 
         // Create transition finish
         ActionDefinitionStateTransition finishTransition = new ActionDefinitionStateTransition();
-        finishTransition.setType("actionDefinition");
         stateTransitions.setTransitionFinish(finishTransition);
 
         // Create a transition to state 2
         ActionDefinitionStateTransition transition = new ActionDefinitionStateTransition();
-        transition.setType("actionDefinition");
         transition.getActivate().add(2L);
         stateTransitions.addTransition(transition);
 
@@ -261,19 +255,16 @@ public class StateTransitionsJsonParserTest {
         // Create transition finish with NONE (falls back to StateTransitions setting)
         ActionDefinitionStateTransition finishTransition = new ActionDefinitionStateTransition();
         finishTransition.setStaysVisibleAfterTransition(IStateTransition.StaysVisible.NONE);
-        finishTransition.setType("actionDefinition");
         stateTransitions.setTransitionFinish(finishTransition);
 
         // Create a transition to state 2 with explicit FALSE
         ActionDefinitionStateTransition transition1 = new ActionDefinitionStateTransition();
-        transition1.setType("actionDefinition");
         transition1.getActivate().add(2L);
         transition1.setStaysVisibleAfterTransition(IStateTransition.StaysVisible.FALSE);
         stateTransitions.addTransition(transition1);
 
         // Create a transition to state 3 with explicit TRUE
         ActionDefinitionStateTransition transition2 = new ActionDefinitionStateTransition();
-        transition2.setType("actionDefinition");
         transition2.getActivate().add(3L);
         transition2.setStaysVisibleAfterTransition(IStateTransition.StaysVisible.TRUE);
         stateTransitions.addTransition(transition2);
