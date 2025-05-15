@@ -23,7 +23,7 @@ public interface IStateTransition {
         NONE, TRUE, FALSE
     }
 
-    Optional<ActionDefinition> getActionDefinition();
+    Optional<ActionDefinition> getActionDefinitionOptional();
 
     /**
      * When set, takes precedence over the same variable in StateTransitions.

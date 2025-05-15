@@ -36,58 +36,6 @@ public class MatchesJsonUtils {
     }
 
     /**
-     * Custom serializer for Matches to handle special cases
-     */
-    public static class MatchesSerializer extends JsonSerializer<Matches> {
-        @Override
-        public void serialize(Matches matches, JsonGenerator gen, SerializerProvider provider) throws IOException {
-            gen.writeStartObject();
-
-            // Handle basic fields
-            gen.writeStringField("actionDescription", matches.getActionDescription());
-            gen.writeBooleanField("success", matches.isSuccess());
-            gen.writeObjectField("duration", matches.getDuration());
-            gen.writeObjectField("startTime", matches.getStartTime());
-            gen.writeObjectField("endTime", matches.getEndTime());
-            gen.writeObjectField("selectedText", matches.getSelectedText());
-            gen.writeObjectField("activeStates", matches.getActiveStates());
-            gen.writeObjectField("definedRegions", matches.getDefinedRegions());
-
-            // Handle text
-            if (matches.getText() != null) {
-                gen.writeObjectField("text", matches.getText());
-            }
-
-            // Handle match list - copy to avoid circular references
-            List<Match> sanitizedMatches = new ArrayList<>();
-            for (Match match : matches.getMatchList()) {
-                // Create a simplified version without problematic fields
-                Match.Builder builder = new Match.Builder()
-                        .setRegion(match.getRegion())
-                        .setSimScore(match.getScore())
-                        .setName(match.getName());
-
-                // Properly handle StateObjectData
-                if (match.getStateObjectData() != null) {
-                    // Create a new StateObjectData with the necessary info
-                    StateObjectData stateObjectData = new StateObjectData();
-                    stateObjectData.setOwnerStateName(match.getOwnerStateName());
-                    stateObjectData.setStateObjectName(match.getStateObjectData().getStateObjectName());
-
-                    // Set the StateObjectData on the builder
-                    builder.setStateObjectData(stateObjectData);
-                }
-
-                sanitizedMatches.add(builder.build());
-            }
-            gen.writeObjectField("matchList", sanitizedMatches);
-
-            // Skip problematic fields: mask, sceneAnalysisCollection, actionLifecycle, actionOptions
-            gen.writeEndObject();
-        }
-    }
-
-    /**
      * Converts Matches to a Map representation that's easier to work with
      * for custom serialization, excluding problematic fields
      */
@@ -146,23 +94,4 @@ public class MatchesJsonUtils {
         }
     }
 
-    /**
-     * Custom serializer for Mat objects
-     */
-    public static class MatSerializer extends JsonSerializer<Mat> {
-        @Override
-        public void serialize(Mat mat, JsonGenerator gen, SerializerProvider provider) throws IOException {
-            // Instead of trying to serialize the full Mat, just output dimensions
-            gen.writeStartObject();
-            if (mat != null && !mat.isNull()) {
-                gen.writeNumberField("rows", mat.rows());
-                gen.writeNumberField("cols", mat.cols());
-                gen.writeNumberField("channels", mat.channels());
-                gen.writeStringField("type", "Mat");
-            } else {
-                gen.writeStringField("type", "null");
-            }
-            gen.writeEndObject();
-        }
-    }
 }

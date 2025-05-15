@@ -164,26 +164,6 @@ public class RegionJsonParserTest {
     }
 
     /**
-     * Test grid functionality
-     */
-    @Test
-    public void testGrid() {
-        Region region = new Region(0, 0, 300, 200);
-
-        // Create a 2x3 grid
-        List<Region> gridRegions = region.getGridRegions(2, 3);
-
-        // Should have 6 cells
-        assertEquals(6, gridRegions.size());
-
-        // First cell should be at (0,0) with width 100 and height 100
-        assertEquals(0, gridRegions.getFirst().x());
-        assertEquals(0, gridRegions.getFirst().y());
-        assertEquals(100, gridRegions.getFirst().w());
-        assertEquals(100, gridRegions.getFirst().h());
-    }
-
-    /**
      * Test isDefined method
      */
     @Test

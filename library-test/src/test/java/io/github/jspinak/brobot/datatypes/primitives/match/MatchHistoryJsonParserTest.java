@@ -101,8 +101,6 @@ public class MatchHistoryJsonParserTest {
     public void testSerializeDeserializeMatchHistory() throws ConfigurationException {
         // Create a match history
         MatchHistory matchHistory = new MatchHistory();
-        matchHistory.setTimesSearched(15);
-        matchHistory.setTimesFound(12);
 
         // Create and add a snapshot
         MatchSnapshot snapshot = new MatchSnapshot.Builder()
@@ -127,8 +125,8 @@ public class MatchHistoryJsonParserTest {
 
         // Verify
         assertNotNull(deserializedHistory);
-        assertEquals(15, deserializedHistory.getTimesSearched());
-        assertEquals(12, deserializedHistory.getTimesFound());
+        assertEquals(1, deserializedHistory.getTimesSearched());
+        assertEquals(1, deserializedHistory.getTimesFound());
 
         // Verify snapshots
         assertNotNull(deserializedHistory.getSnapshots());
@@ -235,22 +233,18 @@ public class MatchHistoryJsonParserTest {
         assertTrue(emptyHistory.isEmpty());
 
         MatchHistory history1 = new MatchHistory();
-        history1.setTimesSearched(5);
-        history1.setTimesFound(3);
         history1.addSnapshot(new MatchSnapshot.Builder().addMatch(new Match()).build());
         assertFalse(history1.isEmpty());
 
         MatchHistory history2 = new MatchHistory();
-        history2.setTimesSearched(10);
-        history2.setTimesFound(7);
         history2.addSnapshot(new MatchSnapshot.Builder().addMatch(new Match()).build());
         history2.addSnapshot(new MatchSnapshot.Builder().addMatch(new Match()).build());
 
         // Merge history2 into history1
         history1.merge(history2);
 
-        assertEquals(15, history1.getTimesSearched()); // 5 + 10
-        assertEquals(10, history1.getTimesFound()); // 3 + 7
+        assertEquals(3, history1.getTimesSearched()); // 1 + 2
+        assertEquals(3, history1.getTimesFound()); // 1 + 2
         assertEquals(3, history1.getSnapshots().size()); // 1 + 2
     }
 
@@ -260,8 +254,6 @@ public class MatchHistoryJsonParserTest {
     @Test
     public void testEquals() {
         MatchHistory history1 = new MatchHistory();
-        history1.setTimesSearched(5);
-        history1.setTimesFound(3);
 
         MatchSnapshot snapshot1 = new MatchSnapshot.Builder()
                 .setActionOptions(ActionOptions.Action.FIND)
@@ -271,8 +263,6 @@ public class MatchHistoryJsonParserTest {
 
         // Create identical history
         MatchHistory history2 = new MatchHistory();
-        history2.setTimesSearched(5);
-        history2.setTimesFound(3);
 
         MatchSnapshot snapshot2 = new MatchSnapshot.Builder()
                 .setActionOptions(ActionOptions.Action.FIND)
@@ -280,12 +270,15 @@ public class MatchHistoryJsonParserTest {
                 .build();
         history2.addSnapshot(snapshot2);
 
+        System.out.println("History1: " + history1);
+        System.out.println("History2: " + history2);
+        System.out.println("Equals result: " + history1.equals(history2));
+        assertEquals(history1.getSnapshots().getFirst().getActionOptions(), history2.getSnapshots().getFirst().getActionOptions());
+        assertTrue(history1.getSnapshots().getFirst().equals(history2.getSnapshots().getFirst()));
         assertTrue(history1.equals(history2));
 
         // Create different history
         MatchHistory history3 = new MatchHistory();
-        history3.setTimesSearched(5);
-        history3.setTimesFound(4); // Different times found
 
         MatchSnapshot snapshot3 = new MatchSnapshot.Builder()
                 .setActionOptions(ActionOptions.Action.FIND)

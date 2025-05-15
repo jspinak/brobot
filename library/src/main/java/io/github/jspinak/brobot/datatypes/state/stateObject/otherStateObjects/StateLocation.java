@@ -23,7 +23,7 @@ public class StateLocation implements StateObject {
     private Location location;
     private String ownerStateName = "null";
     private Long ownerStateId = null;
-    private int staysVisibleAfterClicked = 100;
+    private int probabilityStaysVisibleAfterClicked = 100;
     private int probabilityExists = 100; // probability something can be acted on at this location
     private int timesActedOn = 0;
     private Position position;
@@ -64,7 +64,7 @@ public class StateLocation implements StateObject {
         private Location location;
         private String ownerStateName = "null";
         private Long ownerStateId = 0L;
-        private int staysVisibleAfterClicked = 100;
+        private int probabilityStaysVisibleAfterClicked = 100;
         private int probabilityExists = 100; // probability something can be acted on at this location
         private int timesActedOn = 0;
         private Position position = new Position(.5, .5);
@@ -91,8 +91,8 @@ public class StateLocation implements StateObject {
             return this;
         }
 
-        public Builder setStaysVisibleAfterClicked(int staysVisibleAfterClicked) {
-            this.staysVisibleAfterClicked = staysVisibleAfterClicked;
+        public Builder setProbabilityStaysVisibleAfterClicked(int probabilityStaysVisibleAfterClicked) {
+            this.probabilityStaysVisibleAfterClicked = probabilityStaysVisibleAfterClicked;
             return this;
         }
 
@@ -142,7 +142,7 @@ public class StateLocation implements StateObject {
             stateLocation.location = location;
             stateLocation.ownerStateName = ownerStateName;
             stateLocation.ownerStateId = ownerStateId;
-            stateLocation.staysVisibleAfterClicked = staysVisibleAfterClicked;
+            stateLocation.probabilityStaysVisibleAfterClicked = probabilityStaysVisibleAfterClicked;
             stateLocation.probabilityExists = probabilityExists;
             stateLocation.timesActedOn = timesActedOn;
             stateLocation.position = position;

@@ -1,8 +1,11 @@
 package io.github.jspinak.brobot.json.parsing;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.fasterxml.jackson.databind.JsonNode;
 import io.github.jspinak.brobot.json.parsing.exception.ConfigurationException;
 import io.github.jspinak.brobot.json.utils.JsonUtils;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -118,7 +121,7 @@ class JsonParserTest {
         obj.setImage(new BufferedImage(10, 10, BufferedImage.TYPE_INT_RGB));
 
         Path file = tempDir.resolve("image-config.json");
-        jsonUtils.toJsonSafe(obj);
+        jsonUtils.writeToFileSafe(obj, file);
 
         assertTrue(Files.exists(file));
         String content = Files.readString(file);
@@ -212,6 +215,8 @@ class JsonParserTest {
     // Class with a problematic field (BufferedImage)
     public static class TestObjectWithImage {
         private String name;
+
+        @JsonIgnore // I'm just trying to test the JSON functionality, not the ability to serialize images.
         private BufferedImage image;
 
         public String getName() { return name; }
@@ -222,6 +227,7 @@ class JsonParserTest {
     }
 
     // Class with a circular reference
+    @JsonIdentityInfo(generator = ObjectIdGenerators.IntSequenceGenerator.class)
     public static class ObjectWithCircularReference {
         private String name;
         private ObjectWithCircularReference reference;

@@ -12,6 +12,7 @@ import org.bytedeco.opencv.opencv_core.Rect;
 
 import java.awt.*;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -320,5 +321,18 @@ public class Region implements Comparable<Region> {
     @JsonIgnore
     public List<Region> minus(Region b) {
         return RegionUtils.minus(this, b);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        Region region = (Region) obj;
+        return x == region.x && y == region.y && w == region.w && h == region.h;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(x, y, w, h);
     }
 }

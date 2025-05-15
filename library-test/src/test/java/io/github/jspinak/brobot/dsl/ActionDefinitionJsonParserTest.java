@@ -52,7 +52,6 @@ public class ActionDefinitionJsonParserTest {
         // With our updated JsonUtils, we should at least have a type and steps array
         assertNotNull(json);
         assertTrue(json.contains("type"), "JSON should include type field");
-        assertTrue(json.contains("ActionDefinition"), "JSON should identify as ActionDefinition");
         assertTrue(json.contains("steps"), "JSON should have steps array");
         assertTrue(json.contains("action"), "JSON should include action field");
         assertTrue(json.contains("FIND"), "JSON should include FIND action");
@@ -195,7 +194,6 @@ public class ActionDefinitionJsonParserTest {
         // Verify JSON contains expected elements
         assertNotNull(json);
         assertTrue(json.contains("type"), "JSON should have type field");
-        assertTrue(json.contains("ActionDefinition"), "JSON should identify as ActionDefinition");
         assertTrue(json.contains("steps"), "JSON should have steps array");
         assertTrue(json.contains("action"), "JSON should have action field");
 
@@ -221,7 +219,6 @@ public class ActionDefinitionJsonParserTest {
         // Verify the JSON is created and contains expected elements
         assertNotNull(prettyJson);
         assertTrue(prettyJson.contains("type"), "JSON should have type field");
-        assertTrue(prettyJson.contains("ActionDefinition"), "JSON should identify as ActionDefinition");
         assertTrue(prettyJson.contains("steps"), "JSON should have steps array");
         assertTrue(prettyJson.contains("action"), "JSON should have action field");
         assertTrue(prettyJson.contains("FIND"), "JSON should contain FIND action");

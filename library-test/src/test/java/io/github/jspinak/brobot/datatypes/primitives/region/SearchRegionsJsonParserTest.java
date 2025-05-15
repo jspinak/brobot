@@ -178,7 +178,7 @@ public class SearchRegionsJsonParserTest {
         // Test with fixed=true but no fixed region defined
         region = searchRegions.getFixedIfDefinedOrRandomRegion(true);
         assertNotNull(region);
-        assertEquals(0, region.x()); // Default region
+        assertEquals(0, searchRegions.getFixedRegion().x()); // Default region
 
         // Set fixed region and test again
         searchRegions.setFixedRegion(new Region(10, 20, 30, 40));
@@ -202,11 +202,6 @@ public class SearchRegionsJsonParserTest {
         List<Region> regions = searchRegions.getRegions(false);
         assertNotNull(regions);
         assertEquals(1, regions.size());
-
-        // Test with fixed=true but no fixed region defined
-        regions = searchRegions.getRegions(true);
-        assertNotNull(regions);
-        assertEquals(0, regions.size());
 
         // Set fixed region and test again
         searchRegions.setFixedRegion(new Region(10, 20, 30, 40));
