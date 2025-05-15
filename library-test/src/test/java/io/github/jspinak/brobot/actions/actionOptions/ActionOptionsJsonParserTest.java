@@ -3,7 +3,6 @@ package io.github.jspinak.brobot.actions.actionOptions;
 import io.github.jspinak.brobot.datatypes.primitives.location.Location;
 import io.github.jspinak.brobot.datatypes.primitives.location.Position;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
-import io.github.jspinak.brobot.json.config.BrobotJsonTestConfig;
 import io.github.jspinak.brobot.json.parsing.JsonParser;
 import io.github.jspinak.brobot.json.parsing.exception.ConfigurationException;
 import org.junit.jupiter.api.BeforeAll;
@@ -12,16 +11,13 @@ import org.sikuli.script.ImagePath;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
-@Import(BrobotJsonTestConfig.class)
 class ActionOptionsJsonParserTest {
 
     @Autowired
-    @Qualifier("testJsonParser")
     private JsonParser jsonParser;
 
     @BeforeAll

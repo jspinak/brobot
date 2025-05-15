@@ -38,10 +38,10 @@ public class StateStringJsonParserTest {
         System.out.println("Serialized StateString: " + json);
 
         // Verify JSON contains expected fields
-        assertTrue(json.contains("\"name\":\"TestString\""));
-        assertTrue(json.contains("\"ownerStateName\":\"TestState\""));
-        assertTrue(json.contains("\"objectType\":\"STRING\""));
-        assertTrue(json.contains("\"string\":\"Hello World\""));
+        assertTrue(json.contains("\"name\" : \"TestString\""));
+        assertTrue(json.contains("\"ownerStateName\" : \"TestState\""));
+        assertTrue(json.contains("\"objectType\" : \"STRING\""));
+        assertTrue(json.contains("\"string\" : \"Hello World\""));
 
         // Deserialize back to StateString
         JsonNode jsonNode = jsonParser.parseJson(json);
@@ -82,10 +82,10 @@ public class StateStringJsonParserTest {
 
         // Verify JSON contains search region
         assertTrue(json.contains("\"searchRegion\""));
-        assertTrue(json.contains("\"x\":50"));
-        assertTrue(json.contains("\"y\":60"));
-        assertTrue(json.contains("\"w\":150"));
-        assertTrue(json.contains("\"h\":200"));
+        assertTrue(json.contains("\"x\" : 50"));
+        assertTrue(json.contains("\"y\" : 60"));
+        assertTrue(json.contains("\"w\" : 150"));
+        assertTrue(json.contains("\"h\" : 200"));
 
         // Deserialize back to StateString
         JsonNode jsonNode = jsonParser.parseJson(json);

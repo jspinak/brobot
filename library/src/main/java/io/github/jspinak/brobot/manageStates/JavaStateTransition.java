@@ -33,7 +33,7 @@ public class JavaStateTransition implements IStateTransition {
     private int timesSuccessful = 0;
 
     @Override
-    public Optional<ActionDefinition> getActionDefinition() {
+    public Optional<ActionDefinition> getActionDefinitionOptional() {
         return Optional.empty();
     }
 

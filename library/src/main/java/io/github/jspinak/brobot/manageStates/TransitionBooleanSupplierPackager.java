@@ -20,7 +20,7 @@ public class TransitionBooleanSupplierPackager {
         if (transition instanceof JavaStateTransition) {
             return ((JavaStateTransition) transition).getTransitionFunction();
         } else {
-            return transition.getActionDefinition()
+            return transition.getActionDefinitionOptional()
                     .map(this::toBooleanSupplier)
                     .orElseThrow(() -> new IllegalArgumentException("Unsupported transition type"));
         }

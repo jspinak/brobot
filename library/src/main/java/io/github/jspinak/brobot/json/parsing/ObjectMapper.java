@@ -49,7 +49,6 @@ public class ObjectMapper {
         mapper.registerModule(brobotJsonModule);
 
         // Add mixins to handle problematic classes
-        mapper.addMixIn(Location.class, LocationMixin.class);
         mapper.addMixIn(org.bytedeco.opencv.opencv_core.Mat.class, MatMixin.class);
         mapper.addMixIn(Rect.class, JavaCVRectMixin.class);
         mapper.addMixIn(Rectangle.class, RectangleMixin.class);
@@ -67,7 +66,6 @@ public class ObjectMapper {
         mapper.addMixIn(ColorModel.class, ColorModelMixin.class);
         mapper.addMixIn(DataBuffer.class, DataBufferMixin.class);
         mapper.addMixIn(Image.class, BrobotImageMixin.class);
-        mapper.addMixIn(Pattern.class, PatternMixin.class);
 
         return mapper;
     }
