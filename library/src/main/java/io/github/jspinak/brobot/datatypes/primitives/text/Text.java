@@ -1,6 +1,8 @@
 package io.github.jspinak.brobot.datatypes.primitives.text;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.Data;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,6 +12,7 @@ import java.util.List;
  * The results of different read iterations will not always be the same.
  * To account for this variability, Text stores a list of Strings corresponding to each read.
  */
+@Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Text {
 
@@ -23,6 +26,7 @@ public class Text {
         strings.addAll(text.getAll());
     }
 
+    @JsonIgnore
     public List<String> getAll() {
         return strings;
     }
@@ -31,10 +35,12 @@ public class Text {
         return strings.size();
     }
 
+    @JsonIgnore
     public boolean isEmpty() {
         return size() == 0;
     }
 
+    @JsonIgnore
     public String get(int position) {
         return strings.get(position);
     }

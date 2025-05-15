@@ -46,16 +46,16 @@ public class StateLocationJsonParserTest {
         System.out.println("Serialized StateLocation: " + json);
 
         // Verify JSON contains expected fields
-        assertTrue(json.contains("\"name\":\"TestLocation\""));
-        assertTrue(json.contains("\"ownerStateName\":\"TestState\""));
-        assertTrue(json.contains("\"objectType\":\"LOCATION\""));
+        assertTrue(json.contains("\"name\" : \"TestLocation\""));
+        assertTrue(json.contains("\"ownerStateName\" : \"TestState\""));
+        assertTrue(json.contains("\"objectType\" : \"LOCATION\""));
         assertTrue(json.contains("\"location\""));
 
         // Note: X,Y are computed by getX() and getY() methods which are annotated with @JsonIgnore
         // So they won't be in the JSON, but the underlying x,y fields should be
-        assertTrue(json.contains("\"x\":100") || json.contains("\"x\": 100"),
+        assertTrue(json.contains("\"x\":100") || json.contains("\"x\" : 100"),
                 "JSON should contain the raw x coordinate");
-        assertTrue(json.contains("\"y\":200") || json.contains("\"y\": 200"),
+        assertTrue(json.contains("\"y\":200") || json.contains("\"y\" : 200"),
                 "JSON should contain the raw y coordinate");
 
         // Deserialize back to StateLocation
@@ -89,14 +89,14 @@ public class StateLocationJsonParserTest {
                 .setName("PropertiesLocation")
                 .setOwnerStateName("PropertiesState")
                 .setLocation(location)
-                .setStaysVisibleAfterClicked(300)
+                .setProbabilityStaysVisibleAfterClicked(100)
                 .setProbabilityExists(85)
                 .setPosition(Positions.Name.BOTTOMRIGHT)
                 .build();
 
         // Verify properties were set
         assertEquals("PropertiesLocation", stateLocation.getName());
-        assertEquals(300, stateLocation.getStaysVisibleAfterClicked());
+        assertEquals(100, stateLocation.getProbabilityStaysVisibleAfterClicked());
         assertEquals(85, stateLocation.getProbabilityExists());
         assertEquals(1.0, stateLocation.getPosition().getPercentW(), 0.001); // BOTTOMRIGHT is (1.0, 1.0)
         assertEquals(1.0, stateLocation.getPosition().getPercentH(), 0.001);
@@ -108,8 +108,8 @@ public class StateLocationJsonParserTest {
         System.out.println("Serialized StateLocation with properties: " + json);
 
         // Verify JSON contains additional properties
-        assertTrue(json.contains("\"staysVisibleAfterClicked\":300"));
-        assertTrue(json.contains("\"probabilityExists\":85"));
+        assertTrue(json.contains("\"probabilityStaysVisibleAfterClicked\" : 100"));
+        assertTrue(json.contains("\"probabilityExists\" : 85"));
         assertTrue(json.contains("\"position\""));
 
         // Deserialize back to StateLocation
@@ -117,7 +117,7 @@ public class StateLocationJsonParserTest {
         StateLocation deserializedLocation = jsonParser.convertJson(jsonNode, StateLocation.class);
 
         // Verify deserialized properties
-        assertEquals(300, deserializedLocation.getStaysVisibleAfterClicked());
+        assertEquals(100, deserializedLocation.getProbabilityStaysVisibleAfterClicked());
         assertEquals(85, deserializedLocation.getProbabilityExists());
         assertNotNull(deserializedLocation.getPosition());
         assertEquals(1.0, deserializedLocation.getPosition().getPercentW(), 0.001);
@@ -185,17 +185,16 @@ public class StateLocationJsonParserTest {
                 .build();
 
         // Cast to StateObject
-        StateObject stateObject = stateLocation;
 
         // Test interface methods
-        assertEquals("InterfaceLocation", stateObject.getName());
-        assertEquals("InterfaceState", stateObject.getOwnerStateName());
-        assertEquals(StateObject.Type.LOCATION, stateObject.getObjectType());
-        assertNotNull(stateObject.getIdAsString());
+        assertEquals("InterfaceLocation", ((StateObject) stateLocation).getName());
+        assertEquals("InterfaceState", ((StateObject) stateLocation).getOwnerStateName());
+        assertEquals(StateObject.Type.LOCATION, ((StateObject) stateLocation).getObjectType());
+        assertNotNull(((StateObject) stateLocation).getIdAsString());
 
         // Test addTimesActedOn
         assertEquals(0, stateLocation.getTimesActedOn());
-        stateObject.addTimesActedOn();
+        ((StateObject) stateLocation).addTimesActedOn();
         assertEquals(1, stateLocation.getTimesActedOn());
     }
 

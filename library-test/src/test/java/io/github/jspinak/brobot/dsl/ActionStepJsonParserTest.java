@@ -18,11 +18,11 @@ class ActionStepJsonParserTest {
     void testActionStepFromJson() throws ConfigurationException {
         String json = """
         {
-            "options": {
+            "actionOptions": {
                 "action": "CLICK",
                 "find": "ALL"
             },
-            "objects": {
+            "objectCollection": {
                 "stateImages": [
                     {
                         "id": "123",

@@ -142,7 +142,7 @@ public class AnchorsJsonParserTest {
 
         // Verify it contains needed info
         assertTrue(str.contains("TOPLEFT"));
-        assertTrue(str.contains("0.5"));
+        assertTrue(str.contains("0,5"));
     }
 
     /**

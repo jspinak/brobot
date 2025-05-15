@@ -1,6 +1,7 @@
 package io.github.jspinak.brobot.datatypes.state.stateObject;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -11,8 +12,7 @@ import lombok.Setter;
  * StateObject implementations such as StateImage have their own repositories and individual StateObjects can be found in the
  * respective repository using the data in this class.
  */
-@Getter
-@Setter
+@Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class StateObjectData {
 

@@ -5,6 +5,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 /**
  * Mixin for Raster to prevent serializing internal classes.
  */
-@JsonIgnoreProperties({"dataElements", "dataBuffer", "numBands", "numDataElements", "parent", "sampleModel", "dataBuffer", "numDataElements"})
+@JsonIgnoreProperties({"raster", "colorModel", "data", "properties", "propertyNames",
+        "graphics", "accelerationPriority", "dataElements", "dataOffsets",
+        "dataBuffer", "dataOffset", "scanlineStride", "pixelStride"})
 public abstract class RasterMixin {
 }

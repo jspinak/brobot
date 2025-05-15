@@ -89,7 +89,7 @@ public class Model {
 
         if (transition instanceof ActionDefinitionStateTransition) {
             ActionDefinitionStateTransition adst = (ActionDefinitionStateTransition) transition;
-            adst.getActionDefinition().ifPresent(actionDef ->
+            adst.getActionDefinitionOptional().ifPresent(actionDef ->
                     sb.append(", actionDefinition=").append(actionDefinitionToString(actionDef, "  ")));
         }
 

@@ -34,6 +34,7 @@ public class ActionDefinitionStateTransitionJsonParserTest {
     public void testParseBasicTransition() throws ConfigurationException {
         String json = """
                 {
+                  "type": "actionDefinition",
                   "actionDefinition": {
                     "steps": [
                       {
@@ -60,9 +61,9 @@ public class ActionDefinitionStateTransitionJsonParserTest {
         assertNotNull(transition);
 
         // Verify action definition
-        assertTrue(transition.getActionDefinition().isPresent());
-        assertNotNull(transition.getActionDefinition().get().getSteps());
-        assertEquals(1, transition.getActionDefinition().get().getSteps().size());
+        assertTrue(transition.getActionDefinitionOptional().isPresent());
+        assertNotNull(transition.getActionDefinitionOptional().get().getSteps());
+        assertEquals(1, transition.getActionDefinitionOptional().get().getSteps().size());
 
         // Verify basic properties
         assertEquals(IStateTransition.StaysVisible.TRUE, transition.getStaysVisibleAfterTransition());
@@ -87,6 +88,7 @@ public class ActionDefinitionStateTransitionJsonParserTest {
     public void testParseMinimalTransition() throws ConfigurationException {
         String json = """
                 {
+                  "type": "actionDefinition",
                   "actionDefinition": {
                     "steps": []
                   },
@@ -100,9 +102,9 @@ public class ActionDefinitionStateTransitionJsonParserTest {
         assertNotNull(transition);
 
         // Verify action definition
-        assertTrue(transition.getActionDefinition().isPresent());
-        assertNotNull(transition.getActionDefinition().get().getSteps());
-        assertEquals(0, transition.getActionDefinition().get().getSteps().size());
+        assertTrue(transition.getActionDefinitionOptional().isPresent());
+        assertNotNull(transition.getActionDefinitionOptional().get().getSteps());
+        assertEquals(0, transition.getActionDefinitionOptional().get().getSteps().size());
 
         // Verify default properties
         assertEquals(IStateTransition.StaysVisible.NONE, transition.getStaysVisibleAfterTransition());
@@ -159,9 +161,9 @@ public class ActionDefinitionStateTransitionJsonParserTest {
         assertNotNull(deserializedTransition);
 
         // Verify action definition
-        assertTrue(deserializedTransition.getActionDefinition().isPresent());
-        assertNotNull(deserializedTransition.getActionDefinition().get().getSteps());
-        assertEquals(1, deserializedTransition.getActionDefinition().get().getSteps().size());
+        assertTrue(deserializedTransition.getActionDefinitionOptional().isPresent());
+        assertNotNull(deserializedTransition.getActionDefinitionOptional().get().getSteps());
+        assertEquals(1, deserializedTransition.getActionDefinitionOptional().get().getSteps().size());
 
         // Verify properties
         assertEquals(IStateTransition.StaysVisible.FALSE, deserializedTransition.getStaysVisibleAfterTransition());
@@ -190,13 +192,13 @@ public class ActionDefinitionStateTransitionJsonParserTest {
         transition.setActionDefinition(actionDef);
 
         // Test getActionDefinition returns correct Optional
-        Optional<ActionDefinition> result = transition.getActionDefinition();
+        Optional<ActionDefinition> result = transition.getActionDefinitionOptional();
         assertTrue(result.isPresent());
         assertSame(actionDef, result.get());
 
         // Test with null actionDefinition
         transition.setActionDefinition(null);
-        result = transition.getActionDefinition();
+        result = transition.getActionDefinitionOptional();
         assertFalse(result.isPresent());
     }
 }

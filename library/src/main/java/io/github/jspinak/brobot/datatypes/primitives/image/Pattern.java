@@ -12,6 +12,7 @@ import io.github.jspinak.brobot.datatypes.primitives.region.SearchRegions;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.imageUtils.BufferedImageOps;
 import io.github.jspinak.brobot.stringUtils.NameSelector;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -32,8 +33,7 @@ import java.util.List;
  * Pattern should be @Embedded. This is the lowest level of object that should be stored in the database.
  * I removed the SikuliX Pattern since it is a non-JPA entity and caused problems with persistence. </p>
  */
-@Getter
-@Setter
+@Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Pattern {
 
@@ -72,7 +72,7 @@ public class Pattern {
     perform mock runs and MatchHistory contains a list of MatchSnapshot, which itself contains a list of Match objects.
     For this reason, I've created a Brobot Image object and use this object in Match and in Pattern.
      */
-    private Image image;
+    private Image image = Image.getEmptyImage();;
 
     public Pattern(String imgPath) {
         setImgpath(imgPath);
@@ -126,6 +126,7 @@ public class Pattern {
      * Mat objects are not stored explicitly in Pattern but converted to and from BufferedImage objects.
      * @param matBGR a JavaCV Mat in BGR format.
      */
+    @JsonIgnore
     public void setMat(Mat matBGR) {
         image.setBufferedImage(BufferedImageOps.fromMat(matBGR));
     }
@@ -139,6 +140,7 @@ public class Pattern {
         return image.getMatHSV();
     }
 
+    @JsonIgnore
     private void setNameFromFilenameIfEmpty(String filename) {
         if (filename == null) return;
         if (name == null || name.isEmpty()) {
@@ -161,6 +163,7 @@ public class Pattern {
      * If there are multiple regions, this returns a random selection.
      * @return a region
      */
+    @JsonIgnore
     public Region getRegion() {
         return searchRegions.getFixedIfDefinedOrRandomRegion(fixed);
     }
@@ -170,6 +173,7 @@ public class Pattern {
      * Otherwise, all regions are returned.
      * @return all usable regions
      */
+    @JsonIgnore
     public List<Region> getRegions() {
         return searchRegions.getRegions(fixed);
     }
@@ -182,6 +186,7 @@ public class Pattern {
         searchRegions.resetFixedRegion();
     }
 
+    @JsonIgnore
     public void setSearchRegionsTo(Region... regions) {
         searchRegions.setRegions(List.of(regions));
     }
@@ -207,32 +212,14 @@ public class Pattern {
                 .build();
     }
 
+    @JsonIgnore
     public boolean isDefined() {
         return searchRegions.isDefined(fixed);
     }
 
+    @JsonIgnore
     public boolean isEmpty() {
         return image.isEmpty();
-    }
-
-    public boolean equals(Pattern comparePattern) {
-        boolean sameFilename = imgpath.equals(comparePattern.getImgpath());
-        boolean bothFixedOrBothNot = fixed == comparePattern.isFixed();
-        boolean sameSearchRegions = searchRegions.equals(comparePattern.getSearchRegions());
-        boolean sameMatchHistory = matchHistory.equals(comparePattern.getMatchHistory());
-        boolean bothDynamicOrBothNot = dynamic == comparePattern.isDynamic();
-        boolean samePosition = targetPosition.equals(comparePattern.getTargetPosition());
-        boolean sameOffset = targetOffset.equals(comparePattern.getTargetOffset());
-        boolean sameAnchors = anchors.equals(comparePattern.getAnchors());
-        if (!sameFilename) return false;
-        if (!bothFixedOrBothNot) return false;
-        if (!sameSearchRegions) return false;
-        if (!sameMatchHistory) return false;
-        if (!bothDynamicOrBothNot) return false;
-        if (!samePosition) return false;
-        if (!sameOffset) return false;
-        if (!sameAnchors) return false;
-        return true;
     }
 
     // __convenience functions for the SikuliX Pattern object__

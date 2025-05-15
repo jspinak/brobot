@@ -78,7 +78,7 @@ public class StateTransitions {
         Optional<IStateTransition> transition = getTransitionFunctionByActivatedStateId(toState);
         if (transition.isEmpty() || !(transition.get() instanceof ActionDefinitionStateTransition))
             return Optional.empty();
-        return transition.get().getActionDefinition();
+        return transition.get().getActionDefinitionOptional();
     }
 
     @Override
