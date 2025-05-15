@@ -106,10 +106,10 @@ public class RegionUtils {
     }
 
     public static boolean contains(Region outer, Region inner) {
-        return outer.sikuli().contains(inner.sikuli().getTopLeft()) &&
-                outer.sikuli().contains(inner.sikuli().getTopRight()) &&
-                outer.sikuli().contains(inner.sikuli().getBottomLeft()) &&
-                outer.sikuli().contains(inner.sikuli().getBottomRight());
+        return contains(outer, new Location(inner.getX(), inner.getY())) &&
+               contains(outer, new Location(inner.getX() + inner.getW(), inner.getY())) &&
+               contains(outer, new Location(inner.getX(), inner.getY() + inner.getH())) &&
+               contains(outer, new Location(inner.getX() + inner.getW(), inner.getY() + inner.getH()));
     }
 
     public static boolean contains(Rect rect1, Rect rect2) {
@@ -210,7 +210,11 @@ public class RegionUtils {
     }
 
     public static Region getUnion(Region r1, Region r2) {
-        return new Region(r1.sikuli().union(r2.sikuli()));
+        int x = Math.min(r1.getX(), r2.getX());
+        int y = Math.min(r1.getY(), r2.getY());
+        int x2 = Math.max(r1.x2(), r2.x2());
+        int y2 = Math.max(r1.y2(), r2.y2());
+        return new Region(x, y, x2 - x, y2 - y);
     }
 
     public static Location getLocation(Region region) {

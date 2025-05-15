@@ -3,6 +3,7 @@ package io.github.jspinak.brobot.datatypes.primitives.match;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.primatives.enums.SpecialStateType;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import org.sikuli.script.Screen;
@@ -11,6 +12,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 
 import static io.github.jspinak.brobot.actions.actionOptions.ActionOptions.Find.UNIVERSAL;
@@ -70,8 +72,7 @@ import static io.github.jspinak.brobot.actions.actionOptions.ActionOptions.Find.
  *      * a Find Action will occur in real execution. The Image will be used with other Actions,
  *      * and these Actions will have MatchSnapshots.
  */
-@Getter
-@Setter
+@Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MatchSnapshot {
 
@@ -161,14 +162,43 @@ public class MatchSnapshot {
 
     public MatchSnapshot() {}
 
-    public boolean equals(MatchSnapshot snapshot) {
-        if (actionOptions.getAction() != snapshot.getActionOptions().getAction()) return false;
-        if (actionOptions.getFind() != snapshot.getActionOptions().getFind()) return false;
-        if (matchList.size() != snapshot.getMatchList().size()) return false;
-        for (int i=0; i<matchList.size(); i++)
-            if (!matchList.get(i).equals(snapshot.getMatchList().get(i))) return false;
-        if (!text.equals(snapshot.getText())) return false;
-        return true;
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        MatchSnapshot that = (MatchSnapshot) obj;
+        return Double.compare(that.duration, duration) == 0 &&
+                actionSuccess == that.actionSuccess &&
+                resultSuccess == that.resultSuccess &&
+                Objects.equals(actionOptions, that.actionOptions) &&
+                Objects.equals(matchList, that.matchList) &&
+                Objects.equals(text, that.text) &&
+                Objects.equals(stateName, that.stateName) &&
+                Objects.equals(stateId, that.stateId) &&
+                (timeStamp == null && that.timeStamp == null ||
+                        timeStamp != null && that.timeStamp != null &&
+                                timeStamp.truncatedTo(java.time.temporal.ChronoUnit.SECONDS)
+                                        .equals(that.timeStamp.truncatedTo(java.time.temporal.ChronoUnit.SECONDS)));
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(actionOptions, matchList, text, duration, timeStamp, actionSuccess, resultSuccess, stateName, stateId);
+    }
+
+    @Override
+    public String toString() {
+        return "MatchSnapshot{" +
+                "actionOptions=" + actionOptions +
+                ", matchList=" + matchList +
+                ", text='" + text + '\'' +
+                ", duration=" + duration +
+                ", timeStamp=" + timeStamp +
+                ", actionSuccess=" + actionSuccess +
+                ", resultSuccess=" + resultSuccess +
+                ", stateName='" + stateName + '\'' +
+                ", stateId=" + stateId +
+                '}';
     }
 
     public static class Builder {

@@ -12,12 +12,14 @@ import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.StateRegion;
 import io.github.jspinak.brobot.datatypes.primitives.region.SearchRegions;
 import io.github.jspinak.brobot.log.entities.LogType;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import org.sikuli.basics.Settings;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.BiConsumer;
 import java.util.function.Predicate;
 
@@ -26,8 +28,7 @@ import java.util.function.Predicate;
  * Since an Action can be performed without selecting and building an ActionOptions object,
  *   the variables need to be initialized with default values.
  */
-@Getter
-@Setter
+@Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ActionOptions {
 

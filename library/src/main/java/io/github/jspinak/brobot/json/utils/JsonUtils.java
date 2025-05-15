@@ -3,8 +3,12 @@ package io.github.jspinak.brobot.json.utils;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.github.jspinak.brobot.json.parsing.JsonParser;
 import io.github.jspinak.brobot.json.parsing.exception.ConfigurationException;
 import org.slf4j.Logger;
@@ -40,12 +44,29 @@ public class JsonUtils {
     private ObjectMapper createCircularReferenceMapper() {
         ObjectMapper mapper = new ObjectMapper();
 
-        // Enable detection of circular references
-        mapper.enable(SerializationFeature.WRITE_SELF_REFERENCES_AS_NULL);
+        // Configure features
+        mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+        mapper.configure(SerializationFeature.WRITE_SELF_REFERENCES_AS_NULL, true);
+        mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
-        // Configure to use fields directly rather than getters
+        // Add support for Java 8 date/time types
+        mapper.registerModule(new JavaTimeModule());
+        mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+
+        // Configure to use fields rather than getters for better control
         mapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
         mapper.setVisibility(PropertyAccessor.GETTER, JsonAutoDetect.Visibility.NONE);
+
+        // IMPORTANT: Disable default typing to avoid array-based types
+        // This ensures only the @JsonTypeInfo annotations on your classes control type information
+        mapper.disable(SerializationFeature.WRAP_ROOT_VALUE);
+        mapper.setConfig(mapper.getSerializationConfig().with(MapperFeature.USE_STATIC_TYPING));
+
+        // Register the same modules used in your primary ObjectMapper
+        // This ensures consistent handling of custom types
+        SimpleModule module = new SimpleModule();
+        mapper.registerModule(module);
 
         return mapper;
     }

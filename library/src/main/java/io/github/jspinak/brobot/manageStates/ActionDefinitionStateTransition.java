@@ -1,6 +1,8 @@
 package io.github.jspinak.brobot.manageStates;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.github.jspinak.brobot.dsl.ActionDefinition;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -16,10 +18,9 @@ import java.util.Set;
  * When created with the web UI, a TransitionEntity can then be converted to this class, which
  *   can be used by the library in the same way the Transition class can be used (both are IStateTransition).
  */
-@Getter
-@Setter
+@Data
 public class ActionDefinitionStateTransition implements IStateTransition {
-    private String type = "actionDefinition";
+    //private String type = "actionDefinition";
     private ActionDefinition actionDefinition;
 
     private StaysVisible staysVisibleAfterTransition = StaysVisible.NONE;
@@ -28,8 +29,9 @@ public class ActionDefinitionStateTransition implements IStateTransition {
     private int score = 0;
     private int timesSuccessful = 0;
 
+    @JsonIgnore
     @Override
-    public Optional<ActionDefinition> getActionDefinition() {
+    public Optional<ActionDefinition> getActionDefinitionOptional() {
         return Optional.ofNullable(actionDefinition);
     }
 

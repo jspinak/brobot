@@ -146,7 +146,7 @@ public class PositionJsonParserTest {
         String str = position.toString();
 
         // Verify it contains needed info
-        assertTrue(str.contains("0.3"));
-        assertTrue(str.contains("0.8"));
+        assertTrue(str.contains("0,3"));
+        assertTrue(str.contains("0,8"));
     }
 }

@@ -33,51 +33,6 @@ public class ObjectCollectionJsonUtils {
     }
 
     /**
-     * Custom serializer for ObjectCollection to handle special cases
-     */
-    public static class ObjectCollectionSerializer extends JsonSerializer<ObjectCollection> {
-        @Override
-        public void serialize(ObjectCollection collection, JsonGenerator gen, SerializerProvider provider) throws IOException {
-            gen.writeStartObject();
-
-            // Write state locations
-            gen.writeObjectField("stateLocations", collection.getStateLocations());
-
-            // Write state images
-            gen.writeObjectField("stateImages", collection.getStateImages());
-
-            // Write state regions
-            gen.writeObjectField("stateRegions", collection.getStateRegions());
-
-            // Write state strings
-            gen.writeObjectField("stateStrings", collection.getStateStrings());
-
-            // Write matches - but with care to avoid circular references
-            // We'll just write simplified versions
-            gen.writeArrayFieldStart("matches");
-            for (int i = 0; i < collection.getMatches().size(); i++) {
-                provider.defaultSerializeValue(collection.getMatches().get(i), gen);
-            }
-            gen.writeEndArray();
-
-            // Write scenes - but skip the bufferedImage and Mat fields
-            gen.writeArrayFieldStart("scenes");
-            collection.getScenes().forEach(scene -> {
-                try {
-                    gen.writeStartObject();
-                    gen.writeStringField("filename", scene.getPattern().getName());
-                    gen.writeEndObject();
-                } catch (IOException e) {
-                    LoggerFactory.getLogger(ObjectCollectionSerializer.class).error("Error serializing scene", e);
-                }
-            });
-            gen.writeEndArray();
-
-            gen.writeEndObject();
-        }
-    }
-
-    /**
      * Converts ObjectCollection to a Map representation that's easier to work with
      * for custom serialization, excluding problematic fields
      */

@@ -32,41 +32,6 @@ public class ActionOptionsJsonUtils {
     }
 
     /**
-     * Custom serializer for ActionOptions to handle special cases
-     */
-    public static class ActionOptionsSerializer extends JsonSerializer<ActionOptions> {
-        @Override
-        public void serialize(ActionOptions actionOptions, JsonGenerator gen, SerializerProvider provider) throws IOException {
-            gen.writeStartObject();
-
-            // Handle all primitive fields using reflection
-            Field[] fields = ActionOptions.class.getDeclaredFields();
-            for (Field field : fields) {
-                field.setAccessible(true);
-                String fieldName = field.getName();
-
-                // Skip problematic fields
-                if (fieldName.equals("tempFind") ||
-                        fieldName.equals("successCriteria") ||
-                        fieldName.equals("actionLifecycle")) {
-                    continue;
-                }
-
-                try {
-                    Object value = field.get(actionOptions);
-                    if (value != null) {
-                        gen.writeObjectField(fieldName, value);
-                    }
-                } catch (IllegalAccessException e) {
-                    log.warn("Cannot access field: {}", fieldName);
-                }
-            }
-
-            gen.writeEndObject();
-        }
-    }
-
-    /**
      * Converts ActionOptions to a Map representation that's easier to work with
      * for custom serialization, excluding problematic fields
      */
