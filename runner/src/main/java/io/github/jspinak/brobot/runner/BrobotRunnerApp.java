@@ -1,6 +1,7 @@
 package io.github.jspinak.brobot.runner;
 
 import io.github.jspinak.brobot.runner.config.BrobotRunnerProperties;
+import io.github.jspinak.brobot.runner.events.EventBus;
 import io.github.jspinak.brobot.runner.init.BrobotLibraryInitializer;
 import io.github.jspinak.brobot.runner.ui.AutomationPanel;
 import io.github.jspinak.brobot.runner.ui.ConfigurationPanel;
@@ -24,13 +25,14 @@ public class BrobotRunnerApp extends Application {
         // Get required beans from Spring context
         BrobotRunnerProperties properties = applicationContext.getBean(BrobotRunnerProperties.class);
         BrobotLibraryInitializer libraryInitializer = applicationContext.getBean(BrobotLibraryInitializer.class);
+        EventBus eventBus = applicationContext.getBean(EventBus.class);
 
         // Create tab pane for different sections
         TabPane tabPane = new TabPane();
 
         // Configuration tab
         Tab configTab = new Tab("Configuration");
-        configTab.setContent(new ConfigurationPanel(properties, libraryInitializer));
+        configTab.setContent(new ConfigurationPanel(properties, libraryInitializer, eventBus));
         configTab.setClosable(false);
 
         // Automation tab

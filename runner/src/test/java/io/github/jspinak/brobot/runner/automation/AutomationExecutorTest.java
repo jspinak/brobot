@@ -2,6 +2,8 @@ package io.github.jspinak.brobot.runner.automation;
 
 import io.github.jspinak.brobot.datatypes.project.Button;
 import io.github.jspinak.brobot.runner.config.BrobotRunnerProperties;
+import io.github.jspinak.brobot.runner.events.EventBus;
+import io.github.jspinak.brobot.runner.events.ExecutionEventPublisher;
 import io.github.jspinak.brobot.runner.execution.ExecutionController;
 import io.github.jspinak.brobot.runner.execution.ExecutionState;
 import io.github.jspinak.brobot.runner.execution.ExecutionStatus;
@@ -29,6 +31,12 @@ class AutomationExecutorTest {
     @Mock
     private ExecutionController executionController;
 
+    @Mock
+    private EventBus eventBus;
+
+    @Mock
+    private ExecutionEventPublisher executionEventPublisher;
+
     private AutomationExecutor automationExecutor;
     private List<String> logMessages;
 
@@ -45,7 +53,7 @@ class AutomationExecutorTest {
         }).when(executionController).setLogCallback(any());
 
         // Create the executor with mocks
-        automationExecutor = new AutomationExecutor(properties, executionController);
+        automationExecutor = new AutomationExecutor(properties, executionController, eventBus, executionEventPublisher);
         automationExecutor.setLogCallback(logMessages::add);
     }
 

@@ -21,7 +21,7 @@ import java.util.function.Supplier;
 @Component
 public class ExecutionController {
     private static final Logger logger = LoggerFactory.getLogger(ExecutionController.class);
-    
+
     private final ExecutorService executorService;
     private final ScheduledExecutorService timeoutExecutor;
     private final ExecutionStatusManager statusManager;
@@ -38,16 +38,15 @@ public class ExecutionController {
     private final Object pauseLock = new Object();
     private volatile boolean paused = false;
     private volatile boolean requestStop = false;
-    
+
     /**
      * Set a callback for logging
      * -- SETTER --
      *  Set a callback for logging
-
      */
     @Setter
     private Consumer<String> logCallback;
-    
+
     public ExecutionController() {
         this.executorService = Executors.newSingleThreadExecutor(r -> {
             Thread thread = new Thread(r, "Brobot-Automation-Thread");
@@ -64,17 +63,26 @@ public class ExecutionController {
     }
 
     /**
+     * Sets a consumer that will be notified of status changes.
+     *
+     * @param statusConsumer The consumer to be notified when status changes
+     */
+    public void setStatusConsumer(Consumer<ExecutionStatus> statusConsumer) {
+        statusManager.setStatusConsumer(statusConsumer);
+    }
+
+    /**
      * Executes an automation function based on a Button definition
-     * 
+     *
      * @param button Button definition containing execution parameters
      * @param automationTask The actual task to execute
      * @param timeoutMillis Timeout in milliseconds, or 0 for no timeout
      * @param statusConsumer Optional consumer for status updates
      */
-    public void executeAutomation(Button button, Runnable automationTask, long timeoutMillis, 
+    public void executeAutomation(Button button, Runnable automationTask, long timeoutMillis,
                                   Consumer<ExecutionStatus> statusConsumer) {
         Duration timeout = timeoutMillis > 0 ? Duration.ofMillis(timeoutMillis) : null;
-        
+
         Supplier<Void> task = () -> {
             try {
                 log("Executing automation function: " + button.getFunctionName());
@@ -87,13 +95,13 @@ public class ExecutionController {
                 throw e;
             }
         };
-        
+
         startExecution(task, timeout, statusConsumer);
     }
-    
+
     /**
      * Starts execution of an automation task with a specified timeout
-     * 
+     *
      * @param task The task to execute
      * @param timeout Maximum allowed execution time
      * @param statusConsumer Optional consumer for receiving status updates
@@ -103,29 +111,31 @@ public class ExecutionController {
         if (isRunning()) {
             throw new IllegalStateException("An automation task is already running");
         }
-        
+
         // Reset state
         requestStop = false;
         paused = false;
-        
+
         // Initialize status
         statusManager.reset();
-        statusManager.setStatusConsumer(statusConsumer);
+        if (statusConsumer != null) {
+            statusManager.setStatusConsumer(statusConsumer);
+        }
         statusManager.updateState(ExecutionState.STARTING);
         statusManager.updateStartTime(Instant.now());
-        
+
         // Log execution start
         log("Starting automation execution");
-        
+
         // Wrap the task to handle execution state
         currentTask = executorService.submit(() -> {
             T result = null;
             try {
                 statusManager.updateState(ExecutionState.RUNNING);
-                
+
                 // Execute the task with pause/stop capabilities
                 result = executeWithControls(task);
-                
+
                 if (requestStop) {
                     statusManager.updateState(ExecutionState.STOPPED);
                     log("Execution was stopped by user request");
@@ -150,25 +160,25 @@ public class ExecutionController {
                     timeoutTask.cancel(false);
                 }
             }
-            
+
             return result;
         });
-        
+
         // Set up timeout if specified
         if (timeout != null && !timeout.isZero() && !timeout.isNegative()) {
             timeoutTask = timeoutExecutor.schedule(() -> {
                 if (isRunning()) {
                     log("Execution timed out after " + timeout);
-                    
+
                     statusManager.updateState(ExecutionState.TIMEOUT);
                     currentTask.cancel(true);
                 }
             }, timeout.toMillis(), TimeUnit.MILLISECONDS);
         }
-        
+
         return new CastingFuture<>(currentTask);
     }
-    
+
     /**
      * Executes a task with pause/resume and stop capabilities
      */
@@ -179,20 +189,20 @@ public class ExecutionController {
             if (requestStop) {
                 throw new InterruptedException("Stop requested");
             }
-            
+
             // Check if paused
             checkPaused();
-            
+
             // Safety check before proceeding
             safetyManager.performSafetyCheck();
-            
+
             // Run the actual task
             return task.get();
         }
-        
+
         throw new InterruptedException("Thread interrupted");
     }
-    
+
     /**
      * Pauses the current execution if running
      */
@@ -200,14 +210,14 @@ public class ExecutionController {
         if (!isRunning()) {
             return;
         }
-        
+
         synchronized (pauseLock) {
             paused = true;
             statusManager.updateState(ExecutionState.PAUSED);
             log("Execution paused");
         }
     }
-    
+
     /**
      * Resumes the execution if paused
      */
@@ -215,16 +225,16 @@ public class ExecutionController {
         if (!isPaused()) {
             return;
         }
-        
+
         synchronized (pauseLock) {
             paused = false;
             statusManager.updateState(ExecutionState.RUNNING);
             pauseLock.notifyAll(); // Wake up waiting thread
-            
+
             log("Execution resumed");
         }
     }
-    
+
     /**
      * Stops the current execution if running
      */
@@ -232,7 +242,7 @@ public class ExecutionController {
         if (!isRunning() && !isPaused()) {
             return;
         }
-        
+
         // First resume if paused to allow the task to continue and check for stop flag
         if (isPaused()) {
             synchronized (pauseLock) {
@@ -240,10 +250,10 @@ public class ExecutionController {
                 pauseLock.notifyAll();
             }
         }
-        
+
         // Set stop flag
         requestStop = true;
-        
+
         // If task doesn't respond to stop flag in 2 seconds, force interrupt
         CompletableFuture.delayedExecutor(2, TimeUnit.SECONDS).execute(() -> {
             if (currentTask != null && !currentTask.isDone()) {
@@ -251,11 +261,11 @@ public class ExecutionController {
                 log("Execution force stopped after timeout");
             }
         });
-        
+
         statusManager.updateState(ExecutionState.STOPPING);
         log("Stop requested for current execution");
     }
-    
+
     /**
      * Checks if execution should remain paused and waits if so
      */
@@ -264,7 +274,7 @@ public class ExecutionController {
             synchronized (pauseLock) {
                 while (paused) {
                     pauseLock.wait();
-                    
+
                     // Check for stop request immediately after waking up
                     if (requestStop) {
                         throw new InterruptedException("Stop requested while paused");
@@ -273,23 +283,23 @@ public class ExecutionController {
             }
         }
     }
-    
+
     /**
      * Checks if an automation task is currently running
      */
     public boolean isRunning() {
         ExecutionState state = status.getState();
         return state == ExecutionState.STARTING || state == ExecutionState.RUNNING ||
-               state == ExecutionState.PAUSED || state == ExecutionState.STOPPING;
+                state == ExecutionState.PAUSED || state == ExecutionState.STOPPING;
     }
-    
+
     /**
      * Checks if execution is paused
      */
     public boolean isPaused() {
         return paused && status.getState() == ExecutionState.PAUSED;
     }
-    
+
     /**
      * Shut down the controller and release resources
      */
@@ -299,11 +309,11 @@ public class ExecutionController {
             if (isRunning()) {
                 stopExecution();
             }
-            
+
             // Shut down executors
             executorService.shutdown();
             timeoutExecutor.shutdown();
-            
+
             // Wait a bit for tasks to complete
             if (!executorService.awaitTermination(5, TimeUnit.SECONDS)) {
                 executorService.shutdownNow();
@@ -317,7 +327,7 @@ public class ExecutionController {
             timeoutExecutor.shutdownNow();
         }
     }
-    
+
     /**
      * Log a message to the configured log callback and the logger
      */
@@ -327,38 +337,38 @@ public class ExecutionController {
             logCallback.accept(message);
         }
     }
-    
+
     /**
      * Helper class to cast Future results correctly
      */
     private static class CastingFuture<T> implements Future<T> {
         private final Future<?> future;
-        
+
         private CastingFuture(Future<?> future) {
             this.future = future;
         }
-        
+
         @Override
         public boolean cancel(boolean mayInterruptIfRunning) {
             return future.cancel(mayInterruptIfRunning);
         }
-        
+
         @Override
         public boolean isCancelled() {
             return future.isCancelled();
         }
-        
+
         @Override
         public boolean isDone() {
             return future.isDone();
         }
-        
+
         @SuppressWarnings("unchecked")
         @Override
         public T get() throws InterruptedException, ExecutionException {
             return (T) future.get();
         }
-        
+
         @SuppressWarnings("unchecked")
         @Override
         public T get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {

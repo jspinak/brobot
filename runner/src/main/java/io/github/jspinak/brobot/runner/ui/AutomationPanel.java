@@ -4,6 +4,8 @@ import io.github.jspinak.brobot.datatypes.project.Button;
 import io.github.jspinak.brobot.datatypes.project.Project;
 import io.github.jspinak.brobot.runner.automation.AutomationExecutor;
 import io.github.jspinak.brobot.runner.config.BrobotRunnerProperties;
+import io.github.jspinak.brobot.runner.events.EventBus;
+import io.github.jspinak.brobot.runner.events.ExecutionStatusEvent;
 import io.github.jspinak.brobot.runner.execution.ExecutionState;
 import io.github.jspinak.brobot.runner.execution.ExecutionStatus;
 import io.github.jspinak.brobot.services.ProjectManager;
@@ -25,12 +27,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Component
 public class AutomationPanel extends VBox {
+    private static AutomationPanel INSTANCE;
+
     private static final Logger logger = LoggerFactory.getLogger(AutomationPanel.class);
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm:ss");
 
@@ -38,6 +43,7 @@ public class AutomationPanel extends VBox {
     private final ProjectManager projectManager;
     private final BrobotRunnerProperties properties;
     private final AutomationExecutor automationExecutor;
+    private final EventBus eventBus;
 
     private final TextArea logArea;
     private final FlowPane buttonPane;
@@ -54,6 +60,7 @@ public class AutomationPanel extends VBox {
         this.projectManager = null;
         this.properties = null;
         this.automationExecutor = null;
+        this.eventBus = null;
         this.logArea = new TextArea();
         this.buttonPane = new FlowPane();
         setupBasicUI();
@@ -67,11 +74,13 @@ public class AutomationPanel extends VBox {
      */
     @Autowired
     public AutomationPanel(ApplicationContext context, ProjectManager projectManager,
-                           BrobotRunnerProperties properties, AutomationExecutor automationExecutor) {
+                           BrobotRunnerProperties properties, AutomationExecutor automationExecutor,
+                           EventBus eventBus) {
         this.context = context;
         this.projectManager = projectManager;
         this.properties = properties;
         this.automationExecutor = automationExecutor;
+        this.eventBus = eventBus;
         this.logArea = new TextArea();
         this.buttonPane = new FlowPane();
 
@@ -85,6 +94,11 @@ public class AutomationPanel extends VBox {
             // Start a UI update thread for status
             startStatusUpdateThread();
         }
+    }
+
+    @PostConstruct
+    public void initialize() {
+        INSTANCE = this;
     }
 
     private void setupBasicUI() {
@@ -366,6 +380,9 @@ public class AutomationPanel extends VBox {
         }
 
         log("Starting automation: " + buttonDef.getLabel());
+        eventBus.publish(ExecutionStatusEvent.started(this,
+                automationExecutor.getExecutionStatus(),
+                "Starting automation: " + buttonDef.getLabel()));
         automationExecutor.executeAutomation(buttonDef);
     }
 
@@ -379,6 +396,9 @@ public class AutomationPanel extends VBox {
         }
 
         log("Stopping all automation...");
+        eventBus.publish(ExecutionStatusEvent.stopped(this,
+                automationExecutor.getExecutionStatus(),
+                "Stopping all automation"));
         automationExecutor.stopAllAutomation();
     }
 
@@ -418,6 +438,91 @@ public class AutomationPanel extends VBox {
             logArea.appendText(logEntry + "\n");
             // Auto-scroll to bottom
             logArea.positionCaret(logArea.getText().length());
+        });
+    }
+
+    /**
+     * Gets the singleton instance of the AutomationPanel.
+     */
+    public static Optional<io.github.jspinak.brobot.runner.ui.AutomationPanel> getInstance() {
+        return Optional.ofNullable((io.github.jspinak.brobot.runner.ui.AutomationPanel) INSTANCE);
+    }
+
+    /**
+     * Sets the singleton instance of the AutomationPanel.
+     */
+    public static void setInstance(io.github.jspinak.brobot.runner.ui.AutomationPanel instance) {
+        INSTANCE = instance;
+    }
+
+    /**
+     * Updates the status message display.
+     */
+    public void setStatusMessage(String message) {
+        Platform.runLater(() -> {
+            statusLabel.setText("Status: " + message);
+        });
+    }
+
+    /**
+     * Updates the progress bar value.
+     */
+    public void setProgressValue(double value) {
+        Platform.runLater(() -> {
+            progressBar.setProgress(value);
+        });
+    }
+
+    /**
+     * Updates the pause/resume button state.
+     */
+    public void updatePauseResumeButton(boolean paused) {
+        Platform.runLater(() -> {
+            if (paused) {
+                pauseResumeButton.setText("Resume Execution");
+            } else {
+                pauseResumeButton.setText("Pause Execution");
+            }
+        });
+    }
+
+    /**
+     * Updates all button states based on whether automation is running.
+     */
+    public void updateButtonStates(boolean running) {
+        Platform.runLater(() -> {
+            // Update pause/resume button
+            pauseResumeButton.setDisable(!running);
+            pauseResumeButton.setText("Pause Execution");
+
+            // If you have a refresh button
+            javafx.scene.control.Button refreshButton = (javafx.scene.control.Button)
+                    lookup("#refreshAutomationButtons");
+            if (refreshButton != null) {
+                refreshButton.setDisable(running);
+            }
+
+            // If you have a stop button
+            javafx.scene.control.Button stopButton = (javafx.scene.control.Button)
+                    lookup("#stopAllAutomation");
+            if (stopButton != null) {
+                stopButton.setDisable(!running);
+            }
+
+            // Disable all automation function buttons if running
+            for (javafx.scene.Node node : buttonPane.getChildren()) {
+                if (node instanceof VBox categoryBox) {
+                    // This is a category box
+                    for (javafx.scene.Node button : categoryBox.getChildren()) {
+                        if (button instanceof javafx.scene.control.Button) {
+                            // Skip category label and control buttons
+                            if (button != refreshButton && button != stopButton && button != pauseResumeButton) {
+                                button.setDisable(running);
+                            }
+                        }
+                    }
+                }
+            }
         });
     }
 }
