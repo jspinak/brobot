@@ -1,8 +1,11 @@
 package io.github.jspinak.brobot.runner.ui;
 
 import io.github.jspinak.brobot.runner.config.BrobotRunnerProperties;
+import io.github.jspinak.brobot.runner.events.ConfigurationEvent;
+import io.github.jspinak.brobot.runner.events.EventBus;
 import io.github.jspinak.brobot.runner.init.BrobotLibraryInitializer;
 import io.github.jspinak.brobot.runner.ui.dialogs.ErrorDialog;
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
@@ -12,18 +15,23 @@ import javafx.stage.FileChooser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.PostConstruct;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Optional;
 
 /**
  * JavaFX component for configuring the Brobot Runner
  */
 public class ConfigurationPanel extends VBox {
+    private static ConfigurationPanel INSTANCE;
+
     private static final Logger logger = LoggerFactory.getLogger(ConfigurationPanel.class);
 
     private final BrobotRunnerProperties properties;
     private final BrobotLibraryInitializer libraryInitializer;
+    private final EventBus eventBus;
 
     private TextField projectConfigField;
     private TextField dslConfigField;
@@ -32,11 +40,19 @@ public class ConfigurationPanel extends VBox {
 
     public ConfigurationPanel(
             BrobotRunnerProperties properties,
-            BrobotLibraryInitializer libraryInitializer) {
+            BrobotLibraryInitializer libraryInitializer,
+            EventBus eventBus) {
         this.properties = properties;
         this.libraryInitializer = libraryInitializer;
+        this.eventBus = eventBus;
 
         setupUI();
+    }
+
+    @PostConstruct
+    public void initialize() {
+        // Set the static instance for use by event handlers
+        INSTANCE = this;
     }
 
     private void setupUI() {
@@ -204,11 +220,15 @@ public class ConfigurationPanel extends VBox {
                             alert.setContentText("Configuration loaded successfully!");
                             alert.showAndWait();
                             updateStatus("Configuration loaded successfully");
+                            eventBus.publish(ConfigurationEvent.loaded(this, "Project Configuration",
+                                    "Configuration loaded successfully"));
                         } else {
                             ErrorDialog.show("Configuration Error",
                                     "Failed to load configuration",
                                     "Please check the log for details.");
                             updateStatus("Configuration loading failed", true);
+                            eventBus.publish(ConfigurationEvent.loadingFailed(this, "Project Configuration",
+                                    "Failed to load configuration", null));
                         }
                     });
                 } catch (Exception ex) {
@@ -221,6 +241,8 @@ public class ConfigurationPanel extends VBox {
                                 "Exception while loading configuration",
                                 "Error: " + ex.getMessage());
                         updateStatus("Error loading configuration: " + ex.getMessage(), true);
+                        eventBus.publish(ConfigurationEvent.loadingFailed(this, "Project Configuration",
+                                "Error loading configuration: " + ex.getMessage(), ex));
                     });
                 }
             }).start();
@@ -268,13 +290,28 @@ public class ConfigurationPanel extends VBox {
         return true;
     }
 
-    private void updateStatus(String message) {
+    /**
+     * Gets the singleton instance of the ConfigurationPanel.
+     */
+    public static Optional<ConfigurationPanel> getInstance() {
+        return Optional.ofNullable(INSTANCE);
+    }
+
+    /**
+     * Updates the status message display.
+     */
+    public void updateStatus(String message) {
         updateStatus(message, false);
     }
 
-    private void updateStatus(String message, boolean isError) {
-        statusLabel.setText("Status: " + message);
-        statusLabel.setStyle(isError ? "-fx-text-fill: red;" : "-fx-text-fill: blue;");
-        logger.info(message);
+    /**
+     * Updates the status message display with optional error indication.
+     */
+    public void updateStatus(String message, boolean isError) {
+        Platform.runLater(() -> {
+            statusLabel.setText("Status: " + message);
+            statusLabel.setStyle(isError ? "-fx-text-fill: red;" : "-fx-text-fill: blue;");
+            logger.info(message);
+        });
     }
 }
