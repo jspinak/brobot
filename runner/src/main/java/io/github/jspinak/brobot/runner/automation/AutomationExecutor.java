@@ -2,6 +2,10 @@ package io.github.jspinak.brobot.runner.automation;
 
 import io.github.jspinak.brobot.datatypes.project.Button;
 import io.github.jspinak.brobot.runner.config.BrobotRunnerProperties;
+import io.github.jspinak.brobot.runner.events.ErrorEvent;
+import io.github.jspinak.brobot.runner.events.EventBus;
+import io.github.jspinak.brobot.runner.events.ExecutionEventPublisher;
+import io.github.jspinak.brobot.runner.events.LogEvent;
 import io.github.jspinak.brobot.runner.execution.ExecutionController;
 import io.github.jspinak.brobot.runner.execution.ExecutionStatus;
 import lombok.Getter;
@@ -13,8 +17,7 @@ import org.springframework.stereotype.Component;
 import java.util.function.Consumer;
 
 /**
- * This class is responsible for executing automation functions.
- * It interacts with the Brobot library to run the specified functions.
+ * Enhanced version of AutomationExecutor that integrates with the event system.
  */
 @Getter
 @Setter
@@ -24,22 +27,35 @@ public class AutomationExecutor {
 
     private final BrobotRunnerProperties properties;
     private final ExecutionController executionController;
+    private final EventBus eventBus;
+    private final ExecutionEventPublisher executionEventPublisher;
 
     /**
-     * -- SETTER --
-     *  Set a callback for logging
+     * Set a callback for logging
      */
     @Setter
     private Consumer<String> logCallback;
 
-    public AutomationExecutor(BrobotRunnerProperties properties, ExecutionController executionController) {
+    public AutomationExecutor(BrobotRunnerProperties properties,
+                              ExecutionController executionController,
+                              EventBus eventBus,
+                              ExecutionEventPublisher executionEventPublisher) {
         this.properties = properties;
         this.executionController = executionController;
+        this.eventBus = eventBus;
+        this.executionEventPublisher = executionEventPublisher;
+
+        // Set up the status consumer to integrate with the event system
         this.executionController.setLogCallback(message -> {
             if (logCallback != null) {
                 logCallback.accept(message);
             }
+            // Also publish as a log event
+            eventBus.publish(LogEvent.info(this, message, "Automation"));
         });
+
+        // Register the event publisher's status consumer with the execution controller
+        this.executionController.setStatusConsumer(executionEventPublisher.getStatusConsumer());
     }
 
     /**
@@ -49,6 +65,10 @@ public class AutomationExecutor {
         // Create a runnable that contains the automation logic
         Runnable automationTask = () -> {
             try {
+                // Publish start log event
+                eventBus.publish(LogEvent.info(this,
+                        "Starting automation: " + button.getLabel(), "Automation"));
+
                 // This is where you would integrate with the Brobot library to execute the function
                 // For example:
                 //   1. Look up the function by name from the loaded configuration
@@ -64,8 +84,20 @@ public class AutomationExecutor {
                     log("Execution step " + (i+1));
                     Thread.sleep(1000);
                 }
+
+                // Publish completion log event
+                eventBus.publish(LogEvent.info(this,
+                        "Completed automation: " + button.getLabel(), "Automation"));
             } catch (Exception e) {
+                // Log error
                 log("Error in automation task: " + e.getMessage());
+
+                // Publish error event
+                eventBus.publish(ErrorEvent.high(this,
+                        "Automation execution failed: " + e.getMessage(),
+                        e,
+                        "AutomationExecution"));
+
                 throw new RuntimeException("Automation execution failed", e);
             }
         };
@@ -75,9 +107,16 @@ public class AutomationExecutor {
         long timeoutMillis = 5 * 60 * 1000;
 
         try {
-            executionController.executeAutomation(button, automationTask, timeoutMillis, this::onStatusUpdate);
+            executionController.executeAutomation(button, automationTask, timeoutMillis, null);
         } catch (Exception e) {
             log("Failed to start automation: " + e.getMessage());
+
+            // Publish error event
+            eventBus.publish(ErrorEvent.high(this,
+                    "Failed to start automation: " + e.getMessage(),
+                    e,
+                    "AutomationExecution"));
+
             logger.error("Failed to start automation", e);
         }
     }
@@ -88,6 +127,7 @@ public class AutomationExecutor {
     public void stopAllAutomation() {
         executionController.stopExecution();
         log("Stop requested for all automation");
+        eventBus.publish(LogEvent.info(this, "Stop requested for all automation", "Automation"));
     }
 
     /**
@@ -96,6 +136,7 @@ public class AutomationExecutor {
     public void pauseAutomation() {
         executionController.pauseExecution();
         log("Pause requested for automation");
+        eventBus.publish(LogEvent.info(this, "Pause requested for automation", "Automation"));
     }
 
     /**
@@ -104,6 +145,7 @@ public class AutomationExecutor {
     public void resumeAutomation() {
         executionController.resumeExecution();
         log("Resume requested for automation");
+        eventBus.publish(LogEvent.info(this, "Resume requested for automation", "Automation"));
     }
 
     /**
@@ -111,15 +153,6 @@ public class AutomationExecutor {
      */
     public ExecutionStatus getExecutionStatus() {
         return executionController.getStatus();
-    }
-
-    /**
-     * Handler for status updates
-     */
-    private void onStatusUpdate(ExecutionStatus status) {
-        // This method is called whenever the execution status changes
-        // You could use this to update UI elements or log status changes
-        logger.debug("Execution status update: {}", status);
     }
 
     private void log(String message) {
