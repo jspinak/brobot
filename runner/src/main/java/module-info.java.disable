@@ -15,7 +15,9 @@ module runner {
 
     // Other dependencies
     requires com.fasterxml.jackson.databind;
-    
+    requires static lombok;
+    requires org.slf4j;
+
     // Open packages to Spring for reflection
     opens io.github.jspinak.brobot.runner to
         spring.core,
