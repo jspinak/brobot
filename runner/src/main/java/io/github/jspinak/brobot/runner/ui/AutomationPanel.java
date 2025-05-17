@@ -4,10 +4,19 @@ import io.github.jspinak.brobot.datatypes.project.Button;
 import io.github.jspinak.brobot.datatypes.project.Project;
 import io.github.jspinak.brobot.runner.automation.AutomationExecutor;
 import io.github.jspinak.brobot.runner.config.BrobotRunnerProperties;
+import io.github.jspinak.brobot.runner.execution.ExecutionState;
+import io.github.jspinak.brobot.runner.execution.ExecutionStatus;
 import io.github.jspinak.brobot.services.ProjectManager;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Label;
+import javafx.scene.control.ProgressBar;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.Separator;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.Tooltip;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import org.slf4j.Logger;
@@ -19,8 +28,6 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 @Component
 public class AutomationPanel extends VBox {
@@ -34,8 +41,10 @@ public class AutomationPanel extends VBox {
 
     private final TextArea logArea;
     private final FlowPane buttonPane;
-    private final ExecutorService executorService = Executors.newSingleThreadExecutor();
-    private volatile boolean isRunning = false;
+    private Label statusLabel;
+    private ProgressBar progressBar;
+    private javafx.scene.control.Button pauseResumeButton;
+    private volatile boolean updateInProgress = false;
 
     /**
      * No-arg constructor for JavaFX initialization
@@ -72,6 +81,9 @@ public class AutomationPanel extends VBox {
         // Register for automation events
         if (automationExecutor != null) {
             automationExecutor.setLogCallback(this::log);
+
+            // Start a UI update thread for status
+            startStatusUpdateThread();
         }
     }
 
@@ -90,7 +102,25 @@ public class AutomationPanel extends VBox {
         stopAllButton.setId("stopAllAutomation");
         stopAllButton.setOnAction(e -> stopAllAutomation());
 
-        HBox controlBar = new HBox(10, refreshButton, stopAllButton);
+        pauseResumeButton = new javafx.scene.control.Button("Pause Execution");
+        pauseResumeButton.setId("pauseResumeExecution");
+        pauseResumeButton.setOnAction(e -> togglePauseResume());
+        pauseResumeButton.setDisable(true);
+
+        HBox controlBar = new HBox(10, refreshButton, pauseResumeButton, stopAllButton);
+
+        // Setup status area
+        statusLabel = new Label("Status: Ready");
+        statusLabel.setStyle("-fx-font-weight: bold;");
+
+        progressBar = new ProgressBar(0);
+        progressBar.setPrefWidth(Double.MAX_VALUE);
+
+        VBox statusBox = new VBox(5, statusLabel, progressBar);
+        statusBox.setPadding(new Insets(5));
+        statusBox.setBorder(new Border(new BorderStroke(
+                Color.LIGHTGRAY, BorderStrokeStyle.SOLID, new CornerRadii(5), BorderWidths.DEFAULT
+        )));
 
         // Setup button pane
         buttonPane.setPadding(new Insets(10));
@@ -107,6 +137,7 @@ public class AutomationPanel extends VBox {
         getChildren().addAll(
                 titleLabel,
                 new Separator(),
+                statusBox,
                 controlBar,
                 new Label("Available Automation Functions:"),
                 buttonScrollPane,
@@ -122,6 +153,89 @@ public class AutomationPanel extends VBox {
         getChildren().add(logArea);
 
         log("Automation panel initialized. Load a configuration to see available automation functions.");
+    }
+
+    /**
+     * Starts a background thread to update the UI with the latest status
+     */
+    private void startStatusUpdateThread() {
+        Thread statusThread = new Thread(() -> {
+            while (true) {
+                try {
+                    // Check execution status and update UI
+                    if (automationExecutor != null) {
+                        updateExecutionStatusUI();
+                    }
+
+                    // Sleep for a short interval
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    break;
+                } catch (Exception e) {
+                    logger.error("Error in status update thread", e);
+                }
+            }
+        });
+        statusThread.setDaemon(true);
+        statusThread.setName("AutomationStatusUpdater");
+        statusThread.start();
+    }
+
+    /**
+     * Updates the UI elements with the current execution status
+     */
+    private void updateExecutionStatusUI() {
+        if (updateInProgress) return;
+
+        updateInProgress = true;
+        try {
+            ExecutionStatus status = automationExecutor.getExecutionStatus();
+
+            Platform.runLater(() -> {
+                // Update status label
+                statusLabel.setText("Status: " + status.getStatusMessage());
+
+                // Update progress bar
+                progressBar.setProgress(status.getProgress());
+
+                // Update pause/resume button state
+                updatePauseResumeButton(status);
+            });
+        } finally {
+            updateInProgress = false;
+        }
+    }
+
+    /**
+     * Updates the pause/resume button based on execution state
+     */
+    private void updatePauseResumeButton(ExecutionStatus status) {
+        ExecutionState state = status.getState();
+
+        if (state == ExecutionState.RUNNING) {
+            pauseResumeButton.setText("Pause Execution");
+            pauseResumeButton.setDisable(false);
+        } else if (state == ExecutionState.PAUSED) {
+            pauseResumeButton.setText("Resume Execution");
+            pauseResumeButton.setDisable(false);
+        } else {
+            pauseResumeButton.setText("Pause Execution");
+            pauseResumeButton.setDisable(!state.isActive());
+        }
+    }
+
+    /**
+     * Toggles between pause and resume based on current state
+     */
+    private void togglePauseResume() {
+        ExecutionState state = automationExecutor.getExecutionStatus().getState();
+
+        if (state == ExecutionState.RUNNING) {
+            pauseAutomation();
+        } else if (state == ExecutionState.PAUSED) {
+            resumeAutomation();
+        }
     }
 
     /**
@@ -168,8 +282,8 @@ public class AutomationPanel extends VBox {
             categoryBox.getChildren().add(categoryLabel);
 
             for (Button buttonDef : entry.getValue()) {
-                javafx.scene.control.Button button = createAutomationButton(buttonDef);
-                categoryBox.getChildren().add(button);
+                javafx.scene.control.Button uiButton = createAutomationButton(buttonDef);
+                categoryBox.getChildren().add(uiButton);
             }
 
             buttonPane.getChildren().add(categoryBox);
@@ -180,7 +294,7 @@ public class AutomationPanel extends VBox {
      * Creates a JavaFX button from a button definition
      */
     private javafx.scene.control.Button createAutomationButton(Button buttonDef) {
-        javafx.scene.control.Button button = new javafx.scene.control.Button(buttonDef.getLabel());
+        javafx.scene.control.Button uiButton = new javafx.scene.control.Button(buttonDef.getLabel());
 
         // Apply styling if defined
         if (buttonDef.getStyling() != null) {
@@ -209,28 +323,29 @@ public class AutomationPanel extends VBox {
             }
 
             if (styling.getCustomClass() != null) {
-                button.getStyleClass().add(styling.getCustomClass());
+                uiButton.getStyleClass().add(styling.getCustomClass());
             }
 
-            button.setStyle(styleString.toString());
+            uiButton.setStyle(styleString.toString());
         }
 
         // Set tooltip if defined
         if (buttonDef.getTooltip() != null) {
-            button.setTooltip(new Tooltip(buttonDef.getTooltip()));
+            uiButton.setTooltip(new Tooltip(buttonDef.getTooltip()));
         }
 
         // Set action
-        button.setOnAction(e -> runAutomation(buttonDef));
+        uiButton.setOnAction(e -> runAutomation(buttonDef));
 
-        return button;
+        return uiButton;
     }
 
     /**
      * Runs the automation function associated with the button
      */
     private void runAutomation(Button buttonDef) {
-        if (isRunning) {
+        // Check if another automation is already running
+        if (automationExecutor.getExecutionStatus().getState().isActive()) {
             log("Another automation task is already running. Please wait or stop it first.");
             return;
         }
@@ -251,33 +366,45 @@ public class AutomationPanel extends VBox {
         }
 
         log("Starting automation: " + buttonDef.getLabel());
-        isRunning = true;
-
-        executorService.submit(() -> {
-            try {
-                automationExecutor.executeAutomation(buttonDef);
-            } catch (Exception ex) {
-                logger.error("Error executing automation", ex);
-                log("ERROR: " + ex.getMessage());
-            } finally {
-                isRunning = false;
-                log("Automation complete: " + buttonDef.getLabel());
-            }
-        });
+        automationExecutor.executeAutomation(buttonDef);
     }
 
     /**
      * Stops all running automation
      */
     private void stopAllAutomation() {
-        if (!isRunning) {
+        if (!automationExecutor.getExecutionStatus().getState().isActive()) {
             log("No automation is currently running.");
             return;
         }
 
         log("Stopping all automation...");
         automationExecutor.stopAllAutomation();
-        isRunning = false;
+    }
+
+    /**
+     * Pauses the current automation
+     */
+    private void pauseAutomation() {
+        if (!automationExecutor.getExecutionStatus().getState().isActive() ||
+                automationExecutor.getExecutionStatus().getState() == ExecutionState.PAUSED) {
+            return;
+        }
+
+        log("Pausing automation...");
+        automationExecutor.pauseAutomation();
+    }
+
+    /**
+     * Resumes the paused automation
+     */
+    private void resumeAutomation() {
+        if (automationExecutor.getExecutionStatus().getState() != ExecutionState.PAUSED) {
+            return;
+        }
+
+        log("Resuming automation...");
+        automationExecutor.resumeAutomation();
     }
 
     /**
