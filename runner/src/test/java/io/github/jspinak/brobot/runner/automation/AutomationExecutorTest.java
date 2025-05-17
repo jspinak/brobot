@@ -2,94 +2,167 @@ package io.github.jspinak.brobot.runner.automation;
 
 import io.github.jspinak.brobot.datatypes.project.Button;
 import io.github.jspinak.brobot.runner.config.BrobotRunnerProperties;
-import org.junit.jupiter.api.BeforeAll;
+import io.github.jspinak.brobot.runner.execution.ExecutionController;
+import io.github.jspinak.brobot.runner.execution.ExecutionState;
+import io.github.jspinak.brobot.runner.execution.ExecutionStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.contains;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-public class AutomationExecutorTest {
+@ExtendWith(MockitoExtension.class)
+class AutomationExecutorTest {
 
     @Mock
     private BrobotRunnerProperties properties;
 
     @Mock
-    private Consumer<String> logCallback;
+    private ExecutionController executionController;
 
     private AutomationExecutor automationExecutor;
+    private List<String> logMessages;
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
-        automationExecutor = new AutomationExecutor(properties);
-        automationExecutor.setLogCallback(logCallback);
+        // Set up the log callback
+        logMessages = new ArrayList<>();
+
+        // Set up the controller mock to capture log callback
+        doAnswer(invocation -> {
+            Consumer<String> logCallback = invocation.getArgument(0);
+            logCallback.accept("Test log message");
+            return null;
+        }).when(executionController).setLogCallback(any());
+
+        // Create the executor with mocks
+        automationExecutor = new AutomationExecutor(properties, executionController);
+        automationExecutor.setLogCallback(logMessages::add);
     }
 
     @Test
-    void testExecuteAutomation() throws InterruptedException {
-        // Create a test button
+    void testExecuteAutomation() {
+        // Create a button for testing
         Button button = new Button();
-        button.setFunctionName("testFunction");
+        button.setFunctionName("TestFunction");
+        button.setLabel("Test Button");
 
-        // Execute the automation
+        // Capture the runnable passed to the execution controller
+        ArgumentCaptor<Runnable> runnableCaptor = ArgumentCaptor.forClass(Runnable.class);
+
+        // Execute automation
         automationExecutor.executeAutomation(button);
 
-        // Verify that logs are called
-        verify(logCallback, atLeastOnce()).accept(anyString());
+        // Verify execution controller was called
+        verify(executionController).executeAutomation(
+                eq(button),
+                runnableCaptor.capture(),
+                anyLong(),
+                any()
+        );
 
-        // Allow execution to start
-        Thread.sleep(100);
+        // The logging happens here
+        ExecutionStatus mockStatus = new ExecutionStatus();
+        mockStatus.setState(ExecutionState.RUNNING);
+        when(executionController.getStatus()).thenReturn(mockStatus);
 
-        // Assert that execution is in progress
-        assertFalse(automationExecutor.isStopRequested());
+        Runnable capturedRunnable = runnableCaptor.getValue();
+        capturedRunnable.run();
 
-        // Verify that start message is logged
-        verify(logCallback).accept(contains("Executing automation function"));
+        // Verify log messages
+        assertTrue(logMessages.stream().anyMatch(msg -> msg.contains("Execution step")));
     }
 
     @Test
     void testStopAllAutomation() {
-        // Call stop
+        // Stop automation
         automationExecutor.stopAllAutomation();
 
-        // Verify stopRequested flag is set
-        assertTrue(automationExecutor.isStopRequested());
+        // Verify execution controller was called
+        verify(executionController).stopExecution();
 
-        // Verify that stop message is logged
-        verify(logCallback).accept(contains("Stop requested"));
+        // Verify log message
+        assertTrue(logMessages.stream().anyMatch(msg -> msg.contains("Stop requested for all automation")));
     }
 
     @Test
-    void testLogMethodWithCallback() {
-        // Setup a log message
-        String testMessage = "Test log message";
+    void testPauseAutomation() {
+        // Pause automation
+        automationExecutor.pauseAutomation();
 
-        // Call private log method via a public method
-        automationExecutor.executeAutomation(createTestButton());
+        // Verify execution controller was called
+        verify(executionController).pauseExecution();
 
-        // Verify callback was called
-        verify(logCallback, atLeastOnce()).accept(anyString());
+        // Verify log message
+        assertTrue(logMessages.stream().anyMatch(msg -> msg.contains("Pause requested for automation")));
     }
 
     @Test
-    void testLogMethodWithoutCallback() {
-        // Remove callback
-        automationExecutor.setLogCallback(null);
+    void testResumeAutomation() {
+        // Resume automation
+        automationExecutor.resumeAutomation();
 
-        // Execute should still work without exceptions
-        assertDoesNotThrow(() -> automationExecutor.executeAutomation(createTestButton()));
+        // Verify execution controller was called
+        verify(executionController).resumeExecution();
+
+        // Verify log message
+        assertTrue(logMessages.stream().anyMatch(msg -> msg.contains("Resume requested for automation")));
     }
 
-    private Button createTestButton() {
+    @Test
+    void testGetExecutionStatus() {
+        // Create mock status
+        ExecutionStatus mockStatus = new ExecutionStatus();
+        mockStatus.setState(ExecutionState.RUNNING);
+
+        // Configure mock
+        when(executionController.getStatus()).thenReturn(mockStatus);
+
+        // Get status
+        ExecutionStatus status = automationExecutor.getExecutionStatus();
+
+        // Verify correct status was returned
+        assertEquals(ExecutionState.RUNNING, status.getState());
+    }
+
+    @Test
+    void testStatusUpdateCallback() {
+        // Create status consumer captor
+        ArgumentCaptor<Consumer<ExecutionStatus>> consumerCaptor = ArgumentCaptor.forClass(Consumer.class);
+
+        // Create a button for testing
         Button button = new Button();
-        button.setFunctionName("testFunction");
-        return button;
+        button.setFunctionName("TestFunction");
+
+        // Execute automation
+        automationExecutor.executeAutomation(button);
+
+        // Verify the status consumer was passed
+        verify(executionController).executeAutomation(
+                any(Button.class),
+                any(Runnable.class),
+                anyLong(),
+                consumerCaptor.capture()
+        );
+
+        // Get the captured consumer
+        Consumer<ExecutionStatus> statusConsumer = consumerCaptor.getValue();
+        assertNotNull(statusConsumer);
+
+        // Test the consumer with a status update
+        ExecutionStatus testStatus = new ExecutionStatus();
+        testStatus.setState(ExecutionState.RUNNING);
+        statusConsumer.accept(testStatus);
+
+        // No exceptions should have been thrown
     }
 }
