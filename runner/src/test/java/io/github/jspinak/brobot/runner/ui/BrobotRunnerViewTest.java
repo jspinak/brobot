@@ -1,6 +1,7 @@
 package io.github.jspinak.brobot.runner.ui;
 
 import io.github.jspinak.brobot.runner.config.BrobotRunnerProperties;
+import io.github.jspinak.brobot.runner.events.EventBus;
 import io.github.jspinak.brobot.runner.init.BrobotLibraryInitializer;
 import javafx.scene.Scene;
 import javafx.scene.control.TabPane;
@@ -10,6 +11,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.context.ApplicationContext;
 import org.testfx.api.FxRobot;
 import org.testfx.framework.junit5.ApplicationExtension;
 import org.testfx.framework.junit5.Start;
@@ -31,6 +33,12 @@ class BrobotRunnerViewTest {
     @Mock
     private BrobotLibraryInitializer libraryInitializer;
 
+    @Mock
+    private ApplicationContext context;
+
+    @Mock
+    private EventBus eventBus;
+
     private BrobotRunnerView view;
 
     @TempDir
@@ -49,7 +57,7 @@ class BrobotRunnerViewTest {
         when(properties.getLogPath()).thenReturn(tempDir.toString());
 
         // Create the view with mocked dependencies
-        view = new BrobotRunnerView(properties, libraryInitializer);
+        view = new BrobotRunnerView(properties, libraryInitializer, context, eventBus);
 
         // Set up the scene
         Scene scene = new Scene(view, 800, 600);

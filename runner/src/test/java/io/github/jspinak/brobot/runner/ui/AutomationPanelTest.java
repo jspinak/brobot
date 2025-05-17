@@ -5,6 +5,7 @@ import io.github.jspinak.brobot.datatypes.project.Button;
 import io.github.jspinak.brobot.datatypes.project.Project;
 import io.github.jspinak.brobot.runner.automation.AutomationExecutor;
 import io.github.jspinak.brobot.runner.config.BrobotRunnerProperties;
+import io.github.jspinak.brobot.runner.events.EventBus;
 import io.github.jspinak.brobot.services.ProjectManager;
 import javafx.application.Platform;
 import javafx.scene.Node;
@@ -46,6 +47,9 @@ class AutomationPanelTest {
     @Mock
     private AutomationExecutor automationExecutor;
 
+    @Mock
+    private EventBus eventBus;
+
     private AutomationPanel automationPanel;
     private Stage stage;
 
@@ -58,7 +62,7 @@ class AutomationPanelTest {
 
         try {
             // Create the panel with proper mocked dependencies
-            automationPanel = new AutomationPanel(context, projectManager, properties, automationExecutor);
+            automationPanel = new AutomationPanel(context, projectManager, properties, automationExecutor, eventBus);
 
             // Set up the scene
             Scene scene = new Scene(automationPanel, 800, 600);
