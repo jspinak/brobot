@@ -2,14 +2,17 @@ package io.github.jspinak.brobot.runner;
 
 import io.github.jspinak.brobot.runner.events.EventBus;
 import io.github.jspinak.brobot.runner.events.LogEvent;
+import io.github.jspinak.brobot.runner.ui.BrobotRunnerView;
 import io.github.jspinak.brobot.runner.ui.icons.IconRegistry;
 import io.github.jspinak.brobot.runner.ui.theme.ThemeManager;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
 import lombok.Getter;
+import net.rgielen.fxweaver.core.FxControllerAndView;
 import net.rgielen.fxweaver.core.FxWeaver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,10 +42,14 @@ public class JavaFxApplication extends Application {
             // Get command line arguments
             String[] args = getParameters().getRaw().toArray(new String[0]);
 
-            // Create the Spring application context
+            // Create the Spring application context - make sure this works
             this.applicationContext = BrobotRunnerMain.createSpringApplicationContext(args);
 
-            logger.info("Spring context initialized");
+            if (this.applicationContext == null) {
+                throw new IllegalStateException("Failed to create Spring application context");
+            }
+
+            logger.info("Spring context initialized successfully");
         } catch (Exception e) {
             logger.error("Failed to initialize Spring context", e);
 
@@ -60,29 +67,40 @@ public class JavaFxApplication extends Application {
             // Store the primary stage
             this.primaryStage = stage;
 
-            // Get dependencies from Spring context
+            // Get dependencies
             FxWeaver fxWeaver = applicationContext.getBean(FxWeaver.class);
-            EventBus eventBus = applicationContext.getBean(EventBus.class);
             ThemeManager themeManager = applicationContext.getBean(ThemeManager.class);
             IconRegistry iconRegistry = applicationContext.getBean(IconRegistry.class);
+            EventBus eventBus = applicationContext.getBean(EventBus.class);
 
-            // Use FxWeaver to load the main view
-            Scene scene = new Scene(fxWeaver.loadView(io.github.jspinak.brobot.runner.ui.BrobotRunnerView.class), 800, 600);
+            // Load the view using FxWeaver and extract the controller
+            FxControllerAndView<BrobotRunnerView, Parent> controllerAndView =
+                    fxWeaver.load(BrobotRunnerView.class);
 
-            // Apply theme to the scene
-            themeManager.registerScene(scene);
+            // Get the actual view component
+            BrobotRunnerView view = controllerAndView.getController();
 
-            // Set application icons
-            List<Image> appIcons = iconRegistry.getAppIcons();
-            if (!appIcons.isEmpty()) {
-                stage.getIcons().addAll(appIcons);
+            // Get the view from the Optional and create the scene
+            // We need to handle the case where the view might not be present
+            if (controllerAndView.getView().isPresent()) {
+                Parent viewNode = controllerAndView.getView().get();
+                Scene scene = new Scene(viewNode, 800, 600);
+
+                // Apply theme to the scene
+                themeManager.registerScene(scene);
+
+                // Set application icons
+                List<Image> appIcons = iconRegistry.getAppIcons();
+                if (!appIcons.isEmpty()) {
+                    stage.getIcons().addAll(appIcons);
+                }
+
+                // Configure the primary stage
+                stage.setScene(scene);
+                stage.setTitle("Brobot Runner");
+                stage.setMinWidth(800);
+                stage.setMinHeight(600);
             }
-
-            // Configure the primary stage
-            stage.setScene(scene);
-            stage.setTitle("Brobot Runner");
-            stage.setMinWidth(800);
-            stage.setMinHeight(600);
 
             // Show the stage
             stage.show();

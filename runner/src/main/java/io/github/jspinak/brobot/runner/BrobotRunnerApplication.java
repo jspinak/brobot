@@ -15,10 +15,11 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import javafx.application.Application;
+import org.springframework.context.annotation.ComponentScan;
 
-@SpringBootApplication(exclude = {
-		DataSourceAutoConfiguration.class,
-		// Add other auto-configurations to exclude if needed
+@SpringBootApplication(exclude = { DataSourceAutoConfiguration.class })
+@ComponentScan(basePackages = {
+		"io.github.jspinak.brobot"
 })
 public class BrobotRunnerApplication {
 
