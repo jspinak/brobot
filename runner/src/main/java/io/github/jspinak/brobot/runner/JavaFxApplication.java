@@ -67,42 +67,31 @@ public class JavaFxApplication extends Application {
             // Store the primary stage
             this.primaryStage = stage;
 
-            // Get dependencies
-            FxWeaver fxWeaver = applicationContext.getBean(FxWeaver.class);
+            // Get dependencies directly from the Spring context
             ThemeManager themeManager = applicationContext.getBean(ThemeManager.class);
             IconRegistry iconRegistry = applicationContext.getBean(IconRegistry.class);
             EventBus eventBus = applicationContext.getBean(EventBus.class);
 
-            // Load the view using FxWeaver and extract the controller
-            FxControllerAndView<BrobotRunnerView, Parent> controllerAndView =
-                    fxWeaver.load(BrobotRunnerView.class);
+            // Get the BrobotRunnerView directly from the context
+            BrobotRunnerView view = applicationContext.getBean(BrobotRunnerView.class);
 
-            // Get the actual view component
-            BrobotRunnerView view = controllerAndView.getController();
+            // Create the scene with the view
+            Scene scene = new Scene(view, 800, 600);
 
-            // Get the view from the Optional and create the scene
-            // We need to handle the case where the view might not be present
-            if (controllerAndView.getView().isPresent()) {
-                Parent viewNode = controllerAndView.getView().get();
-                Scene scene = new Scene(viewNode, 800, 600);
+            // Apply theme
+            themeManager.registerScene(scene);
 
-                // Apply theme to the scene
-                themeManager.registerScene(scene);
-
-                // Set application icons
-                List<Image> appIcons = iconRegistry.getAppIcons();
-                if (!appIcons.isEmpty()) {
-                    stage.getIcons().addAll(appIcons);
-                }
-
-                // Configure the primary stage
-                stage.setScene(scene);
-                stage.setTitle("Brobot Runner");
-                stage.setMinWidth(800);
-                stage.setMinHeight(600);
+            // Set application icons
+            List<Image> appIcons = iconRegistry.getAppIcons();
+            if (!appIcons.isEmpty()) {
+                stage.getIcons().addAll(appIcons);
             }
 
-            // Show the stage
+            // Configure and show the stage
+            stage.setScene(scene);
+            stage.setTitle("Brobot Runner");
+            stage.setMinWidth(800);
+            stage.setMinHeight(600);
             stage.show();
 
             // Publish application started event
