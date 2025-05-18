@@ -13,14 +13,11 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 /**
  * A showcase screen that demonstrates the custom UI components available in the application.
  * This serves as both documentation and a visual test for the components.
  */
-@Component
 public class ComponentShowcaseScreen extends BorderPane {
 
     private final ThemeManager themeManager;
@@ -44,7 +41,6 @@ public class ComponentShowcaseScreen extends BorderPane {
         }
     }
 
-    @Autowired
     public ComponentShowcaseScreen(ThemeManager themeManager) {
         this.themeManager = themeManager;
 
