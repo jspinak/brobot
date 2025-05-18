@@ -70,6 +70,9 @@ public class BrobotRunnerView extends BorderPane {
         contentContainer = new StackPane();
         contentContainer.getStyleClass().add("content-area");
 
+        setStyle("-fx-background-color: lightblue;");
+        setPrefSize(800, 600);
+
         // Create tab pane for different sections
         tabPane = new TabPane();
 
@@ -82,6 +85,8 @@ public class BrobotRunnerView extends BorderPane {
         setCenter(contentContainer);
         contentContainer.getChildren().add(tabPane);
         setBottom(statusBar);
+
+        contentContainer.setStyle("-fx-background-color: lightyellow;");
 
         // Register the content container with the navigation manager
         navigationManager.setContentContainer(contentContainer);
