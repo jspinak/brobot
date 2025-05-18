@@ -1,10 +1,12 @@
 package io.github.jspinak.brobot.runner;
 
+import io.github.jspinak.brobot.runner.automation.AutomationExecutor;
 import io.github.jspinak.brobot.runner.config.BrobotRunnerProperties;
 import io.github.jspinak.brobot.runner.events.EventBus;
 import io.github.jspinak.brobot.runner.init.BrobotLibraryInitializer;
 import io.github.jspinak.brobot.runner.ui.AutomationPanel;
 import io.github.jspinak.brobot.runner.ui.ConfigurationPanel;
+import io.github.jspinak.brobot.services.ProjectManager;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.control.Tab;
@@ -26,6 +28,8 @@ public class BrobotRunnerApp extends Application {
         BrobotRunnerProperties properties = applicationContext.getBean(BrobotRunnerProperties.class);
         BrobotLibraryInitializer libraryInitializer = applicationContext.getBean(BrobotLibraryInitializer.class);
         EventBus eventBus = applicationContext.getBean(EventBus.class);
+        ProjectManager projectManager = applicationContext.getBean(ProjectManager.class);
+        AutomationExecutor automationExecutor = applicationContext.getBean(AutomationExecutor.class);
 
         // Create tab pane for different sections
         TabPane tabPane = new TabPane();
@@ -37,7 +41,7 @@ public class BrobotRunnerApp extends Application {
 
         // Automation tab
         Tab automationTab = new Tab("Automation");
-        automationTab.setContent(new AutomationPanel()); // This would be your UI for running automation
+        automationTab.setContent(new AutomationPanel(applicationContext, projectManager, properties, automationExecutor, eventBus));
         automationTab.setClosable(false);
 
         // Add tabs to pane

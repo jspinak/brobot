@@ -24,6 +24,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -31,7 +32,7 @@ import java.util.Optional;
  * This is the root container that hosts all other screens and components.
  */
 @Component
-@FxmlView
+@FxmlView("")
 @RequiredArgsConstructor
 public class BrobotRunnerView extends BorderPane {
     private static final Logger logger = LoggerFactory.getLogger(BrobotRunnerView.class);
@@ -43,6 +44,7 @@ public class BrobotRunnerView extends BorderPane {
     private final ScreenRegistry screenRegistry;
     private final EventBus eventBus;
     private final IconRegistry iconRegistry;
+    private final UiComponentFactory uiComponentFactory;
 
     // UI components
     @Getter
@@ -115,7 +117,13 @@ public class BrobotRunnerView extends BorderPane {
         header.setSpacing(20);
 
         // Application logo
-        ImageView logoView = iconRegistry.getIconView("app_icon", 32);
+        ImageView logoView = new ImageView(
+                new javafx.scene.image.Image(Objects.requireNonNull(
+                        getClass().getResourceAsStream("/icons/brobot-icon.png")))
+        );
+        logoView.setFitWidth(32);
+        logoView.setFitHeight(32);
+        logoView.setPreserveRatio(true);
 
         // Application title
         Label titleLabel = new Label("Brobot Runner");
@@ -167,28 +175,28 @@ public class BrobotRunnerView extends BorderPane {
         screenRegistry.registerScreenFactory(
                 "configuration",
                 "Configuration",
-                context -> applicationContext.getBean(ConfigurationPanel.class)
+                context -> uiComponentFactory.createConfigurationPanel()
         );
 
         // Automation screen
         screenRegistry.registerScreenFactory(
                 "automation",
                 "Automation",
-                context -> applicationContext.getBean(AutomationPanel.class)
+                context -> uiComponentFactory.createAutomationPanel()
         );
 
         // Resources screen
         screenRegistry.registerScreenFactory(
                 "resources",
                 "Resources",
-                context -> applicationContext.getBean(ResourceMonitorPanel.class)
+                context -> uiComponentFactory.createResourceMonitorPanel()
         );
 
         // Component showcase screen
         screenRegistry.registerScreenFactory(
                 "showcase",
                 "Component Showcase",
-                context -> applicationContext.getBean(io.github.jspinak.brobot.runner.ui.screens.ComponentShowcaseScreen.class)
+                context -> uiComponentFactory.createComponentShowcaseScreen()
         );
 
         logger.info("Registered {} screens", screenRegistry.getAllScreenIds().size());
