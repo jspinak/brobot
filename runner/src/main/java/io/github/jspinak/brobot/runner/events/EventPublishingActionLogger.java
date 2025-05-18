@@ -18,8 +18,6 @@ import java.util.Set;
  * Decorator that implements both ActionLogger and TestSessionLogger interfaces,
  * adding event publishing behavior to all logging operations.
  */
-@Component
-@Primary
 public class EventPublishingActionLogger implements ActionLogger, TestSessionLogger {
     private final ActionLogger actionLogger;
     private final TestSessionLogger sessionLogger;
