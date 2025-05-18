@@ -1,11 +1,13 @@
 package io.github.jspinak.brobot.runner.init;
 
+import io.github.jspinak.brobot.database.services.AllStatesInProjectService;
 import io.github.jspinak.brobot.json.parsing.JsonParser;
 import io.github.jspinak.brobot.json.schemaValidation.ConfigValidator;
 import io.github.jspinak.brobot.json.schemaValidation.model.ValidationError;
 import io.github.jspinak.brobot.json.schemaValidation.model.ValidationResult;
 import io.github.jspinak.brobot.json.schemaValidation.model.ValidationSeverity;
 import io.github.jspinak.brobot.runner.config.BrobotRunnerProperties;
+import io.github.jspinak.brobot.runner.resources.ImageResourceManager;
 import io.github.jspinak.brobot.services.Init;
 import lombok.Getter;
 import lombok.Setter;
@@ -34,6 +36,8 @@ public class BrobotLibraryInitializer {
     private final JsonParser jsonParser;
     private final ProjectConfigLoader projectConfigLoader;
     private final ConfigValidator configValidator;
+    private final ImageResourceManager imageResourceManager;
+    private final AllStatesInProjectService allStatesInProjectService;
 
     private boolean initialized = false;
     private String lastErrorMessage = null;
@@ -45,12 +49,16 @@ public class BrobotLibraryInitializer {
             BrobotRunnerProperties properties,
             JsonParser jsonParser,
             ProjectConfigLoader projectConfigLoader,
-            ConfigValidator configValidator) {
+            ConfigValidator configValidator,
+            ImageResourceManager imageResourceManager,
+            AllStatesInProjectService allStatesInProjectService) {
         this.initService = initService;
         this.properties = properties;
         this.jsonParser = jsonParser;
         this.projectConfigLoader = projectConfigLoader;
         this.configValidator = configValidator;
+        this.imageResourceManager = imageResourceManager;
+        this.allStatesInProjectService = allStatesInProjectService;
     }
 
     @EventListener(ApplicationReadyEvent.class)
@@ -135,6 +143,9 @@ public class BrobotLibraryInitializer {
             // Build the project model from the configuration
             try {
                 projectConfigLoader.loadAndValidate(projectConfigPath, dslConfigPath, Paths.get(properties.getImagePath()));
+                allStatesInProjectService.getAllStates().forEach(state -> {
+                    state.getStateImages().forEach(imageResourceManager::updateStateImageCache);
+                });
             } catch (Exception e) {
                 lastErrorMessage = "Failed to load project: " + e.getMessage();
                 logger.error("Failed to load project configuration", e);

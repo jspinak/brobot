@@ -1,11 +1,13 @@
 package io.github.jspinak.brobot.runner.init;
 
+import io.github.jspinak.brobot.database.services.AllStatesInProjectService;
 import io.github.jspinak.brobot.json.parsing.JsonParser;
 import io.github.jspinak.brobot.json.schemaValidation.ConfigValidator;
 import io.github.jspinak.brobot.json.schemaValidation.model.ValidationError;
 import io.github.jspinak.brobot.json.schemaValidation.model.ValidationResult;
 import io.github.jspinak.brobot.json.schemaValidation.model.ValidationSeverity;
 import io.github.jspinak.brobot.runner.config.BrobotRunnerProperties;
+import io.github.jspinak.brobot.runner.resources.ImageResourceManager;
 import io.github.jspinak.brobot.services.Init;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -39,6 +41,12 @@ class BrobotLibraryInitializerTest {
     @Mock
     private ConfigValidator configValidator;
 
+    @Mock
+    private ImageResourceManager imageResourceManager;
+
+    @Mock
+    private AllStatesInProjectService allStatesInProjectService;
+
     private BrobotLibraryInitializer initializer;
 
     @TempDir
@@ -56,7 +64,8 @@ class BrobotLibraryInitializerTest {
         when(properties.isValidateConfiguration()).thenReturn(true);
 
         initializer = new BrobotLibraryInitializer(
-                initService, properties, jsonParser, projectConfigLoader, configValidator);
+                initService, properties, jsonParser, projectConfigLoader,
+                configValidator, imageResourceManager, allStatesInProjectService);
     }
 
     @Test
