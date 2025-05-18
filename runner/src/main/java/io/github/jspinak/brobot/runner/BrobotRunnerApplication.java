@@ -11,11 +11,15 @@ import io.github.jspinak.brobot.services.StateTransitionsRepository;
 import net.rgielen.fxweaver.core.FxWeaver;
 import net.rgielen.fxweaver.spring.SpringFxWeaver;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import javafx.application.Application;
 
-@SpringBootApplication
+@SpringBootApplication(exclude = {
+		DataSourceAutoConfiguration.class,
+		// Add other auto-configurations to exclude if needed
+})
 public class BrobotRunnerApplication {
 
 	public static void main(String[] args) {
