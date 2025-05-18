@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.runner.execution;
 
+import lombok.Setter;
+
 import java.time.Instant;
 import java.util.function.Consumer;
 
@@ -9,17 +11,15 @@ import java.util.function.Consumer;
  */
 public class ExecutionStatusManager {
     private final ExecutionStatus status;
+    /**
+     * -- SETTER --
+     *  Sets a consumer that will be notified of status changes
+     */
+    @Setter
     private Consumer<ExecutionStatus> statusConsumer;
 
     public ExecutionStatusManager(ExecutionStatus status) {
         this.status = status;
-    }
-
-    /**
-     * Sets a consumer that will be notified of status changes
-     */
-    public void setStatusConsumer(Consumer<ExecutionStatus> statusConsumer) {
-        this.statusConsumer = statusConsumer;
     }
 
     /**
