@@ -1,6 +1,7 @@
 package io.github.jspinak.brobot.runner.execution;
 
 import io.github.jspinak.brobot.datatypes.project.Button;
+import io.github.jspinak.brobot.runner.resources.ResourceManager;
 import lombok.Getter;
 import lombok.Setter;
 import org.slf4j.Logger;
@@ -19,7 +20,7 @@ import java.util.function.Supplier;
  * status tracking, and timeout mechanisms.
  */
 @Component
-public class ExecutionController {
+public class ExecutionController implements AutoCloseable {
     private static final Logger logger = LoggerFactory.getLogger(ExecutionController.class);
 
     private final ExecutorService executorService;
@@ -47,7 +48,7 @@ public class ExecutionController {
     @Setter
     private Consumer<String> logCallback;
 
-    public ExecutionController() {
+    public ExecutionController(ResourceManager resourceManager) {
         this.executorService = Executors.newSingleThreadExecutor(r -> {
             Thread thread = new Thread(r, "Brobot-Automation-Thread");
             thread.setDaemon(true); // Make thread daemon so it doesn't prevent JVM shutdown
@@ -60,6 +61,8 @@ public class ExecutionController {
         });
         this.statusManager = new ExecutionStatusManager(this.status);
         this.safetyManager = new SafetyManager();
+        // Register with ResourceManager for auto-cleanup
+        resourceManager.registerResource(this, "ExecutionController");
     }
 
     /**
@@ -183,24 +186,19 @@ public class ExecutionController {
      * Executes a task with pause/resume and stop capabilities
      */
     private <T> T executeWithControls(Supplier<T> task) throws InterruptedException {
-        // Run the task with periodic checks for pause/stop
-        while (!Thread.currentThread().isInterrupted()) {
-            // Check if stop requested
-            if (requestStop) {
-                throw new InterruptedException("Stop requested");
-            }
-
-            // Check if paused
-            checkPaused();
-
-            // Safety check before proceeding
-            safetyManager.performSafetyCheck();
-
-            // Run the actual task
-            return task.get();
+        // Check if stop requested
+        if (requestStop) {
+            throw new InterruptedException("Stop requested");
         }
 
-        throw new InterruptedException("Thread interrupted");
+        // Check if paused
+        checkPaused();
+
+        // Safety check before proceeding
+        safetyManager.performSafetyCheck();
+
+        // Run the actual task
+        return task.get();
     }
 
     /**
@@ -336,6 +334,11 @@ public class ExecutionController {
         if (logCallback != null) {
             logCallback.accept(message);
         }
+    }
+
+    @Override
+    public void close() throws Exception {
+        shutdown(); // Call existing shutdown method
     }
 
     /**
