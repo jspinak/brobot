@@ -113,9 +113,16 @@ public class Card extends VBox {
         footer.addListener((obs, oldVal, newVal) -> {
             footerBox.getChildren().clear();
             if (newVal != null) {
-                footerBox.getChildren().add(newVal);
-                footerBox.setVisible(true);
-                footerBox.setManaged(true);
+                // Don't add the footerBox to itself - this causes the cycle
+                if (newVal != footerBox) {
+                    footerBox.getChildren().add(newVal);
+                    footerBox.setVisible(true);
+                    footerBox.setManaged(true);
+                } else {
+                    // Just make the footerBox visible and managed, no need to add it to itself
+                    footerBox.setVisible(true);
+                    footerBox.setManaged(true);
+                }
             } else {
                 footerBox.setVisible(false);
                 footerBox.setManaged(false);
@@ -258,19 +265,17 @@ public class Card extends VBox {
      */
     public void addAction(Button action) {
         if (action != null) {
-            if (footer.get() == null) {
-                footerBox.getChildren().add(action);
+            // Always add the action directly to the footerBox
+            footerBox.getChildren().add(action);
+
+            // Only set the footer property if it's not already set to footerBox
+            if (footer.get() != footerBox) {
                 footer.set(footerBox);
-            } else if (footer.get() == footerBox) {
-                footerBox.getChildren().add(action);
-            } else {
-                // Replace custom footer with default footer
-                HBox defaultFooter = new HBox(10);
-                defaultFooter.getStyleClass().add("card-footer");
-                defaultFooter.setAlignment(Pos.CENTER_RIGHT);
-                defaultFooter.getChildren().add(action);
-                footer.set(defaultFooter);
             }
+
+            // Make sure the footer is visible
+            footerBox.setVisible(true);
+            footerBox.setManaged(true);
         }
     }
 
