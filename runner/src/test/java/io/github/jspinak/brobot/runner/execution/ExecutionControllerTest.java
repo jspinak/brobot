@@ -1,14 +1,17 @@
 package io.github.jspinak.brobot.runner.execution;
 
 import io.github.jspinak.brobot.datatypes.project.Button;
+import io.github.jspinak.brobot.runner.resources.ResourceManager;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -18,15 +21,22 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.verify;
 
+@ExtendWith(MockitoExtension.class)
 class ExecutionControllerTest {
+
+    @Mock
+    private ResourceManager resourceManager;
 
     private ExecutionController executionController;
     private List<String> logMessages;
 
     @BeforeEach
     void setUp() {
-        executionController = new ExecutionController();
+        executionController = new ExecutionController(resourceManager);
         logMessages = new ArrayList<>();
         executionController.setLogCallback(logMessages::add);
     }
@@ -34,6 +44,12 @@ class ExecutionControllerTest {
     @AfterEach
     void tearDown() {
         executionController.shutdown();
+    }
+
+    // Add a test to verify ResourceManager interaction
+    @Test
+    void testResourceManagerRegistration() {
+        verify(resourceManager).registerResource(any(ExecutionController.class), anyString());
     }
 
     @Test

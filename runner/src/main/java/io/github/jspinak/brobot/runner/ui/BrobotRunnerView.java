@@ -71,5 +71,13 @@ public class BrobotRunnerView extends BorderPane {
                 eventBus.publish(LogEvent.debug(this, "Tab changed to: " + newTab.getText(), "UI"));
             }
         });
+
+        // Add a new tab for resource monitoring
+        Tab resourceTab = new Tab("Resources");
+        resourceTab.setContent(context.getBean(ResourceMonitorPanel.class));
+        resourceTab.setClosable(false);
+
+        // Add the tab
+        tabPane.getTabs().add(resourceTab);
     }
 }
