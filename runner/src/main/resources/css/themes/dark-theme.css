@@ -1,0 +1,204 @@
+/*** DARK THEME ***/
+
+.root {
+    /* Override base colors for dark theme */
+    -fx-base: #202124;
+    -fx-background: #202124;
+    -fx-control-inner-background: #303134;
+
+    /* Override text colors for dark theme */
+    -fx-text-dark: #e8eaed;
+    -fx-text-medium: #bdc1c6;
+    -fx-text-light: #9aa0a6;
+
+    /* Adjust other colors for dark theme */
+    -fx-very-light-gray: #303134;
+    -fx-light-gray: #5f6368;
+    -fx-medium-gray: #9aa0a6;
+    -fx-dark-gray: #bdc1c6;
+    -fx-white: #202124;
+    -fx-dark: #e8eaed;
+
+    /* Adjust the shadow color for dark theme */
+    -fx-shadow-color: rgba(0, 0, 0, 0.4);
+
+    /* Adjust border color for dark theme */
+    -fx-border-color: #5f6368;
+    -fx-hover-color: rgba(66, 133, 244, 0.2);
+}
+
+/* Override specific components for dark theme */
+
+/* Header */
+.app-header {
+    -fx-background-color: #303134;
+}
+
+/* Text colors */
+.label, .text {
+    -fx-text-fill: -fx-text-dark;
+}
+
+/* Button styles */
+.button {
+    -fx-background-color: #303134;
+    -fx-text-fill: -fx-text-dark;
+    -fx-border-color: #5f6368;
+}
+
+.button:hover {
+    -fx-background-color: #5f6368;
+}
+
+/* Primary button retains its color in dark mode */
+.button-primary {
+    -fx-background-color: -fx-primary;
+    -fx-text-fill: -fx-white;
+    -fx-border-color: -fx-primary-dark;
+}
+
+/* Secondary button retains its color in dark mode */
+.button-secondary {
+    -fx-background-color: -fx-secondary;
+    -fx-text-fill: -fx-white;
+    -fx-border-color: -fx-secondary-dark;
+}
+
+/* Text field */
+.text-field, .text-area {
+    -fx-background-color: #303134;
+    -fx-text-fill: -fx-text-dark;
+    -fx-border-color: #5f6368;
+}
+
+.text-area .content {
+    -fx-background-color: #303134;
+}
+
+/* List view */
+.list-view {
+    -fx-background-color: #303134;
+    -fx-border-color: #5f6368;
+}
+
+.list-cell {
+    -fx-background-color: #303134;
+    -fx-text-fill: -fx-text-dark;
+}
+
+.list-cell:even {
+    -fx-background-color: #303134;
+}
+
+.list-cell:odd {
+    -fx-background-color: #202124;
+}
+
+/* Table view */
+.table-view {
+    -fx-background-color: #303134;
+    -fx-border-color: #5f6368;
+}
+
+.table-view .column-header {
+    -fx-background-color: #202124;
+    -fx-border-color: #5f6368;
+}
+
+.table-view .table-cell {
+    -fx-text-fill: -fx-text-dark;
+}
+
+.table-row-cell {
+    -fx-background-color: #303134;
+    -fx-border-color: #5f6368;
+}
+
+.table-row-cell:odd {
+    -fx-background-color: #202124;
+}
+
+/* Tab pane */
+.tab-pane > .tab-header-area > .headers-region > .tab {
+    -fx-background-color: #303134;
+    -fx-border-color: #5f6368;
+}
+
+.tab-pane > .tab-header-area > .headers-region > .tab:selected {
+    -fx-background-color: #202124;
+    -fx-border-color: -fx-primary #5f6368 #202124 #5f6368;
+}
+
+.tab-pane > .tab-header-area > .tab-header-background {
+    -fx-background-color: #202124;
+    -fx-border-color: #5f6368;
+}
+
+/* Card */
+.card {
+    -fx-background-color: #303134;
+    -fx-border-color: #5f6368;
+}
+
+/* Panel */
+.panel {
+    -fx-background-color: #303134;
+    -fx-border-color: #5f6368;
+}
+
+.panel-header {
+    -fx-background-color: #202124;
+    -fx-border-color: #5f6368;
+}
+
+/* Alert boxes */
+.alert-box {
+    -fx-background-color: #303134;
+    -fx-border-color: #5f6368;
+}
+
+/* Status bar */
+.status-bar {
+    -fx-background-color: #202124;
+    -fx-border-color: #5f6368;
+}
+
+/* Sidebar */
+.sidebar {
+    -fx-background-color: #202124;
+}
+
+/* Breadcrumb */
+.breadcrumb-bar {
+    -fx-background-color: #202124;
+    -fx-border-color: #5f6368;
+}
+
+/* Checkbox and radio button */
+.check-box > .box, .radio-button > .radio {
+    -fx-background-color: #303134;
+    -fx-border-color: #5f6368;
+}
+
+/* Combo box */
+.combo-box-base {
+    -fx-background-color: #303134;
+    -fx-border-color: #5f6368;
+    -fx-text-fill: -fx-text-dark;
+}
+
+.combo-box-popup > .list-view {
+    -fx-background-color: #303134;
+    -fx-border-color: #5f6368;
+}
+
+/* Tooltip */
+.tooltip {
+    -fx-background-color: #5f6368;
+    -fx-text-fill: -fx-text-dark;
+}
+
+/* Progress bar */
+.progress-bar {
+    -fx-background-color: #5f6368;
+}

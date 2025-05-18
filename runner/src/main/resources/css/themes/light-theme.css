@@ -1,0 +1,35 @@
+/*** LIGHT THEME ***/
+
+.root {
+    -fx-base: -fx-white;
+    -fx-background: -fx-white;
+    -fx-control-inner-background: -fx-white;
+    -fx-text-fill: -fx-text-dark;
+}
+
+/* Override specific components for light theme */
+.app-header {
+    /* Standard primary color for header in light theme */
+}
+
+.status-bar {
+    -fx-background-color: -fx-very-light-gray;
+}
+
+.sidebar {
+    -fx-background-color: -fx-very-light-gray;
+}
+
+.breadcrumb-bar {
+    -fx-background-color: -fx-very-light-gray;
+}
+
+.panel-header {
+    -fx-background-color: -fx-very-light-gray;
+}
+
+.table-row-cell:odd {
+    -fx-background-color: -fx-very-light-gray;
+}
+
+/* Additional styles specific to the light theme can be added here */
