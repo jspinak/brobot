@@ -12,6 +12,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
+import net.rgielen.fxweaver.core.FxmlView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,6 +25,7 @@ import java.util.Optional;
 /**
  * JavaFX component for configuring the Brobot Runner
  */
+@FxmlView("")
 public class ConfigurationPanel extends VBox {
     private static ConfigurationPanel INSTANCE;
 

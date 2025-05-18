@@ -11,28 +11,20 @@ import io.github.jspinak.brobot.runner.execution.ExecutionStatus;
 import io.github.jspinak.brobot.services.ProjectManager;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.Label;
-import javafx.scene.control.ProgressBar;
-import javafx.scene.control.ScrollPane;
-import javafx.scene.control.Separator;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.Tooltip;
+import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
-@Component
+/**
+ * JavaFX UI component for automation control.
+ */
 public class AutomationPanel extends VBox {
     private static AutomationPanel INSTANCE;
 
@@ -53,26 +45,8 @@ public class AutomationPanel extends VBox {
     private volatile boolean updateInProgress = false;
 
     /**
-     * No-arg constructor for JavaFX initialization
-     */
-    public AutomationPanel() {
-        this.context = null;
-        this.projectManager = null;
-        this.properties = null;
-        this.automationExecutor = null;
-        this.eventBus = null;
-        this.logArea = new TextArea();
-        this.buttonPane = new FlowPane();
-        setupBasicUI();
-
-        // Show message when not properly initialized with Spring
-        log("AutomationPanel initialized without Spring context. Limited functionality available.");
-    }
-
-    /**
      * Constructor with Spring dependencies
      */
-    @Autowired
     public AutomationPanel(ApplicationContext context, ProjectManager projectManager,
                            BrobotRunnerProperties properties, AutomationExecutor automationExecutor,
                            EventBus eventBus) {
@@ -94,10 +68,8 @@ public class AutomationPanel extends VBox {
             // Start a UI update thread for status
             startStatusUpdateThread();
         }
-    }
 
-    @PostConstruct
-    public void initialize() {
+        // Set the singleton instance
         INSTANCE = this;
     }
 
