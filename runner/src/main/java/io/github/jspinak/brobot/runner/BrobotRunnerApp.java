@@ -1,11 +1,13 @@
 package io.github.jspinak.brobot.runner;
 
+import io.github.jspinak.brobot.database.services.AllStatesInProjectService;
 import io.github.jspinak.brobot.runner.automation.AutomationExecutor;
+import io.github.jspinak.brobot.runner.config.ApplicationConfig;
 import io.github.jspinak.brobot.runner.config.BrobotRunnerProperties;
 import io.github.jspinak.brobot.runner.events.EventBus;
 import io.github.jspinak.brobot.runner.init.BrobotLibraryInitializer;
 import io.github.jspinak.brobot.runner.ui.AutomationPanel;
-import io.github.jspinak.brobot.runner.ui.ConfigurationPanel;
+import io.github.jspinak.brobot.runner.ui.EnhancedConfigurationPanel;
 import io.github.jspinak.brobot.services.ProjectManager;
 import javafx.application.Application;
 import javafx.scene.Scene;
@@ -30,13 +32,15 @@ public class BrobotRunnerApp extends Application {
         EventBus eventBus = applicationContext.getBean(EventBus.class);
         ProjectManager projectManager = applicationContext.getBean(ProjectManager.class);
         AutomationExecutor automationExecutor = applicationContext.getBean(AutomationExecutor.class);
+        AllStatesInProjectService allStatesService = applicationContext.getBean(AllStatesInProjectService.class);
+        ApplicationConfig appConfig = applicationContext.getBean(ApplicationConfig.class);
 
         // Create tab pane for different sections
         TabPane tabPane = new TabPane();
 
         // Configuration tab
         Tab configTab = new Tab("Configuration");
-        configTab.setContent(new ConfigurationPanel(properties, libraryInitializer, eventBus));
+        configTab.setContent(new EnhancedConfigurationPanel(eventBus, properties, libraryInitializer, appConfig, projectManager, allStatesService));
         configTab.setClosable(false);
 
         // Automation tab

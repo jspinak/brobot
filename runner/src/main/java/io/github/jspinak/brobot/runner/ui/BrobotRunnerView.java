@@ -1,5 +1,6 @@
 package io.github.jspinak.brobot.runner.ui;
 
+import io.github.jspinak.brobot.database.services.AllStatesInProjectService;
 import io.github.jspinak.brobot.runner.events.EventBus;
 import io.github.jspinak.brobot.runner.events.LogEvent;
 import io.github.jspinak.brobot.runner.ui.components.StatusBar;
@@ -180,7 +181,7 @@ public class BrobotRunnerView extends BorderPane {
         screenRegistry.registerScreenFactory(
                 "configuration",
                 "Configuration",
-                context -> uiComponentFactory.createConfigurationPanel()
+                context -> uiComponentFactory.createConfigManagementPanel()
         );
 
         // Automation screen
