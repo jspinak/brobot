@@ -88,6 +88,17 @@ public class ValidationResult {
     }
 
     /**
+     * Gets validation errors with INFO severity.
+     *
+     * @return List of info messages
+     */
+    public List<ValidationError> getInfoMessages() {
+        return errors.stream()
+                .filter(e -> e.severity() == ValidationSeverity.INFO)
+                .collect(Collectors.toList());
+    }
+
+    /**
      * Checks if there are any errors (of any severity).
      *
      * @return true if there are any errors
