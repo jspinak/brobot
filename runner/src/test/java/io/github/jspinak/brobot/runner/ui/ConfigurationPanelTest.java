@@ -1,5 +1,6 @@
 package io.github.jspinak.brobot.runner.ui;
 
+import io.github.jspinak.brobot.database.services.AllStatesInProjectService;
 import io.github.jspinak.brobot.runner.config.BrobotRunnerProperties;
 import io.github.jspinak.brobot.runner.events.EventBus;
 import io.github.jspinak.brobot.runner.init.BrobotLibraryInitializer;
@@ -36,6 +37,9 @@ class ConfigurationPanelTest {
     @Mock
     private EventBus eventBus;
 
+    @Mock
+    AllStatesInProjectService allStatesService;
+
     private ConfigurationPanel panel;
 
     @TempDir
@@ -61,7 +65,7 @@ class ConfigurationPanelTest {
         when(libraryInitializer.initializeWithConfig(any(Path.class), any(Path.class))).thenReturn(true);
 
         // Create the panel with mocked dependencies
-        panel = new ConfigurationPanel(properties, libraryInitializer, eventBus);
+        panel = new ConfigurationPanel(properties, libraryInitializer, eventBus, allStatesService);
 
         // Set up the scene
         Scene scene = new Scene(panel, 800, 600);
