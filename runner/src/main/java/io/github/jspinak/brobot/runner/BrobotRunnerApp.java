@@ -8,7 +8,9 @@ import io.github.jspinak.brobot.runner.events.EventBus;
 import io.github.jspinak.brobot.runner.init.BrobotLibraryInitializer;
 import io.github.jspinak.brobot.runner.ui.AutomationPanel;
 import io.github.jspinak.brobot.runner.ui.EnhancedConfigurationPanel;
+import io.github.jspinak.brobot.runner.ui.execution.ExecutionDashboardPanel;
 import io.github.jspinak.brobot.services.ProjectManager;
+import io.github.jspinak.brobot.services.StateTransitionsRepository;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.control.Tab;
@@ -34,25 +36,34 @@ public class BrobotRunnerApp extends Application {
         AutomationExecutor automationExecutor = applicationContext.getBean(AutomationExecutor.class);
         AllStatesInProjectService allStatesService = applicationContext.getBean(AllStatesInProjectService.class);
         ApplicationConfig appConfig = applicationContext.getBean(ApplicationConfig.class);
+        StateTransitionsRepository stateTransitionsRepository = applicationContext.getBean(StateTransitionsRepository.class);
 
         // Create tab pane for different sections
         TabPane tabPane = new TabPane();
 
         // Configuration tab
         Tab configTab = new Tab("Configuration");
-        configTab.setContent(new EnhancedConfigurationPanel(eventBus, properties, libraryInitializer, appConfig, projectManager, allStatesService));
+        configTab.setContent(
+                new EnhancedConfigurationPanel(eventBus, properties, libraryInitializer, appConfig, projectManager, allStatesService));
         configTab.setClosable(false);
 
         // Automation tab
         Tab automationTab = new Tab("Automation");
-        automationTab.setContent(new AutomationPanel(applicationContext, projectManager, properties, automationExecutor, eventBus));
+        automationTab.setContent(
+                new AutomationPanel(applicationContext, projectManager, properties, automationExecutor, eventBus));
         automationTab.setClosable(false);
 
+        // Execution Dashboard tab
+        Tab executionDashboardTab = new Tab("Execution Dashboard");
+        executionDashboardTab.setContent(
+                new ExecutionDashboardPanel(eventBus, automationExecutor, stateTransitionsRepository, allStatesService));
+        executionDashboardTab.setClosable(false);
+
         // Add tabs to pane
-        tabPane.getTabs().addAll(configTab, automationTab);
+        tabPane.getTabs().addAll(configTab, automationTab, executionDashboardTab);
 
         // Create scene
-        Scene scene = new Scene(tabPane, 800, 600);
+        Scene scene = new Scene(tabPane, 900, 700);
         primaryStage.setScene(scene);
         primaryStage.setTitle("Brobot Runner - Java " + javaVersion + ", JavaFX " + javafxVersion);
         primaryStage.show();
