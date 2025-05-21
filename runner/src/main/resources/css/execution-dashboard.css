@@ -1,0 +1,111 @@
+/* Execution Dashboard Styling */
+
+/* Control Panel */
+.execution-control-panel {
+    -fx-background-color: #f5f5f5;
+    -fx-border-color: #ddd;
+    -fx-border-radius: 5;
+    -fx-padding: 10px;
+}
+
+/* Status Panel */
+.status-panel {
+    -fx-background-color: #f8f8f8;
+    -fx-border-color: #ddd;
+    -fx-border-radius: 5;
+    -fx-padding: 10px;
+}
+
+.status-indicator-running {
+    -fx-fill: #4CAF50;
+}
+
+.status-indicator-paused {
+    -fx-fill: #FF9800;
+}
+
+.status-indicator-stopped {
+    -fx-fill: #9E9E9E;
+}
+
+.status-indicator-completed {
+    -fx-fill: #2196F3;
+}
+
+.status-indicator-error {
+    -fx-fill: #F44336;
+}
+
+.status-indicator-idle {
+    -fx-fill: #BDBDBD;
+}
+
+/* Progress Bar */
+.progress-bar {
+    -fx-accent: #4CAF50;
+}
+
+.progress-bar .track {
+    -fx-background-color: #E0E0E0;
+}
+
+/* Performance Metrics Panel */
+.metrics-grid {
+    -fx-background-color: #f0f0f0;
+    -fx-border-color: #ddd;
+    -fx-border-radius: 5;
+    -fx-padding: 10px;
+}
+
+.metrics-value {
+    -fx-font-weight: bold;
+}
+
+/* State Transition & Action Tables */
+.table-view {
+    -fx-background-color: transparent;
+}
+
+.table-view .column-header {
+    -fx-background-color: #f0f0f0;
+    -fx-font-weight: bold;
+}
+
+.table-row-cell:success {
+    -fx-background-color: #E8F5E9;
+}
+
+.table-row-cell:failure {
+    -fx-background-color: #FFEBEE;
+}
+
+/* Charts */
+.chart {
+    -fx-padding: 10px;
+}
+
+.chart-series-line.action-duration {
+    -fx-stroke: #2196F3;
+    -fx-stroke-width: 2px;
+}
+
+.chart-series-line.match-time {
+    -fx-stroke: #FF9800;
+    -fx-stroke-width: 2px;
+}
+
+/* Labels */
+.label-header {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+}
+
+.label-subheader {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
+
+.elapsed-time {
+    -fx-font-family: "Monospaced";
+    -fx-font-size: 14px;
+}
