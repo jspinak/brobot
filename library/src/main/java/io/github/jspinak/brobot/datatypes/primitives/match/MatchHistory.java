@@ -31,12 +31,12 @@ public class MatchHistory {
     private List<MatchSnapshot> snapshots = new ArrayList<>();
 
     @JsonProperty
-    private void setTimesSearched(int timesSearched) {
+    public void setTimesSearched(int timesSearched) {
         this.timesSearched = timesSearched;
     }
 
     @JsonProperty
-    private void setTimesFound(int timesFound) {
+    public void setTimesFound(int timesFound) {
         this.timesFound = timesFound;
     }
 
