@@ -7,8 +7,7 @@ plugins {
     id 'io.freefair.lombok'
     id 'io.spring.dependency-management'
     id 'org.springframework.boot' version '3.2.4'
-    id 'org.openjfx.javafxplugin' version '0.0.13'
-    //id 'org.beryx.jlink' version '3.1.1'  // Add jlink plugin for jpackage support
+    id 'org.openjfx.javafxplugin' version '0.1.0'
 }
 
 description = 'Brobot Runner - JavaFX UI for Brobot Automation'
@@ -41,10 +40,10 @@ dependencies {
     implementation 'org.springframework:spring-core'
 
     // Explicit JavaFX dependencies
-    // javafx-base is included as a transitive dependency
     implementation "org.openjfx:javafx-controls:21"
     implementation "org.openjfx:javafx-fxml:21"
     implementation "org.openjfx:javafx-graphics:21"
+    implementation "org.openjfx:javafx-base:21"  // ADDED: Explicit base dependency
     implementation "net.rgielen:javafx-weaver-spring:2.0.1"
 
     // JSON parsing with specific version
@@ -64,16 +63,30 @@ dependencies {
     }
     testImplementation 'org.springframework.boot:spring-boot-test-autoconfigure'
 
-    // JavaFX testing dependencies
-    testImplementation "org.openjfx:javafx-base:21:${platform}"
-    testImplementation "org.openjfx:javafx-controls:21:${platform}"
-    testImplementation "org.openjfx:javafx-graphics:21:${platform}"
-    testImplementation "org.openjfx:javafx-fxml:21:${platform}"
+    // FIXED: JavaFX testing dependencies - ensure platform-specific natives are available
+    testImplementation "org.openjfx:javafx-base:21"
+    testImplementation "org.openjfx:javafx-controls:21"
+    testImplementation "org.openjfx:javafx-graphics:21"
+    testImplementation "org.openjfx:javafx-fxml:21"
 
-    // TestFX dependencies for JavaFX testing
-    testImplementation 'org.testfx:openjfx-monocle:jdk-12.0.1+2'
-    testImplementation 'org.testfx:testfx-junit5:4.0.16-alpha'
+    // Platform-specific natives for tests
+    testRuntimeOnly "org.openjfx:javafx-base:21:${platform}"
+    testRuntimeOnly "org.openjfx:javafx-controls:21:${platform}"
+    testRuntimeOnly "org.openjfx:javafx-graphics:21:${platform}"
+    testRuntimeOnly "org.openjfx:javafx-fxml:21:${platform}"
+
+    // FIXED: TestFX dependencies with correct monocle version for headless testing
+    testImplementation "org.testfx:testfx-junit5:4.0.16-alpha"
     testImplementation 'org.testfx:testfx-core:4.0.16-alpha'
+
+    // CRITICAL: Use monocle for headless JavaFX testing (fixes PlatformFactory null issue)
+    testImplementation "org.openjfx:javafx-base:21:win"
+    testImplementation "org.openjfx:javafx-controls:21:win"
+    testImplementation "org.openjfx:javafx-graphics:21:win"
+    testImplementation "org.openjfx:javafx-fxml:21:win"
+
+    // Add TestFX Monocle for headless testing - this provides the missing PlatformFactory
+    testImplementation "org.testfx:openjfx-monocle:jdk-12.0.1+2"
 
     // JUnit 5 for testing
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.2'
@@ -82,44 +95,112 @@ dependencies {
     // mockito for mocking
     testImplementation 'org.mockito:mockito-junit-jupiter:4.5.1'
     testImplementation 'org.mockito:mockito-core:4.5.1'
-    testImplementation 'org.mockito:mockito-inline:4.5.1'  // For static mocking support
+    testImplementation 'org.mockito:mockito-inline:4.5.1'
 }
 
 test {
     useJUnitPlatform()
 
-    // Configure TestFX for better stability
-    systemProperty 'testfx.setup.timeout', '10000'
-    systemProperty 'testfx.robot.write.sleep', '30'
-    systemProperty 'testfx.robot', 'glass'
+    // CRITICAL FIX: Configure for Monocle headless testing to avoid PlatformFactory null error
+    jvmArgs = [
+            // TestFX specific exports (without --add-modules)
+            '--add-exports', 'javafx.graphics/com.sun.javafx.application=ALL-UNNAMED',
+            '--add-opens', 'javafx.graphics/com.sun.javafx.application=ALL-UNNAMED',
+            '--add-opens', 'javafx.base/com.sun.javafx.runtime=ALL-UNNAMED',
+            '--add-opens', 'javafx.controls/com.sun.javafx.scene.control=ALL-UNNAMED',
+            '--add-opens', 'javafx.graphics/com.sun.javafx.util=ALL-UNNAMED',
+            '--add-opens', 'javafx.graphics/com.sun.javafx.scene=ALL-UNNAMED',
+            '--add-opens', 'javafx.graphics/com.sun.glass.ui=ALL-UNNAMED',
+            '--add-opens', 'javafx.graphics/com.sun.glass.utils=ALL-UNNAMED',
+            '--add-exports', 'javafx.graphics/com.sun.glass.ui=ALL-UNNAMED',
+            '--add-exports', 'javafx.graphics/com.sun.glass.ui.monocle=ALL-UNNAMED'
+    ]
 
-    // For headless testing environments
-    if (System.getProperty('testfx.headless') == 'true') {
-        systemProperty 'testfx.headless', 'true'
-        systemProperty 'glass.platform', 'Monocle'
-        systemProperty 'monocle.platform', 'Headless'
-        systemProperty 'prism.order', 'sw'
-        systemProperty 'prism.text', 't2k'
-        systemProperty 'java.awt.headless', 'true'
-    }
+    // FIXED: Use Monocle for headless testing (prevents PlatformFactory null)
+    systemProperties = [
+            // TestFX configuration
+            'testfx.setup.timeout': '30000',
+            'testfx.robot.write.sleep': '30',
+            'testfx.robot': 'glass',
 
-    // Optional: increase verbosity for debugging
+            // CRITICAL: Force Monocle headless mode for tests
+            'java.awt.headless': 'true',
+            'testfx.headless': 'true',
+            'glass.platform': 'Monocle',
+            'monocle.platform': 'Headless',
+            'prism.order': 'sw',
+            'prism.text': 't2k',
+            'prism.verbose': 'false'
+    ]
+
+    // Increase memory for tests
+    minHeapSize = '512m'
+    maxHeapSize = '2g'
+
+    // Better test logging
     testLogging {
         events "passed", "skipped", "failed", "standardOut", "standardError"
         showExceptions true
         exceptionFormat "full"
+        showCauses true
+        showStackTraces true
+    }
+
+    // Set test timeout
+    timeout = Duration.ofMinutes(10)
+}
+
+// ADDED: Task to run tests in headless mode when needed
+task testHeadless(type: Test) {
+    useJUnitPlatform()
+
+    // Don't use --add-modules here either
+    jvmArgs = [
+            '--add-exports', 'javafx.graphics/com.sun.javafx.application=ALL-UNNAMED',
+            '--add-opens', 'javafx.graphics/com.sun.javafx.application=ALL-UNNAMED',
+            '--add-opens', 'javafx.base/com.sun.javafx.runtime=ALL-UNNAMED',
+            '--add-opens', 'javafx.controls/com.sun.javafx.scene.control=ALL-UNNAMED',
+            '--add-opens', 'javafx.graphics/com.sun.javafx.util=ALL-UNNAMED',
+            '--add-opens', 'javafx.graphics/com.sun.javafx.scene=ALL-UNNAMED',
+            '--add-opens', 'javafx.graphics/com.sun.glass.ui=ALL-UNNAMED',
+            '--add-opens', 'javafx.graphics/com.sun.glass.utils=ALL-UNNAMED',
+            '--add-exports', 'javafx.graphics/com.sun.glass.ui=ALL-UNNAMED',
+            '--add-exports', 'javafx.graphics/com.sun.glass.ui.monocle=ALL-UNNAMED'
+    ]
+
+    systemProperties = [
+            // TestFX configuration
+            'testfx.setup.timeout': '30000',
+            'testfx.robot.write.sleep': '30',
+            'testfx.robot': 'glass',
+
+            // Headless mode settings
+            'java.awt.headless': 'true',
+            'testfx.headless': 'true',
+            'glass.platform': 'Monocle',
+            'monocle.platform': 'Headless',
+            'prism.order': 'sw',
+            'prism.text': 't2k'
+    ]
+
+    // Configure testLogging properly
+    testLogging {
+        events "passed", "skipped", "failed", "standardOut", "standardError"
+        showExceptions true
+        exceptionFormat "full"
+        showCauses true
+        showStackTraces true
     }
 }
 
 application {
     mainClass = 'io.github.jspinak.brobot.runner.BrobotRunnerApplication'
-    //mainModule = 'runner'  // when using modules for JavaFX
 }
 
-// Runtime configuration for JavaFX
+// FIXED: Runtime configuration for JavaFX applications (remove --add-modules)
 tasks.withType(JavaExec).configureEach {
     jvmArgs += [
-            '--add-modules', 'javafx.controls,javafx.fxml,javafx.graphics,javafx.base'
+            '--add-exports', 'javafx.graphics/com.sun.javafx.application=ALL-UNNAMED'
     ]
 }
 
@@ -135,72 +216,32 @@ bootJar {
     }
 }
 
-/*
-// Configure jlink task for modular JavaFX application
-jlink {
-    options = ['--strip-debug', '--compress', '2', '--no-header-files', '--no-man-pages']
-    launcher {
-        name = 'brobot'
-        mainClass = 'io.github.jspinak.brobot.runner.BrobotRunnerApplication'
-        jvmArgs = [
-                '--add-modules', 'javafx.controls,javafx.fxml,javafx.graphics,javafx.base',
-                '--add-reads', 'runner=ALL-UNNAMED',
-                '--add-opens', 'java.base/java.lang=ALL-UNNAMED',
-                '--add-opens', 'java.desktop/java.awt=ALL-UNNAMED',
-                '--add-opens', 'java.desktop/java.awt.image=ALL-UNNAMED',
-                '--add-opens', 'java.desktop/javax.imageio=ALL-UNNAMED',
-                '--add-opens', 'javafx.graphics/javafx.scene=ALL-UNNAMED',
-                '--add-opens', 'javafx.graphics/com.sun.javafx.application=ALL-UNNAMED'
-        ]
-    }
+// ADDED: Diagnostic task to check JavaFX setup
+task checkJavaFX {
+    doLast {
+        println "\n=== JavaFX Configuration Check ==="
+        println "JavaFX Version: ${javafx.version}"
+        println "JavaFX Modules: ${javafx.modules}"
+        println "Platform: ${platform}"
+        println "Java Version: ${java.sourceCompatibility}"
 
-    // Set jpackage-specific options
-    jpackage {
-        // The jpackage configuration differs between versions of the plugin
-        // Some properties must be set via installer options
+        println "\n=== Checking JavaFX Dependencies ==="
+        configurations.testRuntimeClasspath.resolvedConfiguration.resolvedArtifacts.each { artifact ->
+            if (artifact.name.contains('javafx')) {
+                println "${artifact.name} - ${artifact.classifier ?: 'main'}"
+            }
+        }
 
-        // Set application version (using project version)
-        imageOptions = ['--app-version', project.version]
-
-        installerOptions = []
-
-        // Set platform-specific installer settings
-        if (org.gradle.internal.os.OperatingSystem.current().isWindows()) {
-            installerType = 'exe'
-            installerOptions.addAll([
-                    '--win-per-user-install',
-                    '--win-dir-chooser',
-                    '--win-menu',
-                    '--win-shortcut',
-                    '--name', 'Brobot', // Set app name
-                    '--vendor', 'io.github.jspinak', // Set vendor
-                    '--description', 'Brobot Automation Desktop Application'
-            ])
-        } else if (org.gradle.internal.os.OperatingSystem.current().isMacOsX()) {
-            installerType = 'dmg'
-            installerOptions.addAll([
-                    '--name', 'Brobot', // Set app name
-                    '--vendor', 'io.github.jspinak', // Set vendor
-                    '--mac-package-name', 'Brobot',
-                    '--description', 'Brobot Automation Desktop Application'
-            ])
-        } else {
-            installerType = 'deb'
-            installerOptions.addAll([
-                    '--name', 'Brobot', // Set app name
-                    '--vendor', 'io.github.jspinak', // Set vendor
-                    '--linux-shortcut',
-                    '--linux-package-name', 'brobot',
-                    '--linux-app-category', 'Development',
-                    '--description', 'Brobot Automation Desktop Application'
-            ])
+        println "\n=== Checking TestFX Dependencies ==="
+        configurations.testRuntimeClasspath.resolvedConfiguration.resolvedArtifacts.each { artifact ->
+            if (artifact.name.contains('testfx')) {
+                println "${artifact.name}"
+            }
         }
     }
 }
 
- */
-
-// Create a direct jpackage task (with a DIFFERENT name to avoid conflicts)
+// Rest of your existing tasks...
 task directJpackage(type: Exec) {
     group = 'packaging'
     description = 'Package the application using jpackage command line tool directly'
@@ -215,11 +256,9 @@ task directJpackage(type: Exec) {
     workingDir = file("${buildDir}")
 
     doFirst {
-        // Create a directory for resources and prepare files
         def resourcesDir = file("${buildDir}/jpackage-resources")
         resourcesDir.mkdirs()
 
-        // Create the command line based on the OS
         commandLine = [
                 jpackageExe,
                 '--type', 'app-image',
@@ -243,11 +282,9 @@ task directJpackage(type: Exec) {
         println "Running jpackage command: ${commandLine.join(' ')}"
     }
 
-    // Make sure that bootJar is executed before this task
     mustRunAfter bootJar
 }
 
-// Task to create distribution zip (fallback option)
 tasks.register('createDistributionZip', Zip) {
     dependsOn bootJar
 
@@ -263,7 +300,6 @@ tasks.register('createDistributionZip', Zip) {
         into "config"
     }
 
-    // Check if LICENSE.txt exists, if not try LICENSE
     def licenseFile = rootProject.file("LICENSE.txt")
     if (!licenseFile.exists()) {
         licenseFile = rootProject.file("LICENSE")
@@ -274,7 +310,6 @@ tasks.register('createDistributionZip', Zip) {
         }
     }
 
-    // Add README.md if it exists
     def readmeFile = rootProject.file("README.md")
     if (readmeFile.exists()) {
         from(readmeFile) {
@@ -287,7 +322,6 @@ tasks.register('createDistributionZip', Zip) {
     }
 }
 
-// Diagnostic tasks
 tasks.register('printClasspath') {
     doLast {
         println "\n=== RUNTIME CLASSPATH ==="
@@ -312,7 +346,6 @@ tasks.register('printJavaHome') {
     }
 }
 
-// Print available tasks to help with debugging
 tasks.register('listJpackageTasks') {
     doLast {
         println "\n=== Available Packaging Tasks ==="
