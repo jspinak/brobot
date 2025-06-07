@@ -1,17 +1,15 @@
-// File: io/github/jspinak/brobot/dsl/model/BuilderExpression.java
+// File: io.github.jspinak/brobot/dsl/BuilderExpression.java
 package io.github.jspinak.brobot.dsl;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 import java.util.List;
 
+@Data
+@EqualsAndHashCode(callSuper = false)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class BuilderExpression extends Expression {
-    private String builderType; // Consider Enum: actionOptions, objectCollection
+    private String builderType;
     private List<BuilderMethod> methods;
-
-    // Getters and Setters
-    public String getBuilderType() { return builderType; }
-    public void setBuilderType(String builderType) { this.builderType = builderType; }
-    public List<BuilderMethod> getMethods() { return methods; }
-    public void setMethods(List<BuilderMethod> methods) { this.methods = methods; }
 }
