@@ -1,10 +1,12 @@
-// File: io/github/jspinak/brobot/dsl/model/Expression.java
+// File: io/github/jspinak/brobot/dsl/Expression.java
 package io.github.jspinak.brobot.dsl;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Getter;
+import lombok.Setter;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonTypeInfo(
@@ -22,13 +24,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 })
 public abstract class Expression {
     @JsonProperty("expressionType")
+    @Getter
+    @Setter
     private String expressionType;
-
-    public String getExpressionType() {
-        return expressionType;
-    }
-
-    public void setExpressionType(String expressionType) {
-        this.expressionType = expressionType;
-    }
 }

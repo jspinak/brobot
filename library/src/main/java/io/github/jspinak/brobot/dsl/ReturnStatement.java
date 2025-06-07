@@ -2,12 +2,12 @@
 package io.github.jspinak.brobot.dsl;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
+@Data
+@EqualsAndHashCode(callSuper = false)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ReturnStatement extends Statement {
     private Expression value;
-
-    // Getters and Setters
-    public Expression getValue() { return value; }
-    public void setValue(Expression value) { this.value = value; }
 }
