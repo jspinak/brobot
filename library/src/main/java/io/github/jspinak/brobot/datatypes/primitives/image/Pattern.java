@@ -72,12 +72,15 @@ public class Pattern {
     perform mock runs and MatchHistory contains a list of MatchSnapshot, which itself contains a list of Match objects.
     For this reason, I've created a Brobot Image object and use this object in Match and in Pattern.
      */
-    private Image image = Image.getEmptyImage();;
+    private Image image;
 
     public Pattern(String imgPath) {
+        // Add this safety check at the beginning
+        if (imgPath == null || imgPath.isEmpty()) {
+            return;
+        }
         setImgpath(imgPath);
         setNameFromFilenameIfEmpty(imgPath);
-        // using SikuliX to get the BufferedImage would make it OS-independent
         this.image = new Image(BufferedImageOps.getBuffImgFromFile(imgPath), name);
     }
 
@@ -219,7 +222,7 @@ public class Pattern {
 
     @JsonIgnore
     public boolean isEmpty() {
-        return image.isEmpty();
+        return image == null || image.isEmpty();
     }
 
     // __convenience functions for the SikuliX Pattern object__
@@ -263,7 +266,7 @@ public class Pattern {
         private String name = "";
         private Image image;
         private BufferedImage bufferedImage;
-        private String filename = "";
+        private String filename = null;
         private boolean fixed = false;
         private SearchRegions searchRegions = new SearchRegions();
         private boolean setKmeansColorProfiles = false;
@@ -416,23 +419,27 @@ public class Pattern {
         /*
         Sets the image in the Builder.
          */
-        private void createAndSetImage(Pattern pattern) {
-            if (image != null) {
-                pattern.setImage(image); //if the Builder has a valid image, use it for the Pattern image
-                return;
+        private void createImageFromSources(Pattern pattern) {
+            if (this.image != null) {
+                pattern.setImage(this.image);
+                if (name != null && pattern.getImage() != null) pattern.getImage().setName(name);
+            } else if (this.bufferedImage != null) {
+                pattern.setImage(new Image(this.bufferedImage, this.name));
+            } else if (this.filename != null && !this.filename.isEmpty()) {
+                pattern.setImage(new Image(BufferedImageOps.getBuffImgFromFile(this.filename), this.name));
+                pattern.setImgpath(this.filename);
             }
-            // the Builder does not have an image. if there is a buffered image, use it to set the image.
-            if (bufferedImage != null) pattern.setImage(new Image(bufferedImage, pattern.getName()));
         }
 
         public Pattern build() {
-            Pattern pattern = makeNewPattern();
+            Pattern pattern = new Pattern(); // Start with a truly empty pattern
             if (name != null) pattern.setName(name);
-            createAndSetImage(pattern);
+
+            createImageFromSources(pattern);
+
             pattern.setFixed(fixed);
             pattern.setSearchRegions(searchRegions);
             pattern.setSetKmeansColorProfiles(setKmeansColorProfiles);
-            //pattern.setKmeansProfilesAllSchemas(kmeansProfilesAllSchemas);
             pattern.setMatchHistory(matchHistory);
             pattern.setIndex(index);
             pattern.setDynamic(dynamic);

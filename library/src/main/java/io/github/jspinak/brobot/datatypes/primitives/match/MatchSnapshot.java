@@ -105,6 +105,9 @@ public class MatchSnapshot {
     private String stateName = SpecialStateType.NULL.toString();
     private Long stateId = SpecialStateType.NULL.getId();
 
+    public <E> MatchSnapshot(List<E> matchInSnapshot) {
+    }
+
     public boolean wasFound() {
         return !matchList.isEmpty() || !text.isEmpty();
     }
@@ -183,7 +186,12 @@ public class MatchSnapshot {
 
     @Override
     public int hashCode() {
-        return Objects.hash(actionOptions, matchList, text, duration, timeStamp, actionSuccess, resultSuccess, stateName, stateId);
+        // Truncate timestamp to seconds to be consistent with the equals() method.
+        java.time.LocalDateTime truncatedTimestamp = (timeStamp != null) ?
+                timeStamp.truncatedTo(java.time.temporal.ChronoUnit.SECONDS) : null;
+
+        return java.util.Objects.hash(actionOptions, matchList, text, duration, truncatedTimestamp,
+                actionSuccess, resultSuccess, stateName, stateId);
     }
 
     @Override
