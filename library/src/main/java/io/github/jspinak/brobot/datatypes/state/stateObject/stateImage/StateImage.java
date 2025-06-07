@@ -288,10 +288,6 @@ public class StateImage implements StateObject {
             return this;
         }
 
-        private void setNameFromPatternIfEmpty(Pattern pattern) {
-            if (name.isEmpty() && pattern != null) name = pattern.getName();
-        }
-
         public Builder setKmeansProfilesAllSchemas(KmeansProfilesAllSchemas kmeansProfilesAllSchemas) {
             this.kmeansProfilesAllSchemas = kmeansProfilesAllSchemas;
             return this;
@@ -335,6 +331,13 @@ public class StateImage implements StateObject {
             stringBuilder.append(this.name).append("\n");
             patterns.forEach(pattern -> stringBuilder.append(pattern.getName()).append(" "));
             return stringBuilder.toString();
+        }
+
+        private void setNameFromPatternIfEmpty(Pattern pattern) {
+            // This condition now safely handles cases where 'name' is null or empty.
+            if ((name == null || name.isEmpty()) && pattern != null && pattern.getName() != null) {
+                name = pattern.getName();
+            }
         }
 
         public StateImage build() {
