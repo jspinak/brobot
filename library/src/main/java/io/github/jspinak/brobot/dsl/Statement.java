@@ -5,13 +5,15 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Getter;
+import lombok.Setter;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonTypeInfo(
         use = JsonTypeInfo.Id.NAME,
-        include = JsonTypeInfo.As.PROPERTY, // Use EXISTING_PROPERTY if statementType is a field in subtypes
+        include = JsonTypeInfo.As.PROPERTY,
         property = "statementType",
-        visible = true // Makes statementType also deserializable into a field if needed
+        visible = true
 )
 @JsonSubTypes({
         @JsonSubTypes.Type(value = VariableDeclarationStatement.class, name = "variableDeclaration"),
@@ -22,17 +24,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
         @JsonSubTypes.Type(value = MethodCallStatement.class, name = "methodCall")
 })
 public abstract class Statement {
-    // The 'statementType' field from JSON will be used by Jackson to determine the subtype.
-    // If you want to access it in your POJOs, you can declare it here or in subtypes.
-    // If 'visible = true' in @JsonTypeInfo, Jackson can map it if a field exists.
     @JsonProperty("statementType")
+    @Getter
+    @Setter
     private String statementType;
-
-    public String getStatementType() {
-        return statementType;
-    }
-
-    public void setStatementType(String statementType) {
-        this.statementType = statementType;
-    }
 }
