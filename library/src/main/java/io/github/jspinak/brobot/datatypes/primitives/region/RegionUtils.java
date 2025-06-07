@@ -65,11 +65,22 @@ public class RegionUtils {
     }
 
     public static boolean isDefined(Region region) {
+        // A region with no area (width or height is zero or less) is not defined.
+        if (region.getW() <= 0 || region.getH() <= 0) {
+            return false;
+        }
+
+        // A region matching the full screen dimensions is the default, and thus not "defined"
+        // in the sense of being a specific, user-set region.
         int defaultWidth = Integer.parseInt(System.getenv().getOrDefault("SCREEN_WIDTH", "1920"));
         int defaultHeight = Integer.parseInt(System.getenv().getOrDefault("SCREEN_HEIGHT", "1080"));
-        return region.getX() != 0 || region.getY() != 0 ||
-                (region.getW() != defaultWidth && region.getW() >= 0) ||
-                (region.getH() != defaultHeight && region.getH() >= 0);
+        if (region.getX() == 0 && region.getY() == 0 &&
+                region.getW() == defaultWidth && region.getH() == defaultHeight) {
+            return false;
+        }
+
+        // Otherwise, the region is considered to be defined.
+        return true;
     }
 
     public static int size(Region region) {
@@ -166,29 +177,35 @@ public class RegionUtils {
 
     // Spatial Transformations
     public static List<Integer> xPoints(Region a, Region b) {
-        List<Integer> points = new ArrayList<>();
-        boolean allXExposedAtSomeY = b.getY() > a.getY() || b.y2() < a.y2();
-        if (allXExposedAtSomeY) {
-            points.add(a.getX());
-            points.add(a.x2());
+        // Using a TreeSet to keep the points sorted and unique
+        java.util.Set<Integer> points = new java.util.TreeSet<>();
+        points.add(a.getX());
+        points.add(a.x2());
+        // Add the start-point of b if it's inside a
+        if (b.getX() > a.getX() && b.getX() < a.x2()) {
+            points.add(b.getX());
         }
-        if (b.getX() > a.getX()) points.add(b.getX());
-        if (a.x2() > b.x2()) points.add(b.x2());
-        Collections.sort(points);
-        return points;
+        // Add the end-point of b if it's inside a
+        if (b.x2() > a.getX() && b.x2() < a.x2()) {
+            points.add(b.x2());
+        }
+        return new java.util.ArrayList<>(points);
     }
 
     public static List<Integer> yPoints(Region a, Region b) {
-        List<Integer> points = new ArrayList<>();
-        boolean allYExposedAtSomeX = b.getX() > a.getX() || b.x2() < a.x2();
-        if (allYExposedAtSomeX) {
-            points.add(a.getY());
-            points.add(a.y2());
+        // Using a TreeSet to keep the points sorted and unique
+        java.util.Set<Integer> points = new java.util.TreeSet<>();
+        points.add(a.getY());
+        points.add(a.y2());
+        // Add the start-point of b if it's inside a
+        if (b.getY() > a.getY() && b.getY() < a.y2()) {
+            points.add(b.getY());
         }
-        if (b.getY() > a.getY()) points.add(b.getY());
-        if (a.y2() > b.y2()) points.add(b.y2());
-        Collections.sort(points);
-        return points;
+        // Add the end-point of b if it's inside a
+        if (b.y2() > a.getY() && b.y2() < a.y2()) {
+            points.add(b.y2());
+        }
+        return new java.util.ArrayList<>(points);
     }
 
     // Methods moved from Region class

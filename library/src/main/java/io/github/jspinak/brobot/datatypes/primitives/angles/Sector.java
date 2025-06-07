@@ -12,19 +12,26 @@ public class Sector {
     private double span;
 
     public Sector(double angle1, double angle2) {
-        double span, reverseSpan;
-        if (angle1 < 0 && angle2 > 0) span = angle1 - angle2 + 360;
-        else span = angle1 - angle2;
-        if (angle2 < 0 && angle1 > 0) reverseSpan = angle2 - angle1 + 360;
-        else reverseSpan = angle2 - angle1;
-        if (span <= reverseSpan) {
-            leftAngle = angle1;
-            rightAngle = angle2;
-            this.span = span;
+        // Normalize angles to be in the range [0, 360) for calculation
+        double normAngle1 = (angle1 % 360 + 360) % 360;
+        double normAngle2 = (angle2 % 360 + 360) % 360;
+
+        // Calculate the clockwise span from angle1 to angle2
+        double span1_to_2 = (normAngle2 - normAngle1 + 360) % 360;
+
+        // Calculate the clockwise span from angle2 to angle1
+        double span2_to_1 = (normAngle1 - normAngle2 + 360) % 360;
+
+        // The sector is defined by the shorter clockwise arc.
+        // We store the original angle values, not the normalized ones.
+        if (span1_to_2 <= span2_to_1) {
+            this.leftAngle = angle1;
+            this.rightAngle = angle2;
+            this.span = span1_to_2 == 0 ? 360 : span1_to_2; // A span of 0 should be a full circle
         } else {
-            rightAngle = angle1;
-            leftAngle = angle2;
-            this.span = reverseSpan;
+            this.leftAngle = angle2;
+            this.rightAngle = angle1;
+            this.span = span2_to_1 == 0 ? 360 : span2_to_1;
         }
     }
 
