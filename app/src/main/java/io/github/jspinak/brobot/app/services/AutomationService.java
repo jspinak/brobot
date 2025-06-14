@@ -8,9 +8,8 @@ import io.github.jspinak.brobot.app.models.BuildModel;
 import io.github.jspinak.brobot.app.web.requests.ProjectRequest;
 import io.github.jspinak.brobot.datatypes.primitives.location.Location;
 import io.github.jspinak.brobot.datatypes.state.state.State;
-import io.github.jspinak.brobot.log.entities.LogEntry;
-import io.github.jspinak.brobot.log.service.LogEntryService;
-import io.github.jspinak.brobot.logging.AutomationSession;
+import io.github.jspinak.brobot.report.log.model.LogData;
+import io.github.jspinak.brobot.report.log.AutomationSession;
 import io.github.jspinak.brobot.testingAUTs.StateTraversalService;
 import io.github.jspinak.brobot.libraryfeatures.captureAndReplay.recorder.Recorder;
 import org.slf4j.Logger;
@@ -89,7 +88,7 @@ public class AutomationService {
 
     private void processAndSendLogs(String sessionId) {
         try {
-            List<LogEntry> logs = logEntryService.getLogEntriesBySessionId(sessionId);
+            List<LogData> logs = logEntryService.getLogEntriesBySessionId(sessionId);
             if (!logs.isEmpty()) {
                 logger.info("Sending {} logs for session {}", logs.size(), sessionId);
                 logSenderService.sendLogUpdate(logs);

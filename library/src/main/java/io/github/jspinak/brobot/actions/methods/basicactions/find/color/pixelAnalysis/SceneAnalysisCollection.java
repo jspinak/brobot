@@ -3,7 +3,7 @@ package io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAn
 import io.github.jspinak.brobot.actions.methods.basicactions.find.contours.Contours;
 import io.github.jspinak.brobot.datatypes.primitives.image.Scene;
 import io.github.jspinak.brobot.illustratedHistory.Illustrations;
-import io.github.jspinak.brobot.reports.Report;
+import io.github.jspinak.brobot.report.Report;
 import lombok.Getter;
 import lombok.Setter;
 import org.bytedeco.opencv.opencv_core.Mat;

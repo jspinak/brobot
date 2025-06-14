@@ -2,8 +2,8 @@ package io.github.jspinak.brobot.manageStates;
 
 import io.github.jspinak.brobot.database.services.AllStatesInProjectService;
 import io.github.jspinak.brobot.datatypes.state.state.State;
-import io.github.jspinak.brobot.reports.Output;
-import io.github.jspinak.brobot.reports.Report;
+import io.github.jspinak.brobot.report.Output;
+import io.github.jspinak.brobot.report.Report;
 import io.github.jspinak.brobot.services.StateTransitionsInProjectService;
 import org.springframework.stereotype.Component;
 

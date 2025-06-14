@@ -5,7 +5,7 @@ import io.github.jspinak.brobot.app.stateStructureBuilders.ExtendedStateImageDTO
 import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
-import io.github.jspinak.brobot.reports.Report;
+import io.github.jspinak.brobot.report.Report;
 import lombok.Getter;
 
 import java.util.ArrayList;

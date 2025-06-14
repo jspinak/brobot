@@ -7,7 +7,7 @@ import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAna
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import io.github.jspinak.brobot.datatypes.primitives.region.SearchRegions;
-import io.github.jspinak.brobot.reports.Report;
+import io.github.jspinak.brobot.report.Report;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;

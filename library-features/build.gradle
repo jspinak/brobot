@@ -1,45 +1,22 @@
+// In brobot/library-features/build.gradle
+
 plugins {
-    id 'java-library'
-    id 'io.freefair.lombok'
-    id 'io.spring.dependency-management'
-}
-
-java {
-    sourceCompatibility = JavaVersion.VERSION_21
-}
-
-group = "io.github.jspinak"
-version = "1.0.7"
-
-repositories {
-    mavenCentral()
+    // This module is a development-only module, not a published library.
+    id 'java'
 }
 
 dependencies {
+    // This makes the library code and its api dependencies (like SikuliX) available.
     implementation project(':library')
 
-    implementation('com.sikulix:sikulixapi:2.0.5') {
-        exclude group: 'org.slf4j', module: 'slf4j-nop'
-        exclude group: 'commons-logging', module: 'commons-logging'
-        exclude group: 'org.opencv', module: 'opencv'
-        exclude group: 'org.openpnp', module: 'opencv'
-    }
+    // ADDED: This provides @Component, @Service, @Configuration, @Bean etc. to this module.
+    // The version is managed by the root project's Spring Boot BOM.
+    implementation 'org.springframework:spring-context'
 
-    implementation 'org.bytedeco:javacv-platform:1.5.10'
-    implementation 'org.apache.commons:commons-lang3:3.0'
-
-    // JUnit 5 dependencies
-    testImplementation platform('org.junit:junit-bom:5.10.1')
-    testImplementation 'org.junit.jupiter:junit-jupiter'
-
-    // features
+    // Add any dependencies that are ONLY needed for your experimental features here.
     implementation 'com.github.stephenc.monte:monte-screen-recorder:0.7.7.0'
     implementation 'com.github.kwhat:jnativehook:2.2.2'
 
-    implementation("org.mockito:mockito-junit-jupiter:5.17.0") // mockito is used in CiTestConfig, which is not a test
-
-}
-
-tasks.test {
-    useJUnitPlatform()
+    // For testing and CI configuration within this module.
+    implementation "org.mockito:mockito-junit-jupiter:5.11.0"
 }

@@ -24,7 +24,6 @@ configurations {
 dependencies {
     implementation project(':library')
     implementation project(':library-features')
-    implementation project(':log')
     
     // Spring Boot
     implementation 'org.springframework.boot:spring-boot-starter-web'

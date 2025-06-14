@@ -2,8 +2,8 @@ package io.github.jspinak.brobot.app.stateStructureBuilders.buildFromNames.attri
 
 import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
 import io.github.jspinak.brobot.datatypes.primitives.match.Match;
-import io.github.jspinak.brobot.reports.ANSI;
-import io.github.jspinak.brobot.reports.Report;
+import io.github.jspinak.brobot.report.ANSI;
+import io.github.jspinak.brobot.report.Report;
 import lombok.Getter;
 import lombok.Setter;
 

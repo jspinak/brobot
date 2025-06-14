@@ -1,7 +1,7 @@
 package io.github.jspinak.brobot.runner.config;
 
-import io.github.jspinak.brobot.logging.ActionLogger;
-import io.github.jspinak.brobot.logging.TestSessionLogger;
+import io.github.jspinak.brobot.report.log.ActionLogger;
+import io.github.jspinak.brobot.report.log.TestSessionLogger;
 import io.github.jspinak.brobot.runner.events.EventBus;
 import io.github.jspinak.brobot.runner.events.EventPublishingActionLogger;
 import org.springframework.beans.factory.annotation.Qualifier;

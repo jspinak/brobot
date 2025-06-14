@@ -3,8 +3,10 @@ package io.github.jspinak.brobot.runner.ui;
 import io.github.jspinak.brobot.database.services.AllStatesInProjectService;
 import io.github.jspinak.brobot.runner.events.EventBus;
 import io.github.jspinak.brobot.runner.events.LogEvent;
+import io.github.jspinak.brobot.runner.persistence.LogQueryService;
 import io.github.jspinak.brobot.runner.ui.components.StatusBar;
 import io.github.jspinak.brobot.runner.ui.icons.IconRegistry;
+import io.github.jspinak.brobot.runner.ui.log.LogViewerPanel;
 import io.github.jspinak.brobot.runner.ui.navigation.NavigationManager;
 import io.github.jspinak.brobot.runner.ui.navigation.Screen;
 import io.github.jspinak.brobot.runner.ui.navigation.ScreenRegistry;
@@ -46,6 +48,7 @@ public class BrobotRunnerView extends BorderPane {
     private final EventBus eventBus;
     private final IconRegistry iconRegistry;
     private final UiComponentFactory uiComponentFactory;
+    private final LogQueryService logQueryService;
 
     // UI components
     @Getter
@@ -205,6 +208,12 @@ public class BrobotRunnerView extends BorderPane {
                 context -> uiComponentFactory.createComponentShowcaseScreen()
         );
 
+        screenRegistry.registerScreenFactory(
+                "logs",
+                "Logs",
+                context -> new LogViewerPanel(logQueryService, eventBus, iconRegistry)
+        );
+
         logger.info("Registered {} screens", screenRegistry.getAllScreenIds().size());
     }
 
@@ -212,7 +221,7 @@ public class BrobotRunnerView extends BorderPane {
      * Registers application tabs.
      */
     private void registerTabs() {
-        String[] tabIds = {"configuration", "automation", "resources", "showcase"};
+        String[] tabIds = {"configuration", "automation", "resources", "logs", "showcase"};
 
         for (String tabId : tabIds) {
             Optional<Screen> screenOpt = screenRegistry.getScreen(tabId);

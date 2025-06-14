@@ -2,6 +2,7 @@ package io.github.jspinak.brobot.json.schemaValidation.resource;
 
 import io.github.jspinak.brobot.json.schemaValidation.model.ValidationResult;
 import io.github.jspinak.brobot.json.schemaValidation.model.ValidationSeverity;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,7 +30,7 @@ class ImageResourceValidatorTest {
     private JSONObject validProject;
 
     @BeforeEach
-    void setUp() throws IOException {
+    void setUp() throws IOException, JSONException {
         validator = new ImageResourceValidator();
 
         // Create a temporary folder for images

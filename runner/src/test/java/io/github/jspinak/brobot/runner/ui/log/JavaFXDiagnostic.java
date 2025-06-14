@@ -122,7 +122,6 @@ public class JavaFXDiagnostic extends Application {
                 "javafx.version",
                 "javafx.runtime.version",
                 "glass.platform",
-                "monocle.platform",
                 "prism.order",
                 "testfx.headless"
         };

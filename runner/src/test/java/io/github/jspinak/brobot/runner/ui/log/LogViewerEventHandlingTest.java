@@ -1,12 +1,13 @@
 package io.github.jspinak.brobot.runner.ui.log;
 
-import io.github.jspinak.brobot.log.entities.LogEntry;
-import io.github.jspinak.brobot.log.entities.LogType;
-import io.github.jspinak.brobot.log.entities.PerformanceMetrics;
+import io.github.jspinak.brobot.report.log.model.LogData;
+import io.github.jspinak.brobot.report.log.model.LogType;
+import io.github.jspinak.brobot.report.log.model.PerformanceMetricsData;
 import io.github.jspinak.brobot.runner.events.BrobotEvent;
 import io.github.jspinak.brobot.runner.events.EventBus;
 import io.github.jspinak.brobot.runner.events.LogEntryEvent;
 import io.github.jspinak.brobot.runner.events.LogEvent;
+import io.github.jspinak.brobot.runner.persistence.LogQueryService;
 import io.github.jspinak.brobot.runner.ui.icons.IconRegistry;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
@@ -25,8 +26,8 @@ import org.testfx.util.WaitForAsyncUtils;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -45,6 +46,9 @@ public class LogViewerEventHandlingTest {
 
     @Mock
     private EventBus mockEventBus;
+
+    @Mock
+    private LogQueryService logQueryService;
 
     @Mock
     private IconRegistry mockIconRegistry;
@@ -66,11 +70,14 @@ public class LogViewerEventHandlingTest {
     public void setUp() throws Exception {
         MockitoAnnotations.openMocks(this);
 
+        // Define default behavior for the mocked service
+        when(logQueryService.getRecentLogs(anyInt())).thenReturn(Collections.emptyList());
+
         // Mock icon registry behavior
         when(mockIconRegistry.getIconView(anyString(), anyInt())).thenReturn(new javafx.scene.image.ImageView());
 
         // Create the LogViewerPanel with mocked EventBus
-        logViewerPanel = new LogViewerPanel(mockEventBus, mockIconRegistry);
+        logViewerPanel = new LogViewerPanel(logQueryService, mockEventBus, mockIconRegistry);
 
         // Access private fields through reflection
         Field logEntriesField = LogViewerPanel.class.getDeclaredField("logEntries");
@@ -88,12 +95,12 @@ public class LogViewerEventHandlingTest {
     @Test
     public void testEventSubscriptionSetup() {
         // Verify correct number of subscriptions for each event type
-        verify(mockEventBus, times(2)).subscribe(eq(BrobotEvent.EventType.LOG_MESSAGE), any());
+        verify(mockEventBus, times(1)).subscribe(eq(BrobotEvent.EventType.LOG_MESSAGE), any());
         verify(mockEventBus, times(1)).subscribe(eq(BrobotEvent.EventType.LOG_WARNING), any());
         verify(mockEventBus, times(1)).subscribe(eq(BrobotEvent.EventType.LOG_ERROR), any());
 
         // Optional: Verify total number of subscriptions
-        verify(mockEventBus, times(4)).subscribe(any(BrobotEvent.EventType.class), any());
+        verify(mockEventBus, times(3)).subscribe(any(BrobotEvent.EventType.class), any());
     }
 
     // Helper method to match lambda method references
@@ -104,34 +111,34 @@ public class LogViewerEventHandlingTest {
     @Test
     public void testHandleLogEntryEvent() throws Exception {
         // Get the method to test
-        Method handleLogEntryEvent = LogViewerPanel.class.getDeclaredMethod(
-                "handleLogEntryEvent", BrobotEvent.class);
-        handleLogEntryEvent.setAccessible(true);
+        Method handleEvent = LogViewerPanel.class.getDeclaredMethod(
+                "handleEvent", BrobotEvent.class);
+        handleEvent.setAccessible(true);
 
         // Create different types of log entries
-        List<LogEntry> testEntries = new ArrayList<>();
+        List<LogData> testEntries = new ArrayList<>();
 
         // 1. Action success
-        LogEntry actionSuccess = new LogEntry("test-session", LogType.ACTION, "Action succeeded");
+        LogData actionSuccess = new LogData("test-session", LogType.ACTION, "Action succeeded");
         actionSuccess.setSuccess(true);
         actionSuccess.setActionType("CLICK");
         testEntries.add(actionSuccess);
 
         // 2. Action failure
-        LogEntry actionFailure = new LogEntry("test-session", LogType.ACTION, "Action failed");
+        LogData actionFailure = new LogData("test-session", LogType.ACTION, "Action failed");
         actionFailure.setSuccess(false);
         actionFailure.setActionType("FIND");
         testEntries.add(actionFailure);
 
         // 3. Transition success
-        LogEntry transitionSuccess = new LogEntry("test-session", LogType.TRANSITION, "Transition succeeded");
+        LogData transitionSuccess = new LogData("test-session", LogType.TRANSITION, "Transition succeeded");
         transitionSuccess.setSuccess(true);
         transitionSuccess.setFromStates("StateA");
         transitionSuccess.setToStateNames(List.of("StateB"));
         testEntries.add(transitionSuccess);
 
         // 4. Error log
-        LogEntry errorLog = new LogEntry("test-session", LogType.ERROR, "Error occurred");
+        LogData errorLog = new LogData("test-session", LogType.ERROR, "Error occurred");
         errorLog.setSuccess(false);
         errorLog.setErrorMessage("Test error message");
         testEntries.add(errorLog);
@@ -139,12 +146,12 @@ public class LogViewerEventHandlingTest {
         // Process each entry
         CountDownLatch latch = new CountDownLatch(testEntries.size());
 
-        for (LogEntry entry : testEntries) {
+        for (LogData entry : testEntries) {
             LogEntryEvent event = LogEntryEvent.created(this, entry);
 
             Platform.runLater(() -> {
                 try {
-                    handleLogEntryEvent.invoke(logViewerPanel, event);
+                    handleEvent.invoke(logViewerPanel, event);
                     latch.countDown();
                 } catch (Exception e) {
                     fail("Exception handling LogEntryEvent: " + e.getMessage());
@@ -170,23 +177,23 @@ public class LogViewerEventHandlingTest {
     @Test
     public void testHandleLogEvent() throws Exception {
         // Get the method to test
-        Method handleLogEvent = LogViewerPanel.class.getDeclaredMethod(
-                "handleLogEvent", BrobotEvent.class);
-        handleLogEvent.setAccessible(true);
+        Method handleEvent = LogViewerPanel.class.getDeclaredMethod(
+                "handleEvent", BrobotEvent.class);
+        handleEvent.setAccessible(true);
 
         // Create different log events
         List<LogEvent> testEvents = new ArrayList<>();
 
         // 1. Info log
-        LogEvent infoEvent = LogEvent.info(this, "Info message", "TEST");
+        LogEvent infoEvent = LogEvent.info(this, "Info message", "ACTION");
         testEvents.add(infoEvent);
 
         // 2. Warning log
-        LogEvent warningEvent = LogEvent.warning(this, "Warning message", "TEST");
+        LogEvent warningEvent = LogEvent.warning(this, "Warning message", "SESSION");
         testEvents.add(warningEvent);
 
         // 3. Error log
-        LogEvent errorEvent = LogEvent.error(this, "Error message", "TEST",
+        LogEvent errorEvent = LogEvent.error(this, "Error message", "ERROR",
                 new RuntimeException("Test exception"));
         testEvents.add(errorEvent);
 
@@ -200,7 +207,7 @@ public class LogViewerEventHandlingTest {
         for (LogEvent event : testEvents) {
             Platform.runLater(() -> {
                 try {
-                    handleLogEvent.invoke(logViewerPanel, event);
+                    handleEvent.invoke(logViewerPanel, event);
                     latch.countDown();
                 } catch (Exception e) {
                     fail("Exception handling LogEvent: " + e.getMessage());
@@ -232,12 +239,12 @@ public class LogViewerEventHandlingTest {
     @Test
     public void testHandleComplexLogEntry() throws Exception {
         // Get the method to test
-        Method handleLogEntryEvent = LogViewerPanel.class.getDeclaredMethod(
-                "handleLogEntryEvent", BrobotEvent.class);
-        handleLogEntryEvent.setAccessible(true);
+        Method handleEvent = LogViewerPanel.class.getDeclaredMethod(
+                "handleEvent", BrobotEvent.class);
+        handleEvent.setAccessible(true);
 
         // Create a complex log entry with all fields populated
-        LogEntry complexEntry = new LogEntry("test-session", LogType.ACTION, "Complex test action");
+        LogData complexEntry = new LogData("test-session", LogType.ACTION, "Complex test action");
         complexEntry.setSuccess(true);
         complexEntry.setActionType("CLICK");
         complexEntry.setApplicationUnderTest("Test App");
@@ -248,7 +255,7 @@ public class LogViewerEventHandlingTest {
         complexEntry.setActionPerformed("Click on button");
         complexEntry.setDuration(1500);
 
-        PerformanceMetrics metrics = new PerformanceMetrics();
+        PerformanceMetricsData metrics = new PerformanceMetricsData();
         metrics.setActionDuration(500);
         metrics.setPageLoadTime(800);
         metrics.setTransitionTime(200);
@@ -263,7 +270,7 @@ public class LogViewerEventHandlingTest {
 
         Platform.runLater(() -> {
             try {
-                handleLogEntryEvent.invoke(logViewerPanel, event);
+                handleEvent.invoke(logViewerPanel, event);
                 latch.countDown();
             } catch (Exception e) {
                 fail("Exception handling complex LogEntryEvent: " + e.getMessage());
@@ -285,19 +292,19 @@ public class LogViewerEventHandlingTest {
         assertTrue(viewModel.isSuccess());
 
         // Verify raw log entry is stored
-        assertSame(complexEntry, viewModel.getRawLogEntry(),
+        assertSame(complexEntry, viewModel.getRawLogData(),
                 "Raw log entry should be stored in the view model");
     }
 
     @Test
     public void testHandleErrorDetailsInLogEntry() throws Exception {
         // Get the method to test
-        Method handleLogEntryEvent = LogViewerPanel.class.getDeclaredMethod(
-                "handleLogEntryEvent", BrobotEvent.class);
-        handleLogEntryEvent.setAccessible(true);
+        Method handleEvent = LogViewerPanel.class.getDeclaredMethod(
+                "handleEvent", BrobotEvent.class);
+        handleEvent.setAccessible(true);
 
         // Create a log entry with error details
-        LogEntry errorEntry = new LogEntry("test-session", LogType.ERROR, "Error action");
+        LogData errorEntry = new LogData("test-session", LogType.ERROR, "Error action");
         errorEntry.setSuccess(false);
         errorEntry.setErrorMessage("Detailed error information");
         errorEntry.setApplicationUnderTest("Test App");
@@ -311,7 +318,7 @@ public class LogViewerEventHandlingTest {
 
         Platform.runLater(() -> {
             try {
-                handleLogEntryEvent.invoke(logViewerPanel, event);
+                handleEvent.invoke(logViewerPanel, event);
                 latch.countDown();
             } catch (Exception e) {
                 fail("Exception handling error LogEntryEvent: " + e.getMessage());
@@ -365,20 +372,20 @@ public class LogViewerEventHandlingTest {
     @Test
     public void testHandleExceptionInLogEvent() throws Exception {
         // Get the method to test
-        Method handleLogEvent = LogViewerPanel.class.getDeclaredMethod(
-                "handleLogEvent", BrobotEvent.class);
-        handleLogEvent.setAccessible(true);
+        Method handleEvent = LogViewerPanel.class.getDeclaredMethod(
+                "handleEvent", BrobotEvent.class);
+        handleEvent.setAccessible(true);
 
         // Create an error log event with exception
         Exception testException = new RuntimeException("Test exception with\nmultiple lines\nof stack trace");
-        LogEvent errorEvent = LogEvent.error(this, "Error with exception", "TEST", testException);
+        LogEvent errorEvent = LogEvent.error(this, "Error with exception", "ACTION", testException);
 
         // Process the event
         CountDownLatch latch = new CountDownLatch(1);
 
         Platform.runLater(() -> {
             try {
-                handleLogEvent.invoke(logViewerPanel, errorEvent);
+                handleEvent.invoke(logViewerPanel, errorEvent);
                 latch.countDown();
             } catch (Exception e) {
                 fail("Exception handling LogEvent with exception: " + e.getMessage());
@@ -393,21 +400,21 @@ public class LogViewerEventHandlingTest {
         assertEquals(1, logEntries.size(), "Error log event should be added to the list");
 
         // Verify view model has correct data
-        LogViewerPanel.LogEntryViewModel viewModel = logEntries.get(0);
+        LogViewerPanel.LogEntryViewModel viewModel = logEntries.getFirst();
         assertEquals("Error with exception", viewModel.getMessage());
         assertEquals("ERROR", viewModel.getLevel());
-        assertEquals("TEST", viewModel.getType());
+        assertEquals("ACTION", viewModel.getType());
         assertFalse(viewModel.isSuccess());
     }
 
     @Test
     public void testAddUnknownLogType() throws Exception {
         // Get the addLogEntry method to test
-        Method addLogEntryMethod = LogViewerPanel.class.getDeclaredMethod("addLogEntry", LogEntry.class);
+        Method addLogEntryMethod = LogViewerPanel.class.getDeclaredMethod("addLogEntry", LogData.class);
         addLogEntryMethod.setAccessible(true);
 
         // Create a log entry with null LogType
-        LogEntry nullTypeLog = new LogEntry("test-session", null, "Log with null type");
+        LogData nullTypeLog = new LogData("test-session", null, "Log with null type");
         nullTypeLog.setSuccess(true);
 
         // Process the entry
@@ -447,7 +454,7 @@ public class LogViewerEventHandlingTest {
         for (Consumer<BrobotEvent> consumer : consumers) {
             try {
                 // Create a test event and try the consumer
-                LogEvent testEvent = LogEvent.info(this, "Test message", "TEST");
+                LogEvent testEvent = LogEvent.info(this, "Test message", "ACTION");
                 consumer.accept(testEvent);
                 logEventConsumer = consumer;
                 break;
@@ -458,8 +465,9 @@ public class LogViewerEventHandlingTest {
 
         assertNotNull(logEventConsumer, "Should find a consumer that handles LogEvent");
 
-        // Reset the logEntries list
-        logEntries.clear();
+        // Wait for the previous event to be processed and then clear the list
+        WaitForAsyncUtils.waitForFxEvents();
+        logEntries.clear(); // <-- *** ADD THIS LINE TO FIX THE TEST ***
 
         // Create a concrete implementation of BrobotEvent for testing
         class TestEvent extends BrobotEvent {
@@ -478,9 +486,7 @@ public class LogViewerEventHandlingTest {
         Platform.runLater(() -> {
             try {
                 finalLogEventConsumer.accept(customEvent);
-                latch.countDown();
-            } catch (Exception e) {
-                // Expected exception for unhandled event type
+            } finally {
                 latch.countDown();
             }
         });
