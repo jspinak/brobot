@@ -1,118 +1,76 @@
-// build.gradle library module
+// In brobot/library/build.gradle
 
 plugins {
     id 'java-library'
-    id 'io.freefair.lombok'
-    id 'io.spring.dependency-management'
     id 'maven-publish'
     id 'signing'
 }
 
+dependencies {
+    // These dependencies are part of the library's public API.
+    api('com.sikulix:sikulixapi:2.0.5') {
+        exclude group: 'org.slf4j', module: 'slf4j-nop'
+        exclude group: 'commons-logging', module: 'commons-logging'
+        // This excludes the old JSON library to resolve the classpath conflict.
+        exclude group: 'com.vaadin.external.google', module: 'android-json'
+    }
+    api 'org.bytedeco:javacv-platform:1.5.10'
+    api 'org.apache.commons:commons-lang3:3.0'
+
+    // These dependencies are internal implementation details.
+    implementation 'org.springframework:spring-context'
+    implementation 'org.springframework.boot:spring-boot-autoconfigure'
+    implementation 'org.slf4j:slf4j-api:2.0.9'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.2'
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.2'
+    implementation 'com.github.erosb:everit-json-schema:1.14.5'
+    implementation 'org.json:json:20240303'
+    implementation 'com.networknt:json-schema-validator:1.4.0'
+
+    // Test dependencies for the unit tests within this module
+    testImplementation platform('org.junit:junit-bom:5.10.1')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.assertj:assertj-core:3.24.2'
+    testImplementation 'org.mockito:mockito-core:5.11.0'
+    testImplementation 'org.mockito:mockito-junit-jupiter:5.11.0'
+}
+
 java {
-    sourceCompatibility = JavaVersion.VERSION_21
     withJavadocJar()
     withSourcesJar()
 }
 
-group = 'io.github.jspinak.brobot'
-version = '1.0.7'
-
-dependencies {
-    implementation project(':log')
-    
-    // Spring dependencies
-    implementation 'org.springframework:spring-core:6.1.3'
-    implementation 'org.springframework:spring-context:6.1.3'
-    implementation 'org.springframework:spring-beans:6.1.3'
-    
-    // Core dependencies
-    implementation('com.sikulix:sikulixapi:2.0.5') {
-        exclude group: 'org.slf4j', module: 'slf4j-nop'
-        exclude group: 'commons-logging', module: 'commons-logging'
-        exclude group: 'org.opencv', module: 'opencv'
-        exclude group: 'org.openpnp', module: 'opencv' 
-    }
-
-    implementation 'org.bytedeco:javacv-platform:1.5.10'
-    implementation 'org.apache.commons:commons-lang3:3.0'
-    
-    // Added SLF4J explicitly
-    implementation 'org.slf4j:slf4j-api:2.0.9'
-
-    // JUnit 5 dependencies
-    testImplementation platform('org.junit:junit-bom:5.10.1')
-    testImplementation 'org.junit.jupiter:junit-jupiter'
-    
-    // Mockito
-    testImplementation 'org.assertj:assertj-core:3.24.2'
-
-    // JSON processing
-    implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.2'
-    // core and annotation modules are included in the databind module but need to be specified explicitly to avoid version conflicts
-    implementation 'com.fasterxml.jackson.core:jackson-core:2.15.2'
-    implementation 'com.fasterxml.jackson.core:jackson-annotations:2.15.2'
-    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.2'
-    //implementation("com.fasterxml.jackson.core:jackson-databind:2.19.0") // converting JSON to Java objects
-    implementation("com.github.erosb:everit-json-schema:1.14.5") // JSON schema validation
-    implementation("org.json:json:20250107") // JSON parsing,
-    implementation("com.networknt:json-schema-validator:1.5.6") // NetworkNT JSON schema validation
-}
-
-test {
-    useJUnitPlatform()
-}
-
 javadoc {
-    exclude "**/module-info.java.disabled"
-}
-
-// Add JVM arguments for reflective access
-tasks.withType(JavaCompile).configureEach {
-    options.compilerArgs += [
-            '--add-opens', 'java.desktop/java.awt=ALL-UNNAMED',
-            '--add-opens', 'java.desktop/java.awt.image=ALL-UNNAMED',
-            '--add-opens', 'java.desktop/javax.imageio=ALL-UNNAMED'
-    ]
-}
-
-tasks.withType(JavaExec).configureEach {
-    jvmArgs += [
-            '--add-opens', 'java.desktop/java.awt=ALL-UNNAMED',
-            '--add-opens', 'java.desktop/java.awt.image=ALL-UNNAMED',
-            '--add-opens', 'java.desktop/javax.imageio=ALL-UNNAMED'
-    ]
-}
-
-// Task to see Java settings
-tasks.register('showJavaInfo') {
-    doLast {
-        println "Java version: ${System.getProperty('java.version')}"
-        println "Java home: ${System.getProperty('java.home')}"
-        println "JVM arguments: ${jvmArgs}"
+    if(JavaVersion.current().isJava9Compatible()) {
+        options.addBooleanOption('html5', true)
     }
+    exclude '**/module-info.java.disabled'
+    options.addStringOption('Xdoclint:none', '-quiet')
 }
 
+// -- Publishing Configuration --
 publishing {
     publications {
         mavenJava(MavenPublication) {
+            // Explicitly set the coordinates for this publication.
+            // This ensures the POM and the upload path are correct.
             groupId = 'io.github.jspinak'
             artifactId = 'brobot'
             version = '1.0.7'
-            from components.java
 
+            from components.java
             pom {
-                name = 'brobot'
-                description = 'testable state-based automation'
+                name = 'Brobot'
+                description = 'Model-based GUI Automation'
                 url = 'https://github.com/jspinak/brobot'
                 inceptionYear = '2022'
-
                 licenses {
                     license {
-                        name = 'MIT license'
-                        url = 'http://www.opensource.org/licenses/mit-license.php'
+                        name = 'MIT License'
+                        url = 'https://www.opensource.org/licenses/mit-license.php'
                     }
                 }
-
                 developers {
                     developer {
                         id = 'jspinak'
@@ -120,34 +78,29 @@ publishing {
                         email = 'jspinak@hotmail.com'
                     }
                 }
-
                 scm {
-                    connection = 'scm:git:git:github.com/jspinak/brobot.git'
-                    developerConnection = 'scm:git"ssh//github.com:jspinak/brobot.git'
+                    connection = 'scm:git:git://github.com/jspinak/brobot.git'
+                    developerConnection = 'scm:git:ssh://github.com:jspinak/brobot.git'
                     url = 'https://github.com/jspinak/brobot'
                 }
             }
         }
     }
-
     repositories {
         maven {
-            name = "OSSRH"
+            name = "CentralPortal"
             url = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
             credentials {
-                username = project.findProperty("ossrhUsername") ?: ""
-                password = project.findProperty("ossrhPassword") ?: ""
+                username = project.property('centralPortalUsername')
+                password = project.property('centralPortalPassword')
             }
         }
     }
 }
 
 signing {
+    def signingKey = findProperty("signing.key")
+    def signingPassword = findProperty("signing.password")
+    useInMemoryPgpKeys(signingKey, signingPassword)
     sign publishing.publications.mavenJava
-}
-
-javadoc {
-    if(JavaVersion.current().isJava9Compatible()) {
-        options.addBooleanOption('html5', true)
-    }
 }

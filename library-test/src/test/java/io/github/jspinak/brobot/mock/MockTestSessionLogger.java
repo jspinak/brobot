@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.mock;
 
-import io.github.jspinak.brobot.logging.TestSessionLogger;
+import io.github.jspinak.brobot.report.log.TestSessionLogger;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 

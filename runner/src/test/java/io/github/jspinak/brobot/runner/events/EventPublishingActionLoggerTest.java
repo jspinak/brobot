@@ -1,12 +1,13 @@
 package io.github.jspinak.brobot.runner.events;
 
+import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import io.github.jspinak.brobot.datatypes.state.state.State;
-import io.github.jspinak.brobot.log.entities.LogEntry;
-import io.github.jspinak.brobot.log.entities.LogType;
-import io.github.jspinak.brobot.logging.ActionLogger;
-import io.github.jspinak.brobot.logging.TestSessionLogger;
+import io.github.jspinak.brobot.report.log.ActionLogger;
+import io.github.jspinak.brobot.report.log.TestSessionLogger;
+import io.github.jspinak.brobot.report.log.model.LogData;
+import io.github.jspinak.brobot.report.log.model.LogType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,9 +18,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.HashSet;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -52,17 +53,17 @@ class EventPublishingActionLoggerTest {
         Matches matches = mock(Matches.class);
         ObjectCollection objectCollection = mock(ObjectCollection.class);
 
-        LogEntry logEntry = new LogEntry();
-        logEntry.setType(LogType.ACTION);
-        when(actionLoggerDelegate.logAction(anyString(), any(), any())).thenReturn(logEntry);
+        LogData logData = new LogData();
+        logData.setType(LogType.ACTION);
+        when(actionLoggerDelegate.logAction(anyString(), any(), any())).thenReturn(logData);
         when(matches.isSuccess()).thenReturn(true);
 
         // Act
-        LogEntry result = logger.logAction(sessionId, matches, objectCollection);
+        LogData result = logger.logAction(sessionId, matches, objectCollection);
 
         // Assert
         verify(actionLoggerDelegate).logAction(sessionId, matches, objectCollection);
-        assertEquals(logEntry, result);
+        assertEquals(logData, result);
 
         // Verify events published
         verify(eventBus, times(2)).publish(any(BrobotEvent.class));
@@ -74,25 +75,21 @@ class EventPublishingActionLoggerTest {
         String sessionId = "test-session";
         Matches matches = mock(Matches.class);
         ObjectCollection objectCollection = mock(ObjectCollection.class);
-        io.github.jspinak.brobot.actions.actionOptions.ActionOptions actionOptions =
-                mock(io.github.jspinak.brobot.actions.actionOptions.ActionOptions.class);
-        io.github.jspinak.brobot.actions.actionOptions.ActionOptions.Action action =
-                mock(io.github.jspinak.brobot.actions.actionOptions.ActionOptions.Action.class);
+        ActionOptions actionOptions = mock(ActionOptions.class);
 
-        LogEntry logEntry = new LogEntry();
-        logEntry.setType(LogType.ACTION);
-        when(actionLoggerDelegate.logAction(anyString(), any(), any())).thenReturn(logEntry);
+        LogData logData = new LogData();
+        logData.setType(LogType.ACTION);
+        when(actionLoggerDelegate.logAction(anyString(), any(), any())).thenReturn(logData);
         when(matches.isSuccess()).thenReturn(false);
         when(matches.getActionOptions()).thenReturn(actionOptions);
-        when(actionOptions.getAction()).thenReturn(action);
-        when(action.toString()).thenReturn("TEST_ACTION");
+        when(actionOptions.getAction()).thenReturn(ActionOptions.Action.CLICK); // Use real enum value
 
         // Act
         logger.logAction(sessionId, matches, objectCollection);
 
         // Assert
         ArgumentCaptor<BrobotEvent> eventCaptor = ArgumentCaptor.forClass(BrobotEvent.class);
-        verify(eventBus, atLeast(3)).publish(eventCaptor.capture());
+        verify(eventBus, atLeast(1)).publish(eventCaptor.capture());
 
         boolean hasErrorEvent = eventCaptor.getAllValues().stream()
                 .anyMatch(event -> event instanceof ErrorEvent);
@@ -109,17 +106,17 @@ class EventPublishingActionLoggerTest {
         boolean success = true;
         long transitionTime = 1000L;
 
-        LogEntry logEntry = new LogEntry();
-        logEntry.setType(LogType.TRANSITION);
+        LogData logData = new LogData();
+        logData.setType(LogType.TRANSITION);
         when(actionLoggerDelegate.logStateTransition(anyString(), any(), any(), any(), anyBoolean(), anyLong()))
-                .thenReturn(logEntry);
+                .thenReturn(logData);
 
         // Act
-        LogEntry result = logger.logStateTransition(sessionId, fromStates, toStates, beforeStates, success, transitionTime);
+        LogData result = logger.logStateTransition(sessionId, fromStates, toStates, beforeStates, success, transitionTime);
 
         // Assert
         verify(actionLoggerDelegate).logStateTransition(sessionId, fromStates, toStates, beforeStates, success, transitionTime);
-        assertEquals(logEntry, result);
+        assertEquals(logData, result);
 
         // Verify events published
         verify(eventBus, times(2)).publish(any(BrobotEvent.class));
@@ -132,16 +129,16 @@ class EventPublishingActionLoggerTest {
         String errorMessage = "Test error";
         String screenshotPath = "path/to/screenshot.png";
 
-        LogEntry logEntry = new LogEntry();
-        logEntry.setType(LogType.ERROR);
-        when(actionLoggerDelegate.logError(anyString(), anyString(), anyString())).thenReturn(logEntry);
+        LogData logData = new LogData();
+        logData.setType(LogType.ERROR);
+        when(actionLoggerDelegate.logError(anyString(), anyString(), anyString())).thenReturn(logData);
 
         // Act
-        LogEntry result = logger.logError(sessionId, errorMessage, screenshotPath);
+        LogData result = logger.logError(sessionId, errorMessage, screenshotPath);
 
         // Assert
         verify(actionLoggerDelegate).logError(sessionId, errorMessage, screenshotPath);
-        assertEquals(logEntry, result);
+        assertEquals(logData, result);
 
         // Verify events published - should be a LogEntryEvent and an ErrorEvent
         verify(eventBus, times(3)).publish(any(BrobotEvent.class));

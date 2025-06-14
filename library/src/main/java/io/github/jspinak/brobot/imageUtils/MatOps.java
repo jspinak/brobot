@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.imageUtils;
 
-import io.github.jspinak.brobot.reports.Report;
+import io.github.jspinak.brobot.report.Report;
 import org.bytedeco.javacpp.DoublePointer;
 import org.bytedeco.javacpp.indexer.*;
 import org.bytedeco.javacv.Java2DFrameUtils;

@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 import io.github.jspinak.brobot.actions.BrobotSettings;
 import io.github.jspinak.brobot.database.services.AllStatesInProjectService;
 import io.github.jspinak.brobot.datatypes.state.state.State;
-import io.github.jspinak.brobot.reports.Report;
+import io.github.jspinak.brobot.report.Report;
 
 /**
  * Given sets of possible active States, this class searches for these States

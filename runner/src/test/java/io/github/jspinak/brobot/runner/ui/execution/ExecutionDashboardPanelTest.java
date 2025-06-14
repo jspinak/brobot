@@ -2,9 +2,9 @@ package io.github.jspinak.brobot.runner.ui.execution;
 
 import io.github.jspinak.brobot.database.services.AllStatesInProjectService;
 import io.github.jspinak.brobot.datatypes.state.state.State;
-import io.github.jspinak.brobot.log.entities.LogEntry;
-import io.github.jspinak.brobot.log.entities.LogType;
-import io.github.jspinak.brobot.log.entities.PerformanceMetrics;
+import io.github.jspinak.brobot.report.log.model.LogData;
+import io.github.jspinak.brobot.report.log.model.LogType;
+import io.github.jspinak.brobot.report.log.model.PerformanceMetricsData;
 import io.github.jspinak.brobot.runner.automation.AutomationExecutor;
 import io.github.jspinak.brobot.runner.events.*;
 import io.github.jspinak.brobot.runner.execution.ExecutionState;
@@ -311,7 +311,7 @@ public class ExecutionDashboardPanelTest {
         );
 
         // Create a log entry for an action
-        LogEntry actionEntry = new LogEntry();
+        LogData actionEntry = new LogData();
         actionEntry.setType(LogType.ACTION);
         actionEntry.setDescription("Click on Button");
         actionEntry.setActionPerformed("CLICK");
@@ -336,7 +336,7 @@ public class ExecutionDashboardPanelTest {
         assertNotNull(successRateLabel);
 
         // Add another action that fails
-        LogEntry failedActionEntry = new LogEntry();
+        LogData failedActionEntry = new LogData();
         failedActionEntry.setType(LogType.ACTION);
         failedActionEntry.setDescription("Click on NonExistentButton");
         failedActionEntry.setActionPerformed("CLICK");
@@ -394,7 +394,7 @@ public class ExecutionDashboardPanelTest {
         WaitForAsyncUtils.waitForFxEvents();
 
         // Now create and send our event
-        LogEntry transitionEntry = new LogEntry();
+        LogData transitionEntry = new LogData();
         transitionEntry.setType(LogType.TRANSITION);
         transitionEntry.setFromStateIds(List.of(1L));
         transitionEntry.setToStateIds(List.of(2L));
@@ -427,13 +427,13 @@ public class ExecutionDashboardPanelTest {
         );
 
         // Create performance metrics
-        PerformanceMetrics perfMetrics = new PerformanceMetrics();
+        PerformanceMetricsData perfMetrics = new PerformanceMetricsData();
         perfMetrics.setActionDuration(100);
         perfMetrics.setPageLoadTime(50);
         perfMetrics.setTransitionTime(25);
 
         // Create a log entry for performance metrics
-        LogEntry metricsEntry = new LogEntry();
+        LogData metricsEntry = new LogData();
         metricsEntry.setType(LogType.METRICS);
         metricsEntry.setDuration(100);
         metricsEntry.setPerformance(perfMetrics);
@@ -453,12 +453,12 @@ public class ExecutionDashboardPanelTest {
         assertNotNull(avgActionDurationLabel);
 
         // Add a second performance metric to test average calculation
-        PerformanceMetrics perfMetrics2 = new PerformanceMetrics();
+        PerformanceMetricsData perfMetrics2 = new PerformanceMetricsData();
         perfMetrics2.setActionDuration(150);
         perfMetrics2.setPageLoadTime(75);
         perfMetrics2.setTransitionTime(30);
 
-        LogEntry metricsEntry2 = new LogEntry();
+        LogData metricsEntry2 = new LogData();
         metricsEntry2.setType(LogType.METRICS);
         metricsEntry2.setDuration(150);
         metricsEntry2.setPerformance(perfMetrics2);
@@ -587,7 +587,7 @@ public class ExecutionDashboardPanelTest {
         );
 
         // Create a log entry for an error
-        LogEntry errorEntry = new LogEntry();
+        LogData errorEntry = new LogData();
         errorEntry.setType(LogType.ERROR);
         errorEntry.setErrorMessage("Test error message");
         errorEntry.setDuration(50);
@@ -625,7 +625,7 @@ public class ExecutionDashboardPanelTest {
         );
 
         // Create a log entry for state detection
-        LogEntry stateDetectionEntry = new LogEntry();
+        LogData stateDetectionEntry = new LogData();
         stateDetectionEntry.setType(LogType.STATE_DETECTION);
         stateDetectionEntry.setCurrentStateName("TestState");
         stateDetectionEntry.setTimestamp(Instant.now());

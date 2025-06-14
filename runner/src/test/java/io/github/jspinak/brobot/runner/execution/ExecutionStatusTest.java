@@ -184,7 +184,7 @@ class ExecutionStatusTest {
 
         String result = status.toString();
         assertTrue(result.contains("RUNNING"));
-        assertTrue(result.contains("50,0%"));
+        assertTrue(result.contains("50,0%") || result.contains("50.0%"));
         assertTrue(result.contains("Test Operation"));
     }
 }

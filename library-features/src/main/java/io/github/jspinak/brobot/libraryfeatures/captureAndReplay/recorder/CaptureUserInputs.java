@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.libraryfeatures.captureAndReplay.recorder;
 
-import io.github.jspinak.brobot.reports.Report;
+import io.github.jspinak.brobot.report.Report;
 import org.apache.commons.lang3.StringUtils;
 import com.github.kwhat.jnativehook.*;
 import com.github.kwhat.jnativehook.keyboard.*;

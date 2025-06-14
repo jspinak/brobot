@@ -8,20 +8,19 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Minimal JavaFX test to verify platform availability
- * FIXED: Uses Monocle headless mode to avoid PlatformFactory null error
+ * Minimal JavaFX test to verify platform availability in a headless environment.
  */
 public class SimpleJavaFXTest {
 
     @BeforeAll
     public static void setupJavaFX() {
-        System.out.println("=== Simple JavaFX Setup Test (Monocle Headless Mode) ===");
+        System.out.println("=== Simple JavaFX Setup Test (Standard Headless Mode) ===");
 
         // Print system properties
         System.out.println("Java version: " + System.getProperty("java.version"));
         System.out.println("JavaFX version: " + System.getProperty("javafx.version", "not set"));
         System.out.println("Glass platform: " + System.getProperty("glass.platform", "not set"));
-        System.out.println("Monocle platform: " + System.getProperty("monocle.platform", "not set"));
+        System.out.println("Prism order: " + System.getProperty("prism.order", "not set"));
         System.out.println("TestFX headless: " + System.getProperty("testfx.headless", "not set"));
         System.out.println("AWT headless: " + System.getProperty("java.awt.headless", "not set"));
 
@@ -49,14 +48,6 @@ public class SimpleJavaFXTest {
         } catch (Exception e) {
             System.out.println("✗ JavaFX Stage class NOT found");
             throw new RuntimeException("JavaFX Stage not available", e);
-        }
-
-        // Check if Monocle is available
-        try {
-            Class.forName("com.sun.glass.ui.monocle.MonoclePlatformFactory");
-            System.out.println("✓ Monocle platform factory found");
-        } catch (Exception e) {
-            System.out.println("ℹ Monocle platform factory not found (may be in different package)");
         }
 
         // SECOND: Initialize JavaFX toolkit in headless mode

@@ -7,7 +7,6 @@ import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.illustratedHistory.draw.DrawMatch;
 import io.github.jspinak.brobot.illustratedHistory.draw.DrawRect;
 import io.github.jspinak.brobot.imageUtils.ImageUtils;
-import io.github.jspinak.brobot.reports.Report;
 import org.bytedeco.opencv.opencv_core.Scalar;
 import org.springframework.stereotype.Component;
 

@@ -1,6 +1,5 @@
 package io.github.jspinak.brobot.imageUtils;
 
-import io.github.jspinak.brobot.reports.Report;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;

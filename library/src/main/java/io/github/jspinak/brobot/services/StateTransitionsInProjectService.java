@@ -4,7 +4,7 @@ import io.github.jspinak.brobot.manageStates.IStateTransition;
 import io.github.jspinak.brobot.manageStates.StateTransitions;
 import io.github.jspinak.brobot.manageStates.StateTransitionsJointTable;
 import io.github.jspinak.brobot.primatives.enums.SpecialStateType;
-import io.github.jspinak.brobot.reports.Report;
+import io.github.jspinak.brobot.report.Report;
 import lombok.Getter;
 import org.springframework.stereotype.Component;
 

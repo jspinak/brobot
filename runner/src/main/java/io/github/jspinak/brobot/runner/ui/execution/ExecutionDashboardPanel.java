@@ -2,8 +2,8 @@ package io.github.jspinak.brobot.runner.ui.execution;
 
 import io.github.jspinak.brobot.database.services.AllStatesInProjectService;
 import io.github.jspinak.brobot.datatypes.state.state.State;
-import io.github.jspinak.brobot.log.entities.LogEntry;
-import io.github.jspinak.brobot.log.entities.PerformanceMetrics;
+import io.github.jspinak.brobot.report.log.model.LogData;
+import io.github.jspinak.brobot.report.log.model.PerformanceMetricsData;
 import io.github.jspinak.brobot.runner.automation.AutomationExecutor;
 import io.github.jspinak.brobot.runner.events.EventBus;
 import io.github.jspinak.brobot.runner.events.ExecutionStatusEvent;
@@ -736,28 +736,28 @@ public class ExecutionDashboardPanel extends BorderPane {
      * Processes a log entry event for detailed action and state transition information.
      */
     private void processLogEntryEvent(LogEntryEvent logEntryEvent) {
-        LogEntry logEntry = logEntryEvent.getLogEntry();
-        if (logEntry == null) return;
+        LogData logData = logEntryEvent.getLogEntry();
+        if (logData == null) return;
 
-        switch (logEntry.getType()) {
+        switch (logData.getType()) {
             case ACTION:
-                processActionLogEntry(logEntry);
+                processActionLogEntry(logData);
                 break;
 
             case TRANSITION:
-                processTransitionLogEntry(logEntry);
+                processTransitionLogEntry(logData);
                 break;
 
             case METRICS:
-                processPerformanceLogEntry(logEntry);
+                processPerformanceLogEntry(logData);
                 break;
 
             case STATE_DETECTION:
-                processStateDetectionLogEntry(logEntry);
+                processStateDetectionLogEntry(logData);
                 break;
 
             case ERROR:
-                processErrorLogEntry(logEntry);
+                processErrorLogEntry(logData);
                 break;
 
             default:
@@ -769,15 +769,15 @@ public class ExecutionDashboardPanel extends BorderPane {
     /**
      * Processes a state detection log entry.
      */
-    private void processStateDetectionLogEntry(LogEntry logEntry) {
+    private void processStateDetectionLogEntry(LogData logData) {
         // Update the current state label if applicable
-        if (logEntry.getCurrentStateName() != null) {
+        if (logData.getCurrentStateName() != null) {
             Platform.runLater(() -> {
-                currentStateLabel.setText(logEntry.getCurrentStateName());
+                currentStateLabel.setText(logData.getCurrentStateName());
             });
 
             // Try to get and set the current state
-            allStatesInProjectService.getState(logEntry.getCurrentStateName())
+            allStatesInProjectService.getState(logData.getCurrentStateName())
                     .ifPresent(this::updateCurrentState);
         }
     }
@@ -785,14 +785,14 @@ public class ExecutionDashboardPanel extends BorderPane {
     /**
      * Processes an error log entry.
      */
-    private void processErrorLogEntry(LogEntry logEntry) {
+    private void processErrorLogEntry(LogData logData) {
         Platform.runLater(() -> {
             // Could display in a dedicated error panel or highlight in the action history
             ActionRecord record = new ActionRecord(
                     LocalDateTime.now().format(TIME_FORMATTER),
                     "ERROR",
-                    logEntry.getErrorMessage() != null ? logEntry.getErrorMessage() : "Unknown error",
-                    logEntry.getDuration() + "",
+                    logData.getErrorMessage() != null ? logData.getErrorMessage() : "Unknown error",
+                    logData.getDuration() + "",
                     "Failed"
             );
 
@@ -808,7 +808,7 @@ public class ExecutionDashboardPanel extends BorderPane {
     /**
      * Processes a state transition log entry.
      */
-    private void processTransitionLogEntry(LogEntry logEntry) {
+    private void processTransitionLogEntry(LogData logData) {
         try {
             String fromStates = "Unknown";
             String toStates = "Unknown";
@@ -816,11 +816,11 @@ public class ExecutionDashboardPanel extends BorderPane {
             // Use structured data from LogEntry instead of parsing from description
 
             // Handle from states
-            if (logEntry.getFromStates() != null && !logEntry.getFromStates().isEmpty()) {
-                fromStates = logEntry.getFromStates();
-            } else if (logEntry.getFromStateIds() != null && !logEntry.getFromStateIds().isEmpty()) {
+            if (logData.getFromStates() != null && !logData.getFromStates().isEmpty()) {
+                fromStates = logData.getFromStates();
+            } else if (logData.getFromStateIds() != null && !logData.getFromStateIds().isEmpty()) {
                 List<String> stateNames = new ArrayList<>();
-                for (Long stateId : logEntry.getFromStateIds()) {
+                for (Long stateId : logData.getFromStateIds()) {
                     String stateName = allStatesInProjectService.getStateName(stateId);
                     stateNames.add(Objects.requireNonNullElseGet(stateName, () -> "State ID: " + stateId));
                 }
@@ -828,11 +828,11 @@ public class ExecutionDashboardPanel extends BorderPane {
             }
 
             // Handle to states
-            if (logEntry.getToStateNames() != null && !logEntry.getToStateNames().isEmpty()) {
-                toStates = String.join(", ", logEntry.getToStateNames());
-            } else if (logEntry.getToStateIds() != null && !logEntry.getToStateIds().isEmpty()) {
+            if (logData.getToStateNames() != null && !logData.getToStateNames().isEmpty()) {
+                toStates = String.join(", ", logData.getToStateNames());
+            } else if (logData.getToStateIds() != null && !logData.getToStateIds().isEmpty()) {
                 List<String> stateNames = new ArrayList<>();
-                for (Long stateId : logEntry.getToStateIds()) {
+                for (Long stateId : logData.getToStateIds()) {
                     String stateName = allStatesInProjectService.getStateName(stateId);
                     stateNames.add(Objects.requireNonNullElseGet(stateName, () -> "State ID: " + stateId));
                 }
@@ -840,8 +840,8 @@ public class ExecutionDashboardPanel extends BorderPane {
             }
 
             // Also update current state if available
-            if (logEntry.getCurrentStateName() != null) {
-                allStatesInProjectService.getState(logEntry.getCurrentStateName())
+            if (logData.getCurrentStateName() != null) {
+                allStatesInProjectService.getState(logData.getCurrentStateName())
                         .ifPresent(this::updateCurrentState);
             }
 
@@ -853,8 +853,8 @@ public class ExecutionDashboardPanel extends BorderPane {
                         LocalDateTime.now().format(TIME_FORMATTER),
                         finalFromStates,
                         finalToStates,
-                        logEntry.getDuration() + "",
-                        logEntry.isSuccess()
+                        logData.getDuration() + "",
+                        logData.isSuccess()
                 );
 
                 stateTransitions.addFirst(record);
@@ -872,13 +872,13 @@ public class ExecutionDashboardPanel extends BorderPane {
     /**
      * Processes a performance log entry.
      */
-    private void processPerformanceLogEntry(LogEntry logEntry) {
+    private void processPerformanceLogEntry(LogData logData) {
         try {
-            long actionDuration = logEntry.getDuration();
+            long actionDuration = logData.getDuration();
             long matchTime = 0;
 
             // Use PerformanceMetrics if available
-            PerformanceMetrics perfMetrics = logEntry.getPerformance();
+            PerformanceMetricsData perfMetrics = logData.getPerformance();
             if (perfMetrics != null) {
                 actionDuration = perfMetrics.getActionDuration();
                 // There's no direct match time in PerformanceMetrics,
@@ -958,10 +958,10 @@ public class ExecutionDashboardPanel extends BorderPane {
     /**
      * Processes an action log entry.
      */
-    private void processActionLogEntry(LogEntry logEntry) {
+    private void processActionLogEntry(LogData logData) {
         // Update action count statistics
         totalActions.incrementAndGet();
-        if (logEntry.isSuccess()) {
+        if (logData.isSuccess()) {
             successfulActions.incrementAndGet();
         }
 
@@ -975,7 +975,7 @@ public class ExecutionDashboardPanel extends BorderPane {
             successRateLabel.setText(successRate + "%");
 
             // Add to action history
-            String actionText = logEntry.getDescription();
+            String actionText = logData.getDescription();
             if (actionText == null) actionText = "Unknown action";
 
             if (actionText.contains(" on ")) {
@@ -987,8 +987,8 @@ public class ExecutionDashboardPanel extends BorderPane {
                         LocalDateTime.now().format(TIME_FORMATTER),
                         action,
                         target,
-                        logEntry.getDuration() + "",
-                        logEntry.isSuccess() ? "Success" : "Failed"
+                        logData.getDuration() + "",
+                        logData.isSuccess() ? "Success" : "Failed"
                 );
 
                 actionHistory.addFirst(record); // Add at the beginning
