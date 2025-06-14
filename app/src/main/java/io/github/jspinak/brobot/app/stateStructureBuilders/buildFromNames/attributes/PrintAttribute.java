@@ -4,8 +4,8 @@ import io.github.jspinak.brobot.app.stateStructureBuilders.ExtendedStateImageDTO
 import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
-import io.github.jspinak.brobot.reports.ANSI;
-import io.github.jspinak.brobot.reports.Report;
+import io.github.jspinak.brobot.report.ANSI;
+import io.github.jspinak.brobot.report.Report;
 import org.springframework.stereotype.Component;
 
 import java.util.List;

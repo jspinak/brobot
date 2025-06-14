@@ -2,8 +2,8 @@ package io.github.jspinak.brobot.app.stateStructureBuilders.buildFromNames;
 
 import io.github.jspinak.brobot.app.stateStructureBuilders.buildFromNames.babyStates.BabyStateRepo;
 import io.github.jspinak.brobot.app.stateStructureBuilders.buildFromNames.findImages.FindImagesInScreenshot;
-import io.github.jspinak.brobot.reports.ANSI;
-import io.github.jspinak.brobot.reports.Report;
+import io.github.jspinak.brobot.report.ANSI;
+import io.github.jspinak.brobot.report.Report;
 import org.springframework.stereotype.Component;
 
 import java.util.List;

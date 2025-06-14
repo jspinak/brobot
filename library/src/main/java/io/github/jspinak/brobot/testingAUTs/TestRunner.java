@@ -6,7 +6,7 @@ import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import io.github.jspinak.brobot.database.services.AllStatesInProjectService;
 import io.github.jspinak.brobot.imageUtils.CaptureScreenshot;
-import io.github.jspinak.brobot.logging.ActionLogger;
+import io.github.jspinak.brobot.report.log.ActionLogger;
 import io.github.jspinak.brobot.manageStates.StateMemory;
 import io.github.jspinak.brobot.manageStates.StateTransitionsManagement;
 import org.slf4j.Logger;

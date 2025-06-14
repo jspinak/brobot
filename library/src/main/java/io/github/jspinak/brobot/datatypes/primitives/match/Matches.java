@@ -12,7 +12,7 @@ import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.primitives.text.Text;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
-import io.github.jspinak.brobot.reports.Output;
+import io.github.jspinak.brobot.report.Output;
 import lombok.Data;
 import org.bytedeco.opencv.opencv_core.Mat;
 

@@ -1,26 +1,26 @@
 package io.github.jspinak.brobot.runner.events;
 
-import io.github.jspinak.brobot.log.entities.LogEntry;
+import io.github.jspinak.brobot.report.log.model.LogData;
 
 /**
  * Event representing a log entry from the Brobot library.
  */
 public class LogEntryEvent extends BrobotEvent {
-    private final LogEntry logEntry;
+    private final LogData logData;
 
-    public LogEntryEvent(EventType eventType, Object source, LogEntry logEntry) {
+    public LogEntryEvent(EventType eventType, Object source, LogData logData) {
         super(eventType, source);
-        this.logEntry = logEntry;
+        this.logData = logData;
     }
 
-    public LogEntry getLogEntry() {
-        return logEntry;
+    public LogData getLogEntry() {
+        return logData;
     }
 
     /**
      * Factory method to create a log entry event
      */
-    public static LogEntryEvent created(Object source, LogEntry logEntry) {
-        return new LogEntryEvent(EventType.LOG_MESSAGE, source, logEntry);
+    public static LogEntryEvent created(Object source, LogData logData) {
+        return new LogEntryEvent(EventType.LOG_MESSAGE, source, logData);
     }
 }

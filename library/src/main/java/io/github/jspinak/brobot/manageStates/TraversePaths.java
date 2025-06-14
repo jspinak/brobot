@@ -1,8 +1,8 @@
 package io.github.jspinak.brobot.manageStates;
 
 import io.github.jspinak.brobot.primatives.enums.SpecialStateType;
-import io.github.jspinak.brobot.reports.ANSI;
-import io.github.jspinak.brobot.reports.Report;
+import io.github.jspinak.brobot.report.ANSI;
+import io.github.jspinak.brobot.report.Report;
 import io.github.jspinak.brobot.services.StateTransitionsInProjectService;
 import lombok.Getter;
 import org.springframework.stereotype.Component;

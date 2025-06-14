@@ -11,15 +11,12 @@ import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.StateRegion;
 import io.github.jspinak.brobot.datatypes.primitives.region.SearchRegions;
-import io.github.jspinak.brobot.log.entities.LogType;
+import io.github.jspinak.brobot.report.log.model.LogType;
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
 import org.sikuli.basics.Settings;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.function.BiConsumer;
 import java.util.function.Predicate;
 

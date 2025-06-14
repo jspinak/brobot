@@ -2,11 +2,10 @@ package io.github.jspinak.brobot.manageStates;
 
 import io.github.jspinak.brobot.database.services.AllStatesInProjectService;
 import io.github.jspinak.brobot.datatypes.state.state.State;
-import io.github.jspinak.brobot.log.entities.LogEntry;
-import io.github.jspinak.brobot.logging.ActionLogger;
-import io.github.jspinak.brobot.logging.AutomationSession;
-import io.github.jspinak.brobot.reports.Output;
-import io.github.jspinak.brobot.reports.Report;
+import io.github.jspinak.brobot.report.log.ActionLogger;
+import io.github.jspinak.brobot.report.log.AutomationSession;
+import io.github.jspinak.brobot.report.Output;
+import io.github.jspinak.brobot.report.Report;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;

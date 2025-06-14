@@ -1,5 +1,6 @@
 package io.github.jspinak.brobot.runner.ui;
 
+import io.github.jspinak.brobot.datatypes.project.AutomationUI;
 import io.github.jspinak.brobot.datatypes.project.Button;
 import io.github.jspinak.brobot.datatypes.project.Project;
 import io.github.jspinak.brobot.runner.automation.AutomationExecutor;
@@ -177,6 +178,7 @@ public class AutomationPanel extends VBox {
         updateInProgress = true;
         try {
             ExecutionStatus status = automationExecutor.getExecutionStatus();
+            if (status == null) return; // **FIX**: Add null check for status
 
             Platform.runLater(() -> {
                 // Update status label
@@ -362,7 +364,7 @@ public class AutomationPanel extends VBox {
      * Stops all running automation
      */
     private void stopAllAutomation() {
-        if (!automationExecutor.getExecutionStatus().getState().isActive()) {
+        if (automationExecutor.getExecutionStatus() != null && !automationExecutor.getExecutionStatus().getState().isActive()) {
             log("No automation is currently running.");
             return;
         }
