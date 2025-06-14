@@ -107,7 +107,7 @@ public class AutomationExecutor {
         long timeoutMillis = 5 * 60 * 1000;
 
         try {
-            executionController.executeAutomation(button, automationTask, timeoutMillis, null);
+            executionController.executeAutomation(button, automationTask, timeoutMillis, executionEventPublisher.getStatusConsumer());
         } catch (Exception e) {
             log("Failed to start automation: " + e.getMessage());
 

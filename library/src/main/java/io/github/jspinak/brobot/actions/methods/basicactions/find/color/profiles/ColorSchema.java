@@ -1,19 +1,14 @@
 package io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles;
 
 import io.github.jspinak.brobot.imageUtils.MatOps;
-import io.github.jspinak.brobot.reports.Report;
+import io.github.jspinak.brobot.report.Report;
 import lombok.Getter;
 import lombok.Setter;
 import org.bytedeco.opencv.opencv_core.Mat;
-import org.bytedeco.opencv.opencv_core.MatVector;
-import org.bytedeco.opencv.opencv_core.Scalar;
 import org.bytedeco.opencv.opencv_core.Size;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.stream.Collectors;
 
 import static org.bytedeco.opencv.global.opencv_core.merge;
 

@@ -1,7 +1,7 @@
 package io.github.jspinak.brobot.datatypes.primitives.grid;
 
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
-import io.github.jspinak.brobot.reports.Report;
+import io.github.jspinak.brobot.report.Report;
 import lombok.Getter;
 
 import java.util.ArrayList;

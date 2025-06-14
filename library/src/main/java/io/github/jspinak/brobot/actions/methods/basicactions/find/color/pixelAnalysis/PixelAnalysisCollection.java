@@ -1,11 +1,10 @@
 package io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis;
 
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles.ColorCluster;
-import io.github.jspinak.brobot.datatypes.primitives.image.Image;
 import io.github.jspinak.brobot.datatypes.primitives.image.Scene;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.imageUtils.MatOps;
-import io.github.jspinak.brobot.reports.Report;
+import io.github.jspinak.brobot.report.Report;
 import lombok.Getter;
 import lombok.Setter;
 import org.bytedeco.opencv.opencv_core.Mat;

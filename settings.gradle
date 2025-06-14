@@ -1,5 +1,5 @@
 // settings.gradle for the brobot project
 
 rootProject.name = 'brobot'
-include ':app', ':library', ':log', ':library-features', ':library-test', ':runner'
-
+// The 'app' module is deprecated and excluded from the build.
+include 'library', 'library-features', 'library-test', 'runner'

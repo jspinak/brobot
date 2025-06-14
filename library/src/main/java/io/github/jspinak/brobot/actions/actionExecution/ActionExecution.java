@@ -12,10 +12,10 @@ import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.illustratedHistory.IllustrateScreenshot;
 import io.github.jspinak.brobot.imageUtils.CaptureScreenshot;
-import io.github.jspinak.brobot.log.entities.LogEntry;
-import io.github.jspinak.brobot.logging.ActionLogger;
-import io.github.jspinak.brobot.logging.AutomationSession;
-import io.github.jspinak.brobot.reports.Report;
+import io.github.jspinak.brobot.report.log.model.LogData;
+import io.github.jspinak.brobot.report.log.ActionLogger;
+import io.github.jspinak.brobot.report.log.AutomationSession;
+import io.github.jspinak.brobot.report.Report;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -89,7 +89,7 @@ public class ActionExecution {
         matches.setDuration(duration); //time.getDuration(actionOptions.getAction()));
         if (BrobotSettings.buildDataset) datasetManager.addSetOfData(matches); // for the neural net training dataset
         Report.println(actionOptions.getAction() + " " + matches.getOutputText() + " " + matches.getSuccessSymbol());
-        LogEntry logEntry = actionLogger.logAction(sessionId, matches, objectCollections[0]); // log the action after it's finished
+        LogData logData = actionLogger.logAction(sessionId, matches, objectCollections[0]); // log the action after it's finished
         if (!matches.isSuccess()) {  // taking a screenshot should be a part of the logError implementation in the App module
             //String screenshotPath = captureScreenshot.captureScreenshot("action_failed_" + sessionId);
             //actionLogger.logError(sessionId, "Action failed: " + actionOptions.getAction(), screenshotPath);

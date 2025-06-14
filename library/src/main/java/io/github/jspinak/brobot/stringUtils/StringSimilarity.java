@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.stringUtils;
 
-import io.github.jspinak.brobot.reports.Report;
+import io.github.jspinak.brobot.report.Report;
 import org.springframework.stereotype.Component;
 
 /**

@@ -1,8 +1,8 @@
 package io.github.jspinak.brobot.app.log;
 
-import io.github.jspinak.brobot.log.entities.LogEntry;
-import io.github.jspinak.brobot.log.entities.LogType;
-import io.github.jspinak.brobot.log.service.LogEntryService;
+import io.github.jspinak.brobot.report.log.model.LogData;
+import io.github.jspinak.brobot.report.log.model.LogType;
+import io.github.jspinak.brobot.report.log.service.LogEntryService;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -19,50 +19,50 @@ public class LocalLogEntryService implements LogEntryService {
     }
 
     @Override
-    public LogEntry saveLog(LogEntry logEntry) {
-        LogEntry savedLog = logEntryRepository.save(logEntry);
+    public LogData saveLog(LogData logData) {
+        LogData savedLog = logEntryRepository.save(logData);
         return savedLog;
     }
 
     @Override
-    public List<LogEntry> getAllLogs() {
+    public List<LogData> getAllLogs() {
         return logEntryRepository.findAll();
     }
 
     @Override
-    public LogEntry getLogById(String id) {
+    public LogData getLogById(String id) {
         return logEntryRepository.findById(Long.parseLong(id))
                 .orElseThrow(() -> new RuntimeException("Log not found"));
     }
 
     @Override
-    public List<LogEntry> getRecentLogs(int limit) {
+    public List<LogData> getRecentLogs(int limit) {
         PageRequest pageRequest = PageRequest.of(0, limit, Sort.by(Sort.Direction.DESC, "timestamp"));
         return logEntryRepository.findAll(pageRequest).getContent();
     }
 
     @Override
-    public List<LogEntry> getLogEntriesBySessionId(String sessionId) {
+    public List<LogData> getLogEntriesBySessionId(String sessionId) {
         return logEntryRepository.findBySessionId(sessionId);
     }
 
     @Override
-    public List<LogEntry> getFailedLogEntries() {
+    public List<LogData> getFailedLogEntries() {
         return logEntryRepository.findBySuccessFalse();
     }
 
     @Override
-    public List<LogEntry> getLogEntriesByState(String state) {
+    public List<LogData> getLogEntriesByState(String state) {
         return logEntryRepository.findByCurrentStateName(state);
     }
 
     @Override
-    public List<LogEntry> getLogEntriesByType(String type) {
+    public List<LogData> getLogEntriesByType(String type) {
         return logEntryRepository.findByType(LogType.valueOf(type));
     }
 
     @Override
-    public List<LogEntry> getLogEntriesBetween(Instant startTime, Instant endTime) {
+    public List<LogData> getLogEntriesBetween(Instant startTime, Instant endTime) {
         return logEntryRepository.findByTimestampBetween(startTime, endTime);
     }
 
