@@ -6,12 +6,12 @@ import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import io.github.jspinak.brobot.datatypes.state.state.State;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.libraryfeatures.recording.VideoRecorderService;
-import io.github.jspinak.brobot.log.entities.LogEntry;
-import io.github.jspinak.brobot.log.entities.LogType;
-import io.github.jspinak.brobot.log.entities.PerformanceMetrics;
-import io.github.jspinak.brobot.log.service.LogEntryService;
-import io.github.jspinak.brobot.logging.ActionLogger;
-import io.github.jspinak.brobot.logging.TestSessionLogger;
+import io.github.jspinak.brobot.report.log.model.LogData;
+import io.github.jspinak.brobot.report.log.model.LogType;
+import io.github.jspinak.brobot.report.log.model.PerformanceMetricsData;
+import io.github.jspinak.brobot.report.log.service.LogEntryService;
+import io.github.jspinak.brobot.report.log.ActionLogger;
+import io.github.jspinak.brobot.report.log.TestSessionLogger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -49,28 +49,28 @@ public class HttpActionLogger implements ActionLogger, TestSessionLogger {
     }
 
     @Override
-    public LogEntry logAction(String sessionId, Matches matches, ObjectCollection objectCollection) {
+    public LogData logAction(String sessionId, Matches matches, ObjectCollection objectCollection) {
         log.debug("Creating log entry - sessionId: {}, action: {}",
                 sessionId, matches.getActionOptions().getAction());
 
-        LogEntry logEntry = new LogEntry();
-        logEntry.setProjectId(getCurrentProjectId());
+        LogData logData = new LogData();
+        logData.setProjectId(getCurrentProjectId());
         log.debug("Set projectId: {}", getCurrentProjectId());
-        logEntry.setSessionId(sessionId);
-        logEntry.setType(LogType.ACTION);
-        logEntry.setActionType(matches.getActionOptions().getAction().toString());
-        logEntry.setDescription(getStateImageDescription(objectCollection, matches)); // matches.getActionDescription());
-        logEntry.setTimestamp(Instant.now());
-        logEntry.setActionPerformed(matches.getActionOptions().getAction().toString());
-        logEntry.setDuration(matches.getDuration().toMillis());
-        logEntry.setSuccess(matches.isSuccess());
-        logEntry.setCurrentStateName(getStateInFocus(objectCollection));
+        logData.setSessionId(sessionId);
+        logData.setType(LogType.ACTION);
+        logData.setActionType(matches.getActionOptions().getAction().toString());
+        logData.setDescription(getStateImageDescription(objectCollection, matches)); // matches.getActionDescription());
+        logData.setTimestamp(Instant.now());
+        logData.setActionPerformed(matches.getActionOptions().getAction().toString());
+        logData.setDuration(matches.getDuration().toMillis());
+        logData.setSuccess(matches.isSuccess());
+        logData.setCurrentStateName(getStateInFocus(objectCollection));
         objectCollection.getStateImages().forEach(
                 sI -> {
-                    logEntry.getStateImageLogs().add(logEntryStateImageMapper.toLog(sI, matches));
-                    System.out.println(logEntry.getStateImageLogs());
+                    logData.getStateImageLogData().add(logEntryStateImageMapper.toLog(sI, matches));
+                    System.out.println(logData.getStateImageLogData());
                 });
-        LogEntry savedLog = logEntryService.saveLog(logEntry);
+        LogData savedLog = logEntryService.saveLog(logData);
         log.debug("Saved log entry with id: {}", savedLog.getId());
         return savedLog;
     }
@@ -98,139 +98,139 @@ public class HttpActionLogger implements ActionLogger, TestSessionLogger {
     }
 
     @Override
-    public LogEntry logStateTransition(String sessionId, Set<State> fromStates, Set<State> toStates,
-                                       Set<State> beforeStates, boolean success, long transitionTime) {
-        LogEntry logEntry = new LogEntry();
-        logEntry.setSessionId(sessionId);
-        logEntry.setType(LogType.TRANSITION);
-        logEntry.setProjectId(getCurrentProjectId());
+    public LogData logStateTransition(String sessionId, Set<State> fromStates, Set<State> toStates,
+                                      Set<State> beforeStates, boolean success, long transitionTime) {
+        LogData logData = new LogData();
+        logData.setSessionId(sessionId);
+        logData.setType(LogType.TRANSITION);
+        logData.setProjectId(getCurrentProjectId());
         String fromStatesString = fromStates.stream()
                 .map(State::getName)
                 .reduce((a, b) -> a + ", " + b)
                 .orElse("None");
-        logEntry.setFromStates(fromStatesString);
+        logData.setFromStates(fromStatesString);
         List<Long> fromStateIds = fromStates.stream()
                 .map(State::getId)
                 .toList();
-        logEntry.setFromStateIds(fromStateIds);
+        logData.setFromStateIds(fromStateIds);
         beforeStates.forEach(state -> {
-            logEntry.getBeforeStateNames().add(state.getName());
-            logEntry.getBeforeStateIds().add(state.getId());
+            logData.getBeforeStateNames().add(state.getName());
+            logData.getBeforeStateIds().add(state.getId());
         });
         toStates.forEach(state -> {
-            logEntry.getToStateNames().add(state.getName());
-            logEntry.getToStateIds().add(state.getId());
+            logData.getToStateNames().add(state.getName());
+            logData.getToStateIds().add(state.getId());
         });
         if (transitionTime > 0) {
-            logEntry.setDuration(transitionTime);
-            logEntry.setSuccess(success);
+            logData.setDuration(transitionTime);
+            logData.setSuccess(success);
         }
-        LogEntry savedLog = logEntryService.saveLog(logEntry);
+        LogData savedLog = logEntryService.saveLog(logData);
         log.debug("Saved transition log with id: {} from {} to {}",
                 savedLog.getId(), savedLog.getFromStates(), savedLog.getToStateNames());
         return savedLog;
     }
 
     @Override
-    public LogEntry logObservation(String sessionId, String observationType, String description, String severity) {
+    public LogData logObservation(String sessionId, String observationType, String description, String severity) {
         log.debug("Creating observation log entry - sessionId: {}, type: {}, description: {}, severity: {}",
                 sessionId, observationType, description, severity);
 
-        LogEntry logEntry = new LogEntry();
-        logEntry.setProjectId(getCurrentProjectId());
-        logEntry.setSessionId(sessionId);
-        logEntry.setType(LogType.OBSERVATION);
-        logEntry.setActionType(observationType);
-        logEntry.setDescription(description);
-        logEntry.setTimestamp(Instant.now());
+        LogData logData = new LogData();
+        logData.setProjectId(getCurrentProjectId());
+        logData.setSessionId(sessionId);
+        logData.setType(LogType.OBSERVATION);
+        logData.setActionType(observationType);
+        logData.setDescription(description);
+        logData.setTimestamp(Instant.now());
         //logEntry.setSeverity(severity);
 
-        LogEntry savedLog = logEntryService.saveLog(logEntry);
+        LogData savedLog = logEntryService.saveLog(logData);
         log.debug("Saved observation log entry with id: {}", savedLog.getId());
         return savedLog;
     }
 
     @Override
-    public LogEntry logPerformanceMetrics(String sessionId, long actionDuration, long pageLoadTime,
-                                                                                long totalTestDuration) {
-        LogEntry logEntry = new LogEntry();
-        logEntry.setProjectId(getCurrentProjectId());
-        logEntry.setSessionId(sessionId);
-        logEntry.setType(LogType.METRICS);
-        logEntry.setTimestamp(Instant.now());
+    public LogData logPerformanceMetrics(String sessionId, long actionDuration, long pageLoadTime,
+                                         long totalTestDuration) {
+        LogData logData = new LogData();
+        logData.setProjectId(getCurrentProjectId());
+        logData.setSessionId(sessionId);
+        logData.setType(LogType.METRICS);
+        logData.setTimestamp(Instant.now());
 
-        PerformanceMetrics metrics = new PerformanceMetrics();
+        PerformanceMetricsData metrics = new PerformanceMetricsData();
         metrics.setActionDuration(actionDuration);
         metrics.setPageLoadTime(pageLoadTime);
         metrics.setTotalTestDuration(totalTestDuration);
-        logEntry.setPerformance(metrics);
+        logData.setPerformance(metrics);
 
-        return logEntryService.saveLog(logEntry);
+        return logEntryService.saveLog(logData);
     }
 
     @Override
-    public LogEntry logError(String sessionId, String errorMessage, String screenshotPath) {
-        LogEntry logEntry = new LogEntry();
-        logEntry.setProjectId(getCurrentProjectId());
-        logEntry.setSessionId(sessionId);
-        logEntry.setType(LogType.ERROR);
-        logEntry.setDescription(errorMessage);
-        logEntry.setTimestamp(Instant.now());
-        logEntry.setSuccess(false);
-        logEntry.setScreenshotPath(screenshotPath);
-        return logEntryService.saveLog(logEntry);
+    public LogData logError(String sessionId, String errorMessage, String screenshotPath) {
+        LogData logData = new LogData();
+        logData.setProjectId(getCurrentProjectId());
+        logData.setSessionId(sessionId);
+        logData.setType(LogType.ERROR);
+        logData.setDescription(errorMessage);
+        logData.setTimestamp(Instant.now());
+        logData.setSuccess(false);
+        logData.setScreenshotPath(screenshotPath);
+        return logEntryService.saveLog(logData);
     }
 
     @Override
-    public LogEntry startVideoRecording(String sessionId) throws IOException, AWTException {
+    public LogData startVideoRecording(String sessionId) throws IOException, AWTException {
         String fileName = "recordings/" + sessionId + "_" + System.currentTimeMillis() + ".avi";
         videoRecorderService.startRecording(fileName);
 
-        LogEntry logEntry = new LogEntry();
-        logEntry.setProjectId(getCurrentProjectId());
-        logEntry.setSessionId(sessionId);
-        logEntry.setType(LogType.VIDEO);
-        logEntry.setDescription("Started video recording: " + fileName);
-        logEntry.setTimestamp(Instant.now());
-        return logEntryService.saveLog(logEntry);
+        LogData logData = new LogData();
+        logData.setProjectId(getCurrentProjectId());
+        logData.setSessionId(sessionId);
+        logData.setType(LogType.VIDEO);
+        logData.setDescription("Started video recording: " + fileName);
+        logData.setTimestamp(Instant.now());
+        return logEntryService.saveLog(logData);
     }
 
     @Override
-    public LogEntry stopVideoRecording(String sessionId) throws IOException {
+    public LogData stopVideoRecording(String sessionId) throws IOException {
         videoRecorderService.stopRecording();
 
-        LogEntry logEntry = new LogEntry();
-        logEntry.setProjectId(getCurrentProjectId());
-        logEntry.setSessionId(sessionId);
-        logEntry.setType(LogType.VIDEO);
-        logEntry.setDescription("Stopped video recording");
-        logEntry.setTimestamp(Instant.now());
-        return logEntryService.saveLog(logEntry);
+        LogData logData = new LogData();
+        logData.setProjectId(getCurrentProjectId());
+        logData.setSessionId(sessionId);
+        logData.setType(LogType.VIDEO);
+        logData.setDescription("Stopped video recording");
+        logData.setTimestamp(Instant.now());
+        return logEntryService.saveLog(logData);
     }
 
     @Override
     public String startSession(String applicationUnderTest) {
         String sessionId = UUID.randomUUID().toString();
-        LogEntry logEntry = new LogEntry();
-        logEntry.setType(LogType.SESSION);
-        logEntry.setDescription("Started session for " + applicationUnderTest);
-        logEntry.setSessionId(sessionId);
-        logEntry.setProjectId(getCurrentProjectId());
-        logEntry.setTimestamp(Instant.now());
-        logEntryService.saveLog(logEntry);
+        LogData logData = new LogData();
+        logData.setType(LogType.SESSION);
+        logData.setDescription("Started session for " + applicationUnderTest);
+        logData.setSessionId(sessionId);
+        logData.setProjectId(getCurrentProjectId());
+        logData.setTimestamp(Instant.now());
+        logEntryService.saveLog(logData);
         return sessionId;
     }
 
     @Override
     public void endSession(String sessionId) {
-        LogEntry logEntry = new LogEntry(sessionId, LogType.SESSION, "Ended session");
-        logEntryService.saveLog(logEntry);
+        LogData logData = new LogData(sessionId, LogType.SESSION, "Ended session");
+        logEntryService.saveLog(logData);
     }
 
     @Override
     public void setCurrentState(String sessionId, String stateName, String stateDescription) {
         String description = String.format("Current State: %s - %s", stateName, stateDescription);
-        LogEntry logEntry = new LogEntry(sessionId, LogType.SESSION, description);
-        logEntryService.saveLog(logEntry);
+        LogData logData = new LogData(sessionId, LogType.SESSION, description);
+        logEntryService.saveLog(logData);
     }
 }

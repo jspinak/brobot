@@ -1,11 +1,12 @@
 package io.github.jspinak.brobot.runner.ui.log;
 
-import io.github.jspinak.brobot.log.entities.LogEntry;
-import io.github.jspinak.brobot.log.entities.LogType;
+import io.github.jspinak.brobot.report.log.model.LogData;
+import io.github.jspinak.brobot.report.log.model.LogType;
 import io.github.jspinak.brobot.runner.events.BrobotEvent;
 import io.github.jspinak.brobot.runner.events.EventBus;
 import io.github.jspinak.brobot.runner.events.LogEntryEvent;
 import io.github.jspinak.brobot.runner.events.LogEvent;
+import io.github.jspinak.brobot.runner.persistence.LogQueryService;
 import io.github.jspinak.brobot.runner.ui.icons.IconRegistry;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
@@ -24,6 +25,8 @@ import org.testfx.util.WaitForAsyncUtils;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -45,8 +48,11 @@ public class EventBusIntegrationTest {
     @Mock
     private IconRegistry iconRegistry;
 
+    @Mock
+    private LogQueryService logQueryService;
+
     @Captor
-    private ArgumentCaptor<Consumer<BrobotEvent>> consumerCaptor;
+    private ArgumentCaptor<Consumer<BrobotEvent>> eventConsumerCaptor;
 
     private EventBus eventBus;
     private LogViewerPanel logViewerPanel;
@@ -65,11 +71,14 @@ public class EventBusIntegrationTest {
         // Create a real EventBus instance (not a mock) to test real interactions
         eventBus = new EventBus();
 
+        // Define default behavior for the mocked service
+        when(logQueryService.getRecentLogs(anyInt())).thenReturn(Collections.emptyList());
+
         // Mock icon registry behavior
         when(iconRegistry.getIconView(anyString(), anyInt())).thenReturn(new javafx.scene.image.ImageView());
 
         // Create the LogViewerPanel with the real EventBus
-        logViewerPanel = new LogViewerPanel(eventBus, iconRegistry);
+        logViewerPanel = new LogViewerPanel(logQueryService, eventBus, iconRegistry);
 
         // Access the private log entries list
         Field logEntriesField = LogViewerPanel.class.getDeclaredField("logEntries");
@@ -90,13 +99,11 @@ public class EventBusIntegrationTest {
                     (java.util.Map<BrobotEvent.EventType, java.util.Set<Consumer<BrobotEvent>>>) subscribersField.get(eventBus);
 
             // Verify that subscriptions exist for the expected event types
-            assertTrue(subscribers.containsKey(LogEntryEvent.EventType.LOG_MESSAGE),
+            assertTrue(subscribers.containsKey(BrobotEvent.EventType.LOG_MESSAGE),
                     "LogViewerPanel should subscribe to LOG_MESSAGE events");
-            assertTrue(subscribers.containsKey(LogEvent.EventType.LOG_MESSAGE),
-                    "LogViewerPanel should subscribe to LOG_MESSAGE events");
-            assertTrue(subscribers.containsKey(LogEvent.EventType.LOG_WARNING),
+            assertTrue(subscribers.containsKey(BrobotEvent.EventType.LOG_WARNING),
                     "LogViewerPanel should subscribe to LOG_WARNING events");
-            assertTrue(subscribers.containsKey(LogEvent.EventType.LOG_ERROR),
+            assertTrue(subscribers.containsKey(BrobotEvent.EventType.LOG_ERROR),
                     "LogViewerPanel should subscribe to LOG_ERROR events");
         } catch (Exception e) {
             fail("Failed to access EventBus subscribers: " + e.getMessage());
@@ -106,28 +113,16 @@ public class EventBusIntegrationTest {
     @Test
     public void testLogEntryEventPropagation() throws Exception {
         // Create a LogEntry
-        LogEntry logEntry = new LogEntry("test-session", LogType.ACTION, "Test action via EventBus");
-        logEntry.setSuccess(true);
-        logEntry.setTimestamp(Instant.now());
+        LogData logData = new LogData("test-session", LogType.ACTION, "Test action via EventBus");
+        logData.setSuccess(true);
+        logData.setTimestamp(Instant.now());
 
         // Create a LogEntryEvent using the factory method
-        LogEntryEvent event = LogEntryEvent.created(this, logEntry);
+        LogEntryEvent event = LogEntryEvent.created(this, logData);
 
-        // Create a barrier to wait for async processing
-        CountDownLatch latch = new CountDownLatch(1);
-
-        // Set up JavaFX platform to release the latch after processing
-        Platform.runLater(() -> {
-            // Publish the event
-            eventBus.publish(event);
-            latch.countDown();
-        });
-
-        // Wait for the event to be processed (with timeout)
-        assertTrue(latch.await(5, TimeUnit.SECONDS), "Event processing timed out");
-
-        // Allow event handling to complete
-        WaitForAsyncUtils.waitForFxEvents();
+        // Publish on the JavaFX thread and wait for it to be processed
+        Platform.runLater(() -> eventBus.publish(event));
+        WaitForAsyncUtils.waitForFxEvents(); // Let the UI update
 
         // Verify that the log entry was added to the panel
         assertEquals(1, logEntries.size(), "LogEntry should be added to the log entries list");
@@ -138,30 +133,20 @@ public class EventBusIntegrationTest {
     @Test
     public void testLogEventPropagation() throws Exception {
         // Create LogEvents for different log levels
-        LogEvent infoEvent = LogEvent.info(this, "Info message via EventBus", "TEST");
-        LogEvent warningEvent = LogEvent.warning(this, "Warning message via EventBus", "TEST");
-        LogEvent errorEvent = LogEvent.error(this, "Error message via EventBus", "TEST",
+        LogEvent infoEvent = LogEvent.info(this, "Info message via EventBus", "INFO");
+        LogEvent warningEvent = LogEvent.warning(this, "Warning message via EventBus", "WARNING");
+        LogEvent errorEvent = LogEvent.error(this, "Error message via EventBus", "ERROR",
                 new RuntimeException("Test exception"));
 
-        // Create a barrier to wait for async processing
-        CountDownLatch latch = new CountDownLatch(3);
-
-        // Set up JavaFX platform to release the latch after processing
+        // Publish events on the JavaFX thread
         Platform.runLater(() -> {
-            // Publish the events
             eventBus.publish(infoEvent);
             eventBus.publish(warningEvent);
             eventBus.publish(errorEvent);
-            latch.countDown();
-            latch.countDown();
-            latch.countDown();
         });
 
-        // Wait for the events to be processed (with timeout)
-        assertTrue(latch.await(5, TimeUnit.SECONDS), "Event processing timed out");
-
-        // Allow event handling to complete
-        WaitForAsyncUtils.waitForFxEvents();
+        // Wait until all three events have been processed by the UI
+        WaitForAsyncUtils.waitFor(10, TimeUnit.SECONDS, () -> logEntries.size() == 3);
 
         // Verify that the log entries were added to the panel
         assertEquals(3, logEntries.size(), "All log events should be added to the log entries list");
@@ -207,11 +192,11 @@ public class EventBusIntegrationTest {
                 Platform.runLater(() -> {
                     // Alternate between LogEvent and LogEntryEvent
                     if (eventNumber % 2 == 0) {
-                        LogEvent event = LogEvent.info(this, "Concurrent event " + eventNumber, "TEST");
+                        LogEvent event = LogEvent.info(this, "Concurrent event " + eventNumber, "INFO");
                         eventBus.publish(event);
                     } else {
-                        LogEntry logEntry = new LogEntry("test-session", LogType.INFO, "Concurrent entry " + eventNumber);
-                        LogEntryEvent event = LogEntryEvent.created(this, logEntry);
+                        LogData logData = new LogData("test-session", LogType.SESSION, "Concurrent entry " + eventNumber);
+                        LogEntryEvent event = LogEntryEvent.created(this, logData);
                         eventBus.publish(event);
                     }
                     latch.countDown();
@@ -243,19 +228,11 @@ public class EventBusIntegrationTest {
         // Verify that unsubscribing works correctly
 
         // First, let's send an event to confirm it's received
-        LogEvent testEvent = LogEvent.info(this, "Test before unsubscribe", "TEST");
+        LogEvent testEvent = LogEvent.info(this, "Test before unsubscribe", "ACTION");
 
-        // Create a barrier to wait for event processing
-        CountDownLatch latch = new CountDownLatch(1);
-
-        Platform.runLater(() -> {
-            eventBus.publish(testEvent);
-            latch.countDown();
-        });
-
-        // Wait for event processing
-        latch.await(5, TimeUnit.SECONDS);
-        WaitForAsyncUtils.waitForFxEvents();
+        // Publish on JavaFX thread and wait
+        Platform.runLater(() -> eventBus.publish(testEvent));
+        WaitForAsyncUtils.waitFor(5, TimeUnit.SECONDS, () -> !logEntries.isEmpty());
 
         // Verify event was received
         assertEquals(1, logEntries.size(), "Event should be received before unsubscribing");
@@ -285,14 +262,14 @@ public class EventBusIntegrationTest {
             };
 
             // Subscribe to an event type
-            eventBus.subscribe(LogEvent.EventType.LOG_MESSAGE, testConsumer);
+            eventBus.subscribe(BrobotEvent.EventType.LOG_MESSAGE, testConsumer);
 
             // Verify the subscription was added
             int countAfterSubscribe = countTotalSubscribers(subscribers);
             assertEquals(initialCount + 1, countAfterSubscribe, "Subscription should be added");
 
             // Unsubscribe
-            eventBus.unsubscribe(LogEvent.EventType.LOG_MESSAGE, testConsumer);
+            eventBus.unsubscribe(BrobotEvent.EventType.LOG_MESSAGE, testConsumer);
 
             // Verify the subscription was removed
             int countAfterUnsubscribe = countTotalSubscribers(subscribers);

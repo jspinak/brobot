@@ -6,7 +6,7 @@ import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import io.github.jspinak.brobot.imageUtils.ImageUtils;
-import io.github.jspinak.brobot.reports.Report;
+import io.github.jspinak.brobot.report.Report;
 import lombok.Getter;
 import org.springframework.stereotype.Component;
 

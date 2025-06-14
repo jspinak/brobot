@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles;
 
-import io.github.jspinak.brobot.reports.Report;
+import io.github.jspinak.brobot.report.Report;
 import lombok.Getter;
 import lombok.Setter;
 

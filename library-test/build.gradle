@@ -1,40 +1,56 @@
-//brobot project's library-test module build.gradle
+// In brobot/library-test/build.gradle
 
 plugins {
-    id 'org.springframework.boot' version '3.2.4'
-    id 'io.freefair.lombok'
-}
-
-java {
-    sourceCompatibility = JavaVersion.VERSION_21
+    // This applies the Spring Boot framework to your test module.
+    id 'org.springframework.boot'
+    // The 'java' plugin is included by the Spring Boot plugin automatically.
 }
 
 dependencies {
+    // This gives your tests access to the main 'library' code and its 'api' dependencies.
     implementation project(':library')
-    implementation project(':log')
 
-    implementation('com.sikulix:sikulixapi:2.0.5') {
-        exclude group: 'org.slf4j', module: 'slf4j-nop'
-    }
-    implementation group: 'org.bytedeco', name: 'javacv-platform', version: '1.5.10'
-    implementation 'com.github.kwhat:jnativehook:2.2.2'
+    // This single dependency provides JUnit 5, Mockito, AssertJ, and the Spring Test framework.
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
 
-    // Mockito
-    testImplementation 'org.assertj:assertj-core:3.24.2'
-
-    // JSON processing
-    implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.2'
-    // core and annotation modules are included in the databind module but need to be specified explicitly to avoid version conflicts
-    implementation 'com.fasterxml.jackson.core:jackson-core:2.15.2'
-    implementation 'com.fasterxml.jackson.core:jackson-annotations:2.15.2'
-    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.2'
-    //implementation("com.fasterxml.jackson.core:jackson-databind:2.19.0") // converting JSON to Java objects
-    implementation("com.github.erosb:everit-json-schema:1.14.5") // JSON schema validation
-    implementation("org.json:json:20250107") // JSON parsing,
-    implementation("com.networknt:json-schema-validator:1.5.6") // NetworkNT JSON schema validation
-
+    // These dependencies are needed for your test code to compile.
+    testImplementation 'com.fasterxml.jackson.core:jackson-databind'
+    testImplementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+    testImplementation 'com.networknt:json-schema-validator:1.4.0'
+    testImplementation 'org.json:json:20240303'
 }
 
+// These tasks prevent Gradle from creating a runnable JAR for this module, which is correct.
 tasks.named('bootJar') {
     enabled = false
+}
+tasks.named('jar') {
+    enabled = false
+}
+
+// ** THE FINAL FIX IS HERE **
+// This task explicitly finds the JARs containing native code and extracts them.
+tasks.register('copyTestNatives', Copy) {
+    dependsOn(project(':library').tasks.named('jar'))
+    from(configurations.testRuntimeClasspath.files.collect { file ->
+        file.isDirectory() ? file : zipTree(file).matching {
+            // Target common native library paths inside JARs
+            include "**/win32-x86-64/*.dll"
+            include "**/win32-x86/*.dll"
+            include "**/opencv/*.dll"
+        }
+    }) {
+        include "*.dll"
+    }
+    into layout.buildDirectory.dir("natives")
+}
+
+// The 'test' task will now depend on this new copy task.
+tasks.named('test', Test) {
+    dependsOn tasks.named('copyTestNatives')
+    useJUnitPlatform()
+
+    // This modifies the PATH environment variable for the test process.
+    // On Windows, this is the most reliable way to ensure native .dll files are found.
+    environment 'PATH', "${layout.buildDirectory.dir('natives').get().asFile.absolutePath};${System.getenv('PATH')}"
 }

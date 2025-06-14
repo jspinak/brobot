@@ -147,6 +147,9 @@ class AutomationExecutorTest {
         // Create status consumer captor
         ArgumentCaptor<Consumer<ExecutionStatus>> consumerCaptor = ArgumentCaptor.forClass(Consumer.class);
 
+        // **FIX**: Stub the getStatusConsumer() method to return a non-null consumer
+        when(executionEventPublisher.getStatusConsumer()).thenReturn(status -> {});
+
         // Create a button for testing
         Button button = new Button();
         button.setFunctionName("TestFunction");
@@ -162,9 +165,9 @@ class AutomationExecutorTest {
                 consumerCaptor.capture()
         );
 
-        // Get the captured consumer
+        // Get the captured consumer and assert it's not null
         Consumer<ExecutionStatus> statusConsumer = consumerCaptor.getValue();
-        assertNotNull(statusConsumer);
+        assertNotNull(statusConsumer, "The captured status consumer should not be null.");
 
         // Test the consumer with a status update
         ExecutionStatus testStatus = new ExecutionStatus();

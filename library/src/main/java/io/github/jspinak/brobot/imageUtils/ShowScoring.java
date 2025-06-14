@@ -1,7 +1,7 @@
 package io.github.jspinak.brobot.imageUtils;
 
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles.ColorSchema;
-import io.github.jspinak.brobot.reports.Report;
+import io.github.jspinak.brobot.report.Report;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Point;
 import org.bytedeco.opencv.opencv_core.Scalar;

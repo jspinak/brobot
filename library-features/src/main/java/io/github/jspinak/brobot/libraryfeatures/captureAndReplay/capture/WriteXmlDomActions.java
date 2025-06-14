@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.libraryfeatures.captureAndReplay.capture;
 
-import io.github.jspinak.brobot.reports.Report;
+import io.github.jspinak.brobot.report.Report;
 import org.sikuli.script.Mouse;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;

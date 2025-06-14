@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.app.services;
 
-import io.github.jspinak.brobot.log.entities.LogEntry;
+import io.github.jspinak.brobot.report.log.model.LogData;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
@@ -14,7 +14,7 @@ public class WebSocketService {
         this.messagingTemplate = messagingTemplate;
     }
 
-    public void sendLogUpdate(List<LogEntry> logEntries) {
+    public void sendLogUpdate(List<LogData> logEntries) {
         messagingTemplate.convertAndSend("/topic/logs", logEntries);
     }
 

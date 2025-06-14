@@ -3,12 +3,10 @@ package io.github.jspinak.brobot.runner.events;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import io.github.jspinak.brobot.datatypes.state.state.State;
-import io.github.jspinak.brobot.log.entities.LogEntry;
-import io.github.jspinak.brobot.log.entities.LogType;
-import io.github.jspinak.brobot.logging.ActionLogger;
-import io.github.jspinak.brobot.logging.TestSessionLogger;
-import org.springframework.context.annotation.Primary;
-import org.springframework.stereotype.Component;
+import io.github.jspinak.brobot.report.log.model.LogData;
+import io.github.jspinak.brobot.report.log.model.LogType;
+import io.github.jspinak.brobot.report.log.ActionLogger;
+import io.github.jspinak.brobot.report.log.TestSessionLogger;
 
 import java.awt.*;
 import java.io.IOException;
@@ -36,26 +34,26 @@ public class EventPublishingActionLogger implements ActionLogger, TestSessionLog
     //
 
     @Override
-    public LogEntry logAction(String sessionId, Matches matches, ObjectCollection objectCollection) {
-        LogEntry logEntry = actionLogger.logAction(sessionId, matches, objectCollection);
-        publishLogEntryEvent(logEntry);
+    public LogData logAction(String sessionId, Matches matches, ObjectCollection objectCollection) {
+        LogData logData = actionLogger.logAction(sessionId, matches, objectCollection);
+        publishLogEntryEvent(logData);
 
         // For failed actions, also publish an error event
         if (!matches.isSuccess()) {
-            publishErrorForFailedAction(matches, logEntry);
+            publishErrorForFailedAction(matches, logData);
         }
 
-        return logEntry;
+        return logData;
     }
 
     @Override
-    public LogEntry logStateTransition(String sessionId, Set<State> fromStates,
-                                       Set<State> toStates,
-                                       Set<State> beforeStates,
-                                       boolean success, long transitionTime) {
-        LogEntry logEntry = actionLogger.logStateTransition(
+    public LogData logStateTransition(String sessionId, Set<State> fromStates,
+                                      Set<State> toStates,
+                                      Set<State> beforeStates,
+                                      boolean success, long transitionTime) {
+        LogData logData = actionLogger.logStateTransition(
                 sessionId, fromStates, toStates, beforeStates, success, transitionTime);
-        publishLogEntryEvent(logEntry);
+        publishLogEntryEvent(logData);
 
         // For failed transitions, also publish an error event
         if (!success) {
@@ -69,31 +67,31 @@ public class EventPublishingActionLogger implements ActionLogger, TestSessionLog
             eventBus.publish(errorEvent);
         }
 
-        return logEntry;
+        return logData;
     }
 
     @Override
-    public LogEntry logObservation(String sessionId, String observationType,
-                                   String description, String severity) {
-        LogEntry logEntry = actionLogger.logObservation(
+    public LogData logObservation(String sessionId, String observationType,
+                                  String description, String severity) {
+        LogData logData = actionLogger.logObservation(
                 sessionId, observationType, description, severity);
-        publishLogEntryEvent(logEntry);
-        return logEntry;
+        publishLogEntryEvent(logData);
+        return logData;
     }
 
     @Override
-    public LogEntry logPerformanceMetrics(String sessionId, long actionDuration,
-                                          long pageLoadTime, long totalTestDuration) {
-        LogEntry logEntry = actionLogger.logPerformanceMetrics(
+    public LogData logPerformanceMetrics(String sessionId, long actionDuration,
+                                         long pageLoadTime, long totalTestDuration) {
+        LogData logData = actionLogger.logPerformanceMetrics(
                 sessionId, actionDuration, pageLoadTime, totalTestDuration);
-        publishLogEntryEvent(logEntry);
-        return logEntry;
+        publishLogEntryEvent(logData);
+        return logData;
     }
 
     @Override
-    public LogEntry logError(String sessionId, String errorMessage, String screenshotPath) {
-        LogEntry logEntry = actionLogger.logError(sessionId, errorMessage, screenshotPath);
-        publishLogEntryEvent(logEntry);
+    public LogData logError(String sessionId, String errorMessage, String screenshotPath) {
+        LogData logData = actionLogger.logError(sessionId, errorMessage, screenshotPath);
+        publishLogEntryEvent(logData);
 
         // Also publish an error event
         ErrorEvent errorEvent = ErrorEvent.high(
@@ -104,21 +102,21 @@ public class EventPublishingActionLogger implements ActionLogger, TestSessionLog
         );
         eventBus.publish(errorEvent);
 
-        return logEntry;
+        return logData;
     }
 
     @Override
-    public LogEntry startVideoRecording(String sessionId) throws IOException, AWTException {
-        LogEntry logEntry = actionLogger.startVideoRecording(sessionId);
-        publishLogEntryEvent(logEntry);
-        return logEntry;
+    public LogData startVideoRecording(String sessionId) throws IOException, AWTException {
+        LogData logData = actionLogger.startVideoRecording(sessionId);
+        publishLogEntryEvent(logData);
+        return logData;
     }
 
     @Override
-    public LogEntry stopVideoRecording(String sessionId) throws IOException {
-        LogEntry logEntry = actionLogger.stopVideoRecording(sessionId);
-        publishLogEntryEvent(logEntry);
-        return logEntry;
+    public LogData stopVideoRecording(String sessionId) throws IOException {
+        LogData logData = actionLogger.stopVideoRecording(sessionId);
+        publishLogEntryEvent(logData);
+        return logData;
     }
 
     //
@@ -170,27 +168,27 @@ public class EventPublishingActionLogger implements ActionLogger, TestSessionLog
     // Helper methods
     //
 
-    private void publishLogEntryEvent(LogEntry logEntry) {
+    private void publishLogEntryEvent(LogData logData) {
         // Skip if logEntry is null (which can happen with no-op implementations)
-        if (logEntry == null) return;
+        if (logData == null) return;
 
-        LogEntryEvent event = LogEntryEvent.created(this, logEntry);
+        LogEntryEvent event = LogEntryEvent.created(this, logData);
         eventBus.publish(event);
 
         // Also publish a corresponding log event for better integration
-        LogEvent.LogLevel level = getLogLevelForEntry(logEntry);
+        LogEvent.LogLevel level = getLogLevelForEntry(logData);
         LogEvent logEvent = new LogEvent(
                 BrobotEvent.EventType.LOG_MESSAGE,
                 this,
-                logEntry.getDescription(),
+                logData.getDescription(),
                 level,
-                logEntry.getType() != null ? logEntry.getType().toString() : "UNKNOWN",
+                logData.getType() != null ? logData.getType().toString() : "UNKNOWN",
                 null
         );
         eventBus.publish(logEvent);
     }
 
-    private void publishErrorForFailedAction(Matches matches, LogEntry logEntry) {
+    private void publishErrorForFailedAction(Matches matches, LogData logData) {
         ErrorEvent errorEvent = ErrorEvent.medium(
                 this,
                 "Action failed: " + matches.getActionOptions().getAction().toString() +
@@ -201,11 +199,11 @@ public class EventPublishingActionLogger implements ActionLogger, TestSessionLog
         eventBus.publish(errorEvent);
     }
 
-    private LogEvent.LogLevel getLogLevelForEntry(LogEntry logEntry) {
-        if (logEntry.getType() == LogType.ERROR) {
+    private LogEvent.LogLevel getLogLevelForEntry(LogData logData) {
+        if (logData.getType() == LogType.ERROR) {
             return LogEvent.LogLevel.ERROR;
-        } else if (!logEntry.isSuccess() &&
-                (logEntry.getType() == LogType.ACTION || logEntry.getType() == LogType.TRANSITION)) {
+        } else if (!logData.isSuccess() &&
+                (logData.getType() == LogType.ACTION || logData.getType() == LogType.TRANSITION)) {
             return LogEvent.LogLevel.WARNING;
         } else {
             return LogEvent.LogLevel.INFO;

@@ -1,13 +1,11 @@
 package io.github.jspinak.brobot.runner.ui.log;
 
-import com.sun.javafx.application.PlatformImpl;
-import io.github.jspinak.brobot.log.entities.LogEntry;
-import io.github.jspinak.brobot.log.entities.LogType;
-import io.github.jspinak.brobot.log.entities.PerformanceMetrics;
+import io.github.jspinak.brobot.report.log.model.LogData;
+import io.github.jspinak.brobot.report.log.model.LogType;
+import io.github.jspinak.brobot.report.log.model.PerformanceMetricsData;
 import io.github.jspinak.brobot.runner.events.BrobotEvent;
 import io.github.jspinak.brobot.runner.events.EventBus;
-import io.github.jspinak.brobot.runner.events.LogEntryEvent;
-import io.github.jspinak.brobot.runner.events.LogEvent;
+import io.github.jspinak.brobot.runner.persistence.LogQueryService;
 import io.github.jspinak.brobot.runner.ui.icons.IconRegistry;
 import javafx.application.Platform;
 import javafx.scene.Parent;
@@ -31,7 +29,6 @@ import org.testfx.util.WaitForAsyncUtils;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.time.Instant;
-import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -61,6 +58,9 @@ public class LogViewerPanelIntegrationTest {
     private EventBus eventBus;
 
     @Mock
+    private LogQueryService logQueryService;
+
+    @Mock
     private IconRegistry iconRegistry;
 
     @Captor
@@ -85,7 +85,6 @@ public class LogViewerPanelIntegrationTest {
         System.getProperties().entrySet().stream()
                 .filter(entry -> entry.getKey().toString().contains("javafx") ||
                         entry.getKey().toString().contains("glass") ||
-                        entry.getKey().toString().contains("monocle") ||
                         entry.getKey().toString().contains("prism") ||
                         entry.getKey().toString().contains("testfx"))
                 .forEach(entry -> debugLog("  " + entry.getKey() + " = " + entry.getValue()));
@@ -175,7 +174,6 @@ public class LogViewerPanelIntegrationTest {
             debugLog("Is FX Application Thread: " + Platform.isFxApplicationThread());
             debugLog("Stage provided: " + (stage != null));
             debugLog("Glass platform: " + System.getProperty("glass.platform"));
-            debugLog("Monocle platform: " + System.getProperty("monocle.platform"));
 
             if (stage != null) {
                 debugLog("Stage details:");
@@ -199,6 +197,9 @@ public class LogViewerPanelIntegrationTest {
             // Step 2: Configure mocks
             debugLog("Step 2: Configuring mock behavior...");
             try {
+                // Define default behavior for the mocked service
+                when(logQueryService.getRecentLogs(anyInt())).thenReturn(Collections.emptyList());
+
                 when(iconRegistry.getIconView(anyString(), anyInt())).thenReturn(new ImageView());
                 debugLog("✓ IconRegistry mock configured");
 
@@ -228,7 +229,7 @@ public class LogViewerPanelIntegrationTest {
             try {
                 debugLog("Creating LogViewerPanel - we're already on: " + Thread.currentThread().getName());
 
-                logViewerPanel = new LogViewerPanel(eventBus, iconRegistry);
+                logViewerPanel = new LogViewerPanel(logQueryService, eventBus, iconRegistry);
                 debugLog("✓ LogViewerPanel constructor completed");
 
                 if (logViewerPanel == null) {
@@ -507,14 +508,14 @@ public class LogViewerPanelIntegrationTest {
 
                 // Add a simple log entry
                 runOnFxThreadAndWait(() -> {
-                    LogEntry logEntry = new LogEntry("test-session", LogType.INFO, "Test info message");
-                    logEntry.setSuccess(true);
-                    logEntry.setTimestamp(Instant.now());
+                    LogData logData = new LogData("test-session", LogType.SESSION, "Test info message");
+                    logData.setSuccess(true);
+                    logData.setTimestamp(Instant.now());
 
                     try {
-                        Method addLogEntryMethod = LogViewerPanel.class.getDeclaredMethod("addLogEntry", LogEntry.class);
+                        Method addLogEntryMethod = LogViewerPanel.class.getDeclaredMethod("addLogEntry", LogData.class);
                         addLogEntryMethod.setAccessible(true);
-                        addLogEntryMethod.invoke(logViewerPanel, logEntry);
+                        addLogEntryMethod.invoke(logViewerPanel, logData);
                         debugLog("✓ Test log entry added successfully");
                     } catch (Exception e) {
                         debugLog("✗ Failed to add test log entry: " + e.getMessage());
@@ -569,30 +570,30 @@ public class LogViewerPanelIntegrationTest {
     }
 
     // Helper methods for test data
-    private LogEntry createMockLogEntry(LogType type, boolean success, String description) {
-        LogEntry logEntry = new LogEntry("test-session", type, description);
-        logEntry.setSuccess(success);
-        logEntry.setTimestamp(Instant.now());
-        return logEntry;
+    private LogData createMockLogEntry(LogType type, boolean success, String description) {
+        LogData logData = new LogData("test-session", type, description);
+        logData.setSuccess(success);
+        logData.setTimestamp(Instant.now());
+        return logData;
     }
 
-    private LogEntry createDetailedLogEntry() {
-        LogEntry logEntry = createMockLogEntry(LogType.ACTION, true, "Detailed test action");
-        logEntry.setActionType("CLICK");
-        logEntry.setErrorMessage(null);
-        logEntry.setCurrentStateName("MainScreen");
-        logEntry.setFromStates("LoginScreen");
-        logEntry.setToStateNames(Collections.singletonList("MainScreen"));
-        logEntry.setScreenshotPath("path/to/screenshot.png");
-        logEntry.setSuccess(true);
+    private LogData createDetailedLogEntry() {
+        LogData logData = createMockLogEntry(LogType.ACTION, true, "Detailed test action");
+        logData.setActionType("CLICK");
+        logData.setErrorMessage(null);
+        logData.setCurrentStateName("MainScreen");
+        logData.setFromStates("LoginScreen");
+        logData.setToStateNames(Collections.singletonList("MainScreen"));
+        logData.setScreenshotPath("path/to/screenshot.png");
+        logData.setSuccess(true);
 
-        PerformanceMetrics metrics = new PerformanceMetrics();
+        PerformanceMetricsData metrics = new PerformanceMetricsData();
         metrics.setActionDuration(100);
         metrics.setPageLoadTime(200);
         metrics.setTransitionTime(150);
         metrics.setTotalTestDuration(450);
-        logEntry.setPerformance(metrics);
+        logData.setPerformance(metrics);
 
-        return logEntry;
+        return logData;
     }
 }

@@ -1,9 +1,9 @@
 package io.github.jspinak.brobot.app.services;
 
-import io.github.jspinak.brobot.log.entities.LogEntry;
-import io.github.jspinak.brobot.log.entities.LogEntryDTO;
-import io.github.jspinak.brobot.log.entities.LogEntryMapper;
-import io.github.jspinak.brobot.logging.LogUpdateSender;
+import io.github.jspinak.brobot.report.log.model.LogData;
+import io.github.jspinak.brobot.report.log.dto.LogEntryDTO;
+import io.github.jspinak.brobot.report.log.mapper.LogEntryMapper;
+import io.github.jspinak.brobot.report.log.LogUpdateSender;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -41,7 +41,7 @@ public class LogSenderService implements LogUpdateSender {
     }
 
     @Override
-    public void sendLogUpdate(List<LogEntry> logEntries) {
+    public void sendLogUpdate(List<LogData> logEntries) {
         if (logEntries == null || logEntries.isEmpty()) {
             logger.warn("Received null or empty log entries list");
             return;
@@ -70,8 +70,8 @@ public class LogSenderService implements LogUpdateSender {
     }
 
     // Convenience method for single log entries
-    public void sendSingleLogUpdate(LogEntry logEntry) {
-        sendLogUpdate(Collections.singletonList(logEntry));
+    public void sendSingleLogUpdate(LogData logData) {
+        sendLogUpdate(Collections.singletonList(logData));
     }
 
     private HttpHeaders createHeaders() {

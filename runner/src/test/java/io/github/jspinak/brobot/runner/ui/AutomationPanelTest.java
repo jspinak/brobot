@@ -6,6 +6,7 @@ import io.github.jspinak.brobot.datatypes.project.Project;
 import io.github.jspinak.brobot.runner.automation.AutomationExecutor;
 import io.github.jspinak.brobot.runner.config.BrobotRunnerProperties;
 import io.github.jspinak.brobot.runner.events.EventBus;
+import io.github.jspinak.brobot.runner.execution.ExecutionStatus;
 import io.github.jspinak.brobot.services.ProjectManager;
 import javafx.application.Platform;
 import javafx.scene.Node;
@@ -59,6 +60,9 @@ class AutomationPanelTest {
 
         // Initialize mocks
         MockitoAnnotations.openMocks(this);
+
+        // **FIX**: Provide a default return value for getExecutionStatus to avoid NPEs
+        when(automationExecutor.getExecutionStatus()).thenReturn(new ExecutionStatus());
 
         try {
             // Create the panel with proper mocked dependencies
@@ -165,9 +169,10 @@ class AutomationPanelTest {
      */
     @Test
     void testStopAllAutomation(FxRobot robot) throws IllegalAccessException, NoSuchFieldException {
-        Field isRunningField = AutomationPanel.class.getDeclaredField("isRunning");
-        isRunningField.setAccessible(true);
-        isRunningField.set(automationPanel, true);
+        // Mock that the automation is running
+        when(automationExecutor.getExecutionStatus()).thenReturn(new ExecutionStatus() {{
+            setState(io.github.jspinak.brobot.runner.execution.ExecutionState.RUNNING);
+        }});
 
         // Find and click the stop button
         Node stopButton = robot.lookup("Stop All Automation").queryButton();
