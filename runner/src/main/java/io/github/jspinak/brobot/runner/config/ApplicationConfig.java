@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.runner.config;
 
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 import lombok.Getter;
 import lombok.Setter;
 import io.github.jspinak.brobot.runner.events.EventBus;
@@ -9,8 +11,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;

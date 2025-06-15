@@ -8,6 +8,7 @@ import io.github.jspinak.brobot.runner.ui.icons.IconRegistry;
 import io.github.jspinak.brobot.runner.ui.theme.ThemeManager;
 import io.github.jspinak.brobot.runner.util.ErrorUtils;
 import io.github.jspinak.brobot.runner.util.FxThreadUtils;
+import jakarta.annotation.PreDestroy;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.image.Image;
@@ -22,7 +23,6 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PreDestroy;
 import java.util.List;
 
 /**
