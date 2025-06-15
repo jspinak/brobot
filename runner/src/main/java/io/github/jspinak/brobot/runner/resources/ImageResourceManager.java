@@ -5,11 +5,11 @@ import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImag
 import io.github.jspinak.brobot.runner.config.BrobotRunnerProperties;
 import io.github.jspinak.brobot.runner.events.EventBus;
 import io.github.jspinak.brobot.runner.events.LogEvent;
+import jakarta.annotation.PostConstruct;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-import javax.annotation.PostConstruct;
 import java.awt.image.BufferedImage;
 import java.lang.ref.SoftReference;
 import java.nio.file.Path;

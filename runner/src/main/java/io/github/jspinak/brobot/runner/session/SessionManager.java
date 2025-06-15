@@ -9,13 +9,13 @@ import io.github.jspinak.brobot.runner.events.EventBus;
 import io.github.jspinak.brobot.runner.events.LogEvent;
 import io.github.jspinak.brobot.runner.resources.ResourceManager;
 import io.github.jspinak.brobot.services.StateTransitionsRepository;
+import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;

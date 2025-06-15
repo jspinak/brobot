@@ -2,9 +2,9 @@ package io.github.jspinak.brobot.runner.resources;
 
 import io.github.jspinak.brobot.runner.events.EventBus;
 import io.github.jspinak.brobot.runner.events.LogEvent;
+import jakarta.annotation.PreDestroy;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.springframework.stereotype.Component;
-import javax.annotation.PreDestroy;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
