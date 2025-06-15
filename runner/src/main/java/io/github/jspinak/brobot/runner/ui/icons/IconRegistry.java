@@ -2,6 +2,7 @@ package io.github.jspinak.brobot.runner.ui.icons;
 
 import io.github.jspinak.brobot.runner.events.EventBus;
 import io.github.jspinak.brobot.runner.events.LogEvent;
+import jakarta.annotation.PostConstruct;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import org.slf4j.Logger;
@@ -9,7 +10,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.HashMap;
