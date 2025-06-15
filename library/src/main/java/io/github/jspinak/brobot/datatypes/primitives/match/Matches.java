@@ -155,7 +155,7 @@ public class Matches {
 
     public Region getDefinedRegion() {
         if (definedRegions.isEmpty()) return new Region();
-        return definedRegions.get(0);
+        return definedRegions.getFirst();
     }
 
     public int size() {

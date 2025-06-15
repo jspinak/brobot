@@ -89,7 +89,9 @@ public class ActionExecution {
         matches.setDuration(duration); //time.getDuration(actionOptions.getAction()));
         if (BrobotSettings.buildDataset) datasetManager.addSetOfData(matches); // for the neural net training dataset
         Report.println(actionOptions.getAction() + " " + matches.getOutputText() + " " + matches.getSuccessSymbol());
-        LogData logData = actionLogger.logAction(sessionId, matches, objectCollections[0]); // log the action after it's finished
+        if (objectCollections.length > 0) {
+            LogData logData = actionLogger.logAction(sessionId, matches, objectCollections[0]); // log the action after it's finished
+        }
         if (!matches.isSuccess()) {  // taking a screenshot should be a part of the logError implementation in the App module
             //String screenshotPath = captureScreenshot.captureScreenshot("action_failed_" + sessionId);
             //actionLogger.logError(sessionId, "Action failed: " + actionOptions.getAction(), screenshotPath);

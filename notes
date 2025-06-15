@@ -1,0 +1,2 @@
+Integration tests of the library module should go in the library-test module. The library module is not a
+SpringBootApplication, just a library with Spring beans.
