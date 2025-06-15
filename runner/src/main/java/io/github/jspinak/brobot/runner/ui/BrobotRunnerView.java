@@ -1,6 +1,5 @@
 package io.github.jspinak.brobot.runner.ui;
 
-import io.github.jspinak.brobot.database.services.AllStatesInProjectService;
 import io.github.jspinak.brobot.runner.events.EventBus;
 import io.github.jspinak.brobot.runner.events.LogEvent;
 import io.github.jspinak.brobot.runner.persistence.LogQueryService;
@@ -11,6 +10,7 @@ import io.github.jspinak.brobot.runner.ui.navigation.NavigationManager;
 import io.github.jspinak.brobot.runner.ui.navigation.Screen;
 import io.github.jspinak.brobot.runner.ui.navigation.ScreenRegistry;
 import io.github.jspinak.brobot.runner.ui.theme.ThemeManager;
+import jakarta.annotation.PostConstruct;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -26,7 +26,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import java.util.Objects;
 import java.util.Optional;
 
