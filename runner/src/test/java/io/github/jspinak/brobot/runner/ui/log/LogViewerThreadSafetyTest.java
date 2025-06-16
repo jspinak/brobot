@@ -15,10 +15,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.extension.ExtendWith;
+import io.github.jspinak.brobot.runner.testutil.JavaFXTestUtils;
+import org.junit.jupiter.api.BeforeAll;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.testfx.framework.junit5.ApplicationExtension;
-import org.testfx.framework.junit5.Start;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.testfx.util.WaitForAsyncUtils;
 
 import java.lang.reflect.Field;
@@ -33,7 +34,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
-@ExtendWith(ApplicationExtension.class)
+@ExtendWith(MockitoExtension.class)
 public class LogViewerThreadSafetyTest {
 
     @Mock
@@ -45,27 +46,27 @@ public class LogViewerThreadSafetyTest {
 
     private LogViewerPanel logViewerPanel;
     private StackPane rootPane;
+    private Stage stage;
 
-    @Start
-    private void start(Stage stage) {
-        rootPane = new StackPane();
-        stage.setScene(new Scene(rootPane, 800, 600));
-        stage.show();
+    @BeforeAll
+    public static void initJavaFX() throws InterruptedException {
+        JavaFXTestUtils.initJavaFX();
     }
 
     @BeforeEach
     public void setUp() throws Exception {
-        MockitoAnnotations.openMocks(this);
-        when(iconRegistry.getIconView(anyString(), anyInt())).thenReturn(new javafx.scene.image.ImageView());
-        when(logQueryService.getRecentLogs(anyInt())).thenReturn(Collections.emptyList());
+        JavaFXTestUtils.runOnFXThread(() -> {
+            when(iconRegistry.getIconView(anyString(), anyInt())).thenReturn(new javafx.scene.image.ImageView());
+            when(logQueryService.getRecentLogs(anyInt())).thenReturn(Collections.emptyList());
 
-        final CountDownLatch latch = new CountDownLatch(1);
-        Platform.runLater(() -> {
             logViewerPanel = new LogViewerPanel(logQueryService, eventBus, iconRegistry);
+            rootPane = new StackPane();
             rootPane.getChildren().add(logViewerPanel);
-            latch.countDown();
+            
+            stage = new Stage();
+            stage.setScene(new Scene(rootPane, 800, 600));
+            stage.show();
         });
-        assertTrue(latch.await(5, TimeUnit.SECONDS), "Panel initialization timed out.");
     }
 
     @AfterEach

@@ -15,11 +15,14 @@ import javafx.stage.Stage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import io.github.jspinak.brobot.runner.testutil.JavaFXTestUtils;
+import org.junit.jupiter.api.BeforeAll;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.testfx.framework.junit5.ApplicationExtension;
-import org.testfx.framework.junit5.Start;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.testfx.util.WaitForAsyncUtils;
 
 import java.lang.reflect.Field;
@@ -35,7 +38,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(ApplicationExtension.class)
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class LogViewerPanelTest {
 
     private LogViewerPanel logViewerPanel;
@@ -52,30 +56,34 @@ public class LogViewerPanelTest {
     private TableView<LogViewerPanel.LogEntryViewModel> logTable;
     private ObservableList<LogViewerPanel.LogEntryViewModel> logEntries;
 
-    @Start
-    private void start(Stage stage) {
-        // Method needed for TestFX ApplicationExtension
+    @BeforeAll
+    public static void initJavaFX() throws InterruptedException {
+        JavaFXTestUtils.initJavaFX();
     }
 
     @BeforeEach
     public void setUp() throws Exception {
-        MockitoAnnotations.openMocks(this);
+        JavaFXTestUtils.runOnFXThread(() -> {
+            // Mock dependencies
+            when(iconRegistry.getIconView(anyString(), anyInt())).thenReturn(new javafx.scene.image.ImageView());
+            when(logQueryService.getRecentLogs(anyInt())).thenReturn(Collections.emptyList());
 
-        // Mock dependencies
-        when(iconRegistry.getIconView(anyString(), anyInt())).thenReturn(new javafx.scene.image.ImageView());
-        when(logQueryService.getRecentLogs(anyInt())).thenReturn(Collections.emptyList());
+            // Create the panel. This will subscribe to the mocked EventBus.
+            logViewerPanel = new LogViewerPanel(logQueryService, eventBus, iconRegistry);
 
-        // Create the panel. This will subscribe to the mocked EventBus.
-        logViewerPanel = new LogViewerPanel(logQueryService, eventBus, iconRegistry);
+            try {
+                // Access private fields for verification
+                Field logTableField = LogViewerPanel.class.getDeclaredField("logTable");
+                logTableField.setAccessible(true);
+                logTable = (TableView<LogViewerPanel.LogEntryViewModel>) logTableField.get(logViewerPanel);
 
-        // Access private fields for verification
-        Field logTableField = LogViewerPanel.class.getDeclaredField("logTable");
-        logTableField.setAccessible(true);
-        logTable = (TableView<LogViewerPanel.LogEntryViewModel>) logTableField.get(logViewerPanel);
-
-        Field logEntriesField = LogViewerPanel.class.getDeclaredField("logEntries");
-        logEntriesField.setAccessible(true);
-        logEntries = (ObservableList<LogViewerPanel.LogEntryViewModel>) logEntriesField.get(logViewerPanel);
+                Field logEntriesField = LogViewerPanel.class.getDeclaredField("logEntries");
+                logEntriesField.setAccessible(true);
+                logEntries = (ObservableList<LogViewerPanel.LogEntryViewModel>) logEntriesField.get(logViewerPanel);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
     }
 
     @Test

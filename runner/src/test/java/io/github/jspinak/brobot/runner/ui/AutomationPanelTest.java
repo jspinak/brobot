@@ -16,12 +16,14 @@ import javafx.stage.Stage;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledIfSystemProperty;
 import org.junit.jupiter.api.extension.ExtendWith;
+import io.github.jspinak.brobot.runner.testutil.JavaFXTestUtils;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationContext;
 import org.testfx.api.FxRobot;
-import org.testfx.framework.junit5.ApplicationExtension;
-import org.testfx.framework.junit5.Start;
 import org.testfx.util.WaitForAsyncUtils;
 
 import java.lang.reflect.Field;
@@ -33,7 +35,7 @@ import java.util.concurrent.TimeoutException;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(ApplicationExtension.class)
+@ExtendWith(MockitoExtension.class)
 class AutomationPanelTest {
 
     @Mock
@@ -54,46 +56,48 @@ class AutomationPanelTest {
     private AutomationPanel automationPanel;
     private Stage stage;
 
-    @Start
-    private void start(Stage stage) {
-        this.stage = stage;
+    @BeforeAll
+    public static void initJavaFX() throws InterruptedException {
+        JavaFXTestUtils.initJavaFX();
+    }
 
-        // Initialize mocks
-        MockitoAnnotations.openMocks(this);
+    @BeforeEach
+    void setUp() throws InterruptedException {
+        JavaFXTestUtils.runOnFXThread(() -> {
+            // **FIX**: Provide a default return value for getExecutionStatus to avoid NPEs
+            when(automationExecutor.getExecutionStatus()).thenReturn(new ExecutionStatus());
 
-        // **FIX**: Provide a default return value for getExecutionStatus to avoid NPEs
-        when(automationExecutor.getExecutionStatus()).thenReturn(new ExecutionStatus());
+            try {
+                // Create the panel with proper mocked dependencies
+                automationPanel = new AutomationPanel(context, projectManager, properties, automationExecutor, eventBus);
 
-        try {
-            // Create the panel with proper mocked dependencies
-            automationPanel = new AutomationPanel(context, projectManager, properties, automationExecutor, eventBus);
+                // Set up the scene
+                stage = new Stage();
+                Scene scene = new Scene(automationPanel, 800, 600);
+                stage.setScene(scene);
+                stage.show();
 
-            // Set up the scene
-            Scene scene = new Scene(automationPanel, 800, 600);
-            stage.setScene(scene);
-            stage.show();
-
-            // Ensure JavaFX is fully initialized
-            WaitForAsyncUtils.waitForFxEvents();
-        } catch (Exception e) {
-            fail("Failed to initialize AutomationPanel: " + e.getMessage());
-        }
-
+                // Ensure JavaFX is fully initialized
+                WaitForAsyncUtils.waitForFxEvents();
+            } catch (Exception e) {
+                fail("Failed to initialize AutomationPanel: " + e.getMessage());
+            }
+        });
     }
 
     /**
      * Tests that the panel contains the expected UI elements after construction.
      */
     @Test
-    void testPanelContainsExpectedElements(FxRobot robot) {
+    void testPanelContainsExpectedElements() {
         // Wait for UI to fully render
         WaitForAsyncUtils.waitForFxEvents();
 
         // Verify that essential UI elements exist
-        assertNotNull(findTextArea(robot), "TextArea should exist");
-        assertNotNull(robot.lookup("Refresh Automation Buttons").tryQuery().orElse(null),
+        assertNotNull(findTextArea(), "TextArea should exist");
+        assertNotNull(automationPanel.lookup("#refreshAutomationButtons"),
                 "Refresh button should exist");
-        assertNotNull(robot.lookup("Stop All Automation").tryQuery().orElse(null),
+        assertNotNull(automationPanel.lookup("#stopAllAutomation"),
                 "Stop button should exist");
     }
 
@@ -101,19 +105,18 @@ class AutomationPanelTest {
      * Tests refreshing automation buttons when no project is loaded.
      */
     @Test
-    void testRefreshAutomationButtons_noProject(FxRobot robot) {
+    void testRefreshAutomationButtons_noProject() {
         // Setup - no project
         when(projectManager.getActiveProject()).thenReturn(null);
 
         // Click the refresh button safely
-        Node refreshButton = robot.lookup("Refresh Automation Buttons").queryButton();
-        robot.clickOn(refreshButton);
+        syncExec(() -> automationPanel.refreshAutomationButtons());
 
         // Wait for UI updates
         WaitForAsyncUtils.waitForFxEvents();
 
         // Verify log message
-        TextArea logArea = findTextArea(robot);
+        TextArea logArea = findTextArea();
         assertNotNull(logArea, "TextArea should exist");
         assertTrue(logArea.getText().contains("No project loaded"),
                 "Log should indicate no project is loaded");
@@ -123,7 +126,7 @@ class AutomationPanelTest {
      * Tests refreshing automation buttons when a project with buttons is loaded.
      */
     @Test
-    void testRefreshAutomationButtons_withButtons(FxRobot robot) {
+    void testRefreshAutomationButtons_withButtons() {
         // Set up mock project with buttons
         Project project = new Project();
 
@@ -158,7 +161,7 @@ class AutomationPanelTest {
         WaitForAsyncUtils.waitForFxEvents();
 
         // Verify TextArea contains correct message
-        TextArea logArea = findTextArea(robot);
+        TextArea logArea = findTextArea();
         assertNotNull(logArea, "TextArea should exist");
         assertTrue(logArea.getText().contains("Found 2 automation functions"),
                 "Log should indicate 2 automation functions were found");
@@ -168,15 +171,19 @@ class AutomationPanelTest {
      * Tests the stop all automation functionality.
      */
     @Test
-    void testStopAllAutomation(FxRobot robot) throws IllegalAccessException, NoSuchFieldException {
+    void testStopAllAutomation() throws IllegalAccessException, NoSuchFieldException {
         // Mock that the automation is running
         when(automationExecutor.getExecutionStatus()).thenReturn(new ExecutionStatus() {{
             setState(io.github.jspinak.brobot.runner.execution.ExecutionState.RUNNING);
         }});
 
-        // Find and click the stop button
-        Node stopButton = robot.lookup("Stop All Automation").queryButton();
-        robot.clickOn(stopButton);
+        // Find and click the stop button via UI
+        syncExec(() -> {
+            javafx.scene.control.Button stopButton = (javafx.scene.control.Button) automationPanel.lookup("#stopAllAutomation");
+            if (stopButton != null && !stopButton.isDisabled()) {
+                stopButton.fire();
+            }
+        });
 
         // Wait for UI updates
         WaitForAsyncUtils.waitForFxEvents();
@@ -195,7 +202,7 @@ class AutomationPanelTest {
             matches = "true",
             disabledReason = "This test can be unstable in headless environments"
     )
-    void testLog(FxRobot robot) {
+    void testLog() {
         // Create a unique test message to identify in log
         final String testMessage = "Test log message " + System.currentTimeMillis();
 
@@ -203,7 +210,7 @@ class AutomationPanelTest {
         syncExec(() -> automationPanel.log(testMessage));
 
         // Find TextArea and verify content
-        TextArea logArea = findTextArea(robot);
+        TextArea logArea = findTextArea();
         assertNotNull(logArea, "TextArea should exist");
 
         // Allow some time for text to appear (with timeout)
@@ -224,7 +231,7 @@ class AutomationPanelTest {
      * in headless testing environments.
      */
     @Test
-    void testLogAltMethod(FxRobot robot) {
+    void testLogAltMethod() {
         // Create a unique test message
         final String testMessage = "Alt log test " + System.currentTimeMillis();
 
@@ -239,7 +246,7 @@ class AutomationPanelTest {
         WaitForAsyncUtils.waitForFxEvents();
 
         // Get log text through direct access rather than UI query
-        String logText = syncGet(() -> findTextArea(robot).getText());
+        String logText = syncGet(() -> findTextArea().getText());
 
         // Verify log content
         assert logText != null;
@@ -252,8 +259,8 @@ class AutomationPanelTest {
     /**
      * Finds the TextArea in the AutomationPanel.
      */
-    private TextArea findTextArea(FxRobot robot) {
-        return robot.lookup(".text-area").queryAs(TextArea.class);
+    private TextArea findTextArea() {
+        return (TextArea) automationPanel.lookup(".text-area");
     }
 
     /**
