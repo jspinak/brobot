@@ -9,8 +9,9 @@ import javafx.scene.shape.Polygon;
 import javafx.stage.Stage;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.testfx.framework.junit5.ApplicationExtension;
-import org.testfx.framework.junit5.Start;
+import io.github.jspinak.brobot.runner.testutil.JavaFXTestUtils;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.testfx.util.WaitForAsyncUtils;
 
 import java.lang.reflect.Field;
@@ -19,28 +20,35 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@ExtendWith(ApplicationExtension.class)
+@ExtendWith({}) // No extension needed since we're initializing JavaFX manually
 public class StateVisualizationPanelTest {
 
     private LogViewerPanel.StateVisualizationPanel stateVisualizationPanel;
     private Pane stateCanvas;
     private Label titleLabel;
 
-    @Start
-    private void start(Stage stage) {
-        // This setup correctly initializes the panel for all tests
-        stateVisualizationPanel = createStateVisualizationPanel();
-        try {
-            Field canvasField = LogViewerPanel.StateVisualizationPanel.class.getDeclaredField("stateCanvas");
-            canvasField.setAccessible(true);
-            stateCanvas = (Pane) canvasField.get(stateVisualizationPanel);
+    @BeforeAll
+    public static void initJavaFX() throws InterruptedException {
+        JavaFXTestUtils.initJavaFX();
+    }
 
-            Field titleField = LogViewerPanel.StateVisualizationPanel.class.getDeclaredField("titleLabel");
-            titleField.setAccessible(true);
-            titleLabel = (Label) titleField.get(stateVisualizationPanel);
-        } catch (Exception e) {
-            fail("Failed to access private fields: " + e.getMessage());
-        }
+    @BeforeEach
+    void setUp() throws InterruptedException {
+        JavaFXTestUtils.runOnFXThread(() -> {
+            // This setup correctly initializes the panel for all tests
+            stateVisualizationPanel = createStateVisualizationPanel();
+            try {
+                Field canvasField = LogViewerPanel.StateVisualizationPanel.class.getDeclaredField("stateCanvas");
+                canvasField.setAccessible(true);
+                stateCanvas = (Pane) canvasField.get(stateVisualizationPanel);
+
+                Field titleField = LogViewerPanel.StateVisualizationPanel.class.getDeclaredField("titleLabel");
+                titleField.setAccessible(true);
+                titleLabel = (Label) titleField.get(stateVisualizationPanel);
+            } catch (Exception e) {
+                fail("Failed to access private fields: " + e.getMessage());
+            }
+        });
     }
 
     @Test

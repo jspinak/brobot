@@ -6,16 +6,17 @@ import io.github.jspinak.brobot.datatypes.state.state.State;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.runner.events.EventBus;
 import io.github.jspinak.brobot.runner.events.LogEvent;
+import io.github.jspinak.brobot.runner.testutil.JavaFXTestUtils;
 import io.github.jspinak.brobot.services.ProjectManager;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.testfx.framework.junit5.ApplicationExtension;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -27,8 +28,13 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-@ExtendWith({MockitoExtension.class, ApplicationExtension.class})
+@ExtendWith(MockitoExtension.class)
 public class ConfigBrowserPanelTest {
+
+    @BeforeAll
+    public static void initJavaFX() throws InterruptedException {
+        JavaFXTestUtils.initJavaFX();
+    }
 
     @Mock
     private EventBus eventBus;
@@ -42,8 +48,10 @@ public class ConfigBrowserPanelTest {
     private ConfigBrowserPanel browserPanel;
 
     @BeforeEach
-    public void setUp() {
-        browserPanel = new ConfigBrowserPanel(eventBus, projectManager, allStatesService);
+    public void setUp() throws InterruptedException {
+        JavaFXTestUtils.runOnFXThread(() -> {
+            browserPanel = new ConfigBrowserPanel(eventBus, projectManager, allStatesService);
+        });
     }
 
     @Test

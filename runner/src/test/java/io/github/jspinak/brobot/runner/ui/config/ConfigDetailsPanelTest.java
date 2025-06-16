@@ -1,12 +1,13 @@
 package io.github.jspinak.brobot.runner.ui.config;
 
 import io.github.jspinak.brobot.runner.events.EventBus;
+import io.github.jspinak.brobot.runner.testutil.JavaFXTestUtils;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.testfx.framework.junit5.ApplicationExtension;
 
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
@@ -14,8 +15,13 @@ import java.time.LocalDateTime;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-@ExtendWith({MockitoExtension.class, ApplicationExtension.class})
+@ExtendWith(MockitoExtension.class)
 public class ConfigDetailsPanelTest {
+
+    @BeforeAll
+    public static void initJavaFX() throws InterruptedException {
+        JavaFXTestUtils.initJavaFX();
+    }
 
     @Mock
     private EventBus eventBus;
@@ -23,8 +29,10 @@ public class ConfigDetailsPanelTest {
     private ConfigDetailsPanel detailsPanel;
 
     @BeforeEach
-    public void setUp() {
-        detailsPanel = new ConfigDetailsPanel(eventBus);
+    public void setUp() throws InterruptedException {
+        JavaFXTestUtils.runOnFXThread(() -> {
+            detailsPanel = new ConfigDetailsPanel(eventBus);
+        });
     }
 
     @Test

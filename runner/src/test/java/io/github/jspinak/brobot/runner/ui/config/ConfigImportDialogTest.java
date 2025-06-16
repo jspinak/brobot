@@ -5,15 +5,18 @@ import io.github.jspinak.brobot.json.schemaValidation.model.ValidationSeverity;
 import io.github.jspinak.brobot.runner.config.BrobotRunnerProperties;
 import io.github.jspinak.brobot.runner.events.EventBus;
 import io.github.jspinak.brobot.runner.init.BrobotLibraryInitializer;
-import io.github.jspinak.brobot.runner.ui.config.test.TestFxBase;
+import io.github.jspinak.brobot.runner.testutil.JavaFXTestUtils;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.testfx.framework.junit5.ApplicationExtension;
-import org.testfx.framework.junit5.Start;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -24,33 +27,42 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.*;
 
-@ExtendWith({MockitoExtension.class, ApplicationExtension.class})
-public class ConfigImportDialogTest extends TestFxBase {
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
+public class ConfigImportDialogTest {
 
+    @BeforeAll
+    public static void initJavaFX() throws InterruptedException {
+        JavaFXTestUtils.initJavaFX();
+    }
+
+    @Mock
     private BrobotLibraryInitializer libraryInitializer;
+    @Mock
     private BrobotRunnerProperties properties;
+    @Mock
     private EventBus eventBus;
+    
     private ConfigImportDialog dialog;
+    private Stage stage;
 
-    @Start
-    public void start(Stage stage) {
-        super.start(stage);
-
-        // Manually create mocks since @Mock might not be initialized before @Start
-        libraryInitializer = mock(BrobotLibraryInitializer.class);
-        properties = mock(BrobotRunnerProperties.class);
-        eventBus = mock(EventBus.class);
-
-        // Configure mocks
-        when(properties.getImagePath()).thenReturn("/path/to/images");
-        when(properties.getConfigPath()).thenReturn("/path/to/config");
-
-        // Create dialog with manually created mocks
-        dialog = new ConfigImportDialog(libraryInitializer, properties, eventBus);
+    @BeforeEach
+    public void setUp() throws Exception {
+        JavaFXTestUtils.runOnFXThread(() -> {
+            stage = new Stage();
+        });
     }
 
     @Test
     public void testValidateConfiguration() throws Exception {
+        // Configure mocks
+        when(properties.getImagePath()).thenReturn("/path/to/images");
+        when(properties.getConfigPath()).thenReturn("/path/to/config");
+        
+        JavaFXTestUtils.runOnFXThread(() -> {
+            // Create dialog with mocks
+            dialog = new ConfigImportDialog(libraryInitializer, properties, eventBus);
+        });
         // Instead of trying to mock static methods and constructors,
         // we'll modify our approach to work with instance methods directly
 
@@ -107,6 +119,14 @@ public class ConfigImportDialogTest extends TestFxBase {
 
     @Test
     public void testCreateConfigEntry() throws Exception {
+        // Configure mocks
+        when(properties.getImagePath()).thenReturn("/path/to/images");
+        when(properties.getConfigPath()).thenReturn("/path/to/config");
+        
+        JavaFXTestUtils.runOnFXThread(() -> {
+            // Create dialog with mocks
+            dialog = new ConfigImportDialog(libraryInitializer, properties, eventBus);
+        });
         // Arrange
         // Set up fields using reflection
         Field projectConfigField = ConfigImportDialog.class.getDeclaredField("projectConfigField");
@@ -175,9 +195,18 @@ public class ConfigImportDialogTest extends TestFxBase {
     }
 
     @Test
-    public void testDialogButtons() {
-        // This is a simple test to verify that the dialog has the expected buttons
-        assertNotNull(dialog.getDialogPane().lookupButton(javafx.scene.control.ButtonType.OK));
-        assertNotNull(dialog.getDialogPane().lookupButton(javafx.scene.control.ButtonType.CANCEL));
+    public void testDialogButtons() throws InterruptedException {
+        // Configure mocks
+        when(properties.getImagePath()).thenReturn("/path/to/images");
+        when(properties.getConfigPath()).thenReturn("/path/to/config");
+        
+        JavaFXTestUtils.runOnFXThread(() -> {
+            // Create dialog with mocks
+            dialog = new ConfigImportDialog(libraryInitializer, properties, eventBus);
+            
+            // This is a simple test to verify that the dialog has the expected buttons
+            assertNotNull(dialog.getDialogPane().lookupButton(javafx.scene.control.ButtonType.OK));
+            assertNotNull(dialog.getDialogPane().lookupButton(javafx.scene.control.ButtonType.CANCEL));
+        });
     }
 }

@@ -1,36 +1,51 @@
 package io.github.jspinak.brobot.runner.ui.components;
 
+import javafx.application.Platform;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.layout.HBox;
-import javafx.stage.Stage;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.testfx.framework.junit5.ApplicationExtension;
-import org.testfx.framework.junit5.Start;
-import org.testfx.util.WaitForAsyncUtils;
+
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@ExtendWith(ApplicationExtension.class)
 public class StatusBarTest {
 
     private StatusBar statusBar;
 
-    @Start
-    private void start(Stage stage) {
-        // No need to show the stage, but we need the JavaFX toolkit to be initialized
+    @BeforeAll
+    public static void initJavaFX() throws InterruptedException {
+        // Initialize JavaFX Platform if not already initialized
+        try {
+            Platform.startup(() -> {
+                // Platform initialized
+            });
+        } catch (IllegalStateException e) {
+            // Platform already initialized, which is fine
+        }
+        
+        // Ensure we're ready by running a simple task
+        CountDownLatch readyLatch = new CountDownLatch(1);
+        Platform.runLater(readyLatch::countDown);
+        assertTrue(readyLatch.await(5, TimeUnit.SECONDS), "JavaFX Platform should be ready");
     }
 
     @BeforeEach
-    public void setUp() {
-        // Create a real StatusBar instance
-        statusBar = new StatusBar();
-
-        // Wait for JavaFX operations to complete
-        WaitForAsyncUtils.waitForFxEvents();
+    public void setUp() throws InterruptedException {
+        CountDownLatch latch = new CountDownLatch(1);
+        
+        Platform.runLater(() -> {
+            // Create a real StatusBar instance on FX thread
+            statusBar = new StatusBar();
+            latch.countDown();
+        });
+        
+        latch.await(5, TimeUnit.SECONDS);
     }
 
     @Test
