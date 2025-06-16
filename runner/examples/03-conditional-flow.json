@@ -1,0 +1,266 @@
+{
+  "name": "ConditionalFlowExample",
+  "version": "1.0.0",
+  "description": "Demonstrates conditional logic and branching based on screen content",
+  "author": "Brobot Examples",
+  "tags": ["intermediate", "conditional", "branching", "logic"],
+  
+  "settings": {
+    "execution": {
+      "continueOnError": true,
+      "timeout": 60
+    },
+    "logging": {
+      "level": "debug",
+      "screenshots": true
+    }
+  },
+  
+  "states": [
+    {
+      "name": "LoginScreen",
+      "description": "Application login screen with conditional paths",
+      "images": [
+        {
+          "name": "login_form",
+          "path": "images/login_form.png",
+          "similarity": 0.9
+        },
+        {
+          "name": "remember_me_checked",
+          "path": "images/remember_me_checked.png",
+          "similarity": 0.95
+        },
+        {
+          "name": "remember_me_unchecked",
+          "path": "images/remember_me_unchecked.png",
+          "similarity": 0.95
+        },
+        {
+          "name": "error_message",
+          "path": "images/error_message.png",
+          "similarity": 0.9
+        },
+        {
+          "name": "username_field",
+          "path": "images/username_field.png",
+          "similarity": 0.9
+        },
+        {
+          "name": "password_field",
+          "path": "images/password_field.png",
+          "similarity": 0.9
+        },
+        {
+          "name": "login_button",
+          "path": "images/login_button.png",
+          "similarity": 0.95
+        }
+      ],
+      "actions": [
+        {
+          "type": "conditional",
+          "description": "Check if already logged in",
+          "condition": {
+            "type": "imageNotExists",
+            "target": "login_form",
+            "timeout": 2
+          },
+          "ifTrue": [
+            {
+              "type": "log",
+              "message": "Already logged in, skipping login"
+            },
+            {
+              "type": "transition",
+              "to": "MainMenu"
+            }
+          ],
+          "ifFalse": [
+            {
+              "type": "log",
+              "message": "Login required, proceeding with authentication"
+            }
+          ]
+        },
+        {
+          "type": "conditional",
+          "description": "Clear any existing error messages",
+          "condition": {
+            "type": "imageExists",
+            "target": "error_message"
+          },
+          "ifTrue": [
+            {
+              "type": "click",
+              "target": "error_message",
+              "description": "Dismiss error message"
+            },
+            {
+              "type": "wait",
+              "duration": 0.5
+            }
+          ]
+        },
+        {
+          "type": "click",
+          "target": "username_field"
+        },
+        {
+          "type": "key",
+          "keys": ["ctrl", "a"]
+        },
+        {
+          "type": "type",
+          "text": "demo_user"
+        },
+        {
+          "type": "click",
+          "target": "password_field"
+        },
+        {
+          "type": "key",
+          "keys": ["ctrl", "a"]
+        },
+        {
+          "type": "type",
+          "text": "demo_password"
+        },
+        {
+          "type": "conditional",
+          "description": "Check and set Remember Me option",
+          "condition": {
+            "type": "imageExists",
+            "target": "remember_me_unchecked"
+          },
+          "ifTrue": [
+            {
+              "type": "click",
+              "target": "remember_me_unchecked",
+              "description": "Enable Remember Me"
+            }
+          ],
+          "ifFalse": [
+            {
+              "type": "log",
+              "message": "Remember Me already checked"
+            }
+          ]
+        },
+        {
+          "type": "click",
+          "target": "login_button"
+        }
+      ]
+    },
+    
+    {
+      "name": "MainMenu",
+      "description": "Main application menu with multiple options",
+      "images": [
+        {
+          "name": "main_menu",
+          "path": "images/main_menu.png",
+          "similarity": 0.9
+        },
+        {
+          "name": "notifications_badge",
+          "path": "images/notifications_badge.png",
+          "similarity": 0.85
+        },
+        {
+          "name": "new_feature_popup",
+          "path": "images/new_feature_popup.png",
+          "similarity": 0.9
+        },
+        {
+          "name": "close_popup_button",
+          "path": "images/close_popup_button.png",
+          "similarity": 0.95
+        }
+      ],
+      "onEnter": [
+        {
+          "type": "log",
+          "message": "Entered main menu"
+        },
+        {
+          "type": "conditional",
+          "description": "Handle new feature popup if present",
+          "condition": {
+            "type": "imageExists",
+            "target": "new_feature_popup",
+            "timeout": 3
+          },
+          "ifTrue": [
+            {
+              "type": "log",
+              "message": "New feature popup detected"
+            },
+            {
+              "type": "click",
+              "target": "close_popup_button"
+            },
+            {
+              "type": "wait",
+              "duration": 1.0
+            }
+          ]
+        }
+      ],
+      "actions": [
+        {
+          "type": "conditional",
+          "description": "Check for notifications",
+          "condition": {
+            "type": "imageExists",
+            "target": "notifications_badge"
+          },
+          "ifTrue": [
+            {
+              "type": "log",
+              "message": "New notifications available"
+            },
+            {
+              "type": "click",
+              "target": "notifications_badge"
+            },
+            {
+              "type": "wait",
+              "duration": 2.0
+            },
+            {
+              "type": "key",
+              "keys": ["escape"],
+              "description": "Close notifications panel"
+            }
+          ],
+          "ifFalse": [
+            {
+              "type": "log",
+              "message": "No new notifications"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  
+  "transitions": [
+    {
+      "from": "LoginScreen",
+      "to": "MainMenu",
+      "condition": {
+        "type": "imageAppears",
+        "target": "main_menu",
+        "timeout": 10
+      },
+      "actions": [
+        {
+          "type": "log",
+          "message": "Login successful, transitioning to main menu"
+        }
+      ]
+    }
+  ]
+}

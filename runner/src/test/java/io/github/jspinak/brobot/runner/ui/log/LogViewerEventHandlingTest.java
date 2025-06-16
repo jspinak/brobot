@@ -16,12 +16,15 @@ import javafx.stage.Stage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import io.github.jspinak.brobot.runner.testutil.JavaFXTestUtils;
+import org.junit.jupiter.api.BeforeAll;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.testfx.framework.junit5.ApplicationExtension;
-import org.testfx.framework.junit5.Start;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.testfx.util.WaitForAsyncUtils;
 
 import java.lang.reflect.Field;
@@ -41,7 +44,8 @@ import static org.mockito.Mockito.*;
  * Tests specifically for event handling in LogViewerPanel.
  * Focuses on how different event types are processed and transformed into log entries.
  */
-@ExtendWith(ApplicationExtension.class)
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class LogViewerEventHandlingTest {
 
     @Mock
@@ -60,36 +64,40 @@ public class LogViewerEventHandlingTest {
     private ObservableList<LogViewerPanel.LogEntryViewModel> logEntries;
     private TableView<LogViewerPanel.LogEntryViewModel> logTable;
 
-    @Start
-    private void start(Stage stage) {
-        // Initialize JavaFX environment
+    @BeforeAll
+    public static void initJavaFX() throws InterruptedException {
+        JavaFXTestUtils.initJavaFX();
     }
 
     @SuppressWarnings("unchecked")
     @BeforeEach
     public void setUp() throws Exception {
-        MockitoAnnotations.openMocks(this);
+        JavaFXTestUtils.runOnFXThread(() -> {
+            // Define default behavior for the mocked service
+            when(logQueryService.getRecentLogs(anyInt())).thenReturn(Collections.emptyList());
 
-        // Define default behavior for the mocked service
-        when(logQueryService.getRecentLogs(anyInt())).thenReturn(Collections.emptyList());
+            // Mock icon registry behavior
+            when(mockIconRegistry.getIconView(anyString(), anyInt())).thenReturn(new javafx.scene.image.ImageView());
 
-        // Mock icon registry behavior
-        when(mockIconRegistry.getIconView(anyString(), anyInt())).thenReturn(new javafx.scene.image.ImageView());
+            // Create the LogViewerPanel with mocked EventBus
+            logViewerPanel = new LogViewerPanel(logQueryService, mockEventBus, mockIconRegistry);
 
-        // Create the LogViewerPanel with mocked EventBus
-        logViewerPanel = new LogViewerPanel(logQueryService, mockEventBus, mockIconRegistry);
+            try {
+                // Access private fields through reflection
+                Field logEntriesField = LogViewerPanel.class.getDeclaredField("logEntries");
+                logEntriesField.setAccessible(true);
+                logEntries = (ObservableList<LogViewerPanel.LogEntryViewModel>) logEntriesField.get(logViewerPanel);
 
-        // Access private fields through reflection
-        Field logEntriesField = LogViewerPanel.class.getDeclaredField("logEntries");
-        logEntriesField.setAccessible(true);
-        logEntries = (ObservableList<LogViewerPanel.LogEntryViewModel>) logEntriesField.get(logViewerPanel);
+                Field logTableField = LogViewerPanel.class.getDeclaredField("logTable");
+                logTableField.setAccessible(true);
+                logTable = (TableView<LogViewerPanel.LogEntryViewModel>) logTableField.get(logViewerPanel);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
 
-        Field logTableField = LogViewerPanel.class.getDeclaredField("logTable");
-        logTableField.setAccessible(true);
-        logTable = (TableView<LogViewerPanel.LogEntryViewModel>) logTableField.get(logViewerPanel);
-
-        // Capture event subscribers
-        verify(mockEventBus, atLeast(3)).subscribe(any(BrobotEvent.EventType.class), eventConsumerCaptor.capture());
+            // Capture event subscribers
+            verify(mockEventBus, atLeast(3)).subscribe(any(BrobotEvent.EventType.class), eventConsumerCaptor.capture());
+        });
     }
 
     @Test

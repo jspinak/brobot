@@ -1,0 +1,197 @@
+{
+  "name": "FormFillingExample",
+  "version": "1.0.0",
+  "description": "Demonstrates filling out a form with text input and navigation",
+  "author": "Brobot Examples",
+  "tags": ["intermediate", "type", "form", "input"],
+  
+  "variables": {
+    "firstName": {
+      "type": "string",
+      "value": "John",
+      "description": "User's first name"
+    },
+    "lastName": {
+      "type": "string",
+      "value": "Doe",
+      "description": "User's last name"
+    },
+    "email": {
+      "type": "string",
+      "value": "john.doe@example.com",
+      "description": "User's email address"
+    },
+    "phone": {
+      "type": "string",
+      "value": "555-0123",
+      "description": "User's phone number"
+    }
+  },
+  
+  "settings": {
+    "execution": {
+      "speed": "normal",
+      "delay": 0.3
+    },
+    "recognition": {
+      "defaultSimilarity": 0.9
+    }
+  },
+  
+  "states": [
+    {
+      "name": "FormPage",
+      "description": "The form input page",
+      "images": [
+        {
+          "name": "form_title",
+          "path": "images/form_title.png",
+          "similarity": 0.95
+        },
+        {
+          "name": "first_name_field",
+          "path": "images/first_name_field.png",
+          "similarity": 0.9,
+          "searchRegion": {
+            "x": 100,
+            "y": 200,
+            "width": 800,
+            "height": 100
+          }
+        },
+        {
+          "name": "last_name_field",
+          "path": "images/last_name_field.png",
+          "similarity": 0.9
+        },
+        {
+          "name": "email_field",
+          "path": "images/email_field.png",
+          "similarity": 0.9
+        },
+        {
+          "name": "phone_field",
+          "path": "images/phone_field.png",
+          "similarity": 0.9
+        },
+        {
+          "name": "submit_button",
+          "path": "images/submit_button.png",
+          "similarity": 0.95
+        }
+      ],
+      "actions": [
+        {
+          "type": "log",
+          "message": "Starting form fill process"
+        },
+        {
+          "type": "click",
+          "target": "first_name_field",
+          "description": "Click on first name field"
+        },
+        {
+          "type": "key",
+          "keys": ["ctrl", "a"],
+          "description": "Select all text"
+        },
+        {
+          "type": "type",
+          "text": "${firstName}",
+          "description": "Type first name"
+        },
+        {
+          "type": "key",
+          "keys": ["tab"],
+          "description": "Move to next field"
+        },
+        {
+          "type": "type",
+          "text": "${lastName}",
+          "description": "Type last name"
+        },
+        {
+          "type": "key",
+          "keys": ["tab"],
+          "description": "Move to email field"
+        },
+        {
+          "type": "type",
+          "text": "${email}",
+          "description": "Type email address"
+        },
+        {
+          "type": "click",
+          "target": "phone_field",
+          "description": "Click on phone field"
+        },
+        {
+          "type": "type",
+          "text": "${phone}",
+          "description": "Type phone number"
+        },
+        {
+          "type": "wait",
+          "duration": 1.0,
+          "description": "Wait before submitting"
+        },
+        {
+          "type": "click",
+          "target": "submit_button",
+          "description": "Click submit button"
+        }
+      ]
+    },
+    
+    {
+      "name": "SuccessPage",
+      "description": "Success page after form submission",
+      "images": [
+        {
+          "name": "success_message",
+          "path": "images/success_message.png",
+          "similarity": 0.9
+        }
+      ],
+      "actions": [
+        {
+          "type": "log",
+          "message": "Form submitted successfully!"
+        },
+        {
+          "type": "screenshot",
+          "path": "screenshots/form_success_${timestamp}.png",
+          "description": "Capture success confirmation"
+        }
+      ]
+    }
+  ],
+  
+  "transitions": [
+    {
+      "from": "FormPage",
+      "to": "SuccessPage",
+      "condition": {
+        "type": "imageAppears",
+        "target": "success_message",
+        "timeout": 10
+      }
+    }
+  ],
+  
+  "errorHandlers": [
+    {
+      "errorType": "ImageNotFound",
+      "actions": [
+        {
+          "type": "screenshot",
+          "path": "errors/form_error_${timestamp}.png"
+        },
+        {
+          "type": "log",
+          "message": "Failed to find form element, check screenshot"
+        }
+      ]
+    }
+  ]
+}

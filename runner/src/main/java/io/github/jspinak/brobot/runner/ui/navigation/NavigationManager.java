@@ -276,15 +276,29 @@ public class NavigationManager {
             return;
         }
 
+        // Create final reference for lambda expressions
+        final Pane container = this.contentContainer;
+
         // Get the old content
-        Node oldContent = contentContainer.getChildren().isEmpty() ?
-                null : contentContainer.getChildren().getFirst();
+        final Node oldContent;
+        if (!container.getChildren().isEmpty()) {
+            Node tempContent;
+            try {
+                tempContent = container.getChildren().get(0);
+            } catch (IndexOutOfBoundsException e) {
+                // List became empty during access, set to null
+                tempContent = null;
+            }
+            oldContent = tempContent;
+        } else {
+            oldContent = null;
+        }
 
         switch (transitionType) {
             case NONE:
                 // Just replace the content
-                contentContainer.getChildren().clear();
-                contentContainer.getChildren().add(newContent);
+                container.getChildren().clear();
+                container.getChildren().add(newContent);
                 break;
 
             case FADE:
@@ -294,8 +308,8 @@ public class NavigationManager {
                     fadeOut.setFromValue(1.0);
                     fadeOut.setToValue(0.0);
                     fadeOut.setOnFinished(e -> {
-                        contentContainer.getChildren().clear();
-                        contentContainer.getChildren().add(newContent);
+                        container.getChildren().clear();
+                        container.getChildren().add(newContent);
                         newContent.setOpacity(0.0);
 
                         FadeTransition fadeIn = new FadeTransition(Duration.millis(150), newContent);
@@ -305,8 +319,8 @@ public class NavigationManager {
                     });
                     fadeOut.play();
                 } else {
-                    contentContainer.getChildren().clear();
-                    contentContainer.getChildren().add(newContent);
+                    container.getChildren().clear();
+                    container.getChildren().add(newContent);
                     newContent.setOpacity(0.0);
 
                     FadeTransition fadeIn = new FadeTransition(Duration.millis(150), newContent);
@@ -318,36 +332,40 @@ public class NavigationManager {
 
             case SLIDE_LEFT:
                 // Slide old content out to the left, slide new content in from the right
-                contentContainer.getChildren().add(newContent);
-                newContent.setTranslateX(contentContainer.getWidth());
+                container.getChildren().add(newContent);
+                newContent.setTranslateX(container.getWidth());
 
                 TranslateTransition slideOutLeft = new TranslateTransition(Duration.millis(200), oldContent);
-                slideOutLeft.setToX(-contentContainer.getWidth());
+                slideOutLeft.setToX(-container.getWidth());
 
                 TranslateTransition slideInRight = new TranslateTransition(Duration.millis(200), newContent);
                 slideInRight.setToX(0);
 
                 ParallelTransition transition = new ParallelTransition(slideOutLeft, slideInRight);
                 transition.setOnFinished(e -> {
-                    contentContainer.getChildren().remove(oldContent);
+                    if (oldContent != null && container.getChildren().contains(oldContent)) {
+                        container.getChildren().remove(oldContent);
+                    }
                 });
                 transition.play();
                 break;
 
             case SLIDE_RIGHT:
                 // Slide old content out to the right, slide new content in from the left
-                contentContainer.getChildren().add(newContent);
-                newContent.setTranslateX(-contentContainer.getWidth());
+                container.getChildren().add(newContent);
+                newContent.setTranslateX(-container.getWidth());
 
                 TranslateTransition slideOutRight = new TranslateTransition(Duration.millis(200), oldContent);
-                slideOutRight.setToX(contentContainer.getWidth());
+                slideOutRight.setToX(container.getWidth());
 
                 TranslateTransition slideInLeft = new TranslateTransition(Duration.millis(200), newContent);
                 slideInLeft.setToX(0);
 
                 ParallelTransition transition2 = new ParallelTransition(slideOutRight, slideInLeft);
                 transition2.setOnFinished(e -> {
-                    contentContainer.getChildren().remove(oldContent);
+                    if (oldContent != null && container.getChildren().contains(oldContent)) {
+                        container.getChildren().remove(oldContent);
+                    }
                 });
                 transition2.play();
                 break;

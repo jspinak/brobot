@@ -1,0 +1,427 @@
+{
+  "name": "AdvancedWorkflowExample",
+  "version": "2.0.0",
+  "description": "Complex workflow demonstrating modules, error handling, and advanced patterns",
+  "author": "Brobot Examples",
+  "tags": ["advanced", "workflow", "modules", "error-handling"],
+  
+  "modules": [
+    {
+      "name": "CommonUtilities",
+      "path": "modules/utilities.json"
+    }
+  ],
+  
+  "variables": {
+    "environment": {
+      "type": "string",
+      "value": "production",
+      "enum": ["development", "staging", "production"]
+    },
+    "retryAttempts": {
+      "type": "number",
+      "value": 0,
+      "max": 3
+    },
+    "reportData": {
+      "type": "object",
+      "value": {
+        "startTime": null,
+        "endTime": null,
+        "itemsProcessed": 0,
+        "errors": []
+      }
+    }
+  },
+  
+  "settings": {
+    "execution": {
+      "timeout": 300,
+      "continueOnError": false
+    },
+    "recognition": {
+      "defaultSimilarity": 0.92,
+      "searchMethod": "accurate"
+    },
+    "logging": {
+      "level": "info",
+      "file": "logs/advanced_workflow.log"
+    },
+    "performance": {
+      "cacheImages": true,
+      "gpuAcceleration": true
+    }
+  },
+  
+  "states": [
+    {
+      "name": "Initialization",
+      "description": "Initialize workflow and check prerequisites",
+      "timeout": 60,
+      "onEnter": [
+        {
+          "type": "script",
+          "language": "javascript",
+          "code": "variables.reportData.startTime = new Date().toISOString();"
+        },
+        {
+          "type": "log",
+          "message": "Starting advanced workflow in ${environment} environment"
+        }
+      ],
+      "images": [
+        {
+          "name": "app_loading",
+          "path": "images/loading_spinner.png",
+          "similarity": 0.8
+        },
+        {
+          "name": "app_ready",
+          "path": "images/app_ready_indicator.png",
+          "similarity": 0.95
+        }
+      ],
+      "actions": [
+        {
+          "type": "parallel",
+          "description": "Run initialization checks in parallel",
+          "actions": [
+            {
+              "type": "checkSystemRequirements",
+              "minMemory": 2048,
+              "requiredServices": ["database", "api"]
+            },
+            {
+              "type": "loadConfiguration",
+              "configFile": "config/${environment}.json"
+            },
+            {
+              "type": "validateLicense",
+              "licenseFile": "license.key"
+            }
+          ]
+        },
+        {
+          "type": "wait",
+          "condition": {
+            "type": "imageDisappears",
+            "target": "app_loading",
+            "timeout": 30
+          }
+        },
+        {
+          "type": "conditional",
+          "condition": {
+            "type": "imageExists",
+            "target": "app_ready"
+          },
+          "ifTrue": [
+            {
+              "type": "log",
+              "message": "Application initialized successfully"
+            }
+          ],
+          "ifFalse": [
+            {
+              "type": "error",
+              "message": "Application failed to initialize",
+              "severity": "critical"
+            }
+          ]
+        }
+      ]
+    },
+    
+    {
+      "name": "DataProcessing",
+      "description": "Main data processing workflow",
+      "regions": [
+        {
+          "name": "workspace",
+          "x": 100,
+          "y": 100,
+          "width": 1720,
+          "height": 880
+        }
+      ],
+      "images": [
+        {
+          "name": "data_grid",
+          "path": "images/data_grid.png",
+          "searchRegion": "workspace"
+        },
+        {
+          "name": "processing_indicator",
+          "path": "images/processing.png"
+        },
+        {
+          "name": "error_icon",
+          "path": "images/error_icon.png",
+          "similarity": 0.85
+        }
+      ],
+      "actions": [
+        {
+          "type": "try",
+          "actions": [
+            {
+              "type": "importData",
+              "source": "data/input_batch_${timestamp}.csv",
+              "validation": {
+                "required": ["id", "name", "value"],
+                "maxRows": 10000
+              }
+            },
+            {
+              "type": "forEach",
+              "items": "${importedData}",
+              "parallel": true,
+              "maxConcurrent": 5,
+              "actions": [
+                {
+                  "type": "processDataItem",
+                  "item": "${currentItem}",
+                  "validations": [
+                    {
+                      "field": "value",
+                      "type": "range",
+                      "min": 0,
+                      "max": 1000
+                    }
+                  ]
+                },
+                {
+                  "type": "script",
+                  "code": "variables.reportData.itemsProcessed++;"
+                }
+              ]
+            }
+          ],
+          "catch": [
+            {
+              "type": "screenshot",
+              "path": "errors/processing_error_${timestamp}.png"
+            },
+            {
+              "type": "script",
+              "code": "variables.reportData.errors.push({timestamp: new Date(), error: error.message});"
+            },
+            {
+              "type": "conditional",
+              "condition": {
+                "type": "expression",
+                "value": "${retryAttempts} < 3"
+              },
+              "ifTrue": [
+                {
+                  "type": "script",
+                  "code": "variables.retryAttempts++;"
+                },
+                {
+                  "type": "wait",
+                  "duration": "${retryAttempts} * 2"
+                },
+                {
+                  "type": "retry",
+                  "state": "DataProcessing"
+                }
+              ],
+              "ifFalse": [
+                {
+                  "type": "transition",
+                  "to": "ErrorRecovery"
+                }
+              ]
+            }
+          ],
+          "finally": [
+            {
+              "type": "log",
+              "message": "Data processing attempt completed"
+            }
+          ]
+        }
+      ]
+    },
+    
+    {
+      "name": "ReportGeneration",
+      "description": "Generate and export processing report",
+      "images": [
+        {
+          "name": "report_template",
+          "path": "images/report_template.png"
+        },
+        {
+          "name": "export_options",
+          "path": "images/export_options.png"
+        }
+      ],
+      "onEnter": [
+        {
+          "type": "script",
+          "code": "variables.reportData.endTime = new Date().toISOString();"
+        }
+      ],
+      "actions": [
+        {
+          "type": "generateReport",
+          "template": "templates/processing_report.html",
+          "data": "${reportData}",
+          "format": ["pdf", "excel", "json"]
+        },
+        {
+          "type": "conditional",
+          "condition": {
+            "type": "expression",
+            "value": "${reportData.errors.length} > 0"
+          },
+          "ifTrue": [
+            {
+              "type": "notification",
+              "title": "Processing completed with errors",
+              "message": "${reportData.itemsProcessed} items processed, ${reportData.errors.length} errors encountered",
+              "type": "warning"
+            }
+          ],
+          "ifFalse": [
+            {
+              "type": "notification",
+              "title": "Processing completed successfully",
+              "message": "${reportData.itemsProcessed} items processed",
+              "type": "success"
+            }
+          ]
+        },
+        {
+          "type": "exportResults",
+          "destinations": [
+            {
+              "type": "file",
+              "path": "output/report_${timestamp}.pdf"
+            },
+            {
+              "type": "email",
+              "recipients": ["admin@example.com"],
+              "subject": "Processing Report - ${timestamp}"
+            },
+            {
+              "type": "api",
+              "endpoint": "https://api.example.com/reports",
+              "method": "POST"
+            }
+          ]
+        }
+      ]
+    },
+    
+    {
+      "name": "ErrorRecovery",
+      "description": "Handle critical errors and attempt recovery",
+      "images": [
+        {
+          "name": "recovery_dialog",
+          "path": "images/recovery_dialog.png"
+        }
+      ],
+      "actions": [
+        {
+          "type": "log",
+          "message": "Entering error recovery mode",
+          "level": "error"
+        },
+        {
+          "type": "diagnostics",
+          "checks": ["memory", "disk", "network", "permissions"]
+        },
+        {
+          "type": "cleanup",
+          "actions": [
+            {
+              "type": "clearCache"
+            },
+            {
+              "type": "resetConnections"
+            },
+            {
+              "type": "saveState",
+              "path": "recovery/state_${timestamp}.json"
+            }
+          ]
+        },
+        {
+          "type": "userPrompt",
+          "message": "Critical error encountered. Retry operation?",
+          "options": ["Retry", "Skip", "Abort"],
+          "timeout": 60,
+          "default": "Abort"
+        }
+      ]
+    }
+  ],
+  
+  "transitions": [
+    {
+      "from": "Initialization",
+      "to": "DataProcessing",
+      "condition": {
+        "type": "allConditions",
+        "conditions": [
+          {
+            "type": "imageExists",
+            "target": "app_ready"
+          },
+          {
+            "type": "expression",
+            "value": "${systemRequirementsMet} === true"
+          }
+        ]
+      }
+    },
+    {
+      "from": "DataProcessing",
+      "to": "ReportGeneration",
+      "condition": {
+        "type": "expression",
+        "value": "${reportData.itemsProcessed} > 0"
+      }
+    },
+    {
+      "from": "ErrorRecovery",
+      "to": "DataProcessing",
+      "condition": {
+        "type": "userChoice",
+        "choice": "Retry"
+      }
+    },
+    {
+      "from": "ErrorRecovery",
+      "to": "ReportGeneration",
+      "condition": {
+        "type": "userChoice",
+        "choice": "Skip"
+      }
+    }
+  ],
+  
+  "errorHandlers": [
+    {
+      "errorType": "CriticalError",
+      "actions": [
+        {
+          "type": "emergencyStop"
+        },
+        {
+          "type": "saveDebugInfo",
+          "includeScreenshot": true,
+          "includeMemoryDump": true
+        },
+        {
+          "type": "notify",
+          "channel": "emergency",
+          "message": "Critical error in advanced workflow"
+        }
+      ]
+    }
+  ]
+}

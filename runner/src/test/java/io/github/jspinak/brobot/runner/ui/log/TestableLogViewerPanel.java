@@ -44,12 +44,12 @@ public class TestableLogViewerPanel extends LogViewerPanel {
 
     // Prevent UI dialogs
     @Override
-    void showExportSuccessMessage(String filePath) {
+    protected void showExportSuccessMessage(String filePath) {
         System.out.println("Export successful: " + filePath);
     }
 
     @Override
-    void showExportErrorMessage(String errorMessage) {
+    protected void showExportErrorMessage(String errorMessage) {
         System.err.println("Export failed: " + errorMessage);
     }
 
@@ -58,6 +58,26 @@ public class TestableLogViewerPanel extends LogViewerPanel {
             java.lang.reflect.Field field = LogViewerPanel.class.getDeclaredField("searchField");
             field.setAccessible(true);
             return (javafx.scene.control.TextField) field.get(this);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+    
+    public javafx.scene.control.ComboBox<String> getLogTypeFilter() {
+        try {
+            java.lang.reflect.Field field = LogViewerPanel.class.getDeclaredField("logTypeFilter");
+            field.setAccessible(true);
+            return (javafx.scene.control.ComboBox<String>) field.get(this);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+    
+    public javafx.scene.control.ComboBox<String> getLogLevelFilter() {
+        try {
+            java.lang.reflect.Field field = LogViewerPanel.class.getDeclaredField("logLevelFilter");
+            field.setAccessible(true);
+            return (javafx.scene.control.ComboBox<String>) field.get(this);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

@@ -17,20 +17,28 @@ import javafx.stage.Stage;
 import lombok.Getter;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import io.github.jspinak.brobot.runner.testutil.JavaFXTestUtils;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.springframework.context.ApplicationContext;
-import org.testfx.framework.junit5.ApplicationExtension;
-import org.testfx.framework.junit5.Start;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.anyInt;
+import lombok.Getter;
+
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-@ExtendWith(ApplicationExtension.class)
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 class BrobotRunnerViewTest {
 
     @Mock
@@ -58,37 +66,32 @@ class BrobotRunnerViewTest {
 
     private TestBrobotRunnerView view;
 
-    @Start
-    private void start(Stage stage) {
-        MockitoAnnotations.openMocks(this);
+    @BeforeAll
+    public static void initJavaFX() throws InterruptedException {
+        JavaFXTestUtils.initJavaFX();
+    }
 
-        // Mock the IconRegistry to prevent NullPointerException
-        when(iconRegistry.getIconView(anyString(), anyInt())).thenReturn(new ImageView());
+    @BeforeEach
+    void setUp() throws InterruptedException {
+        JavaFXTestUtils.runOnFXThread(() -> {
+            // Create simplified view for testing, passing all required mock dependencies
+            view = new TestBrobotRunnerView(
+                    applicationContext,
+                    themeManager,
+                    navigationManager,
+                    screenRegistry,
+                    eventBus,
+                    iconRegistry,
+                    logQueryService,
+                    uiComponentFactory
+            );
 
-        // CORRECTED: Mock the factory to return mocks of the correct specific types.
-        when(uiComponentFactory.createConfigManagementPanel()).thenReturn(mock(ConfigManagementPanel.class));
-        when(uiComponentFactory.createAutomationPanel()).thenReturn(mock(AutomationPanel.class));
-        when(uiComponentFactory.createResourceMonitorPanel()).thenReturn(mock(ResourceMonitorPanel.class));
-        // CORRECTED: Mock the ComponentShowcaseScreen instead of trying to construct it.
-        when(uiComponentFactory.createComponentShowcaseScreen()).thenReturn(mock(ComponentShowcaseScreen.class));
-
-
-        // Create simplified view for testing, passing all required mock dependencies
-        view = new TestBrobotRunnerView(
-                applicationContext,
-                themeManager,
-                navigationManager,
-                screenRegistry,
-                eventBus,
-                iconRegistry,
-                logQueryService,
-                uiComponentFactory
-        );
-
-        // Set up the scene
-        Scene scene = new Scene(view, 800, 600);
-        stage.setScene(scene);
-        stage.show();
+            // Set up the scene
+            Stage stage = new Stage();
+            Scene scene = new Scene(view, 800, 600);
+            stage.setScene(scene);
+            stage.show();
+        });
     }
 
     @Test
