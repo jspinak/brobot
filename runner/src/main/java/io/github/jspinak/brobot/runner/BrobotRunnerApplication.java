@@ -11,13 +11,14 @@ import io.github.jspinak.brobot.services.StateTransitionsRepository;
 import net.rgielen.fxweaver.core.FxWeaver;
 import net.rgielen.fxweaver.spring.SpringFxWeaver;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import javafx.application.Application;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
-@SpringBootApplication(exclude = { DataSourceAutoConfiguration.class })
+@SpringBootApplication
+@EnableJpaRepositories(basePackages = "io.github.jspinak.brobot.runner.persistence.repo")
 @ComponentScan(basePackages = {
 		"io.github.jspinak.brobot"
 })
