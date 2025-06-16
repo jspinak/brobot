@@ -447,14 +447,14 @@ public class LogViewerPanel extends BorderPane implements AutoCloseable {
         }
     }
 
-    void showExportSuccessMessage(String filePath) {
+    protected void showExportSuccessMessage(String filePath) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION, "Logs exported to:\n" + filePath, ButtonType.OK);
         alert.setTitle("Export Successful");
         alert.setHeaderText(null);
         alert.showAndWait();
     }
 
-    void showExportErrorMessage(String errorMessage) {
+    protected void showExportErrorMessage(String errorMessage) {
         Alert alert = new Alert(Alert.AlertType.ERROR, "Error exporting logs:\n" + errorMessage, ButtonType.OK);
         alert.setTitle("Export Error");
         alert.setHeaderText(null);
