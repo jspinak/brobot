@@ -1,27 +1,33 @@
 package io.github.jspinak.brobot.runner.ui.components;
 
+import io.github.jspinak.brobot.runner.testutil.JavaFXTestUtils;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.testfx.framework.junit5.ApplicationExtension;
 
 import java.util.List;
 import java.util.function.Consumer;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@ExtendWith(ApplicationExtension.class)
 public class BreadcrumbBarTest {
 
     private BreadcrumbBar breadcrumbBar;
     private boolean callbackInvoked;
 
+    @BeforeAll
+    public static void initJavaFX() throws InterruptedException {
+        JavaFXTestUtils.initJavaFX();
+    }
+
     @BeforeEach
-    public void setUp() {
-        breadcrumbBar = new BreadcrumbBar();
-        callbackInvoked = false;
+    public void setUp() throws InterruptedException {
+        JavaFXTestUtils.runOnFXThread(() -> {
+            breadcrumbBar = new BreadcrumbBar();
+            callbackInvoked = false;
+        });
     }
 
     @Test

@@ -1,0 +1,275 @@
+{
+  "name": "LoopProcessingExample",
+  "version": "1.0.0",
+  "description": "Demonstrates loop constructs for repetitive tasks and batch processing",
+  "author": "Brobot Examples",
+  "tags": ["intermediate", "loop", "batch", "iteration"],
+  
+  "variables": {
+    "maxItems": {
+      "type": "number",
+      "value": 10,
+      "description": "Maximum items to process"
+    },
+    "processedCount": {
+      "type": "number",
+      "value": 0,
+      "description": "Counter for processed items"
+    },
+    "batchSize": {
+      "type": "number",
+      "value": 5,
+      "description": "Items to process per batch"
+    }
+  },
+  
+  "settings": {
+    "execution": {
+      "speed": "fast",
+      "delay": 0.2
+    },
+    "performance": {
+      "maxThreads": 2
+    }
+  },
+  
+  "states": [
+    {
+      "name": "ItemListScreen",
+      "description": "Screen showing a list of items to process",
+      "images": [
+        {
+          "name": "item_list",
+          "path": "images/item_list.png",
+          "similarity": 0.9
+        },
+        {
+          "name": "item_row",
+          "path": "images/item_row.png",
+          "similarity": 0.85,
+          "cacheable": true
+        },
+        {
+          "name": "checkbox_unchecked",
+          "path": "images/checkbox_unchecked.png",
+          "similarity": 0.95
+        },
+        {
+          "name": "checkbox_checked",
+          "path": "images/checkbox_checked.png",
+          "similarity": 0.95
+        },
+        {
+          "name": "process_button",
+          "path": "images/process_button.png",
+          "similarity": 0.95
+        },
+        {
+          "name": "next_page_button",
+          "path": "images/next_page_button.png",
+          "similarity": 0.9
+        },
+        {
+          "name": "no_more_items",
+          "path": "images/no_more_items.png",
+          "similarity": 0.9
+        }
+      ],
+      "actions": [
+        {
+          "type": "log",
+          "message": "Starting batch processing of items"
+        },
+        {
+          "type": "loop",
+          "description": "Process items in batches",
+          "condition": {
+            "type": "while",
+            "expression": "${processedCount} < ${maxItems}"
+          },
+          "maxIterations": 20,
+          "actions": [
+            {
+              "type": "log",
+              "message": "Processing batch starting at item ${processedCount}"
+            },
+            {
+              "type": "loop",
+              "description": "Select items in current batch",
+              "count": "${batchSize}",
+              "actions": [
+                {
+                  "type": "conditional",
+                  "condition": {
+                    "type": "imageExists",
+                    "target": "checkbox_unchecked",
+                    "timeout": 1
+                  },
+                  "ifTrue": [
+                    {
+                      "type": "click",
+                      "target": "checkbox_unchecked",
+                      "description": "Select item"
+                    },
+                    {
+                      "type": "wait",
+                      "duration": 0.2
+                    },
+                    {
+                      "type": "script",
+                      "language": "javascript",
+                      "code": "variables.processedCount++;"
+                    }
+                  ],
+                  "ifFalse": [
+                    {
+                      "type": "log",
+                      "message": "No more unchecked items on this page"
+                    },
+                    {
+                      "type": "break",
+                      "description": "Exit inner loop"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "conditional",
+              "description": "Process selected items if any",
+              "condition": {
+                "type": "imageExists",
+                "target": "checkbox_checked"
+              },
+              "ifTrue": [
+                {
+                  "type": "click",
+                  "target": "process_button"
+                },
+                {
+                  "type": "wait",
+                  "duration": 2.0,
+                  "description": "Wait for processing to complete"
+                }
+              ]
+            },
+            {
+              "type": "conditional",
+              "description": "Check if more pages available",
+              "condition": {
+                "type": "imageExists",
+                "target": "next_page_button"
+              },
+              "ifTrue": [
+                {
+                  "type": "click",
+                  "target": "next_page_button"
+                },
+                {
+                  "type": "wait",
+                  "duration": 1.0
+                }
+              ],
+              "ifFalse": [
+                {
+                  "type": "conditional",
+                  "condition": {
+                    "type": "imageExists",
+                    "target": "no_more_items"
+                  },
+                  "ifTrue": [
+                    {
+                      "type": "log",
+                      "message": "All items processed"
+                    },
+                    {
+                      "type": "break",
+                      "description": "Exit main loop"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "log",
+          "message": "Batch processing complete. Total items processed: ${processedCount}"
+        }
+      ]
+    },
+    
+    {
+      "name": "ProcessingResultsScreen",
+      "description": "Shows results after batch processing",
+      "images": [
+        {
+          "name": "results_summary",
+          "path": "images/results_summary.png",
+          "similarity": 0.9
+        },
+        {
+          "name": "export_button",
+          "path": "images/export_button.png",
+          "similarity": 0.95
+        }
+      ],
+      "actions": [
+        {
+          "type": "screenshot",
+          "path": "results/batch_results_${timestamp}.png"
+        },
+        {
+          "type": "loop",
+          "description": "Retry export if needed",
+          "maxIterations": 3,
+          "continueOnError": true,
+          "actions": [
+            {
+              "type": "click",
+              "target": "export_button"
+            },
+            {
+              "type": "wait",
+              "duration": 3.0
+            },
+            {
+              "type": "conditional",
+              "condition": {
+                "type": "fileExists",
+                "path": "downloads/export_results.csv"
+              },
+              "ifTrue": [
+                {
+                  "type": "log",
+                  "message": "Export successful"
+                },
+                {
+                  "type": "break"
+                }
+              ],
+              "ifFalse": [
+                {
+                  "type": "log",
+                  "message": "Export not found, retrying..."
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  
+  "transitions": [
+    {
+      "from": "ItemListScreen",
+      "to": "ProcessingResultsScreen",
+      "condition": {
+        "type": "imageAppears",
+        "target": "results_summary",
+        "timeout": 5
+      }
+    }
+  ]
+}

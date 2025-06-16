@@ -8,14 +8,15 @@ import io.github.jspinak.brobot.runner.events.EventBus;
 import io.github.jspinak.brobot.runner.events.LogEvent;
 import io.github.jspinak.brobot.runner.init.BrobotLibraryInitializer;
 import io.github.jspinak.brobot.services.ProjectManager;
-import javafx.application.Platform;
+import io.github.jspinak.brobot.runner.testutil.JavaFXTestUtils;
 import javafx.scene.control.TabPane;
 import javafx.stage.Stage;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.testfx.framework.junit5.ApplicationExtension;
-import org.testfx.framework.junit5.Start;
 
 import java.lang.reflect.Field;
 import java.nio.file.Paths;
@@ -27,40 +28,45 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-@ExtendWith({MockitoExtension.class, ApplicationExtension.class})
+@ExtendWith(MockitoExtension.class)
 public class ConfigManagementPanelTest {
 
+    @BeforeAll
+    public static void initJavaFX() throws InterruptedException {
+        JavaFXTestUtils.initJavaFX();
+    }
+
+    @Mock
     private EventBus eventBus;
+    @Mock
     private BrobotRunnerProperties properties;
+    @Mock
     private BrobotLibraryInitializer libraryInitializer;
+    @Mock
     private ApplicationConfig appConfig;
+    @Mock
     private ProjectManager projectManager;
+    @Mock
     private AllStatesInProjectService allStatesService;
+    @Mock
     private ConfigSelectionPanel selectionPanel;
+    @Mock
     private ConfigBrowserPanel browserPanel;
+    @Mock
     private ConfigMetadataEditor metadataEditor;
 
     private ConfigManagementPanel panel;
     private Stage stage;
 
-    @Start
-    public void start(Stage stage) {
-        this.stage = stage;
+    @BeforeEach
+    public void setUp() throws InterruptedException {
+        JavaFXTestUtils.runOnFXThread(() -> {
+            stage = new Stage();
 
-        // Initialize all mocks
-        eventBus = mock(EventBus.class);
-        properties = mock(BrobotRunnerProperties.class);
-        libraryInitializer = mock(BrobotLibraryInitializer.class);
-        appConfig = mock(ApplicationConfig.class);
-        projectManager = mock(ProjectManager.class);
-        allStatesService = mock(AllStatesInProjectService.class);
-        selectionPanel = mock(ConfigSelectionPanel.class);
-        browserPanel = mock(ConfigBrowserPanel.class);
-        metadataEditor = mock(ConfigMetadataEditor.class);
-
-        // Configure properties
-        when(properties.getConfigPath()).thenReturn("/path/to/config");
-        when(properties.getImagePath()).thenReturn("/path/to/images");
+            // Configure properties
+            when(properties.getConfigPath()).thenReturn("/path/to/config");
+            when(properties.getImagePath()).thenReturn("/path/to/images");
+        });
     }
 
     private void createPanel() {
@@ -93,24 +99,21 @@ public class ConfigManagementPanelTest {
     }
 
     @Test
-    public void testCreateUI() {
+    public void testCreateUI() throws InterruptedException {
         // Create panel and add to scene
         CountDownLatch latch = new CountDownLatch(1);
-        Platform.runLater(() -> {
+        JavaFXTestUtils.runOnFXThread(() -> {
             createPanel();
             stage.setScene(new javafx.scene.Scene(panel));
-            latch.countDown();
+            stage.show();
         });
+        latch.countDown();
 
-        try {
-            assertTrue(latch.await(5, TimeUnit.SECONDS), "JavaFX operation timed out");
-        } catch (InterruptedException e) {
-            fail("Test interrupted: " + e.getMessage());
-        }
+        assertTrue(latch.await(5, TimeUnit.SECONDS), "JavaFX operation timed out");
 
         // Verify panel structure
         CountDownLatch verifyLatch = new CountDownLatch(1);
-        Platform.runLater(() -> {
+        JavaFXTestUtils.runOnFXThread(() -> {
             try {
                 // Verify that the panel is not null
                 assertNotNull(panel);
@@ -132,18 +135,14 @@ public class ConfigManagementPanelTest {
             }
         });
 
-        try {
-            assertTrue(verifyLatch.await(5, TimeUnit.SECONDS), "JavaFX verification timed out");
-        } catch (InterruptedException e) {
-            fail("Test interrupted: " + e.getMessage());
-        }
+        assertTrue(verifyLatch.await(5, TimeUnit.SECONDS), "JavaFX verification timed out");
     }
 
     @Test
-    public void testCreateNewConfiguration() {
+    public void testCreateNewConfiguration() throws InterruptedException {
         // Create panel and mock method
         CountDownLatch setupLatch = new CountDownLatch(1);
-        Platform.runLater(() -> {
+        JavaFXTestUtils.runOnFXThread(() -> {
             createPanel();
             ConfigManagementPanel panelSpy = spy(panel);
             doNothing().when(panelSpy).createNewConfiguration();
@@ -156,18 +155,14 @@ public class ConfigManagementPanelTest {
             setupLatch.countDown();
         });
 
-        try {
-            assertTrue(setupLatch.await(5, TimeUnit.SECONDS), "JavaFX operation timed out");
-        } catch (InterruptedException e) {
-            fail("Test interrupted: " + e.getMessage());
-        }
+        assertTrue(setupLatch.await(5, TimeUnit.SECONDS), "JavaFX operation timed out");
     }
 
     @Test
-    public void testImportConfiguration() {
+    public void testImportConfiguration() throws InterruptedException {
         // Create panel and mock method
         CountDownLatch setupLatch = new CountDownLatch(1);
-        Platform.runLater(() -> {
+        JavaFXTestUtils.runOnFXThread(() -> {
             createPanel();
             ConfigManagementPanel panelSpy = spy(panel);
             doNothing().when(panelSpy).importConfiguration();
@@ -180,15 +175,11 @@ public class ConfigManagementPanelTest {
             setupLatch.countDown();
         });
 
-        try {
-            assertTrue(setupLatch.await(5, TimeUnit.SECONDS), "JavaFX operation timed out");
-        } catch (InterruptedException e) {
-            fail("Test interrupted: " + e.getMessage());
-        }
+        assertTrue(setupLatch.await(5, TimeUnit.SECONDS), "JavaFX operation timed out");
     }
 
     @Test
-    public void testRefreshConfiguration() {
+    public void testRefreshConfiguration() throws InterruptedException {
         // Setup mock data
         Project mockProject = mock(Project.class);
         when(projectManager.getActiveProject()).thenReturn(mockProject);
@@ -205,7 +196,7 @@ public class ConfigManagementPanelTest {
 
         // Create panel and execute test
         CountDownLatch latch = new CountDownLatch(1);
-        Platform.runLater(() -> {
+        JavaFXTestUtils.runOnFXThread(() -> {
             createPanel();
 
             // Act
@@ -220,21 +211,17 @@ public class ConfigManagementPanelTest {
             latch.countDown();
         });
 
-        try {
-            assertTrue(latch.await(5, TimeUnit.SECONDS), "JavaFX operation timed out");
-        } catch (InterruptedException e) {
-            fail("Test interrupted: " + e.getMessage());
-        }
+        assertTrue(latch.await(5, TimeUnit.SECONDS), "JavaFX operation timed out");
     }
 
     @Test
-    public void testRefreshConfiguration_NoActiveProject() {
+    public void testRefreshConfiguration_NoActiveProject() throws InterruptedException {
         // Setup mock data - no active project
         when(projectManager.getActiveProject()).thenReturn(null);
 
         // Create panel and execute test
         CountDownLatch latch = new CountDownLatch(1);
-        Platform.runLater(() -> {
+        JavaFXTestUtils.runOnFXThread(() -> {
             createPanel();
 
             // Act
@@ -249,10 +236,6 @@ public class ConfigManagementPanelTest {
             latch.countDown();
         });
 
-        try {
-            assertTrue(latch.await(5, TimeUnit.SECONDS), "JavaFX operation timed out");
-        } catch (InterruptedException e) {
-            fail("Test interrupted: " + e.getMessage());
-        }
+        assertTrue(latch.await(5, TimeUnit.SECONDS), "JavaFX operation timed out");
     }
 }

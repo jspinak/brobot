@@ -327,6 +327,21 @@ public class ApplicationConfig {
     }
 
     /**
+     * Gets the configuration directory.
+     * 
+     * @return The configuration directory as a File
+     */
+    public File getConfigDirectory() {
+        Path configDir = Paths.get(System.getProperty("user.home"), ".brobot-runner");
+        try {
+            Files.createDirectories(configDir);
+        } catch (IOException e) {
+            logger.error("Failed to create config directory", e);
+        }
+        return configDir.toFile();
+    }
+
+    /**
      * Cleans up resources when the application is shutting down.
      */
     @PreDestroy

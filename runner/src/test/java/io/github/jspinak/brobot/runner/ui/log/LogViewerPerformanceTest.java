@@ -13,10 +13,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.extension.ExtendWith;
+import io.github.jspinak.brobot.runner.testutil.JavaFXTestUtils;
+import org.junit.jupiter.api.BeforeAll;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.testfx.framework.junit5.ApplicationExtension;
-import org.testfx.framework.junit5.Start;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.testfx.util.WaitForAsyncUtils;
 
 import java.lang.reflect.Field;
@@ -41,7 +44,8 @@ import static org.mockito.Mockito.when;
  * Note: These tests have been refactored to work with the new architecture where
  * the panel gets its data from a service instead of managing it in memory.
  */
-@ExtendWith(ApplicationExtension.class)
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class LogViewerPerformanceTest {
 
     @Mock
@@ -59,36 +63,37 @@ public class LogViewerPerformanceTest {
 
     private final Random random = new Random();
 
-    @Start
-    private void start(Stage stage) {
-        // TestFX requires a start method to initialize the JavaFX toolkit
+    @BeforeAll
+    public static void initJavaFX() throws InterruptedException {
+        JavaFXTestUtils.initJavaFX();
     }
 
     @SuppressWarnings("unchecked")
     @BeforeEach
     public void setUp() throws Exception {
-        MockitoAnnotations.openMocks(this);
+        JavaFXTestUtils.runOnFXThread(() -> {
+            // Mock dependencies
+            when(iconRegistry.getIconView(anyString(), anyInt())).thenReturn(new javafx.scene.image.ImageView());
 
-        // Mock dependencies
-        when(iconRegistry.getIconView(anyString(), anyInt())).thenReturn(new javafx.scene.image.ImageView());
+            // CRITICAL: Set default behavior for the service to prevent NullPointerExceptions on init
+            when(logQueryService.getRecentLogs(anyInt())).thenReturn(Collections.emptyList());
 
-        // CRITICAL: Set default behavior for the service to prevent NullPointerExceptions on init
-        when(logQueryService.getRecentLogs(anyInt())).thenReturn(Collections.emptyList());
-
-        // Create the panel on the JavaFX thread
-        Platform.runLater(() -> {
+            // Create the panel
             logViewerPanel = new LogViewerPanel(logQueryService, eventBus, iconRegistry);
+
+            try {
+                // Access private fields for verification purposes
+                Field logEntriesField = LogViewerPanel.class.getDeclaredField("logEntries");
+                logEntriesField.setAccessible(true);
+                logEntries = (ObservableList<LogViewerPanel.LogEntryViewModel>) logEntriesField.get(logViewerPanel);
+
+                Field logTableField = LogViewerPanel.class.getDeclaredField("logTable");
+                logTableField.setAccessible(true);
+                logTable = (TableView<LogViewerPanel.LogEntryViewModel>) logTableField.get(logViewerPanel);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
         });
-        WaitForAsyncUtils.waitForFxEvents(); // Ensure panel is created before tests run
-
-        // Access private fields for verification purposes
-        Field logEntriesField = LogViewerPanel.class.getDeclaredField("logEntries");
-        logEntriesField.setAccessible(true);
-        logEntries = (ObservableList<LogViewerPanel.LogEntryViewModel>) logEntriesField.get(logViewerPanel);
-
-        Field logTableField = LogViewerPanel.class.getDeclaredField("logTable");
-        logTableField.setAccessible(true);
-        logTable = (TableView<LogViewerPanel.LogEntryViewModel>) logTableField.get(logViewerPanel);
     }
 
     @Test
