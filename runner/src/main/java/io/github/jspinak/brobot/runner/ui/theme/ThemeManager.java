@@ -24,6 +24,7 @@ import java.util.Map;
 public class ThemeManager {
     private static final Logger logger = LoggerFactory.getLogger(ThemeManager.class);
 
+    private static final String MODERN_THEME_CSS = "/css/modern-theme.css";
     private static final String BASE_CSS = "/css/base.css";
     private static final String COMPONENTS_CSS = "/css/components.css";
     private static final String LAYOUTS_CSS = "/css/layouts.css";
@@ -49,40 +50,58 @@ public class ThemeManager {
     @PostConstruct
     public void initialize() {
         try {
-            // Load common CSS resources
-            URL baseUrl = getClass().getResource(BASE_CSS);
-            URL componentsUrl = getClass().getResource(COMPONENTS_CSS);
-            URL layoutsUrl = getClass().getResource(LAYOUTS_CSS);
+            // Load modern theme CSS
+            URL modernThemeCss = getClass().getResource(MODERN_THEME_CSS);
+            
+            if (modernThemeCss == null) {
+                logger.warn("Failed to load modern theme CSS, falling back to legacy themes");
+                
+                // Fall back to loading legacy CSS resources
+                URL baseUrl = getClass().getResource(BASE_CSS);
+                URL componentsUrl = getClass().getResource(COMPONENTS_CSS);
+                URL layoutsUrl = getClass().getResource(LAYOUTS_CSS);
 
-            if (baseUrl == null || componentsUrl == null || layoutsUrl == null) {
-                logger.error("Failed to load common CSS resources");
-                throw new IOException("Missing core CSS resources");
-            }
+                if (baseUrl == null || componentsUrl == null || layoutsUrl == null) {
+                    logger.error("Failed to load common CSS resources");
+                    throw new IOException("Missing core CSS resources");
+                }
 
-            // Light theme CSS
-            URL lightThemeCss = getClass().getResource(LIGHT_THEME_CSS);
-            if (lightThemeCss != null) {
+                // Light theme CSS
+                URL lightThemeCss = getClass().getResource(LIGHT_THEME_CSS);
+                if (lightThemeCss != null) {
+                    List<URL> lightThemeUrls = new ArrayList<>();
+                    lightThemeUrls.add(baseUrl);
+                    lightThemeUrls.add(componentsUrl);
+                    lightThemeUrls.add(layoutsUrl);
+                    lightThemeUrls.add(lightThemeCss);
+                    themeCssMap.put(Theme.LIGHT, lightThemeUrls);
+                } else {
+                    logger.error("Failed to load light theme CSS");
+                }
+
+                // Dark theme CSS
+                URL darkThemeCss = getClass().getResource(DARK_THEME_CSS);
+                if (darkThemeCss != null) {
+                    List<URL> darkThemeUrls = new ArrayList<>();
+                    darkThemeUrls.add(baseUrl);
+                    darkThemeUrls.add(componentsUrl);
+                    darkThemeUrls.add(layoutsUrl);
+                    darkThemeUrls.add(darkThemeCss);
+                    themeCssMap.put(Theme.DARK, darkThemeUrls);
+                } else {
+                    logger.error("Failed to load dark theme CSS");
+                }
+            } else {
+                // Use modern theme for both light and dark modes
                 List<URL> lightThemeUrls = new ArrayList<>();
-                lightThemeUrls.add(baseUrl);
-                lightThemeUrls.add(componentsUrl);
-                lightThemeUrls.add(layoutsUrl);
-                lightThemeUrls.add(lightThemeCss);
+                lightThemeUrls.add(modernThemeCss);
                 themeCssMap.put(Theme.LIGHT, lightThemeUrls);
-            } else {
-                logger.error("Failed to load light theme CSS");
-            }
-
-            // Dark theme CSS
-            URL darkThemeCss = getClass().getResource(DARK_THEME_CSS);
-            if (darkThemeCss != null) {
+                
                 List<URL> darkThemeUrls = new ArrayList<>();
-                darkThemeUrls.add(baseUrl);
-                darkThemeUrls.add(componentsUrl);
-                darkThemeUrls.add(layoutsUrl);
-                darkThemeUrls.add(darkThemeCss);
+                darkThemeUrls.add(modernThemeCss);
                 themeCssMap.put(Theme.DARK, darkThemeUrls);
-            } else {
-                logger.error("Failed to load dark theme CSS");
+                
+                logger.info("Modern theme loaded successfully");
             }
 
             logger.info("ThemeManager initialized with {} themes", themeCssMap.size());
@@ -208,6 +227,15 @@ public class ThemeManager {
         scene.getStylesheets().clear();
         for (URL url : cssUrls) {
             scene.getStylesheets().add(url.toExternalForm());
+        }
+        
+        // Add or remove dark class from root element
+        if (scene.getRoot() != null) {
+            if (theme == Theme.DARK) {
+                scene.getRoot().getStyleClass().add("dark");
+            } else {
+                scene.getRoot().getStyleClass().remove("dark");
+            }
         }
     }
 
