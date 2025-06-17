@@ -24,6 +24,7 @@ public class IconRegistry {
     private static final Logger logger = LoggerFactory.getLogger(IconRegistry.class);
 
     private final EventBus eventBus;
+    private final ModernIconGenerator iconGenerator;
 
     // Paths to icon resources
     private static final String ICON_BASE_PATH = "/icons/";
@@ -35,8 +36,9 @@ public class IconRegistry {
     private static final int[] ICON_SIZES = { 16, 24, 32, 48, 64 };
 
     @Autowired
-    public IconRegistry(EventBus eventBus) {
+    public IconRegistry(EventBus eventBus, ModernIconGenerator iconGenerator) {
         this.eventBus = eventBus;
+        this.iconGenerator = iconGenerator;
     }
 
     @PostConstruct
@@ -103,8 +105,11 @@ public class IconRegistry {
                 is = getClass().getResourceAsStream(path);
 
                 if (is == null) {
-                    logger.warn("Icon not found: {}", iconName);
-                    return false;
+                    // Try to generate the icon programmatically
+                    logger.debug("Icon not found in resources, generating: {}", iconName);
+                    Image generatedIcon = iconGenerator.getIcon(iconName, size);
+                    iconCache.put(key, generatedIcon);
+                    return true;
                 }
             }
 
