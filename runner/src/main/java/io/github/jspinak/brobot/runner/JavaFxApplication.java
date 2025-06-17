@@ -75,8 +75,8 @@ public class JavaFxApplication extends Application {
             // Get the BrobotRunnerView directly from the context
             BrobotRunnerView view = applicationContext.getBean(BrobotRunnerView.class);
 
-            // Create the scene with the view
-            Scene scene = new Scene(view, 800, 600);
+            // Create the scene with the view - larger default size
+            Scene scene = new Scene(view, 1400, 900);
 
             // Apply theme
             themeManager.registerScene(scene);
@@ -90,8 +90,16 @@ public class JavaFxApplication extends Application {
             // Configure and show the stage
             stage.setScene(scene);
             stage.setTitle("Brobot Runner");
-            stage.setMinWidth(800);
-            stage.setMinHeight(600);
+            stage.setMinWidth(1200);
+            stage.setMinHeight(700);
+            
+            // Enable maximization and set window to be resizable
+            stage.setMaximized(false);
+            stage.setResizable(true);
+            
+            // Center the window on screen
+            stage.centerOnScreen();
+            
             stage.show();
 
             // Publish application started event
