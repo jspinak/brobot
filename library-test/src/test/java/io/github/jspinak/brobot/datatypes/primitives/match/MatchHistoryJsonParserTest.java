@@ -281,7 +281,7 @@ public class MatchHistoryJsonParserTest {
         MatchHistory history3 = new MatchHistory();
 
         MatchSnapshot snapshot3 = new MatchSnapshot.Builder()
-                .setActionOptions(ActionOptions.Action.FIND)
+                .setActionOptions(ActionOptions.Action.CLICK)  // Different action
                 .addMatch(new Match.Builder().setRegion(10, 20, 30, 40).build())
                 .build();
         history3.addSnapshot(snapshot3);

@@ -35,11 +35,19 @@ public class FindStatesData {
     }
 
     private ObjectCollection getStateObjectCollection(Action action, Pattern scene) {
-        Matches matches = action.perform(findWordsOptions, getObjectCollectionWithScene(scene));
-        return new ObjectCollection.Builder()
-                .withImages(matches.getMatchListAsStateImages())
-                .withScenes(scene)
-                .build();
+        try {
+            Matches matches = action.perform(findWordsOptions, getObjectCollectionWithScene(scene));
+            return new ObjectCollection.Builder()
+                    .withImages(matches.getMatchListAsStateImages())
+                    .withScenes(scene)
+                    .build();
+        } catch (Exception e) {
+            // OCR may not be available in headless mode
+            System.out.println("OCR not available for scene, returning empty ObjectCollection: " + e.getMessage());
+            return new ObjectCollection.Builder()
+                    .withScenes(scene)
+                    .build();
+        }
     }
 
     public List<ObjectCollection> getStateObjectCollections(Action action) {

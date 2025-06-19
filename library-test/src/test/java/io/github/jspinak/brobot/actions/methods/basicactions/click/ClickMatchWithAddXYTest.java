@@ -13,6 +13,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import io.github.jspinak.brobot.testutils.TestPaths;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -34,10 +35,10 @@ public class ClickMatchWithAddXYTest {
      */
     @Test
     void setPosition() {
-        BrobotSettings.screenshots.add("floranext0");
+        BrobotSettings.screenshots.add(TestPaths.getScreenshotPath("floranext0"));
         StateImage topLeft = new StateImage.Builder()
                 .addPattern(new Pattern.Builder()
-                        .setFilename("topLeft")
+                        .setFilename(TestPaths.getImagePath("topLeft"))
                         .setTargetPosition(new Position(100, 100))
                         .build())
                 .build();
@@ -58,10 +59,10 @@ public class ClickMatchWithAddXYTest {
 
     @Test
     void addXY() {
-        BrobotSettings.screenshots.add("floranext0");
+        BrobotSettings.screenshots.add(TestPaths.getScreenshotPath("floranext0"));
         StateImage topLeft = new StateImage.Builder()
                 .addPattern(new Pattern.Builder()
-                        .setFilename("topLeft")
+                        .setFilename(TestPaths.getImagePath("topLeft"))
                         //.setPosition(new Position(100, 100))
                         .build())
                 .build();

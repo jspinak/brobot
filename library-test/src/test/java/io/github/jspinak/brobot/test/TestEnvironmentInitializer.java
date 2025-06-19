@@ -1,0 +1,81 @@
+package io.github.jspinak.brobot.test;
+
+import io.github.jspinak.brobot.actions.BrobotEnvironment;
+import io.github.jspinak.brobot.actions.BrobotSettings;
+import org.springframework.context.ApplicationContextInitializer;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.test.context.ContextConfiguration;
+
+import java.nio.file.Paths;
+
+/**
+ * Initializes the test environment before Spring context loads.
+ * This ensures BrobotEnvironment is configured before any beans are created.
+ */
+@ContextConfiguration(initializers = TestEnvironmentInitializer.class)
+public class TestEnvironmentInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
+    
+    @Override
+    public void initialize(ConfigurableApplicationContext applicationContext) {
+        ConfigurableEnvironment environment = applicationContext.getEnvironment();
+        
+        // Get test type from system property or environment
+        String testType = System.getProperty("brobot.test.type", 
+                         environment.getProperty("brobot.test.type", "unit"));
+        
+        // Configure paths for test resources
+        String projectRoot = Paths.get("").toAbsolutePath().toString();
+        String testResourcePath = projectRoot + "/src/test/resources/";
+        
+        // Set paths in BrobotSettings
+        BrobotSettings.screenshotPath = "screenshots/";
+        
+        // Configure BrobotEnvironment based on test type
+        BrobotEnvironment env;
+        
+        if ("integration".equals(testType)) {
+            System.out.println("Initializing INTEGRATION test environment");
+            
+            env = BrobotEnvironment.builder()
+                .mockMode(false)  // Use real files
+                .forceHeadless(true)  // Force headless for CI/WSL
+                .allowScreenCapture(false)
+                .verboseLogging(true)
+                .build();
+            
+            BrobotSettings.mock = false;
+            
+            // Set ImagePath bundle path if not in full mock mode
+            if (!env.shouldSkipSikuliX()) {
+                try {
+                    org.sikuli.script.ImagePath.setBundlePath("images");
+                } catch (Exception e) {
+                    System.err.println("Could not set ImagePath: " + e.getMessage());
+                }
+            }
+            
+        } else {
+            System.out.println("Initializing UNIT test environment");
+            
+            env = BrobotEnvironment.builder()
+                .mockMode(true)  // Use mock data
+                .forceHeadless(true)
+                .allowScreenCapture(false)
+                .build();
+            
+            BrobotSettings.mock = true;
+        }
+        
+        BrobotEnvironment.setInstance(env);
+        
+        // Prevent SikuliX initialization
+        System.setProperty("sikuli.Debug", "0");
+        System.setProperty("sikuli.AutoDetectFromIDE", "false");
+        System.setProperty("java.awt.headless", "true");
+        
+        System.out.println("Test environment initialized: " + env.getEnvironmentInfo());
+        System.out.println("Working directory: " + projectRoot);
+        System.out.println("BrobotSettings.mock: " + BrobotSettings.mock);
+    }
+}

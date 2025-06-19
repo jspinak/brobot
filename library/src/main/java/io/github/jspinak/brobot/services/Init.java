@@ -7,6 +7,7 @@ import io.github.jspinak.brobot.manageStates.StateTransitions;
 import org.springframework.stereotype.Component;
 
 import io.github.jspinak.brobot.actions.BrobotSettings;
+import io.github.jspinak.brobot.actions.BrobotEnvironment;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles.SetAllProfiles;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles.SetKMeansProfiles;
 import io.github.jspinak.brobot.database.services.AllStatesInProjectService;
@@ -48,7 +49,11 @@ public class Init {
      * @param path Path to the directory containing the images.
      */
     public void setBundlePathAndPreProcessImages(String path) {
-        org.sikuli.script.ImagePath.setBundlePath(path);
+        BrobotEnvironment env = BrobotEnvironment.getInstance();
+        
+        if (!env.shouldSkipSikuliX()) {
+            org.sikuli.script.ImagePath.setBundlePath(path);
+        }
         Report.println("Saving indices for images in states: ");
         allStatesInProjectService.getAllStates().forEach(this::preProcessImages);
         Report.println();
@@ -72,7 +77,11 @@ public class Init {
     }
 
     public void add(String path) {
-        org.sikuli.script.ImagePath.add(path);
+        BrobotEnvironment env = BrobotEnvironment.getInstance();
+        
+        if (!env.shouldSkipSikuliX()) {
+            org.sikuli.script.ImagePath.add(path);
+        }
     }
 
     private void populateTransitionsWithStateIds() {

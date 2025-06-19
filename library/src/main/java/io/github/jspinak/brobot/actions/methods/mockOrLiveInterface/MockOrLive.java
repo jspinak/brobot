@@ -14,6 +14,7 @@ import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImag
 import io.github.jspinak.brobot.mock.MockFind;
 import io.github.jspinak.brobot.mock.MockText;
 import io.github.jspinak.brobot.mock.MockTime;
+import io.github.jspinak.brobot.actions.BrobotEnvironment;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.springframework.stereotype.Component;
 
@@ -80,8 +81,23 @@ public class MockOrLive {
     }
 
     public void wait(double seconds) {
-        if (permissions.isMock()) mockTime.wait(seconds);
-        new Region().sikuli().wait(seconds);
+        BrobotEnvironment env = BrobotEnvironment.getInstance();
+        
+        if (permissions.isMock() || env.shouldSkipSikuliX()) {
+            mockTime.wait(seconds);
+        } else {
+            org.sikuli.script.Region sikuliRegion = new Region().sikuli();
+            if (sikuliRegion != null) {
+                sikuliRegion.wait(seconds);
+            } else {
+                // Fallback to Thread.sleep when SikuliX not available
+                try {
+                    Thread.sleep((long) (seconds * 1000));
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+        }
     }
 
     public List<Match> findHistogram(StateImage stateImage, Mat sceneHSV, List<Region> regions) {
