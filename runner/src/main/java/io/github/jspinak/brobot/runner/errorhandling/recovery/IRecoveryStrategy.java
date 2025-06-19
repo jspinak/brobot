@@ -8,7 +8,7 @@ import java.util.function.Supplier;
 /**
  * Interface for implementing different recovery strategies.
  */
-public interface RecoveryStrategy {
+public interface IRecoveryStrategy {
     
     /**
      * Attempt to recover from an error.

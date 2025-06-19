@@ -31,7 +31,36 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 /**
- * Manages automation sessions with persistence capabilities
+ * Manages automation sessions with persistence capabilities.
+ * 
+ * <p>The SessionManager is responsible for creating, loading, saving, and managing
+ * the lifecycle of automation sessions. It provides session persistence, automatic
+ * saving, and recovery capabilities to ensure automation configurations and state
+ * are not lost.</p>
+ * 
+ * <p>Key features:
+ * <ul>
+ *   <li>Session creation and initialization</li>
+ *   <li>Automatic periodic session saving</li>
+ *   <li>Session recovery from disk</li>
+ *   <li>Recent session history tracking</li>
+ *   <li>Configuration and state management within sessions</li>
+ *   <li>Thread-safe session switching</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Sessions are stored as JSON files in a configurable directory and include:
+ * <ul>
+ *   <li>Session metadata (ID, name, timestamps)</li>
+ *   <li>Configuration file references</li>
+ *   <li>Loaded states and transitions</li>
+ *   <li>Execution history and results</li>
+ * </ul>
+ * </p>
+ * 
+ * @see Session
+ * @see BrobotRunnerProperties
+ * @see StateTransitionsRepository
  */
 @Component
 public class SessionManager implements AutoCloseable {

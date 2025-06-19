@@ -22,7 +22,7 @@ import java.util.function.Supplier;
 public class RecoveryManager {
 
     private final EventBus eventBus;
-    private final Map<String, RecoveryStrategy> recoveryStrategies = new ConcurrentHashMap<>();
+    private final Map<String, IRecoveryStrategy> recoveryStrategies = new ConcurrentHashMap<>();
     private final Map<String, RecoveryState> activeRecoveries = new ConcurrentHashMap<>();
     
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(
@@ -42,14 +42,14 @@ public class RecoveryManager {
     /**
      * Register a recovery strategy for a specific error category.
      */
-    public void registerStrategy(ErrorContext.ErrorCategory category, RecoveryStrategy strategy) {
+    public void registerStrategy(ErrorContext.ErrorCategory category, IRecoveryStrategy strategy) {
         recoveryStrategies.put(category.name(), strategy);
     }
     
     /**
      * Register a recovery strategy by name.
      */
-    public void registerStrategy(String name, RecoveryStrategy strategy) {
+    public void registerStrategy(String name, IRecoveryStrategy strategy) {
         recoveryStrategies.put(name, strategy);
     }
     
@@ -66,7 +66,7 @@ public class RecoveryManager {
         activeRecoveries.put(recoveryId, state);
         
         // Find appropriate strategy
-        RecoveryStrategy strategy = findStrategy(context);
+        IRecoveryStrategy strategy = findStrategy(context);
         
         log.info("Attempting recovery [{}] for error in {}", 
             recoveryId, context.getOperation());
@@ -117,9 +117,9 @@ public class RecoveryManager {
         return false;
     }
     
-    private RecoveryStrategy findStrategy(ErrorContext context) {
+    private IRecoveryStrategy findStrategy(ErrorContext context) {
         // Try category-specific strategy
-        RecoveryStrategy strategy = recoveryStrategies.get(context.getCategory().name());
+        IRecoveryStrategy strategy = recoveryStrategies.get(context.getCategory().name());
         if (strategy != null) {
             return strategy;
         }
@@ -209,7 +209,7 @@ public class RecoveryManager {
     /**
      * Exponential backoff retry strategy.
      */
-    public static class ExponentialBackoffStrategy implements RecoveryStrategy {
+    public static class ExponentialBackoffStrategy implements IRecoveryStrategy {
         private final int maxAttempts;
         private final long initialDelay;
         private final long maxDelay;
@@ -286,7 +286,7 @@ public class RecoveryManager {
     /**
      * Immediate retry strategy without delays.
      */
-    public static class ImmediateRetryStrategy implements RecoveryStrategy {
+    public static class ImmediateRetryStrategy implements IRecoveryStrategy {
         private final int maxAttempts;
         
         public ImmediateRetryStrategy() {
@@ -332,7 +332,7 @@ public class RecoveryManager {
     /**
      * Circuit breaker pattern for preventing cascading failures.
      */
-    public static class CircuitBreakerStrategy implements RecoveryStrategy {
+    public static class CircuitBreakerStrategy implements IRecoveryStrategy {
         private final int failureThreshold;
         private final long resetTimeoutMs;
         private final AtomicInteger failureCount = new AtomicInteger(0);

@@ -17,6 +17,40 @@ import java.util.function.Function;
 /**
  * Central error handling component that manages error processing,
  * recovery, and notification throughout the application.
+ * 
+ * <p>This component provides a comprehensive error handling framework with:
+ * <ul>
+ *   <li>Pluggable error processing strategies for different exception types</li>
+ *   <li>Error recovery mechanisms with retry capabilities</li>
+ *   <li>Error history tracking and statistics</li>
+ *   <li>System state enrichment for better error context</li>
+ *   <li>Event-based error notification</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>The error handler supports registering custom:
+ * <ul>
+ *   <li>{@link IErrorStrategy} - Define how specific error types should be handled</li>
+ *   <li>{@link IErrorProcessor} - Process errors for logging, metrics, notifications</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Error handling workflow:
+ * <ol>
+ *   <li>Error is received with context information</li>
+ *   <li>Context is enriched with system state (memory, CPU, threads)</li>
+ *   <li>Error is recorded in history</li>
+ *   <li>Appropriate strategy is selected based on error type</li>
+ *   <li>All registered processors are executed</li>
+ *   <li>Strategy handles the error and returns result</li>
+ *   <li>Recovery actions are executed if applicable</li>
+ * </ol>
+ * </p>
+ * 
+ * @see IErrorStrategy
+ * @see IErrorProcessor
+ * @see ErrorContext
+ * @see ErrorResult
  */
 @Slf4j
 @Component
@@ -24,8 +58,8 @@ import java.util.function.Function;
 public class ErrorHandler {
 
     private final EventBus eventBus;
-    private final List<ErrorProcessor> errorProcessors = new CopyOnWriteArrayList<>();
-    private final Map<Class<? extends Throwable>, ErrorStrategy> errorStrategies = new ConcurrentHashMap<>();
+    private final List<IErrorProcessor> errorProcessors = new CopyOnWriteArrayList<>();
+    private final Map<Class<? extends Throwable>, IErrorStrategy> errorStrategies = new ConcurrentHashMap<>();
     private final ErrorHistory errorHistory = new ErrorHistory();
     
     // Error metrics
@@ -60,10 +94,10 @@ public class ErrorHandler {
         errorHistory.record(error, enrichedContext);
         
         // Find appropriate strategy
-        ErrorStrategy strategy = findStrategy(error);
+        IErrorStrategy strategy = findStrategy(error);
         
         // Process error through all processors
-        for (ErrorProcessor processor : errorProcessors) {
+        for (IErrorProcessor processor : errorProcessors) {
             try {
                 processor.process(error, enrichedContext);
             } catch (Exception e) {
@@ -107,7 +141,7 @@ public class ErrorHandler {
     /**
      * Register a custom error processor.
      */
-    public void registerProcessor(ErrorProcessor processor) {
+    public void registerProcessor(IErrorProcessor processor) {
         errorProcessors.add(processor);
     }
     
@@ -115,7 +149,7 @@ public class ErrorHandler {
      * Register a custom error strategy for a specific exception type.
      */
     public <T extends Throwable> void registerStrategy(Class<T> errorType, 
-                                                      ErrorStrategy strategy) {
+                                                      IErrorStrategy strategy) {
         errorStrategies.put(errorType, strategy);
     }
     
@@ -175,9 +209,9 @@ public class ErrorHandler {
         }
     }
     
-    private ErrorStrategy findStrategy(Throwable error) {
+    private IErrorStrategy findStrategy(Throwable error) {
         // Look for exact match
-        ErrorStrategy strategy = errorStrategies.get(error.getClass());
+        IErrorStrategy strategy = errorStrategies.get(error.getClass());
         if (strategy != null) {
             return strategy;
         }
@@ -237,7 +271,7 @@ public class ErrorHandler {
     /**
      * Default error processor that logs errors.
      */
-    private class LoggingErrorProcessor implements ErrorProcessor {
+    private class LoggingErrorProcessor implements IErrorProcessor {
         @Override
         public void process(Throwable error, ErrorContext context) {
             if (context.getSeverity().getLevel() >= ErrorContext.ErrorSeverity.HIGH.getLevel()) {
@@ -262,7 +296,7 @@ public class ErrorHandler {
     /**
      * Error processor that publishes error events.
      */
-    private class EventPublishingProcessor implements ErrorProcessor {
+    private class EventPublishingProcessor implements IErrorProcessor {
         @Override
         public void process(Throwable error, ErrorContext context) {
             // Map ErrorContext.ErrorSeverity to ErrorEvent.ErrorSeverity
@@ -287,7 +321,7 @@ public class ErrorHandler {
     /**
      * Default error strategy for unhandled exceptions.
      */
-    private static class DefaultErrorStrategy implements ErrorStrategy {
+    private static class DefaultErrorStrategy implements IErrorStrategy {
         @Override
         public ErrorResult handle(Throwable error, ErrorContext context) {
             return ErrorResult.builder()
@@ -303,7 +337,7 @@ public class ErrorHandler {
     /**
      * Strategy for application exceptions.
      */
-    private static class ApplicationExceptionStrategy implements ErrorStrategy {
+    private static class ApplicationExceptionStrategy implements IErrorStrategy {
         @Override
         public ErrorResult handle(Throwable error, ErrorContext context) {
             ApplicationException appEx = (ApplicationException) error;
@@ -336,7 +370,7 @@ public class ErrorHandler {
     /**
      * Strategy for null pointer exceptions.
      */
-    private static class NullPointerStrategy implements ErrorStrategy {
+    private static class NullPointerStrategy implements IErrorStrategy {
         @Override
         public ErrorResult handle(Throwable error, ErrorContext context) {
             return ErrorResult.builder()
@@ -352,7 +386,7 @@ public class ErrorHandler {
     /**
      * Strategy for illegal argument exceptions.
      */
-    private static class IllegalArgumentStrategy implements ErrorStrategy {
+    private static class IllegalArgumentStrategy implements IErrorStrategy {
         @Override
         public ErrorResult handle(Throwable error, ErrorContext context) {
             return ErrorResult.builder()
@@ -368,7 +402,7 @@ public class ErrorHandler {
     /**
      * Strategy for illegal state exceptions.
      */
-    private static class IllegalStateStrategy implements ErrorStrategy {
+    private static class IllegalStateStrategy implements IErrorStrategy {
         @Override
         public ErrorResult handle(Throwable error, ErrorContext context) {
             return ErrorResult.builder()
@@ -385,7 +419,7 @@ public class ErrorHandler {
     /**
      * Strategy for I/O exceptions.
      */
-    private static class IOExceptionStrategy implements ErrorStrategy {
+    private static class IOExceptionStrategy implements IErrorStrategy {
         @Override
         public ErrorResult handle(Throwable error, ErrorContext context) {
             return ErrorResult.builder()
@@ -402,7 +436,7 @@ public class ErrorHandler {
     /**
      * Strategy for file not found exceptions.
      */
-    private static class FileNotFoundStrategy implements ErrorStrategy {
+    private static class FileNotFoundStrategy implements IErrorStrategy {
         @Override
         public ErrorResult handle(Throwable error, ErrorContext context) {
             return ErrorResult.builder()
@@ -418,7 +452,7 @@ public class ErrorHandler {
     /**
      * Strategy for timeout exceptions.
      */
-    private static class TimeoutStrategy implements ErrorStrategy {
+    private static class TimeoutStrategy implements IErrorStrategy {
         @Override
         public ErrorResult handle(Throwable error, ErrorContext context) {
             return ErrorResult.builder()
@@ -435,7 +469,7 @@ public class ErrorHandler {
     /**
      * Strategy for interrupted exceptions.
      */
-    private static class InterruptedStrategy implements ErrorStrategy {
+    private static class InterruptedStrategy implements IErrorStrategy {
         @Override
         public ErrorResult handle(Throwable error, ErrorContext context) {
             Thread.currentThread().interrupt(); // Restore interrupted status
