@@ -17,6 +17,25 @@ import javafx.application.Application;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
+/**
+ * Main Spring Boot application class for the Brobot Runner.
+ * 
+ * <p>The Brobot Runner is a JavaFX-based GUI application that provides a visual interface
+ * for configuring and executing Brobot automation scripts. It manages automation configurations,
+ * state transitions, and provides real-time monitoring of automation execution.</p>
+ * 
+ * <p>This class configures the Spring application context with:
+ * <ul>
+ *   <li>JPA repositories for persistence</li>
+ *   <li>Component scanning for both runner and library packages</li>
+ *   <li>Essential beans for resource management, caching, and session handling</li>
+ * </ul>
+ * </p>
+ * 
+ * @author jspinak
+ * @see JavaFxApplication
+ * @see BrobotRunnerProperties
+ */
 @SpringBootApplication
 @EnableJpaRepositories(basePackages = "io.github.jspinak.brobot.runner.persistence.repo")
 @ComponentScan(basePackages = {

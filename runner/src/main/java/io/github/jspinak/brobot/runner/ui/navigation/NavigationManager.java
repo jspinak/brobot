@@ -21,7 +21,38 @@ import java.util.*;
 
 /**
  * Manages navigation between screens in the application.
- * Supports history tracking, animations, and navigation events.
+ * 
+ * <p>The NavigationManager provides a centralized navigation system for the JavaFX
+ * application, supporting screen transitions with animations, navigation history,
+ * and event notifications. It implements a browser-like navigation model with
+ * back/forward functionality.</p>
+ * 
+ * <p>Key features:
+ * <ul>
+ *   <li>Screen registration and lifecycle management</li>
+ *   <li>Animated transitions between screens (fade, slide)</li>
+ *   <li>Navigation history with back/forward support</li>
+ *   <li>Navigation event notifications for observers</li>
+ *   <li>Context passing between screens</li>
+ *   <li>Breadcrumb trail generation</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Navigation flow:
+ * <ol>
+ *   <li>Screen requests navigation via navigateTo()</li>
+ *   <li>Current screen is animated out</li>
+ *   <li>New screen is created with context</li>
+ *   <li>New screen is animated in</li>
+ *   <li>History is updated</li>
+ *   <li>Listeners are notified</li>
+ * </ol>
+ * </p>
+ * 
+ * @see IScreen
+ * @see NavigationContext
+ * @see ScreenRegistry
+ * @see INavigationListener
  */
 @Component
 public class NavigationManager {
@@ -42,7 +73,7 @@ public class NavigationManager {
     private final Deque<Screen> forwardHistory = new LinkedList<>();
 
     // Navigation listeners
-    private final List<NavigationListener> navigationListeners = new ArrayList<>();
+    private final List<INavigationListener> navigationListeners = new ArrayList<>();
 
     @Autowired
     public NavigationManager(EventBus eventBus, ScreenRegistry screenRegistry) {
@@ -145,7 +176,7 @@ public class NavigationManager {
         eventBus.publish(LogEvent.info(this, "Navigated to: " + screen.getTitle(), "Navigation"));
 
         // Notify listeners
-        for (NavigationListener listener : navigationListeners) {
+        for (INavigationListener listener : navigationListeners) {
             listener.onNavigated(previousScreen, screen, context);
         }
 
@@ -243,7 +274,7 @@ public class NavigationManager {
      *
      * @param listener The listener to add
      */
-    public void addNavigationListener(NavigationListener listener) {
+    public void addNavigationListener(INavigationListener listener) {
         if (listener != null && !navigationListeners.contains(listener)) {
             navigationListeners.add(listener);
         }
@@ -254,7 +285,7 @@ public class NavigationManager {
      *
      * @param listener The listener to remove
      */
-    public void removeNavigationListener(NavigationListener listener) {
+    public void removeNavigationListener(INavigationListener listener) {
         navigationListeners.remove(listener);
     }
 
@@ -385,7 +416,7 @@ public class NavigationManager {
     /**
      * Listener interface for navigation events.
      */
-    public interface NavigationListener {
+    public interface INavigationListener {
         void onNavigated(Screen previousScreen, Screen newScreen, NavigationContext context);
     }
 }

@@ -31,7 +31,7 @@ public class StartupOptimizer {
         }
     );
     
-    private final Map<StartupPhase, List<StartupTask>> phasedTasks = new ConcurrentHashMap<>();
+    private final Map<StartupPhase, List<IStartupTask>> phasedTasks = new ConcurrentHashMap<>();
     private final AtomicInteger completedTasks = new AtomicInteger();
     private volatile int totalTasks = 0;
     
@@ -50,7 +50,7 @@ public class StartupOptimizer {
     }
     
     @FunctionalInterface
-    public interface StartupTask {
+    public interface IStartupTask {
         CompletableFuture<Void> execute();
         
         default String getName() {
@@ -62,7 +62,7 @@ public class StartupOptimizer {
         }
     }
     
-    public void registerTask(StartupPhase phase, StartupTask task) {
+    public void registerTask(StartupPhase phase, IStartupTask task) {
         phasedTasks.computeIfAbsent(phase, k -> new CopyOnWriteArrayList<>()).add(task);
         totalTasks++;
     }
@@ -98,7 +98,7 @@ public class StartupOptimizer {
     }
     
     private void executePhase(StartupPhase phase) {
-        List<StartupTask> tasks = phasedTasks.get(phase);
+        List<IStartupTask> tasks = phasedTasks.get(phase);
         if (tasks == null || tasks.isEmpty()) {
             return;
         }
@@ -120,7 +120,7 @@ public class StartupOptimizer {
         }
     }
     
-    private CompletableFuture<Void> executeTask(StartupPhase phase, StartupTask task) {
+    private CompletableFuture<Void> executeTask(StartupPhase phase, IStartupTask task) {
         return CompletableFuture
             .runAsync(() -> {
                 String taskName = task.getName();
@@ -143,7 +143,7 @@ public class StartupOptimizer {
             });
     }
     
-    private void handleTaskFailure(StartupPhase phase, StartupTask task, Exception e) {
+    private void handleTaskFailure(StartupPhase phase, IStartupTask task, Exception e) {
         String taskName = task.getName();
         
         if (phase == StartupPhase.CRITICAL) {
@@ -176,8 +176,8 @@ public class StartupOptimizer {
     }
     
     // Utility method to create deferred loading tasks
-    public static StartupTask deferredLoader(String name, Runnable loader) {
-        return new StartupTask() {
+    public static IStartupTask deferredLoader(String name, Runnable loader) {
+        return new IStartupTask() {
             @Override
             public CompletableFuture<Void> execute() {
                 return CompletableFuture.runAsync(loader);
@@ -191,8 +191,8 @@ public class StartupOptimizer {
     }
     
     // Utility method for retryable tasks
-    public static StartupTask retryableTask(String name, Supplier<CompletableFuture<Void>> supplier) {
-        return new StartupTask() {
+    public static IStartupTask retryableTask(String name, Supplier<CompletableFuture<Void>> supplier) {
+        return new IStartupTask() {
             @Override
             public CompletableFuture<Void> execute() {
                 return supplier.get();
