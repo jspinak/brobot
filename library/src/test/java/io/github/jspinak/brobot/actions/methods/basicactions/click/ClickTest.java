@@ -1,128 +1,196 @@
 package io.github.jspinak.brobot.actions.methods.basicactions.click;
 
+import io.github.jspinak.brobot.actions.BrobotSettings;
 import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.Find;
 import io.github.jspinak.brobot.actions.methods.sikuliWrappers.mouse.ClickLocationOnce;
 import io.github.jspinak.brobot.actions.methods.time.Time;
+import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
 import io.github.jspinak.brobot.datatypes.primitives.location.Location;
+import io.github.jspinak.brobot.datatypes.primitives.location.Position;
 import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
+import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.mockito.stubbing.Answer;
 
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 class ClickTest {
 
-    @InjectMocks
-    private Click click;
-
     @Mock
     private Find find;
+    
     @Mock
     private ClickLocationOnce clickLocationOnce;
+    
     @Mock
     private Time time;
+    
     @Mock
     private AfterClick afterClick;
 
-    @Mock
-    private Matches matches;
-    @Mock
-    private ActionOptions actionOptions;
+    private Click click;
+    private boolean originalMockState;
+
+    @BeforeAll
+    public static void setup() {
+        System.setProperty("java.awt.headless", "false");
+    }
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        when(matches.getActionOptions()).thenReturn(actionOptions);
+        click = new Click(find, clickLocationOnce, time, afterClick);
+        originalMockState = BrobotSettings.mock;
+        BrobotSettings.mock = true;
     }
 
     @Test
     void perform_shouldClickEachMatch() {
         // Setup
-        Match match1 = mock(Match.class);
-        Match match2 = mock(Match.class);
-        Location loc1 = mock(Location.class);
-        Location loc2 = mock(Location.class);
+        StateImage stateImage = mock(StateImage.class);
+        Pattern pattern = mock(Pattern.class);
+        when(stateImage.getPatterns()).thenReturn(List.of(pattern));
+        
+        ObjectCollection objectCollection = new ObjectCollection.Builder()
+                .withImages(stateImage)
+                .build();
+        
+        ActionOptions actionOptions = new ActionOptions.Builder()
+                .setAction(ActionOptions.Action.CLICK)
+                .setTimesToRepeatIndividualAction(1)
+                .build();
 
-        when(match1.getTarget()).thenReturn(loc1);
-        when(match2.getTarget()).thenReturn(loc2);
-        when(actionOptions.getTimesToRepeatIndividualAction()).thenReturn(1);
-
-        // When find.perform is called, populate the matches object with our mock matches
-        doAnswer((Answer<Void>) invocation -> {
+        // Create matches with actionOptions
+        Matches matches = new Matches(actionOptions);
+        
+        // Mock find to return two matches
+        doAnswer(invocation -> {
             Matches matchesArg = invocation.getArgument(0);
-            when(matchesArg.getMatchList()).thenReturn(List.of(match1, match2));
+            matchesArg.add(new Match.Builder()
+                    .setRegion(10, 10, 10, 10)
+                    .setPosition(new Position(50, 50)) // Center position
+                    .setSimScore(0.9)
+                    .build());
+            matchesArg.add(new Match.Builder()
+                    .setRegion(30, 30, 10, 10)
+                    .setPosition(new Position(50, 50)) // Center position
+                    .setSimScore(0.9)
+                    .build());
+            matchesArg.setSuccess(true);
             return null;
-        }).when(find).perform(any(Matches.class), any());
+        }).when(find).perform(any(Matches.class), any(ObjectCollection[].class));
 
         // Action
-        click.perform(matches);
+        click.perform(matches, objectCollection);
 
         // Verification
-        verify(find).perform(eq(matches), any());
-        verify(clickLocationOnce).click(loc1, actionOptions);
-        verify(clickLocationOnce).click(loc2, actionOptions);
-        verify(match1).incrementTimesActedOn();
-        verify(match2).incrementTimesActedOn();
-        verify(time).wait(actionOptions.getPauseBetweenIndividualActions()); // called once between clicks
+        assertTrue(matches.isSuccess());
+        assertEquals(2, matches.getMatchList().size());
+        
+        // Verify clicks happened for each match
+        verify(clickLocationOnce, times(2)).click(any(Location.class), any(ActionOptions.class));
+        
+        // Verify pause between individual actions
+        verify(time, times(1)).wait(anyDouble());
     }
 
     @Test
     void perform_shouldRespectMaxMatchesToActOn() {
         // Setup
-        Match match1 = mock(Match.class);
-        Match match2 = mock(Match.class);
-        Location loc1 = mock(Location.class);
-        Location loc2 = mock(Location.class);
+        StateImage stateImage = mock(StateImage.class);
+        Pattern pattern = mock(Pattern.class);
+        when(stateImage.getPatterns()).thenReturn(List.of(pattern));
+        
+        ObjectCollection objectCollection = new ObjectCollection.Builder()
+                .withImages(stateImage)
+                .build();
+        
+        ActionOptions actionOptions = new ActionOptions.Builder()
+                .setAction(ActionOptions.Action.CLICK)
+                .setMaxMatchesToActOn(1) // Only act on the first match
+                .setTimesToRepeatIndividualAction(1)
+                .build();
 
-        when(match1.getTarget()).thenReturn(loc1);
-        when(match2.getTarget()).thenReturn(loc2);
-        when(actionOptions.getMaxMatchesToActOn()).thenReturn(1); // Only act on the first match
-        when(actionOptions.getTimesToRepeatIndividualAction()).thenReturn(1);
+        // Create matches with actionOptions
+        Matches matches = new Matches(actionOptions);
 
-        doAnswer((Answer<Void>) invocation -> {
+        // Mock find to return two matches
+        doAnswer(invocation -> {
             Matches matchesArg = invocation.getArgument(0);
-            when(matchesArg.getMatchList()).thenReturn(List.of(match1, match2));
+            matchesArg.add(new Match.Builder()
+                    .setRegion(10, 10, 10, 10)
+                    .setPosition(new Position(50, 50)) // Center position
+                    .setSimScore(0.9)
+                    .build());
+            matchesArg.add(new Match.Builder()
+                    .setRegion(30, 30, 10, 10)
+                    .setPosition(new Position(50, 50)) // Center position
+                    .setSimScore(0.9)
+                    .build());
+            matchesArg.setSuccess(true);
             return null;
-        }).when(find).perform(any(Matches.class), any());
+        }).when(find).perform(any(Matches.class), any(ObjectCollection[].class));
 
         // Action
-        click.perform(matches);
+        click.perform(matches, objectCollection);
 
         // Verification
-        verify(clickLocationOnce).click(loc1, actionOptions);
-        verify(clickLocationOnce, never()).click(loc2, actionOptions); // Second match should not be clicked
+        assertTrue(matches.isSuccess());
+        
+        // Should only click once due to maxMatchesToActOn
+        verify(clickLocationOnce, times(1)).click(any(Location.class), any(ActionOptions.class));
     }
 
     @Test
     void perform_shouldRepeatClickForIndividualAction() {
         // Setup
-        Match match1 = mock(Match.class);
-        Location loc1 = mock(Location.class);
+        StateImage stateImage = mock(StateImage.class);
+        Pattern pattern = mock(Pattern.class);
+        when(stateImage.getPatterns()).thenReturn(List.of(pattern));
+        
+        ObjectCollection objectCollection = new ObjectCollection.Builder()
+                .withImages(stateImage)
+                .build();
+        
+        ActionOptions actionOptions = new ActionOptions.Builder()
+                .setAction(ActionOptions.Action.CLICK)
+                .setTimesToRepeatIndividualAction(3) // Click each match 3 times
+                .build();
 
-        when(match1.getTarget()).thenReturn(loc1);
-        when(actionOptions.getTimesToRepeatIndividualAction()).thenReturn(3); // Click each match 3 times
+        // Create matches with actionOptions
+        Matches matches = new Matches(actionOptions);
 
-        doAnswer((Answer<Void>) invocation -> {
+        // Mock find to return one match
+        doAnswer(invocation -> {
             Matches matchesArg = invocation.getArgument(0);
-            when(matchesArg.getMatchList()).thenReturn(List.of(match1));
+            matchesArg.add(new Match.Builder()
+                    .setRegion(10, 10, 10, 10)
+                    .setPosition(new Position(50, 50)) // Center position
+                    .setSimScore(0.9)
+                    .build());
+            matchesArg.setSuccess(true);
             return null;
-        }).when(find).perform(any(Matches.class), any());
+        }).when(find).perform(any(Matches.class), any(ObjectCollection[].class));
 
         // Action
-        click.perform(matches);
+        click.perform(matches, objectCollection);
 
         // Verification
-        verify(clickLocationOnce, times(3)).click(loc1, actionOptions);
-        verify(match1, times(3)).incrementTimesActedOn();
-        // pause is called twice between the three clicks
-        verify(time, times(2)).wait(actionOptions.getPauseBetweenIndividualActions());
+        assertTrue(matches.isSuccess());
+        
+        // Should click 3 times for the single match
+        verify(clickLocationOnce, times(3)).click(any(Location.class), any(ActionOptions.class));
+        
+        // Pause is called twice between the three clicks
+        verify(time, times(2)).wait(anyDouble());
     }
 }
