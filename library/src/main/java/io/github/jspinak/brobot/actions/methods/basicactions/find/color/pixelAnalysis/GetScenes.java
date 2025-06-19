@@ -59,8 +59,14 @@ public class GetScenes {
                 scenes.add(new Scene(new Pattern(Image.getEmptyImage())));
             // If scenes are listed in the settings, use them.
             else for (String filename : BrobotSettings.screenshots){
-                String relativePath = "../" + BrobotSettings.screenshotPath + filename;
-                scenes.add(new Scene(new Pattern(new Image(relativePath))));
+                // Check if filename is already an absolute path
+                String imagePath;
+                if (new java.io.File(filename).isAbsolute()) {
+                    imagePath = filename;
+                } else {
+                    imagePath = "../" + BrobotSettings.screenshotPath + filename;
+                }
+                scenes.add(new Scene(new Pattern(new Image(imagePath))));
             }
             return scenes;
         }

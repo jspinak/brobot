@@ -11,6 +11,8 @@ import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.datatypes.primitives.region.SearchRegions;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.imageUtils.BufferedImageOps;
+import io.github.jspinak.brobot.actions.BrobotEnvironment;
+import io.github.jspinak.brobot.actions.BrobotSettings;
 import io.github.jspinak.brobot.stringUtils.NameSelector;
 import lombok.Data;
 import lombok.Getter;
@@ -81,7 +83,16 @@ public class Pattern {
         }
         setImgpath(imgPath);
         setNameFromFilenameIfEmpty(imgPath);
-        this.image = new Image(BufferedImageOps.getBuffImgFromFile(imgPath), name);
+        
+        BrobotEnvironment env = BrobotEnvironment.getInstance();
+        
+        if (env.useRealFiles()) {
+            // Load real image - works in headless but not mock mode
+            this.image = new Image(BufferedImageOps.getBuffImgFromFile(imgPath), name);
+        } else {
+            // Only create dummy in mock mode
+            this.image = new Image(new BufferedImage(100, 100, BufferedImage.TYPE_INT_RGB), name);
+        }
     }
 
     public Pattern(BufferedImage bimg) {
