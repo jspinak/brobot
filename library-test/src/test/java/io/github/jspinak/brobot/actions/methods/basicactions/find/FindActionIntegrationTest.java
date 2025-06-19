@@ -12,6 +12,7 @@ import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.StateLocation;
 import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.StateRegion;
+import io.github.jspinak.brobot.testutils.TestPaths;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -58,13 +59,13 @@ public class FindActionIntegrationTest {
     void basicFindActionWithSingleImage() {
         StateImage stateImage = new StateImage.Builder()
                 .addPattern(new Pattern.Builder()
-                        .setFilename("topLeft")
+                        .setFilename(TestPaths.getImagePath("topLeft"))
                         .build())
                 .build();
         
         ObjectCollection objColl = new ObjectCollection.Builder()
                 .withImages(stateImage)
-                .withScenes("../screenshots/floranext0")
+                .withScenes(TestPaths.getScreenshotPath("floranext0"))
                 .build();
         
         ActionOptions actionOptions = new ActionOptions.Builder()
@@ -84,13 +85,13 @@ public class FindActionIntegrationTest {
     void findWithCustomSimilarityThreshold() {
         StateImage stateImage = new StateImage.Builder()
                 .addPattern(new Pattern.Builder()
-                        .setFilename("topLeft")
+                        .setFilename(TestPaths.getImagePath("topLeft"))
                         .build())
                 .build();
         
         ObjectCollection objColl = new ObjectCollection.Builder()
                 .withImages(stateImage)
-                .withScenes("../screenshots/floranext0")
+                .withScenes(TestPaths.getScreenshotPath("floranext0"))
                 .build();
         
         ActionOptions actionOptions = new ActionOptions.Builder()
@@ -110,13 +111,13 @@ public class FindActionIntegrationTest {
     void findFirstOption() {
         StateImage stateImage = new StateImage.Builder()
                 .addPattern(new Pattern.Builder()
-                        .setFilename("bottomRight")
+                        .setFilename(TestPaths.getImagePath("bottomRight"))
                         .build())
                 .build();
         
         ObjectCollection objColl = new ObjectCollection.Builder()
                 .withImages(stateImage)
-                .withScenes("../screenshots/floranext0")
+                .withScenes(TestPaths.getScreenshotPath("floranext0"))
                 .build();
         
         ActionOptions actionOptions = new ActionOptions.Builder()
@@ -136,13 +137,13 @@ public class FindActionIntegrationTest {
     void findAllOption() {
         StateImage stateImage = new StateImage.Builder()
                 .addPattern(new Pattern.Builder()
-                        .setFilename("topLeft")
+                        .setFilename(TestPaths.getImagePath("topLeft"))
                         .build())
                 .build();
         
         ObjectCollection objColl = new ObjectCollection.Builder()
                 .withImages(stateImage)
-                .withScenes("../screenshots/floranext0")
+                .withScenes(TestPaths.getScreenshotPath("floranext0"))
                 .build();
         
         ActionOptions actionOptions = new ActionOptions.Builder()
@@ -163,13 +164,13 @@ public class FindActionIntegrationTest {
     void findBestOption() {
         StateImage stateImage = new StateImage.Builder()
                 .addPattern(new Pattern.Builder()
-                        .setFilename("topLeft")
+                        .setFilename(TestPaths.getImagePath("topLeft"))
                         .build())
                 .build();
         
         ObjectCollection objColl = new ObjectCollection.Builder()
                 .withImages(stateImage)
-                .withScenes("../screenshots/floranext0")
+                .withScenes(TestPaths.getScreenshotPath("floranext0"))
                 .build();
         
         ActionOptions actionOptions = new ActionOptions.Builder()
@@ -191,14 +192,14 @@ public class FindActionIntegrationTest {
         
         StateImage stateImage = new StateImage.Builder()
                 .addPattern(new Pattern.Builder()
-                        .setFilename("topLeft")
+                        .setFilename(TestPaths.getImagePath("topLeft"))
                         .addSearchRegion(searchRegion)
                         .build())
                 .build();
         
         ObjectCollection objColl = new ObjectCollection.Builder()
                 .withImages(stateImage)
-                .withScenes("../screenshots/floranext0")
+                .withScenes(TestPaths.getScreenshotPath("floranext0"))
                 .build();
         
         ActionOptions actionOptions = new ActionOptions.Builder()
@@ -219,16 +220,16 @@ public class FindActionIntegrationTest {
     void findWithMultiplePatterns() {
         StateImage stateImage = new StateImage.Builder()
                 .addPattern(new Pattern.Builder()
-                        .setFilename("topLeft")
+                        .setFilename(TestPaths.getImagePath("topLeft"))
                         .build())
                 .addPattern(new Pattern.Builder()
-                        .setFilename("bottomRight")
+                        .setFilename(TestPaths.getImagePath("bottomRight"))
                         .build())
                 .build();
         
         ObjectCollection objColl = new ObjectCollection.Builder()
                 .withImages(stateImage)
-                .withScenes("../screenshots/floranext0")
+                .withScenes(TestPaths.getScreenshotPath("floranext0"))
                 .build();
         
         ActionOptions actionOptions = new ActionOptions.Builder()
@@ -247,19 +248,19 @@ public class FindActionIntegrationTest {
     void findEachOption() {
         StateImage stateImage1 = new StateImage.Builder()
                 .addPattern(new Pattern.Builder()
-                        .setFilename("topLeft")
+                        .setFilename(TestPaths.getImagePath("topLeft"))
                         .build())
                 .build();
         
         StateImage stateImage2 = new StateImage.Builder()
                 .addPattern(new Pattern.Builder()
-                        .setFilename("bottomRight")
+                        .setFilename(TestPaths.getImagePath("bottomRight"))
                         .build())
                 .build();
         
         ObjectCollection objColl = new ObjectCollection.Builder()
                 .withImages(stateImage1, stateImage2)
-                .withScenes("../screenshots/floranext0")
+                .withScenes(TestPaths.getScreenshotPath("floranext0"))
                 .build();
         
         ActionOptions actionOptions = new ActionOptions.Builder()
@@ -279,14 +280,14 @@ public class FindActionIntegrationTest {
         // Use an image that exists but won't be found in the screenshot
         StateImage stateImage = new StateImage.Builder()
                 .addPattern(new Pattern.Builder()
-                        .setFilename("bottomRight3")
+                        .setFilename(TestPaths.getImagePath("bottomRight3"))
                         .build())
                 .build();
         
         // Use a screenshot where bottomRight3 won't be found
         ObjectCollection objColl = new ObjectCollection.Builder()
                 .withImages(stateImage)
-                .withScenes("../screenshots/floranext2")
+                .withScenes(TestPaths.getScreenshotPath("floranext2"))
                 .build();
         
         ActionOptions actionOptions = new ActionOptions.Builder()
@@ -310,13 +311,13 @@ public class FindActionIntegrationTest {
     void findWithPauseAfterSuccess() {
         StateImage stateImage = new StateImage.Builder()
                 .addPattern(new Pattern.Builder()
-                        .setFilename("topLeft")
+                        .setFilename(TestPaths.getImagePath("topLeft"))
                         .build())
                 .build();
         
         ObjectCollection objColl = new ObjectCollection.Builder()
                 .withImages(stateImage)
-                .withScenes("../screenshots/floranext0")
+                .withScenes(TestPaths.getScreenshotPath("floranext0"))
                 .build();
         
         ActionOptions actionOptions = new ActionOptions.Builder()
@@ -340,28 +341,28 @@ public class FindActionIntegrationTest {
     void findMultipleImagesInCollection() {
         StateImage topLeft = new StateImage.Builder()
                 .addPattern(new Pattern.Builder()
-                        .setFilename("topLeft")
+                        .setFilename(TestPaths.getImagePath("topLeft"))
                         .build())
                 .setName("TopLeftImage")
                 .build();
         
         StateImage bottomRight = new StateImage.Builder()
                 .addPattern(new Pattern.Builder()
-                        .setFilename("bottomRight")
+                        .setFilename(TestPaths.getImagePath("bottomRight"))
                         .build())
                 .setName("BottomRightImage")
                 .build();
         
         StateImage topLeft2 = new StateImage.Builder()
                 .addPattern(new Pattern.Builder()
-                        .setFilename("topLeft2")
+                        .setFilename(TestPaths.getImagePath("topLeft2"))
                         .build())
                 .setName("TopLeft2Image")
                 .build();
         
         ObjectCollection objColl = new ObjectCollection.Builder()
                 .withImages(topLeft, bottomRight, topLeft2)
-                .withScenes("../screenshots/floranext0")
+                .withScenes(TestPaths.getScreenshotPath("floranext0"))
                 .build();
         
         ActionOptions actionOptions = new ActionOptions.Builder()
@@ -386,13 +387,13 @@ public class FindActionIntegrationTest {
     void findWithMinMaxArea() {
         StateImage stateImage = new StateImage.Builder()
                 .addPattern(new Pattern.Builder()
-                        .setFilename("topLeft")
+                        .setFilename(TestPaths.getImagePath("topLeft"))
                         .build())
                 .build();
         
         ObjectCollection objColl = new ObjectCollection.Builder()
                 .withImages(stateImage)
-                .withScenes("../screenshots/floranext0")
+                .withScenes(TestPaths.getScreenshotPath("floranext0"))
                 .build();
         
         ActionOptions actionOptions = new ActionOptions.Builder()

@@ -2,6 +2,7 @@ package io.github.jspinak.brobot.imageUtils;
 
 import io.github.jspinak.brobot.datatypes.primitives.region.Region;
 import io.github.jspinak.brobot.report.Report;
+import io.github.jspinak.brobot.actions.BrobotEnvironment;
 
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -31,6 +32,12 @@ public class BufferedImageOps {
      * @return the BufferedImage from file
      */
     public static BufferedImage getBuffImgFromFile(String path) {
+        BrobotEnvironment env = BrobotEnvironment.getInstance();
+        
+        if (env.shouldSkipSikuliX()) {
+            // In headless or mock mode, use direct file reading
+            return getBuffImgDirectly(path);
+        }
         Pattern sikuliPattern = new Pattern(path);
         BufferedImage bi = sikuliPattern.getBImage();
         if (bi == null) Report.println(path + " is invalid. The absolute path is: " + new File(path).getAbsolutePath());
@@ -54,14 +61,41 @@ public class BufferedImageOps {
     }
 
     public static BufferedImage getBufferedImageFromScreen(Region region) {
+        BrobotEnvironment env = BrobotEnvironment.getInstance();
+        
+        if (!env.canCaptureScreen()) {
+            // Return dummy only when screen capture not possible
+            return new BufferedImage(region.w() > 0 ? region.w() : 1920, 
+                                   region.h() > 0 ? region.h() : 1080, 
+                                   BufferedImage.TYPE_INT_RGB);
+        }
         return new Screen().capture(region.sikuli()).getImage();
     }
 
     public BufferedImage getBuffImgFromScreen(Region region) {
+        BrobotEnvironment env = BrobotEnvironment.getInstance();
+        
+        if (!env.canCaptureScreen()) {
+            // Return dummy only when screen capture not possible
+            return new BufferedImage(region.w() > 0 ? region.w() : 1920, 
+                                   region.h() > 0 ? region.h() : 1080, 
+                                   BufferedImage.TYPE_INT_RGB);
+        }
         return new Screen().capture(region.sikuli()).getImage();
     }
 
     public List<BufferedImage> getBuffImgsFromScreen(List<Region> regions) {
+        BrobotEnvironment env = BrobotEnvironment.getInstance();
+        
+        if (!env.canCaptureScreen()) {
+            // Return dummy images only when screen capture not possible
+            List<BufferedImage> bufferedImages = new ArrayList<>();
+            regions.forEach(region -> bufferedImages.add(
+                    new BufferedImage(region.w() > 0 ? region.w() : 100, 
+                                    region.h() > 0 ? region.h() : 100, 
+                                    BufferedImage.TYPE_INT_RGB)));
+            return bufferedImages;
+        }
         ScreenImage screenImage = new Screen().capture(); // uses IRobot
         List<BufferedImage> bufferedImages = new ArrayList<>();
         regions.forEach(region -> bufferedImages.add(

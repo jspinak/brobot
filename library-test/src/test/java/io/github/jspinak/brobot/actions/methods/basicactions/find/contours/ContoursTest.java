@@ -9,6 +9,9 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Tests contour detection using Mat operations which work in headless mode.
+ */
 class ContoursTest {
 
     private static Mat mat;

@@ -7,13 +7,12 @@ import io.github.jspinak.brobot.json.utils.JsonUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.TestPropertySource;
+import io.github.jspinak.brobot.test.BrobotIntegrationTestBase;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
-@TestPropertySource(properties = {"java.awt.headless=false"})
-public class SceneJsonParserTest {
+public class SceneJsonParserTest extends BrobotIntegrationTestBase {
 
     @Autowired
     private JsonParser jsonParser;
@@ -78,11 +77,13 @@ public class SceneJsonParserTest {
      */
     @Test
     public void testSceneFromFilename() throws ConfigurationException {
-        // This test will fail in a real environment because the file doesn't exist
-        // We're just testing the JSON serialization/deserialization
-
-        // Create a scene from a filename
-        Scene scene = new Scene("test/scene.png");
+        // When using real files mode in integration tests, we need to handle missing files
+        // Create a scene using Pattern instead of filename to avoid file loading issues
+        
+        Pattern pattern = new Pattern();
+        pattern.setName("test/scene.png");
+        
+        Scene scene = new Scene(pattern);
         scene.setId(789L);
 
         // Serialize
@@ -97,7 +98,7 @@ public class SceneJsonParserTest {
         assertNotNull(deserializedScene);
         assertEquals(789L, deserializedScene.getId());
         assertNotNull(deserializedScene.getPattern());
-        // The pattern name might not be preserved exactly as the input filename
+        assertEquals("test/scene.png", deserializedScene.getPattern().getName());
     }
 
     /**
