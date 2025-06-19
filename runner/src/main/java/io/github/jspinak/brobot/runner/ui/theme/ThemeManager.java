@@ -42,7 +42,7 @@ public class ThemeManager {
     private final List<Scene> registeredScenes = new ArrayList<>();
 
     // List of registered theme change listeners
-    private final List<ThemeChangeListener> themeChangeListeners = new ArrayList<>();
+    private final List<IThemeChangeListener> themeChangeListeners = new ArrayList<>();
 
     /**
      * Initializes the ThemeManager and loads the CSS resources for each theme.
@@ -169,7 +169,7 @@ public class ThemeManager {
             }
 
             // Notify listeners
-            for (ThemeChangeListener listener : themeChangeListeners) {
+            for (IThemeChangeListener listener : themeChangeListeners) {
                 listener.onThemeChanged(oldTheme, theme);
             }
 
@@ -244,7 +244,7 @@ public class ThemeManager {
      *
      * @param listener The listener to add
      */
-    public void addThemeChangeListener(ThemeChangeListener listener) {
+    public void addThemeChangeListener(IThemeChangeListener listener) {
         if (listener != null && !themeChangeListeners.contains(listener)) {
             themeChangeListeners.add(listener);
         }
@@ -255,7 +255,7 @@ public class ThemeManager {
      *
      * @param listener The listener to remove
      */
-    public void removeThemeChangeListener(ThemeChangeListener listener) {
+    public void removeThemeChangeListener(IThemeChangeListener listener) {
         themeChangeListeners.remove(listener);
     }
 
@@ -271,7 +271,7 @@ public class ThemeManager {
     /**
      * Listener interface for theme changes.
      */
-    public interface ThemeChangeListener {
+    public interface IThemeChangeListener {
         void onThemeChanged(Theme oldTheme, Theme newTheme);
     }
 

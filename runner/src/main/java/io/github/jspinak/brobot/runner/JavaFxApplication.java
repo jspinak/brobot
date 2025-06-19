@@ -24,7 +24,23 @@ import java.util.List;
 
 /**
  * Main JavaFX application class that integrates with Spring Boot.
- * This class serves as the entry point for the JavaFX UI.
+ * 
+ * <p>This class serves as the entry point for the JavaFX UI and handles the lifecycle
+ * of the JavaFX application. It creates and manages the Spring application context,
+ * initializes the primary stage, and sets up the main application view.</p>
+ * 
+ * <p>Key responsibilities:
+ * <ul>
+ *   <li>Bootstrapping the Spring context before JavaFX starts</li>
+ *   <li>Creating and configuring the primary stage with the main view</li>
+ *   <li>Setting up application icons and theme</li>
+ *   <li>Handling application lifecycle events (init, start, stop)</li>
+ *   <li>Managing thread safety between JavaFX and Spring</li>
+ * </ul>
+ * </p>
+ * 
+ * @see BrobotRunnerApplication
+ * @see BrobotRunnerView
  */
 public class JavaFxApplication extends Application {
     private static final Logger logger = LoggerFactory.getLogger(JavaFxApplication.class);

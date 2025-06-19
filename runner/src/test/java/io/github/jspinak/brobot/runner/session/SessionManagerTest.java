@@ -27,7 +27,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
@@ -84,18 +84,18 @@ public class SessionManagerTest {
         Session session = sessionManager.startNewSession("TestProject", "/test/config", "/test/images");
 
         // Verify session properties
-        assertNotNull(session);
-        assertNotNull(session.getId());
-        assertEquals("TestProject", session.getProjectName());
-        assertEquals("/test/config", session.getConfigPath());
-        assertEquals("/test/images", session.getImagePath());
-        assertTrue(session.isActive());
-        assertNotNull(session.getStartTime());
-        assertNull(session.getEndTime());
+        assertThat(session).isNotNull();
+        assertThat(session.getId()).isNotNull();
+        assertThat(session.getProjectName()).isEqualTo("TestProject");
+        assertThat(session.getConfigPath()).isEqualTo("/test/config");
+        assertThat(session.getImagePath()).isEqualTo("/test/images");
+        assertThat(session.isActive()).isTrue();
+        assertThat(session.getStartTime()).isNotNull();
+        assertThat(session.getEndTime()).isNull();
 
         // Verify session is current
-        assertTrue(sessionManager.isSessionActive());
-        assertEquals(session, sessionManager.getCurrentSession());
+        assertThat(sessionManager.isSessionActive()).isTrue();
+        assertThat(sessionManager.getCurrentSession()).isEqualTo(session);
 
         // Verify events published
         verify(eventBus, atLeastOnce()).publish(any(LogEvent.class));
@@ -111,12 +111,12 @@ public class SessionManagerTest {
         sessionManager.endCurrentSession();
 
         // Verify session is not active
-        assertFalse(sessionManager.isSessionActive());
-        assertNull(sessionManager.getCurrentSession());
+        assertThat(sessionManager.isSessionActive()).isFalse();
+        assertThat(sessionManager.getCurrentSession()).isNull();
 
         // Verify session was ended properly
-        assertFalse(session.isActive());
-        assertNotNull(session.getEndTime());
+        assertThat(session.isActive()).isFalse();
+        assertThat(session.getEndTime()).isNotNull();
 
         // Verify events published
         ArgumentCaptor<LogEvent> eventCaptor = ArgumentCaptor.forClass(LogEvent.class);
@@ -129,7 +129,7 @@ public class SessionManagerTest {
                 break;
             }
         }
-        assertTrue(foundEndEvent, "Expected a session ended event");
+        assertThat(foundEndEvent).as("Expected a session ended event").isTrue();
     }
 
     @Test
@@ -150,7 +150,7 @@ public class SessionManagerTest {
         verify(jsonParser).toPrettyJsonSafe(eq(session));
 
         // Verify lastAutosaveTime was updated
-        assertNotNull(sessionManager.getLastAutosaveTime());
+        assertThat(sessionManager.getLastAutosaveTime()).isNotNull();
 
         // Verify events published
         verify(eventBus, atLeastOnce()).publish(any(LogEvent.class));
@@ -173,9 +173,9 @@ public class SessionManagerTest {
         Optional<Session> loadedSession = sessionManager.loadSession(sessionId);
 
         // Verify session was loaded
-        assertTrue(loadedSession.isPresent());
-        assertEquals(sessionId, loadedSession.get().getId());
-        assertEquals("LoadedProject", loadedSession.get().getProjectName());
+        assertThat(loadedSession).isPresent();
+        assertThat(loadedSession.get().getId()).isEqualTo(sessionId);
+        assertThat(loadedSession.get().getProjectName()).isEqualTo("LoadedProject");
 
         // Verify events published
         verify(eventBus, atLeastOnce()).publish(any(LogEvent.class));
@@ -212,18 +212,18 @@ public class SessionManagerTest {
         List<SessionSummary> summaries = sessionManager.getAllSessionSummaries();
 
         // Verify summaries
-        assertEquals(2, summaries.size());
+        assertThat(summaries).hasSize(2);
 
         // Sessions should be sorted by startTime (newest first)
-        assertEquals("def", summaries.getFirst().getId());
-        assertEquals("Project2", summaries.getFirst().getProjectName());
-        assertEquals(LocalDateTime.parse("2024-01-02T12:00:00"), summaries.getFirst().getStartTime());
-        assertEquals("Completed", summaries.getFirst().getStatus());
+        assertThat(summaries.getFirst().getId()).isEqualTo("def");
+        assertThat(summaries.getFirst().getProjectName()).isEqualTo("Project2");
+        assertThat(summaries.getFirst().getStartTime()).isEqualTo(LocalDateTime.parse("2024-01-02T12:00:00"));
+        assertThat(summaries.getFirst().getStatus()).isEqualTo("Completed");
 
-        assertEquals("abc", summaries.get(1).getId());
-        assertEquals("Project1", summaries.get(1).getProjectName());
-        assertEquals(LocalDateTime.parse("2024-01-01T12:00:00"), summaries.get(1).getStartTime());
-        assertEquals("Active", summaries.get(1).getStatus());
+        assertThat(summaries.get(1).getId()).isEqualTo("abc");
+        assertThat(summaries.get(1).getProjectName()).isEqualTo("Project1");
+        assertThat(summaries.get(1).getStartTime()).isEqualTo(LocalDateTime.parse("2024-01-01T12:00:00"));
+        assertThat(summaries.get(1).getStatus()).isEqualTo("Active");
     }
 
     @Test
@@ -252,12 +252,12 @@ public class SessionManagerTest {
         boolean success = spySessionManager.restoreSession("restore-session");
 
         // Verify success
-        assertTrue(success);
+        assertThat(success).isTrue();
 
         // Verify current session
-        assertTrue(spySessionManager.isSessionActive());
-        assertEquals("restore-session", spySessionManager.getCurrentSession().getId());
-        assertEquals("RestoredProject", spySessionManager.getCurrentSession().getProjectName());
+        assertThat(spySessionManager.isSessionActive()).isTrue();
+        assertThat(spySessionManager.getCurrentSession().getId()).isEqualTo("restore-session");
+        assertThat(spySessionManager.getCurrentSession().getProjectName()).isEqualTo("RestoredProject");
 
         // Verify state transitions were restored
         verify(stateTransitionsRepository).emptyRepos();
@@ -274,7 +274,7 @@ public class SessionManagerTest {
                 break;
             }
         }
-        assertTrue(foundRestoreEvent, "Expected a session restored event");
+        assertThat(foundRestoreEvent).as("Expected a session restored event").isTrue();
     }
 
     @Test
@@ -288,10 +288,10 @@ public class SessionManagerTest {
         boolean success = sessionManager.deleteSession(sessionId);
 
         // Verify success
-        assertTrue(success);
+        assertThat(success).isTrue();
 
         // Verify file was deleted
-        assertFalse(Files.exists(sessionFile));
+        assertThat(Files.exists(sessionFile)).isFalse();
 
         // Verify events published
         ArgumentCaptor<LogEvent> eventCaptor = ArgumentCaptor.forClass(LogEvent.class);
@@ -304,7 +304,7 @@ public class SessionManagerTest {
                 break;
             }
         }
-        assertTrue(foundDeleteEvent, "Expected a session deleted event");
+        assertThat(foundDeleteEvent).as("Expected a session deleted event").isTrue();
     }
 
     @Test
@@ -325,7 +325,7 @@ public class SessionManagerTest {
         verify(jsonParser).toPrettyJsonSafe(any(Session.class));
 
         // Verify no active session
-        assertFalse(sessionManager.isSessionActive());
+        assertThat(sessionManager.isSessionActive()).isFalse();
 
         // Verify events published
         verify(eventBus, atLeastOnce()).publish(any(LogEvent.class));

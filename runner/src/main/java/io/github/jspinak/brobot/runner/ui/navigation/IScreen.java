@@ -8,7 +8,7 @@ import java.util.Optional;
  * Interface representing a screen in the application.
  * A screen is a top-level UI component that can be navigated to.
  */
-public interface Screen {
+public interface IScreen {
 
     /**
      * Gets the unique identifier for this screen.

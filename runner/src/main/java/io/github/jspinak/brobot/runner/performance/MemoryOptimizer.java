@@ -28,7 +28,7 @@ public class MemoryOptimizer {
     private volatile double emergencyThreshold = 0.95; // 95% heap usage
     private volatile boolean aggressiveGcEnabled = false;
     
-    private final List<WeakReference<MemoryReleasable>> releasables = new CopyOnWriteArrayList<>();
+    private final List<WeakReference<IMemoryReleasable>> releasables = new CopyOnWriteArrayList<>();
     private final AtomicLong lastGcTime = new AtomicLong(System.currentTimeMillis());
     
     @PostConstruct
@@ -71,7 +71,7 @@ public class MemoryOptimizer {
         memoryPools.put(name, new MemoryPool(name, maxSize));
     }
     
-    public void registerReleasable(MemoryReleasable releasable) {
+    public void registerReleasable(IMemoryReleasable releasable) {
         releasables.add(new WeakReference<>(releasable));
         cleanupDeadReferences();
     }
@@ -139,8 +139,8 @@ public class MemoryOptimizer {
     private int releaseMemory(MemoryPriority minPriority) {
         int releasedCount = 0;
         
-        for (WeakReference<MemoryReleasable> ref : releasables) {
-            MemoryReleasable releasable = ref.get();
+        for (WeakReference<IMemoryReleasable> ref : releasables) {
+            IMemoryReleasable releasable = ref.get();
             if (releasable != null) {
                 try {
                     if (releasable.getMemoryPriority().ordinal() >= minPriority.ordinal()) {
@@ -199,7 +199,7 @@ public class MemoryOptimizer {
         return pool.allocate(size);
     }
     
-    public interface MemoryReleasable {
+    public interface IMemoryReleasable {
         /**
          * Release memory held by this component.
          * @return The approximate number of bytes released
