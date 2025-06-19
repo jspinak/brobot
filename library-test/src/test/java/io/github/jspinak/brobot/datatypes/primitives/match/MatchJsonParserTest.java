@@ -10,13 +10,12 @@ import io.github.jspinak.brobot.json.utils.JsonUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.TestPropertySource;
+import io.github.jspinak.brobot.test.BrobotIntegrationTestBase;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
-@TestPropertySource(properties = {"java.awt.headless=false"})
-public class MatchJsonParserTest {
+public class MatchJsonParserTest extends BrobotIntegrationTestBase {
 
     @Autowired
     private JsonParser jsonParser;

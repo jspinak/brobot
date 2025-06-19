@@ -18,6 +18,7 @@ import org.bytedeco.opencv.opencv_core.Rect;
 
 import java.awt.image.BufferedImage;
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 /**
  * The SikuliX Match object has many protected fields, making it difficult to work with as a field. Instead,
@@ -363,6 +364,24 @@ public class Match {
             return match;
         }
 
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        Match match = (Match) obj;
+        
+        // Compare essential fields for match equality
+        return Double.compare(match.score, score) == 0 &&
+                Objects.equals(name, match.name) &&
+                Objects.equals(text, match.text) &&
+                Objects.equals(getRegion(), match.getRegion());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(score, name, text, getRegion());
     }
 
 }

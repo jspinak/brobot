@@ -15,7 +15,7 @@ import io.github.jspinak.brobot.json.utils.JsonUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.TestPropertySource;
+import io.github.jspinak.brobot.test.BrobotIntegrationTestBase;
 
 import java.io.IOException;
 import java.util.HashSet;
@@ -28,8 +28,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * with a custom approach to solve circular reference issues.
  */
 @SpringBootTest
-@TestPropertySource(properties = {"java.awt.headless=false"})
-public class StateCustomSerializerTest {
+public class StateCustomSerializerTest extends BrobotIntegrationTestBase {
 
     @Autowired
     private JsonParser jsonParser;

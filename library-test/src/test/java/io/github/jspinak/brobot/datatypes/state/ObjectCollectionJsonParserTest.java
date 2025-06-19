@@ -11,6 +11,7 @@ import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.St
 import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.json.parsing.JsonParser;
 import io.github.jspinak.brobot.json.parsing.exception.ConfigurationException;
+import io.github.jspinak.brobot.testutils.TestPaths;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.sikuli.script.ImagePath;
@@ -62,14 +63,14 @@ class ObjectCollectionJsonParserTest {
                 .withLocations(new Location(10, 20), new Location(30, 40))
                 .withRegions(new Region(50, 60, 100, 80))
                 .withStrings("Test String 1", "Test String 2")
-                .withScenes("bottomR")
+                .withScenes(TestPaths.getImagePath("bottomR"))
                 .build();
 
         // Add a StateImage (normally would be created with more context)
         StateImage stateImage = new StateImage.Builder()
                 .setOwnerStateName("TestState")
                 .setName("TestImage")
-                .addPattern(new Pattern("topLeft"))
+                .addPattern(new Pattern(TestPaths.getImagePath("topLeft")))
                 .build();
 
         collection.getStateImages().add(stateImage);
@@ -120,11 +121,11 @@ class ObjectCollectionJsonParserTest {
         assertEquals(1, deserializedCollection.getStateImages().size());
         assertEquals("TestState", deserializedCollection.getStateImages().getFirst().getOwnerStateName());
         assertEquals("TestImage", deserializedCollection.getStateImages().getFirst().getName());
-        assertEquals("topLeft", deserializedCollection.getStateImages().getFirst().getPatterns().getFirst().getImgpath());
+        assertEquals(TestPaths.getImagePath("topLeft"), deserializedCollection.getStateImages().getFirst().getPatterns().getFirst().getImgpath());
 
         // Verify scenes
         assertEquals(1, deserializedCollection.getScenes().size());
-        assertEquals("bottomR", deserializedCollection.getScenes().getFirst().getPattern().getImgpath());
+        assertEquals(TestPaths.getImagePath("bottomR"), deserializedCollection.getScenes().getFirst().getPattern().getImgpath());
     }
 
     @Test
@@ -152,10 +153,10 @@ class ObjectCollectionJsonParserTest {
                         .build("Lorem ipsum"))
 
                 // Add patterns
-                .withPatterns(new Pattern("topLeft"))
+                .withPatterns(new Pattern(TestPaths.getImagePath("topLeft")))
 
                 // Add scenes
-                .withScenes(new Scene("bottomR"))
+                .withScenes(new Scene(TestPaths.getImagePath("bottomR")))
 
                 // Add a Matches object
                 .withMatches(new Matches())
@@ -204,10 +205,10 @@ class ObjectCollectionJsonParserTest {
         assertEquals("Lorem ipsum", deserializedCollection.getStateStrings().getFirst().getString());
 
         assertEquals(1, deserializedCollection.getStateImages().size());
-        assertEquals("topLeft", deserializedCollection.getStateImages().getFirst().getPatterns().getFirst().getImgpath());
+        assertEquals(TestPaths.getImagePath("topLeft"), deserializedCollection.getStateImages().getFirst().getPatterns().getFirst().getImgpath());
 
         assertEquals(1, deserializedCollection.getScenes().size());
-        assertEquals("bottomR", deserializedCollection.getScenes().getFirst().getPattern().getImgpath());
+        assertEquals(TestPaths.getImagePath("bottomR"), deserializedCollection.getScenes().getFirst().getPattern().getImgpath());
 
         assertEquals(1, deserializedCollection.getMatches().size());
     }

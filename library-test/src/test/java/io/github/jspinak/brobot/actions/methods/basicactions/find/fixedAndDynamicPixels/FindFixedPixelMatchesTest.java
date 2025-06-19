@@ -9,6 +9,7 @@ import io.github.jspinak.brobot.imageUtils.MatOps;
 import io.github.jspinak.brobot.imageUtils.MatOps3d;
 import io.github.jspinak.brobot.BrobotTestApplication;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -22,7 +23,7 @@ class FindFixedPixelMatchesTest {
 
     @BeforeAll
     public static void setupHeadlessMode() {
-        System.setProperty("java.awt.headless", "false");
+        System.setProperty("java.awt.headless", "true");
     }
 
     @Autowired
