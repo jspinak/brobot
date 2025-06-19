@@ -11,7 +11,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -40,7 +40,7 @@ class EventBusTest {
 
         // Create a subscriber that counts down the latch when notified
         Consumer<BrobotEvent> subscriber = e -> {
-            assertEquals(event.getEventType(), e.getEventType());
+            assertThat(e.getEventType()).isEqualTo(event.getEventType());
             latch.countDown();
         };
 
@@ -52,7 +52,7 @@ class EventBusTest {
 
         // Assert
         // Wait for the subscriber to be notified (with timeout)
-        assertTrue(latch.await(1, TimeUnit.SECONDS), "Subscriber should have been notified");
+        assertThat(latch.await(1, TimeUnit.SECONDS)).as("Subscriber should have been notified").isTrue();
     }
 
     @Test

@@ -63,10 +63,16 @@ public class ComponentShowcaseScreen extends BorderPane {
         VBox header = new VBox(10, titleLabel, toolBar);
         header.setPadding(new Insets(20, 20, 10, 20));
 
+        // Create status bar early so it can be used in callbacks
+        statusBar = new StatusBar();
+        statusBar.setStatusMessage("Ready");
+        statusBar.addStatusIndicator("Demo Mode", "warning");
+        statusBar.createMemoryIndicator();
+
         // Create breadcrumb navigation
         BreadcrumbBar breadcrumbBar = new BreadcrumbBar();
-        breadcrumbBar.addItem("Home", item -> System.out.println("Home clicked"));
-        breadcrumbBar.addItem("Components", item -> System.out.println("Components clicked"));
+        breadcrumbBar.addItem("Home", item -> statusBar.setStatusMessage("Home clicked"));
+        breadcrumbBar.addItem("Components", item -> statusBar.setStatusMessage("Components clicked"));
         breadcrumbBar.addItem("Showcase", null);
 
         // Create content
@@ -78,11 +84,7 @@ public class ComponentShowcaseScreen extends BorderPane {
             content.getChildren().add(createSection(section));
         }
 
-        // Create status bar
-        statusBar = new StatusBar();
-        statusBar.setStatusMessage("Ready");
-        statusBar.addStatusIndicator("Demo Mode", "warning");
-        statusBar.createMemoryIndicator();
+        // Status bar already created above
 
         // Add all to the layout
         setTop(new VBox(header, breadcrumbBar));
