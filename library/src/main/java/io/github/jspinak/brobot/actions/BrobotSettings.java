@@ -116,5 +116,10 @@ public class BrobotSettings {
      */
     public static int testIteration = 1;
     public static boolean sendLogs = true;
+    
+    /**
+     * Test Screenshots
+     */
+    public static String testScreenshotsPath = "screenshots/"; // base path for test screenshots used in unit tests
 
 }

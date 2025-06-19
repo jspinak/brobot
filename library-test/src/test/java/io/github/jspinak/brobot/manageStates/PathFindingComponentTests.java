@@ -102,7 +102,8 @@ public class PathFindingComponentTests {
     }
 
     private StateImage createStateImage(String imageName, String filename) {
-        Pattern pattern = new Pattern.Builder().setName(imageName).setFilename(filename).build();
+        // In mock mode, we don't need actual files, just create pattern with name
+        Pattern pattern = new Pattern.Builder().setName(imageName).build();
         return new StateImage.Builder().setName(imageName).addPattern(pattern).build();
     }
 

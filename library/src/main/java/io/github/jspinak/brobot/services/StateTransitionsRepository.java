@@ -7,6 +7,7 @@ import lombok.Getter;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Manages the StateTransitions repository and retrieves
@@ -16,7 +17,7 @@ import java.util.*;
 @Getter
 public class StateTransitionsRepository {
 
-    private List<StateTransitions> repo = new ArrayList<>();
+    private List<StateTransitions> repo = new CopyOnWriteArrayList<>();
     private final StateTransitionsJointTable stateTransitionsJointTable;
 
     public StateTransitionsRepository(StateTransitionsJointTable stateTransitionsJointTable) {
@@ -87,7 +88,7 @@ public class StateTransitionsRepository {
     }
 
     public void emptyRepos() {
-        repo = new ArrayList<>();
+        repo = new CopyOnWriteArrayList<>();
         stateTransitionsJointTable.emptyRepos();
     }
 

@@ -6,6 +6,7 @@ import io.github.jspinak.brobot.datatypes.primitives.location.Location;
 import io.github.jspinak.brobot.datatypes.primitives.match.Match;
 import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.StateRegion;
+import io.github.jspinak.brobot.actions.BrobotEnvironment;
 import lombok.Getter;
 import lombok.Setter;
 import org.bytedeco.opencv.opencv_core.Rect;
@@ -63,6 +64,12 @@ public class Region implements Comparable<Region> {
 
     @JsonIgnore
     public org.sikuli.script.Region sikuli() {
+        BrobotEnvironment env = BrobotEnvironment.getInstance();
+        
+        if (env.shouldSkipSikuliX()) {
+            // Return null when SikuliX operations should be skipped
+            return null;
+        }
         return new org.sikuli.script.Region(x, y, w, h);
     }
 
@@ -187,7 +194,18 @@ public class Region implements Comparable<Region> {
     @JsonIgnore
     public Region getGridRegion(int gridNumber) {
         if (gridNumber == -1) return this;
-        return new Region(sikuli().getCell(RegionUtils.toRow(this, gridNumber), RegionUtils.toCol(this, gridNumber)));
+        org.sikuli.script.Region sikuliRegion = sikuli();
+        if (sikuliRegion == null) {
+            // In headless mode, calculate grid region manually
+            int rows = 3; // default grid size
+            int cols = 3;
+            int cellWidth = w / cols;
+            int cellHeight = h / rows;
+            int row = RegionUtils.toRow(this, gridNumber);
+            int col = RegionUtils.toCol(this, gridNumber);
+            return new Region(x + col * cellWidth, y + row * cellHeight, cellWidth, cellHeight);
+        }
+        return new Region(sikuliRegion.getCell(RegionUtils.toRow(this, gridNumber), RegionUtils.toCol(this, gridNumber)));
     }
 
     @JsonIgnore
