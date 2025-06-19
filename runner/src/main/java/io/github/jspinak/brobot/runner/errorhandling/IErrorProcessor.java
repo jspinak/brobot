@@ -4,7 +4,7 @@ package io.github.jspinak.brobot.runner.errorhandling;
  * Interface for error processors that can handle errors in various ways
  * (logging, notifications, metrics, etc.).
  */
-public interface ErrorProcessor {
+public interface IErrorProcessor {
     
     /**
      * Process an error with its context.

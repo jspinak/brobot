@@ -91,7 +91,7 @@ public class UIResponsivenessOptimizer {
     /**
      * Execute a task with progress updates.
      */
-    public <T> Task<T> executeWithProgress(ProgressTask<T> progressTask) {
+    public <T> Task<T> executeWithProgress(IProgressTask<T> progressTask) {
         Task<T> task = new Task<>() {
             @Override
             protected T call() throws Exception {
@@ -161,17 +161,17 @@ public class UIResponsivenessOptimizer {
     }
     
     @FunctionalInterface
-    public interface ProgressTask<T> {
-        T execute(ProgressUpdater progressUpdater, MessageUpdater messageUpdater) throws Exception;
+    public interface IProgressTask<T> {
+        T execute(IProgressUpdater progressUpdater, IMessageUpdater messageUpdater) throws Exception;
     }
     
     @FunctionalInterface
-    public interface ProgressUpdater {
+    public interface IProgressUpdater {
         void update(double workDone, double totalWork);
     }
     
     @FunctionalInterface
-    public interface MessageUpdater {
+    public interface IMessageUpdater {
         void update(String message);
     }
     

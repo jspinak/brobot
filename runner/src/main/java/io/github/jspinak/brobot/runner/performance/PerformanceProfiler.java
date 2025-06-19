@@ -14,6 +14,47 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.time.Duration;
 import java.time.Instant;
 
+/**
+ * Performance profiling component for monitoring and analyzing application performance.
+ * 
+ * <p>The PerformanceProfiler provides comprehensive performance monitoring capabilities
+ * including operation timing, memory usage tracking, thread analysis, and garbage
+ * collection statistics. It helps identify performance bottlenecks and optimize
+ * application behavior.</p>
+ * 
+ * <p>Key features:
+ * <ul>
+ *   <li>Operation timing with automatic metrics collection</li>
+ *   <li>Memory usage monitoring and analysis</li>
+ *   <li>Thread contention and CPU usage tracking</li>
+ *   <li>Garbage collection statistics</li>
+ *   <li>Performance snapshots for trend analysis</li>
+ *   <li>Hot spot detection for performance bottlenecks</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Usage example:
+ * <pre>{@code
+ * try (var timer = profiler.startOperation("database-query")) {
+ *     // Perform operation
+ * } // Metrics automatically recorded
+ * }</pre>
+ * </p>
+ * 
+ * <p>The profiler collects:
+ * <ul>
+ *   <li>Operation execution times (min, max, average, percentiles)</li>
+ *   <li>Operation invocation counts</li>
+ *   <li>Memory allocation rates</li>
+ *   <li>Thread states and CPU usage</li>
+ *   <li>GC pause times and frequencies</li>
+ * </ul>
+ * </p>
+ * 
+ * @see OperationTimer
+ * @see PerformanceSnapshot
+ * @see OperationMetrics
+ */
 @Slf4j
 @Component
 public class PerformanceProfiler {
