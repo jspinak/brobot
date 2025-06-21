@@ -7,7 +7,7 @@ sidebar_position: 1
 When this tutorial was created, version 1.0.7 was still in development and not in Maven Central. 
 If you are reading this before 1.0.7 is on Maven Central and want to follow the tutorial,
 look first at the tutorial about 
-[using the latest code in GitHub](/docs/tutorial-using-the-latest-code-in-github/intro). 
+[using the latest code in GitHub](https://github.com/jspinak/brobot). 
 The repository for this project is at https://github.com/jspinak/mrdoob.
 
 This tutorial shows how to set up a Brobot application. In this tutorial, you will create a 
