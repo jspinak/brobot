@@ -9,7 +9,58 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Prints to the console if the output meets the required reporting level.
+ * Centralized reporting system with configurable output levels for the Brobot framework.
+ * 
+ * <p>Report provides a unified interface for all console output throughout the framework, 
+ * enabling fine-grained control over verbosity levels. This centralized approach ensures 
+ * consistent formatting, allows dynamic adjustment of output detail, and facilitates 
+ * debugging by controlling information flow without code changes.</p>
+ * 
+ * <p>Output level hierarchy:
+ * <ul>
+ *   <li><b>NONE (0)</b>: Suppresses all output for silent operation</li>
+ *   <li><b>LOW (1)</b>: Essential information only - action names and targets</li>
+ *   <li><b>HIGH (2)</b>: Detailed information including match coordinates and parameters</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Key features:
+ * <ul>
+ *   <li><b>Level-based Filtering</b>: Output only appears if it meets the minimum level</li>
+ *   <li><b>Structured Formatting</b>: Consistent format for different types of information</li>
+ *   <li><b>Color Support</b>: Integration with ANSI color codes for enhanced readability</li>
+ *   <li><b>Overloaded Methods</b>: Multiple signatures for different reporting scenarios</li>
+ *   <li><b>Match Reporting</b>: Specialized methods for reporting match results</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Common usage patterns:
+ * <ul>
+ *   <li>Action execution: Reports what action is being performed on which element</li>
+ *   <li>Match results: Shows found elements with coordinates at HIGH level</li>
+ *   <li>State transitions: Tracks navigation through the state graph</li>
+ *   <li>Error conditions: Highlights problems with color coding</li>
+ *   <li>Debug information: Detailed data shown only at HIGH level</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Configuration:
+ * <ul>
+ *   <li>Set {@code outputLevel} to control global verbosity</li>
+ *   <li>Use level-specific methods to ensure appropriate visibility</li>
+ *   <li>{@code MaxMockMatchesFindAll} limits match output in mock mode</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>In the model-based approach, Report serves as the framework's communication channel 
+ * with developers and operators. By providing graduated levels of detail, it enables 
+ * efficient debugging during development while supporting quiet operation in production. 
+ * The consistent formatting makes logs parseable for automated analysis.</p>
+ * 
+ * @since 1.0
+ * @see Output
+ * @see ANSI
+ * @see OutputLevel
  */
 public class Report {
 

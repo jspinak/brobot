@@ -1,0 +1,8 @@
+{
+  "label": "Theoretical Foundations",
+  "position": 5,
+  "link": {
+    "type": "generated-index",
+    "description": "Understanding the theoretical foundations of model-based GUI automation that underpin Brobot's design"
+  }
+}

@@ -14,12 +14,58 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Moves the mouse to one or more locations.
- * There can be multiple points per ObjectCollection if Find.EACH or Find.ALL is used.
- * There may be multiple ObjectCollections.
- * Points are visited in the following order:
- *   Within an ObjectCollection, as recorded by the Find operation (Images, Matches, Regions, Locations)
- *   In the order the ObjectCollection appears
+ * Moves the mouse to one or more locations in the Brobot model-based GUI automation framework.
+ * 
+ * <p>MoveMouse is a fundamental action in the Action Model (α) that provides precise cursor 
+ * control for GUI automation. It bridges the gap between visual element identification and 
+ * physical mouse positioning, enabling complex interaction patterns including hover effects, 
+ * drag operations, and tooltip activation.</p>
+ * 
+ * <p>Movement patterns supported:
+ * <ul>
+ *   <li><b>Single Target</b>: Direct movement to a specific location</li>
+ *   <li><b>Multiple Targets</b>: Sequential movement through multiple locations</li>
+ *   <li><b>Pattern-based</b>: Movement to visually identified elements</li>
+ *   <li><b>Collection-based</b>: Processing multiple ObjectCollections in sequence</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Processing order:
+ * <ul>
+ *   <li>Within an ObjectCollection: Points are visited as recorded by Find operations 
+ *       (Images → Matches → Regions → Locations)</li>
+ *   <li>Between ObjectCollections: Processed in the order they appear in the parameters</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Key features:
+ * <ul>
+ *   <li><b>Visual Integration</b>: Uses Find to locate targets before movement</li>
+ *   <li><b>Batch Processing</b>: Can move through multiple locations in one action</li>
+ *   <li><b>Timing Control</b>: Configurable pauses between movements</li>
+ *   <li><b>State Awareness</b>: Updates framework's understanding of cursor position</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Common use cases:
+ * <ul>
+ *   <li>Hovering over elements to trigger tooltips or dropdown menus</li>
+ *   <li>Positioning cursor for subsequent click or drag operations</li>
+ *   <li>Following paths through UI elements for gesture-based interactions</li>
+ *   <li>Moving mouse away from active areas to prevent interference</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>In the model-based approach, MoveMouse actions contribute to the framework's spatial 
+ * understanding of the GUI. By tracking cursor movements, the framework can model hover 
+ * states, anticipate UI reactions, and optimize subsequent actions based on current 
+ * cursor position.</p>
+ * 
+ * @since 1.0
+ * @see Find
+ * @see Click
+ * @see MouseDown
+ * @see ActionOptions
  */
 @Component
 public class MoveMouse implements ActionInterface {

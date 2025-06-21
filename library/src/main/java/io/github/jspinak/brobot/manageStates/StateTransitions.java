@@ -8,14 +8,41 @@ import java.util.*;
 import java.util.function.BooleanSupplier;
 
 /**
- * StateTransitions hold all the Transitions for a State.
- * The 'transitionFinish' is the ToTransition that is performed after
- * a successful FromTransition from another State going to this State.
- * This StateTransitions can also have FromTransitions that start a
- * transition to another State.
- *
- * By default, this State will exit after a successful transition,
- * but this can be changed with the variable 'staysVisibleAfterTransition'.
+ * Container for all transitions associated with a specific State in the Brobot framework.
+ * 
+ * <p>StateTransitions is a key component of the state structure (Ω), defining the edges 
+ * in the state graph that enable navigation between GUI configurations. It encapsulates 
+ * both incoming transitions (how to finalize arrival at this state) and outgoing 
+ * transitions (how to navigate from this state to others).</p>
+ * 
+ * <p>Transition types:
+ * <ul>
+ *   <li><b>Transition Finish</b>: Actions performed when arriving at this state from another 
+ *       state, ensuring the GUI is in the expected configuration</li>
+ *   <li><b>Outgoing Transitions</b>: Collection of transitions that can navigate from this 
+ *       state to other states in the application</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Key features:
+ * <ul>
+ *   <li>Supports multiple transition types (Java functions, Action definitions)</li>
+ *   <li>Handles state visibility control during transitions</li>
+ *   <li>Enables dynamic path finding by providing transition options</li>
+ *   <li>Maintains bidirectional navigation information</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>In the model-based approach, StateTransitions transform implicit navigation knowledge 
+ * into explicit, executable paths through the GUI. This enables the framework to automatically 
+ * find routes between states and recover from unexpected situations by recalculating paths.</p>
+ * 
+ * @since 1.0
+ * @see State
+ * @see IStateTransition
+ * @see JavaStateTransition
+ * @see ActionDefinitionStateTransition
+ * @see PathFinder
  */
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)

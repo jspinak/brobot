@@ -21,28 +21,42 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 
 /**
- * The SikuliX Match object has many protected fields, making it difficult to work with as a field. Instead,
- * the important SikuliX Match fields are included here and a constructor with the SikuliX Match is available.
- *
- * Simplified version of the MatchObject of versions 1.0.6 and earlier.
- * Removed: action duration
- * Simplified: Text is a String and not a Text object.
- * Replaced:
- * - StateImage with Pattern. This is more granular, since a find action searches for Pattern objects.
- * - sceneName with scene.
- *
- *  * Match is used to store information about new Pattern matches. It includes:
- *  *   The SikuliX Match
- *  *   The String found during text detection
- *  *   The StateObject used in the Find operation
- *  *   The time the MatchObject was created
- *  *
- *  *   This object is similar to MatchSnapshot but has the following differences:
- *  *     Match objects always have successful matches, whereas Snapshots can have failed matches.
- *  *     Snapshots are contained within Image objects and StateRegions. Match objects include
- *  *       a StateObject as a variable.
- *  *     Match objects have only one match, as opposed to Snapshots, which can have
- *  *       multiple Match objects.
+ * Represents a successful pattern match found on the screen in the Brobot model-based GUI automation framework.
+ * 
+ * <p>A Match is created when a Find operation successfully locates a GUI element (image, text, or region) 
+ * on the screen. It encapsulates all information about the match including its location, similarity score, 
+ * the image content at that location, and metadata about how it was found.</p>
+ * 
+ * <p>In the model-based approach, Matches are fundamental for:
+ * <ul>
+ *   <li>Providing targets for mouse and keyboard actions (clicks, typing, etc.)</li>
+ *   <li>Verifying that GUI elements exist in expected States</li>
+ *   <li>Building dynamic relationships between GUI elements</li>
+ *   <li>Creating visual feedback through match highlighting</li>
+ *   <li>Tracking interaction history with GUI elements</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Key features:
+ * <ul>
+ *   <li><b>Score</b>: Similarity score (0.0-1.0) indicating match quality</li>
+ *   <li><b>Target</b>: Location within the matched region for precise interactions</li>
+ *   <li><b>Image content</b>: Actual pixels from the screen at the match location</li>
+ *   <li><b>Search image</b>: The pattern that was searched for</li>
+ *   <li><b>State context</b>: Information about which State object found this match</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Unlike MatchSnapshot which can represent failed matches, a Match object always 
+ * represents a successful find operation. Multiple Match objects are aggregated in 
+ * a Matches collection.</p>
+ * 
+ * @since 1.0
+ * @see Matches
+ * @see Region
+ * @see Location
+ * @see Pattern
+ * @see StateObject
  */
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)

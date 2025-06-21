@@ -13,9 +13,63 @@ import io.github.jspinak.brobot.datatypes.state.stateObject.StateObject;
 import lombok.Data;
 
 /**
- * A StateRegion belongs to a State and usually has a Region that
- * has a special meaning for its owner State. For example, there
- * may be text in this Region that doesn't appear in any other State.
+ * Represents a meaningful screen area associated with a specific state in Brobot.
+ * 
+ * <p>StateRegion encapsulates a rectangular area that has contextual significance within 
+ * a particular state. Unlike simple Region objects, StateRegion maintains state ownership, 
+ * interaction history, and behavioral properties that make it suitable for sophisticated 
+ * GUI automation scenarios where screen areas have state-specific meanings and behaviors.</p>
+ * 
+ * <p>Key features:
+ * <ul>
+ *   <li><b>State Association</b>: Bound to a specific state for contextual relevance</li>
+ *   <li><b>Interaction Tracking</b>: Records how many times the region has been acted upon</li>
+ *   <li><b>Click Positioning</b>: Configurable target position within the region (default center)</li>
+ *   <li><b>Visibility Persistence</b>: Tracks likelihood of remaining visible after interaction</li>
+ *   <li><b>Existence Probability</b>: Statistical measure of finding actionable content</li>
+ *   <li><b>Anchor Support</b>: Relative positioning based on other screen elements</li>
+ *   <li><b>Mock Text</b>: Simulated text content for testing and mocking</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Common use cases:
+ * <ul>
+ *   <li>Text input fields that appear only in specific states</li>
+ *   <li>Dynamic content areas with state-specific behavior</li>
+ *   <li>Button or control regions that change meaning by state</li>
+ *   <li>Areas for text extraction or verification</li>
+ *   <li>Regions that trigger state transitions when clicked</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Behavioral properties:
+ * <ul>
+ *   <li><b>staysVisibleAfterClicked</b>: Probability (0-100) the region remains after interaction</li>
+ *   <li><b>probabilityExists</b>: Likelihood (0-100) of finding actionable content</li>
+ *   <li><b>position</b>: Target point within region for clicks (0-1 scale)</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Integration features:
+ * <ul>
+ *   <li>Maintains MatchHistory for learning and mocking</li>
+ *   <li>Converts to ObjectCollection for action execution</li>
+ *   <li>Supports anchoring for dynamic positioning</li>
+ *   <li>Provides convenience methods for coordinate access</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>In the model-based approach, StateRegion enables fine-grained control over screen 
+ * areas that have different meanings in different states. This is essential for handling 
+ * complex GUIs where the same screen location may serve different purposes depending on 
+ * the application's current state, such as multi-purpose panels or context-sensitive areas.</p>
+ * 
+ * @since 1.0
+ * @see StateObject
+ * @see Region
+ * @see State
+ * @see Anchors
+ * @see MatchHistory
  */
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)

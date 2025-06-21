@@ -19,28 +19,51 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * <p>Brobot StateImage objects can contain multiple patterns.
- * Some types of find methods:
- *   First: Returns the first match found per pattern
- *   Best: Returns the best scoring match from all matches
- *   Each: Returns the first or best match found for each pattern
- *   All: Returns all matches for all patterns
- *   Custom: User-defined
+ * Core pattern matching action that locates GUI elements on the screen.
+ * 
+ * <p>Find is the fundamental action in Brobot's visual GUI automation, implementing various 
+ * pattern matching strategies to locate GUI elements. It embodies the visual recognition 
+ * capability that enables the framework to interact with any GUI regardless of the underlying 
+ * technology.</p>
+ * 
+ * <p>Find strategies supported:
+ * <ul>
+ *   <li><b>FIRST</b>: Returns the first match found, optimized for speed</li>
+ *   <li><b>BEST</b>: Returns the highest-scoring match from all possibilities</li>
+ *   <li><b>EACH</b>: Returns one match per StateImage/Pattern</li>
+ *   <li><b>ALL</b>: Returns all matches found, useful for lists and grids</li>
+ *   <li><b>CUSTOM</b>: User-defined find strategies for special cases</li>
+ * </ul>
  * </p>
- *
- * <p>In addition to StateImage objects, ObjectCollections can contain (this list may not be comprehensive):
- *   Matches
- *   Regions
- *   Locations
- * These objects are converted directly to MatchObjects and added to the Matches object.
+ * 
+ * <p>Advanced features:
+ * <ul>
+ *   <li>Multi-pattern matching with StateImages containing multiple templates</li>
+ *   <li>Color-based matching using k-means profiles</li>
+ *   <li>Text extraction from matched regions (OCR integration)</li>
+ *   <li>Match fusion for combining overlapping results</li>
+ *   <li>Dynamic offset adjustments for precise targeting</li>
+ * </ul>
  * </p>
- *
- * <p>Uses only objects in the first ObjectCollection</p>
- *
- * <p>GET_TEXT is included in Find with version 1.0.7. All Find operations will return text with the
- * match objects.</p>
- *
- * <p>Author: Joshua Spinak</p>
+ * 
+ * <p>Find operations also handle non-image objects in ObjectCollections:
+ * <ul>
+ *   <li>Existing Matches can be reused without re-searching</li>
+ *   <li>Regions are converted to matches for consistent handling</li>
+ *   <li>Locations provide direct targeting without pattern matching</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>In the model-based approach, Find operations are context-aware through integration 
+ * with StateMemory, automatically adjusting active states based on what is found. This 
+ * enables the framework to maintain an accurate understanding of the current GUI state.</p>
+ * 
+ * @since 1.0
+ * @see ActionOptions.Find
+ * @see StateImage
+ * @see Matches
+ * @see Pattern
+ * @author Joshua Spinak
  */
 @Component
 public class Find implements ActionInterface {

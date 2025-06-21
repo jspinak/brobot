@@ -12,8 +12,42 @@ import java.awt.image.BufferedImage;
 import static java.awt.image.BufferedImage.TYPE_BYTE_BINARY;
 
 /**
- * The physical representation of an image, stored as a BufferedImage, sent to the database as a byte array, and
- * retrievable in these forms as well as a JavaCV Mat of BGR or HSV.
+ * Physical representation of an image in the Brobot GUI automation framework.
+ * 
+ * <p>Image serves as the core container for visual data in Brobot, providing a unified 
+ * interface for working with images across different formats and libraries. It acts as 
+ * the bridge between Java's BufferedImage, OpenCV's Mat format, and SikuliX's image 
+ * representation, enabling seamless interoperability.</p>
+ * 
+ * <p>Key features:
+ * <ul>
+ *   <li><b>Multi-format Support</b>: Stores images as BufferedImage internally with 
+ *       conversions to Mat (BGR/HSV) and SikuliX formats</li>
+ *   <li><b>Database Persistence</b>: Serializable to byte arrays for storage</li>
+ *   <li><b>Color Space Conversions</b>: Built-in BGR and HSV representations for 
+ *       advanced color-based matching</li>
+ *   <li><b>Flexible Construction</b>: Can be created from files, BufferedImages, 
+ *       Mats, Patterns, or SikuliX images</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Use cases in model-based automation:
+ * <ul>
+ *   <li>Storing screenshots captured during automation execution</li>
+ *   <li>Holding pattern templates for visual matching</li>
+ *   <li>Providing image data for color analysis and profiling</li>
+ *   <li>Enabling image manipulation and processing operations</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>The Image class abstracts away the complexity of working with multiple image 
+ * libraries, providing a consistent API that supports the framework's cross-platform 
+ * and technology-agnostic approach to GUI automation.</p>
+ * 
+ * @since 1.0
+ * @see Pattern
+ * @see BufferedImageOps
+ * @see ImageOps
  */
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)

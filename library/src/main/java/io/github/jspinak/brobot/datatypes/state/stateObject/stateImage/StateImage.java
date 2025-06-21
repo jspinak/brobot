@@ -20,15 +20,44 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import java.util.*;
 
 /**
- * A collection of Pattern objects.
- * It can belong to a state.
- * The probabilityExists variable is no longer available in 1.0.7. MatchSnapshots are the only constructs used
- *   to find mock matches.
- *
- * Some variables names appear both in Pattern and Image. For example,
- * - index values are used for individual Pattern objects and a different set of index values are used for Image
- *   objects.
- * - KmeansProfiles for Image objects use the pixels of all Pattern objects in the Image to determine the ColorProfiles.
+ * Visual pattern identifier for States in the Brobot model-based GUI automation framework.
+ * 
+ * <p>StateImage is a fundamental building block of the state structure (Ω), serving as the 
+ * primary means of identifying and verifying GUI states. It encapsulates one or more Pattern 
+ * objects (image templates) that, when found on screen, indicate the presence of a specific 
+ * state configuration.</p>
+ * 
+ * <p>Key concepts:
+ * <ul>
+ *   <li><b>Pattern Collection</b>: Contains multiple Patterns for robust state identification 
+ *       (handling variations in appearance, different resolutions, etc.)</li>
+ *   <li><b>State Ownership</b>: Belongs to a specific State, though can be marked as "shared" 
+ *       when the same visual element appears across multiple states</li>
+ *   <li><b>Color Analysis</b>: Supports advanced color-based matching through k-means clustering 
+ *       and color profiles for more sophisticated pattern recognition</li>
+ *   <li><b>Dynamic Images</b>: Can be marked as dynamic when the visual content changes frequently, 
+ *       requiring special handling</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>In the model-based approach, StateImages serve multiple critical functions:
+ * <ul>
+ *   <li>State identification: Determining which state is currently active</li>
+ *   <li>Action targets: Providing clickable/interactive elements within states</li>
+ *   <li>Transition triggers: Visual elements that initiate state transitions</li>
+ *   <li>Verification points: Confirming successful navigation or action completion</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>The class supports both traditional pattern matching and advanced color-based analysis,
+ * making it adaptable to various GUI automation challenges including dynamic content,
+ * theme variations, and cross-platform differences.</p>
+ * 
+ * @since 1.0
+ * @see Pattern
+ * @see State
+ * @see StateObject
+ * @see ColorCluster
  */
 @Getter
 @Setter

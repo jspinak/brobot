@@ -22,7 +22,42 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * The results object for all actions.
+ * Comprehensive results container for all action executions in the Brobot framework.
+ * 
+ * <p>Matches serves as the universal return type for all actions, encapsulating not just 
+ * pattern matching results but all information generated during action execution. This 
+ * unified approach simplifies the API and provides consistent access to action outcomes 
+ * regardless of the action type.</p>
+ * 
+ * <p>Key information contained:
+ * <ul>
+ *   <li><b>Match List</b>: Collection of successful pattern matches found during execution</li>
+ *   <li><b>Success Status</b>: Boolean indicating whether the action achieved its goal</li>
+ *   <li><b>Timing Data</b>: Start time, end time, and duration for performance analysis</li>
+ *   <li><b>Text Results</b>: Any text extracted or read during the action</li>
+ *   <li><b>Active States</b>: States identified as active during execution</li>
+ *   <li><b>Defined Regions</b>: Regions created or modified by the action</li>
+ *   <li><b>Analysis Data</b>: Advanced results like color analysis, motion detection, etc.</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Design benefits:
+ * <ul>
+ *   <li>Single return type for all actions simplifies the API</li>
+ *   <li>Rich metadata supports debugging and performance optimization</li>
+ *   <li>Chainable results enable complex composite actions</li>
+ *   <li>Comprehensive logging data for illustrated histories</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>The Matches object is central to Brobot's approach of making automation testable 
+ * and debuggable by providing complete visibility into what happened during execution.</p>
+ * 
+ * @since 1.0
+ * @see Match
+ * @see Action
+ * @see ActionOptions
+ * @see ActionLifecycle
  */
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)

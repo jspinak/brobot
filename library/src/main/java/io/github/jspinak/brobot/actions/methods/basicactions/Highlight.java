@@ -11,7 +11,54 @@ import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import org.springframework.stereotype.Component;
 
 /**
- * Highlight all Matches at once, or one at a time.
+ * Highlights visual matches on screen in the Brobot model-based GUI automation framework.
+ * 
+ * <p>Highlight is a diagnostic and demonstration action in the Action Model (α) that provides 
+ * visual feedback by drawing attention to matched elements on the screen. It serves both 
+ * debugging and presentation purposes, making automation behavior visible and verifiable 
+ * to developers and stakeholders.</p>
+ * 
+ * <p>Highlighting modes:
+ * <ul>
+ *   <li><b>All at Once</b>: Simultaneously highlights all matches, useful for showing 
+ *       multiple found elements or validating pattern matching accuracy</li>
+ *   <li><b>One at a Time</b>: Sequentially highlights each match, ideal for demonstrating 
+ *       the order of operations or focusing attention on individual elements</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Key features:
+ * <ul>
+ *   <li><b>Visual Feedback</b>: Draws colored rectangles around matched regions</li>
+ *   <li><b>Configurable Duration</b>: Control how long highlights remain visible</li>
+ *   <li><b>Non-invasive</b>: Does not interfere with GUI state or functionality</li>
+ *   <li><b>Match Integration</b>: Works seamlessly with Find results</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Common use cases:
+ * <ul>
+ *   <li>Debugging pattern matching to verify correct element identification</li>
+ *   <li>Demonstrating automation scripts to stakeholders</li>
+ *   <li>Creating visual documentation of automation flows</li>
+ *   <li>Validating search regions and match accuracy</li>
+ *   <li>Training new users on how the framework identifies GUI elements</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>In the model-based approach, Highlight actions provide transparency into the framework's 
+ * visual perception layer. They help bridge the gap between the abstract state model and 
+ * the concrete visual representation, making it easier to understand and debug how the 
+ * framework interprets and interacts with the GUI.</p>
+ * 
+ * <p>Note: Highlight operations are typically disabled in production environments to avoid 
+ * performance overhead and visual distractions during automated execution.</p>
+ * 
+ * @since 1.0
+ * @see Find
+ * @see Match
+ * @see ActionOptions
+ * @see HighlightMatch
  */
 @Component
 public class Highlight implements ActionInterface {

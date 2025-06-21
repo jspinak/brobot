@@ -11,9 +11,70 @@ import java.util.Set;
 import java.util.function.BooleanSupplier;
 
 /**
- * After a successful transition (both 'from' and 'to' Transitions):
- *   'activate' holds all States to make active
- *   'exit' holds all States to deactivate
+ * Code-based state transition implementation for the Brobot framework.
+ * 
+ * <p>JavaStateTransition represents transitions defined through Java code using BooleanSupplier 
+ * functions. This implementation enables dynamic, programmatic state navigation where transition 
+ * logic can involve complex conditions, external data, or runtime calculations that cannot be 
+ * expressed declaratively.</p>
+ * 
+ * <p>Key components:
+ * <ul>
+ *   <li><b>Transition Function</b>: BooleanSupplier that executes the transition logic</li>
+ *   <li><b>Activation List</b>: States to activate after successful transition</li>
+ *   <li><b>Exit List</b>: States to deactivate after successful transition</li>
+ *   <li><b>Visibility Control</b>: Whether source state remains visible post-transition</li>
+ *   <li><b>Path Score</b>: Weight for path-finding algorithms (higher = less preferred)</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>State reference handling:
+ * <ul>
+ *   <li>Uses state names during definition (IDs not yet assigned)</li>
+ *   <li>Names are converted to IDs during initialization</li>
+ *   <li>Both name and ID sets are maintained for flexibility</li>
+ *   <li>Supports multiple target states for branching transitions</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Transition execution flow:
+ * <ol>
+ *   <li>BooleanSupplier is invoked to perform transition logic</li>
+ *   <li>If true is returned, transition is considered successful</li>
+ *   <li>States in 'activate' set become active</li>
+ *   <li>States in 'exit' set become inactive</li>
+ *   <li>Success counter is incremented for metrics</li>
+ * </ol>
+ * </p>
+ * 
+ * <p>Common use patterns:
+ * <ul>
+ *   <li>Complex navigation logic that depends on runtime conditions</li>
+ *   <li>Transitions involving external API calls or data validation</li>
+ *   <li>Dynamic state activation based on application state</li>
+ *   <li>Fallback transitions with custom error handling</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Builder pattern benefits:
+ * <ul>
+ *   <li>Fluent API for readable transition definitions</li>
+ *   <li>Default values for optional properties</li>
+ *   <li>Type-safe state name specification</li>
+ *   <li>Convenient overloads for common patterns</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>In the model-based approach, JavaStateTransition provides the flexibility needed for 
+ * complex automation scenarios where declarative ActionDefinitions are insufficient. It 
+ * enables seamless integration of custom logic while maintaining the benefits of the 
+ * state graph structure for navigation and path finding.</p>
+ * 
+ * @since 1.0
+ * @see IStateTransition
+ * @see ActionDefinitionStateTransition
+ * @see StateTransitions
+ * @see BooleanSupplier
  */
 @Getter
 @Setter

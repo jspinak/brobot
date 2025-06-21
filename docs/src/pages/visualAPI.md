@@ -36,7 +36,7 @@ open-source framework is introduced that streamlines the process of building a v
 Visual automation is difficult, and no source attests more clearly to this than
 the industry where it is used the most, the software testing industry. The market
 for software testing was estimated at 
-[over $40 billion in 2020](https://www.gminsights.com/industry-analysis/software-testing-market). 
+[over \$40 billion in 2020](https://www.gminsights.com/industry-analysis/software-testing-market). 
 However, the vast
 majority of these revenues did not go to automated testing applications. Industry
 participants prefer to invest in manual testing, apparently due to the relative high
@@ -102,9 +102,9 @@ interdependency of actions. If A1 fails then A2 and A3 are also likely to fail.
 If an automation program is a series of actions, the probability of the program
 failing will be related directly to the number of actions. If each action is
 given a probability p of succeeding, and there are n actions, we can calculate
-the overall probability of success as a function of n and p: $f(n,p) = p^n$.   
+the overall probability of success as a function of n and p: `f(n,p) = p^n`.   
 
-$f(n,p)$ looks like this when setting p to 90%: at just 7 actions the process 
+`f(n,p)` looks like this when setting p to 90%: at just 7 actions the process 
 is more likely to fail than succeed, and the chances of success with a large 
 number of actions is extremely low.   
 
@@ -123,11 +123,11 @@ reaching this goal.
 A process is a series of successive actions. A process follows a path through 
 different environments and this environment may change as the result of a successful 
 action. If there are 3 different processes, A, B, and C, that can reach a goal, and 
-each action in {A1,A2,A3,B1,…,C3} has probability p of success, then the probability 
-of success for each process is $p^3$.  
+each action in \{A1,A2,A3,B1,…,C3\} has probability p of success, then the probability 
+of success for each process is `p^3`.  
 
 At first glance, it would seem that the probability of success for the entire algorithm is 
-$1 - (1 - p^3)^3$ because in order for the entire algorithm to fail, all 3 paths 
+`1 - (1 - p^3)^3` because in order for the entire algorithm to fail, all 3 paths 
 would need to fail. When p = 90%, the probability of a single process succeeding is 
 72.9% and the probability of the entire algorithm succeeding is 98%. This is, however, 
 incorrect. Since actions can change the environment, the only place where the 
@@ -135,18 +135,17 @@ additional paths would be available is at the start point. We only have backup
 processes at the start point, after which we have to follow the process we have 
 chosen. In other words, if A1 fails we can try B1, but if B2 fails our algorithm 
 has failed. In this diagram there is no path back to the start point. This gives 
-us a success rate in the first layer of $p + [p * (1 - p)] + [p * (1 - p)^2] = 
-3p - 3p^2 + p^3$, since there is a p chance of A1 succeeding, a p chance of B1 
+us a success rate in the first layer of `p + p(1 - p) + p(1 - p)^2 = 3p - 3p^2 + p^3`, since there is a p chance of A1 succeeding, a p chance of B1 
 succeeding in the event that A1 fails, and a p chance of C1 succeeding in the 
 event that both A1 and B1 have failed. In the second and third layers the 
 probability of success is just p. This gives an overall probability of success of
-$p * p * (3p - 3p^2 + p^3) = 3p^3 - 3p^4 + p^5$. With p = 90%, the overall 
+`p * p * (3p - 3p^2 + p^3) = 3p^3 - 3p^4 + p^5`. With p = 90%, the overall 
 probability of success is just ~80.9%.  
 
 To keep the probability of success around 99% we would need to create 
 alternate processes for each action, including the actions in processes 
 B and C. If there were n original actions, the total number of actions in 
-our more robust algorithm would be $3^n + 3^{n-1} + 3^{n-2} + ... + 3^{n-(n-1)}$. 
+our more robust algorithm would be `3^n + 3^(n-1) + 3^(n-2) + ... + 3^1`. 
 In this example, with n=3, we have 27 + 9 + 3 = 39 actions. The run-time
 complexity is still linear since only a small subset of all actions will 
 be performed, but the programming-time complexity is exponential. 
@@ -250,9 +249,9 @@ is also a reason why many automation applications written as process flows will 
 the model environment defined by the assumptions often contains inconsistencies not 
 found in the real environment.  
 
-$$
-\widehat{env} \neq env
-$$
+```
+env^ ≠ env
+```
 
 In changing our focus from processes to environments we have changed our focus from 
 writing an automation process to developing a model of the environment. A good model 
@@ -373,7 +372,7 @@ developers of the game provide an API to programmers and AI researchers. The
 [StarCraft API](https://news.blizzard.com/en-us/starcraft2/20944009/the-starcraft-ii-api-has-arrived) 
 provides detailed information about the pieces in the game and 
 their positions, as well as allowing a program to manipulate these pieces 
-according to the game rules. In both Go and StarCraft, $\widehat{env} = env$ since 
+according to the game rules. In both Go and StarCraft, `env^ = env` since 
 the game environments are converted to a digital representation without information 
 loss. Having such a realistic model of the environment allows the researchers to 
 focus on the reinforcement learning algorithms and not worry about the accuracy 
@@ -386,8 +385,8 @@ be manipulated by the automation application. This allows the automation
 instructions to focus on business logic and ignore the details of manipulating 
 the environment. The visual API differs from a traditional API in that its functions 
 produce stochastic results. With a visual API, the model of the environment is not 
-equal to the real environment $\widehat{env} \neq env$ but is an approximation of 
-the real environment $\widehat{env} \thickapprox env$. An important objective when 
+equal to the real environment `env^ ≠ env` but is an approximation of 
+the real environment `env^ ≈ env`. An important objective when 
 creating a visual API is to reduce the stochasticity of its functions. There are 
 many ways to do this, and a comprehensive tutorial on building a visual API with 
 Brobot can be found in 

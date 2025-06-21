@@ -11,12 +11,65 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * When working with color profiles, images should be created that represent the colors
- *   to be found. ColorProfiles do not use k-means to identify the most common color(s);
- *   instead, they take a minimum and maximum value and find the mean and stddev of all pixels.
- *
- * A ColorCluster has ColorSchemas (BGR, HSV)
- *                    ColorSchemas have ColorInfos (min, max, mean, stddev)
+ * Manages color profiles across multiple color spaces for pattern matching in Brobot.
+ * 
+ * <p>ColorCluster serves as a container for color analysis data across different color 
+ * schemas (BGR and HSV), enabling sophisticated color-based pattern matching. Unlike 
+ * k-means clustering approaches that identify dominant colors, ColorCluster uses 
+ * statistical analysis of color ranges to create robust color profiles that can handle 
+ * variations in lighting and display conditions.</p>
+ * 
+ * <p>Architecture:
+ * <ul>
+ *   <li><b>ColorCluster</b>: Top-level container for all color schemas</li>
+ *   <li><b>ColorSchema</b>: Color space-specific data (BGR or HSV)</li>
+ *   <li><b>ColorInfo</b>: Statistical data for each color channel (min, max, mean, stddev)</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Color analysis approach:
+ * <ul>
+ *   <li>Define color ranges through minimum and maximum values</li>
+ *   <li>Calculate statistical properties (mean, standard deviation) within ranges</li>
+ *   <li>Support multiple color spaces for robust matching</li>
+ *   <li>Enable tolerance-based matching using statistical distributions</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Supported color schemas:
+ * <ul>
+ *   <li><b>BGR</b>: Blue-Green-Red color space used by OpenCV</li>
+ *   <li><b>HSV</b>: Hue-Saturation-Value for lighting-invariant matching</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Common use cases:
+ * <ul>
+ *   <li>Identifying UI elements by their color signatures</li>
+ *   <li>Detecting state changes through color variations</li>
+ *   <li>Finding regions with specific color characteristics</li>
+ *   <li>Creating lighting-tolerant pattern matching</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Mat generation:
+ * <ul>
+ *   <li>Can generate OpenCV Mat objects representing color statistics</li>
+ *   <li>Supports different statistical representations (mean, min, max)</li>
+ *   <li>Enables visual debugging of color profiles</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>In the model-based approach, ColorCluster enables robust visual element detection 
+ * that goes beyond simple pixel matching. By maintaining statistical color profiles across 
+ * multiple color spaces, it provides tolerance to the natural variations found in real-world 
+ * GUI applications while maintaining high accuracy in element identification.</p>
+ * 
+ * @since 1.0
+ * @see ColorSchema
+ * @see ColorInfo
+ * @see ColorStatProfile
+ * @see KmeansProfile
  */
 @Getter
 @Setter
