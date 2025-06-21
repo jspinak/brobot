@@ -483,7 +483,7 @@ retrieval operation on the region, which can be Farms, Mines, Lakes,
 Mountains, Forest, or Castle. The categories of the random variable 
 include additionally the entries Forms and Minez to simulate the imperfect 
 retrieval of data during visual automation. This example is taken from the 
-[basic tutorial](/brobot/docs/tutorial-basics/intro), which shows how to automate 
+[basic tutorial](/docs/core-library/tutorials/tutorial-basics/intro), which shows how to automate 
 the creation of a labeled image dataset.   
 
 <p align="center">

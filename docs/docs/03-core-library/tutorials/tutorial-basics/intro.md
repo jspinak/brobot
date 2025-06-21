@@ -40,7 +40,7 @@ This demo is meant as an introduction to the Brobot library
 and as a demonstration of its mocking functionality. It can be run
 in any Java IDE on Windows, Mac, or Linux with mocking enabled. 
 You can see the real execution in the 
-[live automation video](/docs/tutorial-basics/live-automation).
+[live automation video](./live-automation).
 Update: Dawn of Titans has been shut down since 2022, but you can still learn about 
 mocking and model-based GUI automation with this tutorial. If you are interested in a tutorial 
-that allows for live automation, check out the [mrdoob tutorial](/docs/tutorial-mrdoob/setup). 
+that allows for live automation, check out the [mrdoob tutorial](../tutorial-mrdoob/setup). 
