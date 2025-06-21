@@ -8,15 +8,37 @@ import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.StateLocation;
 import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.StateRegion;
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
 
 import java.util.Optional;
 
 /**
- * Location is calculated
- * - when the region is defined, first with the position in the region, then with the offset
- * - when the region is not defined, with the x,y values, then with the offset
+ * Represents a point on the screen in the Brobot model-based GUI automation framework.
+ * 
+ * <p>A Location defines a specific point that can be specified in two ways:
+ * <ul>
+ *   <li>Absolute coordinates: Using x,y pixel values directly</li>
+ *   <li>Relative position: As a percentage position within a Region</li>
+ * </ul>
+ * Both methods support optional x,y offsets for fine-tuning the final position.</p>
+ * 
+ * <p>In the model-based approach, Locations are essential for:
+ * <ul>
+ *   <li>Specifying click targets within GUI elements</li>
+ *   <li>Defining anchor points for spatial relationships between elements</li>
+ *   <li>Positioning the mouse for hover actions</li>
+ *   <li>Creating dynamic positions that adapt to different screen sizes</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>The relative positioning feature is particularly powerful in model-based automation
+ * as it allows locations to remain valid even when GUI elements move or resize, making
+ * automation more robust to UI changes.</p>
+ * 
+ * @since 1.0
+ * @see Region
+ * @see Position
+ * @see StateLocation
+ * @see Match
  */
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -31,11 +53,20 @@ public class Location {
     private int offsetX = 0;
     private int offsetY = 0;
 
+    /**
+     * Creates a Location at the origin (0,0).
+     */
     public Location() {
         this.x = 0;
         this.y = 0;
     }
 
+    /**
+     * Creates a Location at the specified absolute coordinates.
+     * 
+     * @param x the x-coordinate in pixels
+     * @param y the y-coordinate in pixels
+     */
     public Location(int x, int y) {
         this.x = x;
         this.y = y;
@@ -68,6 +99,14 @@ public class Location {
         setPosition(sikuliLocation.x, sikuliLocation.y);
     }
 
+    /**
+     * Creates a Location at the center of the specified Region.
+     * 
+     * <p>This constructor is useful for targeting the middle of GUI elements
+     * in a way that remains valid even if the element moves or resizes.</p>
+     * 
+     * @param region the Region to center the Location in
+     */
     public Location(Region region) {
         this.region = region;
         position = new Position(.5, .5);
@@ -80,6 +119,15 @@ public class Location {
         position = new Position(percentOfW, percentOfH);
     }
 
+    /**
+     * Creates a Location at a specific position within a Region.
+     * 
+     * <p>The Position specifies where within the Region this Location points to,
+     * using percentage values (0.0 to 1.0) for both width and height.</p>
+     * 
+     * @param region the Region containing this Location
+     * @param position the relative position within the Region
+     */
     public Location(Region region, Position position) {
         this.region = region;
         this.position = position;
@@ -165,6 +213,14 @@ public class Location {
         return LocationUtils.getSikuliLocationFromRegion(region, position, offsetX, offsetY);
     }
 
+    /**
+     * Converts this Location to a SikuliX Location for compatibility.
+     * 
+     * <p>This method calculates the final screen coordinates (including any offsets)
+     * and returns them as a SikuliX Location object for use with Sikuli operations.</p>
+     * 
+     * @return a SikuliX Location with the calculated screen coordinates
+     */
     @JsonIgnore
     public org.sikuli.script.Location sikuli() {
         return LocationUtils.getSikuliLocation(this);
@@ -196,6 +252,15 @@ public class Location {
         return LocationUtils.getRegionH(this);
     }
 
+    /**
+     * Checks if this Location has valid coordinates.
+     * 
+     * <p>A Location is considered defined if it has either valid x,y coordinates
+     * or a valid Region with position. This is important for validating click
+     * targets before attempting interactions.</p>
+     * 
+     * @return true if the Location can produce valid screen coordinates
+     */
     @JsonIgnore
     public boolean defined() {
         return LocationUtils.isDefined(this);
@@ -247,8 +312,13 @@ public class Location {
     }
 
     /**
-     * If the locations are mixed (defined by region and by xy) then it is converted to 'defined by xy'.
-     * @param loc the location to add to this one
+     * Adds another Location's coordinates to this Location.
+     * 
+     * <p>If the locations use different definition methods (absolute vs relative),
+     * the result will be converted to absolute coordinates. This is useful for
+     * creating offset positions from a base location.</p>
+     * 
+     * @param loc the Location to add to this one
      */
     public void add(Location loc) {
         LocationUtils.add(this, loc);

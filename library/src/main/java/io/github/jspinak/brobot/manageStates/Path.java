@@ -9,8 +9,57 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * A single path from a start State to a target State.
- * Paths with lower scores will be chosen before those with higher scores.
+ * Represents a navigation path between states in the Brobot model-based GUI automation framework.
+ * 
+ * <p>Path is a fundamental component of the Path Traversal Model (ξ), encapsulating a sequence 
+ * of states and the transitions between them that form a valid route through the GUI. Each path 
+ * represents a concrete way to navigate from one or more starting states to a target state, 
+ * enabling automated traversal of complex application workflows.</p>
+ * 
+ * <p>Key components:
+ * <ul>
+ *   <li><b>State Sequence</b>: Ordered list of state IDs representing the navigation route</li>
+ *   <li><b>Transitions</b>: The state transition functions that move between consecutive states</li>
+ *   <li><b>Score</b>: Numeric value for path quality (lower scores indicate preferred paths)</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Path scoring:
+ * <ul>
+ *   <li>Lower scores are preferred when multiple paths exist to the same target</li>
+ *   <li>Scores are calculated based on state weights and transition costs</li>
+ *   <li>Enables optimization of navigation efficiency and reliability</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Path operations:
+ * <ul>
+ *   <li><b>Trimming</b>: Removes states before the first active state for partial execution</li>
+ *   <li><b>Cleaning</b>: Removes paths containing failed transitions</li>
+ *   <li><b>Reversal</b>: Changes direction for backward path construction</li>
+ *   <li><b>Copying</b>: Creates independent path instances for modification</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Use cases:
+ * <ul>
+ *   <li>Storing discovered routes from PathFinder algorithms</li>
+ *   <li>Executing state transitions in sequence during automation</li>
+ *   <li>Recovering from failures by finding alternative paths</li>
+ *   <li>Optimizing navigation by selecting lowest-score paths</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>In the model-based approach, Path objects transform abstract state graphs into concrete 
+ * execution plans. They bridge the gap between the theoretical model of possible GUI states 
+ * and the practical requirements of navigating through them in a specific order to achieve 
+ * automation goals.</p>
+ * 
+ * @since 1.0
+ * @see Paths
+ * @see PathFinder
+ * @see IStateTransition
+ * @see StateTransitions
  */
 @Getter
 @Setter

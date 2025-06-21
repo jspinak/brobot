@@ -10,8 +10,41 @@ import org.springframework.stereotype.Component;
 import java.util.*;
 
 /**
- * Finds all paths from a set of start States to a target State.
- * The Path list is sorted in ascending order for Path score.
+ * Implements graph traversal algorithms to find navigation paths between States.
+ * 
+ * <p>PathFinder is a core component of the Path Traversal Model (ξ) in the Brobot framework,
+ * responsible for discovering all possible routes from a set of starting states to a target 
+ * state. It treats the state structure as a directed graph and uses recursive traversal to 
+ * find valid paths.</p>
+ * 
+ * <p>Key features:
+ * <ul>
+ *   <li><b>Multi-path Discovery</b>: Finds all valid paths, not just the shortest one</li>
+ *   <li><b>Path Scoring</b>: Evaluates paths based on state weights to prioritize optimal routes</li>
+ *   <li><b>Cycle Prevention</b>: Avoids infinite loops by tracking visited states</li>
+ *   <li><b>Multi-start Support</b>: Can begin from multiple possible starting states</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>The pathfinding algorithm:
+ * <ol>
+ *   <li>Starts from the target state and works backwards</li>
+ *   <li>Recursively explores all states that have transitions to the current state</li>
+ *   <li>Terminates paths when reaching any of the start states</li>
+ *   <li>Scores and sorts discovered paths for optimal selection</li>
+ * </ol>
+ * </p>
+ * 
+ * <p>This approach enables the framework to automatically navigate complex GUI structures,
+ * recover from unexpected states, and adapt to changes in the application flow. The ability
+ * to find alternative paths is crucial for robust automation that can handle variations
+ * in GUI behavior.</p>
+ * 
+ * @since 1.0
+ * @see Path
+ * @see Paths
+ * @see StateTransitions
+ * @see StateTransitionsJointTable
  */
 @Component
 public class PathFinder {

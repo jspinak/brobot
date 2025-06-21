@@ -4,6 +4,7 @@ plugins {
     id 'java-library'
     id 'maven-publish'
     id 'signing'
+    id 'org.jreleaser'
 }
 
 dependencies {
@@ -99,8 +100,68 @@ publishing {
 }
 
 signing {
-    def signingKey = findProperty("signing.key")
-    def signingPassword = findProperty("signing.password")
-    useInMemoryPgpKeys(signingKey, signingPassword)
     sign publishing.publications.mavenJava
+}
+
+// JReleaser configuration
+jreleaser {
+    // Git configuration
+    gitRootSearch = true
+    
+    // Project configuration
+    project {
+        name = 'brobot'
+        description = 'Model-based GUI Automation'
+        website = 'https://github.com/jspinak/brobot'
+        authors = ['Joshua Spinak']
+        license = 'MIT'
+        inceptionYear = '2022'
+        stereotype = 'NONE'
+        
+        java {
+            groupId = 'io.github.jspinak'
+            version = '21'
+            multiProject = true
+        }
+    }
+    
+    // Release configuration
+    release {
+        github {
+            overwrite = true
+            draft = false
+            prerelease {
+                enabled = false
+            }
+            changelog {
+                formatted = 'ALWAYS'
+                preset = 'conventional-commits'
+                contributors {
+                    enabled = false
+                }
+            }
+        }
+    }
+    
+    // Signing configuration
+    signing {
+        active = 'ALWAYS'
+        armored = true
+        mode = 'MEMORY'
+    }
+    
+    // Deploy configuration for Maven Central
+    deploy {
+        maven {
+            nexus2 {
+                'maven-central' {
+                    active = 'ALWAYS'
+                    url = 'https://s01.oss.sonatype.org/service/local'
+                    closeRepository = true
+                    releaseRepository = true
+                    stagingRepositories = ['build/staging-deploy']
+                }
+            }
+        }
+    }
 }

@@ -1,5 +1,83 @@
 package io.github.jspinak.brobot.report;
 
+/**
+ * ANSI escape code constants for colored terminal output in Brobot reporting.
+ * 
+ * <p>ANSI provides a comprehensive set of escape sequences for formatting console output 
+ * with colors, styles, and backgrounds. This enables the framework to produce visually 
+ * distinctive reports, highlight important information, and improve readability of 
+ * automation logs in terminal environments that support ANSI codes.</p>
+ * 
+ * <p>Color categories:
+ * <ul>
+ *   <li><b>Regular Colors</b>: Standard 8-color palette for normal text</li>
+ *   <li><b>Bold Colors</b>: Emphasized versions with increased brightness</li>
+ *   <li><b>Underlined Colors</b>: Text with underline decoration</li>
+ *   <li><b>Background Colors</b>: Colored backgrounds for highlighting</li>
+ *   <li><b>Bright Colors</b>: High-intensity variants for better visibility</li>
+ *   <li><b>Bold Bright Colors</b>: Maximum emphasis combining bold and bright</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Common usage patterns:
+ * <ul>
+ *   <li>GREEN for successful operations and passed tests</li>
+ *   <li>RED for errors, failures, and warnings</li>
+ *   <li>YELLOW for important notices and state changes</li>
+ *   <li>BLUE for informational messages and links</li>
+ *   <li>CYAN for debug information and timestamps</li>
+ *   <li>PURPLE for special states or unique identifiers</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Terminal compatibility:
+ * <ul>
+ *   <li>Works in most Unix/Linux terminals</li>
+ *   <li>Supported in macOS Terminal and iTerm</li>
+ *   <li>Windows Terminal and PowerShell (Windows 10+)</li>
+ *   <li>VS Code integrated terminal</li>
+ *   <li>IntelliJ IDEA console</li>
+ *   <li>Ignored in environments without ANSI support</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Example usage in reports:
+ * <pre>
+ * System.out.println(ANSI.GREEN + "✓ Test passed" + ANSI.RESET);
+ * System.out.println(ANSI.RED_BOLD + "✗ Error: " + ANSI.RESET + message);
+ * System.out.println(ANSI.YELLOW_BACKGROUND + " WARNING " + ANSI.RESET);
+ * </pre>
+ * </p>
+ * 
+ * <p>Best practices:
+ * <ul>
+ *   <li>Always end colored sections with RESET to avoid color bleeding</li>
+ *   <li>Use bold variants for headers and critical information</li>
+ *   <li>Combine foreground and background for maximum visibility</li>
+ *   <li>Test output in target terminal environments</li>
+ *   <li>Provide non-colored alternatives for accessibility</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Accessibility considerations:
+ * <ul>
+ *   <li>Not all terminals support all color combinations</li>
+ *   <li>Some users may have color blindness</li>
+ *   <li>Screen readers ignore ANSI codes</li>
+ *   <li>Consider providing plain-text logs as alternative</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>In the model-based approach, ANSI colors help distinguish different types of 
+ * automation events, making logs easier to scan and debug. The visual differentiation 
+ * is particularly valuable when monitoring real-time automation execution or analyzing 
+ * large log files for specific events or errors.</p>
+ * 
+ * @since 1.0
+ * @see Report
+ * @see Output
+ * @see TestOutput
+ */
 public class ANSI {
     // Reset
     public static final String RESET = "\033[0m";  // Text Reset

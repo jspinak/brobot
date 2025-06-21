@@ -16,12 +16,70 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 /**
- * This class runs an automation script continuously by
- * - searching for active states at a fixed interval
- * - running transitions for any active states found
- *
- * When using this script, the model could contain some states without transitions and some states with transitions.
- * The script will run transitions for active states with transitions until a rest state without transitions is reached.
+ * Implements continuous state-based automation that monitors and responds to GUI changes.
+ * 
+ * <p>ContinuousAutomation provides an event-loop based automation pattern that continuously 
+ * monitors the GUI for active states and executes appropriate transitions. This implementation 
+ * is ideal for reactive automation scenarios where the system must respond to unpredictable 
+ * GUI events or maintain ongoing interaction with an application.</p>
+ * 
+ * <p>Execution model:
+ * <ul>
+ *   <li><b>Periodic Scanning</b>: Searches for active states at configurable intervals</li>
+ *   <li><b>Transition Execution</b>: Runs transitions for any active states found</li>
+ *   <li><b>Rest State Support</b>: Naturally pauses at states without transitions</li>
+ *   <li><b>Concurrent Safety</b>: Single-threaded executor prevents race conditions</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Key features:
+ * <ul>
+ *   <li>Automatic state discovery through periodic searches</li>
+ *   <li>Graceful handling of states with and without transitions</li>
+ *   <li>Clean shutdown with proper thread termination</li>
+ *   <li>Error recovery with automatic stop on exceptions</li>
+ *   <li>Configurable search intervals for performance tuning</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Common use cases:
+ * <ul>
+ *   <li>Monitoring applications for specific conditions</li>
+ *   <li>Handling asynchronous popups or notifications</li>
+ *   <li>Maintaining application state during long-running processes</li>
+ *   <li>Creating responsive bots that react to GUI events</li>
+ *   <li>Implementing watchdog functionality</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>State handling strategy:
+ * <ul>
+ *   <li>Active states with transitions trigger state handler execution</li>
+ *   <li>Active states without transitions serve as rest points</li>
+ *   <li>Multiple active states are processed sequentially</li>
+ *   <li>State handler failures are logged but don't stop execution</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Performance considerations:
+ * <ul>
+ *   <li>Search interval affects responsiveness vs. CPU usage</li>
+ *   <li>State finder efficiency impacts overall performance</li>
+ *   <li>Consider search optimization for large state spaces</li>
+ *   <li>Single-threaded design prevents parallel state handling</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>In the model-based approach, ContinuousAutomation embodies the reactive automation 
+ * paradigm where the system continuously adapts to the current GUI state. This pattern 
+ * is particularly powerful for applications with dynamic behavior, unexpected events, or 
+ * when human interaction may occur alongside automation.</p>
+ * 
+ * @since 1.0
+ * @see BaseAutomation
+ * @see StateFinder
+ * @see StateHandler
+ * @see StateTransitions
  */
 @Component
 public class ContinuousAutomation extends BaseAutomation {

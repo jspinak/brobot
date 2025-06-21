@@ -21,14 +21,43 @@ import java.util.*;
 import static io.github.jspinak.brobot.datatypes.primitives.location.Positions.Name.TOPLEFT;
 
 /**
- * This class holds all the objects that can be passed to an Action, which include:
- * - StateLocation
- * - StateImage
- * - StateRegion
- * - StateString
- * - Matches
- * - Image: these are scenes, or screenshots on file, that are used for the operation instead of the active environment
- *   (what is currently on the monitor).
+ * Container for GUI elements that serve as targets for automation actions in Brobot.
+ * 
+ * <p>ObjectCollection is a fundamental data structure in the model-based approach that 
+ * aggregates different types of GUI elements that can be acted upon. It provides a 
+ * unified way to pass multiple heterogeneous targets to actions, supporting the 
+ * framework's flexibility in handling various GUI interaction scenarios.</p>
+ * 
+ * <p>Supported element types:
+ * <ul>
+ *   <li><b>StateImages</b>: Visual patterns to find and interact with</li>
+ *   <li><b>StateLocations</b>: Specific points for precise interactions</li>
+ *   <li><b>StateRegions</b>: Rectangular areas for spatial operations</li>
+ *   <li><b>StateStrings</b>: Text strings for keyboard input</li>
+ *   <li><b>Matches</b>: Results from previous find operations that can be reused</li>
+ *   <li><b>Scenes</b>: Screenshots for offline processing instead of live screen capture</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Key features:
+ * <ul>
+ *   <li>Supports multiple objects of each type for batch operations</li>
+ *   <li>Tracks interaction counts for each object (timesActedOn)</li>
+ *   <li>Enables offline automation using stored screenshots (Scenes)</li>
+ *   <li>Provides builder pattern for convenient construction</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>This design allows actions to be polymorphic - the same action (e.g., Click) can 
+ * operate on images, regions, locations, or previous matches, making automation code 
+ * more flexible and reusable.</p>
+ * 
+ * @since 1.0
+ * @see StateImage
+ * @see StateRegion
+ * @see StateLocation
+ * @see Matches
+ * @see Action
  */
 @Getter
 @Setter

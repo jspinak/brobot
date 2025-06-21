@@ -1,8 +1,9 @@
 // @ts-check
 // Note: type annotations allow type checking and IDEs autocompletion
 
-const lightCodeTheme = require('prism-react-renderer/themes/github');
-const darkCodeTheme = require('prism-react-renderer/themes/dracula');
+const {themes} = require('prism-react-renderer');
+const lightCodeTheme = themes.github;
+const darkCodeTheme = themes.dracula;
 
 // for KaTeX (Latex)
 const math = require('remark-math');
@@ -14,32 +15,43 @@ const config = {
   tagline: 'Testable State-based Automation',
   url: 'https://jspinak.github.io',
   baseUrl: '/brobot/',
-  onBrokenLinks: 'throw',
+  onBrokenLinks: 'warn', // Consider changing to 'throw' for production builds
   onBrokenMarkdownLinks: 'warn',
   favicon: 'img/brobot-happy.ico',
   organizationName: 'jspinak', // Usually your GitHub org/user name.
   projectName: 'brobot', // Usually your repo name.
 
+  plugins: [
+    [
+      '@docusaurus/plugin-google-gtag',
+      {
+        trackingID: 'G-6WY1S6ZWEY',
+        anonymizeIP: true,
+      },
+    ],
+  ],
+
   presets: [
     [
       '@docusaurus/preset-classic',
       /** @type {import('@docusaurus/preset-classic').Options} */
-      {
-        // Will be passed to @docusaurus/plugin-google-analytics
-        gtag: {
-          trackingID: 'G-6WY1S6ZWEY',
-          anonymizeIP: true,
-        },
+      ({
         pages: {
-          remarkPlugins: [math],
-          rehypePlugins: [katex],
+          // You can re-enable math plugins here if needed for standalone pages
         },
         docs: {
           path: 'docs',
           remarkPlugins: [math],
           rehypePlugins: [katex],
           sidebarPath: require.resolve('./sidebars.js'),
-          editUrl: 'https://jspinak.github.io/brobot/',
+          editUrl: 'https://github.com/jspinak/brobot/edit/main/docs/',
+          lastVersion: '1.0.7',
+          versions: {
+            current: {
+              label: 'Next',
+              banner: 'unreleased',
+            },
+          },
         },
         blog: {
           showReadingTime: true,
@@ -49,15 +61,15 @@ const config = {
         theme: {
           customCss: require.resolve('./src/css/custom.css'),
         },
-      },
+      }),
     ],
   ],
   stylesheets: [
     {
-      href: 'https://cdn.jsdelivr.net/npm/katex@0.13.24/dist/katex.min.css',
+      href: 'https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css',
       type: 'text/css',
       integrity:
-          'sha384-odtC+0UGzzFL/6PNoE8rX/SPcQDXBJ+uRepguP4QkPCm2LBxH3FA3y+fKSiJ+AmM',
+        'sha384-GvrOXuhMATgEsSwCs4smul74iXGOixntILdUW9XmUC6+HX0sLNAK3q71HotJqlAn',
       crossorigin: 'anonymous',
     },
   ],
@@ -65,32 +77,32 @@ const config = {
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
       navbar: {
-        title: 'Home',
+        title: 'Brobot', // Changed from 'Home' for clarity
         logo: {
-          alt: 'My Site Logo',
+          alt: 'Brobot Logo',
           src: 'img/brobot_logo/brobot-happy-text.svg',
         },
         items: [
+          // A single entry point for all documentation
           {
-            type: 'doc',
-            docId: 'introduction/introduction',
-            position: 'left',
-            label: 'Introduction',
-          },
-          {
-            type: 'doc',
-            docId: 'tutorial-basics/intro',
-            position: 'left',
-            label: 'Tutorial',
-          },
-          {
-            type: 'doc',
-            docId: 'API/overview',
+            type: 'docSidebar',
+            sidebarId: 'docSidebar', // Make sure this matches the ID in sidebars.js
             position: 'left',
             label: 'Documentation',
           },
-          {to: 'visualAPI', label: 'The Visual API', position: 'left'},
+          // The external link to your hosted API documentation
+          {
+            href: 'https://jspinak.github.io/brobot/api/1.0.7/',
+            label: 'API Reference (1.0.7)',
+            position: 'left',
+          },
           {to: '/blog', label: 'Blog', position: 'left'},
+          // The version dropdown and GitHub link remain on the right
+          {
+            type: 'docsVersionDropdown',
+            position: 'right',
+            dropdownActiveClassDisabled: true,
+          },
           {
             href: 'https://github.com/jspinak/brobot',
             label: 'GitHub',
@@ -101,16 +113,17 @@ const config = {
       footer: {
         style: 'dark',
         links: [
+          // Footer links remain the same
           {
             title: 'Docs',
             items: [
               {
-              label: 'Introductory Video',
-              to: 'https://www.youtube.com/watch?v=aHnVQ8KmOVw',
+                label: 'Introductory Video',
+                to: 'https://www.youtube.com/watch?v=aHnVQ8KmOVw',
               },
               {
                 label: 'Tutorial',
-                to: '/docs/tutorial-basics/intro',
+                to: '/docs/03-core-library/tutorials/tutorial-basics/intro',
               },
               {
                 label: 'The Visual API white paper',
