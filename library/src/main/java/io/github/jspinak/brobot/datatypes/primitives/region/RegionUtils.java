@@ -10,6 +10,72 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 
+/**
+ * Comprehensive utility methods for Region manipulation and analysis in Brobot.
+ * 
+ * <p>RegionUtils provides a rich set of static methods for working with Region objects, 
+ * including spatial calculations, transformations, comparisons, and grid operations. 
+ * These utilities form the foundation for complex region-based operations throughout 
+ * the framework, enabling sophisticated spatial reasoning about GUI elements.</p>
+ * 
+ * <p>Operation categories:
+ * <ul>
+ *   <li><b>Conversions</b>: Transform between Region, Match, Location, and Rect types</li>
+ *   <li><b>Spatial Analysis</b>: Overlap detection, containment checks, bounding boxes</li>
+ *   <li><b>Boundary Operations</b>: Adjust edges, calculate endpoints, union regions</li>
+ *   <li><b>Grid Operations</b>: Divide regions into grids, map locations to cells</li>
+ *   <li><b>Set Operations</b>: Subtract regions, merge adjacent areas, find intersections</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Key spatial methods:
+ * <ul>
+ *   <li>{@code overlaps()}: Detect if two regions share any area</li>
+ *   <li>{@code contains()}: Check if one region fully contains another</li>
+ *   <li>{@code getOverlappingRegion()}: Find the intersection of two regions</li>
+ *   <li>{@code getUnion()}: Create smallest region containing both inputs</li>
+ *   <li>{@code minus()}: Subtract one region from another</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Grid functionality:
+ * <ul>
+ *   <li>Divide regions into row/column grids for systematic processing</li>
+ *   <li>Map locations to grid cell numbers</li>
+ *   <li>Convert between grid coordinates and cell indices</li>
+ *   <li>Support for SikuliX raster operations (minimum 5x5 cells)</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Advanced operations:
+ * <ul>
+ *   <li><b>Region Merging</b>: Combine adjacent regions to simplify collections</li>
+ *   <li><b>Boundary Points</b>: Extract significant x/y coordinates for subdivision</li>
+ *   <li><b>Random Locations</b>: Generate random points within regions for testing</li>
+ *   <li><b>Definition Checking</b>: Validate regions have meaningful dimensions</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Integration notes:
+ * <ul>
+ *   <li>Works with both Brobot and SikuliX region representations</li>
+ *   <li>Supports JavaCV Rect for OpenCV operations</li>
+ *   <li>Handles edge cases like zero-sized or screen-sized regions</li>
+ *   <li>Thread-safe through stateless design</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>In the model-based approach, RegionUtils enables sophisticated spatial reasoning 
+ * about GUI elements. These utilities are essential for implementing features like 
+ * smart search areas, collision detection, layout analysis, and dynamic region 
+ * adjustment based on screen content.</p>
+ * 
+ * @since 1.0
+ * @see Region
+ * @see Location
+ * @see Match
+ * @see SearchRegions
+ */
 public class RegionUtils {
 
     public static Region convertMatchToRegion(Match match) {

@@ -10,6 +10,104 @@ import java.util.List;
 
 import static org.bytedeco.opencv.global.opencv_imgcodecs.imwrite;
 
+/**
+ * Container for visual debugging and analysis illustrations in Brobot.
+ * 
+ * <p>Illustrations manages the collection of visual outputs generated during automation 
+ * execution for debugging, analysis, and reporting purposes. It creates comprehensive 
+ * visual documentation showing what Brobot "sees" during pattern matching, including 
+ * match locations, search regions, image classifications, and motion detection. These 
+ * illustrations are invaluable for understanding automation behavior and troubleshooting 
+ * recognition issues.</p>
+ * 
+ * <p>Illustration types:
+ * <ul>
+ *   <li><b>Scene with Matches</b>: Screenshot annotated with found patterns and search regions</li>
+ *   <li><b>Sidebar Details</b>: Detailed view of individual matches with scores and metadata</li>
+ *   <li><b>Class Segmentation</b>: Visual classification of screen regions by image type</li>
+ *   <li><b>Legend</b>: Reference showing image classes, patterns, and color profiles</li>
+ *   <li><b>Motion Detection</b>: Highlights pixels that changed between frames</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Mat components managed:
+ * <ul>
+ *   <li><b>scene</b>: Original screenshot without annotations</li>
+ *   <li><b>matchesOnScene</b>: Scene with match rectangles and search regions</li>
+ *   <li><b>sceneWithMatchesAndSidebar</b>: Complete illustration with detail panel</li>
+ *   <li><b>classes</b>: Scene with image classification overlay</li>
+ *   <li><b>matchesOnClasses</b>: Classification view with matches</li>
+ *   <li><b>classesWithMatchesAndLegend</b>: Complete classification illustration</li>
+ *   <li><b>motion</b>: Motion detection visualization</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Use cases:
+ * <ul>
+ *   <li>Debugging pattern matching failures</li>
+ *   <li>Analyzing search region effectiveness</li>
+ *   <li>Understanding state detection results</li>
+ *   <li>Documenting automation behavior</li>
+ *   <li>Creating test reports with visual evidence</li>
+ *   <li>Training users on pattern selection</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Workflow:
+ * <ol>
+ *   <li>Set base scene from screenshot</li>
+ *   <li>Draw matches and regions on scene</li>
+ *   <li>Create sidebar with match details</li>
+ *   <li>Generate classification overlays</li>
+ *   <li>Compose final illustrations</li>
+ *   <li>Write to files for review</li>
+ * </ol>
+ * </p>
+ * 
+ * <p>File management:
+ * <ul>
+ *   <li>Automatic filename generation with prefixes</li>
+ *   <li>Scene illustrations: "[name]-scene-"</li>
+ *   <li>Class illustrations: "[name]-classes-"</li>
+ *   <li>Batch writing of all illustration types</li>
+ *   <li>PNG format for web compatibility</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Visual elements included:
+ * <ul>
+ *   <li>Match rectangles with confidence scores</li>
+ *   <li>Search region boundaries</li>
+ *   <li>Pattern thumbnails in sidebar</li>
+ *   <li>Color-coded classifications</li>
+ *   <li>Motion detection highlights</li>
+ *   <li>Timestamp and state information</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Benefits for development:
+ * <ul>
+ *   <li>Visual confirmation of recognition accuracy</li>
+ *   <li>Easy identification of false positives/negatives</li>
+ *   <li>Understanding of search region coverage</li>
+ *   <li>Insight into classification algorithms</li>
+ *   <li>Historical record of automation execution</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>In the model-based approach, Illustrations provides the visual feedback loop 
+ * essential for developing and maintaining robust automation. By showing exactly 
+ * what the automation system perceives and how it makes decisions, developers can 
+ * quickly identify and resolve recognition issues, optimize search regions, and 
+ * ensure reliable state detection.</p>
+ * 
+ * @since 1.0
+ * @see IllustrateScreenshot
+ * @see IllustrateState
+ * @see Draw
+ * @see StateIllustrator
+ * @see Mat
+ */
 @Getter
 @Setter
 public class Illustrations {

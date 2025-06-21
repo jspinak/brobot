@@ -9,6 +9,31 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
+/**
+ * Service responsible for managing state-related operations in the Brobot framework.
+ * 
+ * <p>StateManagementService handles the critical task of converting between state names 
+ * (used in code for readability) and state IDs (used internally for efficient processing). 
+ * This abstraction allows developers to work with meaningful state names while the 
+ * framework maintains performance through numeric identifiers.</p>
+ * 
+ * <p>Key responsibilities:
+ * <ul>
+ *   <li>Convert state names to IDs for runtime efficiency</li>
+ *   <li>Manage state transition configurations</li>
+ *   <li>Coordinate with the state repository for persistence</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>This service is essential for the model-based approach as it bridges the gap between 
+ * human-readable state definitions and machine-efficient state processing, ensuring both 
+ * developer productivity and runtime performance.</p>
+ * 
+ * @since 1.0
+ * @see StateTransitions
+ * @see State
+ * @see AllStatesInProjectService
+ */
 @Service
 public class StateManagementService {
 

@@ -15,8 +15,64 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Drags from an Image Match, Region, or Location to an Image Match, Region, or Location
- * Drag is a Composite Action composed of a Basic Action (Find) and a Sikuli Wrapper (Drag Location)
+ * Performs drag-and-drop operations between GUI elements in the Brobot model-based automation framework.
+ * 
+ * <p>Drag is a composite action in the Action Model (α) that combines multiple basic actions 
+ * to implement complex drag-and-drop interactions. It seamlessly handles dragging between 
+ * various target types including visually identified elements (Image Matches), screen areas 
+ * (Regions), and specific coordinates (Locations), providing a unified interface for all 
+ * drag operations.</p>
+ * 
+ * <p>Architecture:
+ * <ul>
+ *   <li><b>Composite Design</b>: Combines Find actions with platform-specific drag operations</li>
+ *   <li><b>Two-phase Execution</b>: First finds the 'from' location, then the 'to' location</li>
+ *   <li><b>Flexible Targeting</b>: Supports Image Matches, Regions, and Locations for both 
+ *       source and destination</li>
+ *   <li><b>Result Tracking</b>: Returns a defined region representing the drag path</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Supported drag patterns:
+ * <ul>
+ *   <li>Image to Image: Drag from one visual element to another</li>
+ *   <li>Image to Region: Drag from a visual element to a screen area</li>
+ *   <li>Location to Location: Precise coordinate-based dragging</li>
+ *   <li>Any combination of Image Match, Region, or Location</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Common use cases:
+ * <ul>
+ *   <li>Moving files between folders in file managers</li>
+ *   <li>Rearranging items in lists or grids</li>
+ *   <li>Drawing or selecting areas in graphics applications</li>
+ *   <li>Adjusting sliders or other draggable UI controls</li>
+ *   <li>Drag-based gesture interactions in modern applications</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Implementation details:
+ * <ul>
+ *   <li>Uses ObjectCollection #1 for the 'from' location</li>
+ *   <li>Uses ObjectCollection #2 for the 'to' location</li>
+ *   <li>Returns matches for the 'to' location, not the 'from' location</li>
+ *   <li>Adds a DefinedRegion to matches with drag path coordinates</li>
+ *   <li>Supports offset adjustments for precise positioning</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>In the model-based approach, Drag actions represent high-level GUI interactions that 
+ * would otherwise require multiple coordinated low-level actions. By encapsulating the 
+ * complexity of drag-and-drop operations, the framework enables more natural and maintainable 
+ * automation scripts that closely mirror human interactions with the GUI.</p>
+ * 
+ * @since 1.0
+ * @see Find
+ * @see DragLocation
+ * @see GetDragLocation
+ * @see ActionOptions
+ * @see ObjectCollection
  */
 @Component
 public class Drag implements ActionInterface {

@@ -9,9 +9,63 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * A StateLocation belongs to a State and usually has a Location that
- * has a special meaning for its owner State. For example, clicking on
- * this Location has an effect in the owner State but not in other States.
+ * Represents a meaningful screen coordinate associated with a specific state in Brobot.
+ * 
+ * <p>StateLocation encapsulates a point on the screen that has contextual significance within 
+ * a particular state. Unlike simple Location objects, StateLocation maintains state ownership, 
+ * interaction history, and behavioral properties that make it suitable for sophisticated GUI 
+ * automation scenarios where specific coordinates have state-dependent meanings and effects.</p>
+ * 
+ * <p>Key features:
+ * <ul>
+ *   <li><b>State Association</b>: Bound to a specific state for contextual relevance</li>
+ *   <li><b>Flexible Positioning</b>: Supports both absolute coordinates and relative positions</li>
+ *   <li><b>Interaction Tracking</b>: Records how many times the location has been acted upon</li>
+ *   <li><b>Visibility Persistence</b>: Probability of remaining actionable after interaction</li>
+ *   <li><b>Existence Probability</b>: Statistical measure of finding actionable content</li>
+ *   <li><b>Anchor Support</b>: Can be positioned relative to other screen elements</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Common use cases:
+ * <ul>
+ *   <li>Fixed buttons or controls that only function in specific states</li>
+ *   <li>Menu items that appear at consistent locations in certain contexts</li>
+ *   <li>Click targets that trigger state-specific actions</li>
+ *   <li>Reference points for relative positioning of other elements</li>
+ *   <li>Hotspots that activate different features based on current state</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Behavioral properties:
+ * <ul>
+ *   <li><b>probabilityStaysVisibleAfterClicked</b>: Likelihood (0-100) the location remains 
+ *       actionable after being clicked</li>
+ *   <li><b>probabilityExists</b>: Likelihood (0-100) of finding actionable content at this 
+ *       location when the state is active</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Positioning options:
+ * <ul>
+ *   <li>Absolute coordinates via Location(x, y)</li>
+ *   <li>Relative position within a region</li>
+ *   <li>Anchored to other elements for dynamic layouts</li>
+ *   <li>Named positions (TOPLEFT, CENTER, etc.) for semantic clarity</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>In the model-based approach, StateLocation enables precise interaction with GUI elements 
+ * that may only be meaningful or functional in specific application states. This is essential 
+ * for handling context-sensitive interfaces where the same screen coordinate may trigger 
+ * different actions or have different effects depending on the current state.</p>
+ * 
+ * @since 1.0
+ * @see StateObject
+ * @see Location
+ * @see State
+ * @see Position
+ * @see Anchors
  */
 @Getter
 @Setter

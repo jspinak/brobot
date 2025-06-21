@@ -5,7 +5,7 @@ import styles from './HomepageFeatures.module.css';
 const FeatureList = [
   {
     title: 'Testable',
-    Svg: require('../../static/img/brobot_logo/brobotStanding2.svg').default, //undraw_docusaurus_mountain
+    Svg: require('/img/brobot_logo/brobotStanding2.svg').default, //undraw_docusaurus_mountain
     description: (
       <>
           Image-based process automation is usually developed
@@ -17,7 +17,7 @@ const FeatureList = [
   },
   {
     title: 'State-based',
-    Svg: require('../../static/img/brobot_logo/brobot-serious.svg').default, // undraw_docusaurus_tree
+    Svg: require('/img/brobot_logo/brobot-serious.svg').default, // undraw_docusaurus_tree
     description: (
       <>
         Graphical environments are classified into <code>states</code>. This
@@ -28,7 +28,7 @@ const FeatureList = [
   },
   {
     title: 'Powered by Sikuli & OpenCV',
-    Svg: require('../../static/img/brobot_logo/rocket.svg').default, // undraw_docusaurus_react.svg
+    Svg: require('/img/brobot_logo/rocket.svg').default, // undraw_docusaurus_react.svg
     description: (
       <>
         Brobot uses Sikuli and OpenCV for automation tasks. Sikuli relies on

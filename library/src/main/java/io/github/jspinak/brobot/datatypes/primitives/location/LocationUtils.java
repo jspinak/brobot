@@ -6,6 +6,72 @@ import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
 import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.StateLocation;
 import io.github.jspinak.brobot.report.Report;
 
+/**
+ * Comprehensive utility methods for Location manipulation and calculations in Brobot.
+ * 
+ * <p>LocationUtils provides a rich set of static methods for working with Location objects, 
+ * supporting both absolute (x,y) and relative (region-based) location representations. 
+ * These utilities handle conversions, calculations, and transformations while maintaining 
+ * the dual nature of Location objects in the framework.</p>
+ * 
+ * <p>Operation categories:
+ * <ul>
+ *   <li><b>Conversions</b>: Transform between Brobot and SikuliX location representations</li>
+ *   <li><b>Type Checking</b>: Determine if locations are absolute or relative</li>
+ *   <li><b>Calculations</b>: Geometric operations like opposites, additions, angles</li>
+ *   <li><b>Transformations</b>: Convert locations to matches, state objects, collections</li>
+ *   <li><b>Utilities</b>: Validation, comparison, string representation</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Location type handling:
+ * <ul>
+ *   <li><b>Absolute (XY)</b>: Defined by x,y coordinates directly</li>
+ *   <li><b>Relative (Region)</b>: Defined by position within a region</li>
+ *   <li>Methods adapt behavior based on location type</li>
+ *   <li>Supports conversion between types when needed</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Key operations:
+ * <ul>
+ *   <li>{@code getSikuliLocation()}: Convert to SikuliX format with offset support</li>
+ *   <li>{@code getOpposite()}: Find opposite point within region</li>
+ *   <li>{@code setFromCenter()}: Position based on angle and distance</li>
+ *   <li>{@code adjustToRegion()}: Ensure location stays within bounds</li>
+ *   <li>{@code add()}: Combine locations with type awareness</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Integration features:
+ * <ul>
+ *   <li>Creates StateLocation objects for state-based operations</li>
+ *   <li>Generates ObjectCollections for action execution</li>
+ *   <li>Converts to Match objects for result compatibility</li>
+ *   <li>Supports null state operations for stateless contexts</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Geometric calculations:
+ * <ul>
+ *   <li>Polar coordinate support (angle/distance from center)</li>
+ *   <li>Opposite point calculations (reflection)</li>
+ *   <li>Vector addition with type-aware semantics</li>
+ *   <li>Boundary enforcement for relative locations</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>In the model-based approach, LocationUtils enables sophisticated spatial reasoning 
+ * about point locations while abstracting the complexity of dual representation modes. 
+ * This flexibility allows the framework to work efficiently with both fixed screen 
+ * coordinates and adaptive region-based positions.</p>
+ * 
+ * @since 1.0
+ * @see Location
+ * @see Position
+ * @see Region
+ * @see StateLocation
+ */
 public class LocationUtils {
 
     /**

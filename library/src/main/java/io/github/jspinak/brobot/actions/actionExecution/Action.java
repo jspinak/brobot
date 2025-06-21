@@ -11,12 +11,40 @@ import org.springframework.stereotype.Component;
 import java.util.Optional;
 
 /**
- * This class is the entry point for processing operations. It reads the action to be
- * performed in the ActionOptions object and calls the corresponding methods. Currently,
- * there are two main types of Actions, Basic and Composite, each with their own
- * methods. Both Basic and Composite Actions follow the ActionInterface.
- *
- * <p>Author: Joshua Spinak</p>
+ * Entry point for executing GUI automation actions in the Brobot model-based framework.
+ * 
+ * <p>The Action class serves as the central dispatcher for all GUI operations, implementing 
+ * the Action Model (α) described in the theoretical foundations. It processes 
+ * ActionOptions to determine what operation to perform and delegates execution to the 
+ * appropriate action implementation using the action function f_α.</p>
+ * 
+ * <p>Key responsibilities:
+ * <ul>
+ *   <li>Parse ActionOptions to identify the requested action type</li>
+ *   <li>Route execution to Basic or Composite action implementations</li>
+ *   <li>Manage the action lifecycle and error handling</li>
+ *   <li>Return comprehensive results via Matches objects</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Action types supported:
+ * <ul>
+ *   <li><b>Basic Actions</b>: Atomic operations like Find, Click, Type, Drag</li>
+ *   <li><b>Composite Actions</b>: Complex operations that combine multiple basic actions</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>This class abstracts the complexity of GUI interaction, allowing automation code to 
+ * focus on what to do rather than how to do it. The model-based approach ensures actions 
+ * are executed in the context of the current State, making them more reliable and robust.</p>
+ * 
+ * @since 1.0
+ * @see ActionOptions
+ * @see ActionInterface
+ * @see BasicAction
+ * @see CompositeAction
+ * @see Matches
+ * @author Joshua Spinak
  */
 @Component
 public class Action {
@@ -30,14 +58,31 @@ public class Action {
     }
 
     /**
-     * @param actionOptions     contains all information about the action.
-     * @param objectCollections contains all objects to be acted on.
-     * @return a Matches object with all results of the action.
+     * Executes a GUI automation action with the specified options and target objects.
+     * 
+     * <p>This is the primary method for performing GUI operations in Brobot. It processes
+     * the action configuration and executes it against the provided GUI elements.</p>
+     * 
+     * @param actionOptions     configuration specifying the action type and parameters
+     * @param objectCollections target GUI elements to act upon (images, regions, locations, etc.)
+     * @return a Matches object containing all results from the action execution
      */
     public Matches perform(ActionOptions actionOptions, ObjectCollection... objectCollections) {
         return perform("", actionOptions, objectCollections);
     }
 
+    /**
+     * Executes a GUI automation action with a descriptive label for logging and debugging.
+     * 
+     * <p>This method adds a human-readable description to the action execution, which is
+     * valuable for debugging, logging, and understanding automation flow. The description
+     * appears in reports and illustrated histories.</p>
+     * 
+     * @param actionDescription human-readable description of what this action accomplishes
+     * @param actionOptions     configuration specifying the action type and parameters
+     * @param objectCollections target GUI elements to act upon
+     * @return a Matches object containing all results from the action execution
+     */
     public Matches perform(String actionDescription, ActionOptions actionOptions, ObjectCollection... objectCollections) {
         for (ObjectCollection objColl : objectCollections) objColl.resetTimesActedOn();
         Optional<ActionInterface> action = actionService.getAction(actionOptions);

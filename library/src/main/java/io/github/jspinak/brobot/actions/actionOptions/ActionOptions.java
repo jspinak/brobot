@@ -21,9 +21,36 @@ import java.util.function.BiConsumer;
 import java.util.function.Predicate;
 
 /**
- * ActionOptions provides options for configuring an action.
- * Since an Action can be performed without selecting and building an ActionOptions object,
- *   the variables need to be initialized with default values.
+ * Configuration object that defines how GUI automation actions are executed in Brobot.
+ * 
+ * <p>ActionOptions encapsulates all parameters needed to customize action behavior, from 
+ * basic settings like action type and similarity thresholds to advanced options like 
+ * custom find strategies and success criteria. This design allows actions to be highly 
+ * configurable while maintaining sensible defaults for common use cases.</p>
+ * 
+ * <p>Key configuration categories:
+ * <ul>
+ *   <li><b>Action Type</b>: Specifies whether to Find, Click, Type, etc.</li>
+ *   <li><b>Find Strategy</b>: Controls how pattern matching is performed (FIRST, ALL, BEST, etc.)</li>
+ *   <li><b>Search Parameters</b>: Similarity thresholds, search regions, and timing</li>
+ *   <li><b>Behavioral Options</b>: Pauses, retries, and action-specific settings</li>
+ *   <li><b>Success Criteria</b>: Conditions that determine when an action succeeds</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>In the model-based approach, ActionOptions provides the flexibility needed to handle 
+ * the inherent stochasticity of GUI environments. By adjusting parameters like similarity 
+ * thresholds and retry counts, automation can adapt to varying conditions while maintaining 
+ * reliability.</p>
+ * 
+ * <p>All fields have sensible defaults, allowing simple actions to be performed with 
+ * minimal configuration while complex scenarios can be precisely controlled.</p>
+ * 
+ * @since 1.0
+ * @see Action
+ * @see Find
+ * @see Matches
+ * @see ObjectCollection
  */
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)

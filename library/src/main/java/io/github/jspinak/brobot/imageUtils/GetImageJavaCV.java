@@ -23,9 +23,94 @@ import static org.bytedeco.opencv.global.opencv_imgproc.COLOR_BGR2HSV;
 import static org.bytedeco.opencv.global.opencv_imgproc.cvtColor;
 
 /**
- * The same methods as in GetImageOpenCV, but for JavaCV.
- * JavaCV is compatible with the DL4J libraries, making it a better choice for Brobot than OpenCV.
- * It would be cleaner to migrate all OpenCV code to JavaCV, but this is a lower priority.
+ * JavaCV-based image acquisition and conversion utilities for Brobot.
+ * 
+ * <p>GetImageJavaCV provides comprehensive image loading, conversion, and capture 
+ * functionality using the JavaCV library. JavaCV offers better integration with 
+ * deep learning frameworks like DL4J (DeepLearning4J), making it the preferred 
+ * choice for Brobot's computer vision operations. This class handles various 
+ * image sources and color space conversions essential for pattern matching 
+ * and state detection.</p>
+ * 
+ * <p>Key capabilities:
+ * <ul>
+ *   <li><b>File Loading</b>: Load images from files with automatic path resolution</li>
+ *   <li><b>Screen Capture</b>: Capture screenshots of full screen or specific regions</li>
+ *   <li><b>Color Conversion</b>: Convert between BGR and HSV color spaces</li>
+ *   <li><b>Region Masking</b>: Extract specific regions from larger images</li>
+ *   <li><b>Batch Processing</b>: Handle multiple images or regions efficiently</li>
+ *   <li><b>Time-Series Capture</b>: Record screen changes over time</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Image sources supported:
+ * <ul>
+ *   <li>File system paths (absolute or bundle-relative)</li>
+ *   <li>Screen captures (full or regional)</li>
+ *   <li>BufferedImage conversions</li>
+ *   <li>Pattern and StateImage collections</li>
+ *   <li>Video frame grabbing via FFmpeg</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Color space support:
+ * <ul>
+ *   <li><b>BGR</b>: Default OpenCV color format (Blue-Green-Red)</li>
+ *   <li><b>HSV</b>: Hue-Saturation-Value for color-based matching</li>
+ *   <li>Automatic conversion based on ColorSchemaName parameter</li>
+ *   <li>In-place or new Mat conversions available</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Common use cases:
+ * <ul>
+ *   <li>Loading pattern images for template matching</li>
+ *   <li>Capturing screenshots for state detection</li>
+ *   <li>Converting images for color-based analysis</li>
+ *   <li>Extracting regions for focused processing</li>
+ *   <li>Recording screen sequences for analysis</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Performance features:
+ * <ul>
+ *   <li>Efficient batch operations for multiple images</li>
+ *   <li>Direct memory operations avoiding unnecessary copies</li>
+ *   <li>Configurable capture intervals for time-series data</li>
+ *   <li>Region-based capture to minimize data volume</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Integration advantages:
+ * <ul>
+ *   <li>Compatible with DL4J for deep learning models</li>
+ *   <li>Unified API across different image sources</li>
+ *   <li>Consistent color space handling</li>
+ *   <li>Seamless integration with Brobot's pattern matching</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Time-series capture example:
+ * <pre>
+ * // Capture screen region every 0.5 seconds for 10 seconds
+ * MatVector frames = getImageJavaCV.getMatsFromScreen(
+ *     region, 0.5, 10.0
+ * );
+ * </pre>
+ * </p>
+ * 
+ * <p>In the model-based approach, GetImageJavaCV serves as the primary image 
+ * acquisition layer, providing consistent access to visual data regardless of 
+ * source. This abstraction enables the framework to work with files during 
+ * development, live screens during execution, and recorded data during testing, 
+ * all through the same interface.</p>
+ * 
+ * @since 1.0
+ * @see Mat
+ * @see ColorCluster
+ * @see BufferedImageOps
+ * @see Pattern
+ * @see StateImage
  */
 @Component
 public class GetImageJavaCV {

@@ -8,10 +8,79 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Grid is either defined by columns and row, or by cell width and cell height.
- * When defined by cell width and cell height, the cells may not cover the region
- * exactly. If this occurs, the remainder areas of the region are discarded and the
- * region is redefined.
+ * Divides a screen region into a matrix of cells for systematic interaction.
+ * 
+ * <p>Grid provides a structured way to interact with regularly arranged GUI elements 
+ * such as icon grids, table cells, calendar dates, or tile-based interfaces. By 
+ * dividing a region into rows and columns, Grid enables precise targeting of 
+ * individual elements within repetitive layouts without defining each element 
+ * separately.</p>
+ * 
+ * <p>Definition modes:
+ * <ul>
+ *   <li><b>By Dimensions</b>: Specify number of rows and columns</li>
+ *   <li><b>By Cell Size</b>: Specify cell width and height</li>
+ *   <li>Hybrid approach with intelligent remainder handling</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Remainder handling strategies:
+ * <ul>
+ *   <li><b>Adjust Region</b>: Shrink region to fit exact grid (adjustRegionToGrids=true)</li>
+ *   <li><b>Expand Last Cells</b>: Rightmost and bottom cells absorb extra space</li>
+ *   <li><b>Smart Expansion</b>: Add extra row/column if remainder > half cell size</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Common use cases:
+ * <ul>
+ *   <li>Desktop icon grids and application launchers</li>
+ *   <li>Calendar date selection (7 columns × n rows)</li>
+ *   <li>Spreadsheet or table cell navigation</li>
+ *   <li>Game boards (chess, tic-tac-toe, etc.)</li>
+ *   <li>Photo galleries and thumbnail grids</li>
+ *   <li>Virtual keyboards and keypads</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Key features:
+ * <ul>
+ *   <li>Flexible definition by count or size</li>
+ *   <li>Intelligent edge handling for imperfect fits</li>
+ *   <li>Direct access to individual cell regions</li>
+ *   <li>Maintains spatial relationships between cells</li>
+ *   <li>Debugging support with visual printing</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Example - Click on calendar date:
+ * <pre>
+ * Grid calendar = new Grid.Builder()
+ *     .setRegion(calendarRegion)
+ *     .setColumns(7)  // Days of week
+ *     .setRows(5)     // Weeks shown
+ *     .build();
+ * Region dateCell = calendar.getGridRegions().get(dayIndex);
+ * </pre>
+ * </p>
+ * 
+ * <p>Edge case handling:
+ * <ul>
+ *   <li>Non-uniform cell sizes at edges accommodate imperfect divisions</li>
+ *   <li>Rightmost column may be wider to include remainder pixels</li>
+ *   <li>Bottom row may be taller for the same reason</li>
+ *   <li>Ensures complete coverage of original region</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>In the model-based approach, Grid abstracts repetitive GUI layouts into 
+ * manageable structures. This enables efficient interaction with matrix-based 
+ * interfaces without manually defining dozens of individual regions, while 
+ * maintaining the precision needed for reliable automation.</p>
+ * 
+ * @since 1.0
+ * @see Region
+ * @see OverlappingGrids
  */
 @Getter
 public class Grid {
