@@ -14,9 +14,83 @@ import static org.bytedeco.opencv.global.opencv_core.CV_8UC3;
 import static org.bytedeco.opencv.global.opencv_imgproc.resize;
 
 /**
- * This builder puts a bunch of Mats together.
- * The underlying Mat will be stretched to include the other Mats if too small.
- * If the submat max width or height is set, submats will be shrunk to fit.
+ * Flexible builder for composing multiple OpenCV Mat objects into a single image.
+ * 
+ * <p>MatBuilder provides a powerful API for assembling complex images from multiple 
+ * Mat objects (OpenCV's matrix representation of images). This is essential for 
+ * creating visual debugging output, generating test data, building composite images 
+ * for analysis, and constructing visual reports in the automation framework.</p>
+ * 
+ * <p>Key capabilities:
+ * <ul>
+ *   <li><b>Dynamic Composition</b>: Automatically resizes base Mat to accommodate submats</li>
+ *   <li><b>Flexible Layout</b>: Support for horizontal, vertical, and positioned placement</li>
+ *   <li><b>Size Control</b>: Optional maximum dimensions for submats with automatic scaling</li>
+ *   <li><b>Spacing Management</b>: Configurable gaps between concatenated images</li>
+ *   <li><b>Type Safety</b>: Automatic type conversion for consistent Mat types</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Layout options:
+ * <ul>
+ *   <li><b>Horizontal Concatenation</b>: Arrange images side by side</li>
+ *   <li><b>Vertical Concatenation</b>: Stack images top to bottom</li>
+ *   <li><b>Absolute Positioning</b>: Place submats at specific coordinates</li>
+ *   <li><b>Mixed Layouts</b>: Combine all placement methods</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Common use cases:
+ * <ul>
+ *   <li>Creating image galleries for visual debugging</li>
+ *   <li>Building comparison views (before/after)</li>
+ *   <li>Assembling multi-panel diagnostic images</li>
+ *   <li>Generating visual test reports</li>
+ *   <li>Constructing training data visualizations</li>
+ *   <li>Creating mock screenshots from components</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Size management features:
+ * <ul>
+ *   <li>Automatic base Mat expansion to fit all submats</li>
+ *   <li>Optional maximum width/height constraints for submats</li>
+ *   <li>Proportional scaling to maintain aspect ratios</li>
+ *   <li>Configurable spacing between concatenated images</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Example - Creating a diagnostic image:
+ * <pre>
+ * Mat diagnostic = new MatBuilder()
+ *     .setName("State Analysis")
+ *     .setWH(800, 600)
+ *     .addHorizontalSubmats(screenshot, expectedPattern)
+ *     .setSpaceBetween(10)
+ *     .addSubMat(new Location(0, 400), matchVisualization)
+ *     .build();
+ * </pre>
+ * </p>
+ * 
+ * <p>Advanced features:
+ * <ul>
+ *   <li>Single-channel row Mat creation for data visualization</li>
+ *   <li>Null-safe submat handling</li>
+ *   <li>Automatic type conversion for mixed Mat types</li>
+ *   <li>Flexible initialization from regions or dimensions</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>In the model-based approach, MatBuilder is crucial for creating visual 
+ * representations of automation state, debugging information, and analysis results. 
+ * It enables the framework to generate comprehensive visual reports that help 
+ * developers understand what the automation system sees and how it makes decisions.</p>
+ * 
+ * @since 1.0
+ * @see Mat
+ * @see MatOps
+ * @see Illustrations
+ * @see Draw
  */
 public class MatBuilder {
 

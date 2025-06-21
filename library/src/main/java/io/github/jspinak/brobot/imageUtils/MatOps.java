@@ -16,6 +16,108 @@ import java.util.Arrays;
 import static org.bytedeco.opencv.global.opencv_core.*;
 import static org.bytedeco.opencv.global.opencv_imgproc.*;
 
+/**
+ * Comprehensive utility class for OpenCV Mat operations in Brobot.
+ * 
+ * <p>MatOps provides an extensive collection of utility methods for working with OpenCV 
+ * Mat objects (matrix representations of images). These operations are fundamental to 
+ * Brobot's computer vision capabilities, supporting everything from basic matrix 
+ * manipulation to complex image analysis. The class bridges JavaCV and OpenCV APIs, 
+ * provides debugging tools, and implements common patterns used throughout the framework.</p>
+ * 
+ * <p>Core operation categories:
+ * <ul>
+ *   <li><b>Data Access</b>: Get/put values at specific positions with type safety</li>
+ *   <li><b>Debugging</b>: Print matrix contents with intelligent formatting</li>
+ *   <li><b>Conversion</b>: Transform between JavaCV/OpenCV formats and color spaces</li>
+ *   <li><b>Creation</b>: Factory methods for creating Mats with specific properties</li>
+ *   <li><b>Analysis</b>: Min/max values, statistics, and content inspection</li>
+ *   <li><b>Manipulation</b>: Channel operations, ROI extraction, aggregation</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Debugging features:
+ * <ul>
+ *   <li>Partial matrix printing to avoid overwhelming output</li>
+ *   <li>Consecutive zero compression for sparse matrices</li>
+ *   <li>Multi-channel support with per-channel display</li>
+ *   <li>Dimension and type information display</li>
+ *   <li>Min/max value reporting for quick data validation</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Type handling:
+ * <ul>
+ *   <li>Automatic indexer selection based on Mat type</li>
+ *   <li>Support for 8-bit, 32-bit integer, and 32-bit float types</li>
+ *   <li>Safe conversions between different Mat representations</li>
+ *   <li>BufferedImage to Mat conversion for Java integration</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Common usage patterns:
+ * <pre>
+ * // Debug print a portion of a Mat
+ * MatOps.printPartOfMat(mat, 10, 10, "Match scores");
+ * 
+ * // Create a Mat with specific values
+ * Mat mask = MatOps.makeMat(100, 100, CV_8UC1, 255);
+ * 
+ * // Convert color spaces
+ * Mat hsv = MatOps.BGRtoHSV(bgrImage);
+ * 
+ * // Get min/max values
+ * double[] minMax = MatOps.getMinMaxOfFirstChannel(mat);
+ * </pre>
+ * </p>
+ * 
+ * <p>Channel operations:
+ * <ul>
+ *   <li>Extract individual channels from multi-channel Mats</li>
+ *   <li>Find min/max values across channels</li>
+ *   <li>Merge single-channel Mats into multi-channel</li>
+ *   <li>Per-cell operations across multiple Mats</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Factory methods:
+ * <ul>
+ *   <li>Create Mats with uniform values</li>
+ *   <li>3x3 kernel creation for morphological operations</li>
+ *   <li>Multi-channel Mat creation with per-channel values</li>
+ *   <li>Size-based and dimension-based constructors</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Safety features:
+ * <ul>
+ *   <li>Null checks and empty Mat handling</li>
+ *   <li>Bounds checking for ROI operations</li>
+ *   <li>Type compatibility verification</li>
+ *   <li>Optional return types for operations that may fail</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Performance considerations:
+ * <ul>
+ *   <li>Direct indexer access for efficient pixel operations</li>
+ *   <li>Minimal copying through careful use of references</li>
+ *   <li>Batch operations for multiple Mats</li>
+ *   <li>Lazy evaluation where possible</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>In the model-based approach, MatOps serves as the foundation for all image 
+ * processing operations. It provides the low-level tools needed to implement 
+ * pattern matching, color analysis, motion detection, and other computer vision 
+ * algorithms that enable Brobot to "see" and understand GUI elements.</p>
+ * 
+ * @since 1.0
+ * @see Mat
+ * @see GetImageJavaCV
+ * @see BufferedImageOps
+ * @see MatBuilder
+ */
 public class MatOps {
 
     public static void printPartOfMat(Mat mat, int rows, int cols, String title) {

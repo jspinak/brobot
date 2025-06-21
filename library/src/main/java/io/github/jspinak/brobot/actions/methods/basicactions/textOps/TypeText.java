@@ -13,7 +13,49 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 /**
- * Types text to the window in focus.
+ * Types text to the window in focus in the Brobot model-based GUI automation framework.
+ * 
+ * <p>TypeText is a fundamental action in the Action Model (α) that enables keyboard input 
+ * simulation. It bridges the gap between high-level text input requirements and low-level 
+ * keyboard event generation, providing a reliable way to enter text into GUI applications 
+ * regardless of their underlying technology.</p>
+ * 
+ * <p>Key features:
+ * <ul>
+ *   <li><b>Focus-based Input</b>: Types to whatever window or field currently has focus, 
+ *       following standard GUI interaction patterns</li>
+ *   <li><b>Configurable Timing</b>: Supports custom delays between keystrokes to accommodate 
+ *       different application response times</li>
+ *   <li><b>Batch Processing</b>: Can type multiple strings in sequence with configurable 
+ *       pauses between them</li>
+ *   <li><b>State-aware</b>: Works with StateString objects that maintain context about 
+ *       their owning states</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Common use cases:
+ * <ul>
+ *   <li>Filling form fields during automated testing</li>
+ *   <li>Entering search queries or commands</li>
+ *   <li>Providing credentials during login sequences</li>
+ *   <li>Interacting with text-based interfaces or terminals</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>The type delay mechanism is particularly important for handling applications that 
+ * process keystrokes asynchronously or have input validation that runs between keystrokes. 
+ * By adjusting the type delay through ActionOptions, automation scripts can adapt to 
+ * different application behaviors without modifying the core logic.</p>
+ * 
+ * <p>This action exemplifies the framework's approach to abstracting platform-specific 
+ * details while providing fine-grained control when needed. The underlying implementation 
+ * delegates to platform-specific wrappers while maintaining a consistent interface.</p>
+ * 
+ * @since 1.0
+ * @see StateString
+ * @see ActionOptions
+ * @see TypeTextWrapper
+ * @see Click
  */
 @Component
 public class TypeText implements ActionInterface {

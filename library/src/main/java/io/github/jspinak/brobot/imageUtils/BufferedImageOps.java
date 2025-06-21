@@ -23,6 +23,64 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * Comprehensive BufferedImage operations for the Brobot GUI automation framework.
+ * 
+ * <p>BufferedImageOps provides a centralized set of utilities for working with Java's 
+ * BufferedImage class, bridging the gap between various image representations used 
+ * throughout the framework. It handles conversions, screen captures, file operations, 
+ * and format transformations while abstracting platform-specific details.</p>
+ * 
+ * <p>Key operation categories:
+ * <ul>
+ *   <li><b>File Operations</b>: Loading images from disk with platform abstraction</li>
+ *   <li><b>Screen Capture</b>: Capturing screen regions with headless/mock support</li>
+ *   <li><b>Format Conversion</b>: Converting between BufferedImage, Mat, and byte arrays</li>
+ *   <li><b>Image Manipulation</b>: Extracting sub-images and type conversions</li>
+ *   <li><b>Serialization</b>: Base64 encoding/decoding for data transmission</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Platform abstraction features:
+ * <ul>
+ *   <li>Uses SikuliX for cross-platform file loading when available</li>
+ *   <li>Falls back to direct file reading in headless environments</li>
+ *   <li>Provides dummy images for mock/test scenarios</li>
+ *   <li>Handles various image formats with automatic PNG extension</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Integration points:
+ * <ul>
+ *   <li><b>SikuliX</b>: Leverages Pattern class for platform-independent file access</li>
+ *   <li><b>OpenCV/JavaCV</b>: Converts between Mat and BufferedImage formats</li>
+ *   <li><b>Screen Capture</b>: Integrates with Screen class for region capture</li>
+ *   <li><b>Environment Awareness</b>: Adapts behavior based on BrobotEnvironment</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Common use cases:
+ * <ul>
+ *   <li>Loading pattern images from files for visual matching</li>
+ *   <li>Capturing screen regions for analysis or comparison</li>
+ *   <li>Converting images for OpenCV processing</li>
+ *   <li>Serializing images for network transmission or storage</li>
+ *   <li>Extracting regions of interest from larger images</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>In the model-based approach, BufferedImageOps serves as the foundation for all 
+ * image handling operations. By providing consistent interfaces and handling edge cases 
+ * like headless environments, it enables the framework to work reliably across different 
+ * deployment scenarios while maintaining clean separation between image processing and 
+ * automation logic.</p>
+ * 
+ * @since 1.0
+ * @see Image
+ * @see Pattern
+ * @see Mat
+ * @see BrobotEnvironment
+ */
 @Component
 public class BufferedImageOps {
 

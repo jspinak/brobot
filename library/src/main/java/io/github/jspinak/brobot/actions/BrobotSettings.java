@@ -6,8 +6,55 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Global settings
- * Some Brobot settings override Sikuli settings.
+ * Global configuration settings for the Brobot model-based GUI automation framework.
+ * 
+ * <p>BrobotSettings serves as the central configuration repository for the entire framework, 
+ * controlling behavior across all components from action execution to data collection. These 
+ * settings enable customization of the framework's operation without modifying code, supporting 
+ * different deployment scenarios from development to production.</p>
+ * 
+ * <p>Setting categories:
+ * <ul>
+ *   <li><b>Mouse Control</b>: Fine-tune mouse action timing and movement for different 
+ *       application response characteristics</li>
+ *   <li><b>Mock Mode</b>: Configure simulated execution for testing without GUI interaction</li>
+ *   <li><b>Data Collection</b>: Control screenshot capture, history recording, and dataset 
+ *       building for analysis and machine learning</li>
+ *   <li><b>Visual Analysis</b>: Configure color profiling, k-means clustering, and image 
+ *       processing parameters</li>
+ *   <li><b>Testing Support</b>: Settings for unit tests and application testing scenarios</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Key configuration areas:
+ * <ul>
+ *   <li><b>Execution Timing</b>: Pause durations before/after mouse actions to accommodate 
+ *       varying GUI response times</li>
+ *   <li><b>Mock Timings</b>: Simulated execution times for different action types when 
+ *       running in mock mode</li>
+ *   <li><b>File Paths</b>: Locations for screenshots, history, datasets, and recordings</li>
+ *   <li><b>Visualization</b>: Control which actions are illustrated in history screenshots</li>
+ *   <li><b>Machine Learning</b>: Settings for building training datasets from automation runs</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Usage patterns:
+ * <ul>
+ *   <li>Configure once at application startup based on environment</li>
+ *   <li>Override specific settings for testing scenarios</li>
+ *   <li>Some settings override underlying SikuliX configurations</li>
+ *   <li>Settings are static and affect all automation instances globally</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>In the model-based approach, BrobotSettings enables the framework to adapt to different 
+ * environments and use cases without code changes. This configurability is essential for 
+ * creating robust automation that can handle variations in application behavior, system 
+ * performance, and deployment requirements.</p>
+ * 
+ * @since 1.0
+ * @see ActionOptions
+ * @see Project
  */
 public class BrobotSettings {
 
