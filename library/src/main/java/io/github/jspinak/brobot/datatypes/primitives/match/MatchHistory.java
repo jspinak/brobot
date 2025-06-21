@@ -13,14 +13,63 @@ import java.util.*;
 import static java.util.stream.Collectors.toList;
 
 /**
- * Used for mock runs when not empty; otherwise, the State's probability variable is used.
- * The MatchHistory can be filled when setting up States,
- * or in a later version of Brobot during real execution when State variables are saved in a database.
- * MatchHistory is a variable in the Image class.
- * When a Match is found, a MatchSnapshot is created along with a MatchObject
- * and the MatchSnapshot is added to the corresponding Image's MatchHistory.
- *
- * All Actions except for Vanish are used in mocks for Find operations.
+ * Maintains historical match data for pattern learning and mock execution in the Brobot framework.
+ * 
+ * <p>MatchHistory accumulates MatchSnapshot records over time, building a statistical model of 
+ * how GUI elements behave in different contexts. This historical data serves two critical 
+ * purposes: enabling realistic mock execution during development/testing and providing empirical 
+ * data for optimizing automation strategies.</p>
+ * 
+ * <p>Key components:
+ * <ul>
+ *   <li><b>Search Statistics</b>: Tracks total searches and successful finds for probability calculations</li>
+ *   <li><b>Snapshot Collection</b>: Stores detailed records of each match attempt with full context</li>
+ *   <li><b>Action-specific Data</b>: Separates snapshots by action type for accurate simulation</li>
+ *   <li><b>State Context</b>: Links matches to their containing states for context-aware mocking</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Mock execution support:
+ * <ul>
+ *   <li>When history exists, uses actual snapshot data for realistic behavior</li>
+ *   <li>Falls back to state probability variables when history is empty</li>
+ *   <li>Provides action-specific and state-specific snapshot selection</li>
+ *   <li>Handles special cases like text extraction and vanish operations</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Snapshot management:
+ * <ul>
+ *   <li><b>Automatic Text Handling</b>: Adds matches to text-only snapshots when needed</li>
+ *   <li><b>Find Type Filtering</b>: Respects Find.ALL, Find.EACH, Find.FIRST distinctions</li>
+ *   <li><b>Vanish Separation</b>: Treats vanish operations differently from find operations</li>
+ *   <li><b>Random Selection</b>: Provides stochastic behavior based on historical distribution</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Data collection strategies:
+ * <ul>
+ *   <li>Can be pre-populated during state setup for immediate mocking capability</li>
+ *   <li>Accumulates naturally during real execution for learning</li>
+ *   <li>Persists to database in production environments for long-term learning</li>
+ *   <li>Merges histories from multiple sources for comprehensive coverage</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>In the model-based approach, MatchHistory transforms the framework from a deterministic 
+ * automation tool into an adaptive system that learns from experience. By capturing not just 
+ * whether elements were found but also when, where, and under what conditions, it enables 
+ * sophisticated simulation and optimization of GUI interactions.</p>
+ * 
+ * <p>The distinction between action types (especially vanish vs. other actions) ensures that 
+ * mock behavior accurately reflects the different success criteria and timing characteristics 
+ * of various operations.</p>
+ * 
+ * @since 1.0
+ * @see MatchSnapshot
+ * @see Image
+ * @see StateImage
+ * @see MatchMaker
  */
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)

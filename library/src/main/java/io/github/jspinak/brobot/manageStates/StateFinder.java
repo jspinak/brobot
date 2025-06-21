@@ -15,14 +15,69 @@ import java.util.Set;
 import static io.github.jspinak.brobot.actions.actionOptions.ActionOptions.Action.FIND;
 
 /**
- * This class finds the active States after Brobot is lost.
- * It is a costly operation since all Images in all States are searched.
- * In a future version of Brobot I hope to run a screenshot through a
- * neural net to get immediately the set of active States. One problem
- * with this approach is that it may take a long time before an
- * automation can produce enough labeled data (screenshots with labeled States)
- * in order to achieve an effective network, although the amount of data needed
- * may not be that large given that States have static images associated with them.
+ * Discovers active states through visual pattern matching in the Brobot framework.
+ * 
+ * <p>StateFinder provides mechanisms to identify which states are currently active in the GUI 
+ * by searching for their associated visual patterns. This is essential for recovering from 
+ * lost context, initializing automation, or maintaining awareness of the current application 
+ * state during long-running automation sessions.</p>
+ * 
+ * <p>Key operations:
+ * <ul>
+ *   <li><b>Check Active States</b>: Verify if currently tracked states are still active</li>
+ *   <li><b>Rebuild Active States</b>: Full discovery when context is lost</li>
+ *   <li><b>Search All States</b>: Comprehensive scan of all defined states</li>
+ *   <li><b>Find Specific State</b>: Check if a particular state is active</li>
+ *   <li><b>Refresh States</b>: Complete reset and rediscovery</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Performance considerations:
+ * <ul>
+ *   <li>Full state search is computationally expensive (O(n) with n = total images)</li>
+ *   <li>Checking existing active states is more efficient than full search</li>
+ *   <li>Future optimization could use machine learning for instant state recognition</li>
+ *   <li>Static images in states make ML training data generation feasible</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>State discovery strategy:
+ * <ol>
+ *   <li>First checks if known active states are still visible</li>
+ *   <li>If no active states remain, performs comprehensive search</li>
+ *   <li>Falls back to UNKNOWN state if no states are found</li>
+ *   <li>Updates StateMemory with discovered active states</li>
+ * </ol>
+ * </p>
+ * 
+ * <p>Common use cases:
+ * <ul>
+ *   <li>Initializing automation when starting state is unknown</li>
+ *   <li>Recovering after application crashes or unexpected navigation</li>
+ *   <li>Periodic state validation in long-running automation</li>
+ *   <li>Debugging state detection issues</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Future enhancements:
+ * <ul>
+ *   <li>Neural network-based instant state recognition from screenshots</li>
+ *   <li>Probabilistic state detection based on partial matches</li>
+ *   <li>Hierarchical search starting with likely states</li>
+ *   <li>Caching and optimization for frequently checked states</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>In the model-based approach, StateFinder serves as the sensory system that connects 
+ * the abstract state model to the concrete visual reality of the GUI. It enables the 
+ * framework to maintain situational awareness and recover gracefully from unexpected 
+ * situations, which is crucial for robust automation.</p>
+ * 
+ * @since 1.0
+ * @see State
+ * @see StateMemory
+ * @see AllStatesInProjectService
+ * @see Action
  */
 @Component
 public class StateFinder {

@@ -16,6 +16,61 @@ import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImag
 import io.github.jspinak.brobot.manageStates.StateManagementService;
 import io.github.jspinak.brobot.report.Report;
 
+/**
+ * Initialization service for the Brobot model-based GUI automation framework.
+ * 
+ * <p>Init provides essential startup operations that prepare the framework for automation 
+ * execution. It handles image preprocessing, state structure initialization, and environment 
+ * configuration, ensuring all components are properly configured before automation begins. 
+ * This service acts as the bridge between static configuration and runtime execution.</p>
+ * 
+ * <p>Initialization phases:
+ * <ul>
+ *   <li><b>Image Path Setup</b>: Configures SikuliX bundle paths for image loading</li>
+ *   <li><b>Image Preprocessing</b>: Indexes images and generates color profiles</li>
+ *   <li><b>State ID Population</b>: Converts state names to IDs throughout the system</li>
+ *   <li><b>Transition Setup</b>: Prepares state transition tables for navigation</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Image preprocessing features:
+ * <ul>
+ *   <li>Assigns unique indices to all StateImages (starting from 1)</li>
+ *   <li>Generates color profiles for pattern matching optimization</li>
+ *   <li>Creates k-means profiles for dynamic images when configured</li>
+ *   <li>Reports progress for monitoring large initialization tasks</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>State structure initialization:
+ * <ul>
+ *   <li>Converts state name references to ID references for performance</li>
+ *   <li>Populates the state transitions joint table for path finding</li>
+ *   <li>Resolves "can hide" relationships between states</li>
+ *   <li>Validates the state structure for consistency</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Usage pattern:
+ * <ol>
+ *   <li>Call {@code setBundlePathAndPreProcessImages()} after Spring initialization</li>
+ *   <li>Call {@code initializeStateStructure()} to prepare state management</li>
+ *   <li>Optionally call {@code add()} to include additional image paths</li>
+ * </ol>
+ * </p>
+ * 
+ * <p>In the model-based approach, Init transforms the static state and image definitions 
+ * into runtime-ready data structures. The preprocessing step is crucial for performance, 
+ * as it moves expensive operations like color profile generation to initialization time 
+ * rather than during automation execution. The index assignment (starting from 1, not 0) 
+ * is designed to work with matrix operations where 0 typically represents "no class".</p>
+ * 
+ * @since 1.0
+ * @see State
+ * @see StateImage
+ * @see StateTransitions
+ * @see BrobotEnvironment
+ */
 @Component
 public class Init {
 

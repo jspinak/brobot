@@ -17,16 +17,44 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 /**
- * States give a Brobot application structure. They are organized in a similar way
- * to html pages in a website. Brobot can find its way to a State by finding a Path to
- * the State and following StateTransitions. If it gets lost, it will try to find its
- * way by identifying its current State and following a new Path to the desired State.
- *
- * States are identified by their StateImages. Some StateImages contain
- * Images that are found in other States. These StateImages identify themselves
- * as 'shared' and are not including in searches for the current State when Brobot is lost.
- * The shared Images are used for all other State searches.
- *
+ * Represents a distinct configuration of the GUI in the Brobot model-based automation framework.
+ * 
+ * <p>A State is the fundamental building block of the model-based approach, representing a 
+ * recognizable and meaningful configuration of the user interface. States form the nodes in 
+ * the state structure (Ω), which models the GUI environment as a navigable graph.</p>
+ * 
+ * <p>Key concepts:
+ * <ul>
+ *   <li><b>Identification</b>: States are identified by their StateImages - visual patterns 
+ *       that uniquely define this GUI configuration</li>
+ *   <li><b>Navigation</b>: States are connected by transitions, allowing Brobot to navigate 
+ *       between them like pages in a website</li>
+ *   <li><b>Recovery</b>: If Brobot gets lost, it can identify the current State and find 
+ *       a new path to the target State</li>
+ *   <li><b>Hierarchy</b>: States can hide other States (like menus covering content) and 
+ *       can be blocking (requiring interaction before accessing other States)</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>State components:
+ * <ul>
+ *   <li><b>StateImages</b>: Visual patterns that identify this State (some may be shared across States)</li>
+ *   <li><b>StateRegions</b>: Clickable or hoverable areas that can trigger State changes</li>
+ *   <li><b>StateStrings</b>: Text input fields that affect State transitions</li>
+ *   <li><b>StateLocations</b>: Specific points for precise interactions</li>
+ *   <li><b>StateText</b>: Text that appears in this State (used for faster preliminary searches)</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>This class embodies the core principle of model-based GUI automation: transforming 
+ * implicit knowledge about GUI structure into an explicit, navigable model that enables 
+ * robust and maintainable automation.</p>
+ * 
+ * @since 1.0
+ * @see StateImage
+ * @see StateRegion
+ * @see StateTransitions
+ * @see PathFinder
  */
 @Getter
 @Setter

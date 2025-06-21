@@ -9,11 +9,66 @@ import org.springframework.stereotype.Component;
 import java.util.*;
 
 /**
- * Holds all static incoming and outgoing Transitions,
- * plus the variable transitions to hidden States.
- * Variable transitions to hidden States, found in the
- * 'incomingTransitionsToPREVIOUS' set, are updated
- * when hidden States are added to or removed from a State.
+ * Maintains a comprehensive graph of state transitions for efficient navigation queries.
+ * 
+ * <p>StateTransitionsJointTable serves as a centralized index of all state relationships in 
+ * the Brobot framework, maintaining both static transitions defined in the state structure 
+ * and dynamic transitions to hidden states. This joint table enables efficient pathfinding 
+ * and state relationship queries without traversing individual StateTransitions objects.</p>
+ * 
+ * <p>Table structure:
+ * <ul>
+ *   <li><b>Incoming Transitions</b>: Map of state ID to set of states that can navigate to it</li>
+ *   <li><b>Outgoing Transitions</b>: Map of state ID to set of states it can navigate to</li>
+ *   <li><b>Hidden State Transitions</b>: Dynamic map of hidden states to their hiding states</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Key features:
+ * <ul>
+ *   <li>Bidirectional navigation queries (who can reach X, where can Y go)</li>
+ *   <li>Dynamic hidden state management based on active states</li>
+ *   <li>Support for multi-target transitions</li>
+ *   <li>Efficient O(1) lookup for state relationships</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Hidden state handling:
+ * <ul>
+ *   <li>When a state becomes active, its hidden states become accessible via PREVIOUS</li>
+ *   <li>These dynamic transitions are added/removed as states activate/deactivate</li>
+ *   <li>Enables navigation back to states that were covered by popups or overlays</li>
+ *   <li>Tracked separately in incomingTransitionsToPREVIOUS map</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Common queries:
+ * <ul>
+ *   <li>"Which states can navigate to state X?" - getStatesWithTransitionsTo()</li>
+ *   <li>"Where can state Y navigate to?" - getStatesWithTransitionsFrom()</li>
+ *   <li>"What hidden states are currently accessible?" - check incomingTransitionsToPREVIOUS</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Integration points:
+ * <ul>
+ *   <li>Populated during initialization from StateTransitions objects</li>
+ *   <li>Updated dynamically as states activate/deactivate</li>
+ *   <li>Used by PathFinder for efficient path discovery</li>
+ *   <li>Consulted during state navigation decisions</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>In the model-based approach, StateTransitionsJointTable provides the indexed view of 
+ * the state graph that enables efficient navigation and pathfinding. By maintaining this 
+ * pre-computed index, the framework can quickly answer reachability questions and find 
+ * navigation paths without expensive graph traversals during automation execution.</p>
+ * 
+ * @since 1.0
+ * @see StateTransitions
+ * @see PathFinder
+ * @see State
+ * @see SpecialStateType
  */
 @Component
 @Getter

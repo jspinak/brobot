@@ -7,9 +7,44 @@ import lombok.Data;
 import java.util.*;
 
 /**
- * SearchRegions allows for multiple Regions to be associated with an Image. This
- * could be useful when you are not sure where an Image may be but want to exclude
- * an area, or when the desired search area cannot be described by one rectangle.
+ * Manages multiple search areas for pattern matching in the Brobot framework.
+ * 
+ * <p>SearchRegions provides sophisticated control over where patterns are searched for 
+ * on the screen, supporting both dynamic and fixed location patterns. This flexibility 
+ * is crucial for handling various GUI scenarios where elements may appear in multiple 
+ * locations or have complex spatial constraints.</p>
+ * 
+ * <p>Key concepts:
+ * <ul>
+ *   <li><b>Multiple Regions</b>: Supports searching in multiple rectangular areas, 
+ *       useful for complex layouts or when excluding certain screen areas</li>
+ *   <li><b>Fixed Region</b>: Special handling for patterns that always appear in the 
+ *       same location, optimizing search performance</li>
+ *   <li><b>Dynamic Selection</b>: Can randomly select from available regions for 
+ *       load distribution or testing variability</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Use cases in model-based automation:
+ * <ul>
+ *   <li>Defining search areas for patterns that may appear in multiple locations 
+ *       (e.g., pop-ups, floating windows)</li>
+ *   <li>Excluding areas known to contain similar but incorrect patterns</li>
+ *   <li>Optimizing performance by constraining searches to relevant screen areas</li>
+ *   <li>Handling fixed UI elements that always appear in the same position</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>The fixed region feature is particularly powerful for improving performance. When 
+ * a pattern is found for the first time, its location can be recorded as fixed, and 
+ * subsequent searches will only look in that specific area, dramatically reducing 
+ * search time.</p>
+ * 
+ * @since 1.0
+ * @see Region
+ * @see Pattern
+ * @see Find
+ * @see SearchRegionsUtils
  */
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)

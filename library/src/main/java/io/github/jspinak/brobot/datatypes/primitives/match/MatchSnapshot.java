@@ -18,59 +18,66 @@ import java.util.Random;
 import static io.github.jspinak.brobot.actions.actionOptions.ActionOptions.Find.UNIVERSAL;
 
 /**
- * MatchSnapshots record a match (or failed match) and the search options at a single point in time.
- * They are used to build a MatchHistory to allow for more accurate mocking. The idea is to have a
- * history of examples from specific situations that give an accurate picture of what may occur
- * in a similar situation in the future. For this reason, only one Snapshot is created in situations
- * where an Image is searched multiple times. Actions that search multiple times until a condition is
- * met are good examples of such situations. Snapshots are kept in the Matches object as DanglingSnapshots
- * until the Action finishes, and only then saved to the Image or StateRegion.
- *
- * When mocking, it is best to use Snapshots of the same Action. Otherwise, a FIND operation
- * may have a higher probability of failure if the same Image was used often for a VANISH operation
- * and frequently not found.
- *
- * A Snapshot with no Match objects records a failed search.
- *
- * How do Snapshots deal with Find.ALL and Find.EACH operations? MatchHistory has a method to return
- *   a list with Snapshots from the Find.ALL and Find.EACH operations.
- *   This is done for the following reasons:
- * 1. Multiple Match Snapshots are used for mocking Find.ALL and Find.EACH Actions. This is why
- *    there is a separate list for these Snapshots.
- * 2. The best Match can be taken from multiple Match objects to simulate a Find.FIRST or Find.BEST
- *    operation. This is why there is a method that returns Snapshots for all Find operations.
- *
- * What happens with a Match that is passed to an ObjectCollection, or a Match that is used multiple
- *   times within an Action (for example, GetText may find multiple Strings with the same Match)?
- *   This Match shouldn't be recorded again in a separate Snapshot because it was only found once.
- *   Found Strings are added to the Text field of the same Match. TimeStamp is for the Match
- *   and not for the Strings in Text.
- *
- * GetText, when used with Find.ALL, returns a series of non-null Strings that are saved in the Text object.
- *
- *      * Action start times are set from the Action class, as the Action is called.
- *      * Many Actions call a Find operation within the Action. These Find operations
- *      * produce MatchObjects and need to set their start times.
- *      * This is done with the findStartTime field.
- *      *
- *      * Snapshots are set at the end of the Action. For a Vanish Action, for example,
- *      * we want to know how long it takes for a Vanish to succeed. This will be useful
- *      * if we perform another Vanish operation and want to know the average wait time,
- *      * or are using the MatchHistory for mocks. On the other hand, every Find operation
- *      * gives us useful information about Images, and we could also save this information.
- *      * Find operation Durations should be measured from the start of the Find operation
- *      * and not from the start of the Action.
- *      * On the other hand, we want MatchSnapshots to be representative of how
- *      * Images will respond in real scenarios, and saving Snapshots in scenarios where
- *      * we are waiting a while for an Image to appear will skew the distribution of
- *      * successful and unsuccessful matches. It is sufficient for us to have Snapshots saved
- *      * for Find Actions and not every individual Find operation, especially if the Duration
- *      * is also saved. One scenario where this may not be optimal is when we always use
- *      * an Image with an Action other than Find, meaning that we won't have a Find Action MatchSnapshot
- *      * for the Image, and we won't have any data with which to mock finding
- *      * this Image. Of course, if we never use a Find Action on this Image, it is unlikely that
- *      * a Find Action will occur in real execution. The Image will be used with other Actions,
- *      * and these Actions will have MatchSnapshots.
+ * Records match results and context at a specific point in time for the Brobot framework.
+ * 
+ * <p>MatchSnapshot captures comprehensive information about a match operation, including the 
+ * matches found (or not found), the action options used, timing data, and contextual state 
+ * information. These snapshots form the foundation of Brobot's learning and mocking capabilities, 
+ * enabling the framework to simulate realistic GUI behavior based on historical data.</p>
+ * 
+ * <p>Key components captured:
+ * <ul>
+ *   <li><b>Match Results</b>: List of matches found (empty for failed searches)</li>
+ *   <li><b>Action Context</b>: The ActionOptions that produced this result</li>
+ *   <li><b>Timing Data</b>: Duration of the operation for performance analysis</li>
+ *   <li><b>State Context</b>: Which state the match occurred in</li>
+ *   <li><b>Success Indicators</b>: Both action success and result success flags</li>
+ *   <li><b>Text Data</b>: Extracted text for text-based operations</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Snapshot creation strategy:
+ * <ul>
+ *   <li>One snapshot per action completion, not per find operation</li>
+ *   <li>Avoids skewing data with repeated searches in wait loops</li>
+ *   <li>Captures representative examples of real-world behavior</li>
+ *   <li>Stored temporarily as "dangling snapshots" until action completion</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Mock operation support:
+ * <ul>
+ *   <li>Provides realistic match/failure distributions based on history</li>
+ *   <li>Action-specific snapshots prevent cross-action interference</li>
+ *   <li>Enables accurate simulation of Find.ALL and Find.EACH operations</li>
+ *   <li>Supports extraction of best matches for Find.FIRST/BEST simulation</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Special handling:
+ * <ul>
+ *   <li><b>Failed Searches</b>: Empty match list indicates search failure</li>
+ *   <li><b>Multiple Results</b>: Text operations may produce multiple strings in one snapshot</li>
+ *   <li><b>Reused Matches</b>: Matches used multiple times within an action are recorded once</li>
+ *   <li><b>State Association</b>: Links matches to their containing state for context</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>In the model-based approach, MatchSnapshot provides the empirical foundation for 
+ * understanding how GUI elements behave over time. By capturing not just what was found 
+ * but also when, where, and under what conditions, these snapshots enable sophisticated 
+ * analysis and realistic simulation of GUI interactions.</p>
+ * 
+ * <p>The extensive documentation in this class reflects its central role in Brobot's 
+ * learning and simulation capabilities. The detailed timing and context capture enables 
+ * the framework to adapt to varying application behaviors and provide accurate mock 
+ * responses during development and testing.</p>
+ * 
+ * @since 1.0
+ * @see MatchHistory
+ * @see Match
+ * @see ActionOptions
+ * @see State
  */
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)

@@ -24,16 +24,42 @@ import java.io.File;
 import java.util.List;
 
 /**
- * Pattern and StateImage_ (to replace StateImage) are for a code restructuring that gets rid of RegionImagePairs.
- * This can also replace DynamicImage, which currently only uses KmeansProfiles for one of its Image objects.
- * StateImage, which can hold multiple Pattern objects, is currently used for classification. Pattern could also be used
- * but not all Pattern objects are associated with StateImage objects and some are generic (without an image).
- *
- * TODO: If Pattern is never used for classification, you can remove the KMeansProfiles.
- *
- * <p>Database: Pattern is an @Entity since a single Pattern may be in multiple StateImage objects. All fields in
- * Pattern should be @Embedded. This is the lowest level of object that should be stored in the database.
- * I removed the SikuliX Pattern since it is a non-JPA entity and caused problems with persistence. </p>
+ * Represents a visual template for pattern matching in the Brobot GUI automation framework.
+ * 
+ * <p>Pattern is the fundamental unit of visual recognition in Brobot, encapsulating an image 
+ * template along with its matching parameters and metadata. It serves as the building block 
+ * for StateImages and provides the core pattern matching capability that enables visual 
+ * GUI automation.</p>
+ * 
+ * <p>Key components:
+ * <ul>
+ *   <li><b>Image Data</b>: The actual visual template stored as a BufferedImage</li>
+ *   <li><b>Search Configuration</b>: Regions where this pattern should be searched for</li>
+ *   <li><b>Target Parameters</b>: Position and offset for precise interaction points</li>
+ *   <li><b>Match History</b>: Historical data for mocking and analysis</li>
+ *   <li><b>Anchors</b>: Reference points for defining relative positions</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Pattern types:
+ * <ul>
+ *   <li><b>Fixed</b>: Patterns that always appear in the same screen location</li>
+ *   <li><b>Dynamic</b>: Patterns with changing content that require special handling</li>
+ *   <li><b>Standard</b>: Regular patterns that can appear anywhere within search regions</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>In the model-based approach, Patterns provide the visual vocabulary for describing 
+ * GUI elements. They enable the framework to recognize and interact with GUI components 
+ * regardless of the underlying technology, making automation truly cross-platform and 
+ * technology-agnostic.</p>
+ * 
+ * @since 1.0
+ * @see StateImage
+ * @see Image
+ * @see Match
+ * @see SearchRegions
+ * @see Anchors
  */
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)

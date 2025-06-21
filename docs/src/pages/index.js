@@ -21,13 +21,13 @@ function HomepageHeader() {
         </div>
         <div className={styles.buttons}>
           <Link className="button button--secondary button--lg"
-                to="../brobot/docs/tutorial-state-structure-builder/intro"
+                to="/docs/tutorial-state-structure-builder/intro"
                 style={{border: '2px dotted red'}}>
               <div>Get Started</div>
           </Link>
         </div>
         <div>
-            <br />Free & open source. The latest version is 1.0.6.
+            <br />Free & open source.
         </div>
       </div>
     </header>
@@ -39,7 +39,7 @@ export default function Home() {
   return (
     <Layout
       title={`Hello from ${siteConfig.title}`}
-      description="Description will go into a meta tag in <head />">
+      description="Brobot - Testable State-based GUI Automation Framework">
       <HomepageHeader />
       <main>
         <HomepageFeatures />

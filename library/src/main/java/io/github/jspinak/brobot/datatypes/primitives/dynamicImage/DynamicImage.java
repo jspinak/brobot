@@ -11,46 +11,104 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- *
- * Last used in version 1.0.6. In version 1.0.7, color analysis is done on Pattern objects.
- *
- * A DynamicImage is an image that does not have a fixed pattern, and thus cannot be accurately found
- * with SikuliX or OpenCV pattern matching. These are images that represent objects, such as cats or dogs,
- * in the real world or in 3d environments such as role-playing-games. These objects are typically
- * found by training labeled datasets on neural nets.
- *
- * In Brobot, characteristics of these images are analyzed to give it a distinct profile. This profile is then
- * used, along with information about the active states and their boundaries, for determining the likelihood of
- * pixels belonging to this object. The end result is a sparse matrix containing the probabilities for each pixel of
- * belonging to all images (dynamic and other) on the screen. If the likelihood is very high (it will be 100% in
- * the case of matches on images with fixed patterns), these matches can be used directly. If it is uncertain to
- * which object a group of pixels belongs, a trained neural net is needed.
- *
- * DynamicImages are defined with images representing
- *  - pieces of the image with no background pixels
- *  - the entire image including background, fit to the boundaries of the object
- *  - scenes giving context, where the object is a small part of the overall image
- *
- * __Inside Images__
- * The inside images give us the colors that make up the object. Per-pixel analysis will be more effective when
- *   objects have less variation in color. For any set of objects there will often be some objects with unique
- *   color ranges. Anytime these ranges are seen, we can be fairly certain that the pixel belongs to this object.
- *   Objects with overlapping color ranges will not be able to be distinguished by color only. The ColorProfile
- *   gives the overall range of the object. Hue is more important here than saturation and value, which can
- *   change due to lighting. Main point: a hue outside the hue range of an object does not belong to the object.
- * Objects often have predominant colors. If a pixel has the predominant color of an object, it is more likely
- *   to belong to this object. Groups of pixels in this predominant color range increase the likelihood further.
- *   K-means gives us the predominant colors for objects. We also need to know how dominant each of the k-means
- *   are. This is calculated in a K-means profile. Main point: a pixel close to the hue of the dominant k-mean
- *   of an object is more likely to be that object.
- *
- * __Outside Images__
- * Contours and edges will be useful here. Look at Hough lines and edge detection in OpenCV.
- * In addition, you can do a color analysis of the background.
- *
- * __Context Images__
- * The histograms are calculated for the corners and center of the context images.
- *
+ * Advanced representation for variable-appearance objects in GUI automation.
+ * 
+ * <p>DynamicImage addresses the challenge of recognizing objects that lack fixed visual 
+ * patterns, such as 3D game characters, natural images, or dynamically rendered content. 
+ * Unlike traditional template matching which requires exact or near-exact visual matches, 
+ * DynamicImage uses color profiling and contextual analysis to identify objects with 
+ * variable appearances. This enables automation of applications with dynamic visual 
+ * content that would otherwise require neural networks or machine learning.</p>
+ * 
+ * <p><b>Note:</b> Last used in version 1.0.6. In version 1.0.7+, color analysis has 
+ * been moved to Pattern objects for better integration.</p>
+ * 
+ * <p>Three-layer analysis approach:
+ * <ul>
+ *   <li><b>Inside Images</b>: Core object pixels without background</li>
+ *   <li><b>Full Images</b>: Complete object including surrounding pixels</li>
+ *   <li><b>Context Images</b>: Wider scene providing environmental context</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Inside image analysis:
+ * <ul>
+ *   <li>Extracts color characteristics unique to the object</li>
+ *   <li>Creates color profiles using ranges and dominant colors</li>
+ *   <li>Uses K-means clustering to identify predominant colors</li>
+ *   <li>Focuses on hue (more stable than saturation/value under lighting changes)</li>
+ *   <li>Enables pixel-level probability calculations</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Full image analysis:
+ * <ul>
+ *   <li>Captures object boundaries and edge characteristics</li>
+ *   <li>Identifies background colors to exclude</li>
+ *   <li>Creates "outside" color cluster (full minus inside)</li>
+ *   <li>Helps distinguish object from background</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Context image analysis:
+ * <ul>
+ *   <li>Provides environmental cues for object location</li>
+ *   <li>Calculates histograms for corners and center</li>
+ *   <li>Helps predict where objects are likely to appear</li>
+ *   <li>Useful for objects that appear in consistent contexts</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Practical applications:
+ * <ul>
+ *   <li>Game automation with 3D characters or items</li>
+ *   <li>Nature photography applications</li>
+ *   <li>Medical imaging interfaces</li>
+ *   <li>Augmented reality applications</li>
+ *   <li>Any GUI with dynamically rendered content</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Color profiling strategy:
+ * <ul>
+ *   <li>Unique color ranges provide high confidence matches</li>
+ *   <li>Overlapping ranges require additional context</li>
+ *   <li>Dominant colors increase likelihood when found in groups</li>
+ *   <li>Hue-based analysis resists lighting variations</li>
+ *   <li>Probabilistic approach handles uncertainty</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Integration with state model:
+ * <ul>
+ *   <li>Active states provide search boundaries</li>
+ *   <li>State context improves recognition accuracy</li>
+ *   <li>Combines with fixed patterns for hybrid recognition</li>
+ *   <li>Produces probability matrices for decision making</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Future enhancements (theoretical):
+ * <ul>
+ *   <li>Edge detection and contour analysis</li>
+ *   <li>Hough line transforms for geometric features</li>
+ *   <li>Integration with neural networks for complex objects</li>
+ *   <li>Motion analysis for moving objects</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>In the model-based approach, DynamicImage represents an attempt to bridge 
+ * traditional template matching with more advanced computer vision techniques. 
+ * While superseded by Pattern-based color analysis in newer versions, it 
+ * demonstrates Brobot's evolution toward handling increasingly complex visual 
+ * recognition challenges in modern GUIs.</p>
+ * 
+ * @deprecated As of version 1.0.7, use Pattern objects with color analysis instead
+ * @since 1.0
+ * @see StateImage
+ * @see ColorCluster
+ * @see KmeansProfilesAllSchemas
+ * @see Pattern
  */
 @Getter
 @Setter

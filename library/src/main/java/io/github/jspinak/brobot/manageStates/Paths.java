@@ -9,8 +9,54 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * A list of Path objects comprising the possible ways to go from
- * start States to the target State.
+ * Collection of navigation paths in the Brobot model-based GUI automation framework.
+ * 
+ * <p>Paths manages multiple Path objects representing all discovered routes from a set of 
+ * starting states to a target state. This collection is the output of pathfinding algorithms 
+ * and serves as the input for path selection and execution strategies in the Path Traversal 
+ * Model (ξ).</p>
+ * 
+ * <p>Key features:
+ * <ul>
+ *   <li><b>Multiple Routes</b>: Stores all valid paths, not just the optimal one</li>
+ *   <li><b>Score-based Sorting</b>: Orders paths by quality for intelligent selection</li>
+ *   <li><b>Path Cleaning</b>: Removes invalid paths based on active states and failures</li>
+ *   <li><b>Best Score Tracking</b>: Identifies the highest quality path available</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Path management operations:
+ * <ul>
+ *   <li><b>Sorting</b>: Arranges paths by score (ascending) for optimal selection</li>
+ *   <li><b>Cleaning</b>: Filters out paths containing failed transitions or unreachable states</li>
+ *   <li><b>Comparison</b>: Determines equivalence between path collections</li>
+ *   <li><b>Reporting</b>: Provides formatted output for debugging and analysis</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Use cases:
+ * <ul>
+ *   <li>Storing pathfinding results for later execution</li>
+ *   <li>Selecting optimal paths based on current conditions</li>
+ *   <li>Providing fallback options when primary paths fail</li>
+ *   <li>Analyzing navigation complexity in the state graph</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>In the model-based approach, Paths represents the framework's understanding of all 
+ * possible ways to achieve a navigation goal. This comprehensive view enables robust 
+ * automation that can adapt to failures, choose optimal routes, and provide insights 
+ * into the application's navigational structure.</p>
+ * 
+ * <p>The ability to maintain multiple paths is crucial for handling the stochastic nature 
+ * of GUI applications, where the optimal path may vary based on current conditions or 
+ * where primary paths may occasionally fail due to timing or state variations.</p>
+ * 
+ * @since 1.0
+ * @see Path
+ * @see PathFinder
+ * @see PathManager
+ * @see TraversePaths
  */
 @Getter
 public class Paths {

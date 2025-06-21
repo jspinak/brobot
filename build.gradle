@@ -7,6 +7,9 @@ plugins {
 
     // This plugin is applied to the root to make it available to all sub-projects.
     id 'io.freefair.lombok' version '8.6'
+    
+    // JReleaser for publishing to Maven Central
+    id 'org.jreleaser' version '1.15.0' apply false
 }
 
 allprojects {
