@@ -36,7 +36,7 @@ _(a ✓ means Brobot now has this functionality, and a_ _____ _means that it's a
 _____  Representation learning  
 _____  Deep Learning models pre-trained on other data, used creatively  
 
-Note: Labeled datasets built by Brobot would be used for automation, as part of a [Visual API](../../visualAPI)*. 
+Note: Labeled datasets built by Brobot would be used for automation, as part of a [Visual API](/visualAPI)*. 
 The goal of Brobot is to be able to control an environment with visual cues. Images for labeling should be collected from the GUI
 as screenshots, keeping in mind how easy they will be to classify. For example, when attempting to label 
 white cats in a game, if possible they should appear on a non-white background. Often, this can be controlled by 

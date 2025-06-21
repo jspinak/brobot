@@ -122,8 +122,8 @@ const config = {
                 to: 'https://www.youtube.com/watch?v=aHnVQ8KmOVw',
               },
               {
-                label: 'Tutorial',
-                to: '/docs/03-core-library/tutorials/tutorial-basics/intro',
+                label: 'Get Started',
+                to: '/docs/getting-started/introduction',
               },
               {
                 label: 'The Visual API white paper',

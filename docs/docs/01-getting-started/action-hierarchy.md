@@ -15,7 +15,6 @@ Sikuli Wrappers route the operational instructions either to Sikuli methods,
 which control the mouse and keyboard and capture data from the screen, or to
 functions that mock (simulate) these methods. When calling Sikuli methods,
 the Wrappers convert Brobot data types to Sikuli data types.  
-[See in detail](../../API/functions/sikuli-wrappers)
 
 ## Basic Actions
 
@@ -25,7 +24,6 @@ powerful and can return Matches for Images with a variety of search options.
 For example, the DefineInsideAnchors class uses a Find Action to return a Match
 for each object in the ObjectCollection, and then uses these Match objects to
 define a Region. All of this is done with 1 Find operation.  
-[See in detail](../../API/functions/basic-actions)
 
 ## Composite Actions
 
@@ -36,4 +34,3 @@ Actions also could be made of multiple Basic Actions that require no Find
 operations. For a Composite Action, achieving its goal with only 1 Find
 operation is either not possible or would make the operation too confusing
 or too complex. Examples of Composite Actions are ClickUntil and Drag.  
-[See in detail](../../API/functions/composite-actions)
