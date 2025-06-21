@@ -60,8 +60,7 @@ If you use Brobot or its underlying concepts in academic work, please cite the f
 
 ### Further Reading
 
-* [The Overall Model](./the-overall-model)
+* [The Overall Model](./overall-model)
 * [States](./states)
 * [Transitions](./transitions)
-* [Path Traversal](./path-traversal)
-* [Testing the Automation](./testing-the-automation)
+* [Testing the Automation](./testing-automation)

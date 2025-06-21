@@ -21,7 +21,7 @@ function HomepageHeader() {
         </div>
         <div className={styles.buttons}>
           <Link className="button button--secondary button--lg"
-                to="/docs/tutorial-state-structure-builder/intro"
+                to="/docs/getting-started/introduction"
                 style={{border: '2px dotted red'}}>
               <div>Get Started</div>
           </Link>

@@ -48,6 +48,8 @@ javadoc {
     }
     exclude '**/module-info.java.disabled'
     options.addStringOption('Xdoclint:none', '-quiet')
+    options.windowTitle = "Brobot 1.0.7 API" // This sets the browser tab title
+    options.docTitle = "Brobot 1.0.7 API" // This sets the main header on the page
 }
 
 // -- Publishing Configuration --
