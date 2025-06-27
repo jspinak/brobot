@@ -1,8 +1,9 @@
 package io.github.jspinak.brobot.datatypes.primitives.match;
 
-import io.github.jspinak.brobot.datatypes.primitives.image.Image;
-import io.github.jspinak.brobot.datatypes.primitives.region.Region;
-import io.github.jspinak.brobot.datatypes.state.stateObject.StateObjectData;
+import io.github.jspinak.brobot.model.element.Image;
+import io.github.jspinak.brobot.model.element.Region;
+import io.github.jspinak.brobot.model.state.StateObjectMetadata;
+import io.github.jspinak.brobot.model.match.Match;
 import org.junit.jupiter.api.Test;
 
 import java.awt.image.BufferedImage;
@@ -53,7 +54,7 @@ class MatchTest {
     @Test
     void toStateImage_shouldCreateCorrectStateImage() {
         Image image = new Image(new BufferedImage(10,10,1));
-        StateObjectData sod = new StateObjectData();
+        StateObjectMetadata sod = new StateObjectMetadata();
         sod.setOwnerStateName("TestState");
         sod.setStateObjectName("TestImage");
 

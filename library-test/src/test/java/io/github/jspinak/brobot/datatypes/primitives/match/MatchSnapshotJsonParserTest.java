@@ -1,10 +1,12 @@
 package io.github.jspinak.brobot.datatypes.primitives.match;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
-import io.github.jspinak.brobot.json.parsing.JsonParser;
-import io.github.jspinak.brobot.json.parsing.exception.ConfigurationException;
-import io.github.jspinak.brobot.json.utils.JsonUtils;
+import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.runner.json.parsing.ConfigurationParser;
+import io.github.jspinak.brobot.runner.json.parsing.exception.ConfigurationException;
+import io.github.jspinak.brobot.runner.json.utils.JsonUtils;
+import io.github.jspinak.brobot.model.match.Match;
+import io.github.jspinak.brobot.model.action.ActionRecord;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -20,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class MatchSnapshotJsonParserTest {
 
     @Autowired
-    private JsonParser jsonParser;
+    private ConfigurationParser jsonParser;
 
     @Autowired
     private JsonUtils jsonUtils;
@@ -59,7 +61,7 @@ public class MatchSnapshotJsonParserTest {
                 """;
 
         JsonNode jsonNode = jsonParser.parseJson(json);
-        MatchSnapshot snapshot = jsonParser.convertJson(jsonNode, MatchSnapshot.class);
+        ActionRecord snapshot = jsonParser.convertJson(jsonNode, ActionRecord.class);
 
         assertNotNull(snapshot);
         assertEquals(ActionOptions.Action.FIND, snapshot.getActionOptions().getAction());
@@ -91,7 +93,7 @@ public class MatchSnapshotJsonParserTest {
     @Test
     public void testSerializeDeserializeMatchSnapshot() throws ConfigurationException {
         // Create a match snapshot
-        MatchSnapshot snapshot = new MatchSnapshot();
+        ActionRecord snapshot = new ActionRecord();
 
         // Set action options
         ActionOptions actionOptions = new ActionOptions.Builder()
@@ -122,7 +124,7 @@ public class MatchSnapshotJsonParserTest {
 
         // Deserialize
         JsonNode jsonNode = jsonParser.parseJson(json);
-        MatchSnapshot deserializedSnapshot = jsonParser.convertJson(jsonNode, MatchSnapshot.class);
+        ActionRecord deserializedSnapshot = jsonParser.convertJson(jsonNode, ActionRecord.class);
 
         // Verify
         assertNotNull(deserializedSnapshot);
@@ -156,7 +158,7 @@ public class MatchSnapshotJsonParserTest {
     @Test
     public void testMatchSnapshotBuilder() throws ConfigurationException {
         // Create a match snapshot with builder
-        MatchSnapshot snapshot = new MatchSnapshot.Builder()
+        ActionRecord snapshot = new ActionRecord.Builder()
                 .setActionOptions(new ActionOptions.Builder()
                         .setAction(ActionOptions.Action.MOVE)
                         .setFind(ActionOptions.Find.ALL)
@@ -179,7 +181,7 @@ public class MatchSnapshotJsonParserTest {
 
         // Deserialize
         JsonNode jsonNode = jsonParser.parseJson(json);
-        MatchSnapshot deserializedSnapshot = jsonParser.convertJson(jsonNode, MatchSnapshot.class);
+        ActionRecord deserializedSnapshot = jsonParser.convertJson(jsonNode, ActionRecord.class);
 
         // Verify
         assertNotNull(deserializedSnapshot);
@@ -212,7 +214,7 @@ public class MatchSnapshotJsonParserTest {
     @Test
     public void testConstructorAndWasFound() {
         // Test constructor with coordinates
-        MatchSnapshot snapshot = new MatchSnapshot(10, 20, 30, 40);
+        ActionRecord snapshot = new ActionRecord(10, 20, 30, 40);
 
         assertNotNull(snapshot.getMatchList());
         assertEquals(1, snapshot.getMatchList().size());
@@ -227,12 +229,12 @@ public class MatchSnapshotJsonParserTest {
         assertTrue(snapshot.wasFound());
 
         // Test wasFound with text only
-        MatchSnapshot textSnapshot = new MatchSnapshot();
+        ActionRecord textSnapshot = new ActionRecord();
         textSnapshot.setText("Text Only");
         assertTrue(textSnapshot.wasFound());
 
         // Test wasFound with no match or text
-        MatchSnapshot emptySnapshot = new MatchSnapshot();
+        ActionRecord emptySnapshot = new ActionRecord();
         assertFalse(emptySnapshot.wasFound());
     }
 
@@ -241,7 +243,7 @@ public class MatchSnapshotJsonParserTest {
      */
     @Test
     public void testAddMethods() {
-        MatchSnapshot snapshot = new MatchSnapshot();
+        ActionRecord snapshot = new ActionRecord();
 
         // Test setString
         snapshot.setString("Test String");
@@ -282,7 +284,7 @@ public class MatchSnapshotJsonParserTest {
     @Test
     public void testComparisonMethods() {
         // Create first snapshot
-        MatchSnapshot snapshot1 = new MatchSnapshot.Builder()
+        ActionRecord snapshot1 = new ActionRecord.Builder()
                 .setActionOptions(ActionOptions.Action.FIND)
                 .addMatch(new Match.Builder()
                         .setName("Match1")
@@ -292,7 +294,7 @@ public class MatchSnapshotJsonParserTest {
                 .build();
 
         // Create identical snapshot
-        MatchSnapshot snapshot2 = new MatchSnapshot.Builder()
+        ActionRecord snapshot2 = new ActionRecord.Builder()
                 .setActionOptions(ActionOptions.Action.FIND)
                 .addMatch(new Match.Builder()
                         .setName("Match1")
@@ -302,7 +304,7 @@ public class MatchSnapshotJsonParserTest {
                 .build();
 
         // Create snapshot with different text
-        MatchSnapshot snapshot3 = new MatchSnapshot.Builder()
+        ActionRecord snapshot3 = new ActionRecord.Builder()
                 .setActionOptions(ActionOptions.Action.FIND)
                 .addMatch(new Match.Builder()
                         .setName("Match1")
@@ -312,7 +314,7 @@ public class MatchSnapshotJsonParserTest {
                 .build();
 
         // Create snapshot with different match
-        MatchSnapshot snapshot4 = new MatchSnapshot.Builder()
+        ActionRecord snapshot4 = new ActionRecord.Builder()
                 .setActionOptions(ActionOptions.Action.FIND)
                 .addMatch(new Match.Builder()
                         .setName("Match1")
@@ -322,7 +324,7 @@ public class MatchSnapshotJsonParserTest {
                 .build();
 
         // Create snapshot with different action
-        MatchSnapshot snapshot5 = new MatchSnapshot.Builder()
+        ActionRecord snapshot5 = new ActionRecord.Builder()
                 .setActionOptions(ActionOptions.Action.CLICK) // Different action
                 .addMatch(new Match.Builder()
                         .setName("Match1")

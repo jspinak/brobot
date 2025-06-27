@@ -1,6 +1,5 @@
 package io.github.jspinak.brobot.runner.automation;
 
-import io.github.jspinak.brobot.datatypes.project.Button;
 import io.github.jspinak.brobot.runner.config.BrobotRunnerProperties;
 import io.github.jspinak.brobot.runner.events.ErrorEvent;
 import io.github.jspinak.brobot.runner.events.EventBus;
@@ -8,6 +7,7 @@ import io.github.jspinak.brobot.runner.events.ExecutionEventPublisher;
 import io.github.jspinak.brobot.runner.events.LogEvent;
 import io.github.jspinak.brobot.runner.execution.ExecutionController;
 import io.github.jspinak.brobot.runner.execution.ExecutionStatus;
+import io.github.jspinak.brobot.runner.project.TaskButton;
 import lombok.Getter;
 import lombok.Setter;
 import org.slf4j.Logger;
@@ -61,7 +61,7 @@ public class AutomationExecutor {
     /**
      * Execute an automation function from a button definition
      */
-    public void executeAutomation(Button button) {
+    public void executeAutomation(TaskButton button) {
         // Create a runnable that contains the automation logic
         Runnable automationTask = () -> {
             try {

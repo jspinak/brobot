@@ -1,12 +1,12 @@
 package io.github.jspinak.brobot.runner.ui.log;
 
-import io.github.jspinak.brobot.report.log.model.LogData;
-import io.github.jspinak.brobot.report.log.model.LogType;
-import io.github.jspinak.brobot.report.log.model.PerformanceMetricsData;
 import io.github.jspinak.brobot.runner.events.BrobotEvent;
 import io.github.jspinak.brobot.runner.events.EventBus;
 import io.github.jspinak.brobot.runner.persistence.LogQueryService;
 import io.github.jspinak.brobot.runner.ui.icons.IconRegistry;
+import io.github.jspinak.brobot.tools.logging.model.LogData;
+import io.github.jspinak.brobot.tools.logging.model.LogEventType;
+import io.github.jspinak.brobot.tools.logging.model.ExecutionMetrics;
 import javafx.application.Platform;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -206,7 +206,7 @@ public class LogViewerPanelIntegrationTest {
 
                 // Add a simple log entry
                 runOnFxThreadAndWait(() -> {
-                    LogData logData = new LogData("test-session", LogType.SESSION, "Test info message");
+                    LogData logData = new LogData("test-session", LogEventType.SESSION, "Test info message");
                     logData.setSuccess(true);
                     logData.setTimestamp(Instant.now());
 
@@ -242,7 +242,7 @@ public class LogViewerPanelIntegrationTest {
 
 
     // Helper methods for test data
-    private LogData createMockLogEntry(LogType type, boolean success, String description) {
+    private LogData createMockLogEntry(LogEventType type, boolean success, String description) {
         LogData logData = new LogData("test-session", type, description);
         logData.setSuccess(success);
         logData.setTimestamp(Instant.now());
@@ -250,7 +250,7 @@ public class LogViewerPanelIntegrationTest {
     }
 
     private LogData createDetailedLogEntry() {
-        LogData logData = createMockLogEntry(LogType.ACTION, true, "Detailed test action");
+        LogData logData = createMockLogEntry(LogEventType.ACTION, true, "Detailed test action");
         logData.setActionType("CLICK");
         logData.setErrorMessage(null);
         logData.setCurrentStateName("MainScreen");
@@ -259,7 +259,7 @@ public class LogViewerPanelIntegrationTest {
         logData.setScreenshotPath("path/to/screenshot.png");
         logData.setSuccess(true);
 
-        PerformanceMetricsData metrics = new PerformanceMetricsData();
+        ExecutionMetrics metrics = new ExecutionMetrics();
         metrics.setActionDuration(100);
         metrics.setPageLoadTime(200);
         metrics.setTransitionTime(150);

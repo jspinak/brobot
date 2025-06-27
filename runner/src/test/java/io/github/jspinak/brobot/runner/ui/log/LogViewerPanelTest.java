@@ -1,13 +1,13 @@
 package io.github.jspinak.brobot.runner.ui.log;
 
-import io.github.jspinak.brobot.report.log.model.LogData;
-import io.github.jspinak.brobot.report.log.model.LogType;
 import io.github.jspinak.brobot.runner.events.BrobotEvent;
 import io.github.jspinak.brobot.runner.events.EventBus;
 import io.github.jspinak.brobot.runner.events.LogEntryEvent;
 import io.github.jspinak.brobot.runner.events.LogEvent;
 import io.github.jspinak.brobot.runner.persistence.LogQueryService;
 import io.github.jspinak.brobot.runner.ui.icons.IconRegistry;
+import io.github.jspinak.brobot.tools.logging.model.LogData;
+import io.github.jspinak.brobot.tools.logging.model.LogEventType;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.scene.control.TableView;
@@ -106,7 +106,7 @@ public class LogViewerPanelTest {
         // 2. Create events to test
         LogEvent infoEvent = LogEvent.info(this, "Info message", "ACTION");
         LogEvent warningEvent = LogEvent.warning(this, "Warning message", "SYSTEM");
-        LogData errorLogData = new LogData("session", LogType.ERROR, "Error from LogData");
+        LogData errorLogData = new LogData("session", LogEventType.ERROR, "Error from LogData");
         LogEntryEvent errorEntryEvent = LogEntryEvent.created(this, errorLogData);
 
         // 3. Invoke the captured handler on the JavaFX thread, simulating the EventBus

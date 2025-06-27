@@ -1,9 +1,10 @@
 package io.github.jspinak.brobot.runner.config;
 
-import io.github.jspinak.brobot.report.log.ActionLogger;
-import io.github.jspinak.brobot.report.log.TestSessionLogger;
 import io.github.jspinak.brobot.runner.events.EventBus;
 import io.github.jspinak.brobot.runner.events.EventPublishingActionLogger;
+import io.github.jspinak.brobot.tools.logging.ActionLogger;
+import io.github.jspinak.brobot.tools.logging.SessionLifecycleLogger;
+
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -27,7 +28,7 @@ public class EventSystemConfig {
     @Primary
     public EventPublishingActionLogger eventPublishingLogger(
             @Qualifier("actionLoggerImpl") ActionLogger actionLoggerDelegate,
-            @Qualifier("sessionLoggerImpl") TestSessionLogger sessionLoggerDelegate,
+            @Qualifier("sessionLoggerImpl") SessionLifecycleLogger sessionLoggerDelegate,
             EventBus eventBus) {
 
         return new EventPublishingActionLogger(

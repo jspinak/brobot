@@ -1,17 +1,18 @@
 package io.github.jspinak.brobot.actions.methods.basicactions.click;
 
-import io.github.jspinak.brobot.actions.BrobotSettings;
-import io.github.jspinak.brobot.actions.actionExecution.Action;
-import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
-import io.github.jspinak.brobot.actions.methods.basicactions.find.Find;
-import io.github.jspinak.brobot.actions.methods.sikuliWrappers.mouse.ClickType;
-import io.github.jspinak.brobot.actions.methods.sikuliWrappers.mouse.MouseDownWrapper;
-import io.github.jspinak.brobot.actions.methods.sikuliWrappers.mouse.MouseUpWrapper;
-import io.github.jspinak.brobot.actions.methods.sikuliWrappers.mouse.MoveMouseWrapper;
-import io.github.jspinak.brobot.datatypes.primitives.location.Location;
-import io.github.jspinak.brobot.datatypes.primitives.match.Match;
-import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
-import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
+import io.github.jspinak.brobot.config.FrameworkSettings;
+import io.github.jspinak.brobot.action.Action;
+import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.action.basic.find.Find;
+import io.github.jspinak.brobot.action.internal.mouse.MoveMouseWrapper;
+import io.github.jspinak.brobot.action.internal.mouse.ClickType;
+import io.github.jspinak.brobot.action.internal.mouse.MouseDownWrapper;
+import io.github.jspinak.brobot.action.internal.mouse.MouseUpWrapper;
+import io.github.jspinak.brobot.model.element.Location;
+import io.github.jspinak.brobot.model.match.Match;
+import io.github.jspinak.brobot.action.ActionResult;
+import io.github.jspinak.brobot.action.ObjectCollection;
+
 import org.junit.jupiter.api.*;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,26 +51,26 @@ class ClickIntegrationTest {
 
     @BeforeEach
     void setUp() {
-        originalMockState = BrobotSettings.mock;
+        originalMockState = FrameworkSettings.mock;
         // ** FIX: Force the test to run in MOCK mode to avoid SikuliX headless issues **
-        BrobotSettings.mock = true;
+        FrameworkSettings.mock = true;
 
         // Since find.perform is a void method that modifies its arguments,
         // we use doAnswer to simulate this behavior.
         doAnswer(invocation -> {
-            Matches matches = invocation.getArgument(0); // Get the Matches object passed to find.perform
+            ActionResult matches = invocation.getArgument(0); // Get the Matches object passed to find.perform
             matches.add(new Match.Builder()
                     .setRegion(10, 10, 10, 10)
                     .setSimScore(0.9)
                     .build());
             matches.setSuccess(true);
             return null; // void methods must return null
-        }).when(find).perform(any(Matches.class), any(ObjectCollection[].class));
+        }).when(find).perform(any(ActionResult.class), any(ObjectCollection[].class));
     }
     
     @AfterEach
     void tearDown() {
-        BrobotSettings.mock = originalMockState;
+        FrameworkSettings.mock = originalMockState;
     }
 
     @Test
@@ -81,13 +82,13 @@ class ClickIntegrationTest {
         ObjectCollection objectCollection = new ObjectCollection();
 
         // Action
-        Matches result = action.perform(actionOptions, objectCollection);
+        ActionResult result = action.perform(actionOptions, objectCollection);
 
         // Verification
         Assertions.assertTrue(result.isSuccess());
         
         // In mock mode, the wrapper methods are not called
-        if (!BrobotSettings.mock) {
+        if (!FrameworkSettings.mock) {
             verify(moveMouseWrapper).move(any(Location.class));
             verify(mouseDownWrapper).press(anyDouble(), anyDouble(), eq(ClickType.Type.LEFT));
             verify(mouseUpWrapper).press(anyDouble(), anyDouble(), eq(ClickType.Type.LEFT));
@@ -105,13 +106,13 @@ class ClickIntegrationTest {
         ObjectCollection objectCollection = new ObjectCollection();
 
         // Action
-        Matches result = action.perform(actionOptions, objectCollection);
+        ActionResult result = action.perform(actionOptions, objectCollection);
 
         // Verification
         Assertions.assertTrue(result.isSuccess());
         
         // In mock mode, the wrapper methods are not called
-        if (!BrobotSettings.mock) {
+        if (!FrameworkSettings.mock) {
             verify(moveMouseWrapper).move(any(Location.class));
             verify(mouseDownWrapper, times(2)).press(anyDouble(), anyDouble(), eq(ClickType.Type.DOUBLE_LEFT));
             verify(mouseUpWrapper, times(2)).press(anyDouble(), anyDouble(), eq(ClickType.Type.DOUBLE_LEFT));
@@ -130,13 +131,13 @@ class ClickIntegrationTest {
         ObjectCollection objectCollection = new ObjectCollection();
 
         // Action
-        Matches result = action.perform(actionOptions, objectCollection);
+        ActionResult result = action.perform(actionOptions, objectCollection);
 
         // Verification
         Assertions.assertTrue(result.isSuccess());
         
         // In mock mode, only the after-click move is called
-        if (BrobotSettings.mock) {
+        if (FrameworkSettings.mock) {
             ArgumentCaptor<Location> locationCaptor = ArgumentCaptor.forClass(Location.class);
             verify(moveMouseWrapper, times(1)).move(locationCaptor.capture());
             Assertions.assertEquals(moveLocation, locationCaptor.getValue());

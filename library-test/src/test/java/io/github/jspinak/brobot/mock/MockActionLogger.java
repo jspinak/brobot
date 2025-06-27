@@ -1,11 +1,12 @@
 package io.github.jspinak.brobot.mock;
 
-import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
-import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
-import io.github.jspinak.brobot.datatypes.state.state.State;
-import io.github.jspinak.brobot.report.log.model.LogData;
-import io.github.jspinak.brobot.report.log.model.LogType;
-import io.github.jspinak.brobot.report.log.ActionLogger;
+import io.github.jspinak.brobot.action.ActionResult;
+import io.github.jspinak.brobot.action.ObjectCollection;
+import io.github.jspinak.brobot.model.state.State;
+import io.github.jspinak.brobot.tools.logging.ActionLogger;
+import io.github.jspinak.brobot.tools.logging.model.LogData;
+import io.github.jspinak.brobot.tools.logging.model.LogEventType;
+
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
@@ -19,9 +20,9 @@ import java.util.Set;
 public class MockActionLogger implements ActionLogger {
 
     @Override
-    public LogData logAction(String sessionId, Matches results, ObjectCollection objectCollection) {
+    public LogData logAction(String sessionId, ActionResult results, ObjectCollection objectCollection) {
         System.out.println("Mock logAction: SessionId=" + sessionId + ", Results=" + results);
-        return createMockLogEntry(sessionId, LogType.ACTION);
+        return createMockLogEntry(sessionId, LogEventType.ACTION);
     }
 
     @Override
@@ -36,7 +37,7 @@ public class MockActionLogger implements ActionLogger {
                 ", To States=[" + String.join(", ", toStates.stream().map(State::getName).toList()) + "]" +
                 ", Success=" + success +
                 ", Time=" + transitionTime + "ms");
-        return createMockLogEntry(sessionId, LogType.TRANSITION);
+        return createMockLogEntry(sessionId, LogEventType.TRANSITION);
     }
 
     @Override
@@ -46,7 +47,7 @@ public class MockActionLogger implements ActionLogger {
                 ", ActionDuration=" + actionDuration +
                 ", PageLoadTime=" + pageLoadTime +
                 ", TotalTestDuration=" + totalTestDuration);
-        return createMockLogEntry(sessionId, LogType.METRICS);
+        return createMockLogEntry(sessionId, LogEventType.METRICS);
     }
 
     @Override
@@ -54,22 +55,22 @@ public class MockActionLogger implements ActionLogger {
         System.out.println("Mock logError: SessionId=" + sessionId +
                 ", ErrorMessage=" + errorMessage +
                 ", ScreenshotPath=" + screenshotPath);
-        return createMockLogEntry(sessionId, LogType.ERROR);
+        return createMockLogEntry(sessionId, LogEventType.ERROR);
     }
 
     @Override
     public LogData startVideoRecording(String sessionId) throws IOException, AWTException {
         System.out.println("Mock startVideoRecording: SessionId=" + sessionId);
-        return createMockLogEntry(sessionId, LogType.VIDEO);
+        return createMockLogEntry(sessionId, LogEventType.VIDEO);
     }
 
     @Override
     public LogData stopVideoRecording(String sessionId) throws IOException {
         System.out.println("Mock stopVideoRecording: SessionId=" + sessionId);
-        return createMockLogEntry(sessionId, LogType.VIDEO);
+        return createMockLogEntry(sessionId, LogEventType.VIDEO);
     }
 
-    private LogData createMockLogEntry(String sessionId, LogType type) {
+    private LogData createMockLogEntry(String sessionId, LogEventType type) {
         LogData logData = new LogData(sessionId, type, "Mock log entry");
         logData.setTimestamp(Instant.now());
         return logData;

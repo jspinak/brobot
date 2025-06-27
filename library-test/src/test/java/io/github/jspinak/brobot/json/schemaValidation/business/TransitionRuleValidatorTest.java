@@ -1,11 +1,13 @@
 package io.github.jspinak.brobot.json.schemaValidation.business;
 
-import io.github.jspinak.brobot.json.schemaValidation.model.ValidationResult;
-import io.github.jspinak.brobot.json.schemaValidation.model.ValidationSeverity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import io.github.jspinak.brobot.runner.json.validation.business.TransitionRuleValidator;
+import io.github.jspinak.brobot.runner.json.validation.model.ValidationResult;
+import io.github.jspinak.brobot.runner.json.validation.model.ValidationSeverity;
 
 import java.util.*;
 

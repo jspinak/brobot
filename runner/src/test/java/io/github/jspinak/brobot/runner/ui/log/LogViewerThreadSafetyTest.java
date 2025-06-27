@@ -1,10 +1,10 @@
 package io.github.jspinak.brobot.runner.ui.log;
 
-import io.github.jspinak.brobot.report.log.model.LogData;
-import io.github.jspinak.brobot.report.log.model.LogType;
 import io.github.jspinak.brobot.runner.events.EventBus;
 import io.github.jspinak.brobot.runner.persistence.LogQueryService;
 import io.github.jspinak.brobot.runner.ui.icons.IconRegistry;
+import io.github.jspinak.brobot.tools.logging.model.LogData;
+import io.github.jspinak.brobot.tools.logging.model.LogEventType;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.scene.Scene;
@@ -99,7 +99,7 @@ public class LogViewerThreadSafetyTest {
         // ARRANGE: Create initial data
         List<LogData> initialData = new ArrayList<>();
         for (int i = 0; i < ENTRIES_TO_ADD; i++) {
-            initialData.add(new LogData("session", LogType.SYSTEM, "Entry " + i));
+            initialData.add(new LogData("session", LogEventType.SYSTEM, "Entry " + i));
         }
         when(logQueryService.getRecentLogs(anyInt())).thenReturn(initialData);
 

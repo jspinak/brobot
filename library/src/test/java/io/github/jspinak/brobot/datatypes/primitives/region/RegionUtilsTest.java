@@ -1,6 +1,9 @@
 package io.github.jspinak.brobot.datatypes.primitives.region;
 
-import io.github.jspinak.brobot.datatypes.primitives.location.Location;
+import io.github.jspinak.brobot.model.element.Location;
+import io.github.jspinak.brobot.model.element.Region;
+import io.github.jspinak.brobot.util.region.RegionUtils;
+
 import org.junit.jupiter.api.Test;
 import java.util.List;
 

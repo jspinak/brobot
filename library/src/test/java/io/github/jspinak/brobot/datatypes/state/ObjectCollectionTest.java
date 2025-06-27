@@ -1,11 +1,12 @@
 package io.github.jspinak.brobot.datatypes.state;
 
-import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
-import io.github.jspinak.brobot.datatypes.primitives.match.Match;
-import io.github.jspinak.brobot.datatypes.primitives.region.Region;
-import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.StateLocation;
-import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.StateRegion;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
+import io.github.jspinak.brobot.model.element.Pattern;
+import io.github.jspinak.brobot.model.element.Region;
+import io.github.jspinak.brobot.model.match.Match;
+import io.github.jspinak.brobot.model.state.StateLocation;
+import io.github.jspinak.brobot.model.state.StateRegion;
+import io.github.jspinak.brobot.model.state.StateImage;
+import io.github.jspinak.brobot.action.ObjectCollection;
 import org.junit.jupiter.api.Test;
 
 import java.awt.image.BufferedImage;

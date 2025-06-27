@@ -1,7 +1,10 @@
 package io.github.jspinak.brobot.dsl;
 
-import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
-import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
+import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.action.ObjectCollection;
+import io.github.jspinak.brobot.runner.dsl.model.ActionStep;
+import io.github.jspinak.brobot.runner.dsl.model.TaskSequence;
+
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -11,14 +14,14 @@ public class ActionDefinitionTest {
     @Test
     void testConstructors() {
         // Test empty constructor
-        ActionDefinition emptyDef = new ActionDefinition();
+        TaskSequence emptyDef = new TaskSequence();
         assertNotNull(emptyDef.getSteps());
         assertTrue(emptyDef.getSteps().isEmpty());
 
         // Test convenience constructor
         ActionOptions options = new ActionOptions.Builder().build();
         ObjectCollection collection = new ObjectCollection.Builder().build();
-        ActionDefinition convenienceDef = new ActionDefinition(options, collection);
+        TaskSequence convenienceDef = new TaskSequence(options, collection);
 
         assertEquals(1, convenienceDef.getSteps().size());
         assertSame(options, convenienceDef.getSteps().get(0).getActionOptions());
@@ -26,7 +29,7 @@ public class ActionDefinitionTest {
 
     @Test
     void testAddStepMethods() {
-        ActionDefinition definition = new ActionDefinition();
+        TaskSequence definition = new TaskSequence();
 
         // Test addStep(ActionOptions, ObjectCollection)
         ActionOptions options1 = new ActionOptions.Builder().setAction(ActionOptions.Action.CLICK).build();

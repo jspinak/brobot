@@ -1,10 +1,12 @@
 package io.github.jspinak.brobot.libraryfeatures.captureAndReplay.recorder;
 
-import io.github.jspinak.brobot.report.Report;
 import org.apache.commons.lang3.StringUtils;
 import com.github.kwhat.jnativehook.*;
 import com.github.kwhat.jnativehook.keyboard.*;
 import com.github.kwhat.jnativehook.mouse.*;
+
+import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
+
 //import org.jnativehook.GlobalScreen;
 //import org.jnativehook.NativeHookException;
 //import org.jnativehook.keyboard.NativeKeyEvent;
@@ -36,7 +38,7 @@ public class CaptureUserInputs implements NativeKeyListener, NativeMouseListener
             logger.setUseParentHandlers(false);
             GlobalScreen.registerNativeHook();
         } catch (NativeHookException e) {
-            Report.format("Error registering native hook: %s", e.getMessage());
+            ConsoleReporter.format("Error registering native hook: %s", e.getMessage());
         }
     }
 
@@ -50,7 +52,7 @@ public class CaptureUserInputs implements NativeKeyListener, NativeMouseListener
             try {
                 GlobalScreen.unregisterNativeHook();
             } catch (NativeHookException e) {
-                Report.formatln("Error unregistering native hook: %s", e.getMessage());
+                ConsoleReporter.formatln("Error unregistering native hook: %s", e.getMessage());
             }
         }
     }

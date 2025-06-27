@@ -1,7 +1,9 @@
 package io.github.jspinak.brobot.datatypes.primitives.image;
 
-import org.junit.jupiter.api.Test;
+import io.github.jspinak.brobot.model.element.Pattern;
+import io.github.jspinak.brobot.model.element.Scene;
 
+import org.junit.jupiter.api.Test;
 import java.awt.image.BufferedImage;
 
 import static org.assertj.core.api.Assertions.assertThat;

@@ -1,40 +1,40 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "Brobot Runner Project Metadata",
-  "description": "Schema for Brobot Runner project configuration files",
+  "title": "Brobot Runner Automation Project",
+  "description": "Schema for Brobot Runner automation project configuration files",
   "type": "object",
   "required": ["id", "name", "states", "stateTransitions"],
   "properties": {
     "id": {
       "type": "integer",
-      "description": "Unique identifier for the project"
+      "description": "Unique identifier for the automation project"
     },
     "name": {
       "type": "string",
-      "description": "Name of the project"
+      "description": "Name of the automation project"
     },
     "description": {
       "type": "string",
-      "description": "Optional description of the project"
+      "description": "Optional description of the automation project"
     },
     "version": {
       "type": "string",
-      "description": "Version of the project configuration",
+      "description": "Version of the automation project configuration",
       "pattern": "^\\d+\\.\\d+\\.\\d+$"
     },
     "created": {
       "type": "string",
       "format": "date-time",
-      "description": "When the project was created"
+      "description": "When the automation project was created"
     },
     "updated": {
       "type": "string",
       "format": "date-time",
-      "description": "When the project was last updated"
+      "description": "When the automation project was last updated"
     },
     "states": {
       "type": "array",
-      "description": "States defined in the project",
+      "description": "States defined in the automation project",
       "items": {
         "$ref": "#/definitions/state"
       }
@@ -48,19 +48,19 @@
     },
     "automation": {
       "type": "object",
-      "description": "Automation configuration",
+      "description": "Automation configuration settings",
       "properties": {
-        "buttons": {
+        "taskButtons": {
           "type": "array",
-          "description": "UI buttons for the desktop runner that call automation functions",
+          "description": "Task buttons for the desktop runner that execute business tasks",
           "items": {
-            "$ref": "#/definitions/button"
+            "$ref": "#/definitions/taskButton"
           }
         }
       }
     },
-    "configuration": {
-      "$ref": "#/definitions/configuration"
+    "automationConfiguration": {
+      "$ref": "#/definitions/automationConfiguration"
     }
   },
   "definitions": {
@@ -181,11 +181,11 @@
 
     "actionDefinitionStateTransition": {
       "type": "object",
-      "description": "State transition implemented via an ActionDefinition",
+      "description": "State transition implemented via a TaskSequence",
       "properties": {
-        "actionDefinition": {
-          "$ref": "#/definitions/actionDefinition",
-          "description": "The action definition that implements this transition"
+        "taskSequence": {
+          "$ref": "#/definitions/taskSequence",
+          "description": "The task sequence that implements this transition"
         },
         "staysVisibleAfterTransition": {
           "type": "string",
@@ -220,13 +220,13 @@
       }
     },
 
-    "actionDefinition": {
+    "taskSequence": {
       "type": "object",
       "required": ["steps"],
       "properties": {
         "steps": {
           "type": "array",
-          "description": "Steps to perform in the action",
+          "description": "Steps to perform in the task sequence",
           "items": {
             "$ref": "#/definitions/actionStep"
           }
@@ -571,42 +571,42 @@
         }
       }
     },
-    "button": {
+    "taskButton": {
       "type": "object",
-      "required": ["id", "label", "functionName"],
+      "required": ["id", "label", "taskName"],
       "properties": {
         "id": {
           "type": "string",
-          "description": "Unique identifier for the button"
+          "description": "Unique identifier for the task button"
         },
         "label": {
           "type": "string",
-          "description": "Button text to display in the UI"
+          "description": "Task button text to display in the UI"
         },
         "tooltip": {
           "type": "string",
-          "description": "Tooltip text to show when hovering over the button"
+          "description": "Tooltip text to show when hovering over the task button"
         },
-        "functionName": {
+        "taskName": {
           "type": "string",
-          "description": "Name of the automation function to call when clicked"
+          "description": "Name of the business task to execute when clicked"
         },
         "parameters": {
           "type": "object",
-          "description": "Parameters to pass to the function when called",
+          "description": "Parameters to pass to the business task when executed",
           "additionalProperties": true
         },
         "category": {
           "type": "string",
-          "description": "Category to group this button with others in the UI"
+          "description": "Category to group this task button with others in the UI"
         },
         "icon": {
           "type": "string",
-          "description": "Optional icon name to display on the button"
+          "description": "Optional icon name to display on the task button"
         },
         "position": {
           "type": "object",
-          "description": "Optional position information for the button in the UI",
+          "description": "Optional position information for the task button in the UI",
           "properties": {
             "row": {
               "type": "integer",
@@ -624,30 +624,30 @@
         },
         "styling": {
           "type": "object",
-          "description": "Optional styling information for the button",
+          "description": "Optional styling information for the task button",
           "properties": {
             "backgroundColor": {
               "type": "string",
-              "description": "Background color of the button (CSS color name or hex)"
+              "description": "Background color of the task button (CSS color name or hex)"
             },
             "textColor": {
               "type": "string",
-              "description": "Text color of the button (CSS color name or hex)"
+              "description": "Text color of the task button (CSS color name or hex)"
             },
             "size": {
               "type": "string",
               "enum": ["small", "medium", "large"],
-              "description": "Size of the button"
+              "description": "Size of the task button"
             },
             "customClass": {
               "type": "string",
-              "description": "Custom CSS class to apply to the button"
+              "description": "Custom CSS class to apply to the task button"
             }
           }
         },
         "confirmationRequired": {
           "type": "boolean",
-          "description": "Whether to require confirmation before executing the function",
+          "description": "Whether to require confirmation before executing the task",
           "default": false
         },
         "confirmationMessage": {
@@ -656,7 +656,7 @@
         }
       }
     },
-    "configuration": {
+    "automationConfiguration": {
       "type": "object",
       "properties": {
         "minSimilarity": {

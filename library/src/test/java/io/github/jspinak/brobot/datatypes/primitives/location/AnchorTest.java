@@ -1,7 +1,10 @@
 package io.github.jspinak.brobot.datatypes.primitives.location;
 
-import org.junit.jupiter.api.Test;
+import io.github.jspinak.brobot.model.element.Anchor;
+import io.github.jspinak.brobot.model.element.Position;
 
+import org.junit.jupiter.api.Test;
+import io.github.jspinak.brobot.model.element.Positions;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class AnchorTest {

@@ -1,14 +1,14 @@
 package io.github.jspinak.brobot.runner.init;
 
-import io.github.jspinak.brobot.database.services.AllStatesInProjectService;
-import io.github.jspinak.brobot.json.parsing.JsonParser;
-import io.github.jspinak.brobot.json.schemaValidation.ConfigValidator;
-import io.github.jspinak.brobot.json.schemaValidation.model.ValidationError;
-import io.github.jspinak.brobot.json.schemaValidation.model.ValidationResult;
-import io.github.jspinak.brobot.json.schemaValidation.model.ValidationSeverity;
 import io.github.jspinak.brobot.runner.config.BrobotRunnerProperties;
+import io.github.jspinak.brobot.runner.json.parsing.ConfigurationParser;
+import io.github.jspinak.brobot.runner.json.validation.ConfigurationValidator;
+import io.github.jspinak.brobot.runner.json.validation.model.ValidationError;
+import io.github.jspinak.brobot.runner.json.validation.model.ValidationResult;
+import io.github.jspinak.brobot.runner.json.validation.model.ValidationSeverity;
 import io.github.jspinak.brobot.runner.resources.ImageResourceManager;
-import io.github.jspinak.brobot.services.Init;
+import io.github.jspinak.brobot.config.FrameworkInitializer;
+import io.github.jspinak.brobot.navigation.service.StateService;
 import lombok.Getter;
 import lombok.Setter;
 import org.slf4j.Logger;
@@ -31,13 +31,13 @@ import java.util.stream.Collectors;
 public class BrobotLibraryInitializer {
     private static final Logger logger = LoggerFactory.getLogger(BrobotLibraryInitializer.class);
 
-    private final Init initService;
+    private final FrameworkInitializer frameworkInitializer;
     private final BrobotRunnerProperties properties;
-    private final JsonParser jsonParser;
+    private final ConfigurationParser jsonParser;
     private final ProjectConfigLoader projectConfigLoader;
-    private final ConfigValidator configValidator;
+    private final ConfigurationValidator configValidator;
     private final ImageResourceManager imageResourceManager;
-    private final AllStatesInProjectService allStatesInProjectService;
+    private final StateService allStatesInProjectService;
 
     private boolean initialized = false;
     private String lastErrorMessage = null;
@@ -45,14 +45,14 @@ public class BrobotLibraryInitializer {
 
     @Autowired
     public BrobotLibraryInitializer(
-            Init initService,
+            FrameworkInitializer initService,
             BrobotRunnerProperties properties,
-            JsonParser jsonParser,
+            ConfigurationParser jsonParser,
             ProjectConfigLoader projectConfigLoader,
-            ConfigValidator configValidator,
+            ConfigurationValidator configValidator,
             ImageResourceManager imageResourceManager,
-            AllStatesInProjectService allStatesInProjectService) {
-        this.initService = initService;
+            StateService allStatesInProjectService) {
+        this.frameworkInitializer = initService;
         this.properties = properties;
         this.jsonParser = jsonParser;
         this.projectConfigLoader = projectConfigLoader;
@@ -69,7 +69,7 @@ public class BrobotLibraryInitializer {
             // Initialize the image processing, but don't load configs yet
             // as the user may need to select config files first
             try {
-                initService.setBundlePathAndPreProcessImages(properties.getImagePath());
+                frameworkInitializer.setBundlePathAndPreProcessImages(properties.getImagePath());
             } catch (Exception e) {
                 logger.warn("Initial image processing failed, will retry when path is set correctly", e);
             }
@@ -154,7 +154,7 @@ public class BrobotLibraryInitializer {
 
             // Initialize the state structure
             try {
-                initService.initializeStateStructure();
+                frameworkInitializer.initializeStateStructure();
             } catch (Exception e) {
                 lastErrorMessage = "Failed to initialize state structure: " + e.getMessage();
                 logger.error("Failed to initialize state structure", e);
@@ -254,7 +254,7 @@ public class BrobotLibraryInitializer {
         properties.setImagePath(newImagePath);
 
         try {
-            initService.setBundlePathAndPreProcessImages(newImagePath);
+            frameworkInitializer.setBundlePathAndPreProcessImages(newImagePath);
             logger.info("Updated image path to: {}", newImagePath);
         } catch (Exception e) {
             logger.error("Failed to process images in new path", e);

@@ -1,15 +1,16 @@
 package io.github.jspinak.brobot.libraryfeatures.captureAndReplay.replay;
 
-import io.github.jspinak.brobot.report.Report;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
+
 import java.util.List;
 
-import static io.github.jspinak.brobot.actions.actionOptions.ActionOptions.Action.CLICK;
-import static io.github.jspinak.brobot.actions.actionOptions.ActionOptions.Action.TYPE;
+import static io.github.jspinak.brobot.action.ActionOptions.Action.CLICK;
+import static io.github.jspinak.brobot.action.ActionOptions.Action.TYPE;
 
 @Component
 public class ReplayCollectionOrganizer {
@@ -55,10 +56,10 @@ public class ReplayCollectionOrganizer {
     }
     private void printTopTenMaxDelays(ReplayCollection replayCollection) {
         List<ReplayObject> replayObjects = replayCollection.getReplayObjects();
-        Report.println("size of replay collection: " + replayObjects.size());
+        ConsoleReporter.println("size of replay collection: " + replayObjects.size());
         replayObjects.sort((o1, o2) -> (int)(o2.getDelayAfterLastPoint() - o1.getDelayAfterLastPoint()));
         for (int i = 0; i < 10; i++) {
-            Report.println("Delay: " + replayObjects.get(i).getDelayAfterLastPoint() + " timeLapse: " + replayObjects.get(i).getTimelapseFromStartOfRecording());
+            ConsoleReporter.println("Delay: " + replayObjects.get(i).getDelayAfterLastPoint() + " timeLapse: " + replayObjects.get(i).getTimelapseFromStartOfRecording());
         }
     }
 

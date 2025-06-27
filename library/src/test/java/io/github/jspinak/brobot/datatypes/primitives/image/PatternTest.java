@@ -1,9 +1,12 @@
 package io.github.jspinak.brobot.datatypes.primitives.image;
 
-import io.github.jspinak.brobot.datatypes.primitives.location.Position;
-import io.github.jspinak.brobot.datatypes.primitives.location.Positions;
-import io.github.jspinak.brobot.datatypes.primitives.match.Match;
-import io.github.jspinak.brobot.datatypes.primitives.region.Region;
+import io.github.jspinak.brobot.model.element.Position;
+import io.github.jspinak.brobot.model.element.Positions;
+import io.github.jspinak.brobot.model.element.Region;
+import io.github.jspinak.brobot.model.match.Match;
+import io.github.jspinak.brobot.model.element.Pattern;
+import io.github.jspinak.brobot.model.element.Image;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import java.awt.image.BufferedImage;

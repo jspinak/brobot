@@ -1,9 +1,10 @@
 package io.github.jspinak.brobot.test;
 
-import io.github.jspinak.brobot.actions.BrobotSettings;
-import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
-import io.github.jspinak.brobot.datatypes.primitives.match.Match;
-import io.github.jspinak.brobot.datatypes.primitives.match.MatchSnapshot;
+import io.github.jspinak.brobot.config.FrameworkSettings;
+import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.model.action.ActionRecord;
+import io.github.jspinak.brobot.model.match.Match;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -16,7 +17,7 @@ public class MockMatchSnapshotTest {
     
     @BeforeEach
     void setUp() {
-        BrobotSettings.mock = true;
+        FrameworkSettings.mock = true;
     }
     
     @Test
@@ -39,11 +40,11 @@ public class MockMatchSnapshotTest {
         System.out.println("Match2 region: " + match2.getRegion());
         
         // Create snapshots
-        MatchSnapshot snapshot1 = new MatchSnapshot();
+        ActionRecord snapshot1 = new ActionRecord();
         snapshot1.addMatch(match1);
         snapshot1.setText("Test");
         
-        MatchSnapshot snapshot2 = new MatchSnapshot();
+        ActionRecord snapshot2 = new ActionRecord();
         snapshot2.addMatch(match2);
         snapshot2.setText("Test");
         

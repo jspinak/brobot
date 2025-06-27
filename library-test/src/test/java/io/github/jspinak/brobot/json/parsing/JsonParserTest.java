@@ -3,8 +3,12 @@ package io.github.jspinak.brobot.json.parsing;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.fasterxml.jackson.databind.JsonNode;
-import io.github.jspinak.brobot.json.parsing.exception.ConfigurationException;
-import io.github.jspinak.brobot.json.utils.JsonUtils;
+
+import io.github.jspinak.brobot.runner.json.parsing.ConfigurationParser;
+import io.github.jspinak.brobot.runner.json.parsing.BrobotObjectMapper;
+import io.github.jspinak.brobot.runner.json.parsing.exception.ConfigurationException;
+import io.github.jspinak.brobot.runner.json.utils.JsonUtils;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -25,10 +29,10 @@ class JsonParserTest {
     Path tempDir;
 
     @Autowired
-    private JsonParser jsonParser;
+    private ConfigurationParser jsonParser;
 
     @Autowired
-    private ObjectMapper objectMapper;
+    private BrobotObjectMapper objectMapper;
 
     @Autowired
     private JsonUtils jsonUtils;

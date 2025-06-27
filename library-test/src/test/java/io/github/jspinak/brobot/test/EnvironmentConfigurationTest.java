@@ -1,9 +1,10 @@
 package io.github.jspinak.brobot.test;
 
-import io.github.jspinak.brobot.actions.BrobotEnvironment;
-import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
-import io.github.jspinak.brobot.datatypes.primitives.region.Region;
-import io.github.jspinak.brobot.imageUtils.BufferedImageOps;
+import io.github.jspinak.brobot.config.ExecutionEnvironment;
+import io.github.jspinak.brobot.model.element.Pattern;
+import io.github.jspinak.brobot.model.element.Region;
+import io.github.jspinak.brobot.util.image.core.BufferedImageUtilities;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -25,7 +26,7 @@ public class EnvironmentConfigurationTest {
         @Test
         @DisplayName("Should use mock data for Pattern creation")
         void testPatternWithMockData() {
-            BrobotEnvironment env = BrobotEnvironment.getInstance();
+            ExecutionEnvironment env = ExecutionEnvironment.getInstance();
             
             // Verify we're in mock mode
             assertTrue(env.isMockMode(), "Should be in mock mode");
@@ -42,14 +43,14 @@ public class EnvironmentConfigurationTest {
         @Test
         @DisplayName("Should skip screen capture in mock mode")
         void testScreenCaptureInMockMode() {
-            BrobotEnvironment env = BrobotEnvironment.getInstance();
+            ExecutionEnvironment env = ExecutionEnvironment.getInstance();
             
             // Verify screen capture is disabled
             assertFalse(env.canCaptureScreen(), "Should not be able to capture screen");
             
             // Try to capture screen - should get dummy image
             Region region = new Region(0, 0, 200, 150);
-            BufferedImage capture = BufferedImageOps.getBufferedImageFromScreen(region);
+            BufferedImage capture = BufferedImageUtilities.getBufferedImageFromScreen(region);
             
             assertNotNull(capture, "Should return dummy image");
             assertEquals(200, capture.getWidth(), "Dummy should match requested width");
@@ -64,7 +65,7 @@ public class EnvironmentConfigurationTest {
         @Test
         @DisplayName("Should load real files in headless environment")
         void testRealFileLoading() {
-            BrobotEnvironment env = BrobotEnvironment.getInstance();
+            ExecutionEnvironment env = ExecutionEnvironment.getInstance();
             
             // Verify we're NOT in mock mode
             assertFalse(env.isMockMode(), "Should not be in mock mode");
@@ -78,7 +79,7 @@ public class EnvironmentConfigurationTest {
         @Test
         @DisplayName("Should handle screen capture appropriately in headless")
         void testScreenCaptureInHeadless() {
-            BrobotEnvironment env = BrobotEnvironment.getInstance();
+            ExecutionEnvironment env = ExecutionEnvironment.getInstance();
             
             // In CI/CD, this would be false
             System.out.println("Has display: " + env.hasDisplay());
@@ -86,7 +87,7 @@ public class EnvironmentConfigurationTest {
             
             // Screen capture would return dummy in headless
             Region region = new Region(0, 0, 100, 100);
-            BufferedImage capture = BufferedImageOps.getBufferedImageFromScreen(region);
+            BufferedImage capture = BufferedImageUtilities.getBufferedImageFromScreen(region);
             
             assertNotNull(capture, "Should always return an image (real or dummy)");
         }
@@ -100,37 +101,37 @@ public class EnvironmentConfigurationTest {
         @DisplayName("Should allow temporary environment switching")
         void testTemporaryEnvironmentSwitch() {
             // Start with current environment
-            BrobotEnvironment original = BrobotEnvironment.getInstance();
+            ExecutionEnvironment original = ExecutionEnvironment.getInstance();
             boolean wasInMockMode = original.isMockMode();
             
             try {
                 // Switch to opposite mode
-                BrobotEnvironment newEnv = BrobotEnvironment.builder()
+                ExecutionEnvironment newEnv = ExecutionEnvironment.builder()
                     .mockMode(!wasInMockMode)
                     .build();
-                BrobotEnvironment.setInstance(newEnv);
+                ExecutionEnvironment.setInstance(newEnv);
                 
                 // Verify the switch
-                assertEquals(!wasInMockMode, BrobotEnvironment.getInstance().isMockMode());
+                assertEquals(!wasInMockMode, ExecutionEnvironment.getInstance().isMockMode());
                 
             } finally {
                 // Always restore original
-                BrobotEnvironment.setInstance(original);
+                ExecutionEnvironment.setInstance(original);
             }
             
             // Verify restoration
-            assertEquals(wasInMockMode, BrobotEnvironment.getInstance().isMockMode());
+            assertEquals(wasInMockMode, ExecutionEnvironment.getInstance().isMockMode());
         }
         
         @Test
         @DisplayName("Should read environment variables when configured")
         void testEnvironmentVariableConfiguration() {
             // Save original
-            BrobotEnvironment original = BrobotEnvironment.getInstance();
+            ExecutionEnvironment original = ExecutionEnvironment.getInstance();
             
             try {
                 // Create configuration from environment
-                BrobotEnvironment env = BrobotEnvironment.builder()
+                ExecutionEnvironment env = ExecutionEnvironment.builder()
                     .fromEnvironment()
                     .build();
                 
@@ -143,7 +144,7 @@ public class EnvironmentConfigurationTest {
                 System.out.println("Environment from variables: " + env.getEnvironmentInfo());
                 
             } finally {
-                BrobotEnvironment.setInstance(original);
+                ExecutionEnvironment.setInstance(original);
             }
         }
     }
@@ -151,7 +152,7 @@ public class EnvironmentConfigurationTest {
     @Test
     @DisplayName("Should provide clear environment information")
     void testEnvironmentInfo() {
-        BrobotEnvironment env = BrobotEnvironment.getInstance();
+        ExecutionEnvironment env = ExecutionEnvironment.getInstance();
         String info = env.getEnvironmentInfo();
         
         assertNotNull(info);

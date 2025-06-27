@@ -1,6 +1,8 @@
 package io.github.jspinak.brobot.actions.methods.basicactions.find.states;
 
 import io.github.jspinak.brobot.BrobotTestApplication;
+import io.github.jspinak.brobot.analysis.scene.SceneCombinationStore;
+
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +17,7 @@ class SceneCombinationsTest {
     }
 
     @Autowired
-    SceneCombinations sceneCombinations;
+    SceneCombinationStore sceneCombinations;
 
     @Test
     void getAllWithScene() {

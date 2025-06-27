@@ -1,10 +1,13 @@
 package io.github.jspinak.brobot.datatypes.project;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import io.github.jspinak.brobot.dsl.AutomationFunction;
-import io.github.jspinak.brobot.json.parsing.JsonParser;
-import io.github.jspinak.brobot.json.parsing.exception.ConfigurationException;
-import io.github.jspinak.brobot.json.utils.JsonUtils;
+
+import io.github.jspinak.brobot.runner.dsl.BusinessTask;
+import io.github.jspinak.brobot.runner.json.parsing.ConfigurationParser;
+import io.github.jspinak.brobot.runner.json.parsing.exception.ConfigurationException;
+import io.github.jspinak.brobot.runner.json.utils.JsonUtils;
+import io.github.jspinak.brobot.runner.project.AutomationConfiguration;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -20,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class ProjectConfigurationJsonParserTest {
 
     @Autowired
-    private JsonParser jsonParser;
+    private ConfigurationParser jsonParser;
 
     @Autowired
     private JsonUtils jsonUtils;
@@ -36,7 +39,7 @@ public class ProjectConfigurationJsonParserTest {
                 """;
 
         JsonNode jsonNode = jsonParser.parseJson(json);
-        ProjectConfiguration config = jsonParser.convertJson(jsonNode, ProjectConfiguration.class);
+        AutomationConfiguration config = jsonParser.convertJson(jsonNode, AutomationConfiguration.class);
 
         // Verify default values
         assertNotNull(config);
@@ -86,7 +89,7 @@ public class ProjectConfigurationJsonParserTest {
                 """;
 
         JsonNode jsonNode = jsonParser.parseJson(json);
-        ProjectConfiguration config = jsonParser.convertJson(jsonNode, ProjectConfiguration.class);
+        AutomationConfiguration config = jsonParser.convertJson(jsonNode, AutomationConfiguration.class);
 
         // Verify configured values
         assertNotNull(config);
@@ -117,7 +120,7 @@ public class ProjectConfigurationJsonParserTest {
     @Test
     public void testSerializeProjectConfiguration() throws ConfigurationException {
         // Create a configuration
-        ProjectConfiguration config = new ProjectConfiguration();
+        AutomationConfiguration config = new AutomationConfiguration();
         config.setMinSimilarity(0.85);
         config.setMoveMouseDelay(0.25);
         config.setMaxWait(7.5);
@@ -125,8 +128,8 @@ public class ProjectConfigurationJsonParserTest {
         config.setLogLevel("WARN");
 
         // Add automation functions
-        List<AutomationFunction> functions = new ArrayList<>();
-        AutomationFunction function = new AutomationFunction();
+        List<BusinessTask> functions = new ArrayList<>();
+        BusinessTask function = new BusinessTask();
         function.setId(2);
         function.setName("testFunction");
         function.setReturnType("void");
@@ -139,7 +142,7 @@ public class ProjectConfigurationJsonParserTest {
 
         // Deserialize and verify
         JsonNode jsonNode = jsonParser.parseJson(json);
-        ProjectConfiguration deserializedConfig = jsonParser.convertJson(jsonNode, ProjectConfiguration.class);
+        AutomationConfiguration deserializedConfig = jsonParser.convertJson(jsonNode, AutomationConfiguration.class);
 
         assertEquals(0.85, deserializedConfig.getMinSimilarity(), 0.001);
         assertEquals(0.25, deserializedConfig.getMoveMouseDelay(), 0.001);

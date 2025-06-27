@@ -1,13 +1,15 @@
 package io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import io.github.jspinak.brobot.datatypes.primitives.location.Location;
-import io.github.jspinak.brobot.datatypes.primitives.location.Positions;
-import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
-import io.github.jspinak.brobot.datatypes.state.stateObject.StateObject;
-import io.github.jspinak.brobot.json.parsing.JsonParser;
-import io.github.jspinak.brobot.json.parsing.exception.ConfigurationException;
-import io.github.jspinak.brobot.json.utils.JsonUtils;
+import io.github.jspinak.brobot.model.element.Location;
+import io.github.jspinak.brobot.model.element.Positions;
+import io.github.jspinak.brobot.runner.json.parsing.ConfigurationParser;
+import io.github.jspinak.brobot.runner.json.parsing.exception.ConfigurationException;
+import io.github.jspinak.brobot.runner.json.utils.JsonUtils;
+import io.github.jspinak.brobot.action.ObjectCollection;
+import io.github.jspinak.brobot.model.state.StateObject;
+import io.github.jspinak.brobot.model.state.StateLocation;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -20,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class StateLocationJsonParserTest {
 
     @Autowired
-    private JsonParser jsonParser;
+    private ConfigurationParser jsonParser;
 
     @Autowired
     private JsonUtils jsonUtils;

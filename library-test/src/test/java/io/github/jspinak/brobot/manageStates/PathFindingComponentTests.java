@@ -1,15 +1,21 @@
 package io.github.jspinak.brobot.manageStates;
 
-import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
-import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
-import io.github.jspinak.brobot.datatypes.state.state.State;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
-import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
-import io.github.jspinak.brobot.dsl.ActionDefinition;
-import io.github.jspinak.brobot.services.Init;
-import io.github.jspinak.brobot.services.StateTransitionsInProjectService;
-import io.github.jspinak.brobot.database.services.AllStatesInProjectService;
-import io.github.jspinak.brobot.services.StateTransitionsRepository;
+import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.action.ObjectCollection;
+import io.github.jspinak.brobot.model.state.State;
+import io.github.jspinak.brobot.model.state.StateImage;
+import io.github.jspinak.brobot.model.element.Pattern;
+import io.github.jspinak.brobot.config.FrameworkInitializer;
+import io.github.jspinak.brobot.navigation.service.StateTransitionService;
+import io.github.jspinak.brobot.navigation.transition.StateTransitionsJointTable;
+import io.github.jspinak.brobot.navigation.transition.StateTransitions;
+import io.github.jspinak.brobot.navigation.transition.TaskSequenceStateTransition;
+import io.github.jspinak.brobot.model.transition.StateTransitionStore;
+import io.github.jspinak.brobot.navigation.path.PathFinder;
+import io.github.jspinak.brobot.navigation.path.Paths;
+import io.github.jspinak.brobot.navigation.service.StateService;
+import io.github.jspinak.brobot.runner.dsl.model.TaskSequence;
+
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,19 +35,19 @@ public class PathFindingComponentTests {
     private PathFinder pathFinder;
 
     @Autowired
-    private StateTransitionsInProjectService stateTransitionsService;
+    private StateTransitionService stateTransitionsService;
 
     @Autowired
-    private AllStatesInProjectService allStatesInProjectService;
+    private StateService allStatesInProjectService;
 
     @Autowired
-    private StateTransitionsRepository stateTransitionsRepository;
+    private StateTransitionStore stateTransitionsRepository;
 
     @Autowired
     private StateTransitionsJointTable stateTransitionsJointTable;
 
     @Autowired
-    private Init init;
+    private FrameworkInitializer init;
 
     @BeforeAll
     public static void setupHeadlessMode() {
@@ -108,7 +114,7 @@ public class PathFindingComponentTests {
     }
 
     private void createTransition(State fromState, State toState, StateImage stateImage, String actionDescription) {
-        ActionDefinition actionDefinition = new ActionDefinition();
+        TaskSequence actionDefinition = new TaskSequence();
         ActionOptions options = new ActionOptions.Builder()
                 .setAction(ActionOptions.Action.CLICK)
                 .build();
@@ -117,7 +123,7 @@ public class PathFindingComponentTests {
                 .build();
         actionDefinition.addStep(options, objects);
 
-        ActionDefinitionStateTransition transition = new ActionDefinitionStateTransition();
+        TaskSequenceStateTransition transition = new TaskSequenceStateTransition();
         transition.setActionDefinition(actionDefinition);
         transition.setActivate(Collections.singleton(toState.getId()));
         StateTransitions stateTransitions = new StateTransitions();

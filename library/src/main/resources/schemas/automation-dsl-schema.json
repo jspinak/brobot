@@ -1,43 +1,43 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "Brobot Runner Automation DSL",
-  "description": "Schema for Brobot Runner automation functions and expressions",
+  "title": "Brobot Automation DSL Schema",
+  "description": "Schema for Brobot automation functions and DSL instructions",
   "type": "object",
   "required": ["automationFunctions"],
   "properties": {
     "automationFunctions": {
       "type": "array",
-      "description": "Automation functions defined in this project",
+      "description": "Automation functions defined in this instruction set",
       "items": {
-        "$ref": "#/definitions/automationFunction"
+        "$ref": "#/definitions/businessTask"
       }
     }
   },
   "definitions": {
-    "automationFunction": {
+    "businessTask": {
       "type": "object",
       "required": ["name", "returnType", "statements"],
       "properties": {
         "id": {
           "type": "integer",
-          "description": "Unique identifier for the function"
+          "description": "Unique identifier for the business task"
         },
         "name": {
           "type": "string",
-          "description": "Name of the function"
+          "description": "Name of the business task"
         },
         "description": {
           "type": "string",
-          "description": "Description of what the function does"
+          "description": "Description of what the business task does"
         },
         "returnType": {
           "type": "string",
           "enum": ["void", "boolean", "string", "int", "double", "region", "matches", "stateImage", "stateRegion", "object"],
-          "description": "Return type of the function"
+          "description": "Return type of the business task"
         },
         "parameters": {
           "type": "array",
-          "description": "Parameters accepted by the function",
+          "description": "Parameters accepted by the business task",
           "items": {
             "type": "object",
             "required": ["name", "type"],
@@ -56,7 +56,7 @@
         },
         "statements": {
           "type": "array",
-          "description": "Statements that make up the function body",
+          "description": "Statements that make up the business task body",
           "items": {
             "$ref": "#/definitions/statement"
           }
@@ -65,7 +65,7 @@
     },
     "statement": {
       "type": "object",
-      "description": "A statement in the function",
+      "description": "A statement in the business task",
       "oneOf": [
         {
           "$ref": "#/definitions/variableDeclaration"

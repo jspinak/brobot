@@ -1,11 +1,12 @@
 package io.github.jspinak.brobot.actions.methods.basicactions.find.motion;
 
-import io.github.jspinak.brobot.imageUtils.MatOps;
-import io.github.jspinak.brobot.imageUtils.MatOps3d;
+import io.github.jspinak.brobot.util.image.core.ColorMatrixUtilities;
+import io.github.jspinak.brobot.util.image.core.MatrixUtilities;
 import io.github.jspinak.brobot.BrobotTestApplication;
+import io.github.jspinak.brobot.analysis.motion.PixelChangeDetector;
+
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -21,7 +22,7 @@ class PixelChangeDetectorTest {
     }
 
     @Autowired
-    MatOps3d matOps3d;
+    ColorMatrixUtilities matOps3d;
 
     @Test
     void getFinalMat() {
@@ -36,7 +37,7 @@ class PixelChangeDetectorTest {
                 .build();
         pixelChangeDetector.print(3, 3, 3);
         Mat finalMat = pixelChangeDetector.getChangeMask();
-        assertEquals(0, MatOps.getDouble(0,0,0, finalMat));
-        assertEquals(255, MatOps.getDouble(0,1,0, finalMat));
+        assertEquals(0, MatrixUtilities.getDouble(0,0,0, finalMat));
+        assertEquals(255, MatrixUtilities.getDouble(0,1,0, finalMat));
     }
 }

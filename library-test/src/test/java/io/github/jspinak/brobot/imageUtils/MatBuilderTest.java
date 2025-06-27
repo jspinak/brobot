@@ -1,9 +1,10 @@
 package io.github.jspinak.brobot.imageUtils;
 
-import io.github.jspinak.brobot.datatypes.primitives.location.Location;
-import io.github.jspinak.brobot.datatypes.primitives.region.Region;
-import io.github.jspinak.brobot.imageUtils.MatBuilder;
-import io.github.jspinak.brobot.imageUtils.MatOps;
+import io.github.jspinak.brobot.model.element.Location;
+import io.github.jspinak.brobot.model.element.Region;
+import io.github.jspinak.brobot.util.image.core.MatrixUtilities;
+import io.github.jspinak.brobot.util.image.visualization.MatBuilder;
+
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Size;
 import org.junit.jupiter.api.BeforeAll;
@@ -37,10 +38,10 @@ class MatBuilderTest {
     @Test
     void addSubMat() {
         MatBuilder matBuilder = getMatBuilder();
-        Mat submat = MatOps.makeMat(new Size(20,20), 24, 100);
+        Mat submat = MatrixUtilities.makeMat(new Size(20,20), 24, 100);
         matBuilder.addSubMat(new Location(100,100), submat);
         Mat mat = matBuilder.build();
-        Double d = MatOps.getDouble(101, 101, 0, mat);
+        Double d = MatrixUtilities.getDouble(101, 101, 0, mat);
         assertEquals(100, d);
     }
 

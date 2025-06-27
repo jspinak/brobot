@@ -1,5 +1,8 @@
 package io.github.jspinak.brobot.datatypes.primitives.region;
 
+import io.github.jspinak.brobot.model.element.Region;
+import io.github.jspinak.brobot.model.element.SearchRegions;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import java.util.List;

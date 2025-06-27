@@ -1,13 +1,13 @@
 package io.github.jspinak.brobot.runner.ui.config;
 
-import io.github.jspinak.brobot.database.services.AllStatesInProjectService;
-import io.github.jspinak.brobot.datatypes.project.Project;
+import io.github.jspinak.brobot.navigation.service.StateService;
 import io.github.jspinak.brobot.runner.config.ApplicationConfig;
 import io.github.jspinak.brobot.runner.config.BrobotRunnerProperties;
 import io.github.jspinak.brobot.runner.events.EventBus;
 import io.github.jspinak.brobot.runner.events.LogEvent;
 import io.github.jspinak.brobot.runner.init.BrobotLibraryInitializer;
-import io.github.jspinak.brobot.services.ProjectManager;
+import io.github.jspinak.brobot.runner.project.AutomationProject;
+import io.github.jspinak.brobot.runner.project.AutomationProjectManager;
 import io.github.jspinak.brobot.runner.testutil.JavaFXTestUtils;
 import javafx.scene.control.TabPane;
 import javafx.stage.Stage;
@@ -45,9 +45,9 @@ public class ConfigManagementPanelTest {
     @Mock
     private ApplicationConfig appConfig;
     @Mock
-    private ProjectManager projectManager;
+    private AutomationProjectManager projectManager;
     @Mock
-    private AllStatesInProjectService allStatesService;
+    private StateService allStatesService;
     @Mock
     private ConfigSelectionPanel selectionPanel;
     @Mock
@@ -181,7 +181,7 @@ public class ConfigManagementPanelTest {
     @Test
     public void testRefreshConfiguration() throws InterruptedException {
         // Setup mock data
-        Project mockProject = mock(Project.class);
+        AutomationProject mockProject = mock(AutomationProject.class);
         when(projectManager.getActiveProject()).thenReturn(mockProject);
 
         ConfigEntry mockEntry = new ConfigEntry(

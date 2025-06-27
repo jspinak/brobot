@@ -1,14 +1,14 @@
 package io.github.jspinak.brobot.actions.methods.basicactions.find;
 
-import io.github.jspinak.brobot.actions.BrobotEnvironment;
-import io.github.jspinak.brobot.actions.BrobotSettings;
-import io.github.jspinak.brobot.actions.actionExecution.Action;
-import io.github.jspinak.brobot.actions.actionExecution.MatchesInitializer;
-import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
-import io.github.jspinak.brobot.actions.methods.basicactions.find.compareImages.FindSimilarImages;
-import io.github.jspinak.brobot.datatypes.primitives.match.Match;
-import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
-import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
+import io.github.jspinak.brobot.config.FrameworkSettings;
+import io.github.jspinak.brobot.action.Action;
+import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.action.ActionResult;
+import io.github.jspinak.brobot.config.ExecutionEnvironment;
+import io.github.jspinak.brobot.action.ObjectCollection;
+import io.github.jspinak.brobot.action.basic.find.FindSimilarImages;
+import io.github.jspinak.brobot.action.internal.factory.ActionResultFactory;
+import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.BrobotTestApplication;
 import io.github.jspinak.brobot.actions.methods.basicactions.TestData;
 import io.github.jspinak.brobot.test.BrobotIntegrationTestBase;
@@ -24,7 +24,7 @@ import java.io.File;
 import java.util.List;
 import java.util.Optional;
 
-import static io.github.jspinak.brobot.actions.actionOptions.ActionOptions.Find.ALL_WORDS;
+import static io.github.jspinak.brobot.action.ActionOptions.Find.ALL_WORDS;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -44,22 +44,22 @@ class FindSimilarImagesTest extends BrobotIntegrationTestBase {
     @Override
     protected void setUpBrobotEnvironment() {
         // Configure for unit testing with screenshots
-        BrobotEnvironment env = BrobotEnvironment.builder()
+        ExecutionEnvironment env = ExecutionEnvironment.builder()
                 .mockMode(false)  // Use real file operations for find
                 .forceHeadless(true)  // No screen capture
                 .allowScreenCapture(false)
                 .build();
-        BrobotEnvironment.setInstance(env);
+        ExecutionEnvironment.setInstance(env);
         
         // Enable action mocking but real find operations
-        BrobotSettings.mock = true;
+        FrameworkSettings.mock = true;
         
         // Clear any previous screenshots
-        BrobotSettings.screenshots.clear();
+        FrameworkSettings.screenshots.clear();
     }
 
     @Autowired
-    MatchesInitializer matchesInitializer;
+    ActionResultFactory matchesInitializer;
 
     @Autowired
     FindSimilarImages findSimilarImages;
@@ -75,11 +75,11 @@ class FindSimilarImagesTest extends BrobotIntegrationTestBase {
     void shouldMatchScreenshot0() {
         try {
             // Add screenshots for find operation (enables hybrid mode)
-            BrobotSettings.screenshots.add(TestPaths.getScreenshotPath("floranext0"));
-            BrobotSettings.screenshots.add(TestPaths.getScreenshotPath("floranext1"));
-            BrobotSettings.screenshots.add(TestPaths.getScreenshotPath("floranext2"));
-            BrobotSettings.screenshots.add(TestPaths.getScreenshotPath("floranext3"));
-            BrobotSettings.screenshots.add(TestPaths.getScreenshotPath("floranext4"));
+            FrameworkSettings.screenshots.add(TestPaths.getScreenshotPath("floranext0"));
+            FrameworkSettings.screenshots.add(TestPaths.getScreenshotPath("floranext1"));
+            FrameworkSettings.screenshots.add(TestPaths.getScreenshotPath("floranext2"));
+            FrameworkSettings.screenshots.add(TestPaths.getScreenshotPath("floranext3"));
+            FrameworkSettings.screenshots.add(TestPaths.getScreenshotPath("floranext4"));
             
             TestData testData = new TestData();
 
@@ -96,7 +96,7 @@ class FindSimilarImagesTest extends BrobotIntegrationTestBase {
                     .withPatterns(testData.getPatterns(0,2,3,4))
                     .build();
 
-            Matches matches = matchesInitializer.init(actionOptions, "find similar screenshots",
+            ActionResult matches = matchesInitializer.init(actionOptions, "find similar screenshots",
                     objectCollection1, objectCollection2);
                     
             findSimilarImages.find(matches, List.of(objectCollection1, objectCollection2));
@@ -136,7 +136,7 @@ class FindSimilarImagesTest extends BrobotIntegrationTestBase {
             }
             
             // Add screenshot for find operation (enables hybrid mode)
-            BrobotSettings.screenshots.add(TestPaths.getScreenshotPath("floranext0"));
+            FrameworkSettings.screenshots.add(TestPaths.getScreenshotPath("floranext0"));
             
             ObjectCollection screen0 = new ObjectCollection.Builder()
                     .withScenes(TestPaths.getScreenshotPath("floranext0"))
@@ -149,7 +149,7 @@ class FindSimilarImagesTest extends BrobotIntegrationTestBase {
                     .setMaxFusionDistances(20, 10)
                     .build();
                     
-            Matches fusedMatches = action.perform(findAndFuseWords, screen0);
+            ActionResult fusedMatches = action.perform(findAndFuseWords, screen0);
 
             ActionOptions findWordsDontFuse = new ActionOptions.Builder()
                     .setAction(ActionOptions.Action.FIND)
@@ -157,7 +157,7 @@ class FindSimilarImagesTest extends BrobotIntegrationTestBase {
                     .setFusionMethod(ActionOptions.MatchFusionMethod.NONE)
                     .build();
                     
-            Matches notFusedMatches = action.perform(findWordsDontFuse, screen0);
+            ActionResult notFusedMatches = action.perform(findWordsDontFuse, screen0);
 
             // If no words were found (OCR issue in headless), skip the similarity test
             if (fusedMatches.isEmpty() || notFusedMatches.isEmpty()) {
@@ -178,7 +178,7 @@ class FindSimilarImagesTest extends BrobotIntegrationTestBase {
                     .withMatchObjectsAsStateImages(notFusedMatches.getMatchList().toArray(new Match[0]))
                     .build();
                     
-            Matches similarMatches = action.perform(findSimilar, fused, notFused);
+            ActionResult similarMatches = action.perform(findSimilar, fused, notFused);
 
             // FIND.SIMILAR_IMAGES returns a match for each image in the 2nd Object Collection
             assertNotNull(similarMatches);

@@ -1,12 +1,12 @@
 package io.github.jspinak.brobot.actions.methods.basicactions.define;
 
-import io.github.jspinak.brobot.actions.methods.basicactions.define.AnchorRegion;
-import io.github.jspinak.brobot.actions.methods.basicactions.define.DefinedBorders;
-import io.github.jspinak.brobot.datatypes.primitives.location.Positions;
-import io.github.jspinak.brobot.datatypes.primitives.match.Match;
-import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
-import io.github.jspinak.brobot.datatypes.primitives.region.Region;
-import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.StateRegion;
+import io.github.jspinak.brobot.model.element.Positions;
+import io.github.jspinak.brobot.action.ActionResult;
+import io.github.jspinak.brobot.action.internal.capture.AnchorRegion;
+import io.github.jspinak.brobot.action.internal.capture.DefinedBorders;
+import io.github.jspinak.brobot.model.element.Region;
+import io.github.jspinak.brobot.model.match.Match;
+import io.github.jspinak.brobot.model.state.StateRegion;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +29,7 @@ class AnchorRegionTest {
     public void testFitRegionToAnchors() {
         DefinedBorders definedBorders = new DefinedBorders();
         Region region = new Region();
-        Matches matches = new Matches();
+        ActionResult matches = new ActionResult();
         StateRegion reg1 = new StateRegion.Builder()
                 .setSearchRegion(0,50,100,20)
                 .addAnchor(Positions.Name.TOPLEFT, Positions.Name.BOTTOMLEFT)

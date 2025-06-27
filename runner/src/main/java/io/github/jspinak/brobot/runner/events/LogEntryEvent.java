@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.runner.events;
 
-import io.github.jspinak.brobot.report.log.model.LogData;
+import io.github.jspinak.brobot.tools.logging.model.LogData;
 
 /**
  * Event representing a log entry from the Brobot library.

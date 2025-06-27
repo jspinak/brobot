@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.runner.ui;
 
-import io.github.jspinak.brobot.database.services.AllStatesInProjectService;
+import io.github.jspinak.brobot.navigation.service.StateService;
 import io.github.jspinak.brobot.runner.config.BrobotRunnerProperties;
 import io.github.jspinak.brobot.runner.events.ConfigurationEvent;
 import io.github.jspinak.brobot.runner.events.EventBus;
@@ -35,7 +35,7 @@ public class ConfigurationPanel extends VBox {
     private final BrobotRunnerProperties properties;
     private final BrobotLibraryInitializer libraryInitializer;
     private final EventBus eventBus;
-    private final AllStatesInProjectService allStatesInProjectService;
+    private final StateService allStatesInProjectService;
 
     private TextField projectConfigField;
     private TextField dslConfigField;
@@ -46,7 +46,7 @@ public class ConfigurationPanel extends VBox {
             BrobotRunnerProperties properties,
             BrobotLibraryInitializer libraryInitializer,
             EventBus eventBus,
-            AllStatesInProjectService allStatesInProjectService) {
+            StateService allStatesInProjectService) {
         this.properties = properties;
         this.libraryInitializer = libraryInitializer;
         this.eventBus = eventBus;
@@ -61,7 +61,7 @@ public class ConfigurationPanel extends VBox {
         INSTANCE = this;
     }
 
-    private void setupUI(AllStatesInProjectService allStatesInProjectService) {
+    private void setupUI(StateService allStatesInProjectService) {
         setPadding(new Insets(20));
         setSpacing(10);
 

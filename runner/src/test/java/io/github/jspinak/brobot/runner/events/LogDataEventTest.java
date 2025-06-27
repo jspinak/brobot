@@ -1,8 +1,9 @@
 package io.github.jspinak.brobot.runner.events;
 
-import io.github.jspinak.brobot.report.log.model.LogData;
-import io.github.jspinak.brobot.report.log.model.LogType;
 import org.junit.jupiter.api.Test;
+
+import io.github.jspinak.brobot.tools.logging.model.LogData;
+import io.github.jspinak.brobot.tools.logging.model.LogEventType;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -14,7 +15,7 @@ class LogDataEventTest {
         // Arrange
         Object source = new Object();
         LogData logData = new LogData();
-        logData.setType(LogType.ACTION);
+        logData.setType(LogEventType.ACTION);
         logData.setDescription("Test log entry");
 
         // Act

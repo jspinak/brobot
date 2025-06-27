@@ -2,7 +2,7 @@ package io.github.jspinak.brobot.runner.ui;
 
 import io.github.jspinak.brobot.runner.ui.icons.IconRegistry;
 import io.github.jspinak.brobot.runner.ui.navigation.NavigationManager;
-import io.github.jspinak.brobot.runner.ui.navigation.Screen;
+import io.github.jspinak.brobot.runner.model.element.Screen;
 import io.github.jspinak.brobot.runner.ui.navigation.ScreenRegistry;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;

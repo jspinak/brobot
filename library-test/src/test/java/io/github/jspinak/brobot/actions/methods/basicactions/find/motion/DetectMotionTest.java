@@ -1,12 +1,12 @@
 package io.github.jspinak.brobot.actions.methods.basicactions.find.motion;
 
-import io.github.jspinak.brobot.imageUtils.MatOps;
-import io.github.jspinak.brobot.imageUtils.MatOps3d;
+import io.github.jspinak.brobot.util.image.core.ColorMatrixUtilities;
+import io.github.jspinak.brobot.util.image.core.MatrixUtilities;
 import io.github.jspinak.brobot.BrobotTestApplication;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.MatVector;
+import io.github.jspinak.brobot.analysis.motion.MotionDetector;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -25,16 +25,16 @@ class DetectMotionTest {
     }
 
     @Autowired
-    MatOps3d matOps3d;
+    ColorMatrixUtilities matOps3d;
 
     @Autowired
-    DetectMotion detectMotion;
+    MotionDetector detectMotion;
 
     private Mat getDynamicPixels() {
         mat1 = matOps3d.makeMat3D(new short[]{0, 255, 255, 255, 0, 0, 255, 255});
         mat2 = matOps3d.makeMat3D(new short[]{0, 0,   255, 255, 0, 0, 0,   255, 255});
         Mat dynamicPixels = detectMotion.getDynamicPixelMask(new MatVector(mat1, mat2));
-        MatOps.printPartOfMat(dynamicPixels, 3, 3, "dynamic");
+        MatrixUtilities.printPartOfMat(dynamicPixels, 3, 3, "dynamic");
         System.out.println();
         return dynamicPixels;
     }
@@ -44,37 +44,37 @@ class DetectMotionTest {
         mat1 = matOps3d.makeMat3D(new short[]{0, 255, 255, 255, 0, 0, 255, 255});
         mat2 = matOps3d.makeMat3D(new short[]{0, 0,   255, 255, 0, 0, 0,   255, 255});
         Mat absdiff = detectMotion.getDynamicPixelMask(mat1, mat2);
-        MatOps.printPartOfMat(absdiff, 3, 3, "absdiff");
-        assertEquals(255, MatOps.getDouble(0,0,0, absdiff));
+        MatrixUtilities.printPartOfMat(absdiff, 3, 3, "absdiff");
+        assertEquals(255, MatrixUtilities.getDouble(0,0,0, absdiff));
     }
 
     @Test
     void getDynamicRegions() {
         Mat dynamicPixels = getDynamicPixels();
-        assertEquals(0, MatOps.getDouble(0,1,0, dynamicPixels));
+        assertEquals(0, MatrixUtilities.getDouble(0,1,0, dynamicPixels));
     }
 
     @Test
     void getDynamicRegions2() {
         Mat dynamicPixels = getDynamicPixels();
-        assertEquals(0, MatOps.getDouble(0,2,0, dynamicPixels));
+        assertEquals(0, MatrixUtilities.getDouble(0,2,0, dynamicPixels));
     }
 
     @Test
     void getDynamicRegions3() {
         Mat dynamicPixels = getDynamicPixels();
-        assertEquals(0, MatOps.getDouble(1,0,0, dynamicPixels));
+        assertEquals(0, MatrixUtilities.getDouble(1,0,0, dynamicPixels));
     }
 
     @Test
     void getDynamicRegions4() {
         Mat dynamicPixels = getDynamicPixels();
-        assertEquals(0, MatOps.getDouble(1,1,0, dynamicPixels));
+        assertEquals(0, MatrixUtilities.getDouble(1,1,0, dynamicPixels));
     }
 
     @Test
     void getDynamicRegions5() {
         Mat dynamicPixels = getDynamicPixels();
-        assertEquals(0, MatOps.getDouble(1,2,0, dynamicPixels));
+        assertEquals(0, MatrixUtilities.getDouble(1,2,0, dynamicPixels));
     }
 }

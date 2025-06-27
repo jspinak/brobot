@@ -1,8 +1,5 @@
 package io.github.jspinak.brobot.runner.ui.config;
 
-import io.github.jspinak.brobot.json.schemaValidation.model.ValidationError;
-import io.github.jspinak.brobot.json.schemaValidation.model.ValidationResult;
-import io.github.jspinak.brobot.json.schemaValidation.model.ValidationSeverity;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.layout.Priority;
@@ -10,6 +7,10 @@ import javafx.scene.layout.VBox;
 import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import io.github.jspinak.brobot.runner.json.validation.model.ValidationError;
+import io.github.jspinak.brobot.runner.json.validation.model.ValidationResult;
+import io.github.jspinak.brobot.runner.json.validation.model.ValidationSeverity;
 
 import java.util.List;
 

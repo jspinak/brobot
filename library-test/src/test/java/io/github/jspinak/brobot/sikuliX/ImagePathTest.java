@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.sikuliX;
 
-import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
+import io.github.jspinak.brobot.model.element.Pattern;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.sikuli.script.ImagePath;

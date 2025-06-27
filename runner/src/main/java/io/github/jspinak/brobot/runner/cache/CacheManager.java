@@ -1,9 +1,9 @@
 package io.github.jspinak.brobot.runner.cache;
 
-import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
-import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
-import io.github.jspinak.brobot.datatypes.state.state.State;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
+import io.github.jspinak.brobot.model.element.Pattern;
+import io.github.jspinak.brobot.action.ActionResult;
+import io.github.jspinak.brobot.model.state.State;
+import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.runner.events.EventBus;
 import io.github.jspinak.brobot.runner.resources.ResourceManager;
 import jakarta.annotation.PostConstruct;
@@ -26,7 +26,7 @@ public class CacheManager {
     private LRUCache<String, State> stateCache;
     private LRUCache<String, StateImage> stateImageCache;
     private LRUCache<String, Pattern> patternCache;
-    private LRUCache<String, Matches> matchesCache;
+    private LRUCache<String, ActionResult> matchesCache;
 
     public CacheManager(EventBus eventBus, ResourceManager resourceManager) {
         this.eventBus = eventBus;
@@ -86,7 +86,7 @@ public class CacheManager {
     /**
      * Gets the matches cache
      */
-    public LRUCache<String, Matches> getMatchesCache() {
+    public LRUCache<String, ActionResult> getMatchesCache() {
         return matchesCache;
     }
 

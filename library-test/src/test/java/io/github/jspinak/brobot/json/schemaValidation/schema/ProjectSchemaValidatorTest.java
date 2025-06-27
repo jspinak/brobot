@@ -1,9 +1,11 @@
 package io.github.jspinak.brobot.json.schemaValidation.schema;
 
-import io.github.jspinak.brobot.json.schemaValidation.model.ValidationResult;
-import io.github.jspinak.brobot.json.schemaValidation.model.ValidationSeverity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import io.github.jspinak.brobot.runner.json.validation.model.ValidationResult;
+import io.github.jspinak.brobot.runner.json.validation.model.ValidationSeverity;
+import io.github.jspinak.brobot.runner.json.validation.schema.ProjectSchemaValidator;
 
 import static org.junit.jupiter.api.Assertions.*;
 

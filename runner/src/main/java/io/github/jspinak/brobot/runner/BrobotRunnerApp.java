@@ -1,16 +1,16 @@
 package io.github.jspinak.brobot.runner;
 
-import io.github.jspinak.brobot.database.services.AllStatesInProjectService;
 import io.github.jspinak.brobot.runner.automation.AutomationExecutor;
 import io.github.jspinak.brobot.runner.config.ApplicationConfig;
 import io.github.jspinak.brobot.runner.config.BrobotRunnerProperties;
 import io.github.jspinak.brobot.runner.events.EventBus;
 import io.github.jspinak.brobot.runner.init.BrobotLibraryInitializer;
+import io.github.jspinak.brobot.runner.project.AutomationProjectManager;
 import io.github.jspinak.brobot.runner.ui.AutomationPanel;
 import io.github.jspinak.brobot.runner.ui.EnhancedConfigurationPanel;
 import io.github.jspinak.brobot.runner.ui.execution.ExecutionDashboardPanel;
-import io.github.jspinak.brobot.services.ProjectManager;
-import io.github.jspinak.brobot.services.StateTransitionsRepository;
+import io.github.jspinak.brobot.model.transition.StateTransitionStore;
+import io.github.jspinak.brobot.navigation.service.StateService;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.control.Tab;
@@ -32,11 +32,11 @@ public class BrobotRunnerApp extends Application {
         BrobotRunnerProperties properties = applicationContext.getBean(BrobotRunnerProperties.class);
         BrobotLibraryInitializer libraryInitializer = applicationContext.getBean(BrobotLibraryInitializer.class);
         EventBus eventBus = applicationContext.getBean(EventBus.class);
-        ProjectManager projectManager = applicationContext.getBean(ProjectManager.class);
+        AutomationProjectManager projectManager = applicationContext.getBean(AutomationProjectManager.class);
         AutomationExecutor automationExecutor = applicationContext.getBean(AutomationExecutor.class);
-        AllStatesInProjectService allStatesService = applicationContext.getBean(AllStatesInProjectService.class);
+        StateService allStatesService = applicationContext.getBean(StateService.class);
         ApplicationConfig appConfig = applicationContext.getBean(ApplicationConfig.class);
-        StateTransitionsRepository stateTransitionsRepository = applicationContext.getBean(StateTransitionsRepository.class);
+        StateTransitionStore stateTransitionsRepository = applicationContext.getBean(StateTransitionStore.class);
 
         // Create tab pane for different sections
         TabPane tabPane = new TabPane();

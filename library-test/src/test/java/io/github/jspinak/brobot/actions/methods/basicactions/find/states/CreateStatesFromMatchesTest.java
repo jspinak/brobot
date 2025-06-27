@@ -1,12 +1,15 @@
 package io.github.jspinak.brobot.actions.methods.basicactions.find.states;
 
-import io.github.jspinak.brobot.actions.actionExecution.Action;
-import io.github.jspinak.brobot.actions.actionExecution.MatchesInitializer;
-import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
-import io.github.jspinak.brobot.datatypes.state.state.State;
-import io.github.jspinak.brobot.imageUtils.MatOps;
+import io.github.jspinak.brobot.action.Action;
+import io.github.jspinak.brobot.action.ActionResult;
+import io.github.jspinak.brobot.model.state.State;
 import io.github.jspinak.brobot.BrobotTestApplication;
 import io.github.jspinak.brobot.test.BrobotIntegrationTestBase;
+import io.github.jspinak.brobot.util.image.core.MatrixUtilities;
+import io.github.jspinak.brobot.action.basic.find.FindState;
+import io.github.jspinak.brobot.action.internal.factory.ActionResultFactory;
+import io.github.jspinak.brobot.action.internal.find.match.MatchToStateConverter;
+
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledIfSystemProperty;
@@ -32,20 +35,20 @@ class CreateStatesFromMatchesTest extends BrobotIntegrationTestBase {
     }
 
     @Autowired
-    CreateStatesFromMatches createStatesFromMatches;
+    MatchToStateConverter createStatesFromMatches;
 
     @Autowired
     Action action;
 
     @Autowired
-    FindStates findStates;
+    FindState findStates;
 
     @Autowired
-    MatchesInitializer matchesInitializer;
+    ActionResultFactory matchesInitializer;
 
     private List<State> createStates() throws Exception {
         try {
-            Matches matches = new FindStatesData().getMatches(action, findStates, matchesInitializer);
+            ActionResult matches = new FindStatesData().getMatches(action, findStates, matchesInitializer);
             return createStatesFromMatches.create(matches);
         } catch (Exception e) {
             // If test data is not available, return empty list
@@ -123,7 +126,7 @@ class CreateStatesFromMatchesTest extends BrobotIntegrationTestBase {
             states.get(0).getStateImages().forEach(img -> {
                 img.getPatterns().forEach(pattern -> {
                     if (pattern.getMat() != null && !pattern.getMat().empty()) {
-                        assertNotEquals(0, countNonZero(MatOps.toGrayscale(pattern.getMat())));
+                        assertNotEquals(0, countNonZero(MatrixUtilities.toGrayscale(pattern.getMat())));
                     }
                 });
             });

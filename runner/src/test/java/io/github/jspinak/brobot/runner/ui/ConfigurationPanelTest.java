@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.runner.ui;
 
-import io.github.jspinak.brobot.database.services.AllStatesInProjectService;
+import io.github.jspinak.brobot.navigation.service.StateService;
 import io.github.jspinak.brobot.runner.config.BrobotRunnerProperties;
 import io.github.jspinak.brobot.runner.events.EventBus;
 import io.github.jspinak.brobot.runner.init.BrobotLibraryInitializer;
@@ -43,7 +43,7 @@ class ConfigurationPanelTest {
     private EventBus eventBus;
 
     @Mock
-    AllStatesInProjectService allStatesService;
+    StateService allStatesService;
 
     private ConfigurationPanel panel;
 

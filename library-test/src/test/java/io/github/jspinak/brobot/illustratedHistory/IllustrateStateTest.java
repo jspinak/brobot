@@ -1,22 +1,24 @@
 package io.github.jspinak.brobot.illustratedHistory;
 
-import io.github.jspinak.brobot.actions.actionExecution.Action;
-import io.github.jspinak.brobot.actions.actionExecution.MatchesInitializer;
-import io.github.jspinak.brobot.actions.methods.basicactions.find.states.CreateStatesFromMatches;
-import io.github.jspinak.brobot.actions.methods.basicactions.find.states.FindStates;
-import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
-import io.github.jspinak.brobot.datatypes.primitives.location.Location;
-import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
-import io.github.jspinak.brobot.datatypes.primitives.region.Region;
-import io.github.jspinak.brobot.datatypes.state.state.State;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
-import io.github.jspinak.brobot.imageUtils.ImageUtils;
-import io.github.jspinak.brobot.imageUtils.MatBuilder;
-import io.github.jspinak.brobot.imageUtils.MatOps;
+import io.github.jspinak.brobot.action.Action;
+import io.github.jspinak.brobot.model.element.Pattern;
+import io.github.jspinak.brobot.model.element.Location;
+import io.github.jspinak.brobot.action.ActionResult;
+import io.github.jspinak.brobot.action.internal.factory.ActionResultFactory;
+import io.github.jspinak.brobot.action.internal.find.match.MatchToStateConverter;
+import io.github.jspinak.brobot.action.basic.find.FindState;
+import io.github.jspinak.brobot.model.element.Region;
+import io.github.jspinak.brobot.model.state.State;
+import io.github.jspinak.brobot.model.state.StateImage;
+import io.github.jspinak.brobot.util.image.core.MatrixUtilities;
+import io.github.jspinak.brobot.util.image.io.ImageFileUtilities;
+import io.github.jspinak.brobot.util.image.visualization.MatBuilder;
 import io.github.jspinak.brobot.BrobotTestApplication;
-import io.github.jspinak.brobot.actions.BrobotSettings;
+import io.github.jspinak.brobot.config.FrameworkSettings;
 import io.github.jspinak.brobot.actions.methods.basicactions.find.states.FindStatesData;
 import io.github.jspinak.brobot.test.HeadlessTestConfiguration;
+import io.github.jspinak.brobot.tools.history.StateLayoutVisualizer;
+
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -42,35 +44,35 @@ class IllustrateStateTest {
     @BeforeAll
     public static void setupHeadlessMode() {
         System.setProperty("java.awt.headless", "true");
-        BrobotSettings.mock = false; // Allow real image processing
+        FrameworkSettings.mock = false; // Allow real image processing
     }
     
     @BeforeEach
     public void setUp() {
-        BrobotSettings.mock = false; // Allow real image processing
+        FrameworkSettings.mock = false; // Allow real image processing
     }
 
     @Autowired
-    CreateStatesFromMatches createStatesFromMatches;
+    MatchToStateConverter createStatesFromMatches;
 
     @Autowired
     Action action;
 
     @Autowired
-    FindStates findStates;
+    FindState findStates;
 
     @Autowired
-    MatchesInitializer matchesInitializer;
+    ActionResultFactory matchesInitializer;
 
     @Autowired
-    IllustrateState illustrateState;
+    StateLayoutVisualizer illustrateState;
 
     @Autowired
-    ImageUtils imageUtils;
+    ImageFileUtilities imageUtils;
 
     private List<State> createStates() {
         try {
-            Matches matches = new FindStatesData().getMatches(action, findStates, matchesInitializer, 100);
+            ActionResult matches = new FindStatesData().getMatches(action, findStates, matchesInitializer, 100);
             return createStatesFromMatches.create(matches);
         } catch (Exception e) {
             // OCR may not be available in headless mode
@@ -90,7 +92,7 @@ class IllustrateStateTest {
             State first = states.get(0);
             System.out.println(first);
             Mat state0 = illustrateState.illustrateWithFixedSearchRegions(states.get(0));
-            assertTrue(countNonZero(MatOps.toGrayscale(state0)) > 0);
+            assertTrue(countNonZero(MatrixUtilities.toGrayscale(state0)) > 0);
         } catch (Exception e) {
             if (e.getMessage() != null && 
                 (e.getMessage().contains("OCR") || 
@@ -128,7 +130,7 @@ class IllustrateStateTest {
             Mat illustratedMat = matBuilder.init()
                     .addSubMat(new Location(matRegion.x(), matRegion.y()), mat)
                     .build();
-            assertTrue(countNonZero(MatOps.toGrayscale(illustratedMat)) > 0);
+            assertTrue(countNonZero(MatrixUtilities.toGrayscale(illustratedMat)) > 0);
             //imageUtils.writeWithUniqueFilename(illustratedMat, "history/illustratedTestMat");
         } catch (Exception e) {
             if (e.getMessage() != null && 
@@ -162,7 +164,7 @@ class IllustrateStateTest {
                 }
             }
             Mat illustratedMat = matBuilder.build();
-            assertTrue(countNonZero(MatOps.toGrayscale(illustratedMat)) > 0);
+            assertTrue(countNonZero(MatrixUtilities.toGrayscale(illustratedMat)) > 0);
             //imageUtils.writeWithUniqueFilename(illustratedMat, "history/illustratedTestMat");
         } catch (Exception e) {
             if (e.getMessage() != null && 

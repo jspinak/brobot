@@ -2,6 +2,9 @@ package io.github.jspinak.brobot.json.schemaValidation.model;
 
 import org.junit.jupiter.api.Test;
 
+import io.github.jspinak.brobot.runner.json.validation.model.ValidationError;
+import io.github.jspinak.brobot.runner.json.validation.model.ValidationSeverity;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class ValidationErrorTest {

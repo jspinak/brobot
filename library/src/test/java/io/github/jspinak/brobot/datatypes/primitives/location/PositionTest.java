@@ -2,6 +2,9 @@ package io.github.jspinak.brobot.datatypes.primitives.location;
 
 import org.junit.jupiter.api.Test;
 
+import io.github.jspinak.brobot.model.element.Positions;
+import io.github.jspinak.brobot.model.element.Position;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 class PositionTest {

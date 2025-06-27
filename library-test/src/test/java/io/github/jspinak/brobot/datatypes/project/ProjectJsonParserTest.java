@@ -1,9 +1,13 @@
 package io.github.jspinak.brobot.datatypes.project;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import io.github.jspinak.brobot.json.parsing.JsonParser;
-import io.github.jspinak.brobot.json.parsing.exception.ConfigurationException;
-import io.github.jspinak.brobot.json.utils.JsonUtils;
+
+import io.github.jspinak.brobot.runner.json.parsing.ConfigurationParser;
+import io.github.jspinak.brobot.runner.json.parsing.exception.ConfigurationException;
+import io.github.jspinak.brobot.runner.json.utils.JsonUtils;
+import io.github.jspinak.brobot.runner.project.AutomationProject;
+import io.github.jspinak.brobot.runner.project.TaskButton;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -16,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class ProjectJsonParserTest {
 
     @Autowired
-    private JsonParser jsonParser;
+    private ConfigurationParser jsonParser;
 
     @Autowired
     private JsonUtils jsonUtils;
@@ -40,7 +44,7 @@ public class ProjectJsonParserTest {
                 """;
 
         JsonNode jsonNode = jsonParser.parseJson(json);
-        Project project = jsonParser.convertJson(jsonNode, Project.class);
+        AutomationProject project = jsonParser.convertJson(jsonNode, AutomationProject.class);
 
         // Verify project fields
         assertEquals(1L, project.getId());
@@ -78,7 +82,7 @@ public class ProjectJsonParserTest {
                 """;
 
         JsonNode jsonNode = jsonParser.parseJson(json);
-        Project project = jsonParser.convertJson(jsonNode, Project.class);
+        AutomationProject project = jsonParser.convertJson(jsonNode, AutomationProject.class);
 
         // Verify basic project fields
         assertEquals(2L, project.getId());
@@ -134,7 +138,7 @@ public class ProjectJsonParserTest {
                 """;
 
         JsonNode jsonNode = jsonParser.parseJson(json);
-        Project project = jsonParser.convertJson(jsonNode, Project.class);
+        AutomationProject project = jsonParser.convertJson(jsonNode, AutomationProject.class);
 
         // Verify basic project fields
         assertEquals(3L, project.getId());
@@ -146,7 +150,7 @@ public class ProjectJsonParserTest {
         assertEquals(1, project.getAutomation().getButtons().size());
 
         // Verify button details
-        Button button = project.getAutomation().getButtons().getFirst();
+        TaskButton button = project.getAutomation().getButtons().getFirst();
         assertEquals("btn1", button.getId());
         assertEquals("Login", button.getLabel());
         assertEquals("performLogin", button.getFunctionName());
@@ -176,7 +180,7 @@ public class ProjectJsonParserTest {
     @Test
     public void testSerializeProject() throws ConfigurationException {
         // Create a new project
-        Project project = new Project();
+        AutomationProject project = new AutomationProject();
         project.setId(5L);
         project.setName("Serialization Test Project");
 

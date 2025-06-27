@@ -1,9 +1,9 @@
 package io.github.jspinak.brobot.runner.ui.config;
 
-import io.github.jspinak.brobot.datatypes.project.Project;
 import io.github.jspinak.brobot.runner.events.EventBus;
 import io.github.jspinak.brobot.runner.events.LogEvent;
-import io.github.jspinak.brobot.services.ProjectManager;
+import io.github.jspinak.brobot.runner.project.AutomationProject;
+import io.github.jspinak.brobot.runner.project.AutomationProjectManager;
 import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.control.TextArea;
@@ -30,7 +30,7 @@ import static org.mockito.Mockito.*;
 public class ConfigMetadataEditorTest {
 
     private EventBus eventBus;
-    private ProjectManager projectManager;
+    private AutomationProjectManager projectManager;
     private ConfigMetadataEditor editor;
     private Stage stage;
 
@@ -40,7 +40,7 @@ public class ConfigMetadataEditorTest {
 
         // Initialize mocks
         eventBus = mock(EventBus.class);
-        projectManager = mock(ProjectManager.class);
+        projectManager = mock(AutomationProjectManager.class);
     }
 
     private void createEditor() {
@@ -78,7 +78,7 @@ public class ConfigMetadataEditorTest {
         config.setAuthor("Test Author");
         config.setVersion("1.0.0");
 
-        Project mockProject = mock(Project.class);
+        AutomationProject mockProject = mock(AutomationProject.class);
         when(mockProject.getName()).thenReturn("Test Project");
         when(mockProject.getVersion()).thenReturn("1.0.0");
         when(mockProject.getAuthor()).thenReturn("Test Author");
@@ -291,7 +291,7 @@ public class ConfigMetadataEditorTest {
                 hasUnsavedChanges.set(editor, true);
 
                 // Mock project
-                Project mockProject = mock(Project.class);
+                AutomationProject mockProject = mock(AutomationProject.class);
                 when(projectManager.getActiveProject()).thenReturn(mockProject);
 
                 // Create spy to avoid file operations

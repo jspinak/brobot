@@ -1,9 +1,10 @@
 package io.github.jspinak.brobot.actions.methods.basicactions.find.matchManagement;
 
-import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
-import io.github.jspinak.brobot.datatypes.primitives.match.Match;
-import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
+import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.action.ActionResult;
+import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.BrobotTestApplication;
+import io.github.jspinak.brobot.analysis.match.MatchFusion;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.sikuli.script.ImagePath;
@@ -32,7 +33,7 @@ class MatchFusionTest {
         Match match2 = new Match.Builder().setRegion(30,0,30,20).build();
         Match match3 = new Match.Builder().setRegion(31,32,30,20).build();
         Match match4 = new Match.Builder().setRegion(30,34,30,20).build();
-        Matches matches = new Matches();
+        ActionResult matches = new ActionResult();
         matches.add(match1, match2, match3, match4);
         matches.setActionOptions(new ActionOptions.Builder().setFusionMethod(ActionOptions.MatchFusionMethod.ABSOLUTE).build());
         List<Match> fusedMatches = matchFusion.getFusedMatchObjects(matches.getMatchList(), matches.getActionOptions());

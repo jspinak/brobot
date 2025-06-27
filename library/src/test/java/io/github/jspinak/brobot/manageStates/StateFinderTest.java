@@ -1,13 +1,14 @@
 package io.github.jspinak.brobot.manageStates;
 
-import io.github.jspinak.brobot.actions.actionExecution.Action;
-import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
-import io.github.jspinak.brobot.database.services.AllStatesInProjectService;
-import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
-import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
-import io.github.jspinak.brobot.datatypes.state.state.State;
-import io.github.jspinak.brobot.manageStates.StateFinder;
-import io.github.jspinak.brobot.manageStates.StateMemory;
+import io.github.jspinak.brobot.action.Action;
+import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.action.ActionResult;
+import io.github.jspinak.brobot.action.ObjectCollection;
+import io.github.jspinak.brobot.model.state.State;
+import io.github.jspinak.brobot.navigation.service.StateService;
+import io.github.jspinak.brobot.statemanagement.StateDetector;
+import io.github.jspinak.brobot.statemanagement.StateMemory;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,17 +25,17 @@ import static org.mockito.Mockito.*;
 class StateFinderTest {
 
     @Mock
-    private AllStatesInProjectService allStatesInProjectService;
+    private StateService allStatesInProjectService;
     @Mock
     private StateMemory stateMemory;
     @Mock
     private Action action;
 
-    private StateFinder stateFinder;
+    private StateDetector stateFinder;
 
     @BeforeEach
     void setUp() {
-        stateFinder = new StateFinder(allStatesInProjectService, stateMemory, action);
+        stateFinder = new StateDetector(allStatesInProjectService, stateMemory, action);
     }
 
     @Test
@@ -45,7 +46,7 @@ class StateFinderTest {
         when(allStatesInProjectService.getState(stateId))
                 .thenReturn(Optional.of(mockState));
 
-        Matches mockMatches = mock(Matches.class);
+        ActionResult mockMatches = mock(ActionResult.class);
         when(mockMatches.isSuccess()).thenReturn(true);
 
         when(action.perform(

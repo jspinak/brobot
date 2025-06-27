@@ -1,7 +1,5 @@
 package io.github.jspinak.brobot.json.schemaValidation.resource;
 
-import io.github.jspinak.brobot.json.schemaValidation.model.ValidationResult;
-import io.github.jspinak.brobot.json.schemaValidation.model.ValidationSeverity;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
@@ -9,6 +7,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import io.github.jspinak.brobot.runner.json.validation.model.ValidationResult;
+import io.github.jspinak.brobot.runner.json.validation.model.ValidationSeverity;
+import io.github.jspinak.brobot.runner.json.validation.resource.ImageResourceValidator;
 
 import java.io.IOException;
 import java.nio.file.Files;

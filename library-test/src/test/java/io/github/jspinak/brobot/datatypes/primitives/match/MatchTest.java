@@ -1,9 +1,10 @@
 package io.github.jspinak.brobot.datatypes.primitives.match;
 
-import io.github.jspinak.brobot.datatypes.primitives.location.Location;
-import io.github.jspinak.brobot.datatypes.primitives.location.Positions;
-import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.StateRegion;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
+import io.github.jspinak.brobot.model.match.Match;
+import io.github.jspinak.brobot.model.element.Location;
+import io.github.jspinak.brobot.model.element.Positions;
+import io.github.jspinak.brobot.model.state.StateRegion;
+import io.github.jspinak.brobot.model.state.StateImage;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
