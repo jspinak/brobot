@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.libraryfeatures.captureAndReplay.capture;
 
-import io.github.jspinak.brobot.datatypes.primitives.location.Location;
+import io.github.jspinak.brobot.model.element.Location;
 import lombok.Getter;
 import org.w3c.dom.Node;
 

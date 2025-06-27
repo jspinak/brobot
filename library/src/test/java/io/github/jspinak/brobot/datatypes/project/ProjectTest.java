@@ -1,7 +1,10 @@
 package io.github.jspinak.brobot.datatypes.project;
 
-import org.junit.jupiter.api.Test;
+import io.github.jspinak.brobot.runner.project.AutomationProject;
+import io.github.jspinak.brobot.runner.project.AutomationConfiguration;
+import io.github.jspinak.brobot.runner.project.RunnerInterface;
 
+import org.junit.jupiter.api.Test;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -17,7 +20,7 @@ class ProjectTest {
 
     @Test
     void testProjectGettersAndSetters() {
-        Project project = new Project();
+        AutomationProject project = new AutomationProject();
         LocalDateTime now = LocalDateTime.now();
         List<String> states = new ArrayList<>();
         Map<String, Object> customProps = new HashMap<>();
@@ -31,8 +34,8 @@ class ProjectTest {
         project.setUpdated(now);
         project.setStates(null); // Type in original class is List<State>
         project.setStateTransitions(null); // Type is List<StateTransitions>
-        project.setAutomation(new AutomationUI());
-        project.setConfiguration(new ProjectConfiguration());
+        project.setAutomation(new RunnerInterface());
+        project.setConfiguration(new AutomationConfiguration());
         project.setOrganization("Test Org");
         project.setWebsite("https://example.com");
         project.setLicense("MIT");
@@ -59,7 +62,7 @@ class ProjectTest {
 
     @Test
     void testReset() {
-        Project project = new Project();
+        AutomationProject project = new AutomationProject();
         project.setId(99L);
         project.setName("Initial Project Name");
         project.setDescription("Some description");

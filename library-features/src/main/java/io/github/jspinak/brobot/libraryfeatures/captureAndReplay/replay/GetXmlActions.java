@@ -1,10 +1,11 @@
 package io.github.jspinak.brobot.libraryfeatures.captureAndReplay.replay;
 
-import io.github.jspinak.brobot.report.Report;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
+
+import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -26,7 +27,7 @@ public class GetXmlActions {
 
     public ReplayCollection getActionsBetweenTimes(double startTime, double endTime) {
         ReplayCollection replayCollection = getAllActions();
-        Report.println("ReplayCollection size: " + replayCollection.getReplayObjects().size());
+        ConsoleReporter.println("ReplayCollection size: " + replayCollection.getReplayObjects().size());
         return replayCollectionOrganizer.getActionsBetweenTimes(replayCollection, startTime * 1000, endTime * 1000);
     }
 
@@ -38,7 +39,7 @@ public class GetXmlActions {
     public ReplayCollection getAllActions() {
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance(); // Instantiate the Factory
         String path = "capture\\input-history.xml";
-        Report.println(Path.of(path).toAbsolutePath().toString());
+        ConsoleReporter.println(Path.of(path).toAbsolutePath().toString());
         DocumentBuilder db;
         try {
             db = dbf.newDocumentBuilder();

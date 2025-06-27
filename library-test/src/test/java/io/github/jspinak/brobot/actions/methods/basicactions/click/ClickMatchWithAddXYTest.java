@@ -1,14 +1,14 @@
 package io.github.jspinak.brobot.actions.methods.basicactions.click;
 
-import io.github.jspinak.brobot.actions.BrobotSettings;
-import io.github.jspinak.brobot.actions.actionExecution.Action;
-import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
-import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
-import io.github.jspinak.brobot.datatypes.primitives.location.Location;
-import io.github.jspinak.brobot.datatypes.primitives.location.Position;
-import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
-import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
+import io.github.jspinak.brobot.config.FrameworkSettings;
+import io.github.jspinak.brobot.action.Action;
+import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.model.element.Pattern;
+import io.github.jspinak.brobot.model.element.Location;
+import io.github.jspinak.brobot.model.element.Position;
+import io.github.jspinak.brobot.action.ActionResult;
+import io.github.jspinak.brobot.action.ObjectCollection;
+import io.github.jspinak.brobot.model.state.StateImage;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +23,7 @@ public class ClickMatchWithAddXYTest {
     @BeforeAll
     public static void setup() {
         System.setProperty("java.awt.headless", "false");
-        BrobotSettings.mock = true;
+        FrameworkSettings.mock = true;
     }
 
     @Autowired
@@ -35,7 +35,7 @@ public class ClickMatchWithAddXYTest {
      */
     @Test
     void setPosition() {
-        BrobotSettings.screenshots.add(TestPaths.getScreenshotPath("floranext0"));
+        FrameworkSettings.screenshots.add(TestPaths.getScreenshotPath("floranext0"));
         StateImage topLeft = new StateImage.Builder()
                 .addPattern(new Pattern.Builder()
                         .setFilename(TestPaths.getImagePath("topLeft"))
@@ -51,7 +51,7 @@ public class ClickMatchWithAddXYTest {
                 //.setAddX(0)
                 //.setAddY(30)
                 .build();
-        Matches matches = action.perform(actionOptions, objColl);
+        ActionResult matches = action.perform(actionOptions, objColl);
         Location loc1 = matches.getMatchLocations().get(0);
         System.out.println(loc1);
         assertEquals(77, loc1.getCalculatedY());
@@ -59,7 +59,7 @@ public class ClickMatchWithAddXYTest {
 
     @Test
     void addXY() {
-        BrobotSettings.screenshots.add(TestPaths.getScreenshotPath("floranext0"));
+        FrameworkSettings.screenshots.add(TestPaths.getScreenshotPath("floranext0"));
         StateImage topLeft = new StateImage.Builder()
                 .addPattern(new Pattern.Builder()
                         .setFilename(TestPaths.getImagePath("topLeft"))
@@ -75,7 +75,7 @@ public class ClickMatchWithAddXYTest {
                 .setAddX(0)
                 .setAddY(30)
                 .build();
-        Matches matches = action.perform(actionOptions, objColl);
+        ActionResult matches = action.perform(actionOptions, objColl);
         Location loc1 = matches.getMatchLocations().get(0);
         System.out.println(loc1);
         assertEquals(85, loc1.getCalculatedY());

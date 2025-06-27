@@ -1,12 +1,13 @@
 package io.github.jspinak.brobot.runner.ui.log;
 
 import com.sun.javafx.application.PlatformImpl;
-import io.github.jspinak.brobot.report.log.model.LogData;
-import io.github.jspinak.brobot.report.log.model.LogType;
-import io.github.jspinak.brobot.report.log.model.PerformanceMetricsData;
+
 import io.github.jspinak.brobot.runner.events.EventBus;
 import io.github.jspinak.brobot.runner.persistence.LogQueryService;
 import io.github.jspinak.brobot.runner.ui.icons.IconRegistry;
+import io.github.jspinak.brobot.tools.logging.model.LogData;
+import io.github.jspinak.brobot.tools.logging.model.LogEventType;
+import io.github.jspinak.brobot.tools.logging.model.ExecutionMetrics;
 import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.control.ComboBox;
@@ -97,11 +98,11 @@ public class LogExportTest {
 
     private void addSimpleTestLogEntries() {
         // Create minimal log entries
-        LogData actionLog = new LogData("test-session", LogType.ACTION, "Test action log");
+        LogData actionLog = new LogData("test-session", LogEventType.ACTION, "Test action log");
         actionLog.setSuccess(true);
         actionLog.setTimestamp(Instant.now());
 
-        LogData errorLog = new LogData("test-session", LogType.ERROR, "Test error log");
+        LogData errorLog = new LogData("test-session", LogEventType.ERROR, "Test error log");
         errorLog.setSuccess(false);
         errorLog.setTimestamp(Instant.now());
 
@@ -196,7 +197,7 @@ public class LogExportTest {
     @Test
     public void testExportLogsAsCSV() throws Exception {
         // Arrange: Add an action log entry
-        LogData actionLog = new LogData("test-session", LogType.ACTION, "Exported action log");
+        LogData actionLog = new LogData("test-session", LogEventType.ACTION, "Exported action log");
         actionLog.setSuccess(true);
         actionLog.setTimestamp(Instant.now());
 
@@ -331,7 +332,7 @@ public class LogExportTest {
     @Test
     public void testExportWithSpecialCharacters() throws Exception {
         // Add a log entry with special characters
-        LogData specialLog = new LogData("test-session", LogType.SESSION,
+        LogData specialLog = new LogData("test-session", LogEventType.SESSION,
                 "Test with special chars: comma, \"quotes\", newline\nand tab\t");
         specialLog.setSuccess(true);
 
@@ -586,7 +587,7 @@ public class LogExportTest {
     }
 
     // Helper methods
-    private LogData createMockLogEntry(LogType type, boolean success, String description) {
+    private LogData createMockLogEntry(LogEventType type, boolean success, String description) {
         LogData logData = new LogData("test-session", type, description);
         logData.setSuccess(success);
         logData.setTimestamp(Instant.now());
@@ -594,13 +595,13 @@ public class LogExportTest {
     }
 
     private LogData createDetailedLogEntry() {
-        LogData logData = createMockLogEntry(LogType.ACTION, true, "Detailed test action");
+        LogData logData = createMockLogEntry(LogEventType.ACTION, true, "Detailed test action");
         logData.setActionType("CLICK");
         logData.setCurrentStateName("MainScreen");
         logData.setFromStates("LoginScreen");
         logData.setToStateNames(List.of("MainScreen"));
 
-        PerformanceMetricsData metrics = new PerformanceMetricsData();
+        ExecutionMetrics metrics = new ExecutionMetrics();
         metrics.setActionDuration(100);
         metrics.setPageLoadTime(200);
         metrics.setTransitionTime(150);

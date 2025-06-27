@@ -1,8 +1,10 @@
 package io.github.jspinak.brobot.actions.actionOptions;
 
-import io.github.jspinak.brobot.actions.BrobotSettings;
-import io.github.jspinak.brobot.datatypes.primitives.location.Location;
-import io.github.jspinak.brobot.datatypes.primitives.region.Region;
+import io.github.jspinak.brobot.config.FrameworkSettings;
+import io.github.jspinak.brobot.model.element.Location;
+import io.github.jspinak.brobot.model.element.Region;
+import io.github.jspinak.brobot.action.ActionOptions;
+
 import org.junit.jupiter.api.Test;
 import org.sikuli.basics.Settings;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -48,6 +50,6 @@ public class ActionOptionsIntegrationTest {
                 .build();
 
         // CORRECTED ASSERTION: Check against the application's settings constant directly.
-        assertEquals(BrobotSettings.pauseAfterMouseDown, clickOptions.getPauseAfterMouseDown());
+        assertEquals(FrameworkSettings.pauseAfterMouseDown, clickOptions.getPauseAfterMouseDown());
     }
 }

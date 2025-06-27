@@ -1,12 +1,13 @@
 package io.github.jspinak.brobot.runner.automation;
 
-import io.github.jspinak.brobot.datatypes.project.Button;
 import io.github.jspinak.brobot.runner.config.BrobotRunnerProperties;
 import io.github.jspinak.brobot.runner.events.EventBus;
 import io.github.jspinak.brobot.runner.events.ExecutionEventPublisher;
 import io.github.jspinak.brobot.runner.execution.ExecutionController;
 import io.github.jspinak.brobot.runner.execution.ExecutionState;
 import io.github.jspinak.brobot.runner.execution.ExecutionStatus;
+import io.github.jspinak.brobot.runner.project.TaskButton;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -60,7 +61,7 @@ class AutomationExecutorTest {
     @Test
     void testExecuteAutomation() {
         // Create a button for testing
-        Button button = new Button();
+        TaskButton button = new TaskButton();
         button.setFunctionName("TestFunction");
         button.setLabel("Test Button");
 
@@ -151,7 +152,7 @@ class AutomationExecutorTest {
         when(executionEventPublisher.getStatusConsumer()).thenReturn(status -> {});
 
         // Create a button for testing
-        Button button = new Button();
+        TaskButton button = new TaskButton();
         button.setFunctionName("TestFunction");
 
         // Execute automation
@@ -159,7 +160,7 @@ class AutomationExecutorTest {
 
         // Verify the status consumer was passed
         verify(executionController).executeAutomation(
-                any(Button.class),
+                any(TaskButton.class),
                 any(Runnable.class),
                 anyLong(),
                 consumerCaptor.capture()

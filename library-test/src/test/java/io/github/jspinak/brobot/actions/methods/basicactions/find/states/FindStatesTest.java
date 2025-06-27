@@ -1,10 +1,12 @@
 package io.github.jspinak.brobot.actions.methods.basicactions.find.states;
 
-import io.github.jspinak.brobot.actions.actionExecution.Action;
-import io.github.jspinak.brobot.actions.actionExecution.MatchesInitializer;
-import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
+import io.github.jspinak.brobot.action.Action;
+import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.BrobotTestApplication;
 import io.github.jspinak.brobot.test.BrobotIntegrationTestBase;
+import io.github.jspinak.brobot.action.basic.find.FindState;
+import io.github.jspinak.brobot.action.internal.factory.ActionResultFactory;
+
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledIfSystemProperty;
@@ -27,18 +29,18 @@ class FindStatesTest extends BrobotIntegrationTestBase {
     }
 
     @Autowired
-    FindStates findStates;
+    FindState findState;
     
     @Autowired
     Action action;
 
     @Autowired
-    MatchesInitializer matchesInitializer;
+    ActionResultFactory matchesInitializer;
 
     @Test
     void returnsSomething() {
         try {
-            Matches matches = new FindStatesData().getMatches(action, findStates, matchesInitializer, 100);
+            ActionResult matches = new FindStatesData().getMatches(action, findState, matchesInitializer, 100);
             System.out.println(matches.toStringAsTempStates());
             
             // In headless mode without test images, we might get empty matches
@@ -57,7 +59,7 @@ class FindStatesTest extends BrobotIntegrationTestBase {
     @Test
     void stateImagesMeetSizeRequirements() {
         try {
-            Matches matches = new FindStatesData().getMatches(action, findStates, matchesInitializer, 100);
+            ActionResult matches = new FindStatesData().getMatches(action, findState, matchesInitializer, 100);
             
             if (matches.isEmpty()) {
                 System.out.println("No matches to test size requirements - skipping");

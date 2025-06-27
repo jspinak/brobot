@@ -1,6 +1,8 @@
 package io.github.jspinak.brobot.datatypes.primitives.grid;
 
-import io.github.jspinak.brobot.datatypes.primitives.region.Region;
+import io.github.jspinak.brobot.model.element.Region;
+import io.github.jspinak.brobot.model.element.Grid;
+import io.github.jspinak.brobot.model.element.OverlappingGrids;
 import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 

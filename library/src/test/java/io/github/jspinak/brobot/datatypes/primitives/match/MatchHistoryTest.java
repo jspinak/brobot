@@ -1,6 +1,9 @@
 package io.github.jspinak.brobot.datatypes.primitives.match;
 
-import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
+import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.model.action.ActionRecord;
+import io.github.jspinak.brobot.model.match.Match;
+import io.github.jspinak.brobot.model.action.ActionHistory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -10,14 +13,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class MatchHistoryTest {
 
-    private MatchHistory history;
+    private ActionHistory history;
     private Match match;
     private ActionOptions findOptions;
     private ActionOptions vanishOptions;
 
     @BeforeEach
     void setUp() {
-        history = new MatchHistory();
+        history = new ActionHistory();
         match = new Match.Builder().setRegion(10, 10, 20, 20).build();
         findOptions = new ActionOptions.Builder().setAction(ActionOptions.Action.FIND).build();
         vanishOptions = new ActionOptions.Builder().setAction(ActionOptions.Action.VANISH).build();
@@ -25,7 +28,7 @@ class MatchHistoryTest {
 
     @Test
     void addSnapshot_whenFound_incrementsSearchedAndFound() {
-        MatchSnapshot foundSnapshot = new MatchSnapshot.Builder().addMatch(match).build();
+        ActionRecord foundSnapshot = new ActionRecord.Builder().addMatch(match).build();
         history.addSnapshot(foundSnapshot);
         assertThat(history.getTimesSearched()).isEqualTo(1);
         assertThat(history.getTimesFound()).isEqualTo(1);
@@ -34,7 +37,7 @@ class MatchHistoryTest {
 
     @Test
     void addSnapshot_whenNotFound_incrementsSearchedOnly() {
-        MatchSnapshot notFoundSnapshot = new MatchSnapshot.Builder().build();
+        ActionRecord notFoundSnapshot = new ActionRecord.Builder().build();
         history.addSnapshot(notFoundSnapshot);
         assertThat(history.getTimesSearched()).isEqualTo(1);
         assertThat(history.getTimesFound()).isEqualTo(0);
@@ -42,13 +45,13 @@ class MatchHistoryTest {
 
     @Test
     void addSnapshot_withTextOnly_addsMatchFromSimilarSnapshot() {
-        MatchSnapshot snapshotWithMatch = new MatchSnapshot.Builder()
+        ActionRecord snapshotWithMatch = new ActionRecord.Builder()
                 .setActionOptions(findOptions)
                 .addMatch(match)
                 .build();
         history.addSnapshot(snapshotWithMatch);
 
-        MatchSnapshot textOnlySnapshot = new MatchSnapshot.Builder()
+        ActionRecord textOnlySnapshot = new ActionRecord.Builder()
                 .setActionOptions(findOptions)
                 .setText("some text")
                 .build();
@@ -60,7 +63,7 @@ class MatchHistoryTest {
 
     @Test
     void addSnapshot_withTextOnlyAndNoSimilarMatch_createsNewMatch() {
-        MatchSnapshot textOnlySnapshot = new MatchSnapshot.Builder()
+        ActionRecord textOnlySnapshot = new ActionRecord.Builder()
                 .setActionOptions(findOptions)
                 .setText("some text")
                 .build();
@@ -71,49 +74,49 @@ class MatchHistoryTest {
 
     @Test
     void getRandomSnapshot_byAction_returnsCorrectSnapshot() {
-        MatchSnapshot findSnapshot = new MatchSnapshot.Builder().setActionOptions(findOptions).build();
+        ActionRecord findSnapshot = new ActionRecord.Builder().setActionOptions(findOptions).build();
         history.addSnapshot(findSnapshot);
 
-        Optional<MatchSnapshot> result = history.getRandomSnapshot(ActionOptions.Action.FIND);
+        Optional<ActionRecord> result = history.getRandomSnapshot(ActionOptions.Action.FIND);
         assertThat(result).isPresent().contains(findSnapshot);
 
-        Optional<MatchSnapshot> emptyResult = history.getRandomSnapshot(ActionOptions.Action.VANISH);
+        Optional<ActionRecord> emptyResult = history.getRandomSnapshot(ActionOptions.Action.VANISH);
         assertThat(emptyResult).isEmpty();
     }
 
     @Test
     void getRandomSnapshot_byActionAndState_returnsCorrectSnapshot() {
-        MatchSnapshot snapshot = new MatchSnapshot.Builder()
+        ActionRecord snapshot = new ActionRecord.Builder()
                 .setActionOptions(findOptions)
                 .build();
         snapshot.setStateId(101L);
         history.addSnapshot(snapshot);
 
-        Optional<MatchSnapshot> result = history.getRandomSnapshot(ActionOptions.Action.FIND, 101L);
+        Optional<ActionRecord> result = history.getRandomSnapshot(ActionOptions.Action.FIND, 101L);
         assertThat(result).isPresent().contains(snapshot);
 
-        Optional<MatchSnapshot> emptyResult = history.getRandomSnapshot(ActionOptions.Action.FIND, 999L);
+        Optional<ActionRecord> emptyResult = history.getRandomSnapshot(ActionOptions.Action.FIND, 999L);
         assertThat(emptyResult).isEmpty();
     }
 
     @Test
     void getRandomSnapshot_separatesVanishActions() {
-        MatchSnapshot findSnapshot = new MatchSnapshot.Builder().setActionOptions(findOptions).build();
-        MatchSnapshot vanishSnapshot = new MatchSnapshot.Builder().setActionOptions(vanishOptions).build();
+        ActionRecord findSnapshot = new ActionRecord.Builder().setActionOptions(findOptions).build();
+        ActionRecord vanishSnapshot = new ActionRecord.Builder().setActionOptions(vanishOptions).build();
         history.addSnapshot(findSnapshot);
         history.addSnapshot(vanishSnapshot);
 
-        Optional<MatchSnapshot> result = history.getRandomSnapshot(vanishOptions);
+        Optional<ActionRecord> result = history.getRandomSnapshot(vanishOptions);
         assertThat(result).isPresent().contains(vanishSnapshot);
     }
 
     @Test
     void merge_combinesHistories() {
-        MatchHistory otherHistory = new MatchHistory();
-        otherHistory.addSnapshot(new MatchSnapshot.Builder().addMatch(match).build());
-        otherHistory.addSnapshot(new MatchSnapshot.Builder().build());
+        ActionHistory otherHistory = new ActionHistory();
+        otherHistory.addSnapshot(new ActionRecord.Builder().addMatch(match).build());
+        otherHistory.addSnapshot(new ActionRecord.Builder().build());
 
-        history.addSnapshot(new MatchSnapshot.Builder().addMatch(match).build());
+        history.addSnapshot(new ActionRecord.Builder().addMatch(match).build());
 
         history.merge(otherHistory);
 
@@ -125,7 +128,7 @@ class MatchHistoryTest {
     @Test
     void isEmpty_returnsCorrectState() {
         assertThat(history.isEmpty()).isTrue();
-        history.addSnapshot(new MatchSnapshot());
+        history.addSnapshot(new ActionRecord());
         assertThat(history.isEmpty()).isFalse();
     }
 }

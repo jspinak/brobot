@@ -1,16 +1,19 @@
 package io.github.jspinak.brobot.services;
 
-import io.github.jspinak.brobot.actions.BrobotSettings;
-import io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles.SetAllProfiles;
-import io.github.jspinak.brobot.actions.methods.basicactions.find.color.profiles.SetKMeansProfiles;
-import io.github.jspinak.brobot.database.services.AllStatesInProjectService;
-import io.github.jspinak.brobot.datatypes.state.state.State;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
-import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
-import io.github.jspinak.brobot.manageStates.StateManagementService;
-import io.github.jspinak.brobot.manageStates.StateTransitions;
+import io.github.jspinak.brobot.config.FrameworkSettings;
+import io.github.jspinak.brobot.config.FrameworkInitializer;
+import io.github.jspinak.brobot.model.state.State;
+import io.github.jspinak.brobot.model.state.StateImage;
+import io.github.jspinak.brobot.navigation.service.StateService;
+import io.github.jspinak.brobot.navigation.transition.StateTransitions;
+import io.github.jspinak.brobot.model.element.Pattern;
+import io.github.jspinak.brobot.statemanagement.StateIdResolver;
+import io.github.jspinak.brobot.analysis.color.profiles.ProfileSetBuilder;
+import io.github.jspinak.brobot.analysis.color.profiles.KmeansProfileBuilder;
+import io.github.jspinak.brobot.navigation.service.StateTransitionService;
+import io.github.jspinak.brobot.model.transition.StateTransitionStore;
+
 import org.junit.jupiter.api.*;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -29,33 +32,33 @@ import static org.mockito.Mockito.*;
 class InitIntegrationTest {
 
     @Autowired
-    private Init init;
+    private FrameworkInitializer init;
     
     @MockBean
-    private AllStatesInProjectService allStatesInProjectService;
+    private StateService allStatesInProjectService;
     
     @MockBean
-    private SetAllProfiles setAllProfiles;
+    private ProfileSetBuilder setAllProfiles;
     
     @MockBean
-    private SetKMeansProfiles setKMeansProfiles;
+    private KmeansProfileBuilder setKMeansProfiles;
     
     @MockBean
-    private StateManagementService stateManagementService;
+    private StateIdResolver stateManagementService;
     
     @MockBean
-    private StateTransitionsInProjectService stateTransitionsInProjectService;
+    private StateTransitionService stateTransitionsInProjectService;
     
     @Autowired
-    private StateTransitionsRepository stateTransitionsRepository;
+    private StateTransitionStore stateTransitionsRepository;
     
     @BeforeEach
     void setUp() {
         // Clear repository before each test
         stateTransitionsRepository.emptyRepos();
         // Reset BrobotSettings
-        BrobotSettings.initProfilesForDynamicImages = false;
-        BrobotSettings.initProfilesForStaticfImages = false;
+        FrameworkSettings.initProfilesForDynamicImages = false;
+        FrameworkSettings.initProfilesForStaticfImages = false;
     }
     
     @Test
@@ -92,7 +95,7 @@ class InitIntegrationTest {
     @Test
     @Order(3)
     void testPreProcessImagesWithDynamicImageSettings() {
-        BrobotSettings.initProfilesForDynamicImages = true;
+        FrameworkSettings.initProfilesForDynamicImages = true;
         
         StateImage dynamicImage = createTestStateImage("dynamic");
         dynamicImage.setDynamic(true);
@@ -111,7 +114,7 @@ class InitIntegrationTest {
     @Test
     @Order(4)
     void testPreProcessImagesWithStaticImageSettings() {
-        BrobotSettings.initProfilesForStaticfImages = true;
+        FrameworkSettings.initProfilesForStaticfImages = true;
         
         StateImage staticImage = createTestStateImage("static");
         staticImage.setDynamic(false);

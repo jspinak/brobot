@@ -1,10 +1,13 @@
 package io.github.jspinak.brobot.manageStates;
 
-import io.github.jspinak.brobot.actions.BrobotEnvironment;
-import io.github.jspinak.brobot.actions.BrobotSettings;
-import io.github.jspinak.brobot.services.StateTransitionsInProjectService;
+import io.github.jspinak.brobot.config.ExecutionEnvironment;
+import io.github.jspinak.brobot.config.FrameworkSettings;
+import io.github.jspinak.brobot.navigation.service.StateTransitionService;
 import io.github.jspinak.brobot.test.BrobotIntegrationTestBase;
 import io.github.jspinak.brobot.test.HeadlessTestConfiguration;
+import io.github.jspinak.brobot.tools.builder.FluentStateBuilder;
+import io.github.jspinak.brobot.navigation.transition.StateNavigator;
+
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -24,29 +27,29 @@ public class PathTests extends BrobotIntegrationTestBase {
     @Override
     protected void setUpBrobotEnvironment() {
         // Configure for mock mode since we don't need real images for path testing
-        BrobotEnvironment env = BrobotEnvironment.builder()
+        ExecutionEnvironment env = ExecutionEnvironment.builder()
                 .mockMode(true)  // Use mock mode since we don't need real images
                 .forceHeadless(true)
                 .allowScreenCapture(false)
                 .verboseLogging(false)
                 .build();
-        BrobotEnvironment.setInstance(env);
-        BrobotSettings.mock = true;
+        ExecutionEnvironment.setInstance(env);
+        FrameworkSettings.mock = true;
     }
 
     @Autowired
-    StateTransitionsManagement stateTransitionsManagement;
+    StateNavigator stateTransitionsManagement;
 
     @Autowired
-    QuickStateStructureBuilder quickStateStructureBuilder;
+    FluentStateBuilder quickStateStructureBuilder;
 
     @Autowired
-    StateTransitionsInProjectService stateTransitionsInProjectService;
+    StateTransitionService stateTransitionsInProjectService;
 
     @Test
     void pathTest() {
         // build simple state structure
-        BrobotSettings.mock = true;
+        FrameworkSettings.mock = true;
         quickStateStructureBuilder
                 .newState("a", "topLeft", "b")
                 .newState("b", "topLeft2", "c")

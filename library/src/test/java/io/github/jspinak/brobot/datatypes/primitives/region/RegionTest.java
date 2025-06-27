@@ -1,7 +1,9 @@
 package io.github.jspinak.brobot.datatypes.primitives.region;
 
-import io.github.jspinak.brobot.datatypes.primitives.location.Location;
-import io.github.jspinak.brobot.datatypes.primitives.match.Match;
+import io.github.jspinak.brobot.model.element.Location;
+import io.github.jspinak.brobot.model.match.Match;
+import io.github.jspinak.brobot.model.element.Region;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

@@ -2,7 +2,9 @@ package io.github.jspinak.brobot.imageUtils;
 
 import io.github.jspinak.brobot.test.BrobotIntegrationTestBase;
 import io.github.jspinak.brobot.testutils.TestPaths;
-import io.github.jspinak.brobot.datatypes.primitives.region.Region;
+import io.github.jspinak.brobot.model.element.Region;
+import io.github.jspinak.brobot.util.image.core.BufferedImageUtilities;
+
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -23,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class BufferedImageOpsTest extends BrobotIntegrationTestBase {
 
     @Autowired
-    private BufferedImageOps bufferedImageOps;
+    private BufferedImageUtilities bufferedImageOps;
 
     @BeforeAll
     public static void setupHeadlessMode() {
@@ -33,7 +35,7 @@ class BufferedImageOpsTest extends BrobotIntegrationTestBase {
     @Test
     void getBuffImgFromFile() {
         // This test loads a real image from file - works in headless mode
-        BufferedImage bufferedImage = BufferedImageOps.getBuffImgFromFile(TestPaths.getImagePath("topLeft"));
+        BufferedImage bufferedImage = BufferedImageUtilities.getBuffImgFromFile(TestPaths.getImagePath("topLeft"));
         assertNotNull(bufferedImage);
         assertTrue(bufferedImage.getWidth() > 0);
         assertTrue(bufferedImage.getHeight() > 0);
@@ -43,7 +45,7 @@ class BufferedImageOpsTest extends BrobotIntegrationTestBase {
     void getBuffImgDirectly() {
         // Test direct file loading
         String imagePath = TestPaths.getImagePath("topLeft");
-        BufferedImage bufferedImage = BufferedImageOps.getBuffImgDirectly(imagePath);
+        BufferedImage bufferedImage = BufferedImageUtilities.getBuffImgDirectly(imagePath);
         assertNotNull(bufferedImage);
         assertTrue(bufferedImage.getWidth() > 0);
         assertTrue(bufferedImage.getHeight() > 0);
@@ -88,7 +90,7 @@ class BufferedImageOpsTest extends BrobotIntegrationTestBase {
     @Test
     void convertTo3ByteBGRType() {
         // Load test image
-        BufferedImage original = BufferedImageOps.getBuffImgFromFile(TestPaths.getImagePath("topLeft"));
+        BufferedImage original = BufferedImageUtilities.getBuffImgFromFile(TestPaths.getImagePath("topLeft"));
         assertNotNull(original);
         
         // Convert to 3-byte BGR (non-static method)
@@ -102,7 +104,7 @@ class BufferedImageOpsTest extends BrobotIntegrationTestBase {
     @Test
     void convert() {
         // Load test image
-        BufferedImage original = BufferedImageOps.getBuffImgFromFile(TestPaths.getImagePath("topLeft"));
+        BufferedImage original = BufferedImageUtilities.getBuffImgFromFile(TestPaths.getImagePath("topLeft"));
         assertNotNull(original);
         
         // Note: BufferedImageOps.convert() only takes Mat, not BufferedImage
@@ -118,7 +120,7 @@ class BufferedImageOpsTest extends BrobotIntegrationTestBase {
     @Test
     void testConvert() {
         // Test conversion with Mat
-        BufferedImage original = BufferedImageOps.getBuffImgFromFile(TestPaths.getImagePath("topLeft"));
+        BufferedImage original = BufferedImageUtilities.getBuffImgFromFile(TestPaths.getImagePath("topLeft"));
         assertNotNull(original);
         
         // Convert Mat to BufferedImage (no direct BufferedImage to Mat conversion available)
@@ -140,7 +142,7 @@ class BufferedImageOpsTest extends BrobotIntegrationTestBase {
         Mat mat = new Mat(100, 100, org.bytedeco.opencv.global.opencv_core.CV_8UC3);
         
         // Convert to BufferedImage
-        BufferedImage img = BufferedImageOps.fromMat(mat);
+        BufferedImage img = BufferedImageUtilities.fromMat(mat);
         assertNotNull(img);
         assertEquals(100, img.getWidth());
         assertEquals(100, img.getHeight());
@@ -151,16 +153,16 @@ class BufferedImageOpsTest extends BrobotIntegrationTestBase {
     @Test
     void toByteArray() throws IOException {
         // Load test image
-        BufferedImage img = BufferedImageOps.getBuffImgFromFile(TestPaths.getImagePath("topLeft"));
+        BufferedImage img = BufferedImageUtilities.getBuffImgFromFile(TestPaths.getImagePath("topLeft"));
         assertNotNull(img);
         
         // Convert to byte array
-        byte[] bytes = BufferedImageOps.toByteArray(img);
+        byte[] bytes = BufferedImageUtilities.toByteArray(img);
         assertNotNull(bytes);
         assertTrue(bytes.length > 0);
         
         // Verify it's a valid image by reading it back
-        BufferedImage restored = BufferedImageOps.fromByteArray(bytes);
+        BufferedImage restored = BufferedImageUtilities.fromByteArray(bytes);
         assertNotNull(restored);
         assertEquals(img.getWidth(), restored.getWidth());
         assertEquals(img.getHeight(), restored.getHeight());
@@ -170,10 +172,10 @@ class BufferedImageOpsTest extends BrobotIntegrationTestBase {
     void fromByteArray() throws IOException {
         // Create a simple image and convert to bytes
         BufferedImage original = new BufferedImage(50, 50, BufferedImage.TYPE_INT_RGB);
-        byte[] bytes = BufferedImageOps.toByteArray(original);
+        byte[] bytes = BufferedImageUtilities.toByteArray(original);
         
         // Convert back from bytes
-        BufferedImage restored = BufferedImageOps.fromByteArray(bytes);
+        BufferedImage restored = BufferedImageUtilities.fromByteArray(bytes);
         assertNotNull(restored);
         assertEquals(50, restored.getWidth());
         assertEquals(50, restored.getHeight());
@@ -182,12 +184,12 @@ class BufferedImageOpsTest extends BrobotIntegrationTestBase {
     @Test
     void getSubImage() {
         // Load test image
-        BufferedImage original = BufferedImageOps.getBuffImgFromFile(TestPaths.getImagePath("topLeft"));
+        BufferedImage original = BufferedImageUtilities.getBuffImgFromFile(TestPaths.getImagePath("topLeft"));
         assertNotNull(original);
         
         // Get sub-image
         Region subRegion = new Region(10, 10, 20, 20);
-        BufferedImage subImage = BufferedImageOps.getSubImage(original, subRegion);
+        BufferedImage subImage = BufferedImageUtilities.getSubImage(original, subRegion);
         assertNotNull(subImage);
         assertEquals(20, subImage.getWidth());
         assertEquals(20, subImage.getHeight());
@@ -199,13 +201,13 @@ class BufferedImageOpsTest extends BrobotIntegrationTestBase {
         BufferedImage original = new BufferedImage(100, 100, BufferedImage.TYPE_INT_RGB);
         
         // Normal case
-        BufferedImage sub1 = BufferedImageOps.getSubImage(original, new Region(25, 25, 50, 50));
+        BufferedImage sub1 = BufferedImageUtilities.getSubImage(original, new Region(25, 25, 50, 50));
         assertNotNull(sub1);
         assertEquals(50, sub1.getWidth());
         assertEquals(50, sub1.getHeight());
         
         // Edge case - region at boundary
-        BufferedImage sub2 = BufferedImageOps.getSubImage(original, new Region(50, 50, 50, 50));
+        BufferedImage sub2 = BufferedImageUtilities.getSubImage(original, new Region(50, 50, 50, 50));
         assertNotNull(sub2);
         assertEquals(50, sub2.getWidth());
         assertEquals(50, sub2.getHeight());
@@ -214,11 +216,11 @@ class BufferedImageOpsTest extends BrobotIntegrationTestBase {
     @Test
     void encodeImage() throws IOException {
         // Load test image
-        BufferedImage img = BufferedImageOps.getBuffImgFromFile(TestPaths.getImagePath("topLeft"));
+        BufferedImage img = BufferedImageUtilities.getBuffImgFromFile(TestPaths.getImagePath("topLeft"));
         assertNotNull(img);
         
         // Encode to base64 using the actual method name
-        String encoded = BufferedImageOps.bufferedImageToStringBase64(img);
+        String encoded = BufferedImageUtilities.bufferedImageToStringBase64(img);
         assertNotNull(encoded);
         assertFalse(encoded.isEmpty());
         
@@ -233,10 +235,10 @@ class BufferedImageOpsTest extends BrobotIntegrationTestBase {
         BufferedImage original = new BufferedImage(30, 30, BufferedImage.TYPE_INT_RGB);
         
         // Encode to base64
-        String encoded = BufferedImageOps.bufferedImageToStringBase64(original);
+        String encoded = BufferedImageUtilities.bufferedImageToStringBase64(original);
         
         // Decode back
-        BufferedImage decoded = BufferedImageOps.base64StringToImage(encoded);
+        BufferedImage decoded = BufferedImageUtilities.base64StringToImage(encoded);
         assertNotNull(decoded);
         assertEquals(30, decoded.getWidth());
         assertEquals(30, decoded.getHeight());

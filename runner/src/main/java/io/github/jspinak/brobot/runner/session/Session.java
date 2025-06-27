@@ -1,7 +1,8 @@
 package io.github.jspinak.brobot.runner.session;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import io.github.jspinak.brobot.manageStates.StateTransitions;
+
+import io.github.jspinak.brobot.navigation.transition.StateTransitions;
 import lombok.Data;
 
 import java.time.Duration;

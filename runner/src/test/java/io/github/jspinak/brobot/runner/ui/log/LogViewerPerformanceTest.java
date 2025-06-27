@@ -1,10 +1,10 @@
 package io.github.jspinak.brobot.runner.ui.log;
 
-import io.github.jspinak.brobot.report.log.model.LogData;
-import io.github.jspinak.brobot.report.log.model.LogType;
 import io.github.jspinak.brobot.runner.events.EventBus;
 import io.github.jspinak.brobot.runner.persistence.LogQueryService;
 import io.github.jspinak.brobot.runner.ui.icons.IconRegistry;
+import io.github.jspinak.brobot.tools.logging.model.LogData;
+import io.github.jspinak.brobot.tools.logging.model.LogEventType;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.scene.control.TableView;
@@ -178,8 +178,8 @@ public class LogViewerPerformanceTest {
     // --- Helper Methods ---
 
     private LogData createRandomLogEntry(String description) {
-        LogType[] types = LogType.values();
-        LogType type = types[random.nextInt(types.length)];
+        LogEventType[] types = LogEventType.values();
+        LogEventType type = types[random.nextInt(types.length)];
         boolean success = random.nextBoolean();
 
         LogData logData = new LogData();

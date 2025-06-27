@@ -1,12 +1,12 @@
 package io.github.jspinak.brobot.runner.ui.config;
 
-import io.github.jspinak.brobot.database.services.AllStatesInProjectService;
-import io.github.jspinak.brobot.datatypes.project.Project;
-import io.github.jspinak.brobot.datatypes.state.state.State;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
+import io.github.jspinak.brobot.model.state.State;
+import io.github.jspinak.brobot.model.state.StateImage;
+import io.github.jspinak.brobot.navigation.service.StateService;
 import io.github.jspinak.brobot.runner.events.EventBus;
 import io.github.jspinak.brobot.runner.events.LogEvent;
-import io.github.jspinak.brobot.services.ProjectManager;
+import io.github.jspinak.brobot.runner.project.AutomationProject;
+import io.github.jspinak.brobot.runner.project.AutomationProjectManager;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
@@ -35,8 +35,8 @@ public class ConfigBrowserPanel extends BorderPane {
     private static final Logger logger = LoggerFactory.getLogger(ConfigBrowserPanel.class);
 
     private final EventBus eventBus;
-    private final ProjectManager projectManager;
-    private final AllStatesInProjectService allStatesService;
+    private final AutomationProjectManager projectManager;
+    private final StateService allStatesService;
 
     private final TreeView<ConfigItem> configTree;
     private final TreeItem<ConfigItem> rootItem;
@@ -48,8 +48,8 @@ public class ConfigBrowserPanel extends BorderPane {
     private ConfigEntry currentConfig;
     private final Map<String, TreeItem<ConfigItem>> stateItems = new HashMap<>();
 
-    public ConfigBrowserPanel(EventBus eventBus, ProjectManager projectManager,
-                              AllStatesInProjectService allStatesService) {
+    public ConfigBrowserPanel(EventBus eventBus, AutomationProjectManager projectManager,
+                              StateService allStatesService) {
         this.eventBus = eventBus;
         this.projectManager = projectManager;
         this.allStatesService = allStatesService;
@@ -188,7 +188,7 @@ public class ConfigBrowserPanel extends BorderPane {
         filesItem.getChildren().addAll(projectConfigItem, dslConfigItem);
 
         // Add project structure if loaded
-        Project project = projectManager.getActiveProject();
+        AutomationProject project = projectManager.getActiveProject();
         if (project != null) {
             // Add states
             TreeItem<ConfigItem> statesItem = new TreeItem<>(new ConfigItem("States", ConfigItemType.FOLDER));
@@ -219,7 +219,7 @@ public class ConfigBrowserPanel extends BorderPane {
             // Add automation buttons
             TreeItem<ConfigItem> automationItem = new TreeItem<>(new ConfigItem("Automation", ConfigItemType.FOLDER));
             if (project.getAutomation() != null && project.getAutomation().getButtons() != null) {
-                for (io.github.jspinak.brobot.datatypes.project.Button button : project.getAutomation().getButtons()) {
+                for (io.github.jspinak.brobot.runner.project.TaskButton button : project.getAutomation().getButtons()) {
                     TreeItem<ConfigItem> buttonItem = new TreeItem<>(
                             new ConfigItem(button.getLabel(), ConfigItemType.AUTOMATION_BUTTON)
                     );
@@ -313,7 +313,7 @@ public class ConfigBrowserPanel extends BorderPane {
                     break;
 
                 case AUTOMATION_BUTTON:
-                    if (configItem.getData() instanceof io.github.jspinak.brobot.datatypes.project.Button button) {
+                    if (configItem.getData() instanceof io.github.jspinak.brobot.runner.project.TaskButton button) {
                         String details = "Button: " + button.getLabel() + "\n\n" +
                                 "Function: " + button.getFunctionName() + "\n" +
                                 "Category: " + (button.getCategory() != null ? button.getCategory() : "None") + "\n" +

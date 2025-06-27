@@ -1,13 +1,13 @@
 package io.github.jspinak.brobot.runner.ui.config;
 
-import io.github.jspinak.brobot.database.services.AllStatesInProjectService;
-import io.github.jspinak.brobot.datatypes.project.Project;
-import io.github.jspinak.brobot.datatypes.state.state.State;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
+import io.github.jspinak.brobot.model.state.State;
+import io.github.jspinak.brobot.model.state.StateImage;
+import io.github.jspinak.brobot.navigation.service.StateService;
 import io.github.jspinak.brobot.runner.events.EventBus;
 import io.github.jspinak.brobot.runner.events.LogEvent;
+import io.github.jspinak.brobot.runner.project.AutomationProject;
+import io.github.jspinak.brobot.runner.project.AutomationProjectManager;
 import io.github.jspinak.brobot.runner.testutil.JavaFXTestUtils;
-import io.github.jspinak.brobot.services.ProjectManager;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
@@ -40,10 +40,10 @@ public class ConfigBrowserPanelTest {
     private EventBus eventBus;
 
     @Mock
-    private ProjectManager projectManager;
+    private AutomationProjectManager projectManager;
 
     @Mock
-    private AllStatesInProjectService allStatesService;
+    private StateService allStatesService;
 
     private ConfigBrowserPanel browserPanel;
 
@@ -66,7 +66,7 @@ public class ConfigBrowserPanelTest {
                 LocalDateTime.now()
         );
 
-        Project mockProject = mock(Project.class);
+        AutomationProject mockProject = mock(AutomationProject.class);
         when(projectManager.getActiveProject()).thenReturn(mockProject);
 
         List<State> mockStates = new ArrayList<>();
@@ -126,7 +126,7 @@ public class ConfigBrowserPanelTest {
                 LocalDateTime.now()
         );
 
-        Project mockProject = mock(Project.class);
+        AutomationProject mockProject = mock(AutomationProject.class);
         when(projectManager.getActiveProject()).thenReturn(mockProject);
 
         List<State> mockStates = new ArrayList<>();

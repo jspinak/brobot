@@ -1,10 +1,9 @@
 package io.github.jspinak.brobot.test.mock;
 
-import io.github.jspinak.brobot.BrobotStartupLifecycle;
-import io.github.jspinak.brobot.services.Init;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import io.github.jspinak.brobot.config.FrameworkInitializer;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
+import io.github.jspinak.brobot.config.FrameworkLifecycleManager;
 
 /**
  * Mock implementation of BrobotStartupLifecycle for tests.
@@ -13,11 +12,11 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @Primary
-public class MockBrobotStartupLifecycle extends BrobotStartupLifecycle {
+public class MockBrobotStartupLifecycle extends FrameworkLifecycleManager {
     
     private boolean running = false;
     
-    public MockBrobotStartupLifecycle(Init initService) {
+    public MockBrobotStartupLifecycle(FrameworkInitializer initService) {
         super(initService);
     }
     

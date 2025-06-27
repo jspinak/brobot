@@ -1,10 +1,11 @@
 package io.github.jspinak.brobot.libraryfeatures.captureAndReplay.replay;
 
-import io.github.jspinak.brobot.actions.actionExecution.Action;
-import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
-import io.github.jspinak.brobot.datatypes.primitives.location.Location;
-import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
-import io.github.jspinak.brobot.report.Report;
+import io.github.jspinak.brobot.action.Action;
+import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.action.ObjectCollection;
+import io.github.jspinak.brobot.model.element.Location;
+import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
+
 import org.springframework.stereotype.Component;
 
 @Component
@@ -26,7 +27,7 @@ public class ReplayAction {
                 .withLocations(mouseLocation)
                 .withStrings(key)
                 .build();
-        Report.println("Replaying action: " + actionOptions.getAction().toString() + " @ x=" + x + " y=" + y + " key:" + key + " millis:" + delayInMillis);
+        ConsoleReporter.println("Replaying action: " + actionOptions.getAction().toString() + " @ x=" + x + " y=" + y + " key:" + key + " millis:" + delayInMillis);
         action.perform(actionOptions, objectCollection);
     }
 

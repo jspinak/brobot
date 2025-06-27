@@ -1,9 +1,12 @@
 package io.github.jspinak.brobot.datatypes.project;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import io.github.jspinak.brobot.json.parsing.JsonParser;
-import io.github.jspinak.brobot.json.parsing.exception.ConfigurationException;
-import io.github.jspinak.brobot.json.utils.JsonUtils;
+
+import io.github.jspinak.brobot.runner.json.parsing.ConfigurationParser;
+import io.github.jspinak.brobot.runner.json.parsing.exception.ConfigurationException;
+import io.github.jspinak.brobot.runner.json.utils.JsonUtils;
+import io.github.jspinak.brobot.runner.project.TaskButton;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -16,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class ButtonJsonParserTest {
 
     @Autowired
-    private JsonParser jsonParser;
+    private ConfigurationParser jsonParser;
 
     @Autowired
     private JsonUtils jsonUtils;
@@ -35,7 +38,7 @@ public class ButtonJsonParserTest {
                 """;
 
         JsonNode jsonNode = jsonParser.parseJson(json);
-        Button button = jsonParser.convertJson(jsonNode, Button.class);
+        TaskButton button = jsonParser.convertJson(jsonNode, TaskButton.class);
 
         assertNotNull(button);
         assertEquals("simple-btn", button.getId());
@@ -69,7 +72,7 @@ public class ButtonJsonParserTest {
                 """;
 
         JsonNode jsonNode = jsonParser.parseJson(json);
-        Button button = jsonParser.convertJson(jsonNode, Button.class);
+        TaskButton button = jsonParser.convertJson(jsonNode, TaskButton.class);
 
         assertNotNull(button);
         assertEquals("positioned-btn", button.getId());
@@ -101,7 +104,7 @@ public class ButtonJsonParserTest {
                 """;
 
         JsonNode jsonNode = jsonParser.parseJson(json);
-        Button button = jsonParser.convertJson(jsonNode, Button.class);
+        TaskButton button = jsonParser.convertJson(jsonNode, TaskButton.class);
 
         assertNotNull(button);
         assertEquals("styled-btn", button.getId());
@@ -130,7 +133,7 @@ public class ButtonJsonParserTest {
                 """;
 
         JsonNode jsonNode = jsonParser.parseJson(json);
-        Button button = jsonParser.convertJson(jsonNode, Button.class);
+        TaskButton button = jsonParser.convertJson(jsonNode, TaskButton.class);
 
         assertNotNull(button);
         assertEquals("confirm-btn", button.getId());
@@ -160,7 +163,7 @@ public class ButtonJsonParserTest {
                 """;
 
         JsonNode jsonNode = jsonParser.parseJson(json);
-        Button button = jsonParser.convertJson(jsonNode, Button.class);
+        TaskButton button = jsonParser.convertJson(jsonNode, TaskButton.class);
 
         assertNotNull(button);
         assertEquals("param-btn", button.getId());
@@ -176,7 +179,7 @@ public class ButtonJsonParserTest {
     @Test
     public void testSerializeButton() throws ConfigurationException {
         // Create a button with all fields
-        Button button = new Button();
+        TaskButton button = new TaskButton();
         button.setId("test-btn");
         button.setLabel("Test Button");
         button.setTooltip("A button for testing");
@@ -187,14 +190,14 @@ public class ButtonJsonParserTest {
         button.setConfirmationMessage("Confirm test?");
 
         // Set position
-        Button.ButtonPosition position = new Button.ButtonPosition();
+        TaskButton.ButtonPosition position = new TaskButton.ButtonPosition();
         position.setRow(1);
         position.setColumn(2);
         position.setOrder(3);
         button.setPosition(position);
 
         // Set styling
-        Button.ButtonStyling styling = new Button.ButtonStyling();
+        TaskButton.ButtonStyling styling = new TaskButton.ButtonStyling();
         styling.setBackgroundColor("#00ff00");
         styling.setTextColor("#000000");
         styling.setSize("medium");
@@ -207,7 +210,7 @@ public class ButtonJsonParserTest {
 
         // Deserialize and verify
         JsonNode jsonNode = jsonParser.parseJson(json);
-        Button deserializedButton = jsonParser.convertJson(jsonNode, Button.class);
+        TaskButton deserializedButton = jsonParser.convertJson(jsonNode, TaskButton.class);
 
         assertEquals("test-btn", deserializedButton.getId());
         assertEquals("Test Button", deserializedButton.getLabel());

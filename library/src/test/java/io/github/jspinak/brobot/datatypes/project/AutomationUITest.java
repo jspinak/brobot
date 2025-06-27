@@ -1,7 +1,9 @@
 package io.github.jspinak.brobot.datatypes.project;
 
-import org.junit.jupiter.api.Test;
+import io.github.jspinak.brobot.runner.project.TaskButton;
+import io.github.jspinak.brobot.runner.project.RunnerInterface;
 
+import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,16 +17,16 @@ class AutomationUITest {
 
     @Test
     void testGetAndSetButtons() {
-        AutomationUI automationUI = new AutomationUI();
-        List<Button> buttons = new ArrayList<>();
-        Button button1 = new Button();
+        RunnerInterface runnerInterface = new RunnerInterface();
+        List<TaskButton> buttons = new ArrayList<>();
+        TaskButton button1 = new TaskButton();
         button1.setId("btn1");
         buttons.add(button1);
 
-        automationUI.setButtons(buttons);
+        runnerInterface.setButtons(buttons);
 
-        assertNotNull(automationUI.getButtons());
-        assertEquals(1, automationUI.getButtons().size());
-        assertEquals("btn1", automationUI.getButtons().get(0).getId());
+        assertNotNull(runnerInterface.getButtons());
+        assertEquals(1, runnerInterface.getButtons().size());
+        assertEquals("btn1", runnerInterface.getButtons().get(0).getId());
     }
 }

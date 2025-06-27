@@ -1,11 +1,12 @@
 package io.github.jspinak.brobot.datatypes.project;
 
 import org.junit.jupiter.api.Test;
-
 import java.util.HashMap;
 import java.util.Map;
-
 import static org.junit.jupiter.api.Assertions.*;
+
+import io.github.jspinak.brobot.runner.project.TaskButton;
+import static io.github.jspinak.brobot.runner.project.TaskButton.ButtonPosition;
 
 /**
  * Tests for the Button class and its nested classes.
@@ -14,7 +15,7 @@ class ButtonTest {
 
     @Test
     void testButtonGettersAndSetters() {
-        Button button = new Button();
+        TaskButton button = new TaskButton();
         button.setId("testId");
         button.setLabel("Test Label");
         button.setTooltip("Test Tooltip");
@@ -38,7 +39,7 @@ class ButtonTest {
 
     @Test
     void testButtonPositionGettersAndSetters() {
-        Button.ButtonPosition position = new Button.ButtonPosition();
+        TaskButton.ButtonPosition position = new TaskButton.ButtonPosition();
         position.setRow(1);
         position.setColumn(2);
         position.setOrder(3);
@@ -50,7 +51,7 @@ class ButtonTest {
 
     @Test
     void testButtonStylingGettersAndSetters() {
-        Button.ButtonStyling styling = new Button.ButtonStyling();
+        TaskButton.ButtonStyling styling = new TaskButton.ButtonStyling();
         styling.setBackgroundColor("#FFFFFF");
         styling.setTextColor("#000000");
         styling.setSize("large");
@@ -64,20 +65,20 @@ class ButtonTest {
 
     @Test
     void testCopy() {
-        Button original = new Button();
+        TaskButton original = new TaskButton();
         original.setId("originalId");
         original.setLabel("Original Label");
 
-        Button.ButtonPosition position = new Button.ButtonPosition();
+        TaskButton.ButtonPosition position = new TaskButton.ButtonPosition();
         position.setRow(10);
         position.setColumn(20);
         original.setPosition(position);
 
-        Button.ButtonStyling styling = new Button.ButtonStyling();
+        TaskButton.ButtonStyling styling = new TaskButton.ButtonStyling();
         styling.setBackgroundColor("#123456");
         original.setStyling(styling);
 
-        Button copy = original.copy();
+        TaskButton copy = original.copy();
 
         assertNotSame(original, copy, "Copied object should be a new instance.");
         assertEquals(original.getId(), copy.getId());
@@ -94,10 +95,10 @@ class ButtonTest {
 
     @Test
     void testCopyWhenPositionAndStylingAreNull() {
-        Button original = new Button();
+        TaskButton original = new TaskButton();
         original.setId("originalId");
 
-        Button copy = original.copy();
+        TaskButton copy = original.copy();
 
         assertNotSame(original, copy);
         assertEquals(original.getId(), copy.getId());
@@ -107,7 +108,7 @@ class ButtonTest {
 
     @Test
     void testGetParametersAsMap() {
-        Button button = new Button();
+        TaskButton button = new TaskButton();
 
         // Test with null parameters - should return an empty map
         assertNotNull(button.getParametersAsMap());
@@ -130,7 +131,7 @@ class ButtonTest {
 
     @Test
     void testToString() {
-        Button button = new Button();
+        TaskButton button = new TaskButton();
         button.setId("btn-001");
         button.setLabel("Submit");
         button.setFunctionName("submitForm");

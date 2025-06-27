@@ -1,8 +1,10 @@
 package io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects;
 
-import io.github.jspinak.brobot.datatypes.primitives.match.MatchSnapshot;
-import io.github.jspinak.brobot.datatypes.primitives.region.Region;
-import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
+import io.github.jspinak.brobot.action.ObjectCollection;
+import io.github.jspinak.brobot.model.action.ActionRecord;
+import io.github.jspinak.brobot.model.element.Region;
+import io.github.jspinak.brobot.model.state.StateRegion;
+
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -69,7 +71,7 @@ public class StateRegionTest {
     @Test
     void addSnapshot() {
         StateRegion newRegion = new StateRegion.Builder().build();
-        MatchSnapshot snapshot = new MatchSnapshot();
+        ActionRecord snapshot = new ActionRecord();
         newRegion.addSnapshot(snapshot);
         assertFalse(newRegion.getMatchHistory().getSnapshots().isEmpty());
     }

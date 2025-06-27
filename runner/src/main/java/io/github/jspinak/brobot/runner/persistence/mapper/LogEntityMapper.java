@@ -1,11 +1,12 @@
 package io.github.jspinak.brobot.runner.persistence.mapper;
 
-import io.github.jspinak.brobot.report.log.model.LogData;
-import io.github.jspinak.brobot.report.log.model.PerformanceMetricsData;
-import io.github.jspinak.brobot.report.log.model.StateImageLogData;
 import io.github.jspinak.brobot.runner.persistence.entity.LogEntry;
 import io.github.jspinak.brobot.runner.persistence.entity.PerformanceMetrics;
 import io.github.jspinak.brobot.runner.persistence.entity.StateImageLog;
+import io.github.jspinak.brobot.tools.logging.model.LogData;
+import io.github.jspinak.brobot.tools.logging.model.ExecutionMetrics;
+import io.github.jspinak.brobot.tools.logging.model.StateImageLogData;
+
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
@@ -63,7 +64,7 @@ public class LogEntityMapper {
         return entity;
     }
 
-    private PerformanceMetrics toPerformanceMetrics(PerformanceMetricsData data) {
+    private PerformanceMetrics toPerformanceMetrics(ExecutionMetrics data) {
         if (data == null) {
             return null;
         }

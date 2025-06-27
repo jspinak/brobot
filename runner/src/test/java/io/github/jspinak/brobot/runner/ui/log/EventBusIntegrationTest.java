@@ -1,13 +1,13 @@
 package io.github.jspinak.brobot.runner.ui.log;
 
-import io.github.jspinak.brobot.report.log.model.LogData;
-import io.github.jspinak.brobot.report.log.model.LogType;
 import io.github.jspinak.brobot.runner.events.BrobotEvent;
 import io.github.jspinak.brobot.runner.events.EventBus;
 import io.github.jspinak.brobot.runner.events.LogEntryEvent;
 import io.github.jspinak.brobot.runner.events.LogEvent;
 import io.github.jspinak.brobot.runner.persistence.LogQueryService;
 import io.github.jspinak.brobot.runner.ui.icons.IconRegistry;
+import io.github.jspinak.brobot.tools.logging.model.LogData;
+import io.github.jspinak.brobot.tools.logging.model.LogEventType;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.stage.Stage;
@@ -121,7 +121,7 @@ public class EventBusIntegrationTest {
     @Test
     public void testLogEntryEventPropagation() throws Exception {
         // Create a LogEntry
-        LogData logData = new LogData("test-session", LogType.ACTION, "Test action via EventBus");
+        LogData logData = new LogData("test-session", LogEventType.ACTION, "Test action via EventBus");
         logData.setSuccess(true);
         logData.setTimestamp(Instant.now());
 
@@ -203,7 +203,7 @@ public class EventBusIntegrationTest {
                         LogEvent event = LogEvent.info(this, "Concurrent event " + eventNumber, "INFO");
                         eventBus.publish(event);
                     } else {
-                        LogData logData = new LogData("test-session", LogType.SESSION, "Concurrent entry " + eventNumber);
+                        LogData logData = new LogData("test-session", LogEventType.SESSION, "Concurrent entry " + eventNumber);
                         LogEntryEvent event = LogEntryEvent.created(this, logData);
                         eventBus.publish(event);
                     }

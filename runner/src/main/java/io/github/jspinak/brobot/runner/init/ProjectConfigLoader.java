@@ -1,11 +1,12 @@
 package io.github.jspinak.brobot.runner.init;
 
-import io.github.jspinak.brobot.json.schemaValidation.ConfigValidator;
-import io.github.jspinak.brobot.json.schemaValidation.exception.ConfigValidationException;
-import io.github.jspinak.brobot.json.schemaValidation.model.ValidationResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+
+import io.github.jspinak.brobot.runner.json.validation.ConfigurationValidator;
+import io.github.jspinak.brobot.runner.json.validation.exception.ConfigValidationException;
+import io.github.jspinak.brobot.runner.json.validation.model.ValidationResult;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -19,9 +20,9 @@ public class ProjectConfigLoader {
 
     private static final Logger logger = LoggerFactory.getLogger(ProjectConfigLoader.class);
 
-    private final ConfigValidator configValidator;
+    private final ConfigurationValidator configValidator;
 
-    public ProjectConfigLoader(ConfigValidator configValidator) {
+    public ProjectConfigLoader(ConfigurationValidator configValidator) {
         this.configValidator = configValidator;
     }
 

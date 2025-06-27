@@ -3,7 +3,11 @@ package io.github.jspinak.brobot.json.parsing;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import io.github.jspinak.brobot.json.parsing.exception.ConfigurationException;
+
+import io.github.jspinak.brobot.runner.json.parsing.ConfigurationParser;
+import io.github.jspinak.brobot.runner.json.parsing.JsonPathUtils;
+import io.github.jspinak.brobot.runner.json.parsing.exception.ConfigurationException;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class JsonPathUtilsTest {
 
     @Autowired
-    private JsonParser jsonParser;
+    private ConfigurationParser jsonParser;
 
     @Autowired
     private JsonPathUtils jsonPathUtils;

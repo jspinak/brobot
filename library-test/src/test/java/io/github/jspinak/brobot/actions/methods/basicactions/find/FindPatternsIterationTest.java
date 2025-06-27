@@ -1,14 +1,14 @@
 package io.github.jspinak.brobot.actions.methods.basicactions.find;
 
-import io.github.jspinak.brobot.actions.actionExecution.MatchesInitializer;
-import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.GetScenes;
-import io.github.jspinak.brobot.datatypes.primitives.image.Scene;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
-import io.github.jspinak.brobot.datatypes.primitives.match.Match;
-import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
+import io.github.jspinak.brobot.model.element.Scene;
+import io.github.jspinak.brobot.model.match.Match;
+import io.github.jspinak.brobot.model.state.StateImage;
+import io.github.jspinak.brobot.action.ActionResult;
+import io.github.jspinak.brobot.action.basic.find.color.SceneProvider;
 import io.github.jspinak.brobot.BrobotTestApplication;
 import io.github.jspinak.brobot.actions.methods.basicactions.TestData;
 import io.github.jspinak.brobot.test.BrobotIntegrationTestBase;
+
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +18,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+
+import io.github.jspinak.brobot.action.internal.factory.ActionResultFactory;
+import io.github.jspinak.brobot.action.internal.find.IterativePatternFinder;
 
 /**
  * Tests for finding patterns through iteration.
@@ -32,13 +35,13 @@ class FindPatternsIterationTest extends BrobotIntegrationTestBase {
     }
 
     @Autowired
-    FindPatternsIteration findPatternsIteration;
+    IterativePatternFinder iterativePatternFinder;
 
     @Autowired
-    GetScenes getScenes;
+    SceneProvider getScenes;
 
     @Autowired
-    MatchesInitializer matchesInitializer;
+    ActionResultFactory matchesInitializer;
 
     @Test
     void find_() {
@@ -52,10 +55,10 @@ class FindPatternsIterationTest extends BrobotIntegrationTestBase {
             stateImages.add(testData.getTopLeft());
             stateImages.add(testData.getBottomRight());
 
-            Matches matches = matchesInitializer.init(testData.getDefineInsideAnchors(), 
+            ActionResult matches = matchesInitializer.init(testData.getDefineInsideAnchors(), 
                 testData.getInsideAnchorObjects());
 
-            findPatternsIteration.find(matches, stateImages, scenes);
+            iterativePatternFinder.find(matches, stateImages, scenes);
             
             // Log results
             System.out.println("Found " + matches.size() + " matches");

@@ -1,15 +1,15 @@
 package io.github.jspinak.brobot.actions.methods.basicactions.find;
 
-import io.github.jspinak.brobot.actions.BrobotEnvironment;
-import io.github.jspinak.brobot.actions.BrobotSettings;
-import io.github.jspinak.brobot.actions.actionExecution.Action;
-import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
-import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
-import io.github.jspinak.brobot.datatypes.primitives.location.Location;
-import io.github.jspinak.brobot.datatypes.primitives.location.Position;
-import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
-import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
+import io.github.jspinak.brobot.config.FrameworkSettings;
+import io.github.jspinak.brobot.action.Action;
+import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.model.element.Pattern;
+import io.github.jspinak.brobot.model.element.Location;
+import io.github.jspinak.brobot.model.element.Position;
+import io.github.jspinak.brobot.action.ActionResult;
+import io.github.jspinak.brobot.config.ExecutionEnvironment;
+import io.github.jspinak.brobot.action.ObjectCollection;
+import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.test.BrobotIntegrationTestBase;
 import io.github.jspinak.brobot.testutils.TestPaths;
 import org.junit.jupiter.api.BeforeAll;
@@ -38,18 +38,18 @@ public class FindImageWithOffsetTest extends BrobotIntegrationTestBase {
     @Override
     protected void setUpBrobotEnvironment() {
         // Configure for unit testing with screenshots
-        BrobotEnvironment env = BrobotEnvironment.builder()
+        ExecutionEnvironment env = ExecutionEnvironment.builder()
                 .mockMode(false)  // Use real file operations for find
                 .forceHeadless(true)  // No screen capture
                 .allowScreenCapture(false)
                 .build();
-        BrobotEnvironment.setInstance(env);
+        ExecutionEnvironment.setInstance(env);
         
         // Enable action mocking but real find operations
-        BrobotSettings.mock = true;
+        FrameworkSettings.mock = true;
         
         // Clear any previous screenshots
-        BrobotSettings.screenshots.clear();
+        FrameworkSettings.screenshots.clear();
     }
 
     @Autowired
@@ -71,7 +71,7 @@ public class FindImageWithOffsetTest extends BrobotIntegrationTestBase {
         }
         
         // Add screenshot for find operation (enables hybrid mode)
-        BrobotSettings.screenshots.add(TestPaths.getScreenshotPath("floranext0"));
+        FrameworkSettings.screenshots.add(TestPaths.getScreenshotPath("floranext0"));
         
         // Test with offset
         StateImage topLeft = new StateImage.Builder()
@@ -84,7 +84,7 @@ public class FindImageWithOffsetTest extends BrobotIntegrationTestBase {
                 .withImages(topLeft)
                 .withScenes(TestPaths.getScreenshotPath("floranext0"))
                 .build();
-        Matches matches = action.perform(ActionOptions.Action.FIND, objColl);
+        ActionResult matches = action.perform(ActionOptions.Action.FIND, objColl);
         
         // Test without offset
         StateImage topLeft2 = new StateImage.Builder()
@@ -96,7 +96,7 @@ public class FindImageWithOffsetTest extends BrobotIntegrationTestBase {
                 .withImages(topLeft2)
                 .withScenes(TestPaths.getScreenshotPath("floranext0"))
                 .build();
-        Matches matches2 = action.perform(ActionOptions.Action.FIND, objColl2);
+        ActionResult matches2 = action.perform(ActionOptions.Action.FIND, objColl2);
         
         // Verify both finds succeeded
         assertFalse(matches.isEmpty(), "Should find pattern with offset");
@@ -135,7 +135,7 @@ public class FindImageWithOffsetTest extends BrobotIntegrationTestBase {
         }
         
         // Add screenshot for find operation
-        BrobotSettings.screenshots.add(TestPaths.getScreenshotPath("floranext0"));
+        FrameworkSettings.screenshots.add(TestPaths.getScreenshotPath("floranext0"));
         
         // Test 1: Pattern with position and offset
         StateImage topLeft = new StateImage.Builder()
@@ -148,7 +148,7 @@ public class FindImageWithOffsetTest extends BrobotIntegrationTestBase {
         ObjectCollection objColl = new ObjectCollection.Builder()
                 .withImages(topLeft)
                 .build();
-        Matches matches = action.perform(ActionOptions.Action.FIND, objColl);
+        ActionResult matches = action.perform(ActionOptions.Action.FIND, objColl);
         
         // Test 2: Pattern with different position, but ActionOptions overrides
         StateImage topLeft2 = new StateImage.Builder()
@@ -165,7 +165,7 @@ public class FindImageWithOffsetTest extends BrobotIntegrationTestBase {
                 .setTargetPosition(100, 100)  // This should override pattern position
                 .setTargetOffset(-10, 0)
                 .build();
-        Matches matches2 = action.perform(actionOptions, objColl2);
+        ActionResult matches2 = action.perform(actionOptions, objColl2);
         
         // Verify both finds succeeded
         assertFalse(matches.isEmpty(), "Should find pattern with position/offset in pattern");
@@ -206,7 +206,7 @@ public class FindImageWithOffsetTest extends BrobotIntegrationTestBase {
         }
         
         // Add screenshot for find operation
-        BrobotSettings.screenshots.add(TestPaths.getScreenshotPath("floranext0"));
+        FrameworkSettings.screenshots.add(TestPaths.getScreenshotPath("floranext0"));
         
         // Create pattern with initial position and offset
         StateImage topLeft = new StateImage.Builder()
@@ -226,7 +226,7 @@ public class FindImageWithOffsetTest extends BrobotIntegrationTestBase {
         ObjectCollection objColl = new ObjectCollection.Builder()
                 .withImages(topLeft)
                 .build();
-        Matches matches = action.perform(ActionOptions.Action.FIND, objColl);
+        ActionResult matches = action.perform(ActionOptions.Action.FIND, objColl);
         
         // Verify find succeeded
         assertFalse(matches.isEmpty(), "Should find the pattern");

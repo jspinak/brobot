@@ -45,7 +45,7 @@ const config = {
           rehypePlugins: [katex],
           sidebarPath: require.resolve('./sidebars.js'),
           editUrl: 'https://github.com/jspinak/brobot/edit/main/docs/',
-          lastVersion: '1.0.7',
+          lastVersion: '1.1.0',
           versions: {
             current: {
               label: 'Next',
@@ -92,8 +92,13 @@ const config = {
           },
           // The external link to your hosted API documentation
           {
-            href: 'https://jspinak.github.io/brobot/api/1.0.7/',
-            label: 'API Reference (1.0.7)',
+            href: 'https://jspinak.github.io/brobot/api/1.1.0/',
+            label: 'API Reference (1.1.0)',
+            position: 'left',
+          },
+          {
+            label: 'The Visual API',
+            to: '/visualAPI',
             position: 'left',
           },
           {to: '/blog', label: 'Blog', position: 'left'},
@@ -123,11 +128,11 @@ const config = {
               },
               {
                 label: 'Get Started',
-                to: '/docs/getting-started/introduction',
+                to: '/docs/01-getting-started/introduction',
               },
               {
-                label: 'The Visual API white paper',
-                to: 'visualAPI',
+                label: 'The Visual API',
+                to: '/visualAPI',
               },
             ],
           },

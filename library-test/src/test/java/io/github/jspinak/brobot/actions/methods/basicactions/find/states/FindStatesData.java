@@ -1,11 +1,12 @@
 package io.github.jspinak.brobot.actions.methods.basicactions.find.states;
 
-import io.github.jspinak.brobot.actions.actionExecution.Action;
-import io.github.jspinak.brobot.actions.actionExecution.MatchesInitializer;
-import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
-import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
-import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
-import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
+import io.github.jspinak.brobot.action.Action;
+import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.model.element.Pattern;
+import io.github.jspinak.brobot.action.ActionResult;
+import io.github.jspinak.brobot.action.basic.find.FindState;
+import io.github.jspinak.brobot.action.internal.factory.ActionResultFactory;
+import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.actions.methods.basicactions.TestData;
 
 import java.util.List;
@@ -36,7 +37,7 @@ public class FindStatesData {
 
     private ObjectCollection getStateObjectCollection(Action action, Pattern scene) {
         try {
-            Matches matches = action.perform(findWordsOptions, getObjectCollectionWithScene(scene));
+            ActionResult matches = action.perform(findWordsOptions, getObjectCollectionWithScene(scene));
             return new ObjectCollection.Builder()
                     .withImages(matches.getMatchListAsStateImages())
                     .withScenes(scene)
@@ -60,17 +61,17 @@ public class FindStatesData {
         return List.of(stateColl1, stateColl2, stateColl3, stateColl4, stateColl5);
     }
 
-    public Matches getMatches(Action action, FindStates findStates, MatchesInitializer matchesInitializer, int minSize) {
+    public ActionResult getMatches(Action action, FindState findState, ActionResultFactory matchesInitializer, int minSize) {
         List<ObjectCollection> objectCollections = getStateObjectCollections(action);
-        Matches matches = matchesInitializer.init(getFindStatesOptions(minSize), objectCollections);
-        findStates.find(matches, objectCollections);
+        ActionResult matches = matchesInitializer.init(getFindStatesOptions(minSize), objectCollections);
+        findState.find(matches, objectCollections);
         return matches;
     }
 
-    public Matches getMatches(Action action, FindStates findStates, MatchesInitializer matchesInitializer) {
+    public ActionResult getMatches(Action action, FindState findState, ActionResultFactory matchesInitializer) {
         List<ObjectCollection> objectCollections = getStateObjectCollections(action);
-        Matches matches = matchesInitializer.init(findStatesOptions, objectCollections);
-        findStates.find(matches, objectCollections);
+        ActionResult matches = matchesInitializer.init(findStatesOptions, objectCollections);
+        findState.find(matches, objectCollections);
         return matches;
     }
 

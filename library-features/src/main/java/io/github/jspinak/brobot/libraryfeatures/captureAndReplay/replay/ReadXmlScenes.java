@@ -2,7 +2,8 @@ package io.github.jspinak.brobot.libraryfeatures.captureAndReplay.replay;
 
 import io.github.jspinak.brobot.libraryfeatures.captureAndReplay.capture.SceneAndObjectsForXML;
 import io.github.jspinak.brobot.libraryfeatures.captureAndReplay.capture.SceneObjectCollectionForXML;
-import io.github.jspinak.brobot.report.Report;
+import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
+
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
@@ -21,7 +22,7 @@ public class ReadXmlScenes {
     public SceneObjectCollectionForXML getSceneAndObjects() {
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance(); // Instantiate the Factory
         String path = "capture\\scenes.xml";
-        Report.println(Path.of(path).toAbsolutePath().toString());
+        ConsoleReporter.println(Path.of(path).toAbsolutePath().toString());
         DocumentBuilder db;
         try {
             db = dbf.newDocumentBuilder();

@@ -1,11 +1,11 @@
 package io.github.jspinak.brobot.actions.methods.basicactions.find;
 
-import io.github.jspinak.brobot.actions.actionExecution.Action;
-import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
-import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
-import io.github.jspinak.brobot.datatypes.primitives.match.Match;
-import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
-import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
+import io.github.jspinak.brobot.action.Action;
+import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.model.element.Pattern;
+import io.github.jspinak.brobot.model.match.Match;
+import io.github.jspinak.brobot.action.ActionResult;
+import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.BrobotTestApplication;
 import io.github.jspinak.brobot.test.ocr.OcrTestBase;
 import io.github.jspinak.brobot.test.ocr.OcrTestSupport;
@@ -17,7 +17,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.io.File;
 
-import static io.github.jspinak.brobot.actions.actionOptions.ActionOptions.Find.ALL_WORDS;
+import static io.github.jspinak.brobot.action.ActionOptions.Find.ALL_WORDS;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -55,7 +55,7 @@ public class FindAllWordsTest extends OcrTestBase {
         
         final String finalImagePath = imagePath;
         
-        Matches wordMatches = performOcrOperation(() -> {
+        ActionResult wordMatches = performOcrOperation(() -> {
             ObjectCollection screens = new ObjectCollection.Builder()
                     .withScenes(new Pattern(finalImagePath))
                     .build();

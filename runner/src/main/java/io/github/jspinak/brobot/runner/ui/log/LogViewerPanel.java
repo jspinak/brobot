@@ -1,13 +1,13 @@
 package io.github.jspinak.brobot.runner.ui.log;
 
-import io.github.jspinak.brobot.report.log.model.LogData;
-import io.github.jspinak.brobot.report.log.model.LogType;
 import io.github.jspinak.brobot.runner.events.BrobotEvent;
 import io.github.jspinak.brobot.runner.events.EventBus;
 import io.github.jspinak.brobot.runner.events.LogEntryEvent;
 import io.github.jspinak.brobot.runner.events.LogEvent;
 import io.github.jspinak.brobot.runner.persistence.LogQueryService;
 import io.github.jspinak.brobot.runner.ui.icons.IconRegistry;
+import io.github.jspinak.brobot.tools.logging.model.LogData;
+import io.github.jspinak.brobot.tools.logging.model.LogEventType;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -122,7 +122,7 @@ public class LogViewerPanel extends BorderPane implements AutoCloseable {
         HBox.setHgrow(searchField, Priority.ALWAYS);
         logTypeFilter = new ComboBox<>();
         logTypeFilter.getItems().add("All Types");
-        for (LogType type : LogType.values()) {
+        for (LogEventType type : LogEventType.values()) {
             logTypeFilter.getItems().add(type.name());
         }
         logTypeFilter.setValue("All Types");
@@ -335,7 +335,7 @@ public class LogViewerPanel extends BorderPane implements AutoCloseable {
             stateVisualizationPanel.clearStates();
             return;
         }
-        if (logData.getType() == LogType.TRANSITION) {
+        if (logData.getType() == LogEventType.TRANSITION) {
             List<String> fromStates = new ArrayList<>();
             if (logData.getFromStates() != null) fromStates.add(logData.getFromStates());
             stateVisualizationPanel.setStates(fromStates, logData.getToStateNames());
@@ -490,7 +490,7 @@ public class LogViewerPanel extends BorderPane implements AutoCloseable {
             this.type.set(logData.getType() != null ? logData.getType().toString() : "UNKNOWN");
             this.message.set(logData.getDescription());
             this.success.set(logData.isSuccess());
-            if (logData.getType() == LogType.ERROR) {
+            if (logData.getType() == LogEventType.ERROR) {
                 this.level.set("ERROR");
             } else if (!logData.isSuccess()) {
                 this.level.set("WARNING");
@@ -512,9 +512,9 @@ public class LogViewerPanel extends BorderPane implements AutoCloseable {
             }
             this.rawLogData = tempLogData;
             try {
-                this.type.set(LogType.valueOf(logEvent.getCategory().toUpperCase()).toString());
+                this.type.set(LogEventType.valueOf(logEvent.getCategory().toUpperCase()).toString());
             } catch (Exception e) {
-                this.type.set(LogType.SYSTEM.toString());
+                this.type.set(LogEventType.SYSTEM.toString());
             }
         }
 

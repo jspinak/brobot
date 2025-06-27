@@ -1,12 +1,12 @@
 package io.github.jspinak.brobot.datatypes.state.stateObject.stateImage;
 
-import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
-import io.github.jspinak.brobot.datatypes.primitives.region.Region;
-import org.junit.jupiter.api.Test;
+import io.github.jspinak.brobot.model.element.Pattern;
+import io.github.jspinak.brobot.model.element.Region;
+import io.github.jspinak.brobot.model.state.StateImage;
 
+import org.junit.jupiter.api.Test;
 import java.awt.image.BufferedImage;
 import java.util.List;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 public class StateImageTest {

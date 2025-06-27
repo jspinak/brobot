@@ -1,12 +1,12 @@
 package io.github.jspinak.brobot.actions.methods.basicactions.find;
 
-import io.github.jspinak.brobot.actions.methods.basicactions.find.compareImages.CompareImages;
-import io.github.jspinak.brobot.datatypes.primitives.match.Match;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
+import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.BrobotTestApplication;
+import io.github.jspinak.brobot.analysis.compare.ImageComparer;
 import io.github.jspinak.brobot.actions.methods.basicactions.TestData;
 import io.github.jspinak.brobot.test.BrobotIntegrationTestBase;
-import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
+import io.github.jspinak.brobot.model.element.Pattern;
+import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.testutils.TestPaths;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -30,7 +30,7 @@ class CompareImagesTest extends BrobotIntegrationTestBase {
     }
 
     @Autowired
-    CompareImages compareImages;
+    ImageComparer compareImages;
 
     @Test
     void comparePatterns1() {

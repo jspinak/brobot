@@ -1,15 +1,15 @@
 package io.github.jspinak.brobot.runner.ui;
 
-import io.github.jspinak.brobot.datatypes.project.AutomationUI;
-import io.github.jspinak.brobot.datatypes.project.Button;
-import io.github.jspinak.brobot.datatypes.project.Project;
 import io.github.jspinak.brobot.runner.automation.AutomationExecutor;
 import io.github.jspinak.brobot.runner.config.BrobotRunnerProperties;
 import io.github.jspinak.brobot.runner.events.EventBus;
 import io.github.jspinak.brobot.runner.events.ExecutionStatusEvent;
 import io.github.jspinak.brobot.runner.execution.ExecutionState;
 import io.github.jspinak.brobot.runner.execution.ExecutionStatus;
-import io.github.jspinak.brobot.services.ProjectManager;
+import io.github.jspinak.brobot.runner.project.RunnerInterface;
+import io.github.jspinak.brobot.runner.project.TaskButton;
+import io.github.jspinak.brobot.runner.project.AutomationProject;
+import io.github.jspinak.brobot.runner.project.AutomationProjectManager;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
@@ -33,7 +33,7 @@ public class AutomationPanel extends VBox {
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm:ss");
 
     private final ApplicationContext context;
-    private final ProjectManager projectManager;
+    private final AutomationProjectManager projectManager;
     private final BrobotRunnerProperties properties;
     private final AutomationExecutor automationExecutor;
     private final EventBus eventBus;
@@ -48,7 +48,7 @@ public class AutomationPanel extends VBox {
     /**
      * Constructor with Spring dependencies
      */
-    public AutomationPanel(ApplicationContext context, ProjectManager projectManager,
+    public AutomationPanel(ApplicationContext context, AutomationProjectManager projectManager,
                            BrobotRunnerProperties properties, AutomationExecutor automationExecutor,
                            EventBus eventBus) {
         this.context = context;
@@ -237,13 +237,13 @@ public class AutomationPanel extends VBox {
             return;
         }
 
-        Project project = projectManager.getActiveProject();
+        AutomationProject project = projectManager.getActiveProject();
         if (project.getAutomation() == null || project.getAutomation().getButtons() == null) {
             log("No automation buttons defined in the current project.");
             return;
         }
 
-        List<Button> buttons = project.getAutomation().getButtons();
+        List<TaskButton> buttons = project.getAutomation().getButtons();
         if (buttons.isEmpty()) {
             log("No automation buttons defined in the current project.");
             return;
@@ -252,15 +252,15 @@ public class AutomationPanel extends VBox {
         log("Found " + buttons.size() + " automation functions.");
 
         // Group buttons by category if available
-        Map<String, List<Button>> buttonsByCategory = new HashMap<>();
+        Map<String, List<TaskButton>> buttonsByCategory = new HashMap<>();
 
-        for (Button buttonDef : buttons) {
+        for (TaskButton buttonDef : buttons) {
             String category = buttonDef.getCategory() != null ? buttonDef.getCategory() : "General";
             buttonsByCategory.computeIfAbsent(category, k -> new ArrayList<>()).add(buttonDef);
         }
 
         // Create button sections by category
-        for (Map.Entry<String, List<Button>> entry : buttonsByCategory.entrySet()) {
+        for (Map.Entry<String, List<TaskButton>> entry : buttonsByCategory.entrySet()) {
             VBox categoryBox = new VBox(5);
             categoryBox.setPadding(new Insets(5));
             categoryBox.setStyle("-fx-border-color: lightgray; -fx-border-radius: 5;");
@@ -269,7 +269,7 @@ public class AutomationPanel extends VBox {
             categoryLabel.setStyle("-fx-font-weight: bold;");
             categoryBox.getChildren().add(categoryLabel);
 
-            for (Button buttonDef : entry.getValue()) {
+            for (TaskButton buttonDef : entry.getValue()) {
                 javafx.scene.control.Button uiButton = createAutomationButton(buttonDef);
                 categoryBox.getChildren().add(uiButton);
             }
@@ -281,12 +281,12 @@ public class AutomationPanel extends VBox {
     /**
      * Creates a JavaFX button from a button definition
      */
-    private javafx.scene.control.Button createAutomationButton(Button buttonDef) {
+    private javafx.scene.control.Button createAutomationButton(TaskButton buttonDef) {
         javafx.scene.control.Button uiButton = new javafx.scene.control.Button(buttonDef.getLabel());
 
         // Apply styling if defined
         if (buttonDef.getStyling() != null) {
-            Button.ButtonStyling styling = buttonDef.getStyling();
+            TaskButton.ButtonStyling styling = buttonDef.getStyling();
             StringBuilder styleString = new StringBuilder();
 
             if (styling.getBackgroundColor() != null) {
@@ -331,7 +331,7 @@ public class AutomationPanel extends VBox {
     /**
      * Runs the automation function associated with the button
      */
-    private void runAutomation(Button buttonDef) {
+    private void runAutomation(TaskButton buttonDef) {
         // Check if another automation is already running
         if (automationExecutor.getExecutionStatus().getState().isActive()) {
             log("Another automation task is already running. Please wait or stop it first.");

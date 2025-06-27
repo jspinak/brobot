@@ -1,13 +1,14 @@
 package io.github.jspinak.brobot.runner.init;
 
-import io.github.jspinak.brobot.json.schemaValidation.ConfigValidator;
-import io.github.jspinak.brobot.json.schemaValidation.exception.ConfigValidationException;
-import io.github.jspinak.brobot.json.schemaValidation.model.ValidationResult;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import io.github.jspinak.brobot.runner.json.validation.ConfigurationValidator;
+import io.github.jspinak.brobot.runner.json.validation.exception.ConfigValidationException;
+import io.github.jspinak.brobot.runner.json.validation.model.ValidationResult;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -21,7 +22,7 @@ import static org.mockito.Mockito.when;
 class ProjectConfigLoaderTest {
 
     @Mock
-    private ConfigValidator configValidator;
+    private ConfigurationValidator configValidator;
 
     private ProjectConfigLoader projectConfigLoader;
 
