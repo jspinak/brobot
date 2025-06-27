@@ -1,9 +1,10 @@
 // Create this new file in: runner/src/main/.../persistence/mapper/LogMapper.java
 package io.github.jspinak.brobot.runner.persistence.mapper;
 
-import io.github.jspinak.brobot.report.log.model.LogData;
-import io.github.jspinak.brobot.report.log.model.PerformanceMetricsData;
 import io.github.jspinak.brobot.runner.persistence.entity.LogEntry;
+import io.github.jspinak.brobot.tools.logging.model.LogData;
+import io.github.jspinak.brobot.tools.logging.model.ExecutionMetrics;
+
 import org.springframework.stereotype.Component;
 
 @Component
@@ -23,7 +24,7 @@ public class LogMapper {
 
         // Map performance metrics
         if (entity.getPerformance() != null) {
-            PerformanceMetricsData metricsData = new PerformanceMetricsData();
+            ExecutionMetrics metricsData = new ExecutionMetrics();
             metricsData.setActionDuration(entity.getPerformance().getActionDuration());
             //... map other performance fields
             logData.setPerformance(metricsData);

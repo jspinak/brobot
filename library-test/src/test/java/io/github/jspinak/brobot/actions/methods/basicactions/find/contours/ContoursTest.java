@@ -1,8 +1,9 @@
 package io.github.jspinak.brobot.actions.methods.basicactions.find.contours;
 
-import io.github.jspinak.brobot.actions.methods.basicactions.find.contours.Contours;
-import io.github.jspinak.brobot.datatypes.primitives.region.Region;
-import io.github.jspinak.brobot.imageUtils.MatOps;
+import io.github.jspinak.brobot.analysis.compare.ContourExtractor;
+import io.github.jspinak.brobot.model.element.Region;
+import io.github.jspinak.brobot.util.image.core.MatrixUtilities;
+
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -15,18 +16,18 @@ import static org.junit.jupiter.api.Assertions.*;
 class ContoursTest {
 
     private static Mat mat;
-    private static Contours contours;
+    private static ContourExtractor contours;
 
     @BeforeAll
     public static void setVars() {
-        mat = MatOps.make3x3Mat(new short[]{0, 255, 255, 0, 0,     0, 0,
+        mat = MatrixUtilities.make3x3Mat(new short[]{0, 255, 255, 0, 0,     0, 0,
                                              0, 255, 255, 0, 0,     0, 0,
                                              0, 0,     0, 0, 255, 255, 0,
                                              0, 0,     0, 0, 255, 255, 0,
                                              0, 0,     0, 0,   0,   0, 0,
                                              0, 0,     0, 0,   0,   0, 0,
                                              0, 0,     0, 0,   0,   0, 0});
-        contours = new Contours.Builder()
+        contours = new ContourExtractor.Builder()
                 .setBgrFromClassification2d(mat)
                 .setSearchRegions(new Region(0,0,7,7))
                 .build();

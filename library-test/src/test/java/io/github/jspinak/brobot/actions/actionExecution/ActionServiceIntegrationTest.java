@@ -1,12 +1,16 @@
 package io.github.jspinak.brobot.actions.actionExecution;
 
-import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
-import io.github.jspinak.brobot.actions.methods.basicactions.click.Click;
-import io.github.jspinak.brobot.actions.methods.basicactions.find.Find;
-import io.github.jspinak.brobot.actions.methods.basicactions.textOps.TypeText;
-import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
-import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
+import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.action.basic.find.Find;
+import io.github.jspinak.brobot.action.basic.click.Click;
+import io.github.jspinak.brobot.action.basic.type.TypeText;
+import io.github.jspinak.brobot.action.ActionResult;
+import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.test.BaseIntegrationTest;
+import io.github.jspinak.brobot.action.internal.execution.BasicActionRegistry;
+import io.github.jspinak.brobot.action.internal.execution.CompositeActionRegistry;
+import io.github.jspinak.brobot.action.internal.service.ActionService;
+import io.github.jspinak.brobot.action.ActionInterface;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -33,10 +37,10 @@ class ActionServiceIntegrationTest extends BaseIntegrationTest {
     private ActionService actionService;
     
     @Autowired
-    private BasicAction basicAction;
+    private BasicActionRegistry basicAction;
     
     @Autowired
-    private CompositeAction compositeAction;
+    private CompositeActionRegistry compositeAction;
     
     @Test
     @Order(1)
@@ -122,7 +126,7 @@ class ActionServiceIntegrationTest extends BaseIntegrationTest {
         AtomicBoolean customFindCalled = new AtomicBoolean(false);
         
         // Create custom find function
-        BiConsumer<Matches, List<ObjectCollection>> customFind = (matches, collections) -> {
+        BiConsumer<ActionResult, List<ObjectCollection>> customFind = (matches, collections) -> {
             customFindCalled.set(true);
             // Custom find logic would go here
         };

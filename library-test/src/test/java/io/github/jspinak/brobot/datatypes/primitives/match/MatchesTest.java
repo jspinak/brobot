@@ -1,9 +1,9 @@
 package io.github.jspinak.brobot.datatypes.primitives.match;
 
-import io.github.jspinak.brobot.datatypes.primitives.match.Match;
-import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
-import io.github.jspinak.brobot.datatypes.primitives.region.Region;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
+import io.github.jspinak.brobot.action.ActionResult;
+import io.github.jspinak.brobot.model.element.Region;
+import io.github.jspinak.brobot.model.match.Match;
+import io.github.jspinak.brobot.model.state.StateImage;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -21,7 +21,7 @@ class MatchesTest {
     }
 
     List<StateImage> getMatchListAsStateImages() {
-        Matches matches = new Matches();
+        ActionResult matches = new ActionResult();
         Match match1 = new Match.Builder()
                 .setRegion(new Region(0, 0, 10, 10))
                 .setName("topLeft")

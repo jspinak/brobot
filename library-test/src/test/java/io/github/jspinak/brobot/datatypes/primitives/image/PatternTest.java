@@ -1,8 +1,7 @@
 package io.github.jspinak.brobot.datatypes.primitives.image;
 
-import io.github.jspinak.brobot.actions.BrobotSettings;
-import io.github.jspinak.brobot.actions.BrobotEnvironment;
-import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
+import io.github.jspinak.brobot.config.ExecutionEnvironment;
+import io.github.jspinak.brobot.model.element.Pattern;
 import io.github.jspinak.brobot.test.BaseIntegrationTest;
 import io.github.jspinak.brobot.testutils.TestPaths;
 import org.junit.jupiter.api.BeforeAll;
@@ -20,7 +19,7 @@ class PatternTest extends BaseIntegrationTest {
     @BeforeAll
     public static void setBundlePath() {
         // Only set bundle path if not in full mock mode
-        BrobotEnvironment env = BrobotEnvironment.getInstance();
+        ExecutionEnvironment env = ExecutionEnvironment.getInstance();
         if (!env.shouldSkipSikuliX()) {
             ImagePath.setBundlePath("images");
         }

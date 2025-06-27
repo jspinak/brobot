@@ -1,13 +1,14 @@
 package io.github.jspinak.brobot.runner.events;
 
-import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
-import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
-import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
-import io.github.jspinak.brobot.datatypes.state.state.State;
-import io.github.jspinak.brobot.report.log.ActionLogger;
-import io.github.jspinak.brobot.report.log.TestSessionLogger;
-import io.github.jspinak.brobot.report.log.model.LogData;
-import io.github.jspinak.brobot.report.log.model.LogType;
+import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.action.ActionResult;
+import io.github.jspinak.brobot.action.ObjectCollection;
+import io.github.jspinak.brobot.model.state.State;
+import io.github.jspinak.brobot.tools.logging.ActionLogger;
+import io.github.jspinak.brobot.tools.logging.SessionLifecycleLogger;
+import io.github.jspinak.brobot.tools.logging.model.LogData;
+import io.github.jspinak.brobot.tools.logging.model.LogEventType;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,7 +31,7 @@ class EventPublishingActionLoggerTest {
     private ActionLogger actionLoggerDelegate;
 
     @Mock
-    private TestSessionLogger sessionLoggerDelegate;
+    private SessionLifecycleLogger sessionLoggerDelegate;
 
     @Mock
     private EventBus eventBus;
@@ -50,11 +51,11 @@ class EventPublishingActionLoggerTest {
     void logAction_ShouldDelegateAndPublishEvent() {
         // Arrange
         String sessionId = "test-session";
-        Matches matches = mock(Matches.class);
+        ActionResult matches = mock(ActionResult.class);
         ObjectCollection objectCollection = mock(ObjectCollection.class);
 
         LogData logData = new LogData();
-        logData.setType(LogType.ACTION);
+        logData.setType(LogEventType.ACTION);
         when(actionLoggerDelegate.logAction(anyString(), any(), any())).thenReturn(logData);
         when(matches.isSuccess()).thenReturn(true);
 
@@ -73,12 +74,12 @@ class EventPublishingActionLoggerTest {
     void logAction_WithFailedMatch_ShouldPublishErrorEvent() {
         // Arrange
         String sessionId = "test-session";
-        Matches matches = mock(Matches.class);
+        ActionResult matches = mock(ActionResult.class);
         ObjectCollection objectCollection = mock(ObjectCollection.class);
         ActionOptions actionOptions = mock(ActionOptions.class);
 
         LogData logData = new LogData();
-        logData.setType(LogType.ACTION);
+        logData.setType(LogEventType.ACTION);
         when(actionLoggerDelegate.logAction(anyString(), any(), any())).thenReturn(logData);
         when(matches.isSuccess()).thenReturn(false);
         when(matches.getActionOptions()).thenReturn(actionOptions);
@@ -107,7 +108,7 @@ class EventPublishingActionLoggerTest {
         long transitionTime = 1000L;
 
         LogData logData = new LogData();
-        logData.setType(LogType.TRANSITION);
+        logData.setType(LogEventType.TRANSITION);
         when(actionLoggerDelegate.logStateTransition(anyString(), any(), any(), any(), anyBoolean(), anyLong()))
                 .thenReturn(logData);
 
@@ -130,7 +131,7 @@ class EventPublishingActionLoggerTest {
         String screenshotPath = "path/to/screenshot.png";
 
         LogData logData = new LogData();
-        logData.setType(LogType.ERROR);
+        logData.setType(LogEventType.ERROR);
         when(actionLoggerDelegate.logError(anyString(), anyString(), anyString())).thenReturn(logData);
 
         // Act
@@ -203,7 +204,7 @@ class EventPublishingActionLoggerTest {
     void handleNullLogEntry_ShouldNotThrowException() {
         // Arrange
         String sessionId = "test-session";
-        Matches matches = mock(Matches.class);
+        ActionResult matches = mock(ActionResult.class);
         ObjectCollection objectCollection = mock(ObjectCollection.class);
 
         // Return null from delegate to simulate no-op implementation

@@ -1,15 +1,18 @@
 package io.github.jspinak.brobot.actions;
 
-import io.github.jspinak.brobot.actions.actionExecution.Action;
-import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
-import io.github.jspinak.brobot.datatypes.primitives.match.Match;
-import io.github.jspinak.brobot.datatypes.primitives.match.MatchSnapshot;
-import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
-import io.github.jspinak.brobot.datatypes.primitives.region.Region;
-import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
-import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
-import io.github.jspinak.brobot.manageStates.StateMemory;
+import io.github.jspinak.brobot.action.Action;
+import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.model.match.Match;
+import io.github.jspinak.brobot.action.ActionResult;
+import io.github.jspinak.brobot.action.ObjectCollection;
+import io.github.jspinak.brobot.model.element.Region;
+import io.github.jspinak.brobot.model.state.StateImage;
+import io.github.jspinak.brobot.statemanagement.StateMemory;
+import io.github.jspinak.brobot.model.action.ActionRecord;
+import io.github.jspinak.brobot.model.element.Pattern;
+import io.github.jspinak.brobot.config.FrameworkSettings;
+import io.github.jspinak.brobot.config.ExecutionEnvironment;
+
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -39,9 +42,9 @@ class BrobotMockingIntegrationTest {
     @BeforeEach
     void setUp() {
         // Reset to real mode
-        BrobotSettings.mock = false;
+        FrameworkSettings.mock = false;
         // Clear any screenshots to ensure proper mock mode behavior
-        BrobotSettings.screenshots.clear();
+        FrameworkSettings.screenshots.clear();
         
         // Create test images
         BufferedImage dummyImage = new BufferedImage(100, 100, BufferedImage.TYPE_INT_RGB);
@@ -66,7 +69,7 @@ class BrobotMockingIntegrationTest {
                 .build();
         
         // Add match history to simulate previous Find operations
-        MatchSnapshot snapshot1 = new MatchSnapshot();
+        ActionRecord snapshot1 = new ActionRecord();
         snapshot1.setActionSuccess(true);
         snapshot1.setDuration(0.5);
         // IMPORTANT: Set the state ID to match the active state
@@ -113,15 +116,15 @@ class BrobotMockingIntegrationTest {
     @Disabled("Skipping - headless environment behavior is inconsistent")
     void testRealModeReturnsEmptyMatches() {
         // In real mode without an actual GUI, Find should return empty matches
-        BrobotSettings.mock = false;
+        FrameworkSettings.mock = false;
         
         // Force headless mode for this test
-        BrobotEnvironment env = BrobotEnvironment.builder()
+        ExecutionEnvironment env = ExecutionEnvironment.builder()
                 .mockMode(false)
                 .forceHeadless(true)
                 .allowScreenCapture(false)
                 .build();
-        BrobotEnvironment.setInstance(env);
+        ExecutionEnvironment.setInstance(env);
         
         // Use stateImageWithoutHistory to avoid any cached matches
         ObjectCollection collection = new ObjectCollection.Builder()
@@ -133,7 +136,7 @@ class BrobotMockingIntegrationTest {
                 .build();
         
         try {
-            Matches matches = action.perform(options, collection);
+            ActionResult matches = action.perform(options, collection);
             
             // In real mode without GUI, should either throw exception or return empty matches
             assertTrue(matches.isEmpty(), 
@@ -151,7 +154,7 @@ class BrobotMockingIntegrationTest {
     @Order(3)
     void testMockModeUsesMatchHistory() {
         // Enable mock mode
-        BrobotSettings.mock = true;
+        FrameworkSettings.mock = true;
         
         // Add the test state to active states for mock to work
         stateMemory.addActiveState(TEST_STATE_ID);
@@ -165,7 +168,7 @@ class BrobotMockingIntegrationTest {
                 .setFind(ActionOptions.Find.ALL)
                 .build();
         
-        Matches matches = action.perform(options, collection);
+        ActionResult matches = action.perform(options, collection);
         
         // In mock mode, matches should be populated from history
         assertFalse(matches.isEmpty(), 
@@ -180,7 +183,7 @@ class BrobotMockingIntegrationTest {
     @Order(4)
     void testMockModeWithoutHistoryUsesDefaults() {
         // Enable mock mode
-        BrobotSettings.mock = true;
+        FrameworkSettings.mock = true;
         
         ObjectCollection collection = new ObjectCollection.Builder()
                 .withImages(stateImageWithoutHistory)
@@ -190,7 +193,7 @@ class BrobotMockingIntegrationTest {
                 .setAction(ActionOptions.Action.FIND)
                 .build();
         
-        Matches matches = action.perform(options, collection);
+        ActionResult matches = action.perform(options, collection);
         
         // Mock mode should still work even without history
         // The behavior depends on the mock implementation
@@ -200,7 +203,7 @@ class BrobotMockingIntegrationTest {
     @Test
     @Order(5)
     void testMockModeRespectsFindOptions() {
-        BrobotSettings.mock = true;
+        FrameworkSettings.mock = true;
         
         ObjectCollection collection = new ObjectCollection.Builder()
                 .withImages(stateImageWithHistory)
@@ -212,7 +215,7 @@ class BrobotMockingIntegrationTest {
                 .setFind(ActionOptions.Find.FIRST)
                 .build();
         
-        Matches firstMatches = action.perform(firstOptions, collection);
+        ActionResult firstMatches = action.perform(firstOptions, collection);
         
         // Test ALL option
         ActionOptions allOptions = new ActionOptions.Builder()
@@ -220,7 +223,7 @@ class BrobotMockingIntegrationTest {
                 .setFind(ActionOptions.Find.ALL)
                 .build();
         
-        Matches allMatches = action.perform(allOptions, collection);
+        ActionResult allMatches = action.perform(allOptions, collection);
         
         // The behavior should differ based on Find option
         // This depends on the mock implementation details
@@ -231,7 +234,7 @@ class BrobotMockingIntegrationTest {
     @Test
     @Order(6)
     void testMockModePreservesStateObjectData() {
-        BrobotSettings.mock = true;
+        FrameworkSettings.mock = true;
         
         // Add the test state to active states for mock to work
         stateMemory.addActiveState(TEST_STATE_ID);
@@ -244,7 +247,7 @@ class BrobotMockingIntegrationTest {
                 .setAction(ActionOptions.Action.FIND)
                 .build();
         
-        Matches matches = action.perform(options, collection);
+        ActionResult matches = action.perform(options, collection);
         
         // In mock mode with history, we should get results
         assertNotNull(matches, "Matches should not be null");
@@ -263,12 +266,12 @@ class BrobotMockingIntegrationTest {
                 .build();
         
         // Test in mock mode
-        BrobotSettings.mock = true;
-        Matches mockMatches = action.perform(options, collection);
+        FrameworkSettings.mock = true;
+        ActionResult mockMatches = action.perform(options, collection);
         
         // Test in real mode
-        BrobotSettings.mock = false;
-        Matches realMatches = action.perform(options, collection);
+        FrameworkSettings.mock = false;
+        ActionResult realMatches = action.perform(options, collection);
         
         // Results should differ between modes
         assertNotNull(mockMatches);
@@ -279,7 +282,7 @@ class BrobotMockingIntegrationTest {
     @Test
     @Order(8)
     void testMockModeBehaviorWithoutProbabilities() {
-        BrobotSettings.mock = true;
+        FrameworkSettings.mock = true;
         
         ObjectCollection collection = new ObjectCollection.Builder()
                 .withImages(stateImageWithHistory)
@@ -296,7 +299,7 @@ class BrobotMockingIntegrationTest {
         int trials = 10;
         
         for (int i = 0; i < trials; i++) {
-            Matches matches = action.perform(options, collection);
+            ActionResult matches = action.perform(options, collection);
             
             if (!matches.isEmpty()) {
                 successCount++;
@@ -310,7 +313,7 @@ class BrobotMockingIntegrationTest {
     @AfterEach
     void tearDown() {
         // Reset to default
-        BrobotSettings.mock = false;
+        FrameworkSettings.mock = false;
         // Reset state memory - we can't directly access active states
         // The mock system will handle state management internally
     }

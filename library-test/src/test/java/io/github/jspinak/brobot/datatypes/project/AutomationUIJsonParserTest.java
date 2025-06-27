@@ -1,9 +1,13 @@
 package io.github.jspinak.brobot.datatypes.project;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import io.github.jspinak.brobot.json.parsing.JsonParser;
-import io.github.jspinak.brobot.json.parsing.exception.ConfigurationException;
-import io.github.jspinak.brobot.json.utils.JsonUtils;
+
+import io.github.jspinak.brobot.runner.json.parsing.ConfigurationParser;
+import io.github.jspinak.brobot.runner.json.parsing.exception.ConfigurationException;
+import io.github.jspinak.brobot.runner.json.utils.JsonUtils;
+import io.github.jspinak.brobot.runner.project.RunnerInterface;
+import io.github.jspinak.brobot.runner.project.TaskButton;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -19,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class AutomationUIJsonParserTest {
 
     @Autowired
-    private JsonParser jsonParser;
+    private ConfigurationParser jsonParser;
 
     @Autowired
     private JsonUtils jsonUtils;
@@ -36,7 +40,7 @@ public class AutomationUIJsonParserTest {
                 """;
 
         JsonNode jsonNode = jsonParser.parseJson(json);
-        AutomationUI automationUI = jsonParser.convertJson(jsonNode, AutomationUI.class);
+        RunnerInterface automationUI = jsonParser.convertJson(jsonNode, RunnerInterface.class);
 
         assertNotNull(automationUI);
         assertNotNull(automationUI.getButtons());
@@ -68,21 +72,21 @@ public class AutomationUIJsonParserTest {
                 """;
 
         JsonNode jsonNode = jsonParser.parseJson(json);
-        AutomationUI automationUI = jsonParser.convertJson(jsonNode, AutomationUI.class);
+        RunnerInterface automationUI = jsonParser.convertJson(jsonNode, RunnerInterface.class);
 
         assertNotNull(automationUI);
         assertNotNull(automationUI.getButtons());
         assertEquals(2, automationUI.getButtons().size());
 
         // Verify first button
-        Button button1 = automationUI.getButtons().getFirst();
+        TaskButton button1 = automationUI.getButtons().getFirst();
         assertEquals("btn1", button1.getId());
         assertEquals("Button 1", button1.getLabel());
         assertEquals("function1", button1.getFunctionName());
         assertEquals("Category A", button1.getCategory());
 
         // Verify second button
-        Button button2 = automationUI.getButtons().get(1);
+        TaskButton button2 = automationUI.getButtons().get(1);
         assertEquals("btn2", button2.getId());
         assertEquals("Button 2", button2.getLabel());
         assertEquals("function2", button2.getFunctionName());
@@ -95,18 +99,18 @@ public class AutomationUIJsonParserTest {
     @Test
     public void testSerializeAutomationUI() throws ConfigurationException {
         // Create an AutomationUI with buttons
-        AutomationUI automationUI = new AutomationUI();
-        List<Button> buttons = new ArrayList<>();
+        RunnerInterface automationUI = new RunnerInterface();
+        List<TaskButton> buttons = new ArrayList<>();
 
         // Create first button
-        Button button1 = new Button();
+        TaskButton button1 = new TaskButton();
         button1.setId("test-btn1");
         button1.setLabel("Test Button 1");
         button1.setFunctionName("testFunction1");
         buttons.add(button1);
 
         // Create second button
-        Button button2 = new Button();
+        TaskButton button2 = new TaskButton();
         button2.setId("test-btn2");
         button2.setLabel("Test Button 2");
         button2.setFunctionName("testFunction2");
@@ -120,20 +124,20 @@ public class AutomationUIJsonParserTest {
 
         // Deserialize and verify
         JsonNode jsonNode = jsonParser.parseJson(json);
-        AutomationUI deserializedUI = jsonParser.convertJson(jsonNode, AutomationUI.class);
+        RunnerInterface deserializedUI = jsonParser.convertJson(jsonNode, RunnerInterface.class);
 
         assertNotNull(deserializedUI);
         assertNotNull(deserializedUI.getButtons());
         assertEquals(2, deserializedUI.getButtons().size());
 
         // Verify first button
-        Button deserializedButton1 = deserializedUI.getButtons().getFirst();
+        TaskButton deserializedButton1 = deserializedUI.getButtons().getFirst();
         assertEquals("test-btn1", deserializedButton1.getId());
         assertEquals("Test Button 1", deserializedButton1.getLabel());
         assertEquals("testFunction1", deserializedButton1.getFunctionName());
 
         // Verify second button
-        Button deserializedButton2 = deserializedUI.getButtons().get(1);
+        TaskButton deserializedButton2 = deserializedUI.getButtons().get(1);
         assertEquals("test-btn2", deserializedButton2.getId());
         assertEquals("Test Button 2", deserializedButton2.getLabel());
         assertEquals("testFunction2", deserializedButton2.getFunctionName());

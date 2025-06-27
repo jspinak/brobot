@@ -6,7 +6,7 @@ plugins {
     id 'org.springframework.boot' version '3.2.4' apply false
 
     // This plugin is applied to the root to make it available to all sub-projects.
-    id 'io.freefair.lombok' version '8.6'
+    //id 'io.freefair.lombok' version '8.11'
     
     // JReleaser for publishing to Maven Central
     id 'org.jreleaser' version '1.15.0' apply false
@@ -14,7 +14,7 @@ plugins {
 
 allprojects {
     group = 'io.github.jspinak.brobot'
-    version = '1.0.7'
+    version = '1.1.0'
 
     repositories {
         mavenCentral()
@@ -23,7 +23,7 @@ allprojects {
 
 subprojects {
     apply plugin: 'java'
-    apply plugin: 'io.freefair.lombok'
+    //apply plugin: 'io.freefair.lombok'
     apply plugin: 'io.spring.dependency-management'
 
     java {
@@ -32,6 +32,13 @@ subprojects {
         toolchain {
             languageVersion = JavaLanguageVersion.of(21)
         }
+    }
+
+    dependencies {
+        compileOnly 'org.projectlombok:lombok:1.18.32'
+        annotationProcessor 'org.projectlombok:lombok:1.18.32'
+        testCompileOnly 'org.projectlombok:lombok:1.18.32'
+        testAnnotationProcessor 'org.projectlombok:lombok:1.18.32'
     }
 
     // Central dependency management for all sub-projects.

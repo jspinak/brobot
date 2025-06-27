@@ -1,7 +1,8 @@
 package io.github.jspinak.brobot.runner.session;
 
-import io.github.jspinak.brobot.manageStates.StateTransitions;
 import org.junit.jupiter.api.Test;
+
+import io.github.jspinak.brobot.navigation.transition.StateTransitions;
 
 import java.time.Duration;
 import java.time.LocalDateTime;

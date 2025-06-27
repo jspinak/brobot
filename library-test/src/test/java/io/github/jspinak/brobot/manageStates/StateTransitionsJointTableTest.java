@@ -1,12 +1,15 @@
 package io.github.jspinak.brobot.manageStates;
 
-import io.github.jspinak.brobot.datatypes.state.state.State;
-import io.github.jspinak.brobot.services.StateTransitionsRepository;
+import io.github.jspinak.brobot.model.state.State;
+import io.github.jspinak.brobot.model.transition.StateTransitionStore;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import io.github.jspinak.brobot.navigation.transition.StateTransitionsJointTable;
+import io.github.jspinak.brobot.navigation.transition.StateTransitions;
+import io.github.jspinak.brobot.navigation.transition.TaskSequenceStateTransition;
 
 import java.util.*;
 
@@ -19,7 +22,7 @@ public class StateTransitionsJointTableTest {
     private StateTransitionsJointTable stateTransitionsJointTable;
 
     @Autowired
-    private StateTransitionsRepository stateTransitionsRepository;
+    private StateTransitionStore stateTransitionsRepository;
 
     private StateTransitionsJointTable table;
 
@@ -42,7 +45,7 @@ public class StateTransitionsJointTableTest {
         // Create and add a transition from A to B
         StateTransitions stateTransitions = new StateTransitions();
         stateTransitions.setStateId(stateA);
-        ActionDefinitionStateTransition transition = new ActionDefinitionStateTransition();
+        TaskSequenceStateTransition transition = new TaskSequenceStateTransition();
         transition.setActivate(Collections.singleton(stateB));
         stateTransitions.addTransition(transition);
         stateTransitionsRepository.add(stateTransitions);

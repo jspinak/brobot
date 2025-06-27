@@ -1,13 +1,5 @@
 package io.github.jspinak.brobot.json.schemaValidation;
 
-import io.github.jspinak.brobot.json.schemaValidation.exception.ConfigValidationException;
-import io.github.jspinak.brobot.json.schemaValidation.model.ValidationError;
-import io.github.jspinak.brobot.json.schemaValidation.model.ValidationResult;
-import io.github.jspinak.brobot.json.schemaValidation.model.ValidationSeverity;
-import io.github.jspinak.brobot.json.schemaValidation.resource.ImageResourceValidator;
-import io.github.jspinak.brobot.json.schemaValidation.schema.SchemaValidator;
-import io.github.jspinak.brobot.json.schemaValidation.crossref.ReferenceValidator;
-import io.github.jspinak.brobot.json.schemaValidation.business.BusinessRuleValidator;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,6 +7,16 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import io.github.jspinak.brobot.runner.json.validation.ConfigurationValidator;
+import io.github.jspinak.brobot.runner.json.validation.business.BusinessRuleValidator;
+import io.github.jspinak.brobot.runner.json.validation.crossref.ReferenceValidator;
+import io.github.jspinak.brobot.runner.json.validation.exception.ConfigValidationException;
+import io.github.jspinak.brobot.runner.json.validation.model.ValidationError;
+import io.github.jspinak.brobot.runner.json.validation.model.ValidationResult;
+import io.github.jspinak.brobot.runner.json.validation.model.ValidationSeverity;
+import io.github.jspinak.brobot.runner.json.validation.resource.ImageResourceValidator;
+import io.github.jspinak.brobot.runner.json.validation.schema.SchemaValidator;
 
 import java.nio.file.Path;
 
@@ -37,7 +39,7 @@ class ConfigValidatorTest {
     private ImageResourceValidator imageResourceValidatorMock;
 
     @InjectMocks
-    private ConfigValidator configValidator;
+    private ConfigurationValidator configValidator;
 
     private String validProjectJson;
     private String validDslJson;

@@ -1,14 +1,15 @@
 package io.github.jspinak.brobot.mock;
 
-import io.github.jspinak.brobot.report.log.TestSessionLogger;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
+
+import io.github.jspinak.brobot.tools.logging.SessionLifecycleLogger;
 
 import java.util.UUID;
 
 @Component
 @Primary
-public class MockTestSessionLogger implements TestSessionLogger {
+public class MockTestSessionLogger implements SessionLifecycleLogger {
 
     @Override
     public String startSession(String applicationUnderTest) {

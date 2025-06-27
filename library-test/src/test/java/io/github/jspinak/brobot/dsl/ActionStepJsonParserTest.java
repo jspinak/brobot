@@ -1,10 +1,12 @@
 package io.github.jspinak.brobot.dsl;
 
-import io.github.jspinak.brobot.json.parsing.JsonParser;
-import io.github.jspinak.brobot.json.parsing.exception.ConfigurationException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import io.github.jspinak.brobot.runner.dsl.model.ActionStep;
+
+import io.github.jspinak.brobot.runner.json.parsing.ConfigurationParser;
+import io.github.jspinak.brobot.runner.json.parsing.exception.ConfigurationException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -12,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class ActionStepJsonParserTest {
 
     @Autowired
-    private JsonParser jsonParser;
+    private ConfigurationParser jsonParser;
 
     @Test
     void testActionStepFromJson() throws ConfigurationException {

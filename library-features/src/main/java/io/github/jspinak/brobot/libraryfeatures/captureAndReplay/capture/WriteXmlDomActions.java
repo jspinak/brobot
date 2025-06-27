@@ -1,10 +1,11 @@
 package io.github.jspinak.brobot.libraryfeatures.captureAndReplay.capture;
 
-import io.github.jspinak.brobot.report.Report;
 import org.sikuli.script.Mouse;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
+import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -73,7 +74,7 @@ public class WriteXmlDomActions {
         if (doc == null) return;
         // write dom document to a file
         String path = FileSystems.getDefault().getPath(".") + "\\" + filename;
-        Report.println("Writing XML to file: " + path);
+        ConsoleReporter.println("Writing XML to file: " + path);
         try (FileOutputStream output = new FileOutputStream(path)) {
             writeXml(doc, output);
         } catch (IOException e) {

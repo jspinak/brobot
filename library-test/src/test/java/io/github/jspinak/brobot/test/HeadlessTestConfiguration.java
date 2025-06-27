@@ -1,7 +1,8 @@
 package io.github.jspinak.brobot.test;
 
-import io.github.jspinak.brobot.actions.BrobotSettings;
-import io.github.jspinak.brobot.actions.BrobotEnvironment;
+import io.github.jspinak.brobot.config.ExecutionEnvironment;
+import io.github.jspinak.brobot.config.FrameworkSettings;
+
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
@@ -22,11 +23,11 @@ public class HeadlessTestConfiguration {
         // Configure BrobotEnvironment based on test type
         String testType = System.getProperty("brobot.test.type", "unit");
         
-        BrobotEnvironment env;
+        ExecutionEnvironment env;
         
         if ("integration".equals(testType)) {
             // Integration tests: use real files but no screen capture
-            env = BrobotEnvironment.builder()
+            env = ExecutionEnvironment.builder()
                 .mockMode(false)  // Use real files
                 .forceHeadless(true)  // But no screen capture
                 .allowScreenCapture(false)
@@ -34,18 +35,18 @@ public class HeadlessTestConfiguration {
                 .build();
             
             // Keep BrobotSettings.mock false for integration tests
-            BrobotSettings.mock = false;
+            FrameworkSettings.mock = false;
         } else {
             // Unit tests: full mock mode
-            env = BrobotEnvironment.builder()
+            env = ExecutionEnvironment.builder()
                 .mockMode(true)  // Use fake data
                 .build();
             
             // Keep BrobotSettings.mock true for backward compatibility
-            BrobotSettings.mock = true;
+            FrameworkSettings.mock = true;
         }
         
-        BrobotEnvironment.setInstance(env);
+        ExecutionEnvironment.setInstance(env);
         
         // Set headless property
         System.setProperty("java.awt.headless", "true");

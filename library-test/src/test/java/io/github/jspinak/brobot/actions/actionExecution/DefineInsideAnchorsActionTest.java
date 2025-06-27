@@ -1,9 +1,11 @@
 package io.github.jspinak.brobot.actions.actionExecution;
 
-import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
+import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.actions.methods.basicactions.TestData;
 import io.github.jspinak.brobot.test.BrobotIntegrationTestBase;
-import io.github.jspinak.brobot.datatypes.primitives.region.Region;
+import io.github.jspinak.brobot.model.element.Region;
+import io.github.jspinak.brobot.action.Action;
+
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +32,7 @@ public class DefineInsideAnchorsActionTest extends BrobotIntegrationTestBase {
     void defineRegion() {
         try {
             TestData testData = new TestData();
-            Matches matches = action.perform(testData.getDefineInsideAnchors(), testData.getInsideAnchorObjects());
+            ActionResult matches = action.perform(testData.getDefineInsideAnchors(), testData.getInsideAnchorObjects());
             
             System.out.println("Matches: " + matches);
             

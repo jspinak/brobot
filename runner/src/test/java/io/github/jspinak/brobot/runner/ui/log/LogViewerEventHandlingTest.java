@@ -1,14 +1,14 @@
 package io.github.jspinak.brobot.runner.ui.log;
 
-import io.github.jspinak.brobot.report.log.model.LogData;
-import io.github.jspinak.brobot.report.log.model.LogType;
-import io.github.jspinak.brobot.report.log.model.PerformanceMetricsData;
 import io.github.jspinak.brobot.runner.events.BrobotEvent;
 import io.github.jspinak.brobot.runner.events.EventBus;
 import io.github.jspinak.brobot.runner.events.LogEntryEvent;
 import io.github.jspinak.brobot.runner.events.LogEvent;
 import io.github.jspinak.brobot.runner.persistence.LogQueryService;
 import io.github.jspinak.brobot.runner.ui.icons.IconRegistry;
+import io.github.jspinak.brobot.tools.logging.model.LogData;
+import io.github.jspinak.brobot.tools.logging.model.LogEventType;
+import io.github.jspinak.brobot.tools.logging.model.ExecutionMetrics;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.scene.control.TableView;
@@ -127,26 +127,26 @@ public class LogViewerEventHandlingTest {
         List<LogData> testEntries = new ArrayList<>();
 
         // 1. Action success
-        LogData actionSuccess = new LogData("test-session", LogType.ACTION, "Action succeeded");
+        LogData actionSuccess = new LogData("test-session", LogEventType.ACTION, "Action succeeded");
         actionSuccess.setSuccess(true);
         actionSuccess.setActionType("CLICK");
         testEntries.add(actionSuccess);
 
         // 2. Action failure
-        LogData actionFailure = new LogData("test-session", LogType.ACTION, "Action failed");
+        LogData actionFailure = new LogData("test-session", LogEventType.ACTION, "Action failed");
         actionFailure.setSuccess(false);
         actionFailure.setActionType("FIND");
         testEntries.add(actionFailure);
 
         // 3. Transition success
-        LogData transitionSuccess = new LogData("test-session", LogType.TRANSITION, "Transition succeeded");
+        LogData transitionSuccess = new LogData("test-session", LogEventType.TRANSITION, "Transition succeeded");
         transitionSuccess.setSuccess(true);
         transitionSuccess.setFromStates("StateA");
         transitionSuccess.setToStateNames(List.of("StateB"));
         testEntries.add(transitionSuccess);
 
         // 4. Error log
-        LogData errorLog = new LogData("test-session", LogType.ERROR, "Error occurred");
+        LogData errorLog = new LogData("test-session", LogEventType.ERROR, "Error occurred");
         errorLog.setSuccess(false);
         errorLog.setErrorMessage("Test error message");
         testEntries.add(errorLog);
@@ -252,7 +252,7 @@ public class LogViewerEventHandlingTest {
         handleEvent.setAccessible(true);
 
         // Create a complex log entry with all fields populated
-        LogData complexEntry = new LogData("test-session", LogType.ACTION, "Complex test action");
+        LogData complexEntry = new LogData("test-session", LogEventType.ACTION, "Complex test action");
         complexEntry.setSuccess(true);
         complexEntry.setActionType("CLICK");
         complexEntry.setApplicationUnderTest("Test App");
@@ -263,7 +263,7 @@ public class LogViewerEventHandlingTest {
         complexEntry.setActionPerformed("Click on button");
         complexEntry.setDuration(1500);
 
-        PerformanceMetricsData metrics = new PerformanceMetricsData();
+        ExecutionMetrics metrics = new ExecutionMetrics();
         metrics.setActionDuration(500);
         metrics.setPageLoadTime(800);
         metrics.setTransitionTime(200);
@@ -312,7 +312,7 @@ public class LogViewerEventHandlingTest {
         handleEvent.setAccessible(true);
 
         // Create a log entry with error details
-        LogData errorEntry = new LogData("test-session", LogType.ERROR, "Error action");
+        LogData errorEntry = new LogData("test-session", LogEventType.ERROR, "Error action");
         errorEntry.setSuccess(false);
         errorEntry.setErrorMessage("Detailed error information");
         errorEntry.setApplicationUnderTest("Test App");

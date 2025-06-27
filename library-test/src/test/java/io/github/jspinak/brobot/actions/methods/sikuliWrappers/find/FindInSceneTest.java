@@ -1,13 +1,14 @@
 package io.github.jspinak.brobot.actions.methods.sikuliWrappers.find;
 
-import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
-import io.github.jspinak.brobot.actions.methods.basicactions.find.color.pixelAnalysis.GetScenes;
-import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
-import io.github.jspinak.brobot.datatypes.primitives.image.Scene;
-import io.github.jspinak.brobot.datatypes.primitives.match.Match;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
-import io.github.jspinak.brobot.datatypes.primitives.location.Positions;
-import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
+import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.action.ObjectCollection;
+import io.github.jspinak.brobot.action.internal.find.scene.ScenePatternMatcher;
+import io.github.jspinak.brobot.action.basic.find.color.SceneProvider;
+import io.github.jspinak.brobot.model.element.Pattern;
+import io.github.jspinak.brobot.model.element.Scene;
+import io.github.jspinak.brobot.model.match.Match;
+import io.github.jspinak.brobot.model.state.StateImage;
+import io.github.jspinak.brobot.model.element.Positions;
 import io.github.jspinak.brobot.BrobotTestApplication;
 import io.github.jspinak.brobot.test.BrobotIntegrationTestBase;
 import io.github.jspinak.brobot.testutils.TestPaths;
@@ -34,10 +35,10 @@ class FindInSceneTest extends BrobotIntegrationTestBase {
     }
 
     @Autowired
-    FindInScene findInScene;
+    ScenePatternMatcher findInScene;
 
     @Autowired
-    GetScenes getScenes;
+    SceneProvider getScenes;
 
     @Test
     void findAllInScene() {

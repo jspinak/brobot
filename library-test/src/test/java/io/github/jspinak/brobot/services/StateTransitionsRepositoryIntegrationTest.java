@@ -1,8 +1,8 @@
 package io.github.jspinak.brobot.services;
 
-import io.github.jspinak.brobot.datatypes.state.state.State;
-import io.github.jspinak.brobot.manageStates.StateTransitions;
-import io.github.jspinak.brobot.manageStates.StateTransitionsJointTable;
+import io.github.jspinak.brobot.navigation.transition.StateTransitions;
+import io.github.jspinak.brobot.navigation.transition.StateTransitionsJointTable;
+import io.github.jspinak.brobot.model.transition.StateTransitionStore;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class StateTransitionsRepositoryIntegrationTest {
 
     @Autowired
-    private StateTransitionsRepository stateTransitionsRepository;
+    private StateTransitionStore stateTransitionsRepository;
     
     @Autowired
     private StateTransitionsJointTable stateTransitionsJointTable;

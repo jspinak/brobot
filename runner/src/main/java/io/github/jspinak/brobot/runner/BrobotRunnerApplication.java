@@ -1,13 +1,13 @@
 package io.github.jspinak.brobot.runner;
 
-import io.github.jspinak.brobot.json.parsing.JsonParser;
 import io.github.jspinak.brobot.runner.cache.CacheManager;
 import io.github.jspinak.brobot.runner.config.BrobotRunnerProperties;
 import io.github.jspinak.brobot.runner.events.EventBus;
+import io.github.jspinak.brobot.runner.json.parsing.ConfigurationParser;
 import io.github.jspinak.brobot.runner.resources.ImageResourceManager;
 import io.github.jspinak.brobot.runner.resources.ResourceManager;
 import io.github.jspinak.brobot.runner.session.SessionManager;
-import io.github.jspinak.brobot.services.StateTransitionsRepository;
+import io.github.jspinak.brobot.model.transition.StateTransitionStore;
 import net.rgielen.fxweaver.core.FxWeaver;
 import net.rgielen.fxweaver.spring.SpringFxWeaver;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -75,8 +75,8 @@ public class BrobotRunnerApplication {
 	public SessionManager sessionManager(EventBus eventBus,
 										 BrobotRunnerProperties properties,
 										 ResourceManager resourceManager,
-										 JsonParser jsonParser,
-										 StateTransitionsRepository stateTransitionsRepository) {
+										 ConfigurationParser jsonParser,
+										 StateTransitionStore stateTransitionsRepository) {
 		return new SessionManager(eventBus, properties, resourceManager, jsonParser, stateTransitionsRepository);
 	}
 }

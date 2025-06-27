@@ -1,10 +1,12 @@
 package io.github.jspinak.brobot.actions.methods.basicactions.define;
 
-import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
+import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.BrobotTestApplication;
 import io.github.jspinak.brobot.actions.methods.basicactions.TestData;
 import io.github.jspinak.brobot.test.BrobotIntegrationTestBase;
-import io.github.jspinak.brobot.datatypes.primitives.region.Region;
+import io.github.jspinak.brobot.model.element.Region;
+import io.github.jspinak.brobot.action.basic.visual.DefineInsideAnchors;
+
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +37,7 @@ class DefineInsideAnchorsTest extends BrobotIntegrationTestBase {
     void perform() {
         try {
             TestData testData = new TestData();
-            Matches matches = new Matches();
+            ActionResult matches = new ActionResult();
             matches.setActionOptions(testData.getDefineInsideAnchors());
             
             defineInsideAnchors.perform(matches, testData.getInsideAnchorObjects());

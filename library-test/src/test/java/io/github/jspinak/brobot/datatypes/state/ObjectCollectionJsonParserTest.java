@@ -1,16 +1,17 @@
 package io.github.jspinak.brobot.datatypes.state;
 
-import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
-import io.github.jspinak.brobot.datatypes.primitives.image.Scene;
-import io.github.jspinak.brobot.datatypes.primitives.location.Location;
-import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
-import io.github.jspinak.brobot.datatypes.primitives.region.Region;
-import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.StateLocation;
-import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.StateRegion;
-import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.StateString;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
-import io.github.jspinak.brobot.json.parsing.JsonParser;
-import io.github.jspinak.brobot.json.parsing.exception.ConfigurationException;
+import io.github.jspinak.brobot.model.element.Pattern;
+import io.github.jspinak.brobot.model.element.Scene;
+import io.github.jspinak.brobot.model.element.Location;
+import io.github.jspinak.brobot.action.ActionResult;
+import io.github.jspinak.brobot.model.element.Region;
+import io.github.jspinak.brobot.model.state.StateLocation;
+import io.github.jspinak.brobot.model.state.StateRegion;
+import io.github.jspinak.brobot.model.state.StateString;
+import io.github.jspinak.brobot.action.ObjectCollection;
+import io.github.jspinak.brobot.runner.json.parsing.ConfigurationParser;
+import io.github.jspinak.brobot.runner.json.parsing.exception.ConfigurationException;
+import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.testutils.TestPaths;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -24,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class ObjectCollectionJsonParserTest {
 
     @Autowired
-    private JsonParser jsonParser;
+    private ConfigurationParser jsonParser;
 
     @BeforeAll
     public static void setupHeadlessMode() {
@@ -159,7 +160,7 @@ class ObjectCollectionJsonParserTest {
                 .withScenes(new Scene(TestPaths.getImagePath("bottomR")))
 
                 // Add a Matches object
-                .withMatches(new Matches())
+                .withMatches(new ActionResult())
 
                 .build();
 

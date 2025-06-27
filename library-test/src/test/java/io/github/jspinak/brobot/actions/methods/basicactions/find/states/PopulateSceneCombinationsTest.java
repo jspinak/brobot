@@ -1,13 +1,16 @@
 package io.github.jspinak.brobot.actions.methods.basicactions.find.states;
 
-import io.github.jspinak.brobot.actions.BrobotEnvironment;
-import io.github.jspinak.brobot.actions.BrobotSettings;
-import io.github.jspinak.brobot.actions.actionExecution.Action;
-import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
-import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
+import io.github.jspinak.brobot.config.FrameworkSettings;
+import io.github.jspinak.brobot.action.Action;
+import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.config.ExecutionEnvironment;
+import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.BrobotTestApplication;
 import io.github.jspinak.brobot.test.BrobotIntegrationTestBase;
 import io.github.jspinak.brobot.testutils.TestPaths;
+import io.github.jspinak.brobot.analysis.scene.SceneCombinationPopulator;
+import io.github.jspinak.brobot.analysis.scene.SceneCombinationGenerator;
+import io.github.jspinak.brobot.model.analysis.scene.SceneCombination;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,25 +35,25 @@ class PopulateSceneCombinationsTest extends BrobotIntegrationTestBase {
     @Override
     protected void setUpBrobotEnvironment() {
         // Configure for unit testing with screenshots
-        BrobotEnvironment env = BrobotEnvironment.builder()
+        ExecutionEnvironment env = ExecutionEnvironment.builder()
                 .mockMode(false)  // Use real file operations for find
                 .forceHeadless(true)  // No screen capture
                 .allowScreenCapture(false)
                 .build();
-        BrobotEnvironment.setInstance(env);
+        ExecutionEnvironment.setInstance(env);
         
         // Don't set mock mode here - let the test methods control it
-        BrobotSettings.mock = false;
+        FrameworkSettings.mock = false;
         
         // Clear any previous screenshots
-        BrobotSettings.screenshots.clear();
+        FrameworkSettings.screenshots.clear();
     }
 
     @Autowired
-    PopulateSceneCombinations populateSceneCombinations;
+    SceneCombinationPopulator populateSceneCombinations;
 
     @Autowired
-    GetSceneCombinations getSceneCombinations;
+    SceneCombinationGenerator getSceneCombinations;
 
     @Autowired
     Action action;
@@ -62,9 +65,9 @@ class PopulateSceneCombinationsTest extends BrobotIntegrationTestBase {
             List<ObjectCollection> objectCollections = new FindStatesData().getStateObjectCollections(action);
             
             // Then enable mock mode with screenshots for hybrid operation
-            BrobotSettings.mock = true;
-            BrobotSettings.screenshots.add(TestPaths.getScreenshotPath("floranext0"));
-            BrobotSettings.screenshots.add(TestPaths.getScreenshotPath("floranext1"));
+            FrameworkSettings.mock = true;
+            FrameworkSettings.screenshots.add(TestPaths.getScreenshotPath("floranext0"));
+            FrameworkSettings.screenshots.add(TestPaths.getScreenshotPath("floranext1"));
             List<SceneCombination> sceneCombinationList = getSceneCombinations.getAllSceneCombinations(objectCollections);
             
             // If we have no scene combinations due to OCR failure, skip the test
@@ -122,9 +125,9 @@ class PopulateSceneCombinationsTest extends BrobotIntegrationTestBase {
             List<ObjectCollection> objectCollections = new FindStatesData().getStateObjectCollections(action);
             
             // Then enable mock mode with screenshots for hybrid operation
-            BrobotSettings.mock = true;
-            BrobotSettings.screenshots.add(TestPaths.getScreenshotPath("floranext0"));
-            BrobotSettings.screenshots.add(TestPaths.getScreenshotPath("floranext1"));
+            FrameworkSettings.mock = true;
+            FrameworkSettings.screenshots.add(TestPaths.getScreenshotPath("floranext0"));
+            FrameworkSettings.screenshots.add(TestPaths.getScreenshotPath("floranext1"));
             List<SceneCombination> sceneCombinationList = getSceneCombinations.getAllSceneCombinations(objectCollections);
             
             // If we have no scene combinations due to OCR failure, skip the test

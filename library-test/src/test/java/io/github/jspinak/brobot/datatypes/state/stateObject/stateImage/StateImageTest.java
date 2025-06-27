@@ -1,9 +1,10 @@
 package io.github.jspinak.brobot.datatypes.state.stateObject.stateImage;
 
-import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
-import io.github.jspinak.brobot.datatypes.primitives.region.Region;
-import io.github.jspinak.brobot.imageUtils.MatOps;
+import io.github.jspinak.brobot.model.element.Pattern;
+import io.github.jspinak.brobot.model.element.Region;
+import io.github.jspinak.brobot.util.image.core.MatrixUtilities;
 import io.github.jspinak.brobot.BrobotTestApplication;
+import io.github.jspinak.brobot.model.state.StateImage;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -22,7 +23,7 @@ class StateImageTest {
     StateImage getImage() {
         Pattern pattern = new Pattern.Builder()
                 .setFixedRegion(new Region(0, 0, 10, 10))
-                .setMat(MatOps.make3x3Mat(new short[]{255, 255, 255}))
+                .setMat(MatrixUtilities.make3x3Mat(new short[]{255, 255, 255}))
                 .build();
         return new StateImage.Builder()
                 .addPattern(pattern)

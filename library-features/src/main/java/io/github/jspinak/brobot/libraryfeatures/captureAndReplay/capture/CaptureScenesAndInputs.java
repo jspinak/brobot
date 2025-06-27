@@ -1,14 +1,15 @@
 package io.github.jspinak.brobot.libraryfeatures.captureAndReplay.capture;
 
-import io.github.jspinak.brobot.actions.BrobotSettings;
-import io.github.jspinak.brobot.actions.actionExecution.Action;
-import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
-import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
-import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
-import io.github.jspinak.brobot.datatypes.primitives.region.Region;
-import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
-import io.github.jspinak.brobot.report.Report;
+import io.github.jspinak.brobot.config.FrameworkSettings;
+import io.github.jspinak.brobot.action.Action;
+import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.model.element.Pattern;
+import io.github.jspinak.brobot.model.state.StateImage;
+import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
+import io.github.jspinak.brobot.util.image.core.BufferedImageUtilities;
+import io.github.jspinak.brobot.action.ActionResult;
+import io.github.jspinak.brobot.action.ObjectCollection;
+import io.github.jspinak.brobot.model.element.Region;
 
 import org.springframework.stereotype.Component;
 
@@ -18,8 +19,6 @@ import java.io.File;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
-
-import io.github.jspinak.brobot.imageUtils.BufferedImageOps;
 
 /**
  * The scene is captured along with the time of the capture.
@@ -39,11 +38,11 @@ public class CaptureScenesAndInputs {
     private WriteXmlDomActions writeXmlDomActions;
     private Action action;
     private WriteXmlDomScenes writeXmlDomScenes;
-    private BufferedImageOps bufferedImageOps;
+    private BufferedImageUtilities bufferedImageOps;
 
     private int screensSaved = 0;
 
-    public CaptureScenesAndInputs(BufferedImageOps bufferedImageOps,
+    public CaptureScenesAndInputs(BufferedImageUtilities bufferedImageOps,
                                   NativeHookDemo nativeHookDemo, WriteXmlDomActions writeXmlDomActions,
                                   Action action, WriteXmlDomScenes writeXmlDomScenes) {
         this.bufferedImageOps = bufferedImageOps;
@@ -79,17 +78,17 @@ public class CaptureScenesAndInputs {
      * Takes and saves screenshots repeatedly in the folder 'capture'.
      */
     public void capture() {
-        int numberOfScreenshots = (int) (BrobotSettings.secondsToCapture / BrobotSettings.captureFrequency);
+        int numberOfScreenshots = (int) (FrameworkSettings.secondsToCapture / FrameworkSettings.captureFrequency);
         nativeHookDemo.start();
         int timelapse;
         LocalDateTime startTime = LocalDateTime.now();
         while (screensSaved < numberOfScreenshots) {
             timelapse = (int) Duration.between(startTime, LocalDateTime.now()).toMillis();
-            if (timelapse > screensSaved * BrobotSettings.captureFrequency * 1000) {
+            if (timelapse > screensSaved * FrameworkSettings.captureFrequency * 1000) {
                 try {
                     ImageIO.write(bufferedImageOps.getBuffImgFromScreen(new Region()),
                             "png", new File("capture/scene" + screensSaved + ".png"));
-                    Report.println("Saved screenshot " + screensSaved);
+                    ConsoleReporter.println("Saved screenshot " + screensSaved);
                     screensSaved++;
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -109,7 +108,7 @@ public class CaptureScenesAndInputs {
                         .withScenes(new Pattern("../capture/scene" + i))
                         .withImages(stateImage)
                         .build();
-                Matches matches = action.perform(actionOptions, objects);
+                ActionResult matches = action.perform(actionOptions, objects);
                 if (matches.getBestLocation().isPresent()) {
                     sceneAndObjectsForXML.addObject(stateImage.getName(), matches.getBestLocation().get());
                 }

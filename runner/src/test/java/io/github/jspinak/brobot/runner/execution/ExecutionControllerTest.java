@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.runner.execution;
 
-import io.github.jspinak.brobot.datatypes.project.Button;
+import io.github.jspinak.brobot.runner.project.TaskButton;
 import io.github.jspinak.brobot.runner.resources.ResourceManager;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -244,7 +244,7 @@ class ExecutionControllerTest {
     @Test
     void testExecuteAutomation() throws Exception {
         // Create a button for testing
-        Button button = new Button();
+        TaskButton button = new TaskButton();
         button.setFunctionName("TestFunction");
         button.setLabel("Test Button");
 

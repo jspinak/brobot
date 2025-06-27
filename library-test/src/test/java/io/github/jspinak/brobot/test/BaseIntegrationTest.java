@@ -1,11 +1,12 @@
 package io.github.jspinak.brobot.test;
 
-import io.github.jspinak.brobot.actions.BrobotEnvironment;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
+
+import io.github.jspinak.brobot.config.ExecutionEnvironment;
 
 /**
  * Base class for integration tests that need to work with real image files
@@ -31,20 +32,20 @@ public abstract class BaseIntegrationTest {
         System.setProperty("brobot.test.type", "integration");
         
         // Configure environment for integration tests
-        BrobotEnvironment env = BrobotEnvironment.builder()
+        ExecutionEnvironment env = ExecutionEnvironment.builder()
             .mockMode(false)  // Use real files
             .fromEnvironment()  // Allow override from environment variables
             .verboseLogging(true)
             .build();
         
-        BrobotEnvironment.setInstance(env);
+        ExecutionEnvironment.setInstance(env);
         
         System.out.println("Integration test environment: " + env.getEnvironmentInfo());
     }
     
     @BeforeEach
     void logTestStart() {
-        BrobotEnvironment env = BrobotEnvironment.getInstance();
+        ExecutionEnvironment env = ExecutionEnvironment.getInstance();
         System.out.println("Running test with environment: " + env.getEnvironmentInfo());
     }
     
@@ -55,14 +56,14 @@ public abstract class BaseIntegrationTest {
      * @param mockMode true to enable mock mode
      * @return the previous environment for restoration
      */
-    protected BrobotEnvironment switchToMockMode(boolean mockMode) {
-        BrobotEnvironment current = BrobotEnvironment.getInstance();
-        BrobotEnvironment newEnv = BrobotEnvironment.builder()
+    protected ExecutionEnvironment switchToMockMode(boolean mockMode) {
+        ExecutionEnvironment current = ExecutionEnvironment.getInstance();
+        ExecutionEnvironment newEnv = ExecutionEnvironment.builder()
             .mockMode(mockMode)
             .forceHeadless(current.hasDisplay() ? false : true)
             .allowScreenCapture(current.canCaptureScreen())
             .build();
-        BrobotEnvironment.setInstance(newEnv);
+        ExecutionEnvironment.setInstance(newEnv);
         return current;
     }
     
@@ -71,7 +72,7 @@ public abstract class BaseIntegrationTest {
      * 
      * @param env the environment to restore
      */
-    protected void restoreEnvironment(BrobotEnvironment env) {
-        BrobotEnvironment.setInstance(env);
+    protected void restoreEnvironment(ExecutionEnvironment env) {
+        ExecutionEnvironment.setInstance(env);
     }
 }

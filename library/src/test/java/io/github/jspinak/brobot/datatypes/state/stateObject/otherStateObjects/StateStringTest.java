@@ -1,6 +1,7 @@
 package io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects;
 
-import io.github.jspinak.brobot.datatypes.primitives.region.Region;
+import io.github.jspinak.brobot.model.element.Region;
+import io.github.jspinak.brobot.model.state.StateString;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
