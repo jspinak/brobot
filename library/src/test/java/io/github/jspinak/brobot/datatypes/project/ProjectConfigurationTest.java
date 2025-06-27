@@ -1,9 +1,9 @@
 package io.github.jspinak.brobot.datatypes.project;
 
+import io.github.jspinak.brobot.runner.project.AutomationConfiguration;
+
 import org.junit.jupiter.api.Test;
-
 import java.util.ArrayList;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -13,7 +13,7 @@ class ProjectConfigurationTest {
 
     @Test
     void testDefaultValues() {
-        ProjectConfiguration config = new ProjectConfiguration();
+        AutomationConfiguration config = new AutomationConfiguration();
 
         assertEquals(0.7, config.getMinSimilarity(), "Default minSimilarity should be 0.7");
         assertEquals(0.5, config.getMoveMouseDelay(), "Default moveMouseDelay should be 0.5");
@@ -31,7 +31,7 @@ class ProjectConfigurationTest {
 
     @Test
     void testGettersAndSetters() {
-        ProjectConfiguration config = new ProjectConfiguration();
+        AutomationConfiguration config = new AutomationConfiguration();
 
         config.setMinSimilarity(0.9);
         config.setMoveMouseDelay(1.0);

@@ -1,15 +1,16 @@
 package io.github.jspinak.brobot.mock;
 
-import io.github.jspinak.brobot.report.log.model.LogData;
-import io.github.jspinak.brobot.report.log.LogUpdateSender;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
+
+import io.github.jspinak.brobot.tools.logging.LogEventDispatcher;
+import io.github.jspinak.brobot.tools.logging.model.LogData;
 
 import java.util.List;
 
 @Component
 @Primary
-public class MockLogUpdateSender implements LogUpdateSender {
+public class MockLogUpdateSender implements LogEventDispatcher {
 
     @Override
     public void sendLogUpdate(List<LogData> logEntries) {

@@ -1,13 +1,13 @@
 package io.github.jspinak.brobot.runner.ui;
 
-import io.github.jspinak.brobot.datatypes.project.AutomationUI;
-import io.github.jspinak.brobot.datatypes.project.Button;
-import io.github.jspinak.brobot.datatypes.project.Project;
 import io.github.jspinak.brobot.runner.automation.AutomationExecutor;
 import io.github.jspinak.brobot.runner.config.BrobotRunnerProperties;
 import io.github.jspinak.brobot.runner.events.EventBus;
 import io.github.jspinak.brobot.runner.execution.ExecutionStatus;
-import io.github.jspinak.brobot.services.ProjectManager;
+import io.github.jspinak.brobot.runner.project.RunnerInterface;
+import io.github.jspinak.brobot.runner.project.TaskButton;
+import io.github.jspinak.brobot.runner.project.AutomationProject;
+import io.github.jspinak.brobot.runner.project.AutomationProjectManager;
 import javafx.application.Platform;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -42,7 +42,7 @@ class AutomationPanelTest {
     private ApplicationContext context;
 
     @Mock
-    private ProjectManager projectManager;
+    private AutomationProjectManager projectManager;
 
     @Mock
     private BrobotRunnerProperties properties;
@@ -128,24 +128,24 @@ class AutomationPanelTest {
     @Test
     void testRefreshAutomationButtons_withButtons() {
         // Set up mock project with buttons
-        Project project = new Project();
+        AutomationProject project = new AutomationProject();
 
         // Create AutomationUI instance (the correct type based on Project.java)
-        AutomationUI automationUI = new AutomationUI();
+        RunnerInterface automationUI = new RunnerInterface();
 
         // Create test buttons
-        Button button1 = new Button();
+        TaskButton button1 = new TaskButton();
         button1.setLabel("Test Button 1");
         button1.setCategory("Test Category");
         button1.setFunctionName("testFunction1");
 
-        Button button2 = new Button();
+        TaskButton button2 = new TaskButton();
         button2.setLabel("Test Button 2");
         button2.setCategory("Test Category");
         button2.setFunctionName("testFunction2");
 
         // Add buttons to the automation UI
-        List<Button> buttons = Arrays.asList(button1, button2);
+        List<TaskButton> buttons = Arrays.asList(button1, button2);
         automationUI.setButtons(buttons);
 
         // Set the automation UI on the project

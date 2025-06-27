@@ -1,9 +1,21 @@
 package io.github.jspinak.brobot.dsl;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import io.github.jspinak.brobot.json.parsing.JsonParser;
-import io.github.jspinak.brobot.json.parsing.exception.ConfigurationException;
-import io.github.jspinak.brobot.json.utils.JsonUtils;
+
+import io.github.jspinak.brobot.runner.dsl.InstructionSet;
+import io.github.jspinak.brobot.runner.dsl.BusinessTask;
+import io.github.jspinak.brobot.runner.dsl.expressions.Expression;
+import io.github.jspinak.brobot.runner.dsl.expressions.LiteralExpression;
+import io.github.jspinak.brobot.runner.dsl.expressions.VariableExpression;
+import io.github.jspinak.brobot.runner.dsl.statements.MethodCallStatement;
+import io.github.jspinak.brobot.runner.dsl.statements.ReturnStatement;
+import io.github.jspinak.brobot.runner.dsl.statements.Statement;
+import io.github.jspinak.brobot.runner.dsl.statements.VariableDeclarationStatement;
+import io.github.jspinak.brobot.runner.dsl.model.Parameter;
+import io.github.jspinak.brobot.runner.json.parsing.ConfigurationParser;
+import io.github.jspinak.brobot.runner.json.parsing.exception.ConfigurationException;
+import io.github.jspinak.brobot.runner.json.utils.JsonUtils;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -19,7 +31,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class AutomationDslJsonParserTest {
 
     @Autowired
-    private JsonParser jsonParser;
+    private ConfigurationParser jsonParser;
 
     @Autowired
     private JsonUtils jsonUtils;
@@ -43,13 +55,13 @@ public class AutomationDslJsonParserTest {
                 """;
 
         JsonNode jsonNode = jsonParser.parseJson(json);
-        AutomationDsl dsl = jsonParser.convertJson(jsonNode, AutomationDsl.class);
+        InstructionSet dsl = jsonParser.convertJson(jsonNode, InstructionSet.class);
 
         assertNotNull(dsl);
         assertNotNull(dsl.getAutomationFunctions());
         assertEquals(1, dsl.getAutomationFunctions().size());
 
-        AutomationFunction function = dsl.getAutomationFunctions().getFirst();
+        BusinessTask function = dsl.getAutomationFunctions().getFirst();
         assertEquals(Integer.valueOf(1), function.getId());
         assertEquals("sampleFunction", function.getName());
         assertEquals("void", function.getReturnType());
@@ -127,14 +139,14 @@ public class AutomationDslJsonParserTest {
                 """;
 
         JsonNode jsonNode = jsonParser.parseJson(json);
-        AutomationDsl dsl = jsonParser.convertJson(jsonNode, AutomationDsl.class);
+        InstructionSet dsl = jsonParser.convertJson(jsonNode, InstructionSet.class);
 
         assertNotNull(dsl);
         assertNotNull(dsl.getAutomationFunctions());
         assertEquals(2, dsl.getAutomationFunctions().size());
 
         // Check first function
-        AutomationFunction function1 = dsl.getAutomationFunctions().getFirst();
+        BusinessTask function1 = dsl.getAutomationFunctions().getFirst();
         assertEquals(Integer.valueOf(1), function1.getId());
         assertEquals("handleLogin", function1.getName());
         assertEquals("Handles the login process", function1.getDescription());
@@ -155,7 +167,7 @@ public class AutomationDslJsonParserTest {
         assertInstanceOf(ReturnStatement.class, function1.getStatements().get(2));
 
         // Check second function
-        AutomationFunction function2 = dsl.getAutomationFunctions().get(1);
+        BusinessTask function2 = dsl.getAutomationFunctions().get(1);
         assertEquals(Integer.valueOf(2), function2.getId());
         assertEquals("logout", function2.getName());
         assertEquals("void", function2.getReturnType());
@@ -172,11 +184,11 @@ public class AutomationDslJsonParserTest {
     @Test
     public void testSerializeDeserializeAutomationDsl() throws ConfigurationException {
         // Create a sample DSL
-        AutomationDsl dsl = new AutomationDsl();
-        List<AutomationFunction> functions = new ArrayList<>();
+        InstructionSet dsl = new InstructionSet();
+        List<BusinessTask> functions = new ArrayList<>();
 
         // Create a function
-        AutomationFunction function = new AutomationFunction();
+        BusinessTask function = new BusinessTask();
         function.setId(1);
         function.setName("testFunction");
         function.setReturnType("void");
@@ -231,14 +243,14 @@ public class AutomationDslJsonParserTest {
 
         // Deserialize
         JsonNode jsonNode = jsonParser.parseJson(json);
-        AutomationDsl deserializedDsl = jsonParser.convertJson(jsonNode, AutomationDsl.class);
+        InstructionSet deserializedDsl = jsonParser.convertJson(jsonNode, InstructionSet.class);
 
         // Verify structure
         assertNotNull(deserializedDsl);
         assertNotNull(deserializedDsl.getAutomationFunctions());
         assertEquals(1, deserializedDsl.getAutomationFunctions().size());
 
-        AutomationFunction deserializedFunction = deserializedDsl.getAutomationFunctions().getFirst();
+        BusinessTask deserializedFunction = deserializedDsl.getAutomationFunctions().getFirst();
         assertEquals(Integer.valueOf(1), deserializedFunction.getId());
         assertEquals("testFunction", deserializedFunction.getName());
         assertEquals("void", deserializedFunction.getReturnType());

@@ -1,8 +1,9 @@
 package io.github.jspinak.brobot.runner.ui.log;
 
-import io.github.jspinak.brobot.report.log.model.LogData;
-import io.github.jspinak.brobot.report.log.model.LogType;
 import org.junit.jupiter.api.Test;
+
+import io.github.jspinak.brobot.tools.logging.model.LogData;
+import io.github.jspinak.brobot.tools.logging.model.LogEventType;
 
 import java.time.Instant;
 
@@ -113,7 +114,7 @@ public class LogDataViewModelTest {
     @Test
     public void testCreateFromLogEntry() {
         // Create a LogEntry with specific properties
-        LogData logData = new LogData("test-session", LogType.ACTION, "Click action");
+        LogData logData = new LogData("test-session", LogEventType.ACTION, "Click action");
         logData.setSuccess(true);
         logData.setTimestamp(Instant.now());
 
@@ -140,7 +141,7 @@ public class LogDataViewModelTest {
         // Test different LogEntry types and success values
 
         // Successful ACTION should map to INFO
-        LogData successAction = new LogData("test-session", LogType.ACTION, "Success action");
+        LogData successAction = new LogData("test-session", LogEventType.ACTION, "Success action");
         successAction.setSuccess(true);
 
         LogViewerPanel.LogEntryViewModel successViewModel = new LogViewerPanel.LogEntryViewModel();
@@ -151,7 +152,7 @@ public class LogDataViewModelTest {
         assertEquals("INFO", successViewModel.getLevel());
 
         // Failed ACTION should map to WARNING
-        LogData failedAction = new LogData("test-session", LogType.ACTION, "Failed action");
+        LogData failedAction = new LogData("test-session", LogEventType.ACTION, "Failed action");
         failedAction.setSuccess(false);
 
         LogViewerPanel.LogEntryViewModel failedViewModel = new LogViewerPanel.LogEntryViewModel();
@@ -162,7 +163,7 @@ public class LogDataViewModelTest {
         assertEquals("WARNING", failedViewModel.getLevel());
 
         // ERROR type should always map to ERROR level regardless of success
-        LogData errorLog = new LogData("test-session", LogType.ERROR, "Error log");
+        LogData errorLog = new LogData("test-session", LogEventType.ERROR, "Error log");
         errorLog.setSuccess(true); // Even if success is true
 
         LogViewerPanel.LogEntryViewModel errorViewModel = new LogViewerPanel.LogEntryViewModel();
@@ -174,7 +175,7 @@ public class LogDataViewModelTest {
     }
 
     private LogData createTestLogEntry() {
-        LogData logData = new LogData("test-session", LogType.ACTION, "Test log entry");
+        LogData logData = new LogData("test-session", LogEventType.ACTION, "Test log entry");
         logData.setSuccess(true);
         return logData;
     }

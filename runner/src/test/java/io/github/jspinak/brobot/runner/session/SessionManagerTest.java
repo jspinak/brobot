@@ -1,14 +1,16 @@
 package io.github.jspinak.brobot.runner.session;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import io.github.jspinak.brobot.json.parsing.JsonParser;
-import io.github.jspinak.brobot.json.parsing.exception.ConfigurationException;
-import io.github.jspinak.brobot.manageStates.StateTransitions;
+
 import io.github.jspinak.brobot.runner.config.BrobotRunnerProperties;
 import io.github.jspinak.brobot.runner.events.EventBus;
 import io.github.jspinak.brobot.runner.events.LogEvent;
+import io.github.jspinak.brobot.runner.json.parsing.ConfigurationParser;
+import io.github.jspinak.brobot.runner.json.parsing.exception.ConfigurationException;
 import io.github.jspinak.brobot.runner.resources.ResourceManager;
-import io.github.jspinak.brobot.services.StateTransitionsRepository;
+import io.github.jspinak.brobot.model.transition.StateTransitionStore;
+import io.github.jspinak.brobot.navigation.transition.StateTransitions;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -45,10 +47,10 @@ public class SessionManagerTest {
     private ResourceManager resourceManager;
 
     @Mock
-    private JsonParser jsonParser;
+    private ConfigurationParser jsonParser;
 
     @Mock
-    private StateTransitionsRepository stateTransitionsRepository;
+    private StateTransitionStore stateTransitionsRepository;
 
     @TempDir
     Path tempDir;

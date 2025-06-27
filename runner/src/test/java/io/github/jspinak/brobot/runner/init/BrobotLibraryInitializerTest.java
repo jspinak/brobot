@@ -1,14 +1,15 @@
 package io.github.jspinak.brobot.runner.init;
 
-import io.github.jspinak.brobot.database.services.AllStatesInProjectService;
-import io.github.jspinak.brobot.json.parsing.JsonParser;
-import io.github.jspinak.brobot.json.schemaValidation.ConfigValidator;
-import io.github.jspinak.brobot.json.schemaValidation.model.ValidationError;
-import io.github.jspinak.brobot.json.schemaValidation.model.ValidationResult;
-import io.github.jspinak.brobot.json.schemaValidation.model.ValidationSeverity;
 import io.github.jspinak.brobot.runner.config.BrobotRunnerProperties;
+import io.github.jspinak.brobot.runner.json.parsing.ConfigurationParser;
+import io.github.jspinak.brobot.runner.json.validation.ConfigurationValidator;
+import io.github.jspinak.brobot.runner.json.validation.model.ValidationError;
+import io.github.jspinak.brobot.runner.json.validation.model.ValidationResult;
+import io.github.jspinak.brobot.runner.json.validation.model.ValidationSeverity;
 import io.github.jspinak.brobot.runner.resources.ImageResourceManager;
-import io.github.jspinak.brobot.services.Init;
+import io.github.jspinak.brobot.config.FrameworkInitializer;
+import io.github.jspinak.brobot.navigation.service.StateService;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -33,19 +34,19 @@ class BrobotLibraryInitializerTest {
     private BrobotRunnerProperties properties;
 
     @Mock
-    private JsonParser jsonParser;
+    private ConfigurationParser jsonParser;
 
     @Mock
     private ProjectConfigLoader projectConfigLoader;
 
     @Mock
-    private ConfigValidator configValidator;
+    private ConfigurationValidator configValidator;
 
     @Mock
     private ImageResourceManager imageResourceManager;
 
     @Mock
-    private AllStatesInProjectService allStatesInProjectService;
+    private StateService allStatesInProjectService;
 
     private BrobotLibraryInitializer initializer;
 

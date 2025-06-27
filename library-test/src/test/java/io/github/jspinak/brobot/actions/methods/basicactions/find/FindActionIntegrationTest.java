@@ -1,17 +1,13 @@
 package io.github.jspinak.brobot.actions.methods.basicactions.find;
 
-import io.github.jspinak.brobot.actions.BrobotSettings;
-import io.github.jspinak.brobot.actions.actionExecution.Action;
-import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
-import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
-import io.github.jspinak.brobot.datatypes.primitives.location.Location;
-import io.github.jspinak.brobot.datatypes.primitives.match.Match;
-import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
-import io.github.jspinak.brobot.datatypes.primitives.region.Region;
-import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
-import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.StateLocation;
-import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.StateRegion;
+import io.github.jspinak.brobot.config.FrameworkSettings;
+import io.github.jspinak.brobot.action.Action;
+import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.model.element.Pattern;
+import io.github.jspinak.brobot.action.ActionResult;
+import io.github.jspinak.brobot.action.ObjectCollection;
+import io.github.jspinak.brobot.model.element.Region;
+import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.testutils.TestPaths;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -49,7 +45,7 @@ public class FindActionIntegrationTest {
     void setUp() {
         // Tests will run in mock mode, which is suitable for integration testing
         // the Action flow without actual image recognition
-        BrobotSettings.mock = true;
+        FrameworkSettings.mock = true;
     }
 
     @Autowired
@@ -72,7 +68,7 @@ public class FindActionIntegrationTest {
                 .setAction(ActionOptions.Action.FIND)
                 .build();
         
-        Matches matches = action.perform(actionOptions, objColl);
+        ActionResult matches = action.perform(actionOptions, objColl);
         
         assertNotNull(matches);
         assertNotNull(matches.getActionOptions());
@@ -99,7 +95,7 @@ public class FindActionIntegrationTest {
                 .setMinSimilarity(0.90)
                 .build();
         
-        Matches matches = action.perform(actionOptions, objColl);
+        ActionResult matches = action.perform(actionOptions, objColl);
         
         assertNotNull(matches);
         assertNotNull(matches.getActionOptions());
@@ -125,7 +121,7 @@ public class FindActionIntegrationTest {
                 .setFind(ActionOptions.Find.FIRST)
                 .build();
         
-        Matches matches = action.perform(actionOptions, objColl);
+        ActionResult matches = action.perform(actionOptions, objColl);
         
         assertNotNull(matches);
         assertNotNull(matches.getActionOptions());
@@ -152,7 +148,7 @@ public class FindActionIntegrationTest {
                 .setMaxMatchesToActOn(10)
                 .build();
         
-        Matches matches = action.perform(actionOptions, objColl);
+        ActionResult matches = action.perform(actionOptions, objColl);
         
         assertNotNull(matches);
         assertNotNull(matches.getActionOptions());
@@ -178,7 +174,7 @@ public class FindActionIntegrationTest {
                 .setFind(ActionOptions.Find.BEST)
                 .build();
         
-        Matches matches = action.perform(actionOptions, objColl);
+        ActionResult matches = action.perform(actionOptions, objColl);
         
         assertNotNull(matches);
         assertNotNull(matches.getActionOptions());
@@ -206,7 +202,7 @@ public class FindActionIntegrationTest {
                 .setAction(ActionOptions.Action.FIND)
                 .build();
         
-        Matches matches = action.perform(actionOptions, objColl);
+        ActionResult matches = action.perform(actionOptions, objColl);
         
         assertNotNull(matches);
         assertNotNull(stateImage.getPatterns());
@@ -237,7 +233,7 @@ public class FindActionIntegrationTest {
                 .setFind(ActionOptions.Find.FIRST)
                 .build();
         
-        Matches matches = action.perform(actionOptions, objColl);
+        ActionResult matches = action.perform(actionOptions, objColl);
         
         assertNotNull(matches);
         assertEquals(2, stateImage.getPatterns().size(), "StateImage should have 2 patterns");
@@ -268,7 +264,7 @@ public class FindActionIntegrationTest {
                 .setFind(ActionOptions.Find.EACH)
                 .build();
         
-        Matches matches = action.perform(actionOptions, objColl);
+        ActionResult matches = action.perform(actionOptions, objColl);
         
         assertNotNull(matches);
         assertEquals(ActionOptions.Find.EACH, matches.getActionOptions().getFind());
@@ -296,7 +292,7 @@ public class FindActionIntegrationTest {
                 .build();
         
         long startTime = System.currentTimeMillis();
-        Matches matches = action.perform(actionOptions, objColl);
+        ActionResult matches = action.perform(actionOptions, objColl);
         long endTime = System.currentTimeMillis();
         
         assertNotNull(matches);
@@ -326,7 +322,7 @@ public class FindActionIntegrationTest {
                 .build();
         
         long startTime = System.currentTimeMillis();
-        Matches matches = action.perform(actionOptions, objColl);
+        ActionResult matches = action.perform(actionOptions, objColl);
         long endTime = System.currentTimeMillis();
         
         assertNotNull(matches);
@@ -370,7 +366,7 @@ public class FindActionIntegrationTest {
                 .setFind(ActionOptions.Find.ALL)
                 .build();
         
-        Matches matches = action.perform(actionOptions, objColl);
+        ActionResult matches = action.perform(actionOptions, objColl);
         
         assertNotNull(matches);
         assertEquals(3, objColl.getStateImages().size(), "Should have 3 StateImages");
@@ -403,7 +399,7 @@ public class FindActionIntegrationTest {
                 .setMaxArea(10000)
                 .build();
         
-        Matches matches = action.perform(actionOptions, objColl);
+        ActionResult matches = action.perform(actionOptions, objColl);
         
         assertNotNull(matches);
         assertEquals(100, matches.getActionOptions().getMinArea());

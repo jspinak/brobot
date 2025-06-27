@@ -1,7 +1,9 @@
 package io.github.jspinak.brobot.json.module;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.github.jspinak.brobot.json.config.JsonConfig;
+
+import io.github.jspinak.brobot.runner.json.module.BrobotJsonModule;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

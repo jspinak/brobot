@@ -1,8 +1,9 @@
 package io.github.jspinak.brobot.libraryfeatures.captureAndReplay.capture;
 
-import io.github.jspinak.brobot.imageUtils.MatOps;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.springframework.stereotype.Component;
+
+import io.github.jspinak.brobot.util.image.core.MatrixUtilities;
 
 @Component
 public class FindInCaptureMatrix {
@@ -32,22 +33,22 @@ public class FindInCaptureMatrix {
         guessIndex = Math.max(0, guessIndex);
         guessIndex = Math.min(mat.rows() - 1, guessIndex);
         int firstIndexAfterStartTime = guessIndex;
-        double time = MatOps.getDouble(4, guessIndex, 0, mat);
+        double time = MatrixUtilities.getDouble(4, guessIndex, 0, mat);
         if (time < startTime) {
             while (time < startTime) {
                 firstIndexAfterStartTime++;
                 if (firstIndexAfterStartTime > mat.rows()) { // we are at the end of the matrix
                     return firstIndexAfterStartTime;
                 }
-                time = MatOps.getDouble(4, firstIndexAfterStartTime, 0, mat);
+                time = MatrixUtilities.getDouble(4, firstIndexAfterStartTime, 0, mat);
             }
         } else {
             while (time > startTime) {
                 if (firstIndexAfterStartTime == 0) { // we are at the beginning of the matrix
                     break;
                 }
-                double previousTime = MatOps.getDouble(4, firstIndexAfterStartTime - 1, 0, mat);
-                time = MatOps.getDouble(4, firstIndexAfterStartTime, 0, mat);
+                double previousTime = MatrixUtilities.getDouble(4, firstIndexAfterStartTime - 1, 0, mat);
+                time = MatrixUtilities.getDouble(4, firstIndexAfterStartTime, 0, mat);
                 if (previousTime < startTime && time > startTime) {
                     break;
                 }
@@ -61,18 +62,18 @@ public class FindInCaptureMatrix {
         guessIndex = Math.max(0, guessIndex);
         guessIndex = Math.min(mat.rows() - 1, guessIndex);
         int lastIndexBeforeEndTime = guessIndex;
-        double time = MatOps.getDouble(4, guessIndex, 0, mat);
+        double time = MatrixUtilities.getDouble(4, guessIndex, 0, mat);
         if (time < endTime) {
             while (time < endTime) {
                 if (lastIndexBeforeEndTime + 1 == mat.rows()) { // we are at the end of the matrix
                     return lastIndexBeforeEndTime;
                 }
-                double nextTime = MatOps.getDouble(4, lastIndexBeforeEndTime + 1, 0, mat);
+                double nextTime = MatrixUtilities.getDouble(4, lastIndexBeforeEndTime + 1, 0, mat);
                 if (time < endTime && nextTime > endTime) {
                     return lastIndexBeforeEndTime;
                 }
                 lastIndexBeforeEndTime++;
-                time = MatOps.getDouble(4, lastIndexBeforeEndTime, 0, mat);
+                time = MatrixUtilities.getDouble(4, lastIndexBeforeEndTime, 0, mat);
             }
         } else {
             while (time > endTime) {
@@ -80,7 +81,7 @@ public class FindInCaptureMatrix {
                     return -1; // no rows before endTime
                 }
                 lastIndexBeforeEndTime--;
-                time = MatOps.getDouble(4, lastIndexBeforeEndTime, 0, mat);
+                time = MatrixUtilities.getDouble(4, lastIndexBeforeEndTime, 0, mat);
             }
         }
         return lastIndexBeforeEndTime;

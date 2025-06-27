@@ -1,14 +1,14 @@
 package io.github.jspinak.brobot.runner.session;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import io.github.jspinak.brobot.datatypes.state.state.State;
-import io.github.jspinak.brobot.json.parsing.JsonParser;
-import io.github.jspinak.brobot.manageStates.StateTransitions;
+import io.github.jspinak.brobot.model.state.State;
 import io.github.jspinak.brobot.runner.config.BrobotRunnerProperties;
 import io.github.jspinak.brobot.runner.events.EventBus;
 import io.github.jspinak.brobot.runner.events.LogEvent;
+import io.github.jspinak.brobot.runner.json.parsing.ConfigurationParser;
 import io.github.jspinak.brobot.runner.resources.ResourceManager;
-import io.github.jspinak.brobot.services.StateTransitionsRepository;
+import io.github.jspinak.brobot.model.transition.StateTransitionStore;
+import io.github.jspinak.brobot.navigation.transition.StateTransitions;
 import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import org.slf4j.Logger;
@@ -60,7 +60,7 @@ import java.util.stream.Collectors;
  * 
  * @see Session
  * @see BrobotRunnerProperties
- * @see StateTransitionsRepository
+ * @see StateTransitionStore
  */
 @Component
 public class SessionManager implements AutoCloseable {
@@ -69,8 +69,8 @@ public class SessionManager implements AutoCloseable {
     private final EventBus eventBus;
     private final BrobotRunnerProperties properties;
     private final ResourceManager resourceManager;
-    private final JsonParser jsonParser;
-    private final StateTransitionsRepository stateTransitionsRepository;
+    private final ConfigurationParser jsonParser;
+    private final StateTransitionStore stateTransitionsRepository;
 
     private final ScheduledExecutorService scheduler;
     private final AtomicReference<Session> currentSession = new AtomicReference<>();
@@ -83,8 +83,8 @@ public class SessionManager implements AutoCloseable {
     public SessionManager(EventBus eventBus,
                           BrobotRunnerProperties properties,
                           ResourceManager resourceManager,
-                          JsonParser jsonParser,
-                          StateTransitionsRepository stateTransitionsRepository) {
+                          ConfigurationParser jsonParser,
+                          StateTransitionStore stateTransitionsRepository) {
         this.eventBus = eventBus;
         this.properties = properties;
         this.resourceManager = resourceManager;

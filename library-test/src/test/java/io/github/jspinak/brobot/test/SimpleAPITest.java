@@ -1,15 +1,16 @@
 package io.github.jspinak.brobot.test;
 
 import io.github.jspinak.brobot.BrobotTestApplication;
-import io.github.jspinak.brobot.actions.BrobotSettings;
-import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
-import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
-import io.github.jspinak.brobot.datatypes.primitives.match.Match;
-import io.github.jspinak.brobot.datatypes.primitives.match.MatchSnapshot;
-import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
-import io.github.jspinak.brobot.datatypes.primitives.region.Region;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
-import io.github.jspinak.brobot.manageStates.StateMemory;
+import io.github.jspinak.brobot.config.FrameworkSettings;
+import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.model.action.ActionRecord;
+import io.github.jspinak.brobot.model.element.Pattern;
+import io.github.jspinak.brobot.model.match.Match;
+import io.github.jspinak.brobot.action.ActionResult;
+import io.github.jspinak.brobot.model.element.Region;
+import io.github.jspinak.brobot.model.state.StateImage;
+import io.github.jspinak.brobot.statemanagement.StateMemory;
+
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,7 +37,7 @@ public class SimpleAPITest {
     
     @BeforeEach
     void setUp() {
-        BrobotSettings.mock = true;
+        FrameworkSettings.mock = true;
     }
     
     @Test
@@ -77,7 +78,7 @@ public class SimpleAPITest {
                 .build();
                 
         // Create match snapshot
-        MatchSnapshot snapshot = new MatchSnapshot();
+        ActionRecord snapshot = new ActionRecord();
         snapshot.setActionSuccess(true);
         snapshot.setDuration(0.5);
         
@@ -99,7 +100,7 @@ public class SimpleAPITest {
     @Test
     void testMatchesCreation() {
         // Test default constructor
-        Matches matches1 = new Matches();
+        ActionResult matches1 = new ActionResult();
         assertNotNull(matches1);
         assertTrue(matches1.isEmpty());
         
@@ -107,7 +108,7 @@ public class SimpleAPITest {
         ActionOptions options = new ActionOptions.Builder()
                 .setAction(ActionOptions.Action.FIND)
                 .build();
-        Matches matches2 = new Matches(options);
+        ActionResult matches2 = new ActionResult(options);
         assertNotNull(matches2);
         assertEquals(options, matches2.getActionOptions());
     }

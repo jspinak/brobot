@@ -1,15 +1,15 @@
 package io.github.jspinak.brobot.actions.methods.basicactions.find.fixedAndDynamicPixels;
 
-import io.github.jspinak.brobot.actions.actionExecution.MatchesInitializer;
-import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
-import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
-import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
-import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
-import io.github.jspinak.brobot.imageUtils.MatOps;
-import io.github.jspinak.brobot.imageUtils.MatOps3d;
+import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.model.element.Pattern;
+import io.github.jspinak.brobot.action.ActionResult;
+import io.github.jspinak.brobot.action.ObjectCollection;
+import io.github.jspinak.brobot.util.image.core.ColorMatrixUtilities;
+import io.github.jspinak.brobot.util.image.core.MatrixUtilities;
+import io.github.jspinak.brobot.action.basic.find.motion.FindDynamicPixelMatches;
+import io.github.jspinak.brobot.action.internal.factory.ActionResultFactory;
 import io.github.jspinak.brobot.BrobotTestApplication;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -30,10 +30,10 @@ class FindDynamicPixelMatchesTest {
     FindDynamicPixelMatches findDynamicPixelMatches;
 
     @Autowired
-    MatOps3d matOps3d;
+    ColorMatrixUtilities matOps3d;
 
     @Autowired
-    MatchesInitializer matchesInitializer;
+    ActionResultFactory matchesInitializer;
 
     private Pattern pattern1() {
         short[] data = new short[]{
@@ -65,10 +65,10 @@ class FindDynamicPixelMatchesTest {
         ObjectCollection objectCollection = new ObjectCollection.Builder()
                 .withPatterns(pattern1(), pattern1())
                 .build();
-        Matches matches = matchesInitializer.init(actionOptions, objectCollection);
+        ActionResult matches = matchesInitializer.init(actionOptions, objectCollection);
         findDynamicPixelMatches.find(matches, List.of(objectCollection));
         System.out.println(matches.getMatchList());
-        MatOps.printPartOfMat(matches.getMask(), 5, 5);
-        assertEquals(0, MatOps.getDouble(0,0,0, matches.getMask()));
+        MatrixUtilities.printPartOfMat(matches.getMask(), 5, 5);
+        assertEquals(0, MatrixUtilities.getDouble(0,0,0, matches.getMask()));
     }
 }

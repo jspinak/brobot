@@ -1,6 +1,8 @@
 package io.github.jspinak.brobot.datatypes.primitives.match;
 
-import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
+import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.model.action.ActionRecord;
+import io.github.jspinak.brobot.model.match.Match;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -25,7 +27,7 @@ class MatchSnapshotTest {
                 .setAction(ActionOptions.Action.CLICK)
                 .build();
 
-        MatchSnapshot snapshot = new MatchSnapshot.Builder()
+        ActionRecord snapshot = new ActionRecord.Builder()
                 .setActionOptions(options)
                 .addMatch(match1)
                 .setText("found text")
@@ -47,55 +49,55 @@ class MatchSnapshotTest {
 
     @Test
     void wasFound_shouldReturnTrueIfMatchListIsNotEmpty() {
-        MatchSnapshot snapshot = new MatchSnapshot.Builder().addMatch(match1).build();
+        ActionRecord snapshot = new ActionRecord.Builder().addMatch(match1).build();
         assertThat(snapshot.wasFound()).isTrue();
     }
 
     @Test
     void wasFound_shouldReturnTrueIfTextIsNotEmpty() {
-        MatchSnapshot snapshot = new MatchSnapshot.Builder().setText("some text").build();
+        ActionRecord snapshot = new ActionRecord.Builder().setText("some text").build();
         assertThat(snapshot.wasFound()).isTrue();
     }
 
     @Test
     void wasFound_shouldReturnFalseIfEmpty() {
-        MatchSnapshot snapshot = new MatchSnapshot.Builder().build();
+        ActionRecord snapshot = new ActionRecord.Builder().build();
         assertThat(snapshot.wasFound()).isFalse();
     }
 
     @Test
     void hasSameResultsAs_shouldReturnTrueForIdenticalResults() {
-        MatchSnapshot snapshot1 = new MatchSnapshot.Builder().addMatch(match1).setText("text").build();
-        MatchSnapshot snapshot2 = new MatchSnapshot.Builder().addMatch(match1).setText("text").build();
+        ActionRecord snapshot1 = new ActionRecord.Builder().addMatch(match1).setText("text").build();
+        ActionRecord snapshot2 = new ActionRecord.Builder().addMatch(match1).setText("text").build();
         assertThat(snapshot1.hasSameResultsAs(snapshot2)).isTrue();
     }
 
     @Test
     void hasSameResultsAs_shouldReturnFalseForDifferentText() {
-        MatchSnapshot snapshot1 = new MatchSnapshot.Builder().addMatch(match1).setText("text1").build();
-        MatchSnapshot snapshot2 = new MatchSnapshot.Builder().addMatch(match1).setText("text2").build();
+        ActionRecord snapshot1 = new ActionRecord.Builder().addMatch(match1).setText("text1").build();
+        ActionRecord snapshot2 = new ActionRecord.Builder().addMatch(match1).setText("text2").build();
         assertThat(snapshot1.hasSameResultsAs(snapshot2)).isFalse();
     }
 
     @Test
     void hasSameResultsAs_shouldReturnFalseForDifferentMatches() {
-        MatchSnapshot snapshot1 = new MatchSnapshot.Builder().addMatch(match1).build();
-        MatchSnapshot snapshot2 = new MatchSnapshot.Builder().addMatch(match2).build();
+        ActionRecord snapshot1 = new ActionRecord.Builder().addMatch(match1).build();
+        ActionRecord snapshot2 = new ActionRecord.Builder().addMatch(match2).build();
         assertThat(snapshot1.hasSameResultsAs(snapshot2)).isFalse();
     }
 
     @Test
     void hasSameResultsAs_shouldReturnFalseForSubsetOfMatches() {
-        MatchSnapshot snapshot1 = new MatchSnapshot.Builder().addMatch(match1).addMatch(match2).build();
-        MatchSnapshot snapshot2 = new MatchSnapshot.Builder().addMatch(match1).build();
+        ActionRecord snapshot1 = new ActionRecord.Builder().addMatch(match1).addMatch(match2).build();
+        ActionRecord snapshot2 = new ActionRecord.Builder().addMatch(match1).build();
         assertThat(snapshot1.hasSameResultsAs(snapshot2)).isFalse();
     }
 
     @Test
     void equals_shouldBeTrueForIdenticalObjects() {
-        MatchSnapshot snapshot1 = new MatchSnapshot.Builder().addMatch(match1).setText("text").build();
+        ActionRecord snapshot1 = new ActionRecord.Builder().addMatch(match1).setText("text").build();
         // To ensure they are considered equal, we manually set the timestamp.
-        MatchSnapshot snapshot2 = new MatchSnapshot.Builder().addMatch(match1).setText("text").build();
+        ActionRecord snapshot2 = new ActionRecord.Builder().addMatch(match1).setText("text").build();
         snapshot2.setTimeStamp(snapshot1.getTimeStamp());
 
         assertThat(snapshot1).isEqualTo(snapshot2);
@@ -104,15 +106,15 @@ class MatchSnapshotTest {
 
     @Test
     void equals_shouldBeFalseForDifferentActionSuccess() {
-        MatchSnapshot snapshot1 = new MatchSnapshot.Builder().setActionSuccess(true).build();
-        MatchSnapshot snapshot2 = new MatchSnapshot.Builder().setActionSuccess(false).build();
+        ActionRecord snapshot1 = new ActionRecord.Builder().setActionSuccess(true).build();
+        ActionRecord snapshot2 = new ActionRecord.Builder().setActionSuccess(false).build();
         assertThat(snapshot1).isNotEqualTo(snapshot2);
     }
 
     @Test
     void equals_shouldBeFalseForDifferentMatchList() {
-        MatchSnapshot snapshot1 = new MatchSnapshot.Builder().addMatch(match1).build();
-        MatchSnapshot snapshot2 = new MatchSnapshot.Builder().addMatch(match2).build();
+        ActionRecord snapshot1 = new ActionRecord.Builder().addMatch(match1).build();
+        ActionRecord snapshot2 = new ActionRecord.Builder().addMatch(match2).build();
         assertThat(snapshot1).isNotEqualTo(snapshot2);
     }
 
@@ -121,7 +123,7 @@ class MatchSnapshotTest {
         // 1. Arrange: Create a base snapshot
         ActionOptions options = new ActionOptions.Builder().setAction(ActionOptions.Action.CLICK).build();
         Match match = new Match.Builder().setRegion(0, 0, 10, 10).build();
-        MatchSnapshot snapshot1 = new MatchSnapshot.Builder()
+        ActionRecord snapshot1 = new ActionRecord.Builder()
                 .setActionOptions(options)
                 .addMatch(match)
                 .setText("test")
@@ -130,7 +132,7 @@ class MatchSnapshotTest {
         snapshot1.setStateId(1L);
 
         // 2. Create a second snapshot with identical properties
-        MatchSnapshot snapshot2 = new MatchSnapshot.Builder()
+        ActionRecord snapshot2 = new ActionRecord.Builder()
                 .setActionOptions(options)
                 .addMatch(match)
                 .setText("test")

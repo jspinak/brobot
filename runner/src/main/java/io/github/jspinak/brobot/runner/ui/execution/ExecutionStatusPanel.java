@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.runner.ui.execution;
 
-import io.github.jspinak.brobot.datatypes.state.state.State;
+import io.github.jspinak.brobot.model.state.State;
 import io.github.jspinak.brobot.runner.execution.ExecutionState;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;

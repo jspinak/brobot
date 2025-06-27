@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.runner.execution;
 
-import io.github.jspinak.brobot.datatypes.project.Button;
+import io.github.jspinak.brobot.runner.project.TaskButton;
 import io.github.jspinak.brobot.runner.resources.ResourceManager;
 import lombok.Getter;
 import lombok.Setter;
@@ -82,7 +82,7 @@ public class ExecutionController implements AutoCloseable {
      * @param timeoutMillis Timeout in milliseconds, or 0 for no timeout
      * @param statusConsumer Optional consumer for status updates
      */
-    public void executeAutomation(Button button, Runnable automationTask, long timeoutMillis,
+    public void executeAutomation(TaskButton button, Runnable automationTask, long timeoutMillis,
                                   Consumer<ExecutionStatus> statusConsumer) {
         Duration timeout = timeoutMillis > 0 ? Duration.ofMillis(timeoutMillis) : null;
 

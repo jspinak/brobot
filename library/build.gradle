@@ -35,6 +35,9 @@ dependencies {
     testImplementation 'org.assertj:assertj-core:3.24.2'
     testImplementation 'org.mockito:mockito-core:5.11.0'
     testImplementation 'org.mockito:mockito-junit-jupiter:5.11.0'
+
+    compileOnly 'org.projectlombok:lombok:1.18.32'
+    annotationProcessor 'org.projectlombok:lombok:1.18.32'
 }
 
 java {
@@ -48,8 +51,8 @@ javadoc {
     }
     exclude '**/module-info.java.disabled'
     options.addStringOption('Xdoclint:none', '-quiet')
-    options.windowTitle = "Brobot 1.0.7 API" // This sets the browser tab title
-    options.docTitle = "Brobot 1.0.7 API" // This sets the main header on the page
+    options.windowTitle = "Brobot 1.1.0 API" // This sets the browser tab title
+    options.docTitle = "Brobot 1.1.0 API" // This sets the main header on the page
 }
 
 // -- Publishing Configuration --
@@ -60,7 +63,7 @@ publishing {
             // This ensures the POM and the upload path are correct.
             groupId = 'io.github.jspinak'
             artifactId = 'brobot'
-            version = '1.0.7'
+            version = '1.1.0'
 
             from components.java
             pom {

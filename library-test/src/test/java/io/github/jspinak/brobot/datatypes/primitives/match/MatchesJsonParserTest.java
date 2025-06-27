@@ -1,8 +1,10 @@
 package io.github.jspinak.brobot.datatypes.primitives.match;
 
-import io.github.jspinak.brobot.datatypes.primitives.region.Region;
-import io.github.jspinak.brobot.json.parsing.JsonParser;
-import io.github.jspinak.brobot.json.parsing.exception.ConfigurationException;
+import io.github.jspinak.brobot.model.element.Region;
+import io.github.jspinak.brobot.runner.json.parsing.ConfigurationParser;
+import io.github.jspinak.brobot.runner.json.parsing.exception.ConfigurationException;
+import io.github.jspinak.brobot.action.ActionResult;
+import io.github.jspinak.brobot.model.match.Match;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.sikuli.script.ImagePath;
@@ -19,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class MatchesJsonParserTest {
 
     @Autowired
-    private JsonParser jsonParser;
+    private ConfigurationParser jsonParser;
 
     @BeforeAll
     public static void setupHeadlessMode() {
@@ -30,7 +32,7 @@ class MatchesJsonParserTest {
     @Test
     void testSerializeAndDeserializeMatches() throws ConfigurationException {
         // Create a test Matches object
-        Matches matches = new Matches();
+        ActionResult matches = new ActionResult();
         matches.setActionDescription("Test Find Action");
         matches.setDuration(Duration.ofMillis(500));
         matches.setStartTime(LocalDateTime.now());
@@ -60,7 +62,7 @@ class MatchesJsonParserTest {
         assertTrue(json.contains("true"));  // for success
 
         // Deserialize back to Matches
-        Matches deserializedMatches = jsonParser.convertJson(json, Matches.class);
+        ActionResult deserializedMatches = jsonParser.convertJson(json, ActionResult.class);
 
         // Verify the object was correctly deserialized
         assertNotNull(deserializedMatches);
@@ -79,7 +81,7 @@ class MatchesJsonParserTest {
     @Test
     void testSerializeAndDeserializeMatchesWithMatchObjects() throws ConfigurationException {
         // Create a test Matches object with match objects
-        Matches matches = new Matches();
+        ActionResult matches = new ActionResult();
 
         // Create some match objects
         Match match1 = new Match.Builder()
@@ -120,7 +122,7 @@ class MatchesJsonParserTest {
         assertTrue(json.contains("HomeScreen"));
 
         // Deserialize back to Matches
-        Matches deserializedMatches = jsonParser.convertJson(json, Matches.class);
+        ActionResult deserializedMatches = jsonParser.convertJson(json, ActionResult.class);
 
         // Verify the object was correctly deserialized
         assertNotNull(deserializedMatches);

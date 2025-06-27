@@ -1,11 +1,11 @@
 package io.github.jspinak.brobot.test;
 
-import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
-import io.github.jspinak.brobot.datatypes.primitives.match.Match;
-import io.github.jspinak.brobot.datatypes.primitives.match.MatchSnapshot;
-import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
-import io.github.jspinak.brobot.datatypes.primitives.region.Region;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
+import io.github.jspinak.brobot.model.action.ActionRecord;
+import io.github.jspinak.brobot.model.element.Pattern;
+import io.github.jspinak.brobot.model.match.Match;
+import io.github.jspinak.brobot.action.ActionResult;
+import io.github.jspinak.brobot.model.element.Region;
+import io.github.jspinak.brobot.model.state.StateImage;
 import org.junit.jupiter.api.Test;
 
 import java.awt.image.BufferedImage;
@@ -44,7 +44,7 @@ public class APIVerificationTest {
     
     @Test
     void testMatchSnapshotCreation() {
-        MatchSnapshot snapshot = new MatchSnapshot();
+        ActionRecord snapshot = new ActionRecord();
         snapshot.setActionSuccess(true);
         snapshot.setDuration(0.5);
         
@@ -61,7 +61,7 @@ public class APIVerificationTest {
     
     @Test
     void testMatchesCreation() {
-        Matches matches = new Matches();
+        ActionResult matches = new ActionResult();
         
         Match match = new Match.Builder()
                 .setRegion(new Region(10, 10, 50, 50))
@@ -79,7 +79,7 @@ public class APIVerificationTest {
                 .setName("TestPattern")
                 .build();
                 
-        MatchSnapshot snapshot = new MatchSnapshot();
+        ActionRecord snapshot = new ActionRecord();
         snapshot.setActionSuccess(true);
         
         // Add snapshot to pattern's match history

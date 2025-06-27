@@ -1,8 +1,9 @@
 package io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects;
 
-import io.github.jspinak.brobot.datatypes.primitives.region.Region;
+import io.github.jspinak.brobot.model.element.Region;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+import io.github.jspinak.brobot.model.state.StateString;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;

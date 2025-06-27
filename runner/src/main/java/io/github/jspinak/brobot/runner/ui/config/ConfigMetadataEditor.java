@@ -1,9 +1,9 @@
 package io.github.jspinak.brobot.runner.ui.config;
 
-import io.github.jspinak.brobot.datatypes.project.Project;
 import io.github.jspinak.brobot.runner.events.EventBus;
 import io.github.jspinak.brobot.runner.events.LogEvent;
-import io.github.jspinak.brobot.services.ProjectManager;
+import io.github.jspinak.brobot.runner.project.AutomationProject;
+import io.github.jspinak.brobot.runner.project.AutomationProjectManager;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -32,7 +32,7 @@ public class ConfigMetadataEditor extends BorderPane {
     private static final Logger logger = LoggerFactory.getLogger(ConfigMetadataEditor.class);
 
     private final EventBus eventBus;
-    private final ProjectManager projectManager;
+    private final AutomationProjectManager projectManager;
 
     private ConfigEntry currentConfig;
     private boolean hasUnsavedChanges = false;
@@ -52,7 +52,7 @@ public class ConfigMetadataEditor extends BorderPane {
     private Label modifiedLabel;
     private Label statusLabel;
 
-    public ConfigMetadataEditor(EventBus eventBus, ProjectManager projectManager) {
+    public ConfigMetadataEditor(EventBus eventBus, AutomationProjectManager projectManager) {
         this.eventBus = eventBus;
         this.projectManager = projectManager;
 
@@ -380,7 +380,7 @@ public class ConfigMetadataEditor extends BorderPane {
     }
 
     private void loadConfigData(ConfigEntry config) {
-        Project project = projectManager.getActiveProject();
+        AutomationProject project = projectManager.getActiveProject();
 
         if (project != null) {
             // Load from active project
@@ -419,7 +419,7 @@ public class ConfigMetadataEditor extends BorderPane {
         }
     }
 
-    private void loadAdditionalMetadata(Project project) {
+    private void loadAdditionalMetadata(AutomationProject project) {
         // In a real implementation, you'd have access to additional metadata fields
         // Here we'll just check for common fields in the ProjectManager
 
@@ -515,7 +515,7 @@ public class ConfigMetadataEditor extends BorderPane {
         Files.writeString(configPath, content);
 
         // If project is loaded, update it
-        Project project = projectManager.getActiveProject();
+        AutomationProject project = projectManager.getActiveProject();
         if (project != null) {
             project.setName(projectNameField.getText());
             project.setVersion(versionField.getText());

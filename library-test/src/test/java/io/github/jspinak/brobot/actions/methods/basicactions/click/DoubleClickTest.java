@@ -1,14 +1,14 @@
 package io.github.jspinak.brobot.actions.methods.basicactions.click;
 
-import io.github.jspinak.brobot.actions.BrobotEnvironment;
-import io.github.jspinak.brobot.actions.BrobotSettings;
-import io.github.jspinak.brobot.actions.actionExecution.Action;
-import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
-import io.github.jspinak.brobot.actions.methods.sikuliWrappers.mouse.ClickType;
-import io.github.jspinak.brobot.datatypes.primitives.location.Location;
-import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
-import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
+import io.github.jspinak.brobot.config.FrameworkSettings;
+import io.github.jspinak.brobot.action.Action;
+import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.model.element.Location;
+import io.github.jspinak.brobot.action.ActionResult;
+import io.github.jspinak.brobot.config.ExecutionEnvironment;
+import io.github.jspinak.brobot.action.ObjectCollection;
+import io.github.jspinak.brobot.action.internal.mouse.ClickType;
+import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.test.BrobotIntegrationTestBase;
 import io.github.jspinak.brobot.testutils.TestPaths;
 import org.junit.jupiter.api.BeforeAll;
@@ -38,18 +38,18 @@ public class DoubleClickTest extends BrobotIntegrationTestBase {
     @Override
     protected void setUpBrobotEnvironment() {
         // Configure for unit testing with screenshots
-        BrobotEnvironment env = BrobotEnvironment.builder()
+        ExecutionEnvironment env = ExecutionEnvironment.builder()
                 .mockMode(false)  // Use real file operations for find
                 .forceHeadless(true)  // No screen capture
                 .allowScreenCapture(false)
                 .build();
-        BrobotEnvironment.setInstance(env);
+        ExecutionEnvironment.setInstance(env);
         
         // Enable action mocking but real find operations
-        BrobotSettings.mock = true;
+        FrameworkSettings.mock = true;
         
         // Clear any previous screenshots
-        BrobotSettings.screenshots.clear();
+        FrameworkSettings.screenshots.clear();
     }
 
     @Autowired
@@ -72,7 +72,7 @@ public class DoubleClickTest extends BrobotIntegrationTestBase {
         }
         
         // Add screenshot for find operation
-        BrobotSettings.screenshots.add(TestPaths.getScreenshotPath("floranext0"));
+        FrameworkSettings.screenshots.add(TestPaths.getScreenshotPath("floranext0"));
         
         // Create pattern to find
         StateImage topLeft = new StateImage.Builder()
@@ -91,7 +91,7 @@ public class DoubleClickTest extends BrobotIntegrationTestBase {
                 .build();
                 
         // Execute - find happens for real, click is mocked
-        Matches matches = action.perform(actionOptions, objColl);
+        ActionResult matches = action.perform(actionOptions, objColl);
         
         // Verify results
         assertFalse(matches.isEmpty(), "Should find the topLeft pattern");
@@ -123,7 +123,7 @@ public class DoubleClickTest extends BrobotIntegrationTestBase {
         }
         
         // Add screenshot for find operation (enables hybrid mode)
-        BrobotSettings.screenshots.add(TestPaths.getScreenshotPath("floranext0"));
+        FrameworkSettings.screenshots.add(TestPaths.getScreenshotPath("floranext0"));
         
         // Create pattern and use scene for matching
         StateImage topLeft = new StateImage.Builder()
@@ -143,7 +143,7 @@ public class DoubleClickTest extends BrobotIntegrationTestBase {
                 .build();
                 
         // Execute
-        Matches matches = action.perform(actionOptions, objColl);
+        ActionResult matches = action.perform(actionOptions, objColl);
         
         // Verify results
         assertFalse(matches.isEmpty(), "Should find the topLeft pattern");

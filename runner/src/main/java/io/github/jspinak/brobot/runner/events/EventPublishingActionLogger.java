@@ -1,12 +1,12 @@
 package io.github.jspinak.brobot.runner.events;
 
-import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
-import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
-import io.github.jspinak.brobot.datatypes.state.state.State;
-import io.github.jspinak.brobot.report.log.model.LogData;
-import io.github.jspinak.brobot.report.log.model.LogType;
-import io.github.jspinak.brobot.report.log.ActionLogger;
-import io.github.jspinak.brobot.report.log.TestSessionLogger;
+import io.github.jspinak.brobot.action.ActionResult;
+import io.github.jspinak.brobot.action.ObjectCollection;
+import io.github.jspinak.brobot.model.state.State;
+import io.github.jspinak.brobot.tools.logging.ActionLogger;
+import io.github.jspinak.brobot.tools.logging.SessionLifecycleLogger;
+import io.github.jspinak.brobot.tools.logging.model.LogData;
+import io.github.jspinak.brobot.tools.logging.model.LogEventType;
 
 import java.awt.*;
 import java.io.IOException;
@@ -16,13 +16,13 @@ import java.util.Set;
  * Decorator that implements both ActionLogger and TestSessionLogger interfaces,
  * adding event publishing behavior to all logging operations.
  */
-public class EventPublishingActionLogger implements ActionLogger, TestSessionLogger {
+public class EventPublishingActionLogger implements ActionLogger, SessionLifecycleLogger {
     private final ActionLogger actionLogger;
-    private final TestSessionLogger sessionLogger;
+    private final SessionLifecycleLogger sessionLogger;
     private final EventBus eventBus;
 
     public EventPublishingActionLogger(ActionLogger actionLogger,
-                                       TestSessionLogger sessionLogger,
+                                       SessionLifecycleLogger sessionLogger,
                                        EventBus eventBus) {
         this.actionLogger = actionLogger;
         this.sessionLogger = sessionLogger;
@@ -34,7 +34,7 @@ public class EventPublishingActionLogger implements ActionLogger, TestSessionLog
     //
 
     @Override
-    public LogData logAction(String sessionId, Matches matches, ObjectCollection objectCollection) {
+    public LogData logAction(String sessionId, ActionResult matches, ObjectCollection objectCollection) {
         LogData logData = actionLogger.logAction(sessionId, matches, objectCollection);
         publishLogEntryEvent(logData);
 
@@ -188,7 +188,7 @@ public class EventPublishingActionLogger implements ActionLogger, TestSessionLog
         eventBus.publish(logEvent);
     }
 
-    private void publishErrorForFailedAction(Matches matches, LogData logData) {
+    private void publishErrorForFailedAction(ActionResult matches, LogData logData) {
         ErrorEvent errorEvent = ErrorEvent.medium(
                 this,
                 "Action failed: " + matches.getActionOptions().getAction().toString() +
@@ -200,10 +200,10 @@ public class EventPublishingActionLogger implements ActionLogger, TestSessionLog
     }
 
     private LogEvent.LogLevel getLogLevelForEntry(LogData logData) {
-        if (logData.getType() == LogType.ERROR) {
+        if (logData.getType() == LogEventType.ERROR) {
             return LogEvent.LogLevel.ERROR;
         } else if (!logData.isSuccess() &&
-                (logData.getType() == LogType.ACTION || logData.getType() == LogType.TRANSITION)) {
+                (logData.getType() == LogEventType.ACTION || logData.getType() == LogEventType.TRANSITION)) {
             return LogEvent.LogLevel.WARNING;
         } else {
             return LogEvent.LogLevel.INFO;

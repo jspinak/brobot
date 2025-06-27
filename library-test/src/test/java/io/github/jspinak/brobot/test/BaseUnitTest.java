@@ -1,9 +1,10 @@
 package io.github.jspinak.brobot.test;
 
-import io.github.jspinak.brobot.actions.BrobotEnvironment;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.test.context.ContextConfiguration;
+
+import io.github.jspinak.brobot.config.ExecutionEnvironment;
 
 /**
  * Base class for unit tests that use mock data and don't require real files
@@ -28,13 +29,13 @@ public abstract class BaseUnitTest {
         System.setProperty("brobot.test.type", "unit");
         
         // Configure environment for unit tests
-        BrobotEnvironment env = BrobotEnvironment.builder()
+        ExecutionEnvironment env = ExecutionEnvironment.builder()
             .mockMode(true)  // Use mock data
             .forceHeadless(true)  // Always headless for unit tests
             .allowScreenCapture(false)
             .build();
         
-        BrobotEnvironment.setInstance(env);
+        ExecutionEnvironment.setInstance(env);
         
         System.out.println("Unit test environment: " + env.getEnvironmentInfo());
     }
@@ -42,15 +43,15 @@ public abstract class BaseUnitTest {
     @BeforeEach
     void ensureMockMode() {
         // Ensure mock mode is still enabled (in case a test changed it)
-        BrobotEnvironment env = BrobotEnvironment.getInstance();
+        ExecutionEnvironment env = ExecutionEnvironment.getInstance();
         if (!env.isMockMode()) {
             System.out.println("WARNING: Mock mode was disabled, re-enabling for unit test");
-            BrobotEnvironment mockEnv = BrobotEnvironment.builder()
+            ExecutionEnvironment mockEnv = ExecutionEnvironment.builder()
                 .mockMode(true)
                 .forceHeadless(true)
                 .allowScreenCapture(false)
                 .build();
-            BrobotEnvironment.setInstance(mockEnv);
+            ExecutionEnvironment.setInstance(mockEnv);
         }
     }
 }
