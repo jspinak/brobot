@@ -1,10 +1,10 @@
 package io.github.jspinak.brobot.datatypes.primitives.text;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
+import io.github.jspinak.brobot.model.element.Text;
 import java.util.List;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 class TextTest {

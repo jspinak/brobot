@@ -1,8 +1,9 @@
 package io.github.jspinak.brobot.libraryfeatures.captureAndReplay.recorder;
 
-import io.github.jspinak.brobot.actions.BrobotSettings;
-import io.github.jspinak.brobot.imageUtils.CaptureScreenshots;
-import io.github.jspinak.brobot.imageUtils.SaveToFile;
+import io.github.jspinak.brobot.config.FrameworkSettings;
+import io.github.jspinak.brobot.util.file.SaveToFile;
+import io.github.jspinak.brobot.util.image.capture.ScreenshotRecorder;
+
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
 
@@ -21,7 +22,7 @@ import org.w3c.dom.Document;
 @Component
 public class Recorder {
 
-    private final CaptureScreenshots captureScreenshots;
+    private final ScreenshotRecorder captureScreenshots;
     private final CaptureUserInputs captureUserInputs;
     private final ProcessRecording processRecording;
     private final SaveToFile saveToFile;
@@ -30,7 +31,7 @@ public class Recorder {
     // todo: review quick replacement done bc not in Sikuli 2.0.5 -> //private File recordingFolder = new File(Commons.getTempFolder(), "Recorder");
     private int screenshotDelay = 1000;
 
-    public Recorder(CaptureScreenshots captureScreenshots, CaptureUserInputs captureUserInputs,
+    public Recorder(ScreenshotRecorder captureScreenshots, CaptureUserInputs captureUserInputs,
                     ProcessRecording processRecording, SaveToFile saveToFile) {
         this.captureScreenshots = captureScreenshots;
         this.captureUserInputs = captureUserInputs;
@@ -71,7 +72,7 @@ public class Recorder {
 
     public boolean setRecordingDirectory(String directory) {
         if (recording) return false;
-        BrobotSettings.recordingFolder = directory;
+        FrameworkSettings.recordingFolder = directory;
         return true;
     }
 

@@ -1,12 +1,12 @@
 package io.github.jspinak.brobot.runner.ui.config;
 
-import io.github.jspinak.brobot.database.services.AllStatesInProjectService;
+import io.github.jspinak.brobot.navigation.service.StateService;
 import io.github.jspinak.brobot.runner.config.ApplicationConfig;
 import io.github.jspinak.brobot.runner.config.BrobotRunnerProperties;
 import io.github.jspinak.brobot.runner.events.EventBus;
 import io.github.jspinak.brobot.runner.events.LogEvent;
 import io.github.jspinak.brobot.runner.init.BrobotLibraryInitializer;
-import io.github.jspinak.brobot.services.ProjectManager;
+import io.github.jspinak.brobot.runner.project.AutomationProjectManager;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
@@ -34,8 +34,8 @@ public class ConfigManagementPanel extends BorderPane {
     private final BrobotRunnerProperties properties;
     private final BrobotLibraryInitializer libraryInitializer;
     private final ApplicationConfig appConfig;
-    private final ProjectManager projectManager;
-    private final AllStatesInProjectService allStatesService;
+    private final AutomationProjectManager projectManager;
+    private final StateService allStatesService;
 
     private TabPane tabPane;
     private ConfigSelectionPanel selectionPanel;
@@ -47,8 +47,8 @@ public class ConfigManagementPanel extends BorderPane {
             BrobotRunnerProperties properties,
             BrobotLibraryInitializer libraryInitializer,
             ApplicationConfig appConfig,
-            ProjectManager projectManager,
-            AllStatesInProjectService allStatesService) {
+            AutomationProjectManager projectManager,
+            StateService allStatesService) {
 
         this.eventBus = eventBus;
         this.properties = properties;

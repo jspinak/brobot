@@ -1,14 +1,14 @@
 package io.github.jspinak.brobot.runner.ui.execution;
 
-import io.github.jspinak.brobot.database.services.AllStatesInProjectService;
-import io.github.jspinak.brobot.datatypes.state.state.State;
-import io.github.jspinak.brobot.report.log.model.LogData;
-import io.github.jspinak.brobot.report.log.model.PerformanceMetricsData;
+import io.github.jspinak.brobot.model.state.State;
 import io.github.jspinak.brobot.runner.automation.AutomationExecutor;
 import io.github.jspinak.brobot.runner.events.*;
 import io.github.jspinak.brobot.runner.execution.ExecutionState;
 import io.github.jspinak.brobot.runner.execution.ExecutionStatus;
-import io.github.jspinak.brobot.services.StateTransitionsRepository;
+import io.github.jspinak.brobot.tools.logging.model.LogData;
+import io.github.jspinak.brobot.tools.logging.model.ExecutionMetrics;
+import io.github.jspinak.brobot.model.transition.StateTransitionStore;
+import io.github.jspinak.brobot.navigation.service.StateService;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
@@ -50,8 +50,8 @@ public class ExecutionDashboardPanel extends BorderPane {
     // Core dependencies
     private final EventBus eventBus;
     private final AutomationExecutor automationExecutor;
-    private final StateTransitionsRepository stateTransitionsRepository;
-    private final AllStatesInProjectService allStatesInProjectService;
+    private final StateTransitionStore stateTransitionsRepository;
+    private final StateService allStatesInProjectService;
 
     // UI components
     private ExecutionControlPanel controlPanel;
@@ -74,8 +74,8 @@ public class ExecutionDashboardPanel extends BorderPane {
      */
     public ExecutionDashboardPanel(EventBus eventBus,
                                    AutomationExecutor automationExecutor,
-                                   StateTransitionsRepository stateTransitionsRepository,
-                                   AllStatesInProjectService allStatesInProjectService) {
+                                   StateTransitionStore stateTransitionsRepository,
+                                   StateService allStatesInProjectService) {
         this.eventBus = eventBus;
         this.automationExecutor = automationExecutor;
         this.stateTransitionsRepository = stateTransitionsRepository;
@@ -389,7 +389,7 @@ public class ExecutionDashboardPanel extends BorderPane {
     }
 
     private void processPerformanceLogEntry(LogData logData) {
-        PerformanceMetricsData metrics = logData.getPerformanceMetrics();
+        ExecutionMetrics metrics = logData.getPerformanceMetrics();
         if (metrics == null) return;
         
         // Process performance metrics

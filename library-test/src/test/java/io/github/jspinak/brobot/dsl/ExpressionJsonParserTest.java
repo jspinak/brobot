@@ -2,9 +2,18 @@ package io.github.jspinak.brobot.dsl;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.github.jspinak.brobot.json.parsing.JsonParser;
-import io.github.jspinak.brobot.json.parsing.exception.ConfigurationException;
-import io.github.jspinak.brobot.json.utils.JsonUtils;
+
+import io.github.jspinak.brobot.runner.dsl.expressions.BinaryOperationExpression;
+import io.github.jspinak.brobot.runner.dsl.expressions.BuilderExpression;
+import io.github.jspinak.brobot.runner.dsl.expressions.Expression;
+import io.github.jspinak.brobot.runner.dsl.expressions.LiteralExpression;
+import io.github.jspinak.brobot.runner.dsl.expressions.MethodCallExpression;
+import io.github.jspinak.brobot.runner.dsl.expressions.VariableExpression;
+import io.github.jspinak.brobot.runner.json.parsing.ConfigurationParser;
+import io.github.jspinak.brobot.runner.json.parsing.exception.ConfigurationException;
+import io.github.jspinak.brobot.runner.json.utils.JsonUtils;
+import io.github.jspinak.brobot.runner.dsl.model.BuilderMethod;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +27,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class ExpressionJsonParserTest {
 
     @Autowired
-    private JsonParser jsonParser;
+    private ConfigurationParser jsonParser;
 
     @Autowired
     private JsonUtils jsonUtils;

@@ -2,6 +2,8 @@ package io.github.jspinak.brobot.json.parsing.exception;
 
 import org.junit.jupiter.api.Test;
 
+import io.github.jspinak.brobot.runner.json.parsing.exception.ConfigurationException;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class ConfigurationExceptionTest {

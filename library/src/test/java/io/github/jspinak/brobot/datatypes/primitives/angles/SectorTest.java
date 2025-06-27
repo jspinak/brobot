@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.datatypes.primitives.angles;
 
+import io.github.jspinak.brobot.util.geometry.Sector;
+
 import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.offset;

@@ -1,9 +1,20 @@
 package io.github.jspinak.brobot.dsl;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import io.github.jspinak.brobot.json.parsing.JsonParser;
-import io.github.jspinak.brobot.json.parsing.exception.ConfigurationException;
-import io.github.jspinak.brobot.json.utils.JsonUtils;
+
+import io.github.jspinak.brobot.runner.dsl.BusinessTask;
+import io.github.jspinak.brobot.runner.dsl.expressions.LiteralExpression;
+import io.github.jspinak.brobot.runner.dsl.expressions.VariableExpression;
+import io.github.jspinak.brobot.runner.dsl.statements.AssignmentStatement;
+import io.github.jspinak.brobot.runner.dsl.statements.MethodCallStatement;
+import io.github.jspinak.brobot.runner.dsl.statements.ReturnStatement;
+import io.github.jspinak.brobot.runner.dsl.statements.Statement;
+import io.github.jspinak.brobot.runner.dsl.statements.VariableDeclarationStatement;
+import io.github.jspinak.brobot.runner.dsl.model.Parameter;
+import io.github.jspinak.brobot.runner.json.parsing.ConfigurationParser;
+import io.github.jspinak.brobot.runner.json.parsing.exception.ConfigurationException;
+import io.github.jspinak.brobot.runner.json.utils.JsonUtils;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -19,7 +30,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class AutomationFunctionJsonParserTest {
 
     @Autowired
-    private JsonParser jsonParser;
+    private ConfigurationParser jsonParser;
 
     @Autowired
     private JsonUtils jsonUtils;
@@ -40,7 +51,7 @@ public class AutomationFunctionJsonParserTest {
                 """;
 
         JsonNode jsonNode = jsonParser.parseJson(json);
-        AutomationFunction function = jsonParser.convertJson(jsonNode, AutomationFunction.class);
+        BusinessTask function = jsonParser.convertJson(jsonNode, BusinessTask.class);
 
         assertNotNull(function);
         assertEquals(Integer.valueOf(1), function.getId());
@@ -76,7 +87,7 @@ public class AutomationFunctionJsonParserTest {
                 """;
 
         JsonNode jsonNode = jsonParser.parseJson(json);
-        AutomationFunction function = jsonParser.convertJson(jsonNode, AutomationFunction.class);
+        BusinessTask function = jsonParser.convertJson(jsonNode, BusinessTask.class);
 
         assertNotNull(function);
         assertEquals("functionWithParams", function.getName());
@@ -142,7 +153,7 @@ public class AutomationFunctionJsonParserTest {
                 """;
 
         JsonNode jsonNode = jsonParser.parseJson(json);
-        AutomationFunction function = jsonParser.convertJson(jsonNode, AutomationFunction.class);
+        BusinessTask function = jsonParser.convertJson(jsonNode, BusinessTask.class);
 
         assertNotNull(function);
         assertEquals("functionWithStatements", function.getName());
@@ -175,7 +186,7 @@ public class AutomationFunctionJsonParserTest {
     @Test
     public void testSerializeDeserializeFunction() throws ConfigurationException {
         // Create a function
-        AutomationFunction function = new AutomationFunction();
+        BusinessTask function = new BusinessTask();
         function.setId(10);
         function.setName("testFunction");
         function.setDescription("Function for testing serialization");
@@ -213,7 +224,7 @@ public class AutomationFunctionJsonParserTest {
 
         // Deserialize
         JsonNode jsonNode = jsonParser.parseJson(json);
-        AutomationFunction deserializedFunction = jsonParser.convertJson(jsonNode, AutomationFunction.class);
+        BusinessTask deserializedFunction = jsonParser.convertJson(jsonNode, BusinessTask.class);
 
         // Verify structure
         assertNotNull(deserializedFunction);

@@ -1,8 +1,10 @@
 package io.github.jspinak.brobot.actions.methods.basicactions.define;
 
-import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
+import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.actions.methods.basicactions.TestData;
 import io.github.jspinak.brobot.test.BrobotIntegrationTestBase;
+import io.github.jspinak.brobot.action.internal.capture.RegionDefinitionHelper;
+
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,13 +25,13 @@ class DefineHelperTest extends BrobotIntegrationTestBase {
     }
 
     @Autowired
-    DefineHelper defineHelper;
+    RegionDefinitionHelper defineHelper;
 
     @Test
     void findMatches() {
         try {
             TestData testData = new TestData();
-            Matches matches = new Matches();
+            ActionResult matches = new ActionResult();
             matches.setActionOptions(testData.getDefineInsideAnchors());
             
             defineHelper.findMatches(matches, testData.getInsideAnchorObjects());

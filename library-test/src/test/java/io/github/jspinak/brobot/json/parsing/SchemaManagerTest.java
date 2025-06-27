@@ -4,7 +4,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.networknt.schema.JsonSchema;
 import com.networknt.schema.ValidationMessage;
-import io.github.jspinak.brobot.json.parsing.exception.ConfigurationException;
+
+import io.github.jspinak.brobot.runner.json.parsing.SchemaManager;
+import io.github.jspinak.brobot.runner.json.parsing.exception.ConfigurationException;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

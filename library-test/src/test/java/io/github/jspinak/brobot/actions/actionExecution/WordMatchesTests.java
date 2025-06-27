@@ -1,17 +1,16 @@
 package io.github.jspinak.brobot.actions.actionExecution;
 
-import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
-import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
-import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
+import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.action.Action;
+import io.github.jspinak.brobot.action.ActionResult;
+import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.BrobotTestApplication;
-import io.github.jspinak.brobot.actions.methods.basicactions.TestData;
 import io.github.jspinak.brobot.test.ocr.OcrTestBase;
 import io.github.jspinak.brobot.test.ocr.OcrTestSupport;
 import io.github.jspinak.brobot.testutils.TestPaths;
-import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
+import io.github.jspinak.brobot.model.element.Pattern;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.DisabledIfSystemProperty;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -35,7 +34,7 @@ class WordMatchesTests extends OcrTestBase {
     @Autowired
     Action action;
 
-    Matches getWordMatches() {
+    ActionResult getWordMatches() {
         // Check if the test image exists
         String imagePath = TestPaths.getScreenshotPath("floranext0");
         File imageFile = new File(imagePath);
@@ -47,13 +46,13 @@ class WordMatchesTests extends OcrTestBase {
             
             if (!imageFile.exists()) {
                 // Return empty matches if no test images available
-                return new Matches();
+                return new ActionResult();
             }
         }
         
         final String finalImagePath = imagePath;
         
-        Matches matches = performOcrOperation(() -> {
+        ActionResult matches = performOcrOperation(() -> {
             Pattern testPattern = new Pattern(finalImagePath);
             ObjectCollection objColl = new ObjectCollection.Builder()
                     .withScenes(testPattern)
@@ -67,12 +66,12 @@ class WordMatchesTests extends OcrTestBase {
             return action.perform(findWordsOptions, objColl);
         });
         
-        return matches != null ? matches : new Matches();
+        return matches != null ? matches : new ActionResult();
     }
 
     @Test
     void findWords() {
-        Matches matches = getWordMatches();
+        ActionResult matches = getWordMatches();
         
         // The test should not fail if no words are found
         // OCR may not find text in all images
@@ -87,7 +86,7 @@ class WordMatchesTests extends OcrTestBase {
 
     @Test
     void matchesHaveMats() {
-        Matches matches = getWordMatches();
+        ActionResult matches = getWordMatches();
         
         assertNotNull(matches);
         // Only check for mats if we have matches
@@ -101,7 +100,7 @@ class WordMatchesTests extends OcrTestBase {
 
     @Test
     void firstMatchHasText() {
-        Matches matches = getWordMatches();
+        ActionResult matches = getWordMatches();
         
         assertNotNull(matches);
         // Only check text if we have matches

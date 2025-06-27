@@ -1,13 +1,14 @@
 package io.github.jspinak.brobot.datatypes.state.state;
 
-import io.github.jspinak.brobot.datatypes.primitives.image.Pattern;
-import io.github.jspinak.brobot.datatypes.primitives.match.Match;
-import io.github.jspinak.brobot.datatypes.primitives.match.MatchSnapshot;
-import io.github.jspinak.brobot.datatypes.primitives.region.Region;
-import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.StateLocation;
-import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.StateRegion;
-import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.StateString;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
+import io.github.jspinak.brobot.model.action.ActionRecord;
+import io.github.jspinak.brobot.model.element.Pattern;
+import io.github.jspinak.brobot.model.match.Match;
+import io.github.jspinak.brobot.model.element.Region;
+import io.github.jspinak.brobot.model.state.StateLocation;
+import io.github.jspinak.brobot.model.state.StateRegion;
+import io.github.jspinak.brobot.model.state.StateString;
+import io.github.jspinak.brobot.model.state.StateImage;
+import io.github.jspinak.brobot.model.state.State;
 import org.junit.jupiter.api.Test;
 
 import java.awt.image.BufferedImage;
@@ -85,7 +86,7 @@ public class StateTest {
     @Test
     void testGetBoundariesWithSnapshots() {
         Match matchInSnapshot = new Match.Builder().setRegion(new Region(50, 50, 5, 5)).build();
-        MatchSnapshot snapshot = new MatchSnapshot();
+        ActionRecord snapshot = new ActionRecord();
         snapshot.addMatch(matchInSnapshot);
 
         Pattern patternWithSnapshot = createTestPattern();

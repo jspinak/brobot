@@ -1,7 +1,8 @@
 package io.github.jspinak.brobot.test;
 
-import io.github.jspinak.brobot.actions.BrobotSettings;
-import io.github.jspinak.brobot.actions.BrobotEnvironment;
+import io.github.jspinak.brobot.config.ExecutionEnvironment;
+import io.github.jspinak.brobot.config.FrameworkSettings;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -22,25 +23,25 @@ import org.springframework.boot.test.context.SpringBootTest;
 public abstract class BrobotIntegrationTestBase {
     
     private boolean originalMockState;
-    private BrobotEnvironment originalEnvironment;
+    private ExecutionEnvironment originalEnvironment;
     
     @BeforeEach
     protected void setUpBrobotEnvironment() {
         // Save original state
-        originalMockState = BrobotSettings.mock;
-        originalEnvironment = BrobotEnvironment.getInstance();
+        originalMockState = FrameworkSettings.mock;
+        originalEnvironment = ExecutionEnvironment.getInstance();
         
         // Configure environment for integration tests
         // Always use real files for integration tests, but handle headless gracefully
-        BrobotEnvironment env = BrobotEnvironment.builder()
+        ExecutionEnvironment env = ExecutionEnvironment.builder()
                 .mockMode(false)  // Use real files and image processing
                 .forceHeadless(isHeadlessEnvironment())  // Auto-detect or force headless
                 .allowScreenCapture(false)  // No screen capture in tests
                 .verboseLogging(false)  // Enable for debugging
                 .build();
         
-        BrobotEnvironment.setInstance(env);
-        BrobotSettings.mock = false;  // Ensure legacy flag is also set correctly
+        ExecutionEnvironment.setInstance(env);
+        FrameworkSettings.mock = false;  // Ensure legacy flag is also set correctly
         
         // Set AWT headless property
         System.setProperty("java.awt.headless", String.valueOf(isHeadlessEnvironment()));
@@ -55,9 +56,9 @@ public abstract class BrobotIntegrationTestBase {
         additionalTearDown();
         
         // Restore original state
-        BrobotSettings.mock = originalMockState;
+        FrameworkSettings.mock = originalMockState;
         if (originalEnvironment != null) {
-            BrobotEnvironment.setInstance(originalEnvironment);
+            ExecutionEnvironment.setInstance(originalEnvironment);
         }
     }
     
@@ -87,7 +88,7 @@ public abstract class BrobotIntegrationTestBase {
      * @return true if screen capture is available
      */
     protected boolean canCaptureScreen() {
-        return BrobotEnvironment.getInstance().canCaptureScreen();
+        return ExecutionEnvironment.getInstance().canCaptureScreen();
     }
     
     /**
@@ -97,7 +98,7 @@ public abstract class BrobotIntegrationTestBase {
      * @return true if real file operations are enabled
      */
     protected boolean useRealFiles() {
-        return BrobotEnvironment.getInstance().useRealFiles();
+        return ExecutionEnvironment.getInstance().useRealFiles();
     }
     
     /**

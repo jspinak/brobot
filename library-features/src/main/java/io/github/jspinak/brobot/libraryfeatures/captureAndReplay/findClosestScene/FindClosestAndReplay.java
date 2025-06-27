@@ -1,18 +1,19 @@
 package io.github.jspinak.brobot.libraryfeatures.captureAndReplay.findClosestScene;
 
-import io.github.jspinak.brobot.actions.actionExecution.Action;
-import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
+import io.github.jspinak.brobot.action.Action;
+import io.github.jspinak.brobot.action.ActionOptions;
 import io.github.jspinak.brobot.libraryfeatures.captureAndReplay.capture.SceneAndObjectsForXML;
 import io.github.jspinak.brobot.libraryfeatures.captureAndReplay.capture.SceneObjectCollectionForXML;
 import io.github.jspinak.brobot.libraryfeatures.captureAndReplay.replay.GetXmlActions;
 import io.github.jspinak.brobot.libraryfeatures.captureAndReplay.replay.ReadXmlScenes;
 import io.github.jspinak.brobot.libraryfeatures.captureAndReplay.replay.ReplayActionsXml;
 import io.github.jspinak.brobot.libraryfeatures.captureAndReplay.replay.ReplayCollection;
-import io.github.jspinak.brobot.analysis.Distance;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
-import io.github.jspinak.brobot.datatypes.primitives.location.Location;
-import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
-import io.github.jspinak.brobot.report.Report;
+import io.github.jspinak.brobot.util.geometry.DistanceCalculator;
+import io.github.jspinak.brobot.model.state.StateImage;
+import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
+import io.github.jspinak.brobot.model.element.Location;
+import io.github.jspinak.brobot.action.ActionResult;
+
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -21,12 +22,12 @@ import java.util.List;
 public class FindClosestAndReplay {
 
     private final Action action;
-    private final Distance distance;
+    private final DistanceCalculator distance;
     private final ReadXmlScenes readXmlScenes;
     private final GetXmlActions getXmlActions;
     private final ReplayActionsXml replayActionsXml;
 
-    public FindClosestAndReplay(Action action, Distance distance, ReadXmlScenes readXmlScenes,
+    public FindClosestAndReplay(Action action, DistanceCalculator distance, ReadXmlScenes readXmlScenes,
                                 GetXmlActions getXmlActions, ReplayActionsXml replayActionsXml) {
         this.action = action;
         this.distance = distance;
@@ -53,7 +54,7 @@ public class FindClosestAndReplay {
             return true;
         }
         // otherwise, find the best match and compare it to the recorded matches
-        Matches matches = action.perform(actionOptions, stateImage);
+        ActionResult matches = action.perform(actionOptions, stateImage);
         if (matches.isEmpty()) return false;
         SceneObjectCollectionForXML scenesObjects = readXmlScenes.getSceneAndObjects();
         if (!scenesContainObject(scenesObjects, stateImage)) return false;
@@ -75,11 +76,11 @@ public class FindClosestAndReplay {
         return scene.getObjectsNames().indexOf(stateImage.getName());
     }
 
-    private SceneAndObjectsForXML getClosestScene(Matches matches, SceneObjectCollectionForXML scenesObjects,
+    private SceneAndObjectsForXML getClosestScene(ActionResult matches, SceneObjectCollectionForXML scenesObjects,
                                                   StateImage stateImage) {
         if (matches.getBestLocation().isEmpty()) return null; // this should never happen, we've already checked if matches are empty
         Location bestLocation = matches.getBestLocation().get();
-        Report.println("Best match: " + bestLocation.getCalculatedX() + ", " + bestLocation.getCalculatedY());
+        ConsoleReporter.println("Best match: " + bestLocation.getCalculatedX() + ", " + bestLocation.getCalculatedY());
         SceneAndObjectsForXML firstScene = scenesObjects.getScenes().get(0);
         int matchingStateImageObjectIndex = getMatchingStateImageObjectIndex(firstScene, stateImage);
         double closestScene = 1000000;
@@ -93,7 +94,7 @@ public class FindClosestAndReplay {
                 closestSceneObject = scObj;
             }
         }
-        Report.println("Closest scene: " + closestSceneObject.getSceneName());
+        ConsoleReporter.println("Closest scene: " + closestSceneObject.getSceneName());
         return closestSceneObject;
     }
 }

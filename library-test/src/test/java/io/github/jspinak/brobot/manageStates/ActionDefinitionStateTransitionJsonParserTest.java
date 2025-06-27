@@ -1,13 +1,16 @@
 package io.github.jspinak.brobot.manageStates;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
-import io.github.jspinak.brobot.dsl.ActionDefinition;
-import io.github.jspinak.brobot.dsl.ActionStep;
-import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
-import io.github.jspinak.brobot.json.parsing.JsonParser;
-import io.github.jspinak.brobot.json.parsing.exception.ConfigurationException;
-import io.github.jspinak.brobot.json.utils.JsonUtils;
+import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.action.ObjectCollection;
+import io.github.jspinak.brobot.navigation.transition.TaskSequenceStateTransition;
+import io.github.jspinak.brobot.runner.dsl.model.TaskSequence;
+import io.github.jspinak.brobot.runner.dsl.model.ActionStep;
+import io.github.jspinak.brobot.model.transition.StateTransition;
+import io.github.jspinak.brobot.runner.json.parsing.ConfigurationParser;
+import io.github.jspinak.brobot.runner.json.parsing.exception.ConfigurationException;
+import io.github.jspinak.brobot.runner.json.utils.JsonUtils;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -22,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class ActionDefinitionStateTransitionJsonParserTest {
 
     @Autowired
-    private JsonParser jsonParser;
+    private ConfigurationParser jsonParser;
 
     @Autowired
     private JsonUtils jsonUtils;
@@ -56,17 +59,17 @@ public class ActionDefinitionStateTransitionJsonParserTest {
                 """;
 
         JsonNode jsonNode = jsonParser.parseJson(json);
-        ActionDefinitionStateTransition transition = jsonParser.convertJson(jsonNode, ActionDefinitionStateTransition.class);
+        TaskSequenceStateTransition transition = jsonParser.convertJson(jsonNode, TaskSequenceStateTransition.class);
 
         assertNotNull(transition);
 
         // Verify action definition
-        assertTrue(transition.getActionDefinitionOptional().isPresent());
-        assertNotNull(transition.getActionDefinitionOptional().get().getSteps());
-        assertEquals(1, transition.getActionDefinitionOptional().get().getSteps().size());
+        assertTrue(transition.getTaskSequenceOptional().isPresent());
+        assertNotNull(transition.getTaskSequenceOptional().get().getSteps());
+        assertEquals(1, transition.getTaskSequenceOptional().get().getSteps().size());
 
         // Verify basic properties
-        assertEquals(IStateTransition.StaysVisible.TRUE, transition.getStaysVisibleAfterTransition());
+        assertEquals(StateTransition.StaysVisible.TRUE, transition.getStaysVisibleAfterTransition());
         assertEquals(5, transition.getScore());
         assertEquals(10, transition.getTimesSuccessful());
 
@@ -97,17 +100,17 @@ public class ActionDefinitionStateTransitionJsonParserTest {
                 """;
 
         JsonNode jsonNode = jsonParser.parseJson(json);
-        ActionDefinitionStateTransition transition = jsonParser.convertJson(jsonNode, ActionDefinitionStateTransition.class);
+        TaskSequenceStateTransition transition = jsonParser.convertJson(jsonNode, TaskSequenceStateTransition.class);
 
         assertNotNull(transition);
 
         // Verify action definition
-        assertTrue(transition.getActionDefinitionOptional().isPresent());
-        assertNotNull(transition.getActionDefinitionOptional().get().getSteps());
-        assertEquals(0, transition.getActionDefinitionOptional().get().getSteps().size());
+        assertTrue(transition.getTaskSequenceOptional().isPresent());
+        assertNotNull(transition.getTaskSequenceOptional().get().getSteps());
+        assertEquals(0, transition.getTaskSequenceOptional().get().getSteps().size());
 
         // Verify default properties
-        assertEquals(IStateTransition.StaysVisible.NONE, transition.getStaysVisibleAfterTransition());
+        assertEquals(StateTransition.StaysVisible.NONE, transition.getStaysVisibleAfterTransition());
         assertEquals(0, transition.getScore());
         assertEquals(0, transition.getTimesSuccessful());
 
@@ -126,10 +129,10 @@ public class ActionDefinitionStateTransitionJsonParserTest {
     @Test
     public void testSerializeDeserializeTransition() throws ConfigurationException {
         // Create transition manually
-        ActionDefinitionStateTransition transition = new ActionDefinitionStateTransition();
+        TaskSequenceStateTransition transition = new TaskSequenceStateTransition();
 
         // Create action definition
-        ActionDefinition actionDef = new ActionDefinition();
+        TaskSequence actionDef = new TaskSequence();
         ActionStep step = new ActionStep();
         ActionOptions options = new ActionOptions();
         options.setAction(ActionOptions.Action.FIND);
@@ -138,7 +141,7 @@ public class ActionDefinitionStateTransitionJsonParserTest {
         actionDef.addStep(step);
 
         transition.setActionDefinition(actionDef);
-        transition.setStaysVisibleAfterTransition(IStateTransition.StaysVisible.FALSE);
+        transition.setStaysVisibleAfterTransition(StateTransition.StaysVisible.FALSE);
         transition.setScore(3);
         transition.setTimesSuccessful(7);
 
@@ -154,19 +157,19 @@ public class ActionDefinitionStateTransitionJsonParserTest {
 
         // Deserialize
         JsonNode jsonNode = jsonParser.parseJson(json);
-        ActionDefinitionStateTransition deserializedTransition =
-                jsonParser.convertJson(jsonNode, ActionDefinitionStateTransition.class);
+        TaskSequenceStateTransition deserializedTransition =
+                jsonParser.convertJson(jsonNode, TaskSequenceStateTransition.class);
 
         // Verify
         assertNotNull(deserializedTransition);
 
         // Verify action definition
-        assertTrue(deserializedTransition.getActionDefinitionOptional().isPresent());
-        assertNotNull(deserializedTransition.getActionDefinitionOptional().get().getSteps());
-        assertEquals(1, deserializedTransition.getActionDefinitionOptional().get().getSteps().size());
+        assertTrue(deserializedTransition.getTaskSequenceOptional().isPresent());
+        assertNotNull(deserializedTransition.getTaskSequenceOptional().get().getSteps());
+        assertEquals(1, deserializedTransition.getTaskSequenceOptional().get().getSteps().size());
 
         // Verify properties
-        assertEquals(IStateTransition.StaysVisible.FALSE, deserializedTransition.getStaysVisibleAfterTransition());
+        assertEquals(StateTransition.StaysVisible.FALSE, deserializedTransition.getStaysVisibleAfterTransition());
         assertEquals(3, deserializedTransition.getScore());
         assertEquals(7, deserializedTransition.getTimesSuccessful());
 
@@ -187,18 +190,18 @@ public class ActionDefinitionStateTransitionJsonParserTest {
     @Test
     public void testGetActionDefinition() {
         // Create transition with actionDefinition
-        ActionDefinitionStateTransition transition = new ActionDefinitionStateTransition();
-        ActionDefinition actionDef = new ActionDefinition();
+        TaskSequenceStateTransition transition = new TaskSequenceStateTransition();
+        TaskSequence actionDef = new TaskSequence();
         transition.setActionDefinition(actionDef);
 
         // Test getActionDefinition returns correct Optional
-        Optional<ActionDefinition> result = transition.getActionDefinitionOptional();
+        Optional<TaskSequence> result = transition.getTaskSequenceOptional();
         assertTrue(result.isPresent());
         assertSame(actionDef, result.get());
 
         // Test with null actionDefinition
         transition.setActionDefinition(null);
-        result = transition.getActionDefinitionOptional();
+        result = transition.getTaskSequenceOptional();
         assertFalse(result.isPresent());
     }
 }

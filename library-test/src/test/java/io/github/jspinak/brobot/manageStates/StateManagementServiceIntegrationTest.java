@@ -1,11 +1,16 @@
 package io.github.jspinak.brobot.manageStates;
 
-import io.github.jspinak.brobot.database.services.AllStatesInProjectService;
 import org.junit.jupiter.api.*;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+
+import io.github.jspinak.brobot.navigation.service.StateService;
+import io.github.jspinak.brobot.statemanagement.StateIdResolver;
+import io.github.jspinak.brobot.navigation.transition.JavaStateTransition;  
+import io.github.jspinak.brobot.navigation.transition.StateTransitions;
+import io.github.jspinak.brobot.model.transition.StateTransition;
 
 import java.util.Arrays;
 import java.util.List;
@@ -19,10 +24,10 @@ import static org.mockito.Mockito.*;
 class StateManagementServiceIntegrationTest {
 
     @Autowired
-    private StateManagementService stateManagementService;
+    private StateIdResolver stateManagementService;
     
     @MockBean
-    private AllStatesInProjectService allStatesInProjectService;
+    private StateService allStatesInProjectService;
     
     @BeforeEach
     void setUp() {
@@ -130,8 +135,8 @@ class StateManagementServiceIntegrationTest {
     @Test
     @Order(6)
     void testConvertNamesToIdsWithNonJavaStateTransition() {
-        // Create a mock implementation of IStateTransition that is not JavaStateTransition
-        IStateTransition nonJavaTransition = mock(IStateTransition.class);
+        // Create a mock implementation of StateTransition that is not JavaStateTransition
+        StateTransition nonJavaTransition = mock(StateTransition.class);
         
         StateTransitions stateTransitions = new StateTransitions();
         stateTransitions.setStateName("TestState");

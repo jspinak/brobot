@@ -1,15 +1,15 @@
 package io.github.jspinak.brobot.runner.ui.execution;
 
-import io.github.jspinak.brobot.database.services.AllStatesInProjectService;
-import io.github.jspinak.brobot.datatypes.state.state.State;
-import io.github.jspinak.brobot.report.log.model.LogData;
-import io.github.jspinak.brobot.report.log.model.LogType;
-import io.github.jspinak.brobot.report.log.model.PerformanceMetricsData;
+import io.github.jspinak.brobot.model.state.State;
 import io.github.jspinak.brobot.runner.automation.AutomationExecutor;
 import io.github.jspinak.brobot.runner.events.*;
 import io.github.jspinak.brobot.runner.execution.ExecutionState;
 import io.github.jspinak.brobot.runner.execution.ExecutionStatus;
-import io.github.jspinak.brobot.services.StateTransitionsRepository;
+import io.github.jspinak.brobot.tools.logging.model.LogData;
+import io.github.jspinak.brobot.tools.logging.model.LogEventType;
+import io.github.jspinak.brobot.tools.logging.model.ExecutionMetrics;
+import io.github.jspinak.brobot.model.transition.StateTransitionStore;
+import io.github.jspinak.brobot.navigation.service.StateService;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.chart.LineChart;
@@ -52,10 +52,10 @@ public class ExecutionDashboardPanelTest {
     private AutomationExecutor automationExecutor;
 
     @Mock
-    private StateTransitionsRepository stateTransitionsRepository;
+    private StateTransitionStore stateTransitionsRepository;
 
     @Mock
-    private AllStatesInProjectService allStatesInProjectService;
+    private StateService allStatesInProjectService;
 
     private ExecutionDashboardPanel dashboardPanel;
     private Scene scene;
@@ -312,7 +312,7 @@ public class ExecutionDashboardPanelTest {
 
         // Create a log entry for an action
         LogData actionEntry = new LogData();
-        actionEntry.setType(LogType.ACTION);
+        actionEntry.setType(LogEventType.ACTION);
         actionEntry.setDescription("Click on Button");
         actionEntry.setActionPerformed("CLICK");
         actionEntry.setDuration(150);
@@ -337,7 +337,7 @@ public class ExecutionDashboardPanelTest {
 
         // Add another action that fails
         LogData failedActionEntry = new LogData();
-        failedActionEntry.setType(LogType.ACTION);
+        failedActionEntry.setType(LogEventType.ACTION);
         failedActionEntry.setDescription("Click on NonExistentButton");
         failedActionEntry.setActionPerformed("CLICK");
         failedActionEntry.setDuration(200);
@@ -395,7 +395,7 @@ public class ExecutionDashboardPanelTest {
 
         // Now create and send our event
         LogData transitionEntry = new LogData();
-        transitionEntry.setType(LogType.TRANSITION);
+        transitionEntry.setType(LogEventType.TRANSITION);
         transitionEntry.setFromStateIds(List.of(1L));
         transitionEntry.setToStateIds(List.of(2L));
         transitionEntry.setCurrentStateName("EndState");
@@ -427,14 +427,14 @@ public class ExecutionDashboardPanelTest {
         );
 
         // Create performance metrics
-        PerformanceMetricsData perfMetrics = new PerformanceMetricsData();
+        ExecutionMetrics perfMetrics = new ExecutionMetrics();
         perfMetrics.setActionDuration(100);
         perfMetrics.setPageLoadTime(50);
         perfMetrics.setTransitionTime(25);
 
         // Create a log entry for performance metrics
         LogData metricsEntry = new LogData();
-        metricsEntry.setType(LogType.METRICS);
+        metricsEntry.setType(LogEventType.METRICS);
         metricsEntry.setDuration(100);
         metricsEntry.setPerformance(perfMetrics);
         metricsEntry.setTimestamp(Instant.now());
@@ -453,13 +453,13 @@ public class ExecutionDashboardPanelTest {
         assertNotNull(avgActionDurationLabel);
 
         // Add a second performance metric to test average calculation
-        PerformanceMetricsData perfMetrics2 = new PerformanceMetricsData();
+        ExecutionMetrics perfMetrics2 = new ExecutionMetrics();
         perfMetrics2.setActionDuration(150);
         perfMetrics2.setPageLoadTime(75);
         perfMetrics2.setTransitionTime(30);
 
         LogData metricsEntry2 = new LogData();
-        metricsEntry2.setType(LogType.METRICS);
+        metricsEntry2.setType(LogEventType.METRICS);
         metricsEntry2.setDuration(150);
         metricsEntry2.setPerformance(perfMetrics2);
         metricsEntry2.setTimestamp(Instant.now());
@@ -588,7 +588,7 @@ public class ExecutionDashboardPanelTest {
 
         // Create a log entry for an error
         LogData errorEntry = new LogData();
-        errorEntry.setType(LogType.ERROR);
+        errorEntry.setType(LogEventType.ERROR);
         errorEntry.setErrorMessage("Test error message");
         errorEntry.setDuration(50);
         errorEntry.setSuccess(false);
@@ -626,7 +626,7 @@ public class ExecutionDashboardPanelTest {
 
         // Create a log entry for state detection
         LogData stateDetectionEntry = new LogData();
-        stateDetectionEntry.setType(LogType.STATE_DETECTION);
+        stateDetectionEntry.setType(LogEventType.STATE_DETECTION);
         stateDetectionEntry.setCurrentStateName("TestState");
         stateDetectionEntry.setTimestamp(Instant.now());
 
@@ -792,7 +792,7 @@ public class ExecutionDashboardPanelTest {
     public void testExecuteAutomationButton() {
         // Create a Button for automation
         Button automationButton = new Button("Test Automation");
-        io.github.jspinak.brobot.datatypes.project.Button broButton = mock(io.github.jspinak.brobot.datatypes.project.Button.class);
+        io.github.jspinak.brobot.runner.project.TaskButton broButton = mock(io.github.jspinak.brobot.runner.project.TaskButton.class);
 
         // Mock initial idle state
         ExecutionStatus idleStatus = new ExecutionStatus();

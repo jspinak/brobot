@@ -1,7 +1,8 @@
 package io.github.jspinak.brobot.runner.persistence.entity;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import io.github.jspinak.brobot.report.log.model.LogType;
+
+import io.github.jspinak.brobot.tools.logging.model.LogEventType;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -23,7 +24,7 @@ public class LogEntry {
     private String sessionId;
 
     @Enumerated(EnumType.STRING)
-    private LogType type;
+    private LogEventType type;
     private String actionType;
     private String description;
     private Instant timestamp = Instant.now();
@@ -58,7 +59,7 @@ public class LogEntry {
     public LogEntry() {
     }
 
-    public LogEntry(String sessionId, LogType logType, String description) {
+    public LogEntry(String sessionId, LogEventType logType, String description) {
         this.sessionId = sessionId;
         this.type = logType;
         this.description = description;

@@ -1,7 +1,9 @@
 package io.github.jspinak.brobot.datatypes.state.stateObject;
 
-import org.junit.jupiter.api.Test;
+import io.github.jspinak.brobot.model.state.StateObject;
+import io.github.jspinak.brobot.model.state.StateObjectMetadata;
 
+import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.mock;
@@ -22,7 +24,7 @@ public class StateObjectDataTest {
         when(mockStateObject.getOwnerStateId()).thenReturn(1L);
 
         // 3. Create StateObjectData from the mock
-        StateObjectData data = new StateObjectData(mockStateObject);
+        StateObjectMetadata data = new StateObjectMetadata(mockStateObject);
 
         // 4. Assert that the data was copied correctly
         assertEquals("ID123", data.getStateObjectId());
@@ -34,7 +36,7 @@ public class StateObjectDataTest {
 
     @Test
     public void testDefaultConstructor() {
-        StateObjectData data = new StateObjectData();
+        StateObjectMetadata data = new StateObjectMetadata();
         assertEquals("", data.getStateObjectId());
         assertEquals(StateObject.Type.IMAGE, data.getObjectType());
         assertEquals("", data.getStateObjectName());
@@ -44,7 +46,7 @@ public class StateObjectDataTest {
 
     @Test
     public void testToString() {
-        StateObjectData data = new StateObjectData();
+        StateObjectMetadata data = new StateObjectMetadata();
         data.setStateObjectName("MyObject");
         data.setObjectType(StateObject.Type.REGION);
         data.setOwnerStateName("MyState");

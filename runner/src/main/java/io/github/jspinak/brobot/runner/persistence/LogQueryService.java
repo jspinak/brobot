@@ -1,10 +1,11 @@
 package io.github.jspinak.brobot.runner.persistence;
 
-import io.github.jspinak.brobot.report.log.model.LogData;
-import io.github.jspinak.brobot.report.log.model.LogType;
 import io.github.jspinak.brobot.runner.persistence.entity.LogEntry;
 import io.github.jspinak.brobot.runner.persistence.mapper.LogMapper;
 import io.github.jspinak.brobot.runner.persistence.repo.LogEntryRepository;
+import io.github.jspinak.brobot.tools.logging.model.LogData;
+import io.github.jspinak.brobot.tools.logging.model.LogEventType;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -45,7 +46,7 @@ public class LogQueryService {
      * Get paginated logs with optional filtering. This is the correct home for this method.
      */
     @Transactional(readOnly = true)
-    public Page<LogData> getLogs(int page, int size, Long projectId, LogType type,
+    public Page<LogData> getLogs(int page, int size, Long projectId, LogEventType type,
                                  String sessionId, LocalDateTime startDate, LocalDateTime endDate) {
 
         Pageable pageable = PageRequest.of(page, size, Sort.by("timestamp").descending());

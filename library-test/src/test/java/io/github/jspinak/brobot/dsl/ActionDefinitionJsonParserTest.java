@@ -1,14 +1,17 @@
 package io.github.jspinak.brobot.dsl;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import io.github.jspinak.brobot.actions.actionOptions.ActionOptions;
-import io.github.jspinak.brobot.datatypes.primitives.region.Region;
-import io.github.jspinak.brobot.datatypes.state.ObjectCollection;
-import io.github.jspinak.brobot.datatypes.state.stateObject.otherStateObjects.StateRegion;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
-import io.github.jspinak.brobot.json.parsing.JsonParser;
-import io.github.jspinak.brobot.json.parsing.exception.ConfigurationException;
-import io.github.jspinak.brobot.json.utils.JsonUtils;
+import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.action.ObjectCollection;
+import io.github.jspinak.brobot.model.element.Region;
+import io.github.jspinak.brobot.model.state.StateRegion;
+import io.github.jspinak.brobot.runner.json.parsing.ConfigurationParser;
+import io.github.jspinak.brobot.runner.json.parsing.exception.ConfigurationException;
+import io.github.jspinak.brobot.runner.json.utils.JsonUtils;
+import io.github.jspinak.brobot.model.state.StateImage;
+import io.github.jspinak.brobot.runner.dsl.model.TaskSequence;
+import io.github.jspinak.brobot.runner.dsl.model.ActionStep;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -16,13 +19,13 @@ import org.springframework.test.context.TestPropertySource;
 
 import java.util.ArrayList;
 
-import static io.github.jspinak.brobot.actions.actionOptions.ActionOptions.Action.CLICK;
-import static io.github.jspinak.brobot.actions.actionOptions.ActionOptions.Action.FIND;
-import static io.github.jspinak.brobot.actions.actionOptions.ActionOptions.ClickUntil.OBJECTS_APPEAR;
-import static io.github.jspinak.brobot.actions.actionOptions.ActionOptions.Find.ALL;
-import static io.github.jspinak.brobot.actions.actionOptions.ActionOptions.Find.FIRST;
-import static io.github.jspinak.brobot.actions.methods.sikuliWrappers.mouse.ClickType.Type.LEFT;
-import static io.github.jspinak.brobot.actions.methods.sikuliWrappers.mouse.ClickType.Type.RIGHT;
+import static io.github.jspinak.brobot.action.ActionOptions.Action.CLICK;
+import static io.github.jspinak.brobot.action.ActionOptions.Action.FIND;
+import static io.github.jspinak.brobot.action.ActionOptions.ClickUntil.OBJECTS_APPEAR;
+import static io.github.jspinak.brobot.action.ActionOptions.Find.ALL;
+import static io.github.jspinak.brobot.action.ActionOptions.Find.FIRST;
+import static io.github.jspinak.brobot.action.internal.mouse.ClickType.Type.LEFT;
+import static io.github.jspinak.brobot.action.internal.mouse.ClickType.Type.RIGHT;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
@@ -30,7 +33,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class ActionDefinitionJsonParserTest {
 
     @Autowired
-    private JsonParser jsonParser;
+    private ConfigurationParser jsonParser;
 
     @Autowired
     private JsonUtils jsonUtils;
@@ -41,7 +44,7 @@ public class ActionDefinitionJsonParserTest {
     @Test
     public void testSerializeSimpleActionDefinition() throws ConfigurationException {
         // Create a minimal ActionDefinition
-        ActionDefinition definition = createMinimalActionDefinition(FIND);
+        TaskSequence definition = createMinimalActionDefinition(FIND);
 
         // Use JsonUtils to safely serialize
         String json = jsonUtils.toJsonSafe(definition);
@@ -120,7 +123,7 @@ public class ActionDefinitionJsonParserTest {
 
         // Parse JSON to ActionDefinition
         JsonNode jsonNode = jsonParser.parseJson(json);
-        ActionDefinition actionDefinition = jsonParser.convertJson(jsonNode, ActionDefinition.class);
+        TaskSequence actionDefinition = jsonParser.convertJson(jsonNode, TaskSequence.class);
 
         // Verify the parsed ActionDefinition
         assertNotNull(actionDefinition);
@@ -166,7 +169,7 @@ public class ActionDefinitionJsonParserTest {
     @Test
     public void testSerializeComplexActionDefinition() throws ConfigurationException {
         // Create a more complex ActionDefinition with multiple steps
-        ActionDefinition definition = new ActionDefinition();
+        TaskSequence definition = new TaskSequence();
 
         // First step with FIND action
         definition.addStep(
@@ -208,7 +211,7 @@ public class ActionDefinitionJsonParserTest {
     @Test
     public void testPrettyJson() throws ConfigurationException {
         // Create a simple ActionDefinition
-        ActionDefinition definition = createMinimalActionDefinition(FIND);
+        TaskSequence definition = createMinimalActionDefinition(FIND);
 
         // Use JsonUtils for safer pretty printing
         String prettyJson = jsonUtils.toPrettyJsonSafe(definition);
@@ -242,8 +245,8 @@ public class ActionDefinitionJsonParserTest {
     /**
      * Helper method to create a minimal ActionDefinition with one step
      */
-    private ActionDefinition createMinimalActionDefinition(ActionOptions.Action action) {
-        ActionDefinition definition = new ActionDefinition();
+    private TaskSequence createMinimalActionDefinition(ActionOptions.Action action) {
+        TaskSequence definition = new TaskSequence();
 
         ActionOptions options = new ActionOptions();
         options.setAction(action);

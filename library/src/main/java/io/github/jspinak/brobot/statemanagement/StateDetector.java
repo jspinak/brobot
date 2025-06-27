@@ -1,0 +1,222 @@
+package io.github.jspinak.brobot.statemanagement;
+
+import io.github.jspinak.brobot.action.Action;
+import io.github.jspinak.brobot.action.ObjectCollection;
+import io.github.jspinak.brobot.model.state.State;
+import io.github.jspinak.brobot.model.state.special.SpecialStateType;
+import io.github.jspinak.brobot.navigation.service.StateService;
+import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
+
+import org.springframework.stereotype.Component;
+
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
+
+import static io.github.jspinak.brobot.action.ActionOptions.Action.FIND;
+
+/**
+ * Discovers active states through visual pattern matching in the Brobot framework.
+ * 
+ * <p>StateDetector provides mechanisms to identify which states are currently active in the GUI 
+ * by searching for their associated visual patterns. This is essential for recovering from 
+ * lost context, initializing automation, or maintaining awareness of the current application 
+ * state during long-running automation sessions.</p>
+ * 
+ * <p>Key operations:
+ * <ul>
+ *   <li><b>Check Active States</b>: Verify if currently tracked states are still active</li>
+ *   <li><b>Rebuild Active States</b>: Full discovery when context is lost</li>
+ *   <li><b>Search All States</b>: Comprehensive scan of all defined states</li>
+ *   <li><b>Find Specific State</b>: Check if a particular state is active</li>
+ *   <li><b>Refresh States</b>: Complete reset and rediscovery</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Performance considerations:
+ * <ul>
+ *   <li>Full state search is computationally expensive (O(n) with n = total images)</li>
+ *   <li>Checking existing active states is more efficient than full search</li>
+ *   <li>Future optimization could use machine learning for instant state recognition</li>
+ *   <li>Static images in states make ML training data generation feasible</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>State discovery strategy:
+ * <ol>
+ *   <li>First checks if known active states are still visible</li>
+ *   <li>If no active states remain, performs comprehensive search</li>
+ *   <li>Falls back to UNKNOWN state if no states are found</li>
+ *   <li>Updates StateMemory with discovered active states</li>
+ * </ol>
+ * </p>
+ * 
+ * <p>Common use cases:
+ * <ul>
+ *   <li>Initializing automation when starting state is unknown</li>
+ *   <li>Recovering after application crashes or unexpected navigation</li>
+ *   <li>Periodic state validation in long-running automation</li>
+ *   <li>Debugging state detection issues</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>Future enhancements:
+ * <ul>
+ *   <li>Neural network-based instant state recognition from screenshots</li>
+ *   <li>Probabilistic state detection based on partial matches</li>
+ *   <li>Hierarchical search starting with likely states</li>
+ *   <li>Caching and optimization for frequently checked states</li>
+ * </ul>
+ * </p>
+ * 
+ * <p>In the model-based approach, StateDetector serves as the sensory system that connects 
+ * the abstract state model to the concrete visual reality of the GUI. It enables the 
+ * framework to maintain situational awareness and recover gracefully from unexpected 
+ * situations, which is crucial for robust automation.</p>
+ * 
+ * @since 1.0
+ * @see State
+ * @see StateMemory
+ * @see StateService
+ * @see Action
+ */
+@Component
+public class StateDetector {
+
+    private final StateService allStatesInProjectService;
+    private final StateMemory stateMemory;
+    private final Action action;
+
+    public StateDetector(StateService allStatesInProjectService, StateMemory stateMemory, Action action) {
+        this.allStatesInProjectService = allStatesInProjectService;
+        this.stateMemory = stateMemory;
+        this.action = action;
+    }
+
+    /**
+     * Verifies that currently active states are still visible on screen.
+     * <p>
+     * Iterates through all states marked as active in StateMemory and checks
+     * if they can still be found on the screen. States that are no longer
+     * visible are removed from the active state list. Uses a HashSet copy
+     * to avoid concurrent modification while removing states.
+     * <p>
+     * Side effects:
+     * <ul>
+     *   <li>Removes states from StateMemory that are no longer visible</li>
+     *   <li>May result in empty active state list if no states remain</li>
+     * </ul>
+     */
+    public void checkForActiveStates() {
+        new HashSet<>(stateMemory.getActiveStates()).forEach(state -> {
+            if (!findState(state)) stateMemory.removeInactiveState(state);
+        });
+    }
+
+    /**
+     * Rebuilds the active state list when context is lost or uncertain.
+     * <p>
+     * First attempts to verify existing active states. If no states remain
+     * active after verification, performs a comprehensive search of all
+     * defined states. If still no states are found, falls back to the
+     * UNKNOWN state to prevent an empty active state list.
+     * <p>
+     * This method implements a three-tier recovery strategy:
+     * <ol>
+     *   <li>Verify known active states (fast)</li>
+     *   <li>Search all states if needed (slow)</li>
+     *   <li>Default to UNKNOWN if nothing found</li>
+     * </ol>
+     *
+     * @see #checkForActiveStates()
+     * @see #searchAllImagesForCurrentStates()
+     */
+    public void rebuildActiveStates() {
+        checkForActiveStates();
+        if (!stateMemory.getActiveStates().isEmpty()) return;
+        searchAllImagesForCurrentStates();
+        if (stateMemory.getActiveStates().isEmpty()) stateMemory.addActiveState(SpecialStateType.UNKNOWN.getId());
+    }
+
+    /**
+     * Performs comprehensive search for all defined states on the current screen.
+     * <p>
+     * Searches for every state in the project (except UNKNOWN) to build a
+     * complete picture of which states are currently active. This is a
+     * computationally expensive operation that should be used sparingly.
+     * <p>
+     * Side effects:
+     * <ul>
+     *   <li>Updates StateMemory with all found states</li>
+     *   <li>Prints progress dots to Report for monitoring</li>
+     *   <li>May take significant time with many states/images</li>
+     * </ul>
+     * <p>
+     * Performance note: O(n*m) where n = number of states, m = images per state
+     */
+    public void searchAllImagesForCurrentStates() {
+        System.out.println("StateDetector: search all states. ");
+        Set<String> allStateEnums = allStatesInProjectService.getAllStateNames();
+        allStateEnums.remove(SpecialStateType.UNKNOWN.toString());
+        allStateEnums.forEach(this::findState);
+        ConsoleReporter.println("");
+    }
+
+    /**
+     * Searches for a specific state by name on the current screen.
+     * <p>
+     * Attempts to find visual patterns associated with the named state.
+     * If found, the state is automatically added to StateMemory's active
+     * list via the Action framework. Progress is reported for debugging.
+     *
+     * @param stateName Name of the state to search for
+     * @return true if the state was found on screen, false otherwise
+     * @see Action#perform(ActionOptions.Action, ObjectCollection)
+     */
+    public boolean findState(String stateName) {
+        ConsoleReporter.print(stateName + ".");
+        Optional<State> state = allStatesInProjectService.getState(stateName);
+        return state.filter(value -> action.perform(FIND, new ObjectCollection.Builder().withNonSharedImages(value).build())
+                .isSuccess()).isPresent();
+    }
+
+    /**
+     * Searches for a specific state by ID on the current screen.
+     * <p>
+     * Attempts to find visual patterns associated with the state ID.
+     * If found, the state is automatically added to StateMemory's active
+     * list via the Action framework. State name is printed for debugging.
+     *
+     * @param stateId ID of the state to search for
+     * @return true if the state was found on screen, false otherwise
+     * @see Action#perform(ActionOptions.Action, ObjectCollection)
+     */
+    public boolean findState(Long stateId) {
+        ConsoleReporter.print(allStatesInProjectService.getStateName(stateId));
+        Optional<State> state = allStatesInProjectService.getState(stateId);
+        return state.filter(value -> action.perform(FIND, new ObjectCollection.Builder().withNonSharedImages(value).build())
+                .isSuccess()).isPresent();
+    }
+
+    /**
+     * Completely resets and rediscovers all active states.
+     * <p>
+     * Clears all existing active state information and performs a fresh
+     * comprehensive search. This provides a clean slate when the automation
+     * needs to re-establish its position from scratch.
+     * <p>
+     * Side effects:
+     * <ul>
+     *   <li>Clears all states from StateMemory</li>
+     *   <li>Performs full state search (expensive)</li>
+     *   <li>Rebuilds active state list from scratch</li>
+     * </ul>
+     *
+     * @return Set of state IDs that were found to be active
+     */
+    public Set<Long> refreshActiveStates() {
+        stateMemory.removeAllStates();
+        searchAllImagesForCurrentStates();
+        return stateMemory.getActiveStates();
+    }
+}
