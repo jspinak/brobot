@@ -1,10 +1,10 @@
 package io.github.jspinak.brobot.action.basic.mouse;
 
 import io.github.jspinak.brobot.action.ActionInterface;
-import io.github.jspinak.brobot.action.ActionOptions;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.action.internal.mouse.MouseUpWrapper;
+import io.github.jspinak.brobot.action.internal.mouse.ClickType;
 
 import org.springframework.stereotype.Component;
 
@@ -51,7 +51,7 @@ import org.springframework.stereotype.Component;
  * @see MouseDown
  * @see MouseMove
  * @see Click
- * @see ActionOptions
+ * @see MouseUpOptions
  */
 @Component
 public class MouseUp implements ActionInterface {
@@ -62,12 +62,40 @@ public class MouseUp implements ActionInterface {
         this.mouseUpWrapper = mouseUpWrapper;
     }
 
+    @Override
+    public Type getActionType() {
+        return Type.MOUSE_UP;
+    }
+
+    @Override
     public void perform(ActionResult matches, ObjectCollection... objectCollections) {
-        ActionOptions actionOptions = matches.getActionOptions();
-        mouseUpWrapper.press(
-                actionOptions.getPauseBeforeMouseUp(),
-                actionOptions.getPauseAfterMouseUp(),
-                actionOptions.getClickType());
+        // Get the configuration - expecting MouseUpOptions
+        if (matches.getActionConfig() instanceof MouseUpOptions) {
+            MouseUpOptions options = (MouseUpOptions) matches.getActionConfig();
+            mouseUpWrapper.press(
+                    options.getPauseBeforeMouseUp(),
+                    options.getPauseAfterMouseUp(),
+                    convertMouseButton(options.getButton()));
+        } else {
+            // Fallback for other configs or throw exception
+            throw new IllegalArgumentException("MouseUp requires MouseUpOptions configuration");
+        }
+    }
+    
+    /**
+     * Converts MouseButton enum to ClickType.Type for backward compatibility.
+     * This conversion will be removed once ClickType is fully replaced.
+     */
+    private ClickType.Type convertMouseButton(io.github.jspinak.brobot.model.action.MouseButton button) {
+        switch (button) {
+            case RIGHT:
+                return ClickType.Type.RIGHT;
+            case MIDDLE:
+                return ClickType.Type.MIDDLE;
+            case LEFT:
+            default:
+                return ClickType.Type.LEFT;
+        }
     }
 
 }

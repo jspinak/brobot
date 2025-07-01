@@ -1,12 +1,12 @@
 package io.github.jspinak.brobot.action.composite.repeat;
 
 import io.github.jspinak.brobot.action.ActionInterface;
+import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.ActionOptions;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.action.composite.multiple.actions.MultipleActionsObject;
 import io.github.jspinak.brobot.action.composite.multiple.actions.MultipleBasicActions;
-import io.github.jspinak.brobot.action.internal.utility.CopyActionOptions;
 
 import org.springframework.stereotype.Component;
 
@@ -48,6 +48,10 @@ import static io.github.jspinak.brobot.action.ActionOptions.Action.*;
  *       (e.g., click "Next" until "Finish" appears)</li>
  * </ul>
  * 
+ * @deprecated Use {@link RepeatUntilConfig} with appropriate action configurations instead.
+ *             RepeatUntilConfig provides more flexibility by allowing any action type to be
+ *             repeated with custom termination conditions.
+ * 
  * <p>The action internally converts ClickUntil conditions to basic actions:
  * OBJECTS_VANISH → VANISH action, OBJECTS_APPEAR → FIND action. This design
  * allows reuse of existing action implementations while providing a cleaner API.</p>
@@ -60,7 +64,13 @@ import static io.github.jspinak.brobot.action.ActionOptions.Action.*;
  * @see ActionOptions.ClickUntil
  */
 @Component
+@Deprecated
 public class ClickUntil implements ActionInterface {
+
+    @Override
+    public Type getActionType() {
+        return Type.CLICK_UNTIL;
+    }
 
     private final MultipleBasicActions multipleBasicActions;
 
@@ -108,20 +118,48 @@ public class ClickUntil implements ActionInterface {
      * @param objectCollections 1 or 2 collections: [0] = click targets, [1] = condition
      *                          targets (if provided, otherwise [0] is used for both)
      */
+    @Override
     public void perform(ActionResult matches, ObjectCollection... objectCollections) {
-        ActionOptions actionOptions = matches.getActionOptions();
+        // Get the configuration - expecting ClickUntilOptions
+        ActionConfig config = matches.getActionConfig();
+        
+        // Extract the condition
+        ClickUntilOptions.Condition condition = ClickUntilOptions.Condition.OBJECTS_APPEAR;
+        if (config instanceof ClickUntilOptions) {
+            ClickUntilOptions clickUntilOptions = (ClickUntilOptions) config;
+            condition = clickUntilOptions.getCondition();
+        }
+        
         ObjectCollection coll1 = objectCollections[0]; //the 'click' collection
         ObjectCollection coll2 = objectCollections[0]; //the 'until' collection
         if (objectCollections.length > 1) coll2 = objectCollections[1];
-        ActionOptions click = CopyActionOptions.copyImmutableOptions(actionOptions);
+        
+        // TODO: Update MultipleBasicActions to accept ActionConfig
+        // For now, create temporary ActionOptions
+        ActionOptions tempOptions = createTemporaryActionOptions(config);
+        
+        ActionOptions click = new ActionOptions.Builder(tempOptions).build();
         click.setAction(CLICK);
-        ActionOptions untilAction = CopyActionOptions.copyImmutableOptions(actionOptions);
-        untilAction.setAction(clickUntilConversion.get(actionOptions.getClickUntil()));
+        
+        ActionOptions untilAction = new ActionOptions.Builder(tempOptions).build();
+        // Map condition to action
+        ActionOptions.ClickUntil clickUntilEnum = condition == ClickUntilOptions.Condition.OBJECTS_VANISH 
+            ? ActionOptions.ClickUntil.OBJECTS_VANISH 
+            : ActionOptions.ClickUntil.OBJECTS_APPEAR;
+        untilAction.setAction(clickUntilConversion.get(clickUntilEnum));
+        
         System.out.print(", until action is "+untilAction.getAction());
         MultipleActionsObject mao = new MultipleActionsObject();
         mao.addActionOptionsObjectCollectionPair(click, coll1);
         mao.addActionOptionsObjectCollectionPair(untilAction, coll2);
         multipleBasicActions.perform(mao);
+    }
+    
+    private ActionOptions createTemporaryActionOptions(ActionConfig config) {
+        ActionOptions tempOptions = new ActionOptions();
+        tempOptions.setPauseBeforeBegin(config.getPauseBeforeBegin());
+        tempOptions.setPauseAfterEnd(config.getPauseAfterEnd());
+        return tempOptions;
     }
 
     /**

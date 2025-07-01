@@ -1,7 +1,8 @@
 package io.github.jspinak.brobot.action.basic.wait;
 
 import io.github.jspinak.brobot.action.ActionInterface;
-import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.action.ActionConfig;
+import io.github.jspinak.brobot.action.basic.vanish.VanishOptions;
 import io.github.jspinak.brobot.action.basic.find.Find;
 import io.github.jspinak.brobot.action.internal.execution.ActionLifecycleManagement;
 import io.github.jspinak.brobot.action.ActionResult;
@@ -53,7 +54,7 @@ import org.springframework.stereotype.Component;
  * 
  * @since 1.0
  * @see Find
- * @see ActionOptions
+ * @see VanishOptions
  * @see ActionLifecycleManagement
  * @see ObjectCollection
  */
@@ -68,10 +69,38 @@ public class WaitVanish implements ActionInterface {
         this.actionLifecycleManagement = actionLifecycleManagement;
     }
 
-    public void perform(ActionResult matches, ObjectCollection[] objectCollections) {
-        matches.getActionOptions().setFind(ActionOptions.Find.EACH);
-        while (actionLifecycleManagement.isOkToContinueAction(matches, objectCollections[0].getStateImages().size())) {
-            find.perform(matches, objectCollections[0]);
+    @Override
+    public Type getActionType() {
+        return Type.VANISH;
+    }
+
+    @Override
+    public void perform(ActionResult matches, ObjectCollection... objectCollections) {
+        // Get the configuration - VanishOptions extends BaseFindOptions
+        ActionConfig config = matches.getActionConfig();
+        double timeout = 10.0; // default timeout
+        
+        if (config instanceof VanishOptions) {
+            VanishOptions vanishOptions = (VanishOptions) config;
+            timeout = vanishOptions.getTimeout();
+        }
+        
+        // Process only the first ObjectCollection
+        if (objectCollections.length > 0) {
+            ObjectCollection firstCollection = objectCollections[0];
+            
+            // Keep checking until objects vanish or timeout is reached
+            long startTime = System.currentTimeMillis();
+            while ((System.currentTimeMillis() - startTime) / 1000.0 < timeout &&
+                   actionLifecycleManagement.isOkToContinueAction(matches, firstCollection.getStateImages().size())) {
+                find.perform(matches, firstCollection);
+                
+                // If nothing was found, the objects have vanished - success!
+                if (matches.getMatchLocations().isEmpty()) {
+                    matches.setSuccess(true);
+                    break;
+                }
+            }
         }
     }
 

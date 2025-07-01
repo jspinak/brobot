@@ -11,9 +11,6 @@
  *   <li><b>{@link io.github.jspinak.brobot.action.internal.utility.ActionSuccessCriteria}</b> - 
  *       Evaluates whether actions have succeeded based on configurable criteria
  *       and match results</li>
- *   <li><b>{@link io.github.jspinak.brobot.action.internal.utility.CopyActionOptions}</b> - 
- *       Provides deep cloning and modification utilities for ActionOptions,
- *       ensuring immutability patterns</li>
  *   <li><b>{@link io.github.jspinak.brobot.action.internal.utility.DragCoordinateCalculator}</b> - 
  *       Calculates start and end coordinates for drag operations based on
  *       various offset and position strategies</li>
@@ -30,15 +27,6 @@
  *   <li>Multiple evaluation strategies</li>
  *   <li>Detailed failure reasoning</li>
  *   <li>Performance metric integration</li>
- * </ul>
- * 
- * <h3>Configuration Management</h3>
- * <p>CopyActionOptions handles:</p>
- * <ul>
- *   <li>Deep cloning of complex configuration objects</li>
- *   <li>Safe modification without side effects</li>
- *   <li>Merging of configuration overlays</li>
- *   <li>Validation of configuration consistency</li>
  * </ul>
  * 
  * <h3>Coordinate Calculations</h3>

@@ -1,10 +1,11 @@
-package io.github.jspinak.brobot.action.basic.visual;
+package io.github.jspinak.brobot.action.basic.region;
 
 import io.github.jspinak.brobot.action.ActionInterface;
-import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.action.internal.capture.RegionDefinitionHelper;
+import io.github.jspinak.brobot.action.internal.capture.RegionDefinitionHelperV2;
 import io.github.jspinak.brobot.model.element.Region;
 
 import org.springframework.stereotype.Component;
@@ -20,11 +21,11 @@ import org.springframework.stereotype.Component;
  * 
  * <p>The class handles five different positioning strategies:
  * <ul>
- *   <li>{@link ActionOptions.DefineAs#MATCH} - Region identical to the match bounds</li>
- *   <li>{@link ActionOptions.DefineAs#BELOW_MATCH} - Region of same size positioned below</li>
- *   <li>{@link ActionOptions.DefineAs#ABOVE_MATCH} - Region of same size positioned above</li>
- *   <li>{@link ActionOptions.DefineAs#LEFT_OF_MATCH} - Region of same size positioned to the left</li>
- *   <li>{@link ActionOptions.DefineAs#RIGHT_OF_MATCH} - Region of same size positioned to the right</li>
+ *   <li>{@link DefineRegionOptions.DefineAs#MATCH} - Region identical to the match bounds</li>
+ *   <li>{@link DefineRegionOptions.DefineAs#BELOW_MATCH} - Region of same size positioned below</li>
+ *   <li>{@link DefineRegionOptions.DefineAs#ABOVE_MATCH} - Region of same size positioned above</li>
+ *   <li>{@link DefineRegionOptions.DefineAs#LEFT_OF_MATCH} - Region of same size positioned to the left</li>
+ *   <li>{@link DefineRegionOptions.DefineAs#RIGHT_OF_MATCH} - Region of same size positioned to the right</li>
  * </ul>
  * </p>
  * 
@@ -34,15 +35,22 @@ import org.springframework.stereotype.Component;
  * 
  * @see DefineRegion
  * @see RegionDefinitionHelper
- * @see ActionOptions.DefineAs
+ * @see DefineRegionOptions.DefineAs
  */
 @Component
 public class DefineWithMatch implements ActionInterface {
 
-    private final RegionDefinitionHelper defineHelper;
+    @Override
+    public Type getActionType() {
+        return Type.DEFINE;
+    }
 
-    public DefineWithMatch(RegionDefinitionHelper defineHelper) {
+    private final RegionDefinitionHelper defineHelper;
+    private final RegionDefinitionHelperV2 defineHelperV2;
+
+    public DefineWithMatch(RegionDefinitionHelper defineHelper, RegionDefinitionHelperV2 defineHelperV2) {
         this.defineHelper = defineHelper;
+        this.defineHelperV2 = defineHelperV2;
     }
 
     /**
@@ -54,7 +62,7 @@ public class DefineWithMatch implements ActionInterface {
      *   <li>Returns early if no matches are found</li>
      *   <li>Creates a region from the best match</li>
      *   <li>Adjusts the region position based on the DefineAs strategy</li>
-     *   <li>Applies any additional adjustments from ActionOptions</li>
+     *   <li>Applies any additional adjustments from DefineRegionOptions</li>
      *   <li>Adds the defined region to the ActionResult</li>
      * </ol>
      * </p>
@@ -69,7 +77,7 @@ public class DefineWithMatch implements ActionInterface {
      * </ul>
      * </p>
      * 
-     * @param matches The ActionResult that contains the ActionOptions and to which
+     * @param matches The ActionResult that contains the DefineRegionOptions and to which
      *                the defined region will be added. This object is mutated by
      *                the method. If no match is found, no region is added.
      * @param objectCollections The collections containing the objects to find. The best
@@ -78,15 +86,32 @@ public class DefineWithMatch implements ActionInterface {
      */
     @Override
     public void perform(ActionResult matches, ObjectCollection... objectCollections) {
-        ActionOptions actionOptions = matches.getActionOptions();
+        // Get the configuration
+        ActionConfig config = matches.getActionConfig();
+        DefineRegionOptions defineOptions = null;
+        if (config instanceof DefineRegionOptions) {
+            defineOptions = (DefineRegionOptions) config;
+        }
+        
         defineHelper.findMatches(matches, objectCollections);
         if (matches.getBestMatch().isEmpty()) return;
+        
         Region region = new Region(matches.getBestMatch().get());
-        if (actionOptions.getDefineAs() == ActionOptions.DefineAs.BELOW_MATCH) region.setY(region.y() + region.h());
-        if (actionOptions.getDefineAs() == ActionOptions.DefineAs.ABOVE_MATCH) region.setY(region.y() - region.h());
-        if (actionOptions.getDefineAs() == ActionOptions.DefineAs.LEFT_OF_MATCH) region.setX(region.x() - region.w());
-        if (actionOptions.getDefineAs() == ActionOptions.DefineAs.RIGHT_OF_MATCH) region.setX(region.x() + region.w());
-        defineHelper.adjust(region, actionOptions);
+        
+        // Apply positioning based on DefineAs strategy
+        if (defineOptions != null) {
+            DefineRegionOptions.DefineAs defineAs = defineOptions.getDefineAs();
+            if (defineAs == DefineRegionOptions.DefineAs.BELOW_MATCH) region.setY(region.y() + region.h());
+            if (defineAs == DefineRegionOptions.DefineAs.ABOVE_MATCH) region.setY(region.y() - region.h());
+            if (defineAs == DefineRegionOptions.DefineAs.LEFT_OF_MATCH) region.setX(region.x() - region.w());
+            if (defineAs == DefineRegionOptions.DefineAs.RIGHT_OF_MATCH) region.setX(region.x() + region.w());
+        }
+        
+        // Apply adjustments using V2 helper if we have DefineRegionOptions
+        if (defineOptions != null) {
+            defineHelperV2.adjust(region, defineOptions);
+        }
+        
         matches.addDefinedRegion(region);
     }
 }

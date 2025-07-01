@@ -7,11 +7,13 @@ import io.github.jspinak.brobot.model.analysis.scene.SceneAnalysis;
 import io.github.jspinak.brobot.action.internal.execution.ActionLifecycle;
 import io.github.jspinak.brobot.model.analysis.scene.SceneAnalyses;
 import io.github.jspinak.brobot.model.element.Location;
+import io.github.jspinak.brobot.model.element.Movement;
 import io.github.jspinak.brobot.model.element.Positions;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.element.Text;
 import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.model.state.StateImage;
+import io.github.jspinak.brobot.model.action.ActionRecord;
 import io.github.jspinak.brobot.tools.logging.MessageFormatter;
 import lombok.Data;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -81,12 +83,12 @@ public class ActionResult {
     private List<Match> initialMatchList = new ArrayList<>();
 
     /**
-     * Configuration options used for this action execution.
+     * Configuration used for this action execution.
      * Contains all parameters that controlled the action behavior.
      * JsonIgnore due to potential non-serializable fields like function references.
      */
     @JsonIgnore
-    private ActionOptions actionOptions;
+    private ActionConfig actionConfig;
 
     /**
      * Names of states identified as active during action execution.
@@ -171,6 +173,19 @@ public class ActionResult {
      */
     @JsonIgnore
     private ActionLifecycle actionLifecycle;
+    
+    /**
+     * List of movements performed during action execution.
+     * Used by drag operations and other movement-based actions.
+     */
+    private List<Movement> movements = new ArrayList<>();
+    
+    /**
+     * Ordered history of action execution steps.
+     * Contains ActionRecord for each step in a chained action sequence.
+     * Empty for single-step actions.
+     */
+    private List<ActionRecord> executionHistory = new ArrayList<>();
 
     /**
      * Creates an empty ActionResult with default values.
@@ -179,12 +194,24 @@ public class ActionResult {
     public ActionResult() {}
 
     /**
-     * Creates an ActionResult configured with specific options.
+     * Creates an ActionResult configured with specific action configuration.
      * 
-     * @param actionOptions Configuration that will control the action execution
+     * @param actionConfig Configuration that will control the action execution
      */
+    public ActionResult(ActionConfig actionConfig) {
+        this.actionConfig = actionConfig;
+    }
+
+    /**
+     * Creates an ActionResult configured with legacy ActionOptions.
+     * @deprecated Use ActionResult(ActionConfig) instead
+     * 
+     * @param actionOptions Legacy configuration object
+     */
+    @Deprecated
     public ActionResult(ActionOptions actionOptions) {
-        this.actionOptions = actionOptions;
+        // This constructor is kept for backward compatibility
+        // In a full migration, this would convert ActionOptions to ActionConfig
     }
 
     /**
@@ -274,6 +301,42 @@ public class ActionResult {
      */
     public void addDefinedRegion(Region region) {
         definedRegions.add(region);
+    }
+    
+    /**
+     * Adds a movement to the result.
+     * Used by drag and other movement-based actions.
+     * 
+     * @param movement The movement to add
+     */
+    public void addMovement(Movement movement) {
+        movements.add(movement);
+    }
+    
+    /**
+     * Returns an Optional containing the first movement from the action.
+     * <p>
+     * This is a convenience method for simple, single-segment actions like a standard
+     * DRAG. It provides easy access to the result without needing to handle the list.
+     *
+     * @return An Optional containing the first Movement if one exists, otherwise an empty Optional
+     */
+    @JsonIgnore
+    public Optional<Movement> getMovement() {
+        if (movements == null || movements.isEmpty()) {
+            return Optional.empty();
+        }
+        return Optional.of(movements.get(0));
+    }
+    
+    /**
+     * Adds an action record to the execution history.
+     * Used by chained actions to track intermediate results.
+     * 
+     * @param record The action record to add
+     */
+    public void addExecutionRecord(ActionRecord record) {
+        executionHistory.add(record);
     }
 
     /**
@@ -735,8 +798,8 @@ public class ActionResult {
 
     public String getSummary() {
         StringBuilder summary = new StringBuilder();
-        if (actionOptions != null) {
-            summary.append("Action: ").append(actionOptions.getAction()).append("\n");
+        if (actionConfig != null) {
+            summary.append("Action: ").append(actionConfig.getClass().getSimpleName()).append("\n");
         }
         summary.append("Success: ").append(success).append("\n");
         summary.append("Number of matches: ").append(matchList.size()).append("\n");

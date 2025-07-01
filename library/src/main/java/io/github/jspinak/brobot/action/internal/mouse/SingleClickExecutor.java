@@ -1,6 +1,8 @@
 package io.github.jspinak.brobot.action.internal.mouse;
 
 import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.action.ActionConfig;
+import io.github.jspinak.brobot.action.basic.click.ClickOptions;
 import io.github.jspinak.brobot.model.element.Location;
 import io.github.jspinak.brobot.config.FrameworkSettings;
 import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
@@ -71,6 +73,34 @@ public class SingleClickExecutor {
     }
 
     /**
+     * Performs a click operation at the specified location using ActionConfig.
+     * <p>
+     * This is the preferred method that accepts the new ActionConfig hierarchy.
+     * In mock mode, simulates the click by printing to the report without actual
+     * mouse interaction. In normal mode, executes the full click sequence including
+     * movement, button press, and release with configured timing.
+     *
+     * @param location Target location for the click operation
+     * @param config Configuration including click type and timing parameters
+     * @return true if the click was performed successfully, false if movement failed
+     */
+    public boolean click(Location location, ActionConfig config) {
+        // Convert to ActionOptions for backward compatibility
+        ActionOptions tempOptions = new ActionOptions();
+        tempOptions.setPauseBeforeBegin(config.getPauseBeforeBegin());
+        tempOptions.setPauseAfterEnd(config.getPauseAfterEnd());
+        
+        if (config instanceof ClickOptions) {
+            ClickOptions clickOptions = (ClickOptions) config;
+            // TODO: Map new click options to legacy ActionOptions
+            // For now, use default click type
+            tempOptions.setClickType(ClickOptions.Type.LEFT);
+        }
+        
+        return click(location, tempOptions);
+    }
+    
+    /**
      * Performs a click operation at the specified location.
      * <p>
      * In mock mode, simulates the click by printing to the report without actual
@@ -87,11 +117,13 @@ public class SingleClickExecutor {
      * @param location Target location for the click operation
      * @param actionOptions Configuration including click type and timing parameters
      * @return true if the click was performed successfully, false if movement failed
+     * @deprecated Use {@link #click(Location, ActionConfig)} instead
      */
+    @Deprecated
     public boolean click(Location location, ActionOptions actionOptions) {
         if (FrameworkSettings.mock) {
             ConsoleReporter.print("<click>");
-            if (actionOptions.getClickType() != ClickType.Type.LEFT) ConsoleReporter.print(actionOptions.getClickType().name());
+            if (actionOptions.getClickType() != ClickOptions.Type.LEFT) ConsoleReporter.print(actionOptions.getClickType().name());
             ConsoleReporter.print(" ");
             return true;
         }

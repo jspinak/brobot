@@ -190,4 +190,83 @@ public class IllustrationController {
         return true;
     }
 
+    /**
+     * Conditionally creates illustrations based on permission and repetition checks.
+     * <p>
+     * This overloaded method accepts ActionConfig instead of ActionOptions, supporting
+     * the new configuration hierarchy. It converts the ActionConfig to ActionOptions
+     * for compatibility with existing illustration logic.
+     * <p>
+     * State updates on success:
+     * <ul>
+     * <li>Last action type is recorded</li>
+     * <li>Find type is recorded for FIND actions</li>
+     * <li>Object collections are stored for comparison</li>
+     * </ul>
+     * <p>
+     * Side effects: Modifies instance state for repetition tracking.
+     *
+     * @param matches action results to illustrate
+     * @param searchRegions regions where searches occurred
+     * @param actionConfig action configuration and illustration settings
+     * @param objectCollections objects involved in the action
+     * @return true if illustration was created, false if filtered out
+     */
+    public boolean illustrateWhenAllowed(ActionResult matches, List<Region> searchRegions, ActionConfig actionConfig,
+                                         ObjectCollection... objectCollections) {
+        // Convert ActionConfig to ActionOptions for compatibility
+        ActionOptions actionOptions = convertToActionOptions(actionConfig);
+        return illustrateWhenAllowed(matches, searchRegions, actionOptions, objectCollections);
+    }
+
+    /**
+     * Converts an ActionConfig to ActionOptions for backward compatibility.
+     * This is a temporary method until the illustration system is fully updated
+     * to work with ActionConfig directly.
+     *
+     * @param config the ActionConfig to convert
+     * @return equivalent ActionOptions
+     */
+    private ActionOptions convertToActionOptions(ActionConfig config) {
+        ActionOptions.Builder builder = new ActionOptions.Builder();
+        
+        // Map illustrate settings
+        switch (config.getIllustrate()) {
+            case YES:
+                builder.setIllustrate(ActionOptions.Illustrate.YES);
+                break;
+            case NO:
+                builder.setIllustrate(ActionOptions.Illustrate.NO);
+                break;
+            case USE_GLOBAL:
+                builder.setIllustrate(ActionOptions.Illustrate.MAYBE);
+                break;
+        }
+        
+        // Map pause settings
+        builder.setPauseBeforeBegin(config.getPauseBeforeBegin());
+        builder.setPauseAfterEnd(config.getPauseAfterEnd());
+        
+        // Determine action type from config class
+        if (config.getClass().getName().contains("Find")) {
+            builder.setAction(ActionOptions.Action.FIND);
+        } else if (config.getClass().getName().contains("Click")) {
+            builder.setAction(ActionOptions.Action.CLICK);
+        } else if (config.getClass().getName().contains("Type")) {
+            builder.setAction(ActionOptions.Action.TYPE);
+        } else if (config.getClass().getName().contains("Drag")) {
+            builder.setAction(ActionOptions.Action.DRAG);
+        } else if (config.getClass().getName().contains("Move")) {
+            builder.setAction(ActionOptions.Action.MOVE);
+        } else if (config.getClass().getName().contains("Highlight")) {
+            builder.setAction(ActionOptions.Action.HIGHLIGHT);
+        } else if (config.getClass().getName().contains("Define")) {
+            builder.setAction(ActionOptions.Action.DEFINE);
+        } else if (config.getClass().getName().contains("Classify")) {
+            builder.setAction(ActionOptions.Action.CLASSIFY);
+        }
+        
+        return builder.build();
+    }
+
 }

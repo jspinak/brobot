@@ -1,9 +1,10 @@
 package io.github.jspinak.brobot.action.composite.multiple.finds;
 
 import io.github.jspinak.brobot.action.ActionInterface;
-import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.action.ActionChainOptions;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
+import io.github.jspinak.brobot.action.internal.execution.ActionChainExecutor;
 
 import org.springframework.stereotype.Component;
 
@@ -36,12 +37,23 @@ import org.springframework.stereotype.Component;
  * <p>This class exemplifies the Strategy pattern, providing a clean interface
  * for selecting between different multi-find algorithms at runtime.</p>
  * 
+ * @deprecated Use {@link ActionChainExecutor} with {@link ActionChainOptions} instead.
+ *             The chaining strategy (nested vs. confirm) is now configured through
+ *             ActionChainOptions.ChainingStrategy.
+ * @see ActionChainExecutor
+ * @see ActionChainOptions
  * @see NestedFinds
  * @see ConfirmedFinds
- * @see ActionOptions#isKeepLargerMatches()
  */
 @Component
+@Deprecated
 public class MultipleFinds implements ActionInterface {
+
+    @Override
+    public Type getActionType() {
+        // This is a composite action that performs multiple finds
+        return Type.FIND;
+    }
 
     private final NestedFinds nestedFinds;
     private final ConfirmedFinds confirmedFinds;
@@ -76,12 +88,16 @@ public class MultipleFinds implements ActionInterface {
      * @param objectCollections Variable array of search targets used by the selected
      *                          find strategy
      */
+    @Override
     public void perform(ActionResult matches, ObjectCollection... objectCollections) {
-        ActionOptions actionOptions = matches.getActionOptions();
-        if (actionOptions.isKeepLargerMatches()) {
-            confirmedFinds.perform(matches, objectCollections);
-            return;
-        }
-        nestedFinds.perform(matches, objectCollections);
+        // MultipleFinds is deprecated - use ActionChainExecutor with ActionChainOptions instead
+        throw new UnsupportedOperationException(
+            "MultipleFinds is deprecated. Use ActionChainExecutor with ActionChainOptions instead.\n" +
+            "Example:\n" +
+            "  ActionChainOptions chain = new ActionChainOptions.Builder(firstFind)\n" +
+            "    .setStrategy(ChainingStrategy.NESTED) // or CONFIRM\n" +
+            "    .then(secondFind)\n" +
+            "    .build();"
+        );
     }
 }

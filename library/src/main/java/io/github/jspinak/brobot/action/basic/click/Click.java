@@ -67,6 +67,11 @@ public class Click implements ActionInterface {
         this.afterClick = afterClick;
     }
 
+    @Override
+    public Type getActionType() {
+        return Type.CLICK;
+    }
+
     /**
      * Executes click operations on all found matches up to the maximum allowed.
      * 
@@ -89,16 +94,23 @@ public class Click implements ActionInterface {
      */
     @Override
     public void perform(ActionResult matches, ObjectCollection... objectCollections) {
-        ActionOptions actionOptions = matches.getActionOptions();
+        // Get the configuration - expecting ClickOptions
+        if (!(matches.getActionConfig() instanceof ClickOptions)) {
+            throw new IllegalArgumentException("Click requires ClickOptions configuration");
+        }
+        ClickOptions clickOptions = (ClickOptions) matches.getActionConfig();
+
         find.perform(matches, objectCollections); // find performs only on 1st collection
-        int i = 0;
+        // Find should have already limited matches based on maxMatchesToActOn
+        int matchIndex = 0;
         for (Match match : matches.getMatchList()) {
             Location location = match.getTarget();
-            click(location, actionOptions, match);
-            i++;
-            if (i == actionOptions.getMaxMatchesToActOn()) break;
-            // pause only between clicks, not after the last click
-            if (i < matches.getMatchList().size()) time.wait(actionOptions.getPauseBetweenIndividualActions());
+            click(location, clickOptions, match);
+            matchIndex++;
+            // pause only between clicking different matches, not after the last match
+            if (matchIndex < matches.getMatchList().size()) {
+                time.wait(clickOptions.getPauseBetweenIndividualActions());
+            }
         }
     }
 
@@ -135,16 +147,14 @@ public class Click implements ActionInterface {
      * @param match The Match object being acted upon. This object is modified by
      *              incrementing its timesActedOn counter for each click.
      */
-    private void click(Location location, ActionOptions actionOptions, Match match) {
-        for (int i = 0; i < actionOptions.getTimesToRepeatIndividualAction(); i++) {
-            clickLocationOnce.click(location, actionOptions);
+    private void click(Location location, ClickOptions clickOptions, Match match) {
+        for (int i = 0; i < clickOptions.getTimesToRepeatIndividualAction(); i++) {
+            // SingleClickExecutor now accepts ActionConfig
+            clickLocationOnce.click(location, clickOptions);
             match.incrementTimesActedOn();
-            if (actionOptions.isMoveMouseAfterAction()) {
-                time.wait(actionOptions.getPauseBetweenIndividualActions());
-                afterClick.moveMouseAfterClick(actionOptions);
-            }
-            if (i < actionOptions.getTimesToRepeatIndividualAction() - 1) {
-                time.wait(actionOptions.getPauseBetweenIndividualActions());
+            // TODO: Handle mouse movement after action when PostClickOptions is implemented
+            if (i < clickOptions.getTimesToRepeatIndividualAction() - 1) {
+                time.wait(clickOptions.getPauseBetweenIndividualActions());
             }
         }
     }

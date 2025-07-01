@@ -1,10 +1,9 @@
 package io.github.jspinak.brobot.action.basic.mouse;
 
 import io.github.jspinak.brobot.action.ActionInterface;
-import io.github.jspinak.brobot.action.ActionOptions;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
-import io.github.jspinak.brobot.action.internal.mouse.MouseWheel;
+import io.github.jspinak.brobot.action.internal.mouse.MouseWheelV2;
 
 import org.springframework.stereotype.Component;
 
@@ -34,11 +33,10 @@ import org.springframework.stereotype.Component;
  *   <li>Triggering scroll-based animations or lazy-loaded content</li>
  * </ul>
  * 
- * <p>Configuration through ActionOptions:</p>
+ * <p>Configuration through ScrollOptions:</p>
  * <ul>
  *   <li>Scroll direction (up/down)</li>
- *   <li>Number of scroll units or "clicks"</li>
- *   <li>Scroll speed and acceleration</li>
+ *   <li>Number of scroll steps or "clicks"</li>
  *   <li>Pause duration after scrolling</li>
  * </ul>
  * 
@@ -53,22 +51,33 @@ import org.springframework.stereotype.Component;
  * its configuration options.</p>
  * 
  * @since 1.0
- * @see ActionOptions
- * @see MouseWheel
+ * @see ScrollOptions
+ * @see MouseWheelV2
  * @see MoveMouse
  * @see Click
  */
 @Component
 public class ScrollMouseWheel implements ActionInterface {
 
-    private final MouseWheel mouseWheel;
+    @Override
+    public Type getActionType() {
+        return Type.SCROLL_MOUSE_WHEEL;
+    }
 
-    public ScrollMouseWheel(MouseWheel mouseWheel) {
+    private final MouseWheelV2 mouseWheel;
+
+    public ScrollMouseWheel(MouseWheelV2 mouseWheel) {
         this.mouseWheel = mouseWheel;
     }
 
+    @Override
     public void perform(ActionResult matches, ObjectCollection... objectCollections) {
-        ActionOptions actionOptions = matches.getActionOptions();
-        mouseWheel.scroll(actionOptions);
+        // Get the configuration - expecting ScrollOptions
+        if (!(matches.getActionConfig() instanceof ScrollOptions)) {
+            throw new IllegalArgumentException("ScrollMouseWheel requires ScrollOptions configuration");
+        }
+        ScrollOptions scrollOptions = (ScrollOptions) matches.getActionConfig();
+        
+        mouseWheel.scroll(scrollOptions);
     }
 }

@@ -1,10 +1,11 @@
-package io.github.jspinak.brobot.action.basic.visual;
+package io.github.jspinak.brobot.action.basic.region;
 
 import io.github.jspinak.brobot.action.ActionInterface;
-import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.action.internal.capture.RegionDefinitionHelper;
+import io.github.jspinak.brobot.action.internal.capture.RegionDefinitionHelperV2;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.match.Match;
 
@@ -36,15 +37,22 @@ import org.springframework.stereotype.Component;
  * 
  * @see DefineRegion
  * @see RegionDefinitionHelper
- * @see ActionOptions.DefineAs#INCLUDING_MATCHES
+ * @see DefineRegionOptions.DefineAs#INCLUDING_MATCHES
  */
 @Component
 public class DefineIncludingMatches implements ActionInterface {
 
-    private final RegionDefinitionHelper defineHelper;
+    @Override
+    public Type getActionType() {
+        return Type.DEFINE;
+    }
 
-    public DefineIncludingMatches(RegionDefinitionHelper defineHelper) {
+    private final RegionDefinitionHelper defineHelper;
+    private final RegionDefinitionHelperV2 defineHelperV2;
+
+    public DefineIncludingMatches(RegionDefinitionHelper defineHelper, RegionDefinitionHelperV2 defineHelperV2) {
         this.defineHelper = defineHelper;
+        this.defineHelperV2 = defineHelperV2;
     }
 
     /**
@@ -54,7 +62,7 @@ public class DefineIncludingMatches implements ActionInterface {
      * <ol>
      *   <li>Uses DefineHelper to find all matches in the object collections</li>
      *   <li>Calculates the bounding box that includes all matches</li>
-     *   <li>Applies any adjustments specified in ActionOptions</li>
+     *   <li>Applies any adjustments specified in DefineRegionOptions</li>
      *   <li>Adds the defined region to the ActionResult</li>
      * </ol>
      * </p>
@@ -62,7 +70,7 @@ public class DefineIncludingMatches implements ActionInterface {
      * <p>If no matches are found, an empty region (0,0,0,0) is created and added
      * to the result after adjustments are applied.</p>
      * 
-     * @param matches The ActionResult containing ActionOptions and to which the
+     * @param matches The ActionResult containing DefineRegionOptions and to which the
      *                defined region will be added. This object is mutated by
      *                adding the encompassing region.
      * @param objectCollections The collections containing objects to find. All matches
@@ -70,10 +78,21 @@ public class DefineIncludingMatches implements ActionInterface {
      */
     @Override
     public void perform(ActionResult matches, ObjectCollection... objectCollections) {
-        ActionOptions actionOptions = matches.getActionOptions();
+        // Get the configuration
+        ActionConfig config = matches.getActionConfig();
+        DefineRegionOptions defineOptions = null;
+        if (config instanceof DefineRegionOptions) {
+            defineOptions = (DefineRegionOptions) config;
+        }
+        
         defineHelper.findMatches(matches, objectCollections);
         Region region = fitRegionToMatches(matches);
-        defineHelper.adjust(region, actionOptions);
+        
+        // Apply adjustments using V2 helper if we have DefineRegionOptions
+        if (defineOptions != null) {
+            defineHelperV2.adjust(region, defineOptions);
+        }
+        
         matches.addDefinedRegion(region);
     }
 
