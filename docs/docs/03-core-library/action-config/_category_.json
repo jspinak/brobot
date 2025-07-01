@@ -1,0 +1,8 @@
+{
+  "label": "ActionConfig API",
+  "position": 4,
+  "link": {
+    "type": "generated-index",
+    "description": "Learn about the new ActionConfig API, how to migrate from ActionOptions, and explore the fluent API patterns for building automation sequences."
+  }
+}
