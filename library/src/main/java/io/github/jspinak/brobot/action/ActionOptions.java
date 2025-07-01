@@ -3,7 +3,7 @@ package io.github.jspinak.brobot.action;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-import io.github.jspinak.brobot.action.internal.mouse.ClickType;
+import io.github.jspinak.brobot.action.basic.click.ClickOptions;
 import io.github.jspinak.brobot.model.element.Location;
 import io.github.jspinak.brobot.model.element.Position;
 import io.github.jspinak.brobot.model.element.Region;
@@ -12,6 +12,8 @@ import io.github.jspinak.brobot.config.FrameworkSettings;
 import io.github.jspinak.brobot.tools.logging.model.LogEventType;
 import io.github.jspinak.brobot.model.element.SearchRegions;
 import lombok.Data;
+
+import org.apache.tools.ant.taskdefs.condition.Matches;
 import org.sikuli.basics.Settings;
 
 import java.util.ArrayList;
@@ -55,37 +57,25 @@ import java.util.function.Predicate;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ActionOptions {
 
-    /**
-     * Defines the type of GUI automation action to perform.
-     * <p>
-     * Actions are divided into two categories:
-     * <ul>
-     * <li><strong>Basic Actions:</strong> Atomic operations that directly interact with the GUI</li>
-     * <li><strong>Composite Actions:</strong> Complex operations that combine multiple basic actions</li>
-     * </ul>
-     * <p>
-     * <strong>Basic Actions:</strong>
-     * <ul>
-     * <li>{@code FIND} - Searches for visual patterns on screen</li>
-     * <li>{@code CLICK} - Performs mouse click operations</li>
-     * <li>{@code DEFINE} - Captures a screen region with specific coordinates</li>
-     * <li>{@code TYPE} - Sends keyboard input to the active window</li>
-     * <li>{@code MOVE} - Moves the mouse cursor to a location</li>
-     * <li>{@code VANISH} - Waits for elements to disappear from screen</li>
-     * <li>{@code HIGHLIGHT} - Draws visual indicators on matches or regions</li>
-     * <li>{@code SCROLL_MOUSE_WHEEL} - Performs mouse wheel scrolling</li>
-     * <li>{@code MOUSE_DOWN} - Presses and holds mouse button</li>
-     * <li>{@code MOUSE_UP} - Releases mouse button</li>
-     * <li>{@code KEY_DOWN} - Presses and holds keyboard key</li>
-     * <li>{@code KEY_UP} - Releases keyboard key</li>
-     * <li>{@code CLASSIFY} - Performs color-based classification</li>
-     * </ul>
-     * <p>
-     * <strong>Composite Actions:</strong>
-     * <ul>
-     * <li>{@code CLICK_UNTIL} - Repeatedly clicks until a condition is met</li>
-     * <li>{@code DRAG} - Performs click-and-drag operations</li>
-     * </ul>
+    /*
+     * BasicActions:
+     * FIND
+     * CLICK
+     * DEFINE return a Region with specific x,y,w,h
+     * TYPE sends keyboard input
+     * MOVE moves the mouse
+     * VANISH is successful when an Image or State disappears
+     * HIGHLIGHT highlights a Match, Region, or Location
+     * SCROLL_MOUSE_WHEEL
+     * MOUSE_DOWN
+     * MOUSE_UP
+     * KEY_DOWN
+     * KEY_UP
+     * CLASSIFY
+     *
+     * CompositeActions:
+     * CLICK_UNTIL clicks Matches, Regions, and/or Locations until a condition is fulfilled
+     * DRAG
      */
     public enum Action {
         FIND, CLICK, DEFINE, TYPE, MOVE, VANISH, HIGHLIGHT, SCROLL_MOUSE_WHEEL,
@@ -94,204 +84,135 @@ public class ActionOptions {
     }
     private Action action = Action.FIND;
 
-    /**
-     * Specifies the pattern matching strategy for Find operations.
-     * <p>
-     * Find strategies control how the framework searches for and returns matches.
-     * Remember that ObjectCollections can contain multiple Images, and Images can
-     * contain multiple Patterns, creating a hierarchy of search targets.
-     * <p>
-     * <strong>Standard matching strategies:</strong>
-     * <ul>
-     * <li>{@code FIRST} - Returns the first match found. Stops searching once any Pattern
-     *     finds a match, making it efficient for existence checks</li>
-     * <li>{@code EACH} - Returns one match per Image. The {@link DoOnEach} option
-     *     determines whether to return the first or best match per Image</li>
-     * <li>{@code ALL} - Returns all matches for all Patterns across all Images during
-     *     the search duration. Useful for counting or processing multiple instances</li>
-     * <li>{@code BEST} - Performs a Find.ALL operation then returns only the match
-     *     with the highest similarity score</li>
-     * </ul>
-     * <p>
-     * <strong>Specialized strategies:</strong>
-     * <ul>
-     * <li>{@code UNIVERSAL} - Mock-friendly strategy that responds to any Find type.
-     *     Used in testing to create versatile mock objects</li>
-     * <li>{@code CUSTOM} - User-defined strategy implemented as
-     *     {@code BiConsumer<ActionResult, List<ObjectCollection>>}</li>
-     * <li>{@code HISTOGRAM} - Matches based on color histogram similarity rather than
-     *     pixel-by-pixel comparison</li>
-     * <li>{@code COLOR} - Finds regions matching specific color criteria</li>
-     * <li>{@code MOTION} - Tracks moving objects across consecutive screenshots</li>
-     * <li>{@code REGIONS_OF_MOTION} - Identifies all areas with pixel changes</li>
-     * </ul>
-     * <p>
-     * <strong>Text and analysis strategies:</strong>
-     * <ul>
-     * <li>{@code ALL_WORDS} - OCR operation that finds individual words and their
-     *     bounding boxes. Returns each word as a separate Match</li>
-     * <li>{@code SIMILAR_IMAGES} - Compares images in the 2nd ObjectCollection against
-     *     the 1st, returning those above the similarity threshold</li>
-     * <li>{@code FIXED_PIXELS} - Returns mask and matches for unchanged pixels</li>
-     * <li>{@code DYNAMIC_PIXELS} - Returns mask and matches for changed pixels</li>
-     * <li>{@code STATES} - Analyzes ObjectCollections to identify GUI states and
-     *     their associated StateImage objects</li>
-     * </ul>
+    /*
+     * Keep in mind:
+     *   ObjectCollections can contain multiple Images.
+     *   Images can contain multiple Patterns (or image files).
+     *
+     * FIRST: first Match found. Finds all matches for a given Pattern, but does not continue searching if at least one Pattern finds a match in any iteration.
+     * EACH: one Match per Image. The DoOnEach option determines specifics of how EACH is performed.
+     * ALL: all Matches for all Patterns in all Images for the duration of the find operation.
+     * BEST: the match with the best score from a Find.ALL operation.
+     * UNIVERSAL: used for mocking. Initializing an Image with a UNIVERSAL Find allows it
+     *   to be accessed by an operation of FIRST, EACH, ALL, and BEST.
+     * CUSTOM: user-defined. Must be of type
+     *         {@code BiFunction<ActionOptions, List<StateImage>, Matches>>}
+     * HISTOGRAM: match the histogram from the input image(s)
+     * MOTION: find the locations of a moving object across screens
+     * REGIONS_OF_MOTION: find all dynamic pixel regions from a series of screens
+     * ALL_WORDS: find all words and their regions. To find all text in a specific region and have that
+     *   text as part of one Match object, use a normal Find operation.
+     *   Normal find operations, when given a region, will return the text in that region.
+     *   This operation will find words and return each word and its region as a separate Match object.
+     * SIMILAR_IMAGES: finds the images in the 2nd ObjectCollection that are above a similarity threshold
+     *   to the images in the 1st ObjectCollection.
+     * FIXED_PIXELS: returns a mask of all pixels that are the same and a corresponding Match list from the contours.
+     * DYNAMIC_PIXELS: returns a mask of all pixels that are changed and a corresponding Match list from the contours.
+     * STATES: each ObjectCollection contains the images found on a screen and the screenshot (as a scene). All
+     *   ObjectCollection(s) are analyzed to produce states with StateImage objects. The Match objects returned
+     *   hold the state owner's name and a Pattern, and this data is all that's needed to create the state
+     *   structure (without transitions).
+     *
      */
     public enum Find {
         FIRST, EACH, ALL, BEST, UNIVERSAL, CUSTOM, HISTOGRAM, COLOR, MOTION, REGIONS_OF_MOTION,
         ALL_WORDS, SIMILAR_IMAGES, FIXED_PIXELS, DYNAMIC_PIXELS, STATES
     }
     private Find find = Find.FIRST;
-    /**
-     * Custom Find implementation for one-time use.
-     * <p>
-     * Allows defining ad-hoc Find logic without creating a permanent custom Find strategy.
-     * The BiConsumer receives the ActionResult to populate and the ObjectCollections to search.
-     * This field is marked JsonIgnore as it contains non-serializable function references.
+    /*
+     * tempFind is a user defined Find method that is not meant to be reused.
      */
     @JsonIgnore
-    private BiConsumer<ActionResult, List<ObjectCollection>> tempFind;
+    private BiConsumer<Matches, List<ObjectCollection>> tempFind;
 
-    /**
-     * Sequence of Find operations to perform in order.
-     * <p>
-     * Enables multi-stage searches where each Find operation refines the results:
-     * <ul>
-     * <li>Operations execute sequentially in list order</li>
-     * <li>Each Find searches only within regions found by the previous Find</li>
-     * <li>ObjectCollections are matched by index (Find #2 uses ObjectCollection #2)</li>
-     * <li>If a matching ObjectCollection is empty, the last non-empty collection is reused</li>
-     * </ul>
-     * This supports workflows like: Find a window → Find a button within it → Find text on the button
+    /*
+     * Find actions are performed in the order they appear in the list.
+     * Actions are performed only on the match regions found in the previous action.
+     * Matching ObjectCollections are used (i.e. ObejctCollection #2 for Find #2),
+     *   unless the matching ObjectCollection is empty, in which case the last
+     *   non-empty ObjectCollection will be used.
      */
     private List<Find> findActions = new ArrayList<>();
-    /**
-     * Controls match refinement behavior in multi-stage Find operations.
-     * <p>
-     * When true, subsequent Find operations validate rather than replace initial matches.
-     * The original larger match is retained only if all subsequent Finds succeed within
-     * its boundaries. This is useful for confirming complex UI elements by checking for
-     * expected sub-elements while preserving the overall element bounds.
+    /*
+     * When set to true, subsequent Find operations will act as confirmations of the initial matches.
+     * An initial match from the first Find operation will be returned if the subsequent
+     * Find operations all find matches within its region.
      */
     private boolean keepLargerMatches = false;
 
-    /**
-     * Minimum similarity threshold for pattern matching.
-     * <p>
-     * For standard Find operations, this value (0.0-1.0) specifies how closely a screen
-     * region must match the search pattern. For histogram-based operations, it defines
-     * the minimum correlation score. Lower values allow more variation but may produce
-     * false positives; higher values are more strict but may miss valid matches.
-     * <p>
-     * Default: {@link Settings#MinSimilarity} (typically 0.7)
+    /*
+     * Specifies how similar the found Match must be to the original Image.
+     * Specifies the minimum score for a histogram to be considered a Match.
      */
     private double similarity = Settings.MinSimilarity;
 
-    /**
-     * Specifies match selection strategy when using {@link Find#EACH}.
-     * <p>
-     * Since Images can contain multiple Patterns, this enum determines which
-     * match to return when multiple matches exist for a single Image:
-     * <ul>
-     * <li>{@code FIRST} - Returns the first match found for each Image (fastest)</li>
-     * <li>{@code BEST} - Returns the match with highest similarity for each Image</li>
-     * </ul>
+    /*
+     * Images can contain multiple Patterns.
+     * DoOnEach specifies how Find.EACH should approach individual Images.
+     *
+     * FIRST: first Match on each Image
+     * BEST: best Match on each Image
      */
     public enum DoOnEach {
         FIRST, BEST
     }
     private DoOnEach doOnEach = DoOnEach.FIRST;
 
-    /**
-     * Controls whether to capture screenshots of match regions.
-     * <p>
-     * When true, each Match will include a captured image (Mat) of its screen region.
-     * This is useful for visual debugging, logging, or further image processing.
-     * Disabling saves memory and improves performance when captures aren't needed.
+    /*
+     * The Match's Mat can be captured from the match region
      */
     private boolean captureImage = true;
 
-    /**
-     * Bypasses image search and uses predefined regions.
-     * <p>
-     * When true, creates matches from StateImage's defined regions without searching:
-     * <ul>
-     * <li>For RegionImagePairs: uses the first found region</li>
-     * <li>Otherwise: uses the first region in SearchRegions</li>
-     * </ul>
-     * This optimization is useful when target locations are known and fixed.
+    /*
+     * Instead of searching for a StateImage, use its defined Region to create a Match.
+     * This is either the first found region if the StateImage uses a
+     * RegionImagePairs object, or the first defined Region in SearchRegions.
      */
     private boolean useDefinedRegion = false;
 
-    /**
-     * Specifies mouse wheel scroll direction.
-     * <p>
-     * Used with {@link Action#SCROLL_MOUSE_WHEEL} to control scrolling direction.
+    /*
+     * For scrolling with the mouse wheel
      */
     public enum ScrollDirection {
         UP, DOWN
     }
     private ScrollDirection scrollDirection = ScrollDirection.UP;
 
-    /**
-     * Defines termination condition for {@link Action#CLICK_UNTIL} operations.
-     * <p>
-     * Controls when repeated clicking should stop:
-     * <ul>
-     * <li>{@code OBJECTS_APPEAR} - Click until target objects become visible</li>
-     * <li>{@code OBJECTS_VANISH} - Click until target objects disappear</li>
-     * </ul>
-     * <p>
-     * <strong>Usage patterns:</strong>
-     * <ul>
-     * <li>1 ObjectCollection: Clicks the objects until they vanish (e.g., dismissing dialogs)</li>
-     * <li>2 ObjectCollections: Clicks objects in #1 until objects in #2 appear/vanish
-     *     (e.g., clicking "Next" until "Finish" appears)</li>
-     * </ul>
+    /*
+     * Specifies the condition to fulfill after a Click.
+     * The Objects in the 1st ObjectCollection are acted on by the CLICK method.
+     * If there is a 2nd ObjectCollection, it is acted on by the FIND method.
+     * If there is only 1 ObjectCollection, the FIND method also uses these objects.
+     *
+     * Translation:
+     * 1 ObjectCollection: Click this until it disappears.
+     * 2 ObjectCollections: Click #1 until #2 appears or disappears.
      */
     public enum ClickUntil {
         OBJECTS_APPEAR, OBJECTS_VANISH
     }
     private ClickUntil clickUntil = ClickUntil.OBJECTS_APPEAR;
 
-    /**
-     * Specifies text-based termination conditions for actions.
-     * <p>
-     * Controls when actions should stop based on OCR text detection:
-     * <ul>
-     * <li>{@code NONE} - Text detection does not affect action termination (default)</li>
-     * <li>{@code TEXT_APPEARS} - Continue until specified text is found</li>
-     * <li>{@code TEXT_VANISHES} - Continue until specified text is no longer found</li>
-     * </ul>
-     * <p>
-     * Note: Since v1.0.7, text is captured in all Find operations regardless of this setting.
+    /*
+     * NONE: Text is not used as an exit condition. Important in versions >= 1.0.7 where text is saved in all Find operations.
+     * TEXT_APPEARS: Keep searching for text until some text appears.
+     * TEXT_VANISHES: Keep searching for text until it vanishes.
      */
     public enum GetTextUntil {
         NONE, TEXT_APPEARS, TEXT_VANISHES
     }
     private GetTextUntil getTextUntil = GetTextUntil.NONE;
-    /**
-     * The specific text to monitor for appearance or vanishing.
-     * <p>
-     * When empty:
-     * <ul>
-     * <li>TEXT_APPEARS succeeds when any text is detected</li>
-     * <li>TEXT_VANISHES succeeds when no text is detected</li>
-     * </ul>
-     * When specified, only this exact text is monitored for the condition.
+    /*
+    When empty, TEXT_APPEARS is achieved when any text appears and
+    TEXT_VANISHES is achieved when no text is found.
      */
     private String textToAppearOrVanish = "";
 
-    /**
-     * Custom success evaluation function.
-     * <p>
-     * Allows defining complex success criteria beyond the standard options.
-     * The predicate receives the ActionResult and returns true if the action
-     * should be considered successful. Overrides default success determination.
+    /*
+     * successEvaluation defines the success criteria for the Find operation.
      */
     @JsonIgnore
-    private Predicate<ActionResult> successCriteria;
+    private Predicate<Matches> successCriteria;
 
     /*
      * A Drag is a good example of how the below options work together.
@@ -323,7 +244,7 @@ public class ActionOptions {
     private int dragToOffsetX = 0;
     private int dragToOffsetY = 0;
 
-    private ClickType.Type clickType = ClickType.Type.LEFT;
+    private ClickOptions.Type clickType = ClickOptions.Type.LEFT;
 
     /*
      * We have 2 options for moving the mouse after a click:
@@ -337,22 +258,14 @@ public class ActionOptions {
     private Location moveMouseAfterActionTo = new Location(-1, 0); // disabled by default (x = -1)
     private Location moveMouseAfterActionBy = new Location(-1, 0);
 
-    /**
-     * Target position within match bounds.
-     * <p>
-     * Overrides default click positions defined in Pattern or StateImage objects.
-     * When specified, clicks occur at this position relative to the match
-     * (e.g., TOP_LEFT, CENTER, BOTTOM_RIGHT). Takes precedence over data type modifiers.
+    /*
+    These options modify the click location for matches.
+    They take precedence over the modifiers in the datatypes (Pattern, StateImage, etc).
+    It's best to keep the Position separate from the Location. These values are not used when they are null.
+    Since offsetX and offsetY in Location are int values, they cannot be null when a Location is not null, which
+    would be the case when creating a Position within a Location.
      */
     private Position targetPosition;
-    
-    /**
-     * Pixel offset from the target position.
-     * <p>
-     * Adds an x,y offset to the final click location after position calculation.
-     * Useful for clicking near but not exactly on matched elements. These modifiers
-     * take precedence over offsets defined in Pattern or StateImage objects.
-     */
     private Location targetOffset;
 
     /*
@@ -372,7 +285,7 @@ public class ActionOptions {
      * automation and not just for automating a process flow.
      *
      * Pauses are always associated with actions: for example, pausing before clicking can increase
-     * the chance that the click will be successful. There are also BrobotSettings for these options
+     * the chance that the click will be successful. There are also FrameworkSettings for these options
      * that apply them to every click (pauseBeforeMouseDown, pauseAfterMouseUp), but the below
      * options give more granular control.
      */
@@ -399,18 +312,6 @@ public class ActionOptions {
      *   is successful. This variable is not used with Find because Find relies solely on the maxWait variable.
      */
     private int timesToRepeatIndividualAction = 1;
-    /**
-     * Maximum iterations of the complete action sequence.
-     * <p>
-     * A sequence includes all targets in all ObjectCollections. The action repeats until:
-     * <ul>
-     * <li>Success criteria are met</li>
-     * <li>Maximum repetitions are reached</li>
-     * </ul>
-     * <p>
-     * For CompositeActions like ClickUntil, success is determined by the final action.
-     * Not used with Find operations (which use maxWait instead).
-     */
     private int maxTimesToRepeatActionSequence = 1;
     private double pauseBetweenIndividualActions = 0;
     private double pauseBetweenActionSequences = 0;
@@ -509,12 +410,12 @@ public class ActionOptions {
     /*
      * In case of multiple Find operations that include a Find.COLOR,
      * it's necessary to be able to specify a MinSimilarity for the Pattern matching Find,
-     * and a different minScore for the Color Find.
+     * and a different minSimilarity for the Color Find.
      * Scale is the same as for MinSimilarity (0-1).
      * This value is converted for the different methods (BGR, HSV, etc) in
      * the class DistSimConversion.
      */
-    private double minScore = 0.7;
+    private double minSimilarity = 0.7;
 
     /*
      * Used with color finds and motion detection.
@@ -631,7 +532,7 @@ public class ActionOptions {
                 ", hueBins=" + hueBins +
                 ", saturationBins=" + saturationBins +
                 ", valueBins=" + valueBins +
-                ", minScore=" + minScore +
+                ", minSimilarity=" + minSimilarity +
                 ", minArea=" + minArea +
                 ", maxArea=" + maxArea +
                 ", maxMovement=" + maxMovement +
@@ -665,22 +566,14 @@ public class ActionOptions {
      */
     public static class Builder {
         private Action action = Action.FIND;
-        private BiConsumer<ActionResult, List<ObjectCollection>> tempFind;
         private ClickUntil clickUntil = ClickUntil.OBJECTS_APPEAR;
-        private Find find = Find.FIRST;
-        private List<Find> findActions = new ArrayList<>();
-        private boolean keepLargerMatches = false;
-        private DoOnEach doOnEach = DoOnEach.FIRST;
-        private boolean captureImage = true;
-        private boolean useDefinedRegion = false;
         private Predicate<ActionResult> successCriteria;
-        private double similarity = Settings.MinSimilarity;
-        private Double pauseBeforeMouseDown; // I want to know if explicitly set to 0.0. // = BrobotSettings.pauseBeforeMouseDown; //Settings.DelayBeforeMouseDown;
-        private Double pauseAfterMouseDown; // = BrobotSettings.pauseAfterMouseDown; // Sikuli = Settings.DelayBeforeDrag
+        private Double pauseBeforeMouseDown; // I want to know if explicitly set to 0.0. // = FrameworkSettings.pauseBeforeMouseDown; //Settings.DelayBeforeMouseDown;
+        private Double pauseAfterMouseDown; // = FrameworkSettings.pauseAfterMouseDown; // Sikuli = Settings.DelayBeforeDrag
         private float moveMouseDelay = Settings.MoveMouseDelay;
-        private Double pauseBeforeMouseUp; // = BrobotSettings.pauseBeforeMouseUp; //Settings.DelayBeforeDrop;
-        private Double pauseAfterMouseUp; // = BrobotSettings.pauseAfterMouseUp;
-        private ClickType.Type clickType = ClickType.Type.LEFT;
+        private Double pauseBeforeMouseUp; // = FrameworkSettings.pauseBeforeMouseUp; //Settings.DelayBeforeDrop;
+        private Double pauseAfterMouseUp; // = FrameworkSettings.pauseAfterMouseUp;
+        private ClickOptions.Type clickType = ClickOptions.Type.LEFT;
         private boolean moveMouseAfterAction = false;
         private Location moveMouseAfterActionTo = new Location(-1, 0);
         private Location moveMouseAfterActionBy = new Location(-1, 0);
@@ -693,8 +586,6 @@ public class ActionOptions {
         private int timesToRepeatIndividualAction = 1; // for example, clicks per match
         private int maxTimesToRepeatActionSequence = 1;
         private double pauseBetweenActionSequences = 0; // action group: rename these to differentiate better between for example, clicks on different matches, and the repetition of clicks on different matches multiple times
-        private double maxWait = 0;
-        private int maxMatchesToActOn = -1;
         private int dragToOffsetX = 0;
         private int dragToOffsetY = 0;
         private DefineAs defineAs = DefineAs.MATCH;
@@ -719,27 +610,75 @@ public class ActionOptions {
         private int hueBins = 12;
         private int saturationBins = 2;
         private int valueBins = 1;
-        private double minScore = .7;
+        private double minSimilarity = .7;
         private int minArea = 1;
         private int maxArea = -1;
         private int maxMovement = 300;
         private Illustrate illustrate = Illustrate.MAYBE;
-        private MatchFusionMethod fusionMethod = MatchFusionMethod.NONE;
-        private int maxFusionDistanceX = 5;
-        private int maxFusionDistanceY = 5;
-        private int sceneToUseForCaptureAfterFusingMatches = 0;
         private LogEventType logType = LogEventType.ACTION;
 
         public Builder() {}
-        //public Builder(Action action) { this.action = action; }
+
+        /**
+         * Builds an immutable copy an an ActionOptions object.
+         * @param original
+         * @return a new ActionOptions object with the same values as the ActionOptions parameter.
+         */
+        public Builder(ActionOptions original) {
+            this.action = original.action;
+            this.clickUntil = original.clickUntil;
+            this.successCriteria = original.successCriteria;
+            this.pauseBeforeMouseDown = original.pauseBeforeMouseDown;
+            this.pauseAfterMouseDown = original.pauseAfterMouseDown;
+            this.moveMouseDelay = original.moveMouseDelay;
+            this.pauseBeforeMouseUp = original.pauseBeforeMouseUp;
+            this.pauseAfterMouseUp = original.pauseAfterMouseUp;
+            this.clickType = original.clickType;
+            this.moveMouseAfterAction = original.moveMouseAfterAction;
+            this.moveMouseAfterActionTo = original.moveMouseAfterActionTo != null ? new Location(original.moveMouseAfterActionTo) : null;
+            this.moveMouseAfterActionBy = original.moveMouseAfterActionBy != null ? new Location(original.moveMouseAfterActionBy) : null;
+            this.targetPosition = original.targetPosition != null ? new Position(original.targetPosition) : null;
+            this.targetOffset = original.targetOffset != null ? new Location(original.targetOffset) : null;
+            this.pauseBeforeBegin = original.pauseBeforeBegin;
+            this.pauseAfterEnd = original.pauseAfterEnd;
+            this.timesToRepeatIndividualAction = original.timesToRepeatIndividualAction;
+            this.maxTimesToRepeatActionSequence = original.maxTimesToRepeatActionSequence;
+            this.pauseBetweenIndividualActions = original.pauseBetweenIndividualActions;
+            this.pauseBetweenActionSequences = original.pauseBetweenActionSequences;
+            this.dragToOffsetX = original.dragToOffsetX;
+            this.dragToOffsetY = original.dragToOffsetY;
+            this.defineAs = original.defineAs;
+            this.addW = original.addW;
+            this.addH = original.addH;
+            this.absoluteW = original.absoluteW; // when negative, not used (addW is used)
+            this.absoluteH = original.absoluteH; // when negative, not used (addH is used)
+            this.addX = original.addX;
+            this.addY = original.addY;
+            this.addX2 = original.addX2;
+            this.addY2 = original.addY2;
+            this.highlightAllAtOnce = original.highlightAllAtOnce;
+            this.highlightSeconds = original.highlightSeconds;
+            this.highlightColor = original.highlightColor;
+            this.getTextUntil = original.getTextUntil;
+            this.typeDelay = original.typeDelay;
+            this.modifiers = original.modifiers;
+            this.scrollDirection = original.scrollDirection;
+            this.color = original.color;
+            this.diameter = original.diameter;
+            this.kmeans = original.kmeans;
+            this.hueBins = original.hueBins;
+            this.saturationBins = original.saturationBins;
+            this.valueBins = original.valueBins;
+            this.minSimilarity = original.minSimilarity;
+            this.minArea = original.minArea;
+            this.maxArea = original.maxArea;
+            this.maxMovement = original.maxMovement;
+            this.illustrate = original.illustrate;
+            this.logType = original.logType;
+        }
 
         public Builder setAction(Action action) {
             this.action = action;
-            return this;
-        }
-
-        public Builder useTempFind(BiConsumer<ActionResult, List<ObjectCollection>> tempFind) {
-            this.tempFind = tempFind;
             return this;
         }
 
@@ -1031,10 +970,6 @@ public class ActionOptions {
             return this;
         }
 
-        public Builder setMinScore(double minScore) {
-            this.minScore = minScore;
-            return this;
-        }
 
         public Builder setMinArea(int minArea) {
             this.minArea = minArea;
@@ -1151,7 +1086,7 @@ public class ActionOptions {
             actionOptions.hueBins = hueBins;
             actionOptions.saturationBins = saturationBins;
             actionOptions.valueBins = valueBins;
-            actionOptions.minScore = minScore;
+            actionOptions.minSimilarity = minSimilarity;
             actionOptions.minArea = minArea;
             actionOptions.maxArea = maxArea;
             actionOptions.maxMovement = maxMovement;

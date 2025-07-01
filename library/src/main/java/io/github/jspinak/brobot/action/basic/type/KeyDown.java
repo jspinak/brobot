@@ -1,7 +1,6 @@
 package io.github.jspinak.brobot.action.basic.type;
 
 import io.github.jspinak.brobot.action.ActionInterface;
-import io.github.jspinak.brobot.action.ActionOptions;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.action.internal.text.KeyDownWrapper;
@@ -62,7 +61,7 @@ import java.util.List;
  * @see KeyUp
  * @see TypeText
  * @see StateString
- * @see ActionOptions
+ * @see KeyDownOptions
  */
 @Component
 public class KeyDown implements ActionInterface {
@@ -75,15 +74,34 @@ public class KeyDown implements ActionInterface {
         this.time = time;
     }
 
-    // uses the first objectCollection, but this can have multiple keys
+    @Override
+    public Type getActionType() {
+        return Type.KEY_DOWN;
+    }
+
+    @Override
     public void perform(ActionResult matches, ObjectCollection... objectCollections) {
-        ActionOptions actionOptions = matches.getActionOptions();
-        if (objectCollections == null) return;
+        // Get the configuration - expecting KeyDownOptions
+        if (!(matches.getActionConfig() instanceof KeyDownOptions)) {
+            throw new IllegalArgumentException("KeyDown requires KeyDownOptions configuration");
+        }
+        KeyDownOptions options = (KeyDownOptions) matches.getActionConfig();
+        
+        if (objectCollections == null || objectCollections.length == 0) return;
+        
+        // Uses the first objectCollection, which can have multiple keys
         List<StateString> strings = objectCollections[0].getStateStrings();
-        for (StateString str : strings) {
-            keyDownWrapper.press(str.getString(), actionOptions.getModifiers());
-            if (strings.indexOf(str) < strings.size()-1)
-                time.wait(actionOptions.getPauseBetweenIndividualActions());
+        for (int i = 0; i < strings.size(); i++) {
+            StateString str = strings.get(i);
+            // Convert List<String> modifiers to single String for legacy API
+            String modifierString = options.getModifiers().isEmpty() ? "" : 
+                String.join("+", options.getModifiers());
+            keyDownWrapper.press(str.getString(), modifierString);
+            
+            // Pause between keys (except after the last one)
+            if (i < strings.size() - 1) {
+                time.wait(options.getPauseBetweenKeys());
+            }
         }
     }
 

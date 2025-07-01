@@ -52,6 +52,10 @@ import java.util.*;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SearchRegions {
 
+    public SearchRegions() {
+        // Default constructor for serialization/deserialization
+    }
+
     private List<Region> regions = new ArrayList<>();
     /**
      * The fixed region is usually defined when an image with a fixed location is found for the first time.
@@ -208,6 +212,18 @@ public class SearchRegions {
         }
 
         return copy;
+    }
+
+    /**
+     * Copy constructor for deep copying SearchRegions.
+     * @param other the SearchRegions instance to copy
+     */
+    public SearchRegions(SearchRegions other) {
+        this.regions = new ArrayList<>();
+        for (Region region : other.regions) {
+            this.regions.add(region != null ? new Region(region) : null);
+        }
+        this.fixedRegion = other.fixedRegion != null ? new Region(other.fixedRegion) : null;
     }
 
     /**

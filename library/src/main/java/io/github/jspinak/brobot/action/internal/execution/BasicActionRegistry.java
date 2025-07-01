@@ -6,15 +6,15 @@ import io.github.jspinak.brobot.action.basic.classify.Classify;
 import io.github.jspinak.brobot.action.basic.wait.WaitVanish;
 import io.github.jspinak.brobot.action.basic.click.Click;
 import io.github.jspinak.brobot.action.basic.find.Find;
+import io.github.jspinak.brobot.action.basic.highlight.Highlight;
 import io.github.jspinak.brobot.action.basic.mouse.MouseDown;
 import io.github.jspinak.brobot.action.basic.mouse.MouseUp;
 import io.github.jspinak.brobot.action.basic.mouse.MoveMouse;
 import io.github.jspinak.brobot.action.basic.mouse.ScrollMouseWheel;
+import io.github.jspinak.brobot.action.basic.region.DefineRegion;
 import io.github.jspinak.brobot.action.basic.type.KeyDown;
 import io.github.jspinak.brobot.action.basic.type.KeyUp;
 import io.github.jspinak.brobot.action.basic.type.TypeText;
-import io.github.jspinak.brobot.action.basic.visual.DefineRegion;
-import io.github.jspinak.brobot.action.basic.visual.Highlight;
 
 import org.springframework.stereotype.Component;
 

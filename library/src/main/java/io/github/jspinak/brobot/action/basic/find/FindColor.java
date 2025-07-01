@@ -1,6 +1,8 @@
 package io.github.jspinak.brobot.action.basic.find;
 
 import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.action.ActionConfig;
+import io.github.jspinak.brobot.action.basic.find.color.ColorFindOptions;
 import io.github.jspinak.brobot.action.internal.find.TargetImageMatchExtractor;
 import io.github.jspinak.brobot.action.internal.find.match.MatchCollectionUtilities;
 import io.github.jspinak.brobot.action.internal.find.scene.SceneAnalysisCollectionBuilder;
@@ -88,7 +90,37 @@ public class FindColor {
      * @param objectCollections three collections configuring the operation
      */
     public void find(ActionResult matches, List<ObjectCollection> objectCollections) {
-        ActionOptions actionOptions = matches.getActionOptions();
+        // Handle both ActionOptions (legacy) and ColorFindOptions (new)
+        ActionConfig config = matches.getActionConfig();
+        if (config instanceof ColorFindOptions) {
+            findWithColorOptions(matches, objectCollections, (ColorFindOptions) config);
+        } else if (config == null && matches.getActionOptions() != null) {
+            // Legacy path for backward compatibility
+            findWithActionOptions(matches, objectCollections, matches.getActionOptions());
+        } else {
+            throw new IllegalArgumentException("FindColor requires ColorFindOptions or ActionOptions");
+        }
+    }
+    
+    private void findWithColorOptions(ActionResult matches, List<ObjectCollection> objectCollections, ColorFindOptions colorOptions) {
+        if (colorOptions.getDiameter() < 0) return;
+        Set<StateImage> targetImages = getSceneAnalysisCollection.getTargetImages(objectCollections);
+        
+        // Convert ColorFindOptions to ActionOptions for now (until internal methods are updated)
+        ActionOptions actionOptions = convertToActionOptions(colorOptions);
+        ActionResult classMatches = getClassMatches.getMatches(matches.getSceneAnalysisCollection(), targetImages, actionOptions);
+        matches.addAllResults(classMatches);
+        
+        // For ColorFindOptions, we check the color strategy instead of action type
+        if (colorOptions.getColor() == ColorFindOptions.Color.CLASSIFICATION) {
+            matches.getMatchList().sort(Comparator.comparing(Match::size).reversed());
+        } else {
+            matches.getMatchList().sort(Comparator.comparingDouble(Match::getScore).reversed());
+        }
+        matchOps.limitNumberOfMatches(matches, actionOptions);
+    }
+    
+    private void findWithActionOptions(ActionResult matches, List<ObjectCollection> objectCollections, ActionOptions actionOptions) {
         if (actionOptions.getDiameter() < 0) return;
         Set<StateImage> targetImages = getSceneAnalysisCollection.getTargetImages(objectCollections);
         ActionResult classMatches = getClassMatches.getMatches(matches.getSceneAnalysisCollection(), targetImages, actionOptions);
@@ -97,6 +129,31 @@ public class FindColor {
             matches.getMatchList().sort(Comparator.comparing(Match::size).reversed());
         else matches.getMatchList().sort(Comparator.comparingDouble(Match::getScore).reversed());
         matchOps.limitNumberOfMatches(matches, actionOptions);
+    }
+    
+    private ActionOptions convertToActionOptions(ColorFindOptions colorOptions) {
+        ActionOptions.Builder builder = new ActionOptions.Builder();
+        builder.setDiameter(colorOptions.getDiameter());
+        builder.setKmeans(colorOptions.getKmeans());
+        builder.setSearchRegions(colorOptions.getSearchRegions());
+        
+        // Map color strategy to action type
+        if (colorOptions.getColor() == ColorFindOptions.Color.CLASSIFICATION) {
+            builder.setAction(ActionOptions.Action.CLASSIFY);
+        } else {
+            builder.setAction(ActionOptions.Action.FIND);
+        }
+        
+        // Map other common properties from BaseFindOptions
+        builder.setMinSimilarity(colorOptions.getSimilarity());
+        builder.setMaxMatchesToActOn(colorOptions.getMaxMatchesToActOn());
+        builder.setUseDefinedRegion(colorOptions.isUseDefinedRegion());
+        
+        // Map properties from ActionConfig
+        builder.setPauseBeforeBegin(colorOptions.getPauseBeforeBegin());
+        builder.setPauseAfterEnd(colorOptions.getPauseAfterEnd());
+        
+        return builder.build();
     }
 
 }

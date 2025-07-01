@@ -2,7 +2,7 @@
 package io.github.jspinak.brobot.runner.dsl.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -22,13 +22,13 @@ import lombok.NoArgsConstructor;
  * <pre>
  * // Click on a login button
  * ActionStep loginStep = new ActionStep(
- *     new ActionOptions.Builder().action(Action.CLICK).build(),
+ *     new ClickOptions.Builder().build(),
  *     new ObjectCollection.Builder().withImages(loginButton).build()
  * );
  * </pre>
  *
  * @see TaskSequence
- * @see ActionOptions
+ * @see ActionConfig
  * @see ObjectCollection
  */
 @Data // Provides getters, setters, toString, equals, hashCode
@@ -41,7 +41,7 @@ public class ActionStep {
      * Specifies the type of action, timing parameters, success criteria,
      * and other behavioral options.
      */
-    private ActionOptions actionOptions;
+    private ActionConfig actionConfig;
     
     /**
      * The collection of target objects for this action.
@@ -61,7 +61,7 @@ public class ActionStep {
     public String toString() {
         // Custom toString logic is preserved
         StringBuilder sb = new StringBuilder();
-        sb.append("Action: ").append(actionOptions.getAction()).append(", ");
+        sb.append("Action: ").append(actionConfig.getClass().getSimpleName()).append(", ");
         sb.append("StateImages: [");
         if (objectCollection != null && objectCollection.getStateImages() != null && !objectCollection.getStateImages().isEmpty()) {
             objectCollection.getStateImages().forEach(si ->

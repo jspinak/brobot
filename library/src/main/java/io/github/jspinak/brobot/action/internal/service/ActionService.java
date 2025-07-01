@@ -2,6 +2,7 @@ package io.github.jspinak.brobot.action.internal.service;
 
 import io.github.jspinak.brobot.action.ActionInterface;
 import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.basic.find.FindStrategyRegistry;
 import io.github.jspinak.brobot.action.internal.execution.BasicActionRegistry;
 import io.github.jspinak.brobot.action.internal.execution.CompositeActionRegistry;
@@ -101,6 +102,100 @@ public class ActionService {
      */
     public void setCustomFind(BiConsumer<ActionResult, List<ObjectCollection>> customFind) {
         findFunctions.addCustomFind(customFind);
+    }
+
+    /**
+     * Resolves the appropriate action implementation for the given ActionConfig.
+     * <p>
+     * Since ActionConfig is type-specific (e.g., ClickOptions, FindOptions),
+     * this method determines the action type based on the config class name
+     * and returns the corresponding implementation.
+     *
+     * @param actionConfig Configuration specifying the desired action
+     * @return Optional containing the action implementation, or empty if not found
+     */
+    public Optional<ActionInterface> getAction(ActionConfig actionConfig) {
+        // Map config class names to action types
+        String configClassName = actionConfig.getClass().getSimpleName();
+        
+        // Pattern-based find operations
+        if (configClassName.contains("FindOptions") || configClassName.contains("PatternFindOptions")) {
+            return basicAction.getAction(ActionOptions.Action.FIND);
+        }
+        // Color-based find operations
+        else if (configClassName.contains("ColorFindOptions")) {
+            return basicAction.getAction(ActionOptions.Action.FIND);
+        }
+        // Text-based find operations
+        else if (configClassName.contains("TextFindOptions")) {
+            return basicAction.getAction(ActionOptions.Action.FIND);
+        }
+        // Histogram-based find operations
+        else if (configClassName.contains("HistogramFindOptions")) {
+            return basicAction.getAction(ActionOptions.Action.FIND);
+        }
+        // Motion-based find operations
+        else if (configClassName.contains("MotionFindOptions")) {
+            return basicAction.getAction(ActionOptions.Action.FIND);
+        }
+        // Pixel-based find operations
+        else if (configClassName.contains("DynamicPixelsFindOptions")) {
+            return basicAction.getAction(ActionOptions.Action.FIND);
+        }
+        else if (configClassName.contains("FixedPixelsFindOptions")) {
+            return basicAction.getAction(ActionOptions.Action.FIND);
+        }
+        // Click operations
+        else if (configClassName.contains("ClickOptions")) {
+            return basicAction.getAction(ActionOptions.Action.CLICK);
+        }
+        // Type operations
+        else if (configClassName.contains("TypeOptions")) {
+            return basicAction.getAction(ActionOptions.Action.TYPE);
+        }
+        // Mouse operations
+        else if (configClassName.contains("MouseMoveOptions")) {
+            return basicAction.getAction(ActionOptions.Action.MOVE);
+        }
+        else if (configClassName.contains("MouseDownOptions")) {
+            return basicAction.getAction(ActionOptions.Action.MOUSE_DOWN);
+        }
+        else if (configClassName.contains("MouseUpOptions")) {
+            return basicAction.getAction(ActionOptions.Action.MOUSE_UP);
+        }
+        else if (configClassName.contains("ScrollOptions")) {
+            return basicAction.getAction(ActionOptions.Action.SCROLL_MOUSE_WHEEL);
+        }
+        // Visual operations
+        else if (configClassName.contains("HighlightOptions")) {
+            return basicAction.getAction(ActionOptions.Action.HIGHLIGHT);
+        }
+        else if (configClassName.contains("DefineOptions")) {
+            return basicAction.getAction(ActionOptions.Action.DEFINE);
+        }
+        // Wait operations
+        else if (configClassName.contains("VanishOptions")) {
+            return basicAction.getAction(ActionOptions.Action.VANISH);
+        }
+        // Key operations
+        else if (configClassName.contains("KeyDownOptions")) {
+            return basicAction.getAction(ActionOptions.Action.KEY_DOWN);
+        }
+        else if (configClassName.contains("KeyUpOptions")) {
+            return basicAction.getAction(ActionOptions.Action.KEY_UP);
+        }
+        // Composite operations
+        else if (configClassName.contains("DragOptions")) {
+            return compositeAction.getAction(ActionOptions.Action.DRAG);
+        }
+        else if (configClassName.contains("ClickUntilOptions")) {
+            return compositeAction.getAction(ActionOptions.Action.CLICK_UNTIL);
+        }
+        else if (configClassName.contains("ClassifyOptions")) {
+            return basicAction.getAction(ActionOptions.Action.CLASSIFY);
+        }
+        
+        return Optional.empty();
     }
 
 }

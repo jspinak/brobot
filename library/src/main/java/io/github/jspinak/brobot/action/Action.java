@@ -1,6 +1,7 @@
 package io.github.jspinak.brobot.action;
 
 import io.github.jspinak.brobot.action.internal.execution.ActionExecution;
+import io.github.jspinak.brobot.action.internal.execution.ActionChainExecutor;
 import io.github.jspinak.brobot.action.internal.service.ActionService;
 import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
@@ -51,20 +52,24 @@ public class Action {
 
     private final ActionExecution actionExecution;
     private final ActionService actionService;
+    private final ActionChainExecutor actionChainExecutor;
 
     /**
      * Constructs an Action instance with required dependencies.
      * <p>
-     * Uses dependency injection to wire the action execution engine and service
-     * layer. The ActionExecution handles the lifecycle management while the
-     * ActionService provides the registry of available actions.
+     * Uses dependency injection to wire the action execution engine, service
+     * layer, and chain executor. The ActionExecution handles the lifecycle management,
+     * the ActionService provides the registry of available actions, and the
+     * ActionChainExecutor handles chained action sequences.
      *
      * @param actionExecution handles action lifecycle, timing, and cross-cutting concerns
      * @param actionService provides access to registered action implementations
+     * @param actionChainExecutor handles execution of chained action sequences
      */
-    public Action(ActionExecution actionExecution, ActionService actionService) {
+    public Action(ActionExecution actionExecution, ActionService actionService, ActionChainExecutor actionChainExecutor) {
         this.actionExecution = actionExecution;
         this.actionService = actionService;
+        this.actionChainExecutor = actionChainExecutor;
     }
 
     /**
@@ -79,6 +84,19 @@ public class Action {
      */
     public ActionResult perform(ActionOptions actionOptions, ObjectCollection... objectCollections) {
         return perform("", actionOptions, objectCollections);
+    }
+    
+    /**
+     * Executes a GUI automation action with the specified configuration and target objects.
+     * 
+     * <p>This method uses the new ActionConfig approach for more type-safe action configuration.</p>
+     * 
+     * @param actionConfig      configuration specifying the action type and parameters
+     * @param objectCollections target GUI elements to act upon (images, regions, locations, etc.)
+     * @return an ActionResult containing all results from the action execution
+     */
+    public ActionResult perform(ActionConfig actionConfig, ObjectCollection... objectCollections) {
+        return perform("", actionConfig, objectCollections);
     }
 
     /**
@@ -101,6 +119,42 @@ public class Action {
             return new ActionResult();
         }
         return actionExecution.perform(action.get(), actionDescription, actionOptions, objectCollections);
+    }
+    
+    /**
+     * Executes a GUI automation action with a descriptive label using ActionConfig.
+     * 
+     * <p>This method uses the new ActionConfig approach for more type-safe action configuration,
+     * while still providing human-readable descriptions for debugging and logging.</p>
+     * 
+     * @param actionDescription human-readable description of what this action accomplishes
+     * @param actionConfig      configuration specifying the action type and parameters
+     * @param objectCollections target GUI elements to act upon
+     * @return an ActionResult containing all results from the action execution
+     */
+    public ActionResult perform(String actionDescription, ActionConfig actionConfig, ObjectCollection... objectCollections) {
+        for (ObjectCollection objColl : objectCollections) objColl.resetTimesActedOn();
+        
+        // Check if this config has subsequent actions chained
+        if (!actionConfig.getSubsequentActions().isEmpty()) {
+            // Build an ActionChainOptions from the config and its subsequent actions
+            ActionChainOptions.Builder chainBuilder = new ActionChainOptions.Builder(actionConfig);
+            for (ActionConfig nextConfig : actionConfig.getSubsequentActions()) {
+                chainBuilder.then(nextConfig);
+            }
+            ActionChainOptions chainOptions = chainBuilder.build();
+            
+            // Execute the chain
+            return actionChainExecutor.executeChain(chainOptions, new ActionResult(), objectCollections);
+        }
+        
+        // Single action execution
+        Optional<ActionInterface> action = actionService.getAction(actionConfig);
+        if (action.isEmpty()) {
+            ConsoleReporter.println("Not a valid Action for " + actionConfig.getClass().getSimpleName());
+            return new ActionResult();
+        }
+        return actionExecution.perform(action.get(), actionDescription, actionConfig, objectCollections);
     }
 
     /**
@@ -144,6 +198,20 @@ public class Action {
      */
     public ActionResult perform(ActionOptions actionOptions, StateImage... stateImages) {
         return perform(actionOptions, new ObjectCollection.Builder().withImages(stateImages).build());
+    }
+    
+    /**
+     * Performs an action on state images with specified configuration.
+     * <p>
+     * This convenience method automatically wraps the provided StateImages into
+     * an ObjectCollection, using the new ActionConfig approach.
+     *
+     * @param actionConfig configuration specifying action type and parameters
+     * @param stateImages target images to act upon
+     * @return ActionResult containing operation results and execution details
+     */
+    public ActionResult perform(ActionConfig actionConfig, StateImage... stateImages) {
+        return perform(actionConfig, new ObjectCollection.Builder().withImages(stateImages).build());
     }
 
     /**

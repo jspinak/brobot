@@ -107,8 +107,8 @@
  *   <li>Fallback strategies for edge cases</li>
  * </ul>
  * 
- * @see io.github.jspinak.brobot.action.basic.visual.DefineRegion
- * @see io.github.jspinak.brobot.action.basic.visual.DefineInsideAnchors
+ * @see io.github.jspinak.brobot.action.basic.region.DefineRegion
+ * @see io.github.jspinak.brobot.action.basic.region.DefineInsideAnchors
  * @see io.github.jspinak.brobot.model.Region
  */
 package io.github.jspinak.brobot.action.internal.capture;

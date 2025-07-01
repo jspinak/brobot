@@ -2,6 +2,7 @@ package io.github.jspinak.brobot.action.internal.factory;
 
 import io.github.jspinak.brobot.model.analysis.scene.SceneAnalyses;
 import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.action.internal.execution.ActionLifecycle;
@@ -79,11 +80,34 @@ public class ActionResultFactory {
     public ActionResult init(ActionOptions actionOptions, String actionDescription, ObjectCollection... objectCollections) {
         ActionResult matches = new ActionResult();
         matches.setActionLifecycle(new ActionLifecycle(time.now(), actionOptions.getMaxWait()));
-        matches.setActionOptions(actionOptions);
+        // ActionResult no longer uses ActionOptions, it uses ActionConfig
+        // matches.setActionOptions(actionOptions);
         matches.setActionDescription(actionDescription);
         SceneAnalyses sceneAnalysisCollection = new SceneAnalyses();
         if (actionOptions.getFind() == ActionOptions.Find.COLOR) sceneAnalysisCollection = getSceneAnalysisCollection.
                 get(Arrays.asList(objectCollections), 1, 0, actionOptions);
+        matches.setSceneAnalysisCollection(sceneAnalysisCollection);
+        return matches;
+    }
+
+    /**
+     * Creates a fully initialized ActionResult for a new action execution using ActionConfig.
+     * <p>
+     * This method sets up all required components for action execution with the new ActionConfig approach.
+     *
+     * @param actionConfig Configuration controlling action behavior
+     * @param actionDescription Human-readable description for logging
+     * @param objectCollections Target objects for the action (images, regions, etc.)
+     * @return Fully initialized ActionResult ready for action execution
+     */
+    public ActionResult init(ActionConfig actionConfig, String actionDescription, ObjectCollection... objectCollections) {
+        ActionResult matches = new ActionResult();
+        // For now, use a default max wait time until ActionConfig includes this
+        matches.setActionLifecycle(new ActionLifecycle(time.now(), 10.0));
+        matches.setActionConfig(actionConfig);
+        matches.setActionDescription(actionDescription);
+        SceneAnalyses sceneAnalysisCollection = new SceneAnalyses();
+        // Scene analysis collection will be handled differently with ActionConfig
         matches.setSceneAnalysisCollection(sceneAnalysisCollection);
         return matches;
     }
