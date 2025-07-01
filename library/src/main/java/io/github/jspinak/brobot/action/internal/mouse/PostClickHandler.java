@@ -1,6 +1,7 @@
 package io.github.jspinak.brobot.action.internal.mouse;
 
 import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.basic.click.Click;
 
 import org.springframework.stereotype.Component;
@@ -68,5 +69,33 @@ public class PostClickHandler {
         if (actionOptions.getMoveMouseAfterActionBy().defined())
             return moveMouseWrapper.move(actionOptions.getMoveMouseAfterActionBy());
         return moveMouseWrapper.move(actionOptions.getMoveMouseAfterActionTo());
+    }
+    
+    /**
+     * Handles post-click operations for ActionConfig-based actions.
+     * 
+     * <p>In the new ActionConfig architecture, mouse movement after clicks should be
+     * handled through action chaining rather than built-in post-click movement.
+     * This method is provided for compatibility but performs no operation.</p>
+     * 
+     * <p>To move the mouse after a click with ActionConfig:
+     * <pre>{@code
+     * ClickOptions clickWithMove = new ClickOptions.Builder()
+     *     .then(new MouseMoveOptions.Builder()
+     *         .setLocation(targetLocation)
+     *         .build())
+     *     .build();
+     * }</pre>
+     * </p>
+     * 
+     * @param actionConfig The action configuration (unused in this implementation)
+     * @return false, as post-click movement is handled through action chaining
+     * @deprecated Post-click mouse movement should be implemented via action chaining
+     */
+    @Deprecated
+    public boolean moveMouseAfterClick(ActionConfig actionConfig) {
+        // Post-click mouse movement is now handled through action chaining
+        // This method exists only for API compatibility during migration
+        return false;
     }
 }

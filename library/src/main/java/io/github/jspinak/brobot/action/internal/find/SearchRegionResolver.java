@@ -1,7 +1,9 @@
 package io.github.jspinak.brobot.action.internal.find;
 
 import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.ObjectCollection;
+import io.github.jspinak.brobot.action.basic.find.BaseFindOptions;
 import io.github.jspinak.brobot.model.element.Pattern;
 import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.model.element.Region;
@@ -123,6 +125,43 @@ public class SearchRegionResolver {
                 regions.addAll(stateImage.getAllSearchRegions());
             }
         }
+        return regions;
+    }
+
+    /**
+     * Collects search regions for ActionConfig-based actions.
+     * <p>
+     * This method handles the new ActionConfig approach. For find-based configurations
+     * that extend BaseFindOptions, it extracts search regions. For other action types,
+     * it returns regions from the object collections.
+     * 
+     * @param actionConfig The action configuration
+     * @param objectCollections Variable number of collections containing StateImages
+     * @return A list of all applicable search regions
+     */
+    public List<Region> getRegionsForAllImages(ActionConfig actionConfig, ObjectCollection... objectCollections) {
+        List<Region> regions = new ArrayList<>();
+        
+        // Check if this is a find-based config with search regions
+        if (actionConfig instanceof BaseFindOptions) {
+            BaseFindOptions findOptions = (BaseFindOptions) actionConfig;
+            if (findOptions.getSearchRegions() != null && findOptions.getSearchRegions().isAnyRegionDefined()) {
+                return findOptions.getSearchRegions().getAllRegions();
+            }
+        }
+        
+        // Otherwise, collect regions from object collections
+        for (ObjectCollection objColl : objectCollections) {
+            for (StateImage stateImage : objColl.getStateImages()) {
+                regions.addAll(stateImage.getAllSearchRegions());
+            }
+        }
+        
+        // Ensure at least one region is returned
+        if (regions.isEmpty()) {
+            regions.add(new Region());
+        }
+        
         return regions;
     }
 }

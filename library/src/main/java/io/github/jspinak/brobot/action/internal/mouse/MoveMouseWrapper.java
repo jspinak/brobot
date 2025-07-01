@@ -1,6 +1,7 @@
 package io.github.jspinak.brobot.action.internal.mouse;
 
 import io.github.jspinak.brobot.model.element.Location;
+import io.github.jspinak.brobot.action.internal.utility.DragCoordinateCalculator;
 import io.github.jspinak.brobot.config.FrameworkSettings;
 import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
 
@@ -66,6 +67,13 @@ public class MoveMouseWrapper {
         org.sikuli.script.Location sikuliLocation = location.sikuli();
         ConsoleReporter.print("move mouse to "+sikuliLocation+" ");
         //return new Region().mouseMove(location.getSikuliLocation()) != 0; // this can cause the script to freeze for unknown reasons
+        settingsManager.executeWithMouseSettings(
+            options.getMouseOptions(),
+            () -> {
+                // This is the only code that runs with the temporary settings.
+                new Screen().mouseMove(target.getSikuliLocation());
+            }
+        );
         return location.sikuli().hover() != null;
     }
 
@@ -100,7 +108,7 @@ public class MoveMouseWrapper {
         }
         boolean success = sikuliMove(location);
         if (!success) ConsoleReporter.print("move failed. ");
-        //else Report.print("move succeeded. ");
+        //else ConsoleReporter.print("move succeeded. ");
         return success;
     }
 

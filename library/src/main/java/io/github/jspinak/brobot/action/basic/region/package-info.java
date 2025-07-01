@@ -9,24 +9,24 @@
  * 
  * <p>These actions create or modify regions based on various criteria:</p>
  * <ul>
- *   <li><b>{@link io.github.jspinak.brobot.action.basic.visual.DefineRegion}</b> - 
+ *   <li><b>{@link io.github.jspinak.brobot.action.basic.region.DefineRegion}</b> - 
  *       Basic region definition using coordinates or existing regions</li>
- *   <li><b>{@link io.github.jspinak.brobot.action.basic.visual.DefineWithMatch}</b> - 
+ *   <li><b>{@link io.github.jspinak.brobot.action.basic.region.DefineWithMatch}</b> - 
  *       Define regions based on found matches</li>
- *   <li><b>{@link io.github.jspinak.brobot.action.basic.visual.DefineInsideAnchors}</b> - 
+ *   <li><b>{@link io.github.jspinak.brobot.action.basic.region.DefineInsideAnchors}</b> - 
  *       Create regions bounded by anchor points</li>
- *   <li><b>{@link io.github.jspinak.brobot.action.basic.visual.DefineOutsideAnchors}</b> - 
+ *   <li><b>{@link io.github.jspinak.brobot.action.basic.region.DefineOutsideAnchors}</b> - 
  *       Define regions outside of anchor boundaries</li>
- *   <li><b>{@link io.github.jspinak.brobot.action.basic.visual.DefineIncludingMatches}</b> - 
+ *   <li><b>{@link io.github.jspinak.brobot.action.basic.region.DefineIncludingMatches}</b> - 
  *       Expand regions to include all specified matches</li>
- *   <li><b>{@link io.github.jspinak.brobot.action.basic.visual.DefineWithWindow}</b> - 
+ *   <li><b>{@link io.github.jspinak.brobot.action.basic.region.DefineWithWindow}</b> - 
  *       Define regions based on application windows</li>
  * </ul>
  * 
  * <h2>Visual Feedback</h2>
  * 
  * <ul>
- *   <li><b>{@link io.github.jspinak.brobot.action.basic.visual.Highlight}</b> - 
+ *   <li><b>{@link io.github.jspinak.brobot.action.basic.highlight.Highlight}</b> - 
  *       Visually highlight regions on screen for debugging and confirmation</li>
  * </ul>
  * 
@@ -116,4 +116,4 @@
  * @see io.github.jspinak.brobot.model.Region
  * @see io.github.jspinak.brobot.action.basic.find.Find
  */
-package io.github.jspinak.brobot.action.basic.visual;
+package io.github.jspinak.brobot.action.basic.region;

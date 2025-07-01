@@ -1,5 +1,8 @@
 package io.github.jspinak.brobot.action;
 
+import io.github.jspinak.brobot.action.internal.execution.BasicActionRegistry;
+import io.github.jspinak.brobot.action.internal.execution.CompositeActionRegistry;
+
 /**
  * Core interface for all actions in the Brobot model-based GUI automation framework.
  * 
@@ -51,6 +54,51 @@ package io.github.jspinak.brobot.action;
  * @see CompositeActionRegistry
  */
 public interface ActionInterface {
+
+    /**
+     * Defines the standard types of GUI automation actions available in the framework.
+     * This enum serves as an internal identifier for logging and dispatching.
+     * <p>
+     * Actions are divided into two categories:
+     * <ul>
+     * <li><strong>Basic Actions:</strong> Atomic operations that directly interact with the GUI</li>
+     * <li><strong>Composite Actions:</strong> Complex operations that combine multiple basic actions</li>
+     * </ul>
+     * <p>
+     * <strong>Basic Actions:</strong>
+     * <ul>
+     * <li>{@code FIND} - Searches for visual patterns on screen</li>
+     * <li>{@code CLICK} - Performs mouse click operations</li>
+     * <li>{@code DEFINE} - Captures a screen region with specific coordinates</li>
+     * <li>{@code TYPE} - Sends keyboard input to the active window</li>
+     * <li>{@code MOVE} - Moves the mouse cursor to a location</li>
+     * <li>{@code VANISH} - Waits for elements to disappear from screen</li>
+     * <li>{@code HIGHLIGHT} - Draws visual indicators on matches or regions</li>
+     * <li>{@code SCROLL_MOUSE_WHEEL} - Performs mouse wheel scrolling</li>
+     * <li>{@code MOUSE_DOWN} - Presses and holds mouse button</li>
+     * <li>{@code MOUSE_UP} - Releases mouse button</li>
+     * <li>{@code KEY_DOWN} - Presses and holds keyboard key</li>
+     * <li>{@code KEY_UP} - Releases keyboard key</li>
+     * <li>{@code CLASSIFY} - Performs color-based classification</li>
+     * </ul>
+     * <p>
+     * <strong>Composite Actions:</strong>
+     * <ul>
+     * <li>{@code CLICK_UNTIL} - Repeatedly clicks until a condition is met</li>
+     * <li>{@code DRAG} - Performs click-and-drag operations</li>
+     * </ul>
+     */
+    enum Type {
+        FIND, CLICK, DEFINE, TYPE, MOVE, VANISH, HIGHLIGHT, SCROLL_MOUSE_WHEEL,
+        MOUSE_DOWN, MOUSE_UP, KEY_DOWN, KEY_UP, CLASSIFY,
+        CLICK_UNTIL, DRAG
+    }
+
+    /**
+     * Returns the standard type of this action implementation.
+     * @return The ActionInterface.Type enum value.
+     */
+    Type getActionType();
 
     /**
      * Executes the action with the provided configuration and target objects.

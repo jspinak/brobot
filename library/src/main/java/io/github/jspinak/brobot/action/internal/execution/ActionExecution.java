@@ -3,6 +3,7 @@ package io.github.jspinak.brobot.action.internal.execution;
 import io.github.jspinak.brobot.config.FrameworkSettings;
 import io.github.jspinak.brobot.action.ActionInterface;
 import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.internal.factory.ActionResultFactory;
 import io.github.jspinak.brobot.action.internal.find.SearchRegionResolver;
 import io.github.jspinak.brobot.action.internal.utility.ActionSuccessCriteria;
@@ -196,6 +197,61 @@ public class ActionExecution {
     private void printAction(ActionOptions actionOptions, ObjectCollection... objectCollections) {
         if (ConsoleReporter.minReportingLevel(ConsoleReporter.OutputLevel.LOW)) {
             ConsoleReporter.format("|%s ", actionOptions.getAction());
+            if (objectCollections.length == 0) return;
+            List<StateImage> stImgs = objectCollections[0].getStateImages();
+            int lastIndex = stImgs.size() - 1;
+            for (StateImage sio : objectCollections[0].getStateImages()) {
+                ConsoleReporter.format("%s.%s", sio.getOwnerStateName(), sio.getName());
+                String ending = stImgs.indexOf(sio) != lastIndex? "," : "|";
+                ConsoleReporter.print(ending+" ");
+            }
+        }
+    }
+
+    /**
+     * Executes an action with complete lifecycle management using ActionConfig.
+     * <p>
+     * This method is the new primary entry point that accepts ActionConfig instead of ActionOptions.
+     * It provides the same comprehensive lifecycle management as the legacy method but uses the
+     * modern configuration approach.
+     *
+     * @param actionMethod The {@link ActionInterface} implementation containing action-specific logic
+     * @param actionDescription Human-readable description of the action for logging and ML training
+     * @param actionConfig Configuration parameters controlling action behavior and success criteria
+     * @param objectCollections Variable number of {@link ObjectCollection} containing target GUI elements
+     * @return {@link ActionResult} containing matches found, success status, duration, and execution details
+     */
+    public ActionResult perform(ActionInterface actionMethod, String actionDescription, ActionConfig actionConfig,
+                               ObjectCollection... objectCollections) {
+        String sessionId = automationSession.getCurrentSessionId();
+        printActionConfig(actionConfig, objectCollections);
+        ActionResult matches = matchesInitializer.init(actionConfig, actionDescription, objectCollections);
+        time.wait(actionConfig.getPauseBeforeBegin());
+        while (actionLifecycleManagement.isMoreSequencesAllowed(matches)) {
+            actionMethod.perform(matches, objectCollections);
+            actionLifecycleManagement.incrementCompletedSequences(matches);
+        }
+        success.set(actionConfig, matches);
+        illustrateScreenshot.illustrateWhenAllowed(matches,
+                selectRegions.getRegionsForAllImages(actionConfig, objectCollections),
+                actionConfig, objectCollections);
+        time.wait(actionConfig.getPauseAfterEnd());
+        Duration duration = actionLifecycleManagement.getCurrentDuration(matches);
+        matches.setDuration(duration);
+        if (FrameworkSettings.buildDataset) datasetManager.addSetOfData(matches);
+        ConsoleReporter.println(actionConfig.getClass().getSimpleName() + " " + matches.getOutputText() + " " + matches.getSuccessSymbol());
+        if (objectCollections.length > 0) {
+            LogData logData = actionLogger.logAction(sessionId, matches, objectCollections[0]);
+        }
+        return matches;
+    }
+
+    /**
+     * Prints action details for ActionConfig-based actions.
+     */
+    private void printActionConfig(ActionConfig actionConfig, ObjectCollection... objectCollections) {
+        if (ConsoleReporter.minReportingLevel(ConsoleReporter.OutputLevel.LOW)) {
+            ConsoleReporter.format("|%s ", actionConfig.getClass().getSimpleName());
             if (objectCollections.length == 0) return;
             List<StateImage> stImgs = objectCollections[0].getStateImages();
             int lastIndex = stImgs.size() - 1;
