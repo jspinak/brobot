@@ -3,6 +3,7 @@ package io.github.jspinak.brobot.action.internal.utility;
 import org.springframework.stereotype.Component;
 
 import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.ActionResult;
 
 import java.util.HashMap;
@@ -106,6 +107,46 @@ public class ActionSuccessCriteria {
         if (actionOptions.getSuccessCriteria() != null) // new success criteria has been added to this operation
             matches.setSuccess(actionOptions.getSuccessCriteria().test(matches));
         else matches.setSuccess(getCriteria(actionOptions).test(matches)); // if not, use the above code
+    }
+
+    /**
+     * Evaluates and sets the success status for ActionConfig-based actions.
+     * <p>
+     * This method evaluates success based on the ActionConfig's success criteria.
+     * Since ActionConfig is type-specific, we derive the success based on the config type
+     * and the matches found.
+     *
+     * @param actionConfig Configuration for the action
+     * @param matches The action results to evaluate and update with success status
+     */
+    public void set(ActionConfig actionConfig, ActionResult matches) {
+        // Check if custom success criteria is provided
+        if (actionConfig.getSuccessCriteria() != null) {
+            matches.setSuccess(actionConfig.getSuccessCriteria().test(matches));
+            return;
+        }
+        
+        // Default success criteria based on common patterns
+        // Most find-based actions succeed when matches are found
+        boolean defaultSuccess = !matches.isEmpty();
+        
+        // Override for specific action types that always succeed
+        String configClassName = actionConfig.getClass().getSimpleName();
+        if (configClassName.contains("Type") || 
+            configClassName.contains("Scroll") ||
+            configClassName.contains("MouseDown") ||
+            configClassName.contains("MouseUp") ||
+            configClassName.contains("KeyDown") ||
+            configClassName.contains("KeyUp") ||
+            configClassName.contains("Wait")) {
+            defaultSuccess = true;
+        } else if (configClassName.contains("Vanish")) {
+            defaultSuccess = matches.isEmpty();
+        } else if (configClassName.contains("Define")) {
+            defaultSuccess = matches.getDefinedRegion() != null && matches.getDefinedRegion().isDefined();
+        }
+        
+        matches.setSuccess(defaultSuccess);
     }
 
 }

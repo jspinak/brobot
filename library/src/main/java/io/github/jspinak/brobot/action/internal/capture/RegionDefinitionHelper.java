@@ -2,13 +2,12 @@ package io.github.jspinak.brobot.action.internal.capture;
 
 import io.github.jspinak.brobot.action.ActionOptions;
 import io.github.jspinak.brobot.action.basic.find.Find;
-import io.github.jspinak.brobot.action.basic.visual.DefineIncludingMatches;
-import io.github.jspinak.brobot.action.basic.visual.DefineInsideAnchors;
-import io.github.jspinak.brobot.action.basic.visual.DefineOutsideAnchors;
-import io.github.jspinak.brobot.action.basic.visual.DefineRegion;
-import io.github.jspinak.brobot.action.basic.visual.DefineWithMatch;
+import io.github.jspinak.brobot.action.basic.region.DefineIncludingMatches;
+import io.github.jspinak.brobot.action.basic.region.DefineInsideAnchors;
+import io.github.jspinak.brobot.action.basic.region.DefineOutsideAnchors;
+import io.github.jspinak.brobot.action.basic.region.DefineRegion;
+import io.github.jspinak.brobot.action.basic.region.DefineWithMatch;
 import io.github.jspinak.brobot.action.internal.factory.ActionResultFactory;
-import io.github.jspinak.brobot.action.internal.utility.CopyActionOptions;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.model.element.Region;
@@ -104,7 +103,7 @@ public class RegionDefinitionHelper {
      *                          from the first collection are searched when using Find.EACH.
      */
     public void findMatches(ActionResult matches, ObjectCollection... objectCollections) {
-        ActionOptions findOptions = CopyActionOptions.copyImmutableOptions(matches.getActionOptions());
+        ActionOptions findOptions = new ActionOptions.Builder(matches.getActionOptions()).build();
         findOptions.setFind(ActionOptions.Find.EACH);
         findOptions.setAddH(0);
         findOptions.setAddW(0);

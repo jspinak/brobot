@@ -32,7 +32,7 @@
         },
         "returnType": {
           "type": "string",
-          "enum": ["void", "boolean", "string", "int", "double", "region", "matches", "stateImage", "stateRegion", "object"],
+          "enum": ["void", "boolean", "string", "int", "double", "region", "matches", "stateImage", "stateRegion", "stateString", "taskSequence", "object"],
           "description": "Return type of the business task"
         },
         "parameters": {
@@ -48,7 +48,7 @@
               },
               "type": {
                 "type": "string",
-                "enum": ["boolean", "string", "int", "double", "region", "matches", "stateImage", "stateRegion", "object"],
+                "enum": ["boolean", "string", "int", "double", "region", "matches", "stateImage", "stateRegion", "stateString", "taskSequence", "object"],
                 "description": "Type of the parameter"
               }
             }
@@ -102,7 +102,7 @@
         },
         "type": {
           "type": "string",
-          "enum": ["boolean", "string", "int", "double", "region", "matches", "stateImage", "stateRegion", "actionOptions", "objectCollection", "object"],
+          "enum": ["boolean", "string", "int", "double", "region", "matches", "stateImage", "stateRegion", "stateString", "actionOptions", "actionConfig", "objectCollection", "taskSequence", "object"],
           "description": "Type of the variable"
         },
         "value": {
@@ -347,7 +347,7 @@
         },
         "builderType": {
           "type": "string",
-          "enum": ["actionOptions", "objectCollection"],
+          "enum": ["actionOptions", "actionConfig", "objectCollection", "taskSequence", "clickOptions", "findOptions", "typeOptions", "dragOptions", "mouseMoveOptions", "mouseDownOptions", "mouseUpOptions", "scrollOptions", "defineOptions", "highlightOptions", "vanishOptions", "clickUntilOptions"],
           "description": "Type of builder"
         },
         "methods": {

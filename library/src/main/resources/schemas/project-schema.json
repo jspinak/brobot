@@ -235,15 +235,24 @@
     },
     "actionStep": {
       "type": "object",
-      "required": ["actionOptions", "objectCollection"],
+      "required": ["objectCollection"],
       "properties": {
         "actionOptions": {
-          "$ref": "#/definitions/actionOptions"
+          "$ref": "#/definitions/actionOptions",
+          "description": "Legacy action options (deprecated, use actionConfig instead)"
+        },
+        "actionConfig": {
+          "$ref": "#/definitions/actionConfig",
+          "description": "New polymorphic action configuration"
         },
         "objectCollection": {
           "$ref": "#/definitions/objectCollection"
         }
-      }
+      },
+      "oneOf": [
+        {"required": ["actionOptions", "objectCollection"]},
+        {"required": ["actionConfig", "objectCollection"]}
+      ]
     },
     "actionOptions": {
       "type": "object",
@@ -730,6 +739,42 @@
           "default": true
         }
       }
+    },
+    "actionConfig": {
+      "type": "object",
+      "description": "Polymorphic action configuration",
+      "required": ["@type"],
+      "properties": {
+        "@type": {
+          "type": "string",
+          "description": "Type discriminator for the action configuration",
+          "enum": [
+            "BaseFindOptions", "HistogramFindOptions", "MotionFindOptions", "VanishOptions",
+            "ClickOptions", "TypeOptions", "MouseMoveOptions", "MouseDownOptions", "MouseUpOptions",
+            "ScrollMouseWheelOptions", "DefineRegionOptions", "HighlightOptions",
+            "DragOptions", "ClickUntilOptions", "PlaybackOptions",
+            "find", "histogramFind", "motionFind", "vanish",
+            "click", "type", "move", "mouseDown", "mouseUp",
+            "scroll", "define", "highlight", "drag", "clickUntil", "playback"
+          ]
+        },
+        "pauseBeforeBegin": {
+          "type": "number",
+          "description": "Pause in seconds before executing the action",
+          "minimum": 0
+        },
+        "pauseAfterEnd": {
+          "type": "number",
+          "description": "Pause in seconds after executing the action",
+          "minimum": 0
+        },
+        "illustrate": {
+          "type": "string",
+          "enum": ["YES", "NO", "USE_GLOBAL"],
+          "description": "Whether to illustrate this action"
+        }
+      },
+      "additionalProperties": true
     }
   }
 }

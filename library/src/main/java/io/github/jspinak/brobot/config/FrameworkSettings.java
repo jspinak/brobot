@@ -3,6 +3,7 @@ package io.github.jspinak.brobot.config;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.github.jspinak.brobot.action.ActionOptions;
 import io.github.jspinak.brobot.runner.project.AutomationProject;
 
 /**
@@ -57,6 +58,11 @@ import io.github.jspinak.brobot.runner.project.AutomationProject;
  * @see AutomationProject
  */
 public class FrameworkSettings {
+
+    /**
+     * Mouse Control - Configuration for mouse action timing and behavior
+     */
+    public static float moveMouseDelay = 0.5f; 
 
     /**
      * Delay in seconds before initiating a mouse down action.

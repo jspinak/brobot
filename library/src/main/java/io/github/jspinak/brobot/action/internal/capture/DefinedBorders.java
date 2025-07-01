@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.action.internal.capture;
 
-import io.github.jspinak.brobot.action.basic.visual.DefineRegion;
+import io.github.jspinak.brobot.action.basic.region.DefineRegion;
 import io.github.jspinak.brobot.model.element.Positions;
 
 import java.util.HashMap;

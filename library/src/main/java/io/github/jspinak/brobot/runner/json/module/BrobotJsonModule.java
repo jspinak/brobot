@@ -2,6 +2,7 @@ package io.github.jspinak.brobot.runner.json.module;
 
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.model.element.Image;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
@@ -30,6 +31,7 @@ import org.springframework.stereotype.Component;
  * <p>
  * Registered deserializers:
  * <ul>
+ * <li>{@link ActionConfig} - Deserializes polymorphic action configuration objects</li>
  * <li>{@link Image} - Reconstructs Image objects from JSON with proper resource loading</li>
  * <li>{@link SearchRegions} - Deserializes search region configurations</li>
  * </ul>
@@ -56,6 +58,7 @@ public class BrobotJsonModule extends SimpleModule {
      * @param objectCollectionSerializer Handles serialization of object collections with state references
      * @param matSerializer Handles serialization of OpenCV Mat objects to base64
      * @param imageSerializer Handles serialization of Brobot Image objects
+     * @param actionConfigDeserializer Handles deserialization of polymorphic action configuration objects
      * @param imageDeserializer Handles deserialization of Brobot Image objects
      * @param searchRegionsDeserializer Handles deserialization of search region configurations
      */
@@ -65,6 +68,7 @@ public class BrobotJsonModule extends SimpleModule {
             ObjectCollectionSerializer objectCollectionSerializer,
             MatSerializer matSerializer,
             ImageSerializer imageSerializer,
+            ActionConfigDeserializer actionConfigDeserializer,
             ImageDeserializer imageDeserializer,
             SearchRegionsDeserializer searchRegionsDeserializer
     ) {
@@ -75,6 +79,7 @@ public class BrobotJsonModule extends SimpleModule {
                 objectCollectionSerializer,
                 matSerializer,
                 imageSerializer,
+                actionConfigDeserializer,
                 imageDeserializer,
                 searchRegionsDeserializer
         );
@@ -93,6 +98,7 @@ public class BrobotJsonModule extends SimpleModule {
      * @param objectCollectionSerializer Serializer for collections of Brobot objects
      * @param matSerializer Serializer for OpenCV Mat objects
      * @param imageSerializer Serializer for Brobot Image objects
+     * @param actionConfigDeserializer Deserializer for polymorphic ActionConfig objects
      * @param imageDeserializer Deserializer for Brobot Image objects
      * @param searchRegionsDeserializer Deserializer for SearchRegions configurations
      */
@@ -102,6 +108,7 @@ public class BrobotJsonModule extends SimpleModule {
             ObjectCollectionSerializer objectCollectionSerializer,
             MatSerializer matSerializer,
             ImageSerializer imageSerializer,
+            ActionConfigDeserializer actionConfigDeserializer,
             ImageDeserializer imageDeserializer,
             SearchRegionsDeserializer searchRegionsDeserializer
     ) {
@@ -113,6 +120,7 @@ public class BrobotJsonModule extends SimpleModule {
         addSerializer(Image.class, imageSerializer);
 
         // Register deserializers
+        addDeserializer(ActionConfig.class, actionConfigDeserializer);
         addDeserializer(Image.class, imageDeserializer);
         addDeserializer(SearchRegions.class, searchRegionsDeserializer);
     }

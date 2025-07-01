@@ -101,7 +101,7 @@ public class GetPixelAnalysisCollectionScores {
      * </ul>
      * 
      * @param pixelAnalysisCollection the collection to update with scores
-     * @param actionOptions contains minScore threshold configuration
+     * @param actionOptions contains minSimilarity threshold configuration
      */
     public void setScores(PixelProfiles pixelAnalysisCollection, ActionOptions actionOptions) {
         Mat scoresBGR = setScores(pixelAnalysisCollection, BGR);
