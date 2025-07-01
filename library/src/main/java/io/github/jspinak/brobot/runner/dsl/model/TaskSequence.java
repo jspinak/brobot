@@ -2,7 +2,7 @@
 package io.github.jspinak.brobot.runner.dsl.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import lombok.Data;
 
@@ -55,7 +55,7 @@ import java.util.List;
  * 
  * @since 1.0
  * @see ActionStep
- * @see ActionOptions
+ * @see ActionConfig
  * @see ObjectCollection
  * @see TaskSequenceStateTransition
  */
@@ -78,8 +78,8 @@ public class TaskSequence {
      * @param options The action configuration for the initial step
      * @param objects The target objects for the initial step
      */
-    public TaskSequence(ActionOptions options, ObjectCollection objects) {
-        steps.add(new ActionStep(options, objects));
+    public TaskSequence(ActionConfig config, ObjectCollection objects) {
+        steps.add(new ActionStep(config, objects));
     }
 
     /**
@@ -89,8 +89,8 @@ public class TaskSequence {
      * @param options The action configuration for the new step
      * @param objects The target objects for the new step
      */
-    public void addStep(ActionOptions options, ObjectCollection objects) {
-        steps.add(new ActionStep(options, objects));
+    public void addStep(ActionConfig config, ObjectCollection objects) {
+        steps.add(new ActionStep(config, objects));
     }
 
     /**

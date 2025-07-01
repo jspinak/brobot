@@ -1,10 +1,11 @@
-package io.github.jspinak.brobot.action.basic.visual;
+package io.github.jspinak.brobot.action.basic.region;
 
 import io.github.jspinak.brobot.action.ActionInterface;
-import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.action.internal.capture.RegionDefinitionHelper;
+import io.github.jspinak.brobot.action.internal.capture.RegionDefinitionHelperV2;
 import io.github.jspinak.brobot.model.element.Location;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.match.Match;
@@ -22,8 +23,8 @@ import org.springframework.stereotype.Component;
  * <ul>
  *   <li>Initializing a 1x1 region at the first anchor point</li>
  *   <li>Expanding the region boundaries outward for each subsequent anchor</li>
- *   <li>Including any additional locations specified in ActionOptions</li>
- *   <li>Applying final adjustments from ActionOptions</li>
+ *   <li>Including any additional locations specified in DefineRegionOptions</li>
+ *   <li>Applying final adjustments from DefineRegionOptions</li>
  * </ul>
  * </p>
  * 
@@ -37,15 +38,22 @@ import org.springframework.stereotype.Component;
  * 
  * @see DefineInsideAnchors
  * @see DefineRegion
- * @see ActionOptions.DefineAs#OUTSIDE_ANCHORS
+ * @see DefineRegionOptions.DefineAs#OUTSIDE_ANCHORS
  */
 @Component
 public class DefineOutsideAnchors implements ActionInterface {
 
-    private final RegionDefinitionHelper defineHelper;
+    @Override
+    public Type getActionType() {
+        return Type.DEFINE;
+    }
 
-    public DefineOutsideAnchors(RegionDefinitionHelper defineHelper) {
+    private final RegionDefinitionHelper defineHelper;
+    private final RegionDefinitionHelperV2 defineHelperV2;
+
+    public DefineOutsideAnchors(RegionDefinitionHelper defineHelper, RegionDefinitionHelperV2 defineHelperV2) {
         this.defineHelper = defineHelper;
+        this.defineHelperV2 = defineHelperV2;
     }
 
     /**
@@ -58,12 +66,12 @@ public class DefineOutsideAnchors implements ActionInterface {
      *   <li>Initializes a region from the first anchor point</li>
      *   <li>Expands the region to include all other anchor points</li>
      *   <li>Further expands to include any specified locations</li>
-     *   <li>Applies final adjustments from ActionOptions</li>
+     *   <li>Applies final adjustments from DefineRegionOptions</li>
      *   <li>Adds the expanded region to the ActionResult</li>
      * </ol>
      * </p>
      * 
-     * @param matches The ActionResult containing ActionOptions and to which the
+     * @param matches The ActionResult containing DefineRegionOptions and to which the
      *                defined region will be added. Output text is set to describe
      *                the result or indicate no matches were found.
      * @param objectCollections The collections containing objects to find. Anchor
@@ -72,7 +80,13 @@ public class DefineOutsideAnchors implements ActionInterface {
      */
     @Override
     public void perform(ActionResult matches, ObjectCollection... objectCollections) {
-        ActionOptions actionOptions = matches.getActionOptions();
+        // Get the configuration
+        ActionConfig config = matches.getActionConfig();
+        DefineRegionOptions defineOptions = null;
+        if (config instanceof DefineRegionOptions) {
+            defineOptions = (DefineRegionOptions) config;
+        }
+        
         defineHelper.findMatches(matches, objectCollections);
         
         if (matches.isEmpty()) {
@@ -83,7 +97,11 @@ public class DefineOutsideAnchors implements ActionInterface {
         Region region = initializeRegionFromFirstAnchor(matches);
         expandRegionToIncludeAllAnchors(region, matches);
         
-        defineHelper.adjust(region, actionOptions);
+        // Apply adjustments using V2 helper if we have DefineRegionOptions
+        if (defineOptions != null) {
+            defineHelperV2.adjust(region, defineOptions);
+        }
+        
         matches.addDefinedRegion(region);
         matches.setOutputText(region.toString());
     }

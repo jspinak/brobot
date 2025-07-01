@@ -1,11 +1,12 @@
-package io.github.jspinak.brobot.action.basic.visual;
+package io.github.jspinak.brobot.action.basic.region;
 
 import io.github.jspinak.brobot.action.ActionInterface;
-import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.action.internal.capture.AnchorRegion;
 import io.github.jspinak.brobot.action.internal.capture.RegionDefinitionHelper;
+import io.github.jspinak.brobot.action.internal.capture.RegionDefinitionHelperV2;
 import io.github.jspinak.brobot.action.internal.capture.DefinedBorders;
 import io.github.jspinak.brobot.model.element.Region;
 
@@ -39,18 +40,26 @@ import org.springframework.stereotype.Component;
  * @see DefineOutsideAnchors
  * @see AnchorRegion
  * @see DefinedBorders
- * @see ActionOptions.DefineAs#INSIDE_ANCHORS
+ * @see DefineRegionOptions.DefineAs#INSIDE_ANCHORS
  */
 @Component
 public class DefineInsideAnchors implements ActionInterface {
 
+    @Override
+    public Type getActionType() {
+        return Type.DEFINE;
+    }
+
     private final RegionDefinitionHelper defineHelper;
+    private final RegionDefinitionHelperV2 defineHelperV2;
     private final AnchorRegion anchorRegion;
 
     private DefinedBorders definedBorders;
 
-    public DefineInsideAnchors(RegionDefinitionHelper defineHelper, AnchorRegion anchorRegion) {
+    public DefineInsideAnchors(RegionDefinitionHelper defineHelper, RegionDefinitionHelperV2 defineHelperV2,
+                              AnchorRegion anchorRegion) {
         this.defineHelper = defineHelper;
+        this.defineHelperV2 = defineHelperV2;
         this.anchorRegion = anchorRegion;
     }
 
@@ -62,7 +71,7 @@ public class DefineInsideAnchors implements ActionInterface {
      *   <li>Uses DefineHelper to find all matches in the object collections</li>
      *   <li>Initializes a new Region and DefinedBorders tracker</li>
      *   <li>Delegates to AnchorRegion to fit the region to all anchor points</li>
-     *   <li>Applies any additional adjustments from ActionOptions</li>
+     *   <li>Applies any additional adjustments from DefineRegionOptions</li>
      *   <li>Adds the region to ActionResult only if all borders are defined</li>
      * </ol>
      * </p>
@@ -74,7 +83,7 @@ public class DefineInsideAnchors implements ActionInterface {
      * <p>The region boundaries are determined by the innermost anchor points in each
      * direction, creating the smallest possible rectangle that contains all anchors.</p>
      * 
-     * @param matches The ActionResult containing ActionOptions and to which the defined
+     * @param matches The ActionResult containing DefineRegionOptions and to which the defined
      *                region will be added. The region is added only if fully defined.
      *                The output text is set to the region's string representation.
      * @param objectCollections The collections containing objects to find. Matches from
@@ -82,13 +91,25 @@ public class DefineInsideAnchors implements ActionInterface {
      */
     @Override
     public void perform(ActionResult matches, ObjectCollection... objectCollections) {
-        ActionOptions actionOptions = matches.getActionOptions();
+        // Get the configuration
+        ActionConfig config = matches.getActionConfig();
+        DefineRegionOptions defineOptions = null;
+        if (config instanceof DefineRegionOptions) {
+            defineOptions = (DefineRegionOptions) config;
+        }
+        
         Region region = new Region();
         definedBorders = new DefinedBorders();
         defineHelper.findMatches(matches, objectCollections);
+        
         // The DefinedBorders object keeps track of defined borders as the region is being defined
         anchorRegion.fitRegionToAnchors(definedBorders, region, matches);
-        defineHelper.adjust(region, actionOptions);
+        
+        // Apply adjustments using V2 helper if we have DefineRegionOptions
+        if (defineOptions != null) {
+            defineHelperV2.adjust(region, defineOptions);
+        }
+        
         if (definedBorders.allBordersDefined()) {
             matches.addDefinedRegion(region);
         } // else return an undefined region instead of a partially defined region

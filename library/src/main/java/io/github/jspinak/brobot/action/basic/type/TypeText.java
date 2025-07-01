@@ -1,10 +1,9 @@
 package io.github.jspinak.brobot.action.basic.type;
 
 import io.github.jspinak.brobot.action.ActionInterface;
-import io.github.jspinak.brobot.action.ActionOptions;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
-import io.github.jspinak.brobot.action.internal.text.TypeTextWrapper;
+import io.github.jspinak.brobot.action.internal.text.TypeTextWrapperV2;
 import io.github.jspinak.brobot.model.state.StateString;
 import io.github.jspinak.brobot.tools.testing.mock.time.TimeProvider;
 
@@ -52,31 +51,50 @@ import java.util.List;
  * 
  * @since 1.0
  * @see StateString
- * @see ActionOptions
- * @see TypeTextWrapper
+ * @see TypeOptions
+ * @see TypeTextWrapperV2
  * @see Click
  */
 @Component
 public class TypeText implements ActionInterface {
 
-    private final TypeTextWrapper typeTextWrapper;
+    @Override
+    public Type getActionType() {
+        return Type.TYPE;
+    }
+
+    private final TypeTextWrapperV2 typeTextWrapper;
     private final TimeProvider time;
 
-    public TypeText(TypeTextWrapper typeTextWrapper, TimeProvider time) {
+    public TypeText(TypeTextWrapperV2 typeTextWrapper, TimeProvider time) {
         this.typeTextWrapper = typeTextWrapper;
         this.time = time;
     }
 
+    @Override
     public void perform(ActionResult matches, ObjectCollection... objectCollections) {
-        ActionOptions actionOptions = matches.getActionOptions();
-        double defaultTypeDelay = Settings.TypeDelay;
-        Settings.TypeDelay = actionOptions.getTypeDelay();
-        List<StateString> strings = objectCollections[0].getStateStrings();
-        for (StateString str : strings) {
-            typeTextWrapper.type(str, actionOptions);
-            if (strings.indexOf(str) < strings.size() - 1)
-                time.wait(actionOptions.getPauseBetweenIndividualActions());
+        // Get the configuration - expecting TypeOptions
+        if (!(matches.getActionConfig() instanceof TypeOptions)) {
+            throw new IllegalArgumentException("TypeText requires TypeOptions configuration");
         }
+        TypeOptions typeOptions = (TypeOptions) matches.getActionConfig();
+        
+        // Save and set the type delay
+        double defaultTypeDelay = Settings.TypeDelay;
+        Settings.TypeDelay = typeOptions.getTypeDelay();
+        
+        List<StateString> strings = objectCollections[0].getStateStrings();
+        for (int i = 0; i < strings.size(); i++) {
+            StateString str = strings.get(i);
+            typeTextWrapper.type(str, typeOptions);
+            
+            // Pause between typing different strings (except after the last one)
+            if (i < strings.size() - 1) {
+                time.wait(typeOptions.getPauseAfterEnd());
+            }
+        }
+        
+        // Restore the default type delay
         Settings.TypeDelay = defaultTypeDelay;
     }
 

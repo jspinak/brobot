@@ -139,7 +139,7 @@ public class PixelScoreCalculator {
      * @return pixel distance threshold (0-255, lower is better match)
      */
     public double convertActionOptionsScoreToPixelAnalysisScoreWithTanh(double actionOptionsScore) {
-        double adjustedMinScore = actionOptionsScore * maxMinScoreForTanh; // minScore is now between 0 and maxMinScoreForTanh
+        double adjustedMinScore = actionOptionsScore * maxMinScoreForTanh; // minSimilarity is now between 0 and maxMinScoreForTanh
         double tanh = Math.tanh(adjustedMinScore); // tanh(1) = 0.7615941559557649, tanh(0) = 0
         double invertedTanh = 1 - tanh; // (1 - 0.7615941559557649) = 0.2384058440442351, 1 - 0 = 1
         double normalizedTanh = (invertedTanh - invMaxTanh) / (1 - invMaxTanh); // values between 0 and 1
@@ -209,11 +209,11 @@ public class PixelScoreCalculator {
      * in the result indicate pixels that meet the similarity criteria.</p>
      *
      * @param scores the pixel score matrix
-     * @param actionOptions contains minScore threshold
+     * @param actionOptions contains minSimilarity threshold
      * @return distance below threshold matrix (0 for non-matching pixels)
      */
     public Mat getDistBelowThreshhold(Mat scores, ActionOptions actionOptions) {
-        double threshold = convertActionOptionsScoreToPixelAnalysisScoreWithTanh(actionOptions.getMinScore());
+        double threshold = convertActionOptionsScoreToPixelAnalysisScoreWithTanh(actionOptions.getMinSimilarity());
         Mat binaryScores = new Mat(scores.size(), CV_8UC3);
         Mat thresholdMat = new Mat(scores.size(), CV_8UC3, Scalar.all(threshold));
         subtract(thresholdMat, scores, binaryScores, null, scores.type());

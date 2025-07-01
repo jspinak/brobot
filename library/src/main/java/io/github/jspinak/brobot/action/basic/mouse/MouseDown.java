@@ -1,10 +1,10 @@
 package io.github.jspinak.brobot.action.basic.mouse;
 
 import io.github.jspinak.brobot.action.ActionInterface;
-import io.github.jspinak.brobot.action.ActionOptions;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.action.internal.mouse.MouseDownWrapper;
+import io.github.jspinak.brobot.action.internal.mouse.ClickType;
 
 import org.springframework.stereotype.Component;
 
@@ -62,12 +62,40 @@ public class MouseDown implements ActionInterface {
         this.mouseDownWrapper = mouseDownWrapper;
     }
 
+    @Override
+    public Type getActionType() {
+        return Type.MOUSE_DOWN;
+    }
+
+    @Override
     public void perform(ActionResult matches, ObjectCollection... objectCollections) {
-        ActionOptions actionOptions = matches.getActionOptions();
-        mouseDownWrapper.press(
-                actionOptions.getPauseBeforeMouseDown(),
-                actionOptions.getPauseAfterMouseDown(),
-                actionOptions.getClickType());
+        // Get the configuration - expecting MouseDownOptions
+        if (matches.getActionConfig() instanceof MouseDownOptions) {
+            MouseDownOptions options = (MouseDownOptions) matches.getActionConfig();
+            mouseDownWrapper.press(
+                    options.getPauseBeforeMouseDown(),
+                    options.getPauseAfterMouseDown(),
+                    convertMouseButton(options.getButton()));
+        } else {
+            // Fallback for other configs or throw exception
+            throw new IllegalArgumentException("MouseDown requires MouseDownOptions configuration");
+        }
+    }
+    
+    /**
+     * Converts MouseButton enum to ClickType.Type for backward compatibility.
+     * This conversion will be removed once ClickType is fully replaced.
+     */
+    private ClickType.Type convertMouseButton(io.github.jspinak.brobot.model.action.MouseButton button) {
+        switch (button) {
+            case RIGHT:
+                return ClickType.Type.RIGHT;
+            case MIDDLE:
+                return ClickType.Type.MIDDLE;
+            case LEFT:
+            default:
+                return ClickType.Type.LEFT;
+        }
     }
 
 }

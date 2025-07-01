@@ -1,7 +1,7 @@
 package io.github.jspinak.brobot.action.basic.mouse;
 
 import io.github.jspinak.brobot.action.ActionInterface;
-import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.basic.find.Find;
 import io.github.jspinak.brobot.action.internal.mouse.MoveMouseWrapper;
 import io.github.jspinak.brobot.action.ActionResult;
@@ -62,10 +62,15 @@ import java.util.List;
  * @see Find
  * @see Click
  * @see MouseDown
- * @see ActionOptions
+ * @see MouseMoveOptions
  */
 @Component
 public class MoveMouse implements ActionInterface {
+
+    @Override
+    public Type getActionType() {
+        return Type.MOVE;
+    }
 
     private final Find find;
     private final MoveMouseWrapper moveMouseWrapper;
@@ -77,15 +82,26 @@ public class MoveMouse implements ActionInterface {
         this.time = time;
     }
 
+    @Override
     public void perform(ActionResult matches, ObjectCollection... objectCollections) {
-        ActionOptions actionOptions = matches.getActionOptions();
+        // Get the configuration - MouseMoveOptions or any ActionConfig is acceptable
+        // since MoveMouse mainly uses Find and basic timing
+        ActionConfig config = matches.getActionConfig();
+        
         List<ObjectCollection> collections = Arrays.asList(objectCollections);
         for (ObjectCollection objColl : collections) {
             find.perform(matches, objColl);
             matches.getMatchLocations().forEach(moveMouseWrapper::move);
             ConsoleReporter.print("finished move. ");
-            if (collections.indexOf(objColl) < collections.size() - 1)
-                time.wait(actionOptions.getPauseBetweenIndividualActions());
+            
+            // Pause between collections if there are more to process
+            if (collections.indexOf(objColl) < collections.size() - 1) {
+                // Use pause from config if available, otherwise use default
+                double pauseDuration = config.getPauseAfterEnd();
+                if (pauseDuration > 0) {
+                    time.wait(pauseDuration);
+                }
+            }
         }
     }
 

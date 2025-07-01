@@ -1,7 +1,6 @@
 package io.github.jspinak.brobot.action.basic.type;
 
 import io.github.jspinak.brobot.action.ActionInterface;
-import io.github.jspinak.brobot.action.ActionOptions;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.action.internal.text.KeyUpWrapper;
@@ -58,7 +57,7 @@ import org.springframework.stereotype.Component;
  * @see KeyDown
  * @see TypeText
  * @see StateString
- * @see ActionOptions
+ * @see KeyUpOptions
  */
 @Component
 public class KeyUp implements ActionInterface {
@@ -69,21 +68,41 @@ public class KeyUp implements ActionInterface {
         this.keyUpWrapper = keyUpWrapper;
     }
 
+    @Override
+    public Type getActionType() {
+        return Type.KEY_UP;
+    }
+
+    @Override
     public void perform(ActionResult matches, ObjectCollection... objectCollections) {
-        ActionOptions actionOptions = matches.getActionOptions();
-        if (nothingToRelease(actionOptions, objectCollections)) keyUpWrapper.release(); // releases all keys
-        else {
-            for (StateString stateString : objectCollections[0].getStateStrings()) {
-                keyUpWrapper.release(stateString.getString());
+        // Get the configuration - expecting KeyUpOptions
+        if (!(matches.getActionConfig() instanceof KeyUpOptions)) {
+            throw new IllegalArgumentException("KeyUp requires KeyUpOptions configuration");
+        }
+        KeyUpOptions options = (KeyUpOptions) matches.getActionConfig();
+        
+        if (nothingToRelease(options, objectCollections)) {
+            keyUpWrapper.release(); // releases all keys
+        } else {
+            // Release specific keys from the collection
+            if (objectCollections != null && objectCollections.length > 0) {
+                for (StateString stateString : objectCollections[0].getStateStrings()) {
+                    keyUpWrapper.release(stateString.getString());
+                }
             }
-            if (!actionOptions.getModifiers().isEmpty()) keyUpWrapper.release(actionOptions.getModifiers());
+            
+            // Release modifier keys last
+            if (!options.getModifiers().isEmpty()) {
+                String modifierString = String.join("+", options.getModifiers());
+                keyUpWrapper.release(modifierString);
+            }
         }
     }
 
-    private boolean nothingToRelease(ActionOptions actionOptions, ObjectCollection... objectCollections) {
-        if (objectCollections == null) return true;
+    private boolean nothingToRelease(KeyUpOptions options, ObjectCollection... objectCollections) {
+        if (objectCollections == null || objectCollections.length == 0) return true;
         return objectCollections[0].getStateStrings().isEmpty() &&
-                actionOptions.getModifiers().isEmpty();
+                options.getModifiers().isEmpty();
     }
 
 }

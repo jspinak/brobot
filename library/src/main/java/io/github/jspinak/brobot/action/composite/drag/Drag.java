@@ -1,19 +1,21 @@
 package io.github.jspinak.brobot.action.composite.drag;
 
 import io.github.jspinak.brobot.action.ActionInterface;
-import io.github.jspinak.brobot.action.internal.factory.ActionResultFactory;
-import io.github.jspinak.brobot.action.internal.find.OffsetLocationManager;
-import io.github.jspinak.brobot.action.internal.utility.DragCoordinateCalculator;
-import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.action.ActionConfig;
+import io.github.jspinak.brobot.action.ActionChainOptions;
+import io.github.jspinak.brobot.action.internal.execution.ActionChainExecutor;
+import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
+import io.github.jspinak.brobot.action.basic.mouse.MouseMoveOptions;
+import io.github.jspinak.brobot.action.basic.mouse.MouseDownOptions;
+import io.github.jspinak.brobot.action.basic.mouse.MouseUpOptions;
+import io.github.jspinak.brobot.action.basic.mouse.MousePressOptions;
 import io.github.jspinak.brobot.model.element.Location;
+import io.github.jspinak.brobot.model.element.Movement;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
-import io.github.jspinak.brobot.model.element.Region;
 
 import org.springframework.stereotype.Component;
 
-import java.util.List;
-import java.util.Optional;
 
 /**
  * Performs drag-and-drop operations between GUI elements in the Brobot model-based automation framework.
@@ -78,17 +80,15 @@ import java.util.Optional;
 @Component
 public class Drag implements ActionInterface {
 
-    private final DragCoordinateCalculator dragLocation;
-    private final GetDragLocation getDragLocation;
-    private final OffsetLocationManager offsetOps;
-    private final ActionResultFactory matchesInitializer;
+    @Override
+    public Type getActionType() {
+        return Type.DRAG;
+    }
 
-    public Drag(DragCoordinateCalculator dragLocation, GetDragLocation getDragLocation, OffsetLocationManager offsetOps,
-                ActionResultFactory matchesInitializer) {
-        this.dragLocation = dragLocation;
-        this.getDragLocation = getDragLocation;
-        this.offsetOps = offsetOps;
-        this.matchesInitializer = matchesInitializer;
+    private final ActionChainExecutor actionChainExecutor;
+
+    public Drag(ActionChainExecutor actionChainExecutor) {
+        this.actionChainExecutor = actionChainExecutor;
     }
 
     /**
@@ -130,18 +130,83 @@ public class Drag implements ActionInterface {
      *                          [0] = source elements to drag from,
      *                          [1] = destination elements to drag to
      */
+    @Override
     public void perform(ActionResult matches, ObjectCollection... objectCollections) {
-        ActionOptions actionOptions = matches.getActionOptions();
-        matches = matchesInitializer.init(actionOptions, objectCollections);
-        Optional<Location> optStartLoc = getDragLocation.getFromLocation(matches, objectCollections);
-        Optional<Location> optEndLoc = getDragLocation.getToLocation(matches, objectCollections);
-        offsetOps.addOffset(List.of(objectCollections), matches, actionOptions);
-        if (optStartLoc.isEmpty() || optEndLoc.isEmpty()) return;
-        dragLocation.drag(optStartLoc.get(), optEndLoc.get(), actionOptions);
-        matches.addDefinedRegion(new Region(
-                optStartLoc.get().getCalculatedX(), optStartLoc.get().getCalculatedY(),
-                optEndLoc.get().getCalculatedX() - optStartLoc.get().getCalculatedX(),
-                optEndLoc.get().getCalculatedY() - optStartLoc.get().getCalculatedY()));
+        // Validate we have the required object collections
+        if (objectCollections.length < 2) {
+            matches.setSuccess(false);
+            return;
+        }
+        
+        // Get the configuration
+        ActionConfig config = matches.getActionConfig();
+        DragOptions dragOptions = (config instanceof DragOptions) ? 
+            (DragOptions) config : new DragOptions.Builder().build();
+        
+        // Extract source and target collections
+        ObjectCollection sourceCollection = objectCollections[0];
+        ObjectCollection targetCollection = objectCollections[1];
+        
+        // Build the 6-action chain: Find source → Find target → MouseMove to source → 
+        // MouseDown → MouseMove to target → MouseUp
+        
+        // Step 1: Find source
+        PatternFindOptions findSourceOptions = new PatternFindOptions.Builder()
+            .setPauseAfterEnd(0.1)
+            .build();
+        
+        // Step 2: Find target (will store both results)
+        PatternFindOptions findTargetOptions = new PatternFindOptions.Builder()
+            .setPauseAfterEnd(0.1)
+            .build();
+        
+        // Step 3: Move to source
+        MouseMoveOptions moveToSourceOptions = new MouseMoveOptions.Builder()
+            .setPauseAfterEnd(0.1)
+            .build();
+        
+        // Step 4: Mouse down at source
+        MouseDownOptions mouseDownOptions = new MouseDownOptions.Builder()
+            .setPressOptions(new MousePressOptions.Builder(dragOptions.getMousePressOptions()))
+            .setPauseAfterEnd(dragOptions.getDelayBetweenMouseDownAndMove())
+            .build();
+        
+        // Step 5: Move to target (while holding mouse down)
+        MouseMoveOptions moveToTargetOptions = new MouseMoveOptions.Builder()
+            .setPauseAfterEnd(0.1)
+            .build();
+        
+        // Step 6: Mouse up at target
+        MouseUpOptions mouseUpOptions = new MouseUpOptions.Builder()
+            .setPressOptions(new MousePressOptions.Builder(dragOptions.getMousePressOptions()))
+            .setPauseAfterEnd(dragOptions.getDelayAfterDrag())
+            .build();
+        
+        // Create the action chain
+        ActionChainOptions chainOptions = new ActionChainOptions.Builder(findSourceOptions)
+            .setStrategy(ActionChainOptions.ChainingStrategy.NESTED)
+            .then(findTargetOptions)
+            .then(moveToSourceOptions)
+            .then(mouseDownOptions)
+            .then(moveToTargetOptions)
+            .then(mouseUpOptions)
+            .build();
+        
+        // Execute the chain
+        ActionResult result = actionChainExecutor.executeChain(chainOptions, matches, 
+            sourceCollection, targetCollection);
+        
+        // Copy results back to the provided matches object
+        matches.setMatchList(result.getMatchList());
+        matches.setSuccess(result.isSuccess());
+        matches.setDuration(result.getDuration());
+        
+        // Add the movement if successful
+        if (result.isSuccess() && result.getMatchList().size() >= 2) {
+            Location startLoc = result.getMatchList().get(0).getTarget();
+            Location endLoc = result.getMatchList().get(result.getMatchList().size() - 1).getTarget();
+            Movement dragMovement = new Movement(startLoc, endLoc);
+            matches.addMovement(dragMovement);
+        }
     }
-
 }

@@ -1,12 +1,12 @@
-package io.github.jspinak.brobot.action.basic.visual;
+package io.github.jspinak.brobot.action.basic.highlight;
 
 import io.github.jspinak.brobot.action.ActionInterface;
-import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.action.basic.find.Find;
 import io.github.jspinak.brobot.model.match.Match;
-import io.github.jspinak.brobot.tools.history.draw.HighlightMatchedRegion;
+import io.github.jspinak.brobot.tools.history.draw.HighlightMatchedRegionV2;
 import io.github.jspinak.brobot.tools.testing.mock.time.TimeProvider;
 
 import org.springframework.stereotype.Component;
@@ -58,41 +58,62 @@ import org.springframework.stereotype.Component;
  * @since 1.0
  * @see Find
  * @see Match
- * @see ActionOptions
- * @see HighlightMatchedRegion
+ * @see HighlightOptions
+ * @see HighlightMatchedRegionV2
  */
 @Component
 public class Highlight implements ActionInterface {
 
+    @Override
+    public Type getActionType() {
+        return Type.HIGHLIGHT;
+    }
+
     private final Find find;
-    private final HighlightMatchedRegion highlightMatch;
+    private final HighlightMatchedRegionV2 highlightMatch;
     private final TimeProvider time;
 
-    public Highlight(Find find, HighlightMatchedRegion highlightMatch, TimeProvider time) {
+    public Highlight(Find find, HighlightMatchedRegionV2 highlightMatch, TimeProvider time) {
         this.find = find;
         this.highlightMatch = highlightMatch;
         this.time = time;
     }
 
+    @Override
     public void perform(ActionResult matches, ObjectCollection... objectCollections) {
-        ActionOptions actionOptions = matches.getActionOptions();
+        // Get the configuration - expecting HighlightOptions or ActionConfig
+        ActionConfig config = matches.getActionConfig();
+        
+        // Extract highlight-specific settings
+        boolean highlightAllAtOnce = false;
+        double highlightSeconds = 1.0;
+        if (config instanceof HighlightOptions) {
+            HighlightOptions highlightOptions = (HighlightOptions) config;
+            highlightAllAtOnce = highlightOptions.isHighlightAllAtOnce();
+            highlightSeconds = highlightOptions.getHighlightSeconds();
+        }
+        
         find.perform(matches, objectCollections);
-        if (actionOptions.isHighlightAllAtOnce()) highlightAllAtOnce(matches, actionOptions);
-        else highlightOneAtATime(matches, actionOptions);
+        
+        if (highlightAllAtOnce) {
+            highlightAllAtOnce(matches, config, highlightSeconds);
+        } else {
+            highlightOneAtATime(matches, config);
+        }
     }
 
-    private void highlightAllAtOnce(ActionResult matches, ActionOptions actionOptions) {
+    private void highlightAllAtOnce(ActionResult matches, ActionConfig config, double highlightSeconds) {
         matches.getMatchList().forEach(match ->
-                highlightMatch.turnOn(match, match.getStateObjectData(), actionOptions));
-        time.wait(actionOptions.getHighlightSeconds());
+                highlightMatch.turnOn(match, match.getStateObjectData(), config));
+        time.wait(highlightSeconds);
         matches.getMatchList().forEach(highlightMatch::turnOff);
     }
 
-    private void highlightOneAtATime(ActionResult matches, ActionOptions actionOptions) {
+    private void highlightOneAtATime(ActionResult matches, ActionConfig config) {
         for (Match match : matches.getMatchList()) {
-            highlightMatch.highlight(match, match.getStateObjectData(), actionOptions);
+            highlightMatch.highlight(match, match.getStateObjectData(), config);
             if (matches.getMatchList().indexOf(match) < matches.getMatchList().size() - 1)
-                time.wait(actionOptions.getPauseBetweenIndividualActions());
+                time.wait(config.getPauseAfterEnd());
         }
     }
 }
