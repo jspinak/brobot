@@ -1,8 +1,16 @@
 package io.github.jspinak.brobot.tools.history;
 
 import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
+import io.github.jspinak.brobot.action.basic.click.ClickOptions;
+import io.github.jspinak.brobot.action.composite.drag.DragOptions;
+import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
+import io.github.jspinak.brobot.action.basic.mouse.MouseMoveOptions;
+import io.github.jspinak.brobot.action.basic.region.DefineRegionOptions;
+import io.github.jspinak.brobot.action.basic.highlight.HighlightOptions;
+import io.github.jspinak.brobot.action.basic.type.TypeOptions;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.config.FrameworkSettings;
 import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
@@ -194,8 +202,8 @@ public class IllustrationController {
      * Conditionally creates illustrations based on permission and repetition checks.
      * <p>
      * This overloaded method accepts ActionConfig instead of ActionOptions, supporting
-     * the new configuration hierarchy. It converts the ActionConfig to ActionOptions
-     * for compatibility with existing illustration logic.
+     * the new configuration hierarchy. It checks illustration permissions and manages
+     * repetition tracking for ActionConfig-based actions.
      * <p>
      * State updates on success:
      * <ul>
@@ -214,11 +222,98 @@ public class IllustrationController {
      */
     public boolean illustrateWhenAllowed(ActionResult matches, List<Region> searchRegions, ActionConfig actionConfig,
                                          ObjectCollection... objectCollections) {
-        // Convert ActionConfig to ActionOptions for compatibility
+        if (!okToIllustrate(actionConfig, objectCollections)) return false;
+        
+        // Update last action tracking
+        ActionOptions.Action mappedAction = getActionType(actionConfig);
+        if (mappedAction != null) {
+            lastAction = mappedAction;
+            if (mappedAction == FIND && actionConfig instanceof PatternFindOptions) {
+                lastFind = mapFindStrategy((PatternFindOptions) actionConfig);
+            }
+        }
+        lastCollections = Arrays.asList(objectCollections);
+        
+        // For now, convert to ActionOptions for the visualization
         ActionOptions actionOptions = convertToActionOptions(actionConfig);
-        return illustrateWhenAllowed(matches, searchRegions, actionOptions, objectCollections);
+        illustrationManager.draw(matches, searchRegions, actionOptions);
+        return true;
     }
 
+    /**
+     * Determines whether an action should be illustrated based on multiple criteria.
+     * <p>
+     * This overloaded method accepts ActionConfig for the new configuration system.
+     * It evaluates illustration eligibility through the same hierarchy of checks
+     * as the ActionOptions version.
+     *
+     * @param actionConfig configuration including action type and illustration directive
+     * @param objectCollections target objects for repetition comparison
+     * @return true if illustration should proceed, false if filtered out
+     */
+    public boolean okToIllustrate(ActionConfig actionConfig, ObjectCollection... objectCollections) {
+        setActionPermissions();
+        if (!FrameworkSettings.saveHistory && actionConfig.getIllustrate() != ActionConfig.Illustrate.YES) return false;
+        if (actionConfig.getIllustrate() == ActionConfig.Illustrate.NO) return false;
+        
+        ActionOptions.Action action = getActionType(actionConfig);
+        if (action == null || !actionPermissions.containsKey(action)) {
+            ConsoleReporter.println(actionConfig.getClass().getSimpleName() + " not available to illustrate in BrobotSettings.");
+            return false;
+        }
+        if (!actionPermissions.get(action)) {
+            ConsoleReporter.println(action + " not set to illustrate in BrobotSettings.");
+            return false;
+        }
+        if (FrameworkSettings.drawRepeatedActions) return true;
+        
+        // Check for repeated actions
+        ActionOptions.Find currentFind = actionConfig instanceof PatternFindOptions ? 
+            mapFindStrategy((PatternFindOptions) actionConfig) : ActionOptions.Find.UNIVERSAL;
+        return lastFind != currentFind ||
+                lastAction != action ||
+                !sameCollections(Arrays.asList(objectCollections));
+    }
+    
+    /**
+     * Maps ActionConfig types to ActionOptions.Action enum values.
+     *
+     * @param config the ActionConfig to map
+     * @return corresponding ActionOptions.Action or null if not mappable
+     */
+    private ActionOptions.Action getActionType(ActionConfig config) {
+        if (config instanceof PatternFindOptions) return ActionOptions.Action.FIND;
+        if (config instanceof ClickOptions) return ActionOptions.Action.CLICK;
+        if (config instanceof TypeOptions) return ActionOptions.Action.TYPE;
+        if (config instanceof DragOptions) return ActionOptions.Action.DRAG;
+        if (config instanceof MouseMoveOptions) return ActionOptions.Action.MOVE;
+        if (config instanceof HighlightOptions) return ActionOptions.Action.HIGHLIGHT;
+        if (config instanceof DefineRegionOptions) return ActionOptions.Action.DEFINE;
+        // CLASSIFY would need its own ActionConfig implementation
+        return null;
+    }
+    
+    /**
+     * Maps PatternFindOptions strategy to ActionOptions.Find enum.
+     *
+     * @param findOptions the find options to map
+     * @return corresponding ActionOptions.Find value
+     */
+    private ActionOptions.Find mapFindStrategy(PatternFindOptions findOptions) {
+        switch (findOptions.getStrategy()) {
+            case FIRST:
+                return ActionOptions.Find.FIRST;
+            case EACH:
+                return ActionOptions.Find.EACH;
+            case ALL:
+                return ActionOptions.Find.ALL;
+            case BEST:
+                return ActionOptions.Find.BEST;
+            default:
+                return ActionOptions.Find.UNIVERSAL;
+        }
+    }
+    
     /**
      * Converts an ActionConfig to ActionOptions for backward compatibility.
      * This is a temporary method until the illustration system is fully updated
@@ -247,23 +342,15 @@ public class IllustrationController {
         builder.setPauseBeforeBegin(config.getPauseBeforeBegin());
         builder.setPauseAfterEnd(config.getPauseAfterEnd());
         
-        // Determine action type from config class
-        if (config.getClass().getName().contains("Find")) {
-            builder.setAction(ActionOptions.Action.FIND);
-        } else if (config.getClass().getName().contains("Click")) {
-            builder.setAction(ActionOptions.Action.CLICK);
-        } else if (config.getClass().getName().contains("Type")) {
-            builder.setAction(ActionOptions.Action.TYPE);
-        } else if (config.getClass().getName().contains("Drag")) {
-            builder.setAction(ActionOptions.Action.DRAG);
-        } else if (config.getClass().getName().contains("Move")) {
-            builder.setAction(ActionOptions.Action.MOVE);
-        } else if (config.getClass().getName().contains("Highlight")) {
-            builder.setAction(ActionOptions.Action.HIGHLIGHT);
-        } else if (config.getClass().getName().contains("Define")) {
-            builder.setAction(ActionOptions.Action.DEFINE);
-        } else if (config.getClass().getName().contains("Classify")) {
-            builder.setAction(ActionOptions.Action.CLASSIFY);
+        // Set action type using proper mapping
+        ActionOptions.Action action = getActionType(config);
+        if (action != null) {
+            builder.setAction(action);
+        }
+        
+        // Set find type for PatternFindOptions
+        if (config instanceof PatternFindOptions) {
+            builder.setFind(mapFindStrategy((PatternFindOptions) config));
         }
         
         return builder.build();

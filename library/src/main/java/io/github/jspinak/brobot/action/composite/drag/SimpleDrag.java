@@ -40,10 +40,18 @@ import org.springframework.stereotype.Component;
  * <p>This implementation provides flexibility for various drag scenarios while
  * maintaining a simpler API compared to the full Drag action.</p>
  * 
+ * <p><b>Note:</b> The modern {@link Drag} class using DragOptions and ActionChainOptions
+ * is the recommended approach for drag operations. SimpleDrag remains for backward
+ * compatibility but is not planned for migration to ActionConfig. New code should
+ * use the Drag class instead.</p>
+ * 
  * @see Drag
  * @see DragCoordinateCalculator
  * @see ActionOptions
+ * @see DragOptions
+ * @deprecated Use {@link Drag} with DragOptions for new implementations
  */
+@Deprecated
 @Component
 public class SimpleDrag implements ActionInterface {
     private final DragCoordinateCalculator dragLocation;
@@ -54,6 +62,11 @@ public class SimpleDrag implements ActionInterface {
         this.dragLocation = dragLocation;
         this.find = find;
         this.matchesInitializer = matchesInitializer;
+    }
+    
+    @Override
+    public Type getActionType() {
+        return Type.DRAG;
     }
 
     /**
@@ -91,7 +104,12 @@ public class SimpleDrag implements ActionInterface {
      *                          Should contain up to two objects for start and end points.
      */
     public void perform(ActionResult matches, ObjectCollection... objectCollections) {
-        ActionOptions actionOptions = matches.getActionOptions();
+        // SimpleDrag only supports ActionOptions and is deprecated.
+        // Use the modern Drag class with DragOptions for new implementations.
+        ActionOptions actionOptions = new ActionOptions.Builder()
+            .setAction(ActionOptions.Action.DRAG)
+            .build();
+            
         matchesInitializer.init(actionOptions, objectCollections);
         ActionOptions findFrom = new ActionOptions.Builder()
                 .setAction(ActionOptions.Action.FIND)

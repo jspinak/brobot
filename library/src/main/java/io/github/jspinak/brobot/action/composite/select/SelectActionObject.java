@@ -1,5 +1,6 @@
 package io.github.jspinak.brobot.action.composite.select;
 
+import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.ActionOptions;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
@@ -24,6 +25,10 @@ import lombok.Getter;
  * This class uses the Builder pattern for construction to handle its many configuration
  * parameters. The runtime state fields are modified by the {@link Select} class during
  * operation execution.
+ * <p>
+ * <b>Migration Note:</b> This class now supports both ActionOptions (legacy) and ActionConfig
+ * (modern) APIs. New code should use the ActionConfig setters. The getters intelligently
+ * return the appropriate configuration based on which was set.
  *
  * @see Select
  * @see CommonSelect
@@ -36,12 +41,16 @@ public class SelectActionObject {
     private ObjectCollection swipeFromObjColl;
     private ObjectCollection swipeToObjColl;
     private ActionOptions swipeActionOptions;
+    private ActionConfig swipeActionConfig;  // Modern API
     private ObjectCollection findObjectCollection;
     private ActionOptions findActionOptions;
+    private ActionConfig findActionConfig;  // Modern API
     private ActionOptions clickActionOptions;
+    private ActionConfig clickActionConfig;  // Modern API
     private ObjectCollection clickMatches; // defined after find operation
     private ObjectCollection confirmationObjectCollection; //when null don't confirm
     private ActionOptions confirmActionOptions;
+    private ActionConfig confirmActionConfig;  // Modern API
 
     //results
     private int totalSwipes = 0;
@@ -101,6 +110,40 @@ public class SelectActionObject {
     public void setSuccess(boolean success) {
         this.success = success;
     }
+    
+    // Custom getters that return either ActionConfig or ActionOptions based on what was set
+    
+    /**
+     * Gets the swipe configuration, preferring ActionConfig if set.
+     * @return ActionConfig if set, otherwise ActionOptions, or null if neither set
+     */
+    public Object getSwipeConfiguration() {
+        return swipeActionConfig != null ? swipeActionConfig : swipeActionOptions;
+    }
+    
+    /**
+     * Gets the find configuration, preferring ActionConfig if set.
+     * @return ActionConfig if set, otherwise ActionOptions, or null if neither set
+     */
+    public Object getFindConfiguration() {
+        return findActionConfig != null ? findActionConfig : findActionOptions;
+    }
+    
+    /**
+     * Gets the click configuration, preferring ActionConfig if set.
+     * @return ActionConfig if set, otherwise ActionOptions, or null if neither set
+     */
+    public Object getClickConfiguration() {
+        return clickActionConfig != null ? clickActionConfig : clickActionOptions;
+    }
+    
+    /**
+     * Gets the confirmation configuration, preferring ActionConfig if set.
+     * @return ActionConfig if set, otherwise ActionOptions, or null if neither set
+     */
+    public Object getConfirmConfiguration() {
+        return confirmActionConfig != null ? confirmActionConfig : confirmActionOptions;
+    }
 
     /**
      * Builder class for constructing SelectActionObject instances.
@@ -108,17 +151,24 @@ public class SelectActionObject {
      * This builder provides a fluent interface for setting the numerous
      * configuration parameters needed for a select operation. All setter
      * methods return the builder instance for method chaining.
+     * <p>
+     * <b>Migration Note:</b> The builder now supports both ActionOptions (legacy)
+     * and ActionConfig (modern) APIs. New code should use the ActionConfig setters.
      */
     public static class Builder {
         private int maxSwipes = 10;
         private ObjectCollection swipeFromObjColl;
         private ObjectCollection swipeToObjColl;
         private ActionOptions swipeActionOptions;
+        private ActionConfig swipeActionConfig;  // Modern API
         private ObjectCollection findObjectCollection;
         private ActionOptions findActionOptions;
+        private ActionConfig findActionConfig;  // Modern API
         private ActionOptions clickActionOptions;
+        private ActionConfig clickActionConfig;  // Modern API
         private ObjectCollection confirmationObjectCollection; //when null don't confirm
         private ActionOptions confirmActionOptions;
+        private ActionConfig confirmActionConfig;  // Modern API
 
         public Builder() {}
 
@@ -141,6 +191,16 @@ public class SelectActionObject {
             this.swipeActionOptions = swipeActionOptions;
             return this;
         }
+        
+        /**
+         * Sets the swipe configuration using ActionConfig (modern API).
+         * @param swipeActionConfig The ActionConfig for swipe operations
+         * @return this Builder instance
+         */
+        public Builder setSwipeActionConfig(ActionConfig swipeActionConfig) {
+            this.swipeActionConfig = swipeActionConfig;
+            return this;
+        }
 
         public Builder setFindObjectCollection(ObjectCollection findObjectCollection) {
             this.findObjectCollection = findObjectCollection;
@@ -151,9 +211,29 @@ public class SelectActionObject {
             this.findActionOptions = findActionOptions;
             return this;
         }
+        
+        /**
+         * Sets the find configuration using ActionConfig (modern API).
+         * @param findActionConfig The ActionConfig for find operations
+         * @return this Builder instance
+         */
+        public Builder setFindActionConfig(ActionConfig findActionConfig) {
+            this.findActionConfig = findActionConfig;
+            return this;
+        }
 
         public Builder setClickActionOptions(ActionOptions clickActionOptions) {
             this.clickActionOptions = clickActionOptions;
+            return this;
+        }
+        
+        /**
+         * Sets the click configuration using ActionConfig (modern API).
+         * @param clickActionConfig The ActionConfig for click operations
+         * @return this Builder instance
+         */
+        public Builder setClickActionConfig(ActionConfig clickActionConfig) {
+            this.clickActionConfig = clickActionConfig;
             return this;
         }
 
@@ -166,6 +246,16 @@ public class SelectActionObject {
             this.confirmActionOptions = confirmActionOptions;
             return this;
         }
+        
+        /**
+         * Sets the confirmation configuration using ActionConfig (modern API).
+         * @param confirmActionConfig The ActionConfig for confirmation operations
+         * @return this Builder instance
+         */
+        public Builder setConfirmActionConfig(ActionConfig confirmActionConfig) {
+            this.confirmActionConfig = confirmActionConfig;
+            return this;
+        }
 
         public SelectActionObject build() {
             SelectActionObject selectActionObject = new SelectActionObject();
@@ -173,11 +263,15 @@ public class SelectActionObject {
             selectActionObject.swipeFromObjColl = swipeFromObjColl;
             selectActionObject.swipeToObjColl = swipeToObjColl;
             selectActionObject.swipeActionOptions = swipeActionOptions;
+            selectActionObject.swipeActionConfig = swipeActionConfig;
             selectActionObject.findObjectCollection = findObjectCollection;
             selectActionObject.findActionOptions = findActionOptions;
+            selectActionObject.findActionConfig = findActionConfig;
             selectActionObject.clickActionOptions = clickActionOptions;
+            selectActionObject.clickActionConfig = clickActionConfig;
             selectActionObject.confirmationObjectCollection = confirmationObjectCollection;
             selectActionObject.confirmActionOptions = confirmActionOptions;
+            selectActionObject.confirmActionConfig = confirmActionConfig;
             return selectActionObject;
         }
     }

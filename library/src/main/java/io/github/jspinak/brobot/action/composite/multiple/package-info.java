@@ -51,53 +51,57 @@
  * <h2>Example Usage</h2>
  * 
  * <pre>{@code
+ * // Modern approach: Use ActionChainOptions for sequences
+ * ActionChainOptions menuSequence = new ActionChainOptions.Builder(
+ *         new PatternFindOptions.Builder()
+ *             .setStrategy(PatternFindOptions.Strategy.FIRST)
+ *             .build())
+ *     .then(new ClickOptions.Builder()
+ *             .setPauseAfterEnd(0.5)
+ *             .build())
+ *     .then(new TypeOptions.Builder()
+ *             .setTypeDelay(0.05)
+ *             .build())
+ *     .build();
+ * 
+ * ActionResult result = chainExecutor.executeChain(menuSequence,
+ *     new ActionResult(),
+ *     menuImage.asObjectCollection(),
+ *     menuItemImage.asObjectCollection(),
+ *     new ObjectCollection.Builder().withStrings("search text").build()
+ * );
+ * 
  * // Execute multiple finds with different strategies
- * MultipleFinds multiFind = new MultipleFinds(...);
+ * PatternFindOptions findAll = new PatternFindOptions.Builder()
+ *     .setStrategy(PatternFindOptions.Strategy.ALL)
+ *     .build();
  * 
- * List<ActionOptions> findConfigs = Arrays.asList(
- *     new ActionOptions.Builder().setFind(Find.ALL).build(),
- *     new ActionOptions.Builder().setFind(Find.BEST).build(),
- *     new ActionOptions.Builder().setFind(Find.MOTION).build()
+ * PatternFindOptions findBest = new PatternFindOptions.Builder()
+ *     .setStrategy(PatternFindOptions.Strategy.BEST)
+ *     .setSimilarity(0.95)
+ *     .build();
+ * 
+ * // Execute finds separately and aggregate results
+ * ActionResult result1 = new ActionResult();
+ * result1.setActionConfig(findAll);
+ * find.perform(result1, targets);
+ * 
+ * ActionResult result2 = new ActionResult();
+ * result2.setActionConfig(findBest);
+ * find.perform(result2, targets);
+ * 
+ * // Nested finds using NESTED chaining strategy
+ * ActionChainOptions nestedFind = new ActionChainOptions.Builder(
+ *         new PatternFindOptions.Builder().build())
+ *     .setStrategy(ActionChainOptions.ChainingStrategy.NESTED)
+ *     .then(new PatternFindOptions.Builder().build())
+ *     .build();
+ * 
+ * ActionResult nestedResult = chainExecutor.executeChain(nestedFind,
+ *     new ActionResult(),
+ *     containerImage.asObjectCollection(),
+ *     nestedElementImage.asObjectCollection()
  * );
- * 
- * ObjectCollection targets = new ObjectCollection.Builder()
- *     .withImages("button.png", "icon.png", "text_field.png")
- *     .build();
- * 
- * ActionResult allFinds = multiFind.perform(findConfigs, targets);
- * 
- * // Execute different actions in sequence
- * MultipleActions multiAction = new MultipleActions(...);
- * 
- * List<ActionOptionsObjectCollectionPair> actionSequence = Arrays.asList(
- *     new ActionOptionsObjectCollectionPair(
- *         new ActionOptions.Builder().setAction(FIND).build(),
- *         new ObjectCollection.Builder().withImages("menu.png").build()
- *     ),
- *     new ActionOptionsObjectCollectionPair(
- *         new ActionOptions.Builder().setAction(CLICK).build(),
- *         new ObjectCollection.Builder().withImages("menu_item.png").build()
- *     ),
- *     new ActionOptionsObjectCollectionPair(
- *         new ActionOptions.Builder().setAction(TYPE).build(),
- *         new ObjectCollection.Builder().withStrings("search text").build()
- *     )
- * );
- * 
- * ActionResult sequenceResult = multiAction.perform(actionSequence);
- * 
- * // Nested finds - find within found regions
- * NestedFinds nestedFind = new NestedFinds(...);
- * 
- * ObjectCollection outerTargets = new ObjectCollection.Builder()
- *     .withImages("container.png")
- *     .build();
- * 
- * ObjectCollection innerTargets = new ObjectCollection.Builder()
- *     .withImages("nested_element.png")
- *     .build();
- * 
- * ActionResult nestedResult = nestedFind.findInside(outerTargets, innerTargets);
  * }</pre>
  * 
  * <h2>Advanced Features</h2>
@@ -128,6 +132,8 @@
  *   <li>Consider memory usage with large batch operations</li>
  * </ul>
  * 
+ * @see io.github.jspinak.brobot.action.ActionChainOptions
+ * @see io.github.jspinak.brobot.action.internal.execution.ActionChainExecutor
  * @see io.github.jspinak.brobot.action.composite.multiple.actions.MultipleActions
  * @see io.github.jspinak.brobot.action.composite.multiple.finds.MultipleFinds
  */

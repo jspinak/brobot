@@ -1,7 +1,10 @@
 package io.github.jspinak.brobot.action.internal.capture;
 
 import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.basic.find.Find;
+import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
+import io.github.jspinak.brobot.action.basic.region.DefineRegionOptions;
 import io.github.jspinak.brobot.action.basic.region.DefineIncludingMatches;
 import io.github.jspinak.brobot.action.basic.region.DefineInsideAnchors;
 import io.github.jspinak.brobot.action.basic.region.DefineOutsideAnchors;
@@ -67,7 +70,9 @@ public class RegionDefinitionHelper {
      *                      addX, addY (position offsets),
      *                      addW, addH (dimension increases),
      *                      absoluteW, absoluteH (absolute dimension overrides).
+     * @deprecated Use {@link #adjust(Region, DefineRegionOptions)} instead
      */
+    @Deprecated
     public void adjust(Region region, ActionOptions actionOptions) {
         region.setX(region.x() + actionOptions.getAddX());
         region.setY(region.y() + actionOptions.getAddY());
@@ -75,6 +80,44 @@ public class RegionDefinitionHelper {
         else region.setW(region.w() + actionOptions.getAddW());
         if (actionOptions.getAbsoluteH() >= 0) region.setH(actionOptions.getAbsoluteH());
         else region.setH(region.h() + actionOptions.getAddH());
+    }
+    
+    /**
+     * Adjusts the position and dimensions of a Region object in-place using DefineRegionOptions.
+     * 
+     * <p>The adjustments are based on the match adjustment options specified in the
+     * DefineRegionOptions. Absolute dimensions take precedence over additive adjustments
+     * when specified (value >= 0).</p>
+     * 
+     * <p>This method modifies the region parameter directly. The adjustments are applied
+     * in the following order:
+     * <ol>
+     *   <li>Position adjustments (addX, addY) are always applied</li>
+     *   <li>Width is set to absoluteW if >= 0, otherwise increased by addW</li>
+     *   <li>Height is set to absoluteH if >= 0, otherwise increased by addH</li>
+     * </ol>
+     * </p>
+     * 
+     * @param region The Region object to modify. Its state will be changed by this method.
+     * @param defineOptions The configuration object containing the adjustment values.
+     */
+    public void adjust(Region region, DefineRegionOptions defineOptions) {
+        if (defineOptions.getMatchAdjustmentOptions() == null) return;
+        
+        region.setX(region.x() + defineOptions.getMatchAdjustmentOptions().getAddX());
+        region.setY(region.y() + defineOptions.getMatchAdjustmentOptions().getAddY());
+        
+        if (defineOptions.getMatchAdjustmentOptions().getAbsoluteW() >= 0) {
+            region.setW(defineOptions.getMatchAdjustmentOptions().getAbsoluteW());
+        } else {
+            region.setW(region.w() + defineOptions.getMatchAdjustmentOptions().getAddW());
+        }
+        
+        if (defineOptions.getMatchAdjustmentOptions().getAbsoluteH() >= 0) {
+            region.setH(defineOptions.getMatchAdjustmentOptions().getAbsoluteH());
+        } else {
+            region.setH(region.h() + defineOptions.getMatchAdjustmentOptions().getAddH());
+        }
     }
 
     /**
@@ -103,7 +146,31 @@ public class RegionDefinitionHelper {
      *                          from the first collection are searched when using Find.EACH.
      */
     public void findMatches(ActionResult matches, ObjectCollection... objectCollections) {
-        ActionOptions findOptions = new ActionOptions.Builder(matches.getActionOptions()).build();
+        // Check if we have ActionConfig (new) or ActionOptions (legacy)
+        ActionConfig config = matches.getActionConfig();
+        if (config instanceof DefineRegionOptions) {
+            findMatchesWithConfig(matches, (DefineRegionOptions) config, objectCollections);
+        } else {
+            // Legacy path
+            findMatchesWithActionOptions(matches, objectCollections);
+        }
+    }
+    
+    private void findMatchesWithConfig(ActionResult matches, DefineRegionOptions defineOptions, ObjectCollection... objectCollections) {
+        // Create PatternFindOptions for finding matches
+        PatternFindOptions findOptions = new PatternFindOptions.Builder()
+                .setStrategy(PatternFindOptions.Strategy.EACH)
+                .build();
+                
+        ActionResult findMatches = matchesInitializer.init(findOptions, "findMatches", objectCollections);
+        find.perform(findMatches, objectCollections);
+        matches.addMatchObjects(findMatches);
+    }
+    
+    private void findMatchesWithActionOptions(ActionResult matches, ObjectCollection... objectCollections) {
+        // For legacy support, create default ActionOptions
+        ActionOptions baseOptions = new ActionOptions();
+        ActionOptions findOptions = new ActionOptions.Builder(baseOptions).build();
         findOptions.setFind(ActionOptions.Find.EACH);
         findOptions.setAddH(0);
         findOptions.setAddW(0);

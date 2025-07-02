@@ -1,18 +1,22 @@
 package io.github.jspinak.brobot.action.composite.chains;
 
 import io.github.jspinak.brobot.action.Action;
-import io.github.jspinak.brobot.action.ActionOptions;
-import io.github.jspinak.brobot.action.internal.mouse.ClickType;
-import io.github.jspinak.brobot.model.state.StateImage;
+import io.github.jspinak.brobot.action.ActionChainOptions;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
-import io.github.jspinak.brobot.action.composite.multiple.actions.MultipleActions;
-import io.github.jspinak.brobot.action.composite.multiple.actions.MultipleActionsObject;
+import io.github.jspinak.brobot.action.basic.click.ClickOptions;
+import io.github.jspinak.brobot.action.basic.mouse.MouseMoveOptions;
+import io.github.jspinak.brobot.model.action.MouseButton;
+import io.github.jspinak.brobot.action.basic.mouse.MousePressOptions;
+import io.github.jspinak.brobot.action.basic.vanish.VanishOptions;
+import io.github.jspinak.brobot.action.basic.highlight.HighlightOptions;
+import io.github.jspinak.brobot.action.internal.execution.ActionChainExecutor;
+import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.model.element.Region;
+import io.github.jspinak.brobot.model.element.Location;
 
 import org.springframework.stereotype.Component;
 
-import static io.github.jspinak.brobot.action.ActionOptions.Action.*;
 
 /**
  * Provides advanced composite action patterns that combine multiple sequential actions.
@@ -35,22 +39,26 @@ import static io.github.jspinak.brobot.action.ActionOptions.Action.*;
  * Teams are encouraged to create similar classes tailored to their specific
  * application workflows.</p>
  * 
- * @see MultipleActions
- * @see ActionFacade
- * @see MultipleActionsObject
- * @see ActionOptions
+ * <p>This class has been updated to use the modern ActionConfig API with ActionChainOptions
+ * for better type safety and cleaner code. The rightClickAndMoveUntilVanishes method now
+ * demonstrates how to build complex action sequences using the fluent ActionChainOptions API.</p>
+ * 
+ * @see ActionChainOptions
+ * @see ActionChainExecutor
+ * @see ClickOptions
+ * @see MouseMoveOptions
+ * @see VanishOptions
+ * @see HighlightOptions
  */
 @Component
 public class ActionSequenceBuilder {
 
-    private MultipleActions multipleActions;
-    private Action action;
-    private ActionFacade commonActions;
+    private final ActionChainExecutor chainExecutor;
+    private final Action action;
 
-    public ActionSequenceBuilder(MultipleActions multipleActions, Action action, ActionFacade commonActions) {
-        this.multipleActions = multipleActions;
+    public ActionSequenceBuilder(ActionChainExecutor chainExecutor, Action action) {
+        this.chainExecutor = chainExecutor;
         this.action = action;
-        this.commonActions = commonActions;
     }
 
     /**
@@ -97,45 +105,78 @@ public class ActionSequenceBuilder {
     public boolean rightClickAndMoveUntilVanishes(int timesToClick, double pauseBetweenClicks,
                                                   double pauseBeforeClick, double pauseAfterMove,
                                                   StateImage image, int xMove, int yMove) {
-        ActionOptions moveBeforeClick = new ActionOptions.Builder()
-                .setAction(MOVE)
-                .setPauseAfterEnd(pauseBeforeClick)
+        // Build the action chain for move -> right-click -> move sequence
+        ActionChainOptions clickSequence = new ActionChainOptions.Builder(
+                // First: Move to the image
+                new MouseMoveOptions.Builder()
+                        .setPauseAfterEnd(pauseBeforeClick)
+                        .build())
+                // Then: Right-click the image
+                .then(new ClickOptions.Builder()
+                        .setPressOptions(new MousePressOptions.Builder()
+                                .setButton(MouseButton.RIGHT)
+                                .setPauseBeforeMouseDown(pauseBeforeClick))
+                        .build())
                 .build();
-        ActionOptions doAction = new ActionOptions.Builder()
-                .setAction(CLICK)
-                .setClickType(ClickType.Type.RIGHT)
-                .setPauseBeforeMouseDown(pauseBeforeClick)
-                .build();
-        ObjectCollection objectCollection = new ObjectCollection.Builder()
+        
+        // Create the object collection for the target image
+        ObjectCollection imageCollection = new ObjectCollection.Builder()
                 .withImages(image)
                 .build();
-        ActionOptions moveAfterClick = new ActionOptions.Builder()
-                .setAction(MOVE)
-                .setAddX(xMove)
-                .setAddY(yMove)
-                .setPauseAfterEnd(pauseAfterMove)
+        
+        // We'll create a location offset from the match for the move
+        
+        // Create vanish options with reduced similarity
+        VanishOptions vanishOptions = new VanishOptions.Builder()
+                .setTimeout(pauseBetweenClicks)
+                .setSimilarity(Math.max(0.1, 0.8 - 0.10)) // Use default similarity if not specified
                 .build();
-        MultipleActionsObject mao = new MultipleActionsObject();
-        mao.addActionOptionsObjectCollectionPair(moveBeforeClick, objectCollection);
-        mao.addActionOptionsObjectCollectionPair(doAction, objectCollection);
-        ActionOptions vanish = new ActionOptions.Builder()
-                .setAction(VANISH)
-                .setMaxWait(pauseBetweenClicks)
-                .setMinSimilarity(doAction.getSimilarity() - .10)
-                .build();
-        ActionResult matches;
-        for (int i=0; i<timesToClick; i++) {
-            matches = multipleActions.perform(mao);
-            if (matches.isSuccess()) {
-                action.perform(moveAfterClick);
-                matches.getBestMatch().ifPresent(match ->
-                        commonActions.highlightRegion(1, new Region(match)));
+        
+        // Execute the click sequence up to timesToClick times
+        for (int i = 0; i < timesToClick; i++) {
+            // Execute the move->click sequence
+            ActionResult result = chainExecutor.executeChain(clickSequence, new ActionResult(),
+                    imageCollection,  // For move
+                    imageCollection   // For click
+            );
+            
+            if (result.isSuccess()) {
+                // Move mouse away from clicked position
+                result.getBestMatch().ifPresent(match -> {
+                    // Create a region from the match for highlighting
+                    Region matchRegion = new Region(match);
+                    
+                    // Create location offset from the match position
+                    // Use match center coordinates and add offset
+                    int centerX = match.x() + match.w() / 2;
+                    int centerY = match.y() + match.h() / 2;
+                    Location offsetLocation = new Location(centerX + xMove, centerY + yMove);
+                    
+                    // Move to the offset location
+                    MouseMoveOptions moveAway = new MouseMoveOptions.Builder()
+                            .setPauseAfterEnd(pauseAfterMove)
+                            .build();
+                    action.perform(moveAway, new ObjectCollection.Builder()
+                            .withLocations(offsetLocation)
+                            .build());
+                    
+                    // Highlight the clicked region for visual feedback
+                    HighlightOptions highlightOptions = new HighlightOptions.Builder()
+                            .setHighlightSeconds(1.0)
+                            .build();
+                    action.perform(highlightOptions, new ObjectCollection.Builder()
+                            .withRegions(matchRegion)
+                            .build());
+                });
             }
-            if (action.perform(vanish, image).isSuccess()) {
-                System.out.println("object vanished, min sim = "+vanish.getSimilarity());
+            
+            // Check if the image has vanished
+            if (action.perform(vanishOptions, image).isSuccess()) {
+                System.out.println("object vanished, min similarity = " + vanishOptions.getSimilarity());
                 return true;
             }
         }
+        
         return false;
     }
 }

@@ -41,57 +41,74 @@
  * 
  * <h2>Configuration Options</h2>
  * 
- * <p>Drag behavior can be customized through {@link io.github.jspinak.brobot.action.ActionOptions}:</p>
+ * <p>Drag behavior can be customized through {@link io.github.jspinak.brobot.action.composite.drag.DragOptions}:</p>
  * <ul>
- *   <li><b>Drag speed</b> - Control movement velocity</li>
- *   <li><b>Hold delays</b> - Pause duration at source and destination</li>
- *   <li><b>Path style</b> - Straight line or curved motion</li>
- *   <li><b>Offset adjustments</b> - Fine-tune grab and drop points</li>
- *   <li><b>Verification</b> - Post-drag validation options</li>
+ *   <li><b>Mouse button</b> - Configure via MousePressOptions (LEFT, MIDDLE, RIGHT)</li>
+ *   <li><b>Hold delays</b> - PauseBeforeMouseDown, pauseBeforeMouseUp via MousePressOptions</li>
+ *   <li><b>Movement timing</b> - DelayBetweenMouseDownAndMove, delayAfterDrag</li>
+ *   <li><b>Offset adjustments</b> - Use separate ObjectCollections for source and destination</li>
+ *   <li><b>Verification</b> - Chain with find actions using ActionChainOptions</li>
  * </ul>
  * 
  * <h2>Example Usage</h2>
  * 
  * <pre>{@code
- * // Basic drag from one image to another
+ * // Basic drag using ActionConfig (recommended)
  * Drag drag = new Drag(...);
  * 
- * ObjectCollection dragTargets = new ObjectCollection.Builder()
- *     .withImages("drag_handle.png", "drop_zone.png")
+ * DragOptions dragOptions = new DragOptions.Builder()
+ *     .setMousePressOptions(new MousePressOptions.Builder()
+ *         .setButton(MouseButton.LEFT)
+ *         .setPauseBeforeMouseDown(0.5)
+ *         .setPauseBeforeMouseUp(0.5)
+ *         .build())
+ *     .setDelayBetweenMouseDownAndMove(0.3)
+ *     .setDelayAfterDrag(0.5)
  *     .build();
  * 
- * ActionOptions dragOptions = new ActionOptions.Builder()
- *     .setAction(ActionOptions.Action.DRAG)
- *     .setDragSpeed(DragSpeed.MEDIUM)
+ * // Source and destination as separate ObjectCollections
+ * ObjectCollection source = new ObjectCollection.Builder()
+ *     .withImages("drag_handle.png")
  *     .build();
  * 
- * ActionResult result = drag.perform(new ActionResult(), dragTargets);
- * 
- * // Drag with offsets
- * ObjectCollection offsetTargets = new ObjectCollection.Builder()
- *     .withImages("item.png", "trash.png")
+ * ObjectCollection destination = new ObjectCollection.Builder()
+ *     .withImages("drop_zone.png")
  *     .build();
  * 
- * ActionOptions offsetOptions = new ActionOptions.Builder()
- *     .setAction(ActionOptions.Action.DRAG)
- *     .setFromOffsetX(5)   // Grab 5 pixels from center
- *     .setToOffsetY(-10)   // Drop 10 pixels above center
+ * ActionResult result = drag.perform(dragOptions, source, destination);
+ * 
+ * // Drag with offsets using locations
+ * ObjectCollection sourceWithOffset = new ObjectCollection.Builder()
+ *     .withImages("item.png")
+ *     .withLocations(new Location(5, 0))  // 5 pixels right from center
  *     .build();
  * 
- * // Multiple sequential drags
- * MultipleDrags multipleDrags = new MultipleDrags(...);
+ * ObjectCollection destWithOffset = new ObjectCollection.Builder()
+ *     .withImages("trash.png")
+ *     .withLocations(new Location(0, -10))  // 10 pixels above center
+ *     .build();
  * 
- * List<ObjectCollection> dragSequence = Arrays.asList(
- *     new ObjectCollection.Builder().withImages("item1.png", "slot1.png").build(),
- *     new ObjectCollection.Builder().withImages("item2.png", "slot2.png").build(),
- *     new ObjectCollection.Builder().withImages("item3.png", "slot3.png").build()
- * );
+ * // Using action chaining for complex drag operations
+ * PatternFindOptions findSource = new PatternFindOptions.Builder()
+ *     .setStrategy(PatternFindOptions.Strategy.BEST)
+ *     .build();
+ * 
+ * PatternFindOptions findDest = new PatternFindOptions.Builder()
+ *     .setStrategy(PatternFindOptions.Strategy.BEST)
+ *     .build();
+ * 
+ * // Create a drag chain: find source, find destination, drag
+ * ActionChainOptions dragChain = new ActionChainOptions.Builder(findSource)
+ *     .then(findDest)
+ *     .then(dragOptions)
+ *     .build();
  * 
  * // Drag to specific coordinates
- * ObjectCollection coordDrag = new ObjectCollection.Builder()
- *     .withImages("draggable.png")
+ * ObjectCollection coordDest = new ObjectCollection.Builder()
  *     .withLocations(new Location(500, 300))
  *     .build();
+ * 
+ * drag.perform(dragOptions, source, coordDest);
  * }</pre>
  * 
  * <h2>Advanced Features</h2>

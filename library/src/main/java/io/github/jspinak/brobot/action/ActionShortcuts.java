@@ -5,6 +5,10 @@ import org.springframework.stereotype.Component;
 /**
  * Provides factory methods for commonly used ActionOptions configurations.
  * 
+ * @deprecated Use {@link ActionConfigShortcuts} instead. This class uses the deprecated
+ *             ActionOptions API. The new ActionConfigShortcuts provides the same functionality
+ *             with the modern ActionConfig architecture.
+ * 
  * <p>CommonActionOptions simplifies the creation of frequently needed ActionOptions patterns, 
  * reducing boilerplate code and promoting consistency across automation scripts. It encapsulates 
  * best practices for common action configurations, making the framework more accessible to 
@@ -47,6 +51,7 @@ import org.springframework.stereotype.Component;
  * @see ActionOptions.Action
  */
 @Component
+@Deprecated
 public class ActionShortcuts {
 
     /**
