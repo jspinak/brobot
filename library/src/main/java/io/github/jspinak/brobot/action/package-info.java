@@ -56,10 +56,12 @@
  * // Create an action instance
  * Action action = new Action();
  * 
- * // Configure action options
- * ActionOptions options = new ActionOptions.Builder()
- *     .setAction(ActionOptions.Action.CLICK)
- *     .setFind(Find.BEST)
+ * // Modern approach using ActionConfig (recommended)
+ * ClickOptions clickOptions = new ClickOptions.Builder()
+ *     .setNumberOfClicks(1)
+ *     .setMousePressOptions(new MousePressOptions.Builder()
+ *         .setButton(MouseButton.LEFT)
+ *         .build())
  *     .build();
  * 
  * // Define target elements
@@ -68,17 +70,32 @@
  *     .build();
  * 
  * // Execute the action
- * ActionResult result = action.perform(options, targets);
+ * ActionResult result = action.perform(clickOptions, targets);
  * 
  * // Check results
  * if (result.isSuccess()) {
  *     System.out.println("Action completed successfully");
  * }
+ * 
+ * // Action chaining example
+ * PatternFindOptions find = new PatternFindOptions.Builder()
+ *     .setStrategy(PatternFindOptions.Strategy.BEST)
+ *     .setSimilarity(0.85)
+ *     .build();
+ * 
+ * ActionChainOptions chain = new ActionChainOptions.Builder(find)
+ *     .then(clickOptions)
+ *     .setStrategy(ActionChainOptions.ChainingStrategy.NESTED)
+ *     .build();
+ * 
+ * ActionResult chainResult = action.perform(chain, targets);
  * }</pre>
  * 
  * @see io.github.jspinak.brobot.action.Action
  * @see io.github.jspinak.brobot.action.ActionInterface
+ * @see io.github.jspinak.brobot.action.ActionConfig
  * @see io.github.jspinak.brobot.action.ActionOptions
+ * @see io.github.jspinak.brobot.action.ActionChainOptions
  * @see io.github.jspinak.brobot.action.ActionResult
  * @see io.github.jspinak.brobot.action.ObjectCollection
  */

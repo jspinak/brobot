@@ -29,14 +29,14 @@
  * 
  * <h2>Configuration Options</h2>
  * 
- * <p>Click behavior can be customized through {@link io.github.jspinak.brobot.action.ActionOptions}:</p>
+ * <p>Click behavior can be customized through {@link io.github.jspinak.brobot.action.basic.click.ClickOptions}:</p>
  * <ul>
- *   <li><b>Click type</b> - Single, double, or multi-click</li>
- *   <li><b>Mouse button</b> - Left, middle, or right</li>
- *   <li><b>Click location</b> - Center, offset, or absolute position</li>
- *   <li><b>Timing</b> - Delays before and after clicking</li>
- *   <li><b>Find strategy</b> - How to locate the target element</li>
- *   <li><b>Success criteria</b> - What constitutes a successful click</li>
+ *   <li><b>Number of clicks</b> - Single, double, or multi-click via setNumberOfClicks()</li>
+ *   <li><b>Mouse button</b> - LEFT, MIDDLE, or RIGHT via MousePressOptions</li>
+ *   <li><b>Click location</b> - Center, offset via setClickLocationOffset(), or absolute position</li>
+ *   <li><b>Timing</b> - Precise control via MousePressOptions (pauseBeforeMouseDown, pauseAfterMouseUp, etc.)</li>
+ *   <li><b>Find strategy</b> - Configured separately in PatternFindOptions when chaining</li>
+ *   <li><b>Movement</b> - DelayBeforeMouseMove and delayAfterMouseMove for timing control</li>
  * </ul>
  * 
  * <h2>Integration Features</h2>
@@ -51,27 +51,38 @@
  * <h2>Example Usage</h2>
  * 
  * <pre>{@code
- * // Simple click on an image
+ * // Simple click on an image using ActionConfig (recommended)
  * Click click = new Click(...);
  * 
- * ActionOptions options = new ActionOptions.Builder()
- *     .setAction(ActionOptions.Action.CLICK)
- *     .setFind(Find.BEST)
- *     .setClickType(ClickType.LEFT)
+ * ClickOptions clickOptions = new ClickOptions.Builder()
+ *     .setNumberOfClicks(1)
+ *     .setMousePressOptions(new MousePressOptions.Builder()
+ *         .setButton(MouseButton.LEFT)
+ *         .build())
  *     .build();
  * 
  * ObjectCollection targets = new ObjectCollection.Builder()
  *     .withImages("submit_button.png")
  *     .build();
  * 
- * ActionResult result = click.perform(new ActionResult(), targets);
+ * ActionResult result = click.perform(clickOptions, targets);
  * 
  * // Double-click with offset
- * ActionOptions doubleClickOptions = new ActionOptions.Builder()
- *     .setAction(ActionOptions.Action.CLICK)
- *     .setClickType(ClickType.DOUBLE_LEFT)
- *     .setAddX(10)  // Click 10 pixels to the right of center
- *     .setAddY(-5)  // Click 5 pixels above center
+ * ClickOptions doubleClickOptions = new ClickOptions.Builder()
+ *     .setNumberOfClicks(2)
+ *     .setMousePressOptions(new MousePressOptions.Builder()
+ *         .setButton(MouseButton.LEFT)
+ *         .build())
+ *     .setClickLocationOffset(new LocationOffset(10, -5))  // 10 pixels right, 5 pixels up
+ *     .build();
+ * 
+ * // Right-click example
+ * ClickOptions rightClickOptions = new ClickOptions.Builder()
+ *     .setMousePressOptions(new MousePressOptions.Builder()
+ *         .setButton(MouseButton.RIGHT)
+ *         .setPauseBeforeMouseDown(0.5)
+ *         .setPauseAfterMouseUp(0.5)
+ *         .build())
  *     .build();
  * 
  * // Click at specific location
@@ -79,7 +90,11 @@
  *     .withLocations(new Location(500, 300))
  *     .build();
  * 
- * ActionResult locationResult = click.perform(new ActionResult(), locationTarget);
+ * ActionResult locationResult = click.perform(clickOptions, locationTarget);
+ * 
+ * // Using convenience utilities
+ * ClickOptions quickDouble = ActionConfigShortcuts.doubleClick();
+ * ActionResult quickResult = click.perform(quickDouble, targets);
  * }</pre>
  * 
  * <h2>Best Practices</h2>

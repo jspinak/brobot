@@ -10,9 +10,11 @@
  * 
  * <ul>
  *   <li><b>{@link io.github.jspinak.brobot.action.composite.repeat.ClickUntil}</b> - 
- *       Repeatedly clicks until a condition is satisfied</li>
+ *       Repeatedly clicks until a condition is satisfied (deprecated - use action chaining)</li>
  *   <li><b>{@link io.github.jspinak.brobot.action.composite.repeat.DoUntilActionObject}</b> - 
  *       Executes any action repeatedly until a condition is met</li>
+ *   <li><b>{@link io.github.jspinak.brobot.action.ActionChainOptions}</b> - 
+ *       Modern approach for conditional action sequences</li>
  * </ul>
  * 
  * <h2>Termination Conditions</h2>
@@ -58,65 +60,73 @@
  * <h2>Example Usage</h2>
  * 
  * <pre>{@code
+ * // Modern approach: Use action chaining for repeated actions
  * // Click Next button until the last page indicator appears
- * ClickUntil clickUntil = new ClickUntil(...);
+ * ActionChainOptions clickUntilLast = new ActionChainOptions.Builder(
+ *         new ClickOptions.Builder()
+ *             .setPauseAfterEnd(1.0)
+ *             .build())
+ *     .setMaxRepetitions(20)
+ *     .setStopCondition(matches -> 
+ *         matches.stream().anyMatch(m -> m.getName().contains("last_page")))
+ *     .build();
  * 
- * ActionOptions untilOptions = new ActionOptions.Builder()
- *     .setAction(ActionOptions.Action.CLICK)
- *     .setUntilImageAppears("last_page_indicator.png")
- *     .setMaxIterations(20)
+ * ActionResult result = chainExecutor.executeChain(clickUntilLast, 
+ *     new ActionResult(),
+ *     nextButton.asObjectCollection());
+ * 
+ * // Use ClickUntilOptions with the deprecated ClickUntil action
+ * ClickUntilOptions untilOptions = new ClickUntilOptions.Builder()
+ *     .setClickOptions(new ClickOptions.Builder().build())
+ *     .setUntilFinds(new PatternFindOptions.Builder()
+ *         .setStrategy(PatternFindOptions.Strategy.FIRST)
+ *         .build())
+ *     .setMaxRepetitions(20)
  *     .setPauseBetweenActions(1.0)
  *     .build();
  * 
- * ObjectCollection nextButton = new ObjectCollection.Builder()
- *     .withImages("next_button.png")
+ * result.setActionConfig(untilOptions);
+ * clickUntil.perform(result, 
+ *     nextButton.asObjectCollection(),
+ *     lastPageIndicator.asObjectCollection());
+ * 
+ * // Scroll until element is visible using action chaining
+ * ActionChainOptions scrollUntilVisible = new ActionChainOptions.Builder(
+ *         new ScrollOptions.Builder()
+ *             .setDirection(-3)  // Scroll down
+ *             .build())
+ *     .setMaxRepetitions(10)
+ *     .setStopCondition(matches -> !matches.isEmpty())
+ *     .then(new PatternFindOptions.Builder()
+ *             .setPauseBeforeBegin(0.5)
+ *             .build())
  *     .build();
  * 
- * ActionResult result = clickUntil.perform(untilOptions, nextButton);
- * 
- * System.out.println("Clicked " + result.getRepetitions() + " times");
- * 
- * // Generic repeat action - scroll until element is visible
- * DoUntilActionObject doUntil = new DoUntilActionObject(...);
- * 
- * ActionOptions scrollOptions = new ActionOptions.Builder()
- *     .setAction(ActionOptions.Action.SCROLL_MOUSE_WHEEL)
- *     .setScrollDirection(-3)  // Scroll down
- *     .build();
- * 
- * DoUntilActionObject.UntilCondition condition = 
- *     new DoUntilActionObject.UntilCondition()
- *         .untilImageAppears("target_element.png")
- *         .withMaxAttempts(10)
- *         .withTimeout(30.0);
- * 
- * ActionResult scrollResult = doUntil.perform(
- *     scrollOptions, 
- *     new ObjectCollection.Builder().build(),
- *     condition
- * );
+ * ActionResult scrollResult = chainExecutor.executeChain(scrollUntilVisible,
+ *     new ActionResult(),
+ *     new ObjectCollection.Builder().build(),  // For scroll
+ *     targetElement.asObjectCollection());     // For find
  * 
  * // Click submit button until success message or error appears
- * ActionOptions submitOptions = new ActionOptions.Builder()
- *     .setAction(ActionOptions.Action.CLICK)
- *     .setUntilImageAppears("success_message.png", "error_message.png")
- *     .setMaxWait(5.0)  // Wait 5 seconds between clicks
- *     .setMaxIterations(3)
+ * ActionChainOptions submitUntilResponse = new ActionChainOptions.Builder(
+ *         new ClickOptions.Builder()
+ *             .setPauseAfterEnd(5.0)  // Wait 5 seconds between clicks
+ *             .build())
+ *     .setMaxRepetitions(3)
+ *     .then(new PatternFindOptions.Builder()
+ *             .setStrategy(PatternFindOptions.Strategy.FIRST)
+ *             .build())
+ *     .setStopCondition(matches -> 
+ *         matches.stream().anyMatch(m -> 
+ *             m.getName().contains("success") || m.getName().contains("error")))
  *     .build();
  * 
- * ObjectCollection submitButton = new ObjectCollection.Builder()
- *     .withImages("submit_button.png")
- *     .build();
- * 
- * ActionResult submitResult = clickUntil.perform(submitOptions, submitButton);
- * 
- * // Determine which condition was met
- * if (submitResult.getMatches().stream()
- *     .anyMatch(m -> m.getName().contains("success"))) {
- *     System.out.println("Submission successful!");
- * } else {
- *     System.out.println("Submission failed or timed out");
- * }
+ * ActionResult submitResult = chainExecutor.executeChain(submitUntilResponse,
+ *     new ActionResult(),
+ *     submitButton.asObjectCollection(),
+ *     new ObjectCollection.Builder()
+ *         .withImages(successMessage, errorMessage)
+ *         .build());
  * }</pre>
  * 
  * <h2>Configuration Options</h2>
@@ -150,7 +160,8 @@
  * </ul>
  * 
  * @see io.github.jspinak.brobot.action.composite.repeat.ClickUntil
- * @see io.github.jspinak.brobot.action.composite.repeat.DoUntilActionObject
- * @see io.github.jspinak.brobot.action.ActionOptions
+ * @see io.github.jspinak.brobot.action.composite.repeat.ClickUntilOptions
+ * @see io.github.jspinak.brobot.action.ActionChainOptions
+ * @see io.github.jspinak.brobot.action.internal.execution.ActionChainExecutor
  */
 package io.github.jspinak.brobot.action.composite.repeat;

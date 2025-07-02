@@ -41,44 +41,61 @@
  * <h2>Example Usage</h2>
  * 
  * <pre>{@code
- * // Move mouse to specific location
- * MoveMouse moveMouse = new MoveMouse(...);
+ * // Move mouse to specific location with custom speed
+ * MouseMoveOptions moveOptions = new MouseMoveOptions.Builder()
+ *     .setMoveMouseDelay(0.5f)
+ *     .setPauseAfterEnd(0.2)
+ *     .build();
+ * 
+ * ActionResult result = new ActionResult();
+ * result.setActionConfig(moveOptions);
  * 
  * ObjectCollection target = new ObjectCollection.Builder()
  *     .withLocations(new Location(500, 300))
  *     .build();
  * 
- * ActionResult moveResult = moveMouse.perform(new ActionResult(), target);
+ * moveMouse.perform(result, target);
  * 
  * // Perform a drag operation using low-level actions
- * MouseDown mouseDown = new MouseDown(...);
- * MouseUp mouseUp = new MouseUp(...);
+ * // Press right mouse button at start location
+ * MouseDownOptions downOptions = new MouseDownOptions.Builder()
+ *     .setPressOptions(new MousePressOptions.Builder()
+ *         .setButton(MouseButton.RIGHT)
+ *         .setPauseBeforeMouseDown(0.1))
+ *     .build();
  * 
- * // Press mouse button at start location
+ * result.setActionConfig(downOptions);
  * ObjectCollection startLoc = new ObjectCollection.Builder()
  *     .withLocations(new Location(100, 100))
  *     .build();
- * moveMouse.perform(new ActionResult(), startLoc);
- * mouseDown.perform(new ActionResult(), new ObjectCollection.Builder().build());
+ * moveMouse.perform(result, startLoc);
+ * mouseDown.perform(result, new ObjectCollection.Builder().build());
  * 
  * // Move to end location while holding button
+ * result.setActionConfig(moveOptions);
  * ObjectCollection endLoc = new ObjectCollection.Builder()
  *     .withLocations(new Location(300, 300))
  *     .build();
- * moveMouse.perform(new ActionResult(), endLoc);
+ * moveMouse.perform(result, endLoc);
  * 
  * // Release mouse button
- * mouseUp.perform(new ActionResult(), new ObjectCollection.Builder().build());
- * 
- * // Scroll the mouse wheel
- * ScrollMouseWheel scroll = new ScrollMouseWheel(...);
- * 
- * ActionOptions scrollOptions = new ActionOptions.Builder()
- *     .setAction(ActionOptions.Action.SCROLL_MOUSE_WHEEL)
- *     .setScrollDirection(-5)  // Scroll down 5 units
+ * MouseUpOptions upOptions = new MouseUpOptions.Builder()
+ *     .setPressOptions(new MousePressOptions.Builder()
+ *         .setButton(MouseButton.RIGHT)
+ *         .setPauseAfterMouseUp(0.5))
  *     .build();
  * 
- * scroll.perform(new ActionResult(), new ObjectCollection.Builder().build());
+ * result.setActionConfig(upOptions);
+ * mouseUp.perform(result, new ObjectCollection.Builder().build());
+ * 
+ * // Scroll the mouse wheel
+ * ScrollOptions scrollOptions = new ScrollOptions.Builder()
+ *     .setDirection(-5)  // Scroll down 5 units
+ *     .setPauseAfterEnd(0.3)
+ *     .build();
+ * 
+ * result.setActionConfig(scrollOptions);
+ * scroll.perform(result, new ObjectCollection.Builder().build());
  * }</pre>
  * 
  * <h2>Use Cases</h2>
@@ -102,6 +119,10 @@
  * 
  * @see io.github.jspinak.brobot.action.basic.click.Click
  * @see io.github.jspinak.brobot.action.composite.drag.Drag
- * @see io.github.jspinak.brobot.model.Location
+ * @see io.github.jspinak.brobot.model.element.Location
+ * @see io.github.jspinak.brobot.action.basic.mouse.MouseMoveOptions
+ * @see io.github.jspinak.brobot.action.basic.mouse.MouseDownOptions
+ * @see io.github.jspinak.brobot.action.basic.mouse.MouseUpOptions
+ * @see io.github.jspinak.brobot.action.basic.scroll.ScrollOptions
  */
 package io.github.jspinak.brobot.action.basic.mouse;

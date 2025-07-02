@@ -4,8 +4,10 @@ import io.github.jspinak.brobot.action.ActionOptions;
 import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.basic.click.ClickOptions;
 import io.github.jspinak.brobot.model.element.Location;
+import io.github.jspinak.brobot.model.action.MouseButton;
 import io.github.jspinak.brobot.config.FrameworkSettings;
 import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
+import io.github.jspinak.brobot.tools.testing.mock.time.TimeProvider;
 
 import org.springframework.stereotype.Component;
 
@@ -56,6 +58,7 @@ public class SingleClickExecutor {
     private final MouseDownWrapper mouseDownWrapper;
     private final MouseUpWrapper mouseUpWrapper;
     private final MoveMouseWrapper moveMouseWrapper;
+    private final TimeProvider time;
 
     /**
      * Constructs a ClickLocationOnce with required mouse operation wrappers.
@@ -66,10 +69,12 @@ public class SingleClickExecutor {
      */
     public SingleClickExecutor(MouseDownWrapper mouseDownWrapper,
                              MouseUpWrapper mouseUpWrapper,
-                             MoveMouseWrapper moveMouseWrapper) {
+                             MoveMouseWrapper moveMouseWrapper,
+                             TimeProvider time) {
         this.mouseDownWrapper = mouseDownWrapper;
         this.mouseUpWrapper = mouseUpWrapper;
         this.moveMouseWrapper = moveMouseWrapper;
+        this.time = time;
     }
 
     /**
@@ -85,19 +90,28 @@ public class SingleClickExecutor {
      * @return true if the click was performed successfully, false if movement failed
      */
     public boolean click(Location location, ActionConfig config) {
-        // Convert to ActionOptions for backward compatibility
-        ActionOptions tempOptions = new ActionOptions();
-        tempOptions.setPauseBeforeBegin(config.getPauseBeforeBegin());
-        tempOptions.setPauseAfterEnd(config.getPauseAfterEnd());
-        
-        if (config instanceof ClickOptions) {
-            ClickOptions clickOptions = (ClickOptions) config;
-            // TODO: Map new click options to legacy ActionOptions
-            // For now, use default click type
-            tempOptions.setClickType(ClickOptions.Type.LEFT);
+        if (!(config instanceof ClickOptions)) {
+            // If not ClickOptions, fall back to simple left click
+            return performClick(location, 1, MouseButton.LEFT, 
+                config.getPauseBeforeBegin(), config.getPauseAfterEnd(), 0, 0, 0, 0);
         }
         
-        return click(location, tempOptions);
+        ClickOptions clickOptions = (ClickOptions) config;
+        
+        // Extract click parameters from ClickOptions
+        int numberOfClicks = clickOptions.getNumberOfClicks();
+        MouseButton button = clickOptions.getMousePressOptions().getButton();
+        
+        // Get timing parameters
+        double pauseBeforeBegin = clickOptions.getPauseBeforeBegin();
+        double pauseAfterEnd = clickOptions.getPauseAfterEnd();
+        double pauseBeforeDown = clickOptions.getMousePressOptions().getPauseBeforeMouseDown();
+        double pauseAfterDown = clickOptions.getMousePressOptions().getPauseAfterMouseDown();
+        double pauseBeforeUp = clickOptions.getMousePressOptions().getPauseBeforeMouseUp();
+        double pauseAfterUp = clickOptions.getMousePressOptions().getPauseAfterMouseUp();
+        
+        return performClick(location, numberOfClicks, button, 
+            pauseBeforeBegin, pauseAfterEnd, pauseBeforeDown, pauseAfterDown, pauseBeforeUp, pauseAfterUp);
     }
     
     /**
@@ -167,11 +181,114 @@ public class SingleClickExecutor {
                 ConsoleReporter.print("2 clicks ");
             }
             for (int j=0; j<i; j++) {
-                mouseDownWrapper.press(pauseBeforeDown, pauseAfterDown, actionOptions.getClickType());
-                mouseUpWrapper.press(pauseBeforeUp, pauseAfterUp, actionOptions.getClickType());
+                mouseDownWrapper.press(pauseBeforeDown, pauseAfterDown, convertClickOptionsTypeToClickType(actionOptions.getClickType()));
+                mouseUpWrapper.press(pauseBeforeUp, pauseAfterUp, convertClickOptionsTypeToClickType(actionOptions.getClickType()));
             }
         }
         return true;
+    }
+    
+    /**
+     * Performs a click operation with full control over timing and button type.
+     * <p>
+     * This method provides the core click implementation that supports the new
+     * ActionConfig architecture while maintaining backward compatibility.
+     *
+     * @param location Target location for the click
+     * @param numberOfClicks Number of clicks to perform (1 for single, 2 for double)
+     * @param button The mouse button to use
+     * @param pauseBeforeBegin Pause before starting the click sequence
+     * @param pauseAfterEnd Pause after completing the click sequence
+     * @param pauseBeforeDown Pause before pressing the mouse button
+     * @param pauseAfterDown Pause after pressing the mouse button
+     * @param pauseBeforeUp Pause before releasing the mouse button
+     * @param pauseAfterUp Pause after releasing the mouse button
+     * @return true if the click was performed successfully, false if movement failed
+     */
+    private boolean performClick(Location location, int numberOfClicks, MouseButton button,
+                                double pauseBeforeBegin, double pauseAfterEnd,
+                                double pauseBeforeDown, double pauseAfterDown,
+                                double pauseBeforeUp, double pauseAfterUp) {
+        if (FrameworkSettings.mock) {
+            ConsoleReporter.print("<click>");
+            if (button != MouseButton.LEFT || numberOfClicks > 1) {
+                ConsoleReporter.print(button.name());
+                if (numberOfClicks > 1) ConsoleReporter.print(" x" + numberOfClicks);
+            }
+            ConsoleReporter.print(" ");
+            return true;
+        }
+        
+        // Move to location
+        if (!moveMouseWrapper.move(location)) return false;
+        
+        // Pause before beginning click sequence
+        if (pauseBeforeBegin > 0) time.wait(pauseBeforeBegin);
+        
+        // Check for native double-click optimization
+        if (numberOfClicks == 2 && button == MouseButton.LEFT && 
+            pauseBeforeDown == 0 && pauseAfterDown == 0 && 
+            pauseBeforeUp == 0 && pauseAfterUp == 0) {
+            location.sikuli().doubleClick();
+        } else {
+            // Perform clicks with timing
+            if (numberOfClicks > 1) {
+                ConsoleReporter.print(numberOfClicks + " clicks ");
+            }
+            
+            // Convert MouseButton to legacy ClickType for wrapper compatibility
+            ClickType.Type clickType = convertToClickType(button, numberOfClicks);
+            
+            for (int i = 0; i < numberOfClicks; i++) {
+                mouseDownWrapper.press(pauseBeforeDown, pauseAfterDown, clickType);
+                mouseUpWrapper.press(pauseBeforeUp, pauseAfterUp, clickType);
+            }
+        }
+        
+        // Pause after completing click sequence
+        if (pauseAfterEnd > 0) time.wait(pauseAfterEnd);
+        
+        return true;
+    }
+    
+    /**
+     * Converts MouseButton to legacy ClickType for backward compatibility.
+     *
+     * @param button The mouse button
+     * @param numberOfClicks Number of clicks (used to determine if double-click)
+     * @return The corresponding ClickType
+     */
+    private ClickType.Type convertToClickType(MouseButton button, int numberOfClicks) {
+        if (numberOfClicks > 1) {
+            switch (button) {
+                case LEFT: return ClickType.Type.DOUBLE_LEFT;
+                case RIGHT: return ClickType.Type.DOUBLE_RIGHT;
+                case MIDDLE: return ClickType.Type.DOUBLE_MIDDLE;
+            }
+        }
+        switch (button) {
+            case RIGHT: return ClickType.Type.RIGHT;
+            case MIDDLE: return ClickType.Type.MIDDLE;
+            default: return ClickType.Type.LEFT;
+        }
+    }
+    
+    /**
+     * Converts ClickOptions.Type to legacy ClickType.Type for backward compatibility.
+     *
+     * @param clickOptionsType The ClickOptions type
+     * @return The corresponding ClickType.Type
+     */
+    private ClickType.Type convertClickOptionsTypeToClickType(ClickOptions.Type clickOptionsType) {
+        switch (clickOptionsType) {
+            case LEFT: return ClickType.Type.LEFT;
+            case RIGHT: return ClickType.Type.RIGHT;
+            case MIDDLE: return ClickType.Type.MIDDLE;
+            case DOUBLE_LEFT: return ClickType.Type.DOUBLE_LEFT;
+            case DOUBLE_RIGHT: return ClickType.Type.DOUBLE_RIGHT;
+            case DOUBLE_MIDDLE: return ClickType.Type.DOUBLE_MIDDLE;
+            default: return ClickType.Type.LEFT;
+        }
     }
 
     /**
@@ -202,7 +319,7 @@ public class SingleClickExecutor {
      * @return true if native double-click should be used, false for manual clicks
      */
     private boolean isSimpleLeftDoubleClick(ActionOptions actionOptions) {
-        return actionOptions.getClickType() == ClickType.Type.DOUBLE_LEFT && noPauses(actionOptions);
+        return actionOptions.getClickType() == ClickOptions.Type.DOUBLE_LEFT && noPauses(actionOptions);
     }
 
     /**
@@ -215,9 +332,9 @@ public class SingleClickExecutor {
      * @return true if the action is a single click, false for double-clicks
      */
     private boolean isSingleClick(ActionOptions actionOptions) {
-        return actionOptions.getClickType() == ClickType.Type.LEFT ||
-                actionOptions.getClickType() == ClickType.Type.RIGHT ||
-                actionOptions.getClickType() == ClickType.Type.MIDDLE;
+        return actionOptions.getClickType() == ClickOptions.Type.LEFT ||
+                actionOptions.getClickType() == ClickOptions.Type.RIGHT ||
+                actionOptions.getClickType() == ClickOptions.Type.MIDDLE;
     }
 
     /**
@@ -237,10 +354,10 @@ public class SingleClickExecutor {
      * @return true if two separate clicks are needed, false otherwise
      */
     private boolean isTwoClicks(ActionOptions actionOptions) {
-        if (actionOptions.getClickType() == ClickType.Type.DOUBLE_RIGHT
-                || actionOptions.getClickType() == ClickType.Type.DOUBLE_MIDDLE)
+        if (actionOptions.getClickType() == ClickOptions.Type.DOUBLE_RIGHT
+                || actionOptions.getClickType() == ClickOptions.Type.DOUBLE_MIDDLE)
             return true;
-        if (actionOptions.getClickType() != ClickType.Type.DOUBLE_LEFT) return false;
+        if (actionOptions.getClickType() != ClickOptions.Type.DOUBLE_LEFT) return false;
         return actionOptions.getPauseAfterMouseDown() > 0 ||
                 actionOptions.getPauseBeforeMouseUp() > 0 ||
                 actionOptions.getPauseBeforeMouseDown() > 0 ||

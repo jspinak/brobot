@@ -10,9 +10,11 @@
  * 
  * <ul>
  *   <li><b>{@link io.github.jspinak.brobot.action.composite.chains.ActionFacade}</b> - 
- *       Library of single-action patterns with common configurations</li>
+ *       Library of single-action patterns with common configurations (deprecated - use ActionConfigFacade)</li>
+ *   <li><b>{@link io.github.jspinak.brobot.action.composite.chains.ActionConfigFacade}</b> - 
+ *       Modern facade using ActionConfig API with type-safe configurations</li>
  *   <li><b>{@link io.github.jspinak.brobot.action.composite.chains.ActionSequenceBuilder}</b> - 
- *       Multi-step action sequences for complex interactions</li>
+ *       Multi-step action sequences using ActionChainOptions for complex interactions</li>
  *   <li><b>{@link io.github.jspinak.brobot.action.composite.chains.MultipleMoves}</b> - 
  *       Sequences of mouse movements for path-based operations</li>
  * </ul>
@@ -53,45 +55,40 @@
  * <h2>Example Usage</h2>
  * 
  * <pre>{@code
- * // Use a common action pattern
- * CommonActions common = new CommonActions(...);
+ * // Use the modern ActionConfig facade
+ * ActionConfigFacade facade = new ActionConfigFacade(action);
  * 
- * // Click and wait for page load
- * ActionResult result = common.clickAndWait(
- *     "submit_button.png", 
- *     "success_message.png",
- *     10.0  // timeout in seconds
+ * // Simple click with timeout
+ * boolean clicked = facade.click(5.0, stateImage);
+ * 
+ * // Right-click on best match
+ * boolean rightClicked = facade.rightClickBest(0.9, stateImage);
+ * 
+ * // Click until vanished
+ * boolean vanished = facade.clickUntilVanished(10, 0.5, targetImage);
+ * 
+ * // Use ActionSequenceBuilder for complex sequences
+ * ActionSequenceBuilder builder = new ActionSequenceBuilder(chainExecutor, action);
+ * 
+ * // Right-click and move mouse away until element vanishes
+ * boolean success = builder.rightClickAndMoveUntilVanishes(
+ *     5,      // max attempts
+ *     2.0,    // pause between clicks
+ *     0.5,    // pause before click
+ *     0.3,    // pause after move
+ *     image,  // target image
+ *     50,     // x offset
+ *     -30     // y offset
  * );
  * 
- * // Navigate through menu hierarchy
- * CommonMultipleActions multiActions = new CommonMultipleActions(...);
- * 
- * List<String> menuPath = Arrays.asList(
- *     "file_menu.png",
- *     "open_submenu.png", 
- *     "recent_files.png"
- * );
- * 
- * ActionResult navResult = multiActions.navigateMenuPath(menuPath);
- * 
- * // Fill a form with multiple fields
- * Map<String, String> formData = new HashMap<>();
- * formData.put("name_field.png", "John Doe");
- * formData.put("email_field.png", "john@example.com");
- * formData.put("phone_field.png", "555-1234");
- * 
- * ActionResult formResult = multiActions.fillForm(formData);
- * 
- * // Execute a series of mouse movements
- * MultipleMoves moves = new MultipleMoves(...);
- * 
- * List<Location> path = Arrays.asList(
- *     new Location(100, 100),
- *     new Location(200, 150),
- *     new Location(300, 200)
- * );
- * 
- * ActionResult moveResult = moves.followPath(path);
+ * // Chain multiple actions with ActionChainOptions
+ * ActionChainOptions loginSequence = new ActionChainOptions.Builder(
+ *         new ClickOptions.Builder().build())
+ *     .then(new TypeOptions.Builder().build())
+ *     .then(new ClickOptions.Builder().build())
+ *     .then(new TypeOptions.Builder().build())
+ *     .then(new ClickOptions.Builder().build())
+ *     .build();
  * }</pre>
  * 
  * <h2>Creating Custom Chains</h2>
@@ -126,8 +123,9 @@
  *   <li>Build complex workflows from simple chains</li>
  * </ul>
  * 
- * @see io.github.jspinak.brobot.action.composite.chains.ActionFacade
+ * @see io.github.jspinak.brobot.action.composite.chains.ActionConfigFacade
  * @see io.github.jspinak.brobot.action.composite.chains.ActionSequenceBuilder
+ * @see io.github.jspinak.brobot.action.ActionChainOptions
  * @see io.github.jspinak.brobot.action.Action
  */
 package io.github.jspinak.brobot.action.composite.chains;
