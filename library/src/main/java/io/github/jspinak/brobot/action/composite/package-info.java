@@ -12,7 +12,8 @@
  *   <li><b>Reusability</b> - Encapsulate common interaction patterns</li>
  *   <li><b>Atomicity</b> - Present complex operations as single actions</li>
  *   <li><b>Consistency</b> - Maintain the same interface as basic actions</li>
- *   <li><b>Flexibility</b> - Support customization through ActionOptions</li>
+ *   <li><b>Flexibility</b> - Support customization through ActionConfig subclasses</li>
+ *   <li><b>Type Safety</b> - Use specific configuration classes for each action type</li>
  * </ul>
  * 
  * <h2>Categories of Composite Actions</h2>
@@ -73,31 +74,43 @@
  * <h2>Example Usage</h2>
  * 
  * <pre>{@code
- * // Drag and drop operation
- * Drag drag = new Drag(...);
+ * // Drag and drop operation with DragOptions
+ * DragOptions dragOptions = new DragOptions.Builder()
+ *     .setPressOptions(new MousePressOptions.Builder()
+ *         .setPauseBeforeMouseDown(0.2)
+ *         .setPauseAfterMouseUp(0.3))
+ *     .build();
+ * 
+ * ActionResult result = new ActionResult();
+ * result.setActionConfig(dragOptions);
  * 
  * ObjectCollection dragTargets = new ObjectCollection.Builder()
- *     .withImages("drag_source.png", "drop_target.png")
+ *     .withImages(sourceImage, targetImage)
  *     .build();
  * 
- * ActionResult dragResult = drag.perform(new ActionResult(), dragTargets);
+ * drag.perform(result, dragTargets);
  * 
- * // Click until condition is met
- * ClickUntil clickUntil = new ClickUntil(...);
- * 
- * ActionOptions clickUntilOptions = new ActionOptions.Builder()
- *     .setAction(ActionOptions.Action.CLICK)
- *     .setUntilImageAppears("success_message.png")
- *     .setMaxIterations(5)
+ * // Action chaining for click-and-verify pattern
+ * ActionChainOptions clickVerifyChain = new ActionChainOptions.Builder(
+ *         new ClickOptions.Builder().build())
+ *     .then(new PatternFindOptions.Builder()
+ *         .setPauseBeforeBegin(2.0)
+ *         .build())
  *     .build();
  * 
- * // Verified click with automatic retry
- * ClickVerify clickVerify = new ClickVerify(...);
+ * chainExecutor.executeChain(clickVerifyChain, result,
+ *     buttonImage.asObjectCollection(),
+ *     successMessage.asObjectCollection());
  * 
- * ActionOptions verifyOptions = new ActionOptions.Builder()
- *     .setAction(ActionOptions.Action.CLICK)
- *     .setVerifyImage("button_pressed.png")
- *     .setRetryOnFailure(true)
+ * // Select pattern with conditional actions
+ * SelectActionObject selectAction = new SelectActionObject.Builder()
+ *     .setClickWithConfig(new ClickOptions.Builder().build())
+ *     .setFindWithConfig(new PatternFindOptions.Builder()
+ *         .setStrategy(PatternFindOptions.Strategy.FIRST)
+ *         .build())
+ *     .setObjectsForActionConfig(ObjectCollection.Builder()
+ *         .withImages(targetImage)
+ *         .build())
  *     .build();
  * }</pre>
  * 
@@ -123,7 +136,9 @@
  * </ul>
  * 
  * @see io.github.jspinak.brobot.action.ActionInterface
- * @see io.github.jspinak.brobot.action.composite.drag.Drag
- * @see io.github.jspinak.brobot.action.composite.chains.ActionFacade
+ * @see io.github.jspinak.brobot.action.ActionConfig
+ * @see io.github.jspinak.brobot.action.ActionChainOptions
+ * @see io.github.jspinak.brobot.action.composite.drag.DragOptions
+ * @see io.github.jspinak.brobot.action.composite.chains.ActionConfigFacade
  */
 package io.github.jspinak.brobot.action.composite;

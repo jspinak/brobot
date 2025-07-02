@@ -33,32 +33,49 @@
  * 
  * <p>All basic actions follow these patterns:</p>
  * <ul>
- *   <li>Accept {@link io.github.jspinak.brobot.action.ActionOptions} for configuration</li>
+ *   <li>Accept {@link io.github.jspinak.brobot.action.ActionConfig} subclasses for type-safe configuration</li>
  *   <li>Work with {@link io.github.jspinak.brobot.action.ObjectCollection} for target elements</li>
  *   <li>Return {@link io.github.jspinak.brobot.action.ActionResult} containing execution details</li>
  *   <li>Support both online (live GUI) and offline (mocked) execution modes</li>
+ *   <li>Perform runtime type checking to ensure correct configuration type</li>
  * </ul>
  * 
  * <h2>Example Usage</h2>
  * 
  * <pre>{@code
- * // Find an element on screen
- * Find find = new Find(...);
- * ActionResult result = find.perform(matches, objectCollection);
+ * // Find an element on screen with pattern matching
+ * PatternFindOptions findOptions = new PatternFindOptions.Builder()
+ *     .setSimilarity(0.9)
+ *     .setStrategy(PatternFindOptions.Strategy.BEST)
+ *     .build();
  * 
- * // Click on a found element
- * Click click = new Click(...);
- * ActionResult clickResult = click.perform(result, objectCollection);
+ * ActionResult result = new ActionResult();
+ * result.setActionConfig(findOptions);
+ * find.perform(result, objectCollection);
  * 
- * // Type text at current focus
- * TypeText type = new TypeText(...);
- * ActionResult typeResult = type.perform(new ActionResult(), 
- *     new ObjectCollection.Builder().withStrings("Hello World").build());
+ * // Click on a found element with specific timing
+ * ClickOptions clickOptions = new ClickOptions.Builder()
+ *     .setPauseAfterEnd(0.5)
+ *     .build();
+ * 
+ * result.setActionConfig(clickOptions);
+ * click.perform(result, objectCollection);
+ * 
+ * // Type text with slow speed
+ * TypeOptions typeOptions = new TypeOptions.Builder()
+ *     .setTypeDelay(0.1)
+ *     .build();
+ * 
+ * result.setActionConfig(typeOptions);
+ * type.perform(result, new ObjectCollection.Builder()
+ *     .withStrings("Hello World")
+ *     .build());
  * }</pre>
  * 
  * @see io.github.jspinak.brobot.action.ActionInterface
- * @see io.github.jspinak.brobot.action.basic.find.Find
- * @see io.github.jspinak.brobot.action.basic.click.Click
- * @see io.github.jspinak.brobot.action.basic.type.TypeText
+ * @see io.github.jspinak.brobot.action.ActionConfig
+ * @see io.github.jspinak.brobot.action.basic.find.PatternFindOptions
+ * @see io.github.jspinak.brobot.action.basic.click.ClickOptions
+ * @see io.github.jspinak.brobot.action.basic.type.TypeOptions
  */
 package io.github.jspinak.brobot.action.basic;

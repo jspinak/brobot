@@ -35,6 +35,16 @@ import java.util.List;
  * <p>The timesToRepeat feature is useful for stress testing, handling flaky UI
  * elements, or performing repetitive tasks like clearing multiple items.</p>
  * 
+ * <p>TODO: This class should be updated to support ActionConfig in addition to ActionOptions.
+ * The migration would involve:
+ * <ul>
+ *   <li>Update ActionParameters to accept ActionConfig</li>
+ *   <li>Add overloaded addActionConfigObjectCollectionPair method</li>
+ *   <li>Update MultipleActions to handle ActionConfig execution</li>
+ *   <li>Consider using ActionChainOptions as a modern replacement pattern</li>
+ * </ul>
+ * </p>
+ * 
  * @see MultipleActions
  * @see ActionParameters
  * @see ActionOptions

@@ -2,7 +2,10 @@ package io.github.jspinak.brobot.action.internal.execution;
 
 import io.github.jspinak.brobot.action.*;
 import io.github.jspinak.brobot.action.basic.find.BaseFindOptions;
+import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
+import io.github.jspinak.brobot.action.basic.find.color.ColorFindOptions;
 import io.github.jspinak.brobot.action.internal.service.ActionService;
+import io.github.jspinak.brobot.model.element.SearchRegions;
 import io.github.jspinak.brobot.exception.ActionFailedException;
 import io.github.jspinak.brobot.exception.BrobotRuntimeException;
 import io.github.jspinak.brobot.model.match.Match;
@@ -199,14 +202,33 @@ public class ActionChainExecutor {
      * Modifies an ActionConfig to search within specific regions for nested searching.
      */
     private ActionConfig modifyConfigForNestedSearch(ActionConfig original, List<Region> searchRegions) {
-        // This is a simplified version - in reality, we'd need to handle different config types
+        // Create a SearchRegions object from the list of regions
+        SearchRegions searchRegionsObj = new SearchRegions();
+        searchRegionsObj.setRegions(searchRegions);
+        
+        // Handle different find option types
+        if (original instanceof PatternFindOptions) {
+            PatternFindOptions findOptions = (PatternFindOptions) original;
+            return new PatternFindOptions.Builder(findOptions)
+                    .setSearchRegions(searchRegionsObj)
+                    .build();
+        }
+        
+        if (original instanceof ColorFindOptions) {
+            ColorFindOptions colorOptions = (ColorFindOptions) original;
+            return new ColorFindOptions.Builder(colorOptions)
+                    .setSearchRegions(searchRegionsObj)
+                    .build();
+        }
+        
         if (original instanceof BaseFindOptions) {
-            // For now, return the original - proper implementation would create a modified copy
-            // TODO: Implement proper config modification for nested search
+            // Generic handling for other BaseFindOptions implementations
+            // This is a fallback - specific implementations should be handled above
             return original;
         }
         
-        // For other config types, return as-is (they might not support search regions)
+        // For non-find configs (Click, Type, etc.), search regions don't apply
+        // Return the original config unchanged
         return original;
     }
     
