@@ -2,7 +2,7 @@ package io.github.jspinak.brobot.action;
 
 import io.github.jspinak.brobot.action.basic.click.ClickOptions;
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
-import io.github.jspinak.brobot.action.basic.find.color.ColorFindOptions;
+// ColorFindOptions removed - not used in adapter
 import io.github.jspinak.brobot.action.basic.highlight.HighlightOptions;
 import io.github.jspinak.brobot.action.basic.find.MatchAdjustmentOptions;
 import io.github.jspinak.brobot.action.basic.find.MatchFusionOptions;
@@ -11,7 +11,7 @@ import io.github.jspinak.brobot.action.basic.mouse.MouseMoveOptions;
 import io.github.jspinak.brobot.action.basic.mouse.MousePressOptions;
 import io.github.jspinak.brobot.action.basic.region.DefineRegionOptions;
 import io.github.jspinak.brobot.action.basic.vanish.VanishOptions;
-import io.github.jspinak.brobot.action.composite.repeat.ClickUntilOptions;
+// ClickUntilOptions removed - deprecated in favor of action chaining
 import io.github.jspinak.brobot.model.element.Location;
 import org.springframework.stereotype.Component;
 
@@ -66,7 +66,10 @@ public class ActionOptionsAdapter {
             case VANISH:
                 return convertToVanishOptions(actionOptions);
             case CLICK_UNTIL:
-                return convertToClickUntilOptions(actionOptions);
+                // CLICK_UNTIL is deprecated - convert to regular click with action chaining
+                // For now, return a simple click and log a warning
+                System.out.println("WARNING: CLICK_UNTIL is deprecated. Use action chaining instead.");
+                return convertToClickOptions(actionOptions);
             default:
                 throw new IllegalArgumentException("Unsupported action type: " + action);
         }
@@ -79,8 +82,8 @@ public class ActionOptionsAdapter {
         PatternFindOptions.Builder builder = new PatternFindOptions.Builder()
             .setPauseBeforeBegin(ao.getPauseBeforeBegin())
             .setPauseAfterEnd(ao.getPauseAfterEnd())
-            // TODO: Convert Predicate<Matches> to Predicate<ActionResult>
-            // .setSuccessCriteria(ao.getSuccessCriteria())
+            // Note: Predicate<Matches> to Predicate<ActionResult> conversion not implemented
+            // This requires a separate converter utility that wraps the old predicate
             .setIllustrate(mapIllustrate(ao.getIllustrate()));
 
         // Set common find fields
@@ -94,7 +97,7 @@ public class ActionOptionsAdapter {
         builder.setStrategy(mapFindStrategy(ao.getFind()))
             .setDoOnEach(mapDoOnEach(ao.getDoOnEach()));
         
-        // Note: keepLargerMatches is now handled through ActionChainOptions with ChainingStrategy.CONFIRM
+        // Note: keepLargerMatches is now handled through ActionChainOptions with ChainingStrategy
 
         // Set match adjustment
         if (needsMatchAdjustment(ao)) {
@@ -109,44 +112,16 @@ public class ActionOptionsAdapter {
         return builder.build();
     }
 
-    private ColorFindOptions convertToColorFindOptions(ActionOptions ao) {
-        ColorFindOptions.Builder builder = new ColorFindOptions.Builder()
-            .setPauseBeforeBegin(ao.getPauseBeforeBegin())
-            .setPauseAfterEnd(ao.getPauseAfterEnd())
-            // TODO: Convert Predicate<Matches> to Predicate<ActionResult>
-            // .setSuccessCriteria(ao.getSuccessCriteria())
-            .setIllustrate(mapIllustrate(ao.getIllustrate()));
-
-        // Set common find fields
-        builder.setSimilarity(ao.getMinSimilarity()) // Use minSimilarity for color similarity
-            .setSearchRegions(ao.getSearchRegions())
-            .setCaptureImage(ao.isCaptureImage())
-            .setUseDefinedRegion(ao.isUseDefinedRegion())
-            .setMaxMatchesToActOn(ao.getMaxMatchesToActOn());
-
-        // Set color-specific fields
-        builder.setColorStrategy(mapColorStrategy(ao.getColor()))
-            .setDiameter(ao.getDiameter())
-            .setKmeans(ao.getKmeans());
-
-        // Set match adjustment
-        if (needsMatchAdjustment(ao)) {
-            builder.setMatchAdjustment(createMatchAdjustmentOptions(ao));
-        }
-
-        return builder.build();
-    }
+    // Removed convertToColorFindOptions - not used in current implementation
+    // Color finds should use ColorFindOptions directly
 
     private ClickOptions convertToClickOptions(ActionOptions ao) {
         ClickOptions.Builder builder = new ClickOptions.Builder()
             .setPauseBeforeBegin(ao.getPauseBeforeBegin())
             .setPauseAfterEnd(ao.getPauseAfterEnd())
-            // TODO: Convert Predicate<Matches> to Predicate<ActionResult>
-            // .setSuccessCriteria(ao.getSuccessCriteria())
+            // Note: Predicate<Matches> to Predicate<ActionResult> conversion not implemented
+            // This requires a separate converter utility that wraps the old predicate
             .setIllustrate(mapIllustrate(ao.getIllustrate()));
-
-        // Set click type - ActionOptions already uses ClickOptions.Type
-        builder.setClickType(ao.getClickType());
 
         // Set mouse press options
         MousePressOptions.Builder pressOptions = new MousePressOptions.Builder()
@@ -154,12 +129,13 @@ public class ActionOptionsAdapter {
             .setPauseAfterMouseDown(ao.getPauseAfterMouseDown())
             .setPauseBeforeMouseUp(ao.getPauseBeforeMouseUp())
             .setPauseAfterMouseUp(ao.getPauseAfterMouseUp());
+        
+        // Convert click type to numberOfClicks and mouse button
+        convertClickType(builder, pressOptions, ao.getClickType());
+        
         builder.setPressOptions(pressOptions);
 
-        // Set verification options if this is a click until action
-        if (ao.getAction() == ActionOptions.Action.CLICK_UNTIL) {
-            builder.setVerification(createVerificationOptions(ao));
-        }
+        // Note: CLICK_UNTIL is deprecated - use action chaining with VerificationOptions
 
         // Chain mouse move after action if needed
         if (ao.isMoveMouseAfterAction()) {
@@ -173,8 +149,8 @@ public class ActionOptionsAdapter {
         TypeOptions.Builder builder = new TypeOptions.Builder()
             .setPauseBeforeBegin(ao.getPauseBeforeBegin())
             .setPauseAfterEnd(ao.getPauseAfterEnd())
-            // TODO: Convert Predicate<Matches> to Predicate<ActionResult>
-            // .setSuccessCriteria(ao.getSuccessCriteria())
+            // Note: Predicate<Matches> to Predicate<ActionResult> conversion not implemented
+            // This requires a separate converter utility that wraps the old predicate
             .setIllustrate(mapIllustrate(ao.getIllustrate()));
 
         builder.setTypeDelay(ao.getTypeDelay())
@@ -187,8 +163,8 @@ public class ActionOptionsAdapter {
         DefineRegionOptions.Builder builder = new DefineRegionOptions.Builder()
             .setPauseBeforeBegin(ao.getPauseBeforeBegin())
             .setPauseAfterEnd(ao.getPauseAfterEnd())
-            // TODO: Convert Predicate<Matches> to Predicate<ActionResult>
-            // .setSuccessCriteria(ao.getSuccessCriteria())
+            // Note: Predicate<Matches> to Predicate<ActionResult> conversion not implemented
+            // This requires a separate converter utility that wraps the old predicate
             .setIllustrate(mapIllustrate(ao.getIllustrate()));
 
         builder.setDefineAs(mapDefineAs(ao.getDefineAs()));
@@ -205,8 +181,8 @@ public class ActionOptionsAdapter {
         HighlightOptions.Builder builder = new HighlightOptions.Builder()
             .setPauseBeforeBegin(ao.getPauseBeforeBegin())
             .setPauseAfterEnd(ao.getPauseAfterEnd())
-            // TODO: Convert Predicate<Matches> to Predicate<ActionResult>
-            // .setSuccessCriteria(ao.getSuccessCriteria())
+            // Note: Predicate<Matches> to Predicate<ActionResult> conversion not implemented
+            // This requires a separate converter utility that wraps the old predicate
             .setIllustrate(mapIllustrate(ao.getIllustrate()));
 
         builder.setHighlightAllAtOnce(ao.isHighlightAllAtOnce())
@@ -220,8 +196,8 @@ public class ActionOptionsAdapter {
         MouseMoveOptions.Builder builder = new MouseMoveOptions.Builder()
             .setPauseBeforeBegin(ao.getPauseBeforeBegin())
             .setPauseAfterEnd(ao.getPauseAfterEnd())
-            // TODO: Convert Predicate<Matches> to Predicate<ActionResult>
-            // .setSuccessCriteria(ao.getSuccessCriteria())
+            // Note: Predicate<Matches> to Predicate<ActionResult> conversion not implemented
+            // This requires a separate converter utility that wraps the old predicate
             .setIllustrate(mapIllustrate(ao.getIllustrate()));
 
         builder.setMoveMouseDelay(ao.getMoveMouseDelay());
@@ -233,8 +209,8 @@ public class ActionOptionsAdapter {
         VanishOptions.Builder builder = new VanishOptions.Builder()
             .setPauseBeforeBegin(ao.getPauseBeforeBegin())
             .setPauseAfterEnd(ao.getPauseAfterEnd())
-            // TODO: Convert Predicate<Matches> to Predicate<ActionResult>
-            // .setSuccessCriteria(ao.getSuccessCriteria())
+            // Note: Predicate<Matches> to Predicate<ActionResult> conversion not implemented
+            // This requires a separate converter utility that wraps the old predicate
             .setIllustrate(mapIllustrate(ao.getIllustrate()));
 
         builder.setTimeout(ao.getMaxWait());
@@ -243,25 +219,8 @@ public class ActionOptionsAdapter {
         return builder.build();
     }
 
-    private ClickUntilOptions convertToClickUntilOptions(ActionOptions ao) {
-        // TODO: Consider migrating to RepeatUntilConfig which provides more flexibility
-        // RepeatUntilConfig allows different action types and separate configuration
-        // for the repeated action and termination condition
-        ClickUntilOptions.Builder builder = new ClickUntilOptions.Builder()
-            .setPauseBeforeBegin(ao.getPauseBeforeBegin())
-            .setPauseAfterEnd(ao.getPauseAfterEnd())
-            // TODO: Convert Predicate<Matches> to Predicate<ActionResult>
-            // .setSuccessCriteria(ao.getSuccessCriteria())
-            .setIllustrate(mapIllustrate(ao.getIllustrate()));
-
-        // Set condition
-        builder.setCondition(mapClickUntilCondition(ao.getClickUntil()));
-        
-        // TODO: ClickUntilOptions doesn't include click configuration or repetition details
-        // The actual click behavior would need to be handled separately
-
-        return builder.build();
-    }
+    // ClickUntilOptions removed - deprecated in favor of action chaining
+    // Use ActionChainOptions with RepetitionOptions and VerificationOptions instead
 
     // Helper methods
 
@@ -308,22 +267,7 @@ public class ActionOptionsAdapter {
             .setSceneToUseForCaptureAfterFusingMatches(ao.getSceneToUseForCaptureAfterFusingMatches());
     }
 
-    private VerificationOptions.Builder createVerificationOptions(ActionOptions ao) {
-        VerificationOptions.Builder builder = new VerificationOptions.Builder();
-        
-        switch (ao.getClickUntil()) {
-            case OBJECTS_APPEAR:
-                builder.setEvent(VerificationOptions.Event.OBJECTS_APPEAR);
-                break;
-            case OBJECTS_VANISH:
-                builder.setEvent(VerificationOptions.Event.OBJECTS_VANISH);
-                break;
-            default:
-                builder.setEvent(VerificationOptions.Event.NONE);
-        }
-        
-        return builder;
-    }
+    // Removed createVerificationOptions - ClickUntil is deprecated
 
     private MouseMoveOptions createMouseMoveAfterAction(ActionOptions ao) {
         MouseMoveOptions.Builder builder = new MouseMoveOptions.Builder();
@@ -363,14 +307,7 @@ public class ActionOptionsAdapter {
         }
     }
 
-    private ColorFindOptions.Color mapColorStrategy(ActionOptions.Color color) {
-        switch (color) {
-            case KMEANS: return ColorFindOptions.Color.KMEANS;
-            case MU: return ColorFindOptions.Color.MU;
-            case CLASSIFICATION: return ColorFindOptions.Color.CLASSIFICATION;
-            default: return ColorFindOptions.Color.MU;
-        }
-    }
+    // Removed mapColorStrategy - not used after removing convertToColorFindOptions
 
 
     private MatchFusionOptions.FusionMethod mapFusionMethod(ActionOptions.MatchFusionMethod method) {
@@ -387,9 +324,8 @@ public class ActionOptionsAdapter {
             case MATCH: return DefineRegionOptions.DefineAs.MATCH;
             case INSIDE_ANCHORS: return DefineRegionOptions.DefineAs.INSIDE_ANCHORS;
             case OUTSIDE_ANCHORS: return DefineRegionOptions.DefineAs.OUTSIDE_ANCHORS;
-            // TODO: MATCH_COLLECT and UNIVERSAL not available in DefineRegionOptions
-            // case MATCH_COLLECT: return DefineRegionOptions.DefineAs.MATCH_COLLECT;
-            // case UNIVERSAL: return DefineRegionOptions.DefineAs.UNIVERSAL;
+            // Note: MATCH_COLLECT and UNIVERSAL are not available in DefineRegionOptions
+            // These options may need to be handled differently in the new architecture
             default: return DefineRegionOptions.DefineAs.MATCH;
         }
     }
@@ -403,11 +339,39 @@ public class ActionOptionsAdapter {
         }
     }
     
-    private ClickUntilOptions.Condition mapClickUntilCondition(ActionOptions.ClickUntil clickUntil) {
-        switch (clickUntil) {
-            case OBJECTS_APPEAR: return ClickUntilOptions.Condition.OBJECTS_APPEAR;
-            case OBJECTS_VANISH: return ClickUntilOptions.Condition.OBJECTS_VANISH;
-            default: return ClickUntilOptions.Condition.OBJECTS_APPEAR;
+    // Removed mapClickUntilCondition - ClickUntil is deprecated
+    
+    private void convertClickType(ClickOptions.Builder builder, MousePressOptions.Builder pressOptions, ClickOptions.Type clickType) {
+        if (clickType == null) {
+            return; // Use default (LEFT click)
+        }
+        
+        switch (clickType) {
+            case DOUBLE_LEFT:
+                builder.setNumberOfClicks(2);
+                pressOptions.setButton(io.github.jspinak.brobot.model.action.MouseButton.LEFT);
+                break;
+            case DOUBLE_RIGHT:
+                builder.setNumberOfClicks(2);
+                pressOptions.setButton(io.github.jspinak.brobot.model.action.MouseButton.RIGHT);
+                break;
+            case DOUBLE_MIDDLE:
+                builder.setNumberOfClicks(2);
+                pressOptions.setButton(io.github.jspinak.brobot.model.action.MouseButton.MIDDLE);
+                break;
+            case RIGHT:
+                builder.setNumberOfClicks(1);
+                pressOptions.setButton(io.github.jspinak.brobot.model.action.MouseButton.RIGHT);
+                break;
+            case MIDDLE:
+                builder.setNumberOfClicks(1);
+                pressOptions.setButton(io.github.jspinak.brobot.model.action.MouseButton.MIDDLE);
+                break;
+            case LEFT:
+            default:
+                builder.setNumberOfClicks(1);
+                pressOptions.setButton(io.github.jspinak.brobot.model.action.MouseButton.LEFT);
+                break;
         }
     }
 }

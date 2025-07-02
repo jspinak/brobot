@@ -7,13 +7,13 @@
  * 
  * <h2>Find Strategies</h2>
  * 
- * <p>The Find action supports multiple strategies for different use cases:</p>
+ * <p>Find actions support multiple strategies through {@link io.github.jspinak.brobot.action.basic.find.PatternFindOptions.Strategy}:</p>
  * <ul>
  *   <li><b>FIRST</b> - Returns the first match found (fastest)</li>
  *   <li><b>BEST</b> - Returns the match with highest similarity score</li>
  *   <li><b>EACH</b> - Returns one match per target object</li>
  *   <li><b>ALL</b> - Returns all matches above the similarity threshold</li>
- *   <li><b>CUSTOM</b> - User-defined matching criteria</li>
+ *   <li><b>CUSTOM</b> - User-defined matching criteria via custom predicates</li>
  * </ul>
  * 
  * <h2>Specialized Find Actions</h2>
@@ -52,9 +52,9 @@
  * <h2>Usage Examples</h2>
  * 
  * <pre>{@code
- * // Find the best match for an image
- * ActionOptions options = new ActionOptions.Builder()
- *     .setFind(Find.BEST)
+ * // Find the best match for an image using ActionConfig (recommended)
+ * PatternFindOptions findOptions = new PatternFindOptions.Builder()
+ *     .setStrategy(PatternFindOptions.Strategy.BEST)
  *     .setSimilarity(0.8)
  *     .build();
  * 
@@ -63,19 +63,31 @@
  *     .build();
  * 
  * Find find = new Find(...);
- * ActionResult result = find.perform(new ActionResult(), targets);
+ * ActionResult result = find.perform(findOptions, targets);
  * 
- * // Find text on screen
- * ActionOptions textOptions = new ActionOptions.Builder()
- *     .setFind(Find.ALL)
+ * // Find all matches above threshold
+ * PatternFindOptions findAllOptions = new PatternFindOptions.Builder()
+ *     .setStrategy(PatternFindOptions.Strategy.ALL)
+ *     .setSimilarity(0.85)
+ *     .setMaxMatches(10)
  *     .build();
  * 
+ * // Find text on screen using pattern matching
  * ObjectCollection textTargets = new ObjectCollection.Builder()
  *     .withStrings("Submit")
  *     .build();
  * 
  * FindText findText = new FindText(...);
- * ActionResult textResult = findText.perform(new ActionResult(), textTargets);
+ * ActionResult textResult = findText.perform(findAllOptions, textTargets);
+ * 
+ * // Color-based finding
+ * ColorFindOptions colorOptions = new ColorFindOptions.Builder()
+ *     .setColorStrategy(ColorFindOptions.Color.TARGET_REGION_HSVA_PROFILE)
+ *     .setMaxColorDistance(50)
+ *     .build();
+ * 
+ * FindColor findColor = new FindColor(...);
+ * ActionResult colorResult = findColor.perform(colorOptions, targets);
  * }</pre>
  * 
  * @see io.github.jspinak.brobot.action.basic.find.Find
