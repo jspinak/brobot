@@ -1,6 +1,8 @@
 package io.github.jspinak.brobot.action.composite.select;
 
 import io.github.jspinak.brobot.action.Action;
+import io.github.jspinak.brobot.action.ActionConfig;
+import io.github.jspinak.brobot.action.ActionOptions;
 import io.github.jspinak.brobot.action.ObjectCollection;
 
 import org.springframework.stereotype.Component;
@@ -63,25 +65,57 @@ public class Select {
     public boolean select(SelectActionObject sao) {
         sao.resetTotalSwipes();
         for (int i=0; i<sao.getMaxSwipes(); i++) {
-            sao.setFoundMatches(action.perform(sao.getFindActionOptions(), sao.getFindObjectCollection()));
+            // Use the configuration getters that return either ActionConfig or ActionOptions
+            Object findConfig = sao.getFindConfiguration();
+            if (findConfig != null) {
+                if (findConfig instanceof ActionConfig) {
+                    sao.setFoundMatches(action.perform((ActionConfig)findConfig, sao.getFindObjectCollection()));
+                } else if (findConfig instanceof ActionOptions) {
+                    sao.setFoundMatches(action.perform((ActionOptions)findConfig, sao.getFindObjectCollection()));
+                }
+            }
             if (sao.getFoundMatches().isSuccess()) {
-                action.perform(sao.getClickActionOptions(), new ObjectCollection.Builder()
-                        .withMatches(sao.getFoundMatches())
-                        .build());
+                Object clickConfig = sao.getClickConfiguration();
+                if (clickConfig != null) {
+                    if (clickConfig instanceof ActionConfig) {
+                        action.perform((ActionConfig)clickConfig, new ObjectCollection.Builder()
+                                .withMatches(sao.getFoundMatches())
+                                .build());
+                    } else if (clickConfig instanceof ActionOptions) {
+                        action.perform((ActionOptions)clickConfig, new ObjectCollection.Builder()
+                                .withMatches(sao.getFoundMatches())
+                                .build());
+                    }
+                }
                 if (sao.getConfirmationObjectCollection() == null) {
                     sao.setSuccess(true);
                     return true;
                 }
                 else {
-                    sao.setFoundConfirmations(action.perform(
-                            sao.getConfirmActionOptions(), sao.getConfirmationObjectCollection()));
+                    Object confirmConfig = sao.getConfirmConfiguration();
+                    if (confirmConfig != null) {
+                        if (confirmConfig instanceof ActionConfig) {
+                            sao.setFoundConfirmations(action.perform(
+                                    (ActionConfig)confirmConfig, sao.getConfirmationObjectCollection()));
+                        } else if (confirmConfig instanceof ActionOptions) {
+                            sao.setFoundConfirmations(action.perform(
+                                    (ActionOptions)confirmConfig, sao.getConfirmationObjectCollection()));
+                        }
+                    }
                     if (sao.getFoundConfirmations().isSuccess()) {
                         sao.setSuccess(true);
                         return true;
                     }
                 }
             }
-            action.perform(sao.getSwipeActionOptions(), sao.getSwipeFromObjColl(), sao.getSwipeToObjColl());
+            Object swipeConfig = sao.getSwipeConfiguration();
+            if (swipeConfig != null) {
+                if (swipeConfig instanceof ActionConfig) {
+                    action.perform((ActionConfig)swipeConfig, sao.getSwipeFromObjColl(), sao.getSwipeToObjColl());
+                } else if (swipeConfig instanceof ActionOptions) {
+                    action.perform((ActionOptions)swipeConfig, sao.getSwipeFromObjColl(), sao.getSwipeToObjColl());
+                }
+            }
             sao.addSwipe();
         }
         return false;

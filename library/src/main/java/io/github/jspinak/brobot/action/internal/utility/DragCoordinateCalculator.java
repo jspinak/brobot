@@ -1,6 +1,8 @@
 package io.github.jspinak.brobot.action.internal.utility;
 
 import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.action.ActionConfig;
+import io.github.jspinak.brobot.action.composite.drag.DragOptions;
 import io.github.jspinak.brobot.model.element.Location;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.config.FrameworkSettings;
@@ -119,5 +121,54 @@ public class DragCoordinateCalculator {
         if (!drag(from, to)) return false;
         time.wait(actionOptions.getPauseAfterMouseUp());
         return true;
+    }
+    
+    /**
+     * Executes a drag-and-drop operation using DragOptions configuration.
+     * <p>
+     * This method performs a complete drag-and-drop sequence using the new ActionConfig
+     * API. It extracts timing parameters from the DragOptions and its contained
+     * MousePressOptions.
+     * 
+     * @param from The starting location for the drag. Must not be null.
+     * @param to The destination location for the drag. Must not be null.
+     * @param dragOptions Configuration containing timing and mouse button settings.
+     * @return {@code true} if the drag completed successfully (or was mocked),
+     *         {@code false} if the drag operation failed.
+     */
+    public boolean drag(Location from, Location to, DragOptions dragOptions) {
+        ConsoleReporter.format(ConsoleReporter.OutputLevel.HIGH, "drag %d.%d to %d.%d ",
+                from.getCalculatedX(), from.getCalculatedY(), to.getCalculatedX(), to.getCalculatedY());
+        if (FrameworkSettings.mock) return mock.drag();
+        
+        // Extract timing from MousePressOptions and DragOptions
+        Settings.DelayBeforeMouseDown = dragOptions.getMousePressOptions().getPauseBeforeMouseDown();
+        Settings.DelayBeforeDrag = dragOptions.getDelayBetweenMouseDownAndMove();
+        Settings.MoveMouseDelay = FrameworkSettings.moveMouseDelay; // Use default as DragOptions doesn't have this
+        Settings.DelayBeforeDrop = dragOptions.getMousePressOptions().getPauseBeforeMouseUp();
+        
+        if (!drag(from, to)) return false;
+        time.wait(dragOptions.getDelayAfterDrag());
+        return true;
+    }
+    
+    /**
+     * Executes a drag-and-drop operation using ActionConfig.
+     * <p>
+     * This method provides support for ActionConfig types. Currently only DragOptions
+     * is supported as ActionOptions doesn't extend ActionConfig.
+     * 
+     * @param from The starting location for the drag.
+     * @param to The destination location for the drag.
+     * @param actionConfig Configuration for the drag operation.
+     * @return {@code true} if the drag completed successfully, {@code false} otherwise.
+     */
+    public boolean drag(Location from, Location to, ActionConfig actionConfig) {
+        if (actionConfig instanceof DragOptions) {
+            return drag(from, to, (DragOptions) actionConfig);
+        } else {
+            ConsoleReporter.println("Unsupported ActionConfig type for drag: " + actionConfig.getClass().getSimpleName());
+            return false;
+        }
     }
 }

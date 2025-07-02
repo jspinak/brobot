@@ -23,6 +23,10 @@ import static io.github.jspinak.brobot.action.ActionOptions.Action.*;
 
 /**
  * Provides a facade of commonly used action patterns for GUI automation.
+ * 
+ * @deprecated Use {@link ActionConfigFacade} instead. This class uses the deprecated
+ *             ActionOptions API. The new ActionConfigFacade provides the same functionality
+ *             with the modern ActionConfig architecture and better type safety.
  * <p>
  * This class encapsulates frequent action combinations into simple, reusable methods,
  * reducing code duplication and improving readability across automation scripts.
@@ -47,6 +51,7 @@ import static io.github.jspinak.brobot.action.ActionOptions.Action.*;
  * @see StateService
  */
 @Component
+@Deprecated
 public class ActionFacade {
 
     private final Action action;

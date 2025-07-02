@@ -31,10 +31,18 @@ import org.springframework.stereotype.Component;
  * <p><b>Note:</b> Currently returns only the last ActionResult. Future versions
  * might aggregate results from all actions in the sequence.</p>
  * 
+ * @deprecated Use {@link io.github.jspinak.brobot.action.ActionChainOptions} with
+ *             {@link io.github.jspinak.brobot.action.internal.execution.ActionChainExecutor} instead.
+ *             ActionChainOptions provides better type safety, proper result flow between actions,
+ *             and sophisticated chaining strategies. See {@link io.github.jspinak.brobot.action.examples.ActionChainExamples}
+ *             for migration examples.
+ * 
  * @see MultipleActionsObject
  * @see ActionParameters
  * @see Action
+ * @see io.github.jspinak.brobot.action.ActionChainOptions
  */
+@Deprecated
 @Component
 public class MultipleActions {
 

@@ -38,54 +38,73 @@
  * 
  * <h2>Configuration Options</h2>
  * 
- * <p>Through {@link io.github.jspinak.brobot.action.ActionOptions}:</p>
+ * <p>Through {@link io.github.jspinak.brobot.action.basic.type.TypeOptions}:</p>
  * <ul>
- *   <li><b>Typing speed</b> - Delay between keystrokes (milliseconds)</li>
- *   <li><b>Modifier delays</b> - Extra time for modifier key combinations</li>
- *   <li><b>Click before type</b> - Ensure focus by clicking target first</li>
+ *   <li><b>Typing speed</b> - Delay between keystrokes via setDelay()</li>
+ *   <li><b>Modifiers</b> - Set of KeyModifier enums (CTRL, ALT, SHIFT, etc.)</li>
  *   <li><b>Clear before type</b> - Clear existing text before typing</li>
+ *   <li><b>Timing control</b> - PauseBeforeBegin and pauseAfterEnd for precise control</li>
  * </ul>
  * 
  * <h2>Example Usage</h2>
  * 
  * <pre>{@code
- * // Simple text typing
+ * // Simple text typing using ActionConfig (recommended)
  * TypeText typeText = new TypeText(...);
  * 
- * ActionOptions options = new ActionOptions.Builder()
- *     .setAction(ActionOptions.Action.TYPE)
- *     .setTypingDelay(50)  // 50ms between keystrokes
+ * TypeOptions typeOptions = new TypeOptions.Builder()
+ *     .setDelay(0.05)  // 50ms between keystrokes
  *     .build();
  * 
  * ObjectCollection text = new ObjectCollection.Builder()
  *     .withStrings("Hello, World!")
  *     .build();
  * 
- * ActionResult result = typeText.perform(new ActionResult(), text);
+ * ActionResult result = typeText.perform(typeOptions, text);
  * 
- * // Type with special keys
+ * // Type with modifiers (e.g., Ctrl+A to select all)
+ * TypeOptions ctrlTypeOptions = new TypeOptions.Builder()
+ *     .setModifiers(Set.of(KeyModifier.CTRL))
+ *     .build();
+ * 
+ * ObjectCollection selectAllKey = new ObjectCollection.Builder()
+ *     .withStrings("a")
+ *     .build();
+ * 
+ * typeText.perform(ctrlTypeOptions, selectAllKey);
+ * 
+ * // Type with special keys using strings
  * ObjectCollection specialKeys = new ObjectCollection.Builder()
  *     .withStrings("{TAB}Username{TAB}Password{ENTER}")
  *     .build();
  * 
- * // Keyboard shortcut using KeyDown/KeyUp
+ * typeText.perform(typeOptions, specialKeys);
+ * 
+ * // Keyboard operations using KeyDownOptions/KeyUpOptions
  * KeyDown keyDown = new KeyDown(...);
  * KeyUp keyUp = new KeyUp(...);
  * 
- * // Press Ctrl
- * ObjectCollection ctrlKey = new ObjectCollection.Builder()
- *     .withStrings("{CTRL}")
+ * // Hold Shift while typing
+ * KeyDownOptions shiftDown = new KeyDownOptions.Builder()
+ *     .setKey("SHIFT")
  *     .build();
- * keyDown.perform(new ActionResult(), ctrlKey);
  * 
- * // Type 'A' while Ctrl is held
- * ObjectCollection aKey = new ObjectCollection.Builder()
- *     .withStrings("a")
+ * keyDown.perform(shiftDown, new ObjectCollection.Builder().build());
+ * 
+ * // Type uppercase letters
+ * typeText.perform(typeOptions, new ObjectCollection.Builder()
+ *     .withStrings("hello")  // Will be uppercase due to Shift
+ *     .build());
+ * 
+ * // Release Shift
+ * KeyUpOptions shiftUp = new KeyUpOptions.Builder()
+ *     .setKey("SHIFT")
  *     .build();
- * typeText.perform(new ActionResult(), aKey);
  * 
- * // Release Ctrl
- * keyUp.perform(new ActionResult(), ctrlKey);
+ * keyUp.perform(shiftUp, new ObjectCollection.Builder().build());
+ * 
+ * // Using convenience utilities
+ * TypeOptions slowType = ActionConfigShortcuts.typeSlowly(0.2);  // 200ms delay
  * }</pre>
  * 
  * <h2>Special Key Notation</h2>

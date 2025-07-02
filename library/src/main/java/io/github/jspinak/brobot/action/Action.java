@@ -6,6 +6,20 @@ import io.github.jspinak.brobot.action.internal.service.ActionService;
 import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
 import io.github.jspinak.brobot.model.element.Region;
+import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
+import io.github.jspinak.brobot.action.basic.click.ClickOptions;
+import io.github.jspinak.brobot.action.basic.type.TypeOptions;
+import io.github.jspinak.brobot.action.composite.drag.DragOptions;
+import io.github.jspinak.brobot.action.basic.mouse.MouseMoveOptions;
+import io.github.jspinak.brobot.action.basic.highlight.HighlightOptions;
+import io.github.jspinak.brobot.action.basic.region.DefineRegionOptions;
+import io.github.jspinak.brobot.action.basic.vanish.VanishOptions;
+import io.github.jspinak.brobot.action.basic.mouse.MouseDownOptions;
+import io.github.jspinak.brobot.action.basic.mouse.MouseUpOptions;
+import io.github.jspinak.brobot.action.basic.mouse.ScrollOptions;
+import io.github.jspinak.brobot.action.basic.type.KeyDownOptions;
+import io.github.jspinak.brobot.action.basic.type.KeyUpOptions;
+import io.github.jspinak.brobot.action.basic.find.color.ColorFindOptions;
 
 import org.springframework.stereotype.Component;
 
@@ -168,7 +182,8 @@ public class Action {
      * @return ActionResult containing found matches and execution details
      */
     public ActionResult find(StateImage... stateImages) {
-        return perform(new ActionOptions(), stateImages);
+        PatternFindOptions findOptions = new PatternFindOptions.Builder().build();
+        return perform(findOptions, stateImages);
     }
 
     /**
@@ -182,7 +197,8 @@ public class Action {
      * @return ActionResult containing all found matches across collections
      */
     public ActionResult find(ObjectCollection... objectCollections) {
-        return perform(new ActionOptions(), objectCollections);
+        PatternFindOptions findOptions = new PatternFindOptions.Builder().build();
+        return perform(findOptions, objectCollections);
     }
 
     /**
@@ -232,14 +248,21 @@ public class Action {
     /**
      * Performs the specified action type with default configuration.
      * <p>
-     * Creates an ActionOptions with default values for the given action type.
+     * Creates an appropriate ActionConfig implementation based on the action type.
      * This simplifies common operations where default behavior is sufficient.
      *
      * @param action the type of action to perform (CLICK, TYPE, etc.)
      * @param objectCollections target objects for the action
      * @return ActionResult containing matches and execution details
+     * @deprecated Use specific ActionConfig implementations instead (e.g., ClickOptions, PatternFindOptions)
      */
+    @Deprecated
     public ActionResult perform(ActionOptions.Action action, ObjectCollection... objectCollections) {
+        ActionConfig config = createDefaultConfig(action);
+        if (config != null) {
+            return perform(config, objectCollections);
+        }
+        // Fall back to ActionOptions for actions without ActionConfig yet
         return perform(new ActionOptions.Builder().setAction(action).build(), objectCollections);
     }
 
@@ -253,8 +276,15 @@ public class Action {
      * @param action the type of action to perform
      * @param stateImages target images for the action
      * @return ActionResult containing matches found and action outcomes
+     * @deprecated Use specific ActionConfig implementations instead (e.g., ClickOptions, PatternFindOptions)
      */
+    @Deprecated
     public ActionResult perform(ActionOptions.Action action, StateImage... stateImages) {
+        ActionConfig config = createDefaultConfig(action);
+        if (config != null) {
+            return perform(config, stateImages);
+        }
+        // Fall back to ActionOptions for actions without ActionConfig yet
         return perform(new ActionOptions.Builder().setAction(action).build(), stateImages);
     }
 
@@ -267,8 +297,15 @@ public class Action {
      *
      * @param action the type of action to perform
      * @return ActionResult with execution details but no match data
+     * @deprecated Use specific ActionConfig implementations instead (e.g., TypeOptions, MouseMoveOptions)
      */
+    @Deprecated
     public ActionResult perform(ActionOptions.Action action) {
+        ActionConfig config = createDefaultConfig(action);
+        if (config != null) {
+            return perform(config, new ObjectCollection.Builder().build());
+        }
+        // Fall back to ActionOptions for actions without ActionConfig yet
         return perform(new ActionOptions.Builder().setAction(action).build(), new ObjectCollection.Builder().build());
     }
 
@@ -282,7 +319,9 @@ public class Action {
      * @param action the type of action to perform
      * @param strings text strings to use as action targets
      * @return ActionResult containing text matches and action outcomes
+     * @deprecated Use specific ActionConfig implementations instead
      */
+    @Deprecated
     public ActionResult perform(ActionOptions.Action action, String... strings) {
         ObjectCollection strColl = new ObjectCollection.Builder().withStrings(strings).build();
         return perform(action, strColl);
@@ -313,10 +352,62 @@ public class Action {
      * @param action the type of action to perform
      * @param regions screen areas to target or search within
      * @return ActionResult containing regional matches and outcomes
+     * @deprecated Use specific ActionConfig implementations instead
      */
+    @Deprecated
     public ActionResult perform(ActionOptions.Action action, Region... regions) {
         ObjectCollection strColl = new ObjectCollection.Builder().withRegions(regions).build();
         return perform(action, strColl);
+    }
+    
+    /**
+     * Creates a default ActionConfig instance for the given action type.
+     * <p>
+     * This helper method maps legacy ActionOptions.Action enum values to their
+     * corresponding ActionConfig implementations. Used to support backward
+     * compatibility during migration.
+     *
+     * @param action the action type to create config for
+     * @return appropriate ActionConfig instance or null if no mapping exists
+     */
+    private ActionConfig createDefaultConfig(ActionOptions.Action action) {
+        switch (action) {
+            case FIND:
+                return new PatternFindOptions.Builder().build();
+            case CLICK:
+                return new ClickOptions.Builder().build();
+            case TYPE:
+                return new TypeOptions.Builder().build();
+            case DRAG:
+                return new DragOptions.Builder().build();
+            case MOVE:
+                return new MouseMoveOptions.Builder().build();
+            case HIGHLIGHT:
+                return new HighlightOptions.Builder().build();
+            case DEFINE:
+                return new DefineRegionOptions.Builder().build();
+            case VANISH:
+                return new VanishOptions.Builder().build();
+            case SCROLL_MOUSE_WHEEL:
+                return new ScrollOptions.Builder().build();
+            case MOUSE_DOWN:
+                return new MouseDownOptions.Builder().build();
+            case MOUSE_UP:
+                return new MouseUpOptions.Builder().build();
+            case KEY_DOWN:
+                return new KeyDownOptions.Builder().build();
+            case KEY_UP:
+                return new KeyUpOptions.Builder().build();
+            case CLASSIFY:
+                return new ColorFindOptions.Builder()
+                        .setColorStrategy(ColorFindOptions.Color.CLASSIFICATION)
+                        .build();
+            // Actions without ActionConfig implementations yet
+            case CLICK_UNTIL:
+                return null;
+            default:
+                return null;
+        }
     }
 
 }
