@@ -145,15 +145,15 @@ public class TransitionConditionPackager {
             for (int i = 0; i < steps.size() - 1; i++) {
                 ActionStep step = steps.get(i);
                 System.out.println("Executing step " + (i+1) + " of " + steps.size());
-                action.perform(step.getActionOptions(), step.getObjectCollection());
+                action.perform(step.getActionConfig(), step.getObjectCollection());
             }
 
             // Evaluate only the last step
             ActionStep lastStep = steps.get(steps.size() - 1);
             System.out.println("Executing final step " + steps.size() + " of " + steps.size());
-            System.out.println("Last step options: " + lastStep.getActionOptions());
+            System.out.println("Last step options: " + lastStep.getActionConfig());
             System.out.println("Last step objects: " + lastStep.getObjectCollection());
-            return action.perform(lastStep.getActionOptions(), lastStep.getObjectCollection()).isSuccess();
+            return action.perform(lastStep.getActionConfig(), lastStep.getObjectCollection()).isSuccess();
         };
     }
 

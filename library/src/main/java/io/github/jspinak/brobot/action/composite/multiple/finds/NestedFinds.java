@@ -64,6 +64,11 @@ public class NestedFinds implements ActionInterface {
         this.find = find;
     }
 
+    @Override
+    public ActionInterface.Type getActionType() {
+        return ActionInterface.Type.FIND;
+    }
+
     /**
      * Executes a sequence of find operations with progressively narrowing search regions.
      * <p>

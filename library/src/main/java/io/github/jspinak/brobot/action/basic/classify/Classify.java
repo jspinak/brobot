@@ -46,6 +46,11 @@ public class Classify implements ActionInterface {
         this.findColor = findColor;
     }
 
+    @Override
+    public ActionInterface.Type getActionType() {
+        return ActionInterface.Type.CLASSIFY;
+    }
+
     /**
      * Performs scene classification using color-based analysis.
      * 

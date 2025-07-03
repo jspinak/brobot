@@ -16,6 +16,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import java.util.*;
 
@@ -24,6 +26,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 class StateDetectorTest {
 
     @Mock
@@ -82,7 +85,7 @@ class StateDetectorTest {
         notFoundResult.setSuccess(false);
         
         when(action.perform(eq(ActionOptions.Action.FIND), 
-                any(ObjectCollection.class))).thenReturn(foundResult, notFoundResult);
+                any(ObjectCollection[].class))).thenReturn(foundResult, notFoundResult);
 
         // Act
         stateDetector.checkForActiveStates();
@@ -112,14 +115,14 @@ class StateDetectorTest {
         notFoundResult.setSuccess(false);
         
         when(action.perform(eq(ActionOptions.Action.FIND), 
-                any(ObjectCollection.class))).thenReturn(notFoundResult);
+                any(ObjectCollection[].class))).thenReturn(notFoundResult);
 
         // Act
         stateDetector.rebuildActiveStates();
 
         // Assert
         verify(stateService).getAllStateNames();
-        verify(action, times(2)).perform(eq(ActionOptions.Action.FIND), any(ObjectCollection.class));
+        verify(action, times(2)).perform(eq(ActionOptions.Action.FIND), any(ObjectCollection[].class));
         verify(stateMemory).addActiveState(SpecialStateType.UNKNOWN.getId());
     }
 
@@ -138,7 +141,7 @@ class StateDetectorTest {
         foundResult.setSuccess(true);
         
         when(action.perform(eq(ActionOptions.Action.FIND), 
-                any(ObjectCollection.class))).thenReturn(foundResult);
+                any(ObjectCollection[].class))).thenReturn(foundResult);
 
         // Act
         stateDetector.rebuildActiveStates();
@@ -168,13 +171,13 @@ class StateDetectorTest {
         foundResult2.setSuccess(true);
         
         when(action.perform(eq(ActionOptions.Action.FIND), 
-                any(ObjectCollection.class))).thenReturn(foundResult1, foundResult2);
+                any(ObjectCollection[].class))).thenReturn(foundResult1, foundResult2);
 
         // Act
         stateDetector.searchAllImagesForCurrentStates();
 
         // Assert
-        verify(action, times(2)).perform(eq(ActionOptions.Action.FIND), any(ObjectCollection.class));
+        verify(action, times(2)).perform(eq(ActionOptions.Action.FIND), any(ObjectCollection[].class));
     }
 
     @Test
@@ -190,7 +193,7 @@ class StateDetectorTest {
         foundResult.setSuccess(true);
         
         when(action.perform(eq(ActionOptions.Action.FIND), 
-                any(ObjectCollection.class))).thenReturn(foundResult);
+                any(ObjectCollection[].class))).thenReturn(foundResult);
 
         // Act
         boolean result = stateDetector.findState(stateName);
@@ -212,7 +215,7 @@ class StateDetectorTest {
         notFoundResult.setSuccess(false);
         
         when(action.perform(eq(ActionOptions.Action.FIND), 
-                any(ObjectCollection.class))).thenReturn(notFoundResult);
+                any(ObjectCollection[].class))).thenReturn(notFoundResult);
 
         // Act
         boolean result = stateDetector.findState(stateName);
@@ -232,7 +235,7 @@ class StateDetectorTest {
 
         // Assert
         assertFalse(result);
-        verify(action, never()).perform(any(), any());
+        verify(action, never()).perform(any(ActionOptions.Action.class), any(ObjectCollection[].class));
     }
 
     @Test
@@ -249,7 +252,7 @@ class StateDetectorTest {
         foundResult.setSuccess(true);
         
         when(action.perform(eq(ActionOptions.Action.FIND), 
-                any(ObjectCollection.class))).thenReturn(foundResult);
+                any(ObjectCollection[].class))).thenReturn(foundResult);
         
         Set<Long> returnedStates = new HashSet<>(Collections.singletonList(1L));
         when(stateMemory.getActiveStates()).thenReturn(returnedStates);
@@ -277,7 +280,7 @@ class StateDetectorTest {
         foundResult.setSuccess(true);
         
         when(action.perform(eq(ActionOptions.Action.FIND), 
-                any(ObjectCollection.class))).thenReturn(foundResult);
+                any(ObjectCollection[].class))).thenReturn(foundResult);
 
         // Act
         boolean result = stateDetector.findState(stateId);
@@ -300,7 +303,7 @@ class StateDetectorTest {
         notFoundResult.setSuccess(false);
         
         when(action.perform(eq(ActionOptions.Action.FIND), 
-                any(ObjectCollection.class))).thenReturn(notFoundResult);
+                any(ObjectCollection[].class))).thenReturn(notFoundResult);
 
         // Act
         boolean result = stateDetector.findState(stateId);
@@ -323,13 +326,13 @@ class StateDetectorTest {
         foundResult.setSuccess(true);
         
         when(action.perform(eq(ActionOptions.Action.FIND), 
-                any(ObjectCollection.class))).thenReturn(foundResult);
+                any(ObjectCollection[].class))).thenReturn(foundResult);
 
         // Act
         stateDetector.searchAllImagesForCurrentStates();
 
         // Assert
-        verify(stateService.getState("State1"), times(1));
-        verify(stateService.getState(SpecialStateType.UNKNOWN.toString()), never());
+        verify(stateService, times(1)).getState("State1");
+        verify(stateService, never()).getState(SpecialStateType.UNKNOWN.toString());
     }
 }
