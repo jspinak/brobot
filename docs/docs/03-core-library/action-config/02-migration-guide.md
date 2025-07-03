@@ -1,8 +1,10 @@
 ---
 sidebar_position: 2
+title: Quick Migration Reference
+slug: quick-migration-reference
 ---
 
-# Migration Guide: ActionOptions to ActionConfig
+# Quick Migration Reference: ActionOptions to ActionConfig
 
 This guide helps you migrate your existing Brobot automation code from `ActionOptions` to the new `ActionConfig` hierarchy.
 
@@ -270,6 +272,6 @@ If you can't migrate everything at once:
 
 ## Need Help?
 
-- Check the [API Reference](./05-reference) for detailed documentation
-- Review [Code Examples](./03-examples) for usage patterns
-- Consult the [Fluent API Guide](./04-fluent-api) for chaining patterns
+- Check the [API Reference](./05-reference.md) for detailed documentation
+- Review [Code Examples](./03-examples.md) for usage patterns
+- Consult the [Fluent API Guide](./04-fluent-api.md) for chaining patterns

@@ -72,7 +72,7 @@ PatternFindOptions findAll = new PatternFindOptions.Builder()
 ## Action Chaining Examples
 
 ### Sequential Actions
-[View detailed examples](./07-action-chaining)
+[View detailed examples](./07-action-chaining.md)
 
 ```java
 // Click and type
@@ -109,7 +109,7 @@ ActionChainOptions nestedFind = new ActionChainOptions.Builder(
 ## Conditional Actions
 
 ### Click Until Examples
-[View detailed examples](./09-conditional-actions)
+[View detailed examples](./09-conditional-actions.md)
 
 ```java
 // Click until image appears (max 10 clicks)
@@ -154,7 +154,7 @@ public boolean waitForCondition(StateImage element, int maxAttempts) {
 ## Complex Workflows
 
 ### Form Automation
-[View detailed examples](./10-form-automation)
+[View detailed examples](./10-form-automation.md)
 
 ```java
 // Complete registration form
@@ -187,7 +187,7 @@ public boolean fillRegistrationForm(UserData data) {
 ```
 
 ### Navigation Patterns
-[View detailed examples](./08-complex-workflows)
+[View detailed examples](./08-complex-workflows.md)
 
 ```java
 // Navigate through menu hierarchy
@@ -212,7 +212,7 @@ public boolean navigateToSettings() {
 ## Reusable Patterns
 
 ### Pattern Library
-[View detailed examples](./11-reusable-patterns)
+[View detailed examples](./11-reusable-patterns.md)
 
 ```java
 // Login pattern
@@ -384,7 +384,7 @@ public void processItems(List<StateImage> items) {
 ## Migration Examples
 
 ### Before and After
-[View migration guide](./12-migration-guide)
+[View migration guide](./12-migration-guide.md)
 
 ```java
 // Before (ActionOptions)
@@ -401,10 +401,7 @@ ClickOptions new = new ClickOptions.Builder()
 
 ## Resources
 
-- [ActionConfig API Reference](../api-reference/action-config)
-- [Best Practices Guide](./best-practices)
-- [Troubleshooting Guide](./troubleshooting)
-- [Performance Tips](./performance)
+- [ActionConfig API Reference](./05-reference.md)
 
 ## Contributing Examples
 

@@ -246,6 +246,6 @@ String guide = ActionConfigMigrationHelper.getMigrationGuide("moveMouseAfterActi
 
 ## Need Help?
 
-- Check the [API Reference](./05-reference.md) for all available options
+- Check the [API Reference](./reference) for all available options
 - Use `ActionConfigMigrationHelper.getMigrationGuide()` for specific patterns
-- Review the [Fluent API Guide](./02-fluent-api.md) for chaining examples
+- Review the [Fluent API Guide](./fluent-api) for chaining examples

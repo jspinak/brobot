@@ -7,6 +7,8 @@ tags: [hello, brobot]
 
 Brobot is now live!  
 
+<!-- truncate -->
+
 You can use StackOverflow for questions about how to use Brobot 
 that are not answered in the documentation. 
 
