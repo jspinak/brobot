@@ -98,6 +98,7 @@ class SingleClickExecutorTest {
     void click_shouldPerformDoubleClickWithPausesAsTwoSeparateClicks() {
         // Using ActionOptions for backward compatibility
         ActionOptions actionOptions = new ActionOptions.Builder()
+                .setClickType(ClickOptions.Type.DOUBLE_LEFT)
                 .setPauseAfterMouseDown(0.1) // Adding a pause forces two separate clicks
                 .build();
         // Compare with: new ClickOptions.Builder()
@@ -110,14 +111,15 @@ class SingleClickExecutorTest {
 
         singleClickExecutor.click(location, actionOptions);
 
-        verify(mouseDownWrapper, times(2)).press(anyDouble(), anyDouble(), eq(ClickType.Type.LEFT));
-        verify(mouseUpWrapper, times(2)).press(anyDouble(), anyDouble(), eq(ClickType.Type.LEFT));
+        verify(mouseDownWrapper, times(2)).press(anyDouble(), anyDouble(), eq(ClickType.Type.DOUBLE_LEFT));
+        verify(mouseUpWrapper, times(2)).press(anyDouble(), anyDouble(), eq(ClickType.Type.DOUBLE_LEFT));
     }
 
     @Test
     void click_shouldPerformDoubleClickWithNoPauses() {
         // Using ActionOptions for backward compatibility (double-click)
         ActionOptions actionOptions = new ActionOptions.Builder()
+                .setClickType(ClickOptions.Type.DOUBLE_LEFT)
                 .build();
         // Compare with: new ClickOptions.Builder().setNumberOfClicks(2).build()
 
@@ -174,8 +176,8 @@ class SingleClickExecutorTest {
         singleClickExecutor.click(location, clickOptions);
         
         // Should perform two separate clicks due to custom pause
-        verify(mouseDownWrapper, times(2)).press(anyDouble(), anyDouble(), eq(ClickType.Type.LEFT));
-        verify(mouseUpWrapper, times(2)).press(anyDouble(), anyDouble(), eq(ClickType.Type.LEFT));
+        verify(mouseDownWrapper, times(2)).press(anyDouble(), anyDouble(), eq(ClickType.Type.DOUBLE_LEFT));
+        verify(mouseUpWrapper, times(2)).press(anyDouble(), anyDouble(), eq(ClickType.Type.DOUBLE_LEFT));
     }
     
     @Test

@@ -1,213 +1,403 @@
 package io.github.jspinak.brobot.action.internal.execution;
 
 import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.model.element.Image;
+import io.github.jspinak.brobot.model.element.Pattern;
 import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.tools.testing.mock.time.TimeProvider;
-import io.github.jspinak.brobot.action.ActionResult;
-import io.github.jspinak.brobot.action.internal.execution.ActionLifecycle;
-import io.github.jspinak.brobot.action.internal.execution.ActionLifecycleManagement;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
+
+import java.awt.image.BufferedImage;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.List;
 
+import static io.github.jspinak.brobot.action.ActionOptions.GetTextUntil.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 class ActionLifecycleManagementTest {
 
-    @InjectMocks
-    private ActionLifecycleManagement actionLifecycleManagement;
-
     @Mock
-    private TimeProvider time;
-
-    @Mock
-    private ActionResult matches;
-
-    @Mock
+    private TimeProvider timeProvider;
+    
+    private ActionLifecycleManagement lifecycleManagement;
+    private ActionResult actionResult;
     private ActionOptions actionOptions;
-
-    @Mock
     private ActionLifecycle actionLifecycle;
-
+    private LocalDateTime startTime;
+    
     @BeforeEach
     void setUp() {
-        // Initialize mocks created with @Mock annotation
-        MockitoAnnotations.openMocks(this);
-        // Common stubbing for most tests
-        when(matches.getActionOptions()).thenReturn(actionOptions);
-        when(matches.getActionLifecycle()).thenReturn(actionLifecycle);
+        lifecycleManagement = new ActionLifecycleManagement(timeProvider);
+        startTime = LocalDateTime.now();
+        actionOptions = new ActionOptions();
+        actionOptions.setMaxWait(10.0); // Set default max wait to match ActionLifecycle
+        actionLifecycle = new ActionLifecycle(startTime, 10.0);
+        actionResult = new ActionResult();
+        actionResult.setActionOptions(actionOptions);
+        actionResult.setActionLifecycle(actionLifecycle);
     }
-
+    
     @Test
-    void incrementCompletedRepetitions_shouldIncrement() {
-        actionLifecycleManagement.incrementCompletedRepetitions(matches);
-        // Verify that the increment method was called on the lifecycle object
-        verify(actionLifecycle).incrementCompletedRepetitions();
+    void testIncrementCompletedRepetitions() {
+        // Initial state
+        assertEquals(0, actionLifecycle.getCompletedRepetitions());
+        
+        // Execute
+        lifecycleManagement.incrementCompletedRepetitions(actionResult);
+        
+        // Verify
+        assertEquals(1, actionLifecycle.getCompletedRepetitions());
     }
-
+    
     @Test
-    void incrementCompletedSequences_shouldIncrement() {
-        actionLifecycleManagement.incrementCompletedSequences(matches);
-        // Verify that the increment method was called on the lifecycle object
-        verify(actionLifecycle).incrementCompletedSequences();
+    void testIncrementCompletedSequences() {
+        // Initial state
+        assertEquals(0, actionLifecycle.getCompletedSequences());
+        
+        // Execute
+        lifecycleManagement.incrementCompletedSequences(actionResult);
+        
+        // Verify
+        assertEquals(1, actionLifecycle.getCompletedSequences());
     }
-
+    
     @Test
-    void getCurrentDuration_shouldReturnCorrectDuration() {
-        LocalDateTime startTime = LocalDateTime.of(2023, 1, 1, 12, 0, 0);
-        LocalDateTime now = LocalDateTime.of(2023, 1, 1, 12, 0, 5);
-
-        when(actionLifecycle.getStartTime()).thenReturn(startTime);
-        when(time.now()).thenReturn(now);
-
-        Duration duration = actionLifecycleManagement.getCurrentDuration(matches);
+    void testGetCurrentDuration() {
+        // Setup
+        LocalDateTime currentTime = startTime.plusSeconds(5);
+        when(timeProvider.now()).thenReturn(currentTime);
+        
+        // Execute
+        Duration duration = lifecycleManagement.getCurrentDuration(actionResult);
+        
+        // Verify
         assertEquals(5, duration.getSeconds());
     }
-
+    
     @Test
-    void getCompletedRepetitions_shouldReturnCorrectCount() {
-        when(actionLifecycle.getCompletedRepetitions()).thenReturn(5);
-        int reps = actionLifecycleManagement.getCompletedRepetitions(matches);
-        assertEquals(5, reps);
+    void testGetCompletedRepetitions() {
+        // Setup
+        actionLifecycle.incrementCompletedRepetitions();
+        actionLifecycle.incrementCompletedRepetitions();
+        
+        // Execute
+        int reps = lifecycleManagement.getCompletedRepetitions(actionResult);
+        
+        // Verify
+        assertEquals(2, reps);
     }
-
+    
     @Test
-    void isMoreSequencesAllowed_shouldReturnTrueWhenAllowed() {
-        when(actionOptions.getMaxTimesToRepeatActionSequence()).thenReturn(5);
-        when(actionLifecycle.getCompletedSequences()).thenReturn(4);
-        assertTrue(actionLifecycleManagement.isMoreSequencesAllowed(matches));
+    void testIsMoreSequencesAllowed_WithinLimit() {
+        // Setup
+        actionOptions.setMaxTimesToRepeatActionSequence(3);
+        actionLifecycle.incrementCompletedSequences();
+        
+        // Execute
+        boolean allowed = lifecycleManagement.isMoreSequencesAllowed(actionResult);
+        
+        // Verify
+        assertTrue(allowed);
     }
-
+    
     @Test
-    void isMoreSequencesAllowed_shouldReturnFalseWhenNotAllowed() {
-        when(actionOptions.getMaxTimesToRepeatActionSequence()).thenReturn(5);
-        when(actionLifecycle.getCompletedSequences()).thenReturn(5);
-        assertFalse(actionLifecycleManagement.isMoreSequencesAllowed(matches));
+    void testIsMoreSequencesAllowed_AtLimit() {
+        // Setup
+        actionOptions.setMaxTimesToRepeatActionSequence(2);
+        actionLifecycle.incrementCompletedSequences();
+        actionLifecycle.incrementCompletedSequences();
+        
+        // Execute
+        boolean allowed = lifecycleManagement.isMoreSequencesAllowed(actionResult);
+        
+        // Verify
+        assertFalse(allowed);
     }
-
+    
     @Test
-    void isOkToContinueAction_shouldReturnFalseWhenTimeExpires() {
-        // Setup: Time has expired
-        when(actionOptions.getMaxWait()).thenReturn(10.0);
-        when(actionLifecycle.getStartTime()).thenReturn(LocalDateTime.now().minusSeconds(11));
-        when(time.now()).thenReturn(LocalDateTime.now());
-        when(actionLifecycle.getCompletedRepetitions()).thenReturn(1);
-
-        // Execution & Assertion
-        assertFalse(actionLifecycleManagement.isOkToContinueAction(matches, 1));
+    void testIsOkToContinueAction_FirstRepetition() {
+        // Setup - first repetition is always allowed
+        // No need to mock time for first repetition
+        
+        // Execute
+        boolean okToContinue = lifecycleManagement.isOkToContinueAction(actionResult, 1);
+        
+        // Verify
+        assertTrue(okToContinue);
     }
-
+    
     @Test
-    void isOkToContinueAction_shouldReturnFalseWhenMaxRepsReached() {
-        // Setup: Max repetitions reached for a non-FIND action
-        when(actionOptions.getAction()).thenReturn(ActionOptions.Action.CLICK);
-        when(actionOptions.getMaxTimesToRepeatActionSequence()).thenReturn(3);
-        when(actionLifecycle.getCompletedRepetitions()).thenReturn(3);
-
-        // Execution & Assertion
-        assertFalse(actionLifecycleManagement.isOkToContinueAction(matches, 1));
+    void testIsOkToContinueAction_TimeExceeded() {
+        // Setup
+        actionOptions.setMaxWait(5.0);
+        actionLifecycle.incrementCompletedRepetitions();
+        when(timeProvider.now()).thenReturn(startTime.plusSeconds(10));
+        
+        // Execute
+        boolean okToContinue = lifecycleManagement.isOkToContinueAction(actionResult, 1);
+        
+        // Verify
+        assertFalse(okToContinue);
     }
-
+    
     @Test
-    void isOkToContinueAction_shouldReturnFalseForFindFirstWithMatch() {
-        // Setup: FIND_FIRST action with a match found
-        when(actionOptions.getFind()).thenReturn(ActionOptions.Find.FIRST);
-        when(matches.isEmpty()).thenReturn(false); // A match has been found
-        when(actionOptions.getMaxWait()).thenReturn(10.0);
-        when(actionLifecycle.getStartTime()).thenReturn(LocalDateTime.now());
-        when(time.now()).thenReturn(LocalDateTime.now());
-
-        // Execution & Assertion
-        assertFalse(actionLifecycleManagement.isOkToContinueAction(matches, 1));
+    void testIsOkToContinueAction_MaxRepetitionsReached() {
+        // Setup
+        actionOptions.setMaxTimesToRepeatActionSequence(2);
+        actionOptions.setAction(ActionOptions.Action.CLICK); // Not FIND
+        actionLifecycle.incrementCompletedRepetitions();
+        actionLifecycle.incrementCompletedRepetitions();
+        // No need to mock time - we're under the time limit
+        
+        // Execute
+        boolean okToContinue = lifecycleManagement.isOkToContinueAction(actionResult, 1);
+        
+        // Verify
+        assertFalse(okToContinue);
     }
-
+    
     @Test
-    void isOkToContinueAction_shouldReturnFalseForFindEachWithAllMatches() {
-        // Setup: FIND_EACH action and all patterns are found
-        when(actionOptions.getFind()).thenReturn(ActionOptions.Find.EACH);
-        when(actionOptions.getDoOnEach()).thenReturn(ActionOptions.DoOnEach.FIRST);
-
-        // Mock two different search images to simulate two patterns
-        Image image1 = mock(Image.class);
-        Image image2 = mock(Image.class);
-
-        Match match1 = mock(Match.class);
-        when(match1.getSearchImage()).thenReturn(image1);
-
-        Match match2 = mock(Match.class);
-        when(match2.getSearchImage()).thenReturn(image2);
-
-        when(matches.getMatchList()).thenReturn(List.of(match1, match2));
-
-        // Time is still valid
-        when(actionOptions.getMaxWait()).thenReturn(10.0);
-        when(actionLifecycle.getStartTime()).thenReturn(LocalDateTime.now());
-        when(time.now()).thenReturn(LocalDateTime.now());
-
-        // We are searching for 2 patterns, and we found 2
-        assertFalse(actionLifecycleManagement.isOkToContinueAction(matches, 2));
+    void testIsOkToContinueAction_FindActionIgnoresRepLimit() {
+        // Setup
+        actionOptions.setMaxTimesToRepeatActionSequence(1);
+        actionOptions.setAction(ActionOptions.Action.FIND);
+        actionOptions.setMaxWait(60.0); // Ensure we have enough time
+        actionLifecycle.incrementCompletedRepetitions();
+        actionLifecycle.incrementCompletedRepetitions();
+        when(timeProvider.now()).thenReturn(startTime.plusSeconds(1));
+        
+        // Execute
+        boolean okToContinue = lifecycleManagement.isOkToContinueAction(actionResult, 1);
+        
+        // Verify
+        assertTrue(okToContinue); // FIND actions can exceed rep limit
     }
-
+    
     @Test
-    void isOkToContinueAction_shouldReturnFalseWhenTextAppears() {
-        // Setup: Condition is TEXT_APPEARS and text is found
-        when(actionOptions.getGetTextUntil()).thenReturn(ActionOptions.GetTextUntil.TEXT_APPEARS);
-        when(actionOptions.getTextToAppearOrVanish()).thenReturn("hello");
-
-        Match matchWithText = mock(Match.class);
-        when(matchWithText.getText()).thenReturn("hello world");
-        when(matches.getMatchList()).thenReturn(List.of(matchWithText));
-
-        // Time is still valid
-        when(actionOptions.getMaxWait()).thenReturn(10.0);
-        when(actionLifecycle.getStartTime()).thenReturn(LocalDateTime.now());
-        when(time.now()).thenReturn(LocalDateTime.now());
-
-        assertFalse(actionLifecycleManagement.isOkToContinueAction(matches, 1));
+    void testIsFindFirstAndAtLeastOneMatchFound_Success() {
+        // Setup
+        actionOptions.setFind(ActionOptions.Find.FIRST);
+        Match match = new Match.Builder().build();
+        actionResult.add(match);
+        
+        // Execute
+        boolean found = lifecycleManagement.isFindFirstAndAtLeastOneMatchFound(actionResult);
+        
+        // Verify
+        assertTrue(found);
     }
-
+    
     @Test
-    void isOkToContinueAction_shouldContinueWhenTextAppearsButWrongText() {
-        // Setup: Condition is TEXT_APPEARS but the found text doesn't match
-        when(actionOptions.getGetTextUntil()).thenReturn(ActionOptions.GetTextUntil.TEXT_APPEARS);
-        when(actionOptions.getTextToAppearOrVanish()).thenReturn("goodbye");
-
-        Match matchWithText = mock(Match.class);
-        when(matchWithText.getText()).thenReturn("hello world");
-        when(matches.getMatchList()).thenReturn(List.of(matchWithText));
-
-        // Time and reps are still valid
-        when(actionOptions.getMaxWait()).thenReturn(10.0);
-        when(actionLifecycle.getStartTime()).thenReturn(LocalDateTime.now());
-        when(time.now()).thenReturn(LocalDateTime.now());
-
-        assertTrue(actionLifecycleManagement.isOkToContinueAction(matches, 1));
+    void testIsFindFirstAndAtLeastOneMatchFound_NoMatches() {
+        // Setup
+        actionOptions.setFind(ActionOptions.Find.FIRST);
+        
+        // Execute
+        boolean found = lifecycleManagement.isFindFirstAndAtLeastOneMatchFound(actionResult);
+        
+        // Verify
+        assertFalse(found);
     }
-
+    
     @Test
-    void isOkToContinueAction_shouldReturnFalseWhenTextVanishes() {
-        // Setup: Condition is TEXT_VANISHES and no text is found in any match
-        when(actionOptions.getGetTextUntil()).thenReturn(ActionOptions.GetTextUntil.TEXT_VANISHES);
-        when(actionOptions.getTextToAppearOrVanish()).thenReturn("disappear");
-
-        // No matches found, or matches have no text
-        when(matches.getMatchList()).thenReturn(Collections.emptyList());
-
-        // Time is still valid
-        when(actionOptions.getMaxWait()).thenReturn(10.0);
-        when(actionLifecycle.getStartTime()).thenReturn(LocalDateTime.now());
-        when(time.now()).thenReturn(LocalDateTime.now());
-
-        assertFalse(actionLifecycleManagement.isOkToContinueAction(matches, 1));
+    void testIsFindEachFirstAndEachPatternFound_AllFound() {
+        // Setup
+        actionOptions.setFind(ActionOptions.Find.EACH);
+        actionOptions.setDoOnEach(ActionOptions.DoOnEach.FIRST);
+        
+        // Create distinct images to ensure they're recognized as different
+        BufferedImage mockBuffImage1 = new BufferedImage(10, 10, BufferedImage.TYPE_INT_RGB);
+        BufferedImage mockBuffImage2 = new BufferedImage(20, 20, BufferedImage.TYPE_INT_RGB);
+        Image image1 = new Image(mockBuffImage1, "image1");
+        Image image2 = new Image(mockBuffImage2, "image2");
+        
+        Match match1 = new Match.Builder()
+                .setSearchImage(image1)
+                .build();
+        Match match2 = new Match.Builder()
+                .setSearchImage(image2)
+                .build();
+                
+        actionResult.add(match1);
+        actionResult.add(match2);
+        
+        // Execute
+        boolean allFound = lifecycleManagement.isFindEachFirstAndEachPatternFound(actionResult, 2);
+        
+        // Verify
+        assertTrue(allFound);
+    }
+    
+    @Test
+    void testIsFindEachFirstAndEachPatternFound_NotAllFound() {
+        // Setup
+        actionOptions.setFind(ActionOptions.Find.EACH);
+        actionOptions.setDoOnEach(ActionOptions.DoOnEach.FIRST);
+        
+        BufferedImage mockBuffImage1 = new BufferedImage(10, 10, BufferedImage.TYPE_INT_RGB);
+        Image image1 = new Image(mockBuffImage1, "image1");
+        
+        Match match1 = new Match.Builder()
+                .setSearchImage(image1)
+                .build();
+        Match match2 = new Match.Builder()
+                .setSearchImage(image1) // Same image
+                .build();
+                
+        actionResult.add(match1);
+        actionResult.add(match2);
+        
+        // Execute
+        boolean allFound = lifecycleManagement.isFindEachFirstAndEachPatternFound(actionResult, 2);
+        
+        // Verify
+        assertFalse(allFound); // Only found 1 unique image, expected 2
+    }
+    
+    @Test
+    void testTextCondition_TextAppears() {
+        // Setup
+        actionOptions.setGetTextUntil(TEXT_APPEARS);
+        actionOptions.setTextToAppearOrVanish("target");
+        
+        Match match = new Match.Builder()
+                .setText("This contains target text")
+                .build();
+        actionResult.add(match);
+        
+        actionLifecycle.incrementCompletedRepetitions();
+        when(timeProvider.now()).thenReturn(startTime.plusSeconds(1));
+        
+        // Execute
+        boolean okToContinue = lifecycleManagement.isOkToContinueAction(actionResult, 1);
+        
+        // Verify
+        assertFalse(okToContinue); // Should stop when text appears
+    }
+    
+    @Test
+    void testTextCondition_TextVanishes() {
+        // Setup
+        actionOptions.setGetTextUntil(TEXT_VANISHES);
+        actionOptions.setTextToAppearOrVanish("target");
+        
+        Match match = new Match.Builder()
+                .setText("This does not contain the word")
+                .build();
+        actionResult.add(match);
+        
+        actionLifecycle.incrementCompletedRepetitions();
+        when(timeProvider.now()).thenReturn(startTime.plusSeconds(1));
+        
+        // Execute
+        boolean okToContinue = lifecycleManagement.isOkToContinueAction(actionResult, 1);
+        
+        // Verify
+        assertFalse(okToContinue); // Should stop when text vanishes
+    }
+    
+    @Test
+    void testTextCondition_None() {
+        // Setup
+        actionOptions.setGetTextUntil(NONE);
+        actionOptions.setMaxWait(60.0); // Ensure we have enough time
+        
+        actionLifecycle.incrementCompletedRepetitions();
+        when(timeProvider.now()).thenReturn(startTime.plusSeconds(1));
+        
+        // Execute
+        boolean okToContinue = lifecycleManagement.isOkToContinueAction(actionResult, 1);
+        
+        // Verify
+        assertTrue(okToContinue); // Text conditions don't apply
+    }
+    
+    @Test
+    void testTextCondition_EmptyTextToFind_ChecksForAnyText() {
+        // Setup
+        actionOptions.setGetTextUntil(TEXT_APPEARS);
+        actionOptions.setTextToAppearOrVanish(""); // Empty means any text
+        
+        Match match = new Match.Builder()
+                .setText("Some text")
+                .build();
+        actionResult.add(match);
+        
+        actionLifecycle.incrementCompletedRepetitions();
+        when(timeProvider.now()).thenReturn(startTime.plusSeconds(1));
+        
+        // Execute
+        boolean okToContinue = lifecycleManagement.isOkToContinueAction(actionResult, 1);
+        
+        // Verify
+        assertFalse(okToContinue); // Should stop when any text appears
+    }
+    
+    @Test
+    void testPrintActionOnce() {
+        // Setup
+        assertFalse(actionLifecycle.isPrinted());
+        
+        // Execute first call
+        lifecycleManagement.printActionOnce(actionResult);
+        
+        // Verify
+        assertTrue(actionLifecycle.isPrinted());
+        
+        // Execute second call - should not print again
+        lifecycleManagement.printActionOnce(actionResult);
+        
+        // Verify still only printed once
+        assertTrue(actionLifecycle.isPrinted());
+    }
+    
+    @Test
+    void testComplexScenario_MultipleConditions() {
+        // Setup - Find Each First with text condition
+        actionOptions.setFind(ActionOptions.Find.EACH);
+        actionOptions.setDoOnEach(ActionOptions.DoOnEach.FIRST);
+        actionOptions.setGetTextUntil(TEXT_APPEARS);
+        actionOptions.setTextToAppearOrVanish("found");
+        actionOptions.setMaxWait(10.0);
+        
+        // Create distinct images to ensure they're recognized as different
+        BufferedImage mockBuffImage1 = new BufferedImage(10, 10, BufferedImage.TYPE_INT_RGB);
+        BufferedImage mockBuffImage2 = new BufferedImage(20, 20, BufferedImage.TYPE_INT_RGB);
+        Image image1 = new Image(mockBuffImage1, "image1");
+        Image image2 = new Image(mockBuffImage2, "image2");
+        
+        // First check - not all patterns found yet
+        Match match1 = new Match.Builder()
+                .setSearchImage(image1)
+                .setText("searching...")
+                .build();
+        actionResult.add(match1);
+        
+        actionLifecycle.incrementCompletedRepetitions();
+        when(timeProvider.now()).thenReturn(startTime.plusSeconds(2));
+        
+        boolean okToContinue = lifecycleManagement.isOkToContinueAction(actionResult, 2);
+        assertTrue(okToContinue); // Should continue - not all patterns found
+        
+        // Second check - all patterns found but text not yet
+        Match match2 = new Match.Builder()
+                .setSearchImage(image2)
+                .setText("still searching...")
+                .build();
+        actionResult.add(match2);
+        
+        okToContinue = lifecycleManagement.isOkToContinueAction(actionResult, 2);
+        assertFalse(okToContinue); // Should stop - all patterns found
     }
 }

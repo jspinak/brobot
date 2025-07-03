@@ -11,7 +11,6 @@ import io.github.jspinak.brobot.action.composite.drag.DragOptions;
 import io.github.jspinak.brobot.action.basic.find.FindStrategyRegistry;
 import io.github.jspinak.brobot.action.internal.execution.BasicActionRegistry;
 import io.github.jspinak.brobot.action.internal.execution.CompositeActionRegistry;
-import io.github.jspinak.brobot.action.internal.service.ActionService;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -188,24 +187,22 @@ class ActionServiceTest {
     @Test
     void getAction_withDragOptions_shouldReturnDragAction() {
         DragOptions dragOptions = new DragOptions.Builder().build();
-        // First check basic registry
-        when(basicAction.getAction(ActionOptions.Action.DRAG)).thenReturn(Optional.empty());
-        // Then check composite registry
+        // DragOptions goes directly to composite registry
         when(compositeAction.getAction(ActionOptions.Action.DRAG)).thenReturn(Optional.of(actionInterface));
         
         Optional<ActionInterface> result = actionService.getAction(dragOptions);
         
         assertTrue(result.isPresent());
         assertEquals(actionInterface, result.get());
-        verify(basicAction).getAction(ActionOptions.Action.DRAG);
+        // Should only check composite registry for DragOptions
         verify(compositeAction).getAction(ActionOptions.Action.DRAG);
+        verify(basicAction, never()).getAction(any());
     }
     
     @Test
     void getAction_withUnknownActionConfig_shouldReturnEmpty() {
-        // Create a mock ActionConfig with an unrecognized class name
-        ActionConfig unknownConfig = mock(ActionConfig.class);
-        when(unknownConfig.getClass()).thenReturn((Class) UnknownOptions.class);
+        // Create a concrete unknown ActionConfig subclass
+        ActionConfig unknownConfig = new UnknownOptions.Builder().build();
         
         Optional<ActionInterface> result = actionService.getAction(unknownConfig);
         
@@ -219,7 +216,6 @@ class ActionServiceTest {
         }
         
         static class Builder extends ActionConfig.Builder<Builder> {
-            @Override
             public UnknownOptions build() {
                 return new UnknownOptions(this);
             }

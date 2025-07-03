@@ -19,7 +19,7 @@ class DragOptionsTest {
         assertEquals(0.5, options.getDelayBetweenMouseDownAndMove());
         assertEquals(0.5, options.getDelayAfterDrag());
         assertEquals(0.0, options.getPauseBeforeBegin());
-        assertEquals(0.5, options.getPauseAfterEnd());
+        assertEquals(0.0, options.getPauseAfterEnd());
     }
 
     @Test

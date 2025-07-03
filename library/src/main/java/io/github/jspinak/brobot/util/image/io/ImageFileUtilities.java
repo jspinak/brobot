@@ -277,8 +277,9 @@ public class ImageFileUtilities {
      * @return a Pattern object referencing the saved file
      */
     public Pattern matToPattern(Mat mat, String name) {
-        imwrite(name + ".png", mat);
-        return new Pattern(name);
+        String filename = name + ".png";
+        imwrite(filename, mat);
+        return new Pattern(filename);
     }
 
     /**
