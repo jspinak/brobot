@@ -67,14 +67,8 @@ public class MoveMouseWrapper {
         org.sikuli.script.Location sikuliLocation = location.sikuli();
         ConsoleReporter.print("move mouse to "+sikuliLocation+" ");
         //return new Region().mouseMove(location.getSikuliLocation()) != 0; // this can cause the script to freeze for unknown reasons
-        settingsManager.executeWithMouseSettings(
-            options.getMouseOptions(),
-            () -> {
-                // This is the only code that runs with the temporary settings.
-                new Screen().mouseMove(target.getSikuliLocation());
-            }
-        );
-        return location.sikuli().hover() != null;
+        // Directly use hover() which is more stable than mouseMove()
+        return sikuliLocation.hover() != null;
     }
 
     /**

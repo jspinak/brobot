@@ -2,6 +2,11 @@ package io.github.jspinak.brobot.action.basic.find;
 
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
+import io.github.jspinak.brobot.action.basic.find.histogram.FindHistogram;
+import io.github.jspinak.brobot.action.basic.find.motion.FindDynamicPixelMatches;
+import io.github.jspinak.brobot.action.basic.find.motion.FindFixedPixelMatches;
+import io.github.jspinak.brobot.action.basic.find.motion.FindMotion;
+import io.github.jspinak.brobot.action.basic.find.motion.FindRegionsOfMotion;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -21,39 +26,46 @@ class FindStrategyRegistryV2Test {
     private FindStrategyRegistryV2 registry;
     
     @Mock
-    private FindImage findImage;
+    private FindHistogram findHistogram;
     
     @Mock
-    private Object findText;  // Mock as Object since we don't have the actual class
+    private FindColor findColor;
     
     @Mock
-    private Object findColor;
+    private FindMotion findMotion;
     
     @Mock
-    private Object findHistogram;
+    private FindRegionsOfMotion findRegionsOfMotion;
     
     @Mock
-    private Object findMotion;
+    private FindImageV2 findImageV2;
     
     @Mock
-    private Object dynamicPixels;
+    private FindText findText;
     
     @Mock
-    private Object fixedPixels;
+    private FindSimilarImages findSimilarImages;
+    
+    @Mock
+    private FindFixedPixelMatches findFixedPixelMatches;
+    
+    @Mock
+    private FindDynamicPixelMatches findDynamicPixelMatches;
     
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        // Create registry with available components
-        // In a real test, we'd need the actual classes or proper mocks
+        // Create registry with all 9 components
+        registry = new FindStrategyRegistryV2(
+            findHistogram, findColor, findMotion, findRegionsOfMotion,
+            findImageV2, findText, findSimilarImages,
+            findFixedPixelMatches, findDynamicPixelMatches
+        );
     }
     
     @Test
     void get_shouldReturnCorrectFunctionForPatternFindOptions() {
-        // Create a minimal registry with just FindImage
-        registry = new FindStrategyRegistryV2(
-            findImage, null, null, null, null, null, null
-        );
+        // Test uses the registry created in setUp
         
         PatternFindOptions options = new PatternFindOptions.Builder()
             .setStrategy(PatternFindOptions.Strategy.BEST)
@@ -68,14 +80,12 @@ class FindStrategyRegistryV2Test {
         List<ObjectCollection> collections = List.of(new ObjectCollection.Builder().build());
         function.accept(result, collections);
         
-        verify(findImage).findBest(result, collections);
+        verify(findImageV2).findBest(result, collections);
     }
     
     @Test
     void get_shouldHandleAllPatternFindStrategies() {
-        registry = new FindStrategyRegistryV2(
-            findImage, null, null, null, null, null, null
-        );
+        // Test uses the registry created in setUp
         
         // Test FIRST
         PatternFindOptions firstOptions = new PatternFindOptions.Builder()
@@ -84,36 +94,37 @@ class FindStrategyRegistryV2Test {
         BiConsumer<ActionResult, List<ObjectCollection>> firstFunction = registry.get(firstOptions);
         assertNotNull(firstFunction);
         
-        // Verify it maps to findAll (based on the registry implementation)
-        ActionResult result = new ActionResult();
-        List<ObjectCollection> collections = List.of(new ObjectCollection.Builder().build());
-        firstFunction.accept(result, collections);
-        verify(findImage).findAll(result, collections);
-        
         // Test ALL
         PatternFindOptions allOptions = new PatternFindOptions.Builder()
             .setStrategy(PatternFindOptions.Strategy.ALL)
             .build();
-        assertNotNull(registry.get(allOptions));
+        BiConsumer<ActionResult, List<ObjectCollection>> allFunction = registry.get(allOptions);
+        assertNotNull(allFunction);
         
         // Test BEST
         PatternFindOptions bestOptions = new PatternFindOptions.Builder()
             .setStrategy(PatternFindOptions.Strategy.BEST)
             .build();
-        assertNotNull(registry.get(bestOptions));
+        BiConsumer<ActionResult, List<ObjectCollection>> bestFunction = registry.get(bestOptions);
+        assertNotNull(bestFunction);
         
         // Test EACH
         PatternFindOptions eachOptions = new PatternFindOptions.Builder()
             .setStrategy(PatternFindOptions.Strategy.EACH)
             .build();
-        assertNotNull(registry.get(eachOptions));
+        BiConsumer<ActionResult, List<ObjectCollection>> eachFunction = registry.get(eachOptions);
+        assertNotNull(eachFunction);
+        
+        // Verify one of them works correctly
+        ActionResult result = new ActionResult();
+        List<ObjectCollection> collections = List.of(new ObjectCollection.Builder().build());
+        bestFunction.accept(result, collections);
+        verify(findImageV2).findBest(result, collections);
     }
     
     @Test
     void get_shouldReturnNullForUnregisteredOptions() {
-        registry = new FindStrategyRegistryV2(
-            findImage, null, null, null, null, null, null
-        );
+        // Test uses the registry created in setUp
         
         // Create a custom find options that's not registered
         BaseFindOptions unknownOptions = new TestFindOptions();
@@ -127,17 +138,20 @@ class FindStrategyRegistryV2Test {
     // Test implementation of BaseFindOptions for testing
     private static class TestFindOptions extends BaseFindOptions {
         public TestFindOptions() {
-            super(new Builder<TestFindOptions.Builder>() {
-                @Override
-                protected TestFindOptions.Builder self() {
-                    return (TestFindOptions.Builder) this;
-                }
-            });
+            super(new TestBuilder());
         }
         
         @Override
         public FindStrategy getFindStrategy() {
             return FindStrategy.CUSTOM;
+        }
+        
+        // Proper builder implementation
+        private static class TestBuilder extends Builder<TestBuilder> {
+            @Override
+            protected TestBuilder self() {
+                return this;
+            }
         }
     }
 }

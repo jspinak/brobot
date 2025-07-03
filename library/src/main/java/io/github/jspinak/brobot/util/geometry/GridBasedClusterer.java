@@ -148,17 +148,23 @@ public class GridBasedClusterer {
         Map<Integer, Integer> sortedPointFreqOverlap = pointFreqOverlap.entrySet().stream()
                 .sorted(Collections.reverseOrder(Map.Entry.comparingByValue()))
                 .collect(toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e2, LinkedHashMap::new));
+        // Convert sorted maps to lists of entries to access by index
+        List<Map.Entry<Integer, Integer>> sortedEntries = new ArrayList<>(sortedPointFreq.entrySet());
+        List<Map.Entry<Integer, Integer>> sortedEntriesOverlap = new ArrayList<>(sortedPointFreqOverlap.entrySet());
+        
         for (int i=0; i<maxClusters; i++) {
-            if (sortedPointFreq.size() > i) {
-                Integer gridNumber = sortedPointFreq.get(i);
-                Integer freq = sortedPointFreq.get(i);
-                if (gridNumber != null && freq != null)
+            if (sortedEntries.size() > i) {
+                Map.Entry<Integer, Integer> entry = sortedEntries.get(i);
+                Integer gridNumber = entry.getKey();
+                Integer freq = entry.getValue();
+                if (gridNumber != null && freq != null && gridNumber >= 0 && gridNumber < 9)
                     topRegions.put(region.getGridRegion(gridNumber), freq);
             }
-            if (sortedPointFreqOverlap.size() > i) {
-                Integer gridNumber = sortedPointFreqOverlap.get(i);
-                Integer freq = sortedPointFreqOverlap.get(i);
-                if (gridNumber != null && freq != null)
+            if (sortedEntriesOverlap.size() > i) {
+                Map.Entry<Integer, Integer> entry = sortedEntriesOverlap.get(i);
+                Integer gridNumber = entry.getKey();
+                Integer freq = entry.getValue();
+                if (gridNumber != null && freq != null && gridNumber >= 0 && gridNumber < 9)
                     topRegions.put(regionOverlap.getGridRegion(gridNumber), freq);
             }
         }

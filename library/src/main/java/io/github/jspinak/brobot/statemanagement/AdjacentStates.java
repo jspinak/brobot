@@ -122,7 +122,7 @@ public class AdjacentStates {
         if (!statesWithStaticTransitions.contains(SpecialStateType.PREVIOUS.getId())) return adjacent;
         adjacent.remove(SpecialStateType.PREVIOUS.getId());
         Optional<State> currentState = allStatesInProjectService.getState(stateId);
-        if (currentState.isEmpty() || currentState.get().getHiddenStateNames().isEmpty()) return adjacent;
+        if (currentState.isEmpty() || currentState.get().getHiddenStateIds().isEmpty()) return adjacent;
         adjacent.addAll(currentState.get().getHiddenStateIds());
         return adjacent;
     }

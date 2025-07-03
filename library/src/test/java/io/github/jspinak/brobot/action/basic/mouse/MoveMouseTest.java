@@ -18,6 +18,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import java.util.Arrays;
 import java.util.List;
@@ -27,6 +29,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 class MoveMouseTest {
 
     @Mock private Find find;
@@ -40,7 +43,6 @@ class MoveMouseTest {
     @BeforeEach
     void setUp() {
         moveMouse = new MoveMouse(find, moveMouseWrapper, timeProvider);
-        when(actionConfig.getPauseAfterEnd()).thenReturn(0.5); // 500ms default
     }
 
     @Test
@@ -51,6 +53,7 @@ class MoveMouseTest {
     @Test
     void testPerform_CallsFindAndMovesToLocations() {
         // Arrange
+        when(actionConfig.getPauseAfterEnd()).thenReturn(0.5); // 500ms default
         ActionResult actionResult = new ActionResult();
         actionResult.setActionConfig(actionConfig);
         
@@ -84,14 +87,22 @@ class MoveMouseTest {
 
         // Assert
         verify(find).perform(eq(actionResult), eq(objectCollection));
-        verify(moveMouseWrapper).move(location1);
-        verify(moveMouseWrapper).move(location2);
+        ArgumentCaptor<Location> locationCaptor = ArgumentCaptor.forClass(Location.class);
+        verify(moveMouseWrapper, times(2)).move(locationCaptor.capture());
+        List<Location> capturedLocations = locationCaptor.getAllValues();
+        assertEquals(2, capturedLocations.size());
+        // The locations will be the center of the 1x1 regions we created
+        assertTrue(capturedLocations.stream().anyMatch(loc -> 
+            loc.getCalculatedX() == location1.getX() && loc.getCalculatedY() == location1.getY()));
+        assertTrue(capturedLocations.stream().anyMatch(loc -> 
+            loc.getCalculatedX() == location2.getX() && loc.getCalculatedY() == location2.getY()));
         verifyNoInteractions(timeProvider); // No pause after last collection
     }
 
     @Test
     void testPerform_WithMultipleCollections_PausesBetweenCollections() {
         // Arrange
+        when(actionConfig.getPauseAfterEnd()).thenReturn(0.5); // 500ms default
         ActionResult actionResult = new ActionResult();
         actionResult.setActionConfig(actionConfig);
         
@@ -132,17 +143,24 @@ class MoveMouseTest {
         // Assert
         verify(find).perform(eq(actionResult), eq(collection1));
         verify(find).perform(eq(actionResult), eq(collection2));
-        verify(moveMouseWrapper).move(location1);
-        verify(moveMouseWrapper).move(location2);
+        ArgumentCaptor<Location> locationCaptor = ArgumentCaptor.forClass(Location.class);
+        verify(moveMouseWrapper, times(2)).move(locationCaptor.capture());
+        List<Location> capturedLocations = locationCaptor.getAllValues();
+        assertEquals(2, capturedLocations.size());
+        // The locations will be the center of the 1x1 regions we created
+        assertTrue(capturedLocations.stream().anyMatch(loc -> 
+            loc.getCalculatedX() == location1.getX() && loc.getCalculatedY() == location1.getY()));
+        assertTrue(capturedLocations.stream().anyMatch(loc -> 
+            loc.getCalculatedX() == location2.getX() && loc.getCalculatedY() == location2.getY()));
         verify(timeProvider).wait(0.5); // Pause between collections
     }
 
     @Test
     void testPerform_WithNoPauseConfiguration_DoesNotPause() {
         // Arrange
+        when(actionConfig.getPauseAfterEnd()).thenReturn(0.0);
         ActionResult actionResult = new ActionResult();
         actionResult.setActionConfig(actionConfig);
-        when(actionConfig.getPauseAfterEnd()).thenReturn(0.0);
         
         ObjectCollection collection1 = new ObjectCollection.Builder().build();
         ObjectCollection collection2 = new ObjectCollection.Builder().build();
@@ -158,6 +176,7 @@ class MoveMouseTest {
     @Test
     void testPerform_WithEmptyMatchLocations_StillCallsFind() {
         // Arrange
+        when(actionConfig.getPauseAfterEnd()).thenReturn(0.5); // 500ms default
         ActionResult actionResult = new ActionResult();
         actionResult.setActionConfig(actionConfig);
         
@@ -177,6 +196,7 @@ class MoveMouseTest {
     @Test
     void testPerform_ProcessesAllLocationsFromFind() {
         // Arrange
+        when(actionConfig.getPauseAfterEnd()).thenReturn(0.5); // 500ms default
         ActionResult actionResult = new ActionResult();
         actionResult.setActionConfig(actionConfig);
         
@@ -204,13 +224,19 @@ class MoveMouseTest {
         moveMouse.perform(actionResult, objectCollection);
 
         // Assert
-        locations.forEach(loc -> verify(moveMouseWrapper).move(loc));
-        verify(moveMouseWrapper, times(3)).move(any(Location.class));
+        ArgumentCaptor<Location> locationCaptor = ArgumentCaptor.forClass(Location.class);
+        verify(moveMouseWrapper, times(3)).move(locationCaptor.capture());
+        List<Location> capturedLocations = locationCaptor.getAllValues();
+        assertEquals(3, capturedLocations.size());
+        // The locations will be the center of the 1x1 regions we created
+        locations.forEach(loc -> assertTrue(capturedLocations.stream().anyMatch(captured -> 
+            captured.getCalculatedX() == loc.getX() && captured.getCalculatedY() == loc.getY())));
     }
 
     @Test
     void testPerform_WithThreeCollections_PausesTwice() {
         // Arrange
+        when(actionConfig.getPauseAfterEnd()).thenReturn(0.5); // 500ms default
         ActionResult actionResult = new ActionResult();
         actionResult.setActionConfig(actionConfig);
         

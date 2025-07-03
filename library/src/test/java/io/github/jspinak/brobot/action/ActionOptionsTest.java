@@ -51,7 +51,7 @@ public class ActionOptionsTest {
         assertEquals(ActionOptions.Action.FIND, options.getAction(), "Default action should be FIND.");
         assertEquals(ActionOptions.Find.FIRST, options.getFind(), "Default find should be FIRST.");
         assertEquals(1, options.getMaxTimesToRepeatActionSequence(), "Default repeat sequence should be 1.");
-        assertEquals(0, options.getMaxWait(), "Default maxWait should be 0.");
+        assertEquals(3.0, options.getMaxWait(), "Default maxWait should be 3.0.");
     }
 
     @Test

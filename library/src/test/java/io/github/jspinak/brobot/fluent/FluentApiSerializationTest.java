@@ -7,6 +7,13 @@ import io.github.jspinak.brobot.runner.dsl.InstructionSet;
 import io.github.jspinak.brobot.runner.dsl.BusinessTask;
 import io.github.jspinak.brobot.runner.dsl.model.ActionStep;
 import io.github.jspinak.brobot.runner.dsl.model.TaskSequence;
+import io.github.jspinak.brobot.action.ActionConfig;
+import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
+import io.github.jspinak.brobot.action.basic.click.ClickOptions;
+import io.github.jspinak.brobot.action.basic.type.TypeOptions;
+import io.github.jspinak.brobot.action.basic.mouse.MouseMoveOptions;
+import io.github.jspinak.brobot.action.basic.mouse.MouseDownOptions;
+import io.github.jspinak.brobot.action.basic.mouse.MouseUpOptions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
 
@@ -74,17 +81,20 @@ public class FluentApiSerializationTest {
         
         // Verify first step (find)
         ActionStep findStep = taskSequence.getSteps().get(0);
-        assertEquals("FIND", findStep.getActionOptions().getAction().name());
+        ActionConfig findConfig = findStep.getActionConfig();
+        assertTrue(findConfig instanceof PatternFindOptions);
         assertNotNull(findStep.getObjectCollection());
         assertEquals(1, findStep.getObjectCollection().getStateImages().size());
         
         // Verify second step (click)
         ActionStep clickStep = taskSequence.getSteps().get(1);
-        assertEquals("CLICK", clickStep.getActionOptions().getAction().name());
+        ActionConfig clickConfig = clickStep.getActionConfig();
+        assertTrue(clickConfig instanceof ClickOptions);
         
         // Verify third step (type)
         ActionStep typeStep = taskSequence.getSteps().get(2);
-        assertEquals("TYPE", typeStep.getActionOptions().getAction().name());
+        ActionConfig typeConfig = typeStep.getActionConfig();
+        assertTrue(typeConfig instanceof TypeOptions);
         assertEquals(1, typeStep.getObjectCollection().getStateStrings().size());
     }
     
@@ -101,7 +111,7 @@ public class FluentApiSerializationTest {
             .withName("complexNavigation")
             .find(menuButton)
             .thenClick()
-            .thenWait(1.0)
+            // Note: thenWait() is not available in the current API
             .find(submenu)
             .thenClick()
             .thenWaitVanish(menuButton)
@@ -137,11 +147,11 @@ public class FluentApiSerializationTest {
         assertEquals(6, dragSequence.getSteps().size());
         
         // Verify the sequence: Find→Find→Move→MouseDown→Move→MouseUp
-        assertEquals("FIND", dragSequence.getSteps().get(0).getActionOptions().getAction().name());
-        assertEquals("FIND", dragSequence.getSteps().get(1).getActionOptions().getAction().name());
-        assertEquals("MOVE", dragSequence.getSteps().get(2).getActionOptions().getAction().name());
-        assertEquals("MOUSE_DOWN", dragSequence.getSteps().get(3).getActionOptions().getAction().name());
-        assertEquals("MOVE", dragSequence.getSteps().get(4).getActionOptions().getAction().name());
-        assertEquals("MOUSE_UP", dragSequence.getSteps().get(5).getActionOptions().getAction().name());
+        assertTrue(dragSequence.getSteps().get(0).getActionConfig() instanceof PatternFindOptions);
+        assertTrue(dragSequence.getSteps().get(1).getActionConfig() instanceof PatternFindOptions);
+        assertTrue(dragSequence.getSteps().get(2).getActionConfig() instanceof MouseMoveOptions);
+        assertTrue(dragSequence.getSteps().get(3).getActionConfig() instanceof MouseDownOptions);
+        assertTrue(dragSequence.getSteps().get(4).getActionConfig() instanceof MouseMoveOptions);
+        assertTrue(dragSequence.getSteps().get(5).getActionConfig() instanceof MouseUpOptions);
     }
 }
