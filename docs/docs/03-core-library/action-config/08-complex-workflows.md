@@ -295,6 +295,6 @@ public ActionResult robustWorkflow(StateImage element1, StateImage element2) {
 
 ## Next Steps
 
-- Learn about [Conditional Actions](./09-conditional-actions) for dynamic workflows
-- Explore [Form Automation](./10-form-automation) patterns
-- See [Reusable Patterns](./11-reusable-patterns) for building a library of common workflows
+- Learn about [Conditional Actions](./09-conditional-actions.md) for dynamic workflows
+- Explore [Form Automation](./10-form-automation.md) patterns
+- See [Reusable Patterns](./11-reusable-patterns.md) for building a library of common workflows

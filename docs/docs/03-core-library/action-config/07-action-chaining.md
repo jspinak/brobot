@@ -158,6 +158,6 @@ ActionChainOptions chain = new ActionChainOptions.Builder(
 
 ## Next Steps
 
-- Explore [Complex Workflows](./08-complex-workflows) for multi-step automation
-- Learn about [Conditional Actions](./09-conditional-actions) using RepeatUntilConfig
-- See [Form Automation](./10-form-automation) for practical examples
+- Explore [Complex Workflows](./complex-workflows) for multi-step automation
+- Learn about [Conditional Actions](./conditional-actions) using RepeatUntilConfig
+- See [Form Automation](./form-automation) for practical examples

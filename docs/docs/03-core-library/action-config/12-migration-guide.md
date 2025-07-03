@@ -345,8 +345,8 @@ public ActionResult perform(ActionConfig actionConfig, ObjectCollection objectCo
 ### Getting Help
 
 If you encounter issues during migration:
-1. Check the [API documentation](../api-reference)
-2. Review the [examples](./examples)
+1. Check the [API documentation](./05-reference.md)
+2. Review the [examples](./03-examples.md)
 3. Post questions in the community forum
 4. File issues on GitHub
 
@@ -360,6 +360,5 @@ If you encounter issues during migration:
 
 ## Next Steps
 
-- Review [ActionConfig API Reference](../api-reference/action-config)
-- Explore [Advanced Patterns](./11-reusable-patterns)
-- Learn about [Performance Optimization](./14-performance)
+- Review [ActionConfig API Reference](./05-reference.md)
+- Explore [Advanced Patterns](./11-reusable-patterns.md)
