@@ -498,6 +498,5 @@ Build a library of form handling utilities that can be reused across different f
 
 ## Next Steps
 
-- Explore [Reusable Patterns](./11-reusable-patterns) for building component libraries
-- Learn about [Troubleshooting](./12-troubleshooting) common form automation issues
-- See [Migration Guide](./13-migration-guide) for updating legacy form automation code
+- Explore [Reusable Patterns](./11-reusable-patterns.md) for building component libraries
+- See [Migration Guide](./12-migration-guide.md) for updating legacy form automation code
