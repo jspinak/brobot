@@ -121,13 +121,13 @@ class ActionTest {
         // Here we use a spy to partially mock the class and verify the internal call
         Action spyAction = spy(action);
         // We must stub the specific overload of 'perform' that 'find' calls.
-        doReturn(new ActionResult()).when(spyAction).perform(any(ActionOptions.class), any(StateImage[].class));
+        doReturn(new ActionResult()).when(spyAction).perform(any(PatternFindOptions.class), any(StateImage[].class));
 
         spyAction.find(stateImage); // Call the method to be tested with a mock StateImage
 
-        // Verify that it called the perform(ActionOptions, StateImage...) overload
-        verify(spyAction).perform(actionOptionsCaptor.capture(), eq(stateImage));
-        assertEquals(ActionOptions.Action.FIND, actionOptionsCaptor.getValue().getAction());
+        // Verify that it called the perform(PatternFindOptions, StateImage...) overload
+        verify(spyAction).perform(actionConfigCaptor.capture(), eq(stateImage));
+        assertTrue(actionConfigCaptor.getValue() instanceof PatternFindOptions);
     }
 
     @Test

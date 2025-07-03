@@ -1,9 +1,14 @@
 package io.github.jspinak.brobot.action.composite.drag;
 
+import io.github.jspinak.brobot.action.ActionChainOptions;
 import io.github.jspinak.brobot.action.ActionConfig;
+import io.github.jspinak.brobot.action.basic.find.MatchAdjustmentOptions;
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
+import io.github.jspinak.brobot.action.basic.mouse.MouseDownOptions;
 import io.github.jspinak.brobot.action.basic.mouse.MouseMoveOptions;
 import io.github.jspinak.brobot.action.basic.mouse.MousePressOptions;
+import io.github.jspinak.brobot.action.basic.mouse.MouseUpOptions;
+import io.github.jspinak.brobot.model.action.MouseButton;
 import io.github.jspinak.brobot.model.element.Location;
 
 /**
@@ -42,9 +47,9 @@ public class DragBuilder {
     private PatternFindOptions fromOptions;
     private PatternFindOptions toOptions;
     private MouseMoveOptions moveToSourceOptions;
-    private MousePressOptions mouseDownOptions;
+    private MouseDownOptions mouseDownOptions;
     private MouseMoveOptions dragMoveOptions;
-    private MousePressOptions mouseUpOptions;
+    private MouseUpOptions mouseUpOptions;
     
     private DragBuilder() {
         // Set defaults
@@ -55,16 +60,16 @@ public class DragBuilder {
             .setStrategy(PatternFindOptions.Strategy.BEST)
             .build();
         this.moveToSourceOptions = new MouseMoveOptions.Builder().build();
-        this.mouseDownOptions = new MousePressOptions.Builder()
-            .setButtonType(MousePressOptions.ButtonType.LEFT)
-            .setPressType(MousePressOptions.PressType.DOWN)
+        this.mouseDownOptions = new MouseDownOptions.Builder()
+            .setPressOptions(new MousePressOptions.Builder()
+                .setButton(MouseButton.LEFT))
             .build();
         this.dragMoveOptions = new MouseMoveOptions.Builder()
             .setMoveMouseDelay(0.5f) // Slower for drag operations
             .build();
-        this.mouseUpOptions = new MousePressOptions.Builder()
-            .setButtonType(MousePressOptions.ButtonType.LEFT)
-            .setPressType(MousePressOptions.PressType.UP)
+        this.mouseUpOptions = new MouseUpOptions.Builder()
+            .setPressOptions(new MousePressOptions.Builder()
+                .setButton(MouseButton.LEFT))
             .build();
     }
     
@@ -125,34 +130,34 @@ public class DragBuilder {
      * @param buttonType The mouse button type
      * @return This builder for chaining
      */
-    public DragBuilder withButton(MousePressOptions.ButtonType buttonType) {
-        this.mouseDownOptions = new MousePressOptions.Builder()
-            .setButtonType(buttonType)
-            .setPressType(MousePressOptions.PressType.DOWN)
+    public DragBuilder withButton(MouseButton button) {
+        this.mouseDownOptions = new MouseDownOptions.Builder()
+            .setPressOptions(new MousePressOptions.Builder()
+                .setButton(button))
             .build();
-        this.mouseUpOptions = new MousePressOptions.Builder()
-            .setButtonType(buttonType)
-            .setPressType(MousePressOptions.PressType.UP)
+        this.mouseUpOptions = new MouseUpOptions.Builder()
+            .setPressOptions(new MousePressOptions.Builder()
+                .setButton(button))
             .build();
         return this;
     }
     
     /**
      * Sets custom options for the mouse down action.
-     * @param options The mouse press options for mouse down
+     * @param options The mouse down options
      * @return This builder for chaining
      */
-    public DragBuilder withMouseDownOptions(MousePressOptions options) {
+    public DragBuilder withMouseDownOptions(MouseDownOptions options) {
         this.mouseDownOptions = options;
         return this;
     }
     
     /**
      * Sets custom options for the mouse up action.
-     * @param options The mouse press options for mouse up
+     * @param options The mouse up options
      * @return This builder for chaining
      */
-    public DragBuilder withMouseUpOptions(MousePressOptions options) {
+    public DragBuilder withMouseUpOptions(MouseUpOptions options) {
         this.mouseUpOptions = options;
         return this;
     }
@@ -165,7 +170,8 @@ public class DragBuilder {
      */
     public DragBuilder withDestinationOffset(int offsetX, int offsetY) {
         this.toOptions = new PatternFindOptions.Builder(toOptions)
-            .setTargetOffset(new Location(offsetX, offsetY))
+            .setMatchAdjustment(new MatchAdjustmentOptions.Builder()
+                .setTargetOffset(new Location(offsetX, offsetY)))
             .build();
         return this;
     }
@@ -177,9 +183,10 @@ public class DragBuilder {
      * @return This builder for chaining
      */
     public DragBuilder withMouseDownPauses(double pauseBefore, double pauseAfter) {
-        this.mouseDownOptions = new MousePressOptions.Builder(mouseDownOptions)
-            .setPauseBeforePress(pauseBefore)
-            .setPauseAfterPress(pauseAfter)
+        this.mouseDownOptions = new MouseDownOptions.Builder(mouseDownOptions)
+            .setPressOptions(new MousePressOptions.Builder()
+                .setPauseBeforeMouseDown(pauseBefore)
+                .setPauseAfterMouseDown(pauseAfter))
             .build();
         return this;
     }
@@ -191,9 +198,10 @@ public class DragBuilder {
      * @return This builder for chaining
      */
     public DragBuilder withMouseUpPauses(double pauseBefore, double pauseAfter) {
-        this.mouseUpOptions = new MousePressOptions.Builder(mouseUpOptions)
-            .setPauseBeforePress(pauseBefore)
-            .setPauseAfterPress(pauseAfter)
+        this.mouseUpOptions = new MouseUpOptions.Builder(mouseUpOptions)
+            .setPressOptions(new MousePressOptions.Builder()
+                .setPauseBeforeMouseUp(pauseBefore)
+                .setPauseAfterMouseUp(pauseAfter))
             .build();
         return this;
     }
@@ -204,7 +212,7 @@ public class DragBuilder {
      */
     public ActionConfig build() {
         // Chain the actions: Find source -> Find destination -> Move to source -> Mouse down -> Drag move -> Mouse up
-        return new PatternFindOptions.Builder(fromOptions)
+        return new ActionChainOptions.Builder(fromOptions)
             .then(toOptions)
             .then(moveToSourceOptions)
             .then(mouseDownOptions)

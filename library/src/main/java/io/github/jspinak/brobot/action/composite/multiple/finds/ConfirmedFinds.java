@@ -61,6 +61,11 @@ public class ConfirmedFinds implements ActionInterface {
         this.getSceneAnalysisCollection = getSceneAnalysisCollection;
     }
 
+    @Override
+    public ActionInterface.Type getActionType() {
+        return ActionInterface.Type.FIND;
+    }
+
     /**
      * Executes a sequence of find operations where each must confirm the previous results.
      * <p>

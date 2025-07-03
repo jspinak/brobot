@@ -1,7 +1,6 @@
 package io.github.jspinak.brobot.action.internal.sikuli;
 
 import io.github.jspinak.brobot.action.basic.mouse.MouseMoveOptions;
-import io.github.jspinak.brobot.action.options.MouseOptions; // Assuming you create this composed class
 import org.sikuli.basics.Settings;
 import org.springframework.stereotype.Component;
 

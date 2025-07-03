@@ -57,8 +57,8 @@ public class FluentApiExample {
             .thenType(searchTerm)
             .find(searchButton)
             .thenClick()
-            .thenWait(2.0) // Wait for results to load
-            .thenScroll(ActionOptions.ScrollDirection.DOWN, 3)
+            // .thenWait(2.0) // Wait for results to load - TODO: implement thenWait method
+            // .thenScroll(ActionOptions.ScrollDirection.DOWN, 3) // TODO: update to use ScrollOptions.Direction
             .find(resultItem)
             .thenHighlight(resultItem, 2.0)
             .build();

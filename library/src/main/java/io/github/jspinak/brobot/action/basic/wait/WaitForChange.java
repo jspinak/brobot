@@ -56,6 +56,11 @@ import org.springframework.stereotype.Component;
 public class WaitForChange implements ActionInterface {
 
     @Override
+    public ActionInterface.Type getActionType() {
+        return ActionInterface.Type.VANISH;
+    }
+
+    @Override
     public void perform(ActionResult matches, ObjectCollection... objectCollections) {
         // TODO: Implement change detection logic
         // This will involve:

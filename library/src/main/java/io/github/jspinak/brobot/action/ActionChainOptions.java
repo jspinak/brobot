@@ -2,6 +2,7 @@ package io.github.jspinak.brobot.action;
 
 import lombok.Getter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -47,6 +48,14 @@ public final class ActionChainOptions extends ActionConfig {
         this.initialAction = builder.initialAction;
         this.strategy = builder.strategy;
         this.chainedActions = new ArrayList<>(builder.chainedActions);
+    }
+    
+    /**
+     * Returns an unmodifiable view of the chained actions list.
+     * @return unmodifiable list of chained actions
+     */
+    public List<ActionConfig> getChainedActions() {
+        return Collections.unmodifiableList(chainedActions);
     }
     
     /**
