@@ -13,7 +13,6 @@ import io.github.jspinak.brobot.tools.logging.model.LogEventType;
 import io.github.jspinak.brobot.model.element.SearchRegions;
 import lombok.Data;
 
-import org.apache.tools.ant.taskdefs.condition.Matches;
 import org.sikuli.basics.Settings;
 
 import java.util.ArrayList;
@@ -123,7 +122,7 @@ public class ActionOptions {
      * tempFind is a user defined Find method that is not meant to be reused.
      */
     @JsonIgnore
-    private BiConsumer<Matches, List<ObjectCollection>> tempFind;
+    private BiConsumer<ActionResult, List<ObjectCollection>> tempFind;
 
     /*
      * Find actions are performed in the order they appear in the list.
@@ -212,7 +211,7 @@ public class ActionOptions {
      * successEvaluation defines the success criteria for the Find operation.
      */
     @JsonIgnore
-    private Predicate<Matches> successCriteria;
+    private Predicate<ActionResult> successCriteria;
 
     /*
      * A Drag is a good example of how the below options work together.
@@ -566,7 +565,15 @@ public class ActionOptions {
      */
     public static class Builder {
         private Action action = Action.FIND;
+        private Find find = Find.FIRST;
+        private List<Find> findActions = new ArrayList<>();
+        private boolean keepLargerMatches = false;
+        private DoOnEach doOnEach = DoOnEach.FIRST;
+        private boolean captureImage = true;
+        private boolean useDefinedRegion = false;
+        private double similarity = Settings.MinSimilarity;
         private ClickUntil clickUntil = ClickUntil.OBJECTS_APPEAR;
+        private BiConsumer<ActionResult, List<ObjectCollection>> tempFind;
         private Predicate<ActionResult> successCriteria;
         private Double pauseBeforeMouseDown; // I want to know if explicitly set to 0.0. // = FrameworkSettings.pauseBeforeMouseDown; //Settings.DelayBeforeMouseDown;
         private Double pauseAfterMouseDown; // = FrameworkSettings.pauseAfterMouseDown; // Sikuli = Settings.DelayBeforeDrag
@@ -614,6 +621,12 @@ public class ActionOptions {
         private int minArea = 1;
         private int maxArea = -1;
         private int maxMovement = 300;
+        private double maxWait = 3.0; // default wait time in seconds
+        private int maxMatchesToActOn = 50;
+        private MatchFusionMethod fusionMethod = MatchFusionMethod.NONE;
+        private int maxFusionDistanceX = 0;
+        private int maxFusionDistanceY = 0;
+        private int sceneToUseForCaptureAfterFusingMatches = -1;
         private Illustrate illustrate = Illustrate.MAYBE;
         private LogEventType logType = LogEventType.ACTION;
 
@@ -760,7 +773,7 @@ public class ActionOptions {
             return this;
         }
 
-        public Builder setClickType(ClickType.Type clickType) {
+        public Builder setClickType(ClickOptions.Type clickType) {
             this.clickType = clickType;
             return this;
         }

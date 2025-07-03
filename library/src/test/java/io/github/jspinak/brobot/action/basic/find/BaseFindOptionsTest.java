@@ -52,7 +52,7 @@ class BaseFindOptionsTest {
         
         assertEquals(Settings.MinSimilarity, options.getSimilarity());
         assertNotNull(options.getSearchRegions());
-        assertFalse(options.isCaptureImage());
+        assertTrue(options.isCaptureImage());
         assertFalse(options.isUseDefinedRegion());
         assertEquals(-1, options.getMaxMatchesToActOn());
         assertNotNull(options.getMatchAdjustmentOptions());

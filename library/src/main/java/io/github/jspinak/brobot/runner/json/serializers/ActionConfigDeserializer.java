@@ -10,6 +10,7 @@ import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.ActionChainOptions;
 import io.github.jspinak.brobot.action.basic.click.ClickOptions;
 import io.github.jspinak.brobot.action.basic.find.BaseFindOptions;
+import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
 import io.github.jspinak.brobot.action.basic.find.histogram.HistogramFindOptions;
 import io.github.jspinak.brobot.action.basic.find.motion.MotionFindOptions;
 import io.github.jspinak.brobot.action.basic.highlight.HighlightOptions;
@@ -42,6 +43,7 @@ public class ActionConfigDeserializer extends JsonDeserializer<ActionConfig> {
         
         // Basic find options
         TYPE_MAPPINGS.put("BaseFindOptions", BaseFindOptions.class);
+        TYPE_MAPPINGS.put("PatternFindOptions", PatternFindOptions.class);
         TYPE_MAPPINGS.put("HistogramFindOptions", HistogramFindOptions.class);
         TYPE_MAPPINGS.put("MotionFindOptions", MotionFindOptions.class);
         TYPE_MAPPINGS.put("VanishOptions", VanishOptions.class);
@@ -66,6 +68,7 @@ public class ActionConfigDeserializer extends JsonDeserializer<ActionConfig> {
         // Add shortened versions for convenience
         TYPE_MAPPINGS.put("chain", ActionChainOptions.class);
         TYPE_MAPPINGS.put("find", BaseFindOptions.class);
+        TYPE_MAPPINGS.put("patternFind", PatternFindOptions.class);
         TYPE_MAPPINGS.put("histogramFind", HistogramFindOptions.class);
         TYPE_MAPPINGS.put("motionFind", MotionFindOptions.class);
         TYPE_MAPPINGS.put("vanish", VanishOptions.class);

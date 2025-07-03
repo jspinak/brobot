@@ -82,7 +82,7 @@ public class OffsetLocationManager {
         if (actionOptions.getAddX() == 0) return;
         if (!areCollectionsEmpty(objectCollections) && doOnlyWhenCollectionsAreEmpty) return;
         Location location = new Location(Mouse.at(), actionOptions.getAddX(), actionOptions.getAddY());
-        double duration = Duration.between(LocalDateTime.now(), matches.getStartTime()).toSeconds();
+        double duration = Duration.between(matches.getStartTime(), LocalDateTime.now()).toSeconds();
         StateLocation stateLocation = new StateLocation.Builder().setLocation(location).build();
         Match offsetMatch = new Match.Builder()
                 .setMatch(location.toMatch())

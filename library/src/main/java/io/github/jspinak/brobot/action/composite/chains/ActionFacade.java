@@ -3,7 +3,7 @@ package io.github.jspinak.brobot.action.composite.chains;
 import io.github.jspinak.brobot.action.Action;
 import io.github.jspinak.brobot.action.ActionOptions;
 import io.github.jspinak.brobot.action.ObjectCollection;
-import io.github.jspinak.brobot.action.internal.mouse.ClickType;
+import io.github.jspinak.brobot.action.basic.click.ClickOptions;
 import io.github.jspinak.brobot.model.element.Pattern;
 import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.model.element.Location;
@@ -138,7 +138,7 @@ public class ActionFacade {
                                                   StateImage image, int xMove, int yMove) {
         ActionOptions actionOptions = new ActionOptions.Builder()
                 .setAction(CLICK_UNTIL)
-                .setClickType(ClickType.Type.RIGHT)
+                .setClickType(ClickOptions.Type.RIGHT)
                 .setClickUntil(ActionOptions.ClickUntil.OBJECTS_VANISH)
                 .setPauseBetweenIndividualActions(pauseBetweenClicks)
                 .setPauseBetweenActionSequences(pauseBetweenClicks)
@@ -166,7 +166,7 @@ public class ActionFacade {
                 new ActionOptions.Builder()
                         .setAction(ActionOptions.Action.CLICK)
                         .setMaxWait(maxWait)
-                        .setClickType(ClickType.Type.DOUBLE_LEFT)
+                        .setClickType(ClickOptions.Type.DOUBLE_LEFT)
                         .build(),
                 stateImages).isSuccess();
     }
@@ -184,7 +184,7 @@ public class ActionFacade {
                 new ActionOptions.Builder()
                         .setAction(ActionOptions.Action.CLICK)
                         .setMaxWait(maxWait)
-                        .setClickType(ClickType.Type.RIGHT)
+                        .setClickType(ClickOptions.Type.RIGHT)
                         .build(),
                 stateImages).isSuccess();
     }

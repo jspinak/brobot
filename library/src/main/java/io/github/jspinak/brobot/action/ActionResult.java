@@ -91,6 +91,15 @@ public class ActionResult {
     private ActionConfig actionConfig;
 
     /**
+     * Legacy ActionOptions for backward compatibility during migration.
+     * This field supports the gradual migration from ActionOptions to ActionConfig.
+     * @deprecated Use actionConfig instead. This field will be removed in a future version.
+     */
+    @JsonIgnore
+    @Deprecated
+    private ActionOptions actionOptions;
+
+    /**
      * Names of states identified as active during action execution.
      * Populated from StateObjectData of successful matches.
      */
@@ -845,6 +854,78 @@ public class ActionResult {
                     -1, // or calculate expected X if available
                     -1  // or calculate expected Y if available
             );
+        }
+    }
+
+    /**
+     * Gets the ActionConfig for this result.
+     * This is the preferred method for accessing action configuration.
+     * 
+     * @return the ActionConfig used for this action execution
+     */
+    public ActionConfig getActionConfig() {
+        return actionConfig;
+    }
+
+    /**
+     * Sets the ActionConfig for this result.
+     * Also updates the legacy actionOptions field for backward compatibility.
+     * 
+     * @param actionConfig the ActionConfig to set
+     */
+    public void setActionConfig(ActionConfig actionConfig) {
+        this.actionConfig = actionConfig;
+        // Clear actionOptions since we can't convert back from ActionConfig
+        // This encourages migration to the new API
+        this.actionOptions = null;
+    }
+
+    /**
+     * Gets the ActionOptions for this result.
+     * This method is provided for backward compatibility during the migration
+     * from ActionOptions to ActionConfig.
+     * 
+     * @deprecated Use {@link #getActionConfig()} instead. This method will be 
+     *             removed in a future version.
+     * @return the ActionOptions if available, otherwise a new default instance
+     */
+    @Deprecated
+    public ActionOptions getActionOptions() {
+        // Return the cached actionOptions if available
+        if (actionOptions != null) {
+            return actionOptions;
+        }
+        // Create a default ActionOptions to prevent NPEs in legacy code
+        // This ensures backward compatibility even when using new ActionConfig
+        ActionOptions defaultOptions = new ActionOptions();
+        // Try to set some basic properties from ActionConfig if available
+        if (actionConfig != null) {
+            // Set the action description if available
+            if (this.actionDescription != null && !this.actionDescription.isEmpty()) {
+                // The description might help legacy code understand what happened
+            }
+        }
+        return defaultOptions;
+    }
+
+    /**
+     * Sets the ActionOptions for this result.
+     * This method is provided for backward compatibility during the migration.
+     * Also converts and sets the ActionConfig using the adapter.
+     * 
+     * @deprecated Use {@link #setActionConfig(ActionConfig)} instead. This method 
+     *             will be removed in a future version.
+     * @param actionOptions the ActionOptions to set
+     */
+    @Deprecated
+    public void setActionOptions(ActionOptions actionOptions) {
+        this.actionOptions = actionOptions;
+        // Convert to ActionConfig for the new API
+        if (actionOptions != null) {
+            ActionOptionsAdapter adapter = new ActionOptionsAdapter();
+            this.actionConfig = adapter.convert(actionOptions);
+        } else {
+            this.actionConfig = null;
         }
     }
 }
