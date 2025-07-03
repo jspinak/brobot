@@ -370,6 +370,5 @@ RepeatUntilConfig config = new RepeatUntilConfig.Builder()
 
 ## Next Steps
 
-- Explore [Form Automation](./10-form-automation) for practical applications
-- Learn about [Reusable Patterns](./11-reusable-patterns) to build your automation library
-- See [Troubleshooting Guide](./12-troubleshooting) for common issues and solutions
+- Explore [Form Automation](./10-form-automation.md) for practical applications
+- Learn about [Reusable Patterns](./11-reusable-patterns.md) to build your automation library

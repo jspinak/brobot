@@ -6,8 +6,8 @@ const lightCodeTheme = themes.github;
 const darkCodeTheme = themes.dracula;
 
 // for KaTeX (Latex)
-const math = require('remark-math');
-const katex = require('rehype-katex');
+const math = require('remark-math').default;
+const katex = require('rehype-katex').default;
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
@@ -36,16 +36,13 @@ const config = {
       '@docusaurus/preset-classic',
       /** @type {import('@docusaurus/preset-classic').Options} */
       ({
-        pages: {
-          // You can re-enable math plugins here if needed for standalone pages
-        },
         docs: {
           path: 'docs',
           remarkPlugins: [math],
           rehypePlugins: [katex],
           sidebarPath: require.resolve('./sidebars.js'),
           editUrl: 'https://github.com/jspinak/brobot/edit/main/docs/',
-          lastVersion: '1.1.0',
+          lastVersion: 'current',
           versions: {
             current: {
               label: 'Next',
@@ -128,7 +125,7 @@ const config = {
               },
               {
                 label: 'Get Started',
-                to: '/docs/01-getting-started/introduction',
+                to: '/docs/getting-started/introduction',
               },
               {
                 label: 'The Visual API',

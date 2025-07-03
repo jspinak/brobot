@@ -541,6 +541,4 @@ public interface VersionedPattern extends AutomationPattern {
 
 ## Next Steps
 
-- Learn about [Troubleshooting](./12-troubleshooting) pattern execution issues
-- Explore [Migration Guide](./13-migration-guide) for updating legacy patterns
-- See [Performance Optimization](./14-performance) for pattern efficiency
+- Explore [Migration Guide](./12-migration-guide.md) for updating legacy patterns
