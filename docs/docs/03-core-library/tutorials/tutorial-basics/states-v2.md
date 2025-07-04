@@ -116,7 +116,7 @@ public class Island {
 }
 ```
 
-## Key Changes in v2.0
+## Key Changes in v1.1.0
 
 The main change in this example is the migration from `ActionOptions` to the new type-safe `ActionConfig` API:
 
@@ -125,4 +125,4 @@ The main change in this example is the migration from `ActionOptions` to the new
 
 The `TextFindOptions` class is specifically designed for text/OCR operations and automatically uses the appropriate strategy for finding text. This provides better type safety and clearer intent in your code.
 
-For more information about the new ActionConfig API, see the [Migration Guide](/docs/migration-guide).
+For more information about the new ActionConfig API, see the [Migration Guide](/docs/03-core-library/guides/migration-guide).

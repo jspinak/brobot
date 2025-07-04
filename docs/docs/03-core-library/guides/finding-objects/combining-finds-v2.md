@@ -9,7 +9,7 @@ There are two ways to do this with Brobot: Nested Finds, and Confirmed Finds.
 
 ## Using the New ActionConfig API
 
-With the new ActionConfig API introduced in Brobot 2.0, combining find operations is more intuitive and type-safe. You can now use specific find configuration classes and chain operations together.
+With the new ActionConfig API introduced in Brobot 1.1.0, combining find operations is more intuitive and type-safe. You can now use specific find configuration classes and chain operations together.
 
 ### Pattern and Color Finding
 
@@ -151,4 +151,4 @@ ChainedFindOptions chainedFind = new ChainedFindOptions.Builder()
 
 The new API provides better type safety, clearer intent, and more flexibility in combining different types of find operations.
 
-For more information on the new ActionConfig API, see the [Migration Guide](/docs/migration-guide).
+For more information on the new ActionConfig API, see the [Migration Guide](/docs/03-core-library/guides/migration-guide).
