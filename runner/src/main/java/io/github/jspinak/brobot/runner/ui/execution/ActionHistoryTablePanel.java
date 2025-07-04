@@ -8,6 +8,8 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.VBox;
 import lombok.Getter;
+import lombok.Setter;
+import lombok.AccessLevel;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -18,6 +20,8 @@ import java.time.format.DateTimeFormatter;
  * <p>This panel shows a table of actions that were executed during
  * automation, including action type, target, result, and timing information.</p>
  */
+@Getter
+@Setter(AccessLevel.PRIVATE)
 public class ActionHistoryTablePanel extends TitledPane {
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm:ss");
     private static final int MAX_HISTORY_SIZE = 1000;
@@ -32,23 +36,17 @@ public class ActionHistoryTablePanel extends TitledPane {
      * Creates a new ActionHistoryTablePanel.
      */
     public ActionHistoryTablePanel() {
-        super("Action History", createContent());
+        super("Action History", null);
         setCollapsible(true);
         setExpanded(false);
+        initializeContent();
     }
 
-    private static VBox createContent() {
+    private void initializeContent() {
         VBox content = new VBox(10);
         content.setPadding(new Insets(10));
-        return content;
-    }
-
-    @Override
-    protected void setContent(javafx.scene.Node value) {
-        super.setContent(value);
-        if (value instanceof VBox) {
-            setupUI((VBox) value);
-        }
+        setupUI(content);
+        super.setContent(content);
     }
 
     private void setupUI(VBox content) {

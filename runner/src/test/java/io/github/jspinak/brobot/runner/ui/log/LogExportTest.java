@@ -1,5 +1,9 @@
 package io.github.jspinak.brobot.runner.ui.log;
 
+import lombok.Data;
+
+import lombok.extern.slf4j.Slf4j;
+
 import com.sun.javafx.application.PlatformImpl;
 
 import io.github.jspinak.brobot.runner.events.EventBus;
@@ -55,6 +59,8 @@ import static org.mockito.Mockito.*;
  */
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
+@Slf4j
+@Data
 public class LogExportTest {
 
     @Mock

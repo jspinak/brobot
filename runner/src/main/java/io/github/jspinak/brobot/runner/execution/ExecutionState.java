@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.runner.execution;
 
+import lombok.Data;
+
 /**
  * Enum representing the possible states of an automation execution.
  */
@@ -11,6 +13,7 @@ public enum ExecutionState {
     STOPPING("Stopping"),
     COMPLETED("Completed successfully"),
     ERROR("Failed with error"),
+    FAILED("Failed"),
     TIMEOUT("Timed out"),
     STOPPED("Stopped");
     

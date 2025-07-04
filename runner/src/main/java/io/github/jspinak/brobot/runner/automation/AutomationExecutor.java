@@ -155,6 +155,45 @@ public class AutomationExecutor {
         return executionController.getStatus();
     }
 
+    /**
+     * Checks if the execution is currently paused
+     */
+    public boolean isPaused() {
+        ExecutionStatus status = executionController.getStatus();
+        return status != null && status.getState() == io.github.jspinak.brobot.runner.execution.ExecutionState.PAUSED;
+    }
+
+    /**
+     * Starts a new execution
+     */
+    public void startExecution() {
+        // This would typically be called when no automation is running
+        // For now, log that execution was requested
+        log("Start execution requested");
+        eventBus.publish(LogEvent.info(this, "Start execution requested", "Automation"));
+    }
+
+    /**
+     * Resumes a paused execution
+     */
+    public void resume() {
+        resumeAutomation();
+    }
+
+    /**
+     * Pauses the current execution
+     */
+    public void pause() {
+        pauseAutomation();
+    }
+
+    /**
+     * Stops the current execution
+     */
+    public void stop() {
+        stopAllAutomation();
+    }
+
     private void log(String message) {
         logger.info(message);
         if (logCallback != null) {

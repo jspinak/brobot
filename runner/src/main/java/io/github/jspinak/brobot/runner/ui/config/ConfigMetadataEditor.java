@@ -1,5 +1,9 @@
 package io.github.jspinak.brobot.runner.ui.config;
 
+import lombok.Data;
+
+import lombok.extern.slf4j.Slf4j;
+
 import io.github.jspinak.brobot.runner.events.EventBus;
 import io.github.jspinak.brobot.runner.events.LogEvent;
 import io.github.jspinak.brobot.runner.project.AutomationProject;
@@ -28,6 +32,8 @@ import java.util.regex.Pattern;
  * Editor component for configuration metadata.
  * Allows editing project information, version, author, and other metadata.
  */
+@Slf4j
+@Data
 public class ConfigMetadataEditor extends BorderPane {
     private static final Logger logger = LoggerFactory.getLogger(ConfigMetadataEditor.class);
 

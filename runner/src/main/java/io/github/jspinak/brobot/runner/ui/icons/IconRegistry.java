@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.runner.ui.icons;
 
+import lombok.Data;
+
 import io.github.jspinak.brobot.runner.events.EventBus;
 import io.github.jspinak.brobot.runner.events.LogEvent;
 import jakarta.annotation.PostConstruct;
@@ -20,6 +22,7 @@ import java.util.Set;
  * Manages application icons and provides easy access to them.
  */
 @Component
+@Data
 public class IconRegistry {
     private static final Logger logger = LoggerFactory.getLogger(IconRegistry.class);
 

@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.runner.ui.execution;
 
+import lombok.Data;
+
 import io.github.jspinak.brobot.model.state.State;
 import io.github.jspinak.brobot.runner.automation.AutomationExecutor;
 import io.github.jspinak.brobot.runner.events.*;
@@ -43,6 +45,7 @@ import static org.mockito.Mockito.*;
  * Tests UI initialization, event handling, status updates, and log processing.
  */
 @ExtendWith({MockitoExtension.class, ApplicationExtension.class})
+@Data
 public class ExecutionDashboardPanelTest {
 
     @Mock

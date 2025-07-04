@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.runner.events;
 
+import lombok.Data;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -41,6 +43,7 @@ import java.util.function.Consumer;
  * @see BrobotEvent.EventType
  */
 @Component
+@Data
 public class EventBus {
     private static final Logger logger = LoggerFactory.getLogger(EventBus.class);
 

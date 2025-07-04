@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.runner.performance;
 
+import lombok.Data;
+
 import io.github.jspinak.brobot.runner.events.EventBus;
 import io.github.jspinak.brobot.runner.events.StartupProgressEvent;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +19,7 @@ import java.util.function.Supplier;
 @Slf4j
 @Component
 @RequiredArgsConstructor
+@Data
 public class StartupOptimizer {
 
     private final EventBus eventBus;

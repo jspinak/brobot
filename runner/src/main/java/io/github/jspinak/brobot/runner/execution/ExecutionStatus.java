@@ -27,6 +27,12 @@ public class ExecutionStatus {
     // Current operation description
     private String currentOperation;
     
+    // Current action being performed
+    private String currentAction;
+    
+    // Current state name
+    private String currentState;
+    
     // Error information if execution failed
     private Exception error;
     

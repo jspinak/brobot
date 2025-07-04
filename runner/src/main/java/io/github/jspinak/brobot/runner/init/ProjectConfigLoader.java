@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.runner.init;
 
+import lombok.Data;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -16,6 +18,7 @@ import java.nio.file.Path;
  * Loads and validates project and DSL configuration files.
  */
 @Component
+@Data
 public class ProjectConfigLoader {
 
     private static final Logger logger = LoggerFactory.getLogger(ProjectConfigLoader.class);

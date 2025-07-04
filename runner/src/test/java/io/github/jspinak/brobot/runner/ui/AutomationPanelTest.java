@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.runner.ui;
 
+import lombok.Data;
+
 import io.github.jspinak.brobot.runner.automation.AutomationExecutor;
 import io.github.jspinak.brobot.runner.config.BrobotRunnerProperties;
 import io.github.jspinak.brobot.runner.events.EventBus;
@@ -36,6 +38,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
+@Data
 class AutomationPanelTest {
 
     @Mock

@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.runner.config;
 
+import lombok.Data;
+
 import io.github.jspinak.brobot.runner.events.EventBus;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,6 +22,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
+@Data
 public class ApplicationConfigTest {
 
     private ApplicationConfig applicationConfig;

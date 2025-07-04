@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.runner.shortcuts;
 
+import lombok.Data;
+
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
@@ -13,6 +15,7 @@ import java.nio.file.StandardOpenOption;
  * Creates shortcuts on desktop and in start menu/applications menu.
  */
 @Slf4j
+@Data
 public class DesktopShortcutManager {
 
     private static final String APP_NAME = "Brobot Runner";

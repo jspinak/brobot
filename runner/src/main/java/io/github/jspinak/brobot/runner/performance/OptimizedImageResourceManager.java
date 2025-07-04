@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.runner.performance;
 
+import lombok.Data;
+
 import io.github.jspinak.brobot.runner.performance.MemoryOptimizer.MemoryPriority;
 import io.github.jspinak.brobot.runner.performance.MemoryOptimizer.MemoryReleasable;
 import javafx.scene.image.Image;
@@ -22,6 +24,7 @@ import java.util.stream.Collectors;
 @Component
 @Primary
 @RequiredArgsConstructor
+@Data
 public class OptimizedImageResourceManager implements MemoryReleasable {
 
     private final MemoryOptimizer memoryOptimizer;

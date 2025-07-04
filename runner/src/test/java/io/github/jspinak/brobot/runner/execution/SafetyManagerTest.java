@@ -1,10 +1,13 @@
 package io.github.jspinak.brobot.runner.execution;
 
+import lombok.Data;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@Data
 class SafetyManagerTest {
 
     private SafetyManager safetyManager;

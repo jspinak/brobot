@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.runner.services;
 
+import lombok.extern.slf4j.Slf4j;
+
 import io.github.jspinak.brobot.runner.events.EventBus;
 import io.github.jspinak.brobot.runner.events.LogEvent;
 import io.github.jspinak.brobot.runner.ui.window.DialogFactory;
@@ -22,6 +24,7 @@ import java.util.concurrent.ExecutionException;
  * Handles both synchronous and asynchronous dialog operations.
  */
 @Service
+@Slf4j
 public class DialogService {
     private static final Logger logger = LoggerFactory.getLogger(DialogService.class);
 

@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.runner.events;
 
+import lombok.Data;
+
 import io.github.jspinak.brobot.runner.execution.ExecutionState;
 import io.github.jspinak.brobot.runner.execution.ExecutionStatus;
 
@@ -7,6 +9,7 @@ import io.github.jspinak.brobot.runner.execution.ExecutionStatus;
  * Event representing a change in execution status.
  * Contains the current execution status details.
  */
+@Data
 public class ExecutionStatusEvent extends BrobotEvent {
     private final ExecutionStatus status;
     private final String message;
@@ -31,6 +34,10 @@ public class ExecutionStatusEvent extends BrobotEvent {
 
     public double getProgress() {
         return status.getProgress();
+    }
+
+    public String getDetails() {
+        return message;
     }
 
     /**

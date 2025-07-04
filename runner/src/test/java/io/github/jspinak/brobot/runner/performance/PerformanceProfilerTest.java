@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.runner.performance;
 
+import lombok.Data;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
@@ -8,6 +10,7 @@ import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@Data
 class PerformanceProfilerTest {
 
     private PerformanceProfiler profiler;

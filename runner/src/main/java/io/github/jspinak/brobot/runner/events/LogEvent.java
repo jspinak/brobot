@@ -1,8 +1,11 @@
 package io.github.jspinak.brobot.runner.events;
 
+import lombok.Data;
+
 /**
  * Event representing a log message from the system.
  */
+@Data
 public class LogEvent extends BrobotEvent {
     private final String message;
     private final LogLevel level;

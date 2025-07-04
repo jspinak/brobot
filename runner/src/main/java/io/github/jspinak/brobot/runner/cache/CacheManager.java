@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.runner.cache;
 
+import lombok.Data;
+
 import io.github.jspinak.brobot.model.element.Pattern;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.model.state.State;
@@ -17,6 +19,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * Factory and manager for different cache types in the application
  */
 @Component
+@Data
 public class CacheManager {
     private final EventBus eventBus;
     private final ResourceManager resourceManager;

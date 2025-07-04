@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.runner.performance;
 
+import lombok.Data;
+
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
@@ -26,6 +28,7 @@ import java.util.zip.GZIPOutputStream;
 @Slf4j
 @Component
 @RequiredArgsConstructor
+@Data
 public class OptimizedFileLoader {
 
     private final PerformanceProfiler profiler;

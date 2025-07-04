@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.runner.ui.log;
 
+import lombok.Data;
+
 import io.github.jspinak.brobot.runner.events.BrobotEvent;
 import io.github.jspinak.brobot.runner.events.EventBus;
 import io.github.jspinak.brobot.runner.persistence.LogQueryService;
@@ -42,6 +44,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
+@Data
 public class LogViewerPanelIntegrationTest {
 
 
