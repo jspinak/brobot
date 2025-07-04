@@ -12,7 +12,7 @@ A good example of how this has affected the design choices taken is how pauses a
 
 Treating processes as objects also simplifies the creation of new composite actions out of the more basic process building blocks. For example, the composite action ClickUntil, which performs clicks until a condition is reached, is much simpler to create with the standard process objects in Brobot.
 
-## Core Classes in Brobot 2.0
+## Core Classes in Brobot 1.1.0
 
 The main classes enabling this object-oriented approach are:
 

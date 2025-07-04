@@ -5,7 +5,7 @@ title: 'Quick Start Guide'
 
 # Quick Start Guide
 
-This guide will help you get started with Brobot 2.0 using the new ActionConfig API.
+This guide will help you get started with Brobot 1.1.0 using the new ActionConfig API.
 
 ## Your First Brobot Application
 
@@ -76,7 +76,7 @@ public class SimpleAutomation {
 
 ### 1. Type-Safe Configuration
 
-Instead of the generic `ActionOptions`, Brobot 2.0 uses specific configuration classes:
+Instead of the generic `ActionOptions`, Brobot 1.1.0 uses specific configuration classes:
 
 ```java
 // Find operations
@@ -237,10 +237,10 @@ public class LoginTransitions {
 
 ## Next Steps
 
-1. **Explore the Examples**: Check out the [LoginAutomationExample](/examples/LoginAutomationExample.java) for a complete working example
-2. **Read the Migration Guide**: If upgrading from Brobot 1.x, see the [Migration Guide](../03-core-library/guides/migration-guide)
+1. **Explore the Examples**: Check out the [LoginAutomationExample](https://github.com/jspinak/brobot/tree/main/examples/LoginAutomationExample.java) for a complete working example
+2. **Read the Migration Guide**: If upgrading from Brobot 1.x, see the [Migration Guide](/docs/03-core-library/guides/migration-guide)
 3. **Learn State Management**: Deep dive into [States](states.md) and [Transitions](transitions.md)
-4. **Advanced Features**: Explore [color-based finding](../03-core-library/guides/finding-objects/using-color-v2.md), [motion detection](../03-core-library/guides/finding-objects/movement-v2.md), and more
+4. **Advanced Features**: Explore [color-based finding](/docs/03-core-library/guides/finding-objects/using-color-v2), [motion detection](/docs/03-core-library/guides/finding-objects/movement-v2), and more
 
 ## Getting Help
 
@@ -256,4 +256,4 @@ public class LoginTransitions {
 4. **Handle Failures**: Always check `ActionResult.isSuccess()`
 5. **Enable History**: Use `BrobotSettings.saveHistory = true` for debugging
 
-Happy automating with Brobot 2.0!
+Happy automating with Brobot 1.1.0!

@@ -65,7 +65,7 @@ All planned tasks for the ActionOptions to ActionConfig migration documentation 
 
 ### 8. Quick Start Guide ✅
 **Location**: `/docs/01-getting-started/quick-start.md`
-- Step-by-step introduction to Brobot 2.0
+- Step-by-step introduction to Brobot 1.1.0
 - Clear examples of new API usage
 - Common action patterns
 - Tips for success
@@ -99,7 +99,7 @@ All planned tasks for the ActionOptions to ActionConfig migration documentation 
    - Include migration hints in JavaDoc
 
 2. **Update Version Documentation**
-   - Ensure v2.0 release notes highlight the new API
+   - Ensure v1.1.0 release notes highlight the new API
    - Link to migration guide prominently
 
 3. **Monitor Adoption**
