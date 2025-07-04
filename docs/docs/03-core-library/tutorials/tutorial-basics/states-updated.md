@@ -11,7 +11,7 @@ and always appear when the state is active. A state image's location on-screen m
 A state has an enum called Name that is used throughout the application to refer to the state. Every state
 starts with an enum declaration.
 
-This guide has been updated to use the new ActionConfig API introduced in Brobot 2.0.
+This guide has been updated to use the new ActionConfig API introduced in Brobot 1.1.0.
 
 ## Home
 

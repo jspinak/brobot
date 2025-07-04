@@ -2,7 +2,7 @@
 
 ## Overview
 
-Brobot 2.0 introduces a new type-safe ActionConfig API that replaces the generic ActionOptions. This guide will help you migrate your existing code to the new API.
+Brobot 1.1.0 introduces a new type-safe ActionConfig API that replaces the generic ActionOptions. This guide will help you migrate your existing code to the new API.
 
 ## Why Migrate?
 

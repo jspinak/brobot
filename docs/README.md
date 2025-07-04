@@ -7,9 +7,9 @@
 
 <p>
   <a href="https://jspinak.github.io/brobot/docs/01-getting-started/quick-start"><img src="https://img.shields.io/badge/docs-quickstart-blue" alt="Quickstart"></a>
-  <a href="https://maven-badges.herokuapp.com/maven-central/io.github.jspinak/brobot"><img src="https://maven-badges.herokuapp.com/maven-central/io.github.jspinak/brobot/badge.svg" alt="Maven Central"></a>
+  <a href="https://maven-badges.herokuapp.com/maven-central/io.github.jspinak/brobot"><img src="https://img.shields.io/maven-central/v/io.github.jspinak/brobot.svg?label=Maven%20Central" alt="Maven Central"></a>
   <a href="./LICENSE"><img src="https://img.shields.io/badge/license-MIT-green.svg" alt="License: MIT"></a>
-  <a href="https://github.com/jspinak/brobot/actions"><img src="https://github.com/jspinak/brobot/workflows/CI/badge.svg" alt="Build Status"></a>
+  <a href="https://github.com/jspinak/brobot/actions"><img src="https://img.shields.io/github/actions/workflow/status/jspinak/brobot/ci.yml?branch=main" alt="Build Status"></a>
   <a href="https://jspinak.github.io/brobot"><img src="https://img.shields.io/badge/website-live-brightgreen" alt="Website"></a>
 </p>
 
@@ -154,9 +154,10 @@ BrobotSettings.mock = true;
 <td width="33%" valign="top">
 
 ### API Reference
-- [Migration Guide (v2.0)](https://jspinak.github.io/brobot/docs/03-core-library/guides/migration-guide)
+- [Migration Guide (v1.1.0)](https://jspinak.github.io/brobot/docs/03-core-library/guides/migration-guide)
 - [Action Hierarchy](https://jspinak.github.io/brobot/docs/01-getting-started/action-hierarchy)
-- [JavaDoc](https://jspinak.github.io/brobot/javadoc)
+- [JavaDoc (v1.0.7)](https://jspinak.github.io/brobot/api/1.0.7/)
+- [JavaDoc (v1.0.6)](https://jspinak.github.io/brobot/api/1.0.6/)
 - [Examples](https://github.com/jspinak/brobot/tree/main/examples)
 
 </td>
