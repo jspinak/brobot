@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.runner.ui.log;
 
+import lombok.Data;
+
 import io.github.jspinak.brobot.runner.events.BrobotEvent;
 import io.github.jspinak.brobot.runner.events.EventBus;
 import io.github.jspinak.brobot.runner.events.LogEntryEvent;
@@ -40,6 +42,7 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
+@Data
 public class LogViewerPanelTest {
 
     private LogViewerPanel logViewerPanel;

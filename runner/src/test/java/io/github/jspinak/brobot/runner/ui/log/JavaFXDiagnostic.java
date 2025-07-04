@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.runner.ui.log;
 
+import lombok.Data;
+
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.Scene;
@@ -15,6 +17,7 @@ import java.util.concurrent.TimeUnit;
  * Diagnostic utility to test JavaFX environment setup
  * Run this before your tests to verify JavaFX is working correctly
  */
+@Data
 public class JavaFXDiagnostic extends Application {
 
     private static final CountDownLatch applicationStarted = new CountDownLatch(1);

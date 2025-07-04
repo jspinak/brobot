@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.runner.ui.components;
 
+import lombok.Data;
+
 import io.github.jspinak.brobot.runner.events.EventBus;
 import io.github.jspinak.brobot.runner.ui.icons.IconRegistry;
 import javafx.animation.KeyFrame;
@@ -31,6 +33,7 @@ import java.time.format.DateTimeFormatter;
  */
 @Component
 @RequiredArgsConstructor
+@Data
 public class ModernStatusBar extends HBox {
     private final EventBus eventBus;
     private final IconRegistry iconRegistry;

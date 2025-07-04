@@ -1,8 +1,10 @@
 package io.github.jspinak.brobot.runner.ui;
 
+import lombok.Data;
+
 import io.github.jspinak.brobot.runner.ui.icons.IconRegistry;
 import io.github.jspinak.brobot.runner.ui.navigation.NavigationManager;
-import io.github.jspinak.brobot.runner.model.element.Screen;
+import io.github.jspinak.brobot.runner.ui.navigation.Screen;
 import io.github.jspinak.brobot.runner.ui.navigation.ScreenRegistry;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -21,6 +23,7 @@ import java.util.Optional;
  */
 @Component
 @RequiredArgsConstructor
+@Data
 public class ModernNavigationView extends VBox {
     private final NavigationManager navigationManager;
     private final ScreenRegistry screenRegistry;

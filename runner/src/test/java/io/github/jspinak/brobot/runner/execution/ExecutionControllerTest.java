@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.runner.execution;
 
+import lombok.Data;
+
 import io.github.jspinak.brobot.runner.project.TaskButton;
 import io.github.jspinak.brobot.runner.resources.ResourceManager;
 import org.junit.jupiter.api.AfterEach;
@@ -26,6 +28,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
+@Data
 class ExecutionControllerTest {
 
     @Mock

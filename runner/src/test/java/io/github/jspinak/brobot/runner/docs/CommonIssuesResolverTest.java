@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.runner.docs;
 
+import lombok.Data;
+
 import io.github.jspinak.brobot.runner.diagnostics.DiagnosticTool;
 import io.github.jspinak.brobot.runner.errorhandling.ErrorContext;
 import io.github.jspinak.brobot.runner.errorhandling.ErrorHandler;
@@ -15,6 +17,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+@Data
 class CommonIssuesResolverTest {
 
     @Mock

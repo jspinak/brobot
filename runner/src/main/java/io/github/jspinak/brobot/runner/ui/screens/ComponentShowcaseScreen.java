@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.runner.ui.screens;
 
+import lombok.Data;
+
 import io.github.jspinak.brobot.runner.ui.components.BreadcrumbBar;
 import io.github.jspinak.brobot.runner.ui.components.EnhancedTable;
 import io.github.jspinak.brobot.runner.ui.components.StatusBar;
@@ -18,6 +20,7 @@ import javafx.scene.layout.VBox;
  * A showcase screen that demonstrates the custom UI components available in the application.
  * This serves as both documentation and a visual test for the components.
  */
+@Data
 public class ComponentShowcaseScreen extends BorderPane {
 
     private final ThemeManager themeManager;

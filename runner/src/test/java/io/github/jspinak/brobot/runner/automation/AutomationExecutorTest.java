@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.runner.automation;
 
+import lombok.Data;
+
 import io.github.jspinak.brobot.runner.config.BrobotRunnerProperties;
 import io.github.jspinak.brobot.runner.events.EventBus;
 import io.github.jspinak.brobot.runner.events.ExecutionEventPublisher;
@@ -24,6 +26,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
+@Data
 class AutomationExecutorTest {
 
     @Mock

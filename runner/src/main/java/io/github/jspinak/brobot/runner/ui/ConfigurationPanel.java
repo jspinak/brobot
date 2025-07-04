@@ -1,5 +1,11 @@
 package io.github.jspinak.brobot.runner.ui;
 
+import lombok.Getter;
+import lombok.Setter;
+import lombok.AccessLevel;
+
+import lombok.extern.slf4j.Slf4j;
+
 import io.github.jspinak.brobot.navigation.service.StateService;
 import io.github.jspinak.brobot.runner.config.BrobotRunnerProperties;
 import io.github.jspinak.brobot.runner.events.ConfigurationEvent;
@@ -27,12 +33,15 @@ import java.util.Optional;
  * JavaFX component for configuring the Brobot Runner
  */
 @FxmlView("")
+@Slf4j
+@Getter
+@Setter(AccessLevel.PRIVATE)
 public class ConfigurationPanel extends VBox {
     private static ConfigurationPanel INSTANCE;
 
     private static final Logger logger = LoggerFactory.getLogger(ConfigurationPanel.class);
 
-    private final BrobotRunnerProperties properties;
+    private final BrobotRunnerProperties runnerProperties;
     private final BrobotLibraryInitializer libraryInitializer;
     private final EventBus eventBus;
     private final StateService allStatesInProjectService;
@@ -43,11 +52,11 @@ public class ConfigurationPanel extends VBox {
     private Label statusLabel;
 
     public ConfigurationPanel(
-            BrobotRunnerProperties properties,
+            BrobotRunnerProperties runnerProperties,
             BrobotLibraryInitializer libraryInitializer,
             EventBus eventBus,
             StateService allStatesInProjectService) {
-        this.properties = properties;
+        this.runnerProperties = runnerProperties;
         this.libraryInitializer = libraryInitializer;
         this.eventBus = eventBus;
         this.allStatesInProjectService = allStatesInProjectService;
@@ -74,17 +83,17 @@ public class ConfigurationPanel extends VBox {
         configGrid.setVgap(10);
 
         Label projectConfigLabel = new Label("Project Configuration:");
-        projectConfigField = new TextField(properties.getProjectConfigPath().toString());
+        projectConfigField = new TextField(runnerProperties.getProjectConfigPath().toString());
         Button browseProjectButton = new Button("Browse...");
         browseProjectButton.setOnAction(e -> browseForProjectConfig());
 
         Label dslConfigLabel = new Label("DSL Configuration:");
-        dslConfigField = new TextField(properties.getDslConfigPath().toString());
+        dslConfigField = new TextField(runnerProperties.getDslConfigPath().toString());
         Button browseDslButton = new Button("Browse...");
         browseDslButton.setOnAction(e -> browseForDslConfig());
 
         Label imagePathLabel = new Label("Images Directory:");
-        imagePathField = new TextField(properties.getImagePath());
+        imagePathField = new TextField(runnerProperties.getImagePath());
         Button browseImageButton = new Button("Browse...");
         browseImageButton.setOnAction(e -> browseForImagesDirectory());
 

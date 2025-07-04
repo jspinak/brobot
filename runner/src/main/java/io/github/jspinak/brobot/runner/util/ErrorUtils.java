@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.runner.util;
 
+import lombok.Data;
+
 import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
@@ -16,6 +18,7 @@ import java.util.function.Consumer;
  * Utility class for error handling.
  * Provides methods for logging errors and displaying error information to the user.
  */
+@Data
 public class ErrorUtils {
     private static final Logger logger = LoggerFactory.getLogger(ErrorUtils.class);
 

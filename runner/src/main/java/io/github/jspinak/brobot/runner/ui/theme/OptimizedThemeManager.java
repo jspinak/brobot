@@ -38,7 +38,7 @@ public class OptimizedThemeManager extends ThemeManager {
     private final Map<Theme, CompletableFuture<List<URL>>> themeCssFutures = new EnumMap<>(Theme.class);
     private final Map<Theme, List<URL>> themeCssMap = new ConcurrentHashMap<>();
     private final List<Scene> registeredScenes = new CopyOnWriteArrayList<>();
-    private final List<ThemeChangeListener> themeChangeListeners = new CopyOnWriteArrayList<>();
+    private final List<IThemeChangeListener> themeChangeListeners = new CopyOnWriteArrayList<>();
     
     private final CountDownLatch criticalCssLoaded = new CountDownLatch(1);
     private volatile boolean initialized = false;
@@ -198,7 +198,7 @@ public class OptimizedThemeManager extends ThemeManager {
     }
     
     private void notifyListeners(Theme oldTheme, Theme newTheme) {
-        for (ThemeChangeListener listener : themeChangeListeners) {
+        for (IThemeChangeListener listener : themeChangeListeners) {
             try {
                 listener.onThemeChanged(oldTheme, newTheme);
             } catch (Exception e) {
@@ -232,14 +232,14 @@ public class OptimizedThemeManager extends ThemeManager {
     }
 
     @Override
-    public void addThemeChangeListener(ThemeChangeListener listener) {
+    public void addThemeChangeListener(IThemeChangeListener listener) {
         if (listener != null) {
             themeChangeListeners.add(listener);
         }
     }
 
     @Override
-    public void removeThemeChangeListener(ThemeChangeListener listener) {
+    public void removeThemeChangeListener(IThemeChangeListener listener) {
         themeChangeListeners.remove(listener);
     }
     

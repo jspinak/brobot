@@ -11,6 +11,8 @@ import javafx.scene.control.TitledPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import lombok.Getter;
+import lombok.Setter;
+import lombok.AccessLevel;
 
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -29,6 +31,8 @@ import java.util.concurrent.atomic.AtomicLong;
  * </ul>
  * </p>
  */
+@Getter
+@Setter(AccessLevel.PRIVATE)
 public class PerformanceMetricsPanel extends TitledPane {
     
     // Metrics labels
@@ -63,23 +67,17 @@ public class PerformanceMetricsPanel extends TitledPane {
      * Creates a new PerformanceMetricsPanel.
      */
     public PerformanceMetricsPanel() {
-        super("Performance Metrics", createContent());
+        super("Performance Metrics", null);
         setCollapsible(true);
         setExpanded(true);
+        initializeContent();
     }
 
-    private static VBox createContent() {
+    private void initializeContent() {
         VBox performancePanel = new VBox(15);
         performancePanel.setPadding(new Insets(10));
-        return performancePanel;
-    }
-
-    @Override
-    protected void setContent(javafx.scene.Node value) {
-        super.setContent(value);
-        if (value instanceof VBox) {
-            setupUI((VBox) value);
-        }
+        setupUI(performancePanel);
+        super.setContent(performancePanel);
     }
 
     private void setupUI(VBox performancePanel) {

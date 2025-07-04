@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.runner.fileassociation;
 
+import lombok.Data;
+
 // TODO: Implement ConfigurationLoader
 // import io.github.jspinak.brobot.runner.config.ConfigurationLoader;
 import io.github.jspinak.brobot.runner.events.EventBus;
@@ -19,6 +21,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+@Data
 class FileAssociationHandlerTest {
 
     // @Mock

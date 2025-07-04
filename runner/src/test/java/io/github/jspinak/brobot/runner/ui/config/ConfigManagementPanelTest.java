@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.runner.ui.config;
 
+import lombok.Data;
+
 import io.github.jspinak.brobot.navigation.service.StateService;
 import io.github.jspinak.brobot.runner.config.ApplicationConfig;
 import io.github.jspinak.brobot.runner.config.BrobotRunnerProperties;
@@ -29,6 +31,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
+@Data
 public class ConfigManagementPanelTest {
 
     @BeforeAll

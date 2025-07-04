@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.runner.events;
 
+import lombok.Data;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,6 +17,7 @@ import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+@Data
 class EventBusTest {
 
     private EventBus eventBus;

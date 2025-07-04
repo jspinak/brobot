@@ -1,5 +1,11 @@
 package io.github.jspinak.brobot.runner.ui.config;
 
+import lombok.Getter;
+import lombok.Setter;
+import lombok.AccessLevel;
+
+import lombok.extern.slf4j.Slf4j;
+
 import io.github.jspinak.brobot.runner.config.ApplicationConfig;
 import io.github.jspinak.brobot.runner.config.BrobotRunnerProperties;
 import io.github.jspinak.brobot.runner.events.EventBus;
@@ -32,6 +38,9 @@ import java.util.List;
 /**
  * Panel for selecting recent configurations and managing configuration history.
  */
+@Slf4j
+@Getter
+@Setter(AccessLevel.PRIVATE)
 public class ConfigSelectionPanel extends VBox {
     private static final Logger logger = LoggerFactory.getLogger(ConfigSelectionPanel.class);
     private static final int MAX_RECENT_CONFIGS = 10;
@@ -39,7 +48,7 @@ public class ConfigSelectionPanel extends VBox {
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
     private final EventBus eventBus;
-    private final BrobotRunnerProperties properties;
+    private final BrobotRunnerProperties runnerProperties;
     private final BrobotLibraryInitializer libraryInitializer;
     private final ApplicationConfig appConfig;
 
@@ -49,11 +58,11 @@ public class ConfigSelectionPanel extends VBox {
     private ConfigDetailsPanel detailsPanel;
 
     public ConfigSelectionPanel(EventBus eventBus,
-                                BrobotRunnerProperties properties,
+                                BrobotRunnerProperties runnerProperties,
                                 BrobotLibraryInitializer libraryInitializer,
                                 ApplicationConfig appConfig) {
         this.eventBus = eventBus;
-        this.properties = properties;
+        this.runnerProperties = runnerProperties;
         this.libraryInitializer = libraryInitializer;
         this.appConfig = appConfig;
 
@@ -185,7 +194,7 @@ public class ConfigSelectionPanel extends VBox {
     private void showImportDialog() {
         ConfigImportDialog dialog = new ConfigImportDialog(
                 libraryInitializer,
-                properties,
+                runnerProperties,
                 eventBus
         );
 
@@ -252,7 +261,7 @@ public class ConfigSelectionPanel extends VBox {
                             "Unknown", // Will be updated when loaded
                             projectConfigPath,
                             dslConfigPath,
-                            Paths.get(properties.getImagePath()),
+                            Paths.get(runnerProperties.getImagePath()),
                             LocalDateTime.now()
                     );
 
@@ -382,7 +391,7 @@ public class ConfigSelectionPanel extends VBox {
                 for (int i = 1; i <= 3; i++) {
                     Path projectConfigPath = Paths.get("config", "project" + i + ".json");
                     Path dslConfigPath = Paths.get("config", "dsl" + i + ".json");
-                    Path imagePath = Paths.get(properties.getImagePath());
+                    Path imagePath = Paths.get(runnerProperties.getImagePath());
 
                     ConfigEntry entry = new ConfigEntry(
                             "Project " + i,

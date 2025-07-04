@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.runner;
 
+import lombok.Data;
+
 import io.github.jspinak.brobot.runner.ui.ConfigurationComponentFactory;
 import io.github.jspinak.brobot.runner.ui.navigation.ScreenRegistry;
 import org.slf4j.Logger;
@@ -13,6 +15,7 @@ import org.springframework.stereotype.Component;
  * Initializes and registers configuration screens with the navigation system.
  */
 @Component
+@Data
 public class ConfigurationScreenInitializer {
     private static final Logger logger = LoggerFactory.getLogger(ConfigurationScreenInitializer.class);
 

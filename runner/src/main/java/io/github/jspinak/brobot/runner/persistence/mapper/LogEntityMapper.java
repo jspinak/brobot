@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.runner.persistence.mapper;
 
+import lombok.extern.slf4j.Slf4j;
+
 import io.github.jspinak.brobot.runner.persistence.entity.LogEntry;
 import io.github.jspinak.brobot.runner.persistence.entity.PerformanceMetrics;
 import io.github.jspinak.brobot.runner.persistence.entity.StateImageLog;
@@ -13,6 +15,7 @@ import java.util.Collections;
 import java.util.stream.Collectors;
 
 @Component
+@Slf4j
 public class LogEntityMapper {
 
     /**

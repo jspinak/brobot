@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.runner.ui.window;
 
+import lombok.extern.slf4j.Slf4j;
+
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
@@ -17,6 +19,7 @@ import java.util.Optional;
 /**
  * Factory for creating common dialog types.
  */
+@Slf4j
 public class DialogFactory {
 
     /**

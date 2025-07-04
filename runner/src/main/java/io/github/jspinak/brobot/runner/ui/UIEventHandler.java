@@ -1,5 +1,9 @@
 package io.github.jspinak.brobot.runner.ui;
 
+import lombok.Data;
+
+import lombok.extern.slf4j.Slf4j;
+
 import io.github.jspinak.brobot.runner.events.*;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
@@ -17,6 +21,8 @@ import java.util.function.Consumer;
  * UI event handler that subscribes to events and updates the UI accordingly.
  */
 @Component
+@Slf4j
+@Data
 public class UIEventHandler {
     private static final Logger logger = LoggerFactory.getLogger(UIEventHandler.class);
 

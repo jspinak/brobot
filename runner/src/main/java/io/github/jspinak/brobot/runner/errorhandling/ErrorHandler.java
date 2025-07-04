@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.runner.errorhandling;
 
+import lombok.Data;
+
 import io.github.jspinak.brobot.runner.events.EventBus;
 import io.github.jspinak.brobot.runner.events.ErrorEvent;
 import lombok.RequiredArgsConstructor;
@@ -55,6 +57,7 @@ import java.util.function.Function;
 @Slf4j
 @Component
 @RequiredArgsConstructor
+@Data
 public class ErrorHandler {
 
     private final EventBus eventBus;

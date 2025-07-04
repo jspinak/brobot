@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.runner.fileassociation;
 
+import lombok.Data;
+
 // TODO: Implement ConfigurationLoader and ConfigurationLoadedEvent
 // import io.github.jspinak.brobot.runner.config.ConfigurationLoader;
 // import io.github.jspinak.brobot.runner.events.ConfigurationLoadedEvent;
@@ -24,6 +26,7 @@ import java.util.Optional;
 @Slf4j
 @Component
 // @RequiredArgsConstructor
+@Data
 public class FileAssociationHandler implements ApplicationRunner {
 
     // TODO: Implement ConfigurationLoader

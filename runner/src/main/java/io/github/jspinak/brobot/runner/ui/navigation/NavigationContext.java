@@ -1,22 +1,16 @@
 package io.github.jspinak.brobot.runner.ui.navigation;
 
+import lombok.Data;
+import lombok.Builder;
 import java.util.Optional;
 
 /**
  * Represents contextual data passed during navigation between screens.
  * This allows screens to pass parameters and state information to each other.
  */
+@Data
 public class NavigationContext {
     private final java.util.Map<String, Object> data;
-
-    /**
-     * Creates a new NavigationContext with the given data.
-     *
-     * @param data The data to store in the context
-     */
-    private NavigationContext(java.util.Map<String, Object> data) {
-        this.data = new java.util.HashMap<>(data);
-    }
 
     /**
      * Gets a value from the context.
@@ -98,12 +92,13 @@ public class NavigationContext {
     }
 
     /**
-     * Creates a new NavigationContext.Builder.
+     * Creates a NavigationContext with the given data.
      *
-     * @return A new Builder
+     * @param data The data to store in the context
+     * @return A new NavigationContext
      */
-    public static Builder builder() {
-        return new Builder();
+    public static NavigationContext of(java.util.Map<String, Object> data) {
+        return new NavigationContext(new java.util.HashMap<>(data));
     }
 
     /**
@@ -113,6 +108,15 @@ public class NavigationContext {
      */
     public static NavigationContext empty() {
         return new NavigationContext(java.util.Collections.emptyMap());
+    }
+
+    /**
+     * Creates a new NavigationContext.Builder.
+     *
+     * @return A new Builder
+     */
+    public static Builder builder() {
+        return new Builder();
     }
 
     /**
@@ -141,7 +145,7 @@ public class NavigationContext {
          * @return The built NavigationContext
          */
         public NavigationContext build() {
-            return new NavigationContext(data);
+            return NavigationContext.of(data);
         }
     }
 }

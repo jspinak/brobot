@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.runner.docs;
 
+import lombok.Data;
+
 import io.github.jspinak.brobot.runner.errorhandling.ErrorContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -10,6 +12,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@Data
 class TroubleshootingGuideTest {
 
     private TroubleshootingGuide troubleshootingGuide;

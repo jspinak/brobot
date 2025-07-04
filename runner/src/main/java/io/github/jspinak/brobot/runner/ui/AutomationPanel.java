@@ -1,5 +1,9 @@
 package io.github.jspinak.brobot.runner.ui;
 
+import lombok.Getter;
+import lombok.Setter;
+import lombok.AccessLevel;
+
 import io.github.jspinak.brobot.runner.automation.AutomationExecutor;
 import io.github.jspinak.brobot.runner.config.BrobotRunnerProperties;
 import io.github.jspinak.brobot.runner.events.EventBus;
@@ -26,6 +30,8 @@ import java.util.*;
 /**
  * JavaFX UI component for automation control.
  */
+@Getter
+@Setter(AccessLevel.PRIVATE)
 public class AutomationPanel extends VBox {
     private static AutomationPanel INSTANCE;
 
@@ -34,7 +40,7 @@ public class AutomationPanel extends VBox {
 
     private final ApplicationContext context;
     private final AutomationProjectManager projectManager;
-    private final BrobotRunnerProperties properties;
+    private final BrobotRunnerProperties runnerProperties;
     private final AutomationExecutor automationExecutor;
     private final EventBus eventBus;
 
@@ -49,11 +55,11 @@ public class AutomationPanel extends VBox {
      * Constructor with Spring dependencies
      */
     public AutomationPanel(ApplicationContext context, AutomationProjectManager projectManager,
-                           BrobotRunnerProperties properties, AutomationExecutor automationExecutor,
+                           BrobotRunnerProperties runnerProperties, AutomationExecutor automationExecutor,
                            EventBus eventBus) {
         this.context = context;
         this.projectManager = projectManager;
-        this.properties = properties;
+        this.runnerProperties = runnerProperties;
         this.automationExecutor = automationExecutor;
         this.eventBus = eventBus;
         this.logArea = new TextArea();

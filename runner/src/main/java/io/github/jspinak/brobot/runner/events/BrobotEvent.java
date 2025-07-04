@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.runner.events;
 
+import lombok.Data;
+
 import java.time.Instant;
 
 /**
@@ -42,6 +44,19 @@ public abstract class BrobotEvent {
         EXECUTION_PAUSED,
         EXECUTION_RESUMED,
         EXECUTION_STOPPED,
+        
+        // Automation events
+        AUTOMATION_STARTED,
+        AUTOMATION_COMPLETED,
+        AUTOMATION_FAILED,
+        AUTOMATION_PROGRESS,
+        AUTOMATION_PAUSED,
+        AUTOMATION_RESUMED,
+        AUTOMATION_STOPPED,
+        STATE_TRANSITION,
+        ACTION_STARTED,
+        ACTION_COMPLETED,
+        ACTION_FAILED,
 
         // Configuration events
         CONFIG_LOADED,
@@ -51,6 +66,7 @@ public abstract class BrobotEvent {
         LOG_MESSAGE,
         LOG_WARNING,
         LOG_ERROR,
+        LOG_ENTRY,
 
         // UI events
         UI_STATE_CHANGED,
