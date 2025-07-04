@@ -1,6 +1,7 @@
 package io.github.jspinak.brobot.dsl;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import io.github.jspinak.brobot.action.Action;
 import io.github.jspinak.brobot.action.ActionOptions;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.model.element.Region;
@@ -14,21 +15,19 @@ import io.github.jspinak.brobot.runner.dsl.model.ActionStep;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
 
 import java.util.ArrayList;
 
-import static io.github.jspinak.brobot.action.ActionOptions.Action.CLICK;
-import static io.github.jspinak.brobot.action.ActionOptions.Action.FIND;
-import static io.github.jspinak.brobot.action.ActionOptions.ClickUntil.OBJECTS_APPEAR;
-import static io.github.jspinak.brobot.action.ActionOptions.Find.ALL;
-import static io.github.jspinak.brobot.action.ActionOptions.Find.FIRST;
-import static io.github.jspinak.brobot.action.internal.mouse.ClickType.Type.LEFT;
-import static io.github.jspinak.brobot.action.internal.mouse.ClickType.Type.RIGHT;
+import static io.github.jspinak.brobot.action.Action.CLICK;
+import static io.github.jspinak.brobot.action.Action.FIND;
+import static io.github.jspinak.brobot.action.enums.ClickUntil.OBJECTS_APPEAR;
+import static io.github.jspinak.brobot.action.enums.Find.ALL;
+import static io.github.jspinak.brobot.action.enums.Find.FIRST;
+import static io.github.jspinak.brobot.action.internal.mouse.ClickType.LEFT;
+import static io.github.jspinak.brobot.action.internal.mouse.ClickType.RIGHT;
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest
 @TestPropertySource(properties = {"java.awt.headless=false"})
 public class ActionDefinitionJsonParserTest {
 
@@ -245,7 +244,7 @@ public class ActionDefinitionJsonParserTest {
     /**
      * Helper method to create a minimal ActionDefinition with one step
      */
-    private TaskSequence createMinimalActionDefinition(ActionOptions.Action action) {
+    private TaskSequence createMinimalActionDefinition(Action action) {
         TaskSequence definition = new TaskSequence();
 
         ActionOptions options = new ActionOptions();

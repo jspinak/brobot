@@ -9,6 +9,9 @@ import io.github.jspinak.brobot.model.element.Location;
 
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Adjusts the position and dimensions of Match objects based on MatchAdjustmentOptions settings.
  * <p>
@@ -164,5 +167,85 @@ public class MatchAdjusterV2 {
     @Deprecated
     public void adjustAll(ActionResult matches, ActionOptions actionOptions) {
         legacyAdjuster.adjustAll(matches, actionOptions);
+    }
+    
+    /**
+     * Filters matches by minimum area, removing matches smaller than the specified threshold.
+     * <p>
+     * This method is integrated into the match adjustment pipeline to avoid redundant
+     * iterations over the match list. It modifies the ActionResult's match list in-place,
+     * removing any matches whose area (width × height) is less than the minimum.
+     * </p>
+     * <p>
+     * This filtering is particularly useful for:
+     * <ul>
+     * <li>Removing noise and false positives from pattern matching</li>
+     * <li>Ensuring matches meet minimum size requirements for interaction</li>
+     * <li>Cleaning up results when searching for UI elements with expected dimensions</li>
+     * </ul>
+     * </p>
+     * 
+     * @param matches The ActionResult containing matches to filter. The match list
+     *                within this object is modified in-place.
+     * @param minArea The minimum area (in pixels²) a match must have to be retained.
+     *                Matches with area less than this value are removed.
+     */
+    public void filterByMinimumArea(ActionResult matches, int minArea) {
+        if (matches == null || minArea <= 0) {
+            return;
+        }
+        
+        List<Match> filteredMatches = new ArrayList<>();
+        for (Match match : matches.getMatchList()) {
+            int area = match.w() * match.h();
+            if (area >= minArea) {
+                filteredMatches.add(match);
+            }
+        }
+        
+        // Update the match list with filtered results
+        matches.setMatchList(filteredMatches);
+    }
+    
+    /**
+     * Adjusts all matches and optionally filters by minimum area in a single pass.
+     * <p>
+     * This method combines position/dimension adjustments with area filtering to
+     * minimize iterations over the match list. It's more efficient than calling
+     * adjustAll and filterByMinimumArea separately.
+     * </p>
+     * 
+     * @param matches The ActionResult containing matches to process
+     * @param adjustmentOptions Configuration for position and dimension adjustments
+     * @param minArea Minimum area filter (0 or negative to disable filtering)
+     */
+    public void adjustAndFilter(ActionResult matches, MatchAdjustmentOptions adjustmentOptions, int minArea) {
+        if (matches == null) {
+            return;
+        }
+        
+        if (minArea <= 0) {
+            // No filtering needed, just adjust
+            adjustAll(matches, adjustmentOptions);
+            return;
+        }
+        
+        List<Match> filteredMatches = new ArrayList<>();
+        
+        for (Match match : matches.getMatchList()) {
+            // Apply adjustments if specified
+            if (adjustmentOptions != null) {
+                adjust(match, adjustmentOptions);
+            }
+            
+            // Check area after adjustment
+            int area = match.w() * match.h();
+            if (area >= minArea) {
+                filteredMatches.add(match);
+            }
+        }
+        
+        // Update the match list with adjusted and filtered results
+        matches.setMatchList(filteredMatches);
     }
 }

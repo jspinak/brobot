@@ -9,6 +9,8 @@ import io.github.jspinak.brobot.action.internal.find.SearchRegionResolver;
 import io.github.jspinak.brobot.action.internal.utility.ActionSuccessCriteria;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
+import io.github.jspinak.brobot.control.ExecutionController;
+import io.github.jspinak.brobot.control.ExecutionStoppedException;
 import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.tools.history.IllustrationController;
 import io.github.jspinak.brobot.tools.logging.ActionLogger;
@@ -19,6 +21,7 @@ import io.github.jspinak.brobot.tools.ml.dataset.DatasetManager;
 import io.github.jspinak.brobot.tools.testing.mock.time.TimeProvider;
 import io.github.jspinak.brobot.util.image.capture.ScreenshotCapture;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
@@ -74,6 +77,7 @@ public class ActionExecution {
     private final ActionLogger actionLogger;
     private final ScreenshotCapture captureScreenshot;
     private final ExecutionSession automationSession;
+    private final ExecutionController executionController;
 
     /**
      * Constructs an ActionExecution instance with all required dependencies.
@@ -92,11 +96,13 @@ public class ActionExecution {
      * @param actionLogger Records action execution details for analysis and debugging
      * @param captureScreenshot Captures raw screenshots for error documentation
      * @param automationSession Manages session context and identifiers
+     * @param executionController Controls execution flow with pause/resume/stop functionality
      */
     public ActionExecution(TimeProvider time, IllustrationController illustrateScreenshot, SearchRegionResolver selectRegions,
                            ActionLifecycleManagement actionLifecycleManagement, DatasetManager datasetManager,
                            ActionSuccessCriteria success, ActionResultFactory matchesInitializer, ActionLogger actionLogger,
-                           ScreenshotCapture captureScreenshot, ExecutionSession automationSession) {
+                           ScreenshotCapture captureScreenshot, ExecutionSession automationSession,
+                           @Autowired(required = false) ExecutionController executionController) {
         this.time = time;
         this.illustrateScreenshot = illustrateScreenshot;
         this.selectRegions = selectRegions;
@@ -107,6 +113,7 @@ public class ActionExecution {
         this.actionLogger = actionLogger;
         this.captureScreenshot = captureScreenshot;
         this.automationSession = automationSession;
+        this.executionController = executionController;
     }
 
     /**
@@ -155,24 +162,42 @@ public class ActionExecution {
         String sessionId = automationSession.getCurrentSessionId();
         printAction(actionOptions, objectCollections);
         ActionResult matches = matchesInitializer.init(actionOptions, actionDescription, objectCollections);
-        time.wait(actionOptions.getPauseBeforeBegin());
-        while (actionLifecycleManagement.isMoreSequencesAllowed(matches)) {
-            actionMethod.perform(matches, objectCollections);
-            actionLifecycleManagement.incrementCompletedSequences(matches);
+        
+        try {
+            // Check pause point before starting
+            checkPausePointSafely();
+            
+            time.wait(actionOptions.getPauseBeforeBegin());
+            
+            while (actionLifecycleManagement.isMoreSequencesAllowed(matches)) {
+                // Check pause point before each sequence
+                checkPausePointSafely();
+                
+                actionMethod.perform(matches, objectCollections);
+                actionLifecycleManagement.incrementCompletedSequences(matches);
+            }
+            
+            success.set(actionOptions, matches);
+            illustrateScreenshot.illustrateWhenAllowed(matches,
+                    selectRegions.getRegionsForAllImages(actionOptions, objectCollections),
+                    actionOptions, objectCollections);
+            time.wait(actionOptions.getPauseAfterEnd());
+            
+        } catch (ExecutionStoppedException e) {
+            log.info("Action execution stopped: {}", actionDescription);
+            matches.setSuccess(false);
+            // Rethrow to propagate the stop signal
+            throw e;
         }
-        success.set(actionOptions, matches);
-        illustrateScreenshot.illustrateWhenAllowed(matches,
-                selectRegions.getRegionsForAllImages(actionOptions, objectCollections),
-                actionOptions, objectCollections);
-        time.wait(actionOptions.getPauseAfterEnd());
+        
         Duration duration = actionLifecycleManagement.getCurrentDuration(matches);
-        matches.setDuration(duration); //time.getDuration(actionOptions.getAction()));
-        if (FrameworkSettings.buildDataset) datasetManager.addSetOfData(matches); // for the neural net training dataset
+        matches.setDuration(duration);
+        if (FrameworkSettings.buildDataset) datasetManager.addSetOfData(matches);
         ConsoleReporter.println(actionOptions.getAction() + " " + matches.getOutputText() + " " + matches.getSuccessSymbol());
         if (objectCollections.length > 0) {
-            LogData logData = actionLogger.logAction(sessionId, matches, objectCollections[0]); // log the action after it's finished
+            LogData logData = actionLogger.logAction(sessionId, matches, objectCollections[0]);
         }
-        if (!matches.isSuccess()) {  // taking a screenshot should be a part of the logError implementation in the App module
+        if (!matches.isSuccess()) {
             //String screenshotPath = captureScreenshot.captureScreenshot("action_failed_" + sessionId);
             //actionLogger.logError(sessionId, "Action failed: " + actionOptions.getAction(), screenshotPath);
         }
@@ -226,16 +251,34 @@ public class ActionExecution {
         String sessionId = automationSession.getCurrentSessionId();
         printActionConfig(actionConfig, objectCollections);
         ActionResult matches = matchesInitializer.init(actionConfig, actionDescription, objectCollections);
-        time.wait(actionConfig.getPauseBeforeBegin());
-        while (actionLifecycleManagement.isMoreSequencesAllowed(matches)) {
-            actionMethod.perform(matches, objectCollections);
-            actionLifecycleManagement.incrementCompletedSequences(matches);
+        
+        try {
+            // Check pause point before starting
+            checkPausePointSafely();
+            
+            time.wait(actionConfig.getPauseBeforeBegin());
+            
+            while (actionLifecycleManagement.isMoreSequencesAllowed(matches)) {
+                // Check pause point before each sequence
+                checkPausePointSafely();
+                
+                actionMethod.perform(matches, objectCollections);
+                actionLifecycleManagement.incrementCompletedSequences(matches);
+            }
+            
+            success.set(actionConfig, matches);
+            illustrateScreenshot.illustrateWhenAllowed(matches,
+                    selectRegions.getRegionsForAllImages(actionConfig, objectCollections),
+                    actionConfig, objectCollections);
+            time.wait(actionConfig.getPauseAfterEnd());
+            
+        } catch (ExecutionStoppedException e) {
+            log.info("Action execution stopped: {}", actionDescription);
+            matches.setSuccess(false);
+            // Rethrow to propagate the stop signal
+            throw e;
         }
-        success.set(actionConfig, matches);
-        illustrateScreenshot.illustrateWhenAllowed(matches,
-                selectRegions.getRegionsForAllImages(actionConfig, objectCollections),
-                actionConfig, objectCollections);
-        time.wait(actionConfig.getPauseAfterEnd());
+        
         Duration duration = actionLifecycleManagement.getCurrentDuration(matches);
         matches.setDuration(duration);
         if (FrameworkSettings.buildDataset) datasetManager.addSetOfData(matches);
@@ -259,6 +302,27 @@ public class ActionExecution {
                 ConsoleReporter.format("%s.%s", sio.getOwnerStateName(), sio.getName());
                 String ending = stImgs.indexOf(sio) != lastIndex? "," : "|";
                 ConsoleReporter.print(ending+" ");
+            }
+        }
+    }
+    
+    /**
+     * Safely checks for pause points when an ExecutionController is available.
+     * <p>
+     * This method provides a null-safe way to check pause points. If no
+     * ExecutionController is configured (for backward compatibility), the
+     * method returns immediately without checking.
+     * </p>
+     * 
+     * @throws ExecutionStoppedException if the execution has been stopped
+     */
+    private void checkPausePointSafely() throws ExecutionStoppedException {
+        if (executionController != null) {
+            try {
+                executionController.checkPausePoint();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new ExecutionStoppedException("Action execution interrupted", e);
             }
         }
     }

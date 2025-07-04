@@ -1,41 +1,37 @@
 package io.github.jspinak.brobot.dsl;
 
 import com.fasterxml.jackson.databind.JsonNode;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import io.github.jspinak.brobot.runner.dsl.expressions.BinaryOperationExpression;
 import io.github.jspinak.brobot.runner.dsl.expressions.Expression;
 import io.github.jspinak.brobot.runner.dsl.expressions.LiteralExpression;
 import io.github.jspinak.brobot.runner.dsl.expressions.VariableExpression;
-import io.github.jspinak.brobot.runner.json.parsing.ConfigurationParser;
-import io.github.jspinak.brobot.runner.json.parsing.exception.ConfigurationException;
-import io.github.jspinak.brobot.runner.json.utils.JsonUtils;
 import io.github.jspinak.brobot.runner.dsl.model.BuilderMethod;
-
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.TestPropertySource;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest
-@TestPropertySource(properties = {"java.awt.headless=false"})
 public class BuilderMethodJsonParserTest {
 
-    @Autowired
-    private ConfigurationParser jsonParser;
+    private ObjectMapper objectMapper;
 
-    @Autowired
-    private JsonUtils jsonUtils;
+    @BeforeEach
+    void setUp() {
+        objectMapper = new ObjectMapper();
+        objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
+        objectMapper.configure(com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    }
 
     /**
      * Test parsing a BuilderMethod from JSON
      */
     @Test
-    public void testParseBuilderMethod() throws ConfigurationException {
+    public void testParseBuilderMethod() throws Exception {
         String json = """
                 {
                   "method": "setAction",
@@ -49,8 +45,8 @@ public class BuilderMethodJsonParserTest {
                 }
                 """;
 
-        JsonNode jsonNode = jsonParser.parseJson(json);
-        BuilderMethod method = jsonParser.convertJson(jsonNode, BuilderMethod.class);
+        JsonNode jsonNode = objectMapper.readTree(json);
+        BuilderMethod method = objectMapper.treeToValue(jsonNode, BuilderMethod.class);
 
         assertNotNull(method);
         assertEquals("setAction", method.getMethod());
@@ -68,7 +64,7 @@ public class BuilderMethodJsonParserTest {
      * Test parsing a BuilderMethod with multiple arguments
      */
     @Test
-    public void testParseWithMultipleArguments() throws ConfigurationException {
+    public void testParseWithMultipleArguments() throws Exception {
         String json = """
                 {
                   "method": "add",
@@ -91,8 +87,8 @@ public class BuilderMethodJsonParserTest {
                 }
                 """;
 
-        JsonNode jsonNode = jsonParser.parseJson(json);
-        BuilderMethod method = jsonParser.convertJson(jsonNode, BuilderMethod.class);
+        JsonNode jsonNode = objectMapper.readTree(json);
+        BuilderMethod method = objectMapper.treeToValue(jsonNode, BuilderMethod.class);
 
         assertNotNull(method);
         assertEquals("add", method.getMethod());
@@ -118,7 +114,7 @@ public class BuilderMethodJsonParserTest {
      * Test serialization and deserialization of BuilderMethod
      */
     @Test
-    public void testSerializeDeserializeBuilderMethod() throws ConfigurationException {
+    public void testSerializeDeserializeBuilderMethod() throws Exception {
         // Create a builder method
         BuilderMethod method = new BuilderMethod();
         method.setMethod("setSimilarity");
@@ -134,12 +130,12 @@ public class BuilderMethodJsonParserTest {
         method.setArguments(arguments);
 
         // Serialize
-        String json = jsonUtils.toJsonSafe(method);
+        String json = objectMapper.writeValueAsString(method);
         System.out.println("DEBUG: Serialized BuilderMethod: " + json);
 
         // Deserialize
-        JsonNode jsonNode = jsonParser.parseJson(json);
-        BuilderMethod deserializedMethod = jsonParser.convertJson(jsonNode, BuilderMethod.class);
+        JsonNode jsonNode = objectMapper.readTree(json);
+        BuilderMethod deserializedMethod = objectMapper.treeToValue(jsonNode, BuilderMethod.class);
 
         // Verify
         assertNotNull(deserializedMethod);
@@ -157,7 +153,7 @@ public class BuilderMethodJsonParserTest {
      * Test empty arguments list
      */
     @Test
-    public void testEmptyArguments() throws ConfigurationException {
+    public void testEmptyArguments() throws Exception {
         String json = """
                 {
                   "method": "reset",
@@ -165,8 +161,8 @@ public class BuilderMethodJsonParserTest {
                 }
                 """;
 
-        JsonNode jsonNode = jsonParser.parseJson(json);
-        BuilderMethod method = jsonParser.convertJson(jsonNode, BuilderMethod.class);
+        JsonNode jsonNode = objectMapper.readTree(json);
+        BuilderMethod method = objectMapper.treeToValue(jsonNode, BuilderMethod.class);
 
         assertNotNull(method);
         assertEquals("reset", method.getMethod());
@@ -178,7 +174,7 @@ public class BuilderMethodJsonParserTest {
      * Test with complex argument (nested expression)
      */
     @Test
-    public void testComplexArgument() throws ConfigurationException {
+    public void testComplexArgument() throws Exception {
         String json = """
                 {
                   "method": "setCondition",
@@ -200,8 +196,8 @@ public class BuilderMethodJsonParserTest {
                 }
                 """;
 
-        JsonNode jsonNode = jsonParser.parseJson(json);
-        BuilderMethod method = jsonParser.convertJson(jsonNode, BuilderMethod.class);
+        JsonNode jsonNode = objectMapper.readTree(json);
+        BuilderMethod method = objectMapper.treeToValue(jsonNode, BuilderMethod.class);
 
         assertNotNull(method);
         assertEquals("setCondition", method.getMethod());

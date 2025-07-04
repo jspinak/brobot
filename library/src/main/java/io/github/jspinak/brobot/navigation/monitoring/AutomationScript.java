@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.navigation.monitoring;
 
+import io.github.jspinak.brobot.control.ExecutionController;
+
 /**
  * Core interface for automation script lifecycle management in the Brobot framework.
  * 
@@ -45,51 +47,30 @@ package io.github.jspinak.brobot.navigation.monitoring;
  * essential lifecycle management capabilities. Implementations typically extend BaseAutomation 
  * for additional functionality like state handling and error management.</p>
  * 
+ * <p>As of version 2.0, AutomationScript extends ExecutionController to provide
+ * pause/resume functionality in addition to the basic start/stop lifecycle.
+ * This enhancement enables more sophisticated execution control for interactive
+ * debugging and user-controlled automation flows.</p>
+ * 
  * @since 1.0
  * @see BaseAutomation
  * @see MonitoringService
  * @see StateHandler
+ * @see ExecutionController
  */
-public interface AutomationScript {
-    /**
-     * Starts the automation script execution.
-     * <p>
-     * Initiates the automation logic, typically launching background threads
-     * or scheduled tasks. Should be idempotent - calling start() on an already
-     * running script should have no effect.
-     * <p>
-     * Implementation notes:
-     * <ul>
-     *   <li>Should return quickly, not block the calling thread</li>
-     *   <li>Must update internal state to reflect running status</li>
-     *   <li>Should handle initialization errors gracefully</li>
-     * </ul>
-     */
-    void start();
+public interface AutomationScript extends ExecutionController {
+    // Methods inherited from ExecutionController:
+    // - start() - Starts the automation script execution
+    // - stop() - Stops the automation script execution
+    // - pause() - Pauses execution at the next checkpoint
+    // - resume() - Resumes a paused execution
+    // - isRunning() - Checks if the automation is currently running
+    // - isPaused() - Checks if the automation is currently paused
+    // - isStopped() - Checks if the automation has been stopped
+    // - getState() - Gets the current execution state
+    // - checkPausePoint() - Checks for pause/stop conditions
+    // - reset() - Resets the controller to IDLE state
     
-    /**
-     * Stops the automation script execution.
-     * <p>
-     * Gracefully terminates the automation, allowing for proper cleanup of
-     * resources and GUI state. Should handle being called multiple times
-     * or when the script is not running.
-     * <p>
-     * Implementation notes:
-     * <ul>
-     *   <li>Should interrupt or signal running threads to stop</li>
-     *   <li>Must wait for clean shutdown before returning</li>
-     *   <li>Should reset internal state to not-running</li>
-     * </ul>
-     */
-    void stop();
-    
-    /**
-     * Checks if the automation script is currently running.
-     * <p>
-     * Provides real-time status of the automation execution. Used by
-     * monitoring services and UI components to display current state.
-     *
-     * @return true if the automation is actively running, false otherwise
-     */
-    boolean isRunning();
+    // AutomationScript can add additional methods specific to automation
+    // scripts if needed in the future
 }

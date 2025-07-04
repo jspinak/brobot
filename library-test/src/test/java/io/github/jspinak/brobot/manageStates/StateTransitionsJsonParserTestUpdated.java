@@ -1,0 +1,507 @@
+package io.github.jspinak.brobot.manageStates;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
+import io.github.jspinak.brobot.action.basic.click.ClickOptions;
+import io.github.jspinak.brobot.action.basic.focus.HighlightOptions;
+import io.github.jspinak.brobot.action.ObjectCollection;
+import io.github.jspinak.brobot.runner.dsl.model.TaskSequence;
+import io.github.jspinak.brobot.runner.dsl.model.ActionStep;
+import io.github.jspinak.brobot.model.transition.StateTransition;
+import io.github.jspinak.brobot.navigation.transition.StateTransitions;
+import io.github.jspinak.brobot.navigation.transition.TaskSequenceStateTransition;
+import io.github.jspinak.brobot.navigation.transition.JavaStateTransition;
+import io.github.jspinak.brobot.runner.json.parsing.ConfigurationParser;
+import io.github.jspinak.brobot.runner.json.parsing.exception.ConfigurationException;
+import io.github.jspinak.brobot.runner.json.utils.JsonUtils;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.TestPropertySource;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.BooleanSupplier;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+/**
+ * Updated test for StateTransitions JSON parsing with new ActionConfig API.
+ * 
+ * Key changes:
+ * - JSON now uses "actionConfig" instead of "actionOptions"
+ * - ActionStep uses specific config classes (ClickOptions, PatternFindOptions, etc.)
+ * - Type-safe configuration in JSON and Java code
+ */
+@SpringBootTest
+@TestPropertySource(properties = {"java.awt.headless=false"})
+public class StateTransitionsJsonParserTestUpdated {
+
+    @Autowired
+    private ConfigurationParser jsonParser;
+
+    @Autowired
+    private JsonUtils jsonUtils;
+
+    /**
+     * Test parsing a basic StateTransitions from JSON with new ActionConfig
+     */
+    @Test
+    public void testParseBasicStateTransitionsWithNewAPI() throws ConfigurationException {
+        String json = """
+                {
+                  "stateName": "LoginState",
+                  "stateId": 1,
+                  "staysVisibleAfterTransition": true,
+                  "actionDefinitionTransitions": {
+                    "2": {
+                      "type": "actionDefinition",
+                      "actionDefinition": {
+                        "steps": [
+                          {
+                            "actionConfig": {
+                              "@type": "ClickOptions",
+                              "clickType": "LEFT",
+                              "numberOfClicks": 1
+                            },
+                            "objectCollection": {
+                              "stateImageIds": [101]
+                            }
+                          }
+                        ]
+                      },
+                      "activate": [2],
+                      "exit": [1]
+                    }
+                  }
+                }
+                """;
+
+        JsonNode jsonNode = jsonParser.parseJson(json);
+        StateTransitions stateTransitions = jsonParser.convertJson(jsonNode, StateTransitions.class);
+
+        assertNotNull(stateTransitions);
+        assertEquals("LoginState", stateTransitions.getStateName());
+        assertEquals(1L, stateTransitions.getStateId());
+        assertTrue(stateTransitions.isStaysVisibleAfterTransition());
+
+        // Verify actionDefinitionTransitions
+        assertNotNull(stateTransitions.getActionDefinitionTransitions());
+        assertEquals(1, stateTransitions.getActionDefinitionTransitions().size());
+        assertTrue(stateTransitions.getActionDefinitionTransitions().containsKey(2L));
+
+        TaskSequenceStateTransition transition = stateTransitions.getActionDefinitionTransitions().get(2L);
+        assertNotNull(transition);
+        assertTrue(transition.getActivate().contains(2L));
+        assertTrue(transition.getExit().contains(1L));
+        assertTrue(transition.getTaskSequenceOptional().isPresent());
+        
+        // Verify the action config is ClickOptions
+        TaskSequence taskSeq = transition.getTaskSequenceOptional().get();
+        assertEquals(1, taskSeq.getSteps().size());
+        assertTrue(taskSeq.getSteps().get(0).getActionConfig() instanceof ClickOptions);
+        ClickOptions clickOptions = (ClickOptions) taskSeq.getSteps().get(0).getActionConfig();
+        assertEquals(ClickOptions.Type.LEFT, clickOptions.getClickType());
+    }
+
+    /**
+     * Test parsing StateTransitions with transitionFinish using PatternFindOptions
+     */
+    @Test
+    public void testParseWithTransitionFinishNewAPI() throws ConfigurationException {
+        String json = """
+                {
+                  "stateName": "MainMenuState",
+                  "stateId": 2,
+                  "transitionFinish": {
+                    "type": "actionDefinition",
+                    "actionDefinition": {
+                      "steps": [
+                        {
+                          "actionConfig": {
+                            "@type": "PatternFindOptions",
+                            "strategy": "FIRST",
+                            "similarity": 0.85
+                          },
+                          "objectCollection": {
+                            "stateImageIds": [201]
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  "actionDefinitionTransitions": {}
+                }
+                """;
+
+        JsonNode jsonNode = jsonParser.parseJson(json);
+        StateTransitions stateTransitions = jsonParser.convertJson(jsonNode, StateTransitions.class);
+
+        assertNotNull(stateTransitions);
+        assertEquals("MainMenuState", stateTransitions.getStateName());
+        assertEquals(2L, stateTransitions.getStateId());
+
+        // Verify transitionFinish
+        assertNotNull(stateTransitions.getTransitionFinish());
+        assertInstanceOf(TaskSequenceStateTransition.class, stateTransitions.getTransitionFinish());
+
+        TaskSequenceStateTransition finishTransition =
+                (TaskSequenceStateTransition) stateTransitions.getTransitionFinish();
+        assertTrue(finishTransition.getTaskSequenceOptional().isPresent());
+        
+        TaskSequence taskSeq = finishTransition.getTaskSequenceOptional().get();
+        assertTrue(taskSeq.getSteps().get(0).getActionConfig() instanceof PatternFindOptions);
+        PatternFindOptions findOptions = (PatternFindOptions) taskSeq.getSteps().get(0).getActionConfig();
+        assertEquals(PatternFindOptions.Strategy.FIRST, findOptions.getStrategy());
+        assertEquals(0.85, findOptions.getSimilarity(), 0.001);
+    }
+
+    @Test
+    public void testSerializeDeserializeStateTransitionsWithNewAPI() throws ConfigurationException {
+        // Create StateTransitions manually
+        StateTransitions stateTransitions = new StateTransitions();
+        stateTransitions.setStateName("TestState");
+        stateTransitions.setStateId(5L);
+        stateTransitions.setStaysVisibleAfterTransition(true);
+
+        // Create transition finish with HighlightOptions
+        TaskSequenceStateTransition finishTransition = new TaskSequenceStateTransition();
+
+        TaskSequence finishActionDef = new TaskSequence();
+        ActionStep finishStep = new ActionStep();
+        
+        // NEW API: Use HighlightOptions
+        HighlightOptions highlightOptions = new HighlightOptions.Builder()
+                .setDuration(2.0)
+                .setColor("yellow")
+                .build();
+        finishStep.setActionConfig(highlightOptions);
+        finishStep.setObjectCollection(new ObjectCollection());
+        finishActionDef.addStep(finishStep);
+        finishTransition.setActionDefinition(finishActionDef);
+        stateTransitions.setTransitionFinish(finishTransition);
+
+        // Create actionDefinitionTransitions with ClickOptions
+        Map<Long, TaskSequenceStateTransition> actionDefinitionTransitions = new HashMap<>();
+        TaskSequenceStateTransition transition = new TaskSequenceStateTransition();
+
+        TaskSequence actionDef = new TaskSequence();
+        ActionStep step = new ActionStep();
+        
+        // NEW API: Use ClickOptions
+        ClickOptions clickOptions = new ClickOptions.Builder()
+                .setClickType(ClickOptions.Type.RIGHT)
+                .setNumberOfClicks(1)
+                .build();
+        step.setActionConfig(clickOptions);
+        step.setObjectCollection(new ObjectCollection());
+        actionDef.addStep(step);
+        transition.setActionDefinition(actionDef);
+        actionDefinitionTransitions.put(6L, transition);
+        stateTransitions.setActionDefinitionTransitions(actionDefinitionTransitions);
+
+        // Populate transitions list (for runtime)
+        List<StateTransition> transitions = new ArrayList<>();
+        transitions.add(transition);
+        stateTransitions.setTransitions(transitions);
+
+        // Serialize
+        String json = jsonUtils.toJsonSafe(stateTransitions);
+        System.out.println("DEBUG: Serialized StateTransitions with new API: " + json);
+
+        // Deserialize
+        JsonNode jsonNode = jsonParser.parseJson(json);
+        StateTransitions deserializedTransitions =
+                jsonParser.convertJson(jsonNode, StateTransitions.class);
+
+        // Verify
+        assertNotNull(deserializedTransitions);
+        assertEquals("TestState", deserializedTransitions.getStateName());
+        assertEquals(5L, deserializedTransitions.getStateId());
+        assertTrue(deserializedTransitions.isStaysVisibleAfterTransition());
+
+        // Verify transitionFinish
+        assertNotNull(deserializedTransitions.getTransitionFinish());
+        assertInstanceOf(TaskSequenceStateTransition.class, deserializedTransitions.getTransitionFinish());
+        TaskSequenceStateTransition deserializedFinish =
+                (TaskSequenceStateTransition) deserializedTransitions.getTransitionFinish();
+        assertTrue(deserializedFinish.getTaskSequenceOptional().isPresent());
+        
+        TaskSequence finishTaskSeq = deserializedFinish.getTaskSequenceOptional().get();
+        assertTrue(finishTaskSeq.getSteps().get(0).getActionConfig() instanceof HighlightOptions);
+        HighlightOptions deserializedHighlight = (HighlightOptions) finishTaskSeq.getSteps().get(0).getActionConfig();
+        assertEquals(2.0, deserializedHighlight.getDuration(), 0.001);
+        assertEquals("yellow", deserializedHighlight.getColor());
+
+        // Verify actionDefinitionTransitions
+        assertNotNull(deserializedTransitions.getActionDefinitionTransitions());
+        assertEquals(1, deserializedTransitions.getActionDefinitionTransitions().size());
+        assertTrue(deserializedTransitions.getActionDefinitionTransitions().containsKey(6L));
+        
+        TaskSequenceStateTransition deserializedTransition = deserializedTransitions.getActionDefinitionTransitions().get(6L);
+        TaskSequence taskSeq = deserializedTransition.getTaskSequenceOptional().get();
+        assertTrue(taskSeq.getSteps().get(0).getActionConfig() instanceof ClickOptions);
+        ClickOptions deserializedClick = (ClickOptions) taskSeq.getSteps().get(0).getActionConfig();
+        assertEquals(ClickOptions.Type.RIGHT, deserializedClick.getClickType());
+
+        // Verify transitions list
+        assertNotNull(deserializedTransitions.getTransitions());
+        assertEquals(1, deserializedTransitions.getTransitions().size());
+    }
+
+    /**
+     * Test JSON with multiple action types
+     */
+    @Test
+    public void testComplexStateTransitionsWithMultipleActionTypes() throws ConfigurationException {
+        String json = """
+                {
+                  "stateName": "ComplexState",
+                  "stateId": 3,
+                  "actionDefinitionTransitions": {
+                    "4": {
+                      "type": "actionDefinition",
+                      "actionDefinition": {
+                        "steps": [
+                          {
+                            "actionConfig": {
+                              "@type": "PatternFindOptions",
+                              "strategy": "ALL",
+                              "similarity": 0.9,
+                              "maxMatchesToActOn": 10
+                            },
+                            "objectCollection": {
+                              "stateImageIds": [301]
+                            }
+                          },
+                          {
+                            "actionConfig": {
+                              "@type": "ClickOptions",
+                              "clickType": "DOUBLE",
+                              "numberOfClicks": 2,
+                              "offsetX": 5,
+                              "offsetY": 5
+                            },
+                            "objectCollection": {
+                              "useMatchesFromPreviousAction": true
+                            }
+                          }
+                        ]
+                      },
+                      "activate": [4]
+                    }
+                  }
+                }
+                """;
+
+        JsonNode jsonNode = jsonParser.parseJson(json);
+        StateTransitions stateTransitions = jsonParser.convertJson(jsonNode, StateTransitions.class);
+
+        assertNotNull(stateTransitions);
+        TaskSequenceStateTransition transition = stateTransitions.getActionDefinitionTransitions().get(4L);
+        assertNotNull(transition);
+        
+        TaskSequence taskSeq = transition.getTaskSequenceOptional().get();
+        assertEquals(2, taskSeq.getSteps().size());
+        
+        // Verify first step is PatternFindOptions
+        assertTrue(taskSeq.getSteps().get(0).getActionConfig() instanceof PatternFindOptions);
+        PatternFindOptions findOptions = (PatternFindOptions) taskSeq.getSteps().get(0).getActionConfig();
+        assertEquals(PatternFindOptions.Strategy.ALL, findOptions.getStrategy());
+        assertEquals(0.9, findOptions.getSimilarity(), 0.001);
+        assertEquals(10, findOptions.getMaxMatchesToActOn());
+        
+        // Verify second step is ClickOptions
+        assertTrue(taskSeq.getSteps().get(1).getActionConfig() instanceof ClickOptions);
+        ClickOptions clickOptions = (ClickOptions) taskSeq.getSteps().get(1).getActionConfig();
+        assertEquals(ClickOptions.Type.DOUBLE, clickOptions.getClickType());
+        assertEquals(2, clickOptions.getNumberOfClicks());
+        assertEquals(5, clickOptions.getOffsetX());
+        assertEquals(5, clickOptions.getOffsetY());
+    }
+
+    /**
+     * Test the getTransitionFunctionByActivatedStateId method
+     */
+    @Test
+    public void testGetTransitionFunctionByActivatedStateId() {
+        // Create StateTransitions
+        StateTransitions stateTransitions = new StateTransitions();
+        stateTransitions.setStateId(1L);
+
+        // Create transition finish
+        TaskSequenceStateTransition finishTransition = new TaskSequenceStateTransition();
+        stateTransitions.setTransitionFinish(finishTransition);
+
+        // Create a transition to state 2
+        TaskSequenceStateTransition transition = new TaskSequenceStateTransition();
+        transition.getActivate().add(2L);
+        stateTransitions.addTransition(transition);
+
+        // Test finding transition finish (to self)
+        Optional<StateTransition> result = stateTransitions.getTransitionFunctionByActivatedStateId(1L);
+        assertTrue(result.isPresent());
+        assertSame(finishTransition, result.get());
+
+        // Test finding transition to state 2
+        result = stateTransitions.getTransitionFunctionByActivatedStateId(2L);
+        assertTrue(result.isPresent());
+        assertSame(transition, result.get());
+
+        // Test with non-existent state
+        result = stateTransitions.getTransitionFunctionByActivatedStateId(3L);
+        assertFalse(result.isPresent());
+
+        // Test with null
+        result = stateTransitions.getTransitionFunctionByActivatedStateId(null);
+        assertFalse(result.isPresent());
+    }
+
+    /**
+     * Test the stateStaysVisible method
+     */
+    @Test
+    public void testStateStaysVisible() {
+        // Create StateTransitions with staysVisibleAfterTransition = true
+        StateTransitions stateTransitions = new StateTransitions();
+        stateTransitions.setStateId(1L);
+        stateTransitions.setStaysVisibleAfterTransition(true);
+
+        // Create transition finish with NONE (falls back to StateTransitions setting)
+        TaskSequenceStateTransition finishTransition = new TaskSequenceStateTransition();
+        finishTransition.setStaysVisibleAfterTransition(StateTransition.StaysVisible.NONE);
+        stateTransitions.setTransitionFinish(finishTransition);
+
+        // Create a transition to state 2 with explicit FALSE
+        TaskSequenceStateTransition transition1 = new TaskSequenceStateTransition();
+        transition1.getActivate().add(2L);
+        transition1.setStaysVisibleAfterTransition(StateTransition.StaysVisible.FALSE);
+        stateTransitions.addTransition(transition1);
+
+        // Create a transition to state 3 with explicit TRUE
+        TaskSequenceStateTransition transition2 = new TaskSequenceStateTransition();
+        transition2.getActivate().add(3L);
+        transition2.setStaysVisibleAfterTransition(StateTransition.StaysVisible.TRUE);
+        stateTransitions.addTransition(transition2);
+
+        // Test transition to self - should use StateTransitions setting (true)
+        assertTrue(stateTransitions.stateStaysVisible(1L));
+
+        // Test transition to state 2 - should use transition's explicit FALSE
+        assertFalse(stateTransitions.stateStaysVisible(2L));
+
+        // Test transition to state 3 - should use transition's explicit TRUE
+        assertTrue(stateTransitions.stateStaysVisible(3L));
+
+        // Test non-existent transition
+        assertFalse(stateTransitions.stateStaysVisible(4L));
+    }
+
+    /**
+     * Test the addTransition methods
+     */
+    @Test
+    public void testAddTransition() {
+        // Create StateTransitions
+        StateTransitions stateTransitions = new StateTransitions();
+
+        // Test adding ActionDefinitionStateTransition
+        TaskSequenceStateTransition transition = new TaskSequenceStateTransition();
+        transition.getActivate().add(2L);
+        transition.getActivate().add(3L);
+        stateTransitions.addTransition(transition);
+
+        assertEquals(2, stateTransitions.getTransitions().size()); // Added twice (once per activate ID)
+        assertEquals(2, stateTransitions.getActionDefinitionTransitions().size());
+        assertTrue(stateTransitions.getActionDefinitionTransitions().containsKey(2L));
+        assertTrue(stateTransitions.getActionDefinitionTransitions().containsKey(3L));
+
+        // Test adding JavaStateTransition
+        JavaStateTransition javaTransition = new JavaStateTransition();
+        stateTransitions.addTransition(javaTransition);
+
+        assertEquals(3, stateTransitions.getTransitions().size()); // Added once
+
+        // Test adding via BooleanSupplier
+        BooleanSupplier supplier = () -> true;
+        stateTransitions.addTransition(supplier, "State4", "State5");
+
+        assertEquals(4, stateTransitions.getTransitions().size()); // Added once
+        // Note: The string state names won't be resolved to IDs in this test
+    }
+
+    /**
+     * Test the getActionDefinition method
+     */
+    @Test
+    public void testGetActionDefinition() {
+        // Create StateTransitions
+        StateTransitions stateTransitions = new StateTransitions();
+
+        // Create ActionDefinitionStateTransition with ActionDefinition
+        TaskSequenceStateTransition transition = new TaskSequenceStateTransition();
+        TaskSequence actionDef = new TaskSequence();
+        
+        // Add a step with new API
+        ActionStep step = new ActionStep();
+        PatternFindOptions findOptions = new PatternFindOptions.Builder()
+                .setStrategy(PatternFindOptions.Strategy.FIRST)
+                .build();
+        step.setActionConfig(findOptions);
+        step.setObjectCollection(new ObjectCollection());
+        actionDef.addStep(step);
+        
+        transition.setActionDefinition(actionDef);
+        transition.getActivate().add(2L);
+        stateTransitions.addTransition(transition);
+
+        // Test finding action definition for state 2
+        Optional<TaskSequence> result = stateTransitions.getActionDefinition(2L);
+        assertTrue(result.isPresent());
+        assertSame(actionDef, result.get());
+
+        // Test with non-existent state
+        result = stateTransitions.getActionDefinition(3L);
+        assertFalse(result.isPresent());
+
+        // Test with JavaStateTransition (should return empty)
+        JavaStateTransition javaTransition = new JavaStateTransition();
+        javaTransition.getActivate().add(4L);
+        stateTransitions.addTransition(javaTransition);
+
+        result = stateTransitions.getActionDefinition(4L);
+        assertFalse(result.isPresent());
+    }
+
+    /**
+     * Test the Builder pattern
+     */
+    @Test
+    public void testBuilder() {
+        // Create using builder
+        BooleanSupplier finishSupplier = () -> true;
+        BooleanSupplier transitionSupplier = () -> false;
+
+        StateTransitions stateTransitions = new StateTransitions.Builder("TestState")
+                .addTransitionFinish(finishSupplier)
+                .addTransition(transitionSupplier, "State2", "State3")
+                .setStaysVisibleAfterTransition(true)
+                .build();
+
+        // Verify
+        assertEquals("TestState", stateTransitions.getStateName());
+        assertTrue(stateTransitions.isStaysVisibleAfterTransition());
+        assertNotNull(stateTransitions.getTransitionFinish());
+        assertEquals(1, stateTransitions.getTransitions().size());
+
+        // Verify JavaStateTransition was created correctly
+        JavaStateTransition transition = (JavaStateTransition) stateTransitions.getTransitions().getFirst();
+        assertEquals(2, transition.getActivateNames().size());
+        assertTrue(transition.getActivateNames().contains("State2"));
+        assertTrue(transition.getActivateNames().contains("State3"));
+    }
+}
