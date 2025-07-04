@@ -2,7 +2,6 @@ package io.github.jspinak.brobot.dsl;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import io.github.jspinak.brobot.runner.dsl.model.ActionStep;
 
 import io.github.jspinak.brobot.runner.json.parsing.ConfigurationParser;
@@ -10,7 +9,6 @@ import io.github.jspinak.brobot.runner.json.parsing.exception.ConfigurationExcep
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest
 class ActionStepJsonParserTest {
 
     @Autowired

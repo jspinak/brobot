@@ -87,6 +87,87 @@ public final class PatternFindOptions extends BaseFindOptions {
                 return FindStrategy.FIRST;
         }
     }
+    
+    /**
+     * Creates a configuration optimized for quick pattern matching.
+     * 
+     * <p>This factory method provides a preset configuration for scenarios where
+     * speed is more important than precision. It uses:
+     * <ul>
+     *   <li>FIRST strategy (stops after finding one match)</li>
+     *   <li>Lower similarity threshold (0.7)</li>
+     *   <li>Disabled image capture for performance</li>
+     * </ul>
+     * </p>
+     * 
+     * @return A PatternFindOptions configured for quick searches
+     * @see io.github.jspinak.brobot.action.basic.find.presets.QuickFindOptions
+     */
+    public static PatternFindOptions forQuickSearch() {
+        return new Builder()
+            .setStrategy(Strategy.FIRST)
+            .setSimilarity(0.7)
+            .setCaptureImage(false)
+            .setMaxMatchesToActOn(1)
+            .build();
+    }
+    
+    /**
+     * Creates a configuration optimized for precise pattern matching.
+     * 
+     * <p>This factory method provides a preset configuration for scenarios where
+     * accuracy is more important than speed. It uses:
+     * <ul>
+     *   <li>BEST strategy (finds all matches and returns highest scoring)</li>
+     *   <li>High similarity threshold (0.9)</li>
+     *   <li>Enabled image capture for debugging</li>
+     *   <li>Conservative match fusion settings</li>
+     * </ul>
+     * </p>
+     * 
+     * @return A PatternFindOptions configured for precise searches
+     * @see io.github.jspinak.brobot.action.basic.find.presets.PreciseFindOptions
+     */
+    public static PatternFindOptions forPreciseSearch() {
+        return new Builder()
+            .setStrategy(Strategy.BEST)
+            .setSimilarity(0.9)
+            .setCaptureImage(true)
+            .setMatchFusion(new MatchFusionOptions.Builder()
+                .setFusionMethod(MatchFusionOptions.FusionMethod.ABSOLUTE)
+                .setMaxFusionDistanceX(10)
+                .setMaxFusionDistanceY(10))
+            .build();
+    }
+    
+    /**
+     * Creates a configuration for finding all occurrences of a pattern.
+     * 
+     * <p>This factory method provides a preset configuration for scenarios where
+     * you need to find multiple instances of an element. It uses:
+     * <ul>
+     *   <li>ALL strategy (finds all matches)</li>
+     *   <li>Balanced similarity threshold (0.8)</li>
+     *   <li>Match fusion to combine adjacent matches</li>
+     *   <li>No limit on match count</li>
+     * </ul>
+     * </p>
+     * 
+     * @return A PatternFindOptions configured for finding all matches
+     * @see io.github.jspinak.brobot.action.basic.find.presets.AllMatchesFindOptions
+     */
+    public static PatternFindOptions forAllMatches() {
+        return new Builder()
+            .setStrategy(Strategy.ALL)
+            .setSimilarity(0.8)
+            .setCaptureImage(false)
+            .setMaxMatchesToActOn(-1)
+            .setMatchFusion(new MatchFusionOptions.Builder()
+                .setFusionMethod(MatchFusionOptions.FusionMethod.ABSOLUTE)
+                .setMaxFusionDistanceX(20)
+                .setMaxFusionDistanceY(20))
+            .build();
+    }
 
     /**
      * Builder for constructing {@link PatternFindOptions} with a fluent API.
