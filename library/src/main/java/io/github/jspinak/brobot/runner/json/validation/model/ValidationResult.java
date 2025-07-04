@@ -221,6 +221,36 @@ public class ValidationResult {
     }
 
     /**
+     * Checks if there are any errors of the specified severity.
+     *
+     * @param severity The severity level to check for
+     * @return true if there are any errors of the specified severity
+     */
+    public boolean hasErrorsOfSeverity(ValidationSeverity severity) {
+        return errors.stream()
+                .anyMatch(e -> e.severity() == severity);
+    }
+
+    /**
+     * Gets all errors of the specified severity.
+     *
+     * @param severity The severity level to filter by
+     * @return List of errors with the specified severity
+     */
+    public List<ValidationError> getErrorsBySeverity(ValidationSeverity severity) {
+        return errors.stream()
+                .filter(e -> e.severity() == severity)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Clears all validation errors from this result.
+     */
+    public void clear() {
+        errors.clear();
+    }
+
+    /**
      * Creates a formatted string of all errors, grouped by severity.
      * 
      * <p>This method produces a human-readable summary of all validation errors,

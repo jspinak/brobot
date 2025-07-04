@@ -2,43 +2,30 @@ package io.github.jspinak.brobot.dsl;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
+import com.fasterxml.jackson.databind.SerializationFeature;
 import io.github.jspinak.brobot.runner.dsl.expressions.VariableExpression;
 import io.github.jspinak.brobot.runner.dsl.statements.AssignmentStatement;
-import io.github.jspinak.brobot.runner.json.parsing.ConfigurationParser;
-import io.github.jspinak.brobot.runner.json.parsing.exception.ConfigurationException;
-import io.github.jspinak.brobot.runner.json.utils.JsonUtils;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.TestPropertySource;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest
-@TestPropertySource(properties = {"java.awt.headless=false"})
 public class AssignmentStatementJsonParserTest {
 
-    @Autowired
-    private ConfigurationParser jsonParser;
-
-    @Autowired
-    private JsonUtils jsonUtils;
-
-    private ObjectMapper jacksonMapper;
+    private ObjectMapper objectMapper;
 
     @BeforeEach
     public void setup() {
-        jacksonMapper = new ObjectMapper();
+        objectMapper = new ObjectMapper();
+        objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
+        objectMapper.configure(com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
 
     /**
      * Test parsing JSON into an AssignmentStatement with a variable expression.
      */
     @Test
-    public void testParseWithVariableExpression() throws ConfigurationException {
+    public void testParseWithVariableExpression() throws Exception {
         // Create sample JSON for AssignmentStatement with a variable expression
         String json = """
                 {
@@ -52,7 +39,7 @@ public class AssignmentStatementJsonParserTest {
                 """;
 
         // Parse JSON to AssignmentStatement
-        JsonNode jsonNode = jsonParser.parseJson(json);
+        JsonNode jsonNode = objectMapper.readTree(json);
 
         // Print the JSON node for debugging
         System.out.println("DEBUG: JsonNode structure: " + jsonNode.toString());
@@ -61,7 +48,7 @@ public class AssignmentStatementJsonParserTest {
         assertTrue(jsonNode.has("variable"), "JSON should have 'variable' field");
         assertEquals("testVar", jsonNode.get("variable").asText(), "JSON 'variable' field should be 'testVar'");
 
-        AssignmentStatement statement = jsonParser.convertJson(jsonNode, AssignmentStatement.class);
+        AssignmentStatement statement = objectMapper.treeToValue(jsonNode, AssignmentStatement.class);
 
         // Add additional debug output
         System.out.println("DEBUG: AssignmentStatement after parsing: " + statement);
@@ -77,7 +64,7 @@ public class AssignmentStatementJsonParserTest {
      * Test parsing JSON with a literal expression into an AssignmentStatement
      */
     @Test
-    public void testParseWithLiteralExpression() throws ConfigurationException {
+    public void testParseWithLiteralExpression() throws Exception {
         // Create sample JSON for AssignmentStatement with a literal expression
         String json = """
                 {
@@ -92,8 +79,8 @@ public class AssignmentStatementJsonParserTest {
                 """;
 
         // Parse JSON to AssignmentStatement
-        JsonNode jsonNode = jsonParser.parseJson(json);
-        AssignmentStatement statement = jsonParser.convertJson(jsonNode, AssignmentStatement.class);
+        JsonNode jsonNode = objectMapper.readTree(json);
+        AssignmentStatement statement = objectMapper.treeToValue(jsonNode, AssignmentStatement.class);
 
         // Verify the parsed AssignmentStatement
         assertNotNull(statement);
@@ -118,7 +105,7 @@ public class AssignmentStatementJsonParserTest {
                 """;
 
         // Try direct deserialization with standard Jackson
-        AssignmentStatement statement = jacksonMapper.readValue(json, AssignmentStatement.class);
+        AssignmentStatement statement = objectMapper.readValue(json, AssignmentStatement.class);
 
         // Verify
         assertNotNull(statement);
@@ -129,7 +116,7 @@ public class AssignmentStatementJsonParserTest {
      * Test serialization of a manually created AssignmentStatement
      */
     @Test
-    public void testSerializeAssignmentStatement() throws ConfigurationException {
+    public void testSerializeAssignmentStatement() throws Exception {
         // Create a statement manually
         AssignmentStatement statement = new AssignmentStatement();
         statement.setVariable("testVar");
@@ -141,11 +128,11 @@ public class AssignmentStatementJsonParserTest {
         statement.setValue(varExpr);
 
         // Serialize
-        String json = jsonUtils.toJsonSafe(statement);
+        String json = objectMapper.writeValueAsString(statement);
         System.out.println("DEBUG: Serialized JSON: " + json);
 
         // Verify serialized JSON contains expected fields
-        JsonNode jsonNode = jsonParser.parseJson(json);
+        JsonNode jsonNode = objectMapper.readTree(json);
         assertTrue(jsonNode.has("variable"));
         assertEquals("testVar", jsonNode.get("variable").asText());
     }

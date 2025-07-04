@@ -35,6 +35,7 @@ import static org.mockito.Mockito.*;
 @MockitoSettings(strictness = Strictness.LENIENT)
 class FindTest {
 
+    @Mock private FindPipeline findPipeline;
     @Mock private FindStrategyRegistryV2 findStrategyRegistry;
     @Mock private StateMemory stateMemory;
     @Mock private NonImageObjectConverter nonImageObjectConverter;
@@ -54,9 +55,7 @@ class FindTest {
 
     @BeforeEach
     void setUp() {
-        find = new Find(findStrategyRegistry, stateMemory, nonImageObjectConverter,
-                matchAdjuster, profileSetBuilder, offsetLocationManager, matchFusion,
-                matchContentExtractor, textSelector);
+        find = new Find(findPipeline);
 
         findOptions = new PatternFindOptions.Builder()
                 .setStrategy(PatternFindOptions.Strategy.FIRST)
@@ -81,24 +80,11 @@ class FindTest {
                 .withImages(stateImage)
                 .build();
         
-        // Set up default mock for nonImageObjectConverter
-        ActionResult emptyResult = new ActionResult();
-        when(nonImageObjectConverter.getOtherObjectsDirectlyAsMatchObjects(any(ObjectCollection.class))).thenReturn(emptyResult);
-        
-        // Set up default mock for matchFusion
-        doNothing().when(matchFusion).setFusedMatches(any(ActionResult.class));
-        
-        // Set up default mock for matchContentExtractor
-        doNothing().when(matchContentExtractor).set(any(ActionResult.class));
-        
-        // Set up default mock for textSelector
-        when(textSelector.getString(any(TextSelector.Method.class), any(Text.class))).thenReturn("");
-        
-        // Set up default mock for findStrategyRegistry
-        when(findStrategyRegistry.get(any(BaseFindOptions.class))).thenReturn(
-                (result, collections) -> {
-                    // Default empty implementation
-                });
+        // Set up default mock for findPipeline - it should do nothing by default
+        doAnswer(invocation -> {
+            // Default implementation - just return the ActionResult as is
+            return invocation.getArgument(1);
+        }).when(findPipeline).execute(any(BaseFindOptions.class), any(ActionResult.class), any(ObjectCollection[].class));
     }
 
     @Test
@@ -113,28 +99,22 @@ class FindTest {
                 .setSearchImage(pattern.getImage())
                 .build();
 
-        ActionResult strategyResult = new ActionResult();
-        strategyResult.setSuccess(true);
-        strategyResult.getMatchList().add(match);
-
-        when(findStrategyRegistry.get(any(BaseFindOptions.class))).thenReturn(
-                (result, collections) -> {
-                    result.getMatchList().addAll(strategyResult.getMatchList());
-                    result.setSuccess(strategyResult.isSuccess());
-                });
+        // Mock the pipeline to add the match to the result
         doAnswer(invocation -> {
-            ActionResult result = invocation.getArgument(0);
-            result.getMatchList().addAll(strategyResult.getMatchList());
-            result.setSuccess(strategyResult.isSuccess());
-            return null;
-        }).when(matchAdjuster).adjustAll(any(ActionResult.class), any(MatchAdjustmentOptions.class));
+            ActionResult result = invocation.getArgument(1);
+            result.getMatchList().add(match);
+            result.setSuccess(true);
+            return result;
+        }).when(findPipeline).execute(any(BaseFindOptions.class), any(ActionResult.class), any(ObjectCollection[].class));
 
         // Act
         find.perform(actionResult, objectCollection);
 
         // Assert
-        verify(findStrategyRegistry).get(any(BaseFindOptions.class));
-        verify(matchAdjuster).adjustAll(any(ActionResult.class), any(MatchAdjustmentOptions.class));
+        verify(findPipeline).execute(eq(findOptions), eq(actionResult), eq(objectCollection));
+        assertTrue(actionResult.isSuccess());
+        assertEquals(1, actionResult.getMatchList().size());
+        assertEquals(match, actionResult.getMatchList().get(0));
     }
 
     @Test
@@ -159,20 +139,21 @@ class FindTest {
                 .setRegion(region)
                 .build());
 
-        when(nonImageObjectConverter.getOtherObjectsDirectlyAsMatchObjects(any(ObjectCollection.class))).thenReturn(convertedResult);
+        // Mock the pipeline to handle the region as a match
         doAnswer(invocation -> {
-            ActionResult result = invocation.getArgument(0);
+            ActionResult result = invocation.getArgument(1);
             result.getMatchList().addAll(convertedResult.getMatchList());
             result.setSuccess(convertedResult.isSuccess());
-            return null;
-        }).when(matchAdjuster).adjustAll(any(ActionResult.class), any(MatchAdjustmentOptions.class));
+            return result;
+        }).when(findPipeline).execute(any(BaseFindOptions.class), any(ActionResult.class), any(ObjectCollection[].class));
 
         // Act
         find.perform(actionResult, regionCollection);
 
         // Assert
-        verify(nonImageObjectConverter).getOtherObjectsDirectlyAsMatchObjects(any(ObjectCollection.class));
-        verify(findStrategyRegistry).get(any(BaseFindOptions.class));
+        verify(findPipeline).execute(eq(findOptions), eq(actionResult), eq(regionCollection));
+        assertTrue(actionResult.isSuccess());
+        assertEquals(1, actionResult.getMatchList().size());
     }
 
     @Test
@@ -197,20 +178,21 @@ class FindTest {
                 .setRegion(new Region(location.getX(), location.getY(), 1, 1))
                 .build());
 
-        when(nonImageObjectConverter.getOtherObjectsDirectlyAsMatchObjects(any(ObjectCollection.class))).thenReturn(convertedResult);
+        // Mock the pipeline to handle the location as a match
         doAnswer(invocation -> {
-            ActionResult result = invocation.getArgument(0);
+            ActionResult result = invocation.getArgument(1);
             result.getMatchList().addAll(convertedResult.getMatchList());
             result.setSuccess(convertedResult.isSuccess());
-            return null;
-        }).when(matchAdjuster).adjustAll(any(ActionResult.class), any(MatchAdjustmentOptions.class));
+            return result;
+        }).when(findPipeline).execute(any(BaseFindOptions.class), any(ActionResult.class), any(ObjectCollection[].class));
 
         // Act
         find.perform(actionResult, locationCollection);
 
         // Assert
-        verify(nonImageObjectConverter).getOtherObjectsDirectlyAsMatchObjects(any(ObjectCollection.class));
-        verify(findStrategyRegistry).get(any(BaseFindOptions.class));
+        verify(findPipeline).execute(eq(findOptions), eq(actionResult), eq(locationCollection));
+        assertTrue(actionResult.isSuccess());
+        assertEquals(1, actionResult.getMatchList().size());
     }
 
     @Test
@@ -299,23 +281,19 @@ class FindTest {
         ActionResult strategyResult = new ActionResult();
         strategyResult.setSuccess(true);
 
-        when(findStrategyRegistry.get(any(BaseFindOptions.class))).thenReturn(
-                (result, collections) -> {
-                    result.getMatchList().addAll(strategyResult.getMatchList());
-                    result.setSuccess(strategyResult.isSuccess());
-                });
+        // Mock the pipeline to process multiple collections
         doAnswer(invocation -> {
-            ActionResult result = invocation.getArgument(0);
-            result.getMatchList().addAll(strategyResult.getMatchList());
-            result.setSuccess(strategyResult.isSuccess());
-            return null;
-        }).when(matchAdjuster).adjustAll(any(ActionResult.class), any(MatchAdjustmentOptions.class));
+            ActionResult result = invocation.getArgument(1);
+            result.setSuccess(true);
+            return result;
+        }).when(findPipeline).execute(any(BaseFindOptions.class), any(ActionResult.class), any(ObjectCollection[].class));
 
         // Act
         find.perform(actionResult, collection1, collection2);
 
         // Assert
-        verify(findStrategyRegistry).get(any(BaseFindOptions.class));
+        verify(findPipeline).execute(eq(findOptions), eq(actionResult), eq(collection1), eq(collection2));
+        assertTrue(actionResult.isSuccess());
     }
 
     @Test
@@ -399,7 +377,9 @@ class FindTest {
         ActionResult actionResult = new ActionResult();
         actionResult.setActionConfig(findOptions);
 
-        when(findStrategyRegistry.get(any(BaseFindOptions.class))).thenReturn(null);
+        // Mock the pipeline to throw an exception
+        doThrow(new IllegalStateException("No strategy found"))
+                .when(findPipeline).execute(any(BaseFindOptions.class), any(ActionResult.class), any(ObjectCollection[].class));
 
         // Act & Assert
         assertThrows(IllegalStateException.class, () -> 

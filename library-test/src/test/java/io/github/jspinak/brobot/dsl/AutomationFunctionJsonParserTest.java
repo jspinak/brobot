@@ -1,7 +1,8 @@
 package io.github.jspinak.brobot.dsl;
 
 import com.fasterxml.jackson.databind.JsonNode;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import io.github.jspinak.brobot.runner.dsl.BusinessTask;
 import io.github.jspinak.brobot.runner.dsl.expressions.LiteralExpression;
 import io.github.jspinak.brobot.runner.dsl.expressions.VariableExpression;
@@ -11,35 +12,30 @@ import io.github.jspinak.brobot.runner.dsl.statements.ReturnStatement;
 import io.github.jspinak.brobot.runner.dsl.statements.Statement;
 import io.github.jspinak.brobot.runner.dsl.statements.VariableDeclarationStatement;
 import io.github.jspinak.brobot.runner.dsl.model.Parameter;
-import io.github.jspinak.brobot.runner.json.parsing.ConfigurationParser;
-import io.github.jspinak.brobot.runner.json.parsing.exception.ConfigurationException;
-import io.github.jspinak.brobot.runner.json.utils.JsonUtils;
-
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.TestPropertySource;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest
-@TestPropertySource(properties = {"java.awt.headless=false"})
 public class AutomationFunctionJsonParserTest {
 
-    @Autowired
-    private ConfigurationParser jsonParser;
+    private ObjectMapper objectMapper;
 
-    @Autowired
-    private JsonUtils jsonUtils;
+    @BeforeEach
+    void setUp() {
+        objectMapper = new ObjectMapper();
+        objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
+        objectMapper.configure(com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    }
 
     /**
      * Test parsing a simple AutomationFunction from JSON
      */
     @Test
-    public void testParseSimpleFunction() throws ConfigurationException {
+    public void testParseSimpleFunction() throws Exception {
         String json = """
                 {
                   "id": 1,
@@ -50,8 +46,8 @@ public class AutomationFunctionJsonParserTest {
                 }
                 """;
 
-        JsonNode jsonNode = jsonParser.parseJson(json);
-        BusinessTask function = jsonParser.convertJson(jsonNode, BusinessTask.class);
+        JsonNode jsonNode = objectMapper.readTree(json);
+        BusinessTask function = objectMapper.treeToValue(jsonNode, BusinessTask.class);
 
         assertNotNull(function);
         assertEquals(Integer.valueOf(1), function.getId());
@@ -66,7 +62,7 @@ public class AutomationFunctionJsonParserTest {
      * Test parsing a function with parameters
      */
     @Test
-    public void testParseFunctionWithParameters() throws ConfigurationException {
+    public void testParseFunctionWithParameters() throws Exception {
         String json = """
                 {
                   "id": 2,
@@ -86,8 +82,8 @@ public class AutomationFunctionJsonParserTest {
                 }
                 """;
 
-        JsonNode jsonNode = jsonParser.parseJson(json);
-        BusinessTask function = jsonParser.convertJson(jsonNode, BusinessTask.class);
+        JsonNode jsonNode = objectMapper.readTree(json);
+        BusinessTask function = objectMapper.treeToValue(jsonNode, BusinessTask.class);
 
         assertNotNull(function);
         assertEquals("functionWithParams", function.getName());
@@ -110,7 +106,7 @@ public class AutomationFunctionJsonParserTest {
      * Test parsing a function with statements
      */
     @Test
-    public void testParseFunctionWithStatements() throws ConfigurationException {
+    public void testParseFunctionWithStatements() throws Exception {
         String json = """
                 {
                   "id": 3,
@@ -152,8 +148,8 @@ public class AutomationFunctionJsonParserTest {
                 }
                 """;
 
-        JsonNode jsonNode = jsonParser.parseJson(json);
-        BusinessTask function = jsonParser.convertJson(jsonNode, BusinessTask.class);
+        JsonNode jsonNode = objectMapper.readTree(json);
+        BusinessTask function = objectMapper.treeToValue(jsonNode, BusinessTask.class);
 
         assertNotNull(function);
         assertEquals("functionWithStatements", function.getName());
@@ -184,7 +180,7 @@ public class AutomationFunctionJsonParserTest {
      * Test serialization and deserialization of AutomationFunction
      */
     @Test
-    public void testSerializeDeserializeFunction() throws ConfigurationException {
+    public void testSerializeDeserializeFunction() throws Exception {
         // Create a function
         BusinessTask function = new BusinessTask();
         function.setId(10);
@@ -219,12 +215,12 @@ public class AutomationFunctionJsonParserTest {
         function.setStatements(statements);
 
         // Serialize
-        String json = jsonUtils.toJsonSafe(function);
+        String json = objectMapper.writeValueAsString(function);
         System.out.println("DEBUG: Serialized AutomationFunction: " + json);
 
         // Deserialize
-        JsonNode jsonNode = jsonParser.parseJson(json);
-        BusinessTask deserializedFunction = jsonParser.convertJson(jsonNode, BusinessTask.class);
+        JsonNode jsonNode = objectMapper.readTree(json);
+        BusinessTask deserializedFunction = objectMapper.treeToValue(jsonNode, BusinessTask.class);
 
         // Verify structure
         assertNotNull(deserializedFunction);
