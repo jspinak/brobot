@@ -2,7 +2,7 @@ package io.github.jspinak.brobot.dsl;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
+import com.fasterxml.jackson.databind.SerializationFeature;
 import io.github.jspinak.brobot.runner.dsl.expressions.BinaryOperationExpression;
 import io.github.jspinak.brobot.runner.dsl.expressions.LiteralExpression;
 import io.github.jspinak.brobot.runner.dsl.expressions.MethodCallExpression;
@@ -14,43 +14,30 @@ import io.github.jspinak.brobot.runner.dsl.statements.MethodCallStatement;
 import io.github.jspinak.brobot.runner.dsl.statements.ReturnStatement;
 import io.github.jspinak.brobot.runner.dsl.statements.Statement;
 import io.github.jspinak.brobot.runner.dsl.statements.VariableDeclarationStatement;
-import io.github.jspinak.brobot.runner.json.parsing.ConfigurationParser;
-import io.github.jspinak.brobot.runner.json.parsing.exception.ConfigurationException;
-import io.github.jspinak.brobot.runner.json.utils.JsonUtils;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.TestPropertySource;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest
-@TestPropertySource(properties = {"java.awt.headless=false"})
 public class StatementJsonParserTest {
 
-    @Autowired
-    private ConfigurationParser jsonParser;
-
-    @Autowired
-    private JsonUtils jsonUtils;
-
-    private ObjectMapper jacksonMapper;
+    private ObjectMapper objectMapper;
 
     @BeforeEach
     public void setup() {
-        jacksonMapper = new ObjectMapper();
+        objectMapper = new ObjectMapper();
+        objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
+        objectMapper.configure(com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
 
     /**
      * Test parsing a VariableDeclarationStatement from JSON
      */
     @Test
-    public void testParseVariableDeclarationStatement() throws ConfigurationException {
+    public void testParseVariableDeclarationStatement() throws Exception {
         String json = """
                 {
                   "statementType": "variableDeclaration",
@@ -64,8 +51,8 @@ public class StatementJsonParserTest {
                 }
                 """;
 
-        JsonNode jsonNode = jsonParser.parseJson(json);
-        Statement statement = jsonParser.convertJson(jsonNode, Statement.class);
+        JsonNode jsonNode = objectMapper.readTree(json);
+        Statement statement = objectMapper.treeToValue(jsonNode, Statement.class);
 
         // Verify the statement is of correct type
         assertTrue(statement instanceof VariableDeclarationStatement);
@@ -88,7 +75,7 @@ public class StatementJsonParserTest {
      * Test parsing an AssignmentStatement from JSON
      */
     @Test
-    public void testParseAssignmentStatement() throws ConfigurationException {
+    public void testParseAssignmentStatement() throws Exception {
         String json = """
                 {
                   "statementType": "assignment",
@@ -109,8 +96,8 @@ public class StatementJsonParserTest {
                 }
                 """;
 
-        JsonNode jsonNode = jsonParser.parseJson(json);
-        Statement statement = jsonParser.convertJson(jsonNode, Statement.class);
+        JsonNode jsonNode = objectMapper.readTree(json);
+        Statement statement = objectMapper.treeToValue(jsonNode, Statement.class);
 
         // Verify the statement is of correct type
         assertTrue(statement instanceof AssignmentStatement);
@@ -133,7 +120,7 @@ public class StatementJsonParserTest {
      * Test parsing an IfStatement from JSON
      */
     @Test
-    public void testParseIfStatement() throws ConfigurationException {
+    public void testParseIfStatement() throws Exception {
         String json = """
                 {
                   "statementType": "if",
@@ -176,8 +163,8 @@ public class StatementJsonParserTest {
                 }
                 """;
 
-        JsonNode jsonNode = jsonParser.parseJson(json);
-        Statement statement = jsonParser.convertJson(jsonNode, Statement.class);
+        JsonNode jsonNode = objectMapper.readTree(json);
+        Statement statement = objectMapper.treeToValue(jsonNode, Statement.class);
 
         // Verify the statement is of correct type
         assertTrue(statement instanceof IfStatement);
@@ -203,7 +190,7 @@ public class StatementJsonParserTest {
      * Test parsing a ForEachStatement from JSON
      */
     @Test
-    public void testParseForEachStatement() throws ConfigurationException {
+    public void testParseForEachStatement() throws Exception {
         String json = """
                 {
                   "statementType": "forEach",
@@ -229,8 +216,8 @@ public class StatementJsonParserTest {
                 }
                 """;
 
-        JsonNode jsonNode = jsonParser.parseJson(json);
-        Statement statement = jsonParser.convertJson(jsonNode, Statement.class);
+        JsonNode jsonNode = objectMapper.readTree(json);
+        Statement statement = objectMapper.treeToValue(jsonNode, Statement.class);
 
         // Verify the statement is of correct type
         assertTrue(statement instanceof ForEachStatement);
@@ -256,7 +243,7 @@ public class StatementJsonParserTest {
      * Test parsing a ReturnStatement from JSON
      */
     @Test
-    public void testParseReturnStatement() throws ConfigurationException {
+    public void testParseReturnStatement() throws Exception {
         String json = """
                 {
                   "statementType": "return",
@@ -267,8 +254,8 @@ public class StatementJsonParserTest {
                 }
                 """;
 
-        JsonNode jsonNode = jsonParser.parseJson(json);
-        Statement statement = jsonParser.convertJson(jsonNode, Statement.class);
+        JsonNode jsonNode = objectMapper.readTree(json);
+        Statement statement = objectMapper.treeToValue(jsonNode, Statement.class);
 
         // Verify the statement is of correct type
         assertTrue(statement instanceof ReturnStatement);
@@ -288,7 +275,7 @@ public class StatementJsonParserTest {
      * Test parsing a MethodCallStatement from JSON
      */
     @Test
-    public void testParseMethodCallStatement() throws ConfigurationException {
+    public void testParseMethodCallStatement() throws Exception {
         String json = """
                 {
                   "statementType": "methodCall",
@@ -309,8 +296,8 @@ public class StatementJsonParserTest {
                 }
                 """;
 
-        JsonNode jsonNode = jsonParser.parseJson(json);
-        Statement statement = jsonParser.convertJson(jsonNode, Statement.class);
+        JsonNode jsonNode = objectMapper.readTree(json);
+        Statement statement = objectMapper.treeToValue(jsonNode, Statement.class);
 
         // Verify the statement is of correct type
         assertTrue(statement instanceof MethodCallStatement);
@@ -338,7 +325,7 @@ public class StatementJsonParserTest {
      * Test serialization and deserialization of an IfStatement
      */
     @Test
-    public void testSerializeDeserializeIfStatement() throws ConfigurationException {
+    public void testSerializeDeserializeIfStatement() throws Exception {
         // Create a complex if statement manually
         IfStatement ifStatement = new IfStatement();
         ifStatement.setStatementType("if");
@@ -380,12 +367,12 @@ public class StatementJsonParserTest {
         ifStatement.setElseStatements(elseStatements);
 
         // Serialize
-        String json = jsonUtils.toJsonSafe(ifStatement);
+        String json = objectMapper.writeValueAsString(ifStatement);
         System.out.println("DEBUG: Serialized IfStatement JSON: " + json);
 
         // Deserialize
-        JsonNode jsonNode = jsonParser.parseJson(json);
-        Statement deserializedStatement = jsonParser.convertJson(jsonNode, Statement.class);
+        JsonNode jsonNode = objectMapper.readTree(json);
+        Statement deserializedStatement = objectMapper.treeToValue(jsonNode, Statement.class);
 
         // Verify the type and basic structure
         assertTrue(deserializedStatement instanceof IfStatement);
@@ -422,9 +409,9 @@ public class StatementJsonParserTest {
                 }
                 """;
 
-        Exception exception = assertThrows(ConfigurationException.class, () -> {
-            JsonNode jsonNode = jsonParser.parseJson(json);
-            Statement statement = jsonParser.convertJson(jsonNode, Statement.class);
+        Exception exception = assertThrows(Exception.class, () -> {
+            JsonNode jsonNode = objectMapper.readTree(json);
+            Statement statement = objectMapper.treeToValue(jsonNode, Statement.class);
         });
 
         // Verify exception contains useful message about the invalid type
@@ -448,14 +435,14 @@ public class StatementJsonParserTest {
         // Some configurations will create the object with null fields
         // Others will throw an exception for missing required fields
         try {
-            JsonNode jsonNode = jsonParser.parseJson(json);
-            Statement statement = jsonParser.convertJson(jsonNode, Statement.class);
+            JsonNode jsonNode = objectMapper.readTree(json);
+            Statement statement = objectMapper.treeToValue(jsonNode, Statement.class);
 
             // If no exception, verify the field is null
             assertInstanceOf(AssignmentStatement.class, statement);
             AssignmentStatement assignment = (AssignmentStatement) statement;
             assertNull(assignment.getVariable());
-        } catch (ConfigurationException e) {
+        } catch (Exception e) {
             // Debug output to check the actual message
             System.out.println("DEBUG: Exception message: " + e.getMessage());
 

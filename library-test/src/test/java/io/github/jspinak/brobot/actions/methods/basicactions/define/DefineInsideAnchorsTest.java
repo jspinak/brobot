@@ -1,11 +1,11 @@
 package io.github.jspinak.brobot.actions.methods.basicactions.define;
 
 import io.github.jspinak.brobot.action.ActionResult;
+import io.github.jspinak.brobot.action.basic.region.DefineInsideAnchors;
 import io.github.jspinak.brobot.BrobotTestApplication;
 import io.github.jspinak.brobot.actions.methods.basicactions.TestData;
 import io.github.jspinak.brobot.test.BrobotIntegrationTestBase;
 import io.github.jspinak.brobot.model.element.Region;
-import io.github.jspinak.brobot.action.basic.visual.DefineInsideAnchors;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;

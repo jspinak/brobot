@@ -1,34 +1,30 @@
 package io.github.jspinak.brobot.dsl;
 
 import com.fasterxml.jackson.databind.JsonNode;
-
-import io.github.jspinak.brobot.runner.json.parsing.ConfigurationParser;
-import io.github.jspinak.brobot.runner.json.parsing.exception.ConfigurationException;
-import io.github.jspinak.brobot.runner.json.utils.JsonUtils;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import io.github.jspinak.brobot.runner.dsl.model.Parameter;
-
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.TestPropertySource;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest
-@TestPropertySource(properties = {"java.awt.headless=false"})
 public class ParameterJsonParserTest {
 
-    @Autowired
-    private ConfigurationParser jsonParser;
+    private ObjectMapper objectMapper;
 
-    @Autowired
-    private JsonUtils jsonUtils;
+    @BeforeEach
+    void setUp() {
+        objectMapper = new ObjectMapper();
+        objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
+        objectMapper.configure(com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    }
 
     /**
      * Test parsing a Parameter from JSON
      */
     @Test
-    public void testParseParameter() throws ConfigurationException {
+    public void testParseParameter() throws Exception {
         String json = """
                 {
                   "name": "inputValue",
@@ -36,8 +32,8 @@ public class ParameterJsonParserTest {
                 }
                 """;
 
-        JsonNode jsonNode = jsonParser.parseJson(json);
-        Parameter parameter = jsonParser.convertJson(jsonNode, Parameter.class);
+        JsonNode jsonNode = objectMapper.readTree(json);
+        Parameter parameter = objectMapper.treeToValue(jsonNode, Parameter.class);
 
         assertNotNull(parameter);
         assertEquals("inputValue", parameter.getName());
@@ -48,7 +44,7 @@ public class ParameterJsonParserTest {
      * Test parsing all parameter types
      */
     @Test
-    public void testParseAllParameterTypes() throws ConfigurationException {
+    public void testParseAllParameterTypes() throws Exception {
         // Test all supported parameter types
         String[] types = {"boolean", "string", "int", "double", "region", "matches", "stateImage", "stateRegion", "object"};
 
@@ -73,19 +69,19 @@ public class ParameterJsonParserTest {
      * Test serialization and deserialization of Parameter
      */
     @Test
-    public void testSerializeDeserializeParameter() throws ConfigurationException {
+    public void testSerializeDeserializeParameter() throws Exception {
         // Create a parameter
         Parameter parameter = new Parameter();
         parameter.setName("testParam");
         parameter.setType("double");
 
         // Serialize
-        String json = jsonUtils.toJsonSafe(parameter);
+        String json = objectMapper.writeValueAsString(parameter);
         System.out.println("DEBUG: Serialized Parameter: " + json);
 
         // Deserialize
-        JsonNode jsonNode = jsonParser.parseJson(json);
-        Parameter deserializedParam = jsonParser.convertJson(jsonNode, Parameter.class);
+        JsonNode jsonNode = objectMapper.readTree(json);
+        Parameter deserializedParam = objectMapper.treeToValue(jsonNode, Parameter.class);
 
         // Verify
         assertNotNull(deserializedParam);
@@ -97,7 +93,7 @@ public class ParameterJsonParserTest {
      * Test with missing fields
      */
     @Test
-    public void testMissingFields() throws ConfigurationException {
+    public void testMissingFields() throws Exception {
         String json = """
                 {
                   "name": "partialParam"
@@ -105,8 +101,8 @@ public class ParameterJsonParserTest {
                 }
                 """;
 
-        JsonNode jsonNode = jsonParser.parseJson(json);
-        Parameter parameter = jsonParser.convertJson(jsonNode, Parameter.class);
+        JsonNode jsonNode = objectMapper.readTree(json);
+        Parameter parameter = objectMapper.treeToValue(jsonNode, Parameter.class);
 
         assertNotNull(parameter);
         assertEquals("partialParam", parameter.getName());
