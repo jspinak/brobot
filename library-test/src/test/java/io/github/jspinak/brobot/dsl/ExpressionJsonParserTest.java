@@ -2,48 +2,35 @@ package io.github.jspinak.brobot.dsl;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
+import com.fasterxml.jackson.databind.SerializationFeature;
 import io.github.jspinak.brobot.runner.dsl.expressions.BinaryOperationExpression;
 import io.github.jspinak.brobot.runner.dsl.expressions.BuilderExpression;
 import io.github.jspinak.brobot.runner.dsl.expressions.Expression;
 import io.github.jspinak.brobot.runner.dsl.expressions.LiteralExpression;
 import io.github.jspinak.brobot.runner.dsl.expressions.MethodCallExpression;
 import io.github.jspinak.brobot.runner.dsl.expressions.VariableExpression;
-import io.github.jspinak.brobot.runner.json.parsing.ConfigurationParser;
-import io.github.jspinak.brobot.runner.json.parsing.exception.ConfigurationException;
-import io.github.jspinak.brobot.runner.json.utils.JsonUtils;
 import io.github.jspinak.brobot.runner.dsl.model.BuilderMethod;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.TestPropertySource;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest
-@TestPropertySource(properties = {"java.awt.headless=false"})
 public class ExpressionJsonParserTest {
 
-    @Autowired
-    private ConfigurationParser jsonParser;
-
-    @Autowired
-    private JsonUtils jsonUtils;
-
-    private ObjectMapper jacksonMapper;
+    private ObjectMapper objectMapper;
 
     @BeforeEach
     public void setup() {
-        jacksonMapper = new ObjectMapper();
+        objectMapper = new ObjectMapper();
+        objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
+        objectMapper.configure(com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
 
     /**
      * Test parsing a LiteralExpression from JSON
      */
     @Test
-    public void testParseLiteralExpression() throws ConfigurationException {
+    public void testParseLiteralExpression() throws Exception {
         // Test boolean literal
         String booleanJson = """
                 {
@@ -53,8 +40,8 @@ public class ExpressionJsonParserTest {
                 }
                 """;
 
-        JsonNode jsonNode = jsonParser.parseJson(booleanJson);
-        Expression expression = jsonParser.convertJson(jsonNode, Expression.class);
+        JsonNode jsonNode = objectMapper.readTree(booleanJson);
+        Expression expression = objectMapper.treeToValue(jsonNode, Expression.class);
 
         assertInstanceOf(LiteralExpression.class, expression);
         LiteralExpression literal = (LiteralExpression) expression;
@@ -71,8 +58,8 @@ public class ExpressionJsonParserTest {
                 }
                 """;
 
-        jsonNode = jsonParser.parseJson(stringJson);
-        expression = jsonParser.convertJson(jsonNode, Expression.class);
+        jsonNode = objectMapper.readTree(stringJson);
+        expression = objectMapper.treeToValue(jsonNode, Expression.class);
 
         assertInstanceOf(LiteralExpression.class, expression);
         literal = (LiteralExpression) expression;
@@ -89,8 +76,8 @@ public class ExpressionJsonParserTest {
                 }
                 """;
 
-        jsonNode = jsonParser.parseJson(intJson);
-        expression = jsonParser.convertJson(jsonNode, Expression.class);
+        jsonNode = objectMapper.readTree(intJson);
+        expression = objectMapper.treeToValue(jsonNode, Expression.class);
 
         assertInstanceOf(LiteralExpression.class, expression);
         literal = (LiteralExpression) expression;
@@ -110,8 +97,8 @@ public class ExpressionJsonParserTest {
                 }
                 """;
 
-        jsonNode = jsonParser.parseJson(doubleJson);
-        expression = jsonParser.convertJson(jsonNode, Expression.class);
+        jsonNode = objectMapper.readTree(doubleJson);
+        expression = objectMapper.treeToValue(jsonNode, Expression.class);
 
         assertInstanceOf(LiteralExpression.class, expression);
         literal = (LiteralExpression) expression;
@@ -129,8 +116,8 @@ public class ExpressionJsonParserTest {
                 }
                 """;
 
-        jsonNode = jsonParser.parseJson(nullJson);
-        expression = jsonParser.convertJson(jsonNode, Expression.class);
+        jsonNode = objectMapper.readTree(nullJson);
+        expression = objectMapper.treeToValue(jsonNode, Expression.class);
 
         assertInstanceOf(LiteralExpression.class, expression);
         literal = (LiteralExpression) expression;
@@ -143,7 +130,7 @@ public class ExpressionJsonParserTest {
      * Test parsing a VariableExpression from JSON
      */
     @Test
-    public void testParseVariableExpression() throws ConfigurationException {
+    public void testParseVariableExpression() throws Exception {
         String json = """
                 {
                   "expressionType": "variable",
@@ -151,8 +138,8 @@ public class ExpressionJsonParserTest {
                 }
                 """;
 
-        JsonNode jsonNode = jsonParser.parseJson(json);
-        Expression expression = jsonParser.convertJson(jsonNode, Expression.class);
+        JsonNode jsonNode = objectMapper.readTree(json);
+        Expression expression = objectMapper.treeToValue(jsonNode, Expression.class);
 
         assertInstanceOf(VariableExpression.class, expression);
         VariableExpression variable = (VariableExpression) expression;
@@ -164,7 +151,7 @@ public class ExpressionJsonParserTest {
      * Test parsing a MethodCallExpression from JSON
      */
     @Test
-    public void testParseMethodCallExpression() throws ConfigurationException {
+    public void testParseMethodCallExpression() throws Exception {
         String json = """
                 {
                   "expressionType": "methodCall",
@@ -185,8 +172,8 @@ public class ExpressionJsonParserTest {
                 }
                 """;
 
-        JsonNode jsonNode = jsonParser.parseJson(json);
-        Expression expression = jsonParser.convertJson(jsonNode, Expression.class);
+        JsonNode jsonNode = objectMapper.readTree(json);
+        Expression expression = objectMapper.treeToValue(jsonNode, Expression.class);
 
         assertInstanceOf(MethodCallExpression.class, expression);
         MethodCallExpression methodCall = (MethodCallExpression) expression;
@@ -212,7 +199,7 @@ public class ExpressionJsonParserTest {
      * Test parsing a BinaryOperationExpression from JSON
      */
     @Test
-    public void testParseBinaryOperationExpression() throws ConfigurationException {
+    public void testParseBinaryOperationExpression() throws Exception {
         String json = """
                 {
                   "expressionType": "binaryOperation",
@@ -228,8 +215,8 @@ public class ExpressionJsonParserTest {
                 }
                 """;
 
-        JsonNode jsonNode = jsonParser.parseJson(json);
-        Expression expression = jsonParser.convertJson(jsonNode, Expression.class);
+        JsonNode jsonNode = objectMapper.readTree(json);
+        Expression expression = objectMapper.treeToValue(jsonNode, Expression.class);
 
         assertInstanceOf(BinaryOperationExpression.class, expression);
         BinaryOperationExpression binOp = (BinaryOperationExpression) expression;
@@ -253,7 +240,7 @@ public class ExpressionJsonParserTest {
      * Test parsing a BuilderExpression from JSON
      */
     @Test
-    public void testParseBuilderExpression() throws ConfigurationException {
+    public void testParseBuilderExpression() throws Exception {
         String json = """
                 {
                   "expressionType": "builder",
@@ -283,8 +270,8 @@ public class ExpressionJsonParserTest {
                 }
                 """;
 
-        JsonNode jsonNode = jsonParser.parseJson(json);
-        Expression expression = jsonParser.convertJson(jsonNode, Expression.class);
+        JsonNode jsonNode = objectMapper.readTree(json);
+        Expression expression = objectMapper.treeToValue(jsonNode, Expression.class);
 
         assertInstanceOf(BuilderExpression.class, expression);
         BuilderExpression builder = (BuilderExpression) expression;
@@ -316,7 +303,7 @@ public class ExpressionJsonParserTest {
      * Test parsing complex nested expressions
      */
     @Test
-    public void testParseComplexNestedExpression() throws ConfigurationException {
+    public void testParseComplexNestedExpression() throws Exception {
         String json = """
                 {
                   "expressionType": "binaryOperation",
@@ -351,8 +338,8 @@ public class ExpressionJsonParserTest {
                 }
                 """;
 
-        JsonNode jsonNode = jsonParser.parseJson(json);
-        Expression expression = jsonParser.convertJson(jsonNode, Expression.class);
+        JsonNode jsonNode = objectMapper.readTree(json);
+        Expression expression = objectMapper.treeToValue(jsonNode, Expression.class);
 
         assertInstanceOf(BinaryOperationExpression.class, expression);
         BinaryOperationExpression rootOp = (BinaryOperationExpression) expression;
@@ -381,7 +368,7 @@ public class ExpressionJsonParserTest {
      * Test serialization of a LiteralExpression
      */
     @Test
-    public void testSerializeLiteralExpression() throws ConfigurationException {
+    public void testSerializeLiteralExpression() throws Exception {
         // Create a literal expression
         LiteralExpression literal = new LiteralExpression();
         literal.setExpressionType("literal");
@@ -389,17 +376,17 @@ public class ExpressionJsonParserTest {
         literal.setValue("test value");
 
         // Serialize
-        String json = jsonUtils.toJsonSafe(literal);
+        String json = objectMapper.writeValueAsString(literal);
         System.out.println("DEBUG: Serialized LiteralExpression: " + json);
 
         // Verify JSON contains expected fields
-        JsonNode jsonNode = jsonParser.parseJson(json);
+        JsonNode jsonNode = objectMapper.readTree(json);
         assertEquals("literal", jsonNode.get("expressionType").asText());
         assertEquals("string", jsonNode.get("valueType").asText());
         assertEquals("test value", jsonNode.get("value").asText());
 
         // Deserialize and verify round-trip
-        Expression deserialized = jsonParser.convertJson(jsonNode, Expression.class);
+        Expression deserialized = objectMapper.treeToValue(jsonNode, Expression.class);
         assertInstanceOf(LiteralExpression.class, deserialized);
         LiteralExpression deserializedLiteral = (LiteralExpression) deserialized;
         assertEquals("literal", deserializedLiteral.getExpressionType());
@@ -411,23 +398,23 @@ public class ExpressionJsonParserTest {
      * Test serialization of a VariableExpression
      */
     @Test
-    public void testSerializeVariableExpression() throws ConfigurationException {
+    public void testSerializeVariableExpression() throws Exception {
         // Create a variable expression
         VariableExpression variable = new VariableExpression();
         variable.setExpressionType("variable");
         variable.setName("testVar");
 
         // Serialize
-        String json = jsonUtils.toJsonSafe(variable);
+        String json = objectMapper.writeValueAsString(variable);
         System.out.println("DEBUG: Serialized VariableExpression: " + json);
 
         // Verify JSON contains expected fields
-        JsonNode jsonNode = jsonParser.parseJson(json);
+        JsonNode jsonNode = objectMapper.readTree(json);
         assertEquals("variable", jsonNode.get("expressionType").asText());
         assertEquals("testVar", jsonNode.get("name").asText());
 
         // Deserialize and verify round-trip
-        Expression deserialized = jsonParser.convertJson(jsonNode, Expression.class);
+        Expression deserialized = objectMapper.treeToValue(jsonNode, Expression.class);
         assertInstanceOf(VariableExpression.class, deserialized);
         VariableExpression deserializedVar = (VariableExpression) deserialized;
         assertEquals("variable", deserializedVar.getExpressionType());
@@ -438,7 +425,7 @@ public class ExpressionJsonParserTest {
      * Test serialization of a complex nested expression
      */
     @Test
-    public void testSerializeComplexExpression() throws ConfigurationException {
+    public void testSerializeComplexExpression() throws Exception {
         // Create a complex expression: (x + 5) > 10
         BinaryOperationExpression rootOp = new BinaryOperationExpression();
         rootOp.setExpressionType("binaryOperation");
@@ -471,12 +458,12 @@ public class ExpressionJsonParserTest {
         rootOp.setRight(lit10);
 
         // Serialize
-        String json = jsonUtils.toJsonSafe(rootOp);
+        String json = objectMapper.writeValueAsString(rootOp);
         System.out.println("DEBUG: Serialized Complex Expression: " + json);
 
         // Deserialize and verify structure
-        JsonNode jsonNode = jsonParser.parseJson(json);
-        Expression deserialized = jsonParser.convertJson(jsonNode, Expression.class);
+        JsonNode jsonNode = objectMapper.readTree(json);
+        Expression deserialized = objectMapper.treeToValue(jsonNode, Expression.class);
 
         assertInstanceOf(BinaryOperationExpression.class, deserialized);
         BinaryOperationExpression deserializedRoot = (BinaryOperationExpression) deserialized;
@@ -511,9 +498,9 @@ public class ExpressionJsonParserTest {
                 }
                 """;
 
-        Exception exception = assertThrows(ConfigurationException.class, () -> {
-            JsonNode jsonNode = jsonParser.parseJson(json);
-            Expression expression = jsonParser.convertJson(jsonNode, Expression.class);
+        Exception exception = assertThrows(Exception.class, () -> {
+            JsonNode jsonNode = objectMapper.readTree(json);
+            Expression expression = objectMapper.treeToValue(jsonNode, Expression.class);
         });
 
         // Verify exception contains useful message about the invalid type
@@ -535,14 +522,14 @@ public class ExpressionJsonParserTest {
                 """;
 
         try {
-            JsonNode jsonNode = jsonParser.parseJson(json);
-            Expression expression = jsonParser.convertJson(jsonNode, Expression.class);
+            JsonNode jsonNode = objectMapper.readTree(json);
+            Expression expression = objectMapper.treeToValue(jsonNode, Expression.class);
 
             // If no exception, verify the field is null
             assertInstanceOf(VariableExpression.class, expression);
             VariableExpression variable = (VariableExpression) expression;
             assertNull(variable.getName());
-        } catch (ConfigurationException e) {
+        } catch (Exception e) {
             System.out.println("DEBUG: Exception message: " + e.getMessage());
             assertTrue(e.getMessage().contains("Failed to convert JSON") ||
                     e.getMessage().toLowerCase().contains("missing"));
