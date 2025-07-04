@@ -151,4 +151,4 @@ ChainedFindOptions chainedFind = new ChainedFindOptions.Builder()
 
 The new API provides better type safety, clearer intent, and more flexibility in combining different types of find operations.
 
-For more information on the new ActionConfig API, see the [Migration Guide](/docs/03-core-library/guides/migration-guide).
+For more information on the new ActionConfig API, see the [Migration Guide](/docs/core-library/guides/migration-guide).
