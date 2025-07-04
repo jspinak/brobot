@@ -192,4 +192,4 @@ ColorFindOptions colorFind = new ColorFindOptions.Builder()
 
 The new API provides better type safety and more color-specific options.
 
-For more information on the new ActionConfig API, see the [Migration Guide](/docs/03-core-library/guides/migration-guide).
+For more information on the new ActionConfig API, see the [Migration Guide](/docs/core-library/guides/migration-guide).

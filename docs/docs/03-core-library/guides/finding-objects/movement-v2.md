@@ -225,4 +225,4 @@ MotionFindOptions findMotion = new MotionFindOptions.Builder()
 
 The new API provides more motion-specific options and better type safety.
 
-For more information on the new ActionConfig API, see the [Migration Guide](/docs/03-core-library/guides/migration-guide).
+For more information on the new ActionConfig API, see the [Migration Guide](/docs/core-library/guides/migration-guide).
