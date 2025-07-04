@@ -159,7 +159,7 @@ public class IslandTransitions {
 }
 ```
 
-## Key Changes in v2.0
+## Key Changes in v1.1.0
 
 The transition examples have been updated to use the new ActionConfig API:
 
@@ -172,4 +172,4 @@ The transition examples have been updated to use the new ActionConfig API:
    - `setPauseBetweenClicks(0.2)` instead of `setPauseBetweenActions(.2)`
 4. **Explicit Action Creation**: Use `actionService.getAction()` to get the appropriate action implementation
 
-For more details on migrating from ActionOptions to ActionConfig, see the [Migration Guide](/docs/migration-guide).
+For more details on migrating from ActionOptions to ActionConfig, see the [Migration Guide](/docs/03-core-library/guides/migration-guide).
