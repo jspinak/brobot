@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.runner.diagnostics;
 
+import lombok.Data;
+
 import io.github.jspinak.brobot.runner.errorhandling.ErrorHandler;
 import io.github.jspinak.brobot.runner.errorhandling.ErrorStatistics;
 import io.github.jspinak.brobot.runner.performance.PerformanceProfiler;
@@ -18,6 +20,7 @@ import java.util.Collections;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+@Data
 class DiagnosticToolTest {
 
     @Mock

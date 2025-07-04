@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.runner.errorhandling;
 
+import lombok.Data;
+
 import io.github.jspinak.brobot.runner.diagnostics.DiagnosticReport;
 import io.github.jspinak.brobot.runner.diagnostics.DiagnosticTool;
 import io.github.jspinak.brobot.runner.session.SessionRecoveryManager;
@@ -23,6 +25,7 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+@Data
 class ErrorReportGeneratorTest {
 
     @Mock

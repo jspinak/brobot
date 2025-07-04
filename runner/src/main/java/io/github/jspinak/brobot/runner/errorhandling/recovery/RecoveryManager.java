@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.runner.errorhandling.recovery;
 
+import lombok.Data;
+
 import io.github.jspinak.brobot.runner.errorhandling.ErrorContext;
 import io.github.jspinak.brobot.runner.errorhandling.ErrorResult;
 import io.github.jspinak.brobot.runner.events.EventBus;
@@ -19,6 +21,7 @@ import java.util.function.Supplier;
 @Slf4j
 @Component
 @RequiredArgsConstructor
+@Data
 public class RecoveryManager {
 
     private final EventBus eventBus;

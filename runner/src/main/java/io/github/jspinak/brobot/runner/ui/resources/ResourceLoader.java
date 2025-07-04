@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.runner.ui.resources;
 
+import lombok.Data;
+
 import io.github.jspinak.brobot.runner.events.EventBus;
 import io.github.jspinak.brobot.runner.events.LogEvent;
 import javafx.scene.image.Image;
@@ -21,6 +23,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * icons, and localized messages.
  */
 @Component
+@Data
 public class ResourceLoader {
     private static final Logger logger = LoggerFactory.getLogger(ResourceLoader.class);
 

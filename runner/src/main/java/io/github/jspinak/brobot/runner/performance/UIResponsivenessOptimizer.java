@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.runner.performance;
 
+import lombok.Data;
+
 import javafx.animation.AnimationTimer;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
@@ -17,6 +19,7 @@ import java.util.function.Supplier;
 
 @Slf4j
 @Component
+@Data
 public class UIResponsivenessOptimizer {
 
     private final ExecutorService uiTaskExecutor = new ThreadPoolExecutor(

@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.runner.ui.navigation;
 
+import lombok.Data;
+
 import io.github.jspinak.brobot.runner.events.EventBus;
 import io.github.jspinak.brobot.runner.events.LogEvent;
 import jakarta.annotation.PostConstruct;
@@ -17,6 +19,7 @@ import java.util.function.Function;
  * Manages screen creation and lifecycle.
  */
 @Component
+@Data
 public class ScreenRegistry {
     private static final Logger logger = LoggerFactory.getLogger(ScreenRegistry.class);
 

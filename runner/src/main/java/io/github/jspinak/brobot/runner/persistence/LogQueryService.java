@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.runner.persistence;
 
+import lombok.Data;
+
 import io.github.jspinak.brobot.runner.persistence.entity.LogEntry;
 import io.github.jspinak.brobot.runner.persistence.mapper.LogMapper;
 import io.github.jspinak.brobot.runner.persistence.repo.LogEntryRepository;
@@ -22,6 +24,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@Data
 public class LogQueryService {
 
     private final LogEntryRepository logRepo;

@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.runner.session;
 
+import lombok.Data;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.jspinak.brobot.runner.config.ApplicationConfig;
 import io.github.jspinak.brobot.runner.events.EventBus;
@@ -25,6 +27,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @Component
 @RequiredArgsConstructor
+@Data
 public class SessionRecoveryManager {
 
     private final ApplicationConfig applicationConfig;

@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.runner.ui.config;
 
+import lombok.Data;
+
 import io.github.jspinak.brobot.runner.events.EventBus;
 import io.github.jspinak.brobot.runner.testutil.JavaFXTestUtils;
 import org.junit.jupiter.api.BeforeAll;
@@ -16,6 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 @ExtendWith(MockitoExtension.class)
+@Data
 public class ConfigDetailsPanelTest {
 
     @BeforeAll

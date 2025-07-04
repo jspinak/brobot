@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.runner.ui.theme;
 
+import lombok.Data;
+
 import jakarta.annotation.PostConstruct;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -21,6 +23,7 @@ import java.util.Map;
  * Allows switching between different themes (e.g., light and dark mode).
  */
 @Component
+@Data
 public class ThemeManager {
     private static final Logger logger = LoggerFactory.getLogger(ThemeManager.class);
 

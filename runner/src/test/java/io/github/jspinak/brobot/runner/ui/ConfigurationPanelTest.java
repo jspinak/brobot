@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.runner.ui;
 
+import lombok.Data;
+
 import io.github.jspinak.brobot.navigation.service.StateService;
 import io.github.jspinak.brobot.runner.config.BrobotRunnerProperties;
 import io.github.jspinak.brobot.runner.events.EventBus;
@@ -31,6 +33,7 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
+@Data
 class ConfigurationPanelTest {
 
     @Mock

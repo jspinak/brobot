@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.runner.init;
 
+import lombok.Data;
+
 import io.github.jspinak.brobot.runner.config.BrobotRunnerProperties;
 import io.github.jspinak.brobot.runner.json.parsing.ConfigurationParser;
 import io.github.jspinak.brobot.runner.json.validation.ConfigurationValidator;
@@ -25,6 +27,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
+@Data
 class BrobotLibraryInitializerTest {
 
     @Mock

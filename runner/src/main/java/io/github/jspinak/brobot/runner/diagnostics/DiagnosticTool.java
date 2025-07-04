@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.runner.diagnostics;
 
+import lombok.Data;
+
 import io.github.jspinak.brobot.runner.errorhandling.ErrorHandler;
 import io.github.jspinak.brobot.runner.errorhandling.ErrorStatistics;
 import io.github.jspinak.brobot.runner.performance.PerformanceProfiler;
@@ -26,6 +28,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @Component
 @RequiredArgsConstructor
+@Data
 public class DiagnosticTool {
 
     private final PerformanceProfiler performanceProfiler;

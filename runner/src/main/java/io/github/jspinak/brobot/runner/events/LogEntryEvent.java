@@ -1,10 +1,13 @@
 package io.github.jspinak.brobot.runner.events;
 
+import lombok.Data;
+
 import io.github.jspinak.brobot.tools.logging.model.LogData;
 
 /**
  * Event representing a log entry from the Brobot library.
  */
+@Data
 public class LogEntryEvent extends BrobotEvent {
     private final LogData logData;
 

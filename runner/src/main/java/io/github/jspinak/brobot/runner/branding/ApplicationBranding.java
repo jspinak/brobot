@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.runner.branding;
 
+import lombok.Data;
+
 import lombok.extern.slf4j.Slf4j;
 
 import javax.imageio.ImageIO;
@@ -17,6 +19,7 @@ import java.util.List;
  * Generates icons in various formats and sizes for different platforms.
  */
 @Slf4j
+@Data
 public class ApplicationBranding {
 
     private static final String ICONS_DIR = "packaging/icons";
