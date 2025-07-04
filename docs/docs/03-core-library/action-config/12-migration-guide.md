@@ -1,6 +1,6 @@
 ---
 sidebar_position: 12
-title: Migration Guide
+title: Complete Migration Guide
 description: Step-by-step guide for migrating from ActionOptions to ActionConfig
 ---
 
