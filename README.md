@@ -6,7 +6,7 @@
 <h3>Build Intelligent Visual Automations with Java</h3>
 
 <p>
-  <a href="https://jspinak.github.io/brobot/docs/01-getting-started/quick-start"><img src="https://img.shields.io/badge/docs-quickstart-blue" alt="Quickstart"></a>
+  <a href="https://jspinak.github.io/brobot/docs/getting-started/quick-start"><img src="https://img.shields.io/badge/docs-quickstart-blue" alt="Quickstart"></a>
   <a href="https://maven-badges.herokuapp.com/maven-central/io.github.jspinak/brobot"><img src="https://img.shields.io/maven-central/v/io.github.jspinak/brobot.svg?label=Maven%20Central" alt="Maven Central"></a>
   <a href="./LICENSE"><img src="https://img.shields.io/badge/license-MIT-green.svg" alt="License: MIT"></a>
   <a href="https://github.com/jspinak/brobot/actions"><img src="https://img.shields.io/github/actions/workflow/status/jspinak/brobot/ci.yml?branch=main" alt="Build Status"></a>
@@ -136,26 +136,26 @@ BrobotSettings.mock = true;
 <td width="33%" valign="top">
 
 ### Getting Started
-- [Quick Start Guide](https://jspinak.github.io/brobot/docs/01-getting-started/quick-start)
-- [Installation](https://jspinak.github.io/brobot/docs/01-getting-started/installation)
-- [Core Concepts](https://jspinak.github.io/brobot/docs/01-getting-started/core-concepts)
-- [Your First State](https://jspinak.github.io/brobot/docs/01-getting-started/states)
+- [Quick Start Guide](https://jspinak.github.io/brobot/docs/getting-started/quick-start)
+- [Installation](https://jspinak.github.io/brobot/docs/getting-started/installation)
+- [Core Concepts](https://jspinak.github.io/brobot/docs/getting-started/core-concepts)
+- [Your First State](https://jspinak.github.io/brobot/docs/getting-started/states)
 
 </td>
 <td width="33%" valign="top">
 
 ### Guides
-- [Finding Objects](https://jspinak.github.io/brobot/docs/03-core-library/guides/finding-objects/combining-finds-v2)
-- [State Management](https://jspinak.github.io/brobot/docs/03-core-library/tutorials/tutorial-basics/states-v2)
-- [Color Detection](https://jspinak.github.io/brobot/docs/03-core-library/guides/finding-objects/using-color-v2)
-- [Motion Tracking](https://jspinak.github.io/brobot/docs/03-core-library/guides/finding-objects/movement-v2)
+- [Finding Objects](https://jspinak.github.io/brobot/docs/core-library/guides/finding-objects/combining-finds-v2)
+- [State Management](https://jspinak.github.io/brobot/docs/core-library/tutorials/tutorial-basics/states-v2)
+- [Color Detection](https://jspinak.github.io/brobot/docs/core-library/guides/finding-objects/using-color-v2)
+- [Motion Tracking](https://jspinak.github.io/brobot/docs/core-library/guides/finding-objects/movement-v2)
 
 </td>
 <td width="33%" valign="top">
 
 ### API Reference
-- [Migration Guide (v1.1.0)](https://jspinak.github.io/brobot/docs/03-core-library/guides/migration-guide)
-- [Action Hierarchy](https://jspinak.github.io/brobot/docs/01-getting-started/action-hierarchy)
+- [Migration Guide (v1.1.0)](https://jspinak.github.io/brobot/docs/core-library/guides/migration-guide)
+- [Action Hierarchy](https://jspinak.github.io/brobot/docs/getting-started/action-hierarchy)
 - [JavaDoc (v1.0.7)](https://jspinak.github.io/brobot/api/1.0.7/)
 - [JavaDoc (v1.0.6)](https://jspinak.github.io/brobot/api/1.0.6/)
 - [Examples](https://github.com/jspinak/brobot/tree/main/examples)

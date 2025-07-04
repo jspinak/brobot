@@ -122,4 +122,4 @@ public class SmartClick {
 
 This design philosophy allows Brobot to provide a framework for semi-intelligent automation, not just for automating static process flows. The type-safe ActionConfig classes in version 2.0 make this approach even more powerful and easier to use.
 
-For more information on migrating from the old ActionOptions API to the new ActionConfig API, see the [Migration Guide](/docs/03-core-library/guides/migration-guide).
+For more information on migrating from the old ActionOptions API to the new ActionConfig API, see the [Migration Guide](/docs/core-library/guides/migration-guide).
