@@ -9,7 +9,7 @@
   <a href="https://jspinak.github.io/brobot/docs/getting-started/quick-start"><img src="https://img.shields.io/badge/docs-quickstart-blue" alt="Quickstart"></a>
   <a href="https://maven-badges.herokuapp.com/maven-central/io.github.jspinak/brobot"><img src="https://img.shields.io/maven-central/v/io.github.jspinak/brobot.svg?label=Maven%20Central" alt="Maven Central"></a>
   <a href="./LICENSE"><img src="https://img.shields.io/badge/license-MIT-green.svg" alt="License: MIT"></a>
-  <a href="https://github.com/jspinak/brobot/actions"><img src="https://img.shields.io/github/actions/workflow/status/jspinak/brobot/ci.yml?branch=main" alt="Build Status"></a>
+  <a href="https://github.com/jspinak/brobot/actions"><img src="https://img.shields.io/github/actions/workflow/status/jspinak/brobot/main.yml?branch=main" alt="Build Status"></a>
   <a href="https://jspinak.github.io/brobot"><img src="https://img.shields.io/badge/website-live-brightgreen" alt="Website"></a>
 </p>
 
