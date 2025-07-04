@@ -157,8 +157,8 @@ BrobotSettings.mock = true;
 - [Migration Guide (v1.1.0)](https://jspinak.github.io/brobot/docs/core-library/guides/migration-guide)
 - [Action Hierarchy](https://jspinak.github.io/brobot/docs/getting-started/action-hierarchy)
 - [JavaDoc (v1.0.7)](https://jspinak.github.io/brobot/api/1.0.7/)
-- [JavaDoc (v1.0.6)](https://jspinak.github.io/brobot/api/1.0.6/)
-- [Examples](https://github.com/jspinak/brobot/tree/main/examples)
+- [JavaDoc (all versions)](https://jspinak.github.io/brobot/api/)
+- [Example: Login Automation](https://github.com/jspinak/brobot/blob/main/examples/LoginAutomationExample.java)
 
 </td>
 </tr>
