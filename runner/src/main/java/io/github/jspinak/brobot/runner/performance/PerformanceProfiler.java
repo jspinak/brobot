@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.runner.performance;
 
+import lombok.Data;
+
 import lombok.extern.slf4j.Slf4j;
 import lombok.Getter;
 import lombok.Builder;
@@ -57,6 +59,7 @@ import java.time.Instant;
  */
 @Slf4j
 @Component
+@Data
 public class PerformanceProfiler {
 
     private final Map<String, OperationMetrics> operationMetrics = new ConcurrentHashMap<>();

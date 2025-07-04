@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.runner.resources;
 
+import lombok.Data;
+
 import io.github.jspinak.brobot.model.element.Pattern;
 import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.runner.config.BrobotRunnerProperties;
@@ -23,6 +25,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
+@Data
 public class ImageResourceManagerTest {
 
     @Mock

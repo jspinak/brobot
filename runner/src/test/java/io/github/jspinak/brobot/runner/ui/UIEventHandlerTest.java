@@ -1,5 +1,9 @@
 package io.github.jspinak.brobot.runner.ui;
 
+import lombok.Data;
+
+import lombok.extern.slf4j.Slf4j;
+
 import io.github.jspinak.brobot.runner.events.*;
 import io.github.jspinak.brobot.runner.execution.ExecutionStatus;
 import io.github.jspinak.brobot.runner.ui.dialogs.ErrorDialog;
@@ -20,6 +24,8 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
+@Slf4j
+@Data
 class UIEventHandlerTest {
 
     @Mock

@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.runner.ui.icons;
 
+import lombok.Data;
+
 import javafx.scene.SnapshotParameters;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -18,6 +20,7 @@ import java.util.Map;
  * Generates modern icons programmatically for the UI.
  */
 @Component
+@Data
 public class ModernIconGenerator {
     
     private final Map<String, Image> iconCache = new HashMap<>();

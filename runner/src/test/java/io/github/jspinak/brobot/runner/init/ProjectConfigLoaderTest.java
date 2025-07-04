@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.runner.init;
 
+import lombok.Data;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -19,6 +21,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
+@Data
 class ProjectConfigLoaderTest {
 
     @Mock

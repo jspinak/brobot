@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.runner.session;
 
+import lombok.Data;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.jspinak.brobot.runner.config.ApplicationConfig;
 import io.github.jspinak.brobot.runner.events.EventBus;
@@ -21,6 +23,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+@Data
 class SessionRecoveryManagerTest {
 
     @Mock

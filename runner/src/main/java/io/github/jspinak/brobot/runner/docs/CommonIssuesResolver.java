@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.runner.docs;
 
+import lombok.Data;
+
 import io.github.jspinak.brobot.runner.diagnostics.DiagnosticTool;
 import io.github.jspinak.brobot.runner.errorhandling.ErrorContext;
 import io.github.jspinak.brobot.runner.errorhandling.ErrorHandler;
@@ -17,6 +19,7 @@ import java.util.Optional;
 @Slf4j
 @Component
 @RequiredArgsConstructor
+@Data
 public class CommonIssuesResolver {
 
     private final TroubleshootingGuide troubleshootingGuide;

@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.runner.util;
 
+import lombok.Data;
+
 import javafx.application.Platform;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +15,7 @@ import java.util.function.Supplier;
  * Utility class for JavaFX thread handling.
  * Simplifies executing tasks on the JavaFX Application Thread and in background threads.
  */
+@Data
 public class FxThreadUtils {
     private static final Logger logger = LoggerFactory.getLogger(FxThreadUtils.class);
 

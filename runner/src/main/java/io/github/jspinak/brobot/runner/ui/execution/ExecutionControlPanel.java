@@ -85,7 +85,7 @@ public class ExecutionControlPanel extends HBox {
      */
     public void updateButtonStates(ExecutionState state) {
         switch (state) {
-            case IDLE, STOPPED, COMPLETED, FAILED:
+            case IDLE, STOPPED, COMPLETED, ERROR:
                 playButton.setDisable(false);
                 pauseButton.setDisable(true);
                 stopButton.setDisable(true);

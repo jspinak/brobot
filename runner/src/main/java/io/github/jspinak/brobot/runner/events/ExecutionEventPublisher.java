@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.runner.events;
 
+import lombok.Data;
+
 import io.github.jspinak.brobot.runner.execution.ExecutionState;
 import io.github.jspinak.brobot.runner.execution.ExecutionStatus;
 import org.slf4j.Logger;
@@ -13,6 +15,7 @@ import java.util.function.Consumer;
  * Monitors execution status and publishes events when status changes.
  */
 @Component
+@Data
 public class ExecutionEventPublisher {
     private static final Logger logger = LoggerFactory.getLogger(ExecutionEventPublisher.class);
 

@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.runner.resources;
 
+import lombok.Data;
+
 import io.github.jspinak.brobot.runner.events.EventBus;
 import io.github.jspinak.brobot.runner.events.LogEvent;
 import jakarta.annotation.PreDestroy;
@@ -13,6 +15,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Component
+@Data
 public class ResourceManager {
     private final EventBus eventBus;
     private final CopyOnWriteArrayList<AutoCloseable> managedResources = new CopyOnWriteArrayList<>();

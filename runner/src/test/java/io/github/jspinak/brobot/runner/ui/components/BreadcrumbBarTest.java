@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.runner.ui.components;
 
+import lombok.Data;
+
 import io.github.jspinak.brobot.runner.testutil.JavaFXTestUtils;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -12,6 +14,7 @@ import java.util.function.Consumer;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@Data
 public class BreadcrumbBarTest {
 
     private BreadcrumbBar breadcrumbBar;
