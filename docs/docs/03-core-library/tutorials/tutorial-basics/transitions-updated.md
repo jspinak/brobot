@@ -7,7 +7,7 @@ sidebar_position: 5
 Transitions allow Brobot to move from one state to another. Any state that 
 will be accessed needs a StateTransitions class.  
 
-This guide has been updated to use the new ActionConfig API introduced in Brobot 2.0.
+This guide has been updated to use the new ActionConfig API introduced in Brobot 1.1.0.
 
 ## Home Transitions
 
