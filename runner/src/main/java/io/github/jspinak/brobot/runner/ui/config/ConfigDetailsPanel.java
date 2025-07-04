@@ -1,5 +1,9 @@
 package io.github.jspinak.brobot.runner.ui.config;
 
+import lombok.Data;
+
+import lombok.extern.slf4j.Slf4j;
+
 import io.github.jspinak.brobot.runner.events.EventBus;
 import io.github.jspinak.brobot.runner.events.LogEvent;
 import javafx.application.Platform;
@@ -24,6 +28,8 @@ import java.time.format.DateTimeFormatter;
 /**
  * Panel for displaying configuration details and metadata.
  */
+@Slf4j
+@Data
 public class ConfigDetailsPanel extends VBox {
     private static final Logger logger = LoggerFactory.getLogger(ConfigDetailsPanel.class);
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");

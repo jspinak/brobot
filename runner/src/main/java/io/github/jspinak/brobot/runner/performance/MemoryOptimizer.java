@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.runner.performance;
 
+import lombok.Data;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -14,6 +16,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 @Slf4j
 @Component
+@Data
 public class MemoryOptimizer {
 
     private final MemoryMXBean memoryBean = ManagementFactory.getMemoryMXBean();
@@ -30,6 +33,13 @@ public class MemoryOptimizer {
     
     private final List<WeakReference<IMemoryReleasable>> releasables = new CopyOnWriteArrayList<>();
     private final AtomicLong lastGcTime = new AtomicLong(System.currentTimeMillis());
+    
+    /**
+     * Inner interface for backward compatibility.
+     * New code should use IMemoryReleasable instead.
+     */
+    public interface MemoryReleasable extends IMemoryReleasable {
+    }
     
     @PostConstruct
     public void initialize() {

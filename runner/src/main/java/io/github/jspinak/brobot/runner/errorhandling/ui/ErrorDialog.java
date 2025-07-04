@@ -1,5 +1,9 @@
 package io.github.jspinak.brobot.runner.errorhandling.ui;
 
+import lombok.Data;
+
+import lombok.extern.slf4j.Slf4j;
+
 import io.github.jspinak.brobot.runner.errorhandling.ErrorContext;
 import io.github.jspinak.brobot.runner.errorhandling.UserFriendlyErrorMessages.ErrorMessage;
 import javafx.geometry.Insets;
@@ -18,6 +22,8 @@ import java.util.Optional;
 /**
  * Dialog for displaying errors to users in a friendly way.
  */
+@Slf4j
+@Data
 public class ErrorDialog extends Dialog<ButtonType> {
 
     private static final String ERROR_ICON_PATH = "/icons/error.png";

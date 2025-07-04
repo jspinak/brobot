@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.runner.ui.components;
 
+import lombok.Data;
+
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -17,6 +19,7 @@ import javafx.scene.layout.VBox;
  * A card component for displaying content with a title and optional actions.
  * Useful for dashboard items, list items, etc.
  */
+@Data
 public class Card extends VBox {
 
     private final ObjectProperty<Node> header = new SimpleObjectProperty<>();

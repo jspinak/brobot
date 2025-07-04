@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.runner.errorhandling;
 
+import lombok.Data;
+
 import io.github.jspinak.brobot.runner.events.ErrorEvent;
 import io.github.jspinak.brobot.runner.events.EventBus;
 import io.github.jspinak.brobot.runner.events.BrobotEvent;
@@ -17,6 +19,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+@Data
 class ErrorHandlerTest {
 
     @Mock

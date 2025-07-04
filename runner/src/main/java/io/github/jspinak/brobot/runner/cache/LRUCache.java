@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.runner.cache;
 
+import lombok.Data;
+
 import io.github.jspinak.brobot.runner.events.EventBus;
 import io.github.jspinak.brobot.runner.events.LogEvent;
 import io.github.jspinak.brobot.runner.resources.ResourceManager;
@@ -15,6 +17,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 /**
  * A generic cache implementation using LRU (Least Recently Used) policy
  */
+@Data
 public class LRUCache<K, V> implements AutoCloseable {
     private final EventBus eventBus;
     private final String cacheName;

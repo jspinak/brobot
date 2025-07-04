@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.runner.ui.components;
 
+import lombok.Data;
+
 import javafx.application.Platform;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
@@ -14,6 +16,7 @@ import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@Data
 public class StatusBarTest {
 
     private StatusBar statusBar;

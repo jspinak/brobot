@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.runner.errorhandling;
 
+import lombok.Data;
+
 import io.github.jspinak.brobot.runner.diagnostics.DiagnosticReport;
 import io.github.jspinak.brobot.runner.diagnostics.DiagnosticTool;
 import io.github.jspinak.brobot.runner.session.SessionRecoveryManager;
@@ -24,6 +26,7 @@ import java.util.zip.ZipOutputStream;
 @Slf4j
 @Component
 @RequiredArgsConstructor
+@Data
 public class ErrorReportGenerator {
 
     private final ErrorHandler errorHandler;

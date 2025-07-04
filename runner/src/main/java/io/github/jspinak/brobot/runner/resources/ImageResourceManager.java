@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.runner.resources;
 
+import lombok.Data;
+
 import io.github.jspinak.brobot.model.element.Pattern;
 import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.runner.config.BrobotRunnerProperties;
@@ -21,6 +23,7 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicLong;
 
 @Component
+@Data
 public class ImageResourceManager implements AutoCloseable {
     private static final Logger logger = LoggerFactory.getLogger(ImageResourceManager.class);
 

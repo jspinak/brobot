@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.runner.ui.config;
 
+import lombok.Data;
+
 import io.github.jspinak.brobot.runner.events.EventBus;
 import io.github.jspinak.brobot.runner.events.LogEvent;
 import io.github.jspinak.brobot.runner.project.AutomationProject;
@@ -27,6 +29,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith({MockitoExtension.class, ApplicationExtension.class})
+@Data
 public class ConfigMetadataEditorTest {
 
     private EventBus eventBus;

@@ -1,5 +1,9 @@
 package io.github.jspinak.brobot.runner.ui.log;
 
+import lombok.Data;
+
+import lombok.extern.slf4j.Slf4j;
+
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.layout.Pane;
@@ -21,6 +25,8 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith({}) // No extension needed since we're initializing JavaFX manually
+@Slf4j
+@Data
 public class StateVisualizationPanelTest {
 
     private LogViewerPanel.StateVisualizationPanel stateVisualizationPanel;

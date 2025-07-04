@@ -1,8 +1,11 @@
 package io.github.jspinak.brobot.runner.events;
 
+import lombok.Data;
+
 /**
  * Event representing a configuration-related event.
  */
+@Data
 public class ConfigurationEvent extends BrobotEvent {
     private final String configName;
     private final String details;

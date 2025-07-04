@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.runner.ui.execution;
 
+import lombok.Data;
+
 import io.github.jspinak.brobot.model.state.State;
 import io.github.jspinak.brobot.runner.automation.AutomationExecutor;
 import io.github.jspinak.brobot.runner.events.*;
@@ -45,6 +47,7 @@ import java.util.concurrent.TimeUnit;
  * @see ActionHistoryTablePanel
  */
 @Slf4j
+@Data
 public class ExecutionDashboardPanel extends BorderPane {
     
     // Core dependencies
@@ -132,7 +135,6 @@ public class ExecutionDashboardPanel extends BorderPane {
         eventBus.subscribe(BrobotEvent.EventType.AUTOMATION_STOPPED, this::handleExecutionStopped);
 
         // Log events for action history and metrics
-        eventBus.subscribe(BrobotEvent.EventType.LOG_MESSAGE, this::handleLogEvent);
         eventBus.subscribe(BrobotEvent.EventType.LOG_ENTRY, this::handleLogEvent);
     }
 
@@ -193,7 +195,13 @@ public class ExecutionDashboardPanel extends BorderPane {
                 
                 // Update current state if available
                 if (status.getCurrentState() != null) {
-                    statusPanel.updateCurrentState(status.getCurrentState());
+                    State state = allStatesInProjectService.getAllStates().stream()
+                            .filter(s -> s.getName().equals(status.getCurrentState()))
+                            .findFirst()
+                            .orElse(null);
+                    if (state != null) {
+                        statusPanel.updateCurrentState(state);
+                    }
                 }
             }
         });
@@ -286,33 +294,34 @@ public class ExecutionDashboardPanel extends BorderPane {
     }
 
     private void processLogEntryEvent(LogEntryEvent logEntryEvent) {
-        LogData logData = logEntryEvent.getLogData();
+        LogData logData = logEntryEvent.getLogEntry();
         
         if (logData == null) return;
         
-        // Process different types of log entries
-        switch (logData.getLogType()) {
-            case "STATE_DETECTION":
-                processStateDetectionLogEntry(logData);
-                break;
-            case "ACTION":
-                processActionLogEntry(logData);
-                break;
-            case "ERROR":
-                processErrorLogEntry(logData);
-                break;
-            case "TRANSITION":
-                processTransitionLogEntry(logData);
-                break;
-            case "PERFORMANCE":
-                processPerformanceLogEntry(logData);
-                break;
+        // Create adapter to provide expected methods
+        LogDataAdapter adapter = new LogDataAdapter(logData);
+        
+        // Process different types of log entries based on available data
+        if (logData.getCurrentStateName() != null) {
+            processStateDetectionLogEntry(adapter);
+        }
+        if (logData.getActionType() != null) {
+            processActionLogEntry(adapter);
+        }
+        if (logData.getErrorMessage() != null) {
+            processErrorLogEntry(adapter);
+        }
+        if (logData.getFromStates() != null && logData.getToStateNames() != null && !logData.getToStateNames().isEmpty()) {
+            processTransitionLogEntry(adapter);
+        }
+        if (logData.getPerformance() != null) {
+            processPerformanceLogEntry(adapter);
         }
     }
 
-    private void processStateDetectionLogEntry(LogData logData) {
+    private void processStateDetectionLogEntry(LogDataAdapter adapter) {
         // Update current state display
-        String stateName = logData.getDetails().get("stateName");
+        String stateName = adapter.getDetails().get("state");
         if (stateName != null) {
             State state = allStatesInProjectService.getAllStates().stream()
                     .filter(s -> s.getName().equals(stateName))
@@ -324,12 +333,12 @@ public class ExecutionDashboardPanel extends BorderPane {
         }
     }
 
-    private void processActionLogEntry(LogData logData) {
-        String action = logData.getAction();
-        String target = logData.getDetails().get("target");
-        String result = logData.getResult();
-        Long duration = parseLong(logData.getDetails().get("duration"));
-        String details = logData.getDetails().get("details");
+    private void processActionLogEntry(LogDataAdapter adapter) {
+        String action = adapter.getAction();
+        String target = adapter.getDetails().get("target");
+        String result = adapter.getResult();
+        Long duration = parseLong(adapter.getDetails().get("duration"));
+        String details = adapter.getDetails().get("details");
         
         actionHistoryPanel.addActionRecord(
             action != null ? action : "Unknown",
@@ -341,7 +350,7 @@ public class ExecutionDashboardPanel extends BorderPane {
         
         // Update performance metrics
         if (duration != null) {
-            Long matchTime = parseLong(logData.getDetails().get("matchTime"));
+            Long matchTime = parseLong(adapter.getDetails().get("matchTime"));
             boolean successful = "SUCCESS".equals(result);
             
             performancePanel.addPerformanceMetric(
@@ -353,10 +362,10 @@ public class ExecutionDashboardPanel extends BorderPane {
         }
     }
 
-    private void processErrorLogEntry(LogData logData) {
-        String errorType = logData.getDetails().get("errorType");
-        String errorMessage = logData.getMessage();
-        String stackTrace = logData.getDetails().get("stackTrace");
+    private void processErrorLogEntry(LogDataAdapter adapter) {
+        String errorType = adapter.getDetails().get("errorType");
+        String errorMessage = adapter.getMessage();
+        String stackTrace = adapter.getDetails().get("stackTrace");
         
         String details = errorType + ": " + errorMessage;
         if (stackTrace != null) {
@@ -372,11 +381,11 @@ public class ExecutionDashboardPanel extends BorderPane {
         );
     }
 
-    private void processTransitionLogEntry(LogData logData) {
-        String fromState = logData.getDetails().get("fromState");
-        String toState = logData.getDetails().get("toState");
-        String trigger = logData.getDetails().get("trigger");
-        Long duration = parseLong(logData.getDetails().get("duration"));
+    private void processTransitionLogEntry(LogDataAdapter adapter) {
+        String fromState = adapter.getDetails().get("fromState");
+        String toState = adapter.getDetails().get("toState");
+        String trigger = adapter.getDetails().get("trigger");
+        Long duration = parseLong(adapter.getDetails().get("duration"));
         
         if (fromState != null && toState != null) {
             stateTransitionPanel.addStateTransition(
@@ -388,8 +397,8 @@ public class ExecutionDashboardPanel extends BorderPane {
         }
     }
 
-    private void processPerformanceLogEntry(LogData logData) {
-        ExecutionMetrics metrics = logData.getPerformanceMetrics();
+    private void processPerformanceLogEntry(LogDataAdapter adapter) {
+        LogDataAdapter.ExecutionMetricsAdapter metrics = adapter.getPerformanceMetrics();
         if (metrics == null) return;
         
         // Process performance metrics

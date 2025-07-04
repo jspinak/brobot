@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.runner.ui.navigation;
 
+import lombok.Data;
+
 import io.github.jspinak.brobot.runner.events.EventBus;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -20,6 +22,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith({MockitoExtension.class, ApplicationExtension.class})
+@Data
 public class NavigationManagerTest {
 
     // Core dependencies

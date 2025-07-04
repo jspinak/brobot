@@ -1,5 +1,10 @@
 package io.github.jspinak.brobot.runner.ui.config;
 
+import lombok.Getter;
+import lombok.Setter;
+import lombok.AccessLevel;
+import lombok.extern.slf4j.Slf4j;
+
 import io.github.jspinak.brobot.navigation.service.StateService;
 import io.github.jspinak.brobot.runner.config.ApplicationConfig;
 import io.github.jspinak.brobot.runner.config.BrobotRunnerProperties;
@@ -27,11 +32,14 @@ import java.nio.file.Paths;
  * Main configuration management panel that integrates all configuration UI components.
  */
 @FxmlView("")
+@Slf4j
+@Getter
+@Setter(AccessLevel.PRIVATE)
 public class ConfigManagementPanel extends BorderPane {
     private static final Logger logger = LoggerFactory.getLogger(ConfigManagementPanel.class);
 
     private final EventBus eventBus;
-    private final BrobotRunnerProperties properties;
+    private final BrobotRunnerProperties runnerProperties;
     private final BrobotLibraryInitializer libraryInitializer;
     private final ApplicationConfig appConfig;
     private final AutomationProjectManager projectManager;
@@ -44,14 +52,14 @@ public class ConfigManagementPanel extends BorderPane {
 
     public ConfigManagementPanel(
             EventBus eventBus,
-            BrobotRunnerProperties properties,
+            BrobotRunnerProperties runnerProperties,
             BrobotLibraryInitializer libraryInitializer,
             ApplicationConfig appConfig,
             AutomationProjectManager projectManager,
             StateService allStatesService) {
 
         this.eventBus = eventBus;
-        this.properties = properties;
+        this.runnerProperties = runnerProperties;
         this.libraryInitializer = libraryInitializer;
         this.appConfig = appConfig;
         this.projectManager = projectManager;
@@ -65,7 +73,7 @@ public class ConfigManagementPanel extends BorderPane {
         ToolBar toolbar = createToolbar();
 
         // Create component panels
-        selectionPanel = new ConfigSelectionPanel(eventBus, properties, libraryInitializer, appConfig);
+        selectionPanel = new ConfigSelectionPanel(eventBus, runnerProperties, libraryInitializer, appConfig);
         browserPanel = new ConfigBrowserPanel(eventBus, projectManager, allStatesService); // Pass allStatesService
         metadataEditor = new ConfigMetadataEditor(eventBus, projectManager);
 
@@ -74,7 +82,7 @@ public class ConfigManagementPanel extends BorderPane {
         tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
 
         // Create component panels
-        selectionPanel = new ConfigSelectionPanel(eventBus, properties, libraryInitializer, appConfig);
+        selectionPanel = new ConfigSelectionPanel(eventBus, runnerProperties, libraryInitializer, appConfig);
         browserPanel = new ConfigBrowserPanel(eventBus, projectManager, allStatesService);
         metadataEditor = new ConfigMetadataEditor(eventBus, projectManager);
 
@@ -114,7 +122,7 @@ public class ConfigManagementPanel extends BorderPane {
         Separator separator = new Separator();
         separator.setOrientation(javafx.geometry.Orientation.VERTICAL);
 
-        Label pathLabel = new Label("Config Path: " + properties.getConfigPath());
+        Label pathLabel = new Label("Config Path: " + runnerProperties.getConfigPath());
 
         Button changePathButton = new Button("Change...");
         changePathButton.setOnAction(e -> changeConfigPath());
@@ -144,8 +152,8 @@ public class ConfigManagementPanel extends BorderPane {
         ProgressBar progressBar = new ProgressBar(0);
         progressBar.setVisible(false);
 
-        Label configPathLabel = new Label("Config Path: " + properties.getConfigPath());
-        Label imagePathLabel = new Label("Image Path: " + properties.getImagePath());
+        Label configPathLabel = new Label("Config Path: " + runnerProperties.getConfigPath());
+        Label imagePathLabel = new Label("Image Path: " + runnerProperties.getImagePath());
 
         // Add items to status bar
         statusBar.getChildren().addAll(
@@ -229,7 +237,7 @@ public class ConfigManagementPanel extends BorderPane {
                     String dslConfig = createDslConfigTemplate(projectName);
 
                     // Save files to disk
-                    Path configDir = Paths.get(properties.getConfigPath());
+                    Path configDir = Paths.get(runnerProperties.getConfigPath());
                     Path projectConfigPath = configDir.resolve(configName + "_project.json");
                     Path dslConfigPath = configDir.resolve(configName + "_dsl.json");
 
@@ -242,7 +250,7 @@ public class ConfigManagementPanel extends BorderPane {
                             projectName,
                             projectConfigPath,
                             dslConfigPath,
-                            Paths.get(properties.getImagePath()),
+                            Paths.get(runnerProperties.getImagePath()),
                             java.time.LocalDateTime.now()
                     );
 
@@ -300,7 +308,7 @@ public class ConfigManagementPanel extends BorderPane {
     void importConfiguration() {
         ConfigImportDialog dialog = new ConfigImportDialog(
                 libraryInitializer,
-                properties,
+                runnerProperties,
                 eventBus
         );
 
@@ -340,7 +348,7 @@ public class ConfigManagementPanel extends BorderPane {
         directoryChooser.setTitle("Select Configuration Directory");
 
         // Set initial directory to current config path
-        File initialDir = new File(properties.getConfigPath());
+        File initialDir = new File(runnerProperties.getConfigPath());
         if (initialDir.exists() && initialDir.isDirectory()) {
             directoryChooser.setInitialDirectory(initialDir);
         }
@@ -349,7 +357,7 @@ public class ConfigManagementPanel extends BorderPane {
         File directory = directoryChooser.showDialog(getScene().getWindow());
         if (directory != null) {
             // Update config path
-            properties.setConfigPath(directory.getAbsolutePath());
+            runnerProperties.setConfigPath(directory.getAbsolutePath());
 
             // Log change
             eventBus.publish(LogEvent.info(this,
@@ -362,7 +370,7 @@ public class ConfigManagementPanel extends BorderPane {
 
     private void openConfigFolder() {
         try {
-            java.awt.Desktop.getDesktop().open(new File(properties.getConfigPath()));
+            java.awt.Desktop.getDesktop().open(new File(runnerProperties.getConfigPath()));
         } catch (Exception e) {
             logger.error("Error opening config folder", e);
             showAlert(Alert.AlertType.ERROR,

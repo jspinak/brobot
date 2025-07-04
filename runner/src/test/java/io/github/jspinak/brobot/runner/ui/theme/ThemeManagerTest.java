@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.runner.ui.theme;
 
+import lombok.Data;
+
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.Scene;
@@ -22,6 +24,7 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)  // <-- Add this line
+@Data
 public class ThemeManagerTest {
 
     @Mock

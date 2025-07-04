@@ -1,5 +1,9 @@
 package io.github.jspinak.brobot.runner.errorhandling;
 
+import lombok.Data;
+
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
@@ -11,6 +15,8 @@ import java.util.regex.Pattern;
  * Translates technical errors into messages that users can understand and act upon.
  */
 @Component
+@Slf4j
+@Data
 public class UserFriendlyErrorMessages {
 
     private final Map<Pattern, MessageTemplate> errorPatterns = new HashMap<>();

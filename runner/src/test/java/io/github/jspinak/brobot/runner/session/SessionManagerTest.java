@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.runner.session;
 
+import lombok.Data;
+
 import com.fasterxml.jackson.databind.JsonNode;
 
 import io.github.jspinak.brobot.runner.config.BrobotRunnerProperties;
@@ -35,6 +37,7 @@ import static org.mockito.Mockito.*;
 
 @MockitoSettings(strictness = Strictness.LENIENT)
 @ExtendWith(MockitoExtension.class)
+@Data
 public class SessionManagerTest {
 
     @Mock

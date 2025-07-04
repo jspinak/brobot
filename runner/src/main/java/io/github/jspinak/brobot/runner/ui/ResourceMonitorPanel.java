@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.runner.ui;
 
+import lombok.Data;
+
 import io.github.jspinak.brobot.runner.cache.CacheManager;
 import io.github.jspinak.brobot.runner.resources.ImageResourceManager;
 import io.github.jspinak.brobot.runner.resources.ResourceManager;
@@ -29,6 +31,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Component
+@Data
 public class ResourceMonitorPanel extends BorderPane {
 
     private final ResourceManager resourceManager;

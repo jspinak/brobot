@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.runner.events;
 
+import lombok.Data;
+
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
@@ -16,6 +18,7 @@ import org.springframework.stereotype.Component;
  * This appender attaches to the logging system and forwards messages to the event bus.
  */
 @Component
+@Data
 public class LogEventBridge {
     private final EventBus eventBus;
     private LoggingAppender appender;

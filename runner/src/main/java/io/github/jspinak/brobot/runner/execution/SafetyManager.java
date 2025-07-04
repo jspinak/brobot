@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.runner.execution;
 
+import lombok.Data;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -8,6 +10,7 @@ import org.slf4j.LoggerFactory;
  * This class is responsible for ensuring safe execution by monitoring for
  * unsafe conditions and triggering appropriate reactions.
  */
+@Data
 public class SafetyManager {
     private static final Logger logger = LoggerFactory.getLogger(SafetyManager.class);
     

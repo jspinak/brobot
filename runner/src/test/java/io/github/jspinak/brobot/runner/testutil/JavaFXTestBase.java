@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.runner.testutil;
 
+import lombok.Data;
+
 import javafx.application.Platform;
 import org.junit.jupiter.api.BeforeAll;
 import java.util.concurrent.CountDownLatch;

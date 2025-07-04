@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.runner.packaging;
 
+import lombok.Data;
+
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
@@ -14,6 +16,7 @@ import java.util.List;
  * This class helps prepare Windows-specific resources for jpackage.
  */
 @Slf4j
+@Data
 public class WindowsInstallerCustomizer {
 
     private static final String INSTALLER_DIR = "build/packaging/windows";

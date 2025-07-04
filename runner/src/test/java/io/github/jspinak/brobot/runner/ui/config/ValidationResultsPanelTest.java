@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.runner.ui.config;
 
+import lombok.Data;
+
 import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.control.TreeItem;
@@ -22,6 +24,7 @@ import java.util.concurrent.TimeUnit;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith({MockitoExtension.class, ApplicationExtension.class})
+@Data
 public class ValidationResultsPanelTest {
 
     private ValidationResultsPanel panel;

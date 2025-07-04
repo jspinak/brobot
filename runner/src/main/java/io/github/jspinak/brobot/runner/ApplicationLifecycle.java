@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.runner;
 
+import lombok.Data;
+
 import io.github.jspinak.brobot.runner.config.ApplicationConfig;
 import io.github.jspinak.brobot.runner.events.EventBus;
 import io.github.jspinak.brobot.runner.events.LogEvent;
@@ -30,6 +32,7 @@ import java.util.List;
  * This component is responsible for initializing the application and cleaning up resources.
  */
 @Component
+@Data
 public class ApplicationLifecycle {
     private static final Logger logger = LoggerFactory.getLogger(ApplicationLifecycle.class);
 

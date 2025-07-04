@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.runner.packaging;
 
+import lombok.Data;
+
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
@@ -13,6 +15,7 @@ import java.util.List;
  * This class helps prepare Linux-specific resources for jpackage.
  */
 @Slf4j
+@Data
 public class LinuxPackageCustomizer {
 
     private static final String PACKAGE_DIR = "build/packaging/linux";

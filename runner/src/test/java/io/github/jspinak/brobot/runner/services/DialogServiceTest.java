@@ -1,5 +1,9 @@
 package io.github.jspinak.brobot.runner.services;
 
+import lombok.Data;
+
+import lombok.extern.slf4j.Slf4j;
+
 import io.github.jspinak.brobot.runner.events.EventBus;
 import io.github.jspinak.brobot.runner.events.LogEvent;
 import io.github.jspinak.brobot.runner.testutil.JavaFXTestUtils;
@@ -27,6 +31,8 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
+@Slf4j
+@Data
 public class DialogServiceTest {
 
     @BeforeAll

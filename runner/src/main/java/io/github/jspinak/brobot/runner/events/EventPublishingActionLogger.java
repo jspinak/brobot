@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.runner.events;
 
+import lombok.Data;
+
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.model.state.State;
@@ -16,6 +18,7 @@ import java.util.Set;
  * Decorator that implements both ActionLogger and TestSessionLogger interfaces,
  * adding event publishing behavior to all logging operations.
  */
+@Data
 public class EventPublishingActionLogger implements ActionLogger, SessionLifecycleLogger {
     private final ActionLogger actionLogger;
     private final SessionLifecycleLogger sessionLogger;

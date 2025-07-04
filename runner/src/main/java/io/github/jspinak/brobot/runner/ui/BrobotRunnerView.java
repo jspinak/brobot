@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.runner.ui;
 
+import lombok.extern.slf4j.Slf4j;
+
 import io.github.jspinak.brobot.runner.events.EventBus;
 import io.github.jspinak.brobot.runner.events.LogEvent;
 import io.github.jspinak.brobot.runner.persistence.LogQueryService;
@@ -36,6 +38,7 @@ import java.util.Optional;
 @Component
 @FxmlView("")
 @RequiredArgsConstructor
+@Slf4j
 public class BrobotRunnerView extends BorderPane {
     private static final Logger logger = LoggerFactory.getLogger(BrobotRunnerView.class);
 

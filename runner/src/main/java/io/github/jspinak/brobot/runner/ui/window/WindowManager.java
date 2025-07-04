@@ -1,5 +1,9 @@
 package io.github.jspinak.brobot.runner.ui.window;
 
+import lombok.Data;
+
+import lombok.extern.slf4j.Slf4j;
+
 import io.github.jspinak.brobot.runner.events.EventBus;
 import io.github.jspinak.brobot.runner.ui.theme.ThemeManager;
 import javafx.geometry.Rectangle2D;
@@ -24,6 +28,8 @@ import java.util.prefs.Preferences;
  * Handles window creation, positioning, and state persistence.
  */
 @Component
+@Slf4j
+@Data
 public class WindowManager {
     private static final Logger logger = LoggerFactory.getLogger(WindowManager.class);
 

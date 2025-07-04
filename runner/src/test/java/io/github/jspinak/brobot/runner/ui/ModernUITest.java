@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.runner.ui;
 
+import lombok.Data;
+
 import io.github.jspinak.brobot.runner.ui.JavaFXTestUtils;
 import io.github.jspinak.brobot.runner.ui.icons.ModernIconGenerator;
 import io.github.jspinak.brobot.runner.ui.layout.ModernLayoutManager;
@@ -13,6 +15,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@Data
 class ModernUITest {
     
     private ModernIconGenerator iconGenerator;
