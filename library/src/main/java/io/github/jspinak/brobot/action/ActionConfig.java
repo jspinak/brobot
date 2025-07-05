@@ -1,6 +1,8 @@
 package io.github.jspinak.brobot.action;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
 import io.github.jspinak.brobot.tools.logging.model.LogEventType;
 import lombok.Getter;
 
@@ -20,6 +22,26 @@ import java.util.function.Predicate;
  * must extend this class.
  */
 @Getter
+@JsonTypeInfo(
+    use = JsonTypeInfo.Id.NAME,
+    include = JsonTypeInfo.As.PROPERTY,
+    property = "@type"
+)
+@JsonSubTypes({
+    @JsonSubTypes.Type(value = io.github.jspinak.brobot.action.basic.click.ClickOptions.class, name = "ClickOptions"),
+    @JsonSubTypes.Type(value = io.github.jspinak.brobot.action.basic.find.PatternFindOptions.class, name = "PatternFindOptions"),
+    @JsonSubTypes.Type(value = io.github.jspinak.brobot.action.composite.drag.DragOptions.class, name = "DragOptions"),
+    @JsonSubTypes.Type(value = io.github.jspinak.brobot.action.basic.region.DefineRegionOptions.class, name = "DefineRegionOptions"),
+    @JsonSubTypes.Type(value = io.github.jspinak.brobot.action.basic.highlight.HighlightOptions.class, name = "HighlightOptions"),
+    @JsonSubTypes.Type(value = io.github.jspinak.brobot.action.basic.type.TypeOptions.class, name = "TypeOptions"),
+    @JsonSubTypes.Type(value = io.github.jspinak.brobot.action.basic.mouse.ScrollOptions.class, name = "ScrollOptions"),
+    @JsonSubTypes.Type(value = io.github.jspinak.brobot.action.basic.mouse.MouseMoveOptions.class, name = "MouseMoveOptions"),
+    @JsonSubTypes.Type(value = io.github.jspinak.brobot.action.basic.mouse.MouseDownOptions.class, name = "MouseDownOptions"),
+    @JsonSubTypes.Type(value = io.github.jspinak.brobot.action.basic.mouse.MouseUpOptions.class, name = "MouseUpOptions"),
+    @JsonSubTypes.Type(value = io.github.jspinak.brobot.action.basic.type.KeyDownOptions.class, name = "KeyDownOptions"),
+    @JsonSubTypes.Type(value = io.github.jspinak.brobot.action.basic.type.KeyUpOptions.class, name = "KeyUpOptions"),
+    @JsonSubTypes.Type(value = io.github.jspinak.brobot.action.composite.repeat.ClickUntilOptions.class, name = "ClickUntilOptions")
+})
 public abstract class ActionConfig {
 
     /**

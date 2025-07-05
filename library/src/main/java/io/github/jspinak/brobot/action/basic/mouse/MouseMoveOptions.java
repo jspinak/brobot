@@ -3,6 +3,10 @@ package io.github.jspinak.brobot.action.basic.mouse;
 import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.config.FrameworkSettings;
 import lombok.Getter;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Configuration for Move Mouse actions.
@@ -17,6 +21,7 @@ import lombok.Getter;
  * @see io.github.jspinak.brobot.action.basic.mouse.MoveMouse
  */
 @Getter
+@JsonDeserialize(builder = MouseMoveOptions.Builder.class)
 public final class MouseMoveOptions extends ActionConfig {
 
     private final float moveMouseDelay;
@@ -29,13 +34,16 @@ public final class MouseMoveOptions extends ActionConfig {
     /**
      * Builder for constructing {@link MouseMoveOptions} with a fluent API.
      */
+    @JsonPOJOBuilder(withPrefix = "set")
     public static class Builder extends ActionConfig.Builder<Builder> {
 
+        @JsonProperty("moveMouseDelay")
         private float moveMouseDelay = FrameworkSettings.moveMouseDelay;
 
         /**
          * Default constructor for creating a new MouseMoveOptions configuration.
          */
+        @JsonCreator
         public Builder() {}
 
         /**

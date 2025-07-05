@@ -3,6 +3,7 @@ package io.github.jspinak.brobot.action.composite.multiple.actions;
 import io.github.jspinak.brobot.action.ActionInterface;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.internal.execution.BasicActionRegistry;
+import io.github.jspinak.brobot.action.internal.service.ActionService;
 
 import org.springframework.stereotype.Component;
 
@@ -45,9 +46,11 @@ import java.util.Optional;
 public class MultipleBasicActions {
 
     private final BasicActionRegistry basicAction;
+    private final ActionService actionService;
 
-    public MultipleBasicActions(BasicActionRegistry basicAction) {
+    public MultipleBasicActions(BasicActionRegistry basicAction, ActionService actionService) {
         this.basicAction = basicAction;
+        this.actionService = actionService;
     }
 
     /**
@@ -93,6 +96,38 @@ public class MultipleBasicActions {
             }
         }
         return matches; // we should return the last Matches object
+    }
+
+    /**
+     * Executes all actions in the sequence using ActionConfig-based implementation.
+     * <p>
+     * This method provides support for the new ActionConfig API, allowing execution
+     * of action sequences defined with specific action configuration classes
+     * (e.g., ClickOptions, PatternFindOptions, TypeOptions).
+     * <p>
+     * Like the ActionOptions version, this method:
+     * <ul>
+     *   <li>Creates a single ActionResult to accumulate results</li>
+     *   <li>Executes actions in the order they appear in the sequence</li>
+     *   <li>Repeats the entire sequence based on timesToRepeat</li>
+     *   <li>Returns the accumulated result with the last action's config</li>
+     * </ul>
+     * 
+     * @param mao The MultipleActionsObjectV2 containing ActionConfig-based action sequence
+     * @return The accumulated ActionResult containing results from all executed actions
+     *         with the last action's configuration
+     * @since 2.0
+     */
+    public ActionResult perform(MultipleActionsObjectV2 mao) {
+        ActionResult matches = new ActionResult();
+        for (int i = 0; i < mao.getTimesToRepeat(); i++) {
+            for (ActionParametersV2 acoc : mao.getActionParameters()) {
+                matches.setActionConfig(acoc.getActionConfig());
+                Optional<ActionInterface> action = actionService.getAction(acoc.getActionConfig());
+                action.ifPresent(actionInterface -> actionInterface.perform(matches, acoc.getObjectCollection()));
+            }
+        }
+        return matches;
     }
 
 }

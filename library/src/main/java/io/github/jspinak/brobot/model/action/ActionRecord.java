@@ -2,6 +2,7 @@ package io.github.jspinak.brobot.model.action;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.model.state.special.SpecialStateType;
 import lombok.Data;
@@ -83,11 +84,19 @@ public class ActionRecord {
 
     /**
      * The ActionOptions can be queried to find which settings lead to success.
+     * @deprecated Use actionConfig instead
      */
+    @Deprecated
     private ActionOptions actionOptions = new ActionOptions.Builder()
             .setAction(ActionOptions.Action.FIND)
             .setFind(UNIVERSAL)
             .build();
+    
+    /**
+     * The ActionConfig can be queried to find which settings lead to success.
+     * This is the new API replacement for actionOptions.
+     */
+    private ActionConfig actionConfig;
     private List<Match> matchList = new ArrayList<>();
     private String text = "";
     private double duration = 0.0;

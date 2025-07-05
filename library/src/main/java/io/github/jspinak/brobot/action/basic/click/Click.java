@@ -3,6 +3,8 @@ package io.github.jspinak.brobot.action.basic.click;
 import io.github.jspinak.brobot.action.ActionInterface;
 import io.github.jspinak.brobot.action.ActionOptions;
 import io.github.jspinak.brobot.action.basic.find.Find;
+import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
+import io.github.jspinak.brobot.action.internal.factory.ActionResultFactory;
 import io.github.jspinak.brobot.action.internal.mouse.PostClickHandler;
 import io.github.jspinak.brobot.action.internal.mouse.SingleClickExecutor;
 import io.github.jspinak.brobot.model.element.Location;
@@ -59,12 +61,15 @@ public class Click implements ActionInterface {
     private final SingleClickExecutor clickLocationOnce;
     private final TimeProvider time;
     private final PostClickHandler afterClick;
+    private final ActionResultFactory actionResultFactory;
 
-    public Click(Find find, SingleClickExecutor clickLocationOnce, TimeProvider time, PostClickHandler afterClick) {
+    public Click(Find find, SingleClickExecutor clickLocationOnce, TimeProvider time, 
+                 PostClickHandler afterClick, ActionResultFactory actionResultFactory) {
         this.find = find;
         this.clickLocationOnce = clickLocationOnce;
         this.time = time;
         this.afterClick = afterClick;
+        this.actionResultFactory = actionResultFactory;
     }
 
     @Override
@@ -100,7 +105,18 @@ public class Click implements ActionInterface {
         }
         ClickOptions clickOptions = (ClickOptions) matches.getActionConfig();
 
-        find.perform(matches, objectCollections); // find performs only on 1st collection
+        // Create a separate ActionResult for Find with PatternFindOptions
+        // This is necessary because Find expects BaseFindOptions, not ClickOptions
+        PatternFindOptions findOptions = new PatternFindOptions.Builder()
+            .build();
+        ActionResult findResult = actionResultFactory.init(findOptions, "Click->Find", objectCollections);
+        
+        // Perform find operation
+        find.perform(findResult, objectCollections); // find performs only on 1st collection
+        
+        // Copy find results back to the original matches
+        matches.getMatchList().addAll(findResult.getMatchList());
+        matches.setSuccess(findResult.isSuccess());
         // Find should have already limited matches based on maxMatchesToActOn
         int matchIndex = 0;
         for (Match match : matches.getMatchList()) {

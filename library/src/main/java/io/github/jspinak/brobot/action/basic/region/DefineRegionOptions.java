@@ -3,6 +3,10 @@ package io.github.jspinak.brobot.action.basic.region;
 import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.basic.find.MatchAdjustmentOptions;
 import lombok.Getter;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Configuration for Define actions, which capture screen regions.
@@ -18,6 +22,7 @@ import lombok.Getter;
  * @see io.github.jspinak.brobot.action.basic.capture.DefineRegion
  */
 @Getter
+@JsonDeserialize(builder = DefineRegionOptions.Builder.class)
 public final class DefineRegionOptions extends ActionConfig {
 
     /**
@@ -84,14 +89,18 @@ public final class DefineRegionOptions extends ActionConfig {
     /**
      * Builder for constructing {@link DefineRegionOptions} with a fluent API.
      */
+    @JsonPOJOBuilder(withPrefix = "set")
     public static class Builder extends ActionConfig.Builder<Builder> {
 
+        @JsonProperty("defineAs")
         private DefineAs defineAs = DefineAs.MATCH;
+        @JsonProperty("matchAdjustmentOptions")
         private MatchAdjustmentOptions.Builder matchAdjustmentOptions;
 
         /**
          * Default constructor for creating a new DefineRegionOptions configuration.
          */
+        @JsonCreator
         public Builder() {}
 
         /**
