@@ -1,6 +1,7 @@
 package io.github.jspinak.brobot.manageStates;
+import io.github.jspinak.brobot.action.basic.click.ClickOptions;
 
-import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.model.element.Pattern;
 import io.github.jspinak.brobot.model.state.State;
@@ -88,13 +89,12 @@ public class StateTransitionsCreationTest {
     private void createTransition(State fromState, State toState, StateImage stateImage, String actionDescription) {
         // Create ActionDefinition
         TaskSequence actionDefinition = new TaskSequence();
-        ActionOptions options = new ActionOptions.Builder()
-                .setAction(ActionOptions.Action.CLICK)
+        ClickOptions clickOptions = new ClickOptions.Builder()
                 .build();
         ObjectCollection objects = new ObjectCollection.Builder()
                 .withImages(stateImage)
                 .build();
-        actionDefinition.addStep(options, objects);
+        actionDefinition.addStep(clickOptions, objects);
 
         // Create StateTransition
         TaskSequenceStateTransition transition = new TaskSequenceStateTransition();

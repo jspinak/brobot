@@ -3,7 +3,7 @@ package io.github.jspinak.brobot.actions.methods.basicactions.find;
 import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.BrobotTestApplication;
 import io.github.jspinak.brobot.analysis.compare.ImageComparer;
-import io.github.jspinak.brobot.actions.methods.basicactions.TestData;
+import io.github.jspinak.brobot.actions.methods.basicactions.TestDataUpdated;
 import io.github.jspinak.brobot.test.BrobotIntegrationTestBase;
 import io.github.jspinak.brobot.model.element.Pattern;
 import io.github.jspinak.brobot.model.match.Match;
@@ -20,6 +20,7 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Tests for image comparison functionality.
  * Works in headless mode as image comparison uses OpenCV which works without display.
+ * Migrated to use TestDataUpdated.
  */
 @SpringBootTest(classes = BrobotTestApplication.class)
 class CompareImagesTest extends BrobotIntegrationTestBase {
@@ -35,7 +36,7 @@ class CompareImagesTest extends BrobotIntegrationTestBase {
     @Test
     void comparePatterns1() {
         try {
-            TestData testData = new TestData();
+            TestDataUpdated testData = new TestDataUpdated();
             
             // Check if test images exist
             if (!testImagesExist()) {
@@ -59,7 +60,7 @@ class CompareImagesTest extends BrobotIntegrationTestBase {
     @Test
     void comparePatterns2() {
         try {
-            TestData testData = new TestData();
+            TestDataUpdated testData = new TestDataUpdated();
             
             if (!testImagesExist()) {
                 System.out.println("Test images not available - using fallback comparison");
@@ -83,7 +84,7 @@ class CompareImagesTest extends BrobotIntegrationTestBase {
     @Test
     void compareImages1() {
         try {
-            TestData testData = new TestData();
+            TestDataUpdated testData = new TestDataUpdated();
             
             if (!testImagesExist()) {
                 System.out.println("Test images not available - using fallback comparison");
@@ -112,7 +113,7 @@ class CompareImagesTest extends BrobotIntegrationTestBase {
     @Test
     void compareImages2() {
         try {
-            TestData testData = new TestData();
+            TestDataUpdated testData = new TestDataUpdated();
             
             if (!testImagesExist()) {
                 System.out.println("Test images not available - using fallback comparison");

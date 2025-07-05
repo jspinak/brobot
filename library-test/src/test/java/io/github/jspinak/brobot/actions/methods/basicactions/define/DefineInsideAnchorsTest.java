@@ -3,7 +3,7 @@ package io.github.jspinak.brobot.actions.methods.basicactions.define;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.basic.region.DefineInsideAnchors;
 import io.github.jspinak.brobot.BrobotTestApplication;
-import io.github.jspinak.brobot.actions.methods.basicactions.TestData;
+import io.github.jspinak.brobot.actions.methods.basicactions.TestDataUpdated;
 import io.github.jspinak.brobot.test.BrobotIntegrationTestBase;
 import io.github.jspinak.brobot.model.element.Region;
 
@@ -36,13 +36,13 @@ class DefineInsideAnchorsTest extends BrobotIntegrationTestBase {
     @Test
     void perform() {
         try {
-            TestData testData = new TestData();
+            TestDataUpdated testData = new TestDataUpdated();
             ActionResult matches = new ActionResult();
-            matches.setActionOptions(testData.getDefineInsideAnchors());
+            matches.setActionConfig(testData.getDefineInsideAnchors());
             
             defineInsideAnchors.perform(matches, testData.getInsideAnchorObjects());
             
-            System.out.println("Matches: " + matches);
+            System.out.println("ActionResult: " + matches);
             
             // Basic assertions that should work in all modes
             assertNotNull(matches);

@@ -44,7 +44,7 @@ public class ActionOptionsIntegrationTest {
         // CORRECTED ASSERTION: Check against the library constant directly, not a magic number.
         assertEquals(Settings.DelayValue, dragOptions.getPauseAfterMouseDown());
 
-        // For a CLICK action, pauseAfterMouseDown should be BrobotSettings.pauseAfterMouseDown.
+        // For a CLICK action, pauseAfterMouseDown should be FrameworkSettings.pauseAfterMouseDown.
         ActionOptions clickOptions = new ActionOptions.Builder()
                 .setAction(ActionOptions.Action.CLICK)
                 .build();

@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.action;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import io.github.jspinak.brobot.model.element.Pattern;
 import io.github.jspinak.brobot.model.element.Scene;
 import io.github.jspinak.brobot.model.element.Location;
@@ -9,23 +11,34 @@ import io.github.jspinak.brobot.model.state.StateLocation;
 import io.github.jspinak.brobot.model.state.StateRegion;
 import io.github.jspinak.brobot.model.state.StateString;
 import io.github.jspinak.brobot.action.ObjectCollection;
-import io.github.jspinak.brobot.runner.json.parsing.ConfigurationParser;
-import io.github.jspinak.brobot.runner.json.parsing.exception.ConfigurationException;
 import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.testutils.TestPaths;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.sikuli.script.ImagePath;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.TestPropertySource;
+import io.github.jspinak.brobot.BrobotTestApplication;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest
+/**
+ * Tests for ObjectCollection JSON serialization with Spring context.
+ * Uses Spring Boot's configured ObjectMapper with all necessary Jackson modules.
+ */
+@SpringBootTest(classes = BrobotTestApplication.class)
+@TestPropertySource(properties = {
+    "spring.main.lazy-initialization=true",
+    "brobot.mock.enabled=true",
+    "brobot.illustration.disabled=true",
+    "brobot.scene.analysis.disabled=true"
+})
 class ObjectCollectionJsonParserTest {
 
     @Autowired
-    private ConfigurationParser jsonParser;
+    private ObjectMapper objectMapper;
 
     @BeforeAll
     public static void setupHeadlessMode() {
@@ -33,18 +46,23 @@ class ObjectCollectionJsonParserTest {
         ImagePath.setBundlePath("images");
     }
 
+    @BeforeEach
+    void setUp() {
+        // ObjectMapper is autowired with all necessary modules
+    }
+
     @Test
-    void testSerializeAndDeserializeEmptyObjectCollection() throws ConfigurationException {
+    void testSerializeAndDeserializeEmptyObjectCollection() throws Exception {
         // Create an empty ObjectCollection
         ObjectCollection collection = new ObjectCollection();
 
         // Serialize to JSON
-        String json = jsonParser.toJson(collection);
+        String json = objectMapper.writeValueAsString(collection);
         assertNotNull(json);
         assertFalse(json.isEmpty());
 
         // Deserialize back to ObjectCollection
-        ObjectCollection deserializedCollection = jsonParser.convertJson(json, ObjectCollection.class);
+        ObjectCollection deserializedCollection = objectMapper.readValue(json, ObjectCollection.class);
 
         // Verify the object was correctly deserialized
         assertNotNull(deserializedCollection);
@@ -58,7 +76,7 @@ class ObjectCollectionJsonParserTest {
     }
 
     @Test
-    void testSerializeAndDeserializeObjectCollectionWithData() throws ConfigurationException {
+    void testSerializeAndDeserializeObjectCollectionWithData() throws Exception {
         // Create an ObjectCollection with various data
         ObjectCollection collection = new ObjectCollection.Builder()
                 .withLocations(new Location(10, 20), new Location(30, 40))
@@ -77,7 +95,7 @@ class ObjectCollectionJsonParserTest {
         collection.getStateImages().add(stateImage);
 
         // Serialize to JSON
-        String json = jsonParser.toJson(collection);
+        String json = objectMapper.writeValueAsString(collection);
         assertNotNull(json);
         assertFalse(json.isEmpty());
 
@@ -93,7 +111,7 @@ class ObjectCollectionJsonParserTest {
         assertTrue(json.contains("bottomR"));
 
         // Deserialize back to ObjectCollection
-        ObjectCollection deserializedCollection = jsonParser.convertJson(json, ObjectCollection.class);
+        ObjectCollection deserializedCollection = objectMapper.readValue(json, ObjectCollection.class);
 
         // Verify the object was correctly deserialized
         assertNotNull(deserializedCollection);
@@ -130,7 +148,7 @@ class ObjectCollectionJsonParserTest {
     }
 
     @Test
-    void testUsingBuilderWithAllTypes() throws ConfigurationException {
+    void testUsingBuilderWithAllTypes() throws Exception {
         // Create a comprehensive ObjectCollection using all builder methods
         ObjectCollection collection = new ObjectCollection.Builder()
                 // Add locations
@@ -159,13 +177,13 @@ class ObjectCollectionJsonParserTest {
                 // Add scenes
                 .withScenes(new Scene(TestPaths.getImagePath("bottomR")))
 
-                // Add a Matches object
+                // Add a ActionResult object
                 .withMatches(new ActionResult())
 
                 .build();
 
         // Serialize to JSON
-        String json = jsonParser.toJson(collection);
+        String json = objectMapper.writeValueAsString(collection);
         assertNotNull(json);
         assertFalse(json.isEmpty());
 
@@ -185,7 +203,7 @@ class ObjectCollectionJsonParserTest {
         assertTrue(json.contains("bottomR"));
 
         // Deserialize back to ObjectCollection
-        ObjectCollection deserializedCollection = jsonParser.convertJson(json, ObjectCollection.class);
+        ObjectCollection deserializedCollection = objectMapper.readValue(json, ObjectCollection.class);
 
         // Verify the object was correctly deserialized
         assertNotNull(deserializedCollection);
@@ -212,5 +230,59 @@ class ObjectCollectionJsonParserTest {
         assertEquals(TestPaths.getImagePath("bottomR"), deserializedCollection.getScenes().getFirst().getPattern().getImgpath());
 
         assertEquals(1, deserializedCollection.getMatches().size());
+    }
+
+    @Test
+    void testSerializeAndDeserializeWithNullFields() throws Exception {
+        // Create ObjectCollection with some null fields
+        ObjectCollection collection = new ObjectCollection();
+        collection.getStateImages().add(new StateImage());
+        
+        // Serialize
+        String json = objectMapper.writeValueAsString(collection);
+        assertNotNull(json);
+        
+        // Deserialize
+        ObjectCollection deserialized = objectMapper.readValue(json, ObjectCollection.class);
+        assertNotNull(deserialized);
+        assertEquals(1, deserialized.getStateImages().size());
+    }
+
+    @Test
+    void testRoundTripWithComplexPattern() throws Exception {
+        // Create complex pattern with search regions
+        Pattern pattern = new Pattern.Builder()
+                .setFilename(TestPaths.getImagePath("topLeft"))
+                .addSearchRegion(new Region(0, 0, 100, 100))
+                .addSearchRegion(new Region(100, 100, 200, 200))
+                .build();
+        
+        StateImage stateImage = new StateImage.Builder()
+                .setOwnerStateName("ComplexState")
+                .addPattern(pattern)
+                .build();
+        
+        ObjectCollection collection = new ObjectCollection.Builder()
+                .withImages(stateImage)
+                .build();
+        
+        // Round trip
+        String json = objectMapper.writeValueAsString(collection);
+        System.out.println("testRoundTripWithComplexPattern JSON: " + json);
+        ObjectCollection deserialized = objectMapper.readValue(json, ObjectCollection.class);
+        
+        // Verify
+        assertNotNull(deserialized);
+        assertEquals(1, deserialized.getStateImages().size());
+        StateImage deserializedImage = deserialized.getStateImages().getFirst();
+        assertEquals("ComplexState", deserializedImage.getOwnerStateName());
+        assertEquals(1, deserializedImage.getPatterns().size());
+        
+        Pattern deserializedPattern = deserializedImage.getPatterns().getFirst();
+        // The pattern name should be preserved
+        assertEquals("topLeft", deserializedPattern.getName());
+        // The imgpath might not be preserved during serialization/deserialization
+        // but the pattern should still have the correct search regions
+        assertEquals(2, deserializedPattern.getSearchRegions().getRegions().size());
     }
 }

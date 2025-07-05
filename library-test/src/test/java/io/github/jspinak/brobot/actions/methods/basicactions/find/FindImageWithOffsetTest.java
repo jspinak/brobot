@@ -1,8 +1,9 @@
 package io.github.jspinak.brobot.actions.methods.basicactions.find;
+import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
 
 import io.github.jspinak.brobot.config.FrameworkSettings;
 import io.github.jspinak.brobot.action.Action;
-import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.model.element.Pattern;
 import io.github.jspinak.brobot.model.element.Location;
 import io.github.jspinak.brobot.model.element.Position;
@@ -84,7 +85,7 @@ public class FindImageWithOffsetTest extends BrobotIntegrationTestBase {
                 .withImages(topLeft)
                 .withScenes(TestPaths.getScreenshotPath("floranext0"))
                 .build();
-        ActionResult matches = action.perform(ActionOptions.Action.FIND, objColl);
+        ActionResult matches = action.perform(new PatternFindOptions.Builder().build(), objColl);
         
         // Test without offset
         StateImage topLeft2 = new StateImage.Builder()
@@ -96,7 +97,7 @@ public class FindImageWithOffsetTest extends BrobotIntegrationTestBase {
                 .withImages(topLeft2)
                 .withScenes(TestPaths.getScreenshotPath("floranext0"))
                 .build();
-        ActionResult matches2 = action.perform(ActionOptions.Action.FIND, objColl2);
+        ActionResult matches2 = action.perform(new PatternFindOptions.Builder().build(), objColl2);
         
         // Verify both finds succeeded
         assertFalse(matches.isEmpty(), "Should find pattern with offset");
@@ -148,24 +149,32 @@ public class FindImageWithOffsetTest extends BrobotIntegrationTestBase {
         ObjectCollection objColl = new ObjectCollection.Builder()
                 .withImages(topLeft)
                 .build();
-        ActionResult matches = action.perform(ActionOptions.Action.FIND, objColl);
+        ActionResult matches = action.perform(new PatternFindOptions.Builder().build(), objColl);
         
         // Test 2: Pattern with different position, but ActionOptions overrides
         StateImage topLeft2 = new StateImage.Builder()
                 .addPattern(new Pattern.Builder()
                         .setFilename(TestPaths.getImagePath("topLeft"))
-                        .setTargetPosition(0, 0)  // This should be overridden
+                        .setTargetPosition(new Position(0, 0))  // This should be overridden
                         .build())
                 .build();
         ObjectCollection objColl2 = new ObjectCollection.Builder()
                 .withImages(topLeft2)
                 .build();
-        ActionOptions actionOptions = new ActionOptions.Builder()
-                .setAction(ActionOptions.Action.FIND)
-                .setTargetPosition(100, 100)  // This should override pattern position
-                .setTargetOffset(-10, 0)
+        // In the new API, position and offset are set on Pattern, not in options
+        // Create a new pattern with the desired position and offset
+        StateImage topLeft2Override = new StateImage.Builder()
+                .addPattern(new Pattern.Builder()
+                        .setFilename(TestPaths.getImagePath("topLeft"))
+                        .setTargetPosition(new Position(100, 100))
+                        .setTargetOffset(-10, 0)
+                        .build())
                 .build();
-        ActionResult matches2 = action.perform(actionOptions, objColl2);
+        ObjectCollection objColl2Override = new ObjectCollection.Builder()
+                .withImages(topLeft2Override)
+                .build();
+        PatternFindOptions findOptions = new PatternFindOptions.Builder().build();
+        ActionResult matches2 = action.perform(findOptions, objColl2Override);
         
         // Verify both finds succeeded
         assertFalse(matches.isEmpty(), "Should find pattern with position/offset in pattern");
@@ -226,7 +235,7 @@ public class FindImageWithOffsetTest extends BrobotIntegrationTestBase {
         ObjectCollection objColl = new ObjectCollection.Builder()
                 .withImages(topLeft)
                 .build();
-        ActionResult matches = action.perform(ActionOptions.Action.FIND, objColl);
+        ActionResult matches = action.perform(new PatternFindOptions.Builder().build(), objColl);
         
         // Verify find succeeded
         assertFalse(matches.isEmpty(), "Should find the pattern");
