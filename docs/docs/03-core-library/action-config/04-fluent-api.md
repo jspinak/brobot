@@ -270,13 +270,17 @@ public class FormFiller {
 ```java
 public ActionResult retryAction(ActionConfig action, int maxRetries) {
     for (int i = 0; i < maxRetries; i++) {
+        // Add exponential backoff pause after action (except for first attempt)
+        if (i > 0) {
+            action = action.toBuilder()
+                .setPauseAfterAction((double)(i + 1))  // Exponential backoff
+                .build();
+        }
+        
         ActionResult result = action.perform(action);
         if (result.isSuccess()) {
             return result;
         }
-        
-        // Wait before retry
-        Thread.sleep(1000 * (i + 1));  // Exponential backoff
     }
     
     return new ActionResult();  // Failed after all retries
