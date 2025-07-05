@@ -1,6 +1,7 @@
 package io.github.jspinak.brobot.runner.resources;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import io.github.jspinak.brobot.runner.events.EventBus;
 import io.github.jspinak.brobot.runner.events.LogEvent;
@@ -16,6 +17,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 @Component
 @Data
+@EqualsAndHashCode(exclude = {"managedResources", "resourceTracker"})
 public class ResourceManager {
     private final EventBus eventBus;
     private final CopyOnWriteArrayList<AutoCloseable> managedResources = new CopyOnWriteArrayList<>();
