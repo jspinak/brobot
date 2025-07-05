@@ -13,11 +13,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Updated test data class using new ActionConfig API.
- * 
- * Key changes:
- * - Uses DefineRegionOptions instead of ActionOptions.Action.DEFINE
- * - Type-safe configuration for region definition
+ * Updated TestData class that uses the new ActionConfig API.
+ * Migrated from ActionOptions to DefineRegionOptions.
  */
 @Getter
 public class TestDataUpdated {
@@ -30,8 +27,6 @@ public class TestDataUpdated {
     private Pattern bottomR;
     private StateImage topLeft;
     private StateImage bottomRight;
-    
-    // NEW API: Use DefineRegionOptions
     private DefineRegionOptions defineInsideAnchors;
     private ObjectCollection insideAnchorObjects;
     private Pattern floranext0;
@@ -60,16 +55,21 @@ public class TestDataUpdated {
         }
     }
     
-    public TestDataUpdated() {
-        initPaths();
-    }
-    
-    private void init() {
+    private void ensureInitialized() {
         if (!initialized) {
-            screenshot = new Pattern(Paths.get(screenshotsPath, "floranext1.png").toString());
-            topL = new Pattern(Paths.get(imagesPath, "topLeft.png").toString());
-            topL.getPositions().setPositionPercentOfRegion(new Positions.PercentOfRegion(30, 15));
-            bottomR = new Pattern(Paths.get(imagesPath, "bottomRight.png").toString());
+            initPaths();
+            
+            screenshot = new Pattern.Builder()
+                    .setFilename(Paths.get(screenshotsPath, "floranext0.png").toString())
+                    .build();
+            topL = new Pattern.Builder()
+                    .setFilename(Paths.get(imagesPath, "topLeft.png").toString())
+                    .addAnchor(Positions.Name.TOPLEFT, Positions.Name.BOTTOMLEFT)
+                    .build();
+            bottomR = new Pattern.Builder()
+                    .setFilename(Paths.get(imagesPath, "bottomR2.png").toString())
+                    .addAnchor(Positions.Name.BOTTOMRIGHT, Positions.Name.TOPRIGHT)
+                    .build();
             topLeft = new StateImage.Builder()
                     .addPattern(topL)
                     .build();
@@ -77,7 +77,7 @@ public class TestDataUpdated {
                     .addPattern(bottomR)
                     .build();
             
-            // NEW API: Use DefineRegionOptions
+            // NEW API: Use DefineRegionOptions instead of ActionOptions
             defineInsideAnchors = new DefineRegionOptions.Builder()
                     .setDefineAs(DefineRegionOptions.DefineAs.INSIDE_ANCHORS)
                     .build();
@@ -94,12 +94,6 @@ public class TestDataUpdated {
             floranext4 = new Pattern(Paths.get(screenshotsPath, "floranext4.png").toString());
             
             initialized = true;
-        }
-    }
-    
-    private void ensureInitialized() {
-        if (!initialized) {
-            init();
         }
     }
     
@@ -162,38 +156,35 @@ public class TestDataUpdated {
         ensureInitialized();
         return floranext4;
     }
-    
-    /**
-     * Example of creating other DefineRegionOptions configurations
-     */
-    public static class DefineRegionExamples {
-        
-        public static DefineRegionOptions defineOutsideAnchors() {
-            return new DefineRegionOptions.Builder()
-                    .setDefineAs(DefineRegionOptions.DefineAs.OUTSIDE_ANCHORS)
-                    .build();
-        }
-        
-        public static DefineRegionOptions defineWithMatches() {
-            return new DefineRegionOptions.Builder()
-                    .setDefineAs(DefineRegionOptions.DefineAs.INCLUDING_MATCHES)
-                    .build();
-        }
-        
-        public static DefineRegionOptions defineWithWindow() {
-            return new DefineRegionOptions.Builder()
-                    .setDefineAs(DefineRegionOptions.DefineAs.WINDOW)
-                    .build();
-        }
-        
-        public static DefineRegionOptions defineWithBorders(int top, int right, int bottom, int left) {
-            return new DefineRegionOptions.Builder()
-                    .setDefineAs(DefineRegionOptions.DefineAs.WITH_MATCH)
-                    .setTopBorder(top)
-                    .setRightBorder(right)
-                    .setBottomBorder(bottom)
-                    .setLeftBorder(left)
-                    .build();
-        }
+
+    public List<Pattern> getPatterns() {
+        ensureInitialized();
+        List<Pattern> patterns = new ArrayList<>();
+        patterns.add(floranext0);
+        patterns.add(floranext1);
+        patterns.add(floranext2);
+        patterns.add(floranext3);
+        patterns.add(floranext4);
+        return patterns;
     }
+
+    public List<Pattern> getPatterns(Integer... indices) {
+        ensureInitialized();
+        List<Pattern> patterns = new ArrayList<>();
+        if (List.of(indices).contains(0)) patterns.add(floranext0);
+        if (List.of(indices).contains(1)) patterns.add(floranext1);
+        if (List.of(indices).contains(2)) patterns.add(floranext2);
+        if (List.of(indices).contains(3)) patterns.add(floranext3);
+        if (List.of(indices).contains(4)) patterns.add(floranext4);
+        return patterns;
+    }
+
+    public List<StateImage> getStateImages() {
+        ensureInitialized();
+        List<StateImage> images = new ArrayList<>();
+        images.add(topLeft);
+        images.add(bottomRight);
+        return images;
+    }
+
 }

@@ -2,14 +2,13 @@ package io.github.jspinak.brobot.actions.methods.basicactions.click;
 
 import io.github.jspinak.brobot.config.FrameworkSettings;
 import io.github.jspinak.brobot.action.Action;
-import io.github.jspinak.brobot.action.ActionOptions;
 import io.github.jspinak.brobot.model.element.Location;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.config.ExecutionEnvironment;
 import io.github.jspinak.brobot.action.ObjectCollection;
-import io.github.jspinak.brobot.action.internal.mouse.ClickType;
+import io.github.jspinak.brobot.action.basic.click.ClickOptions;
 import io.github.jspinak.brobot.model.state.StateImage;
-import io.github.jspinak.brobot.test.BrobotIntegrationTestBase;
+import io.github.jspinak.brobot.BrobotTestApplication;
 import io.github.jspinak.brobot.testutils.TestPaths;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,8 +25,14 @@ import static org.junit.jupiter.api.Assertions.*;
  * Find operations execute with real pattern matching on screenshots.
  * Physical click actions are mocked to verify locations without side effects.
  */
-@SpringBootTest
-public class DoubleClickTest extends BrobotIntegrationTestBase {
+@SpringBootTest(classes = BrobotTestApplication.class)
+@org.springframework.test.context.TestPropertySource(properties = {
+    "spring.main.lazy-initialization=true",
+    "brobot.mock.enabled=true",
+    "brobot.illustration.disabled=true",
+    "brobot.scene.analysis.disabled=true"
+})
+public class DoubleClickTest {
 
     @BeforeAll
     public static void setup() {
@@ -35,17 +40,8 @@ public class DoubleClickTest extends BrobotIntegrationTestBase {
     }
     
     @BeforeEach
-    @Override
     protected void setUpBrobotEnvironment() {
-        // Configure for unit testing with screenshots
-        ExecutionEnvironment env = ExecutionEnvironment.builder()
-                .mockMode(false)  // Use real file operations for find
-                .forceHeadless(true)  // No screen capture
-                .allowScreenCapture(false)
-                .build();
-        ExecutionEnvironment.setInstance(env);
-        
-        // Enable action mocking but real find operations
+        // Enable mock mode for tests
         FrameworkSettings.mock = true;
         
         // Clear any previous screenshots
@@ -84,14 +80,13 @@ public class DoubleClickTest extends BrobotIntegrationTestBase {
                 .build();
                 
         // Configure double-click action
-        ActionOptions actionOptions = new ActionOptions.Builder()
-                .setAction(ActionOptions.Action.CLICK)
-                .setClickType(ClickType.Type.DOUBLE_LEFT)
+        ClickOptions clickOptions = new ClickOptions.Builder()
+                .setNumberOfClicks(2)
                 .setPauseBeforeBegin(2.0)
                 .build();
                 
         // Execute - find happens for real, click is mocked
-        ActionResult matches = action.perform(actionOptions, objColl);
+        ActionResult matches = action.perform(clickOptions, objColl);
         
         // Verify results
         assertFalse(matches.isEmpty(), "Should find the topLeft pattern");
@@ -136,14 +131,13 @@ public class DoubleClickTest extends BrobotIntegrationTestBase {
                 .build();
                 
         // Configure double-click with custom pause
-        ActionOptions actionOptions = new ActionOptions.Builder()
-                .setAction(ActionOptions.Action.CLICK)
-                .setClickType(ClickType.Type.DOUBLE_LEFT)
-                .setPauseBeforeMouseDown(2.0)
+        ClickOptions clickOptions = new ClickOptions.Builder()
+                .setNumberOfClicks(2)
+                .setPauseBeforeBegin(2.0)
                 .build();
                 
         // Execute
-        ActionResult matches = action.perform(actionOptions, objColl);
+        ActionResult matches = action.perform(clickOptions, objColl);
         
         // Verify results
         assertFalse(matches.isEmpty(), "Should find the topLeft pattern");

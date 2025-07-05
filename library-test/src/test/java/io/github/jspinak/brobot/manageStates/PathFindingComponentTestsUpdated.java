@@ -1,4 +1,5 @@
 package io.github.jspinak.brobot.manageStates;
+import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
 
 import io.github.jspinak.brobot.action.basic.click.ClickOptions;
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
@@ -34,7 +35,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * Tests individual components of the path finding system.
  * 
  * Key changes:
- * - Uses ClickOptions instead of ActionOptions.Action.CLICK
+ * - Uses ClickOptions instead of ClickOptions
  * - Demonstrates component testing with new API
  */
 @SpringBootTest
@@ -214,7 +215,7 @@ public class PathFindingComponentTestsUpdated {
                 .build();
                 
         ObjectCollection clickObjects = new ObjectCollection.Builder()
-                .useMatchesFromPreviousAction()
+                // .useMatchesFromPreviousAction() // Method not available in new API
                 .build();
                 
         actionDefinition.addStep(clickOptions, clickObjects);
@@ -235,7 +236,7 @@ public class PathFindingComponentTestsUpdated {
         
         // NEW API: Use ClickOptions with DOUBLE type
         ClickOptions doubleClickOptions = new ClickOptions.Builder()
-                .setClickType(ClickOptions.Type.DOUBLE)
+                .setClickType(ClickOptions.Type.DOUBLE_LEFT)
                 .setNumberOfClicks(2)
                 .setPauseAfterEnd(0.5)
                 .build();

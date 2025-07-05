@@ -1,6 +1,7 @@
 package io.github.jspinak.brobot.model.region;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.github.jspinak.brobot.runner.json.parsing.ConfigurationParser;
 import io.github.jspinak.brobot.runner.json.parsing.exception.ConfigurationException;
@@ -17,8 +18,14 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest
-@TestPropertySource(properties = {"java.awt.headless=false"})
+import io.github.jspinak.brobot.BrobotTestApplication;
+
+@SpringBootTest(classes = BrobotTestApplication.class)
+@TestPropertySource(properties = {
+    "java.awt.headless=false",
+    "spring.main.lazy-initialization=true",
+    "brobot.mock.enabled=true"
+})
 public class SearchRegionsJsonParserTest {
 
     @Autowired

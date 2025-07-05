@@ -7,24 +7,31 @@ import io.github.jspinak.brobot.runner.project.AutomationProject;
 import io.github.jspinak.brobot.runner.project.TaskButton;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.TestPropertySource;
+import io.github.jspinak.brobot.BrobotTestApplication;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Updated tests for Project JSON parsing without Spring dependencies.
- * Demonstrates migration from ConfigurationParser to ObjectMapper.
+ * Updated tests for Project JSON parsing with Spring context for proper JSON configuration.
  */
+@SpringBootTest(classes = BrobotTestApplication.class)
+@TestPropertySource(properties = {
+    "spring.main.lazy-initialization=true",
+    "brobot.mock.enabled=true",
+    "brobot.illustration.disabled=true",
+    "brobot.scene.analysis.disabled=true"
+})
 public class ProjectJsonParserTestUpdated {
 
+    @Autowired
     private ObjectMapper objectMapper;
 
     @BeforeEach
     void setUp() {
-        objectMapper = new ObjectMapper();
-        objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
-        objectMapper.configure(com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        // Configure for date/time handling
-        objectMapper.findAndRegisterModules();
+        // ObjectMapper is now injected by Spring with all necessary configurations
     }
 
     /**
@@ -111,13 +118,13 @@ public class ProjectJsonParserTestUpdated {
                   "name": "Project With Tasks",
                   "states": [],
                   "stateTransitions": [],
-                  "taskButtons": [
+                  "automation": {
+                    "buttons": [
                     {
                       "id": 1,
                       "label": "Start Process",
                       "tooltip": "Starts the automation process",
-                      "enabled": true,
-                      "taskId": 100,
+                      "functionName": "startProcess",
                       "position": {
                         "row": 0,
                         "column": 0
@@ -127,14 +134,14 @@ public class ProjectJsonParserTestUpdated {
                       "id": 2,
                       "label": "Stop Process",
                       "tooltip": "Stops the automation process",
-                      "enabled": false,
-                      "taskId": 101,
+                      "functionName": "stopProcess",
                       "position": {
                         "row": 0,
                         "column": 1
                       }
                     }
-                  ]
+                    ]
+                  }
                 }
                 """;
 
@@ -145,22 +152,23 @@ public class ProjectJsonParserTestUpdated {
         assertEquals("Project With Tasks", project.getName());
 
         // Verify task buttons
-        assertNotNull(project.getTaskButtons());
-        assertEquals(2, project.getTaskButtons().size());
+        assertNotNull(project.getAutomation());
+        assertNotNull(project.getAutomation().getButtons());
+        assertEquals(2, project.getAutomation().getButtons().size());
 
-        TaskButton button1 = project.getTaskButtons().get(0);
-        assertEquals(1L, button1.getId());
+        TaskButton button1 = project.getAutomation().getButtons().get(0);
+        assertEquals("1", button1.getId());
         assertEquals("Start Process", button1.getLabel());
         assertEquals("Starts the automation process", button1.getTooltip());
-        assertTrue(button1.getEnabled());
-        assertEquals(100L, button1.getTaskId());
+        assertEquals("startProcess", button1.getFunctionName());
+        assertNotNull(button1.getPosition());
         assertEquals(0, button1.getPosition().getRow());
         assertEquals(0, button1.getPosition().getColumn());
 
-        TaskButton button2 = project.getTaskButtons().get(1);
-        assertEquals(2L, button2.getId());
+        TaskButton button2 = project.getAutomation().getButtons().get(1);
+        assertEquals("2", button2.getId());
         assertEquals("Stop Process", button2.getLabel());
-        assertFalse(button2.getEnabled());
+        assertEquals("stopProcess", button2.getFunctionName());
     }
 
     /**

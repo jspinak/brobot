@@ -31,7 +31,7 @@ class MatchesJsonParserTest {
 
     @Test
     void testSerializeAndDeserializeMatches() throws ConfigurationException {
-        // Create a test Matches object
+        // Create a test ActionResult object
         ActionResult matches = new ActionResult();
         matches.setActionDescription("Test Find Action");
         matches.setDuration(Duration.ofMillis(500));
@@ -53,7 +53,7 @@ class MatchesJsonParserTest {
         assertFalse(json.isEmpty());
 
         // Print the JSON for debugging
-        System.out.println("Serialized Matches JSON:");
+        System.out.println("Serialized ActionResult JSON:");
         System.out.println(json);
 
         // Verify JSON contains expected fields
@@ -61,7 +61,7 @@ class MatchesJsonParserTest {
         assertTrue(json.contains("Sample text"));
         assertTrue(json.contains("true"));  // for success
 
-        // Deserialize back to Matches
+        // Deserialize back to ActionResult
         ActionResult deserializedMatches = jsonParser.convertJson(json, ActionResult.class);
 
         // Verify the object was correctly deserialized
@@ -80,7 +80,7 @@ class MatchesJsonParserTest {
 
     @Test
     void testSerializeAndDeserializeMatchesWithMatchObjects() throws ConfigurationException {
-        // Create a test Matches object with match objects
+        // Create a test ActionResult object with match objects
         ActionResult matches = new ActionResult();
 
         // Create some match objects
@@ -98,7 +98,7 @@ class MatchesJsonParserTest {
                 .build();
         match2.getStateObjectData().setOwnerStateName("HomeScreen");
 
-        // Add matches to the Matches object
+        // Add matches to the ActionResult object
         matches.add(match1, match2);
         matches.setSuccess(true);
 
@@ -111,7 +111,7 @@ class MatchesJsonParserTest {
         assertFalse(json.isEmpty());
 
         // Print the JSON for debugging
-        System.out.println("Serialized Matches with MatchObjects JSON:");
+        System.out.println("Serialized ActionResult with MatchObjects JSON:");
         System.out.println(json);
 
         // Verify JSON contains expected values
@@ -121,7 +121,7 @@ class MatchesJsonParserTest {
         assertTrue(json.contains("0.87"));
         assertTrue(json.contains("HomeScreen"));
 
-        // Deserialize back to Matches
+        // Deserialize back to ActionResult
         ActionResult deserializedMatches = jsonParser.convertJson(json, ActionResult.class);
 
         // Verify the object was correctly deserialized
