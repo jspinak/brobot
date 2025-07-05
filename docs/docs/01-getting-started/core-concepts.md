@@ -46,10 +46,8 @@ This system continuously observes the screen to determine which states are curre
 
 ## State Finder and the Unknown State
 
-In case Brobot gets lost and cannot find any of the active states, there is
-a State Finder that will search for active states. This is a costly operation
-but will rebuild the list of active states in State Memory and allow the
-automation to continue.
+In case Brobot gets lost and cannot find any of the active states, there is a State Finder that will search for active states. This is a costly operation
+but will rebuild the list of active states in State Memory and allow the automation to continue.
 
 There is also a possibility that something really unexpected happens and that
 no states are active. In this case the UNKNOWN state will become active. The UNKNOWN state also has transitions and will attempt these transitions in order to find its way back to the target state. Any code meant to deal with unexpected situations in which no states are visible should go into the UNKNOWN state's transitions. 
