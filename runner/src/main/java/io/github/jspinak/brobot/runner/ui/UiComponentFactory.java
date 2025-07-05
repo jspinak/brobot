@@ -1,7 +1,7 @@
 package io.github.jspinak.brobot.runner.ui;
 
 import io.github.jspinak.brobot.navigation.service.StateService;
-import io.github.jspinak.brobot.runner.automation.AutomationExecutor;
+import io.github.jspinak.brobot.runner.automation.AutomationOrchestrator;
 import io.github.jspinak.brobot.runner.cache.CacheManager;
 import io.github.jspinak.brobot.runner.config.ApplicationConfig;
 import io.github.jspinak.brobot.runner.config.BrobotRunnerProperties;
@@ -27,7 +27,7 @@ public class UiComponentFactory {
     private final EventBus eventBus;
     private final ApplicationContext applicationContext;
     private final AutomationProjectManager projectManager;
-    private final AutomationExecutor automationExecutor;
+    private final AutomationOrchestrator automationOrchestrator;
     private final ResourceManager resourceManager;
     private final ImageResourceManager imageResourceManager;
     private final CacheManager cacheManager;
@@ -52,7 +52,7 @@ public class UiComponentFactory {
     }
 
     public AutomationPanel createAutomationPanel() {
-        return new AutomationPanel(applicationContext, projectManager, properties, automationExecutor, eventBus);
+        return new AutomationPanel(applicationContext, projectManager, properties, automationOrchestrator, eventBus);
     }
 
     /**

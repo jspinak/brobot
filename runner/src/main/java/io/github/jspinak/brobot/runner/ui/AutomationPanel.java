@@ -4,7 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.AccessLevel;
 
-import io.github.jspinak.brobot.runner.automation.AutomationExecutor;
+import io.github.jspinak.brobot.runner.automation.AutomationOrchestrator;
 import io.github.jspinak.brobot.runner.config.BrobotRunnerProperties;
 import io.github.jspinak.brobot.runner.events.EventBus;
 import io.github.jspinak.brobot.runner.events.ExecutionStatusEvent;
@@ -41,7 +41,7 @@ public class AutomationPanel extends VBox {
     private final ApplicationContext context;
     private final AutomationProjectManager projectManager;
     private final BrobotRunnerProperties runnerProperties;
-    private final AutomationExecutor automationExecutor;
+    private final AutomationOrchestrator automationOrchestrator;
     private final EventBus eventBus;
 
     private final TextArea logArea;
@@ -55,12 +55,12 @@ public class AutomationPanel extends VBox {
      * Constructor with Spring dependencies
      */
     public AutomationPanel(ApplicationContext context, AutomationProjectManager projectManager,
-                           BrobotRunnerProperties runnerProperties, AutomationExecutor automationExecutor,
+                           BrobotRunnerProperties runnerProperties, AutomationOrchestrator automationOrchestrator,
                            EventBus eventBus) {
         this.context = context;
         this.projectManager = projectManager;
         this.runnerProperties = runnerProperties;
-        this.automationExecutor = automationExecutor;
+        this.automationOrchestrator = automationOrchestrator;
         this.eventBus = eventBus;
         this.logArea = new TextArea();
         this.buttonPane = new FlowPane();
@@ -69,8 +69,8 @@ public class AutomationPanel extends VBox {
         setupLogArea();
 
         // Register for automation events
-        if (automationExecutor != null) {
-            automationExecutor.setLogCallback(this::log);
+        if (automationOrchestrator != null) {
+            automationOrchestrator.setLogCallback(this::log);
 
             // Start a UI update thread for status
             startStatusUpdateThread();
@@ -156,7 +156,7 @@ public class AutomationPanel extends VBox {
             while (true) {
                 try {
                     // Check execution status and update UI
-                    if (automationExecutor != null) {
+                    if (automationOrchestrator != null) {
                         updateExecutionStatusUI();
                     }
 
@@ -183,7 +183,7 @@ public class AutomationPanel extends VBox {
 
         updateInProgress = true;
         try {
-            ExecutionStatus status = automationExecutor.getExecutionStatus();
+            ExecutionStatus status = automationOrchestrator.getExecutionStatus();
             if (status == null) return; // **FIX**: Add null check for status
 
             Platform.runLater(() -> {
@@ -223,7 +223,7 @@ public class AutomationPanel extends VBox {
      * Toggles between pause and resume based on current state
      */
     private void togglePauseResume() {
-        ExecutionState state = automationExecutor.getExecutionStatus().getState();
+        ExecutionState state = automationOrchestrator.getExecutionStatus().getState();
 
         if (state == ExecutionState.RUNNING) {
             pauseAutomation();
@@ -339,7 +339,7 @@ public class AutomationPanel extends VBox {
      */
     private void runAutomation(TaskButton buttonDef) {
         // Check if another automation is already running
-        if (automationExecutor.getExecutionStatus().getState().isActive()) {
+        if (automationOrchestrator.getExecutionStatus().getState().isActive()) {
             log("Another automation task is already running. Please wait or stop it first.");
             return;
         }
@@ -361,50 +361,50 @@ public class AutomationPanel extends VBox {
 
         log("Starting automation: " + buttonDef.getLabel());
         eventBus.publish(ExecutionStatusEvent.started(this,
-                automationExecutor.getExecutionStatus(),
+                automationOrchestrator.getExecutionStatus(),
                 "Starting automation: " + buttonDef.getLabel()));
-        automationExecutor.executeAutomation(buttonDef);
+        automationOrchestrator.executeAutomation(buttonDef);
     }
 
     /**
      * Stops all running automation
      */
     private void stopAllAutomation() {
-        if (automationExecutor.getExecutionStatus() != null && !automationExecutor.getExecutionStatus().getState().isActive()) {
+        if (automationOrchestrator.getExecutionStatus() != null && !automationOrchestrator.getExecutionStatus().getState().isActive()) {
             log("No automation is currently running.");
             return;
         }
 
         log("Stopping all automation...");
         eventBus.publish(ExecutionStatusEvent.stopped(this,
-                automationExecutor.getExecutionStatus(),
+                automationOrchestrator.getExecutionStatus(),
                 "Stopping all automation"));
-        automationExecutor.stopAllAutomation();
+        automationOrchestrator.stopAllAutomation();
     }
 
     /**
      * Pauses the current automation
      */
     private void pauseAutomation() {
-        if (!automationExecutor.getExecutionStatus().getState().isActive() ||
-                automationExecutor.getExecutionStatus().getState() == ExecutionState.PAUSED) {
+        if (!automationOrchestrator.getExecutionStatus().getState().isActive() ||
+                automationOrchestrator.getExecutionStatus().getState() == ExecutionState.PAUSED) {
             return;
         }
 
         log("Pausing automation...");
-        automationExecutor.pauseAutomation();
+        automationOrchestrator.pauseAutomation();
     }
 
     /**
      * Resumes the paused automation
      */
     private void resumeAutomation() {
-        if (automationExecutor.getExecutionStatus().getState() != ExecutionState.PAUSED) {
+        if (automationOrchestrator.getExecutionStatus().getState() != ExecutionState.PAUSED) {
             return;
         }
 
         log("Resuming automation...");
-        automationExecutor.resumeAutomation();
+        automationOrchestrator.resumeAutomation();
     }
 
     /**
