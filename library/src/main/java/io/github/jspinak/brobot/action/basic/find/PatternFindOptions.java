@@ -1,6 +1,10 @@
 package io.github.jspinak.brobot.action.basic.find;
 
 import lombok.Getter;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Configuration for all standard pattern-matching Find actions.
@@ -18,6 +22,7 @@ import lombok.Getter;
  * @see io.github.jspinak.brobot.action.basic.find.Find
  */
 @Getter
+@JsonDeserialize(builder = PatternFindOptions.Builder.class)
 public final class PatternFindOptions extends BaseFindOptions {
 
     /**
@@ -172,15 +177,20 @@ public final class PatternFindOptions extends BaseFindOptions {
     /**
      * Builder for constructing {@link PatternFindOptions} with a fluent API.
      */
+    @JsonPOJOBuilder(withPrefix = "set")
     public static class Builder extends BaseFindOptions.Builder<Builder> {
 
+        @JsonProperty("strategy")
         private Strategy strategy = Strategy.FIRST;
+        @JsonProperty("doOnEach")
         private DoOnEach doOnEach = DoOnEach.FIRST;
+        @JsonProperty("matchFusionOptions")
         private MatchFusionOptions.Builder matchFusionOptions = new MatchFusionOptions.Builder();
 
         /**
          * Default constructor for creating a new PatternFindOptions configuration.
          */
+        @JsonCreator
         public Builder() {}
 
         /**

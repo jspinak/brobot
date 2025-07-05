@@ -1,5 +1,9 @@
 package io.github.jspinak.brobot.action.basic.type;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import io.github.jspinak.brobot.action.ActionConfig;
 import lombok.Getter;
 
@@ -23,6 +27,7 @@ import java.util.List;
  * @see io.github.jspinak.brobot.action.basic.type.KeyDownOptions
  */
 @Getter
+@JsonDeserialize(builder = KeyUpOptions.Builder.class)
 public final class KeyUpOptions extends ActionConfig {
 
     private final List<String> modifiers;
@@ -35,13 +40,16 @@ public final class KeyUpOptions extends ActionConfig {
     /**
      * Builder for constructing {@link KeyUpOptions} with a fluent API.
      */
+    @JsonPOJOBuilder(withPrefix = "set")
     public static class Builder extends ActionConfig.Builder<Builder> {
 
+        @JsonProperty("modifiers")
         private List<String> modifiers = new ArrayList<>();
 
         /**
          * Default constructor for creating a new KeyUpOptions configuration.
          */
+        @JsonCreator
         public Builder() {}
 
         /**

@@ -1,20 +1,32 @@
 package io.github.jspinak.brobot.runner.json.serializers;
 
 import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.BeanDescription;
+import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.ser.BeanPropertyWriter;
+import com.fasterxml.jackson.databind.ser.BeanSerializerFactory;
+import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import io.github.jspinak.brobot.action.ActionConfig;
 
 import java.io.IOException;
+
+import org.springframework.stereotype.Component;
 
 /**
  * Custom serializer for ActionConfig hierarchy that adds a type discriminator field.
  * This works in conjunction with ActionConfigDeserializer for polymorphic serialization.
  */
-public class ActionConfigSerializer extends JsonSerializer<ActionConfig> {
+@Component
+public class ActionConfigSerializer extends StdSerializer<ActionConfig> {
+    
+    public ActionConfigSerializer() {
+        super(ActionConfig.class);
+    }
     
     @Override
-    public void serialize(ActionConfig value, JsonGenerator gen, SerializerProvider serializers)
+    public void serialize(ActionConfig value, JsonGenerator gen, SerializerProvider provider)
             throws IOException {
         
         gen.writeStartObject();
@@ -23,14 +35,16 @@ public class ActionConfigSerializer extends JsonSerializer<ActionConfig> {
         String typeName = value.getClass().getSimpleName();
         gen.writeStringField("@type", typeName);
         
-        // Serialize all fields
-        serializers.defaultSerializeValue(value, gen);
+        // Get the bean serializer for the actual type
+        JavaType javaType = provider.constructType(value.getClass());
+        BeanDescription beanDesc = provider.getConfig().introspect(javaType);
+        JsonSerializer<Object> beanSerializer = BeanSerializerFactory.instance.findBeanSerializer(provider, javaType, beanDesc);
+        
+        // Serialize all the bean properties
+        if (beanSerializer != null) {
+            beanSerializer.unwrappingSerializer(null).serialize(value, gen, provider);
+        }
         
         gen.writeEndObject();
-    }
-    
-    @Override
-    public Class<ActionConfig> handledType() {
-        return ActionConfig.class;
     }
 }

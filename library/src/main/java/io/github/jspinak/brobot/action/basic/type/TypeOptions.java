@@ -2,6 +2,10 @@ package io.github.jspinak.brobot.action.basic.type;
 
 import io.github.jspinak.brobot.action.ActionConfig;
 import lombok.Getter;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.sikuli.basics.Settings;
 
 /**
@@ -17,6 +21,7 @@ import org.sikuli.basics.Settings;
  * @see io.github.jspinak.brobot.action.basic.type.TypeText
  */
 @Getter
+@JsonDeserialize(builder = TypeOptions.Builder.class)
 public final class TypeOptions extends ActionConfig {
 
     private final double typeDelay;
@@ -31,14 +36,18 @@ public final class TypeOptions extends ActionConfig {
     /**
      * Builder for constructing {@link TypeOptions} with a fluent API.
      */
+    @JsonPOJOBuilder(withPrefix = "set")
     public static class Builder extends ActionConfig.Builder<Builder> {
 
+        @JsonProperty("typeDelay")
         private double typeDelay = Settings.TypeDelay;
+        @JsonProperty("modifiers")
         private String modifiers = "";
 
         /**
          * Default constructor for creating a new TypeOptions configuration.
          */
+        @JsonCreator
         public Builder() {}
 
         /**

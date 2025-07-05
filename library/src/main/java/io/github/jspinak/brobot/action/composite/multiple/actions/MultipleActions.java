@@ -92,4 +92,36 @@ public class MultipleActions {
         }
         return matches; // we should return the last Matches object
     }
+
+    /**
+     * Executes all actions defined in the MultipleActionsObjectV2 in sequence.
+     * <p>
+     * This overload provides support for the new ActionConfig API, allowing
+     * action sequences to be defined using type-specific configuration classes
+     * (e.g., ClickOptions, PatternFindOptions, TypeOptions) instead of the
+     * generic ActionOptions.
+     * <p>
+     * The execution behavior is identical to the ActionOptions version:
+     * <ul>
+     *   <li>Actions execute synchronously in order</li>
+     *   <li>The entire sequence can be repeated multiple times</li>
+     *   <li>Debug output shows the execution flow</li>
+     *   <li>Returns the result of the last executed action</li>
+     * </ul>
+     * 
+     * @param mao The MultipleActionsObjectV2 containing ActionConfig-based action sequence
+     * @return The ActionResult from the last executed action, or an empty ActionResult
+     *         if no actions were executed
+     * @since 2.0
+     */
+    public ActionResult perform(MultipleActionsObjectV2 mao) {
+        ActionResult matches = new ActionResult();
+        for (int i = 0; i < mao.getTimesToRepeat(); i++) {
+            for (ActionParametersV2 acoc : mao.getActionParameters()) {
+                System.out.println(acoc.getActionConfig().getClass().getSimpleName() + "->" + acoc.getObjectCollection());
+                matches = action.perform(acoc.getActionConfig(), acoc.getObjectCollection());
+            }
+        }
+        return matches;
+    }
 }
