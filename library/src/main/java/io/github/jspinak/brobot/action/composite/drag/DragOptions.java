@@ -4,6 +4,10 @@ import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.basic.mouse.MousePressOptions;
 import io.github.jspinak.brobot.model.action.MouseButton;
 import lombok.Getter;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Configuration for drag actions.
@@ -13,6 +17,7 @@ import lombok.Getter;
  * </p>
  */
 @Getter
+@JsonDeserialize(builder = DragOptions.Builder.class)
 public final class DragOptions extends ActionConfig {
     
     private final MousePressOptions mousePressOptions;
@@ -29,17 +34,22 @@ public final class DragOptions extends ActionConfig {
     /**
      * Builder for constructing DragOptions with a fluent API.
      */
+    @JsonPOJOBuilder(withPrefix = "set")
     public static class Builder extends ActionConfig.Builder<Builder> {
         
+        @JsonProperty("mousePressOptions")
         private MousePressOptions mousePressOptions = new MousePressOptions.Builder()
             .setButton(MouseButton.LEFT)
             .build();
+        @JsonProperty("delayBetweenMouseDownAndMove")
         private double delayBetweenMouseDownAndMove = 0.5;
+        @JsonProperty("delayAfterDrag")
         private double delayAfterDrag = 0.5;
         
         /**
          * Default constructor for creating a new DragOptions configuration.
          */
+        @JsonCreator
         public Builder() {}
         
         /**

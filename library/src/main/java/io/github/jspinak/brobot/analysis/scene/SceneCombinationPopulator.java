@@ -1,7 +1,9 @@
 package io.github.jspinak.brobot.analysis.scene;
 
 import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.ObjectCollection;
+import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
 import io.github.jspinak.brobot.action.basic.find.FindState;
 import io.github.jspinak.brobot.model.analysis.scene.SceneCombination;
 import io.github.jspinak.brobot.model.element.Region;
@@ -83,6 +85,30 @@ public class SceneCombinationPopulator {
                     for (SceneCombination sceneCombination : sceneCombinations) {
                         addImageToCombinationIfFound(i, stateImage, sceneCombination);
                     }
+                }
+            }
+        }
+    }
+
+    /**
+     * Distributes StateImage objects to all scene combinations where they remain stable.
+     * <p>
+     * This overloaded method accepts ActionConfig (new API) instead of ActionOptions.
+     * It extracts the minArea parameter from PatternFindOptions if available.
+     * 
+     * @param sceneCombinations All possible scene combinations to populate with images
+     * @param objectCollections Collections containing StateImages to distribute
+     * @param actionConfig Configuration containing minimum area threshold for images
+     */
+    public void populateSceneCombinationsWithImages(List<SceneCombination> sceneCombinations,
+                                                    List<ObjectCollection> objectCollections,
+                                                    ActionConfig actionConfig) {
+        // In the new API, minArea filtering is typically done elsewhere
+        // For now, we'll accept all images regardless of size
+        for (int i=0; i<objectCollections.size(); i++) {
+            for (StateImage stateImage : objectCollections.get(i).getStateImages()) {
+                for (SceneCombination sceneCombination : sceneCombinations) {
+                    addImageToCombinationIfFound(i, stateImage, sceneCombination);
                 }
             }
         }

@@ -96,6 +96,28 @@ public class FindAll {
         }
         return allMatchObjects;
     }
+    
+    /**
+     * Finds all occurrences of patterns from a StateImage within the specified scene.
+     * <p>
+     * This method performs exhaustive pattern matching using the new PatternFindOptions API.
+     * 
+     * @param stateImage The StateImage containing patterns to search for. Must not be null.
+     * @param scene The scene (screenshot) to search within. Must not be null.
+     * @param findOptions Configuration controlling search behavior.
+     * @return A list of all Match objects found for all patterns. Returns an empty list
+     *         if no matches are found or all matches are filtered out by region constraints.
+     */
+    public List<Match> find(StateImage stateImage, Scene scene, PatternFindOptions findOptions) {
+        List<Match> allMatchObjects = new ArrayList<>();
+        for (Pattern pattern : stateImage.getPatterns()) {
+            Position targetPosition = pattern.getTargetPosition();
+            Location xyOffset = pattern.getTargetOffset();
+            List<Match> matchList = mockOrLive.findAll(pattern, scene);
+            addMatchObjects(allMatchObjects, matchList, pattern, stateImage, findOptions, scene, targetPosition, xyOffset);
+        }
+        return allMatchObjects;
+    }
 
     /**
      * Processes and filters raw matches, converting them to enriched Match objects.
@@ -122,6 +144,34 @@ public class FindAll {
                 pattern.getName() : scene.getPattern().getName();
         for (Match match : matchList) {
             List<Region> regionsAllowedForMatch = selectRegions.getRegions(actionOptions, stateImage);
+            if (matchProofer.isInSearchRegions(match, regionsAllowedForMatch)) {
+                Match newMatch = new Match.Builder()
+                        .setMatch(match)
+                        .setName(name+"-"+i)
+                        .setPosition(target)
+                        .setOffset(offset)
+                        .setSearchImage(pattern.getBImage())
+                        .setAnchors(pattern.getAnchors())
+                        .setStateObjectData(stateImage)
+                        .setScene(scene)
+                        .build();
+                allMatchObjects.add(newMatch);
+                i++;
+            }
+        }
+    }
+    
+    /**
+     * Processes and filters raw matches for PatternFindOptions.
+     */
+    private void addMatchObjects(List<Match> allMatchObjects, List<Match> matchList, Pattern pattern,
+                               StateImage stateImage, PatternFindOptions findOptions, Scene scene,
+                               Position target, Location offset) {
+        int i=0;
+        String name = pattern.getName() != null && !pattern.getName().isEmpty() ?
+                pattern.getName() : scene.getPattern().getName();
+        for (Match match : matchList) {
+            List<Region> regionsAllowedForMatch = selectRegions.getRegions(findOptions, stateImage);
             if (matchProofer.isInSearchRegions(match, regionsAllowedForMatch)) {
                 Match newMatch = new Match.Builder()
                         .setMatch(match)

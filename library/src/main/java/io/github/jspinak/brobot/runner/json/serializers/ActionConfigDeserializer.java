@@ -29,10 +29,13 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.stereotype.Component;
+
 /**
  * Custom deserializer for ActionConfig hierarchy that handles polymorphic deserialization.
  * Uses a type discriminator field (@type or type) to determine the concrete class.
  */
+@Component
 public class ActionConfigDeserializer extends JsonDeserializer<ActionConfig> {
     
     private static final Map<String, Class<? extends ActionConfig>> TYPE_MAPPINGS = new HashMap<>();

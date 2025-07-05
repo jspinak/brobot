@@ -139,6 +139,19 @@ public class ActionResultFactory {
     public ActionResult init(ActionOptions actionOptions, ObjectCollection... objectCollections) {
         return init(actionOptions, "", objectCollections);
     }
+    
+    /**
+     * Initializes ActionResult with ActionConfig and a list of object collections.
+     * <p>
+     * Convenience method that converts the list to varargs format.
+     *
+     * @param actionConfig Configuration for the action
+     * @param objectCollections List of target object collections
+     * @return Initialized ActionResult
+     */
+    public ActionResult init(ActionConfig actionConfig, List<ObjectCollection> objectCollections) {
+        return init(actionConfig, "", objectCollections.toArray(new ObjectCollection[0]));
+    }
 
     /*
      * Implementation notes for action developers:
