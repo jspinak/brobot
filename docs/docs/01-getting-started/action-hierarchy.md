@@ -18,19 +18,58 @@ the Wrappers convert Brobot data types to Sikuli data types.
 
 ## Basic Actions
 
-Comprising Actions such as Find and Click, Basic Actions are simple processes
-that require a maximum of 1 Find operation. Find operations are pretty
-powerful and can return Matches for Images with a variety of search options.
-For example, the DefineInsideAnchors class uses a Find Action to return a Match
-for each object in the ObjectCollection, and then uses these Match objects to
-define a Region. All of this is done with 1 Find operation.  
+Basic Actions are the fundamental building blocks of GUI automation in Brobot.
+They perform simple, atomic operations that typically require at most one Find operation.
+Examples include:
 
-## Composite Actions
+- **Find Actions** - Locate images, text, or patterns on screen
+- **Click Actions** - Single, double, or right clicks at specific locations
+- **Type Actions** - Keyboard input and key combinations
+- **Move Actions** - Mouse movements and hover operations
 
-Composite Actions use Basic Actions and Sikuli Wrappers as building blocks
-to create more complex operations. A typical candidate for a Composite Action
-is a process that requires more than 1 Find operation, although Composite
-Actions also could be made of multiple Basic Actions that require no Find
-operations. For a Composite Action, achieving its goal with only 1 Find
-operation is either not possible or would make the operation too confusing
-or too complex. Examples of Composite Actions are ClickUntil and Drag.  
+Each Basic Action is implemented as a separate class that implements the `ActionInterface`,
+providing a clean, type-safe API through specific configuration classes like `PatternFindOptions`,
+`ClickOptions`, and `TypeOptions`.
+
+## Complex Actions
+
+Complex Actions (formerly called Composite Actions) combine Basic Actions and Sikuli Wrappers
+to create more sophisticated operations. These are useful for:
+
+- **Multi-step Operations** - Actions requiring multiple Find operations
+- **Conditional Behaviors** - Click until something appears/disappears
+- **Drag Operations** - Click, hold, move, and release sequences
+- **Scrolling** - Repeated scroll actions until target is found
+- **Retry Logic** - Automatic retry with different strategies
+
+In Brobot 1.1.0, Complex Actions are built by:
+1. Chaining multiple Basic Actions together
+2. Using `TaskSequence` (formerly `ActionDefinition`) for scripted sequences
+3. Creating custom action classes that orchestrate Basic Actions
+
+### Example: Click Until Pattern Appears
+
+```java
+// Using individual actions with retry logic
+public boolean clickUntilFound(StateImage clickTarget, StateImage findTarget, int maxAttempts) {
+    for (int i = 0; i < maxAttempts; i++) {
+        // Click on target with pause after action
+        ClickOptions click = new ClickOptions.Builder()
+                .setPauseAfterAction(1.0)  // 1 second pause after click
+                .build();
+        performAction(click, clickTarget);
+        
+        // Check if pattern appeared
+        PatternFindOptions find = PatternFindOptions.forQuickSearch();
+        ActionResult result = performAction(find, findTarget);
+        
+        if (result.isSuccess()) {
+            return true;
+        }
+    }
+    return false;
+}
+```
+
+This modular approach makes it easy to create custom complex behaviors while maintaining
+the benefits of type safety and clear intent provided by the ActionConfig architecture.
