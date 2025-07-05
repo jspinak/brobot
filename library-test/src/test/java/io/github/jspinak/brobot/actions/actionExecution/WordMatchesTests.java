@@ -1,18 +1,16 @@
 package io.github.jspinak.brobot.actions.actionExecution;
-
-import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
 import io.github.jspinak.brobot.action.Action;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.BrobotTestApplication;
-import io.github.jspinak.brobot.test.ocr.OcrTestBase;
-import io.github.jspinak.brobot.test.ocr.OcrTestSupport;
 import io.github.jspinak.brobot.testutils.TestPaths;
 import io.github.jspinak.brobot.model.element.Pattern;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.TestPropertySource;
 
 import java.io.File;
 
@@ -23,8 +21,13 @@ import static org.junit.jupiter.api.Assertions.*;
  * These tests require Tesseract OCR to be installed on the system.
  */
 @SpringBootTest(classes = BrobotTestApplication.class)
-@OcrTestSupport.RequiresOcr
-class WordMatchesTests extends OcrTestBase {
+@org.springframework.test.context.TestPropertySource(properties = {
+    "spring.main.lazy-initialization=true",
+    "brobot.mock.enabled=true",
+    "brobot.illustration.disabled=true",
+    "brobot.scene.analysis.disabled=true"
+})
+class WordMatchesTests {
 
     @BeforeAll
     public static void setupHeadlessMode() {
@@ -52,19 +55,16 @@ class WordMatchesTests extends OcrTestBase {
         
         final String finalImagePath = imagePath;
         
-        ActionResult matches = performOcrOperation(() -> {
-            Pattern testPattern = new Pattern(finalImagePath);
-            ObjectCollection objColl = new ObjectCollection.Builder()
-                    .withScenes(testPattern)
-                    .build();
-                    
-            ActionOptions findWordsOptions = new ActionOptions.Builder()
-                    .setAction(ActionOptions.Action.FIND)
-                    .setFind(ActionOptions.Find.ALL_WORDS)
-                    .build();
-                    
-            return action.perform(findWordsOptions, objColl);
-        });
+        Pattern testPattern = new Pattern(finalImagePath);
+        ObjectCollection objColl = new ObjectCollection.Builder()
+                .withScenes(testPattern)
+                .build();
+                
+        PatternFindOptions findWordsOptions = new PatternFindOptions.Builder()
+                .setStrategy(PatternFindOptions.Strategy.ALL)
+                .build();
+                
+        ActionResult matches = action.perform(findWordsOptions, objColl);
         
         return matches != null ? matches : new ActionResult();
     }

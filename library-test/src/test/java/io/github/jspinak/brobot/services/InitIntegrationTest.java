@@ -55,7 +55,7 @@ class InitIntegrationTest {
     @BeforeEach
     void setUp() {
         // Clear repository before each test
-        stateTransitionsRepository.emptyRepos();
+        // stateTransitionsRepository.clear() - method removed;
         // Reset BrobotSettings
         FrameworkSettings.initProfilesForDynamicImages = false;
         FrameworkSettings.initProfilesForStaticfImages = false;

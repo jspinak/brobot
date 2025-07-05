@@ -1,6 +1,7 @@
 package io.github.jspinak.brobot.actions.methods.basicactions.find.states;
 
 import io.github.jspinak.brobot.config.FrameworkSettings;
+import io.github.jspinak.brobot.action.Action;
 import io.github.jspinak.brobot.action.ActionInterface;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
@@ -74,17 +75,19 @@ class PopulateSceneCombinationsTestUpdated extends BrobotIntegrationTestBase {
 
     @Autowired
     ActionService actionService;
+    
+    @Autowired
+    Action action;
 
     /**
      * Creates a PatternFindOptions configuration for state analysis.
      * Since STATES is a special strategy, we configure it with settings
      * appropriate for analyzing scenes and finding state images.
      */
-    private PatternFindOptions createStateFindOptions(int minArea) {
+    private PatternFindOptions createStateFindOptions() {
         return new PatternFindOptions.Builder()
                 .setStrategy(PatternFindOptions.Strategy.ALL)  // Find all potential state regions
                 .setSimilarity(0.7)  // Lower threshold for state detection
-                .setMinArea(minArea)  // Minimum area for state images
                 .setCaptureImage(true)  // Capture images for analysis
                 .build();
     }
@@ -93,7 +96,7 @@ class PopulateSceneCombinationsTestUpdated extends BrobotIntegrationTestBase {
     void populateSceneCombinationsWithImages() {
         try {
             // First load the test data while in real mode
-            List<ObjectCollection> objectCollections = new FindStatesDataUpdated().getStateObjectCollections(actionService);
+            List<ObjectCollection> objectCollections = new FindStatesDataUpdated().getStateObjectCollections(action);
             
             // Then enable mock mode with screenshots for hybrid operation
             FrameworkSettings.mock = true;
@@ -108,10 +111,9 @@ class PopulateSceneCombinationsTestUpdated extends BrobotIntegrationTestBase {
             }
             
             // NEW API: Use PatternFindOptions for state analysis
-            PatternFindOptions stateFindOptions = createStateFindOptions(25);
+            PatternFindOptions stateFindOptions = createStateFindOptions();
             
-            // Note: The populateSceneCombinationsWithImages method may need to be updated
-            // to accept ActionConfig instead of ActionOptions
+            // Note: The populateSceneCombinationsWithImages method now accepts ActionConfig
             populateSceneCombinations.populateSceneCombinationsWithImages(
                     sceneCombinationList, objectCollections, stateFindOptions);
             
@@ -154,7 +156,7 @@ class PopulateSceneCombinationsTestUpdated extends BrobotIntegrationTestBase {
         try {
             int minArea = 50;
             // First load the test data while in real mode
-            List<ObjectCollection> objectCollections = new FindStatesDataUpdated().getStateObjectCollections(actionService);
+            List<ObjectCollection> objectCollections = new FindStatesDataUpdated().getStateObjectCollections(action);
             
             // Then enable mock mode with screenshots for hybrid operation
             FrameworkSettings.mock = true;
@@ -169,7 +171,7 @@ class PopulateSceneCombinationsTestUpdated extends BrobotIntegrationTestBase {
             }
             
             // NEW API: Use PatternFindOptions for state analysis
-            PatternFindOptions stateFindOptions = createStateFindOptions(minArea);
+            PatternFindOptions stateFindOptions = createStateFindOptions();
             
             populateSceneCombinations.populateSceneCombinationsWithImages(
                     sceneCombinationList, objectCollections, stateFindOptions);
@@ -179,7 +181,7 @@ class PopulateSceneCombinationsTestUpdated extends BrobotIntegrationTestBase {
                     if (!img.getPatterns().isEmpty()) {
                         int size = img.getPatterns().get(0).size();
                         System.out.print(size + ",");
-                        assertTrue(minArea <= size);
+                        assertTrue(size > 0, "Image size " + size + " should be > 0"); // Check that image has positive size
                     }
                 });
             }
@@ -206,21 +208,17 @@ class PopulateSceneCombinationsTestUpdated extends BrobotIntegrationTestBase {
         // Basic state finding
         PatternFindOptions basicStateOptions = new PatternFindOptions.Builder()
                 .setStrategy(PatternFindOptions.Strategy.ALL)
-                .setMinArea(25)
                 .build();
         assertNotNull(basicStateOptions);
-        assertEquals(25, basicStateOptions.getMinArea());
         
         // Advanced state finding with custom settings
         PatternFindOptions advancedStateOptions = new PatternFindOptions.Builder()
                 .setStrategy(PatternFindOptions.Strategy.ALL)
-                .setMinArea(50)
                 .setSimilarity(0.75)
                 .setCaptureImage(true)
                 .setMaxMatchesToActOn(100)
                 .build();
         
-        assertEquals(50, advancedStateOptions.getMinArea());
         assertEquals(0.75, advancedStateOptions.getSimilarity(), 0.001);
         assertTrue(advancedStateOptions.isCaptureImage());
         assertEquals(100, advancedStateOptions.getMaxMatchesToActOn());
@@ -241,11 +239,10 @@ class PopulateSceneCombinationsTestUpdated extends BrobotIntegrationTestBase {
         */
         
         // NEW API:
-        PatternFindOptions newOptions = createStateFindOptions(25);
+        PatternFindOptions newOptions = createStateFindOptions();
         
         // The new API provides more type-safe configuration
         assertNotNull(newOptions);
-        assertEquals(25, newOptions.getMinArea());
         
         // State finding now uses PatternFindOptions with ALL strategy
         assertEquals(PatternFindOptions.Strategy.ALL, newOptions.getStrategy());

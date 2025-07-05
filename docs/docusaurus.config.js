@@ -89,8 +89,8 @@ const config = {
           },
           // The external link to your hosted API documentation
           {
-            href: 'https://jspinak.github.io/brobot/api/1.1.0/',
-            label: 'API Reference (1.1.0)',
+            href: 'https://jspinak.github.io/brobot/api/',
+            label: 'API Reference',
             position: 'left',
           },
           {
