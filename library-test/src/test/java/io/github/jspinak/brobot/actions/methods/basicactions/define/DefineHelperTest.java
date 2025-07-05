@@ -1,9 +1,10 @@
 package io.github.jspinak.brobot.actions.methods.basicactions.define;
 
 import io.github.jspinak.brobot.action.ActionResult;
-import io.github.jspinak.brobot.actions.methods.basicactions.TestData;
+import io.github.jspinak.brobot.actions.methods.basicactions.TestDataUpdated;
 import io.github.jspinak.brobot.test.BrobotIntegrationTestBase;
 import io.github.jspinak.brobot.action.internal.capture.RegionDefinitionHelper;
+import io.github.jspinak.brobot.BrobotTestApplication;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -16,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * Tests for DefineHelper functionality.
  * Works in headless mode by handling image loading gracefully.
  */
-@SpringBootTest
+@SpringBootTest(classes = BrobotTestApplication.class)
 class DefineHelperTest extends BrobotIntegrationTestBase {
 
     @BeforeAll
@@ -30,9 +31,9 @@ class DefineHelperTest extends BrobotIntegrationTestBase {
     @Test
     void findMatches() {
         try {
-            TestData testData = new TestData();
+            TestDataUpdated testData = new TestDataUpdated();
             ActionResult matches = new ActionResult();
-            matches.setActionOptions(testData.getDefineInsideAnchors());
+            matches.setActionConfig(testData.getDefineInsideAnchors());
             
             defineHelper.findMatches(matches, testData.getInsideAnchorObjects());
             

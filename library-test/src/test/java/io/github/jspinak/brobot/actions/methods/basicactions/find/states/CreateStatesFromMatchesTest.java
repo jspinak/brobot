@@ -24,6 +24,7 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Tests for creating states from visual matches.
  * Works in headless mode using real image processing.
+ * Migrated to use FindStatesDataUpdated with new ActionConfig API.
  */
 @SpringBootTest(classes = BrobotTestApplication.class)
 @DisabledIfSystemProperty(named = "brobot.tests.ocr.disable", matches = "true")
@@ -48,7 +49,8 @@ class CreateStatesFromMatchesTest extends BrobotIntegrationTestBase {
 
     private List<State> createStates() throws Exception {
         try {
-            ActionResult matches = new FindStatesData().getMatches(action, findStates, matchesInitializer);
+            // Use FindStatesDataUpdated with new API
+            ActionResult matches = new FindStatesDataUpdated().getMatches(action, findStates, matchesInitializer, 100);
             return createStatesFromMatches.create(matches);
         } catch (Exception e) {
             // If test data is not available, return empty list

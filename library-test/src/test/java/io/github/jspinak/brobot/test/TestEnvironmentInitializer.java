@@ -76,6 +76,6 @@ public class TestEnvironmentInitializer implements ApplicationContextInitializer
         
         System.out.println("Test environment initialized: " + env.getEnvironmentInfo());
         System.out.println("Working directory: " + projectRoot);
-        System.out.println("BrobotSettings.mock: " + FrameworkSettings.mock);
+        System.out.println("FrameworkSettings.mock: " + FrameworkSettings.mock);
     }
 }
