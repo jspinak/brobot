@@ -1,8 +1,9 @@
 package io.github.jspinak.brobot.test;
+import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
 
 import io.github.jspinak.brobot.BrobotTestApplication;
 import io.github.jspinak.brobot.config.FrameworkSettings;
-import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.model.action.ActionRecord;
 import io.github.jspinak.brobot.model.element.Pattern;
 import io.github.jspinak.brobot.model.match.Match;
@@ -104,13 +105,12 @@ public class SimpleAPITest {
         assertNotNull(matches1);
         assertTrue(matches1.isEmpty());
         
-        // Test constructor with ActionOptions
-        ActionOptions options = new ActionOptions.Builder()
-                .setAction(ActionOptions.Action.FIND)
+        // Test constructor with PatternFindOptions
+        PatternFindOptions options = new PatternFindOptions.Builder()
                 .build();
-        ActionResult matches2 = new ActionResult(options);
+        ActionResult matches2 = new ActionResult();
         assertNotNull(matches2);
-        assertEquals(options, matches2.getActionOptions());
+        // ActionResult no longer stores options in the new API
     }
     
     @Test

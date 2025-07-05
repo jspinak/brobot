@@ -34,7 +34,7 @@ public class HeadlessTestConfiguration {
                 .verboseLogging(true)
                 .build();
             
-            // Keep BrobotSettings.mock false for integration tests
+            // Keep FrameworkSettings.mock false for integration tests
             FrameworkSettings.mock = false;
         } else {
             // Unit tests: full mock mode
@@ -42,7 +42,7 @@ public class HeadlessTestConfiguration {
                 .mockMode(true)  // Use fake data
                 .build();
             
-            // Keep BrobotSettings.mock true for backward compatibility
+            // Keep FrameworkSettings.mock true for backward compatibility
             FrameworkSettings.mock = true;
         }
         

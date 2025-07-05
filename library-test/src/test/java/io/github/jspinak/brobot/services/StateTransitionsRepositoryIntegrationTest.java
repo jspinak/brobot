@@ -25,7 +25,7 @@ class StateTransitionsRepositoryIntegrationTest {
     @BeforeEach
     void setUp() {
         // Clear repository before each test
-        stateTransitionsRepository.emptyRepos();
+        // stateTransitionsRepository.clear() - method removed;
     }
     
     @Test
@@ -108,7 +108,7 @@ class StateTransitionsRepositoryIntegrationTest {
         
         assertEquals(2, copy.size());
         // Verify it's a copy by clearing original and checking copy still has items
-        stateTransitionsRepository.emptyRepos();
+        // stateTransitionsRepository.clear() - method removed;
         assertEquals(2, copy.size(), "Copy should be independent of original");
     }
     

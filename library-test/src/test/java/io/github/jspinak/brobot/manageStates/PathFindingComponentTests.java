@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.manageStates;
+import io.github.jspinak.brobot.action.basic.click.ClickOptions;
 
-import io.github.jspinak.brobot.action.ActionOptions;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.model.state.State;
 import io.github.jspinak.brobot.model.state.StateImage;
@@ -115,8 +115,7 @@ public class PathFindingComponentTests {
 
     private void createTransition(State fromState, State toState, StateImage stateImage, String actionDescription) {
         TaskSequence actionDefinition = new TaskSequence();
-        ActionOptions options = new ActionOptions.Builder()
-                .setAction(ActionOptions.Action.CLICK)
+        ClickOptions options = new ClickOptions.Builder()
                 .build();
         ObjectCollection objects = new ObjectCollection.Builder()
                 .withImages(stateImage)

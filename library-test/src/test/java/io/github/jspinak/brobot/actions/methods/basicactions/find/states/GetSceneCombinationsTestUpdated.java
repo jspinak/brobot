@@ -7,7 +7,7 @@ import io.github.jspinak.brobot.action.basic.find.text.TextFindOptions;
 import io.github.jspinak.brobot.action.internal.service.ActionService;
 import io.github.jspinak.brobot.model.element.Pattern;
 import io.github.jspinak.brobot.BrobotTestApplication;
-import io.github.jspinak.brobot.actions.methods.basicactions.TestData;
+import io.github.jspinak.brobot.actions.methods.basicactions.TestDataUpdated;
 import io.github.jspinak.brobot.analysis.scene.SceneCombinationGenerator;
 import io.github.jspinak.brobot.model.analysis.scene.SceneCombination;
 
@@ -33,6 +33,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * - ActionResult requires setActionConfig() before perform()
  * - Uses ActionService to get the appropriate action
  * - TextFindOptions automatically uses ALL_WORDS strategy
+ * - Migrated to use TestDataUpdated
  */
 @SpringBootTest(classes = BrobotTestApplication.class)
 @DisabledIfSystemProperty(named = "brobot.tests.ocr.disable", matches = "true")
@@ -63,8 +64,8 @@ class GetSceneCombinationsTestUpdated {
             ActionResult matches = new ActionResult();
             matches.setActionConfig(textFindOptions);
             
-            ActionInterface findWordsAction = actionService.getAction(textFindOptions);
-            findWordsAction.perform(matches, objColl);
+            actionService.getAction(textFindOptions)
+                    .ifPresent(action -> action.perform(matches, objColl));
             
             return new ObjectCollection.Builder()
                     .withImages(matches.getMatchListAsStateImages())
@@ -80,7 +81,7 @@ class GetSceneCombinationsTestUpdated {
     }
 
     private List<ObjectCollection> getStateObjectCollections() {
-        TestData testData = new TestData();
+        TestDataUpdated testData = new TestDataUpdated();
         ObjectCollection stateColl1 = getStateObjectCollection(testData.getFloranext0());
         ObjectCollection stateColl2 = getStateObjectCollection(testData.getFloranext1());
         ObjectCollection stateColl3 = getStateObjectCollection(testData.getFloranext2());
@@ -140,14 +141,12 @@ class GetSceneCombinationsTestUpdated {
         
         // Advanced text finding with custom settings
         TextFindOptions advancedTextOptions = new TextFindOptions.Builder()
-                .setLanguage("eng")  // Specify language for OCR
                 .setMaxMatchRetries(5)
                 .setPauseBeforeBegin(1.0)
                 .setPauseAfterEnd(0.5)
                 .setSimilarity(0.8)  // Text similarity threshold
                 .build();
         
-        assertEquals("eng", advancedTextOptions.getLanguage());
         assertEquals(5, advancedTextOptions.getMaxMatchRetries());
         assertEquals(1.0, advancedTextOptions.getPauseBeforeBegin(), 0.001);
         assertEquals(0.5, advancedTextOptions.getPauseAfterEnd(), 0.001);

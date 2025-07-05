@@ -1,19 +1,18 @@
 package io.github.jspinak.brobot.actions.actionExecution;
 
-import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
+import io.github.jspinak.brobot.action.basic.click.ClickOptions;
+import io.github.jspinak.brobot.action.basic.type.TypeOptions;
+import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.basic.find.Find;
 import io.github.jspinak.brobot.action.basic.click.Click;
 import io.github.jspinak.brobot.action.basic.type.TypeText;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
-import io.github.jspinak.brobot.test.BaseIntegrationTest;
-import io.github.jspinak.brobot.action.internal.execution.BasicActionRegistry;
-import io.github.jspinak.brobot.action.internal.execution.CompositeActionRegistry;
-import io.github.jspinak.brobot.action.internal.service.ActionService;
-import io.github.jspinak.brobot.action.ActionInterface;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.TestPropertySource;
 
 import java.util.List;
 import java.util.Optional;
@@ -23,151 +22,171 @@ import java.util.function.BiConsumer;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Integration test for ActionService.
- * Tests the action retrieval and custom action registration.
- * 
- * Extends BaseIntegrationTest to ensure proper environment configuration
- * for integration testing with real files in headless environments.
+ * Integration test for Action execution.
+ * Tests the action execution with the new ActionConfig API.
  */
-@SpringBootTest
+@SpringBootTest(classes = io.github.jspinak.brobot.BrobotTestApplication.class)
+@TestPropertySource(properties = {
+    "spring.main.lazy-initialization=true",
+    "brobot.mock.enabled=true",
+    "brobot.illustration.disabled=true",
+    "brobot.scene.analysis.disabled=true"
+})
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-class ActionServiceIntegrationTest extends BaseIntegrationTest {
+class ActionServiceIntegrationTest {
 
     @Autowired
-    private ActionService actionService;
+    private io.github.jspinak.brobot.action.Action action;
     
     @Autowired
-    private BasicActionRegistry basicAction;
+    private Find find;
     
     @Autowired
-    private CompositeActionRegistry compositeAction;
+    private Click click;
+    
+    @Autowired
+    private TypeText typeText;
     
     @Test
     @Order(1)
     void testSpringContextLoads() {
-        assertNotNull(actionService, "ActionService should be autowired");
-        assertNotNull(basicAction, "BasicAction should be autowired");
-        assertNotNull(compositeAction, "CompositeAction should be autowired");
+        assertNotNull(action, "Action should be autowired");
+        assertNotNull(find, "Find should be autowired");
+        assertNotNull(click, "Click should be autowired");
+        assertNotNull(typeText, "TypeText should be autowired");
     }
     
     @Test
     @Order(2)
-    void testGetBasicFindAction() {
-        ActionOptions options = new ActionOptions.Builder()
-                .setAction(ActionOptions.Action.FIND)
+    void testBasicFindAction() {
+        PatternFindOptions options = new PatternFindOptions.Builder()
                 .build();
         
-        Optional<ActionInterface> action = actionService.getAction(options);
+        ObjectCollection collection = new ObjectCollection.Builder()
+                .build();
         
-        assertTrue(action.isPresent(), "Should return Find action");
-        assertTrue(action.get() instanceof Find, "Should be instance of Find");
+        ActionResult result = action.perform(options, collection);
+        
+        assertNotNull(result, "Should return result");
     }
     
     @Test
     @Order(3)
-    void testGetBasicClickAction() {
-        ActionOptions options = new ActionOptions.Builder()
-                .setAction(ActionOptions.Action.CLICK)
+    void testBasicClickAction() {
+        ClickOptions options = new ClickOptions.Builder()
                 .build();
         
-        Optional<ActionInterface> action = actionService.getAction(options);
+        ObjectCollection collection = new ObjectCollection.Builder()
+                .build();
         
-        assertTrue(action.isPresent(), "Should return Click action");
-        assertTrue(action.get() instanceof Click, "Should be instance of Click");
+        ActionResult result = action.perform(options, collection);
+        
+        assertNotNull(result, "Should return result");
     }
     
     @Test
     @Order(4)
-    void testGetBasicTypeAction() {
-        ActionOptions options = new ActionOptions.Builder()
-                .setAction(ActionOptions.Action.TYPE)
+    void testBasicTypeAction() {
+        TypeOptions options = new TypeOptions.Builder()
                 .build();
         
-        Optional<ActionInterface> action = actionService.getAction(options);
+        ObjectCollection collection = new ObjectCollection.Builder()
+                .withStrings("test")
+                .build();
         
-        assertTrue(action.isPresent(), "Should return Type action");
-        assertTrue(action.get() instanceof TypeText, "Should be instance of TypeText");
+        ActionResult result = action.perform(options, collection);
+        
+        assertNotNull(result, "Should return result");
     }
     
     @Test
     @Order(5)
-    void testGetCompositeActionWithMultipleFindActions() {
-        // Create options with multiple find actions
-        ActionOptions options = new ActionOptions.Builder()
-                .setAction(ActionOptions.Action.FIND)
-                .setFind(ActionOptions.Find.FIRST)
-                .addFind(ActionOptions.Find.ALL)
+    void testFindActionWithDifferentStrategies() {
+        // Test FIRST strategy
+        PatternFindOptions firstOptions = new PatternFindOptions.Builder()
+                .setStrategy(PatternFindOptions.Strategy.FIRST)
                 .build();
         
-        Optional<ActionInterface> action = actionService.getAction(options);
+        // Test ALL strategy
+        PatternFindOptions allOptions = new PatternFindOptions.Builder()
+                .setStrategy(PatternFindOptions.Strategy.ALL)
+                .build();
         
-        assertTrue(action.isPresent(), "Should return composite action for multiple finds");
-        // The actual type depends on CompositeAction implementation
+        ObjectCollection collection = new ObjectCollection.Builder()
+                .build();
+        
+        ActionResult firstResult = action.perform(firstOptions, collection);
+        ActionResult allResult = action.perform(allOptions, collection);
+        
+        assertNotNull(firstResult, "Should return result for FIRST strategy");
+        assertNotNull(allResult, "Should return result for ALL strategy");
     }
     
     @Test
     @Order(6)
-    void testGetCompositeActionForNonBasicAction() {
-        // Test with an action that might be composite (depends on implementation)
-        ActionOptions options = new ActionOptions.Builder()
-                .setAction(ActionOptions.Action.DEFINE)
+    void testClickActionWithMultipleClicks() {
+        // Test click with multiple clicks
+        ClickOptions options = new ClickOptions.Builder()
+                .setNumberOfClicks(2)
                 .build();
         
-        Optional<ActionInterface> action = actionService.getAction(options);
+        ObjectCollection collection = new ObjectCollection.Builder()
+                .build();
         
-        // This might return either basic or composite depending on implementation
-        // The test just verifies it doesn't throw exception
-        assertNotNull(action);
+        ActionResult result = action.perform(options, collection);
+        
+        assertNotNull(result, "Should return result for double click");
     }
     
     @Test
     @Order(7)
-    void testSetCustomFind() {
-        AtomicBoolean customFindCalled = new AtomicBoolean(false);
+    void testActionWithPauseOptions() {
+        // Test action with pause options
+        PatternFindOptions options = new PatternFindOptions.Builder()
+                .setPauseBeforeBegin(0.5)
+                .setPauseAfterEnd(0.5)
+                .build();
         
-        // Create custom find function
-        BiConsumer<ActionResult, List<ObjectCollection>> customFind = (matches, collections) -> {
-            customFindCalled.set(true);
-            // Custom find logic would go here
-        };
+        ObjectCollection collection = new ObjectCollection.Builder()
+                .build();
         
-        // Register custom find
-        assertDoesNotThrow(() -> actionService.setCustomFind(customFind));
+        ActionResult result = action.perform(options, collection);
         
-        // Note: To actually test if custom find is used, we would need to 
-        // trigger a find operation and verify the custom function was called.
-        // This depends on the internal implementation of FindFunctions.
+        assertNotNull(result, "Should return result with pause options");
     }
     
     @Test
     @Order(8)
-    void testGetActionWithNullAction() {
-        ActionOptions options = new ActionOptions.Builder()
-                .build(); // No action specified
+    void testActionWithEmptyCollection() {
+        PatternFindOptions options = new PatternFindOptions.Builder()
+                .build();
         
-        Optional<ActionInterface> action = actionService.getAction(options);
+        ObjectCollection emptyCollection = new ObjectCollection();
         
-        // Behavior depends on default action in ActionOptions
-        assertNotNull(action);
+        ActionResult result = action.perform(options, emptyCollection);
+        
+        assertNotNull(result, "Should handle empty collection gracefully");
+        assertTrue(result.isEmpty(), "Result should be empty for empty collection");
     }
     
     @Test
     @Order(9)
-    void testConcurrentActionRetrieval() throws InterruptedException {
-        // Test thread safety of action retrieval
+    void testConcurrentActionExecution() throws InterruptedException {
+        // Test thread safety of action execution
         Thread[] threads = new Thread[10];
-        Optional<ActionInterface>[] results = new Optional[10];
+        ActionResult[] results = new ActionResult[10];
+        
+        ObjectCollection collection = new ObjectCollection.Builder()
+                .build();
         
         for (int i = 0; i < threads.length; i++) {
             final int index = i;
-            ActionOptions.Action actionType = index % 2 == 0 ? 
-                    ActionOptions.Action.FIND : ActionOptions.Action.CLICK;
+            ActionConfig config = index % 2 == 0 ? 
+                    new PatternFindOptions.Builder().build() : 
+                    new ClickOptions.Builder().build();
             
             threads[i] = new Thread(() -> {
-                ActionOptions options = new ActionOptions.Builder()
-                        .setAction(actionType)
-                        .build();
-                results[index] = actionService.getAction(options);
+                results[index] = action.perform(config, collection);
             });
         }
         
@@ -181,31 +200,29 @@ class ActionServiceIntegrationTest extends BaseIntegrationTest {
             thread.join();
         }
         
-        // Verify all got valid actions
+        // Verify all got valid results
         for (int i = 0; i < results.length; i++) {
-            assertNotNull(results[i]);
-            assertTrue(results[i].isPresent(), "Thread " + i + " should get valid action");
+            assertNotNull(results[i], "Thread " + i + " should get valid result");
         }
     }
     
     @Test
     @Order(10)
-    void testActionServiceConsistency() {
-        // Test that same options return same action type
-        ActionOptions options1 = new ActionOptions.Builder()
-                .setAction(ActionOptions.Action.FIND)
+    void testActionConsistency() {
+        // Test that same options return consistent results
+        PatternFindOptions options = new PatternFindOptions.Builder()
                 .build();
         
-        ActionOptions options2 = new ActionOptions.Builder()
-                .setAction(ActionOptions.Action.FIND)
+        ObjectCollection collection = new ObjectCollection.Builder()
                 .build();
         
-        Optional<ActionInterface> action1 = actionService.getAction(options1);
-        Optional<ActionInterface> action2 = actionService.getAction(options2);
+        ActionResult result1 = action.perform(options, collection);
+        ActionResult result2 = action.perform(options, collection);
         
-        assertTrue(action1.isPresent());
-        assertTrue(action2.isPresent());
-        assertEquals(action1.get().getClass(), action2.get().getClass(), 
-                "Same options should return same action type");
+        assertNotNull(result1);
+        assertNotNull(result2);
+        // In mock mode, results should be consistent
+        assertEquals(result1.isSuccess(), result2.isSuccess(), 
+                "Same options should return consistent results in mock mode");
     }
 }

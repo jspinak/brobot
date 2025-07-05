@@ -1,8 +1,8 @@
 package io.github.jspinak.brobot.actions.methods.basicactions.find;
+import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
 
 import io.github.jspinak.brobot.config.FrameworkSettings;
 import io.github.jspinak.brobot.action.Action;
-import io.github.jspinak.brobot.action.ActionOptions;
 import io.github.jspinak.brobot.model.element.Pattern;
 import io.github.jspinak.brobot.model.element.Location;
 import io.github.jspinak.brobot.model.element.Position;
@@ -84,7 +84,8 @@ public class FindImageWithPositionTest extends BrobotIntegrationTestBase {
                 .withImages(topLeft)
                 .withScenes(TestPaths.getScreenshotPath("floranext0"))
                 .build();
-        ActionResult matches = action.perform(ActionOptions.Action.FIND, objColl);
+        PatternFindOptions findOptions = new PatternFindOptions.Builder().build();
+        ActionResult matches = action.perform(findOptions, objColl);
         
         // Test with position (0, 0)
         StateImage topLeft2 = new StateImage.Builder()
@@ -97,7 +98,8 @@ public class FindImageWithPositionTest extends BrobotIntegrationTestBase {
                 .withImages(topLeft2)
                 .withScenes(TestPaths.getScreenshotPath("floranext0"))
                 .build();
-        ActionResult matches2 = action.perform(ActionOptions.Action.FIND, objColl2);
+        PatternFindOptions findOptions2 = new PatternFindOptions.Builder().build();
+        ActionResult matches2 = action.perform(findOptions2, objColl2);
         
         // Verify both finds succeeded
         assertFalse(matches.isEmpty(), "Should find pattern with position (100,100)");
@@ -115,11 +117,11 @@ public class FindImageWithPositionTest extends BrobotIntegrationTestBase {
     }
 
     /**
-     * Test that Position set in ActionOptions overrides the Position in the Pattern.
-     * Verifies the priority of ActionOptions settings over Pattern settings.
+     * Test that different Positions in Patterns give different results.
+     * In the new API, positions are only set on Patterns, not in options.
      */
     @Test
-    void findWithPositionInActionOptions() {
+    void findWithDifferentPositionsInPatterns() {
         // Check if test images exist
         File screenshotFile = new File(TestPaths.getScreenshotPath("floranext0"));
         File patternFile = new File(TestPaths.getImagePath("topLeft"));
@@ -143,39 +145,38 @@ public class FindImageWithPositionTest extends BrobotIntegrationTestBase {
                 .withImages(topLeft)
                 .withScenes(TestPaths.getScreenshotPath("floranext0"))
                 .build();
-        ActionResult matches = action.perform(ActionOptions.Action.FIND, objColl);
+        PatternFindOptions findOptions = new PatternFindOptions.Builder().build();
+        ActionResult matches = action.perform(findOptions, objColl);
         
-        // Test 2: Pattern with position (0,0) but ActionOptions overrides to (100,100)
+        // Test 2: Pattern with position (50,50) to compare with (100,100)
         StateImage topLeft2 = new StateImage.Builder()
                 .addPattern(new Pattern.Builder()
                         .setFilename(TestPaths.getImagePath("topLeft"))
-                        .setTargetPosition(new Position(0, 0))  // This should be overridden
+                        .setTargetPosition(new Position(50, 50))  // Different position
                         .build())
                 .build();
         ObjectCollection objColl2 = new ObjectCollection.Builder()
                 .withImages(topLeft2)
                 .withScenes(TestPaths.getScreenshotPath("floranext0"))
                 .build();
-        ActionOptions actionOptions = new ActionOptions.Builder()
-                .setAction(ActionOptions.Action.FIND)
-                .setTargetPosition(100, 100)  // This should override pattern position
+        PatternFindOptions findOptions3 = new PatternFindOptions.Builder()
                 .build();
-        ActionResult matches2 = action.perform(actionOptions, objColl2);
+        ActionResult matches2 = action.perform(findOptions3, objColl2);
         
         // Verify both finds succeeded
-        assertFalse(matches.isEmpty(), "Should find pattern with position in pattern");
-        assertFalse(matches2.isEmpty(), "Should find pattern with position in ActionOptions");
+        assertFalse(matches.isEmpty(), "Should find pattern with position (100,100)");
+        assertFalse(matches2.isEmpty(), "Should find pattern with position (50,50)");
         
         Location loc1 = matches.getMatchLocations().get(0);
         Location loc2 = matches2.getMatchLocations().get(0);
         
-        System.out.println("Location from pattern position: " + loc1);
-        System.out.println("Location from ActionOptions override: " + loc2);
+        System.out.println("Location from pattern position (100,100): " + loc1);
+        System.out.println("Location from pattern position (50,50): " + loc2);
         
-        // Both should have the same position since ActionOptions overrides to same value
-        assertEquals(loc1.getCalculatedX(), loc2.getCalculatedX(), 
-                    "ActionOptions position should override pattern position");
-        assertEquals(loc1.getCalculatedY(), loc2.getCalculatedY(), 
-                    "ActionOptions position should override pattern position");
+        // Different positions should give different results
+        assertNotEquals(loc1.getCalculatedX(), loc2.getCalculatedX(), 
+                    "Different target positions should result in different X coordinates");
+        assertNotEquals(loc1.getCalculatedY(), loc2.getCalculatedY(), 
+                    "Different target positions should result in different Y coordinates");
     }
 }
