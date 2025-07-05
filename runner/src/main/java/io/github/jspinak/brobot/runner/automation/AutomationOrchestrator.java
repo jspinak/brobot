@@ -17,13 +17,15 @@ import org.springframework.stereotype.Component;
 import java.util.function.Consumer;
 
 /**
- * Enhanced version of AutomationExecutor that integrates with the event system.
+ * Orchestrates automation execution by coordinating between the UI, event system, and execution layer.
+ * This class acts as a high-level facade that manages automation tasks initiated from TaskButtons,
+ * publishes events throughout the execution lifecycle, and provides control over automation flow.
  */
 @Getter
 @Setter
 @Component
-public class AutomationExecutor {
-    private static final Logger logger = LoggerFactory.getLogger(AutomationExecutor.class);
+public class AutomationOrchestrator {
+    private static final Logger logger = LoggerFactory.getLogger(AutomationOrchestrator.class);
 
     private final BrobotRunnerProperties properties;
     private final ExecutionController executionController;
@@ -36,10 +38,10 @@ public class AutomationExecutor {
     @Setter
     private Consumer<String> logCallback;
 
-    public AutomationExecutor(BrobotRunnerProperties properties,
-                              ExecutionController executionController,
-                              EventBus eventBus,
-                              ExecutionEventPublisher executionEventPublisher) {
+    public AutomationOrchestrator(BrobotRunnerProperties properties,
+                                   ExecutionController executionController,
+                                   EventBus eventBus,
+                                   ExecutionEventPublisher executionEventPublisher) {
         this.properties = properties;
         this.executionController = executionController;
         this.eventBus = eventBus;

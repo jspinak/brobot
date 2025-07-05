@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.runner;
 
-import io.github.jspinak.brobot.runner.automation.AutomationExecutor;
+import io.github.jspinak.brobot.runner.automation.AutomationOrchestrator;
 import io.github.jspinak.brobot.runner.config.ApplicationConfig;
 import io.github.jspinak.brobot.runner.config.BrobotRunnerProperties;
 import io.github.jspinak.brobot.runner.events.EventBus;
@@ -33,7 +33,7 @@ public class BrobotRunnerApp extends Application {
         BrobotLibraryInitializer libraryInitializer = applicationContext.getBean(BrobotLibraryInitializer.class);
         EventBus eventBus = applicationContext.getBean(EventBus.class);
         AutomationProjectManager projectManager = applicationContext.getBean(AutomationProjectManager.class);
-        AutomationExecutor automationExecutor = applicationContext.getBean(AutomationExecutor.class);
+        AutomationOrchestrator automationOrchestrator = applicationContext.getBean(AutomationOrchestrator.class);
         StateService allStatesService = applicationContext.getBean(StateService.class);
         ApplicationConfig appConfig = applicationContext.getBean(ApplicationConfig.class);
         StateTransitionStore stateTransitionsRepository = applicationContext.getBean(StateTransitionStore.class);
@@ -50,13 +50,13 @@ public class BrobotRunnerApp extends Application {
         // Automation tab
         Tab automationTab = new Tab("Automation");
         automationTab.setContent(
-                new AutomationPanel(applicationContext, projectManager, properties, automationExecutor, eventBus));
+                new AutomationPanel(applicationContext, projectManager, properties, automationOrchestrator, eventBus));
         automationTab.setClosable(false);
 
         // Execution Dashboard tab
         Tab executionDashboardTab = new Tab("Execution Dashboard");
         executionDashboardTab.setContent(
-                new ExecutionDashboardPanel(eventBus, automationExecutor, stateTransitionsRepository, allStatesService));
+                new ExecutionDashboardPanel(eventBus, automationOrchestrator, stateTransitionsRepository, allStatesService));
         executionDashboardTab.setClosable(false);
 
         // Add tabs to pane
