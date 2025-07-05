@@ -2,6 +2,10 @@ package io.github.jspinak.brobot.action.composite.repeat;
 
 import io.github.jspinak.brobot.action.ActionConfig;
 import lombok.Getter;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Configuration for the composite action ClickUntil.
@@ -23,6 +27,7 @@ import lombok.Getter;
  */
 @Deprecated
 @Getter
+@JsonDeserialize(builder = ClickUntilOptions.Builder.class)
 public final class ClickUntilOptions extends ActionConfig {
 
     /**
@@ -54,13 +59,16 @@ public final class ClickUntilOptions extends ActionConfig {
     /**
      * Builder for constructing {@link ClickUntilOptions} with a fluent API.
      */
+    @JsonPOJOBuilder(withPrefix = "set")
     public static class Builder extends ActionConfig.Builder<Builder> {
 
+        @JsonProperty("condition")
         private Condition condition = Condition.OBJECTS_APPEAR;
 
         /**
          * Default constructor for creating a new ClickUntilOptions configuration.
          */
+        @JsonCreator
         public Builder() {}
 
         /**

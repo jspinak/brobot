@@ -1,5 +1,9 @@
 package io.github.jspinak.brobot.action.basic.mouse;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import io.github.jspinak.brobot.action.ActionConfig;
 import lombok.Getter;
 
@@ -20,6 +24,7 @@ import lombok.Getter;
  * @see io.github.jspinak.brobot.action.basic.mouse.ScrollMouseWheel
  */
 @Getter
+@JsonDeserialize(builder = ScrollOptions.Builder.class)
 public final class ScrollOptions extends ActionConfig {
 
     /**
@@ -49,14 +54,18 @@ public final class ScrollOptions extends ActionConfig {
     /**
      * Builder for constructing {@link ScrollOptions} with a fluent API.
      */
+    @JsonPOJOBuilder(withPrefix = "set")
     public static class Builder extends ActionConfig.Builder<Builder> {
 
+        @JsonProperty("direction")
         private Direction direction = Direction.DOWN;
+        @JsonProperty("scrollSteps")
         private int scrollSteps = 3;
 
         /**
          * Default constructor for creating a new ScrollOptions configuration.
          */
+        @JsonCreator
         public Builder() {}
 
         /**

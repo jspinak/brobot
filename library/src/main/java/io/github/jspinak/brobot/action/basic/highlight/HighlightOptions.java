@@ -2,6 +2,10 @@ package io.github.jspinak.brobot.action.basic.highlight;
 
 import io.github.jspinak.brobot.action.ActionConfig;
 import lombok.Getter;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Configuration for Highlight actions.
@@ -17,6 +21,7 @@ import lombok.Getter;
  * @see io.github.jspinak.brobot.action.basic.highlight.Highlight
  */
 @Getter
+@JsonDeserialize(builder = HighlightOptions.Builder.class)
 public final class HighlightOptions extends ActionConfig {
 
     private final boolean highlightAllAtOnce;
@@ -29,19 +34,40 @@ public final class HighlightOptions extends ActionConfig {
         this.highlightSeconds = builder.highlightSeconds;
         this.highlightColor = builder.highlightColor;
     }
+    
+    /**
+     * Alias for getHighlightSeconds to support legacy tests.
+     * @return The duration in seconds.
+     */
+    public double getDuration() {
+        return highlightSeconds;
+    }
+    
+    /**
+     * Alias for getHighlightColor to support legacy tests.
+     * @return The color of the highlight.
+     */
+    public String getColor() {
+        return highlightColor;
+    }
 
     /**
      * Builder for constructing {@link HighlightOptions} with a fluent API.
      */
+    @JsonPOJOBuilder(withPrefix = "set")
     public static class Builder extends ActionConfig.Builder<Builder> {
 
+        @JsonProperty("highlightAllAtOnce")
         private boolean highlightAllAtOnce = false;
+        @JsonProperty("highlightSeconds")
         private double highlightSeconds = 1.0;
+        @JsonProperty("highlightColor")
         private String highlightColor = "red";
 
         /**
          * Default constructor for creating a new HighlightOptions configuration.
          */
+        @JsonCreator
         public Builder() {}
 
         /**
@@ -79,6 +105,16 @@ public final class HighlightOptions extends ActionConfig {
             this.highlightSeconds = highlightSeconds;
             return self();
         }
+        
+        /**
+         * Alias for setHighlightSeconds to support legacy tests.
+         *
+         * @param duration The duration in seconds.
+         * @return this Builder instance for chaining.
+         */
+        public Builder setDuration(double duration) {
+            return setHighlightSeconds(duration);
+        }
 
         /**
          * Sets the color of the highlight.
@@ -91,6 +127,16 @@ public final class HighlightOptions extends ActionConfig {
         public Builder setHighlightColor(String highlightColor) {
             this.highlightColor = highlightColor;
             return self();
+        }
+        
+        /**
+         * Alias for setHighlightColor to support legacy tests.
+         *
+         * @param color The color of the highlight.
+         * @return this Builder instance for chaining.
+         */
+        public Builder setColor(String color) {
+            return setHighlightColor(color);
         }
 
         /**
