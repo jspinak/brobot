@@ -27,7 +27,7 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 @Data
-class AutomationExecutorTest {
+class AutomationOrchestratorTest {
 
     @Mock
     private BrobotRunnerProperties properties;
@@ -41,7 +41,7 @@ class AutomationExecutorTest {
     @Mock
     private ExecutionEventPublisher executionEventPublisher;
 
-    private AutomationExecutor automationExecutor;
+    private AutomationOrchestrator automationOrchestrator;
     private List<String> logMessages;
 
     @BeforeEach
@@ -57,8 +57,8 @@ class AutomationExecutorTest {
         }).when(executionController).setLogCallback(any());
 
         // Create the executor with mocks
-        automationExecutor = new AutomationExecutor(properties, executionController, eventBus, executionEventPublisher);
-        automationExecutor.setLogCallback(logMessages::add);
+        automationOrchestrator = new AutomationOrchestrator(properties, executionController, eventBus, executionEventPublisher);
+        automationOrchestrator.setLogCallback(logMessages::add);
     }
 
     @Test
@@ -72,7 +72,7 @@ class AutomationExecutorTest {
         ArgumentCaptor<Runnable> runnableCaptor = ArgumentCaptor.forClass(Runnable.class);
 
         // Execute automation
-        automationExecutor.executeAutomation(button);
+        automationOrchestrator.executeAutomation(button);
 
         // Verify execution controller was called
         verify(executionController).executeAutomation(
@@ -97,7 +97,7 @@ class AutomationExecutorTest {
     @Test
     void testStopAllAutomation() {
         // Stop automation
-        automationExecutor.stopAllAutomation();
+        automationOrchestrator.stopAllAutomation();
 
         // Verify execution controller was called
         verify(executionController).stopExecution();
@@ -109,7 +109,7 @@ class AutomationExecutorTest {
     @Test
     void testPauseAutomation() {
         // Pause automation
-        automationExecutor.pauseAutomation();
+        automationOrchestrator.pauseAutomation();
 
         // Verify execution controller was called
         verify(executionController).pauseExecution();
@@ -121,7 +121,7 @@ class AutomationExecutorTest {
     @Test
     void testResumeAutomation() {
         // Resume automation
-        automationExecutor.resumeAutomation();
+        automationOrchestrator.resumeAutomation();
 
         // Verify execution controller was called
         verify(executionController).resumeExecution();
@@ -140,7 +140,7 @@ class AutomationExecutorTest {
         when(executionController.getStatus()).thenReturn(mockStatus);
 
         // Get status
-        ExecutionStatus status = automationExecutor.getExecutionStatus();
+        ExecutionStatus status = automationOrchestrator.getExecutionStatus();
 
         // Verify correct status was returned
         assertEquals(ExecutionState.RUNNING, status.getState());
@@ -159,7 +159,7 @@ class AutomationExecutorTest {
         button.setFunctionName("TestFunction");
 
         // Execute automation
-        automationExecutor.executeAutomation(button);
+        automationOrchestrator.executeAutomation(button);
 
         // Verify the status consumer was passed
         verify(executionController).executeAutomation(
