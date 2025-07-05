@@ -3,7 +3,7 @@ package io.github.jspinak.brobot.runner.ui.execution;
 import lombok.Data;
 
 import io.github.jspinak.brobot.model.state.State;
-import io.github.jspinak.brobot.runner.automation.AutomationExecutor;
+import io.github.jspinak.brobot.runner.automation.AutomationOrchestrator;
 import io.github.jspinak.brobot.runner.events.*;
 import io.github.jspinak.brobot.runner.execution.ExecutionState;
 import io.github.jspinak.brobot.runner.execution.ExecutionStatus;
@@ -52,7 +52,7 @@ public class ExecutionDashboardPanel extends BorderPane {
     
     // Core dependencies
     private final EventBus eventBus;
-    private final AutomationExecutor automationExecutor;
+    private final AutomationOrchestrator automationOrchestrator;
     private final StateTransitionStore stateTransitionsRepository;
     private final StateService allStatesInProjectService;
 
@@ -76,11 +76,11 @@ public class ExecutionDashboardPanel extends BorderPane {
      * @param allStatesInProjectService Service for accessing all states in project
      */
     public ExecutionDashboardPanel(EventBus eventBus,
-                                   AutomationExecutor automationExecutor,
+                                   AutomationOrchestrator automationOrchestrator,
                                    StateTransitionStore stateTransitionsRepository,
                                    StateService allStatesInProjectService) {
         this.eventBus = eventBus;
-        this.automationExecutor = automationExecutor;
+        this.automationOrchestrator = automationOrchestrator;
         this.stateTransitionsRepository = stateTransitionsRepository;
         this.allStatesInProjectService = allStatesInProjectService;
 
@@ -98,7 +98,7 @@ public class ExecutionDashboardPanel extends BorderPane {
         mainLayout.setPadding(new Insets(15));
 
         // Create specialized panels
-        controlPanel = new ExecutionControlPanel(eventBus, automationExecutor);
+        controlPanel = new ExecutionControlPanel(eventBus, automationOrchestrator);
         statusPanel = new ExecutionStatusPanel();
         performancePanel = new PerformanceMetricsPanel();
         stateTransitionPanel = new StateTransitionTablePanel();

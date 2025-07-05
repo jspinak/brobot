@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.runner.ui.execution;
 
-import io.github.jspinak.brobot.runner.automation.AutomationExecutor;
+import io.github.jspinak.brobot.runner.automation.AutomationOrchestrator;
 import io.github.jspinak.brobot.runner.events.EventBus;
 import io.github.jspinak.brobot.runner.execution.ExecutionState;
 import javafx.geometry.Insets;
@@ -27,7 +27,7 @@ public class ExecutionControlPanel extends HBox {
     private static final Logger logger = LoggerFactory.getLogger(ExecutionControlPanel.class);
 
     private final EventBus eventBus;
-    private final AutomationExecutor automationExecutor;
+    private final AutomationOrchestrator automationOrchestrator;
 
     @Getter
     private Button playButton;
@@ -42,9 +42,9 @@ public class ExecutionControlPanel extends HBox {
      * @param eventBus The event bus for communication
      * @param automationExecutor The automation executor for controlling execution
      */
-    public ExecutionControlPanel(EventBus eventBus, AutomationExecutor automationExecutor) {
+    public ExecutionControlPanel(EventBus eventBus, AutomationOrchestrator automationOrchestrator) {
         this.eventBus = eventBus;
-        this.automationExecutor = automationExecutor;
+        this.automationOrchestrator = automationOrchestrator;
         
         setupUI();
     }
@@ -110,20 +110,20 @@ public class ExecutionControlPanel extends HBox {
 
     private void resumeExecution() {
         logger.info("Resuming execution");
-        if (automationExecutor.isPaused()) {
-            automationExecutor.resume();
+        if (automationOrchestrator.isPaused()) {
+            automationOrchestrator.resume();
         } else {
-            automationExecutor.startExecution();
+            automationOrchestrator.startExecution();
         }
     }
 
     private void pauseExecution() {
         logger.info("Pausing execution");
-        automationExecutor.pause();
+        automationOrchestrator.pause();
     }
 
     private void stopExecution() {
         logger.info("Stopping execution");
-        automationExecutor.stop();
+        automationOrchestrator.stop();
     }
 }
