@@ -9,11 +9,10 @@ import io.github.jspinak.brobot.action.basic.type.TypeOptions;
 import io.github.jspinak.brobot.action.internal.service.ActionService;
 import io.github.jspinak.brobot.model.state.State;
 import io.github.jspinak.brobot.model.state.StateImage;
-import io.github.jspinak.brobot.navigation.transition.StateTransitions;
-import io.github.jspinak.brobot.runner.dsl.model.TaskSequence;
-import io.github.jspinak.brobot.navigation.transition.TaskSequenceStateTransition;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.Optional;
 
 /**
  * Example: Login Automation with New ActionConfig API
@@ -49,26 +48,31 @@ public class LoginAutomationExample {
     public boolean performSimpleLogin(String username, String password) {
         // Find and click username field
         if (!findAndClickElement("UsernameField")) {
+            System.out.println("Failed to find username field");
             return false;
         }
         
         // Type username
         if (!typeText(username)) {
+            System.out.println("Failed to type username");
             return false;
         }
         
-        // Find and click password field
+        // Find and click password field  
         if (!findAndClickElement("PasswordField")) {
+            System.out.println("Failed to find password field");
             return false;
         }
         
         // Type password
         if (!typeText(password)) {
+            System.out.println("Failed to type password");
             return false;
         }
         
         // Click login button
         if (!clickElement("LoginButton")) {
+            System.out.println("Failed to click login button");
             return false;
         }
         
@@ -77,83 +81,7 @@ public class LoginAutomationExample {
     }
     
     /**
-     * Example 2: Login using TaskSequence (formerly ActionDefinition)
-     */
-    public TaskSequence createLoginSequence(String username, String password) {
-        TaskSequence loginSequence = new TaskSequence();
-        
-        // Step 1: Find username field
-        PatternFindOptions findUsername = new PatternFindOptions.Builder()
-                .setStrategy(PatternFindOptions.Strategy.FIRST)
-                .setSimilarity(0.9)
-                .setCaptureImage(true)
-                .build();
-        loginSequence.addStep(findUsername, new ObjectCollection.Builder()
-                .withImages(getStateImage("UsernameField"))
-                .build());
-        
-        // Step 2: Click username field
-        ClickOptions clickUsername = new ClickOptions.Builder()
-                .setClickType(ClickOptions.Type.LEFT)
-                .build();
-        loginSequence.addStep(clickUsername, new ObjectCollection.Builder()
-                .useMatchesFromPreviousAction()
-                .build());
-        
-        // Step 3: Type username
-        TypeOptions typeUsername = new TypeOptions.Builder()
-                .setModifierDelay(0.05)
-                .setClearFieldFirst(true)
-                .build();
-        loginSequence.addStep(typeUsername, new ObjectCollection.Builder()
-                .withStrings(username)
-                .build());
-        
-        // Step 4: Tab to password field
-        TypeOptions tabToPassword = new TypeOptions.Builder()
-                .setUseKeyboard(true)
-                .build();
-        loginSequence.addStep(tabToPassword, new ObjectCollection.Builder()
-                .withStrings("\t") // Tab key
-                .build());
-        
-        // Step 5: Type password
-        TypeOptions typePassword = new TypeOptions.Builder()
-                .setModifierDelay(0.05)
-                .setHideText(true) // Don't log password
-                .build();
-        loginSequence.addStep(typePassword, new ObjectCollection.Builder()
-                .withStrings(password)
-                .build());
-        
-        // Step 6: Press Enter to submit
-        TypeOptions pressEnter = new TypeOptions.Builder()
-                .setUseKeyboard(true)
-                .build();
-        loginSequence.addStep(pressEnter, new ObjectCollection.Builder()
-                .withStrings("\n") // Enter key
-                .build());
-        
-        return loginSequence;
-    }
-    
-    /**
-     * Example 3: Create state transition for automated login
-     */
-    public StateTransitions createLoginTransition() {
-        TaskSequence loginSequence = createLoginSequence("demo_user", "demo_pass");
-        
-        TaskSequenceStateTransition loginTransition = new TaskSequenceStateTransition();
-        loginTransition.setActionDefinition(loginSequence);
-        loginTransition.getActivate().add(2L); // Dashboard state ID
-        
-        return new StateTransitions.Builder("LOGIN")
-                .addTransition(loginTransition)
-                .build();
-    }
-    
-    /**
-     * Example 4: Advanced login with retry logic
+     * Example 2: Login with retry logic
      */
     public boolean performLoginWithRetry(String username, String password, int maxRetries) {
         for (int attempt = 1; attempt <= maxRetries; attempt++) {
@@ -174,8 +102,14 @@ public class LoginAutomationExample {
                 return true;
             }
             
-            // Wait before retry
-            sleep(2000);
+            // Wait before retry using action options
+            if (attempt < maxRetries) {
+                PatternFindOptions waitOptions = new PatternFindOptions.Builder()
+                    .setPauseAfterEnd(2.0)  // 2 second pause
+                    .setMaxMatchesToActOn(0)     // Don't actually search
+                    .build();
+                findElement("LoginButton", waitOptions);  // Use existing element just for the pause
+            }
         }
         
         return false;
@@ -194,8 +128,11 @@ public class LoginAutomationExample {
                 .withImages(getStateImage(imageName))
                 .build();
         
-        ActionInterface findAction = actionService.getAction(findOptions);
-        findAction.perform(findResult, objects);
+        Optional<ActionInterface> findActionOpt = actionService.getAction(findOptions);
+        if (findActionOpt.isEmpty()) {
+            return false;
+        }
+        findActionOpt.get().perform(findResult, objects);
         
         if (!findResult.isSuccess()) {
             return false;
@@ -211,11 +148,14 @@ public class LoginAutomationExample {
         clickResult.setActionConfig(clickOptions);
         
         ObjectCollection clickObjects = new ObjectCollection.Builder()
-                .withMatches(findResult.getMatchList())
+                .withMatches(findResult)
                 .build();
         
-        ActionInterface clickAction = actionService.getAction(clickOptions);
-        clickAction.perform(clickResult, clickObjects);
+        Optional<ActionInterface> clickActionOpt = actionService.getAction(clickOptions);
+        if (clickActionOpt.isEmpty()) {
+            return false;
+        }
+        clickActionOpt.get().perform(clickResult, clickObjects);
         
         return clickResult.isSuccess();
     }
@@ -233,15 +173,18 @@ public class LoginAutomationExample {
                 .withImages(getStateImage(imageName))
                 .build();
         
-        ActionInterface clickAction = actionService.getAction(clickOptions);
-        clickAction.perform(result, objects);
+        Optional<ActionInterface> clickActionOpt = actionService.getAction(clickOptions);
+        if (clickActionOpt.isEmpty()) {
+            return false;
+        }
+        clickActionOpt.get().perform(result, objects);
         
         return result.isSuccess();
     }
     
     private boolean typeText(String text) {
         TypeOptions typeOptions = new TypeOptions.Builder()
-                .setModifierDelay(0.05)
+                .setTypeDelay(0.05)
                 .setPauseAfterEnd(0.3)
                 .build();
         
@@ -252,8 +195,10 @@ public class LoginAutomationExample {
                 .withStrings(text)
                 .build();
         
-        ActionInterface typeAction = actionService.getAction(typeOptions);
-        typeAction.perform(result, objects);
+        Optional<ActionInterface> typeActionOpt = actionService.getAction(typeOptions);
+        if (typeActionOpt.isPresent()) {
+            typeActionOpt.get().perform(result, objects);
+        }
         
         return result.isSuccess();
     }
@@ -266,18 +211,19 @@ public class LoginAutomationExample {
                 .withImages(getStateImage(imageName))
                 .build();
         
-        ActionInterface findAction = actionService.getAction(options);
-        findAction.perform(result, objects);
+        Optional<ActionInterface> findActionOpt = actionService.getAction(options);
+        if (findActionOpt.isPresent()) {
+            findActionOpt.get().perform(result, objects);
+        }
         
         return result.isSuccess();
     }
     
     private boolean verifyDashboard() {
-        // Use ALL strategy to ensure multiple dashboard elements are present
+        // Look for multiple dashboard elements to verify state
         PatternFindOptions verifyOptions = new PatternFindOptions.Builder()
-                .setStrategy(PatternFindOptions.Strategy.ALL)
+                .setMaxMatchesToActOn(3)
                 .setSimilarity(0.8)
-                .setMaxMatchesToActOn(2)
                 .build();
         
         ActionResult result = new ActionResult();
@@ -287,8 +233,11 @@ public class LoginAutomationExample {
                 .withAllStateImages(dashboardState)
                 .build();
         
-        ActionInterface findAction = actionService.getAction(verifyOptions);
-        findAction.perform(result, objects);
+        Optional<ActionInterface> findActionOpt = actionService.getAction(verifyOptions);
+        if (findActionOpt.isEmpty()) {
+            return false;
+        }
+        findActionOpt.get().perform(result, objects);
         
         // Should find at least 2 dashboard elements
         return result.isSuccess() && result.getMatchList().size() >= 2;
@@ -298,31 +247,23 @@ public class LoginAutomationExample {
         return new StateImage.Builder().setName(name).build();
     }
     
-    private void sleep(long millis) {
-        try {
-            Thread.sleep(millis);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-    }
-    
     /**
      * Main method to demonstrate usage
      */
     public static void main(String[] args) {
-        System.out.println("Login Automation Example - New ActionConfig API");
-        System.out.println("===============================================");
+        // This would typically be run within a Spring context
+        System.out.println("Login Automation Example");
+        System.out.println("=======================");
         System.out.println();
         System.out.println("This example demonstrates:");
-        System.out.println("1. Simple login with direct actions");
-        System.out.println("2. Login using TaskSequence");
-        System.out.println("3. State transitions for automated login");
-        System.out.println("4. Advanced login with retry logic");
+        System.out.println("1. Finding and clicking GUI elements");
+        System.out.println("2. Typing text with the new TypeOptions API");
+        System.out.println("3. Implementing retry logic with proper pauses");
+        System.out.println("4. State verification using multiple image matches");
         System.out.println();
-        System.out.println("Key features of the new API:");
-        System.out.println("- Type-safe configuration builders");
-        System.out.println("- Action-specific options");
-        System.out.println("- Clear separation of concerns");
-        System.out.println("- Better error handling");
+        System.out.println("Note: This example requires:");
+        System.out.println("- Spring context to be initialized");
+        System.out.println("- Image files for the StateImages (UsernameField.png, etc.)");
+        System.out.println("- A running application to automate");
     }
 }
