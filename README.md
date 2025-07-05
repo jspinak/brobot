@@ -158,7 +158,7 @@ BrobotSettings.mock = true;
 - [Action Hierarchy](https://jspinak.github.io/brobot/docs/getting-started/action-hierarchy)
 - [JavaDoc (v1.0.7)](https://jspinak.github.io/brobot/api/1.0.7/)
 - [JavaDoc (all versions)](https://jspinak.github.io/brobot/api/)
-- [Example: Login Automation](https://github.com/jspinak/brobot/tree/main/library/src/test/java/io/github/jspinak/brobot/examples/LoginAutomationExample.java)
+- [Example: Login Automation](https://github.com/jspinak/brobot/blob/main/examples/LoginAutomationExample.java)
 
 </td>
 </tr>
