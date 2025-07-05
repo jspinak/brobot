@@ -164,4 +164,34 @@ public class SearchRegionResolver {
         
         return regions;
     }
+    
+    /**
+     * Selects search regions for ActionConfig-based find operations.
+     * 
+     * @param actionConfig The action configuration (e.g., PatternFindOptions)
+     * @param stateImage The image that may contain its own search regions
+     * @return A non-empty list of regions to search within
+     */
+    public List<Region> getRegions(ActionConfig actionConfig, StateImage stateImage) {
+        List<Region> definedFixed = stateImage.getDefinedFixedRegions();
+        if (!definedFixed.isEmpty()) return definedFixed;
+        
+        List<Region> regions = new ArrayList<>();
+        if (actionConfig instanceof BaseFindOptions) {
+            BaseFindOptions findOptions = (BaseFindOptions) actionConfig;
+            if (findOptions.getSearchRegions() != null && !findOptions.getSearchRegions().isEmpty()) {
+                regions = findOptions.getSearchRegions().getAllRegions();
+            }
+        }
+        
+        if (regions.isEmpty()) {
+            regions = stateImage.getAllSearchRegions();
+        }
+        
+        if (regions.isEmpty()) {
+            regions.add(new Region());
+        }
+        
+        return regions;
+    }
 }

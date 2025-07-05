@@ -1,5 +1,9 @@
 package io.github.jspinak.brobot.action.basic.mouse;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import io.github.jspinak.brobot.action.ActionConfig;
 import lombok.Getter;
 
@@ -18,6 +22,7 @@ import lombok.Getter;
  * @see io.github.jspinak.brobot.action.basic.mouse.MouseUp
  */
 @Getter
+@JsonDeserialize(builder = MouseUpOptions.Builder.class)
 public final class MouseUpOptions extends ActionConfig {
 
     private final MousePressOptions mousePressOptions;
@@ -54,13 +59,16 @@ public final class MouseUpOptions extends ActionConfig {
     /**
      * Builder for constructing MouseUpOptions with a fluent API.
      */
+    @JsonPOJOBuilder(withPrefix = "set")
     public static class Builder extends ActionConfig.Builder<Builder> {
 
+        @JsonProperty("mousePressOptions")
         private MousePressOptions.Builder mousePressOptions = new MousePressOptions.Builder();
 
         /**
          * Default constructor for creating a new MouseUpOptions configuration.
          */
+        @JsonCreator
         public Builder() {}
 
         /**

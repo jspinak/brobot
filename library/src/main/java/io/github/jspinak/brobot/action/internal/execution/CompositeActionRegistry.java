@@ -5,7 +5,6 @@ import io.github.jspinak.brobot.action.ActionOptions;
 import io.github.jspinak.brobot.action.composite.drag.Drag;
 import io.github.jspinak.brobot.action.composite.drag.SimpleDrag;
 import io.github.jspinak.brobot.action.composite.multiple.finds.MultipleFinds;
-import io.github.jspinak.brobot.action.composite.repeat.ClickUntil;
 
 import org.springframework.stereotype.Component;
 
@@ -34,14 +33,16 @@ import java.util.Optional;
  * Currently registered composite actions:
  * <ul>
  * <li>{@link Drag}: Click-and-drag operations between two points</li>
- * <li>{@link ClickUntil}: Repeated clicking until a condition is met</li>
  * <li>{@link MultipleFinds}: Finding multiple patterns in sequence</li>
  * </ul>
  *
+ * @deprecated This registry contains only deprecated composite actions. 
+ *             Use action chaining instead for a cleaner and more powerful way to combine actions.
  * @see BasicActionRegistry
  * @see ActionInterface
  * @see ActionExecution
  */
+@Deprecated
 @Component
 public class CompositeActionRegistry {
 
@@ -60,14 +61,11 @@ public class CompositeActionRegistry {
      *
      * @param drag Performs click-and-drag operations by combining mouse down,
      *             move, and mouse up actions with find operations
-     * @param clickUntil Repeatedly clicks until a specified condition is met,
-     *                   useful for dismissing dialogs or waiting for state changes
      * @param multipleFinds Executes find operations for multiple patterns,
      *                      supporting complex multi-element interactions
      */
-    public CompositeActionRegistry(SimpleDrag drag, ClickUntil clickUntil, MultipleFinds multipleFinds) {
+    public CompositeActionRegistry(SimpleDrag drag, MultipleFinds multipleFinds) {
         actions.put(ActionOptions.Action.DRAG, drag);
-        actions.put(ActionOptions.Action.CLICK_UNTIL, clickUntil);
         actions.put(ActionOptions.Action.FIND, multipleFinds);
     }
 

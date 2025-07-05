@@ -5,6 +5,10 @@ import io.github.jspinak.brobot.action.VerificationOptions;
 import io.github.jspinak.brobot.action.RepetitionOptions;
 import io.github.jspinak.brobot.action.basic.mouse.MousePressOptions;
 import lombok.Getter;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Configuration for all Click actions.
@@ -34,6 +38,7 @@ import lombok.Getter;
  * @see io.github.jspinak.brobot.action.basic.click.Click
  */
 @Getter
+@JsonDeserialize(builder = ClickOptions.Builder.class)
 public final class ClickOptions extends ActionConfig {
 
     /**
@@ -97,20 +102,27 @@ public final class ClickOptions extends ActionConfig {
     /**
      * Builder for constructing {@link ClickOptions} with a fluent API.
      */
+    @JsonPOJOBuilder(withPrefix = "set")
     public static class Builder extends ActionConfig.Builder<Builder> {
 
+        @JsonProperty("numberOfClicks")
         private int numberOfClicks = 1;
+        @JsonProperty("mousePressOptions")
         private MousePressOptions.Builder mousePressOptions = new MousePressOptions.Builder(); // Default: LEFT button with default timings
+        @JsonProperty("verificationOptions")
         private VerificationOptions.Builder verificationOptions = new VerificationOptions.Builder(); // Default: no verification
+        @JsonProperty("repetitionOptions")
         private RepetitionOptions.Builder repetitionOptions = new RepetitionOptions.Builder(); // Default: single repetition
         
         // Deprecated field for backward compatibility
         @Deprecated
+        @JsonProperty("clickType")
         private Type clickType = Type.LEFT;
 
         /**
          * Default constructor for creating a new ClickOptions configuration.
          */
+        @JsonCreator
         public Builder() {}
 
         /**

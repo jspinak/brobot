@@ -1,5 +1,5 @@
 // settings.gradle for the brobot project
 
 rootProject.name = 'brobot'
-include 'library', 'library-features', 'runner'
-// 'library-test' module disabled - tests are outdated and reference non-existent classes
+include 'library', 'library-features', 'runner', 'library-test'
+// 'library-test' module re-enabled after migration
