@@ -125,7 +125,7 @@ if (result.isSuccess()) {
 
 ## Next Steps
 
-- [Migration Guide](./migration-guide) - Learn how to migrate from ActionOptions
+- [Quick Migration Reference](./quick-migration-reference) - Learn how to migrate from ActionOptions
 - [Code Examples](./examples) - See ActionConfig in action
 - [Fluent API Guide](./fluent-api) - Master the fluent API patterns
 - [API Reference](./reference) - Detailed API documentation
