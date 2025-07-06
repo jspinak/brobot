@@ -31,6 +31,7 @@ public class ThemeManager {
     private static final String BASE_CSS = "/css/base.css";
     private static final String COMPONENTS_CSS = "/css/components.css";
     private static final String LAYOUTS_CSS = "/css/layouts.css";
+    private static final String LABEL_FIXES_CSS = "/css/label-fixes.css";
 
     private static final String LIGHT_THEME_CSS = "/css/themes/light-theme.css";
     private static final String DARK_THEME_CSS = "/css/themes/dark-theme.css";
@@ -63,6 +64,7 @@ public class ThemeManager {
                 URL baseUrl = getClass().getResource(BASE_CSS);
                 URL componentsUrl = getClass().getResource(COMPONENTS_CSS);
                 URL layoutsUrl = getClass().getResource(LAYOUTS_CSS);
+                URL labelFixesUrl = getClass().getResource(LABEL_FIXES_CSS);
 
                 if (baseUrl == null || componentsUrl == null || layoutsUrl == null) {
                     logger.error("Failed to load common CSS resources");
@@ -76,6 +78,9 @@ public class ThemeManager {
                     lightThemeUrls.add(baseUrl);
                     lightThemeUrls.add(componentsUrl);
                     lightThemeUrls.add(layoutsUrl);
+                    if (labelFixesUrl != null) {
+                        lightThemeUrls.add(labelFixesUrl);
+                    }
                     lightThemeUrls.add(lightThemeCss);
                     themeCssMap.put(Theme.LIGHT, lightThemeUrls);
                 } else {
@@ -89,6 +94,9 @@ public class ThemeManager {
                     darkThemeUrls.add(baseUrl);
                     darkThemeUrls.add(componentsUrl);
                     darkThemeUrls.add(layoutsUrl);
+                    if (labelFixesUrl != null) {
+                        darkThemeUrls.add(labelFixesUrl);
+                    }
                     darkThemeUrls.add(darkThemeCss);
                     themeCssMap.put(Theme.DARK, darkThemeUrls);
                 } else {
@@ -96,12 +104,20 @@ public class ThemeManager {
                 }
             } else {
                 // Use modern theme for both light and dark modes
+                URL labelFixesUrl = getClass().getResource(LABEL_FIXES_CSS);
+                
                 List<URL> lightThemeUrls = new ArrayList<>();
                 lightThemeUrls.add(modernThemeCss);
+                if (labelFixesUrl != null) {
+                    lightThemeUrls.add(labelFixesUrl);
+                }
                 themeCssMap.put(Theme.LIGHT, lightThemeUrls);
                 
                 List<URL> darkThemeUrls = new ArrayList<>();
                 darkThemeUrls.add(modernThemeCss);
+                if (labelFixesUrl != null) {
+                    darkThemeUrls.add(labelFixesUrl);
+                }
                 themeCssMap.put(Theme.DARK, darkThemeUrls);
                 
                 logger.info("Modern theme loaded successfully");

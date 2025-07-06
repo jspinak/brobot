@@ -3,6 +3,7 @@ package io.github.jspinak.brobot.runner;
 import io.github.jspinak.brobot.runner.events.EventBus;
 import io.github.jspinak.brobot.runner.events.LogEvent;
 import io.github.jspinak.brobot.runner.ui.BrobotRunnerView;
+import io.github.jspinak.brobot.runner.ui.WindowManager;
 import io.github.jspinak.brobot.runner.ui.icons.IconRegistry;
 import io.github.jspinak.brobot.runner.ui.theme.ThemeManager;
 import javafx.application.Application;
@@ -96,6 +97,10 @@ public class JavaFxApplication extends Application {
             ThemeManager themeManager = applicationContext.getBean(ThemeManager.class);
             IconRegistry iconRegistry = applicationContext.getBean(IconRegistry.class);
             EventBus eventBus = applicationContext.getBean(EventBus.class);
+            WindowManager windowManager = applicationContext.getBean(WindowManager.class);
+
+            // Register primary stage with WindowManager
+            windowManager.setPrimaryStage(stage);
 
             // Get the BrobotRunnerView directly from the context
             BrobotRunnerView view = applicationContext.getBean(BrobotRunnerView.class);
