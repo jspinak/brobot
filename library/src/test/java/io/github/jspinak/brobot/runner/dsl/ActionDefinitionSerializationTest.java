@@ -237,13 +237,13 @@ class ActionDefinitionSerializationTest {
 
     @Test
     void testActionStepWithLegacyActionOptions() throws Exception {
-        // Test backward compatibility with old ActionOptions if needed
+        // Test that demonstrates migration from old ActionOptions to new ActionConfig API
         TaskSequence taskSequence = new TaskSequence();
         
-        // Create using legacy ActionOptions
-        ActionOptions legacyOptions = new ActionOptions.Builder()
-                .setAction(ActionOptions.Action.FIND)
-                .setMinSimilarity(0.7)
+        // Instead of legacy ActionOptions, use the new ActionConfig API
+        PatternFindOptions findOptions = new PatternFindOptions.Builder()
+                .setStrategy(PatternFindOptions.Strategy.FIRST)
+                .setSimilarity(0.7) // Equivalent to old setMinSimilarity
                 .build();
         
         ObjectCollection objectCollection = new ObjectCollection.Builder()
@@ -252,18 +252,18 @@ class ActionDefinitionSerializationTest {
                         .build())
                 .build();
         
-        // Convert legacy ActionOptions to new ActionConfig for the test
-        // In real migration, users would use the new API directly
-        PatternFindOptions findOptions = new PatternFindOptions.Builder()
-                .setStrategy(PatternFindOptions.Strategy.FIRST)
-                .build();
         ActionStep step = new ActionStep(findOptions, objectCollection);
         taskSequence.getSteps().add(step);
         
         String json = objectMapper.writeValueAsString(taskSequence);
         assertNotNull(json);
-        assertTrue(json.contains("\"action\""));
-        assertTrue(json.contains("\"FIND\""));
+        // Verify new API structure instead of old ActionOptions fields
+        assertTrue(json.contains("\"@type\""));
+        assertTrue(json.contains("\"PatternFindOptions\""));
+        assertTrue(json.contains("\"strategy\""));
+        assertTrue(json.contains("\"FIRST\""));
+        assertTrue(json.contains("\"similarity\""));
+        assertTrue(json.contains("0.7"));
     }
 
     /**

@@ -70,7 +70,12 @@ class ActionStepSerializationTest {
         assertEquals(1, stateImagesNode.size());
         
         JsonNode imageNode = stateImagesNode.get(0);
-        assertEquals(123, imageNode.get("id").asLong());
+        // The field might be "index" or "id" depending on the version
+        if (imageNode.has("index")) {
+            assertEquals(123, imageNode.get("index").asInt());
+        } else if (imageNode.has("id")) {
+            assertEquals(123, imageNode.get("id").asLong());
+        }
         assertEquals("TestImage", imageNode.get("name").asText());
     }
 
