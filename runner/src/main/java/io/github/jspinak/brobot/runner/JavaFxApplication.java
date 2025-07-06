@@ -55,6 +55,15 @@ public class JavaFxApplication extends Application {
     @Override
     public void init() {
         try {
+            // Log environment information
+            logger.info("JavaFX init() - Display: {}, Headless: {}, AWT Headless: {}", 
+                System.getenv("DISPLAY"), 
+                System.getProperty("javafx.headless"),
+                System.getProperty("java.awt.headless"));
+            logger.info("JavaFX platform: {}, Monocle: {}", 
+                System.getProperty("javafx.platform"),
+                System.getProperty("glass.platform"));
+            
             // Get command line arguments
             String[] args = getParameters().getRaw().toArray(new String[0]);
 
@@ -113,10 +122,27 @@ public class JavaFxApplication extends Application {
             stage.setMaximized(false);
             stage.setResizable(true);
             
-            // Center the window on screen
-            stage.centerOnScreen();
+            // Ensure window is visible on screen
+            stage.setX(100);
+            stage.setY(100);
+            
+            // Log window properties before showing
+            logger.info("About to show stage - Width: {}, Height: {}, Title: {}", 
+                stage.getWidth(), stage.getHeight(), stage.getTitle());
+            logger.info("Stage showing: {}, iconified: {}", stage.isShowing(), stage.isIconified());
             
             stage.show();
+            
+            // Log window properties after showing
+            logger.info("Stage shown - Showing: {}, X: {}, Y: {}, Width: {}, Height: {}", 
+                stage.isShowing(), stage.getX(), stage.getY(), stage.getWidth(), stage.getHeight());
+            logger.info("Stage focused: {}, iconified: {}", stage.isFocused(), stage.isIconified());
+
+            // Force stage to front
+            stage.toFront();
+            stage.requestFocus();
+            
+            logger.info("Stage brought to front and focus requested");
 
             // Publish application started event
             eventBus.publish(LogEvent.info(this, "JavaFX application started", "System"));

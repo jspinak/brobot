@@ -1,0 +1,14 @@
+{
+  "name": "brobot-runner-puppeteer-tests",
+  "version": "1.0.0",
+  "description": "Puppeteer tests for Brobot Desktop Runner",
+  "main": "index.js",
+  "scripts": {
+    "test": "node desktop-runner-test.js",
+    "test:debug": "DEBUG=* node desktop-runner-test.js"
+  },
+  "dependencies": {
+    "puppeteer": "^21.0.0"
+  },
+  "devDependencies": {}
+}

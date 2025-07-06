@@ -30,7 +30,21 @@ public class ModernIconGenerator {
      */
     public Image getIcon(String iconName, int size) {
         String key = iconName + "_" + size;
-        return iconCache.computeIfAbsent(key, k -> generateIcon(iconName, size));
+        return iconCache.computeIfAbsent(key, k -> {
+            if (javafx.application.Platform.isFxApplicationThread()) {
+                return generateIcon(iconName, size);
+            } else {
+                // If not on FX thread, generate a simple placeholder
+                return createPlaceholderIcon(size);
+            }
+        });
+    }
+    
+    private Image createPlaceholderIcon(int size) {
+        // Create a simple placeholder icon that doesn't require JavaFX thread
+        WritableImage image = new WritableImage(size, size);
+        // Return empty transparent image as placeholder
+        return image;
     }
     
     private Image generateIcon(String iconName, int size) {
