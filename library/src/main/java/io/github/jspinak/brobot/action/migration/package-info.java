@@ -21,7 +21,7 @@
  * </ol>
  * 
  * @deprecated This entire package is temporary and will be removed after migration
- * @since 2.0
+ * @since 1.1.0
  */
 @Deprecated
 package io.github.jspinak.brobot.action.migration;

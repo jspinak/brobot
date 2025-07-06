@@ -28,7 +28,12 @@ import org.springframework.stereotype.Component;
  * @see Drag
  * @see SimpleDrag
  * @see MultipleDrags
+ * 
+ * @deprecated Since version 2.0, use {@link DragOptions} instead which provides
+ *             a cleaner API for configuring drag operations without needing to
+ *             decompose into individual ActionOptions.
  */
+@Deprecated(since = "1.1.0", forRemoval = true)
 @Component
 public class ActionOptionsForDrag {
 

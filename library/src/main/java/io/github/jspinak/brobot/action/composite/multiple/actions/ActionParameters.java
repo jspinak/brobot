@@ -35,7 +35,12 @@ import lombok.Getter;
  * @see MultipleActions
  * @see ActionOptions
  * @see ObjectCollection
+ * 
+ * @deprecated Since version 2.0, use {@link ActionParametersV2} which supports ActionConfig,
+ *             or preferably migrate to {@link io.github.jspinak.brobot.action.ActionChainOptions}
+ *             for better action chaining capabilities.
  */
+@Deprecated(since = "1.1.0", forRemoval = true)
 @Getter
 public class ActionParameters {
 
