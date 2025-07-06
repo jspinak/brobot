@@ -174,11 +174,11 @@ jobs:
           
           echo "Runner build.gradle modified for non-modular build"
 
-      # Use a simpler packaging approach with createDistributionZip
+      # Use standard distribution tasks from application plugin
       - name: Create distribution package
         run: |
           ./gradlew :runner:bootJar
-          ./gradlew :runner:createDistributionZip --info
+          ./gradlew :runner:distZip --info
         env:
           _JAVA_OPTIONS: "-Djava.awt.headless=true"
 
