@@ -10,7 +10,6 @@ import io.github.jspinak.brobot.runner.events.EventBus;
 import io.github.jspinak.brobot.runner.events.ExecutionStatusEvent;
 import io.github.jspinak.brobot.runner.execution.ExecutionState;
 import io.github.jspinak.brobot.runner.execution.ExecutionStatus;
-import io.github.jspinak.brobot.runner.project.RunnerInterface;
 import io.github.jspinak.brobot.runner.project.TaskButton;
 import io.github.jspinak.brobot.runner.project.AutomationProject;
 import io.github.jspinak.brobot.runner.project.AutomationProjectManager;
@@ -83,8 +82,10 @@ public class AutomationPanel extends VBox {
     private void setupBasicUI() {
         setPadding(new Insets(20));
         setSpacing(10);
+        getStyleClass().add("automation-panel");
 
         Label titleLabel = new Label("Automation Control");
+        titleLabel.getStyleClass().add("title-label");
         titleLabel.setStyle("-fx-font-size: 16; -fx-font-weight: bold;");
 
         javafx.scene.control.Button refreshButton = new javafx.scene.control.Button("Refresh Automation Buttons");
@@ -101,21 +102,25 @@ public class AutomationPanel extends VBox {
         pauseResumeButton.setDisable(true);
 
         HBox controlBar = new HBox(10, refreshButton, pauseResumeButton, stopAllButton);
+        controlBar.getStyleClass().add("control-bar");
 
         // Setup status area
         statusLabel = new Label("Status: Ready");
+        statusLabel.getStyleClass().add("status-label");
         statusLabel.setStyle("-fx-font-weight: bold;");
 
         progressBar = new ProgressBar(0);
         progressBar.setPrefWidth(Double.MAX_VALUE);
 
         VBox statusBox = new VBox(5, statusLabel, progressBar);
+        statusBox.getStyleClass().add("content-section");
         statusBox.setPadding(new Insets(5));
         statusBox.setBorder(new Border(new BorderStroke(
                 Color.LIGHTGRAY, BorderStrokeStyle.SOLID, new CornerRadii(5), BorderWidths.DEFAULT
         )));
 
         // Setup button pane
+        buttonPane.getStyleClass().add("button-pane");
         buttonPane.setPadding(new Insets(10));
         buttonPane.setHgap(10);
         buttonPane.setVgap(10);
@@ -132,9 +137,9 @@ public class AutomationPanel extends VBox {
                 new Separator(),
                 statusBox,
                 controlBar,
-                new Label("Available Automation Functions:"),
+                createSectionLabel("Available Automation Functions:"),
                 buttonScrollPane,
-                new Label("Automation Log:")
+                createSectionLabel("Automation Log:")
         );
     }
 
@@ -233,6 +238,15 @@ public class AutomationPanel extends VBox {
     }
 
     /**
+     * Creates a section label with consistent styling
+     */
+    private Label createSectionLabel(String text) {
+        Label label = new Label(text);
+        label.getStyleClass().add("section-label");
+        return label;
+    }
+
+    /**
      * Refreshes the automation buttons based on the currently loaded project
      */
     public void refreshAutomationButtons() {
@@ -272,6 +286,7 @@ public class AutomationPanel extends VBox {
             categoryBox.setStyle("-fx-border-color: lightgray; -fx-border-radius: 5;");
 
             Label categoryLabel = new Label(entry.getKey());
+            categoryLabel.getStyleClass().add("category-label");
             categoryLabel.setStyle("-fx-font-weight: bold;");
             categoryBox.getChildren().add(categoryLabel);
 
