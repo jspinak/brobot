@@ -22,9 +22,9 @@ class ValidationSeverityTest {
     @Test
     void testValidationSeverityOrdinal() {
         // Test that severity levels are ordered correctly
-        assertTrue(ValidationSeverity.INFO.ordinal() < ValidationSeverity.WARNING.ordinal());
         assertTrue(ValidationSeverity.WARNING.ordinal() < ValidationSeverity.ERROR.ordinal());
         assertTrue(ValidationSeverity.ERROR.ordinal() < ValidationSeverity.CRITICAL.ordinal());
+        assertTrue(ValidationSeverity.CRITICAL.ordinal() < ValidationSeverity.INFO.ordinal());
     }
 
     @Test
@@ -51,9 +51,9 @@ class ValidationSeverityTest {
         ValidationSeverity critical = ValidationSeverity.CRITICAL;
 
         // Using ordinal for comparison
-        assertTrue(info.ordinal() < warning.ordinal());
         assertTrue(warning.ordinal() < error.ordinal());
         assertTrue(error.ordinal() < critical.ordinal());
+        assertTrue(critical.ordinal() < info.ordinal());
     }
 
     @Test

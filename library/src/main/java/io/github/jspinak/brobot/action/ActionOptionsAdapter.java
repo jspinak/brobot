@@ -28,7 +28,12 @@ import org.springframework.stereotype.Component;
  *
  * @see ActionOptions
  * @see ActionConfig
+ * 
+ * @deprecated Since version 2.0, this adapter is only for migration purposes.
+ *             New code should use ActionConfig implementations directly rather
+ *             than converting from ActionOptions.
  */
+@Deprecated(since = "1.1.0", forRemoval = true)
 @Component
 public class ActionOptionsAdapter {
 

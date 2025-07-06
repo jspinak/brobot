@@ -20,7 +20,6 @@ import io.github.jspinak.brobot.config.ExecutionEnvironment;
  * <p>Unit tests should extend this class when they don't need real image
  * processing or file access.
  */
-@ContextConfiguration(initializers = TestEnvironmentInitializer.class)
 public abstract class BaseUnitTest {
     
     @BeforeAll
