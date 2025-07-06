@@ -28,6 +28,18 @@ import java.util.function.Predicate;
  * custom find strategies and success criteria. This design allows actions to be highly 
  * configurable while maintaining sensible defaults for common use cases.</p>
  * 
+ * @deprecated Since version 2.0, use specific ActionConfig implementations instead:
+ * <ul>
+ *   <li>{@link ClickOptions} for click actions</li>
+ *   <li>{@link io.github.jspinak.brobot.action.basic.find.PatternFindOptions} for pattern finding</li>
+ *   <li>{@link io.github.jspinak.brobot.action.basic.find.text.TextFindOptions} for text finding</li>
+ *   <li>{@link io.github.jspinak.brobot.action.basic.type.TypeOptions} for typing</li>
+ *   <li>{@link io.github.jspinak.brobot.action.basic.region.DefineRegionOptions} for region definition</li>
+ *   <li>{@link io.github.jspinak.brobot.action.composite.drag.DragOptions} for drag operations</li>
+ * </ul>
+ * For migration assistance, use {@link ActionOptionsAdapter} to convert existing ActionOptions
+ * to the appropriate ActionConfig implementation.
+ * 
  * <p>Key configuration categories:
  * <ul>
  *   <li><b>Action Type</b>: Specifies whether to Find, Click, Type, etc.</li>
@@ -52,6 +64,7 @@ import java.util.function.Predicate;
  * @see ActionResult
  * @see ObjectCollection
  */
+@Deprecated(since = "1.1.0", forRemoval = true)
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ActionOptions {
