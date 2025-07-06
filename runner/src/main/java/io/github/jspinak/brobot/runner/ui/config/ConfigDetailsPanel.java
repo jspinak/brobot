@@ -17,6 +17,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import javafx.scene.control.OverrunStyle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -229,6 +230,9 @@ public class ConfigDetailsPanel extends VBox {
     private Label createInfoLabel() {
         Label label = new Label();
         label.setStyle("-fx-font-weight: normal;");
+        label.setMaxWidth(Double.MAX_VALUE);
+        label.setWrapText(false);
+        label.setTextOverrun(OverrunStyle.ELLIPSIS);
         return label;
     }
 

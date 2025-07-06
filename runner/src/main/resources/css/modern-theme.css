@@ -347,6 +347,13 @@
     -fx-background-color: -fx-dark-bg-secondary;
 }
 
+/* Table cell text overflow handling */
+.table-view .table-cell {
+    -fx-text-overrun: ellipsis;
+    -fx-wrap-text: false;
+    -fx-padding: 8px;
+}
+
 .table-view .column-header {
     -fx-background-color: -fx-bg-tertiary;
     -fx-pref-height: 36px;
@@ -504,6 +511,18 @@
 
 .dark .card {
     -fx-background-color: -fx-dark-bg-secondary;
+}
+
+/* Card title styling to prevent overlap */
+.card .card-title {
+    -fx-font-size: -fx-font-size-lg;
+    -fx-font-weight: 600;
+    -fx-text-fill: -fx-text-fill;
+    -fx-padding: 0 0 -fx-spacing-sm 0;
+}
+
+.dark .card .card-title {
+    -fx-text-fill: -fx-dark-text-primary;
 }
 
 /* Animations and transitions */

@@ -129,29 +129,63 @@ public class ConfigSelectionPanel extends VBox {
 
     private void setupRecentConfigsTable() {
         TableView<ConfigEntry> tableView = recentConfigsTable.getTableView();
+        
+        // Configure table to auto-resize columns
+        tableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 
         TableColumn<ConfigEntry, String> nameColumn = new TableColumn<>("Name");
         nameColumn.setCellValueFactory(cellData ->
                 new SimpleStringProperty(cellData.getValue().getName()));
+        nameColumn.setMinWidth(100);
+        nameColumn.setPrefWidth(150);
+        nameColumn.setMaxWidth(250);
         tableView.getColumns().add(nameColumn);
 
         TableColumn<ConfigEntry, String> projectColumn = new TableColumn<>("Project");
         projectColumn.setCellValueFactory(cellData ->
                 new SimpleStringProperty(cellData.getValue().getProject()));
+        projectColumn.setMinWidth(100);
+        projectColumn.setPrefWidth(150);
+        projectColumn.setMaxWidth(250);
         tableView.getColumns().add(projectColumn);
 
         TableColumn<ConfigEntry, String> lastModifiedColumn = new TableColumn<>("Last Modified");
         lastModifiedColumn.setCellValueFactory(cellData ->
                 new SimpleStringProperty(cellData.getValue().getLastModified().format(DATE_FORMATTER)));
+        lastModifiedColumn.setMinWidth(120);
+        lastModifiedColumn.setPrefWidth(140);
+        lastModifiedColumn.setMaxWidth(160);
         tableView.getColumns().add(lastModifiedColumn);
 
         TableColumn<ConfigEntry, String> pathColumn = new TableColumn<>("Path");
         pathColumn.setCellValueFactory(cellData ->
                 new SimpleStringProperty(cellData.getValue().getProjectConfigPath().toString()));
+        pathColumn.setMinWidth(150);
+        pathColumn.setPrefWidth(300);
+        // Setup custom cell factory for text truncation with tooltip
+        pathColumn.setCellFactory(column -> new TableCell<ConfigEntry, String>() {
+            @Override
+            protected void updateItem(String path, boolean empty) {
+                super.updateItem(path, empty);
+                if (empty || path == null) {
+                    setText(null);
+                    setTooltip(null);
+                } else {
+                    setText(path);
+                    setStyle("-fx-text-overrun: ellipsis;");
+                    // Add tooltip for full path
+                    Tooltip tooltip = new Tooltip(path);
+                    setTooltip(tooltip);
+                }
+            }
+        });
         tableView.getColumns().add(pathColumn);
 
         // Add action column with load and delete buttons
         TableColumn<ConfigEntry, Void> actionColumn = new TableColumn<>("Actions");
+        actionColumn.setMinWidth(120);
+        actionColumn.setPrefWidth(140);
+        actionColumn.setMaxWidth(160);
         actionColumn.setCellFactory(param -> new TableCell<>() {
             private final Button loadButton = new Button("Load");
             private final Button deleteButton = new Button("Delete");
