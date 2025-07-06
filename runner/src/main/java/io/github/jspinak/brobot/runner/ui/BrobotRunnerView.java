@@ -68,6 +68,7 @@ public class BrobotRunnerView extends BorderPane {
     @PostConstruct
     public void initialize() {
         getStyleClass().add("app-container");
+        setStyle("-fx-background-color: #f0f0f0;");
 
         // Create the header
         HBox header = createHeader();
@@ -84,12 +85,6 @@ public class BrobotRunnerView extends BorderPane {
         statusBar = new StatusBar();
         statusBar.createMemoryIndicator();
 
-        // Set the layout
-        setTop(header);
-        setCenter(contentContainer);
-        contentContainer.getChildren().add(tabPane);
-        setBottom(statusBar);
-
         // Register the content container with the navigation manager
         navigationManager.setContentContainer(contentContainer);
 
@@ -98,6 +93,23 @@ public class BrobotRunnerView extends BorderPane {
 
         // Register tabs
         registerTabs();
+        
+        // Set the layout
+        setTop(header);
+        setCenter(contentContainer);
+        
+        // Add debug content if tabs are empty
+        if (tabPane.getTabs().isEmpty()) {
+            Label debugLabel = new Label("DEBUG: No tabs loaded - check screen registration");
+            debugLabel.setStyle("-fx-font-size: 18px; -fx-text-fill: red;");
+            contentContainer.getChildren().add(debugLabel);
+            logger.error("No tabs were registered!");
+        } else {
+            contentContainer.getChildren().add(tabPane);
+            logger.info("Registered {} tabs", tabPane.getTabs().size());
+        }
+        
+        setBottom(statusBar);
 
         // Set initial status message
         statusBar.setStatusMessage("Application initialized");
@@ -124,13 +136,20 @@ public class BrobotRunnerView extends BorderPane {
         header.setSpacing(20);
 
         // Application logo
-        ImageView logoView = new ImageView(
-                new javafx.scene.image.Image(Objects.requireNonNull(
-                        getClass().getResourceAsStream("/icons/brobot-icon.png")))
-        );
-        logoView.setFitWidth(32);
-        logoView.setFitHeight(32);
-        logoView.setPreserveRatio(true);
+        ImageView logoView = null;
+        try {
+            var iconStream = getClass().getResourceAsStream("/icons/brobot-icon.png");
+            if (iconStream != null) {
+                logoView = new ImageView(new javafx.scene.image.Image(iconStream));
+                logoView.setFitWidth(32);
+                logoView.setFitHeight(32);
+                logoView.setPreserveRatio(true);
+            } else {
+                logger.warn("Could not find brobot-icon.png resource");
+            }
+        } catch (Exception e) {
+            logger.error("Error loading application icon", e);
+        }
 
         // Application title
         Label titleLabel = new Label("Brobot Runner");
@@ -150,8 +169,10 @@ public class BrobotRunnerView extends BorderPane {
         });
 
         // Add components to header
+        if (logoView != null) {
+            header.getChildren().add(logoView);
+        }
         header.getChildren().addAll(
-                logoView,
                 titleLabel,
                 spacer,
                 themeToggle
@@ -229,6 +250,7 @@ public class BrobotRunnerView extends BorderPane {
 
                 if (contentOpt.isPresent()) {
                     Node content = contentOpt.get();
+                    logger.debug("Creating tab for {} with content type: {}", tabId, content.getClass().getSimpleName());
 
                     // Create tab
                     Tab tab = new Tab(screen.getTitle());
@@ -243,7 +265,11 @@ public class BrobotRunnerView extends BorderPane {
 
                     // Add to tab pane
                     tabPane.getTabs().add(tab);
+                } else {
+                    logger.warn("No content available for tab: {}", tabId);
                 }
+            } else {
+                logger.warn("Screen not found for tab: {}", tabId);
             }
         }
 
