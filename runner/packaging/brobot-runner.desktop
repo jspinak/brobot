@@ -1,0 +1,13 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Brobot Runner
+Comment=Desktop automation framework with visual UI
+Exec=/opt/brobot-runner/bin/brobot-runner %F
+Icon=brobot-runner
+Terminal=false
+Categories=Development;IDE;
+MimeType=application/json;application/x-brobot;
+Keywords=automation;testing;visual;ui;
+StartupNotify=true
+StartupWMClass=brobot-runner
