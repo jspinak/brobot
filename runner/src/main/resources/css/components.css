@@ -320,3 +320,16 @@
     -fx-font-size: 12px;
     -fx-padding: 8px;
 }
+
+/* Label text overflow handling */
+.label {
+    -fx-text-overrun: ellipsis;
+    -fx-wrap-text: false;
+}
+
+/* Grid pane labels - prevent overlap */
+.grid-pane .label {
+    -fx-max-width: Infinity;
+    -fx-text-overrun: ellipsis;
+    -fx-wrap-text: false;
+}
