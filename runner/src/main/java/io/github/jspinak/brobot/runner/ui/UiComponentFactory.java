@@ -14,6 +14,7 @@ import io.github.jspinak.brobot.runner.session.SessionManager;
 import io.github.jspinak.brobot.runner.ui.config.ConfigManagementPanel;
 import io.github.jspinak.brobot.runner.ui.screens.ComponentShowcaseScreen;
 import io.github.jspinak.brobot.runner.ui.theme.ThemeManager;
+import io.github.jspinak.brobot.runner.hotkeys.HotkeyManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
@@ -53,6 +54,23 @@ public class UiComponentFactory {
 
     public AutomationPanel createAutomationPanel() {
         return new AutomationPanel(applicationContext, projectManager, properties, automationOrchestrator, eventBus);
+    }
+
+    /**
+     * Creates an enhanced automation panel with hotkey support
+     *
+     * @return A new EnhancedAutomationPanel instance
+     */
+    public EnhancedAutomationPanel createEnhancedAutomationPanel() {
+        return new EnhancedAutomationPanel(
+                applicationContext,
+                projectManager,
+                properties,
+                automationOrchestrator,
+                eventBus,
+                applicationContext.getBean(HotkeyManager.class),
+                applicationContext.getBean(WindowManager.class)
+        );
     }
 
     /**
