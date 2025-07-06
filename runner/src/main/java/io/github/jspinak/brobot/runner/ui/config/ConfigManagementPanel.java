@@ -72,11 +72,6 @@ public class ConfigManagementPanel extends BorderPane {
         // Create toolbar
         ToolBar toolbar = createToolbar();
 
-        // Create component panels
-        selectionPanel = new ConfigSelectionPanel(eventBus, runnerProperties, libraryInitializer, appConfig);
-        browserPanel = new ConfigBrowserPanel(eventBus, projectManager, allStatesService); // Pass allStatesService
-        metadataEditor = new ConfigMetadataEditor(eventBus, projectManager);
-
         // Create tab pane for different views
         tabPane = new TabPane();
         tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);

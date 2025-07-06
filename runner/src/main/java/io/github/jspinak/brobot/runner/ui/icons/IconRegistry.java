@@ -46,9 +46,9 @@ public class IconRegistry {
 
     @PostConstruct
     public void initialize() {
-        // Preload common icons
-        preloadCommonIcons();
-
+        // Don't preload icons in PostConstruct - wait until FX thread is ready
+        // Icons will be loaded on-demand when first requested from FX thread
+        
         logger.info("IconRegistry initialized");
         eventBus.publish(LogEvent.info(this, "Icon registry initialized", "Resources"));
     }
