@@ -56,8 +56,8 @@ public class ParameterJsonParserTest {
                     }
                     """, type, type);
 
-            JsonNode jsonNode = jsonParser.parseJson(json);
-            Parameter parameter = jsonParser.convertJson(jsonNode, Parameter.class);
+            JsonNode jsonNode = objectMapper.readTree(json);
+            Parameter parameter = objectMapper.treeToValue(jsonNode, Parameter.class);
 
             assertNotNull(parameter);
             assertEquals("param_" + type, parameter.getName());
@@ -97,7 +97,6 @@ public class ParameterJsonParserTest {
         String json = """
                 {
                   "name": "partialParam"
-                  // Missing type field
                 }
                 """;
 

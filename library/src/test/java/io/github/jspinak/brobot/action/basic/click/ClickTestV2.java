@@ -1,6 +1,7 @@
 package io.github.jspinak.brobot.action.basic.click;
 
 import io.github.jspinak.brobot.config.FrameworkSettings;
+import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.basic.find.Find;
 import io.github.jspinak.brobot.action.basic.click.Click;
 import io.github.jspinak.brobot.action.basic.click.ClickOptions;
@@ -15,6 +16,7 @@ import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.tools.testing.mock.time.TimeProvider;
+import io.github.jspinak.brobot.action.internal.factory.ActionResultFactory;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -43,6 +45,9 @@ class ClickTestV2 {
     
     @Mock
     private PostClickHandler afterClick;
+    
+    @Mock
+    private ActionResultFactory actionResultFactory;
 
     private Click click;
 
@@ -54,8 +59,12 @@ class ClickTestV2 {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        click = new Click(find, clickLocationOnce, time, afterClick);
+        click = new Click(find, clickLocationOnce, time, afterClick, actionResultFactory);
         FrameworkSettings.mock = true;
+        
+        // Default mock behavior for actionResultFactory
+        when(actionResultFactory.init(any(ActionConfig.class), anyString(), any()))
+                .thenAnswer(invocation -> new ActionResult());
     }
 
     @Test
