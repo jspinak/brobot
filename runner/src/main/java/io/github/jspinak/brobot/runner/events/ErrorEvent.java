@@ -1,11 +1,15 @@
 package io.github.jspinak.brobot.runner.events;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.ToString;
 
 /**
  * Event published when an error occurs in the application.
  */
 @Getter
+@ToString(callSuper = true)
+@EqualsAndHashCode(callSuper = true)
 public class ErrorEvent extends BrobotEvent {
     private final String errorMessage;
     private final Exception exception;

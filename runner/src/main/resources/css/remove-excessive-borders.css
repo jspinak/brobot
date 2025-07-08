@@ -1,0 +1,359 @@
+/**
+ * Remove Excessive Borders - Align with AtlantaFX Clean Design
+ * This CSS removes unnecessary borders from containers and non-interactive elements
+ */
+
+/* Remove borders from containers and layout elements */
+.root,
+.vbox,
+.hbox,
+.stackpane,
+.borderpane,
+.gridpane,
+.flowpane,
+.anchorpane,
+.pane,
+.region,
+.split-pane,
+.scroll-pane,
+.tab-pane,
+.content-area,
+.main-content,
+.card-body,
+.card-header,
+.panel,
+.panel-header,
+.container,
+.wrapper {
+    -fx-border-width: 0 !important;
+    -fx-border-color: transparent !important;
+}
+
+/* Remove borders from labels and text */
+.label,
+.text {
+    -fx-border-width: 0 !important;
+    -fx-border-color: transparent !important;
+}
+
+/* Keep borders only on interactive elements that need them */
+/* Buttons should have subtle borders */
+.button {
+    -fx-border-width: 1px !important;
+    -fx-border-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+.button:hover {
+    -fx-border-color: rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Text inputs need borders */
+.text-field,
+.text-area,
+.password-field {
+    -fx-border-width: 1px !important;
+    -fx-border-color: #dadce0 !important;
+    -fx-border-radius: 4px !important;
+    -fx-background-radius: 4px !important;
+}
+
+.text-field:focused,
+.text-area:focused,
+.password-field:focused {
+    -fx-border-color: -fx-primary !important;
+}
+
+/* Combo boxes and choice boxes need borders */
+.combo-box,
+.choice-box {
+    -fx-border-width: 1px !important;
+    -fx-border-color: #dadce0 !important;
+}
+
+/* Tables need minimal borders */
+.table-view {
+    -fx-border-width: 1px !important;
+    -fx-border-color: #e0e0e0 !important;
+}
+
+.table-view .column-header {
+    -fx-border-width: 0 0 1px 0 !important;
+    -fx-border-color: transparent transparent #e0e0e0 transparent !important;
+}
+
+.table-row-cell {
+    -fx-border-width: 0 0 1px 0 !important;
+    -fx-border-color: transparent transparent #f5f5f5 transparent !important;
+}
+
+/* Lists need subtle borders */
+.list-view {
+    -fx-border-width: 1px !important;
+    -fx-border-color: #e0e0e0 !important;
+}
+
+/* Tab pane - modern flat design */
+.tab-pane {
+    -fx-border-width: 0 !important;
+}
+
+.tab-pane > .tab-header-area {
+    -fx-border-width: 0 0 1px 0 !important;
+    -fx-border-color: transparent transparent #e0e0e0 transparent !important;
+}
+
+.tab-pane > .tab-header-area > .headers-region > .tab {
+    -fx-border-width: 0 !important;
+    -fx-background-radius: 0 !important;
+    -fx-border-radius: 0 !important;
+}
+
+.tab-pane > .tab-header-area > .headers-region > .tab:selected {
+    -fx-border-width: 0 0 2px 0 !important;
+    -fx-border-color: transparent transparent -fx-primary transparent !important;
+}
+
+/* Cards should have subtle shadows instead of borders */
+.card,
+.brobot-card,
+.atlanta-card {
+    -fx-border-width: 0 !important;
+    -fx-border-color: transparent !important;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.1), 4, 0, 0, 2);
+    -fx-background-color: white;
+    -fx-background-radius: 8px;
+}
+
+/* Remove all inline style borders */
+* {
+    -fx-border-style: none !important;
+}
+
+/* Specific fixes for detected issues */
+.refactored-config-panel,
+.config-action-bar,
+.config-list-panel,
+.search-bar,
+.split-layout,
+.tab-content-wrapper,
+.tab-content-wrapper-root,
+.clipped-container,
+.virtual-flow,
+.cell,
+.tab-container,
+.focus-indicator,
+.line,
+.separator {
+    -fx-border-width: 0 !important;
+    -fx-border-color: transparent !important;
+}
+
+/* AtlantaCard needs special handling */
+.atlanta-card {
+    -fx-border-width: 0 !important;
+    -fx-border-color: transparent !important;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.1), 4, 0, 0, 2);
+}
+
+/* Tab container fixes */
+.tab-pane .tab-container {
+    -fx-border-width: 0 !important;
+}
+
+/* Focus indicators should be subtle */
+.focus-indicator {
+    -fx-border-width: 0 !important;
+    -fx-background-color: transparent !important;
+}
+
+/* Tab labels should not have borders */
+.tab-pane .tab .label {
+    -fx-border-width: 0 !important;
+}
+
+/* Separators should be thin lines, not bordered boxes */
+.separator {
+    -fx-border-width: 0 !important;
+    -fx-background-color: #e0e0e0 !important;
+    -fx-max-height: 1px !important;
+    -fx-padding: 0 !important;
+}
+
+.separator.line {
+    -fx-border-width: 0 !important;
+}
+
+/* Ensure proper spacing without borders */
+.main-content {
+    -fx-padding: 16px !important;
+}
+
+.card {
+    -fx-padding: 16px !important;
+    -fx-spacing: 8px !important;
+}
+
+.card-header {
+    -fx-padding: 0 0 12px 0 !important;
+}
+
+.card-body {
+    -fx-padding: 0 !important;
+}
+
+/* Status bar should only have top border */
+.status-bar {
+    -fx-border-width: 1px 0 0 0 !important;
+    -fx-border-color: #e0e0e0 transparent transparent transparent !important;
+}
+
+/* Header should only have bottom border */
+.header,
+.header-panel,
+.app-header {
+    -fx-border-width: 0 0 1px 0 !important;
+    -fx-border-color: transparent transparent #e0e0e0 transparent !important;
+}
+
+/* Remove debug borders */
+.debug-border {
+    -fx-border-width: 0 !important;
+}
+
+/* Ensure tooltips have clean styling */
+.tooltip {
+    -fx-border-width: 0 !important;
+    -fx-background-color: rgba(0, 0, 0, 0.8);
+    -fx-text-fill: white;
+    -fx-background-radius: 4px;
+    -fx-padding: 8px 12px;
+}
+
+/* Progress bars should be borderless */
+.progress-bar {
+    -fx-border-width: 0 !important;
+    -fx-background-radius: 4px;
+}
+
+.progress-bar > .track {
+    -fx-border-width: 0 !important;
+    -fx-background-color: #e0e0e0;
+    -fx-background-radius: 4px;
+}
+
+.progress-bar > .bar {
+    -fx-border-width: 0 !important;
+    -fx-background-radius: 4px;
+}
+
+/* Sliders should be borderless */
+.slider {
+    -fx-border-width: 0 !important;
+}
+
+.slider .track {
+    -fx-border-width: 0 !important;
+}
+
+.slider .thumb {
+    -fx-border-width: 0 !important;
+}
+
+/* Spinners need minimal borders */
+.spinner {
+    -fx-border-width: 1px !important;
+    -fx-border-color: #dadce0 !important;
+}
+
+/* Accordion should be borderless with shadows */
+.accordion {
+    -fx-border-width: 0 !important;
+}
+
+.accordion > .titled-pane {
+    -fx-border-width: 0 !important;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.05), 2, 0, 0, 1);
+    -fx-background-color: white;
+    -fx-margin: 0 0 8px 0;
+}
+
+/* Menu bars should be borderless */
+.menu-bar {
+    -fx-border-width: 0 !important;
+    -fx-background-color: -fx-very-light-gray;
+}
+
+/* Tool bars should have minimal borders */
+.tool-bar {
+    -fx-border-width: 0 0 1px 0 !important;
+    -fx-border-color: transparent transparent #e0e0e0 transparent !important;
+}
+
+/* Split pane dividers should be subtle */
+.split-pane-divider {
+    -fx-border-width: 0 !important;
+    -fx-background-color: #e0e0e0 !important;
+    -fx-padding: 0 1px !important;
+}
+
+/* Scroll bars should be borderless */
+.scroll-bar {
+    -fx-border-width: 0 !important;
+}
+
+.scroll-bar .track {
+    -fx-border-width: 0 !important;
+}
+
+.scroll-bar .thumb {
+    -fx-border-width: 0 !important;
+}
+
+/* Tree view should have minimal borders */
+.tree-view {
+    -fx-border-width: 1px !important;
+    -fx-border-color: #e0e0e0 !important;
+}
+
+.tree-cell {
+    -fx-border-width: 0 !important;
+}
+
+/* Date picker needs borders */
+.date-picker {
+    -fx-border-width: 1px !important;
+    -fx-border-color: #dadce0 !important;
+}
+
+/* Color picker needs borders */
+.color-picker {
+    -fx-border-width: 1px !important;
+    -fx-border-color: #dadce0 !important;
+}
+
+/* Pagination should be borderless */
+.pagination {
+    -fx-border-width: 0 !important;
+}
+
+.pagination .pagination-control {
+    -fx-border-width: 0 !important;
+}
+
+/* Check boxes and radio buttons should be borderless containers */
+.check-box,
+.radio-button {
+    -fx-border-width: 0 !important;
+}
+
+/* But their boxes should have borders */
+.check-box > .box,
+.radio-button > .radio {
+    -fx-border-width: 1px !important;
+    -fx-border-color: #757575 !important;
+}
+
+/* Hyperlinks should be borderless */
+.hyperlink {
+    -fx-border-width: 0 !important;
+}

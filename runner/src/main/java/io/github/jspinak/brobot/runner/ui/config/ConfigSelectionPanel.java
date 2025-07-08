@@ -24,6 +24,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import atlantafx.base.theme.Styles;
 
 import java.io.File;
 import java.io.IOException;
@@ -66,6 +67,7 @@ public class ConfigSelectionPanel extends VBox {
         this.libraryInitializer = libraryInitializer;
         this.appConfig = appConfig;
 
+        getStyleClass().add("config-selection-panel");
         setPadding(new Insets(15));
         setSpacing(15);
 
@@ -103,16 +105,21 @@ public class ConfigSelectionPanel extends VBox {
 
         // Layout components
         SplitPane splitPane = new SplitPane();
+        splitPane.getStyleClass().add("config-split-pane");
 
         // Wrap table in a titled card
         Card recentConfigsCard = new Card("Recent Configurations");
+        recentConfigsCard.getStyleClass().addAll("recent-configurations-table", Styles.ELEVATED_1);
         recentConfigsCard.setContent(recentConfigsTable);
+        recentConfigsCard.setMinWidth(300);
 
         Card detailsCard = new Card("Configuration Details");
+        detailsCard.getStyleClass().addAll("configuration-details-card", Styles.ELEVATED_1);
         detailsCard.setContent(detailsPanel);
+        detailsCard.setMinWidth(400);
 
         splitPane.getItems().addAll(recentConfigsCard, detailsCard);
-        splitPane.setDividerPositions(0.4);
+        splitPane.setDividerPositions(0.45);
         VBox.setVgrow(splitPane, Priority.ALWAYS);
 
         getChildren().addAll(header, splitPane);
@@ -131,7 +138,7 @@ public class ConfigSelectionPanel extends VBox {
         TableView<ConfigEntry> tableView = recentConfigsTable.getTableView();
         
         // Configure table to auto-resize columns
-        tableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        tableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
 
         TableColumn<ConfigEntry, String> nameColumn = new TableColumn<>("Name");
         nameColumn.setCellValueFactory(cellData ->
@@ -192,13 +199,13 @@ public class ConfigSelectionPanel extends VBox {
             private final HBox buttonBox = new HBox(5, loadButton, deleteButton);
 
             {
-                loadButton.getStyleClass().add("button-primary");
+                loadButton.getStyleClass().add(Styles.ACCENT);
                 loadButton.setOnAction(event -> {
                     ConfigEntry entry = getTableView().getItems().get(getIndex());
                     loadConfiguration(entry);
                 });
 
-                deleteButton.getStyleClass().add("button-danger");
+                deleteButton.getStyleClass().add(Styles.DANGER);
                 deleteButton.setOnAction(event -> {
                     ConfigEntry entry = getTableView().getItems().get(getIndex());
                     removeConfiguration(entry);

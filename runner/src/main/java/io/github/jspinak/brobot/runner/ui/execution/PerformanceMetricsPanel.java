@@ -13,6 +13,8 @@ import javafx.scene.layout.VBox;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.AccessLevel;
+import io.github.jspinak.brobot.runner.ui.components.base.BrobotCard;
+import atlantafx.base.theme.Styles;
 
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -33,7 +35,7 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 @Getter
 @Setter(AccessLevel.PRIVATE)
-public class PerformanceMetricsPanel extends TitledPane {
+public class PerformanceMetricsPanel extends BrobotCard {
     
     // Metrics labels
     @Getter
@@ -67,17 +69,15 @@ public class PerformanceMetricsPanel extends TitledPane {
      * Creates a new PerformanceMetricsPanel.
      */
     public PerformanceMetricsPanel() {
-        super("Performance Metrics", null);
-        setCollapsible(true);
-        setExpanded(true);
+        super("Performance Metrics");
         initializeContent();
     }
 
     private void initializeContent() {
         VBox performancePanel = new VBox(15);
-        performancePanel.setPadding(new Insets(10));
+        performancePanel.setPadding(new Insets(16));
         setupUI(performancePanel);
-        super.setContent(performancePanel);
+        addContent(performancePanel);
     }
 
     private void setupUI(VBox performancePanel) {

@@ -284,12 +284,9 @@ public class SessionManager implements AutoCloseable {
         }
 
         // Find the latest session file
-        File latestFile = files[0];
-        for (File file : files) {
-            if (file.lastModified() > latestFile.lastModified()) {
-                latestFile = file;
-            }
-        }
+        File latestFile = Arrays.stream(files)
+            .max(Comparator.comparingLong(File::lastModified))
+            .orElse(files[0]);
 
         try {
             String json = Files.readString(latestFile.toPath());
@@ -368,28 +365,37 @@ public class SessionManager implements AutoCloseable {
     }
 
     private String getStringValue(JsonNode node, String fieldName) {
-        if (node.has(fieldName) && !node.get(fieldName).isNull()) {
-            return node.get(fieldName).asText();
-        }
-        return null;
+        return Optional.ofNullable(node)
+            .filter(n -> n.has(fieldName))
+            .map(n -> n.get(fieldName))
+            .filter(n -> !n.isNull())
+            .map(JsonNode::asText)
+            .orElse(null);
     }
 
     private LocalDateTime getDateTimeValue(JsonNode node, String fieldName) {
-        if (node.has(fieldName) && !node.get(fieldName).isNull()) {
-            try {
-                return LocalDateTime.parse(node.get(fieldName).asText());
-            } catch (Exception e) {
-                return null;
-            }
-        }
-        return null;
+        return Optional.ofNullable(node)
+            .filter(n -> n.has(fieldName))
+            .map(n -> n.get(fieldName))
+            .filter(n -> !n.isNull())
+            .map(JsonNode::asText)
+            .map(text -> {
+                try {
+                    return LocalDateTime.parse(text);
+                } catch (Exception e) {
+                    return null;
+                }
+            })
+            .orElse(null);
     }
 
     private Boolean getBooleanValue(JsonNode node, String fieldName) {
-        if (node.has(fieldName) && !node.get(fieldName).isNull()) {
-            return node.get(fieldName).asBoolean();
-        }
-        return null;
+        return Optional.ofNullable(node)
+            .filter(n -> n.has(fieldName))
+            .map(n -> n.get(fieldName))
+            .filter(n -> !n.isNull())
+            .map(JsonNode::asBoolean)
+            .orElse(null);
     }
 
     /**
@@ -463,12 +469,13 @@ public class SessionManager implements AutoCloseable {
             }
 
             // Restore active states if available
-            Set<Long> activeStateIds = session.getActiveStateIds();
-            if (activeStateIds != null && !activeStateIds.isEmpty()) {
-                // This would activate the states in the Brobot system
-                eventBus.publish(LogEvent.info(this,
-                        "Restored " + activeStateIds.size() + " active states", "Session"));
-            }
+            Optional.ofNullable(session.getActiveStateIds())
+                .filter(ids -> !ids.isEmpty())
+                .ifPresent(activeStateIds -> {
+                    // This would activate the states in the Brobot system
+                    eventBus.publish(LogEvent.info(this,
+                            "Restored " + activeStateIds.size() + " active states", "Session"));
+                });
 
         } catch (Exception e) {
             eventBus.publish(LogEvent.error(this,
@@ -479,6 +486,9 @@ public class SessionManager implements AutoCloseable {
 
     /**
      * Deletes a session
+     * 
+     * @param sessionId The session ID to delete
+     * @return true if all session files were deleted successfully
      */
     public boolean deleteSession(String sessionId) {
         File[] files = sessionStoragePath.toFile().listFiles(
@@ -490,21 +500,22 @@ public class SessionManager implements AutoCloseable {
             return false;
         }
 
-        boolean allDeleted = true;
-        for (File file : files) {
-            try {
-                boolean deleted = file.delete();
-                if (!deleted) {
-                    allDeleted = false;
-                    eventBus.publish(LogEvent.warning(this,
-                            "Failed to delete session file: " + file.getName(), "Session"));
+        boolean allDeleted = Arrays.stream(files)
+            .map(file -> {
+                try {
+                    boolean deleted = file.delete();
+                    if (!deleted) {
+                        eventBus.publish(LogEvent.warning(this,
+                                "Failed to delete session file: " + file.getName(), "Session"));
+                    }
+                    return deleted;
+                } catch (Exception e) {
+                    eventBus.publish(LogEvent.error(this,
+                            "Error deleting session file: " + e.getMessage(), "Session", e));
+                    return false;
                 }
-            } catch (Exception e) {
-                allDeleted = false;
-                eventBus.publish(LogEvent.error(this,
-                        "Error deleting session file: " + e.getMessage(), "Session", e));
-            }
-        }
+            })
+            .reduce(true, (a, b) -> a && b);
 
         if (allDeleted) {
             eventBus.publish(LogEvent.info(this,

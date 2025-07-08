@@ -10,6 +10,8 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.Separator;
 import javafx.scene.layout.*;
+import io.github.jspinak.brobot.runner.ui.components.base.BrobotCard;
+import atlantafx.base.theme.Styles;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 
@@ -21,7 +23,7 @@ import java.util.Map;
  * Enhanced status panel that displays automation state with visual indicators
  * and hotkey information.
  */
-public class AutomationStatusPanel extends VBox {
+public class AutomationStatusPanel extends BrobotCard {
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm:ss");
     
     private final Label stateLabel;
@@ -41,12 +43,12 @@ public class AutomationStatusPanel extends VBox {
     private static final Color COLOR_COMPLETED = Color.DARKGREEN;
     
     public AutomationStatusPanel(HotkeyManager hotkeyManager) {
+        super("Automation Status");
         this.hotkeyManager = hotkeyManager;
-        
-        setPadding(new Insets(15));
-        setSpacing(10);
         getStyleClass().add("automation-status-panel");
-        setStyle("-fx-background-color: #f5f5f5; -fx-border-color: #cccccc; -fx-border-radius: 5px;");
+        
+        VBox contentBox = new VBox(10);
+        contentBox.setPadding(new Insets(16));
         
         // Main status display
         HBox statusRow = new HBox(15);
@@ -60,17 +62,18 @@ public class AutomationStatusPanel extends VBox {
         
         // State label
         stateLabel = new Label("IDLE");
-        stateLabel.setStyle("-fx-font-size: 24px; -fx-font-weight: bold;");
+        stateLabel.getStyleClass().addAll(Styles.TITLE_2, Styles.TEXT_BOLD);
         
         // Duration label
         durationLabel = new Label("00:00:00");
-        durationLabel.setStyle("-fx-font-size: 18px; -fx-font-family: monospace;");
+        durationLabel.getStyleClass().addAll(Styles.TITLE_3, "monospace");
+        durationLabel.setStyle("-fx-font-family: monospace;");
         
         statusRow.getChildren().addAll(statusIndicator, stateLabel, createSpacer(), durationLabel);
         
         // Current operation label
         currentOperationLabel = new Label("Ready");
-        currentOperationLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: #666666;");
+        currentOperationLabel.getStyleClass().add(Styles.TEXT_MUTED);
         currentOperationLabel.setWrapText(true);
         
         // Progress bar
@@ -82,14 +85,17 @@ public class AutomationStatusPanel extends VBox {
         // Hotkey info
         hotkeyInfoBox = createHotkeyInfoBox();
         
-        // Add all components
-        getChildren().addAll(
+        // Add all components to content box
+        contentBox.getChildren().addAll(
             statusRow,
             currentOperationLabel,
             progressBar,
             new Separator(),
             hotkeyInfoBox
         );
+        
+        // Add content box to card
+        addContent(contentBox);
     }
     
     private Region createSpacer() {
@@ -103,7 +109,7 @@ public class AutomationStatusPanel extends VBox {
         box.setPadding(new Insets(10, 0, 0, 0));
         
         Label title = new Label("Hotkeys:");
-        title.setStyle("-fx-font-weight: bold; -fx-font-size: 14px;");
+        title.getStyleClass().addAll(Styles.TITLE_4, Styles.TEXT_BOLD);
         box.getChildren().add(title);
         
         updateHotkeyDisplay();

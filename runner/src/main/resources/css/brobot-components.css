@@ -1,0 +1,219 @@
+/* Brobot Component-Specific Styles
+ * Component styles that complement AtlantFX themes
+ */
+
+/* Resource Monitor Panel */
+.resource-monitor-panel {
+    -fx-spacing: -fx-spacing-lg;
+}
+
+.resource-monitor-panel .grid-pane {
+    -fx-hgap: -fx-spacing-lg;
+    -fx-vgap: -fx-spacing-sm;
+}
+
+.resource-monitor-panel .grid-pane .label {
+    -fx-min-width: 180px;
+    -fx-pref-width: 200px;
+}
+
+.resource-monitor-panel .value-label {
+    -fx-min-width: 80px;
+    -fx-font-weight: 600;
+    -fx-text-fill: -color-accent-emphasis;
+}
+
+.resource-monitor-panel .memory-chart {
+    -fx-max-height: 200px;
+    -fx-create-symbols: false;
+}
+
+/* Configuration Panel */
+.configuration-panel .config-grid {
+    -fx-hgap: -fx-spacing-md;
+    -fx-vgap: -fx-spacing-md;
+}
+
+.configuration-panel .section-title {
+    -fx-font-size: 14px;
+    -fx-font-weight: 600;
+    -fx-padding: -fx-spacing-sm 0;
+}
+
+.configuration-list-view {
+    -fx-pref-height: 300px;
+    -fx-background-radius: -fx-border-radius-md;
+}
+
+/* Automation Panel */
+.automation-panel {
+    -fx-spacing: -fx-spacing-lg;
+}
+
+.automation-controls {
+    -fx-spacing: -fx-spacing-md;
+    -fx-padding: -fx-spacing-md;
+    -fx-background-radius: -fx-border-radius-md;
+}
+
+.run-button {
+    -fx-pref-width: 120px;
+    -fx-font-weight: 600;
+}
+
+.stop-button {
+    -fx-pref-width: 120px;
+}
+
+/* Log Viewer Panel */
+.log-viewer {
+    -fx-font-family: "Consolas", "Monaco", monospace;
+    -fx-font-size: 12px;
+}
+
+.log-viewer .log-entry {
+    -fx-padding: 2px 8px;
+}
+
+.log-viewer .log-level-error {
+    -fx-text-fill: -color-danger-emphasis;
+}
+
+.log-viewer .log-level-warn {
+    -fx-text-fill: -color-warning-emphasis;
+}
+
+.log-viewer .log-level-info {
+    -fx-text-fill: -color-fg-default;
+}
+
+.log-viewer .log-level-debug {
+    -fx-text-fill: -color-fg-muted;
+}
+
+/* Component Showcase Panel */
+.component-showcase {
+    -fx-spacing: -fx-spacing-xl;
+}
+
+.showcase-section {
+    -fx-spacing: -fx-spacing-md;
+    -fx-padding: -fx-spacing-lg;
+    -fx-background-radius: -fx-border-radius-md;
+}
+
+/* Tab styling */
+.tab-pane {
+    -fx-tab-min-height: 36px;
+    -fx-tab-max-height: 36px;
+}
+
+.tab-pane .tab {
+    -fx-padding: 8px 16px;
+}
+
+.tab-pane .tab-label {
+    -fx-font-size: 13px;
+}
+
+/* Status bar */
+.status-bar {
+    -fx-padding: -fx-spacing-sm -fx-spacing-md;
+    -fx-spacing: -fx-spacing-md;
+    -fx-background-color: -color-bg-subtle;
+    -fx-border-width: 1px 0 0 0;
+    -fx-border-color: -color-border-default;
+}
+
+.status-label {
+    -fx-font-size: 12px;
+    -fx-text-fill: -color-fg-muted;
+}
+
+/* Dialog styling */
+.dialog-pane {
+    -fx-padding: -fx-spacing-lg;
+}
+
+.dialog-pane .header-panel {
+    -fx-padding: 0 0 -fx-spacing-md 0;
+}
+
+/* Session table specific */
+.sessions-table {
+    -fx-pref-height: 200px;
+}
+
+.sessions-table .table-column {
+    -fx-alignment: center-left;
+}
+
+/* Cache controls */
+.cache-controls {
+    -fx-spacing: -fx-spacing-md;
+    -fx-alignment: center-left;
+}
+
+.cache-selector {
+    -fx-pref-width: 150px;
+}
+
+/* Memory usage visualization */
+.memory-stats {
+    -fx-spacing: -fx-spacing-sm;
+    -fx-padding: -fx-spacing-md;
+    -fx-background-color: -color-bg-subtle;
+    -fx-background-radius: -fx-border-radius-sm;
+}
+
+/* Progress indicators */
+.progress-indicator-panel {
+    -fx-spacing: -fx-spacing-sm;
+    -fx-alignment: center;
+}
+
+/* Execution dashboard */
+.execution-dashboard {
+    -fx-spacing: -fx-spacing-lg;
+}
+
+.execution-stats {
+    -fx-hgap: -fx-spacing-lg;
+    -fx-vgap: -fx-spacing-md;
+}
+
+.execution-stat-value {
+    -fx-font-size: 24px;
+    -fx-font-weight: 700;
+    -fx-text-fill: -color-accent-emphasis;
+}
+
+.execution-stat-label {
+    -fx-font-size: 12px;
+    -fx-text-fill: -color-fg-muted;
+}
+
+/* Image display panel */
+.image-display-panel {
+    -fx-padding: -fx-spacing-md;
+    -fx-background-color: -color-bg-subtle;
+    -fx-background-radius: -fx-border-radius-md;
+}
+
+.image-view-container {
+    -fx-alignment: center;
+    -fx-min-height: 200px;
+}
+
+/* Tree view styling */
+.tree-view {
+    -fx-background-radius: -fx-border-radius-md;
+}
+
+.tree-cell {
+    -fx-padding: 4px 8px;
+}
+
+.tree-cell:selected {
+    -fx-font-weight: 600;
+}
