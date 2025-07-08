@@ -1,0 +1,71 @@
+/* Tab-specific performance optimizations */
+
+/* Disable all animations and transitions on tabs */
+.tab-pane, .tab-pane * {
+    -fx-transition-duration: 0s !important;
+    -fx-animation-duration: 0s !important;
+}
+
+/* Optimize tab header area */
+.tab-pane .tab-header-area {
+    -fx-padding: 0;
+    -fx-background-insets: 0;
+}
+
+/* Optimize individual tabs */
+.tab-pane .tab {
+    -fx-cursor: hand;
+    -fx-background-insets: 0;
+    -fx-padding: 8 12 8 12;
+    -fx-effect: none !important;
+}
+
+/* Remove hover effects */
+.tab-pane .tab:hover {
+    -fx-effect: none !important;
+    -fx-background-color: derive(-fx-base, 10%);
+}
+
+/* Optimize selected tab */
+.tab-pane .tab:selected {
+    -fx-effect: none !important;
+    -fx-background-insets: 0;
+}
+
+/* Disable tab animations */
+.tab-pane .tab-header-background {
+    -fx-effect: none !important;
+    -fx-background-insets: 0;
+}
+
+/* Optimize tab content area */
+.tab-pane .tab-content-area {
+    -fx-padding: 0;
+    -fx-background-insets: 0;
+}
+
+/* Force immediate rendering */
+.tab-pane {
+    -fx-tab-min-width: 80;
+    -fx-tab-max-width: 200;
+    -fx-tab-min-height: 30;
+    -fx-tab-max-height: 30;
+}
+
+/* Disable focus animations */
+.tab-pane:focused .tab:selected {
+    -fx-effect: none !important;
+}
+
+/* Optimize tab label */
+.tab-pane .tab .tab-label {
+    -fx-font-smoothing-type: gray;
+    -fx-text-fill: -fx-text-base-color;
+}
+
+/* Remove all visual effects that might cause delays */
+.tab-pane .tab * {
+    -fx-effect: null !important;
+    -fx-blend-mode: null !important;
+    -fx-opacity: 1.0 !important;
+}

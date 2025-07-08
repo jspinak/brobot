@@ -1,6 +1,7 @@
 package io.github.jspinak.brobot.runner.ui.screens;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.EqualsAndHashCode;
 
 import io.github.jspinak.brobot.runner.ui.components.BreadcrumbBar;
 import io.github.jspinak.brobot.runner.ui.components.EnhancedTable;
@@ -13,14 +14,14 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 
 /**
  * A showcase screen that demonstrates the custom UI components available in the application.
  * This serves as both documentation and a visual test for the components.
  */
-@Data
+@Getter
+@EqualsAndHashCode(callSuper = false)
 public class ComponentShowcaseScreen extends BorderPane {
 
     private final ThemeManager themeManager;
@@ -46,24 +47,15 @@ public class ComponentShowcaseScreen extends BorderPane {
 
     public ComponentShowcaseScreen(ThemeManager themeManager) {
         this.themeManager = themeManager;
+        
+        // Add CSS class for specific styling
+        getStyleClass().add("component-showcase-screen");
 
         // Create header
         Label titleLabel = new Label("Component Showcase");
         titleLabel.getStyleClass().add("title");
 
-        // Create toolbar with theme toggle
-        ToggleButton themeToggle = new ToggleButton("Dark Mode");
-        themeToggle.setSelected(themeManager.getCurrentTheme() == ThemeManager.Theme.DARK);
-        themeToggle.selectedProperty().addListener((obs, oldVal, newVal) -> {
-            themeManager.setTheme(newVal ? ThemeManager.Theme.DARK : ThemeManager.Theme.LIGHT);
-        });
-
-        HBox toolBar = new HBox(10);
-        toolBar.setAlignment(Pos.CENTER_RIGHT);
-        toolBar.setPadding(new Insets(10));
-        toolBar.getChildren().add(themeToggle);
-
-        VBox header = new VBox(10, titleLabel, toolBar);
+        VBox header = new VBox(10, titleLabel);
         header.setPadding(new Insets(20, 20, 10, 20));
 
         // Create status bar early so it can be used in callbacks
@@ -78,20 +70,30 @@ public class ComponentShowcaseScreen extends BorderPane {
         breadcrumbBar.addItem("Components", item -> statusBar.setStatusMessage("Components clicked"));
         breadcrumbBar.addItem("Showcase", null);
 
-        // Create content
-        VBox content = new VBox(20);
+        // Create content with scroll pane for better layout
+        VBox content = new VBox(30);
+        content.getStyleClass().add("showcase-content");
         content.setPadding(new Insets(20));
+        content.setFillWidth(true);
+        content.setAlignment(Pos.TOP_CENTER);
 
         // Add demonstration sections
         for (DemoSection section : DemoSection.values()) {
             content.getChildren().add(createSection(section));
         }
+        
+        // Wrap content in scroll pane
+        javafx.scene.control.ScrollPane scrollPane = new javafx.scene.control.ScrollPane(content);
+        scrollPane.getStyleClass().add("scroll-pane");
+        scrollPane.setFitToWidth(true);
+        scrollPane.setVbarPolicy(javafx.scene.control.ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        scrollPane.setHbarPolicy(javafx.scene.control.ScrollPane.ScrollBarPolicy.NEVER);
 
         // Status bar already created above
 
         // Add all to the layout
         setTop(new VBox(header, breadcrumbBar));
-        setCenter(content);
+        setCenter(scrollPane);
         setBottom(statusBar);
     }
 
@@ -103,10 +105,11 @@ public class ComponentShowcaseScreen extends BorderPane {
      */
     private VBox createSection(DemoSection section) {
         Label sectionTitle = new Label(section.getTitle());
-        sectionTitle.getStyleClass().add("subtitle");
+        sectionTitle.getStyleClass().add("showcase-section-title");
 
-        VBox sectionContent = new VBox(10);
-        sectionContent.setPadding(new Insets(10, 0, 20, 0));
+        VBox sectionContent = new VBox(15);
+        sectionContent.getStyleClass().add("showcase-section");
+        sectionContent.setFillWidth(true);
 
         // Create section content based on type
         switch (section) {
@@ -127,8 +130,11 @@ public class ComponentShowcaseScreen extends BorderPane {
                 break;
         }
 
-        VBox sectionBox = new VBox(10);
+        VBox sectionBox = new VBox(16);
+        sectionBox.getStyleClass().add("showcase-section-container");
         sectionBox.getChildren().addAll(sectionTitle, sectionContent);
+        sectionBox.setFillWidth(true);
+        sectionBox.setMaxWidth(1000);
         return sectionBox;
     }
 
@@ -138,10 +144,17 @@ public class ComponentShowcaseScreen extends BorderPane {
      * @return The buttons demo node
      */
     private VBox createButtonsDemo() {
-        VBox container = new VBox(15);
+        VBox container = new VBox(20);
+        container.getStyleClass().add("button-showcase");
 
-        // Standard buttons
-        HBox standardButtons = new HBox(10);
+        // Standard buttons section
+        VBox standardSection = new VBox(12);
+        standardSection.getStyleClass().add("demo-section");
+        
+        Label standardLabel = new Label("Standard Buttons");
+        standardLabel.getStyleClass().add("demo-title");
+        
+        javafx.scene.layout.FlowPane standardButtons = new javafx.scene.layout.FlowPane(12, 12);
         standardButtons.setAlignment(Pos.CENTER_LEFT);
 
         Button defaultButton = new Button("Default Button");
@@ -152,22 +165,26 @@ public class ComponentShowcaseScreen extends BorderPane {
         primaryButton.setOnAction(e -> statusBar.setStatusMessage("Primary button clicked"));
 
         Button secondaryButton = new Button("Secondary Button");
-        secondaryButton.getStyleClass().add("button-secondary");
+        secondaryButton.getStyleClass().add("button-success");
         secondaryButton.setOnAction(e -> statusBar.setStatusMessage("Secondary button clicked"));
 
         Button dangerButton = new Button("Danger Button");
         dangerButton.getStyleClass().add("button-danger");
         dangerButton.setOnAction(e -> statusBar.setStatusMessage("Danger button clicked"));
 
-        Button outlineButton = new Button("Outline Button");
-        outlineButton.getStyleClass().add("button-outline");
-        outlineButton.setOnAction(e -> statusBar.setStatusMessage("Outline button clicked"));
-
         standardButtons.getChildren().addAll(
-                defaultButton, primaryButton, secondaryButton, dangerButton, outlineButton);
+                defaultButton, primaryButton, secondaryButton, dangerButton);
+        
+        standardSection.getChildren().addAll(standardLabel, standardButtons);
 
-        // Toggle buttons
-        HBox toggleButtons = new HBox(10);
+        // Toggle buttons section
+        VBox toggleSection = new VBox(12);
+        toggleSection.getStyleClass().add("demo-section");
+        
+        Label toggleLabel = new Label("Toggle Buttons");
+        toggleLabel.getStyleClass().add("demo-title");
+        
+        HBox toggleButtons = new HBox(12);
         toggleButtons.setAlignment(Pos.CENTER_LEFT);
 
         ToggleButton toggleButton1 = new ToggleButton("Toggle 1");
@@ -175,15 +192,10 @@ public class ComponentShowcaseScreen extends BorderPane {
         toggleButton2.setSelected(true);
 
         toggleButtons.getChildren().addAll(toggleButton1, toggleButton2);
+        
+        toggleSection.getChildren().addAll(toggleLabel, toggleButtons);
 
-        // Add descriptions
-        container.getChildren().addAll(
-                new Label("Standard Buttons:"),
-                standardButtons,
-                new Label("Toggle Buttons:"),
-                toggleButtons
-        );
-
+        container.getChildren().addAll(standardSection, toggleSection);
         return container;
     }
 
@@ -193,10 +205,18 @@ public class ComponentShowcaseScreen extends BorderPane {
      * @return The layout demo node
      */
     private VBox createLayoutDemo() {
-        VBox container = new VBox(15);
+        VBox container = new VBox(20);
+
+        // Cards and Panels section
+        VBox cardsSection = new VBox(12);
+        cardsSection.getStyleClass().add("demo-section");
+        
+        Label cardsLabel = new Label("Cards and Panels");
+        cardsLabel.getStyleClass().add("demo-title");
 
         // Card demo
         io.github.jspinak.brobot.runner.ui.components.Card card = new io.github.jspinak.brobot.runner.ui.components.Card("Sample Card");
+        card.getStyleClass().add("showcase-card");
         Label cardContent = new Label("This is a card component that can contain any content. Cards are useful for displaying grouped information.");
         cardContent.setWrapText(true);
         card.setContent(cardContent);
@@ -207,6 +227,7 @@ public class ComponentShowcaseScreen extends BorderPane {
 
         // Panel demo
         io.github.jspinak.brobot.runner.ui.components.Panel panel = new io.github.jspinak.brobot.runner.ui.components.Panel("Sample Panel");
+        panel.getStyleClass().add("showcase-panel");
         panel.setCollapsible(true);
 
         Label panelContent = new Label("This is a panel component that can be collapsed. Panels are useful for sections that need to be toggled on and off.");
@@ -216,16 +237,12 @@ public class ComponentShowcaseScreen extends BorderPane {
         Button panelAction = new Button("Panel Action");
         panel.addAction(panelAction);
 
-        HBox cardsLayout = new HBox(20);
+        javafx.scene.layout.FlowPane cardsLayout = new javafx.scene.layout.FlowPane(20, 20);
+        cardsLayout.setAlignment(Pos.TOP_LEFT);
         cardsLayout.getChildren().addAll(card, panel);
-        HBox.setHgrow(card, Priority.ALWAYS);
-        HBox.setHgrow(panel, Priority.ALWAYS);
-
-        // Add descriptions
-        container.getChildren().addAll(
-                new Label("Cards and Panels:"),
-                cardsLayout
-        );
+        
+        cardsSection.getChildren().addAll(cardsLabel, cardsLayout);
+        container.getChildren().add(cardsSection);
 
         return container;
     }
@@ -338,7 +355,8 @@ public class ComponentShowcaseScreen extends BorderPane {
 
         // Alert boxes
         HBox alertBoxes = new HBox(20);
-        alertBoxes.setAlignment(Pos.CENTER_LEFT);
+        alertBoxes.setAlignment(Pos.TOP_LEFT);
+        alertBoxes.setFillHeight(false);
 
         for (String type : new String[] {"info", "success", "warning", "error"}) {
             VBox alertBox = new VBox(5);
@@ -350,8 +368,8 @@ public class ComponentShowcaseScreen extends BorderPane {
             Label alertText = new Label("This is a " + type + " message box");
 
             alertBox.getChildren().addAll(alertTitle, alertText);
+            alertBox.setMaxWidth(200);
             alertBoxes.getChildren().add(alertBox);
-            HBox.setHgrow(alertBox, Priority.ALWAYS);
         }
 
         // Add descriptions

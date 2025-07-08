@@ -1,0 +1,1023 @@
+/* ============================================
+ * AtlantaFX Theme Customization for Brobot Runner
+ * Based on Primer Light/Dark theme
+ * ============================================ */
+
+/* Root Variables - Light Theme (default) */
+.root {
+    /* Colors */
+    -fx-color-canvas-default: #ffffff;
+    -fx-color-canvas-subtle: #f6f8fa;
+    -fx-color-canvas-backdrop: #f8f9fa;
+    -fx-color-border-default: #d1d9e0;
+    -fx-color-border-muted: #e9ecef;
+    -fx-color-border-subtle: #f0f3f6;
+    
+    -fx-color-fg-default: #24292f;
+    -fx-color-fg-muted: #57606a;
+    -fx-color-fg-subtle: #6c757d;
+    
+    /* Shadows */
+    -fx-shadow-sm: dropshadow(gaussian, rgba(0, 0, 0, 0.05), 3, 0, 0, 1);
+    -fx-shadow-md: dropshadow(gaussian, rgba(0, 0, 0, 0.08), 12, 0, 0, 4);
+    -fx-shadow-lg: dropshadow(gaussian, rgba(0, 0, 0, 0.12), 24, 0, 0, 8);
+    
+    /* Spacing */
+    -fx-spacing-xs: 4px;
+    -fx-spacing-sm: 8px;
+    -fx-spacing-md: 16px;
+    -fx-spacing-lg: 24px;
+    -fx-spacing-xl: 32px;
+}
+
+/* Dark Theme Variables */
+.root.dark {
+    -fx-color-canvas-default: #0d1117;
+    -fx-color-canvas-subtle: #161b22;
+    -fx-color-canvas-backdrop: #010409;
+    -fx-color-border-default: #30363d;
+    -fx-color-border-muted: #21262d;
+    -fx-color-border-subtle: #1b1f24;
+    
+    -fx-color-fg-default: #c9d1d9;
+    -fx-color-fg-muted: #8b949e;
+    -fx-color-fg-subtle: #6e7681;
+    
+    /* Darker shadows for dark theme */
+    -fx-shadow-sm: dropshadow(gaussian, rgba(0, 0, 0, 0.12), 3, 0, 0, 1);
+    -fx-shadow-md: dropshadow(gaussian, rgba(0, 0, 0, 0.15), 12, 0, 0, 4);
+    -fx-shadow-lg: dropshadow(gaussian, rgba(0, 0, 0, 0.18), 24, 0, 0, 8);
+}
+
+/* ============================================
+ * Base Application Styling
+ * ============================================ */
+
+/* Main application container */
+.app-container {
+    -fx-background-color: -fx-color-canvas-backdrop;
+}
+
+/* Content area */
+.content-area {
+    -fx-background-color: -fx-color-canvas-backdrop;
+    -fx-padding: -fx-spacing-lg;
+}
+
+/* Fix for all containers to prevent white borders */
+VBox, HBox, StackPane, BorderPane, GridPane, FlowPane, AnchorPane {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+/* Ensure text is visible in all text nodes */
+Text {
+    -fx-fill: -fx-color-fg-default;
+}
+
+/* ============================================
+ * Header Styling
+ * ============================================ */
+
+.header-panel {
+    -fx-background-color: -fx-color-canvas-default;
+    -fx-border-color: -fx-color-border-muted;
+    -fx-border-width: 0 0 1 0;
+    -fx-padding: -fx-spacing-sm -fx-spacing-lg;
+    -fx-effect: -fx-shadow-sm;
+}
+
+.header-title {
+    -fx-font-size: 20px;
+    -fx-font-weight: 600;
+    -fx-text-fill: -fx-color-fg-default;
+}
+
+.theme-toggle {
+    -fx-background-color: -fx-color-canvas-subtle;
+    -fx-border-color: -fx-color-border-default;
+    -fx-border-radius: 6px;
+    -fx-background-radius: 6px;
+    -fx-padding: 6px 12px;
+    -fx-cursor: hand;
+}
+
+.theme-toggle:hover {
+    -fx-background-color: -fx-color-canvas-default;
+    -fx-border-color: -fx-accent;
+}
+
+/* ============================================
+ * Tab Navigation Styling
+ * ============================================ */
+
+.tab-pane {
+    -fx-background-color: transparent;
+}
+
+.tab-pane > .tab-header-area {
+    -fx-background-color: -fx-color-canvas-default;
+    -fx-border-color: -fx-color-border-muted;
+    -fx-border-width: 0 0 1 0;
+    -fx-padding: 0 -fx-spacing-lg;
+}
+
+.tab-pane > .tab-header-area > .tab-header-background {
+    -fx-background-color: transparent;
+}
+
+.tab {
+    -fx-background-color: transparent;
+    -fx-background-radius: 6px 6px 0 0;
+    -fx-padding: -fx-spacing-sm -fx-spacing-md;
+    -fx-cursor: hand;
+    -fx-text-fill: -fx-color-fg-muted;
+}
+
+.tab:hover {
+    -fx-background-color: -fx-color-canvas-subtle;
+    -fx-text-fill: -fx-color-fg-default;
+}
+
+.tab:selected {
+    -fx-background-color: -fx-color-canvas-backdrop;
+    -fx-text-fill: -fx-accent;
+    -fx-border-color: -fx-color-border-muted -fx-color-border-muted -fx-color-canvas-backdrop -fx-color-border-muted;
+    -fx-border-width: 1;
+}
+
+.tab-label {
+    -fx-font-weight: 500;
+    -fx-font-size: 14px;
+}
+
+/* ============================================
+ * Card Component Styling
+ * ============================================ */
+
+.card, .brobot-card {
+    -fx-background-color: -fx-color-canvas-default;
+    -fx-border-color: -fx-color-border-muted;
+    -fx-border-width: 1;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-effect: -fx-shadow-sm;
+}
+
+.card:hover, .brobot-card:hover {
+    -fx-effect: -fx-shadow-md;
+}
+
+.card-header {
+    -fx-background-color: -fx-color-canvas-subtle;
+    -fx-padding: -fx-spacing-md -fx-spacing-lg;
+    -fx-border-color: -fx-color-border-muted;
+    -fx-border-width: 0 0 1 0;
+    -fx-font-weight: 600;
+    -fx-font-size: 16px;
+}
+
+.card-body {
+    -fx-padding: -fx-spacing-lg;
+}
+
+/* ============================================
+ * Button Styling
+ * ============================================ */
+
+.button {
+    -fx-padding: 6px 16px;
+    -fx-border-radius: 6px;
+    -fx-background-radius: 6px;
+    -fx-font-size: 14px;
+    -fx-font-weight: 500;
+    -fx-cursor: hand;
+    -fx-border-width: 1;
+}
+
+/* Primary button */
+.button.primary, .button-primary {
+    -fx-background-color: #0969da;
+    -fx-text-fill: white;
+    -fx-border-color: #0969da;
+}
+
+.button.primary:hover, .button-primary:hover {
+    -fx-background-color: #0860ca;
+    -fx-translate-y: -1;
+    -fx-effect: dropshadow(gaussian, rgba(9, 105, 218, 0.2), 4, 0, 0, 2);
+}
+
+/* Secondary button */
+.button.secondary, .button-secondary {
+    -fx-background-color: -fx-color-canvas-default;
+    -fx-text-fill: -fx-color-fg-default;
+    -fx-border-color: -fx-color-border-default;
+}
+
+.button.secondary:hover, .button-secondary:hover {
+    -fx-background-color: -fx-color-canvas-subtle;
+    -fx-border-color: -fx-color-fg-muted;
+}
+
+/* Accent button */
+.button.accent, .button-accent {
+    -fx-background-color: #ddf4ff;
+    -fx-text-fill: #0969da;
+    -fx-border-color: #0969da;
+}
+
+.button.accent:hover, .button-accent:hover {
+    -fx-background-color: #0969da;
+    -fx-text-fill: white;
+}
+
+/* Danger button */
+.button.danger, .button-danger {
+    -fx-background-color: -fx-color-canvas-default;
+    -fx-text-fill: #cf222e;
+    -fx-border-color: #cf222e;
+}
+
+.button.danger:hover, .button-danger:hover {
+    -fx-background-color: #cf222e;
+    -fx-text-fill: white;
+}
+
+/* Small button */
+.button.small, .button-sm {
+    -fx-padding: 4px 12px;
+    -fx-font-size: 13px;
+}
+
+/* ============================================
+ * Form Control Styling
+ * ============================================ */
+
+/* Fix for all labels to ensure text is visible */
+.label {
+    -fx-text-fill: -fx-color-fg-default;
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+/* Dark mode label fix */
+.root.dark .label {
+    -fx-text-fill: -fx-color-fg-default;
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.text-field, .text-area, .combo-box, .choice-box {
+    -fx-background-color: -fx-color-canvas-default;
+    -fx-border-color: -fx-color-border-default;
+    -fx-border-radius: 6px;
+    -fx-background-radius: 6px;
+    -fx-padding: 8px 12px;
+    -fx-font-size: 14px;
+    -fx-text-fill: -fx-color-fg-default;
+}
+
+.text-field:focused, .text-area:focused, .combo-box:focused, .choice-box:focused {
+    -fx-border-color: -fx-accent;
+    -fx-effect: dropshadow(gaussian, rgba(9, 105, 218, 0.1), 0, 0, 0, 3);
+}
+
+.label.form-label {
+    -fx-font-weight: 600;
+    -fx-font-size: 13px;
+    -fx-text-fill: -fx-color-fg-muted;
+    -fx-padding: 0 0 -fx-spacing-xs 0;
+}
+
+/* ============================================
+ * Table Styling
+ * ============================================ */
+
+.table-view {
+    -fx-background-color: -fx-color-canvas-default;
+    -fx-border-color: -fx-color-border-muted;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-effect: -fx-shadow-sm;
+}
+
+.table-view .column-header {
+    -fx-background-color: -fx-color-canvas-subtle;
+    -fx-border-color: transparent transparent -fx-color-border-muted transparent;
+    -fx-border-width: 0 0 2 0;
+    -fx-padding: 12px 16px;
+}
+
+.table-view .column-header-background {
+    -fx-background-color: -fx-color-canvas-subtle;
+}
+
+.table-view .column-header .label {
+    -fx-font-weight: 600;
+    -fx-font-size: 13px;
+    -fx-text-fill: -fx-color-fg-muted;
+}
+
+.table-row-cell {
+    -fx-background-color: -fx-color-canvas-default;
+    -fx-border-color: transparent transparent -fx-color-border-subtle transparent;
+    -fx-border-width: 0 0 1 0;
+}
+
+.table-row-cell:hover {
+    -fx-background-color: -fx-color-canvas-subtle;
+}
+
+.table-row-cell:selected {
+    -fx-background-color: #ddf4ff;
+}
+
+.table-cell {
+    -fx-padding: 14px 16px;
+    -fx-font-size: 14px;
+    -fx-text-fill: -fx-color-fg-default;
+}
+
+/* ============================================
+ * ScrollBar Styling
+ * ============================================ */
+
+.scroll-bar {
+    -fx-background-color: transparent;
+}
+
+.scroll-bar .track {
+    -fx-background-color: -fx-color-canvas-subtle;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+}
+
+.scroll-bar .thumb {
+    -fx-background-color: -fx-color-border-default;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+}
+
+.scroll-bar .thumb:hover {
+    -fx-background-color: -fx-color-fg-muted;
+}
+
+.scroll-bar .increment-button,
+.scroll-bar .decrement-button {
+    -fx-opacity: 0;
+}
+
+/* ============================================
+ * Status Bar Styling
+ * ============================================ */
+
+.status-bar {
+    -fx-background-color: -fx-color-canvas-default;
+    -fx-border-color: -fx-color-border-muted;
+    -fx-border-width: 1 0 0 0;
+    -fx-padding: -fx-spacing-sm -fx-spacing-lg;
+    -fx-font-size: 13px;
+}
+
+.status-indicator {
+    -fx-spacing: -fx-spacing-sm;
+}
+
+.status-dot {
+    -fx-fill: #2ea043;
+}
+
+/* ============================================
+ * Progress Bar Styling
+ * ============================================ */
+
+.progress-bar {
+    -fx-background-color: -fx-color-border-muted;
+    -fx-background-radius: 2px;
+    -fx-border-radius: 2px;
+}
+
+.progress-bar .track {
+    -fx-background-color: -fx-color-border-muted;
+    -fx-background-radius: 2px;
+}
+
+.progress-bar .bar {
+    -fx-background-color: -fx-accent;
+    -fx-background-radius: 2px;
+}
+
+/* ============================================
+ * Badge Styling
+ * ============================================ */
+
+.badge {
+    -fx-padding: 2px 8px;
+    -fx-background-radius: 12px;
+    -fx-font-size: 12px;
+    -fx-font-weight: 500;
+}
+
+.badge.info {
+    -fx-background-color: #ddf4ff;
+    -fx-text-fill: #0969da;
+}
+
+.badge.success {
+    -fx-background-color: #d1f7d1;
+    -fx-text-fill: #2ea043;
+}
+
+.badge.warning {
+    -fx-background-color: #fff3cd;
+    -fx-text-fill: #fb8500;
+}
+
+.badge.danger {
+    -fx-background-color: #ffebe9;
+    -fx-text-fill: #cf222e;
+}
+
+/* ============================================
+ * Empty State Styling
+ * ============================================ */
+
+.empty-state {
+    -fx-alignment: center;
+    -fx-padding: -fx-spacing-xl;
+    -fx-spacing: -fx-spacing-md;
+}
+
+.empty-state-icon {
+    -fx-font-size: 48px;
+    -fx-opacity: 0.5;
+}
+
+.empty-state-title {
+    -fx-font-size: 18px;
+    -fx-font-weight: 600;
+    -fx-text-fill: -fx-color-fg-default;
+}
+
+.empty-state-description {
+    -fx-text-fill: -fx-color-fg-muted;
+}
+
+/* ============================================
+ * Specific Component Overrides
+ * ============================================ */
+
+/* Main container updates */
+.root > .border-pane {
+    -fx-background-color: -fx-color-canvas-backdrop;
+}
+
+/* Configuration panel styling */
+.configuration-panel {
+    -fx-background-color: -fx-color-canvas-backdrop;
+    -fx-padding: -fx-spacing-lg;
+}
+
+/* Action bar specific styling */
+.action-bar {
+    -fx-background-color: -fx-color-canvas-default;
+    -fx-border-color: -fx-color-border-muted;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-padding: -fx-spacing-md;
+    -fx-spacing: -fx-spacing-sm;
+    -fx-effect: -fx-shadow-sm;
+}
+
+/* Split layout styling */
+.split-layout {
+    -fx-spacing: -fx-spacing-lg;
+    -fx-padding: -fx-spacing-lg 0 0 0;
+}
+
+.recent-configurations-card {
+    -fx-min-width: 600px;
+}
+
+.configuration-details-card {
+    -fx-min-width: 500px;
+}
+
+/* Search bar */
+.search-bar {
+    -fx-spacing: -fx-spacing-sm;
+    -fx-padding: 0 0 -fx-spacing-md 0;
+}
+
+/* Detail row styling */
+.detail-row {
+    -fx-spacing: -fx-spacing-xs;
+    -fx-padding: 0 0 -fx-spacing-md 0;
+}
+
+/* ============================================
+ * Automation Panel Styling
+ * ============================================ */
+
+.automation-panel {
+    -fx-background-color: -fx-color-canvas-backdrop;
+    -fx-padding: -fx-spacing-lg;
+}
+
+.task-buttons-pane {
+    -fx-padding: -fx-spacing-sm;
+}
+
+.task-category {
+    -fx-padding: -fx-spacing-md;
+    -fx-background-color: -fx-color-canvas-subtle;
+    -fx-background-radius: 8px;
+    -fx-spacing: -fx-spacing-sm;
+}
+
+.category-label {
+    -fx-font-weight: 600;
+    -fx-font-size: 14px;
+    -fx-text-fill: -fx-color-fg-muted;
+    -fx-padding: 0 0 -fx-spacing-xs 0;
+}
+
+.task-button {
+    -fx-min-width: 120px;
+    -fx-pref-height: 40px;
+    -fx-font-weight: 500;
+}
+
+.log-area {
+    -fx-font-family: monospace;
+    -fx-font-size: 13px;
+    -fx-background-color: -fx-color-canvas-subtle;
+    -fx-border-color: -fx-color-border-muted;
+    -fx-border-radius: 6px;
+    -fx-background-radius: 6px;
+}
+
+.project-label {
+    -fx-font-weight: 600;
+    -fx-text-fill: -fx-color-fg-default;
+}
+
+.status-label {
+    -fx-font-size: 13px;
+    -fx-font-weight: 500;
+}
+
+.status-running {
+    -fx-text-fill: #2ea043;
+}
+
+.status-paused {
+    -fx-text-fill: #fb8500;
+}
+
+.status-stopped {
+    -fx-text-fill: -fx-color-fg-muted;
+}
+
+.detail-value {
+    -fx-background-color: -fx-color-canvas-subtle;
+    -fx-border-color: -fx-color-border-muted;
+    -fx-border-radius: 6px;
+    -fx-background-radius: 6px;
+    -fx-padding: 8px 12px;
+    -fx-font-family: monospace;
+    -fx-font-size: 13px;
+}
+
+/* ============================================
+ * Resource Panel Styling
+ * ============================================ */
+
+.resource-panel {
+    -fx-background-color: -fx-color-canvas-backdrop;
+    -fx-padding: -fx-spacing-lg;
+}
+
+.resource-overview {
+    -fx-spacing: -fx-spacing-lg;
+}
+
+.metric-label {
+    -fx-font-weight: 600;
+    -fx-font-size: 13px;
+    -fx-text-fill: -fx-color-fg-muted;
+    -fx-min-width: 100px;
+}
+
+.metric-value {
+    -fx-font-size: 14px;
+    -fx-text-fill: -fx-color-fg-default;
+    -fx-font-family: monospace;
+}
+
+.cpu-progress .track {
+    -fx-background-color: #e1f5e1;
+}
+
+.cpu-progress .bar {
+    -fx-background-color: #2ea043;
+}
+
+.memory-progress .track {
+    -fx-background-color: #e1e9f5;
+}
+
+.memory-progress .bar {
+    -fx-background-color: #0969da;
+}
+
+.resource-chart {
+    -fx-background-color: -fx-color-canvas-default;
+    -fx-padding: -fx-spacing-sm;
+}
+
+.resource-chart .chart-content {
+    -fx-padding: -fx-spacing-sm;
+}
+
+.resource-chart .chart-plot-background {
+    -fx-background-color: -fx-color-canvas-subtle;
+}
+
+.resource-chart .chart-vertical-grid-lines {
+    -fx-stroke: -fx-color-border-subtle;
+}
+
+.resource-chart .chart-horizontal-grid-lines {
+    -fx-stroke: -fx-color-border-subtle;
+}
+
+/* Metadata section */
+.metadata-section {
+    -fx-background-color: -fx-color-canvas-subtle;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-padding: -fx-spacing-lg;
+}
+
+/* ============================================
+ * Animation and Transitions
+ * ============================================ */
+
+.button, .card, .tab {
+    -fx-transition: all 0.2s ease;
+}
+
+/* Fade in animation */
+@keyframes fadeIn {
+    from {
+        -fx-opacity: 0;
+        -fx-translate-y: 10px;
+    }
+    to {
+        -fx-opacity: 1;
+        -fx-translate-y: 0;
+    }
+}
+
+.fade-in {
+    -fx-animation: fadeIn 0.3s ease;
+}
+
+/* ============================================
+ * Logs Panel Styling
+ * ============================================ */
+
+.logs-panel {
+    -fx-padding: -fx-spacing-lg;
+    -fx-spacing: -fx-spacing-lg;
+}
+
+/* Log table styling */
+.log-table {
+    -fx-background-color: -fx-color-canvas-default;
+    -fx-border-color: -fx-color-border-default;
+    -fx-border-radius: 8px;
+}
+
+.log-table .column-header {
+    -fx-background-color: -fx-color-canvas-subtle;
+    -fx-font-weight: 600;
+    -fx-padding: -fx-spacing-sm -fx-spacing-md;
+}
+
+.log-table .table-row-cell {
+    -fx-background-color: -fx-color-canvas-default;
+    -fx-cell-size: 32px;
+    -fx-border-color: transparent transparent -fx-color-border-subtle transparent;
+    -fx-border-width: 0 0 1 0;
+}
+
+.log-table .table-row-cell:hover {
+    -fx-background-color: -fx-color-canvas-overlay;
+}
+
+.log-table .table-row-cell:selected {
+    -fx-background-color: -fx-color-accent-subtle;
+}
+
+/* Log level row coloring */
+.log-row-error {
+    -fx-background-color: rgba(220, 53, 69, 0.1);
+}
+
+.log-row-error:hover {
+    -fx-background-color: rgba(220, 53, 69, 0.15);
+}
+
+.log-row-error:selected {
+    -fx-background-color: rgba(220, 53, 69, 0.2);
+}
+
+.log-row-warning {
+    -fx-background-color: rgba(255, 193, 7, 0.1);
+}
+
+.log-row-warning:hover {
+    -fx-background-color: rgba(255, 193, 7, 0.15);
+}
+
+.log-row-warning:selected {
+    -fx-background-color: rgba(255, 193, 7, 0.2);
+}
+
+.log-row-debug {
+    -fx-background-color: rgba(108, 117, 125, 0.05);
+}
+
+/* Level labels */
+.level-error {
+    -fx-text-fill: #dc3545;
+    -fx-font-weight: bold;
+}
+
+.level-warning {
+    -fx-text-fill: #ffc107;
+    -fx-font-weight: bold;
+}
+
+.level-info {
+    -fx-text-fill: #17a2b8;
+}
+
+.level-debug {
+    -fx-text-fill: #6c757d;
+}
+
+/* Time cell styling */
+.time-cell {
+    -fx-text-fill: -fx-color-fg-muted;
+    -fx-font-family: 'monospace';
+    -fx-font-size: 12px;
+}
+
+/* Log detail area */
+.log-detail-area {
+    -fx-font-family: 'monospace';
+    -fx-font-size: 13px;
+    -fx-background-color: -fx-color-canvas-subtle;
+    -fx-text-fill: -fx-color-fg-default;
+    -fx-border-color: -fx-color-border-default;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+    -fx-padding: -fx-spacing-md;
+}
+
+/* Search field */
+.search-field {
+    -fx-background-color: -fx-color-canvas-default;
+    -fx-border-color: -fx-color-border-default;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+    -fx-padding: 6px 12px;
+}
+
+.search-field:focused {
+    -fx-border-color: -fx-color-accent-emphasis;
+}
+
+/* Filter combos */
+.filter-combo {
+    -fx-background-color: -fx-color-canvas-default;
+    -fx-border-color: -fx-color-border-default;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+    -fx-padding: 4px 8px;
+}
+
+/* Auto-scroll checkbox */
+.auto-scroll-check {
+    -fx-text-fill: -fx-color-fg-default;
+}
+
+/* Small buttons in logs panel */
+.button.small {
+    -fx-padding: 4px 12px;
+    -fx-font-size: 12px;
+}
+
+/* ============================================
+ * Base Panel Improvements
+ * ============================================ */
+
+/* Atlanta base panel */
+.atlanta-panel {
+    -fx-background-color: -fx-color-canvas-backdrop;
+}
+
+/* Panel title */
+.panel-title {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -fx-color-fg-default;
+    -fx-padding: 0 0 -fx-spacing-md 0;
+}
+
+/* Button groups */
+.button-group {
+    -fx-spacing: 8px;
+    -fx-alignment: center-left;
+}
+
+/* Improved action bar */
+.action-bar {
+    -fx-background-color: -fx-color-canvas-default;
+    -fx-padding: -fx-spacing-md -fx-spacing-lg;
+    -fx-spacing: -fx-spacing-lg;
+    -fx-border-color: -fx-color-border-muted;
+    -fx-border-width: 0 0 1 0;
+    -fx-min-height: 56px;
+    -fx-pref-height: 56px;
+}
+
+/* Responsive split layout */
+.split-layout.responsive {
+    -fx-spacing: -fx-spacing-lg;
+}
+
+.split-layout.responsive > * {
+    -fx-min-width: 300;
+}
+
+/* Config panel improvements */
+.config-path-label {
+    -fx-text-fill: -fx-color-fg-muted;
+    -fx-font-weight: 500;
+}
+
+.config-path-value {
+    -fx-background-color: -fx-color-canvas-subtle;
+    -fx-padding: 4px 8px;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+    -fx-text-fill: -fx-color-fg-default;
+    -fx-font-family: 'monospace';
+    -fx-font-size: 12px;
+}
+
+/* Field labels and values */
+.field-label {
+    -fx-text-fill: -fx-color-fg-muted;
+    -fx-font-weight: 500;
+    -fx-min-width: 120px;
+}
+
+.field-value {
+    -fx-text-fill: -fx-color-fg-default;
+}
+
+/* Empty state styling */
+.empty-state-title {
+    -fx-font-size: 18px;
+    -fx-font-weight: 600;
+    -fx-text-fill: -fx-color-fg-default;
+}
+
+.empty-state-text {
+    -fx-font-size: 14px;
+    -fx-text-fill: -fx-color-fg-muted;
+}
+
+/* Task category styling */
+.task-category {
+    -fx-background-color: -fx-color-canvas-subtle;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-padding: -fx-spacing-md;
+}
+
+.category-label {
+    -fx-font-size: 14px;
+    -fx-font-weight: 600;
+    -fx-text-fill: -fx-color-fg-default;
+    -fx-padding: 0 0 8px 0;
+}
+
+/* Status labels */
+.status-label {
+    -fx-font-weight: 500;
+}
+
+.status-running {
+    -fx-text-fill: #28a745;
+}
+
+.status-paused {
+    -fx-text-fill: #ffc107;
+}
+
+.status-stopped {
+    -fx-text-fill: #6c757d;
+}
+
+/* Project label */
+.project-label {
+    -fx-font-weight: 600;
+    -fx-text-fill: -fx-color-fg-default;
+}
+
+/* Auto-scroll checkbox */
+.auto-scroll-check {
+    -fx-text-fill: -fx-color-fg-muted;
+    -fx-font-size: 12px;
+}
+
+/* Detail actions */
+.detail-actions {
+    -fx-padding: -fx-spacing-md 0 0 0;
+    -fx-spacing: -fx-spacing-sm;
+}
+
+/* Info grid */
+.info-grid {
+    -fx-background-color: -fx-color-canvas-subtle;
+    -fx-padding: -fx-spacing-md;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+}
+
+/* Section label */
+.section-label {
+    -fx-font-weight: 600;
+    -fx-text-fill: -fx-color-fg-default;
+    -fx-padding: -fx-spacing-sm 0;
+}
+
+/* Description area */
+.description-area {
+    -fx-background-color: -fx-color-canvas-default;
+    -fx-border-color: -fx-color-border-default;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+    -fx-padding: 8px;
+    -fx-font-family: 'system';
+    -fx-font-size: 13px;
+}
+
+/* Author field */
+.author-field {
+    -fx-background-color: -fx-color-canvas-default;
+    -fx-border-color: -fx-color-border-default;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+    -fx-padding: 4px 8px;
+}
+
+/* Task button improvements */
+.task-button {
+    -fx-min-width: 120px;
+    -fx-padding: 8px 16px;
+}
+
+.task-button:hover {
+    -fx-scale-x: 1.02;
+    -fx-scale-y: 1.02;
+}
+
+/* Danger button style */
+.button.danger {
+    -fx-background-color: #dc3545;
+    -fx-text-fill: white;
+}
+
+.button.danger:hover {
+    -fx-background-color: #c82333;
+}
+
+.button.danger:pressed {
+    -fx-background-color: #bd2130;
+}
+
+/* Improved separators */
+.action-bar .separator {
+    -fx-padding: 0 -fx-spacing-sm;
+    -fx-background-color: -fx-color-border-muted;
+    -fx-pref-width: 1;
+    -fx-max-width: 1;
+}

@@ -11,6 +11,8 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.TextAlignment;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
@@ -22,6 +24,7 @@ import java.util.Map;
 @Component
 @Data
 public class ModernIconGenerator {
+    private static final Logger logger = LoggerFactory.getLogger(ModernIconGenerator.class);
     
     private final Map<String, Image> iconCache = new HashMap<>();
     
@@ -30,14 +33,39 @@ public class ModernIconGenerator {
      */
     public Image getIcon(String iconName, int size) {
         String key = iconName + "_" + size;
-        return iconCache.computeIfAbsent(key, k -> {
-            if (javafx.application.Platform.isFxApplicationThread()) {
-                return generateIcon(iconName, size);
-            } else {
-                // If not on FX thread, generate a simple placeholder
+        
+        // Check cache first
+        Image cached = iconCache.get(key);
+        if (cached != null) {
+            return cached;
+        }
+        
+        // Generate icon
+        if (javafx.application.Platform.isFxApplicationThread()) {
+            logger.debug("Generating icon '{}' on FX thread", iconName);
+            Image icon = generateIcon(iconName, size);
+            if (icon != null) {
+                iconCache.put(key, icon);
+            }
+            return icon;
+        } else {
+            // Must generate on FX thread
+            logger.warn("Icon generation requested off FX thread for '{}'", iconName);
+            final Image[] result = new Image[1];
+            try {
+                javafx.application.Platform.runLater(() -> {
+                    result[0] = generateIcon(iconName, size);
+                    if (result[0] != null) {
+                        iconCache.put(key, result[0]);
+                    }
+                });
+                // Return placeholder for now
+                return createPlaceholderIcon(size);
+            } catch (Exception e) {
+                logger.error("Error generating icon: {}", iconName, e);
                 return createPlaceholderIcon(size);
             }
-        });
+        }
     }
     
     private Image createPlaceholderIcon(int size) {
@@ -121,6 +149,33 @@ public class ModernIconGenerator {
                 break;
             case "success":
                 drawSuccessIcon(gc, size);
+                break;
+            case "pause":
+                drawPauseIcon(gc, size);
+                break;
+            case "stop":
+                drawStopIcon(gc, size);
+                break;
+            case "folder":
+                drawFolderIcon(gc, size);
+                break;
+            case "folder-open":
+                drawFolderOpenIcon(gc, size);
+                break;
+            case "window":
+                drawWindowIcon(gc, size);
+                break;
+            case "keyboard":
+                drawKeyboardIcon(gc, size);
+                break;
+            case "moon":
+                drawMoonIcon(gc, size);
+                break;
+            case "sun":
+                drawSunIcon(gc, size);
+                break;
+            case "bug":
+                drawBugIcon(gc, size);
                 break;
             default:
                 drawDefaultIcon(gc, size);
@@ -414,5 +469,142 @@ public class ModernIconGenerator {
     private void drawDefaultIcon(GraphicsContext gc, int size) {
         double margin = size * 0.2;
         gc.strokeRect(margin, margin, size - 2 * margin, size - 2 * margin);
+    }
+    
+    private void drawPauseIcon(GraphicsContext gc, int size) {
+        double width = size * 0.25;
+        double height = size * 0.6;
+        double y = size * 0.2;
+        
+        // Draw two vertical bars
+        gc.fillRect(size * 0.25, y, width * 0.4, height);
+        gc.fillRect(size * 0.6, y, width * 0.4, height);
+    }
+    
+    private void drawStopIcon(GraphicsContext gc, int size) {
+        double margin = size * 0.25;
+        gc.fillRect(margin, margin, size - 2 * margin, size - 2 * margin);
+    }
+    
+    private void drawFolderIcon(GraphicsContext gc, int size) {
+        double margin = size * 0.15;
+        double folderHeight = size * 0.6;
+        double tabWidth = size * 0.3;
+        double tabHeight = size * 0.1;
+        
+        // Draw folder tab
+        gc.fillRect(margin, margin + tabHeight, tabWidth, tabHeight);
+        
+        // Draw folder body
+        gc.fillRect(margin, margin + tabHeight, size - 2 * margin, folderHeight);
+    }
+    
+    private void drawFolderOpenIcon(GraphicsContext gc, int size) {
+        double margin = size * 0.15;
+        double folderHeight = size * 0.5;
+        
+        // Draw folder back
+        gc.setFill(Color.web("#007ACC").darker());
+        gc.fillRect(margin, margin + size * 0.2, size - 2 * margin, folderHeight);
+        
+        // Draw folder front (slightly offset)
+        gc.setFill(Color.web("#007ACC"));
+        gc.fillRect(margin, margin + size * 0.3, size - 2 * margin, folderHeight);
+    }
+    
+    private void drawWindowIcon(GraphicsContext gc, int size) {
+        double margin = size * 0.15;
+        double windowSize = size - 2 * margin;
+        double titleBarHeight = size * 0.15;
+        
+        // Draw window frame
+        gc.strokeRect(margin, margin, windowSize, windowSize);
+        
+        // Draw title bar
+        gc.fillRect(margin, margin, windowSize, titleBarHeight);
+        
+        // Draw window buttons
+        gc.setFill(Color.WHITE);
+        double buttonSize = titleBarHeight * 0.5;
+        double buttonY = margin + (titleBarHeight - buttonSize) / 2;
+        gc.fillOval(size - margin - buttonSize * 3, buttonY, buttonSize, buttonSize);
+        gc.fillOval(size - margin - buttonSize * 2, buttonY, buttonSize, buttonSize);
+        gc.fillOval(size - margin - buttonSize, buttonY, buttonSize, buttonSize);
+    }
+    
+    private void drawKeyboardIcon(GraphicsContext gc, int size) {
+        double margin = size * 0.1;
+        double keyboardHeight = size * 0.4;
+        double keySize = size * 0.08;
+        double keySpacing = size * 0.02;
+        
+        // Draw keyboard base
+        gc.strokeRect(margin, size - margin - keyboardHeight, size - 2 * margin, keyboardHeight);
+        
+        // Draw keys
+        for (int row = 0; row < 3; row++) {
+            for (int col = 0; col < 8; col++) {
+                double x = margin + keySpacing + col * (keySize + keySpacing);
+                double y = size - margin - keyboardHeight + keySpacing + row * (keySize + keySpacing);
+                gc.fillRect(x, y, keySize, keySize);
+            }
+        }
+    }
+    
+    private void drawMoonIcon(GraphicsContext gc, int size) {
+        double centerX = size / 2.0;
+        double centerY = size / 2.0;
+        double radius = size * 0.35;
+        
+        // Draw moon (circle with cutout)
+        gc.fillOval(centerX - radius, centerY - radius, radius * 2, radius * 2);
+        
+        // Cut out crescent
+        gc.setFill(Color.WHITE);
+        gc.fillOval(centerX - radius * 0.5, centerY - radius, radius * 2, radius * 2);
+    }
+    
+    private void drawSunIcon(GraphicsContext gc, int size) {
+        double centerX = size / 2.0;
+        double centerY = size / 2.0;
+        double radius = size * 0.25;
+        
+        // Draw sun circle
+        gc.fillOval(centerX - radius, centerY - radius, radius * 2, radius * 2);
+        
+        // Draw rays
+        gc.setLineWidth(2);
+        int rays = 8;
+        for (int i = 0; i < rays; i++) {
+            double angle = i * 2 * Math.PI / rays;
+            double innerRadius = radius * 1.5;
+            double outerRadius = radius * 2.2;
+            double x1 = centerX + Math.cos(angle) * innerRadius;
+            double y1 = centerY + Math.sin(angle) * innerRadius;
+            double x2 = centerX + Math.cos(angle) * outerRadius;
+            double y2 = centerY + Math.sin(angle) * outerRadius;
+            gc.strokeLine(x1, y1, x2, y2);
+        }
+    }
+    
+    private void drawBugIcon(GraphicsContext gc, int size) {
+        double centerX = size / 2.0;
+        double centerY = size / 2.0;
+        double bodyRadius = size * 0.2;
+        
+        // Draw body
+        gc.fillOval(centerX - bodyRadius, centerY - bodyRadius, bodyRadius * 2, bodyRadius * 2);
+        
+        // Draw head
+        double headRadius = bodyRadius * 0.6;
+        gc.fillOval(centerX - headRadius, centerY - bodyRadius * 2, headRadius * 2, headRadius * 2);
+        
+        // Draw legs
+        gc.setLineWidth(1.5);
+        for (int i = -1; i <= 1; i++) {
+            double legY = centerY + i * bodyRadius * 0.5;
+            gc.strokeLine(centerX - bodyRadius, legY, centerX - bodyRadius * 1.5, legY + bodyRadius * 0.3);
+            gc.strokeLine(centerX + bodyRadius, legY, centerX + bodyRadius * 1.5, legY + bodyRadius * 0.3);
+        }
     }
 }

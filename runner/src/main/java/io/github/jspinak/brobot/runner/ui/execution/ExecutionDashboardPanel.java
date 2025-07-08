@@ -1,6 +1,7 @@
 package io.github.jspinak.brobot.runner.ui.execution;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.EqualsAndHashCode;
 
 import io.github.jspinak.brobot.model.state.State;
 import io.github.jspinak.brobot.runner.automation.AutomationOrchestrator;
@@ -47,7 +48,8 @@ import java.util.concurrent.TimeUnit;
  * @see ActionHistoryTablePanel
  */
 @Slf4j
-@Data
+@Getter
+@EqualsAndHashCode(callSuper = false)
 public class ExecutionDashboardPanel extends BorderPane {
     
     // Core dependencies

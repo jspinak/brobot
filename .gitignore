@@ -47,3 +47,10 @@ hs_err_pid*
 
 # VS Code if you ever use it
 **/.vscode/runner/src/test/puppeteer/node_modules/
+
+# Ignore H2 database files
+runner/data/brobot.lock.db
+runner/data/brobot.mv.db
+
+# Ignore screenshots directory and all its contents
+runner/screenshots/

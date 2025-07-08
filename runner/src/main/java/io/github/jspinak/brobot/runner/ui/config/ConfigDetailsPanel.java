@@ -1,7 +1,7 @@
 package io.github.jspinak.brobot.runner.ui.config;
 
-import lombok.Data;
-
+import lombok.Getter;
+import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
 
 import io.github.jspinak.brobot.runner.events.EventBus;
@@ -17,7 +17,9 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import io.github.jspinak.brobot.runner.ui.components.BrobotFormGrid;
 import javafx.scene.control.OverrunStyle;
+import io.github.jspinak.brobot.runner.ui.components.BrobotButton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,7 +32,8 @@ import java.time.format.DateTimeFormatter;
  * Panel for displaying configuration details and metadata.
  */
 @Slf4j
-@Data
+@Getter
+@EqualsAndHashCode(callSuper = false)
 public class ConfigDetailsPanel extends VBox {
     private static final Logger logger = LoggerFactory.getLogger(ConfigDetailsPanel.class);
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
@@ -55,13 +58,12 @@ public class ConfigDetailsPanel extends VBox {
     public ConfigDetailsPanel(EventBus eventBus) {
         this.eventBus = eventBus;
 
+        getStyleClass().add("configuration-details");
         setPadding(new Insets(15));
         setSpacing(15);
 
-        // Basic info section
-        GridPane basicInfoGrid = new GridPane();
-        basicInfoGrid.setHgap(10);
-        basicInfoGrid.setVgap(10);
+        // Basic info section - using BrobotFormGrid for proper spacing
+        BrobotFormGrid basicInfoGrid = new BrobotFormGrid();
 
         nameLabel = createInfoLabel();
         projectLabel = createInfoLabel();
@@ -70,30 +72,13 @@ public class ConfigDetailsPanel extends VBox {
         imagePathLabel = createInfoLabel();
         lastModifiedLabel = createInfoLabel();
 
-        basicInfoGrid.add(new Label("Name:"), 0, 0);
-        basicInfoGrid.add(nameLabel, 1, 0);
-
-        basicInfoGrid.add(new Label("Project:"), 0, 1);
-        basicInfoGrid.add(projectLabel, 1, 1);
-
-        basicInfoGrid.add(new Label("Project Config:"), 0, 2);
-        basicInfoGrid.add(projectConfigPathLabel, 1, 2);
-
-        basicInfoGrid.add(new Label("DSL Config:"), 0, 3);
-        basicInfoGrid.add(dslConfigPathLabel, 1, 3);
-
-        basicInfoGrid.add(new Label("Image Path:"), 0, 4);
-        basicInfoGrid.add(imagePathLabel, 1, 4);
-
-        basicInfoGrid.add(new Label("Last Modified:"), 0, 5);
-        basicInfoGrid.add(lastModifiedLabel, 1, 5);
-
-        GridPane.setHgrow(nameLabel, Priority.ALWAYS);
-        GridPane.setHgrow(projectLabel, Priority.ALWAYS);
-        GridPane.setHgrow(projectConfigPathLabel, Priority.ALWAYS);
-        GridPane.setHgrow(dslConfigPathLabel, Priority.ALWAYS);
-        GridPane.setHgrow(imagePathLabel, Priority.ALWAYS);
-        GridPane.setHgrow(lastModifiedLabel, Priority.ALWAYS);
+        // Add fields using the BrobotFormGrid methods for proper spacing
+        basicInfoGrid.addField("Name", nameLabel);
+        basicInfoGrid.addField("Project", projectLabel);
+        basicInfoGrid.addField("Project Config", projectConfigPathLabel);
+        basicInfoGrid.addField("DSL Config", dslConfigPathLabel);
+        basicInfoGrid.addField("Image Path", imagePathLabel);
+        basicInfoGrid.addField("Last Modified", lastModifiedLabel);
 
         // Metadata section
         VBox metadataBox = new VBox(10);
@@ -123,14 +108,14 @@ public class ConfigDetailsPanel extends VBox {
         );
 
         // Edit actions
-        Button editButton = new Button("Edit Metadata");
+        BrobotButton editButton = new BrobotButton("Edit Metadata");
         editButton.setOnAction(e -> toggleEditMode());
 
-        Button saveButton = new Button("Save");
+        BrobotButton saveButton = BrobotButton.primary("Save");
         saveButton.setOnAction(e -> saveMetadata());
         saveButton.setDisable(true);
 
-        Button cancelButton = new Button("Cancel");
+        BrobotButton cancelButton = BrobotButton.secondary("Cancel");
         cancelButton.setOnAction(e -> cancelEdit());
         cancelButton.setDisable(true);
 
