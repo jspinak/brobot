@@ -19,7 +19,11 @@ import java.util.function.Consumer;
 
 /**
  * UI event handler that subscribes to events and updates the UI accordingly.
+ * 
+ * @deprecated Use {@link RefactoredUIEventHandler} instead.
+ *             This class has singleton dependencies that will be removed.
  */
+@Deprecated
 @Component
 @Slf4j
 @Data
@@ -233,9 +237,9 @@ public class UIEventHandler {
         logger.debug("Handling config loaded event: {}", configEvent.getConfigName());
 
         Platform.runLater(() -> {
-            ConfigurationPanel.getInstance().ifPresent(panel -> {
-                panel.updateStatus("Configuration loaded: " + configEvent.getConfigName());
-            });
+            // ConfigurationPanel doesn't use singleton pattern
+            // Just log the event for now
+            logger.info("Configuration loaded: {}", configEvent.getConfigName());
 
             AutomationPanel.getInstance().ifPresent(panel -> {
                 panel.log("Configuration loaded: " + configEvent.getConfigName());
@@ -249,9 +253,9 @@ public class UIEventHandler {
         logger.debug("Handling config loading failed event: {}", configEvent.getConfigName());
 
         Platform.runLater(() -> {
-            ConfigurationPanel.getInstance().ifPresent(panel -> {
-                panel.updateStatus("Configuration loading failed: " + configEvent.getDetails(), true);
-            });
+            // ConfigurationPanel doesn't use singleton pattern
+            // Just log the error for now
+            logger.error("Configuration loading failed: {}", configEvent.getDetails());
 
             showErrorDialog("Configuration Error", "Failed to load configuration",
                     configEvent.getDetails(), configEvent.getError());

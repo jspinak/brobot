@@ -53,15 +53,36 @@ public class CacheManager {
 
     /**
      * Creates a new LRU cache with the specified name and size
+     * 
+     * @param name The cache name
+     * @param maxSize Maximum number of entries
+     * @return New LRU cache instance
+     * @throws IllegalArgumentException if name is null or maxSize is invalid
      */
     public <K, V> LRUCache<K, V> createCache(String name, int maxSize) {
+        if (name == null || name.trim().isEmpty()) {
+            throw new IllegalArgumentException("Cache name cannot be null or empty");
+        }
+        if (maxSize <= 0) {
+            throw new IllegalArgumentException("Cache max size must be positive");
+        }
         return new LRUCache<>(eventBus, name, maxSize, resourceManager);
     }
 
     /**
      * Registers a cache for management
+     * 
+     * @param key The cache key
+     * @param cache The cache instance
+     * @throws IllegalArgumentException if key or cache is null
      */
     public <K, V> void registerCache(String key, LRUCache<K, V> cache) {
+        if (key == null || key.trim().isEmpty()) {
+            throw new IllegalArgumentException("Cache key cannot be null or empty");
+        }
+        if (cache == null) {
+            throw new IllegalArgumentException("Cache cannot be null");
+        }
         caches.put(key, cache);
     }
 
@@ -97,15 +118,23 @@ public class CacheManager {
      * Clears all caches
      */
     public void clearAllCaches() {
-        caches.values().forEach(LRUCache::invalidateAll);
+        caches.values().stream()
+            .filter(cache -> cache != null)
+            .forEach(LRUCache::invalidateAll);
     }
 
     /**
      * Gets statistics for all caches
+     * 
+     * @return Map of cache names to their statistics
      */
     public Map<String, Map<String, Long>> getAllCacheStats() {
         Map<String, Map<String, Long>> stats = new ConcurrentHashMap<>();
-        caches.forEach((name, cache) -> stats.put(name, cache.getStats()));
+        caches.forEach((name, cache) -> {
+            if (cache != null) {
+                stats.put(name, cache.getStats());
+            }
+        });
         return stats;
     }
 

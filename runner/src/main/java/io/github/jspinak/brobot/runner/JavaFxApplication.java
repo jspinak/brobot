@@ -3,7 +3,7 @@ package io.github.jspinak.brobot.runner;
 import io.github.jspinak.brobot.runner.events.EventBus;
 import io.github.jspinak.brobot.runner.events.LogEvent;
 import io.github.jspinak.brobot.runner.ui.BrobotRunnerView;
-import io.github.jspinak.brobot.runner.ui.WindowManager;
+import io.github.jspinak.brobot.runner.ui.window.WindowManager;
 import io.github.jspinak.brobot.runner.ui.icons.IconRegistry;
 import io.github.jspinak.brobot.runner.ui.theme.ThemeManager;
 import javafx.application.Application;
@@ -18,6 +18,8 @@ import net.rgielen.fxweaver.core.FxWeaver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ConfigurableApplicationContext;
+import atlantafx.base.theme.PrimerLight;
+import atlantafx.base.theme.PrimerDark;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -78,6 +80,7 @@ public class JavaFxApplication extends Application {
             logger.info("Spring context initialized successfully");
         } catch (Exception e) {
             logger.error("Failed to initialize Spring context", e);
+            e.printStackTrace(); // Also print to console for debugging
 
             // Show error dialog and exit if Spring context initialization fails
             Platform.runLater(() -> {
@@ -90,6 +93,13 @@ public class JavaFxApplication extends Application {
     @Override
     public void start(Stage stage) {
         try {
+            // Check if Spring context was initialized successfully
+            if (applicationContext == null) {
+                logger.error("Cannot start application: Spring context is null");
+                Platform.exit();
+                return;
+            }
+
             // Store the primary stage
             this.primaryStage = stage;
 
@@ -100,16 +110,26 @@ public class JavaFxApplication extends Application {
             WindowManager windowManager = applicationContext.getBean(WindowManager.class);
 
             // Register primary stage with WindowManager
-            windowManager.setPrimaryStage(stage);
+            windowManager.registerStage("main", stage);
 
             // Get the BrobotRunnerView directly from the context
             BrobotRunnerView view = applicationContext.getBean(BrobotRunnerView.class);
 
+            // Apply AtlantFX theme globally before creating scene
+            Application.setUserAgentStylesheet(new PrimerLight().getUserAgentStylesheet());
+            
             // Create the scene with the view - larger default size
             Scene scene = new Scene(view, 1400, 900);
 
-            // Apply theme
+            // Set light theme in ThemeManager
+            themeManager.setTheme(ThemeManager.Theme.LIGHT);
+            
+            // Apply theme (will override with dark if needed)
             themeManager.registerScene(scene);
+            
+            // Add Modena override CSS (only for dark mode)
+            // String modenaOverride = getClass().getResource("/css/modena-dark-override.css").toExternalForm();
+            // scene.getStylesheets().add(modenaOverride);
 
             // Set application icons
             List<Image> appIcons = iconRegistry.getAppIcons();
@@ -130,6 +150,13 @@ public class JavaFxApplication extends Application {
             // Ensure window is visible on screen
             stage.setX(100);
             stage.setY(100);
+            
+            // Add screenshot capability with F12 key
+            scene.setOnKeyPressed(event -> {
+                if (event.getCode() == javafx.scene.input.KeyCode.F12) {
+                    io.github.jspinak.brobot.runner.ui.utils.ScreenshotUtil.captureAndAnalyze(stage, "Manual Screenshot");
+                }
+            });
             
             // Log window properties before showing
             logger.info("About to show stage - Width: {}, Height: {}, Title: {}", 
@@ -153,6 +180,38 @@ public class JavaFxApplication extends Application {
             eventBus.publish(LogEvent.info(this, "JavaFX application started", "System"));
 
             logger.info("JavaFX application started");
+            
+            // Apply style fixes after scene is shown (if needed)
+            // javafx.application.Platform.runLater(() -> {
+            //     logger.info("Applying dark mode style fixes");
+            //     io.github.jspinak.brobot.runner.ui.utils.StyleDiagnostic.removeWhiteBorders(scene);
+            // });
+            
+            // Take automatic screenshot after 3 seconds to verify styling
+            // DISABLED - causing performance issues with tab switching
+            // javafx.animation.Timeline timeline = new javafx.animation.Timeline(
+            //     new javafx.animation.KeyFrame(
+            //         javafx.util.Duration.seconds(3),
+            //         e -> {
+            //             logger.info("Taking automatic screenshot for style verification");
+            //             io.github.jspinak.brobot.runner.ui.utils.ScreenshotUtil.captureAndAnalyze(stage, "Auto-Screenshot-Light-Mode");
+            //         }
+            //     )
+            // );
+            // timeline.play();
+            
+            // Test theme switching after 5 seconds
+            // DISABLED - causing performance issues
+            // javafx.animation.Timeline themeTestTimeline = new javafx.animation.Timeline(
+            //     new javafx.animation.KeyFrame(
+            //         javafx.util.Duration.seconds(5),
+            //         e -> {
+            //             logger.info("Testing theme switching");
+            //             io.github.jspinak.brobot.runner.ui.utils.ThemeTestUtil.testThemeSwitching(stage, themeManager);
+            //         }
+            //     )
+            // );
+            // themeTestTimeline.play();
         } catch (Exception e) {
             logger.error("Failed to start JavaFX application", e);
             showInitializationErrorDialog(e);

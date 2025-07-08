@@ -1,0 +1,363 @@
+/* Final AtlantaFX fixes for all overlapping issues */
+
+/* Global fixes for all labels */
+.label {
+    -fx-text-overrun: ellipsis !important;
+    -fx-wrap-text: false !important;
+    -fx-min-width: -fx-computed !important;
+}
+
+/* Fix overlapping in Component Showcase */
+.component-showcase-screen .label {
+    -fx-padding: 4 8 4 8 !important;
+}
+
+/* Ensure proper spacing in all containers */
+.vbox {
+    -fx-spacing: 12 !important;
+}
+
+.hbox {
+    -fx-spacing: 12 !important;
+}
+
+/* Fix showcase content width */
+.showcase-content {
+    -fx-max-width: 1200px !important;
+    -fx-alignment: top-center !important;
+}
+
+/* Fix section containers */
+.showcase-section-container {
+    -fx-spacing: 16 !important;
+    -fx-padding: 0 0 24 0 !important;
+}
+
+/* Fix demo sections to prevent overlap */
+.demo-section {
+    -fx-background-color: -color-bg-subtle !important;
+    -fx-background-radius: 8 !important;
+    -fx-border-radius: 8 !important;
+    -fx-border-color: -color-border-default !important;
+    -fx-border-width: 1 !important;
+    -fx-padding: 16 !important;
+    -fx-spacing: 12 !important;
+}
+
+.demo-title {
+    -fx-font-size: 14px !important;
+    -fx-font-weight: bold !important;
+    -fx-text-fill: -color-fg-emphasis !important;
+    -fx-padding: 0 0 8 0 !important;
+}
+
+/* Fix button spacing in showcase */
+.button-showcase {
+    -fx-spacing: 20 !important;
+}
+
+.button-showcase .button {
+    -fx-min-width: 120px !important;
+}
+
+/* Fix FlowPane spacing */
+.flow-pane {
+    -fx-hgap: 12 !important;
+    -fx-vgap: 12 !important;
+    -fx-padding: 0 !important;
+}
+
+/* Fix Card and Panel in showcase */
+.showcase-card,
+.showcase-panel {
+    -fx-min-width: 300px !important;
+    -fx-max-width: 400px !important;
+    -fx-pref-width: 350px !important;
+}
+
+/* Fix table headers globally */
+.table-view .column-header {
+    -fx-min-height: 36px !important;
+    -fx-pref-height: 36px !important;
+}
+
+.table-view .column-header .label {
+    -fx-padding: 0 12 0 12 !important;
+    -fx-alignment: center-left !important;
+}
+
+/* Fix tab pane headers */
+.tab-pane .tab {
+    -fx-min-width: 100px !important;
+    -fx-padding: 8 24 8 24 !important;
+}
+
+.tab-pane .tab .tab-label {
+    -fx-padding: 0 !important;
+}
+
+/* Fix breadcrumb spacing */
+.breadcrumb-bar {
+    -fx-spacing: 8 !important;
+    -fx-padding: 8 16 8 16 !important;
+}
+
+.breadcrumb-bar .label {
+    -fx-padding: 0 4 0 4 !important;
+}
+
+/* Fix status bar */
+.status-bar {
+    -fx-spacing: 16 !important;
+    -fx-min-height: 36px !important;
+    -fx-pref-height: 36px !important;
+}
+
+.status-bar .label {
+    -fx-padding: 0 8 0 0 !important;
+}
+
+/* Fix toolbar spacing */
+.tool-bar {
+    -fx-spacing: 12 !important;
+    -fx-padding: 8 12 8 12 !important;
+}
+
+.tool-bar .button {
+    -fx-min-width: 90px !important;
+}
+
+.tool-bar .label {
+    -fx-padding: 0 8 0 8 !important;
+}
+
+/* Enhanced table fixes */
+.enhanced-table {
+    -fx-spacing: 12 !important;
+}
+
+.enhanced-table .search-box {
+    -fx-spacing: 12 !important;
+    -fx-padding: 8 !important;
+}
+
+.enhanced-table .pagination-control {
+    -fx-spacing: 12 !important;
+    -fx-padding: 8 !important;
+}
+
+/* Fix overlapping in cards */
+.card {
+    -fx-spacing: 0 !important;
+}
+
+.card .card-header {
+    -fx-padding: 12 16 12 16 !important;
+    -fx-min-height: 44px !important;
+}
+
+.card .card-content {
+    -fx-padding: 16 !important;
+    -fx-spacing: 12 !important;
+}
+
+.card .card-footer {
+    -fx-padding: 8 16 8 16 !important;
+    -fx-spacing: 8 !important;
+}
+
+/* Fix panels */
+.panel {
+    -fx-spacing: 0 !important;
+}
+
+.panel .panel-header {
+    -fx-padding: 16 !important;
+    -fx-spacing: 12 !important;
+}
+
+.panel .panel-content {
+    -fx-padding: 16 !important;
+    -fx-spacing: 12 !important;
+}
+
+.panel .panel-actions {
+    -fx-padding: 12 16 12 16 !important;
+    -fx-spacing: 8 !important;
+}
+
+/* Fix alert boxes */
+.alert {
+    -fx-padding: 16 !important;
+    -fx-spacing: 12 !important;
+    -fx-max-width: 600px !important;
+}
+
+/* Fix form groups */
+.form-group {
+    -fx-spacing: 8 !important;
+    -fx-padding: 8 0 8 0 !important;
+}
+
+.form-group .label {
+    -fx-min-width: 120px !important;
+    -fx-font-weight: bold !important;
+}
+
+/* Fix titled panes */
+.titled-pane {
+    -fx-text-overrun: ellipsis !important;
+}
+
+.titled-pane > .title {
+    -fx-padding: 8 12 8 12 !important;
+}
+
+.titled-pane > .content {
+    -fx-padding: 12 !important;
+}
+
+/* Fix split panes */
+.split-pane {
+    -fx-padding: 0 !important;
+}
+
+.split-pane > .split-pane-divider {
+    -fx-padding: 0 2 0 2 !important;
+}
+
+/* Fix tree views */
+.tree-view .tree-cell {
+    -fx-padding: 4 8 4 8 !important;
+    -fx-min-height: 28px !important;
+}
+
+/* Fix list views */
+.list-view .list-cell {
+    -fx-padding: 8 12 8 12 !important;
+    -fx-min-height: 32px !important;
+}
+
+/* Fix combo boxes */
+.combo-box {
+    -fx-min-width: 120px !important;
+}
+
+.combo-box .list-cell {
+    -fx-padding: 4 8 4 8 !important;
+}
+
+/* Fix text fields and areas */
+.text-field,
+.text-area {
+    -fx-padding: 8 12 8 12 !important;
+}
+
+/* Fix progress indicators */
+.progress-bar,
+.progress-indicator {
+    -fx-min-width: 100px !important;
+}
+
+/* Fix separators */
+.separator {
+    -fx-padding: 8 0 8 0 !important;
+}
+
+.separator:vertical {
+    -fx-padding: 0 8 0 8 !important;
+}
+
+/* Ensure no overlap in nested containers */
+.vbox > .vbox,
+.hbox > .hbox {
+    -fx-spacing: 8 !important;
+}
+
+/* Fix pagination controls */
+.pagination {
+    -fx-spacing: 8 !important;
+}
+
+.pagination .pagination-control {
+    -fx-spacing: 8 !important;
+}
+
+/* Fix menu bars and items */
+.menu-bar {
+    -fx-padding: 0 !important;
+}
+
+.menu {
+    -fx-padding: 4 12 4 12 !important;
+}
+
+.menu-item {
+    -fx-padding: 6 12 6 12 !important;
+}
+
+/* Fix toggle groups */
+.toggle-button {
+    -fx-min-width: 80px !important;
+    -fx-padding: 6 16 6 16 !important;
+}
+
+/* Fix radio buttons and checkboxes */
+.radio-button,
+.check-box {
+    -fx-spacing: 8 !important;
+    -fx-padding: 4 !important;
+}
+
+/* Ensure consistent button sizes */
+.button {
+    -fx-min-width: 80px !important;
+    -fx-padding: 6 16 6 16 !important;
+}
+
+.button.small {
+    -fx-min-width: 60px !important;
+    -fx-padding: 4 12 4 12 !important;
+}
+
+.button.large {
+    -fx-min-width: 120px !important;
+    -fx-padding: 8 24 8 24 !important;
+}
+
+/* Fix hyperlinks */
+.hyperlink {
+    -fx-padding: 4 8 4 8 !important;
+}
+
+/* Fix sliders */
+.slider {
+    -fx-min-width: 150px !important;
+}
+
+/* Fix spinners */
+.spinner {
+    -fx-min-width: 100px !important;
+}
+
+/* Fix choice boxes */
+.choice-box {
+    -fx-min-width: 120px !important;
+    -fx-padding: 6 12 6 12 !important;
+}
+
+/* Fix date pickers */
+.date-picker {
+    -fx-min-width: 150px !important;
+}
+
+/* Fix color pickers */
+.color-picker {
+    -fx-min-width: 100px !important;
+}
+
+/* Global border fix */
+* {
+    -fx-background-insets: 0 !important;
+    -fx-border-insets: 0 !important;
+}
