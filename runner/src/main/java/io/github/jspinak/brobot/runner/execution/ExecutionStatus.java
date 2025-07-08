@@ -36,6 +36,12 @@ public class ExecutionStatus {
     // Error information if execution failed
     private Exception error;
     
+    // Task tracking
+    private String currentTaskName;
+    private String errorMessage;
+    private int completedSteps = 0;
+    private int totalSteps = 0;
+    
     /**
      * Gets the current duration of the execution
      * @return Duration of execution or null if not started
@@ -124,7 +130,13 @@ public class ExecutionStatus {
         copy.endTime = this.endTime;
         copy.progress = this.progress;
         copy.currentOperation = this.currentOperation;
+        copy.currentAction = this.currentAction;
+        copy.currentState = this.currentState;
         copy.error = this.error;
+        copy.currentTaskName = this.currentTaskName;
+        copy.errorMessage = this.errorMessage;
+        copy.completedSteps = this.completedSteps;
+        copy.totalSteps = this.totalSteps;
         return copy;
     }
     
@@ -137,7 +149,13 @@ public class ExecutionStatus {
         endTime = null;
         progress = 0.0;
         currentOperation = null;
+        currentAction = null;
+        currentState = null;
         error = null;
+        currentTaskName = null;
+        errorMessage = null;
+        completedSteps = 0;
+        totalSteps = 0;
     }
     
     @Override

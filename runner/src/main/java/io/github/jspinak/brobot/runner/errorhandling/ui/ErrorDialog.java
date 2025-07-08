@@ -1,7 +1,7 @@
 package io.github.jspinak.brobot.runner.errorhandling.ui;
 
-import lombok.Data;
-
+import lombok.Getter;
+import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
 
 import io.github.jspinak.brobot.runner.errorhandling.ErrorContext;
@@ -23,7 +23,8 @@ import java.util.Optional;
  * Dialog for displaying errors to users in a friendly way.
  */
 @Slf4j
-@Data
+@Getter
+@EqualsAndHashCode(callSuper = false)
 public class ErrorDialog extends Dialog<ButtonType> {
 
     private static final String ERROR_ICON_PATH = "/icons/error.png";

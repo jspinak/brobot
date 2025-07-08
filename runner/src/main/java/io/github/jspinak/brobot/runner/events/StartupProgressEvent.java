@@ -1,8 +1,12 @@
 package io.github.jspinak.brobot.runner.events;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.ToString;
 
 @Getter
+@ToString(callSuper = true)
+@EqualsAndHashCode(callSuper = true)
 public class StartupProgressEvent extends BrobotEvent {
     private final String taskName;
     private final int completedTasks;

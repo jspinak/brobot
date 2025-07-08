@@ -28,7 +28,11 @@ import java.util.*;
 
 /**
  * JavaFX UI component for automation control.
+ * 
+ * @deprecated Use {@link io.github.jspinak.brobot.runner.ui.panels.UnifiedAutomationPanel} instead.
+ *             This class will be removed in a future version.
  */
+@Deprecated
 @Getter
 @Setter(AccessLevel.PRIVATE)
 public class AutomationPanel extends VBox {

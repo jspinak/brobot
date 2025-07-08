@@ -7,6 +7,7 @@ import io.github.jspinak.brobot.runner.events.EventBus;
 import io.github.jspinak.brobot.runner.events.LogEvent;
 import io.github.jspinak.brobot.runner.services.DialogService;
 import io.github.jspinak.brobot.runner.ui.icons.IconRegistry;
+import io.github.jspinak.brobot.runner.ui.theme.OptimizedThemeManager;
 import io.github.jspinak.brobot.runner.ui.theme.ThemeManager;
 import io.github.jspinak.brobot.runner.util.ErrorUtils;
 import io.github.jspinak.brobot.runner.util.FxThreadUtils;
@@ -40,7 +41,7 @@ public class ApplicationLifecycle {
     private final EventBus eventBus;
     private final ApplicationConfig appConfig;
     private final DialogService dialogService;
-    private final ThemeManager themeManager;
+    private final OptimizedThemeManager themeManager;
     private final IconRegistry iconRegistry;
 
     // Command line arguments
@@ -60,7 +61,7 @@ public class ApplicationLifecycle {
             EventBus eventBus,
             ApplicationConfig appConfig,
             DialogService dialogService,
-            ThemeManager themeManager,
+            OptimizedThemeManager themeManager,
             IconRegistry iconRegistry,
             ApplicationArguments appArgs) {
         this.context = context;

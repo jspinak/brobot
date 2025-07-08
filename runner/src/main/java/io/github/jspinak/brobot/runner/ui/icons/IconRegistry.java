@@ -51,37 +51,55 @@ public class IconRegistry {
         
         logger.info("IconRegistry initialized");
         eventBus.publish(LogEvent.info(this, "Icon registry initialized", "Resources"));
+        
+        // Preload common icons on FX thread
+        if (javafx.application.Platform.isFxApplicationThread()) {
+            preloadCommonIcons();
+        } else {
+            javafx.application.Platform.runLater(this::preloadCommonIcons);
+        }
     }
 
     /**
      * Preloads common icons into the cache.
      */
     private void preloadCommonIcons() {
-        // App icons
-        loadIcon("app_icon", 32);
-
-        // Common action icons
+        logger.info("Preloading common icons on thread: {}", Thread.currentThread().getName());
+        
+        // Tab icons
+        loadIcon("settings", 16);    // Configuration tab
+        loadIcon("play", 16);        // Automation tab
+        loadIcon("grid", 16);        // Resources tab
+        loadIcon("list", 16);        // Logs tab
+        loadIcon("chart", 16);       // Showcase tab
+        
+        // Button icons
         loadIcon("add", 16);
+        loadIcon("folder", 16);
+        loadIcon("folder-open", 16);
+        loadIcon("refresh", 16);
+        loadIcon("pause", 16);
+        loadIcon("stop", 16);
+        loadIcon("window", 16);
+        loadIcon("keyboard", 16);
+        loadIcon("moon", 16);
+        loadIcon("sun", 16);
+        
+        // Common action icons
         loadIcon("edit", 16);
         loadIcon("delete", 16);
         loadIcon("save", 16);
         loadIcon("cancel", 16);
-        loadIcon("refresh", 16);
         loadIcon("search", 16);
-        loadIcon("settings", 16);
-
-        // Navigation icons
-        loadIcon("home", 16);
-        loadIcon("back", 16);
-        loadIcon("forward", 16);
 
         // Status icons
         loadIcon("success", 16);
         loadIcon("warning", 16);
         loadIcon("error", 16);
         loadIcon("info", 16);
+        loadIcon("bug", 16);
 
-        logger.debug("Preloaded {} common icons", iconCache.size());
+        logger.info("Preloaded {} common icons", iconCache.size());
     }
 
     /**
@@ -103,16 +121,28 @@ public class IconRegistry {
             InputStream is = getClass().getResourceAsStream(path);
 
             if (is == null) {
-                // Try SVG if PNG not found
-                path = ICON_BASE_PATH + "svg/" + iconName + ".svg";
+                // Try without size subdirectory
+                path = ICON_BASE_PATH + iconName + ".png";
                 is = getClass().getResourceAsStream(path);
-
+                
                 if (is == null) {
-                    // Try to generate the icon programmatically
-                    logger.debug("Icon not found in resources, generating: {}", iconName);
-                    Image generatedIcon = iconGenerator.getIcon(iconName, size);
-                    iconCache.put(key, generatedIcon);
-                    return true;
+                    // Try SVG if PNG not found
+                    path = ICON_BASE_PATH + "svg/" + iconName + ".svg";
+                    is = getClass().getResourceAsStream(path);
+
+                    if (is == null) {
+                        // Try to generate the icon programmatically
+                        logger.debug("Icon not found in resources, generating: {}", iconName);
+                        Image generatedIcon = iconGenerator.getIcon(iconName, size);
+                        if (generatedIcon != null) {
+                            iconCache.put(key, generatedIcon);
+                            logger.info("Successfully generated icon: {} at size {}", iconName, size);
+                            return true;
+                        } else {
+                            logger.warn("Failed to generate icon: {} at size {}", iconName, size);
+                            return false;
+                        }
+                    }
                 }
             }
 
@@ -161,15 +191,18 @@ public class IconRegistry {
      * @return The ImageView, or null if the icon was not found
      */
     public ImageView getIconView(String iconName, int size) {
+        logger.debug("Getting icon view for '{}' at size {}", iconName, size);
         Image icon = getIcon(iconName, size);
 
         if (icon != null) {
             ImageView imageView = new ImageView(icon);
             imageView.setFitWidth(size);
             imageView.setFitHeight(size);
+            logger.debug("Created ImageView for icon '{}' at size {}", iconName, size);
             return imageView;
         }
 
+        logger.warn("No icon found for '{}' at size {}", iconName, size);
         return null;
     }
 
@@ -240,7 +273,7 @@ public class IconRegistry {
         java.util.List<Image> icons = new java.util.ArrayList<>();
 
         for (int size : new int[] { 16, 32, 48, 64, 128 }) {
-            Image icon = getIcon("app_icon", size);
+            Image icon = getIcon("brobot-icon", size);
             if (icon != null) {
                 icons.add(icon);
             }

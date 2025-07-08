@@ -29,7 +29,20 @@ public class BrobotRunnerMain {
      * @return Configured Spring application context
      */
     public static ConfigurableApplicationContext createSpringApplicationContext(String[] args) {
-        return SpringApplication.run(BrobotRunnerApplication.class, args);
+        try {
+            // Configure Spring Boot application
+            SpringApplication app = new SpringApplication(BrobotRunnerApplication.class);
+            
+            // Disable headless mode for JavaFX compatibility
+            app.setHeadless(false);
+            
+            // Run the application
+            return app.run(args);
+        } catch (Exception e) {
+            System.err.println("Failed to create Spring application context: " + e.getMessage());
+            e.printStackTrace();
+            return null;
+        }
     }
 
     /**

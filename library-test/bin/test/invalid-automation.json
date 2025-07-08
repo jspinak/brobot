@@ -1,0 +1,18 @@
+{
+  "automationFunctions": [
+    {
+      "id": "one",
+      "name": 123,
+      "description": true,
+      "returnType": "invalidType",
+      "parameters": "invalid",
+      "statements": [
+        {
+          "statementType": "unknownType",
+          "name": 123,
+          "type": false
+        }
+      ]
+    }
+  ]
+}
