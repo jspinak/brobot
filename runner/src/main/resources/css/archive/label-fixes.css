@@ -1,11 +1,17 @@
 /* Label overlap and duplication fixes */
 
+/* Root fix to prevent duplicate rendering */
+.root {
+    -fx-depth-buffer: true;
+}
+
 /* Ensure labels have proper spacing and don't overlap */
 .label {
     -fx-text-overrun: ellipsis;
     -fx-wrap-text: false;
     -fx-min-height: 20px;
     -fx-padding: 2px 4px;
+    -fx-background-color: transparent;
 }
 
 /* Title labels need more spacing */
@@ -50,18 +56,31 @@
 
 /* Fix for VBox spacing to prevent overlapping */
 .vbox {
-    -fx-spacing: 8px;
+    -fx-spacing: 8px !important;
+}
+
+VBox {
+    -fx-spacing: 8px !important;
 }
 
 /* Fix for HBox spacing */
 .hbox {
-    -fx-spacing: 10px;
+    -fx-spacing: 10px !important;
+}
+
+HBox {
+    -fx-spacing: 10px !important;
 }
 
 /* Fix for FlowPane spacing */
 .flow-pane {
-    -fx-hgap: 10px;
-    -fx-vgap: 10px;
+    -fx-hgap: 10px !important;
+    -fx-vgap: 10px !important;
+}
+
+FlowPane {
+    -fx-hgap: 10px !important;
+    -fx-vgap: 10px !important;
 }
 
 /* Ensure proper spacing in control bars */
@@ -144,13 +163,12 @@
     -fx-min-height: 24px;
 }
 
-/* Prevent duplicate rendering with proper z-order */
-.root {
-    -fx-depth-buffer: true;
-}
-
 /* Ensure proper layering for overlapping elements */
 .stack-pane > * {
+    -fx-background-color: transparent;
+}
+
+StackPane > * {
     -fx-background-color: transparent;
 }
 
@@ -158,4 +176,34 @@
 .split-pane > * {
     -fx-min-width: 0;
     -fx-min-height: 0;
+}
+
+/* Fix for tab pane content */
+.tab-pane > .tab-content-area {
+    -fx-padding: 0;
+}
+
+/* Prevent label duplication in automation panel */
+.automation-panel Label,
+.enhanced-automation-panel Label {
+    -fx-background-color: transparent;
+    -fx-text-overrun: ellipsis;
+}
+
+/* Fix for control bar spacing */
+.control-bar {
+    -fx-spacing: 10px !important;
+    -fx-padding: 5px 0px;
+}
+
+/* Fix spacing in all panels */
+.panel {
+    -fx-spacing: 10px;
+}
+
+/* Global fix for all labels */
+Label {
+    -fx-text-overrun: ellipsis;
+    -fx-wrap-text: false;
+    -fx-background-color: transparent;
 }

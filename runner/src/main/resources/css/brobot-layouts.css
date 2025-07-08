@@ -1,0 +1,202 @@
+/* Brobot Layout Utilities and Responsive Design
+ * Layout helpers and grid systems for consistent spacing
+ */
+
+/* Main application layout */
+.main-container {
+    -fx-padding: 0;
+}
+
+.content-area {
+    -fx-padding: -fx-spacing-lg;
+    -fx-spacing: -fx-spacing-lg;
+}
+
+/* Grid layout utilities */
+.grid-pane-uniform {
+    -fx-hgap: -fx-spacing-md;
+    -fx-vgap: -fx-spacing-md;
+}
+
+.grid-pane-tight {
+    -fx-hgap: -fx-spacing-sm;
+    -fx-vgap: -fx-spacing-sm;
+}
+
+.grid-pane-loose {
+    -fx-hgap: -fx-spacing-lg;
+    -fx-vgap: -fx-spacing-lg;
+}
+
+/* Flexbox-like utilities */
+.hbox-centered {
+    -fx-alignment: center;
+    -fx-spacing: -fx-spacing-md;
+}
+
+.vbox-centered {
+    -fx-alignment: center;
+    -fx-spacing: -fx-spacing-md;
+}
+
+.hbox-space-between {
+    -fx-alignment: center-left;
+    -fx-spacing: -fx-spacing-md;
+}
+
+.vbox-stretch {
+    -fx-fill-width: true;
+}
+
+/* Panel layouts */
+.panel-header {
+    -fx-padding: -fx-spacing-md -fx-spacing-lg;
+    -fx-background-color: -color-bg-subtle;
+    -fx-border-width: 0 0 1px 0;
+    -fx-border-color: -color-border-default;
+}
+
+.panel-body {
+    -fx-padding: -fx-spacing-lg;
+}
+
+.panel-footer {
+    -fx-padding: -fx-spacing-md -fx-spacing-lg;
+    -fx-background-color: -color-bg-subtle;
+    -fx-border-width: 1px 0 0 0;
+    -fx-border-color: -color-border-default;
+}
+
+/* Sidebar layouts */
+.sidebar {
+    -fx-min-width: 250px;
+    -fx-pref-width: 300px;
+    -fx-max-width: 400px;
+    -fx-padding: -fx-spacing-lg;
+    -fx-background-color: -color-bg-subtle;
+}
+
+.sidebar-item {
+    -fx-padding: -fx-spacing-sm -fx-spacing-md;
+    -fx-cursor: hand;
+}
+
+.sidebar-item:hover {
+    -fx-background-color: -color-bg-default;
+}
+
+/* Toolbar layouts */
+.toolbar {
+    -fx-padding: -fx-spacing-sm -fx-spacing-md;
+    -fx-spacing: -fx-spacing-sm;
+    -fx-background-color: -color-bg-subtle;
+    -fx-border-width: 0 0 1px 0;
+    -fx-border-color: -color-border-default;
+}
+
+.toolbar-separator {
+    -fx-padding: 0 -fx-spacing-sm;
+}
+
+/* Form layouts */
+.form-container {
+    -fx-spacing: -fx-spacing-lg;
+    -fx-padding: -fx-spacing-lg;
+}
+
+.form-group {
+    -fx-spacing: -fx-spacing-sm;
+}
+
+.form-group-horizontal {
+    -fx-spacing: -fx-spacing-md;
+    -fx-alignment: center-left;
+}
+
+.form-label {
+    -fx-min-width: 120px;
+    -fx-font-weight: 500;
+}
+
+.form-control {
+    -fx-pref-width: 250px;
+}
+
+/* Responsive containers */
+.container-sm {
+    -fx-max-width: 600px;
+}
+
+.container-md {
+    -fx-max-width: 900px;
+}
+
+.container-lg {
+    -fx-max-width: 1200px;
+}
+
+/* Margin utilities */
+.mt-xs { -fx-padding: -fx-spacing-xs 0 0 0; }
+.mt-sm { -fx-padding: -fx-spacing-sm 0 0 0; }
+.mt-md { -fx-padding: -fx-spacing-md 0 0 0; }
+.mt-lg { -fx-padding: -fx-spacing-lg 0 0 0; }
+
+.mb-xs { -fx-padding: 0 0 -fx-spacing-xs 0; }
+.mb-sm { -fx-padding: 0 0 -fx-spacing-sm 0; }
+.mb-md { -fx-padding: 0 0 -fx-spacing-md 0; }
+.mb-lg { -fx-padding: 0 0 -fx-spacing-lg 0; }
+
+.ml-xs { -fx-padding: 0 0 0 -fx-spacing-xs; }
+.ml-sm { -fx-padding: 0 0 0 -fx-spacing-sm; }
+.ml-md { -fx-padding: 0 0 0 -fx-spacing-md; }
+.ml-lg { -fx-padding: 0 0 0 -fx-spacing-lg; }
+
+.mr-xs { -fx-padding: 0 -fx-spacing-xs 0 0; }
+.mr-sm { -fx-padding: 0 -fx-spacing-sm 0 0; }
+.mr-md { -fx-padding: 0 -fx-spacing-md 0 0; }
+.mr-lg { -fx-padding: 0 -fx-spacing-lg 0 0; }
+
+/* Gap utilities for HBox/VBox */
+.gap-xs { -fx-spacing: -fx-spacing-xs; }
+.gap-sm { -fx-spacing: -fx-spacing-sm; }
+.gap-md { -fx-spacing: -fx-spacing-md; }
+.gap-lg { -fx-spacing: -fx-spacing-lg; }
+.gap-xl { -fx-spacing: -fx-spacing-xl; }
+
+/* Border utilities */
+.border-all {
+    -fx-border-width: 1px;
+    -fx-border-color: -color-border-default;
+    -fx-border-radius: -fx-border-radius-md;
+}
+
+.border-top {
+    -fx-border-width: 1px 0 0 0;
+    -fx-border-color: -color-border-default;
+}
+
+.border-bottom {
+    -fx-border-width: 0 0 1px 0;
+    -fx-border-color: -color-border-default;
+}
+
+/* Shadow utilities */
+.shadow-sm { -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.05), 4, 0, 0, 1); }
+.shadow-md { -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.1), 8, 0, 0, 2); }
+.shadow-lg { -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.15), 16, 0, 0, 4); }
+
+/* Overflow control */
+.scroll-vertical {
+    -fx-hbar-policy: never;
+    -fx-vbar-policy: as-needed;
+}
+
+.scroll-horizontal {
+    -fx-hbar-policy: as-needed;
+    -fx-vbar-policy: never;
+}
+
+.no-scroll {
+    -fx-hbar-policy: never;
+    -fx-vbar-policy: never;
+}

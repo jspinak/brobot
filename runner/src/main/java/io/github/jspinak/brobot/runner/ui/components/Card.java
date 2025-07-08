@@ -1,6 +1,7 @@
 package io.github.jspinak.brobot.runner.ui.components;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.EqualsAndHashCode;
 
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
@@ -19,7 +20,8 @@ import javafx.scene.layout.VBox;
  * A card component for displaying content with a title and optional actions.
  * Useful for dashboard items, list items, etc.
  */
-@Data
+@Getter
+@EqualsAndHashCode(callSuper = false)
 public class Card extends VBox {
 
     private final ObjectProperty<Node> header = new SimpleObjectProperty<>();
@@ -49,13 +51,15 @@ public class Card extends VBox {
         footerBox = new HBox();
         footerBox.getStyleClass().add("card-footer");
         footerBox.setAlignment(Pos.CENTER_RIGHT);
+        footerBox.setVisible(false);
+        footerBox.setManaged(false);
 
         // Add to parent
         getChildren().addAll(headerBox, contentBox, footerBox);
 
-        // Set default padding
-        setPadding(new Insets(10));
-        setSpacing(10);
+        // Remove default padding and spacing - let CSS handle it
+        setPadding(new Insets(0));
+        setSpacing(0);
 
         // Setup bindings
         setupBindings();
@@ -114,21 +118,16 @@ public class Card extends VBox {
 
         // Update footer when footer property changes
         footer.addListener((obs, oldVal, newVal) -> {
-            footerBox.getChildren().clear();
-            if (newVal != null) {
-                // Don't add the footerBox to itself - this causes the cycle
-                if (newVal != footerBox) {
+            if (newVal != footerBox) {
+                footerBox.getChildren().clear();
+                if (newVal != null) {
                     footerBox.getChildren().add(newVal);
                     footerBox.setVisible(true);
                     footerBox.setManaged(true);
                 } else {
-                    // Just make the footerBox visible and managed, no need to add it to itself
-                    footerBox.setVisible(true);
-                    footerBox.setManaged(true);
+                    footerBox.setVisible(false);
+                    footerBox.setManaged(false);
                 }
-            } else {
-                footerBox.setVisible(false);
-                footerBox.setManaged(false);
             }
         });
 
@@ -268,15 +267,10 @@ public class Card extends VBox {
      */
     public void addAction(Button action) {
         if (action != null) {
-            // Always add the action directly to the footerBox
+            // Add the action to the footerBox
             footerBox.getChildren().add(action);
-
-            // Only set the footer property if it's not already set to footerBox
-            if (footer.get() != footerBox) {
-                footer.set(footerBox);
-            }
-
-            // Make sure the footer is visible
+            
+            // Make sure the footer is visible and managed
             footerBox.setVisible(true);
             footerBox.setManaged(true);
         }

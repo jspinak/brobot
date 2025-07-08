@@ -47,6 +47,9 @@ dependencies {
     implementation 'jakarta.annotation:jakarta.annotation-api:2.1.1'
     implementation 'org.bytedeco:javacv-platform:1.5.10'
     implementation 'org.slf4j:slf4j-api:2.0.9'
+    
+    // AtlantaFX Theme
+    implementation 'io.github.mkpaz:atlantafx-base:2.0.1'
 
     // --- Testing Dependencies ---
     testImplementation 'org.springframework.boot:spring-boot-starter-test'

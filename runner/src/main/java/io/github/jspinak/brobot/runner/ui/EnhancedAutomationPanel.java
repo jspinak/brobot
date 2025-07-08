@@ -29,7 +29,11 @@ import java.util.*;
 
 /**
  * Enhanced JavaFX UI component for automation control with hotkey support.
+ * 
+ * @deprecated Use {@link io.github.jspinak.brobot.runner.ui.panels.UnifiedAutomationPanel} instead.
+ *             This class will be removed in a future version.
  */
+@Deprecated
 @Getter
 @Setter(AccessLevel.PRIVATE)
 public class EnhancedAutomationPanel extends VBox {
@@ -44,7 +48,7 @@ public class EnhancedAutomationPanel extends VBox {
     private final AutomationOrchestrator automationOrchestrator;
     private final EventBus eventBus;
     private final HotkeyManager hotkeyManager;
-    private final WindowManager windowManager;
+    private final AutomationWindowController windowController;
     
     private final TextArea logArea;
     private final FlowPane buttonPane;
@@ -64,14 +68,14 @@ public class EnhancedAutomationPanel extends VBox {
                                    AutomationOrchestrator automationOrchestrator,
                                    EventBus eventBus,
                                    HotkeyManager hotkeyManager,
-                                   WindowManager windowManager) {
+                                   AutomationWindowController windowController) {
         this.context = context;
         this.projectManager = projectManager;
         this.runnerProperties = runnerProperties;
         this.automationOrchestrator = automationOrchestrator;
         this.eventBus = eventBus;
         this.hotkeyManager = hotkeyManager;
-        this.windowManager = windowManager;
+        this.windowController = windowController;
         this.logArea = new TextArea();
         this.buttonPane = new FlowPane();
         
@@ -155,9 +159,9 @@ public class EnhancedAutomationPanel extends VBox {
         configureHotkeysButton.setOnAction(e -> showHotkeyConfigDialog());
         
         autoMinimizeCheckbox = new CheckBox("Auto-minimize on start");
-        autoMinimizeCheckbox.setSelected(windowManager.isAutoMinimizeEnabled());
+        autoMinimizeCheckbox.setSelected(windowController.isAutoMinimizeEnabled());
         autoMinimizeCheckbox.selectedProperty().addListener((obs, oldVal, newVal) -> {
-            windowManager.setAutoMinimizeEnabled(newVal);
+            windowController.setAutoMinimizeEnabled(newVal);
         });
         
         settingsBar.getChildren().addAll(configureHotkeysButton, autoMinimizeCheckbox);
@@ -398,7 +402,7 @@ public class EnhancedAutomationPanel extends VBox {
         log("Starting automation: " + buttonDef.getLabel());
         
         // Minimize window if enabled
-        windowManager.minimizeForAutomation();
+        windowController.minimizeForAutomation();
         
         eventBus.publish(ExecutionStatusEvent.started(this,
             automationOrchestrator.getExecutionStatus(),
@@ -452,7 +456,7 @@ public class EnhancedAutomationPanel extends VBox {
         automationOrchestrator.stopAllAutomation();
         
         // Restore window if it was minimized
-        windowManager.restoreAfterAutomation();
+        windowController.restoreAfterAutomation();
     }
     
     private void updateButtonStates(boolean running) {
