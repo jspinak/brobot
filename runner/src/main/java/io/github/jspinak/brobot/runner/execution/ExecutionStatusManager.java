@@ -86,4 +86,11 @@ public class ExecutionStatusManager {
             statusConsumer.accept(status.copy());
         }
     }
+    
+    /**
+     * Manually triggers notification of current status to consumers
+     */
+    public void notifyConsumer() {
+        notifyStatusChange();
+    }
 }
