@@ -1,70 +1,82 @@
 package io.github.jspinak.brobot.runner.execution;
 
+import io.github.jspinak.brobot.runner.common.diagnostics.DiagnosticCapable;
+import io.github.jspinak.brobot.runner.common.diagnostics.DiagnosticInfo;
+import io.github.jspinak.brobot.runner.execution.context.ExecutionOptions;
+import io.github.jspinak.brobot.runner.execution.control.ExecutionControl;
+import io.github.jspinak.brobot.runner.execution.control.PausableExecutionControl;
+import io.github.jspinak.brobot.runner.execution.service.ExecutionService;
 import io.github.jspinak.brobot.runner.project.TaskButton;
 import io.github.jspinak.brobot.runner.resources.ResourceManager;
 import lombok.Getter;
 import lombok.Setter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
-import java.time.Instant;
-import java.util.concurrent.*;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 /**
- * Main controller for managing execution of automation tasks.
- * Provides lifecycle control (start/pause/resume/stop), thread management,
- * status tracking, and timeout mechanisms.
+ * Thin orchestrator for managing execution of automation tasks.
+ * 
+ * This refactored controller delegates responsibilities to specialized services:
+ * - ExecutionService: Core execution logic
+ * - ExecutionThreadManager: Thread management
+ * - ExecutionTimeoutManager: Timeout handling
+ * - ExecutionSafetyService: Safety checks
+ * 
+ * The controller now focuses solely on:
+ * - API coordination
+ * - Control flow (pause/resume/stop)
+ * - Status access
+ * 
+ * Thread Safety: This class is thread-safe.
+ * 
+ * @since 2.0.0
  */
+@Slf4j
 @Component
-public class ExecutionController implements AutoCloseable {
-    private static final Logger logger = LoggerFactory.getLogger(ExecutionController.class);
-
-    private final ExecutorService executorService;
-    private final ScheduledExecutorService timeoutExecutor;
+public class ExecutionController implements AutoCloseable, DiagnosticCapable {
+    
+    private final ExecutionService executionService;
     private final ExecutionStatusManager statusManager;
     private final SafetyManager safetyManager;
-
-    /**
-     * -- GETTER --
-     *  Get the current execution status
-     */
+    
+    // Current execution tracking
+    private final AtomicReference<String> currentExecutionId = new AtomicReference<>();
+    private final AtomicReference<ExecutionControl> currentControl = new AtomicReference<>();
+    private final Map<String, CompletableFuture<Void>> activeFutures = new ConcurrentHashMap<>();
+    
+    // Status tracking
     @Getter
     private final ExecutionStatus status = new ExecutionStatus();
-    private Future<?> currentTask;
-    private ScheduledFuture<?> timeoutTask;
-    private final Object pauseLock = new Object();
-    private volatile boolean paused = false;
-    private volatile boolean requestStop = false;
-
-    /**
-     * Set a callback for logging
-     * -- SETTER --
-     *  Set a callback for logging
-     */
+    
+    // Logging callback
     @Setter
     private Consumer<String> logCallback;
-
-    public ExecutionController(ResourceManager resourceManager) {
-        this.executorService = Executors.newSingleThreadExecutor(r -> {
-            Thread thread = new Thread(r, "Brobot-Automation-Thread");
-            thread.setDaemon(true); // Make thread daemon so it doesn't prevent JVM shutdown
-            return thread;
-        });
-        this.timeoutExecutor = Executors.newSingleThreadScheduledExecutor(r -> {
-            Thread thread = new Thread(r, "Brobot-Timeout-Thread");
-            thread.setDaemon(true);
-            return thread;
-        });
+    
+    // Diagnostic mode
+    private final AtomicBoolean diagnosticMode = new AtomicBoolean(false);
+    
+    @Autowired
+    public ExecutionController(ExecutionService executionService,
+                             ResourceManager resourceManager) {
+        this.executionService = executionService;
         this.statusManager = new ExecutionStatusManager(this.status);
         this.safetyManager = new SafetyManager();
+        
         // Register with ResourceManager for auto-cleanup
         resourceManager.registerResource(this, "ExecutionController");
+        
+        log.info("ExecutionController initialized (refactored version)");
     }
-
+    
     /**
      * Sets a consumer that will be notified of status changes.
      *
@@ -73,309 +85,256 @@ public class ExecutionController implements AutoCloseable {
     public void setStatusConsumer(Consumer<ExecutionStatus> statusConsumer) {
         statusManager.setStatusConsumer(statusConsumer);
     }
-
+    
     /**
-     * Executes an automation function based on a Button definition
+     * Executes an automation function based on a Button definition.
      *
      * @param button Button definition containing execution parameters
      * @param automationTask The actual task to execute
      * @param timeoutMillis Timeout in milliseconds, or 0 for no timeout
      * @param statusConsumer Optional consumer for status updates
      */
-    public void executeAutomation(TaskButton button, Runnable automationTask, long timeoutMillis,
-                                  Consumer<ExecutionStatus> statusConsumer) {
-        Duration timeout = timeoutMillis > 0 ? Duration.ofMillis(timeoutMillis) : null;
-
-        Supplier<Void> task = () -> {
-            try {
-                log("Executing automation function: " + button.getFunctionName());
-                automationTask.run();
-                log("Function completed: " + button.getFunctionName());
-                return null;
-            } catch (Exception e) {
-                log("Error executing function: " + e.getMessage());
-                logger.error("Error executing automation", e);
-                throw e;
-            }
-        };
-
-        startExecution(task, timeout, statusConsumer);
-    }
-
-    /**
-     * Starts execution of an automation task with a specified timeout
-     *
-     * @param task The task to execute
-     * @param timeout Maximum allowed execution time
-     * @param statusConsumer Optional consumer for receiving status updates
-     * @return A future representing the running task
-     */
-    public <T> Future<T> startExecution(Supplier<T> task, Duration timeout, Consumer<ExecutionStatus> statusConsumer) {
+    public void executeAutomation(TaskButton button, Runnable automationTask, 
+                                long timeoutMillis, Consumer<ExecutionStatus> statusConsumer) {
         if (isRunning()) {
             throw new IllegalStateException("An automation task is already running");
         }
-
-        // Reset state
-        requestStop = false;
-        paused = false;
-
-        // Initialize status
+        
+        log("Starting automation: " + button.getFunctionName());
+        
+        // Create execution options
+        ExecutionOptions options = ExecutionOptions.builder()
+                .timeout(timeoutMillis > 0 ? Duration.ofMillis(timeoutMillis) : Duration.ofMinutes(30))
+                .safeMode(true)
+                .diagnosticMode(diagnosticMode.get())
+                .build();
+        
+        // Create pausable control
+        String executionId = "exec-" + System.currentTimeMillis();
+        PausableExecutionControl control = new PausableExecutionControl(executionId);
+        
+        // Store current execution info
+        currentExecutionId.set(executionId);
+        currentControl.set(control);
+        
+        // Reset and set status management
         statusManager.reset();
         if (statusConsumer != null) {
             statusManager.setStatusConsumer(statusConsumer);
         }
-        statusManager.updateState(ExecutionState.STARTING);
-        statusManager.updateStartTime(Instant.now());
-
-        // Log execution start
-        log("Starting automation execution");
-
-        // Wrap the task to handle execution state
-        currentTask = executorService.submit(() -> {
-            T result = null;
+        
+        // Create wrapped task with pause/stop support and safety checks
+        Runnable wrappedTask = () -> {
             try {
-                statusManager.updateState(ExecutionState.RUNNING);
-
-                // Execute the task with pause/stop capabilities
-                result = executeWithControls(task);
-
-                if (requestStop) {
-                    statusManager.updateState(ExecutionState.STOPPED);
-                    log("Execution was stopped by user request");
-                } else if (status.getState() == ExecutionState.TIMEOUT) {
-                    log("Execution ended due to timeout");
-                } else {
-                    statusManager.updateState(ExecutionState.COMPLETED);
-                    log("Execution completed successfully");
-                }
+                // Initial safety check
+                safetyManager.performSafetyCheck();
+                
+                // Check for immediate stop
+                control.checkPaused();
+                
+                // Run the automation task
+                automationTask.run();
+                
+                log("Function completed: " + button.getFunctionName());
+                
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
-                statusManager.updateState(ExecutionState.STOPPED);
-                log("Execution was interrupted: " + e.getMessage());
+                log("Execution interrupted: " + e.getMessage());
+                throw new RuntimeException("Execution interrupted", e);
             } catch (Exception e) {
-                statusManager.updateState(ExecutionState.ERROR);
-                statusManager.setError(e);
-                log("Execution failed with error: " + e.getMessage());
-                logger.error("Execution error", e);
-            } finally {
-                statusManager.updateEndTime(Instant.now());
-                if (timeoutTask != null) {
-                    timeoutTask.cancel(false);
-                }
+                log("Error executing function: " + e.getMessage());
+                throw e;
             }
-
-            return result;
+        };
+        
+        // Register status listener with execution service
+        executionService.addStatusListener(executionId, status -> {
+            // Update our status from execution service status
+            updateStatusFromService(status);
+            
+            // Handle pause state synchronization
+            if (control.isPaused() && status.getState() == ExecutionState.RUNNING) {
+                statusManager.updateState(ExecutionState.PAUSED);
+            }
         });
-
-        // Set up timeout if specified
-        if (timeout != null && !timeout.isZero() && !timeout.isNegative()) {
-            timeoutTask = timeoutExecutor.schedule(() -> {
-                if (isRunning()) {
-                    log("Execution timed out after " + timeout);
-
-                    statusManager.updateState(ExecutionState.TIMEOUT);
-                    currentTask.cancel(true);
-                }
-            }, timeout.toMillis(), TimeUnit.MILLISECONDS);
-        }
-
-        return new CastingFuture<>(currentTask);
+        
+        // Execute through service
+        CompletableFuture<Void> future = executionService.execute(
+                wrappedTask, 
+                button.getFunctionName(), 
+                options
+        );
+        
+        // Store future
+        activeFutures.put(executionId, future);
+        
+        // Handle completion
+        future.whenComplete((result, error) -> {
+            cleanupExecution(executionId);
+            
+            if (error != null) {
+                log("Execution failed: " + error.getMessage());
+            } else if (control.isStopRequested()) {
+                log("Execution stopped by user");
+            } else {
+                log("Execution completed successfully");
+            }
+        });
     }
-
+    
     /**
-     * Executes a task with pause/resume and stop capabilities
-     */
-    private <T> T executeWithControls(Supplier<T> task) throws InterruptedException {
-        // Check if stop requested
-        if (requestStop) {
-            throw new InterruptedException("Stop requested");
-        }
-
-        // Check if paused
-        checkPaused();
-
-        // Safety check before proceeding
-        safetyManager.performSafetyCheck();
-
-        // Run the actual task
-        return task.get();
-    }
-
-    /**
-     * Pauses the current execution if running
+     * Pauses the current execution if running.
      */
     public void pauseExecution() {
-        if (!isRunning()) {
-            return;
-        }
-
-        synchronized (pauseLock) {
-            paused = true;
+        ExecutionControl control = currentControl.get();
+        if (control != null && isRunning()) {
+            control.pause();
             statusManager.updateState(ExecutionState.PAUSED);
             log("Execution paused");
         }
     }
-
+    
     /**
-     * Resumes the execution if paused
+     * Resumes the execution if paused.
      */
     public void resumeExecution() {
-        if (!isPaused()) {
-            return;
-        }
-
-        synchronized (pauseLock) {
-            paused = false;
+        ExecutionControl control = currentControl.get();
+        if (control != null && control.isPaused()) {
+            control.resume();
             statusManager.updateState(ExecutionState.RUNNING);
-            pauseLock.notifyAll(); // Wake up waiting thread
-
             log("Execution resumed");
         }
     }
-
+    
     /**
-     * Stops the current execution if running
+     * Stops the current execution if running.
      */
     public void stopExecution() {
-        if (!isRunning() && !isPaused()) {
+        String executionId = currentExecutionId.get();
+        ExecutionControl control = currentControl.get();
+        
+        if (executionId == null || control == null || !isRunning()) {
             return;
         }
-
-        // First resume if paused to allow the task to continue and check for stop flag
-        if (isPaused()) {
-            synchronized (pauseLock) {
-                paused = false;
-                pauseLock.notifyAll();
-            }
-        }
-
-        // Set stop flag
-        requestStop = true;
-
-        // If task doesn't respond to stop flag in 2 seconds, force interrupt
-        CompletableFuture.delayedExecutor(2, TimeUnit.SECONDS).execute(() -> {
-            if (currentTask != null && !currentTask.isDone()) {
-                currentTask.cancel(true);
-                log("Execution force stopped after timeout");
-            }
-        });
-
+        
+        log("Stopping execution");
+        
+        // Signal stop through control
+        control.stop();
+        
+        // Cancel through execution service
+        executionService.cancel(executionId);
+        
         statusManager.updateState(ExecutionState.STOPPING);
-        log("Stop requested for current execution");
     }
-
+    
     /**
-     * Checks if execution should remain paused and waits if so
-     */
-    private void checkPaused() throws InterruptedException {
-        if (paused) {
-            synchronized (pauseLock) {
-                while (paused) {
-                    pauseLock.wait();
-
-                    // Check for stop request immediately after waking up
-                    if (requestStop) {
-                        throw new InterruptedException("Stop requested while paused");
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     * Checks if an automation task is currently running
+     * Checks if an automation task is currently running.
      */
     public boolean isRunning() {
         ExecutionState state = status.getState();
-        return state == ExecutionState.STARTING || state == ExecutionState.RUNNING ||
-                state == ExecutionState.PAUSED || state == ExecutionState.STOPPING;
+        return state == ExecutionState.STARTING || 
+               state == ExecutionState.RUNNING ||
+               state == ExecutionState.PAUSED || 
+               state == ExecutionState.STOPPING;
     }
-
+    
     /**
-     * Checks if execution is paused
+     * Checks if execution is paused.
      */
     public boolean isPaused() {
-        return paused && status.getState() == ExecutionState.PAUSED;
+        ExecutionControl control = currentControl.get();
+        return control != null && control.isPaused() && 
+               status.getState() == ExecutionState.PAUSED;
     }
-
+    
     /**
-     * Shut down the controller and release resources
+     * Shuts down the controller and releases resources.
      */
     public void shutdown() {
-        try {
-            // Stop any running execution first
-            if (isRunning()) {
-                stopExecution();
-            }
-
-            // Shut down executors
-            executorService.shutdown();
-            timeoutExecutor.shutdown();
-
-            // Wait a bit for tasks to complete
-            if (!executorService.awaitTermination(5, TimeUnit.SECONDS)) {
-                executorService.shutdownNow();
-            }
-            if (!timeoutExecutor.awaitTermination(2, TimeUnit.SECONDS)) {
-                timeoutExecutor.shutdownNow();
-            }
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            executorService.shutdownNow();
-            timeoutExecutor.shutdownNow();
+        log.info("Shutting down ExecutionController");
+        
+        // Stop any running execution
+        if (isRunning()) {
+            stopExecution();
         }
+        
+        // Clear references
+        currentExecutionId.set(null);
+        currentControl.set(null);
+        activeFutures.clear();
     }
-
+    
+    @Override
+    public void close() {
+        shutdown();
+    }
+    
+    @Override
+    public DiagnosticInfo getDiagnosticInfo() {
+        Map<String, Object> states = new ConcurrentHashMap<>();
+        states.put("currentExecutionId", currentExecutionId.get());
+        states.put("isRunning", isRunning());
+        states.put("isPaused", isPaused());
+        states.put("currentState", status.getState());
+        states.put("activeFutures", activeFutures.size());
+        
+        return DiagnosticInfo.builder()
+                .component("ExecutionController")
+                .states(states)
+                .build();
+    }
+    
+    @Override
+    public boolean isDiagnosticModeEnabled() {
+        return diagnosticMode.get();
+    }
+    
+    @Override
+    public void enableDiagnosticMode(boolean enabled) {
+        diagnosticMode.set(enabled);
+        log.info("Diagnostic mode {}", enabled ? "enabled" : "disabled");
+    }
+    
     /**
-     * Log a message to the configured log callback and the logger
+     * Updates our status from the execution service status.
+     */
+    private void updateStatusFromService(ExecutionStatus serviceStatus) {
+        status.setState(serviceStatus.getState());
+        status.setStartTime(serviceStatus.getStartTime());
+        status.setEndTime(serviceStatus.getEndTime());
+        status.setProgress(serviceStatus.getProgress());
+        status.setCurrentOperation(serviceStatus.getCurrentOperation());
+        status.setCurrentAction(serviceStatus.getCurrentAction());
+        status.setError(serviceStatus.getError());
+        status.setErrorMessage(serviceStatus.getErrorMessage());
+        
+        // Notify status manager's consumer
+        statusManager.notifyConsumer();
+    }
+    
+    /**
+     * Cleans up after execution completes.
+     */
+    private void cleanupExecution(String executionId) {
+        // Remove from active futures
+        activeFutures.remove(executionId);
+        
+        // Clear current execution if it matches
+        currentExecutionId.compareAndSet(executionId, null);
+        currentControl.set(null);
+        
+        // Remove status listener
+        executionService.removeStatusListener(executionId);
+    }
+    
+    /**
+     * Logs a message to the configured log callback and the logger.
      */
     private void log(String message) {
-        logger.info(message);
+        log.info(message);
         if (logCallback != null) {
             logCallback.accept(message);
-        }
-    }
-
-    @Override
-    public void close() throws Exception {
-        shutdown(); // Call existing shutdown method
-    }
-
-    /**
-     * Helper class to cast Future results correctly
-     */
-    private static class CastingFuture<T> implements Future<T> {
-        private final Future<?> future;
-
-        private CastingFuture(Future<?> future) {
-            this.future = future;
-        }
-
-        @Override
-        public boolean cancel(boolean mayInterruptIfRunning) {
-            return future.cancel(mayInterruptIfRunning);
-        }
-
-        @Override
-        public boolean isCancelled() {
-            return future.isCancelled();
-        }
-
-        @Override
-        public boolean isDone() {
-            return future.isDone();
-        }
-
-        @SuppressWarnings("unchecked")
-        @Override
-        public T get() throws InterruptedException, ExecutionException {
-            return (T) future.get();
-        }
-
-        @SuppressWarnings("unchecked")
-        @Override
-        public T get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
-            return (T) future.get(timeout, unit);
         }
     }
 }
