@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -120,6 +121,84 @@ public class SessionLifecycleService implements DiagnosticCapable {
     public boolean isSessionActive(String sessionId) {
         return activeSessions.containsKey(sessionId) && 
                sessionStates.get(sessionId) == SessionState.ACTIVE;
+    }
+    
+    /**
+     * Starts a new session from a context.
+     * 
+     * @param context the session context
+     * @return the created session
+     */
+    public Session startSession(SessionContext context) {
+        log.info("Starting new session from context: {} for project: {}", 
+                context.getSessionName(), context.getProjectName());
+        
+        // Create session object
+        Session session = new Session();
+        session.setId(context.getSessionId());
+        session.setProjectName(context.getProjectName());
+        session.setConfigPath(context.getConfigPath());
+        session.setImagePath(context.getImagePath());
+        session.setStartTime(LocalDateTime.now());
+        session.setActive(true);
+        
+        // Store session
+        activeSessions.put(context.getSessionId(), session);
+        sessionStates.put(context.getSessionId(), SessionState.ACTIVE);
+        
+        if (diagnosticMode.get()) {
+            log.info("[DIAGNOSTIC] Session started - ID: {}, Name: {}, Project: {}",
+                    context.getSessionId(), context.getSessionName(), context.getProjectName());
+        }
+        
+        return session;
+    }
+    
+    /**
+     * Gets the current active session.
+     * 
+     * @return the current session or empty if none active
+     */
+    public Optional<Session> getCurrentSession() {
+        // Return the most recently created active session
+        return activeSessions.values().stream()
+                .filter(Session::isActive)
+                .max((s1, s2) -> s1.getStartTime().compareTo(s2.getStartTime()));
+    }
+    
+    /**
+     * Checks if any session is currently active.
+     * 
+     * @return true if there is an active session
+     */
+    public boolean isSessionActive() {
+        return !activeSessions.isEmpty() && 
+               activeSessions.values().stream().anyMatch(Session::isActive);
+    }
+    
+    /**
+     * Activates a previously loaded session.
+     * 
+     * @param session the session to activate
+     */
+    public void activateSession(Session session) {
+        if (session == null || session.getId() == null) {
+            throw new IllegalArgumentException("Session and session ID must not be null");
+        }
+        
+        log.info("Activating session: {}", session.getId());
+        
+        // Clear any current sessions
+        activeSessions.clear();
+        
+        // Add this session as active
+        session.setActive(true);
+        activeSessions.put(session.getId(), session);
+        sessionStates.put(session.getId(), SessionState.ACTIVE);
+        
+        if (diagnosticMode.get()) {
+            log.info("[DIAGNOSTIC] Session activated - ID: {}", session.getId());
+        }
     }
     
     /**
