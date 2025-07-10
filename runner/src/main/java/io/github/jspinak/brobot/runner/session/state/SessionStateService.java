@@ -6,6 +6,7 @@ import io.github.jspinak.brobot.navigation.transition.StateTransitions;
 import io.github.jspinak.brobot.runner.common.diagnostics.DiagnosticCapable;
 import io.github.jspinak.brobot.runner.common.diagnostics.DiagnosticInfo;
 import io.github.jspinak.brobot.runner.session.Session;
+import io.github.jspinak.brobot.runner.session.SessionEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -165,6 +166,63 @@ public class SessionStateService implements DiagnosticCapable {
             log.error("Failed to restore snapshot: {}", snapshotId, e);
             return false;
         }
+    }
+    
+    /**
+     * Captures current application state and updates the session.
+     * 
+     * @param session the session to update with current state
+     */
+    public void captureState(Session session) {
+        if (session == null) {
+            return;
+        }
+        
+        ApplicationState currentState = captureCurrentState();
+        
+        // Update session with current state
+        session.setStateTransitions(currentState.getStateTransitions());
+        session.setActiveStateIds(currentState.getActiveStateIds());
+        
+        // Add event
+        session.addEvent(new SessionEvent("STATE_CAPTURE",
+                "Application state captured",
+                String.format("Active states: %d, Transitions: %d",
+                        currentState.getActiveStateIds() != null ? currentState.getActiveStateIds().size() : 0,
+                        currentState.getStateTransitions() != null ? currentState.getStateTransitions().size() : 0)));
+        
+        if (diagnosticMode.get()) {
+            log.info("[DIAGNOSTIC] State captured for session - Session: {}, Active states: {}",
+                    session.getId(), currentState.getActiveStateIds() != null ? currentState.getActiveStateIds().size() : 0);
+        }
+    }
+    
+    /**
+     * Restores application state from a session.
+     * 
+     * @param session the session to restore state from
+     */
+    public void restoreState(Session session) {
+        if (session == null) {
+            return;
+        }
+        
+        log.info("Restoring state from session: {}", session.getId());
+        
+        ApplicationState appState = ApplicationState.builder()
+                .stateTransitions(session.getStateTransitions())
+                .activeStateIds(session.getActiveStateIds())
+                .lastModified(LocalDateTime.now())
+                .build();
+        
+        restoreState(appState);
+        
+        // Add event
+        session.addEvent(new SessionEvent("STATE_RESTORED",
+                "Application state restored",
+                String.format("Restored %d transitions and %d active states",
+                        appState.getStateTransitions() != null ? appState.getStateTransitions().size() : 0,
+                        appState.getActiveStateIds() != null ? appState.getActiveStateIds().size() : 0)));
     }
     
     /**

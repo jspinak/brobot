@@ -1,7 +1,10 @@
 package io.github.jspinak.brobot.runner.session.state;
 
 import io.github.jspinak.brobot.navigation.transition.StateTransitions;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -16,6 +19,9 @@ import java.util.Set;
  * @since 1.0.0
  */
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class ApplicationState {
     
     /**
@@ -37,4 +43,9 @@ public class ApplicationState {
      * Additional metadata about the state
      */
     private java.util.Map<String, Object> metadata;
+    
+    /**
+     * Last modification time of this state
+     */
+    private LocalDateTime lastModified;
 }
