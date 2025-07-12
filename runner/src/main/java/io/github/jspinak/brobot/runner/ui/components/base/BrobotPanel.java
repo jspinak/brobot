@@ -41,7 +41,7 @@ public abstract class BrobotPanel extends VBox {
         shadow.setOffsetY(2);
         setEffect(shadow);
         
-        initialize();
+        // Don't call initialize() here - let subclasses handle it after their fields are set
     }
     
     /**

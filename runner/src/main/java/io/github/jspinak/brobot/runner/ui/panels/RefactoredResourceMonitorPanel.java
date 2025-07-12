@@ -66,7 +66,7 @@ public class RefactoredResourceMonitorPanel extends BrobotPanel {
                                           SessionManager sessionManager,
                                           LabelManager labelManager,
                                           UIUpdateManager uiUpdateManager) {
-        // Don't call super() yet to avoid premature initialization
+        super(); // Now safe to call since parent doesn't call initialize()
         this.cacheManager = cacheManager;
         this.sessionManager = sessionManager;
         this.labelManager = labelManager;
@@ -84,19 +84,7 @@ public class RefactoredResourceMonitorPanel extends BrobotPanel {
 
     @PostConstruct
     public void postConstruct() {
-        // Initialize panel styling after fields are set
-        setPadding(new Insets(16));
-        setSpacing(12);
-        getStyleClass().add("brobot-panel");
-        
-        // Add subtle shadow effect
-        DropShadow shadow = new DropShadow();
-        shadow.setColor(Color.rgb(0, 0, 0, 0.1));
-        shadow.setRadius(8);
-        shadow.setOffsetY(2);
-        setEffect(shadow);
-        
-        // Now initialize content
+        // Initialize content now that all fields are set
         initialize();
         // Start monitoring and schedule periodic UI updates
         monitoringService.startMonitoring(this::handleMonitoringData);
