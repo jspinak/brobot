@@ -27,7 +27,7 @@ import java.util.function.Consumer;
  * @since 1.0.0
  */
 @Slf4j
-@Service
+@Service("legacySessionAutosaveService")
 public class SessionAutosaveService implements DiagnosticCapable {
     
     private final ScheduledExecutorService scheduler;

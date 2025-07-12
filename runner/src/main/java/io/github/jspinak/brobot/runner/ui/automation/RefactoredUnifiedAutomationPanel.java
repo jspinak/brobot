@@ -4,6 +4,7 @@ import atlantafx.base.theme.Styles;
 import io.github.jspinak.brobot.runner.events.EventBus;
 import io.github.jspinak.brobot.runner.project.AutomationProject;
 import io.github.jspinak.brobot.runner.project.AutomationProjectManager;
+import io.github.jspinak.brobot.runner.project.ProjectInfo;
 import io.github.jspinak.brobot.runner.ui.automation.components.AutomationControlPanel;
 import io.github.jspinak.brobot.runner.ui.automation.components.AutomationStatusPanel;
 import io.github.jspinak.brobot.runner.ui.automation.factories.AutomationButtonFactory;
@@ -26,6 +27,7 @@ import jakarta.annotation.PreDestroy;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -34,7 +36,7 @@ import java.util.stream.Collectors;
  * Uses separated services and components following Single Responsibility Principle.
  */
 @Slf4j
-@Component
+@Component("automationRefactoredUnifiedPanel")
 public class RefactoredUnifiedAutomationPanel extends BrobotPanel {
     
     private final AutomationProjectManager projectManager;
@@ -216,9 +218,12 @@ public class RefactoredUnifiedAutomationPanel extends BrobotPanel {
      * Updates the project list in the selector.
      */
     private void updateProjectList() {
-        List<String> projects = projectManager.getAvailableProjects();
+        List<ProjectInfo> projects = projectManager.getAvailableProjects();
+        List<String> projectNames = projects.stream()
+            .map(ProjectInfo::getName)
+            .collect(Collectors.toList());
         projectSelector.getItems().clear();
-        projectSelector.getItems().addAll(projects);
+        projectSelector.getItems().addAll(projectNames);
         
         // Select current project if any
         AutomationProject currentProject = projectManager.getCurrentProject();
@@ -255,8 +260,18 @@ public class RefactoredUnifiedAutomationPanel extends BrobotPanel {
         log.info("Loading project: {}", projectName);
         
         try {
-            projectManager.loadProject(projectName);
-            loadCurrentProject();
+            // Find project by name and load it
+            List<ProjectInfo> projects = projectManager.getAvailableProjects();
+            Optional<ProjectInfo> projectInfo = projects.stream()
+                .filter(p -> p.getName().equals(projectName))
+                .findFirst();
+            
+            if (projectInfo.isPresent()) {
+                projectManager.openProject(projectInfo.get().getProjectPath());
+                loadCurrentProject();
+            } else {
+                throw new IllegalArgumentException("Project not found: " + projectName);
+            }
             showInfo("Project loaded: " + projectName);
         } catch (Exception e) {
             log.error("Error loading project", e);

@@ -264,7 +264,7 @@ public class UnifiedAutomationPanel extends VBox {
         Platform.runLater(() -> {
             updateInProgress = true;
             try {
-                if (projectManager == null || projectManager.getActiveProject() == null) {
+                if (projectManager == null || projectManager.getCurrentProject() == null) {
                     buttonPane.getChildren().clear();
                     renderedCategories.clear();
                     renderedButtons.clear();
@@ -272,7 +272,7 @@ public class UnifiedAutomationPanel extends VBox {
                     return;
                 }
                 
-                AutomationProject project = projectManager.getActiveProject();
+                AutomationProject project = projectManager.getCurrentProject();
                 if (project.getAutomation() == null || project.getAutomation().getButtons() == null) {
                     buttonPane.getChildren().clear();
                     renderedCategories.clear();

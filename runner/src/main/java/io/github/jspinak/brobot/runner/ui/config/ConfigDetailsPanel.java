@@ -30,7 +30,12 @@ import java.time.format.DateTimeFormatter;
 
 /**
  * Panel for displaying configuration details and metadata.
+ * 
+ * @deprecated Use {@link RefactoredConfigDetailsPanel} instead.
+ *             This class uses the new LabelManager and UIUpdateManager architecture for better resource management.
+ *             Will be removed in version 3.0.
  */
+@Deprecated(since = "2.5", forRemoval = true)
 @Slf4j
 @Getter
 @EqualsAndHashCode(callSuper = false)
