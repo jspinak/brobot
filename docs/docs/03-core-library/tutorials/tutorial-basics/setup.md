@@ -4,6 +4,10 @@ sidebar_position: 2
 
 # Setup 
 
+:::info Version Note
+This tutorial was originally created for an earlier version of Brobot but has been updated for version 1.1.0. The original code examples are available in documentation versions 1.0.6 and 1.0.7.
+:::
+
 ## Start a new Spring Boot Project
 
 A Spring Boot project can be created with the [Spring Initializr](https://start.spring.io/)
@@ -19,17 +23,17 @@ Maven:
 <dependency>
   <groupId>io.github.jspinak</groupId>
   <artifactId>brobot</artifactId>
-  <version>1.0.1</version>
+  <version>1.1.0</version>
 </dependency>
 ```
 
 Gradle:
 
 ```gradle
-implementation 'io.github.jspinak:brobot:1.0.1'
+implementation 'io.github.jspinak:brobot:1.1.0'
 ``` 
 
-Note that Brobot works with Java version 14 or later. 
+Note that Brobot 1.1.0 requires Java 21 or later. 
 The full build.gradle file should look similar to this:
 
 ```gradle
@@ -54,18 +58,14 @@ repositories {
 }
 
 dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter'
-    compileOnly 'org.projectlombok:lombok'
-    annotationProcessor 'org.projectlombok:lombok'
+    // Brobot 1.1.0+ includes Spring Boot, Lombok, SLF4J, and SikuliX as transitive dependencies
+    implementation 'io.github.jspinak:brobot:1.1.0'
+    
+    // Lombok annotation processor still needed for compilation
+    annotationProcessor 'org.projectlombok:lombok:1.18.32'
+    
+    // Testing
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    implementation 'io.github.jspinak:brobot:1.0.1'
-    /*
-    There are some settings that can be changed in Sikuli and are not yet
-    replicated in Brobot.  
-     */
-    implementation('com.sikulix:sikulixapi:2.0.5') {
-        exclude group: 'org.slf4j', module: 'slf4j-nop'
-    }
 }
 ```
 

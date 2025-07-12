@@ -3,6 +3,7 @@ package io.github.jspinak.brobot.navigation.transition;
 import io.github.jspinak.brobot.model.state.State;
 import io.github.jspinak.brobot.model.state.special.SpecialStateType;
 import io.github.jspinak.brobot.model.transition.StateTransition;
+import io.github.jspinak.brobot.navigation.service.StateService;
 import lombok.Getter;
 import org.springframework.stereotype.Component;
 
@@ -74,9 +75,25 @@ import java.util.*;
 @Getter
 public class StateTransitionsJointTable {
 
+    private final StateService stateService;
+    
     Map<Long, Set<Long>> incomingTransitions = new HashMap<>();
     Map<Long, Set<Long>> outgoingTransitions = new HashMap<>();
     Map<Long, Set<Long>> incomingTransitionsToPREVIOUS = new HashMap<>(); // updated dynamically
+    
+    public StateTransitionsJointTable(StateService stateService) {
+        this.stateService = stateService;
+    }
+    
+    /**
+     * Formats a state ID with its name for logging.
+     * @param stateId The state ID to format
+     * @return A string in the format "NAME(ID)" or just "ID" if name not found
+     */
+    private String formatStateNameAndId(Long stateId) {
+        String name = stateService.getStateName(stateId);
+        return name != null ? name + "(" + stateId + ")" : String.valueOf(stateId);
+    }
 
     /**
      * Clears all transition tables for reinitialization.
@@ -214,23 +231,42 @@ public class StateTransitionsJointTable {
      * @return Set of source state IDs that can reach the targets
      */
     public Set<Long> getStatesWithTransitionsTo(Long... children) {
-        System.out.println("Getting states with transitions to: " + Arrays.toString(children));
+        String childrenStr = Arrays.stream(children)
+                .map(id -> formatStateNameAndId(id))
+                .reduce((a, b) -> a + ", " + b)
+                .orElse("");
+        System.out.println("Getting states with transitions to: [" + childrenStr + "]");
+        
         Set<Long> parents = new HashSet<>();
         for (Long child : children) {
+            String childStr = formatStateNameAndId(child);
             if (incomingTransitions.containsKey(child)) {
                 parents.addAll(incomingTransitions.get(child));
-                System.out.println("Found incoming transitions for " + child + ": " + incomingTransitions.get(child));
+                String parentsStr = incomingTransitions.get(child).stream()
+                        .map(id -> formatStateNameAndId(id))
+                        .reduce((a, b) -> a + ", " + b)
+                        .orElse("");
+                System.out.println("Found incoming transitions for " + childStr + ": [" + parentsStr + "]");
             } else {
-                System.out.println("No incoming transitions found for " + child);
+                System.out.println("No incoming transitions found for " + childStr);
             }
             if (incomingTransitionsToPREVIOUS.containsKey(child)) {
                 parents.addAll(incomingTransitionsToPREVIOUS.get(child));
-                System.out.println("Found incoming PREVIOUS transitions for " + child + ": " + incomingTransitionsToPREVIOUS.get(child));
+                String prevParentsStr = incomingTransitionsToPREVIOUS.get(child).stream()
+                        .map(id -> formatStateNameAndId(id))
+                        .reduce((a, b) -> a + ", " + b)
+                        .orElse("");
+                System.out.println("Found incoming PREVIOUS transitions for " + childStr + ": [" + prevParentsStr + "]");
             } else {
-                System.out.println("No incoming PREVIOUS transitions found for " + child);
+                System.out.println("No incoming PREVIOUS transitions found for " + childStr);
             }
         }
-        System.out.println("Returning parent states: " + parents);
+        
+        String allParentsStr = parents.stream()
+                .map(id -> formatStateNameAndId(id))
+                .reduce((a, b) -> a + ", " + b)
+                .orElse("");
+        System.out.println("Returning parent states: [" + allParentsStr + "]");
         return parents;
     }
 

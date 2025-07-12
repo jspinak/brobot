@@ -4,6 +4,10 @@ sidebar_position: 8
 
 # Save Labeled Images
 
+:::info Version Note
+This tutorial was originally created for an earlier version of Brobot but has been updated for version 1.1.0. The original code examples are available in documentation versions 1.0.6 and 1.0.7.
+:::
+
 ## The SaveLabeledImages Class
 
 In the main program loop, we first go to the Island state. If this 

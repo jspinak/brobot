@@ -4,6 +4,10 @@ sidebar_position: 2
 
 # The Model
 
+:::info Version Note
+This tutorial was originally created for an earlier version of Brobot but has been updated for version 1.1.0. The original code examples are available in documentation versions 1.0.6 and 1.0.7.
+:::
+
 Review your target GUI environment and decide what to include in your model.
 At this stage, you will focus less on what the automation will do and more on the characteristics
 of your target GUI environment. For example, what can you do in this environment and 
