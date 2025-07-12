@@ -336,7 +336,7 @@ public class ConfigManagementPanel extends BorderPane {
         selectionPanel.refreshRecentConfigurations();
 
         // If a project is loaded, refresh browser
-        if (projectManager.getActiveProject() != null) {
+        if (projectManager.getCurrentProject() != null) {
             ConfigEntry currentConfig = selectionPanel.getSelectedConfiguration();
             if (currentConfig != null) {
                 browserPanel.setConfiguration(currentConfig);

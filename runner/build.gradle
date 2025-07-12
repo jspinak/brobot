@@ -34,9 +34,8 @@ dependencies {
     // Project dependencies
     implementation project(':library')
 
-    // Spring Boot
+    // Spring Boot - additional starter for JPA (Spring context comes from library)
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    implementation 'org.springframework:spring-context'
     implementation 'net.rgielen:javafx-weaver-spring:2.0.1' // For Spring/JavaFX integration
 
     // Database (Using H2 for embedded persistence)
@@ -44,9 +43,9 @@ dependencies {
 
     // Other Utilities
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.4'
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.4'
     implementation 'jakarta.annotation:jakarta.annotation-api:2.1.1'
-    implementation 'org.bytedeco:javacv-platform:1.5.10'
-    implementation 'org.slf4j:slf4j-api:2.0.9'
+    // Note: javacv-platform and slf4j-api are now provided transitively by the library
     
     // AtlantaFX Theme
     implementation 'io.github.mkpaz:atlantafx-base:2.0.1'

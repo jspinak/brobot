@@ -111,11 +111,11 @@ public class AutomationButtonService {
      * Loads and organizes buttons from the current project.
      */
     public ButtonLoadResult loadProjectButtons() {
-        if (projectManager == null || projectManager.getActiveProject() == null) {
+        if (projectManager == null || projectManager.getCurrentProject() == null) {
             return new ButtonLoadResult(false, 0, "No project loaded. Please load a configuration first.");
         }
         
-        AutomationProject project = projectManager.getActiveProject();
+        AutomationProject project = projectManager.getCurrentProject();
         if (project.getAutomation() == null || project.getAutomation().getButtons() == null) {
             return new ButtonLoadResult(false, 0, "No automation buttons defined in the current project.");
         }

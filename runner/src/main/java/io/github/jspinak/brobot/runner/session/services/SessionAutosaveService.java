@@ -21,7 +21,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * Provides configurable autosave intervals and pause/resume functionality.
  */
 @Slf4j
-@Service
+@Service("sessionAutosaveService")
 public class SessionAutosaveService {
     
     private static final long DEFAULT_AUTOSAVE_INTERVAL_MINUTES = 5;

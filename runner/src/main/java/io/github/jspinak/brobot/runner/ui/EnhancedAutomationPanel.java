@@ -285,12 +285,12 @@ public class EnhancedAutomationPanel extends VBox {
     public void refreshAutomationButtons() {
         buttonPane.getChildren().clear();
         
-        if (projectManager == null || projectManager.getActiveProject() == null) {
+        if (projectManager == null || projectManager.getCurrentProject() == null) {
             log("No project loaded. Please load a configuration first.");
             return;
         }
         
-        AutomationProject project = projectManager.getActiveProject();
+        AutomationProject project = projectManager.getCurrentProject();
         if (project.getAutomation() == null || project.getAutomation().getButtons() == null) {
             log("No automation buttons defined in the current project.");
             return;

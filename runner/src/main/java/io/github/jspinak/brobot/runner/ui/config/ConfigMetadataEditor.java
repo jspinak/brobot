@@ -388,7 +388,7 @@ public class ConfigMetadataEditor extends BorderPane {
     }
 
     private void loadConfigData(ConfigEntry config) {
-        AutomationProject project = projectManager.getActiveProject();
+        AutomationProject project = projectManager.getCurrentProject();
 
         if (project != null) {
             // Load from active project
@@ -523,7 +523,7 @@ public class ConfigMetadataEditor extends BorderPane {
         Files.writeString(configPath, content);
 
         // If project is loaded, update it
-        AutomationProject project = projectManager.getActiveProject();
+        AutomationProject project = projectManager.getCurrentProject();
         if (project != null) {
             project.setName(projectNameField.getText());
             project.setVersion(versionField.getText());
