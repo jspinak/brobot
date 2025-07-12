@@ -3,24 +3,60 @@ sidebar_position: 5
 ---
 
 # Transitions
- 
-The transitions classes do 2 things. They tell Brobot how to move from their state to another state, and also how
-to finish an incoming transition to their state. These transitions are also saved with Brobot so that Brobot
-can manage state transitions for us.
 
-Here are the transitions classes:
+:::info Version Note
+This tutorial was originally created for an earlier version of Brobot but has been updated for version 1.1.0 with the new annotation system.
+:::
+ 
+Transitions define how to navigate between states. With the new annotation system, transitions are now separate classes with the `@Transition` annotation.
+
+Here are the transition classes:
+
+## Homepage to Harmony Transition
 
 ```java
-@Component
-public class HomepageTransitions {
+@Transition(from = Homepage.class, to = Harmony.class)
+@RequiredArgsConstructor
+@Slf4j
+public class HomepageToHarmonyTransition {
     
     private final Action action;
     private final Homepage homepage;
     
-    public HomepageTransitions(StateTransitionsRepository stateTransitionsRepository,
+    public boolean execute() {
+        log.info("Transitioning from Homepage to Harmony");
+        return action.perform(CLICK, homepage.getHarmony()).isSuccess();
+    }
+}
+```
+
+## Harmony to About Transition
+
+```java
+@Transition(from = Harmony.class, to = About.class)
+@RequiredArgsConstructor
+@Slf4j
+public class HarmonyToAboutTransition {
+    
+    private final Action action;
+    private final Harmony harmony;
+    
+    public boolean execute() {
+        log.info("Transitioning from Harmony to About");
+        return action.perform(CLICK, harmony.getAbout()).isSuccess();
+    }
+}
+```
+
+## Key Improvements with Annotations
+
+### Before (Manual Registration)
+```java
+@Component
+public class HomepageTransitions {
+    
+    public HomepageTransitions(StateTransitionsRepository repository,
                                Action action, Homepage homepage) {
-        this.action = action;
-        this.homepage = homepage;
         StateTransitions transitions = new StateTransitions.Builder("homepage")
                 .addTransitionFinish(this::finishTransition)
                 .addTransition(new StateTransition.Builder()
@@ -28,72 +64,91 @@ public class HomepageTransitions {
                         .setFunction(this::gotoHarmony)
                         .build())
                 .build();
-        stateTransitionsRepository.add(transitions);
+        repository.add(transitions);  // Manual registration
     }
     
-    private boolean finishTransition() {
-        return action.perform(FIND, homepage.getHarmony()).isSuccess();
-    }
-    
-    private boolean gotoHarmony() {
+    private boolean finishTransition() { /* ... */ }
+    private boolean gotoHarmony() { /* ... */ }
+}
+```
+
+### After (Automatic Registration)
+```java
+@Transition(from = Homepage.class, to = Harmony.class)
+@RequiredArgsConstructor
+@Slf4j
+public class HomepageToHarmonyTransition {
+    public boolean execute() {
+        // Just implement the transition logic
         return action.perform(CLICK, homepage.getHarmony()).isSuccess();
     }
-
 }
 ```
 
+## Benefits
+
+1. **Declarative**: `@Transition(from = X.class, to = Y.class)` clearly shows the navigation
+2. **Less Code**: No StateTransitions.Builder or manual registration
+3. **Single Responsibility**: Each transition is a focused class
+4. **Automatic Wiring**: Framework handles all the connections
+5. **Type Safety**: Compile-time checking of state relationships
+
+## Transition Patterns
+
+### Simple Click Transition
 ```java
-@Component
-public class HarmonyTransitions {
-    
-    private final Action action;
-    private final Harmony harmony;
-    
-    public HarmonyTransitions(StateTransitionsRepository stateTransitionsRepository,
-                               Action action, Harmony harmony) {
-        this.action = action;
-        this.harmony = harmony;
-        StateTransitions transitions = new StateTransitions.Builder("harmony")
-                .addTransitionFinish(this::finishTransition)
-                .addTransition(new StateTransition.Builder()
-                        .addToActivate("about")
-                        .setFunction(this::gotoAbout)
-                        .build())
-                .build();
-        stateTransitionsRepository.add(transitions);
+@Transition(from = SourceState.class, to = TargetState.class)
+public class SimpleTransition {
+    public boolean execute() {
+        return action.click(element).isSuccess();
     }
-    
-    private boolean finishTransition() {
-        return action.perform(FIND, harmony.getAbout()).isSuccess();
-    }
-    
-    private boolean gotoAbout() {
-        return action.perform(CLICK, harmony.getAbout()).isSuccess();
-    }
-
 }
 ```
 
+### Multiple Actions
 ```java
-@Component
-public class AboutTransitions {
-    
-    private final Action action;
-    private final About about;
-    
-    public AboutTransitions(StateTransitionsRepository stateTransitionsRepository,
-                              Action action, About about) {
-        this.action = action;
-        this.about = about;
-        StateTransitions transitions = new StateTransitions.Builder("about")
-                .addTransitionFinish(this::finishTransition)
-                .build();
-        stateTransitionsRepository.add(transitions);
+@Transition(from = FormState.class, to = ResultState.class)
+public class FormSubmitTransition {
+    public boolean execute() {
+        return action.type(nameField, "John Doe").isSuccess() &&
+               action.type(emailField, "john@example.com").isSuccess() &&
+               action.click(submitButton).isSuccess();
     }
-    
-    private boolean finishTransition() {
-        return action.perform(FIND, about.getAboutText()).isSuccess();
-    }
-
 }
 ```
+
+### Error Handling
+```java
+@Transition(from = SearchState.class, to = ResultsState.class)
+public class SearchTransition {
+    public boolean execute() {
+        try {
+            action.type(searchBox, searchTerm);
+            action.click(searchButton);
+            return action.find(resultsPanel).isSuccess();
+        } catch (Exception e) {
+            log.error("Search transition failed", e);
+            return false;
+        }
+    }
+}
+```
+
+## Best Practices
+
+1. Use these standard annotations:
+   ```java
+   @Transition(from = X.class, to = Y.class)
+   @RequiredArgsConstructor  // For dependency injection
+   @Slf4j                   // For logging
+   ```
+
+2. Keep transitions simple and focused on navigation
+
+3. Log important steps for debugging
+
+4. Return `true` for success, `false` for failure
+
+5. Inject dependencies via constructor (Action, states, etc.)
+
+With states and transitions using annotations, the entire state machine is automatically configured!

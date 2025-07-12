@@ -381,7 +381,6 @@ public class BrobotProperties {
         // Core settings
         FrameworkSettings.mock = core.mock;
         FrameworkSettings.packageName = core.packageName;
-        FrameworkSettings.inputImageFolder = core.imagePath;
         
         // Mouse settings
         FrameworkSettings.moveMouseDelay = mouse.moveDelay;

@@ -16,9 +16,9 @@ Brobot can use color information to:
 ## Basic Color Matching
 
 ```java
-ActionOptions colorFind = new ActionOptions.Builder()
-    .setAction(ActionOptions.Action.FIND)
-    .setColor(Color.RED)
+// Using modern PatternFindOptions for color-based finding
+PatternFindOptions colorFind = new PatternFindOptions.Builder()
+    .setTargetColors(Color.RED)
     .setColorTolerance(50)
     .build();
 ```
@@ -41,9 +41,9 @@ Brobot can classify regions based on dominant colors:
 ### Finding Red Buttons
 
 ```java
-StateImageObject redButton = new StateImageObject.Builder()
-    .withImage("button.png")
-    .withColor(Color.RED)
+StateImage redButton = new StateImage.Builder()
+    .addPatterns("button")  // No .png extension
+    .setTargetColors(Color.RED)
     .build();
 ```
 

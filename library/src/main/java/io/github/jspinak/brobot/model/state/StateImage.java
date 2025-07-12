@@ -316,6 +316,13 @@ public class StateImage implements StateObject {
             return this;
         }
 
+        public Builder addPatterns(String... imageNames) {
+            for (String imageName : imageNames) {
+                addPattern(imageName);
+            }
+            return this;
+        }
+
         public Builder setKmeansProfilesAllSchemas(KmeansProfilesAllSchemas kmeansProfilesAllSchemas) {
             this.kmeansProfilesAllSchemas = kmeansProfilesAllSchemas;
             return this;
