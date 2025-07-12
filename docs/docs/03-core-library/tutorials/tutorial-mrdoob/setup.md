@@ -2,12 +2,13 @@
 sidebar_position: 1
 ---
 
-# A Simple Automation App with Brobot 1.0.7.
+# A Simple Automation App with Brobot 1.1.0.
 
-When this tutorial was created, version 1.0.7 was still in development and not in Maven Central. 
-If you are reading this before 1.0.7 is on Maven Central and want to follow the tutorial,
-look first at the tutorial about 
-[using the latest code in GitHub](https://github.com/jspinak/brobot). 
+:::info Version Note
+This tutorial was originally created for an earlier version of Brobot but has been updated for version 1.1.0. The original code examples are available in documentation versions 1.0.6 and 1.0.7.
+:::
+
+This tutorial demonstrates how to create a Brobot automation application using version 1.1.0. 
 The repository for this project is at https://github.com/jspinak/mrdoob.
 
 This tutorial shows how to set up a Brobot application. In this tutorial, you will create a 
@@ -26,7 +27,7 @@ version = '0.0.1-SNAPSHOT'
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(20)
+        languageVersion = JavaLanguageVersion.of(21)
     }
 }
 
@@ -41,16 +42,17 @@ repositories {
 }
 
 dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter'
-    compileOnly 'org.projectlombok:lombok'
-    annotationProcessor 'org.projectlombok:lombok'
+    // Brobot 1.1.0+ includes Spring Boot, Lombok, SLF4J, SikuliX, and JavaCV as transitive dependencies
+    implementation 'io.github.jspinak:brobot:1.1.0'
+    
+    // Lombok annotation processor still needed for compilation
+    annotationProcessor 'org.projectlombok:lombok:1.18.32'
+    
+    // Testing
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-    implementation('com.sikulix:sikulixapi:2.0.5') {
-        exclude group: 'org.slf4j', module: 'slf4j-nop'
-    }
-    implementation group: 'org.bytedeco', name: 'javacv-platform', version: '1.5.10'
-    implementation files('../brobot/library/build/libs/library-1.0.7.jar') // the relative path to the JAR
+    
+    // Additional dependencies specific to this tutorial
     implementation 'com.github.kwhat:jnativehook:2.2.2'
 }
 

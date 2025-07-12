@@ -134,6 +134,21 @@ public class StateNavigator {
     }
 
     /**
+     * Opens the specified state using its enum identifier.
+     * 
+     * <p>This convenience method simplifies navigation by allowing direct use of
+     * StateEnum values, eliminating the need for manual toString() calls and 
+     * providing type safety at compile time.</p>
+     *
+     * @param stateEnum Enum representing the target state
+     * @return true if navigation succeeded, false otherwise
+     * @see #openState(String)
+     */
+    public boolean openState(io.github.jspinak.brobot.model.state.StateEnum stateEnum) {
+        return openState(stateEnum.toString());
+    }
+
+    /**
      * Navigates to a target state by ID.
      * <p>
      * Orchestrates the complete navigation process:
