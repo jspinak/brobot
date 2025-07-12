@@ -24,7 +24,7 @@ To add the Brobot library to your project, add the following dependency to your 
 In your `build.gradle` or `build.gradle.kts` file, add the following to your `dependencies` block:
 
 ```groovy
-implementation 'io.github.jspinak:brobot:1.0.7'
+implementation 'io.github.jspinak:brobot:1.1.0'
 ```
 
 ### Maven
@@ -35,7 +35,7 @@ In your `pom.xml` file, add the following within your `<dependencies>` block:
 <dependency>
     <groupId>io.github.jspinak</groupId>
     <artifactId>brobot</artifactId>
-    <version>1.0.7</version>
+    <version>1.1.0</version>
 </dependency>
 ```
 
@@ -45,11 +45,43 @@ Your build tool will automatically download the Brobot library and its required 
 
 Brobot is built on top of several powerful open-source libraries. When you add Brobot as a dependency, your build tool will automatically include these as well. You do not need to add them to your build file manually.
 
-The key transitive dependencies include:
+Starting from version 1.1.0, Brobot includes the following transitive dependencies:
 
-* **SikuliX**: The core engine used for all visual automation, screen analysis, and control of the mouse and keyboard.
-* **JavaCV (OpenCV)**: Provides the underlying computer vision functionality.
-* **Spring Framework**: Used for dependency injection and application configuration.
+### Core Dependencies (Automatically Included)
+
+* **SikuliX API (2.0.5)**: The core engine used for all visual automation, screen analysis, and control of the mouse and keyboard.
+* **JavaCV Platform (1.5.10)**: Provides the underlying computer vision functionality.
+* **OpenCV Platform (4.9.0-1.5.10)**: Computer vision algorithms for image recognition.
+* **FFmpeg Platform (6.1.1-1.5.10)**: Media handling capabilities.
+* **Apache Commons Lang3 (3.0)**: Common utilities and helper methods.
+* **Spring Context**: Core Spring Framework for dependency injection.
+* **Spring Boot Autoconfigure**: Automatic configuration support for Spring Boot applications.
+* **SLF4J API (2.0.9)**: Logging facade for consistent logging across the application.
+* **Project Lombok (1.18.32)**: Reduces boilerplate code with annotations like `@Getter`, `@Setter`, etc.
+
+### What This Means for Your Project
+
+With Brobot 1.1.0+, you only need to add the Brobot dependency. The following are included automatically:
+- All computer vision libraries (SikuliX, OpenCV, JavaCV)
+- Spring Framework components
+- Logging framework (SLF4J)
+- Lombok for cleaner code
+
+You'll still need to add:
+- Spring Boot Starter Test (for testing)
+- Any specific implementation libraries your project needs
+- A concrete SLF4J implementation (like Logback) if not using Spring Boot
+
+### Note on Lombok
+Since Lombok is now a transitive dependency, you still need to configure your IDE to recognize Lombok annotations:
+- **IntelliJ IDEA**: Install the Lombok plugin
+- **Eclipse**: Install the Lombok plugin
+- **VS Code**: Install the Lombok Annotations Support extension
+
+You also need to add the annotation processor to your build file:
+```groovy
+annotationProcessor 'org.projectlombok:lombok:1.18.32'
+```
 
 ## Using Unstable (Snapshot) Versions
 

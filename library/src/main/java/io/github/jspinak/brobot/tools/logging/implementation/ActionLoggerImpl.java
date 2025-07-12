@@ -288,9 +288,10 @@ public class ActionLoggerImpl implements ActionLogger {
      */
     private LogData createLogEntry(String sessionId, LogEventType type, String description, boolean success) {
         LogData entry = new LogData();
-        entry.setId(Long.valueOf(UUID.randomUUID().toString()));
+        // Use UUID's most significant bits as a Long ID
+        entry.setId(UUID.randomUUID().getMostSignificantBits() & Long.MAX_VALUE);
         entry.setSessionId(sessionId);
-        entry.setTimestamp(Instant.from(LocalDateTime.now()));
+        entry.setTimestamp(Instant.now());
         entry.setType(type);
         entry.setDescription(description);
         entry.setSuccess(success);
