@@ -111,7 +111,35 @@ public class BufferedImageUtilities {
      * @return the BufferedImage from an image on file
      */
     public static BufferedImage getBuffImgDirectly(String path) {
-        File f = new File(FilenameUtils.addPngExtensionIfNeeded(path));
+        String pathWithExtension = FilenameUtils.addPngExtensionIfNeeded(path);
+        File f = new File(pathWithExtension);
+        
+        // If file doesn't exist and path is relative, try common locations
+        if (!f.exists() && !f.isAbsolute()) {
+            // Try "images" folder first (common convention)
+            File imagesFile = new File("images", pathWithExtension);
+            if (imagesFile.exists()) {
+                f = imagesFile;
+                ConsoleReporter.println("Found in images folder: " + f.getAbsolutePath());
+            } else {
+                // Try SikuliX bundle path as fallback
+                try {
+                    String bundlePath = org.sikuli.script.ImagePath.getBundlePath();
+                    if (bundlePath != null && !bundlePath.isEmpty()) {
+                        File bundleFile = new File(bundlePath, pathWithExtension);
+                        if (bundleFile.exists()) {
+                            f = bundleFile;
+                            ConsoleReporter.println("Found in SikuliX bundle path: " + f.getAbsolutePath());
+                        }
+                    }
+                } catch (Exception e) {
+                    // Ignore and continue with original file
+                }
+            }
+        }
+        
+        ConsoleReporter.println("Loading image from: " + f.getAbsolutePath() + " (exists: " + f.exists() + ")");
+        
         try {
             return ImageIO.read(Objects.requireNonNull(f));
         } catch (IOException e) {

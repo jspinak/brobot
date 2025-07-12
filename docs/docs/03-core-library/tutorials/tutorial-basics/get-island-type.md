@@ -4,6 +4,10 @@ sidebar_position: 7
 
 # Get Island Type
 
+:::info Version Note
+This tutorial was originally created for an earlier version of Brobot but has been updated for version 1.1.0. The original code examples are available in documentation versions 1.0.6 and 1.0.7.
+:::
+
 Here we determine the island type from the on-screen text.
 
 ## Go to a new Island and Get its Type
@@ -38,7 +42,7 @@ public String getIsland() {
 With the following action we retrieve the text found where the island
 names are. We know that at least one name was already found when
 the state management system opened the Island state, since the IslandName
-variable is the only StateImageObject that identifies the Island state.
+variable is the only StateImage that identifies the Island state.
 Since the IslandName has already been found once, its SearchRegion will be defined
 as the region where it was first found. We can then use this SearchRegion to retrieve
 the name of the new island type.
@@ -48,18 +52,15 @@ We use the ALL_WORDS find strategy to extract all text from the defined region.
 
 ```java
 private String getIslandType() {
-    ActionOptions findText = new ActionOptions.Builder()
-            .setAction(ActionOptions.Action.FIND)
-            .setFind(ActionOptions.Find.ALL_WORDS)
+    // Using modern PatternFindOptions with fluent API
+    PatternFindOptions findText = new PatternFindOptions.Builder()
+            .setDoOnEach(ActionOptions.Find.ALL_WORDS)
             .setGetTextUntil(ActionOptions.GetTextUntil.TEXT_APPEARS)
-            .setUseDefinedRegion(true)
-            .setMaxWait(3)
-            .setPauseBeforeBegin(3)
+            .setSearchRegions(island.getIslandName().getSearchRegion())
+            .setPauseBeforeBegin(3.0)
             .build();
-    ObjectCollection islandName = new ObjectCollection.Builder()
-            .withRegions(island.getIslandName().getSearchRegion())
-            .build();
-    Matches matches = action.perform(findText, islandName);
+    
+    Matches matches = action.perform(findText, island.getIslandName());
     // Combine all found words into a single string
     return matches.getMatchList().stream()
             .map(Match::getText)
