@@ -22,7 +22,9 @@ import io.github.jspinak.brobot.runner.ui.components.SessionManagementPanel;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.scene.control.Label;
+import javafx.scene.effect.DropShadow;
 import javafx.scene.layout.GridPane;
+import javafx.scene.paint.Color;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -64,7 +66,7 @@ public class RefactoredResourceMonitorPanel extends BrobotPanel {
                                           SessionManager sessionManager,
                                           LabelManager labelManager,
                                           UIUpdateManager uiUpdateManager) {
-        super();
+        // Don't call super() yet to avoid premature initialization
         this.cacheManager = cacheManager;
         this.sessionManager = sessionManager;
         this.labelManager = labelManager;
@@ -82,6 +84,20 @@ public class RefactoredResourceMonitorPanel extends BrobotPanel {
 
     @PostConstruct
     public void postConstruct() {
+        // Initialize panel styling after fields are set
+        setPadding(new Insets(16));
+        setSpacing(12);
+        getStyleClass().add("brobot-panel");
+        
+        // Add subtle shadow effect
+        DropShadow shadow = new DropShadow();
+        shadow.setColor(Color.rgb(0, 0, 0, 0.1));
+        shadow.setRadius(8);
+        shadow.setOffsetY(2);
+        setEffect(shadow);
+        
+        // Now initialize content
+        initialize();
         // Start monitoring and schedule periodic UI updates
         monitoringService.startMonitoring(this::handleMonitoringData);
         

@@ -1,8 +1,8 @@
 package io.github.jspinak.brobot.runner.ui.components.base;
 
 import io.github.jspinak.brobot.runner.ui.lifecycle.UIComponent;
-import io.github.jspinak.brobot.runner.ui.managers.LabelManager;
-import io.github.jspinak.brobot.runner.ui.managers.UIUpdateManager;
+import io.github.jspinak.brobot.runner.ui.management.LabelManager;
+import io.github.jspinak.brobot.runner.ui.management.UIUpdateManager;
 import io.github.jspinak.brobot.runner.ui.registry.UIComponentRegistry;
 import javafx.scene.layout.VBox;
 import lombok.Getter;
@@ -94,7 +94,7 @@ public abstract class BasePanel extends VBox implements UIComponent {
         
         // Cancel any scheduled updates
         if (updateManager != null) {
-            updateManager.cancelTask(componentId);
+            updateManager.cancelScheduledUpdate(componentId);
         }
         
         // Unregister from component registry
@@ -131,10 +131,8 @@ public abstract class BasePanel extends VBox implements UIComponent {
      */
     protected void schedulePeriodicUpdate(Runnable updateTask, int periodSeconds) {
         if (updateManager != null) {
-            updateManager.updateTask(componentId)
-                .withTask(updateTask)
-                .withPeriod(periodSeconds, java.util.concurrent.TimeUnit.SECONDS)
-                .schedule();
+            updateManager.schedulePeriodicUpdate(componentId, updateTask, 
+                0, periodSeconds, java.util.concurrent.TimeUnit.SECONDS);
         }
     }
     
