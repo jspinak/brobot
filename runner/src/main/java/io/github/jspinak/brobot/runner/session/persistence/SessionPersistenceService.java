@@ -33,7 +33,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @since 1.0.0
  */
 @Slf4j
-@Service
+@Service("legacySessionPersistenceService")
 public class SessionPersistenceService implements DiagnosticCapable {
     
     private static final String SESSION_FILE_EXTENSION = ".json";

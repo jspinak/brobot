@@ -37,7 +37,7 @@ public class ConfigMetadataService {
             return null;
         }
         
-        AutomationProject project = projectManager.getActiveProject();
+        AutomationProject project = projectManager.getCurrentProject();
         if (project == null) {
             return createDefaultMetadata(config);
         }
@@ -74,7 +74,7 @@ public class ConfigMetadataService {
         }
         
         try {
-            AutomationProject project = projectManager.getActiveProject();
+            AutomationProject project = projectManager.getCurrentProject();
             if (project == null) {
                 project = new AutomationProject();
                 project.setName(metadata.getProjectName());
@@ -98,7 +98,7 @@ public class ConfigMetadataService {
             }
             
             // Save project
-            projectManager.setActiveProject(project);
+            projectManager.saveProject();
             
             // Log success
             eventBus.publish(LogEvent.info(

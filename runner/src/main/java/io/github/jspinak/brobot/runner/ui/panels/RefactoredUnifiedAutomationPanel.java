@@ -222,12 +222,12 @@ public class RefactoredUnifiedAutomationPanel extends VBox {
      * Loads buttons from the current project.
      */
     private List<TaskButton> loadProjectButtons() {
-        if (projectManager == null || projectManager.getActiveProject() == null) {
+        if (projectManager == null || projectManager.getCurrentProject() == null) {
             log("No project loaded. Please load a configuration first.");
             return List.of();
         }
         
-        AutomationProject project = projectManager.getActiveProject();
+        AutomationProject project = projectManager.getCurrentProject();
         if (project.getAutomation() == null || project.getAutomation().getButtons() == null) {
             log("No automation buttons defined in the current project.");
             return List.of();
