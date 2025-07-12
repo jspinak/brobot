@@ -260,7 +260,7 @@ public class RefactoredConfigurationPanel extends BasePanel {
             runnerProperties.setImagePath(imagePathField.getText());
             
             // Execute loading in background
-            updateManager.executeNow(() -> {
+            updateManager.executeUpdate("config-load", () -> {
                 try {
                     boolean success = libraryInitializer.initializeWithConfig(projectPath, dslPath);
                     if (success) {

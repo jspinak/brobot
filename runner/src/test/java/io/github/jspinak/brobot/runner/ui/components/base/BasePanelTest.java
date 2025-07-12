@@ -1,7 +1,7 @@
 package io.github.jspinak.brobot.runner.ui.components.base;
 
-import io.github.jspinak.brobot.runner.ui.managers.LabelManager;
-import io.github.jspinak.brobot.runner.ui.managers.UIUpdateManager;
+import io.github.jspinak.brobot.runner.ui.management.LabelManager;
+import io.github.jspinak.brobot.runner.ui.management.UIUpdateManager;
 import io.github.jspinak.brobot.runner.ui.registry.UIComponentRegistry;
 import javafx.application.Platform;
 import javafx.scene.Scene;
