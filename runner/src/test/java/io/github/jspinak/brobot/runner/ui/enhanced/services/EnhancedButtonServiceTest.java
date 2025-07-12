@@ -2,6 +2,7 @@ package io.github.jspinak.brobot.runner.ui.enhanced.services;
 
 import io.github.jspinak.brobot.runner.project.AutomationProject;
 import io.github.jspinak.brobot.runner.project.AutomationProjectManager;
+import io.github.jspinak.brobot.runner.project.ProjectDefinition;
 import io.github.jspinak.brobot.runner.project.RunnerInterface;
 import io.github.jspinak.brobot.runner.project.TaskButton;
 import javafx.application.Platform;
@@ -30,6 +31,9 @@ class EnhancedButtonServiceTest {
     
     @Mock
     private AutomationProjectManager projectManager;
+    
+    @Mock
+    private ProjectDefinition projectDefinition;
     
     @Mock
     private AutomationProject project;
@@ -69,7 +73,8 @@ class EnhancedButtonServiceTest {
     @Test
     void testLoadProjectButtonsWithNoAutomation() {
         // Given
-        when(projectManager.getActiveProject()).thenReturn(project);
+        when(projectManager.getActiveProject()).thenReturn(projectDefinition);
+        when(projectManager.getActiveAutomationProject()).thenReturn(project);
         when(project.getAutomation()).thenReturn(null);
         
         // When
@@ -83,7 +88,8 @@ class EnhancedButtonServiceTest {
     @Test
     void testLoadProjectButtonsWithEmptyButtons() {
         // Given
-        when(projectManager.getActiveProject()).thenReturn(project);
+        when(projectManager.getActiveProject()).thenReturn(projectDefinition);
+        when(projectManager.getActiveAutomationProject()).thenReturn(project);
         when(project.getAutomation()).thenReturn(automation);
         when(automation.getButtons()).thenReturn(Collections.emptyList());
         
@@ -102,7 +108,8 @@ class EnhancedButtonServiceTest {
         TaskButton button2 = createTaskButton("2", "Button 2", "Category B");
         List<TaskButton> buttons = Arrays.asList(button1, button2);
         
-        when(projectManager.getActiveProject()).thenReturn(project);
+        when(projectManager.getActiveProject()).thenReturn(projectDefinition);
+        when(projectManager.getActiveAutomationProject()).thenReturn(project);
         when(project.getAutomation()).thenReturn(automation);
         when(automation.getButtons()).thenReturn(buttons);
         

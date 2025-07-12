@@ -48,6 +48,7 @@ class RefactoredAutomationPanelTest {
     @Mock private AutomationOrchestrator automationOrchestrator;
     @Mock private EventBus eventBus;
     @Mock private HotkeyManager hotkeyManager;
+    @Mock private io.github.jspinak.brobot.runner.project.ProjectDefinition projectDefinition;
     @Mock private AutomationWindowController windowController;
     
     private UIComponentRegistry componentRegistry;
@@ -170,7 +171,8 @@ class RefactoredAutomationPanelTest {
         
         List<TaskButton> buttons = Arrays.asList(button1, button2, button3);
         
-        when(projectManager.getActiveProject()).thenReturn(project);
+        when(projectManager.getActiveProject()).thenReturn(projectDefinition);
+        when(projectManager.getActiveAutomationProject()).thenReturn(project);
         when(project.getAutomation()).thenReturn(config);
         when(config.getButtons()).thenReturn(buttons);
         
@@ -200,7 +202,8 @@ class RefactoredAutomationPanelTest {
         button.setLabel("Test Button");
         button.setCategory("Test Category");
         
-        when(projectManager.getActiveProject()).thenReturn(project);
+        when(projectManager.getActiveProject()).thenReturn(projectDefinition);
+        when(projectManager.getActiveAutomationProject()).thenReturn(project);
         when(project.getAutomation()).thenReturn(config);
         when(config.getButtons()).thenReturn(Arrays.asList(button));
         

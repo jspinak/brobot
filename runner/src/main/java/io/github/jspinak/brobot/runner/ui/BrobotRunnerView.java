@@ -308,7 +308,7 @@ public class BrobotRunnerView extends BorderPane {
         screenRegistry.registerScreenFactory(
                 "logs",
                 "Logs",
-                context -> uiComponentFactory.createAtlantaLogsPanel()
+                context -> uiComponentFactory.createRefactoredAtlantaLogsPanel()
         );
 
         logger.info("Registered {} screens", screenRegistry.getAllScreenIds().size());

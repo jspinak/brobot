@@ -13,6 +13,8 @@ import io.github.jspinak.brobot.runner.events.LogEvent;
 import io.github.jspinak.brobot.runner.init.BrobotLibraryInitializer;
 import io.github.jspinak.brobot.runner.ui.components.Card;
 import io.github.jspinak.brobot.runner.ui.components.EnhancedTable;
+import io.github.jspinak.brobot.runner.ui.management.LabelManager;
+import io.github.jspinak.brobot.runner.ui.management.UIUpdateManager;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.geometry.Insets;
@@ -56,7 +58,7 @@ public class ConfigSelectionPanel extends VBox {
     private final EnhancedTable<ConfigEntry> recentConfigsTable;
     private final List<ConfigEntry> recentConfigs = new ArrayList<>();
 
-    private ConfigDetailsPanel detailsPanel;
+    private RefactoredConfigDetailsPanel detailsPanel;
 
     public ConfigSelectionPanel(EventBus eventBus,
                                 BrobotRunnerProperties runnerProperties,
@@ -98,7 +100,11 @@ public class ConfigSelectionPanel extends VBox {
         setupRecentConfigsTable();
 
         // Configuration details panel
-        detailsPanel = new ConfigDetailsPanel(eventBus);
+        // TODO: Get LabelManager and UIUpdateManager from Spring context
+        LabelManager labelManager = new LabelManager();
+        UIUpdateManager uiUpdateManager = new UIUpdateManager();
+        uiUpdateManager.initialize();
+        detailsPanel = new RefactoredConfigDetailsPanel(eventBus, labelManager, uiUpdateManager);
 
         // Load recent configurations
         loadRecentConfigurations();
