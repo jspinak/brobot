@@ -330,27 +330,35 @@ public class RefactoredExecutionDashboardPanel extends BorderPane {
     private void handleLogEvent(BrobotEvent event) {
         if (event instanceof LogEvent) {
             LogEvent logEvent = (LogEvent) event;
-            LogData logData = logEvent.getLogData();
             
             uiUpdateManager.queueUpdate(STATUS_UPDATE_TASK_ID, () -> {
-                // Add to action history
-                actionHistoryPanel.addAction(logData);
-                
-                // Update performance metrics if available
-                if (logData.getExecutionMetrics() != null) {
-                    ExecutionMetrics metrics = logData.getExecutionMetrics();
-                    performancePanel.updateMetrics(metrics);
+                // Update status panel with log message
+                if (logEvent.getLevel() == LogEvent.LogLevel.ERROR || 
+                    logEvent.getLevel() == LogEvent.LogLevel.CRITICAL) {
+                    statusPanel.updateCurrentAction("Error: " + logEvent.getMessage());
+                } else if (logEvent.getCategory() != null && logEvent.getCategory().equals("ACTION")) {
+                    statusPanel.updateCurrentAction(logEvent.getMessage());
                 }
                 
-                // Update state transition table if this is a state transition
-                if (logData.getTransition() != null) {
-                    stateTransitionPanel.addTransition(
-                            logData.getTransition(),
-                            LocalDateTime.now(),
-                            logData.isSuccess()
-                    );
-                }
+                // For now, we'll skip action history and performance updates
+                // since LogEvent doesn't contain LogData
+                // These panels will be updated through other event types
             });
+        } else if (event instanceof LogEntryEvent) {
+            LogEntryEvent logEntryEvent = (LogEntryEvent) event;
+            if (logEntryEvent.getLogEntry() != null) {
+                LogData logData = logEntryEvent.getLogEntry();
+                
+                uiUpdateManager.queueUpdate(STATUS_UPDATE_TASK_ID, () -> {
+                    // Update status with log description
+                    if (logData.getDescription() != null) {
+                        statusPanel.updateCurrentAction(logData.getDescription());
+                    }
+                    
+                    // Note: The panels expect specific data that LogData might not have
+                    // We'd need to check the actual methods available on these panels
+                });
+            }
         }
     }
 

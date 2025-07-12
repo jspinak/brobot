@@ -19,6 +19,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import io.github.jspinak.brobot.runner.testutils.TestHelper;
+import io.github.jspinak.brobot.runner.testutils.JavaFXTestBase;
 
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
@@ -31,7 +33,7 @@ import static org.mockito.Mockito.when;
  * Visual regression tests for refactored UI panels.
  */
 @DisabledIfEnvironmentVariable(named = "CI", matches = "true", disabledReason = "Visual tests require display")
-class PanelVisualRegressionTest extends VisualRegressionTest {
+class PanelVisualRegressionTest extends JavaFXTestBase {
     
     @Mock
     private EventBus eventBus;
@@ -63,8 +65,8 @@ class PanelVisualRegressionTest extends VisualRegressionTest {
     @Test
     void testExampleLabelManagedPanelVisual() throws Exception {
         runAndWait(() -> {
-            ExampleLabelManagedPanel panel = new ExampleLabelManagedPanel(labelManager, uiUpdateManager);
-            panel.postConstruct();
+            ExampleLabelManagedPanel panel = TestHelper.createExamplePanel(labelManager, uiUpdateManager);
+            panel.initialize();
             
             // Set some data
             labelManager.updateLabel(panel, "statusLabel", "Active");
@@ -150,16 +152,8 @@ class PanelVisualRegressionTest extends VisualRegressionTest {
             panel.postConstruct();
             
             // Create test configuration
-            ConfigEntry testConfig = new ConfigEntry();
-            testConfig.setName("Test Configuration");
-            testConfig.setProject("Test Project");
-            testConfig.setProjectConfigPath(Paths.get("/test/project/config.xml"));
-            testConfig.setDslConfigPath(Paths.get("/test/dsl/config.dsl"));
-            testConfig.setImagePath(Paths.get("/test/images"));
-            testConfig.setLastModified(LocalDateTime.now());
+            ConfigEntry testConfig = TestHelper.createTestConfigEntry("Test Configuration", "Test Project");
             testConfig.setDescription("This is a test configuration for visual regression testing");
-            testConfig.setAuthor("Test Author");
-            testConfig.setVersion("1.0.0");
             
             panel.setConfiguration(testConfig);
             
@@ -195,8 +189,8 @@ class PanelVisualRegressionTest extends VisualRegressionTest {
             container.setStyle("-fx-padding: 20; -fx-background-color: #f0f0f0;");
             
             // Add example panel
-            ExampleLabelManagedPanel examplePanel = new ExampleLabelManagedPanel(labelManager, uiUpdateManager);
-            examplePanel.postConstruct();
+            ExampleLabelManagedPanel examplePanel = TestHelper.createExamplePanel(labelManager, uiUpdateManager);
+            examplePanel.initialize();
             labelManager.updateLabel(examplePanel, "statusLabel", "Connected");
             
             // Add resource monitor summary
@@ -233,8 +227,8 @@ class PanelVisualRegressionTest extends VisualRegressionTest {
     @Test
     void testThemeVariations() throws Exception {
         runAndWait(() -> {
-            ExampleLabelManagedPanel panel = new ExampleLabelManagedPanel(labelManager, uiUpdateManager);
-            panel.postConstruct();
+            ExampleLabelManagedPanel panel = TestHelper.createExamplePanel(labelManager, uiUpdateManager);
+            panel.initialize();
             
             // Create scene
             Scene scene = new Scene(panel, 400, 300);
@@ -270,13 +264,7 @@ class PanelVisualRegressionTest extends VisualRegressionTest {
             panel.postConstruct();
             
             // Set test data
-            ConfigEntry testConfig = new ConfigEntry();
-            testConfig.setName("Responsive Test");
-            testConfig.setProject("Test Project");
-            testConfig.setProjectConfigPath(Paths.get("/test/config.xml"));
-            testConfig.setDslConfigPath(Paths.get("/test/config.dsl"));
-            testConfig.setImagePath(Paths.get("/test/images"));
-            testConfig.setLastModified(LocalDateTime.now());
+            ConfigEntry testConfig = TestHelper.createTestConfigEntry("Responsive Test", "Test Project");
             
             panel.setConfiguration(testConfig);
             

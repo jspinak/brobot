@@ -55,7 +55,7 @@ class TaskManagementServiceTest {
         when(projectManager.getCurrentProject()).thenReturn(null);
         
         // When
-        AutomationProject result = service.getCurrentProject();
+        AutomationProject result = service.getActiveProject();
         
         // Then
         assertNull(result);

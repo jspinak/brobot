@@ -117,7 +117,7 @@ class ConfigFileOperationsServiceTest {
         // Then
         // Should not publish success log event
         verify(eventBus, never()).publish(argThat(event -> 
-            event instanceof LogEvent && event.getMessage().contains("Opened configuration folder")
+            event instanceof LogEvent && ((LogEvent) event).getMessage().contains("Opened configuration folder")
         ));
     }
     

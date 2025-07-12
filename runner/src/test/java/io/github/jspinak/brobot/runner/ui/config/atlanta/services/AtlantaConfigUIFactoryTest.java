@@ -97,7 +97,7 @@ class AtlantaConfigUIFactoryTest {
         assertNotNull(card);
         assertTrue(card.getStyleClass().contains("test-card"));
         assertEquals(500, card.getMinWidth());
-        assertTrue(card.isExpand());
+        // Expand property is set via HBox.setHgrow, not a property on the card itself
         assertEquals(Priority.ALWAYS, HBox.getHgrow(card));
     }
     

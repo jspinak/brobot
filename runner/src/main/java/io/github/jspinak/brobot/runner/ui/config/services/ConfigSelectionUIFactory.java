@@ -3,7 +3,9 @@ package io.github.jspinak.brobot.runner.ui.config.services;
 import atlantafx.base.theme.Styles;
 import io.github.jspinak.brobot.runner.ui.components.Card;
 import io.github.jspinak.brobot.runner.ui.components.EnhancedTable;
-import io.github.jspinak.brobot.runner.ui.config.ConfigDetailsPanel;
+import io.github.jspinak.brobot.runner.ui.config.RefactoredConfigDetailsPanel;
+import io.github.jspinak.brobot.runner.ui.management.LabelManager;
+import io.github.jspinak.brobot.runner.ui.management.UIUpdateManager;
 import io.github.jspinak.brobot.runner.ui.config.ConfigEntry;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -161,10 +163,10 @@ public class ConfigSelectionUIFactory {
         private final Card recentConfigsCard;
         private final Card detailsCard;
         private final EnhancedTable<ConfigEntry> configTable;
-        private final ConfigDetailsPanel detailsPanel;
+        private final RefactoredConfigDetailsPanel detailsPanel;
         
         private SplitPaneSection(SplitPane splitPane, Card recentConfigsCard, Card detailsCard,
-                               EnhancedTable<ConfigEntry> configTable, ConfigDetailsPanel detailsPanel) {
+                               EnhancedTable<ConfigEntry> configTable, RefactoredConfigDetailsPanel detailsPanel) {
             this.splitPane = splitPane;
             this.recentConfigsCard = recentConfigsCard;
             this.detailsCard = detailsCard;
@@ -248,7 +250,11 @@ public class ConfigSelectionUIFactory {
         EnhancedTable<ConfigEntry> configTable = new EnhancedTable<>();
         
         // Create details panel
-        ConfigDetailsPanel detailsPanel = new ConfigDetailsPanel(eventBus);
+        // TODO: Get LabelManager and UIUpdateManager from Spring context
+        LabelManager labelManager = new LabelManager();
+        UIUpdateManager uiUpdateManager = new UIUpdateManager();
+        uiUpdateManager.initialize();
+        RefactoredConfigDetailsPanel detailsPanel = new RefactoredConfigDetailsPanel(eventBus, labelManager, uiUpdateManager);
         
         // Create split pane
         SplitPane splitPane = new SplitPane();
