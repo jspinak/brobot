@@ -4,6 +4,10 @@ sidebar_position: 5
 
 # Transitions
 
+:::info Version Note
+This tutorial was originally created for an earlier version of Brobot but has been updated for version 1.1.0. The original code examples are available in documentation versions 1.0.6 and 1.0.7.
+:::
+
 Transitions allow Brobot to move from one state to another. Any state that 
 will be accessed needs a StateTransitions class.  
 
@@ -11,25 +15,27 @@ will be accessed needs a StateTransitions class.
 
 ```java
 @Component
+@RequiredArgsConstructor
 public class HomeTransitions {
     
     private final Action action;
     private final Home home;
     
-    private StateTransitions transitions;
-    
-    public HomeTransitions(StateTransitionsRepository stateTransitionsRepository,
-                           Action action, Home home) {
-        this.action = action;
-        this.home = home;
-        transitions = new StateTransitions.Builder(HOME)
-                .addTransition(this::goToWorld, WORLD)
+    public StateTransitions getStateTransitions() {
+        return new StateTransitions.Builder(Home.Name.HOME.toString())
+                .addTransition(createWorldTransition())
                 .build();
-        stateTransitionsRepository.add(transitions);
+    }
+    
+    private JavaStateTransition createWorldTransition() {
+        return new JavaStateTransition.Builder()
+                .setFunction(this::goToWorld)
+                .addToActivate(World.Name.WORLD.toString())
+                .build();
     }
     
     private boolean goToWorld() {
-        return action.perform(ActionOptions.Action.CLICK, home.getToWorldButton()).isSuccess();
+        return action.click(home.getToWorldButton()).isSuccess();
     }
 
 }
@@ -43,45 +49,39 @@ a special option: in this transition the World state stays visible.
 
 ```java
 @Component
+@RequiredArgsConstructor
 public class WorldTransitions {
     
     private final Action action;
     private final World world;
     
-    private StateTransitions transitions;
-    
-    public WorldTransitions(StateTransitionsRepository stateTransitionsRepository,
-                            Action action, World world) {
-        this.action = action;
-        this.world = world;
-        transitions = new StateTransitions.Builder(WORLD)
+    public StateTransitions getStateTransitions() {
+        return new StateTransitions.Builder(World.Name.WORLD.toString())
                 .addTransitionFinish(this::finishTransition)
-                .addTransition(new StateTransition.Builder()
-                        .addToActivate(ISLAND)
-                        .setFunction(this::goToIsland)
-                        .setStaysVisibleAfterTransition(TRUE)
-                        .build())
+                .addTransition(createIslandTransition())
                 .build();
-        stateTransitionsRepository.add(transitions);
+    }
+    
+    private JavaStateTransition createIslandTransition() {
+        return new JavaStateTransition.Builder()
+                .setFunction(this::goToIsland)
+                .addToActivate(Island.Name.ISLAND.toString())
+                .setStaysVisibleAfterTransition(true)
+                .build();
     }
     
     private boolean finishTransition() {
-        ObjectCollection worldImages = new ObjectCollection.Builder()
-                .withAllStateImages(world.getState())
-                .build();
-        return action.perform(FIND, worldImages).isSuccess();
+        // Using convenience method for find
+        return action.find(world.getSearchButton()).isSuccess();
     }
     
     public boolean goToIsland() {
-        ActionOptions clickTwice = new ActionOptions.Builder()
-                .setAction(ActionOptions.Action.CLICK)
-                .setTimesToRepeatIndividualAction(2)
-                .setPauseBetweenActions(.2)
+        // Using fluent API for action chaining
+        ClickOptions clickTwice = new ClickOptions.Builder()
+                .setClicks(2)
+                .setPauseBetweenClicks(0.2)
                 .build();
-        ObjectCollection searchButton = new ObjectCollection.Builder()
-                .withImages(world.getSearchButton())
-                .build();
-        return action.perform(clickTwice, searchButton).isSuccess();
+        return action.perform(clickTwice, world.getSearchButton()).isSuccess();
     }
 
 }
@@ -91,28 +91,21 @@ public class WorldTransitions {
 
 ```java
 @Component
+@RequiredArgsConstructor
 public class IslandTransitions {
     
     private final Action action;
     private final Island island;
     
-    private StateTransitions transitions;
-    
-    public IslandTransitions(StateTransitionsRepository stateTransitionsRepository,
-                             Action action, Island island) {
-        this.action = action;
-        this.island = island;
-        transitions = new StateTransitions.Builder(ISLAND)
+    public StateTransitions getStateTransitions() {
+        return new StateTransitions.Builder(Island.Name.ISLAND.toString())
                 .addTransitionFinish(this::finishTransition)
                 .build();
-        stateTransitionsRepository.add(transitions);
     }
     
     private boolean finishTransition() {
-        ObjectCollection worldImages = new ObjectCollection.Builder()
-                .withAllStateImages(island.getState())
-                .build();
-        return action.perform(FIND, worldImages).isSuccess();
+        // Using convenience method to verify state
+        return action.find(island.getIslandName()).isSuccess();
     }
 
 }

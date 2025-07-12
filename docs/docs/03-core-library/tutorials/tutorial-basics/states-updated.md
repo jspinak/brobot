@@ -4,6 +4,10 @@ sidebar_position: 4
 
 # States (Updated API)
 
+:::info Version Note
+This tutorial was originally created for an earlier version of Brobot but has been updated for version 1.1.0. The original code examples are available in documentation versions 1.0.6 and 1.0.7.
+:::
+
 There are 3 states in the demo: HOME, WORLD, and ISLAND. Each state describes a collection
 of static images. The images are static in that they don't change their appearance
 and always appear when the state is active. A state image's location on-screen may or may not change.
