@@ -248,6 +248,10 @@ public class State {
             this.name = stateName;
         }
 
+        public Builder(StateEnum stateEnum) {
+            this.name = stateEnum.toString();
+        }
+
         public Builder withText(String... stateText) {
             Collections.addAll(this.stateText, stateText);
             return this;

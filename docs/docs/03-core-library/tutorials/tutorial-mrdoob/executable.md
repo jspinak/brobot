@@ -4,6 +4,10 @@ sidebar_position: 7
 
 # The Executable Class
 
+:::info Version Note
+This tutorial was originally created for an earlier version of Brobot but has been updated for version 1.1.0. The original code examples are available in documentation versions 1.0.6 and 1.0.7.
+:::
+
 The main method in our executable class needs a few lines of code to initialize the application. 
 First, we need to set up Spring Boot to work with a live GUI. This is done with the following lines:
 

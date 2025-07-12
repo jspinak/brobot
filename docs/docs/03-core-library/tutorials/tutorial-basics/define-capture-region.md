@@ -4,6 +4,10 @@ sidebar_position: 6
 
 # Define the Capture Region
 
+:::info Version Note
+This tutorial was originally created for an earlier version of Brobot but has been updated for version 1.1.0. The original code examples are available in documentation versions 1.0.6 and 1.0.7.
+:::
+
 We now need to define the region where we will capture the image of the island. 
 The island always appears near the search button, so we use the search button's
 location to define our island region.   
