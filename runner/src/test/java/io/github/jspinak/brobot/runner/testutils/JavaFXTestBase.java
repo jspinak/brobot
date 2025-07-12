@@ -54,4 +54,13 @@ public abstract class JavaFXTestBase {
             latch.await(5, TimeUnit.SECONDS);
         }
     }
+    
+    /**
+     * Waits for any JavaFX animations to complete.
+     * This is a simplified version that just waits a fixed time for animations.
+     */
+    protected void waitForAnimations() throws InterruptedException {
+        Thread.sleep(100); // Wait 100ms for animations to complete
+        runAndWait(() -> {}); // Ensure JavaFX thread processes any pending updates
+    }
 }
