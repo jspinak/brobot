@@ -229,7 +229,7 @@ class TableFilterServiceTest {
             filteredList = filterService.initializeFiltering(items);
             
             // Get the filter predicate
-            Predicate<TestItem> predicate = filterService.getFilterPredicate();
+            Predicate<? super TestItem> predicate = filterService.getFilterPredicate();
             assertNotNull(predicate);
             
             // Initially all items should pass

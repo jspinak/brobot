@@ -5,6 +5,7 @@ import io.github.jspinak.brobot.runner.hotkeys.HotkeyManager.HotkeyAction;
 import io.github.jspinak.brobot.runner.ui.AutomationStatusPanel;
 import javafx.application.Platform;
 import javafx.scene.Scene;
+import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.VBox;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -151,7 +152,8 @@ class EnhancedHotkeyServiceTest {
     @Test
     void testIsHotkeyRegistered() {
         // Given
-        when(hotkeyManager.getHotkey(HotkeyAction.STOP)).thenReturn("Ctrl+S");
+        KeyCombination stopKey = KeyCombination.keyCombination("Ctrl+S");
+        when(hotkeyManager.getHotkey(HotkeyAction.STOP)).thenReturn(stopKey);
         when(hotkeyManager.getHotkey(HotkeyAction.PAUSE)).thenReturn(null);
         
         // When/Then

@@ -2,6 +2,7 @@ package io.github.jspinak.brobot.runner.ui.management;
 
 import io.github.jspinak.brobot.runner.events.EventBus;
 import io.github.jspinak.brobot.runner.testutils.JavaFXTestBase;
+import io.github.jspinak.brobot.runner.testutils.TestHelper;
 import io.github.jspinak.brobot.runner.ui.panels.ExampleLabelManagedPanel;
 import io.github.jspinak.brobot.runner.ui.panels.RefactoredResourceMonitorPanel;
 import io.github.jspinak.brobot.runner.ui.config.RefactoredConfigDetailsPanel;
@@ -68,8 +69,8 @@ class IntegrationTest extends JavaFXTestBase {
         
         runAndWait(() -> {
             // Create multiple panels sharing the same managers
-            ExampleLabelManagedPanel panel1 = new ExampleLabelManagedPanel(labelManager, uiUpdateManager);
-            panel1.postConstruct();
+            ExampleLabelManagedPanel panel1 = TestHelper.createExamplePanel(labelManager, uiUpdateManager);
+            panel1.initialize();
             
             RefactoredConfigDetailsPanel panel2 = new RefactoredConfigDetailsPanel(eventBus, labelManager, uiUpdateManager);
             panel2.postConstruct();
@@ -88,14 +89,11 @@ class IntegrationTest extends JavaFXTestBase {
     
     @Test
     void testLabelUpdatesAcrossPanels() throws InterruptedException {
-        ExampleLabelManagedPanel panel = null;
-        
         // Create panel
-        ExampleLabelManagedPanel finalPanel = new ExampleLabelManagedPanel(labelManager, uiUpdateManager);
+        final ExampleLabelManagedPanel panel = TestHelper.createExamplePanel(labelManager, uiUpdateManager);
         runAndWait(() -> {
-            finalPanel.postConstruct();
+            panel.initialize();
         });
-        panel = finalPanel;
         
         // Update labels
         runAndWait(() -> {
@@ -119,8 +117,8 @@ class IntegrationTest extends JavaFXTestBase {
         
         runAndWait(() -> {
             // Create multiple panels
-            ExampleLabelManagedPanel panel1 = new ExampleLabelManagedPanel(labelManager, uiUpdateManager);
-            panel1.postConstruct();
+            ExampleLabelManagedPanel panel1 = TestHelper.createExamplePanel(labelManager, uiUpdateManager);
+            panel1.initialize();
             
             RefactoredConfigDetailsPanel panel2 = new RefactoredConfigDetailsPanel(eventBus, labelManager, uiUpdateManager);
             panel2.postConstruct();
@@ -132,13 +130,7 @@ class IntegrationTest extends JavaFXTestBase {
             });
             
             uiUpdateManager.executeUpdate("panel2-update", () -> {
-                ConfigEntry config = new ConfigEntry();
-                config.setName("Test Config");
-                config.setProject("Test Project");
-                config.setProjectConfigPath(Paths.get("/test"));
-                config.setDslConfigPath(Paths.get("/test"));
-                config.setImagePath(Paths.get("/test"));
-                config.setLastModified(LocalDateTime.now());
+                ConfigEntry config = TestHelper.createTestConfigEntry("Test Config", "Test Project");
                 panel2.setConfiguration(config);
                 updateLatch.countDown();
             });
@@ -159,27 +151,21 @@ class IntegrationTest extends JavaFXTestBase {
     
     @Test
     void testPanelCleanupDoesNotAffectOthers() throws InterruptedException {
-        ExampleLabelManagedPanel panel1 = null;
-        RefactoredConfigDetailsPanel panel2 = null;
-        
         // Create panels
-        ExampleLabelManagedPanel finalPanel1 = new ExampleLabelManagedPanel(labelManager, uiUpdateManager);
-        RefactoredConfigDetailsPanel finalPanel2 = new RefactoredConfigDetailsPanel(eventBus, labelManager, uiUpdateManager);
+        final ExampleLabelManagedPanel panel1 = TestHelper.createExamplePanel(labelManager, uiUpdateManager);
+        final RefactoredConfigDetailsPanel panel2 = new RefactoredConfigDetailsPanel(eventBus, labelManager, uiUpdateManager);
         
         runAndWait(() -> {
-            finalPanel1.postConstruct();
-            finalPanel2.postConstruct();
+            panel1.initialize();
+            panel2.postConstruct();
         });
-        
-        panel1 = finalPanel1;
-        panel2 = finalPanel2;
         
         int totalLabels = labelManager.getLabelCount();
         assertTrue(totalLabels > 0);
         
         // Clean up panel1
         runAndWait(() -> {
-            panel1.preDestroy();
+            panel1.cleanup();
         });
         
         // Panel2's labels should still exist
@@ -210,8 +196,8 @@ class IntegrationTest extends JavaFXTestBase {
             resourcePanel.postConstruct();
             
             // Create another panel
-            ExampleLabelManagedPanel examplePanel = new ExampleLabelManagedPanel(labelManager, uiUpdateManager);
-            examplePanel.postConstruct();
+            ExampleLabelManagedPanel examplePanel = TestHelper.createExamplePanel(labelManager, uiUpdateManager);
+            examplePanel.initialize();
         });
         
         // Let scheduled updates run
@@ -228,8 +214,8 @@ class IntegrationTest extends JavaFXTestBase {
         CountDownLatch completeLatch = new CountDownLatch(10);
         
         runAndWait(() -> {
-            ExampleLabelManagedPanel panel = new ExampleLabelManagedPanel(labelManager, uiUpdateManager);
-            panel.postConstruct();
+            ExampleLabelManagedPanel panel = TestHelper.createExamplePanel(labelManager, uiUpdateManager);
+            panel.initialize();
             
             startLatch.countDown();
             
@@ -258,8 +244,8 @@ class IntegrationTest extends JavaFXTestBase {
     void testPerformanceMetricsAggregation() throws InterruptedException {
         runAndWait(() -> {
             // Create multiple panels
-            ExampleLabelManagedPanel panel1 = new ExampleLabelManagedPanel(labelManager, uiUpdateManager);
-            panel1.postConstruct();
+            ExampleLabelManagedPanel panel1 = TestHelper.createExamplePanel(labelManager, uiUpdateManager);
+            panel1.initialize();
             
             RefactoredConfigDetailsPanel panel2 = new RefactoredConfigDetailsPanel(eventBus, labelManager, uiUpdateManager);
             panel2.postConstruct();
@@ -294,8 +280,8 @@ class IntegrationTest extends JavaFXTestBase {
     void testMemoryManagementWithWeakReferences() throws InterruptedException {
         // Create a panel in a limited scope
         runAndWait(() -> {
-            ExampleLabelManagedPanel panel = new ExampleLabelManagedPanel(labelManager, uiUpdateManager);
-            panel.postConstruct();
+            ExampleLabelManagedPanel panel = TestHelper.createExamplePanel(labelManager, uiUpdateManager);
+            panel.initialize();
             
             // Panel goes out of scope here
         });
@@ -316,8 +302,8 @@ class IntegrationTest extends JavaFXTestBase {
             // Create a complete scene with multiple panels
             VBox root = new VBox(10);
             
-            ExampleLabelManagedPanel panel1 = new ExampleLabelManagedPanel(labelManager, uiUpdateManager);
-            panel1.postConstruct();
+            ExampleLabelManagedPanel panel1 = TestHelper.createExamplePanel(labelManager, uiUpdateManager);
+            panel1.initialize();
             
             RefactoredConfigDetailsPanel panel2 = new RefactoredConfigDetailsPanel(eventBus, labelManager, uiUpdateManager);
             panel2.postConstruct();
@@ -337,7 +323,7 @@ class IntegrationTest extends JavaFXTestBase {
             });
             
             // Clean up
-            panel1.preDestroy();
+            panel1.cleanup();
             panel2.preDestroy();
             stage.close();
         });

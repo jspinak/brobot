@@ -6,9 +6,8 @@ import io.github.jspinak.brobot.runner.config.BrobotRunnerProperties;
 import io.github.jspinak.brobot.runner.events.EventBus;
 import io.github.jspinak.brobot.runner.init.BrobotLibraryInitializer;
 import io.github.jspinak.brobot.runner.project.AutomationProjectManager;
-import io.github.jspinak.brobot.runner.ui.AutomationPanel;
+import io.github.jspinak.brobot.runner.ui.UiComponentFactory;
 import io.github.jspinak.brobot.runner.ui.EnhancedConfigurationPanel;
-import io.github.jspinak.brobot.runner.ui.execution.ExecutionDashboardPanel;
 import io.github.jspinak.brobot.model.transition.StateTransitionStore;
 import io.github.jspinak.brobot.navigation.service.StateService;
 import javafx.application.Application;
@@ -47,16 +46,17 @@ public class BrobotRunnerApp extends Application {
                 new EnhancedConfigurationPanel(eventBus, properties, libraryInitializer, appConfig, projectManager, allStatesService));
         configTab.setClosable(false);
 
+        // Get UiComponentFactory
+        UiComponentFactory uiFactory = applicationContext.getBean(UiComponentFactory.class);
+        
         // Automation tab
         Tab automationTab = new Tab("Automation");
-        automationTab.setContent(
-                new AutomationPanel(applicationContext, projectManager, properties, automationOrchestrator, eventBus));
+        automationTab.setContent(uiFactory.createAutomationPanel());
         automationTab.setClosable(false);
 
         // Execution Dashboard tab
         Tab executionDashboardTab = new Tab("Execution Dashboard");
-        executionDashboardTab.setContent(
-                new ExecutionDashboardPanel(eventBus, automationOrchestrator, stateTransitionsRepository, allStatesService));
+        executionDashboardTab.setContent(uiFactory.createRefactoredExecutionDashboardPanel());
         executionDashboardTab.setClosable(false);
 
         // Add tabs to pane
