@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
  * Manages the interaction between sessions and the Brobot state system.
  */
 @Slf4j
-@Service
+@Service("sessionStateService")
 public class SessionStateService {
     
     private final EventBus eventBus;

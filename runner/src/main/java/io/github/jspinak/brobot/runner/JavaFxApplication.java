@@ -6,6 +6,7 @@ import io.github.jspinak.brobot.runner.ui.BrobotRunnerView;
 import io.github.jspinak.brobot.runner.ui.window.WindowManager;
 import io.github.jspinak.brobot.runner.ui.icons.IconRegistry;
 import io.github.jspinak.brobot.runner.ui.theme.ThemeManager;
+import io.github.jspinak.brobot.runner.ui.services.ScreenshotService;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.Parent;
@@ -108,6 +109,15 @@ public class JavaFxApplication extends Application {
             IconRegistry iconRegistry = applicationContext.getBean(IconRegistry.class);
             EventBus eventBus = applicationContext.getBean(EventBus.class);
             WindowManager windowManager = applicationContext.getBean(WindowManager.class);
+            
+            // Initialize ScreenshotService with primary stage if available
+            try {
+                ScreenshotService screenshotService = applicationContext.getBean(ScreenshotService.class);
+                screenshotService.setPrimaryStage(stage);
+                logger.info("ScreenshotService initialized with primary stage");
+            } catch (Exception e) {
+                logger.warn("ScreenshotService not available: {}", e.getMessage());
+            }
 
             // Register primary stage with WindowManager
             windowManager.registerStage("main", stage);

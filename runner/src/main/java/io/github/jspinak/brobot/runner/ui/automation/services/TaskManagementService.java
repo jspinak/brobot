@@ -116,7 +116,7 @@ public class TaskManagementService {
     /**
      * Gets the current project.
      */
-    public AutomationProject getCurrentProject() {
+    public AutomationProject getActiveProject() {
         return projectManager.getCurrentProject();
     }
     
@@ -124,7 +124,7 @@ public class TaskManagementService {
      * Gets the current project name.
      */
     public String getCurrentProjectName() {
-        AutomationProject project = getCurrentProject();
+        AutomationProject project = getActiveProject();
         return project != null ? project.getName() : "No project loaded";
     }
     
@@ -148,7 +148,7 @@ public class TaskManagementService {
     public ProjectTasksResult loadProjectTasks() {
         taskButtons.clear();
         
-        AutomationProject currentProject = getCurrentProject();
+        AutomationProject currentProject = getActiveProject();
         if (currentProject == null) {
             return new ProjectTasksResult(null, Collections.emptyList(), "No project loaded");
         }

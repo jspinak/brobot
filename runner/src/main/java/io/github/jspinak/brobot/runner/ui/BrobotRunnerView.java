@@ -8,6 +8,8 @@ import io.github.jspinak.brobot.runner.persistence.LogQueryService;
 import io.github.jspinak.brobot.runner.ui.components.StatusBar;
 import io.github.jspinak.brobot.runner.ui.components.TabContentWrapper;
 import io.github.jspinak.brobot.runner.ui.components.LazyTabContent;
+import io.github.jspinak.brobot.runner.ui.components.ScreenshotMenu;
+import io.github.jspinak.brobot.runner.ui.components.ScreenshotToolbar;
 import io.github.jspinak.brobot.runner.ui.icons.IconRegistry;
 import io.github.jspinak.brobot.runner.ui.log.LogViewerPanel;
 import io.github.jspinak.brobot.runner.ui.navigation.NavigationManager;
@@ -62,6 +64,8 @@ public class BrobotRunnerView extends BorderPane {
     private final UiComponentFactory uiComponentFactory;
     private final LogQueryService logQueryService;
     private final ThemeChangeHandler themeChangeHandler;
+    private final ScreenshotMenu screenshotMenu;
+    private final ScreenshotToolbar screenshotToolbar;
 
     // UI components
     @Getter
@@ -83,8 +87,15 @@ public class BrobotRunnerView extends BorderPane {
         // Register theme change handler
         themeManager.addThemeChangeListener(themeChangeHandler);
         
+        // Create menu bar
+        MenuBar menuBar = createMenuBar();
+        
         // Create the header
         HBox header = createHeader();
+        
+        // Create a VBox to hold menu bar and header
+        VBox topContainer = new VBox();
+        topContainer.getChildren().addAll(menuBar, header);
 
         // Create the content container
         contentContainer = new StackPane();
@@ -113,7 +124,7 @@ public class BrobotRunnerView extends BorderPane {
         // TabPerformanceFix.preloadTabContent(tabPane);
         
         // Set the layout
-        setTop(header);
+        setTop(topContainer);
         setCenter(contentContainer);
         
         // Add debug content if tabs are empty
@@ -181,6 +192,69 @@ public class BrobotRunnerView extends BorderPane {
         );
 
         return header;
+    }
+    
+    /**
+     * Creates the application menu bar.
+     *
+     * @return The menu bar
+     */
+    private MenuBar createMenuBar() {
+        MenuBar menuBar = new MenuBar();
+        
+        // File menu
+        Menu fileMenu = new Menu("File");
+        MenuItem exitItem = new MenuItem("Exit");
+        exitItem.setOnAction(e -> Platform.exit());
+        fileMenu.getItems().add(exitItem);
+        
+        // View menu
+        Menu viewMenu = new Menu("View");
+        CheckMenuItem showToolbarItem = new CheckMenuItem("Show Screenshot Toolbar");
+        showToolbarItem.setSelected(false);
+        showToolbarItem.setOnAction(e -> toggleScreenshotToolbar(showToolbarItem.isSelected()));
+        viewMenu.getItems().add(showToolbarItem);
+        
+        // Screenshot menu - using the ScreenshotMenu component
+        Menu screenshotMenuItems = screenshotMenu.createScreenshotMenu();
+        
+        // Help menu
+        Menu helpMenu = new Menu("Help");
+        MenuItem aboutItem = new MenuItem("About");
+        aboutItem.setOnAction(e -> showAboutDialog());
+        helpMenu.getItems().add(aboutItem);
+        
+        menuBar.getMenus().addAll(fileMenu, viewMenu, screenshotMenuItems, helpMenu);
+        
+        return menuBar;
+    }
+    
+    /**
+     * Toggles the visibility of the screenshot toolbar.
+     */
+    private void toggleScreenshotToolbar(boolean show) {
+        if (show) {
+            // Add toolbar to the content area
+            VBox contentWithToolbar = new VBox();
+            contentWithToolbar.getChildren().addAll(screenshotToolbar, tabPane);
+            contentContainer.getChildren().clear();
+            contentContainer.getChildren().add(contentWithToolbar);
+        } else {
+            // Remove toolbar
+            contentContainer.getChildren().clear();
+            contentContainer.getChildren().add(tabPane);
+        }
+    }
+    
+    /**
+     * Shows the about dialog.
+     */
+    private void showAboutDialog() {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("About Brobot Runner");
+        alert.setHeaderText("Brobot Runner");
+        alert.setContentText("A JavaFX UI for Brobot Automation Framework\n\nVersion: 0.0.1-SNAPSHOT");
+        alert.showAndWait();
     }
 
     /**

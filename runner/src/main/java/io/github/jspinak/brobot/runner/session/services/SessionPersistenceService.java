@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
  * Handles all file I/O operations related to session storage.
  */
 @Slf4j
-@Service
+@Service("sessionPersistenceService")
 public class SessionPersistenceService {
     
     private static final String SESSION_PREFIX = "session_";

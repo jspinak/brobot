@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
  * @since 1.0.0
  */
 @Slf4j
-@Service
+@Service("legacySessionStateService")
 public class SessionStateService implements DiagnosticCapable {
     
     private final StateTransitionStore stateTransitionStore;
