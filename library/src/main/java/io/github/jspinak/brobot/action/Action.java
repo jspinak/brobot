@@ -202,6 +202,97 @@ public class Action {
     }
 
     /**
+     * Performs a Find action with a specified timeout before beginning the search.
+     * <p>
+     * This method is useful when you need to wait for UI elements to appear or
+     * stabilize before attempting to find them. The timeout is applied as a pause
+     * before the find operation begins, giving the application time to render or
+     * update the UI.
+     * </p>
+     * 
+     * <p>Example usage:
+     * <pre>{@code
+     * // Wait 2.5 seconds before searching for the save button
+     * ActionResult result = action.findWithTimeout(2.5, saveButton);
+     * 
+     * // Wait 1 second before searching for multiple images
+     * ActionResult results = action.findWithTimeout(1.0, loginButton, submitButton);
+     * }</pre>
+     * </p>
+     *
+     * @param timeoutSeconds the number of seconds to wait before beginning the find operation
+     * @param stateImages the images to search for on screen after the timeout
+     * @return ActionResult containing found matches and execution details
+     * @see #find(StateImage...)
+     * @see PatternFindOptions.Builder#setPauseBeforeBegin(double)
+     */
+    public ActionResult findWithTimeout(double timeoutSeconds, StateImage... stateImages) {
+        PatternFindOptions findOptions = new PatternFindOptions.Builder()
+                .setPauseBeforeBegin(timeoutSeconds)
+                .build();
+        return perform(findOptions, stateImages);
+    }
+
+    /**
+     * Performs a Find action with a specified timeout on the given object collections.
+     * <p>
+     * This method extends the timeout functionality to work with ObjectCollections,
+     * allowing you to search for mixed object types (images, regions, text) after
+     * waiting for a specified duration. This is particularly useful when dealing
+     * with dynamic UIs or slow-loading content.
+     * </p>
+     * 
+     * <p>The timeout helps in scenarios such as:
+     * <ul>
+     *   <li>Waiting for animations to complete</li>
+     *   <li>Allowing time for AJAX requests to populate UI elements</li>
+     *   <li>Ensuring dialogs or popups have fully rendered</li>
+     *   <li>Synchronizing with application state changes</li>
+     * </ul>
+     * </p>
+     *
+     * @param timeoutSeconds the number of seconds to wait before beginning the find operation
+     * @param objectCollections collections of objects to search for after the timeout
+     * @return ActionResult containing all found matches across collections
+     * @see #find(ObjectCollection...)
+     * @see PatternFindOptions.Builder#setPauseBeforeBegin(double)
+     */
+    public ActionResult findWithTimeout(double timeoutSeconds, ObjectCollection... objectCollections) {
+        PatternFindOptions findOptions = new PatternFindOptions.Builder()
+                .setPauseBeforeBegin(timeoutSeconds)
+                .build();
+        return perform(findOptions, objectCollections);
+    }
+
+    /**
+     * Performs a Click action with default options on the specified state images.
+     * <p>
+     * This convenience method simplifies the common pattern of clicking on images,
+     * automatically finding and clicking on the first match found.
+     *
+     * @param stateImages the images to find and click
+     * @return ActionResult containing the click operation results
+     */
+    public ActionResult click(StateImage... stateImages) {
+        ClickOptions clickOptions = new ClickOptions.Builder().build();
+        return perform(clickOptions, stateImages);
+    }
+
+    /**
+     * Performs a Type action with default options using the specified object collections.
+     * <p>
+     * This method types text from StateString objects in the collections. If the
+     * collections also contain images, it will first find and click on them before typing.
+     *
+     * @param objectCollections collections containing strings to type
+     * @return ActionResult containing the type operation results
+     */
+    public ActionResult type(ObjectCollection... objectCollections) {
+        TypeOptions typeOptions = new TypeOptions.Builder().build();
+        return perform(typeOptions, objectCollections);
+    }
+
+    /**
      * Performs an action on state images with specified options.
      * <p>
      * This convenience method automatically wraps the provided StateImages into

@@ -4,6 +4,10 @@ sidebar_position: 4
 
 # States
 
+:::info Version Note
+This tutorial was originally created for an earlier version of Brobot but has been updated for version 1.1.0. The original code examples are available in documentation versions 1.0.6 and 1.0.7.
+:::
+
 There are 3 states in the demo: HOME, WORLD, and ISLAND. Each state describes a collection
 of static images. The images are static in that they don't change their appearance
 and always appear when the state is active. A state image's location on-screen may or may not change.
@@ -13,11 +17,11 @@ starts with an enum declaration.
 
 ## Home
 
-The snapshot defined with the StateImageObject toWorldButton gives the location we 
+The snapshot defined with the StateImage toWorldButton gives the location we 
 expect to find this object. Snapshots represent possible locations for the image, and 
 when there is more than one a match will be chosen randomly from all snapshots.   
 
-When a StateImageObject is fixed, it is expected to be found in the same location every time.  
+When a StateImage is fixed, it is expected to be found in the same location every time.  
 
 ```java
 @Component
@@ -28,13 +32,13 @@ public class Home {
         HOME
     }
     
-    private StateImageObject toWorldButton = new StateImageObject.Builder()
-            .withImage("toWorldButton")
-            .isFixed()
+    private final StateImage toWorldButton = new StateImage.Builder()
+            .addPatterns("toWorldButton")
+            .setFixed(true)
             .addSnapshot(new MatchSnapshot(220, 600, 20, 20))
             .build();
     
-    private State state = new State.Builder(HOME)
+    private final State state = new State.Builder(Name.HOME)
             .withImages(toWorldButton)
             .build();
     
@@ -44,7 +48,7 @@ public class Home {
 
 ## World
 
-If a StateImageObject has no snapshots, the locations of matches will be
+If a StateImage has no snapshots, the locations of matches will be
 determined using probabilities. 
 
 ```java
@@ -56,9 +60,9 @@ public class World {
         WORLD
     }
     
-    private StateImageObject searchButton = new StateImageObject.Builder()
-            .withImage("searchButton")
-            .isFixed()
+    private final StateImage searchButton = new StateImage.Builder()
+            .addPatterns("searchButton")
+            .setFixed(true)
             .build();
     
     private State state = new State.Builder(Name.WORLD)
@@ -90,15 +94,14 @@ public class Island {
         ISLAND
     }
     
-    private StateImageObject islandName = new StateImageObject.Builder()
-            .withImage("castle", "mines", "farms", "forest", "mountains", "lakes")
-            .called("island type text")
-            .isFixed()
+    private final StateImage islandName = new StateImage.Builder()
+            .addPatterns("castle", "mines", "farms", "forest", "mountains", "lakes")
+            .setName("island type text")
+            .setFixed(true)
             .build();
-    private StateRegion islandRegion = new StateRegion.Builder()
-            .called("island region")
+    private final StateRegion islandRegion = new StateRegion.Builder()
+            .setName("island region")
             .addSnapshot(new MatchSnapshot.Builder()
-                    .setActionOptions(ActionOptions.Action.FIND, ActionOptions.Find.ALL_WORDS)
                     .addString("Mines")
                     .addString("Lakess")
                     .addString("Farmz")

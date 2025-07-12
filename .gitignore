@@ -53,4 +53,6 @@ runner/data/brobot.lock.db
 runner/data/brobot.mv.db
 
 # Ignore screenshots directory and all its contents
-runner/screenshots/
+runner/screenshots/# Gradle bin directory
+bin/
+**/bin/

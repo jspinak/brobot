@@ -26,13 +26,13 @@ A state is defined by its collection of elements, such as images or regions. For
 
 ```java
 // From the DoT test application in the paper
-private StateImageObject toWorldButton = new StateImageObject.Builder()
-    .withImage("toWorldButton")
-    .isFixed(true)
+private StateImage toWorldButton = new StateImage.Builder()
+    .addPatterns("toWorldButton")
+    .setFixed(true)
     .addSnapshot(new MatchSnapshot(220, 600, 20, 20))
     .build(); 
 
-private State state = new State.Builder(HOME)
+private State state = new State.Builder(Name.HOME)
     .withImages(toWorldButton)
     .build(); 
 ```
