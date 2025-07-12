@@ -32,7 +32,12 @@ import java.util.concurrent.ScheduledExecutorService;
 /**
  * Refactored ResourceMonitorPanel using composition and single responsibility principle.
  * This panel coordinates between different monitoring components.
+ * 
+ * @deprecated Use {@link io.github.jspinak.brobot.runner.ui.panels.RefactoredResourceMonitorPanel} instead.
+ *             This class uses the new LabelManager and UIUpdateManager architecture for better resource management.
+ *             Will be removed in version 3.0.
  */
+@Deprecated(since = "2.5", forRemoval = true)
 @Component
 @Data
 @lombok.EqualsAndHashCode(callSuper = false)

@@ -100,7 +100,7 @@ public class ExecutionController implements AutoCloseable, DiagnosticCapable {
             throw new IllegalStateException("An automation task is already running");
         }
         
-        log("Starting automation: " + button.getFunctionName());
+        log("Starting automation: " + button.getLabel());
         
         // Create execution options
         ExecutionOptions options = ExecutionOptions.builder()
@@ -135,7 +135,7 @@ public class ExecutionController implements AutoCloseable, DiagnosticCapable {
                 // Run the automation task
                 automationTask.run();
                 
-                log("Function completed: " + button.getFunctionName());
+                log("Function completed: " + button.getLabel());
                 
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
@@ -161,7 +161,7 @@ public class ExecutionController implements AutoCloseable, DiagnosticCapable {
         // Execute through service
         CompletableFuture<Void> future = executionService.execute(
                 wrappedTask, 
-                button.getFunctionName(), 
+                button.getLabel(), 
                 options
         );
         

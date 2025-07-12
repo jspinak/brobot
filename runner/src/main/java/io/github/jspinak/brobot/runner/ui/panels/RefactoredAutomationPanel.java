@@ -231,13 +231,13 @@ public class RefactoredAutomationPanel extends BasePanel {
     private void refreshAutomationButtons() {
         Platform.runLater(() -> {
             try {
-                if (projectManager == null || projectManager.getActiveProject() == null) {
+                if (projectManager == null || projectManager.getCurrentProject() == null) {
                     clearButtons();
                     addLogEntry("No project loaded");
                     return;
                 }
                 
-                AutomationProject project = projectManager.getActiveProject();
+                AutomationProject project = projectManager.getCurrentProject();
                 if (project.getAutomation() == null || project.getAutomation().getButtons() == null) {
                     clearButtons();
                     addLogEntry("No automation buttons defined");

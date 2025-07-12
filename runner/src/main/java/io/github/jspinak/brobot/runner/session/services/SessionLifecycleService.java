@@ -17,7 +17,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * Handles session creation, activation, deactivation, and state management.
  */
 @Slf4j
-@Service
+@Service("sessionLifecycleService")
 public class SessionLifecycleService {
     
     private final EventBus eventBus;

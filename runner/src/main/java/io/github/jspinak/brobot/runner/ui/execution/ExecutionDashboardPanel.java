@@ -30,6 +30,10 @@ import java.util.concurrent.TimeUnit;
 /**
  * Comprehensive dashboard for execution control and monitoring.
  * 
+ * @deprecated Use {@link RefactoredExecutionDashboardPanel} instead.
+ *             This class uses the new LabelManager and UIUpdateManager architecture for better resource management.
+ *             Will be removed in version 3.0.
+ * 
  * <p>This dashboard combines multiple specialized panels to provide a complete
  * interface for controlling and monitoring automation execution. It includes:
  * <ul>

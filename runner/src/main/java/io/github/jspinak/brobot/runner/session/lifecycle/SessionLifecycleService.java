@@ -26,7 +26,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @since 1.0.0
  */
 @Slf4j
-@Service
+@Service("legacySessionLifecycleService")
 public class SessionLifecycleService implements DiagnosticCapable {
     
     // Active sessions tracking
