@@ -93,6 +93,7 @@ public class JavaFxApplication extends Application {
 
     @Override
     public void start(Stage stage) {
+        logger.info("JavaFX start() method called");
         try {
             // Check if Spring context was initialized successfully
             if (applicationContext == null) {
@@ -100,15 +101,22 @@ public class JavaFxApplication extends Application {
                 Platform.exit();
                 return;
             }
+            logger.info("Spring context is valid");
 
             // Store the primary stage
             this.primaryStage = stage;
+            logger.info("Primary stage stored");
 
             // Get dependencies directly from the Spring context
+            logger.info("Getting beans from Spring context...");
             ThemeManager themeManager = applicationContext.getBean(ThemeManager.class);
+            logger.info("Got ThemeManager");
             IconRegistry iconRegistry = applicationContext.getBean(IconRegistry.class);
+            logger.info("Got IconRegistry");
             EventBus eventBus = applicationContext.getBean(EventBus.class);
+            logger.info("Got EventBus");
             WindowManager windowManager = applicationContext.getBean(WindowManager.class);
+            logger.info("Got WindowManager");
             
             // Initialize ScreenshotService with primary stage if available
             try {
@@ -123,10 +131,20 @@ public class JavaFxApplication extends Application {
             windowManager.registerStage("main", stage);
 
             // Get the BrobotRunnerView directly from the context
-            BrobotRunnerView view = applicationContext.getBean(BrobotRunnerView.class);
+            logger.info("About to get BrobotRunnerView from context...");
+            BrobotRunnerView view = null;
+            try {
+                view = applicationContext.getBean(BrobotRunnerView.class);
+                logger.info("Successfully got BrobotRunnerView: " + view);
+            } catch (Exception e) {
+                logger.error("Failed to get BrobotRunnerView", e);
+                throw e;
+            }
 
             // Apply AtlantFX theme globally before creating scene
+            logger.info("Applying AtlantaFX theme...");
             Application.setUserAgentStylesheet(new PrimerLight().getUserAgentStylesheet());
+            logger.info("Theme applied");
             
             // Create the scene with the view - larger default size
             Scene scene = new Scene(view, 1400, 900);
@@ -157,9 +175,45 @@ public class JavaFxApplication extends Application {
             stage.setMaximized(false);
             stage.setResizable(true);
             
-            // Ensure window is visible on screen
-            stage.setX(100);
-            stage.setY(100);
+            // Display on monitor 1 (the left monitor at x=0, y=0, width=1080, height=1920)
+            // Get all screens and find the one that starts at x=0
+            javafx.stage.Screen targetScreen = null;
+            for (javafx.stage.Screen screen : javafx.stage.Screen.getScreens()) {
+                javafx.geometry.Rectangle2D bounds = screen.getVisualBounds();
+                logger.info("Screen found - X: {}, Y: {}, Width: {}, Height: {}", 
+                    bounds.getMinX(), bounds.getMinY(), bounds.getWidth(), bounds.getHeight());
+                if (bounds.getMinX() == 0) {
+                    targetScreen = screen;
+                    break;
+                }
+            }
+            
+            if (targetScreen == null) {
+                logger.warn("Could not find monitor 1, using primary screen");
+                targetScreen = javafx.stage.Screen.getPrimary();
+            }
+            
+            javafx.geometry.Rectangle2D targetBounds = targetScreen.getVisualBounds();
+            logger.info("Target screen bounds - X: {}, Y: {}, Width: {}, Height: {}", 
+                targetBounds.getMinX(), targetBounds.getMinY(), 
+                targetBounds.getWidth(), targetBounds.getHeight());
+            
+            // Adjust window size to fit monitor 1 (1080x1920)
+            // Make window smaller to fit comfortably
+            double windowWidth = Math.min(1000, targetBounds.getWidth() - 80);
+            double windowHeight = Math.min(800, targetBounds.getHeight() - 100);
+            
+            // Center the window on monitor 1
+            double centerX = targetBounds.getMinX() + (targetBounds.getWidth() - windowWidth) / 2;
+            double centerY = targetBounds.getMinY() + (targetBounds.getHeight() - windowHeight) / 2;
+            
+            stage.setWidth(windowWidth);
+            stage.setHeight(windowHeight);
+            stage.setX(centerX);
+            stage.setY(centerY);
+            
+            logger.info("Setting window size to {}x{} at position X: {}, Y: {}", 
+                windowWidth, windowHeight, centerX, centerY);
             
             // Add screenshot capability with F12 key
             scene.setOnKeyPressed(event -> {
@@ -173,7 +227,9 @@ public class JavaFxApplication extends Application {
                 stage.getWidth(), stage.getHeight(), stage.getTitle());
             logger.info("Stage showing: {}, iconified: {}", stage.isShowing(), stage.isIconified());
             
+            logger.info("Calling stage.show()...");
             stage.show();
+            logger.info("stage.show() completed");
             
             // Log window properties after showing
             logger.info("Stage shown - Showing: {}, X: {}, Y: {}, Width: {}, Height: {}", 
@@ -185,6 +241,27 @@ public class JavaFxApplication extends Application {
             stage.requestFocus();
             
             logger.info("Stage brought to front and focus requested");
+            
+            // Add a delay and check again
+            Platform.runLater(() -> {
+                try {
+                    Thread.sleep(1000);
+                    logger.info("After 1 second - Stage showing: {}, X: {}, Y: {}, Width: {}, Height: {}", 
+                        stage.isShowing(), stage.getX(), stage.getY(), stage.getWidth(), stage.getHeight());
+                    logger.info("After 1 second - Stage focused: {}, iconified: {}, alwaysOnTop: {}", 
+                        stage.isFocused(), stage.isIconified(), stage.isAlwaysOnTop());
+                    
+                    // Try to force window to be visible
+                    stage.setAlwaysOnTop(true);
+                    stage.setAlwaysOnTop(false);
+                    stage.toFront();
+                    stage.requestFocus();
+                    
+                    logger.info("Forced window visibility attempt completed");
+                } catch (Exception e) {
+                    logger.error("Error in delayed window check", e);
+                }
+            });
 
             // Publish application started event
             eventBus.publish(LogEvent.info(this, "JavaFX application started", "System"));
