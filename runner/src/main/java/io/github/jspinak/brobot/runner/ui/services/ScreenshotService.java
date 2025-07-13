@@ -44,12 +44,20 @@ public class ScreenshotService {
     public void setPrimaryStage(Stage primaryStage) {
         this.primaryStage = primaryStage;
         
-        // Initialize desktop screenshot capability
+        // Initialize desktop screenshot capability asynchronously to avoid blocking JavaFX thread
         if (!initialized) {
-            initialized = DesktopScreenshotUtil.initialize();
-            if (!initialized) {
-                logger.warn("Desktop screenshot capability not fully initialized - screenshots may fail");
-            }
+            CompletableFuture.runAsync(() -> {
+                try {
+                    initialized = DesktopScreenshotUtil.initialize();
+                    if (!initialized) {
+                        logger.warn("Desktop screenshot capability not fully initialized - screenshots may fail");
+                    } else {
+                        logger.info("Desktop screenshot capability initialized successfully");
+                    }
+                } catch (Exception e) {
+                    logger.error("Failed to initialize desktop screenshot capability", e);
+                }
+            });
         }
     }
     
