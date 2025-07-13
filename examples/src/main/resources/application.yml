@@ -1,0 +1,138 @@
+# Enhanced Logging Demo Configuration
+
+spring:
+  application:
+    name: enhanced-logging-demo
+
+# Brobot configuration
+brobot:
+  # Enable mock mode for demo
+  core:
+    mock: true
+    image-path: images
+  
+  # Console action reporting configuration
+  console:
+    actions:
+      enabled: true
+      level: VERBOSE
+      show-match-details: true
+      show-timing: true
+      use-colors: true
+      use-icons: true
+      report:
+        find: true
+        click: true
+        type: true
+        drag: true
+      report-transitions: true
+      performance-warn-threshold: 1000
+      performance-error-threshold: 5000
+  
+  # Visual highlighting configuration
+  highlight:
+    enabled: true
+    auto-highlight-finds: true
+    auto-highlight-search-regions: false
+    
+    find:
+      color: "#00FF00"
+      duration: 2.0
+      border-width: 3
+      flash: false
+    
+    search-region:
+      color: "#0000FF"
+      duration: 1.5
+      border-width: 2
+      opacity: 0.3
+      show-dimensions: true
+    
+    error:
+      enabled: true
+      color: "#FF0000"
+      duration: 3.0
+      show-cross-mark: true
+    
+    click:
+      enabled: true
+      color: "#FFFF00"
+      duration: 0.5
+      radius: 20
+      ripple-effect: true
+  
+  # GUI access monitoring
+  gui-access:
+    report-problems: true
+    verbose-errors: true
+    suggest-solutions: true
+    check-on-startup: true
+    continue-on-error: true  # Continue demo even without GUI
+    log-successful-checks: true
+  
+  # Unified logging configuration
+  logging:
+    console:
+      level: HIGH
+      colors: true
+      format: compact
+      intercept-legacy: true  # Enable ConsoleReporter interception
+    structured:
+      enabled: true
+      format: json
+      sink: file
+      file:
+        path: logs/enhanced-logging-demo.json
+    performance:
+      enabled: true
+    context:
+      include-thread-name: true
+      include-timestamp: true
+
+# Logging configuration
+logging:
+  level:
+    root: INFO
+    io.github.jspinak.brobot: DEBUG
+    io.github.jspinak.brobot.examples: DEBUG
+    io.github.jspinak.brobot.tools.logging: TRACE
+
+---
+# CI/CD Profile - Minimal output
+spring:
+  config:
+    activate:
+      on-profile: ci
+
+brobot:
+  console:
+    actions:
+      level: QUIET
+  highlight:
+    enabled: false
+  gui-access:
+    report-problems: false
+
+---
+# Visual Debug Profile - Maximum visibility
+spring:
+  config:
+    activate:
+      on-profile: visual-debug
+
+brobot:
+  console:
+    actions:
+      level: VERBOSE
+      show-match-details: true
+  highlight:
+    auto-highlight-finds: true
+    auto-highlight-search-regions: true
+    find:
+      flash: true
+      duration: 3.0
+    search-region:
+      filled: true
+      show-dimensions: true
+    error:
+      enabled: true
