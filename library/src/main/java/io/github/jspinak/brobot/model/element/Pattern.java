@@ -109,7 +109,12 @@ public class Pattern {
         
         if (env.useRealFiles()) {
             // Load real image - works in headless but not mock mode
-            this.image = new Image(BufferedImageUtilities.getBuffImgFromFile(imgPath), name);
+            BufferedImage bufferedImage = BufferedImageUtilities.getBuffImgFromFile(imgPath);
+            if (bufferedImage == null) {
+                throw new IllegalStateException("Failed to load image: " + imgPath + 
+                    ". Make sure the image exists in the configured image path and has .png extension.");
+            }
+            this.image = new Image(bufferedImage, name);
         } else {
             // Only create dummy in mock mode
             this.image = new Image(new BufferedImage(100, 100, BufferedImage.TYPE_INT_RGB), name);
