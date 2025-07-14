@@ -1,5 +1,6 @@
 package io.github.jspinak.brobot.config;
 
+import io.github.jspinak.brobot.tools.logging.gui.GuiAccessConfig;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -25,7 +26,7 @@ import org.springframework.context.annotation.Import;
  */
 @AutoConfiguration
 @Import({BrobotConfig.class, BrobotDefaultsConfiguration.class})
-@EnableConfigurationProperties(BrobotProperties.class)
+@EnableConfigurationProperties({BrobotProperties.class, GuiAccessConfig.class})
 public class BrobotAutoConfiguration {
     
     /**
