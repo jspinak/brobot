@@ -121,7 +121,7 @@ public class ConsoleActionReporter {
                 icon, target, status, duration);
             
             brobotLogger.log()
-                .console(message)
+                .observation(message)
                 .metadata("action", "FIND")
                 .metadata("target", target)
                 .metadata("success", success)
@@ -140,7 +140,7 @@ public class ConsoleActionReporter {
                 target);
             
             brobotLogger.log()
-                .console(message)
+                .observation(message)
                 .log();
         }
     }
@@ -160,7 +160,7 @@ public class ConsoleActionReporter {
                 icon, target, duration, success ? SUCCESS_ICON : FAILURE_ICON);
             
             brobotLogger.log()
-                .console(message)
+                .observation(message)
                 .metadata("action", "CLICK")
                 .metadata("target", target)
                 .metadata("success", success)
@@ -171,7 +171,7 @@ public class ConsoleActionReporter {
                 target);
             
             brobotLogger.log()
-                .console(message)
+                .observation(message)
                 .log();
         }
     }
@@ -191,7 +191,7 @@ public class ConsoleActionReporter {
                 icon, displayText, success ? SUCCESS_ICON : FAILURE_ICON);
             
             brobotLogger.log()
-                .console(message)
+                .observation(message)
                 .metadata("action", "TYPE")
                 .metadata("textLength", text.length())
                 .metadata("success", success)
@@ -201,7 +201,7 @@ public class ConsoleActionReporter {
                 success ? SUCCESS_ICON : FAILURE_ICON);
             
             brobotLogger.log()
-                .console(message)
+                .observation(message)
                 .log();
         }
     }
@@ -220,7 +220,7 @@ public class ConsoleActionReporter {
                 icon, duration, success ? SUCCESS_ICON : FAILURE_ICON);
             
             brobotLogger.log()
-                .console(message)
+                .observation(message)
                 .metadata("action", "DRAG")
                 .metadata("success", success)
                 .log();
@@ -229,7 +229,7 @@ public class ConsoleActionReporter {
                 success ? SUCCESS_ICON : FAILURE_ICON);
             
             brobotLogger.log()
-                .console(message)
+                .observation(message)
                 .log();
         }
     }
@@ -247,7 +247,7 @@ public class ConsoleActionReporter {
                 actionType.toUpperCase());
             
             brobotLogger.log()
-                .console(message)
+                .observation(message)
                 .log();
         }
     }
@@ -263,7 +263,7 @@ public class ConsoleActionReporter {
         String details = extractMatchDetails(logData);
         if (details != null && !details.isEmpty()) {
             brobotLogger.log()
-                .console("   └─ " + details)
+                .observation("   └─ " + details)
                 .log();
         }
     }
@@ -276,7 +276,7 @@ public class ConsoleActionReporter {
             String errorMessage = logData.getErrorMessage();
             if (errorMessage != null && !errorMessage.isEmpty()) {
                 brobotLogger.log()
-                    .console("   └─ " + errorMessage)
+                    .observation("   └─ " + errorMessage)
                     .log();
             }
         }
@@ -301,7 +301,7 @@ public class ConsoleActionReporter {
             icon, from, toStates, duration, success ? "SUCCESS" : "FAILED");
         
         brobotLogger.log()
-            .console(message)
+            .observation(message)
             .metadata("type", "TRANSITION")
             .metadata("from", from)
             .metadata("to", toStates)
@@ -318,7 +318,7 @@ public class ConsoleActionReporter {
             icon, logData.getErrorMessage());
         
         brobotLogger.log()
-            .console(message)
+            .observation(message)
             .metadata("type", "ERROR")
             .log();
     }
@@ -334,7 +334,7 @@ public class ConsoleActionReporter {
             icon, actionType, logData.getDuration(), config.getPerformanceWarnThreshold());
         
         brobotLogger.log()
-            .console(message)
+            .observation(message)
             .metadata("type", "PERFORMANCE_WARNING")
             .metadata("action", actionType)
             .metadata("duration", logData.getDuration())

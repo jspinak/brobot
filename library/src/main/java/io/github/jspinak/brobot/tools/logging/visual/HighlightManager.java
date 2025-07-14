@@ -1,19 +1,20 @@
 package io.github.jspinak.brobot.tools.logging.visual;
 
 import io.github.jspinak.brobot.config.FrameworkSettings;
-import io.github.jspinak.brobot.model.element.basic.match.Match;
-import io.github.jspinak.brobot.model.element.basic.region.Region;
+import io.github.jspinak.brobot.model.match.Match;
+import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.logging.unified.BrobotLogger;
+import io.github.jspinak.brobot.action.Action;
+import io.github.jspinak.brobot.action.ObjectCollection;
+import io.github.jspinak.brobot.action.basic.highlight.HighlightOptions;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.sikuli.script.support.ScreenHighlighter;
 import org.springframework.stereotype.Component;
 
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Manages visual highlighting of screen regions during automation execution.
@@ -36,9 +37,10 @@ public class HighlightManager {
     
     private final VisualFeedbackConfig config;
     private final BrobotLogger brobotLogger;
+    private final Action action;
     
-    // Keep track of active highlights for cleanup
-    private final List<ScreenHighlighter> activeHighlights = new ArrayList<>();
+    // Keep track of active highlight threads for cleanup
+    private final List<CompletableFuture<Void>> activeHighlights = new ArrayList<>();
     
     /**
      * Highlights successful match findings.
@@ -181,7 +183,7 @@ public class HighlightManager {
      */
     private void highlightRegion(Region region, Color color, double duration, 
                                 int borderWidth, String type, Double score) {
-        if (FrameworkSettings.isMockBuild()) {
+        if (FrameworkSettings.mock) {
             // In mock mode, just log the highlight action
             brobotLogger.log()
                 .observation("Mock highlight")
@@ -196,29 +198,36 @@ public class HighlightManager {
         
         try {
             // Use CompletableFuture for non-blocking highlight
-            CompletableFuture.runAsync(() -> {
+            CompletableFuture<Void> highlightFuture = CompletableFuture.runAsync(() -> {
                 try {
-                    // Convert Brobot Region to Sikuli Region
-                    org.sikuli.script.Region sikuliRegion = convertToSikuliRegion(region);
+                    // Create highlight configuration using Brobot's HighlightOptions
+                    HighlightOptions highlightOptions = new HighlightOptions.Builder()
+                        .setHighlightSeconds(duration)
+                        .setHighlightColor(getColorName(color))
+                        .setHighlightAllAtOnce(false)  // Highlight one at a time
+                        .build();
                     
-                    // Create and show highlight
-                    ScreenHighlighter highlighter = new ScreenHighlighter();
-                    highlighter.highlight(sikuliRegion, (float) duration, color.toString());
+                    // Create object collection with the region to highlight
+                    ObjectCollection objectCollection = new ObjectCollection.Builder()
+                        .withRegions(region)
+                        .build();
                     
-                    synchronized (activeHighlights) {
-                        activeHighlights.add(highlighter);
-                    }
+                    // Use Brobot's Action system to perform the highlight
+                    action.perform(highlightOptions, objectCollection);
                     
-                    // Schedule cleanup
-                    CompletableFuture.delayedExecutor((long)(duration * 1000), TimeUnit.MILLISECONDS)
-                        .execute(() -> {
-                            synchronized (activeHighlights) {
-                                activeHighlights.remove(highlighter);
-                            }
-                        });
-                        
                 } catch (Exception e) {
-                    log.warn("Failed to highlight region: {}", e.getMessage());
+                    log.error("Error highlighting region: {}", e.getMessage(), e);
+                }
+            });
+            
+            synchronized (activeHighlights) {
+                activeHighlights.add(highlightFuture);
+            }
+            
+            // Schedule cleanup
+            highlightFuture.whenComplete((result, throwable) -> {
+                synchronized (activeHighlights) {
+                    activeHighlights.remove(highlightFuture);
                 }
             });
             
@@ -326,28 +335,17 @@ public class HighlightManager {
         });
     }
     
-    /**
-     * Converts a Brobot Region to a Sikuli Region.
-     */
-    private org.sikuli.script.Region convertToSikuliRegion(Region brobotRegion) {
-        return new org.sikuli.script.Region(
-            brobotRegion.x(),
-            brobotRegion.y(),
-            brobotRegion.w(),
-            brobotRegion.h()
-        );
-    }
     
     /**
      * Clears all active highlights immediately.
      */
     public void clearAllHighlights() {
         synchronized (activeHighlights) {
-            for (ScreenHighlighter highlighter : activeHighlights) {
+            for (CompletableFuture<Void> highlightFuture : activeHighlights) {
                 try {
-                    highlighter.close();
+                    highlightFuture.cancel(true);
                 } catch (Exception e) {
-                    log.warn("Error closing highlighter: {}", e.getMessage());
+                    log.warn("Error canceling highlight: {}", e.getMessage());
                 }
             }
             activeHighlights.clear();
@@ -363,5 +361,42 @@ public class HighlightManager {
      */
     public VisualFeedbackConfig getConfig() {
         return config;
+    }
+    
+    /**
+     * Converts a Color object to a color name string that Sikuli understands.
+     * Sikuli accepts: "red", "green", "blue", "yellow", "cyan", "magenta", "white", "black", "gray", "orange"
+     */
+    private String getColorName(Color color) {
+        // Check for exact matches to common colors
+        if (color.equals(Color.RED)) return "red";
+        if (color.equals(Color.GREEN)) return "green";
+        if (color.equals(Color.BLUE)) return "blue";
+        if (color.equals(Color.YELLOW)) return "yellow";
+        if (color.equals(Color.CYAN)) return "cyan";
+        if (color.equals(Color.MAGENTA)) return "magenta";
+        if (color.equals(Color.WHITE)) return "white";
+        if (color.equals(Color.BLACK)) return "black";
+        if (color.equals(Color.GRAY)) return "gray";
+        if (color.equals(Color.ORANGE)) return "orange";
+        
+        // For other colors, find the closest match
+        int r = color.getRed();
+        int g = color.getGreen();
+        int b = color.getBlue();
+        
+        // Simple heuristic for color matching
+        if (r > 200 && g < 100 && b < 100) return "red";
+        if (r < 100 && g > 200 && b < 100) return "green";
+        if (r < 100 && g < 100 && b > 200) return "blue";
+        if (r > 200 && g > 200 && b < 100) return "yellow";
+        if (r < 100 && g > 200 && b > 200) return "cyan";
+        if (r > 200 && g < 100 && b > 200) return "magenta";
+        if (r > 200 && g > 150 && b < 100) return "orange";
+        if (r > 180 && g > 180 && b > 180) return "white";
+        if (r < 80 && g < 80 && b < 80) return "black";
+        
+        // Default to gray for anything else
+        return "gray";
     }
 }
