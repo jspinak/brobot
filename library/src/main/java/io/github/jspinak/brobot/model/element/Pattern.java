@@ -458,8 +458,14 @@ public class Pattern {
             } else if (this.bufferedImage != null) {
                 pattern.setImage(new Image(this.bufferedImage, this.name));
             } else if (this.filename != null && !this.filename.isEmpty()) {
-                pattern.setImage(new Image(BufferedImageUtilities.getBuffImgFromFile(this.filename), this.name));
-                pattern.setImgpath(this.filename);
+                BufferedImage loadedImage = BufferedImageUtilities.getBuffImgFromFile(this.filename);
+                if (loadedImage != null) {
+                    pattern.setImage(new Image(loadedImage, this.name));
+                    pattern.setImgpath(this.filename);
+                } else {
+                    // Log warning but don't create an Image with null BufferedImage
+                    System.err.println("Failed to load image from file: " + this.filename);
+                }
             }
         }
 
