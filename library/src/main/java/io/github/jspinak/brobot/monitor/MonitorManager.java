@@ -36,25 +36,44 @@ public class MonitorManager {
      */
     private void initializeMonitors() {
         GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-        GraphicsDevice[] devices = ge.getScreenDevices();
         
-        log.info("Detected {} monitor(s)", devices.length);
-        
-        for (int i = 0; i < devices.length; i++) {
-            GraphicsDevice device = devices[i];
-            Rectangle bounds = device.getDefaultConfiguration().getBounds();
-            MonitorInfo info = new MonitorInfo(i, bounds, device.getIDstring());
-            monitorCache.put(i, info);
-            
-            if (properties.getMonitor().isLogMonitorInfo()) {
-                log.info("Monitor {}: {} - Bounds: x={}, y={}, width={}, height={}", 
-                    i, info.getDeviceId(), bounds.x, bounds.y, bounds.width, bounds.height);
-            }
+        // Check if running in headless mode
+        if (ge.isHeadlessInstance() || GraphicsEnvironment.isHeadless()) {
+            log.warn("Running in headless mode. Monitor detection disabled.");
+            // Create a default monitor for headless mode
+            Rectangle bounds = new Rectangle(0, 0, 1920, 1080); // Default resolution
+            MonitorInfo info = new MonitorInfo(0, bounds, "headless-default");
+            monitorCache.put(0, info);
+            return;
         }
         
-        if (devices.length > 1 && !properties.getMonitor().isMultiMonitorEnabled()) {
-            log.warn("Multiple monitors detected but multi-monitor support is disabled. " +
-                    "Enable it in configuration: brobot.monitor.multi-monitor-enabled=true");
+        try {
+            GraphicsDevice[] devices = ge.getScreenDevices();
+            
+            log.info("Detected {} monitor(s)", devices.length);
+            
+            for (int i = 0; i < devices.length; i++) {
+                GraphicsDevice device = devices[i];
+                Rectangle bounds = device.getDefaultConfiguration().getBounds();
+                MonitorInfo info = new MonitorInfo(i, bounds, device.getIDstring());
+                monitorCache.put(i, info);
+                
+                if (properties.getMonitor().isLogMonitorInfo()) {
+                    log.info("Monitor {}: {} - Bounds: x={}, y={}, width={}, height={}", 
+                        i, info.getDeviceId(), bounds.x, bounds.y, bounds.width, bounds.height);
+                }
+            }
+            
+            if (devices.length > 1 && !properties.getMonitor().isMultiMonitorEnabled()) {
+                log.warn("Multiple monitors detected but multi-monitor support is disabled. " +
+                        "Enable it in configuration: brobot.monitor.multi-monitor-enabled=true");
+            }
+        } catch (HeadlessException e) {
+            log.warn("HeadlessException caught. Creating default monitor for headless mode.");
+            // Create a default monitor for headless mode
+            Rectangle bounds = new Rectangle(0, 0, 1920, 1080); // Default resolution
+            MonitorInfo info = new MonitorInfo(0, bounds, "headless-default");
+            monitorCache.put(0, info);
         }
     }
     
