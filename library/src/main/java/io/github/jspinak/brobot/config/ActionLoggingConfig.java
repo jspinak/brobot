@@ -94,39 +94,8 @@ public class ActionLoggingConfig {
         return new GuiAccessMonitor(brobotLogger, config);
     }
     
-    /**
-     * Creates the enhanced action logger as the primary ActionLogger bean.
-     * This decorates the base ActionLogger with visual feedback and console output.
-     */
-    @Bean
-    @Primary
-    public ActionLogger enhancedActionLogger(
-        ActionLogger baseActionLogger,
-        BrobotLogger brobotLogger,
-        ConsoleActionReporter consoleReporter,
-        HighlightManager highlightManager,
-        GuiAccessMonitor guiAccessMonitor,
-        VisualFeedbackConfig visualConfig
-    ) {
-        // EnhancedActionLoggerImpl has been removed due to interface incompatibility
-        // Return the base logger for now
-        return baseActionLogger;
-    }
-    
-    /**
-     * Provides EnhancedActionLogger interface for components that need
-     * the enhanced features directly.
-     */
-    @Bean
-    public EnhancedActionLogger enhancedActionLoggerInterface(ActionLogger actionLogger) {
-        if (actionLogger instanceof EnhancedActionLogger) {
-            return (EnhancedActionLogger) actionLogger;
-        }
-        throw new IllegalStateException(
-            "ActionLogger is not an instance of EnhancedActionLogger. " +
-            "Check configuration to ensure enhanced logging is enabled."
-        );
-    }
+    // Removed the enhanced action logger configuration as it was causing bean conflicts
+    // The base ActionLoggerImpl is sufficient for now
     
     /**
      * Creates a startup bean that performs initial GUI access check if configured.
