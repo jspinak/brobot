@@ -19,7 +19,6 @@ import org.springframework.stereotype.Component;
  * @see ConsoleActionReporter for the implementation that uses this config
  */
 @Data
-@Component
 @ConfigurationProperties(prefix = "brobot.console.actions")
 public class ConsoleActionConfig {
     
