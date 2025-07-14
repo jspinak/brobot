@@ -213,6 +213,7 @@ public class HighlightManager {
                         .build();
                     
                     // Use Brobot's Action system to perform the highlight
+                    // The action will handle the Find internally
                     action.perform(highlightOptions, objectCollection);
                     
                 } catch (Exception e) {
