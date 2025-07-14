@@ -37,6 +37,10 @@ public class GuiAccessMonitor {
     private final BrobotLogger brobotLogger;
     private final GuiAccessConfig config;
     
+    public GuiAccessConfig getConfig() {
+        return config;
+    }
+    
     // Icons for different message types
     private static final String ERROR_ICON = "❌";
     private static final String WARNING_ICON = "⚠️";
@@ -56,7 +60,7 @@ public class GuiAccessMonitor {
         
         List<GuiAccessProblem> problems = new ArrayList<>();
         
-        try (var operation = brobotLogger.operation("GuiAccessCheck")) {
+        try (AutoCloseable operation = brobotLogger.operation("GuiAccessCheck")) {
             // Check if running in headless mode
             boolean headless = checkHeadlessMode(problems);
             
@@ -90,6 +94,9 @@ public class GuiAccessMonitor {
                 .log();
                 
             return accessible;
+        } catch (Exception e) {
+            log.error("Error during GUI access check", e);
+            return false;
         }
     }
     
@@ -374,7 +381,7 @@ public class GuiAccessMonitor {
         if (problems.isEmpty()) {
             String message = SUCCESS_ICON + " GUI access check passed - display is available";
             brobotLogger.log()
-                .console(message)
+                .observation(message)
                 .metadata("status", "SUCCESS")
                 .log();
             return;
@@ -393,25 +400,25 @@ public class GuiAccessMonitor {
         String message = String.format("%s GUI Problem: %s", icon, problem.getTitle());
         
         brobotLogger.log()
-            .console(message)
+            .observation(message)
             .metadata("severity", problem.getSeverity())
             .metadata("title", problem.getTitle())
             .log();
             
         if (config.isVerboseErrors()) {
             brobotLogger.log()
-                .console("   " + problem.getDescription())
+                .observation("   " + problem.getDescription())
                 .log();
         }
         
         if (config.isSuggestSolutions() && !problem.getSolutions().isEmpty()) {
             brobotLogger.log()
-                .console(SOLUTION_ICON + " Possible solutions:")
+                .observation(SOLUTION_ICON + " Possible solutions:")
                 .log();
                 
             for (String solution : problem.getSolutions()) {
                 brobotLogger.log()
-                    .console("   • " + solution)
+                    .observation("   • " + solution)
                     .log();
             }
         }
