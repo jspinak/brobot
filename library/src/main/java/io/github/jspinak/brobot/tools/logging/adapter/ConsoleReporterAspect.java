@@ -22,7 +22,7 @@ import org.springframework.stereotype.Component;
  * @see ConsoleReporter for the legacy API being intercepted
  * @see ConsoleReporterAdapter for the routing logic
  */
-@Aspect
+//@Aspect // Temporarily disabled due to AspectJ binding issues
 @Component
 @ConditionalOnProperty(
     prefix = "brobot.logging.console",
@@ -47,11 +47,11 @@ public class ConsoleReporterAspect {
     @Pointcut("execution(* io.github.jspinak.brobot.tools.logging.ConsoleReporter.println(io.github.jspinak.brobot.tools.logging.ConsoleReporter.OutputLevel, String)) && args(level, str)")
     public void printlnLevelString(OutputLevel level, String str) {}
     
-    @Pointcut("execution(* io.github.jspinak.brobot.tools.logging.ConsoleReporter.format(String, Object...)) && args(format, arguments)")
-    public void formatString(String format, Object[] arguments) {}
+    @Pointcut("execution(* io.github.jspinak.brobot.tools.logging.ConsoleReporter.format(String, Object...))")
+    public void formatString() {}
     
-    @Pointcut("execution(* io.github.jspinak.brobot.tools.logging.ConsoleReporter.format(io.github.jspinak.brobot.tools.logging.ConsoleReporter.OutputLevel, String, Object...)) && args(level, format, arguments)")
-    public void formatLevelString(OutputLevel level, String format, Object[] arguments) {}
+    @Pointcut("execution(* io.github.jspinak.brobot.tools.logging.ConsoleReporter.format(io.github.jspinak.brobot.tools.logging.ConsoleReporter.OutputLevel, String, Object...))")
+    public void formatLevelString() {}
     
     // Advice methods that intercept and redirect
     
@@ -79,14 +79,21 @@ public class ConsoleReporterAspect {
         return ConsoleReporterAdapter.println(str, level);
     }
     
-    @Around("formatString(format, arguments)")
-    public Object interceptFormat(ProceedingJoinPoint joinPoint, String format, Object[] arguments) throws Throwable {
+    @Around("formatString()")
+    public Object interceptFormat(ProceedingJoinPoint joinPoint) throws Throwable {
+        Object[] args = joinPoint.getArgs();
+        String format = (String) args[0];
+        Object[] arguments = (Object[]) args[1];
         log.trace("Intercepting ConsoleReporter.format(\"{}\", args)", format);
         return ConsoleReporterAdapter.format(format, OutputLevel.HIGH, arguments);
     }
     
-    @Around("formatLevelString(level, format, arguments)")
-    public Object interceptFormatLevel(ProceedingJoinPoint joinPoint, OutputLevel level, String format, Object[] arguments) throws Throwable {
+    @Around("formatLevelString()")
+    public Object interceptFormatLevel(ProceedingJoinPoint joinPoint) throws Throwable {
+        Object[] args = joinPoint.getArgs();
+        OutputLevel level = (OutputLevel) args[0];
+        String format = (String) args[1];
+        Object[] arguments = (Object[]) args[2];
         log.trace("Intercepting ConsoleReporter.format({}, \"{}\", args)", level, format);
         return ConsoleReporterAdapter.format(format, level, arguments);
     }
