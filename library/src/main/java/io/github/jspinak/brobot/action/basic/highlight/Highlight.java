@@ -5,8 +5,8 @@ import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.action.basic.find.Find;
-import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
 import io.github.jspinak.brobot.model.match.Match;
+import io.github.jspinak.brobot.model.state.StateRegion;
 import io.github.jspinak.brobot.tools.history.draw.HighlightMatchedRegionV2;
 import io.github.jspinak.brobot.tools.testing.mock.time.TimeProvider;
 
@@ -94,16 +94,23 @@ public class Highlight implements ActionInterface {
             highlightSeconds = highlightOptions.getHighlightSeconds();
         }
         
-        // If we're highlighting regions only, Find doesn't need special config
-        // It will simply return the regions as matches
-        if (objectCollections.length > 0 && hasOnlyRegions(objectCollections)) {
-            // For regions, we can use a simple pattern find with no pattern
-            PatternFindOptions findOptions = new PatternFindOptions.Builder()
-                .build();
-            matches.setActionConfig(findOptions);
+        // Only run Find if we have images or other searchable objects
+        if (objectCollections.length > 0 && !hasOnlyRegions(objectCollections)) {
+            find.perform(matches, objectCollections);
+        } else if (objectCollections.length > 0) {
+            // For regions only, convert them directly to matches without Find
+            for (ObjectCollection collection : objectCollections) {
+                for (StateRegion stateRegion : collection.getStateRegions()) {
+                    Match match = new Match.Builder()
+                        .setRegion(stateRegion.getSearchRegion())
+                        .setSimScore(1.0) // Perfect score for direct regions
+                        .setStateObjectData(stateRegion)
+                        .build();
+                    matches.add(match);
+                }
+            }
+            matches.setSuccess(true);
         }
-        
-        find.perform(matches, objectCollections);
         
         if (highlightAllAtOnce) {
             highlightAllAtOnce(matches, config, highlightSeconds);
@@ -128,6 +135,7 @@ public class Highlight implements ActionInterface {
     }
     
     private boolean hasOnlyRegions(ObjectCollection[] objectCollections) {
+        boolean hasRegions = false;
         for (ObjectCollection collection : objectCollections) {
             if (!collection.getStateImages().isEmpty() || 
                 !collection.getStateLocations().isEmpty() || 
@@ -136,7 +144,10 @@ public class Highlight implements ActionInterface {
                 !collection.getScenes().isEmpty()) {
                 return false;
             }
+            if (!collection.getStateRegions().isEmpty()) {
+                hasRegions = true;
+            }
         }
-        return true;
+        return hasRegions;
     }
 }
