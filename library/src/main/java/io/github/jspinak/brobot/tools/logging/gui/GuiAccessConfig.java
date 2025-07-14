@@ -18,6 +18,7 @@ import org.springframework.stereotype.Component;
  * @see GuiAccessMonitor for the implementation that uses this config
  */
 @Data
+@Component
 @ConfigurationProperties(prefix = "brobot.gui-access")
 public class GuiAccessConfig {
     
