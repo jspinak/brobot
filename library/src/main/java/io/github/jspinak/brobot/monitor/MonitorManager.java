@@ -1,0 +1,218 @@
+package io.github.jspinak.brobot.monitor;
+
+import io.github.jspinak.brobot.config.BrobotProperties;
+import lombok.extern.slf4j.Slf4j;
+import org.sikuli.script.Screen;
+import org.springframework.stereotype.Component;
+
+import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.Map;
+
+/**
+ * Manages multi-monitor support for Brobot automation framework.
+ * Provides methods to detect, select, and work with multiple monitors.
+ */
+@Slf4j
+@Component
+public class MonitorManager {
+    
+    private final BrobotProperties properties;
+    private final Map<Integer, MonitorInfo> monitorCache = new ConcurrentHashMap<>();
+    private final Map<String, Integer> operationMonitorMap = new ConcurrentHashMap<>();
+    
+    public MonitorManager(BrobotProperties properties) {
+        this.properties = properties;
+        initializeMonitors();
+        if (properties.getMonitor().getOperationMonitorMap() != null) {
+            operationMonitorMap.putAll(properties.getMonitor().getOperationMonitorMap());
+        }
+    }
+    
+    /**
+     * Initialize monitor information and cache available monitors
+     */
+    private void initializeMonitors() {
+        GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+        GraphicsDevice[] devices = ge.getScreenDevices();
+        
+        log.info("Detected {} monitor(s)", devices.length);
+        
+        for (int i = 0; i < devices.length; i++) {
+            GraphicsDevice device = devices[i];
+            Rectangle bounds = device.getDefaultConfiguration().getBounds();
+            MonitorInfo info = new MonitorInfo(i, bounds, device.getIDstring());
+            monitorCache.put(i, info);
+            
+            if (properties.getMonitor().isLogMonitorInfo()) {
+                log.info("Monitor {}: {} - Bounds: x={}, y={}, width={}, height={}", 
+                    i, info.getDeviceId(), bounds.x, bounds.y, bounds.width, bounds.height);
+            }
+        }
+        
+        if (devices.length > 1 && !properties.getMonitor().isMultiMonitorEnabled()) {
+            log.warn("Multiple monitors detected but multi-monitor support is disabled. " +
+                    "Enable it in configuration: brobot.monitor.multi-monitor-enabled=true");
+        }
+    }
+    
+    /**
+     * Get Screen object for specified monitor index
+     * @param monitorIndex The monitor index (0-based)
+     * @return Screen object for the specified monitor
+     */
+    public Screen getScreen(int monitorIndex) {
+        if (!isValidMonitorIndex(monitorIndex)) {
+            log.warn("Invalid monitor index: {}. Using primary monitor.", monitorIndex);
+            return new Screen();
+        }
+        
+        if (properties.getMonitor().isLogMonitorInfo()) {
+            MonitorInfo info = monitorCache.get(monitorIndex);
+            log.debug("Using monitor {}: {} for operation", monitorIndex, info.getDeviceId());
+        }
+        
+        return new Screen(monitorIndex);
+    }
+    
+    /**
+     * Get Screen object based on configuration and operation context
+     * @param operationName Optional operation name for specific monitor assignment
+     * @return Appropriate Screen object
+     */
+    public Screen getScreen(String operationName) {
+        // Check if operation has specific monitor assignment
+        if (operationName != null && operationMonitorMap.containsKey(operationName)) {
+            int monitorIndex = operationMonitorMap.get(operationName);
+            if (properties.getMonitor().isLogMonitorInfo()) {
+                log.debug("Operation '{}' assigned to monitor {}", operationName, monitorIndex);
+            }
+            return getScreen(monitorIndex);
+        }
+        
+        // Use default monitor from configuration
+        int defaultIndex = properties.getMonitor().getDefaultScreenIndex();
+        if (defaultIndex >= 0) {
+            return getScreen(defaultIndex);
+        }
+        
+        // Fall back to primary monitor
+        return new Screen();
+    }
+    
+    /**
+     * Get all available screens for multi-monitor search
+     * @return List of all Screen objects
+     */
+    public List<Screen> getAllScreens() {
+        List<Screen> screens = new ArrayList<>();
+        for (int i = 0; i < getMonitorCount(); i++) {
+            screens.add(new Screen(i));
+        }
+        return screens;
+    }
+    
+    /**
+     * Check if monitor index is valid
+     */
+    public boolean isValidMonitorIndex(int index) {
+        return index >= 0 && index < getMonitorCount();
+    }
+    
+    /**
+     * Get total number of monitors
+     */
+    public int getMonitorCount() {
+        return monitorCache.size();
+    }
+    
+    /**
+     * Get monitor information
+     */
+    public MonitorInfo getMonitorInfo(int index) {
+        return monitorCache.get(index);
+    }
+    
+    /**
+     * Get all monitor information
+     */
+    public List<MonitorInfo> getAllMonitorInfo() {
+        return new ArrayList<>(monitorCache.values());
+    }
+    
+    /**
+     * Set monitor for specific operation
+     */
+    public void setOperationMonitor(String operationName, int monitorIndex) {
+        if (isValidMonitorIndex(monitorIndex)) {
+            operationMonitorMap.put(operationName, monitorIndex);
+            log.info("Assigned operation '{}' to monitor {}", operationName, monitorIndex);
+        } else {
+            log.error("Cannot assign operation '{}' to invalid monitor index: {}", 
+                     operationName, monitorIndex);
+        }
+    }
+    
+    /**
+     * Get the monitor containing a specific point
+     */
+    public int getMonitorAtPoint(Point point) {
+        for (MonitorInfo info : monitorCache.values()) {
+            if (info.getBounds().contains(point)) {
+                return info.getIndex();
+            }
+        }
+        return 0; // Default to primary if not found
+    }
+    
+    /**
+     * Convert global coordinates to monitor-relative coordinates
+     */
+    public Point toMonitorCoordinates(Point globalPoint, int monitorIndex) {
+        MonitorInfo info = monitorCache.get(monitorIndex);
+        if (info == null) {
+            return globalPoint;
+        }
+        
+        Rectangle bounds = info.getBounds();
+        return new Point(globalPoint.x - bounds.x, globalPoint.y - bounds.y);
+    }
+    
+    /**
+     * Convert monitor-relative coordinates to global coordinates
+     */
+    public Point toGlobalCoordinates(Point monitorPoint, int monitorIndex) {
+        MonitorInfo info = monitorCache.get(monitorIndex);
+        if (info == null) {
+            return monitorPoint;
+        }
+        
+        Rectangle bounds = info.getBounds();
+        return new Point(monitorPoint.x + bounds.x, monitorPoint.y + bounds.y);
+    }
+    
+    /**
+     * Information about a monitor
+     */
+    public static class MonitorInfo {
+        private final int index;
+        private final Rectangle bounds;
+        private final String deviceId;
+        
+        public MonitorInfo(int index, Rectangle bounds, String deviceId) {
+            this.index = index;
+            this.bounds = bounds;
+            this.deviceId = deviceId;
+        }
+        
+        public int getIndex() { return index; }
+        public Rectangle getBounds() { return bounds; }
+        public String getDeviceId() { return deviceId; }
+        public int getWidth() { return bounds.width; }
+        public int getHeight() { return bounds.height; }
+        public int getX() { return bounds.x; }
+        public int getY() { return bounds.y; }
+    }
+}

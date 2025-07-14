@@ -4,6 +4,9 @@ import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.config.ExecutionEnvironment;
 import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
 import io.github.jspinak.brobot.util.file.FilenameUtils;
+import io.github.jspinak.brobot.monitor.MonitorManager;
+import io.github.jspinak.brobot.config.BrobotProperties;
+import io.github.jspinak.brobot.util.image.capture.ScreenUtilities;
 
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -11,6 +14,8 @@ import org.sikuli.script.Pattern;
 import org.sikuli.script.Screen;
 import org.sikuli.script.ScreenImage;
 import org.springframework.stereotype.Component;
+import org.springframework.beans.factory.annotation.Autowired;
+import lombok.extern.slf4j.Slf4j;
 import java.util.Base64;
 
 import javax.imageio.ImageIO;
@@ -24,6 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+@Slf4j
 /**
  * Comprehensive BufferedImage operations for the Brobot GUI automation framework.
  * 
@@ -84,6 +90,34 @@ import java.util.Objects;
  */
 @Component
 public class BufferedImageUtilities {
+    
+    @Autowired(required = false)
+    private MonitorManager monitorManager;
+    
+    @Autowired(required = false)
+    private BrobotProperties properties;
+    
+    /**
+     * Get Screen object for a specific operation with monitor logging
+     */
+    private Screen getScreenForOperation(String operationName) {
+        Screen screen = null;
+        
+        if (monitorManager != null) {
+            screen = monitorManager.getScreen(operationName);
+        }
+        
+        if (screen == null) {
+            screen = new Screen(); // Fallback to primary
+        }
+        
+        // Log monitor info if enabled
+        if (properties != null && properties.getMonitor().isLogMonitorInfo()) {
+            log.info("Using monitor {} for {} operation", screen.getID(), operationName);
+        }
+        
+        return screen;
+    }
 
     /**
      * Creates a new SikuliX Pattern and retrieves the BufferedImage from this Pattern.
@@ -156,7 +190,15 @@ public class BufferedImageUtilities {
                                    region.h() > 0 ? region.h() : 1080, 
                                    BufferedImage.TYPE_INT_RGB);
         }
-        return new Screen().capture(region.sikuli()).getImage();
+        
+        // Use ScreenUtilities which has monitor support
+        Screen screen = ScreenUtilities.getScreen("find");
+        if (screen == null) {
+            screen = new Screen(); // Fallback to primary monitor
+        } else {
+            log.debug("Capturing from monitor {} for region: {}", screen.getID(), region);
+        }
+        return screen.capture(region.sikuli()).getImage();
     }
 
     public BufferedImage getBuffImgFromScreen(Region region) {
@@ -168,7 +210,10 @@ public class BufferedImageUtilities {
                                    region.h() > 0 ? region.h() : 1080, 
                                    BufferedImage.TYPE_INT_RGB);
         }
-        return new Screen().capture(region.sikuli()).getImage();
+        
+        // Use monitor-aware screen selection
+        Screen screen = getScreenForOperation("find");
+        return screen.capture(region.sikuli()).getImage();
     }
 
     public List<BufferedImage> getBuffImgsFromScreen(List<Region> regions) {
@@ -183,7 +228,10 @@ public class BufferedImageUtilities {
                                     BufferedImage.TYPE_INT_RGB)));
             return bufferedImages;
         }
-        ScreenImage screenImage = new Screen().capture(); // uses IRobot
+        
+        // Use monitor-aware screen selection
+        Screen screen = getScreenForOperation("find-multiple");
+        ScreenImage screenImage = screen.capture(); // uses IRobot
         List<BufferedImage> bufferedImages = new ArrayList<>();
         regions.forEach(region -> bufferedImages.add(
                 screenImage.getSub(new Rectangle(region.x(), region.y(), region.w(), region.h())).getImage()));
