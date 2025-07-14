@@ -54,15 +54,41 @@ public class Region implements Comparable<Region> {
     private int h;
 
     /**
-     * Creates a Region representing the full screen with default or environment-specified dimensions.
+     * Creates a Region representing the full screen with dynamically detected dimensions.
      * 
-     * <p>The screen dimensions can be overridden using SCREEN_WIDTH and SCREEN_HEIGHT 
-     * environment variables. Defaults to 1920x1080 if not specified.</p>
+     * <p>The screen dimensions are detected from the primary screen. Falls back to
+     * environment variables SCREEN_WIDTH and SCREEN_HEIGHT if screen detection fails.
+     * If all else fails, defaults to 1920x1080.</p>
      */
     public Region() {
-        int defaultWidth = Integer.parseInt(System.getenv().getOrDefault("SCREEN_WIDTH", "1920"));
-        int defaultHeight = Integer.parseInt(System.getenv().getOrDefault("SCREEN_HEIGHT", "1080"));
-        setXYWH(0, 0, defaultWidth, defaultHeight);
+        int width = 1920;  // fallback default
+        int height = 1080; // fallback default
+        
+        try {
+            // Try to get actual screen dimensions
+            org.sikuli.script.Screen screen = new org.sikuli.script.Screen();
+            if (screen.w > 0 && screen.h > 0) {
+                width = screen.w;
+                height = screen.h;
+            }
+        } catch (Exception e) {
+            // If SikuliX fails, try GraphicsEnvironment
+            try {
+                java.awt.GraphicsEnvironment ge = java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment();
+                java.awt.GraphicsDevice gd = ge.getDefaultScreenDevice();
+                java.awt.DisplayMode dm = gd.getDisplayMode();
+                if (dm.getWidth() > 0 && dm.getHeight() > 0) {
+                    width = dm.getWidth();
+                    height = dm.getHeight();
+                }
+            } catch (Exception e2) {
+                // Fall back to environment variables
+                width = Integer.parseInt(System.getenv().getOrDefault("SCREEN_WIDTH", "1920"));
+                height = Integer.parseInt(System.getenv().getOrDefault("SCREEN_HEIGHT", "1080"));
+            }
+        }
+        
+        setXYWH(0, 0, width, height);
     }
 
     /**
