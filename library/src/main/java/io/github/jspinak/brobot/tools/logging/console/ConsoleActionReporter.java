@@ -42,16 +42,16 @@ public class ConsoleActionReporter {
     private static final Pattern ACTION_PATTERN = Pattern.compile("^(\\w+)\\s+(.*)");
     
     // Icons for different states
-    private static final String SUCCESS_ICON = "✓";
-    private static final String FAILURE_ICON = "✗";
-    private static final String WARNING_ICON = "⚠️";
-    private static final String ERROR_ICON = "❌";
-    private static final String INFO_ICON = "ℹ️";
-    private static final String SEARCH_ICON = "🔍";
-    private static final String CLICK_ICON = "👆";
-    private static final String TYPE_ICON = "⌨️";
-    private static final String DRAG_ICON = "↔️";
-    private static final String STATE_ICON = "🔄";
+    private static final String SUCCESS_ICON = "[OK]";
+    private static final String FAILURE_ICON = "[X]";
+    private static final String WARNING_ICON = "[!]";
+    private static final String ERROR_ICON = "[ERROR]";
+    private static final String INFO_ICON = "[i]";
+    private static final String SEARCH_ICON = "[FIND]";
+    private static final String CLICK_ICON = "[CLICK]";
+    private static final String TYPE_ICON = "[TYPE]";
+    private static final String DRAG_ICON = "[DRAG]";
+    private static final String STATE_ICON = "[STATE]";
     
     /**
      * Reports an action log entry to the console based on configuration settings.
@@ -117,7 +117,7 @@ public class ConsoleActionReporter {
         String status = success ? SUCCESS_ICON + " FOUND" : FAILURE_ICON + " NOT FOUND";
         
         if (config.getLevel() == ConsoleActionConfig.Level.VERBOSE) {
-            String message = String.format("%sFIND: %s → %s (%dms)", 
+            String message = String.format("%sFIND: %s -> %s (%dms)", 
                 icon, target, status, duration);
             
             brobotLogger.log()
@@ -297,7 +297,7 @@ public class ConsoleActionReporter {
         long duration = logData.getDuration();
         
         String icon = config.isUseIcons() ? STATE_ICON + " " : "";
-        String message = String.format("%sSTATE: %s → %s [%dms] [%s]", 
+        String message = String.format("%sSTATE: %s -> %s [%dms] [%s]", 
             icon, from, toStates, duration, success ? "SUCCESS" : "FAILED");
         
         brobotLogger.log()
