@@ -35,6 +35,14 @@ public class MonitorManager {
      * Initialize monitor information and cache available monitors
      */
     private void initializeMonitors() {
+        // First check if headless mode is forced via system property
+        String headlessProperty = System.getProperty("java.awt.headless");
+        boolean forcedHeadless = "true".equalsIgnoreCase(headlessProperty);
+        
+        if (forcedHeadless) {
+            log.info("Headless mode forced via java.awt.headless=true property");
+        }
+        
         GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
         
         // Check if running in headless mode
@@ -49,6 +57,14 @@ public class MonitorManager {
         
         try {
             GraphicsDevice[] devices = ge.getScreenDevices();
+            
+            if (devices == null || devices.length == 0) {
+                log.warn("No screen devices found. Creating default monitor.");
+                Rectangle bounds = new Rectangle(0, 0, 1920, 1080);
+                MonitorInfo info = new MonitorInfo(0, bounds, "default-monitor");
+                monitorCache.put(0, info);
+                return;
+            }
             
             log.info("Detected {} monitor(s)", devices.length);
             
@@ -69,10 +85,15 @@ public class MonitorManager {
                         "Enable it in configuration: brobot.monitor.multi-monitor-enabled=true");
             }
         } catch (HeadlessException e) {
-            log.warn("HeadlessException caught. Creating default monitor for headless mode.");
+            log.warn("HeadlessException caught. Creating default monitor for headless mode.", e);
             // Create a default monitor for headless mode
             Rectangle bounds = new Rectangle(0, 0, 1920, 1080); // Default resolution
             MonitorInfo info = new MonitorInfo(0, bounds, "headless-default");
+            monitorCache.put(0, info);
+        } catch (Exception e) {
+            log.error("Unexpected error during monitor initialization. Creating default monitor.", e);
+            Rectangle bounds = new Rectangle(0, 0, 1920, 1080);
+            MonitorInfo info = new MonitorInfo(0, bounds, "error-default");
             monitorCache.put(0, info);
         }
     }
