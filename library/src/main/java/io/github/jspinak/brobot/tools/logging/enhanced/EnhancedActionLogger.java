@@ -2,7 +2,7 @@ package io.github.jspinak.brobot.tools.logging.enhanced;
 
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
-import io.github.jspinak.brobot.model.element.basic.region.Region;
+import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.state.StateObject;
 import io.github.jspinak.brobot.tools.logging.ActionLogger;
 import io.github.jspinak.brobot.tools.logging.visual.VisualFeedbackOptions;
