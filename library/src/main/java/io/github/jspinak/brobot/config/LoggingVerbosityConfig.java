@@ -2,7 +2,6 @@ package io.github.jspinak.brobot.config;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.stereotype.Component;
 
 /**
  * Configuration for logging verbosity across the Brobot framework.
@@ -21,7 +20,6 @@ import org.springframework.stereotype.Component;
  * @since 2.0
  */
 @Data
-@Component
 @ConfigurationProperties(prefix = "brobot.logging")
 public class LoggingVerbosityConfig {
     
@@ -60,7 +58,6 @@ public class LoggingVerbosityConfig {
      * Configuration for normal logging mode.
      */
     @Data
-    @Component
     @ConfigurationProperties(prefix = "brobot.logging.normal")
     public static class NormalModeConfig {
         
@@ -101,7 +98,6 @@ public class LoggingVerbosityConfig {
      * Configuration for verbose logging mode.
      */
     @Data
-    @Component
     @ConfigurationProperties(prefix = "brobot.logging.verbose")
     public static class VerboseModeConfig {
         
