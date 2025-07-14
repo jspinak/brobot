@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.github.jspinak.brobot.util.image.core.BufferedImageUtilities;
 import io.github.jspinak.brobot.util.image.core.ImageConverter;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import org.bytedeco.opencv.opencv_core.Mat;
 import java.awt.image.BufferedImage;
 
@@ -49,6 +50,7 @@ import static java.awt.image.BufferedImage.TYPE_BYTE_BINARY;
  * @see BufferedImageUtilities
  * @see ImageConverter
  */
+@Slf4j
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Image {
@@ -128,10 +130,18 @@ public class Image {
     }
 
     public int w() {
+        if (bufferedImage == null) {
+            log.warn("BufferedImage is null for image: {}", name);
+            return 0;
+        }
         return bufferedImage.getWidth();
     }
 
     public int h() {
+        if (bufferedImage == null) {
+            log.warn("BufferedImage is null for image: {}", name);
+            return 0;
+        }
         return bufferedImage.getHeight();
     }
 
