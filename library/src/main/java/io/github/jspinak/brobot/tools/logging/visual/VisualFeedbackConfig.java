@@ -47,7 +47,6 @@ public class VisualFeedbackConfig {
      * Configuration for find highlighting.
      */
     @Data
-    @Component
     @ConfigurationProperties(prefix = "brobot.highlight.find")
     public static class FindHighlightConfig {
         /**
@@ -103,7 +102,6 @@ public class VisualFeedbackConfig {
      * Configuration for search region highlighting.
      */
     @Data
-    @Component
     @ConfigurationProperties(prefix = "brobot.highlight.search-region")
     public static class SearchRegionHighlightConfig {
         /**
@@ -165,7 +163,6 @@ public class VisualFeedbackConfig {
      * Configuration for error highlighting.
      */
     @Data
-    @Component
     @ConfigurationProperties(prefix = "brobot.highlight.error")
     public static class ErrorHighlightConfig {
         /**
@@ -209,7 +206,6 @@ public class VisualFeedbackConfig {
      * Configuration for click highlighting.
      */
     @Data
-    @Component
     @ConfigurationProperties(prefix = "brobot.highlight.click")
     public static class ClickHighlightConfig {
         /**
