@@ -243,11 +243,23 @@ public class LogEvent {
      * @return A formatted string representation
      */
     public String toFormattedString() {
+        return toFormattedString(false);
+    }
+    
+    /**
+     * Formats the event as a human-readable string with verbosity control.
+     * 
+     * @param verbose Whether to include verbose details
+     * @return A formatted string representation
+     */
+    public String toFormattedString(boolean verbose) {
         StringBuilder sb = new StringBuilder();
         
-        // Add timestamp if present
-        if (sessionId != null) {
-            sb.append("[").append(sessionId).append("] ");
+        if (verbose) {
+            // Verbose mode - include all details
+            if (sessionId != null) {
+                sb.append("[").append(sessionId).append("] ");
+            }
         }
         
         // Format based on type
@@ -257,7 +269,7 @@ public class LogEvent {
                 if (target != null) {
                     sb.append(" → ").append(target);
                 }
-                if (duration != null) {
+                if (verbose && duration != null) {
                     sb.append(" (").append(duration).append("ms)");
                 }
                 break;
@@ -267,7 +279,7 @@ public class LogEvent {
                 sb.append(fromState != null ? fromState : "?");
                 sb.append(" → ");
                 sb.append(toState != null ? toState : "?");
-                if (duration != null) {
+                if (verbose && duration != null) {
                     sb.append(" [").append(duration).append("ms]");
                 }
                 break;
@@ -285,7 +297,7 @@ public class LogEvent {
                 
             case ERROR:
                 sb.append("ERROR: ").append(message);
-                if (error != null) {
+                if (verbose && error != null) {
                     sb.append(" - ").append(error.getClass().getSimpleName());
                 }
                 break;

@@ -2,6 +2,7 @@ package io.github.jspinak.brobot.logging.unified;
 
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
+import io.github.jspinak.brobot.config.LoggingVerbosityConfig;
 import io.github.jspinak.brobot.model.state.State;
 import io.github.jspinak.brobot.tools.logging.ActionLogger;
 import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
@@ -47,11 +48,13 @@ public class MessageRouter {
     private static final Logger slf4jLogger = LoggerFactory.getLogger(BrobotLogger.class);
     
     private final ActionLogger actionLogger;
+    private final LoggingVerbosityConfig verbosityConfig;
     private boolean structuredLoggingEnabled = false;
     
     @Autowired
-    public MessageRouter(ActionLogger actionLogger) {
+    public MessageRouter(ActionLogger actionLogger, LoggingVerbosityConfig verbosityConfig) {
         this.actionLogger = actionLogger;
+        this.verbosityConfig = verbosityConfig;
     }
     
     /**
@@ -108,7 +111,8 @@ public class MessageRouter {
             return;
         }
         
-        String output = event.toFormattedString();
+        // Use verbosity setting to format output
+        String output = event.toFormattedString(verbosityConfig.isVerboseMode());
         String[] colors = determineColors(event);
         
         if (colors.length > 0) {
@@ -219,6 +223,66 @@ public class MessageRouter {
      * Formats message for SLF4J output.
      */
     private String formatSlf4jMessage(LogEvent event) {
+        if (verbosityConfig.isNormalMode()) {
+            return formatNormalMessage(event);
+        } else {
+            return formatVerboseMessage(event);
+        }
+    }
+    
+    /**
+     * Formats message in normal mode - concise essential information only.
+     */
+    private String formatNormalMessage(LogEvent event) {
+        StringBuilder sb = new StringBuilder();
+        
+        switch (event.getType()) {
+            case ACTION:
+                // Format: ACTION Target [SUCCESS/FAILED]
+                sb.append(event.getAction() != null ? event.getAction() : "ACTION");
+                if (event.getTarget() != null) {
+                    String target = truncateObjectName(event.getTarget());
+                    sb.append(" ").append(target);
+                }
+                sb.append(" [").append(event.isSuccess() ? "SUCCESS" : "FAILED").append("]");
+                
+                // Add match coordinates if configured and available
+                if (verbosityConfig.getNormal().isShowMatchCoordinates() && 
+                    event.getMetadataValue("matchX") != null && 
+                    event.getMetadataValue("matchY") != null) {
+                    sb.append(" @(").append(event.getMetadataValue("matchX"))
+                      .append(",").append(event.getMetadataValue("matchY")).append(")");
+                }
+                
+                // Add timing if configured
+                if (verbosityConfig.getNormal().isShowTiming() && event.getDuration() != null) {
+                    sb.append(" ").append(event.getDuration()).append("ms");
+                }
+                break;
+                
+            case TRANSITION:
+                // Format: STATE: From -> To [SUCCESS/FAILED]
+                sb.append("STATE: ").append(event.getFromState())
+                  .append(" -> ").append(event.getToState())
+                  .append(" [").append(event.isSuccess() ? "SUCCESS" : "FAILED").append("]");
+                break;
+                
+            case OBSERVATION:
+            case PERFORMANCE:
+            case ERROR:
+                if (event.getMessage() != null) {
+                    sb.append(event.getMessage());
+                }
+                break;
+        }
+        
+        return sb.toString();
+    }
+    
+    /**
+     * Formats message in verbose mode - all available information.
+     */
+    private String formatVerboseMessage(LogEvent event) {
         StringBuilder sb = new StringBuilder();
         
         if (event.getSessionId() != null) {
@@ -230,6 +294,14 @@ public class MessageRouter {
                 sb.append("Action: ").append(event.getAction());
                 if (event.getTarget() != null) {
                     sb.append(" on ").append(event.getTarget());
+                }
+                
+                // Add metadata if configured
+                if (verbosityConfig.getVerbose().isShowMetadata() && !event.getMetadata().isEmpty()) {
+                    sb.append(" {");
+                    event.getMetadata().forEach((k, v) -> sb.append(k).append("=").append(v).append(", "));
+                    sb.setLength(sb.length() - 2); // Remove trailing comma
+                    sb.append("}");
                 }
                 break;
                 
@@ -256,6 +328,17 @@ public class MessageRouter {
         }
         
         return sb.toString();
+    }
+    
+    /**
+     * Truncates object names to configured maximum length.
+     */
+    private String truncateObjectName(String name) {
+        int maxLength = verbosityConfig.getNormal().getMaxObjectNameLength();
+        if (name.length() <= maxLength) {
+            return name;
+        }
+        return name.substring(0, maxLength - 3) + "...";
     }
     
     /**
