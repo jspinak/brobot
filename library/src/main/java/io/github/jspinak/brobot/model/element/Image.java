@@ -118,6 +118,10 @@ public class Image {
 
     @JsonIgnore
     public org.sikuli.script.Image sikuli() {
+        if (bufferedImage == null) {
+            throw new IllegalStateException("Cannot create SikuliX Image: BufferedImage is null. " +
+                "Image file may not exist or failed to load: " + name);
+        }
         return new org.sikuli.script.Image(bufferedImage);
     }
 
