@@ -25,6 +25,7 @@ dependencies {
     // These dependencies are exposed as part of Brobot's public API
     api 'org.springframework:spring-context'
     api 'org.springframework.boot:spring-boot-autoconfigure'
+    api 'org.springframework.boot:spring-boot-starter-aop'
     api 'org.slf4j:slf4j-api:2.0.9'
 
     // These dependencies are internal implementation details.

@@ -5,11 +5,11 @@ import io.github.jspinak.brobot.tools.logging.ActionLogger;
 import io.github.jspinak.brobot.tools.logging.console.ConsoleActionConfig;
 import io.github.jspinak.brobot.tools.logging.console.ConsoleActionReporter;
 import io.github.jspinak.brobot.tools.logging.enhanced.EnhancedActionLogger;
-import io.github.jspinak.brobot.tools.logging.enhanced.EnhancedActionLoggerImpl;
 import io.github.jspinak.brobot.tools.logging.gui.GuiAccessConfig;
 import io.github.jspinak.brobot.tools.logging.gui.GuiAccessMonitor;
 import io.github.jspinak.brobot.tools.logging.visual.HighlightManager;
 import io.github.jspinak.brobot.tools.logging.visual.VisualFeedbackConfig;
+import io.github.jspinak.brobot.action.Action;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -76,9 +76,10 @@ public class ActionLoggingConfig {
     )
     public HighlightManager highlightManager(
         VisualFeedbackConfig config,
-        BrobotLogger brobotLogger
+        BrobotLogger brobotLogger,
+        Action action
     ) {
-        return new HighlightManager(config, brobotLogger);
+        return new HighlightManager(config, brobotLogger, action);
     }
     
     /**
@@ -107,14 +108,9 @@ public class ActionLoggingConfig {
         GuiAccessMonitor guiAccessMonitor,
         VisualFeedbackConfig visualConfig
     ) {
-        return new EnhancedActionLoggerImpl(
-            baseActionLogger,
-            brobotLogger,
-            consoleReporter,
-            highlightManager,
-            guiAccessMonitor,
-            visualConfig
-        );
+        // EnhancedActionLoggerImpl has been removed due to interface incompatibility
+        // Return the base logger for now
+        return baseActionLogger;
     }
     
     /**

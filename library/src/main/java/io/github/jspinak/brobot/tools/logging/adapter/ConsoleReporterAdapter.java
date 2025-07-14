@@ -75,7 +75,7 @@ public class ConsoleReporterAdapter {
         var logBuilder = unifiedLogger.log()
             .type(type)
             .level(logLevel)
-            .console(message.trim());
+            .observation(message.trim());
             
         // Add extracted metadata
         metadata.forEach(logBuilder::metadata);
@@ -103,7 +103,7 @@ public class ConsoleReporterAdapter {
      */
     private static LogEvent.Type determineLogType(String message) {
         if (message == null || message.isEmpty()) {
-            return LogEvent.Type.CONSOLE;
+            return LogEvent.Type.OBSERVATION;  // Default to observation for generic messages
         }
         
         // Check for specific patterns
@@ -111,7 +111,7 @@ public class ConsoleReporterAdapter {
             return LogEvent.Type.ACTION;
         }
         if (STATE_PATTERN.matcher(message).find() || PATH_PATTERN.matcher(message).find()) {
-            return LogEvent.Type.NAVIGATION;
+            return LogEvent.Type.TRANSITION;  // Navigation is a type of transition
         }
         if (TRANSITION_PATTERN.matcher(message).find()) {
             return LogEvent.Type.TRANSITION;
@@ -123,7 +123,7 @@ public class ConsoleReporterAdapter {
             return LogEvent.Type.OBSERVATION;
         }
         
-        return LogEvent.Type.CONSOLE;
+        return LogEvent.Type.OBSERVATION;  // Default type for console messages
     }
     
     /**
@@ -132,7 +132,7 @@ public class ConsoleReporterAdapter {
     private static LogEvent.Level mapOutputLevel(OutputLevel outputLevel) {
         switch (outputLevel) {
             case NONE:
-                return LogEvent.Level.TRACE;
+                return LogEvent.Level.DEBUG;  // TRACE doesn't exist, use DEBUG
             case LOW:
                 return LogEvent.Level.INFO;
             case HIGH:
