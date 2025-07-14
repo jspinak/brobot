@@ -2,7 +2,6 @@ package io.github.jspinak.brobot.tools.logging.visual;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.stereotype.Component;
 
 import java.awt.*;
 
@@ -22,7 +21,6 @@ import java.awt.*;
  * @see HighlightManager for the implementation that uses this config
  */
 @Data
-@Component
 @ConfigurationProperties(prefix = "brobot.highlight")
 public class VisualFeedbackConfig {
     
