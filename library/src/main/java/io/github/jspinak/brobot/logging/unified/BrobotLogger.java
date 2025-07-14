@@ -1,9 +1,12 @@
 package io.github.jspinak.brobot.logging.unified;
 
 import io.github.jspinak.brobot.action.ActionResult;
+import io.github.jspinak.brobot.config.LoggingVerbosityConfig;
+import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.model.state.State;
 import io.github.jspinak.brobot.model.state.StateObject;
 import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -55,12 +58,18 @@ public class BrobotLogger {
     
     private final LoggingContext context;
     private final MessageRouter router;
+    private LoggingVerbosityConfig verbosityConfig;
     private ConsoleReporter.OutputLevel consoleLevel = ConsoleReporter.OutputLevel.HIGH;
     private boolean structuredLoggingEnabled = false;
 
     public BrobotLogger(LoggingContext context, MessageRouter router) {
         this.context = context;
         this.router = router;
+    }
+    
+    @Autowired(required = false)
+    public void setVerbosityConfig(LoggingVerbosityConfig verbosityConfig) {
+        this.verbosityConfig = verbosityConfig;
     }
 
     /**
@@ -94,7 +103,7 @@ public class BrobotLogger {
      * @param result The result of the action execution
      */
     public void action(String action, StateObject target, ActionResult result) {
-        LogEvent event = LogEvent.builder()
+        LogEvent.Builder eventBuilder = LogEvent.builder()
                 .type(LogEvent.Type.ACTION)
                 .action(action)
                 .target(target.getName())
@@ -103,10 +112,20 @@ public class BrobotLogger {
                 .sessionId(context.getSessionId())
                 .stateId(context.getCurrentState() != null ? context.getCurrentState().getName() : null)
                 .timestamp(System.currentTimeMillis())
-                .metadata("matchCount", result.getMatchList().size())
-                .build();
+                .metadata("matchCount", result.getMatchList().size());
         
-        router.route(event);
+        // Add match coordinates if available
+        if (!result.getMatchList().isEmpty()) {
+            // Get the first (best) match
+            Object firstMatch = result.getMatchList().get(0);
+            if (firstMatch instanceof Match) {
+                Match match = (Match) firstMatch;
+                eventBuilder.metadata("matchX", match.x())
+                           .metadata("matchY", match.y());
+            }
+        }
+        
+        router.route(eventBuilder.build());
     }
 
     /**
@@ -297,6 +316,29 @@ public class BrobotLogger {
      */
     public boolean isStructuredLoggingEnabled() {
         return structuredLoggingEnabled;
+    }
+    
+    /**
+     * Sets the logging verbosity level.
+     * 
+     * @param level The desired verbosity level (NORMAL or VERBOSE)
+     */
+    public void setVerbosity(LoggingVerbosityConfig.VerbosityLevel level) {
+        if (verbosityConfig != null) {
+            verbosityConfig.setVerbosity(level);
+        }
+    }
+    
+    /**
+     * Gets the current logging verbosity level.
+     * 
+     * @return The current verbosity level
+     */
+    public LoggingVerbosityConfig.VerbosityLevel getVerbosity() {
+        if (verbosityConfig != null) {
+            return verbosityConfig.getVerbosity();
+        }
+        return LoggingVerbosityConfig.VerbosityLevel.NORMAL;
     }
 
     /**
