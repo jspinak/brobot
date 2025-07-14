@@ -265,8 +265,11 @@ public class Pattern {
     @JsonIgnore
     public org.sikuli.script.Pattern sikuli() {
         if (image == null) {
-            System.out.println("Image is null for pattern: " + name);
-            return new org.sikuli.script.Pattern();
+            throw new IllegalStateException("Cannot create SikuliX Pattern: Image is null for pattern: " + name);
+        }
+        if (image.isEmpty()) {
+            throw new IllegalStateException("Cannot create SikuliX Pattern: Image has no BufferedImage. " +
+                "Image file may not exist or failed to load for pattern: " + name);
         }
         return new org.sikuli.script.Pattern(image.sikuli());
     }
