@@ -5,6 +5,7 @@ import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.action.basic.find.Find;
+import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
 import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.tools.history.draw.HighlightMatchedRegionV2;
 import io.github.jspinak.brobot.tools.testing.mock.time.TimeProvider;
@@ -93,6 +94,15 @@ public class Highlight implements ActionInterface {
             highlightSeconds = highlightOptions.getHighlightSeconds();
         }
         
+        // If we're highlighting regions only, Find doesn't need special config
+        // It will simply return the regions as matches
+        if (objectCollections.length > 0 && hasOnlyRegions(objectCollections)) {
+            // For regions, we can use a simple pattern find with no pattern
+            PatternFindOptions findOptions = new PatternFindOptions.Builder()
+                .build();
+            matches.setActionConfig(findOptions);
+        }
+        
         find.perform(matches, objectCollections);
         
         if (highlightAllAtOnce) {
@@ -115,5 +125,18 @@ public class Highlight implements ActionInterface {
             if (matches.getMatchList().indexOf(match) < matches.getMatchList().size() - 1)
                 time.wait(config.getPauseAfterEnd());
         }
+    }
+    
+    private boolean hasOnlyRegions(ObjectCollection[] objectCollections) {
+        for (ObjectCollection collection : objectCollections) {
+            if (!collection.getStateImages().isEmpty() || 
+                !collection.getStateLocations().isEmpty() || 
+                !collection.getStateStrings().isEmpty() ||
+                !collection.getMatches().isEmpty() ||
+                !collection.getScenes().isEmpty()) {
+                return false;
+            }
+        }
+        return true;
     }
 }
