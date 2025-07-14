@@ -42,11 +42,11 @@ public class GuiAccessMonitor {
     }
     
     // Icons for different message types
-    private static final String ERROR_ICON = "❌";
-    private static final String WARNING_ICON = "⚠️";
-    private static final String INFO_ICON = "ℹ️";
-    private static final String SOLUTION_ICON = "💡";
-    private static final String SUCCESS_ICON = "✅";
+    private static final String ERROR_ICON = "[ERROR]";
+    private static final String WARNING_ICON = "[WARNING]";
+    private static final String INFO_ICON = "[INFO]";
+    private static final String SOLUTION_ICON = "[SOLUTION]";
+    private static final String SUCCESS_ICON = "[SUCCESS]";
     
     /**
      * Performs a comprehensive GUI access check and reports any problems found.
