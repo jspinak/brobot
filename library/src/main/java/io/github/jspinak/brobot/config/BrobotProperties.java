@@ -99,6 +99,11 @@ public class BrobotProperties {
      */
     private Testing testing = new Testing();
     
+    /**
+     * Monitor configuration settings
+     */
+    private Monitor monitor = new Monitor();
+    
     @Getter
     @Setter
     public static class Core {
@@ -371,6 +376,37 @@ public class BrobotProperties {
          * Send logs to external systems
          */
         private boolean sendLogs = true;
+    }
+    
+    @Getter
+    @Setter
+    public static class Monitor {
+        /**
+         * Monitor index to use for automation (0 = primary, 1 = secondary, etc.)
+         * Default: -1 (use primary monitor)
+         */
+        private int defaultScreenIndex = -1;
+        
+        /**
+         * Enable multi-monitor support
+         */
+        private boolean multiMonitorEnabled = false;
+        
+        /**
+         * Search across all monitors when finding elements
+         */
+        private boolean searchAllMonitors = false;
+        
+        /**
+         * Log monitor information for each operation
+         */
+        private boolean logMonitorInfo = true;
+        
+        /**
+         * Monitor assignment for specific operations
+         * Key: operation name, Value: monitor index
+         */
+        private java.util.Map<String, Integer> operationMonitorMap = new java.util.HashMap<>();
     }
     
     /**
