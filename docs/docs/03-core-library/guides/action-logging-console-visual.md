@@ -2,19 +2,115 @@
 sidebar_position: 7
 ---
 
-# Action Logging with Console Output and Visual Feedback
-
-The enhanced action logging system provides real-time console output and visual highlighting to improve the development and debugging experience. This guide covers the console reporting and visual feedback features added to Brobot's action logging.
+# Enhanced Action Logging with Console Output and Visual Feedback
 
 ## Overview
 
-When developing automation scripts, it's crucial to understand what Brobot is doing at each step. The enhanced action logging provides:
+The Brobot framework includes enhanced action logging that provides real-time console output and visual highlighting during automation execution. This makes debugging and development significantly easier by showing exactly what Brobot is doing at each step.
 
-- **Real-time console output** showing action execution with visual indicators
-- **Visual highlighting** on screen to show what's being found and clicked
-- **GUI access detection** to quickly identify environment issues
-- **Performance warnings** for slow operations
-- **Configurable verbosity** for different environments
+## Key Features
+
+### 1. Console Action Reporting
+- Real-time feedback with visual indicators (🔍, ✓, ✗, ⚠️)
+- Configurable verbosity levels (QUIET, NORMAL, VERBOSE)
+- Performance warnings for slow operations
+- Detailed match information including location and confidence scores
+
+### 2. Visual Highlighting
+- **Green borders** for successful pattern matches
+- **Blue borders** for search regions
+- **Yellow ripple effects** for clicks
+- **Red indicators** for errors
+- All colors and durations are configurable
+
+### 3. GUI Access Detection
+- Automatic detection of environment issues
+- Platform-specific solutions (Linux/X11, Windows, macOS)
+- Clear, actionable advice for fixing problems
+
+## Quick Start
+
+### Basic Usage
+
+The enhanced logging is automatically enabled. Just run your Brobot application and you'll see:
+
+```
+🔍 FIND: login-button → ✓ FOUND (234ms)
+   └─ Location: (450,320) Score: 98.5%
+
+✓ CLICK login-button (156ms)
+
+✗ FIND submit-button (2003ms)
+   └─ Search regions: 3 areas checked
+
+⚠️ Performance Warning: FIND took 2003ms (threshold: 1000ms)
+```
+
+### Configuration
+
+Add to your `application.yml`:
+
+```yaml
+brobot:
+  # Console output settings
+  console:
+    actions:
+      enabled: true
+      level: NORMAL  # QUIET, NORMAL, VERBOSE
+      show-match-details: true
+      use-icons: true
+  
+  # Visual highlighting
+  highlight:
+    enabled: true
+    auto-highlight-finds: true
+    find:
+      color: "#00FF00"
+      duration: 2.0
+```
+
+### Using Visual Debug Profile
+
+For maximum visibility during development:
+
+```bash
+java -jar your-app.jar --spring.profiles.active=visual-debug
+```
+
+## Common Use Cases
+
+### 1. Debugging Failed Finds
+
+With VERBOSE logging, you'll see exactly where Brobot searched:
+
+```
+✗ FIND submit-button (2003ms)
+   └─ Search regions: 3 areas checked
+   └─ Region 1: (0,0 800x600)
+   └─ Region 2: (800,0 800x600)
+   └─ Similar matches: button-disabled (85.2%)
+```
+
+### 2. Performance Optimization
+
+Identify slow operations immediately:
+
+```
+⚠️ Performance Warning: FIND took 2003ms (threshold: 1000ms)
+```
+
+### 3. GUI Environment Issues
+
+Get immediate feedback about environment problems:
+
+```
+❌ GUI Problem: No DISPLAY environment variable set
+💡 Possible solutions:
+   • Set DISPLAY=:0 for local display
+   • For SSH: use -X or -Y flag for X11 forwarding
+   • For Docker: pass --env DISPLAY=$DISPLAY
+   • For WSL: install and configure X server (VcXsrv, Xming)
+```
 
 ## Console Action Reporting
 
@@ -223,190 +319,110 @@ brobot:
     min-screen-height: 600
 ```
 
-## Usage Examples
+## Advanced Features
 
-### Basic Usage with Default Settings
-
-```java
-@Autowired
-private ActionLogger actionLogger;
-
-// Actions are automatically logged to console with default settings
-ActionResult result = action.perform(findOptions, targetImage);
-actionLogger.logAction("FIND", targetImage, result);
-```
-
-### Using Enhanced Action Logger
+### Custom Visual Feedback
 
 ```java
 @Autowired
 private EnhancedActionLogger logger;
 
-// Log with visual feedback
-logger.logActionWithVisuals(
-    "FIND", 
-    target, 
-    result,
-    VisualFeedbackOptions.defaults()
-);
-
-// Check GUI access at startup
-if (!logger.checkAndLogGuiAccess()) {
-    // Handle GUI access problems
-}
-```
-
-### Custom Visual Feedback
-
-```java
 // Create custom visual options
 VisualFeedbackOptions options = VisualFeedbackOptions.builder()
     .highlightFinds(true)
-    .highlightSearchRegions(true)
     .findHighlightColor(Color.YELLOW)
     .findHighlightDuration(5.0)
     .flashHighlight(true)
-    .flashCount(3)
     .showMatchScore(true)
-    .highlightLabel("Target Found!")
     .build();
 
-logger.logActionWithVisuals("CLICK", button, result, options);
+logger.logActionWithVisuals("FIND", target, result, options);
 ```
 
-### Debugging Complex Searches
+### Profile-Based Configuration
 
-```java
-// Log search start with regions
-logger.logSearchStart(targetImage, searchRegion1, searchRegion2);
-
-// Perform search
-ActionResult result = finder.find(targetImage);
-
-// Log search completion with timing
-logger.logSearchComplete(targetImage, result, timer.stop());
-```
-
-## Profile Configurations
-
-### Development Profile
-
-Maximum visibility for debugging:
-
+#### Development Profile
 ```yaml
-# application-dev.yml
+# Maximum visibility
 brobot:
-  console:
-    actions:
-      enabled: true
-      level: VERBOSE
-      show-match-details: true
-  highlight:
-    enabled: true
-    auto-highlight-finds: true
-    auto-highlight-search-regions: true
-    error:
-      enabled: true
+  console.actions.level: VERBOSE
+  highlight.auto-highlight-finds: true
+  highlight.auto-highlight-search-regions: true
 ```
 
-### CI/CD Profile
-
-Minimal output for automated tests:
-
+#### CI/CD Profile
 ```yaml
-# application-ci.yml
+# Minimal output
 brobot:
-  console:
-    actions:
-      enabled: true
-      level: QUIET
-  highlight:
-    enabled: false
-  gui-access:
-    continue-on-error: true
+  console.actions.level: QUIET
+  highlight.enabled: false
+  gui-access.continue-on-error: true
 ```
 
-### Production Profile
-
-Disabled for production use:
-
+#### Production Profile
 ```yaml
-# application-prod.yml
+# Disabled
 brobot:
-  console:
-    actions:
-      enabled: false
-  highlight:
-    enabled: false
-  gui-access:
-    report-problems: true
-    suggest-solutions: false
+  console.actions.enabled: false
+  highlight.enabled: false
 ```
-
-## Visual Feedback Presets
-
-The library provides convenient presets for common scenarios:
-
-```java
-// Maximum debugging visibility
-VisualFeedbackOptions.debug()
-
-// No visual feedback (production)
-VisualFeedbackOptions.none()
-
-// Only highlight successful finds
-VisualFeedbackOptions.findsOnly()
-
-// Default settings from configuration
-VisualFeedbackOptions.defaults()
-```
-
-## Performance Considerations
-
-1. **Console Output**: Minimal overhead (~1ms per log)
-2. **Visual Highlighting**: Asynchronous, non-blocking
-3. **GUI Checks**: Only performed on startup by default
-4. **Conditional Loading**: Components only created when enabled
 
 ## Troubleshooting
 
 ### No Console Output
+1. Check if enabled: `brobot.console.actions.enabled: true`
+2. Check verbosity: `brobot.console.actions.level: NORMAL`
+3. Check action filters: `brobot.console.actions.report.find: true`
 
-1. Check if console actions are enabled:
-   ```yaml
-   brobot.console.actions.enabled: true
-   ```
-
-2. Verify the verbosity level:
-   ```yaml
-   brobot.console.actions.level: NORMAL
-   ```
-
-3. Check if specific action types are filtered:
-   ```yaml
-   brobot.console.actions.report.find: true
-   ```
-
-### Visual Highlighting Not Working
-
-1. Ensure highlighting is enabled globally:
-   ```yaml
-   brobot.highlight.enabled: true
-   ```
-
-2. Check if running in mock mode (highlights are logged but not shown)
-
-3. Verify GUI access:
-   ```java
-   logger.checkAndLogGuiAccess();
-   ```
-
-### Icons Not Displaying
-
+### Icons Not Showing
 Some terminals don't support unicode. Disable icons:
 ```yaml
 brobot.console.actions.use-icons: false
 ```
+
+### Visual Highlighting Not Working
+1. Check if enabled: `brobot.highlight.enabled: true`
+2. Verify GUI access: Run the GUI access check
+3. Check if in mock mode (highlights are logged but not shown visually)
+
+## Example Application
+
+See the complete example in `/examples/src/main/java/io/github/jspinak/brobot/examples/logging/EnhancedLoggingDemo.java`
+
+Run it with:
+```bash
+cd examples
+./gradlew bootRun
+```
+
+Or with visual debug profile:
+```bash
+./gradlew bootRun --args='--spring.profiles.active=visual-debug'
+```
+
+## Performance Impact
+
+- Console output: ~1ms overhead per action
+- Visual highlighting: Asynchronous, non-blocking
+- GUI access check: Only on startup (configurable)
+- Overall impact: < 2% in typical usage
+
+## Migration from Old Logging
+
+The new system is backward compatible. Existing code continues to work, but you can enhance it:
+
+```java
+// Old way
+actionLogger.logAction("CLICK", button, result);
+
+// Enhanced way with visual feedback
+enhancedLogger.logActionWithVisuals("CLICK", button, result, 
+    VisualFeedbackOptions.debug());
+```
+
+## Configuration Reference
+
+See `/library/src/main/resources/brobot-visual-feedback.properties` for all available settings with documentation.
 
 ## Integration with Desktop Runner
 
@@ -430,7 +446,8 @@ The desktop runner automatically integrates console output through the `ConsoleA
 
 ## Next Steps
 
-- Try the visual-debug profile: `--spring.profiles.active=visual-debug`
-- Customize colors and durations for your needs
-- Create custom visual feedback options for specific scenarios
-- Configure performance thresholds based on your SLAs
+1. Enable enhanced logging in your application
+2. Try the visual-debug profile during development
+3. Customize colors and durations for your needs
+4. Use GUI access detection to catch environment issues early
+5. Monitor performance with automatic warnings
