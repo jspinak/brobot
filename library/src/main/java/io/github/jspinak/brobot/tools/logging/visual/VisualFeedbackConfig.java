@@ -22,6 +22,7 @@ import java.awt.*;
  * @see HighlightManager for the implementation that uses this config
  */
 @Data
+@Component
 @ConfigurationProperties(prefix = "brobot.highlight")
 public class VisualFeedbackConfig {
     
