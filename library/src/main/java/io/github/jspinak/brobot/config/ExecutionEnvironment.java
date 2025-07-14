@@ -91,9 +91,20 @@ public class ExecutionEnvironment {
             return false;
         }
         
-        // Check for DISPLAY variable on Unix-like systems
+        // Check OS type
         String os = System.getProperty("os.name").toLowerCase();
-        if (os.contains("nix") || os.contains("nux") || os.contains("mac")) {
+        boolean isWindows = os.contains("windows");
+        boolean isWSL = System.getenv("WSL_DISTRO_NAME") != null || 
+                       System.getenv("WSL_INTEROP") != null;
+        
+        // For Windows (not WSL), display is generally available
+        if (isWindows && !isWSL) {
+            // Windows has display unless running in CI
+            return !isRunningInCI();
+        }
+        
+        // Check for DISPLAY variable on Unix-like systems (including WSL)
+        if (os.contains("nix") || os.contains("nux") || os.contains("mac") || isWSL) {
             String display = System.getenv("DISPLAY");
             if (display == null || display.isEmpty()) {
                 return false;
