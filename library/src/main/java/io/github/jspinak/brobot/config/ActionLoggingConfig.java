@@ -40,9 +40,13 @@ import org.springframework.context.annotation.PropertySource;
     VisualFeedbackConfig.SearchRegionHighlightConfig.class,
     VisualFeedbackConfig.ErrorHighlightConfig.class,
     VisualFeedbackConfig.ClickHighlightConfig.class,
-    GuiAccessConfig.class
+    GuiAccessConfig.class,
+    LoggingVerbosityConfig.class,
+    LoggingVerbosityConfig.NormalModeConfig.class,
+    LoggingVerbosityConfig.VerboseModeConfig.class
 })
 @PropertySource(value = "classpath:brobot-visual-feedback.properties", ignoreResourceNotFound = true)
+@PropertySource(value = "classpath:brobot-logging-defaults.properties", ignoreResourceNotFound = true)
 public class ActionLoggingConfig {
     
     /**
