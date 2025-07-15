@@ -212,7 +212,7 @@ logging:
 | `default-screen-index` | int | -1 | Default monitor index (-1 uses primary) |
 | `search-all-monitors` | boolean | false | Search across all monitors |
 | `log-monitor-info` | boolean | true | Log monitor information |
-| `operation-monitor-map` | Map<String, Integer> | empty | Map operations to specific monitors |
+| `operation-monitor-map` | Map&lt;String, Integer&gt; | empty | Map operations to specific monitors |
 
 ### MonitorManager Methods
 
