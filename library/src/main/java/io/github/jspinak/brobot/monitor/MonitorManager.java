@@ -22,6 +22,7 @@ public class MonitorManager {
     private final BrobotProperties properties;
     private final Map<Integer, MonitorInfo> monitorCache = new ConcurrentHashMap<>();
     private final Map<String, Integer> operationMonitorMap = new ConcurrentHashMap<>();
+    private boolean headlessMode = false;
     
     public MonitorManager(BrobotProperties properties) {
         this.properties = properties;
@@ -48,6 +49,7 @@ public class MonitorManager {
         // Check if running in headless mode
         if (ge.isHeadlessInstance() || GraphicsEnvironment.isHeadless()) {
             log.warn("Running in headless mode. Monitor detection disabled.");
+            headlessMode = true;
             // Create a default monitor for headless mode
             Rectangle bounds = new Rectangle(0, 0, 1920, 1080); // Default resolution
             MonitorInfo info = new MonitorInfo(0, bounds, "headless-default");
@@ -104,9 +106,20 @@ public class MonitorManager {
      * @return Screen object for the specified monitor
      */
     public Screen getScreen(int monitorIndex) {
+        if (headlessMode) {
+            log.debug("Running in headless mode - returning null Screen");
+            return null;
+        }
+        
         if (!isValidMonitorIndex(monitorIndex)) {
             log.warn("Invalid monitor index: {}. Using primary monitor.", monitorIndex);
-            return new Screen();
+            try {
+                return new Screen();
+            } catch (Exception e) {
+                log.error("Failed to create Screen: " + e.getMessage());
+                headlessMode = true;
+                return null;
+            }
         }
         
         if (properties.getMonitor().isLogMonitorInfo()) {
@@ -114,7 +127,13 @@ public class MonitorManager {
             log.debug("Using monitor {}: {} for operation", monitorIndex, info.getDeviceId());
         }
         
-        return new Screen(monitorIndex);
+        try {
+            return new Screen(monitorIndex);
+        } catch (Exception e) {
+            log.error("Failed to create Screen for monitor {}: {}", monitorIndex, e.getMessage());
+            headlessMode = true;
+            return null;
+        }
     }
     
     /**
@@ -139,7 +158,13 @@ public class MonitorManager {
         }
         
         // Fall back to primary monitor
-        return new Screen();
+        try {
+            return new Screen();
+        } catch (Exception e) {
+            log.error("Failed to create default Screen: " + e.getMessage());
+            headlessMode = true;
+            return null;
+        }
     }
     
     /**
@@ -148,8 +173,19 @@ public class MonitorManager {
      */
     public List<Screen> getAllScreens() {
         List<Screen> screens = new ArrayList<>();
+        if (headlessMode) {
+            log.debug("Running in headless mode - returning empty screen list");
+            return screens;
+        }
+        
         for (int i = 0; i < getMonitorCount(); i++) {
-            screens.add(new Screen(i));
+            try {
+                screens.add(new Screen(i));
+            } catch (Exception e) {
+                log.error("Failed to create Screen for monitor {}: {}", i, e.getMessage());
+                headlessMode = true;
+                return screens;
+            }
         }
         return screens;
     }

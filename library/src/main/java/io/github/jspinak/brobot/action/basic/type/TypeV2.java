@@ -46,11 +46,24 @@ import java.util.logging.Logger;
 public class TypeV2 implements ActionInterface {
     
     private static final Logger logger = Logger.getLogger(TypeV2.class.getName());
-    private final Screen screen = new Screen();
+    private Screen screen;
+    private boolean headlessMode = false;
+    
+    private Screen getScreen() {
+        if (screen == null && !headlessMode) {
+            try {
+                screen = new Screen();
+            } catch (Exception e) {
+                logger.warning("Failed to initialize Screen - running in headless mode: " + e.getMessage());
+                headlessMode = true;
+            }
+        }
+        return screen;
+    }
     
     @Override
-    public Type getActionType() {
-        return Type.TYPE;
+    public ActionInterface.Type getActionType() {
+        return ActionInterface.Type.TYPE;
     }
     
     @Override
@@ -68,10 +81,16 @@ public class TypeV2 implements ActionInterface {
             
             // Click on location if provided
             Location clickLocation = extractClickLocation(objectCollections);
-            if (clickLocation != null) {
-                org.sikuli.script.Location sikuliLoc = clickLocation.sikuli();
-                sikuliLoc.click();
-                Thread.sleep(100);
+            if (clickLocation != null && !headlessMode) {
+                try {
+                    org.sikuli.script.Location sikuliLoc = clickLocation.sikuli();
+                    sikuliLoc.click();
+                    Thread.sleep(100);
+                } catch (Exception e) {
+                    logger.warning("Failed to click location: " + e.getMessage());
+                }
+            } else if (clickLocation != null && headlessMode) {
+                logger.info("Running in headless mode - simulating click at: " + clickLocation);
             }
             
             // Type the text
@@ -134,8 +153,19 @@ public class TypeV2 implements ActionInterface {
      */
     private boolean typeText(String text) {
         try {
+            if (headlessMode) {
+                logger.info("Running in headless mode - simulating type: " + text);
+                return true;
+            }
+            
+            Screen currentScreen = getScreen();
+            if (currentScreen == null) {
+                logger.warning("Screen not available for typing");
+                return false;
+            }
+            
             // Type the text
-            screen.type(text);
+            currentScreen.type(text);
             
             logger.fine("Successfully typed: " + text);
             return true;

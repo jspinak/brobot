@@ -76,11 +76,16 @@ public class ScreenUtilities {
      * @return array containing [width, height] in pixels
      */
     public static int[] getNewScreenWH() {
-        Screen screen = new Screen();
-        int[] wh = new int[2];
-        wh[0] = screen.w;
-        wh[1] = screen.h;
-        return wh;
+        try {
+            Screen screen = new Screen();
+            int[] wh = new int[2];
+            wh[0] = screen.w;
+            wh[1] = screen.h;
+            return wh;
+        } catch (Exception e) {
+            // In headless mode, return default dimensions
+            return new int[]{1920, 1080};
+        }
     }
 
     /**
@@ -160,8 +165,16 @@ public class ScreenUtilities {
      * @return Appropriate Screen object
      */
     public static Screen getScreen(String operationName) {
-        return monitorManager != null ? 
-            monitorManager.getScreen(operationName) : new Screen();
+        if (monitorManager != null) {
+            return monitorManager.getScreen(operationName);
+        }
+        
+        try {
+            return new Screen();
+        } catch (Exception e) {
+            // In headless mode, return null
+            return null;
+        }
     }
     
     /**
