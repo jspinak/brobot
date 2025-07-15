@@ -393,8 +393,12 @@ public class Region implements Comparable<Region> {
         return RegionUtils.getRandomLocation(this);
     }
 
+    /**
+     * @deprecated Use toString() instead
+     */
+    @Deprecated
     public void print() {
-        System.out.println("region: XYWH="+x()+"."+y()+"."+w()+"."+h()+"| ");
+        // Use toString() for string representation
     }
 
     @JsonIgnore

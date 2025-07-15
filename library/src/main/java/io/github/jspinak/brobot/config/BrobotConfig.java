@@ -56,7 +56,7 @@ import org.springframework.context.annotation.Import;
  */
 @Configuration
 @ComponentScan
-@Import({BrobotDefaultsConfiguration.class})
+@Import({BrobotDefaultsConfiguration.class, SikuliXLoggingConfig.class})
 public class BrobotConfig {
 
     /**
