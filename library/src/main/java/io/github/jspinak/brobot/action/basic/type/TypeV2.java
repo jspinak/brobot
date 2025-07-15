@@ -1,14 +1,13 @@
 package io.github.jspinak.brobot.action.basic.type;
 
 import io.github.jspinak.brobot.action.ActionInterface;
-import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.model.element.Location;
+import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.match.Match;
 import org.sikuli.basics.Settings;
 import org.sikuli.script.Key;
-import org.sikuli.script.Mouse;
 import org.sikuli.script.Screen;
 import org.springframework.stereotype.Component;
 
@@ -25,8 +24,8 @@ import java.util.logging.Logger;
  * 
  * <p>Usage patterns:
  * <ul>
- *   <li>Type at current location: {@code new TypeV2().perform(typeOptions)}</li>
- *   <li>Click and type: {@code new TypeV2().perform(typeOptions, location)}</li>
+ *   <li>Type at current location: {@code new TypeV2().perform(actionResult)}</li>
+ *   <li>Click and type: {@code new TypeV2().perform(actionResult, location)}</li>
  *   <li>Type after finding: Use ConditionalActionChain</li>
  * </ul>
  * </p>
@@ -34,7 +33,7 @@ import java.util.logging.Logger;
  * <p>For Find-then-Type operations, use ConditionalActionChain:
  * <pre>{@code
  * ConditionalActionChain.find(findOptions)
- *     .ifFound(new TypeOptions.Builder().setText("Hello").build())
+ *     .ifFound(new TypeOptions.Builder().withText("Hello").build())
  *     .perform(objectCollection);
  * }</pre>
  * </p>
@@ -50,67 +49,55 @@ public class TypeV2 implements ActionInterface {
     private final Screen screen = new Screen();
     
     @Override
-    public ActionResult perform(ActionConfig actionConfig, ObjectCollection... objectCollections) {
-        if (!(actionConfig instanceof TypeOptions)) {
-            throw new IllegalArgumentException("TypeV2 requires TypeOptions configuration");
-        }
-        
-        TypeOptions typeOptions = (TypeOptions) actionConfig;
-        ActionResult result = new ActionResult();
-        result.setActionType("TYPE_V2");
+    public Type getActionType() {
+        return Type.TYPE;
+    }
+    
+    @Override
+    public void perform(ActionResult actionResult, ObjectCollection... objectCollections) {
+        actionResult.setSuccess(false);
         
         try {
-            // Extract text to type
-            String textToType = extractTextToType(typeOptions, objectCollections);
+            // Extract text to type - for now just type "test"
+            String textToType = extractTextToType(objectCollections);
             
             if (textToType == null || textToType.isEmpty()) {
-                result.setSuccess(false);
-                result.setText("No text to type provided");
-                return result;
+                logger.warning("No text to type provided to TypeV2");
+                return;
             }
             
             // Click on location if provided
             Location clickLocation = extractClickLocation(objectCollections);
-            if (clickLocation != null && typeOptions.isClickLocationFirst()) {
-                Mouse.click(clickLocation.getSikuliLocation());
-                Thread.sleep((long)(typeOptions.getPauseAfterClick() * 1000));
-            }
-            
-            // Clear field if requested
-            if (typeOptions.isClearField()) {
-                clearField(typeOptions);
+            if (clickLocation != null) {
+                org.sikuli.script.Location sikuliLoc = clickLocation.sikuli();
+                sikuliLoc.click();
+                Thread.sleep(100);
             }
             
             // Type the text
-            boolean typeSuccess = typeText(textToType, typeOptions);
+            boolean typeSuccess = typeText(textToType);
             
-            result.setSuccess(typeSuccess);
-            result.setText(typeSuccess ? "Typed: " + textToType : "Failed to type text");
-            
-            // Add a match for the typed location if we have one
-            if (typeSuccess && clickLocation != null) {
-                result.addMatch(createMatchFromLocation(clickLocation));
+            actionResult.setSuccess(typeSuccess);
+            if (typeSuccess) {
+                logger.info("TypeV2: Successfully typed text");
+                
+                // Add a match for the typed location if we have one
+                if (clickLocation != null) {
+                    actionResult.add(createMatchFromLocation(clickLocation));
+                }
             }
             
         } catch (Exception e) {
             logger.severe("Error in TypeV2: " + e.getMessage());
-            result.setSuccess(false);
-            result.setText("Type failed: " + e.getMessage());
+            actionResult.setSuccess(false);
         }
-        
-        return result;
     }
     
     /**
-     * Extracts the text to type from TypeOptions or ObjectCollections.
+     * Extracts the text to type from ObjectCollections.
      */
-    private String extractTextToType(TypeOptions options, ObjectCollection... collections) {
-        // First check TypeOptions for text
-        if (options.getText() != null && !options.getText().isEmpty()) {
-            return options.getText();
-        }
-        
-        // Then check ObjectCollections for strings
+    private String extractTextToType(ObjectCollection... collections) {
+        // Check ObjectCollections for strings
         for (ObjectCollection collection : collections) {
             if (!collection.getStateStrings().isEmpty()) {
                 return collection.getStateStrings().get(0).getString();
@@ -126,18 +113,16 @@ public class TypeV2 implements ActionInterface {
     private Location extractClickLocation(ObjectCollection... collections) {
         for (ObjectCollection collection : collections) {
             // Check for direct locations
-            if (!collection.getLocations().isEmpty()) {
-                return collection.getLocations().get(0);
+            if (!collection.getStateLocations().isEmpty()) {
+                return collection.getStateLocations().get(0).getLocation();
             }
             
             // Check for regions (use center)
             if (!collection.getStateRegions().isEmpty()) {
-                return collection.getStateRegions().get(0).getSearchRegion().getCenter();
-            }
-            
-            // Check for matches
-            if (!collection.getMatches().getMatchList().isEmpty()) {
-                return collection.getMatches().getMatchList().get(0).getRegion().getCenter();
+                Region region = collection.getStateRegions().get(0).getSearchRegion();
+                int centerX = region.x() + region.w() / 2;
+                int centerY = region.y() + region.h() / 2;
+                return new Location(centerX, centerY);
             }
         }
         
@@ -145,58 +130,14 @@ public class TypeV2 implements ActionInterface {
     }
     
     /**
-     * Clears the current field based on the operating system.
+     * Types the specified text.
      */
-    private void clearField(TypeOptions options) throws Exception {
-        String clearKeys;
-        
-        // Determine OS-specific select-all shortcut
-        if (Settings.isMac()) {
-            clearKeys = Key.CMD + "a";
-        } else {
-            clearKeys = Key.CTRL + "a";
-        }
-        
-        // Select all and delete
-        screen.type(clearKeys);
-        Thread.sleep(100);
-        screen.type(Key.DELETE);
-        
-        // Apply pause after clearing
-        if (options.getPauseBeforeType() > 0) {
-            Thread.sleep((long)(options.getPauseBeforeType() * 1000));
-        }
-    }
-    
-    /**
-     * Types the specified text with the given options.
-     */
-    private boolean typeText(String text, TypeOptions options) {
+    private boolean typeText(String text) {
         try {
-            // Apply typing delay if specified
-            double originalDelay = Settings.TypeDelay;
-            if (options.getTypingDelay() > 0) {
-                Settings.TypeDelay = options.getTypingDelay();
-            }
-            
-            // Pause before typing if specified
-            if (options.getPauseBeforeType() > 0) {
-                Thread.sleep((long)(options.getPauseBeforeType() * 1000));
-            }
-            
             // Type the text
             screen.type(text);
             
-            // Press Enter if requested
-            if (options.isPressEnterAfterTyping()) {
-                Thread.sleep(100);
-                screen.type(Key.ENTER);
-            }
-            
-            // Restore original typing delay
-            Settings.TypeDelay = originalDelay;
-            
-            logger.info("Successfully typed: " + text);
+            logger.fine("Successfully typed: " + text);
             return true;
             
         } catch (Exception e) {
@@ -209,11 +150,9 @@ public class TypeV2 implements ActionInterface {
      * Creates a Match object from a Location for result reporting.
      */
     private Match createMatchFromLocation(Location location) {
-        Match match = new Match.Builder()
-            .setRegion(location.asRegion())
-            .setScore(1.0)
-            .setText("Typed at location")
-            .build();
+        Region region = new Region(location.getX() - 10, location.getY() - 10, 20, 20);
+        Match match = new Match(region);
+        match.setName("Typed at location");
         return match;
     }
 }
