@@ -65,7 +65,7 @@ public class AnnotationProcessor {
     @EventListener(ApplicationReadyEvent.class)
     @Order(1)  // Run early
     public void processAnnotations() {
-        System.out.println("=== ANNOTATION PROCESSOR START ===");
+        log.info("=== ANNOTATION PROCESSOR START ===");
         log.info("Processing Brobot annotations...");
         log.info("AnnotationProcessor running at ApplicationReadyEvent");
         
@@ -90,7 +90,6 @@ public class AnnotationProcessor {
         List<String> initialStateNames = new ArrayList<>();
         
         Map<String, Object> stateBeans = applicationContext.getBeansWithAnnotation(io.github.jspinak.brobot.annotations.State.class);
-        System.out.println("Found " + stateBeans.size() + " @State beans");
         log.info("Found {} beans with @State annotation", stateBeans.size());
         
         for (Map.Entry<String, Object> entry : stateBeans.entrySet()) {

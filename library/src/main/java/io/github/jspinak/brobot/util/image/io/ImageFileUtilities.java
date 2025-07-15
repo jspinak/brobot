@@ -102,12 +102,12 @@ public class ImageFileUtilities {
                 ConsoleReporter.format("Save file as %s \n", newPath);
                 return newPath;
             }
-            if (!FrameworkSettings.saveHistory) System.out.println(newPath); // don't print when running live
+            // Remove debug print - use proper logging if needed
             ImageIO.write(bufferedImageOps.getBuffImgFromScreen(region),
                     "png", new File(newPath));
             return newPath;
         } catch (IOException e) {
-            e.printStackTrace();
+            ConsoleReporter.println("Error saving region to file: " + e.getMessage());
             return null;
         }
     }

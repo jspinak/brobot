@@ -1,5 +1,6 @@
 package io.github.jspinak.brobot.config;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import java.awt.GraphicsEnvironment;
 
@@ -31,6 +32,7 @@ import java.awt.GraphicsEnvironment;
  *     .build();  // Auto-detects display availability
  * }</pre>
  */
+@Slf4j
 @Component
 public class ExecutionEnvironment {
     
@@ -293,7 +295,7 @@ public class ExecutionEnvironment {
             env.verboseLogging = this.verboseLogging;
             
             if (env.verboseLogging) {
-                System.out.println("ExecutionEnvironment configured: " + env.getEnvironmentInfo());
+                log.debug("ExecutionEnvironment configured: {}", env.getEnvironmentInfo());
             }
             
             return env;
