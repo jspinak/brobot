@@ -451,6 +451,180 @@ public class Action {
         return perform(action, strColl);
     }
     
+    // ===== New Convenience Methods for ActionType enum =====
+    
+    /**
+     * Performs the specified action type on a location with default configuration.
+     * <p>
+     * This convenience method enables simple one-line calls like:
+     * {@code action.perform(CLICK, location)}
+     * </p>
+     * <p>
+     * The method automatically creates the appropriate ActionConfig based on
+     * the ActionType and wraps the location in an ObjectCollection.
+     * </p>
+     * 
+     * @param type the type of action to perform
+     * @param location the location to act upon
+     * @return ActionResult containing the operation results
+     * @since 2.0
+     */
+    public ActionResult perform(ActionType type, Location location) {
+        ActionConfig config = createDefaultConfig(type);
+        ObjectCollection collection = new ObjectCollection.Builder()
+            .withLocations(location)
+            .build();
+        return perform(config, collection);
+    }
+    
+    /**
+     * Performs the specified action type on a region with default configuration.
+     * <p>
+     * This convenience method enables simple one-line calls like:
+     * {@code action.perform(HIGHLIGHT, region)}
+     * </p>
+     * 
+     * @param type the type of action to perform
+     * @param region the region to act upon
+     * @return ActionResult containing the operation results
+     * @since 2.0
+     */
+    public ActionResult perform(ActionType type, Region region) {
+        ActionConfig config = createDefaultConfig(type);
+        ObjectCollection collection = new ObjectCollection.Builder()
+            .withRegions(region)
+            .build();
+        return perform(config, collection);
+    }
+    
+    /**
+     * Performs the specified action type with text input.
+     * <p>
+     * This convenience method enables simple one-line calls like:
+     * {@code action.perform(TYPE, "Hello World")}
+     * </p>
+     * 
+     * @param type the type of action to perform (typically TYPE)
+     * @param text the text to type or use in the action
+     * @return ActionResult containing the operation results
+     * @since 2.0
+     */
+    public ActionResult perform(ActionType type, String text) {
+        if (type == ActionType.TYPE) {
+            TypeOptions typeOptions = new TypeOptions.Builder()
+                .setText(text)
+                .build();
+            return perform(typeOptions);
+        }
+        
+        // For other actions, wrap text in ObjectCollection
+        ActionConfig config = createDefaultConfig(type);
+        ObjectCollection collection = new ObjectCollection.Builder()
+            .withStrings(text)
+            .build();
+        return perform(config, collection);
+    }
+    
+    /**
+     * Performs the specified action type on multiple objects with default configuration.
+     * <p>
+     * This is the most flexible convenience method, accepting any objects that
+     * can be converted to the appropriate type for the action. The method will
+     * attempt to extract locations, regions, or other required data from the
+     * provided objects.
+     * </p>
+     * 
+     * @param type the type of action to perform
+     * @param objects the objects to act upon (Location, Region, StateRegion, Match, etc.)
+     * @return ActionResult containing the operation results
+     * @since 2.0
+     */
+    public ActionResult perform(ActionType type, Object... objects) {
+        ActionConfig config = createDefaultConfig(type);
+        ObjectCollection.Builder builder = new ObjectCollection.Builder();
+        
+        // Process each object and add to collection
+        for (Object obj : objects) {
+            if (obj instanceof Location) {
+                builder.withLocations((Location) obj);
+            } else if (obj instanceof Region) {
+                builder.withRegions((Region) obj);
+            } else if (obj instanceof StateImage) {
+                builder.withImages((StateImage) obj);
+            } else if (obj instanceof String) {
+                builder.withStrings((String) obj);
+            } else if (obj instanceof ObjectCollection) {
+                // Direct ObjectCollection - use as is
+                return perform(config, (ObjectCollection) obj);
+            }
+            // Add more type conversions as needed
+        }
+        
+        return perform(config, builder.build());
+    }
+    
+    /**
+     * Creates a default ActionConfig instance for the given ActionType.
+     * <p>
+     * Maps ActionType enum values to their corresponding ActionConfig
+     * implementations with sensible defaults.
+     * </p>
+     * 
+     * @param type the action type to create config for
+     * @return appropriate ActionConfig instance
+     * @throws IllegalArgumentException if action type is not yet supported
+     * @since 2.0
+     */
+    private ActionConfig createDefaultConfig(ActionType type) {
+        switch (type) {
+            case CLICK:
+                return new ClickOptions.Builder().build();
+            case DOUBLE_CLICK:
+                return new ClickOptions.Builder()
+                    .setNumberOfClicks(2)
+                    .build();
+            case RIGHT_CLICK:
+                return new ClickOptions.Builder()
+                    .setClickType(ClickOptions.Type.RIGHT)
+                    .build();
+            case MIDDLE_CLICK:
+                return new ClickOptions.Builder()
+                    .setClickType(ClickOptions.Type.MIDDLE)
+                    .build();
+            case HIGHLIGHT:
+                return new HighlightOptions.Builder().build();
+            case TYPE:
+                return new TypeOptions.Builder().build();
+            case HOVER:
+                return new MouseMoveOptions.Builder().build();
+            case DRAG:
+                return new DragOptions.Builder().build();
+            case FIND:
+                return new PatternFindOptions.Builder().build();
+            case WAIT_VANISH:
+                return new VanishOptions.Builder().build();
+            case SCROLL_UP:
+                return new ScrollOptions.Builder()
+                    .setDirection(ScrollOptions.Direction.UP)
+                    .build();
+            case SCROLL_DOWN:
+                return new ScrollOptions.Builder()
+                    .setDirection(ScrollOptions.Direction.DOWN)
+                    .build();
+            case KEY_DOWN:
+                return new KeyDownOptions.Builder().build();
+            case KEY_UP:
+                return new KeyUpOptions.Builder().build();
+            case MOUSE_DOWN:
+                return new MouseDownOptions.Builder().build();
+            case MOUSE_UP:
+                return new MouseUpOptions.Builder().build();
+            default:
+                throw new IllegalArgumentException(
+                    "ActionType " + type + " is not yet supported in convenience methods");
+        }
+    }
+    
     /**
      * Creates a default ActionConfig instance for the given action type.
      * <p>
