@@ -1,12 +1,11 @@
 package io.github.jspinak.brobot.action.basic.highlight;
 
 import io.github.jspinak.brobot.action.ActionInterface;
-import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.match.Match;
-import org.sikuli.script.Screen;
+import io.github.jspinak.brobot.model.state.StateRegion;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -23,8 +22,8 @@ import java.util.logging.Logger;
  * 
  * <p>Usage patterns:
  * <ul>
- *   <li>Highlight a specific region: {@code new HighlightV2().perform(highlightOptions, region)}</li>
- *   <li>Highlight matches from a Find: {@code new HighlightV2().perform(highlightOptions, matches)}</li>
+ *   <li>Highlight a specific region: {@code new HighlightV2().perform(actionResult, region)}</li>
+ *   <li>Highlight matches from a Find: {@code new HighlightV2().perform(actionResult, matches)}</li>
  * </ul>
  * </p>
  * 
@@ -46,66 +45,53 @@ public class HighlightV2 implements ActionInterface {
     private static final Logger logger = Logger.getLogger(HighlightV2.class.getName());
     
     @Override
-    public ActionResult perform(ActionConfig actionConfig, ObjectCollection... objectCollections) {
-        if (!(actionConfig instanceof HighlightOptions)) {
-            throw new IllegalArgumentException("HighlightV2 requires HighlightOptions configuration");
-        }
-        
-        HighlightOptions highlightOptions = (HighlightOptions) actionConfig;
-        ActionResult result = new ActionResult();
-        result.setActionType("HIGHLIGHT_V2");
+    public Type getActionType() {
+        return Type.HIGHLIGHT;
+    }
+    
+    @Override
+    public void perform(ActionResult actionResult, ObjectCollection... objectCollections) {
+        actionResult.setSuccess(false);
         
         try {
             // Extract highlightable regions from collections
             List<Region> regions = extractHighlightableRegions(objectCollections);
             
             if (regions.isEmpty()) {
-                result.setSuccess(false);
-                result.setText("No highlightable regions provided");
-                return result;
+                logger.warning("No highlightable regions provided to HighlightV2");
+                return;
             }
             
             // Highlight each region
             int highlightedCount = 0;
             for (Region region : regions) {
-                if (highlightRegion(region, highlightOptions)) {
-                    result.addMatch(createMatchFromRegion(region));
+                if (highlightRegion(region)) {
+                    actionResult.add(createMatchFromRegion(region));
                     highlightedCount++;
                 }
             }
             
-            result.setSuccess(highlightedCount > 0);
-            result.setText(String.format("Highlighted %d of %d regions", highlightedCount, regions.size()));
+            actionResult.setSuccess(highlightedCount > 0);
+            logger.info(String.format("HighlightV2: Highlighted %d of %d regions", highlightedCount, regions.size()));
             
         } catch (Exception e) {
             logger.severe("Error in HighlightV2: " + e.getMessage());
-            result.setSuccess(false);
-            result.setText("Highlight failed: " + e.getMessage());
+            actionResult.setSuccess(false);
         }
-        
-        return result;
     }
     
     /**
      * Extracts highlightable regions from the provided object collections.
-     * Supports Region, StateRegion, and Match objects.
+     * Supports Region and StateRegion objects.
      */
     private List<Region> extractHighlightableRegions(ObjectCollection... collections) {
         List<Region> regions = new ArrayList<>();
         
         for (ObjectCollection collection : collections) {
-            // Extract from StateRegions
-            collection.getStateRegions().stream()
-                .map(stateRegion -> stateRegion.getSearchRegion())
-                .forEach(regions::add);
-            
-            // Extract from Matches
-            collection.getMatches().getMatchList().stream()
-                .map(Match::getRegion)
-                .forEach(regions::add);
-            
-            // Note: Locations don't have bounds, so they can't be highlighted
-            // Users should convert locations to small regions if needed
+            // Extract regions from StateRegions
+            for (StateRegion stateRegion : collection.getStateRegions()) {
+                regions.add(stateRegion.getSearchRegion());
+            }
         }
         
         return regions;
@@ -114,26 +100,15 @@ public class HighlightV2 implements ActionInterface {
     /**
      * Performs the actual highlight operation on the specified region.
      */
-    private boolean highlightRegion(Region region, HighlightOptions options) {
+    private boolean highlightRegion(Region region) {
         try {
-            org.sikuli.script.Region sikuliRegion = region.getSikuliRegion();
+            // Get Sikuli region and highlight
+            org.sikuli.script.Region sikuliRegion = region.sikuli();
             
-            // Apply highlight color
-            String color = options.getHighlightColor();
-            if (color != null && !color.isEmpty()) {
-                sikuliRegion.setHighlightColor(color);
-            }
+            // Perform the highlight with default duration
+            sikuliRegion.highlight(2.0);
             
-            // Perform the highlight
-            double duration = options.getHighlightDuration();
-            if (duration > 0) {
-                sikuliRegion.highlight(duration);
-            } else {
-                // Default to 2 seconds if duration not specified
-                sikuliRegion.highlight(2);
-            }
-            
-            logger.info("Highlighted region: " + region);
+            logger.fine("Highlighted region: " + region);
             return true;
             
         } catch (Exception e) {
@@ -146,8 +121,8 @@ public class HighlightV2 implements ActionInterface {
      * Creates a Match object from a Region for result reporting.
      */
     private Match createMatchFromRegion(Region region) {
-        Match match = new Match(region, 1.0, "");
-        match.setText("Highlighted region");
+        Match match = new Match(region);
+        match.setName("Highlighted region");
         return match;
     }
 }

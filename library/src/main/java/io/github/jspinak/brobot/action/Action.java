@@ -6,6 +6,7 @@ import io.github.jspinak.brobot.action.internal.service.ActionService;
 import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
 import io.github.jspinak.brobot.model.element.Region;
+import io.github.jspinak.brobot.model.element.Location;
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
 import io.github.jspinak.brobot.action.basic.click.ClickOptions;
 import io.github.jspinak.brobot.action.basic.type.TypeOptions;
@@ -511,10 +512,12 @@ public class Action {
      */
     public ActionResult perform(ActionType type, String text) {
         if (type == ActionType.TYPE) {
-            TypeOptions typeOptions = new TypeOptions.Builder()
-                .setText(text)
+            // For typing, create TypeOptions and pass text in ObjectCollection
+            TypeOptions typeOptions = new TypeOptions.Builder().build();
+            ObjectCollection collection = new ObjectCollection.Builder()
+                .withStrings(text)
                 .build();
-            return perform(typeOptions);
+            return perform(typeOptions, collection);
         }
         
         // For other actions, wrap text in ObjectCollection

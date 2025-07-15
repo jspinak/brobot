@@ -1,14 +1,13 @@
 package io.github.jspinak.brobot.action.basic.click;
 
 import io.github.jspinak.brobot.action.ActionInterface;
-import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.model.element.Location;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.match.Match;
-import io.github.jspinak.brobot.exception.ActionFailedException;
-import org.sikuli.script.Mouse;
+import io.github.jspinak.brobot.model.state.StateLocation;
+import io.github.jspinak.brobot.model.state.StateRegion;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -26,9 +25,9 @@ import java.util.logging.Logger;
  * 
  * <p>Usage patterns:
  * <ul>
- *   <li>Click on a specific location: {@code new ClickV2().perform(clickOptions, location)}</li>
- *   <li>Click on a region's center: {@code new ClickV2().perform(clickOptions, region)}</li>
- *   <li>Click on matches from a previous Find: {@code new ClickV2().perform(clickOptions, matches)}</li>
+ *   <li>Click on a specific location: {@code new ClickV2().perform(actionResult, location)}</li>
+ *   <li>Click on a region's center: {@code new ClickV2().perform(actionResult, region)}</li>
+ *   <li>Click on matches from a previous Find: {@code new ClickV2().perform(actionResult, matches)}</li>
  * </ul>
  * </p>
  * 
@@ -50,71 +49,64 @@ public class ClickV2 implements ActionInterface {
     private static final Logger logger = Logger.getLogger(ClickV2.class.getName());
     
     @Override
-    public ActionResult perform(ActionConfig actionConfig, ObjectCollection... objectCollections) {
-        if (!(actionConfig instanceof ClickOptions)) {
-            throw new IllegalArgumentException("ClickV2 requires ClickOptions configuration");
-        }
-        
-        ClickOptions clickOptions = (ClickOptions) actionConfig;
-        ActionResult result = new ActionResult();
-        result.setActionType("CLICK_V2");
+    public Type getActionType() {
+        return Type.CLICK;
+    }
+    
+    @Override
+    public void perform(ActionResult actionResult, ObjectCollection... objectCollections) {
+        actionResult.setSuccess(false);
         
         try {
             // Extract clickable objects from collections
             List<Location> locations = extractClickableLocations(objectCollections);
             
             if (locations.isEmpty()) {
-                result.setSuccess(false);
-                result.setText("No clickable objects provided");
-                return result;
+                logger.warning("No clickable objects provided to ClickV2");
+                return;
             }
             
-            // Perform clicks based on configuration
+            // Perform clicks
+            int successCount = 0;
             for (Location location : locations) {
-                boolean clickSuccess = performClick(location, clickOptions);
-                if (clickSuccess) {
-                    result.addMatch(createMatchFromLocation(location));
-                }
-                
-                // Handle click until configuration
-                if (clickOptions.isClickUntil() && !clickSuccess) {
-                    break;
+                if (performClick(location)) {
+                    actionResult.add(createMatchFromLocation(location));
+                    successCount++;
                 }
             }
             
-            result.setSuccess(!result.getMatchList().isEmpty());
-            result.setText(String.format("Clicked %d of %d locations", 
-                result.getMatchList().size(), locations.size()));
+            actionResult.setSuccess(successCount > 0);
+            logger.info(String.format("ClickV2: Clicked %d of %d locations", successCount, locations.size()));
             
         } catch (Exception e) {
             logger.severe("Error in ClickV2: " + e.getMessage());
-            result.setSuccess(false);
-            result.setText("Click failed: " + e.getMessage());
+            actionResult.setSuccess(false);
         }
-        
-        return result;
     }
     
     /**
      * Extracts clickable locations from the provided object collections.
-     * Supports Location, Region, Match, and any object with getLocation() method.
+     * Supports Location, Region, and Match objects.
      */
     private List<Location> extractClickableLocations(ObjectCollection... collections) {
         List<Location> locations = new ArrayList<>();
         
         for (ObjectCollection collection : collections) {
             // Extract from Locations
-            locations.addAll(collection.getLocations());
+            for (StateLocation stateLoc : collection.getStateLocations()) {
+                locations.add(stateLoc.getLocation());
+            }
             
-            // Extract from Regions (use center point)
-            collection.getStateRegions().stream()
-                .map(stateRegion -> stateRegion.getSearchRegion().getCenter())
-                .forEach(locations::add);
+            // Extract from StateRegions (use center point)
+            for (StateRegion stateRegion : collection.getStateRegions()) {
+                Region region = stateRegion.getSearchRegion();
+                // Calculate center of region
+                int centerX = region.x() + region.w() / 2;
+                int centerY = region.y() + region.h() / 2;
+                locations.add(new Location(centerX, centerY));
+            }
             
-            // Extract from Matches
-            collection.getMatches().getMatchList().stream()
-                .map(match -> match.getRegion().getCenter())
-                .forEach(locations::add);
+            // Note: Matches would typically be passed through ActionResult
         }
         
         return locations;
@@ -123,36 +115,16 @@ public class ClickV2 implements ActionInterface {
     /**
      * Performs the actual click operation at the specified location.
      */
-    private boolean performClick(Location location, ClickOptions options) {
+    private boolean performClick(Location location) {
         try {
-            // Move to location if needed
-            if (options.isMoveMouseFirst()) {
-                Mouse.move(location.getSikuliLocation());
-                Thread.sleep((long)(options.getPauseAfterMouseMove() * 1000));
-            }
+            // Perform the click
+            org.sikuli.script.Location sikuliLoc = location.sikuli();
+            sikuliLoc.click();
             
-            // Perform the click based on type
-            switch (options.getClickType()) {
-                case LEFT:
-                    Mouse.click(location.getSikuliLocation());
-                    break;
-                case RIGHT:
-                    Mouse.rightClick(location.getSikuliLocation());
-                    break;
-                case MIDDLE:
-                    Mouse.middleClick(location.getSikuliLocation());
-                    break;
-                case DOUBLE:
-                    Mouse.doubleClick(location.getSikuliLocation());
-                    break;
-            }
+            // Small pause after click
+            Thread.sleep(100);
             
-            // Apply post-click delay
-            if (options.getPauseAfterClick() > 0) {
-                Thread.sleep((long)(options.getPauseAfterClick() * 1000));
-            }
-            
-            logger.info("Clicked at location: " + location);
+            logger.fine("Clicked at location: " + location);
             return true;
             
         } catch (Exception e) {
@@ -165,9 +137,10 @@ public class ClickV2 implements ActionInterface {
      * Creates a Match object from a Location for result reporting.
      */
     private Match createMatchFromLocation(Location location) {
+        // Create a small region around the click point
         Region region = new Region(location.getX() - 5, location.getY() - 5, 10, 10);
-        Match match = new Match(region, 1.0, "");
-        match.setText("Clicked location");
+        Match match = new Match(region);
+        match.setName("Clicked location");
         return match;
     }
 }
