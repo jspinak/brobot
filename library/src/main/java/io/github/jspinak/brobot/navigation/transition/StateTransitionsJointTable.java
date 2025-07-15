@@ -5,6 +5,7 @@ import io.github.jspinak.brobot.model.state.special.SpecialStateType;
 import io.github.jspinak.brobot.model.transition.StateTransition;
 import io.github.jspinak.brobot.navigation.service.StateService;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -71,6 +72,7 @@ import java.util.*;
  * @see State
  * @see SpecialStateType
  */
+@Slf4j
 @Component
 @Getter
 public class StateTransitionsJointTable {
@@ -235,7 +237,7 @@ public class StateTransitionsJointTable {
                 .map(id -> formatStateNameAndId(id))
                 .reduce((a, b) -> a + ", " + b)
                 .orElse("");
-        System.out.println("Getting states with transitions to: [" + childrenStr + "]");
+        log.debug("Getting states with transitions to: [{}]", childrenStr);
         
         Set<Long> parents = new HashSet<>();
         for (Long child : children) {
@@ -246,9 +248,9 @@ public class StateTransitionsJointTable {
                         .map(id -> formatStateNameAndId(id))
                         .reduce((a, b) -> a + ", " + b)
                         .orElse("");
-                System.out.println("Found incoming transitions for " + childStr + ": [" + parentsStr + "]");
+                log.debug("Found incoming transitions for {}: [{}]", childStr, parentsStr);
             } else {
-                System.out.println("No incoming transitions found for " + childStr);
+                log.debug("No incoming transitions found for {}", childStr);
             }
             if (incomingTransitionsToPREVIOUS.containsKey(child)) {
                 parents.addAll(incomingTransitionsToPREVIOUS.get(child));
@@ -256,9 +258,9 @@ public class StateTransitionsJointTable {
                         .map(id -> formatStateNameAndId(id))
                         .reduce((a, b) -> a + ", " + b)
                         .orElse("");
-                System.out.println("Found incoming PREVIOUS transitions for " + childStr + ": [" + prevParentsStr + "]");
+                log.debug("Found incoming PREVIOUS transitions for {}: [{}]", childStr, prevParentsStr);
             } else {
-                System.out.println("No incoming PREVIOUS transitions found for " + childStr);
+                log.debug("No incoming PREVIOUS transitions found for {}", childStr);
             }
         }
         
@@ -266,7 +268,7 @@ public class StateTransitionsJointTable {
                 .map(id -> formatStateNameAndId(id))
                 .reduce((a, b) -> a + ", " + b)
                 .orElse("");
-        System.out.println("Returning parent states: [" + allParentsStr + "]");
+        log.debug("Returning parent states: [{}]", allParentsStr);
         return parents;
     }
 
@@ -358,7 +360,7 @@ public class StateTransitionsJointTable {
             stringBuilder.append("incoming transitions to PREVIOUS ").append(previousStateId.toString()).append(": ");
             incomingTransitionsToPREVIOUS.get(previousStateId).forEach(fromStateId -> stringBuilder.append(fromStateId).append(" "));
         }
-        System.out.println(stringBuilder);
+        log.debug("{}", stringBuilder);
         return stringBuilder.toString();
     }
 

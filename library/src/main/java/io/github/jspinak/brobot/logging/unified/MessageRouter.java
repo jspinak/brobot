@@ -7,6 +7,7 @@ import io.github.jspinak.brobot.model.state.State;
 import io.github.jspinak.brobot.tools.logging.ActionLogger;
 import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
 import io.github.jspinak.brobot.tools.logging.ansi.AnsiColor;
+import io.github.jspinak.brobot.logging.unified.console.ConsoleFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,12 +50,14 @@ public class MessageRouter {
     
     private final ActionLogger actionLogger;
     private final LoggingVerbosityConfig verbosityConfig;
+    private final ConsoleFormatter consoleFormatter;
     private boolean structuredLoggingEnabled = false;
     
     @Autowired
-    public MessageRouter(ActionLogger actionLogger, LoggingVerbosityConfig verbosityConfig) {
+    public MessageRouter(ActionLogger actionLogger, LoggingVerbosityConfig verbosityConfig, ConsoleFormatter consoleFormatter) {
         this.actionLogger = actionLogger;
         this.verbosityConfig = verbosityConfig;
+        this.consoleFormatter = consoleFormatter;
     }
     
     /**
@@ -111,15 +114,11 @@ public class MessageRouter {
             return;
         }
         
-        // Use verbosity setting to format output
-        String output = event.toFormattedString(verbosityConfig.isVerboseMode());
-        String[] colors = determineColors(event);
+        // Use the new ConsoleFormatter
+        String output = consoleFormatter.format(event);
         
-        if (colors.length > 0) {
-            ConsoleReporter.println(output, colors);
-        } else {
-            ConsoleReporter.println(level, output);
-        }
+        // Print directly to avoid double formatting
+        System.out.println(output);
     }
     
     /**

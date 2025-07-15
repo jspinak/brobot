@@ -1,5 +1,6 @@
 package io.github.jspinak.brobot.config;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.SmartLifecycle;
 import org.springframework.stereotype.Component;
 
@@ -46,6 +47,7 @@ import org.springframework.stereotype.Component;
  * @see FrameworkInitializer
  * @see BrobotConfig
  */
+@Slf4j
 @Component
 public class FrameworkLifecycleManager implements SmartLifecycle {
 
@@ -95,7 +97,7 @@ public class FrameworkLifecycleManager implements SmartLifecycle {
         initService.setBundlePathAndPreProcessImages(imagePath);
         initService.initializeStateStructure();
         
-        System.out.println("Brobot library: All beans initialized with image path: " + imagePath);
+        log.info("Brobot library: All beans initialized with image path: {}", imagePath);
         running = true;
     }
 

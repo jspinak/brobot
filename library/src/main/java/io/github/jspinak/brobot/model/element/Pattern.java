@@ -12,6 +12,7 @@ import io.github.jspinak.brobot.util.image.core.BufferedImageUtilities;
 import io.github.jspinak.brobot.util.string.FilenameExtractor;
 
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import org.bytedeco.opencv.opencv_core.Mat;
 
 
@@ -302,6 +303,7 @@ public class Pattern {
                 '}';
     }
 
+    @Slf4j
     public static class Builder {
         private String name = "";
         private Image image;
@@ -472,7 +474,7 @@ public class Pattern {
                     pattern.setImgpath(this.filename);
                 } else {
                     // Log warning but don't create an Image with null BufferedImage
-                    System.err.println("Failed to load image from file: " + this.filename);
+                    log.error("Failed to load image from file: {}", this.filename);
                 }
             }
         }
