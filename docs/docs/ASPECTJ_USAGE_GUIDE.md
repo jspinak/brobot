@@ -8,11 +8,9 @@ This guide explains how to use the AspectJ enhancements in the Brobot framework.
 
 1. [Quick Start](#quick-start)
 2. [Available Aspects](#available-aspects)
-3. [Configuration](#configuration)
-4. [Using Annotations](#using-annotations)
-5. [Examples](#examples)
-6. [Best Practices](#best-practices)
-7. [Troubleshooting](#troubleshooting)
+3. [Examples](#examples)
+4. [Best Practices](#best-practices)
+5. [Troubleshooting](#troubleshooting)
 
 ## Quick Start
 
