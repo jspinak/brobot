@@ -66,6 +66,9 @@ public class PerformanceMonitoringAspect {
     private final ConcurrentHashMap<String, MethodPerformanceStats> performanceStats = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, List<Long>> recentExecutions = new ConcurrentHashMap<>();
     
+    // Recursion guard to prevent infinite loops
+    private final ThreadLocal<Boolean> isMonitoring = ThreadLocal.withInitial(() -> false);
+    
     // Global counters
     private final LongAdder totalMethodCalls = new LongAdder();
     private final AtomicLong totalExecutionTime = new AtomicLong();
@@ -74,6 +77,23 @@ public class PerformanceMonitoringAspect {
     public void init() {
         log.info("Performance Monitoring Aspect initialized with alert threshold: {}ms", alertThresholdMillis);
     }
+    
+    /**
+     * Pointcut for initialization methods to exclude
+     */
+    @Pointcut("execution(* *.init(..)) || execution(* *.initialize(..)) || " +
+              "execution(* *.postConstruct(..)) || execution(* *.afterPropertiesSet(..))")
+    public void initializationMethods() {}
+    
+    /**
+     * Pointcut for logging and monitoring infrastructure to exclude
+     */
+    @Pointcut("within(io.github.jspinak.brobot.logger..*) || " +
+              "within(io.github.jspinak.brobot.aspects..*) || " +
+              "within(io.github.jspinak.brobot.config..*) || " +
+              "within(org.springframework..*) || " +
+              "within(org.aspectj..*)")
+    public void infrastructureMethods() {}
     
     /**
      * Pointcut for action package methods
@@ -94,9 +114,10 @@ public class PerformanceMonitoringAspect {
     public void stateMethods() {}
     
     /**
-     * Combined pointcut for all monitored methods
+     * Combined pointcut for all monitored methods with exclusions
      */
-    @Pointcut("actionMethods() || navigationMethods() || stateMethods()")
+    @Pointcut("(actionMethods() || navigationMethods() || stateMethods()) && " +
+              "!initializationMethods() && !infrastructureMethods()")
     public void monitoredMethods() {}
     
     /**
@@ -104,6 +125,12 @@ public class PerformanceMonitoringAspect {
      */
     @Around("monitoredMethods()")
     public Object monitorPerformance(ProceedingJoinPoint joinPoint) throws Throwable {
+        // Check recursion guard
+        if (isMonitoring.get()) {
+            // Already monitoring in this thread, skip to avoid recursion
+            return joinPoint.proceed();
+        }
+        
         String methodSignature = joinPoint.getSignature().toShortString();
         
         // Skip toString, hashCode, equals methods
@@ -112,20 +139,24 @@ public class PerformanceMonitoringAspect {
             return joinPoint.proceed();
         }
         
-        // Capture start metrics
-        long startTime = System.currentTimeMillis();
-        long startMemory = trackMemoryUsage ? getUsedMemory() : 0;
+        // Set recursion guard
+        isMonitoring.set(true);
         
         try {
-            // Execute the method
-            Object result = joinPoint.proceed();
+            // Capture start metrics
+            long startTime = System.currentTimeMillis();
+            long startMemory = trackMemoryUsage ? getUsedMemory() : 0;
             
-            // Capture end metrics
-            long executionTime = System.currentTimeMillis() - startTime;
-            long memoryDelta = trackMemoryUsage ? getUsedMemory() - startMemory : 0;
-            
-            // Record performance data
-            recordPerformanceData(methodSignature, executionTime, true, memoryDelta);
+            try {
+                // Execute the method
+                Object result = joinPoint.proceed();
+                
+                // Capture end metrics
+                long executionTime = System.currentTimeMillis() - startTime;
+                long memoryDelta = trackMemoryUsage ? getUsedMemory() - startMemory : 0;
+                
+                // Record performance data
+                recordPerformanceData(methodSignature, executionTime, true, memoryDelta);
             
             // Check for slow operations
             if (executionTime > alertThresholdMillis) {
@@ -139,6 +170,10 @@ public class PerformanceMonitoringAspect {
             long executionTime = System.currentTimeMillis() - startTime;
             recordPerformanceData(methodSignature, executionTime, false, 0);
             throw e;
+        }
+        } finally {
+            // Clear recursion guard
+            isMonitoring.set(false);
         }
     }
     
