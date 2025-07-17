@@ -2,6 +2,7 @@ package io.github.jspinak.brobot.util.image.core;
 
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.config.ExecutionEnvironment;
+import io.github.jspinak.brobot.config.SmartImageLoader;
 import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
 import io.github.jspinak.brobot.util.file.FilenameUtils;
 import io.github.jspinak.brobot.monitor.MonitorManager;
@@ -97,6 +98,16 @@ public class BufferedImageUtilities {
     @Autowired(required = false)
     private BrobotProperties properties;
     
+    @Autowired(required = false)
+    private SmartImageLoader smartImageLoader;
+    
+    private static BufferedImageUtilities instance;
+    
+    @Autowired
+    public BufferedImageUtilities() {
+        instance = this;
+    }
+    
     /**
      * Get Screen object for a specific operation with monitor logging
      */
@@ -125,6 +136,19 @@ public class BufferedImageUtilities {
      * @return the BufferedImage from file
      */
     public static BufferedImage getBuffImgFromFile(String path) {
+        // Try SmartImageLoader first if available
+        if (instance != null && instance.smartImageLoader != null) {
+            try {
+                BufferedImage image = instance.smartImageLoader.loadImage(path);
+                if (image != null) {
+                    return image;
+                }
+            } catch (Exception e) {
+                ConsoleReporter.println("SmartImageLoader failed for " + path + ": " + e.getMessage());
+            }
+        }
+        
+        // Fall back to original implementation
         ExecutionEnvironment env = ExecutionEnvironment.getInstance();
         
         // In mock mode, always use dummy images
