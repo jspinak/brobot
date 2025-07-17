@@ -18,32 +18,83 @@ import java.util.Map;
 @Component
 public class ConsoleFormatter {
     
-    // ANSI color codes for cross-platform compatibility
-    private static final String RESET = "\u001B[0m";
-    private static final String BLACK = "\u001B[30m";
-    private static final String RED = "\u001B[31m";
-    private static final String GREEN = "\u001B[32m";
-    private static final String YELLOW = "\u001B[33m";
-    private static final String BLUE = "\u001B[34m";
-    private static final String PURPLE = "\u001B[35m";
-    private static final String CYAN = "\u001B[36m";
-    private static final String WHITE = "\u001B[37m";
-    private static final String BRIGHT_RED = "\u001B[91m";
-    private static final String BRIGHT_GREEN = "\u001B[92m";
-    private static final String BRIGHT_YELLOW = "\u001B[93m";
-    private static final String BRIGHT_BLUE = "\u001B[94m";
-    private static final String DIM = "\u001B[2m";
-    private static final String BOLD = "\u001B[1m";
+    /**
+     * Detects if running in Windows Terminal which supports Unicode and ANSI.
+     */
+    private static boolean isWindowsTerminal() {
+        // Windows Terminal sets WT_SESSION environment variable
+        return System.getenv("WT_SESSION") != null;
+    }
     
-    // Unicode symbols that work across most terminals
-    private static final String SUCCESS_SYMBOL = "✓"; // Check mark
-    private static final String FAILURE_SYMBOL = "✗"; // X mark
-    private static final String ACTION_SYMBOL = "▶"; // Play symbol
-    private static final String TRANSITION_SYMBOL = "→"; // Arrow
-    private static final String WARNING_SYMBOL = "⚠"; // Warning triangle
-    private static final String ERROR_SYMBOL = "⚠"; // Warning triangle (fallback for cross-platform)
-    private static final String INFO_SYMBOL = "ℹ"; // Info symbol
-    private static final String DEBUG_SYMBOL = "•"; // Bullet point
+    /**
+     * Checks if ANSI colors are explicitly enabled via system property.
+     */
+    private static boolean isAnsiEnabled() {
+        // Check for explicit ANSI enablement
+        String ansiProp = System.getProperty("brobot.console.ansi");
+        if (ansiProp != null) {
+            return Boolean.parseBoolean(ansiProp);
+        }
+        
+        // Check for ConEmu or other terminal emulators that support ANSI
+        return System.getenv("ConEmuANSI") != null || 
+               System.getenv("ANSICON") != null ||
+               System.getenv("TERM") != null;
+    }
+    
+    // Platform detection
+    private static final boolean IS_WINDOWS = System.getProperty("os.name", "").toLowerCase().contains("windows");
+    private static final boolean ANSI_COLORS_SUPPORTED = !IS_WINDOWS || isWindowsTerminal() || isAnsiEnabled();
+    
+    // ANSI color codes (empty strings on unsupported platforms)
+    private static final String RESET = ANSI_COLORS_SUPPORTED ? "\u001B[0m" : "";
+    private static final String BLACK = ANSI_COLORS_SUPPORTED ? "\u001B[30m" : "";
+    private static final String RED = ANSI_COLORS_SUPPORTED ? "\u001B[31m" : "";
+    private static final String GREEN = ANSI_COLORS_SUPPORTED ? "\u001B[32m" : "";
+    private static final String YELLOW = ANSI_COLORS_SUPPORTED ? "\u001B[33m" : "";
+    private static final String BLUE = ANSI_COLORS_SUPPORTED ? "\u001B[34m" : "";
+    private static final String PURPLE = ANSI_COLORS_SUPPORTED ? "\u001B[35m" : "";
+    private static final String CYAN = ANSI_COLORS_SUPPORTED ? "\u001B[36m" : "";
+    private static final String WHITE = ANSI_COLORS_SUPPORTED ? "\u001B[37m" : "";
+    private static final String BRIGHT_RED = ANSI_COLORS_SUPPORTED ? "\u001B[91m" : "";
+    private static final String BRIGHT_GREEN = ANSI_COLORS_SUPPORTED ? "\u001B[92m" : "";
+    private static final String BRIGHT_YELLOW = ANSI_COLORS_SUPPORTED ? "\u001B[93m" : "";
+    private static final String BRIGHT_BLUE = ANSI_COLORS_SUPPORTED ? "\u001B[94m" : "";
+    private static final String DIM = ANSI_COLORS_SUPPORTED ? "\u001B[2m" : "";
+    private static final String BOLD = ANSI_COLORS_SUPPORTED ? "\u001B[1m" : "";
+    
+    // Symbol sets for different platforms
+    private static final boolean UNICODE_SUPPORTED = ANSI_COLORS_SUPPORTED;
+    
+    // Unicode symbols for Unix-like systems
+    private static final String SUCCESS_SYMBOL_UNICODE = "✓"; // Check mark
+    private static final String FAILURE_SYMBOL_UNICODE = "✗"; // X mark
+    private static final String ACTION_SYMBOL_UNICODE = "▶"; // Play symbol
+    private static final String TRANSITION_SYMBOL_UNICODE = "→"; // Arrow
+    private static final String WARNING_SYMBOL_UNICODE = "⚠"; // Warning triangle
+    private static final String ERROR_SYMBOL_UNICODE = "⚠"; // Warning triangle
+    private static final String INFO_SYMBOL_UNICODE = "ℹ"; // Info symbol
+    private static final String DEBUG_SYMBOL_UNICODE = "•"; // Bullet point
+    
+    // ASCII fallbacks for Windows/legacy terminals
+    private static final String SUCCESS_SYMBOL_ASCII = "[OK]";
+    private static final String FAILURE_SYMBOL_ASCII = "[FAIL]";
+    private static final String ACTION_SYMBOL_ASCII = ">";
+    private static final String TRANSITION_SYMBOL_ASCII = "->";
+    private static final String WARNING_SYMBOL_ASCII = "[WARN]";
+    private static final String ERROR_SYMBOL_ASCII = "[ERROR]";
+    private static final String INFO_SYMBOL_ASCII = "[INFO]";
+    private static final String DEBUG_SYMBOL_ASCII = "*";
+    
+    // Select appropriate symbols based on platform
+    private static final String SUCCESS_SYMBOL = UNICODE_SUPPORTED ? SUCCESS_SYMBOL_UNICODE : SUCCESS_SYMBOL_ASCII;
+    private static final String FAILURE_SYMBOL = UNICODE_SUPPORTED ? FAILURE_SYMBOL_UNICODE : FAILURE_SYMBOL_ASCII;
+    private static final String ACTION_SYMBOL = UNICODE_SUPPORTED ? ACTION_SYMBOL_UNICODE : ACTION_SYMBOL_ASCII;
+    private static final String TRANSITION_SYMBOL = UNICODE_SUPPORTED ? TRANSITION_SYMBOL_UNICODE : TRANSITION_SYMBOL_ASCII;
+    private static final String WARNING_SYMBOL = UNICODE_SUPPORTED ? WARNING_SYMBOL_UNICODE : WARNING_SYMBOL_ASCII;
+    private static final String ERROR_SYMBOL = UNICODE_SUPPORTED ? ERROR_SYMBOL_UNICODE : ERROR_SYMBOL_ASCII;
+    private static final String INFO_SYMBOL = UNICODE_SUPPORTED ? INFO_SYMBOL_UNICODE : INFO_SYMBOL_ASCII;
+    private static final String DEBUG_SYMBOL = UNICODE_SUPPORTED ? DEBUG_SYMBOL_UNICODE : DEBUG_SYMBOL_ASCII;
     
     private final LoggingVerbosityConfig verbosityConfig;
     private final DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss.SSS");
@@ -169,11 +220,14 @@ public class ConsoleFormatter {
             sb.append(event.getMessage());
         }
         
-        // Success/failure indicator
-        if (event.isSuccess()) {
-            sb.append(" ").append(GREEN).append(SUCCESS_SYMBOL).append(RESET);
-        } else {
-            sb.append(" ").append(RED).append(FAILURE_SYMBOL).append(RESET);
+        // Success/failure indicator - only show for COMPLETE/FAILED actions
+        if (event.getAction() != null && 
+            (event.getAction().endsWith("_COMPLETE") || event.getAction().endsWith("_FAILED"))) {
+            if (event.isSuccess()) {
+                sb.append(" ").append(GREEN).append(SUCCESS_SYMBOL).append(RESET);
+            } else {
+                sb.append(" ").append(RED).append(FAILURE_SYMBOL).append(RESET);
+            }
         }
         
         // Match coordinates if enabled
@@ -302,4 +356,5 @@ public class ConsoleFormatter {
                 return DIM + "TRACE" + RESET;
         }
     }
+    
 }
