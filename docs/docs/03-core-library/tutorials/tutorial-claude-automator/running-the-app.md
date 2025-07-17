@@ -22,22 +22,24 @@
 
 ```
 INFO  c.c.a.ClaudeAutomatorApplication - Starting ClaudeAutomatorApplication
-INFO  c.c.a.config.StateConfiguration - Registering states and transitions for Claude Automator
-INFO  c.c.a.config.StateConfiguration - Registered states: WORKING, PROMPT
-INFO  c.c.a.config.StateConfiguration - Registered transitions for Working and Prompt states
-INFO  c.c.a.config.StateConfiguration - Set PROMPT as initial active state
-INFO  c.c.a.config.StateConfiguration - State registration complete
+INFO  i.g.j.b.startup.AutoStartupVerifier - === Brobot Auto Startup Verification: Phase 1 (Images) ===
+INFO  i.g.j.b.startup.ApplicationStartupVerifier - Discovered 7 images from 2 states
+INFO  i.g.j.b.startup.ApplicationStartupVerifier - All 7 required images verified successfully
+INFO  c.c.a.config.StateRegistrationListener - Application ready - registering states with StateService
+INFO  c.c.a.config.StateRegistrationListener - States and transitions registered successfully
+INFO  i.g.j.b.startup.AutoStartupVerifier - === Brobot Auto Startup Verification: Phase 2 (States) ===
+INFO  i.g.j.b.startup.ApplicationStartupVerifier - Successfully verified expected states. Active states: [PROMPT]
 INFO  c.c.a.automation.ClaudeMonitoringAutomation - Starting Claude monitoring automation
-INFO  c.c.a.ClaudeAutomatorApplication - Started ClaudeAutomatorApplication in 2.345 seconds
+INFO  c.c.a.ClaudeAutomatorApplication - Started ClaudeAutomatorApplication in 3.456 seconds
 ```
 
 ## Testing the Automation
 
 ### 1. Initial State
 
-- The application starts with the Prompt state active
-- Open Claude AI in your browser
-- The automation will look for the prompt interface
+- The auto-verifier detects which state is currently visible
+- Open Claude AI in your browser before starting the app
+- The automation will automatically set the correct initial state
 
 ### 2. Trigger Transition
 
@@ -82,13 +84,16 @@ brobot.sikuli.highlight.duration=2
 #### Images Not Found
 
 ```
-WARN - Failed to find claude-prompt image
+ERROR - Failed to load required image: prompt/claude-prompt-1.png
+ERROR -   Suggestion: Check if file exists at: /path/to/images/prompt/claude-prompt-1.png
+ERROR -   Suggestion: Verify image format is supported (PNG, JPG, JPEG, GIF, BMP)
 ```
 
 **Solution**: 
-- Verify images are in the correct location
-- Check image quality and cropping
-- Adjust similarity threshold if needed
+- The auto-verifier provides specific suggestions
+- Check the exact path shown in the error
+- Verify image format and accessibility
+- Add fallback paths in application.yml if needed
 
 #### State Not Activating
 
