@@ -9,9 +9,15 @@ import io.github.jspinak.brobot.action.internal.find.match.MatchAdjusterV2;
 import io.github.jspinak.brobot.action.internal.find.match.MatchContentExtractor;
 import io.github.jspinak.brobot.analysis.color.profiles.ProfileSetBuilder;
 import io.github.jspinak.brobot.analysis.match.MatchFusion;
+import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.state.StateImage;
+import io.github.jspinak.brobot.model.state.StateRegion;
 import io.github.jspinak.brobot.statemanagement.StateMemory;
+import io.github.jspinak.brobot.tools.logging.visual.HighlightManager;
+import io.github.jspinak.brobot.tools.logging.visual.VisualFeedbackConfig;
 import io.github.jspinak.brobot.util.string.TextSelector;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -56,6 +62,15 @@ public class FindPipeline {
     private final MatchContentExtractor matchContentExtractor;
     private final TextSelector textSelector;
     
+    @Autowired(required = false)
+    private HighlightManager highlightManager;
+    
+    @Autowired(required = false)
+    private VisualFeedbackConfig visualFeedbackConfig;
+    
+    @Value("${brobot.highlight.enabled:true}")
+    private boolean highlightEnabled;
+    
     public FindPipeline(FindStrategyRegistryV2 findFunctions,
                         StateMemory stateMemory,
                         NonImageObjectConverter addNonImageObjects,
@@ -86,9 +101,19 @@ public class FindPipeline {
      * @throws IllegalStateException if no find strategy is registered for the given options
      */
     public void execute(BaseFindOptions options, ActionResult matches, ObjectCollection... collections) {
+        // Highlight search regions before searching
+        if (shouldHighlightSearchRegions()) {
+            highlightSearchRegions(collections);
+        }
+        
         runPreProcessing(options, matches, collections);
         runStrategy(options, matches, collections);
         runPostProcessing(options, matches, collections);
+        
+        // Highlight found matches after searching
+        if (shouldHighlightFinds() && matches.isSuccess() && !matches.getMatchList().isEmpty()) {
+            highlightManager.highlightMatches(matches.getMatchList());
+        }
     }
     
     /**
@@ -208,5 +233,63 @@ public class FindPipeline {
         }
         // Add similar checks for other option types that support area filtering
         // as they are implemented
+    }
+    
+    /**
+     * Checks if search regions should be highlighted based on configuration.
+     */
+    private boolean shouldHighlightSearchRegions() {
+        return highlightEnabled && 
+               highlightManager != null && 
+               visualFeedbackConfig != null && 
+               visualFeedbackConfig.isEnabled() && 
+               visualFeedbackConfig.isAutoHighlightSearchRegions();
+    }
+    
+    /**
+     * Checks if found matches should be highlighted based on configuration.
+     */
+    private boolean shouldHighlightFinds() {
+        return highlightEnabled && 
+               highlightManager != null && 
+               visualFeedbackConfig != null && 
+               visualFeedbackConfig.isEnabled() && 
+               visualFeedbackConfig.isAutoHighlightFinds();
+    }
+    
+    /**
+     * Highlights the search regions for all objects in the collections.
+     * 
+     * @param collections The object collections containing search regions to highlight
+     */
+    private void highlightSearchRegions(ObjectCollection... collections) {
+        if (highlightManager == null) return;
+        
+        List<Region> searchRegions = new ArrayList<>();
+        
+        for (ObjectCollection collection : collections) {
+            // Extract regions from StateRegions
+            for (StateRegion stateRegion : collection.getStateRegions()) {
+                if (stateRegion.getSearchRegion() != null) {
+                    searchRegions.add(stateRegion.getSearchRegion());
+                }
+            }
+            
+            // Extract search regions from StateImages
+            for (StateImage stateImage : collection.getStateImages()) {
+                for (var pattern : stateImage.getPatterns()) {
+                    if (pattern.getSearchRegions() != null && 
+                        !pattern.getSearchRegions().getAllRegions().isEmpty()) {
+                        searchRegions.addAll(pattern.getSearchRegions().getAllRegions());
+                    }
+                }
+            }
+        }
+        
+        // If no specific search regions found, don't highlight anything
+        // (avoid highlighting the entire screen as a fallback)
+        if (!searchRegions.isEmpty()) {
+            highlightManager.highlightSearchRegions(searchRegions);
+        }
     }
 }
