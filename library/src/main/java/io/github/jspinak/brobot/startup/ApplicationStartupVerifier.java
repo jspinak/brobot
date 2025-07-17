@@ -126,7 +126,7 @@ public class ApplicationStartupVerifier {
      * @return Result containing verification status and details
      */
     public StartupResult verify(StartupConfig config) {
-        log.info("=== Application Startup Verification Beginning ===");
+        log.debug("Starting application startup verification");
         
         List<String> errorMessages = new ArrayList<>();
         String diagnosticReport = null;
@@ -151,7 +151,8 @@ public class ApplicationStartupVerifier {
         if (!success && config.isRunDiagnosticsOnFailure()) {
             ConfigurationDiagnostics.DiagnosticReport report = configurationDiagnostics.runFullDiagnostics();
             diagnosticReport = report.toFormattedString();
-            log.error("Startup verification failed. Diagnostic report:\n{}", diagnosticReport);
+            // Don't log the full report to console - it's too verbose
+            log.debug("Startup verification failed. Diagnostic report available in debug logs.");
         }
         
         // Step 4: Build result
@@ -167,7 +168,7 @@ public class ApplicationStartupVerifier {
                 .diagnosticReport(diagnosticReport)
                 .build();
         
-        log.info("=== Application Startup Verification Complete: {} ===", 
+        log.debug("Application startup verification complete: {}", 
                 success ? "SUCCESS" : "FAILED");
         
         // Step 5: Throw exception if configured
@@ -188,7 +189,7 @@ public class ApplicationStartupVerifier {
      * @return Result containing verification status and details
      */
     public StartupResult verifyFromStates(List<State> states, StartupConfig config) {
-        log.info("=== Application Startup Verification with State Discovery ===");
+        log.debug("Application startup verification with state discovery");
         
         // Extract all image paths from states
         Set<String> discoveredImages = extractImagesFromStates(states);
@@ -319,7 +320,7 @@ public class ApplicationStartupVerifier {
      * Performs image resource verification
      */
     private ImageVerificationResult verifyImages(StartupConfig config) {
-        log.info("Starting image resource verification...");
+        log.debug("Starting image resource verification");
         
         // Initialize image paths
         // Access config fields using reflection due to Lombok issues
@@ -403,7 +404,7 @@ public class ApplicationStartupVerifier {
      * Performs initial state verification
      */
     private StateVerificationResult verifyStates(StartupConfig config) {
-        log.info("Starting initial state verification...");
+        log.debug("Starting initial state verification");
         
         try {
             // Clear states if configured
@@ -469,7 +470,7 @@ public class ApplicationStartupVerifier {
     
     private void logImagePathConfiguration() {
         List<ImagePath.PathEntry> pathEntries = ImagePath.getPaths();
-        log.info("SikuliX ImagePath configuration ({} paths):", pathEntries.size());
+        log.debug("SikuliX ImagePath configuration ({} paths)", pathEntries.size());
         for (ImagePath.PathEntry entry : pathEntries) {
             log.debug("  - {}", entry.getPath());
         }
