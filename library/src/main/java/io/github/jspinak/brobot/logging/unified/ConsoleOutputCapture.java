@@ -1,6 +1,7 @@
 package io.github.jspinak.brobot.logging.unified;
 
 import org.springframework.stereotype.Component;
+import org.springframework.beans.factory.annotation.Autowired;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 
@@ -21,12 +22,18 @@ import java.io.OutputStream;
 @Component
 public class ConsoleOutputCapture {
     
-    private final BrobotLogger brobotLogger;
-    private PrintStream originalOut;
-    private PrintStream originalErr;
+    private BrobotLogger brobotLogger;
+    private static PrintStream originalOut;
+    private static PrintStream originalErr;
     private boolean captureEnabled = true;
+    private static final ThreadLocal<Boolean> isLogging = ThreadLocal.withInitial(() -> false);
     
-    public ConsoleOutputCapture(BrobotLogger brobotLogger) {
+    public ConsoleOutputCapture() {
+        // Empty constructor to break circular dependency
+    }
+    
+    @Autowired
+    public void setBrobotLogger(BrobotLogger brobotLogger) {
         this.brobotLogger = brobotLogger;
     }
     
@@ -99,21 +106,38 @@ public class ConsoleOutputCapture {
         }
         
         private void logLine(String line) {
-            if (isError) {
-                brobotLogger.log()
-                    .observation(line)
-                    .level(LogEvent.Level.ERROR)
-                    .metadata("source", "console.err")
-                    .log();
-            } else {
-                // Determine appropriate log level based on content
-                LogEvent.Level level = determineLogLevel(line);
+            // Prevent recursive logging
+            if (isLogging.get()) {
+                // Write directly to original stream to avoid infinite recursion
+                if (isError && originalErr != null) {
+                    originalErr.println(line);
+                } else if (!isError && originalOut != null) {
+                    originalOut.println(line);
+                }
+                return;
+            }
+            
+            try {
+                isLogging.set(true);
                 
-                brobotLogger.log()
-                    .observation(line)
-                    .level(level)
-                    .metadata("source", "console.out")
-                    .log();
+                if (isError) {
+                    brobotLogger.log()
+                        .observation(line)
+                        .level(LogEvent.Level.ERROR)
+                        .metadata("source", "console.err")
+                        .log();
+                } else {
+                    // Determine appropriate log level based on content
+                    LogEvent.Level level = determineLogLevel(line);
+                    
+                    brobotLogger.log()
+                        .observation(line)
+                        .level(level)
+                        .metadata("source", "console.out")
+                        .log();
+                }
+            } finally {
+                isLogging.remove();
             }
         }
         
@@ -158,5 +182,21 @@ public class ConsoleOutputCapture {
     public void enableCapture() {
         captureEnabled = true;
         startCapture();
+    }
+    
+    /**
+     * Gets the original stdout PrintStream.
+     * Used by MessageRouter to avoid recursive logging.
+     */
+    public static PrintStream getOriginalOut() {
+        return originalOut;
+    }
+    
+    /**
+     * Gets the original stderr PrintStream.
+     * Used by MessageRouter to avoid recursive logging.
+     */
+    public static PrintStream getOriginalErr() {
+        return originalErr;
     }
 }
