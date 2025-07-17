@@ -1,7 +1,11 @@
 # Claude Automator Tutorial
 
 :::info Version Note
-This tutorial demonstrates the latest Brobot patterns and features for version 1.1.0. It uses modern ActionConfig classes, fluent API, and enhanced developer experience improvements.
+This tutorial demonstrates the latest Brobot patterns and features for version 1.1.0+, including:
+- Modern ActionConfig classes and fluent API
+- Automatic startup verification (no custom startup code needed!)
+- Enhanced developer experience improvements
+- Configuration-driven initialization
 :::
 
 ## Overview
@@ -29,6 +33,7 @@ The Claude Automator application:
 - **Modern Transitions**: Using JavaStateTransition for flexible state navigation
 - **Action Chaining**: Combining find, click, and type actions in a single fluent call
 - **Active State Management**: Using StateMemory to track and manage active states
+- **Automatic Startup Verification**: Zero-code image and state verification
 - **Convenience Methods**: Leveraging new API improvements for cleaner code
 
 ## Prerequisites
