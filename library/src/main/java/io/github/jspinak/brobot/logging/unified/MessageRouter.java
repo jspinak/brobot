@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.io.PrintStream;
 import java.time.Duration;
 
 import java.util.HashSet;
@@ -117,8 +118,14 @@ public class MessageRouter {
         // Use the new ConsoleFormatter
         String output = consoleFormatter.format(event);
         
-        // Print directly to avoid double formatting
-        System.out.println(output);
+        // Use original PrintStream if available to avoid circular dependency
+        PrintStream originalOut = ConsoleOutputCapture.getOriginalOut();
+        if (originalOut != null) {
+            originalOut.println(output);
+        } else {
+            // Fallback to System.out if ConsoleOutputCapture not available
+            System.out.println(output);
+        }
     }
     
     /**
