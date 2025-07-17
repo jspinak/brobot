@@ -227,14 +227,51 @@ public class ActionLifecycleAspect {
      * Log action start
      */
     private void logActionStart(ActionContext context) {
-        brobotLogger.log()
+        var logBuilder = brobotLogger.log()
             .type(LogEvent.Type.ACTION)
             .level(LogEvent.Level.INFO)
             .action(context.getActionType() + "_START")
             .metadata("actionId", context.getActionId())
-            .metadata("thread", context.getThreadName())
-            .metadata("collection", context.getObjectCollection() != null ? "present" : "null")
-            .log();
+            .metadata("thread", context.getThreadName());
+            
+        // Add target information from ObjectCollection
+        if (context.getObjectCollection() != null) {
+            ObjectCollection collection = context.getObjectCollection();
+            // Try to get a description of what's being acted on
+            StringBuilder targetInfo = new StringBuilder();
+            
+            if (!collection.getStateImages().isEmpty()) {
+                targetInfo.append("Images[").append(collection.getStateImages().size()).append("]");
+            }
+            if (!collection.getStateStrings().isEmpty()) {
+                if (targetInfo.length() > 0) targetInfo.append(", ");
+                targetInfo.append("Strings[").append(collection.getStateStrings().size()).append("]");
+                // Include first string if available
+                if (collection.getStateStrings().size() == 1) {
+                    String firstString = collection.getStateStrings().get(0).getString();
+                    if (firstString != null && firstString.length() <= 50) {
+                        targetInfo.append(": \"").append(firstString).append("\"");
+                    }
+                }
+            }
+            if (!collection.getStateRegions().isEmpty()) {
+                if (targetInfo.length() > 0) targetInfo.append(", ");
+                targetInfo.append("Regions[").append(collection.getStateRegions().size()).append("]");
+            }
+            if (!collection.getMatches().isEmpty()) {
+                if (targetInfo.length() > 0) targetInfo.append(", ");
+                targetInfo.append("Matches[").append(collection.getMatches().size()).append("]");
+            }
+            
+            if (targetInfo.length() > 0) {
+                logBuilder.target(targetInfo.toString());
+            }
+            logBuilder.metadata("hasCollection", true);
+        } else {
+            logBuilder.metadata("hasCollection", false);
+        }
+        
+        logBuilder.log();
     }
     
     /**

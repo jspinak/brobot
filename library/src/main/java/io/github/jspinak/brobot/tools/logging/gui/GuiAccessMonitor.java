@@ -418,7 +418,7 @@ public class GuiAccessMonitor {
                 
             for (String solution : problem.getSolutions()) {
                 brobotLogger.log()
-                    .observation("   • " + solution)
+                    .observation("   - " + solution)
                     .log();
             }
         }

@@ -23,6 +23,7 @@ public class MonitorManager {
     private final Map<Integer, MonitorInfo> monitorCache = new ConcurrentHashMap<>();
     private final Map<String, Integer> operationMonitorMap = new ConcurrentHashMap<>();
     private boolean headlessMode = false;
+    private int primaryMonitorIndex = 0;
     
     public MonitorManager(BrobotProperties properties) {
         this.properties = properties;
@@ -30,6 +31,41 @@ public class MonitorManager {
         if (properties.getMonitor().getOperationMonitorMap() != null) {
             operationMonitorMap.putAll(properties.getMonitor().getOperationMonitorMap());
         }
+    }
+    
+    /**
+     * Detect the primary monitor based on position and Windows settings
+     */
+    private int detectPrimaryMonitor(GraphicsDevice[] devices, GraphicsEnvironment ge) {
+        // Method 1: Check if GraphicsEnvironment default device matches
+        GraphicsDevice defaultDevice = ge.getDefaultScreenDevice();
+        for (int i = 0; i < devices.length; i++) {
+            if (devices[i].equals(defaultDevice)) {
+                log.info("Primary monitor detected using default screen device: Monitor {}", i);
+                return i;
+            }
+        }
+        
+        // Method 2: Find monitor closest to (0,0) - typically the primary
+        int closestIndex = 0;
+        double closestDistance = Double.MAX_VALUE;
+        
+        for (int i = 0; i < devices.length; i++) {
+            Rectangle bounds = devices[i].getDefaultConfiguration().getBounds();
+            // Calculate distance from (0,0)
+            double distance = Math.sqrt(bounds.x * bounds.x + bounds.y * bounds.y);
+            
+            if (distance < closestDistance) {
+                closestDistance = distance;
+                closestIndex = i;
+            }
+        }
+        
+        MonitorInfo primaryInfo = monitorCache.get(closestIndex);
+        log.info("Primary monitor detected at position ({},{}): Monitor {}", 
+                 primaryInfo.getX(), primaryInfo.getY(), closestIndex);
+        
+        return closestIndex;
     }
     
     /**
@@ -70,6 +106,7 @@ public class MonitorManager {
             
             log.info("Detected {} monitor(s)", devices.length);
             
+            // First pass: collect all monitor info
             for (int i = 0; i < devices.length; i++) {
                 GraphicsDevice device = devices[i];
                 Rectangle bounds = device.getDefaultConfiguration().getBounds();
@@ -81,6 +118,9 @@ public class MonitorManager {
                         i, info.getDeviceId(), bounds.x, bounds.y, bounds.width, bounds.height);
                 }
             }
+            
+            // Second pass: determine the primary monitor
+            primaryMonitorIndex = detectPrimaryMonitor(devices, ge);
             
             if (devices.length > 1 && !properties.getMonitor().isMultiMonitorEnabled()) {
                 log.warn("Multiple monitors detected but multi-monitor support is disabled. " +
@@ -157,6 +197,12 @@ public class MonitorManager {
             return getScreen(defaultIndex);
         }
         
+        // Use detected primary monitor when defaultIndex is -1
+        if (defaultIndex == -1) {
+            log.debug("Using detected primary monitor: Monitor {}", primaryMonitorIndex);
+            return getScreen(primaryMonitorIndex);
+        }
+        
         // Fall back to primary monitor
         try {
             return new Screen();
@@ -202,6 +248,13 @@ public class MonitorManager {
      */
     public int getMonitorCount() {
         return monitorCache.size();
+    }
+    
+    /**
+     * Get the index of the primary monitor
+     */
+    public int getPrimaryMonitorIndex() {
+        return primaryMonitorIndex;
     }
     
     /**
