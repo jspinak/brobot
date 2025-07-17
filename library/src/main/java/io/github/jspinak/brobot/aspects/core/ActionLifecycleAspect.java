@@ -231,7 +231,7 @@ public class ActionLifecycleAspect {
             .type(LogEvent.Type.ACTION)
             .level(LogEvent.Level.INFO)
             .action(context.getActionType() + "_START")
-            .success(false)  // START events should not show success/failure
+            // Don't set success for START events - let formatter handle it
             .metadata("actionId", context.getActionId())
             .metadata("thread", context.getThreadName());
             
