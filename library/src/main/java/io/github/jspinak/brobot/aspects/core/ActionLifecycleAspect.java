@@ -231,6 +231,7 @@ public class ActionLifecycleAspect {
             .type(LogEvent.Type.ACTION)
             .level(LogEvent.Level.INFO)
             .action(context.getActionType() + "_START")
+            .success(false)  // START events should not show success/failure
             .metadata("actionId", context.getActionId())
             .metadata("thread", context.getThreadName());
             
@@ -241,7 +242,21 @@ public class ActionLifecycleAspect {
             StringBuilder targetInfo = new StringBuilder();
             
             if (!collection.getStateImages().isEmpty()) {
-                targetInfo.append("Images[").append(collection.getStateImages().size()).append("]");
+                // For single image, show its name; for multiple, show count and first name
+                if (collection.getStateImages().size() == 1) {
+                    String imageName = collection.getStateImages().get(0).getName();
+                    if (imageName != null && !imageName.isEmpty()) {
+                        targetInfo.append(imageName);
+                    } else {
+                        targetInfo.append("Image");
+                    }
+                } else {
+                    targetInfo.append("Images[").append(collection.getStateImages().size()).append("]");
+                    String firstName = collection.getStateImages().get(0).getName();
+                    if (firstName != null && !firstName.isEmpty()) {
+                        targetInfo.append(": ").append(firstName).append("...");
+                    }
+                }
             }
             if (!collection.getStateStrings().isEmpty()) {
                 if (targetInfo.length() > 0) targetInfo.append(", ");
