@@ -4,42 +4,57 @@
 
 The configuration class brings everything together, registering states and transitions with the Brobot framework.
 
-## Initial State Verification (v1.1.0+)
+## Automatic Startup Verification (v1.1.0+)
 
-Brobot now provides automatic initial state verification through configuration:
+Brobot 1.1.0+ provides comprehensive automatic startup verification that handles both image and state verification:
 
 ### Configuration Properties
 
-```properties
-# Enable automatic verification on startup
-brobot.startup.verify-initial-states = true
-
-# States to verify (comma-separated)
-brobot.startup.initial-states = PROMPT,WORKING
-
-# Search all states if specified ones not found
-brobot.startup.fallback-search = false
-
-# Activate only the first found state
-brobot.startup.activate-first-only = false
-
-# Delay before verification (seconds)
-brobot.startup.startup-delay = 2
+```yaml
+brobot:
+  startup:
+    # Enable automatic startup verification
+    auto-verify: true
+    
+    # States to verify (comma-separated)
+    verify-states: "Working,Prompt"
+    
+    # Image path configuration
+    image-path: images
+    fallback-paths:
+      - "/home/user/app/images"
+      - "${user.home}/Documents/app/images"
+    
+    # State verification options
+    clear-states-before-verify: true
+    ui-stabilization-delay: 2.0
+    
+    # Error handling
+    throw-on-failure: false
+    run-diagnostics-on-failure: true
 ```
 
 ### How It Works
 
-1. **Automatic Execution**: When enabled, verification runs automatically after Spring context initialization
-2. **State Search**: Searches for configured states on the actual screen
-3. **State Activation**: Found states are automatically activated in StateMemory
-4. **Mock Support**: In mock mode, randomly selects states based on equal probability
+1. **Phase 1 - Image Verification** (ApplicationRunner):
+   - Automatically discovers required images from configured states
+   - Verifies all images exist and are loadable
+   - Uses intelligent fallback paths
+   - Runs diagnostics on failure
+
+2. **Phase 2 - State Verification** (StatesRegisteredEvent):
+   - Waits for UI stabilization
+   - Verifies expected states are visible on screen
+   - Updates StateMemory automatically
+   - Provides detailed error reporting
 
 ### Benefits
 
-- **No Boilerplate**: No need to manually set initial states in code
+- **Zero Code**: No custom startup classes needed
+- **Auto-Discovery**: Images automatically found from state definitions
 - **Configuration-Driven**: Change behavior without recompiling
-- **Consistent**: Same approach across all Brobot applications
-- **Testable**: Works seamlessly with mock mode
+- **Intelligent Defaults**: Common fallback paths included
+- **Comprehensive**: Handles both images and states
 
 ## StateRegistrationListener.java (Recommended Approach)
 
@@ -100,12 +115,10 @@ public class StateRegistrationListener {
             
             log.info("State structure initialized with transitions joint table");
             
-            // Set initial active state - using Prompt as starting state
-            Long promptStateId = stateService.getStateId(PromptState.Name.PROMPT.toString());
-            if (promptStateId != null) {
-                stateMemory.addActiveState(promptStateId);
-                log.info("Set PROMPT as initial active state with ID: {}", promptStateId);
-            }
+            // Note: With auto-verify enabled, initial states are set automatically
+            // based on what's actually visible on screen. No need to manually
+            // set initial states here.
+            log.info("State registration complete. Auto-verifier will handle initial states.");
         } catch (Exception e) {
             log.error("Error registering states: ", e);
         }
@@ -141,7 +154,7 @@ This second call to `initializeStateStructure()` is crucial because:
 1. **States first**: Must exist before transitions reference them
 2. **Transitions second**: Need state IDs to function
 3. **Framework structure initialization**: Sets up internal mappings
-4. **Initial state last**: Requires states to be registered
+4. **Auto-verification**: Handles initial state detection automatically
 
 ## Alternative Configuration Patterns
 

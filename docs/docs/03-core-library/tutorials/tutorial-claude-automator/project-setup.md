@@ -13,7 +13,7 @@ claude-automator/
 │   ├── config/
 │   └── ClaudeAutomatorApplication.java
 ├── src/main/resources/
-│   ├── application.properties
+│   ├── application.yml
 │   └── images/
 │       ├── working/
 │       │   ├── claude-icon-1.png
@@ -21,7 +21,9 @@ claude-automator/
 │       │   ├── claude-icon-3.png
 │       │   └── claude-icon-4.png
 │       └── prompt/
-│           └── claude-prompt.png
+│           ├── claude-prompt-1.png
+│           ├── claude-prompt-2.png
+│           └── claude-prompt-3.png
 ├── build.gradle
 └── settings.gradle
 ```
@@ -117,20 +119,30 @@ logging:
 # Brobot Configuration (v1.1.0+)
 brobot:
   core:
-    image-path: classpath:images/   # Images loaded from classpath
+    image-path: images       # Base path for images
     mock: false
-    headless: false
   startup:
-    verify-initial-states: true
-    initial-states: PROMPT
-    fallback-search: false
-    startup-delay: 2
+    # New auto-verification system (v1.1.0+)
+    auto-verify: true
+    verify-states: "Working,Prompt"  # States to verify
+    clear-states-before-verify: true
+    ui-stabilization-delay: 2.0
+    throw-on-failure: false
+    run-diagnostics-on-failure: true
   sikuli:
     highlight: true
 ```
 
-:::tip Configuration Formats
-You can use either `application.properties` or `application.yml`. The YAML format shown above provides better structure for nested properties.
+:::info Automatic Startup Verification
+Brobot 1.1.0+ includes automatic startup verification that:
+- Discovers required images from your states
+- Verifies images exist before running
+- Checks that expected states are visible on screen
+- No custom startup code needed!
+:::
+
+:::tip Zero-Code Startup
+Unlike earlier versions, Brobot 1.1.0+ handles all startup verification through configuration. No need to write custom `ImageVerifier` or `ActiveStateVerifier` classes!
 :::
 
 ## Image Preparation
@@ -139,16 +151,17 @@ Place your screenshots in the appropriate folders:
 
 1. **Working State Images** (`images/working/`):
    - Multiple variations of Claude's response icon
-   - Name them: `claude-icon-1.png`, `claude-icon-2.png`, etc.
+   - Name them: `claude-icon-1.png`, `claude-icon-2.png`, `claude-icon-3.png`, `claude-icon-4.png`
 
 2. **Prompt State Images** (`images/prompt/`):
-   - Screenshot of Claude's prompt interface
-   - Name it: `claude-prompt.png`
+   - Multiple variations of Claude's prompt interface
+   - Name them: `claude-prompt-1.png`, `claude-prompt-2.png`, `claude-prompt-3.png`
 
 :::warning Image Guidelines
 - Remove `.png` extensions when referencing images in code
 - Crop images to show only the relevant UI element
 - Include multiple variations if the element changes appearance
+- Images are automatically discovered from your state definitions
 :::
 
 ## Main Application Class
