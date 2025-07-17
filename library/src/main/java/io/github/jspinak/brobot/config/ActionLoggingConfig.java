@@ -1,21 +1,15 @@
 package io.github.jspinak.brobot.config;
 
 import io.github.jspinak.brobot.logging.unified.BrobotLogger;
-import io.github.jspinak.brobot.tools.logging.ActionLogger;
 import io.github.jspinak.brobot.tools.logging.console.ConsoleActionConfig;
 import io.github.jspinak.brobot.tools.logging.console.ConsoleActionReporter;
-import io.github.jspinak.brobot.tools.logging.enhanced.EnhancedActionLogger;
 import io.github.jspinak.brobot.tools.logging.gui.GuiAccessConfig;
 import io.github.jspinak.brobot.tools.logging.gui.GuiAccessMonitor;
-import io.github.jspinak.brobot.tools.logging.visual.HighlightManager;
 import io.github.jspinak.brobot.tools.logging.visual.VisualFeedbackConfig;
-import io.github.jspinak.brobot.action.Action;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.PropertySource;
 
 /**
@@ -67,24 +61,8 @@ public class ActionLoggingConfig {
         return new ConsoleActionReporter(brobotLogger, config);
     }
     
-    /**
-     * Creates the highlight manager for visual feedback.
-     * Only created if highlighting is enabled.
-     */
-    @Bean
-    @ConditionalOnProperty(
-        prefix = "brobot.highlight",
-        name = "enabled",
-        havingValue = "true",
-        matchIfMissing = true
-    )
-    public HighlightManager highlightManager(
-        VisualFeedbackConfig config,
-        BrobotLogger brobotLogger,
-        Action action
-    ) {
-        return new HighlightManager(config, brobotLogger, action);
-    }
+    // HighlightManager is now created automatically as a @Component with lazy Action injection
+    // to avoid circular dependency issues
     
     /**
      * Creates the GUI access monitor.
