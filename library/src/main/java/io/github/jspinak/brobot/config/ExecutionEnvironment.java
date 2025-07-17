@@ -96,6 +96,7 @@ public class ExecutionEnvironment {
         // Check OS type
         String os = System.getProperty("os.name").toLowerCase();
         boolean isWindows = os.contains("windows");
+        boolean isMac = os.contains("mac");
         boolean isWSL = System.getenv("WSL_DISTRO_NAME") != null || 
                        System.getenv("WSL_INTEROP") != null;
         
@@ -105,8 +106,19 @@ public class ExecutionEnvironment {
             return !isRunningInCI();
         }
         
+        // For macOS, check actual display capability using AWT
+        if (isMac) {
+            try {
+                // Try to get screen devices - this works on macOS
+                GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+                return ge.getScreenDevices().length > 0 && !isRunningInCI();
+            } catch (Exception e) {
+                return false;
+            }
+        }
+        
         // Check for DISPLAY variable on Unix-like systems (including WSL)
-        if (os.contains("nix") || os.contains("nux") || os.contains("mac") || isWSL) {
+        if (os.contains("nix") || os.contains("nux") || isWSL) {
             String display = System.getenv("DISPLAY");
             if (display == null || display.isEmpty()) {
                 return false;
