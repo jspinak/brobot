@@ -85,12 +85,12 @@ public class AutoStartupVerifier implements ApplicationRunner {
      */
     @Override
     public void run(ApplicationArguments args) throws Exception {
-        log.info("=== Brobot Auto Startup Verification: Phase 1 (Images) ===");
+        log.debug("Auto startup verification: Phase 1 (Images)");
         
         // Parse states to verify
         statesToVerify = parseStatesToVerify();
         if (statesToVerify.isEmpty()) {
-            log.info("No states configured for verification. Skipping auto-verification.");
+            log.debug("No states configured for verification. Skipping auto-verification.");
             return;
         }
         
@@ -120,9 +120,7 @@ public class AutoStartupVerifier implements ApplicationRunner {
             return; // Auto-verification not configured
         }
         
-        log.info("=== Brobot Auto Startup Verification: Phase 2 (States) ===");
-        log.info("States registered - verifying active states... (states: {}, transitions: {})", 
-                event.getStateCount(), event.getTransitionCount());
+        log.debug("Auto startup verification: Phase 2 (States)");
         
         try {
             if (brobotLogger != null) {
@@ -141,11 +139,7 @@ public class AutoStartupVerifier implements ApplicationRunner {
     }
     
     private void performImageVerification() {
-        logMetadata("Starting automatic image verification", 
-            "statesToVerify", statesToVerify,
-            "primaryImagePath", imagePath,
-            "fallbackPathCount", fallbackPaths.size()
-        );
+        log.debug("Starting automatic image verification for states: {}", statesToVerify);
         
         // Build configuration with automatic fallback paths
         List<String> enhancedFallbackPaths = buildEnhancedFallbackPaths();
@@ -166,9 +160,8 @@ public class AutoStartupVerifier implements ApplicationRunner {
         imageVerificationCompleted = result.isImageVerificationPassed();
         
         if (result.isSuccess()) {
-            logMetadata("Image verification completed successfully",
-                "verifiedImages", result.getVerifiedImages().size()
-            );
+            log.info("Image verification completed successfully ({} images)", 
+                result.getVerifiedImages().size());
         } else {
             logMetadata("Image verification completed with errors",
                 "missingImages", result.getMissingImages(),
@@ -183,11 +176,7 @@ public class AutoStartupVerifier implements ApplicationRunner {
     }
     
     private void performStateVerification() {
-        logMetadata("Starting automatic state verification",
-            "imageVerificationCompleted", imageVerificationCompleted,
-            "clearStatesBeforeVerify", clearStatesBeforeVerify,
-            "uiStabilizationDelay", uiStabilizationDelay
-        );
+        log.debug("Starting automatic state verification");
         
         ApplicationStartupVerifier.StartupConfig config = ApplicationStartupVerifier.StartupConfig.builder()
                 .primaryImagePath(imagePath) // Already configured
@@ -201,11 +190,7 @@ public class AutoStartupVerifier implements ApplicationRunner {
         ApplicationStartupVerifier.StartupResult result = applicationStartupVerifier.verify(config);
         
         if (result.isStateVerificationPassed()) {
-            logMetadata("State verification completed successfully",
-                "activeStates", result.getActiveStateNames(),
-                "activeStateCount", result.getActiveStates().size()
-            );
-            log.info("Application ready. Active states: {}", result.getActiveStateNames());
+            log.info("State verification completed. Active states: {}", result.getActiveStateNames());
         } else {
             logMetadata("State verification completed with warnings",
                 "activeStates", result.getActiveStateNames(),

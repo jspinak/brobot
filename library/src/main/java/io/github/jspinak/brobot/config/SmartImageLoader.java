@@ -126,7 +126,7 @@ public class SmartImageLoader {
         
         // If all strategies failed, create placeholder and log error
         if (image == null) {
-            log.error("Failed to load image: {}. Creating placeholder.", imageName);
+            log.debug("Image not found: {} - using placeholder", imageName);
             image = createPlaceholder(imageName);
             result = LoadResult.failure("All load strategies failed", System.currentTimeMillis() - startTime);
         }
@@ -135,7 +135,7 @@ public class SmartImageLoader {
         imageCache.put(imageName, image);
         loadHistory.put(imageName, result);
         
-        log.info("Image '{}' loaded from {} in {}ms", imageName, result.loadedFrom, result.loadTimeMs);
+        log.debug("Image '{}' loaded from {} in {}ms", imageName, result.loadedFrom, result.loadTimeMs);
         return image;
     }
     
