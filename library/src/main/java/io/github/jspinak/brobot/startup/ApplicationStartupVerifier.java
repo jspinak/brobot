@@ -5,7 +5,7 @@ import io.github.jspinak.brobot.config.ImagePathManager;
 import io.github.jspinak.brobot.config.SmartImageLoader;
 import io.github.jspinak.brobot.model.state.State;
 import io.github.jspinak.brobot.model.state.StateEnum;
-import io.github.jspinak.brobot.model.stateobject.stateimage.StateImage;
+import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.navigation.service.StateService;
 import io.github.jspinak.brobot.statemanagement.StateMemory;
 import lombok.Builder;
