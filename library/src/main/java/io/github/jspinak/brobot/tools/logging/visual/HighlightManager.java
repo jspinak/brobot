@@ -7,8 +7,9 @@ import io.github.jspinak.brobot.logging.unified.BrobotLogger;
 import io.github.jspinak.brobot.action.Action;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.action.basic.highlight.HighlightOptions;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import java.awt.*;
@@ -31,16 +32,24 @@ import java.util.concurrent.CompletableFuture;
  * @see VisualFeedbackConfig for configuration options
  */
 @Component
-@RequiredArgsConstructor
 @Slf4j
 public class HighlightManager {
     
     private final VisualFeedbackConfig config;
     private final BrobotLogger brobotLogger;
-    private final Action action;
+    
+    @Autowired
+    @Lazy
+    private Action action;
     
     // Keep track of active highlight threads for cleanup
     private final List<CompletableFuture<Void>> activeHighlights = new ArrayList<>();
+    
+    @Autowired
+    public HighlightManager(VisualFeedbackConfig config, BrobotLogger brobotLogger) {
+        this.config = config;
+        this.brobotLogger = brobotLogger;
+    }
     
     /**
      * Highlights successful match findings.
