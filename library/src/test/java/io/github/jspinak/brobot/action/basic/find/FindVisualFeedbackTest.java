@@ -153,9 +153,23 @@ public class FindVisualFeedbackTest {
      * Simple implementation of BaseFindOptions for testing
      */
     private static class SimpleFindOptions extends BaseFindOptions {
+        private final FindStrategy strategy;
+        
         public SimpleFindOptions() {
-            super();
-            setFindStrategy(FindStrategy.FIRST);
+            super(new Builder());
+            this.strategy = FindStrategy.FIRST;
+        }
+        
+        @Override
+        public FindStrategy getFindStrategy() {
+            return strategy;
+        }
+        
+        private static class Builder extends BaseFindOptions.Builder<Builder> {
+            @Override
+            protected Builder self() {
+                return this;
+            }
         }
     }
 }
