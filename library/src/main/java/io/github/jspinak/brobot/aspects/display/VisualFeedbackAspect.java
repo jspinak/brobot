@@ -4,8 +4,10 @@ import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.logging.unified.BrobotLogger;
 import io.github.jspinak.brobot.logging.unified.LogEvent;
-// Match import removed - not available
+import io.github.jspinak.brobot.model.match.Match;
+import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.state.StateObject;
+import io.github.jspinak.brobot.model.state.StateRegion;
 import io.github.jspinak.brobot.tools.logging.visual.HighlightManager;
 import io.github.jspinak.brobot.tools.logging.visual.VisualFeedbackConfig;
 import lombok.Data;
@@ -174,53 +176,62 @@ public class VisualFeedbackAspect {
      * Highlight search regions before operation
      */
     private void highlightSearchRegions(ObjectCollection targets, String operationType) {
-        if (targets == null) return;
+        if (targets == null || highlightManager == null) return;
         
-        // Get all state objects
-        Set<StateObject> stateObjects = new HashSet<>();
-        // Note: actual extraction would use proper ObjectCollection methods
+        // Extract regions from the ObjectCollection
+        List<Region> regions = new ArrayList<>();
         
-        // Highlight each search region
-        for (StateObject obj : stateObjects) {
-            String highlightId = UUID.randomUUID().toString();
-            
-            // Schedule highlight
-            scheduleHighlight(highlightId, () -> {
-                // Actual highlighting would use HighlightManager
-                log.debug("Highlighting search region for {} operation", operationType);
-            }, 0);
-            
-            // Schedule removal
-            scheduleHighlight(highlightId + "_remove", () -> {
-                // Remove highlight
-                log.debug("Removing highlight for {} operation", operationType);
-            }, highlightDuration * 1000);
+        // Get regions from StateRegions
+        for (StateRegion stateRegion : targets.getStateRegions()) {
+            if (stateRegion.getSearchRegion() != null) {
+                regions.add(stateRegion.getSearchRegion());
+            }
         }
         
-        logVisualFeedback("SEARCH_HIGHLIGHT", operationType, stateObjects.size());
+        // Get search regions from StateImages
+        for (var stateImage : targets.getStateImages()) {
+            // StateImages don't have direct search regions, they use patterns
+            // which have their own search regions
+            for (var pattern : stateImage.getPatterns()) {
+                if (pattern.getSearchRegions() != null) {
+                    regions.addAll(pattern.getSearchRegions().getAllRegions());
+                }
+            }
+        }
+        
+        // If no specific search regions, get default regions
+        if (regions.isEmpty() && !targets.getStateImages().isEmpty()) {
+            // Use screen as default search region
+            regions.add(new Region(0, 0, 1920, 1080)); // Default screen size
+        }
+        
+        // Use HighlightManager to highlight the regions
+        if (!regions.isEmpty()) {
+            highlightManager.highlightSearchRegions(regions);
+        }
+        
+        logVisualFeedback("SEARCH_HIGHLIGHT", operationType, regions.size());
     }
     
     /**
      * Provide feedback for operation results
      */
     private void provideResultFeedback(ActionResult result, String operationType) {
-        if (!result.isSuccess()) {
+        if (!result.isSuccess() || highlightManager == null) {
             return;
         }
         
-        List<?> matches = result.getMatchList();
+        List<Match> matches = result.getMatchList();
         if (matches == null || matches.isEmpty()) {
             return;
         }
         
-        // Highlight found matches
-        for (Object match : matches) {
-            highlightMatch(match, operationType);
-        }
+        // Use HighlightManager to highlight the matches
+        highlightManager.highlightMatches(matches);
         
         // Update action flow
         if (showActionFlow && !matches.isEmpty()) {
-            Object bestMatch = matches.get(0);
+            Match bestMatch = matches.get(0);
             addActionPoint(bestMatch, operationType);
             drawActionFlow();
         }
@@ -228,28 +239,6 @@ public class VisualFeedbackAspect {
         logVisualFeedback("RESULT_HIGHLIGHT", operationType, matches.size());
     }
     
-    /**
-     * Highlight a found match
-     */
-    private void highlightMatch(Object match, String operationType) {
-        if (highlightManager == null) return;
-        
-        String highlightId = UUID.randomUUID().toString();
-        Color color = getColorForOperation(operationType);
-        
-        // Schedule highlight with confidence display
-        scheduleHighlight(highlightId, () -> {
-            // Actual highlighting would use HighlightManager
-            if (showConfidenceScores) {
-                log.debug("Highlighting match");
-            }
-        }, 0);
-        
-        // Schedule removal
-        scheduleHighlight(highlightId + "_remove", () -> {
-            log.debug("Removing match highlight");
-        }, highlightDuration * 1000);
-    }
     
     /**
      * Provide error feedback
@@ -257,17 +246,36 @@ public class VisualFeedbackAspect {
     private void provideErrorFeedback(ObjectCollection targets, String operationType, Throwable error) {
         if (highlightManager == null || targets == null) return;
         
-        // Highlight search regions in red to indicate error
-        String highlightId = "error_" + UUID.randomUUID().toString();
+        // Get the first search region to highlight as error
+        Region errorRegion = null;
         
-        scheduleHighlight(highlightId, () -> {
-            log.debug("Highlighting error location for {} operation", operationType);
-        }, 0);
+        // Try to get region from StateRegions first
+        if (!targets.getStateRegions().isEmpty()) {
+            StateRegion stateRegion = targets.getStateRegions().get(0);
+            if (stateRegion.getSearchRegion() != null) {
+                errorRegion = stateRegion.getSearchRegion();
+            }
+        }
         
-        // Keep error highlight longer
-        scheduleHighlight(highlightId + "_remove", () -> {
-            log.debug("Removing error highlight");
-        }, highlightDuration * 2000);
+        // If no region from StateRegions, try from StateImages
+        if (errorRegion == null && !targets.getStateImages().isEmpty()) {
+            var stateImage = targets.getStateImages().get(0);
+            if (!stateImage.getPatterns().isEmpty()) {
+                var pattern = stateImage.getPatterns().get(0);
+                if (pattern.getSearchRegions() != null && 
+                    !pattern.getSearchRegions().getAllRegions().isEmpty()) {
+                    errorRegion = pattern.getSearchRegions().getAllRegions().get(0);
+                }
+            }
+        }
+        
+        // If still no region, use default screen area
+        if (errorRegion == null) {
+            errorRegion = new Region(0, 0, 1920, 1080);
+        }
+        
+        // Use HighlightManager to highlight the error
+        highlightManager.highlightError(errorRegion);
         
         logVisualFeedback("ERROR_HIGHLIGHT", operationType, 1);
     }
@@ -275,11 +283,21 @@ public class VisualFeedbackAspect {
     /**
      * Add action point for flow visualization
      */
-    private void addActionPoint(Object match, String operationType) {
+    private void addActionPoint(Match match, String operationType) {
         ActionPoint point = new ActionPoint();
-        // Match coordinates would be extracted here
-        point.setX(100); // Placeholder
-        point.setY(100); // Placeholder
+        
+        // Extract coordinates from the match
+        if (match.getRegion() != null) {
+            Region region = match.getRegion();
+            // Use center point of the match
+            point.setX(region.x() + region.w() / 2);
+            point.setY(region.y() + region.h() / 2);
+        } else {
+            // Fallback if no region
+            point.setX(100);
+            point.setY(100);
+        }
+        
         point.setOperationType(operationType);
         point.setTimestamp(System.currentTimeMillis());
         
@@ -304,36 +322,6 @@ public class VisualFeedbackAspect {
         log.debug("Drawing action flow with {} points", recentActions.size());
     }
     
-    /**
-     * Get color for operation type
-     */
-    private Color getColorForOperation(String operationType) {
-        switch (operationType) {
-            case "FIND":
-                return Color.GREEN;
-            case "CLICK":
-                return Color.BLUE;
-            case "TYPE":
-                return Color.ORANGE;
-            default:
-                return Color.YELLOW;
-        }
-    }
-    
-    /**
-     * Schedule a highlight task
-     */
-    private void scheduleHighlight(String id, Runnable task, long delayMillis) {
-        // Cancel any existing highlight with same ID
-        ScheduledFuture<?> existing = activeHighlights.remove(id);
-        if (existing != null) {
-            existing.cancel(false);
-        }
-        
-        // Schedule new highlight
-        ScheduledFuture<?> future = overlayScheduler.schedule(task, delayMillis, TimeUnit.MILLISECONDS);
-        activeHighlights.put(id, future);
-    }
     
     /**
      * Log visual feedback event
