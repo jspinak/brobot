@@ -47,6 +47,7 @@ hs_err_pid*
 
 # VS Code if you ever use it
 **/.vscode/runner/src/test/puppeteer/node_modules/
+.vscode/
 
 # Ignore H2 database files
 runner/data/brobot.lock.db
