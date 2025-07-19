@@ -11,6 +11,8 @@ import java.io.*;
 import java.net.URL;
 import java.nio.file.*;
 import java.util.Map;
+import java.util.List;
+import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -36,10 +38,10 @@ public class SmartImageLoader {
      * Result of an image load attempt with diagnostic information
      */
     public static class LoadResult {
-        public final boolean success;
-        public final String loadedFrom;
-        public final String failureReason;
-        public final long loadTimeMs;
+        private final boolean success;
+        private final String loadedFrom;
+        private final String failureReason;
+        private final Long loadTimeMs;
         
         private LoadResult(boolean success, String loadedFrom, String failureReason, long loadTimeMs) {
             this.success = success;
@@ -55,6 +57,33 @@ public class SmartImageLoader {
         public static LoadResult failure(String reason, long loadTimeMs) {
             return new LoadResult(false, null, reason, loadTimeMs);
         }
+        
+        public boolean isSuccess() {
+            return success;
+        }
+        
+        public String getLoadedFrom() {
+            return loadedFrom;
+        }
+        
+        public String getFailureReason() {
+            return failureReason;
+        }
+        
+        public Long getLoadTimeMs() {
+            return loadTimeMs;
+        }
+    }
+    
+    /**
+     * Load an image using intelligent path resolution and caching.
+     * 
+     * @param imageName the name or path of the image to load
+     * @return LoadResult containing the result and diagnostic information
+     */
+    public LoadResult loadImage(String imageName) {
+        BufferedImage image = loadImageInternal(imageName);
+        return loadHistory.get(imageName);
     }
     
     /**
@@ -63,7 +92,7 @@ public class SmartImageLoader {
      * @param imageName the name or path of the image to load
      * @return the loaded BufferedImage, or a placeholder in mock mode
      */
-    public BufferedImage loadImage(String imageName) {
+    private BufferedImage loadImageInternal(String imageName) {
         long startTime = System.currentTimeMillis();
         
         // Check cache first
@@ -135,7 +164,7 @@ public class SmartImageLoader {
         imageCache.put(imageName, image);
         loadHistory.put(imageName, result);
         
-        log.debug("Image '{}' loaded from {} in {}ms", imageName, result.loadedFrom, result.loadTimeMs);
+        log.debug("Image '{}' loaded from {} in {}ms", imageName, result.getLoadedFrom(), result.getLoadTimeMs());
         return image;
     }
     
@@ -146,7 +175,7 @@ public class SmartImageLoader {
      * @return SikuliX Image object
      */
     public Image loadSikuliImage(String imageName) {
-        BufferedImage bufferedImage = loadImage(imageName);
+        BufferedImage bufferedImage = loadImageInternal(imageName);
         return new Image(bufferedImage, imageName);
     }
     
@@ -156,6 +185,16 @@ public class SmartImageLoader {
     public void clearCache() {
         imageCache.clear();
         log.info("Image cache cleared");
+    }
+    
+    /**
+     * Get an image from cache if it exists
+     * 
+     * @param imageName the name of the image
+     * @return the cached BufferedImage or null if not cached
+     */
+    public BufferedImage getFromCache(String imageName) {
+        return imageCache.get(imageName);
     }
     
     /**
@@ -172,30 +211,31 @@ public class SmartImageLoader {
     /**
      * Provide suggestions for fixing image loading issues
      */
-    public String getSuggestionsForFailure(String imageName) {
+    public List<String> getSuggestionsForFailure(String imageName) {
+        List<String> suggestions = new ArrayList<>();
         LoadResult result = loadHistory.get(imageName);
-        if (result == null || result.success) {
-            return "No failure recorded for image: " + imageName;
+        
+        if (result == null || result.isSuccess()) {
+            suggestions.add("No failure recorded for image: " + imageName);
+            return suggestions;
         }
         
-        StringBuilder suggestions = new StringBuilder();
-        suggestions.append("Image loading failed for: ").append(imageName).append("\n");
-        suggestions.append("Reason: ").append(result.failureReason).append("\n\n");
-        suggestions.append("Suggestions:\n");
+        suggestions.add("Image loading failed for: " + imageName);
+        suggestions.add("Reason: " + result.getFailureReason());
         
         // Check if image paths are configured
         if (pathManager.getConfiguredPaths().isEmpty()) {
-            suggestions.append("1. No image paths configured. Set brobot.core.image-path in application.properties\n");
+            suggestions.add("No image paths configured. Set brobot.core.image-path in application.properties");
         } else {
-            suggestions.append("1. Configured paths: ").append(pathManager.getConfiguredPaths()).append("\n");
-            suggestions.append("   Ensure your image exists in one of these locations.\n");
+            suggestions.add("Configured paths: " + pathManager.getConfiguredPaths());
+            suggestions.add("Ensure your image exists in one of these locations.");
         }
         
-        suggestions.append("2. Check image filename and extension (png, jpg, jpeg, gif, bmp supported)\n");
-        suggestions.append("3. If running from JAR, ensure images are in external directory\n");
-        suggestions.append("4. Try using absolute path to test: /full/path/to/image.png\n");
+        suggestions.add("Check image filename and extension (png, jpg, jpeg, gif, bmp supported)");
+        suggestions.add("If running from JAR, ensure images are in external directory");
+        suggestions.add("Try using absolute path to test: /full/path/to/image.png");
         
-        return suggestions.toString();
+        return suggestions;
     }
     
     private BufferedImage tryLoadFromFile(String imageName) {
