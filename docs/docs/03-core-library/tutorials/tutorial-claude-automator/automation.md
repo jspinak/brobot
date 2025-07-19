@@ -195,6 +195,116 @@ ActionResult result = action.perform(
 );
 ```
 
+## State-Aware Scheduling
+
+### Enhanced Monitoring with State Validation
+
+The framework now supports state-aware scheduling, which automatically validates and manages active states at the beginning of each scheduled cycle.
+
+### StateAwareScheduler Component
+
+```java
+@Component
+@RequiredArgsConstructor
+public class StateAwareScheduler {
+    private final StateDetector stateDetector;
+    private final StateMemory stateMemory;
+    private final StateService stateService;
+    
+    public void scheduleWithStateCheck(
+            ScheduledExecutorService scheduler,
+            Runnable task,
+            StateCheckConfiguration config,
+            long initialDelay,
+            long period,
+            TimeUnit unit) {
+        
+        scheduler.scheduleAtFixedRate(() -> {
+            try {
+                performStateCheck(config);
+                task.run();
+            } catch (Exception e) {
+                log.error("Error in state-aware scheduled task", e);
+            }
+        }, initialDelay, period, unit);
+    }
+}
+```
+
+### Configuration Options
+
+```java
+StateCheckConfiguration config = new StateCheckConfiguration.Builder()
+    .withRequiredStates(List.of("Prompt", "Working"))  // States that must be active
+    .withRebuildOnMismatch(true)                       // Auto-rebuild if states missing
+    .withSkipIfStatesMissing(false)                    // Continue even if states missing
+    .build();
+```
+
+### Enhanced Claude Automation Example
+
+```java
+@Service
+@RequiredArgsConstructor
+@Slf4j
+public class ClaudeMonitoringAutomationV2 {
+    private final StateAwareScheduler stateAwareScheduler;
+    // ... other dependencies ...
+    
+    @PostConstruct
+    public void startMonitoring() {
+        // Configure state validation
+        StateCheckConfiguration stateConfig = new StateCheckConfiguration.Builder()
+                .withRequiredStates(List.of("Prompt", "Working"))
+                .withRebuildOnMismatch(true)
+                .build();
+        
+        // Schedule with automatic state checking
+        stateAwareScheduler.scheduleWithStateCheck(
+                scheduler,
+                this::getClaudeWorking,
+                stateConfig,
+                initialDelay,
+                checkInterval,
+                TimeUnit.SECONDS
+        );
+    }
+    
+    private void getClaudeWorking() {
+        // Task runs after state validation
+        // States are guaranteed to be checked/rebuilt
+        if (selectClaudePrompt()) {
+            checkClaudeIconStatus();
+        }
+    }
+}
+```
+
+### Benefits of State-Aware Scheduling
+
+1. **Automatic State Validation**: Ensures required states are active before task execution
+2. **Self-Healing**: Can automatically rebuild states if they're missing
+3. **Separation of Concerns**: State management logic is isolated from business logic
+4. **Configurable Behavior**: Flexible options for different scenarios
+5. **Error Recovery**: Handles state mismatches gracefully
+
+### Configuration Properties
+
+```properties
+# State-Aware Scheduling Configuration
+claude.automator.monitoring.required-states=Prompt,Working
+claude.automator.monitoring.rebuild-on-mismatch=true
+claude.automator.monitoring.initial-delay=5
+claude.automator.monitoring.check-interval=2
+```
+
+### Use Cases
+
+1. **GUI State Validation**: Ensure expected GUI states before automation
+2. **Recovery from Crashes**: Automatically detect and recover lost states
+3. **Complex Workflows**: Maintain state integrity in multi-step processes
+4. **Background Monitoring**: Keep automation aligned with application state
+
 ## Next Steps
 
 Finally, we'll wire everything together with Spring configuration to create a complete working application.

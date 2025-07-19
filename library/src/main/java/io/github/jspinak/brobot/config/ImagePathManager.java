@@ -112,6 +112,15 @@ public class ImagePathManager {
     }
     
     /**
+     * Get all paths including primary, configured, and extracted JAR paths
+     */
+    public List<String> getAllPaths() {
+        List<String> allPaths = new ArrayList<>(getConfiguredPaths());
+        extractedJarPaths.values().forEach(path -> allPaths.add(path.toString()));
+        return allPaths;
+    }
+    
+    /**
      * Extract images from JAR if running from JAR file
      */
     public Path extractImagesFromJar(String resourcePath) {
