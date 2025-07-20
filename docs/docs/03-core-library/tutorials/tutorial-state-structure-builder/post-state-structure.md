@@ -4,6 +4,10 @@ sidebar_position: 5
 
 # Where do I go from here?
 
+:::info Version Note
+This tutorial was originally created for an earlier version of Brobot but has been updated for version 1.1.0. The original code examples are available in documentation versions 1.0.6 and 1.0.7.
+:::
+
 Now that you have a state structure, you can start writing the code for your automation program. 
 How you do this is ultimately up to you, but I'll share here how I write my Brobot code.  
 

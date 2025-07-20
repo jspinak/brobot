@@ -1,0 +1,209 @@
+/* Label overlap and duplication fixes */
+
+/* Root fix to prevent duplicate rendering */
+.root {
+    -fx-depth-buffer: true;
+}
+
+/* Ensure labels have proper spacing and don't overlap */
+.label {
+    -fx-text-overrun: ellipsis;
+    -fx-wrap-text: false;
+    -fx-min-height: 20px;
+    -fx-padding: 2px 4px;
+    -fx-background-color: transparent;
+}
+
+/* Title labels need more spacing */
+.title-label {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-padding: 8px 0px;
+    -fx-min-height: 30px;
+}
+
+/* Fix for AutomationPanel labels */
+.automation-panel .label {
+    -fx-padding: 4px 0px;
+    -fx-min-height: 24px;
+}
+
+/* Fix for status label */
+.status-label {
+    -fx-min-width: 150px;
+    -fx-padding: 4px 8px;
+}
+
+/* Fix for section labels in AutomationPanel */
+.section-label {
+    -fx-font-weight: bold;
+    -fx-padding: 8px 0px 4px 0px;
+    -fx-min-height: 28px;
+}
+
+/* Fix for button pane labels */
+.button-pane .label {
+    -fx-padding: 4px 8px;
+    -fx-min-height: 24px;
+}
+
+/* Fix for category labels */
+.category-label {
+    -fx-font-weight: bold;
+    -fx-padding: 6px 4px;
+    -fx-min-height: 26px;
+}
+
+/* Fix for VBox spacing to prevent overlapping */
+.vbox {
+    -fx-spacing: 8px !important;
+}
+
+VBox {
+    -fx-spacing: 8px !important;
+}
+
+/* Fix for HBox spacing */
+.hbox {
+    -fx-spacing: 10px !important;
+}
+
+HBox {
+    -fx-spacing: 10px !important;
+}
+
+/* Fix for FlowPane spacing */
+.flow-pane {
+    -fx-hgap: 10px !important;
+    -fx-vgap: 10px !important;
+}
+
+FlowPane {
+    -fx-hgap: 10px !important;
+    -fx-vgap: 10px !important;
+}
+
+/* Ensure proper spacing in control bars */
+.control-bar {
+    -fx-spacing: 10px;
+    -fx-padding: 5px 0px;
+}
+
+/* Fix for header sections */
+.header-section {
+    -fx-spacing: 15px;
+    -fx-padding: 10px 0px;
+}
+
+/* Fix for content sections */
+.content-section {
+    -fx-spacing: 10px;
+    -fx-padding: 10px;
+}
+
+/* Prevent label stacking in grid panes */
+.grid-pane .label {
+    -fx-max-width: Infinity;
+    -fx-text-overrun: ellipsis;
+    -fx-wrap-text: false;
+    -fx-min-height: 24px;
+}
+
+/* Fix for separator spacing */
+.separator {
+    -fx-padding: 5px 0px;
+}
+
+/* Ensure button labels don't overlap */
+.button .label {
+    -fx-padding: 0px;
+    -fx-min-height: 20px;
+}
+
+/* Fix for tab labels */
+.tab .label {
+    -fx-padding: 2px 8px;
+    -fx-min-height: 20px;
+}
+
+/* Fix for table column headers */
+.table-view .column-header .label {
+    -fx-padding: 4px 8px;
+    -fx-min-height: 24px;
+    -fx-alignment: center-left;
+}
+
+/* Fix for card titles */
+.card-title {
+    -fx-padding: 8px 0px 8px 0px;
+    -fx-min-height: 32px;
+}
+
+/* Fix for panel titles */
+.panel-title {
+    -fx-padding: 6px 0px;
+    -fx-min-height: 28px;
+}
+
+/* Ensure tooltips don't cause overlapping */
+.tooltip {
+    -fx-show-delay: 500ms;
+    -fx-hide-delay: 200ms;
+}
+
+/* Fix for status bar items */
+.status-bar .label {
+    -fx-padding: 2px 8px;
+    -fx-min-height: 20px;
+}
+
+/* Fix for dialog labels */
+.dialog-pane .label {
+    -fx-padding: 4px 0px;
+    -fx-min-height: 24px;
+}
+
+/* Ensure proper layering for overlapping elements */
+.stack-pane > * {
+    -fx-background-color: transparent;
+}
+
+StackPane > * {
+    -fx-background-color: transparent;
+}
+
+/* Fix for overlapping in split panes */
+.split-pane > * {
+    -fx-min-width: 0;
+    -fx-min-height: 0;
+}
+
+/* Fix for tab pane content */
+.tab-pane > .tab-content-area {
+    -fx-padding: 0;
+}
+
+/* Prevent label duplication in automation panel */
+.automation-panel Label,
+.enhanced-automation-panel Label {
+    -fx-background-color: transparent;
+    -fx-text-overrun: ellipsis;
+}
+
+/* Fix for control bar spacing */
+.control-bar {
+    -fx-spacing: 10px !important;
+    -fx-padding: 5px 0px;
+}
+
+/* Fix spacing in all panels */
+.panel {
+    -fx-spacing: 10px;
+}
+
+/* Global fix for all labels */
+Label {
+    -fx-text-overrun: ellipsis;
+    -fx-wrap-text: false;
+    -fx-background-color: transparent;
+}

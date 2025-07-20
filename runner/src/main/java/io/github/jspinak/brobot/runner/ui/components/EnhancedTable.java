@@ -17,6 +17,7 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.util.Callback;
 import lombok.Getter;
+import atlantafx.base.theme.Styles;
 
 import java.util.Comparator;
 import java.util.HashMap;
@@ -62,6 +63,7 @@ public class EnhancedTable<T> extends VBox {
     public EnhancedTable() {
         // Create the table view
         tableView = new TableView<>();
+        tableView.getStyleClass().addAll(Styles.STRIPED, Styles.BORDERED);
         tableView.setPlaceholder(new Label("No data available"));
 
         // Setup search field

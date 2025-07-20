@@ -1,7 +1,7 @@
 package io.github.jspinak.brobot.runner.ui.config;
 
-import lombok.Data;
-
+import lombok.Getter;
+import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
 
 import io.github.jspinak.brobot.runner.config.BrobotRunnerProperties;
@@ -36,7 +36,8 @@ import java.time.LocalDateTime;
  * Dialog for importing configuration files into the Brobot Runner.
  */
 @Slf4j
-@Data
+@Getter
+@EqualsAndHashCode(callSuper = false)
 public class ConfigImportDialog extends Dialog<ConfigEntry> {
     private static final Logger logger = LoggerFactory.getLogger(ConfigImportDialog.class);
 

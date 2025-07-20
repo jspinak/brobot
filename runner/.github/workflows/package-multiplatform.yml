@@ -1,0 +1,222 @@
+name: Package Multi-Platform
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  # Build and test on Linux first
+  build-jar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up JDK 21
+        uses: actions/setup-java@v3
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+      
+      - name: Build with Gradle
+        run: ./gradlew :runner:bootJar
+      
+      - name: Upload JAR
+        uses: actions/upload-artifact@v3
+        with:
+          name: runner-jar
+          path: runner/build/libs/*.jar
+
+  # Package for Linux
+  package-linux:
+    needs: build-jar
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up JDK 21
+        uses: actions/setup-java@v3
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+      
+      - name: Download JAR
+        uses: actions/download-artifact@v3
+        with:
+          name: runner-jar
+          path: runner/build/libs/
+      
+      - name: Install packaging tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y dpkg-dev rpm
+      
+      - name: Build DEB package
+        run: |
+          chmod +x runner/build-package.sh
+          bash runner/build-package.sh deb
+      
+      - name: Build RPM package
+        run: |
+          # Would need to implement RPM packaging
+          echo "RPM packaging not implemented yet"
+      
+      - name: Build AppImage
+        run: |
+          # Download AppImage tools
+          wget https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
+          chmod +x appimagetool-x86_64.AppImage
+          
+          # Create AppDir structure
+          mkdir -p AppDir/usr/bin
+          mkdir -p AppDir/usr/share/applications
+          mkdir -p AppDir/usr/share/icons
+          
+          # Copy files
+          cp runner/build/libs/*.jar AppDir/usr/bin/brobot-runner.jar
+          cp runner/packaging/brobot-runner.desktop AppDir/
+          cp runner/packaging/icons/brobot-256x256.png AppDir/brobot-runner.png
+          
+          # Create AppRun script
+          cat > AppDir/AppRun << 'EOF'
+          #!/bin/bash
+          SELF=$(readlink -f "$0")
+          HERE=${SELF%/*}
+          export PATH="${HERE}/usr/bin/:${HERE}/usr/sbin/:${HERE}/usr/games/:${HERE}/bin/:${HERE}/sbin/${PATH:+:$PATH}"
+          exec java -jar "${HERE}/usr/bin/brobot-runner.jar" "$@"
+          EOF
+          chmod +x AppDir/AppRun
+          
+          # Build AppImage
+          ./appimagetool-x86_64.AppImage AppDir brobot-runner-x86_64.AppImage
+      
+      - name: Upload Linux packages
+        uses: actions/upload-artifact@v3
+        with:
+          name: linux-packages
+          path: |
+            runner/build/*.deb
+            *.AppImage
+
+  # Package for Windows
+  package-windows:
+    needs: build-jar
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up JDK 21
+        uses: actions/setup-java@v3
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+      
+      - name: Download JAR
+        uses: actions/download-artifact@v3
+        with:
+          name: runner-jar
+          path: runner/build/libs/
+      
+      - name: Build Windows installer
+        run: |
+          # Use jpackage to create MSI
+          ./gradlew :runner:jpackage
+      
+      - name: Sign Windows installer (optional)
+        if: ${{ env.WINDOWS_CERTIFICATE }}
+        run: |
+          # Sign with Windows certificate
+          signtool sign /f certificate.pfx /p ${{ secrets.CERT_PASSWORD }} /t http://timestamp.digicert.com runner/build/installers/*.msi
+      
+      - name: Upload Windows installer
+        uses: actions/upload-artifact@v3
+        with:
+          name: windows-installer
+          path: runner/build/installers/*.msi
+
+  # Package for macOS
+  package-macos:
+    needs: build-jar
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up JDK 21
+        uses: actions/setup-java@v3
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+      
+      - name: Download JAR
+        uses: actions/download-artifact@v3
+        with:
+          name: runner-jar
+          path: runner/build/libs/
+      
+      - name: Build macOS installer
+        run: |
+          # Use jpackage to create DMG
+          ./gradlew :runner:jpackage
+      
+      - name: Sign and notarize (optional)
+        if: ${{ env.APPLE_CERTIFICATE }}
+        run: |
+          # Import certificate
+          security import certificate.p12 -P ${{ secrets.CERT_PASSWORD }}
+          
+          # Sign the app
+          codesign --force --verify --verbose --sign "Developer ID Application: Your Name" runner/build/installers/*.app
+          
+          # Create DMG
+          hdiutil create -volname "Brobot Runner" -srcfolder runner/build/installers/*.app -ov -format UDZO brobot-runner.dmg
+          
+          # Notarize
+          xcrun altool --notarize-app --primary-bundle-id "io.github.jspinak.brobot.runner" \
+            --username ${{ secrets.APPLE_ID }} --password ${{ secrets.APPLE_PASSWORD }} \
+            --file brobot-runner.dmg
+      
+      - name: Upload macOS installer
+        uses: actions/upload-artifact@v3
+        with:
+          name: macos-installer
+          path: |
+            runner/build/installers/*.dmg
+            *.dmg
+
+  # Create GitHub Release
+  create-release:
+    needs: [package-linux, package-windows, package-macos]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Download all artifacts
+        uses: actions/download-artifact@v3
+      
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            linux-packages/*
+            windows-installer/*
+            macos-installer/*
+          body: |
+            # Brobot Runner ${{ github.ref_name }}
+            
+            ## Installation
+            
+            ### Linux
+            - **DEB** (Ubuntu/Debian): `brobot-runner_*.deb`
+            - **AppImage** (Universal): `brobot-runner-x86_64.AppImage`
+            
+            ### Windows
+            - **MSI Installer**: `brobot-runner-*.msi`
+            
+            ### macOS
+            - **DMG**: `brobot-runner-*.dmg`
+            
+            See [Installation Guide](https://github.com/${{ github.repository }}/blob/main/runner/INSTALL.md) for details.
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

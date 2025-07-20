@@ -12,6 +12,7 @@ import io.github.jspinak.brobot.util.image.core.BufferedImageUtilities;
 import io.github.jspinak.brobot.util.string.FilenameExtractor;
 
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import org.bytedeco.opencv.opencv_core.Mat;
 
 
@@ -109,7 +110,12 @@ public class Pattern {
         
         if (env.useRealFiles()) {
             // Load real image - works in headless but not mock mode
-            this.image = new Image(BufferedImageUtilities.getBuffImgFromFile(imgPath), name);
+            BufferedImage bufferedImage = BufferedImageUtilities.getBuffImgFromFile(imgPath);
+            if (bufferedImage == null) {
+                throw new IllegalStateException("Failed to load image: " + imgPath + 
+                    ". Make sure the image exists in the configured image path and has .png extension.");
+            }
+            this.image = new Image(bufferedImage, name);
         } else {
             // Only create dummy in mock mode
             this.image = new Image(new BufferedImage(100, 100, BufferedImage.TYPE_INT_RGB), name);
@@ -265,8 +271,11 @@ public class Pattern {
     @JsonIgnore
     public org.sikuli.script.Pattern sikuli() {
         if (image == null) {
-            System.out.println("Image is null for pattern: " + name);
-            return new org.sikuli.script.Pattern();
+            throw new IllegalStateException("Cannot create SikuliX Pattern: Image is null for pattern: " + name);
+        }
+        if (image.isEmpty()) {
+            throw new IllegalStateException("Cannot create SikuliX Pattern: Image has no BufferedImage. " +
+                "Image file may not exist or failed to load for pattern: " + name);
         }
         return new org.sikuli.script.Pattern(image.sikuli());
     }
@@ -294,6 +303,7 @@ public class Pattern {
                 '}';
     }
 
+    @Slf4j
     public static class Builder {
         private String name = "";
         private Image image;
@@ -458,8 +468,14 @@ public class Pattern {
             } else if (this.bufferedImage != null) {
                 pattern.setImage(new Image(this.bufferedImage, this.name));
             } else if (this.filename != null && !this.filename.isEmpty()) {
-                pattern.setImage(new Image(BufferedImageUtilities.getBuffImgFromFile(this.filename), this.name));
-                pattern.setImgpath(this.filename);
+                BufferedImage loadedImage = BufferedImageUtilities.getBuffImgFromFile(this.filename);
+                if (loadedImage != null) {
+                    pattern.setImage(new Image(loadedImage, this.name));
+                    pattern.setImgpath(this.filename);
+                } else {
+                    // Log warning but don't create an Image with null BufferedImage
+                    log.error("Failed to load image from file: {}", this.filename);
+                }
             }
         }
 

@@ -1,0 +1,22 @@
+# Test configuration for Brobot
+brobot:
+  core:
+    image-path: src/test/resources/images
+    find-timeout: 0.5
+    action-pause: 0.0
+    mock-mode: false
+    verbose-logging: true
+    
+  environment:
+    profile: testing
+    
+  sikuli:
+    min-similarity: 0.8
+    wait-time: 0.5
+    visual-debugging: false
+    save-failure-screenshots: false
+    
+  performance:
+    enable-parallel-execution: true
+    max-retry-attempts: 1
+    retry-delay: 0.1

@@ -1,7 +1,7 @@
 package io.github.jspinak.brobot.runner.ui.config;
 
-import lombok.Data;
-
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import io.github.jspinak.brobot.runner.events.EventBus;
@@ -15,6 +15,7 @@ import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import atlantafx.base.theme.Styles;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -33,7 +34,8 @@ import java.util.regex.Pattern;
  * Allows editing project information, version, author, and other metadata.
  */
 @Slf4j
-@Data
+@Getter
+@EqualsAndHashCode(callSuper = false)
 public class ConfigMetadataEditor extends BorderPane {
     private static final Logger logger = LoggerFactory.getLogger(ConfigMetadataEditor.class);
 
@@ -231,7 +233,7 @@ public class ConfigMetadataEditor extends BorderPane {
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
         saveButton = new Button("Save Changes");
-        saveButton.getStyleClass().add("button-primary");
+        saveButton.getStyleClass().add(Styles.ACCENT);
         saveButton.setOnAction(e -> saveChanges());
         saveButton.setDisable(true);
 
@@ -386,7 +388,7 @@ public class ConfigMetadataEditor extends BorderPane {
     }
 
     private void loadConfigData(ConfigEntry config) {
-        AutomationProject project = projectManager.getActiveProject();
+        AutomationProject project = projectManager.getCurrentProject();
 
         if (project != null) {
             // Load from active project
@@ -521,7 +523,7 @@ public class ConfigMetadataEditor extends BorderPane {
         Files.writeString(configPath, content);
 
         // If project is loaded, update it
-        AutomationProject project = projectManager.getActiveProject();
+        AutomationProject project = projectManager.getCurrentProject();
         if (project != null) {
             project.setName(projectNameField.getText());
             project.setVersion(versionField.getText());

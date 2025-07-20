@@ -1,7 +1,10 @@
 package io.github.jspinak.brobot.util.image.capture;
 
 import io.github.jspinak.brobot.model.element.Region;
+import io.github.jspinak.brobot.monitor.MonitorManager;
 import org.sikuli.script.Screen;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * Utility class for screen dimension operations and region creation.
@@ -38,6 +41,7 @@ import org.sikuli.script.Screen;
  * @see Region
  * @see Screen
  */
+@Component
 public class ScreenUtilities {
 
     /**
@@ -51,6 +55,13 @@ public class ScreenUtilities {
      * Should be initialized at application startup and treated as read-only.
      */
     public static int h;
+    
+    private static MonitorManager monitorManager;
+    
+    @Autowired
+    public void setMonitorManager(MonitorManager monitorManager) {
+        ScreenUtilities.monitorManager = monitorManager;
+    }
 
     /**
      * Retrieves current screen dimensions directly from the system.
@@ -65,11 +76,16 @@ public class ScreenUtilities {
      * @return array containing [width, height] in pixels
      */
     public static int[] getNewScreenWH() {
-        Screen screen = new Screen();
-        int[] wh = new int[2];
-        wh[0] = screen.w;
-        wh[1] = screen.h;
-        return wh;
+        try {
+            Screen screen = new Screen();
+            int[] wh = new int[2];
+            wh[0] = screen.w;
+            wh[1] = screen.h;
+            return wh;
+        } catch (Exception e) {
+            // In headless mode, return default dimensions
+            return new int[]{1920, 1080};
+        }
     }
 
     /**
@@ -101,5 +117,81 @@ public class ScreenUtilities {
      */
     public static Region getRegion() {
         return new Region(0,0,w,h);
+    }
+    
+    /**
+     * Gets screen dimensions for a specific monitor.
+     *
+     * @param monitorIndex The monitor index (0-based)
+     * @return array containing [width, height] in pixels
+     */
+    public static int[] getMonitorDimensions(int monitorIndex) {
+        Screen screen = monitorManager != null ? 
+            monitorManager.getScreen(monitorIndex) : new Screen(monitorIndex);
+        return new int[]{screen.w, screen.h};
+    }
+    
+    /**
+     * Creates a region covering the entire specified monitor.
+     *
+     * @param monitorIndex The monitor index (0-based)
+     * @return Region covering the specified monitor
+     */
+    public static Region getMonitorRegion(int monitorIndex) {
+        if (monitorManager != null && monitorManager.isValidMonitorIndex(monitorIndex)) {
+            MonitorManager.MonitorInfo info = monitorManager.getMonitorInfo(monitorIndex);
+            return new Region(info.getX(), info.getY(), info.getWidth(), info.getHeight());
+        }
+        // Fallback to Sikuli Screen
+        Screen screen = new Screen(monitorIndex);
+        return new Region(screen.x, screen.y, screen.w, screen.h);
+    }
+    
+    /**
+     * Gets the Screen object for a specific monitor.
+     *
+     * @param monitorIndex The monitor index (0-based)
+     * @return Screen object for the specified monitor
+     */
+    public static Screen getScreen(int monitorIndex) {
+        return monitorManager != null ? 
+            monitorManager.getScreen(monitorIndex) : new Screen(monitorIndex);
+    }
+    
+    /**
+     * Gets the Screen object based on operation context.
+     *
+     * @param operationName Operation name for monitor assignment
+     * @return Appropriate Screen object
+     */
+    public static Screen getScreen(String operationName) {
+        if (monitorManager != null) {
+            return monitorManager.getScreen(operationName);
+        }
+        
+        try {
+            return new Screen();
+        } catch (Exception e) {
+            // In headless mode, return null
+            return null;
+        }
+    }
+    
+    /**
+     * Gets all available screens for multi-monitor operations.
+     *
+     * @return List of all Screen objects
+     */
+    public static java.util.List<Screen> getAllScreens() {
+        if (monitorManager != null) {
+            return monitorManager.getAllScreens();
+        }
+        // Fallback: create screens based on Sikuli's Screen.getNumberScreens()
+        java.util.List<Screen> screens = new java.util.ArrayList<>();
+        int numScreens = Screen.getNumberScreens();
+        for (int i = 0; i < numScreens; i++) {
+            screens.add(new Screen(i));
+        }
+        return screens;
     }
 }
