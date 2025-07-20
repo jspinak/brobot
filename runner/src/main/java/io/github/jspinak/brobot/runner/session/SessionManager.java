@@ -1,305 +1,258 @@
 package io.github.jspinak.brobot.runner.session;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import io.github.jspinak.brobot.model.state.State;
-import io.github.jspinak.brobot.runner.config.BrobotRunnerProperties;
+import io.github.jspinak.brobot.runner.common.diagnostics.DiagnosticCapable;
+import io.github.jspinak.brobot.runner.common.diagnostics.DiagnosticInfo;
 import io.github.jspinak.brobot.runner.events.EventBus;
 import io.github.jspinak.brobot.runner.events.LogEvent;
-import io.github.jspinak.brobot.runner.json.parsing.ConfigurationParser;
 import io.github.jspinak.brobot.runner.resources.ResourceManager;
-import io.github.jspinak.brobot.model.transition.StateTransitionStore;
-import io.github.jspinak.brobot.navigation.transition.StateTransitions;
+import io.github.jspinak.brobot.runner.session.autosave.SessionAutosaveService;
+import io.github.jspinak.brobot.runner.session.context.SessionContext;
+import io.github.jspinak.brobot.runner.session.context.SessionOptions;
+import io.github.jspinak.brobot.runner.session.discovery.SessionDiscoveryService;
+import io.github.jspinak.brobot.runner.session.lifecycle.SessionLifecycleService;
+import io.github.jspinak.brobot.runner.session.persistence.SessionPersistenceService;
+import io.github.jspinak.brobot.runner.session.state.SessionStateService;
 import jakarta.annotation.PostConstruct;
-import lombok.Getter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.*;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Manages automation sessions with persistence capabilities.
  * 
- * <p>The SessionManager is responsible for creating, loading, saving, and managing
- * the lifecycle of automation sessions. It provides session persistence, automatic
- * saving, and recovery capabilities to ensure automation configurations and state
- * are not lost.</p>
- * 
- * <p>Key features:
+ * <p>This class acts as a thin orchestrator that delegates responsibilities to specialized services:
  * <ul>
- *   <li>Session creation and initialization</li>
- *   <li>Automatic periodic session saving</li>
- *   <li>Session recovery from disk</li>
- *   <li>Recent session history tracking</li>
- *   <li>Configuration and state management within sessions</li>
- *   <li>Thread-safe session switching</li>
+ *   <li>{@link SessionLifecycleService} - Manages session lifecycle (start, end, active sessions)</li>
+ *   <li>{@link SessionPersistenceService} - Handles all file I/O operations</li>
+ *   <li>{@link SessionStateService} - Captures and restores application state</li>
+ *   <li>{@link SessionAutosaveService} - Manages automatic periodic saving</li>
+ *   <li>{@link SessionDiscoveryService} - Provides session search and discovery</li>
  * </ul>
  * </p>
  * 
- * <p>Sessions are stored as JSON files in a configurable directory and include:
- * <ul>
- *   <li>Session metadata (ID, name, timestamps)</li>
- *   <li>Configuration file references</li>
- *   <li>Loaded states and transitions</li>
- *   <li>Execution history and results</li>
- * </ul>
- * </p>
+ * <p>Thread Safety: This class is thread-safe through delegation to thread-safe services.</p>
  * 
  * @see Session
- * @see BrobotRunnerProperties
- * @see StateTransitionStore
+ * @see SessionContext
+ * @see SessionOptions
+ * @since 1.0.0
  */
+@Slf4j
 @Component
-public class SessionManager implements AutoCloseable {
-    private static final Logger logger = LoggerFactory.getLogger(SessionManager.class);
+public class SessionManager implements AutoCloseable, DiagnosticCapable {
 
     private final EventBus eventBus;
-    private final BrobotRunnerProperties properties;
     private final ResourceManager resourceManager;
-    private final ConfigurationParser jsonParser;
-    private final StateTransitionStore stateTransitionsRepository;
-
-    private final ScheduledExecutorService scheduler;
-    private final AtomicReference<Session> currentSession = new AtomicReference<>();
-    private Path sessionStoragePath;
-
-    @Getter
-    private LocalDateTime lastAutosaveTime;
+    
+    // Delegated services
+    private final SessionLifecycleService lifecycleService;
+    private final SessionPersistenceService persistenceService;
+    private final SessionStateService stateService;
+    private final SessionAutosaveService autosaveService;
+    private final SessionDiscoveryService discoveryService;
+    
+    // Diagnostic mode
+    private final AtomicBoolean diagnosticMode = new AtomicBoolean(false);
 
     @Autowired
     public SessionManager(EventBus eventBus,
-                          BrobotRunnerProperties properties,
                           ResourceManager resourceManager,
-                          ConfigurationParser jsonParser,
-                          StateTransitionStore stateTransitionsRepository) {
+                          SessionLifecycleService lifecycleService,
+                          SessionPersistenceService persistenceService,
+                          SessionStateService stateService,
+                          SessionAutosaveService autosaveService,
+                          SessionDiscoveryService discoveryService) {
         this.eventBus = eventBus;
-        this.properties = properties;
         this.resourceManager = resourceManager;
-        this.jsonParser = jsonParser;
-        this.stateTransitionsRepository = stateTransitionsRepository;
-
-        this.scheduler = Executors.newSingleThreadScheduledExecutor(r -> {
-            Thread t = new Thread(r, "Session-Persistence");
-            t.setDaemon(true);
-            return t;
-        });
+        this.lifecycleService = lifecycleService;
+        this.persistenceService = persistenceService;
+        this.stateService = stateService;
+        this.autosaveService = autosaveService;
+        this.discoveryService = discoveryService;
 
         resourceManager.registerResource(this, "SessionManager");
     }
 
     @PostConstruct
     public void initialize() {
-        sessionStoragePath = Paths.get(properties.getLogPath(), "sessions");
-
-        try {
-            Files.createDirectories(sessionStoragePath);
-            eventBus.publish(LogEvent.info(this,
-                    "Session directory created: " + sessionStoragePath, "Session"));
-        } catch (IOException e) {
-            eventBus.publish(LogEvent.error(this,
-                    "Failed to create session directory: " + e.getMessage(), "Session", e));
-        }
-
-        // Schedule periodic session autosave
-        scheduler.scheduleAtFixedRate(
-                this::autosaveCurrentSession,
-                5, 5, TimeUnit.MINUTES);
+        log.info("SessionManager initialized with all services");
+        eventBus.publish(LogEvent.info(this, "Session management initialized", "Session"));
     }
 
     /**
-     * Starts a new session with the given configuration
+     * Starts a new session with the given configuration.
+     * 
+     * @param projectName the project name
+     * @param configPath the configuration path
+     * @param imagePath the image path
+     * @return the created session
      */
     public Session startNewSession(String projectName, String configPath, String imagePath) {
-        if (isSessionActive()) {
-            // Save and close the current session
-            endCurrentSession();
+        log.info("Starting new session for project: {}", projectName);
+        
+        // Build session context
+        SessionContext context = SessionContext.builder()
+                .projectName(projectName)
+                .configPath(configPath)
+                .imagePath(imagePath)
+                .options(SessionOptions.defaultOptions())
+                .build();
+        
+        // Start session through lifecycle service
+        Session session = lifecycleService.startSession(context);
+        
+        // Save initial session state
+        try {
+            persistenceService.saveSession(session);
+        } catch (IOException e) {
+            log.error("Failed to save initial session state", e);
         }
-
-        String sessionId = UUID.randomUUID().toString();
-        Session session = new Session();
-        session.setId(sessionId);
-        session.setStartTime(LocalDateTime.now());
-        session.setActive(true);
-        session.setProjectName(projectName);
-        session.setConfigPath(configPath);
-        session.setImagePath(imagePath);
-
-        currentSession.set(session);
-
-        eventBus.publish(LogEvent.info(this,
-                "Session started: " + sessionId, "Session"));
-
-        // Save the initial session state
-        saveSession(session);
-
+        
+        // Enable autosave if configured
+        if (context.getOptions().isAutosaveEnabled()) {
+            autosaveService.enableAutosave(context, this::autosaveSession);
+        }
+        
+        eventBus.publish(LogEvent.info(this, 
+                "Session started: " + session.getId(), "Session"));
+        
         return session;
     }
 
     /**
-     * Ends the current session
+     * Ends the current session.
      */
     public void endCurrentSession() {
-        Session session = currentSession.get();
-        if (session != null && session.isActive()) {
-            session.setEndTime(LocalDateTime.now());
-            session.setActive(false);
-
-            // Save the final session state
-            saveSession(session);
-
-            eventBus.publish(LogEvent.info(this,
-                    "Session ended: " + session.getId(), "Session"));
-
-            currentSession.set(null);
+        Optional<Session> currentSession = lifecycleService.getCurrentSession();
+        
+        if (currentSession.isEmpty()) {
+            log.warn("No active session to end");
+            return;
         }
+        
+        Session session = currentSession.get();
+        String sessionId = session.getId();
+        
+        // Disable autosave
+        autosaveService.disableAutosave(sessionId);
+        
+        // End session
+        lifecycleService.endSession(sessionId);
+        
+        // Save final state
+        try {
+            persistenceService.saveSession(session);
+        } catch (IOException e) {
+            log.error("Failed to save final session state", e);
+        }
+        
+        eventBus.publish(LogEvent.info(this, 
+                "Session ended: " + sessionId, "Session"));
     }
 
     /**
-     * Checks if there's an active session
+     * Checks if there's an active session.
+     * 
+     * @return true if a session is active
      */
     public boolean isSessionActive() {
-        Session session = currentSession.get();
-        return session != null && session.isActive();
+        return lifecycleService.isSessionActive();
     }
 
     /**
-     * Gets the current session or null if none exists
+     * Gets the current session.
+     * 
+     * @return the current session or null
      */
     public Session getCurrentSession() {
-        return currentSession.get();
+        return lifecycleService.getCurrentSession().orElse(null);
     }
 
     /**
-     * Autosaves the current session if one exists
+     * Autosaves the current session.
      */
     public void autosaveCurrentSession() {
-        Session session = currentSession.get();
-        if (session != null && session.isActive()) {
-            try {
-                // Capture current application state before saving
-                captureApplicationState(session);
-                saveSession(session);
-                lastAutosaveTime = LocalDateTime.now();
-
-                eventBus.publish(LogEvent.info(this,
-                        "Session autosaved: " + session.getId(), "Session"));
-            } catch (Exception e) {
-                eventBus.publish(LogEvent.error(this,
-                        "Failed to autosave session: " + e.getMessage(), "Session", e));
-            }
+        Optional<Session> currentSession = lifecycleService.getCurrentSession();
+        
+        if (currentSession.isEmpty()) {
+            log.debug("No active session to autosave");
+            return;
         }
+        
+        autosaveSession(currentSession.get());
     }
 
     /**
-     * Captures the current application state into the session
+     * Gets the last autosave time.
+     * 
+     * @return the last autosave time or null
      */
-    private void captureApplicationState(Session session) {
-        try {
-            // Capture state transitions
-            List<StateTransitions> stateTransitions =
-                    stateTransitionsRepository.getAllStateTransitionsAsCopy();
-            session.setStateTransitions(stateTransitions);
-
-            // Get active states, if any
-            Set<State> activeStates = getActiveStates();
-            if (activeStates != null && !activeStates.isEmpty()) {
-                session.setActiveStateIds(
-                        activeStates.stream()
-                                .map(State::getId)
-                                .collect(Collectors.toSet())
-                );
-            }
-
-            // Add a session event for this capture
-            session.addEvent(new SessionEvent("STATE_CAPTURE",
-                    "Application state captured",
-                    "Active states: " + (activeStates != null ? activeStates.size() : 0)));
-
-        } catch (Exception e) {
-            logger.error("Error capturing application state", e);
-            session.addEvent(new SessionEvent("ERROR",
-                    "Failed to capture application state: " + e.getMessage()));
-        }
+    public LocalDateTime getLastAutosaveTime() {
+        return lifecycleService.getCurrentSession()
+                .map(Session::getId)
+                .map(autosaveService::getStatus)
+                .map(status -> status.getLastSaveTime())
+                .orElse(null);
     }
 
     /**
-     * Gets the currently active states (implementation depends on Brobot state management)
-     */
-    private Set<State> getActiveStates() {
-        // This would need to be implemented to access the Brobot state system
-        // As a placeholder, we'll return an empty set
-        return new HashSet<>();
-    }
-
-    /**
-     * Saves a session to disk
+     * Saves a session.
+     * 
+     * @param session the session to save
      */
     public void saveSession(Session session) {
-        if (session == null) return;
-
-        // Create a filename with session ID and timestamp
-        String timestamp = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss")
-                .format(LocalDateTime.now());
-        String filename = "session_" + session.getId() + "_" + timestamp + ".json";
-
-        Path filePath = sessionStoragePath.resolve(filename);
-
+        if (session == null) {
+            return;
+        }
+        
         try {
-            // Use the safe serialization approach for complex objects
-            String json = jsonParser.toPrettyJsonSafe(session);
-            Files.writeString(filePath, json);
-
-            eventBus.publish(LogEvent.debug(this,
-                    "Session saved: " + session.getId(), "Session"));
+            // Capture current state
+            stateService.captureState(session);
+            
+            // Save to disk
+            persistenceService.saveSession(session);
+            
+            log.debug("Session saved: {}", session.getId());
+            
         } catch (Exception e) {
+            log.error("Failed to save session", e);
             eventBus.publish(LogEvent.error(this,
                     "Failed to save session: " + e.getMessage(), "Session", e));
         }
     }
 
     /**
-     * Loads a session by ID
+     * Loads a session by ID.
+     * 
+     * @param sessionId the session ID
+     * @return the loaded session or empty
      */
     public Optional<Session> loadSession(String sessionId) {
-        File[] files = sessionStoragePath.toFile().listFiles(
-                (dir, name) -> name.contains("session_" + sessionId));
-
-        if (files == null || files.length == 0) {
-            eventBus.publish(LogEvent.warning(this,
-                    "No session found with ID: " + sessionId, "Session"));
-            return Optional.empty();
-        }
-
-        // Find the latest session file
-        File latestFile = files[0];
-        for (File file : files) {
-            if (file.lastModified() > latestFile.lastModified()) {
-                latestFile = file;
-            }
-        }
-
+        log.info("Loading session: {}", sessionId);
+        
         try {
-            String json = Files.readString(latestFile.toPath());
-            Session loadedSession = jsonParser.convertJson(json, Session.class);
-
-            eventBus.publish(LogEvent.info(this,
-                    "Session loaded: " + sessionId, "Session"));
-
-            return Optional.of(loadedSession);
+            Optional<Session> session = persistenceService.loadSession(sessionId);
+            
+            if (session.isPresent()) {
+                eventBus.publish(LogEvent.info(this,
+                        "Session loaded: " + sessionId, "Session"));
+            } else {
+                eventBus.publish(LogEvent.warning(this,
+                        "Session not found: " + sessionId, "Session"));
+            }
+            
+            return session;
+            
         } catch (Exception e) {
+            log.error("Failed to load session", e);
             eventBus.publish(LogEvent.error(this,
                     "Failed to load session: " + e.getMessage(), "Session", e));
             return Optional.empty();
@@ -307,132 +260,67 @@ public class SessionManager implements AutoCloseable {
     }
 
     /**
-     * Gets a list of all available session IDs
+     * Gets all session summaries.
+     * 
+     * @return list of session summaries
      */
     public List<SessionSummary> getAllSessionSummaries() {
-        List<SessionSummary> summaries = new ArrayList<>();
-        File[] files = sessionStoragePath.toFile().listFiles(
-                (dir, name) -> name.startsWith("session_") && name.endsWith(".json"));
-
-        if (files == null || files.length == 0) {
-            return summaries;
-        }
-
-        // Group files by session ID
-        Map<String, List<File>> sessionFiles = new HashMap<>();
-        for (File file : files) {
-            String name = file.getName();
-            int endIndex = name.indexOf('_', "session_".length());
-            if (endIndex < 0) continue;
-
-            String sessionId = name.substring("session_".length(), endIndex);
-            sessionFiles.computeIfAbsent(sessionId, k -> new ArrayList<>()).add(file);
-        }
-
-        // Create summaries from the latest file for each session
-        for (Map.Entry<String, List<File>> entry : sessionFiles.entrySet()) {
-            String sessionId = entry.getKey();
-            List<File> sessionFileList = entry.getValue();
-
-            // Find the latest file
-            File latestFile = sessionFileList.stream()
-                    .max(Comparator.comparing(File::lastModified))
-                    .orElse(null);
-
-            if (latestFile == null) continue;
-
-            try {
-                String json = Files.readString(latestFile.toPath());
-                JsonNode rootNode = jsonParser.parseJson(json);
-
-                SessionSummary summary = new SessionSummary();
-                summary.setId(sessionId);
-                summary.setProjectName(getStringValue(rootNode, "projectName"));
-                summary.setStartTime(getDateTimeValue(rootNode, "startTime"));
-                summary.setEndTime(getDateTimeValue(rootNode, "endTime"));
-                summary.setLastSaved(LocalDateTime.ofInstant(
-                        java.time.Instant.ofEpochMilli(latestFile.lastModified()),
-                        java.time.ZoneId.systemDefault()));
-                summary.setActive(getBooleanValue(rootNode, "active"));
-
-                summaries.add(summary);
-            } catch (Exception e) {
-                logger.error("Error reading session file: " + latestFile.getName(), e);
-            }
-        }
-
-        // Sort by start time (most recent first)
-        summaries.sort(Comparator.comparing(SessionSummary::getStartTime).reversed());
-
-        return summaries;
-    }
-
-    private String getStringValue(JsonNode node, String fieldName) {
-        if (node.has(fieldName) && !node.get(fieldName).isNull()) {
-            return node.get(fieldName).asText();
-        }
-        return null;
-    }
-
-    private LocalDateTime getDateTimeValue(JsonNode node, String fieldName) {
-        if (node.has(fieldName) && !node.get(fieldName).isNull()) {
-            try {
-                return LocalDateTime.parse(node.get(fieldName).asText());
-            } catch (Exception e) {
-                return null;
-            }
-        }
-        return null;
-    }
-
-    private Boolean getBooleanValue(JsonNode node, String fieldName) {
-        if (node.has(fieldName) && !node.get(fieldName).isNull()) {
-            return node.get(fieldName).asBoolean();
-        }
-        return null;
+        return discoveryService.listAvailableSessions();
     }
 
     /**
-     * Restores a session
+     * Restores a session.
+     * 
+     * @param sessionId the session ID to restore
+     * @return true if restored successfully
      */
     public boolean restoreSession(String sessionId) {
+        log.info("Restoring session: {}", sessionId);
+        
         Optional<Session> loadedSession = loadSession(sessionId);
         if (loadedSession.isEmpty()) {
             return false;
         }
-
+        
         try {
             Session session = loadedSession.get();
-
+            
             // End current session if active
             if (isSessionActive()) {
                 endCurrentSession();
             }
-
-            // Mark session as active if it wasn't explicitly ended
-            if (session.getEndTime() == null) {
-                session.setActive(true);
-            }
-
-            // Set as current session
-            currentSession.set(session);
-
+            
+            // Activate the loaded session
+            lifecycleService.activateSession(session);
+            
             // Restore application state
-            restoreApplicationState(session);
-
-            // Add a restoration event
+            stateService.restoreState(session);
+            
+            // Re-enable autosave if the session was active
+            if (session.isActive()) {
+                SessionContext context = SessionContext.builder()
+                        .sessionId(session.getId())
+                        .projectName(session.getProjectName())
+                        .configPath(session.getConfigPath())
+                        .imagePath(session.getImagePath())
+                        .options(SessionOptions.defaultOptions())
+                        .build();
+                        
+                autosaveService.enableAutosave(context, this::autosaveSession);
+            }
+            
+            // Add restoration event
             session.addEvent(new SessionEvent("RESTORED",
                     "Session restored",
                     "Application state restored from saved session"));
-
-            // Save the restored session
-            saveSession(session);
-
+            
             eventBus.publish(LogEvent.info(this,
                     "Session restored: " + sessionId, "Session"));
-
+            
             return true;
+            
         } catch (Exception e) {
+            log.error("Failed to restore session", e);
             eventBus.publish(LogEvent.error(this,
                     "Failed to restore session: " + e.getMessage(), "Session", e));
             return false;
@@ -440,94 +328,106 @@ public class SessionManager implements AutoCloseable {
     }
 
     /**
-     * Restores the application state from a session
-     */
-    private void restoreApplicationState(Session session) {
-        try {
-            // Clear current state
-            // This would need to access the Brobot state management system
-
-            // Restore state transitions if available
-            List<StateTransitions> stateTransitions = session.getStateTransitions();
-            if (stateTransitions != null && !stateTransitions.isEmpty()) {
-                // Clear existing transitions
-                stateTransitionsRepository.emptyRepos();
-
-                // Add restored transitions
-                for (StateTransitions transition : stateTransitions) {
-                    stateTransitionsRepository.add(transition);
-                }
-
-                eventBus.publish(LogEvent.info(this,
-                        "Restored " + stateTransitions.size() + " state transitions", "Session"));
-            }
-
-            // Restore active states if available
-            Set<Long> activeStateIds = session.getActiveStateIds();
-            if (activeStateIds != null && !activeStateIds.isEmpty()) {
-                // This would activate the states in the Brobot system
-                eventBus.publish(LogEvent.info(this,
-                        "Restored " + activeStateIds.size() + " active states", "Session"));
-            }
-
-        } catch (Exception e) {
-            eventBus.publish(LogEvent.error(this,
-                    "Error restoring application state: " + e.getMessage(), "Session", e));
-            throw new RuntimeException("Failed to restore application state", e);
-        }
-    }
-
-    /**
-     * Deletes a session
+     * Deletes a session.
+     * 
+     * @param sessionId the session ID to delete
+     * @return true if deleted successfully
      */
     public boolean deleteSession(String sessionId) {
-        File[] files = sessionStoragePath.toFile().listFiles(
-                (dir, name) -> name.contains("session_" + sessionId));
-
-        if (files == null || files.length == 0) {
-            eventBus.publish(LogEvent.warning(this,
-                    "No session found to delete with ID: " + sessionId, "Session"));
+        log.info("Deleting session: {}", sessionId);
+        
+        // Make sure we're not deleting the active session
+        Optional<Session> currentSession = lifecycleService.getCurrentSession();
+        if (currentSession.isPresent() && currentSession.get().getId().equals(sessionId)) {
+            log.warn("Cannot delete active session");
             return false;
         }
-
-        boolean allDeleted = true;
-        for (File file : files) {
-            try {
-                boolean deleted = file.delete();
-                if (!deleted) {
-                    allDeleted = false;
-                    eventBus.publish(LogEvent.warning(this,
-                            "Failed to delete session file: " + file.getName(), "Session"));
-                }
-            } catch (Exception e) {
-                allDeleted = false;
-                eventBus.publish(LogEvent.error(this,
-                        "Error deleting session file: " + e.getMessage(), "Session", e));
-            }
-        }
-
-        if (allDeleted) {
+        
+        boolean deleted = persistenceService.deleteSession(sessionId);
+        
+        if (deleted) {
             eventBus.publish(LogEvent.info(this,
                     "Session deleted: " + sessionId, "Session"));
         }
-
-        return allDeleted;
+        
+        return deleted;
     }
 
     @Override
     public void close() {
+        log.info("Closing SessionManager");
+        
         // Ensure any active session is saved
         if (isSessionActive()) {
             endCurrentSession();
         }
-
-        scheduler.shutdown();
-        try {
-            scheduler.awaitTermination(5, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-
+        
+        // Shutdown autosave service (it has its own cleanup)
+        autosaveService.shutdown();
+        
         eventBus.publish(LogEvent.info(this, "Session manager closed", "Resources"));
+    }
+
+    @Override
+    public DiagnosticInfo getDiagnosticInfo() {
+        Map<String, Object> states = new ConcurrentHashMap<>();
+        
+        // Aggregate diagnostic info from all services
+        states.put("lifecycle", lifecycleService.getDiagnosticInfo());
+        states.put("persistence", persistenceService.getDiagnosticInfo());
+        states.put("state", stateService.getDiagnosticInfo());
+        states.put("autosave", autosaveService.getDiagnosticInfo());
+        states.put("discovery", discoveryService.getDiagnosticInfo());
+        
+        // Add orchestrator-specific info
+        states.put("activeSession", isSessionActive());
+        states.put("currentSessionId", getCurrentSession() != null ? getCurrentSession().getId() : null);
+        
+        return DiagnosticInfo.builder()
+                .component("SessionManager")
+                .states(states)
+                .build();
+    }
+
+    @Override
+    public boolean isDiagnosticModeEnabled() {
+        return diagnosticMode.get();
+    }
+
+    @Override
+    public void enableDiagnosticMode(boolean enabled) {
+        diagnosticMode.set(enabled);
+        
+        // Propagate to all services
+        lifecycleService.enableDiagnosticMode(enabled);
+        persistenceService.enableDiagnosticMode(enabled);
+        stateService.enableDiagnosticMode(enabled);
+        autosaveService.enableDiagnosticMode(enabled);
+        discoveryService.enableDiagnosticMode(enabled);
+        
+        log.info("Diagnostic mode {} for SessionManager and all services", 
+                enabled ? "enabled" : "disabled");
+    }
+
+    /**
+     * Helper method for autosave callback.
+     */
+    private void autosaveSession(Session session) {
+        try {
+            // Capture current state
+            stateService.captureState(session);
+            
+            // Save to disk
+            persistenceService.saveSession(session);
+            
+            log.debug("Session autosaved: {}", session.getId());
+            
+            if (diagnosticMode.get()) {
+                log.info("[DIAGNOSTIC] Autosave completed for session: {}", session.getId());
+            }
+            
+        } catch (Exception e) {
+            log.error("Autosave failed for session: {}", session.getId(), e);
+        }
     }
 }

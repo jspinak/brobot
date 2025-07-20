@@ -67,7 +67,7 @@ class ActionExecutionIntegrationTest {
     
     @Test
     @Order(2)
-    @Disabled("Temporarily disabled due to memory issues with Mat cloning")
+    @Disabled("Spring configuration issue: multiple primary ExecutionController beans")
     void testClickActionWithActionOptions() {
         // Setup
         ObjectCollection objectCollection = new ObjectCollection.Builder()

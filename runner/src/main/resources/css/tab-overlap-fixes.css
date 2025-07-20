@@ -1,0 +1,209 @@
+/* Tab-specific overlap fixes for Brobot Runner */
+
+/* ============================================
+ * Tab Layout Structure Fix
+ * ============================================ */
+
+/* Main tab pane container */
+.tab-pane {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+
+/* Tab header area - contains the tabs themselves */
+.tab-pane > .tab-header-area {
+    -fx-background-color: -fx-color-canvas-default;
+    -fx-padding: 0;
+    -fx-pref-height: 40px;
+    -fx-min-height: 40px;
+    -fx-max-height: 40px;
+}
+
+/* Tab header background */
+.tab-pane > .tab-header-area > .tab-header-background {
+    -fx-background-color: -fx-color-canvas-default;
+}
+
+/* Headers region - contains all tabs */
+.tab-pane > .tab-header-area > .headers-region {
+    -fx-background-color: transparent;
+    -fx-padding: 4px 4px 0 4px;
+}
+
+/* Individual tabs */
+.tab-pane > .tab-header-area > .headers-region > .tab {
+    -fx-background-radius: 6px 6px 0 0;
+    -fx-background-insets: 0 2px 0 0;
+    -fx-padding: 8px 16px;
+    -fx-pref-height: 32px;
+    -fx-min-height: 32px;
+}
+
+/* Tab label */
+.tab-pane > .tab-header-area > .headers-region > .tab > .tab-container > .tab-label {
+    -fx-padding: 0;
+    -fx-alignment: CENTER;
+    -fx-text-fill: -fx-color-fg-default;
+}
+
+/* Selected tab */
+.tab-pane > .tab-header-area > .headers-region > .tab:selected {
+    -fx-background-color: -fx-color-canvas-backdrop;
+}
+
+/* Tab content area - CRITICAL: This contains the actual content */
+.tab-pane > .tab-content-area {
+    -fx-background-color: -fx-color-canvas-backdrop;
+    -fx-padding: 0;
+    /* Push content below the tab header */
+    -fx-translate-y: 0;
+    -fx-background-insets: 0;
+    -fx-border-insets: 0;
+}
+
+/* ============================================
+ * Panel Content Fixes
+ * ============================================ */
+
+/* Atlanta panels inside tabs need proper structure */
+.tab-pane .atlanta-panel,
+.tab-pane .config-panel {
+    -fx-padding: 0;
+    -fx-background-color: transparent;
+}
+
+/* CRITICAL FIX: Force panel content below tabs */
+.atlanta-panel {
+    -fx-padding: 0 !important;
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-border-insets: 0;
+}
+
+/* Action bar in panels - should be at top of panel content */
+.tab-pane .atlanta-panel > .action-bar,
+.tab-pane .config-panel > .action-bar,
+.atlanta-panel > .action-bar {
+    -fx-background-color: -fx-color-canvas-default;
+    -fx-padding: 12px 16px;
+    -fx-spacing: 8px;
+    -fx-min-height: 48px;
+    -fx-pref-height: 48px;
+    -fx-max-height: 48px;
+    -fx-border-color: transparent transparent -fx-color-border-muted transparent;
+    -fx-border-width: 0 0 1 0;
+    /* Ensure action bar is at the top of the panel, not overlapping tabs */
+    -fx-alignment: top-left;
+    -fx-translate-y: 0;
+    -fx-translate-x: 0;
+    /* Prevent overflow */
+    -fx-background-insets: 0;
+    -fx-border-insets: 0;
+}
+
+/* Content container in panels */
+.tab-pane .atlanta-panel > .content-container,
+.tab-pane .config-panel > .content-container {
+    -fx-padding: 16px;
+    -fx-background-color: transparent;
+}
+
+/* ============================================
+ * Z-Order and Layering Fixes
+ * ============================================ */
+
+/* Ensure proper stacking order */
+.tab-pane > .tab-header-area {
+    -fx-view-order: 0;
+}
+
+.tab-pane > .tab-content-area {
+    -fx-view-order: 1;
+}
+
+/* Action bars should be within their container, not overlapping tabs */
+.atlanta-panel > .action-bar {
+    -fx-view-order: 0;
+}
+
+.atlanta-panel > .content-container {
+    -fx-view-order: 1;
+}
+
+/* ============================================
+ * Specific Panel Fixes
+ * ============================================ */
+
+/* Configuration panel specific */
+.config-panel {
+    -fx-background-color: -fx-color-canvas-backdrop;
+}
+
+/* Ensure the split pane doesn't push content up */
+.config-panel SplitPane {
+    -fx-padding: 0;
+    -fx-background-color: transparent;
+}
+
+/* Recent configurations panel */
+.recent-configurations-panel {
+    -fx-padding: 12px;
+    -fx-background-color: -fx-color-canvas-default;
+    -fx-background-radius: 8px;
+}
+
+/* Configuration details panel */
+.configuration-details-panel {
+    -fx-padding: 12px;
+    -fx-background-color: -fx-color-canvas-default;
+    -fx-background-radius: 8px;
+}
+
+/* ============================================
+ * Button Positioning Fixes
+ * ============================================ */
+
+/* Ensure buttons in action bar don't overflow */
+.action-bar > .button {
+    -fx-min-height: 32px;
+    -fx-pref-height: 32px;
+    -fx-max-height: 32px;
+}
+
+/* Configuration path section */
+.config-path-container {
+    -fx-padding: 8px 0;
+    -fx-spacing: 8px;
+}
+
+/* ============================================
+ * Visual Debugging (Comment out in production)
+ * ============================================ */
+
+/* Debug styling - shows layout boundaries
+.tab-pane {
+    -fx-border-color: red;
+    -fx-border-width: 2;
+}
+
+.tab-pane > .tab-header-area {
+    -fx-border-color: blue;
+    -fx-border-width: 2;
+}
+
+.tab-pane > .tab-content-area {
+    -fx-border-color: green;
+    -fx-border-width: 2;
+}
+
+.atlanta-panel > .action-bar {
+    -fx-border-color: orange;
+    -fx-border-width: 2;
+    -fx-background-color: rgba(255, 165, 0, 0.1);
+}
+
+.atlanta-panel > .action-bar > .button {
+    -fx-border-color: purple;
+    -fx-border-width: 1;
+}
+*/

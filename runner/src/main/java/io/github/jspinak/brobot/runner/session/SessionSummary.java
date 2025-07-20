@@ -11,10 +11,13 @@ import java.time.LocalDateTime;
 public class SessionSummary {
     private String id;
     private String projectName;
+    private String sessionName;
+    private String configPath;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private LocalDateTime lastSaved;
     private Boolean active;
+    private Long fileSize;
 
     public String getFormattedDuration() {
         if (startTime == null) {

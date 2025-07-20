@@ -143,5 +143,31 @@ public class AutomationProject {
         createdDate = null;
         customProperties = new HashMap<>();
     }
+    
+    /**
+     * Gets the list of automation names from the automation UI.
+     * 
+     * @return List of automation names, or empty list if no automation is set
+     */
+    public List<String> getAutomationNames() {
+        if (automation != null && automation.getButtons() != null) {
+            return automation.getButtons().stream()
+                    .map(TaskButton::getLabel)
+                    .toList();
+        }
+        return List.of();
+    }
+    
+    /**
+     * Gets the list of automations (task buttons) from the automation UI.
+     * 
+     * @return List of TaskButton objects, or empty list if no automation is set
+     */
+    public List<TaskButton> getAutomations() {
+        if (automation != null && automation.getButtons() != null) {
+            return automation.getButtons();
+        }
+        return List.of();
+    }
 
 }

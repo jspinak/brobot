@@ -6,14 +6,15 @@ import io.github.jspinak.brobot.model.state.State;
 import io.github.jspinak.brobot.model.state.special.SpecialStateType;
 import io.github.jspinak.brobot.navigation.service.StateService;
 import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.stereotype.Component;
 
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
-
-import static io.github.jspinak.brobot.action.ActionOptions.Action.FIND;
+import java.util.stream.Collectors;
 
 /**
  * Discovers active states through visual pattern matching in the Brobot framework.
@@ -81,17 +82,13 @@ import static io.github.jspinak.brobot.action.ActionOptions.Action.FIND;
  * @see Action
  */
 @Component
+@RequiredArgsConstructor
+@Slf4j
 public class StateDetector {
 
     private final StateService allStatesInProjectService;
     private final StateMemory stateMemory;
     private final Action action;
-
-    public StateDetector(StateService allStatesInProjectService, StateMemory stateMemory, Action action) {
-        this.allStatesInProjectService = allStatesInProjectService;
-        this.stateMemory = stateMemory;
-        this.action = action;
-    }
 
     /**
      * Verifies that currently active states are still visible on screen.
@@ -108,9 +105,22 @@ public class StateDetector {
      * </ul>
      */
     public void checkForActiveStates() {
-        new HashSet<>(stateMemory.getActiveStates()).forEach(state -> {
-            if (!findState(state)) stateMemory.removeInactiveState(state);
-        });
+        Set<Long> currentActiveStates = new HashSet<>(stateMemory.getActiveStates());
+        log.debug("Checking {} active states for visibility", currentActiveStates.size());
+        
+        Set<Long> statesNoLongerVisible = currentActiveStates.stream()
+                .filter(stateId -> !findState(stateId))
+                .collect(Collectors.toSet());
+        
+        statesNoLongerVisible.forEach(stateMemory::removeInactiveState);
+        
+        if (!statesNoLongerVisible.isEmpty()) {
+            log.info("Removed {} states that are no longer visible: {}", 
+                    statesNoLongerVisible.size(), 
+                    statesNoLongerVisible.stream()
+                            .map(allStatesInProjectService::getStateName)
+                            .collect(Collectors.joining(", ")));
+        }
     }
 
     /**
@@ -132,10 +142,24 @@ public class StateDetector {
      * @see #searchAllImagesForCurrentStates()
      */
     public void rebuildActiveStates() {
+        log.info("Rebuilding active states");
         checkForActiveStates();
-        if (!stateMemory.getActiveStates().isEmpty()) return;
+        
+        if (!stateMemory.getActiveStates().isEmpty()) {
+            log.info("Active states still present after verification: {}", 
+                    stateMemory.getActiveStateNames());
+            return;
+        }
+        
+        log.info("No active states found, performing comprehensive search");
         searchAllImagesForCurrentStates();
-        if (stateMemory.getActiveStates().isEmpty()) stateMemory.addActiveState(SpecialStateType.UNKNOWN.getId());
+        
+        if (stateMemory.getActiveStates().isEmpty()) {
+            log.warn("No states found after comprehensive search, defaulting to UNKNOWN state");
+            stateMemory.addActiveState(SpecialStateType.UNKNOWN.getId());
+        } else {
+            log.info("Rebuilt active states: {}", stateMemory.getActiveStateNames());
+        }
     }
 
     /**
@@ -155,11 +179,20 @@ public class StateDetector {
      * Performance note: O(n*m) where n = number of states, m = images per state
      */
     public void searchAllImagesForCurrentStates() {
-        System.out.println("StateDetector: search all states. ");
+        log.info("Starting comprehensive state search");
         Set<String> allStateEnums = allStatesInProjectService.getAllStateNames();
         allStateEnums.remove(SpecialStateType.UNKNOWN.toString());
-        allStateEnums.forEach(this::findState);
-        ConsoleReporter.println("");
+        
+        int totalStates = allStateEnums.size();
+        int found = 0;
+        
+        for (String stateName : allStateEnums) {
+            if (findState(stateName)) {
+                found++;
+            }
+        }
+        
+        log.info("Comprehensive search complete: found {} of {} states", found, totalStates);
     }
 
     /**
@@ -174,10 +207,25 @@ public class StateDetector {
      * @see Action#perform(ActionOptions.Action, ObjectCollection)
      */
     public boolean findState(String stateName) {
-        ConsoleReporter.print(stateName + ".");
+        log.debug("Searching for state: {}", stateName);
         Optional<State> state = allStatesInProjectService.getState(stateName);
-        return state.filter(value -> action.perform(FIND, new ObjectCollection.Builder().withNonSharedImages(value).build())
-                .isSuccess()).isPresent();
+        
+        if (state.isEmpty()) {
+            log.warn("State '{}' not found in service", stateName);
+            return false;
+        }
+        
+        boolean found = action.find(
+                new ObjectCollection.Builder()
+                        .withNonSharedImages(state.get())
+                        .build())
+                .isSuccess();
+        
+        if (found) {
+            log.debug("State '{}' found and activated", stateName);
+        }
+        
+        return found;
     }
 
     /**
@@ -192,10 +240,27 @@ public class StateDetector {
      * @see Action#perform(ActionOptions.Action, ObjectCollection)
      */
     public boolean findState(Long stateId) {
-        ConsoleReporter.print(allStatesInProjectService.getStateName(stateId));
+        String stateName = allStatesInProjectService.getStateName(stateId);
+        log.debug("Searching for state by ID: {} ({})", stateId, stateName);
+        
         Optional<State> state = allStatesInProjectService.getState(stateId);
-        return state.filter(value -> action.perform(FIND, new ObjectCollection.Builder().withNonSharedImages(value).build())
-                .isSuccess()).isPresent();
+        
+        if (state.isEmpty()) {
+            log.warn("State with ID {} not found in service", stateId);
+            return false;
+        }
+        
+        boolean found = action.find(
+                new ObjectCollection.Builder()
+                        .withNonSharedImages(state.get())
+                        .build())
+                .isSuccess();
+        
+        if (found) {
+            log.debug("State '{}' (ID: {}) found and activated", stateName, stateId);
+        }
+        
+        return found;
     }
 
     /**
@@ -215,8 +280,16 @@ public class StateDetector {
      * @return Set of state IDs that were found to be active
      */
     public Set<Long> refreshActiveStates() {
+        log.info("Refreshing all active states - clearing and rediscovering");
         stateMemory.removeAllStates();
         searchAllImagesForCurrentStates();
-        return stateMemory.getActiveStates();
+        
+        Set<Long> activeStates = stateMemory.getActiveStates();
+        log.info("Refresh complete. Active states: {}", 
+                activeStates.stream()
+                        .map(allStatesInProjectService::getStateName)
+                        .collect(Collectors.joining(", ")));
+        
+        return activeStates;
     }
 }

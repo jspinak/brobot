@@ -1,0 +1,10 @@
+{
+  "label": "MCP Server",
+  "position": 1,
+  "link": {
+    "type": "generated-index",
+    "title": "MCP Server for AI Integration",
+    "description": "Enable AI agents to control Brobot automations through the Model Context Protocol (MCP) server.",
+    "keywords": ["mcp", "ai", "api", "server", "gpt", "claude", "langchain"]
+  }
+}

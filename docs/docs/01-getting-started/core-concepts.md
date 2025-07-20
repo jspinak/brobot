@@ -66,6 +66,19 @@ All operations in Brobot, from a simple click to a complex drag-and-drop, are bu
 
 [Learn more on the detailed Action Hierarchy page...](action-hierarchy.md)
 
+## State-Aware Scheduling
+
+For continuous monitoring and background automation tasks, Brobot provides state-aware scheduling capabilities. This feature automatically validates and manages active states before executing scheduled tasks, ensuring your automation runs with the correct GUI context.
+
+The `StateAwareScheduler` component wraps standard Java scheduling with intelligent state validation, allowing you to:
+- Define required states that must be active before task execution
+- Automatically rebuild states when they're missing
+- Configure different behaviors for different automation scenarios
+
+This is particularly useful for long-running automation, periodic maintenance tasks, and error recovery scenarios where maintaining state integrity is critical.
+
+[Learn more about state-aware scheduling...](../03-core-library/guides/state-aware-scheduling.md)
+
 ## Benefits: Cleaner and Simpler Code
 
 By modeling the environment with states and transitions, the underlying framework handles the complex logic of navigation, state tracking, and error recovery. Once your state structure is created, moving to any state is often a single line of code, such as `stateTransitionsManagement.open(STATE_TO_OPEN);`. This allows you to concentrate on business logic rather than the complexities of dealing with an unpredictable GUI environment.

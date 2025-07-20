@@ -33,6 +33,7 @@ public abstract class BaseFindOptions extends ActionConfig {
     private final boolean useDefinedRegion;
     private final int maxMatchesToActOn;
     private final MatchAdjustmentOptions matchAdjustmentOptions;
+    private final double searchDuration;
 
     /**
      * Protected constructor to be called by the builders of subclasses.
@@ -47,6 +48,7 @@ public abstract class BaseFindOptions extends ActionConfig {
         this.useDefinedRegion = builder.useDefinedRegion;
         this.maxMatchesToActOn = builder.maxMatchesToActOn;
         this.matchAdjustmentOptions = builder.matchAdjustmentOptions.build();
+        this.searchDuration = builder.searchDuration;
     }
 
     /**
@@ -75,6 +77,7 @@ public abstract class BaseFindOptions extends ActionConfig {
         private boolean useDefinedRegion = false;
         private int maxMatchesToActOn = -1;
         private MatchAdjustmentOptions.Builder matchAdjustmentOptions = new MatchAdjustmentOptions.Builder();
+        private double searchDuration = 3.0; // Default 3 seconds, same as SikuliX default
 
         /**
          * Default constructor for the builder.
@@ -94,6 +97,7 @@ public abstract class BaseFindOptions extends ActionConfig {
             this.useDefinedRegion = original.useDefinedRegion;
             this.maxMatchesToActOn = original.maxMatchesToActOn;
             this.matchAdjustmentOptions = new MatchAdjustmentOptions.Builder(original.matchAdjustmentOptions);
+            this.searchDuration = original.searchDuration;
         }
 
         /**
@@ -168,6 +172,19 @@ public abstract class BaseFindOptions extends ActionConfig {
          */
         public B setMatchAdjustment(MatchAdjustmentOptions.Builder matchAdjustmentBuilder) {
             this.matchAdjustmentOptions = matchAdjustmentBuilder;
+            return self();
+        }
+
+        /**
+         * Sets the search duration (in seconds) for finding a match.
+         * The search will continue until a match is found or this duration is reached.
+         * This replaces the deprecated ActionOptions.maxWait parameter.
+         *
+         * @param seconds The maximum duration to search for a match (default: 3.0 seconds)
+         * @return this Builder instance for chaining.
+         */
+        public B setSearchDuration(double seconds) {
+            this.searchDuration = seconds;
             return self();
         }
     }
