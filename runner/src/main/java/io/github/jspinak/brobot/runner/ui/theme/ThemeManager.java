@@ -9,7 +9,10 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
+import javafx.application.Application;
+import atlantafx.base.theme.PrimerLight;
+import atlantafx.base.theme.PrimerDark;
+import atlantafx.base.theme.Theme;
 
 import java.io.IOException;
 import java.net.URL;
@@ -22,24 +25,37 @@ import java.util.Map;
  * Manages the application's visual themes.
  * Allows switching between different themes (e.g., light and dark mode).
  */
-@Component
 @Data
 public class ThemeManager {
     private static final Logger logger = LoggerFactory.getLogger(ThemeManager.class);
 
-    private static final String MODERN_THEME_CSS = "/css/modern-theme.css";
-    private static final String BASE_CSS = "/css/base.css";
-    private static final String COMPONENTS_CSS = "/css/components.css";
-    private static final String LAYOUTS_CSS = "/css/layouts.css";
-
-    private static final String LIGHT_THEME_CSS = "/css/themes/light-theme.css";
-    private static final String DARK_THEME_CSS = "/css/themes/dark-theme.css";
+    // CSS resource paths for additional custom styling
+    private static final String ATLANTAFX_THEME_CSS = "/css/atlantafx-theme.css";
+    private static final String LABEL_FIXES_CSS = "/css/label-fixes.css";
+    private static final String LABEL_OVERLAP_FIX_CSS = "/css/label-overlap-fix.css";
+    private static final String AUTOMATION_PANEL_FIXES_CSS = "/css/automation-panel-fixes.css";
+    private static final String DARK_MODE_FIXES_CSS = "/css/dark-mode-fixes.css";
+    private static final String ENHANCED_DARK_MODE_CSS = "/css/enhanced-dark-mode.css";
+    private static final String LIGHT_MODE_SPACING_FIXES_CSS = "/css/light-mode-spacing-fixes.css";
+    private static final String COMPREHENSIVE_FIXES_CSS = "/css/comprehensive-style-fixes.css";
+    private static final String TAB_OVERLAP_FIXES_CSS = "/css/tab-overlap-fixes.css";
+    private static final String TAB_STRUCTURE_FIX_CSS = "/css/tab-structure-fix.css";
+    private static final String CARD_HEADER_FIXES_CSS = "/css/card-header-fixes.css";
+    private static final String BUTTON_LABEL_FIXES_CSS = "/css/button-label-fixes.css";
+    private static final String MINIMUM_SPACING_FIXES_CSS = "/css/minimum-spacing-fixes.css";
+    private static final String COMPREHENSIVE_SPACING_FIXES_CSS = "/css/comprehensive-spacing-fixes.css";
+    private static final String ICON_FIXES_CSS = "/css/icon-fixes.css";
+    private static final String PERFORMANCE_FIXES_CSS = "/css/performance-fixes.css";
+    private static final String TAB_PERFORMANCE_FIXES_CSS = "/css/tab-performance-fixes.css";
 
     // Current theme
     private final ObjectProperty<Theme> currentTheme = new SimpleObjectProperty<>(Theme.LIGHT);
 
-    // Map of loaded CSS URLs
-    private final Map<Theme, List<URL>> themeCssMap = new EnumMap<>(Theme.class);
+    // Map of AtlantFX themes
+    private final Map<Theme, atlantafx.base.theme.Theme> atlantaThemeMap = new EnumMap<>(Theme.class);
+    
+    // Map of additional CSS URLs for custom styling
+    private final Map<Theme, List<URL>> additionalCssMap = new EnumMap<>(Theme.class);
 
     // List of registered scenes that will have their stylesheets updated when the theme changes
     private final List<Scene> registeredScenes = new ArrayList<>();
@@ -48,66 +64,138 @@ public class ThemeManager {
     private final List<IThemeChangeListener> themeChangeListeners = new ArrayList<>();
 
     /**
-     * Initializes the ThemeManager and loads the CSS resources for each theme.
+     * Initializes the ThemeManager with AtlantFX themes.
      */
     @PostConstruct
     public void initialize() {
         try {
-            // Load modern theme CSS
-            URL modernThemeCss = getClass().getResource(MODERN_THEME_CSS);
+            // Initialize AtlantFX themes
+            atlantaThemeMap.put(Theme.LIGHT, new PrimerLight());
+            atlantaThemeMap.put(Theme.DARK, new PrimerDark());
             
-            if (modernThemeCss == null) {
-                logger.warn("Failed to load modern theme CSS, falling back to legacy themes");
-                
-                // Fall back to loading legacy CSS resources
-                URL baseUrl = getClass().getResource(BASE_CSS);
-                URL componentsUrl = getClass().getResource(COMPONENTS_CSS);
-                URL layoutsUrl = getClass().getResource(LAYOUTS_CSS);
-
-                if (baseUrl == null || componentsUrl == null || layoutsUrl == null) {
-                    logger.error("Failed to load common CSS resources");
-                    throw new IOException("Missing core CSS resources");
-                }
-
-                // Light theme CSS
-                URL lightThemeCss = getClass().getResource(LIGHT_THEME_CSS);
-                if (lightThemeCss != null) {
-                    List<URL> lightThemeUrls = new ArrayList<>();
-                    lightThemeUrls.add(baseUrl);
-                    lightThemeUrls.add(componentsUrl);
-                    lightThemeUrls.add(layoutsUrl);
-                    lightThemeUrls.add(lightThemeCss);
-                    themeCssMap.put(Theme.LIGHT, lightThemeUrls);
-                } else {
-                    logger.error("Failed to load light theme CSS");
-                }
-
-                // Dark theme CSS
-                URL darkThemeCss = getClass().getResource(DARK_THEME_CSS);
-                if (darkThemeCss != null) {
-                    List<URL> darkThemeUrls = new ArrayList<>();
-                    darkThemeUrls.add(baseUrl);
-                    darkThemeUrls.add(componentsUrl);
-                    darkThemeUrls.add(layoutsUrl);
-                    darkThemeUrls.add(darkThemeCss);
-                    themeCssMap.put(Theme.DARK, darkThemeUrls);
-                } else {
-                    logger.error("Failed to load dark theme CSS");
-                }
-            } else {
-                // Use modern theme for both light and dark modes
-                List<URL> lightThemeUrls = new ArrayList<>();
-                lightThemeUrls.add(modernThemeCss);
-                themeCssMap.put(Theme.LIGHT, lightThemeUrls);
-                
-                List<URL> darkThemeUrls = new ArrayList<>();
-                darkThemeUrls.add(modernThemeCss);
-                themeCssMap.put(Theme.DARK, darkThemeUrls);
-                
-                logger.info("Modern theme loaded successfully");
+            // Load additional custom CSS if needed
+            URL atlantafxThemeUrl = getClass().getResource(ATLANTAFX_THEME_CSS);
+            URL labelFixesUrl = getClass().getResource(LABEL_FIXES_CSS);
+            URL labelOverlapFixUrl = getClass().getResource(LABEL_OVERLAP_FIX_CSS);
+            URL automationPanelFixesUrl = getClass().getResource(AUTOMATION_PANEL_FIXES_CSS);
+            URL darkModeFixesUrl = getClass().getResource(DARK_MODE_FIXES_CSS);
+            URL enhancedDarkModeUrl = getClass().getResource(ENHANCED_DARK_MODE_CSS);
+            URL lightModeSpacingFixesUrl = getClass().getResource(LIGHT_MODE_SPACING_FIXES_CSS);
+            URL comprehensiveFixesUrl = getClass().getResource(COMPREHENSIVE_FIXES_CSS);
+            URL tabOverlapFixesUrl = getClass().getResource(TAB_OVERLAP_FIXES_CSS);
+            URL tabStructureFixUrl = getClass().getResource(TAB_STRUCTURE_FIX_CSS);
+            URL cardHeaderFixesUrl = getClass().getResource(CARD_HEADER_FIXES_CSS);
+            URL buttonLabelFixesUrl = getClass().getResource(BUTTON_LABEL_FIXES_CSS);
+            URL minimumSpacingFixesUrl = getClass().getResource(MINIMUM_SPACING_FIXES_CSS);
+            URL comprehensiveSpacingFixesUrl = getClass().getResource(COMPREHENSIVE_SPACING_FIXES_CSS);
+            URL iconFixesUrl = getClass().getResource(ICON_FIXES_CSS);
+            URL performanceFixesUrl = getClass().getResource(PERFORMANCE_FIXES_CSS);
+            URL tabPerformanceFixesUrl = getClass().getResource(TAB_PERFORMANCE_FIXES_CSS);
+            
+            // Add any custom CSS that should be applied on top of AtlantFX
+            List<URL> lightAdditionalCss = new ArrayList<>();
+            List<URL> darkAdditionalCss = new ArrayList<>();
+            
+            // Add AtlantaFX theme CSS first (highest priority)
+            if (atlantafxThemeUrl != null) {
+                lightAdditionalCss.add(atlantafxThemeUrl);
+                darkAdditionalCss.add(atlantafxThemeUrl);
             }
-
-            logger.info("ThemeManager initialized with {} themes", themeCssMap.size());
+            
+            if (labelFixesUrl != null) {
+                lightAdditionalCss.add(labelFixesUrl);
+                darkAdditionalCss.add(labelFixesUrl);
+            }
+            if (labelOverlapFixUrl != null) {
+                lightAdditionalCss.add(labelOverlapFixUrl);
+                darkAdditionalCss.add(labelOverlapFixUrl);
+            }
+            if (automationPanelFixesUrl != null) {
+                lightAdditionalCss.add(automationPanelFixesUrl);
+                darkAdditionalCss.add(automationPanelFixesUrl);
+            }
+            
+            // Add dark mode fixes only for dark theme
+            if (darkModeFixesUrl != null) {
+                darkAdditionalCss.add(darkModeFixesUrl);
+            }
+            
+            // Add enhanced dark mode fixes with better contrast
+            if (enhancedDarkModeUrl != null) {
+                darkAdditionalCss.add(enhancedDarkModeUrl);
+            }
+            
+            // Add light mode spacing fixes only for light theme
+            if (lightModeSpacingFixesUrl != null) {
+                lightAdditionalCss.add(lightModeSpacingFixesUrl);
+            }
+            
+            // Add comprehensive fixes for both themes
+            if (comprehensiveFixesUrl != null) {
+                lightAdditionalCss.add(comprehensiveFixesUrl);
+                darkAdditionalCss.add(comprehensiveFixesUrl);
+            }
+            
+            // Add tab overlap fixes for both themes
+            if (tabOverlapFixesUrl != null) {
+                lightAdditionalCss.add(tabOverlapFixesUrl);
+                darkAdditionalCss.add(tabOverlapFixesUrl);
+            }
+            
+            // Add tab structure fix for both themes
+            if (tabStructureFixUrl != null) {
+                lightAdditionalCss.add(tabStructureFixUrl);
+                darkAdditionalCss.add(tabStructureFixUrl);
+            }
+            
+            // Add card header fixes for both themes
+            if (cardHeaderFixesUrl != null) {
+                lightAdditionalCss.add(cardHeaderFixesUrl);
+                darkAdditionalCss.add(cardHeaderFixesUrl);
+            }
+            
+            // Add button label fixes for both themes
+            if (buttonLabelFixesUrl != null) {
+                lightAdditionalCss.add(buttonLabelFixesUrl);
+                darkAdditionalCss.add(buttonLabelFixesUrl);
+            }
+            
+            // Add minimum spacing fixes for both themes
+            if (minimumSpacingFixesUrl != null) {
+                lightAdditionalCss.add(minimumSpacingFixesUrl);
+                darkAdditionalCss.add(minimumSpacingFixesUrl);
+            }
+            
+            // Add comprehensive spacing fixes last (highest priority) for both themes
+            if (comprehensiveSpacingFixesUrl != null) {
+                lightAdditionalCss.add(comprehensiveSpacingFixesUrl);
+                darkAdditionalCss.add(comprehensiveSpacingFixesUrl);
+            }
+            
+            // Add icon fixes for both themes
+            if (iconFixesUrl != null) {
+                lightAdditionalCss.add(iconFixesUrl);
+                darkAdditionalCss.add(iconFixesUrl);
+            }
+            
+            // Add performance fixes for both themes (highest priority)
+            // Temporarily disabled - may be interfering with tab clicks
+            // if (performanceFixesUrl != null) {
+            //     lightAdditionalCss.add(performanceFixesUrl);
+            //     darkAdditionalCss.add(performanceFixesUrl);
+            // }
+            
+            // Add tab performance fixes for both themes
+            // Temporarily disabled - may be interfering with tab clicks
+            // if (tabPerformanceFixesUrl != null) {
+            //     lightAdditionalCss.add(tabPerformanceFixesUrl);
+            //     darkAdditionalCss.add(tabPerformanceFixesUrl);
+            // }
+            
+            additionalCssMap.put(Theme.LIGHT, lightAdditionalCss);
+            additionalCssMap.put(Theme.DARK, darkAdditionalCss);
+            
+            logger.info("ThemeManager initialized with AtlantFX themes");
         } catch (Exception e) {
             logger.error("Error initializing ThemeManager", e);
         }
@@ -166,9 +254,15 @@ public class ThemeManager {
             Theme oldTheme = currentTheme.get();
             currentTheme.set(theme);
 
-            // Apply theme to all registered scenes
+            // Apply AtlantFX theme globally
+            atlantafx.base.theme.Theme atlantaTheme = atlantaThemeMap.get(theme);
+            if (atlantaTheme != null) {
+                Application.setUserAgentStylesheet(atlantaTheme.getUserAgentStylesheet());
+            }
+
+            // Apply additional CSS to all registered scenes
             for (Scene scene : registeredScenes) {
-                applyThemeToScene(scene, theme);
+                applyAdditionalStyling(scene, theme);
             }
 
             // Notify listeners
@@ -220,16 +314,35 @@ public class ThemeManager {
             return;
         }
 
-        List<URL> cssUrls = themeCssMap.get(theme);
-        if (cssUrls == null || cssUrls.isEmpty()) {
-            logger.warn("No CSS resources found for theme {}", theme);
+        // Apply AtlantFX theme globally
+        atlantafx.base.theme.Theme atlantaTheme = atlantaThemeMap.get(theme);
+        if (atlantaTheme != null) {
+            Application.setUserAgentStylesheet(atlantaTheme.getUserAgentStylesheet());
+        }
+        
+        // Apply additional custom styling
+        applyAdditionalStyling(scene, theme);
+    }
+    
+    /**
+     * Applies additional custom CSS on top of AtlantFX theme.
+     *
+     * @param scene The scene to apply additional styling to
+     * @param theme The current theme
+     */
+    private void applyAdditionalStyling(Scene scene, Theme theme) {
+        if (scene == null) {
             return;
         }
-
-        // Clear existing stylesheets and add new ones
+        
+        // Clear existing custom stylesheets and add new ones
         scene.getStylesheets().clear();
-        for (URL url : cssUrls) {
-            scene.getStylesheets().add(url.toExternalForm());
+        
+        List<URL> additionalCss = additionalCssMap.get(theme);
+        if (additionalCss != null) {
+            for (URL url : additionalCss) {
+                scene.getStylesheets().add(url.toExternalForm());
+            }
         }
         
         // Add or remove dark class from root element
@@ -268,7 +381,7 @@ public class ThemeManager {
      * @return List of available themes
      */
     public List<Theme> getAvailableThemes() {
-        return new ArrayList<>(themeCssMap.keySet());
+        return new ArrayList<>(atlantaThemeMap.keySet());
     }
 
     /**

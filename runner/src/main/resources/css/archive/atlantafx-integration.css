@@ -1,0 +1,307 @@
+/* AtlantaFX Integration Styles for Brobot Runner */
+/* This file provides proper styling using AtlantaFX design system */
+
+/* Root variables to complement AtlantaFX */
+.root {
+    /* Spacing constants */
+    -fx-spacing-sm: 4px;
+    -fx-spacing-md: 8px;
+    -fx-spacing-lg: 16px;
+    -fx-spacing-xl: 24px;
+    
+    /* Border radius */
+    -fx-border-radius: 4px;
+    
+    /* Font sizes */
+    -fx-font-size-sm: 12px;
+    -fx-font-size-md: 14px;
+    -fx-font-size-lg: 16px;
+    -fx-font-size-xl: 20px;
+}
+
+/* Fix overlapping labels globally */
+.label {
+    -fx-padding: 2 4 2 4;
+    -fx-min-width: -fx-computed;
+    -fx-pref-width: -fx-computed;
+    -fx-max-width: -Infinity;
+    -fx-text-overrun: ellipsis;
+}
+
+/* Tab styling to prevent overlap */
+.tab-pane {
+    -fx-tab-min-height: 32px;
+    -fx-tab-max-height: 32px;
+}
+
+.tab-pane > .tab-header-area {
+    -fx-padding: 0 0 0 0;
+}
+
+.tab-pane > .tab-header-area > .tab-header-background {
+    -fx-background-color: -color-bg-default;
+    -fx-border-color: -color-border-default;
+    -fx-border-width: 0 0 1 0;
+}
+
+.tab {
+    -fx-padding: 8 16 8 16;
+    -fx-background-color: transparent;
+    -fx-text-fill: -color-fg-default;
+    -fx-font-size: 14px;
+    -fx-min-width: 80px;
+    -fx-pref-width: -fx-computed;
+}
+
+.tab:selected {
+    -fx-background-color: -color-bg-subtle;
+    -fx-text-fill: -color-fg-emphasis;
+}
+
+.tab .tab-label {
+    -fx-alignment: CENTER;
+    -fx-text-overrun: ellipsis;
+    -fx-padding: 0 4 0 4;
+}
+
+/* Header styling (title bar) */
+.header-panel {
+    -fx-background-color: -color-accent-emphasis;
+    -fx-padding: 12 16 12 16;
+    -fx-spacing: 16;
+    -fx-alignment: center-left;
+    -fx-min-height: 48px;
+    -fx-pref-height: 48px;
+}
+
+.header-title {
+    -fx-text-fill: white;
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+}
+
+/* Toolbar styling */
+.tool-bar {
+    -fx-background-color: -color-bg-subtle;
+    -fx-padding: 4 8 4 8;
+    -fx-spacing: 8;
+    -fx-border-color: -color-border-default;
+    -fx-border-width: 0 0 1 0;
+}
+
+.tool-bar > .button {
+    -fx-padding: 6 12 6 12;
+    -fx-min-height: 28px;
+}
+
+/* Status bar fix */
+.status-bar {
+    -fx-background-color: -color-bg-subtle;
+    -fx-border-color: -color-border-default;
+    -fx-border-width: 1 0 0 0;
+    -fx-padding: 4 16 4 16;
+    -fx-spacing: 24;
+    -fx-min-height: 28px;
+    -fx-pref-height: 28px;
+}
+
+.status-bar > .label {
+    -fx-text-fill: -color-fg-muted;
+    -fx-font-size: 12px;
+    -fx-min-width: -fx-computed;
+    -fx-padding: 0 8 0 0;
+}
+
+.status-bar > .separator {
+    -fx-padding: 0 8 0 8;
+    -fx-orientation: vertical;
+}
+
+/* Table view fixes */
+.table-view {
+    -fx-background-color: -color-bg-default;
+    -fx-border-color: -color-border-default;
+    -fx-border-radius: 4px;
+    -fx-padding: 0;
+}
+
+.table-view .column-header {
+    -fx-background-color: -color-bg-subtle;
+    -fx-padding: 8 12 8 12;
+    -fx-border-color: -color-border-default;
+    -fx-border-width: 0 0 1 0;
+}
+
+.table-view .column-header .label {
+    -fx-text-fill: -color-fg-emphasis;
+    -fx-font-weight: bold;
+    -fx-alignment: center-left;
+    -fx-text-overrun: ellipsis;
+    -fx-graphic-text-gap: 8;
+}
+
+.table-view .table-cell {
+    -fx-padding: 8 12 8 12;
+    -fx-border-color: transparent -color-border-default transparent transparent;
+    -fx-border-width: 0 1 0 0;
+    -fx-text-fill: -color-fg-default;
+}
+
+/* Split pane styling */
+.split-pane {
+    -fx-background-color: -color-bg-default;
+}
+
+.split-pane > .split-pane-divider {
+    -fx-background-color: -color-border-default;
+    -fx-padding: 0 1 0 1;
+}
+
+/* Card/Panel styling */
+.card {
+    -fx-background-color: -color-bg-default;
+    -fx-border-color: -color-border-default;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+    -fx-padding: 16;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 2, 0, 0, 1);
+}
+
+.card-header {
+    -fx-padding: 0 0 12 0;
+    -fx-border-color: transparent transparent -color-border-default transparent;
+    -fx-border-width: 0 0 1 0;
+}
+
+.card-title {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -color-fg-emphasis;
+}
+
+/* Button styling */
+.button {
+    -fx-padding: 6 16 6 16;
+    -fx-background-radius: 4px;
+    -fx-border-radius: 4px;
+    -fx-font-size: 14px;
+    -fx-cursor: hand;
+}
+
+.button-primary {
+    -fx-background-color: -color-accent-emphasis;
+    -fx-text-fill: white;
+}
+
+.button-primary:hover {
+    -fx-background-color: derive(-color-accent-emphasis, -10%);
+}
+
+/* Text field styling */
+.text-field {
+    -fx-padding: 6 12 6 12;
+    -fx-background-radius: 4px;
+    -fx-border-radius: 4px;
+    -fx-border-color: -color-border-default;
+    -fx-border-width: 1;
+    -fx-font-size: 14px;
+}
+
+.text-field:focused {
+    -fx-border-color: -color-accent-emphasis;
+}
+
+/* ComboBox styling */
+.combo-box {
+    -fx-padding: 6 12 6 12;
+    -fx-background-radius: 4px;
+    -fx-border-radius: 4px;
+    -fx-border-color: -color-border-default;
+    -fx-border-width: 1;
+    -fx-font-size: 14px;
+}
+
+/* Pagination controls */
+.pagination-control {
+    -fx-padding: 8;
+    -fx-spacing: 8;
+}
+
+.page-button {
+    -fx-padding: 4 8 4 8;
+    -fx-min-width: 32px;
+    -fx-pref-width: 32px;
+}
+
+/* Search box styling */
+.search-box {
+    -fx-spacing: 8;
+    -fx-padding: 8;
+    -fx-alignment: center-left;
+}
+
+.search-field {
+    -fx-prompt-text-fill: -color-fg-muted;
+    -fx-min-width: 200px;
+    -fx-pref-width: 250px;
+}
+
+/* Fix for specific overlapping issues */
+.configuration-tabs .tab-header-area {
+    -fx-padding: 0;
+}
+
+.configuration-tabs .tab {
+    -fx-min-width: 100px;
+    -fx-pref-width: 120px;
+}
+
+/* Recent configurations table fix */
+.recent-configurations-table {
+    -fx-padding: 0;
+}
+
+.recent-configurations-table .column-header {
+    -fx-min-width: 80px;
+    -fx-pref-width: -fx-computed;
+}
+
+/* Configuration details panel */
+.configuration-details {
+    -fx-spacing: 12;
+    -fx-padding: 16;
+}
+
+.configuration-details .label {
+    -fx-min-width: 100px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -color-fg-muted;
+}
+
+.configuration-details .value-label {
+    -fx-font-weight: normal;
+    -fx-text-fill: -color-fg-default;
+}
+
+/* Memory status styling */
+.memory-status {
+    -fx-spacing: 8;
+    -fx-alignment: center-right;
+}
+
+.memory-bar {
+    -fx-min-width: 100px;
+    -fx-pref-width: 150px;
+    -fx-min-height: 16px;
+    -fx-pref-height: 16px;
+    -fx-background-color: -color-bg-subtle;
+    -fx-background-radius: 8px;
+    -fx-border-radius: 8px;
+    -fx-border-color: -color-border-default;
+    -fx-border-width: 1;
+}
+
+.memory-bar-fill {
+    -fx-background-color: -color-success-emphasis;
+    -fx-background-radius: 7px;
+}

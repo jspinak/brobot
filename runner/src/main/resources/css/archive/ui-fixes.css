@@ -1,0 +1,128 @@
+/* UI interaction and rendering fixes */
+
+/* Ensure proper event handling */
+.root {
+    -fx-focus-traversable: true;
+}
+
+/* Fix for tab pane to ensure it's interactive */
+.tab-pane {
+    -fx-focus-traversable: true;
+}
+
+.tab-pane > .tab-header-area {
+    -fx-padding: 0;
+}
+
+.tab-pane > .tab-header-area > .tab-header-background {
+    -fx-background-color: -fx-background;
+}
+
+.tab-pane > .tab-header-area > .headers-region > .tab {
+    -fx-focus-traversable: true;
+    -fx-cursor: hand;
+}
+
+/* Ensure buttons are clickable */
+.button {
+    -fx-cursor: hand;
+    -fx-focus-traversable: true;
+}
+
+/* Fix for content area */
+.content-area {
+    -fx-focus-traversable: true;
+}
+
+/* Ensure all controls are interactive */
+.text-field,
+.text-area,
+.combo-box,
+.choice-box,
+.check-box,
+.radio-button {
+    -fx-focus-traversable: true;
+}
+
+/* Fix overlapping in headers */
+.app-header {
+    -fx-min-height: 50px;
+    -fx-pref-height: 50px;
+}
+
+.app-header .title {
+    -fx-min-width: 150px;
+}
+
+/* Fix for automation panel */
+.automation-panel,
+.enhanced-automation-panel {
+    -fx-focus-traversable: true;
+}
+
+/* Ensure proper z-ordering */
+.stack-pane {
+    -fx-alignment: top-left;
+}
+
+.stack-pane > * {
+    -fx-managed: true;
+    -fx-opacity: 1.0;
+}
+
+/* Fix for tab content */
+.tab-pane > .tab-content-area {
+    -fx-padding: 0;
+}
+
+.tab-pane > .tab-content-area > .tab-content {
+    -fx-padding: 0;
+}
+
+/* Prevent text overlap in automation panel */
+.automation-panel .label,
+.enhanced-automation-panel .label {
+    -fx-min-height: 20px;
+    -fx-padding: 2px 5px;
+}
+
+/* Fix button pane layout */
+.button-pane {
+    -fx-min-height: 100px;
+    -fx-pref-height: 150px;
+}
+
+/* Status panel fixes */
+.automation-status-panel {
+    -fx-min-height: 200px;
+    -fx-spacing: 10px;
+}
+
+/* Fix separator spacing */
+.separator {
+    -fx-padding: 5px 0;
+}
+
+/* Ensure scroll panes work properly */
+.scroll-pane {
+    -fx-focus-traversable: true;
+    -fx-pannable: true;
+}
+
+.scroll-pane > .viewport {
+    -fx-background-color: transparent;
+}
+
+/* Fix for flow pane in button area */
+.flow-pane {
+    -fx-orientation: horizontal;
+    -fx-pref-wrap-length: 800;
+    -fx-focus-traversable: true;
+}
+
+/* Category box styling */
+.category-box {
+    -fx-min-width: 150px;
+    -fx-padding: 10px;
+    -fx-spacing: 5px;
+}

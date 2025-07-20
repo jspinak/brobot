@@ -33,14 +33,17 @@ jobs:
       # Create a test environment setup specifically for GitHub Actions
       - name: Setup test environment
         run: |
-          # Backup original application.properties
-          if [ -f "app/src/main/resources/application.properties" ]; then
-            cp app/src/main/resources/application.properties app/src/main/resources/application.properties.backup
+          # Create directories for runner module if they don't exist
+          mkdir -p runner/src/main/resources
+          
+          # Backup original application.properties if it exists
+          if [ -f "runner/src/main/resources/application.properties" ]; then
+            cp runner/src/main/resources/application.properties runner/src/main/resources/application.properties.backup
           fi
           
           # Create application-ci.properties with direct values
-          cat > app/src/main/resources/application-ci.properties << EOF
-          spring.application.name=brobot-app
+          cat > runner/src/main/resources/application-ci.properties << EOF
+          spring.application.name=brobot-runner
           server.port=8080
           spring.datasource.url=jdbc:h2:mem:testdb
           spring.datasource.username=sa
@@ -76,7 +79,7 @@ jobs:
       # Build with non-modular approach
       - name: Build with Gradle (excluding library-features)
         run: |
-          ./gradlew :library:build :log:build :runner:build -x test \
+          ./gradlew :library:build :runner:build -x test \
             -Dorg.gradle.jvmargs="-Xmx4g -XX:MaxMetaspaceSize=1g"
         env:
           SPRING_PROFILES_ACTIVE: "ci"
@@ -149,7 +152,7 @@ jobs:
       # Build with non-modular approach
       - name: Build minimal runner package
         run: |
-          ./gradlew :library:build :log:build :runner:build -x test \
+          ./gradlew :library:build :runner:build -x test \
             -Dorg.gradle.jvmargs="-Xmx4g -XX:MaxMetaspaceSize=1g"
         env:
           SPRING_PROFILES_ACTIVE: "ci"
@@ -171,11 +174,11 @@ jobs:
           
           echo "Runner build.gradle modified for non-modular build"
 
-      # Use a simpler packaging approach with createDistributionZip
+      # Use standard distribution tasks from application plugin
       - name: Create distribution package
         run: |
           ./gradlew :runner:bootJar
-          ./gradlew :runner:createDistributionZip --info
+          ./gradlew :runner:distZip --info
         env:
           _JAVA_OPTIONS: "-Djava.awt.headless=true"
 

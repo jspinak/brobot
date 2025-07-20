@@ -1,0 +1,36 @@
+{
+  "automationFunctions": [
+    {
+      "id": 1,
+      "name": "exampleFunction",
+      "description": "A valid automation function",
+      "returnType": "boolean",
+      "parameters": [
+        {
+          "name": "param1",
+          "type": "string"
+        }
+      ],
+      "statements": [
+        {
+          "statementType": "variableDeclaration",
+          "name": "exampleVar",
+          "type": "string",
+          "value": {
+            "expressionType": "literal",
+            "valueType": "string",
+            "value": "exampleValue"
+          }
+        },
+        {
+          "statementType": "return",
+          "value": {
+            "expressionType": "literal",
+            "valueType": "boolean",
+            "value": true
+          }
+        }
+      ]
+    }
+  ]
+}

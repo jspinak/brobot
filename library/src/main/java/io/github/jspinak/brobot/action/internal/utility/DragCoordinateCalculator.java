@@ -72,8 +72,7 @@ public class DragCoordinateCalculator {
         try {
             new Region().sikuli().dragDrop(from.sikuli(), to.sikuli());
         } catch (FindFailed findFailed) {
-            if (ConsoleReporter.minReportingLevel(ConsoleReporter.OutputLevel.HIGH))
-                System.out.print("|drag failed| ");
+            ConsoleReporter.print(ConsoleReporter.OutputLevel.HIGH, "|drag failed| ");
             return false;
         }
         return true;

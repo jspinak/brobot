@@ -1,0 +1,32 @@
+import javafx.application.Application;
+import javafx.scene.Scene;
+import javafx.scene.control.Label;
+import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
+
+public class TestGuiVisibility extends Application {
+    
+    @Override
+    public void start(Stage primaryStage) {
+        VBox root = new VBox();
+        root.setStyle("-fx-background-color: red; -fx-padding: 20;");
+        
+        Label label = new Label("Test - GUI is visible!");
+        label.setStyle("-fx-font-size: 24px; -fx-text-fill: white;");
+        
+        root.getChildren().add(label);
+        
+        Scene scene = new Scene(root, 400, 300);
+        primaryStage.setTitle("Visibility Test");
+        primaryStage.setScene(scene);
+        primaryStage.show();
+        
+        System.out.println("Stage shown: " + primaryStage.isShowing());
+        System.out.println("Stage position: " + primaryStage.getX() + ", " + primaryStage.getY());
+        System.out.println("Stage size: " + primaryStage.getWidth() + " x " + primaryStage.getHeight());
+    }
+    
+    public static void main(String[] args) {
+        launch(args);
+    }
+}

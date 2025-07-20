@@ -45,6 +45,9 @@ class BrobotJsonModuleTest {
     @Mock
     private SearchRegionsDeserializer searchRegionsDeserializer;
     
+    @Mock
+    private MatDeserializer matDeserializer;
+    
     private BrobotJsonModule brobotJsonModule;
     
     @BeforeEach
@@ -57,7 +60,8 @@ class BrobotJsonModuleTest {
             imageSerializer,
             actionConfigDeserializer,
             imageDeserializer,
-            searchRegionsDeserializer
+            searchRegionsDeserializer,
+            matDeserializer
         );
     }
     
@@ -208,7 +212,8 @@ class BrobotJsonModuleTest {
                 imageSerializer,
                 actionConfigDeserializer,
                 imageDeserializer,
-                searchRegionsDeserializer
+                searchRegionsDeserializer,
+                matDeserializer
             )
         );
     }
@@ -225,7 +230,8 @@ class BrobotJsonModuleTest {
                 imageSerializer,
                 null,
                 imageDeserializer,
-                searchRegionsDeserializer
+                searchRegionsDeserializer,
+                matDeserializer
             )
         );
     }

@@ -1,0 +1,153 @@
+/*
+ * Gemini-generated JavaFX Theme
+ * Based on the provided design inspiration.
+ * Brand color: #5865F2 (approximated from image)
+ */
+
+.root {
+    -fx-primary-color: #5865F2;
+    -fx-background-color: #23272A;
+    -fx-control-inner-background: #2C2F33;
+    -fx-text-fill: #FFFFFF;
+    -fx-accent-color: -fx-primary-color;
+    -fx-focus-color: -fx-primary-color;
+    -fx-border-color: #1E2124;
+    -fx-font-family: "Inter", sans-serif; /* A modern, clean font */
+}
+
+/* --- General Controls --- */
+
+.label {
+    -fx-text-fill: -fx-text-fill;
+    -fx-font-size: 14px;
+}
+
+.button {
+    -fx-background-color: -fx-primary-color;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 8;
+    -fx-padding: 10 20 10 20;
+    -fx-font-size: 14px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 10, 0.5, 0, 2);
+}
+
+.button:hover {
+    -fx-background-color: derive(-fx-primary-color, 10%);
+}
+
+.button:pressed {
+    -fx-background-color: derive(-fx-primary-color, -10%);
+}
+
+.text-field, .text-area {
+    -fx-background-color: -fx-control-inner-background;
+    -fx-text-fill: -fx-text-fill;
+    -fx-prompt-text-fill: #B9BBBE;
+    -fx-background-radius: 8;
+    -fx-border-color: -fx-border-color;
+    -fx-border-radius: 8;
+    -fx-font-size: 14px;
+    -fx-padding: 8;
+}
+
+.text-field:focused, .text-area:focused {
+    -fx-border-color: -fx-primary-color;
+    -fx-border-width: 2;
+}
+
+.scroll-pane {
+    -fx-background-color: transparent;
+}
+
+.scroll-bar:vertical, .scroll-bar:horizontal {
+    -fx-background-color: transparent;
+}
+
+.scroll-bar .thumb {
+    -fx-background-color: -fx-control-inner-background;
+    -fx-background-radius: 8;
+}
+
+.scroll-bar .thumb:hover {
+    -fx-background-color: derive(-fx-control-inner-background, 10%);
+}
+
+/* --- Card Style --- */
+
+.card {
+    -fx-background-color: #2C2F33;
+    -fx-background-radius: 12;
+    -fx-border-color: -fx-border-color;
+    -fx-border-radius: 12;
+    -fx-border-width: 1;
+    -fx-padding: 20;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 15, 0.6, 0, 4);
+}
+
+/* --- Table/List Views --- */
+
+.table-view, .list-view {
+    -fx-background-color: #2C2F33;
+    -fx-control-inner-background: #2C2F33;
+    -fx-border-color: -fx-border-color;
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+}
+
+.table-view .column-header-background,
+.list-view .list-cell {
+    -fx-background-color: #2C2F33;
+}
+
+.table-view .column-header,
+.table-view .filler {
+    -fx-background-color: #23272A;
+    -fx-border-color: -fx-border-color;
+    -fx-size: 40;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+}
+
+.table-view .cell,
+.list-view .list-cell {
+    -fx-border-color: transparent;
+    -fx-padding: 10;
+    -fx-text-fill: #B9BBBE;
+}
+
+.table-view .table-row-cell:selected,
+.list-view .list-cell:selected {
+    -fx-background-color: -fx-primary-color;
+    -fx-text-fill: white;
+}
+
+/* --- Tab Pane --- */
+.tab-pane .tab-header-area .tab-header-background {
+    -fx-background-color: #23272A;
+}
+
+.tab-pane .tab {
+    -fx-background-color: #2C2F33;
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+    -fx-padding: 10 20 10 20;
+}
+
+.tab-pane .tab:selected {
+    -fx-background-color: -fx-primary-color;
+}
+
+.tab-pane .tab .tab-label {
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+}
+
+.tab-pane .tab:selected .tab-label {
+    -fx-text-fill: white;
+}
+
+.tab-pane > .tab-content-area {
+    -fx-background-color: #23272A;
+    -fx-padding: 20;
+}

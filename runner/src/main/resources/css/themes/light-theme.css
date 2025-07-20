@@ -1,35 +1,37 @@
-/*** LIGHT THEME ***/
+/*** LIGHT THEME WITH PROPER CONTRAST ***/
 
+/* Import enhanced light theme styles */
+@import url("light-theme-enhanced.css");
+
+/* Any additional overrides specific to this light theme */
 .root {
-    -fx-base: -fx-white;
-    -fx-background: -fx-white;
-    -fx-control-inner-background: -fx-white;
-    -fx-text-fill: -fx-text-dark;
+    /* Ensure text is always visible */
+    -fx-text-fill: #24292f !important;
 }
 
-/* Override specific components for light theme */
-.app-header {
-    /* Standard primary color for header in light theme */
+/* Force all labels and text to be dark */
+.label, Label, Text, .text {
+    -fx-text-fill: #24292f !important;
+    -fx-fill: #24292f !important;
 }
 
-.status-bar {
-    -fx-background-color: -fx-very-light-gray;
+/* Ensure buttons have visible text */
+.button {
+    -fx-text-fill: #24292f !important;
 }
 
-.sidebar {
-    -fx-background-color: -fx-very-light-gray;
+/* Fix any components that might have inherited dark mode styles */
+.text-field, .text-area, .combo-box, .choice-box {
+    -fx-text-fill: #24292f !important;
+    -fx-background-color: #ffffff !important;
 }
 
-.breadcrumb-bar {
-    -fx-background-color: -fx-very-light-gray;
+/* Ensure table text is visible */
+.table-cell, .list-cell, .tree-cell {
+    -fx-text-fill: #24292f !important;
 }
 
-.panel-header {
-    -fx-background-color: -fx-very-light-gray;
+/* Fix spinner text visibility */
+.spinner .text-field {
+    -fx-text-fill: #24292f !important;
 }
-
-.table-row-cell:odd {
-    -fx-background-color: -fx-very-light-gray;
-}
-
-/* Additional styles specific to the light theme can be added here */

@@ -72,11 +72,6 @@ public class ConfigManagementPanel extends BorderPane {
         // Create toolbar
         ToolBar toolbar = createToolbar();
 
-        // Create component panels
-        selectionPanel = new ConfigSelectionPanel(eventBus, runnerProperties, libraryInitializer, appConfig);
-        browserPanel = new ConfigBrowserPanel(eventBus, projectManager, allStatesService); // Pass allStatesService
-        metadataEditor = new ConfigMetadataEditor(eventBus, projectManager);
-
         // Create tab pane for different views
         tabPane = new TabPane();
         tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
@@ -144,27 +139,39 @@ public class ConfigManagementPanel extends BorderPane {
     }
 
     private HBox createStatusBar() {
-        HBox statusBar = new HBox(10);
-        statusBar.setPadding(new Insets(5));
+        HBox statusBar = new HBox();
+        statusBar.getStyleClass().add("status-bar");
+        statusBar.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
 
         Label statusLabel = new Label("Ready");
+        statusLabel.getStyleClass().add("status-label");
 
         ProgressBar progressBar = new ProgressBar(0);
         progressBar.setVisible(false);
+        progressBar.setManaged(false);
 
         Label configPathLabel = new Label("Config Path: " + runnerProperties.getConfigPath());
-        Label imagePathLabel = new Label("Image Path: " + runnerProperties.getImagePath());
+        configPathLabel.getStyleClass().add("status-path-label");
 
-        // Add items to status bar
+        Separator separator1 = new Separator();
+        separator1.setOrientation(javafx.geometry.Orientation.VERTICAL);
+
+        Label imagePathLabel = new Label("Image Path: " + runnerProperties.getImagePath());
+        imagePathLabel.getStyleClass().add("status-path-label");
+
+        // Create spacer
+        javafx.scene.layout.Region spacer = new javafx.scene.layout.Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+
+        // Add items to status bar with proper spacing
         statusBar.getChildren().addAll(
                 statusLabel,
                 progressBar,
-                new javafx.scene.layout.Region(),  // Spacer
+                spacer,
                 configPathLabel,
+                separator1,
                 imagePathLabel
         );
-
-        HBox.setHgrow(statusBar.getChildren().get(2), Priority.ALWAYS);
 
         return statusBar;
     }
@@ -329,7 +336,7 @@ public class ConfigManagementPanel extends BorderPane {
         selectionPanel.refreshRecentConfigurations();
 
         // If a project is loaded, refresh browser
-        if (projectManager.getActiveProject() != null) {
+        if (projectManager.getCurrentProject() != null) {
             ConfigEntry currentConfig = selectionPanel.getSelectedConfiguration();
             if (currentConfig != null) {
                 browserPanel.setConfiguration(currentConfig);

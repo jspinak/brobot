@@ -71,9 +71,14 @@ public class Panel extends VBox {
         actionsBox = new HBox(10);
         actionsBox.setAlignment(Pos.CENTER_RIGHT);
         actionsBox.getStyleClass().add("panel-actions");
+        actionsBox.setVisible(false);
+        actionsBox.setManaged(false);
 
         // Add to parent
         getChildren().addAll(headerBox, contentBox, actionsBox);
+        
+        // Remove default spacing - let CSS handle it
+        setSpacing(0);
 
         // Setup bindings
         setupBindings();
@@ -213,6 +218,8 @@ public class Panel extends VBox {
     public void addAction(Button action) {
         if (action != null) {
             actionsBox.getChildren().add(action);
+            actionsBox.setVisible(true);
+            actionsBox.setManaged(true);
         }
     }
 
@@ -230,6 +237,8 @@ public class Panel extends VBox {
      */
     public void clearActions() {
         actionsBox.getChildren().clear();
+        actionsBox.setVisible(false);
+        actionsBox.setManaged(false);
     }
 
     /**

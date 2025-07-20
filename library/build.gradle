@@ -21,11 +21,14 @@ dependencies {
     api 'org.bytedeco:opencv-platform:4.9.0-1.5.10'
     api 'org.bytedeco:ffmpeg-platform:6.1.1-1.5.10'
     api 'org.apache.commons:commons-lang3:3.0'
+    
+    // These dependencies are exposed as part of Brobot's public API
+    api 'org.springframework:spring-context'
+    api 'org.springframework.boot:spring-boot-autoconfigure'
+    api 'org.springframework.boot:spring-boot-starter-aop'
+    api 'org.slf4j:slf4j-api:2.0.9'
 
     // These dependencies are internal implementation details.
-    implementation 'org.springframework:spring-context'
-    implementation 'org.springframework.boot:spring-boot-autoconfigure'
-    implementation 'org.slf4j:slf4j-api:2.0.9'
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.2'
     implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.2'
     implementation 'com.github.erosb:everit-json-schema:1.14.5'
@@ -40,7 +43,8 @@ dependencies {
     testImplementation 'org.mockito:mockito-core:5.11.0'
     testImplementation 'org.mockito:mockito-junit-jupiter:5.11.0'
 
-    compileOnly 'org.projectlombok:lombok:1.18.32'
+    // Lombok is exposed through our API (classes use Lombok annotations)
+    api 'org.projectlombok:lombok:1.18.32'
     annotationProcessor 'org.projectlombok:lombok:1.18.32'
 }
 

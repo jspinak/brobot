@@ -13,6 +13,8 @@ import io.github.jspinak.brobot.runner.events.LogEvent;
 import io.github.jspinak.brobot.runner.init.BrobotLibraryInitializer;
 import io.github.jspinak.brobot.runner.ui.components.Card;
 import io.github.jspinak.brobot.runner.ui.components.EnhancedTable;
+import io.github.jspinak.brobot.runner.ui.management.LabelManager;
+import io.github.jspinak.brobot.runner.ui.management.UIUpdateManager;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.geometry.Insets;
@@ -24,6 +26,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import atlantafx.base.theme.Styles;
 
 import java.io.File;
 import java.io.IOException;
@@ -55,7 +58,7 @@ public class ConfigSelectionPanel extends VBox {
     private final EnhancedTable<ConfigEntry> recentConfigsTable;
     private final List<ConfigEntry> recentConfigs = new ArrayList<>();
 
-    private ConfigDetailsPanel detailsPanel;
+    private RefactoredConfigDetailsPanel detailsPanel;
 
     public ConfigSelectionPanel(EventBus eventBus,
                                 BrobotRunnerProperties runnerProperties,
@@ -66,6 +69,7 @@ public class ConfigSelectionPanel extends VBox {
         this.libraryInitializer = libraryInitializer;
         this.appConfig = appConfig;
 
+        getStyleClass().add("config-selection-panel");
         setPadding(new Insets(15));
         setSpacing(15);
 
@@ -96,23 +100,32 @@ public class ConfigSelectionPanel extends VBox {
         setupRecentConfigsTable();
 
         // Configuration details panel
-        detailsPanel = new ConfigDetailsPanel(eventBus);
+        // TODO: Get LabelManager and UIUpdateManager from Spring context
+        LabelManager labelManager = new LabelManager();
+        UIUpdateManager uiUpdateManager = new UIUpdateManager();
+        uiUpdateManager.initialize();
+        detailsPanel = new RefactoredConfigDetailsPanel(eventBus, labelManager, uiUpdateManager);
 
         // Load recent configurations
         loadRecentConfigurations();
 
         // Layout components
         SplitPane splitPane = new SplitPane();
+        splitPane.getStyleClass().add("config-split-pane");
 
         // Wrap table in a titled card
         Card recentConfigsCard = new Card("Recent Configurations");
+        recentConfigsCard.getStyleClass().addAll("recent-configurations-table", Styles.ELEVATED_1);
         recentConfigsCard.setContent(recentConfigsTable);
+        recentConfigsCard.setMinWidth(300);
 
         Card detailsCard = new Card("Configuration Details");
+        detailsCard.getStyleClass().addAll("configuration-details-card", Styles.ELEVATED_1);
         detailsCard.setContent(detailsPanel);
+        detailsCard.setMinWidth(400);
 
         splitPane.getItems().addAll(recentConfigsCard, detailsCard);
-        splitPane.setDividerPositions(0.4);
+        splitPane.setDividerPositions(0.45);
         VBox.setVgrow(splitPane, Priority.ALWAYS);
 
         getChildren().addAll(header, splitPane);
@@ -129,42 +142,76 @@ public class ConfigSelectionPanel extends VBox {
 
     private void setupRecentConfigsTable() {
         TableView<ConfigEntry> tableView = recentConfigsTable.getTableView();
+        
+        // Configure table to auto-resize columns
+        tableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
 
         TableColumn<ConfigEntry, String> nameColumn = new TableColumn<>("Name");
         nameColumn.setCellValueFactory(cellData ->
                 new SimpleStringProperty(cellData.getValue().getName()));
+        nameColumn.setMinWidth(100);
+        nameColumn.setPrefWidth(150);
+        nameColumn.setMaxWidth(250);
         tableView.getColumns().add(nameColumn);
 
         TableColumn<ConfigEntry, String> projectColumn = new TableColumn<>("Project");
         projectColumn.setCellValueFactory(cellData ->
                 new SimpleStringProperty(cellData.getValue().getProject()));
+        projectColumn.setMinWidth(100);
+        projectColumn.setPrefWidth(150);
+        projectColumn.setMaxWidth(250);
         tableView.getColumns().add(projectColumn);
 
         TableColumn<ConfigEntry, String> lastModifiedColumn = new TableColumn<>("Last Modified");
         lastModifiedColumn.setCellValueFactory(cellData ->
                 new SimpleStringProperty(cellData.getValue().getLastModified().format(DATE_FORMATTER)));
+        lastModifiedColumn.setMinWidth(120);
+        lastModifiedColumn.setPrefWidth(140);
+        lastModifiedColumn.setMaxWidth(160);
         tableView.getColumns().add(lastModifiedColumn);
 
         TableColumn<ConfigEntry, String> pathColumn = new TableColumn<>("Path");
         pathColumn.setCellValueFactory(cellData ->
                 new SimpleStringProperty(cellData.getValue().getProjectConfigPath().toString()));
+        pathColumn.setMinWidth(150);
+        pathColumn.setPrefWidth(300);
+        // Setup custom cell factory for text truncation with tooltip
+        pathColumn.setCellFactory(column -> new TableCell<ConfigEntry, String>() {
+            @Override
+            protected void updateItem(String path, boolean empty) {
+                super.updateItem(path, empty);
+                if (empty || path == null) {
+                    setText(null);
+                    setTooltip(null);
+                } else {
+                    setText(path);
+                    setStyle("-fx-text-overrun: ellipsis;");
+                    // Add tooltip for full path
+                    Tooltip tooltip = new Tooltip(path);
+                    setTooltip(tooltip);
+                }
+            }
+        });
         tableView.getColumns().add(pathColumn);
 
         // Add action column with load and delete buttons
         TableColumn<ConfigEntry, Void> actionColumn = new TableColumn<>("Actions");
+        actionColumn.setMinWidth(120);
+        actionColumn.setPrefWidth(140);
+        actionColumn.setMaxWidth(160);
         actionColumn.setCellFactory(param -> new TableCell<>() {
             private final Button loadButton = new Button("Load");
             private final Button deleteButton = new Button("Delete");
             private final HBox buttonBox = new HBox(5, loadButton, deleteButton);
 
             {
-                loadButton.getStyleClass().add("button-primary");
+                loadButton.getStyleClass().add(Styles.ACCENT);
                 loadButton.setOnAction(event -> {
                     ConfigEntry entry = getTableView().getItems().get(getIndex());
                     loadConfiguration(entry);
                 });
 
-                deleteButton.getStyleClass().add("button-danger");
+                deleteButton.getStyleClass().add(Styles.DANGER);
                 deleteButton.setOnAction(event -> {
                     ConfigEntry entry = getTableView().getItems().get(getIndex());
                     removeConfiguration(entry);

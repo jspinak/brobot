@@ -43,6 +43,19 @@ export default function Home() {
       <HomepageHeader />
       <main>
         <HomepageFeatures />
+        <section className={styles.aiSection}>
+          <div className="container">
+            <div className="row">
+              <div className="col col--12 text--center">
+                <h2>AI-Assisted Project Creation</h2>
+                <p>Let AI help you create your Brobot automation project quickly and easily.</p>
+                <Link className="button button--primary button--lg" to="/docs/preparing-folder-for-ai-project-creation">
+                  Learn How to Prepare Your Project for AI Assistance
+                </Link>
+              </div>
+            </div>
+          </div>
+        </section>
       </main>
     </Layout>
   );

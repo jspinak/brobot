@@ -49,7 +49,12 @@ import java.util.List;
  * @see ActionParameters
  * @see ActionOptions
  * @see ObjectCollection
+ * 
+ * @deprecated Since version 2.0, use {@link MultipleActionsObjectV2} with ActionConfig support,
+ *             or preferably migrate to {@link io.github.jspinak.brobot.action.ActionChainOptions}
+ *             which provides better action chaining with strategies and proper result flow.
  */
+@Deprecated(since = "1.1.0", forRemoval = true)
 @Getter
 public class MultipleActionsObject {
 
