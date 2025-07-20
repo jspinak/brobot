@@ -107,7 +107,7 @@ public String getId() {
         private String ownerStateName;
         private Long ownerStateId = 0L;
         private int timesActedOn;
-        private String string; // defined when build is called
+        private String string;
 
         public Builder setName(String name) {
             this.name = name;
@@ -129,9 +129,15 @@ public String getId() {
             return this;
         }
 
-        // String as param because it shouldn't be created without a string
-        public StateString build(String string) {
-            StateString stateString = new StateString(string);
+        public Builder setString(String string) {
+            this.string = string;
+            return this;
+        }
+
+        public StateString build() {
+            // Use empty string as default if setString() wasn't called
+            String stringValue = (string != null) ? string : "";
+            StateString stateString = new StateString(stringValue);
             stateString.name = name;
             stateString.searchRegion = searchRegion;
             stateString.ownerStateName = ownerStateName;

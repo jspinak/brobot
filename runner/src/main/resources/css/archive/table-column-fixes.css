@@ -1,0 +1,183 @@
+/* Specific fixes for table column overlapping issues */
+
+/* Force all table columns to respect minimum widths */
+.table-view .column-header {
+    -fx-min-height: 36px !important;
+    -fx-pref-height: 36px !important;
+    -fx-padding: 0 !important;
+}
+
+.table-view .column-header > .label {
+    -fx-padding: 8 12 8 12 !important;
+    -fx-min-width: -fx-computed !important;
+    -fx-text-overrun: ellipsis !important;
+    -fx-alignment: center-left !important;
+    -fx-font-weight: bold !important;
+}
+
+/* Ensure column header content doesn't overlap */
+.table-view .column-header-background {
+    -fx-padding: 0 !important;
+}
+
+.table-view .column-header-background .nested-column-header > .label {
+    -fx-padding: 8 12 8 12 !important;
+}
+
+/* Fix for the filler column */
+.table-view .filler {
+    -fx-background-color: -color-bg-subtle !important;
+}
+
+/* Specific fixes for Recent Configurations table */
+.recent-configurations-table .table-view {
+    -fx-padding: 0 !important;
+}
+
+.recent-configurations-table .column-header {
+    -fx-pref-width: -fx-computed !important;
+}
+
+/* Name column - ensure minimum space */
+.recent-configurations-table .table-column:nth-child(1) {
+    -fx-min-width: 120px !important;
+    -fx-pref-width: 150px !important;
+}
+
+/* Project column */
+.recent-configurations-table .table-column:nth-child(2) {
+    -fx-min-width: 120px !important;
+    -fx-pref-width: 150px !important;
+}
+
+/* Last Modified column */
+.recent-configurations-table .table-column:nth-child(3) {
+    -fx-min-width: 140px !important;
+    -fx-pref-width: 160px !important;
+}
+
+/* Path column */
+.recent-configurations-table .table-column:nth-child(4) {
+    -fx-min-width: 200px !important;
+    -fx-pref-width: 300px !important;
+}
+
+/* Actions column */
+.recent-configurations-table .table-column:nth-child(5) {
+    -fx-min-width: 140px !important;
+    -fx-pref-width: 160px !important;
+}
+
+/* Fix column resize policy */
+.table-view {
+    -fx-column-resize-policy: constrained-resize !important;
+}
+
+/* Ensure proper spacing between column headers */
+.table-view .column-drag-header {
+    -fx-spacing: 0 !important;
+}
+
+/* Fix for nested columns if any */
+.table-view .nested-column-header {
+    -fx-padding: 0 !important;
+}
+
+/* Column dividers */
+.table-view .column-header .column-header-divider {
+    -fx-background-color: -color-border-default !important;
+    -fx-padding: 0 1 0 0 !important;
+}
+
+/* Fix tab header overlapping */
+.tab-pane > .tab-header-area > .headers-region > .tab {
+    -fx-min-width: 100px !important;
+    -fx-padding: 8 20 8 20 !important;
+}
+
+.tab-pane > .tab-header-area > .headers-region {
+    -fx-spacing: 0 !important;
+}
+
+/* Fix for the tab labels */
+.tab .tab-label {
+    -fx-padding: 0 !important;
+    -fx-text-overrun: ellipsis !important;
+    -fx-alignment: center !important;
+}
+
+/* Ensure Configuration Details panel labels don't overlap */
+.configuration-details .form-label {
+    -fx-min-width: 120px !important;
+    -fx-text-overrun: ellipsis !important;
+}
+
+/* Fix pagination controls spacing */
+.pagination-control {
+    -fx-spacing: 12px !important;
+}
+
+.pagination-control .label {
+    -fx-min-width: -fx-computed !important;
+    -fx-padding: 0 8 0 8 !important;
+}
+
+/* Fix search box layout */
+.search-box .label {
+    -fx-min-width: 60px !important;
+    -fx-padding: 0 8 0 0 !important;
+}
+
+/* Tree view fixes for ConfigBrowserPanel */
+.tree-view .tree-cell {
+    -fx-padding: 4 8 4 8 !important;
+    -fx-min-height: 28px !important;
+}
+
+.tree-view .tree-cell > .tree-disclosure-node {
+    -fx-padding: 0 4 0 0 !important;
+}
+
+/* Split pane divider fix */
+.split-pane > .split-pane-divider {
+    -fx-background-color: -color-border-default !important;
+    -fx-padding: 0 2 0 2 !important;
+}
+
+/* Card headers should not overlap content */
+.card .card-header {
+    -fx-padding: 12 16 12 16 !important;
+    -fx-min-height: 40px !important;
+}
+
+.card .card-title {
+    -fx-text-overrun: ellipsis !important;
+}
+
+/* Status bar fixes for overlapping path labels */
+.status-bar {
+    -fx-min-height: 32px !important;
+    -fx-pref-height: 32px !important;
+}
+
+.status-bar > * {
+    -fx-min-width: -fx-computed !important;
+}
+
+.status-bar .separator {
+    -fx-padding: 0 12 0 12 !important;
+}
+
+/* Fix toolbar button spacing */
+.tool-bar {
+    -fx-spacing: 8px !important;
+}
+
+.tool-bar .button {
+    -fx-min-width: 80px !important;
+}
+
+.tool-bar .label {
+    -fx-padding: 0 8 0 8 !important;
+    -fx-min-width: -fx-computed !important;
+}

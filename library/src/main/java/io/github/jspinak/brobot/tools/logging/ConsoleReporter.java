@@ -5,6 +5,8 @@ import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.model.state.StateObject;
 import io.github.jspinak.brobot.model.state.StateObjectMetadata;
 import io.github.jspinak.brobot.tools.logging.ansi.AnsiColor;
+import io.github.jspinak.brobot.logging.unified.BrobotLogger;
+import io.github.jspinak.brobot.logging.unified.LogEvent;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -107,7 +109,23 @@ public class ConsoleReporter {
      * Prevents console flooding when many matches are found.
      */
     public static int MaxMockMatchesFindAll = 10;
+    
+    /**
+     * Static instance of BrobotLogger for unified logging.
+     * This is set by Spring during application initialization.
+     */
+    private static BrobotLogger brobotLogger;
 
+    /**
+     * Sets the BrobotLogger instance to use for unified logging.
+     * This is called during Spring initialization.
+     * 
+     * @param logger the BrobotLogger instance
+     */
+    public static void setBrobotLogger(BrobotLogger logger) {
+        brobotLogger = logger;
+    }
+    
     /**
      * Checks if the specified level meets the minimum reporting threshold.
      * 
@@ -158,10 +176,32 @@ public class ConsoleReporter {
      * @return always returns true for chaining
      */
     public static boolean print(Match match, String stateObjectName, String action) {
-        if (minReportingLevel(OutputLevel.LOW))
-            System.out.format("%s: %s ", action, stateObjectName);
-        if (minReportingLevel(OutputLevel.HIGH))
-            System.out.format("%s: %s, match=%s ", action, stateObjectName, match.toString());
+        if (brobotLogger != null) {
+            // Use unified logging system
+            if (minReportingLevel(OutputLevel.LOW)) {
+                var logBuilder = brobotLogger.log()
+                    .type(LogEvent.Type.ACTION)
+                    .observation(String.format("%s: %s", action, stateObjectName))
+                    .metadata("action", action)
+                    .metadata("target", stateObjectName);
+                
+                if (minReportingLevel(OutputLevel.HIGH) && match != null) {
+                    logBuilder.metadata("match", match.toString())
+                              .metadata("matchX", match.x())
+                              .metadata("matchY", match.y())
+                              .metadata("matchW", match.w())
+                              .metadata("matchH", match.h());
+                }
+                
+                logBuilder.log();
+            }
+        } else {
+            // Fallback to direct console output
+            if (minReportingLevel(OutputLevel.LOW))
+                System.out.format("%s: %s ", action, stateObjectName);
+            if (minReportingLevel(OutputLevel.HIGH))
+                System.out.format("%s: %s, match=%s ", action, stateObjectName, match.toString());
+        }
         return true;
     }
 
@@ -173,7 +213,15 @@ public class ConsoleReporter {
      */
     public static boolean print(String str) {
         if (!minReportingLevel(OutputLevel.HIGH)) return false;
-        System.out.format("%s", str);
+        
+        if (brobotLogger != null) {
+            brobotLogger.log()
+                .observation(str)
+                .level(LogEvent.Level.DEBUG)
+                .log();
+        } else {
+            System.out.format("%s", str);
+        }
         return true;
     }
 
@@ -233,7 +281,15 @@ public class ConsoleReporter {
      */
     public static boolean println(String str) {
         if (!minReportingLevel(OutputLevel.HIGH)) return false;
-        System.out.println(str);
+        
+        if (brobotLogger != null) {
+            brobotLogger.log()
+                .observation(str)
+                .level(LogEvent.Level.DEBUG)
+                .log();
+        } else {
+            System.out.println(str);
+        }
         return true;
     }
 
@@ -259,7 +315,16 @@ public class ConsoleReporter {
      */
     public static boolean println(OutputLevel outputLevel, String str) {
         if (!minReportingLevel(outputLevel)) return false;
-        System.out.println(str);
+        
+        if (brobotLogger != null) {
+            LogEvent.Level level = outputLevel == OutputLevel.LOW ? LogEvent.Level.INFO : LogEvent.Level.DEBUG;
+            brobotLogger.log()
+                .observation(str)
+                .level(level)
+                .log();
+        } else {
+            System.out.println(str);
+        }
         return true;
     }
 

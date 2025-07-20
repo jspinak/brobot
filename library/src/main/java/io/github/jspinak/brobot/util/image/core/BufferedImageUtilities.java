@@ -2,8 +2,12 @@ package io.github.jspinak.brobot.util.image.core;
 
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.config.ExecutionEnvironment;
+import io.github.jspinak.brobot.config.SmartImageLoader;
 import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
 import io.github.jspinak.brobot.util.file.FilenameUtils;
+import io.github.jspinak.brobot.monitor.MonitorManager;
+import io.github.jspinak.brobot.config.BrobotProperties;
+import io.github.jspinak.brobot.util.image.capture.ScreenUtilities;
 
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -11,6 +15,8 @@ import org.sikuli.script.Pattern;
 import org.sikuli.script.Screen;
 import org.sikuli.script.ScreenImage;
 import org.springframework.stereotype.Component;
+import org.springframework.beans.factory.annotation.Autowired;
+import lombok.extern.slf4j.Slf4j;
 import java.util.Base64;
 
 import javax.imageio.ImageIO;
@@ -24,6 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+@Slf4j
 /**
  * Comprehensive BufferedImage operations for the Brobot GUI automation framework.
  * 
@@ -84,6 +91,44 @@ import java.util.Objects;
  */
 @Component
 public class BufferedImageUtilities {
+    
+    @Autowired(required = false)
+    private MonitorManager monitorManager;
+    
+    @Autowired(required = false)
+    private BrobotProperties properties;
+    
+    @Autowired(required = false)
+    private SmartImageLoader smartImageLoader;
+    
+    private static BufferedImageUtilities instance;
+    
+    @Autowired
+    public BufferedImageUtilities() {
+        instance = this;
+    }
+    
+    /**
+     * Get Screen object for a specific operation with monitor logging
+     */
+    private Screen getScreenForOperation(String operationName) {
+        Screen screen = null;
+        
+        if (monitorManager != null) {
+            screen = monitorManager.getScreen(operationName);
+        }
+        
+        if (screen == null) {
+            screen = new Screen(); // Fallback to primary
+        }
+        
+        // Log monitor info if enabled
+        if (properties != null && properties.getMonitor().isLogMonitorInfo()) {
+            log.info("Using monitor {} for {} operation", screen.getID(), operationName);
+        }
+        
+        return screen;
+    }
 
     /**
      * Creates a new SikuliX Pattern and retrieves the BufferedImage from this Pattern.
@@ -91,16 +136,42 @@ public class BufferedImageUtilities {
      * @return the BufferedImage from file
      */
     public static BufferedImage getBuffImgFromFile(String path) {
+        // Try SmartImageLoader first if available
+        if (instance != null && instance.smartImageLoader != null) {
+            try {
+                BufferedImage image = instance.smartImageLoader.loadImage(path);
+                if (image != null) {
+                    return image;
+                }
+            } catch (Exception e) {
+                ConsoleReporter.println("SmartImageLoader failed for " + path + ": " + e.getMessage());
+            }
+        }
+        
+        // Fall back to original implementation
         ExecutionEnvironment env = ExecutionEnvironment.getInstance();
         
-        if (env.shouldSkipSikuliX()) {
-            // In headless or mock mode, use direct file reading
-            return getBuffImgDirectly(path);
+        // In mock mode, always use dummy images
+        if (env.isMockMode()) {
+            return new BufferedImage(100, 100, BufferedImage.TYPE_INT_RGB);
         }
-        Pattern sikuliPattern = new Pattern(path);
-        BufferedImage bi = sikuliPattern.getBImage();
-        if (bi == null) ConsoleReporter.println(path + " is invalid. The absolute path is: " + new File(path).getAbsolutePath());
-        return bi;
+        
+        // Try SikuliX Pattern first if we have display
+        if (env.hasDisplay()) {
+            try {
+                Pattern sikuliPattern = new Pattern(path);
+                BufferedImage bi = sikuliPattern.getBImage();
+                if (bi != null) {
+                    return bi;
+                }
+                ConsoleReporter.println("SikuliX Pattern returned null for: " + path);
+            } catch (Exception e) {
+                ConsoleReporter.println("SikuliX Pattern failed for " + path + ": " + e.getMessage());
+            }
+        }
+        
+        // Fall back to direct file reading
+        return getBuffImgDirectly(path);
     }
 
     /**
@@ -111,10 +182,63 @@ public class BufferedImageUtilities {
      * @return the BufferedImage from an image on file
      */
     public static BufferedImage getBuffImgDirectly(String path) {
-        File f = new File(FilenameUtils.addPngExtensionIfNeeded(path));
+        String pathWithExtension = FilenameUtils.addPngExtensionIfNeeded(path);
+        File f = new File(pathWithExtension);
+        
+        // If file doesn't exist and path is relative, try common locations
+        if (!f.exists() && !f.isAbsolute()) {
+            // Try "images" folder first (common convention)
+            File imagesFile = new File("images", pathWithExtension);
+            if (imagesFile.exists()) {
+                f = imagesFile;
+                ConsoleReporter.println("Found in images folder: " + f.getAbsolutePath());
+            } else {
+                // Skip ImagePath.getPaths() since the return type is complex
+                // We'll rely on bundle path and common locations
+                
+                // If still not found, try bundle path
+                if (!f.exists()) {
+                    try {
+                        String bundlePath = org.sikuli.script.ImagePath.getBundlePath();
+                        if (bundlePath != null && !bundlePath.isEmpty()) {
+                            File bundleFile = new File(bundlePath, pathWithExtension);
+                            if (bundleFile.exists()) {
+                                f = bundleFile;
+                                ConsoleReporter.println("Found in SikuliX bundle path: " + f.getAbsolutePath());
+                            }
+                        }
+                    } catch (Exception e) {
+                        // Ignore and continue with original file
+                    }
+                }
+            }
+        }
+        
+        if (!f.exists()) {
+            ConsoleReporter.println("Image file not found: " + f.getAbsolutePath());
+            ConsoleReporter.println("Searched in:");
+            ConsoleReporter.println("  - Working directory images: " + new File("images").getAbsolutePath());
+            try {
+                String bundlePath = org.sikuli.script.ImagePath.getBundlePath();
+                if (bundlePath != null) {
+                    ConsoleReporter.println("  - SikuliX bundle path: " + bundlePath);
+                }
+            } catch (Exception e) {
+                ConsoleReporter.println("  - Could not get bundle path");
+            }
+            return null;
+        }
+        
+        ConsoleReporter.println("Loading image from: " + f.getAbsolutePath());
+        
         try {
-            return ImageIO.read(Objects.requireNonNull(f));
+            BufferedImage img = ImageIO.read(f);
+            if (img == null) {
+                ConsoleReporter.println("ImageIO.read returned null for: " + f.getAbsolutePath());
+            }
+            return img;
         } catch (IOException e) {
+            ConsoleReporter.println("IOException reading image: " + e.getMessage());
             throw new RuntimeException(e);
         }
     }
@@ -128,7 +252,15 @@ public class BufferedImageUtilities {
                                    region.h() > 0 ? region.h() : 1080, 
                                    BufferedImage.TYPE_INT_RGB);
         }
-        return new Screen().capture(region.sikuli()).getImage();
+        
+        // Use ScreenUtilities which has monitor support
+        Screen screen = ScreenUtilities.getScreen("find");
+        if (screen == null) {
+            screen = new Screen(); // Fallback to primary monitor
+        } else {
+            log.debug("Capturing from monitor {} for region: {}", screen.getID(), region);
+        }
+        return screen.capture(region.sikuli()).getImage();
     }
 
     public BufferedImage getBuffImgFromScreen(Region region) {
@@ -140,7 +272,10 @@ public class BufferedImageUtilities {
                                    region.h() > 0 ? region.h() : 1080, 
                                    BufferedImage.TYPE_INT_RGB);
         }
-        return new Screen().capture(region.sikuli()).getImage();
+        
+        // Use monitor-aware screen selection
+        Screen screen = getScreenForOperation("find");
+        return screen.capture(region.sikuli()).getImage();
     }
 
     public List<BufferedImage> getBuffImgsFromScreen(List<Region> regions) {
@@ -155,7 +290,10 @@ public class BufferedImageUtilities {
                                     BufferedImage.TYPE_INT_RGB)));
             return bufferedImages;
         }
-        ScreenImage screenImage = new Screen().capture(); // uses IRobot
+        
+        // Use monitor-aware screen selection
+        Screen screen = getScreenForOperation("find-multiple");
+        ScreenImage screenImage = screen.capture(); // uses IRobot
         List<BufferedImage> bufferedImages = new ArrayList<>();
         regions.forEach(region -> bufferedImages.add(
                 screenImage.getSub(new Rectangle(region.x(), region.y(), region.w(), region.h())).getImage()));

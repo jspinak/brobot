@@ -1,11 +1,15 @@
 package io.github.jspinak.brobot.runner.events;
 
-import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
 
 /**
  * Event representing a configuration-related event.
  */
-@Data
+@Getter
+@ToString(callSuper = true)
+@EqualsAndHashCode(callSuper = true)
 public class ConfigurationEvent extends BrobotEvent {
     private final String configName;
     private final String details;

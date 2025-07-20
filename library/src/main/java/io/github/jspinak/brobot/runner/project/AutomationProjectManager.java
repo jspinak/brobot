@@ -8,6 +8,8 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 /**
  * Manages the active project configuration in the Brobot framework.
  * 
@@ -129,5 +131,34 @@ public class AutomationProjectManager {
     public void loadProject(String json) throws ConfigurationException {
         // Direct deserialization
         this.activeProject = jsonParser.convertJson(json, AutomationProject.class);
+    }
+    
+    /**
+     * Gets the list of available projects.
+     * For now, returns a simple list with a default project.
+     * 
+     * @return List of available project names
+     */
+    public List<String> getAvailableProjects() {
+        // TODO: Implement actual project discovery from filesystem
+        return List.of("Default Project", "Test Project");
+    }
+    
+    /**
+     * Gets the currently active project.
+     * 
+     * @return The current AutomationProject or null if none is loaded
+     */
+    public AutomationProject getCurrentProject() {
+        return activeProject;
+    }
+    
+    /**
+     * Refreshes the list of available projects.
+     * For now, this is a no-op.
+     */
+    public void refreshProjects() {
+        // TODO: Implement actual refresh logic
+        // This would scan the projects directory and update available projects
     }
 }

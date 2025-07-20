@@ -13,10 +13,10 @@ import javafx.scene.control.ProgressBar;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
 import javafx.util.Duration;
 import lombok.Getter;
+import io.github.jspinak.brobot.runner.ui.components.base.BrobotCard;
+import atlantafx.base.theme.Styles;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -35,7 +35,7 @@ import java.time.temporal.ChronoUnit;
  * </ul>
  * </p>
  */
-public class ExecutionStatusPanel extends VBox {
+public class ExecutionStatusPanel extends BrobotCard {
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm:ss");
 
     @Getter
@@ -59,13 +59,13 @@ public class ExecutionStatusPanel extends VBox {
      * Creates a new ExecutionStatusPanel.
      */
     public ExecutionStatusPanel() {
+        super("Execution Status");
         setupUI();
     }
 
     private void setupUI() {
-        setSpacing(10);
-        setPadding(new Insets(10));
-        setStyle("-fx-background-color: #f8f8f8; -fx-border-color: #ddd; -fx-border-radius: 5;");
+        VBox contentBox = new VBox(10);
+        contentBox.setPadding(new Insets(16));
 
         // Status indicator and label
         HBox statusRow = new HBox(10);
@@ -75,16 +75,17 @@ public class ExecutionStatusPanel extends VBox {
         statusIndicator.setFill(Color.LIGHTGRAY);
 
         statusLabel = new Label("Ready");
-        statusLabel.setFont(Font.font("System", FontWeight.BOLD, 14));
+        statusLabel.getStyleClass().addAll(Styles.TITLE_4, Styles.TEXT_BOLD);
 
         elapsedTimeLabel = new Label("00:00:00");
-        elapsedTimeLabel.setFont(Font.font("Monospaced", 14));
+        elapsedTimeLabel.getStyleClass().add("monospace");
+        elapsedTimeLabel.setStyle("-fx-font-family: monospace; -fx-font-size: 14px;");
 
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
         statusRow.getChildren().addAll(statusIndicator, statusLabel, spacer, 
-            new Label("Elapsed Time:"), elapsedTimeLabel);
+            createLabel("Elapsed Time:"), elapsedTimeLabel);
 
         // Progress bar
         progressBar = new ProgressBar(0);
@@ -95,18 +96,27 @@ public class ExecutionStatusPanel extends VBox {
         infoGrid.setHgap(10);
         infoGrid.setVgap(5);
 
-        infoGrid.add(new Label("Current Action:"), 0, 0);
+        infoGrid.add(createLabel("Current Action:"), 0, 0);
         currentActionLabel = new Label("None");
         infoGrid.add(currentActionLabel, 1, 0);
 
-        infoGrid.add(new Label("Current State:"), 0, 1);
+        infoGrid.add(createLabel("Current State:"), 0, 1);
         currentStateLabel = new Label("None");
         infoGrid.add(currentStateLabel, 1, 1);
 
         GridPane.setHgrow(currentActionLabel, Priority.ALWAYS);
         GridPane.setHgrow(currentStateLabel, Priority.ALWAYS);
 
-        getChildren().addAll(statusRow, progressBar, infoGrid);
+        contentBox.getChildren().addAll(statusRow, progressBar, infoGrid);
+        
+        // Add content box to card
+        addContent(contentBox);
+    }
+    
+    private Label createLabel(String text) {
+        Label label = new Label(text);
+        label.getStyleClass().add(Styles.TEXT_MUTED);
+        return label;
     }
 
     /**

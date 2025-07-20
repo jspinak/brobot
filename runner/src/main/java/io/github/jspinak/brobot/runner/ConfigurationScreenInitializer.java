@@ -33,7 +33,7 @@ public class ConfigurationScreenInitializer {
     /**
      * Registers configuration screens when the application is ready.
      */
-    @EventListener(ApplicationReadyEvent.class)
+    // @EventListener(ApplicationReadyEvent.class) // Disabled to prevent duplicate registration
     public void registerConfigurationScreens() {
         logger.info("Registering configuration screens");
 

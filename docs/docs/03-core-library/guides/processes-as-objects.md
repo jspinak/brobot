@@ -80,7 +80,7 @@ The object-oriented approach makes it easy to create complex, reusable actions:
 public class SmartClick {
     private final ActionService actionService;
     
-    public boolean clickWithRetry(StateImageObject target, int maxRetries) {
+    public boolean clickWithRetry(StateImage target, int maxRetries) {
         for (int i = 0; i < maxRetries; i++) {
             // First, find the target
             PatternFindOptions findOptions = PatternFindOptions.forPreciseSearch();

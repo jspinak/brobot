@@ -1,0 +1,208 @@
+package io.github.jspinak.brobot.manageStates;
+import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.action.ObjectCollection;
+import io.github.jspinak.brobot.navigation.transition.TaskSequenceStateTransition;
+import io.github.jspinak.brobot.runner.dsl.model.TaskSequence;
+import io.github.jspinak.brobot.runner.dsl.model.ActionStep;
+import io.github.jspinak.brobot.model.transition.StateTransition;
+import io.github.jspinak.brobot.runner.json.parsing.ConfigurationParser;
+import io.github.jspinak.brobot.runner.json.parsing.exception.ConfigurationException;
+import io.github.jspinak.brobot.runner.json.utils.JsonUtils;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.TestPropertySource;
+
+import java.util.*;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+@SpringBootTest
+@TestPropertySource(properties = {"java.awt.headless=false"})
+public class ActionDefinitionStateTransitionJsonParserTest {
+
+    @Autowired
+    private ConfigurationParser jsonParser;
+
+    @Autowired
+    private JsonUtils jsonUtils;
+
+    /**
+     * Test parsing a basic ActionDefinitionStateTransition from JSON
+     */
+    @Test
+    public void testParseBasicTransition() throws ConfigurationException {
+        String json = """
+                {
+                  "type": "actionDefinition",
+                  "actionDefinition": {
+                    "steps": [
+                      {
+                        "actionOptions": {
+                          "action": "CLICK"
+                        },
+                        "objectCollection": {
+                          "stateImageIds": [101]
+                        }
+                      }
+                    ]
+                  },
+                  "staysVisibleAfterTransition": "TRUE",
+                  "activate": [2, 3],
+                  "exit": [1],
+                  "score": 5,
+                  "timesSuccessful": 10
+                }
+                """;
+
+        JsonNode jsonNode = jsonParser.parseJson(json);
+        TaskSequenceStateTransition transition = jsonParser.convertJson(jsonNode, TaskSequenceStateTransition.class);
+
+        assertNotNull(transition);
+
+        // Verify action definition
+        assertTrue(transition.getTaskSequenceOptional().isPresent());
+        assertNotNull(transition.getTaskSequenceOptional().get().getSteps());
+        assertEquals(1, transition.getTaskSequenceOptional().get().getSteps().size());
+
+        // Verify basic properties
+        assertEquals(StateTransition.StaysVisible.TRUE, transition.getStaysVisibleAfterTransition());
+        assertEquals(5, transition.getScore());
+        assertEquals(10, transition.getTimesSuccessful());
+
+        // Verify activate and exit sets
+        assertNotNull(transition.getActivate());
+        assertEquals(2, transition.getActivate().size());
+        assertTrue(transition.getActivate().contains(2L));
+        assertTrue(transition.getActivate().contains(3L));
+
+        assertNotNull(transition.getExit());
+        assertEquals(1, transition.getExit().size());
+        assertTrue(transition.getExit().contains(1L));
+    }
+
+    /**
+     * Test parsing an ActionDefinitionStateTransition with minimal properties
+     */
+    @Test
+    public void testParseMinimalTransition() throws ConfigurationException {
+        String json = """
+                {
+                  "type": "actionDefinition",
+                  "actionDefinition": {
+                    "steps": []
+                  },
+                  "activate": [5]
+                }
+                """;
+
+        JsonNode jsonNode = jsonParser.parseJson(json);
+        TaskSequenceStateTransition transition = jsonParser.convertJson(jsonNode, TaskSequenceStateTransition.class);
+
+        assertNotNull(transition);
+
+        // Verify action definition
+        assertTrue(transition.getTaskSequenceOptional().isPresent());
+        assertNotNull(transition.getTaskSequenceOptional().get().getSteps());
+        assertEquals(0, transition.getTaskSequenceOptional().get().getSteps().size());
+
+        // Verify default properties
+        assertEquals(StateTransition.StaysVisible.NONE, transition.getStaysVisibleAfterTransition());
+        assertEquals(0, transition.getScore());
+        assertEquals(0, transition.getTimesSuccessful());
+
+        // Verify activate and exit sets
+        assertNotNull(transition.getActivate());
+        assertEquals(1, transition.getActivate().size());
+        assertTrue(transition.getActivate().contains(5L));
+
+        assertNotNull(transition.getExit());
+        assertEquals(0, transition.getExit().size());
+    }
+
+    /**
+     * Test serializing and deserializing an ActionDefinitionStateTransition
+     */
+    @Test
+    public void testSerializeDeserializeTransition() throws ConfigurationException {
+        // Create transition manually
+        TaskSequenceStateTransition transition = new TaskSequenceStateTransition();
+
+        // Create action definition
+        TaskSequence actionDef = new TaskSequence();
+        ActionStep step = new ActionStep();
+        ActionOptions options = new ActionOptions();
+        options.setAction(PatternFindOptions);
+        step.setActionOptions(options);
+        step.setObjectCollection(new ObjectCollection());
+        actionDef.addStep(step);
+
+        transition.setActionDefinition(actionDef);
+        transition.setStaysVisibleAfterTransition(StateTransition.StaysVisible.FALSE);
+        transition.setScore(3);
+        transition.setTimesSuccessful(7);
+
+        // Set activate and exit sets
+        Set<Long> activate = new HashSet<>(Arrays.asList(10L, 20L));
+        Set<Long> exit = new HashSet<>(List.of(5L));
+        transition.setActivate(activate);
+        transition.setExit(exit);
+
+        // Serialize
+        String json = jsonUtils.toJsonSafe(transition);
+        System.out.println("DEBUG: Serialized transition: " + json);
+
+        // Deserialize
+        JsonNode jsonNode = jsonParser.parseJson(json);
+        TaskSequenceStateTransition deserializedTransition =
+                jsonParser.convertJson(jsonNode, TaskSequenceStateTransition.class);
+
+        // Verify
+        assertNotNull(deserializedTransition);
+
+        // Verify action definition
+        assertTrue(deserializedTransition.getTaskSequenceOptional().isPresent());
+        assertNotNull(deserializedTransition.getTaskSequenceOptional().get().getSteps());
+        assertEquals(1, deserializedTransition.getTaskSequenceOptional().get().getSteps().size());
+
+        // Verify properties
+        assertEquals(StateTransition.StaysVisible.FALSE, deserializedTransition.getStaysVisibleAfterTransition());
+        assertEquals(3, deserializedTransition.getScore());
+        assertEquals(7, deserializedTransition.getTimesSuccessful());
+
+        // Verify activate and exit sets
+        assertNotNull(deserializedTransition.getActivate());
+        assertEquals(2, deserializedTransition.getActivate().size());
+        assertTrue(deserializedTransition.getActivate().contains(10L));
+        assertTrue(deserializedTransition.getActivate().contains(20L));
+
+        assertNotNull(deserializedTransition.getExit());
+        assertEquals(1, deserializedTransition.getExit().size());
+        assertTrue(deserializedTransition.getExit().contains(5L));
+    }
+
+    /**
+     * Test the getActionDefinition method behavior
+     */
+    @Test
+    public void testGetActionDefinition() {
+        // Create transition with actionDefinition
+        TaskSequenceStateTransition transition = new TaskSequenceStateTransition();
+        TaskSequence actionDef = new TaskSequence();
+        transition.setActionDefinition(actionDef);
+
+        // Test getActionDefinition returns correct Optional
+        Optional<TaskSequence> result = transition.getTaskSequenceOptional();
+        assertTrue(result.isPresent());
+        assertSame(actionDef, result.get());
+
+        // Test with null actionDefinition
+        transition.setActionDefinition(null);
+        result = transition.getTaskSequenceOptional();
+        assertFalse(result.isPresent());
+    }
+}

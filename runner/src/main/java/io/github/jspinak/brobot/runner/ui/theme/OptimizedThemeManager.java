@@ -6,7 +6,6 @@ import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.Scene;
-import javafx.stage.Stage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Primary;
@@ -22,7 +21,6 @@ import java.util.concurrent.*;
  */
 @Slf4j
 @Component
-@Primary
 @RequiredArgsConstructor
 public class OptimizedThemeManager extends ThemeManager {
 
@@ -33,6 +31,9 @@ public class OptimizedThemeManager extends ThemeManager {
     private static final String LAYOUTS_CSS = "/css/layouts.css";
     private static final String LIGHT_THEME_CSS = "/css/themes/light-theme.css";
     private static final String DARK_THEME_CSS = "/css/themes/dark-theme.css";
+    private static final String THEME_TRANSITION_FIX_CSS = "/css/theme-transition-fix.css";
+    private static final String THEME_TEXT_FIX_CSS = "/css/theme-text-fix.css";
+    private static final String REMOVE_BORDERS_CSS = "/css/remove-excessive-borders.css";
 
     private final ObjectProperty<Theme> currentTheme = new SimpleObjectProperty<>(Theme.LIGHT);
     private final Map<Theme, CompletableFuture<List<URL>>> themeCssFutures = new EnumMap<>(Theme.class);
@@ -120,6 +121,9 @@ public class OptimizedThemeManager extends ThemeManager {
             addResourceIfExists(urls, BASE_CSS);
             addResourceIfExists(urls, COMPONENTS_CSS);
             addResourceIfExists(urls, LAYOUTS_CSS);
+            addResourceIfExists(urls, THEME_TRANSITION_FIX_CSS);
+            addResourceIfExists(urls, THEME_TEXT_FIX_CSS);
+            addResourceIfExists(urls, REMOVE_BORDERS_CSS);
             
             // Load theme-specific CSS
             String themeFile = theme == Theme.LIGHT ? LIGHT_THEME_CSS : DARK_THEME_CSS;
@@ -143,7 +147,10 @@ public class OptimizedThemeManager extends ThemeManager {
 
     @Override
     public void registerScene(Scene scene) {
-        if (scene == null) return;
+        if (scene == null) {
+            log.warn("Attempted to register null scene");
+            return;
+        }
         
         registeredScenes.add(scene);
         
@@ -167,6 +174,9 @@ public class OptimizedThemeManager extends ThemeManager {
         
         Theme oldTheme = currentTheme.get();
         currentTheme.set(theme);
+        
+        // Also update parent's currentTheme
+        super.currentThemeProperty().set(theme);
         
         // Check if theme CSS is loaded
         CompletableFuture<List<URL>> future = themeCssFutures.get(theme);
@@ -226,11 +236,22 @@ public class OptimizedThemeManager extends ThemeManager {
     
     private void updateSceneStylesheets(Scene scene, List<URL> cssUrls) {
         scene.getStylesheets().clear();
-        for (URL url : cssUrls) {
-            scene.getStylesheets().add(url.toExternalForm());
-        }
+        cssUrls.stream()
+            .filter(Objects::nonNull)
+            .map(URL::toExternalForm)
+            .forEach(scene.getStylesheets()::add);
+            
+        // Log what CSS files are loaded
+        log.debug("Updated scene stylesheets for theme {}: {}", 
+            currentTheme.get(), 
+            scene.getStylesheets());
     }
 
+    @Override
+    public Theme getCurrentTheme() {
+        return currentTheme.get();
+    }
+    
     @Override
     public void addThemeChangeListener(IThemeChangeListener listener) {
         if (listener != null) {
@@ -246,8 +267,15 @@ public class OptimizedThemeManager extends ThemeManager {
     /**
      * Preload a specific theme's CSS resources.
      * Useful for pre-warming themes that will likely be used.
+     * 
+     * @param theme The theme to preload
+     * @return CompletableFuture that completes when the theme is loaded
      */
     public CompletableFuture<Void> preloadTheme(Theme theme) {
+        if (theme == null) {
+            return CompletableFuture.completedFuture(null);
+        }
+        
         CompletableFuture<List<URL>> future = themeCssFutures.get(theme);
         if (future != null) {
             return future.thenApply(urls -> null);

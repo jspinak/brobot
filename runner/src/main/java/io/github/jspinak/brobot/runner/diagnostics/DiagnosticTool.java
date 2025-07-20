@@ -1,45 +1,35 @@
 package io.github.jspinak.brobot.runner.diagnostics;
 
-import lombok.Data;
-
+import io.github.jspinak.brobot.runner.diagnostics.services.*;
 import io.github.jspinak.brobot.runner.errorhandling.ErrorHandler;
-import io.github.jspinak.brobot.runner.errorhandling.ErrorStatistics;
-import io.github.jspinak.brobot.runner.performance.PerformanceProfiler;
-import io.github.jspinak.brobot.runner.performance.ThreadManagementOptimizer;
+import io.github.jspinak.brobot.runner.common.diagnostics.DiagnosticCapable;
+import io.github.jspinak.brobot.runner.common.diagnostics.DiagnosticInfo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import jakarta.annotation.PostConstruct;
-import java.io.*;
-import java.lang.management.*;
-import java.nio.file.Files;
+import java.io.IOException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Comprehensive diagnostic tool for troubleshooting application issues.
- * Collects system information, performance metrics, and error data.
+ * Acts as an orchestrator for various diagnostic services.
  */
 @Slf4j
 @Component
 @RequiredArgsConstructor
-@Data
-public class DiagnosticTool {
+public class DiagnosticTool implements DiagnosticCapable {
 
-    private final PerformanceProfiler performanceProfiler;
+    private final SystemInfoCollectorService systemInfoService;
+    private final MemoryDiagnosticService memoryService;
+    private final ThreadDiagnosticService threadService;
+    private final PerformanceDiagnosticService performanceService;
+    private final HealthCheckService healthCheckService;
+    private final DiagnosticReportService reportService;
     private final ErrorHandler errorHandler;
-    private final ThreadManagementOptimizer threadOptimizer;
-    
-    private final RuntimeMXBean runtimeBean = ManagementFactory.getRuntimeMXBean();
-    private final OperatingSystemMXBean osBean = ManagementFactory.getOperatingSystemMXBean();
-    private final MemoryMXBean memoryBean = ManagementFactory.getMemoryMXBean();
-    private final ThreadMXBean threadBean = ManagementFactory.getThreadMXBean();
-    private final List<GarbageCollectorMXBean> gcBeans = ManagementFactory.getGarbageCollectorMXBeans();
     
     @PostConstruct
     public void initialize() {
@@ -48,395 +38,239 @@ public class DiagnosticTool {
     
     /**
      * Run a complete system diagnostic and return the report.
+     * 
+     * @return Complete diagnostic report
      */
     public DiagnosticReport runDiagnostics() {
-        log.info("Running system diagnostics...");
+        log.info("Running comprehensive diagnostics...");
         
-        DiagnosticReport report = DiagnosticReport.builder()
-            .timestamp(LocalDateTime.now())
-            .systemInfo(collectSystemInfo())
-            .memoryInfo(collectMemoryInfo())
-            .threadInfo(collectThreadInfo())
-            .performanceMetrics(collectPerformanceMetrics())
-            .errorStatistics(collectErrorStatistics())
-            .environmentVariables(collectEnvironmentVariables())
-            .systemProperties(collectSystemProperties())
-            .build();
+        try {
+            DiagnosticReport report = DiagnosticReport.builder()
+                .timestamp(LocalDateTime.now())
+                .systemInfo(systemInfoService.collectSystemInfo())
+                .memoryInfo(memoryService.collectMemoryInfo())
+                .threadInfo(threadService.collectThreadInfo())
+                .performanceMetrics(performanceService.collectPerformanceMetrics())
+                .errorStatistics(errorHandler.getStatistics())
+                .healthCheckResult(healthCheckService.performHealthCheck())
+                .environmentVariables(collectEnvironmentVariables())
+                .systemProperties(collectSystemProperties())
+                .build();
+                
+            log.info("Diagnostics complete");
+            return report;
             
-        log.info("Diagnostics complete");
-        return report;
+        } catch (Exception e) {
+            log.error("Error running diagnostics", e);
+            throw new RuntimeException("Failed to run diagnostics", e);
+        }
     }
     
     /**
      * Run a quick health check.
+     * 
+     * @return Health check result
      */
     public HealthCheckResult performHealthCheck() {
-        List<HealthCheckItem> checks = new ArrayList<>();
-        
-        // Memory check
-        checks.add(checkMemoryHealth());
-        
-        // Thread check
-        checks.add(checkThreadHealth());
-        
-        // GC check
-        checks.add(checkGCHealth());
-        
-        // Error rate check
-        checks.add(checkErrorRate());
-        
-        // Disk space check
-        checks.add(checkDiskSpace());
-        
-        HealthStatus overallStatus = checks.stream()
-            .map(HealthCheckItem::status)
-            .max(Comparator.naturalOrder())
-            .orElse(HealthStatus.HEALTHY);
-            
-        return new HealthCheckResult(overallStatus, checks);
+        log.debug("Performing quick health check");
+        return healthCheckService.performHealthCheck();
     }
     
     /**
      * Export diagnostic report to file.
+     * 
+     * @param report The diagnostic report
+     * @param outputDir Directory to save the report
+     * @return Path to the saved report
+     * @throws IOException If unable to save the report
      */
     public Path exportDiagnostics(DiagnosticReport report, Path outputDir) throws IOException {
-        Files.createDirectories(outputDir);
-        
-        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
-        Path reportFile = outputDir.resolve("diagnostics_" + timestamp + ".txt");
-        
-        try (BufferedWriter writer = Files.newBufferedWriter(reportFile)) {
-            writer.write(formatReport(report));
+        log.info("Exporting diagnostics to: {}", outputDir);
+        return reportService.saveReport(report, outputDir);
+    }
+    
+    /**
+     * Export current diagnostics to file.
+     * 
+     * @param outputDir Directory to save the report
+     * @return Path to the saved report
+     * @throws IOException If unable to save the report
+     */
+    public Path exportCurrentDiagnostics(Path outputDir) throws IOException {
+        DiagnosticReport report = runDiagnostics();
+        return exportDiagnostics(report, outputDir);
+    }
+    
+    /**
+     * Get a summary of the current system state.
+     * 
+     * @return Summary string
+     */
+    public String getSystemSummary() {
+        try {
+            DiagnosticReport report = runDiagnostics();
+            return reportService.generateSummary(report);
+        } catch (Exception e) {
+            log.error("Error generating system summary", e);
+            return "Error generating summary: " + e.getMessage();
         }
-        
-        log.info("Diagnostic report exported to: {}", reportFile);
-        return reportFile;
     }
     
-    private SystemInfo collectSystemInfo() {
-        return SystemInfo.builder()
-            .osName(System.getProperty("os.name"))
-            .osVersion(System.getProperty("os.version"))
-            .osArch(System.getProperty("os.arch"))
-            .javaVersion(System.getProperty("java.version"))
-            .javaVendor(System.getProperty("java.vendor"))
-            .jvmName(runtimeBean.getVmName())
-            .jvmVersion(runtimeBean.getVmVersion())
-            .availableProcessors(osBean.getAvailableProcessors())
-            .systemLoadAverage(osBean.getSystemLoadAverage())
-            .uptime(runtimeBean.getUptime())
-            .startTime(new Date(runtimeBean.getStartTime()))
-            .build();
-    }
-    
-    private MemoryInfo collectMemoryInfo() {
-        MemoryUsage heapUsage = memoryBean.getHeapMemoryUsage();
-        MemoryUsage nonHeapUsage = memoryBean.getNonHeapMemoryUsage();
-        
-        Runtime runtime = Runtime.getRuntime();
-        
-        return MemoryInfo.builder()
-            .heapUsed(heapUsage.getUsed())
-            .heapMax(heapUsage.getMax())
-            .heapCommitted(heapUsage.getCommitted())
-            .nonHeapUsed(nonHeapUsage.getUsed())
-            .nonHeapMax(nonHeapUsage.getMax())
-            .nonHeapCommitted(nonHeapUsage.getCommitted())
-            .freeMemory(runtime.freeMemory())
-            .totalMemory(runtime.totalMemory())
-            .maxMemory(runtime.maxMemory())
-            .memoryPools(collectMemoryPools())
-            .build();
-    }
-    
-    private Map<String, MemoryPoolInfo> collectMemoryPools() {
-        Map<String, MemoryPoolInfo> pools = new HashMap<>();
-        
-        for (MemoryPoolMXBean pool : ManagementFactory.getMemoryPoolMXBeans()) {
-            MemoryUsage usage = pool.getUsage();
-            pools.put(pool.getName(), MemoryPoolInfo.builder()
-                .name(pool.getName())
-                .type(pool.getType().name())
-                .used(usage.getUsed())
-                .max(usage.getMax())
-                .committed(usage.getCommitted())
-                .build()
-            );
+    /**
+     * Get formatted diagnostic report as string.
+     * 
+     * @return Formatted report string
+     */
+    public String getFormattedReport() {
+        try {
+            DiagnosticReport report = runDiagnostics();
+            return reportService.formatReport(report);
+        } catch (Exception e) {
+            log.error("Error formatting report", e);
+            return "Error formatting report: " + e.getMessage();
         }
-        
-        return pools;
     }
     
-    private ThreadInfo collectThreadInfo() {
-        long[] deadlockedThreads = threadBean.findDeadlockedThreads();
-        
-        return ThreadInfo.builder()
-            .threadCount(threadBean.getThreadCount())
-            .peakThreadCount(threadBean.getPeakThreadCount())
-            .daemonThreadCount(threadBean.getDaemonThreadCount())
-            .totalStartedThreadCount(threadBean.getTotalStartedThreadCount())
-            .deadlockedThreads(deadlockedThreads != null ? deadlockedThreads.length : 0)
-            .threadStates(collectThreadStates())
-            .build();
+    /**
+     * Check if the system is healthy.
+     * 
+     * @return true if all health checks pass
+     */
+    public boolean isSystemHealthy() {
+        HealthCheckResult result = performHealthCheck();
+        return result.overallStatus() == HealthStatus.HEALTHY;
     }
     
-    private Map<Thread.State, Integer> collectThreadStates() {
-        Map<Thread.State, Integer> states = new EnumMap<>(Thread.State.class);
-        
-        for (java.lang.management.ThreadInfo info : threadBean.dumpAllThreads(false, false)) {
-            if (info != null) {
-                states.merge(info.getThreadState(), 1, Integer::sum);
-            }
-        }
-        
-        return states;
+    /**
+     * Get specific component health.
+     * 
+     * @param component Component name
+     * @return Health check item for the component
+     */
+    public HealthCheckItem getComponentHealth(String component) {
+        return healthCheckService.getComponentHealth(component);
     }
     
-    private PerformanceMetrics collectPerformanceMetrics() {
-        PerformanceProfiler.PerformanceReport perfReport = performanceProfiler.generateReport();
-        
-        // GC metrics
-        long totalGcCount = 0;
-        long totalGcTime = 0;
-        Map<String, GCInfo> gcInfo = new HashMap<>();
-        
-        for (GarbageCollectorMXBean gc : gcBeans) {
-            totalGcCount += gc.getCollectionCount();
-            totalGcTime += gc.getCollectionTime();
-            
-            gcInfo.put(gc.getName(), GCInfo.builder()
-                .name(gc.getName())
-                .collectionCount(gc.getCollectionCount())
-                .collectionTime(gc.getCollectionTime())
-                .build()
-            );
-        }
-        
-        return PerformanceMetrics.builder()
-            .performanceReport(perfReport.toString())
-            .gcTotalCount(totalGcCount)
-            .gcTotalTime(totalGcTime)
-            .gcDetails(gcInfo)
-            .cpuUsage(getCpuUsage())
-            .build();
+    /**
+     * Force garbage collection.
+     */
+    public void forceGarbageCollection() {
+        log.info("Forcing garbage collection");
+        memoryService.runGarbageCollection();
     }
     
-    private ErrorStatistics collectErrorStatistics() {
-        return errorHandler.getStatistics();
+    /**
+     * Get current memory usage percentage.
+     * 
+     * @return Heap usage percentage
+     */
+    public double getMemoryUsagePercentage() {
+        return memoryService.getHeapUsagePercentage();
+    }
+    
+    /**
+     * Get current thread count.
+     * 
+     * @return Active thread count
+     */
+    public int getThreadCount() {
+        ThreadDiagnosticInfo info = threadService.collectThreadInfo();
+        return info.threadCount();
+    }
+    
+    /**
+     * Check for deadlocked threads.
+     * 
+     * @return true if deadlocks detected
+     */
+    public boolean hasDeadlockedThreads() {
+        ThreadDiagnosticInfo info = threadService.collectThreadInfo();
+        return info.deadlockedThreads() > 0;
+    }
+    
+    /**
+     * Get GC overhead percentage.
+     * 
+     * @return GC overhead as percentage of runtime
+     */
+    public double getGCOverheadPercentage() {
+        return performanceService.getGCOverheadPercentage();
     }
     
     private Map<String, String> collectEnvironmentVariables() {
-        return new HashMap<>(System.getenv());
+        Map<String, String> filtered = new HashMap<>();
+        Map<String, String> env = System.getenv();
+        
+        // Only include relevant environment variables
+        String[] relevantVars = {
+            "JAVA_HOME", "JAVA_OPTS", "PATH", "USER", "HOME",
+            "BROBOT_HOME", "BROBOT_CONFIG", "LOG_LEVEL"
+        };
+        
+        for (String var : relevantVars) {
+            String value = env.get(var);
+            if (value != null) {
+                filtered.put(var, value);
+            }
+        }
+        
+        return filtered;
     }
     
     private Map<String, String> collectSystemProperties() {
+        Map<String, String> filtered = new HashMap<>();
         Properties props = System.getProperties();
-        Map<String, String> propsMap = new HashMap<>();
         
-        props.forEach((key, value) -> propsMap.put(key.toString(), value.toString()));
+        // Only include relevant system properties
+        String[] relevantProps = {
+            "java.version", "java.vendor", "java.home",
+            "java.runtime.name", "java.runtime.version",
+            "java.vm.name", "java.vm.vendor", "java.vm.version",
+            "os.name", "os.arch", "os.version",
+            "user.name", "user.home", "user.dir",
+            "file.encoding", "java.class.path"
+        };
         
-        return propsMap;
-    }
-    
-    private double getCpuUsage() {
-        if (osBean instanceof com.sun.management.OperatingSystemMXBean) {
-            return ((com.sun.management.OperatingSystemMXBean) osBean).getProcessCpuLoad() * 100;
-        }
-        return -1;
-    }
-    
-    private HealthCheckItem checkMemoryHealth() {
-        MemoryUsage heapUsage = memoryBean.getHeapMemoryUsage();
-        double usagePercent = (double) heapUsage.getUsed() / heapUsage.getMax() * 100;
-        
-        HealthStatus status;
-        String message;
-        
-        if (usagePercent > 90) {
-            status = HealthStatus.CRITICAL;
-            message = String.format("Critical memory usage: %.1f%%", usagePercent);
-        } else if (usagePercent > 80) {
-            status = HealthStatus.WARNING;
-            message = String.format("High memory usage: %.1f%%", usagePercent);
-        } else {
-            status = HealthStatus.HEALTHY;
-            message = String.format("Memory usage normal: %.1f%%", usagePercent);
+        for (String prop : relevantProps) {
+            String value = props.getProperty(prop);
+            if (value != null) {
+                filtered.put(prop, value);
+            }
         }
         
-        return new HealthCheckItem("Memory", status, message);
+        return filtered;
     }
     
-    private HealthCheckItem checkThreadHealth() {
-        long[] deadlocked = threadBean.findDeadlockedThreads();
-        int threadCount = threadBean.getThreadCount();
+    @Override
+    public DiagnosticInfo getDiagnosticInfo() {
+        Map<String, Object> states = new HashMap<>();
         
-        if (deadlocked != null && deadlocked.length > 0) {
-            return new HealthCheckItem("Threads", HealthStatus.CRITICAL, 
-                "Deadlocked threads detected: " + deadlocked.length);
-        } else if (threadCount > 500) {
-            return new HealthCheckItem("Threads", HealthStatus.WARNING,
-                "High thread count: " + threadCount);
-        } else {
-            return new HealthCheckItem("Threads", HealthStatus.HEALTHY,
-                "Thread count normal: " + threadCount);
-        }
-    }
-    
-    private HealthCheckItem checkGCHealth() {
-        long totalGcTime = gcBeans.stream()
-            .mapToLong(GarbageCollectorMXBean::getCollectionTime)
-            .sum();
-            
-        long uptime = runtimeBean.getUptime();
-        double gcOverhead = (double) totalGcTime / uptime * 100;
-        
-        HealthStatus status;
-        String message;
-        
-        if (gcOverhead > 10) {
-            status = HealthStatus.CRITICAL;
-            message = String.format("High GC overhead: %.2f%%", gcOverhead);
-        } else if (gcOverhead > 5) {
-            status = HealthStatus.WARNING;
-            message = String.format("Moderate GC overhead: %.2f%%", gcOverhead);
-        } else {
-            status = HealthStatus.HEALTHY;
-            message = String.format("GC overhead normal: %.2f%%", gcOverhead);
-        }
-        
-        return new HealthCheckItem("Garbage Collection", status, message);
-    }
-    
-    private HealthCheckItem checkErrorRate() {
-        ErrorStatistics stats = errorHandler.getStatistics();
-        long totalErrors = stats.totalErrors();
-        long uptime = runtimeBean.getUptime() / 1000; // Convert to seconds
-        
-        if (uptime == 0) uptime = 1; // Avoid division by zero
-        
-        double errorsPerMinute = (double) totalErrors / uptime * 60;
-        
-        HealthStatus status;
-        String message;
-        
-        if (errorsPerMinute > 10) {
-            status = HealthStatus.CRITICAL;
-            message = String.format("High error rate: %.1f errors/min", errorsPerMinute);
-        } else if (errorsPerMinute > 5) {
-            status = HealthStatus.WARNING;
-            message = String.format("Elevated error rate: %.1f errors/min", errorsPerMinute);
-        } else {
-            status = HealthStatus.HEALTHY;
-            message = String.format("Error rate normal: %.1f errors/min", errorsPerMinute);
-        }
-        
-        return new HealthCheckItem("Error Rate", status, message);
-    }
-    
-    private HealthCheckItem checkDiskSpace() {
         try {
-            File root = new File("/");
-            long freeSpace = root.getFreeSpace();
-            long totalSpace = root.getTotalSpace();
+            // Basic system state
+            states.put("memory_usage_percent", getMemoryUsagePercentage());
+            states.put("thread_count", getThreadCount());
+            states.put("has_deadlocks", hasDeadlockedThreads());
+            states.put("gc_overhead_percent", getGCOverheadPercentage());
+            states.put("system_healthy", isSystemHealthy());
             
-            if (totalSpace == 0) {
-                return new HealthCheckItem("Disk Space", HealthStatus.WARNING, 
-                    "Unable to determine disk space");
-            }
+            // Service statuses
+            states.put("services_available", Map.of(
+                "systemInfo", systemInfoService != null,
+                "memory", memoryService != null,
+                "thread", threadService != null,
+                "performance", performanceService != null,
+                "health", healthCheckService != null,
+                "report", reportService != null
+            ));
             
-            double freePercent = (double) freeSpace / totalSpace * 100;
-            
-            HealthStatus status;
-            String message;
-            
-            if (freePercent < 5) {
-                status = HealthStatus.CRITICAL;
-                message = String.format("Critical: Only %.1f%% disk space free", freePercent);
-            } else if (freePercent < 10) {
-                status = HealthStatus.WARNING;
-                message = String.format("Low disk space: %.1f%% free", freePercent);
-            } else {
-                status = HealthStatus.HEALTHY;
-                message = String.format("Disk space adequate: %.1f%% free", freePercent);
-            }
-            
-            return new HealthCheckItem("Disk Space", status, message);
-            
+            return DiagnosticInfo.builder()
+                .component("DiagnosticTool")
+                .states(states)
+                .build();
+                
         } catch (Exception e) {
-            return new HealthCheckItem("Disk Space", HealthStatus.WARNING,
-                "Unable to check disk space: " + e.getMessage());
+            log.error("Error collecting diagnostic info", e);
+            return DiagnosticInfo.error("DiagnosticTool", e);
         }
-    }
-    
-    private String formatReport(DiagnosticReport report) {
-        StringBuilder sb = new StringBuilder();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        
-        sb.append("=== BROBOT RUNNER DIAGNOSTIC REPORT ===\n");
-        sb.append("Generated: ").append(report.timestamp().format(formatter)).append("\n\n");
-        
-        // System Info
-        sb.append("SYSTEM INFORMATION\n");
-        sb.append("==================\n");
-        SystemInfo sys = report.systemInfo();
-        sb.append("OS: ").append(sys.osName()).append(" ").append(sys.osVersion()).append("\n");
-        sb.append("Architecture: ").append(sys.osArch()).append("\n");
-        sb.append("Java: ").append(sys.javaVersion()).append(" (").append(sys.javaVendor()).append(")\n");
-        sb.append("JVM: ").append(sys.jvmName()).append(" ").append(sys.jvmVersion()).append("\n");
-        sb.append("Processors: ").append(sys.availableProcessors()).append("\n");
-        sb.append("System Load: ").append(String.format("%.2f", sys.systemLoadAverage())).append("\n");
-        sb.append("Uptime: ").append(formatUptime(sys.uptime())).append("\n\n");
-        
-        // Memory Info
-        sb.append("MEMORY INFORMATION\n");
-        sb.append("==================\n");
-        MemoryInfo mem = report.memoryInfo();
-        sb.append("Heap Memory:\n");
-        sb.append("  Used: ").append(formatBytes(mem.heapUsed())).append("\n");
-        sb.append("  Max: ").append(formatBytes(mem.heapMax())).append("\n");
-        sb.append("  Committed: ").append(formatBytes(mem.heapCommitted())).append("\n");
-        sb.append("Non-Heap Memory:\n");
-        sb.append("  Used: ").append(formatBytes(mem.nonHeapUsed())).append("\n");
-        sb.append("  Max: ").append(formatBytes(mem.nonHeapMax())).append("\n");
-        sb.append("  Committed: ").append(formatBytes(mem.nonHeapCommitted())).append("\n\n");
-        
-        // Thread Info
-        sb.append("THREAD INFORMATION\n");
-        sb.append("==================\n");
-        ThreadInfo threads = report.threadInfo();
-        sb.append("Current Threads: ").append(threads.threadCount()).append("\n");
-        sb.append("Peak Threads: ").append(threads.peakThreadCount()).append("\n");
-        sb.append("Daemon Threads: ").append(threads.daemonThreadCount()).append("\n");
-        sb.append("Total Started: ").append(threads.totalStartedThreadCount()).append("\n");
-        sb.append("Deadlocked: ").append(threads.deadlockedThreads()).append("\n\n");
-        
-        // Performance Metrics
-        sb.append("PERFORMANCE METRICS\n");
-        sb.append("===================\n");
-        sb.append(report.performanceMetrics().performanceReport()).append("\n");
-        
-        // Error Statistics
-        sb.append("ERROR STATISTICS\n");
-        sb.append("================\n");
-        sb.append(report.errorStatistics().getSummary()).append("\n");
-        
-        return sb.toString();
-    }
-    
-    private String formatUptime(long uptimeMs) {
-        long seconds = uptimeMs / 1000;
-        long minutes = seconds / 60;
-        long hours = minutes / 60;
-        long days = hours / 24;
-        
-        return String.format("%d days, %d hours, %d minutes", 
-            days, hours % 24, minutes % 60);
-    }
-    
-    private String formatBytes(long bytes) {
-        if (bytes < 1024) return bytes + " B";
-        if (bytes < 1024 * 1024) return String.format("%.1f KB", bytes / 1024.0);
-        if (bytes < 1024 * 1024 * 1024) return String.format("%.1f MB", bytes / (1024.0 * 1024));
-        return String.format("%.1f GB", bytes / (1024.0 * 1024 * 1024));
     }
 }

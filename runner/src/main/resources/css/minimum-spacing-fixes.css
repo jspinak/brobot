@@ -1,0 +1,335 @@
+/* Ensure minimum 8px spacing throughout the application */
+
+/* Global spacing defaults */
+.root {
+    -fx-spacing: 8px;
+}
+
+/* VBox and HBox default spacing */
+.vbox {
+    -fx-spacing: 8px;
+}
+
+.hbox {
+    -fx-spacing: 8px;
+}
+
+/* Grid pane minimum gaps */
+.grid-pane {
+    -fx-hgap: 12px;
+    -fx-vgap: 12px;
+}
+
+/* All containers should have minimum padding */
+.pane,
+.stack-pane,
+.flow-pane,
+.tile-pane,
+.anchor-pane,
+.border-pane,
+.split-pane {
+    -fx-padding: 8px;
+}
+
+/* Border pane regions */
+.border-pane > .top,
+.border-pane > .right,
+.border-pane > .bottom,
+.border-pane > .left,
+.border-pane > .center {
+    -fx-padding: 8px;
+}
+
+/* Tab content area spacing */
+.tab-pane > .tab-content-area {
+    -fx-padding: 12px;
+}
+
+/* Tab header area spacing */
+.tab-pane > .tab-header-area {
+    -fx-padding: 0 0 8px 0;
+}
+
+/* Button bar spacing */
+.button-bar {
+    -fx-spacing: 8px;
+    -fx-padding: 8px;
+}
+
+/* Tool bar spacing */
+.tool-bar {
+    -fx-spacing: 8px;
+    -fx-padding: 8px;
+}
+
+/* Menu bar spacing */
+.menu-bar {
+    -fx-spacing: 8px;
+    -fx-padding: 4px 8px;
+}
+
+/* List view item spacing */
+.list-view {
+    -fx-padding: 8px;
+}
+
+.list-cell {
+    -fx-padding: 8px 12px;
+    -fx-cell-size: 40px;
+}
+
+/* Tree view item spacing */
+.tree-view {
+    -fx-padding: 8px;
+}
+
+.tree-cell {
+    -fx-padding: 8px 12px;
+    -fx-cell-size: 32px;
+}
+
+/* Table view spacing */
+.table-view {
+    -fx-padding: 0;
+}
+
+.table-row-cell {
+    -fx-padding: 8px 0;
+    -fx-cell-size: 40px;
+}
+
+.table-cell {
+    -fx-padding: 0 12px;
+}
+
+/* Form control spacing */
+.text-field,
+.password-field,
+.text-area,
+.combo-box,
+.choice-box,
+.date-picker,
+.color-picker,
+.spinner {
+    -fx-padding: 8px;
+    margin: 8px 0;
+}
+
+/* Label spacing */
+.label {
+    -fx-padding: 4px 0;
+}
+
+/* Titled pane spacing */
+.titled-pane {
+    -fx-padding: 8px;
+}
+
+.titled-pane > .title {
+    -fx-padding: 8px 12px;
+}
+
+.titled-pane > .content {
+    -fx-padding: 12px;
+}
+
+/* Accordion spacing */
+.accordion {
+    -fx-spacing: 8px;
+}
+
+/* Scroll pane spacing */
+.scroll-pane {
+    -fx-padding: 8px;
+}
+
+.scroll-pane > .viewport {
+    -fx-padding: 8px;
+}
+
+/* Dialog pane spacing */
+.dialog-pane {
+    -fx-padding: 16px;
+}
+
+.dialog-pane > .header-panel {
+    -fx-padding: 12px 16px;
+}
+
+.dialog-pane > .content {
+    -fx-padding: 16px;
+}
+
+.dialog-pane > .button-bar {
+    -fx-padding: 12px 16px;
+    -fx-spacing: 8px;
+}
+
+/* Alert spacing */
+.alert {
+    -fx-padding: 16px;
+}
+
+/* Progress indicators spacing */
+.progress-bar,
+.progress-indicator {
+    margin: 8px;
+}
+
+/* Slider spacing */
+.slider {
+    -fx-padding: 8px;
+}
+
+/* Pagination spacing */
+.pagination {
+    -fx-padding: 8px;
+}
+
+.pagination > .pagination-control {
+    -fx-spacing: 8px;
+}
+
+/* Specific component fixes */
+
+/* Configuration panel grid spacing */
+.configuration-details .grid-pane {
+    -fx-hgap: 16px;
+    -fx-vgap: 12px;
+}
+
+/* Action bar minimum spacing */
+.action-bar {
+    -fx-spacing: 12px;
+    -fx-padding: 12px;
+}
+
+/* Header panel spacing */
+.header-panel {
+    -fx-spacing: 16px;
+    -fx-padding: 12px 16px;
+}
+
+/* Card spacing */
+.card {
+    margin: 8px;
+    -fx-spacing: 12px;
+}
+
+.card-header {
+    -fx-spacing: 12px;
+}
+
+.card-body {
+    -fx-spacing: 12px;
+}
+
+/* Recent configurations table spacing */
+.recent-configurations-table .table-view {
+    margin: 8px 0;
+}
+
+/* Split pane divider spacing */
+.split-pane-divider {
+    -fx-padding: 0 8px;
+}
+
+/* Empty state spacing */
+.empty-state {
+    -fx-padding: 32px;
+    -fx-spacing: 16px;
+}
+
+/* Search field container spacing */
+.search-container {
+    -fx-spacing: 8px;
+    -fx-padding: 8px;
+}
+
+/* Pagination controls spacing */
+.pagination-container {
+    -fx-spacing: 12px;
+    -fx-padding: 8px;
+}
+
+/* Fix zero-spacing text elements */
+.text {
+    -fx-line-spacing: 2px;
+}
+
+/* Ensure minimum margin between adjacent elements */
+.button + .button,
+.label + .label,
+.text-field + .text-field {
+    margin-left: 8px;
+}
+
+/* Tab spacing */
+.tab {
+    -fx-padding: 8px 16px;
+}
+
+.tab-header-area {
+    -fx-spacing: 4px;
+}
+
+/* Fix overlapping metadata fields */
+.configuration-details .form-label {
+    -fx-min-width: 140px;
+    -fx-padding: 0 12px 0 0;
+}
+
+/* Ensure proper spacing in button groups */
+.segmented-button-bar {
+    -fx-spacing: 0;
+}
+
+.segmented-button-bar .button {
+    margin: 0;
+    -fx-background-radius: 0;
+}
+
+.segmented-button-bar .button:first-child {
+    -fx-background-radius: 4px 0 0 4px;
+}
+
+.segmented-button-bar .button:last-child {
+    -fx-background-radius: 0 4px 4px 0;
+}
+
+/* Toggle button spacing */
+.toggle-button {
+    -fx-padding: 8px 16px;
+}
+
+/* Radio button and checkbox spacing */
+.radio-button,
+.check-box {
+    -fx-padding: 8px;
+    -fx-label-padding: 0 0 0 8px;
+}
+
+/* Hyperlink spacing */
+.hyperlink {
+    -fx-padding: 4px 8px;
+}
+
+/* Context menu spacing */
+.context-menu {
+    -fx-padding: 4px 0;
+}
+
+.menu-item {
+    -fx-padding: 8px 16px;
+}
+
+/* Tooltip spacing */
+.tooltip {
+    -fx-padding: 8px 12px;
+}
+
+/* Status bar spacing */
+.status-bar {
+    -fx-spacing: 16px;
+    -fx-padding: 8px 16px;
+}

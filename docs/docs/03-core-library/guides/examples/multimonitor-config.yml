@@ -1,0 +1,41 @@
+# Example Multi-Monitor Configuration for Brobot
+# 
+# This example shows a typical 3-monitor development setup where:
+# - Monitor 0 (left): IDE and development tools
+# - Monitor 1 (middle): Target application for automation
+# - Monitor 2 (right): Documentation, logs, or other tools
+#
+# Save this as application-multimonitor.yml in your resources directory
+# and activate with: --spring.profiles.active=multimonitor
+
+brobot:
+  monitor:
+    # Enable multi-monitor support
+    multi-monitor-enabled: true
+    
+    # Use middle monitor (index 1) as default for all operations
+    default-screen-index: 1
+    
+    # Don't search across all monitors - stay on the specified one
+    search-all-monitors: false
+    
+    # Enable logging to see which monitor is being used
+    log-monitor-info: true
+    
+    # Map specific operations to monitors
+    # All automation operations go to the middle monitor
+    operation-monitor-map:
+      find: 1
+      find-multiple: 1
+      click: 1
+      type: 1
+      drag: 1
+      screenshot: 1
+      move: 1
+      hover: 1
+
+# Optional: Add debug logging for monitor operations
+logging:
+  level:
+    io.github.jspinak.brobot.monitor: DEBUG
+    io.github.jspinak.brobot.util.image.core: INFO

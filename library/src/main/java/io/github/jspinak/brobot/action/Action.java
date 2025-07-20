@@ -6,6 +6,7 @@ import io.github.jspinak.brobot.action.internal.service.ActionService;
 import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
 import io.github.jspinak.brobot.model.element.Region;
+import io.github.jspinak.brobot.model.element.Location;
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
 import io.github.jspinak.brobot.action.basic.click.ClickOptions;
 import io.github.jspinak.brobot.action.basic.type.TypeOptions;
@@ -202,6 +203,97 @@ public class Action {
     }
 
     /**
+     * Performs a Find action with a specified timeout before beginning the search.
+     * <p>
+     * This method is useful when you need to wait for UI elements to appear or
+     * stabilize before attempting to find them. The timeout is applied as a pause
+     * before the find operation begins, giving the application time to render or
+     * update the UI.
+     * </p>
+     * 
+     * <p>Example usage:
+     * <pre>{@code
+     * // Wait 2.5 seconds before searching for the save button
+     * ActionResult result = action.findWithTimeout(2.5, saveButton);
+     * 
+     * // Wait 1 second before searching for multiple images
+     * ActionResult results = action.findWithTimeout(1.0, loginButton, submitButton);
+     * }</pre>
+     * </p>
+     *
+     * @param timeoutSeconds the number of seconds to wait before beginning the find operation
+     * @param stateImages the images to search for on screen after the timeout
+     * @return ActionResult containing found matches and execution details
+     * @see #find(StateImage...)
+     * @see PatternFindOptions.Builder#setPauseBeforeBegin(double)
+     */
+    public ActionResult findWithTimeout(double timeoutSeconds, StateImage... stateImages) {
+        PatternFindOptions findOptions = new PatternFindOptions.Builder()
+                .setPauseBeforeBegin(timeoutSeconds)
+                .build();
+        return perform(findOptions, stateImages);
+    }
+
+    /**
+     * Performs a Find action with a specified timeout on the given object collections.
+     * <p>
+     * This method extends the timeout functionality to work with ObjectCollections,
+     * allowing you to search for mixed object types (images, regions, text) after
+     * waiting for a specified duration. This is particularly useful when dealing
+     * with dynamic UIs or slow-loading content.
+     * </p>
+     * 
+     * <p>The timeout helps in scenarios such as:
+     * <ul>
+     *   <li>Waiting for animations to complete</li>
+     *   <li>Allowing time for AJAX requests to populate UI elements</li>
+     *   <li>Ensuring dialogs or popups have fully rendered</li>
+     *   <li>Synchronizing with application state changes</li>
+     * </ul>
+     * </p>
+     *
+     * @param timeoutSeconds the number of seconds to wait before beginning the find operation
+     * @param objectCollections collections of objects to search for after the timeout
+     * @return ActionResult containing all found matches across collections
+     * @see #find(ObjectCollection...)
+     * @see PatternFindOptions.Builder#setPauseBeforeBegin(double)
+     */
+    public ActionResult findWithTimeout(double timeoutSeconds, ObjectCollection... objectCollections) {
+        PatternFindOptions findOptions = new PatternFindOptions.Builder()
+                .setPauseBeforeBegin(timeoutSeconds)
+                .build();
+        return perform(findOptions, objectCollections);
+    }
+
+    /**
+     * Performs a Click action with default options on the specified state images.
+     * <p>
+     * This convenience method simplifies the common pattern of clicking on images,
+     * automatically finding and clicking on the first match found.
+     *
+     * @param stateImages the images to find and click
+     * @return ActionResult containing the click operation results
+     */
+    public ActionResult click(StateImage... stateImages) {
+        ClickOptions clickOptions = new ClickOptions.Builder().build();
+        return perform(clickOptions, stateImages);
+    }
+
+    /**
+     * Performs a Type action with default options using the specified object collections.
+     * <p>
+     * This method types text from StateString objects in the collections. If the
+     * collections also contain images, it will first find and click on them before typing.
+     *
+     * @param objectCollections collections containing strings to type
+     * @return ActionResult containing the type operation results
+     */
+    public ActionResult type(ObjectCollection... objectCollections) {
+        TypeOptions typeOptions = new TypeOptions.Builder().build();
+        return perform(typeOptions, objectCollections);
+    }
+
+    /**
      * Performs an action on state images with specified options.
      * <p>
      * This convenience method automatically wraps the provided StateImages into
@@ -358,6 +450,182 @@ public class Action {
     public ActionResult perform(ActionOptions.Action action, Region... regions) {
         ObjectCollection strColl = new ObjectCollection.Builder().withRegions(regions).build();
         return perform(action, strColl);
+    }
+    
+    // ===== New Convenience Methods for ActionType enum =====
+    
+    /**
+     * Performs the specified action type on a location with default configuration.
+     * <p>
+     * This convenience method enables simple one-line calls like:
+     * {@code action.perform(CLICK, location)}
+     * </p>
+     * <p>
+     * The method automatically creates the appropriate ActionConfig based on
+     * the ActionType and wraps the location in an ObjectCollection.
+     * </p>
+     * 
+     * @param type the type of action to perform
+     * @param location the location to act upon
+     * @return ActionResult containing the operation results
+     * @since 2.0
+     */
+    public ActionResult perform(ActionType type, Location location) {
+        ActionConfig config = createDefaultConfig(type);
+        ObjectCollection collection = new ObjectCollection.Builder()
+            .withLocations(location)
+            .build();
+        return perform(config, collection);
+    }
+    
+    /**
+     * Performs the specified action type on a region with default configuration.
+     * <p>
+     * This convenience method enables simple one-line calls like:
+     * {@code action.perform(HIGHLIGHT, region)}
+     * </p>
+     * 
+     * @param type the type of action to perform
+     * @param region the region to act upon
+     * @return ActionResult containing the operation results
+     * @since 2.0
+     */
+    public ActionResult perform(ActionType type, Region region) {
+        ActionConfig config = createDefaultConfig(type);
+        ObjectCollection collection = new ObjectCollection.Builder()
+            .withRegions(region)
+            .build();
+        return perform(config, collection);
+    }
+    
+    /**
+     * Performs the specified action type with text input.
+     * <p>
+     * This convenience method enables simple one-line calls like:
+     * {@code action.perform(TYPE, "Hello World")}
+     * </p>
+     * 
+     * @param type the type of action to perform (typically TYPE)
+     * @param text the text to type or use in the action
+     * @return ActionResult containing the operation results
+     * @since 2.0
+     */
+    public ActionResult perform(ActionType type, String text) {
+        if (type == ActionType.TYPE) {
+            // For typing, create TypeOptions and pass text in ObjectCollection
+            TypeOptions typeOptions = new TypeOptions.Builder().build();
+            ObjectCollection collection = new ObjectCollection.Builder()
+                .withStrings(text)
+                .build();
+            return perform(typeOptions, collection);
+        }
+        
+        // For other actions, wrap text in ObjectCollection
+        ActionConfig config = createDefaultConfig(type);
+        ObjectCollection collection = new ObjectCollection.Builder()
+            .withStrings(text)
+            .build();
+        return perform(config, collection);
+    }
+    
+    /**
+     * Performs the specified action type on multiple objects with default configuration.
+     * <p>
+     * This is the most flexible convenience method, accepting any objects that
+     * can be converted to the appropriate type for the action. The method will
+     * attempt to extract locations, regions, or other required data from the
+     * provided objects.
+     * </p>
+     * 
+     * @param type the type of action to perform
+     * @param objects the objects to act upon (Location, Region, StateRegion, Match, etc.)
+     * @return ActionResult containing the operation results
+     * @since 2.0
+     */
+    public ActionResult perform(ActionType type, Object... objects) {
+        ActionConfig config = createDefaultConfig(type);
+        ObjectCollection.Builder builder = new ObjectCollection.Builder();
+        
+        // Process each object and add to collection
+        for (Object obj : objects) {
+            if (obj instanceof Location) {
+                builder.withLocations((Location) obj);
+            } else if (obj instanceof Region) {
+                builder.withRegions((Region) obj);
+            } else if (obj instanceof StateImage) {
+                builder.withImages((StateImage) obj);
+            } else if (obj instanceof String) {
+                builder.withStrings((String) obj);
+            } else if (obj instanceof ObjectCollection) {
+                // Direct ObjectCollection - use as is
+                return perform(config, (ObjectCollection) obj);
+            }
+            // Add more type conversions as needed
+        }
+        
+        return perform(config, builder.build());
+    }
+    
+    /**
+     * Creates a default ActionConfig instance for the given ActionType.
+     * <p>
+     * Maps ActionType enum values to their corresponding ActionConfig
+     * implementations with sensible defaults.
+     * </p>
+     * 
+     * @param type the action type to create config for
+     * @return appropriate ActionConfig instance
+     * @throws IllegalArgumentException if action type is not yet supported
+     * @since 2.0
+     */
+    private ActionConfig createDefaultConfig(ActionType type) {
+        switch (type) {
+            case CLICK:
+                return new ClickOptions.Builder().build();
+            case DOUBLE_CLICK:
+                return new ClickOptions.Builder()
+                    .setNumberOfClicks(2)
+                    .build();
+            case RIGHT_CLICK:
+                return new ClickOptions.Builder()
+                    .setClickType(ClickOptions.Type.RIGHT)
+                    .build();
+            case MIDDLE_CLICK:
+                return new ClickOptions.Builder()
+                    .setClickType(ClickOptions.Type.MIDDLE)
+                    .build();
+            case HIGHLIGHT:
+                return new HighlightOptions.Builder().build();
+            case TYPE:
+                return new TypeOptions.Builder().build();
+            case HOVER:
+                return new MouseMoveOptions.Builder().build();
+            case DRAG:
+                return new DragOptions.Builder().build();
+            case FIND:
+                return new PatternFindOptions.Builder().build();
+            case WAIT_VANISH:
+                return new VanishOptions.Builder().build();
+            case SCROLL_UP:
+                return new ScrollOptions.Builder()
+                    .setDirection(ScrollOptions.Direction.UP)
+                    .build();
+            case SCROLL_DOWN:
+                return new ScrollOptions.Builder()
+                    .setDirection(ScrollOptions.Direction.DOWN)
+                    .build();
+            case KEY_DOWN:
+                return new KeyDownOptions.Builder().build();
+            case KEY_UP:
+                return new KeyUpOptions.Builder().build();
+            case MOUSE_DOWN:
+                return new MouseDownOptions.Builder().build();
+            case MOUSE_UP:
+                return new MouseUpOptions.Builder().build();
+            default:
+                throw new IllegalArgumentException(
+                    "ActionType " + type + " is not yet supported in convenience methods");
+        }
     }
     
     /**

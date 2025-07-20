@@ -60,7 +60,7 @@ public class EnvironmentConfigurationTest {
     
     @Nested
     @DisplayName("Integration Test Mode")
-    class IntegrationTestMode extends BaseIntegrationTest {
+    class IntegrationTestMode {
         
         @Test
         @DisplayName("Should load real files in headless environment")
