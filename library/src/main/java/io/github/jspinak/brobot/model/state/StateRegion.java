@@ -1,16 +1,20 @@
 package io.github.jspinak.brobot.model.state;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import java.util.ArrayList;
+import java.util.List;
 
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.model.action.ActionHistory;
 import io.github.jspinak.brobot.model.action.ActionRecord;
 import io.github.jspinak.brobot.model.element.Anchor;
 import io.github.jspinak.brobot.model.element.Anchors;
+import io.github.jspinak.brobot.model.element.CrossStateAnchor;
 import io.github.jspinak.brobot.model.element.Position;
 import io.github.jspinak.brobot.model.element.Positions;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.state.StateObject;
+import io.github.jspinak.brobot.action.basic.region.DefineRegionOptions.DefineAs;
 import lombok.Data;
 
 /**
@@ -88,6 +92,10 @@ public class StateRegion implements StateObject {
     private Anchors anchors = new Anchors();
     private String mockText = "mock text";
     private ActionHistory matchHistory = new ActionHistory();
+    
+    // Cross-state anchor support
+    private List<CrossStateAnchor> crossStateAnchors = new ArrayList<>();
+    private DefineAs defineStrategy = DefineAs.OUTSIDE_ANCHORS;
 
     public String getIdAsString() {
         return objectType.name() + name + searchRegion.getX() + searchRegion.getY() + searchRegion.getW() + searchRegion.getY();
@@ -139,6 +147,8 @@ public class StateRegion implements StateObject {
         private Anchors anchors = new Anchors();
         private String mockText = "mock text";
         private ActionHistory matchHistory = new ActionHistory();
+        private List<CrossStateAnchor> crossStateAnchors = new ArrayList<>();
+        private DefineAs defineStrategy = DefineAs.OUTSIDE_ANCHORS;
 
         public Builder setName(String name) {
             this.name = name;
@@ -209,6 +219,21 @@ public class StateRegion implements StateObject {
             this.matchHistory = matchHistory;
             return this;
         }
+        
+        public Builder addCrossStateAnchor(CrossStateAnchor anchor) {
+            this.crossStateAnchors.add(anchor);
+            return this;
+        }
+        
+        public Builder setCrossStateAnchors(List<CrossStateAnchor> anchors) {
+            this.crossStateAnchors = anchors;
+            return this;
+        }
+        
+        public Builder setDefineStrategy(DefineAs strategy) {
+            this.defineStrategy = strategy;
+            return this;
+        }
 
         public StateRegion build() {
             StateRegion stateRegion = new StateRegion();
@@ -223,6 +248,8 @@ public class StateRegion implements StateObject {
             stateRegion.anchors = anchors;
             stateRegion.mockText = mockText;
             stateRegion.matchHistory = matchHistory;
+            stateRegion.crossStateAnchors = crossStateAnchors;
+            stateRegion.defineStrategy = defineStrategy;
             return stateRegion;
         }
     }
