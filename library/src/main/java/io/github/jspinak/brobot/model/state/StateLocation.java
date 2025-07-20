@@ -5,6 +5,7 @@ import io.github.jspinak.brobot.model.element.Location;
 import io.github.jspinak.brobot.model.element.Position;
 import io.github.jspinak.brobot.model.element.Positions;
 import io.github.jspinak.brobot.model.element.Anchors;
+import io.github.jspinak.brobot.model.element.SearchRegionOnObject;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.model.action.ActionHistory;
 import io.github.jspinak.brobot.model.element.Anchor;
@@ -86,6 +87,9 @@ public class StateLocation implements StateObject {
     private Position position;
     private Anchors anchors; // just one, but defined with Anchors b/c it's a StateObject
     private ActionHistory matchHistory = new ActionHistory(); // not used yet
+    
+    // Cross-state search region support
+    private SearchRegionOnObject searchRegionOnObject;
 
 
     public String getIdAsString() {
@@ -127,6 +131,7 @@ public class StateLocation implements StateObject {
         private Position position = new Position(.5, .5);
         private Anchors anchors = new Anchors();
         private ActionHistory matchHistory = new ActionHistory(); // not used yet
+        private SearchRegionOnObject searchRegionOnObject;
 
         public Builder setName(String name) {
             this.name = name;
@@ -192,6 +197,11 @@ public class StateLocation implements StateObject {
             this.matchHistory = matchHistory;
             return this;
         }
+        
+        public Builder setSearchRegionOnObject(SearchRegionOnObject searchRegionOnObject) {
+            this.searchRegionOnObject = searchRegionOnObject;
+            return this;
+        }
 
         public StateLocation build() {
             StateLocation stateLocation = new StateLocation();
@@ -205,6 +215,7 @@ public class StateLocation implements StateObject {
             stateLocation.position = position;
             stateLocation.anchors = anchors;
             stateLocation.matchHistory = matchHistory;
+            stateLocation.searchRegionOnObject = searchRegionOnObject;
             return stateLocation;
         }
     }
