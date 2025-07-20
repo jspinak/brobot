@@ -27,7 +27,6 @@ import jakarta.annotation.PostConstruct;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Optional;
 
 /**
  * JavaFX component for configuring the Brobot Runner
@@ -37,8 +36,6 @@ import java.util.Optional;
 @Getter
 @Setter(AccessLevel.PRIVATE)
 public class ConfigurationPanel extends VBox {
-    private static ConfigurationPanel INSTANCE;
-
     private static final Logger logger = LoggerFactory.getLogger(ConfigurationPanel.class);
 
     private final BrobotRunnerProperties runnerProperties;
@@ -66,8 +63,7 @@ public class ConfigurationPanel extends VBox {
 
     @PostConstruct
     public void initialize() {
-        // Set the static instance for use by event handlers
-        INSTANCE = this;
+        // Initialization complete
     }
 
     private void setupUI(StateService allStatesInProjectService) {
@@ -305,12 +301,6 @@ public class ConfigurationPanel extends VBox {
         return true;
     }
 
-    /**
-     * Gets the singleton instance of the ConfigurationPanel.
-     */
-    public static Optional<ConfigurationPanel> getInstance() {
-        return Optional.ofNullable(INSTANCE);
-    }
 
     /**
      * Updates the status message display.

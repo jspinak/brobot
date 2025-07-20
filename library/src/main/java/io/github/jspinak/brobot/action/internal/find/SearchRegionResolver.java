@@ -40,50 +40,85 @@ public class SearchRegionResolver {
     /**
      * Selects search regions for a StateImage-based find operation.
      * <p>
-     * As of version 1.7, ActionOptions search regions do not override fixed/defined regions
-     * on the StateImage. This method implements the following priority order:
+     * This method implements the following priority order:
      * <ol>
-     * <li>Fixed/defined regions from the StateImage (highest priority)</li>
-     * <li>Search regions from ActionOptions</li>
-     * <li>Search regions from the StateImage</li>
+     * <li>Search regions from ActionOptions (highest priority)</li>
+     * <li>Fixed regions from individual Patterns within the StateImage</li>
+     * <li>Search regions from individual Patterns within the StateImage</li>
      * <li>Default full-screen region if no regions are found</li>
      * </ol>
      *
      * @param actionOptions The action configuration containing optional search regions
-     * @param stateImage The image that may contain its own search regions
+     * @param stateImage The image that may contain patterns with their own search regions
      * @return A non-empty list of regions to search within. Always contains at least
      *         one region (full screen) if no specific regions are defined.
      */
     public List<Region> getRegions(ActionOptions actionOptions, StateImage stateImage) {
-        List<Region> definedFixed = stateImage.getDefinedFixedRegions();
-        if (!definedFixed.isEmpty()) return definedFixed;
-        List<Region> regions;
-        if (!actionOptions.getSearchRegions().isEmpty())
-            regions = actionOptions.getSearchRegions().getAllRegions();
-        else regions = stateImage.getAllSearchRegions();
-        if (regions.isEmpty()) regions.add(new Region());
+        // Priority 1: Use ActionOptions search regions if specified
+        if (!actionOptions.getSearchRegions().isEmpty()) {
+            return actionOptions.getSearchRegions().getAllRegions();
+        }
+        
+        // Priority 2: Check for fixed regions in patterns
+        List<Region> fixedRegions = new ArrayList<>();
+        for (Pattern pattern : stateImage.getPatterns()) {
+            if (pattern.getSearchRegions().isFixedRegionSet()) {
+                fixedRegions.addAll(pattern.getRegions());
+            }
+        }
+        if (!fixedRegions.isEmpty()) {
+            return fixedRegions;
+        }
+        
+        // Priority 3: Collect search regions from all patterns
+        List<Region> regions = new ArrayList<>();
+        for (Pattern pattern : stateImage.getPatterns()) {
+            regions.addAll(pattern.getRegions());
+        }
+        
+        // Priority 4: Default to full screen if no regions found
+        if (regions.isEmpty()) {
+            regions.add(new Region());
+        }
+        
         return regions;
     }
 
     /**
      * Selects search regions for a Pattern-based find operation.
      * <p>
-     * As of version 1.7, ActionOptions search regions do not override a Pattern's fixed
-     * search region. To modify a fixed region, use the Pattern's {@code reset()} method.
-     * ActionOptions regions will replace standard search regions but not fixed regions.
+     * This method implements the following priority order:
+     * <ol>
+     * <li>Search regions from ActionOptions (highest priority)</li>
+     * <li>Fixed regions from the Pattern</li>
+     * <li>Search regions from the Pattern</li>
+     * <li>Default full-screen region if no regions are found</li>
+     * </ol>
      * 
      * @param actionOptions The action configuration containing optional search regions
      * @param pattern The pattern that may contain its own search regions (fixed or standard)
-     * @return A non-empty list of regions to search within. Returns the Pattern's fixed
-     *         region if set, otherwise follows the standard priority order.
+     * @return A non-empty list of regions to search within.
      */
     public List<Region> getRegions(ActionOptions actionOptions, Pattern pattern) {
-        List<Region> regions;
-        if (pattern.getSearchRegions().isFixedRegionSet()) return pattern.getRegions();
-        if (!actionOptions.getSearchRegions().isEmpty())
-            regions = actionOptions.getSearchRegions().getAllRegions();
-        else regions = pattern.getRegions();
-        if (regions.isEmpty()) regions.add(new Region());
+        // Priority 1: Use ActionOptions search regions if specified
+        if (!actionOptions.getSearchRegions().isEmpty()) {
+            return actionOptions.getSearchRegions().getAllRegions();
+        }
+        
+        // Priority 2: Use Pattern's fixed regions if set
+        if (pattern.getSearchRegions().isFixedRegionSet()) {
+            return pattern.getRegions();
+        }
+        
+        // Priority 3: Use Pattern's regular search regions
+        List<Region> regions = pattern.getRegions();
+        
+        // Priority 4: Default to full screen if no regions found
+        if (regions.isEmpty()) {
+            regions = new ArrayList<>();
+            regions.add(new Region());
+        }
+        
         return regions;
     }
 
@@ -167,27 +202,46 @@ public class SearchRegionResolver {
     
     /**
      * Selects search regions for ActionConfig-based find operations.
+     * <p>
+     * This method implements the following priority order:
+     * <ol>
+     * <li>Search regions from BaseFindOptions (highest priority)</li>
+     * <li>Fixed regions from individual Patterns within the StateImage</li>
+     * <li>Search regions from individual Patterns within the StateImage</li>
+     * <li>Default full-screen region if no regions are found</li>
+     * </ol>
      * 
      * @param actionConfig The action configuration (e.g., PatternFindOptions)
-     * @param stateImage The image that may contain its own search regions
+     * @param stateImage The image that may contain patterns with their own search regions
      * @return A non-empty list of regions to search within
      */
     public List<Region> getRegions(ActionConfig actionConfig, StateImage stateImage) {
-        List<Region> definedFixed = stateImage.getDefinedFixedRegions();
-        if (!definedFixed.isEmpty()) return definedFixed;
-        
-        List<Region> regions = new ArrayList<>();
+        // Priority 1: Use BaseFindOptions search regions if specified
         if (actionConfig instanceof BaseFindOptions) {
             BaseFindOptions findOptions = (BaseFindOptions) actionConfig;
             if (findOptions.getSearchRegions() != null && !findOptions.getSearchRegions().isEmpty()) {
-                regions = findOptions.getSearchRegions().getAllRegions();
+                return findOptions.getSearchRegions().getAllRegions();
             }
         }
         
-        if (regions.isEmpty()) {
-            regions = stateImage.getAllSearchRegions();
+        // Priority 2: Check for fixed regions in patterns
+        List<Region> fixedRegions = new ArrayList<>();
+        for (Pattern pattern : stateImage.getPatterns()) {
+            if (pattern.getSearchRegions().isFixedRegionSet()) {
+                fixedRegions.addAll(pattern.getRegions());
+            }
+        }
+        if (!fixedRegions.isEmpty()) {
+            return fixedRegions;
         }
         
+        // Priority 3: Collect search regions from all patterns
+        List<Region> regions = new ArrayList<>();
+        for (Pattern pattern : stateImage.getPatterns()) {
+            regions.addAll(pattern.getRegions());
+        }
+        
+        // Priority 4: Default to full screen if no regions found
         if (regions.isEmpty()) {
             regions.add(new Region());
         }

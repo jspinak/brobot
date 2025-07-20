@@ -1,130 +1,122 @@
 package io.github.jspinak.brobot.runner.errorhandling;
 
-import lombok.Data;
-
+import io.github.jspinak.brobot.runner.common.diagnostics.DiagnosticCapable;
+import io.github.jspinak.brobot.runner.common.diagnostics.DiagnosticInfo;
+import io.github.jspinak.brobot.runner.errorhandling.enrichment.ErrorEnrichmentService;
+import io.github.jspinak.brobot.runner.errorhandling.history.ErrorHistoryService;
+import io.github.jspinak.brobot.runner.errorhandling.processing.ErrorProcessingService;
+import io.github.jspinak.brobot.runner.errorhandling.statistics.ErrorStatisticsService;
+import io.github.jspinak.brobot.runner.errorhandling.strategy.ErrorStrategyService;
 import io.github.jspinak.brobot.runner.events.EventBus;
-import io.github.jspinak.brobot.runner.events.ErrorEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import jakarta.annotation.PostConstruct;
-import java.lang.management.ManagementFactory;
-import java.util.*;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.Function;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * Central error handling component that manages error processing,
- * recovery, and notification throughout the application.
+ * Central error handling orchestrator that coordinates error processing
+ * across specialized services.
  * 
- * <p>This component provides a comprehensive error handling framework with:
- * <ul>
- *   <li>Pluggable error processing strategies for different exception types</li>
- *   <li>Error recovery mechanisms with retry capabilities</li>
- *   <li>Error history tracking and statistics</li>
- *   <li>System state enrichment for better error context</li>
- *   <li>Event-based error notification</li>
- * </ul>
- * </p>
+ * This component acts as a thin orchestrator that delegates specific
+ * responsibilities to specialized services following the Single
+ * Responsibility Principle:
  * 
- * <p>The error handler supports registering custom:
- * <ul>
- *   <li>{@link IErrorStrategy} - Define how specific error types should be handled</li>
- *   <li>{@link IErrorProcessor} - Process errors for logging, metrics, notifications</li>
- * </ul>
- * </p>
+ * - ErrorProcessingService: Manages error processor pipeline
+ * - ErrorStrategyService: Manages error handling strategies  
+ * - ErrorHistoryService: Tracks error history
+ * - ErrorEnrichmentService: Enriches error context
+ * - ErrorStatisticsService: Collects error statistics
  * 
- * <p>Error handling workflow:
- * <ol>
- *   <li>Error is received with context information</li>
- *   <li>Context is enriched with system state (memory, CPU, threads)</li>
- *   <li>Error is recorded in history</li>
- *   <li>Appropriate strategy is selected based on error type</li>
- *   <li>All registered processors are executed</li>
- *   <li>Strategy handles the error and returns result</li>
- *   <li>Recovery actions are executed if applicable</li>
- * </ol>
- * </p>
+ * The error handler coordinates these services to provide comprehensive
+ * error handling, recovery, and analysis capabilities.
  * 
- * @see IErrorStrategy
- * @see IErrorProcessor
- * @see ErrorContext
- * @see ErrorResult
+ * Thread Safety: This class is thread-safe.
+ * 
+ * @see ErrorProcessingService
+ * @see ErrorStrategyService
+ * @see ErrorHistoryService
+ * @see ErrorEnrichmentService
+ * @see ErrorStatisticsService
+ * @since 1.0.0
  */
 @Slf4j
 @Component
 @RequiredArgsConstructor
-@Data
-public class ErrorHandler {
+public class ErrorHandler implements DiagnosticCapable {
 
     private final EventBus eventBus;
-    private final List<IErrorProcessor> errorProcessors = new CopyOnWriteArrayList<>();
-    private final Map<Class<? extends Throwable>, IErrorStrategy> errorStrategies = new ConcurrentHashMap<>();
-    private final ErrorHistory errorHistory = new ErrorHistory();
+    private final ErrorProcessingService processingService;
+    private final ErrorStrategyService strategyService;
+    private final ErrorHistoryService historyService;
+    private final ErrorEnrichmentService enrichmentService;
+    private final ErrorStatisticsService statisticsService;
     
-    // Error metrics
-    private final AtomicLong totalErrors = new AtomicLong();
-    private final Map<ErrorContext.ErrorCategory, AtomicLong> errorsByCategory = new ConcurrentHashMap<>();
+    // Diagnostic mode
+    private final AtomicBoolean diagnosticMode = new AtomicBoolean(false);
     
     @PostConstruct
     public void initialize() {
-        // Register default error strategies
-        registerDefaultStrategies();
+        // Initialize default processors
+        processingService.registerProcessor(new LoggingErrorProcessor());
+        processingService.registerProcessor(new EventPublishingProcessor(eventBus));
         
-        // Register default processors
-        registerProcessor(new LoggingErrorProcessor());
-        registerProcessor(new EventPublishingProcessor());
+        // Initialize default strategies
+        strategyService.registerDefaultStrategies();
         
-        log.info("Error handler initialized with {} strategies and {} processors",
-            errorStrategies.size(), errorProcessors.size());
+        log.info("Error handler initialized with {} processors and {} strategies",
+            processingService.getProcessorCount(), strategyService.getStrategyCount());
     }
     
     /**
      * Handle an error with full context.
+     * 
+     * @param error the error to handle
+     * @param context the error context
+     * @return result of error handling
      */
     public ErrorResult handleError(Throwable error, ErrorContext context) {
-        totalErrors.incrementAndGet();
-        errorsByCategory.computeIfAbsent(context.getCategory(), k -> new AtomicLong())
-            .incrementAndGet();
-        
-        // Enrich context with system state
-        ErrorContext enrichedContext = enrichContext(context);
-        
-        // Record in history
-        errorHistory.record(error, enrichedContext);
-        
-        // Find appropriate strategy
-        IErrorStrategy strategy = findStrategy(error);
-        
-        // Process error through all processors
-        for (IErrorProcessor processor : errorProcessors) {
-            try {
-                processor.process(error, enrichedContext);
-            } catch (Exception e) {
-                log.error("Error processor {} failed", processor.getClass().getSimpleName(), e);
-            }
+        if (error == null || context == null) {
+            throw new IllegalArgumentException("Error and context must not be null");
         }
         
-        // Execute strategy
-        ErrorResult result = strategy.handle(error, enrichedContext);
+        String operation = context.getOperation();
+        
+        // Record operation start in statistics
+        statisticsService.recordOperationStart(operation);
+        
+        // Enrich context with system state
+        ErrorContext enrichedContext = enrichmentService.enrichContext(context);
+        
+        // Record in history
+        historyService.record(error, enrichedContext);
+        
+        // Record error in statistics
+        statisticsService.recordError(error, enrichedContext);
+        
+        // Process error through processor pipeline
+        processingService.processError(error, enrichedContext);
+        
+        // Execute appropriate strategy
+        ErrorResult result = strategyService.handleError(error, enrichedContext);
         
         // Handle recovery if needed
         if (result.isRecoverable() && result.getRecoveryAction() != null) {
-            try {
-                result.getRecoveryAction().run();
-                log.info("Successfully executed recovery action for error: {}", 
-                    enrichedContext.getErrorId());
-            } catch (Exception e) {
-                log.error("Recovery action failed for error: {}", 
-                    enrichedContext.getErrorId(), e);
-                result = ErrorResult.unrecoverable(
-                    "Recovery failed: " + e.getMessage(),
-                    enrichedContext.getErrorId()
-                );
-            }
+            result = attemptRecovery(result, enrichedContext);
+        }
+        
+        // Record operation result in statistics
+        statisticsService.recordOperationResult(operation, result);
+        
+        if (diagnosticMode.get()) {
+            log.info("[DIAGNOSTIC] Handled error {} - Type: {}, Result: {}, Recoverable: {}",
+                    enrichedContext.getErrorId(),
+                    error.getClass().getSimpleName(),
+                    result.isSuccess() ? "Success" : "Failed",
+                    result.isRecoverable());
         }
         
         return result;
@@ -132,149 +124,146 @@ public class ErrorHandler {
     
     /**
      * Handle an error with minimal context.
+     * 
+     * @param error the error to handle
+     * @return result of error handling
      */
     public ErrorResult handleError(Throwable error) {
-        ErrorContext context = ErrorContext.minimal(
-            "Unknown Operation",
-            categorizeError(error)
-        );
+        ErrorContext.ErrorCategory category = enrichmentService.categorizeError(error);
+        ErrorContext context = ErrorContext.minimal("Unknown Operation", category);
         return handleError(error, context);
     }
     
     /**
      * Register a custom error processor.
+     * 
+     * @param processor the processor to register
      */
     public void registerProcessor(IErrorProcessor processor) {
-        errorProcessors.add(processor);
+        processingService.registerProcessor(processor);
     }
     
     /**
      * Register a custom error strategy for a specific exception type.
+     * 
+     * @param errorType the error type
+     * @param strategy the strategy to use
      */
     public <T extends Throwable> void registerStrategy(Class<T> errorType, 
                                                       IErrorStrategy strategy) {
-        errorStrategies.put(errorType, strategy);
+        strategyService.registerStrategy(errorType, strategy);
     }
     
     /**
-     * Get error statistics.
+     * Get comprehensive error statistics.
+     * 
+     * @return error statistics
      */
     public ErrorStatistics getStatistics() {
-        Map<ErrorContext.ErrorCategory, Long> categoryStats = new HashMap<>();
-        errorsByCategory.forEach((category, count) -> 
-            categoryStats.put(category, count.get())
-        );
+        ErrorHistory.ErrorHistoryStatistics historyStats = historyService.getStatistics();
         
         return new ErrorStatistics(
-            totalErrors.get(),
-            categoryStats,
-            errorHistory.getRecentErrors(10),
-            errorHistory.getMostFrequentErrors(5)
+            historyStats.totalErrors(),
+            historyStats.errorsByCategory(),
+            historyService.getRecentErrors(10),
+            historyStats.mostFrequent()
         );
     }
     
     /**
-     * Clear error history.
+     * Clear all error history and statistics.
      */
     public void clearHistory() {
-        errorHistory.clear();
-        totalErrors.set(0);
-        errorsByCategory.clear();
+        historyService.clear();
+        statisticsService.reset();
+        log.info("Error history and statistics cleared");
     }
     
-    private ErrorContext enrichContext(ErrorContext context) {
-        Runtime runtime = Runtime.getRuntime();
+    /**
+     * Get current error rate.
+     * 
+     * @return errors per minute
+     */
+    public double getCurrentErrorRate() {
+        return statisticsService.getCurrentErrorRate();
+    }
+    
+    /**
+     * Get overall success rate.
+     * 
+     * @return success rate percentage
+     */
+    public double getOverallSuccessRate() {
+        return statisticsService.getOverallSuccessRate();
+    }
+    
+    @Override
+    public DiagnosticInfo getDiagnosticInfo() {
+        Map<String, Object> states = new ConcurrentHashMap<>();
         
-        return ErrorContext.builder()
-            .errorId(context.getErrorId())
-            .timestamp(context.getTimestamp())
-            .operation(context.getOperation())
-            .component(context.getComponent())
-            .userId(context.getUserId())
-            .sessionId(context.getSessionId())
-            .additionalData(context.getAdditionalData())
-            .category(context.getCategory())
-            .severity(context.getSeverity())
-            .recoverable(context.isRecoverable())
-            .recoveryHint(context.getRecoveryHint())
-            .memoryUsed(runtime.totalMemory() - runtime.freeMemory())
-            .activeThreads(ManagementFactory.getThreadMXBean().getThreadCount())
-            .cpuUsage(getCpuUsage())
-            .build();
+        // Aggregate diagnostic info from all services
+        states.put("processorCount", processingService.getProcessorCount());
+        states.put("strategyCount", strategyService.getStrategyCount());
+        states.put("errorRate", getCurrentErrorRate());
+        states.put("successRate", getOverallSuccessRate());
+        
+        // Get recent errors
+        var recentErrors = historyService.getRecentErrors(5);
+        states.put("recentErrorCount", recentErrors.size());
+        
+        // Include diagnostic info from services
+        states.put("services.processing", processingService.getDiagnosticInfo());
+        states.put("services.strategy", strategyService.getDiagnosticInfo());
+        states.put("services.history", historyService.getDiagnosticInfo());
+        states.put("services.enrichment", enrichmentService.getDiagnosticInfo());
+        states.put("services.statistics", statisticsService.getDiagnosticInfo());
+        
+        return DiagnosticInfo.builder()
+                .component("ErrorHandler")
+                .states(states)
+                .build();
     }
     
-    private double getCpuUsage() {
+    @Override
+    public boolean isDiagnosticModeEnabled() {
+        return diagnosticMode.get();
+    }
+    
+    @Override
+    public void enableDiagnosticMode(boolean enabled) {
+        diagnosticMode.set(enabled);
+        
+        // Propagate to all services
+        processingService.enableDiagnosticMode(enabled);
+        strategyService.enableDiagnosticMode(enabled);
+        historyService.enableDiagnosticMode(enabled);
+        enrichmentService.enableDiagnosticMode(enabled);
+        statisticsService.enableDiagnosticMode(enabled);
+        
+        log.info("Diagnostic mode {} for ErrorHandler and all services", 
+                enabled ? "enabled" : "disabled");
+    }
+    
+    private ErrorResult attemptRecovery(ErrorResult result, ErrorContext context) {
         try {
-            return ((com.sun.management.OperatingSystemMXBean) 
-                ManagementFactory.getOperatingSystemMXBean()).getProcessCpuLoad();
+            result.getRecoveryAction().run();
+            log.info("Successfully executed recovery action for error: {}", 
+                context.getErrorId());
+            return result;
         } catch (Exception e) {
-            return -1;
+            log.error("Recovery action failed for error: {}", 
+                context.getErrorId(), e);
+            return ErrorResult.unrecoverable(
+                "Recovery failed: " + e.getMessage(),
+                context.getErrorId()
+            );
         }
-    }
-    
-    private IErrorStrategy findStrategy(Throwable error) {
-        // Look for exact match
-        IErrorStrategy strategy = errorStrategies.get(error.getClass());
-        if (strategy != null) {
-            return strategy;
-        }
-        
-        // Look for superclass match
-        Class<?> currentClass = error.getClass();
-        while (currentClass != null && Throwable.class.isAssignableFrom(currentClass)) {
-            strategy = errorStrategies.get(currentClass);
-            if (strategy != null) {
-                return strategy;
-            }
-            currentClass = currentClass.getSuperclass();
-        }
-        
-        // Return default strategy
-        return new DefaultErrorStrategy();
-    }
-    
-    private ErrorContext.ErrorCategory categorizeError(Throwable error) {
-        String errorName = error.getClass().getSimpleName().toLowerCase();
-        
-        if (errorName.contains("file") || errorName.contains("io")) {
-            return ErrorContext.ErrorCategory.FILE_IO;
-        } else if (errorName.contains("network") || errorName.contains("connection")) {
-            return ErrorContext.ErrorCategory.NETWORK;
-        } else if (errorName.contains("database") || errorName.contains("sql")) {
-            return ErrorContext.ErrorCategory.DATABASE;
-        } else if (errorName.contains("validation") || errorName.contains("invalid")) {
-            return ErrorContext.ErrorCategory.VALIDATION;
-        } else if (errorName.contains("auth")) {
-            return ErrorContext.ErrorCategory.AUTHORIZATION;
-        } else if (errorName.contains("config")) {
-            return ErrorContext.ErrorCategory.CONFIGURATION;
-        }
-        
-        return ErrorContext.ErrorCategory.UNKNOWN;
-    }
-    
-    private void registerDefaultStrategies() {
-        // Application exceptions
-        registerStrategy(ApplicationException.class, new ApplicationExceptionStrategy());
-        
-        // Common Java exceptions
-        registerStrategy(NullPointerException.class, new NullPointerStrategy());
-        registerStrategy(IllegalArgumentException.class, new IllegalArgumentStrategy());
-        registerStrategy(IllegalStateException.class, new IllegalStateStrategy());
-        
-        // I/O exceptions
-        registerStrategy(java.io.IOException.class, new IOExceptionStrategy());
-        registerStrategy(java.nio.file.NoSuchFileException.class, new FileNotFoundStrategy());
-        
-        // Concurrency exceptions
-        registerStrategy(java.util.concurrent.TimeoutException.class, new TimeoutStrategy());
-        registerStrategy(InterruptedException.class, new InterruptedStrategy());
     }
     
     /**
      * Default error processor that logs errors.
      */
-    private class LoggingErrorProcessor implements IErrorProcessor {
+    private static class LoggingErrorProcessor implements IErrorProcessor {
         @Override
         public void process(Throwable error, ErrorContext context) {
             if (context.getSeverity().getLevel() >= ErrorContext.ErrorSeverity.HIGH.getLevel()) {
@@ -299,191 +288,33 @@ public class ErrorHandler {
     /**
      * Error processor that publishes error events.
      */
-    private class EventPublishingProcessor implements IErrorProcessor {
-        @Override
-        public void process(Throwable error, ErrorContext context) {
-            // Map ErrorContext.ErrorSeverity to ErrorEvent.ErrorSeverity
-            ErrorEvent.ErrorSeverity eventSeverity = switch (context.getSeverity()) {
-                case LOW -> ErrorEvent.ErrorSeverity.LOW;
-                case MEDIUM -> ErrorEvent.ErrorSeverity.MEDIUM;
-                case HIGH -> ErrorEvent.ErrorSeverity.HIGH;
-                case CRITICAL -> ErrorEvent.ErrorSeverity.FATAL;
-            };
-            
-            ErrorEvent event = new ErrorEvent(
-                this,
-                error.getMessage(),
-                error instanceof Exception ? (Exception) error : new Exception(error),
-                eventSeverity,
-                context.getComponent() != null ? context.getComponent() : "ErrorHandler"
-            );
-            eventBus.publish(event);
-        }
-    }
-    
-    /**
-     * Default error strategy for unhandled exceptions.
-     */
-    private static class DefaultErrorStrategy implements IErrorStrategy {
-        @Override
-        public ErrorResult handle(Throwable error, ErrorContext context) {
-            return ErrorResult.builder()
-                .errorId(context.getErrorId())
-                .success(false)
-                .recoverable(false)
-                .userMessage("An unexpected error occurred: " + error.getMessage())
-                .technicalDetails(error.toString())
-                .build();
-        }
-    }
-    
-    /**
-     * Strategy for application exceptions.
-     */
-    private static class ApplicationExceptionStrategy implements IErrorStrategy {
-        @Override
-        public ErrorResult handle(Throwable error, ErrorContext context) {
-            ApplicationException appEx = (ApplicationException) error;
-            
-            return ErrorResult.builder()
-                .errorId(context.getErrorId())
-                .success(false)
-                .recoverable(appEx.isRecoverable())
-                .userMessage(appEx.getDisplayMessage())
-                .technicalDetails(appEx.getTechnicalDetails())
-                .recoveryAction(createRecoveryAction(appEx))
-                .build();
+    private static class EventPublishingProcessor implements IErrorProcessor {
+        private final EventBus eventBus;
+        
+        EventPublishingProcessor(EventBus eventBus) {
+            this.eventBus = eventBus;
         }
         
-        private Runnable createRecoveryAction(ApplicationException ex) {
-            if (!ex.isRecoverable()) {
-                return null;
-            }
+        @Override
+        public void process(Throwable error, ErrorContext context) {
+            // Create and publish error event
+            io.github.jspinak.brobot.runner.events.ErrorEvent.ErrorSeverity eventSeverity = 
+                switch (context.getSeverity()) {
+                    case LOW -> io.github.jspinak.brobot.runner.events.ErrorEvent.ErrorSeverity.LOW;
+                    case MEDIUM -> io.github.jspinak.brobot.runner.events.ErrorEvent.ErrorSeverity.MEDIUM;
+                    case HIGH -> io.github.jspinak.brobot.runner.events.ErrorEvent.ErrorSeverity.HIGH;
+                    case CRITICAL -> io.github.jspinak.brobot.runner.events.ErrorEvent.ErrorSeverity.FATAL;
+                };
             
-            // Create appropriate recovery action based on error category
-            return switch (ex.getContext().getCategory()) {
-                case FILE_IO -> () -> log.info("Retrying file operation...");
-                case NETWORK -> () -> log.info("Retrying network operation...");
-                case VALIDATION -> () -> log.info("Awaiting user correction...");
-                default -> null;
-            };
-        }
-    }
-    
-    /**
-     * Strategy for null pointer exceptions.
-     */
-    private static class NullPointerStrategy implements IErrorStrategy {
-        @Override
-        public ErrorResult handle(Throwable error, ErrorContext context) {
-            return ErrorResult.builder()
-                .errorId(context.getErrorId())
-                .success(false)
-                .recoverable(false)
-                .userMessage("A required value was missing.")
-                .technicalDetails("NullPointerException in " + context.getOperation())
-                .build();
-        }
-    }
-    
-    /**
-     * Strategy for illegal argument exceptions.
-     */
-    private static class IllegalArgumentStrategy implements IErrorStrategy {
-        @Override
-        public ErrorResult handle(Throwable error, ErrorContext context) {
-            return ErrorResult.builder()
-                .errorId(context.getErrorId())
-                .success(false)
-                .recoverable(true)
-                .userMessage("Invalid input provided: " + error.getMessage())
-                .technicalDetails(error.toString())
-                .build();
-        }
-    }
-    
-    /**
-     * Strategy for illegal state exceptions.
-     */
-    private static class IllegalStateStrategy implements IErrorStrategy {
-        @Override
-        public ErrorResult handle(Throwable error, ErrorContext context) {
-            return ErrorResult.builder()
-                .errorId(context.getErrorId())
-                .success(false)
-                .recoverable(true)
-                .userMessage("Operation cannot be performed in current state.")
-                .technicalDetails(error.getMessage())
-                .recoveryAction(() -> log.info("Resetting to valid state..."))
-                .build();
-        }
-    }
-    
-    /**
-     * Strategy for I/O exceptions.
-     */
-    private static class IOExceptionStrategy implements IErrorStrategy {
-        @Override
-        public ErrorResult handle(Throwable error, ErrorContext context) {
-            return ErrorResult.builder()
-                .errorId(context.getErrorId())
-                .success(false)
-                .recoverable(true)
-                .userMessage("File operation failed: " + error.getMessage())
-                .technicalDetails(error.toString())
-                .recoveryAction(() -> log.info("Retrying file operation..."))
-                .build();
-        }
-    }
-    
-    /**
-     * Strategy for file not found exceptions.
-     */
-    private static class FileNotFoundStrategy implements IErrorStrategy {
-        @Override
-        public ErrorResult handle(Throwable error, ErrorContext context) {
-            return ErrorResult.builder()
-                .errorId(context.getErrorId())
-                .success(false)
-                .recoverable(false)
-                .userMessage("File not found: " + error.getMessage())
-                .technicalDetails("Check file path and permissions")
-                .build();
-        }
-    }
-    
-    /**
-     * Strategy for timeout exceptions.
-     */
-    private static class TimeoutStrategy implements IErrorStrategy {
-        @Override
-        public ErrorResult handle(Throwable error, ErrorContext context) {
-            return ErrorResult.builder()
-                .errorId(context.getErrorId())
-                .success(false)
-                .recoverable(true)
-                .userMessage("Operation timed out. Please try again.")
-                .technicalDetails("Timeout after waiting period")
-                .recoveryAction(() -> log.info("Retrying with extended timeout..."))
-                .build();
-        }
-    }
-    
-    /**
-     * Strategy for interrupted exceptions.
-     */
-    private static class InterruptedStrategy implements IErrorStrategy {
-        @Override
-        public ErrorResult handle(Throwable error, ErrorContext context) {
-            Thread.currentThread().interrupt(); // Restore interrupted status
-            
-            return ErrorResult.builder()
-                .errorId(context.getErrorId())
-                .success(false)
-                .recoverable(false)
-                .userMessage("Operation was cancelled.")
-                .technicalDetails("Thread interrupted during " + context.getOperation())
-                .build();
+            io.github.jspinak.brobot.runner.events.ErrorEvent event = 
+                new io.github.jspinak.brobot.runner.events.ErrorEvent(
+                    this,
+                    error.getMessage(),
+                    error instanceof Exception ? (Exception) error : new Exception(error),
+                    eventSeverity,
+                    context.getComponent() != null ? context.getComponent() : "ErrorHandler"
+                );
+            eventBus.publish(event);
         }
     }
 }

@@ -1,5 +1,6 @@
 package io.github.jspinak.brobot.config;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import java.awt.GraphicsEnvironment;
 
@@ -31,6 +32,7 @@ import java.awt.GraphicsEnvironment;
  *     .build();  // Auto-detects display availability
  * }</pre>
  */
+@Slf4j
 @Component
 public class ExecutionEnvironment {
     
@@ -91,9 +93,32 @@ public class ExecutionEnvironment {
             return false;
         }
         
-        // Check for DISPLAY variable on Unix-like systems
+        // Check OS type
         String os = System.getProperty("os.name").toLowerCase();
-        if (os.contains("nix") || os.contains("nux") || os.contains("mac")) {
+        boolean isWindows = os.contains("windows");
+        boolean isMac = os.contains("mac");
+        boolean isWSL = System.getenv("WSL_DISTRO_NAME") != null || 
+                       System.getenv("WSL_INTEROP") != null;
+        
+        // For Windows (not WSL), display is generally available
+        if (isWindows && !isWSL) {
+            // Windows has display unless running in CI
+            return !isRunningInCI();
+        }
+        
+        // For macOS, check actual display capability using AWT
+        if (isMac) {
+            try {
+                // Try to get screen devices - this works on macOS
+                GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+                return ge.getScreenDevices().length > 0 && !isRunningInCI();
+            } catch (Exception e) {
+                return false;
+            }
+        }
+        
+        // Check for DISPLAY variable on Unix-like systems (including WSL)
+        if (os.contains("nix") || os.contains("nux") || isWSL) {
             String display = System.getenv("DISPLAY");
             if (display == null || display.isEmpty()) {
                 return false;
@@ -282,7 +307,7 @@ public class ExecutionEnvironment {
             env.verboseLogging = this.verboseLogging;
             
             if (env.verboseLogging) {
-                System.out.println("ExecutionEnvironment configured: " + env.getEnvironmentInfo());
+                log.debug("ExecutionEnvironment configured: {}", env.getEnvironmentInfo());
             }
             
             return env;

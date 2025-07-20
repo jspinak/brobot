@@ -6,6 +6,7 @@ import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.action.basic.find.Find;
 import io.github.jspinak.brobot.model.match.Match;
+import io.github.jspinak.brobot.model.state.StateRegion;
 import io.github.jspinak.brobot.tools.history.draw.HighlightMatchedRegionV2;
 import io.github.jspinak.brobot.tools.testing.mock.time.TimeProvider;
 
@@ -93,7 +94,23 @@ public class Highlight implements ActionInterface {
             highlightSeconds = highlightOptions.getHighlightSeconds();
         }
         
-        find.perform(matches, objectCollections);
+        // Only run Find if we have images or other searchable objects
+        if (objectCollections.length > 0 && !hasOnlyRegions(objectCollections)) {
+            find.perform(matches, objectCollections);
+        } else if (objectCollections.length > 0) {
+            // For regions only, convert them directly to matches without Find
+            for (ObjectCollection collection : objectCollections) {
+                for (StateRegion stateRegion : collection.getStateRegions()) {
+                    Match match = new Match.Builder()
+                        .setRegion(stateRegion.getSearchRegion())
+                        .setSimScore(1.0) // Perfect score for direct regions
+                        .setStateObjectData(stateRegion)
+                        .build();
+                    matches.add(match);
+                }
+            }
+            matches.setSuccess(true);
+        }
         
         if (highlightAllAtOnce) {
             highlightAllAtOnce(matches, config, highlightSeconds);
@@ -115,5 +132,22 @@ public class Highlight implements ActionInterface {
             if (matches.getMatchList().indexOf(match) < matches.getMatchList().size() - 1)
                 time.wait(config.getPauseAfterEnd());
         }
+    }
+    
+    private boolean hasOnlyRegions(ObjectCollection[] objectCollections) {
+        boolean hasRegions = false;
+        for (ObjectCollection collection : objectCollections) {
+            if (!collection.getStateImages().isEmpty() || 
+                !collection.getStateLocations().isEmpty() || 
+                !collection.getStateStrings().isEmpty() ||
+                !collection.getMatches().isEmpty() ||
+                !collection.getScenes().isEmpty()) {
+                return false;
+            }
+            if (!collection.getStateRegions().isEmpty()) {
+                hasRegions = true;
+            }
+        }
+        return hasRegions;
     }
 }

@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.stereotype.Component;
+import org.springframework.context.event.EventListener;
+import io.github.jspinak.brobot.annotations.StatesRegisteredEvent;
 
 import io.github.jspinak.brobot.analysis.color.profiles.KmeansProfileBuilder;
 import io.github.jspinak.brobot.analysis.color.profiles.ProfileSetBuilder;
@@ -317,5 +319,18 @@ public class FrameworkInitializer {
             populateStateIds();
             stateTransitionsRepository.populateStateTransitionsJointTable();
         }
+    }
+    
+    /**
+     * Handles the StatesRegisteredEvent to initialize state structure after annotation processing.
+     * This ensures states are properly registered before framework initialization.
+     * 
+     * @param event The event containing information about registered states
+     */
+    @EventListener
+    public void onStatesRegistered(StatesRegisteredEvent event) {
+        ConsoleReporter.println("Received StatesRegisteredEvent with " + event.getStateCount() + 
+                " states and " + event.getTransitionCount() + " transitions.");
+        initializeStateStructure();
     }
 }

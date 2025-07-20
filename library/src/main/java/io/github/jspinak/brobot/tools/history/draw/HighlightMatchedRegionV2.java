@@ -6,8 +6,10 @@ import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.model.state.StateObjectMetadata;
 import io.github.jspinak.brobot.config.FrameworkSettings;
 import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
+import io.github.jspinak.brobot.logging.unified.BrobotLogger;
 
 import org.sikuli.script.Region;
+import org.sikuli.basics.Settings;
 import org.springframework.stereotype.Component;
 
 /**
@@ -34,9 +36,11 @@ import org.springframework.stereotype.Component;
 public class HighlightMatchedRegionV2 {
 
     private final HighlightMatchedRegion legacyHighlighter;
+    private final BrobotLogger brobotLogger;
     
-    public HighlightMatchedRegionV2(HighlightMatchedRegion legacyHighlighter) {
+    public HighlightMatchedRegionV2(HighlightMatchedRegion legacyHighlighter, BrobotLogger brobotLogger) {
         this.legacyHighlighter = legacyHighlighter;
+        this.brobotLogger = brobotLogger;
     }
 
     /**
@@ -59,9 +63,28 @@ public class HighlightMatchedRegionV2 {
         }
         
         if (FrameworkSettings.mock && FrameworkSettings.screenshots.isEmpty()) {
-            ConsoleReporter.println("Highlight ON: " + match + " with color: " + highlightColor);
+            brobotLogger.log()
+                .observation("Highlight ON: " + formatMatch(match) + " with color: " + highlightColor)
+                .metadata("action", "HIGHLIGHT_ON")
+                .metadata("color", highlightColor)
+                .log();
         } else {
-            match.sikuli().highlightOn(highlightColor);
+            // Temporarily disable SikuliX logs
+            boolean previousActionLogs = Settings.ActionLogs;
+            Settings.ActionLogs = false;
+            try {
+                match.sikuli().highlightOn(highlightColor);
+                
+                // Log through Brobot instead
+                brobotLogger.log()
+                    .observation("Highlighting region")
+                    .metadata("action", "HIGHLIGHT_ON")
+                    .metadata("region", formatMatch(match))
+                    .metadata("color", highlightColor)
+                    .log();
+            } finally {
+                Settings.ActionLogs = previousActionLogs;
+            }
         }
     }
 
@@ -76,7 +99,14 @@ public class HighlightMatchedRegionV2 {
      */
     public void turnOff(Match match) {
         if (!FrameworkSettings.mock || !FrameworkSettings.screenshots.isEmpty()) {
-            match.sikuli().highlightOff();
+            // Temporarily disable SikuliX logs
+            boolean previousActionLogs = Settings.ActionLogs;
+            Settings.ActionLogs = false;
+            try {
+                match.sikuli().highlightOff();
+            } finally {
+                Settings.ActionLogs = previousActionLogs;
+            }
         }
     }
 
@@ -112,16 +142,45 @@ public class HighlightMatchedRegionV2 {
         }
         
         if (FrameworkSettings.mock && FrameworkSettings.screenshots.isEmpty()) {
-            ConsoleReporter.println("Highlight: " + match + " for " + highlightSeconds + " seconds with color: " + highlightColor);
+            brobotLogger.log()
+                .observation("Highlight: " + formatMatch(match))
+                .metadata("action", "HIGHLIGHT")
+                .metadata("duration", highlightSeconds)
+                .metadata("color", highlightColor)
+                .log();
             return true;
         }
         
-        match.sikuli().highlight(1);
-        Region highlightReg = match.getRegion().sikuli();
-        if (match.w() == 0) highlightReg.w = 10;
-        if (match.h() == 0) highlightReg.h = 10;
-        ConsoleReporter.println("in HighlightRegion: " + highlightReg);
-        highlightReg.highlight(highlightSeconds, highlightColor);
-        return true;
+        // Temporarily disable SikuliX logs
+        boolean previousActionLogs = Settings.ActionLogs;
+        Settings.ActionLogs = false;
+        
+        try {
+            match.sikuli().highlight(1);
+            Region highlightReg = match.getRegion().sikuli();
+            if (match.w() == 0) highlightReg.w = 10;
+            if (match.h() == 0) highlightReg.h = 10;
+            
+            // Log through Brobot instead of ConsoleReporter
+            brobotLogger.log()
+                .observation("Highlighting region")
+                .metadata("action", "HIGHLIGHT")
+                .metadata("region", formatMatch(match))
+                .metadata("duration", highlightSeconds)
+                .metadata("color", highlightColor)
+                .log();
+            
+            highlightReg.highlight(highlightSeconds, highlightColor);
+            return true;
+        } finally {
+            Settings.ActionLogs = previousActionLogs;
+        }
+    }
+    
+    /**
+     * Formats a match for logging in a concise way.
+     */
+    private String formatMatch(Match match) {
+        return String.format("R[%d,%d %dx%d]", match.x(), match.y(), match.w(), match.h());
     }
 }

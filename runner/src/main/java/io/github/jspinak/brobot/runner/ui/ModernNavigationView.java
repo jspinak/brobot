@@ -1,6 +1,7 @@
 package io.github.jspinak.brobot.runner.ui;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.EqualsAndHashCode;
 
 import io.github.jspinak.brobot.runner.ui.icons.IconRegistry;
 import io.github.jspinak.brobot.runner.ui.navigation.NavigationManager;
@@ -23,7 +24,8 @@ import java.util.Optional;
  */
 @Component
 @RequiredArgsConstructor
-@Data
+@Getter
+@EqualsAndHashCode(callSuper = false)
 public class ModernNavigationView extends VBox {
     private final NavigationManager navigationManager;
     private final ScreenRegistry screenRegistry;

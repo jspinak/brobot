@@ -2,6 +2,7 @@ package io.github.jspinak.brobot.config;
 
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 
 /**
  * Spring configuration class for the Brobot framework.
@@ -55,6 +56,7 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 @ComponentScan
+@Import({BrobotDefaultsConfiguration.class, SikuliXLoggingConfig.class})
 public class BrobotConfig {
 
     /**

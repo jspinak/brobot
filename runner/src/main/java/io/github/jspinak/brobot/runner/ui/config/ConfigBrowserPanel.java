@@ -188,7 +188,7 @@ public class ConfigBrowserPanel extends BorderPane {
         filesItem.getChildren().addAll(projectConfigItem, dslConfigItem);
 
         // Add project structure if loaded
-        AutomationProject project = projectManager.getActiveProject();
+        AutomationProject project = projectManager.getCurrentProject();
         if (project != null) {
             // Add states
             TreeItem<ConfigItem> statesItem = new TreeItem<>(new ConfigItem("States", ConfigItemType.FOLDER));

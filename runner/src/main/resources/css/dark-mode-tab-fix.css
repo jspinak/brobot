@@ -1,0 +1,95 @@
+/**
+ * Dark Mode Tab Visibility Fix
+ * Ensures tabs are clearly visible in dark mode
+ */
+
+/* Tab header area in dark mode */
+.dark .tab-pane > .tab-header-area,
+.dark-theme .tab-pane > .tab-header-area {
+    -fx-background-color: #2b2b2b !important;
+}
+
+/* Individual tabs in dark mode */
+.dark .tab,
+.dark-theme .tab {
+    -fx-background-color: transparent !important;
+    -fx-padding: 8 16 8 16 !important;
+}
+
+/* Tab labels must be visible */
+.dark .tab .tab-label,
+.dark-theme .tab .tab-label,
+.dark .tab-label,
+.dark-theme .tab-label {
+    -fx-text-fill: #cccccc !important;
+    -fx-opacity: 1.0 !important;
+}
+
+/* Hover state for tabs */
+.dark .tab:hover,
+.dark-theme .tab:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.dark .tab:hover .tab-label,
+.dark-theme .tab:hover .tab-label {
+    -fx-text-fill: #ffffff !important;
+}
+
+/* Selected tab */
+.dark .tab:selected,
+.dark-theme .tab:selected {
+    -fx-background-color: transparent !important;
+    -fx-border-width: 0 0 2px 0 !important;
+    -fx-border-color: transparent transparent #4fc3f7 transparent !important;
+}
+
+.dark .tab:selected .tab-label,
+.dark-theme .tab:selected .tab-label {
+    -fx-text-fill: #4fc3f7 !important;
+}
+
+/* Tab content area in dark mode */
+.dark .tab-pane > .tab-content-area,
+.dark-theme .tab-pane > .tab-content-area {
+    -fx-background-color: transparent !important;
+}
+
+/* Ensure tab close buttons are visible */
+.dark .tab .tab-close-button,
+.dark-theme .tab .tab-close-button {
+    -fx-background-color: transparent !important;
+}
+
+.dark .tab .tab-close-button:hover,
+.dark-theme .tab .tab-close-button:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+/* Force tab text to be visible even with nested structures */
+.dark .tab *,
+.dark-theme .tab * {
+    -fx-text-fill: inherit !important;
+    -fx-fill: inherit !important;
+}
+
+/* Specific fix for LabeledText inside tabs */
+.dark .tab .labeled .text,
+.dark-theme .tab .labeled .text,
+.dark .tab .label .text,
+.dark-theme .tab .label .text {
+    -fx-fill: #cccccc !important;
+}
+
+.dark .tab:selected .labeled .text,
+.dark-theme .tab:selected .labeled .text,
+.dark .tab:selected .label .text,
+.dark-theme .tab:selected .label .text {
+    -fx-fill: #4fc3f7 !important;
+}
+
+/* Debug - ensure tabs have minimum height */
+.dark .tab,
+.dark-theme .tab {
+    -fx-min-height: 36px !important;
+}

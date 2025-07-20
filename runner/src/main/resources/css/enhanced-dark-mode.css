@@ -1,0 +1,436 @@
+/* Enhanced Dark Mode CSS with WCAG-compliant contrast ratios */
+
+/* Root dark mode styling */
+.root {
+    -fx-background-color: #0d1117 !important;
+}
+
+/* Main background colors for containers */
+.app-container,
+.content-area,
+.tab-content-wrapper,
+.tab-content-wrapper-root,
+.refactored-config-panel,
+.automation-panel,
+.resource-panel,
+.logs-panel {
+    -fx-background-color: #0d1117 !important;
+}
+
+/* Card and panel backgrounds */
+.brobot-card,
+.brobot-panel,
+.config-section,
+.config-details-view,
+.config-list-panel {
+    -fx-background-color: #161b22 !important;
+    -fx-border-color: #30363d !important;
+    -fx-border-width: 1px !important;
+    -fx-border-radius: 6px !important;
+    -fx-background-radius: 6px !important;
+}
+
+/* Header styling */
+.header-panel {
+    -fx-background-color: #010409 !important;
+    -fx-border-color: transparent transparent #30363d transparent !important;
+    -fx-border-width: 0 0 1 0 !important;
+}
+
+.header-title {
+    -fx-text-fill: #f0f6fc !important; /* High contrast white */
+    -fx-font-size: 16px !important;
+    -fx-font-weight: bold !important;
+}
+
+/* All text elements - ensure high contrast */
+.label, Label {
+    -fx-text-fill: #e6edf3 !important; /* High contrast light gray */
+}
+
+Text {
+    -fx-fill: #e6edf3 !important;
+}
+
+/* Specific label types with enhanced contrast */
+.section-header {
+    -fx-text-fill: #f0f6fc !important;
+    -fx-font-weight: bold !important;
+    -fx-font-size: 14px !important;
+}
+
+.field-label {
+    -fx-text-fill: #e6edf3 !important;
+    -fx-font-weight: normal !important;
+}
+
+.status-label {
+    -fx-text-fill: #e6edf3 !important;
+}
+
+/* Button styling with proper contrast */
+.button {
+    -fx-background-color: #21262d !important;
+    -fx-text-fill: #f0f6fc !important; /* High contrast white text */
+    -fx-border-color: #30363d !important;
+    -fx-border-width: 1px !important;
+    -fx-border-radius: 6px !important;
+    -fx-background-radius: 6px !important;
+}
+
+.button:hover {
+    -fx-background-color: #30363d !important;
+    -fx-text-fill: #f0f6fc !important;
+    -fx-border-color: #8b949e !important;
+}
+
+.button:pressed {
+    -fx-background-color: #0d1117 !important;
+    -fx-text-fill: #f0f6fc !important;
+}
+
+/* Theme toggle button special styling */
+.theme-toggle {
+    -fx-background-color: #1f6feb !important;
+    -fx-text-fill: #ffffff !important;
+    -fx-border-color: transparent !important;
+}
+
+.theme-toggle:hover {
+    -fx-background-color: #2d79f5 !important;
+    -fx-text-fill: #ffffff !important;
+}
+
+/* Primary/Accent buttons */
+.button.primary,
+.button.accent {
+    -fx-background-color: #238636 !important;
+    -fx-text-fill: #ffffff !important;
+    -fx-border-color: transparent !important;
+}
+
+.button.primary:hover,
+.button.accent:hover {
+    -fx-background-color: #2ea043 !important;
+    -fx-text-fill: #ffffff !important;
+}
+
+/* Text input fields with proper contrast */
+.text-field,
+.text-area {
+    -fx-background-color: #0d1117 !important;
+    -fx-text-fill: #f0f6fc !important; /* High contrast text */
+    -fx-prompt-text-fill: #8b949e !important;
+    -fx-border-color: #30363d !important;
+    -fx-border-width: 1px !important;
+    -fx-border-radius: 6px !important;
+    -fx-background-radius: 6px !important;
+}
+
+.text-field:focused,
+.text-area:focused {
+    -fx-border-color: #58a6ff !important;
+    -fx-text-fill: #f0f6fc !important;
+}
+
+/* Combo box and choice box */
+.combo-box,
+.choice-box {
+    -fx-background-color: #0d1117 !important;
+    -fx-border-color: #30363d !important;
+    -fx-border-width: 1px !important;
+}
+
+.combo-box .list-cell,
+.choice-box .list-cell {
+    -fx-text-fill: #e6edf3 !important;
+    -fx-background-color: #0d1117 !important;
+}
+
+.combo-box:hover,
+.choice-box:hover {
+    -fx-border-color: #8b949e !important;
+}
+
+/* Spinner controls */
+.spinner {
+    -fx-background-color: #0d1117 !important;
+    -fx-border-color: #30363d !important;
+}
+
+.spinner .text-field {
+    -fx-text-fill: #f0f6fc !important;
+}
+
+.spinner .increment-arrow-button,
+.spinner .decrement-arrow-button {
+    -fx-background-color: #21262d !important;
+    -fx-border-color: #30363d !important;
+}
+
+.spinner .increment-arrow-button:hover,
+.spinner .decrement-arrow-button:hover {
+    -fx-background-color: #30363d !important;
+}
+
+/* Table styling with proper contrast */
+.table-view {
+    -fx-background-color: #0d1117 !important;
+    -fx-border-color: #30363d !important;
+}
+
+.table-view .column-header {
+    -fx-background-color: #161b22 !important;
+    -fx-border-color: #30363d !important;
+}
+
+.table-view .column-header .label {
+    -fx-text-fill: #f0f6fc !important;
+    -fx-font-weight: bold !important;
+}
+
+.table-row-cell {
+    -fx-background-color: #0d1117 !important;
+    -fx-text-fill: #e6edf3 !important;
+    -fx-border-color: transparent transparent #21262d transparent !important;
+    -fx-border-width: 0 0 1 0 !important;
+}
+
+.table-row-cell:hover {
+    -fx-background-color: #161b22 !important;
+}
+
+.table-row-cell:selected {
+    -fx-background-color: #1f3c88 !important;
+    -fx-text-fill: #f0f6fc !important;
+}
+
+.table-cell {
+    -fx-text-fill: #e6edf3 !important;
+}
+
+/* Tab styling with enhanced visibility */
+.tab-pane {
+    -fx-background-color: transparent !important;
+}
+
+.tab-header-area {
+    -fx-background-color: #010409 !important;
+    -fx-border-color: transparent transparent #30363d transparent !important;
+    -fx-border-width: 0 0 1 0 !important;
+}
+
+.tab {
+    -fx-background-color: transparent !important;
+    -fx-border-color: transparent !important;
+    -fx-padding: 8 16 8 16 !important;
+}
+
+.tab:hover {
+    -fx-background-color: #161b22 !important;
+}
+
+.tab:selected {
+    -fx-background-color: transparent !important;
+    -fx-border-color: transparent transparent #1f6feb transparent !important;
+    -fx-border-width: 0 0 3 0 !important;
+}
+
+.tab .tab-label {
+    -fx-text-fill: #8b949e !important;
+    -fx-font-size: 13px !important;
+}
+
+.tab:hover .tab-label {
+    -fx-text-fill: #e6edf3 !important;
+}
+
+.tab:selected .tab-label {
+    -fx-text-fill: #f0f6fc !important;
+    -fx-font-weight: bold !important;
+}
+
+/* Scroll bars */
+.scroll-bar {
+    -fx-background-color: transparent !important;
+}
+
+.scroll-bar .track {
+    -fx-background-color: #161b22 !important;
+    -fx-border-color: #30363d !important;
+    -fx-border-width: 1px !important;
+}
+
+.scroll-bar .thumb {
+    -fx-background-color: #484f58 !important;
+    -fx-border-radius: 4px !important;
+    -fx-background-radius: 4px !important;
+}
+
+.scroll-bar .thumb:hover {
+    -fx-background-color: #6e7681 !important;
+}
+
+/* Status bar styling */
+.status-bar {
+    -fx-background-color: #010409 !important;
+    -fx-border-color: #30363d transparent transparent transparent !important;
+    -fx-border-width: 1 0 0 0 !important;
+}
+
+.status-bar .label {
+    -fx-text-fill: #e6edf3 !important;
+}
+
+/* Online indicator proper contrast */
+.online-indicator {
+    -fx-background-color: #238636 !important;
+    -fx-text-fill: #ffffff !important;
+    -fx-padding: 4 8 4 8 !important;
+    -fx-background-radius: 12px !important;
+}
+
+/* Error and warning messages */
+.error-label {
+    -fx-text-fill: #f85149 !important;
+}
+
+.warning-label {
+    -fx-text-fill: #d29922 !important;
+}
+
+.success-label {
+    -fx-text-fill: #3fb950 !important;
+}
+
+/* Tooltips */
+.tooltip {
+    -fx-background-color: #1c2128 !important;
+    -fx-text-fill: #f0f6fc !important;
+    -fx-border-color: #30363d !important;
+    -fx-border-width: 1px !important;
+    -fx-border-radius: 6px !important;
+    -fx-background-radius: 6px !important;
+    -fx-padding: 8 12 8 12 !important;
+}
+
+/* Progress bars */
+.progress-bar {
+    -fx-background-color: #21262d !important;
+    -fx-border-color: #30363d !important;
+}
+
+.progress-bar .bar {
+    -fx-background-color: #1f6feb !important;
+}
+
+/* Checkbox and radio button */
+.check-box,
+.radio-button {
+    -fx-text-fill: #e6edf3 !important;
+}
+
+.check-box .box,
+.radio-button .radio {
+    -fx-background-color: #0d1117 !important;
+    -fx-border-color: #30363d !important;
+}
+
+.check-box:selected .mark,
+.radio-button:selected .dot {
+    -fx-background-color: #1f6feb !important;
+}
+
+/* Split pane dividers */
+.split-pane {
+    -fx-background-color: #0d1117 !important;
+}
+
+.split-pane-divider {
+    -fx-background-color: #30363d !important;
+    -fx-padding: 0 1 0 1 !important;
+}
+
+/* Menu and menu items */
+.menu-bar {
+    -fx-background-color: #010409 !important;
+    -fx-border-color: transparent transparent #30363d transparent !important;
+    -fx-border-width: 0 0 1 0 !important;
+}
+
+.menu {
+    -fx-text-fill: #e6edf3 !important;
+}
+
+.menu:hover,
+.menu:showing {
+    -fx-background-color: #161b22 !important;
+}
+
+.menu-item {
+    -fx-background-color: #0d1117 !important;
+    -fx-text-fill: #e6edf3 !important;
+}
+
+.menu-item:hover {
+    -fx-background-color: #161b22 !important;
+}
+
+/* Context menus */
+.context-menu {
+    -fx-background-color: #1c2128 !important;
+    -fx-border-color: #30363d !important;
+    -fx-border-width: 1px !important;
+}
+
+/* Tree view */
+.tree-view {
+    -fx-background-color: #0d1117 !important;
+    -fx-border-color: #30363d !important;
+}
+
+.tree-cell {
+    -fx-background-color: transparent !important;
+    -fx-text-fill: #e6edf3 !important;
+}
+
+.tree-cell:hover {
+    -fx-background-color: #161b22 !important;
+}
+
+.tree-cell:selected {
+    -fx-background-color: #1f3c88 !important;
+    -fx-text-fill: #f0f6fc !important;
+}
+
+/* List view */
+.list-view {
+    -fx-background-color: #0d1117 !important;
+    -fx-border-color: #30363d !important;
+}
+
+.list-cell {
+    -fx-background-color: transparent !important;
+    -fx-text-fill: #e6edf3 !important;
+}
+
+.list-cell:hover {
+    -fx-background-color: #161b22 !important;
+}
+
+.list-cell:selected {
+    -fx-background-color: #1f3c88 !important;
+    -fx-text-fill: #f0f6fc !important;
+}
+
+/* Force override any inline styles */
+* {
+    -fx-border-color: transparent !important;
+}
+
+/* Ensure all text has minimum contrast */
+.label:disabled,
+.button:disabled,
+.text-field:disabled {
+    -fx-opacity: 0.6 !important;
+}

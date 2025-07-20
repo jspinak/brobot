@@ -1,0 +1,79 @@
+# Visual Debug Profile - Maximum visibility for development and debugging
+# Activate with: --spring.profiles.active=visual-debug
+
+brobot:
+  # Console action reporting - verbose output
+  console:
+    actions:
+      enabled: true
+      level: VERBOSE
+      show-match-details: true
+      show-timing: true
+      use-colors: true
+      use-icons: true
+      # Report all action types
+      report:
+        find: true
+        click: true
+        type: true
+        drag: true
+        highlight: true
+      report-transitions: true
+      # Lower thresholds for performance warnings
+      performance-warn-threshold: 500
+      performance-error-threshold: 2000
+  
+  # Visual highlighting - all features enabled
+  highlight:
+    enabled: true
+    auto-highlight-finds: true
+    auto-highlight-search-regions: true
+    
+    # Find highlighting - bright green with flash
+    find:
+      color: "#00FF00"
+      duration: 3.0
+      border-width: 4
+      flash: true
+      flash-count: 2
+      flash-interval: 300
+    
+    # Search region highlighting - blue with dimensions
+    search-region:
+      color: "#0066FF"
+      duration: 2.0
+      border-width: 3
+      opacity: 0.3
+      filled: true
+      show-dimensions: true
+    
+    # Error highlighting - red with cross mark
+    error:
+      enabled: true
+      color: "#FF0000"
+      duration: 4.0
+      show-cross-mark: true
+    
+    # Click highlighting - yellow with ripple
+    click:
+      enabled: true
+      color: "#FFFF00"
+      duration: 1.0
+      radius: 25
+      ripple-effect: true
+  
+  # GUI access monitoring - verbose with solutions
+  gui-access:
+    report-problems: true
+    verbose-errors: true
+    suggest-solutions: true
+    check-on-startup: true
+    continue-on-error: false
+    log-successful-checks: true
+    platform-specific-advice: true
+
+# Logging configuration
+logging:
+  level:
+    io.github.jspinak.brobot.tools.logging: DEBUG
+    io.github.jspinak.brobot.logging.unified: DEBUG
