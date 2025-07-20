@@ -13,6 +13,7 @@ import io.github.jspinak.brobot.model.element.Location;
 import io.github.jspinak.brobot.model.element.Position;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.element.Pattern;
+import io.github.jspinak.brobot.model.element.SearchRegionOnObject;
 import lombok.Getter;
 import lombok.Setter;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -99,6 +100,9 @@ public class StateImage implements StateObject {
      */
     private Set<Long> involvedTransitionIds = new HashSet<>();
 
+    // Cross-state search region configuration
+    private SearchRegionOnObject searchRegionOnObject;
+
     public String getIdAsString() {
         return objectType.name() + name + patterns.toString();
     }
@@ -142,6 +146,17 @@ public class StateImage implements StateObject {
     }
 
     /**
+     * Sets the fixed search region for all patterns in this StateImage.
+     * @param region the fixed region to set
+     */
+    public void setFixedSearchRegion(Region region) {
+        patterns.forEach(pattern -> {
+            pattern.getSearchRegions().setFixedRegion(region);
+            pattern.setFixed(true);
+        });
+    }
+
+    /**
      * Finds snapshots from all patterns.
      * @return a list of snapshots
      */
@@ -171,6 +186,23 @@ public class StateImage implements StateObject {
     public boolean isDefined() {
         for (Pattern pattern : patterns) {
             if (pattern.isDefined()) return true;
+        }
+        return false;
+    }
+
+    /**
+     * Checks if this StateImage has a defined search region.
+     * A search region is defined if any pattern has a fixed region or defined search regions.
+     * @return true if any pattern has a defined search region
+     */
+    public boolean hasDefinedSearchRegion() {
+        for (Pattern pattern : patterns) {
+            if (pattern.getSearchRegions().getFixedRegion().isDefined()) return true;
+            if (!pattern.getSearchRegions().getRegions().isEmpty()) {
+                for (Region region : pattern.getSearchRegions().getRegions()) {
+                    if (region.isDefined()) return true;
+                }
+            }
         }
         return false;
     }
@@ -291,6 +323,7 @@ public class StateImage implements StateObject {
         private Long ownerStateId = null;
         private Position positionForAllPatterns;
         private Location offsetForAllPatterns;
+        private SearchRegionOnObject searchRegionOnObject;
 
         public Builder setName(String name) {
             this.name = name;
@@ -351,6 +384,11 @@ public class StateImage implements StateObject {
             return this;
         }
 
+        public Builder setSearchRegionOnObject(SearchRegionOnObject searchRegionOnObject) {
+            this.searchRegionOnObject = searchRegionOnObject;
+            return this;
+        }
+
         @Override
         public String toString() {
             StringBuilder stringBuilder = new StringBuilder();
@@ -376,6 +414,7 @@ public class StateImage implements StateObject {
             stateImage.index = index;
             stateImage.ownerStateName = ownerStateName;
             stateImage.ownerStateId = ownerStateId;
+            stateImage.searchRegionOnObject = searchRegionOnObject;
             if (positionForAllPatterns != null) stateImage.getPatterns().forEach(pattern ->
                     pattern.setTargetPosition(positionForAllPatterns));
             if (offsetForAllPatterns != null) stateImage.getPatterns().forEach(pattern ->
