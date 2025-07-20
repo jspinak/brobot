@@ -7,9 +7,11 @@ import io.github.jspinak.brobot.action.internal.find.NonImageObjectConverter;
 import io.github.jspinak.brobot.action.internal.find.OffsetLocationManagerV2;
 import io.github.jspinak.brobot.action.internal.find.match.MatchAdjusterV2;
 import io.github.jspinak.brobot.action.internal.find.match.MatchContentExtractor;
+import io.github.jspinak.brobot.action.internal.region.DynamicRegionResolver;
 import io.github.jspinak.brobot.analysis.color.profiles.ProfileSetBuilder;
 import io.github.jspinak.brobot.analysis.match.MatchFusion;
 import io.github.jspinak.brobot.model.state.StateImage;
+import io.github.jspinak.brobot.model.state.StateObject;
 import io.github.jspinak.brobot.statemanagement.StateMemory;
 import io.github.jspinak.brobot.util.string.TextSelector;
 import org.springframework.stereotype.Component;
@@ -55,6 +57,7 @@ public class FindPipeline {
     private final MatchFusion matchFusion;
     private final MatchContentExtractor matchContentExtractor;
     private final TextSelector textSelector;
+    private final DynamicRegionResolver dynamicRegionResolver;
     
     public FindPipeline(FindStrategyRegistryV2 findFunctions,
                         StateMemory stateMemory,
@@ -64,7 +67,8 @@ public class FindPipeline {
                         OffsetLocationManagerV2 offsetOps,
                         MatchFusion matchFusion,
                         MatchContentExtractor matchContentExtractor,
-                        TextSelector textSelector) {
+                        TextSelector textSelector,
+                        DynamicRegionResolver dynamicRegionResolver) {
         this.findFunctions = findFunctions;
         this.stateMemory = stateMemory;
         this.addNonImageObjects = addNonImageObjects;
@@ -74,6 +78,7 @@ public class FindPipeline {
         this.matchFusion = matchFusion;
         this.matchContentExtractor = matchContentExtractor;
         this.textSelector = textSelector;
+        this.dynamicRegionResolver = dynamicRegionResolver;
     }
     
     /**
@@ -96,6 +101,7 @@ public class FindPipeline {
      * 
      * <p>This phase handles:
      * <ul>
+     *   <li>Updating cross-state search regions</li>
      *   <li>Creating color profiles for COLOR strategy</li>
      *   <li>Setting maximum matches limit</li>
      *   <li>Adding initial offset matches if configured</li>
@@ -103,6 +109,9 @@ public class FindPipeline {
      * </p>
      */
     private void runPreProcessing(BaseFindOptions options, ActionResult matches, ObjectCollection... collections) {
+        // Update cross-state search regions for all objects
+        updateCrossStateSearchRegions(matches, collections);
+        
         // Create color profiles if using COLOR strategy
         createColorProfilesWhenNecessary(options, collections);
         
@@ -208,5 +217,26 @@ public class FindPipeline {
         }
         // Add similar checks for other option types that support area filtering
         // as they are implemented
+    }
+    
+    /**
+     * Updates search regions for objects that have cross-state search region configurations.
+     * 
+     * <p>This method processes all state objects in the collections and updates their
+     * search regions based on matches from other state objects, enabling dynamic
+     * search area definition.</p>
+     */
+    private void updateCrossStateSearchRegions(ActionResult matches, ObjectCollection... collections) {
+        List<StateObject> allObjects = new ArrayList<>();
+        
+        // Collect all state objects
+        for (ObjectCollection collection : collections) {
+            allObjects.addAll(collection.getStateImages());
+            allObjects.addAll(collection.getStateRegions());
+            allObjects.addAll(collection.getStateLocations());
+        }
+        
+        // Update search regions based on cross-state references
+        dynamicRegionResolver.updateSearchRegionsForObjects(allObjects, matches);
     }
 }
