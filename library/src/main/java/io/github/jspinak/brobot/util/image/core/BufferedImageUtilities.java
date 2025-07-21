@@ -139,9 +139,9 @@ public class BufferedImageUtilities {
         // Try SmartImageLoader first if available
         if (instance != null && instance.smartImageLoader != null) {
             try {
-                BufferedImage image = instance.smartImageLoader.loadImage(path);
-                if (image != null) {
-                    return image;
+                SmartImageLoader.LoadResult result = instance.smartImageLoader.loadImage(path);
+                if (result.isSuccess()) {
+                    return instance.smartImageLoader.getFromCache(path);
                 }
             } catch (Exception e) {
                 ConsoleReporter.println("SmartImageLoader failed for " + path + ": " + e.getMessage());
