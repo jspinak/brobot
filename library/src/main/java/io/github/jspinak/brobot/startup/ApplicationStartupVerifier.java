@@ -374,9 +374,11 @@ public class ApplicationStartupVerifier {
                     errors.add("Failed to load required image: " + requiredImage);
                     
                     // Get troubleshooting suggestions
-                    String suggestions = smartImageLoader.getSuggestionsForFailure(requiredImage);
+                    List<String> suggestions = smartImageLoader.getSuggestionsForFailure(requiredImage);
                     if (suggestions != null && !suggestions.isEmpty()) {
-                        log.error("  Suggestion: {}", suggestions);
+                        for (String suggestion : suggestions) {
+                            log.error("  Suggestion: {}", suggestion);
+                        }
                     }
                 }
             } catch (Exception e) {

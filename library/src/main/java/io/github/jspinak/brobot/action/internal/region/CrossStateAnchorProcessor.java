@@ -1,7 +1,7 @@
 package io.github.jspinak.brobot.action.internal.region;
 
 import io.github.jspinak.brobot.action.ActionResult;
-import io.github.jspinak.brobot.action.basic.region.DefineAs;
+import io.github.jspinak.brobot.action.basic.region.DefineRegionOptions.DefineAs;
 import io.github.jspinak.brobot.action.basic.region.DefineInsideAnchors;
 import io.github.jspinak.brobot.action.basic.region.DefineOutsideAnchors;
 import io.github.jspinak.brobot.action.internal.capture.AnchorRegion;
@@ -12,6 +12,7 @@ import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.model.state.State;
 import io.github.jspinak.brobot.model.state.StateImage;
+import io.github.jspinak.brobot.model.state.StateLocation;
 import io.github.jspinak.brobot.model.state.StateObject;
 import io.github.jspinak.brobot.model.state.StateRegion;
 import io.github.jspinak.brobot.model.state.StateStore;
@@ -31,10 +32,16 @@ public class CrossStateAnchorProcessor {
 
     private final StateStore stateStore;
     private final AnchorRegion anchorRegion;
+    private final DefineInsideAnchors defineInsideAnchors;
+    private final DefineOutsideAnchors defineOutsideAnchors;
 
-    public CrossStateAnchorProcessor(StateStore stateStore, AnchorRegion anchorRegion) {
+    public CrossStateAnchorProcessor(StateStore stateStore, AnchorRegion anchorRegion,
+                                    DefineInsideAnchors defineInsideAnchors,
+                                    DefineOutsideAnchors defineOutsideAnchors) {
         this.stateStore = stateStore;
         this.anchorRegion = anchorRegion;
+        this.defineInsideAnchors = defineInsideAnchors;
+        this.defineOutsideAnchors = defineOutsideAnchors;
     }
 
     /**
@@ -190,35 +197,48 @@ public class CrossStateAnchorProcessor {
      * Applies the INSIDE_ANCHORS strategy - creates the smallest rectangle containing all points.
      */
     private Optional<Region> applyInsideAnchorsStrategy(List<LocationWithAnchor> anchorPoints) {
-        DefineInsideAnchors defineInside = new DefineInsideAnchors(anchorRegion);
-        Region region = new Region(); // Start with undefined region
+        // Create an ActionResult with proper configuration
+        ActionResult actionResult = new ActionResult();
         
+        // Add matches from anchor points to the result
         for (LocationWithAnchor point : anchorPoints) {
-            List<Match> matches = List.of(createMatchAtLocation(point.location));
-            region = defineInside.defineRegion(region, matches, List.of(point.anchor));
+            Match match = createMatchAtLocation(point.location);
+            actionResult.add(match);
         }
         
-        return region.isDefined() ? Optional.of(region) : Optional.empty();
+        // Use the injected DefineInsideAnchors component
+        defineInsideAnchors.perform(actionResult);
+        
+        // Return the first defined region if any
+        if (!actionResult.getDefinedRegions().isEmpty()) {
+            return Optional.of(actionResult.getDefinedRegions().get(0));
+        }
+        
+        return Optional.empty();
     }
 
     /**
      * Applies the OUTSIDE_ANCHORS strategy - creates the largest rectangle encompassing all points.
      */
     private Optional<Region> applyOutsideAnchorsStrategy(List<LocationWithAnchor> anchorPoints) {
-        DefineOutsideAnchors defineOutside = new DefineOutsideAnchors();
-        Region region = null;
+        // Create an ActionResult with proper configuration
+        ActionResult actionResult = new ActionResult();
         
+        // Add matches from anchor points to the result
         for (LocationWithAnchor point : anchorPoints) {
-            List<Match> matches = List.of(createMatchAtLocation(point.location));
-            if (region == null) {
-                // Initialize with first point
-                region = new Region(point.location.getCalculatedX(), point.location.getCalculatedY(), 1, 1);
-            } else {
-                region = defineOutside.defineRegion(region, matches, List.of(point.anchor));
-            }
+            Match match = createMatchAtLocation(point.location);
+            actionResult.add(match);
         }
         
-        return Optional.ofNullable(region);
+        // Use the injected DefineOutsideAnchors component
+        defineOutsideAnchors.perform(actionResult);
+        
+        // Return the first defined region if any
+        if (!actionResult.getDefinedRegions().isEmpty()) {
+            return Optional.of(actionResult.getDefinedRegions().get(0));
+        }
+        
+        return Optional.empty();
     }
 
     /**
