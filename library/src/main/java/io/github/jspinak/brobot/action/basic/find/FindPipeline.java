@@ -173,13 +173,17 @@ public class FindPipeline {
     private void highlightSearchRegions(ObjectCollection... collections) {
         if (highlightManager == null) return;
         
-        List<Region> searchRegions = new ArrayList<>();
+        List<HighlightManager.RegionWithContext> regionsWithContext = new ArrayList<>();
         
         for (ObjectCollection collection : collections) {
             // Extract regions from StateRegions
             for (StateRegion stateRegion : collection.getStateRegions()) {
                 if (stateRegion.getSearchRegion() != null) {
-                    searchRegions.add(stateRegion.getSearchRegion());
+                    regionsWithContext.add(new HighlightManager.RegionWithContext(
+                        stateRegion.getSearchRegion(),
+                        stateRegion.getOwnerStateName(),
+                        stateRegion.getName()
+                    ));
                 }
             }
             
@@ -188,7 +192,13 @@ public class FindPipeline {
                 for (var pattern : stateImage.getPatterns()) {
                     if (pattern.getSearchRegions() != null && 
                         !pattern.getSearchRegions().getAllRegions().isEmpty()) {
-                        searchRegions.addAll(pattern.getSearchRegions().getAllRegions());
+                        for (Region region : pattern.getSearchRegions().getAllRegions()) {
+                            regionsWithContext.add(new HighlightManager.RegionWithContext(
+                                region,
+                                stateImage.getOwnerStateName(),
+                                stateImage.getName()
+                            ));
+                        }
                     }
                 }
             }
@@ -196,8 +206,8 @@ public class FindPipeline {
         
         // If no specific search regions found, don't highlight anything
         // (avoid highlighting the entire screen as a fallback)
-        if (!searchRegions.isEmpty()) {
-            highlightManager.highlightSearchRegions(searchRegions);
+        if (!regionsWithContext.isEmpty()) {
+            highlightManager.highlightSearchRegionsWithContext(regionsWithContext);
         }
     }
     

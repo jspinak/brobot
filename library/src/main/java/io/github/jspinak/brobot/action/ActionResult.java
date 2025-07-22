@@ -19,6 +19,7 @@ import lombok.Data;
 import org.bytedeco.opencv.opencv_core.Mat;
 
 import java.time.Duration;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -927,5 +928,228 @@ public class ActionResult {
         } else {
             this.actionConfig = null;
         }
+    }
+    
+    // ===============================
+    // Enhanced Logging Data Structures
+    // ===============================
+    
+    /**
+     * Enhanced execution context for modular logging architecture.
+     * This field will be populated by ActionLifecycleAspect and used by formatters.
+     */
+    @JsonIgnore
+    private ActionExecutionContext executionContext;
+    
+    /**
+     * Action metrics for logging and performance analysis.
+     */
+    @JsonIgnore
+    private ActionMetrics actionMetrics;
+    
+    /**
+     * Environment snapshot captured during action execution.
+     */
+    @JsonIgnore
+    private static volatile EnvironmentSnapshot environmentSnapshot;
+    
+    /**
+     * Context information about the action execution, optimized for logging.
+     * Contains all information needed to generate comprehensive log messages.
+     */
+    @Data
+    public static class ActionExecutionContext {
+        /** Type of action being performed (FIND, CLICK, TYPE, etc.) */
+        private String actionType;
+        
+        /** StateImages that were targeted by this action */
+        private List<StateImage> targetImages = new ArrayList<>();
+        
+        /** StateStrings that were targeted by this action */
+        private List<String> targetStrings = new ArrayList<>();
+        
+        /** StateRegions that were targeted by this action */
+        private List<Region> targetRegions = new ArrayList<>();
+        
+        /** Primary target name in "State.Object" format for logging */
+        private String primaryTargetName;
+        
+        /** Whether the action completed successfully */
+        private boolean success;
+        
+        /** Duration of action execution */
+        private Duration executionDuration = Duration.ZERO;
+        
+        /** When the action started */
+        private Instant startTime;
+        
+        /** When the action completed */
+        private Instant endTime;
+        
+        /** Matches found by the action */
+        private List<Match> resultMatches = new ArrayList<>();
+        
+        /** Exception that occurred during execution, if any */
+        private Throwable executionError;
+        
+        /** Thread that executed the action */
+        private String executingThread;
+        
+        /** Unique identifier for this action execution */
+        private String actionId;
+    }
+    
+    /**
+     * Metrics and performance data for the action execution.
+     */
+    @Data
+    public static class ActionMetrics {
+        /** Total execution time in milliseconds */
+        private long executionTimeMs;
+        
+        /** Number of matches found */
+        private int matchCount;
+        
+        /** Confidence score of the best match (if applicable) */
+        private double bestMatchConfidence = 0.0;
+        
+        /** Name of thread that executed the action */
+        private String threadName;
+        
+        /** Unique identifier for this action execution */
+        private String actionId;
+        
+        /** Number of retries attempted */
+        private int retryCount = 0;
+        
+        /** Total time spent in retries */
+        private long retryTimeMs = 0;
+    }
+    
+    /**
+     * Environment information captured once and shared across all actions.
+     * This avoids repeatedly collecting the same environmental data.
+     */
+    @Data
+    public static class EnvironmentSnapshot {
+        /** Information about available monitors */
+        private List<MonitorInfo> monitors = new ArrayList<>();
+        
+        /** Operating system name */
+        private String osName;
+        
+        /** Java version */
+        private String javaVersion;
+        
+        /** Whether running in headless mode */
+        private boolean headlessMode;
+        
+        /** When this snapshot was created */
+        private Instant captureTime;
+        
+        /** Get or create the singleton environment snapshot */
+        public static EnvironmentSnapshot getInstance() {
+            if (environmentSnapshot == null) {
+                synchronized (EnvironmentSnapshot.class) {
+                    if (environmentSnapshot == null) {
+                        environmentSnapshot = captureEnvironment();
+                    }
+                }
+            }
+            return environmentSnapshot;
+        }
+        
+        /** Capture current environment information */
+        private static EnvironmentSnapshot captureEnvironment() {
+            EnvironmentSnapshot snapshot = new EnvironmentSnapshot();
+            snapshot.setOsName(System.getProperty("os.name", "unknown"));
+            snapshot.setJavaVersion(System.getProperty("java.version", "unknown"));
+            snapshot.setHeadlessMode("true".equals(System.getProperty("java.awt.headless")));
+            snapshot.setCaptureTime(Instant.now());
+            
+            // Monitor information would be collected here
+            // This is a placeholder - actual implementation would use AWT/Swing
+            snapshot.setMonitors(new ArrayList<>());
+            
+            return snapshot;
+        }
+    }
+    
+    /**
+     * Information about a display monitor.
+     */
+    @Data
+    public static class MonitorInfo {
+        private int monitorId;
+        private int width;
+        private int height;
+        private int x;
+        private int y;
+        private boolean primary;
+    }
+    
+    // Getters and setters for new fields
+    public ActionExecutionContext getExecutionContext() {
+        return executionContext;
+    }
+    
+    public void setExecutionContext(ActionExecutionContext executionContext) {
+        this.executionContext = executionContext;
+    }
+    
+    public ActionMetrics getActionMetrics() {
+        return actionMetrics;
+    }
+    
+    public void setActionMetrics(ActionMetrics actionMetrics) {
+        this.actionMetrics = actionMetrics;
+    }
+    
+    public EnvironmentSnapshot getEnvironmentSnapshot() {
+        return EnvironmentSnapshot.getInstance();
+    }
+    
+    /**
+     * Convenience method to get primary target name for logging.
+     * Builds the target name from various sources in priority order.
+     */
+    public String getLogTargetName() {
+        if (executionContext != null && executionContext.getPrimaryTargetName() != null) {
+            return executionContext.getPrimaryTargetName();
+        }
+        
+        // Fallback: try to build from existing match data
+        if (!getMatchList().isEmpty()) {
+            Match firstMatch = getMatchList().get(0);
+            if (firstMatch.getStateObjectData() != null) {
+                String stateName = firstMatch.getStateObjectData().getOwnerStateName();
+                String objectName = firstMatch.getStateObjectData().getStateObjectName();
+                if (stateName != null && objectName != null) {
+                    return stateName + "." + objectName;
+                }
+            }
+        }
+        
+        return null;
+    }
+    
+    /**
+     * Convenience method to get execution time in milliseconds.
+     */
+    public long getExecutionTimeMs() {
+        if (actionMetrics != null) {
+            return actionMetrics.getExecutionTimeMs();
+        }
+        // Fallback to existing duration field
+        return duration != null ? duration.toMillis() : 0;
+    }
+    
+    /**
+     * Convenience method to check if this action should be logged.
+     * An action is loggable if it has been completed (has end time).
+     */
+    public boolean isLoggable() {
+        return executionContext != null && 
+               executionContext.getEndTime() != null;
     }
 }

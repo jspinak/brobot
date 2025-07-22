@@ -56,29 +56,14 @@ public class SearchRegionResolver {
     public List<Region> getRegions(ActionOptions actionOptions, StateImage stateImage) {
         // Priority 1: Use ActionOptions search regions if specified
         if (!actionOptions.getSearchRegions().isEmpty()) {
-            return actionOptions.getSearchRegions().getAllRegions();
+            return actionOptions.getSearchRegions().getRegionsForSearch();
         }
         
-        // Priority 2: Check for fixed regions in patterns
-        List<Region> fixedRegions = new ArrayList<>();
-        for (Pattern pattern : stateImage.getPatterns()) {
-            if (pattern.getSearchRegions().isFixedRegionSet()) {
-                fixedRegions.addAll(pattern.getRegions());
-            }
-        }
-        if (!fixedRegions.isEmpty()) {
-            return fixedRegions;
-        }
-        
-        // Priority 3: Collect search regions from all patterns
+        // Priority 2: Collect search regions from all patterns
+        // Pattern.getRegionsForSearch() handles fixed regions and defaults internally
         List<Region> regions = new ArrayList<>();
         for (Pattern pattern : stateImage.getPatterns()) {
-            regions.addAll(pattern.getRegions());
-        }
-        
-        // Priority 4: Default to full screen if no regions found
-        if (regions.isEmpty()) {
-            regions.add(new Region());
+            regions.addAll(pattern.getRegionsForSearch());
         }
         
         return regions;
@@ -102,24 +87,11 @@ public class SearchRegionResolver {
     public List<Region> getRegions(ActionOptions actionOptions, Pattern pattern) {
         // Priority 1: Use ActionOptions search regions if specified
         if (!actionOptions.getSearchRegions().isEmpty()) {
-            return actionOptions.getSearchRegions().getAllRegions();
+            return actionOptions.getSearchRegions().getRegionsForSearch();
         }
         
-        // Priority 2: Use Pattern's fixed regions if set
-        if (pattern.getSearchRegions().isFixedRegionSet()) {
-            return pattern.getRegions();
-        }
-        
-        // Priority 3: Use Pattern's regular search regions
-        List<Region> regions = pattern.getRegions();
-        
-        // Priority 4: Default to full screen if no regions found
-        if (regions.isEmpty()) {
-            regions = new ArrayList<>();
-            regions.add(new Region());
-        }
-        
-        return regions;
+        // Priority 2: Use Pattern's search regions (handles fixed regions and defaults internally)
+        return pattern.getRegionsForSearch();
     }
 
     /**
@@ -133,8 +105,7 @@ public class SearchRegionResolver {
      *         if no regions are defined
      */
     public List<Region> getRegions(ActionOptions actionOptions) {
-        if (actionOptions.getSearchRegions().isEmpty()) return List.of(new Region());
-        return actionOptions.getSearchRegions().getAllRegions();
+        return actionOptions.getSearchRegions().getRegionsForSearch();
     }
 
     /**
@@ -154,11 +125,15 @@ public class SearchRegionResolver {
     public List<Region> getRegionsForAllImages(ActionOptions actionOptions, ObjectCollection... objectCollections) {
         List<Region> regions = new ArrayList<>();
         if (actionOptions.getSearchRegions().isAnyRegionDefined())
-            return actionOptions.getSearchRegions().getAllRegions();
+            return actionOptions.getSearchRegions().getRegionsForSearch();
         for (ObjectCollection objColl : objectCollections) {
             for (StateImage stateImage : objColl.getStateImages()) {
                 regions.addAll(stateImage.getAllSearchRegions());
             }
+        }
+        // Ensure at least one region is returned
+        if (regions.isEmpty()) {
+            regions.add(new Region());
         }
         return regions;
     }
@@ -181,7 +156,7 @@ public class SearchRegionResolver {
         if (actionConfig instanceof BaseFindOptions) {
             BaseFindOptions findOptions = (BaseFindOptions) actionConfig;
             if (findOptions.getSearchRegions() != null && findOptions.getSearchRegions().isAnyRegionDefined()) {
-                return findOptions.getSearchRegions().getAllRegions();
+                return findOptions.getSearchRegions().getRegionsForSearch();
             }
         }
         
@@ -220,30 +195,15 @@ public class SearchRegionResolver {
         if (actionConfig instanceof BaseFindOptions) {
             BaseFindOptions findOptions = (BaseFindOptions) actionConfig;
             if (findOptions.getSearchRegions() != null && !findOptions.getSearchRegions().isEmpty()) {
-                return findOptions.getSearchRegions().getAllRegions();
+                return findOptions.getSearchRegions().getRegionsForSearch();
             }
         }
         
-        // Priority 2: Check for fixed regions in patterns
-        List<Region> fixedRegions = new ArrayList<>();
-        for (Pattern pattern : stateImage.getPatterns()) {
-            if (pattern.getSearchRegions().isFixedRegionSet()) {
-                fixedRegions.addAll(pattern.getRegions());
-            }
-        }
-        if (!fixedRegions.isEmpty()) {
-            return fixedRegions;
-        }
-        
-        // Priority 3: Collect search regions from all patterns
+        // Priority 2: Collect search regions from all patterns
+        // Pattern.getRegionsForSearch() handles fixed regions and defaults internally
         List<Region> regions = new ArrayList<>();
         for (Pattern pattern : stateImage.getPatterns()) {
-            regions.addAll(pattern.getRegions());
-        }
-        
-        // Priority 4: Default to full screen if no regions found
-        if (regions.isEmpty()) {
-            regions.add(new Region());
+            regions.addAll(pattern.getRegionsForSearch());
         }
         
         return regions;

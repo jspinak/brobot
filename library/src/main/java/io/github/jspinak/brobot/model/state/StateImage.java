@@ -323,6 +323,7 @@ public class StateImage implements StateObject {
         private Long ownerStateId = null;
         private Position positionForAllPatterns;
         private Location offsetForAllPatterns;
+        private Region searchRegionForAllPatterns;
         private SearchRegionOnObject searchRegionOnObject;
 
         public Builder setName(String name) {
@@ -391,6 +392,11 @@ public class StateImage implements StateObject {
             return this;
         }
 
+        public Builder setSearchRegionForAllPatterns(Region searchRegion) {
+            this.searchRegionForAllPatterns = searchRegion;
+            return this;
+        }
+
         public Builder setSearchRegionOnObject(SearchRegionOnObject searchRegionOnObject) {
             this.searchRegionOnObject = searchRegionOnObject;
             return this;
@@ -426,6 +432,8 @@ public class StateImage implements StateObject {
                     pattern.setTargetPosition(positionForAllPatterns));
             if (offsetForAllPatterns != null) stateImage.getPatterns().forEach(pattern ->
                     pattern.setTargetOffset(offsetForAllPatterns));
+            if (searchRegionForAllPatterns != null) stateImage.getPatterns().forEach(pattern ->
+                    pattern.addSearchRegion(searchRegionForAllPatterns));
             return stateImage;
         }
 
