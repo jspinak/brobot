@@ -23,6 +23,7 @@ The new unified system combines these into a single `BrobotLogger` facade that a
 - **Performance Tracking** - Built-in timers and metrics
 - **Backward Compatible** - Works with existing logging infrastructure
 - **Thread Safe** - Thread-local context management
+- **Modular Formatting** - Configurable output formats (QUIET, NORMAL, VERBOSE) via the [Modular Logging System](../architecture/modular-logging-system.md)
 
 ## Quick Start
 

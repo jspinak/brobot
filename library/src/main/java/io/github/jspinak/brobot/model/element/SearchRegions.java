@@ -126,18 +126,34 @@ public class SearchRegions {
     }
 
     /**
-     * Returns all regions, or a list with one empty region if no regions exist.
-     * Using a mutable ArrayList instead of Collections.singletonList to avoid
-     * serialization issues.
+     * Returns all configured regions without adding any defaults.
+     * This method returns exactly what has been configured, with no surprises.
      *
-     * @return a list of all regions, or a list with one empty region
+     * @return a list of all configured regions (may be empty)
      */
     @JsonIgnore
     public List<Region> getAllRegions() {
-        if (!regions.isEmpty()) return regions;
-        List<Region> list = new ArrayList<>();
-        list.add(new Region());
-        return list;
+        return new ArrayList<>(regions);
+    }
+    
+    /**
+     * Returns regions for searching, adding a full-screen default if no regions are configured.
+     * This is the method to use when actually performing searches.
+     * 
+     * @return a list of search regions, with full-screen default if empty
+     */
+    @JsonIgnore
+    public List<Region> getRegionsForSearch() {
+        // If fixed region is set, use only that
+        if (fixedRegion.isDefined()) {
+            return List.of(fixedRegion);
+        }
+        // If regions are configured, use them
+        if (!regions.isEmpty()) {
+            return new ArrayList<>(regions);
+        }
+        // Only default to full screen when no regions are configured
+        return List.of(new Region()); // full screen default
     }
 
     /**

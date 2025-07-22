@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -42,16 +43,14 @@ public class ConsoleActionReporter {
     private static final Pattern ACTION_PATTERN = Pattern.compile("^(\\w+)\\s+(.*)");
     
     // Icons for different states
-    private static final String SUCCESS_ICON = "[OK]";
-    private static final String FAILURE_ICON = "[X]";
-    private static final String WARNING_ICON = "[!]";
-    private static final String ERROR_ICON = "[ERROR]";
-    private static final String INFO_ICON = "[i]";
-    private static final String SEARCH_ICON = "[FIND]";
-    private static final String CLICK_ICON = "[CLICK]";
-    private static final String TYPE_ICON = "[TYPE]";
-    private static final String DRAG_ICON = "[DRAG]";
-    private static final String STATE_ICON = "[STATE]";
+    private static final String SUCCESS_ICON = "✓";
+    private static final String FAILURE_ICON = "✗";
+    private static final String WARNING_ICON = "⚠";
+    private static final String ERROR_ICON = "✗";
+    private static final String INFO_ICON = "ℹ";
+    private static final String ACTION_ICON = "▶";
+    private static final String TRANSITION_ICON = "→";
+    private static final String DEBUG_ICON = "•";
     
     /**
      * Reports an action log entry to the console based on configuration settings.
@@ -113,35 +112,40 @@ public class ConsoleActionReporter {
         boolean success = logData.isSuccess();
         long duration = logData.getDuration();
         
-        String icon = config.isUseIcons() ? SEARCH_ICON + " " : "";
-        String status = success ? SUCCESS_ICON + " FOUND" : FAILURE_ICON + " NOT FOUND";
-        
-        if (config.getLevel() == ConsoleActionConfig.Level.VERBOSE) {
-            String message = String.format("%sFIND: %s -> %s (%dms)", 
-                icon, target, status, duration);
+        if (config.getLevel() == ConsoleActionConfig.Level.QUIET) {
+            // Minimal format: ✓/✗ Find State.Object • 234ms
+            String location = "";
+            // Location info would come from ActionResult if available
+            // For now, we'll skip location in minimal mode
             
+            String message = String.format("%s Find %s%s • %dms",
+                success ? SUCCESS_ICON : FAILURE_ICON,
+                target,
+                location,
+                duration);
+                
             brobotLogger.log()
                 .observation(message)
-                .metadata("action", "FIND")
-                .metadata("target", target)
-                .metadata("success", success)
-                .metadata("duration", duration)
                 .log();
                 
-            if (success && config.isShowMatchDetails()) {
-                reportMatchDetails(logData);
-            } else if (!success) {
-                reportFindFailureDetails(logData);
-            }
         } else if (config.getLevel() == ConsoleActionConfig.Level.NORMAL) {
-            String message = String.format("%s %s %s", 
-                success ? SUCCESS_ICON : FAILURE_ICON, 
-                "FIND", 
-                target);
-            
+            // Current two-line format for NORMAL mode
+            String startMessage = String.format("%s Find_START: ", ACTION_ICON);
             brobotLogger.log()
-                .observation(message)
+                .observation(startMessage)
                 .log();
+                
+            String completeMessage = String.format("%s Find_COMPLETE:  %s", 
+                ACTION_ICON, 
+                success ? SUCCESS_ICON : FAILURE_ICON);
+                
+            brobotLogger.log()
+                .observation(completeMessage)
+                .log();
+                
+        } else { // VERBOSE
+            // For now, use existing verbose format
+            reportFindVerboseFormat(logData);
         }
     }
     
@@ -153,26 +157,43 @@ public class ConsoleActionReporter {
         boolean success = logData.isSuccess();
         long duration = logData.getDuration();
         
-        String icon = config.isUseIcons() ? CLICK_ICON + " " : "";
-        
-        if (config.getLevel() == ConsoleActionConfig.Level.VERBOSE) {
-            String message = String.format("%sCLICK: %s (%dms) %s", 
-                icon, target, duration, success ? SUCCESS_ICON : FAILURE_ICON);
+        if (config.getLevel() == ConsoleActionConfig.Level.QUIET) {
+            // Minimal format: ✓/✗ Click State.Object @ (x,y) • 201ms
+            String location = "";
+            String failureReason = "";
             
+            // Location info would come from ActionResult if available
+            if (!success) {
+                failureReason = " • Target not found";
+            }
+            
+            String message = String.format("%s Click %s%s%s • %dms",
+                success ? SUCCESS_ICON : FAILURE_ICON,
+                target,
+                location,
+                failureReason,
+                duration);
+                
             brobotLogger.log()
                 .observation(message)
-                .metadata("action", "CLICK")
-                .metadata("target", target)
-                .metadata("success", success)
                 .log();
+                
         } else if (config.getLevel() == ConsoleActionConfig.Level.NORMAL) {
-            String message = String.format("%s CLICK %s", 
-                success ? SUCCESS_ICON : FAILURE_ICON, 
-                target);
-            
+            String startMessage = String.format("%s Click_START: ", ACTION_ICON);
             brobotLogger.log()
-                .observation(message)
+                .observation(startMessage)
                 .log();
+                
+            String completeMessage = String.format("%s Click_COMPLETE:  %s", 
+                ACTION_ICON, 
+                success ? SUCCESS_ICON : FAILURE_ICON);
+                
+            brobotLogger.log()
+                .observation(completeMessage)
+                .log();
+                
+        } else { // VERBOSE
+            reportClickVerboseFormat(logData);
         }
     }
     
@@ -182,27 +203,44 @@ public class ConsoleActionReporter {
     private void reportType(LogData logData) {
         String text = extractTypeText(logData);
         boolean success = logData.isSuccess();
+        long duration = logData.getDuration();
         
-        String icon = config.isUseIcons() ? TYPE_ICON + " " : "";
-        String displayText = text.length() > 30 ? text.substring(0, 27) + "..." : text;
-        
-        if (config.getLevel() == ConsoleActionConfig.Level.VERBOSE) {
-            String message = String.format("%sTYPE: \"%s\" %s", 
-                icon, displayText, success ? SUCCESS_ICON : FAILURE_ICON);
+        if (config.getLevel() == ConsoleActionConfig.Level.QUIET) {
+            // Minimal format: ✓/✗ Type "text" • 14 chars • 702ms
+            String displayText = text;
+            if (text.length() > 30) {
+                displayText = text.substring(0, 27) + "...";
+            }
             
+            // Handle password fields - would need to check action options
+            // For now, we'll show truncated text
+            
+            String message = String.format("%s Type \"%s\" • %d chars • %dms",
+                success ? SUCCESS_ICON : FAILURE_ICON,
+                displayText,
+                text.length(),
+                duration);
+                
             brobotLogger.log()
                 .observation(message)
-                .metadata("action", "TYPE")
-                .metadata("textLength", text.length())
-                .metadata("success", success)
                 .log();
+                
         } else if (config.getLevel() == ConsoleActionConfig.Level.NORMAL) {
-            String message = String.format("%s TYPE", 
-                success ? SUCCESS_ICON : FAILURE_ICON);
-            
+            String startMessage = String.format("%s Type_START: ", ACTION_ICON);
             brobotLogger.log()
-                .observation(message)
+                .observation(startMessage)
                 .log();
+                
+            String completeMessage = String.format("%s Type_COMPLETE:  %s", 
+                ACTION_ICON, 
+                success ? SUCCESS_ICON : FAILURE_ICON);
+                
+            brobotLogger.log()
+                .observation(completeMessage)
+                .log();
+                
+        } else { // VERBOSE
+            reportTypeVerboseFormat(logData);
         }
     }
     
@@ -212,25 +250,35 @@ public class ConsoleActionReporter {
     private void reportDrag(LogData logData) {
         boolean success = logData.isSuccess();
         long duration = logData.getDuration();
+        String target = extractTargetName(logData);
         
-        String icon = config.isUseIcons() ? DRAG_ICON + " " : "";
-        
-        if (config.getLevel() == ConsoleActionConfig.Level.VERBOSE) {
-            String message = String.format("%sDRAG (%dms) %s", 
-                icon, duration, success ? SUCCESS_ICON : FAILURE_ICON);
-            
+        if (config.getLevel() == ConsoleActionConfig.Level.QUIET) {
+            // Minimal format: ✓/✗ Drag State.Object • 234ms
+            String message = String.format("%s Drag %s • %dms",
+                success ? SUCCESS_ICON : FAILURE_ICON,
+                target,
+                duration);
+                
             brobotLogger.log()
                 .observation(message)
-                .metadata("action", "DRAG")
-                .metadata("success", success)
                 .log();
+                
         } else if (config.getLevel() == ConsoleActionConfig.Level.NORMAL) {
-            String message = String.format("%s DRAG", 
-                success ? SUCCESS_ICON : FAILURE_ICON);
-            
+            String startMessage = String.format("%s Drag_START: ", ACTION_ICON);
             brobotLogger.log()
-                .observation(message)
+                .observation(startMessage)
                 .log();
+                
+            String completeMessage = String.format("%s Drag_COMPLETE:  %s", 
+                ACTION_ICON, 
+                success ? SUCCESS_ICON : FAILURE_ICON);
+                
+            brobotLogger.log()
+                .observation(completeMessage)
+                .log();
+                
+        } else { // VERBOSE
+            reportDragVerboseFormat(logData);
         }
     }
     
@@ -240,15 +288,38 @@ public class ConsoleActionReporter {
     private void reportGenericAction(LogData logData) {
         String actionType = extractActionType(logData);
         boolean success = logData.isSuccess();
+        long duration = logData.getDuration();
+        String target = extractTargetName(logData);
         
-        if (config.getLevel() != ConsoleActionConfig.Level.QUIET) {
-            String message = String.format("%s %s", 
-                success ? SUCCESS_ICON : FAILURE_ICON, 
-                actionType.toUpperCase());
-            
+        if (config.getLevel() == ConsoleActionConfig.Level.QUIET) {
+            // Minimal format: ✓/✗ Action State.Object • 234ms
+            String message = String.format("%s %s %s • %dms",
+                success ? SUCCESS_ICON : FAILURE_ICON,
+                actionType,
+                target,
+                duration);
+                
             brobotLogger.log()
                 .observation(message)
                 .log();
+                
+        } else if (config.getLevel() == ConsoleActionConfig.Level.NORMAL) {
+            String startMessage = String.format("%s %s_START: ", ACTION_ICON, actionType);
+            brobotLogger.log()
+                .observation(startMessage)
+                .log();
+                
+            String completeMessage = String.format("%s %s_COMPLETE:  %s", 
+                ACTION_ICON, 
+                actionType,
+                success ? SUCCESS_ICON : FAILURE_ICON);
+                
+            brobotLogger.log()
+                .observation(completeMessage)
+                .log();
+                
+        } else { // VERBOSE
+            reportGenericActionVerboseFormat(logData);
         }
     }
     
@@ -296,24 +367,39 @@ public class ConsoleActionReporter {
         boolean success = logData.isSuccess();
         long duration = logData.getDuration();
         
-        String icon = config.isUseIcons() ? STATE_ICON + " " : "";
-        String message = String.format("%sSTATE: %s -> %s [%dms] [%s]", 
-            icon, from, toStates, duration, success ? "SUCCESS" : "FAILED");
-        
-        brobotLogger.log()
-            .observation(message)
-            .metadata("type", "TRANSITION")
-            .metadata("from", from)
-            .metadata("to", toStates)
-            .metadata("success", success)
-            .log();
+        if (config.getLevel() == ConsoleActionConfig.Level.QUIET) {
+            // Minimal format: ✓/✗ State transition: Working → Prompt • 1.2s
+            String message = String.format("%s State transition: %s %s %s • %.1fs",
+                success ? SUCCESS_ICON : FAILURE_ICON,
+                from,
+                TRANSITION_ICON,
+                toStates,
+                duration / 1000.0);
+                
+            brobotLogger.log()
+                .observation(message)
+                .log();
+                
+        } else {
+            String icon = config.isUseIcons() ? TRANSITION_ICON + " " : "";
+            String message = String.format("%sSTATE: %s -> %s [%dms] [%s]", 
+                icon, from, toStates, duration, success ? "SUCCESS" : "FAILED");
+            
+            brobotLogger.log()
+                .observation(message)
+                .metadata("type", "TRANSITION")
+                .metadata("from", from)
+                .metadata("to", toStates)
+                .metadata("success", success)
+                .log();
+        }
     }
     
     /**
      * Reports errors with appropriate formatting.
      */
     private void reportError(LogData logData) {
-        String icon = config.isUseIcons() ? ERROR_ICON + " " : "";
+        String icon = FAILURE_ICON + " ";
         String message = String.format("%sERROR: %s", 
             icon, logData.getErrorMessage());
         
@@ -327,7 +413,7 @@ public class ConsoleActionReporter {
      * Reports performance warnings for slow operations.
      */
     private void reportPerformanceWarning(LogData logData) {
-        String icon = config.isUseIcons() ? WARNING_ICON + " " : "";
+        String icon = WARNING_ICON + " ";
         String actionType = extractActionType(logData);
         
         String message = String.format("%sPerformance Warning: %s took %dms (threshold: %dms)", 
@@ -421,5 +507,114 @@ public class ConsoleActionReporter {
             default:
                 return true; // Report unknown actions by default
         }
+    }
+    
+    // Verbose format methods - these will eventually be moved to VerboseConsoleReporter
+    
+    private void reportFindVerboseFormat(LogData logData) {
+        String target = extractTargetName(logData);
+        boolean success = logData.isSuccess();
+        long duration = logData.getDuration();
+        
+        brobotLogger.log()
+            .observation(String.format("▶ Find [%s]", target))
+            .log();
+            
+        brobotLogger.log()
+            .observation(String.format("├─ ⏱ Started: %s", formatTime(logData.getTimestamp())))
+            .log();
+            
+        if (success) {
+            brobotLogger.log()
+                .observation("├─ ✓ Match Found")
+                .log();
+        } else {
+            brobotLogger.log()
+                .observation("├─ ✗ No Match Found")
+                .log();
+        }
+        
+        brobotLogger.log()
+            .observation(String.format("└─ %s Find Complete [%dms]", 
+                success ? "✓" : "✗", duration))
+            .log();
+    }
+    
+    private void reportClickVerboseFormat(LogData logData) {
+        String target = extractTargetName(logData);
+        boolean success = logData.isSuccess();
+        long duration = logData.getDuration();
+        
+        brobotLogger.log()
+            .observation(String.format("▶ Click [%s]", target))
+            .log();
+            
+        if (success) {
+            brobotLogger.log()
+                .observation("├─ 🖱 Button: LEFT")
+                .log();
+        }
+        
+        brobotLogger.log()
+            .observation(String.format("└─ %s Click Complete [%dms]", 
+                success ? "✓" : "✗", duration))
+            .log();
+    }
+    
+    private void reportTypeVerboseFormat(LogData logData) {
+        String text = extractTypeText(logData);
+        boolean success = logData.isSuccess();
+        long duration = logData.getDuration();
+        
+        brobotLogger.log()
+            .observation(String.format("▶ Type [\"%s\"]", 
+                text.length() > 30 ? text.substring(0, 27) + "..." : text))
+            .log();
+            
+        brobotLogger.log()
+            .observation(String.format("├─ 📝 Text Length: %d characters", text.length()))
+            .log();
+            
+        brobotLogger.log()
+            .observation(String.format("└─ %s Type Complete [%dms]", 
+                success ? "✓" : "✗", duration))
+            .log();
+    }
+    
+    private void reportDragVerboseFormat(LogData logData) {
+        String target = extractTargetName(logData);
+        boolean success = logData.isSuccess();
+        long duration = logData.getDuration();
+        
+        brobotLogger.log()
+            .observation(String.format("▶ Drag [%s]", target))
+            .log();
+            
+        brobotLogger.log()
+            .observation(String.format("└─ %s Drag Complete [%dms]", 
+                success ? "✓" : "✗", duration))
+            .log();
+    }
+    
+    private void reportGenericActionVerboseFormat(LogData logData) {
+        String actionType = extractActionType(logData);
+        String target = extractTargetName(logData);
+        boolean success = logData.isSuccess();
+        long duration = logData.getDuration();
+        
+        brobotLogger.log()
+            .observation(String.format("▶ %s [%s]", actionType, target))
+            .log();
+            
+        brobotLogger.log()
+            .observation(String.format("└─ %s %s Complete [%dms]", 
+                success ? "✓" : "✗", actionType, duration))
+            .log();
+    }
+    
+    private String formatTime(Instant timestamp) {
+        if (timestamp == null) return "N/A";
+        // Simple time format - can be enhanced later
+        return timestamp.toString();
     }
 }

@@ -107,11 +107,74 @@ public class ConsoleFormatter {
      * Formats a log event for console output based on current verbosity settings.
      */
     public String format(LogEvent event) {
-        if (verbosityConfig.getVerbosity() == VerbosityLevel.NORMAL) {
+        if (verbosityConfig.getVerbosity() == VerbosityLevel.QUIET) {
+            return formatQuiet(event);
+        } else if (verbosityConfig.getVerbosity() == VerbosityLevel.NORMAL) {
             return formatNormal(event);
         } else {
             return formatVerbose(event);
         }
+    }
+    
+    /**
+     * Formats a log event in quiet mode - single line output with minimal information.
+     */
+    private String formatQuiet(LogEvent event) {
+        // DEBUG: Check what ACTION events we're receiving  
+        if (event.getType() == LogEvent.Type.ACTION) {
+            System.err.println("DEBUG ConsoleFormatter ACTION: " + event.getAction() + 
+                              ", Target: " + event.getTarget() + 
+                              ", Duration: " + event.getDuration() + 
+                              ", Success: " + event.isSuccess());
+        }
+        
+        // Only format ACTION events that are COMPLETE or FAILED, skip START events
+        if (event.getType() == LogEvent.Type.ACTION && event.getAction() != null) {
+            String action = event.getAction();
+            
+            // Skip START events in quiet mode
+            if (action.endsWith("_START")) {
+                return null; // Return null to indicate this should not be logged
+            }
+            
+            // Only process COMPLETE or FAILED events
+            if (action.endsWith("_COMPLETE") || action.endsWith("_FAILED")) {
+                StringBuilder sb = new StringBuilder();
+                
+                // Success/failure symbol
+                sb.append(event.isSuccess() ? SUCCESS_SYMBOL : FAILURE_SYMBOL).append(" ");
+                
+                // Extract base action name (remove _COMPLETE/_FAILED suffix)
+                String baseAction = action.replace("_COMPLETE", "").replace("_FAILED", "");
+                // Convert to proper case (FIND -> Find, CLICK -> Click)
+                if (baseAction.length() > 0) {
+                    baseAction = baseAction.substring(0, 1).toUpperCase() + baseAction.substring(1).toLowerCase();
+                }
+                sb.append(baseAction);
+                
+                // Target
+                if (event.getTarget() != null) {
+                    sb.append(" ").append(event.getTarget());
+                }
+                
+                // Duration if available
+                if (event.getMetadata().containsKey("duration")) {
+                    sb.append(" ").append("• ").append(event.getMetadata().get("duration")).append("ms");
+                }
+                
+                return sb.toString();
+            }
+        }
+        
+        // For non-action events, use minimal formatting
+        if (event.getType() == LogEvent.Type.ERROR) {
+            return RED + ERROR_SYMBOL + " " + event.getMessage() + RESET;
+        } else if (event.getType() == LogEvent.Type.OBSERVATION) {
+            return event.getMessage();
+        }
+        
+        // Skip other event types in quiet mode
+        return null;
     }
     
     /**
