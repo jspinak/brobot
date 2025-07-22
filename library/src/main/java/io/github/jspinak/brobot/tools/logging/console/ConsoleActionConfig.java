@@ -2,7 +2,6 @@ package io.github.jspinak.brobot.tools.logging.console;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.stereotype.Component;
 
 /**
  * Configuration for console action reporting. Controls how actions are
@@ -16,7 +15,15 @@ import org.springframework.stereotype.Component;
  * brobot.console.actions.show-match-details=true
  * </pre>
  * 
+ * <p><b>Important Note:</b> This class uses {@code @ConfigurationProperties} which
+ * automatically creates a Spring bean when used with {@code @EnableConfigurationProperties}.
+ * DO NOT add {@code @Component} or {@code @Configuration} annotations to this class as it will
+ * create duplicate beans and cause conflicts. The bean is created by the framework when
+ * {@link io.github.jspinak.brobot.config.ActionLoggingConfig} includes this class in its
+ * {@code @EnableConfigurationProperties} annotation.</p>
+ * 
  * @see ConsoleActionReporter for the implementation that uses this config
+ * @see io.github.jspinak.brobot.config.ActionLoggingConfig for the configuration that enables this properties class
  */
 @Data
 @ConfigurationProperties(prefix = "brobot.console.actions")

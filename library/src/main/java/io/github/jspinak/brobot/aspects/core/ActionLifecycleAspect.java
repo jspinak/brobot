@@ -1,10 +1,11 @@
 package io.github.jspinak.brobot.aspects.core;
 
+import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.ActionInterface;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
-import io.github.jspinak.brobot.logging.unified.BrobotLogger;
-import io.github.jspinak.brobot.logging.unified.LogEvent;
+import io.github.jspinak.brobot.logging.modular.ActionLoggingService;
+import io.github.jspinak.brobot.model.state.StateImage;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -16,7 +17,10 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -46,7 +50,7 @@ import java.util.UUID;
 public class ActionLifecycleAspect {
     
     @Autowired
-    private BrobotLogger brobotLogger;
+    private ActionLoggingService actionLoggingService;
     
     // Pause configuration
     @Value("${brobot.action.pre-pause:0}")
@@ -82,14 +86,54 @@ public class ActionLifecycleAspect {
         ActionInterface action = (ActionInterface) joinPoint.getTarget();
         Object[] args = joinPoint.getArgs();
         
-        // Assume standard signature: perform(ActionOptions, ObjectCollection)
-        Object actionOptions = args.length > 0 ? args[0] : null;
-        ObjectCollection objectCollection = args.length > 1 && args[1] instanceof ObjectCollection ? 
-            (ObjectCollection) args[1] : new ObjectCollection.Builder().build();
+        // Debug: Log aspect invocation
+        log.debug("ActionLifecycleAspect invoked for: {} with {} args", 
+                 action.getClass().getSimpleName(), args.length);
+        
+        // Standard signature: perform(ActionResult, ObjectCollection...)
+        ActionResult actionResult = args.length > 0 && args[0] instanceof ActionResult ? 
+            (ActionResult) args[0] : null;
+        
+        // Extract ObjectCollections from varargs
+        ObjectCollection objectCollection = null;
+        List<ObjectCollection> allCollections = new ArrayList<>();
+        
+        // Collect all ObjectCollections from varargs (starting at index 1)
+        for (int i = 1; i < args.length; i++) {
+            if (args[i] instanceof ObjectCollection) {
+                allCollections.add((ObjectCollection) args[i]);
+            } else if (args[i] instanceof ObjectCollection[]) {
+                // Handle case where varargs are passed as array
+                ObjectCollection[] array = (ObjectCollection[]) args[i];
+                Collections.addAll(allCollections, array);
+            }
+        }
+        
+        // Use first collection as primary, or create empty if none
+        if (!allCollections.isEmpty()) {
+            objectCollection = allCollections.get(0);
+        } else {
+            objectCollection = new ObjectCollection.Builder().build();
+        }
+        
+        // Extract action options from ActionResult
+        Object actionOptions = actionResult != null ? actionResult.getActionConfig() : null;
+        if (actionOptions == null && actionResult != null) {
+            // Try legacy ActionOptions
+            actionOptions = actionResult.getActionOptions();
+        }
         
         // Create action context
         ActionContext context = createActionContext(action, actionOptions, objectCollection);
         actionContext.set(context);
+        
+        // Set start time immediately  
+        context.setStartTime(Instant.now());
+        
+        // Initialize ActionResult execution context if available
+        if (actionResult != null) {
+            populateExecutionContext(actionResult, context, objectCollection);
+        }
         
         try {
             // Pre-execution phase
@@ -103,16 +147,40 @@ public class ActionLifecycleAspect {
             // Update context with results
             context.setResult(result);
             context.setDuration(duration);
-            context.setSuccess(isSuccessfulResult(result));
+            
+            // The action modifies the ActionResult in-place
+            if (actionResult != null) {
+                context.setSuccess(actionResult.isSuccess());
+                // Update duration in the ActionResult if not already set
+                if (actionResult.getDuration() == null || actionResult.getDuration().toMillis() == 0) {
+                    actionResult.setDuration(java.time.Duration.ofMillis(duration));
+                }
+                // Update execution context with final results
+                updateExecutionContextWithResults(actionResult, context, duration);
+            } else {
+                context.setSuccess(isSuccessfulResult(result));
+            }
             
             // Post-execution phase
             performPostExecution(context);
+            
+            // Log the completed action using modular logging
+            if (actionResult != null) {
+                actionLoggingService.logAction(actionResult);
+            }
             
             return result;
             
         } catch (Exception e) {
             // Handle execution failure
             handleExecutionFailure(context, e);
+            
+            // Update ActionResult with failure information and log it
+            if (actionResult != null) {
+                updateExecutionContextWithError(actionResult, context, e);
+                actionLoggingService.logAction(actionResult);
+            }
+            
             throw e;
             
         } finally {
@@ -128,18 +196,14 @@ public class ActionLifecycleAspect {
         // Apply pre-action pause
         applyPause(preActionPause);
         
-        // Log action start
-        if (logEvents) {
-            logActionStart(context);
-        }
+        // Action start logging handled by modular logging service
         
         // Capture before screenshot if enabled
         if (captureBeforeScreenshot) {
             captureScreenshot(context, "before");
         }
         
-        // Record action start time for metrics
-        context.setStartTime(Instant.now());
+        // Start time already set in main method before populateExecutionContext
     }
     
     /**
@@ -149,10 +213,7 @@ public class ActionLifecycleAspect {
         // Apply post-action pause
         applyPause(postActionPause);
         
-        // Log action completion
-        if (logEvents) {
-            logActionCompletion(context);
-        }
+        // Action completion logging handled by modular logging service
         
         // Capture after screenshot if enabled
         if (captureAfterScreenshot && context.isSuccess()) {
@@ -173,10 +234,7 @@ public class ActionLifecycleAspect {
         context.setError(e);
         context.setDuration(System.currentTimeMillis() - context.getStartTime().toEpochMilli());
         
-        // Log failure
-        if (logEvents) {
-            logActionFailure(context);
-        }
+        // Failure logging handled by modular logging service
         
         // Capture error screenshot
         if (captureAfterScreenshot) {
@@ -190,12 +248,55 @@ public class ActionLifecycleAspect {
     private ActionContext createActionContext(ActionInterface action, Object actionOptions, ObjectCollection objectCollection) {
         ActionContext context = new ActionContext();
         context.setActionId(UUID.randomUUID().toString());
-        // ActionInterface doesn't have getType() method, using class name
-        context.setActionType(action.getClass().getSimpleName());
+        
+        // Extract action type from ActionConfig if available
+        String actionType = extractActionType(actionOptions, action);
+        context.setActionType(actionType);
+        
         context.setActionOptions(actionOptions);
         context.setObjectCollection(objectCollection);
         context.setThreadName(Thread.currentThread().getName());
         return context;
+    }
+    
+    /**
+     * Extract action type from ActionConfig or fallback to action class
+     */
+    private String extractActionType(Object actionOptions, ActionInterface action) {
+        // Check if it's an ActionConfig (base class for all action options)
+        if (actionOptions instanceof ActionConfig) {
+            ActionConfig config = (ActionConfig) actionOptions;
+            
+            // Try to extract a meaningful action name from the config class
+            String configClassName = config.getClass().getSimpleName();
+            
+            // Handle special cases
+            if (configClassName.equals("PatternFindOptions")) {
+                return "FIND";
+            }
+            
+            // Convert XxxOptions to XXX (e.g., ClickOptions -> CLICK)
+            if (configClassName.endsWith("Options")) {
+                String actionName = configClassName.substring(0, configClassName.length() - 7);
+                return actionName.toUpperCase();
+            }
+        }
+        
+        // Check if it's the legacy ActionOptions
+        if (actionOptions != null && actionOptions.getClass().getName().equals("io.github.jspinak.brobot.action.ActionOptions")) {
+            try {
+                // Use reflection to get the action enum value
+                Object actionEnum = actionOptions.getClass().getMethod("getAction").invoke(actionOptions);
+                if (actionEnum != null) {
+                    return actionEnum.toString();
+                }
+            } catch (Exception e) {
+                log.debug("Could not extract action from ActionOptions: {}", e.getMessage());
+            }
+        }
+        
+        // Fallback to action interface implementation class name
+        return action.getClass().getSimpleName().toUpperCase();
     }
     
     /**
@@ -223,112 +324,6 @@ public class ActionLifecycleAspect {
         }
     }
     
-    /**
-     * Log action start
-     */
-    private void logActionStart(ActionContext context) {
-        var logBuilder = brobotLogger.log()
-            .type(LogEvent.Type.ACTION)
-            .level(LogEvent.Level.INFO)
-            .action(context.getActionType() + "_START")
-            // Don't set success for START events - let formatter handle it
-            .metadata("actionId", context.getActionId())
-            .metadata("thread", context.getThreadName());
-            
-        // Add target information from ObjectCollection
-        if (context.getObjectCollection() != null) {
-            ObjectCollection collection = context.getObjectCollection();
-            // Try to get a description of what's being acted on
-            StringBuilder targetInfo = new StringBuilder();
-            
-            if (!collection.getStateImages().isEmpty()) {
-                // For single image, show its name; for multiple, show count and first name
-                if (collection.getStateImages().size() == 1) {
-                    String imageName = collection.getStateImages().get(0).getName();
-                    if (imageName != null && !imageName.isEmpty()) {
-                        targetInfo.append(imageName);
-                    } else {
-                        targetInfo.append("Image");
-                    }
-                } else {
-                    targetInfo.append("Images[").append(collection.getStateImages().size()).append("]");
-                    String firstName = collection.getStateImages().get(0).getName();
-                    if (firstName != null && !firstName.isEmpty()) {
-                        targetInfo.append(": ").append(firstName).append("...");
-                    }
-                }
-            }
-            if (!collection.getStateStrings().isEmpty()) {
-                if (targetInfo.length() > 0) targetInfo.append(", ");
-                targetInfo.append("Strings[").append(collection.getStateStrings().size()).append("]");
-                // Include first string if available
-                if (collection.getStateStrings().size() == 1) {
-                    String firstString = collection.getStateStrings().get(0).getString();
-                    if (firstString != null && firstString.length() <= 50) {
-                        targetInfo.append(": \"").append(firstString).append("\"");
-                    }
-                }
-            }
-            if (!collection.getStateRegions().isEmpty()) {
-                if (targetInfo.length() > 0) targetInfo.append(", ");
-                targetInfo.append("Regions[").append(collection.getStateRegions().size()).append("]");
-            }
-            if (!collection.getMatches().isEmpty()) {
-                if (targetInfo.length() > 0) targetInfo.append(", ");
-                targetInfo.append("Matches[").append(collection.getMatches().size()).append("]");
-            }
-            
-            if (targetInfo.length() > 0) {
-                logBuilder.target(targetInfo.toString());
-            }
-            logBuilder.metadata("hasCollection", true);
-        } else {
-            logBuilder.metadata("hasCollection", false);
-        }
-        
-        logBuilder.log();
-    }
-    
-    /**
-     * Log action completion
-     */
-    private void logActionCompletion(ActionContext context) {
-        brobotLogger.log()
-            .type(LogEvent.Type.ACTION)
-            .level(LogEvent.Level.INFO)
-            .action(context.getActionType() + "_COMPLETE")
-            .success(context.isSuccess())
-            .duration(context.getDuration())
-            .metadata("actionId", context.getActionId())
-            .metadata("matches", getMatchCount(context.getResult()))
-            .log();
-    }
-    
-    /**
-     * Log action failure
-     */
-    private void logActionFailure(ActionContext context) {
-        brobotLogger.log()
-            .type(LogEvent.Type.ERROR)
-            .level(LogEvent.Level.ERROR)
-            .action(context.getActionType() + "_FAILED")
-            .success(false)
-            .duration(context.getDuration())
-            .error(context.getError())
-            .metadata("actionId", context.getActionId())
-            .log();
-    }
-    
-    /**
-     * Get match count from result
-     */
-    private int getMatchCount(Object result) {
-        if (result instanceof ActionResult) {
-            ActionResult actionResult = (ActionResult) result;
-            return actionResult.getMatchList() != null ? actionResult.getMatchList().size() : 0;
-        }
-        return 0;
-    }
     
     /**
      * Capture screenshot
@@ -353,6 +348,92 @@ public class ActionLifecycleAspect {
      */
     public Optional<ActionContext> getCurrentActionContext() {
         return Optional.ofNullable(actionContext.get());
+    }
+    
+    /**
+     * Populate ActionResult execution context with initial data
+     */
+    private void populateExecutionContext(ActionResult actionResult, ActionContext context, ObjectCollection objectCollection) {
+        // Initialize execution context if not present
+        ActionResult.ActionExecutionContext execContext = actionResult.getExecutionContext();
+        if (execContext == null) {
+            execContext = new ActionResult.ActionExecutionContext();
+            actionResult.setExecutionContext(execContext);
+        }
+        
+        // Set basic action information
+        execContext.setActionType(context.getActionType());
+        execContext.setActionId(context.getActionId());
+        execContext.setExecutingThread(context.getThreadName());
+        execContext.setStartTime(context.getStartTime());
+        
+        // Extract target information from ObjectCollection
+        if (objectCollection != null) {
+            execContext.setTargetImages(objectCollection.getStateImages());
+            execContext.setTargetStrings(objectCollection.getStateStrings().stream()
+                .map(ss -> ss.getString())
+                .collect(java.util.stream.Collectors.toList()));
+            execContext.setTargetRegions(objectCollection.getStateRegions().stream()
+                .map(sr -> sr.getSearchRegion())
+                .collect(java.util.stream.Collectors.toList()));
+            
+            // Set primary target name
+            if (!objectCollection.getStateImages().isEmpty()) {
+                StateImage primaryImage = objectCollection.getStateImages().get(0);
+                String primaryTargetName = "";
+                if (primaryImage.getOwnerStateName() != null && !primaryImage.getOwnerStateName().isEmpty()) {
+                    primaryTargetName = primaryImage.getOwnerStateName() + ".";
+                }
+                if (primaryImage.getName() != null && !primaryImage.getName().isEmpty()) {
+                    primaryTargetName += primaryImage.getName();
+                }
+                execContext.setPrimaryTargetName(primaryTargetName);
+            }
+        }
+        
+        // Initialize metrics if not present
+        if (actionResult.getActionMetrics() == null) {
+            actionResult.setActionMetrics(new ActionResult.ActionMetrics());
+        }
+        
+        // Initialize environment snapshot if not present
+        if (actionResult.getEnvironmentSnapshot() == null) {
+            ActionResult.EnvironmentSnapshot envSnapshot = new ActionResult.EnvironmentSnapshot();
+            envSnapshot.setOsName(System.getProperty("os.name"));
+            // Monitor count and other env info would be populated by other components
+            // ActionResult doesn't have setEnvironmentSnapshot yet, will be added later
+        }
+    }
+    
+    /**
+     * Update execution context with final results
+     */
+    private void updateExecutionContextWithResults(ActionResult actionResult, ActionContext context, long duration) {
+        ActionResult.ActionExecutionContext execContext = actionResult.getExecutionContext();
+        if (execContext != null) {
+            execContext.setEndTime(java.time.Instant.now());
+            execContext.setSuccess(actionResult.isSuccess());
+            execContext.setExecutionDuration(java.time.Duration.ofMillis(duration));
+            
+            // Copy matches from ActionResult
+            if (actionResult.getMatchList() != null) {
+                execContext.setResultMatches(actionResult.getMatchList());
+            }
+        }
+    }
+    
+    /**
+     * Update execution context with error information
+     */
+    private void updateExecutionContextWithError(ActionResult actionResult, ActionContext context, Exception error) {
+        ActionResult.ActionExecutionContext execContext = actionResult.getExecutionContext();
+        if (execContext != null) {
+            execContext.setEndTime(java.time.Instant.now());
+            execContext.setSuccess(false);
+            execContext.setExecutionError(error);
+            execContext.setExecutionDuration(java.time.Duration.ofMillis(
+                System.currentTimeMillis() - context.getStartTime().toEpochMilli()));
+        }
     }
     
     /**

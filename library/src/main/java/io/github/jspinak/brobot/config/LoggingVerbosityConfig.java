@@ -28,6 +28,14 @@ public class LoggingVerbosityConfig {
      */
     public enum VerbosityLevel {
         /**
+         * Quiet logging - minimal single-line output:
+         * - Single line per action with result
+         * - Format: ✓/✗ Action State.Object • timing
+         * - No START/COMPLETE separation
+         */
+        QUIET,
+        
+        /**
          * Normal logging - shows only essential information:
          * - Action type (CLICK, FIND, TYPE, etc.)
          * - State and object acted on
