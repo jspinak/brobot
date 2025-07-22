@@ -76,9 +76,19 @@ public class HighlightMatchedRegionV2 {
                 match.sikuli().highlightOn(highlightColor);
                 
                 // Log through Brobot instead
+                String stateName = match.getStateObjectData() != null && match.getStateObjectData().getOwnerStateName() != null
+                    ? match.getStateObjectData().getOwnerStateName() : "Unknown";
+                String objectName = match.getStateObjectData() != null && match.getStateObjectData().getStateObjectName() != null
+                    ? match.getStateObjectData().getStateObjectName() : "Unknown";
+                
                 brobotLogger.log()
-                    .observation("Highlighting region")
+                    .observation(String.format("Highlighting region for %s.%s (%d,%d,%dx%d)",
+                        stateName, objectName, 
+                        match.getRegion().x(), match.getRegion().y(), 
+                        match.getRegion().w(), match.getRegion().h()))
                     .metadata("action", "HIGHLIGHT_ON")
+                    .metadata("state", stateName)
+                    .metadata("object", objectName)
                     .metadata("region", formatMatch(match))
                     .metadata("color", highlightColor)
                     .log();
@@ -162,9 +172,19 @@ public class HighlightMatchedRegionV2 {
             if (match.h() == 0) highlightReg.h = 10;
             
             // Log through Brobot instead of ConsoleReporter
+            String stateName = match.getStateObjectData() != null && match.getStateObjectData().getOwnerStateName() != null
+                ? match.getStateObjectData().getOwnerStateName() : "Unknown";
+            String objectName = match.getStateObjectData() != null && match.getStateObjectData().getStateObjectName() != null
+                ? match.getStateObjectData().getStateObjectName() : "Unknown";
+            
             brobotLogger.log()
-                .observation("Highlighting region")
+                .observation(String.format("Highlighting region for %s.%s (%d,%d,%dx%d)",
+                    stateName, objectName, 
+                    match.getRegion().x(), match.getRegion().y(), 
+                    match.getRegion().w(), match.getRegion().h()))
                 .metadata("action", "HIGHLIGHT")
+                .metadata("state", stateName)
+                .metadata("object", objectName)
                 .metadata("region", formatMatch(match))
                 .metadata("duration", highlightSeconds)
                 .metadata("color", highlightColor)

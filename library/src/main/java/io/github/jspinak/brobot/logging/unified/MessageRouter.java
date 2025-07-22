@@ -119,6 +119,11 @@ public class MessageRouter {
         // Use the new ConsoleFormatter
         String output = consoleFormatter.format(event);
         
+        // Skip null output (e.g., START events in QUIET mode)
+        if (output == null) {
+            return;
+        }
+        
         // Use original PrintStream if available to avoid circular dependency
         PrintStream originalOut = ConsoleOutputCapture.getOriginalOut();
         if (originalOut != null) {

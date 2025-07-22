@@ -2,6 +2,7 @@ package io.github.jspinak.brobot.logging.unified;
 
 import org.springframework.stereotype.Component;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 
@@ -25,7 +26,10 @@ public class ConsoleOutputCapture {
     private BrobotLogger brobotLogger;
     private static PrintStream originalOut;
     private static PrintStream originalErr;
-    private boolean captureEnabled = true;
+    
+    @Value("${brobot.logging.console.capture-enabled:true}")
+    private boolean captureEnabled;
+    
     private static final ThreadLocal<Boolean> isLogging = ThreadLocal.withInitial(() -> false);
     
     public ConsoleOutputCapture() {

@@ -8,8 +8,10 @@ import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.state.StateObject;
 import io.github.jspinak.brobot.model.state.StateRegion;
+import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.tools.logging.visual.HighlightManager;
 import io.github.jspinak.brobot.tools.logging.visual.VisualFeedbackConfig;
+import io.github.jspinak.brobot.monitor.MonitorManager;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -60,6 +62,9 @@ public class VisualFeedbackAspect {
     @Autowired(required = false)
     private VisualFeedbackConfig visualConfig;
     
+    @Autowired
+    private MonitorManager monitorManager;
+    
     @Value("${brobot.aspects.visual-feedback.highlight-duration:2}")
     private int highlightDuration;
     
@@ -91,19 +96,22 @@ public class VisualFeedbackAspect {
     /**
      * Pointcut for find operations
      */
-    @Pointcut("execution(* io.github.jspinak.brobot.action.methods.basicactions.find.*.find*(..))")
+    @Pointcut("execution(* io.github.jspinak.brobot.action.basic.find.*.perform(..)) || " +
+              "execution(* io.github.jspinak.brobot.action.methods.basicactions.find.*.find*(..))")
     public void findOperations() {}
     
     /**
      * Pointcut for click operations
      */
-    @Pointcut("execution(* io.github.jspinak.brobot.action.methods.basicactions.click.*.click*(..))")
+    @Pointcut("execution(* io.github.jspinak.brobot.action.basic.click.*.perform(..)) || " +
+              "execution(* io.github.jspinak.brobot.action.methods.basicactions.click.*.click*(..))")
     public void clickOperations() {}
     
     /**
      * Pointcut for type operations
      */
-    @Pointcut("execution(* io.github.jspinak.brobot.action.methods.basicactions.type.*.type*(..))")
+    @Pointcut("execution(* io.github.jspinak.brobot.action.basic.type.*.perform(..)) || " +
+              "execution(* io.github.jspinak.brobot.action.methods.basicactions.type.*.type*(..))")
     public void typeOperations() {}
     
     /**
@@ -119,6 +127,9 @@ public class VisualFeedbackAspect {
     public Object provideVisualFeedback(ProceedingJoinPoint joinPoint) throws Throwable {
         String operationType = extractOperationType(joinPoint);
         ObjectCollection targets = extractTargets(joinPoint.getArgs());
+        
+        log.debug("Visual feedback for {} operation, targets: {}", operationType, 
+                 targets != null ? "found" : "null");
         
         // Highlight search regions before operation
         if (targets != null && highlightManager != null) {
@@ -148,7 +159,20 @@ public class VisualFeedbackAspect {
      */
     private String extractOperationType(ProceedingJoinPoint joinPoint) {
         String methodName = joinPoint.getSignature().getName().toLowerCase();
+        String className = joinPoint.getSignature().getDeclaringType().getSimpleName().toLowerCase();
         
+        log.debug("Analyzing method: {}.{}", className, methodName);
+        
+        // Check class name first for operation type
+        if (className.contains("find")) {
+            return "FIND";
+        } else if (className.contains("click")) {
+            return "CLICK";
+        } else if (className.contains("type")) {
+            return "TYPE";
+        }
+        
+        // Fallback to method name
         if (methodName.contains("find")) {
             return "FIND";
         } else if (methodName.contains("click")) {
@@ -164,9 +188,23 @@ public class VisualFeedbackAspect {
      * Extract targets from method arguments
      */
     private ObjectCollection extractTargets(Object[] args) {
-        for (Object arg : args) {
+        log.debug("Extracting targets from {} arguments", args.length);
+        for (int i = 0; i < args.length; i++) {
+            Object arg = args[i];
+            log.debug("Arg {}: {} ({})", i, arg != null ? arg.getClass().getSimpleName() : "null", arg);
+            
+            // Handle direct ObjectCollection
             if (arg instanceof ObjectCollection) {
                 return (ObjectCollection) arg;
+            }
+            
+            // Handle ObjectCollection array
+            if (arg instanceof ObjectCollection[]) {
+                ObjectCollection[] collections = (ObjectCollection[]) arg;
+                if (collections.length > 0 && collections[0] != null) {
+                    log.debug("Found ObjectCollection array with {} elements, using first", collections.length);
+                    return collections[0];
+                }
             }
         }
         return null;
@@ -178,39 +216,73 @@ public class VisualFeedbackAspect {
     private void highlightSearchRegions(ObjectCollection targets, String operationType) {
         if (targets == null || highlightManager == null) return;
         
-        // Extract regions from the ObjectCollection
-        List<Region> regions = new ArrayList<>();
+        log.debug("Extracting search regions for highlighting. StateImages: {}, StateRegions: {}", 
+                 targets.getStateImages().size(), targets.getStateRegions().size());
+        
+        // Extract regions with context from the ObjectCollection
+        List<HighlightManager.RegionWithContext> regionsWithContext = new ArrayList<>();
         
         // Get regions from StateRegions
         for (StateRegion stateRegion : targets.getStateRegions()) {
             if (stateRegion.getSearchRegion() != null) {
-                regions.add(stateRegion.getSearchRegion());
+                regionsWithContext.add(new HighlightManager.RegionWithContext(
+                    stateRegion.getSearchRegion(),
+                    stateRegion.getOwnerStateName(),
+                    stateRegion.getName()
+                ));
             }
         }
         
         // Get search regions from StateImages
-        for (var stateImage : targets.getStateImages()) {
+        for (StateImage stateImage : targets.getStateImages()) {
+            log.debug("StateImage: {}, patterns: {}", stateImage.getName(), 
+                     stateImage.getPatterns().size());
+            boolean foundRegions = false;
+            
             // StateImages don't have direct search regions, they use patterns
             // which have their own search regions
             for (var pattern : stateImage.getPatterns()) {
                 if (pattern.getSearchRegions() != null) {
-                    regions.addAll(pattern.getSearchRegions().getAllRegions());
+                    // Get configured regions (without defaults)
+                    List<Region> configuredRegions = pattern.getRegions();
+                    
+                    if (!configuredRegions.isEmpty()) {
+                        for (Region region : configuredRegions) {
+                            if (region.isDefined()) {
+                                regionsWithContext.add(new HighlightManager.RegionWithContext(
+                                    region,
+                                    stateImage.getOwnerStateName(),
+                                    stateImage.getName()
+                                ));
+                                foundRegions = true;
+                                log.debug("Added region from pattern: {}", region);
+                            }
+                        }
+                    }
                 }
+            }
+            
+            // If no regions found for this StateImage and we're processing it, use full screen
+            if (!foundRegions && stateImage.getPatterns().size() > 0) {
+                Region screenRegion = getScreenRegion();
+                regionsWithContext.add(new HighlightManager.RegionWithContext(
+                    screenRegion,
+                    stateImage.getOwnerStateName(),
+                    stateImage.getName()
+                ));
+                log.debug("No search regions defined for StateImage {}, using full screen", stateImage.getName());
             }
         }
         
-        // If no specific search regions, get default regions
-        if (regions.isEmpty() && !targets.getStateImages().isEmpty()) {
-            // Use screen as default search region
-            regions.add(new Region(0, 0, 1920, 1080)); // Default screen size
+        
+        log.debug("Total search regions to highlight: {}", regionsWithContext.size());
+        
+        // Use HighlightManager to highlight the regions with context
+        if (!regionsWithContext.isEmpty()) {
+            highlightManager.highlightSearchRegionsWithContext(regionsWithContext);
         }
         
-        // Use HighlightManager to highlight the regions
-        if (!regions.isEmpty()) {
-            highlightManager.highlightSearchRegions(regions);
-        }
-        
-        logVisualFeedback("SEARCH_HIGHLIGHT", operationType, regions.size());
+        logVisualFeedback("SEARCH_HIGHLIGHT", operationType, regionsWithContext.size());
     }
     
     /**
@@ -346,6 +418,23 @@ public class VisualFeedbackAspect {
         activeHighlights.clear();
         recentActions.clear();
         log.info("All visual highlights cleared");
+    }
+    
+    /**
+     * Get screen region from Brobot's monitor configuration
+     */
+    private Region getScreenRegion() {
+        try {
+            // Get primary monitor info from MonitorManager
+            int primaryIndex = monitorManager.getPrimaryMonitorIndex();
+            MonitorManager.MonitorInfo monitorInfo = monitorManager.getMonitorInfo(primaryIndex);
+            Rectangle bounds = monitorInfo.getBounds();
+            return new Region(bounds.x, bounds.y, bounds.width, bounds.height);
+        } catch (Exception e) {
+            log.warn("Failed to get monitor bounds, using default", e);
+            // Fallback to a reasonable default
+            return new Region(0, 0, 1920, 1080);
+        }
     }
     
     /**
