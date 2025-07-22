@@ -6,6 +6,8 @@ sidebar_position: 6
 
 A concise reference for the Brobot Unified Logging System.
 
+> **Note**: For action-specific logging with configurable output formats (QUIET, NORMAL, VERBOSE), see the [Modular Logging Guide](./modular-logging-guide.md).
+
 ## Basic Logging
 
 ```java

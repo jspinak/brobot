@@ -4,7 +4,9 @@ import io.github.jspinak.brobot.config.FrameworkSettings;
 import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.logging.unified.BrobotLogger;
+import io.github.jspinak.brobot.logging.unified.LogEvent;
 import io.github.jspinak.brobot.action.Action;
+import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.action.basic.highlight.HighlightOptions;
 import lombok.extern.slf4j.Slf4j;
@@ -34,6 +36,25 @@ import java.util.concurrent.CompletableFuture;
 @Component
 @Slf4j
 public class HighlightManager {
+    
+    /**
+     * Represents a region with its state and object context for better logging.
+     */
+    public static class RegionWithContext {
+        private final Region region;
+        private final String stateName;
+        private final String objectName;
+        
+        public RegionWithContext(Region region, String stateName, String objectName) {
+            this.region = region;
+            this.stateName = stateName;
+            this.objectName = objectName;
+        }
+        
+        public Region getRegion() { return region; }
+        public String getStateName() { return stateName; }
+        public String getObjectName() { return objectName; }
+    }
     
     private final VisualFeedbackConfig config;
     private final BrobotLogger brobotLogger;
@@ -96,31 +117,174 @@ public class HighlightManager {
      */
     public void highlightSearchRegions(List<Region> regions) {
         if (!config.isEnabled() || !config.isAutoHighlightSearchRegions() || regions.isEmpty()) {
+            log.debug("Search region highlighting skipped: enabled={}, autoHighlight={}, regions={}", 
+                     config.isEnabled(), config.isAutoHighlightSearchRegions(), regions.size());
             return;
         }
         
         VisualFeedbackConfig.SearchRegionHighlightConfig searchConfig = config.getSearchRegion();
         
-        for (Region region : regions) {
-            if (region == null) continue;
+        // Perform synchronous highlighting for search regions so they appear in console
+        try {
+            // Create highlight configuration
+            HighlightOptions highlightOptions = new HighlightOptions.Builder()
+                .setHighlightSeconds(searchConfig.getDuration())
+                .setHighlightColor(getColorName(searchConfig.getColorObject()))
+                .setHighlightAllAtOnce(true)  // Highlight all regions at once
+                .build();
             
-            highlightRegion(
-                region,
-                searchConfig.getColorObject(),
-                searchConfig.getDuration(),
-                searchConfig.getBorderWidth(),
-                "SEARCH_REGION",
-                null
-            );
+            // Create object collection with all regions
+            ObjectCollection objectCollection = new ObjectCollection.Builder()
+                .withRegions(regions.toArray(new Region[0]))
+                .build();
+            
+            // Perform highlight synchronously using Brobot's Action
+            if (action != null) {
+                log.debug("Highlighting {} search regions synchronously", regions.size());
+                brobotLogger.log()
+                    .observation("Starting highlight action")
+                    .metadata("regionCount", regions.size())
+                    .metadata("color", getColorName(searchConfig.getColorObject()))
+                    .metadata("duration", searchConfig.getDuration())
+                    .log();
+                    
+                ActionResult result = action.perform(highlightOptions, objectCollection);
+                
+                brobotLogger.log()
+                    .observation("Highlight action completed")
+                    .metadata("success", result.isSuccess())
+                    .metadata("matchesFound", result.size())
+                    .log();
+                    
+                if (!result.isSuccess()) {
+                    log.warn("Highlight action failed - no matches found for highlight regions");
+                }
+            } else {
+                log.error("Action not available for highlighting - highlights will not appear on screen");
+                brobotLogger.log()
+                    .error(new IllegalStateException("Action bean not injected"))
+                    .message("Cannot display highlights - Action component not available")
+                    .log();
+            }
             
             if (searchConfig.isShowDimensions()) {
-                showRegionDimensions(region);
+                for (Region region : regions) {
+                    showRegionDimensions(region);
+                }
             }
+            
+        } catch (Exception e) {
+            log.error("Error highlighting search regions", e);
         }
         
         brobotLogger.log()
             .observation("Highlighted search regions")
             .metadata("regionCount", regions.size())
+            .metadata("color", searchConfig.getColor())
+            .metadata("duration", searchConfig.getDuration())
+            .log();
+    }
+    
+    /**
+     * Highlights search regions with state and object context for better logging.
+     * 
+     * @param regionsWithContext List of regions with their state/object context
+     */
+    public void highlightSearchRegionsWithContext(List<RegionWithContext> regionsWithContext) {
+        if (!config.isEnabled() || !config.isAutoHighlightSearchRegions() || regionsWithContext.isEmpty()) {
+            log.debug("Search region highlighting skipped: enabled={}, autoHighlight={}, regions={}", 
+                     config.isEnabled(), config.isAutoHighlightSearchRegions(), regionsWithContext.size());
+            return;
+        }
+        
+        VisualFeedbackConfig.SearchRegionHighlightConfig searchConfig = config.getSearchRegion();
+        
+        // Log that we're about to highlight regions with context
+        brobotLogger.log()
+            .level(LogEvent.Level.INFO)
+            .observation(String.format("Highlighting %d search regions with context", regionsWithContext.size()))
+            .log();
+        
+        // Log each region with its context
+        for (RegionWithContext rwc : regionsWithContext) {
+            Region region = rwc.getRegion();
+            String stateName = rwc.getStateName() != null ? rwc.getStateName() : "Unknown";
+            String objectName = rwc.getObjectName() != null ? rwc.getObjectName() : "Unknown";
+            
+            brobotLogger.log()
+                .level(LogEvent.Level.INFO)
+                .observation(String.format("Highlighting region for %s.%s (%d,%d,%dx%d)",
+                    stateName, objectName, region.x(), region.y(), region.w(), region.h()))
+                .metadata("state", stateName)
+                .metadata("object", objectName)
+                .metadata("x", region.x())
+                .metadata("y", region.y())
+                .metadata("width", region.w())
+                .metadata("height", region.h())
+                .log();
+        }
+        
+        // Perform synchronous highlighting for search regions
+        try {
+            // Create highlight configuration
+            HighlightOptions highlightOptions = new HighlightOptions.Builder()
+                .setHighlightSeconds(searchConfig.getDuration())
+                .setHighlightColor(getColorName(searchConfig.getColorObject()))
+                .setHighlightAllAtOnce(true)  // Highlight all regions at once
+                .build();
+            
+            // Extract just the regions for highlighting
+            List<Region> regions = regionsWithContext.stream()
+                .map(RegionWithContext::getRegion)
+                .toList();
+            
+            // Create object collection with all regions
+            ObjectCollection objectCollection = new ObjectCollection.Builder()
+                .withRegions(regions.toArray(new Region[0]))
+                .build();
+            
+            // Perform highlight synchronously using Brobot's Action
+            if (action != null) {
+                log.debug("Highlighting {} search regions synchronously", regions.size());
+                brobotLogger.log()
+                    .observation("Starting highlight action with context")
+                    .metadata("regionCount", regions.size())
+                    .metadata("color", getColorName(searchConfig.getColorObject()))
+                    .metadata("duration", searchConfig.getDuration())
+                    .log();
+                    
+                ActionResult result = action.perform(highlightOptions, objectCollection);
+                
+                brobotLogger.log()
+                    .observation("Highlight action with context completed")
+                    .metadata("success", result.isSuccess())
+                    .metadata("matchesFound", result.size())
+                    .log();
+                    
+                if (!result.isSuccess()) {
+                    log.warn("Highlight action failed - no matches found for highlight regions");
+                }
+            } else {
+                log.error("Action not available for highlighting - highlights will not appear on screen");
+                brobotLogger.log()
+                    .error(new IllegalStateException("Action bean not injected"))
+                    .message("Cannot display highlights - Action component not available")
+                    .log();
+            }
+            
+            if (searchConfig.isShowDimensions()) {
+                for (RegionWithContext rwc : regionsWithContext) {
+                    showRegionDimensionsWithContext(rwc);
+                }
+            }
+            
+        } catch (Exception e) {
+            log.error("Error highlighting search regions", e);
+        }
+        
+        brobotLogger.log()
+            .observation("Highlighted search regions complete")
+            .metadata("regionCount", regionsWithContext.size())
             .metadata("color", searchConfig.getColor())
             .metadata("duration", searchConfig.getDuration())
             .log();
@@ -318,6 +482,24 @@ public class HighlightManager {
             .observation("Region dimensions")
             .metadata("dimensions", dimensions)
             .metadata("location", String.format("(%d,%d)", region.x(), region.y()))
+            .log();
+    }
+    
+    /**
+     * Shows region dimensions with state/object context.
+     */
+    private void showRegionDimensionsWithContext(RegionWithContext rwc) {
+        Region region = rwc.getRegion();
+        String dimensions = String.format("%dx%d", region.w(), region.h());
+        String stateName = rwc.getStateName() != null ? rwc.getStateName() : "Unknown";
+        String objectName = rwc.getObjectName() != null ? rwc.getObjectName() : "Unknown";
+        
+        brobotLogger.log()
+            .observation(String.format("Region dimensions for %s.%s", stateName, objectName))
+            .metadata("dimensions", dimensions)
+            .metadata("location", String.format("(%d,%d)", region.x(), region.y()))
+            .metadata("state", stateName)
+            .metadata("object", objectName)
             .log();
     }
     

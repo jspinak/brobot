@@ -193,7 +193,8 @@ public class ActionExecution {
         Duration duration = actionLifecycleManagement.getCurrentDuration(matches);
         matches.setDuration(duration);
         if (FrameworkSettings.buildDataset) datasetManager.addSetOfData(matches);
-        ConsoleReporter.println(actionOptions.getAction() + " " + matches.getOutputText() + " " + matches.getSuccessSymbol());
+        // Removed direct console output - logging is handled by ActionLifecycleAspect which respects QUIET mode
+        // ConsoleReporter.println(actionOptions.getAction() + " " + matches.getOutputText() + " " + matches.getSuccessSymbol());
         if (objectCollections.length > 0) {
             LogData logData = actionLogger.logAction(sessionId, matches, objectCollections[0]);
         }
@@ -220,17 +221,8 @@ public class ActionExecution {
      *                         Only the first collection is processed if multiple are provided.
      */
     private void printAction(ActionOptions actionOptions, ObjectCollection... objectCollections) {
-        if (ConsoleReporter.minReportingLevel(ConsoleReporter.OutputLevel.LOW)) {
-            ConsoleReporter.format("|%s ", actionOptions.getAction());
-            if (objectCollections.length == 0) return;
-            List<StateImage> stImgs = objectCollections[0].getStateImages();
-            int lastIndex = stImgs.size() - 1;
-            for (StateImage sio : objectCollections[0].getStateImages()) {
-                ConsoleReporter.format("%s.%s", sio.getOwnerStateName(), sio.getName());
-                String ending = stImgs.indexOf(sio) != lastIndex? "," : "|";
-                ConsoleReporter.print(ending+" ");
-            }
-        }
+        // Disabled direct console output - logging is handled by ActionLifecycleAspect which respects QUIET mode
+        // Legacy direct console printing interferes with structured logging and QUIET mode
     }
 
     /**
@@ -282,7 +274,8 @@ public class ActionExecution {
         Duration duration = actionLifecycleManagement.getCurrentDuration(matches);
         matches.setDuration(duration);
         if (FrameworkSettings.buildDataset) datasetManager.addSetOfData(matches);
-        ConsoleReporter.println(actionConfig.getClass().getSimpleName() + " " + matches.getOutputText() + " " + matches.getSuccessSymbol());
+        // Removed direct console output - logging is handled by ActionLifecycleAspect which respects QUIET mode
+        // ConsoleReporter.println(actionConfig.getClass().getSimpleName() + " " + matches.getOutputText() + " " + matches.getSuccessSymbol());
         if (objectCollections.length > 0) {
             LogData logData = actionLogger.logAction(sessionId, matches, objectCollections[0]);
         }
@@ -293,17 +286,8 @@ public class ActionExecution {
      * Prints action details for ActionConfig-based actions.
      */
     private void printActionConfig(ActionConfig actionConfig, ObjectCollection... objectCollections) {
-        if (ConsoleReporter.minReportingLevel(ConsoleReporter.OutputLevel.LOW)) {
-            ConsoleReporter.format("|%s ", actionConfig.getClass().getSimpleName());
-            if (objectCollections.length == 0) return;
-            List<StateImage> stImgs = objectCollections[0].getStateImages();
-            int lastIndex = stImgs.size() - 1;
-            for (StateImage sio : objectCollections[0].getStateImages()) {
-                ConsoleReporter.format("%s.%s", sio.getOwnerStateName(), sio.getName());
-                String ending = stImgs.indexOf(sio) != lastIndex? "," : "|";
-                ConsoleReporter.print(ending+" ");
-            }
-        }
+        // Disabled direct console output - logging is handled by ActionLifecycleAspect which respects QUIET mode
+        // Legacy direct console printing interferes with structured logging and QUIET mode
     }
     
     /**

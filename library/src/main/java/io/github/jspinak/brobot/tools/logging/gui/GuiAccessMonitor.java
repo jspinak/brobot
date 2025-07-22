@@ -64,17 +64,17 @@ public class GuiAccessMonitor {
             // Check if running in headless mode
             boolean headless = checkHeadlessMode(problems);
             
-            // Platform-specific checks
-            if (SystemUtils.IS_OS_LINUX || SystemUtils.IS_OS_UNIX) {
-                checkLinuxDisplay(problems);
-                checkX11Access(problems);
-                checkWaylandAccess(problems);
+            // Platform-specific checks (order matters - check Mac first since it's also Unix-based)
+            if (SystemUtils.IS_OS_MAC) {
+                checkMacDisplay(problems);
+                checkScreenRecordingPermission(problems);
             } else if (SystemUtils.IS_OS_WINDOWS) {
                 checkWindowsDisplay(problems);
                 checkRemoteDesktop(problems);
-            } else if (SystemUtils.IS_OS_MAC) {
-                checkMacDisplay(problems);
-                checkScreenRecordingPermission(problems);
+            } else if (SystemUtils.IS_OS_LINUX || SystemUtils.IS_OS_UNIX) {
+                checkLinuxDisplay(problems);
+                checkX11Access(problems);
+                checkWaylandAccess(problems);
             }
             
             // General display checks

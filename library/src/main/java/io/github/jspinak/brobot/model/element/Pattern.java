@@ -218,6 +218,20 @@ public class Pattern {
     public List<Region> getRegions() {
         return searchRegions.getRegions(fixed);
     }
+    
+    /**
+     * Get regions for searching, with full-screen default if none are configured.
+     * This is the method to use when actually performing searches.
+     * @return regions for searching (never empty)
+     */
+    @JsonIgnore
+    public List<Region> getRegionsForSearch() {
+        List<Region> regions = searchRegions.getRegions(fixed);
+        if (regions.isEmpty()) {
+            return List.of(new Region()); // full screen default
+        }
+        return regions;
+    }
 
     public void addSearchRegion(Region region) {
         searchRegions.addSearchRegions(region);
