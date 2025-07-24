@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.action.internal.execution;
 
-import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.action.internal.options.ActionOptions;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.model.element.Image;
 import io.github.jspinak.brobot.model.element.Pattern;
@@ -19,7 +19,7 @@ import java.awt.image.BufferedImage;
 import java.time.Duration;
 import java.time.LocalDateTime;
 
-import static io.github.jspinak.brobot.action.ActionOptions.GetTextUntil.*;
+import static io.github.jspinak.brobot.action.internal.options.ActionOptions.GetTextUntil.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 

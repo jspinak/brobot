@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.action.composite.drag;
 
-import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.action.internal.options.ActionOptions;
 import io.github.jspinak.brobot.model.element.Location;
 import io.github.jspinak.brobot.model.element.Positions;
 import io.github.jspinak.brobot.action.ActionResult;

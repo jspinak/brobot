@@ -1,7 +1,7 @@
 package io.github.jspinak.brobot.action.internal.service;
 
 import io.github.jspinak.brobot.action.ActionInterface;
-import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.action.internal.options.ActionOptions;
 import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.basic.find.FindStrategyRegistry;
 import io.github.jspinak.brobot.action.internal.execution.BasicActionRegistry;

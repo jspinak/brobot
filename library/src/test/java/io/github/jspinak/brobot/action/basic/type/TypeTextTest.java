@@ -42,7 +42,7 @@ class TypeTextTest {
                 
         stateString = new StateString.Builder()
                 .setName("testString")
-                .build("Hello World");
+                .setString("Hello World").build();
     }
 
     @Test
@@ -79,15 +79,15 @@ class TypeTextTest {
         
         StateString string1 = new StateString.Builder()
                 .setName("string1")
-                .build("First");
+                .setString("First").build();
                 
         StateString string2 = new StateString.Builder()
                 .setName("string2")
-                .build("Second");
+                .setString("Second").build();
                 
         StateString string3 = new StateString.Builder()
                 .setName("string3")
-                .build("Third");
+                .setString("Third").build();
                 
         objectCollection = new ObjectCollection.Builder()
                 .withStrings(string1, string2, string3)
@@ -197,9 +197,9 @@ class TypeTextTest {
         actionResult.setActionConfig(noPauseOptions);
         
         StateString string1 = new StateString.Builder()
-                .build("One");
+                .setString("One").build();
         StateString string2 = new StateString.Builder()
-                .build("Two");
+                .setString("Two").build();
                 
         objectCollection = new ObjectCollection.Builder()
                 .withStrings(string1, string2)

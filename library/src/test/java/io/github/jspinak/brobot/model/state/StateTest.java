@@ -28,7 +28,7 @@ public class StateTest {
         // 1. Setup child objects using memory-based patterns
         StateImage image = new StateImage.Builder().addPattern(createTestPattern()).build();
         StateRegion region = new StateRegion.Builder().setSearchRegion(new Region(1, 1, 1, 1)).build();
-        StateString str = new StateString.Builder().build("test");
+        StateString str = new StateString.Builder().setString("test").build();
         StateLocation loc = new StateLocation.Builder().setLocation(1, 1).build();
 
         // 2. Build the State

@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.tools.history;
 
-import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.action.internal.options.ActionOptions;
 import io.github.jspinak.brobot.model.analysis.scene.SceneAnalysis;
 import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.config.FrameworkSettings;
@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static io.github.jspinak.brobot.action.ActionOptions.Action.FIND;
+import static io.github.jspinak.brobot.action.internal.options.ActionOptions.Action.FIND;
 
 /**
  * Generates unique filenames for Brobot's visual history illustrations.

@@ -2,7 +2,7 @@ package io.github.jspinak.brobot.action.internal.utility;
 
 import org.springframework.stereotype.Component;
 
-import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.action.internal.options.ActionOptions;
 import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.ActionResult;
 

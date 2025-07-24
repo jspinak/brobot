@@ -88,6 +88,8 @@ jacocoTestReport {
 }
 
 javadoc {
+    dependsOn compileJava
+    
     if(JavaVersion.current().isJava9Compatible()) {
         options.addBooleanOption('html5', true)
     }
@@ -95,6 +97,12 @@ javadoc {
     options.addStringOption('Xdoclint:none', '-quiet')
     options.windowTitle = "Brobot 1.1.0 API" // This sets the browser tab title
     options.docTitle = "Brobot 1.1.0 API" // This sets the main header on the page
+    
+    // Include compiled classes in classpath for Lombok-generated code
+    classpath = configurations.compileClasspath + sourceSets.main.output
+    
+    // Disable javadoc temporarily due to Lombok builder issues
+    enabled = false
 }
 
 // -- Publishing Configuration --

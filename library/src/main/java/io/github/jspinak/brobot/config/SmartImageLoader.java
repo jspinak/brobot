@@ -87,6 +87,17 @@ public class SmartImageLoader {
     }
     
     /**
+     * Load an image and return the BufferedImage directly.
+     * For backward compatibility with existing tests.
+     * 
+     * @param imageName the name or path of the image to load
+     * @return the loaded BufferedImage, or null if loading failed
+     */
+    public BufferedImage loadImageDirect(String imageName) {
+        return loadImageInternal(imageName);
+    }
+    
+    /**
      * Load an image using intelligent path resolution and caching.
      * 
      * @param imageName the name or path of the image to load

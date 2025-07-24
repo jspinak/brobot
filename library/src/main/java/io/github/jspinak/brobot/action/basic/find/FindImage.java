@@ -3,7 +3,7 @@ package io.github.jspinak.brobot.action.basic.find;
 import io.github.jspinak.brobot.action.internal.execution.ActionLifecycleManagement;
 import io.github.jspinak.brobot.action.internal.find.IterativePatternFinder;
 import io.github.jspinak.brobot.action.internal.find.DefinedRegionConverter;
-import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.action.internal.options.ActionOptions;
 import io.github.jspinak.brobot.action.basic.find.color.SceneProvider;
 import io.github.jspinak.brobot.model.element.Scene;
 import io.github.jspinak.brobot.model.match.Match;

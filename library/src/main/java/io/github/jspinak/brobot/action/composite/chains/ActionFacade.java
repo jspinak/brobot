@@ -1,7 +1,7 @@
 package io.github.jspinak.brobot.action.composite.chains;
 
 import io.github.jspinak.brobot.action.Action;
-import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.action.internal.options.ActionOptions;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.action.basic.click.ClickOptions;
 import io.github.jspinak.brobot.model.element.Pattern;
@@ -19,7 +19,7 @@ import org.springframework.stereotype.Component;
 import java.util.Objects;
 import java.util.Optional;
 
-import static io.github.jspinak.brobot.action.ActionOptions.Action.*;
+import static io.github.jspinak.brobot.action.internal.options.ActionOptions.Action.*;
 
 /**
  * Provides a facade of commonly used action patterns for GUI automation.

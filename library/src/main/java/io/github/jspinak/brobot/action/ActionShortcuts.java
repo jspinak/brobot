@@ -1,5 +1,6 @@
 package io.github.jspinak.brobot.action;
 
+import io.github.jspinak.brobot.action.internal.options.ActionOptions;
 import org.springframework.stereotype.Component;
 
 /**

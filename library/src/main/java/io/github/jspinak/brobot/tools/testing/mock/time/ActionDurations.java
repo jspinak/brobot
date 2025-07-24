@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.tools.testing.mock.time;
 
-import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.action.internal.options.ActionOptions;
 import io.github.jspinak.brobot.config.FrameworkSettings;
 
 import org.springframework.stereotype.Component;

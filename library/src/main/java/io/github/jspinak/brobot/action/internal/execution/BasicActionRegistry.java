@@ -1,7 +1,8 @@
 package io.github.jspinak.brobot.action.internal.execution;
 
 import io.github.jspinak.brobot.action.ActionInterface;
-import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.action.internal.options.ActionOptions;
+import static io.github.jspinak.brobot.action.internal.options.ActionOptions.Action.*;
 import io.github.jspinak.brobot.action.basic.classify.Classify;
 import io.github.jspinak.brobot.action.basic.wait.WaitVanish;
 import io.github.jspinak.brobot.action.basic.click.Click;
@@ -22,7 +23,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import static io.github.jspinak.brobot.action.ActionOptions.Action.*;
 
 /**
  * BasicActions, which run for 1 iteration, require 1 or no Find operations.

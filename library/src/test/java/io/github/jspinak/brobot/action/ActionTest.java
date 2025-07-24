@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.action;
 
-import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.action.internal.options.ActionOptions;
 import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
@@ -173,7 +173,7 @@ class ActionTest {
         ObjectCollection collection = new ObjectCollection.Builder()
                 .withStrings(new io.github.jspinak.brobot.model.state.StateString.Builder()
                         .setName("testString")
-                        .build("Hello World"))
+                        .setString("Hello World").build())
                 .build();
         when(actionService.getAction(typeOptions)).thenReturn(Optional.of(actionInterface));
 
