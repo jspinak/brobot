@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.action.internal.find.pixel;
 
-import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.action.internal.options.ActionOptions;
 import io.github.jspinak.brobot.model.analysis.color.ColorCluster;
 import io.github.jspinak.brobot.action.basic.find.color.GetPixelAnalysisCollectionScores;
 import io.github.jspinak.brobot.analysis.color.profiles.KmeansProfileBuilder;

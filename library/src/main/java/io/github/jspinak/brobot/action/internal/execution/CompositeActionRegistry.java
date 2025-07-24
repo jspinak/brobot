@@ -1,7 +1,7 @@
 package io.github.jspinak.brobot.action.internal.execution;
 
 import io.github.jspinak.brobot.action.ActionInterface;
-import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.action.internal.options.ActionOptions;
 import io.github.jspinak.brobot.action.composite.drag.Drag;
 import io.github.jspinak.brobot.action.composite.drag.SimpleDrag;
 import io.github.jspinak.brobot.action.composite.multiple.finds.MultipleFinds;

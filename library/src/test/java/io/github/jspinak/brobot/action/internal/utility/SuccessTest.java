@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.action.internal.utility;
 
-import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.action.internal.options.ActionOptions;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.internal.utility.ActionSuccessCriteria;
 import io.github.jspinak.brobot.model.element.Region;

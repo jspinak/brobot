@@ -1,7 +1,7 @@
 package io.github.jspinak.brobot.action.internal.mouse;
 
 import io.github.jspinak.brobot.config.FrameworkSettings;
-import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.action.internal.options.ActionOptions;
 import io.github.jspinak.brobot.action.basic.click.ClickOptions;
 import io.github.jspinak.brobot.action.basic.mouse.MousePressOptions;
 import io.github.jspinak.brobot.action.internal.mouse.ClickType;

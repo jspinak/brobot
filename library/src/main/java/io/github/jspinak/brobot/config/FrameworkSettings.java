@@ -3,7 +3,7 @@ package io.github.jspinak.brobot.config;
 import java.util.ArrayList;
 import java.util.List;
 
-import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.action.internal.options.ActionOptions;
 import io.github.jspinak.brobot.runner.project.AutomationProject;
 
 /**

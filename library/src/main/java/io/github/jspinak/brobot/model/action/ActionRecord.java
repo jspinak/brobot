@@ -1,7 +1,7 @@
 package io.github.jspinak.brobot.model.action;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.action.internal.options.ActionOptions;
 import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.model.state.special.SpecialStateType;
@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Random;
 
-import static io.github.jspinak.brobot.action.ActionOptions.Find.UNIVERSAL;
+import static io.github.jspinak.brobot.action.internal.options.ActionOptions.Find.UNIVERSAL;
 
 /**
  * Records match results and context at a specific point in time for the Brobot framework.

@@ -1,7 +1,7 @@
 package io.github.jspinak.brobot.action.basic.click;
 
 import io.github.jspinak.brobot.config.FrameworkSettings;
-import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.action.internal.options.ActionOptions;
 import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.RepetitionOptions;
 import io.github.jspinak.brobot.action.basic.find.Find;

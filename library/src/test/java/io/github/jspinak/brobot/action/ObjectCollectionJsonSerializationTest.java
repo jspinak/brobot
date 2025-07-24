@@ -235,7 +235,7 @@ class ObjectCollectionJsonSerializationTest {
                 .withStrings(new StateString.Builder()
                         .setOwnerStateName("StringState")
                         .setName("TestString")
-                        .build("Lorem ipsum"))
+                        .setString("Lorem ipsum").build())
                 
                 // Add patterns (creates StateImages)
                 // Note: Pattern constructor with filename tries to load image, so we create Pattern differently

@@ -1,12 +1,12 @@
 package io.github.jspinak.brobot.action.composite.chains;
 
-import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.action.internal.options.ActionOptions;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.action.composite.multiple.actions.MultipleActions;
 import io.github.jspinak.brobot.action.composite.multiple.actions.MultipleActionsObject;
 import io.github.jspinak.brobot.model.element.Location;
 
-import static io.github.jspinak.brobot.action.ActionOptions.Action.MOVE;
+import static io.github.jspinak.brobot.action.internal.options.ActionOptions.Action.MOVE;
 
 /**
  * Demonstrates sequential mouse movement patterns using the composite action framework.

@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.action.internal.find;
 
-import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.action.internal.options.ActionOptions;
 import io.github.jspinak.brobot.model.element.Location;
 import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.action.ActionResult;

@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.analysis.scene;
 
-import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.action.internal.options.ActionOptions;
 import io.github.jspinak.brobot.action.basic.find.motion.FindDynamicPixelMatches;
 import io.github.jspinak.brobot.action.internal.factory.ActionResultFactory;
 import io.github.jspinak.brobot.model.analysis.scene.SceneCombination;

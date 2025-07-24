@@ -4,6 +4,7 @@ import org.junit.jupiter.api.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.nio.file.*;
+import java.util.List;
 import javax.imageio.ImageIO;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -39,7 +40,7 @@ public class SmartImageLoaderTest {
         createRealPngImage(imagePath);
         
         // Load using absolute path
-        BufferedImage image = imageLoader.loadImage(imagePath.toString());
+        BufferedImage image = imageLoader.loadImageDirect(imagePath.toString());
         
         assertNotNull(image);
         assertEquals(100, image.getWidth());
@@ -61,7 +62,7 @@ public class SmartImageLoaderTest {
         pathManager.initialize(imageDir.toString());
         
         // Load using just filename
-        BufferedImage image = imageLoader.loadImage("button.png");
+        BufferedImage image = imageLoader.loadImageDirect("button.png");
         
         assertNotNull(image);
         assertEquals(100, image.getWidth());
@@ -76,12 +77,12 @@ public class SmartImageLoaderTest {
         
         // First load - from file
         long start1 = System.currentTimeMillis();
-        BufferedImage image1 = imageLoader.loadImage(imagePath.toString());
+        BufferedImage image1 = imageLoader.loadImageDirect(imagePath.toString());
         long time1 = System.currentTimeMillis() - start1;
         
         // Second load - from cache
         long start2 = System.currentTimeMillis();
-        BufferedImage image2 = imageLoader.loadImage(imagePath.toString());
+        BufferedImage image2 = imageLoader.loadImageDirect(imagePath.toString());
         long time2 = System.currentTimeMillis() - start2;
         
         assertNotNull(image1);
@@ -109,7 +110,7 @@ public class SmartImageLoaderTest {
         SmartImageLoader mockLoader = new SmartImageLoader(pathManager, env);
         
         // Load non-existent image
-        BufferedImage placeholder = mockLoader.loadImage("non-existent.png");
+        BufferedImage placeholder = mockLoader.loadImageDirect("non-existent.png");
         
         assertNotNull(placeholder);
         assertEquals(100, placeholder.getWidth());
@@ -125,7 +126,7 @@ public class SmartImageLoaderTest {
     @DisplayName("Fallback strategies for missing images")
     void testFallbackStrategies() {
         // Load non-existent image
-        BufferedImage fallback = imageLoader.loadImage("missing-image.png");
+        BufferedImage fallback = imageLoader.loadImageDirect("missing-image.png");
         
         assertNotNull(fallback); // Should return placeholder
         assertEquals(100, fallback.getWidth());
@@ -138,8 +139,8 @@ public class SmartImageLoaderTest {
         
         var result = loadHistory.get("missing-image.png");
         assertNotNull(result);
-        assertFalse(result.success);
-        assertNotNull(result.failureReason);
+        assertFalse(result.isSuccess());
+        assertNotNull(result.getFailureReason());
     }
     
     @Test
@@ -153,7 +154,7 @@ public class SmartImageLoaderTest {
         pathManager.initialize(imageDir.toString());
         
         // Try loading without extension
-        BufferedImage image = imageLoader.loadImage("icon");
+        BufferedImage image = imageLoader.loadImageDirect("icon");
         
         // Should find icon.png
         assertNotNull(image);
@@ -167,15 +168,15 @@ public class SmartImageLoaderTest {
         imageLoader.loadImage("does-not-exist.png");
         
         // Get suggestions
-        String suggestions = imageLoader.getSuggestionsForFailure("does-not-exist.png");
+        List<String> suggestions = imageLoader.getSuggestionsForFailure("does-not-exist.png");
         
         assertNotNull(suggestions);
-        assertTrue(suggestions.contains("Image loading failed"));
-        assertTrue(suggestions.contains("Suggestions:"));
+        assertFalse(suggestions.isEmpty());
         
         // Suggestions for successful load
-        String noFailure = imageLoader.getSuggestionsForFailure("not-attempted.png");
-        assertTrue(noFailure.contains("No failure recorded"));
+        List<String> noFailure = imageLoader.getSuggestionsForFailure("not-attempted.png");
+        assertNotNull(noFailure);
+        assertTrue(noFailure.stream().anyMatch(s -> s.contains("No failure recorded")));
     }
     
     @Test
@@ -212,7 +213,7 @@ public class SmartImageLoaderTest {
         
         for (int i = 0; i < 5; i++) {
             final int index = i;
-            futures.add(executor.submit(() -> imageLoader.loadImage("img" + index + ".png")));
+            futures.add(executor.submit(() -> imageLoader.loadImageDirect("img" + index + ".png")));
         }
         
         // Verify all loaded successfully

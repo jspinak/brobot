@@ -229,7 +229,7 @@ class StateJsonSerializationTest {
         // Add a state string using addStateString
         StateString string = new StateString.Builder()
                 .setName("TestString")
-                .build("Test String Value");
+                .setString("Test String Value").build();
         state.addStateString(string);
 
         assertEquals(1, state.getStateStrings().size());

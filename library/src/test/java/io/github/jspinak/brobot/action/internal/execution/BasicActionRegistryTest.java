@@ -1,7 +1,7 @@
 package io.github.jspinak.brobot.action.internal.execution;
 
 import io.github.jspinak.brobot.action.ActionInterface;
-import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.action.internal.options.ActionOptions;
 import io.github.jspinak.brobot.action.basic.classify.Classify;
 import io.github.jspinak.brobot.action.basic.click.Click;
 import io.github.jspinak.brobot.action.basic.find.Find;
@@ -23,7 +23,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
 
-import static io.github.jspinak.brobot.action.ActionOptions.Action.*;
+import static io.github.jspinak.brobot.action.internal.options.ActionOptions.Action.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)

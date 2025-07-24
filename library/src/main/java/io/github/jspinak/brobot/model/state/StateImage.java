@@ -2,7 +2,7 @@ package io.github.jspinak.brobot.model.state;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.action.internal.options.ActionOptions;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.model.analysis.color.ColorCluster;
 import io.github.jspinak.brobot.analysis.color.kmeans.KmeansProfilesAllSchemas;

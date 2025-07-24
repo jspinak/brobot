@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.action.internal.execution;
 
-import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.action.internal.options.ActionOptions;
 import io.github.jspinak.brobot.model.element.Image;
 import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
@@ -14,7 +14,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import static io.github.jspinak.brobot.action.ActionOptions.GetTextUntil.*;
 
 /**
  * Manages the execution lifecycle logic for GUI automation actions.
@@ -225,15 +224,15 @@ public class ActionLifecycleManagement {
      */
     private boolean isTextConditionAchieved(ActionResult matches) {
         ActionOptions.GetTextUntil condition = matches.getActionOptions().getGetTextUntil();
-        if (condition == NONE) return false; // text is not used as an exit condition
+        if (condition == ActionOptions.GetTextUntil.NONE) return false; // text is not used as an exit condition
         String textToFind = matches.getActionOptions().getTextToAppearOrVanish();
         boolean containsText;
         for (Match match : matches.getMatchList()) {
             containsText = matchContainsText(match, textToFind);
-            if (condition == TEXT_APPEARS && containsText) return true;
-            if (condition == TEXT_VANISHES && containsText) return false;
+            if (condition == ActionOptions.GetTextUntil.TEXT_APPEARS && containsText) return true;
+            if (condition == ActionOptions.GetTextUntil.TEXT_VANISHES && containsText) return false;
         }
-        if (condition == TEXT_APPEARS) return false;
+        if (condition == ActionOptions.GetTextUntil.TEXT_APPEARS) return false;
         return true;
     }
 

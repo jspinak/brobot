@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.tools.history.draw;
 
-import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.action.internal.options.ActionOptions;
 import io.github.jspinak.brobot.analysis.color.profiles.ProfileMatrixBuilder;
 import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.tools.history.VisualizationLayout;

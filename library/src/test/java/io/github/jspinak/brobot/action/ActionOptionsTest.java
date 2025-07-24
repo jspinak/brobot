@@ -1,5 +1,6 @@
 package io.github.jspinak.brobot.action;
 
+import io.github.jspinak.brobot.action.internal.options.ActionOptions;
 import io.github.jspinak.brobot.model.element.Position;
 import io.github.jspinak.brobot.model.element.Region;
 

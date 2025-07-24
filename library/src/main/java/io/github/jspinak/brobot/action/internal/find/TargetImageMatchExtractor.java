@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.action.internal.find;
 
-import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.action.internal.options.ActionOptions;
 import io.github.jspinak.brobot.model.analysis.color.PixelProfiles;
 import io.github.jspinak.brobot.analysis.compare.ContourExtractor;
 import io.github.jspinak.brobot.model.state.StateImage;

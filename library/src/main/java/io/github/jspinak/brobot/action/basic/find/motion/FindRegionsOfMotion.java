@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.action.basic.find.motion;
 
-import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.action.internal.options.ActionOptions;
 import io.github.jspinak.brobot.action.internal.find.SearchRegionResolver;
 import io.github.jspinak.brobot.action.internal.find.match.MatchCollectionUtilities;
 import io.github.jspinak.brobot.action.internal.find.scene.SceneAnalysisCollectionBuilder;
