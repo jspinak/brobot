@@ -1,5 +1,6 @@
-package io.github.jspinak.brobot.action;
+package io.github.jspinak.brobot.action.internal.options;
 
+import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.basic.click.ClickOptions;
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
 // ColorFindOptions removed - not used in adapter
@@ -14,6 +15,14 @@ import io.github.jspinak.brobot.action.basic.vanish.VanishOptions;
 // ClickUntilOptions removed - deprecated in favor of action chaining
 import io.github.jspinak.brobot.model.element.Location;
 import org.springframework.stereotype.Component;
+
+import static io.github.jspinak.brobot.action.internal.options.ActionOptions.Action.*;
+import static io.github.jspinak.brobot.action.internal.options.ActionOptions.Find.*;
+import static io.github.jspinak.brobot.action.internal.options.ActionOptions.DoOnEach.*;
+import static io.github.jspinak.brobot.action.internal.options.ActionOptions.GetTextUntil.*;
+import static io.github.jspinak.brobot.action.internal.options.ActionOptions.MatchFusionMethod.*;
+import static io.github.jspinak.brobot.action.internal.options.ActionOptions.DefineAs.*;
+import static io.github.jspinak.brobot.action.internal.options.ActionOptions.Illustrate.*;
 
 /**
  * Adapter to convert legacy ActionOptions to the new Options class hierarchy.
@@ -33,7 +42,6 @@ import org.springframework.stereotype.Component;
  *             New code should use ActionConfig implementations directly rather
  *             than converting from ActionOptions.
  */
-@Deprecated(since = "1.1.0", forRemoval = true)
 @Component
 public class ActionOptionsAdapter {
 

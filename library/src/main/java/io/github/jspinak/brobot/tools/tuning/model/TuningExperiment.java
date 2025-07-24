@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.tools.tuning.model;
 
-import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.action.internal.options.ActionOptions;
 import io.github.jspinak.brobot.tools.tuning.store.TuningExperimentStore;
 import lombok.Getter;
 import lombok.Setter;

@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.action.basic.find;
 
-import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.action.internal.options.ActionOptions;
 import io.github.jspinak.brobot.action.basic.find.motion.FindDynamicPixelMatches;
 import io.github.jspinak.brobot.action.basic.find.motion.FindFixedPixelMatches;
 import io.github.jspinak.brobot.action.basic.find.histogram.FindHistogram;

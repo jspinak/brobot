@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.tools.history;
 
-import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.action.internal.options.ActionOptions;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.model.analysis.scene.SceneAnalysis;
 import io.github.jspinak.brobot.model.element.Region;
@@ -17,8 +17,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-import static io.github.jspinak.brobot.action.ActionOptions.Action.*;
-import static io.github.jspinak.brobot.action.ActionOptions.Find.*;
+import static io.github.jspinak.brobot.action.internal.options.ActionOptions.Action.*;
+import static io.github.jspinak.brobot.action.internal.options.ActionOptions.Find.*;
 
 /**
  * Orchestrates the creation of comprehensive visual illustrations for action results.

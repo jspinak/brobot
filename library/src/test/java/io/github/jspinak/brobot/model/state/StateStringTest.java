@@ -16,7 +16,8 @@ public class StateStringTest {
                 .setSearchRegion(new Region(5, 5, 15, 15))
                 .setOwnerStateName("owner")
                 .setTimesActedOn(2)
-                .build("test");
+                .setString("test")
+                .build();
 
         assertEquals("testString", stateString.getName());
         assertEquals(5, stateString.getSearchRegion().getX());
@@ -27,14 +28,14 @@ public class StateStringTest {
 
     @Test
     public void testGetId() {
-        StateString stateString = new StateString.Builder().build("test");
+        StateString stateString = new StateString.Builder().setString("test").build();
         assertTrue(stateString.getId().contains("STRING"));
         assertTrue(stateString.getId().contains("test"));
     }
 
     @Test
     public void testDefined() {
-        StateString definedString = new StateString.Builder().build("defined");
+        StateString definedString = new StateString.Builder().setString("defined").build();
         assertTrue(definedString.defined());
     }
 
@@ -47,7 +48,7 @@ public class StateStringTest {
 
     @Test
     public void testAddTimesActedOn() {
-        StateString stateString = new StateString.Builder().setTimesActedOn(2).build("test");
+        StateString stateString = new StateString.Builder().setTimesActedOn(2).setString("test").build();
         stateString.addTimesActedOn();
         assertEquals(3, stateString.getTimesActedOn());
     }

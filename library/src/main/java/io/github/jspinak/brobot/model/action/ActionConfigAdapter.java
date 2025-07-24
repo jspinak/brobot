@@ -1,7 +1,7 @@
 package io.github.jspinak.brobot.model.action;
 
 import io.github.jspinak.brobot.action.ActionConfig;
-import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.action.internal.options.ActionOptions;
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
 import io.github.jspinak.brobot.action.basic.find.color.ColorFindOptions;
 import io.github.jspinak.brobot.action.basic.click.ClickOptions;
@@ -13,9 +13,9 @@ import io.github.jspinak.brobot.action.basic.mouse.MouseUpOptions;
 import io.github.jspinak.brobot.action.basic.region.DefineRegionOptions;
 import io.github.jspinak.brobot.action.basic.highlight.HighlightOptions;
 import io.github.jspinak.brobot.action.composite.drag.DragOptions;
-import io.github.jspinak.brobot.action.ActionOptions;
-import io.github.jspinak.brobot.action.ActionOptions.Action;
-import io.github.jspinak.brobot.action.ActionOptions.Find;
+import io.github.jspinak.brobot.action.internal.options.ActionOptions;
+import io.github.jspinak.brobot.action.internal.options.ActionOptions.Action;
+import io.github.jspinak.brobot.action.internal.options.ActionOptions.Find;
 
 import org.springframework.stereotype.Component;
 
