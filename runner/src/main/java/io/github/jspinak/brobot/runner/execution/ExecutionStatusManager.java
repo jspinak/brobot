@@ -8,15 +8,18 @@ import java.util.function.Consumer;
 /**
  * Manages the status of an execution and provides methods to update it.
  * Also handles notifying any registered status consumers when the status changes.
+ * Thread-safe: All methods are synchronized to prevent concurrent modification.
  */
 public class ExecutionStatusManager {
     private final ExecutionStatus status;
+    private final Object lock = new Object();
+    
     /**
      * -- SETTER --
      *  Sets a consumer that will be notified of status changes
      */
     @Setter
-    private Consumer<ExecutionStatus> statusConsumer;
+    private volatile Consumer<ExecutionStatus> statusConsumer;
 
     public ExecutionStatusManager(ExecutionStatus status) {
         this.status = status;
@@ -26,64 +29,80 @@ public class ExecutionStatusManager {
      * Updates the execution state and notifies consumers
      */
     public void updateState(ExecutionState state) {
-        status.setState(state);
-        notifyStatusChange();
+        synchronized (lock) {
+            status.setState(state);
+            notifyStatusChange();
+        }
     }
 
     /**
      * Updates the execution progress and notifies consumers
      */
     public void updateProgress(double progress) {
-        status.setProgress(progress);
-        notifyStatusChange();
+        synchronized (lock) {
+            status.setProgress(progress);
+            notifyStatusChange();
+        }
     }
 
     /**
      * Updates the current operation description and notifies consumers
      */
     public void setCurrentOperation(String operation) {
-        status.setCurrentOperation(operation);
-        notifyStatusChange();
+        synchronized (lock) {
+            status.setCurrentOperation(operation);
+            notifyStatusChange();
+        }
     }
 
     /**
      * Updates the start time and notifies consumers
      */
     public void updateStartTime(Instant startTime) {
-        status.setStartTime(startTime);
-        notifyStatusChange();
+        synchronized (lock) {
+            status.setStartTime(startTime);
+            notifyStatusChange();
+        }
     }
 
     /**
      * Updates the end time and notifies consumers
      */
     public void updateEndTime(Instant endTime) {
-        status.setEndTime(endTime);
-        notifyStatusChange();
+        synchronized (lock) {
+            status.setEndTime(endTime);
+            notifyStatusChange();
+        }
     }
 
     /**
      * Sets an error that occurred during execution
      */
     public void setError(Exception error) {
-        status.setError(error);
-        notifyStatusChange();
+        synchronized (lock) {
+            status.setError(error);
+            notifyStatusChange();
+        }
     }
 
     /**
      * Resets the status to initial state
      */
     public void reset() {
-        status.reset();
-        notifyStatusChange();
+        synchronized (lock) {
+            status.reset();
+            notifyStatusChange();
+        }
     }
 
     /**
      * Notifies any registered consumers of a status change
+     * Note: Called within synchronized blocks, so already thread-safe
      */
     private void notifyStatusChange() {
-        if (statusConsumer != null) {
-            statusConsumer.accept(status.copy());
+        Consumer<ExecutionStatus> consumer = statusConsumer;
+        if (consumer != null) {
+            consumer.accept(status.copy());
         }
     }
     
@@ -91,6 +110,8 @@ public class ExecutionStatusManager {
      * Manually triggers notification of current status to consumers
      */
     public void notifyConsumer() {
-        notifyStatusChange();
+        synchronized (lock) {
+            notifyStatusChange();
+        }
     }
 }
