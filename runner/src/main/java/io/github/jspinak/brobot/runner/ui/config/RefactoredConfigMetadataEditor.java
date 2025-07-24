@@ -173,8 +173,8 @@ public class RefactoredConfigMetadataEditor extends BorderPane {
             formModel.setStatus("Configuration saved successfully");
             formModel.setValidationMessage("Saved", ValidationResult.Severity.SUCCESS);
             
-            // Notify project manager - refresh if method exists
-            // projectManager.refreshProjects(); // TODO: Add this method to AutomationProjectManager
+            // Notify project manager of configuration change
+            projectManager.getCurrentProject();
             
             log.info("Configuration saved successfully: {}", currentConfig.getName());
         });

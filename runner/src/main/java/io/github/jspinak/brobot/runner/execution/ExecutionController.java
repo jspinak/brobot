@@ -298,8 +298,9 @@ public class ExecutionController implements AutoCloseable, DiagnosticCapable {
     
     /**
      * Updates our status from the execution service status.
+     * Thread-safe: synchronized to prevent concurrent modification
      */
-    private void updateStatusFromService(ExecutionStatus serviceStatus) {
+    private synchronized void updateStatusFromService(ExecutionStatus serviceStatus) {
         status.setState(serviceStatus.getState());
         status.setStartTime(serviceStatus.getStartTime());
         status.setEndTime(serviceStatus.getEndTime());
