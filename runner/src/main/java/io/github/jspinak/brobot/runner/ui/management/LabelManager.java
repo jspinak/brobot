@@ -4,9 +4,14 @@ import javafx.scene.control.Label;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 import java.util.Map;
 import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Manages label creation and updates to prevent duplication issues.
@@ -22,6 +27,14 @@ public class LabelManager {
     
     // Track which labels belong to which component (weak references to allow GC)
     private final Map<Object, Map<String, Label>> componentLabels = new WeakHashMap<>();
+    
+    // Scheduled executor for periodic cleanup
+    private ScheduledExecutorService cleanupExecutor;
+    
+    // Configuration for cleanup
+    private static final int INITIAL_CLEANUP_DELAY_MINUTES = 5;
+    private static final int CLEANUP_PERIOD_MINUTES = 10;
+    private static final int MAX_LABEL_COUNT = 10000; // Threshold for aggressive cleanup
     
     /**
      * Creates or retrieves a label with the given identifier.
@@ -179,5 +192,99 @@ public class LabelManager {
         });
         
         return summary.toString();
+    }
+    
+    /**
+     * Initializes the cleanup scheduler.
+     */
+    @PostConstruct
+    public void init() {
+        cleanupExecutor = Executors.newSingleThreadScheduledExecutor(r -> {
+            Thread thread = new Thread(r, "LabelManager-Cleanup");
+            thread.setDaemon(true);
+            return thread;
+        });
+        
+        cleanupExecutor.scheduleWithFixedDelay(
+            this::performCleanup,
+            INITIAL_CLEANUP_DELAY_MINUTES,
+            CLEANUP_PERIOD_MINUTES,
+            TimeUnit.MINUTES
+        );
+        
+        log.info("LabelManager initialized with automatic cleanup every {} minutes", CLEANUP_PERIOD_MINUTES);
+    }
+    
+    /**
+     * Shuts down the cleanup scheduler.
+     */
+    @PreDestroy
+    public void shutdown() {
+        log.info("Shutting down LabelManager cleanup scheduler");
+        
+        if (cleanupExecutor != null) {
+            cleanupExecutor.shutdown();
+            try {
+                if (!cleanupExecutor.awaitTermination(5, TimeUnit.SECONDS)) {
+                    cleanupExecutor.shutdownNow();
+                }
+            } catch (InterruptedException e) {
+                cleanupExecutor.shutdownNow();
+                Thread.currentThread().interrupt();
+            }
+        }
+        
+        // Clear all labels on shutdown
+        clear();
+    }
+    
+    /**
+     * Performs periodic cleanup of orphaned labels.
+     */
+    private void performCleanup() {
+        try {
+            int initialCount = labelRegistry.size();
+            
+            // Remove orphaned labels (labels not referenced by any component)
+            labelRegistry.entrySet().removeIf(entry -> {
+                String fullId = entry.getKey();
+                boolean isOrphaned = componentLabels.values().stream()
+                    .noneMatch(labelMap -> labelMap.values().contains(entry.getValue()));
+                
+                if (isOrphaned) {
+                    log.debug("Removing orphaned label: {}", fullId);
+                }
+                return isOrphaned;
+            });
+            
+            // Aggressive cleanup if over threshold
+            if (labelRegistry.size() > MAX_LABEL_COUNT) {
+                log.warn("Label count {} exceeds maximum {}, performing aggressive cleanup", 
+                         labelRegistry.size(), MAX_LABEL_COUNT);
+                
+                // Keep only labels that are currently referenced
+                Map<String, Label> activeLabels = new ConcurrentHashMap<>();
+                componentLabels.values().forEach(labelMap -> 
+                    labelMap.forEach((id, label) -> {
+                        String fullId = label.getId();
+                        if (fullId != null) {
+                            activeLabels.put(fullId, label);
+                        }
+                    })
+                );
+                
+                labelRegistry.clear();
+                labelRegistry.putAll(activeLabels);
+            }
+            
+            int removedCount = initialCount - labelRegistry.size();
+            if (removedCount > 0) {
+                log.info("Cleanup removed {} orphaned labels, {} labels remaining", 
+                         removedCount, labelRegistry.size());
+            }
+            
+        } catch (Exception e) {
+            log.error("Error during label cleanup", e);
+        }
     }
 }
