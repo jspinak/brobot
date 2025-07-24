@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.action.internal.find.pixel;
 
-import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.action.internal.options.ActionOptions;
 import io.github.jspinak.brobot.analysis.compare.ContourExtractor;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.internal.find.SearchRegionResolver;

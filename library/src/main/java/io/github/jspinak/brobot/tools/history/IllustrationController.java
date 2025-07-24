@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.tools.history;
 
-import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.action.internal.options.ActionOptions;
 import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
@@ -13,14 +13,17 @@ import io.github.jspinak.brobot.action.basic.highlight.HighlightOptions;
 import io.github.jspinak.brobot.action.basic.type.TypeOptions;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.config.FrameworkSettings;
+import io.github.jspinak.brobot.config.LoggingVerbosityConfig;
 import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
 import io.github.jspinak.brobot.util.image.io.ImageFileUtilities;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
 
-import static io.github.jspinak.brobot.action.ActionOptions.Action.*;
+import static io.github.jspinak.brobot.action.internal.options.ActionOptions.Action.*;
 
 /**
  * Controls when and how action results are illustrated to prevent redundancy.
@@ -63,6 +66,7 @@ import static io.github.jspinak.brobot.action.ActionOptions.Action.*;
  * @see FrameworkSettings
  * @see ActionOptions.Illustrate
  */
+@Slf4j
 @Component
 @Getter
 public class IllustrationController {
@@ -70,6 +74,9 @@ public class IllustrationController {
     private ImageFileUtilities imageUtils;
     private ActionVisualizer draw;
     private VisualizationOrchestrator illustrationManager;
+    
+    @Autowired(required = false)
+    private LoggingVerbosityConfig loggingConfig;
 
     private List<ObjectCollection> lastCollections = new ArrayList<>();
     private ActionOptions.Action lastAction = ActionOptions.Action.TYPE;
@@ -126,22 +133,62 @@ public class IllustrationController {
      */
     public boolean okToIllustrate(ActionOptions actionOptions, ObjectCollection... objectCollections) {
         setActionPermissions();
-        if (!FrameworkSettings.saveHistory && actionOptions.getIllustrate() != ActionOptions.Illustrate.YES) return false;
-        if (actionOptions.getIllustrate() == ActionOptions.Illustrate.NO) return false;
+        
+        // Verbose logging
+        if (isVerbose()) {
+            log.debug("[ILLUSTRATION] Checking if ok to illustrate:");
+            log.debug("  FrameworkSettings.saveHistory: {}", FrameworkSettings.saveHistory);
+            log.debug("  FrameworkSettings.historyPath: {}", FrameworkSettings.historyPath);
+            log.debug("  ActionOptions.illustrate: {}", actionOptions.getIllustrate());
+            log.debug("  Action type: {}", actionOptions.getAction());
+        }
+        
+        if (!FrameworkSettings.saveHistory && actionOptions.getIllustrate() != ActionOptions.Illustrate.YES) {
+            if (isVerbose()) {
+                log.debug("  Result: NO - saveHistory is false and illustrate is not YES");
+            }
+            return false;
+        }
+        if (actionOptions.getIllustrate() == ActionOptions.Illustrate.NO) {
+            if (isVerbose()) {
+                log.debug("  Result: NO - illustrate is explicitly NO");
+            }
+            return false;
+        }
         ActionOptions.Action action = actionOptions.getAction();
         if (!actionPermissions.containsKey(action)) {
             ConsoleReporter.println(actionOptions.getAction() + " not available to illustrate in BrobotSettings.");
+            if (isVerbose()) {
+                log.debug("  Result: NO - action {} not available to illustrate", action);
+            }
             return false;
         }
         if (!actionPermissions.get(action)) {
             ConsoleReporter.println(actionOptions.getAction() + " not set to illustrate in BrobotSettings.");
+            if (isVerbose()) {
+                log.debug("  Result: NO - action {} not permitted in settings", action);
+                log.debug("  FrameworkSettings.drawFind: {}", FrameworkSettings.drawFind);
+                log.debug("  FrameworkSettings.drawClick: {}", FrameworkSettings.drawClick);
+            }
             return false;
         }
-        if (FrameworkSettings.drawRepeatedActions) return true;
+        if (FrameworkSettings.drawRepeatedActions) {
+            if (isVerbose()) {
+                log.debug("  Result: YES - drawRepeatedActions is true");
+            }
+            return true;
+        }
         // otherwise, if the action is a repeat (same Action, same ObjectCollections), false
-        return lastFind != actionOptions.getFind() ||
-                lastAction != action ||
-                !sameCollections(Arrays.asList(objectCollections));
+        boolean isRepeat = lastFind == actionOptions.getFind() &&
+                lastAction == action &&
+                sameCollections(Arrays.asList(objectCollections));
+        
+        if (isVerbose()) {
+            log.debug("  Is repeat action: {}", isRepeat);
+            log.debug("  Result: {} - illustration", !isRepeat ? "YES" : "NO");
+        }
+        
+        return !isRepeat;
     }
 
     /**
@@ -151,8 +198,8 @@ public class IllustrationController {
      * action targets the same objects as the previous action. This comparison
      * is critical for filtering redundant illustrations.
      * <p>
-     * Bug note: The implementation contains a bug where it compares element 0
-     * against all positions instead of comparing corresponding elements.
+     * The comparison ensures element-wise equality between collections,
+     * comparing corresponding elements at each position.
      *
      * @param objectCollections current collections to compare against stored last collections
      * @return true if collections match (indicating a repeated action)
@@ -160,7 +207,7 @@ public class IllustrationController {
     private boolean sameCollections(List<ObjectCollection> objectCollections) {
         if (objectCollections.size() != lastCollections.size()) return false;
         for (int i=0; i<objectCollections.size(); i++) {
-            if (!objectCollections.get(0).equals(lastCollections.get(i))) return false;
+            if (!objectCollections.get(i).equals(lastCollections.get(i))) return false;
         }
         return true;
     }
@@ -190,11 +237,39 @@ public class IllustrationController {
      */
     public boolean illustrateWhenAllowed(ActionResult matches, List<Region> searchRegions, ActionOptions actionOptions,
                                          ObjectCollection... objectCollections) {
-        if (!okToIllustrate(actionOptions, objectCollections)) return false;
+        if (isVerbose()) {
+            log.debug("[ILLUSTRATION] illustrateWhenAllowed called for action: {}", actionOptions.getAction());
+        }
+        
+        if (!okToIllustrate(actionOptions, objectCollections)) {
+            if (isVerbose()) {
+                log.debug("[ILLUSTRATION] Illustration not allowed, skipping");
+            }
+            return false;
+        }
+        
         lastAction = actionOptions.getAction();
         if (lastAction == FIND) lastFind = actionOptions.getFind();
         lastCollections = Arrays.asList(objectCollections);
-        illustrationManager.draw(matches, searchRegions, actionOptions);
+        
+        if (isVerbose()) {
+            log.debug("[ILLUSTRATION] Creating illustration for action: {}", actionOptions.getAction());
+            log.debug("[ILLUSTRATION] History path: {}", FrameworkSettings.historyPath);
+            log.debug("[ILLUSTRATION] Calling illustrationManager.draw()");
+        }
+        
+        try {
+            illustrationManager.draw(matches, searchRegions, actionOptions);
+            if (isVerbose()) {
+                log.debug("[ILLUSTRATION] Illustration completed successfully");
+            }
+        } catch (Exception e) {
+            log.error("[ILLUSTRATION] Error creating illustration: {}", e.getMessage(), e);
+            if (isVerbose()) {
+                log.debug("[ILLUSTRATION] Full error:", e);
+            }
+        }
+        
         return true;
     }
 
@@ -253,8 +328,28 @@ public class IllustrationController {
      */
     public boolean okToIllustrate(ActionConfig actionConfig, ObjectCollection... objectCollections) {
         setActionPermissions();
-        if (!FrameworkSettings.saveHistory && actionConfig.getIllustrate() != ActionConfig.Illustrate.YES) return false;
-        if (actionConfig.getIllustrate() == ActionConfig.Illustrate.NO) return false;
+        
+        // Verbose logging
+        if (isVerbose()) {
+            log.debug("[ILLUSTRATION] Checking if ok to illustrate (ActionConfig):");
+            log.debug("  FrameworkSettings.saveHistory: {}", FrameworkSettings.saveHistory);
+            log.debug("  FrameworkSettings.historyPath: {}", FrameworkSettings.historyPath);
+            log.debug("  ActionConfig.illustrate: {}", actionConfig.getIllustrate());
+            log.debug("  ActionConfig type: {}", actionConfig.getClass().getSimpleName());
+        }
+        
+        if (!FrameworkSettings.saveHistory && actionConfig.getIllustrate() != ActionConfig.Illustrate.YES) {
+            if (isVerbose()) {
+                log.debug("  Result: NO - saveHistory is false and illustrate is not YES");
+            }
+            return false;
+        }
+        if (actionConfig.getIllustrate() == ActionConfig.Illustrate.NO) {
+            if (isVerbose()) {
+                log.debug("  Result: NO - illustrate is explicitly NO");
+            }
+            return false;
+        }
         
         ActionOptions.Action action = getActionType(actionConfig);
         if (action == null || !actionPermissions.containsKey(action)) {
@@ -354,6 +449,14 @@ public class IllustrationController {
         }
         
         return builder.build();
+    }
+    
+    /**
+     * Helper method to check if verbose logging is enabled.
+     */
+    private boolean isVerbose() {
+        return loggingConfig != null && 
+               loggingConfig.getVerbosity() == LoggingVerbosityConfig.VerbosityLevel.VERBOSE;
     }
 
 }

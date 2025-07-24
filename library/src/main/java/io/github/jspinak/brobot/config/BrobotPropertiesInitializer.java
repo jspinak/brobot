@@ -43,11 +43,17 @@ public class BrobotPropertiesInitializer implements InitializingBean {
             }
         }
         
-        log.debug("FrameworkSettings initialized with:");
-        log.debug("  Image path: {}", properties.getCore().getImagePath());
-        log.debug("  Mock mode: {}", properties.getCore().isMock());
-        log.debug("  Headless: {}", properties.getCore().isHeadless());
-        log.debug("  Save snapshots: {}", properties.getScreenshot().isSaveSnapshots());
-        log.debug("  Save history: {}", properties.getScreenshot().isSaveHistory());
+        log.info("FrameworkSettings initialized with:");
+        log.info("  Image path: {}", properties.getCore().getImagePath());
+        log.info("  Mock mode: {}", properties.getCore().isMock());
+        log.info("  Headless: {}", properties.getCore().isHeadless());
+        log.info("  Save snapshots: {}", properties.getScreenshot().isSaveSnapshots());
+        log.info("  Save history: {}", properties.getScreenshot().isSaveHistory());
+        log.info("  History path: {}", properties.getScreenshot().getHistoryPath());
+        
+        // Log the actual FrameworkSettings values after applying
+        log.info("FrameworkSettings values after applying:");
+        log.info("  FrameworkSettings.saveHistory: {}", FrameworkSettings.saveHistory);
+        log.info("  FrameworkSettings.historyPath: {}", FrameworkSettings.historyPath);
     }
 }

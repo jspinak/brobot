@@ -1,7 +1,7 @@
 package io.github.jspinak.brobot.statemanagement;
 
 import io.github.jspinak.brobot.action.Action;
-import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.action.internal.options.ActionOptions;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.model.match.Match;

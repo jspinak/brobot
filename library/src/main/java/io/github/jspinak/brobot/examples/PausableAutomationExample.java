@@ -1,7 +1,7 @@
 package io.github.jspinak.brobot.examples;
 
 import io.github.jspinak.brobot.action.Action;
-import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.action.internal.options.ActionOptions;
 import io.github.jspinak.brobot.control.ExecutionStoppedException;
 import io.github.jspinak.brobot.navigation.monitoring.BaseAutomation;
 import io.github.jspinak.brobot.navigation.monitoring.StateHandler;

@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.action.composite.drag;
 
-import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.action.internal.options.ActionOptions;
 import org.springframework.stereotype.Component;
 
 /**

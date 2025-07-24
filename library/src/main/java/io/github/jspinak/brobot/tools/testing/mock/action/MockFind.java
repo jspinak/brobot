@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.tools.testing.mock.action;
 
-import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.action.internal.options.ActionOptions;
 import io.github.jspinak.brobot.model.action.ActionRecord;
 import io.github.jspinak.brobot.model.element.Pattern;
 import io.github.jspinak.brobot.model.match.Match;

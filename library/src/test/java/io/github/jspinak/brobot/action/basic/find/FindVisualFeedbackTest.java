@@ -43,15 +43,17 @@ public class FindVisualFeedbackTest {
         
         // Create a minimal FindPipeline with mocked dependencies
         findPipeline = new FindPipeline(
-            findFunctions,
-            mock(io.github.jspinak.brobot.statemanagement.StateMemory.class),
-            mock(io.github.jspinak.brobot.action.internal.find.NonImageObjectConverter.class),
-            mock(io.github.jspinak.brobot.action.internal.find.match.MatchAdjusterV2.class),
             mock(io.github.jspinak.brobot.analysis.color.profiles.ProfileSetBuilder.class),
             mock(io.github.jspinak.brobot.action.internal.find.OffsetLocationManagerV2.class),
             mock(io.github.jspinak.brobot.analysis.match.MatchFusion.class),
+            mock(io.github.jspinak.brobot.action.internal.find.match.MatchAdjusterV2.class),
             mock(io.github.jspinak.brobot.action.internal.find.match.MatchContentExtractor.class),
-            mock(io.github.jspinak.brobot.util.string.TextSelector.class)
+            mock(io.github.jspinak.brobot.action.internal.find.NonImageObjectConverter.class),
+            mock(io.github.jspinak.brobot.statemanagement.StateMemory.class),
+            mock(io.github.jspinak.brobot.util.string.TextSelector.class),
+            mock(io.github.jspinak.brobot.action.internal.region.DynamicRegionResolver.class),
+            highlightManager,
+            visualFeedbackConfig
         );
         
         // Inject mocked HighlightManager and VisualFeedbackConfig
@@ -79,7 +81,7 @@ public class FindVisualFeedbackTest {
         result.setActionConfig(options);
         
         // Mock the find function
-        when(findFunctions.get(any())).thenReturn((matches, collections) -> {
+        when(findFunctions.get(any(BaseFindOptions.class))).thenReturn((matches, collections) -> {
             // Do nothing for this test
         });
         
@@ -111,7 +113,7 @@ public class FindVisualFeedbackTest {
         match.setScore(0.95);
         
         // Mock the find function to add a match
-        when(findFunctions.get(any())).thenReturn((matches, collections) -> {
+        when(findFunctions.get(any(BaseFindOptions.class))).thenReturn((matches, collections) -> {
             matches.getMatchList().add(match);
             matches.setSuccess(true);
         });
@@ -137,7 +139,7 @@ public class FindVisualFeedbackTest {
         result.setActionConfig(options);
         
         // Mock the find function
-        when(findFunctions.get(any())).thenReturn((matches, collections) -> {
+        when(findFunctions.get(any(BaseFindOptions.class))).thenReturn((matches, collections) -> {
             // Do nothing
         });
         

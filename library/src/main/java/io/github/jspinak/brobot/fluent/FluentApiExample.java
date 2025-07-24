@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.fluent;
 
-import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.action.internal.options.ActionOptions;
 import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.model.state.StateString;
 import io.github.jspinak.brobot.runner.dsl.InstructionSet;

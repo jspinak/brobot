@@ -1,7 +1,7 @@
 package io.github.jspinak.brobot.tools.testing.exploration;
 
 import io.github.jspinak.brobot.action.Action;
-import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.action.internal.options.ActionOptions;
 import io.github.jspinak.brobot.model.state.State;
 import lombok.Getter;
 import lombok.Setter;

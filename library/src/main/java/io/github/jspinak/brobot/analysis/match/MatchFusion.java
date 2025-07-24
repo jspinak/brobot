@@ -1,13 +1,13 @@
 package io.github.jspinak.brobot.analysis.match;
 
-import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.action.internal.options.ActionOptions;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.util.string.StringFusion;
 import org.springframework.stereotype.Component;
 
-import static io.github.jspinak.brobot.action.ActionOptions.MatchFusionMethod.NONE;
+import static io.github.jspinak.brobot.action.internal.options.ActionOptions.MatchFusionMethod.NONE;
 
 import java.util.*;
 

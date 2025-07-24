@@ -2,7 +2,7 @@ package io.github.jspinak.brobot.action.composite.repeat;
 
 import io.github.jspinak.brobot.action.ActionInterface;
 import io.github.jspinak.brobot.action.ActionConfig;
-import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.action.internal.options.ActionOptions;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.action.composite.multiple.actions.MultipleActionsObject;
@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 import java.util.HashMap;
 import java.util.Map;
 
-import static io.github.jspinak.brobot.action.ActionOptions.Action.*;
+import static io.github.jspinak.brobot.action.internal.options.ActionOptions.Action.*;
 
 /**
  * Repeatedly clicks elements until a specified condition is met or timeout occurs.

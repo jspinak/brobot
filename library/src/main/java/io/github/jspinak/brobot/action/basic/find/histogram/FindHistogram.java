@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.action.basic.find.histogram;
 
-import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.action.internal.options.ActionOptions;
 import io.github.jspinak.brobot.action.basic.find.color.SceneProvider;
 import io.github.jspinak.brobot.action.internal.find.SearchRegionResolver;
 import io.github.jspinak.brobot.analysis.histogram.HistogramExtractor;
