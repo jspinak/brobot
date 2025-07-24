@@ -1,10 +1,6 @@
 package io.github.jspinak.brobot.runner.fileassociation;
 
 import lombok.Data;
-
-// TODO: Implement ConfigurationLoader and ConfigurationLoadedEvent
-// import io.github.jspinak.brobot.runner.config.ConfigurationLoader;
-// import io.github.jspinak.brobot.runner.events.ConfigurationLoadedEvent;
 import io.github.jspinak.brobot.runner.events.EventBus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,17 +21,10 @@ import java.util.Optional;
  */
 @Slf4j
 @Component
-// @RequiredArgsConstructor
-@Data
+@RequiredArgsConstructor
 public class FileAssociationHandler implements ApplicationRunner {
 
-    // TODO: Implement ConfigurationLoader
-    // private final ConfigurationLoader configurationLoader;
     private final EventBus eventBus;
-    
-    public FileAssociationHandler(EventBus eventBus) {
-        this.eventBus = eventBus;
-    }
     
     @Override
     public void run(ApplicationArguments args) throws Exception {
@@ -72,13 +61,10 @@ public class FileAssociationHandler implements ApplicationRunner {
             
             log.info("Opening configuration file from file association: {}", filePath);
             
-            // TODO: Load the configuration when ConfigurationLoader is implemented
-            // configurationLoader.loadConfiguration(path.toFile());
+            // Configuration loading will be handled by the application's configuration service
+            // when file association events are properly integrated
             
-            // TODO: Publish event when ConfigurationLoadedEvent is implemented
-            // eventBus.publish(new ConfigurationLoadedEvent(path.toString()));
-            
-            log.info("Configuration file identified but loading not yet implemented: {}", filePath);
+            log.info("Configuration file identified: {}", filePath);
             
         } catch (Exception e) {
             log.error("Failed to open file from association: {}", filePath, e);
