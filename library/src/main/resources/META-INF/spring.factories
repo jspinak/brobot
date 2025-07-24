@@ -1,3 +1,2 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-io.github.jspinak.brobot.BrobotSpringBeanConfig,\
 io.github.jspinak.brobot.config.BrobotAutoConfiguration
