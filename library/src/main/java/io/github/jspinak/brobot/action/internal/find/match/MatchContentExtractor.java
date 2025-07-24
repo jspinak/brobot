@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.action.internal.find.match;
 
-import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.action.internal.options.ActionOptions;
 import io.github.jspinak.brobot.model.element.Scene;
 import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.tools.testing.mock.action.ExecutionModeController;

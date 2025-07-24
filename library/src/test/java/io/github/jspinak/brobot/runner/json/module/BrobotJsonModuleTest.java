@@ -2,7 +2,7 @@ package io.github.jspinak.brobot.runner.json.module;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.jspinak.brobot.action.ActionConfig;
-import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.action.internal.options.ActionOptions;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.model.element.Image;

@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.List;
 
-import static io.github.jspinak.brobot.action.ActionOptions.Action.CLICK;
+import static io.github.jspinak.brobot.action.internal.options.ActionOptions.Action.CLICK;
 
 /**
  * This class is meant mostly for testing state structures and state management,

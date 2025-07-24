@@ -135,7 +135,7 @@ public class DeploymentScenarioTest {
         );
         
         // Should return placeholder image
-        var image = imageLoader.loadImage("non-existent.png");
+        var image = imageLoader.loadImageDirect("non-existent.png");
         assertNotNull(image);
         assertEquals(100, image.getWidth());
         assertEquals(100, image.getHeight());

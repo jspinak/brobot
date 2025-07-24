@@ -5,6 +5,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import io.github.jspinak.brobot.model.analysis.scene.SceneAnalysis;
 import io.github.jspinak.brobot.action.internal.execution.ActionLifecycle;
+import io.github.jspinak.brobot.action.internal.options.ActionOptions;
+import io.github.jspinak.brobot.action.internal.options.ActionOptionsAdapter;
 import io.github.jspinak.brobot.model.analysis.scene.SceneAnalyses;
 import io.github.jspinak.brobot.model.element.Location;
 import io.github.jspinak.brobot.model.element.Movement;
@@ -501,6 +503,7 @@ public class ActionResult {
      * @deprecated Use {@link #sortMatchObjects()} for ascending or
      *             {@link #sortMatchObjectsDescending()} for descending
      */
+    @Deprecated
     public void sortByMatchScoreDecending() {
         matchList.sort(Comparator.comparingDouble(Match::getScore));
     }

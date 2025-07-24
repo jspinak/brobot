@@ -1,8 +1,10 @@
-package io.github.jspinak.brobot.action;
+package io.github.jspinak.brobot.action.internal.options;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import io.github.jspinak.brobot.action.ActionResult;
+import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.action.basic.click.ClickOptions;
 import io.github.jspinak.brobot.model.element.Location;
 import io.github.jspinak.brobot.model.element.Position;
@@ -28,7 +30,8 @@ import java.util.function.Predicate;
  * custom find strategies and success criteria. This design allows actions to be highly 
  * configurable while maintaining sensible defaults for common use cases.</p>
  * 
- * @deprecated Since version 2.0, use specific ActionConfig implementations instead:
+ * <p><b>Note:</b> This class is maintained for internal framework use and backward
+ * compatibility. New applications should use the specific ActionConfig implementations:
  * <ul>
  *   <li>{@link ClickOptions} for click actions</li>
  *   <li>{@link io.github.jspinak.brobot.action.basic.find.PatternFindOptions} for pattern finding</li>
@@ -64,7 +67,6 @@ import java.util.function.Predicate;
  * @see ActionResult
  * @see ObjectCollection
  */
-@Deprecated(since = "1.1.0", forRemoval = true)
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ActionOptions {
