@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkdocs=self.webpackChunkdocs||[]).push([[3415],{9616:function(o){o.exports=JSON.parse('[{"label":"hello","permalink":"/brobot/blog/tags/hello","count":1},{"label":"brobot","permalink":"/brobot/blog/tags/brobot","count":1}]')}}]);
