@@ -10,7 +10,9 @@ import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
+import io.github.jspinak.brobot.action.ActionConfig;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -36,6 +38,7 @@ import java.util.*;
  * @see ActionLifecycleManagement
  * @see DefinedRegionConverter
  */
+@Slf4j
 @Component
 public class FindImage {
 
@@ -150,7 +153,11 @@ public class FindImage {
      */
     void getImageMatches(ActionResult matches, List<ObjectCollection> objectCollections) {
         if (objectCollections.isEmpty()) return; // no images to search for
+        
+        // Check if we have ActionConfig first (new way), then fall back to ActionOptions (legacy)
+        ActionConfig actionConfig = matches.getActionConfig();
         ActionOptions actionOptions = matches.getActionOptions();
+        
         if (actionOptions.isUseDefinedRegion()) {
             matches.addAllResults(useDefinedRegion.useRegion(matches, objectCollections.get(0)));
             return;
@@ -160,11 +167,29 @@ public class FindImage {
         the images are no longer found. The results for each execution are added to the Matches object.
          */
         List<StateImage> stateImages = objectCollections.getFirst().getStateImages();
+        log.debug("[FIND_IMAGE] Starting find operation with {} state images", stateImages.size());
+        
         while (actionLifecycleManagement.isOkToContinueAction(matches, stateImages.size())) {
-            List<Scene> scenes = getScenes.getScenes(actionOptions, objectCollections, 1, 0);
+            List<Scene> scenes;
+            if (actionConfig != null) {
+                // Use ActionConfig if available (new way)
+                scenes = getScenes.getScenes(actionConfig, objectCollections, 1, 0);
+            } else {
+                // Fall back to ActionOptions (legacy)
+                scenes = getScenes.getScenes(actionOptions, objectCollections, 1, 0);
+            }
+            log.debug("[FIND_IMAGE] Got {} scenes from SceneProvider", scenes.size());
+            
+            if (scenes.isEmpty()) {
+                log.warn("[FIND_IMAGE] No scenes available for illustration!");
+            }
+            
             findPatternsIteration.find(matches, stateImages, scenes);
             actionLifecycleManagement.incrementCompletedRepetitions(matches);
         }
+        
+        log.debug("[FIND_IMAGE] Find operation complete. SceneAnalysisCollection size: {}", 
+                matches.getSceneAnalysisCollection().getSceneAnalyses().size());
     }
 
 }

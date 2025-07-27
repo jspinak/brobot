@@ -62,6 +62,7 @@ public class FindPipeline {
     private final DynamicRegionResolver dynamicRegionResolver;
     private final HighlightManager highlightManager;
     private final VisualFeedbackConfig visualFeedbackConfig;
+    private final FindStrategyRegistryV2 findStrategyRegistry;
     
     @Value("${brobot.highlighting.enabled:false}")
     private boolean highlightEnabled;
@@ -77,7 +78,8 @@ public class FindPipeline {
                        TextSelector textSelector,
                        DynamicRegionResolver dynamicRegionResolver,
                        HighlightManager highlightManager,
-                       VisualFeedbackConfig visualFeedbackConfig) {
+                       VisualFeedbackConfig visualFeedbackConfig,
+                       FindStrategyRegistryV2 findStrategyRegistry) {
         this.profileSetBuilder = profileSetBuilder;
         this.offsetLocationManager = offsetLocationManager;
         this.matchFusion = matchFusion;
@@ -89,6 +91,7 @@ public class FindPipeline {
         this.dynamicRegionResolver = dynamicRegionResolver;
         this.highlightManager = highlightManager;
         this.visualFeedbackConfig = visualFeedbackConfig;
+        this.findStrategyRegistry = findStrategyRegistry;
     }
 
     /**
@@ -131,6 +134,12 @@ public class FindPipeline {
         // Convert non-image objects and delegate to find strategies
         ActionResult nonImageMatches = nonImageObjectConverter.getOtherObjectsDirectlyAsMatchObjects(objectCollections[0]);
         matches.addAllResults(nonImageMatches);
+        
+        // Execute the appropriate find strategy for image objects
+        FindStrategy strategy = findOptions.getFindStrategy();
+        if (strategy != null && findStrategyRegistry != null) {
+            findStrategyRegistry.runFindStrategy(strategy, matches, objectCollections);
+        }
         
         // Post-process matches: fusion, adjustment, content extraction
         matchFusion.setFusedMatches(matches);

@@ -7,6 +7,7 @@ import io.github.jspinak.brobot.tools.history.RuntimeStateVisualizer;
 import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.bytedeco.opencv.opencv_core.Mat;
 
 import java.util.Arrays;
@@ -112,6 +113,7 @@ import static org.bytedeco.opencv.global.opencv_imgcodecs.imwrite;
  * @see RuntimeStateVisualizer
  * @see Mat
  */
+@Slf4j
 @Getter
 @Setter
 public class Visualization {
@@ -174,8 +176,19 @@ public class Visualization {
     }
 
     public void setScene(Mat scene) {
+        log.debug("[VISUALIZATION] setScene called");
+        if (scene == null) {
+            log.error("[VISUALIZATION] Cannot set null scene");
+            return;
+        }
+        if (scene.empty()) {
+            log.error("[VISUALIZATION] Cannot set empty scene");
+            return;
+        }
+        log.debug("[VISUALIZATION] Setting scene with dimensions: {}x{}", scene.cols(), scene.rows());
         this.scene = scene;
         this.matchesOnScene = scene.clone();
+        log.debug("[VISUALIZATION] Scene and matchesOnScene set successfully");
     }
 
     public void setClasses(Mat classes) {
@@ -193,6 +206,15 @@ public class Visualization {
     }
 
     public List<Mat> getFinishedMats() {
+        log.debug("[VISUALIZATION] getFinishedMats called");
+        log.debug("[VISUALIZATION] sceneWithMatchesAndSidebar: {}", 
+                sceneWithMatchesAndSidebar == null ? "null" : 
+                (sceneWithMatchesAndSidebar.empty() ? "empty" : 
+                String.format("%dx%d", sceneWithMatchesAndSidebar.cols(), sceneWithMatchesAndSidebar.rows())));
+        log.debug("[VISUALIZATION] classesWithMatchesAndLegend: {}", 
+                classesWithMatchesAndLegend == null ? "null" : 
+                (classesWithMatchesAndLegend.empty() ? "empty" : 
+                String.format("%dx%d", classesWithMatchesAndLegend.cols(), classesWithMatchesAndLegend.rows())));
         return Arrays.asList(sceneWithMatchesAndSidebar, classesWithMatchesAndLegend);
     }
 }

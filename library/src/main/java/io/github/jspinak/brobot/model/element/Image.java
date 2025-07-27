@@ -99,7 +99,18 @@ public class Image {
      */
     @JsonIgnore
     public Mat getMatBGR() {
-        return ImageConverter.getMatBGR(bufferedImage);
+        if (bufferedImage == null) {
+            log.error("[IMAGE] Cannot convert to Mat - bufferedImage is null for image: {}", name);
+            return new Mat();
+        }
+        Mat mat = ImageConverter.getMatBGR(bufferedImage);
+        if (mat == null || mat.empty()) {
+            log.error("[IMAGE] Mat conversion failed for image: {}", name);
+        } else {
+            log.debug("[IMAGE] Successfully converted to Mat BGR - dimensions: {}x{} for image: {}", 
+                    mat.cols(), mat.rows(), name);
+        }
+        return mat;
     }
 
     /**
@@ -109,7 +120,18 @@ public class Image {
      */
     @JsonIgnore
     public Mat getMatHSV() {
-        return ImageConverter.getMatHSV(bufferedImage);
+        if (bufferedImage == null) {
+            log.error("[IMAGE] Cannot convert to Mat - bufferedImage is null for image: {}", name);
+            return new Mat();
+        }
+        Mat mat = ImageConverter.getMatHSV(bufferedImage);
+        if (mat == null || mat.empty()) {
+            log.error("[IMAGE] Mat HSV conversion failed for image: {}", name);
+        } else {
+            log.debug("[IMAGE] Successfully converted to Mat HSV - dimensions: {}x{} for image: {}", 
+                    mat.cols(), mat.rows(), name);
+        }
+        return mat;
     }
 
     public boolean isEmpty() {
