@@ -12,8 +12,11 @@ import io.github.jspinak.brobot.tools.testing.mock.time.TimeProvider;
 import io.github.jspinak.brobot.util.image.core.BufferedImageUtilities;
 import io.github.jspinak.brobot.util.image.recognition.ImageLoader;
 
+import lombok.extern.slf4j.Slf4j;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.springframework.stereotype.Component;
+
+import java.awt.image.BufferedImage;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,6 +52,7 @@ import java.util.List;
  * @see ObjectCollection
  * @see ImageLoader
  */
+@Slf4j
 @Component
 public class SceneProvider {
     private final TimeProvider time;
@@ -86,19 +90,26 @@ public class SceneProvider {
                                  int scenesToCapture, double secondsBetweenCaptures) {
         List<Scene> scenes = new ArrayList<>();
         boolean takeScreenshot = isOkToTakeScreenshot(objectCollections.toArray(new ObjectCollection[0]));
+        
+        log.debug("[SCENE_PROVIDER] getScenes called - scenesToCapture: {}, takeScreenshot: {}, mock: {}", 
+                scenesToCapture, takeScreenshot, FrameworkSettings.mock);
+        
         if (takeScreenshot) {
             for (int i=0; i<scenesToCapture; i++) {
-                Mat bgr = getImage.getMatFromScreen(new Region());
-                scenes.add(new Scene(new Pattern(new Image(
-                        BufferedImageUtilities.getBufferedImageFromScreen(new Region()), "screenshot" + i))));
+                // Capture the screen once and use it for the Scene
+                BufferedImage screenshot = BufferedImageUtilities.getBufferedImageFromScreen(new Region());
+                scenes.add(new Scene(new Pattern(new Image(screenshot, "screenshot" + i))));
                 if (i<scenesToCapture-1) time.wait(secondsBetweenCaptures);
             }
             return scenes;
         }
         if (FrameworkSettings.mock) {
+            log.debug("[SCENE_PROVIDER] Mock mode active");
             // If no scenes are listed in the settings, use a randomly generated scene.
-            if (FrameworkSettings.screenshots.isEmpty())
+            if (FrameworkSettings.screenshots.isEmpty()) {
+                log.debug("[SCENE_PROVIDER] No mock screenshots configured, using empty image");
                 scenes.add(new Scene(new Pattern(Image.getEmptyImage())));
+            }
             // If scenes are listed in the settings, use them.
             else for (String filename : FrameworkSettings.screenshots){
                 // Check if filename is already an absolute path
@@ -115,11 +126,13 @@ public class SceneProvider {
         // If scenes are passed as parameters, use them.
         List<Scene> scenesInObjectCollection = objectCollections.get(0).getScenes();
         if (!scenesInObjectCollection.isEmpty()) {
+            log.debug("[SCENE_PROVIDER] Using {} scenes from ObjectCollection", scenesInObjectCollection.size());
             for (Scene scene : scenesInObjectCollection) {
                 scenes.add(scene);
             }
             return scenes;
         }
+        log.debug("[SCENE_PROVIDER] No scenes available, returning empty image");
         scenes.add(new Scene(new Pattern(Image.getEmptyImage())));
         return scenes;
     }

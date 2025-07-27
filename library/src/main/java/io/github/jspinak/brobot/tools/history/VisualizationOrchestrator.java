@@ -12,9 +12,9 @@ import io.github.jspinak.brobot.tools.history.visual.Visualization;
 import io.github.jspinak.brobot.util.image.io.ImageFileUtilities;
 import io.github.jspinak.brobot.tools.history.visual.AnalysisSidebar;
 
+import lombok.extern.slf4j.Slf4j;
 import org.bytedeco.opencv.opencv_core.Scalar;
 import org.springframework.stereotype.Component;
-
 import java.util.List;
 
 import static io.github.jspinak.brobot.action.internal.options.ActionOptions.Action.*;
@@ -68,6 +68,7 @@ import static io.github.jspinak.brobot.action.internal.options.ActionOptions.Fin
  * @see DrawClassesLegend
  * @see ActionResult
  */
+@Slf4j
 @Component
 public class VisualizationOrchestrator {
 
@@ -110,9 +111,19 @@ public class VisualizationOrchestrator {
      * @param actionOptions configuration determining illustration style and content
      */
     public void draw(ActionResult matches, List<Region> searchRegions, ActionOptions actionOptions) {
+        log.debug("[VISUALIZATION] draw() called with action: {}", actionOptions.getAction());
+        log.debug("[VISUALIZATION] Number of scenes to illustrate: {}", 
+                matches.getSceneAnalysisCollection().getSceneAnalyses().size());
+        
         drawIllustrations(matches, searchRegions, actionOptions);
-        matches.getSceneAnalysisCollection().getAllIllustratedScenes().forEach(
-                ill -> imageUtils.writeAllWithUniqueFilename(ill.getFinishedMats(), ill.getFilenames()));
+        
+        List<Visualization> illustrations = matches.getSceneAnalysisCollection().getAllIllustratedScenes();
+        log.debug("[VISUALIZATION] Number of illustrated scenes: {}", illustrations.size());
+        
+        illustrations.forEach(ill -> 
+            imageUtils.writeAllWithUniqueFilename(ill.getFinishedMats(), ill.getFilenames()));
+        
+        log.debug("[VISUALIZATION] draw() completed");
     }
 
     /**

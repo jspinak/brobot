@@ -6,6 +6,7 @@ import io.github.jspinak.brobot.config.FrameworkSettings;
 import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
 import io.github.jspinak.brobot.util.image.core.BufferedImageUtilities;
 
+import lombok.extern.slf4j.Slf4j;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.springframework.stereotype.Component;
 
@@ -60,6 +61,7 @@ import static org.bytedeco.opencv.global.opencv_imgcodecs.imwrite;
  * @see Pattern
  * @see Mat
  */
+@Slf4j
 @Component
 public class ImageFileUtilities {
 
@@ -294,8 +296,42 @@ public class ImageFileUtilities {
      * @return true if save successful, false otherwise
      */
     public boolean writeWithUniqueFilename(Mat mat, String nameWithoutFiletype) {
+        if (mat == null) {
+            log.error("[IMAGE_WRITE] Cannot write null Mat for filename: {}", nameWithoutFiletype);
+            return false;
+        }
+        if (mat.empty()) {
+            log.error("[IMAGE_WRITE] Cannot write empty Mat for filename: {}", nameWithoutFiletype);
+            return false;
+        }
         nameWithoutFiletype = getFreePath(nameWithoutFiletype) + ".png";
-        return imwrite(nameWithoutFiletype, mat);
+        log.debug("[IMAGE_WRITE] Attempting to write Mat to: {}", nameWithoutFiletype);
+        
+        try {
+            boolean result = imwrite(nameWithoutFiletype, mat);
+            if (result) {
+                log.debug("[IMAGE_WRITE] Successfully wrote image to: {}", nameWithoutFiletype);
+            } else {
+                log.error("[IMAGE_WRITE] Failed to write image to: {} (imwrite returned false)", nameWithoutFiletype);
+                // Check if directory exists
+                File file = new File(nameWithoutFiletype);
+                File parentDir = file.getParentFile();
+                if (parentDir != null && !parentDir.exists()) {
+                    log.error("[IMAGE_WRITE] Directory does not exist: {}", parentDir.getAbsolutePath());
+                    log.error("[IMAGE_WRITE] Creating directory: {}", parentDir.getAbsolutePath());
+                    parentDir.mkdirs();
+                    // Try again after creating directory
+                    result = imwrite(nameWithoutFiletype, mat);
+                    if (result) {
+                        log.info("[IMAGE_WRITE] Successfully wrote image after creating directory");
+                    }
+                }
+            }
+            return result;
+        } catch (Exception e) {
+            log.error("[IMAGE_WRITE] Exception writing image to {}: {}", nameWithoutFiletype, e.getMessage(), e);
+            return false;
+        }
     }
 
     /**
@@ -327,24 +363,64 @@ public class ImageFileUtilities {
      *         or lists have different sizes
      */
     public boolean writeAllWithUniqueFilename(List<Mat> mats, List<String> filenames) {
+        log.debug("[IMAGE_WRITE] writeAllWithUniqueFilename called with {} mats and {} filenames", 
+                mats.size(), filenames.size());
+        
         if (mats.size() != filenames.size()) {
             ConsoleReporter.println("Error: number of mats and filenames must be equal.");
+            log.error("[IMAGE_WRITE] Size mismatch: {} mats vs {} filenames", mats.size(), filenames.size());
             return false;
         }
+        
+        // Log all filenames for debugging
+        for (int i = 0; i < filenames.size(); i++) {
+            log.debug("[IMAGE_WRITE] Filename[{}]: {}", i, filenames.get(i));
+        }
+        
         List<Mat> nonNullMats = new ArrayList<>();
         List<String> nonNullFilenames = new ArrayList<>();
+        int nullCount = 0;
+        int emptyCount = 0;
+        
         for (int i=0; i<mats.size(); i++) {
-            if (mats.get(i) != null) {
-                nonNullMats.add(mats.get(i));
+            Mat mat = mats.get(i);
+            if (mat == null) {
+                nullCount++;
+                log.debug("[IMAGE_WRITE] Mat at index {} is null", i);
+            } else if (mat.empty()) {
+                emptyCount++;
+                log.debug("[IMAGE_WRITE] Mat at index {} is empty", i);
+            } else {
+                nonNullMats.add(mat);
                 nonNullFilenames.add(filenames.get(i));
+                log.debug("[IMAGE_WRITE] Mat at index {} is valid ({}x{})", i, mat.cols(), mat.rows());
             }
-            //else Report.println("Mat at index " + i + " is null.");
         }
+        
+        log.info("[IMAGE_WRITE] Mat summary: {} total, {} null, {} empty, {} valid", 
+                mats.size(), nullCount, emptyCount, nonNullMats.size());
+        
+        if (nonNullMats.isEmpty()) {
+            log.warn("[IMAGE_WRITE] No valid mats to write");
+            return true; // Return true since there's no error, just nothing to write
+        }
+        
+        log.debug("[IMAGE_WRITE] Processing {} non-null mats", nonNullMats.size());
+        
+        int successCount = 0;
         for (int i=0; i<nonNullMats.size(); i++) {
-            if (!writeWithUniqueFilename(nonNullMats.get(i), nonNullFilenames.get(i))) {
-                return false;
+            String filename = nonNullFilenames.get(i);
+            log.debug("[IMAGE_WRITE] Writing image {}: {}", i, filename);
+            
+            if (writeWithUniqueFilename(nonNullMats.get(i), filename)) {
+                successCount++;
+            } else {
+                log.error("[IMAGE_WRITE] Failed to write image: {}", filename);
             }
         }
-        return true;
+        
+        log.info("[IMAGE_WRITE] Write complete: {} of {} images written successfully", 
+                successCount, nonNullMats.size());
+        return successCount == nonNullMats.size();
     }
 }
