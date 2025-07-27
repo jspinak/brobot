@@ -140,7 +140,12 @@ public class ActionRecord {
 
     public void print() {
         System.out.print(timeStamp.format(DateTimeFormatter.ofPattern("MM-dd HH:mm:ss")));
-        System.out.format(" %s", actionOptions.getAction());
+        if (actionConfig != null) {
+            ActionConfigAdapter adapter = new ActionConfigAdapter();
+            System.out.format(" %s", adapter.getActionType(actionConfig));
+        } else {
+            System.out.format(" %s", actionOptions.getAction());
+        }
         matchList.forEach(match -> System.out.format(" %d.%d,%d.%d", match.x(), match.y(), match.w(), match.h()));
         System.out.format(" %s", text);
         System.out.println();
@@ -188,6 +193,7 @@ public class ActionRecord {
                 actionSuccess == that.actionSuccess &&
                 resultSuccess == that.resultSuccess &&
                 Objects.equals(actionOptions, that.actionOptions) &&
+                Objects.equals(actionConfig, that.actionConfig) &&
                 Objects.equals(matchList, that.matchList) &&
                 Objects.equals(text, that.text) &&
                 Objects.equals(stateName, that.stateName) &&
@@ -204,7 +210,7 @@ public class ActionRecord {
         java.time.LocalDateTime truncatedTimestamp = (timeStamp != null) ?
                 timeStamp.truncatedTo(java.time.temporal.ChronoUnit.SECONDS) : null;
 
-        return java.util.Objects.hash(actionOptions, matchList, text, duration, truncatedTimestamp,
+        return java.util.Objects.hash(actionOptions, actionConfig, matchList, text, duration, truncatedTimestamp,
                 actionSuccess, resultSuccess, stateName, stateId);
     }
 
@@ -212,6 +218,7 @@ public class ActionRecord {
     public String toString() {
         return "ActionRecord{" +
                 "actionOptions=" + actionOptions +
+                ", actionConfig=" + actionConfig +
                 ", matchList=" + matchList +
                 ", text='" + text + '\'' +
                 ", duration=" + duration +
@@ -228,6 +235,7 @@ public class ActionRecord {
                 .setAction(ActionOptions.Action.FIND)
                 .setFind(UNIVERSAL)
                 .build();
+        private ActionConfig actionConfig;
         private List<Match> matchList = new ArrayList<>();
         private String text = "";
         private double duration = 0.0;
@@ -236,11 +244,32 @@ public class ActionRecord {
         private boolean resultSuccess = false; // can be initialized for mocks
         private String state = SpecialStateType.NULL.toString(); // the state in which it was found
 
+        /**
+         * Sets the ActionConfig for this record (modern API).
+         * @param actionConfig the ActionConfig used for the action
+         * @return this builder
+         */
+        public Builder setActionConfig(ActionConfig actionConfig) {
+            this.actionConfig = actionConfig;
+            // For backward compatibility, also set ActionOptions
+            ActionConfigAdapter adapter = new ActionConfigAdapter();
+            this.actionOptions = adapter.createRecordBuilder(actionConfig).build().getActionOptions();
+            return this;
+        }
+
+        /**
+         * @deprecated Use setActionConfig(ActionConfig) instead
+         */
+        @Deprecated
         public Builder setActionOptions(ActionOptions actionOptions) {
             this.actionOptions = actionOptions;
             return this;
         }
 
+        /**
+         * @deprecated Use setActionConfig(ActionConfig) instead
+         */
+        @Deprecated
         public Builder setActionOptions(ActionOptions.Action action) {
             this.actionOptions = new ActionOptions.Builder()
                     .setAction(action)
@@ -248,6 +277,10 @@ public class ActionRecord {
             return this;
         }
 
+        /**
+         * @deprecated Use setActionConfig(ActionConfig) instead
+         */
+        @Deprecated
         public Builder setActionOptions(ActionOptions.Find find) {
             this.actionOptions = new ActionOptions.Builder()
                     .setAction(ActionOptions.Action.FIND)
@@ -314,6 +347,7 @@ public class ActionRecord {
         public ActionRecord build() {
             ActionRecord actionRecord = new ActionRecord();
             actionRecord.actionOptions = actionOptions;
+            actionRecord.actionConfig = actionConfig;
             actionRecord.text = text;
             actionRecord.matchList = matchList;
             actionRecord.duration = duration;

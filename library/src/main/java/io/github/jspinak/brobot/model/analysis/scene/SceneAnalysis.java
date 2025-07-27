@@ -12,6 +12,7 @@ import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.tools.history.visual.Visualization;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 
 import org.bytedeco.opencv.opencv_core.Mat;
 
@@ -56,6 +57,7 @@ import static io.github.jspinak.brobot.model.analysis.color.ColorCluster.ColorSc
  * @see ContourExtractor
  * @see Visualization
  */
+@Slf4j
 @Getter
 @Setter
 public class SceneAnalysis {
@@ -91,10 +93,14 @@ public class SceneAnalysis {
     public SceneAnalysis(List<PixelProfiles> pixelAnalysisCollections, Scene scene) {
         this.pixelAnalysisCollections = pixelAnalysisCollections;
         this.scene = scene;
-        addAnalysis(BGR, SCENE, scene.getPattern().getImage().getMatBGR());
-        addAnalysis(HSV, SCENE, scene.getPattern().getImage().getMatHSV());
+        Mat sceneBGR = scene.getPattern().getImage().getMatBGR();
+        Mat sceneHSV = scene.getPattern().getImage().getMatHSV();
+        log.debug("[SCENE_ANALYSIS] Creating with scene BGR Mat: {}x{}", 
+                sceneBGR.cols(), sceneBGR.rows());
+        addAnalysis(BGR, SCENE, sceneBGR);
+        addAnalysis(HSV, SCENE, sceneHSV);
         illustrations = new Visualization();
-        illustrations.setScene(scene.getPattern().getImage().getMatBGR());
+        illustrations.setScene(sceneBGR);
     }
 
     /**
@@ -112,10 +118,14 @@ public class SceneAnalysis {
     public SceneAnalysis(Scene scene) {
         pixelAnalysisCollections = new ArrayList<>();
         this.scene = scene;
-        addAnalysis(BGR, SCENE, scene.getPattern().getImage().getMatBGR());
-        addAnalysis(HSV, SCENE, scene.getPattern().getImage().getMatHSV());
+        Mat sceneBGR = scene.getPattern().getImage().getMatBGR();
+        Mat sceneHSV = scene.getPattern().getImage().getMatHSV();
+        log.debug("[SCENE_ANALYSIS] Creating minimal with scene BGR Mat: {}x{}", 
+                sceneBGR.cols(), sceneBGR.rows());
+        addAnalysis(BGR, SCENE, sceneBGR);
+        addAnalysis(HSV, SCENE, sceneHSV);
         illustrations = new Visualization();
-        illustrations.setScene(scene.getPattern().getImage().getMatBGR());
+        illustrations.setScene(sceneBGR);
     }
 
     /**

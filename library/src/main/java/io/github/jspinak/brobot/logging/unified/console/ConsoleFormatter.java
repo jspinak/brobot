@@ -120,13 +120,6 @@ public class ConsoleFormatter {
      * Formats a log event in quiet mode - single line output with minimal information.
      */
     private String formatQuiet(LogEvent event) {
-        // DEBUG: Check what ACTION events we're receiving  
-        if (event.getType() == LogEvent.Type.ACTION) {
-            System.err.println("DEBUG ConsoleFormatter ACTION: " + event.getAction() + 
-                              ", Target: " + event.getTarget() + 
-                              ", Duration: " + event.getDuration() + 
-                              ", Success: " + event.isSuccess());
-        }
         
         // Only format ACTION events that are COMPLETE or FAILED, skip START events
         if (event.getType() == LogEvent.Type.ACTION && event.getAction() != null) {

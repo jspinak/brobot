@@ -124,4 +124,23 @@ public class FindStrategyRegistryV2 {
         }
         return findFunction.get(strategy);
     }
+    
+    /**
+     * Executes the find strategy with the given parameters.
+     * <p>
+     * This method looks up and executes the appropriate find function based on the
+     * provided strategy. If no function is registered for the strategy, this method
+     * returns without performing any action.
+     * </p>
+     * 
+     * @param strategy The find strategy to execute
+     * @param matches The action result to populate with matches
+     * @param objectCollections The collections of objects to search for
+     */
+    public void runFindStrategy(FindStrategy strategy, ActionResult matches, ObjectCollection... objectCollections) {
+        BiConsumer<ActionResult, List<ObjectCollection>> function = get(strategy);
+        if (function != null) {
+            function.accept(matches, List.of(objectCollections));
+        }
+    }
 }

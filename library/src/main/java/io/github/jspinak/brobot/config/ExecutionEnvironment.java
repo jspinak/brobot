@@ -3,6 +3,7 @@ package io.github.jspinak.brobot.config;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import java.awt.GraphicsEnvironment;
+import java.awt.HeadlessException;
 
 /**
  * Manages Brobot's runtime environment configuration.
@@ -13,6 +14,17 @@ import java.awt.GraphicsEnvironment;
  *   <li>Display availability - Whether screen capture operations are possible</li>
  *   <li>Headless mode - Running without a GUI (can still process files)</li>
  * </ul>
+ * 
+ * <p><strong>Default Headless Configuration:</strong><br>
+ * Brobot automatically sets {@code java.awt.headless=false} during class initialization
+ * to enable GUI automation by default. This overrides any existing headless setting
+ * (including those set by build tools like Gradle). Applications that specifically need 
+ * to preserve the original headless setting can use:
+ * <pre>{@code
+ * // Preserve original headless setting (e.g., for CI/CD)
+ * System.setProperty("brobot.preserve.headless.setting", "true");
+ * // Then initialize Brobot...
+ * }</pre>
  * 
  * <p>Example usage:
  * <pre>{@code
@@ -35,6 +47,26 @@ import java.awt.GraphicsEnvironment;
 @Slf4j
 @Component
 public class ExecutionEnvironment {
+    
+    static {
+        // Set java.awt.headless=false as the default for GUI automation
+        // Override even if already set, unless explicitly preserved via system property
+        String currentHeadless = System.getProperty("java.awt.headless");
+        String preserveHeadless = System.getProperty("brobot.preserve.headless.setting");
+        
+        if ("true".equals(preserveHeadless)) {
+            log.debug("Preserving existing java.awt.headless setting: {}", currentHeadless);
+        } else {
+            // Always set to false for GUI automation, unless explicitly preserved
+            System.setProperty("java.awt.headless", "false");
+            if (currentHeadless != null && !"false".equals(currentHeadless)) {
+                log.info("Overrode java.awt.headless from '{}' to 'false' for GUI automation. " +
+                        "Set -Dbrobot.preserve.headless.setting=true to preserve original setting.", currentHeadless);
+            } else {
+                log.debug("Set java.awt.headless=false for GUI automation");
+            }
+        }
+    }
     
     private static ExecutionEnvironment instance = new ExecutionEnvironment();
     
@@ -83,20 +115,79 @@ public class ExecutionEnvironment {
      * @return true if display is available
      */
     public boolean hasDisplay() {
+        // Check OS type first
+        String os = System.getProperty("os.name").toLowerCase();
+        boolean isMac = os.contains("mac");
+        
+        log.debug("[DISPLAY_CHECK] OS: {}, isMac: {}", os, isMac);
+        
         // If explicitly set to headless, return false
         if (forceHeadless != null) {
+            log.debug("[DISPLAY_CHECK] forceHeadless is set to: {}", forceHeadless);
             return !forceHeadless;
         }
         
-        // Auto-detect display availability
-        if (GraphicsEnvironment.isHeadless()) {
+        // Check if java.awt.headless is explicitly set to false - this overrides detection
+        String headlessProp = System.getProperty("java.awt.headless");
+        if ("false".equalsIgnoreCase(headlessProp)) {
+            log.debug("[DISPLAY_CHECK] java.awt.headless explicitly set to false, assuming display available");
+            return true;
+        }
+        
+        // Special handling for macOS - check actual GraphicsEnvironment state
+        if (isMac) {
+            boolean notInCI = !isRunningInCI();
+            log.debug("[DISPLAY_CHECK] macOS: notInCI={}", notInCI);
+            
+            // Even on macOS not in CI, we need to verify actual display state
+            // Check if GraphicsEnvironment is actually headless
+            try {
+                String macHeadlessProp = System.getProperty("java.awt.headless");
+                String headlessEnv = System.getenv("JAVA_AWT_HEADLESS");
+                boolean javaHeadless = GraphicsEnvironment.isHeadless();
+                log.debug("[DISPLAY_CHECK] macOS: java.awt.headless property = {}", macHeadlessProp);
+                log.debug("[DISPLAY_CHECK] macOS: JAVA_AWT_HEADLESS env = {}", headlessEnv);
+                log.debug("[DISPLAY_CHECK] macOS: GraphicsEnvironment.isHeadless() = {}", javaHeadless);
+                
+                if (javaHeadless) {
+                    log.debug("[DISPLAY_CHECK] macOS: Java reports headless, cannot use display");
+                    return false;
+                }
+                
+                if (notInCI) {
+                    log.debug("[DISPLAY_CHECK] macOS: Not in CI and not headless, assuming display available");
+                    return true;
+                }
+            } catch (Exception e) {
+                log.debug("[DISPLAY_CHECK] macOS: Error checking GraphicsEnvironment: {}", e.getMessage());
+                return false;
+            }
+            
+            // If in CI, try to check screen devices but don't fail if headless
+            try {
+                GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+                boolean hasScreens = ge.getScreenDevices().length > 0;
+                log.debug("[DISPLAY_CHECK] macOS CI: hasScreens={}", hasScreens);
+                return hasScreens;
+            } catch (HeadlessException e) {
+                log.debug("[DISPLAY_CHECK] macOS CI: HeadlessException caught, assuming no display in CI");
+                return false;
+            } catch (Exception e) {
+                log.error("[DISPLAY_CHECK] macOS CI: Unexpected error checking display: ", e);
+                return false;
+            }
+        }
+        
+        // For non-Mac systems, check GraphicsEnvironment
+        boolean isHeadless = GraphicsEnvironment.isHeadless();
+        log.debug("[DISPLAY_CHECK] GraphicsEnvironment.isHeadless(): {}", isHeadless);
+        
+        if (isHeadless) {
             return false;
         }
         
-        // Check OS type
-        String os = System.getProperty("os.name").toLowerCase();
+        // Check other OS types
         boolean isWindows = os.contains("windows");
-        boolean isMac = os.contains("mac");
         boolean isWSL = System.getenv("WSL_DISTRO_NAME") != null || 
                        System.getenv("WSL_INTEROP") != null;
         
@@ -106,16 +197,6 @@ public class ExecutionEnvironment {
             return !isRunningInCI();
         }
         
-        // For macOS, check actual display capability using AWT
-        if (isMac) {
-            try {
-                // Try to get screen devices - this works on macOS
-                GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-                return ge.getScreenDevices().length > 0 && !isRunningInCI();
-            } catch (Exception e) {
-                return false;
-            }
-        }
         
         // Check for DISPLAY variable on Unix-like systems (including WSL)
         if (os.contains("nix") || os.contains("nux") || isWSL) {
@@ -140,7 +221,15 @@ public class ExecutionEnvironment {
      * @return true if screen capture is allowed
      */
     public boolean canCaptureScreen() {
-        return hasDisplay() && allowScreenCapture && !mockMode;
+        boolean hasDisp = hasDisplay();
+        boolean result = hasDisp && allowScreenCapture && !mockMode;
+        
+        if (!result) {
+            log.debug("[CAPTURE_CHECK] Cannot capture screen - hasDisplay: {}, allowScreenCapture: {}, mockMode: {}", 
+                    hasDisp, allowScreenCapture, mockMode);
+        }
+        
+        return result;
     }
     
     /**

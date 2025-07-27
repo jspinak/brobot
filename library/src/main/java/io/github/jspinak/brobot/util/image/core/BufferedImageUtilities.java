@@ -246,36 +246,73 @@ public class BufferedImageUtilities {
     public static BufferedImage getBufferedImageFromScreen(Region region) {
         ExecutionEnvironment env = ExecutionEnvironment.getInstance();
         
-        if (!env.canCaptureScreen()) {
+        log.debug("[STATIC_SCREEN_CAPTURE] Environment info: {}", env.getEnvironmentInfo());
+        log.debug("[STATIC_SCREEN_CAPTURE] canCaptureScreen: {}, hasDisplay: {}, mockMode: {}", 
+                env.canCaptureScreen(), env.hasDisplay(), env.isMockMode());
+        
+        // Only return dummy image if we're in mock mode or don't have display
+        // canCaptureScreen() may be too restrictive for illustration generation
+        if (env.isMockMode() || !env.hasDisplay()) {
+            log.warn("[STATIC_SCREEN_CAPTURE] Mock mode or no display - returning black dummy image");
             // Return dummy only when screen capture not possible
             return new BufferedImage(region.w() > 0 ? region.w() : 1920, 
                                    region.h() > 0 ? region.h() : 1080, 
                                    BufferedImage.TYPE_INT_RGB);
         }
         
-        // Use ScreenUtilities which has monitor support
-        Screen screen = ScreenUtilities.getScreen("find");
-        if (screen == null) {
-            screen = new Screen(); // Fallback to primary monitor
-        } else {
-            log.debug("Capturing from monitor {} for region: {}", screen.getID(), region);
+        try {
+            // Use ScreenUtilities which has monitor support
+            Screen screen = ScreenUtilities.getScreen("find");
+            if (screen == null) {
+                screen = new Screen(); // Fallback to primary monitor
+            } else {
+                log.debug("Capturing from monitor {} for region: {}", screen.getID(), region);
+            }
+            BufferedImage captured = screen.capture(region.sikuli()).getImage();
+            log.debug("[STATIC_SCREEN_CAPTURE] Successfully captured screen: {}x{}", 
+                    captured.getWidth(), captured.getHeight());
+            return captured;
+        } catch (Exception e) {
+            log.error("[STATIC_SCREEN_CAPTURE] Failed to capture screen: {}", e.getMessage(), e);
+            // Return dummy image on capture failure
+            return new BufferedImage(region.w() > 0 ? region.w() : 1920, 
+                                   region.h() > 0 ? region.h() : 1080, 
+                                   BufferedImage.TYPE_INT_RGB);
         }
-        return screen.capture(region.sikuli()).getImage();
     }
 
     public BufferedImage getBuffImgFromScreen(Region region) {
         ExecutionEnvironment env = ExecutionEnvironment.getInstance();
         
-        if (!env.canCaptureScreen()) {
+        log.debug("[SCREEN_CAPTURE] Environment info: {}", env.getEnvironmentInfo());
+        log.debug("[SCREEN_CAPTURE] canCaptureScreen: {}, hasDisplay: {}, mockMode: {}, allowScreenCapture: {}", 
+                env.canCaptureScreen(), env.hasDisplay(), env.isMockMode(), true);
+        
+        // Only return dummy image if we're in mock mode or don't have display
+        // canCaptureScreen() may be too restrictive for illustration generation
+        if (env.isMockMode() || !env.hasDisplay()) {
+            log.warn("[SCREEN_CAPTURE] Mock mode or no display - returning black dummy image");
             // Return dummy only when screen capture not possible
             return new BufferedImage(region.w() > 0 ? region.w() : 1920, 
                                    region.h() > 0 ? region.h() : 1080, 
                                    BufferedImage.TYPE_INT_RGB);
         }
         
-        // Use monitor-aware screen selection
-        Screen screen = getScreenForOperation("find");
-        return screen.capture(region.sikuli()).getImage();
+        try {
+            // Use monitor-aware screen selection
+            Screen screen = getScreenForOperation("find");
+            log.debug("[SCREEN_CAPTURE] Using screen {} to capture region {}", screen.getID(), region);
+            BufferedImage captured = screen.capture(region.sikuli()).getImage();
+            log.debug("[SCREEN_CAPTURE] Successfully captured screen: {}x{}", 
+                    captured.getWidth(), captured.getHeight());
+            return captured;
+        } catch (Exception e) {
+            log.error("[SCREEN_CAPTURE] Failed to capture screen: {}", e.getMessage(), e);
+            // Return dummy image on capture failure
+            return new BufferedImage(region.w() > 0 ? region.w() : 1920, 
+                                   region.h() > 0 ? region.h() : 1080, 
+                                   BufferedImage.TYPE_INT_RGB);
+        }
     }
 
     public List<BufferedImage> getBuffImgsFromScreen(List<Region> regions) {
