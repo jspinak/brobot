@@ -7,6 +7,8 @@ sidebar_position: 6
 A concise reference for the Brobot Unified Logging System.
 
 > **Note**: For action-specific logging with configurable output formats (QUIET, NORMAL, VERBOSE), see the [Modular Logging Guide](./modular-logging-guide.md).
+> 
+> **New**: For automatic action logging without boilerplate code, see the [Automatic Action Logging Guide](./automatic-action-logging.md).
 
 ## Basic Logging
 

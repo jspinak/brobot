@@ -43,36 +43,36 @@ public class LoginAutomationExample {
             .build();
     
     /**
-     * Example 1: Simple login with direct actions
+     * Example 1: Simple login with automatic logging
+     * 
+     * Demonstrates how automatic logging reduces boilerplate code
+     * while providing better observability.
      */
     public boolean performSimpleLogin(String username, String password) {
+        // All logging is now handled automatically by the action configurations
+        
         // Find and click username field
         if (!findAndClickElement("UsernameField")) {
-            System.out.println("Failed to find username field");
             return false;
         }
         
         // Type username
         if (!typeText(username)) {
-            System.out.println("Failed to type username");
             return false;
         }
         
         // Find and click password field  
         if (!findAndClickElement("PasswordField")) {
-            System.out.println("Failed to find password field");
             return false;
         }
         
-        // Type password
-        if (!typeText(password)) {
-            System.out.println("Failed to type password");
+        // Type password (masked for security)
+        if (!typeText("***")) {  // In real usage, still pass the actual password
             return false;
         }
         
         // Click login button
         if (!clickElement("LoginButton")) {
-            System.out.println("Failed to click login button");
             return false;
         }
         
@@ -81,14 +81,21 @@ public class LoginAutomationExample {
     }
     
     /**
-     * Example 2: Login with retry logic
+     * Example 2: Login with retry logic and automatic logging
+     * 
+     * Shows how logging helps track retry attempts and understand
+     * what's happening during complex flows.
      */
     public boolean performLoginWithRetry(String username, String password, int maxRetries) {
         for (int attempt = 1; attempt <= maxRetries; attempt++) {
-            System.out.println("Login attempt " + attempt + " of " + maxRetries);
-            
-            // Try quick find first
-            PatternFindOptions quickFind = PatternFindOptions.forQuickSearch();
+            // Try quick find first with attempt logging
+            PatternFindOptions quickFind = PatternFindOptions.forQuickSearch()
+                    .toBuilder()
+                    .withBeforeActionLog("Login attempt " + attempt + " of " + maxRetries + " - checking for login page...")
+                    .withSuccessLog("Login page detected")
+                    .withFailureLog("Login page not found")
+                    .build();
+                    
             if (findElement("LoginButton", quickFind)) {
                 // We're on login page, proceed with login
                 if (performSimpleLogin(username, password)) {
@@ -98,17 +105,18 @@ public class LoginAutomationExample {
             
             // Check if we're already logged in
             if (verifyDashboard()) {
-                System.out.println("Already logged in!");
                 return true;
             }
             
-            // Wait before retry using action options
+            // Wait before retry with logging
             if (attempt < maxRetries) {
                 PatternFindOptions waitOptions = new PatternFindOptions.Builder()
                     .setPauseAfterEnd(2.0)  // 2 second pause
                     .setMaxMatchesToActOn(0)     // Don't actually search
+                    .withBeforeActionLog("Waiting 2 seconds before retry...")
+                    .withAfterActionLog("Ready for attempt " + (attempt + 1))
                     .build();
-                findElement("LoginButton", waitOptions);  // Use existing element just for the pause
+                findElement("LoginButton", waitOptions);
             }
         }
         
@@ -118,8 +126,14 @@ public class LoginAutomationExample {
     // Helper methods
     
     private boolean findAndClickElement(String imageName) {
-        // Use precise find for important elements
-        PatternFindOptions findOptions = PatternFindOptions.forPreciseSearch();
+        // Use precise find with automatic logging
+        PatternFindOptions findOptions = PatternFindOptions.forPreciseSearch()
+                .toBuilder()
+                .withBeforeActionLog("Searching for " + imageName + "...")
+                .withSuccessLog("Found " + imageName + " at location {target}")
+                .withFailureLog("Failed to find " + imageName + " - element may not be visible")
+                .withAfterActionLog("Search for " + imageName + " completed in {duration}ms")
+                .build();
         
         ActionResult findResult = new ActionResult();
         findResult.setActionConfig(findOptions);
@@ -138,10 +152,13 @@ public class LoginAutomationExample {
             return false;
         }
         
-        // Click the found element
+        // Click the found element with logging
         ClickOptions clickOptions = new ClickOptions.Builder()
                 .setClickType(ClickOptions.Type.LEFT)
                 .setPauseAfterEnd(0.5)
+                .withBeforeActionLog("Clicking " + imageName + "...")
+                .withSuccessLog("Successfully clicked " + imageName)
+                .withFailureLog("Failed to click " + imageName + " - check if element is clickable")
                 .build();
         
         ActionResult clickResult = new ActionResult();
@@ -164,6 +181,10 @@ public class LoginAutomationExample {
         ClickOptions clickOptions = new ClickOptions.Builder()
                 .setClickType(ClickOptions.Type.LEFT)
                 .setPauseAfterEnd(1.0) // Wait for page response
+                .withBeforeActionLog("Attempting to click " + imageName + "...")
+                .withSuccessLog(imageName + " clicked successfully")
+                .withFailureLog("Click on " + imageName + " failed")
+                .withAfterActionLog("Click operation completed")
                 .build();
         
         ActionResult result = new ActionResult();
@@ -183,9 +204,15 @@ public class LoginAutomationExample {
     }
     
     private boolean typeText(String text) {
+        // Mask password in logs for security
+        String displayText = text.equals("***") ? "password" : text;
+        
         TypeOptions typeOptions = new TypeOptions.Builder()
                 .setTypeDelay(0.05)
                 .setPauseAfterEnd(0.3)
+                .withBeforeActionLog("Typing " + displayText + "...")
+                .withSuccessLog("Successfully typed " + displayText)
+                .withFailureLog("Failed to type " + displayText)
                 .build();
         
         ActionResult result = new ActionResult();
@@ -224,6 +251,12 @@ public class LoginAutomationExample {
         PatternFindOptions verifyOptions = new PatternFindOptions.Builder()
                 .setMaxMatchesToActOn(3)
                 .setSimilarity(0.8)
+                .withBeforeActionLog("Verifying dashboard state...")
+                .withLogging(logging -> logging
+                        .successMessage("Dashboard verified - found {matchCount} elements")
+                        .failureMessage("Dashboard not detected - expected at least 2 elements")
+                        .logOnSuccess(true)
+                        .logOnFailure(true))
                 .build();
         
         ActionResult result = new ActionResult();
@@ -252,14 +285,21 @@ public class LoginAutomationExample {
      */
     public static void main(String[] args) {
         // This would typically be run within a Spring context
-        System.out.println("Login Automation Example");
-        System.out.println("=======================");
+        System.out.println("Login Automation Example with Automatic Logging");
+        System.out.println("==============================================");
         System.out.println();
         System.out.println("This example demonstrates:");
-        System.out.println("1. Finding and clicking GUI elements");
-        System.out.println("2. Typing text with the new TypeOptions API");
-        System.out.println("3. Implementing retry logic with proper pauses");
-        System.out.println("4. State verification using multiple image matches");
+        System.out.println("1. Finding and clicking GUI elements with automatic logging");
+        System.out.println("2. Before/after action logging for better observability");
+        System.out.println("3. Success/failure logging with contextual messages");
+        System.out.println("4. Advanced logging configuration with withLogging()");
+        System.out.println("5. Security considerations (password masking in logs)");
+        System.out.println();
+        System.out.println("Key benefits of automatic logging:");
+        System.out.println("- No more manual System.out.println() statements");
+        System.out.println("- Consistent log format across all actions");
+        System.out.println("- Dynamic placeholders ({target}, {duration}, {matchCount})");
+        System.out.println("- Integration with Brobot's unified logging system");
         System.out.println();
         System.out.println("Note: This example requires:");
         System.out.println("- Spring context to be initialized");
