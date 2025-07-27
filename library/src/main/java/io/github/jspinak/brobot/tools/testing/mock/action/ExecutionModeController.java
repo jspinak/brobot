@@ -12,6 +12,7 @@ import io.github.jspinak.brobot.config.ExecutionEnvironment;
 import io.github.jspinak.brobot.config.ExecutionMode;
 import io.github.jspinak.brobot.tools.testing.mock.time.MockTime;
 
+import lombok.extern.slf4j.Slf4j;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.springframework.stereotype.Component;
 
@@ -102,6 +103,7 @@ import java.util.List;
  * @see GetTextWrapper
  * @since 1.0
  */
+@Slf4j
 @Component
 public class ExecutionModeController {
     private final ExecutionMode executionMode;
@@ -277,14 +279,24 @@ public class ExecutionModeController {
         if (executionMode.isMock() || env.shouldSkipSikuliX()) {
             mockTime.wait(seconds);
         } else {
-            org.sikuli.script.Region sikuliRegion = new Region().sikuli();
-            if (sikuliRegion != null) {
-                sikuliRegion.wait(seconds);
-            } else {
-                // Fallback to Thread.sleep when SikuliX not available
+            try {
+                org.sikuli.script.Region sikuliRegion = new Region().sikuli();
+                if (sikuliRegion != null) {
+                    sikuliRegion.wait(seconds);
+                } else {
+                    // Fallback to Thread.sleep when SikuliX not available
+                    try {
+                        Thread.sleep((long) (seconds * 1000));
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
+                }
+            } catch (org.sikuli.script.SikuliXception e) {
+                // SikuliX failed (likely headless environment) - fallback to thread sleep
+                log.warn("SikuliX failed in wait operation ({}), falling back to Thread.sleep", e.getMessage());
                 try {
                     Thread.sleep((long) (seconds * 1000));
-                } catch (InterruptedException e) {
+                } catch (InterruptedException ie) {
                     Thread.currentThread().interrupt();
                 }
             }

@@ -8,6 +8,7 @@ import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.tools.history.VisualizationLayout;
 import io.github.jspinak.brobot.tools.history.draw.DrawHistogram;
 
+import lombok.extern.slf4j.Slf4j;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Rect;
 import org.bytedeco.opencv.opencv_core.Size;
@@ -71,6 +72,7 @@ import static org.bytedeco.opencv.global.opencv_imgproc.resize;
  * @see DrawHistogram
  * @see ActionResult
  */
+@Slf4j
 @Component
 public class AnalysisSidebar {
 
@@ -132,9 +134,29 @@ public class AnalysisSidebar {
      * @param matchList specific matches to display (may differ from matches.getMatchList())
      */
     public void drawSidebars(Visualization illustrations, ActionResult matches, ActionOptions actionOptions, List<Match> matchList) {
-        if (illustrations.getScene() == null) return;
+        log.debug("[SIDEBAR] drawSidebars called");
+        
+        if (illustrations.getScene() == null) {
+            log.warn("[SIDEBAR] Scene is null, cannot draw sidebars");
+            return;
+        }
+        
+        log.debug("[SIDEBAR] Scene dimensions: {}x{}", 
+                illustrations.getScene().cols(), illustrations.getScene().rows());
+        
         List<Mat> sidebarEntries = getEntriesForSceneSidebar(illustrations, matches, actionOptions, matchList);
+        log.debug("[SIDEBAR] Number of sidebar entries: {}", sidebarEntries.size());
+        
         Mat sidebar = getSidebar(illustrations.getScene(), sidebarEntries, matches, matchList);
+        
+        if (sidebar == null) {
+            log.error("[SIDEBAR] getSidebar returned null");
+        } else if (sidebar.empty()) {
+            log.error("[SIDEBAR] getSidebar returned empty Mat");
+        } else {
+            log.debug("[SIDEBAR] Sidebar dimensions: {}x{}", sidebar.cols(), sidebar.rows());
+        }
+        
         illustrations.setSidebar(sidebar);
     }
 
@@ -155,11 +177,39 @@ public class AnalysisSidebar {
      * @param illustrations container with scene and sidebar; sets merged result
      */
     public void mergeSceneAndSidebar(Visualization illustrations) {
-        if (illustrations.getMatchesOnScene() == null) return;
+        log.debug("[SIDEBAR] mergeSceneAndSidebar called");
+        
+        if (illustrations.getMatchesOnScene() == null) {
+            log.warn("[SIDEBAR] MatchesOnScene is null, cannot merge");
+            return;
+        }
+        
+        if (illustrations.getSidebar() == null || illustrations.getSidebar().empty()) {
+            log.warn("[SIDEBAR] Sidebar is null or empty, using scene only");
+            // If no sidebar, just use the scene with matches
+            illustrations.setSceneWithMatchesAndSidebar(illustrations.getMatchesOnScene());
+            return;
+        }
+        
+        log.debug("[SIDEBAR] MatchesOnScene dimensions: {}x{}", 
+                illustrations.getMatchesOnScene().cols(), illustrations.getMatchesOnScene().rows());
+        log.debug("[SIDEBAR] Sidebar dimensions: {}x{}", 
+                illustrations.getSidebar().cols(), illustrations.getSidebar().rows());
+        
         Mat sceneAndSidebar = new MatBuilder()
                 .addHorizontalSubmats(illustrations.getMatchesOnScene(), illustrations.getSidebar())
                 .setSpaceBetween(spacesBetweenEntries)
                 .build();
+        
+        if (sceneAndSidebar == null) {
+            log.error("[SIDEBAR] MatBuilder returned null");
+        } else if (sceneAndSidebar.empty()) {
+            log.error("[SIDEBAR] MatBuilder returned empty Mat");
+        } else {
+            log.debug("[SIDEBAR] Merged Mat dimensions: {}x{}", 
+                    sceneAndSidebar.cols(), sceneAndSidebar.rows());
+        }
+        
         illustrations.setSceneWithMatchesAndSidebar(sceneAndSidebar);
     }
 
@@ -200,6 +250,11 @@ public class AnalysisSidebar {
      * @return completed sidebar Mat with all entries arranged
      */
     private Mat getSidebar(Mat scene, List<Mat> sidebarEntries, ActionResult matches, List<Match> matchList) {
+        if (sidebarEntries.isEmpty()) {
+            log.debug("[SIDEBAR] No sidebar entries to display");
+            return new Mat(); // Return empty Mat for no entries
+        }
+        
         initSidebar(scene, matches.size());
         List<Mat> sidebarColumns = new ArrayList<>();
         for (int i = 0; i < columns; i++) {

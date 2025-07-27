@@ -19,6 +19,7 @@ import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
 import io.github.jspinak.brobot.tools.logging.model.LogData;
 import io.github.jspinak.brobot.tools.ml.dataset.DatasetManager;
 import io.github.jspinak.brobot.tools.testing.mock.time.TimeProvider;
+import io.github.jspinak.brobot.logging.unified.BrobotLogger;
 import io.github.jspinak.brobot.util.image.capture.ScreenshotCapture;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -78,6 +79,7 @@ public class ActionExecution {
     private final ScreenshotCapture captureScreenshot;
     private final ExecutionSession automationSession;
     private final ExecutionController executionController;
+    private final BrobotLogger brobotLogger;
 
     /**
      * Constructs an ActionExecution instance with all required dependencies.
@@ -102,7 +104,8 @@ public class ActionExecution {
                            ActionLifecycleManagement actionLifecycleManagement, DatasetManager datasetManager,
                            ActionSuccessCriteria success, ActionResultFactory matchesInitializer, ActionLogger actionLogger,
                            ScreenshotCapture captureScreenshot, ExecutionSession automationSession,
-                           @Autowired(required = false) ExecutionController executionController) {
+                           @Autowired(required = false) ExecutionController executionController,
+                           BrobotLogger brobotLogger) {
         this.time = time;
         this.illustrateScreenshot = illustrateScreenshot;
         this.selectRegions = selectRegions;
@@ -114,6 +117,7 @@ public class ActionExecution {
         this.captureScreenshot = captureScreenshot;
         this.automationSession = automationSession;
         this.executionController = executionController;
+        this.brobotLogger = brobotLogger;
     }
 
     /**
@@ -248,6 +252,9 @@ public class ActionExecution {
             // Check pause point before starting
             checkPausePointSafely();
             
+            // Handle before action logging
+            handleBeforeActionLogging(actionConfig, objectCollections);
+            
             time.wait(actionConfig.getPauseBeforeBegin());
             
             while (actionLifecycleManagement.isMoreSequencesAllowed(matches)) {
@@ -259,10 +266,17 @@ public class ActionExecution {
             }
             
             success.set(actionConfig, matches);
+            
+            // Handle automatic logging based on ActionConfig logging options
+            handleAutomaticLogging(actionConfig, matches, objectCollections);
+            
             illustrateScreenshot.illustrateWhenAllowed(matches,
                     selectRegions.getRegionsForAllImages(actionConfig, objectCollections),
                     actionConfig, objectCollections);
             time.wait(actionConfig.getPauseAfterEnd());
+            
+            // Handle after action logging
+            handleAfterActionLogging(actionConfig, matches, objectCollections);
             
         } catch (ExecutionStoppedException e) {
             log.info("Action execution stopped: {}", actionDescription);
@@ -308,6 +322,167 @@ public class ActionExecution {
                 Thread.currentThread().interrupt();
                 throw new ExecutionStoppedException("Action execution interrupted", e);
             }
+        }
+    }
+
+    /**
+     * Handles logging before action execution begins.
+     * 
+     * @param actionConfig The action configuration containing logging options
+     * @param objectCollections The object collections involved in the action
+     */
+    private void handleBeforeActionLogging(ActionConfig actionConfig, ObjectCollection... objectCollections) {
+        if (actionConfig.getLoggingOptions() == null || 
+            !actionConfig.getLoggingOptions().isLogBeforeAction() ||
+            actionConfig.getLoggingOptions().getBeforeActionMessage() == null) {
+            return;
+        }
+        
+        String message = formatLogMessage(actionConfig.getLoggingOptions().getBeforeActionMessage(), 
+                                        null, objectCollections);
+        logMessage(message, actionConfig.getLoggingOptions().getBeforeActionLevel(), 
+                  actionConfig, null, objectCollections);
+    }
+    
+    /**
+     * Handles logging after action execution completes.
+     * 
+     * @param actionConfig The action configuration containing logging options
+     * @param actionResult The result of the action execution
+     * @param objectCollections The object collections involved in the action
+     */
+    private void handleAfterActionLogging(ActionConfig actionConfig, ActionResult actionResult,
+                                         ObjectCollection... objectCollections) {
+        if (actionConfig.getLoggingOptions() == null || 
+            !actionConfig.getLoggingOptions().isLogAfterAction() ||
+            actionConfig.getLoggingOptions().getAfterActionMessage() == null) {
+            return;
+        }
+        
+        String message = formatLogMessage(actionConfig.getLoggingOptions().getAfterActionMessage(), 
+                                        actionResult, objectCollections);
+        logMessage(message, actionConfig.getLoggingOptions().getAfterActionLevel(), 
+                  actionConfig, actionResult, objectCollections);
+    }
+
+    /**
+     * Handles automatic logging based on ActionConfig logging options.
+     * <p>
+     * This method checks the logging configuration and logs success or failure
+     * messages automatically, reducing boilerplate in application code.
+     * </p>
+     * 
+     * @param actionConfig The action configuration containing logging options
+     * @param actionResult The result of the action execution
+     * @param objectCollections The object collections involved in the action
+     */
+    private void handleAutomaticLogging(ActionConfig actionConfig, ActionResult actionResult, 
+                                       ObjectCollection... objectCollections) {
+        if (actionConfig.getLoggingOptions() == null) {
+            return; // No logging configured
+        }
+        
+        ActionConfig.LoggingOptions loggingOptions = actionConfig.getLoggingOptions();
+        
+        if (actionResult.isSuccess() && loggingOptions.isLogOnSuccess() && 
+            loggingOptions.getSuccessMessage() != null) {
+            // Log success message
+            String message = formatLogMessage(loggingOptions.getSuccessMessage(), 
+                                            actionResult, objectCollections);
+            logMessage(message, loggingOptions.getSuccessLevel(), actionConfig, 
+                      actionResult, objectCollections);
+        } else if (!actionResult.isSuccess() && loggingOptions.isLogOnFailure() && 
+                   loggingOptions.getFailureMessage() != null) {
+            // Log failure message
+            String message = formatLogMessage(loggingOptions.getFailureMessage(), 
+                                            actionResult, objectCollections);
+            logMessage(message, loggingOptions.getFailureLevel(), actionConfig, 
+                      actionResult, objectCollections);
+        }
+    }
+    
+    /**
+     * Formats a log message with placeholders replaced by actual values.
+     * Supports placeholders like {matchCount}, {duration}, {target}, etc.
+     */
+    private String formatLogMessage(String template, ActionResult actionResult, 
+                                   ObjectCollection... objectCollections) {
+        String message = template;
+        
+        // Replace action result placeholders if result is available
+        if (actionResult != null) {
+            message = message.replace("{matchCount}", String.valueOf(actionResult.getMatchList().size()));
+            if (actionResult.getDuration() != null) {
+                message = message.replace("{duration}", String.valueOf(actionResult.getDuration().toMillis()));
+            }
+            message = message.replace("{success}", String.valueOf(actionResult.isSuccess()));
+        }
+        
+        // Add target name if available
+        if (objectCollections.length > 0 && !objectCollections[0].getStateImages().isEmpty()) {
+            String targetName = objectCollections[0].getStateImages().get(0).getName();
+            message = message.replace("{target}", targetName);
+        }
+        
+        // Add action type
+        message = message.replace("{action}", getActionType(template));
+        
+        return message;
+    }
+    
+    /**
+     * Extracts action type from the class name or template.
+     */
+    private String getActionType(String template) {
+        // This is a placeholder - in practice, you'd extract from the ActionConfig class name
+        return "action";
+    }
+    
+    /**
+     * Logs a message through the unified logging system.
+     */
+    private void logMessage(String message, io.github.jspinak.brobot.tools.logging.model.LogEventType logType,
+                           ActionConfig actionConfig, ActionResult actionResult, 
+                           ObjectCollection... objectCollections) {
+        // Determine the primary target for logging
+        String targetName = "unknown";
+        if (objectCollections.length > 0 && !objectCollections[0].getStateImages().isEmpty()) {
+            targetName = objectCollections[0].getStateImages().get(0).getName();
+        }
+        
+        // Build log entry
+        var logBuilder = brobotLogger.log()
+            .type(mapLogEventType(logType))
+            .action(actionConfig.getClass().getSimpleName().replace("Options", ""))
+            .target(targetName)
+            .observation(message);
+            
+        // Add result-specific data if available
+        if (actionResult != null) {
+            logBuilder.success(actionResult.isSuccess());
+            if (actionResult.getDuration() != null) {
+                logBuilder.duration(actionResult.getDuration().toMillis());
+            }
+            logBuilder.metadata("matchCount", actionResult.getMatchList().size());
+        }
+        
+        logBuilder.log();
+    }
+    
+    /**
+     * Maps LogEventType to unified LogEvent.Type
+     */
+    private io.github.jspinak.brobot.logging.unified.LogEvent.Type mapLogEventType(
+            io.github.jspinak.brobot.tools.logging.model.LogEventType logEventType) {
+        switch (logEventType) {
+            case ACTION:
+                return io.github.jspinak.brobot.logging.unified.LogEvent.Type.ACTION;
+            case ERROR:
+                return io.github.jspinak.brobot.logging.unified.LogEvent.Type.ERROR;
+            case TRANSITION:
+                return io.github.jspinak.brobot.logging.unified.LogEvent.Type.TRANSITION;
+            default:
+                return io.github.jspinak.brobot.logging.unified.LogEvent.Type.OBSERVATION;
         }
     }
 
