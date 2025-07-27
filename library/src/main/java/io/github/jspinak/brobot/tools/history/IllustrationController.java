@@ -237,14 +237,13 @@ public class IllustrationController {
      */
     public boolean illustrateWhenAllowed(ActionResult matches, List<Region> searchRegions, ActionOptions actionOptions,
                                          ObjectCollection... objectCollections) {
+        log.debug("[ILLUSTRATION] illustrateWhenAllowed called for action: {}", actionOptions.getAction());
         if (isVerbose()) {
-            log.debug("[ILLUSTRATION] illustrateWhenAllowed called for action: {}", actionOptions.getAction());
+            log.debug("[ILLUSTRATION] Verbose mode - additional details will be shown");
         }
         
         if (!okToIllustrate(actionOptions, objectCollections)) {
-            if (isVerbose()) {
-                log.debug("[ILLUSTRATION] Illustration not allowed, skipping");
-            }
+            log.debug("[ILLUSTRATION] Illustration not allowed, skipping");
             return false;
         }
         
@@ -297,7 +296,14 @@ public class IllustrationController {
      */
     public boolean illustrateWhenAllowed(ActionResult matches, List<Region> searchRegions, ActionConfig actionConfig,
                                          ObjectCollection... objectCollections) {
-        if (!okToIllustrate(actionConfig, objectCollections)) return false;
+        log.debug("[ILLUSTRATION] illustrateWhenAllowed called for ActionConfig: {}", actionConfig.getClass().getSimpleName());
+        
+        if (!okToIllustrate(actionConfig, objectCollections)) {
+            log.debug("[ILLUSTRATION] Illustration not allowed, skipping");
+            return false;
+        }
+        
+        log.debug("[ILLUSTRATION] Illustration allowed, proceeding to create illustration");
         
         // Update last action tracking
         ActionOptions.Action mappedAction = getActionType(actionConfig);
@@ -311,7 +317,15 @@ public class IllustrationController {
         
         // For now, convert to ActionOptions for the visualization
         ActionOptions actionOptions = convertToActionOptions(actionConfig);
-        illustrationManager.draw(matches, searchRegions, actionOptions);
+        
+        log.debug("[ILLUSTRATION] Calling illustrationManager.draw()");
+        try {
+            illustrationManager.draw(matches, searchRegions, actionOptions);
+            log.debug("[ILLUSTRATION] Illustration completed successfully");
+        } catch (Exception e) {
+            log.error("[ILLUSTRATION] Error creating illustration: {}", e.getMessage(), e);
+        }
+        
         return true;
     }
 
@@ -352,22 +366,46 @@ public class IllustrationController {
         }
         
         ActionOptions.Action action = getActionType(actionConfig);
+        if (isVerbose()) {
+            log.debug("  Mapped action type: {}", action);
+        }
+        
         if (action == null || !actionPermissions.containsKey(action)) {
             ConsoleReporter.println(actionConfig.getClass().getSimpleName() + " not available to illustrate in BrobotSettings.");
+            if (isVerbose()) {
+                log.debug("  Result: NO - action {} not available to illustrate", action);
+            }
             return false;
         }
         if (!actionPermissions.get(action)) {
             ConsoleReporter.println(action + " not set to illustrate in BrobotSettings.");
+            if (isVerbose()) {
+                log.debug("  Result: NO - action {} not permitted in settings", action);
+                log.debug("  Permission value: {}", actionPermissions.get(action));
+                log.debug("  FrameworkSettings.drawFind: {}", FrameworkSettings.drawFind);
+            }
             return false;
         }
-        if (FrameworkSettings.drawRepeatedActions) return true;
+        if (FrameworkSettings.drawRepeatedActions) {
+            if (isVerbose()) {
+                log.debug("  Result: YES - drawRepeatedActions is true");
+            }
+            return true;
+        }
         
         // Check for repeated actions
         ActionOptions.Find currentFind = actionConfig instanceof PatternFindOptions ? 
             mapFindStrategy((PatternFindOptions) actionConfig) : ActionOptions.Find.UNIVERSAL;
-        return lastFind != currentFind ||
-                lastAction != action ||
-                !sameCollections(Arrays.asList(objectCollections));
+        boolean isRepeat = lastFind == currentFind &&
+                lastAction == action &&
+                sameCollections(Arrays.asList(objectCollections));
+        
+        if (isVerbose()) {
+            log.debug("  Is repeat action: {}", isRepeat);
+            log.debug("  Result: {} - illustration", !isRepeat ? "YES" : "NO");
+        }
+        
+        return !isRepeat;
     }
     
     /**

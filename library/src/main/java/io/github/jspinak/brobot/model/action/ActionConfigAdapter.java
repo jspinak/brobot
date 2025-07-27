@@ -3,7 +3,7 @@ package io.github.jspinak.brobot.model.action;
 import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.internal.options.ActionOptions;
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
-import io.github.jspinak.brobot.action.basic.find.color.ColorFindOptions;
+// import io.github.jspinak.brobot.action.basic.find.color.ColorFindOptions;
 import io.github.jspinak.brobot.action.basic.click.ClickOptions;
 import io.github.jspinak.brobot.action.basic.type.TypeOptions;
 import io.github.jspinak.brobot.action.basic.vanish.VanishOptions;
@@ -92,8 +92,7 @@ public class ActionConfigAdapter {
      * @return The corresponding Action enum value
      */
     public Action getActionType(ActionConfig actionConfig) {
-        if (actionConfig instanceof PatternFindOptions || 
-            actionConfig instanceof ColorFindOptions) {
+        if (actionConfig instanceof PatternFindOptions) {
             return Action.FIND;
         }
         if (actionConfig instanceof ClickOptions) {
@@ -154,13 +153,14 @@ public class ActionConfigAdapter {
                     return Find.UNIVERSAL;
             }
         }
-        if (actionConfig instanceof ColorFindOptions) {
-            ColorFindOptions colorOptions = (ColorFindOptions) actionConfig;
-            if (colorOptions.getColor() == ColorFindOptions.Color.CLASSIFICATION) {
-                return Find.COLOR;
-            }
-            return Find.HISTOGRAM;
-        }
+        // ColorFindOptions support commented out - class not available
+        // if (actionConfig instanceof ColorFindOptions) {
+        //     ColorFindOptions colorOptions = (ColorFindOptions) actionConfig;
+        //     if (colorOptions.getColor() == ColorFindOptions.Color.CLASSIFICATION) {
+        //         return Find.COLOR;
+        //     }
+        //     return Find.HISTOGRAM;
+        // }
         
         return Find.UNIVERSAL;
     }
@@ -196,8 +196,9 @@ public class ActionConfigAdapter {
      * @return true if this is a find operation
      */
     public boolean isFindOperation(ActionConfig actionConfig) {
-        return actionConfig instanceof PatternFindOptions || 
-               actionConfig instanceof ColorFindOptions;
+        return actionConfig instanceof PatternFindOptions;
+        // ColorFindOptions support commented out - class not available
+        // || actionConfig instanceof ColorFindOptions;
     }
 
     /**
