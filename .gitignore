@@ -2,6 +2,12 @@
 /**/.idea/*
 /**/shelf/
 
+# Large media files (moved to external hosting)
+*.mp4
+*.mov
+*.avi
+*.mkv
+
 # Production
 .gradle
 /library/.gradle
