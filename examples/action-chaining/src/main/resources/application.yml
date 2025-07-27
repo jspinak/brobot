@@ -1,0 +1,75 @@
+spring:
+  application:
+    name: action-chaining-example
+
+# Brobot Configuration
+brobot:
+  # Core settings
+  headless: false
+  
+  # Timing settings
+  action:
+    move:
+      duration: 0.5
+    delay:
+      before-mouse-down: 0.1
+      after-mouse-up: 0.1
+  
+  # Find operation settings
+  find:
+    similarity: 0.85
+    max-search-time: 5
+  
+  # Logging configuration
+  logging:
+    # Enable unified logging
+    enabled: true
+    # Console output settings
+    console:
+      enabled: true
+      colored: true
+      include-timestamp: true
+      format: "DETAILED"
+    # History tracking
+    history:
+      enabled: true
+      max-entries: 1000
+    # Illustration settings
+    illustration:
+      enabled: true
+      auto-open: false
+      save-path: "build/illustrations"
+  
+  # Action chain specific settings
+  chains:
+    # Default pause between chained actions
+    default-pause: 0.2
+    # Maximum retry attempts for chains
+    max-retries: 3
+    # Retry delay in seconds
+    retry-delay: 1.0
+
+# Application-specific settings
+action-chaining:
+  # Demo settings
+  demos:
+    # Enable/disable specific demos
+    basic: true
+    advanced: true
+    conditional: true
+  
+  # Mock mode for demonstrations
+  mock-mode: true
+  
+  # Image resources path
+  images-path: "images/"
+
+# Logging levels
+logging:
+  level:
+    com.example.chaining: INFO
+    io.github.jspinak.brobot: INFO
+    # Show detailed action logging
+    io.github.jspinak.brobot.action: DEBUG
+    # Show chain execution details
+    io.github.jspinak.brobot.action.chain: DEBUG

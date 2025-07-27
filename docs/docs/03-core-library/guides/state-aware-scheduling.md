@@ -88,7 +88,7 @@ StateCheckConfiguration config = new StateCheckConfiguration.Builder()
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
-| `requiredStates` | List<String> | Empty | States that must be active before task execution |
+| `requiredStates` | `List<String>` | Empty | States that must be active before task execution |
 | `rebuildOnMismatch` | boolean | true | Whether to rebuild states if requirements not met |
 | `skipIfStatesMissing` | boolean | false | Skip task execution if states cannot be validated |
 

@@ -365,9 +365,9 @@ public class MockTestConfig {
 |----------|------|-------------|
 | `scenarioName` | String | Unique identifier for the scenario |
 | `description` | String | Human-readable description |
-| `stateAppearanceProbabilities` | Map<String, Double> | Per-state appearance rates (0.0-1.0) |
-| `actionFailurePatterns` | Map<Action, FailurePattern> | Failure patterns by action type |
-| `temporalConditions` | Map<String, TemporalConditions> | Time-based conditions |
+| `stateAppearanceProbabilities` | `Map<String, Double>` | Per-state appearance rates (0.0-1.0) |
+| `actionFailurePatterns` | `Map<Action, FailurePattern>` | Failure patterns by action type |
+| `temporalConditions` | `Map<String, TemporalConditions>` | Time-based conditions |
 | `maxDuration` | Duration | Maximum scenario runtime |
 | `cascadingFailures` | boolean | Enable failure cascading |
 
@@ -380,7 +380,7 @@ public class MockTestConfig {
 | `maxConsecutiveFailures` | int | Max failures before forced success |
 | `cascading` | boolean | Whether failures increase probability |
 | `recoveryDelay` | Duration | Recovery time after failures |
-| `exceptionType` | Class<Exception> | Type of exception to throw |
+| `exceptionType` | `Class<Exception>` | Type of exception to throw |
 
 ### Verification Configuration
 

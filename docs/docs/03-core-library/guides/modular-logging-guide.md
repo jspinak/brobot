@@ -265,7 +265,7 @@ Best Match Score: 0.987
 1. **Check configuration hierarchy**:
    - Command line args override
    - Environment variables override
-   - application-{profile}.yml overrides
+   - `application-{profile}.yml` overrides
    - application.yml defaults
 
 2. **Verify active profile**:
