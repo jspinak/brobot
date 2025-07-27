@@ -395,9 +395,9 @@ IllustrationConfig debugConfig = IllustrationConfig.builder()
 | Property | Type | Default | Description |
 |----------|------|---------|-------------|
 | `globalEnabled` | boolean | true | Master switch for all illustrations |
-| `actionEnabledMap` | Map<Action, Boolean> | all true | Per-action enablement |
-| `contextFilters` | Map<String, Predicate> | empty | Context-based filters |
-| `samplingRates` | Map<Action, Double> | all 1.0 | Action sampling rates |
+| `actionEnabledMap` | `Map<Action, Boolean>` | all true | Per-action enablement |
+| `contextFilters` | `Map<String, Predicate>` | empty | Context-based filters |
+| `samplingRates` | `Map<Action, Double>` | all 1.0 | Action sampling rates |
 | `qualityThreshold` | double | 0.0 | Minimum quality for illustration |
 | `maxIllustrationsPerMinute` | int | MAX_VALUE | Rate limiting |
 | `adaptiveSampling` | boolean | false | Enable adaptive sampling |

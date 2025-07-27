@@ -1,0 +1,239 @@
+spring:
+  application:
+    name: visual-feedback-example
+
+# Brobot Configuration
+brobot:
+  # Core settings
+  headless: false
+  
+  # Timing settings
+  action:
+    move:
+      duration: 0.5
+    delay:
+      before-mouse-down: 0.1
+      after-mouse-up: 0.1
+  
+  # Find operation settings
+  find:
+    similarity: 0.85
+    max-search-time: 5
+  
+  # Logging configuration
+  logging:
+    # Enable unified logging
+    enabled: true
+    # Console output settings
+    console:
+      enabled: true
+      colored: true
+      include-timestamp: true
+      format: "DETAILED"
+    # History tracking
+    history:
+      enabled: true
+      max-entries: 2000
+    # Illustration settings
+    illustration:
+      enabled: true
+      auto-open: false
+      save-path: "build/illustrations"
+      format: "PNG"
+      quality: 95
+      annotations:
+        enabled: true
+        highlight-matches: true
+        show-confidence: true
+        show-coordinates: true
+        color-coding: true
+  
+  # Analysis and reporting
+  analysis:
+    enabled: true
+    capture-screenshots: true
+    track-performance: true
+    generate-reports: true
+    report-formats: ["HTML", "JSON", "PDF"]
+    detailed-analysis: true
+    pattern-analysis: true
+    failure-analysis: true
+    
+  # Performance monitoring
+  performance:
+    monitoring:
+      enabled: true
+      real-time-alerts: true
+      track-memory: true
+      track-cpu: true
+      track-execution-time: true
+      sampling-interval: 100ms
+    thresholds:
+      slow-action: 5s
+      memory-usage: 150MB
+      cpu-usage: 80%
+      failure-rate: 10%
+    
+  # Visual feedback settings
+  visual-feedback:
+    # Screenshot capture
+    screenshots:
+      enabled: true
+      before-action: true
+      after-action: true
+      on-failure: true
+      comparison: true
+      quality: 90
+    
+    # Match highlighting
+    highlighting:
+      enabled: true
+      all-matches: true
+      confidence-scores: true
+      coordinates: true
+      color-coding:
+        high-confidence: "#00FF00"  # Green
+        medium-confidence: "#FFAA00"  # Orange
+        low-confidence: "#FF0000"   # Red
+    
+    # Timeline generation
+    timeline:
+      enabled: true
+      interactive: true
+      step-numbering: true
+      annotations: true
+      performance-markers: true
+    
+    # Heatmap generation
+    heatmaps:
+      enabled: true
+      search-patterns: true
+      failure-locations: true
+      performance-hotspots: true
+
+# Application-specific settings
+visual-feedback:
+  # Demo settings
+  demos:
+    illustration: true
+    analysis: true
+    performance: true
+    reporting: true
+  
+  # Mock mode for demonstrations
+  mock-mode: true
+  
+  # Report generation
+  reports:
+    auto-generate: true
+    formats: ["HTML", "JSON"]
+    include-screenshots: true
+    include-timeline: true
+    include-analytics: true
+    output-path: "reports/"
+    
+  # Analytics settings
+  analytics:
+    enabled: true
+    kpi-tracking: true
+    trend-analysis: true
+    forecasting: true
+    business-intelligence: true
+    real-time-dashboard: true
+    
+  # Performance benchmarking
+  benchmarking:
+    enabled: true
+    iterations: 50
+    warmup-runs: 10
+    detailed-metrics: true
+    algorithm-comparison: true
+    resolution-scaling: true
+    
+  # Image resources path
+  images-path: "images/"
+  
+  # Template paths
+  templates:
+    executive-summary: "templates/executive-summary.html"
+    technical-analysis: "templates/technical-analysis.html"
+    compliance-report: "templates/compliance-audit.html"
+    dashboard: "templates/dashboard.html"
+
+# Logging levels
+logging:
+  level:
+    com.example.visual: INFO
+    io.github.jspinak.brobot: INFO
+    # Show detailed action logging
+    io.github.jspinak.brobot.action: DEBUG
+    # Show illustration and analysis details
+    io.github.jspinak.brobot.tools.history: DEBUG
+    io.github.jspinak.brobot.tools.analysis: DEBUG
+    # Performance monitoring
+    io.github.jspinak.brobot.performance: DEBUG
+
+# Dashboard configuration
+dashboard:
+  refresh-interval: 5s
+  real-time-updates: true
+  auto-refresh: true
+  widgets:
+    - type: "success-rate"
+      title: "Success Rate"
+      position: [0, 0]
+      size: [2, 1]
+    - type: "execution-time"
+      title: "Avg Execution Time"
+      position: [2, 0]
+      size: [2, 1]
+    - type: "performance-chart"
+      title: "Performance Trend"
+      position: [0, 1]
+      size: [4, 2]
+    - type: "error-distribution"
+      title: "Error Distribution"
+      position: [4, 0]
+      size: [2, 2]
+
+# Alerting configuration
+alerts:
+  enabled: true
+  channels:
+    - type: "console"
+      enabled: true
+    - type: "email"
+      enabled: false
+      recipients: []
+    - type: "webhook"
+      enabled: false
+      url: ""
+  rules:
+    - name: "High Failure Rate"
+      condition: "failure_rate > 0.1"
+      severity: "warning"
+      message: "Action failure rate exceeded 10%"
+    - name: "Slow Performance"
+      condition: "avg_execution_time > 5000"
+      severity: "warning"
+      message: "Average execution time exceeded 5 seconds"
+    - name: "Memory Usage"
+      condition: "memory_usage > 200"
+      severity: "critical"
+      message: "Memory usage exceeded 200MB"
+
+# Export settings
+export:
+  formats:
+    csv:
+      enabled: true
+      delimiter: ","
+      include-headers: true
+    json:
+      enabled: true
+      pretty-print: true
+      include-metadata: true
+    xlsx:
+      enabled: true
+      multiple-sheets: true
+      charts: true

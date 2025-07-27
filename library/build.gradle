@@ -65,7 +65,8 @@ test {
     // JVM settings for OpenCV/JavaCV on Linux
     jvmArgs '-Djava.library.path=/usr/lib:/usr/local/lib'
     jvmArgs '-Dorg.bytedeco.javacpp.logger.debug=true'
-    systemProperty 'java.awt.headless', 'true'
+    // Don't force headless mode - let the ExecutionEnvironment handle this
+    // systemProperty 'java.awt.headless', 'true'
     
     // Increase memory for OpenCV operations
     maxHeapSize = '2g'

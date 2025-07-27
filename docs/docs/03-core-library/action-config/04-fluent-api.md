@@ -417,6 +417,27 @@ ActionConfig debugChain = find(element)
 
 ### Add Logging
 
+#### Automatic Logging (Recommended)
+
+Use the built-in logging capabilities for cleaner code:
+
+```java
+ActionConfig searchWithLogging = find(searchButton)
+    .withBeforeActionLog("Searching for search button...")
+    .withSuccessLog("Found search button at {target}")
+    .withFailureLog("Search button not found - check if page loaded")
+    .withAfterActionLog("Search completed in {duration}ms")
+    .then(click())
+    .withBeforeActionLog("Clicking search button...")
+    .withSuccessLog("Search initiated successfully");
+```
+
+See the [Automatic Action Logging Guide](../guides/automatic-action-logging.md) for more details.
+
+#### Manual Logging
+
+For custom logging logic, use success criteria:
+
 ```java
 public class LoggingActions {
     public ActionConfig find(StateImage image) {
