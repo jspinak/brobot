@@ -1,0 +1,8 @@
+rootProject.name = 'claude-automator'
+
+// Use local Brobot library for development
+includeBuild('../../') {
+    dependencySubstitution {
+        substitute module('io.github.jspinak:brobot') using project(':library')
+    }
+}
