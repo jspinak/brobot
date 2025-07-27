@@ -93,13 +93,14 @@ export default function Home() {
                 <h3 className={styles.videoTitle}>Demo: Creating a Labeled Image Dataset</h3>
                 <div className={styles.videoWrapper}>
                   <div style={{padding:"56.25% 0 0 0", position:"relative"}}>
-                    <video 
-                      controls
-                      style={{position:"absolute", top:0, left:0, width:"100%", height:"100%"}}
-                    >
-                      <source src="/img/islandsLive.mp4" type="video/mp4" />
-                      Your browser does not support the video tag.
-                    </video>
+                    <iframe 
+                      src="https://player.vimeo.com/video/1104905215?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479" 
+                      frameBorder="0" 
+                      allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share" 
+                      referrerPolicy="strict-origin-when-cross-origin" 
+                      style={{position:"absolute", top:0, left:0, width:"100%", height:"100%"}} 
+                      title="Automation Demo - Creating a Labeled Image Dataset"
+                    />
                   </div>
                 </div>
               </div>
