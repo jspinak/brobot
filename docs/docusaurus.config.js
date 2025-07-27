@@ -2,19 +2,18 @@
 // Note: type annotations allow type checking and IDEs autocompletion
 
 const {themes} = require('prism-react-renderer');
-const lightCodeTheme = themes.github;
-const darkCodeTheme = themes.dracula;
 
 // for KaTeX (Latex)
-const math = require('remark-math').default;
-const katex = require('rehype-katex').default;
+const math = require('remark-math');
+const katex = require('rehype-katex');
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
   title: 'Brobot',
-  tagline: 'Testable State-based Automation',
+  tagline: 'Intelligent Visual Automation',
   url: 'https://jspinak.github.io',
   baseUrl: '/brobot/',
+  trailingSlash: false,
   onBrokenLinks: 'warn', // Consider changing to 'throw' for production builds
   onBrokenMarkdownLinks: 'warn',
   favicon: 'img/brobot-happy.ico',
@@ -45,8 +44,7 @@ const config = {
           lastVersion: 'current',
           versions: {
             current: {
-              label: 'Next',
-              banner: 'unreleased',
+              label: 'Latest',
             },
           },
         },
@@ -140,10 +138,6 @@ const config = {
                 label: 'Stack Overflow',
                 href: 'https://stackoverflow.com/questions/tagged/brobot',
               },
-              {
-                label: 'Twitter',
-                href: 'https://twitter.com/brobotJosh',
-              },
             ],
           },
           {
@@ -168,11 +162,11 @@ const config = {
             ],
           },
         ],
-        copyright: `© ${new Date().getFullYear()} Joshua Spinak`,
+        copyright: `© ${new Date().getFullYear()} Joshua Spinak · Free & Open Source`,
       },
       prism: {
-        theme: lightCodeTheme,
-        darkTheme: darkCodeTheme,
+        theme: themes.github,
+        darkTheme: themes.dracula,
       },
     }),
 };

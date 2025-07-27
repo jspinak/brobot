@@ -4,11 +4,14 @@ import io.github.jspinak.brobot.action.Action;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
+import io.github.jspinak.brobot.action.basic.click.ClickOptions;
+import io.github.jspinak.brobot.action.basic.type.TypeOptions;
 import io.github.jspinak.brobot.logging.unified.BrobotLogger;
-import io.github.jspinak.brobot.model.element.basic.region.Region;
+import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.state.State;
 import io.github.jspinak.brobot.model.state.StateObject;
-import io.github.jspinak.brobot.model.state.StateObjectBuilder;
+import io.github.jspinak.brobot.model.state.StateImage;
+import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.tools.logging.enhanced.EnhancedActionLogger;
 import io.github.jspinak.brobot.tools.logging.gui.GuiAccessMonitor;
 import io.github.jspinak.brobot.tools.logging.visual.HighlightManager;
@@ -90,6 +93,9 @@ public class EnhancedLoggingDemo implements CommandLineRunner {
             // 6. State Transitions
             demonstrateStateTransitions();
             
+            // 7. Automatic Action Logging
+            demonstrateAutomaticActionLogging();
+            
             logger.observation("Enhanced Logging Demo completed successfully");
         }
     }
@@ -122,14 +128,14 @@ public class EnhancedLoggingDemo implements CommandLineRunner {
             .log();
             
         // Create mock state objects for demonstration
-        StateObject loginButton = new StateObjectBuilder()
-            .withName("login-button")
-            .withImage("images/login-button.png")
+        StateImage loginButton = new StateImage.Builder()
+            .setName("login-button")
+            .addPattern("images/login-button.png")
             .build();
             
-        StateObject submitButton = new StateObjectBuilder()
-            .withName("submit-button")
-            .withImage("images/submit-button.png")
+        StateImage submitButton = new StateImage.Builder()
+            .setName("submit-button")
+            .addPattern("images/submit-button.png")
             .build();
             
         // Simulate successful find
@@ -139,7 +145,7 @@ public class EnhancedLoggingDemo implements CommandLineRunner {
         ));
         
         actionLogger.logAction("FIND", 
-            new ObjectCollection.Builder().withStateObjects(loginButton).build(), 
+            new ObjectCollection.Builder().withImages(loginButton).build(), 
             successResult);
             
         // Simulate failed find
@@ -147,7 +153,7 @@ public class EnhancedLoggingDemo implements CommandLineRunner {
         ActionResult failedResult = createMockResult(false, 2003, List.of());
         
         actionLogger.logAction("FIND",
-            new ObjectCollection.Builder().withStateObjects(submitButton).build(),
+            new ObjectCollection.Builder().withImages(submitButton).build(),
             failedResult);
             
         // Simulate click action
@@ -155,7 +161,7 @@ public class EnhancedLoggingDemo implements CommandLineRunner {
         ActionResult clickResult = createMockResult(true, 156, List.of());
         
         actionLogger.logAction("CLICK",
-            new ObjectCollection.Builder().withStateObjects(loginButton).build(),
+            new ObjectCollection.Builder().withImages(loginButton).build(),
             clickResult);
     }
     
@@ -202,8 +208,8 @@ public class EnhancedLoggingDemo implements CommandLineRunner {
             .console("\n=== Performance Warnings Demo ===\n")
             .log();
             
-        StateObject slowElement = new StateObjectBuilder()
-            .withName("slow-loading-element")
+        StateImage slowElement = new StateImage.Builder()
+            .setName("slow-loading-element")
             .build();
             
         // Simulate slow action that triggers warning
@@ -211,7 +217,7 @@ public class EnhancedLoggingDemo implements CommandLineRunner {
         ActionResult slowResult = createMockResult(true, 1500, List.of());
         
         actionLogger.logAction("FIND",
-            new ObjectCollection.Builder().withStateObjects(slowElement).build(),
+            new ObjectCollection.Builder().withImages(slowElement).build(),
             slowResult);
             
         // Simulate very slow action that triggers error threshold
@@ -219,7 +225,7 @@ public class EnhancedLoggingDemo implements CommandLineRunner {
         ActionResult verySlowResult = createMockResult(false, 5500, List.of());
         
         actionLogger.logAction("FIND",
-            new ObjectCollection.Builder().withStateObjects(slowElement).build(),
+            new ObjectCollection.Builder().withImages(slowElement).build(),
             verySlowResult);
     }
     
@@ -232,15 +238,15 @@ public class EnhancedLoggingDemo implements CommandLineRunner {
             .console("\n=== Custom Visual Feedback Demo ===\n")
             .log();
             
-        StateObject importantButton = new StateObjectBuilder()
-            .withName("important-button")
+        StateImage importantButton = new StateImage.Builder()
+            .setName("important-button")
             .build();
             
         // Debug mode - everything visible
         logger.observation("Using debug visual feedback...");
         actionLogger.logActionWithVisuals(
             "FIND",
-            new ObjectCollection.Builder().withStateObjects(importantButton).build(),
+            new ObjectCollection.Builder().withImages(importantButton).build(),
             createMockResult(true, 150, List.of(createMockMatch(600, 400, 150, 50, 0.99))),
             VisualFeedbackOptions.debug()
         );
@@ -259,7 +265,7 @@ public class EnhancedLoggingDemo implements CommandLineRunner {
             
         actionLogger.logActionWithVisuals(
             "CLICK",
-            new ObjectCollection.Builder().withStateObjects(importantButton).build(),
+            new ObjectCollection.Builder().withImages(importantButton).build(),
             createMockResult(true, 100, List.of()),
             customOptions
         );
@@ -283,12 +289,119 @@ public class EnhancedLoggingDemo implements CommandLineRunner {
         actionLogger.logTransition("Dashboard", "Settings", false, 3000);
     }
     
+    /**
+     * Demonstrates the new automatic action logging capabilities.
+     * Shows how automatic logging reduces boilerplate while providing better observability.
+     */
+    private void demonstrateAutomaticActionLogging() {
+        logger.log()
+            .observation("=== Automatic Action Logging Demo ===")
+            .console("\n=== Automatic Action Logging Demo ===\n")
+            .log();
+            
+        StateImage searchBox = new StateImage.Builder()
+            .setName("search-box")
+            .addPattern("images/search-box.png")
+            .build();
+            
+        StateImage searchButton = new StateImage.Builder()
+            .setName("search-button")
+            .addPattern("images/search-button.png")
+            .build();
+            
+        // 1. Simple automatic logging
+        logger.observation("1. Simple automatic logging:");
+        PatternFindOptions simpleFind = new PatternFindOptions.Builder()
+            .withBeforeActionLog("Looking for search box...")
+            .withSuccessLog("Search box found")
+            .withFailureLog("Search box not found")
+            .withAfterActionLog("Search completed")
+            .build();
+            
+        // Simulate action (in real usage, would use action.perform())
+        actionLogger.logAction("FIND",
+            new ObjectCollection.Builder().withImages(searchBox).build(),
+            createMockResult(true, 125, List.of(createMockMatch(300, 200, 200, 30, 0.95))));
+            
+        // 2. Logging with placeholders
+        logger.observation("\n2. Logging with dynamic placeholders:");
+        ClickOptions clickWithPlaceholders = new ClickOptions.Builder()
+            .withBeforeActionLog("Clicking {target}...")
+            .withSuccessLog("Successfully clicked {target} at location ({matchCount} matches)")
+            .withFailureLog("Failed to click {target} after {duration}ms")
+            .withAfterActionLog("Click operation took {duration}ms")
+            .build();
+            
+        // Simulate action with placeholders
+        actionLogger.logAction("CLICK",
+            new ObjectCollection.Builder().withImages(searchButton).build(),
+            createMockResult(true, 85, List.of(createMockMatch(550, 200, 80, 30, 0.99))));
+            
+        // 3. Advanced logging configuration
+        logger.observation("\n3. Advanced logging configuration:");
+        TypeOptions advancedType = new TypeOptions.Builder()
+            .withLogging(logging -> logging
+                .beforeActionMessage("Starting to type search query...")
+                .successMessage("Query typed successfully in {duration}ms")
+                .failureMessage("Failed to type query - check if field is focused")
+                .afterActionMessage("Typing completed")
+                .logBeforeAction(true)
+                .logOnSuccess(true)
+                .logOnFailure(true)
+                .logAfterAction(true))
+            .build();
+            
+        // Simulate typing action
+        actionLogger.logAction("TYPE",
+            new ObjectCollection.Builder().withStrings("example search query").build(),
+            createMockResult(true, 750, List.of()));
+            
+        // 4. Conditional logging based on environment
+        logger.observation("\n4. Environment-specific logging:");
+        boolean isDebugMode = log.isDebugEnabled();
+        
+        PatternFindOptions conditionalFind = new PatternFindOptions.Builder()
+            .withLogging(logging -> {
+                logging.successMessage("Element found")
+                      .failureMessage("Element not found");
+                
+                if (isDebugMode) {
+                    logging.beforeActionMessage("DEBUG: Starting search with similarity 0.9")
+                          .afterActionMessage("DEBUG: Search completed, {matchCount} matches")
+                          .logBeforeAction(true)
+                          .logAfterAction(true);
+                }
+                
+                return logging;
+            })
+            .build();
+            
+        // 5. Chained actions with logging
+        logger.observation("\n5. Chained actions with automatic logging:");
+        logger.observation("This would execute: find -> click -> type sequence");
+        logger.observation("Each action logs its progress automatically");
+        
+        // In real usage:
+        // PatternFindOptions chainedFind = new PatternFindOptions.Builder()
+        //     .withBeforeActionLog("Finding search field...")
+        //     .withSuccessLog("Search field located")
+        //     .then(new ClickOptions.Builder()
+        //         .withBeforeActionLog("Clicking to focus...")
+        //         .withSuccessLog("Field focused")
+        //         .build())
+        //     .then(new TypeOptions.Builder()
+        //         .withBeforeActionLog("Typing search query...")
+        //         .withSuccessLog("Query entered")
+        //         .build())
+        //     .build();
+    }
+    
     // Helper methods for creating mock objects
     
-    private ActionResult createMockResult(boolean success, long duration, List<Match> matches) {
+    private ActionResult createMockResult(boolean success, long durationMs, List<Match> matches) {
         ActionResult result = new ActionResult();
         result.setSuccess(success);
-        result.setDuration(duration);
+        result.setDuration(java.time.Duration.ofMillis(durationMs));
         result.setMatchList(matches);
         result.setActionDescription(success ? "Action completed successfully" : "Action failed");
         return result;
