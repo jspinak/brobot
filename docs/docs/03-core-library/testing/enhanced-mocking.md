@@ -66,11 +66,12 @@ public void testRetryBehaviorWithCascadingFailures() {
     
     // Test retry logic
     for (int attempt = 1; attempt <= 5; attempt++) {
-        ActionResult result = actions.find(targetElement);
+        // Find with pause before next retry
+        PatternFindOptions findWithPause = new PatternFindOptions.Builder()
+            .setPauseAfterEnd(0.5)  // 500ms pause if not found
+            .build();
+        ActionResult result = actions.perform(findWithPause, targetElement);
         if (result.isSuccess()) break;
-        
-        // Verify retry delays
-        Thread.sleep(500); // Your retry delay
     }
 }
 ```

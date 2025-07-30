@@ -62,14 +62,14 @@ Replace ActionOptions.Find with FindStrategy enum:
 
 ```java
 // Old
-ActionOptions.Find.FIRST → FindStrategy.FIRST
-ActionOptions.Find.ALL → FindStrategy.ALL
-ActionOptions.Find.BEST → FindStrategy.BEST
-ActionOptions.Find.EACH → FindStrategy.EACH
+ActionOptions.Find.FIRST → PatternFindOptions.Strategy.FIRST
+ActionOptions.Find.ALL → PatternFindOptions.Strategy.ALL
+ActionOptions.Find.BEST → PatternFindOptions.Strategy.BEST
+ActionOptions.Find.EACH → PatternFindOptions.Strategy.EACH
 
 // New
 PatternFindOptions options = new PatternFindOptions.Builder()
-    .setStrategy(FindStrategy.FIRST)
+    .setStrategy(PatternFindOptions.Strategy.FIRST)
     .build();
 ```
 
@@ -133,7 +133,7 @@ ActionOptions findOptions = new ActionOptions.Builder()
 New:
 ```java
 PatternFindOptions findOptions = new PatternFindOptions.Builder()
-    .setStrategy(FindStrategy.BEST)
+    .setStrategy(PatternFindOptions.Strategy.BEST)
     .setSimilarity(0.8)
     .build();
 ```

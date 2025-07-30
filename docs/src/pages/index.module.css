@@ -79,6 +79,14 @@
   transform: rotate(0.8deg);
 }
 
+.mobileText {
+  display: none;
+}
+
+.desktopText {
+  display: inline;
+}
+
 [data-theme='dark'] .aiBox {
   background-color: var(--ifm-color-emphasis-200);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
@@ -165,6 +173,14 @@
   
   .aiButtonText {
     display: inline-block;
+  }
+  
+  .mobileText {
+    display: inline;
+  }
+  
+  .desktopText {
+    display: none;
   }
 }
 
