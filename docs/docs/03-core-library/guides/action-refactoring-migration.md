@@ -206,8 +206,13 @@ action.perform(findAndClick, stateImage);
 ActionResult matches = action.find(targetImage);
 if (matches.isSuccess()) {
     for (Match match : matches.getMatchList()) {
-        action.perform(ActionType.HIGHLIGHT, match.getRegion());
-        Thread.sleep(500);
+        // Highlight with pause after
+        HighlightOptions highlight = new HighlightOptions.Builder()
+            .setPauseAfterEnd(0.5)  // 500ms pause after highlighting
+            .build();
+        action.perform(highlight, match.getRegion());
+        
+        // Then click
         action.perform(ActionType.CLICK, match.getRegion());
     }
 }

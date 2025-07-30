@@ -311,8 +311,8 @@ TextFindOptions findText = new TextFindOptions.Builder()
 ### Color Finding
 ```java
 ColorFindOptions findColor = new ColorFindOptions.Builder()
-    .setTargetColor(new Color(255, 0, 0))
-    .setColorTolerance(10)
+    .setColorStrategy(ColorFindOptions.Color.KMEANS)
+    .setKmeans(3)  // Find 3 dominant colors
     .build();
 ```
 
