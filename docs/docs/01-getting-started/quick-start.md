@@ -7,13 +7,30 @@ title: 'Quick Start Guide'
 
 This guide will help you get started with Brobot 1.1.0 using the new ActionConfig API.
 
+## Installation
+
+Add Brobot to your project:
+
+```xml
+<!-- Maven -->
+<dependency>
+    <groupId>io.github.jspinak</groupId>
+    <artifactId>brobot</artifactId>
+    <version>1.1.0</version>
+</dependency>
+```
+
+```gradle
+// Gradle
+implementation 'io.github.jspinak:brobot:1.1.0'
+```
+
 ## Your First Brobot Application
 
 Here's a simple example that demonstrates the core concepts:
 
 ```java
-import io.github.jspinak.brobot.action.ActionService;
-import io.github.jspinak.brobot.action.ActionInterface;
+import io.github.jspinak.brobot.action.Action;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
@@ -24,15 +41,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
+@Slf4j  // Add logging support
 public class SimpleAutomation {
     
     @Autowired
-    private ActionService actionService;
+    private Action action;
     
     public void clickButton() {
         // 1. Define what to look for
         StateImage buttonImage = new StateImage.Builder()
-                .setName("submit-button.png")
+                .setName("submit-button")
+                .addPattern("submit-button")
                 .build();
         
         // 2. Configure how to find it
@@ -41,16 +60,13 @@ public class SimpleAutomation {
                 .setSimilarity(0.9)
                 .build();
         
-        // 3. Find the button
-        ActionResult findResult = new ActionResult();
-        findResult.setActionConfig(findOptions);
-        
+        // 3. Add the button to the objects to find
         ObjectCollection objects = new ObjectCollection.Builder()
                 .withImages(buttonImage)
                 .build();
         
-        ActionInterface findAction = actionService.getAction(findOptions);
-        findAction.perform(findResult, objects);
+        // 4. Find the button
+        ActionResult findResult = action.perform(findOptions, objects);
         
         // 4. Click the found button
         if (findResult.isSuccess()) {
@@ -58,19 +74,125 @@ public class SimpleAutomation {
                     .setClickType(ClickOptions.Type.LEFT)
                     .build();
             
-            ActionResult clickResult = new ActionResult();
-            clickResult.setActionConfig(clickOptions);
-            
             ObjectCollection clickObjects = new ObjectCollection.Builder()
                     .withMatches(findResult.getMatchList())
                     .build();
             
-            ActionInterface clickAction = actionService.getAction(clickOptions);
-            clickAction.perform(clickResult, clickObjects);
+            ActionResult clickResult = action.perform(clickOptions, clickObjects);
         }
     }
 }
 ```
+
+### Simplified Version Using Convenience Methods
+
+The above example can be greatly simplified using Brobot's convenience methods and default settings:
+
+```java
+@Component
+@Slf4j
+public class SimpleAutomation {
+    
+    @Autowired
+    private Action action;
+    
+    public void clickButtonSimplified() {
+        // 1. Define the button image
+        StateImage buttonImage = new StateImage.Builder()
+                .setName("submit-button")
+                .addPattern("submit-button")
+                .build();
+        
+        // 2. Find and click in one line
+        action.click(buttonImage);
+        
+        // That's it! 🎉
+    }
+}
+```
+
+**What happens behind the scenes:**
+- Uses default similarity of 0.7 (70% match)
+- Automatically finds the image first, then clicks if found
+- Uses `PatternFindOptions.Strategy.FIRST` (clicks first match)
+- Uses standard left click with no delays
+- No need to create ObjectCollections manually
+
+### Even More Concise
+
+For quick prototyping or simple cases:
+
+```java
+// Find an image on screen
+ActionResult found = action.find(submitButton);
+
+// Click an image (finds it first automatically)
+action.click(submitButton);
+
+// Type text (with automatic focus)
+action.type(new ObjectCollection.Builder().withStrings("Hello World").build());
+
+// Chain find and click with fluent API
+new PatternFindOptions.Builder()
+    .then(new ClickOptions.Builder().build())
+    .build();
+```
+
+**Default values used:**
+- **Similarity**: 0.7 (defined in Sikuli's `Settings.MinSimilarity`)
+- **Search Strategy**: FIRST (find first match)
+- **Search Duration**: 3 seconds timeout
+- **Click Type**: Single left click
+- **Search Region**: Entire screen
+
+These convenience methods are perfect when:
+- You're prototyping or testing
+- Default settings work for your use case
+- You want minimal, readable code
+- You don't need fine-grained control
+
+For production code requiring specific settings (higher similarity, custom timeouts, logging), use the full builder pattern shown in the first example.
+
+### Minimal Complete Example
+
+Here's the absolute minimum code needed for a working Brobot application:
+
+```java
+import io.github.jspinak.brobot.action.Action;
+import io.github.jspinak.brobot.model.state.StateImage;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.ApplicationContext;
+
+@SpringBootApplication
+public class MinimalBrobot {
+    
+    public static void main(String[] args) {
+        // Start Spring context
+        ApplicationContext context = SpringApplication.run(MinimalBrobot.class, args);
+        
+        // Get the Action bean
+        Action action = context.getBean(Action.class);
+        
+        // Create an image to find
+        StateImage button = new StateImage.Builder()
+                .addPattern("button")  // No .png extension needed
+                .build();
+        
+        // Find and click it
+        action.click(button);
+        
+        // Done!
+    }
+}
+```
+
+**That's all you need!** Brobot handles:
+- Image loading from resources
+- Screen capture
+- Pattern matching with 70% similarity
+- Mouse movement and clicking
+- Error handling if image not found
 
 ## Understanding the New API
 
@@ -87,8 +209,7 @@ PatternFindOptions patternFind = new PatternFindOptions.Builder()
 
 // Click operations
 ClickOptions click = new ClickOptions.Builder()
-    .setClickType(ClickOptions.Type.DOUBLE)
-    .setNumberOfClicks(2)
+    .setClickType(ClickOptions.Type.DOUBLE_LEFT)
     .build();
 
 // Text/OCR operations
@@ -106,20 +227,15 @@ The new API follows a consistent pattern:
 // 1. Create configuration
 ActionConfig config = new SomeOptions.Builder().build();
 
-// 2. Create result container
-ActionResult result = new ActionResult();
-result.setActionConfig(config);
-
-// 3. Create object collection
+// 2. Create object collection
 ObjectCollection objects = new ObjectCollection.Builder()
     .withImages(images)
     .build();
 
-// 4. Get and execute action
-ActionInterface action = actionService.getAction(config);
-action.perform(result, objects);
+// 3. Execute action
+ActionResult result = action.perform(config, objects);
 
-// 5. Check results
+// 4. Check results
 if (result.isSuccess()) {
     // Handle success
 }
@@ -164,7 +280,9 @@ DragOptions dragOptions = new DragOptions.Builder()
 Define states to model your application:
 
 ```java
-@Component
+@State(initial = true)  // Mark as initial state, includes @Component
+@Getter  // Generate getters
+@Slf4j   // Add logging
 public class LoginState {
     
     private final State state;
@@ -202,7 +320,7 @@ Define transitions between states:
 public class LoginTransitions {
     
     @Autowired
-    private ActionService actionService;
+    private Action action;
     
     @Autowired
     private LoginState loginState;
@@ -240,7 +358,7 @@ public class LoginTransitions {
 1. **Explore the Examples**: Check out the [LoginAutomationExample](https://github.com/jspinak/brobot/tree/main/examples/LoginAutomationExample.java) for a complete working example
 2. **Read the Migration Guide**: If upgrading from Brobot 1.x, see the [Migration Guide](/docs/core-library/guides/migration-guide)
 3. **Learn State Management**: Deep dive into [States](states.md) and [Transitions](transitions.md)
-4. **Advanced Features**: Explore [color-based finding](/docs/core-library/guides/finding-objects/using-color-v2), [motion detection](/docs/core-library/guides/finding-objects/movement-v2), and more
+4. **Advanced Features**: Explore [color-based finding](/docs/core-library/guides/finding-objects/using-color), [motion detection](/docs/core-library/guides/finding-objects/movement), and more
 
 ## Getting Help
 
@@ -255,5 +373,29 @@ public class LoginTransitions {
 3. **Model Your Application**: Think in terms of states and transitions
 4. **Handle Failures**: Always check `ActionResult.isSuccess()`
 5. **Enable History**: Use `BrobotSettings.saveHistory = true` for debugging
+6. **Avoid Thread.sleep()**: Use `setPauseBeforeBegin()` or `setPauseAfterEnd()` in action options instead
+
+### Important: Pausing in Brobot
+
+Never use `Thread.sleep()` in Brobot code. Instead, use the built-in pause options:
+
+```java
+// ❌ Don't do this:
+action.click(button);
+Thread.sleep(1000);  // Bad practice in Brobot
+
+// ✅ Do this instead:
+ClickOptions clickWithPause = new ClickOptions.Builder()
+    .setPauseAfterEnd(1.0)  // 1 second pause after clicking
+    .build();
+action.perform(clickWithPause, button);
+
+// Or for pauses before actions:
+PatternFindOptions findWithPause = new PatternFindOptions.Builder()
+    .setPauseBeforeBegin(0.5)  // 500ms pause before searching
+    .build();
+```
+
+This approach keeps pauses as part of the action configuration, making them mockable, testable, and part of the action history.
 
 Happy automating with Brobot 1.1.0!

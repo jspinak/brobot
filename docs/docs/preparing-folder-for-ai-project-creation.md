@@ -18,7 +18,7 @@ Place screenshots of UI elements you want to automate in the folder:
 
 ## AI Instructions Location
 The AI assistant has detailed instructions at:
-https://github.com/jspinak/brobot/docs/docs/ai-brobot-project-creation.md
+https://jspinak.github.io/brobot/docs/ai-brobot-project-creation
 
 ## Example Prompt
 

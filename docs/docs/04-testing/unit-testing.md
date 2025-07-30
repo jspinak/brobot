@@ -76,17 +76,20 @@ class LoginAutomationTest {
     @Autowired
     private Action action;
     
-    @Autowired
-    private StateImageRepository stateImageRepo;
-    
     // No @BeforeEach needed - configuration handled by properties
     
     @Test
     void testSuccessfulLogin() {
-        // Arrange - Get state objects
-        StateImage usernameField = stateImageRepo.get("username_field");
-        StateImage passwordField = stateImageRepo.get("password_field");
-        StateImage loginButton = stateImageRepo.get("login_button");
+        // Arrange - Create state objects
+        StateImage usernameField = new StateImage.Builder()
+            .addPattern("username_field")
+            .build();
+        StateImage passwordField = new StateImage.Builder()
+            .addPattern("password_field")
+            .build();
+        StateImage loginButton = new StateImage.Builder()
+            .addPattern("login_button")
+            .build();
         
         // Act - Perform actions
         // Find and click username field
@@ -99,11 +102,15 @@ class LoginAutomationTest {
         TypeOptions typeOptions = new TypeOptions.Builder()
             .setTypeDelay(0.05)
             .build();
-        action.perform(typeOptions, "testuser");
+        action.perform(typeOptions, new ObjectCollection.Builder()
+            .withStrings("testuser")
+            .build());
         
         // Find and click password field
         ActionResult passwordResult = action.perform(findOptions, passwordField);
-        action.perform(typeOptions, "testpass");
+        action.perform(typeOptions, new ObjectCollection.Builder()
+            .withStrings("testpass")
+            .build());
         
         // Click login button
         ClickOptions clickOptions = new ClickOptions.Builder()
@@ -138,17 +145,23 @@ void testNavigationFlow() {
     
     // Test navigation sequence
     // Step 1: Login
-    StateImage loginButton = stateImageRepo.get("login_button");
+    StateImage loginButton = new StateImage.Builder()
+        .addPattern("login_button.png")
+        .build();
     ActionResult loginResult = action.perform(findOptions, loginButton);
     action.perform(new ClickOptions.Builder().build(), loginButton);
     
     // Step 2: Navigate to dashboard
-    StateImage dashboardLink = stateImageRepo.get("dashboard_link");
+    StateImage dashboardLink = new StateImage.Builder()
+        .addPattern("dashboard_link")
+        .build();
     ActionResult dashboardResult = action.perform(findOptions, dashboardLink);
     action.perform(new ClickOptions.Builder().build(), dashboardLink);
     
     // Step 3: Open settings
-    StateImage settingsIcon = stateImageRepo.get("settings_icon");
+    StateImage settingsIcon = new StateImage.Builder()
+        .addPattern("settings_icon.png")
+        .build();
     ActionResult settingsResult = action.perform(findOptions, settingsIcon);
     action.perform(new ClickOptions.Builder().build(), settingsIcon);
     
@@ -173,7 +186,9 @@ void testFindOperations() {
         .build();
     
     // Perform find action
-    StateImage submitButton = stateImageRepo.get("submit_button");
+    StateImage submitButton = new StateImage.Builder()
+        .addPattern("submit_button.png")
+        .build();
     ActionResult result = action.perform(findOptions, submitButton);
     
     // Test result properties
@@ -183,7 +198,7 @@ void testFindOperations() {
     // Access best match
     Optional<Match> bestMatch = result.getBestMatch();
     assertTrue(bestMatch.isPresent());
-    assertTrue(bestMatch.get().getSimScore() > 0.8);
+    assertTrue(bestMatch.get().getScore() > 0.8);
     
     // Test specific regions
     List<Region> regions = result.getMatchRegions();
@@ -192,7 +207,7 @@ void testFindOperations() {
     // Test filtering
     ActionResult highScoreMatches = new ActionResult();
     result.getMatchList().stream()
-        .filter(match -> match.getSimScore() > 0.9)
+        .filter(match -> match.getScore() > 0.9)
         .forEach(highScoreMatches::add);
     assertTrue(highScoreMatches.size() > 0);
 }
@@ -214,7 +229,9 @@ void testMockTimings() {
         .setStrategy(PatternFindOptions.Strategy.FIRST)
         .build();
     
-    StateImage button = stateImageRepo.get("button");
+    StateImage button = new StateImage.Builder()
+        .addPattern("button.png")
+        .build();
     ActionResult findResult = action.perform(findOptions, button);
     
     ClickOptions clickOptions = new ClickOptions.Builder().build();
@@ -229,35 +246,34 @@ void testMockTimings() {
 
 ## Advanced Testing Patterns
 
-### State-Based Testing
+### Pattern-Based Testing
 
 ```java
 @Test
-@TestPropertySource(properties = {
-    "brobot.screenshot.path=src/test/resources/state-screenshots/"
-})
-void testStateTransitions() {
-    // Screenshots: initial_state.png, target_state.png in configured path
-    
-    // Get state transition objects
-    State initialState = stateRepository.get("INITIAL_STATE");
-    State targetState = stateRepository.get("TARGET_STATE");
-    
-    // Find element that triggers transition
-    StateImage transitionButton = initialState.getStateImages().get(0);
-    PatternFindOptions findOptions = new PatternFindOptions.Builder()
+void testPatternMatching() {
+    // Test with different similarity thresholds
+    PatternFindOptions strictFind = new PatternFindOptions.Builder()
         .setStrategy(PatternFindOptions.Strategy.BEST)
+        .setSimilarity(0.95)
         .build();
     
-    ActionResult findResult = action.perform(findOptions, transitionButton);
-    assertTrue(findResult.isSuccess());
+    PatternFindOptions relaxedFind = new PatternFindOptions.Builder()
+        .setStrategy(PatternFindOptions.Strategy.ALL)
+        .setSimilarity(0.70)
+        .build();
     
-    // Click to trigger transition
-    ClickOptions clickOptions = new ClickOptions.Builder().build();
-    ActionResult clickResult = action.perform(clickOptions, transitionButton);
+    StateImage targetPattern = new StateImage.Builder()
+        .addPattern("target_button.png")
+        .build();
     
-    assertTrue(clickResult.isSuccess());
-    // In mock mode, state transitions are simulated based on probabilities
+    // Test strict matching
+    ActionResult strictResult = action.perform(strictFind, targetPattern);
+    assertTrue(strictResult.size() <= 1, "Strict matching should find at most one match");
+    
+    // Test relaxed matching
+    ActionResult relaxedResult = action.perform(relaxedFind, targetPattern);
+    assertTrue(relaxedResult.size() >= strictResult.size(), 
+        "Relaxed matching should find at least as many matches");
 }
 ```
 
@@ -278,9 +294,9 @@ public class BrobotAssertions {
     public static void assertMinimumScore(ActionResult result, double minScore) {
         assertTrue(result.getBestMatch().isPresent(), "No matches found");
         assertTrue(
-            result.getBestMatch().get().getSimScore() >= minScore,
+            result.getBestMatch().get().getScore() >= minScore,
             String.format("Best match score %.3f below minimum %.3f", 
-                result.getBestMatch().get().getSimScore(), minScore)
+                result.getBestMatch().get().getScore(), minScore)
         );
     }
 }

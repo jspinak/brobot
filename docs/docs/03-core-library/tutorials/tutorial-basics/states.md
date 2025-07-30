@@ -39,7 +39,7 @@ public class Home {
             .build();
     
     private final State state = new State.Builder(Name.HOME)
-            .withImages(toWorldButton)
+            .addStateImages(toWorldButton)
             .build();
     
     public Home(StateService stateService) { stateService.save(state); }
@@ -66,7 +66,7 @@ public class World {
             .build();
     
     private State state = new State.Builder(Name.WORLD)
-            .withImages(searchButton)
+            .addStateImages(searchButton)
             .build();
     
     public World(StateService stateService) { stateService.save(state); }
@@ -109,8 +109,8 @@ public class Island {
             .build();
     
     private State state = new State.Builder(Name.ISLAND)
-            .withImages(islandName)
-            .withRegions(islandRegion)
+            .addStateImages(islandName)
+            .addStateRegions(islandRegion)
             .build();
     
     public Island(StateService stateService) { stateService.save(state); }

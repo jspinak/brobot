@@ -111,7 +111,7 @@ class AutomationTest {
     private Action action;
     
     @Autowired
-    private StateImageRepository stateImageRepo;
+    private StateService stateService;
     
     // No manual configuration needed - handled by properties
 }
@@ -127,8 +127,10 @@ void testAutomationFlow() {
         .setSimilarity(0.85)
         .build();
     
-    // Get state object from repository
-    StateImage loginButton = stateImageRepo.get("login_button");
+    // Create state object
+    StateImage loginButton = new StateImage.Builder()
+        .addPattern("login_button")  // No .png extension needed
+        .build();
     
     // Execute automation with mock/real behavior based on configuration
     ActionResult result = action.perform(findOptions, loginButton);
@@ -155,7 +157,7 @@ void validateResults() {
     // Test ActionResult properties
     Optional<Match> bestMatch = result.getBestMatch();
     assertTrue(bestMatch.isPresent());
-    assertTrue(bestMatch.get().getSimScore() > 0.8);
+    assertTrue(bestMatch.get().getScore() > 0.8);
     
     // Test regions and coordinates
     List<Region> regions = result.getMatchRegions();
