@@ -47,7 +47,7 @@ public abstract class BaseFindOptions extends ActionConfig {
         this.captureImage = builder.captureImage;
         this.useDefinedRegion = builder.useDefinedRegion;
         this.maxMatchesToActOn = builder.maxMatchesToActOn;
-        this.matchAdjustmentOptions = builder.matchAdjustmentOptions.build();
+        this.matchAdjustmentOptions = builder.matchAdjustmentOptions;
         this.searchDuration = builder.searchDuration;
     }
 
@@ -76,7 +76,7 @@ public abstract class BaseFindOptions extends ActionConfig {
         private boolean captureImage = true;
         private boolean useDefinedRegion = false;
         private int maxMatchesToActOn = -1;
-        private MatchAdjustmentOptions.Builder matchAdjustmentOptions = new MatchAdjustmentOptions.Builder();
+        private MatchAdjustmentOptions matchAdjustmentOptions = MatchAdjustmentOptions.builder().build();
         private double searchDuration = 3.0; // Default 3 seconds, same as SikuliX default
 
         /**
@@ -96,7 +96,7 @@ public abstract class BaseFindOptions extends ActionConfig {
             this.captureImage = original.captureImage;
             this.useDefinedRegion = original.useDefinedRegion;
             this.maxMatchesToActOn = original.maxMatchesToActOn;
-            this.matchAdjustmentOptions = new MatchAdjustmentOptions.Builder(original.matchAdjustmentOptions);
+            this.matchAdjustmentOptions = original.matchAdjustmentOptions.toBuilder().build();
             this.searchDuration = original.searchDuration;
         }
 
@@ -170,8 +170,8 @@ public abstract class BaseFindOptions extends ActionConfig {
          * @param matchAdjustmentBuilder A builder for MatchAdjustmentOptions.
          * @return this Builder instance for chaining.
          */
-        public B setMatchAdjustment(MatchAdjustmentOptions.Builder matchAdjustmentBuilder) {
-            this.matchAdjustmentOptions = matchAdjustmentBuilder;
+        public B setMatchAdjustment(MatchAdjustmentOptions matchAdjustmentOptions) {
+            this.matchAdjustmentOptions = matchAdjustmentOptions;
             return self();
         }
 

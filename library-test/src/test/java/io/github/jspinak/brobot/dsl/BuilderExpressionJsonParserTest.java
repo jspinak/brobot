@@ -33,7 +33,7 @@ public class BuilderExpressionJsonParserTest {
      * Test parsing a BuilderExpression for actionOptions from JSON
      */
     @Test
-    public void testParseActionOptionsBuilder() throws ConfigurationException {
+    public void testParseObject// ActionOptionsBuilder() throws ConfigurationException {
         String json = """
                 {
                   "expressionType": "builder",

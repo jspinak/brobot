@@ -37,7 +37,7 @@ import java.util.Optional;
  * 2. Make sure the image is visible on screen when running the test
  * 3. Run the test and check the console output for debugging information
  */
-@SpringBootTest
+@SpringBootTest(classes = io.github.jspinak.brobot.test.TestConfiguration.class, classes = io.github.jspinak.brobot.test.TestConfiguration.class)
 public class ImageMatchingDebugTest {
 
     @Autowired

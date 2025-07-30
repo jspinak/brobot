@@ -27,11 +27,11 @@ import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Updated tests for scene combinations using new ActionConfig API.
- * Demonstrates migration from ActionOptions.Action.FIND with Find.STATES
+ * Demonstrates migration from Object// ActionOptions.Action.FIND with Find.STATES
  * to using PatternFindOptions with state analysis.
  * 
  * Key changes:
- * - Uses PatternFindOptions instead of generic ActionOptions
+ * - Uses PatternFindOptions instead of generic Object// ActionOptions
  * - ActionResult requires setActionConfig() before perform()
  * - Uses ActionService to get the appropriate action
  * - State finding is now handled through specific configurations
@@ -230,9 +230,9 @@ class PopulateSceneCombinationsTestUpdated extends BrobotIntegrationTestBase {
         
         // OLD API (commented out):
         /*
-        ActionOptions oldOptions = new ActionOptions.Builder()
-                .setAction(ActionOptions.Action.FIND)
-                .setFind(ActionOptions.Find.STATES)
+        Object// ActionOptions oldOptions = new ActionOptions.Builder()
+                .setAction(Object// ActionOptions.Action.FIND)
+                .setFind(Object// ActionOptions.Find.STATES)
                 .setMinArea(25)
                 .build();
         // Used with populateSceneCombinations

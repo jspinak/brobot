@@ -18,6 +18,7 @@ import io.github.jspinak.brobot.tools.logging.ExecutionSession;
 import io.github.jspinak.brobot.tools.ml.dataset.DatasetManager;
 import io.github.jspinak.brobot.tools.testing.mock.time.TimeProvider;
 import io.github.jspinak.brobot.util.image.capture.ScreenshotCapture;
+import io.github.jspinak.brobot.logging.unified.BrobotLogger;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -47,6 +48,7 @@ class ActionExecutionPauseTest {
     @Mock private ScreenshotCapture captureScreenshot;
     @Mock private ExecutionSession automationSession;
     @Mock private ExecutionController executionController;
+    @Mock private BrobotLogger brobotLogger;
     @Mock private ActionInterface actionMethod;
 
     private ActionExecution actionExecution;
@@ -59,7 +61,7 @@ class ActionExecutionPauseTest {
                 time, illustrateScreenshot, selectRegions,
                 actionLifecycleManagement, datasetManager, success,
                 matchesInitializer, actionLogger, captureScreenshot,
-                automationSession, executionController
+                automationSession, executionController, brobotLogger
         );
 
         actionOptions = new ActionOptions.Builder()
@@ -90,7 +92,7 @@ class ActionExecutionPauseTest {
                 time, illustrateScreenshot, selectRegions,
                 actionLifecycleManagement, datasetManager, success,
                 matchesInitializer, actionLogger, captureScreenshot,
-                automationSession, null
+                automationSession, null, brobotLogger
         );
 
         when(actionLifecycleManagement.isMoreSequencesAllowed(any())).thenReturn(true, false);

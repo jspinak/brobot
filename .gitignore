@@ -1,6 +1,6 @@
 # IDE
 /**/.idea/*
-/**/shelf/
+/**/shelf/p
 
 # Large media files (moved to external hosting)
 *.mp4

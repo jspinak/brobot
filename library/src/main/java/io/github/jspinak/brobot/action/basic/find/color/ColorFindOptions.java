@@ -66,7 +66,7 @@ public final class ColorFindOptions extends BaseFindOptions {
         this.color = builder.color;
         this.diameter = builder.diameter;
         this.kmeans = builder.kmeans;
-        this.areaFiltering = builder.areaFiltering.build(); 
+        this.areaFiltering = builder.areaFiltering; 
         this.binOptions = builder.binOptions.build();
     }
 
@@ -83,8 +83,8 @@ public final class ColorFindOptions extends BaseFindOptions {
         private Color color = Color.MU;
         private int diameter = 5;
         private int kmeans = 2;
-        private AreaFilteringOptions.Builder areaFiltering = new AreaFilteringOptions.Builder();
-        private HSVBinOptions.Builder binOptions = new HSVBinOptions.Builder();
+        private AreaFilteringOptions areaFiltering = AreaFilteringOptions.builder().build();
+        private HSVBinOptions.HSVBinOptionsBuilder binOptions = HSVBinOptions.builder();
 
         /**
          * Default constructor for creating a new ColorFindOptions configuration.
@@ -102,8 +102,8 @@ public final class ColorFindOptions extends BaseFindOptions {
             this.color = original.color;
             this.diameter = original.diameter;
             this.kmeans = original.kmeans;
-            this.areaFiltering = new AreaFilteringOptions.Builder(original.areaFiltering);
-            this.binOptions = new HSVBinOptions.Builder(original.binOptions);
+            this.areaFiltering = original.areaFiltering.toBuilder().build();
+            this.binOptions = original.binOptions.toBuilder();
         }
 
         /**
@@ -141,8 +141,8 @@ public final class ColorFindOptions extends BaseFindOptions {
          * @param areaFilteringBuilder A builder for AreaFilteringOptions.
          * @return this Builder instance for chaining.
          */
-        public Builder setAreaFiltering(AreaFilteringOptions.Builder areaFilteringBuilder) {
-            this.areaFiltering = areaFilteringBuilder;
+        public Builder setAreaFiltering(AreaFilteringOptions areaFilteringOptions) {
+            this.areaFiltering = areaFilteringOptions;
             return self();
         }
 
@@ -151,7 +151,7 @@ public final class ColorFindOptions extends BaseFindOptions {
          * @param binOptionsBuilder A builder for hsv bins.
          * @return this Builder instance for chaining.
          */
-        public Builder setBinOptions(HSVBinOptions.Builder binOptionsBuilder) {
+        public Builder setBinOptions(HSVBinOptions.HSVBinOptionsBuilder binOptionsBuilder) {
             this.binOptions = binOptionsBuilder;
             return self();
         }

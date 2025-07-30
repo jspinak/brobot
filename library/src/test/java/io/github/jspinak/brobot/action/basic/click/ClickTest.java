@@ -181,8 +181,8 @@ class ClickTest {
         // Create ClickOptions for the test
         ClickOptions clickOptions = new ClickOptions.Builder()
                 .setNumberOfClicks(1)
-                .setRepetition(new RepetitionOptions.Builder()
-                        .setTimesToRepeatIndividualAction(3)) // Click each match 3 times
+                .setRepetition(RepetitionOptions.builder()
+                        .timesToRepeatIndividualAction(3)) // Click each match 3 times
                 .build();
         
         // Create matches with no-arg constructor and set ClickOptions
@@ -284,8 +284,9 @@ class ClickTest {
         
         // Using new ClickOptions API for right-click
         ClickOptions clickOptions = new ClickOptions.Builder()
-                .setPressOptions(new MousePressOptions.Builder()
-                        .setButton(MouseButton.RIGHT))
+                .setPressOptions(MousePressOptions.builder()
+                        .button(MouseButton.RIGHT)
+                        .build())
                 .build();
 
         // Create matches with no-arg constructor and set ClickOptions
@@ -334,9 +335,10 @@ class ClickTest {
         // Using new ClickOptions API for double-click
         ClickOptions clickOptions = new ClickOptions.Builder()
                 .setNumberOfClicks(2)
-                .setPressOptions(new MousePressOptions.Builder()
-                        .setPauseAfterMouseDown(0.1)
-                        .setPauseBeforeMouseUp(0.05))
+                .setPressOptions(MousePressOptions.builder()
+                        .pauseAfterMouseDown(0.1)
+                        .pauseBeforeMouseUp(0.05)
+                        .build())
                 .build();
 
         // Create matches with no-arg constructor and set ClickOptions

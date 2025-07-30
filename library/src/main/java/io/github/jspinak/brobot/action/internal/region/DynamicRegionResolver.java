@@ -100,7 +100,7 @@ public class DynamicRegionResolver {
 
         // Apply adjustments
         SearchRegionOnObject.AdjustOptions adjustments = config.getAdjustments();
-        if (adjustments == null) adjustments = new SearchRegionOnObject.AdjustOptions();
+        if (adjustments == null) adjustments = SearchRegionOnObject.AdjustOptions.builder().build();
 
         int x = baseRegion.getX() + adjustments.getXAdjust();
         int y = baseRegion.getY() + adjustments.getYAdjust();

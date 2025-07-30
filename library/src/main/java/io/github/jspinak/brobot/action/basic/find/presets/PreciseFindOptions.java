@@ -78,10 +78,11 @@ public final class PreciseFindOptions {
             .setStrategy(PatternFindOptions.Strategy.BEST)
             .setSimilarity(DEFAULT_SIMILARITY)
             .setCaptureImage(true)
-            .setMatchFusion(new MatchFusionOptions.Builder()
-                .setFusionMethod(MatchFusionOptions.FusionMethod.ABSOLUTE)
-                .setMaxFusionDistanceX(DEFAULT_FUSION_DISTANCE)
-                .setMaxFusionDistanceY(DEFAULT_FUSION_DISTANCE));
+            .setMatchFusion(MatchFusionOptions.builder()
+                .fusionMethod(MatchFusionOptions.FusionMethod.ABSOLUTE)
+                .maxFusionDistanceX(DEFAULT_FUSION_DISTANCE)
+                .maxFusionDistanceY(DEFAULT_FUSION_DISTANCE)
+                .build());
     }
     
     /**

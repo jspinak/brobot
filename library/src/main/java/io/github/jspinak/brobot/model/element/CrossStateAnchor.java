@@ -20,12 +20,12 @@ public class CrossStateAnchor extends Anchor {
 
     public CrossStateAnchor() {
         super();
-        this.adjustments = new SearchRegionOnObject.AdjustOptions();
+        this.adjustments = SearchRegionOnObject.AdjustOptions.builder().build();
     }
 
     public CrossStateAnchor(Positions.Name anchorInNewDefinedRegion, Positions.Name positionInMatch) {
         super(anchorInNewDefinedRegion, new Position(positionInMatch));
-        this.adjustments = new SearchRegionOnObject.AdjustOptions();
+        this.adjustments = SearchRegionOnObject.AdjustOptions.builder().build();
     }
 
     /**
@@ -75,17 +75,22 @@ public class CrossStateAnchor extends Anchor {
         }
 
         public Builder adjustX(int x) {
-            anchor.adjustments.setXAdjust(x);
+            anchor.adjustments = anchor.adjustments.toBuilder().xAdjust(x).build();
             return this;
         }
 
         public Builder adjustY(int y) {
-            anchor.adjustments.setYAdjust(y);
+            anchor.adjustments = anchor.adjustments.toBuilder().yAdjust(y).build();
             return this;
         }
 
         public Builder adjustments(int x, int y) {
-            anchor.adjustments = new SearchRegionOnObject.AdjustOptions(x, y, 0, 0);
+            anchor.adjustments = SearchRegionOnObject.AdjustOptions.builder()
+                .xAdjust(x)
+                .yAdjust(y)
+                .wAdjust(0)
+                .hAdjust(0)
+                .build();
             return this;
         }
 

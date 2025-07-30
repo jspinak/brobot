@@ -146,7 +146,7 @@ public class ActionConfigFactory {
                 builder.setNumberOfClicks((Integer) overrides.get("numberOfClicks"));
             }
             if (overrides.containsKey("mousePressOptions")) {
-                builder.setPressOptions((MousePressOptions.Builder) overrides.get("mousePressOptions"));
+                builder.setPressOptions((MousePressOptions) overrides.get("mousePressOptions"));
             }
         }
         

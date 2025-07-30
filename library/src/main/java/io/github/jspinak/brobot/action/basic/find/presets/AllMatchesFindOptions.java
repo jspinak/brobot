@@ -87,10 +87,11 @@ public final class AllMatchesFindOptions {
             .setSimilarity(DEFAULT_SIMILARITY)
             .setCaptureImage(false)
             .setMaxMatchesToActOn(-1) // No limit
-            .setMatchFusion(new MatchFusionOptions.Builder()
-                .setFusionMethod(MatchFusionOptions.FusionMethod.ABSOLUTE)
-                .setMaxFusionDistanceX(DEFAULT_FUSION_DISTANCE)
-                .setMaxFusionDistanceY(DEFAULT_FUSION_DISTANCE));
+            .setMatchFusion(MatchFusionOptions.builder()
+                .fusionMethod(MatchFusionOptions.FusionMethod.ABSOLUTE)
+                .maxFusionDistanceX(DEFAULT_FUSION_DISTANCE)
+                .maxFusionDistanceY(DEFAULT_FUSION_DISTANCE)
+                .build());
     }
     
     /**

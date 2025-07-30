@@ -163,8 +163,9 @@ public class ActionConfigFacade {
      */
     public boolean rightClick(double maxWait, StateImage... stateImages) {
         ClickOptions rightClickOptions = new ClickOptions.Builder()
-                .setPressOptions(new MousePressOptions.Builder()
-                        .setButton(MouseButton.RIGHT))
+                .setPressOptions(MousePressOptions.builder()
+                        .button(MouseButton.RIGHT)
+                        .build())
                 .build();
                 
         PatternFindOptions findOptions = new PatternFindOptions.Builder()
@@ -219,8 +220,9 @@ public class ActionConfigFacade {
                 .build();
                 
         ClickOptions rightClick = new ClickOptions.Builder()
-                .setPressOptions(new MousePressOptions.Builder()
-                        .setButton(MouseButton.RIGHT))
+                .setPressOptions(MousePressOptions.builder()
+                        .button(MouseButton.RIGHT)
+                        .build())
                 .build();
         
         ActionChainOptions chain = new ActionChainOptions.Builder(findBest)

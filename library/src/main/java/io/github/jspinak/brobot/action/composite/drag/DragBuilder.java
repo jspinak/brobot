@@ -61,15 +61,17 @@ public class DragBuilder {
             .build();
         this.moveToSourceOptions = new MouseMoveOptions.Builder().build();
         this.mouseDownOptions = new MouseDownOptions.Builder()
-            .setPressOptions(new MousePressOptions.Builder()
-                .setButton(MouseButton.LEFT))
+            .setPressOptions(MousePressOptions.builder()
+                .button(MouseButton.LEFT)
+                .build())
             .build();
         this.dragMoveOptions = new MouseMoveOptions.Builder()
             .setMoveMouseDelay(0.5f) // Slower for drag operations
             .build();
         this.mouseUpOptions = new MouseUpOptions.Builder()
-            .setPressOptions(new MousePressOptions.Builder()
-                .setButton(MouseButton.LEFT))
+            .setPressOptions(MousePressOptions.builder()
+                .button(MouseButton.LEFT)
+                .build())
             .build();
     }
     
@@ -132,12 +134,14 @@ public class DragBuilder {
      */
     public DragBuilder withButton(MouseButton button) {
         this.mouseDownOptions = new MouseDownOptions.Builder()
-            .setPressOptions(new MousePressOptions.Builder()
-                .setButton(button))
+            .setPressOptions(MousePressOptions.builder()
+                .button(button)
+                .build())
             .build();
         this.mouseUpOptions = new MouseUpOptions.Builder()
-            .setPressOptions(new MousePressOptions.Builder()
-                .setButton(button))
+            .setPressOptions(MousePressOptions.builder()
+                .button(button)
+                .build())
             .build();
         return this;
     }
@@ -170,8 +174,9 @@ public class DragBuilder {
      */
     public DragBuilder withDestinationOffset(int offsetX, int offsetY) {
         this.toOptions = new PatternFindOptions.Builder(toOptions)
-            .setMatchAdjustment(new MatchAdjustmentOptions.Builder()
-                .setTargetOffset(new Location(offsetX, offsetY)))
+            .setMatchAdjustment(MatchAdjustmentOptions.builder()
+                .targetOffset(new Location(offsetX, offsetY))
+                .build())
             .build();
         return this;
     }
@@ -184,9 +189,10 @@ public class DragBuilder {
      */
     public DragBuilder withMouseDownPauses(double pauseBefore, double pauseAfter) {
         this.mouseDownOptions = new MouseDownOptions.Builder(mouseDownOptions)
-            .setPressOptions(new MousePressOptions.Builder()
-                .setPauseBeforeMouseDown(pauseBefore)
-                .setPauseAfterMouseDown(pauseAfter))
+            .setPressOptions(MousePressOptions.builder()
+                .pauseBeforeMouseDown(pauseBefore)
+                .pauseAfterMouseDown(pauseAfter)
+                .build())
             .build();
         return this;
     }
@@ -199,9 +205,10 @@ public class DragBuilder {
      */
     public DragBuilder withMouseUpPauses(double pauseBefore, double pauseAfter) {
         this.mouseUpOptions = new MouseUpOptions.Builder(mouseUpOptions)
-            .setPressOptions(new MousePressOptions.Builder()
-                .setPauseBeforeMouseUp(pauseBefore)
-                .setPauseAfterMouseUp(pauseAfter))
+            .setPressOptions(MousePressOptions.builder()
+                .pauseBeforeMouseUp(pauseBefore)
+                .pauseAfterMouseUp(pauseAfter)
+                .build())
             .build();
         return this;
     }

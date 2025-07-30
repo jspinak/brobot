@@ -137,16 +137,16 @@ public class ActionOptionsAdapter {
             .setIllustrate(mapIllustrate(ao.getIllustrate()));
 
         // Set mouse press options
-        MousePressOptions.Builder pressOptions = new MousePressOptions.Builder()
-            .setPauseBeforeMouseDown(ao.getPauseBeforeMouseDown())
-            .setPauseAfterMouseDown(ao.getPauseAfterMouseDown())
-            .setPauseBeforeMouseUp(ao.getPauseBeforeMouseUp())
-            .setPauseAfterMouseUp(ao.getPauseAfterMouseUp());
+        var pressOptionsBuilder = MousePressOptions.builder()
+            .pauseBeforeMouseDown(ao.getPauseBeforeMouseDown())
+            .pauseAfterMouseDown(ao.getPauseAfterMouseDown())
+            .pauseBeforeMouseUp(ao.getPauseBeforeMouseUp())
+            .pauseAfterMouseUp(ao.getPauseAfterMouseUp());
         
         // Convert click type to numberOfClicks and mouse button
-        convertClickType(builder, pressOptions, ao.getClickType());
+        convertClickType(builder, pressOptionsBuilder, ao.getClickType());
         
-        builder.setPressOptions(pressOptions);
+        builder.setPressOptions(pressOptionsBuilder.build());
 
         // Note: CLICK_UNTIL is deprecated - use action chaining with VerificationOptions
 
@@ -248,36 +248,37 @@ public class ActionOptionsAdapter {
                ao.getAddY() != 0;
     }
 
-    private MatchAdjustmentOptions.Builder createMatchAdjustmentOptions(ActionOptions ao) {
-        MatchAdjustmentOptions.Builder builder = new MatchAdjustmentOptions.Builder();
+    private MatchAdjustmentOptions createMatchAdjustmentOptions(ActionOptions ao) {
+        var builder = MatchAdjustmentOptions.builder();
         
         if (ao.getTargetPosition() != null) {
-            builder.setTargetPosition(ao.getTargetPosition());
+            builder.targetPosition(ao.getTargetPosition());
         }
         if (ao.getTargetOffset() != null) {
-            builder.setTargetOffset(ao.getTargetOffset());
+            builder.targetOffset(ao.getTargetOffset());
         }
         
-        builder.setAddW(ao.getAddW())
-            .setAddH(ao.getAddH())
-            .setAbsoluteW(ao.getAbsoluteW())
-            .setAbsoluteH(ao.getAbsoluteH())
-            .setAddX(ao.getAddX())
-            .setAddY(ao.getAddY());
+        builder.addW(ao.getAddW())
+            .addH(ao.getAddH())
+            .absoluteW(ao.getAbsoluteW())
+            .absoluteH(ao.getAbsoluteH())
+            .addX(ao.getAddX())
+            .addY(ao.getAddY());
 
-        return builder;
+        return builder.build();
     }
 
     private boolean needsMatchFusion(ActionOptions ao) {
         return ao.getFusionMethod() != ActionOptions.MatchFusionMethod.NONE;
     }
 
-    private MatchFusionOptions.Builder createMatchFusionOptions(ActionOptions ao) {
-        return new MatchFusionOptions.Builder()
-            .setFusionMethod(mapFusionMethod(ao.getFusionMethod()))
-            .setMaxFusionDistanceX(ao.getMaxFusionDistanceX())
-            .setMaxFusionDistanceY(ao.getMaxFusionDistanceY())
-            .setSceneToUseForCaptureAfterFusingMatches(ao.getSceneToUseForCaptureAfterFusingMatches());
+    private MatchFusionOptions createMatchFusionOptions(ActionOptions ao) {
+        return MatchFusionOptions.builder()
+            .fusionMethod(mapFusionMethod(ao.getFusionMethod()))
+            .maxFusionDistanceX(ao.getMaxFusionDistanceX())
+            .maxFusionDistanceY(ao.getMaxFusionDistanceY())
+            .sceneToUseForCaptureAfterFusingMatches(ao.getSceneToUseForCaptureAfterFusingMatches())
+            .build();
     }
 
     // Removed createVerificationOptions - ClickUntil is deprecated
@@ -354,7 +355,7 @@ public class ActionOptionsAdapter {
     
     // Removed mapClickUntilCondition - ClickUntil is deprecated
     
-    private void convertClickType(ClickOptions.Builder builder, MousePressOptions.Builder pressOptions, ClickOptions.Type clickType) {
+    private void convertClickType(ClickOptions.Builder builder, MousePressOptions.MousePressOptionsBuilder pressOptions, ClickOptions.Type clickType) {
         if (clickType == null) {
             return; // Use default (LEFT click)
         }
@@ -362,28 +363,28 @@ public class ActionOptionsAdapter {
         switch (clickType) {
             case DOUBLE_LEFT:
                 builder.setNumberOfClicks(2);
-                pressOptions.setButton(io.github.jspinak.brobot.model.action.MouseButton.LEFT);
+                pressOptions.button(io.github.jspinak.brobot.model.action.MouseButton.LEFT);
                 break;
             case DOUBLE_RIGHT:
                 builder.setNumberOfClicks(2);
-                pressOptions.setButton(io.github.jspinak.brobot.model.action.MouseButton.RIGHT);
+                pressOptions.button(io.github.jspinak.brobot.model.action.MouseButton.RIGHT);
                 break;
             case DOUBLE_MIDDLE:
                 builder.setNumberOfClicks(2);
-                pressOptions.setButton(io.github.jspinak.brobot.model.action.MouseButton.MIDDLE);
+                pressOptions.button(io.github.jspinak.brobot.model.action.MouseButton.MIDDLE);
                 break;
             case RIGHT:
                 builder.setNumberOfClicks(1);
-                pressOptions.setButton(io.github.jspinak.brobot.model.action.MouseButton.RIGHT);
+                pressOptions.button(io.github.jspinak.brobot.model.action.MouseButton.RIGHT);
                 break;
             case MIDDLE:
                 builder.setNumberOfClicks(1);
-                pressOptions.setButton(io.github.jspinak.brobot.model.action.MouseButton.MIDDLE);
+                pressOptions.button(io.github.jspinak.brobot.model.action.MouseButton.MIDDLE);
                 break;
             case LEFT:
             default:
                 builder.setNumberOfClicks(1);
-                pressOptions.setButton(io.github.jspinak.brobot.model.action.MouseButton.LEFT);
+                pressOptions.button(io.github.jspinak.brobot.model.action.MouseButton.LEFT);
                 break;
         }
     }

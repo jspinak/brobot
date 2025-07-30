@@ -82,8 +82,7 @@ public final class DefineRegionOptions extends ActionConfig {
     private DefineRegionOptions(Builder builder) {
         super(builder); // Initialize fields from the base ActionConfig
         this.defineAs = builder.defineAs;
-        this.matchAdjustmentOptions = builder.matchAdjustmentOptions != null ? 
-            builder.matchAdjustmentOptions.build() : null;
+        this.matchAdjustmentOptions = builder.matchAdjustmentOptions;
     }
 
     /**
@@ -95,7 +94,7 @@ public final class DefineRegionOptions extends ActionConfig {
         @JsonProperty("defineAs")
         private DefineAs defineAs = DefineAs.MATCH;
         @JsonProperty("matchAdjustmentOptions")
-        private MatchAdjustmentOptions.Builder matchAdjustmentOptions;
+        private MatchAdjustmentOptions matchAdjustmentOptions;
 
         /**
          * Default constructor for creating a new DefineRegionOptions configuration.
@@ -113,7 +112,7 @@ public final class DefineRegionOptions extends ActionConfig {
             super(original); // Call parent copy logic
             this.defineAs = original.defineAs;
             if (original.matchAdjustmentOptions != null) {
-                this.matchAdjustmentOptions = new MatchAdjustmentOptions.Builder(original.matchAdjustmentOptions);
+                this.matchAdjustmentOptions = original.matchAdjustmentOptions.toBuilder().build();
             }
         }
 
@@ -134,8 +133,8 @@ public final class DefineRegionOptions extends ActionConfig {
          * @param matchAdjustmentBuilder A builder for MatchAdjustmentOptions.
          * @return this Builder instance for chaining.
          */
-        public Builder setMatchAdjustment(MatchAdjustmentOptions.Builder matchAdjustmentBuilder) {
-            this.matchAdjustmentOptions = matchAdjustmentBuilder;
+        public Builder setMatchAdjustment(MatchAdjustmentOptions matchAdjustmentOptions) {
+            this.matchAdjustmentOptions = matchAdjustmentOptions;
             return self();
         }
 
