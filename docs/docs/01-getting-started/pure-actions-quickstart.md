@@ -45,7 +45,7 @@ import io.github.jspinak.brobot.model.state.StateImage;
 
 // Step 2: Create your target image
 StateImage submitButton = new StateImage.Builder()
-    .withImage("submit-button.png")
+    .addPattern("submit-button")  // No .png extension needed
     .build();
 
 // Step 3: Find and click using conditional chain
@@ -77,9 +77,9 @@ ConditionalActionChain.find(findOptions)
 action.perform(ActionType.TYPE, "Hello World");
 
 // Find field and type
-ConditionalActionChain.find(textFieldImage)
-    .ifFound(click())
-    .then(type("user@example.com"))
+ConditionalActionChain.find(findOptions)
+    .ifFound(clickOptions)
+    .then(typeOptions)
     .perform(action, objectCollection);
 ```
 
@@ -94,10 +94,10 @@ for (Match match : matches.getMatchList()) {
 
 ### 4. Right-Click Menu
 ```java
-ConditionalActionChain.find(fileIcon)
-    .ifFound(rightClick())
-    .then(find(deleteOption))
-    .ifFound(click())
+ConditionalActionChain.find(findOptions)
+    .ifFound(rightClickOptions)
+    .then(findDeleteOptions)
+    .ifFound(clickOptions)
     .perform(action, objectCollection);
 ```
 
@@ -155,7 +155,7 @@ Pure actions make error handling explicit and clear:
 ```java
 ConditionalActionChain.find(criticalButton)
     .ifFound(click())
-    .ifNotFoundLog("ERROR: Critical button not found!")
+    .ifNotFound(log("ERROR: Critical button not found!"))
     .ifNotFoundDo(result -> {
         // Custom error handling
         takeScreenshot("error-state");
@@ -169,14 +169,14 @@ ConditionalActionChain.find(criticalButton)
 ### 1. Separate Find from Action
 ```java
 // Good: Clear separation
-ActionResult found = action.find(target);
+ActionResult found = action.find(targetImage);
 if (found.isSuccess()) {
-    action.perform(ActionType.CLICK, found.getFirstMatch());
+    action.perform(ActionType.CLICK, found.getFirstMatch().getLocation());
 }
 
 // Better: Use conditional chains
-ConditionalActionChain.find(target)
-    .ifFound(click())
+ConditionalActionChain.find(findOptions)
+    .ifFound(clickOptions)
     .perform(action, objectCollection);
 ```
 
@@ -184,7 +184,7 @@ ConditionalActionChain.find(target)
 ```java
 ConditionalActionChain.find(saveButton)
     .ifFound(click())
-    .ifFoundLog("Document saved")
+    .ifFound(log("Document saved"))
     .ifNotFound(log("Save button not found"))
     .ifNotFound(tryAlternativeSave())
     .perform(action, objectCollection);
@@ -195,8 +195,13 @@ ConditionalActionChain.find(saveButton)
 // Find once, use multiple times
 ActionResult buttons = action.find(allButtons);
 for (Match button : buttons.getMatchList()) {
-    action.perform(ActionType.HIGHLIGHT, button.getRegion());
-    Thread.sleep(500);
+    // Highlight with pause after
+    HighlightOptions highlight = new HighlightOptions.Builder()
+        .setPauseAfterEnd(0.5)  // 500ms pause after highlighting
+        .build();
+    action.perform(highlight, button.getRegion());
+    
+    // Then click
     action.perform(ActionType.CLICK, button.getRegion());
 }
 ```

@@ -34,8 +34,8 @@ public class StateRegistrationListener {
 @Getter
 @Slf4j
 public class PromptState {
-    private StateObject submitButton = new StateObject.Builder()
-        .withImage("submit")
+    private final StateImage submitButton = new StateImage.Builder()
+        .addPattern("submit")
         .build();
 }
 
@@ -58,12 +58,12 @@ The `@State` annotation marks a class as a Brobot state and includes Spring's `@
 @Getter
 @Slf4j
 public class LoginState {
-    private StateObject loginButton = new StateObject.Builder()
-        .withImage("login-button")
+    private StateImage loginButton = new StateImage.Builder()
+        .addPattern("login-button")
         .build();
     
-    private StateObject usernameField = new StateObject.Builder()
-        .withImage("username-field")
+    private StateImage usernameField = new StateImage.Builder()
+        .addPattern("username-field")
         .build();
 }
 ```
@@ -106,14 +106,17 @@ The `@Transition` annotation marks a class as containing transition logic and in
 @Slf4j
 public class LoginToDashboardTransition {
     
-    private final ActionOptions actionOptions;
+    private final Action action;
+    private final LoginState loginState;
     
     public boolean execute() {
         log.info("Transitioning from Login to Dashboard");
         // Perform login actions
-        return action.click("login-button")
-            .find("dashboard-header")
-            .isSuccess();
+        ClickOptions clickOptions = new ClickOptions.Builder().build();
+        ObjectCollection objects = new ObjectCollection.Builder()
+            .withImages(loginState.getLoginButton())
+            .build();
+        return action.perform(clickOptions, objects).isSuccess();
     }
 }
 ```
@@ -202,20 +205,20 @@ Here's a complete example showing how annotations simplify a typical automation 
 @Getter
 @Slf4j
 public class LoginPageState {
-    private StateObject logo = new StateObject.Builder()
-        .withImage("app-logo")
+    private final StateImage logo = new StateImage.Builder()
+        .addPattern("app-logo")
         .build();
     
-    private StateObject usernameField = new StateObject.Builder()
-        .withImage("username-field")
+    private final StateImage usernameField = new StateImage.Builder()
+        .addPattern("username-field")
         .build();
     
-    private StateObject passwordField = new StateObject.Builder()
-        .withImage("password-field")
+    private final StateImage passwordField = new StateImage.Builder()
+        .addPattern("password-field")
         .build();
     
-    private StateObject loginButton = new StateObject.Builder()
-        .withImage("login-button")
+    private final StateImage loginButton = new StateImage.Builder()
+        .addPattern("login-button")
         .build();
 }
 
@@ -224,12 +227,12 @@ public class LoginPageState {
 @Getter
 @Slf4j
 public class DashboardState {
-    private StateObject dashboardHeader = new StateObject.Builder()
-        .withImage("dashboard-header")
+    private final StateImage dashboardHeader = new StateImage.Builder()
+        .addPattern("dashboard-header")
         .build();
     
-    private StateObject menuButton = new StateObject.Builder()
-        .withImage("menu-button")
+    private final StateImage menuButton = new StateImage.Builder()
+        .addPattern("menu-button")
         .build();
 }
 
@@ -239,20 +242,30 @@ public class DashboardState {
 @Slf4j
 public class LoginTransition {
     
-    private final ActionOptions actionOptions;
-    private final String username;
-    private final String password;
+    private final Action action;
+    private final LoginPageState loginState;
     
     public boolean execute() {
         log.info("Performing login");
         
-        return action.click("username-field")
-            .type(username)
-            .click("password-field")
-            .type(password)
-            .click("login-button")
-            .find("dashboard-header")
-            .isSuccess();
+        // Click username field
+        if (!action.click(loginState.getUsernameField()).isSuccess()) return false;
+        
+        // Type username
+        if (!action.type(new ObjectCollection.Builder()
+                .withStrings("user@example.com")
+                .build()).isSuccess()) return false;
+        
+        // Click password field
+        if (!action.click(loginState.getPasswordField()).isSuccess()) return false;
+        
+        // Type password
+        if (!action.type(new ObjectCollection.Builder()
+                .withStrings("password123")
+                .build()).isSuccess()) return false;
+        
+        // Click login button
+        return action.click(loginState.getLoginButton()).isSuccess();
     }
 }
 ```
@@ -358,13 +371,102 @@ Ensure your states are in a package scanned by Spring:
 - Check logs for "Marked X as initial state" messages
 - Verify the state class is being discovered
 
+## @CollectData Annotation
+
+The `@CollectData` annotation enables automatic dataset collection for machine learning applications. When applied to methods, it captures inputs, outputs, and execution context for training ML models.
+
+### Basic Usage
+
+```java
+@Component
+public class SmartAutomation {
+    
+    @CollectData(category = "click_accuracy")
+    public ActionResult performClick(StateImage target) {
+        return action.click(target);
+    }
+}
+```
+
+### Parameters
+
+- **`category`** (String, default: "general") - Category for organizing collected data
+- **`features`** (String[], default: {}) - Specific features to collect (empty = all)
+- **`captureScreenshots`** (boolean, default: true) - Capture before/after screenshots
+- **`captureIntermediateStates`** (boolean, default: false) - Capture multi-step operations
+- **`samplingRate`** (double, default: 1.0) - Collection rate (0.0-1.0, where 1.0 = 100%)
+- **`maxSamples`** (int, default: -1) - Maximum samples to collect (-1 = unlimited)
+- **`onlySuccess`** (boolean, default: false) - Collect only successful executions
+- **`includeTiming`** (boolean, default: true) - Include timing information
+- **`anonymize`** (boolean, default: true) - Anonymize sensitive data
+- **`format`** (DataFormat, default: JSON) - Storage format
+- **`labels`** (String[], default: {}) - Labels for supervised learning
+- **`compress`** (boolean, default: true) - Compress collected data
+
+### Advanced Examples
+
+```java
+// Collect only 10% of executions with specific features
+@CollectData(
+    category = "text_recognition",
+    features = {"image", "location", "confidence"},
+    samplingRate = 0.1,
+    format = DataFormat.CSV
+)
+public String extractText(Region region) {
+    // Text extraction logic
+}
+
+// Collect data for successful operations only
+@CollectData(
+    category = "form_submission",
+    onlySuccess = true,
+    captureIntermediateStates = true,
+    labels = {"form_type", "submission_time"}
+)
+public boolean submitForm(FormData data) {
+    // Form submission logic
+}
+
+// High-volume data collection with limits
+@CollectData(
+    category = "mouse_movements",
+    maxSamples = 10000,
+    captureScreenshots = false,  // Save space
+    format = DataFormat.BINARY,   // Efficient storage
+    compress = true
+)
+public void trackMouseMovement(Location from, Location to) {
+    // Movement tracking logic
+}
+```
+
+### Data Formats
+
+- **JSON** - Human-readable, good for debugging
+- **CSV** - Tabular data, easy to import into analysis tools
+- **BINARY** - Efficient storage for large datasets
+- **TFRECORD** - TensorFlow native format
+- **PARQUET** - Apache Parquet for big data processing
+
+### Use Cases
+
+1. **Training Click Accuracy Models**: Collect data about successful/failed clicks to improve pattern matching
+2. **Text Recognition Improvement**: Gather OCR results with ground truth for model training
+3. **Workflow Optimization**: Analyze action sequences to identify bottlenecks
+4. **Error Pattern Detection**: Collect failure cases to improve error handling
+5. **Performance Tuning**: Gather timing data to optimize action execution
+
 ## Summary
 
-The Brobot annotation system dramatically simplifies state machine configuration by:
-- Eliminating boilerplate registration code
-- Providing clear, declarative configuration
-- Integrating seamlessly with Spring
-- Supporting complex transition scenarios
-- Enabling better code organization
+The Brobot annotation system dramatically simplifies state machine configuration and enables advanced features:
+- **@State** - Automatic state registration with Spring integration
+- **@Transition** - Declarative transition configuration
+- **@CollectData** - Non-invasive ML dataset collection
+- Eliminates boilerplate registration code
+- Provides clear, declarative configuration
+- Integrates seamlessly with Spring
+- Supports complex transition scenarios
+- Enables better code organization
 
-By using `@State` and `@Transition` annotations, you can focus on your automation logic rather than framework setup, making your code more maintainable and easier to understand.
+By using these annotations, you can focus on your automation logic rather than framework setup, making your code more maintainable and easier to understand.
