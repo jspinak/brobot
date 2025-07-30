@@ -239,8 +239,13 @@ ConditionalActionChain.find(findOptions)
 ```java
 ActionResult matches = action.find(allButtons);
 for (Match match : matches.getMatchList()) {
-    action.perform(ActionType.HIGHLIGHT, match.getRegion());
-    Thread.sleep(500);
+    // Highlight with pause after
+    HighlightOptions highlight = new HighlightOptions.Builder()
+        .setPauseAfterEnd(0.5)  // 500ms pause after highlighting
+        .build();
+    action.perform(highlight, match.getRegion());
+    
+    // Then click
     action.perform(ActionType.CLICK, match.getRegion());
 }
 ```

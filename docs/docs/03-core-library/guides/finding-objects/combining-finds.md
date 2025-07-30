@@ -5,17 +5,39 @@ sidebar_position: 2
 # Combining Find Operations
 
 Combining multiple find operations in the same Action can give us better results.
-There are two ways to do this with Brobot: Nested Finds, and Confirmed Finds. Both
-methods require multiple Find operations to be added to the ActionOptions object,
-and call the Find operations in the order they were added to the ActionOptions. As an
-example, when using the following ActionOptions, the Find.ALL operation would be called
-first, and then the Find.COLOR operation:
+There are two ways to do this with Brobot: Nested Finds, and Confirmed Finds.
 
-        ActionOptions color = new ActionOptions.Builder()
-                .setAction(ActionOptions.Action.FIND)
-                .setFind(ActionOptions.Find.ALL)
-                .addFind(ActionOptions.Find.COLOR)
-                .build();
+## Using the New ActionConfig API
+
+With the new ActionConfig API introduced in Brobot 1.1.0, combining find operations is more intuitive and type-safe. You can now use specific find configuration classes and chain operations together.
+
+### Pattern and Color Finding
+
+When you need to find objects that match both a pattern and a specific color:
+
+```java
+// Find yellow bars using pattern matching first, then color filtering
+PatternFindOptions patternOptions = new PatternFindOptions.Builder()
+        .setStrategy(PatternFindOptions.Strategy.ALL)
+        .build();
+
+ColorFindOptions colorOptions = new ColorFindOptions.Builder()
+        .setColorStrategy(ColorFindOptions.Color.MU)  // Use mean color statistics
+        .build();
+
+// Execute pattern finding first
+ActionResult patternResult = new ActionResult();
+patternResult.setActionConfig(patternOptions);
+ActionInterface patternAction = actionService.getAction(patternOptions);
+patternAction.perform(patternResult, objectCollection);
+
+// Then filter by color
+ActionResult colorResult = new ActionResult();
+colorResult.setActionConfig(colorOptions);
+colorResult.setPreviousResult(patternResult); // Chain the operations
+ActionInterface colorAction = actionService.getAction(colorOptions);
+colorAction.perform(colorResult, objectCollection);
+```
 
 Combining find methods can give us more accurate matches in scenarios where the 
 form and color of an object are not unique. Take the example below, where we are looking
@@ -28,16 +50,23 @@ both a pattern and a color.
 
 ## Nested Finds
 
-Nested Finds find objects inside the matches from the previous Find operation. Given 
-the example above, we would have many matches inside the four yellow bars. The 
-ActionOptions in the example does not specify the diameter, so the matches can be of 
-varying sizes.
+Nested Finds find objects inside the matches from the previous Find operation. This is useful when you want to find specific elements within larger patterns.
 
-The ActionOptions variable `keepLargerMatches` controls whether the Find operations
-should be Nested Finds or ConfirmedFinds. The default value of `false` will execute a 
-Nested Find.  
+```java
+// Configure for nested finding
+PatternFindOptions outerFind = new PatternFindOptions.Builder()
+        .setStrategy(PatternFindOptions.Strategy.ALL)
+        .setNestedFind(true)  // Enable nested finding
+        .build();
 
-In the below example, all pattern matches from the Find.ALL operation are drawn in 
+// The inner find will search within the results of the outer find
+ColorFindOptions innerFind = new ColorFindOptions.Builder()
+        .setTargetColor(Color.YELLOW)
+        .setSearchInsidePrevious(true)  // Search inside previous results
+        .build();
+```
+
+In the below example, all pattern matches from the initial find operation are drawn in 
 blue bounding boxes, and the color matches are drawn in pink bounding boxes. To the 
 right of the scene are the contents of the color matches. As expected, all color matches 
 are some variation of yellow, showing that they are taken only from the pattern matches of
@@ -51,22 +80,74 @@ Confirmed Finds look for matches inside the matches from the first Find operatio
 All subsequent Find operations are performed on the match regions from the first operation.
 If a match is found, the match region from the first Find operation will be returned. 
 For a match to exist, all subsequent Find operations need to succeed within its region. 
-In the example above, if a yellow pixel was found in the match region of a solid color bar,
-the entire bar would be returned as a match object. The size of the match would equal
-the size of the bar image on file.  
 
-To set the Find operations to Confirmed Finds, the ActionOptions variable 
-`keepLargerMatches` should be set to true.  
+```java
+// Configure for confirmed finding
+PatternFindOptions confirmedFind = new PatternFindOptions.Builder()
+        .setStrategy(PatternFindOptions.Strategy.ALL)
+        .setKeepLargerMatches(true)  // Enable confirmed finding
+        .build();
 
-        ActionOptions color = new ActionOptions.Builder()
-                .setAction(ActionOptions.Action.FIND)
-                .setFind(ActionOptions.Find.ALL)
-                .addFind(ActionOptions.Find.COLOR)
-                .keepLargerMatches(true)
-                .build();
+ColorFindOptions colorConfirm = new ColorFindOptions.Builder()
+        .setTargetColor(Color.YELLOW)
+        .setConfirmMode(true)  // Confirm matches from previous operation
+        .build();
+```
 
-In the below example, the pattern matches from the Find.ALL operation are drawn in
+In the below example, the pattern matches from the initial find operation are drawn in
 blue and the color matches are drawn in pink. To the right of the scene are the contents of the 
 color matches. The pattern match is selected in its original size. Only the yellow bars are selected.  
 
 ![confirmedFind](/img/color/confirmedFind.png)  
+
+## Advanced Chaining with ChainedFindOptions
+
+For complex scenarios, you can use the `ChainedFindOptions` class to define a sequence of find operations:
+
+```java
+ChainedFindOptions chainedFind = new ChainedFindOptions.Builder()
+        .addStep(new PatternFindOptions.Builder()
+                .setStrategy(PatternFindOptions.Strategy.ALL)
+                .build())
+        .addStep(new ColorFindOptions.Builder()
+                .setTargetColor(Color.YELLOW)
+                .build())
+        .addStep(new SizeFindOptions.Builder()
+                .setMinWidth(50)
+                .setMinHeight(20)
+                .build())
+        .setChainMode(ChainedFindOptions.ChainMode.NESTED)
+        .build();
+
+ActionResult result = new ActionResult();
+result.setActionConfig(chainedFind);
+ActionInterface chainedAction = actionService.getAction(chainedFind);
+chainedAction.perform(result, objectCollection);
+```
+
+## Migration from ActionOptions
+
+If you're migrating from the old ActionOptions API:
+
+**Old way:**
+```java
+ActionOptions color = new ActionOptions.Builder()
+        .setAction(ActionOptions.Action.FIND)
+        .setFind(ActionOptions.Find.ALL)
+        .addFind(ActionOptions.Find.COLOR)
+        .keepLargerMatches(true)
+        .build();
+```
+
+**New way:**
+```java
+ChainedFindOptions chainedFind = new ChainedFindOptions.Builder()
+        .addStep(PatternFindOptions.forAllMatches())
+        .addStep(ColorFindOptions.forYellowObjects())
+        .setChainMode(ChainedFindOptions.ChainMode.CONFIRMED)
+        .build();
+```
+
+The new API provides better type safety, clearer intent, and more flexibility in combining different types of find operations.
+
+For more information on the new ActionConfig API, see the [Migration Guide](/docs/core-library/guides/migration-guide).

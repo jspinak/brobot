@@ -22,7 +22,10 @@ function HomepageHeader() {
               <h3>AI-Assisted Project Creation</h3>
               <p>Let AI help you create your Brobot automation project quickly and easily.</p>
               <Link className={clsx("button button--primary button--sm", styles.aiButton)} to="/docs/preparing-folder-for-ai-project-creation">
-                <span className={styles.aiButtonText}>Learn How to Prepare Your<br />Project for AI Assistance</span>
+                <span className={styles.aiButtonText}>
+                  <span className={styles.desktopText}>Learn How to Prepare Your Project for AI Assistance</span>
+                  <span className={styles.mobileText}>Learn How to Prepare Your<br />Project for AI Assistance</span>
+                </span>
               </Link>
             </div>
           </div>

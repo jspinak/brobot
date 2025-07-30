@@ -47,6 +47,9 @@ When you chain actions:
 The most basic use case is executing actions in sequence:
 
 ```java
+@Autowired
+private ActionChainExecutor chainExecutor;
+
 // Click a button, then type text
 ActionChainOptions chain = new ActionChainOptions.Builder(
     new ClickOptions.Builder().build())

@@ -13,9 +13,10 @@
    │   └── [ProjectName]Application.java
    ├── src/main/resources/
    │   ├── application.properties
-   │   ├── application.yml         # Alternative to properties
-   │   └── images/                  # Default location for classpath images
-   │       └── [state-name]/
+   │   └── application.yml          # Alternative to properties
+   ├── images/                      # Image resources in project root
+   │   └── [state-name]/
+   ├── history/                     # Destination for illustrated screenshots from unit testing
    ├── build.gradle
    └── settings.gradle
    ```
@@ -45,10 +46,11 @@
    }
    ```
 
-3. **State Creation Pattern (Modern)**
+3. **State Creation Pattern (Modern with Annotations)**
    ```java
-   @Component
+   @State  // Automatically registers as Spring component and Brobot state
    @Getter
+   @Slf4j
    public class ExampleState {
        private final State state;
        private final StateImage mainImage;  // Direct access to components
@@ -60,18 +62,47 @@
        public ExampleState() {
            // Store component for direct access
            mainImage = new StateImage.Builder()
-               .addPatterns("folder/image-name1", "folder/image-name2")  // NO .png extension
+               .addPatterns("folder/image-name1", "folder/image-name2")  // No .png extension needed
                .setName("MainImage")
                .build();
            
            state = new State.Builder(Name.EXAMPLE)
-               .withImages(mainImage)
+               .addStateImages(mainImage)
                .build();
        }
    }
    ```
+   
+   **For Initial States:**
+   ```java
+   @State(initial = true)  // Marks as initial state for state machine
+   @Getter
+   @Slf4j
+   public class HomeState {
+       // State definition
+   }
+   ```
 
-4. **Transitions with JavaStateTransition**
+4. **Transitions (Two Approaches)**
+
+   **Modern Approach with @Transition Annotation (Recommended):**
+   ```java
+   @Transition(from = ExampleState.class, to = TargetState.class)
+   @RequiredArgsConstructor
+   @Slf4j
+   public class ExampleToTargetTransition {
+       private final ExampleState exampleState;
+       private final Action action;
+       
+       public boolean execute() {
+           log.info("Executing transition from Example to Target");
+           // Use convenience methods for clean code
+           return action.click(exampleState.getMainImage()).isSuccess();
+       }
+   }
+   ```
+
+   **Traditional Approach with JavaStateTransition:**
    ```java
    @Component
    @RequiredArgsConstructor
@@ -96,7 +127,6 @@
        }
        
        private boolean executeTransition() {
-           // Use convenience methods for clean code
            return action.click(exampleState.getMainImage()).isSuccess();
        }
        
@@ -219,8 +249,9 @@
    ```
 
 9. **Image and Resource Organization**
-   - Place images in `src/main/resources/images/[state-name]/`
-   - Build.gradle should copy images:
+   - Place images in `images/[state-name]/` at project root
+   - Create `history/` folder at project root for illustrated test screenshots
+   - Build.gradle should copy images to build directory:
      ```gradle
      task copyImages(type: Copy) {
          from 'images'
@@ -229,11 +260,58 @@
      processResources.dependsOn copyImages
      ```
 
+## Brobot Annotations
+
+### @State Annotation
+- **Purpose**: Marks a class as a Brobot state and Spring component
+- **Parameters**:
+  - `initial`: boolean (default false) - marks as initial state
+  - `name`: String (default "") - optional state name override
+  - `description`: String (default "") - state documentation
+- **Required with**: `@Getter` and `@Slf4j`
+
+### @Transition Annotation
+- **Purpose**: Marks a class as a Brobot transition and Spring component
+- **Parameters**:
+  - `from`: Class\<?\>[] - source state class(es)
+  - `to`: Class\<?\>[] - target state class(es)
+  - `method`: String (default "execute") - transition method name
+  - `priority`: int (default 0) - transition priority
+  - `description`: String (default "") - transition documentation
+- **Required with**: `@RequiredArgsConstructor` and `@Slf4j`
+
+### @CollectData Annotation (Advanced)
+- **Purpose**: Marks methods for automatic ML dataset collection
+- **Parameters**:
+  - `category`: String - data category (default "general")
+  - `features`: String[] - specific features to collect (empty = all)
+  - `captureScreenshots`: boolean - capture before/after screenshots (default true)
+  - `captureIntermediateStates`: boolean - capture multi-step operations (default false)
+  - `samplingRate`: double - collection rate 0.0-1.0 (default 1.0)
+  - `maxSamples`: int - max samples to collect, -1 = unlimited (default -1)
+  - `onlySuccess`: boolean - collect only successful executions (default false)
+  - `format`: DataFormat - storage format (JSON, CSV, BINARY, TFRECORD, PARQUET)
+  - `labels`: String[] - labels for supervised learning
+- **Use Case**: Training ML models on automation behavior
+
+Example usage:
+```java
+@CollectData(
+    category = "click_accuracy",
+    captureScreenshots = true,
+    samplingRate = 0.1  // Collect 10% of executions
+)
+public ActionResult performCriticalClick(StateImage target) {
+    // Click logic that will have data collected
+    return action.click(target);
+}
+```
+
 ## Best Practices
 
 1. **Code Organization**
    - Keep states simple with direct access to components
-   - Use JavaStateTransition for code-based transitions
+   - Use @State and @Transition annotations for cleaner code
    - Separate transitions into dedicated classes
    - Use Spring dependency injection throughout
 
@@ -311,16 +389,16 @@ Brobot includes sensible defaults in `brobot-defaults.properties`. You only need
 # application.yml
 brobot:
   core:
-    image-path: classpath:images/    # Load from classpath (recommended)
+    image-path: images/              # Load from project root images folder
+    # image-path: classpath:images/  # Load from classpath (after build copies them)
     # image-path: /absolute/path/    # Absolute path
-    # image-path: relative/path/     # Relative to working directory
 ```
 
 ### Complete Configuration Example
 ```yaml
 brobot:
   core:
-    image-path: classpath:images/
+    image-path: images/
     mock: false
     headless: false
   startup:
@@ -334,6 +412,8 @@ brobot:
   screenshot:
     save-snapshots: false
     path: screenshots/
+  history:
+    path: history/                   # Path for illustrated test screenshots
 ```
 
 ## Initial State Verification (v1.1.0+)

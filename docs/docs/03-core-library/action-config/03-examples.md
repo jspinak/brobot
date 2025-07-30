@@ -415,8 +415,8 @@ for (ActionRecord record : result.getExecutionHistory()) {
 // Good: Type-safe and clear
 ClickOptions click = new ClickOptions.Builder().build();
 
-// Bad: Using generic ActionConfig
-ActionConfig click = new ClickOptions.Builder().build();
+// Avoid: Using generic ActionConfig
+ActionConfig genericClick = new ClickOptions.Builder().build();
 ```
 
 ### 2. Configure Timing Appropriately
