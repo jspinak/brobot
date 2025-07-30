@@ -74,7 +74,7 @@ public final class PatternFindOptions extends BaseFindOptions {
         super(builder);
         this.strategy = builder.strategy;
         this.doOnEach = builder.doOnEach;
-        this.matchFusionOptions = builder.matchFusionOptions.build();
+        this.matchFusionOptions = builder.matchFusionOptions;
     }
 
     @Override
@@ -138,10 +138,11 @@ public final class PatternFindOptions extends BaseFindOptions {
             .setStrategy(Strategy.BEST)
             .setSimilarity(0.9)
             .setCaptureImage(true)
-            .setMatchFusion(new MatchFusionOptions.Builder()
-                .setFusionMethod(MatchFusionOptions.FusionMethod.ABSOLUTE)
-                .setMaxFusionDistanceX(10)
-                .setMaxFusionDistanceY(10))
+            .setMatchFusion(MatchFusionOptions.builder()
+                .fusionMethod(MatchFusionOptions.FusionMethod.ABSOLUTE)
+                .maxFusionDistanceX(10)
+                .maxFusionDistanceY(10)
+                .build())
             .build();
     }
     
@@ -167,10 +168,11 @@ public final class PatternFindOptions extends BaseFindOptions {
             .setSimilarity(0.8)
             .setCaptureImage(false)
             .setMaxMatchesToActOn(-1)
-            .setMatchFusion(new MatchFusionOptions.Builder()
-                .setFusionMethod(MatchFusionOptions.FusionMethod.ABSOLUTE)
-                .setMaxFusionDistanceX(20)
-                .setMaxFusionDistanceY(20))
+            .setMatchFusion(MatchFusionOptions.builder()
+                .fusionMethod(MatchFusionOptions.FusionMethod.ABSOLUTE)
+                .maxFusionDistanceX(20)
+                .maxFusionDistanceY(20)
+                .build())
             .build();
     }
 
@@ -185,7 +187,7 @@ public final class PatternFindOptions extends BaseFindOptions {
         @JsonProperty("doOnEach")
         private DoOnEach doOnEach = DoOnEach.FIRST;
         @JsonProperty("matchFusionOptions")
-        private MatchFusionOptions.Builder matchFusionOptions = new MatchFusionOptions.Builder();
+        private MatchFusionOptions matchFusionOptions = MatchFusionOptions.builder().build();
 
         /**
          * Default constructor for creating a new PatternFindOptions configuration.
@@ -203,7 +205,7 @@ public final class PatternFindOptions extends BaseFindOptions {
             super(original);
             this.strategy = original.strategy;
             this.doOnEach = original.doOnEach;
-            this.matchFusionOptions = new MatchFusionOptions.Builder(original.matchFusionOptions);
+            this.matchFusionOptions = original.matchFusionOptions.toBuilder().build();
         }
 
         /**
@@ -233,8 +235,8 @@ public final class PatternFindOptions extends BaseFindOptions {
          * @param matchFusionBuilder A builder for MatchFusionOptions.
          * @return this Builder instance for chaining.
          */
-        public Builder setMatchFusion(MatchFusionOptions.Builder matchFusionBuilder) {
-            this.matchFusionOptions = matchFusionBuilder;
+        public Builder setMatchFusion(MatchFusionOptions matchFusionOptions) {
+            this.matchFusionOptions = matchFusionOptions;
             return self();
         }
 

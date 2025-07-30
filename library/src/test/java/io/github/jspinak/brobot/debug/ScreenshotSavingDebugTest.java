@@ -27,7 +27,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * Debug test to verify screenshot saving functionality.
  * This test helps diagnose why screenshots are not being saved in claude-automator.
  */
-@SpringBootTest
+@SpringBootTest(classes = io.github.jspinak.brobot.test.TestConfiguration.class, classes = io.github.jspinak.brobot.test.TestConfiguration.class)
 @TestPropertySource(properties = {
     "brobot.screenshot.save-history=true",
     "brobot.screenshot.history-path=history/",

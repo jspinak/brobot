@@ -103,7 +103,7 @@ class SingleClickExecutorTest {
                 .build();
         // Compare with: new ClickOptions.Builder()
         //     .setNumberOfClicks(2)
-        //     .setPressOptions(new MousePressOptions.Builder()
+        //     .setPressOptions(MousePressOptions.builder()
         //         .setPauseAfterMouseDown(0.1))
         //     .build()
 
@@ -167,8 +167,9 @@ class SingleClickExecutorTest {
         // Using the new ClickOptions API for double-click
         ClickOptions clickOptions = new ClickOptions.Builder()
             .setNumberOfClicks(2)
-            .setPressOptions(new MousePressOptions.Builder()
-                .setPauseAfterMouseDown(0.1))
+            .setPressOptions(MousePressOptions.builder()
+                .pauseAfterMouseDown(0.1)
+                .build())
             .build();
         
         when(location.sikuli()).thenReturn(mock(org.sikuli.script.Location.class));
@@ -184,8 +185,9 @@ class SingleClickExecutorTest {
     void click_shouldPerformRightClickWithClickOptions() {
         // Using the new ClickOptions API with MousePressOptions
         ClickOptions clickOptions = new ClickOptions.Builder()
-            .setPressOptions(new MousePressOptions.Builder()
-                .setButton(MouseButton.RIGHT))
+            .setPressOptions(MousePressOptions.builder()
+                .button(MouseButton.RIGHT)
+                .build())
             .build();
         
         singleClickExecutor.click(location, clickOptions);

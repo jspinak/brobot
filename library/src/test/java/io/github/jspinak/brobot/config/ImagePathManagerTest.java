@@ -12,7 +12,11 @@ import static org.junit.jupiter.api.Assertions.*;
  * Unit tests for ImagePathManager focusing on path resolution strategies.
  */
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class ImagePathManagerTest {
+@SpringBootTest(classes = io.github.jspinak.brobot.test.TestConfiguration.class)
+@TestPropertySource(properties = {
+    "brobot.image.base-path=src/test/resources/images",
+    "brobot.framework.mock=true"
+})public class ImagePathManagerTest {
     
     private Path tempDir;
     private ImagePathManager pathManager;

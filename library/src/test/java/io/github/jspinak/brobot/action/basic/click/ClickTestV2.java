@@ -80,8 +80,8 @@ class ClickTestV2 {
         
         // Using new ClickOptions API
         ClickOptions clickOptions = new ClickOptions.Builder()
-                .setRepetition(new RepetitionOptions.Builder()
-                    .setTimesToRepeatIndividualAction(1))
+                .setRepetition(RepetitionOptions.builder()
+                    .timesToRepeatIndividualAction(1))
                 .build();
 
         // Create matches with clickOptions
@@ -133,8 +133,8 @@ class ClickTestV2 {
         // Note: In the new architecture, Click uses Find internally.
         // To limit matches, you would need to configure the Find operation separately.
         ClickOptions clickOptions = new ClickOptions.Builder()
-                .setRepetition(new RepetitionOptions.Builder()
-                    .setTimesToRepeatIndividualAction(1))
+                .setRepetition(RepetitionOptions.builder()
+                    .timesToRepeatIndividualAction(1))
                 .build();
 
         // Create matches with clickOptions
@@ -176,8 +176,8 @@ class ClickTestV2 {
         
         // Using new ClickOptions API
         ClickOptions clickOptions = new ClickOptions.Builder()
-                .setRepetition(new RepetitionOptions.Builder()
-                    .setTimesToRepeatIndividualAction(3)) // Click each match 3 times
+                .setRepetition(RepetitionOptions.builder()
+                    .timesToRepeatIndividualAction(3)) // Click each match 3 times
                 .build();
 
         // Create matches with clickOptions
@@ -221,8 +221,8 @@ class ClickTestV2 {
         
         // Using new ClickOptions API with custom pause
         ClickOptions clickOptions = new ClickOptions.Builder()
-                .setRepetition(new RepetitionOptions.Builder()
-                    .setPauseBetweenIndividualActions(2.5)) // Custom pause
+                .setRepetition(RepetitionOptions.builder()
+                    .pauseBetweenIndividualActions(2.5)) // Custom pause
                 .build();
 
         // Create matches with clickOptions

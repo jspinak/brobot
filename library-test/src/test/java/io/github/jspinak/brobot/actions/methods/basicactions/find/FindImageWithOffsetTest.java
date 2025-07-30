@@ -121,11 +121,11 @@ public class FindImageWithOffsetTest extends BrobotIntegrationTestBase {
     }
 
     /**
-     * Test that Position set in ActionOptions overrides the Position in the Pattern.
-     * Verifies the priority of ActionOptions settings over Pattern settings.
+     * Test that Position set in Object// ActionOptions overrides the Position in the Pattern.
+     * Verifies the priority of Object// ActionOptions settings over Pattern settings.
      */
     @Test
-    void findWithPositionAndOffsetInActionOptions() {
+    void findWithPositionAndOffsetInObject// ActionOptions() {
         // Check if test images exist
         File screenshotFile = new File(TestPaths.getScreenshotPath("floranext0"));
         File patternFile = new File(TestPaths.getImagePath("topLeft"));
@@ -151,7 +151,7 @@ public class FindImageWithOffsetTest extends BrobotIntegrationTestBase {
                 .build();
         ActionResult matches = action.perform(new PatternFindOptions.Builder().build(), objColl);
         
-        // Test 2: Pattern with different position, but ActionOptions overrides
+        // Test 2: Pattern with different position, but Object// ActionOptions overrides
         StateImage topLeft2 = new StateImage.Builder()
                 .addPattern(new Pattern.Builder()
                         .setFilename(TestPaths.getImagePath("topLeft"))
@@ -178,19 +178,19 @@ public class FindImageWithOffsetTest extends BrobotIntegrationTestBase {
         
         // Verify both finds succeeded
         assertFalse(matches.isEmpty(), "Should find pattern with position/offset in pattern");
-        assertFalse(matches2.isEmpty(), "Should find pattern with position/offset in ActionOptions");
+        assertFalse(matches2.isEmpty(), "Should find pattern with position/offset in Object// ActionOptions");
         
         Location loc1 = matches.getMatchLocations().get(0);
         Location loc2 = matches2.getMatchLocations().get(0);
         
         System.out.println("Location from pattern settings: " + loc1);
-        System.out.println("Location from ActionOptions override: " + loc2);
+        System.out.println("Location from Object// ActionOptions override: " + loc2);
         
         // Both should have the same effective position and offset
         assertEquals(loc1.getCalculatedX(), loc2.getCalculatedX(), 
-                    "ActionOptions position should override pattern position");
+                    "Object// ActionOptions position should override pattern position");
         assertEquals(loc1.getCalculatedY(), loc2.getCalculatedY(), 
-                    "ActionOptions position should override pattern position");
+                    "Object// ActionOptions position should override pattern position");
         
         // Verify the offset was applied
         // Note: The actual calculation depends on where the pattern is found

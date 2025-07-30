@@ -23,7 +23,7 @@ import java.util.Optional;
  * 
  * Update TEST_IMAGE_PATH to point to your actual image file.
  */
-@SpringBootTest
+@SpringBootTest(classes = io.github.jspinak.brobot.test.TestConfiguration.class, classes = io.github.jspinak.brobot.test.TestConfiguration.class)
 public class SimpleImageMatchingDebugTest {
 
     @Autowired

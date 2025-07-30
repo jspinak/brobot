@@ -29,7 +29,7 @@ public final class MouseDownOptions extends ActionConfig {
 
     private MouseDownOptions(Builder builder) {
         super(builder);
-        this.mousePressOptions = builder.mousePressOptions.build();
+        this.mousePressOptions = builder.mousePressOptions;
     }
     
     /**
@@ -63,7 +63,7 @@ public final class MouseDownOptions extends ActionConfig {
     public static class Builder extends ActionConfig.Builder<Builder> {
 
         @JsonProperty("mousePressOptions")
-        private MousePressOptions.Builder mousePressOptions = new MousePressOptions.Builder();
+        private MousePressOptions mousePressOptions = MousePressOptions.builder().build();
 
         /**
          * Default constructor for creating a new MouseDownOptions configuration.
@@ -80,7 +80,7 @@ public final class MouseDownOptions extends ActionConfig {
         public Builder(MouseDownOptions original) {
             super(original);
             if (original != null) {
-                this.mousePressOptions = new MousePressOptions.Builder(original.mousePressOptions);
+                this.mousePressOptions = original.mousePressOptions.toBuilder().build();
             }
         }
 
@@ -92,8 +92,8 @@ public final class MouseDownOptions extends ActionConfig {
          * @param pressOptionsBuilder A builder for MousePressOptions
          * @return this Builder instance for chaining
          */
-        public Builder setPressOptions(MousePressOptions.Builder pressOptionsBuilder) {
-            this.mousePressOptions = pressOptionsBuilder;
+        public Builder setPressOptions(MousePressOptions pressOptions) {
+            this.mousePressOptions = pressOptions;
             return self();
         }
 

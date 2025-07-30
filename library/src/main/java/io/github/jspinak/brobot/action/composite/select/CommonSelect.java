@@ -196,8 +196,8 @@ public class CommonSelect {
         
         // Create DragOptions for swiping
         DragOptions swipeOptions = new DragOptions.Builder()
-                .setMousePressOptions(new MousePressOptions.Builder()
-                        .setPauseBeforeMouseUp(0.5)
+                .setMousePressOptions(MousePressOptions.builder()
+                        .pauseBeforeMouseUp(0.5)
                         .build())
                 .build();
         
@@ -212,8 +212,9 @@ public class CommonSelect {
         // Create ClickOptions for clicking on matches
         ClickOptions clickOptions = new ClickOptions.Builder()
                 .setNumberOfClicks(clicksPerImage)
-                .setPressOptions(new MousePressOptions.Builder()
-                        .setPauseAfterMouseUp(0.7)) // Pause between clicks
+                .setPressOptions(MousePressOptions.builder()
+                        .pauseAfterMouseUp(0.7)
+                        .build()) // Pause between clicks
                 .build();
         
         // Set up confirmation if needed

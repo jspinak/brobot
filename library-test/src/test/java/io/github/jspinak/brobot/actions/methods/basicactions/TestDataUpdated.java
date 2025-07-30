@@ -14,7 +14,7 @@ import java.util.List;
 
 /**
  * Updated TestData class that uses the new ActionConfig API.
- * Migrated from ActionOptions to DefineRegionOptions.
+ * Migrated from Object// ActionOptions to DefineRegionOptions.
  */
 @Getter
 public class TestDataUpdated {
@@ -77,7 +77,7 @@ public class TestDataUpdated {
                     .addPattern(bottomR)
                     .build();
             
-            // NEW API: Use DefineRegionOptions instead of ActionOptions
+            // NEW API: Use DefineRegionOptions instead of Object// ActionOptions
             defineInsideAnchors = new DefineRegionOptions.Builder()
                     .setDefineAs(DefineRegionOptions.DefineAs.INSIDE_ANCHORS)
                     .build();

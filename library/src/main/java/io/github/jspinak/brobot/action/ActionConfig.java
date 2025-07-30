@@ -6,7 +6,6 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import io.github.jspinak.brobot.tools.logging.model.LogEventType;
 import lombok.Getter;
 import lombok.Data;
-import lombok.Builder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -64,27 +63,27 @@ public abstract class ActionConfig {
      * Enables streamlined success/failure logging without manual checks.
      */
     @Data
-    @Builder
+    @lombok.Builder
     public static class LoggingOptions {
         private String beforeActionMessage;
         private String afterActionMessage;
         private String successMessage;
         private String failureMessage;
-        @Builder.Default
+        @lombok.Builder.Default
         private boolean logBeforeAction = false;
-        @Builder.Default
+        @lombok.Builder.Default
         private boolean logAfterAction = false;
-        @Builder.Default
+        @lombok.Builder.Default
         private boolean logOnSuccess = true;
-        @Builder.Default
+        @lombok.Builder.Default
         private boolean logOnFailure = true;
-        @Builder.Default
+        @lombok.Builder.Default
         private LogEventType beforeActionLevel = LogEventType.ACTION;
-        @Builder.Default
+        @lombok.Builder.Default
         private LogEventType afterActionLevel = LogEventType.ACTION;
-        @Builder.Default
+        @lombok.Builder.Default
         private LogEventType successLevel = LogEventType.ACTION;
-        @Builder.Default
+        @lombok.Builder.Default
         private LogEventType failureLevel = LogEventType.ERROR;
         
         /**

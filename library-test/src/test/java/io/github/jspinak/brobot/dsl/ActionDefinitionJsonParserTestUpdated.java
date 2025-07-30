@@ -311,11 +311,11 @@ public class ActionDefinitionJsonParserTestUpdated {
     }
 
     /**
-     * Test backward compatibility - parsing old ActionOptions JSON should still work
+     * Test backward compatibility - parsing old Object// ActionOptions JSON should still work
      */
     @Test
-    public void testBackwardCompatibilityWithActionOptions() throws ConfigurationException {
-        // Old format JSON with ActionOptions
+    public void testBackwardCompatibilityWithObject// ActionOptions() throws ConfigurationException {
+        // Old format JSON with Object// ActionOptions
         String oldFormatJson = """
                 {
                   "steps": [

@@ -49,9 +49,10 @@ class ClickOptionsTest {
     @Test
     void builder_shouldSetMousePressOptions() {
         ClickOptions options = new ClickOptions.Builder()
-            .setPressOptions(new MousePressOptions.Builder()
-                .setButton(MouseButton.RIGHT)
-                .setPauseAfterMouseDown(0.5))
+            .setPressOptions(MousePressOptions.builder()
+                .button(MouseButton.RIGHT)
+                .pauseAfterMouseDown(0.5)
+                .build())
             .build();
         
         assertEquals(MouseButton.RIGHT, options.getMousePressOptions().getButton());
@@ -61,9 +62,9 @@ class ClickOptionsTest {
     @Test
     void builder_shouldSetVerificationOptions() {
         ClickOptions options = new ClickOptions.Builder()
-            .setVerification(new VerificationOptions.Builder()
-                .setEvent(VerificationOptions.Event.TEXT_APPEARS)
-                .setText("Success"))
+            .setVerification(VerificationOptions.builder()
+                .event(VerificationOptions.Event.TEXT_APPEARS)
+                .text("Success"))
             .build();
         
         assertEquals(VerificationOptions.Event.TEXT_APPEARS, 
@@ -74,9 +75,9 @@ class ClickOptionsTest {
     @Test
     void builder_shouldSetRepetitionOptions() {
         ClickOptions options = new ClickOptions.Builder()
-            .setRepetition(new RepetitionOptions.Builder()
-                .setTimesToRepeatIndividualAction(5)
-                .setPauseBetweenIndividualActions(1.0))
+            .setRepetition(RepetitionOptions.builder()
+                .timesToRepeatIndividualAction(5)
+                .pauseBetweenIndividualActions(1.0))
             .build();
         
         assertEquals(5, options.getRepetitionOptions().getTimesToRepeatIndividualAction());
@@ -119,10 +120,11 @@ class ClickOptionsTest {
     void builder_shouldCreateFromExistingOptions() {
         ClickOptions original = new ClickOptions.Builder()
             .setNumberOfClicks(2)
-            .setPressOptions(new MousePressOptions.Builder()
-                .setButton(MouseButton.RIGHT))
-            .setRepetition(new RepetitionOptions.Builder()
-                .setTimesToRepeatIndividualAction(3))
+            .setPressOptions(MousePressOptions.builder()
+                .button(MouseButton.RIGHT)
+                .build())
+            .setRepetition(RepetitionOptions.builder()
+                .timesToRepeatIndividualAction(3))
             .setPauseBeforeBegin(1.0)
             .setPauseAfterEnd(2.0)
             .build();

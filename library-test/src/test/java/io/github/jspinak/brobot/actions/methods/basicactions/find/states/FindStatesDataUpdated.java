@@ -14,7 +14,7 @@ import java.util.List;
 
 /**
  * Updated FindStatesData class that uses the new ActionConfig API.
- * Migrated from ActionOptions to TextFindOptions and PatternFindOptions.
+ * Migrated from Object// ActionOptions to TextFindOptions and PatternFindOptions.
  */
 public class FindStatesDataUpdated {
 

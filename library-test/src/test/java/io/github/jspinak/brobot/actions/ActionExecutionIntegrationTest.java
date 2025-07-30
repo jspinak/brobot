@@ -28,7 +28,7 @@ import io.github.jspinak.brobot.BrobotTestApplication;
  * Integration tests for the Action execution system.
  * 
  * These tests verify the integration between:
- * - ActionOptions API
+ * - Object// ActionOptions API
  * - Action class and its dependencies
  * - Spring context and dependency injection
  * - Action execution pipeline
@@ -68,7 +68,7 @@ class ActionExecutionIntegrationTest {
     @Test
     @Order(2)
     @Disabled("Spring configuration issue: multiple primary ExecutionController beans")
-    void testClickActionWithActionOptions() {
+    void testClickActionWithObject// ActionOptions() {
         // Setup
         ObjectCollection objectCollection = new ObjectCollection.Builder()
             .withRegions(new Region(100, 100, 50, 50))
@@ -89,7 +89,7 @@ class ActionExecutionIntegrationTest {
     
     @Test
     @Order(3)
-    void testFindActionWithActionOptions() {
+    void testFindActionWithObject// ActionOptions() {
         // Setup
         List<Region> searchRegions = List.of(
             new Region(0, 0, 100, 100),
@@ -116,7 +116,7 @@ class ActionExecutionIntegrationTest {
     
     @Test
     @Order(4)
-    void testDragActionWithActionOptions() {
+    void testDragActionWithObject// ActionOptions() {
         // Setup
         Region fromRegion = new Region(50, 50, 20, 20);
         

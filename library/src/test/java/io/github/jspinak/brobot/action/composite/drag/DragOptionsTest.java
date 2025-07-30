@@ -25,10 +25,10 @@ class DragOptionsTest {
     @Test
     void testBuilder_WithCustomMousePressOptions() {
         // Arrange
-        MousePressOptions mousePressOptions = new MousePressOptions.Builder()
-                .setButton(MouseButton.RIGHT)
-                .setPauseAfterMouseDown(1.0)
-                .setPauseAfterMouseUp(0.8)
+        MousePressOptions mousePressOptions = MousePressOptions.builder()
+                .button(MouseButton.RIGHT)
+                .pauseAfterMouseDown(1.0)
+                .pauseAfterMouseUp(0.8)
                 .build();
 
         // Act
@@ -63,8 +63,8 @@ class DragOptionsTest {
     @Test
     void testBuilder_WithMiddleMouseButton() {
         // Arrange
-        MousePressOptions middleButtonOptions = new MousePressOptions.Builder()
-                .setButton(MouseButton.MIDDLE)
+        MousePressOptions middleButtonOptions = MousePressOptions.builder()
+                .button(MouseButton.MIDDLE)
                 .build();
 
         // Act
@@ -97,9 +97,9 @@ class DragOptionsTest {
     void testBuilder_ChainedConfiguration() {
         // Act
         DragOptions options = new DragOptions.Builder()
-                .setMousePressOptions(new MousePressOptions.Builder()
-                        .setButton(MouseButton.RIGHT)
-                        .setPauseAfterMouseDown(0.3)
+                .setMousePressOptions(MousePressOptions.builder()
+                        .button(MouseButton.RIGHT)
+                        .pauseAfterMouseDown(0.3)
                         .build())
                 .setDelayBetweenMouseDownAndMove(0.7)
                 .setDelayAfterDrag(1.3)
@@ -119,9 +119,9 @@ class DragOptionsTest {
     @Test
     void testBuilder_ModifyMousePressOptionsAfterSetting() {
         // Arrange
-        MousePressOptions originalPress = new MousePressOptions.Builder()
-                .setButton(MouseButton.LEFT)
-                .setPauseAfterMouseDown(0.5)
+        MousePressOptions originalPress = MousePressOptions.builder()
+                .button(MouseButton.LEFT)
+                .pauseAfterMouseDown(0.5)
                 .build();
 
         // Act
@@ -130,9 +130,9 @@ class DragOptionsTest {
                 .build();
                 
         DragOptions drag2 = new DragOptions.Builder()
-                .setMousePressOptions(new MousePressOptions.Builder()
-                        .setButton(MouseButton.RIGHT)
-                        .setPauseAfterMouseDown(1.0)
+                .setMousePressOptions(MousePressOptions.builder()
+                        .button(MouseButton.RIGHT)
+                        .pauseAfterMouseDown(1.0)
                         .build())
                 .build();
 
@@ -164,7 +164,7 @@ class DragOptionsTest {
         DragOptions options = new DragOptions.Builder()
                 .setDelayBetweenMouseDownAndMove(1.0)
                 .setPauseBeforeBegin(0.5)  // From ActionConfig
-                .setMousePressOptions(new MousePressOptions.Builder().build())
+                .setMousePressOptions(MousePressOptions.builder().build())
                 .setDelayAfterDrag(1.5)
                 .setPauseAfterEnd(0.8)  // From ActionConfig
                 .build();

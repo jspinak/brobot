@@ -25,10 +25,10 @@ import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Updated tests for double-click functionality using the new ActionConfig API.
- * Demonstrates migration from ActionOptions to ClickOptions.
+ * Demonstrates migration from Object// ActionOptions to ClickOptions.
  * 
  * Key changes:
- * - Uses ClickOptions instead of generic ActionOptions
+ * - Uses ClickOptions instead of generic Object// ActionOptions
  * - ActionResult requires setActionConfig() before perform()
  * - Uses ActionService to get the appropriate action
  * - ClickType.Type is now ClickOptions.Type
@@ -238,8 +238,8 @@ public class DoubleClickTestUpdated extends BrobotIntegrationTestBase {
         
         // OLD API (commented out):
         /*
-        ActionOptions oldOptions = new ActionOptions.Builder()
-                .setAction(ActionOptions.Action.CLICK)
+        Object// ActionOptions oldOptions = new ActionOptions.Builder()
+                .setAction(Object// ActionOptions.Action.CLICK)
                 .setClickType(ClickType.Type.DOUBLE_LEFT)
                 .setPauseBeforeMouseDown(2.0)
                 .build();

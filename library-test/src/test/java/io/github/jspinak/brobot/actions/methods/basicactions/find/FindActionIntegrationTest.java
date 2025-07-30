@@ -25,12 +25,12 @@ import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Integration tests for find actions using the Action class.
- * These tests run in mock mode to verify the integration of ActionOptions,
+ * These tests run in mock mode to verify the integration of Object// ActionOptions,
  * ObjectCollections, and the Action execution flow without requiring
  * actual image recognition capabilities.
  * 
  * The tests validate:
- * - Proper configuration of ActionOptions for different find types
+ * - Proper configuration of Object// ActionOptions for different find types
  * - Correct handling of ObjectCollections with StateImages and patterns
  * - Integration with the Spring context and autowired components
  * - Various find operation parameters (similarity, timeout, areas, etc.)

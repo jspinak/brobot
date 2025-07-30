@@ -22,6 +22,7 @@ import io.github.jspinak.brobot.action.basic.mouse.ScrollOptions;
 import io.github.jspinak.brobot.action.basic.type.KeyDownOptions;
 import io.github.jspinak.brobot.action.basic.type.KeyUpOptions;
 import io.github.jspinak.brobot.action.basic.find.color.ColorFindOptions;
+import io.github.jspinak.brobot.action.basic.mouse.MousePressOptions;
 
 import org.springframework.stereotype.Component;
 
@@ -589,11 +590,15 @@ public class Action {
                     .build();
             case RIGHT_CLICK:
                 return new ClickOptions.Builder()
-                    .setClickType(ClickOptions.Type.RIGHT)
+                    .setPressOptions(MousePressOptions.builder()
+                        .button(io.github.jspinak.brobot.model.action.MouseButton.RIGHT)
+                        .build())
                     .build();
             case MIDDLE_CLICK:
                 return new ClickOptions.Builder()
-                    .setClickType(ClickOptions.Type.MIDDLE)
+                    .setPressOptions(MousePressOptions.builder()
+                        .button(io.github.jspinak.brobot.model.action.MouseButton.MIDDLE)
+                        .build())
                     .build();
             case HIGHLIGHT:
                 return new HighlightOptions.Builder().build();

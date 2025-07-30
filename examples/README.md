@@ -1,60 +1,60 @@
 # Brobot Examples
 
-This directory contains working examples that demonstrate various features of the Brobot automation framework.
+This folder contains example projects demonstrating Brobot features, organized to match the documentation structure.
 
-## Available Examples
+## Structure
 
-### 1. Quick Start (`quick-start/`)
-A minimal example showing basic find and click operations.
-- Basic StateImage usage
-- PatternFindOptions configurations
-- Simple action execution
-- Spring Boot integration
+Examples are organized by documentation section:
 
-### 2. Claude Automator (`claude-automator/`)
-A complete example demonstrating advanced features:
-- Annotation-based state management (`@State`, `@Transition`)
-- Continuous monitoring with scheduled tasks
-- Action chaining (find → click → type)
-- State transitions and navigation
-- Automatic state recovery
+### 01-getting-started/
+- **quick-start** - Basic Brobot setup and simple automation
+- **pure-actions-quickstart** - New Pure Actions API for cleaner code
+- **action-hierarchy** - Understanding Basic and Complex Actions
 
-### 3. Login Automation (`LoginAutomationExample.java`)
-A standalone example showing:
-- Login workflow automation
-- Retry logic implementation
-- State verification
-- Error handling
+### 03-core-library/
 
-## Getting Started
+#### guides/
+- **automatic-action-logging** - Built-in logging functionality
+- **advanced-illustration-system** - Visual debugging and analysis
+- **finding-objects/**
+  - **using-color** - Color-based object detection
+  - **combining-finds** - Nested and confirmed find operations
+  - **movement** - Motion detection across scenes
 
-Each example includes:
-- Complete source code
-- Build configuration (`build.gradle`)
-- README with detailed instructions
-- Required directory structure
+#### action-config/
+- **examples** - Form automation and validation
+- **conditional-chains-examples** - ConditionalActionChain patterns
 
-## Building Examples
+#### tutorials/
+- **tutorial-basics** - State management fundamentals
+- **tutorial-claude-automator** - Annotation-driven automation
 
-All examples use Gradle and can be built with:
-```bash
-cd example-name
-./gradlew build
-```
+### 04-testing/
+- **unit-testing** - Testing Brobot automations
+- **enhanced-mocking** - Advanced mocking capabilities
 
-## Requirements
+## Running Examples
 
-- Java 21 or higher
-- Gradle 8.x
-- Screenshot images of UI elements to automate
+Each example is a standalone Spring Boot project:
 
-## Learning Path
+1. Navigate to the example directory
+2. Build: `./gradlew build`
+3. Run: `./gradlew bootRun`
+4. See the example's README for specific instructions
 
-1. Start with `quick-start` to understand basic concepts
-2. Move to `LoginAutomationExample.java` for workflow patterns
-3. Explore `claude-automator` for advanced features and best practices
+## Documentation Links
 
-## Documentation
+Each example corresponds to documentation pages. The README in each project shows the exact documentation page(s) it demonstrates.
 
-For more information, see the main Brobot documentation at:
-https://jspinak.github.io/brobot/
+## Prerequisites
+
+- Java 11 or higher
+- Gradle (wrapper included in each project)
+- Brobot 1.1.0 or higher
+
+## Finding Examples
+
+To find examples for a specific topic:
+1. Check the documentation page you're reading
+2. Look for the corresponding example in this folder structure
+3. The example code matches the documentation code exactly

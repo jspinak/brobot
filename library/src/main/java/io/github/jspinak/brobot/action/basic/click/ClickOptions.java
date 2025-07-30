@@ -75,7 +75,7 @@ public final class ClickOptions extends ActionConfig {
     private ClickOptions(Builder builder) {
         super(builder); // Initialize common ActionConfig fields
         this.numberOfClicks = builder.numberOfClicks;
-        this.mousePressOptions = builder.mousePressOptions.build();
+        this.mousePressOptions = builder.mousePressOptions;
         this.verificationOptions = builder.verificationOptions.build(); // Build the composed object
         this.repetitionOptions = builder.repetitionOptions.build();
         
@@ -108,11 +108,11 @@ public final class ClickOptions extends ActionConfig {
         @JsonProperty("numberOfClicks")
         private int numberOfClicks = 1;
         @JsonProperty("mousePressOptions")
-        private MousePressOptions.Builder mousePressOptions = new MousePressOptions.Builder(); // Default: LEFT button with default timings
+        private MousePressOptions mousePressOptions = MousePressOptions.builder().build(); // Default: LEFT button with default timings
         @JsonProperty("verificationOptions")
-        private VerificationOptions.Builder verificationOptions = new VerificationOptions.Builder(); // Default: no verification
+        private VerificationOptions.VerificationOptionsBuilder verificationOptions = VerificationOptions.builder(); // Default: no verification
         @JsonProperty("repetitionOptions")
-        private RepetitionOptions.Builder repetitionOptions = new RepetitionOptions.Builder(); // Default: single repetition
+        private RepetitionOptions.RepetitionOptionsBuilder repetitionOptions = RepetitionOptions.builder(); // Default: single repetition
         
         // Deprecated field for backward compatibility
         @Deprecated
@@ -134,9 +134,9 @@ public final class ClickOptions extends ActionConfig {
         public Builder(ClickOptions original) {
             super(original); // Call parent copy logic
             this.numberOfClicks = original.numberOfClicks;
-            this.mousePressOptions = new MousePressOptions.Builder(original.mousePressOptions);
-            this.verificationOptions = new VerificationOptions.Builder(original.verificationOptions);
-            this.repetitionOptions = new RepetitionOptions.Builder(original.repetitionOptions);
+            this.mousePressOptions = original.mousePressOptions.toBuilder().build();
+            this.verificationOptions = original.verificationOptions.toBuilder();
+            this.repetitionOptions = original.repetitionOptions.toBuilder();
             this.clickType = original.clickType; // For backward compatibility
         }
 
@@ -163,28 +163,28 @@ public final class ClickOptions extends ActionConfig {
             switch (clickType) {
                 case DOUBLE_LEFT:
                     this.numberOfClicks = 2;
-                    this.mousePressOptions.setButton(io.github.jspinak.brobot.model.action.MouseButton.LEFT);
+                    this.mousePressOptions = this.mousePressOptions.toBuilder().button(io.github.jspinak.brobot.model.action.MouseButton.LEFT).build();
                     break;
                 case DOUBLE_RIGHT:
                     this.numberOfClicks = 2;
-                    this.mousePressOptions.setButton(io.github.jspinak.brobot.model.action.MouseButton.RIGHT);
+                    this.mousePressOptions = this.mousePressOptions.toBuilder().button(io.github.jspinak.brobot.model.action.MouseButton.RIGHT).build();
                     break;
                 case DOUBLE_MIDDLE:
                     this.numberOfClicks = 2;
-                    this.mousePressOptions.setButton(io.github.jspinak.brobot.model.action.MouseButton.MIDDLE);
+                    this.mousePressOptions = this.mousePressOptions.toBuilder().button(io.github.jspinak.brobot.model.action.MouseButton.MIDDLE).build();
                     break;
                 case RIGHT:
                     this.numberOfClicks = 1;
-                    this.mousePressOptions.setButton(io.github.jspinak.brobot.model.action.MouseButton.RIGHT);
+                    this.mousePressOptions = this.mousePressOptions.toBuilder().button(io.github.jspinak.brobot.model.action.MouseButton.RIGHT).build();
                     break;
                 case MIDDLE:
                     this.numberOfClicks = 1;
-                    this.mousePressOptions.setButton(io.github.jspinak.brobot.model.action.MouseButton.MIDDLE);
+                    this.mousePressOptions = this.mousePressOptions.toBuilder().button(io.github.jspinak.brobot.model.action.MouseButton.MIDDLE).build();
                     break;
                 case LEFT:
                 default:
                     this.numberOfClicks = 1;
-                    this.mousePressOptions.setButton(io.github.jspinak.brobot.model.action.MouseButton.LEFT);
+                    this.mousePressOptions = this.mousePressOptions.toBuilder().button(io.github.jspinak.brobot.model.action.MouseButton.LEFT).build();
                     break;
             }
             return self();
@@ -195,8 +195,8 @@ public final class ClickOptions extends ActionConfig {
          * @param pressOptionsBuilder A builder for MousePressOptions.
          * @return this Builder instance for chaining.
          */
-        public Builder setPressOptions(MousePressOptions.Builder pressOptionsBuilder) {
-            this.mousePressOptions = pressOptionsBuilder;
+        public Builder setPressOptions(MousePressOptions pressOptions) {
+            this.mousePressOptions = pressOptions;
             return self();
         }
 
@@ -207,7 +207,7 @@ public final class ClickOptions extends ActionConfig {
          * @param verificationOptionsBuilder The builder for the verification options.
          * @return this Builder instance for chaining.
          */
-        public Builder setVerification(VerificationOptions.Builder verificationOptionsBuilder) {
+        public Builder setVerification(VerificationOptions.VerificationOptionsBuilder verificationOptionsBuilder) {
             this.verificationOptions = verificationOptionsBuilder;
             return self();
         }
@@ -218,7 +218,7 @@ public final class ClickOptions extends ActionConfig {
          * @param repetitionOptionsBuilder The builder for the repetition options.
          * @return this Builder instance for chaining.
          */
-        public Builder setRepetition(RepetitionOptions.Builder repetitionOptionsBuilder) {
+        public Builder setRepetition(RepetitionOptions.RepetitionOptionsBuilder repetitionOptionsBuilder) {
             this.repetitionOptions = repetitionOptionsBuilder;
             return self();
         }

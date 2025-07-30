@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.actions.methods.basicactions.find.matchManagement;
 
-import io.github.jspinak.brobot.action.ActionOptions;
+// Removed: Object// ActionOptions no longer exists
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.BrobotTestApplication;
@@ -35,8 +35,8 @@ class MatchFusionTest {
         Match match4 = new Match.Builder().setRegion(30,34,30,20).build();
         ActionResult matches = new ActionResult();
         matches.add(match1, match2, match3, match4);
-        matches.setActionOptions(new ActionOptions.Builder().setFusionMethod(ActionOptions.MatchFusionMethod.ABSOLUTE).build());
-        List<Match> fusedMatches = matchFusion.getFusedMatchObjects(matches.getMatchList(), matches.getActionOptions());
+        matches.setObject// ActionOptions(new ActionOptions.Builder().setFusionMethod(ActionOptions.MatchFusionMethod.ABSOLUTE).build());
+        List<Match> fusedMatches = matchFusion.getFusedMatchObjects(matches.getMatchList(), matches.getObject// ActionOptions());
         fusedMatches.forEach(System.out::println);
         assertEquals(2, fusedMatches.size());
         Match fusedMatch = fusedMatches.get(0);

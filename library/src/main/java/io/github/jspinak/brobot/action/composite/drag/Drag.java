@@ -167,7 +167,7 @@ public class Drag implements ActionInterface {
         
         // Step 4: Mouse down at source
         MouseDownOptions mouseDownOptions = new MouseDownOptions.Builder()
-            .setPressOptions(new MousePressOptions.Builder(dragOptions.getMousePressOptions()))
+            .setPressOptions(dragOptions.getMousePressOptions().toBuilder().build())
             .setPauseAfterEnd(dragOptions.getDelayBetweenMouseDownAndMove())
             .build();
         
@@ -178,7 +178,7 @@ public class Drag implements ActionInterface {
         
         // Step 6: Mouse up at target
         MouseUpOptions mouseUpOptions = new MouseUpOptions.Builder()
-            .setPressOptions(new MousePressOptions.Builder(dragOptions.getMousePressOptions()))
+            .setPressOptions(dragOptions.getMousePressOptions().toBuilder().build())
             .setPauseAfterEnd(dragOptions.getDelayAfterDrag())
             .build();
         
