@@ -79,7 +79,10 @@ public class TaskSequence {
      * @param objects The target objects for the initial step
      */
     public TaskSequence(ActionConfig config, ObjectCollection objects) {
-        steps.add(new ActionStep(config, objects));
+        ActionStep step = new ActionStep();
+        step.setActionConfig(config);
+        step.setObjectCollection(objects);
+        steps.add(step);
     }
 
     /**
@@ -90,7 +93,10 @@ public class TaskSequence {
      * @param objects The target objects for the new step
      */
     public void addStep(ActionConfig config, ObjectCollection objects) {
-        steps.add(new ActionStep(config, objects));
+        ActionStep step = new ActionStep();
+        step.setActionConfig(config);
+        step.setObjectCollection(objects);
+        steps.add(step);
     }
 
     /**

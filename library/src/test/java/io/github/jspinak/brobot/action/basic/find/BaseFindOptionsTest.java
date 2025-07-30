@@ -109,11 +109,12 @@ class BaseFindOptionsTest {
     @Test
     void builder_shouldSetMatchAdjustmentOptions() {
         TestFindOptions options = new TestFindOptions.Builder()
-            .setMatchAdjustment(new MatchAdjustmentOptions.Builder()
-                .setAddX(10)
-                .setAddY(20)
-                .setAddW(30)
-                .setAddH(40))
+            .setMatchAdjustment(MatchAdjustmentOptions.builder()
+                .addX(10)
+                .addY(20)
+                .addW(30)
+                .addH(40)
+                .build())
             .build();
         
         MatchAdjustmentOptions adjustment = options.getMatchAdjustmentOptions();

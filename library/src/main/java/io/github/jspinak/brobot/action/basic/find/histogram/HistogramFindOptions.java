@@ -36,7 +36,7 @@ public final class HistogramFindOptions extends BaseFindOptions {
      * Builder for constructing {@link HistogramFindOptions} with a fluent API.
      */
     public static class Builder extends BaseFindOptions.Builder<Builder> {
-        private HSVBinOptions.Builder binOptions = new HSVBinOptions.Builder();
+        private HSVBinOptions.HSVBinOptionsBuilder binOptions = HSVBinOptions.builder();
 
         /**
          * Default constructor for creating a new HistogramFindOptions configuration.
@@ -51,7 +51,7 @@ public final class HistogramFindOptions extends BaseFindOptions {
          */
         public Builder(HistogramFindOptions original) {
             super(original);
-            this.binOptions = new HSVBinOptions.Builder(original.binOptions);
+            this.binOptions = original.binOptions.toBuilder();
         }
 
         /**
@@ -59,7 +59,7 @@ public final class HistogramFindOptions extends BaseFindOptions {
          * @param binOptionsBuilder A builder for HSV bins.
          * @return this Builder instance for chaining.
          */
-        public Builder setBinOptions(HSVBinOptions.Builder binOptionsBuilder) {
+        public Builder setBinOptions(HSVBinOptions.HSVBinOptionsBuilder binOptionsBuilder) {
             this.binOptions = binOptionsBuilder;
             return self();
         }

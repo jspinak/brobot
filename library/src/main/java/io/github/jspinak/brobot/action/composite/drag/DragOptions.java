@@ -38,8 +38,8 @@ public final class DragOptions extends ActionConfig {
     public static class Builder extends ActionConfig.Builder<Builder> {
         
         @JsonProperty("mousePressOptions")
-        private MousePressOptions mousePressOptions = new MousePressOptions.Builder()
-            .setButton(MouseButton.LEFT)
+        private MousePressOptions mousePressOptions = MousePressOptions.builder()
+            .button(MouseButton.LEFT)
             .build();
         @JsonProperty("delayBetweenMouseDownAndMove")
         private double delayBetweenMouseDownAndMove = 0.5;

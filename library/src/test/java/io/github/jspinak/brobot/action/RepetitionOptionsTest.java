@@ -11,7 +11,7 @@ class RepetitionOptionsTest {
     
     @Test
     void builder_shouldSetDefaultValues() {
-        RepetitionOptions options = new RepetitionOptions.Builder().build();
+        RepetitionOptions options = RepetitionOptions.builder().build();
         
         assertEquals(1, options.getTimesToRepeatIndividualAction());
         assertEquals(1, options.getMaxTimesToRepeatActionSequence());
@@ -21,8 +21,8 @@ class RepetitionOptionsTest {
     
     @Test
     void builder_shouldSetTimesToRepeatIndividualAction() {
-        RepetitionOptions options = new RepetitionOptions.Builder()
-            .setTimesToRepeatIndividualAction(5)
+        RepetitionOptions options = RepetitionOptions.builder()
+            .timesToRepeatIndividualAction(5)
             .build();
         
         assertEquals(5, options.getTimesToRepeatIndividualAction());
@@ -30,8 +30,8 @@ class RepetitionOptionsTest {
     
     @Test
     void builder_shouldSetMaxTimesToRepeatActionSequence() {
-        RepetitionOptions options = new RepetitionOptions.Builder()
-            .setMaxTimesToRepeatActionSequence(3)
+        RepetitionOptions options = RepetitionOptions.builder()
+            .maxTimesToRepeatActionSequence(3)
             .build();
         
         assertEquals(3, options.getMaxTimesToRepeatActionSequence());
@@ -39,8 +39,8 @@ class RepetitionOptionsTest {
     
     @Test
     void builder_shouldSetPauseBetweenIndividualActions() {
-        RepetitionOptions options = new RepetitionOptions.Builder()
-            .setPauseBetweenIndividualActions(1.5)
+        RepetitionOptions options = RepetitionOptions.builder()
+            .pauseBetweenIndividualActions(1.5)
             .build();
         
         assertEquals(1.5, options.getPauseBetweenIndividualActions());
@@ -48,8 +48,8 @@ class RepetitionOptionsTest {
     
     @Test
     void builder_shouldSetPauseBetweenActionSequences() {
-        RepetitionOptions options = new RepetitionOptions.Builder()
-            .setPauseBetweenActionSequences(2.0)
+        RepetitionOptions options = RepetitionOptions.builder()
+            .pauseBetweenActionSequences(2.0)
             .build();
         
         assertEquals(2.0, options.getPauseBetweenActionSequences());
@@ -57,11 +57,11 @@ class RepetitionOptionsTest {
     
     @Test
     void builder_shouldSetAllValues() {
-        RepetitionOptions options = new RepetitionOptions.Builder()
-            .setTimesToRepeatIndividualAction(3)
-            .setMaxTimesToRepeatActionSequence(5)
-            .setPauseBetweenIndividualActions(0.5)
-            .setPauseBetweenActionSequences(1.0)
+        RepetitionOptions options = RepetitionOptions.builder()
+            .timesToRepeatIndividualAction(3)
+            .maxTimesToRepeatActionSequence(5)
+            .pauseBetweenIndividualActions(0.5)
+            .pauseBetweenActionSequences(1.0)
             .build();
         
         assertEquals(3, options.getTimesToRepeatIndividualAction());
@@ -72,14 +72,14 @@ class RepetitionOptionsTest {
     
     @Test
     void builder_shouldCreateFromExistingOptions() {
-        RepetitionOptions original = new RepetitionOptions.Builder()
-            .setTimesToRepeatIndividualAction(2)
-            .setMaxTimesToRepeatActionSequence(4)
-            .setPauseBetweenIndividualActions(0.25)
-            .setPauseBetweenActionSequences(0.75)
+        RepetitionOptions original = RepetitionOptions.builder()
+            .timesToRepeatIndividualAction(2)
+            .maxTimesToRepeatActionSequence(4)
+            .pauseBetweenIndividualActions(0.25)
+            .pauseBetweenActionSequences(0.75)
             .build();
             
-        RepetitionOptions copy = new RepetitionOptions.Builder(original).build();
+        RepetitionOptions copy = original.toBuilder().build();
         
         assertEquals(original.getTimesToRepeatIndividualAction(), 
             copy.getTimesToRepeatIndividualAction());
@@ -94,7 +94,7 @@ class RepetitionOptionsTest {
     @Test
     void builder_shouldHandleNullOriginal() {
         // Should not throw exception when original is null
-        RepetitionOptions options = new RepetitionOptions.Builder(null).build();
+        RepetitionOptions options = RepetitionOptions.builder().build();
         
         // Should have default values
         assertEquals(1, options.getTimesToRepeatIndividualAction());

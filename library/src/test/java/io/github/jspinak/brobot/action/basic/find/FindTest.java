@@ -301,8 +301,9 @@ class FindTest {
         // Arrange
         PatternFindOptions fusionOptions = new PatternFindOptions.Builder()
                 .setStrategy(PatternFindOptions.Strategy.ALL)
-                .setMatchFusion(new MatchFusionOptions.Builder()
-                        .setFusionMethod(MatchFusionOptions.FusionMethod.ABSOLUTE))
+                .setMatchFusion(MatchFusionOptions.builder()
+                        .fusionMethod(MatchFusionOptions.FusionMethod.ABSOLUTE)
+                        .build())
                 .build();
 
         ActionResult actionResult = new ActionResult();

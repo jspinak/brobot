@@ -25,11 +25,11 @@ import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Updated tests for scene combinations using new ActionConfig API.
- * Demonstrates migration from ActionOptions.Action.FIND with Find.ALL_WORDS
+ * Demonstrates migration from Object// ActionOptions.Action.FIND with Find.ALL_WORDS
  * to TextFindOptions.
  * 
  * Key changes:
- * - Uses TextFindOptions instead of generic ActionOptions for OCR
+ * - Uses TextFindOptions instead of generic Object// ActionOptions for OCR
  * - ActionResult requires setActionConfig() before perform()
  * - Uses ActionService to get the appropriate action
  * - TextFindOptions automatically uses ALL_WORDS strategy
@@ -162,9 +162,9 @@ class GetSceneCombinationsTestUpdated {
         
         // OLD API (commented out):
         /*
-        ActionOptions oldOptions = new ActionOptions.Builder()
-                .setAction(ActionOptions.Action.FIND)
-                .setFind(ActionOptions.Find.ALL_WORDS)
+        Object// ActionOptions oldOptions = new ActionOptions.Builder()
+                .setAction(Object// ActionOptions.Action.FIND)
+                .setFind(Object// ActionOptions.Find.ALL_WORDS)
                 .build();
         ActionResult matches = action.perform(oldOptions, objColl);
         */
@@ -175,7 +175,7 @@ class GetSceneCombinationsTestUpdated {
                 .build();
         
         // The new API provides OCR-specific parameters
-        // that were not available in the generic ActionOptions
+        // that were not available in the generic Object// ActionOptions
         assertNotNull(newOptions);
         
         // TextFindOptions automatically uses ALL_WORDS strategy for text finding

@@ -1,6 +1,7 @@
 package io.github.jspinak.brobot.action;
 
 import io.github.jspinak.brobot.action.ObjectCollection;
+import lombok.Builder;
 import lombok.Getter;
 
 /**
@@ -10,10 +11,10 @@ import lombok.Getter;
  * condition, such as the appearance of text or an image, is met. It allows any
  * action to be converted into a "wait-like" operation.
  * <p>
- * It is an immutable object designed to be composed within other {@code Options} classes
- * and should be constructed using its inner {@link Builder}.
+ * It is an immutable object designed to be composed within other {@code Options} classes.
  */
 @Getter
+@Builder(toBuilder = true)
 public final class VerificationOptions {
 
     /**
@@ -42,58 +43,15 @@ public final class VerificationOptions {
         TEXT_VANISHES
     }
 
-    private final Condition condition;
-    private final Event event;
-    private final String text;
-    private final ObjectCollection objectCollection; // For OBJECTS_APPEAR/VANISH
-
-    private VerificationOptions(Builder builder) {
-        this.condition = builder.condition;
-        this.event = builder.event;
-        this.text = builder.text;
-        this.objectCollection = builder.objectCollection;
-    }
-
-    /**
-     * Builder for constructing {@link VerificationOptions} with a fluent API.
-     */
-    public static class Builder {
-        private Condition condition = Condition.CONTINUE_UNTIL_CONDITION_MET;
-        private Event event = Event.NONE;
-        private String text = "";
-        private ObjectCollection objectCollection = new ObjectCollection.Builder().build();
-
-        public Builder(VerificationOptions original) {
-            this.condition = original.condition;
-            this.event = original.event;
-            this.text = original.text;
-            this.objectCollection = original.objectCollection;
-        }
-
-        public Builder() {}
-
-        public Builder setCondition(Condition condition) {
-            this.condition = condition;
-            return this;
-        }
-
-        public Builder setEvent(Event event) {
-            this.event = event;
-            return this;
-        }
-
-        public Builder setText(String text) {
-            this.text = text;
-            return this;
-        }
-
-        public Builder setObjectCollection(ObjectCollection objectCollection) {
-            this.objectCollection = objectCollection;
-            return this;
-        }
-
-        public VerificationOptions build() {
-            return new VerificationOptions(this);
-        }
-    }
+    @Builder.Default
+    private final Condition condition = Condition.CONTINUE_UNTIL_CONDITION_MET;
+    
+    @Builder.Default
+    private final Event event = Event.NONE;
+    
+    @Builder.Default
+    private final String text = "";
+    
+    @Builder.Default
+    private final ObjectCollection objectCollection = new ObjectCollection.Builder().build(); // For OBJECTS_APPEAR/VANISH
 }
