@@ -81,6 +81,9 @@ public class IllustrationViewer extends BorderPane {
         playButton = new Button("Play");
         exportButton = new Button("Export");
         
+        // Initialize layer checkboxes array (will be populated as layers are added)
+        layerCheckboxes = new CheckBox[10]; // Support up to 10 layers
+        
         // Setup interaction handlers
         setupMouseHandlers();
         setupScrollHandler();
