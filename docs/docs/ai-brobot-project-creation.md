@@ -285,6 +285,89 @@
    
    **Rule of Thumb:** Start with .then() for simple cases. Switch to ActionChainBuilder when you need more control or have 3+ actions.
    
+   ### ConditionalActionChain - The Most Elegant Approach
+   
+   **ConditionalActionChain provides the cleanest API for conditional execution flows:**
+   
+   ```java
+   // Basic pattern: find → if found do X → if not found do Y
+   ConditionalActionChain
+       .find(new PatternFindOptions.Builder().build())
+       .ifFound(new ClickOptions.Builder().build())
+       .ifNotFound(log("Button not found"))
+       .perform(action, objectCollection);
+   ```
+   
+   **Key Features:**
+   - **Conditional Flow**: `ifFound()` and `ifNotFound()` branches
+   - **Sequential Actions**: Use `.then()` to chain actions
+   - **Multiple Conditions**: Add multiple `ifFound`/`ifNotFound` handlers
+   - **Custom Actions**: Use lambdas for inline custom logic
+   - **Automatic Result Propagation**: Results flow through the chain
+   
+   **Common Patterns:**
+   
+   1. **Find and Click with Error Handling:**
+   ```java
+   ConditionalActionChain
+       .find(findOptions)
+       .ifFound(clickOptions)
+       .ifNotFound(log("ERROR: Critical button missing"))
+       .perform(action, buttonImage);
+   ```
+   
+   2. **Multi-Step Workflow:**
+   ```java
+   ConditionalActionChain
+       .find(findExportButton)           // Find export button
+       .ifFound(clickOptions)            // Click it
+       .then(findFileNameField)          // Find filename field
+       .ifFound(typeFileName)            // Type the filename
+       .then(findConfirmButton)          // Find confirm button
+       .ifFound(clickOptions)            // Click confirm
+       .perform(action, objectCollection);
+   ```
+   
+   3. **Custom Logic with Lambdas:**
+   ```java
+   ConditionalActionChain
+       .find(criticalElement)
+       .ifFoundDo(result -> {
+           log.info("Found {} matches", result.getMatchList().size());
+           // Custom processing logic
+           processMatches(result.getMatchList());
+       })
+       .ifNotFoundDo(result -> {
+           takeScreenshot("error-state");
+           notifyTeam("Critical element missing");
+       })
+       .perform(action, objectCollection);
+   ```
+   
+   4. **Combining with Pure Actions:**
+   ```java
+   // For simple operations on known locations/regions
+   Location buttonLocation = new Location(100, 200);
+   action.perform(ActionType.CLICK, buttonLocation);
+   
+   // For complex conditional flows
+   ConditionalActionChain
+       .find(dynamicButton)
+       .ifFound(click())
+       .perform(action, objectCollection);
+   ```
+   
+   **When to Use ConditionalActionChain:**
+   - **Always for UI interactions** - Handles element not found gracefully
+   - **Multi-step workflows** - Clean sequential flow with error handling
+   - **When you need both success and failure handling**
+   - **For readable, self-documenting code**
+   
+   **When NOT to Use:**
+   - **Known coordinates** - Use `action.perform(ActionType.CLICK, location)`
+   - **Simple unconditional actions** - Use convenience methods
+   - **Performance-critical loops** - Use traditional find/action separation
+   
    - **Convenience Methods**:
      ```java
      // Simple find
@@ -876,6 +959,7 @@ Modern Brobot development emphasizes:
 - Type safety through StateEnum and proper generics
 - Dependency injection with Spring Boot
 - Fluent APIs and method chaining
+- **ConditionalActionChain for elegant UI interactions with error handling**
 - Direct access to state components
 - Automatic initial state verification
 - Configuration-driven behavior
