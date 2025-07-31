@@ -1,3 +1,8 @@
+---
+sidebar_position: 8
+title: 'Pure Actions Quick Start Guide'
+---
+
 # Pure Actions Quick Start Guide
 
 ## What are Pure Actions?
