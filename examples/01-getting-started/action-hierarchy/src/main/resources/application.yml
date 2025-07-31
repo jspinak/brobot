@@ -1,0 +1,17 @@
+brobot:
+  core:
+    mock: true              # Use mock mode for testing
+    image-path: images/     # Path to image resources
+  screenshot:
+    save-history: true      # Save action history
+    save-snapshots: true    # Save screenshots
+    path: screenshots/      # Screenshot directory
+    history-path: history/  # History directory
+  mouse:
+    move-delay: 0.5         # Mouse movement delay
+    pause-before-down: 0.0  # Pause before mouse down
+
+logging:
+  level:
+    com.example.actionhierarchy: DEBUG
+    io.github.jspinak.brobot: INFO

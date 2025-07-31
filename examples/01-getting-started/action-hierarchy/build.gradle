@@ -1,0 +1,42 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.2.0'
+    id 'io.spring.dependency-management' version '1.1.4'
+}
+
+group = 'com.example'
+version = '1.0.0'
+sourceCompatibility = '21'
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // Brobot 1.1.0+ includes Spring, Lombok, SLF4J as transitive dependencies
+    implementation 'io.github.jspinak:brobot:1.1.0'
+    
+    // Only need annotation processor for Lombok
+    annotationProcessor 'org.projectlombok:lombok:1.18.32'
+    
+    // Add test dependencies as needed
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
+
+// Copy images to build directory
+task copyImages(type: Copy) {
+    from 'images'
+    into "$buildDir/resources/main/images"
+}
+
+processResources.dependsOn copyImages

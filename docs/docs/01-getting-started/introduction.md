@@ -15,15 +15,10 @@ into a programmatic API.
 This is, however, not the only use for Brobot. Brobot builds a model of the underlying environment, which
 allows you to test your automation application's codebase. Previous to Brobot, this was not possible,
 making the development of large automation applications very difficult due to the highly stochastic nature
-of automation. Think about it like this: You have a written an application that
-depends on an external API in almost every single function of your program, and the output of the external
-API is highly variable. How do you test your codebase in this case? Well, traditionally, you would write
+of automation. Think about it like this: You have a written an application that depends on an external API in almost every single function of your program, and the output of the external API is highly variable. How do you test your codebase in this case? Well, traditionally, you would write
 a mock test for each call to the external API, simulating the variability available in its output. While
 different functions of the API are called in almost every single function call in your program, the test
-code would quickly outgrow the underlying program code. This is also true for testing an automation application.
-Without Brobot, to test an automation app, the environment's output would need to be simulated at every step,
-making the test code larger and more complex than the automation application. Brobot takes care of
-this for you, thus allowing for testing without this level of complexity.
+code would quickly outgrow the underlying program code. This is also true for testing an automation application. Without Brobot, to test an automation app, the environment's output would need to be simulated at every step, making the test code larger and more complex than the automation application. Brobot takes care of this for you, thus allowing for testing without this level of complexity.
 
 # GUI Processes
 
@@ -46,15 +41,14 @@ time-consuming. But, why aren't they tested?
 
 ## GUI Processes Are Stochastic
 
-GUI automations apps are not tested because the processes that are being 
-automated are stochastic processes. 
+GUI automations apps are not tested because the processes that are being automated are stochastic processes. 
 
 ### Sikuli vs Selenium
 
 To illustrate why this is important, let's compare two different pieces of automation software:
 Sikuli and Selenium. Both Sikuli and Selenium can automate process flows in
 Web sites, but they do it differently. Sikuli recognizes images and can click
-on these images or use the scroll bar to navegate through a Web site. Selenium
+on these images or use the scroll bar to navigate through a Web site. Selenium
 accesses the html of the Web site and manipulates Web objects directly. The process
 Sikuli uses is a stochastic process since it is not sure to recognize an image
 correctly and attempting to drag the scroll bar is not guaranteed to actually scroll
