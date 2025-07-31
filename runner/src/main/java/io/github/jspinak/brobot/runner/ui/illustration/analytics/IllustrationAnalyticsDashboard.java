@@ -13,6 +13,7 @@ import javafx.geometry.Pos;
 import javafx.scene.chart.*;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.Separator;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.layout.*;
@@ -388,7 +389,7 @@ public class IllustrationAnalyticsDashboard extends ScrollPane {
         ObservableList<PieChart.Data> pieData = FXCollections.observableArrayList();
         
         snapshot.getActionCounts().forEach((action, count) -> {
-            pieData.add(new PieChart.Data(action, count));
+            pieData.add(new PieChart.Data(action, count.get()));
         });
         
         actionDistributionChart.setData(pieData);
@@ -437,7 +438,7 @@ public class IllustrationAnalyticsDashboard extends ScrollPane {
             double successRate = snapshot.getSuccessRatesByAction().getOrDefault(action, 0.0);
             double avgTime = snapshot.getAverageTimeByAction().getOrDefault(action, 0.0);
             
-            items.add(new ActionStatistic(action, count, successRate, avgTime));
+            items.add(new ActionStatistic(action, count.get(), successRate, avgTime));
         });
         
         actionStatsTable.setItems(items);

@@ -189,9 +189,9 @@ public class IllustrationStreamService {
                 }
                 
                 // Broadcast event
-                eventBus.publish(new io.github.jspinak.brobot.runner.events.BrobotEvent(
+                eventBus.publish(new io.github.jspinak.brobot.runner.events.UIUpdateEvent(
                     this,
-                    io.github.jspinak.brobot.runner.events.BrobotEvent.EventType.ILLUSTRATION_CAPTURED,
+                    "ILLUSTRATION_CAPTURED",
                     event
                 ));
             });
@@ -319,7 +319,7 @@ public class IllustrationStreamService {
             
             // Add performance data
             builder.performanceData(IllustrationMetadata.PerformanceData.builder()
-                .executionTimeMs(data.getActionResult().getDuration())
+                .executionTimeMs(data.getActionResult().getDuration().toMillis())
                 .matchesFound(data.getActionResult().getMatchList().size())
                 .averageSimilarity(data.getActionResult().getMatchList().stream()
                     .mapToDouble(m -> m.getScore())
