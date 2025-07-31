@@ -83,6 +83,77 @@
    }
    ```
 
+   ### Traditional State Pattern (Without @State)
+   
+   For reference, here's the traditional approach without annotations (as shown in the research paper):
+   
+   ```java
+   @Component
+   @Getter
+   public class Home { 
+       public enum Name implements StateEnum { HOME } 
+       
+       private StateImageObject toWorldButton = new StateImageObject.Builder() 
+           .withImage("toWorldButton") 
+           .isFixed(true) 
+           .addSnapshot(new MatchSnapshot(220, 600, 20, 20)) 
+           .build(); 
+
+       private State state = new State.Builder(HOME) 
+           .withImages(toWorldButton) 
+           .build(); 
+
+       public Home(StateService stateService) { 
+           stateService.save(state); 
+       } 
+   }
+   ```
+   
+   This approach requires:
+   - Manual state registration in constructor
+   - Explicit State object creation
+   - Direct StateService dependency
+   - Uses older StateImageObject API
+   
+   ### When to Define an Explicit State Object
+   
+   **With @State annotation, you have two options:**
+   
+   1. **Components Only (Recommended)** - Let the framework handle State creation:
+      ```java
+      @State
+      @Getter
+      public class MenuState {
+          private final StateImage button;  // Only components
+          
+          public MenuState() {
+              button = new StateImage.Builder()...
+          }
+      }
+      ```
+   
+   2. **Explicit State (Rare)** - Only if you need direct State access:
+      ```java
+      @State
+      @Getter
+      public class MenuState {
+          private final State state;  // Explicit State object
+          private final StateImage button;
+          
+          public MenuState() {
+              button = new StateImage.Builder()...
+              state = new State.Builder("MENU")...
+          }
+      }
+      ```
+   
+   **Use explicit State only when:**
+   - Migrating legacy code gradually
+   - You need the State object for specific framework interactions
+   - You're not using @State annotation (traditional approach)
+   
+   **Otherwise, stick with components only** - it's cleaner and the framework handles everything automatically.
+
 4. **Transitions (Two Approaches)**
 
    **Modern Approach with @Transition Annotation (Recommended):**
@@ -143,19 +214,76 @@
      PatternFindOptions findOptions = new PatternFindOptions.Builder().build();
      ClickOptions clickOptions = new ClickOptions.Builder().build();
      TypeOptions typeOptions = new TypeOptions.Builder().build();
+     ColorFindOptions colorOptions = new ColorFindOptions.Builder().build();
+     MotionFindOptions motionOptions = new MotionFindOptions.Builder().build();
      ```
    
-   - **Fluent API with Action Chaining**:
-     ```java
-     PatternFindOptions findClickType = new PatternFindOptions.Builder()
-         .setPauseAfterEnd(0.5)
-         .then(new ClickOptions.Builder()
-                 .setPauseAfterEnd(0.5)
-                 .build())
-         .then(new TypeOptions.Builder()
-                 .build())
-         .build();
-     ```
+   - **Fluent API with Action Chaining (Two Approaches)**:
+   
+   ### When to Use ActionChainBuilder vs .then()
+   
+   **Use ActionChainBuilder when you need:**
+   - More than 2 actions in sequence
+   - Explicit control over chaining strategy (NESTED vs CONFIRM)
+   - Chain-level configuration (pauseBeforeBegin, pauseAfterEnd for entire chain)
+   - Better readability for complex sequences
+   - To build reusable chain configurations
+   
+   ```java
+   // Example: Complex 3+ action chain with strategy control
+   ActionChainOptions validateAndSubmit = ActionChainBuilder
+       .of(new PatternFindOptions.Builder()
+           .setStrategy(PatternFindOptions.Strategy.BEST)
+           .build())
+       .then(new ColorFindOptions.Builder()
+           .setColorStrategy(ColorFindOptions.Color.MU)
+           .build())
+       .then(new ClickOptions.Builder()
+           .setNumberOfClicks(2)
+           .build())
+       .then(new TypeOptions.Builder()
+           .setText("Submit")
+           .build())
+       .withStrategy(ActionChainOptions.ChainingStrategy.CONFIRM) // Explicit strategy
+       .pauseBeforeBegin(2.0)  // Wait before entire chain starts
+       .pauseAfterEnd(1.0)     // Wait after entire chain completes
+       .build();
+   ```
+   
+   **Use .then() on ActionConfig when you have:**
+   - Simple 2-action sequences (find→click, find→type)
+   - No need for explicit strategy control (defaults to sequential execution)
+   - Quick inline action chains
+   - Actions that naturally flow together
+   
+   ```java
+   // Example: Simple find and click - concise and readable
+   ActionResult result = action.perform(
+       new PatternFindOptions.Builder()
+           .setStrategy(PatternFindOptions.Strategy.BEST)
+           .then(new ClickOptions.Builder()
+               .setNumberOfClicks(1)
+               .build())
+           .build(),
+       stateImage
+   );
+   
+   // Example: Find and type - common pattern
+   PatternFindOptions findAndType = new PatternFindOptions.Builder()
+       .setStrategy(PatternFindOptions.Strategy.FIRST)
+       .then(new TypeOptions.Builder()
+           .setText("Hello World")
+           .build())
+       .build();
+   ```
+   
+   **Key Differences:**
+   - **ActionChainBuilder** → Creates ActionChainOptions with full chain control
+   - **.then()** → Creates a simple subsequent action list (convenience method)
+   - **ActionChainBuilder** → Supports chain-wide configuration and strategies
+   - **.then()** → Inherits Action's default sequential execution behavior
+   
+   **Rule of Thumb:** Start with .then() for simple cases. Switch to ActionChainBuilder when you need more control or have 3+ actions.
    
    - **Convenience Methods**:
      ```java
@@ -381,6 +509,20 @@ private boolean findWithTimeout() {
 
 ## Configuration (v1.1.0+)
 
+### Important: Configuration Best Practices
+
+**DO:** Configure through `application.yml` or `application.properties`  
+**DO NOT:** Set FrameworkSettings fields directly (deprecated)
+
+```java
+// ❌ WRONG - Direct static field access is deprecated
+FrameworkSettings.mock = true;
+FrameworkSettings.saveHistory = true;
+
+// ✅ CORRECT - Use application properties
+// Configure in application.yml or application.properties
+```
+
 ### Default Configuration
 Brobot includes sensible defaults in `brobot-defaults.properties`. You only need to override what you want to change.
 
@@ -395,26 +537,131 @@ brobot:
 ```
 
 ### Complete Configuration Example
+
+#### Using application.yml (Recommended):
 ```yaml
 brobot:
   core:
     image-path: images/
-    mock: false
-    headless: false
+    mock: false                      # Enable/disable mock mode
+    headless: false                  # Run without GUI (for CI/CD)
+    package-name: com.example        # Base package for scanning
+  
   startup:
     verify-initial-states: true
     initial-states: HOME,LOGIN
     fallback-search: true
     startup-delay: 2
+  
   mouse:
-    move-delay: 0.5
-    pause-before-down: 0.0
+    move-delay: 0.5                  # Delay for mouse movements
+    pause-before-down: 0.0           # Pause before mouse down
+    pause-after-down: 0.0            # Pause after mouse down
+    pause-before-up: 0.0             # Pause before mouse up
+    pause-after-up: 0.0              # Pause after mouse up
+  
+  mock:                              # Mock mode timings (seconds)
+    time-find-first: 0.1
+    time-find-all: 0.2
+    time-drag: 0.3
+    time-click: 0.05
+    time-move: 0.1
+    time-find-histogram: 0.3
+    time-find-color: 0.3
+    time-classify: 0.4
+  
   screenshot:
-    save-snapshots: false
-    path: screenshots/
-  history:
-    path: history/                   # Path for illustrated test screenshots
+    save-snapshots: false            # Save screenshots during execution
+    save-history: false              # Save illustrated action history
+    path: screenshots/               # Screenshot directory
+    filename: screen                 # Screenshot filename prefix
+    history-path: history/           # History directory
+    history-filename: hist           # History filename prefix
+  
+  illustration:                      # What to draw in history screenshots
+    draw-find: true
+    draw-click: true
+    draw-drag: true
+    draw-move: true
+    draw-highlight: true
+    draw-repeated-actions: true
+    draw-classify: true
+    draw-define: true
+  
+  analysis:                          # Color analysis settings
+    k-means-in-profile: 5
+    max-k-means-to-store: 10
+  
+  recording:                         # Screen recording settings
+    enabled: false
+    path: recordings/
+    fps: 10
+    quality: 0.7
+  
+  dataset:                           # ML dataset generation
+    enabled: false
+    path: dataset/
+    save-format: JSON
+  
+  testing:                           # Unit test settings
+    mock: true
+    save-snapshots: true
 ```
+
+#### Using application.properties:
+```properties
+# Core settings
+brobot.core.image-path=images/
+brobot.core.mock=false
+brobot.core.headless=false
+brobot.core.package-name=com.example
+
+# Startup settings
+brobot.startup.verify-initial-states=true
+brobot.startup.initial-states=HOME,LOGIN
+brobot.startup.fallback-search=true
+brobot.startup.startup-delay=2
+
+# Mouse settings
+brobot.mouse.move-delay=0.5
+brobot.mouse.pause-before-down=0.0
+brobot.mouse.pause-after-down=0.0
+
+# Mock mode timings
+brobot.mock.time-find-first=0.1
+brobot.mock.time-find-all=0.2
+brobot.mock.time-click=0.05
+
+# Screenshot settings
+brobot.screenshot.save-snapshots=false
+brobot.screenshot.save-history=false
+brobot.screenshot.path=screenshots/
+brobot.screenshot.history-path=history/
+
+# Illustration settings
+brobot.illustration.draw-find=true
+brobot.illustration.draw-click=true
+
+# Testing settings
+brobot.testing.mock=true
+brobot.testing.save-snapshots=true
+```
+
+### Configuration Classes
+
+**BrobotProperties**: The main configuration class that maps to `brobot.*` properties
+- Uses Spring's `@ConfigurationProperties(prefix = "brobot")`
+- Automatically initialized on startup
+- Values are copied to FrameworkSettings for backward compatibility
+
+**Key Configuration Groups**:
+- `brobot.core.*` - Essential framework settings
+- `brobot.mouse.*` - Mouse action timing and behavior
+- `brobot.mock.*` - Simulated execution timings
+- `brobot.screenshot.*` - Screen capture and history
+- `brobot.illustration.*` - Visual feedback settings
+- `brobot.analysis.*` - Color profiling settings
+- `brobot.testing.*` - Test-specific overrides
 
 ## Initial State Verification (v1.1.0+)
 
@@ -459,6 +706,169 @@ stateVerifier.builder()
     .verify();
 ```
 
+## Color Finding and Motion Detection
+
+### Color Finding with ColorFindOptions
+
+Brobot supports three color analysis strategies:
+
+```java
+// 1. KMEANS - Find dominant colors using k-means clustering
+ColorFindOptions kmeansColor = new ColorFindOptions.Builder()
+    .setColorStrategy(ColorFindOptions.Color.KMEANS)
+    .setKmeans(3)  // Find 3 dominant colors
+    .setDiameter(5) // Minimum cluster size
+    .setSimilarity(0.9)
+    .build();
+
+// 2. MU - Use mean color statistics (default)
+ColorFindOptions meanColor = new ColorFindOptions.Builder()
+    .setColorStrategy(ColorFindOptions.Color.MU)
+    .setDiameter(5)
+    .setSimilarity(0.95)
+    .build();
+
+// 3. CLASSIFICATION - Multi-class pixel classification
+ColorFindOptions classification = new ColorFindOptions.Builder()
+    .setColorStrategy(ColorFindOptions.Color.CLASSIFICATION)
+    .setSimilarity(0.8)
+    .build();
+```
+
+### Nested vs Confirmed Finds with ActionChainOptions
+
+**Key Difference**: 
+- **NESTED**: Each action searches WITHIN the results of the previous action
+- **CONFIRM**: Each action validates the results of the previous action; returns original match if confirmed
+
+#### Nested Finds Example
+```java
+// Find yellow bars: first find all bars, then find yellow within those bars
+PatternFindOptions findBars = new PatternFindOptions.Builder()
+    .setStrategy(PatternFindOptions.Strategy.ALL)
+    .setSimilarity(0.7)  // Lower to catch all bars
+    .build();
+
+ColorFindOptions findYellow = new ColorFindOptions.Builder()
+    .setColorStrategy(ColorFindOptions.Color.MU)
+    .setDiameter(10)
+    .setSimilarity(0.9)
+    .build();
+
+ActionChainOptions nestedFind = new ActionChainOptions.Builder(findBars)
+    .setStrategy(ActionChainOptions.ChainingStrategy.NESTED)
+    .then(findYellow)
+    .build();
+
+// Result: Returns yellow regions found INSIDE the bar patterns
+Action action = // obtain from Spring context
+ActionResult yellowRegions = action.perform(nestedFind, objectCollection);
+```
+
+#### Confirmed Finds Example
+```java
+// Confirm buttons by checking they have the right color
+PatternFindOptions findButtons = new PatternFindOptions.Builder()
+    .setStrategy(PatternFindOptions.Strategy.ALL)
+    .setSimilarity(0.8)
+    .build();
+
+ColorFindOptions confirmColor = new ColorFindOptions.Builder()
+    .setColorStrategy(ColorFindOptions.Color.MU)
+    .setSimilarity(0.85)
+    .build();
+
+ActionChainOptions confirmedFind = new ActionChainOptions.Builder(findButtons)
+    .setStrategy(ActionChainOptions.ChainingStrategy.CONFIRM)
+    .then(confirmColor)
+    .build();
+
+// Result: Returns original button matches that passed color confirmation
+ActionResult confirmedButtons = action.perform(confirmedFind, objectCollection);
+```
+
+### Motion Detection with MotionFindOptions
+
+Motion detection requires 3 scenes to determine direction of movement:
+
+```java
+// Configure motion detection
+MotionFindOptions motionOptions = new MotionFindOptions.Builder()
+    .setMaxMovement(150)     // Max pixels object can move between scenes
+    .setMinArea(100)         // Filter out small movements
+    .setMaxMatchesToActOn(5) // Track up to 5 moving objects
+    .setSimilarity(0.75)     // Match threshold across scenes
+    .build();
+
+// Three ways to provide scenes:
+
+// 1. From files (mock mode)
+// Configure in application.properties:
+// brobot.core.mock=true
+// brobot.screenshot.path=screenshots/
+ObjectCollection emptyCollection = new ObjectCollection.Builder().build();
+ActionResult motionFromFiles = action.perform(motionOptions, emptyCollection);
+
+// 2. From Brobot images
+ObjectCollection scenes = new ObjectCollection.Builder()
+    .withScenes(scene1, scene2, scene3)
+    .build();
+ActionResult motionFromImages = action.perform(motionOptions, scenes);
+
+// 3. From live screen (mock=false)
+// brobot.core.mock=false
+ActionResult motionFromScreen = action.perform(motionOptions, emptyCollection);
+
+// Access results
+List<Match> movingObjects = motionFromScreen.getMatchList();
+SceneAnalysisCollection sceneAnalysis = motionFromScreen.getSceneAnalysis();
+```
+
+### Histogram Finding
+
+```java
+HistogramFindOptions histogramFind = new HistogramFindOptions.Builder()
+    .setSimilarity(0.8)
+    .setBinOptions(HSVBinOptions.builder()
+        .hueBins(90)
+        .saturationBins(2)
+        .valueBins(1))
+    .setMaxMatchesToActOn(5)
+    .build();
+```
+
+### Practical Color + Pattern Example
+
+```java
+// Find red error buttons using pattern + color confirmation
+public boolean clickErrorButton() {
+    // Define the chain
+    ActionChainOptions findRedButton = ActionChainBuilder
+        .of(new PatternFindOptions.Builder()
+            .setStrategy(PatternFindOptions.Strategy.ALL)
+            .setSimilarity(0.7)
+            .build())
+        .then(new ColorFindOptions.Builder()
+            .setColorStrategy(ColorFindOptions.Color.MU)
+            .setSimilarity(0.9)
+            .build())
+        .withStrategy(ActionChainOptions.ChainingStrategy.CONFIRM)
+        .build();
+    
+    // Execute find
+    ActionResult result = action.perform(findRedButton, 
+        new ObjectCollection.Builder()
+            .withImages(errorButtonImage)
+            .build());
+    
+    // Click if found
+    if (result.isSuccess() && !result.getMatchList().isEmpty()) {
+        return action.click(result.getMatchList().get(0)).isSuccess();
+    }
+    return false;
+}
+```
+
 ## Summary
 
 Modern Brobot development emphasizes:
@@ -469,5 +879,7 @@ Modern Brobot development emphasizes:
 - Direct access to state components
 - Automatic initial state verification
 - Configuration-driven behavior
+- Advanced color and motion detection capabilities
+- Flexible action chaining with nested/confirmed strategies
 
 Follow these patterns for maintainable, professional Brobot applications.

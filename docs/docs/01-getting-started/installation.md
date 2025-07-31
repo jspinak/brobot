@@ -98,7 +98,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'io.github.jspinak:brobot:1.0.8-SNAPSHOT' // Example version
+    implementation 'io.github.jspinak:brobot:1.1.1-SNAPSHOT' // Example version
 }
 ```
 

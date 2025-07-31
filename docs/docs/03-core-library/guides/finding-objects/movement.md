@@ -6,7 +6,7 @@ sidebar_position: 3
 
 _Finding moving objects is available with version 1.0.6._
 
-Brobot also has functionality for finding moving objects. Movement is detected from three scenes, either
+Brobot has functionality for finding moving objects. Movement is detected from three scenes, either
 provided to the function as files, as Brobot images, or taken from the screen. The reason three scenes is used is that 
 changed pixels between two scenes does not tell us the direction of movement. Three scenes allows us to 
 ascertain at which point the object started and where it ended.   
@@ -33,45 +33,69 @@ The game shows an outline of the person behind the trees, allowing the Brobot al
 In the third scene, the third person disappears behind a house, and its absence is selected as the match.  
 ![motion_history.png](/img/motion/motion3.png)
 
-## Input Methods with New API
+## Using MotionFindOptions
 
-The three different input methods for finding motion using the new ActionConfig API:
+The new MotionFindOptions class provides a type-safe way to configure motion detection:
+
+```java
+MotionFindOptions motionOptions = new MotionFindOptions.Builder()
+        .setMaxMovement(100)  // Maximum pixels an object can move between scenes
+        .setMinArea(50)       // Minimum area to filter out noise
+        .setMaxMatchesToActOn(10)  // Limit number of moving objects to track
+        .build();
+```
+
+## Input Methods
+
+The three different input methods for finding motion:
 
 ### Example 1: Using files  
 
 ```java
-BrobotSettings.saveHistory = true;
-BrobotSettings.mock = true;
-BrobotSettings.screenshots.add("screen15.png");
-BrobotSettings.screenshots.add("screen16.png");
-BrobotSettings.screenshots.add("screen17.png");
+// Configure in application.yml:
+// brobot:
+//   core:
+//     mock: true
+//   screenshot:
+//     save-history: true
+// 
+// Or in application.properties:
+// brobot.core.mock=true
+// brobot.screenshot.save-history=true
+//
+// Screenshots should be placed in the directory configured by
+// brobot.screenshot.path (default: screenshots/)
 
 MotionFindOptions motionOptions = new MotionFindOptions.Builder()
-        .setMaxMatches(10)
-        .setMinArea(50)
         .setMaxMovement(100)
-        .setAnalysisMethod(MotionFindOptions.Method.OPTICAL_FLOW)
+        .setMinArea(50)
+        .setMaxMatchesToActOn(10)
+        .setSimilarity(0.7)  // Similarity threshold for matching objects across scenes
         .build();
 
-ActionResult result = new ActionResult();
-result.setActionConfig(motionOptions);
+ObjectCollection objectCollection = new ObjectCollection.Builder().build();
 
-ActionInterface motionAction = actionService.getAction(motionOptions);
-motionAction.perform(result, new ObjectCollection());
+// Execute motion finding
+@Autowired
+private Action action; // obtain from Spring context or dependency injection
+
+ActionResult result = action.perform(motionOptions, objectCollection);
 ```
 
 ### Example 2: Using Brobot images  
 
 ```java
-BrobotSettings.saveHistory = true;
-BrobotSettings.mock = true;
+// Ensure these are configured in your application properties:
+// brobot.screenshot.save-history=true
+// brobot.core.mock=true
 
 MotionFindOptions motionOptions = new MotionFindOptions.Builder()
-        .setMaxMatches(10)
-        .setMinArea(50)
         .setMaxMovement(100)
+        .setMinArea(50)
+        .setMaxMatchesToActOn(10)
         .build();
 
+// Provide scenes as Brobot images
 ObjectCollection screenshots = new ObjectCollection.Builder()
         .withScenes(
             motionState.getScreen1(), 
@@ -80,149 +104,166 @@ ObjectCollection screenshots = new ObjectCollection.Builder()
         )
         .build();
 
-ActionResult result = new ActionResult();
-result.setActionConfig(motionOptions);
+@Autowired
+private Action action; // obtain from Spring context or dependency injection
 
-ActionInterface motionAction = actionService.getAction(motionOptions);
-motionAction.perform(result, screenshots);
+ActionResult result = action.perform(motionOptions, screenshots);
 ```
 
 ### Example 3: Using the screen  
 
 ```java
-BrobotSettings.mock = false;
+// Configure for live mode in application properties:
+// brobot.core.mock=false
 
 MotionFindOptions motionOptions = new MotionFindOptions.Builder()
-        .setMaxMatches(10)
-        .setMinArea(50)
         .setMaxMovement(100)
-        .setCaptureInterval(500)  // milliseconds between captures
-        .setSceneCount(3)         // number of scenes to capture
+        .setMinArea(50)
+        .setMaxMatchesToActOn(10)
+        .setPauseBeforeBegin(1.0)  // Wait before capturing first scene
+        .setPauseBetweenActions(0.5)  // Pause between scene captures
         .build();
 
-ActionResult result = new ActionResult();
-result.setActionConfig(motionOptions);
+ObjectCollection objectCollection = new ObjectCollection.Builder().build();
 
-ActionInterface motionAction = actionService.getAction(motionOptions);
-motionAction.perform(result, new ObjectCollection());
+// The motion finding action will capture three screenshots from the screen
+// with appropriate delays between captures
+@Autowired
+private Action action; // obtain from Spring context or dependency injection
+
+ActionResult result = action.perform(motionOptions, objectCollection);
 ```
 
 ## Configuration Options
 
 ### Basic Options
 
-- **MinArea**: Limits the results to objects of a certain size. Often there are small changes on screen that we don't want to follow, like the moving of grass or clouds.
-- **MaxMovement**: Limits the distance an object can move between scenes. By limiting the distance, you can eliminate false results caused by some movement in the same direction of the target object, but farther away.
+The MotionFindOptions class provides these configuration options:
 
-### Advanced Options with MotionFindOptions
+- **MaxMovement**: Limits the distance an object can move between scenes. By limiting the distance, you can eliminate false results caused by some movement in the same direction of the target object, but farther away. Set using `setMaxMovement(int)`.
+
+- **MinArea**: Limits the results to objects of a certain size. Often there are small changes on screen that we don't want to follow, like the moving of grass or clouds. This is configured through `setMinArea(int)` in the base options.
+
+- **MaxMatchesToActOn**: Limits the number of moving objects to track. Set using `setMaxMatchesToActOn(int)`.
+
+- **Similarity**: The similarity threshold for matching objects across scenes. Set using `setSimilarity(double)`.
+
+### Example with all options:
 
 ```java
 MotionFindOptions advancedMotion = new MotionFindOptions.Builder()
-        // Basic filtering
-        .setMinArea(50)
-        .setMaxArea(5000)
-        .setMinMovement(10)      // Minimum pixels moved
-        .setMaxMovement(100)     // Maximum pixels moved
-        
-        // Motion detection settings
-        .setAnalysisMethod(MotionFindOptions.Method.OPTICAL_FLOW)
-        .setMotionThreshold(0.3)
-        .setDirectionFilter(MotionFindOptions.Direction.ANY)
-        
-        // Scene capture settings
-        .setCaptureInterval(500)  // ms between captures
-        .setSceneCount(3)         // number of scenes
-        
-        // Output settings
-        .setTrackingMode(true)    // Track objects across scenes
-        .setDrawMotionVectors(true) // Show motion vectors in history
-        .build();
-```
-
-## Motion Analysis Methods
-
-The new API supports different motion analysis methods:
-
-```java
-// Optical Flow - Best for smooth motion
-MotionFindOptions opticalFlow = new MotionFindOptions.Builder()
-        .setAnalysisMethod(MotionFindOptions.Method.OPTICAL_FLOW)
-        .build();
-
-// Frame Differencing - Fast, good for simple motion
-MotionFindOptions frameDiff = new MotionFindOptions.Builder()
-        .setAnalysisMethod(MotionFindOptions.Method.FRAME_DIFFERENCE)
-        .build();
-
-// Background Subtraction - Good for stationary camera
-MotionFindOptions bgSubtract = new MotionFindOptions.Builder()
-        .setAnalysisMethod(MotionFindOptions.Method.BACKGROUND_SUBTRACTION)
-        .build();
-```
-
-## Directional Motion Detection
-
-Filter motion by direction:
-
-```java
-// Only detect upward motion
-MotionFindOptions upwardMotion = new MotionFindOptions.Builder()
-        .setDirectionFilter(MotionFindOptions.Direction.UP)
-        .setDirectionTolerance(30)  // degrees
-        .build();
-
-// Detect horizontal motion
-MotionFindOptions horizontalMotion = new MotionFindOptions.Builder()
-        .setDirectionFilter(MotionFindOptions.Direction.HORIZONTAL)
+        .setMaxMovement(150)     // Maximum pixels moved between scenes
+        .setMinArea(100)         // Minimum area of moving objects
+        .setMaxArea(5000)        // Maximum area of moving objects  
+        .setMaxMatchesToActOn(5) // Track up to 5 moving objects
+        .setSimilarity(0.75)     // 75% similarity required to match objects
+        .setIllustrate(MotionFindOptions.Illustrate.YES)  // Save visual history
         .build();
 ```
 
 ## Working with Motion Results
 
 ```java
-ActionResult motionResult = // ... perform motion detection
+MotionFindOptions motionOptions = new MotionFindOptions.Builder()
+        .setMaxMovement(100)
+        .setMaxMatchesToActOn(10)
+        .build();
+
+@Autowired
+private Action action; // obtain from Spring context or dependency injection
+
+ActionResult motionResult = action.perform(motionOptions, objectCollection);
 
 // Get all moving objects
 List<Match> movingObjects = motionResult.getMatchList();
+System.out.println("Found " + movingObjects.size() + " moving objects");
 
 // Access scene-by-scene analysis
 SceneAnalysisCollection scenes = motionResult.getSceneAnalysis();
-for (SceneAnalysis scene : scenes.getScenes()) {
-    System.out.println("Scene " + scene.getSceneNumber() + 
-                      " found " + scene.getMatches().size() + " objects");
-    
-    // Get motion vectors for this scene
-    for (MotionVector vector : scene.getMotionVectors()) {
-        System.out.println("Object moved from " + vector.getStart() + 
-                          " to " + vector.getEnd());
+if (scenes != null) {
+    for (SceneAnalysis scene : scenes.getScenes()) {
+        System.out.println("Scene " + scene.getSceneNumber() + 
+                          " found " + scene.getMatches().size() + " objects");
+        
+        // Get matches for this scene
+        for (Match match : scene.getMatches()) {
+            System.out.println("  Object at " + match.getRegion());
+        }
     }
+}
+
+// Check if motion detection was successful
+if (motionResult.isSuccess()) {
+    System.out.println("Motion detection successful!");
 }
 ```
 
-## Migration from ActionOptions
+## Practical Example: Tracking Game Characters
 
-If you're migrating from the old API:
-
-**Old way:**
 ```java
-ActionOptions findMotion = new ActionOptions.Builder()
-        .setAction(ActionOptions.Action.FIND)
-        .setFind(ActionOptions.Find.MOTION)
-        .setMaxMatchesToActOn(10)
-        .setMinArea(50)
-        .setMaxMovement(100)
+// Configure motion detection for tracking characters
+MotionFindOptions trackCharacters = new MotionFindOptions.Builder()
+        .setMaxMovement(200)    // Characters can move up to 200 pixels
+        .setMinArea(500)        // Character sprites are at least 500 pixels
+        .setMaxArea(10000)      // But no larger than 10000 pixels
+        .setMaxMatchesToActOn(3) // Track up to 3 characters
+        .setSimilarity(0.8)     // High similarity for character matching
         .build();
+
+// Configure for mock mode in application properties:
+// brobot.core.mock=true
+// Place screenshots in the directory configured by brobot.screenshot.path
+
+// Execute motion tracking
+@Autowired
+private Action action; // obtain from Spring context or dependency injection
+
+ActionResult characters = action.perform(
+    trackCharacters, 
+    new ObjectCollection.Builder().build()
+);
+
+// Process results
+for (Match character : characters.getMatchList()) {
+    System.out.println("Character moved to: " + character.getTarget());
+}
 ```
 
-**New way:**
+## Tips for Better Motion Detection
+
+1. **Scene Timing**: Allow sufficient time between scene captures for objects to move noticeably
+2. **Lighting**: Consistent lighting between scenes improves detection accuracy
+3. **Background**: Static backgrounds help distinguish moving objects
+4. **Object Size**: Set appropriate minArea to filter out noise and small movements
+5. **Movement Range**: Adjust maxMovement based on expected object speeds
+
+## Integration with Other Actions
+
+Motion finding can be combined with other actions using ActionChainOptions:
+
 ```java
+// First detect motion, then click on moving objects
 MotionFindOptions findMotion = new MotionFindOptions.Builder()
-        .setMaxMatches(10)
-        .setMinArea(50)
         .setMaxMovement(100)
+        .setMaxMatchesToActOn(1)  // Find the best moving object
         .build();
+
+ClickOptions clickMoving = new ClickOptions.Builder()
+        .setNumberOfClicks(1)
+        .build();
+
+ActionChainOptions trackAndClick = new ActionChainOptions.Builder(findMotion)
+        .setStrategy(ActionChainOptions.ChainingStrategy.NESTED)
+        .then(clickMoving)
+        .build();
+
+@Autowired
+private Action action; // obtain from Spring context or dependency injection
+
+ActionResult result = action.perform(trackAndClick, objectCollection);
 ```
 
-The new API provides more motion-specific options and better type safety.
-
-For more information on the new ActionConfig API, see the [Migration Guide](/docs/core-library/guides/migration-guide).
+For more information on find operations, see the other guides in this section:
+- [Using Color](using-color.md)
+- [Combining Finds](combining-finds.md)
+- [Configuration Note](configuration-note.md)
