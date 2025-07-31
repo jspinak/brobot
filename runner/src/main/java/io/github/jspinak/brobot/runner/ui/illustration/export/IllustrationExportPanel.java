@@ -132,8 +132,8 @@ public class IllustrationExportPanel extends BorderPane {
         
         Label selectionLabel = new Label("0 selected");
         illustrationList.getSelectionModel().getSelectedItems().addListener(
-            (obs, old, selected) -> {
-                selectionLabel.setText(selected.size() + " selected");
+            (javafx.collections.ListChangeListener<IllustrationItem>) change -> {
+                selectionLabel.setText(illustrationList.getSelectionModel().getSelectedItems().size() + " selected");
                 updateExportButton();
             }
         );

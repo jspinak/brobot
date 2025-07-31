@@ -77,6 +77,10 @@ public class IllustrationViewer extends BorderPane {
         canvas = new Canvas(800, 600);
         gc = canvas.getGraphicsContext2D();
         
+        // Initialize buttons
+        playButton = new Button("Play");
+        exportButton = new Button("Export");
+        
         // Setup interaction handlers
         setupMouseHandlers();
         setupScrollHandler();
@@ -295,7 +299,6 @@ public class IllustrationViewer extends BorderPane {
         Label playbackLabel = new Label("Playback:");
         playbackLabel.setStyle("-fx-font-weight: bold;");
         
-        playButton = new Button("Play");
         playButton.setOnAction(e -> {
             if (isAnimating.get()) {
                 stopPlayback();
@@ -307,7 +310,6 @@ public class IllustrationViewer extends BorderPane {
         });
         
         // Export button
-        exportButton = new Button("Export");
         exportButton.setOnAction(e -> {
             export(image -> {
                 // Default handler - could show save dialog
