@@ -28,7 +28,7 @@ providing a clean, type-safe API through specific configuration classes like `Pa
 
 ## Complex Actions
 
-Complex Actions (formerly called Composite Actions) combine Basic Actions and Sikuli Wrappers to create more sophisticated operations. These are useful for:
+Complex Actions (formerly called Composite Actions) combine Basic Actions to create more sophisticated operations. These are useful for:
 
 - **Multi-step Operations** - Actions requiring multiple Find operations
 - **Conditional Behaviors** - Click until something appears/disappears
@@ -38,7 +38,7 @@ Complex Actions (formerly called Composite Actions) combine Basic Actions and Si
 
 In Brobot 1.1.0, Complex Actions are built by:
 1. Chaining multiple Basic Actions together
-2. Using `TaskSequence` (formerly `ActionDefinition`) for scripted sequences
+2. Using `TaskSequence` for scripted sequences
 3. Creating custom action classes that orchestrate Basic Actions
 
 ### Example: Click Until Pattern Appears

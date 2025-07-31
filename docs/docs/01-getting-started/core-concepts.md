@@ -81,4 +81,4 @@ This is particularly useful for long-running automation, periodic maintenance ta
 
 ## Benefits: Cleaner and Simpler Code
 
-By modeling the environment with states and transitions, the underlying framework handles the complex logic of navigation, state tracking, and error recovery. Once your state structure is created, moving to any state is often a single line of code, such as `stateTransitionsManagement.open(STATE_TO_OPEN);`. This allows you to concentrate on business logic rather than the complexities of dealing with an unpredictable GUI environment.
+By modeling the environment with states and transitions, the underlying framework handles the complex logic of navigation, state tracking, and error recovery. Once your state structure is created, moving to any state is often a single line of code, such as `stateNavigator.open(STATE_TO_OPEN);`. This allows you to concentrate on business logic rather than the complexities of dealing with an unpredictable GUI environment.

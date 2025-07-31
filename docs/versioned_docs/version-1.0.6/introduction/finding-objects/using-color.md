@@ -4,8 +4,7 @@ sidebar_position: 1
 
 # Using Color
 
-_Color requires version 1.0.4 or greater. Versions 1.0.5 and higher treat color differently than 1.0.4. A look under the hood
-at how versions 1.0.5 and higher deal with color can be found [here](../../labeling/color-analysis.md)._   
+_Color requires version 1.0.4 or greater. Versions 1.0.5 and higher treat color differently than 1.0.4. A look under the hood at how versions 1.0.5 and higher deal with color can be found [here](../../labeling/color-analysis.md)._   
 
 Color can be used in a variety of ways to locate objects in a Brobot automation application.
 It is selected in an ActionOptions variable as a Find option, and there are currently two 
@@ -40,7 +39,7 @@ selected region (the minimap area), and the matches are shown as pink boxes. The
 colors shown at the far right of the illustrated screenshot are the contents of the 
 matches. They show the colors that were found.
 
-![illColor](/img/hist0-FIND-COLOR-redDotColor.png)  
+![illColor](/img/color/reddot.png)  
 
 The below example shows the results of a similar operation on the red dot but
 allowing for a larger diameter.  
