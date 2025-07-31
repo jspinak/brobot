@@ -48,7 +48,7 @@ wait(2);
 type("password");
 
 // Brobot: intelligent and state-aware
-stateTransitions.navigateTo(LoginState.class);
+stateNavigator.openState("login");
 // Brobot automatically finds the best path, handles errors, and recovers from failures
 ```
 
@@ -61,13 +61,13 @@ stateTransitions.navigateTo(LoginState.class);
 <dependency>
     <groupId>io.github.jspinak</groupId>
     <artifactId>brobot</artifactId>
-    <version>1.0.7</version>
+    <version>1.1.0</version>
 </dependency>
 ```
 
 #### Gradle
 ```groovy
-implementation 'io.github.jspinak:brobot:1.0.7'
+implementation 'io.github.jspinak:brobot:1.1.0'
 ```
 
 ### Your First Automation
@@ -77,22 +77,36 @@ implementation 'io.github.jspinak:brobot:1.0.7'
 public class SimpleAutomation {
     
     @Autowired
-    private ActionService actionService;
+    private Action action;
     
-    public void clickButton() {
+    public void actOnButton() {
         // Define what to look for
         StateImage button = new StateImage.Builder()
                 .setName("button.png")
                 .build();
         
         // Configure the search
-        PatternFindOptions findOptions = PatternFindOptions.forPreciseSearch();
+        PatternFindOptions findOptions = new PatternFindOptions.Builder()
+                .setSimilarity(0.7)
+                .build();
         
-        // Find and click
-        ActionResult result = performAction(findOptions, button);
-        if (result.isSuccess()) {
-            performClick(result.getMatchList());
-        }
+        // Find 
+        ActionResult findResult = action.perform(findOptions, button);
+
+        if (findResult.isSuccess()) {
+        // Get the first match
+        Match firstMatch = findResult.getFirstMatch();
+    
+        // Get all matches
+        List<Match> allMatches = findResult.getMatchList();
+    
+        // Work with each match
+        for (Match match : allMatches) {
+            // Highlight each found instance
+            action.perform(ActionType.HIGHLIGHT, match.getRegion());
+        
+            // Click each one
+            action.perform(ActionType.CLICK, match.getRegion());
     }
 }
 ```
@@ -169,12 +183,62 @@ BrobotSettings.mock = true;
 ### Game Automation
 Build sophisticated game bots that understand game states and react intelligently:
 ```java
-// Brobot understands the game state and makes decisions
-if (stateService.isActive(BattleState.class)) {
-    combatAI.executeOptimalStrategy();
-} else {
-    navigation.moveToObjective();
+// Define game states
+@State(initial = true)
+@Getter
+public class HomeBaseState {
+    private final StateImage baseFlag;
+    private final StateImage attackButton;
+    
+    public HomeBaseState() {
+        baseFlag = new StateImage.Builder()
+            .setName("home-flag")
+            .addPatterns("game/home-flag")
+            .build();
+            
+        attackButton = new StateImage.Builder()
+            .setName("attack-button")
+            .addPatterns("game/attack-button")
+            .build();
+    }
 }
+
+@State
+@Getter
+public class EnemyBaseState {
+    private final StateImage enemyFlag;
+    private final StateImage enemyUnits;
+    
+    public EnemyBaseState() {
+        enemyFlag = new StateImage.Builder()
+            .setName("enemy-flag")
+            .addPatterns("game/enemy-flag")
+            .build();
+            
+        enemyUnits = new StateImage.Builder()
+            .setName("enemy-units")
+            .addPatterns("game/enemy-units")
+            .build();
+    }
+}
+
+// Define transition from Home Base to Enemy Base
+@Transition(from = HomeBaseState.class, to = EnemyBaseState.class)
+@RequiredArgsConstructor
+public class AttackEnemyBaseTransition {
+    private final HomeBaseState homeBase;
+    private final Action action;
+    
+    public boolean execute() {
+        // Click attack button to navigate to enemy base
+        ActionResult result = action.click(homeBase.getAttackButton());
+        return result.isSuccess();
+    }
+}
+
+// To go to the enemy base
+stateNavigator.openState("EnemyBase");
+
 ```
 
 ### Visual Testing
@@ -182,18 +246,50 @@ Create maintainable visual regression tests:
 ```java
 @Test
 void loginPageShouldDisplayCorrectly() {
-    stateTransitions.navigateTo(LoginState.class);
-    assertTrue(visualValidator.matches(LoginState.class));
+    // Define expected UI elements
+    StateImage logo = new StateImage.Builder()
+        .setName("company-logo")
+        .addPatterns("login/logo")
+        .setSimilarity(0.95)  // High similarity for visual tests
+        .build();
+    
+    StateImage loginForm = new StateImage.Builder()
+        .setName("login-form")
+        .addPatterns("login/form")
+        .build();
+    
+    // Verify all elements are present
+    ActionResult logoResult = action.find(logo);
+    assertTrue(logoResult.isSuccess(), "Logo should be visible");
+    
+    ActionResult formResult = action.find(loginForm);
+    assertTrue(formResult.isSuccess(), "Login form should be visible");
 }
 ```
 
 ### Process Automation
 Automate complex workflows across multiple applications:
 ```java
-// Brobot handles window switching, popups, and unexpected dialogs
-workflow.extractDataFromApp1()
-        .processInApp2()
-        .uploadToApp3();
+// Define UI elements
+StateImage exportButton = new StateImage.Builder()
+    .addPatterns("app/export-button")
+    .build();
+
+StateImage fileNameField = new StateImage.Builder()
+    .addPatterns("dialog/filename-field")
+    .build();
+
+// Complete workflow in one conditional chain
+ConditionalActionChain
+    .find(new PatternFindOptions.Builder().build())  // Find export button
+    .ifFound(new ClickOptions.Builder().build())     // Click it
+    .then(new PatternFindOptions.Builder().build())  // Find filename field
+    .ifFound(new TypeOptions.Builder()               // Type filename
+        .setText("export_" + System.currentTimeMillis() + ".csv")
+        .build())
+    .perform(action, new ObjectCollection.Builder()
+        .withImages(exportButton, fileNameField)
+        .build());
 ```
 
 ## 🏗️ Architecture
