@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.runner.ui.illustration.analytics;
 
-import io.github.jspinak.brobot.runner.ui.theme.ThemeService;
+import io.github.jspinak.brobot.runner.ui.theme.UnifiedThemeManager;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -47,7 +47,7 @@ import java.util.stream.Collectors;
 public class IllustrationAnalyticsDashboard extends ScrollPane {
     
     private final IllustrationAnalyticsService analyticsService;
-    private final ThemeService themeService;
+    private final UnifiedThemeManager themeService;
     
     // Charts
     private final LineChart<String, Number> throughputChart;
@@ -70,7 +70,7 @@ public class IllustrationAnalyticsDashboard extends ScrollPane {
     
     @Autowired
     public IllustrationAnalyticsDashboard(IllustrationAnalyticsService analyticsService,
-                                         ThemeService themeService) {
+                                         UnifiedThemeManager themeService) {
         this.analyticsService = analyticsService;
         this.themeService = themeService;
         

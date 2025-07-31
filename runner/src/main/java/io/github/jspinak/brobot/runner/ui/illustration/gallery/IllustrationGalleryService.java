@@ -370,7 +370,7 @@ public class IllustrationGalleryService {
         private LocalDateTime endDate;
         private Set<String> tags;
         private String sessionId;
-        @Builder.Default
+        @lombok.Builder.Default
         private int maxResults = 100;
     }
     
