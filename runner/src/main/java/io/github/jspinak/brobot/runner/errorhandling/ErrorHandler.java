@@ -132,7 +132,7 @@ public class ErrorHandler implements DiagnosticCapable {
                 
                 // If error handling itself failed, throw to trigger circuit breaker
                 if (!result.isSuccess() && context.getSeverity() == ErrorContext.ErrorSeverity.CRITICAL) {
-                    throw new RuntimeException("Critical error handling failed: " + result.getMessage());
+                    throw new RuntimeException("Critical error handling failed: " + result.getUserMessage());
                 }
                 
                 return result;
@@ -298,7 +298,7 @@ public class ErrorHandler implements DiagnosticCapable {
         // Circuit breaker status
         Map<String, String> circuitBreakerStates = new ConcurrentHashMap<>();
         circuitBreakers.forEach((op, breaker) -> 
-            circuitBreakerStates.put(op, breaker.getState().name())
+            circuitBreakerStates.put(op, breaker.getState().get().name())
         );
         states.put("circuitBreakers", circuitBreakerStates);
         

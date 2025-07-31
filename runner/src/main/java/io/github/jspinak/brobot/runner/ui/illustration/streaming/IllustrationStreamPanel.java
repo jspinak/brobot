@@ -1,6 +1,8 @@
 package io.github.jspinak.brobot.runner.ui.illustration.streaming;
 
+import io.github.jspinak.brobot.runner.events.BrobotEvent;
 import io.github.jspinak.brobot.runner.events.EventBus;
+import io.github.jspinak.brobot.runner.events.UIUpdateEvent;
 import io.github.jspinak.brobot.runner.ui.illustration.IllustrationViewer;
 import javafx.animation.FadeTransition;
 import javafx.application.Platform;
@@ -48,7 +50,7 @@ public class IllustrationStreamPanel extends BorderPane {
     private final ListView<StreamHistoryItem> historyList;
     
     // State
-    private final Queue<IllustrationStreamEvent> history = new LinkedList<>();
+    private final Queue<StreamHistoryItem> history = new LinkedList<>();
     private static final int MAX_HISTORY_SIZE = 100;
     private boolean isPaused = false;
     
@@ -65,6 +67,10 @@ public class IllustrationStreamPanel extends BorderPane {
         statusLabel = new Label("Stream Active");
         queueLabel = new Label("Queue: 0");
         performanceLabel = new Label("Processing: 0ms");
+        pauseButton = new ToggleButton("Pause");
+        autoFitCheckBox = new CheckBox("Auto-fit");
+        filterCombo = new ComboBox<>();
+        historyList = new ListView<>();
         
         // Setup UI
         setupUI();
@@ -114,18 +120,15 @@ public class IllustrationStreamPanel extends BorderPane {
         controls.setAlignment(Pos.CENTER_LEFT);
         
         // Pause button
-        pauseButton = new ToggleButton("Pause");
         pauseButton.setOnAction(e -> {
             isPaused = pauseButton.isSelected();
             updateStatus();
         });
         
         // Auto-fit checkbox
-        autoFitCheckBox = new CheckBox("Auto-fit");
         autoFitCheckBox.setSelected(true);
         
         // Filter combo
-        filterCombo = new ComboBox<>();
         filterCombo.getItems().addAll(FilterMode.values());
         filterCombo.setValue(FilterMode.ALL);
         filterCombo.setOnAction(e -> applyFilter());
@@ -192,7 +195,6 @@ public class IllustrationStreamPanel extends BorderPane {
         historyLabel.setStyle("-fx-font-weight: bold;");
         
         // History list
-        historyList = new ListView<>();
         historyList.setCellFactory(lv -> new StreamHistoryCell());
         historyList.setOnMouseClicked(e -> {
             if (e.getClickCount() == 2) {
@@ -227,7 +229,16 @@ public class IllustrationStreamPanel extends BorderPane {
      * Subscribes to relevant events.
      */
     private void subscribeToEvents() {
-        eventBus.register(this);
+        // Subscribe to UI update events for illustration captures
+        eventBus.subscribe(BrobotEvent.EventType.UI_STATE_CHANGED, event -> {
+            if (event instanceof UIUpdateEvent) {
+                UIUpdateEvent uiEvent = (UIUpdateEvent) event;
+                if ("ILLUSTRATION_CAPTURED".equals(uiEvent.getUpdateType()) 
+                    && uiEvent.getUpdateData() instanceof IllustrationStreamEvent) {
+                    displayStreamEvent((IllustrationStreamEvent) uiEvent.getUpdateData());
+                }
+            }
+        });
     }
     
     /**
