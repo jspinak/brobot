@@ -1,0 +1,53 @@
+# Advanced Illustration System Configuration
+spring:
+  application:
+    name: advanced-illustration-system
+  main:
+    banner-mode: off
+
+# Brobot Configuration
+brobot:
+  core:
+    # Run in mock mode for examples
+    mock: true
+    # Enable verbose logging to see illustration decisions
+    verbose: true
+    
+  # Basic illustration settings (legacy)
+  illustration:
+    # These are overridden by advanced configuration
+    draw-find: true
+    draw-click: true
+    draw-move: false
+    save-history: true
+    
+  # Advanced illustration configuration is done in code
+  # See the config classes for examples
+    
+# Illustration output directory
+illustration:
+  output-dir: illustrations
+  # Format: png, jpg, or gif (for animations)
+  format: png
+  # Quality for jpg format (1-100)
+  quality: 95
+  
+# Performance settings
+performance:
+  # Maximum concurrent illustrations
+  max-concurrent: 5
+  # Thread pool size for illustration processing
+  thread-pool-size: 3
+  
+# Logging configuration
+logging:
+  level:
+    root: INFO
+    com.example.illustration: DEBUG
+    io.github.jspinak.brobot: INFO
+    # Show detailed illustration decisions
+    io.github.jspinak.brobot.illustratedHistory: DEBUG
+    # Show performance metrics
+    io.github.jspinak.brobot.illustratedHistory.performance: DEBUG
+  pattern:
+    console: '%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n'

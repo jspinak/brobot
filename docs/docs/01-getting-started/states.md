@@ -110,7 +110,6 @@ The modern approach encourages exposing frequently-used components:
 @Getter
 @Slf4j
 public class GameMenuState {
-    private final State state;
     private final StateImage playButton;
     private final StateImage settingsButton;
     private final StateImage exitButton;
@@ -139,11 +138,6 @@ public class GameMenuState {
             .setSearchRegion(new Region(100, 100, 400, 600))
             .setName("MenuArea")
             .build();
-        
-        state = new State.Builder(Name.GAME_MENU)
-            .addStateImages(playButton, settingsButton, exitButton)
-            .addStateRegions(menuArea)
-            .build();
     }
 }
 ```
@@ -166,7 +160,7 @@ public class StartGameTransition {
 
 The `@State` annotation uses reflection through `AnnotatedStateBuilder` and `StateComponentExtractor` to:
 
-1. **Automatically extract** all StateImage, StateString, and StateObject fields from the class
+1. **Automatically extract** all StateImage, StateRegion, StateLocation, and StateString fields from the class
 2. **Build a State object** internally using the extracted components  
 3. **Register it** with the state management system
 
@@ -178,13 +172,10 @@ This means:
 ### When to Use Each Approach
 
 **Use the traditional approach (with explicit State object) when:**
-- You're not using the @State annotation
 - Working with legacy code that predates @State
 - You need explicit control over state construction
-- You need to reference the State object directly (rare)
 
 **Use the modern approach (components only) when:**
-- You're using the @State annotation (recommended)
 - You want cleaner, less boilerplate code
 - You only need access to the components (most common case)
 - Building new projects with Brobot 1.1.0+
