@@ -52,23 +52,28 @@
    @Getter
    @Slf4j
    public class ExampleState {
-       private final State state;
        private final StateImage mainImage;  // Direct access to components
-       
-       public enum Name implements StateEnum {
-           EXAMPLE
-       }
+       private final StateImage secondaryImage;
+       private final StateString textRegion;
        
        public ExampleState() {
-           // Store component for direct access
+           // Create state components
            mainImage = new StateImage.Builder()
                .addPatterns("folder/image-name1", "folder/image-name2")  // No .png extension needed
                .setName("MainImage")
                .build();
-           
-           state = new State.Builder(Name.EXAMPLE)
-               .addStateImages(mainImage)
+               
+           secondaryImage = new StateImage.Builder()
+               .addPatterns("folder/secondary-image")
+               .setName("SecondaryImage")
                .build();
+               
+           textRegion = new StateString.Builder()
+               .setName("TextRegion")
+               .setRegion(new Region(100, 100, 200, 50))
+               .build();
+           
+           // No need to build State object - annotation handles it
        }
    }
    ```
@@ -154,7 +159,76 @@
    
    **Otherwise, stick with components only** - it's cleaner and the framework handles everything automatically.
 
-4. **Transitions (Two Approaches)**
+4. **Declarative Search Region Definition (v1.1.0+)**
+
+   Brobot supports defining search regions relative to other objects, even across states:
+
+   ```java
+   @State
+   @Getter
+   public class WorkingState {
+       private final StateImage claudeIcon;
+       
+       public WorkingState() {
+           // ClaudeIcon's search region is defined relative to ClaudePrompt
+           claudeIcon = new StateImage.Builder()
+               .addPatterns("working/claude-icon-1", "working/claude-icon-2")
+               .setName("ClaudeIcon")
+               .setSearchRegionOnObject(SearchRegionOnObject.builder()
+                   .targetType(StateObject.Type.IMAGE)
+                   .targetStateName("Prompt")  // Can reference other states
+                   .targetObjectName("ClaudePrompt")
+                   .adjustments(MatchAdjustmentOptions.builder()
+                       .addX(3)    // Offset from ClaudePrompt location
+                       .addY(10)
+                       .addW(30)   // Expand width by 30 pixels
+                       .addH(55)   // Expand height by 55 pixels
+                       .build())
+                   .build())
+               .build();
+       }
+   }
+   ```
+
+   **Key Benefits:**
+   - **Automatic Updates**: When ClaudePrompt is found, ClaudeIcon's search region updates automatically
+   - **Cross-State References**: Objects can depend on objects in other states
+   - **No Manual Calculations**: Framework handles all region math
+   - **Cleaner Code**: Define relationships declaratively, not imperatively
+
+   **Common Patterns:**
+   ```java
+   // Simple relative positioning
+   .setSearchRegionOnObject(SearchRegionOnObject.builder()
+       .targetType(StateObject.Type.IMAGE)
+       .targetStateName("Menu")
+       .targetObjectName("MenuBar")
+       .adjustments(MatchAdjustmentOptions.builder()
+           .addY(50)  // 50 pixels below menu bar
+           .build())
+       .build())
+   
+   // Fixed dimensions with relative position
+   .setSearchRegionOnObject(SearchRegionOnObject.builder()
+       .targetType(StateObject.Type.IMAGE)
+       .targetStateName("Form")
+       .targetObjectName("FormTitle")
+       .adjustments(MatchAdjustmentOptions.builder()
+           .addY(100)     // Below title
+           .absoluteW(200) // Fixed 200x50 region
+           .absoluteH(50)
+           .build())
+       .build())
+   ```
+
+   **How It Works:**
+   1. Dependencies are registered when states load (via `SearchRegionDependencyInitializer`)
+   2. When a FIND operation succeeds, `FindPipeline` updates dependent regions
+   3. Next search uses the updated region automatically
+
+   **For detailed documentation, see:** `docs/03-core-library/guides/declarative-region-definition.md`
+
+5. **Transitions (Two Approaches)**
 
    **Modern Approach with @Transition Annotation (Recommended):**
    ```java
@@ -368,6 +442,62 @@
    - **Simple unconditional actions** - Use convenience methods
    - **Performance-critical loops** - Use traditional find/action separation
    
+   **ConditionalActionWrapper for Spring Applications:**
+   
+   When using Spring Boot, prefer `ConditionalActionWrapper` over direct ConditionalActionChain:
+   
+   ```java
+   @Component
+   public class LoginAutomation {
+       @Autowired
+       private ConditionalActionWrapper actions;
+       
+       public void performLogin(StateImage loginButton, String username) {
+           // Simple find and click
+           actions.findAndClick(loginButton);
+           
+           // Find and type
+           actions.findAndType(usernameField, username);
+           
+           // Complex conditional chain
+           actions.createChain()
+               .find(submitButton)
+               .ifFound(ConditionalActionWrapper.click())
+               .ifNotFoundLog("Submit button not found")
+               .execute();
+       }
+   }
+   ```
+   
+   **ConditionalActionWrapper vs FindAndClick/FindAndType:**
+   
+   - **FindAndClick/FindAndType**: Simple composite actions that always execute all steps
+     ```java
+     // Always finds then clicks, no conditions
+     FindAndClick findAndClick = new FindAndClick.Builder()
+         .withSimilarity(0.9)
+         .build();
+     action.perform(findAndClick, objectCollection);
+     ```
+   
+   - **ConditionalActionWrapper**: Spring component with conditional execution
+     ```java
+     // Only clicks if found, with logging
+     @Autowired ConditionalActionWrapper actions;
+     actions.findAndClick(submitButton);  // Handles errors gracefully
+     ```
+   
+   **Use ConditionalActionWrapper when:**
+   - Working in a Spring Boot application
+   - Need conditional execution paths
+   - Want automatic error handling and logging
+   - Building complex conditional workflows
+   
+   **Use FindAndClick/FindAndType when:**
+   - Not using Spring dependency injection
+   - Always want to execute all steps
+   - Working with simple, predictable sequences
+   
    - **Convenience Methods**:
      ```java
      // Simple find
@@ -525,6 +655,7 @@ public ActionResult performCriticalClick(StateImage target) {
    - Use @State and @Transition annotations for cleaner code
    - Separate transitions into dedicated classes
    - Use Spring dependency injection throughout
+   - Use declarative search regions for UI elements with predictable relationships
 
 2. **Modern API Usage**
    - Always use ActionConfig classes (PatternFindOptions, ClickOptions, etc.)
@@ -572,6 +703,13 @@ public ActionResult performCriticalClick(StateImage target) {
    - Use StateTransitions.Builder pattern
    - Use `addTransitionFinish()` not `setTransitionFinish()`
    - Use `setPauseBeforeBegin()` for timeouts
+
+6. **Declarative Search Regions Not Working**
+   - Verify target state and object names match exactly (case-sensitive)
+   - Check logs for "Registered search region dependency" messages
+   - Ensure target object has been found at least once
+   - Enable debug logging: `logging.level.io.github.jspinak.brobot.action.internal.region=DEBUG`
+   - Verify Spring component scanning includes `io.github.jspinak.brobot`
 
 ## Testing Patterns
 
@@ -745,6 +883,176 @@ brobot.testing.save-snapshots=true
 - `brobot.illustration.*` - Visual feedback settings
 - `brobot.analysis.*` - Color profiling settings
 - `brobot.testing.*` - Test-specific overrides
+
+## Movement and Navigation in v1.1.0
+
+### Available Movement APIs
+
+Brobot v1.1.0 provides comprehensive movement control:
+
+#### Mouse Movement
+```java
+// Direct mouse movement with speed control
+MouseMoveOptions moveOptions = new MouseMoveOptions.Builder()
+    .setMoveMouseDelay(0.5f)  // 0.0 = instant, 1.0 = slow
+    .setPauseAfterEnd(1.0)
+    .build();
+
+action.move(moveOptions, objectCollection);
+```
+
+#### Scrolling
+```java
+// Native mouse wheel scrolling
+ScrollOptions scrollDown = new ScrollOptions.Builder()
+    .setDirection(ScrollOptions.Direction.DOWN)
+    .setScrollSteps(5)  // Number of scroll wheel clicks
+    .setPauseAfterEnd(0.5)
+    .build();
+
+action.scroll(scrollDown, objectCollection);
+```
+
+#### Mouse Button Control
+```java
+// Press and hold mouse button
+MouseDownOptions pressOptions = new MouseDownOptions.Builder()
+    .setPressOptions(MousePressOptions.builder()
+        .button(MouseButton.LEFT)
+        .pauseAfterMouseDown(0.5)
+        .build())
+    .build();
+
+action.mouseDown(pressOptions, location);
+
+// Release mouse button
+MouseUpOptions releaseOptions = new MouseUpOptions.Builder()
+    .setPressOptions(MousePressOptions.builder()
+        .button(MouseButton.LEFT)
+        .build())
+    .build();
+
+action.mouseUp(releaseOptions, location);
+```
+
+#### Drag Operations
+```java
+DragOptions dragOptions = new DragOptions.Builder()
+    .setFromOptions(new PatternFindOptions.Builder()
+        .setSimilarity(0.9)
+        .build())
+    .setToOptions(new PatternFindOptions.Builder()
+        .setSimilarity(0.9)
+        .build())
+    .setDragDelay(0.5)  // Hold duration before dragging
+    .build();
+
+action.drag(dragOptions, dragCollection);
+```
+
+## Illustration System (v1.1.0)
+
+### IllustrationController API
+
+v1.1.0 provides the IllustrationController for programmatic control:
+
+```java
+@Component
+@RequiredArgsConstructor
+public class MyAutomation {
+    private final IllustrationController illustrationController;
+    
+    public void checkIllustration(ActionConfig config, ObjectCollection objects) {
+        // Check if action will be illustrated
+        boolean willIllustrate = illustrationController.okToIllustrate(config, objects);
+        
+        // Manually create illustration
+        ActionResult result = action.find(objects);
+        boolean illustrated = illustrationController.illustrateWhenAllowed(
+            result, searchRegions, config, objects
+        );
+    }
+}
+```
+
+### Configuration Properties
+
+```properties
+# Enable/disable illustrations by action type
+brobot.illustration.draw-find=true
+brobot.illustration.draw-click=true
+brobot.illustration.draw-drag=true
+brobot.illustration.draw-move=true
+brobot.illustration.draw-highlight=true
+
+# Screenshot and history settings
+brobot.screenshot.save-history=true
+brobot.screenshot.save-snapshots=false
+brobot.screenshot.path=screenshots/
+brobot.screenshot.history-path=history/
+brobot.screenshot.filename=screen
+brobot.screenshot.history-filename=hist
+```
+
+### Environment-Specific Configurations
+
+Create different property files for different environments:
+
+```properties
+# application-dev.properties - Full debugging
+brobot.illustration.draw-find=true
+brobot.illustration.draw-click=true
+brobot.screenshot.save-history=true
+
+# application-test.properties - Selective
+brobot.illustration.draw-find=false
+brobot.illustration.draw-click=true
+brobot.screenshot.save-history=true
+
+# application-prod.properties - Minimal
+brobot.illustration.draw-find=false
+brobot.illustration.draw-click=false
+brobot.screenshot.save-history=false
+```
+
+Run with: `java -jar app.jar --spring.profiles.active=dev`
+
+## State Management in v1.1.0
+
+### Recommended: Using Annotations
+
+The modern approach uses @State and @Transition annotations for automatic registration:
+
+```java
+// State with @State annotation
+@State(initial = true)  // Marks as initial state
+@Getter
+public class HomeState {
+    private final StateImage loginButton;
+    
+    public HomeState() {
+        loginButton = new StateImage.Builder()
+            .setName("LoginButton")
+            .addPatterns("home/login_button")
+            .setFixed(true)
+            .build();
+    }
+}
+
+// Transition with @Transition annotation
+@Transition(from = HomeState.class, to = WorldState.class)
+@RequiredArgsConstructor
+public class HomeToWorldTransition {
+    private final HomeState homeState;
+    private final Action action;
+    
+    public boolean execute() {
+        return action.click(homeState.getLoginButton()).isSuccess();
+    }
+}
+
+// No manual configuration needed - annotations handle registration!
+```
 
 ## Initial State Verification (v1.1.0+)
 

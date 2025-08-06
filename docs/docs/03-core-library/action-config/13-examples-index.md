@@ -108,6 +108,25 @@ ActionChainOptions nestedFind = new ActionChainOptions.Builder(
 
 ## Conditional Actions
 
+### ConditionalActionWrapper (Spring Applications)
+[View detailed documentation](./16-conditional-action-wrapper.md)
+
+```java
+// Spring-integrated conditional actions
+@Autowired
+private ConditionalActionWrapper actions;
+
+// Simple find and click with error handling
+actions.findAndClick(submitButton);
+
+// Complex conditional chain
+actions.createChain()
+    .find(loginButton)
+    .ifFound(ConditionalActionWrapper.click())
+    .ifNotFoundLog("Login button not found")
+    .execute();
+```
+
 ### Click Until Examples
 [View detailed examples](./09-conditional-actions.md)
 

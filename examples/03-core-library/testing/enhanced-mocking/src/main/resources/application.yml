@@ -1,0 +1,47 @@
+spring:
+  application:
+    name: enhanced-mocking-example
+
+# Brobot configuration
+brobot:
+  mock:
+    enabled: true
+    verbose: true
+    delay:
+      min: 100
+      max: 500
+    success-rate: 0.95
+    
+  action:
+    max-wait: 10
+    delay-between-actions: 500
+    
+  logging:
+    level: INFO
+    show-timestamps: true
+
+# Enhanced mock configuration
+enhanced-mock:
+  scenarios:
+    default-timeout: 300000  # 5 minutes
+    enable-reporting: true
+    report-format: detailed
+    
+  verification:
+    strict-mode: false
+    capture-screenshots: false
+    timing-precision: milliseconds
+    
+  test-data:
+    cache-scenarios: true
+    enable-variations: true
+    variation-auto-naming: true
+
+# Logging configuration
+logging:
+  level:
+    root: INFO
+    com.example.mocking: DEBUG
+    io.github.jspinak.brobot: INFO
+  pattern:
+    console: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"

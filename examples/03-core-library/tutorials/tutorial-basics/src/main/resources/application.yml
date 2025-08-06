@@ -1,0 +1,82 @@
+# Tutorial Basics Configuration
+spring:
+  application:
+    name: tutorial-basics
+  main:
+    banner-mode: off
+
+# Brobot Configuration
+brobot:
+  core:
+    # Run in mock mode for tutorial
+    mock: true
+    # Enable verbose logging to see what's happening
+    verbose: true
+    
+  # State management
+  state:
+    # Automatically scan for @State annotated classes
+    auto-scan: true
+    # Package to scan for states
+    scan-package: com.example.basics
+    
+  # Transition settings
+  transition:
+    # Maximum attempts for a transition
+    max-attempts: 3
+    # Pause between attempts
+    retry-pause: 2.0
+    
+  # Action settings
+  action:
+    # Default timeouts
+    max-wait: 5
+    # Success criteria
+    min-similarity: 0.7
+    
+  # Find settings
+  find:
+    # Default similarity threshold
+    similarity: 0.8
+    # Use all cores for parallel searching
+    parallel: true
+    
+  # Mock configuration
+  mock:
+    # Simulate realistic delays
+    realistic-delays: true
+    # Success probability for actions
+    success-probability: 0.9
+    # Generate mock matches for images
+    generate-matches: true
+    
+  # Screenshot settings (for real mode)
+  screenshot:
+    # Save screenshots for debugging
+    save-history: true
+    # Screenshot directory
+    path: screenshots/
+
+# Logging configuration
+logging:
+  level:
+    root: INFO
+    com.example.basics: DEBUG
+    io.github.jspinak.brobot: INFO
+    # Show state management details
+    io.github.jspinak.brobot.statemanagement: DEBUG
+    # Show transition execution
+    io.github.jspinak.brobot.statemanagement.transitions: DEBUG
+    # Show action execution
+    io.github.jspinak.brobot.action: DEBUG
+  pattern:
+    console: '%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n'
+    
+# Tutorial-specific settings
+tutorial:
+  # Show step-by-step progress
+  show-steps: true
+  # Pause between major operations
+  step-pause: 1.0
+  # Highlight important concepts
+  highlight-concepts: true

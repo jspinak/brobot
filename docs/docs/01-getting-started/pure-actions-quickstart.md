@@ -137,7 +137,7 @@ ActionResult findResult = action.find(targetImage);
 
 if (findResult.isSuccess()) {
     // Get the first match
-    Match firstMatch = findResult.getFirstMatch();
+    Match firstMatch = findResult.getBestMatch().get();
     
     // Get all matches
     List<Match> allMatches = findResult.getMatchList();
@@ -176,7 +176,7 @@ ConditionalActionChain.find(criticalButton)
 // Good: Clear separation
 ActionResult found = action.find(targetImage);
 if (found.isSuccess()) {
-    action.perform(ActionType.CLICK, found.getFirstMatch().getLocation());
+    action.perform(ActionType.CLICK, found.getBestMatch().get().getTarget());
 }
 
 // Better: Use conditional chains

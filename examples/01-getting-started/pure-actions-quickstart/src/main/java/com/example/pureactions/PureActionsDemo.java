@@ -9,8 +9,8 @@ import io.github.jspinak.brobot.action.basic.type.TypeOptions;
 import io.github.jspinak.brobot.action.basic.highlight.HighlightOptions;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.model.match.Match;
-import io.github.jspinak.brobot.model.region.Location;
-import io.github.jspinak.brobot.model.region.Region;
+import io.github.jspinak.brobot.model.element.Location;
+import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.state.StateImage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -46,7 +46,7 @@ public class PureActionsDemo {
         log.info("New way: Find first, then act");
         ActionResult found = action.find(buttonImage);
         if (found.isSuccess()) {
-            action.perform(ActionType.CLICK, found.getFirstMatch());
+            action.perform(ActionType.CLICK, found.getBestMatch().get().getRegion());
         }
         
         // Even Better Way (With action chaining)
@@ -197,8 +197,8 @@ public class PureActionsDemo {
         
         if (findResult.isSuccess()) {
             // Get the first match
-            Match firstMatch = findResult.getFirstMatch();
-            log.info("First match found at: {}", firstMatch.getLocation());
+            Match firstMatch = findResult.getBestMatch().get();
+            log.info("First match found at: {}", firstMatch.getTarget());
             
             // Get all matches
             List<Match> allMatches = findResult.getMatchList();
@@ -241,7 +241,7 @@ public class PureActionsDemo {
             action.perform(
                     new ClickOptions.Builder().build(),
                     new ObjectCollection.Builder()
-                            .withMatches(result.getMatchList())
+                            .withMatches(result)
                             .build());
         } else {
             log.error("ERROR: Critical button not found!");
@@ -271,7 +271,7 @@ public class PureActionsDemo {
             action.perform(
                     new ClickOptions.Builder().build(),
                     new ObjectCollection.Builder()
-                            .withMatches(result.getMatchList())
+                            .withMatches(result)
                             .build());
             log.info("Document saved");
         } else {
@@ -302,7 +302,7 @@ public class PureActionsDemo {
                     .build();
             
             action.perform(highlight, new ObjectCollection.Builder()
-                    .withMatches(button)
+                    .withRegions(button.getRegion())
                     .build());
         }
     }

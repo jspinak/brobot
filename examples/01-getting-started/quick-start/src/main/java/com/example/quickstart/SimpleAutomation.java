@@ -47,14 +47,11 @@ public class SimpleAutomation {
         // 5. Click the found button
         if (findResult.isSuccess()) {
             ClickOptions clickOptions = new ClickOptions.Builder()
-                    .setClickType(ClickOptions.ClickType.LEFT)
+                    .setClickType(ClickOptions.Type.LEFT)
                     .build();
             
-            ObjectCollection clickObjects = new ObjectCollection.Builder()
-                    .withMatches(findResult.getMatchList())
-                    .build();
-            
-            ActionResult clickResult = action.perform(clickOptions, clickObjects);
+            // Click the found matches
+            ActionResult clickResult = action.perform(clickOptions, objects);
             log.info("Click result: {}", clickResult.isSuccess());
         }
     }

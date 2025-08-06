@@ -1,10 +1,11 @@
 rootProject.name = 'action-hierarchy-example'
 
-// If using local Brobot development
-if (file('../../../library').exists()) {
-    includeBuild('../../../') {
-        dependencySubstitution {
-            substitute module('io.github.jspinak:brobot') using project(':library')
-        }
-    }
-}
+// Commented out to use Maven Central version instead of local library
+// // If using local Brobot development
+// if (file('../../../library').exists()) {
+// //     includeBuild('../../../') {
+// //         dependencySubstitution {
+// //             substitute module('io.github.jspinak:brobot') using project(':library')
+// //         }
+// //     }
+// // }

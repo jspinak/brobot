@@ -7,6 +7,7 @@ import io.github.jspinak.brobot.action.internal.find.OffsetLocationManagerV2;
 import io.github.jspinak.brobot.action.internal.find.match.MatchAdjusterV2;
 import io.github.jspinak.brobot.action.internal.find.match.MatchContentExtractor;
 import io.github.jspinak.brobot.action.internal.region.DynamicRegionResolver;
+import io.github.jspinak.brobot.action.internal.utility.ActionSuccessCriteria;
 import io.github.jspinak.brobot.analysis.color.profiles.ProfileSetBuilder;
 import io.github.jspinak.brobot.analysis.match.MatchFusion;
 import io.github.jspinak.brobot.model.element.Region;
@@ -17,6 +18,7 @@ import io.github.jspinak.brobot.statemanagement.StateMemory;
 import io.github.jspinak.brobot.tools.logging.visual.HighlightManager;
 import io.github.jspinak.brobot.tools.logging.visual.VisualFeedbackConfig;
 import io.github.jspinak.brobot.util.string.TextSelector;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -49,6 +51,7 @@ import java.util.List;
  * @see Find
  */
 @Component
+@Slf4j
 public class FindPipeline {
     
     private final ProfileSetBuilder profileSetBuilder;
@@ -63,6 +66,7 @@ public class FindPipeline {
     private final HighlightManager highlightManager;
     private final VisualFeedbackConfig visualFeedbackConfig;
     private final FindStrategyRegistryV2 findStrategyRegistry;
+    private final ActionSuccessCriteria actionSuccessCriteria;
     
     @Value("${brobot.highlighting.enabled:false}")
     private boolean highlightEnabled;
@@ -79,7 +83,8 @@ public class FindPipeline {
                        DynamicRegionResolver dynamicRegionResolver,
                        HighlightManager highlightManager,
                        VisualFeedbackConfig visualFeedbackConfig,
-                       FindStrategyRegistryV2 findStrategyRegistry) {
+                       FindStrategyRegistryV2 findStrategyRegistry,
+                       ActionSuccessCriteria actionSuccessCriteria) {
         this.profileSetBuilder = profileSetBuilder;
         this.offsetLocationManager = offsetLocationManager;
         this.matchFusion = matchFusion;
@@ -92,6 +97,7 @@ public class FindPipeline {
         this.highlightManager = highlightManager;
         this.visualFeedbackConfig = visualFeedbackConfig;
         this.findStrategyRegistry = findStrategyRegistry;
+        this.actionSuccessCriteria = actionSuccessCriteria;
     }
 
     /**
@@ -123,7 +129,8 @@ public class FindPipeline {
      * @param objectCollections The collections of objects to search for
      */
     public void execute(BaseFindOptions findOptions, ActionResult matches, ObjectCollection... objectCollections) {
-        // Update cross-state search regions first
+        // Note: Dependencies should be registered when states are built, not here
+        // For now, we'll check if search regions need updating based on previous matches
         updateCrossStateSearchRegions(matches, objectCollections);
         
         // Highlight search regions if enabled
@@ -146,9 +153,23 @@ public class FindPipeline {
         matchAdjuster.adjustAll(matches, findOptions.getMatchAdjustmentOptions());
         contentExtractor.set(matches);
         
+        // Update search regions for objects that depend on what we just found
+        if (!matches.isEmpty()) {
+            log.debug("FindPipeline: Found {} matches, updating dependent search regions", matches.size());
+            dynamicRegionResolver.updateDependentSearchRegions(matches);
+        } else {
+            log.debug("FindPipeline: No matches found, skipping dependent search region update");
+        }
+        
         // Highlight found matches if enabled
         if (shouldHighlightFinds() && !matches.isEmpty()) {
             highlightManager.highlightMatches(matches.getMatchList());
+        }
+        
+        // Set success criteria based on the action configuration
+        // This ensures success is evaluated before the ActionLifecycleAspect logs the result
+        if (matches.getActionConfig() != null) {
+            actionSuccessCriteria.set(matches.getActionConfig(), matches);
         }
     }
 
