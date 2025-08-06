@@ -1,6 +1,7 @@
 package io.github.jspinak.brobot.action.internal.region;
 
 import io.github.jspinak.brobot.action.ActionResult;
+import io.github.jspinak.brobot.action.basic.find.MatchAdjustmentOptions;
 import io.github.jspinak.brobot.model.action.ActionRecord;
 import io.github.jspinak.brobot.model.element.Location;
 import io.github.jspinak.brobot.model.element.Region;
@@ -12,10 +13,12 @@ import io.github.jspinak.brobot.model.state.StateLocation;
 import io.github.jspinak.brobot.model.state.StateObject;
 import io.github.jspinak.brobot.model.state.StateRegion;
 import io.github.jspinak.brobot.model.state.StateStore;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * Resolves and updates search regions dynamically based on matches from other state objects.
@@ -23,12 +26,15 @@ import java.util.Optional;
  * their search areas based on the location of other objects, even from different states.
  */
 @Component
+@Slf4j
 public class DynamicRegionResolver {
 
     private final StateStore stateStore;
+    private final SearchRegionDependencyRegistry dependencyRegistry;
 
-    public DynamicRegionResolver(StateStore stateStore) {
+    public DynamicRegionResolver(StateStore stateStore, SearchRegionDependencyRegistry dependencyRegistry) {
         this.stateStore = stateStore;
+        this.dependencyRegistry = dependencyRegistry;
     }
 
     /**
@@ -99,19 +105,22 @@ public class DynamicRegionResolver {
         Region baseRegion = match.getRegion();
 
         // Apply adjustments
-        SearchRegionOnObject.AdjustOptions adjustments = config.getAdjustments();
-        if (adjustments == null) adjustments = SearchRegionOnObject.AdjustOptions.builder().build();
-
-        int x = baseRegion.getX() + adjustments.getXAdjust();
-        int y = baseRegion.getY() + adjustments.getYAdjust();
-        int w = baseRegion.getW() + adjustments.getWAdjust();
-        int h = baseRegion.getH() + adjustments.getHAdjust();
-
-        // Apply absolute dimensions if specified
-        SearchRegionOnObject.AbsoluteDimensions absoluteDims = config.getAbsoluteDimensions();
-        if (absoluteDims != null) {
-            if (absoluteDims.hasWidth()) w = absoluteDims.getWidth();
-            if (absoluteDims.hasHeight()) h = absoluteDims.getHeight();
+        MatchAdjustmentOptions adjustments = config.getAdjustments();
+        
+        int x = baseRegion.getX();
+        int y = baseRegion.getY();
+        int w = baseRegion.getW();
+        int h = baseRegion.getH();
+        
+        if (adjustments != null) {
+            x += adjustments.getAddX();
+            y += adjustments.getAddY();
+            w += adjustments.getAddW();
+            h += adjustments.getAddH();
+            
+            // Apply absolute dimensions if specified (>= 0 means set)
+            if (adjustments.getAbsoluteW() >= 0) w = adjustments.getAbsoluteW();
+            if (adjustments.getAbsoluteH() >= 0) h = adjustments.getAbsoluteH();
         }
 
         return Optional.of(new Region(x, y, w, h));
@@ -189,5 +198,111 @@ public class DynamicRegionResolver {
      */
     public void updateSearchRegionsForObjects(List<StateObject> objects, ActionResult actionResult) {
         objects.forEach(obj -> updateSearchRegions(obj, actionResult));
+    }
+    
+    /**
+     * Registers search region dependencies for state objects.
+     * This should be called when states are initialized.
+     */
+    public void registerDependencies(List<StateObject> objects) {
+        log.info("DynamicRegionResolver: Registering dependencies for {} objects", objects.size());
+        int registeredCount = 0;
+        
+        for (StateObject obj : objects) {
+            if (obj instanceof StateImage) {
+                StateImage stateImage = (StateImage) obj;
+                if (stateImage.getSearchRegionOnObject() != null) {
+                    log.debug("Registering dependency for StateImage: {}", stateImage.getName());
+                    dependencyRegistry.registerDependency(stateImage, stateImage.getSearchRegionOnObject());
+                    registeredCount++;
+                }
+            } else if (obj instanceof StateLocation) {
+                StateLocation stateLoc = (StateLocation) obj;
+                if (stateLoc.getSearchRegionOnObject() != null) {
+                    log.debug("Registering dependency for StateLocation: {}", stateLoc.getName());
+                    dependencyRegistry.registerDependency(stateLoc, stateLoc.getSearchRegionOnObject());
+                    registeredCount++;
+                }
+            }
+            // Add StateRegion if it supports SearchRegionOnObject in the future
+        }
+        
+        log.info("DynamicRegionResolver: Registered {} dependencies", registeredCount);
+    }
+    
+    /**
+     * Updates search regions for all objects that depend on the found matches.
+     * This should be called after a successful find operation.
+     */
+    public void updateDependentSearchRegions(ActionResult actionResult) {
+        List<Match> matches = actionResult.getMatchList();
+        log.debug("updateDependentSearchRegions: Processing {} matches", matches.size());
+        
+        for (Match match : matches) {
+            if (match.getStateObjectData() == null) {
+                log.debug("Match has no StateObjectData, skipping");
+                continue;
+            }
+            
+            String sourceName = match.getStateObjectData().getOwnerStateName();
+            String sourceObject = match.getStateObjectData().getStateObjectName();
+            log.debug("Looking for dependents of {}:{}", sourceName, sourceObject);
+            
+            // Get all objects that depend on this match
+            Set<SearchRegionDependencyRegistry.DependentObject> dependents = 
+                dependencyRegistry.getDependents(sourceName, sourceObject);
+            
+            log.debug("Found {} dependents for {}:{}", dependents.size(), sourceName, sourceObject);
+            
+            for (SearchRegionDependencyRegistry.DependentObject dependent : dependents) {
+                updateDependentSearchRegion(dependent, match);
+            }
+        }
+    }
+    
+    /**
+     * Updates a single dependent object's search region based on a source match.
+     */
+    private void updateDependentSearchRegion(SearchRegionDependencyRegistry.DependentObject dependent, 
+                                            Match sourceMatch) {
+        StateObject targetObject = dependent.getStateObject();
+        SearchRegionOnObject config = dependent.getSearchRegionConfig();
+        
+        // Calculate the new region based on the source match
+        Region baseRegion = sourceMatch.getRegion();
+        MatchAdjustmentOptions adjustments = config.getAdjustments();
+        
+        int x = baseRegion.getX();
+        int y = baseRegion.getY();
+        int w = baseRegion.getW();
+        int h = baseRegion.getH();
+        
+        // Apply adjustments if specified
+        if (adjustments != null) {
+            x += adjustments.getAddX();
+            y += adjustments.getAddY();
+            w += adjustments.getAddW();
+            h += adjustments.getAddH();
+            
+            // Apply absolute dimensions if specified (>= 0 means set)
+            if (adjustments.getAbsoluteW() >= 0) w = adjustments.getAbsoluteW();
+            if (adjustments.getAbsoluteH() >= 0) h = adjustments.getAbsoluteH();
+        }
+        
+        Region newRegion = new Region(x, y, w, h);
+        
+        // Update the target object's search region
+        if (targetObject instanceof StateImage) {
+            ((StateImage) targetObject).setFixedSearchRegion(newRegion);
+            log.debug("Updated search region for {} based on {} to {}", 
+                     targetObject.getName(), sourceMatch.getStateObjectData().getStateObjectName(), newRegion);
+        } else if (targetObject instanceof StateLocation) {
+            // For StateLocation, update the location based on the center of the region
+            int centerX = newRegion.getX() + newRegion.getW() / 2;
+            int centerY = newRegion.getY() + newRegion.getH() / 2;
+            ((StateLocation) targetObject).setLocation(new Location(centerX, centerY));
+            log.debug("Updated location for {} based on {} to ({}, {})", 
+                     targetObject.getName(), sourceMatch.getStateObjectData().getStateObjectName(), centerX, centerY);
+        }
     }
 }

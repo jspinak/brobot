@@ -1,0 +1,66 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.2.0'
+    id 'io.spring.dependency-management' version '1.1.0'
+}
+
+group = 'com.example'
+version = '1.0.0'
+sourceCompatibility = '21'
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+}
+
+dependencies {
+    // Note: In a real project, you would include the brobot library here
+    
+    
+    // Spring Boot
+    implementation 'org.springframework.boot:spring-boot-starter'
+    
+    // Lombok
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+    
+    // Logging
+    implementation 'ch.qos.logback:logback-classic'
+    
+    // Testing
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testImplementation 'org.mockito:mockito-core'
+    testImplementation 'org.assertj:assertj-core'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
+
+springBoot {
+    mainClass = 'com.example.mocking.SimpleStandaloneApp'
+}
+
+// Task to run specific examples
+task runExample(type: JavaExec) {
+    mainClass = 'com.example.mocking.EnhancedMockingApplication'
+    classpath = sourceSets.main.runtimeClasspath
+    standardInput = System.in
+}
+
+// Task to run with specific scenario
+task runScenario(type: JavaExec) {
+    mainClass = 'com.example.mocking.EnhancedMockingApplication'
+    classpath = sourceSets.main.runtimeClasspath
+    if (project.hasProperty('scenario')) {
+        args = ['--scenario', project.getProperty('scenario')]
+    }
+    standardInput = System.in
+}

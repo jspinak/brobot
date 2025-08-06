@@ -1,5 +1,6 @@
 package io.github.jspinak.brobot.model.element;
 
+import io.github.jspinak.brobot.action.basic.find.MatchAdjustmentOptions;
 import io.github.jspinak.brobot.model.state.StateObject;
 import lombok.Builder;
 import lombok.Data;
@@ -16,42 +17,11 @@ public class SearchRegionOnObject {
     private StateObject.Type targetType;
     private String targetStateName;
     private String targetObjectName;
-    @Builder.Default
-    private AdjustOptions adjustments = AdjustOptions.builder().build();
-    private AbsoluteDimensions absoluteDimensions;
-
+    
     /**
-     * Adjustment options for the derived region.
+     * Optional adjustments to apply to the calculated region.
+     * Uses the same adjustment options as match post-processing for consistency.
      */
-    @Data
-    @Builder(toBuilder = true)
-    public static class AdjustOptions {
-        @Builder.Default
-        private int xAdjust = 0;
-        @Builder.Default
-        private int yAdjust = 0;
-        @Builder.Default
-        private int wAdjust = 0;
-        @Builder.Default
-        private int hAdjust = 0;
-    }
-
-    /**
-     * Absolute dimensions to override calculated dimensions.
-     */
-    @Data
-    @Builder(toBuilder = true)
-    public static class AbsoluteDimensions {
-        private Integer width;
-        private Integer height;
-
-        public boolean hasWidth() {
-            return width != null;
-        }
-
-        public boolean hasHeight() {
-            return height != null;
-        }
-    }
+    private MatchAdjustmentOptions adjustments;
 
 }

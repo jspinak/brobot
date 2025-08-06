@@ -23,10 +23,11 @@ public class SearchRegionOnObject {
     private StateObject.Type targetType;     // Type of target object (IMAGE, REGION, etc.)
     private String targetStateName;          // Name of the state containing the target
     private String targetObjectName;         // Name of the specific object
-    private AdjustOptions adjustments;       // Position and size adjustments
-    private AbsoluteDimensions absoluteDimensions; // Fixed width/height overrides
+    private MatchAdjustmentOptions adjustments; // Position and size adjustments (reuses existing class)
 }
 ```
+
+The `adjustments` field uses the standard `MatchAdjustmentOptions` class for consistency with other Brobot operations.
 
 ## Basic Usage
 
@@ -38,10 +39,10 @@ Define a search region relative to another StateImage:
 StateImage searchArea = new StateImage.Builder()
     .addPatterns("search-icon.png")
     .setName("SearchIcon")
-    .setSearchRegionOnObject(new SearchRegionOnObject.Builder()
+    .setSearchRegionOnObject(SearchRegionOnObject.builder()
         .targetType(StateObject.Type.IMAGE)
-        .targetState("MainMenu")
-        .targetObject("MenuButton")
+        .targetStateName("MainMenu")
+        .targetObjectName("MenuButton")
         .build())
     .build();
 ```
@@ -54,11 +55,16 @@ Apply position and size adjustments to the derived region:
 StateImage icon = new StateImage.Builder()
     .addPatterns("status-icon.png")
     .setName("StatusIcon")
-    .setSearchRegionOnObject(new SearchRegionOnObject.Builder()
+    .setSearchRegionOnObject(SearchRegionOnObject.builder()
         .targetType(StateObject.Type.IMAGE)
-        .targetState("Dashboard")
-        .targetObject("HeaderBar")
-        .adjustments(10, -5, 50, 20)  // x, y, width, height adjustments
+        .targetStateName("Dashboard")
+        .targetObjectName("HeaderBar")
+        .adjustments(MatchAdjustmentOptions.builder()
+            .addX(10)    // Move 10 pixels right
+            .addY(-5)    // Move 5 pixels up
+            .addW(50)    // Expand width by 50 pixels
+            .addH(20)    // Expand height by 20 pixels
+            .build())
         .build())
     .build();
 ```
@@ -71,12 +77,15 @@ Override the calculated dimensions with fixed values:
 StateImage button = new StateImage.Builder()
     .addPatterns("submit-button.png")
     .setName("SubmitButton")
-    .setSearchRegionOnObject(new SearchRegionOnObject.Builder()
+    .setSearchRegionOnObject(SearchRegionOnObject.builder()
         .targetType(StateObject.Type.IMAGE)
-        .targetState("Form")
-        .targetObject("FormTitle")
-        .yAdjust(100)               // Move down 100 pixels
-        .absoluteDimensions(200, 50) // Fixed 200x50 region
+        .targetStateName("Form")
+        .targetObjectName("FormTitle")
+        .adjustments(MatchAdjustmentOptions.builder()
+            .addY(100)        // Move down 100 pixels
+            .absoluteW(200)   // Fixed width of 200 pixels
+            .absoluteH(50)    // Fixed height of 50 pixels
+            .build())
         .build())
     .build();
 ```
@@ -100,11 +109,16 @@ public class WorkingState {
                         "working/claude-icon-3", 
                         "working/claude-icon-4")
             .setName("ClaudeIcon")
-            .setSearchRegionOnObject(new SearchRegionOnObject.Builder()
+            .setSearchRegionOnObject(SearchRegionOnObject.builder()
                     .targetType(StateObject.Type.IMAGE)
-                    .targetState("Prompt")
-                    .targetObject("ClaudePrompt")
-                    .adjustments(3, 10, 30, 55)  // Relative to prompt location
+                    .targetStateName("Prompt")
+                    .targetObjectName("ClaudePrompt")
+                    .adjustments(MatchAdjustmentOptions.builder()
+                            .addX(3)      // Slight offset to the right
+                            .addY(10)     // Below the prompt
+                            .addW(30)     // Wider search area
+                            .addH(55)     // Taller search area
+                            .build())
                     .build())
             .build();
     }
@@ -128,27 +142,37 @@ ActionResult result = action.perform(findOptions, workingState.getClaudeIcon());
 
 ## Builder Methods
 
-The `SearchRegionOnObject.Builder` provides multiple ways to configure adjustments:
+The `SearchRegionOnObject.builder()` provides a fluent API for configuration:
 
-### Individual Adjustments
+### Basic Structure
 ```java
-.xAdjust(10)      // Adjust x position
-.yAdjust(20)      // Adjust y position  
-.wAdjust(30)      // Adjust width
-.hAdjust(40)      // Adjust height
+SearchRegionOnObject.builder()
+    .targetType(StateObject.Type.IMAGE)  // Required: Type of target
+    .targetStateName("StateName")        // Required: State containing target
+    .targetObjectName("ObjectName")      // Required: Name of target object
+    .adjustments(...)                    // Optional: Position/size adjustments using MatchAdjustmentOptions
+    .build()
 ```
 
-### Combined Adjustments
+### MatchAdjustmentOptions Builder
 ```java
-.adjustments(10, 20, 30, 40)  // x, y, width, height
+.adjustments(MatchAdjustmentOptions.builder()
+    .addX(10)         // Add to x position
+    .addY(20)         // Add to y position  
+    .addW(30)         // Add to width
+    .addH(40)         // Add to height
+    .absoluteW(200)   // Override with fixed width (optional)
+    .absoluteH(100)   // Override with fixed height (optional)
+    .targetPosition(Position.CENTER)  // Target position within region (optional)
+    .targetOffset(new Location(5, 5)) // Additional offset (optional)
+    .build())
 ```
 
-### Absolute Dimensions
-```java
-.width(200)       // Fixed width
-.height(100)      // Fixed height
-.absoluteDimensions(200, 100)  // Both at once
-```
+### Key Differences from Standard Match Adjustments
+- When used with SearchRegionOnObject, only position and dimension adjustments apply
+- `targetPosition` and `targetOffset` are ignored for search region calculation
+- Use negative values in `addX`/`addY` to move left/up
+- Use `absoluteW`/`absoluteH` set to -1 (default) to not override dimensions
 
 ## Cross-State References
 
@@ -167,11 +191,31 @@ StateImage notification = new StateImage.Builder()
     .setName("Notification")
     .setSearchRegionOnObject(new SearchRegionOnObject.Builder()
         .targetType(StateObject.Type.IMAGE)
-        .targetState("Login")  // Different state
-        .targetObject("LoginButton")
+        .targetStateName("Login")  // Different state
+        .targetObjectName("LoginButton")
         .yAdjust(-50)  // Above the login button
         .build())
     .build();
+```
+
+### How Cross-State Dependencies Work
+
+When you define a cross-state dependency:
+
+1. **Registration Phase**: When states are loaded, the `SearchRegionDependencyInitializer` automatically registers all dependencies with the `DynamicRegionResolver`.
+
+2. **Runtime Resolution**: When a FIND operation succeeds:
+   - The `FindPipeline` calls `updateDependentSearchRegions()`
+   - All objects depending on the found object have their search regions updated
+   - The updates apply the configured adjustments
+
+3. **Automatic Updates**: Search regions are dynamically updated each time the target object is found in a new location.
+
+Example flow:
+```java
+// 1. ClaudePrompt is found at location (100, 200)
+// 2. ClaudeIcon's search region is automatically updated to (103, 210, width+30, height+55)
+// 3. Next search for ClaudeIcon uses this updated region
 ```
 
 ## Integration with State-Aware Scheduling
@@ -259,11 +303,16 @@ To migrate existing code:
    // New approach
    stateImage = new StateImage.Builder()
        .addPatterns("pattern.png")
-       .setSearchRegionOnObject(new SearchRegionOnObject.Builder()
+       .setSearchRegionOnObject(SearchRegionOnObject.builder()
            .targetType(StateObject.Type.IMAGE)
-           .targetState("BaseState")
-           .targetObject("BaseImage")
-           .adjustments(10, 50, 20, 0)
+           .targetStateName("BaseState")
+           .targetObjectName("BaseImage")
+           .adjustments(MatchAdjustmentOptions.builder()
+               .addX(10)
+               .addY(50)
+               .addW(20)
+               .addH(0)
+               .build())
            .build())
        .build();
    ```
@@ -273,12 +322,78 @@ To migrate existing code:
    - Remove region storage variables
    - Simplify action methods
 
+## Implementation Architecture
+
+The declarative region system consists of several key components:
+
+### Core Components
+
+1. **SearchRegionOnObject**: The configuration object that defines the dependency
+   - Holds target state/object information
+   - Contains adjustment and dimension settings
+   - Attached to StateImages during state construction
+
+2. **SearchRegionDependencyRegistry**: Tracks all dependencies
+   - Maps source objects to their dependents
+   - Provides lookup for dependent objects when sources are found
+   - Thread-safe for concurrent access
+
+3. **DynamicRegionResolver**: Resolves and updates regions
+   - Calculates actual regions based on found objects
+   - Updates dependent object search regions
+   - Handles both same-state and cross-state dependencies
+
+4. **SearchRegionDependencyInitializer**: Initializes the system
+   - Listens for `StatesRegisteredEvent`
+   - Collects all StateObjects with dependencies
+   - Registers them with the DynamicRegionResolver
+
+5. **FindPipeline Integration**: Triggers updates
+   - Calls `updateDependentSearchRegions()` after successful finds
+   - Ensures dependent regions are updated before next search
+
+### Initialization Flow
+
+```
+Application Start
+    ↓
+States Loaded (@State classes instantiated)
+    ↓
+StatesRegisteredEvent Published
+    ↓
+SearchRegionDependencyInitializer Receives Event
+    ↓
+Collects All StateObjects with SearchRegionOnObject
+    ↓
+Registers Dependencies with DynamicRegionResolver
+    ↓
+System Ready for Dynamic Region Updates
+```
+
+### Runtime Flow
+
+```
+FIND Operation Executes
+    ↓
+Matches Found
+    ↓
+FindPipeline.updateDependentSearchRegions()
+    ↓
+For Each Match:
+    - Get Dependent Objects from Registry
+    - Calculate New Search Region
+    - Update Dependent Object's Search Region
+    ↓
+Next FIND Uses Updated Regions
+```
+
 ## Troubleshooting
 
 ### Region Not Found
 - Verify target state and object names match exactly
 - Ensure target state is active when searching
 - Check that target object has been found at least once
+- Enable logging: `logging.level.io.github.jspinak.brobot.action.internal.region=DEBUG`
 
 ### Incorrect Region Position
 - Log the resolved region for debugging:
@@ -292,9 +407,16 @@ To migrate existing code:
   action.perform(new HighlightOptions.Builder().build(), stateImage);
   ```
 
+### Dependencies Not Working
+- Verify SearchRegionDependencyInitializer is being instantiated
+- Check logs for "Registered search region dependency" messages
+- Ensure Spring component scanning includes brobot packages
+- Verify target object names match exactly (case-sensitive)
+
 ### Performance Considerations
 - Region resolution happens on each search
-- Cache frequently used regions if performance is critical
+- Dependencies are registered once at startup
+- Updates only occur when source objects are found
 - Consider using fixed regions for static layouts
 
 ## Summary

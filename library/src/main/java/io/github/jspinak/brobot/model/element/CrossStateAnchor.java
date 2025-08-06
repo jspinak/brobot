@@ -1,5 +1,6 @@
 package io.github.jspinak.brobot.model.element;
 
+import io.github.jspinak.brobot.action.basic.find.MatchAdjustmentOptions;
 import io.github.jspinak.brobot.model.state.StateObject;
 import lombok.Getter;
 import lombok.Setter;
@@ -16,16 +17,16 @@ public class CrossStateAnchor extends Anchor {
     private String sourceStateName;
     private String sourceObjectName;
     private StateObject.Type sourceType;
-    private SearchRegionOnObject.AdjustOptions adjustments;
+    private MatchAdjustmentOptions adjustments;
 
     public CrossStateAnchor() {
         super();
-        this.adjustments = SearchRegionOnObject.AdjustOptions.builder().build();
+        this.adjustments = MatchAdjustmentOptions.builder().build();
     }
 
     public CrossStateAnchor(Positions.Name anchorInNewDefinedRegion, Positions.Name positionInMatch) {
         super(anchorInNewDefinedRegion, new Position(positionInMatch));
-        this.adjustments = SearchRegionOnObject.AdjustOptions.builder().build();
+        this.adjustments = MatchAdjustmentOptions.builder().build();
     }
 
     /**
@@ -41,8 +42,8 @@ public class CrossStateAnchor extends Anchor {
         
         // Apply adjustments
         return new Location(
-            (int)(x + adjustments.getXAdjust()),
-            (int)(y + adjustments.getYAdjust())
+            (int)(x + adjustments.getAddX()),
+            (int)(y + adjustments.getAddY())
         );
     }
 
@@ -75,21 +76,19 @@ public class CrossStateAnchor extends Anchor {
         }
 
         public Builder adjustX(int x) {
-            anchor.adjustments = anchor.adjustments.toBuilder().xAdjust(x).build();
+            anchor.adjustments = anchor.adjustments.toBuilder().addX(x).build();
             return this;
         }
 
         public Builder adjustY(int y) {
-            anchor.adjustments = anchor.adjustments.toBuilder().yAdjust(y).build();
+            anchor.adjustments = anchor.adjustments.toBuilder().addY(y).build();
             return this;
         }
 
         public Builder adjustments(int x, int y) {
-            anchor.adjustments = SearchRegionOnObject.AdjustOptions.builder()
-                .xAdjust(x)
-                .yAdjust(y)
-                .wAdjust(0)
-                .hAdjust(0)
+            anchor.adjustments = MatchAdjustmentOptions.builder()
+                .addX(x)
+                .addY(y)
                 .build();
             return this;
         }

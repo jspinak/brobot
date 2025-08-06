@@ -1,0 +1,62 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.2.0'
+    id 'io.spring.dependency-management' version '1.1.4'
+}
+
+group = 'com.example'
+version = '1.0.0'
+sourceCompatibility = '21'
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+}
+
+dependencies {
+    // Brobot library
+    implementation 'io.github.jspinak:brobot:1.1.0'
+    
+    // Spring Boot
+    implementation 'org.springframework.boot:spring-boot-starter'
+    
+    // Logging
+    implementation 'org.springframework.boot:spring-boot-starter-logging'
+    
+    // Lombok
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+    
+    // Testing
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
+
+// Create necessary directories
+task createDirectories {
+    doLast {
+        file('images').mkdirs()
+        file('images/forms').mkdirs()
+        file('images/login').mkdirs()
+        file('images/buttons').mkdirs()
+        file('logs').mkdirs()
+    }
+}
+
+build.dependsOn createDirectories
+
+// Clean logs
+task cleanLogs(type: Delete) {
+    delete 'logs'
+}
+
+clean.dependsOn cleanLogs

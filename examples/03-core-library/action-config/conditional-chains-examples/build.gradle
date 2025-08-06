@@ -1,0 +1,52 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.1.0'
+    id 'io.spring.dependency-management' version '1.1.0'
+}
+
+group = 'com.example'
+version = '1.0.0'
+java {
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+}
+
+dependencies {
+    // Brobot library - commented out for standalone build
+    implementation 'io.github.jspinak:brobot:1.1.0'
+    
+    // Spring Boot
+    implementation 'org.springframework.boot:spring-boot-starter'
+    
+    // Lombok - using gradle plugin above
+    
+    // Testing
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
+
+// Create images directory structure
+task createImageDirs {
+    doLast {
+        file('images').mkdirs()
+        file('images/buttons').mkdirs()
+        file('images/forms').mkdirs()
+        file('images/indicators').mkdirs()
+    }
+}
+
+build.dependsOn createImageDirs

@@ -16,7 +16,7 @@ configurations {
 
 repositories {
     mavenCentral()
-}
+    mavenLocal()}
 
 dependencies {
     // Brobot 1.1.0+ includes Spring, Lombok, SLF4J as transitive dependencies

@@ -51,7 +51,7 @@ public class SimpleAutomation {
         // 1. Define what to look for
         StateImage buttonImage = new StateImage.Builder()
                 .setName("submit-button")
-                .addPattern("submit-button")
+                .addPatterns("submit-button")
                 .build();
         
         // 2. Configure how to find it
@@ -74,11 +74,8 @@ public class SimpleAutomation {
                     .setClickType(ClickOptions.Type.LEFT)
                     .build();
             
-            ObjectCollection clickObjects = new ObjectCollection.Builder()
-                    .withMatches(findResult.getMatchList())
-                    .build();
-            
-            ActionResult clickResult = action.perform(clickOptions, clickObjects);
+            // Click on the same objects we found
+            ActionResult clickResult = action.perform(clickOptions, objects);
         }
     }
 }
@@ -100,7 +97,7 @@ public class SimpleAutomation {
         // 1. Define the button image
         StateImage buttonImage = new StateImage.Builder()
                 .setName("submit-button")
-                .addPattern("submit-button")
+                .addPatterns("submit-button")
                 .build();
         
         // 2. Find and click in one line
@@ -176,7 +173,7 @@ public class MinimalBrobot {
         
         // Create an image to find
         StateImage button = new StateImage.Builder()
-                .addPattern("button")  // No .png extension needed
+                .addPatterns("button")  // No .png extension needed
                 .build();
         
         // Find and click it
