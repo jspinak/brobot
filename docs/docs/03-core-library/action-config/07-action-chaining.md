@@ -159,8 +159,19 @@ ActionChainOptions chain = new ActionChainOptions.Builder(
 4. **Create reusable patterns**: Build utility methods for common chains
 5. **Keep chains focused**: Break complex workflows into smaller, manageable chains
 
+## Enhanced Conditional Action Chaining
+
+For more advanced conditional workflows with proper sequential composition, see the [Enhanced Conditional Action Chains](./conditional-chains-examples) documentation. The `EnhancedConditionalActionChain` class provides:
+
+- The crucial `then()` method for sequential action composition
+- Convenience methods like `click()`, `type()`, `scrollDown()`
+- Built-in keyboard shortcuts
+- Proper conditional execution logic
+- No explicit `wait()` methods (following model-based principles)
+
 ## Next Steps
 
-- Explore [Complex Workflows](./complex-workflows) for multi-step automation
+- Explore [Enhanced Conditional Action Chains](./conditional-chains-examples) for advanced patterns
+- Learn about [Complex Workflows](./complex-workflows) for multi-step automation
 - Learn about [Conditional Actions](./conditional-actions) using RepeatUntilConfig
 - See [Form Automation](./form-automation) for practical examples
