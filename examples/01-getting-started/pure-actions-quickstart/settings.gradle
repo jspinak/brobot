@@ -1,10 +1,8 @@
 rootProject.name = 'pure-actions-quickstart-example'
 
-// If using local Brobot development
-// if (file('../../../library').exists()) {
-//     includeBuild('../../../') {
-//         dependencySubstitution {
-//             substitute module('io.github.jspinak:brobot') using project(':library')
-//         }
-//     }
-// }
+// Use local Brobot library
+includeBuild('../../../') {
+    dependencySubstitution {
+        substitute module('io.github.jspinak:brobot') using project(':library')
+    }
+}

@@ -5,6 +5,12 @@ title: 'Enhanced Mock Testing System'
 
 # Enhanced Mock Testing System
 
+:::info For Framework Developers
+This section covers **advanced mocking features** for developers extending the Brobot framework or building complex testing scenarios. 
+
+For standard automation testing, see the [main Testing documentation](/docs/testing/testing-intro).
+:::
+
 Brobot's enhanced mock testing system provides sophisticated scenario-based testing capabilities with advanced failure patterns, verification, and structured test data management.
 
 ## Overview

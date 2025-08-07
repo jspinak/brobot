@@ -6,12 +6,14 @@ import io.github.jspinak.brobot.action.Action;
 import io.github.jspinak.brobot.annotations.Transition;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 
 /**
  * Transition from WORLD back to HOME state.
  * Completes the navigation cycle.
  */
 @Transition(from = WorldState.class, to = HomeState.class)
+@Component
 @RequiredArgsConstructor
 @Slf4j
 public class WorldToHomeTransition {
@@ -25,7 +27,7 @@ public class WorldToHomeTransition {
     public boolean execute() {
         log.info("Transitioning from WORLD back to HOME");
         
-        // Click the home button
-        return action.click(worldState.getHomeButton()).isSuccess();
+        // Click the search button to go home (from the documentation pattern)
+        return action.click(worldState.getSearchButton()).isSuccess();
     }
 }

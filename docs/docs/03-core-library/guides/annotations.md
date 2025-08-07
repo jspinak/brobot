@@ -1,5 +1,6 @@
 ---
-sidebar_position: 2
+sidebar_position: 20
+title: 'Annotations API'
 ---
 
 # Annotations

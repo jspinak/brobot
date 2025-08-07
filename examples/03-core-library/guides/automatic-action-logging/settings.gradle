@@ -1,8 +1,8 @@
 rootProject.name = 'automatic-action-logging'
 
-// Use local brobot library for development
-// // includeBuild('../../../../') {
-// //     dependencySubstitution {
-// //         substitute module('io.github.jspinak:brobot') using project(':library')
-// // }
-// // }
+// Use local Brobot library
+includeBuild('../../../../') {
+    dependencySubstitution {
+        substitute module('io.github.jspinak:brobot') using project(':library')
+    }
+}

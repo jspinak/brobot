@@ -23,15 +23,13 @@ repositories {
 }
 
 dependencies {
-    // Brobot library - commented out for standalone build
+    // Brobot 1.1.0+ includes Spring, Lombok, SLF4J as transitive dependencies
     implementation 'io.github.jspinak:brobot:1.1.0'
     
-    // Spring Boot
-    implementation 'org.springframework.boot:spring-boot-starter'
+    // Only need annotation processor for Lombok
+    annotationProcessor 'org.projectlombok:lombok:1.18.32'
     
-    // Lombok - using gradle plugin above
-    
-    // Testing
+    // Add test dependencies as needed
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
 

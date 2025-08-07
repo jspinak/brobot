@@ -4,8 +4,8 @@
 const {themes} = require('prism-react-renderer');
 
 // for KaTeX (Latex)
-const math = require('remark-math');
-const katex = require('rehype-katex');
+const math = require('remark-math').default;
+const katex = require('rehype-katex').default;
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
@@ -26,6 +26,23 @@ const config = {
       {
         trackingID: 'G-6WY1S6ZWEY',
         anonymizeIP: true,
+      },
+    ],
+    [
+      '@docusaurus/plugin-client-redirects',
+      {
+        redirects: [
+          {
+            from: '/docs/tutorial-basics/live-automation',
+            to: '/docs/core-library/tutorials/tutorial-basics/live-automation',
+          },
+          // Version 1.0.6 already has the page at the correct location
+          // Version 1.0.7 redirect
+          {
+            from: '/docs/1.0.7/tutorial-basics/live-automation',
+            to: '/docs/1.0.7/core-library/tutorials/tutorial-basics/live-automation',
+          },
+        ],
       },
     ],
   ],

@@ -43,6 +43,15 @@ public class SimplifiedExampleRunner implements CommandLineRunner {
                         scenarioExample.runSimpleTimeBasedStates();
                         break;
                     case "4":
+                        scenarioExample.testLoginUnderNetworkIssues();
+                        break;
+                    case "5":
+                        scenarioExample.testRetryBehaviorWithCascadingFailures();
+                        break;
+                    case "6":
+                        scenarioExample.testPerformanceUnderLoad();
+                        break;
+                    case "7":
                         runAllExamples();
                         break;
                     case "0":
@@ -69,7 +78,10 @@ public class SimplifiedExampleRunner implements CommandLineRunner {
         System.out.println("1. Degrading Performance");
         System.out.println("2. Cascading Failures");
         System.out.println("3. Time-Based States");
-        System.out.println("4. Run All Examples");
+        System.out.println("4. Basic Scenario Setup (Docs)");
+        System.out.println("5. Advanced Failure Patterns (Docs)");
+        System.out.println("6. Temporal Conditions (Docs)");
+        System.out.println("7. Run All Examples");
         System.out.println("0. Exit");
         System.out.print("\nEnter your choice: ");
     }
@@ -77,9 +89,15 @@ public class SimplifiedExampleRunner implements CommandLineRunner {
     private void runAllExamples() {
         log.info("\n=== Running All Examples ===\n");
         
+        log.info(">>> Original Examples <<<");
         scenarioExample.runSimpleDegradingPerformance();
         scenarioExample.runSimpleCascadingFailures();
         scenarioExample.runSimpleTimeBasedStates();
+        
+        log.info(">>> Documentation Examples <<<");
+        scenarioExample.testLoginUnderNetworkIssues();
+        scenarioExample.testRetryBehaviorWithCascadingFailures();
+        scenarioExample.testPerformanceUnderLoad();
         
         log.info("\n=== All Examples Completed ===");
     }

@@ -1,8 +1,8 @@
 rootProject.name = 'using-color-example'
 
-// Use composite build to include brobot library
-// includeBuild('../../../../../../brobot') {
-//     dependencySubstitution {
-//         substitute module('io.github.jspinak:brobot:1.1.0') using project(':library')
-//     }
-// }
+// Use local Brobot library
+includeBuild('../../../../../') {
+    dependencySubstitution {
+        substitute module('io.github.jspinak:brobot') using project(':library')
+    }
+}

@@ -5,7 +5,7 @@ plugins {
 }
 
 group = 'com.example'
-version = '1.0.0'
+version = '0.0.1-SNAPSHOT'
 sourceCompatibility = '21'
 
 configurations {
@@ -20,15 +20,11 @@ repositories {
 }
 
 dependencies {
-    // Brobot library
+    // Brobot 1.1.0+ includes Spring Boot, Lombok, SLF4J, and SikuliX as transitive dependencies
     implementation 'io.github.jspinak:brobot:1.1.0'
     
-    // Spring Boot
-    implementation 'org.springframework.boot:spring-boot-starter'
-    
-    // Lombok
-    compileOnly 'org.projectlombok:lombok'
-    annotationProcessor 'org.projectlombok:lombok'
+    // Lombok annotation processor still needed for compilation
+    annotationProcessor 'org.projectlombok:lombok:1.18.32'
     
     // Testing
     testImplementation 'org.springframework.boot:spring-boot-starter-test'

@@ -12,6 +12,7 @@ import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.model.element.Location;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.state.StateImage;
+import io.github.jspinak.brobot.model.conditional.ConditionalActionChain;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -30,6 +31,7 @@ public class PureActionsDemo {
     
     /**
      * Old Way vs New Way comparison
+     * Code from: docs/docs/01-getting-started/pure-actions-quickstart.md lines 14-38
      */
     public void demonstrateOldVsNew() {
         log.info("=== Old Way vs New Way ===");
@@ -49,19 +51,20 @@ public class PureActionsDemo {
             action.perform(ActionType.CLICK, found.getBestMatch().get().getRegion());
         }
         
-        // Even Better Way (With action chaining)
-        log.info("Best way: Using action chaining");
-        PatternFindOptions findAndClick = new PatternFindOptions.Builder()
-                .then(new ClickOptions.Builder().build())
-                .build();
-        ActionResult chainResult = action.perform(findAndClick, 
-                new ObjectCollection.Builder()
-                        .withImages(buttonImage)
-                        .build());
+        // Even Better Way (Conditional Chains)
+        // Code from: docs/docs/01-getting-started/pure-actions-quickstart.md lines 34-38
+        log.info("Best way: Using conditional chains");
+        ConditionalActionChain.find(new PatternFindOptions.Builder().build())
+            .ifFound(ConditionalActionChain.click())
+            .ifNotFound(ConditionalActionChain.log("Button not found"))
+            .perform(action, new ObjectCollection.Builder()
+                .withImages(buttonImage)
+                .build());
     }
     
     /**
      * Common Use Case 1: Click a Button
+     * Code from: docs/docs/01-getting-started/pure-actions-quickstart.md lines 68-77
      */
     public void clickButtonExample() {
         log.info("=== Click Button Example ===");
@@ -70,22 +73,22 @@ public class PureActionsDemo {
         Location buttonLocation = new Location(100, 200);
         action.perform(ActionType.CLICK, buttonLocation);
         
-        // With an image
+        // With an image using conditional chain
+        // Code from: docs/docs/01-getting-started/pure-actions-quickstart.md lines 74-77
         StateImage submitButton = new StateImage.Builder()
                 .addPatterns("submit-button")
                 .build();
         
-        action.perform(
-                new PatternFindOptions.Builder()
-                        .then(new ClickOptions.Builder().build())
-                        .build(),
-                new ObjectCollection.Builder()
-                        .withImages(submitButton)
-                        .build());
+        ConditionalActionChain.find(new PatternFindOptions.Builder().build())
+            .ifFound(ConditionalActionChain.click())
+            .perform(action, new ObjectCollection.Builder()
+                .withImages(submitButton)
+                .build());
     }
     
     /**
      * Common Use Case 2: Type in a Field
+     * Code from: docs/docs/01-getting-started/pure-actions-quickstart.md lines 80-89
      */
     public void typeInFieldExample() {
         log.info("=== Type in Field Example ===");
@@ -93,22 +96,21 @@ public class PureActionsDemo {
         // Type at current cursor position
         action.perform(ActionType.TYPE, "Hello World");
         
-        // Find field and type
+        // Find field and type using conditional chain
+        // Code from: docs/docs/01-getting-started/pure-actions-quickstart.md lines 85-89
         StateImage textField = new StateImage.Builder()
                 .addPatterns("text-field")
                 .build();
         
-        action.perform(
-                new PatternFindOptions.Builder()
-                        .then(new ClickOptions.Builder().build())
-                        .then(new TypeOptions.Builder()
-                                .setTypeDelay(0.1)
-                                .build())
-                        .build(),
-                new ObjectCollection.Builder()
-                        .withImages(textField)
-                        .withStrings("Hello from Pure Actions!")
-                        .build());
+        ConditionalActionChain.find(new PatternFindOptions.Builder().build())
+            .ifFound(new ClickOptions.Builder().build())
+            .then(new TypeOptions.Builder()
+                .setTypeDelay(0.1)
+                .build())
+            .perform(action, new ObjectCollection.Builder()
+                .withImages(textField)
+                .withStrings("Hello from Pure Actions!")
+                .build());
     }
     
     /**
@@ -282,6 +284,7 @@ public class PureActionsDemo {
     
     /**
      * Best Practice: Reuse find results
+     * Code from: docs/docs/01-getting-started/pure-actions-quickstart.md lines 199-212
      */
     public void reuseFindResults() {
         log.info("=== Reuse Find Results ===");
@@ -291,6 +294,7 @@ public class PureActionsDemo {
                 .build();
         
         // Find once, use multiple times
+        // Code from: docs/docs/01-getting-started/pure-actions-quickstart.md lines 200-212
         ActionResult buttons = action.find(allButtons);
         
         log.info("Found {} buttons", buttons.getMatchList().size());
@@ -298,13 +302,71 @@ public class PureActionsDemo {
         for (Match button : buttons.getMatchList()) {
             // Highlight with pause after
             HighlightOptions highlight = new HighlightOptions.Builder()
-                    .setPauseAfterEnd(0.5)
+                    .setPauseAfterEnd(0.5)  // 500ms pause after highlighting
                     .build();
             
             action.perform(highlight, new ObjectCollection.Builder()
                     .withRegions(button.getRegion())
                     .build());
+            
+            // Then click
+            action.perform(ActionType.CLICK, button.getRegion());
         }
+    }
+    
+    /**
+     * Login Flow Example using Conditional Chains
+     * Code from: docs/docs/03-core-library/action-config/15-conditional-chains-examples.md lines 38-56
+     */
+    public ActionResult performLogin(String username, String password) {
+        log.info("=== Login Flow Example ===");
+        
+        StateImage loginButton = new StateImage.Builder()
+                .addPatterns("login-button")
+                .build();
+                
+        StateImage usernameField = new StateImage.Builder()
+                .addPatterns("username-field")
+                .build();
+                
+        StateImage passwordField = new StateImage.Builder()
+                .addPatterns("password-field")
+                .build();
+                
+        StateImage submitButton = new StateImage.Builder()
+                .addPatterns("submit-button")
+                .build();
+        
+        // Simplified version of the login flow from documentation
+        return ConditionalActionChain.find(new PatternFindOptions.Builder().build())
+            .ifFound(new ClickOptions.Builder().build())
+            .ifNotFoundLog("Login button not visible")
+            .perform(action, new ObjectCollection.Builder()
+                .withImages(loginButton)
+                .build());
+    }
+    
+    /**
+     * Save with Confirmation Dialog Example
+     * Code from: docs/docs/03-core-library/action-config/15-conditional-chains-examples.md lines 62-76
+     */
+    public ActionResult saveWithConfirmation() {
+        log.info("=== Save with Confirmation Example ===");
+        
+        StateImage saveButton = new StateImage.Builder()
+                .addPatterns("save-button")
+                .build();
+                
+        StateImage confirmDialog = new StateImage.Builder()
+                .addPatterns("confirm-dialog")
+                .build();
+        
+        return ConditionalActionChain.find(new PatternFindOptions.Builder().build())
+            .ifFound(new ClickOptions.Builder().build())
+            .ifNotFoundLog("Save button not found")
+            .perform(action, new ObjectCollection.Builder()
+                .withImages(saveButton)
+                .build());
     }
     
     // Helper methods
@@ -321,5 +383,15 @@ public class PureActionsDemo {
     private void tryAlternativeSave() {
         log.info("Trying alternative save method...");
         // Implementation would try Ctrl+S or menu option
+    }
+    
+    private void alertUser(String message) {
+        log.warn("Alert: {}", message);
+        // Implementation would show alert dialog
+    }
+    
+    private void takeDebugScreenshot() {
+        log.info("Taking debug screenshot");
+        // Implementation would capture screen for debugging
     }
 }
