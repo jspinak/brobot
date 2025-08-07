@@ -33,6 +33,7 @@ javafx {
 dependencies {
     // Project dependencies
     implementation project(':library')
+    implementation project(':persistence')  // New persistence module
 
     // Spring Boot - additional starter for JPA (Spring context comes from library)
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'

@@ -19,6 +19,9 @@ import io.github.jspinak.brobot.action.internal.options.ActionOptions.Find;
 
 import org.springframework.stereotype.Component;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 /**
  * Adapter for bridging ActionConfig and ActionOptions in ActionRecord storage.
  * <p>
@@ -50,6 +53,17 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class ActionConfigAdapter {
+    
+    /**
+     * Cache for ActionConfig class to Action type mappings.
+     * Using ConcurrentHashMap for thread-safe caching.
+     */
+    private final Map<Class<? extends ActionConfig>, Action> actionTypeCache = new ConcurrentHashMap<>();
+    
+    /**
+     * Cache for PatternFindOptions.Strategy to Find enum mappings.
+     */
+    private final Map<PatternFindOptions.Strategy, Find> findStrategyCache = new ConcurrentHashMap<>();
 
     /**
      * Creates an ActionRecord with configuration from an ActionConfig.
@@ -82,45 +96,62 @@ public class ActionConfigAdapter {
     }
 
     /**
-     * Extracts the action type from an ActionConfig.
+     * Extracts the action type from an ActionConfig with caching for performance.
      * <p>
      * This method determines which Action enum value corresponds to the
-     * given ActionConfig implementation. This is useful for logging,
-     * debugging, and analytics.
+     * given ActionConfig implementation. Results are cached to avoid repeated
+     * instanceof checks for the same config types.
      * 
      * @param actionConfig The ActionConfig to analyze
      * @return The corresponding Action enum value
      */
     public Action getActionType(ActionConfig actionConfig) {
-        if (actionConfig instanceof PatternFindOptions) {
+        if (actionConfig == null) {
+            return Action.FIND; // Default for null
+        }
+        
+        // Check cache first
+        Class<? extends ActionConfig> configClass = actionConfig.getClass();
+        return actionTypeCache.computeIfAbsent(configClass, this::computeActionType);
+    }
+    
+    /**
+     * Computes the action type for a given ActionConfig class.
+     * This method is called only when the type is not in the cache.
+     * 
+     * @param configClass The ActionConfig class to analyze
+     * @return The corresponding Action enum value
+     */
+    private Action computeActionType(Class<? extends ActionConfig> configClass) {
+        if (PatternFindOptions.class.isAssignableFrom(configClass)) {
             return Action.FIND;
         }
-        if (actionConfig instanceof ClickOptions) {
+        if (ClickOptions.class.isAssignableFrom(configClass)) {
             return Action.CLICK;
         }
-        if (actionConfig instanceof TypeOptions) {
+        if (TypeOptions.class.isAssignableFrom(configClass)) {
             return Action.TYPE;
         }
-        if (actionConfig instanceof VanishOptions) {
+        if (VanishOptions.class.isAssignableFrom(configClass)) {
             return Action.VANISH;
         }
-        if (actionConfig instanceof MouseMoveOptions) {
+        if (MouseMoveOptions.class.isAssignableFrom(configClass)) {
             return Action.MOVE;
         }
-        if (actionConfig instanceof MouseDownOptions) {
+        if (MouseDownOptions.class.isAssignableFrom(configClass)) {
             return Action.MOUSE_DOWN;
         }
-        if (actionConfig instanceof MouseUpOptions) {
+        if (MouseUpOptions.class.isAssignableFrom(configClass)) {
             return Action.MOUSE_UP;
         }
         // ScrollOptions, KeyDownOptions, KeyUpOptions would go here when available
-        if (actionConfig instanceof DefineRegionOptions) {
+        if (DefineRegionOptions.class.isAssignableFrom(configClass)) {
             return Action.DEFINE;
         }
-        if (actionConfig instanceof HighlightOptions) {
+        if (HighlightOptions.class.isAssignableFrom(configClass)) {
             return Action.HIGHLIGHT;
         }
-        if (actionConfig instanceof DragOptions) {
+        if (DragOptions.class.isAssignableFrom(configClass)) {
             return Action.DRAG;
         }
         
@@ -129,10 +160,11 @@ public class ActionConfigAdapter {
     }
 
     /**
-     * Extracts the find strategy from a find-related ActionConfig.
+     * Extracts the find strategy from a find-related ActionConfig with caching.
      * <p>
      * For PatternFindOptions, this maps the Strategy enum to the legacy
-     * Find enum. For other action types, returns UNIVERSAL as default.
+     * Find enum. Results are cached to improve performance. For other action 
+     * types, returns UNIVERSAL as default.
      * 
      * @param actionConfig The ActionConfig to analyze
      * @return The corresponding Find enum value
@@ -140,18 +172,10 @@ public class ActionConfigAdapter {
     public Find getFindStrategy(ActionConfig actionConfig) {
         if (actionConfig instanceof PatternFindOptions) {
             PatternFindOptions findOptions = (PatternFindOptions) actionConfig;
-            switch (findOptions.getStrategy()) {
-                case FIRST:
-                    return Find.FIRST;
-                case BEST:
-                    return Find.BEST;
-                case ALL:
-                    return Find.ALL;
-                case EACH:
-                    return Find.EACH;
-                default:
-                    return Find.UNIVERSAL;
-            }
+            PatternFindOptions.Strategy strategy = findOptions.getStrategy();
+            
+            // Use cache for strategy mapping
+            return findStrategyCache.computeIfAbsent(strategy, this::computeFindStrategy);
         }
         // ColorFindOptions support commented out - class not available
         // if (actionConfig instanceof ColorFindOptions) {
@@ -163,6 +187,28 @@ public class ActionConfigAdapter {
         // }
         
         return Find.UNIVERSAL;
+    }
+    
+    /**
+     * Computes the Find enum value for a given PatternFindOptions.Strategy.
+     * This method is called only when the strategy is not in the cache.
+     * 
+     * @param strategy The strategy to convert
+     * @return The corresponding Find enum value
+     */
+    private Find computeFindStrategy(PatternFindOptions.Strategy strategy) {
+        switch (strategy) {
+            case FIRST:
+                return Find.FIRST;
+            case BEST:
+                return Find.BEST;
+            case ALL:
+                return Find.ALL;
+            case EACH:
+                return Find.EACH;
+            default:
+                return Find.UNIVERSAL;
+        }
     }
 
     /**

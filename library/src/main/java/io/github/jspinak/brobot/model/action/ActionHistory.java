@@ -3,9 +3,11 @@ package io.github.jspinak.brobot.model.action;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.github.jspinak.brobot.action.ActionConfig;
+import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
 import io.github.jspinak.brobot.action.internal.options.ActionOptions;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.match.Match;
+import io.github.jspinak.brobot.tools.migration.DeprecationMetrics;
 import io.github.jspinak.brobot.tools.testing.mock.MockMatchBuilder;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -159,6 +161,9 @@ public class ActionHistory {
      */
     @Deprecated
     public Optional<ActionRecord> getRandomSnapshot(ActionOptions.Action action) {
+        // Log deprecation usage
+        DeprecationMetrics.log("getRandomSnapshot", "ActionOptions.Action");
+        
         List<ActionRecord> selectedSnapshots = snapshots.stream()
                 .filter(snapshot -> getSnapshotActionType(snapshot) == action)
                 .collect(toList());
@@ -364,7 +369,11 @@ public class ActionHistory {
     }
 
     public String getRandomText() {
-        Optional<ActionRecord> textSnapshot = getRandomSnapshot(ActionOptions.Action.FIND);
+        // Use modern ActionConfig instead of deprecated ActionOptions.Action
+        PatternFindOptions findConfig = new PatternFindOptions.Builder()
+            .setStrategy(PatternFindOptions.Strategy.BEST)
+            .build();
+        Optional<ActionRecord> textSnapshot = getRandomSnapshot(findConfig);
         if (textSnapshot.isEmpty()) return "";
         return textSnapshot.get().getText();
     }
