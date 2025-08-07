@@ -1,0 +1,256 @@
+package com.example.movement.examples;
+
+import io.github.jspinak.brobot.action.ActionInterface;
+import io.github.jspinak.brobot.action.basic.find.motion.MotionFindOptions;
+import io.github.jspinak.brobot.action.ObjectCollection;
+import io.github.jspinak.brobot.model.state.StateImage;
+import io.github.jspinak.brobot.action.ActionResult;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+/**
+ * Demonstrates basic motion detection operations using MotionFindOptions.
+ * 
+ * Based on documentation: /brobot/docs/docs/03-core-library/guides/finding-objects/movement.md
+ * 
+ * Shows the three input methods for finding motion: using files, Brobot images, and screen capture.
+ */
+@Component
+public class BasicMovementExample {
+    private static final Logger log = LoggerFactory.getLogger(BasicMovementExample.class);
+    
+    @Autowired
+    private ActionInterface action; // obtain from Spring context or dependency injection
+    
+    /**
+     * Example 1: Using files - from documentation
+     * 
+     * // Configure in application.yml:
+     * // brobot:
+     * //   core:
+     * //     mock: true
+     * //   screenshot:
+     * //     save-history: true
+     * // 
+     * // Or in application.properties:
+     * // brobot.core.mock=true
+     * // brobot.screenshot.save-history=true
+     * //
+     * // Screenshots should be placed in the directory configured by
+     * // brobot.screenshot.path (default: screenshots/)
+     * 
+     * MotionFindOptions motionOptions = new MotionFindOptions.Builder()
+     *         .setMaxMovement(100)
+     *         .setMinArea(50)
+     *         .setMaxMatchesToActOn(10)
+     *         .setSimilarity(0.7)  // Similarity threshold for matching objects across scenes
+     *         .build();
+     * 
+     * ObjectCollection objectCollection = new ObjectCollection.Builder().build();
+     * 
+     * // Execute motion finding
+     * ActionResult result = action.perform(motionOptions, objectCollection);
+     */
+    public void motionDetectionUsingFiles() {
+        log.info("=== Motion Detection Using Files ===");
+        log.info("Configure in application.yml:");
+        log.info("brobot:");
+        log.info("  core:");
+        log.info("    mock: true");
+        log.info("  screenshot:");
+        log.info("    save-history: true");
+        log.info("");
+        log.info("Screenshots should be placed in brobot.screenshot.path directory");
+        
+        MotionFindOptions motionOptions = new MotionFindOptions.Builder()
+                .setMaxMovement(100)
+                .setMinArea(50)
+                .setMaxMatchesToActOn(10)
+                .setSimilarity(0.7)  // Similarity threshold for matching objects across scenes
+                .build();
+
+        ObjectCollection objectCollection = new ObjectCollection.Builder().build();
+
+        // Execute motion finding
+        ActionResult result = action.perform(motionOptions, objectCollection);
+        
+        if (result.isSuccess()) {
+            log.info("Motion detection from files successful!");
+            log.info("Found {} moving objects", result.getMatchList().size());
+        } else {
+            log.warn("Motion detection from files failed - check file configuration");
+        }
+    }
+    
+    /**
+     * Example 2: Using Brobot images - from documentation
+     * 
+     * // Ensure these are configured in your application properties:
+     * // brobot.screenshot.save-history=true
+     * // brobot.core.mock=true
+     * 
+     * MotionFindOptions motionOptions = new MotionFindOptions.Builder()
+     *         .setMaxMovement(100)
+     *         .setMinArea(50)
+     *         .setMaxMatchesToActOn(10)
+     *         .build();
+     * 
+     * // Provide scenes as Brobot images
+     * ObjectCollection screenshots = new ObjectCollection.Builder()
+     *         .withScenes(
+     *             motionState.getScreen1(), 
+     *             motionState.getScreen2(), 
+     *             motionState.getScreen3()
+     *         )
+     *         .build();
+     * 
+     * ActionResult result = action.perform(motionOptions, screenshots);
+     */
+    public void motionDetectionUsingBrobotImages() {
+        log.info("=== Motion Detection Using Brobot Images ===");
+        log.info("Ensure these are configured in your application properties:");
+        log.info("brobot.screenshot.save-history=true");
+        log.info("brobot.core.mock=true");
+        
+        MotionFindOptions motionOptions = new MotionFindOptions.Builder()
+                .setMaxMovement(100)
+                .setMinArea(50)
+                .setMaxMatchesToActOn(10)
+                .build();
+
+        // In a real implementation, you would have actual StateImages
+        StateImage screen1 = new StateImage.Builder()
+            .setName("Screen1")
+            .addImages("motion-scene1.png")
+            .build();
+            
+        StateImage screen2 = new StateImage.Builder()
+            .setName("Screen2")
+            .addImages("motion-scene2.png")
+            .build();
+            
+        StateImage screen3 = new StateImage.Builder()
+            .setName("Screen3")
+            .addImages("motion-scene3.png")
+            .build();
+
+        // Provide scenes as Brobot images - exact from documentation
+        ObjectCollection screenshots = new ObjectCollection.Builder()
+                .withScenes(
+                    screen1, 
+                    screen2, 
+                    screen3
+                )
+                .build();
+
+        ActionResult result = action.perform(motionOptions, screenshots);
+        
+        if (result.isSuccess()) {
+            log.info("Motion detection using Brobot images successful!");
+            log.info("Found {} moving objects", result.getMatchList().size());
+        } else {
+            log.warn("Motion detection using Brobot images failed");
+        }
+    }
+    
+    /**
+     * Example 3: Using the screen - from documentation
+     * 
+     * // Configure for live mode in application properties:
+     * // brobot.core.mock=false
+     * 
+     * MotionFindOptions motionOptions = new MotionFindOptions.Builder()
+     *         .setMaxMovement(100)
+     *         .setMinArea(50)
+     *         .setMaxMatchesToActOn(10)
+     *         .setPauseBeforeBegin(1.0)  // Wait before capturing first scene
+     *         .setPauseBetweenActions(0.5)  // Pause between scene captures
+     *         .build();
+     * 
+     * ObjectCollection objectCollection = new ObjectCollection.Builder().build();
+     * 
+     * // The motion finding action will capture three screenshots from the screen
+     * // with appropriate delays between captures
+     * ActionResult result = action.perform(motionOptions, objectCollection);
+     */
+    public void motionDetectionUsingScreen() {
+        log.info("=== Motion Detection Using Screen ===");
+        log.info("Configure for live mode in application properties:");
+        log.info("brobot.core.mock=false");
+        
+        MotionFindOptions motionOptions = new MotionFindOptions.Builder()
+                .setMaxMovement(100)
+                .setMinArea(50)
+                .setMaxMatchesToActOn(10)
+                .setPauseBeforeBegin(1.0)  // Wait before capturing first scene
+                .setPauseBetweenActions(0.5)  // Pause between scene captures
+                .build();
+
+        ObjectCollection objectCollection = new ObjectCollection.Builder().build();
+
+        // The motion finding action will capture three screenshots from the screen
+        // with appropriate delays between captures
+        ActionResult result = action.perform(motionOptions, objectCollection);
+        
+        if (result.isSuccess()) {
+            log.info("Live screen motion detection successful!");
+            log.info("Found {} moving objects", result.getMatchList().size());
+        } else {
+            log.warn("Live screen motion detection failed");
+        }
+    }
+    
+    /**
+     * Basic MotionFindOptions Configuration - from documentation
+     * 
+     * MotionFindOptions motionOptions = new MotionFindOptions.Builder()
+     *         .setMaxMovement(100)  // Maximum pixels an object can move between scenes
+     *         .setMinArea(50)       // Minimum area to filter out noise
+     *         .setMaxMatchesToActOn(10)  // Limit number of moving objects to track
+     *         .build();
+     */
+    public void basicMotionConfiguration() {
+        log.info("=== Basic Motion Configuration ===");
+        
+        MotionFindOptions motionOptions = new MotionFindOptions.Builder()
+                .setMaxMovement(100)  // Maximum pixels an object can move between scenes
+                .setMinArea(50)       // Minimum area to filter out noise
+                .setMaxMatchesToActOn(10)  // Limit number of moving objects to track
+                .build();
+                
+        log.info("Created MotionFindOptions with:");
+        log.info("  - Max movement: 100 pixels");
+        log.info("  - Min area: 50 pixels");
+        log.info("  - Max matches: 10 objects");
+        
+        ObjectCollection objectCollection = new ObjectCollection.Builder().build();
+        ActionResult result = action.perform(motionOptions, objectCollection);
+        
+        if (result.isSuccess()) {
+            log.info("Basic motion configuration worked!");
+        }
+    }
+    
+    /**
+     * Demonstrates all basic motion detection methods from documentation
+     */
+    public void runAllBasicMotionExamples() {
+        log.info("Running all basic motion detection examples from documentation...\n");
+        
+        basicMotionConfiguration();
+        log.info("");
+        
+        motionDetectionUsingFiles();
+        log.info("");
+        
+        motionDetectionUsingBrobotImages();
+        log.info("");
+        
+        motionDetectionUsingScreen();
+        log.info("");
+        
+        log.info("All basic motion examples completed!");
+    }
+}

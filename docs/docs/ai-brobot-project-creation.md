@@ -359,79 +359,110 @@
    
    **Rule of Thumb:** Start with .then() for simple cases. Switch to ActionChainBuilder when you need more control or have 3+ actions.
    
-   ### ConditionalActionChain - The Most Elegant Approach
+   ### EnhancedConditionalActionChain - The Most Elegant Approach
    
-   **ConditionalActionChain provides the cleanest API for conditional execution flows:**
+   **EnhancedConditionalActionChain provides the cleanest API for conditional execution flows with proper sequential composition:**
    
    ```java
    // Basic pattern: find → if found do X → if not found do Y
-   ConditionalActionChain
-       .find(new PatternFindOptions.Builder().build())
-       .ifFound(new ClickOptions.Builder().build())
-       .ifNotFound(log("Button not found"))
-       .perform(action, objectCollection);
+   EnhancedConditionalActionChain
+       .find(buttonImage)
+       .ifFoundClick()
+       .ifNotFoundLog("Button not found")
+       .perform(action, new ObjectCollection.Builder().build());
    ```
    
-   **Key Features:**
-   - **Conditional Flow**: `ifFound()` and `ifNotFound()` branches
-   - **Sequential Actions**: Use `.then()` to chain actions
-   - **Multiple Conditions**: Add multiple `ifFound`/`ifNotFound` handlers
-   - **Custom Actions**: Use lambdas for inline custom logic
-   - **Automatic Result Propagation**: Results flow through the chain
+   **Key Feature - The then() Method:**
+   ```java
+   // Sequential actions with then() - the missing piece!
+   EnhancedConditionalActionChain
+       .find(loginButton)
+       .ifFoundClick()
+       .then(usernameField)  // Move to next element
+       .ifFoundType("username")
+       .then(passwordField)  // Continue the flow
+       .ifFoundType("password")
+       .then(submitButton)   // Keep going
+       .ifFoundClick()
+       .perform(action, new ObjectCollection.Builder().build());
+   ```
+   
+   **Enhanced Features:**
+   - **Sequential Composition**: The crucial `then()` method for multi-step workflows
+   - **Convenience Methods**: Direct `click()`, `type()`, `scrollDown()` methods
+   - **Keyboard Shortcuts**: Built-in `pressEnter()`, `pressTab()`, `pressCtrlS()`
+   - **No wait() Method**: Follows model-based principles - timing via action configurations
+   - **Control Flow**: `stopChain()`, `retry()`, `throwError()` methods
+   - **Conditional Logic**: Proper if/then/else execution with `ifFound()` and `ifNotFound()`
    
    **Common Patterns:**
    
-   1. **Find and Click with Error Handling:**
+   1. **Login Flow with Sequential Actions:**
    ```java
-   ConditionalActionChain
-       .find(findOptions)
-       .ifFound(clickOptions)
-       .ifNotFound(log("ERROR: Critical button missing"))
-       .perform(action, buttonImage);
+   EnhancedConditionalActionChain
+       .find(loginButton)
+       .ifFoundClick()
+       .then(usernameField)      // Sequential action
+       .ifFoundType("username")
+       .then(passwordField)      // Continue flow
+       .ifFoundType("password")
+       .then(submitButton)       // Keep going
+       .ifFoundClick()
+       .perform(action, new ObjectCollection.Builder().build());
    ```
    
-   2. **Multi-Step Workflow:**
+   2. **Form Filling with Convenience Methods:**
    ```java
-   ConditionalActionChain
-       .find(findExportButton)           // Find export button
-       .ifFound(clickOptions)            // Click it
-       .then(findFileNameField)          // Find filename field
-       .ifFound(typeFileName)            // Type the filename
-       .then(findConfirmButton)          // Find confirm button
-       .ifFound(clickOptions)            // Click confirm
+   EnhancedConditionalActionChain
+       .find(formTitle)
+       .ifNotFoundDo(res -> { throw new RuntimeException("Form not found"); })
+       .then(nameField)
+       .ifFoundClick()
+       .clearAndType("John Doe")    // Convenience method
+       .pressTab()                   // Keyboard shortcut
+       .type("john@example.com")
+       .then(submitButton)
+       .ifFoundClick()
+       .takeScreenshot("form-submitted")
+       .perform(action, new ObjectCollection.Builder().build());
+   ```
+   
+   3. **Error Handling with Control Flow:**
+   ```java
+   EnhancedConditionalActionChain
+       .find(submitButton)
+       .ifFoundClick()
+       .then(errorDialog)
+       .ifFoundLog("Error appeared")
+       .stopIf(res -> res.getText() != null && 
+               !res.getText().isEmpty() && 
+               res.getText().get(0).contains("CRITICAL"))
+       .then(retryButton)
+       .ifFoundClick()
+       .perform(action, new ObjectCollection.Builder().build());
+   ```
+   
+   4. **Retry Pattern and Keyboard Shortcuts:**
+   ```java
+   // Retry with convenience methods
+   EnhancedConditionalActionChain
+       .retry(new PatternFindOptions.Builder().build(), 3)
+       .ifFoundClick()
+       .ifNotFoundLog("Failed after retries")
        .perform(action, objectCollection);
+   
+   // Keyboard shortcuts workflow
+   EnhancedConditionalActionChain
+       .find(editorField)
+       .ifFoundClick()
+       .pressCtrlA()      // Select all
+       .pressDelete()     // Delete
+       .type("New text")
+       .pressCtrlS()      // Save
+       .perform(action, new ObjectCollection.Builder().build());
    ```
    
-   3. **Custom Logic with Lambdas:**
-   ```java
-   ConditionalActionChain
-       .find(criticalElement)
-       .ifFoundDo(result -> {
-           log.info("Found {} matches", result.getMatchList().size());
-           // Custom processing logic
-           processMatches(result.getMatchList());
-       })
-       .ifNotFoundDo(result -> {
-           takeScreenshot("error-state");
-           notifyTeam("Critical element missing");
-       })
-       .perform(action, objectCollection);
-   ```
-   
-   4. **Combining with Pure Actions:**
-   ```java
-   // For simple operations on known locations/regions
-   Location buttonLocation = new Location(100, 200);
-   action.perform(ActionType.CLICK, buttonLocation);
-   
-   // For complex conditional flows
-   ConditionalActionChain
-       .find(dynamicButton)
-       .ifFound(click())
-       .perform(action, objectCollection);
-   ```
-   
-   **When to Use ConditionalActionChain:**
+   **When to Use EnhancedConditionalActionChain:**
    - **Always for UI interactions** - Handles element not found gracefully
    - **Multi-step workflows** - Clean sequential flow with error handling
    - **When you need both success and failure handling**
@@ -444,7 +475,7 @@
    
    **ConditionalActionWrapper for Spring Applications:**
    
-   When using Spring Boot, prefer `ConditionalActionWrapper` over direct ConditionalActionChain:
+   When using Spring Boot, you can use `ConditionalActionWrapper` with EnhancedConditionalActionChain:
    
    ```java
    @Component
@@ -1260,6 +1291,362 @@ public boolean clickErrorButton() {
 }
 ```
 
+## ActionHistory for Integration Testing
+
+### Overview
+
+ActionHistory is Brobot's core component for mock testing and probabilistic automation. It records action execution patterns over time, enabling realistic testing without the target application.
+
+### Basic ActionHistory Setup
+
+```java
+import io.github.jspinak.brobot.model.action.ActionHistory;
+import io.github.jspinak.brobot.model.action.ActionRecord;
+import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
+import io.github.jspinak.brobot.model.match.Match;
+
+// Initialize StateImage with ActionHistory for mock testing
+@State
+@Getter
+public class LoginState {
+    private final StateImage loginButton;
+    
+    public LoginState() {
+        loginButton = new StateImage.Builder()
+            .addPatterns("login/button")
+            .setName("LoginButton")
+            .build();
+        
+        // Add historical data for realistic mocking
+        initializeActionHistory();
+    }
+    
+    private void initializeActionHistory() {
+        ActionHistory history = new ActionHistory();
+        
+        // Simulate 90% success rate with varying match scores
+        for (int i = 0; i < 100; i++) {
+            boolean success = i < 90;  // 90% success rate
+            
+            ActionRecord record = new ActionRecord.Builder()
+                .setActionConfig(new PatternFindOptions.Builder()
+                    .setStrategy(PatternFindOptions.Strategy.BEST)
+                    .setSimilarity(0.85)
+                    .build())
+                .addMatch(success ? new Match.Builder()
+                    .setRegion(500, 400, 100, 40)
+                    .setSimScore(0.85 + Math.random() * 0.1)
+                    .build() : null)
+                .setActionSuccess(success)
+                .setDuration(success ? 200 + (long)(Math.random() * 300) : 5000)
+                .build();
+            
+            history.addSnapshot(record);
+        }
+        
+        loginButton.setActionHistory(history);
+    }
+}
+```
+
+### Recording Different Action Types
+
+```java
+// Click actions with timing data
+ActionRecord clickRecord = new ActionRecord.Builder()
+    .setActionConfig(new ClickOptions.Builder()
+        .setClickType(ClickOptions.Type.DOUBLE)
+        .setNumberOfClicks(2)
+        .build())
+    .addMatch(new Match.Builder()
+        .setRegion(150, 250, 40, 20)
+        .setSimScore(0.92)
+        .build())
+    .setActionSuccess(true)
+    .setDuration(250)  // milliseconds
+    .build();
+
+// Type actions with text capture
+ActionRecord typeRecord = new ActionRecord.Builder()
+    .setActionConfig(new TypeOptions.Builder()
+        .setPauseBeforeBegin(200)
+        .build())
+    .setText("user@example.com")
+    .setActionSuccess(true)
+    .build();
+
+// Vanish actions for element disappearance
+ActionRecord vanishRecord = new ActionRecord.Builder()
+    .setActionConfig(new VanishOptions.Builder()
+        .setWaitTime(5.0)
+        .build())
+    .setActionSuccess(true)
+    .setDuration(3500)  // Vanished after 3.5 seconds
+    .build();
+```
+
+### Integration Test Configuration
+
+```yaml
+# application-test.yml
+brobot:
+  mock:
+    enabled: true
+    use-real-screenshots: false
+    
+  testing:
+    deterministic: true  # Use seeded random for reproducible tests
+    seed: 12345
+```
+
+**Note**: ActionHistory persistence is handled by the Brobot Runner application, not the library. To use recorded data in tests:
+
+1. **Record sessions** in the Runner during live automation
+2. **Export sessions** as JSON files from the Runner UI
+3. **Import in tests** using ObjectMapper or custom loaders
+4. **Apply to StateImages** for realistic mock testing
+
+### Writing Integration Tests with ActionHistory
+
+```java
+@SpringBootTest
+@TestPropertySource(properties = {
+    "brobot.mock.enabled=true",
+    "brobot.testing.deterministic=true"
+})
+public class WorkflowIntegrationTest {
+    
+    @Autowired
+    private LoginState loginState;
+    
+    @Autowired
+    private Action action;
+    
+    @Test
+    public void testLoginWorkflowWithHistory() {
+        // Pre-populate with realistic data
+        prepareLoginHistory();
+        
+        // Execute workflow - uses ActionHistory for mocking
+        boolean success = performLogin();
+        
+        // Verify based on historical success rate
+        assertTrue(success || getRetryCount() > 0, 
+            "Should succeed or retry based on history");
+    }
+    
+    private void prepareLoginHistory() {
+        ActionHistory history = loginState.getLoginButton().getActionHistory();
+        
+        // Add time-based patterns (morning = higher success)
+        LocalDateTime morning = LocalDateTime.now().withHour(9);
+        LocalDateTime evening = LocalDateTime.now().withHour(18);
+        
+        // Morning: 95% success
+        addTimeBasedRecords(history, morning, 0.95, 20);
+        
+        // Evening: 75% success (system load)
+        addTimeBasedRecords(history, evening, 0.75, 20);
+    }
+    
+    private void addTimeBasedRecords(ActionHistory history, 
+                                     LocalDateTime time, 
+                                     double successRate, 
+                                     int count) {
+        for (int i = 0; i < count; i++) {
+            boolean success = Math.random() < successRate;
+            
+            ActionRecord record = new ActionRecord.Builder()
+                .setActionConfig(new PatternFindOptions.Builder().build())
+                .setActionSuccess(success)
+                .setTimestamp(time.plusMinutes(i))
+                .setDuration(success ? 200 : 5000)
+                .build();
+            
+            history.addSnapshot(record);
+        }
+    }
+}
+```
+
+### State-Specific ActionHistory
+
+```java
+// Different success patterns for different states
+public class StateAwareActionHistory {
+    
+    public void setupStateSpecificHistory(StateImage image) {
+        ActionHistory history = new ActionHistory();
+        
+        // Login state: high reliability
+        Long loginStateId = 1L;
+        addStateRecords(history, loginStateId, 0.95, 50);
+        
+        // Error state: lower reliability
+        Long errorStateId = 2L;
+        addStateRecords(history, errorStateId, 0.60, 50);
+        
+        image.setActionHistory(history);
+    }
+    
+    private void addStateRecords(ActionHistory history, 
+                                 Long stateId, 
+                                 double successRate, 
+                                 int count) {
+        for (int i = 0; i < count; i++) {
+            ActionRecord record = new ActionRecord.Builder()
+                .setActionConfig(new PatternFindOptions.Builder().build())
+                .setStateId(stateId)
+                .setActionSuccess(Math.random() < successRate)
+                .build();
+            
+            history.addSnapshot(record);
+        }
+    }
+    
+    // Query state-specific records
+    public Optional<ActionRecord> getStateSnapshot(ActionHistory history, 
+                                                   Long stateId) {
+        PatternFindOptions config = new PatternFindOptions.Builder().build();
+        return history.getRandomSnapshot(config, stateId);
+    }
+}
+```
+
+### Loading ActionHistory from Files
+
+```java
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.github.jspinak.brobot.tools.migration.ActionHistoryJsonConverter;
+
+@Component
+public class ActionHistoryLoader {
+    
+    @Autowired
+    private ActionHistoryJsonConverter jsonConverter;
+    
+    public ActionHistory loadFromFile(String filename) throws IOException {
+        Path path = Path.of("src/test/resources/histories", filename);
+        String json = Files.readString(path);
+        
+        // Automatically migrates legacy format if needed
+        return jsonConverter.deserialize(json);
+    }
+    
+    public void saveToFile(ActionHistory history, String filename) 
+            throws IOException {
+        Path path = Path.of("src/test/resources/histories", filename);
+        String json = jsonConverter.serialize(history);
+        Files.writeString(path, json);
+    }
+    
+    // Batch load for comprehensive testing
+    public Map<String, ActionHistory> loadAllHistories() throws IOException {
+        Map<String, ActionHistory> histories = new HashMap<>();
+        Path dir = Path.of("src/test/resources/histories");
+        
+        Files.list(dir)
+            .filter(p -> p.toString().endsWith(".json"))
+            .forEach(path -> {
+                try {
+                    String name = path.getFileName().toString()
+                        .replace(".json", "");
+                    histories.put(name, loadFromFile(path.getFileName().toString()));
+                } catch (IOException e) {
+                    log.error("Failed to load {}: {}", path, e.getMessage());
+                }
+            });
+        
+        return histories;
+    }
+}
+```
+
+### Performance Testing with ActionHistory
+
+```java
+public class PerformanceValidation {
+    
+    @Test
+    public void validateActionPerformance() {
+        ActionHistory performanceHistory = createPerformanceHistory();
+        
+        // Analyze timing patterns
+        DoubleSummaryStatistics stats = performanceHistory.getSnapshots().stream()
+            .filter(ActionRecord::isActionSuccess)
+            .mapToDouble(ActionRecord::getDuration)
+            .summaryStatistics();
+        
+        // Assert performance requirements
+        assertTrue(stats.getAverage() < 500, 
+            "Average response time should be under 500ms");
+        assertTrue(stats.getMax() < 2000, 
+            "Max response time should be under 2s");
+        
+        // Check success rate
+        double successRate = performanceHistory.getTimesFound() * 100.0 / 
+                           performanceHistory.getTimesSearched();
+        assertTrue(successRate > 85, 
+            "Success rate should be above 85%");
+    }
+    
+    private ActionHistory createPerformanceHistory() {
+        ActionHistory history = new ActionHistory();
+        Random random = new Random(42);  // Deterministic
+        
+        // Simulate performance distribution
+        for (int i = 0; i < 1000; i++) {
+            // 90% fast responses, 10% slow
+            boolean fast = random.nextDouble() < 0.9;
+            long duration = fast ? 
+                100 + random.nextInt(400) :  // 100-500ms
+                1000 + random.nextInt(4000); // 1-5s
+            
+            ActionRecord record = new ActionRecord.Builder()
+                .setActionConfig(new PatternFindOptions.Builder().build())
+                .setDuration(duration)
+                .setActionSuccess(duration < 2000)  // Timeout at 2s
+                .build();
+            
+            history.addSnapshot(record);
+        }
+        
+        return history;
+    }
+}
+```
+
+### Best Practices for ActionHistory
+
+1. **Realistic Data Generation**: Create patterns that reflect real-world behavior
+2. **Deterministic Testing**: Use seeded random for reproducible tests
+3. **State-Aware Patterns**: Different states should have different success patterns
+4. **Time-Based Variations**: Model performance changes throughout the day
+5. **Gradual Degradation**: Simulate system degradation over time
+
+### Migration from Legacy ActionOptions
+
+If you have existing code using the deprecated `ActionOptions` API:
+
+```java
+// Legacy (deprecated)
+ActionRecord legacyRecord = new ActionRecord.Builder()
+    .setActionOptions(new ActionOptions.Builder()
+        .setAction(ActionOptions.Action.FIND)
+        .setFind(ActionOptions.Find.BEST)
+        .build())
+    .build();
+
+// Modern (use this)
+ActionRecord modernRecord = new ActionRecord.Builder()
+    .setActionConfig(new PatternFindOptions.Builder()
+        .setStrategy(PatternFindOptions.Strategy.BEST)
+        .build())
+    .build();
+```
+
+For detailed migration instructions, see the [ActionHistory Migration Guide](testing/actionhistory-integration-testing).
+
 ## Summary
 
 Modern Brobot development emphasizes:
@@ -1267,11 +1654,13 @@ Modern Brobot development emphasizes:
 - Type safety through StateEnum and proper generics
 - Dependency injection with Spring Boot
 - Fluent APIs and method chaining
-- **ConditionalActionChain for elegant UI interactions with error handling**
+- **EnhancedConditionalActionChain for elegant UI interactions with proper sequential composition**
+- **ActionHistory for probabilistic mock testing and integration tests**
 - Direct access to state components
 - Automatic initial state verification
 - Configuration-driven behavior
 - Advanced color and motion detection capabilities
 - Flexible action chaining with nested/confirmed strategies
+- Comprehensive testing with historical action data
 
 Follow these patterns for maintainable, professional Brobot applications.

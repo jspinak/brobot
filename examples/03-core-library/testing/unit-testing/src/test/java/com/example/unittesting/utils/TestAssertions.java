@@ -1,5 +1,8 @@
 package com.example.unittesting.utils;
 
+import io.github.jspinak.brobot.action.ActionResult;
+import io.github.jspinak.brobot.model.element.Region;
+import io.github.jspinak.brobot.model.element.Location;
 import org.assertj.core.api.AbstractAssert;
 import java.util.Map;
 import java.util.List;
@@ -202,6 +205,98 @@ public class TestAssertions {
             }
             
             return this;
+        }
+    }
+    
+    /**
+     * Brobot-specific custom assertions from documentation.
+     * From: /docs/04-testing/unit-testing.md
+     */
+    public static class BrobotAssertions {
+        
+        public static void assertFoundInRegion(ActionResult result, Region expectedRegion) {
+            if (result == null) {
+                throw new AssertionError("ActionResult was null");
+            }
+            
+            if (!result.isSuccess()) {
+                throw new AssertionError("Expected to find matches");
+            }
+            
+            boolean foundInRegion = result.getMatchList().stream()
+                .anyMatch(match -> {
+                    Region matchRegion = match.getRegion();
+                    return expectedRegion.contains(new Location(matchRegion.getX(), matchRegion.getY()));
+                });
+                
+            if (!foundInRegion) {
+                throw new AssertionError("No matches found in expected region");
+            }
+        }
+        
+        public static void assertMinimumScore(ActionResult result, double minScore) {
+            if (result == null) {
+                throw new AssertionError("ActionResult was null");
+            }
+            
+            if (!result.getBestMatch().isPresent()) {
+                throw new AssertionError("No matches found");
+            }
+            
+            double actualScore = result.getBestMatch().get().getScore();
+            if (actualScore < minScore) {
+                throw new AssertionError(
+                    String.format("Best match score %.3f below minimum %.3f", 
+                        actualScore, minScore)
+                );
+            }
+        }
+        
+        public static void assertMatchCount(ActionResult result, int expectedCount) {
+            if (result == null) {
+                throw new AssertionError("ActionResult was null");
+            }
+            
+            int actualCount = result.size();
+            if (actualCount != expectedCount) {
+                throw new AssertionError(
+                    String.format("Expected %d matches but found %d", expectedCount, actualCount)
+                );
+            }
+        }
+        
+        public static void assertHasBestMatch(ActionResult result) {
+            if (result == null) {
+                throw new AssertionError("ActionResult was null");
+            }
+            
+            if (!result.getBestMatch().isPresent()) {
+                throw new AssertionError("No best match found in result");
+            }
+        }
+        
+        public static void assertMatchInArea(ActionResult result, int minX, int minY, int maxX, int maxY) {
+            if (result == null) {
+                throw new AssertionError("ActionResult was null");
+            }
+            
+            if (!result.isSuccess()) {
+                throw new AssertionError("Expected to find matches");
+            }
+            
+            Region searchArea = new Region(minX, minY, maxX - minX, maxY - minY);
+            boolean foundInArea = result.getMatchList().stream()
+                .anyMatch(match -> {
+                    Region matchRegion = match.getRegion();
+                    return searchArea.contains(new Location(matchRegion.getX(), matchRegion.getY()));
+                });
+                
+            if (!foundInArea) {
+                throw new AssertionError(
+                    String.format("No matches found in area (%d,%d) to (%d,%d)", 
+                        minX, minY, maxX, maxY)
+                );
+            }
         }
     }
 }

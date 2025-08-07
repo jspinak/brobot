@@ -2,51 +2,58 @@ package com.example.basics.states;
 
 import io.github.jspinak.brobot.annotations.State;
 import io.github.jspinak.brobot.model.state.StateImage;
+import io.github.jspinak.brobot.model.state.StateRegion;
 import io.github.jspinak.brobot.model.element.Region;
 import lombok.Getter;
+import org.springframework.stereotype.Component;
 
 /**
  * The WORLD state - shows a map with various islands.
  * 
  * Demonstrates:
  * - State with @State annotation
- * - Multiple similar objects (islands)
+ * - Multiple UI elements
+ * - StateRegion for area-based interactions
  * - Search regions
- * - Dynamic content
  */
 @State
+@Component
 @Getter
 public class WorldState {
     
-    // Navigation elements
-    private final StateImage homeButton;
-    
-    // Island types
-    private final StateImage castleIsland;
-    private final StateImage minesIsland;
-    
-    // Map area
-    private final Region mapRegion;
+    private final StateImage minimap;
+    private final StateImage castle;
+    private final StateImage farms;
+    private final StateImage mines;
+    private final StateImage searchButton;
+    private final StateRegion gameArea;
     
     public WorldState() {
-        // Navigation button
-        homeButton = new StateImage.Builder()
-            .setName("HomeButton")
-            .addPatterns("world/home_button")
+        minimap = new StateImage.Builder()
+            .addPatterns("minimap")
+            // .setFixed(true) // Method doesn't exist in current version
+            // .setSearchRegion(new Region(900, 0, 124, 124)) // Method doesn't exist
             .build();
-        
-        // Island types - can appear multiple times
-        castleIsland = new StateImage.Builder()
-            .setName("CastleIsland")
-            .addPatterns("world/castle_island_1", "world/castle_island_2")
+            
+        castle = new StateImage.Builder()
+            .addPatterns("castle")
             .build();
-        
-        minesIsland = new StateImage.Builder()
-            .setName("MinesIsland")
-            .addPatterns("world/mines_island_1", "world/mines_island_2")
+            
+        farms = new StateImage.Builder()
+            .addPatterns("farms")
             .build();
-        
-        // Define the map area where islands appear
-        mapRegion = new Region(100, 150, 1720, 800);
+            
+        mines = new StateImage.Builder()
+            .addPatterns("mines")
+            .build();
+            
+        searchButton = new StateImage.Builder()
+            .addPatterns("searchButton")
+            .build();
+            
+        // Define regions for area-based interactions
+        gameArea = new StateRegion.Builder()
+            .setSearchRegion(new Region(100, 100, 800, 600))
+            .build();
     }
 }

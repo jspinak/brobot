@@ -20,7 +20,7 @@ repositories {
 }
 
 dependencies {
-    // Brobot 1.1.0+ includes Spring, Lombok, SLF4J as transitive dependencies
+    // Brobot library - will use local version via composite build
     implementation 'io.github.jspinak:brobot:1.1.0'
     
     // Only need annotation processor for Lombok

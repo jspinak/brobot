@@ -6,6 +6,10 @@ sidebar_position: 1
 
 Brobot provides comprehensive testing capabilities designed for GUI automation reliability and maintainability. The framework supports multiple testing approaches, each serving specific purposes in the automation testing lifecycle.
 
+:::tip Advanced Testing Features
+For advanced mock testing capabilities including scenario-based configurations and failure patterns, see the [Enhanced Mock Testing System](/docs/core-library/testing/enhanced-mocking) in the Core Library documentation.
+:::
+
 ## Testing Types
 
 ### Integration Testing

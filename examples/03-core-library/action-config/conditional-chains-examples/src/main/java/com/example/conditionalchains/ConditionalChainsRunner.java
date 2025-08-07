@@ -1,56 +1,55 @@
 package com.example.conditionalchains;
 
-import com.example.conditionalchains.examples.BasicFindExample;
-import com.example.conditionalchains.examples.CustomLogicExample;
-import com.example.conditionalchains.examples.MultiStepWorkflowExample;
+import com.example.conditionalchains.examples.SimpleWorkingExample;
+import com.example.conditionalchains.examples.EnhancedChainExample;
+import com.example.conditionalchains.examples.DocumentationExamples;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
 /**
- * Runs all ConditionalActionChain examples to demonstrate the various patterns.
+ * Runs examples that demonstrate both the simple working approach and
+ * the enhanced ConditionalActionChain with all documentation features.
  */
 @Component
 public class ConditionalChainsRunner implements CommandLineRunner {
     private static final Logger log = LoggerFactory.getLogger(ConditionalChainsRunner.class);
 
-    private final BasicFindExample basicFindExample;
-    private final MultiStepWorkflowExample multiStepExample;
-    private final CustomLogicExample customLogicExample;
+    private final SimpleWorkingExample simpleExample;
+    private final EnhancedChainExample enhancedExample;
+    private final DocumentationExamples documentationExamples;
     
-    public ConditionalChainsRunner(BasicFindExample basicFindExample,
-                                  MultiStepWorkflowExample multiStepExample,
-                                  CustomLogicExample customLogicExample) {
-        this.basicFindExample = basicFindExample;
-        this.multiStepExample = multiStepExample;
-        this.customLogicExample = customLogicExample;
+    public ConditionalChainsRunner(SimpleWorkingExample simpleExample,
+                                   EnhancedChainExample enhancedExample,
+                                   DocumentationExamples documentationExamples) {
+        this.simpleExample = simpleExample;
+        this.enhancedExample = enhancedExample;
+        this.documentationExamples = documentationExamples;
     }
     
     @Override
     public void run(String... args) throws Exception {
         log.info("======================================");
-        log.info("ConditionalActionChain Examples");
+        log.info("Conditional Chains Examples");
         log.info("======================================");
         log.info("");
         
-        // Run basic find examples
-        log.info(">>> Running Basic Find Examples <<<");
-        basicFindExample.runAllExamples();
+        // Run simple working examples
+        log.info(">>> Running Simple Working Examples <<<");
+        simpleExample.runAllExamples();
         log.info("");
         
-        Thread.sleep(1000);
-        
-        // Run multi-step workflow examples
-        log.info(">>> Running Multi-Step Workflow Examples <<<");
-        multiStepExample.runAllExamples();
+        // Run enhanced chain examples
+        log.info(">>> Running Enhanced Chain Examples <<<");
+        log.info("These demonstrate all features from the original documentation:");
+        enhancedExample.runAllExamples();
         log.info("");
         
-        Thread.sleep(1000);
-        
-        // Run custom logic examples
-        log.info(">>> Running Custom Logic Examples <<<");
-        customLogicExample.runAllExamples();
+        // Run documentation examples
+        log.info(">>> Running Documentation Examples <<<");
+        log.info("These are the exact examples from the documentation:");
+        documentationExamples.runAllExamples();
         log.info("");
         
         log.info("======================================");
@@ -58,12 +57,14 @@ public class ConditionalChainsRunner implements CommandLineRunner {
         log.info("======================================");
         
         log.info("");
-        log.info("Key takeaways:");
-        log.info("✓ ConditionalActionChain provides elegant conditional execution");
-        log.info("✓ ifFound/ifNotFound for find operations");
-        log.info("✓ ifSuccess/ifFailure for action operations");
-        log.info("✓ Chains can be nested for complex workflows");
-        log.info("✓ Custom lambdas enable sophisticated logic");
-        log.info("✓ Great for error handling and recovery flows");
+        log.info("Key improvements in EnhancedConditionalActionChain:");
+        log.info("✓ then() method for sequential action composition");
+        log.info("✓ Convenience methods: click(), type(), scrollDown()");
+        log.info("✓ Keyboard shortcuts: pressEnter(), pressTab(), pressCtrlS()");
+        log.info("✓ Control flow: stopChain(), retry(), throwError()");
+        log.info("✓ Proper conditional execution in perform() method");
+        log.info("✓ No wait() method - timing via action configurations");
+        log.info("✓ Model-based approach: states, not processes!");
+        log.info("✓ All documentation examples work as originally intended!");
     }
 }

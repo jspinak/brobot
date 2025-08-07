@@ -1,0 +1,442 @@
+package com.example.conditionalchains.examples;
+
+import io.github.jspinak.brobot.action.ActionInterface;
+import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
+import io.github.jspinak.brobot.action.basic.click.ClickOptions;
+import io.github.jspinak.brobot.action.ObjectCollection;
+import io.github.jspinak.brobot.model.state.StateImage;
+import io.github.jspinak.brobot.model.conditional.ConditionalActionChain;
+import io.github.jspinak.brobot.action.ActionResult;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+/**
+ * Demonstrates multi-step workflows using ConditionalActionChain.
+ * 
+ * Based on documentation: /brobot/docs/docs/03-core-library/action-config/15-conditional-chains-examples.md
+ * 
+ * Shows advanced patterns like form filling, navigation, validation chains,
+ * and performance optimization from the documentation.
+ */
+@Component
+public class MultiStepWorkflowExample {
+    private static final Logger log = LoggerFactory.getLogger(MultiStepWorkflowExample.class);
+
+    @Autowired
+    private ActionInterface action;
+    
+    // Form elements
+    private StateImage formTitle;
+    private StateImage nameField;
+    private StateImage emailField;
+    private StateImage countryDropdown;
+    private StateImage agreeCheckbox;
+    private StateImage submitButton;
+    
+    // Navigation elements
+    private StateImage hamburgerMenu;
+    private StateImage navigationBar;
+    
+    // Validation elements
+    private StateImage formFields;
+    private StateImage errorMessages;
+    
+    public MultiStepWorkflowExample() {
+        initializeObjects();
+    }
+    
+    private void initializeObjects() {
+        // Form elements
+        formTitle = new StateImage.Builder()
+            .setName("FormTitle")
+            .addPattern("form-title.png")
+            .build();
+            
+        nameField = new StateImage.Builder()
+            .setName("NameField")
+            .addPattern("name-field.png")
+            .build();
+            
+        emailField = new StateImage.Builder()
+            .setName("EmailField")
+            .addPattern("email-field.png")
+            .build();
+            
+        countryDropdown = new StateImage.Builder()
+            .setName("CountryDropdown")
+            .addPattern("country-dropdown.png")
+            .build();
+            
+        agreeCheckbox = new StateImage.Builder()
+            .setName("AgreeCheckbox")
+            .addPattern("agree-checkbox.png")
+            .build();
+            
+        submitButton = new StateImage.Builder()
+            .setName("SubmitButton")
+            .addPattern("submit-button.png")
+            .build();
+            
+        // Navigation elements
+        hamburgerMenu = new StateImage.Builder()
+            .setName("HamburgerMenu")
+            .addPattern("hamburger-menu.png")
+            .build();
+            
+        navigationBar = new StateImage.Builder()
+            .setName("NavigationBar")
+            .addPattern("navigation-bar.png")
+            .build();
+            
+        // Validation elements
+        formFields = new StateImage.Builder()
+            .setName("FormFields")
+            .addPattern("form-fields.png")
+            .build();
+            
+        errorMessages = new StateImage.Builder()
+            .setName("ErrorMessages")
+            .addPattern("error-messages.png")
+            .build();
+    }
+    
+    /**
+     * Multi-Step Form Filling - Using real API
+     * 
+     * public ActionResult fillForm(FormData data) {
+     *     return ConditionalActionChain.find(formTitle)
+     *         .ifNotFoundLog("Form not visible")
+     *         .ifNotFound(throwError("Cannot proceed without form"))
+     *         
+     *         // Name field
+     *         .then(find(nameField))
+     *         .ifFound(click())
+     *         .ifFound(clearAndType(data.getName()))
+     *         
+     *         // Email field
+     *         .then(find(emailField))
+     *         .ifFound(click())
+     *         .ifFound(clearAndType(data.getEmail()))
+     *         
+     *         // Dropdown selection
+     *         .then(find(countryDropdown))
+     *         .ifFound(click())
+     *         .ifFound(wait(0.5))
+     *         .then(find(data.getCountry()))
+     *         .ifFound(click())
+     *         
+     *         // Checkbox
+     *         .then(find(agreeCheckbox))
+     *         .ifFound(clickIfNotChecked())
+     *         
+     *         // Submit
+     *         .then(find(submitButton))
+     *         .ifFound(click())
+     *         .always(takeScreenshot("form-submission"))
+     *         .perform(action, objectCollection);
+     * }
+     */
+    public ActionResult fillForm(FormData data) {
+        log.info("=== Multi-Step Form Filling Example ===");
+        
+        ObjectCollection objectCollection = new ObjectCollection.Builder()
+            .withImages(formTitle, nameField, emailField, countryDropdown, agreeCheckbox, submitButton)
+            .build();
+            
+        // Using real API for form filling
+        PatternFindOptions findOptions = new PatternFindOptions.Builder().build();
+        ClickOptions clickOptions = new ClickOptions.Builder().build();
+        
+        // Check form is visible
+        ActionResult result = action.perform(findOptions,
+            new ObjectCollection.Builder().withImages(formTitle).build());
+        
+        if (!result.isSuccess()) {
+            log.error("Form not visible - Cannot proceed without form");
+            ActionResult failResult = new ActionResult();
+            failResult.setSuccess(false);
+            return failResult;
+        }
+        
+        // Fill name field
+        result = action.perform(findOptions,
+            new ObjectCollection.Builder().withImages(nameField).build());
+        if (result.isSuccess()) {
+            action.perform(clickOptions,
+                new ObjectCollection.Builder().withImages(nameField).build());
+            // Clear and type name
+            action.perform(new io.github.jspinak.brobot.action.basic.type.TypeOptions.Builder()
+                .setClearFirst(true).build(),
+                new ObjectCollection.Builder().withStrings(data.getName()).build());
+        }
+        
+        // Fill email field
+        result = action.perform(findOptions,
+            new ObjectCollection.Builder().withImages(emailField).build());
+        if (result.isSuccess()) {
+            action.perform(clickOptions,
+                new ObjectCollection.Builder().withImages(emailField).build());
+            // Clear and type email
+            action.perform(new io.github.jspinak.brobot.action.basic.type.TypeOptions.Builder()
+                .setClearFirst(true).build(),
+                new ObjectCollection.Builder().withStrings(data.getEmail()).build());
+        }
+        
+        // Select country from dropdown
+        result = action.perform(findOptions,
+            new ObjectCollection.Builder().withImages(countryDropdown).build());
+        if (result.isSuccess()) {
+            action.perform(clickOptions,
+                new ObjectCollection.Builder().withImages(countryDropdown).build());
+            try { Thread.sleep(500); } catch (InterruptedException e) {}
+            // In real implementation, would select country here
+        }
+        
+        // Check agree checkbox
+        result = action.perform(findOptions,
+            new ObjectCollection.Builder().withImages(agreeCheckbox).build());
+        if (result.isSuccess()) {
+            // In real implementation, would check if already checked
+            action.perform(clickOptions,
+                new ObjectCollection.Builder().withImages(agreeCheckbox).build());
+        }
+        
+        // Submit form
+        result = action.perform(findOptions,
+            new ObjectCollection.Builder().withImages(submitButton).build());
+        if (result.isSuccess()) {
+            action.perform(clickOptions,
+                new ObjectCollection.Builder().withImages(submitButton).build());
+        }
+        
+        // Take screenshot
+        // Take screenshot - would use CaptureOptions
+        action.perform(new io.github.jspinak.brobot.action.basic.capture.CaptureOptions.Builder()
+            .setFilename("form-submission").build(),
+            new ObjectCollection.Builder().build());
+        
+        return result;
+    }
+    
+    /**
+     * Dynamic UI Navigation - Using real API
+     * 
+     * public ActionResult navigateToSection(String sectionName) {
+     *     return ConditionalActionChain.find(hamburgerMenu)
+     *         .ifFound(click())
+     *         .ifNotFound(find(navigationBar))
+     *         .always(wait(0.5))
+     *         .then(find(sectionName))
+     *         .ifFound(click())
+     *         .ifNotFound(scrollDown())
+     *         .ifNotFound(find(sectionName))
+     *         .ifFound(click())
+     *         .ifNotFoundLog("Section '" + sectionName + "' not found")
+     *         .always(wait(1.0))
+     *         .perform(action, objectCollection);
+     * }
+     */
+    public ActionResult navigateToSection(String sectionName) {
+        log.info("=== Dynamic UI Navigation Example ===");
+        
+        ObjectCollection objectCollection = new ObjectCollection.Builder()
+            .withImages(hamburgerMenu, navigationBar)
+            .build();
+            
+        // Using real API for dynamic navigation
+        PatternFindOptions findOptions = new PatternFindOptions.Builder().build();
+        ClickOptions clickOptions = new ClickOptions.Builder().build();
+        
+        // Try hamburger menu first
+        ActionResult result = action.perform(findOptions,
+            new ObjectCollection.Builder().withImages(hamburgerMenu).build());
+        
+        if (result.isSuccess()) {
+            action.perform(clickOptions,
+                new ObjectCollection.Builder().withImages(hamburgerMenu).build());
+        } else {
+            // Try navigation bar instead
+            action.perform(findOptions,
+                new ObjectCollection.Builder().withImages(navigationBar).build());
+        }
+        
+        // Wait for menu to open
+        try { Thread.sleep(500); } catch (InterruptedException e) {}
+        
+        // Try to find section - create a mock StateImage for the section name
+        // In real implementation, would have proper image for section
+        log.info("Looking for section: {}", sectionName);
+        
+        // Simulate finding section (would need actual image in real use)
+        // If not found, scroll and try again
+        boolean found = false;
+        for (int i = 0; i < 2; i++) {
+            // In real implementation, would search for section image here
+            if (!found && i > 0) {
+                // Scroll down - would use ScrollOptions
+                action.perform(new io.github.jspinak.brobot.action.basic.scroll.ScrollOptions.Builder()
+                    .setDirection(io.github.jspinak.brobot.action.basic.scroll.ScrollOptions.Direction.DOWN)
+                    .build(),
+                    new ObjectCollection.Builder().build());
+                try { Thread.sleep(500); } catch (InterruptedException e) {}
+            }
+        }
+        
+        if (!found) {
+            log.error("Section '{}' not found", sectionName);
+        }
+        
+        // Wait for navigation to complete
+        try { Thread.sleep(1000); } catch (InterruptedException e) {}
+        
+        ActionResult navResult = new ActionResult();
+        navResult.setSuccess(found);
+        return navResult;
+    }
+    
+    /**
+     * Validation Chain - Using real API
+     * 
+     * public ActionResult validateAndSubmit() {
+     *     return ConditionalActionChain.find(formFields)
+     *         .ifFound(validateFields())
+     *         .ifNotFoundLog("Form fields not found")
+     *         
+     *         // Check for errors
+     *         .then(find(errorMessages))
+     *         .ifFoundLog("Validation errors present")
+     *         .ifFound(highlightErrors())
+     *         .ifFound(stopChain())
+     *         
+     *         // No errors, proceed
+     *         .ifNotFound(find(submitButton))
+     *         .ifFound(highlight())
+     *         .ifFound(wait(1.0))
+     *         .ifFound(click())
+     *         
+     *         // Verify submission
+     *         .then(waitVanish(submitButton))
+     *         .ifFoundLog("Form submitted successfully")
+     *         .ifNotFound(find(errorMessage))
+     *         .ifFoundLog("Submission failed with error")
+     *         .perform(action, objectCollection);
+     * }
+     */
+    public ActionResult validateAndSubmit() {
+        log.info("=== Validation Chain Example ===");
+        
+        ObjectCollection objectCollection = new ObjectCollection.Builder()
+            .withImages(formFields, errorMessages, submitButton)
+            .build();
+            
+        // Using real API for validation
+        PatternFindOptions findOptions = new PatternFindOptions.Builder().build();
+        ClickOptions clickOptions = new ClickOptions.Builder().build();
+        
+        // Check form fields are present
+        ActionResult result = action.perform(findOptions,
+            new ObjectCollection.Builder().withImages(formFields).build());
+        
+        if (!result.isSuccess()) {
+            log.error("Form fields not found");
+            return result;
+        }
+        
+        // Validate fields (mock validation)
+        log.info("Validating form fields...");
+        
+        // Check for validation errors
+        result = action.perform(findOptions,
+            new ObjectCollection.Builder().withImages(errorMessages).build());
+        
+        if (result.isSuccess()) {
+            log.error("Validation errors present");
+            // Highlight errors (mock)
+            // Highlight errors - would use HighlightOptions
+            action.perform(new io.github.jspinak.brobot.action.basic.highlight.HighlightOptions.Builder().build(),
+                new ObjectCollection.Builder().withImages(errorMessages).build());
+            ActionResult failResult = new ActionResult();
+            failResult.setSuccess(false);
+            return failResult; // Stop here due to errors
+        }
+        
+        // No errors, proceed with submission
+        result = action.perform(findOptions,
+            new ObjectCollection.Builder().withImages(submitButton).build());
+        
+        if (result.isSuccess()) {
+            // Highlight submit button
+            action.perform(new io.github.jspinak.brobot.action.basic.highlight.HighlightOptions.Builder().build(),
+                new ObjectCollection.Builder().withImages(submitButton).build());
+            try { Thread.sleep(1000); } catch (InterruptedException e) {}
+            action.perform(clickOptions,
+                new ObjectCollection.Builder().withImages(submitButton).build());
+        }
+        
+        // Wait for submit button to disappear
+        try { Thread.sleep(2000); } catch (InterruptedException e) {}
+        
+        // Check if button is gone (indicating submission)
+        result = action.perform(findOptions,
+            new ObjectCollection.Builder().withImages(submitButton).build());
+        
+        if (!result.isSuccess()) {
+            log.info("Form submitted successfully");
+            ActionResult passResult = new ActionResult();
+            passResult.setSuccess(true);
+            return passResult;
+        } else {
+            // Check for error message
+            result = action.perform(findOptions,
+                new ObjectCollection.Builder().withImages(errorMessages).build());
+            if (result.isSuccess()) {
+                log.error("Submission failed with error");
+            }
+            ActionResult failResult = new ActionResult();
+            failResult.setSuccess(false);
+            return failResult;
+        }
+    }
+    
+    // Helper methods removed - using real API directly
+    
+    /**
+     * Form data helper class
+     */
+    public static class FormData {
+        private String name;
+        private String email;
+        private String country;
+        
+        public FormData(String name, String email, String country) {
+            this.name = name;
+            this.email = email;
+            this.country = country;
+        }
+        
+        public String getName() { return name; }
+        public String getEmail() { return email; }
+        public String getCountry() { return country; }
+    }
+    
+    /**
+     * Demonstrates all multi-step workflow examples from documentation
+     */
+    public void runAllExamples() {
+        log.info("Running all multi-step workflow ConditionalActionChain examples...\n");
+        
+        FormData testData = new FormData("John Doe", "john@example.com", "USA");
+        fillForm(testData);
+        log.info("");
+        
+        navigateToSection("Reports");
+        log.info("");
+        
+        validateAndSubmit();
+        log.info("");
+        
+        log.info("All workflow examples completed!");
+    }
+}

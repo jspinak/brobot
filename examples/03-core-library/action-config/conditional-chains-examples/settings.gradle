@@ -1,9 +1,8 @@
 rootProject.name = 'conditional-chains-examples'
 
-// Use local brobot library for development
-// Commented out for standalone build
-// // includeBuild('../../../../../') {
-// //     dependencySubstitution {
-// //         substitute module('io.github.jspinak:brobot') using project(':library')
-// //     }
-// // }
+// Use local Brobot library
+includeBuild('../../../../') {
+    dependencySubstitution {
+        substitute module('io.github.jspinak:brobot') using project(':library')
+    }
+}
