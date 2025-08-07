@@ -1,1 +1,8 @@
 rootProject.name = 'enhanced-mocking'
+
+// Use local Brobot library
+includeBuild('../../../../') {
+    dependencySubstitution {
+        substitute module('io.github.jspinak:brobot') using project(':library')
+    }
+}

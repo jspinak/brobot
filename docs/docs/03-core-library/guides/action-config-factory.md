@@ -1,4 +1,9 @@
-# Action Configuration
+---
+sidebar_position: 21
+title: 'ActionConfig Factory'
+---
+
+# Action Configuration Factory
 
 Brobot provides powerful patterns for creating and managing action configurations through the `ActionConfigFactory` and `ActionChainBuilder` classes. These tools simplify the creation of action configurations and make complex action sequences more readable and maintainable.
 

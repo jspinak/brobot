@@ -26,6 +26,11 @@ public class CombiningFindsRunner implements ApplicationRunner {
         combiningFindsExamples.demonstrateNestedStrategy();
         combiningFindsExamples.demonstrateConfirmStrategy();
         
+        // Documentation examples
+        log.info("\n--- Documentation Examples ---");
+        combiningFindsExamples.findYellowHealthBars();
+        combiningFindsExamples.confirmUIElements();
+        
         // Practical examples
         log.info("\n--- Practical Examples ---");
         combiningFindsExamples.findColoredTextInPanels();

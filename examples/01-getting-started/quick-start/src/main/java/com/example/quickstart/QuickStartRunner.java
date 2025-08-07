@@ -33,7 +33,21 @@ public class QuickStartRunner implements ApplicationRunner {
         boolean success = simpleAutomation.submitForm("testuser", "testpass");
         log.info("Form submission result: {}", success);
         
+        log.info("\n5. Type-safe configuration examples:");
+        simpleAutomation.demonstrateTypeSafeConfiguration();
+        
+        log.info("\n6. Common action patterns:");
+        simpleAutomation.demonstrateCommonActions();
+        
+        log.info("\n7. Proper pause usage in Brobot:");
+        simpleAutomation.demonstrateProperPauseUsage();
+        
         log.info("\n=== Quick Start Examples Complete ===");
         log.info("Check the logs above to understand how each approach works!");
+        log.info("Key principles:");
+        log.info("- Use type-safe configuration builders");
+        log.info("- Never use Thread.sleep(), use built-in pause options");
+        log.info("- Handle ActionResult success/failure properly");
+        log.info("- Leverage convenience methods for simpler code");
     }
 }

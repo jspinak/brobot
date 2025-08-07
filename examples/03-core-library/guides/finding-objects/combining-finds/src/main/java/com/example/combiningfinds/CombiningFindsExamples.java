@@ -26,94 +26,92 @@ public class CombiningFindsExamples {
     
     /**
      * Demonstrates NESTED strategy - searching within previous results
+     * From: /docs/03-core-library/guides/finding-objects/combining-finds.md
      */
     public void demonstrateNestedStrategy() {
         log.info("=== NESTED Strategy Example ===");
         log.info("Finding yellow elements WITHIN bar patterns");
         
-        // First, find all bars
-        PatternFindOptions findBars = new PatternFindOptions.Builder()
+        // Find pattern matches first, then search for color within those matches
+        PatternFindOptions patternFind = new PatternFindOptions.Builder()
                 .setStrategy(PatternFindOptions.Strategy.ALL)
-                .setSimilarity(0.7)  // Lower to catch all bars
+                .setSimilarity(0.8)
                 .build();
-        
-        // Then find yellow color within those bars
-        ColorFindOptions findYellow = new ColorFindOptions.Builder()
-                .setColorStrategy(ColorFindOptions.Color.MU)
-                .setDiameter(10)
+
+        ColorFindOptions colorFind = new ColorFindOptions.Builder()
+                .setColorStrategy(ColorFindOptions.Color.MU)  // Use mean color statistics
+                .setDiameter(5)
                 .setSimilarity(0.9)
                 .build();
-        
-        // Create nested chain
-        ActionChainOptions nestedFind = new ActionChainOptions.Builder(findBars)
+
+        ActionChainOptions nestedChain = new ActionChainOptions.Builder(patternFind)
                 .setStrategy(ActionChainOptions.ChainingStrategy.NESTED)
-                .then(findYellow)
+                .then(colorFind)
                 .build();
         
         // Create test images
-        StateImage barPattern = new StateImage.Builder()
-                .addPatterns("patterns/bar-pattern")
-                .setName("BarPattern")
+        StateImage barImage = new StateImage.Builder()
+                .addPatterns("bar-pattern.png")
+                .setName("BarImage")
                 .build();
         
-        StateImage yellowColor = new StateImage.Builder()
-                .addPatterns("colors/yellow-sample")
-                .setName("YellowColor")
+        StateImage yellowColorSample = new StateImage.Builder()
+                .addPatterns("yellow-sample.png")
+                .setName("YellowColorSample")
                 .build();
         
-        ObjectCollection objects = new ObjectCollection.Builder()
-                .withImages(barPattern, yellowColor)
+        ObjectCollection objectCollection = new ObjectCollection.Builder()
+                .withImages(barImage, yellowColorSample)
                 .build();
         
-        // Execute nested find
-        ActionResult yellowRegions = action.perform(nestedFind, objects);
+        // Execute the chain
+        ActionResult result = action.perform(nestedChain, objectCollection);
         log.info("Found {} yellow regions inside bar patterns", 
-                yellowRegions.getMatchList().size());
+                result.getMatchList().size());
     }
     
     /**
      * Demonstrates CONFIRM strategy - validating results with second search
+     * From: /docs/03-core-library/guides/finding-objects/combining-finds.md
      */
     public void demonstrateConfirmStrategy() {
         log.info("=== CONFIRM Strategy Example ===");
-        log.info("Finding buttons and confirming they have the right color");
+        log.info("Finding patterns and confirming with color");
         
-        // Find all button patterns
-        PatternFindOptions findButtons = new PatternFindOptions.Builder()
+        // Find pattern matches and confirm with color
+        PatternFindOptions patternFind = new PatternFindOptions.Builder()
                 .setStrategy(PatternFindOptions.Strategy.ALL)
                 .setSimilarity(0.8)
                 .build();
-        
-        // Confirm they have the expected color
-        ColorFindOptions confirmColor = new ColorFindOptions.Builder()
+
+        ColorFindOptions colorConfirm = new ColorFindOptions.Builder()
                 .setColorStrategy(ColorFindOptions.Color.MU)
+                .setDiameter(5)
                 .setSimilarity(0.85)
                 .build();
-        
-        // Create confirmed chain
-        ActionChainOptions confirmedFind = new ActionChainOptions.Builder(findButtons)
+
+        ActionChainOptions confirmedChain = new ActionChainOptions.Builder(patternFind)
                 .setStrategy(ActionChainOptions.ChainingStrategy.CONFIRM)
-                .then(confirmColor)
+                .then(colorConfirm)
+                .build();
+
+        StateImage barImage = new StateImage.Builder()
+                .addPatterns("bar-pattern.png")
+                .setName("BarImage")
                 .build();
         
-        StateImage buttonPattern = new StateImage.Builder()
-                .addPatterns("ui/button-shape")
-                .setName("ButtonShape")
+        StateImage yellowColorSample = new StateImage.Builder()
+                .addPatterns("yellow-sample.png")
+                .setName("YellowColorSample")
                 .build();
         
-        StateImage expectedColor = new StateImage.Builder()
-                .addPatterns("ui/button-color")
-                .setName("ExpectedButtonColor")
+        ObjectCollection objectCollection = new ObjectCollection.Builder()
+                .withImages(barImage, yellowColorSample)
                 .build();
-        
-        ObjectCollection objects = new ObjectCollection.Builder()
-                .withImages(buttonPattern, expectedColor)
-                .build();
-        
-        // Execute confirmed find
-        ActionResult confirmedButtons = action.perform(confirmedFind, objects);
-        log.info("Found {} buttons with correct color (confirmed)", 
-                confirmedButtons.getMatchList().size());
+                
+        ActionResult result = action.perform(confirmedChain, objectCollection);
+        log.info("Found {} confirmed patterns with correct color", 
+                result.getMatchList().size());
     }
     
     /**
@@ -329,5 +327,87 @@ public class CombiningFindsExamples {
         ActionResult result = action.perform(multiStage, objects);
         log.info("Multi-stage filtering: {} final matches from broad->narrow search", 
                 result.getMatchList().size());
+    }
+    
+    /**
+     * Finding Yellow Health Bars - Example from documentation
+     * From: /docs/03-core-library/guides/finding-objects/combining-finds.md
+     */
+    public void findYellowHealthBars() {
+        log.info("=== Finding Yellow Health Bars ===");
+        
+        // First find all bar-shaped patterns
+        PatternFindOptions barPatterns = new PatternFindOptions.Builder()
+                .setStrategy(PatternFindOptions.Strategy.ALL)
+                .setSimilarity(0.7)  // Lower similarity to catch all bars
+                .build();
+
+        // Then filter for yellow color
+        ColorFindOptions yellowFilter = new ColorFindOptions.Builder()
+                .setColorStrategy(ColorFindOptions.Color.MU)
+                .setDiameter(10)  // Larger diameter for solid color areas
+                .setSimilarity(0.9)  // High similarity for color matching
+                .build();
+
+        // Create nested chain to find yellow bars
+        ActionChainOptions findYellowBars = new ActionChainOptions.Builder(barPatterns)
+                .setStrategy(ActionChainOptions.ChainingStrategy.NESTED)
+                .then(yellowFilter)
+                .setPauseAfterEnd(0.5)  // Add pause after finding
+                .build();
+
+        // Execute
+        StateImage barImage = new StateImage.Builder()
+                .setName("health_bar")
+                .addPatterns("bar_pattern.png")
+                .build();
+
+        ObjectCollection objects = new ObjectCollection.Builder()
+                .withImages(barImage)
+                .build();
+
+        ActionResult yellowBars = action.perform(findYellowBars, objects);
+        log.info("Found {} yellow health bars", yellowBars.getMatchList().size());
+    }
+    
+    /**
+     * Confirming UI Elements - Example from documentation
+     * From: /docs/03-core-library/guides/finding-objects/combining-finds.md
+     */
+    public void confirmUIElements() {
+        log.info("=== Confirming UI Elements ===");
+        
+        // Find buttons by pattern, confirm by color to reduce false positives
+        PatternFindOptions buttonPattern = new PatternFindOptions.Builder()
+                .setStrategy(PatternFindOptions.Strategy.ALL)
+                .setSimilarity(0.8)
+                .build();
+
+        ColorFindOptions buttonColor = new ColorFindOptions.Builder()
+                .setColorStrategy(ColorFindOptions.Color.CLASSIFICATION)
+                .setSimilarity(0.85)
+                .build();
+
+        ActionChainOptions confirmButtons = new ActionChainOptions.Builder(buttonPattern)
+                .setStrategy(ActionChainOptions.ChainingStrategy.CONFIRM)
+                .then(buttonColor)
+                .build();
+        
+        StateImage buttonImage = new StateImage.Builder()
+                .setName("button_pattern")
+                .addPatterns("button_pattern.png")
+                .build();
+                
+        StateImage colorSample = new StateImage.Builder()
+                .setName("button_color")
+                .addPatterns("button_color.png")
+                .build();
+
+        ObjectCollection objects = new ObjectCollection.Builder()
+                .withImages(buttonImage, colorSample)
+                .build();
+
+        ActionResult confirmedButtons = action.perform(confirmButtons, objects);
+        log.info("Found {} confirmed UI buttons", confirmedButtons.getMatchList().size());
     }
 }

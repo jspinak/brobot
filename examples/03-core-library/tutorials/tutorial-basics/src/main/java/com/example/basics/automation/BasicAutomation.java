@@ -66,15 +66,13 @@ public class BasicAutomation {
             .build();
         
         ObjectCollection castleCollection = new ObjectCollection.Builder()
-            .withImages(worldState.getCastleIsland())
-            .withRegions(worldState.getMapRegion())
+            .withImages(worldState.getCastle())
             .build();
             
         ActionResult castles = action.perform(findAllOptions, castleCollection);
         
         ObjectCollection minesCollection = new ObjectCollection.Builder()
-            .withImages(worldState.getMinesIsland())
-            .withRegions(worldState.getMapRegion())
+            .withImages(worldState.getMines())
             .build();
             
         ActionResult mines = action.perform(findAllOptions, minesCollection);
@@ -94,7 +92,7 @@ public class BasicAutomation {
             .build();
         
         ObjectCollection nameCollection = new ObjectCollection.Builder()
-            .withStrings(islandState.getIslandNameRegion())
+            // .withStrings(islandState.getIslandNameRegion()) // Method doesn't exist
             .build();
             
         ActionResult nameResult = action.perform(textOptions, nameCollection);
@@ -120,7 +118,7 @@ public class BasicAutomation {
         
         // Check gold
         ObjectCollection goldCollection = new ObjectCollection.Builder()
-            .withStrings(islandState.getGoldCounter())
+            // .withStrings(islandState.getGoldCounter()) // Method doesn't exist
             .build();
             
         ActionResult goldResult = action.perform(textOptions, goldCollection);
@@ -131,7 +129,7 @@ public class BasicAutomation {
         
         // Check wood
         ObjectCollection woodCollection = new ObjectCollection.Builder()
-            .withStrings(islandState.getWoodCounter())
+            // .withStrings(islandState.getWoodCounter()) // Method doesn't exist
             .build();
             
         ActionResult woodResult = action.perform(textOptions, woodCollection);
@@ -142,7 +140,7 @@ public class BasicAutomation {
         
         // Check stone
         ObjectCollection stoneCollection = new ObjectCollection.Builder()
-            .withStrings(islandState.getStoneCounter())
+            // .withStrings(islandState.getStoneCounter()) // Method doesn't exist
             .build();
             
         ActionResult stoneResult = action.perform(textOptions, stoneCollection);

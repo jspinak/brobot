@@ -6,6 +6,7 @@ import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.action.basic.click.ClickOptions;
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
 import io.github.jspinak.brobot.action.basic.type.TypeOptions;
+import io.github.jspinak.brobot.action.ActionChainOptions;
 import io.github.jspinak.brobot.model.state.StateImage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -322,10 +323,53 @@ public class FormAutomation {
     }
     
     /**
+     * Form automation example directly from the documentation.
+     * Shows action chaining with proper logging.
+     * From: /docs/03-core-library/guides/automatic-action-logging.md
+     */
+    public void fillAndSubmitFormViaActionChain(StateImage firstNameField, StateImage submitButton) {
+        log.info("Starting form automation via action chain");
+        
+        // Create form data
+        ObjectCollection formData = new ObjectCollection.Builder()
+            .withImages(firstNameField, submitButton)
+            .withStrings("John", "Doe", "john.doe@example.com")
+            .build();
+        
+        // Build the action chain
+        PatternFindOptions findFirstName = new PatternFindOptions.Builder()
+            .build();
+            
+        ActionChainOptions fillForm = new ActionChainOptions.Builder(findFirstName)
+            .then(new ClickOptions.Builder().build())
+            .then(new TypeOptions.Builder().build())
+            .then(new TypeOptions.Builder().build()) // Tab key
+            .then(new TypeOptions.Builder().build()) // Last name
+            .then(new TypeOptions.Builder().build()) // Tab key
+            .then(new TypeOptions.Builder().build()) // Email
+            .then(new PatternFindOptions.Builder().build()) // Find submit
+            .then(new ClickOptions.Builder().build()) // Click submit
+            .build();
+        
+        // Execute with logging
+        log.info("Filling form fields");
+        ActionResult result = action.perform(fillForm, formData);
+        
+        if (result.isSuccess()) {
+            log.info("Form submitted successfully");
+        } else {
+            log.error("Form submission failed");
+        }
+    }
+    
+    /**
      * Demonstrates form automation
      */
     public void demonstrateFormAutomation() {
         log.info("=== Form Automation Demonstration ===");
+        
+        // Show both approaches
+        log.info(">>> Method 1: Sequential Form Filling <<<");
         
         // Create sample form data
         Map<String, String> formData = new HashMap<>();
@@ -335,6 +379,11 @@ public class FormAutomation {
         
         // Execute form automation
         fillAndSubmitForm(formData);
+        
+        log.info(">>> Method 2: Action Chain Form Filling <<<");
+        
+        // Use the documentation example approach
+        fillAndSubmitFormViaActionChain(firstNameField, submitButton);
         
         log.info("Form automation demonstration completed");
     }

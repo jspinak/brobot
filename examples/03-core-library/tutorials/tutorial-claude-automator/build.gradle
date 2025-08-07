@@ -17,6 +17,9 @@ dependencies {
     // Brobot library (includes Spring Boot, Lombok, SikuliX as transitive dependencies)
     implementation 'io.github.jspinak:brobot:1.1.0'
     
+    // Reactive programming support
+    implementation 'io.projectreactor:reactor-core:3.6.0'
+    
     // Lombok annotation processor
     annotationProcessor 'org.projectlombok:lombok:1.18.32'
     

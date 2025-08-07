@@ -48,11 +48,17 @@ public class PureActionsRunner implements ApplicationRunner {
         pureActionsDemo.handleBothSuccessAndFailure();
         pureActionsDemo.reuseFindResults();
         
+        // Real-world examples with conditional chains
+        log.info("\n--- Real-World Examples ---");
+        pureActionsDemo.performLogin("testuser", "testpass");
+        pureActionsDemo.saveWithConfirmation();
+        
         log.info("\n=== Pure Actions Examples Complete ===");
         log.info("Pure actions provide:");
         log.info("- Clear separation of concerns");
         log.info("- Better error handling");
         log.info("- More testable code");
         log.info("- Greater flexibility");
+        log.info("- Conditional action chains for complex workflows");
     }
 }

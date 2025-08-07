@@ -23,12 +23,8 @@ public class ExampleRunner implements ApplicationRunner {
         log.info("=== Action Hierarchy Examples ===");
         log.info("This example demonstrates different ways to implement complex actions in Brobot");
         
-        // Demonstrate basic actions first
-        log.info("\n1. Demonstrating basic actions:");
-        complexActionExamples.demonstrateBasicActions(exampleState.getNextButton());
-        
         // Demonstrate different click-until-found approaches
-        log.info("\n2. Traditional loop approach:");
+        log.info("\n1. Traditional loop approach:");
         boolean result1 = complexActionExamples.clickUntilFound(
                 exampleState.getNextButton(), 
                 exampleState.getFinishButton(), 
@@ -36,28 +32,34 @@ public class ExampleRunner implements ApplicationRunner {
         );
         log.info("Traditional approach result: {}", result1);
         
-        log.info("\n3. Fluent API approach:");
+        log.info("\n2. Fluent API approach:");
         boolean result2 = complexActionExamples.clickUntilFoundFluent(
                 exampleState.getNextButton(),
                 exampleState.getFinishButton()
         );
         log.info("Fluent API approach result: {}", result2);
         
-        log.info("\n4. Built-in ClickUntilOptions approach:");
+        log.info("\n3. Built-in ClickUntilOptions approach:");
         boolean result3 = complexActionExamples.clickUntilFoundBuiltIn(
                 exampleState.getNextButton(),
                 exampleState.getFinishButton()
         );
         log.info("Built-in approach result: {}", result3);
         
-        log.info("\n5. Reusable function approach:");
-        boolean result4 = complexActionExamples.clickUntilFoundReusable(
+        log.info("\n4. Reusable function approach (overloaded method):");
+        boolean result4 = complexActionExamples.clickUntilFound(
                 exampleState.getNextButton(),
                 exampleState.getFinishButton(),
                 10,
                 1.0
         );
         log.info("Reusable function result: {}", result4);
+        
+        log.info("\n5. Usage example:");
+        complexActionExamples.usageExample(
+                exampleState.getNextButton(),
+                exampleState.getFinishButton()
+        );
         
         log.info("\n=== Action Hierarchy Examples Complete ===");
     }
