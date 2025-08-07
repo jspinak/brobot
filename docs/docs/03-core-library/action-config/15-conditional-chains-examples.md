@@ -1,8 +1,17 @@
-# Conditional Action Chains Examples
+# Enhanced Conditional Action Chains
 
 ## Overview
 
-ConditionalActionChain provides a fluent API for building complex action sequences with conditional execution. This page demonstrates common patterns and real-world examples.
+`EnhancedConditionalActionChain` provides a powerful fluent API for building complex action sequences with conditional execution. This enhanced implementation adds the missing features from the original design, including the crucial `then()` method for sequential composition and numerous convenience methods.
+
+## Key Features
+
+- **Sequential Composition**: The `then()` method enables multi-step workflows
+- **Convenience Methods**: Direct methods like `click()`, `type()`, `scrollDown()`
+- **Keyboard Shortcuts**: Built-in support for common key combinations
+- **Control Flow**: Methods for stopping chains, retrying, and error handling
+- **No Explicit Waits**: Follows model-based principles - timing via action configurations
+- **Proper Conditional Logic**: True if/then/else execution flow
 
 ## Basic Examples
 
@@ -10,25 +19,24 @@ ConditionalActionChain provides a fluent API for building complex action sequenc
 
 ```java
 // Basic find and click pattern
-ConditionalActionChain.find(new PatternFindOptions.Builder().build())
-    .ifFound(new ClickOptions.Builder().build())
-    .perform(action, new ObjectCollection.Builder()
-        .withImages(buttonImage)
-        .build());
+EnhancedConditionalActionChain.find(buttonImage)
+    .ifFoundClick()
+    .ifNotFoundLog("Button not found")
+    .perform(action, new ObjectCollection.Builder().build());
 ```
 
-### Find with Error Handling
+### Sequential Actions with then()
 
 ```java
-ConditionalActionChain.find(findOptions)
-    .ifFound(click())
-    .ifNotFoundLog("Critical button not found!")
-    .ifNotFoundDo(result -> {
-        // Custom error handling
-        alertUser("UI element missing");
-        takeDebugScreenshot();
-    })
-    .perform(action, objectCollection);
+// The then() method enables sequential workflows
+EnhancedConditionalActionChain.find(menuButton)
+    .ifFoundClick()
+    .then(searchField)  // Move to next element
+    .ifFoundClick()
+    .ifFoundType("search query")
+    .then(submitButton) // Continue the flow
+    .ifFoundClick()
+    .perform(action, new ObjectCollection.Builder().build());
 ```
 
 ## Real-World Scenarios
@@ -37,22 +45,21 @@ ConditionalActionChain.find(findOptions)
 
 ```java
 public ActionResult performLogin(String username, String password) {
-    return ConditionalActionChain.find(loginButton)
-        .ifFound(click())
+    return EnhancedConditionalActionChain.find(loginButton)
+        .ifFoundClick()
         .ifNotFoundLog("Login button not visible")
-        .ifNotFound(find(menuButton))
-        .ifFound(click())
-        .always(wait(1.0))
-        .then(find(usernameField))
-        .ifFound(click())
-        .ifFound(type(username))
-        .then(find(passwordField))
-        .ifFound(click())
-        .ifFound(type(password))
-        .then(find(submitButton))
-        .ifFound(click())
-        .always(wait(2.0))
-        .perform(action, objectCollection);
+        .then(usernameField)  // Sequential action using then()
+        .ifFoundClick()
+        .ifFoundType(username)
+        .then(passwordField)  // Continue to next field
+        .ifFoundClick()
+        .ifFoundType(password)
+        .then(submitButton)   // Move to submit
+        .ifFoundClick()
+        .then(successMessage) // Check for success
+        .ifFoundLog("Login successful!")
+        .ifNotFoundLog("Login might have failed")
+        .perform(action, new ObjectCollection.Builder().build());
 }
 ```
 
@@ -60,19 +67,21 @@ public ActionResult performLogin(String username, String password) {
 
 ```java
 public ActionResult saveWithConfirmation() {
-    return ConditionalActionChain.find(saveButton)
-        .ifFound(click())
+    StateImage saveButton = new StateImage.Builder()
+        .addPattern("images/buttons/save.png")
+        .build();
+    
+    return EnhancedConditionalActionChain.find(saveButton)
+        .ifFoundClick()
         .ifNotFoundLog("Save button not found")
-        .ifFound(wait(0.5))
-        .then(find(confirmDialog))
-        .ifFound(find(yesButton))
-        .ifFound(click())
-        .ifNotFound(log("No confirmation needed"))
-        .always(wait(1.0))
-        .then(find(successMessage))
+        .then(confirmDialog)  // Look for confirmation
+        .then(yesButton)      // Find yes button within dialog
+        .ifFoundClick()
+        .ifNotFoundLog("No confirmation needed")
+        .then(successMessage) // Verify success
         .ifFoundLog("Save successful")
         .ifNotFoundLog("Save may have failed")
-        .perform(action, objectCollection);
+        .perform(action, new ObjectCollection.Builder().build());
 }
 ```
 
@@ -80,23 +89,11 @@ public ActionResult saveWithConfirmation() {
 
 ```java
 public ActionResult clickWithRetry(StateImage target, int maxRetries) {
-    ConditionalActionChain chain = ConditionalActionChain.find(
-        new PatternFindOptions.Builder()
-            .setSimilarity(0.8)
-            .build()
-    );
-    
-    for (int i = 0; i < maxRetries; i++) {
-        chain = chain
-            .ifNotFoundLog("Attempt " + (i + 1) + " failed")
-            .ifNotFound(wait(1.0))
-            .ifNotFound(find(target));
-    }
-    
-    return chain
-        .ifFound(click())
+    return EnhancedConditionalActionChain
+        .retry(new PatternFindOptions.Builder().build(), maxRetries)
+        .ifFoundClick()
         .ifFoundLog("Successfully clicked after retries")
-        .ifNotFoundLog("Failed after " + maxRetries + " attempts")
+        .ifNotFoundLog("Failed after all attempts")
         .perform(action, new ObjectCollection.Builder()
             .withImages(target)
             .build());
@@ -108,254 +105,169 @@ public ActionResult clickWithRetry(StateImage target, int maxRetries) {
 ### Multi-Step Form Filling
 
 ```java
-public ActionResult fillForm(FormData data) {
-    return ConditionalActionChain.find(formTitle)
+public ActionResult fillComplexForm(FormData data) {
+    return EnhancedConditionalActionChain
+        .find(new PatternFindOptions.Builder().build())
         .ifNotFoundLog("Form not visible")
-        .ifNotFound(throwError("Cannot proceed without form"))
+        .ifNotFoundDo(res -> { throw new RuntimeException("Cannot proceed without form"); })
         
-        // Name field
-        .then(find(nameField))
-        .ifFound(click())
-        .ifFound(clearAndType(data.getName()))
+        // Name field - using clearAndType
+        .then(nameField)
+        .ifFoundClick()
+        .clearAndType(data.getName())
         
-        // Email field
-        .then(find(emailField))
-        .ifFound(click())
-        .ifFound(clearAndType(data.getEmail()))
+        // Email field - using tab navigation
+        .pressTab()
+        .type(data.getEmail())
         
-        // Dropdown selection
-        .then(find(countryDropdown))
-        .ifFound(click())
-        .ifFound(wait(0.5))
-        .then(find(data.getCountry()))
-        .ifFound(click())
+        // Phone field - using direct navigation
+        .then(phoneField)
+        .ifFoundClick()
+        .ifFoundType(data.getPhone())
         
-        // Checkbox
-        .then(find(agreeCheckbox))
-        .ifFound(clickIfNotChecked())
-        
-        // Submit
-        .then(find(submitButton))
-        .ifFound(click())
-        .always(takeScreenshot("form-submission"))
-        .perform(action, objectCollection);
+        // Submit form
+        .then(submitButton)
+        .ifFoundClick()
+        .takeScreenshot("form-submission")
+        .perform(action, new ObjectCollection.Builder().build());
 }
 ```
 
-### Dynamic UI Navigation
+### Dynamic UI Navigation with Scrolling
 
 ```java
-public ActionResult navigateToSection(String sectionName) {
-    return ConditionalActionChain.find(hamburgerMenu)
-        .ifFound(click())
-        .ifNotFound(find(navigationBar))
-        .always(wait(0.5))
-        .then(find(sectionName))
-        .ifFound(click())
-        .ifNotFound(scrollDown())
-        .ifNotFound(find(sectionName))
-        .ifFound(click())
-        .ifNotFoundLog("Section '" + sectionName + "' not found")
-        .always(wait(1.0))
-        .perform(action, objectCollection);
+public ActionResult scrollToFind(StateImage target) {
+    return EnhancedConditionalActionChain.find(target)
+        .ifNotFound(chain -> chain.scrollDown())
+        .ifNotFound(new PatternFindOptions.Builder().build())
+        .ifNotFound(chain -> chain.scrollDown())
+        .ifNotFound(new PatternFindOptions.Builder().build())
+        .ifNotFound(chain -> chain.scrollDown())
+        .ifFoundClick()
+        .ifFoundLog("Found and clicked target after scrolling")
+        .ifNotFoundLog("Could not find target even after scrolling")
+        .perform(action, new ObjectCollection.Builder()
+            .withImages(target)
+            .build());
 }
 ```
 
-### Validation Chain
+### Keyboard Shortcuts Workflow
 
 ```java
-public ActionResult validateAndSubmit() {
-    return ConditionalActionChain.find(formFields)
-        .ifFound(validateFields())
-        .ifNotFoundLog("Form fields not found")
-        
-        // Check for errors
-        .then(find(errorMessages))
-        .ifFoundLog("Validation errors present")
-        .ifFound(highlightErrors())
-        .ifFound(stopChain())
-        
-        // No errors, proceed
-        .ifNotFound(find(submitButton))
-        .ifFound(highlight())
-        .ifFound(wait(1.0))
-        .ifFound(click())
-        
-        // Verify submission
-        .then(waitVanish(submitButton))
-        .ifFoundLog("Form submitted successfully")
-        .ifNotFound(find(errorMessage))
-        .ifFoundLog("Submission failed with error")
-        .perform(action, objectCollection);
+public ActionResult useKeyboardShortcuts() {
+    return EnhancedConditionalActionChain
+        .find(editorField)
+        .ifFoundClick()
+        .pressCtrlA()      // Select all
+        .pressDelete()     // Delete content
+        .type("New content here")
+        .pressCtrlS()      // Save
+        .then(savedIndicator)
+        .ifFoundLog("Document saved successfully")
+        .perform(action, new ObjectCollection.Builder().build());
 }
 ```
 
 ## Conditional Patterns
 
-### If-Else Logic
+### Error Handling with Control Flow
 
 ```java
-// Check if logged in, login if not
-ConditionalActionChain.find(userAvatar)
-    .ifFoundLog("Already logged in")
-    .ifNotFound(find(loginButton))
-    .ifFound(click())
-    .ifFound(performLogin())
+public ActionResult handleErrors() {
+    return EnhancedConditionalActionChain
+        .find(submitButton)
+        .ifFoundClick()
+        .then(errorDialog)
+        .ifFoundLog("Error dialog appeared")
+        .ifFound(chain -> chain.takeScreenshot("error-state"))
+        .ifFoundDo(res -> {
+            log.error("Operation failed with error: {}", res.getText());
+        })
+        .stopIf(res -> res.getText() != null && 
+                !res.getText().isEmpty() && 
+                res.getText().get(0).contains("CRITICAL"))
+        .then(retryButton)
+        .ifFoundClick()
+        .ifFoundLog("Retrying operation")
+        .perform(action, new ObjectCollection.Builder().build());
+}
+```
+
+### Wait for Element to Disappear
+
+```java
+public ActionResult waitForLoadingToComplete() {
+    StateImage loadingSpinner = new StateImage.Builder()
+        .addPattern("images/indicators/loading.png")
+        .build();
+    
+    return EnhancedConditionalActionChain
+        .find(submitButton)
+        .ifFoundClick()
+        .waitVanish(loadingSpinner)  // Wait for spinner to disappear
+        .then(successMessage)
+        .ifFoundLog("Operation completed successfully")
+        .then(errorDialog)
+        .ifFoundLog("Operation failed")
+        .perform(action, new ObjectCollection.Builder().build());
+}
+```
+
+### Highlighting and Debugging
+
+```java
+public ActionResult debugWorkflow() {
+    return EnhancedConditionalActionChain
+        .find(targetElement)
+        .ifFound(chain -> chain.highlight())  // Highlight found element
+        .ifFoundLog("Found target element")   // Log for debugging
+        .takeScreenshot("debug-1")            // Take screenshot
+        .ifFoundClick()
+        .takeScreenshot("debug-2")            // Another screenshot
+        .perform(action, new ObjectCollection.Builder().build());
+}
+```
+
+## Model-Based Automation Principles
+
+### No Explicit Waits
+
+Unlike process-based automation, EnhancedConditionalActionChain does **not** include a `wait()` method. This is intentional:
+
+```java
+// WRONG - Process-based approach with explicit waits
+chain.click().wait(2.0).type("text")  // Don't do this!
+
+// CORRECT - Model-based approach with action configurations
+PatternFindOptions findWithDelay = new PatternFindOptions.Builder()
+    .setPauseBeforeBegin(2.0)  // Timing in action configuration
+    .build();
+    
+EnhancedConditionalActionChain.find(findWithDelay)
+    .ifFoundClick()
+    .then(new TypeOptions.Builder()
+        .setTypeDelay(0.1)  // Type-specific timing
+        .build())
     .perform(action, objectCollection);
 ```
 
-### Switch-Like Behavior
+### State-Based Navigation
 
 ```java
-public ActionResult handleDialog() {
-    return ConditionalActionChain.find(dialogBox)
-        // Try OK button first
-        .ifFound(find(okButton))
-        .ifFound(click())
-        
-        // If no OK, try Yes button
-        .ifNotFound(find(yesButton))
-        .ifFound(click())
-        
-        // If no Yes, try Continue button
-        .ifNotFound(find(continueButton))
-        .ifFound(click())
-        
-        // If none found, try Close button
-        .ifNotFound(find(closeButton))
-        .ifFound(click())
-        
-        // Last resort - press Escape
-        .ifNotFound(pressEscape())
-        .always(wait(0.5))
-        .perform(action, objectCollection);
-}
-```
-
-### Conditional Branching
-
-```java
-public ActionResult processItem(StateImage item) {
-    return ConditionalActionChain.find(item)
-        .ifFound(analyzeItem())
-        
-        // Branch based on item type
-        .ifFoundDo(result -> {
-            String itemType = result.getText();
-            if ("document".equals(itemType)) {
-                chain.then(openDocument());
-            } else if ("image".equals(itemType)) {
-                chain.then(viewImage());
-            } else {
-                chain.then(showProperties());
-            }
+public ActionResult navigateToState(State targetState) {
+    // Focus on states, not processes
+    return EnhancedConditionalActionChain
+        .find(targetState.getIdentifyingImage())
+        .ifFoundLog("Already in target state")
+        .ifNotFound(navigationButton)
+        .ifFoundClick()
+        .then(targetState.getIdentifyingImage())
+        .ifFoundLog("Successfully navigated to state")
+        .ifNotFoundDo(res -> {
+            throw new StateTransitionException("Failed to reach target state");
         })
-        
-        .always(logAction())
-        .perform(action, objectCollection);
-}
-```
-
-## Error Recovery
-
-### Graceful Degradation
-
-```java
-public ActionResult saveDocument() {
-    return ConditionalActionChain
-        // Try primary save method
-        .find(saveButton)
-        .ifFound(click())
-        
-        // Fallback to menu
-        .ifNotFound(find(fileMenu))
-        .ifFound(click())
-        .ifFound(find(saveMenuItem))
-        .ifFound(click())
-        
-        // Fallback to keyboard shortcut
-        .ifNotFound(pressCtrlS())
-        
-        // Verify save completed
-        .always(wait(1.0))
-        .then(find(savedIndicator))
-        .ifFoundLog("Document saved successfully")
-        .ifNotFoundLog("Save status unknown")
-        .perform(action, objectCollection);
-}
-```
-
-### Exception Handling
-
-```java
-public ActionResult safeOperation() {
-    return ConditionalActionChain.find(dangerousButton)
-        .ifFound(checkPrerequisites())
-        .ifFoundDo(result -> {
-            if (!result.isSuccess()) {
-                throw new IllegalStateException("Prerequisites not met");
-            }
-        })
-        .ifFound(click())
-        .ifFound(wait(2.0))
-        .then(find(confirmationDialog))
-        .ifFound(handleConfirmation())
-        .ifNotFoundLog("Operation completed without confirmation")
-        .always(cleanupResources())
-        .perform(action, objectCollection);
-}
-```
-
-## Performance Optimization
-
-### Batch Operations
-
-```java
-public ActionResult processAllItems() {
-    // Find all items once
-    ActionResult items = action.find(itemPattern);
-    
-    if (!items.isSuccess()) {
-        return items;
-    }
-    
-    // Process each item without re-finding
-    ActionResult finalResult = new ActionResult();
-    for (Match item : items.getMatchList()) {
-        ActionResult result = ConditionalActionChain
-            .start(highlightRegion(item.getRegion()))
-            .then(clickRegion(item.getRegion()))
-            .then(wait(0.5))
-            .then(processItemDialog())
-            .perform(action, emptyCollection);
-            
-        finalResult.merge(result);
-    }
-    
-    return finalResult;
-}
-```
-
-### Lazy Evaluation
-
-```java
-public ActionResult efficientWorkflow() {
-    return ConditionalActionChain
-        // Quick check first
-        .find(new PatternFindOptions.Builder()
-            .setSimilarity(0.9)
-            .setSearchRegion(topBar)
-            .build())
-        .ifFound(quickAction())
-        
-        // Full search only if quick check fails
-        .ifNotFound(find(new PatternFindOptions.Builder()
-            .setSimilarity(0.7)
-            .setSearchRegion(fullScreen)
-            .build()))
-        .ifFound(fullAction())
-        
-        .perform(action, objectCollection);
+        .perform(action, new ObjectCollection.Builder().build());
 }
 ```
 
@@ -365,37 +277,102 @@ public ActionResult efficientWorkflow() {
 
 ```java
 @Test
-public void testLoginChain() {
-    // Create test data
-    ObjectCollection testCollection = new ObjectCollection.Builder()
-        .withImages(mockLoginButton)
-        .build();
+public void testEnhancedChainFeatures() {
+    // Setup mock
+    Action mockAction = mock(Action.class);
+    ActionResult successResult = new ActionResult();
+    successResult.setSuccess(true);
     
-    // Build and test chain
-    ActionResult result = ConditionalActionChain
-        .find(testFindOptions)
-        .ifFound(testClickOptions)
-        .ifNotFoundLog("Test: Login button not found")
-        .perform(mockAction, testCollection);
+    when(mockAction.perform(any(ActionConfig.class), any(ObjectCollection[].class)))
+        .thenReturn(successResult);
     
-    // Verify behavior
+    // Test the then() method
+    ActionResult result = EnhancedConditionalActionChain
+        .find(loginButton)
+        .ifFoundClick()
+        .then(usernameField)  // Sequential composition
+        .ifFoundType("testuser")
+        .then(passwordField)  // Continue flow
+        .ifFoundType("password")
+        .perform(mockAction, new ObjectCollection.Builder().build());
+    
     assertTrue(result.isSuccess());
-    assertEquals("Test: Login button not found", 
-                 result.getText());
 }
 ```
 
+## Complete API Reference
+
+### Core Methods
+- `find(PatternFindOptions)` / `find(StateImage)` - Start chain with find
+- `then(ActionConfig)` / `then(StateImage)` - Sequential action composition
+- `ifFound(ActionConfig)` - Execute if previous succeeded
+- `ifNotFound(ActionConfig)` - Execute if previous failed
+- `always(ActionConfig)` - Execute regardless
+
+### Convenience Methods
+- `click()` / `ifFoundClick()` - Click actions
+- `type(String)` / `ifFoundType(String)` - Type text
+- `clearAndType(String)` - Clear field and type
+- `scrollDown()` / `scrollUp()` - Scroll actions
+- `highlight()` - Highlight last found element
+- `waitVanish(StateImage)` - Wait for element to disappear
+
+### Keyboard Shortcuts
+- `pressEnter()`, `pressTab()`, `pressEscape()`
+- `pressCtrlS()`, `pressCtrlA()`, `pressDelete()`
+- `pressKey(int keyCode)` - Press specific key
+- `pressKeyCombo(int modifier, int key)` - Key combinations
+
+### Control Flow
+- `stopChain()` - Stop execution
+- `stopIf(Predicate<ActionResult>)` - Conditional stop
+- `retry(ActionConfig, int)` - Retry pattern
+- `throwError(String)` - Throw exception
+
+### Logging & Debugging
+- `log(String)` - Log message
+- `ifFoundLog(String)` / `ifNotFoundLog(String)` - Conditional logging
+- `takeScreenshot(String)` - Capture screenshot
+
+### Custom Handlers
+- `ifFoundDo(Consumer<ActionResult>)` - Custom success handler
+- `ifNotFoundDo(Consumer<ActionResult>)` - Custom failure handler
+- `ifFound(Consumer<EnhancedConditionalActionChain>)` - Chain operations
+- `ifNotFound(Consumer<EnhancedConditionalActionChain>)` - Chain operations
+
 ## Best Practices
 
-1. **Keep Chains Readable**: Break complex chains into named methods
-2. **Use Logging**: Add ifFoundLog/ifNotFoundLog for debugging
-3. **Handle Failures**: Always provide ifNotFound alternatives
-4. **Test Incrementally**: Build chains step by step
-5. **Reuse Common Patterns**: Create utility methods for repeated sequences
+1. **Use then() for Sequential Actions**: The then() method is essential for multi-step workflows
+2. **No Explicit Waits**: Use action configurations for timing, not wait() calls
+3. **Leverage Convenience Methods**: Use built-in methods like click() and type()
+4. **Add Logging**: Use ifFoundLog/ifNotFoundLog for debugging
+5. **Handle Failures**: Always provide ifNotFound alternatives
+6. **Keep Chains Focused**: Break complex workflows into smaller methods
+7. **Think States, Not Processes**: Focus on state transitions, not step-by-step procedures
 
-## Common Pitfalls
+## Migration from Basic ConditionalActionChain
 
-1. **Forgetting always()**: Use for cleanup that must happen
-2. **Long Chains**: Break into smaller, named sub-chains
-3. **Missing Error Handling**: Always handle the ifNotFound case
-4. **Tight Coupling**: Keep chains focused on single workflows
+The original ConditionalActionChain was limited. Here's how to migrate:
+
+```java
+// OLD - Limited ConditionalActionChain (no then() method!)
+ConditionalActionChain.find(button)
+    .ifFound(click())
+    // Can't continue to next element without then()!
+    
+// NEW - EnhancedConditionalActionChain
+EnhancedConditionalActionChain.find(button)
+    .ifFoundClick()
+    .then(nextElement)  // Now you can continue!
+    .ifFoundClick()
+    .then(anotherElement)  // And continue further!
+    .ifFoundType("text")
+```
+
+## Common Pitfalls to Avoid
+
+1. **Don't Use Explicit Waits**: No wait() method by design - use action configurations
+2. **Don't Forget then()**: Use then() to move between different elements
+3. **Don't Mix APIs**: Use EnhancedConditionalActionChain, not the basic version
+4. **Don't Ignore State**: Think in terms of application states, not process steps
+5. **Don't Skip Error Handling**: Always handle the ifNotFound case
