@@ -15,7 +15,7 @@
 <script>function gtag(){dataLayer.push(arguments)}window.dataLayer=window.dataLayer||[],gtag("js",new Date),gtag("config","G-6WY1S6ZWEY",{anonymize_ip:!0})</script>
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css" integrity="sha384-GvrOXuhMATgEsSwCs4smul74iXGOixntILdUW9XmUC6+HX0sLNAK3q71HotJqlAn" crossorigin="anonymous"><link rel="stylesheet" href="/brobot/assets/css/styles.1b22d91f.css">
-<script src="/brobot/assets/js/runtime~main.8739cc6f.js" defer="defer"></script>
+<script src="/brobot/assets/js/runtime~main.448605cd.js" defer="defer"></script>
 <script src="/brobot/assets/js/main.ed7fbb8d.js" defer="defer"></script>
 </head>
 <body class="navigation-with-keyboard">
@@ -26,15 +26,16 @@
 <div class="theme-admonition theme-admonition-info admonition_xJq3 alert alert--info"><div class="admonitionHeading_Gvgb"><span class="admonitionIcon_Rf37"><svg viewBox="0 0 14 16"><path fill-rule="evenodd" d="M7 2.3c3.14 0 5.7 2.56 5.7 5.7s-2.56 5.7-5.7 5.7A5.71 5.71 0 0 1 1.3 8c0-3.14 2.56-5.7 5.7-5.7zM7 1C3.14 1 0 4.14 0 8s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm1 3H6v5h2V4zm0 6H6v2h2v-2z"></path></svg></span>Version Note</div><div class="admonitionContent_BuS1"><p>This tutorial was originally created for an earlier version of Brobot but has been updated for version 1.1.0. The original code examples are available in documentation versions 1.0.6 and 1.0.7.</p></div></div>
 <p>Here we determine the island type from the on-screen text.</p>
 <h2 class="anchor anchorWithStickyNavbar_LWe7" id="go-to-a-new-island-and-get-its-type">Go to a new Island and Get its Type<a href="#go-to-a-new-island-and-get-its-type" class="hash-link" aria-label="Direct link to Go to a new Island and Get its Type" title="Direct link to Go to a new Island and Get its Type">​</a></h2>
-<p>Here we call the transition directly instead of using Brobot&#x27;s state management system
-by calling StateTransitionsManagement.openState(ISLAND). Normally we would use the
-state management system, which takes care of everything related to transitions, including
-finding and traversing paths. In this case, the state management system would not do
-anything because the Island state is already active. In this special situation, we want to
-perform the transition activities from the World state to the Island state even though the
-Island state is already present. The reason we want to do this is that this transition will
-take us to a different island. The Island state does not know whether the specific island
-has changed. It only recognizes that it is on an island.</p>
+<p>Here we call the transition directly instead of using Brobot&#x27;s state navigation system.
+In Brobot 1.1.0, navigation between states is handled by <code>StateNavigator</code> (which provides
+the <code>openState()</code> methods), while <code>StateTransitions</code> manages the actual transition execution.
+Normally we would use the state navigation system through <code>StateNavigator.openState()</code>, which
+takes care of everything related to transitions, including finding and traversing paths. In
+this case, the state navigation system would not do anything because the Island state is already
+active. In this special situation, we want to perform the transition activities from the World
+state to the Island state even though the Island state is already present. The reason we want
+to do this is that this transition will take us to a different island. The Island state does
+not know whether the specific island has changed. It only recognizes that it is on an island.</p>
 <p>If the text we found on-screen contains any of these substrings,
 we return the corresponding island type. Otherwise, we return an
 empty string.</p>
