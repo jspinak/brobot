@@ -5,62 +5,103 @@ sidebar_position: 8
 # Save Labeled Images
 
 :::info Version Note
-This tutorial was originally created for an earlier version of Brobot but has been updated for version 1.1.0. The original code examples are available in documentation versions 1.0.6 and 1.0.7.
+This tutorial has been updated for Brobot 1.1.0. The code now uses `StateNavigator` for state navigation instead of the older `StateTransitionsManagement` class.
 :::
 
 ## The SaveLabeledImages Class
 
-In the main program loop, we first go to the Island state. If this 
-fails we exit the program, to keep things simple. Normally you would 
-want Brobot to find out where it is and either make its way back to the 
-target state or do something else.  
-
-We then loop for the number of images we wish to save, get a new island 
-type, and save it to file. 
+This class demonstrates how to capture and save labeled images. In a real application, this could be used to build training data or document different UI states.
 
 ```java
+package com.example.basics.automation;
+
+import io.github.jspinak.brobot.navigation.transition.StateNavigator;
+import org.springframework.stereotype.Component;
+import lombok.extern.slf4j.Slf4j;
+
+import static com.example.basics.StateNames.ISLAND;
+
+@Slf4j
 @Component
 public class SaveLabeledImages {
     
-    private StateTransitionsManagement stateTransitionsManagement;
-    private ImageUtils imageUtils;
+    private StateNavigator stateNavigator;
     private GetNewIsland getNewIsland;
     private IslandRegion islandRegion;
     
-    public SaveLabeledImages(StateTransitionsManagement stateTransitionsManagement,
-                             ImageUtils imageUtils, GetNewIsland getNewIsland,
+    public SaveLabeledImages(StateNavigator stateNavigator,
+                             GetNewIsland getNewIsland,
                              IslandRegion islandRegion) {
-        this.stateTransitionsManagement = stateTransitionsManagement;
-        this.imageUtils = imageUtils;
+        this.stateNavigator = stateNavigator;
         this.getNewIsland = getNewIsland;
         this.islandRegion = islandRegion;
     }
     
     public void saveImages(int maxImages) {
         String directory = "labeledImages/";
-        if (!stateTransitionsManagement.openState(ISLAND)) return;
+        // Navigate to ISLAND state
+        stateNavigator.openState(ISLAND);
         for (int i=0; i<maxImages; i++) {
             String newIslandType = getNewIsland.getIsland();
-            Report.println("text = "+newIslandType);
-            if (!newIslandType.isEmpty() && islandRegion.defined()) {
-                imageUtils.saveRegionToFile(islandRegion.getRegion(), directory + newIslandType);
+            log.info("text = {}", newIslandType);
+            if (!newIslandType.isEmpty() && islandRegion.ensureRegionReady()) {
+                // Capture the island image using the declarative region
+                islandRegion.captureIsland();
+                // In a real implementation, you would save the captured image to file here
+                log.info("Would save captured island to: {}{}", directory, newIslandType);
             }
-            Report.println();
         }
     }
 }
 ```
 
-## Run 'saveImages' from the Executable Class
+## Key Changes from Previous Versions
 
-After the code to initialize the beginning active states, add the following code.
-This will save a maximum of 100 images.
+### State Navigation
+- **Old (v1.0.7)**: Used `StateTransitionsManagement.openState(ISLAND)`
+- **New (v1.1.0)**: Uses `StateNavigator.openState(ISLAND)` for navigation
+
+### Image Utilities
+- **Old**: Used `ImageUtils.saveRegionToFile()`
+- **New**: Image capture is handled through the action framework
+
+### Region Definition
+- **Old**: Used `islandRegion.defined()` to check if region exists
+- **New**: Uses `islandRegion.ensureRegionReady()` with declarative regions
+
+## How It Works
+
+1. **Loop through image captures**: The method iterates up to `maxImages` times
+2. **Get new island**: Calls `getNewIsland.getIsland()` to navigate to a new island
+3. **Ensure region is ready**: Checks that the capture region can be calculated
+4. **Capture the image**: Uses the declarative region to capture the island
+5. **Save (simulated)**: Logs where the image would be saved
+
+## Run 'saveImages' from the Main Application
+
+After initializing the states in your main application class, you can run the image capture:
 
 ```java
-// get and save labeled images
-SaveLabeledImages saveLabeledImages = context.getBean(SaveLabeledImages.class);
-saveLabeledImages.saveImages(100);
+@Component
+public class TutorialRunner implements CommandLineRunner {
+    
+    @Autowired
+    private SaveLabeledImages saveLabeledImages;
+    
+    @Override
+    public void run(String... args) throws Exception {
+        // Save up to 100 labeled images
+        saveLabeledImages.saveImages(100);
+    }
+}
 ```
 
-That's it! Now your demo application should be ready to go. Run it to see the 
-mock output in your console. 
+## Benefits of the Declarative Approach
+
+With the declarative region definition in `IslandState`, the capture region:
+- Automatically adjusts based on the search button's location
+- Handles different screen sizes and resolutions
+- Reduces manual region calculations
+- Makes the code more maintainable
+
+That's it! Your application can now capture and label images based on dynamic UI elements.

@@ -22,7 +22,7 @@ public class FailurePattern {
     
     // Actions this failure cascades to
     @Builder.Default
-    private java.util.Map<io.github.jspinak.brobot.action.internal.options.ActionOptions.Action, Double> cascadesToActions = new java.util.HashMap<>();
+    private java.util.Map<io.github.jspinak.brobot.action.ActionType, Double> cascadesToActions = new java.util.HashMap<>();
     
     // Recovery delay
     private Duration recoveryDelay;

@@ -1,5 +1,5 @@
 ---
-sidebar_position: 7
+sidebar_position: 4
 ---
 
 # States
@@ -11,6 +11,8 @@ States in Brobot represent distinct screens or UI contexts in your application. 
 The `@State` annotation automatically registers your state with Brobot's state management system:
 
 ```java
+import io.github.jspinak.brobot.tools.testing.data.ActionRecordTestUtils;
+
 @State(initial = true)  // Marks this as the initial state
 @Component
 @Getter
@@ -23,12 +25,12 @@ public class HomeState {
         // Define UI elements with fluent builder pattern
         toWorldButton = new StateImage.Builder()
             .addPatterns("toWorldButton")
-            .setFixed(true)  // Won't change position
+            // .setFixed(true)  // Method doesn't exist in current API
             .build();
             
         searchButton = new StateImage.Builder()
             .addPatterns("searchButton")
-            .setSearchRegion(new Region(0, 0, 500, 100))  // Top area only
+            .setSearchRegionForAllPatterns(new Region(0, 0, 500, 100))  // Top area only
             .build();
             
         // Initialize with action history for mock testing
@@ -36,26 +38,13 @@ public class HomeState {
     }
     
     private void initializeActionHistory() {
-        // Add mock action records for testing
-        toWorldButton.getPatterns().get(0).getActionHistory()
-            .addSnapshot(createActionRecord(0.95, 220, 600, 20, 20));
+        // Add mock action records for testing using the utility class
+        // TODO: ActionHistory API needs to be updated for current version
+        // toWorldButton.getPatterns().get(0).getActionHistory()
+        //     .addSnapshot(ActionRecordTestUtils.createActionRecord(0.95, 220, 600, 20, 20));
             
-        searchButton.getPatterns().get(0).getActionHistory()
-            .addSnapshot(createActionRecord(0.92, 250, 50, 100, 30));
-    }
-    
-    private ActionRecord createActionRecord(double similarity, int x, int y, int w, int h) {
-        return new ActionRecord.Builder()
-            .setActionConfig(new PatternFindOptions.Builder()
-                .setStrategy(PatternFindOptions.Strategy.BEST)
-                .setSimilarity(similarity)
-                .build())
-            .addMatch(new Match.Builder()
-                .setRegion(x, y, w, h)
-                .setSimScore(similarity)
-                .build())
-            .setActionSuccess(true)
-            .build();
+        // searchButton.getPatterns().get(0).getActionHistory()
+        //     .addSnapshot(ActionRecordTestUtils.createActionRecord(0.92, 250, 50, 100, 30));
     }
 }
 ```
@@ -91,8 +80,8 @@ Use the fluent builder pattern with modern configuration:
 ```java
 StateImage island = new StateImage.Builder()
     .addPatterns("island_farm", "island_mine")  // Multiple patterns
-    .setFixed(false)  // Can appear anywhere
-    .setSearchRegion(new Region(100, 100, 800, 600))
+    // .setFixed(false)  // Method doesn't exist in current API
+    .setSearchRegionForAllPatterns(new Region(100, 100, 800, 600))
     .build();
 
 // Add action history for testing (optional)
@@ -130,8 +119,8 @@ public class WorldState {
     public WorldState() {
         minimap = new StateImage.Builder()
             .addPatterns("minimap")
-            .setFixed(true)
-            .setSearchRegion(new Region(900, 0, 124, 124))
+            // .setFixed(true)  // Method doesn't exist in current API
+            .setSearchRegionForAllPatterns(new Region(900, 0, 124, 124))
             .build();
             
         castle = new StateImage.Builder()
@@ -201,8 +190,8 @@ Mark UI elements that don't move as fixed for faster matching:
 ```java
 StateImage logo = new StateImage.Builder()
     .addPatterns("company_logo")
-    .setFixed(true)  // Always in same position
-    .setSearchRegion(new Region(10, 10, 100, 50))
+    // .setFixed(true)  // Method doesn't exist in current API - Always in same position
+    .setSearchRegionForAllPatterns(new Region(10, 10, 100, 50))
     .build();
 ```
 
@@ -211,7 +200,7 @@ Constrain searches to improve performance:
 ```java
 StateImage submitButton = new StateImage.Builder()
     .addPatterns("submit")
-    .setSearchRegion(new Region(0, 500, 1024, 268))  // Bottom area only
+    .setSearchRegionForAllPatterns(new Region(0, 500, 1024, 268))  // Bottom area only
     .build();
 ```
 
@@ -222,7 +211,7 @@ For image-based UI elements:
 ```java
 StateImage button = new StateImage.Builder()
     .addPatterns("button.png")
-    .setSearchRegion(region)
+    .setSearchRegionForAllPatterns(region)
     .build();
 
 // Optionally add action history for mock testing
@@ -271,6 +260,8 @@ StateString username = new StateString.Builder()
 For integration testing, you can initialize states with ActionRecords that provide mock data:
 
 ```java
+import io.github.jspinak.brobot.tools.testing.data.ActionRecordTestUtils;
+
 @State
 @Component
 @Getter
@@ -290,34 +281,10 @@ public class TestableState {
         Pattern pattern = element.getPatterns().get(0);
         ActionHistory history = pattern.getActionHistory();
         
-        // Add multiple snapshots for varied test outcomes
-        history.addSnapshot(createSuccessRecord(0.98, 100, 200));
-        history.addSnapshot(createSuccessRecord(0.95, 102, 201));
-        history.addSnapshot(createFailureRecord());
-    }
-    
-    private ActionRecord createSuccessRecord(double similarity, int x, int y) {
-        return new ActionRecord.Builder()
-            .setActionConfig(new PatternFindOptions.Builder()
-                .setStrategy(PatternFindOptions.Strategy.BEST)
-                .setSimilarity(0.85)
-                .build())
-            .addMatch(new Match.Builder()
-                .setRegion(x, y, 80, 30)
-                .setSimScore(similarity)
-                .build())
-            .setActionSuccess(true)
-            .build();
-    }
-    
-    private ActionRecord createFailureRecord() {
-        return new ActionRecord.Builder()
-            .setActionConfig(new PatternFindOptions.Builder()
-                .setStrategy(PatternFindOptions.Strategy.BEST)
-                .setSimilarity(0.85)
-                .build())
-            .setActionSuccess(false)
-            .build();
+        // Add multiple snapshots for varied test outcomes using the utility class
+        history.addSnapshot(ActionRecordTestUtils.createSuccessRecord(0.98, 100, 200));
+        history.addSnapshot(ActionRecordTestUtils.createSuccessRecord(0.95, 102, 201));
+        history.addSnapshot(ActionRecordTestUtils.createFailureRecord());
     }
 }
 ```
@@ -366,20 +333,20 @@ public class MainMenuState {
         
         playButton = new StateImage.Builder()
             .addPatterns("play_button", "play_button_hover")
-            .setFixed(true)
-            .setSearchRegion(new Region(400, 300, 224, 80))
+            // .setFixed(true)  // Method doesn't exist in current API
+            .setSearchRegionForAllPatterns(new Region(400, 300, 224, 80))
             .build();
             
         settingsButton = new StateImage.Builder()
             .addPatterns("settings_icon")
-            .setFixed(true)
-            .setSearchRegion(new Region(950, 10, 64, 64))
+            // .setFixed(true)  // Method doesn't exist in current API
+            .setSearchRegionForAllPatterns(new Region(950, 10, 64, 64))
             .build();
             
         exitButton = new StateImage.Builder()
             .addPatterns("exit_button")
-            .setFixed(true)
-            .setSearchRegion(new Region(400, 500, 224, 80))
+            // .setFixed(true)  // Method doesn't exist in current API
+            .setSearchRegionForAllPatterns(new Region(400, 500, 224, 80))
             .build();
             
         menuArea = new StateRegion.Builder()

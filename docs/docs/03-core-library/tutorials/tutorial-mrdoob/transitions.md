@@ -15,7 +15,18 @@ Here are the transition classes:
 ## Homepage to Harmony Transition
 
 ```java
+package com.example.mrdoob.transitions;
+
+import io.github.jspinak.brobot.annotations.Transition;
+import io.github.jspinak.brobot.action.Action;
+import com.example.mrdoob.states.Homepage;
+import com.example.mrdoob.states.Harmony;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
+
 @Transition(from = Homepage.class, to = Harmony.class)
+@Component
 @RequiredArgsConstructor
 @Slf4j
 public class HomepageToHarmonyTransition {
@@ -25,7 +36,7 @@ public class HomepageToHarmonyTransition {
     
     public boolean execute() {
         log.info("Transitioning from Homepage to Harmony");
-        return action.perform(CLICK, homepage.getHarmony()).isSuccess();
+        return action.click(homepage.getHarmony()).isSuccess();
     }
 }
 ```
@@ -33,7 +44,18 @@ public class HomepageToHarmonyTransition {
 ## Harmony to About Transition
 
 ```java
+package com.example.mrdoob.transitions;
+
+import io.github.jspinak.brobot.annotations.Transition;
+import io.github.jspinak.brobot.action.Action;
+import com.example.mrdoob.states.Harmony;
+import com.example.mrdoob.states.About;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
+
 @Transition(from = Harmony.class, to = About.class)
+@Component
 @RequiredArgsConstructor
 @Slf4j
 public class HarmonyToAboutTransition {
@@ -43,7 +65,7 @@ public class HarmonyToAboutTransition {
     
     public boolean execute() {
         log.info("Transitioning from Harmony to About");
-        return action.perform(CLICK, harmony.getAbout()).isSuccess();
+        return action.click(harmony.getAbout()).isSuccess();
     }
 }
 ```
@@ -75,12 +97,13 @@ public class HomepageTransitions {
 ### After (Automatic Registration)
 ```java
 @Transition(from = Homepage.class, to = Harmony.class)
+@Component
 @RequiredArgsConstructor
 @Slf4j
 public class HomepageToHarmonyTransition {
     public boolean execute() {
         // Just implement the transition logic
-        return action.perform(CLICK, homepage.getHarmony()).isSuccess();
+        return action.click(homepage.getHarmony()).isSuccess();
     }
 }
 ```
@@ -139,6 +162,7 @@ public class SearchTransition {
 1. Use these standard annotations:
    ```java
    @Transition(from = X.class, to = Y.class)
+   @Component               // Spring component registration
    @RequiredArgsConstructor  // For dependency injection
    @Slf4j                   // For logging
    ```

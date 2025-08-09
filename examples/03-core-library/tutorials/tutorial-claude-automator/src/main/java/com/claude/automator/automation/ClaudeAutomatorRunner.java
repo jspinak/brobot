@@ -1,7 +1,7 @@
-package com.example.claudeautomator.automation;
+package com.claude.automator.automation;
 
-import com.example.claudeautomator.states.PromptState;
-import com.example.claudeautomator.states.WorkingState;
+import com.claude.automator.states.PromptState;
+import com.claude.automator.states.WorkingState;
 import io.github.jspinak.brobot.action.Action;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;

@@ -1,6 +1,6 @@
 package com.example.basics.automation;
 
-import io.github.jspinak.brobot.navigation.transition.StateTransitions;
+import io.github.jspinak.brobot.navigation.transition.StateNavigator;
 import org.springframework.stereotype.Component;
 import lombok.extern.slf4j.Slf4j;
 
@@ -10,14 +10,14 @@ import static com.example.basics.StateNames.ISLAND;
 @Component
 public class SaveLabeledImages {
     
-    private StateTransitions stateTransitions;
+    private StateNavigator stateNavigator;
     private GetNewIsland getNewIsland;
     private IslandRegion islandRegion;
     
-    public SaveLabeledImages(StateTransitions stateTransitions,
+    public SaveLabeledImages(StateNavigator stateNavigator,
                              GetNewIsland getNewIsland,
                              IslandRegion islandRegion) {
-        this.stateTransitions = stateTransitions;
+        this.stateNavigator = stateNavigator;
         this.getNewIsland = getNewIsland;
         this.islandRegion = islandRegion;
     }
@@ -25,12 +25,15 @@ public class SaveLabeledImages {
     public void saveImages(int maxImages) {
         String directory = "labeledImages/";
         // Navigate to ISLAND state
+        stateNavigator.openState(ISLAND);
         for (int i=0; i<maxImages; i++) {
             String newIslandType = getNewIsland.getIsland();
             log.info("text = {}", newIslandType);
-            if (!newIslandType.isEmpty() && islandRegion.defined()) {
-                // In a real implementation, you would save the region to file here
-                log.info("Would save region to: {}{}", directory, newIslandType);
+            if (!newIslandType.isEmpty() && islandRegion.ensureRegionReady()) {
+                // Capture the island image using the declarative region
+                islandRegion.captureIsland();
+                // In a real implementation, you would save the captured image to file here
+                log.info("Would save captured island to: {}{}", directory, newIslandType);
             }
         }
     }

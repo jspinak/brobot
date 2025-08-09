@@ -89,9 +89,9 @@ Demonstrates strategies for high-volume operations:
 **Adaptive Sampling:**
 ```java
 .adaptiveSampling(true)
-.samplingRate(ActionOptions.Action.MOVE, 0.1)   // Sample 10% of moves
-.samplingRate(ActionOptions.Action.FIND, 0.5)   // Sample 50% of finds
-.samplingRate(ActionOptions.Action.CLICK, 0.8)  // Sample 80% of clicks
+.samplingRate(ActionType.MOVE, 0.1)   // Sample 10% of moves
+.samplingRate(ActionType.FIND, 0.5)   // Sample 50% of finds
+.samplingRate(ActionType.CLICK, 0.8)  // Sample 80% of clicks
 ```
 
 **System-Aware Decisions:**
@@ -239,10 +239,11 @@ metrics.getIllustrationsBatched()      // Number batched for efficiency
 The system works seamlessly with both legacy and new action configurations:
 
 ```java
-// Legacy ActionOptions
-ActionOptions options = new ActionOptions.Builder()
-    .setAction(ActionOptions.Action.FIND)
-    .setIllustrate(ActionOptions.Illustrate.YES)
+// Legacy ActionOptions (deprecated)
+// The ActionOptions class has been deprecated.
+// Use ActionConfig with illustration settings instead:
+PatternFindOptions findOptions = new PatternFindOptions.Builder()
+    .setIllustrate(IllustrateMode.YES)
     .build();
 
 // New ActionConfig

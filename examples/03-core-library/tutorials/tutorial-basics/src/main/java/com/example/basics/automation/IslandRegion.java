@@ -1,13 +1,21 @@
 package com.example.basics.automation;
 
 import io.github.jspinak.brobot.action.Action;
+import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
 import io.github.jspinak.brobot.action.ObjectCollection;
-import io.github.jspinak.brobot.model.element.Region;
 import com.example.basics.states.WorldState;
 import com.example.basics.states.IslandState;
 import org.springframework.stereotype.Component;
 
+/**
+ * Demonstrates declarative region definition.
+ * 
+ * With the new declarative approach using SearchRegionOnObject,
+ * we no longer need manual region calculations. The island capture
+ * region is automatically calculated relative to the search button's
+ * location whenever it's found.
+ */
 @Component
 public class IslandRegion {
     
@@ -21,19 +29,44 @@ public class IslandRegion {
         this.island = island;
     }
     
-    public boolean defined() {
-        if (island.getIslandRegion().defined()) return true;
+    /**
+     * Ensure the search button has been found so the island capture region
+     * can be calculated relative to it.
+     * 
+     * @return true if the search button was found and the region is ready
+     */
+    public boolean ensureRegionReady() {
+        // Find the search button to establish the reference point
         PatternFindOptions findOptions = new PatternFindOptions.Builder()
                 .build();
         ObjectCollection searchButton = new ObjectCollection.Builder()
                 .withImages(world.getSearchButton())
                 .build();
-        // In modern Brobot, region definition is handled differently
-        // For now, just return if the region is defined
-        return island.getIslandRegion().defined();
+        
+        ActionResult result = action.perform(findOptions, searchButton);
+        
+        // If the search button is found, the island capture region
+        // will automatically be updated relative to its location
+        return result.isSuccess();
     }
     
-    public Region getRegion() {
-        return island.getIslandRegion().getSearchRegion();
+    /**
+     * Capture an image of the island using the dynamically calculated region.
+     * The region is automatically positioned relative to the search button.
+     * 
+     * @return ActionResult containing the captured image
+     */
+    public ActionResult captureIsland() {
+        // The search region for islandCapture is automatically calculated
+        // relative to the search button's last known location
+        PatternFindOptions captureOptions = new PatternFindOptions.Builder()
+                .setCaptureImage(true)
+                .build();
+        
+        ObjectCollection islandCapture = new ObjectCollection.Builder()
+                .withImages(island.getIslandCapture())
+                .build();
+        
+        return action.perform(captureOptions, islandCapture);
     }
 }

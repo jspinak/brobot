@@ -406,9 +406,9 @@ public void processItems(List<StateImage> items) {
 [View migration guide](./12-migration-guide.md)
 
 ```java
-// Before (ActionOptions)
+// Before (ActionOptions) - DEPRECATED
 ActionOptions old = new ActionOptions.Builder()
-    .setAction(ActionOptions.Action.CLICK)
+    .setAction(ActionType.CLICK)
     .setPauseAfterEnd(0.5)
     .build();
 

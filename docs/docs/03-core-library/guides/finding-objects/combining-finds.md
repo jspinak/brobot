@@ -7,6 +7,13 @@ sidebar_position: 2
 Combining multiple find operations in the same Action can give us better results.
 With the new ActionChainOptions, you can create nested or confirmed find operations.
 
+## Related Documentation
+
+- **[ActionConfig Factory](../action-config-factory.md)** - Learn about creating and managing action configurations
+- **[Conditional Action Chaining](/docs/ai-brobot-project-creation#conditionalactionchain---the-foundation)** - Build complex conditional execution flows
+- **[AI Project Creation Guide](/docs/ai-brobot-project-creation#when-to-use-actionchainbuilder-vs-then)** - Comprehensive action chaining patterns
+- **[ConditionalActionChain Example](https://github.com/jspinak/brobot/tree/main/examples/03-core-library/action-config/conditional-chains-examples)** - Complete implementation example
+
 Combining find methods can give us more accurate matches in scenarios where the 
 form and color of an object are not unique. Take the example below, where we are looking
 for the yellow bars above the kobolds (the top-left bar has blue circles on it). 

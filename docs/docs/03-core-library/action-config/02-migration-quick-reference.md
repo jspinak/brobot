@@ -12,8 +12,8 @@ This guide helps you migrate your existing Brobot automation code from `ActionOp
 
 ### Action Type Mapping
 
-| ActionOptions.Action | New ActionConfig Class |
-|---------------------|------------------------|
+| ActionType (replaces ActionOptions.Action) | New ActionConfig Class |
+|--------------------------------------------|------------------------|
 | `FIND` | `PatternFindOptions`, `BaseFindOptions` |
 | `CLICK` | `ClickOptions` |
 | `TYPE` | `TypeOptions` |
@@ -43,8 +43,9 @@ This guide helps you migrate your existing Brobot automation code from `ActionOp
 
 #### Before (ActionOptions)
 ```java
+// DEPRECATED - ActionOptions class is deprecated
 ActionOptions findOptions = new ActionOptions.Builder()
-    .setAction(ActionOptions.Action.FIND)
+    .setAction(ActionType.FIND)
     .setSimilarity(0.8)
     .setSearchRegions(searchRegions)
     .build();
@@ -66,8 +67,9 @@ action.perform(findOptions, stateImage);
 
 #### Before
 ```java
+// DEPRECATED - ActionOptions class is deprecated
 ActionOptions clickOptions = new ActionOptions.Builder()
-    .setAction(ActionOptions.Action.CLICK)
+    .setAction(ActionType.CLICK)
     .setClickType(ActionOptions.ClickType.DOUBLE_LEFT)
     .setPauseBeforeMouseDown(0.5)
     .build();
@@ -88,8 +90,9 @@ ClickOptions clickOptions = new ClickOptions.Builder()
 
 #### Before
 ```java
+// DEPRECATED - ActionOptions class is deprecated
 ActionOptions typeOptions = new ActionOptions.Builder()
-    .setAction(ActionOptions.Action.TYPE)
+    .setAction(ActionType.TYPE)
     .setTextToType("Hello World")
     .setModifierKeys(new String[]{"ctrl", "a"})
     .build();
@@ -107,8 +110,9 @@ TypeOptions typeOptions = new TypeOptions.Builder()
 
 #### Before
 ```java
+// DEPRECATED - ActionOptions class is deprecated
 ActionOptions dragOptions = new ActionOptions.Builder()
-    .setAction(ActionOptions.Action.DRAG)
+    .setAction(ActionType.DRAG)
     .setDragToOffsetX(100)
     .setDragToOffsetY(50)
     .build();
@@ -185,11 +189,12 @@ Movement movement = result.getMovement().orElse(null);
 
 Replace:
 ```java
-import io.github.jspinak.brobot.action.ActionOptions;
+import io.github.jspinak.brobot.action.ActionOptions; // DEPRECATED
 ```
 
 With specific imports:
 ```java
+import io.github.jspinak.brobot.action.ActionType; // For ActionType enum
 import io.github.jspinak.brobot.action.basic.click.ClickOptions;
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
 import io.github.jspinak.brobot.action.basic.type.TypeOptions;
@@ -202,7 +207,7 @@ Find all `new ActionOptions.Builder()` and replace with specific builders:
 
 ```java
 // Find all instances of:
-new ActionOptions.Builder().setAction(ActionOptions.Action.CLICK)
+new ActionOptions.Builder().setAction(ActionType.CLICK)
 
 // Replace with:
 new ClickOptions.Builder()
@@ -221,8 +226,9 @@ Wait is no longer an action. Use conditions or pauses:
 
 ```java
 // Before
+// DEPRECATED - ActionOptions class is deprecated
 ActionOptions wait = new ActionOptions.Builder()
-    .setAction(ActionOptions.Action.WAIT)
+    .setAction(ActionType.WAIT)
     .setMaxWait(5)
     .build();
 

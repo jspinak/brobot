@@ -6,6 +6,8 @@ import io.github.jspinak.brobot.action.Action;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.annotations.Transition;
 import io.github.jspinak.brobot.action.ConditionalActionChain;
+import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
+import io.github.jspinak.brobot.action.ObjectCollection;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -28,20 +30,35 @@ public class HomeToWorldAdvancedTransition {
      * Execute the transition with robust error handling
      */
     public boolean execute() {
-        log.info("Starting advanced Home to World transition");
+        log.info("Starting game from main menu");
         
-        // Simplified version - ConditionalActionChain API has changed
-        ActionResult result = action.click(homeState.getToWorldButton());
-        
-        if (!result.isSuccess()) {
-            log.warn("Primary to-world button not found, trying search button");
-            result = action.click(homeState.getSearchButton());
+        try {
+            // First try to click the to-world button
+            ActionResult clickResult = action.click(homeState.getToWorldButton());
+            
+            if (!clickResult.isSuccess()) {
+                log.warn("To-world button not found, trying alternative");
+                clickResult = action.click(homeState.getSearchButton());
+                
+                if (!clickResult.isSuccess()) {
+                    log.error("Neither button could be clicked");
+                    return false;
+                }
+            }
+            
+            // Wait for world state to load (using findWithTimeout instead of waitFor)
+            ActionResult waitResult = action.findWithTimeout(10.0, worldState.getMinimap());
+            
+            if (!waitResult.isSuccess()) {
+                log.error("World state did not load");
+                return false;
+            }
+            
+            return true;
+            
+        } catch (Exception e) {
+            log.error("Transition failed with exception: ", e);
+            return false;
         }
-        
-        if (!result.isSuccess()) {
-            log.error("World state not reached");
-        }
-        
-        return result.isSuccess();
     }
 }

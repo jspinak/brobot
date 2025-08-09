@@ -69,7 +69,7 @@ FailurePattern slowClicks = FailurePattern.builder()
     .failureRate(0.3)
     .delayBeforeFailure(Duration.ofSeconds(2))
     .cascadesToActions(Map.of(
-        ActionOptions.Action.TYPE, 0.5
+        ActionType.TYPE, 0.5
     ))
     .build();
 ```
@@ -81,20 +81,20 @@ Verify complex action sequences and behaviors:
 ```java
 // Verify action sequences
 behaviorVerifier.expectActionSequence(Arrays.asList(
-    ActionOptions.Action.CLICK,
-    ActionOptions.Action.TYPE,
-    ActionOptions.Action.CLICK
+    ActionType.CLICK,
+    ActionType.TYPE,
+    ActionType.CLICK
 )).within(Duration.ofSeconds(10));
 
 // Verify timing constraints
-behaviorVerifier.expectActionTiming(ActionOptions.Action.CLICK)
+behaviorVerifier.expectActionTiming(ActionType.CLICK)
     .maxDuration(Duration.ofMillis(500))
     .forNextActions(3);
 
 // Verify conditional behaviors
 behaviorVerifier.expectConditionalBehavior()
     .when(() -> clickCount.get() < 3)
-    .thenExpect(ActionOptions.Action.CLICK)
+    .thenExpect(ActionType.CLICK)
     .toSucceed();
 ```
 
@@ -192,7 +192,7 @@ Verify that your automation properly recovers from failures:
 
 ```java
 behaviorVerifier.expectRecoveryBehavior()
-    .afterFailureOf(ActionOptions.Action.CLICK)
+    .afterFailureOf(ActionType.CLICK)
     .expectRetryWithin(Duration.ofSeconds(2))
     .maxRetries(3);
 ```

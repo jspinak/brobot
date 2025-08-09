@@ -87,6 +87,12 @@
        // State definition
    }
    ```
+   
+   **Important Naming Convention:**
+   - Classes with `@State` annotation are registered with the "State" suffix removed
+   - Example: `WorldState` class is registered as `"World"`
+   - Example: `HomeState` class is registered as `"Home"`
+   - When referencing states (e.g., in `targetStateName`), use the name without "State"
 
    ### Traditional State Pattern (Without @State)
    
@@ -352,16 +358,47 @@
    ```
    
    **Key Differences:**
-   - **ActionChainBuilder** → Creates ActionChainOptions with full chain control
-   - **.then()** → Creates a simple subsequent action list (convenience method)
-   - **ActionChainBuilder** → Supports chain-wide configuration and strategies
-   - **.then()** → Inherits Action's default sequential execution behavior
+   - **ActionChainBuilder**:
+     - Creates ActionChainOptions with full chain control
+     - Supports chain-wide configuration and strategies (NESTED, CONFIRM)
+     - Best for complex multi-action sequences requiring precise control
+   - **.then() method**:
+     - Creates a simple subsequent action list (convenience method)
+     - Inherits the parent action's default sequential execution behavior
+     - Best for simple 2-3 step sequences without special requirements
    
    **Rule of Thumb:** Start with .then() for simple cases. Switch to ActionChainBuilder when you need more control or have 3+ actions.
    
+   ### ConditionalActionChain - The Foundation
+   
+   **ConditionalActionChain provides the core fluent API for building complex action sequences with conditional execution:**
+   
+   Located in the examples at `examples/03-core-library/action-config/conditional-chains-examples/`, this class demonstrates the patterns for building conditional action sequences that handle different UI states and conditions.
+   
+   ```java
+   import io.github.jspinak.brobot.model.conditional.ConditionalActionChain;
+   
+   // Basic usage pattern
+   ConditionalActionChain
+       .find(loginButton)           // Start with find
+       .ifFound(clickOptions)        // Execute if found
+       .ifNotFoundLog("Not found")   // Log if not found
+       .then(usernameField)          // Continue to next element
+       .ifFoundType("username")      // Type if found
+       .perform(action, objectCollection);
+   ```
+   
+   **Key Methods:**
+   - **Starting methods**: `find()`, `start()` - Begin a chain
+   - **Conditional methods**: `ifFound()`, `ifNotFound()`, `ifFoundDo()`, `ifNotFoundDo()`
+   - **Sequential methods**: `then()`, `always()` - Continue the chain
+   - **Action methods**: `click()`, `type()`, `clearAndType()`, `highlight()`
+   - **Control methods**: `stopChain()`, `throwError()`, `wait()`
+   - **Utility methods**: `takeScreenshot()`, `log()`, `logAction()`
+   
    ### EnhancedConditionalActionChain - The Most Elegant Approach
    
-   **EnhancedConditionalActionChain provides the cleanest API for conditional execution flows with proper sequential composition:**
+   **EnhancedConditionalActionChain extends ConditionalActionChain with additional convenience methods and better sequential composition:**
    
    ```java
    // Basic pattern: find → if found do X → if not found do Y
@@ -472,6 +509,129 @@
    - **Known coordinates** - Use `action.perform(ActionType.CLICK, location)`
    - **Simple unconditional actions** - Use convenience methods
    - **Performance-critical loops** - Use traditional find/action separation
+   
+   ### Real-World ConditionalActionChain Examples
+   
+   **Complex Dialog Handling:**
+   ```java
+   // Handle multi-path dialog with various UI states
+   ConditionalActionChain
+       .find(dialogTitle)
+       .ifNotFoundLog("Dialog not present")
+       .stopChain()  // Exit early if no dialog
+       .then(errorMessage)
+       .ifFoundLog("Error detected")
+       .ifFoundDo(result -> {
+           // Custom error handling logic
+           String error = result.getText().get(0);
+           logger.error("Dialog error: {}", error);
+       })
+       .then(retryButton)
+       .ifFound(new ClickOptions.Builder().build())
+       .ifNotFound(cancelButton)
+       .ifFound(new ClickOptions.Builder().build())
+       .perform(action, objectCollection);
+   ```
+   
+   **Form Validation Flow:**
+   ```java
+   // Validate and submit form with error highlighting
+   ConditionalActionChain
+       .start(validateButton)  // Start without initial find
+       .click()
+       .wait(0.5)  // Allow validation to complete
+       .then(errorFields)
+       .ifFoundDo(result -> {
+           // Highlight all error fields
+           result.getMatchList().forEach(match -> {
+               action.highlight(match.getRegion());
+           });
+       })
+       .highlightErrors()  // Additional error highlighting
+       .ifNotFound(submitButton)  // No errors, submit
+       .ifFoundClick()
+       .logAction()
+       .perform(action, objectCollection);
+   ```
+   
+   **State-Aware Navigation:**
+   ```java
+   // Navigate based on current state
+   ConditionalActionChain
+       .checkPrerequisites()  // Custom prerequisite check
+       .then(homeIcon)
+       .ifFound(new ClickOptions.Builder().build())
+       .waitVanish(loadingSpinner)  // Wait for load
+       .then(navigationMenu)
+       .ifNotFoundLog("Menu not accessible")
+       .throwError("Navigation failed")
+       .ifFound(menuItems)
+       .analyzeItem()  // Analyze menu structure
+       .processItemDialog()  // Handle item selection
+       .cleanupResources()  // Cleanup after navigation
+       .perform(action, objectCollection);
+   ```
+   
+   **Document Processing:**
+   ```java
+   // Process documents with different handlers
+   ConditionalActionChain
+       .find(documentIcon)
+       .ifFoundDo(result -> {
+           // Determine document type
+           String docType = analyzeDocumentType(result);
+           context.put("docType", docType);
+       })
+       .then(pdfIcon)
+       .ifFound(openDocument())  // PDF handler
+       .ifNotFound(imageIcon)
+       .ifFound(viewImage())     // Image handler
+       .ifNotFound(textIcon)
+       .ifFound(openDocument())  // Text handler
+       .always(showProperties()) // Always show properties
+       .perform(action, objectCollection);
+   ```
+   
+   **Keyboard Navigation Example:**
+   ```java
+   // Navigate using keyboard shortcuts
+   ConditionalActionChain
+       .find(textEditor)
+       .ifFoundClick()
+       .pressCtrlA()      // Select all
+       .pressDelete()     // Clear
+       .type("New content")
+       .pressCtrlS()      // Save
+       .handleConfirmation()  // Handle save dialog
+       .perform(action, objectCollection);
+   ```
+   
+   **Checkbox and Toggle Handling:**
+   ```java
+   // Smart checkbox handling
+   ConditionalActionChain
+       .find(checkbox)
+       .clickIfNotChecked()  // Only click if unchecked
+       .then(relatedOption)
+       .ifFoundLog("Related option appeared")
+       .validateFields()  // Validate dependent fields
+       .perform(action, objectCollection);
+   ```
+   
+   **Region-Based Actions:**
+   ```java
+   // Work with specific regions
+   Region searchArea = new Region(100, 100, 400, 300);
+   Region clickArea = new Region(150, 150, 50, 30);
+   
+   ConditionalActionChain
+       .find(new PatternFindOptions.Builder()
+           .setSearchRegion(searchArea)
+           .build())
+       .ifFound(highlightRegion(searchArea))
+       .clickRegion(clickArea)
+       .perform(action, objectCollection);
+   ```
    
    **ConditionalActionWrapper for Spring Applications:**
    
@@ -1399,7 +1559,21 @@ brobot:
     seed: 12345
 ```
 
-**Note**: ActionHistory persistence is handled by the Brobot Runner application, not the library. To use recorded data in tests:
+**ActionHistory Persistence Options**:
+
+1. **In Java Projects (Library-based)**:
+   - Use `ActionHistoryJsonConverter` from the library for serialize/deserialize
+   - Implement your own persistence layer (as shown above)
+   - Full control over when and how to save histories
+   - Best for: Custom automation projects, integration tests
+
+2. **In Brobot Runner Application**:
+   - Automatic recording during execution
+   - GUI for viewing and managing histories
+   - Export/import functionality built-in
+   - Best for: Interactive development, visual debugging
+
+To use recorded data from the Runner in your Java tests:
 
 1. **Record sessions** in the Runner during live automation
 2. **Export sessions** as JSON files from the Runner UI
@@ -1513,65 +1687,211 @@ public class StateAwareActionHistory {
 }
 ```
 
-### Loading ActionHistory from Files
+### Saving and Loading ActionHistory in Java Projects
+
+The Brobot library now includes comprehensive ActionHistory utilities in the `io.github.jspinak.brobot.tools.actionhistory` package:
+
+#### Built-in Library Classes
+
+**ActionHistoryPersistence** - Core persistence functionality:
+```java
+import io.github.jspinak.brobot.tools.actionhistory.ActionHistoryPersistence;
+import io.github.jspinak.brobot.model.action.ActionHistory;
+import io.github.jspinak.brobot.model.element.Pattern;
+
+@Autowired
+private ActionHistoryPersistence persistence;
+
+// Save ActionHistory to JSON
+persistence.saveToFile(history, "my-history.json");
+
+// Load ActionHistory from JSON
+ActionHistory loaded = persistence.loadFromFile("my-history.json");
+
+// Save from Pattern with session metadata
+persistence.saveSessionHistory(pattern, "session-name");
+
+// Capture current execution
+persistence.captureCurrentExecution(result, pattern, config);
+
+// Batch load multiple histories
+Map<String, ActionHistory> histories = persistence.loadAllHistories();
+
+// Clean old history files
+int deleted = persistence.cleanOldHistories("histories", 30); // Keep 30 days
+```
+
+**RecordingActionWrapper** - Automatic recording during execution:
+```java
+import io.github.jspinak.brobot.tools.actionhistory.RecordingActionWrapper;
+
+@Autowired
+private RecordingActionWrapper recorder;
+
+// Start recording session
+recorder.startSession("test-session");
+
+// Actions are automatically recorded
+ActionResult result = recorder.find(stateImage);
+result = recorder.click(stateImage);
+
+// End session and save all histories
+recorder.endSession("test-session", patterns);
+
+// Get recording statistics
+Map<String, Integer> stats = recorder.getRecordingStatistics();
+```
+
+**ActionHistoryExporter** - Export to various formats:
+```java
+import io.github.jspinak.brobot.tools.actionhistory.ActionHistoryExporter;
+
+@Autowired
+private ActionHistoryExporter exporter;
+
+// Export to CSV
+exporter.exportToCSV(history, "report.csv");
+
+// Export to HTML with visualizations
+exporter.exportToHTML(history, "report.html");
+
+// Generate summary statistics
+Map<String, Object> summary = exporter.generateSummary(history);
+
+// Filter and export
+ActionHistory filtered = exporter.filterHistory(history, 
+    true, // successOnly
+    0,    // minDuration
+    5000  // maxDuration
+);
+
+// Batch export multiple histories
+exporter.batchExport(histories, "combined.html", ExportFormat.HTML);
+```
+
+**PerformanceValidator** - Validate performance characteristics:
+```java
+import io.github.jspinak.brobot.tools.actionhistory.PerformanceValidator;
+
+@Autowired
+private PerformanceValidator validator;
+
+// Validate with default thresholds
+ValidationResult result = validator.validate(history);
+if (!result.isValid()) {
+    log.error("Performance issues: {}", result.getErrors());
+}
+
+// Custom validation config
+ValidationConfig config = ValidationConfig.getDefault()
+    .withMinSuccessRate(90.0)
+    .withMaxAverageDuration(1000);
+ValidationResult custom = validator.validate(history, config);
+
+// Compare baseline vs current
+ComparisonResult comparison = validator.compare(baselineHistory, currentHistory);
+if (comparison.isRegression()) {
+    log.warn("Performance regression detected: {}", comparison.getIssues());
+}
+```
+
+### Recording ActionHistory During Live Automation
+
+The library's `RecordingActionWrapper` class automatically captures ActionHistory during automation runs. Use it in your transitions and actions:
 
 ```java
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.github.jspinak.brobot.tools.migration.ActionHistoryJsonConverter;
-
-@Component
-public class ActionHistoryLoader {
+// Use in transitions
+@Transition(from = HomeState.class, to = WorldState.class)
+@RequiredArgsConstructor
+public class RecordedTransition {
     
     @Autowired
-    private ActionHistoryJsonConverter jsonConverter;
+    private RecordingActionWrapper recorder;
+    private final HomeState homeState;
     
-    public ActionHistory loadFromFile(String filename) throws IOException {
-        Path path = Path.of("src/test/resources/histories", filename);
-        String json = Files.readString(path);
+    public boolean execute() {
+        // Start recording session
+        recorder.startSession("transition-session");
         
-        // Automatically migrates legacy format if needed
-        return jsonConverter.deserialize(json);
+        // All actions are automatically recorded
+        ActionResult result = recorder.click(homeState.getButton());
+        
+        // End session and save
+        recorder.endSession("transition-session", 
+            Arrays.asList(homeState.getButton().getPatterns()));
+        
+        return result.isSuccess();
     }
+}
+```
+
+### Export/Import Between Projects
+
+Use the library's `ActionHistoryExporter` for sharing histories between projects:
+
+```java
+@Autowired
+private ActionHistoryExporter exporter;
+@Autowired
+private ActionHistoryPersistence persistence;
+
+// Export multiple histories for sharing
+public void exportForProject(String projectName) throws IOException {
+    // Load all histories from the project
+    Map<String, ActionHistory> histories = persistence.loadAllHistories();
     
-    public void saveToFile(ActionHistory history, String filename) 
-            throws IOException {
-        Path path = Path.of("src/test/resources/histories", filename);
-        String json = jsonConverter.serialize(history);
-        Files.writeString(path, json);
-    }
+    // Batch export with metadata
+    exporter.batchExport(histories, 
+        String.format("%s-export.html", projectName),
+        ActionHistoryExporter.ExportFormat.HTML);
     
-    // Batch load for comprehensive testing
-    public Map<String, ActionHistory> loadAllHistories() throws IOException {
-        Map<String, ActionHistory> histories = new HashMap<>();
-        Path dir = Path.of("src/test/resources/histories");
-        
-        Files.list(dir)
-            .filter(p -> p.toString().endsWith(".json"))
-            .forEach(path -> {
-                try {
-                    String name = path.getFileName().toString()
-                        .replace(".json", "");
-                    histories.put(name, loadFromFile(path.getFileName().toString()));
-                } catch (IOException e) {
-                    log.error("Failed to load {}: {}", path, e.getMessage());
-                }
-            });
-        
-        return histories;
+    // Also export as CSV for analysis
+    exporter.batchExport(histories,
+        String.format("%s-export.csv", projectName),
+        ActionHistoryExporter.ExportFormat.CSV);
+    
+    // Generate summary report
+    for (Map.Entry<String, ActionHistory> entry : histories.entrySet()) {
+        Map<String, Object> summary = exporter.generateSummary(entry.getValue());
+        log.info("History {}: {} actions, {:.1f}% success rate", 
+            entry.getKey(), 
+            summary.get("totalActions"),
+            summary.get("successRate"));
     }
 }
 ```
 
 ### Performance Testing with ActionHistory
 
+Use the library's `PerformanceValidator` for comprehensive performance testing:
+
 ```java
-public class PerformanceValidation {
+@Autowired
+private PerformanceValidator validator;
+
+@Test
+public void validateActionPerformance() {
+    ActionHistory performanceHistory = loadPerformanceHistory();
     
-    @Test
-    public void validateActionPerformance() {
-        ActionHistory performanceHistory = createPerformanceHistory();
-        
-        // Analyze timing patterns
+    // Validate with custom thresholds
+    PerformanceValidator.ValidationConfig config = 
+        PerformanceValidator.ValidationConfig.getDefault()
+            .withMinSuccessRate(85.0)
+            .withMaxAverageDuration(1500)
+            .withMaxDuration(3000);
+    
+    PerformanceValidator.ValidationResult result = 
+        validator.validate(performanceHistory, config);
+    
+    // Assert no performance issues
+    assertTrue(result.isValid(), 
+        "Performance issues detected: " + result.getErrors());
+    
+    // Check for anomalies
+    assertEquals(0, result.getAnomalyCount(), 
+        "Anomalies detected: " + result.getAnomalies());
+    
+    // Analyze timing patterns
         DoubleSummaryStatistics stats = performanceHistory.getSnapshots().stream()
             .filter(ActionRecord::isActionSuccess)
             .mapToDouble(ActionRecord::getDuration)
@@ -1623,6 +1943,19 @@ public class PerformanceValidation {
 3. **State-Aware Patterns**: Different states should have different success patterns
 4. **Time-Based Variations**: Model performance changes throughout the day
 5. **Gradual Degradation**: Simulate system degradation over time
+6. **Regular Persistence**: Save histories periodically during long automation runs
+7. **Version Control**: Include history JSON files in test resources for regression testing
+
+### ActionHistory Utility Classes
+
+The Brobot library now includes comprehensive ActionHistory utilities in the `io.github.jspinak.brobot.tools.actionhistory` package:
+
+1. **ActionHistoryPersistence** - Standardized save/load operations with JSON serialization
+2. **RecordingActionWrapper** - Automatic recording during execution with session management
+3. **ActionHistoryExporter** - Export to CSV/HTML formats with summary statistics
+4. **PerformanceValidator** - Performance analysis, anomaly detection, and regression testing
+
+These classes provide production-ready functionality for capturing, persisting, and analyzing automation performance.
 
 ### Migration from Legacy ActionOptions
 
@@ -1647,6 +1980,98 @@ ActionRecord modernRecord = new ActionRecord.Builder()
 
 For detailed migration instructions, see the [ActionHistory Migration Guide](testing/actionhistory-integration-testing).
 
+## Screen-Adaptive Region Building
+
+The Brobot library now includes enhanced `RegionBuilder` with Position integration for creating screen-size aware regions that adapt to different resolutions.
+
+### Position-Based Region Building
+
+The `RegionBuilder` class now integrates with `Position` and `Positions.Name` for intuitive region placement:
+
+```java
+import static io.github.jspinak.brobot.model.element.Positions.Name.*;
+
+// Position a region at 70% width, 30% height of screen
+Region customPos = Region.builder()
+    .withSize(200, 150)
+    .withPosition(new Position(0.7, 0.3))
+    .build();
+
+// Use named positions for quick placement
+Region topRight = Region.builder()
+    .withSize(300, 200)
+    .withPosition(TOPRIGHT)
+    .build();
+
+// Position relative to another region
+Region tooltip = Region.builder()
+    .withSize(200, 50)
+    .positionRelativeTo(dialogRegion, TOPMIDDLE)
+    .adjustY(-10)  // 10px gap above
+    .build();
+
+// Create centered dialog with margins
+Region dialog = Region.builder()
+    .withScreenPercentageSize(0.6, 0.4)  // 60% width, 40% height
+    .centerOnScreen()
+    .build();
+```
+
+### Advanced Positioning Features
+
+```java
+// Custom anchor points
+Region customAnchor = Region.builder()
+    .withSize(100, 100)
+    .withAnchor(new Position(0.75, 0.25))  // Custom anchor at 75% width, 25% height
+    .build();
+
+// Named anchor helpers
+Region bottomCorner = Region.builder()
+    .withSize(120, 40)
+    .bottomRight()
+    .adjustX(-20)  // 20px margin from edges
+    .adjustY(-20)
+    .build();
+
+// Position chains for complex layouts
+Region sidebar = Region.builder()
+    .withScreenPercentageSize(0.2, 1.0)  // 20% width, full height
+    .leftCenter()
+    .build();
+
+Region content = Region.builder()
+    .positionRelativeTo(sidebar, MIDDLERIGHT)
+    .withScreenPercentageSize(0.8, 1.0)
+    .build();
+```
+
+### Screen Scaling and Adaptation
+
+```java
+// Scale regions designed for specific resolutions
+Region scaledButton = Region.builder()
+    .withBaseScreenSize(1920, 1080)  // Original design resolution
+    .withBaseRegion(1800, 1000, 100, 50)  // Original button position
+    .adjustToCurrentScreen()  // Automatically scale to current resolution
+    .build();
+
+// Percentage-based regions that adapt automatically
+Region searchArea = Region.builder()
+    .withScreenPercentage(0.1, 0.1, 0.8, 0.3)  // 10% margins, 80% width, 30% height
+    .build();
+```
+
+### Integration with Position Class
+
+The `Position` class provides percentage-based coordinates (0.0 to 1.0) that work seamlessly with `RegionBuilder`:
+
+- **Positions.Name enum**: Predefined positions like `TOPLEFT`, `MIDDLEMIDDLE`, `BOTTOMRIGHT`
+- **Custom positions**: Any percentage-based position using `new Position(x, y)`
+- **Position math**: Add offsets and scale positions for dynamic layouts
+
+This integration makes it easy to create regions that adapt to different screen sizes while maintaining their relative positions and proportions.
+
 ## Summary
 
 Modern Brobot development emphasizes:
@@ -1656,6 +2081,7 @@ Modern Brobot development emphasizes:
 - Fluent APIs and method chaining
 - **EnhancedConditionalActionChain for elegant UI interactions with proper sequential composition**
 - **ActionHistory for probabilistic mock testing and integration tests**
+- **Screen-adaptive RegionBuilder with Position integration for resolution-independent automation**
 - Direct access to state components
 - Automatic initial state verification
 - Configuration-driven behavior

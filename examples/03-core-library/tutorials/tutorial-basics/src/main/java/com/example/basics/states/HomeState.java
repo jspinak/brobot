@@ -3,10 +3,7 @@ package com.example.basics.states;
 import io.github.jspinak.brobot.annotations.State;
 import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.model.element.Region;
-import io.github.jspinak.brobot.model.action.ActionRecord;
-import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
-import io.github.jspinak.brobot.model.match.Match;
-import org.sikuli.script.Pattern;
+import io.github.jspinak.brobot.tools.testing.data.ActionRecordTestUtils;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -36,12 +33,12 @@ public class HomeState {
         // Define UI elements with fluent builder pattern
         toWorldButton = new StateImage.Builder()
             .addPatterns("toWorldButton")
-            // .setFixed(true)  // Method doesn't exist in current version
+            // .setFixed(true)  // Method doesn't exist in current API
             .build();
             
         searchButton = new StateImage.Builder()
             .addPatterns("searchButton")
-            // .setSearchRegion(new Region(0, 0, 500, 100))  // Method doesn't exist
+            .setSearchRegionForAllPatterns(new Region(0, 0, 500, 100))  // Top area only
             .build();
             
         // Initialize with action history for mock testing
@@ -49,21 +46,12 @@ public class HomeState {
     }
     
     private void initializeActionHistory() {
-        // Initialize action history would go here in real implementation
-        // The getActionHistory() method doesn't exist on Pattern in current version
-    }
-    
-    private ActionRecord createActionRecord(double similarity, int x, int y, int w, int h) {
-        return new ActionRecord.Builder()
-            .setActionConfig(new PatternFindOptions.Builder()
-                .setStrategy(PatternFindOptions.Strategy.BEST)
-                .setSimilarity(similarity)
-                .build())
-            .addMatch(new Match.Builder()
-                .setRegion(x, y, w, h)
-                .setSimScore(similarity)
-                .build())
-            .setActionSuccess(true)
-            .build();
+        // Add mock action records for testing using the utility class
+        // TODO: ActionHistory API needs to be updated for current version
+        // toWorldButton.getPatterns().get(0).getActionHistory()
+        //     .addSnapshot(ActionRecordTestUtils.createActionRecord(0.95, 220, 600, 20, 20));
+            
+        // searchButton.getPatterns().get(0).getActionHistory()
+        //     .addSnapshot(ActionRecordTestUtils.createActionRecord(0.92, 250, 50, 100, 30));
     }
 }

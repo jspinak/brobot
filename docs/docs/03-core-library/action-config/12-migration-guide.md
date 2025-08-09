@@ -12,9 +12,9 @@ This guide helps you migrate your existing Brobot automation code from the legac
 
 ### Old API (ActionOptions)
 ```java
-// Everything in one class
+// Everything in one class - DEPRECATED
 ActionOptions options = new ActionOptions.Builder()
-    .setAction(ActionOptions.Action.CLICK)
+    .setAction(ActionType.CLICK)
     .setFind(ActionOptions.Find.FIRST)
     .setSimilarity(0.8)
     .setPauseAfterEnd(0.5)
@@ -40,8 +40,8 @@ PatternFindOptions findOptions = new PatternFindOptions.Builder()
 
 Map your existing ActionOptions usage to the appropriate ActionConfig subclass:
 
-| ActionOptions.Action | New Config Class |
-|---------------------|------------------|
+| ActionType (replaces ActionOptions.Action) | New Config Class |
+|---------------------------------------------|------------------|
 | CLICK | ClickOptions |
 | TYPE | TypeOptions |
 | FIND | PatternFindOptions |
@@ -79,8 +79,9 @@ PatternFindOptions options = new PatternFindOptions.Builder()
 
 Old:
 ```java
+// DEPRECATED - ActionOptions class is deprecated
 ActionOptions clickOptions = new ActionOptions.Builder()
-    .setAction(ActionOptions.Action.CLICK)
+    .setAction(ActionType.CLICK)
     .setClickType(ActionOptions.ClickType.LEFT)
     .setPauseAfterEnd(0.5)
     .build();
@@ -102,8 +103,9 @@ action.perform(clickOptions, objectCollection);
 
 Old:
 ```java
+// DEPRECATED - ActionOptions class is deprecated
 ActionOptions typeOptions = new ActionOptions.Builder()
-    .setAction(ActionOptions.Action.TYPE)
+    .setAction(ActionType.TYPE)
     .setTypeDelay(0.1)
     .build();
 
@@ -123,8 +125,9 @@ action.perform(typeOptions, stringCollection);
 
 Old:
 ```java
+// DEPRECATED - ActionOptions class is deprecated
 ActionOptions findOptions = new ActionOptions.Builder()
-    .setAction(ActionOptions.Action.FIND)
+    .setAction(ActionType.FIND)
     .setFind(ActionOptions.Find.BEST)
     .setSimilarity(0.8)
     .build();
@@ -188,8 +191,9 @@ Old test:
 ```java
 @Test
 public void testClickAction() {
+    // DEPRECATED - ActionOptions class is deprecated
     ActionOptions options = new ActionOptions.Builder()
-        .setAction(ActionOptions.Action.CLICK)
+        .setAction(ActionType.CLICK)
         .build();
     
     ActionResult result = action.perform(options, image);
@@ -216,13 +220,13 @@ Old:
 ```java
 // Click button
 ActionOptions clickOpt = new ActionOptions.Builder()
-    .setAction(ActionOptions.Action.CLICK)
+    .setAction(ActionType.CLICK)
     .build();
 action.perform(clickOpt, button);
 
 // Verify result
 ActionOptions findOpt = new ActionOptions.Builder()
-    .setAction(ActionOptions.Action.FIND)
+    .setAction(ActionType.FIND)
     .build();
 ActionResult result = action.perform(findOpt, expectedResult);
 ```

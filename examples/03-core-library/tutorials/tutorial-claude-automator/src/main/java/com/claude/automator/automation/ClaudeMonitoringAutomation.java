@@ -1,6 +1,6 @@
-package com.example.claudeautomator.automation;
+package com.claude.automator.automation;
 
-import com.example.claudeautomator.states.WorkingState;
+import com.claude.automator.states.WorkingState;
 import io.github.jspinak.brobot.action.Action;
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
 import io.github.jspinak.brobot.navigation.service.StateService;

@@ -1,5 +1,5 @@
 ---
-sidebar_position: 8
+sidebar_position: 5
 ---
 
 # Transitions
@@ -70,9 +70,9 @@ public boolean execute() {
 }
 ```
 
-## Robust Error Handling with ConditionalActionChain
+## Robust Error Handling with Sequential Actions
 
-Handle failures gracefully with conditional chains:
+Handle failures gracefully with sequential action patterns:
 
 ```java
 @Transition(from = MainMenuState.class, to = GameState.class)
@@ -87,19 +87,28 @@ public class MainMenuToGameTransition {
     public boolean execute() {
         log.info("Starting game from main menu");
         
-        return new ConditionalActionChain(action)
-            .add(() -> action.click(mainMenu.getPlayButton()))
-            .onFailure(() -> {
-                log.warn("Play button not found, trying alternative");
-                return action.click(mainMenu.getStartButton());
-            })
-            .add(() -> action.waitFor(gameState.getGameBoard(), 10))
-            .onFailure(() -> {
-                log.error("Game failed to load");
-                return ActionResult.fail();
-            })
-            .execute()
-            .isSuccess();
+        // Try primary action first
+        ActionResult playResult = action.click(mainMenu.getPlayButton());
+        
+        if (!playResult.isSuccess()) {
+            log.warn("Play button not found, trying alternative");
+            playResult = action.click(mainMenu.getStartButton());
+        }
+        
+        if (!playResult.isSuccess()) {
+            log.error("Failed to start game");
+            return false;
+        }
+        
+        // Wait for game board to appear with timeout
+        ActionResult waitResult = action.findWithTimeout(gameState.getGameBoard(), 10);
+        
+        if (!waitResult.isSuccess()) {
+            log.error("Game failed to load");
+            return false;
+        }
+        
+        return true;
     }
 }
 ```
@@ -237,7 +246,7 @@ public class HomeToWorldWithValidation {
         }
         
         // Validate we reached the target state
-        ActionResult validation = action.waitFor(worldState.getMinimap(), 5);
+        ActionResult validation = action.findWithTimeout(worldState.getMinimap(), 5);
         
         if (validation.isSuccess()) {
             log.info("Successfully transitioned to World state");
@@ -279,7 +288,7 @@ public class ConnectWithRetryTransition {
             }
             
             // Wait for connection with timeout
-            ActionResult waitResult = action.waitFor(
+            ActionResult waitResult = action.findWithTimeout(
                 connectedState.getConnectionIndicator(), 
                 10
             );
@@ -353,15 +362,23 @@ public boolean execute() {
 ```
 
 ### 4. Error Recovery
-Use ConditionalActionChain for robust error handling:
+Use sequential actions with error checking for robust handling:
 ```java
 public boolean execute() {
-    return new ConditionalActionChain(action)
-        .add(() -> action.click(primaryButton))
-        .onFailure(() -> action.click(fallbackButton))
-        .add(() -> action.waitFor(targetElement, 5))
-        .execute()
-        .isSuccess();
+    // Try primary button first
+    ActionResult primaryResult = action.click(primaryButton);
+    
+    if (!primaryResult.isSuccess()) {
+        primaryResult = action.click(fallbackButton);
+    }
+    
+    if (!primaryResult.isSuccess()) {
+        return false;
+    }
+    
+    // Wait for target element to appear
+    ActionResult waitResult = action.findWithTimeout(targetElement, 5);
+    return waitResult.isSuccess();
 }
 ```
 
@@ -389,24 +406,30 @@ public class CartToCheckoutTransition {
             return false;
         }
         
-        // Use conditional chain for robust execution
-        ConditionalActionChain chain = new ConditionalActionChain(action)
-            // Try primary checkout button
-            .add(() -> action.click(cartState.getCheckoutButton()))
-            .onFailure(() -> {
-                log.warn("Primary checkout button failed, trying alternative");
-                return action.click(cartState.getProceedButton());
-            })
-            // Wait for checkout page
-            .add(() -> action.waitFor(checkoutState.getPaymentSection(), 10))
-            .onFailure(() -> {
-                log.error("Checkout page did not load");
-                // Try to recover by refreshing
-                action.keyPress(KeyEvent.VK_F5);
-                return action.waitFor(checkoutState.getPaymentSection(), 5);
-            });
+        // Use sequential execution for robust handling
+        // Try primary checkout button first
+        ActionResult checkoutResult = action.click(cartState.getCheckoutButton());
         
-        ActionResult result = chain.execute();
+        if (!checkoutResult.isSuccess()) {
+            log.warn("Primary checkout button failed, trying alternative");
+            checkoutResult = action.click(cartState.getProceedButton());
+        }
+        
+        if (!checkoutResult.isSuccess()) {
+            log.error("Failed to click checkout button");
+            return false;
+        }
+        
+        // Wait for checkout page to load
+        ActionResult waitResult = action.findWithTimeout(checkoutState.getPaymentSection(), 10);
+        
+        if (!waitResult.isSuccess()) {
+            log.error("Checkout page did not load, trying to recover by refreshing");
+            action.keyPress(KeyEvent.VK_F5);
+            waitResult = action.findWithTimeout(checkoutState.getPaymentSection(), 5);
+        }
+        
+        ActionResult result = waitResult;
         
         if (result.isSuccess()) {
             log.info("Successfully reached checkout");

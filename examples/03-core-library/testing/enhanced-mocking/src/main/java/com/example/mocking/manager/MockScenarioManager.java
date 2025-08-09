@@ -3,7 +3,7 @@ package com.example.mocking.manager;
 import com.example.mocking.config.MockScenarioConfig;
 import com.example.mocking.config.FailurePattern;
 import com.example.mocking.config.TemporalConditions;
-import io.github.jspinak.brobot.action.internal.options.ActionOptions;
+import io.github.jspinak.brobot.action.ActionType;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import java.util.Map;
@@ -100,7 +100,7 @@ public class MockScenarioManager {
     /**
      * Check if an action should fail based on current scenario
      */
-    public boolean shouldActionFail(ActionOptions.Action action) {
+    public boolean shouldActionFail(ActionType action) {
         if (activeScenario == null) {
             return false;
         }
