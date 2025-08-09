@@ -75,6 +75,11 @@ public class ExecutionEnvironment {
     private boolean allowScreenCapture = true;
     private boolean verboseLogging = false;
     
+    // Cache for display check result to avoid repeated checks
+    private Boolean cachedHasDisplay = null;
+    private long lastDisplayCheckTime = 0;
+    private static final long DISPLAY_CHECK_CACHE_DURATION = 60000; // Cache for 1 minute
+    
     private ExecutionEnvironment() {
         // Private constructor for singleton
     }
@@ -111,55 +116,100 @@ public class ExecutionEnvironment {
     /**
      * Checks if a display is available for GUI operations.
      * This determines whether screen capture and GUI automation are possible.
+     * Results are cached to avoid repeated expensive checks during automation.
      * 
      * @return true if display is available
      */
     public boolean hasDisplay() {
+        // Return cached result if still valid
+        long currentTime = System.currentTimeMillis();
+        if (cachedHasDisplay != null && (currentTime - lastDisplayCheckTime) < DISPLAY_CHECK_CACHE_DURATION) {
+            return cachedHasDisplay;
+        }
+        
+        // Perform the actual display check
+        boolean result = performDisplayCheck();
+        
+        // Cache the result
+        cachedHasDisplay = result;
+        lastDisplayCheckTime = currentTime;
+        
+        // Log only on first check or when cache expires
+        log.debug("[DISPLAY_CHECK] Display availability: {} (cached for {} ms)", 
+                result, DISPLAY_CHECK_CACHE_DURATION);
+        
+        return result;
+    }
+    
+    /**
+     * Forces a refresh of the display check cache.
+     * Useful when the environment might have changed.
+     */
+    public void refreshDisplayCheck() {
+        cachedHasDisplay = null;
+        lastDisplayCheckTime = 0;
+        log.debug("[DISPLAY_CHECK] Cache cleared, will perform fresh check on next call");
+    }
+    
+    /**
+     * Performs the actual display check without caching.
+     * This method contains the original display checking logic.
+     * 
+     * @return true if display is available
+     */
+    private boolean performDisplayCheck() {
         // Check OS type first
         String os = System.getProperty("os.name").toLowerCase();
         boolean isMac = os.contains("mac");
         
-        log.debug("[DISPLAY_CHECK] OS: {}, isMac: {}", os, isMac);
+        // Only log detailed checks on first run or after cache expiry
+        if (cachedHasDisplay == null) {
+            log.debug("[DISPLAY_CHECK] Performing initial display check - OS: {}, isMac: {}", os, isMac);
+        }
         
         // If explicitly set to headless, return false
         if (forceHeadless != null) {
-            log.debug("[DISPLAY_CHECK] forceHeadless is set to: {}", forceHeadless);
+            if (cachedHasDisplay == null) {
+                log.debug("[DISPLAY_CHECK] forceHeadless is set to: {}", forceHeadless);
+            }
             return !forceHeadless;
         }
         
         // Check if java.awt.headless is explicitly set to false - this overrides detection
         String headlessProp = System.getProperty("java.awt.headless");
         if ("false".equalsIgnoreCase(headlessProp)) {
-            log.debug("[DISPLAY_CHECK] java.awt.headless explicitly set to false, assuming display available");
+            if (cachedHasDisplay == null) {
+                log.debug("[DISPLAY_CHECK] java.awt.headless explicitly set to false, assuming display available");
+            }
             return true;
         }
         
         // Special handling for macOS - check actual GraphicsEnvironment state
         if (isMac) {
             boolean notInCI = !isRunningInCI();
-            log.debug("[DISPLAY_CHECK] macOS: notInCI={}", notInCI);
             
             // Even on macOS not in CI, we need to verify actual display state
             // Check if GraphicsEnvironment is actually headless
             try {
-                String macHeadlessProp = System.getProperty("java.awt.headless");
-                String headlessEnv = System.getenv("JAVA_AWT_HEADLESS");
                 boolean javaHeadless = GraphicsEnvironment.isHeadless();
-                log.debug("[DISPLAY_CHECK] macOS: java.awt.headless property = {}", macHeadlessProp);
-                log.debug("[DISPLAY_CHECK] macOS: JAVA_AWT_HEADLESS env = {}", headlessEnv);
-                log.debug("[DISPLAY_CHECK] macOS: GraphicsEnvironment.isHeadless() = {}", javaHeadless);
                 
                 if (javaHeadless) {
-                    log.debug("[DISPLAY_CHECK] macOS: Java reports headless, cannot use display");
+                    if (cachedHasDisplay == null) {
+                        log.debug("[DISPLAY_CHECK] macOS: Java reports headless, cannot use display");
+                    }
                     return false;
                 }
                 
                 if (notInCI) {
-                    log.debug("[DISPLAY_CHECK] macOS: Not in CI and not headless, assuming display available");
+                    if (cachedHasDisplay == null) {
+                        log.debug("[DISPLAY_CHECK] macOS: Not in CI and not headless, assuming display available");
+                    }
                     return true;
                 }
             } catch (Exception e) {
-                log.debug("[DISPLAY_CHECK] macOS: Error checking GraphicsEnvironment: {}", e.getMessage());
+                if (cachedHasDisplay == null) {
+                    log.debug("[DISPLAY_CHECK] macOS: Error checking GraphicsEnvironment: {}", e.getMessage());
+                }
                 return false;
             }
             
@@ -167,10 +217,14 @@ public class ExecutionEnvironment {
             try {
                 GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
                 boolean hasScreens = ge.getScreenDevices().length > 0;
-                log.debug("[DISPLAY_CHECK] macOS CI: hasScreens={}", hasScreens);
+                if (cachedHasDisplay == null) {
+                    log.debug("[DISPLAY_CHECK] macOS CI: hasScreens={}", hasScreens);
+                }
                 return hasScreens;
             } catch (HeadlessException e) {
-                log.debug("[DISPLAY_CHECK] macOS CI: HeadlessException caught, assuming no display in CI");
+                if (cachedHasDisplay == null) {
+                    log.debug("[DISPLAY_CHECK] macOS CI: HeadlessException caught, assuming no display in CI");
+                }
                 return false;
             } catch (Exception e) {
                 log.error("[DISPLAY_CHECK] macOS CI: Unexpected error checking display: ", e);
@@ -180,9 +234,11 @@ public class ExecutionEnvironment {
         
         // For non-Mac systems, check GraphicsEnvironment
         boolean isHeadless = GraphicsEnvironment.isHeadless();
-        log.debug("[DISPLAY_CHECK] GraphicsEnvironment.isHeadless(): {}", isHeadless);
         
         if (isHeadless) {
+            if (cachedHasDisplay == null) {
+                log.debug("[DISPLAY_CHECK] GraphicsEnvironment.isHeadless(): true");
+            }
             return false;
         }
         
@@ -394,6 +450,10 @@ public class ExecutionEnvironment {
             env.forceHeadless = this.forceHeadless;
             env.allowScreenCapture = this.allowScreenCapture;
             env.verboseLogging = this.verboseLogging;
+            
+            // Reset cache for new environment
+            env.cachedHasDisplay = null;
+            env.lastDisplayCheckTime = 0;
             
             if (env.verboseLogging) {
                 log.debug("ExecutionEnvironment configured: {}", env.getEnvironmentInfo());

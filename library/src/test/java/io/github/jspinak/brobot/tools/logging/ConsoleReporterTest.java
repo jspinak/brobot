@@ -1,6 +1,10 @@
 package io.github.jspinak.brobot.tools.logging;
 
-import io.github.jspinak.brobot.action.internal.options.ActionOptions;
+import io.github.jspinak.brobot.action.ActionConfig;
+import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
+import io.github.jspinak.brobot.action.basic.click.ClickOptions;
+import io.github.jspinak.brobot.action.basic.mouse.MouseMoveOptions;
+import io.github.jspinak.brobot.action.basic.type.TypeOptions;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.model.state.StateObject;
@@ -33,9 +37,6 @@ class ConsoleReporterTest {
     
     @Mock
     private StateObjectMetadata stateObjectMetadata;
-    
-    @Mock
-    private Object//ActionOptions actionOptions;
     
     @BeforeEach
     void setUp() {
@@ -73,17 +74,18 @@ class ConsoleReporterTest {
     }
     
     @Test
-    @org.junit.jupiter.api.Disabled("Depends on non-existent functionality")
     void testPrint_WithStateObject() {
         // Setup
         when(stateObject.getName()).thenReturn("TestButton");
-        when(actionOptions.getAction()).thenReturn(ActionOptions.Action.CLICK);
         when(match.toString()).thenReturn("[100,200,50,30]");
+        
+        ActionConfig clickConfig = new ClickOptions.Builder()
+            .build();
         
         ConsoleReporter.outputLevel = ConsoleReporter.OutputLevel.HIGH;
         
         // Execute
-        boolean result = ConsoleReporter.print(match, stateObject, actionOptions);
+        boolean result = ConsoleReporter.print(match, stateObject, clickConfig);
         
         // Verify
         assertTrue(result);
@@ -93,41 +95,43 @@ class ConsoleReporterTest {
     }
     
     @Test
-    @org.junit.jupiter.api.Disabled("Depends on non-existent functionality")
-    @org.junit.jupiter.api.Disabled("Depends on non-existent functionality")
     void testPrint_WithStateObjectMetadata() {
         // Setup
         when(stateObjectMetadata.getStateObjectName()).thenReturn("TestImage");
-        when(actionOptions.getAction()).thenReturn(ActionOptions.Action.FIND);
         when(match.toString()).thenReturn("[50,75,100,100]");
+        
+        ActionConfig findConfig = new PatternFindOptions.Builder()
+            .setStrategy(PatternFindOptions.Strategy.BEST)
+            .build();
         
         ConsoleReporter.outputLevel = ConsoleReporter.OutputLevel.HIGH;
         
         // Execute
-        boolean result = ConsoleReporter.print(match, stateObjectMetadata, actionOptions);
+        boolean result = ConsoleReporter.print(match, stateObjectMetadata, findConfig);
         
         // Verify
         assertTrue(result);
         String output = outputStream.toString();
-        assertTrue(output.contains("FIND: TestImage"));
+        assertTrue(output.contains("PatternFind: TestImage") || output.contains("FIND: TestImage"));
         assertTrue(output.contains("[50,75,100,100]"));
     }
     
     @Test
-    @org.junit.jupiter.api.Disabled("Depends on non-existent functionality")
     void testPrint_LowOutputLevel() {
         // Setup
         when(stateObject.getName()).thenReturn("MenuItem");
-        when(actionOptions.getAction()).thenReturn(ActionOptions.Action.MOVE);
+        
+        ActionConfig moveConfig = new MouseMoveOptions.Builder()
+            .build();
         
         ConsoleReporter.outputLevel = ConsoleReporter.OutputLevel.LOW;
         
         // Execute
-        ConsoleReporter.print(match, stateObject, actionOptions);
+        ConsoleReporter.print(match, stateObject, moveConfig);
         
         // Verify
         String output = outputStream.toString();
-        assertTrue(output.contains("MOVE: MenuItem"));
+        assertTrue(output.contains("Move: MenuItem") || output.contains("MOVE: MenuItem"));
         assertFalse(output.contains("match=")); // Match details not shown at LOW level
     }
     
@@ -135,16 +139,39 @@ class ConsoleReporterTest {
     void testPrint_NoneOutputLevel() {
         // Setup
         when(stateObject.getName()).thenReturn("TextField");
-        when(actionOptions.getAction()).thenReturn(ActionOptions.Action.TYPE);
+        
+        ActionConfig typeConfig = new TypeOptions.Builder()
+            .build();
         
         ConsoleReporter.outputLevel = ConsoleReporter.OutputLevel.NONE;
         
         // Execute
-        ConsoleReporter.print(match, stateObject, actionOptions);
+        ConsoleReporter.print(match, stateObject, typeConfig);
         
         // Verify
         String output = outputStream.toString();
         assertTrue(output.isEmpty()); // Nothing printed at NONE level
+    }
+    
+    @Test
+    void testPrint_WithClickAction() {
+        // Setup
+        when(stateObject.getName()).thenReturn("Button");
+        when(match.toString()).thenReturn("[100,200,50,30]");
+        
+        ActionConfig clickConfig = new ClickOptions.Builder()
+            .setClickType(ClickOptions.Type.DOUBLE_LEFT)
+            .build();
+        
+        ConsoleReporter.outputLevel = ConsoleReporter.OutputLevel.HIGH;
+        
+        // Execute
+        ConsoleReporter.print(match, stateObject, clickConfig);
+        
+        // Verify
+        String output = outputStream.toString();
+        assertTrue(output.contains("Click: Button") || output.contains("CLICK: Button"));
+        assertTrue(output.contains("[100,200,50,30]"));
     }
     
     @Test
@@ -193,7 +220,6 @@ class ConsoleReporterTest {
     }
     
     @Test
-    @org.junit.jupiter.api.Disabled("Depends on non-existent functionality")
     @org.junit.jupiter.api.Disabled("Depends on non-existent functionality")
     void testPrintln_WithLevel() {
         ConsoleReporter.outputLevel = ConsoleReporter.OutputLevel.LOW;

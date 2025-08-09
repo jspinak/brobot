@@ -128,8 +128,11 @@ public class VisualFeedbackAspect {
         String operationType = extractOperationType(joinPoint);
         ObjectCollection targets = extractTargets(joinPoint.getArgs());
         
-        log.debug("Visual feedback for {} operation, targets: {}", operationType, 
-                 targets != null ? "found" : "null");
+        // Only log if aspect is actually enabled and will do something
+        if (visualConfig != null && visualConfig.isEnabled()) {
+            log.debug("Visual feedback for {} operation, targets: {}", operationType, 
+                     targets != null ? "found" : "null");
+        }
         
         // Highlight search regions before operation
         if (targets != null && highlightManager != null) {
@@ -216,8 +219,11 @@ public class VisualFeedbackAspect {
     private void highlightSearchRegions(ObjectCollection targets, String operationType) {
         if (targets == null || highlightManager == null) return;
         
-        log.debug("Extracting search regions for highlighting. StateImages: {}, StateRegions: {}", 
-                 targets.getStateImages().size(), targets.getStateRegions().size());
+        // Only log if highlighting is actually enabled
+        if (visualConfig != null && visualConfig.isEnabled() && visualConfig.isAutoHighlightSearchRegions()) {
+            log.debug("Extracting search regions for highlighting. StateImages: {}, StateRegions: {}", 
+                     targets.getStateImages().size(), targets.getStateRegions().size());
+        }
         
         // Extract regions with context from the ObjectCollection
         List<HighlightManager.RegionWithContext> regionsWithContext = new ArrayList<>();
@@ -235,8 +241,11 @@ public class VisualFeedbackAspect {
         
         // Get search regions from StateImages
         for (StateImage stateImage : targets.getStateImages()) {
-            log.debug("StateImage: {}, patterns: {}", stateImage.getName(), 
-                     stateImage.getPatterns().size());
+            // Only log detailed info if highlighting is actually happening
+            if (visualConfig != null && visualConfig.isEnabled() && visualConfig.isAutoHighlightSearchRegions()) {
+                log.debug("StateImage: {}, patterns: {}", stateImage.getName(), 
+                         stateImage.getPatterns().size());
+            }
             boolean foundRegions = false;
             
             // StateImages don't have direct search regions, they use patterns
@@ -255,7 +264,10 @@ public class VisualFeedbackAspect {
                                     stateImage.getName()
                                 ));
                                 foundRegions = true;
-                                log.debug("Added region from pattern: {}", region);
+                                // Only log if actually highlighting
+                                if (visualConfig != null && visualConfig.isEnabled()) {
+                                    log.debug("Added region from pattern: {}", region);
+                                }
                             }
                         }
                     }
@@ -275,7 +287,15 @@ public class VisualFeedbackAspect {
         }
         
         
-        log.debug("Total search regions to highlight: {}", regionsWithContext.size());
+        // Check if highlighting is actually enabled before logging
+        if (visualConfig != null && visualConfig.isEnabled() && visualConfig.isAutoHighlightSearchRegions()) {
+            log.debug("Total search regions to highlight: {}", regionsWithContext.size());
+        } else if (!regionsWithContext.isEmpty()) {
+            log.debug("Search region highlighting skipped: enabled={}, autoHighlight={}, regions={}",
+                     visualConfig != null ? visualConfig.isEnabled() : false,
+                     visualConfig != null ? visualConfig.isAutoHighlightSearchRegions() : false,
+                     regionsWithContext.size());
+        }
         
         // Use HighlightManager to highlight the regions with context
         if (!regionsWithContext.isEmpty()) {
