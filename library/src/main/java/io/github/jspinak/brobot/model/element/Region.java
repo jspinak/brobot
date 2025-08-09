@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.github.jspinak.brobot.util.region.RegionUtils;
 import io.github.jspinak.brobot.action.ObjectCollection;
-import io.github.jspinak.brobot.model.element.Location;
 import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.model.state.StateRegion;
 import io.github.jspinak.brobot.config.ExecutionEnvironment;
@@ -91,6 +90,15 @@ public class Region implements Comparable<Region> {
         setXYWH(0, 0, width, height);
     }
 
+    /**
+     * Creates a RegionBuilder for fluent region creation with screen-size awareness.
+     * 
+     * @return a new RegionBuilder instance
+     */
+    public static RegionBuilder builder() {
+        return new RegionBuilder();
+    }
+    
     /**
      * Creates a Region with specified coordinates and dimensions.
      * 

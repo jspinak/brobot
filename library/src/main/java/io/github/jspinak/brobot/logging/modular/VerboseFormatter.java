@@ -18,6 +18,12 @@ public class VerboseFormatter implements ActionLogFormatter {
     
     private static final DateTimeFormatter TIMESTAMP_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
     
+    // Cache environment information that doesn't change during execution
+    private static String cachedOsName = null;
+    private static String cachedJavaVersion = null;
+    private static Boolean cachedHeadlessMode = null;
+    private static boolean environmentCached = false;
+    
     @Override
     public String format(ActionResult actionResult) {
         if (!shouldLog(actionResult)) {
@@ -113,17 +119,36 @@ public class VerboseFormatter implements ActionLogFormatter {
             }
         }
         
-        // Environment information
+        // Environment information - cache static values and only log once
         ActionResult.EnvironmentSnapshot env = actionResult.getEnvironmentSnapshot();
         if (env != null) {
-            formatted.append("\n--- ENVIRONMENT ---\n");
-            formatted.append("OS:         ").append(env.getOsName() != null ? env.getOsName() : "Unknown").append("\n");
-            formatted.append("Java:       ").append(env.getJavaVersion() != null ? env.getJavaVersion() : "Unknown").append("\n");
-            formatted.append("Headless:   ").append(env.isHeadlessMode()).append("\n");
-            if (env.getMonitors() != null && !env.getMonitors().isEmpty()) {
-                formatted.append("Monitors:   ").append(env.getMonitors().size()).append("\n");
+            // Cache static environment values on first run
+            if (!environmentCached && env.getOsName() != null) {
+                cachedOsName = env.getOsName();
+                cachedJavaVersion = env.getJavaVersion();
+                cachedHeadlessMode = env.isHeadlessMode();
+                environmentCached = true;
+                
+                // Log full environment info on first run
+                formatted.append("\n--- ENVIRONMENT (Initial) ---\n");
+                formatted.append("OS:         ").append(cachedOsName != null ? cachedOsName : "Unknown").append("\n");
+                formatted.append("Java:       ").append(cachedJavaVersion != null ? cachedJavaVersion : "Unknown").append("\n");
+                formatted.append("Headless:   ").append(cachedHeadlessMode != null ? cachedHeadlessMode : false).append("\n");
+                if (env.getMonitors() != null && !env.getMonitors().isEmpty()) {
+                    formatted.append("Monitors:   ").append(env.getMonitors().size()).append("\n");
+                }
+            } else if (!environmentCached) {
+                // Only include environment section if not yet cached
+                formatted.append("\n--- ENVIRONMENT ---\n");
+                formatted.append("OS:         ").append(env.getOsName() != null ? env.getOsName() : "Unknown").append("\n");
+                formatted.append("Java:       ").append(env.getJavaVersion() != null ? env.getJavaVersion() : "Unknown").append("\n");
+                formatted.append("Headless:   ").append(env.isHeadlessMode()).append("\n");
             }
-            if (env.getCaptureTime() != null) {
+            // Always include capture time if available (this changes)
+            if (env.getCaptureTime() != null && !environmentCached) {
+                if (!formatted.toString().contains("--- ENVIRONMENT")) {
+                    formatted.append("\n--- CAPTURE ---\n");
+                }
                 formatted.append("Captured:   ").append(env.getCaptureTime().atZone(java.time.ZoneId.systemDefault()).format(TIMESTAMP_FORMATTER)).append("\n");
             }
         }

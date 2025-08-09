@@ -24,12 +24,21 @@ public class BrobotPropertyVerifier {
     @Autowired
     private ExecutionEnvironment executionEnvironment;
     
+    // Flag to ensure properties are only verified once
+    private static boolean propertiesVerified = false;
+    
     /**
      * Logs property verification after application is ready.
      * This ensures all properties have been properly initialized.
      */
     @EventListener(ApplicationReadyEvent.class)
     public void verifyProperties() {
+        // Only verify properties once per application lifecycle
+        if (propertiesVerified) {
+            return;
+        }
+        propertiesVerified = true;
+        
         // Log screenshot and illustration settings
         brobotLogger.log()
             .observation("Brobot Property Verification")

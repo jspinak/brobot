@@ -243,6 +243,24 @@ public class StateMemory {
     }
 
     /**
+     * Removes a state from the active state list by name.
+     * <p>
+     * Convenience method that retrieves the state ID by name and calls
+     * removeInactiveState with it. If the state does not exist, it reports
+     * that the removal was attempted but the state was not found.
+     *
+     * @param inactiveStateName Name of the state to remove from active states
+     */
+    public void removeInactiveState(String inactiveStateName) {
+        Long inactiveStateId = stateService.getStateId(inactiveStateName);
+        if (inactiveStateId != null) {
+            removeInactiveState(inactiveStateId);
+        } else {
+            ConsoleReporter.println("- remove "+inactiveStateName+" from active states (not found)");
+        }
+    }
+
+    /**
      * Clears all active states from memory.
      * <p>
      * Completely resets the active state tracking by creating a new empty set.

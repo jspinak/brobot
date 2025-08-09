@@ -103,6 +103,11 @@ public class BufferedImageUtilities {
     
     private static BufferedImageUtilities instance;
     
+    // Cache for environment info logging to avoid spam
+    private static boolean environmentLogged = false;
+    private static long lastMonitorLogTime = 0;
+    private static final long MONITOR_LOG_INTERVAL = 60000; // Log monitor info at most once per minute
+    
     @Autowired
     public BufferedImageUtilities() {
         instance = this;
@@ -246,14 +251,20 @@ public class BufferedImageUtilities {
     public static BufferedImage getBufferedImageFromScreen(Region region) {
         ExecutionEnvironment env = ExecutionEnvironment.getInstance();
         
-        log.debug("[STATIC_SCREEN_CAPTURE] Environment info: {}", env.getEnvironmentInfo());
-        log.debug("[STATIC_SCREEN_CAPTURE] canCaptureScreen: {}, hasDisplay: {}, mockMode: {}", 
-                env.canCaptureScreen(), env.hasDisplay(), env.isMockMode());
+        // Log environment info only once per session
+        if (!environmentLogged) {
+            log.debug("[STATIC_SCREEN_CAPTURE] Environment info: {}", env.getEnvironmentInfo());
+            log.debug("[STATIC_SCREEN_CAPTURE] canCaptureScreen: {}, hasDisplay: {}, mockMode: {}", 
+                    env.canCaptureScreen(), env.hasDisplay(), env.isMockMode());
+            environmentLogged = true;
+        }
         
         // Only return dummy image if we're in mock mode or don't have display
         // canCaptureScreen() may be too restrictive for illustration generation
         if (env.isMockMode() || !env.hasDisplay()) {
-            log.warn("[STATIC_SCREEN_CAPTURE] Mock mode or no display - returning black dummy image");
+            if (!environmentLogged) {
+                log.warn("[STATIC_SCREEN_CAPTURE] Mock mode or no display - returning black dummy image");
+            }
             // Return dummy only when screen capture not possible
             return new BufferedImage(region.w() > 0 ? region.w() : 1920, 
                                    region.h() > 0 ? region.h() : 1080, 
@@ -266,11 +277,19 @@ public class BufferedImageUtilities {
             if (screen == null) {
                 screen = new Screen(); // Fallback to primary monitor
             } else {
-                log.debug("Capturing from monitor {} for region: {}", screen.getID(), region);
+                // Only log monitor info periodically to reduce spam
+                long now = System.currentTimeMillis();
+                if (now - lastMonitorLogTime > MONITOR_LOG_INTERVAL) {
+                    log.debug("Capturing from monitor {} for region: {}", screen.getID(), region);
+                    lastMonitorLogTime = now;
+                }
             }
             BufferedImage captured = screen.capture(region.sikuli()).getImage();
-            log.debug("[STATIC_SCREEN_CAPTURE] Successfully captured screen: {}x{}", 
-                    captured.getWidth(), captured.getHeight());
+            // Only log successful capture occasionally
+            if (!environmentLogged) {
+                log.debug("[STATIC_SCREEN_CAPTURE] Successfully captured screen: {}x{}", 
+                        captured.getWidth(), captured.getHeight());
+            }
             return captured;
         } catch (Exception e) {
             log.error("[STATIC_SCREEN_CAPTURE] Failed to capture screen: {}", e.getMessage(), e);
@@ -284,14 +303,20 @@ public class BufferedImageUtilities {
     public BufferedImage getBuffImgFromScreen(Region region) {
         ExecutionEnvironment env = ExecutionEnvironment.getInstance();
         
-        log.debug("[SCREEN_CAPTURE] Environment info: {}", env.getEnvironmentInfo());
-        log.debug("[SCREEN_CAPTURE] canCaptureScreen: {}, hasDisplay: {}, mockMode: {}, allowScreenCapture: {}", 
-                env.canCaptureScreen(), env.hasDisplay(), env.isMockMode(), true);
+        // Log environment info only once per session
+        if (!environmentLogged) {
+            log.debug("[SCREEN_CAPTURE] Environment info: {}", env.getEnvironmentInfo());
+            log.debug("[SCREEN_CAPTURE] canCaptureScreen: {}, hasDisplay: {}, mockMode: {}", 
+                    env.canCaptureScreen(), env.hasDisplay(), env.isMockMode());
+            environmentLogged = true;
+        }
         
         // Only return dummy image if we're in mock mode or don't have display
         // canCaptureScreen() may be too restrictive for illustration generation
         if (env.isMockMode() || !env.hasDisplay()) {
-            log.warn("[SCREEN_CAPTURE] Mock mode or no display - returning black dummy image");
+            if (!environmentLogged) {
+                log.warn("[SCREEN_CAPTURE] Mock mode or no display - returning black dummy image");
+            }
             // Return dummy only when screen capture not possible
             return new BufferedImage(region.w() > 0 ? region.w() : 1920, 
                                    region.h() > 0 ? region.h() : 1080, 
@@ -301,10 +326,18 @@ public class BufferedImageUtilities {
         try {
             // Use monitor-aware screen selection
             Screen screen = getScreenForOperation("find");
-            log.debug("[SCREEN_CAPTURE] Using screen {} to capture region {}", screen.getID(), region);
+            // Only log monitor selection periodically
+            long now = System.currentTimeMillis();
+            if (now - lastMonitorLogTime > MONITOR_LOG_INTERVAL) {
+                log.debug("[SCREEN_CAPTURE] Using screen {} to capture region {}", screen.getID(), region);
+                lastMonitorLogTime = now;
+            }
             BufferedImage captured = screen.capture(region.sikuli()).getImage();
-            log.debug("[SCREEN_CAPTURE] Successfully captured screen: {}x{}", 
-                    captured.getWidth(), captured.getHeight());
+            // Only log successful capture once
+            if (!environmentLogged) {
+                log.debug("[SCREEN_CAPTURE] Successfully captured screen: {}x{}", 
+                        captured.getWidth(), captured.getHeight());
+            }
             return captured;
         } catch (Exception e) {
             log.error("[SCREEN_CAPTURE] Failed to capture screen: {}", e.getMessage(), e);
