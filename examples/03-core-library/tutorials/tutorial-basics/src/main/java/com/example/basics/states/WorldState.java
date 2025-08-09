@@ -5,6 +5,7 @@ import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.model.state.StateRegion;
 import io.github.jspinak.brobot.model.element.Region;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 /**
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Component;
 @State
 @Component
 @Getter
+@Slf4j
 public class WorldState {
     
     private final StateImage minimap;
@@ -31,8 +33,8 @@ public class WorldState {
     public WorldState() {
         minimap = new StateImage.Builder()
             .addPatterns("minimap")
-            // .setFixed(true) // Method doesn't exist in current version
-            // .setSearchRegion(new Region(900, 0, 124, 124)) // Method doesn't exist
+            // .setFixed(true)  // Method doesn't exist in current API
+            .setSearchRegionForAllPatterns(new Region(900, 0, 124, 124))
             .build();
             
         castle = new StateImage.Builder()
@@ -49,6 +51,7 @@ public class WorldState {
             
         searchButton = new StateImage.Builder()
             .addPatterns("searchButton")
+            .setName("searchButton")
             .build();
             
         // Define regions for area-based interactions

@@ -12,7 +12,7 @@ import jakarta.annotation.PostConstruct;
  * 
  * In Brobot v1.1.0, illustration configuration is done through:
  * - Application properties (brobot.framework.* settings)
- * - ActionConfig/ActionOptions with Illustrate enum (YES, NO, USE_GLOBAL)
+ * - ActionConfig with Illustrate enum (YES, NO, USE_GLOBAL)
  * 
  * This class demonstrates different configuration profiles for various use cases.
  */

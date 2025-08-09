@@ -13,7 +13,7 @@ Real-world examples of migrating from ActionOptions to ActionConfig.
 **Before (ActionOptions):**
 ```java
 ActionOptions clickOptions = new ActionOptions.Builder()
-    .setAction(ActionOptions.Action.CLICK)
+    .setAction(ActionType.CLICK)
     .setClickType(ClickType.Type.LEFT)
     .setPauseBeforeMouseDown(0.1)
     .setPauseAfterMouseUp(0.2)
@@ -35,7 +35,7 @@ ClickOptions clickOptions = new ClickOptions.Builder()
 **Before:**
 ```java
 ActionOptions doubleClick = new ActionOptions.Builder()
-    .setAction(ActionOptions.Action.CLICK)
+    .setAction(ActionType.CLICK)
     .setClickType(ClickType.Type.DOUBLE_LEFT)
     .build();
 ```
@@ -52,7 +52,7 @@ ClickOptions doubleClick = new ClickOptions.Builder()
 **Before:**
 ```java
 ActionOptions findOptions = new ActionOptions.Builder()
-    .setAction(ActionOptions.Action.FIND)
+    .setAction(ActionType.FIND)
     .setFind(ActionOptions.Find.BEST)
     .setSimilarity(0.9)
     .setSearchRegions(regions)
@@ -73,7 +73,7 @@ PatternFindOptions findOptions = new PatternFindOptions.Builder()
 **Before:**
 ```java
 ActionOptions typeOptions = new ActionOptions.Builder()
-    .setAction(ActionOptions.Action.TYPE)
+    .setAction(ActionType.TYPE)
     .setModifiers("ctrl+shift")
     .setTypeDelay(0.05)
     .build();
@@ -96,7 +96,7 @@ TypeOptions typeOptions = new TypeOptions.Builder()
 **Before:**
 ```java
 ActionOptions clickAndMove = new ActionOptions.Builder()
-    .setAction(ActionOptions.Action.CLICK)
+    .setAction(ActionType.CLICK)
     .setMoveMouseAfterAction(true)
     .setMoveMouseAfterActionTo(new Location(100, 100))
     .build();
@@ -115,7 +115,7 @@ ClickOptions clickAndMove = new ClickOptions.Builder()
 **Before:**
 ```java
 ActionOptions dragOptions = new ActionOptions.Builder()
-    .setAction(ActionOptions.Action.DRAG)
+    .setAction(ActionType.DRAG)
     .setDragToOffsetX(50)
     .setDragToOffsetY(100)
     .build();
@@ -141,7 +141,7 @@ DragOptions dragOptions = new DragOptions.Builder()
 **Before:**
 ```java
 ActionOptions multipleFindOptions = new ActionOptions.Builder()
-    .setAction(ActionOptions.Action.FIND)
+    .setAction(ActionType.FIND)
     .addFind(ActionOptions.Find.PATTERN)
     .addFind(ActionOptions.Find.COLOR)
     .build();
@@ -162,7 +162,7 @@ PatternFindOptions chainedFind = new PatternFindOptions.Builder()
 @Test
 void testClick() {
     ActionOptions options = new ActionOptions.Builder()
-        .setAction(ActionOptions.Action.CLICK)
+        .setAction(ActionType.CLICK)
         .setTimesToRepeatIndividualAction(3)
         .setPauseBetweenIndividualActions(0.5)
         .build();

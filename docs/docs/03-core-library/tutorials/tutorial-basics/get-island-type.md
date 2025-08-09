@@ -12,15 +12,16 @@ Here we determine the island type from the on-screen text.
 
 ## Go to a new Island and Get its Type
 
-Here we call the transition directly instead of using Brobot's state management system
-by calling StateTransitionsManagement.openState(ISLAND). Normally we would use the
-state management system, which takes care of everything related to transitions, including
-finding and traversing paths. In this case, the state management system would not do
-anything because the Island state is already active. In this special situation, we want to
-perform the transition activities from the World state to the Island state even though the
-Island state is already present. The reason we want to do this is that this transition will
-take us to a different island. The Island state does not know whether the specific island
-has changed. It only recognizes that it is on an island.
+Here we call the transition directly instead of using Brobot's state navigation system.
+In Brobot 1.1.0, navigation between states is handled by `StateNavigator` (which provides 
+the `openState()` methods), while `StateTransitions` manages the actual transition execution. 
+Normally we would use the state navigation system through `StateNavigator.openState()`, which 
+takes care of everything related to transitions, including finding and traversing paths. In 
+this case, the state navigation system would not do anything because the Island state is already 
+active. In this special situation, we want to perform the transition activities from the World 
+state to the Island state even though the Island state is already present. The reason we want 
+to do this is that this transition will take us to a different island. The Island state does 
+not know whether the specific island has changed. It only recognizes that it is on an island.
 
 If the text we found on-screen contains any of these substrings,
 we return the corresponding island type. Otherwise, we return an

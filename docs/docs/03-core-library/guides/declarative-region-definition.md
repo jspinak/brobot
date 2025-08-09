@@ -305,7 +305,7 @@ To migrate existing code:
        .addPatterns("pattern.png")
        .setSearchRegionOnObject(SearchRegionOnObject.builder()
            .targetType(StateObject.Type.IMAGE)
-           .targetStateName("BaseState")
+           .targetStateName("Base")  // @State removes "State" suffix from class name
            .targetObjectName("BaseImage")
            .adjustments(MatchAdjustmentOptions.builder()
                .addX(10)

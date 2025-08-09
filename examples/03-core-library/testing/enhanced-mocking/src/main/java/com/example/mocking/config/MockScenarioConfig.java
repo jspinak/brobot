@@ -1,6 +1,6 @@
 package com.example.mocking.config;
 
-import io.github.jspinak.brobot.action.internal.options.ActionOptions;
+import io.github.jspinak.brobot.action.ActionType;
 import lombok.Builder;
 import lombok.Data;
 import java.time.Duration;
@@ -23,7 +23,7 @@ public class MockScenarioConfig {
     
     // Action failure patterns
     @Builder.Default
-    private Map<ActionOptions.Action, FailurePattern> actionFailurePatterns = new HashMap<>();
+    private Map<ActionType, FailurePattern> actionFailurePatterns = new HashMap<>();
     
     // Temporal conditions
     @Builder.Default
@@ -50,7 +50,7 @@ public class MockScenarioConfig {
         return this;
     }
     
-    public MockScenarioConfig actionFailurePattern(ActionOptions.Action action, FailurePattern pattern) {
+    public MockScenarioConfig actionFailurePattern(ActionType action, FailurePattern pattern) {
         this.actionFailurePatterns.put(action, pattern);
         return this;
     }

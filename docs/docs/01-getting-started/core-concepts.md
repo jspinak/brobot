@@ -15,7 +15,7 @@ In model-based GUI automation, a State represents a distinct configuration of th
 
 The state structure is a way of organizing an environment into manageable parts, similar to how a website is structured with pages and links. Formally, this is called the **State Structure (Ω)** and is defined as a tuple `(E, S, T)`:
 
-* **E**: The set of all GUI **Elements** selected to model the environment (images, regions, etc.).
+* **E**: The set of all GUI **Elements** selected to model the environment (images, regions, etc.). Brobot provides powerful tools for defining these elements, including [screen-adaptive regions](../03-core-library/guides/screen-adaptive-regions.md) that automatically adjust to different resolutions.
 * **S**: The set of all **States** defined in the model.
 * **T**: The set of all **Transitions** between states.
 

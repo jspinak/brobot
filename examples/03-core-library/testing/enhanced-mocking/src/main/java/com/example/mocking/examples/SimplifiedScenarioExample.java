@@ -4,7 +4,7 @@ import com.example.mocking.manager.MockScenarioManager;
 import com.example.mocking.config.MockScenarioConfig;
 import com.example.mocking.config.FailurePattern;
 import com.example.mocking.config.TemporalConditions;
-import io.github.jspinak.brobot.action.internal.options.ActionOptions;
+import io.github.jspinak.brobot.action.ActionType;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -49,7 +49,7 @@ public class SimplifiedScenarioExample {
             .failureRate(0.0)  // No failures, just delays
             .delayBeforeFailure(Duration.ofSeconds(2))
             .build();
-        config.getActionFailurePatterns().put(ActionOptions.Action.CLICK, slowClicks);
+        config.getActionFailurePatterns().put(ActionType.CLICK, slowClicks);
         
         // Start scenario
         scenarioManager.activateScenario(config);
@@ -59,7 +59,7 @@ public class SimplifiedScenarioExample {
             log.info("Initial actions (should be fast):");
             for (int i = 1; i <= 3; i++) {
                 long start = System.currentTimeMillis();
-                boolean shouldFail = scenarioManager.shouldActionFail(ActionOptions.Action.CLICK);
+                boolean shouldFail = scenarioManager.shouldActionFail(ActionType.CLICK);
                 long duration = System.currentTimeMillis() - start;
                 log.info("  Action {}: {} ({}ms)", i, shouldFail ? "SLOW" : "FAST", duration);
                 Thread.sleep(1000);
@@ -73,7 +73,7 @@ public class SimplifiedScenarioExample {
             log.info("Degraded actions (should be slower):");
             for (int i = 1; i <= 3; i++) {
                 long start = System.currentTimeMillis();
-                boolean shouldFail = scenarioManager.shouldActionFail(ActionOptions.Action.CLICK);
+                boolean shouldFail = scenarioManager.shouldActionFail(ActionType.CLICK);
                 long duration = System.currentTimeMillis() - start;
                 log.info("  Action {}: {} ({}ms)", i, shouldFail ? "SLOW" : "FAST", duration);
                 Thread.sleep(1000);
@@ -104,13 +104,13 @@ public class SimplifiedScenarioExample {
             .patternName("initial_failure")
             .failureRate(0.3)  // 30% failure rate
             .cascadesToActions(Map.of(
-                ActionOptions.Action.TYPE, 0.8,    // 80% chance of TYPE failing
-                ActionOptions.Action.FIND, 0.5     // 50% chance of FIND failing
+                ActionType.TYPE, 0.8,    // 80% chance of TYPE failing
+                ActionType.FIND, 0.5     // 50% chance of FIND failing
             ))
             .recoveryDelay(Duration.ofSeconds(2))
             .build();
         
-        config.getActionFailurePatterns().put(ActionOptions.Action.CLICK, initialFailure);
+        config.getActionFailurePatterns().put(ActionType.CLICK, initialFailure);
         
         scenarioManager.activateScenario(config);
         
@@ -119,14 +119,14 @@ public class SimplifiedScenarioExample {
             
             // Simulate click actions
             for (int i = 1; i <= 5; i++) {
-                boolean clickFailed = simulateAction(ActionOptions.Action.CLICK, i);
+                boolean clickFailed = simulateAction(ActionType.CLICK, i);
                 
                 if (clickFailed) {
                     log.info("  Click {} failed! Checking for cascading effects...", i);
                     
                     // Check if other actions are affected
-                    boolean typeFailed = simulateAction(ActionOptions.Action.TYPE, i);
-                    boolean findFailed = simulateAction(ActionOptions.Action.FIND, i);
+                    boolean typeFailed = simulateAction(ActionType.TYPE, i);
+                    boolean findFailed = simulateAction(ActionType.FIND, i);
                     
                     if (typeFailed || findFailed) {
                         log.info("    Cascading failure detected!");
@@ -202,7 +202,7 @@ public class SimplifiedScenarioExample {
         }
     }
     
-    private boolean simulateAction(ActionOptions.Action action, int attempt) {
+    private boolean simulateAction(ActionType action, int attempt) {
         boolean shouldFail = scenarioManager.shouldActionFail(action);
         log.info("  {} attempt {}: {}", action, attempt, shouldFail ? "FAILED" : "SUCCESS");
         return shouldFail;
@@ -281,8 +281,8 @@ public class SimplifiedScenarioExample {
             .failureMessage("Network timeout")
             .build();
             
-        Map<ActionOptions.Action, FailurePattern> actionFailures = new HashMap<>();
-        actionFailures.put(ActionOptions.Action.FIND, cascadingFailure);
+        Map<ActionType, FailurePattern> actionFailures = new HashMap<>();
+        actionFailures.put(ActionType.FIND, cascadingFailure);
         
         MockScenarioConfig scenario = MockScenarioConfig.builder()
             .scenarioName("cascading_network_failures")
@@ -299,7 +299,7 @@ public class SimplifiedScenarioExample {
             for (int attempt = 1; attempt <= 5; attempt++) {
                 log.info("  Attempt {}: Checking for FIND failure", attempt);
                 
-                boolean shouldFail = scenarioManager.shouldActionFail(ActionOptions.Action.FIND);
+                boolean shouldFail = scenarioManager.shouldActionFail(ActionType.FIND);
                 if (shouldFail) {
                     log.warn("    FIND failed - Network timeout");
                 } else {

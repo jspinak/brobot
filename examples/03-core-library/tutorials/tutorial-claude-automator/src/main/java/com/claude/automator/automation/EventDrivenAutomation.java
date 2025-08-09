@@ -1,6 +1,6 @@
-package com.example.claudeautomator.automation;
+package com.claude.automator.automation;
 
-import com.example.claudeautomator.states.WorkingState;
+import com.claude.automator.states.WorkingState;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
