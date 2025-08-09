@@ -15,7 +15,16 @@ Here are our 3 state classes:
 ## Homepage State
 
 ```java
+package com.example.mrdoob.states;
+
+import io.github.jspinak.brobot.annotations.State;
+import io.github.jspinak.brobot.model.state.StateImage;
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
+
 @State(initial = true)
+@Component
 @Getter
 @Slf4j
 public class Homepage {
@@ -34,7 +43,16 @@ public class Homepage {
 ## Harmony State
 
 ```java
+package com.example.mrdoob.states;
+
+import io.github.jspinak.brobot.annotations.State;
+import io.github.jspinak.brobot.model.state.StateImage;
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
+
 @State
+@Component
 @Getter
 @Slf4j
 public class Harmony {
@@ -53,7 +71,16 @@ public class Harmony {
 ## About State
 
 ```java
+package com.example.mrdoob.states;
+
+import io.github.jspinak.brobot.annotations.State;
+import io.github.jspinak.brobot.model.state.StateImage;
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
+
 @State
+@Component
 @Getter
 @Slf4j
 public class About {
@@ -110,6 +137,7 @@ public class Homepage {
 1. Always include these annotations:
    ```java
    @State              // Brobot state registration
+   @Component          // Spring component registration
    @Getter             // Lombok getter generation
    @Slf4j              // Lombok logging
    ```

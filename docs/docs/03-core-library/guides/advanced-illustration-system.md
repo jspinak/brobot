@@ -29,9 +29,9 @@ public class IllustrationConfig {
     public IllustrationConfig illustrationConfig() {
         return IllustrationConfig.builder()
             .globalEnabled(true)
-            .actionEnabled(ActionOptions.Action.FIND, true)
-            .actionEnabled(ActionOptions.Action.CLICK, true)
-            .actionEnabled(ActionOptions.Action.MOVE, false) // Disable noisy move illustrations
+            .actionEnabled(ActionType.FIND, true)
+            .actionEnabled(ActionType.CLICK, true)
+            .actionEnabled(ActionType.MOVE, false) // Disable noisy move illustrations
             .qualityThreshold(0.75) // Only illustrate high-quality matches
             .maxIllustrationsPerMinute(30) // Rate limiting
             .build();
@@ -74,9 +74,9 @@ public class PerformanceOptimizedIllustrations {
             .globalEnabled(true)
             .adaptiveSampling(true) // Enable intelligent sampling
             // High-frequency actions get reduced sampling
-            .samplingRate(ActionOptions.Action.FIND, 1.0)   // Always illustrate find
-            .samplingRate(ActionOptions.Action.MOVE, 0.1)   // Sample 10% of moves
-            .samplingRate(ActionOptions.Action.CLICK, 0.5)  // Sample 50% of clicks
+            .samplingRate(ActionType.FIND, 1.0)   // Always illustrate find
+            .samplingRate(ActionType.MOVE, 0.1)   // Sample 10% of moves
+            .samplingRate(ActionType.CLICK, 0.5)  // Sample 50% of clicks
             // Performance-based batching
             .batchConfig(BatchConfig.builder()
                 .maxBatchSize(20)
@@ -152,7 +152,7 @@ public class CustomIllustrationStrategy {
     public void configureAdaptiveSampling() {
         IllustrationConfig config = IllustrationConfig.builder()
             .adaptiveSampling(true)
-            .samplingRate(ActionOptions.Action.FIND, 1.0)
+            .samplingRate(ActionType.FIND, 1.0)
             .contextFilter("performance_aware", context -> {
                 // Skip during high system load
                 if (context.getSystemMetrics() != null && 
@@ -190,7 +190,7 @@ public void testBatchedIllustrations() {
         .contextFilter("batch_eligible", context -> {
             // Only batch low-priority, frequent actions
             return context.getPriority() == IllustrationContext.Priority.LOW &&
-                   context.getCurrentAction() == ActionOptions.Action.MOVE;
+                   context.getCurrentAction() == ActionType.MOVE;
         })
         .build();
         
@@ -224,7 +224,7 @@ IllustrationConfig stateAwareConfig = IllustrationConfig.builder()
     .alwaysIllustrateState("PAYMENT_CONFIRMATION")
     
     // Never illustrate noisy intermediate states
-    .neverIllustrateAction(ActionOptions.Action.MOVE)
+    .neverIllustrateAction(ActionType.MOVE)
     
     .contextFilter("state_priority", context -> {
         // High priority for error conditions
@@ -268,8 +268,8 @@ public class NewIllustrationConfig {
     public IllustrationConfig illustrationConfig() {
         return IllustrationConfig.builder()
             .globalEnabled(true)
-            .actionEnabled(ActionOptions.Action.FIND, true)
-            .actionEnabled(ActionOptions.Action.CLICK, true)
+            .actionEnabled(ActionType.FIND, true)
+            .actionEnabled(ActionType.CLICK, true)
             
             // Add intelligent filtering
             .contextFilter("meaningful_only", context -> 
@@ -279,7 +279,7 @@ public class NewIllustrationConfig {
                 !context.getLastActionResult().isSuccess())
                 
             // Add performance optimization    
-            .samplingRate(ActionOptions.Action.FIND, 0.8)
+            .samplingRate(ActionType.FIND, 0.8)
             .qualityThreshold(0.7)
             .maxIllustrationsPerMinute(60)
             .build();
@@ -289,24 +289,25 @@ public class NewIllustrationConfig {
 
 ### ActionConfig Integration
 
-The new system seamlessly works with both ActionOptions and ActionConfig:
+The modern system uses ActionConfig with PatternFindOptions for flexible configuration:
 
 ```java
-// Works with traditional ActionOptions
-ActionOptions options = new ActionOptions.Builder()
-    .setAction(ActionOptions.Action.FIND)
-    .setIllustrate(ActionOptions.Illustrate.YES)
-    .build();
-
-// Also works with new ActionConfig
+// Modern ActionConfig approach
 PatternFindOptions findConfig = new PatternFindOptions.Builder()
+    .setActionType(ActionType.FIND)
     .setIllustrate(ActionConfig.Illustrate.USE_GLOBAL)
     .setSimilarity(0.8)
     .build();
+
+PatternClickOptions clickConfig = new PatternClickOptions.Builder()
+    .setActionType(ActionType.CLICK)
+    .setIllustrate(ActionConfig.Illustrate.YES)
+    .setClickType(Click.Type.LEFT)
+    .build();
     
-// Both will respect the advanced configuration rules
-ActionResult result1 = actions.find(element).configure(options);
-ActionResult result2 = actions.find(element).configure(findConfig);
+// All configurations respect the advanced illustration rules
+ActionResult findResult = actions.find(element).configure(findConfig);
+ActionResult clickResult = actions.click(element).configure(clickConfig);
 ```
 
 ## Monitoring and Debugging

@@ -64,7 +64,7 @@ public void testRetryBehaviorWithCascadingFailures() {
         
     MockScenarioConfig scenario = MockScenarioConfig.builder()
         .scenarioName("cascading_network_failures")
-        .actionFailurePattern(ActionOptions.Action.FIND, cascadingFailure)
+        .actionFailurePattern(ActionType.FIND, cascadingFailure)
         .maxDuration(Duration.ofMinutes(5))  // Scenario timeout
         .build();
         
@@ -150,7 +150,7 @@ public void testRetryPatternCompliance() {
     // Verify that find operations retry with proper backoff
     ActionPatternVerification retryVerification = mockBehaviorVerifier
         .expectActionPattern("find_retry_pattern")
-        .action(ActionOptions.Action.FIND)
+        .action(ActionType.FIND)
         .maxAttempts(3)
         .withBackoff(Duration.ofMillis(500))
         .expectedSuccessRate(0.8)  // 80% should eventually succeed
@@ -278,7 +278,7 @@ public void newStyleTest() {
     
     ActionPatternVerification verification = mockBehaviorVerifier
         .expectActionPattern("find_pattern")
-        .action(ActionOptions.Action.FIND)
+        .action(ActionType.FIND)
         .expectedSuccessRate(1.0)
         .verify();
         
@@ -314,7 +314,7 @@ public class MockTestConfig {
         
         scenarios.put("network_issues", MockScenarioConfig.builder()
             .scenarioName("network_issues")
-            .actionFailurePattern(ActionOptions.Action.FIND, 
+            .actionFailurePattern(ActionType.FIND, 
                 FailurePattern.builder()
                     .baseProbability(0.2)
                     .maxConsecutiveFailures(2)

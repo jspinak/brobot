@@ -25,14 +25,16 @@ The most common pattern is clicking a button until something appears:
 ```java
 public boolean clickUntilImageAppears(StateImage buttonToClick, StateImage imageToAppear) {
     // Configure the click action
+    // DEPRECATED - ActionOptions class is deprecated
     ActionOptions clickOptions = new ActionOptions.Builder()
-        .setAction(ActionOptions.Action.CLICK)
+        .setAction(ActionType.CLICK)
         .setPauseAfterEnd(0.5) // Pause between clicks
         .build();
     
     // Configure the verification action
+    // DEPRECATED - ActionOptions class is deprecated
     ActionOptions findOptions = new ActionOptions.Builder()
-        .setAction(ActionOptions.Action.FIND)
+        .setAction(ActionType.FIND)
         .setMaxWait(2.0) // Wait up to 2 seconds for image
         .build();
     
@@ -57,14 +59,16 @@ Sometimes you need to click elements until they disappear:
 ```java
 public boolean clickUntilElementsVanish(ObjectCollection elementsToClick) {
     // Configure click action
+    // DEPRECATED - ActionOptions class is deprecated
     ActionOptions clickOptions = new ActionOptions.Builder()
-        .setAction(ActionOptions.Action.CLICK)
+        .setAction(ActionType.CLICK)
         .setPauseAfterEnd(0.5)
         .build();
     
     // Configure vanish verification
+    // DEPRECATED - ActionOptions class is deprecated
     ActionOptions vanishOptions = new ActionOptions.Builder()
-        .setAction(ActionOptions.Action.VANISH)
+        .setAction(ActionType.VANISH)
         .setMaxWait(2.0)
         .build();
     
@@ -90,14 +94,16 @@ Click through a wizard until the finish button appears:
 ```java
 public boolean clickNextUntilFinishAppears(StateImage nextButton, StateImage finishButton) {
     // Configure with specific settings for wizard navigation
+    // DEPRECATED - ActionOptions class is deprecated
     ActionOptions clickOptions = new ActionOptions.Builder()
-        .setAction(ActionOptions.Action.CLICK)
+        .setAction(ActionType.CLICK)
         .setPauseAfterEnd(1.0) // Longer pause for page transitions
         .setMinSimilarity(0.8) // Higher accuracy for buttons
         .build();
     
+    // DEPRECATED - ActionOptions class is deprecated
     ActionOptions findOptions = new ActionOptions.Builder()
-        .setAction(ActionOptions.Action.FIND)
+        .setAction(ActionType.FIND)
         .setMaxWait(3.0) // More time for page loads
         .setMinSimilarity(0.85) // High accuracy for finish button
         .build();
@@ -121,13 +127,15 @@ Remove all items from a list by clicking delete buttons:
 ```java
 public boolean clearAllItems(StateImage deleteButton) {
     // Click delete until no more delete buttons exist
+    // DEPRECATED - ActionOptions class is deprecated
     ActionOptions clickOptions = new ActionOptions.Builder()
-        .setAction(ActionOptions.Action.CLICK)
+        .setAction(ActionType.CLICK)
         .setPauseAfterEnd(0.3) // Quick succession
         .build();
     
+    // DEPRECATED - ActionOptions class is deprecated
     ActionOptions vanishOptions = new ActionOptions.Builder()
-        .setAction(ActionOptions.Action.VANISH)
+        .setAction(ActionType.VANISH)
         .setMaxWait(1.0) // Quick check
         .build();
     
@@ -151,13 +159,15 @@ Wait for a process to complete by checking status:
 public boolean waitForProcessComplete(StateImage refreshButton, 
                                     StateImage completeStatus) {
     // Click refresh until status shows complete
+    // DEPRECATED - ActionOptions class is deprecated
     ActionOptions clickOptions = new ActionOptions.Builder()
-        .setAction(ActionOptions.Action.CLICK)
+        .setAction(ActionType.CLICK)
         .setPauseAfterEnd(2.0) // Wait between refreshes
         .build();
     
+    // DEPRECATED - ActionOptions class is deprecated
     ActionOptions findOptions = new ActionOptions.Builder()
-        .setAction(ActionOptions.Action.FIND)
+        .setAction(ActionType.FIND)
         .setMaxWait(1.0) // Quick check after refresh
         .build();
     
@@ -184,13 +194,15 @@ public boolean typeUntilAccepted(StateImage inputField,
     
     // Try different values until one is accepted
     for (String value : possibleValues) {
+        // DEPRECATED - ActionOptions class is deprecated
         ActionOptions typeOptions = new ActionOptions.Builder()
-            .setAction(ActionOptions.Action.TYPE)
+            .setAction(ActionType.TYPE)
             .setPauseAfterEnd(0.5)
             .build();
         
+        // DEPRECATED - ActionOptions class is deprecated
         ActionOptions findOptions = new ActionOptions.Builder()
-            .setAction(ActionOptions.Action.FIND)
+            .setAction(ActionType.FIND)
             .setMaxWait(2.0)
             .build();
         
@@ -263,12 +275,12 @@ public boolean complexConditionalWorkflow(StateImage menuButton,
     // Keep trying to open menu until submenu appears
     RepeatUntilConfig openMenu = new RepeatUntilConfig.Builder()
         .setDoAction(new ActionOptions.Builder()
-            .setAction(ActionOptions.Action.CLICK)
+            .setAction(ActionType.CLICK)
             .setPauseAfterEnd(0.5)
             .build())
         .setActionObjectCollection(menuButton.asObjectCollection())
         .setUntilAction(new ActionOptions.Builder()
-            .setAction(ActionOptions.Action.FIND)
+            .setAction(ActionType.FIND)
             .build())
         .setConditionObjectCollection(submenu.asObjectCollection())
         .setMaxActions(3)
@@ -281,11 +293,11 @@ public boolean complexConditionalWorkflow(StateImage menuButton,
     // Menu is open, now find and click target
     RepeatUntilConfig selectOption = new RepeatUntilConfig.Builder()
         .setDoAction(new ActionOptions.Builder()
-            .setAction(ActionOptions.Action.CLICK)
+            .setAction(ActionType.CLICK)
             .build())
         .setActionObjectCollection(targetOption.asObjectCollection())
         .setUntilAction(new ActionOptions.Builder()
-            .setAction(ActionOptions.Action.VANISH)
+            .setAction(ActionType.VANISH)
             .build())
         .setConditionObjectCollection(submenu.asObjectCollection())
         .setMaxActions(1)
@@ -357,11 +369,11 @@ clickUntil.clickAndFind(buttonImage, targetImage);
 // New RepeatUntilConfig approach
 RepeatUntilConfig config = new RepeatUntilConfig.Builder()
     .setDoAction(new ActionOptions.Builder()
-        .setAction(ActionOptions.Action.CLICK)
+        .setAction(ActionType.CLICK)
         .build())
     .setActionObjectCollection(buttonImage.asObjectCollection())
     .setUntilAction(new ActionOptions.Builder()
-        .setAction(ActionOptions.Action.FIND)
+        .setAction(ActionType.FIND)
         .build())
     .setConditionObjectCollection(targetImage.asObjectCollection())
     .setMaxActions(10)

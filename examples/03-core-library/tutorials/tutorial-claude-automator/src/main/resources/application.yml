@@ -41,6 +41,6 @@ brobot:
 logging:
   level:
     root: INFO
-    com.example.claudeautomator: INFO
+    com.claude.automator: INFO
     io.github.jspinak.brobot.action.internal.region: DEBUG  # Show region updates
     org.springframework: WARN
