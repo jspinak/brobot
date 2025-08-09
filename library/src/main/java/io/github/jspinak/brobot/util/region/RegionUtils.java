@@ -2,6 +2,7 @@ package io.github.jspinak.brobot.util.region;
 
 import io.github.jspinak.brobot.model.element.Location;
 import io.github.jspinak.brobot.model.element.Region;
+import io.github.jspinak.brobot.model.element.RegionBuilder;
 import io.github.jspinak.brobot.model.match.Match;
 
 import org.bytedeco.opencv.opencv_core.Rect;
@@ -404,5 +405,130 @@ public class RegionUtils {
             }
         }
         return merged;
+    }
+    
+    /**
+     * Creates a region scaled from a base screen size to the current screen size.
+     * 
+     * @param baseRegion the region designed for the base screen
+     * @param baseScreenWidth the width of the base screen
+     * @param baseScreenHeight the height of the base screen
+     * @param currentScreenWidth the width of the current screen
+     * @param currentScreenHeight the height of the current screen
+     * @return a new region scaled to the current screen
+     */
+    public static Region scaleToScreen(Region baseRegion, 
+                                       int baseScreenWidth, int baseScreenHeight,
+                                       int currentScreenWidth, int currentScreenHeight) {
+        if (baseRegion == null) return null;
+        
+        double xScale = (double) currentScreenWidth / baseScreenWidth;
+        double yScale = (double) currentScreenHeight / baseScreenHeight;
+        
+        int newX = (int) Math.round(baseRegion.getX() * xScale);
+        int newY = (int) Math.round(baseRegion.getY() * yScale);
+        int newWidth = (int) Math.round(baseRegion.getW() * xScale);
+        int newHeight = (int) Math.round(baseRegion.getH() * yScale);
+        
+        return new Region(newX, newY, newWidth, newHeight);
+    }
+    
+    /**
+     * Creates a region as a percentage of the screen size.
+     * 
+     * @param xPercent x position as percentage (0.0 to 1.0)
+     * @param yPercent y position as percentage (0.0 to 1.0)
+     * @param widthPercent width as percentage (0.0 to 1.0)
+     * @param heightPercent height as percentage (0.0 to 1.0)
+     * @param screenWidth the screen width
+     * @param screenHeight the screen height
+     * @return a new region based on screen percentages
+     */
+    public static Region fromScreenPercentage(double xPercent, double yPercent,
+                                             double widthPercent, double heightPercent,
+                                             int screenWidth, int screenHeight) {
+        int x = (int) Math.round(screenWidth * xPercent);
+        int y = (int) Math.round(screenHeight * yPercent);
+        int width = (int) Math.round(screenWidth * widthPercent);
+        int height = (int) Math.round(screenHeight * heightPercent);
+        
+        return new Region(x, y, width, height);
+    }
+    
+    /**
+     * Creates a centered region with the specified size.
+     * 
+     * @param width the region width
+     * @param height the region height
+     * @param screenWidth the screen width
+     * @param screenHeight the screen height
+     * @return a new region centered on the screen
+     */
+    public static Region centerOnScreen(int width, int height,
+                                       int screenWidth, int screenHeight) {
+        int x = (screenWidth - width) / 2;
+        int y = (screenHeight - height) / 2;
+        return new Region(x, y, width, height);
+    }
+    
+    /**
+     * Adjusts a region by the specified offsets.
+     * 
+     * @param region the region to adjust
+     * @param xOffset offset to add to x
+     * @param yOffset offset to add to y
+     * @param widthOffset offset to add to width
+     * @param heightOffset offset to add to height
+     * @return a new adjusted region
+     */
+    public static Region adjust(Region region, int xOffset, int yOffset,
+                               int widthOffset, int heightOffset) {
+        if (region == null) return null;
+        
+        return new Region(
+            region.getX() + xOffset,
+            region.getY() + yOffset,
+            Math.max(1, region.getW() + widthOffset),
+            Math.max(1, region.getH() + heightOffset)
+        );
+    }
+    
+    /**
+     * Expands or contracts a region by the specified amount on all sides.
+     * 
+     * @param region the region to expand
+     * @param pixels pixels to expand (negative to contract)
+     * @return a new expanded/contracted region
+     */
+    public static Region expand(Region region, int pixels) {
+        return adjust(region, -pixels, -pixels, pixels * 2, pixels * 2);
+    }
+    
+    /**
+     * Constrains a region to fit within screen bounds.
+     * 
+     * @param region the region to constrain
+     * @param screenWidth the screen width
+     * @param screenHeight the screen height
+     * @return a new region constrained to screen bounds
+     */
+    public static Region constrainToScreen(Region region, int screenWidth, int screenHeight) {
+        if (region == null) return null;
+        
+        int x = Math.max(0, Math.min(region.getX(), screenWidth - region.getW()));
+        int y = Math.max(0, Math.min(region.getY(), screenHeight - region.getH()));
+        int width = Math.min(region.getW(), screenWidth - x);
+        int height = Math.min(region.getH(), screenHeight - y);
+        
+        return new Region(x, y, Math.max(1, width), Math.max(1, height));
+    }
+    
+    /**
+     * Creates a RegionBuilder for fluent region creation.
+     * 
+     * @return a new RegionBuilder instance
+     */
+    public static RegionBuilder builder() {
+        return new RegionBuilder();
     }
 }

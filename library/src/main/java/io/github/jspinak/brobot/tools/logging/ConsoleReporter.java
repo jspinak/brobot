@@ -1,6 +1,8 @@
 package io.github.jspinak.brobot.tools.logging;
 
+import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.internal.options.ActionOptions;
+import io.github.jspinak.brobot.model.action.ActionConfigAdapter;
 import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.model.state.StateObject;
 import io.github.jspinak.brobot.model.state.StateObjectMetadata;
@@ -158,6 +160,34 @@ public class ConsoleReporter {
      */
     public static boolean print(Match match, StateObjectMetadata stateObject, ActionOptions actionOptions) {
         return print(match, stateObject.getStateObjectName(), actionOptions.getAction().toString());
+    }
+
+    /**
+     * Reports an action performed on a StateObject with match details using modern ActionConfig.
+     * 
+     * @param match        the match result from the action
+     * @param stateObject  the state object being acted upon
+     * @param actionConfig the action configuration including action type
+     * @return always returns true for chaining
+     */
+    public static boolean print(Match match, StateObject stateObject, ActionConfig actionConfig) {
+        ActionConfigAdapter adapter = new ActionConfigAdapter();
+        String actionType = adapter.getActionType(actionConfig).toString();
+        return print(match, stateObject.getName(), actionType);
+    }
+
+    /**
+     * Reports an action performed on a StateObjectData with match details using modern ActionConfig.
+     * 
+     * @param match        the match result from the action
+     * @param stateObject  the state object data being acted upon
+     * @param actionConfig the action configuration including action type
+     * @return always returns true for chaining
+     */
+    public static boolean print(Match match, StateObjectMetadata stateObject, ActionConfig actionConfig) {
+        ActionConfigAdapter adapter = new ActionConfigAdapter();
+        String actionType = adapter.getActionType(actionConfig).toString();
+        return print(match, stateObject.getStateObjectName(), actionType);
     }
 
     /**
