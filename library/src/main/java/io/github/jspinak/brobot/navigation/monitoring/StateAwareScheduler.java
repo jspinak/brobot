@@ -10,7 +10,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 /**
@@ -54,6 +56,7 @@ public class StateAwareScheduler {
         private final boolean rebuildOnMismatch;
         private final boolean skipIfStatesMissing;
         private final CheckMode checkMode;
+        private final int maxIterations;
         
         /**
          * Defines how states should be checked.
@@ -77,6 +80,7 @@ public class StateAwareScheduler {
             this.rebuildOnMismatch = builder.rebuildOnMismatch;
             this.skipIfStatesMissing = builder.skipIfStatesMissing;
             this.checkMode = builder.checkMode;
+            this.maxIterations = builder.maxIterations;
         }
         
         public List<String> getRequiredStates() {
@@ -95,11 +99,16 @@ public class StateAwareScheduler {
             return checkMode;
         }
         
+        public int getMaxIterations() {
+            return maxIterations;
+        }
+        
         public static class Builder {
             private List<String> requiredStates = List.of();
             private boolean rebuildOnMismatch = true;
             private boolean skipIfStatesMissing = false;
             private CheckMode checkMode = CheckMode.CHECK_INACTIVE_ONLY;
+            private int maxIterations = -1; // -1 means unlimited
             
             public Builder withRequiredStates(List<String> states) {
                 this.requiredStates = states;
@@ -121,6 +130,11 @@ public class StateAwareScheduler {
                 return this;
             }
             
+            public Builder withMaxIterations(int maxIterations) {
+                this.maxIterations = maxIterations;
+                return this;
+            }
+            
             public StateCheckConfiguration build() {
                 return new StateCheckConfiguration(this);
             }
@@ -129,15 +143,17 @@ public class StateAwareScheduler {
     
     /**
      * Schedules a task with state checking at the beginning of each cycle.
+     * Supports optional iteration limit to stop after a specified number of executions.
      * 
      * @param scheduler The executor service to use for scheduling
      * @param task The task to execute after state validation
-     * @param config Configuration for state checking behavior
+     * @param config Configuration for state checking behavior (including max iterations)
      * @param initialDelay Initial delay before first execution
      * @param period Period between executions
      * @param unit Time unit for delays
+     * @return ScheduledFuture that can be used to cancel the task
      */
-    public void scheduleWithStateCheck(
+    public ScheduledFuture<?> scheduleWithStateCheck(
             ScheduledExecutorService scheduler,
             Runnable task,
             StateCheckConfiguration config,
@@ -145,8 +161,22 @@ public class StateAwareScheduler {
             long period,
             TimeUnit unit) {
         
-        scheduler.scheduleAtFixedRate(() -> {
+        final AtomicInteger iterationCount = new AtomicInteger(0);
+        final int maxIterations = config.getMaxIterations();
+        
+        return scheduler.scheduleAtFixedRate(() -> {
             try {
+                // Check if we've reached the iteration limit
+                if (maxIterations > 0) {
+                    int currentIteration = iterationCount.incrementAndGet();
+                    if (currentIteration > maxIterations) {
+                        log.info("Reached maximum iterations ({}) for scheduled task, stopping", maxIterations);
+                        throw new RuntimeException("Max iterations reached");
+                    }
+                    log.debug("Executing scheduled task iteration {}/{}", 
+                             currentIteration, maxIterations);
+                }
+                
                 performStateCheck(config);
                 task.run();
             } catch (IllegalStateException e) {
@@ -155,6 +185,12 @@ public class StateAwareScheduler {
                 } else {
                     log.error("State check failed", e);
                 }
+            } catch (RuntimeException e) {
+                if (e.getMessage() != null && e.getMessage().equals("Max iterations reached")) {
+                    // This will cause the scheduled task to stop
+                    throw e;
+                }
+                log.error("Error in state-aware scheduled task", e);
             } catch (Exception e) {
                 log.error("Error in state-aware scheduled task", e);
             }
@@ -163,15 +199,17 @@ public class StateAwareScheduler {
     
     /**
      * Schedules a task with fixed delay and state checking.
+     * Supports optional iteration limit to stop after a specified number of executions.
      * 
      * @param scheduler The executor service to use for scheduling
      * @param task The task to execute after state validation
-     * @param config Configuration for state checking behavior
+     * @param config Configuration for state checking behavior (including max iterations)
      * @param initialDelay Initial delay before first execution
      * @param delay Delay between end of one execution and start of next
      * @param unit Time unit for delays
+     * @return ScheduledFuture that can be used to cancel the task
      */
-    public void scheduleWithFixedDelayAndStateCheck(
+    public ScheduledFuture<?> scheduleWithFixedDelayAndStateCheck(
             ScheduledExecutorService scheduler,
             Runnable task,
             StateCheckConfiguration config,
@@ -179,8 +217,22 @@ public class StateAwareScheduler {
             long delay,
             TimeUnit unit) {
         
-        scheduler.scheduleWithFixedDelay(() -> {
+        final AtomicInteger iterationCount = new AtomicInteger(0);
+        final int maxIterations = config.getMaxIterations();
+        
+        return scheduler.scheduleWithFixedDelay(() -> {
             try {
+                // Check if we've reached the iteration limit
+                if (maxIterations > 0) {
+                    int currentIteration = iterationCount.incrementAndGet();
+                    if (currentIteration > maxIterations) {
+                        log.info("Reached maximum iterations ({}) for scheduled task, stopping", maxIterations);
+                        throw new RuntimeException("Max iterations reached");
+                    }
+                    log.debug("Executing scheduled task iteration {}/{}", 
+                             currentIteration, maxIterations);
+                }
+                
                 performStateCheck(config);
                 task.run();
             } catch (IllegalStateException e) {
@@ -189,6 +241,12 @@ public class StateAwareScheduler {
                 } else {
                     log.error("State check failed", e);
                 }
+            } catch (RuntimeException e) {
+                if (e.getMessage() != null && e.getMessage().equals("Max iterations reached")) {
+                    // This will cause the scheduled task to stop
+                    throw e;
+                }
+                log.error("Error in state-aware scheduled task", e);
             } catch (Exception e) {
                 log.error("Error in state-aware scheduled task", e);
             }
