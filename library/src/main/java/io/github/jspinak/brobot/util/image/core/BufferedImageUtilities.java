@@ -257,6 +257,20 @@ public class BufferedImageUtilities {
     /**
      * Get human-readable image type name
      */
+    private static boolean isRunningInWSL() {
+        try {
+            String osVersion = System.getProperty("os.version", "").toLowerCase();
+            String osName = System.getProperty("os.name", "").toLowerCase();
+            // Check for WSL indicators
+            return osName.contains("linux") && 
+                   (osVersion.contains("microsoft") || osVersion.contains("wsl") ||
+                    new File("/proc/version").exists() && 
+                    java.nio.file.Files.readString(java.nio.file.Paths.get("/proc/version")).toLowerCase().contains("microsoft"));
+        } catch (Exception e) {
+            return false;
+        }
+    }
+    
     private static String getImageTypeName(int type) {
         switch (type) {
             case BufferedImage.TYPE_INT_RGB: return "RGB";
@@ -387,6 +401,13 @@ public class BufferedImageUtilities {
                 if (blackPixels == sampleCount) {
                     ConsoleReporter.println("  -> WARNING: Captured image appears to be all black!");
                     ConsoleReporter.println("  -> This may indicate screen capture is not working properly");
+                    ConsoleReporter.println("  -> Environment: " + System.getProperty("os.name") + " " + System.getProperty("os.version"));
+                    ConsoleReporter.println("  -> Display: " + System.getenv("DISPLAY"));
+                    ConsoleReporter.println("  -> Running in WSL: " + isRunningInWSL());
+                    if (isRunningInWSL()) {
+                        ConsoleReporter.println("  -> NOTE: WSL2 cannot directly capture Windows screens");
+                        ConsoleReporter.println("  -> Consider running the application directly on Windows");
+                    }
                 }
             } else {
                 ConsoleReporter.println("[SCREEN CAPTURE] ERROR: Captured image is null!");

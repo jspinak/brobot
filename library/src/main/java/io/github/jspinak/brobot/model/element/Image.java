@@ -156,8 +156,8 @@ public class Image {
                 BufferedImage.TYPE_INT_RGB
             );
             Graphics2D g = rgbImage.createGraphics();
-            // Use white background for transparency (SikuliX default)
-            g.setColor(Color.WHITE);
+            // Use dark gray background for better matching with dark UIs
+            g.setColor(new Color(30, 30, 30)); // Dark gray, close to Claude's background
             g.fillRect(0, 0, rgbImage.getWidth(), rgbImage.getHeight());
             g.setComposite(AlphaComposite.SrcOver);
             g.drawImage(bufferedImage, 0, 0, null);

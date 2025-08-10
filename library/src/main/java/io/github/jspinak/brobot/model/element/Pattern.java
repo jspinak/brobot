@@ -308,6 +308,12 @@ public class Pattern {
         // Get the BufferedImage
         BufferedImage buffImg = image.getBufferedImage();
         
+        // Debug logging for pattern conversion
+        if (name != null && name.contains("prompt")) {
+            System.out.println("[PATTERN DEBUG] Converting pattern '" + name + "' to SikuliX Pattern");
+            System.out.println("[PATTERN DEBUG] Original image type: " + buffImg.getType() + " hasAlpha: " + buffImg.getColorModel().hasAlpha());
+        }
+        
         // Convert to RGB if it has alpha channel (like SikuliX does internally)
         if (buffImg.getColorModel().hasAlpha()) {
             BufferedImage rgbImage = new BufferedImage(
@@ -316,18 +322,31 @@ public class Pattern {
                 BufferedImage.TYPE_INT_RGB
             );
             Graphics2D g = rgbImage.createGraphics();
-            // Use white background for transparency (SikuliX default)
-            g.setColor(Color.WHITE);
+            // Use a dark gray background which works better for dark-themed UIs
+            // The Claude UI has a dark theme, so this should match better
+            g.setColor(new Color(30, 30, 30)); // Dark gray, close to Claude's background
             g.fillRect(0, 0, rgbImage.getWidth(), rgbImage.getHeight());
             g.setComposite(AlphaComposite.SrcOver);
             g.drawImage(buffImg, 0, 0, null);
             g.dispose();
             
+            if (name != null && name.contains("prompt")) {
+                System.out.println("[PATTERN DEBUG] Using dark gray background (30,30,30) for alpha conversion");
+            }
+            
             // Create pattern with RGB image
             cachedSikuliPattern = new org.sikuli.script.Pattern(rgbImage);
+            
+            if (name != null && name.contains("prompt")) {
+                System.out.println("[PATTERN DEBUG] Converted to RGB, new type: " + rgbImage.getType());
+            }
         } else {
             // No alpha channel, use as-is
             cachedSikuliPattern = new org.sikuli.script.Pattern(buffImg);
+            
+            if (name != null && name.contains("prompt")) {
+                System.out.println("[PATTERN DEBUG] No conversion needed, using original");
+            }
         }
         
         return cachedSikuliPattern;
