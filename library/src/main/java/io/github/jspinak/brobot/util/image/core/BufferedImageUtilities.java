@@ -8,6 +8,7 @@ import io.github.jspinak.brobot.util.file.FilenameUtils;
 import io.github.jspinak.brobot.monitor.MonitorManager;
 import io.github.jspinak.brobot.config.BrobotProperties;
 import io.github.jspinak.brobot.util.image.capture.ScreenUtilities;
+import io.github.jspinak.brobot.util.image.capture.DPIAwareCapture;
 
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.beans.factory.annotation.Autowired;
 import lombok.extern.slf4j.Slf4j;
 import java.util.Base64;
+import jakarta.annotation.PostConstruct;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -103,7 +105,11 @@ public class BufferedImageUtilities {
     @Autowired(required = false)
     private SmartImageLoader smartImageLoader;
     
+    @Autowired(required = false)
+    private DPIAwareCapture dpiAwareCaptureInstance;
+    
     private static BufferedImageUtilities instance;
+    private static DPIAwareCapture dpiAwareCapture;
     
     // Cache for environment info logging to avoid spam
     private static boolean environmentLogged = false;
@@ -113,6 +119,13 @@ public class BufferedImageUtilities {
     @Autowired
     public BufferedImageUtilities() {
         instance = this;
+    }
+    
+    @PostConstruct
+    private void init() {
+        if (dpiAwareCaptureInstance != null) {
+            dpiAwareCapture = dpiAwareCaptureInstance;
+        }
     }
     
     /**
@@ -381,7 +394,14 @@ public class BufferedImageUtilities {
             ConsoleReporter.println("[SCREEN CAPTURE] Attempting capture of region: " + 
                 region.x() + "," + region.y() + " " + region.w() + "x" + region.h());
             
-            BufferedImage captured = screen.capture(region.sikuli()).getImage();
+            // Check if DPI-aware capture is available and needed
+            BufferedImage captured;
+            if (dpiAwareCapture != null && dpiAwareCapture.isScalingActive()) {
+                ConsoleReporter.println("[SCREEN CAPTURE] Display scaling detected, using DPI-aware capture");
+                captured = dpiAwareCapture.captureDPIAware(region.x(), region.y(), region.w(), region.h());
+            } else {
+                captured = screen.capture(region.sikuli()).getImage();
+            }
             
             // Validate captured image
             if (captured != null) {
