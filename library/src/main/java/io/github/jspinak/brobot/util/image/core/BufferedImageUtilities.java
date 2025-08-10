@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import lombok.extern.slf4j.Slf4j;
 import java.util.Base64;
 import jakarta.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Value;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -108,8 +109,12 @@ public class BufferedImageUtilities {
     @Autowired(required = false)
     private DPIAwareCapture dpiAwareCaptureInstance;
     
+    @Value("${brobot.capture.dpi-aware:true}")
+    private boolean dpiAwareCaptureEnabled = true;
+    
     private static BufferedImageUtilities instance;
     private static DPIAwareCapture dpiAwareCapture;
+    private static boolean staticDpiAwareCaptureEnabled = true;
     
     // Cache for environment info logging to avoid spam
     private static boolean environmentLogged = false;
@@ -126,6 +131,7 @@ public class BufferedImageUtilities {
         if (dpiAwareCaptureInstance != null) {
             dpiAwareCapture = dpiAwareCaptureInstance;
         }
+        staticDpiAwareCaptureEnabled = dpiAwareCaptureEnabled;
     }
     
     /**
@@ -396,10 +402,14 @@ public class BufferedImageUtilities {
             
             // Check if DPI-aware capture is available and needed
             BufferedImage captured;
-            if (dpiAwareCapture != null && dpiAwareCapture.isScalingActive()) {
+            if (staticDpiAwareCaptureEnabled && dpiAwareCapture != null && dpiAwareCapture.isScalingActive()) {
                 ConsoleReporter.println("[SCREEN CAPTURE] Display scaling detected, using DPI-aware capture");
                 captured = dpiAwareCapture.captureDPIAware(region.x(), region.y(), region.w(), region.h());
             } else {
+                if (dpiAwareCapture != null && dpiAwareCapture.isScalingActive() && !staticDpiAwareCaptureEnabled) {
+                    ConsoleReporter.println("[SCREEN CAPTURE] Display scaling detected but DPI-aware capture is DISABLED");
+                    ConsoleReporter.println("[SCREEN CAPTURE] Using direct SikuliX capture (matches SikuliX IDE behavior)");
+                }
                 captured = screen.capture(region.sikuli()).getImage();
             }
             

@@ -285,6 +285,29 @@ public class Pattern {
     private transient org.sikuli.script.Pattern cachedSikuliPattern = null;
     
     /**
+     * Checks if an image with alpha channel actually has transparent pixels.
+     * @param img The image to check
+     * @return true if the image has pixels with alpha < 255, false otherwise
+     */
+    private boolean hasTransparency(BufferedImage img) {
+        if (!img.getColorModel().hasAlpha()) {
+            return false;
+        }
+        
+        // Check if any pixel has alpha < 255
+        for (int y = 0; y < img.getHeight(); y++) {
+            for (int x = 0; x < img.getWidth(); x++) {
+                int argb = img.getRGB(x, y);
+                int alpha = (argb >> 24) & 0xFF;
+                if (alpha < 255) {
+                    return true; // Found transparency
+                }
+            }
+        }
+        return false; // All pixels are fully opaque
+    }
+    
+    /**
      * Another way to get the SikuliX object.
      * Converts images with alpha channel to RGB to match SikuliX's internal handling.
      * @return the SikuliX Pattern object.
@@ -314,8 +337,12 @@ public class Pattern {
             System.out.println("[PATTERN DEBUG] Original image type: " + buffImg.getType() + " hasAlpha: " + buffImg.getColorModel().hasAlpha());
         }
         
-        // Convert to RGB if it has alpha channel (like SikuliX does internally)
-        if (buffImg.getColorModel().hasAlpha()) {
+        // Only convert to RGB if it has alpha channel WITH actual transparency
+        // If the image is fully opaque, keep it as-is to preserve exact pixel values
+        if (buffImg.getColorModel().hasAlpha() && hasTransparency(buffImg)) {
+            if (name != null && name.contains("prompt")) {
+                System.out.println("[PATTERN DEBUG] Image has actual transparency, converting to RGB");
+            }
             BufferedImage rgbImage = new BufferedImage(
                 buffImg.getWidth(),
                 buffImg.getHeight(),
