@@ -254,6 +254,72 @@ CompletableFuture.runAsync(() -> {
 });
 ```
 
+## Diagnostic Logging
+
+### DiagnosticLogger
+
+The `DiagnosticLogger` component provides specialized logging for pattern matching and image analysis, with full verbosity awareness:
+
+```java
+@Autowired
+private DiagnosticLogger diagnosticLogger;
+
+// Pattern search logging
+diagnosticLogger.logPatternSearch(pattern, scene, similarity);
+
+// Match result logging
+diagnosticLogger.logPatternResult(pattern, matchCount, bestScore);
+
+// Image analysis for failed matches
+diagnosticLogger.logImageAnalysis(patternImg, sceneImg, patternName);
+
+// Similarity threshold analysis
+diagnosticLogger.logSimilarityAnalysis(patternName, thresholds, foundThreshold, foundScore);
+```
+
+### Verbosity Levels
+
+The diagnostic logger respects the configured verbosity level:
+
+- **QUIET**: Minimal output (✓/✗ symbols only)
+- **NORMAL**: Concise diagnostic information with [SEARCH], [RESULT], [IMAGE ANALYSIS] tags
+- **VERBOSE**: Full details including all matches, metadata, caching information, and performance metrics
+
+### Pattern Matching Diagnostics
+
+In VERBOSE mode, you'll see comprehensive pattern matching information:
+
+```
+[SEARCH] Pattern: 'login-button' (64x32) | Similarity: 0.70 | Scene: 1920x1080
+  [Pattern.sikuli()] Using CACHED SikuliX Pattern for: login-button
+  [FOUND #1] Score: 0.852 at (450, 320)
+  [FOUND #2] Score: 0.743 at (450, 520)
+  [RESULT] 2 matches for 'login-button' | Best score: 0.852
+```
+
+### Failed Match Analysis
+
+When patterns aren't found, detailed diagnostics help identify the issue:
+
+```
+[RESULT] NO MATCHES for 'submit-button'
+  [IMAGE ANALYSIS]
+    Pattern: 128x48 type=RGB bytes=24KB
+    Pattern content: 2.3% black, 45.6% white, avg RGB=(127,189,210)
+    Scene: 1920x1080 type=RGB bytes=8MB
+    Scene content: 95.2% black, 0.1% white, avg RGB=(5,5,5)
+    WARNING: Scene is mostly BLACK - possible capture failure!
+  [SIMILARITY ANALYSIS]
+    Threshold 0.9: No match
+    Threshold 0.8: No match
+    Threshold 0.7: No match
+    Threshold 0.6: FOUND with score 0.624
+```
+
+This immediately shows that:
+1. The scene is mostly black (screen capture failure)
+2. The pattern would match at 0.6 similarity but not at the configured 0.7
+
 ## Output Formats
 
 ### Console Output

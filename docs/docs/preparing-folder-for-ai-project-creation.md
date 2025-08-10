@@ -25,6 +25,8 @@ https://jspinak.github.io/brobot/docs/ai-brobot-project-creation
 ```
 Can you create a Brobot application in the folder web-scraper? 
 
+Here are instructions on creating a Brobot application: https://jspinak.github.io/brobot/docs/ai-brobot-project-creation  
+
 I have these images:
 - search-box.png - should be part of SearchState
 - results-list.png - should be part of ResultsState  
