@@ -8,6 +8,7 @@ import io.github.jspinak.brobot.model.action.ActionHistory;
 import io.github.jspinak.brobot.model.action.ActionRecord;
 import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.config.ExecutionEnvironment;
+import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
 import io.github.jspinak.brobot.util.image.core.BufferedImageUtilities;
 import io.github.jspinak.brobot.util.string.FilenameExtractor;
 
@@ -284,14 +285,29 @@ public class Pattern {
      */
     @JsonIgnore
     public org.sikuli.script.Pattern sikuli() {
+        ConsoleReporter.println("  [Pattern.sikuli()] Creating SikuliX Pattern for: " + name);
+        
         if (image == null) {
+            ConsoleReporter.println("    ERROR: Image is null for pattern: " + name);
             throw new IllegalStateException("Cannot create SikuliX Pattern: Image is null for pattern: " + name);
         }
+        
         if (image.isEmpty()) {
+            ConsoleReporter.println("    ERROR: Image has no BufferedImage for pattern: " + name);
+            ConsoleReporter.println("    Image path: " + imgpath);
             throw new IllegalStateException("Cannot create SikuliX Pattern: Image has no BufferedImage. " +
                 "Image file may not exist or failed to load for pattern: " + name);
         }
-        return new org.sikuli.script.Pattern(image.sikuli());
+        
+        BufferedImage buffImg = image.getBufferedImage();
+        ConsoleReporter.println("    BufferedImage: " + buffImg.getWidth() + "x" + buffImg.getHeight());
+        
+        org.sikuli.script.Pattern sikuliPattern = new org.sikuli.script.Pattern(image.sikuli());
+        ConsoleReporter.println("    SikuliX Pattern created successfully");
+        ConsoleReporter.println("    Pattern filename: " + sikuliPattern.getFilename());
+        ConsoleReporter.println("    Pattern similarity: " + sikuliPattern.getSimilar());
+        
+        return sikuliPattern;
     }
 
     @JsonIgnore
