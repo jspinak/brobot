@@ -4,9 +4,11 @@ import io.github.jspinak.brobot.model.element.Image;
 import io.github.jspinak.brobot.model.element.Pattern;
 import io.github.jspinak.brobot.model.element.Scene;
 import io.github.jspinak.brobot.model.match.Match;
+import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
 
 import org.sikuli.script.Finder;
 import org.sikuli.script.OCR;
+import org.sikuli.basics.Settings;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -84,21 +86,66 @@ public class ScenePatternMatcher {
      *           to the location of the best match found.
      */
     public List<Match> findAllInScene(Pattern pattern, Scene scene) {
-        if (pattern.w()>scene.getPattern().w() || pattern.h()>scene.getPattern().h()) return new ArrayList<>();
+        ConsoleReporter.println("=== [PATTERN MATCHING] Starting SikuliX pattern search ===");
+        ConsoleReporter.println("  Pattern: " + pattern.getName());
+        ConsoleReporter.println("  Pattern size: " + pattern.w() + "x" + pattern.h());
+        ConsoleReporter.println("  Scene size: " + scene.getPattern().w() + "x" + scene.getPattern().h());
+        ConsoleReporter.println("  Current MinSimilarity: " + Settings.MinSimilarity);
+        
+        if (pattern.sikuli() != null) {
+            ConsoleReporter.println("  Pattern similarity: " + pattern.sikuli().getSimilar());
+            ConsoleReporter.println("  Pattern filename: " + pattern.sikuli().getFilename());
+        } else {
+            ConsoleReporter.println("  WARNING: pattern.sikuli() is null!");
+        }
+        
+        if (pattern.w()>scene.getPattern().w() || pattern.h()>scene.getPattern().h()) {
+            ConsoleReporter.println("  ERROR: Pattern larger than scene - skipping search");
+            return new ArrayList<>();
+        }
+        
+        ConsoleReporter.println("  Creating Finder with scene image...");
         Finder f = getFinder(scene.getPattern().getImage());
+        
+        ConsoleReporter.println("  Executing findAll with pattern...");
         f.findAll(pattern.sikuli());
+        
         List<Match> matchList = new ArrayList<>();
+        int matchCount = 0;
         while (f.hasNext()) {
+            org.sikuli.script.Match sikuliMatch = f.next();
+            ConsoleReporter.println("  Match #" + (matchCount + 1) + ":");
+            ConsoleReporter.println("    Location: (" + sikuliMatch.x + ", " + sikuliMatch.y + ")");
+            ConsoleReporter.println("    Size: " + sikuliMatch.w + "x" + sikuliMatch.h);
+            ConsoleReporter.println("    Score: " + sikuliMatch.getScore());
+            
             Match nextMatch = new Match.Builder()
-                    .setSikuliMatch(f.next())
+                    .setSikuliMatch(sikuliMatch)
                     .setName(pattern.getName())
                     .build();
             matchList.add(nextMatch);
+            matchCount++;
         }
+        
+        ConsoleReporter.println("  Total matches found: " + matchCount);
         f.destroy();
-        if (matchList.isEmpty()) return matchList;
+        
+        if (matchList.isEmpty()) {
+            ConsoleReporter.println("  NO MATCHES FOUND for pattern: " + pattern.getName());
+            return matchList;
+        }
+        
         Match bestMatch = Collections.max(matchList, Comparator.comparingDouble(Match::getScore));
-        if (bestMatch != null && pattern.isFixed()) pattern.getSearchRegions().setFixedRegion(bestMatch.getRegion());
+        if (bestMatch != null) {
+            ConsoleReporter.println("  Best match score: " + bestMatch.getScore() + 
+                " at (" + bestMatch.x() + ", " + bestMatch.y() + ")");
+            if (pattern.isFixed()) {
+                pattern.getSearchRegions().setFixedRegion(bestMatch.getRegion());
+                ConsoleReporter.println("  Updated fixed region to best match location");
+            }
+        }
+        
+        ConsoleReporter.println("=== [PATTERN MATCHING] Complete ===");
         return matchList;
     }
 
