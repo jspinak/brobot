@@ -8,12 +8,13 @@ import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
 
 import org.sikuli.script.Finder;
 import org.sikuli.script.OCR;
-import org.sikuli.basics.Settings;
 import org.springframework.stereotype.Component;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -86,66 +87,80 @@ public class ScenePatternMatcher {
      *           to the location of the best match found.
      */
     public List<Match> findAllInScene(Pattern pattern, Scene scene) {
-        ConsoleReporter.println("=== [PATTERN MATCHING] Starting SikuliX pattern search ===");
-        ConsoleReporter.println("  Pattern: " + pattern.getName());
-        ConsoleReporter.println("  Pattern size: " + pattern.w() + "x" + pattern.h());
-        ConsoleReporter.println("  Scene size: " + scene.getPattern().w() + "x" + scene.getPattern().h());
-        ConsoleReporter.println("  Current MinSimilarity: " + Settings.MinSimilarity);
-        
-        if (pattern.sikuli() != null) {
-            ConsoleReporter.println("  Pattern similarity: " + pattern.sikuli().getSimilar());
-            ConsoleReporter.println("  Pattern filename: " + pattern.sikuli().getFilename());
-        } else {
-            ConsoleReporter.println("  WARNING: pattern.sikuli() is null!");
-        }
-        
+        // Check size constraints first
         if (pattern.w()>scene.getPattern().w() || pattern.h()>scene.getPattern().h()) {
-            ConsoleReporter.println("  ERROR: Pattern larger than scene - skipping search");
+            ConsoleReporter.println("[SKIP] Pattern '" + pattern.getName() + "' (" + pattern.w() + "x" + pattern.h() + 
+                ") larger than scene (" + scene.getPattern().w() + "x" + scene.getPattern().h() + ")");
             return new ArrayList<>();
         }
         
-        ConsoleReporter.println("  Creating Finder with scene image...");
+        // Get the SikuliX pattern once and cache it
+        org.sikuli.script.Pattern sikuliPattern = pattern.sikuli();
+        
+        // Ensure the pattern has the correct similarity threshold
+        double globalSimilarity = org.sikuli.basics.Settings.MinSimilarity;
+        if (Math.abs(sikuliPattern.getSimilar() - globalSimilarity) > 0.01) {
+            sikuliPattern = sikuliPattern.similar(globalSimilarity);
+        }
+        
+        // Log the search attempt
+        ConsoleReporter.println("[SEARCH] Pattern: '" + pattern.getName() + "' (" + pattern.w() + "x" + pattern.h() + 
+            ") | Similarity: " + sikuliPattern.getSimilar() + "/" + globalSimilarity + " | Scene: " + 
+            scene.getPattern().w() + "x" + scene.getPattern().h());
+        
+        // Create Finder and execute search
         Finder f = getFinder(scene.getPattern().getImage());
+        f.findAll(sikuliPattern);
         
-        ConsoleReporter.println("  Executing findAll with pattern...");
-        f.findAll(pattern.sikuli());
-        
+        // Process results
         List<Match> matchList = new ArrayList<>();
         int matchCount = 0;
+        double bestScore = 0;
+        Match bestMatch = null;
+        
         while (f.hasNext()) {
             org.sikuli.script.Match sikuliMatch = f.next();
-            ConsoleReporter.println("  Match #" + (matchCount + 1) + ":");
-            ConsoleReporter.println("    Location: (" + sikuliMatch.x + ", " + sikuliMatch.y + ")");
-            ConsoleReporter.println("    Size: " + sikuliMatch.w + "x" + sikuliMatch.h);
-            ConsoleReporter.println("    Score: " + sikuliMatch.getScore());
-            
             Match nextMatch = new Match.Builder()
                     .setSikuliMatch(sikuliMatch)
                     .setName(pattern.getName())
                     .build();
             matchList.add(nextMatch);
+            
+            if (sikuliMatch.getScore() > bestScore) {
+                bestScore = sikuliMatch.getScore();
+                bestMatch = nextMatch;
+            }
+            
             matchCount++;
-        }
-        
-        ConsoleReporter.println("  Total matches found: " + matchCount);
-        f.destroy();
-        
-        if (matchList.isEmpty()) {
-            ConsoleReporter.println("  NO MATCHES FOUND for pattern: " + pattern.getName());
-            return matchList;
-        }
-        
-        Match bestMatch = Collections.max(matchList, Comparator.comparingDouble(Match::getScore));
-        if (bestMatch != null) {
-            ConsoleReporter.println("  Best match score: " + bestMatch.getScore() + 
-                " at (" + bestMatch.x() + ", " + bestMatch.y() + ")");
-            if (pattern.isFixed()) {
-                pattern.getSearchRegions().setFixedRegion(bestMatch.getRegion());
-                ConsoleReporter.println("  Updated fixed region to best match location");
+            
+            // Log only first few matches to avoid spam
+            if (matchCount <= 3) {
+                ConsoleReporter.println("  [FOUND #" + matchCount + "] Score: " + 
+                    String.format("%.3f", sikuliMatch.getScore()) + " at (" + 
+                    sikuliMatch.x + ", " + sikuliMatch.y + ")");
             }
         }
         
-        ConsoleReporter.println("=== [PATTERN MATCHING] Complete ===");
+        f.destroy();
+        
+        // Log summary
+        if (matchList.isEmpty()) {
+            ConsoleReporter.println("  [RESULT] NO MATCHES for '" + pattern.getName() + "'");
+            
+            // Save debug images if enabled and pattern name contains "prompt"
+            if (pattern.getName() != null && pattern.getName().toLowerCase().contains("prompt")) {
+                saveDebugImages(pattern, scene);
+            }
+        } else {
+            ConsoleReporter.println("  [RESULT] " + matchCount + " matches for '" + pattern.getName() + 
+                "' | Best score: " + String.format("%.3f", bestScore));
+            
+            // Update fixed region if needed
+            if (bestMatch != null && pattern.isFixed()) {
+                pattern.getSearchRegions().setFixedRegion(bestMatch.getRegion());
+            }
+        }
+        
         return matchList;
     }
 
@@ -190,6 +205,159 @@ public class ScenePatternMatcher {
             i++;
         }
         return wordMatches;
+    }
+    
+    /**
+     * Saves pattern and scene images for debugging when matches aren't found.
+     */
+    private void saveDebugImages(Pattern pattern, Scene scene) {
+        try {
+            String debugDir = "debug_images";
+            File dir = new File(debugDir);
+            if (!dir.exists()) {
+                dir.mkdirs();
+            }
+            
+            // Image validation and properties
+            BufferedImage patternImg = pattern.getBImage();
+            BufferedImage sceneImg = scene.getPattern().getBImage();
+            
+            ConsoleReporter.println("    [IMAGE ANALYSIS]");
+            if (patternImg != null) {
+                ConsoleReporter.println("      Pattern: " + patternImg.getWidth() + "x" + patternImg.getHeight() + 
+                    " type=" + getImageType(patternImg.getType()) + " bytes=" + estimateImageSize(patternImg));
+                
+                // Check if pattern is mostly black/white/uniform
+                analyzeImageContent(patternImg, "Pattern");
+            } else {
+                ConsoleReporter.println("      Pattern image is NULL!");
+            }
+            
+            if (sceneImg != null) {
+                ConsoleReporter.println("      Scene: " + sceneImg.getWidth() + "x" + sceneImg.getHeight() + 
+                    " type=" + getImageType(sceneImg.getType()) + " bytes=" + estimateImageSize(sceneImg));
+                
+                // Check if scene is mostly black (common in WSL2/headless)
+                analyzeImageContent(sceneImg, "Scene");
+            } else {
+                ConsoleReporter.println("      Scene image is NULL!");
+            }
+            
+            // Save pattern image
+            String patternFile = debugDir + "/pattern_" + pattern.getName() + ".png";
+            if (patternImg != null) {
+                ImageIO.write(patternImg, "png", new File(patternFile));
+                ConsoleReporter.println("    [DEBUG] Saved pattern image to: " + patternFile);
+            }
+            
+            // Save scene image (only first time for each pattern set)
+            String sceneFile = debugDir + "/scene_current.png";
+            File sceneFileObj = new File(sceneFile);
+            if (!sceneFileObj.exists() && sceneImg != null) {
+                ImageIO.write(sceneImg, "png", sceneFileObj);
+                ConsoleReporter.println("    [DEBUG] Saved scene image to: " + sceneFile);
+            }
+            
+            // Progressive similarity testing
+            ConsoleReporter.println("    [SIMILARITY ANALYSIS]");
+            double originalSimilarity = org.sikuli.basics.Settings.MinSimilarity;
+            double[] testThresholds = {0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3};
+            
+            for (double threshold : testThresholds) {
+                org.sikuli.basics.Settings.MinSimilarity = threshold;
+                Finder testFinder = getFinder(scene.getPattern().getImage());
+                org.sikuli.script.Pattern testPattern = pattern.sikuli().similar(threshold);
+                testFinder.findAll(testPattern);
+                
+                if (testFinder.hasNext()) {
+                    org.sikuli.script.Match firstMatch = testFinder.next();
+                    ConsoleReporter.println("      Threshold " + String.format("%.1f", threshold) + 
+                        ": FOUND with score " + String.format("%.3f", firstMatch.getScore()) + 
+                        " at (" + firstMatch.x + ", " + firstMatch.y + ")");
+                    testFinder.destroy();
+                    break; // Found a match, no need to test lower thresholds
+                } else {
+                    ConsoleReporter.println("      Threshold " + String.format("%.1f", threshold) + ": No match");
+                }
+                testFinder.destroy();
+            }
+            
+            org.sikuli.basics.Settings.MinSimilarity = originalSimilarity;
+            
+        } catch (Exception e) {
+            ConsoleReporter.println("    [DEBUG] Error in analysis: " + e.getMessage());
+        }
+    }
+    
+    /**
+     * Analyzes image content to detect common issues
+     */
+    private void analyzeImageContent(BufferedImage img, String label) {
+        int width = img.getWidth();
+        int height = img.getHeight();
+        int sampleSize = Math.min(100, width * height);
+        
+        // Sample pixels to check for uniformity
+        int blackCount = 0;
+        int whiteCount = 0;
+        long totalR = 0, totalG = 0, totalB = 0;
+        
+        for (int i = 0; i < sampleSize; i++) {
+            int x = (i * 7) % width;  // Pseudo-random sampling
+            int y = ((i * 13) / width) % height;
+            int rgb = img.getRGB(x, y);
+            
+            int r = (rgb >> 16) & 0xFF;
+            int g = (rgb >> 8) & 0xFF;
+            int b = rgb & 0xFF;
+            
+            totalR += r;
+            totalG += g;
+            totalB += b;
+            
+            if (r < 10 && g < 10 && b < 10) blackCount++;
+            if (r > 245 && g > 245 && b > 245) whiteCount++;
+        }
+        
+        double blackPercent = (blackCount * 100.0) / sampleSize;
+        double whitePercent = (whiteCount * 100.0) / sampleSize;
+        int avgR = (int)(totalR / sampleSize);
+        int avgG = (int)(totalG / sampleSize);
+        int avgB = (int)(totalB / sampleSize);
+        
+        ConsoleReporter.println("      " + label + " content: " + 
+            String.format("%.1f%%", blackPercent) + " black, " +
+            String.format("%.1f%%", whitePercent) + " white, " +
+            "avg RGB=(" + avgR + "," + avgG + "," + avgB + ")");
+        
+        if (blackPercent > 90) {
+            ConsoleReporter.println("      WARNING: " + label + " is mostly BLACK - possible capture failure!");
+        } else if (whitePercent > 90) {
+            ConsoleReporter.println("      WARNING: " + label + " is mostly WHITE - possible capture issue!");
+        }
+    }
+    
+    /**
+     * Get human-readable image type
+     */
+    private String getImageType(int type) {
+        switch (type) {
+            case BufferedImage.TYPE_INT_RGB: return "RGB";
+            case BufferedImage.TYPE_INT_ARGB: return "ARGB";
+            case BufferedImage.TYPE_3BYTE_BGR: return "BGR";
+            case BufferedImage.TYPE_BYTE_GRAY: return "GRAY";
+            default: return "Type" + type;
+        }
+    }
+    
+    /**
+     * Estimate image size in memory
+     */
+    private String estimateImageSize(BufferedImage img) {
+        long bytes = (long)img.getWidth() * img.getHeight() * 4; // Assume 4 bytes per pixel
+        if (bytes < 1024) return bytes + "B";
+        if (bytes < 1024 * 1024) return (bytes / 1024) + "KB";
+        return (bytes / (1024 * 1024)) + "MB";
     }
 
 }

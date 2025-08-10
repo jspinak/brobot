@@ -55,14 +55,14 @@ public class SearchRegionResolver {
      *         one region (full screen) if no specific regions are defined.
      */
     public List<Region> getRegions(ActionOptions actionOptions, StateImage stateImage) {
-        ConsoleReporter.println("=== [SEARCH REGIONS] Resolving regions for StateImage: " + stateImage.getName());
-        
         // Priority 1: Use ActionOptions search regions if specified
         if (!actionOptions.getSearchRegions().isEmpty()) {
             List<Region> regions = actionOptions.getSearchRegions().getRegionsForSearch();
-            ConsoleReporter.println("  Using ActionOptions regions: " + regions.size() + " region(s)");
-            for (Region r : regions) {
-                ConsoleReporter.println("    Region: " + r);
+            if (regions.size() == 1 && regions.get(0).w() == 1536 && regions.get(0).h() == 864) {
+                // Full screen search - don't log unless it's interesting
+            } else {
+                ConsoleReporter.println("[REGIONS] Using " + regions.size() + " custom region(s) for '" + 
+                    stateImage.getName() + "'");
             }
             return regions;
         }
@@ -70,17 +70,17 @@ public class SearchRegionResolver {
         // Priority 2: Collect search regions from all patterns
         // Pattern.getRegionsForSearch() handles fixed regions and defaults internally
         List<Region> regions = new ArrayList<>();
-        ConsoleReporter.println("  Collecting regions from " + stateImage.getPatterns().size() + " patterns");
         for (Pattern pattern : stateImage.getPatterns()) {
-            List<Region> patternRegions = pattern.getRegionsForSearch();
-            ConsoleReporter.println("    Pattern '" + pattern.getName() + "': " + patternRegions.size() + " region(s)");
-            for (Region r : patternRegions) {
-                ConsoleReporter.println("      Region: " + r);
-            }
-            regions.addAll(patternRegions);
+            regions.addAll(pattern.getRegionsForSearch());
         }
         
-        ConsoleReporter.println("  Total regions collected: " + regions.size());
+        // Only log if not full screen or if there are multiple regions
+        if (regions.size() > 1 || (regions.size() == 1 && 
+            (regions.get(0).w() != 1536 || regions.get(0).h() != 864))) {
+            ConsoleReporter.println("[REGIONS] Using " + regions.size() + " region(s) for '" + 
+                stateImage.getName() + "'");
+        }
+        
         return regions;
     }
 
