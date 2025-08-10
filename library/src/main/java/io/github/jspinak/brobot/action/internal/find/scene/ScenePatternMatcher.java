@@ -5,9 +5,11 @@ import io.github.jspinak.brobot.model.element.Pattern;
 import io.github.jspinak.brobot.model.element.Scene;
 import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
+import io.github.jspinak.brobot.logging.DiagnosticLogger;
 
 import org.sikuli.script.Finder;
 import org.sikuli.script.OCR;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.imageio.ImageIO;
@@ -44,6 +46,9 @@ import java.util.List;
  */
 @Component
 public class ScenePatternMatcher {
+
+    @Autowired(required = false)
+    private DiagnosticLogger diagnosticLogger;
 
     /**
      * Creates a Sikuli Finder instance for the given scene image.
@@ -103,10 +108,15 @@ public class ScenePatternMatcher {
             sikuliPattern = sikuliPattern.similar(globalSimilarity);
         }
         
-        // Log the search attempt
-        ConsoleReporter.println("[SEARCH] Pattern: '" + pattern.getName() + "' (" + pattern.w() + "x" + pattern.h() + 
-            ") | Similarity: " + sikuliPattern.getSimilar() + "/" + globalSimilarity + " | Scene: " + 
-            scene.getPattern().w() + "x" + scene.getPattern().h());
+        // Log the search attempt using DiagnosticLogger if available
+        if (diagnosticLogger != null) {
+            diagnosticLogger.logPatternSearch(pattern, scene, sikuliPattern.getSimilar());
+        } else {
+            // Fallback to ConsoleReporter
+            ConsoleReporter.println("[SEARCH] Pattern: '" + pattern.getName() + "' (" + pattern.w() + "x" + pattern.h() + 
+                ") | Similarity: " + sikuliPattern.getSimilar() + "/" + globalSimilarity + " | Scene: " + 
+                scene.getPattern().w() + "x" + scene.getPattern().h());
+        }
         
         // Create Finder and execute search
         Finder f = getFinder(scene.getPattern().getImage());
@@ -133,8 +143,11 @@ public class ScenePatternMatcher {
             
             matchCount++;
             
-            // Log only first few matches to avoid spam
-            if (matchCount <= 3) {
+            // Log match details using DiagnosticLogger
+            if (diagnosticLogger != null) {
+                diagnosticLogger.logFoundMatch(matchCount, sikuliMatch.getScore(), sikuliMatch.x, sikuliMatch.y);
+            } else if (matchCount <= 3) {
+                // Fallback to ConsoleReporter for first 3 matches
                 ConsoleReporter.println("  [FOUND #" + matchCount + "] Score: " + 
                     String.format("%.3f", sikuliMatch.getScore()) + " at (" + 
                     sikuliMatch.x + ", " + sikuliMatch.y + ")");
@@ -143,18 +156,26 @@ public class ScenePatternMatcher {
         
         f.destroy();
         
-        // Log summary
+        // Log results using DiagnosticLogger
+        if (diagnosticLogger != null) {
+            diagnosticLogger.logPatternResult(pattern, matchCount, bestScore);
+        } else {
+            // Fallback to ConsoleReporter
+            if (matchList.isEmpty()) {
+                ConsoleReporter.println("  [RESULT] NO MATCHES for '" + pattern.getName() + "'");
+            } else {
+                ConsoleReporter.println("  [RESULT] " + matchCount + " matches for '" + pattern.getName() + 
+                    "' | Best score: " + String.format("%.3f", bestScore));
+            }
+        }
+        
+        // Handle failed matches
         if (matchList.isEmpty()) {
-            ConsoleReporter.println("  [RESULT] NO MATCHES for '" + pattern.getName() + "'");
-            
             // Save debug images if enabled and pattern name contains "prompt"
             if (pattern.getName() != null && pattern.getName().toLowerCase().contains("prompt")) {
                 saveDebugImages(pattern, scene);
             }
         } else {
-            ConsoleReporter.println("  [RESULT] " + matchCount + " matches for '" + pattern.getName() + 
-                "' | Best score: " + String.format("%.3f", bestScore));
-            
             // Update fixed region if needed
             if (bestMatch != null && pattern.isFixed()) {
                 pattern.getSearchRegions().setFixedRegion(bestMatch.getRegion());
@@ -222,25 +243,27 @@ public class ScenePatternMatcher {
             BufferedImage patternImg = pattern.getBImage();
             BufferedImage sceneImg = scene.getPattern().getBImage();
             
-            ConsoleReporter.println("    [IMAGE ANALYSIS]");
-            if (patternImg != null) {
-                ConsoleReporter.println("      Pattern: " + patternImg.getWidth() + "x" + patternImg.getHeight() + 
-                    " type=" + getImageType(patternImg.getType()) + " bytes=" + estimateImageSize(patternImg));
-                
-                // Check if pattern is mostly black/white/uniform
-                analyzeImageContent(patternImg, "Pattern");
+            // Use DiagnosticLogger for image analysis
+            if (diagnosticLogger != null) {
+                diagnosticLogger.logImageAnalysis(patternImg, sceneImg, pattern.getName());
             } else {
-                ConsoleReporter.println("      Pattern image is NULL!");
-            }
-            
-            if (sceneImg != null) {
-                ConsoleReporter.println("      Scene: " + sceneImg.getWidth() + "x" + sceneImg.getHeight() + 
-                    " type=" + getImageType(sceneImg.getType()) + " bytes=" + estimateImageSize(sceneImg));
+                // Fallback to ConsoleReporter
+                ConsoleReporter.println("    [IMAGE ANALYSIS]");
+                if (patternImg != null) {
+                    ConsoleReporter.println("      Pattern: " + patternImg.getWidth() + "x" + patternImg.getHeight() + 
+                        " type=" + getImageType(patternImg.getType()) + " bytes=" + estimateImageSize(patternImg));
+                    analyzeImageContent(patternImg, "Pattern");
+                } else {
+                    ConsoleReporter.println("      Pattern image is NULL!");
+                }
                 
-                // Check if scene is mostly black (common in WSL2/headless)
-                analyzeImageContent(sceneImg, "Scene");
-            } else {
-                ConsoleReporter.println("      Scene image is NULL!");
+                if (sceneImg != null) {
+                    ConsoleReporter.println("      Scene: " + sceneImg.getWidth() + "x" + sceneImg.getHeight() + 
+                        " type=" + getImageType(sceneImg.getType()) + " bytes=" + estimateImageSize(sceneImg));
+                    analyzeImageContent(sceneImg, "Scene");
+                } else {
+                    ConsoleReporter.println("      Scene image is NULL!");
+                }
             }
             
             // Save pattern image
@@ -259,9 +282,10 @@ public class ScenePatternMatcher {
             }
             
             // Progressive similarity testing
-            ConsoleReporter.println("    [SIMILARITY ANALYSIS]");
             double originalSimilarity = org.sikuli.basics.Settings.MinSimilarity;
             double[] testThresholds = {0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3};
+            Double foundThreshold = null;
+            Double foundScore = null;
             
             for (double threshold : testThresholds) {
                 org.sikuli.basics.Settings.MinSimilarity = threshold;
@@ -271,18 +295,29 @@ public class ScenePatternMatcher {
                 
                 if (testFinder.hasNext()) {
                     org.sikuli.script.Match firstMatch = testFinder.next();
-                    ConsoleReporter.println("      Threshold " + String.format("%.1f", threshold) + 
-                        ": FOUND with score " + String.format("%.3f", firstMatch.getScore()) + 
-                        " at (" + firstMatch.x + ", " + firstMatch.y + ")");
+                    foundThreshold = threshold;
+                    foundScore = firstMatch.getScore();
                     testFinder.destroy();
                     break; // Found a match, no need to test lower thresholds
-                } else {
-                    ConsoleReporter.println("      Threshold " + String.format("%.1f", threshold) + ": No match");
                 }
                 testFinder.destroy();
             }
             
             org.sikuli.basics.Settings.MinSimilarity = originalSimilarity;
+            
+            // Log similarity analysis using DiagnosticLogger
+            if (diagnosticLogger != null) {
+                diagnosticLogger.logSimilarityAnalysis(pattern.getName(), testThresholds, foundThreshold, foundScore);
+            } else {
+                // Fallback to ConsoleReporter
+                ConsoleReporter.println("    [SIMILARITY ANALYSIS]");
+                if (foundThreshold != null && foundScore != null) {
+                    ConsoleReporter.println("      Threshold " + String.format("%.1f", foundThreshold) + 
+                        ": FOUND with score " + String.format("%.3f", foundScore));
+                } else {
+                    ConsoleReporter.println("      No match found at any threshold tested");
+                }
+            }
             
         } catch (Exception e) {
             ConsoleReporter.println("    [DEBUG] Error in analysis: " + e.getMessage());

@@ -2072,6 +2072,161 @@ The `Position` class provides percentage-based coordinates (0.0 to 1.0) that wor
 
 This integration makes it easy to create regions that adapt to different screen sizes while maintaining their relative positions and proportions.
 
+## Logging and Diagnostics
+
+### Integrated Logging System
+
+Brobot v1.1.0+ includes a unified logging system that combines multiple logging approaches for comprehensive diagnostics:
+
+```yaml
+# application.yml - Configure logging levels
+brobot:
+  logging:
+    verbosity: VERBOSE        # QUIET, NORMAL, or VERBOSE
+    console:
+      capture-enabled: false  # Prevent duplicate output
+      
+  console:
+    actions:
+      enabled: true
+      level: VERBOSE         # Maximum diagnostic information
+      report-highlight: true
+      show-search-regions: true
+
+# Component logging levels
+logging:
+  level:
+    io.github.jspinak.brobot: DEBUG
+    io.github.jspinak.brobot.logging.DiagnosticLogger: DEBUG
+```
+
+### DiagnosticLogger Component
+
+The `DiagnosticLogger` provides specialized pattern matching diagnostics that integrate with both `ConsoleReporter` and `BrobotLogger`:
+
+```java
+@Autowired
+private DiagnosticLogger diagnosticLogger;
+
+// Automatic logging in ScenePatternMatcher
+// You get output like:
+// [SEARCH] Pattern: 'login-button' (64x32) | Similarity: 0.70 | Scene: 1920x1080
+// [FOUND #1] Score: 0.852 at (450, 320)
+// [RESULT] 2 matches for 'login-button' | Best score: 0.852
+```
+
+### Verbosity Levels
+
+**QUIET Mode**: Minimal output
+- Only ✓/✗ symbols for success/failure
+- No detailed diagnostics
+
+**NORMAL Mode**: Concise diagnostics
+- [SEARCH], [RESULT], [FOUND] prefixes
+- Basic match information
+- Image analysis for failures
+
+**VERBOSE Mode**: Maximum information
+- All NORMAL mode output
+- Pattern caching information
+- Detailed metadata via BrobotLogger
+- Similarity threshold analysis
+- Performance metrics
+
+### Failed Match Analysis
+
+When patterns aren't found, the system provides comprehensive diagnostics:
+
+```
+[RESULT] NO MATCHES for 'submit-button'
+  [IMAGE ANALYSIS]
+    Pattern: 128x48 type=RGB bytes=24KB
+    Pattern content: 2.3% black, 45.6% white, avg RGB=(127,189,210)
+    Scene: 1920x1080 type=RGB bytes=8MB
+    Scene content: 95.2% black, 0.1% white, avg RGB=(5,5,5)
+    WARNING: Scene is mostly BLACK - possible capture failure!
+  [SIMILARITY ANALYSIS]
+    Threshold 0.9: No match
+    Threshold 0.8: No match
+    Threshold 0.7: No match
+    Threshold 0.6: FOUND with score 0.624
+```
+
+This immediately identifies:
+1. Screen capture failures (black/white screens)
+2. Similarity threshold issues
+3. Image content problems
+
+### Pattern Caching
+
+The system now caches SikuliX Pattern objects to eliminate redundant creation:
+
+```java
+// Pattern.java includes caching
+@JsonIgnore
+private transient org.sikuli.script.Pattern cachedSikuliPattern = null;
+
+// In VERBOSE mode, you'll see:
+// [Pattern.sikuli()] Using CACHED SikuliX Pattern for: login-button
+// [Pattern.sikuli()] Creating NEW SikuliX Pattern for: login-button
+```
+
+### Debug Image Saving
+
+For patterns with "prompt" in the name, debug images are automatically saved:
+
+```
+[DEBUG] Saved pattern image to: debug_images/pattern_prompt-button.png
+[DEBUG] Saved scene image to: debug_images/scene_current.png
+```
+
+### Using DiagnosticLogger in Custom Code
+
+```java
+@Component
+public class MyAutomation {
+    @Autowired(required = false)
+    private DiagnosticLogger diagnosticLogger;
+    
+    public void debugPatternMatching(Pattern pattern, Scene scene) {
+        if (diagnosticLogger != null) {
+            // Log search attempt
+            diagnosticLogger.logPatternSearch(pattern, scene, 0.7);
+            
+            // Log results
+            diagnosticLogger.logPatternResult(pattern, matchCount, bestScore);
+            
+            // Analyze failures
+            diagnosticLogger.logImageAnalysis(patternImg, sceneImg, pattern.getName());
+            
+            // Test similarity thresholds
+            double[] thresholds = {0.9, 0.8, 0.7, 0.6, 0.5};
+            diagnosticLogger.logSimilarityAnalysis(pattern.getName(), 
+                thresholds, foundThreshold, foundScore);
+        }
+    }
+}
+```
+
+### Best Practices for Logging
+
+1. **Development**: Use VERBOSE for maximum information
+2. **Testing**: Use NORMAL for concise but useful output  
+3. **Production**: Use QUIET to minimize overhead
+4. **Debugging Pattern Matching**: Always use VERBOSE to see:
+   - Pattern caching behavior
+   - Similarity scores for all matches
+   - Image content analysis
+   - Progressive threshold testing
+
+### Unified Logging System
+
+For complete documentation on the unified logging system, see:
+- [Unified Logging System Guide](03-core-library/guides/unified-logging-system.md)
+- Covers BrobotLogger, ConsoleReporter, and ActionLogger integration
+- Session management and context propagation
+- Performance tracking and metrics
+
 ## Summary
 
 Modern Brobot development emphasizes:
@@ -2082,6 +2237,7 @@ Modern Brobot development emphasizes:
 - **EnhancedConditionalActionChain for elegant UI interactions with proper sequential composition**
 - **ActionHistory for probabilistic mock testing and integration tests**
 - **Screen-adaptive RegionBuilder with Position integration for resolution-independent automation**
+- **Integrated logging with DiagnosticLogger for comprehensive pattern matching diagnostics**
 - Direct access to state components
 - Automatic initial state verification
 - Configuration-driven behavior

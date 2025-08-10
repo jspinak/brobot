@@ -8,7 +8,6 @@ import io.github.jspinak.brobot.model.action.ActionHistory;
 import io.github.jspinak.brobot.model.action.ActionRecord;
 import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.config.ExecutionEnvironment;
-import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
 import io.github.jspinak.brobot.util.image.core.BufferedImageUtilities;
 import io.github.jspinak.brobot.util.string.FilenameExtractor;
 
