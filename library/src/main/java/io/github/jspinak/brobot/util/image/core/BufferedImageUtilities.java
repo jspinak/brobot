@@ -141,15 +141,22 @@ public class BufferedImageUtilities {
      * @return the BufferedImage from file
      */
     public static BufferedImage getBuffImgFromFile(String path) {
+        ConsoleReporter.println("=== [IMAGE LOADING] Starting load for: " + path);
+        
         // Try SmartImageLoader first if available
         if (instance != null && instance.smartImageLoader != null) {
             try {
+                ConsoleReporter.println("  [SmartImageLoader] Attempting to load: " + path);
                 SmartImageLoader.LoadResult result = instance.smartImageLoader.loadImage(path);
                 if (result.isSuccess()) {
-                    return instance.smartImageLoader.getFromCache(path);
+                    BufferedImage img = instance.smartImageLoader.getFromCache(path);
+                    ConsoleReporter.println("  [SmartImageLoader] SUCCESS - Loaded image: " + 
+                        img.getWidth() + "x" + img.getHeight());
+                    return img;
                 }
+                ConsoleReporter.println("  [SmartImageLoader] FAILED - Result not successful");
             } catch (Exception e) {
-                ConsoleReporter.println("SmartImageLoader failed for " + path + ": " + e.getMessage());
+                ConsoleReporter.println("  [SmartImageLoader] ERROR: " + e.getMessage());
             }
         }
         
@@ -158,25 +165,40 @@ public class BufferedImageUtilities {
         
         // In mock mode, always use dummy images
         if (env.isMockMode()) {
+            ConsoleReporter.println("  [Mock Mode] Returning dummy image 100x100");
             return new BufferedImage(100, 100, BufferedImage.TYPE_INT_RGB);
         }
         
         // Try SikuliX Pattern first if we have display
         if (env.hasDisplay()) {
             try {
+                ConsoleReporter.println("  [SikuliX Pattern] Attempting to load: " + path);
                 Pattern sikuliPattern = new Pattern(path);
                 BufferedImage bi = sikuliPattern.getBImage();
                 if (bi != null) {
+                    ConsoleReporter.println("  [SikuliX Pattern] SUCCESS - Loaded image: " + 
+                        bi.getWidth() + "x" + bi.getHeight());
                     return bi;
                 }
-                ConsoleReporter.println("SikuliX Pattern returned null for: " + path);
+                ConsoleReporter.println("  [SikuliX Pattern] FAILED - Pattern.getBImage() returned null");
             } catch (Exception e) {
-                ConsoleReporter.println("SikuliX Pattern failed for " + path + ": " + e.getMessage());
+                ConsoleReporter.println("  [SikuliX Pattern] ERROR: " + e.getClass().getSimpleName() + 
+                    " - " + e.getMessage());
             }
+        } else {
+            ConsoleReporter.println("  [Environment] No display available - skipping SikuliX Pattern");
         }
         
         // Fall back to direct file reading
-        return getBuffImgDirectly(path);
+        ConsoleReporter.println("  [Direct Load] Falling back to direct file reading");
+        BufferedImage result = getBuffImgDirectly(path);
+        if (result != null) {
+            ConsoleReporter.println("=== [IMAGE LOADING] SUCCESS - Final image: " + 
+                result.getWidth() + "x" + result.getHeight());
+        } else {
+            ConsoleReporter.println("=== [IMAGE LOADING] FAILED - No image loaded");
+        }
+        return result;
     }
 
     /**
@@ -187,63 +209,81 @@ public class BufferedImageUtilities {
      * @return the BufferedImage from an image on file
      */
     public static BufferedImage getBuffImgDirectly(String path) {
+        ConsoleReporter.println("    [Direct] Original path: " + path);
         String pathWithExtension = FilenameUtils.addPngExtensionIfNeeded(path);
+        ConsoleReporter.println("    [Direct] Path with extension: " + pathWithExtension);
+        
         File f = new File(pathWithExtension);
+        ConsoleReporter.println("    [Direct] Initial file absolute: " + f.isAbsolute() + 
+            ", exists: " + f.exists());
         
         // If file doesn't exist and path is relative, try common locations
         if (!f.exists() && !f.isAbsolute()) {
+            ConsoleReporter.println("    [Direct] File not found, searching alternative locations...");
+            
             // Try "images" folder first (common convention)
             File imagesFile = new File("images", pathWithExtension);
+            ConsoleReporter.println("    [Direct] Checking images folder: " + imagesFile.getAbsolutePath());
             if (imagesFile.exists()) {
                 f = imagesFile;
-                ConsoleReporter.println("Found in images folder: " + f.getAbsolutePath());
+                ConsoleReporter.println("    [Direct] FOUND in images folder");
             } else {
-                // Skip ImagePath.getPaths() since the return type is complex
-                // We'll rely on bundle path and common locations
+                ConsoleReporter.println("    [Direct] NOT in images folder");
                 
                 // If still not found, try bundle path
                 if (!f.exists()) {
                     try {
                         String bundlePath = org.sikuli.script.ImagePath.getBundlePath();
+                        ConsoleReporter.println("    [Direct] SikuliX bundle path: " + bundlePath);
                         if (bundlePath != null && !bundlePath.isEmpty()) {
                             File bundleFile = new File(bundlePath, pathWithExtension);
+                            ConsoleReporter.println("    [Direct] Checking bundle: " + bundleFile.getAbsolutePath());
                             if (bundleFile.exists()) {
                                 f = bundleFile;
-                                ConsoleReporter.println("Found in SikuliX bundle path: " + f.getAbsolutePath());
+                                ConsoleReporter.println("    [Direct] FOUND in SikuliX bundle path");
+                            } else {
+                                ConsoleReporter.println("    [Direct] NOT in bundle path");
                             }
                         }
                     } catch (Exception e) {
-                        // Ignore and continue with original file
+                        ConsoleReporter.println("    [Direct] ERROR getting bundle path: " + e.getMessage());
                     }
                 }
             }
         }
         
         if (!f.exists()) {
-            ConsoleReporter.println("Image file not found: " + f.getAbsolutePath());
-            ConsoleReporter.println("Searched in:");
-            ConsoleReporter.println("  - Working directory images: " + new File("images").getAbsolutePath());
+            ConsoleReporter.println("    [Direct] IMAGE FILE NOT FOUND!");
+            ConsoleReporter.println("    [Direct] Final attempted path: " + f.getAbsolutePath());
+            ConsoleReporter.println("    [Direct] Working directory: " + System.getProperty("user.dir"));
+            ConsoleReporter.println("    [Direct] Searched locations:");
+            ConsoleReporter.println("      - Direct path: " + new File(pathWithExtension).getAbsolutePath());
+            ConsoleReporter.println("      - Images folder: " + new File("images", pathWithExtension).getAbsolutePath());
             try {
                 String bundlePath = org.sikuli.script.ImagePath.getBundlePath();
                 if (bundlePath != null) {
-                    ConsoleReporter.println("  - SikuliX bundle path: " + bundlePath);
+                    ConsoleReporter.println("      - Bundle path: " + new File(bundlePath, pathWithExtension).getAbsolutePath());
                 }
             } catch (Exception e) {
-                ConsoleReporter.println("  - Could not get bundle path");
+                ConsoleReporter.println("      - Bundle path: [Error: " + e.getMessage() + "]");
             }
             return null;
         }
         
-        ConsoleReporter.println("Loading image from: " + f.getAbsolutePath());
+        ConsoleReporter.println("    [Direct] Loading image from: " + f.getAbsolutePath());
+        ConsoleReporter.println("    [Direct] File size: " + f.length() + " bytes");
         
         try {
             BufferedImage img = ImageIO.read(f);
             if (img == null) {
-                ConsoleReporter.println("ImageIO.read returned null for: " + f.getAbsolutePath());
+                ConsoleReporter.println("    [Direct] ERROR: ImageIO.read returned null");
+            } else {
+                ConsoleReporter.println("    [Direct] SUCCESS: Loaded image " + 
+                    img.getWidth() + "x" + img.getHeight() + ", type: " + img.getType());
             }
             return img;
         } catch (IOException e) {
-            ConsoleReporter.println("IOException reading image: " + e.getMessage());
+            ConsoleReporter.println("    [Direct] IOException: " + e.getMessage());
             throw new RuntimeException(e);
         }
     }

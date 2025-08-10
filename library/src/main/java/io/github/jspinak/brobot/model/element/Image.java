@@ -3,6 +3,7 @@ package io.github.jspinak.brobot.model.element;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
 import io.github.jspinak.brobot.util.image.core.BufferedImageUtilities;
 import io.github.jspinak.brobot.util.image.core.ImageConverter;
 import lombok.Data;
@@ -140,11 +141,19 @@ public class Image {
 
     @JsonIgnore
     public org.sikuli.script.Image sikuli() {
+        ConsoleReporter.println("    [Image.sikuli()] Creating SikuliX Image for: " + name);
+        
         if (bufferedImage == null) {
+            ConsoleReporter.println("      ERROR: BufferedImage is null for: " + name);
             throw new IllegalStateException("Cannot create SikuliX Image: BufferedImage is null. " +
                 "Image file may not exist or failed to load: " + name);
         }
-        return new org.sikuli.script.Image(bufferedImage);
+        
+        ConsoleReporter.println("      BufferedImage size: " + bufferedImage.getWidth() + "x" + bufferedImage.getHeight());
+        org.sikuli.script.Image sikuliImage = new org.sikuli.script.Image(bufferedImage);
+        ConsoleReporter.println("      SikuliX Image created successfully");
+        
+        return sikuliImage;
     }
 
     public void setName(String name) {
