@@ -204,6 +204,64 @@ When console colors are enabled:
 - 🟦 **Cyan** - Performance metrics
 - ⚪ **Default** - Observations and info
 
+## Pattern Matching Diagnostics
+
+### DiagnosticLogger
+```java
+@Autowired
+private DiagnosticLogger diagnosticLogger;
+
+// Automatic logging in ScenePatternMatcher
+// Provides verbosity-aware output:
+// - QUIET: Only ✓/✗ symbols
+// - NORMAL: [SEARCH], [RESULT], [FOUND] prefixes
+// - VERBOSE: Full details with caching info
+
+// Manual diagnostic logging
+diagnosticLogger.logPatternSearch(pattern, scene, 0.7);
+diagnosticLogger.logPatternResult(pattern, matchCount, bestScore);
+diagnosticLogger.logImageAnalysis(patternImg, sceneImg, "button");
+diagnosticLogger.logSimilarityAnalysis("button", thresholds, foundAt, score);
+```
+
+### Diagnostic Output Examples
+```
+# NORMAL Mode:
+[SEARCH] Pattern: 'login-button' (64x32) | Similarity: 0.70 | Scene: 1920x1080
+[FOUND #1] Score: 0.852 at (450, 320)
+[RESULT] 2 matches for 'login-button' | Best score: 0.852
+
+# VERBOSE Mode adds:
+  [Pattern.sikuli()] Using CACHED SikuliX Pattern for: login-button
+  [FOUND #4] Score: 0.743 at (450, 720)
+  [METADATA] matchCount=2, cacheHit=true, searchTime=234ms
+
+# Failed Match Analysis:
+[RESULT] NO MATCHES for 'submit-button'
+  [IMAGE ANALYSIS]
+    Pattern: 128x48 type=RGB bytes=24KB
+    Pattern content: 2.3% black, 45.6% white, avg RGB=(127,189,210)
+    Scene: 1920x1080 type=RGB bytes=8MB
+    Scene content: 95.2% black, 0.1% white, avg RGB=(5,5,5)
+    WARNING: Scene is mostly BLACK - possible capture failure!
+  [SIMILARITY ANALYSIS]
+    Threshold 0.7: No match
+    Threshold 0.6: FOUND with score 0.624
+```
+
+### Configuration for Diagnostics
+```yaml
+brobot:
+  logging:
+    verbosity: VERBOSE  # QUIET, NORMAL, or VERBOSE
+  console:
+    actions:
+      level: VERBOSE
+logging:
+  level:
+    io.github.jspinak.brobot.logging.DiagnosticLogger: DEBUG
+```
+
 ## Enhanced Action Logging
 
 ### Console Output Configuration

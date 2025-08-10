@@ -124,6 +124,7 @@ public class MessageRouter {
         if (structuredLoggingEnabled) {
             routeToActionLogger(event);
         }
+        routeToDiagnosticLogger(event);
     }
 }
 ```
@@ -132,7 +133,36 @@ public class MessageRouter {
 - All events → SLF4J (with appropriate levels)
 - Events → ConsoleReporter (based on output level)
 - Events → ActionLogger (if structured logging enabled)
+- Pattern matching events → DiagnosticLogger (verbosity-aware)
 - Future: Custom handlers via SPI
+
+### DiagnosticLogger
+
+Specialized component for pattern matching diagnostics:
+
+```java
+@Component
+public class DiagnosticLogger {
+    @Autowired(required = false)
+    private LoggingVerbosityConfig verbosityConfig;
+    
+    @Autowired(required = false)
+    private BrobotLogger brobotLogger;
+    
+    // Pattern search logging with verbosity awareness
+    void logPatternSearch(Pattern pattern, Scene scene, double similarity);
+    void logPatternResult(Pattern pattern, int matchCount, double bestScore);
+    void logImageAnalysis(BufferedImage pattern, BufferedImage scene, String name);
+    void logSimilarityAnalysis(String pattern, double[] thresholds, Double found, Double score);
+}
+```
+
+**Features:**
+- Verbosity-aware output (QUIET/NORMAL/VERBOSE)
+- Pattern caching diagnostics
+- Image content analysis (black screen detection)
+- Progressive similarity threshold testing
+- Integration with both ConsoleReporter and BrobotLogger
 
 ### LogBuilder
 
