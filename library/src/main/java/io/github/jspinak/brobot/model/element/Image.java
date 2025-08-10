@@ -9,6 +9,7 @@ import io.github.jspinak.brobot.util.image.core.ImageConverter;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.bytedeco.opencv.opencv_core.Mat;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 
 import static java.awt.image.BufferedImage.TYPE_BYTE_BINARY;
@@ -145,7 +146,26 @@ public class Image {
             throw new IllegalStateException("Cannot create SikuliX Image: BufferedImage is null. " +
                 "Image file may not exist or failed to load: " + name);
         }
-        return new org.sikuli.script.Image(bufferedImage);
+        
+        // Convert to RGB if it has alpha channel (like SikuliX does internally)
+        BufferedImage imgToUse = bufferedImage;
+        if (bufferedImage.getColorModel().hasAlpha()) {
+            BufferedImage rgbImage = new BufferedImage(
+                bufferedImage.getWidth(),
+                bufferedImage.getHeight(),
+                BufferedImage.TYPE_INT_RGB
+            );
+            Graphics2D g = rgbImage.createGraphics();
+            // Use white background for transparency (SikuliX default)
+            g.setColor(Color.WHITE);
+            g.fillRect(0, 0, rgbImage.getWidth(), rgbImage.getHeight());
+            g.setComposite(AlphaComposite.SrcOver);
+            g.drawImage(bufferedImage, 0, 0, null);
+            g.dispose();
+            imgToUse = rgbImage;
+        }
+        
+        return new org.sikuli.script.Image(imgToUse);
     }
 
     public void setName(String name) {

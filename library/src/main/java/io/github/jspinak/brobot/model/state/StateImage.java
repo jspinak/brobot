@@ -325,6 +325,7 @@ public class StateImage implements StateObject {
         private Location offsetForAllPatterns;
         private Region searchRegionForAllPatterns;
         private SearchRegionOnObject searchRegionOnObject;
+        private boolean fixedForAllPatterns = false;
 
         public Builder setName(String name) {
             this.name = name;
@@ -402,6 +403,11 @@ public class StateImage implements StateObject {
             return this;
         }
 
+        public Builder setFixedForAllPatterns(boolean fixed) {
+            this.fixedForAllPatterns = fixed;
+            return this;
+        }
+
         @Override
         public String toString() {
             StringBuilder stringBuilder = new StringBuilder();
@@ -434,6 +440,8 @@ public class StateImage implements StateObject {
                     pattern.setTargetOffset(offsetForAllPatterns));
             if (searchRegionForAllPatterns != null) stateImage.getPatterns().forEach(pattern ->
                     pattern.addSearchRegion(searchRegionForAllPatterns));
+            if (fixedForAllPatterns) stateImage.getPatterns().forEach(pattern ->
+                    pattern.setFixed(true));
             return stateImage;
         }
 
