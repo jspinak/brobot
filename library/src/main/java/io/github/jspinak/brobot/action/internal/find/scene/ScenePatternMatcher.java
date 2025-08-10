@@ -6,10 +6,12 @@ import io.github.jspinak.brobot.model.element.Scene;
 import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
 import io.github.jspinak.brobot.logging.DiagnosticLogger;
+import io.github.jspinak.brobot.action.internal.find.pattern.PatternScaleAdjuster;
 
 import org.sikuli.script.Finder;
 import org.sikuli.script.OCR;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.imageio.ImageIO;
@@ -51,6 +53,12 @@ public class ScenePatternMatcher {
     
     @Autowired(required = false)
     private BestMatchCapture bestMatchCapture;
+    
+    @Autowired(required = false)
+    private PatternScaleAdjuster patternScaleAdjuster;
+    
+    @Value("${brobot.pattern.auto-scale:false}")
+    private boolean autoScaleEnabled;
 
     /**
      * Creates a Sikuli Finder instance for the given scene image.
@@ -184,10 +192,42 @@ public class ScenePatternMatcher {
             }
         }
         
-        // Handle failed matches
-        if (matchList.isEmpty()) {
-            // Save debug images if enabled and pattern name contains "prompt"
-            if (pattern.getName() != null && pattern.getName().toLowerCase().contains("prompt")) {
+        // Handle failed matches or low similarity
+        if (matchList.isEmpty() || (bestScore < 0.8 && autoScaleEnabled && patternScaleAdjuster != null)) {
+            // Try scale adjustment if enabled
+            if (autoScaleEnabled && patternScaleAdjuster != null) {
+                ConsoleReporter.println("[SCALE] Attempting scale adjustment for pattern '" + pattern.getName() + "' (score: " + bestScore + ")");
+                
+                // Check if there's a scale mismatch
+                if (patternScaleAdjuster.hasScaleMismatch(pattern, scene)) {
+                    ConsoleReporter.println("[SCALE] Scale mismatch detected, trying scaled pattern");
+                    
+                    // Create scaled pattern
+                    Pattern scaledPattern = patternScaleAdjuster.createScaledPattern(pattern, scene);
+                    
+                    if (scaledPattern != pattern) {
+                        // Try matching with scaled pattern
+                        ConsoleReporter.println("[SCALE] Retrying with scaled pattern");
+                        List<Match> scaledMatches = findScaledPattern(scaledPattern, scene, pattern.getName());
+                        
+                        if (!scaledMatches.isEmpty()) {
+                            ConsoleReporter.println("[SCALE] Success! Found " + scaledMatches.size() + " matches with scaled pattern");
+                            matchList = scaledMatches;
+                            
+                            // Update fixed region if needed
+                            if (pattern.isFixed() && !scaledMatches.isEmpty()) {
+                                Match bestScaledMatch = scaledMatches.stream()
+                                    .max((m1, m2) -> Double.compare(m1.getScore(), m2.getScore()))
+                                    .orElse(scaledMatches.get(0));
+                                pattern.getSearchRegions().setFixedRegion(bestScaledMatch.getRegion());
+                            }
+                        }
+                    }
+                }
+            }
+            
+            // Save debug images if still no matches and pattern name contains "prompt"
+            if (matchList.isEmpty() && pattern.getName() != null && pattern.getName().toLowerCase().contains("prompt")) {
                 saveDebugImages(pattern, scene);
             }
         } else {
@@ -418,6 +458,43 @@ public class ScenePatternMatcher {
         if (bytes < 1024) return bytes + "B";
         if (bytes < 1024 * 1024) return (bytes / 1024) + "KB";
         return (bytes / (1024 * 1024)) + "MB";
+    }
+    
+    /**
+     * Helper method to find a scaled pattern without recursion.
+     * This is a simplified version of findAllInScene specifically for scaled patterns.
+     */
+    private List<Match> findScaledPattern(Pattern scaledPattern, Scene scene, String originalName) {
+        // Check size constraints
+        if (scaledPattern.w() > scene.getPattern().w() || scaledPattern.h() > scene.getPattern().h()) {
+            return new ArrayList<>();
+        }
+        
+        // Get the SikuliX pattern
+        org.sikuli.script.Pattern sikuliPattern = scaledPattern.sikuli();
+        double globalSimilarity = org.sikuli.basics.Settings.MinSimilarity;
+        
+        if (Math.abs(sikuliPattern.getSimilar() - globalSimilarity) > 0.01) {
+            sikuliPattern = sikuliPattern.similar(globalSimilarity);
+        }
+        
+        // Create Finder and execute search
+        Finder f = getFinder(scene.getPattern().getImage());
+        f.findAll(sikuliPattern);
+        
+        // Process results
+        List<Match> matchList = new ArrayList<>();
+        while (f.hasNext()) {
+            org.sikuli.script.Match sikuliMatch = f.next();
+            Match nextMatch = new Match.Builder()
+                    .setSikuliMatch(sikuliMatch)
+                    .setName(originalName) // Use original name, not scaled name
+                    .build();
+            matchList.add(nextMatch);
+        }
+        
+        f.destroy();
+        return matchList;
     }
 
 }
