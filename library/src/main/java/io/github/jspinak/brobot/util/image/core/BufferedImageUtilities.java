@@ -27,8 +27,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 @Slf4j
 /**
@@ -135,28 +137,49 @@ public class BufferedImageUtilities {
         return screen;
     }
 
+    // Track which images have been logged to avoid spam
+    private static final Set<String> loggedImages = new HashSet<>();
+    
     /**
      * Creates a new SikuliX Pattern and retrieves the BufferedImage from this Pattern.
      * @param path the filename of the image
      * @return the BufferedImage from file
      */
     public static BufferedImage getBuffImgFromFile(String path) {
-        ConsoleReporter.println("=== [IMAGE LOADING] Starting load for: " + path);
+        boolean shouldLog = !loggedImages.contains(path);
+        if (shouldLog) {
+            loggedImages.add(path);
+            ConsoleReporter.println("[IMAGE LOAD] Loading: " + path);
+            
+            // Check if file exists and log absolute path
+            File file = new File(path);
+            if (!file.isAbsolute()) {
+                file = new File(System.getProperty("user.dir"), path);
+            }
+            ConsoleReporter.println("  -> Absolute path: " + file.getAbsolutePath());
+            ConsoleReporter.println("  -> File exists: " + file.exists());
+            
+            if (file.exists()) {
+                ConsoleReporter.println("  -> File size: " + file.length() + " bytes");
+            }
+        }
         
         // Try SmartImageLoader first if available
         if (instance != null && instance.smartImageLoader != null) {
             try {
-                ConsoleReporter.println("  [SmartImageLoader] Attempting to load: " + path);
                 SmartImageLoader.LoadResult result = instance.smartImageLoader.loadImage(path);
                 if (result.isSuccess()) {
                     BufferedImage img = instance.smartImageLoader.getFromCache(path);
-                    ConsoleReporter.println("  [SmartImageLoader] SUCCESS - Loaded image: " + 
-                        img.getWidth() + "x" + img.getHeight());
+                    if (shouldLog) {
+                        ConsoleReporter.println("  -> SmartImageLoader: " + img.getWidth() + "x" + img.getHeight() + 
+                            " type=" + getImageTypeName(img.getType()));
+                    }
                     return img;
                 }
-                ConsoleReporter.println("  [SmartImageLoader] FAILED - Result not successful");
             } catch (Exception e) {
-                ConsoleReporter.println("  [SmartImageLoader] ERROR: " + e.getMessage());
+                if (shouldLog) {
+                    ConsoleReporter.println("  -> SmartImageLoader failed: " + e.getMessage());
+                }
             }
         }
         
@@ -165,40 +188,84 @@ public class BufferedImageUtilities {
         
         // In mock mode, always use dummy images
         if (env.isMockMode()) {
-            ConsoleReporter.println("  [Mock Mode] Returning dummy image 100x100");
             return new BufferedImage(100, 100, BufferedImage.TYPE_INT_RGB);
         }
         
         // Try SikuliX Pattern first if we have display
         if (env.hasDisplay()) {
             try {
-                ConsoleReporter.println("  [SikuliX Pattern] Attempting to load: " + path);
                 Pattern sikuliPattern = new Pattern(path);
                 BufferedImage bi = sikuliPattern.getBImage();
                 if (bi != null) {
-                    ConsoleReporter.println("  [SikuliX Pattern] SUCCESS - Loaded image: " + 
-                        bi.getWidth() + "x" + bi.getHeight());
+                    if (shouldLog) {
+                        ConsoleReporter.println("  -> SikuliX Pattern: " + bi.getWidth() + "x" + bi.getHeight() + 
+                            " type=" + getImageTypeName(bi.getType()));
+                        validateImageContent(bi, path);
+                    }
                     return bi;
                 }
-                ConsoleReporter.println("  [SikuliX Pattern] FAILED - Pattern.getBImage() returned null");
             } catch (Exception e) {
-                ConsoleReporter.println("  [SikuliX Pattern] ERROR: " + e.getClass().getSimpleName() + 
-                    " - " + e.getMessage());
+                if (shouldLog) {
+                    ConsoleReporter.println("  -> SikuliX Pattern failed: " + e.getMessage());
+                }
             }
-        } else {
-            ConsoleReporter.println("  [Environment] No display available - skipping SikuliX Pattern");
         }
         
         // Fall back to direct file reading
-        ConsoleReporter.println("  [Direct Load] Falling back to direct file reading");
         BufferedImage result = getBuffImgDirectly(path);
-        if (result != null) {
-            ConsoleReporter.println("=== [IMAGE LOADING] SUCCESS - Final image: " + 
-                result.getWidth() + "x" + result.getHeight());
-        } else {
-            ConsoleReporter.println("=== [IMAGE LOADING] FAILED - No image loaded");
+        if (shouldLog && result != null) {
+            ConsoleReporter.println("  -> Direct load: " + result.getWidth() + "x" + result.getHeight() + 
+                " type=" + getImageTypeName(result.getType()));
+            validateImageContent(result, path);
         }
         return result;
+    }
+    
+    /**
+     * Quick validation of image content
+     */
+    private static void validateImageContent(BufferedImage img, String path) {
+        if (img == null) return;
+        
+        // Sample a few pixels to check if image is valid
+        int width = img.getWidth();
+        int height = img.getHeight();
+        if (width < 1 || height < 1) {
+            ConsoleReporter.println("  -> WARNING: Invalid dimensions for " + path);
+            return;
+        }
+        
+        // Quick sample to check if image is all black/white
+        int centerX = width / 2;
+        int centerY = height / 2;
+        int rgb = img.getRGB(centerX, centerY);
+        int r = (rgb >> 16) & 0xFF;
+        int g = (rgb >> 8) & 0xFF;
+        int b = rgb & 0xFF;
+        
+        // Sample corners too
+        int topLeft = img.getRGB(0, 0);
+        int bottomRight = img.getRGB(width-1, height-1);
+        
+        if ((r < 5 && g < 5 && b < 5) && 
+            (topLeft & 0xFFFFFF) < 0x050505 && 
+            (bottomRight & 0xFFFFFF) < 0x050505) {
+            ConsoleReporter.println("  -> WARNING: Image appears to be all black!");
+        }
+    }
+    
+    /**
+     * Get human-readable image type name
+     */
+    private static String getImageTypeName(int type) {
+        switch (type) {
+            case BufferedImage.TYPE_INT_RGB: return "RGB";
+            case BufferedImage.TYPE_INT_ARGB: return "ARGB";
+            case BufferedImage.TYPE_3BYTE_BGR: return "BGR";
+            case BufferedImage.TYPE_BYTE_GRAY: return "GRAY";
+            case BufferedImage.TYPE_BYTE_BINARY: return "BINARY";
+            default: return "Type" + type;
+        }
     }
 
     /**
@@ -209,81 +276,46 @@ public class BufferedImageUtilities {
      * @return the BufferedImage from an image on file
      */
     public static BufferedImage getBuffImgDirectly(String path) {
-        ConsoleReporter.println("    [Direct] Original path: " + path);
         String pathWithExtension = FilenameUtils.addPngExtensionIfNeeded(path);
-        ConsoleReporter.println("    [Direct] Path with extension: " + pathWithExtension);
-        
         File f = new File(pathWithExtension);
-        ConsoleReporter.println("    [Direct] Initial file absolute: " + f.isAbsolute() + 
-            ", exists: " + f.exists());
         
         // If file doesn't exist and path is relative, try common locations
         if (!f.exists() && !f.isAbsolute()) {
-            ConsoleReporter.println("    [Direct] File not found, searching alternative locations...");
-            
             // Try "images" folder first (common convention)
             File imagesFile = new File("images", pathWithExtension);
-            ConsoleReporter.println("    [Direct] Checking images folder: " + imagesFile.getAbsolutePath());
             if (imagesFile.exists()) {
                 f = imagesFile;
-                ConsoleReporter.println("    [Direct] FOUND in images folder");
             } else {
-                ConsoleReporter.println("    [Direct] NOT in images folder");
-                
                 // If still not found, try bundle path
                 if (!f.exists()) {
                     try {
                         String bundlePath = org.sikuli.script.ImagePath.getBundlePath();
-                        ConsoleReporter.println("    [Direct] SikuliX bundle path: " + bundlePath);
                         if (bundlePath != null && !bundlePath.isEmpty()) {
                             File bundleFile = new File(bundlePath, pathWithExtension);
-                            ConsoleReporter.println("    [Direct] Checking bundle: " + bundleFile.getAbsolutePath());
                             if (bundleFile.exists()) {
                                 f = bundleFile;
-                                ConsoleReporter.println("    [Direct] FOUND in SikuliX bundle path");
-                            } else {
-                                ConsoleReporter.println("    [Direct] NOT in bundle path");
                             }
                         }
                     } catch (Exception e) {
-                        ConsoleReporter.println("    [Direct] ERROR getting bundle path: " + e.getMessage());
+                        // Ignore and continue with original file
                     }
                 }
             }
         }
         
         if (!f.exists()) {
-            ConsoleReporter.println("    [Direct] IMAGE FILE NOT FOUND!");
-            ConsoleReporter.println("    [Direct] Final attempted path: " + f.getAbsolutePath());
-            ConsoleReporter.println("    [Direct] Working directory: " + System.getProperty("user.dir"));
-            ConsoleReporter.println("    [Direct] Searched locations:");
-            ConsoleReporter.println("      - Direct path: " + new File(pathWithExtension).getAbsolutePath());
-            ConsoleReporter.println("      - Images folder: " + new File("images", pathWithExtension).getAbsolutePath());
-            try {
-                String bundlePath = org.sikuli.script.ImagePath.getBundlePath();
-                if (bundlePath != null) {
-                    ConsoleReporter.println("      - Bundle path: " + new File(bundlePath, pathWithExtension).getAbsolutePath());
-                }
-            } catch (Exception e) {
-                ConsoleReporter.println("      - Bundle path: [Error: " + e.getMessage() + "]");
+            if (!loggedImages.contains(path + "_not_found")) {
+                loggedImages.add(path + "_not_found");
+                ConsoleReporter.println("[IMAGE NOT FOUND] " + path);
+                ConsoleReporter.println("  Searched: " + f.getAbsolutePath());
             }
             return null;
         }
         
-        ConsoleReporter.println("    [Direct] Loading image from: " + f.getAbsolutePath());
-        ConsoleReporter.println("    [Direct] File size: " + f.length() + " bytes");
-        
         try {
             BufferedImage img = ImageIO.read(f);
-            if (img == null) {
-                ConsoleReporter.println("    [Direct] ERROR: ImageIO.read returned null");
-            } else {
-                ConsoleReporter.println("    [Direct] SUCCESS: Loaded image " + 
-                    img.getWidth() + "x" + img.getHeight() + ", type: " + img.getType());
-            }
             return img;
         } catch (IOException e) {
-            ConsoleReporter.println("    [Direct] IOException: " + e.getMessage());
             throw new RuntimeException(e);
         }
     }
@@ -293,22 +325,29 @@ public class BufferedImageUtilities {
         
         // Log environment info only once per session
         if (!environmentLogged) {
-            log.debug("[STATIC_SCREEN_CAPTURE] Environment info: {}", env.getEnvironmentInfo());
-            log.debug("[STATIC_SCREEN_CAPTURE] canCaptureScreen: {}, hasDisplay: {}, mockMode: {}", 
-                    env.canCaptureScreen(), env.hasDisplay(), env.isMockMode());
+            ConsoleReporter.println("[SCREEN CAPTURE] Environment check:");
+            ConsoleReporter.println("  -> Display available: " + env.hasDisplay());
+            ConsoleReporter.println("  -> Can capture screen: " + env.canCaptureScreen());
+            ConsoleReporter.println("  -> Mock mode: " + env.isMockMode());
+            ConsoleReporter.println("  -> Display env var: " + System.getenv("DISPLAY"));
+            ConsoleReporter.println("  -> Java AWT headless: " + java.awt.GraphicsEnvironment.isHeadless());
             environmentLogged = true;
         }
         
         // Only return dummy image if we're in mock mode or don't have display
         // canCaptureScreen() may be too restrictive for illustration generation
         if (env.isMockMode() || !env.hasDisplay()) {
-            if (!environmentLogged) {
-                log.warn("[STATIC_SCREEN_CAPTURE] Mock mode or no display - returning black dummy image");
-            }
+            ConsoleReporter.println("[SCREEN CAPTURE] No display - returning dummy image");
             // Return dummy only when screen capture not possible
-            return new BufferedImage(region.w() > 0 ? region.w() : 1920, 
+            BufferedImage dummy = new BufferedImage(region.w() > 0 ? region.w() : 1920, 
                                    region.h() > 0 ? region.h() : 1080, 
                                    BufferedImage.TYPE_INT_RGB);
+            // Fill with dark gray instead of black to distinguish from real black screens
+            Graphics2D g = dummy.createGraphics();
+            g.setColor(new Color(32, 32, 32));
+            g.fillRect(0, 0, dummy.getWidth(), dummy.getHeight());
+            g.dispose();
+            return dummy;
         }
         
         try {
@@ -320,23 +359,52 @@ public class BufferedImageUtilities {
                 // Only log monitor info periodically to reduce spam
                 long now = System.currentTimeMillis();
                 if (now - lastMonitorLogTime > MONITOR_LOG_INTERVAL) {
-                    log.debug("Capturing from monitor {} for region: {}", screen.getID(), region);
+                    ConsoleReporter.println("[SCREEN CAPTURE] Using monitor " + screen.getID() + " for region: " + region);
                     lastMonitorLogTime = now;
                 }
             }
+            
+            ConsoleReporter.println("[SCREEN CAPTURE] Attempting capture of region: " + 
+                region.x() + "," + region.y() + " " + region.w() + "x" + region.h());
+            
             BufferedImage captured = screen.capture(region.sikuli()).getImage();
-            // Only log successful capture occasionally
-            if (!environmentLogged) {
-                log.debug("[STATIC_SCREEN_CAPTURE] Successfully captured screen: {}x{}", 
-                        captured.getWidth(), captured.getHeight());
+            
+            // Validate captured image
+            if (captured != null) {
+                ConsoleReporter.println("[SCREEN CAPTURE] Success: " + captured.getWidth() + "x" + captured.getHeight() + 
+                    " type=" + getImageTypeName(captured.getType()));
+                
+                // Quick check if captured image is all black
+                int sampleCount = 10;
+                int blackPixels = 0;
+                for (int i = 0; i < sampleCount; i++) {
+                    int x = (captured.getWidth() * i) / sampleCount;
+                    int y = captured.getHeight() / 2;
+                    int rgb = captured.getRGB(x, y);
+                    if ((rgb & 0xFFFFFF) < 0x0A0A0A) blackPixels++;
+                }
+                
+                if (blackPixels == sampleCount) {
+                    ConsoleReporter.println("  -> WARNING: Captured image appears to be all black!");
+                    ConsoleReporter.println("  -> This may indicate screen capture is not working properly");
+                }
+            } else {
+                ConsoleReporter.println("[SCREEN CAPTURE] ERROR: Captured image is null!");
             }
+            
             return captured;
         } catch (Exception e) {
-            log.error("[STATIC_SCREEN_CAPTURE] Failed to capture screen: {}", e.getMessage(), e);
+            ConsoleReporter.println("[SCREEN CAPTURE] FAILED: " + e.getMessage());
+            e.printStackTrace();
             // Return dummy image on capture failure
-            return new BufferedImage(region.w() > 0 ? region.w() : 1920, 
+            BufferedImage dummy = new BufferedImage(region.w() > 0 ? region.w() : 1920, 
                                    region.h() > 0 ? region.h() : 1080, 
                                    BufferedImage.TYPE_INT_RGB);
+            Graphics2D g = dummy.createGraphics();
+            g.setColor(new Color(64, 0, 0)); // Dark red to indicate error
+            g.fillRect(0, 0, dummy.getWidth(), dummy.getHeight());
+            g.dispose();
+            return dummy;
         }
     }
 

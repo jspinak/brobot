@@ -279,35 +279,33 @@ public class Pattern {
     }
 
     // __convenience functions for the SikuliX Pattern object__
+    // Cache for SikuliX Pattern to avoid recreating it multiple times
+    @JsonIgnore
+    private transient org.sikuli.script.Pattern cachedSikuliPattern = null;
+    
     /**
      * Another way to get the SikuliX object.
      * @return the SikuliX Pattern object.
      */
     @JsonIgnore
     public org.sikuli.script.Pattern sikuli() {
-        ConsoleReporter.println("  [Pattern.sikuli()] Creating SikuliX Pattern for: " + name);
+        // Return cached pattern if available
+        if (cachedSikuliPattern != null) {
+            return cachedSikuliPattern;
+        }
         
         if (image == null) {
-            ConsoleReporter.println("    ERROR: Image is null for pattern: " + name);
             throw new IllegalStateException("Cannot create SikuliX Pattern: Image is null for pattern: " + name);
         }
         
         if (image.isEmpty()) {
-            ConsoleReporter.println("    ERROR: Image has no BufferedImage for pattern: " + name);
-            ConsoleReporter.println("    Image path: " + imgpath);
             throw new IllegalStateException("Cannot create SikuliX Pattern: Image has no BufferedImage. " +
                 "Image file may not exist or failed to load for pattern: " + name);
         }
         
-        BufferedImage buffImg = image.getBufferedImage();
-        ConsoleReporter.println("    BufferedImage: " + buffImg.getWidth() + "x" + buffImg.getHeight());
-        
-        org.sikuli.script.Pattern sikuliPattern = new org.sikuli.script.Pattern(image.sikuli());
-        ConsoleReporter.println("    SikuliX Pattern created successfully");
-        ConsoleReporter.println("    Pattern filename: " + sikuliPattern.getFilename());
-        ConsoleReporter.println("    Pattern similarity: " + sikuliPattern.getSimilar());
-        
-        return sikuliPattern;
+        // Create and cache the pattern
+        cachedSikuliPattern = new org.sikuli.script.Pattern(image.sikuli());
+        return cachedSikuliPattern;
     }
 
     @JsonIgnore

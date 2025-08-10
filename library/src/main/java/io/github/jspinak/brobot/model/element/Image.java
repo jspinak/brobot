@@ -141,19 +141,11 @@ public class Image {
 
     @JsonIgnore
     public org.sikuli.script.Image sikuli() {
-        ConsoleReporter.println("    [Image.sikuli()] Creating SikuliX Image for: " + name);
-        
         if (bufferedImage == null) {
-            ConsoleReporter.println("      ERROR: BufferedImage is null for: " + name);
             throw new IllegalStateException("Cannot create SikuliX Image: BufferedImage is null. " +
                 "Image file may not exist or failed to load: " + name);
         }
-        
-        ConsoleReporter.println("      BufferedImage size: " + bufferedImage.getWidth() + "x" + bufferedImage.getHeight());
-        org.sikuli.script.Image sikuliImage = new org.sikuli.script.Image(bufferedImage);
-        ConsoleReporter.println("      SikuliX Image created successfully");
-        
-        return sikuliImage;
+        return new org.sikuli.script.Image(bufferedImage);
     }
 
     public void setName(String name) {
