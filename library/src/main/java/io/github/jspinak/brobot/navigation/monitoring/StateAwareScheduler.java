@@ -2,8 +2,11 @@ package io.github.jspinak.brobot.navigation.monitoring;
 
 import io.github.jspinak.brobot.statemanagement.StateDetector;
 import io.github.jspinak.brobot.statemanagement.StateMemory;
+import io.github.jspinak.brobot.config.LoggingVerbosityConfig;
+import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -47,6 +50,9 @@ public class StateAwareScheduler {
     
     private final StateDetector stateDetector;
     private final StateMemory stateMemory;
+    
+    @Autowired(required = false)
+    private LoggingVerbosityConfig verbosityConfig;
     
     /**
      * Configuration for state checking behavior.
@@ -164,17 +170,46 @@ public class StateAwareScheduler {
         final AtomicInteger iterationCount = new AtomicInteger(0);
         final int maxIterations = config.getMaxIterations();
         
+        // Log scheduling start
+        if (maxIterations > 0) {
+            if (verbosityConfig != null && (verbosityConfig.isNormalMode() || verbosityConfig.isVerboseMode())) {
+                ConsoleReporter.println("[SCHEDULER] Starting scheduled task with " + maxIterations + 
+                                      " iteration limit, period: " + period + " " + unit.toString().toLowerCase());
+            }
+        }
+        
         return scheduler.scheduleAtFixedRate(() -> {
             try {
                 // Check if we've reached the iteration limit
                 if (maxIterations > 0) {
                     int currentIteration = iterationCount.incrementAndGet();
                     if (currentIteration > maxIterations) {
+                        // Always log when stopping due to max iterations
+                        ConsoleReporter.println("[SCHEDULER] Reached maximum iterations (" + maxIterations + 
+                                              "), stopping scheduled task");
                         log.info("Reached maximum iterations ({}) for scheduled task, stopping", maxIterations);
                         throw new RuntimeException("Max iterations reached");
                     }
-                    log.debug("Executing scheduled task iteration {}/{}", 
-                             currentIteration, maxIterations);
+                    
+                    // Log iteration progress based on verbosity
+                    if (verbosityConfig != null) {
+                        if (verbosityConfig.isVerboseMode()) {
+                            // VERBOSE: Log every iteration
+                            ConsoleReporter.println("[SCHEDULER] Executing iteration " + currentIteration + 
+                                                  "/" + maxIterations);
+                        } else if (verbosityConfig.isNormalMode() && 
+                                 (currentIteration == 1 || currentIteration % 5 == 0 || 
+                                  currentIteration == maxIterations)) {
+                            // NORMAL: Log first, every 5th, and last iteration
+                            ConsoleReporter.println("[SCHEDULER] Iteration " + currentIteration + 
+                                                  "/" + maxIterations);
+                        }
+                        // QUIET: No iteration logging
+                    } else {
+                        // Fallback to debug logging if config not available
+                        log.debug("Executing scheduled task iteration {}/{}", 
+                                currentIteration, maxIterations);
+                    }
                 }
                 
                 performStateCheck(config);
@@ -220,17 +255,46 @@ public class StateAwareScheduler {
         final AtomicInteger iterationCount = new AtomicInteger(0);
         final int maxIterations = config.getMaxIterations();
         
+        // Log scheduling start
+        if (maxIterations > 0) {
+            if (verbosityConfig != null && (verbosityConfig.isNormalMode() || verbosityConfig.isVerboseMode())) {
+                ConsoleReporter.println("[SCHEDULER] Starting scheduled task with " + maxIterations + 
+                                      " iteration limit, delay: " + delay + " " + unit.toString().toLowerCase());
+            }
+        }
+        
         return scheduler.scheduleWithFixedDelay(() -> {
             try {
                 // Check if we've reached the iteration limit
                 if (maxIterations > 0) {
                     int currentIteration = iterationCount.incrementAndGet();
                     if (currentIteration > maxIterations) {
+                        // Always log when stopping due to max iterations
+                        ConsoleReporter.println("[SCHEDULER] Reached maximum iterations (" + maxIterations + 
+                                              "), stopping scheduled task");
                         log.info("Reached maximum iterations ({}) for scheduled task, stopping", maxIterations);
                         throw new RuntimeException("Max iterations reached");
                     }
-                    log.debug("Executing scheduled task iteration {}/{}", 
-                             currentIteration, maxIterations);
+                    
+                    // Log iteration progress based on verbosity
+                    if (verbosityConfig != null) {
+                        if (verbosityConfig.isVerboseMode()) {
+                            // VERBOSE: Log every iteration
+                            ConsoleReporter.println("[SCHEDULER] Executing iteration " + currentIteration + 
+                                                  "/" + maxIterations);
+                        } else if (verbosityConfig.isNormalMode() && 
+                                 (currentIteration == 1 || currentIteration % 5 == 0 || 
+                                  currentIteration == maxIterations)) {
+                            // NORMAL: Log first, every 5th, and last iteration
+                            ConsoleReporter.println("[SCHEDULER] Iteration " + currentIteration + 
+                                                  "/" + maxIterations);
+                        }
+                        // QUIET: No iteration logging
+                    } else {
+                        // Fallback to debug logging if config not available
+                        log.debug("Executing scheduled task iteration {}/{}", 
+                                currentIteration, maxIterations);
+                    }
                 }
                 
                 performStateCheck(config);
