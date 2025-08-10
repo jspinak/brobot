@@ -91,6 +91,14 @@ public class ScenePatternMatcher {
      *           to the location of the best match found.
      */
     public List<Match> findAllInScene(Pattern pattern, Scene scene) {
+        // Debug: log what regions the pattern thinks it should search
+        ConsoleReporter.println("[REGION DEBUG] Pattern '" + pattern.getName() + "' search configuration:");
+        ConsoleReporter.println("  - Is fixed: " + pattern.isFixed());
+        ConsoleReporter.println("  - Search regions: " + pattern.getSearchRegions().getRegions());
+        ConsoleReporter.println("  - Fixed region: " + pattern.getSearchRegions().getFixedRegion());
+        ConsoleReporter.println("  - getRegions(fixed): " + pattern.getRegions());
+        ConsoleReporter.println("  - Scene size: " + scene.getPattern().w() + "x" + scene.getPattern().h());
+        
         // Check size constraints first
         if (pattern.w()>scene.getPattern().w() || pattern.h()>scene.getPattern().h()) {
             ConsoleReporter.println("[SKIP] Pattern '" + pattern.getName() + "' (" + pattern.w() + "x" + pattern.h() + 
@@ -103,8 +111,11 @@ public class ScenePatternMatcher {
         
         // Ensure the pattern has the correct similarity threshold
         double globalSimilarity = org.sikuli.basics.Settings.MinSimilarity;
+        ConsoleReporter.println("[SIMILARITY] Global MinSimilarity: " + globalSimilarity);
+        ConsoleReporter.println("[SIMILARITY] Pattern current similarity: " + sikuliPattern.getSimilar());
         if (Math.abs(sikuliPattern.getSimilar() - globalSimilarity) > 0.01) {
             sikuliPattern = sikuliPattern.similar(globalSimilarity);
+            ConsoleReporter.println("[SIMILARITY] Updated pattern similarity to: " + sikuliPattern.getSimilar());
         }
         
         // Log the search attempt using DiagnosticLogger if available
@@ -119,7 +130,9 @@ public class ScenePatternMatcher {
         
         // Create Finder and execute search
         Finder f = getFinder(scene.getPattern().getImage());
+        ConsoleReporter.println("[FINDER] Searching with similarity threshold: " + sikuliPattern.getSimilar());
         f.findAll(sikuliPattern);
+        ConsoleReporter.println("[FINDER] Search completed, checking for matches...");
         
         // Process results
         List<Match> matchList = new ArrayList<>();
@@ -285,6 +298,11 @@ public class ScenePatternMatcher {
             double[] testThresholds = {0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3};
             Double foundThreshold = null;
             Double foundScore = null;
+            
+            ConsoleReporter.println("    [SIMILARITY DEBUG] Testing pattern '" + pattern.getName() + "'");
+            ConsoleReporter.println("    [SIMILARITY DEBUG] Original MinSimilarity: " + originalSimilarity);
+            ConsoleReporter.println("    [SIMILARITY DEBUG] Pattern type before conversion: Type" + patternImg.getType());
+            ConsoleReporter.println("    [SIMILARITY DEBUG] Scene type: Type" + sceneImg.getType());
             
             for (double threshold : testThresholds) {
                 org.sikuli.basics.Settings.MinSimilarity = threshold;
