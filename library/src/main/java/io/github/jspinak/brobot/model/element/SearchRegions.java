@@ -60,8 +60,9 @@ public class SearchRegions {
     /**
      * The fixed region is usually defined when an image with a fixed location is found for the first time.
      * This region is then used in future FIND operations with the associated image.
+     * Initialized to null to distinguish between "not set" and "explicitly set to a region".
      */
-    private Region fixedRegion = new Region();
+    private Region fixedRegion = null;
 
     /**
      * If the fixed region has been set.
@@ -69,11 +70,11 @@ public class SearchRegions {
      */
     @JsonIgnore
     public boolean isFixedRegionSet() {
-        return fixedRegion.isDefined();
+        return fixedRegion != null && fixedRegion.isDefined();
     }
 
     public void resetFixedRegion() {
-        fixedRegion = new Region();
+        fixedRegion = null;
     }
 
     /**
@@ -115,7 +116,9 @@ public class SearchRegions {
      */
     public List<Region> getRegions(boolean fixed) {
         if (!fixed) return regions;
-        if (fixedRegion.isDefined()) return List.of(fixedRegion);
+        // Only return fixed region if it's been explicitly set (not just default initialized)
+        // fixedRegion is null when not set (to distinguish from default full-screen Region)
+        if (fixedRegion != null && fixedRegion.isDefined()) return List.of(fixedRegion);
         return regions;
     }
 
@@ -145,7 +148,7 @@ public class SearchRegions {
     @JsonIgnore
     public List<Region> getRegionsForSearch() {
         // If fixed region is set, use only that
-        if (fixedRegion.isDefined()) {
+        if (fixedRegion != null && fixedRegion.isDefined()) {
             return List.of(fixedRegion);
         }
         // If regions are configured, use them
@@ -183,7 +186,7 @@ public class SearchRegions {
      */
     @JsonIgnore
     public boolean isAnyRegionDefined() {
-        if (fixedRegion.isDefined()) return true;
+        if (fixedRegion != null && fixedRegion.isDefined()) return true;
         for (Region region : regions) {
             if (region.isDefined()) return true;
         }
@@ -196,7 +199,7 @@ public class SearchRegions {
      */
     @JsonIgnore
     public boolean isDefined(boolean fixed) {
-        if (fixedRegion.isDefined()) return true;
+        if (fixedRegion != null && fixedRegion.isDefined()) return true;
         if (fixed) return false; // should be fixed but the region is not defined
         return isAnyRegionDefined();
     }

@@ -197,7 +197,10 @@ public class StateImage implements StateObject {
      */
     public boolean hasDefinedSearchRegion() {
         for (Pattern pattern : patterns) {
-            if (pattern.getSearchRegions().getFixedRegion().isDefined()) return true;
+            // Check if fixed region is set and defined
+            Region fixedRegion = pattern.getSearchRegions().getFixedRegion();
+            if (fixedRegion != null && fixedRegion.isDefined()) return true;
+            // Check if any search regions are defined
             if (!pattern.getSearchRegions().getRegions().isEmpty()) {
                 for (Region region : pattern.getSearchRegions().getRegions()) {
                     if (region.isDefined()) return true;
