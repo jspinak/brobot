@@ -48,6 +48,9 @@ public class ScenePatternMatcher {
 
     @Autowired(required = false)
     private DiagnosticLogger diagnosticLogger;
+    
+    @Autowired(required = false)
+    private BestMatchCapture bestMatchCapture;
 
     /**
      * Creates a Sikuli Finder instance for the given scene image.
@@ -192,6 +195,11 @@ public class ScenePatternMatcher {
             if (bestMatch != null && pattern.isFixed()) {
                 pattern.getSearchRegions().setFixedRegion(bestMatch.getRegion());
             }
+        }
+        
+        // Capture best match for debugging if enabled
+        if (bestMatchCapture != null && bestMatchCapture.isCaptureEnabled()) {
+            bestMatchCapture.captureBestMatch(pattern, scene, matchList);
         }
         
         return matchList;
