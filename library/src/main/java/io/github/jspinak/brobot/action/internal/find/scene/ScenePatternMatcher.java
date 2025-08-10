@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.imageio.ImageIO;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -99,6 +100,20 @@ public class ScenePatternMatcher {
             return new ArrayList<>();
         }
         
+        // Debug: Check image types
+        if (pattern.getName() != null && pattern.getName().contains("prompt")) {
+            BufferedImage patternImg = pattern.getBImage();
+            BufferedImage sceneImg = scene.getPattern().getBImage();
+            if (patternImg != null) {
+                ConsoleReporter.println("[DEBUG] Pattern '" + pattern.getName() + "' image type: " + 
+                    getImageType(patternImg.getType()) + " hasAlpha=" + patternImg.getColorModel().hasAlpha());
+            }
+            if (sceneImg != null) {
+                ConsoleReporter.println("[DEBUG] Scene image type: " + 
+                    getImageType(sceneImg.getType()) + " hasAlpha=" + sceneImg.getColorModel().hasAlpha());
+            }
+        }
+        
         // Get the SikuliX pattern once and cache it
         org.sikuli.script.Pattern sikuliPattern = pattern.sikuli();
         
@@ -120,6 +135,47 @@ public class ScenePatternMatcher {
         
         // Create Finder and execute search
         Finder f = getFinder(scene.getPattern().getImage());
+        
+        // Debug: Test direct SikuliX pattern matching for prompt patterns
+        if (pattern.getName() != null && pattern.getName().contains("prompt")) {
+            ConsoleReporter.println("[DEBUG] Testing direct SikuliX match for '" + pattern.getName() + "'");
+            
+            // Test 1: Create a fresh SikuliX pattern directly from the BufferedImage
+            org.sikuli.script.Pattern testPattern = new org.sikuli.script.Pattern(pattern.getBImage());
+            testPattern = testPattern.similar(sikuliPattern.getSimilar());
+            
+            // Test with the test pattern
+            Finder testFinder = getFinder(scene.getPattern().getImage());
+            testFinder.findAll(testPattern);
+            
+            if (testFinder.hasNext()) {
+                org.sikuli.script.Match firstMatch = testFinder.next();
+                ConsoleReporter.println("[DEBUG] Direct test found match! Score: " + 
+                    String.format("%.3f", firstMatch.getScore()) + " at (" + firstMatch.x + ", " + firstMatch.y + ")");
+            } else {
+                ConsoleReporter.println("[DEBUG] Direct test also found no matches");
+            }
+            testFinder.destroy();
+            
+            // Test 2: Convert pattern to RGB and try again
+            ConsoleReporter.println("[DEBUG] Testing with RGB-converted pattern");
+            BufferedImage rgbPattern = convertToRGB(pattern.getBImage());
+            org.sikuli.script.Pattern rgbTestPattern = new org.sikuli.script.Pattern(rgbPattern);
+            rgbTestPattern = rgbTestPattern.similar(sikuliPattern.getSimilar());
+            
+            Finder rgbFinder = getFinder(scene.getPattern().getImage());
+            rgbFinder.findAll(rgbTestPattern);
+            
+            if (rgbFinder.hasNext()) {
+                org.sikuli.script.Match firstMatch = rgbFinder.next();
+                ConsoleReporter.println("[DEBUG] RGB-converted pattern FOUND match! Score: " + 
+                    String.format("%.3f", firstMatch.getScore()) + " at (" + firstMatch.x + ", " + firstMatch.y + ")");
+            } else {
+                ConsoleReporter.println("[DEBUG] RGB-converted pattern also found no matches");
+            }
+            rgbFinder.destroy();
+        }
+        
         f.findAll(sikuliPattern);
         
         // Process results
@@ -393,6 +449,22 @@ public class ScenePatternMatcher {
         if (bytes < 1024) return bytes + "B";
         if (bytes < 1024 * 1024) return (bytes / 1024) + "KB";
         return (bytes / (1024 * 1024)) + "MB";
+    }
+    
+    /**
+     * Convert image to RGB format if it has alpha channel
+     */
+    private BufferedImage convertToRGB(BufferedImage img) {
+        if (img.getType() == BufferedImage.TYPE_INT_RGB || img.getType() == BufferedImage.TYPE_3BYTE_BGR) {
+            return img; // Already RGB
+        }
+        
+        BufferedImage rgbImage = new BufferedImage(img.getWidth(), img.getHeight(), BufferedImage.TYPE_INT_RGB);
+        Graphics2D g = rgbImage.createGraphics();
+        g.setComposite(AlphaComposite.Src);
+        g.drawImage(img, 0, 0, null);
+        g.dispose();
+        return rgbImage;
     }
 
 }
