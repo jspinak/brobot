@@ -234,7 +234,81 @@
 
    **For detailed documentation, see:** `docs/03-core-library/guides/declarative-region-definition.md`
 
-5. **Transitions (Two Approaches)**
+5. **Search Regions and Fixed Locations**
+
+   Understanding how search regions and fixed locations work together is crucial for efficient pattern matching:
+
+   **Key Concept:**
+   > The normal search region defines a limited area in which to search. StateImages marked as fixed will set the fixed region when found. However, until the image has been found, it will continue to search within the search regions defined for it.
+
+   **Basic Search Region Configuration:**
+   ```java
+   @State
+   @Getter
+   public class ExampleState {
+       private final StateImage element;
+       
+       public ExampleState() {
+           // Define search region (e.g., lower left quarter of screen)
+           Region searchArea = Region.builder()
+               .withScreenPercentage(0.0, 0.5, 0.5, 0.5)  // x=0%, y=50%, w=50%, h=50%
+               .build();
+           
+           // Apply search region to StateImage
+           element = new StateImage.Builder()
+               .addPatterns("element-1", "element-2")
+               .setName("Element")
+               .setSearchRegionForAllPatterns(searchArea)
+               .build();
+       }
+   }
+   ```
+
+   **Fixed Location Pattern:**
+   ```java
+   @State
+   @Getter
+   public class NavigationState {
+       private final StateImage menuBar;
+       
+       public NavigationState() {
+           Region topArea = Region.builder()
+               .withScreenPercentage(0.0, 0.0, 1.0, 0.1)  // Top 10% of screen
+               .build();
+           
+           menuBar = new StateImage.Builder()
+               .addPatterns("menu/menu-bar")
+               .setName("MenuBar")
+               .setSearchRegionForAllPatterns(topArea)
+               .build();
+           
+           // Mark as fixed - will remember location once found
+           menuBar.getPatterns().forEach(p -> p.setFixed(true));
+       }
+   }
+   ```
+
+   **How Fixed Locations Work:**
+   1. **First Search**: Searches within defined search regions
+   2. **Location Memory**: When found, saves exact location as fixed region
+   3. **Subsequent Searches**: Checks fixed location first, falls back to search regions if not found
+
+   **Best Practices:**
+   - Use fixed locations for static UI elements (navigation bars, status indicators)
+   - Use search regions only for dynamic content (popups, moving elements)
+   - Combine both for robustness (fixed location with search region fallback)
+   - Keep search regions as small as practical for performance
+
+   **Performance Impact:**
+   | Approach | Initial Search | Subsequent Searches | Use Case |
+   |----------|---------------|-------------------|----------|
+   | Full Screen | Slowest | Slowest | Last resort |
+   | Search Region | Fast | Fast | Dynamic content |
+   | Fixed + Region | Fast | Fastest | Static UI elements |
+
+   **For detailed documentation, see:** `docs/03-core-library/guides/search-regions-and-fixed-locations.md`
+
+6. **Transitions (Two Approaches)**
 
    **Modern Approach with @Transition Annotation (Recommended):**
    ```java
@@ -287,7 +361,7 @@
    }
    ```
 
-5. **Modern Action Patterns**
+7. **Modern Action Patterns**
    - **Use ActionConfig classes, NOT ActionOptions**:
      ```java
      // Good - Modern approach
@@ -706,7 +780,7 @@
          .build())
      ```
 
-6. **State Registration with Event Listener (Recommended)**
+8. **State Registration with Event Listener (Recommended)**
    ```java
    import org.springframework.boot.context.event.ApplicationReadyEvent;
    import org.springframework.context.event.EventListener;
@@ -755,7 +829,7 @@
    - Better integration with Spring Boot lifecycle
    - Required call to `frameworkInitializer.initializeStateStructure()` after all states are registered
 
-7. **Spring Boot Application**
+9. **Spring Boot Application**
    ```java
    @SpringBootApplication
    @ComponentScan(basePackages = {
@@ -769,7 +843,7 @@
    }
    ```
 
-8. **Enhanced StateNavigator**
+10. **Enhanced StateNavigator**
    ```java
    // Add this method to StateNavigator for cleaner code
    public boolean openState(StateEnum stateEnum) {
@@ -780,7 +854,7 @@
    stateNavigator.openState(WorkingState.Name.WORKING);
    ```
 
-9. **Image and Resource Organization**
+11. **Image and Resource Organization**
    - Place images in `images/[state-name]/` at project root
    - Create `history/` folder at project root for illustrated test screenshots
    - Build.gradle should copy images to build directory:

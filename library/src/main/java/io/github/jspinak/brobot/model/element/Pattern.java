@@ -15,6 +15,8 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.bytedeco.opencv.opencv_core.Mat;
 
+import java.awt.*;
+
 
 import java.awt.image.BufferedImage;
 import java.util.List;
@@ -284,6 +286,7 @@ public class Pattern {
     
     /**
      * Another way to get the SikuliX object.
+     * Converts images with alpha channel to RGB to match SikuliX's internal handling.
      * @return the SikuliX Pattern object.
      */
     @JsonIgnore
@@ -302,8 +305,31 @@ public class Pattern {
                 "Image file may not exist or failed to load for pattern: " + name);
         }
         
-        // Create and cache the pattern
-        cachedSikuliPattern = new org.sikuli.script.Pattern(image.sikuli());
+        // Get the BufferedImage
+        BufferedImage buffImg = image.getBufferedImage();
+        
+        // Convert to RGB if it has alpha channel (like SikuliX does internally)
+        if (buffImg.getColorModel().hasAlpha()) {
+            BufferedImage rgbImage = new BufferedImage(
+                buffImg.getWidth(),
+                buffImg.getHeight(),
+                BufferedImage.TYPE_INT_RGB
+            );
+            Graphics2D g = rgbImage.createGraphics();
+            // Use white background for transparency (SikuliX default)
+            g.setColor(Color.WHITE);
+            g.fillRect(0, 0, rgbImage.getWidth(), rgbImage.getHeight());
+            g.setComposite(AlphaComposite.SrcOver);
+            g.drawImage(buffImg, 0, 0, null);
+            g.dispose();
+            
+            // Create pattern with RGB image
+            cachedSikuliPattern = new org.sikuli.script.Pattern(rgbImage);
+        } else {
+            // No alpha channel, use as-is
+            cachedSikuliPattern = new org.sikuli.script.Pattern(buffImg);
+        }
+        
         return cachedSikuliPattern;
     }
 
