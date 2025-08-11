@@ -24,11 +24,10 @@ import static io.github.jspinak.brobot.model.element.Positions.Name.*;
  *     .centerOnScreen()
  *     .build();
  * 
- * // Create a region with specific size, adjusted for current screen
+ * // Create a region with specific coordinates
  * Region searchArea = new RegionBuilder()
- *     .withBaseScreenSize(1920, 1080)  // Original design resolution
- *     .withBaseRegion(100, 100, 200, 150)  // Original coordinates
- *     .adjustToCurrentScreen()
+ *     .x(100).y(100)
+ *     .width(200).height(150)
  *     .build();
  * 
  * // Create a region with adjustments
@@ -64,9 +63,7 @@ public class RegionBuilder {
     private int widthAdjustment = 0;
     private int heightAdjustment = 0;
     
-    // Screen size references
-    private int baseScreenWidth = 0;
-    private int baseScreenHeight = 0;
+    // Current screen dimensions (for percentage calculations only)
     private int currentScreenWidth = 0;
     private int currentScreenHeight = 0;
     
@@ -312,55 +309,6 @@ public class RegionBuilder {
         return this;
     }
     
-    /**
-     * Sets the base screen size for scaling calculations.
-     * 
-     * @param width base screen width
-     * @param height base screen height
-     * @return this builder
-     */
-    public RegionBuilder withBaseScreenSize(int width, int height) {
-        this.baseScreenWidth = width;
-        this.baseScreenHeight = height;
-        return this;
-    }
-    
-    /**
-     * Sets a base region designed for a specific screen size.
-     * 
-     * @param x x-coordinate on base screen
-     * @param y y-coordinate on base screen
-     * @param width width on base screen
-     * @param height height on base screen
-     * @return this builder
-     */
-    public RegionBuilder withBaseRegion(int x, int y, int width, int height) {
-        this.x = x;
-        this.y = y;
-        this.width = width;
-        this.height = height;
-        return this;
-    }
-    
-    /**
-     * Adjusts the region to the current screen size based on the base screen size.
-     * 
-     * @return this builder
-     */
-    public RegionBuilder adjustToCurrentScreen() {
-        if (baseScreenWidth > 0 && baseScreenHeight > 0 && 
-            currentScreenWidth > 0 && currentScreenHeight > 0) {
-            
-            double xScale = (double) currentScreenWidth / baseScreenWidth;
-            double yScale = (double) currentScreenHeight / baseScreenHeight;
-            
-            if (x != null) x = (int) Math.round(x * xScale);
-            if (y != null) y = (int) Math.round(y * yScale);
-            if (width != null) width = (int) Math.round(width * xScale);
-            if (height != null) height = (int) Math.round(height * yScale);
-        }
-        return this;
-    }
     
     /**
      * Sets the anchor point using Positions.Name enum.
@@ -377,7 +325,7 @@ public class RegionBuilder {
     /**
      * Sets the anchor point using a custom Position.
      * 
-     * @param position the custom position for anchoring (0.0 to 1.0 scale)
+     * @param position the custom position for anchoring (0.0 to 1.0 relative positioning)
      * @return this builder
      */
     public RegionBuilder withAnchor(Position position) {
@@ -391,7 +339,7 @@ public class RegionBuilder {
      * The Position determines where in the reference region this region's anchor point will be placed.
      * 
      * @param referenceRegion the region to position relative to
-     * @param position the position within the reference region (0.0 to 1.0 scale)
+     * @param position the position within the reference region (0.0 to 1.0 relative positioning)
      * @return this builder
      */
     public RegionBuilder positionRelativeTo(Region referenceRegion, Position position) {

@@ -2,21 +2,21 @@
 sidebar_position: 8
 ---
 
-# Screen-Adaptive Regions
+# Region Building with Position Integration
 
-Create resolution-independent regions that adapt automatically to different screen sizes using the enhanced `RegionBuilder` with Position integration.
+Create regions using flexible positioning with the `RegionBuilder` and Position integration for precise placement.
 
 ## Overview
 
-The `RegionBuilder` class provides a fluent API for creating regions that adapt to different screen resolutions and sizes. By integrating with the `Position` class and `Positions.Name` enum, it offers intuitive, percentage-based positioning that works across different environments.
+The `RegionBuilder` class provides a fluent API for creating regions with precise positioning. By integrating with the `Position` class and `Positions.Name` enum, it offers both absolute pixel positioning and percentage-based placement options.
 
 ### Key Features
 
-- **Resolution Independence**: Define regions using percentages instead of absolute pixels
-- **Position Integration**: Leverage the Position class for precise percentage-based placement
+- **Absolute Positioning**: Define regions using exact pixel coordinates
+- **Position Integration**: Leverage the Position class for percentage-based placement
 - **Named Positions**: Use semantic positions like TOPLEFT, MIDDLEMIDDLE, BOTTOMRIGHT
 - **Relative Positioning**: Position regions relative to other regions
-- **Screen Scaling**: Automatically scale regions designed for specific resolutions
+- **Percentage-Based Sizing**: Define regions as percentages of screen size
 - **Fluent API**: Chain methods for readable region construction
 
 ## Basic Usage
@@ -181,32 +181,9 @@ Region marker = Region.builder()
     .build();
 ```
 
-## Screen Scaling and Adaptation
+## Predefined Screen Regions
 
-### Scaling from Base Resolution
-
-Design for a specific resolution and automatically scale to the current screen:
-
-```java
-// Design for 1920x1080, scale to current resolution
-Region scaledButton = Region.builder()
-    .withBaseScreenSize(1920, 1080)  // Original design resolution
-    .withBaseRegion(1800, 1000, 100, 50)  // Original button position
-    .adjustToCurrentScreen()  // Automatically scale
-    .build();
-
-// Complex scaling with adjustments
-Region scaledDialog = Region.builder()
-    .withBaseScreenSize(1920, 1080)
-    .withBaseRegion(560, 240, 800, 600)
-    .adjustToCurrentScreen()
-    .expand(10)  // Add 10px padding after scaling
-    .build();
-```
-
-### Predefined Screen Regions
-
-Quick methods for common screen divisions:
+### Quick methods for common screen divisions:
 
 ```java
 // Full screen
@@ -438,14 +415,13 @@ Region fixed = Region.builder()
     .build();
 ```
 
-### 2. Design for a Base Resolution
+### 2. Use Direct Coordinates for Pixel-Perfect Placement
 
 ```java
-// Design for common resolution, then scale
-Region scalable = Region.builder()
-    .withBaseScreenSize(1920, 1080)
-    .withBaseRegion(500, 300, 400, 200)
-    .adjustToCurrentScreen()
+// Specify exact pixel coordinates when precision is needed
+Region precise = Region.builder()
+    .withPosition(500, 300)
+    .withSize(400, 200)
     .build();
 ```
 
@@ -479,25 +455,17 @@ Region precise = Region.builder()
     .build();
 ```
 
-### 5. Test on Multiple Resolutions
+### 5. Use Percentage-Based Sizing for Flexibility
 
 ```java
-// Create test suite for different resolutions
-int[][] testResolutions = {
-    {1920, 1080}, {1366, 768}, {2560, 1440}, {3840, 2160}
-};
+// Create regions that work well at any resolution
+Region flexible = Region.builder()
+    .withScreenPercentage(0.1, 0.1, 0.8, 0.8)  // 10% margins, 80% of screen
+    .build();
 
-for (int[] res : testResolutions) {
-    Region testRegion = Region.builder()
-        .withBaseScreenSize(1920, 1080)
-        .withBaseRegion(100, 100, 200, 150)
-        .adjustToCurrentScreen()  // Will scale based on actual screen
-        .build();
-    
-    // Verify region stays within bounds and maintains proportions
-    assert testRegion.isDefined();
-    assert testRegion.getW() > 0 && testRegion.getH() > 0;
-}
+// Verify region is properly defined
+assert flexible.isDefined();
+assert flexible.getW() > 0 && flexible.getH() > 0;
 ```
 
 ## Integration with Brobot Actions
@@ -595,26 +563,25 @@ Region solution = Region.builder()
     .build();
 ```
 
-### Scaling Issues
+### Size Issues
 
 ```java
-// Problem: Region too small after scaling
+// Problem: Region too small for reliable clicking
 Region tooSmall = Region.builder()
-    .withBaseScreenSize(3840, 2160)  // 4K design
-    .withBaseRegion(100, 100, 50, 30)  // Small on 4K
-    .adjustToCurrentScreen()  // May be tiny on 1080p
+    .withPosition(100, 100)
+    .withSize(5, 5)  // Too small!
     .build();
 
-// Solution: Use minimum sizes
-Region minSize = Region.builder()
-    .withBaseScreenSize(3840, 2160)
-    .withBaseRegion(100, 100, 50, 30)
-    .adjustToCurrentScreen()
+// Solution: Use appropriate minimum sizes
+Region clickable = Region.builder()
+    .withPosition(100, 100)
+    .withSize(50, 30)  // Reasonable click target
     .build();
 
-// Ensure minimum dimensions
-if (minSize.getW() < 100) minSize.setW(100);
-if (minSize.getH() < 60) minSize.setH(60);
+// Or use percentage-based sizing for flexibility
+Region flexible = Region.builder()
+    .withScreenPercentage(0.1, 0.1, 0.05, 0.03)  // 5% width, 3% height
+    .build();
 ```
 
 ### Position Calculation Errors
