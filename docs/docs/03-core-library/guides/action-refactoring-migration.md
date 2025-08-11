@@ -33,7 +33,17 @@ We've introduced "pure" actions that only perform their core function without an
 - `TypeV2` - Pure typing operations
 - More pure actions coming soon
 
-### 3. Convenience Methods
+### 3. Enhanced Conditional Action Chains
+
+The `ConditionalActionChain` class has been replaced with `ConditionalActionChain`, which provides:
+
+- **Convenience Methods**: `ifFoundClick()`, `ifFoundType()`, `alwaysClick()` etc.
+- **Better Performance**: Optimized execution paths
+- **Enhanced Debugging**: Improved logging and error reporting
+
+> **Migration Note:** `ConditionalActionChain` is now deprecated. Update your imports to use `ConditionalActionChain` for all new development.
+
+### 4. Convenience Methods
 
 The Action class now provides convenience methods for common operations:
 
@@ -56,10 +66,10 @@ ClickOptions options = new ClickOptions.Builder()
 action.perform(options, stateImage);
 ```
 
-**New Code** (Explicit):
+**New Code** (Enhanced):
 ```java
 ConditionalActionChain.find(new PatternFindOptions.Builder().build())
-    .ifFound(new ClickOptions.Builder().build())
+    .ifFoundClick()
     .perform(action, new ObjectCollection.Builder()
         .withImages(stateImage)
         .build());
@@ -88,9 +98,7 @@ action.perform(options, textFieldImage);
 **New Code**:
 ```java
 ConditionalActionChain.find(new PatternFindOptions.Builder().build())
-    .ifFound(new TypeOptions.Builder()
-        .setText("Hello World")
-        .build())
+    .ifFoundType("Hello World")
     .perform(action, new ObjectCollection.Builder()
         .withImages(textFieldImage)
         .build());
@@ -138,13 +146,13 @@ if (result1.isSuccess()) {
 **New Code**:
 ```java
 ConditionalActionChain.find(loginButton)
-    .ifFound(click())
+    .ifFoundClick()
     .then(find(usernameField))
-    .ifFound(type(username))
+    .ifFoundType(username)
     .then(find(passwordField))
-    .ifFound(type(password))
+    .ifFoundType(password)
     .then(find(submitButton))
-    .ifFound(click())
+    .ifFoundClick()
     .perform(action, objectCollection);
 ```
 
@@ -222,10 +230,10 @@ if (matches.isSuccess()) {
 
 ```java
 ConditionalActionChain.find(saveButton)
-    .ifFound(click())
-    .ifNotFound(log("Save button not found, trying alt method"))
+    .ifFoundClick()
+    .ifNotFoundLog("Save button not found, trying alt method")
     .ifNotFound(find(altSaveButton))
-    .ifFound(click())
+    .ifFoundClick()
     .always(takeScreenshot())
     .perform(action, objectCollection);
 ```
@@ -234,11 +242,11 @@ ConditionalActionChain.find(saveButton)
 
 ```java
 ConditionalActionChain.find(dialogBox)
-    .ifFound(highlight())
+    .ifFoundHighlight()
     .then(find(confirmButton))
-    .ifFound(click())
+    .ifFoundClick()
     .then(waitVanish(dialogBox))
-    .ifNotFound(throwError("Dialog didn't close"))
+    .ifNotFoundDo(result -> { throw new RuntimeException("Dialog didn't close"); })
     .perform(action, objectCollection);
 ```
 
@@ -246,7 +254,8 @@ ConditionalActionChain.find(dialogBox)
 
 - [ ] Identify all uses of embedded Find in actions
 - [ ] Replace with ConditionalActionChain or pure actions
-- [ ] Update imports for new action classes
+- [ ] Update imports: `ConditionalActionChain` → `ConditionalActionChain`
+- [ ] Update method calls to use convenience methods (e.g., `ifFoundClick()`)
 - [ ] Test thoroughly - behavior should be identical
 - [ ] Consider using convenience methods for simple cases
 - [ ] Update any custom actions to follow the new pattern

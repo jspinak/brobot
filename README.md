@@ -282,11 +282,9 @@ StateImage fileNameField = new StateImage.Builder()
 // Complete workflow in one conditional chain
 ConditionalActionChain
     .find(new PatternFindOptions.Builder().build())  // Find export button
-    .ifFound(new ClickOptions.Builder().build())     // Click it
+    .ifFoundClick()     // Click it
     .then(new PatternFindOptions.Builder().build())  // Find filename field
-    .ifFound(new TypeOptions.Builder()               // Type filename
-        .setText("export_" + System.currentTimeMillis() + ".csv")
-        .build())
+    .ifFoundType("export_" + System.currentTimeMillis() + ".csv")  // Type filename
     .perform(action, new ObjectCollection.Builder()
         .withImages(exportButton, fileNameField)
         .build());

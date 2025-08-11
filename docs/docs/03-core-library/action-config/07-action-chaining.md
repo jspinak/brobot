@@ -161,7 +161,7 @@ ActionChainOptions chain = new ActionChainOptions.Builder(
 
 ## Enhanced Conditional Action Chaining
 
-For more advanced conditional workflows with proper sequential composition, see the [Enhanced Conditional Action Chains](./conditional-chains-examples) documentation. The `EnhancedConditionalActionChain` class provides:
+For more advanced conditional workflows with proper sequential composition, see the [Enhanced Conditional Action Chains](./conditional-chains-examples) documentation. The `ConditionalActionChain` class provides:
 
 - The crucial `then()` method for sequential action composition
 - Convenience methods like `click()`, `type()`, `scrollDown()`

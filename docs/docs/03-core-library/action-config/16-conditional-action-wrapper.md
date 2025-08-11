@@ -8,6 +8,8 @@ description: Spring-friendly wrapper for ConditionalActionChain with comparison 
 
 The ConditionalActionWrapper is a Spring-friendly utility that simplifies the use of ConditionalActionChain in Spring Boot applications. It provides convenient methods for common patterns and integrates seamlessly with dependency injection.
 
+> **Note:** ConditionalActionWrapper now uses the enhanced `ConditionalActionChain` internally, providing access to improved convenience methods and enhanced functionality.
+
 ## Overview
 
 ConditionalActionWrapper serves as a bridge between Spring applications and Brobot's ConditionalActionChain, offering:
@@ -63,9 +65,9 @@ actions.findAndClick(submitButton);
 // Complex conditional chains
 actions.createChain()
     .find(loginButton)
-    .ifFound(click())
+    .ifFoundClick()
     .ifNotFound(actions.find(alternativeButton))
-    .ifFound(click())
+    .ifFoundClick()
     .ifNotFoundLog("No login button found")
     .execute();
 ```
@@ -135,12 +137,12 @@ public ActionResult performLogin(StateImage loginButton,
                                String password) {
     return actions.createChain()
         .find(loginButton)
-        .ifFound(ConditionalActionWrapper.click())
+        .ifFoundClick()
         .ifNotFoundLog("Login button not visible")
         .always(ConditionalActionWrapper.find())
         .find(usernameField)
-        .ifFound(ConditionalActionWrapper.click())
-        .ifFound(ConditionalActionWrapper.type())
+        .ifFoundClick()
+        .ifFoundType(username)
         .execute();
 }
 ```
@@ -156,14 +158,14 @@ public ActionResult saveWithFallback(StateImage saveButton,
     return actions.createChain()
         // Try the save button first
         .find(saveButton)
-        .ifFound(ConditionalActionWrapper.click())
+        .ifFoundClick()
         
         // If not found, try menu approach
         .ifNotFound(actions.createChain()
             .find(fileMenu)
-            .ifFound(ConditionalActionWrapper.click())
+            .ifFoundClick()
             .find(saveMenuItem)
-            .ifFound(ConditionalActionWrapper.click())
+            .ifFoundClick()
             .execute())
         
         // Log the result
@@ -186,17 +188,19 @@ public class FormAutomation {
         
         // Find and fill each field conditionally
         chain.find(nameField)
-            .ifFound(ConditionalActionWrapper.click())
+            .ifFoundClick()
+            .ifFoundType(data.getName())
             .ifFoundLog("Entering name: " + data.getName());
             
         // Add email field
         chain.find(emailField)
-            .ifFound(ConditionalActionWrapper.click())
+            .ifFoundClick()
+            .ifFoundType(data.getEmail())
             .ifFoundLog("Entering email: " + data.getEmail());
             
         // Submit only if all fields were found
         chain.find(submitButton)
-            .ifFound(ConditionalActionWrapper.click())
+            .ifFoundClick()
             .ifFoundLog("Form submitted")
             .ifNotFoundLog("Submit button not found - form incomplete");
             
@@ -251,7 +255,7 @@ public void submitForm() {
 // Flexible but verbose
 public void submitForm() {
     ConditionalActionChain.find(new PatternFindOptions.Builder().build())
-        .ifFound(new ClickOptions.Builder().build())
+        .ifFoundClick()
         .ifNotFoundLog("Submit button not found")
         .perform(action, new ObjectCollection.Builder()
             .withImages(submitButton)
@@ -269,7 +273,7 @@ private ConditionalActionWrapper actions;
 public void submitForm() {
     actions.createChain()
         .find(submitButton)
-        .ifFound(ConditionalActionWrapper.click())
+        .ifFoundClick()
         .ifNotFoundLog("Submit button not found")
         .execute();
 }
@@ -300,7 +304,7 @@ public class CommonActions {
     public ActionResult clickIfExists(StateObject element) {
         return actions.createChain()
             .find(element)
-            .ifFound(ConditionalActionWrapper.click())
+            .ifFoundClick()
             .ifNotFoundLog("Optional element not found: " + element.getName())
             .execute();
     }
@@ -339,9 +343,9 @@ import static com.example.ConditionalActionWrapper.*;
 
 actions.createChain()
     .find(element)
-    .ifFound(click())      // Static import
-    .ifFound(type())       // Static import
-    .ifFound(find())       // Static import
+    .ifFoundClick()        // Convenience method
+    .ifFoundType("text")   // Convenience method
+    .thenFind()            // Chain method
     .execute();
 ```
 
@@ -394,7 +398,7 @@ public class LoginAutomationTest {
         // Test the conditional flow
         ActionResult result = actions.createChain()
             .find(loginButton)
-            .ifFound(click())
+            .ifFoundClick()
             .execute();
             
         assertTrue(result.isSuccess());

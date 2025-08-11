@@ -193,13 +193,15 @@ boolean success = clickUntilFound(nextButton, finishButton, 10, 1.0);
 
 This modular approach makes it easy to create custom complex behaviors while maintaining the benefits of type safety and clear intent provided by the ActionConfig architecture.
 
-## Conditional Action Chaining
+## Enhanced Conditional Action Chaining
 
-Brobot 1.1.0+ introduces the powerful `ConditionalActionChain` class for building sophisticated conditional execution flows. This provides a fluent API for creating complex action sequences with conditional branching, error handling, and retry logic.
+Brobot 1.1.0+ introduces the powerful `EnhancedConditionalActionChain` class for building sophisticated conditional execution flows. This provides a fluent API for creating complex action sequences with conditional branching, error handling, and retry logic.
 
-### ConditionalActionChain Overview
+> **Note:** The original `ConditionalActionChain` class is now deprecated. Use `EnhancedConditionalActionChain` for all new development.
 
-The `ConditionalActionChain` class allows you to:
+### EnhancedConditionalActionChain Overview
+
+The `EnhancedConditionalActionChain` class allows you to:
 - Chain actions with conditional execution based on previous results
 - Add fallback actions when primary actions fail
 - Implement retry logic with different strategies
@@ -209,7 +211,7 @@ The `ConditionalActionChain` class allows you to:
 ### Basic Conditional Chaining
 
 ```java
-import io.github.jspinak.brobot.action.ConditionalActionChain;
+import io.github.jspinak.brobot.action.EnhancedConditionalActionChain;
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
 import io.github.jspinak.brobot.action.basic.click.ClickOptions;
 import io.github.jspinak.brobot.action.basic.type.TypeOptions;
@@ -218,9 +220,9 @@ import io.github.jspinak.brobot.action.RepetitionOptions;
 import io.github.jspinak.brobot.action.ActionChainOptions;
 
 // Simple conditional chain: if login button found, click it and enter credentials
-ConditionalActionChain loginChain = ConditionalActionChain
+EnhancedConditionalActionChain loginChain = EnhancedConditionalActionChain
     .find(new PatternFindOptions.Builder().build())
-    .ifFound(new ClickOptions.Builder().build())
+    .ifFoundClick()
     .ifFoundDo(result -> {
         action.type(usernameField, username);
         action.type(passwordField, password);
@@ -239,13 +241,13 @@ ActionResult result = loginChain.perform(action,
 #### Pattern 1: Multi-Step Validation
 ```java
 // Validate each step and proceed only if successful
-ConditionalActionChain wizardChain = ConditionalActionChain
+EnhancedConditionalActionChain wizardChain = EnhancedConditionalActionChain
     .find(new PatternFindOptions.Builder().build())
-    .ifFound(new ClickOptions.Builder().build())  // Click step 1
+    .ifFoundClick()  // Click step 1
     .then(new PatternFindOptions.Builder().build())  // Find step 2
-    .ifFound(new ClickOptions.Builder().build())  // Click step 2
+    .ifFoundClick()  // Click step 2
     .then(new PatternFindOptions.Builder().build())  // Find step 3
-    .ifFound(new ClickOptions.Builder().build())  // Click step 3
+    .ifFoundClick()  // Click step 3
     .then(new PatternFindOptions.Builder()  // Find completion
         .setSearchDuration(5.0)  // Wait up to 5 seconds
         .build())
@@ -266,7 +268,7 @@ ActionResult result = wizardChain.perform(action, steps);
 // Method 1: Try X button first
 ConditionalActionChain closeWithX = ConditionalActionChain
     .find(new PatternFindOptions.Builder().build())  // Find close button
-    .ifFound(new ClickOptions.Builder().build())
+    .ifFoundClick()
     .ifFoundLog("Closed dialog with X button");
 
 // Method 2: Try Escape key if X button fails
@@ -306,22 +308,22 @@ PatternFindOptions findDialog = new PatternFindOptions.Builder()
 // Chain for home screen
 ConditionalActionChain fromHome = ConditionalActionChain
     .find(new PatternFindOptions.Builder().build())  // Find home screen
-    .ifFound(new ClickOptions.Builder().build())  // Click menu button
+    .ifFoundClick()  // Click menu button
     .then(new PatternFindOptions.Builder().build())  // Find menu panel
     .ifFoundLog("Opened menu from home screen");
 
 // Chain for settings screen  
 ConditionalActionChain fromSettings = ConditionalActionChain
     .find(new PatternFindOptions.Builder().build())  // Find settings screen
-    .ifFound(new ClickOptions.Builder().build())  // Click back button
+    .ifFoundClick()  // Click back button
     .then(new PatternFindOptions.Builder().build())  // Find home screen
     .ifFoundLog("Returned to home from settings");
 
 // Chain for error dialog
 ConditionalActionChain fromError = ConditionalActionChain
     .find(new PatternFindOptions.Builder().build())  // Find error dialog
-    .ifFound(new ClickOptions.Builder().build())  // Click dismiss
-    .always(new ClickOptions.Builder().build())  // Click home button
+    .ifFoundClick()  // Click dismiss
+    .alwaysClick()  // Click home button
     .then(new PatternFindOptions.Builder().build())  // Verify home screen
     .ifFoundLog("Recovered from error state");
 
@@ -364,7 +366,7 @@ ActionChainOptions nestedFind = new ActionChainOptions.Builder(
 // Then use ConditionalActionChain for conditional logic
 ConditionalActionChain robustClick = ConditionalActionChain
     .start(nestedFind)  // Start with the chained find
-    .ifFound(new ClickOptions.Builder().build())  // Click if found
+    .ifFoundClick()  // Click if found
     .ifNotFoundDo(result -> {
         // Fallback: try with lower similarity
         PatternFindOptions relaxedFind = new PatternFindOptions.Builder()

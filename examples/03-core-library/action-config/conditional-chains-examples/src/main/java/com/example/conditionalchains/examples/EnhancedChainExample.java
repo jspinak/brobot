@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 /**
- * Demonstrates the EnhancedConditionalActionChain with all the features
+ * Demonstrates the ConditionalActionChain with all the features
  * from the original documentation now working correctly.
  */
 @Component
@@ -80,9 +80,9 @@ public class EnhancedChainExample {
      * This now works with the enhanced implementation!
      */
     public void performLoginWorkflow() {
-        log.info("Starting login workflow with EnhancedConditionalActionChain");
+        log.info("Starting login workflow with ConditionalActionChain");
         
-        ActionResult result = EnhancedConditionalActionChain
+        ActionResult result = ConditionalActionChain
             .find(loginButton)
             .ifFoundClick()
             .ifNotFoundLog("Login button not visible")
@@ -108,7 +108,7 @@ public class EnhancedChainExample {
     public void fillComplexForm() {
         log.info("Filling complex form with convenience methods");
         
-        ActionResult result = EnhancedConditionalActionChain
+        ActionResult result = ConditionalActionChain
             .find(new PatternFindOptions.Builder().build())
             .ifNotFoundLog("Form not visible")
             .ifNotFoundDo(res -> { throw new RuntimeException("Cannot proceed without form"); })
@@ -142,7 +142,7 @@ public class EnhancedChainExample {
     public void handleErrors() {
         log.info("Demonstrating error handling");
         
-        ActionResult result = EnhancedConditionalActionChain
+        ActionResult result = ConditionalActionChain
             .find(submitButton)
             .ifFoundClick()
             .then(errorDialog)
@@ -171,7 +171,7 @@ public class EnhancedChainExample {
             .addPattern("images/ui-elements/target.png")
             .build();
         
-        ActionResult result = EnhancedConditionalActionChain
+        ActionResult result = ConditionalActionChain
             .find(targetElement)
             .ifNotFound(chain -> chain.scrollDown())
             .ifNotFound(new PatternFindOptions.Builder().build())
@@ -192,7 +192,7 @@ public class EnhancedChainExample {
     public void useKeyboardShortcuts() {
         log.info("Using keyboard shortcuts");
         
-        ActionResult result = EnhancedConditionalActionChain
+        ActionResult result = ConditionalActionChain
             .find(new StateImage.Builder().addPattern("images/forms/editor.png").build())
             .ifFoundClick()
             .pressCtrlA()      // Select all
@@ -212,7 +212,7 @@ public class EnhancedChainExample {
     public void waitForLoadingToComplete() {
         log.info("Waiting for loading to complete");
         
-        ActionResult result = EnhancedConditionalActionChain
+        ActionResult result = ConditionalActionChain
             .find(submitButton)
             .ifFoundClick()
             .waitVanish(loadingSpinner)  // Wait for spinner to disappear
@@ -235,7 +235,7 @@ public class EnhancedChainExample {
             .addPattern("images/buttons/connect.png")
             .build();
         
-        ActionResult result = EnhancedConditionalActionChain
+        ActionResult result = ConditionalActionChain
             .retry(new PatternFindOptions.Builder().build(), 3)
             .ifFoundClick()
             .ifFoundLog("Successfully connected after retries")
@@ -258,7 +258,7 @@ public class EnhancedChainExample {
             .build();
         
         // This example from the documentation now works perfectly!
-        ActionResult result = EnhancedConditionalActionChain
+        ActionResult result = ConditionalActionChain
             .find(saveButton)
             .ifFoundClick()
             .ifNotFoundLog("Save button not found")
@@ -278,7 +278,7 @@ public class EnhancedChainExample {
      * Run all examples to demonstrate the enhanced functionality
      */
     public void runAllExamples() {
-        log.info("=== Running all EnhancedConditionalActionChain examples ===");
+        log.info("=== Running all ConditionalActionChain examples ===");
         
         try {
             performLoginWorkflow();

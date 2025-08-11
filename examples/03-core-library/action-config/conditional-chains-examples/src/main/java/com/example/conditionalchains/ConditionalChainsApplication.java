@@ -8,10 +8,11 @@ import org.springframework.context.annotation.ComponentScan;
  * Demonstrates ConditionalActionChain - Brobot's elegant API for conditional execution flows.
  * 
  * This example shows:
- * - Basic find → ifFound → ifNotFound patterns
+ * - Basic find → ifFoundClick → ifNotFoundLog patterns
  * - Multi-step workflows with error handling
- * - Custom logic with lambdas
+ * - Custom logic with lambdas using ifFoundDo/ifNotFoundDo
  * - Combining conditional chains with other patterns
+ * - Convenience methods for common operations (ifFoundClick, ifFoundType, etc.)
  */
 @SpringBootApplication
 @ComponentScan(basePackages = {"com.example.conditionalchains", "io.github.jspinak.brobot"})

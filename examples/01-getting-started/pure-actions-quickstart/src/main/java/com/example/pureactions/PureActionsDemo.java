@@ -12,7 +12,7 @@ import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.model.element.Location;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.state.StateImage;
-import io.github.jspinak.brobot.model.conditional.ConditionalActionChain;
+import io.github.jspinak.brobot.action.ConditionalActionChain;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -55,8 +55,8 @@ public class PureActionsDemo {
         // Code from: docs/docs/01-getting-started/pure-actions-quickstart.md lines 34-38
         log.info("Best way: Using conditional chains");
         ConditionalActionChain.find(new PatternFindOptions.Builder().build())
-            .ifFound(ConditionalActionChain.click())
-            .ifNotFound(ConditionalActionChain.log("Button not found"))
+            .ifFoundClick()
+            .ifNotFoundLog("Button not found")
             .perform(action, new ObjectCollection.Builder()
                 .withImages(buttonImage)
                 .build());
@@ -80,7 +80,7 @@ public class PureActionsDemo {
                 .build();
         
         ConditionalActionChain.find(new PatternFindOptions.Builder().build())
-            .ifFound(ConditionalActionChain.click())
+            .ifFoundClick()
             .perform(action, new ObjectCollection.Builder()
                 .withImages(submitButton)
                 .build());
@@ -103,7 +103,7 @@ public class PureActionsDemo {
                 .build();
         
         ConditionalActionChain.find(new PatternFindOptions.Builder().build())
-            .ifFound(new ClickOptions.Builder().build())
+            .ifFoundClick()
             .then(new TypeOptions.Builder()
                 .setTypeDelay(0.1)
                 .build())
@@ -339,7 +339,7 @@ public class PureActionsDemo {
         
         // Simplified version of the login flow from documentation
         return ConditionalActionChain.find(new PatternFindOptions.Builder().build())
-            .ifFound(new ClickOptions.Builder().build())
+            .ifFoundClick()
             .ifNotFoundLog("Login button not visible")
             .perform(action, new ObjectCollection.Builder()
                 .withImages(loginButton)
@@ -362,7 +362,7 @@ public class PureActionsDemo {
                 .build();
         
         return ConditionalActionChain.find(new PatternFindOptions.Builder().build())
-            .ifFound(new ClickOptions.Builder().build())
+            .ifFoundClick()
             .ifNotFoundLog("Save button not found")
             .perform(action, new ObjectCollection.Builder()
                 .withImages(saveButton)

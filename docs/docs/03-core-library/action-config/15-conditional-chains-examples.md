@@ -2,7 +2,7 @@
 
 ## Overview
 
-`EnhancedConditionalActionChain` provides a powerful fluent API for building complex action sequences with conditional execution. This enhanced implementation adds the missing features from the original design, including the crucial `then()` method for sequential composition and numerous convenience methods.
+`ConditionalActionChain` provides a powerful fluent API for building complex action sequences with conditional execution. This enhanced implementation adds the missing features from the original design, including the crucial `then()` method for sequential composition and numerous convenience methods.
 
 ## Key Features
 
@@ -19,7 +19,7 @@
 
 ```java
 // Basic find and click pattern
-EnhancedConditionalActionChain.find(buttonImage)
+ConditionalActionChain.find(buttonImage)
     .ifFoundClick()
     .ifNotFoundLog("Button not found")
     .perform(action, new ObjectCollection.Builder().build());
@@ -29,7 +29,7 @@ EnhancedConditionalActionChain.find(buttonImage)
 
 ```java
 // The then() method enables sequential workflows
-EnhancedConditionalActionChain.find(menuButton)
+ConditionalActionChain.find(menuButton)
     .ifFoundClick()
     .then(searchField)  // Move to next element
     .ifFoundClick()
@@ -45,7 +45,7 @@ EnhancedConditionalActionChain.find(menuButton)
 
 ```java
 public ActionResult performLogin(String username, String password) {
-    return EnhancedConditionalActionChain.find(loginButton)
+    return ConditionalActionChain.find(loginButton)
         .ifFoundClick()
         .ifNotFoundLog("Login button not visible")
         .then(usernameField)  // Sequential action using then()
@@ -71,7 +71,7 @@ public ActionResult saveWithConfirmation() {
         .addPattern("images/buttons/save.png")
         .build();
     
-    return EnhancedConditionalActionChain.find(saveButton)
+    return ConditionalActionChain.find(saveButton)
         .ifFoundClick()
         .ifNotFoundLog("Save button not found")
         .then(confirmDialog)  // Look for confirmation
@@ -89,7 +89,7 @@ public ActionResult saveWithConfirmation() {
 
 ```java
 public ActionResult clickWithRetry(StateImage target, int maxRetries) {
-    return EnhancedConditionalActionChain
+    return ConditionalActionChain
         .retry(new PatternFindOptions.Builder().build(), maxRetries)
         .ifFoundClick()
         .ifFoundLog("Successfully clicked after retries")
@@ -106,7 +106,7 @@ public ActionResult clickWithRetry(StateImage target, int maxRetries) {
 
 ```java
 public ActionResult fillComplexForm(FormData data) {
-    return EnhancedConditionalActionChain
+    return ConditionalActionChain
         .find(new PatternFindOptions.Builder().build())
         .ifNotFoundLog("Form not visible")
         .ifNotFoundDo(res -> { throw new RuntimeException("Cannot proceed without form"); })
@@ -137,7 +137,7 @@ public ActionResult fillComplexForm(FormData data) {
 
 ```java
 public ActionResult scrollToFind(StateImage target) {
-    return EnhancedConditionalActionChain.find(target)
+    return ConditionalActionChain.find(target)
         .ifNotFound(chain -> chain.scrollDown())
         .ifNotFound(new PatternFindOptions.Builder().build())
         .ifNotFound(chain -> chain.scrollDown())
@@ -156,7 +156,7 @@ public ActionResult scrollToFind(StateImage target) {
 
 ```java
 public ActionResult useKeyboardShortcuts() {
-    return EnhancedConditionalActionChain
+    return ConditionalActionChain
         .find(editorField)
         .ifFoundClick()
         .pressCtrlA()      // Select all
@@ -175,7 +175,7 @@ public ActionResult useKeyboardShortcuts() {
 
 ```java
 public ActionResult handleErrors() {
-    return EnhancedConditionalActionChain
+    return ConditionalActionChain
         .find(submitButton)
         .ifFoundClick()
         .then(errorDialog)
@@ -202,7 +202,7 @@ public ActionResult waitForLoadingToComplete() {
         .addPattern("images/indicators/loading.png")
         .build();
     
-    return EnhancedConditionalActionChain
+    return ConditionalActionChain
         .find(submitButton)
         .ifFoundClick()
         .waitVanish(loadingSpinner)  // Wait for spinner to disappear
@@ -218,7 +218,7 @@ public ActionResult waitForLoadingToComplete() {
 
 ```java
 public ActionResult debugWorkflow() {
-    return EnhancedConditionalActionChain
+    return ConditionalActionChain
         .find(targetElement)
         .ifFound(chain -> chain.highlight())  // Highlight found element
         .ifFoundLog("Found target element")   // Log for debugging
@@ -233,7 +233,7 @@ public ActionResult debugWorkflow() {
 
 ### No Explicit Waits
 
-Unlike process-based automation, EnhancedConditionalActionChain does **not** include a `wait()` method. This is intentional:
+Unlike process-based automation, ConditionalActionChain does **not** include a `wait()` method. This is intentional:
 
 ```java
 // WRONG - Process-based approach with explicit waits
@@ -244,7 +244,7 @@ PatternFindOptions findWithDelay = new PatternFindOptions.Builder()
     .setPauseBeforeBegin(2.0)  // Timing in action configuration
     .build();
     
-EnhancedConditionalActionChain.find(findWithDelay)
+ConditionalActionChain.find(findWithDelay)
     .ifFoundClick()
     .then(new TypeOptions.Builder()
         .setTypeDelay(0.1)  // Type-specific timing
@@ -257,7 +257,7 @@ EnhancedConditionalActionChain.find(findWithDelay)
 ```java
 public ActionResult navigateToState(State targetState) {
     // Focus on states, not processes
-    return EnhancedConditionalActionChain
+    return ConditionalActionChain
         .find(targetState.getIdentifyingImage())
         .ifFoundLog("Already in target state")
         .ifNotFound(navigationButton)
@@ -287,7 +287,7 @@ public void testEnhancedChainFeatures() {
         .thenReturn(successResult);
     
     // Test the then() method
-    ActionResult result = EnhancedConditionalActionChain
+    ActionResult result = ConditionalActionChain
         .find(loginButton)
         .ifFoundClick()
         .then(usernameField)  // Sequential composition
@@ -337,8 +337,8 @@ public void testEnhancedChainFeatures() {
 ### Custom Handlers
 - `ifFoundDo(Consumer<ActionResult>)` - Custom success handler
 - `ifNotFoundDo(Consumer<ActionResult>)` - Custom failure handler
-- `ifFound(Consumer<EnhancedConditionalActionChain>)` - Chain operations
-- `ifNotFound(Consumer<EnhancedConditionalActionChain>)` - Chain operations
+- `ifFound(Consumer<ConditionalActionChain>)` - Chain operations
+- `ifNotFound(Consumer<ConditionalActionChain>)` - Chain operations
 
 ## Best Practices
 
@@ -360,8 +360,8 @@ ConditionalActionChain.find(button)
     .ifFound(click())
     // Can't continue to next element without then()!
     
-// NEW - EnhancedConditionalActionChain
-EnhancedConditionalActionChain.find(button)
+// NEW - ConditionalActionChain
+ConditionalActionChain.find(button)
     .ifFoundClick()
     .then(nextElement)  // Now you can continue!
     .ifFoundClick()
@@ -373,6 +373,6 @@ EnhancedConditionalActionChain.find(button)
 
 1. **Don't Use Explicit Waits**: No wait() method by design - use action configurations
 2. **Don't Forget then()**: Use then() to move between different elements
-3. **Don't Mix APIs**: Use EnhancedConditionalActionChain, not the basic version
+3. **Don't Mix APIs**: Use ConditionalActionChain, not the basic version
 4. **Don't Ignore State**: Think in terms of application states, not process steps
 5. **Don't Skip Error Handling**: Always handle the ifNotFound case

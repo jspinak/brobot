@@ -32,8 +32,8 @@ if (found.isSuccess()) {
 ```java
 // Elegant chaining with automatic conditional execution
 ConditionalActionChain.find(findOptions)
-    .ifFound(click())
-    .ifNotFound(log("Button not found"))
+    .ifFoundClick()
+    .ifNotFoundLog("Button not found")
     .perform(action, objectCollection);
 ```
 
@@ -56,7 +56,7 @@ StateImage submitButton = new StateImage.Builder()
 // Step 3: Find and click using conditional chain
 ActionResult result = ConditionalActionChain
     .find(new PatternFindOptions.Builder().build())
-    .ifFound(new ClickOptions.Builder().build())
+    .ifFoundClick()
     .perform(action, new ObjectCollection.Builder()
         .withImages(submitButton)
         .build());
@@ -72,7 +72,7 @@ action.perform(ActionType.CLICK, buttonLocation);
 
 // Or with an image
 ConditionalActionChain.find(findOptions)
-    .ifFound(click())
+    .ifFoundClick()
     .perform(action, objectCollection);
 ```
 
@@ -83,8 +83,8 @@ action.perform(ActionType.TYPE, "Hello World");
 
 // Find field and type
 ConditionalActionChain.find(findOptions)
-    .ifFound(clickOptions)
-    .then(typeOptions)
+    .ifFoundClick()
+    .thenType("Hello World")
     .perform(action, objectCollection);
 ```
 
@@ -100,9 +100,9 @@ for (Match match : matches.getMatchList()) {
 ### 4. Right-Click Menu
 ```java
 ConditionalActionChain.find(findOptions)
-    .ifFound(rightClickOptions)
+    .ifFoundRightClick()
     .then(findDeleteOptions)
-    .ifFound(clickOptions)
+    .ifFoundClick()
     .perform(action, objectCollection);
 ```
 
@@ -159,8 +159,8 @@ Pure actions make error handling explicit and clear:
 
 ```java
 ConditionalActionChain.find(criticalButton)
-    .ifFound(click())
-    .ifNotFound(log("ERROR: Critical button not found!"))
+    .ifFoundClick()
+    .ifNotFoundLog("ERROR: Critical button not found!")
     .ifNotFoundDo(result -> {
         // Custom error handling
         takeScreenshot("error-state");
@@ -181,17 +181,17 @@ if (found.isSuccess()) {
 
 // Better: Use conditional chains
 ConditionalActionChain.find(findOptions)
-    .ifFound(clickOptions)
+    .ifFoundClick()
     .perform(action, objectCollection);
 ```
 
 ### 2. Handle Both Success and Failure
 ```java
 ConditionalActionChain.find(saveButton)
-    .ifFound(click())
-    .ifFound(log("Document saved"))
-    .ifNotFound(log("Save button not found"))
-    .ifNotFound(tryAlternativeSave())
+    .ifFoundClick()
+    .ifFoundLog("Document saved")
+    .ifNotFoundLog("Save button not found")
+    .ifNotFoundDo(result -> tryAlternativeSave())
     .perform(action, objectCollection);
 ```
 
@@ -233,7 +233,7 @@ if (found.isSuccess()) {
 
 // New code - Option 2 (chain)
 ConditionalActionChain.find(findOptions)
-    .ifFound(click())
+    .ifFoundClick()
     .perform(action, new ObjectCollection.Builder()
         .withImages(submitButton)
         .build());

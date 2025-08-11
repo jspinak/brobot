@@ -22,19 +22,22 @@ import java.util.logging.Logger;
  * testing, cleaner code, and more flexible action composition.
  * </p>
  * 
- * <p>Usage patterns:
+ * <p>
+ * Usage patterns:
  * <ul>
- *   <li>Type at current location: {@code new TypeV2().perform(actionResult)}</li>
- *   <li>Click and type: {@code new TypeV2().perform(actionResult, location)}</li>
- *   <li>Type after finding: Use ConditionalActionChain</li>
+ * <li>Type at current location: {@code new TypeV2().perform(actionResult)}</li>
+ * <li>Click and type: {@code new TypeV2().perform(actionResult, location)}</li>
+ * <li>Type after finding: Use ConditionalActionChain</li>
  * </ul>
  * </p>
  * 
- * <p>For Find-then-Type operations, use ConditionalActionChain:
+ * <p>
+ * For Find-then-Type operations, use ConditionalActionChain:
+ * 
  * <pre>{@code
  * ConditionalActionChain.find(findOptions)
- *     .ifFound(new TypeOptions.Builder().withText("Hello").build())
- *     .perform(objectCollection);
+ *         .ifFound(new TypeOptions.Builder().withText("Hello").build())
+ *         .perform(objectCollection);
  * }</pre>
  * </p>
  * 
@@ -44,11 +47,11 @@ import java.util.logging.Logger;
  */
 @Component("typeV2")
 public class TypeV2 implements ActionInterface {
-    
+
     private static final Logger logger = Logger.getLogger(TypeV2.class.getName());
     private Screen screen;
     private boolean headlessMode = false;
-    
+
     private Screen getScreen() {
         if (screen == null && !headlessMode) {
             try {
@@ -60,25 +63,25 @@ public class TypeV2 implements ActionInterface {
         }
         return screen;
     }
-    
+
     @Override
     public ActionInterface.Type getActionType() {
         return ActionInterface.Type.TYPE;
     }
-    
+
     @Override
     public void perform(ActionResult actionResult, ObjectCollection... objectCollections) {
         actionResult.setSuccess(false);
-        
+
         try {
             // Extract text to type - for now just type "test"
             String textToType = extractTextToType(objectCollections);
-            
+
             if (textToType == null || textToType.isEmpty()) {
                 logger.warning("No text to type provided to TypeV2");
                 return;
             }
-            
+
             // Click on location if provided
             Location clickLocation = extractClickLocation(objectCollections);
             if (clickLocation != null && !headlessMode) {
@@ -92,26 +95,26 @@ public class TypeV2 implements ActionInterface {
             } else if (clickLocation != null && headlessMode) {
                 logger.info("Running in headless mode - simulating click at: " + clickLocation);
             }
-            
+
             // Type the text
             boolean typeSuccess = typeText(textToType);
-            
+
             actionResult.setSuccess(typeSuccess);
             if (typeSuccess) {
                 logger.info("TypeV2: Successfully typed text");
-                
+
                 // Add a match for the typed location if we have one
                 if (clickLocation != null) {
                     actionResult.add(createMatchFromLocation(clickLocation));
                 }
             }
-            
+
         } catch (Exception e) {
             logger.severe("Error in TypeV2: " + e.getMessage());
             actionResult.setSuccess(false);
         }
     }
-    
+
     /**
      * Extracts the text to type from ObjectCollections.
      */
@@ -122,10 +125,10 @@ public class TypeV2 implements ActionInterface {
                 return collection.getStateStrings().get(0).getString();
             }
         }
-        
+
         return null;
     }
-    
+
     /**
      * Extracts a click location from the provided object collections.
      */
@@ -135,7 +138,7 @@ public class TypeV2 implements ActionInterface {
             if (!collection.getStateLocations().isEmpty()) {
                 return collection.getStateLocations().get(0).getLocation();
             }
-            
+
             // Check for regions (use center)
             if (!collection.getStateRegions().isEmpty()) {
                 Region region = collection.getStateRegions().get(0).getSearchRegion();
@@ -144,10 +147,10 @@ public class TypeV2 implements ActionInterface {
                 return new Location(centerX, centerY);
             }
         }
-        
+
         return null;
     }
-    
+
     /**
      * Types the specified text.
      */
@@ -157,25 +160,25 @@ public class TypeV2 implements ActionInterface {
                 logger.info("Running in headless mode - simulating type: " + text);
                 return true;
             }
-            
+
             Screen currentScreen = getScreen();
             if (currentScreen == null) {
                 logger.warning("Screen not available for typing");
                 return false;
             }
-            
+
             // Type the text
             currentScreen.type(text);
-            
+
             logger.fine("Successfully typed: " + text);
             return true;
-            
+
         } catch (Exception e) {
             logger.warning("Failed to type text: " + e.getMessage());
             return false;
         }
     }
-    
+
     /**
      * Creates a Match object from a Location for result reporting.
      */

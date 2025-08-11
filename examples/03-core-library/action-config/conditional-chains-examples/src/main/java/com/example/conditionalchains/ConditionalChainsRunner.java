@@ -57,7 +57,7 @@ public class ConditionalChainsRunner implements CommandLineRunner {
         log.info("======================================");
         
         log.info("");
-        log.info("Key improvements in EnhancedConditionalActionChain:");
+        log.info("Key improvements in ConditionalActionChain:");
         log.info("✓ then() method for sequential action composition");
         log.info("✓ Convenience methods: click(), type(), scrollDown()");
         log.info("✓ Keyboard shortcuts: pressEnter(), pressTab(), pressCtrlS()");
