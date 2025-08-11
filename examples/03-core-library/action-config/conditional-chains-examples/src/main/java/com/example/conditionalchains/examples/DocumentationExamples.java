@@ -116,7 +116,7 @@ public class DocumentationExamples {
     
     public void simpleFindAndClick() {
         // Basic find and click pattern
-        EnhancedConditionalActionChain.find(buttonImage)
+        ConditionalActionChain.find(buttonImage)
             .ifFoundClick()
             .ifNotFoundLog("Button not found")
             .perform(action, new ObjectCollection.Builder().build());
@@ -124,7 +124,7 @@ public class DocumentationExamples {
     
     public void sequentialActionsWithThen() {
         // The then() method enables sequential workflows
-        EnhancedConditionalActionChain.find(menuButton)
+        ConditionalActionChain.find(menuButton)
             .ifFoundClick()
             .then(searchField)  // Move to next element
             .ifFoundClick()
@@ -137,7 +137,7 @@ public class DocumentationExamples {
     // ===== Real-World Scenarios =====
     
     public ActionResult performLogin(String username, String password) {
-        return EnhancedConditionalActionChain.find(loginButton)
+        return ConditionalActionChain.find(loginButton)
             .ifFoundClick()
             .ifNotFoundLog("Login button not visible")
             .then(usernameField)  // Sequential action using then()
@@ -159,7 +159,7 @@ public class DocumentationExamples {
             .addPattern("images/buttons/save.png")
             .build();
         
-        return EnhancedConditionalActionChain.find(saveButton)
+        return ConditionalActionChain.find(saveButton)
             .ifFoundClick()
             .ifNotFoundLog("Save button not found")
             .then(confirmDialog)  // Look for confirmation
@@ -173,7 +173,7 @@ public class DocumentationExamples {
     }
     
     public ActionResult clickWithRetry(StateImage target, int maxRetries) {
-        return EnhancedConditionalActionChain
+        return ConditionalActionChain
             .retry(new PatternFindOptions.Builder().build(), maxRetries)
             .ifFoundClick()
             .ifFoundLog("Successfully clicked after retries")
@@ -186,7 +186,7 @@ public class DocumentationExamples {
     // ===== Advanced Patterns =====
     
     public ActionResult fillComplexForm(FormData data) {
-        return EnhancedConditionalActionChain
+        return ConditionalActionChain
             .find(new PatternFindOptions.Builder().build())
             .ifNotFoundLog("Form not visible")
             .ifNotFoundDo(res -> { throw new RuntimeException("Cannot proceed without form"); })
@@ -213,7 +213,7 @@ public class DocumentationExamples {
     }
     
     public ActionResult scrollToFind(StateImage target) {
-        return EnhancedConditionalActionChain.find(target)
+        return ConditionalActionChain.find(target)
             .ifNotFound(chain -> chain.scrollDown())
             .ifNotFound(new PatternFindOptions.Builder().build())
             .ifNotFound(chain -> chain.scrollDown())
@@ -228,7 +228,7 @@ public class DocumentationExamples {
     }
     
     public ActionResult useKeyboardShortcuts() {
-        return EnhancedConditionalActionChain
+        return ConditionalActionChain
             .find(editorField)
             .ifFoundClick()
             .pressCtrlA()      // Select all
@@ -243,7 +243,7 @@ public class DocumentationExamples {
     // ===== Conditional Patterns =====
     
     public ActionResult handleErrors() {
-        return EnhancedConditionalActionChain
+        return ConditionalActionChain
             .find(submitButton)
             .ifFoundClick()
             .then(errorDialog)
@@ -266,7 +266,7 @@ public class DocumentationExamples {
             .addPattern("images/indicators/loading.png")
             .build();
         
-        return EnhancedConditionalActionChain
+        return ConditionalActionChain
             .find(submitButton)
             .ifFoundClick()
             .waitVanish(loadingSpinner)  // Wait for spinner to disappear
@@ -278,7 +278,7 @@ public class DocumentationExamples {
     }
     
     public ActionResult debugWorkflow() {
-        return EnhancedConditionalActionChain
+        return ConditionalActionChain
             .find(targetElement)
             .ifFound(chain -> chain.highlight())  // Highlight found element
             .ifFoundLog("Found target element")   // Log for debugging
@@ -301,7 +301,7 @@ public class DocumentationExamples {
             
         ObjectCollection objectCollection = new ObjectCollection.Builder().build();
         
-        EnhancedConditionalActionChain.find(findWithDelay)
+        ConditionalActionChain.find(findWithDelay)
             .ifFoundClick()
             .then(new TypeOptions.Builder()
                 .setTypeDelay(0.1)  // Type-specific timing
@@ -312,7 +312,7 @@ public class DocumentationExamples {
     public ActionResult navigateToState(StateImage targetStateImage) {
         // Focus on states, not processes
         // Note: In real code, you would get the StateImage from the State object
-        return EnhancedConditionalActionChain
+        return ConditionalActionChain
             .find(targetStateImage)
             .ifFoundLog("Already in target state")
             .ifNotFound(new PatternFindOptions.Builder().build())

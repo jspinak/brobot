@@ -29,7 +29,7 @@ logging:
     com.example.conditionalchains: DEBUG
     io.github.jspinak.brobot: INFO
     # Show detailed conditional chain execution
-    io.github.jspinak.brobot.model.conditional: DEBUG
+    io.github.jspinak.brobot.action: DEBUG
     io.github.jspinak.brobot.util.ConditionalActionWrapper: DEBUG
   pattern:
     console: '%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n'

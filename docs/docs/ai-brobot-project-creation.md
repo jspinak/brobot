@@ -470,13 +470,13 @@
    - **Control methods**: `stopChain()`, `throwError()`, `wait()`
    - **Utility methods**: `takeScreenshot()`, `log()`, `logAction()`
    
-   ### EnhancedConditionalActionChain - The Most Elegant Approach
+   ### ConditionalActionChain - The Most Elegant Approach
    
-   **EnhancedConditionalActionChain extends ConditionalActionChain with additional convenience methods and better sequential composition:**
+   **ConditionalActionChain extends ConditionalActionChain with additional convenience methods and better sequential composition:**
    
    ```java
    // Basic pattern: find → if found do X → if not found do Y
-   EnhancedConditionalActionChain
+   ConditionalActionChain
        .find(buttonImage)
        .ifFoundClick()
        .ifNotFoundLog("Button not found")
@@ -486,7 +486,7 @@
    **Key Feature - The then() Method:**
    ```java
    // Sequential actions with then() - the missing piece!
-   EnhancedConditionalActionChain
+   ConditionalActionChain
        .find(loginButton)
        .ifFoundClick()
        .then(usernameField)  // Move to next element
@@ -510,7 +510,7 @@
    
    1. **Login Flow with Sequential Actions:**
    ```java
-   EnhancedConditionalActionChain
+   ConditionalActionChain
        .find(loginButton)
        .ifFoundClick()
        .then(usernameField)      // Sequential action
@@ -524,7 +524,7 @@
    
    2. **Form Filling with Convenience Methods:**
    ```java
-   EnhancedConditionalActionChain
+   ConditionalActionChain
        .find(formTitle)
        .ifNotFoundDo(res -> { throw new RuntimeException("Form not found"); })
        .then(nameField)
@@ -540,7 +540,7 @@
    
    3. **Error Handling with Control Flow:**
    ```java
-   EnhancedConditionalActionChain
+   ConditionalActionChain
        .find(submitButton)
        .ifFoundClick()
        .then(errorDialog)
@@ -556,14 +556,14 @@
    4. **Retry Pattern and Keyboard Shortcuts:**
    ```java
    // Retry with convenience methods
-   EnhancedConditionalActionChain
+   ConditionalActionChain
        .retry(new PatternFindOptions.Builder().build(), 3)
        .ifFoundClick()
        .ifNotFoundLog("Failed after retries")
        .perform(action, objectCollection);
    
    // Keyboard shortcuts workflow
-   EnhancedConditionalActionChain
+   ConditionalActionChain
        .find(editorField)
        .ifFoundClick()
        .pressCtrlA()      // Select all
@@ -573,7 +573,7 @@
        .perform(action, new ObjectCollection.Builder().build());
    ```
    
-   **When to Use EnhancedConditionalActionChain:**
+   **When to Use ConditionalActionChain:**
    - **Always for UI interactions** - Handles element not found gracefully
    - **Multi-step workflows** - Clean sequential flow with error handling
    - **When you need both success and failure handling**
@@ -709,7 +709,7 @@
    
    **ConditionalActionWrapper for Spring Applications:**
    
-   When using Spring Boot, you can use `ConditionalActionWrapper` with EnhancedConditionalActionChain:
+   When using Spring Boot, you can use `ConditionalActionWrapper` with ConditionalActionChain:
    
    ```java
    @Component
@@ -2307,7 +2307,7 @@ Modern Brobot development emphasizes:
 - Type safety through StateEnum and proper generics
 - Dependency injection with Spring Boot
 - Fluent APIs and method chaining
-- **EnhancedConditionalActionChain for elegant UI interactions with proper sequential composition**
+- **ConditionalActionChain for elegant UI interactions with proper sequential composition**
 - **ActionHistory for probabilistic mock testing and integration tests**
 - **Screen-adaptive RegionBuilder with Position integration for resolution-independent automation**
 - **Integrated logging with DiagnosticLogger for comprehensive pattern matching diagnostics**
