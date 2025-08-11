@@ -397,45 +397,18 @@ public class BufferedImageUtilities {
         }
         
         try {
-            // Use ScreenUtilities which has monitor support
-            Screen screen = ScreenUtilities.getScreen("find");
-            if (screen == null) {
-                screen = new Screen(); // Fallback to primary monitor
-            } else {
-                // Only log monitor info periodically to reduce spam
-                long now = System.currentTimeMillis();
-                if (now - lastMonitorLogTime > MONITOR_LOG_INTERVAL) {
-                    ConsoleReporter.println("[SCREEN CAPTURE] Using monitor " + screen.getID() + " for region: " + region);
-                    lastMonitorLogTime = now;
-                }
-            }
+            // IMPORTANT: Use new Screen() directly like version 1.0.7
+            // This avoids any monitor management or caching that might affect capture
+            Screen screen = new Screen();
+            ConsoleReporter.println("[SCREEN CAPTURE] Using new Screen() instance (v1.0.7 approach)");
             
             ConsoleReporter.println("[SCREEN CAPTURE] Attempting capture of region: " + 
                 region.x() + "," + region.y() + " " + region.w() + "x" + region.h());
             
-            BufferedImage captured;
-            
-            // Option to use direct Robot capture to bypass SikuliX completely
-            if (staticUseDirectRobotCapture && staticDirectRobotCapture != null) {
-                ConsoleReporter.println("[SCREEN CAPTURE] Using DIRECT ROBOT capture (bypassing SikuliX)");
-                captured = staticDirectRobotCapture.captureRegion(region.x(), region.y(), region.w(), region.h());
-                
-                // Compare with SikuliX capture for debugging
-                if (captured != null) {
-                    BufferedImage sikuliCapture = screen.capture(region.sikuli()).getImage();
-                    staticDirectRobotCapture.compareWithSikuliCapture(sikuliCapture, 
-                        region.x(), region.y(), region.w(), region.h());
-                }
-            } else {
-                // Use SikuliX capture
-                ConsoleReporter.println("[SCREEN CAPTURE] Using SikuliX Screen.capture()");
-                captured = screen.capture(region.sikuli()).getImage();
-                
-                // Log if scaling would have been applied (for debugging)
-                if (dpiAwareCapture != null && dpiAwareCapture.isScalingActive()) {
-                    ConsoleReporter.println("[SCREEN CAPTURE] Display scaling detected but IGNORED - using direct SikuliX capture");
-                }
-            }
+            // Version 1.0.7 approach: Simple direct capture
+            BufferedImage captured = screen.capture(region.sikuli()).getImage();
+            ConsoleReporter.println("[SCREEN CAPTURE] Captured " + captured.getWidth() + "x" + captured.getHeight() + 
+                " using v1.0.7 approach");
             
             // Validate captured image
             if (captured != null) {
