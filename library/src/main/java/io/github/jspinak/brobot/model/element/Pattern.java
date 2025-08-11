@@ -337,9 +337,18 @@ public class Pattern {
             System.out.println("[PATTERN DEBUG] Original image type: " + buffImg.getType() + " hasAlpha: " + buffImg.getColorModel().hasAlpha());
         }
         
-        // Only convert to RGB if it has alpha channel WITH actual transparency
-        // If the image is fully opaque, keep it as-is to preserve exact pixel values
-        if (buffImg.getColorModel().hasAlpha() && hasTransparency(buffImg)) {
+        // IMPORTANT: Use v1.0.7 approach - pass image directly to SikuliX without conversion
+        // This preserves exact pixel values and matches how patterns were captured with SikuliX tool
+        boolean useV107Approach = System.getProperty("brobot.pattern.v107", "true").equals("true");
+        
+        if (useV107Approach) {
+            // Version 1.0.7 approach: Direct pass-through without any conversion
+            if (name != null && name.contains("prompt")) {
+                System.out.println("[PATTERN DEBUG] Using v1.0.7 approach - direct pass-through without conversion");
+            }
+            cachedSikuliPattern = new org.sikuli.script.Pattern(buffImg);
+        } else if (buffImg.getColorModel().hasAlpha() && hasTransparency(buffImg)) {
+            // Current approach: Only convert if has actual transparency
             if (name != null && name.contains("prompt")) {
                 System.out.println("[PATTERN DEBUG] Image has actual transparency, converting to RGB");
             }

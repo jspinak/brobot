@@ -147,7 +147,16 @@ public class Image {
                 "Image file may not exist or failed to load: " + name);
         }
         
-        // Convert to RGB if it has alpha channel (like SikuliX does internally)
+        // IMPORTANT: Use v1.0.7 approach - pass image directly to SikuliX without conversion
+        // This preserves exact pixel values and matches how patterns were captured with SikuliX tool
+        boolean useV107Approach = System.getProperty("brobot.pattern.v107", "true").equals("true");
+        
+        if (useV107Approach) {
+            // Version 1.0.7 approach: Direct pass-through without any conversion
+            return new org.sikuli.script.Image(bufferedImage);
+        }
+        
+        // Current approach: Convert to RGB if it has alpha channel
         BufferedImage imgToUse = bufferedImage;
         if (bufferedImage.getColorModel().hasAlpha()) {
             BufferedImage rgbImage = new BufferedImage(
