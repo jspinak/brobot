@@ -109,8 +109,8 @@ public class BufferedImageUtilities {
     @Autowired(required = false)
     private DPIAwareCapture dpiAwareCaptureInstance;
     
-    @Value("${brobot.capture.dpi-aware:true}")
-    private boolean dpiAwareCaptureEnabled = true;
+    @Value("${brobot.capture.dpi-aware:false}")
+    private boolean dpiAwareCaptureEnabled = false;
     
     private static BufferedImageUtilities instance;
     private static DPIAwareCapture dpiAwareCapture;
@@ -400,17 +400,12 @@ public class BufferedImageUtilities {
             ConsoleReporter.println("[SCREEN CAPTURE] Attempting capture of region: " + 
                 region.x() + "," + region.y() + " " + region.w() + "x" + region.h());
             
-            // Check if DPI-aware capture is available and needed
-            BufferedImage captured;
-            if (staticDpiAwareCaptureEnabled && dpiAwareCapture != null && dpiAwareCapture.isScalingActive()) {
-                ConsoleReporter.println("[SCREEN CAPTURE] Display scaling detected, using DPI-aware capture");
-                captured = dpiAwareCapture.captureDPIAware(region.x(), region.y(), region.w(), region.h());
-            } else {
-                if (dpiAwareCapture != null && dpiAwareCapture.isScalingActive() && !staticDpiAwareCaptureEnabled) {
-                    ConsoleReporter.println("[SCREEN CAPTURE] Display scaling detected but DPI-aware capture is DISABLED");
-                    ConsoleReporter.println("[SCREEN CAPTURE] Using direct SikuliX capture (matches SikuliX IDE behavior)");
-                }
-                captured = screen.capture(region.sikuli()).getImage();
+            // ALWAYS use direct SikuliX capture - NO DPI scaling adjustments
+            BufferedImage captured = screen.capture(region.sikuli()).getImage();
+            
+            // Log if scaling would have been applied (for debugging)
+            if (dpiAwareCapture != null && dpiAwareCapture.isScalingActive()) {
+                ConsoleReporter.println("[SCREEN CAPTURE] Display scaling detected but IGNORED - using direct SikuliX capture");
             }
             
             // Validate captured image
