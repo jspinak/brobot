@@ -337,17 +337,31 @@ public class Pattern {
             System.out.println("[PATTERN DEBUG] Original image type: " + buffImg.getType() + " hasAlpha: " + buffImg.getColorModel().hasAlpha());
         }
         
-        // IMPORTANT: Use v1.0.7 approach - pass image directly to SikuliX without conversion
-        // This preserves exact pixel values and matches how patterns were captured with SikuliX tool
-        boolean useV107Approach = System.getProperty("brobot.pattern.v107", "true").equals("true");
+        // IMPORTANT: Convert ARGB to RGB to match captured scene type
+        // Captured scenes are Type1 (RGB) but patterns are Type6 (ARGB)
+        // This type mismatch causes pattern matching to fail
+        boolean forceRGBConversion = System.getProperty("brobot.pattern.forceRGB", "true").equals("true");
         
-        if (useV107Approach) {
-            // Version 1.0.7 approach: Direct pass-through without any conversion
+        if (forceRGBConversion && buffImg.getType() != BufferedImage.TYPE_INT_RGB) {
+            // Convert to RGB to match scene type
             if (name != null && name.contains("prompt")) {
-                System.out.println("[PATTERN DEBUG] Using v1.0.7 approach - direct pass-through without conversion");
+                System.out.println("[PATTERN DEBUG] Converting Type" + buffImg.getType() + " to RGB to match scene type");
             }
-            cachedSikuliPattern = new org.sikuli.script.Pattern(buffImg);
-        } else if (buffImg.getColorModel().hasAlpha() && hasTransparency(buffImg)) {
+            BufferedImage rgbImage = new BufferedImage(
+                buffImg.getWidth(),
+                buffImg.getHeight(),
+                BufferedImage.TYPE_INT_RGB
+            );
+            Graphics2D g = rgbImage.createGraphics();
+            // Use white background for better contrast
+            g.setColor(Color.WHITE);
+            g.fillRect(0, 0, rgbImage.getWidth(), rgbImage.getHeight());
+            g.setComposite(AlphaComposite.SrcOver);
+            g.drawImage(buffImg, 0, 0, null);
+            g.dispose();
+            cachedSikuliPattern = new org.sikuli.script.Pattern(rgbImage);
+        } else if (!System.getProperty("brobot.pattern.v107", "false").equals("true") && 
+                   buffImg.getColorModel().hasAlpha() && hasTransparency(buffImg)) {
             // Current approach: Only convert if has actual transparency
             if (name != null && name.contains("prompt")) {
                 System.out.println("[PATTERN DEBUG] Image has actual transparency, converting to RGB");
