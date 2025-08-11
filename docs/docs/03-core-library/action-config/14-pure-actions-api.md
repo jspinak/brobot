@@ -162,6 +162,8 @@ Provides conditional execution of actions based on previous results.
 public class ConditionalActionChain
 ```
 
+> **Note:** The original `ConditionalActionChain` class is now deprecated. Use `ConditionalActionChain` for all new development, which includes improved convenience methods and enhanced functionality.
+
 ### Available Methods
 
 #### Static Factory Methods
@@ -170,8 +172,12 @@ public class ConditionalActionChain
 
 #### Conditional Methods
 - `ifFound(ActionConfig)` - Execute if previous action succeeded
+- `ifFoundClick()` - Click if previous action succeeded (convenience method)
+- `ifFoundRightClick()` - Right-click if previous action succeeded (convenience method)
+- `ifFoundType(String)` - Type text if previous action succeeded (convenience method)
 - `ifNotFound(ActionConfig)` - Execute if previous action failed
 - `always(ActionConfig)` - Execute regardless of previous result
+- `alwaysClick()` - Always click (convenience method)
 
 #### Logging Methods
 - `ifFoundLog(String)` - Log message if found
@@ -184,10 +190,17 @@ public class ConditionalActionChain
 ### Example Usage
 
 ```java
+// Using ActionConfig objects
 ConditionalActionChain.find(findOptions)
     .ifFound(clickOptions)
-    .ifNotFound(log("Button not found"))
+    .ifNotFoundLog("Button not found")
     .always(screenshotOptions)
+    .perform(action, objectCollection);
+
+// Using convenience methods (recommended for common operations)
+ConditionalActionChain.find(findOptions)
+    .ifFoundClick()
+    .ifNotFoundLog("Button not found")
     .perform(action, objectCollection);
 ```
 
@@ -231,7 +244,7 @@ if (matches.isSuccess()) {
 
 // Better: Use ConditionalActionChain
 ConditionalActionChain.find(findOptions)
-    .ifFound(click())
+    .ifFoundClick()
     .perform(action, objectCollection);
 ```
 

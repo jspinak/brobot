@@ -10,7 +10,7 @@ With the new ActionChainOptions, you can create nested or confirmed find operati
 ## Related Documentation
 
 - **[ActionConfig Factory](../action-config-factory.md)** - Learn about creating and managing action configurations
-- **[Conditional Action Chaining](/docs/ai-brobot-project-creation#conditionalactionchain---the-foundation)** - Build complex conditional execution flows
+- **[Enhanced Conditional Action Chaining](/docs/ai-brobot-project-creation#ConditionalActionChain---the-foundation)** - Build complex conditional execution flows
 - **[AI Project Creation Guide](/docs/ai-brobot-project-creation#when-to-use-actionchainbuilder-vs-then)** - Comprehensive action chaining patterns
 - **[ConditionalActionChain Example](https://github.com/jspinak/brobot/tree/main/examples/03-core-library/action-config/conditional-chains-examples)** - Complete implementation example
 

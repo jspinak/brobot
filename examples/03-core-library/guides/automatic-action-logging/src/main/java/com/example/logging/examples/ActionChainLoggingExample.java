@@ -57,6 +57,18 @@ public class ActionChainLoggingExample {
     
     /**
      * Demonstrates using separate action chains for each step with logging
+     * 
+     * Note: This example shows manual sequential execution for educational purposes.
+     * For production code, consider using ConditionalActionChain:
+     * 
+     * ConditionalActionChain.find(loginButtonCollection, findOptions)
+     *     .ifFoundClick(clickOptions)
+     *     .ifNotFoundLog("Login button not found")
+     *     .then()
+     *     .find(usernameCollection, findOptions)
+     *     .ifFoundClick()
+     *     .ifFoundType("testuser")
+     *     .perform(action);
      */
     public void loginChainWithLogging() {
         log.info("=== Login Chain with Logging Example ===");

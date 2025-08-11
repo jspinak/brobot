@@ -23,19 +23,25 @@ import java.util.logging.Logger;
  * action composition through action chains.
  * </p>
  * 
- * <p>Usage patterns:
+ * <p>
+ * Usage patterns:
  * <ul>
- *   <li>Click on a specific location: {@code new ClickV2().perform(actionResult, location)}</li>
- *   <li>Click on a region's center: {@code new ClickV2().perform(actionResult, region)}</li>
- *   <li>Click on matches from a previous Find: {@code new ClickV2().perform(actionResult, matches)}</li>
+ * <li>Click on a specific location:
+ * {@code new ClickV2().perform(actionResult, location)}</li>
+ * <li>Click on a region's center:
+ * {@code new ClickV2().perform(actionResult, region)}</li>
+ * <li>Click on matches from a previous Find:
+ * {@code new ClickV2().perform(actionResult, matches)}</li>
  * </ul>
  * </p>
  * 
- * <p>For Find-then-Click operations, use ConditionalActionChain:
+ * <p>
+ * For Find-then-Click operations, use ConditionalActionChain:
+ * 
  * <pre>{@code
  * ConditionalActionChain.find(findOptions)
- *     .ifFound(new ClickOptions.Builder().build())
- *     .perform(objectCollection);
+ *         .ifFound(new ClickOptions.Builder().build())
+ *         .perform(objectCollection);
  * }</pre>
  * </p>
  * 
@@ -45,27 +51,27 @@ import java.util.logging.Logger;
  */
 @Component("clickV2")
 public class ClickV2 implements ActionInterface {
-    
+
     private static final Logger logger = Logger.getLogger(ClickV2.class.getName());
-    
+
     @Override
     public Type getActionType() {
         return Type.CLICK;
     }
-    
+
     @Override
     public void perform(ActionResult actionResult, ObjectCollection... objectCollections) {
         actionResult.setSuccess(false);
-        
+
         try {
             // Extract clickable objects from collections
             List<Location> locations = extractClickableLocations(objectCollections);
-            
+
             if (locations.isEmpty()) {
                 logger.warning("No clickable objects provided to ClickV2");
                 return;
             }
-            
+
             // Perform clicks
             int successCount = 0;
             for (Location location : locations) {
@@ -74,29 +80,29 @@ public class ClickV2 implements ActionInterface {
                     successCount++;
                 }
             }
-            
+
             actionResult.setSuccess(successCount > 0);
             logger.info(String.format("ClickV2: Clicked %d of %d locations", successCount, locations.size()));
-            
+
         } catch (Exception e) {
             logger.severe("Error in ClickV2: " + e.getMessage());
             actionResult.setSuccess(false);
         }
     }
-    
+
     /**
      * Extracts clickable locations from the provided object collections.
      * Supports Location, Region, and Match objects.
      */
     private List<Location> extractClickableLocations(ObjectCollection... collections) {
         List<Location> locations = new ArrayList<>();
-        
+
         for (ObjectCollection collection : collections) {
             // Extract from Locations
             for (StateLocation stateLoc : collection.getStateLocations()) {
                 locations.add(stateLoc.getLocation());
             }
-            
+
             // Extract from StateRegions (use center point)
             for (StateRegion stateRegion : collection.getStateRegions()) {
                 Region region = stateRegion.getSearchRegion();
@@ -105,13 +111,13 @@ public class ClickV2 implements ActionInterface {
                 int centerY = region.y() + region.h() / 2;
                 locations.add(new Location(centerX, centerY));
             }
-            
+
             // Note: Matches would typically be passed through ActionResult
         }
-        
+
         return locations;
     }
-    
+
     /**
      * Performs the actual click operation at the specified location.
      */
@@ -120,19 +126,19 @@ public class ClickV2 implements ActionInterface {
             // Perform the click
             org.sikuli.script.Location sikuliLoc = location.sikuli();
             sikuliLoc.click();
-            
+
             // Small pause after click
             Thread.sleep(100);
-            
+
             logger.fine("Clicked at location: " + location);
             return true;
-            
+
         } catch (Exception e) {
             logger.warning("Failed to click at location " + location + ": " + e.getMessage());
             return false;
         }
     }
-    
+
     /**
      * Creates a Match object from a Location for result reporting.
      */

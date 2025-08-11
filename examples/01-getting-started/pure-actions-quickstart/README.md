@@ -36,8 +36,8 @@ if (found.isSuccess()) {
 ### Conditional Chains
 ```java
 ConditionalActionChain.find(findOptions)
-    .ifFound(click())
-    .ifNotFound(log("Button not found"))
+    .ifFoundClick()
+    .ifNotFoundLog("Button not found")
     .perform(action, objectCollection);
 ```
 
