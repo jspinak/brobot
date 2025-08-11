@@ -606,6 +606,8 @@ public class Action {
                 return new TypeOptions.Builder().build();
             case HOVER:
                 return new MouseMoveOptions.Builder().build();
+            case MOVE:
+                return new MouseMoveOptions.Builder().build();
             case DRAG:
                 return new DragOptions.Builder().build();
             case FIND:
