@@ -2120,17 +2120,16 @@ Region content = Region.builder()
     .build();
 ```
 
-### Screen Scaling and Adaptation
+### Precise Positioning and Flexibility
 
 ```java
-// Scale regions designed for specific resolutions
-Region scaledButton = Region.builder()
-    .withBaseScreenSize(1920, 1080)  // Original design resolution
-    .withBaseRegion(1800, 1000, 100, 50)  // Original button position
-    .adjustToCurrentScreen()  // Automatically scale to current resolution
+// Direct pixel coordinates for precise placement
+Region button = Region.builder()
+    .withPosition(1800, 1000)  // Exact pixel position
+    .withSize(100, 50)  // Exact size in pixels
     .build();
 
-// Percentage-based regions that adapt automatically
+// Percentage-based regions for flexibility
 Region searchArea = Region.builder()
     .withScreenPercentage(0.1, 0.1, 0.8, 0.3)  // 10% margins, 80% width, 30% height
     .build();

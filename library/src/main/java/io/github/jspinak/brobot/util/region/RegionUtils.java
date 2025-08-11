@@ -407,31 +407,6 @@ public class RegionUtils {
         return merged;
     }
     
-    /**
-     * Creates a region scaled from a base screen size to the current screen size.
-     * 
-     * @param baseRegion the region designed for the base screen
-     * @param baseScreenWidth the width of the base screen
-     * @param baseScreenHeight the height of the base screen
-     * @param currentScreenWidth the width of the current screen
-     * @param currentScreenHeight the height of the current screen
-     * @return a new region scaled to the current screen
-     */
-    public static Region scaleToScreen(Region baseRegion, 
-                                       int baseScreenWidth, int baseScreenHeight,
-                                       int currentScreenWidth, int currentScreenHeight) {
-        if (baseRegion == null) return null;
-        
-        double xScale = (double) currentScreenWidth / baseScreenWidth;
-        double yScale = (double) currentScreenHeight / baseScreenHeight;
-        
-        int newX = (int) Math.round(baseRegion.getX() * xScale);
-        int newY = (int) Math.round(baseRegion.getY() * yScale);
-        int newWidth = (int) Math.round(baseRegion.getW() * xScale);
-        int newHeight = (int) Math.round(baseRegion.getH() * yScale);
-        
-        return new Region(newX, newY, newWidth, newHeight);
-    }
     
     /**
      * Creates a region as a percentage of the screen size.
