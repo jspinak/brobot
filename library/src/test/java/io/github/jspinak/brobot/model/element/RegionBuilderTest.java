@@ -100,18 +100,18 @@ public class RegionBuilderTest {
     }
     
     @Test
-    public void testScreenScaling() {
-        // Test scaling from a base resolution to current
+    public void testDirectCoordinates() {
+        // Test direct coordinate specification
         Region region = builder
-            .withBaseScreenSize(1920, 1080)
-            .withBaseRegion(100, 100, 200, 150)
-            .adjustToCurrentScreen()
+            .withPosition(100, 100)
+            .withSize(200, 150)
             .build();
         
         assertNotNull(region);
-        // The actual values will depend on the current screen size
-        assertTrue(region.getW() > 0);
-        assertTrue(region.getH() > 0);
+        assertEquals(100, region.getX());
+        assertEquals(100, region.getY());
+        assertEquals(200, region.getW());
+        assertEquals(150, region.getH());
     }
     
     @Test
@@ -280,11 +280,10 @@ public class RegionBuilderTest {
             .topRight()
             .build();
         
-        // Example 2: Scale a region designed for 1920x1080 to current screen
-        Region scaledRegion = Region.builder()
-            .withBaseScreenSize(1920, 1080)
-            .withBaseRegion(500, 300, 400, 200)
-            .adjustToCurrentScreen()
+        // Example 2: Create a region with specific coordinates
+        Region specificRegion = Region.builder()
+            .withPosition(500, 300)
+            .withSize(400, 200)
             .build();
         
         // Example 3: Create a centered dialog region
@@ -332,7 +331,7 @@ public class RegionBuilderTest {
         
         // All regions should be valid
         assertNotNull(topRightSearch);
-        assertNotNull(scaledRegion);
+        assertNotNull(specificRegion);
         assertNotNull(dialogRegion);
         assertNotNull(adjusted);
         assertNotNull(percentageRegion);

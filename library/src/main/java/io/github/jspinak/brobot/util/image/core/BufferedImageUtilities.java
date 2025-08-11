@@ -9,6 +9,7 @@ import io.github.jspinak.brobot.monitor.MonitorManager;
 import io.github.jspinak.brobot.config.BrobotProperties;
 import io.github.jspinak.brobot.util.image.capture.ScreenUtilities;
 import io.github.jspinak.brobot.util.image.capture.DPIAwareCapture;
+import io.github.jspinak.brobot.util.image.capture.DirectRobotCapture;
 
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -109,12 +110,20 @@ public class BufferedImageUtilities {
     @Autowired(required = false)
     private DPIAwareCapture dpiAwareCaptureInstance;
     
+    @Autowired(required = false)
+    private DirectRobotCapture directRobotCapture;
+    
     @Value("${brobot.capture.dpi-aware:false}")
     private boolean dpiAwareCaptureEnabled = false;
     
+    @Value("${brobot.capture.use-direct-robot:false}")
+    private boolean useDirectRobotCapture = false;
+    
     private static BufferedImageUtilities instance;
     private static DPIAwareCapture dpiAwareCapture;
+    private static DirectRobotCapture staticDirectRobotCapture;
     private static boolean staticDpiAwareCaptureEnabled = true;
+    private static boolean staticUseDirectRobotCapture = false;
     
     // Cache for environment info logging to avoid spam
     private static boolean environmentLogged = false;
@@ -131,7 +140,11 @@ public class BufferedImageUtilities {
         if (dpiAwareCaptureInstance != null) {
             dpiAwareCapture = dpiAwareCaptureInstance;
         }
+        if (directRobotCapture != null) {
+            staticDirectRobotCapture = directRobotCapture;
+        }
         staticDpiAwareCaptureEnabled = dpiAwareCaptureEnabled;
+        staticUseDirectRobotCapture = useDirectRobotCapture;
     }
     
     /**
@@ -400,12 +413,28 @@ public class BufferedImageUtilities {
             ConsoleReporter.println("[SCREEN CAPTURE] Attempting capture of region: " + 
                 region.x() + "," + region.y() + " " + region.w() + "x" + region.h());
             
-            // ALWAYS use direct SikuliX capture - NO DPI scaling adjustments
-            BufferedImage captured = screen.capture(region.sikuli()).getImage();
+            BufferedImage captured;
             
-            // Log if scaling would have been applied (for debugging)
-            if (dpiAwareCapture != null && dpiAwareCapture.isScalingActive()) {
-                ConsoleReporter.println("[SCREEN CAPTURE] Display scaling detected but IGNORED - using direct SikuliX capture");
+            // Option to use direct Robot capture to bypass SikuliX completely
+            if (staticUseDirectRobotCapture && staticDirectRobotCapture != null) {
+                ConsoleReporter.println("[SCREEN CAPTURE] Using DIRECT ROBOT capture (bypassing SikuliX)");
+                captured = staticDirectRobotCapture.captureRegion(region.x(), region.y(), region.w(), region.h());
+                
+                // Compare with SikuliX capture for debugging
+                if (captured != null) {
+                    BufferedImage sikuliCapture = screen.capture(region.sikuli()).getImage();
+                    staticDirectRobotCapture.compareWithSikuliCapture(sikuliCapture, 
+                        region.x(), region.y(), region.w(), region.h());
+                }
+            } else {
+                // Use SikuliX capture
+                ConsoleReporter.println("[SCREEN CAPTURE] Using SikuliX Screen.capture()");
+                captured = screen.capture(region.sikuli()).getImage();
+                
+                // Log if scaling would have been applied (for debugging)
+                if (dpiAwareCapture != null && dpiAwareCapture.isScalingActive()) {
+                    ConsoleReporter.println("[SCREEN CAPTURE] Display scaling detected but IGNORED - using direct SikuliX capture");
+                }
             }
             
             // Validate captured image
