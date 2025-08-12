@@ -8,8 +8,6 @@ import io.github.jspinak.brobot.util.file.FilenameUtils;
 import io.github.jspinak.brobot.monitor.MonitorManager;
 import io.github.jspinak.brobot.config.BrobotProperties;
 import io.github.jspinak.brobot.util.image.capture.ScreenUtilities;
-import io.github.jspinak.brobot.util.image.capture.DPIAwareCapture;
-import io.github.jspinak.brobot.util.image.capture.DirectRobotCapture;
 
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -108,23 +106,7 @@ public class BufferedImageUtilities {
     @Autowired(required = false)
     private SmartImageLoader smartImageLoader;
     
-    @Autowired(required = false)
-    private DPIAwareCapture dpiAwareCaptureInstance;
-    
-    @Autowired(required = false)
-    private DirectRobotCapture directRobotCapture;
-    
-    @Value("${brobot.capture.dpi-aware:false}")
-    private boolean dpiAwareCaptureEnabled = false;
-    
-    @Value("${brobot.capture.use-direct-robot:false}")
-    private boolean useDirectRobotCapture = false;
-    
     private static BufferedImageUtilities instance;
-    private static DPIAwareCapture dpiAwareCapture;
-    private static DirectRobotCapture staticDirectRobotCapture;
-    private static boolean staticDpiAwareCaptureEnabled = true;
-    private static boolean staticUseDirectRobotCapture = false;
     
     // Cache for environment info logging to avoid spam
     private static boolean environmentLogged = false;
@@ -138,14 +120,7 @@ public class BufferedImageUtilities {
     
     @PostConstruct
     private void init() {
-        if (dpiAwareCaptureInstance != null) {
-            dpiAwareCapture = dpiAwareCaptureInstance;
-        }
-        if (directRobotCapture != null) {
-            staticDirectRobotCapture = directRobotCapture;
-        }
-        staticDpiAwareCaptureEnabled = dpiAwareCaptureEnabled;
-        staticUseDirectRobotCapture = useDirectRobotCapture;
+        // Initialization if needed
     }
     
     /**
