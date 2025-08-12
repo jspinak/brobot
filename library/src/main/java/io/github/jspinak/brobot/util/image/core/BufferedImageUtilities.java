@@ -25,6 +25,7 @@ import org.springframework.beans.factory.annotation.Value;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
+import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -397,18 +398,60 @@ public class BufferedImageUtilities {
         }
         
         try {
-            // IMPORTANT: Use new Screen() directly like version 1.0.7
-            // This avoids any monitor management or caching that might affect capture
-            Screen screen = new Screen();
-            ConsoleReporter.println("[SCREEN CAPTURE] Using new Screen() instance (v1.0.7 approach)");
+            BufferedImage captured;
             
-            ConsoleReporter.println("[SCREEN CAPTURE] Attempting capture of region: " + 
-                region.x() + "," + region.y() + " " + region.w() + "x" + region.h());
+            // Check if we should use physical resolution capture
+            boolean usePhysicalResolution = System.getProperty("brobot.capture.physical", "true").equals("true");
             
-            // Version 1.0.7 approach: Simple direct capture
-            BufferedImage captured = screen.capture(region.sikuli()).getImage();
-            ConsoleReporter.println("[SCREEN CAPTURE] Captured " + captured.getWidth() + "x" + captured.getHeight() + 
-                " using v1.0.7 approach");
+            if (usePhysicalResolution) {
+                // Use Robot directly to capture at physical resolution
+                ConsoleReporter.println("[SCREEN CAPTURE] Using physical resolution capture");
+                
+                Robot robot = new Robot();
+                GraphicsEnvironment gEnv = GraphicsEnvironment.getLocalGraphicsEnvironment();
+                GraphicsDevice device = gEnv.getDefaultScreenDevice();
+                GraphicsConfiguration config = device.getDefaultConfiguration();
+                
+                // Get scale factor
+                java.awt.geom.AffineTransform transform = config.getDefaultTransform();
+                double scale = transform.getScaleX();
+                
+                Rectangle captureRect;
+                if (scale > 1.0 && region.w() == 1536 && region.h() == 864) {
+                    // Full screen capture - use physical resolution
+                    captureRect = new Rectangle(0, 0, 1920, 1080);
+                    ConsoleReporter.println("[SCREEN CAPTURE] Capturing at physical resolution: 1920x1080 (scale: " + 
+                        (int)(scale * 100) + "%)");
+                } else if (scale > 1.0) {
+                    // Scaled region capture
+                    captureRect = new Rectangle(
+                        (int)(region.x() * scale),
+                        (int)(region.y() * scale),
+                        (int)(region.w() * scale),
+                        (int)(region.h() * scale)
+                    );
+                    ConsoleReporter.println("[SCREEN CAPTURE] Scaling region from " + region.w() + "x" + region.h() + 
+                        " to " + captureRect.width + "x" + captureRect.height);
+                } else {
+                    // No scaling needed
+                    captureRect = new Rectangle(region.x(), region.y(), region.w(), region.h());
+                }
+                
+                captured = robot.createScreenCapture(captureRect);
+                ConsoleReporter.println("[SCREEN CAPTURE] Captured " + captured.getWidth() + "x" + captured.getHeight() + 
+                    " at physical resolution");
+            } else {
+                // Original v1.0.7 approach using SikuliX Screen
+                Screen screen = new Screen();
+                ConsoleReporter.println("[SCREEN CAPTURE] Using new Screen() instance (v1.0.7 approach)");
+                
+                ConsoleReporter.println("[SCREEN CAPTURE] Attempting capture of region: " + 
+                    region.x() + "," + region.y() + " " + region.w() + "x" + region.h());
+                
+                captured = screen.capture(region.sikuli()).getImage();
+                ConsoleReporter.println("[SCREEN CAPTURE] Captured " + captured.getWidth() + "x" + captured.getHeight() + 
+                    " using v1.0.7 approach");
+            }
             
             // Validate captured image
             if (captured != null) {
