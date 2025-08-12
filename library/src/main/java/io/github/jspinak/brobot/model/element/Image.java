@@ -147,34 +147,11 @@ public class Image {
                 "Image file may not exist or failed to load: " + name);
         }
         
-        // IMPORTANT: Use v1.0.7 approach - pass image directly to SikuliX without conversion
+        // VERSION 1.0.7 APPROACH - DEFAULT
+        // Pass image directly to SikuliX without any conversion
         // This preserves exact pixel values and matches how patterns were captured with SikuliX tool
-        boolean useV107Approach = System.getProperty("brobot.pattern.v107", "true").equals("true");
-        
-        if (useV107Approach) {
-            // Version 1.0.7 approach: Direct pass-through without any conversion
-            return new org.sikuli.script.Image(bufferedImage);
-        }
-        
-        // Current approach: Convert to RGB if it has alpha channel
-        BufferedImage imgToUse = bufferedImage;
-        if (bufferedImage.getColorModel().hasAlpha()) {
-            BufferedImage rgbImage = new BufferedImage(
-                bufferedImage.getWidth(),
-                bufferedImage.getHeight(),
-                BufferedImage.TYPE_INT_RGB
-            );
-            Graphics2D g = rgbImage.createGraphics();
-            // Use dark gray background for better matching with dark UIs
-            g.setColor(new Color(30, 30, 30)); // Dark gray, close to Claude's background
-            g.fillRect(0, 0, rgbImage.getWidth(), rgbImage.getHeight());
-            g.setComposite(AlphaComposite.SrcOver);
-            g.drawImage(bufferedImage, 0, 0, null);
-            g.dispose();
-            imgToUse = rgbImage;
-        }
-        
-        return new org.sikuli.script.Image(imgToUse);
+        // SikuliX handles any image type differences internally
+        return new org.sikuli.script.Image(bufferedImage);
     }
 
     public void setName(String name) {

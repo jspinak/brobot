@@ -337,66 +337,15 @@ public class Pattern {
             System.out.println("[PATTERN DEBUG] Original image type: " + buffImg.getType() + " hasAlpha: " + buffImg.getColorModel().hasAlpha());
         }
         
-        // IMPORTANT: Convert ARGB to RGB to match captured scene type
-        // Captured scenes are Type1 (RGB) but patterns are Type6 (ARGB)
-        // This type mismatch causes pattern matching to fail
-        boolean forceRGBConversion = System.getProperty("brobot.pattern.forceRGB", "true").equals("true");
+        // VERSION 1.0.7 APPROACH - DEFAULT
+        // Pass images directly to SikuliX without any conversion
+        // This preserves exact pixel values and works with both ARGB and RGB images
+        // SikuliX handles the image type differences internally
+        cachedSikuliPattern = new org.sikuli.script.Pattern(buffImg);
         
-        if (forceRGBConversion && buffImg.getType() != BufferedImage.TYPE_INT_RGB) {
-            // Convert to RGB to match scene type
-            if (name != null && name.contains("prompt")) {
-                System.out.println("[PATTERN DEBUG] Converting Type" + buffImg.getType() + " to RGB to match scene type");
-            }
-            BufferedImage rgbImage = new BufferedImage(
-                buffImg.getWidth(),
-                buffImg.getHeight(),
-                BufferedImage.TYPE_INT_RGB
-            );
-            Graphics2D g = rgbImage.createGraphics();
-            // Use white background for better contrast
-            g.setColor(Color.WHITE);
-            g.fillRect(0, 0, rgbImage.getWidth(), rgbImage.getHeight());
-            g.setComposite(AlphaComposite.SrcOver);
-            g.drawImage(buffImg, 0, 0, null);
-            g.dispose();
-            cachedSikuliPattern = new org.sikuli.script.Pattern(rgbImage);
-        } else if (!System.getProperty("brobot.pattern.v107", "false").equals("true") && 
-                   buffImg.getColorModel().hasAlpha() && hasTransparency(buffImg)) {
-            // Current approach: Only convert if has actual transparency
-            if (name != null && name.contains("prompt")) {
-                System.out.println("[PATTERN DEBUG] Image has actual transparency, converting to RGB");
-            }
-            BufferedImage rgbImage = new BufferedImage(
-                buffImg.getWidth(),
-                buffImg.getHeight(),
-                BufferedImage.TYPE_INT_RGB
-            );
-            Graphics2D g = rgbImage.createGraphics();
-            // Use a dark gray background which works better for dark-themed UIs
-            // The Claude UI has a dark theme, so this should match better
-            g.setColor(new Color(30, 30, 30)); // Dark gray, close to Claude's background
-            g.fillRect(0, 0, rgbImage.getWidth(), rgbImage.getHeight());
-            g.setComposite(AlphaComposite.SrcOver);
-            g.drawImage(buffImg, 0, 0, null);
-            g.dispose();
-            
-            if (name != null && name.contains("prompt")) {
-                System.out.println("[PATTERN DEBUG] Using dark gray background (30,30,30) for alpha conversion");
-            }
-            
-            // Create pattern with RGB image
-            cachedSikuliPattern = new org.sikuli.script.Pattern(rgbImage);
-            
-            if (name != null && name.contains("prompt")) {
-                System.out.println("[PATTERN DEBUG] Converted to RGB, new type: " + rgbImage.getType());
-            }
-        } else {
-            // No alpha channel, use as-is
-            cachedSikuliPattern = new org.sikuli.script.Pattern(buffImg);
-            
-            if (name != null && name.contains("prompt")) {
-                System.out.println("[PATTERN DEBUG] No conversion needed, using original");
-            }
+        if (name != null && (name.contains("prompt") || name.contains("icon"))) {
+            System.out.println("[PATTERN DEBUG] Using v1.0.7 approach - no conversion for '" + name + "'");
+            System.out.println("[PATTERN DEBUG] Image type: " + buffImg.getType());
         }
         
         return cachedSikuliPattern;
