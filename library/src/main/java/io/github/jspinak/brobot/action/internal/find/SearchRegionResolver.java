@@ -37,6 +37,32 @@ import java.util.List;
  */
 @Component
 public class SearchRegionResolver {
+    
+    // Track last logged message to prevent consecutive duplicates
+    private String lastLoggedMessage = "";
+    private int suppressedCount = 0;
+    
+    /**
+     * Logs a message while preventing consecutive duplicates.
+     * If the same message is repeated, it increments a counter instead of logging again.
+     * When a different message comes in, it logs any suppressed count and the new message.
+     */
+    private synchronized void logWithDeduplication(String message) {
+        if (message.equals(lastLoggedMessage)) {
+            suppressedCount++;
+            return;
+        }
+        
+        // If we had suppressed messages, log the count
+        if (suppressedCount > 0) {
+            ConsoleReporter.println("    [Previous message repeated " + suppressedCount + " more time(s)]");
+            suppressedCount = 0;
+        }
+        
+        // Log the new message
+        ConsoleReporter.println(message);
+        lastLoggedMessage = message;
+    }
 
     /**
      * Selects search regions for a StateImage-based find operation.
@@ -61,7 +87,7 @@ public class SearchRegionResolver {
             if (regions.size() == 1 && regions.get(0).w() == 1536 && regions.get(0).h() == 864) {
                 // Full screen search - don't log unless it's interesting
             } else {
-                ConsoleReporter.println("[REGIONS] Using " + regions.size() + " custom region(s) for '" + 
+                logWithDeduplication("[REGIONS] Using " + regions.size() + " custom region(s) for '" + 
                     stateImage.getName() + "'");
             }
             return regions;
@@ -77,7 +103,7 @@ public class SearchRegionResolver {
         // Only log if not full screen or if there are multiple regions
         if (regions.size() > 1 || (regions.size() == 1 && 
             (regions.get(0).w() != 1536 || regions.get(0).h() != 864))) {
-            ConsoleReporter.println("[REGIONS] Using " + regions.size() + " region(s) for '" + 
+            logWithDeduplication("[REGIONS] Using " + regions.size() + " region(s) for '" + 
                 stateImage.getName() + "'");
         }
         
