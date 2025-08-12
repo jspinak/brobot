@@ -143,6 +143,11 @@ public class ScenePatternMatcher {
         double bestScore = 0;
         Match bestMatch = null;
         
+        // Reset match tracking for this search
+        if (diagnosticLogger != null) {
+            diagnosticLogger.resetMatchTracking();
+        }
+        
         while (f.hasNext()) {
             org.sikuli.script.Match sikuliMatch = f.next();
             Match nextMatch = new Match.Builder()
@@ -161,8 +166,8 @@ public class ScenePatternMatcher {
             // Log match details using DiagnosticLogger
             if (diagnosticLogger != null) {
                 diagnosticLogger.logFoundMatch(matchCount, sikuliMatch.getScore(), sikuliMatch.x, sikuliMatch.y);
-            } else if (matchCount <= 3) {
-                // Fallback to ConsoleReporter for first 3 matches
+            } else if (matchCount <= 3 && sikuliMatch.getScore() >= 0.50) {
+                // Fallback to ConsoleReporter for first 3 high-score matches only
                 ConsoleReporter.println("  [FOUND #" + matchCount + "] Score: " + 
                     String.format("%.3f", sikuliMatch.getScore()) + " at (" + 
                     sikuliMatch.x + ", " + sikuliMatch.y + ")");
@@ -170,6 +175,11 @@ public class ScenePatternMatcher {
         }
         
         f.destroy();
+        
+        // Log low-score summary if applicable
+        if (diagnosticLogger != null) {
+            diagnosticLogger.logLowScoreSummary();
+        }
         
         // Log results using DiagnosticLogger
         if (diagnosticLogger != null) {

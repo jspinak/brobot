@@ -8,6 +8,7 @@ import io.github.jspinak.brobot.model.element.Pattern;
 import io.github.jspinak.brobot.model.element.Scene;
 import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.awt.image.BufferedImage;
@@ -31,6 +32,17 @@ public class DiagnosticLogger {
     
     @Autowired(required = false)
     private LoggingVerbosityConfig verbosityConfig;
+    
+    // Track low-score matches for summarization
+    private int lowScoreMatchCount = 0;
+    private double lowestScore = 1.0;
+    private double highestLowScore = 0.0;
+    
+    @Value("${brobot.logging.low-score-threshold:0.50}")
+    private double lowScoreThreshold = 0.50; // Matches below this are considered low-score
+    
+    @Value("${brobot.logging.max-detailed-matches:10}")
+    private int maxDetailedMatches = 10; // Show details for first N high-score matches
     
     private VerbosityLevel getVerbosity() {
         if (verbosityConfig != null) {
@@ -254,7 +266,7 @@ public class DiagnosticLogger {
     }
     
     /**
-     * Log found match details
+     * Log found match details with intelligent filtering and summarization
      */
     public void logFoundMatch(int matchNumber, double score, int x, int y) {
         VerbosityLevel level = getVerbosity();
@@ -263,10 +275,55 @@ public class DiagnosticLogger {
             return;
         }
         
-        // Log first 3 matches in NORMAL mode, all in VERBOSE
-        if (matchNumber <= 3 || level == VerbosityLevel.VERBOSE) {
+        // Track low-score matches for summarization
+        if (score < lowScoreThreshold) {
+            lowScoreMatchCount++;
+            lowestScore = Math.min(lowestScore, score);
+            highestLowScore = Math.max(highestLowScore, score);
+            
+            // In VERBOSE mode, show first few low-score matches as examples
+            if (level == VerbosityLevel.VERBOSE && lowScoreMatchCount <= 3) {
+                ConsoleReporter.println(String.format("  [LOW-SCORE #%d] Score: %.3f at (%d, %d)",
+                    matchNumber, score, x, y));
+            }
+            return;
+        }
+        
+        // For high-score matches, show details based on verbosity level
+        boolean showDetails = false;
+        
+        if (level == VerbosityLevel.NORMAL) {
+            // In NORMAL mode, show top 3 high-score matches
+            showDetails = (matchNumber <= 3 && score >= lowScoreThreshold);
+        } else if (level == VerbosityLevel.VERBOSE) {
+            // In VERBOSE mode, show more high-score matches but still limit
+            showDetails = (matchNumber <= maxDetailedMatches && score >= lowScoreThreshold);
+        }
+        
+        if (showDetails) {
             ConsoleReporter.println(String.format("  [FOUND #%d] Score: %.3f at (%d, %d)",
                 matchNumber, score, x, y));
+        }
+    }
+    
+    /**
+     * Reset match tracking for a new search
+     */
+    public void resetMatchTracking() {
+        lowScoreMatchCount = 0;
+        lowestScore = 1.0;
+        highestLowScore = 0.0;
+    }
+    
+    /**
+     * Log summary of low-score matches if any were found
+     */
+    public void logLowScoreSummary() {
+        if (lowScoreMatchCount > 0) {
+            if (lowScoreMatchCount > 3) {
+                ConsoleReporter.println(String.format("  [LOW-SCORE SUMMARY] %d matches below %.2f threshold (range: %.3f-%.3f)",
+                    lowScoreMatchCount, lowScoreThreshold, lowestScore, highestLowScore));
+            }
         }
     }
     
