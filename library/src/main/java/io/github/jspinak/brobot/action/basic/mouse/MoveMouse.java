@@ -6,6 +6,7 @@ import io.github.jspinak.brobot.action.basic.find.Find;
 import io.github.jspinak.brobot.action.internal.mouse.MoveMouseWrapper;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
+import io.github.jspinak.brobot.model.element.Location;
 import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
 import io.github.jspinak.brobot.tools.testing.mock.time.TimeProvider;
 
@@ -94,19 +95,26 @@ public class MoveMouse implements ActionInterface {
             if (objColl.getStateLocations() != null && !objColl.getStateLocations().isEmpty()) {
                 // Move directly to the locations without finding
                 objColl.getStateLocations().forEach(stateLocation -> {
-                    moveMouseWrapper.move(stateLocation.getLocation());
-                    matches.getMatchLocations().add(stateLocation.getLocation());
+                    Location location = stateLocation.getLocation();
+                    moveMouseWrapper.move(location);
+                    matches.getMatchLocations().add(location);
+                    // Create a Match object for success determination
+                    matches.add(location.toMatch());
                 });
             } else if (objColl.getStateRegions() != null && !objColl.getStateRegions().isEmpty()) {
                 // Move to center of regions without finding
                 objColl.getStateRegions().forEach(stateRegion -> {
-                    moveMouseWrapper.move(stateRegion.getSearchRegion().getLocation());
-                    matches.getMatchLocations().add(stateRegion.getSearchRegion().getLocation());
+                    Location location = stateRegion.getSearchRegion().getLocation();
+                    moveMouseWrapper.move(location);
+                    matches.getMatchLocations().add(location);
+                    // Create a Match object for success determination
+                    matches.add(location.toMatch());
                 });
             } else {
                 // Only use find if we have images/patterns to search for
                 find.perform(matches, objColl);
                 matches.getMatchLocations().forEach(moveMouseWrapper::move);
+                // Find.perform will populate the matchList and success will be determined by ActionSuccessCriteria
             }
             ConsoleReporter.print("finished move. ");
             
