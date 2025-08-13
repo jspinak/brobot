@@ -1,7 +1,7 @@
 import io.github.jspinak.brobot.config.ExecutionEnvironment;
 
 public class TestDisplayCaching {
-    public static void main(String[] args) {
+    public static void main(Stringig[] args) {
         System.out.println("Testing Display Check Caching...\n");
         
         ExecutionEnvironment env = ExecutionEnvironment.getInstance();

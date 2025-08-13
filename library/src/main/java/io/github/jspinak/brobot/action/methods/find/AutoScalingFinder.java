@@ -132,8 +132,8 @@ public class AutoScalingFinder {
             
             // Create finder and search
             Finder finder = new Finder(searchImage);
-            // Get the SikuliX pattern from Brobot pattern
-            org.sikuli.script.Pattern sikuliPattern = new org.sikuli.script.Pattern(pattern.getBufferedImage());
+            // Get the SikuliX pattern from Brobot pattern - use sikuli() method which handles file path loading
+            org.sikuli.script.Pattern sikuliPattern = pattern.sikuli();
             sikuliPattern = sikuliPattern.similar(minSimilarity);
             
             finder.find(sikuliPattern);
