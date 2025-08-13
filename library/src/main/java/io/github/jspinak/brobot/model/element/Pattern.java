@@ -309,7 +309,7 @@ public class Pattern {
     
     /**
      * Another way to get the SikuliX object.
-     * Converts images with alpha channel to RGB to match SikuliX's internal handling.
+     * Now uses direct file path loading like SikuliX IDE to achieve 0.99 similarity scores.
      * @return the SikuliX Pattern object.
      */
     @JsonIgnore
@@ -319,6 +319,27 @@ public class Pattern {
             return cachedSikuliPattern;
         }
         
+        // CRITICAL FIX: Use direct file path loading like SikuliX IDE
+        // The IDE uses finder.find(patFilename) which loads patterns directly from file paths
+        // This avoids BufferedImage conversion that causes similarity scores to drop from 0.99 to 0.70
+        if (imgpath != null && !imgpath.isEmpty()) {
+            try {
+                // Load pattern directly from file path - exactly like SikuliX IDE
+                cachedSikuliPattern = new org.sikuli.script.Pattern(imgpath);
+                
+                if (name != null && (name.contains("prompt") || name.contains("claude"))) {
+                    System.out.println("[PATTERN FIX] Using direct file path loading for '" + name + "' from: " + imgpath);
+                    System.out.println("[PATTERN FIX] This matches SikuliX IDE behavior for 0.99 similarity");
+                }
+                
+                return cachedSikuliPattern;
+            } catch (Exception e) {
+                // Fall back to BufferedImage if file path fails
+                System.out.println("[PATTERN] File path loading failed for: " + imgpath + ", falling back to BufferedImage");
+            }
+        }
+        
+        // Fallback: Use BufferedImage if no file path is available
         if (image == null) {
             throw new IllegalStateException("Cannot create SikuliX Pattern: Image is null for pattern: " + name);
         }
@@ -333,20 +354,12 @@ public class Pattern {
         
         // Debug logging for pattern conversion
         if (name != null && name.contains("prompt")) {
-            System.out.println("[PATTERN DEBUG] Converting pattern '" + name + "' to SikuliX Pattern");
-            System.out.println("[PATTERN DEBUG] Original image type: " + buffImg.getType() + " hasAlpha: " + buffImg.getColorModel().hasAlpha());
+            System.out.println("[PATTERN FALLBACK] Using BufferedImage for '" + name + "' (no file path available)");
+            System.out.println("[PATTERN FALLBACK] Image type: " + buffImg.getType());
         }
         
-        // VERSION 1.0.7 APPROACH - DEFAULT
         // Pass images directly to SikuliX without any conversion
-        // This preserves exact pixel values and works with both ARGB and RGB images
-        // SikuliX handles the image type differences internally
         cachedSikuliPattern = new org.sikuli.script.Pattern(buffImg);
-        
-        if (name != null && (name.contains("prompt") || name.contains("icon"))) {
-            System.out.println("[PATTERN DEBUG] Using v1.0.7 approach - no conversion for '" + name + "'");
-            System.out.println("[PATTERN DEBUG] Image type: " + buffImg.getType());
-        }
         
         return cachedSikuliPattern;
     }
