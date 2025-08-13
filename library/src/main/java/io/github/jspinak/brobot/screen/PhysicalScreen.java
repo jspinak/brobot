@@ -2,7 +2,6 @@ package io.github.jspinak.brobot.screen;
 
 import org.sikuli.script.Screen;
 import org.sikuli.script.ScreenImage;
-import org.springframework.stereotype.Component;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -14,7 +13,6 @@ import java.awt.image.BufferedImage;
  * This ensures Brobot captures screenshots at the same resolution as the SikuliX IDE,
  * solving pattern matching issues caused by DPI scaling.
  */
-@Component
 public class PhysicalScreen extends Screen {
     
     private final int physicalWidth;

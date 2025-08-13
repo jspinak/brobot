@@ -2,6 +2,7 @@ package io.github.jspinak.brobot.config;
 
 import io.github.jspinak.brobot.screen.PhysicalScreen;
 import org.sikuli.script.Screen;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -15,8 +16,11 @@ import org.springframework.context.annotation.Primary;
  * This configuration makes Brobot behave exactly like the SikuliX IDE,
  * achieving the same high pattern matching scores (~0.99) without needing
  * Settings.AlwaysResize or other scaling workarounds.
+ * 
+ * Enable this configuration by setting: brobot.capture.physical-resolution=true
  */
 @Configuration
+@ConditionalOnProperty(name = "brobot.capture.physical-resolution", havingValue = "true", matchIfMissing = true)
 public class BrobotPhysicalResolutionConfig {
     
     /**
