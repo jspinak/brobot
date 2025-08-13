@@ -16,7 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.bytedeco.opencv.opencv_core.Mat;
 
 import java.awt.*;
-
+import java.io.File;
 
 import java.awt.image.BufferedImage;
 import java.util.List;
@@ -308,6 +308,24 @@ public class Pattern {
     }
     
     /**
+     * Get string representation of BufferedImage type.
+     * @param type The BufferedImage type constant
+     * @return String representation of the type
+     */
+    private String getImageTypeString(int type) {
+        switch(type) {
+            case BufferedImage.TYPE_INT_RGB: return "TYPE_INT_RGB";
+            case BufferedImage.TYPE_INT_ARGB: return "TYPE_INT_ARGB";
+            case BufferedImage.TYPE_INT_ARGB_PRE: return "TYPE_INT_ARGB_PRE";
+            case BufferedImage.TYPE_INT_BGR: return "TYPE_INT_BGR";
+            case BufferedImage.TYPE_3BYTE_BGR: return "TYPE_3BYTE_BGR";
+            case BufferedImage.TYPE_4BYTE_ABGR: return "TYPE_4BYTE_ABGR";
+            case BufferedImage.TYPE_4BYTE_ABGR_PRE: return "TYPE_4BYTE_ABGR_PRE";
+            default: return "Type " + type;
+        }
+    }
+    
+    /**
      * Another way to get the SikuliX object.
      * Now uses direct file path loading like SikuliX IDE to achieve 0.99 similarity scores.
      * @return the SikuliX Pattern object.
@@ -319,24 +337,21 @@ public class Pattern {
             return cachedSikuliPattern;
         }
         
-        // CRITICAL FIX: Use direct file path loading like SikuliX IDE
-        // The IDE uses finder.find(patFilename) which loads patterns directly from file paths
-        // This avoids BufferedImage conversion that causes similarity scores to drop from 0.99 to 0.70
-        if (imgpath != null && !imgpath.isEmpty()) {
-            try {
-                // Load pattern directly from file path - exactly like SikuliX IDE
-                cachedSikuliPattern = new org.sikuli.script.Pattern(imgpath);
-                
-                if (name != null && (name.contains("prompt") || name.contains("claude"))) {
-                    System.out.println("[PATTERN FIX] Using direct file path loading for '" + name + "' from: " + imgpath);
-                    System.out.println("[PATTERN FIX] This matches SikuliX IDE behavior for 0.99 similarity");
-                }
-                
-                return cachedSikuliPattern;
-            } catch (Exception e) {
-                // Fall back to BufferedImage if file path fails
-                System.out.println("[PATTERN] File path loading failed for: " + imgpath + ", falling back to BufferedImage");
+        // CRITICAL FIX: Use BufferedImage directly without conversion
+        // The key is to pass the exact BufferedImage to SikuliX without any type conversion
+        // File path loading doesn't work well with SikuliX's ImagePath system
+        if (image != null && !image.isEmpty()) {
+            BufferedImage buffImg = image.getBufferedImage();
+            
+            if (name != null && (name.contains("prompt") || name.contains("claude"))) {
+                System.out.println("[PATTERN FIX] Creating SikuliX pattern for '" + name + "'");
+                System.out.println("[PATTERN FIX] Image type: " + getImageTypeString(buffImg.getType()));
+                System.out.println("[PATTERN FIX] Image size: " + buffImg.getWidth() + "x" + buffImg.getHeight());
             }
+            
+            // Pass the BufferedImage directly to SikuliX without any conversion
+            cachedSikuliPattern = new org.sikuli.script.Pattern(buffImg);
+            return cachedSikuliPattern;
         }
         
         // Fallback: Use BufferedImage if no file path is available
