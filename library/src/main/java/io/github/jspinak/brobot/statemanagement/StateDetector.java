@@ -200,7 +200,7 @@ public class StateDetector {
      * <p>
      * Attempts to find visual patterns associated with the named state.
      * If found, the state is automatically added to StateMemory's active
-     * list via the Action framework. Progress is reported for debugging.
+     * list by the Action framework. Progress is reported for debugging.
      *
      * @param stateName Name of the state to search for
      * @return true if the state was found on screen, false otherwise
@@ -215,6 +215,8 @@ public class StateDetector {
             return false;
         }
         
+        // The state will be automatically activated in StateMemory by ActionExecution
+        // when patterns are found
         boolean found = action.find(
                 new ObjectCollection.Builder()
                         .withNonSharedImages(state.get())
@@ -233,7 +235,7 @@ public class StateDetector {
      * <p>
      * Attempts to find visual patterns associated with the state ID.
      * If found, the state is automatically added to StateMemory's active
-     * list via the Action framework. State name is printed for debugging.
+     * list by the Action framework. State name is printed for debugging.
      *
      * @param stateId ID of the state to search for
      * @return true if the state was found on screen, false otherwise
@@ -250,6 +252,8 @@ public class StateDetector {
             return false;
         }
         
+        // The state will be automatically activated in StateMemory by ActionExecution
+        // when patterns are found
         boolean found = action.find(
                 new ObjectCollection.Builder()
                         .withNonSharedImages(state.get())

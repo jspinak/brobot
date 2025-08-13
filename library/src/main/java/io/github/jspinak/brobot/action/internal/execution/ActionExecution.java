@@ -12,6 +12,7 @@ import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.control.ExecutionController;
 import io.github.jspinak.brobot.control.ExecutionStoppedException;
 import io.github.jspinak.brobot.model.state.StateImage;
+import io.github.jspinak.brobot.statemanagement.StateMemory;
 import io.github.jspinak.brobot.tools.history.IllustrationController;
 import io.github.jspinak.brobot.tools.logging.ActionLogger;
 import io.github.jspinak.brobot.tools.logging.ExecutionSession;
@@ -80,6 +81,7 @@ public class ActionExecution {
     private final ExecutionSession automationSession;
     private final ExecutionController executionController;
     private final BrobotLogger brobotLogger;
+    private final StateMemory stateMemory;
 
     /**
      * Constructs an ActionExecution instance with all required dependencies.
@@ -105,7 +107,7 @@ public class ActionExecution {
                            ActionSuccessCriteria success, ActionResultFactory matchesInitializer, ActionLogger actionLogger,
                            ScreenshotCapture captureScreenshot, ExecutionSession automationSession,
                            @Autowired(required = false) ExecutionController executionController,
-                           BrobotLogger brobotLogger) {
+                           BrobotLogger brobotLogger, StateMemory stateMemory) {
         this.time = time;
         this.illustrateScreenshot = illustrateScreenshot;
         this.selectRegions = selectRegions;
@@ -118,6 +120,7 @@ public class ActionExecution {
         this.automationSession = automationSession;
         this.executionController = executionController;
         this.brobotLogger = brobotLogger;
+        this.stateMemory = stateMemory;
     }
 
     /**
@@ -206,6 +209,13 @@ public class ActionExecution {
             //String screenshotPath = captureScreenshot.captureScreenshot("action_failed_" + sessionId);
             //actionLogger.logError(sessionId, "Action failed: " + actionOptions.getAction(), screenshotPath);
         }
+        
+        // Automatically update state memory when patterns are found
+        // This ensures states are activated when their patterns are detected
+        if (matches.isSuccess() && !matches.getMatchList().isEmpty()) {
+            stateMemory.adjustActiveStatesWithMatches(matches);
+        }
+        
         return matches;
     }
 
@@ -293,6 +303,13 @@ public class ActionExecution {
         if (objectCollections.length > 0) {
             LogData logData = actionLogger.logAction(sessionId, matches, objectCollections[0]);
         }
+        
+        // Automatically update state memory when patterns are found
+        // This ensures states are activated when their patterns are detected
+        if (matches.isSuccess() && !matches.getMatchList().isEmpty()) {
+            stateMemory.adjustActiveStatesWithMatches(matches);
+        }
+        
         return matches;
     }
 
