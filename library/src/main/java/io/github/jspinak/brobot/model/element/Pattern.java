@@ -327,7 +327,7 @@ public class Pattern {
     
     /**
      * Another way to get the SikuliX object.
-     * Now uses direct file path loading like SikuliX IDE to achieve 0.99 similarity scores.
+     * Attempts multiple loading strategies to achieve optimal similarity scores.
      * @return the SikuliX Pattern object.
      */
     @JsonIgnore
@@ -337,46 +337,49 @@ public class Pattern {
             return cachedSikuliPattern;
         }
         
-        // CRITICAL FIX: Use BufferedImage directly without conversion
-        // The key is to pass the exact BufferedImage to SikuliX without any type conversion
-        // File path loading doesn't work well with SikuliX's ImagePath system
+        // Strategy 1: Try using SikuliX's Image.create() with file path
+        // This is how SikuliX IDE might be loading patterns internally
+        if (imgpath != null && !imgpath.isEmpty()) {
+            try {
+                File file = new File(imgpath);
+                if (file.exists()) {
+                    // Use SikuliX's Image.create() method which might handle loading better
+                    org.sikuli.script.Image sikuliImage = org.sikuli.script.Image.create(file.getAbsolutePath());
+                    if (sikuliImage != null && sikuliImage.isValid()) {
+                        cachedSikuliPattern = new org.sikuli.script.Pattern(sikuliImage);
+                        
+                        if (name != null && (name.contains("prompt") || name.contains("claude"))) {
+                            System.out.println("[PATTERN] Using Image.create() for '" + name + "'");
+                            System.out.println("[PATTERN] File: " + file.getAbsolutePath());
+                        }
+                        
+                        return cachedSikuliPattern;
+                    }
+                }
+            } catch (Exception e) {
+                // Fall through to next strategy
+                if (name != null && (name.contains("prompt") || name.contains("claude"))) {
+                    System.out.println("[PATTERN] Image.create() failed: " + e.getMessage());
+                }
+            }
+        }
+        
+        // Strategy 2: Use BufferedImage directly
         if (image != null && !image.isEmpty()) {
             BufferedImage buffImg = image.getBufferedImage();
             
             if (name != null && (name.contains("prompt") || name.contains("claude"))) {
-                System.out.println("[PATTERN FIX] Creating SikuliX pattern for '" + name + "'");
-                System.out.println("[PATTERN FIX] Image type: " + getImageTypeString(buffImg.getType()));
-                System.out.println("[PATTERN FIX] Image size: " + buffImg.getWidth() + "x" + buffImg.getHeight());
+                System.out.println("[PATTERN] Using BufferedImage for '" + name + "'");
+                System.out.println("[PATTERN] Image type: " + getImageTypeString(buffImg.getType()));
+                System.out.println("[PATTERN] Image size: " + buffImg.getWidth() + "x" + buffImg.getHeight());
             }
             
-            // Pass the BufferedImage directly to SikuliX without any conversion
+            // Pass the BufferedImage directly to SikuliX
             cachedSikuliPattern = new org.sikuli.script.Pattern(buffImg);
             return cachedSikuliPattern;
         }
         
-        // Fallback: Use BufferedImage if no file path is available
-        if (image == null) {
-            throw new IllegalStateException("Cannot create SikuliX Pattern: Image is null for pattern: " + name);
-        }
-        
-        if (image.isEmpty()) {
-            throw new IllegalStateException("Cannot create SikuliX Pattern: Image has no BufferedImage. " +
-                "Image file may not exist or failed to load for pattern: " + name);
-        }
-        
-        // Get the BufferedImage
-        BufferedImage buffImg = image.getBufferedImage();
-        
-        // Debug logging for pattern conversion
-        if (name != null && name.contains("prompt")) {
-            System.out.println("[PATTERN FALLBACK] Using BufferedImage for '" + name + "' (no file path available)");
-            System.out.println("[PATTERN FALLBACK] Image type: " + buffImg.getType());
-        }
-        
-        // Pass images directly to SikuliX without any conversion
-        cachedSikuliPattern = new org.sikuli.script.Pattern(buffImg);
-        
-        return cachedSikuliPattern;
+        throw new IllegalStateException("Cannot create SikuliX Pattern: No valid image source for pattern: " + name);
     }
 
     @JsonIgnore
