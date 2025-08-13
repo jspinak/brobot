@@ -1,5 +1,6 @@
 package io.github.jspinak.brobot.config;
 
+import io.github.jspinak.brobot.startup.PhysicalResolutionInitializer;
 import io.github.jspinak.brobot.tools.logging.gui.GuiAccessConfig;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -28,6 +29,12 @@ import org.springframework.context.annotation.Import;
 @Import({BrobotConfig.class, BrobotDefaultsConfiguration.class})
 @EnableConfigurationProperties({BrobotProperties.class, GuiAccessConfig.class})
 public class BrobotAutoConfiguration {
+    
+    static {
+        // Ensure physical resolution is initialized as early as possible
+        // This runs when the auto-configuration class is loaded
+        PhysicalResolutionInitializer.forceInitialization();
+    }
     
     /**
      * Provides BrobotPropertiesInitializer if not already defined by the application.

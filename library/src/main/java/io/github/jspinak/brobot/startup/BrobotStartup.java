@@ -18,6 +18,8 @@ public class BrobotStartup {
     
     static {
         // Static initializer runs before Spring context
+        // Use the dedicated initializer to ensure it runs first
+        PhysicalResolutionInitializer.forceInitialization();
         configurePhysicalResolution();
     }
     
