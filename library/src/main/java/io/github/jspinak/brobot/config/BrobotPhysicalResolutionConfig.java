@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.config;
 
-import io.github.jspinak.brobot.screen.PhysicalScreen;
+import io.github.jspinak.brobot.screen.PhysicalResolutionScreen;
 import org.sikuli.script.Screen;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
@@ -24,23 +24,20 @@ import org.springframework.context.annotation.Primary;
 public class BrobotPhysicalResolutionConfig {
     
     /**
-     * Provides a PhysicalScreen as the primary Screen implementation.
+     * Provides a PhysicalResolutionScreen as the primary Screen implementation.
      * This will be used by default for all screen operations.
      */
     @Bean
     @Primary
     public Screen physicalScreen() {
         System.out.println("=== Brobot Physical Resolution Mode ===");
-        PhysicalScreen screen = new PhysicalScreen();
+        PhysicalResolutionScreen screen = new PhysicalResolutionScreen();
         
-        System.out.println("Physical Resolution: " + screen.getPhysicalResolution().width + 
-                          "x" + screen.getPhysicalResolution().height);
-        
-        if (screen.isScalingCompensated()) {
-            System.out.println("DPI Scaling Compensation: ACTIVE");
-            System.out.println("Scale Factor: " + screen.getScaleFactor());
+        if (screen.isPhysicalResolutionEnabled()) {
+            System.out.println("✓ Physical resolution capture is ACTIVE");
         } else {
-            System.out.println("DPI Scaling Compensation: NOT NEEDED");
+            System.out.println("⚠ Physical resolution may not be properly configured");
+            System.out.println("  Ensure the application is started with: -Dsun.java2d.dpiaware=false");
         }
         
         System.out.println("Pattern matching will work like SikuliX IDE");
@@ -50,7 +47,7 @@ public class BrobotPhysicalResolutionConfig {
     }
     
     /**
-     * Factory method to create PhysicalScreen instances when needed.
+     * Factory method to create PhysicalResolutionScreen instances when needed.
      */
     @Bean
     public PhysicalScreenFactory physicalScreenFactory() {
@@ -58,15 +55,15 @@ public class BrobotPhysicalResolutionConfig {
     }
     
     /**
-     * Factory class for creating PhysicalScreen instances.
+     * Factory class for creating PhysicalResolutionScreen instances.
      */
     public static class PhysicalScreenFactory {
         
         /**
-         * Creates a new PhysicalScreen instance.
+         * Creates a new PhysicalResolutionScreen instance.
          */
-        public PhysicalScreen create() {
-            return new PhysicalScreen();
+        public PhysicalResolutionScreen create() {
+            return new PhysicalResolutionScreen();
         }
         
         /**
@@ -74,7 +71,7 @@ public class BrobotPhysicalResolutionConfig {
          * Can be used as a drop-in replacement for new Screen().
          */
         public Screen createScreen() {
-            return new PhysicalScreen();
+            return new PhysicalResolutionScreen();
         }
     }
 }

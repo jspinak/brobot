@@ -34,7 +34,8 @@ public class BrobotStartup {
     private static void configurePhysicalResolution() {
         System.out.println("=== Brobot Physical Resolution Configuration ===");
         
-        // Disable DPI awareness - must be set before AWT initialization
+        // CRITICAL: These must be set before ANY AWT/Swing classes are loaded
+        // Disable DPI awareness completely
         System.setProperty("sun.java2d.dpiaware", "false");
         System.setProperty("sun.java2d.uiScale", "1.0");
         System.setProperty("sun.java2d.uiScale.enabled", "false");
@@ -45,11 +46,16 @@ public class BrobotStartup {
         System.setProperty("sun.java2d.dpiaware.override", "false");
         System.setProperty("sun.java2d.win.uiScale.enabled", "false");
         
-        // Force headless mode off (required for screen capture)
+        // Ensure we're not in headless mode
         System.setProperty("java.awt.headless", "false");
+        
+        // Force physical pixels for all operations
+        System.setProperty("sun.java2d.noddraw", "false");
+        System.setProperty("sun.java2d.d3d", "false");  // Disable D3D which might apply scaling
         
         System.out.println("✓ DPI awareness disabled");
         System.out.println("✓ Physical resolution capture enabled");
+        System.out.println("✓ All coordinates will be in physical pixels");
     }
     
     /**
