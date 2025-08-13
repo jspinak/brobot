@@ -1,6 +1,7 @@
 package io.github.jspinak.brobot.config;
 
 import io.github.jspinak.brobot.screen.PhysicalResolutionScreen;
+import io.github.jspinak.brobot.startup.PhysicalResolutionInitializer;
 import org.sikuli.script.Screen;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
@@ -22,6 +23,12 @@ import org.springframework.context.annotation.Primary;
 @Configuration
 @ConditionalOnProperty(name = "brobot.capture.physical-resolution", havingValue = "true", matchIfMissing = true)
 public class BrobotPhysicalResolutionConfig {
+    
+    static {
+        // Force physical resolution initialization as soon as this config class loads
+        // This ensures DPI awareness is disabled before any AWT classes are used
+        PhysicalResolutionInitializer.forceInitialization();
+    }
     
     /**
      * Provides a PhysicalResolutionScreen as the primary Screen implementation.
