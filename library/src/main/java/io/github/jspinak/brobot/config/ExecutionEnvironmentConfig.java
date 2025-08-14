@@ -10,12 +10,16 @@ import jakarta.annotation.PostConstruct;
 /**
  * Spring configuration for ExecutionEnvironment initialization.
  * Sets up the ExecutionEnvironment based on Spring properties and profiles.
+ * 
+ * NOTE: This configuration is now handled by BrobotPropertiesInitializer
+ * to ensure proper synchronization with FrameworkSettings.
+ * This class is kept for backward compatibility but disabled by default.
  */
 @Slf4j
-@Configuration
+// @Configuration // Disabled - handled by BrobotPropertiesInitializer
 public class ExecutionEnvironmentConfig {
     
-    @Value("${brobot.framework.mock:false}")
+    @Value("${brobot.core.mock:false}")
     private boolean mockMode;
     
     @Value("${brobot.force.headless:#{null}}")
@@ -32,6 +36,14 @@ public class ExecutionEnvironmentConfig {
     
     @PostConstruct
     public void initializeExecutionEnvironment() {
+        // IMPORTANT: Don't override if FrameworkSettings has already been configured
+        // This is likely from BrobotPropertiesInitializer which has the authoritative configuration
+        if (FrameworkSettings.mock) {
+            // FrameworkSettings.mock is already set, use it as the source of truth
+            mockMode = true;
+            log.debug("Using FrameworkSettings.mock = true as authoritative mock mode setting");
+        }
+        
         // Check active profiles
         String[] activeProfiles = springEnvironment.getActiveProfiles();
         boolean hasWindowsProfile = false;
