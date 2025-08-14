@@ -45,6 +45,9 @@ public class AnnotatedStateBuilder {
         // Extract components from the state instance
         StateComponentExtractor.StateComponents components = componentExtractor.extractComponents(stateInstance);
         
+        // Set the owner state name for all extracted components
+        setOwnerStateNameForComponents(components, stateName);
+        
         // Build the State object using the string constructor
         State.Builder stateBuilder = new State.Builder(stateName);
         
@@ -70,6 +73,42 @@ public class AnnotatedStateBuilder {
         log.info("Built state '{}' with {} total components", stateName, components.getTotalComponents());
         
         return state;
+    }
+    
+    /**
+     * Sets the owner state name for all components in the collection.
+     * This ensures that all StateObjects know which state they belong to,
+     * which is essential for features like cross-state search region resolution.
+     */
+    private void setOwnerStateNameForComponents(StateComponentExtractor.StateComponents components, String stateName) {
+        // Set owner state name for all StateImages
+        for (io.github.jspinak.brobot.model.state.StateImage stateImage : components.getStateImages()) {
+            stateImage.setOwnerStateName(stateName);
+            log.trace("Set owner state '{}' for StateImage '{}'", stateName, stateImage.getName());
+        }
+        
+        // Set owner state name for all StateStrings
+        for (io.github.jspinak.brobot.model.state.StateString stateString : components.getStateStrings()) {
+            stateString.setOwnerStateName(stateName);
+            log.trace("Set owner state '{}' for StateString '{}'", stateName, stateString.getName());
+        }
+        
+        // Set owner state name for all StateObjects (handle specific types)
+        for (io.github.jspinak.brobot.model.state.StateObject stateObject : components.getStateObjects()) {
+            // StateObject is a base class - we need to check for specific implementations
+            if (stateObject instanceof io.github.jspinak.brobot.model.state.StateLocation) {
+                ((io.github.jspinak.brobot.model.state.StateLocation) stateObject).setOwnerStateName(stateName);
+                log.trace("Set owner state '{}' for StateLocation '{}'", stateName, stateObject.getName());
+            } else if (stateObject instanceof io.github.jspinak.brobot.model.state.StateRegion) {
+                ((io.github.jspinak.brobot.model.state.StateRegion) stateObject).setOwnerStateName(stateName);
+                log.trace("Set owner state '{}' for StateRegion '{}'", stateName, stateObject.getName());
+            } else {
+                log.trace("StateObject '{}' type {} does not support owner state name", 
+                         stateObject.getName(), stateObject.getClass().getSimpleName());
+            }
+        }
+        
+        log.debug("Set owner state name '{}' for {} components", stateName, components.getTotalComponents());
     }
     
     /**
