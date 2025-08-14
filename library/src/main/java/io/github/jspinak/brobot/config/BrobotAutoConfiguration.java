@@ -45,4 +45,23 @@ public class BrobotAutoConfiguration {
     public BrobotPropertiesInitializer brobotPropertiesInitializer(BrobotProperties properties) {
         return new BrobotPropertiesInitializer(properties);
     }
+    
+    /**
+     * Provides ExecutionEnvironment as a Spring bean.
+     * This returns the singleton instance to ensure consistency.
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public ExecutionEnvironment executionEnvironment(BrobotProperties properties) {
+        // Configure ExecutionEnvironment directly here based on properties
+        // This ensures it's configured before being used by other beans
+        ExecutionEnvironment env = ExecutionEnvironment.builder()
+            .mockMode(properties.getCore().isMock())
+            .forceHeadless(properties.getCore().isHeadless() ? true : null)
+            .allowScreenCapture(!properties.getCore().isMock())
+            .build();
+        ExecutionEnvironment.setInstance(env);
+        System.out.println("[BrobotAutoConfiguration] Configured and providing ExecutionEnvironment bean: " + env.getEnvironmentInfo());
+        return env;
+    }
 }

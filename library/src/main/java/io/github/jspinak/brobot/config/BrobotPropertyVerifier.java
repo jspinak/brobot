@@ -21,8 +21,7 @@ public class BrobotPropertyVerifier {
     @Autowired
     private BrobotLogger brobotLogger;
     
-    @Autowired
-    private ExecutionEnvironment executionEnvironment;
+    // Remove autowiring - use singleton instance instead to avoid Spring creating a new instance
     
     // Flag to ensure properties are only verified once
     private static boolean propertiesVerified = false;
@@ -48,12 +47,13 @@ public class BrobotPropertyVerifier {
             .metadata("illustrationEnabled", isIllustrationEnabled())
             .log();
         
-        // Log execution environment
+        // Log execution environment - use singleton instance
+        ExecutionEnvironment env = ExecutionEnvironment.getInstance();
         brobotLogger.log()
             .observation("Execution Environment")
-            .metadata("mockMode", executionEnvironment.isMockMode())
-            .metadata("hasDisplay", executionEnvironment.hasDisplay())
-            .metadata("canCaptureScreen", executionEnvironment.canCaptureScreen())
+            .metadata("mockMode", env.isMockMode())
+            .metadata("hasDisplay", env.hasDisplay())
+            .metadata("canCaptureScreen", env.canCaptureScreen())
             .metadata("headlessMode", java.awt.GraphicsEnvironment.isHeadless())
             .metadata("osName", System.getProperty("os.name"))
             .metadata("javaAwtHeadless", System.getProperty("java.awt.headless"))
@@ -93,7 +93,7 @@ public class BrobotPropertyVerifier {
                 .metadata("reason", "saveHistory is false")
                 .metadata("solution", "Set brobot.screenshot.save-history=true in application.properties")
                 .log();
-        } else if (executionEnvironment.isMockMode()) {
+        } else if (env.isMockMode()) {
             log.info("Illustrations may be limited in mock mode");
             brobotLogger.observation("Note: Running in mock mode - illustrations use mock data");
         } else if (java.awt.GraphicsEnvironment.isHeadless()) {
@@ -118,9 +118,10 @@ public class BrobotPropertyVerifier {
         System.out.println("Save history: " + properties.getScreenshot().isSaveHistory());
         System.out.println("History path: " + FrameworkSettings.historyPath);
         System.out.println("Save history (FrameworkSettings): " + FrameworkSettings.saveHistory);
-        System.out.println("Mock mode: " + executionEnvironment.isMockMode());
-        System.out.println("Has display: " + executionEnvironment.hasDisplay());
-        System.out.println("Can capture screen: " + executionEnvironment.canCaptureScreen());
+        ExecutionEnvironment env = ExecutionEnvironment.getInstance();
+        System.out.println("Mock mode: " + env.isMockMode());
+        System.out.println("Has display: " + env.hasDisplay());
+        System.out.println("Can capture screen: " + env.canCaptureScreen());
         System.out.println("===================================\n");
     }
     

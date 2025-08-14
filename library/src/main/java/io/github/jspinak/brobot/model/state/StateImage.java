@@ -329,6 +329,7 @@ public class StateImage implements StateObject {
         private Region searchRegionForAllPatterns;
         private SearchRegionOnObject searchRegionOnObject;
         private boolean fixedForAllPatterns = false;
+        private ActionHistory actionHistoryForAllPatterns;
 
         public Builder setName(String name) {
             this.name = name;
@@ -411,6 +412,44 @@ public class StateImage implements StateObject {
             return this;
         }
 
+        /**
+         * Sets ActionHistory for all patterns in this StateImage.
+         * This is required for mock mode finds to work.
+         * 
+         * @param actionHistory the ActionHistory to apply to all patterns
+         * @return this builder for method chaining
+         */
+        public Builder withActionHistory(ActionHistory actionHistory) {
+            this.actionHistoryForAllPatterns = actionHistory;
+            return this;
+        }
+
+        /**
+         * Sets ActionHistory for all patterns using a supplier function.
+         * Useful for lazy initialization or conditional creation.
+         * 
+         * @param historySupplier supplier that creates the ActionHistory
+         * @return this builder for method chaining
+         */
+        public Builder withActionHistory(java.util.function.Supplier<ActionHistory> historySupplier) {
+            this.actionHistoryForAllPatterns = historySupplier.get();
+            return this;
+        }
+
+        /**
+         * Sets ActionHistory for all patterns using a single ActionRecord.
+         * Useful for simple test scenarios.
+         * 
+         * @param record the ActionRecord to add as a single snapshot
+         * @return this builder for method chaining
+         */
+        public Builder withActionHistory(ActionRecord record) {
+            ActionHistory history = new ActionHistory();
+            history.addSnapshot(record);
+            this.actionHistoryForAllPatterns = history;
+            return this;
+        }
+
         @Override
         public String toString() {
             StringBuilder stringBuilder = new StringBuilder();
@@ -445,6 +484,8 @@ public class StateImage implements StateObject {
                     pattern.addSearchRegion(searchRegionForAllPatterns));
             if (fixedForAllPatterns) stateImage.getPatterns().forEach(pattern ->
                     pattern.setFixed(true));
+            if (actionHistoryForAllPatterns != null) stateImage.getPatterns().forEach(pattern ->
+                    pattern.setMatchHistory(actionHistoryForAllPatterns));
             return stateImage;
         }
 
