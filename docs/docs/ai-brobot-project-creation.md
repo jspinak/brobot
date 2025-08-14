@@ -1354,13 +1354,206 @@ public class MyAutomation implements ApplicationRunner {
 ```
 
 ### Mock Testing Support
+
+#### Understanding Mock Mode
+
+Mock mode (`brobot.framework.mock=true`) enables testing automation logic without GUI interaction:
+
+- **No screen capture** - Patterns are "found" based on configured probabilities
+- **Deterministic testing** - Use 100% probabilities for flow validation
+- **Stochastic testing** - Use variable probabilities for robustness testing
+- **CI/CD friendly** - No GUI dependencies required
+
+**IMPORTANT**: Starting with Brobot v1.0.0+, ActionHistory is **REQUIRED** for patterns to be found in mock mode. Without ActionHistory, all find operations will fail with "No matches found". Always configure ActionHistory using the new builder methods when creating StateImages for mock testing.
+
+#### Configuring Mock Mode
+
+**Enable in application.properties:**
+```properties
+# Enable mock mode for testing
+brobot.framework.mock=true
+```
+
+**Configure state probabilities in state classes (recommended):**
 ```java
-// For testing with probabilities
+@State(initial = true)  // Mark initial state
+@Getter
+@Slf4j
+public class LoginState {
+    
+    @Autowired(required = false)
+    private MockStateManagement mockStateManagement;
+    
+    // 100% for deterministic flow testing
+    private static final int MOCK_PROBABILITY = 100;
+    
+    private final StateImage loginButton;
+    
+    public LoginState() {
+        loginButton = new StateImage.Builder()
+            .addPatterns("login-button")
+            .setName("LoginButton")
+            .build();
+    }
+    
+    @PostConstruct
+    public void configureMockProbability() {
+        if (FrameworkSettings.mock && mockStateManagement != null) {
+            mockStateManagement.setStateProbabilities(MOCK_PROBABILITY, "Login");
+            log.debug("Configured Login state mock probability to {}%", MOCK_PROBABILITY);
+        }
+    }
+}
+```
+
+#### Testing State Transitions
+
+**Deterministic flow testing (100% probabilities):**
+```java
+@Test
+public void testLoginToHomeTransition() {
+    // Configure states for reliable transitions
+    mockStateManagement.setStateProbabilities(100, "Login", "Home");
+    
+    // Initial state should be Login
+    assertTrue(stateMemory.getActiveStateNames().contains("Login"));
+    
+    // Navigate to Home
+    boolean success = stateNavigator.openState("Home");
+    assertTrue(success);
+    
+    // Verify transition
+    assertTrue(stateMemory.getActiveStateNames().contains("Home"));
+}
+```
+
+**Stochastic robustness testing (variable probabilities):**
+```java
+// Test with unreliable element detection
 stateVerifier.builder()
     .withState(HomePage.Name.HOME, 70)    // 70% probability
     .withState(LoginPage.Name.LOGIN, 30)  // 30% probability
     .verify();
+
+// Test retry logic with intermittent failures
+mockStateManagement.setStateProbabilities(50, "UnstableDialog");
+for (int i = 0; i < MAX_RETRIES; i++) {
+    ActionResult result = action.find(dialogElement);
+    if (result.isSuccess()) break;
+    Thread.sleep(1000);
+}
 ```
+
+#### Dynamic State Simulation
+
+Simulate state changes during test execution:
+
+```java
+@Test
+public void testCompleteWorkflow() {
+    // Initial: Login visible
+    mockStateManagement.setStateProbabilities(100, "Login");
+    mockStateManagement.setStateProbabilities(0, "Home");
+    
+    // Perform login
+    stateNavigator.openState("Home");
+    
+    // Simulate successful login: Home appears, Login disappears
+    mockStateManagement.setStateProbabilities(0, "Login");
+    mockStateManagement.setStateProbabilities(100, "Home");
+    
+    // Continue with workflow...
+}
+```
+
+#### Best Practices for Mock Testing
+
+1. **Use 100% probability for flow testing** - Focus on automation logic, not robustness
+2. **Set initial states correctly** - Only starting states should have `@State(initial = true)`
+3. **Configure probabilities in state classes** - Keep mock behavior with state definition
+4. **Clean state between tests** - Clear active states in @AfterEach
+5. **Use separate test properties** - Keep mock config separate from production
+
+For complete mock mode documentation, see [Mock Mode Guide](/docs/testing/mock-mode-guide).
+
+### Profile-Based Testing Architecture
+
+Brobot now supports a cleaner profile-based architecture that eliminates runtime conditionals and provides better separation between test and production environments.
+
+#### Quick Setup
+
+**1. Create `application-test.properties`:**
+```properties
+# Test profile - automatically enables mock mode
+spring.config.import=optional:classpath:brobot-test-defaults.properties
+brobot.framework.mock=true
+brobot.action.similarity=0.70
+logging.level.com.yourapp=DEBUG
+
+# State probabilities for deterministic testing
+yourapp.mock.state-probabilities=100
+```
+
+**2. Use `@ActiveProfiles` in tests:**
+```java
+@SpringBootTest
+@ActiveProfiles("test")  // Replaces manual property configuration
+public class YourAutomationTest {
+    // Mock mode automatically enabled
+    // Test-optimized settings applied
+}
+```
+
+**3. Configure states to use profiles:**
+```java
+@State(initial = true)
+@Slf4j
+public class YourState {
+    @Autowired(required = false)
+    private MockStateManagement mockStateManagement;
+    
+    @PostConstruct
+    public void configureMockMode() {
+        if (FrameworkSettings.mock && mockStateManagement != null) {
+            mockStateManagement.setStateProbabilities(100, "YourState");
+            log.info("Mock mode configured for YourState");
+        }
+    }
+}
+```
+
+#### Benefits Over Runtime Delegation
+
+The old approach used runtime checks:
+```java
+// OLD - Runtime delegation (still supported but not recommended)
+if (FrameworkSettings.mock) {
+    return mockExecution();
+} else {
+    return liveExecution();
+}
+```
+
+The new profile-based approach uses dependency injection:
+```java
+// NEW - Profile-based (recommended)
+@Component
+@Profile("test")
+public class MockExecutor implements Executor { }
+
+@Component
+@Profile("!test")
+public class LiveExecutor implements Executor { }
+```
+
+Benefits:
+- **No runtime overhead** - No conditional checks in production
+- **Clean separation** - Test and production code clearly separated  
+- **Automatic configuration** - Settings applied based on environment
+- **Better IDE support** - Profile-aware code completion
+- **Easier testing** - Guaranteed mock mode in tests
+
+For complete profile documentation, see [Profile-Based Architecture Guide](/docs/testing/profile-based-architecture).
 
 ## Color Finding and Motion Detection
 
@@ -1531,7 +1724,111 @@ public boolean clickErrorButton() {
 
 ActionHistory is Brobot's core component for mock testing and probabilistic automation. It records action execution patterns over time, enabling realistic testing without the target application.
 
-### Basic ActionHistory Setup
+**New in v1.0.0+**: ActionHistory can now be configured directly in the StateImage builder using the new `withActionHistory()` methods, eliminating the need for separate initialization methods.
+
+### Modern ActionHistory Setup (v1.0.0+)
+
+#### Direct Builder Integration
+
+```java
+import io.github.jspinak.brobot.model.state.StateImage;
+import io.github.jspinak.brobot.model.element.Region;
+import io.github.jspinak.brobot.tools.testing.mock.history.MockActionHistoryFactory;
+import io.github.jspinak.brobot.tools.testing.mock.history.MockActionHistoryBuilder;
+
+// NEW: ActionHistory configured directly in builder
+@State
+@Getter
+public class LoginState {
+    private final StateImage loginButton;
+    
+    public LoginState() {
+        // Use factory method for common UI patterns
+        loginButton = new StateImage.Builder()
+            .addPatterns("login/button")
+            .setName("LoginButton")
+            .withActionHistory(MockActionHistoryFactory.reliableButton(
+                new Region(500, 400, 100, 40)))
+            .build();
+        // No separate initializeActionHistory() method needed!
+    }
+}
+```
+
+#### Using MockActionHistoryBuilder for Custom Configurations
+
+```java
+@State
+@Getter
+public class CustomState {
+    private final StateImage customElement;
+    
+    public CustomState() {
+        customElement = new StateImage.Builder()
+            .addPatterns("custom/element")
+            .setName("CustomElement")
+            .withActionHistory(MockActionHistoryBuilder.builder()
+                .successRate(0.85)          // 85% success rate
+                .matchRegion(new Region(50, 100, 150, 75))
+                .minSimilarity(0.80)
+                .maxSimilarity(0.95)
+                .minDuration(20)
+                .maxDuration(100)
+                .recordCount(30)
+                .build()
+                .build())
+            .build();
+    }
+}
+```
+
+#### Factory Methods for Common UI Patterns
+
+```java
+// Different factory methods for different UI elements
+StateImage button = new StateImage.Builder()
+    .addPatterns("ok-button")
+    .withActionHistory(MockActionHistoryFactory.reliableButton(region))
+    .build();
+
+StateImage textField = new StateImage.Builder()
+    .addPatterns("search-field")
+    .withActionHistory(MockActionHistoryFactory.dynamicTextField(region))
+    .build();
+
+StateImage loader = new StateImage.Builder()
+    .addPatterns("loading")
+    .withActionHistory(MockActionHistoryFactory.loadingIndicator(region))
+    .build();
+
+StateImage menu = new StateImage.Builder()
+    .addPatterns("file-menu")
+    .withActionHistory(MockActionHistoryFactory.menuItem(region))
+    .build();
+```
+
+#### Screen Position Helpers
+
+```java
+import io.github.jspinak.brobot.model.element.Positions;
+
+// Element at center of screen
+StateImage centerModal = new StateImage.Builder()
+    .addPatterns("modal")
+    .withActionHistory(MockActionHistoryFactory.forScreenPosition(
+        Positions.Name.MIDDLEMIDDLE, 400, 300))
+    .build();
+
+// Element in lower-left corner
+StateImage chatWindow = new StateImage.Builder()
+    .addPatterns("chat")
+    .withActionHistory(MockActionHistoryFactory.lowerLeftElement(300, 200))
+    .build();
+```
+
+### Legacy ActionHistory Setup (Pre-v1.0.0)
+
+For reference, here's the traditional approach (still supported but not recommended):
 
 ```java
 import io.github.jspinak.brobot.model.action.ActionHistory;
@@ -1539,32 +1836,31 @@ import io.github.jspinak.brobot.model.action.ActionRecord;
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
 import io.github.jspinak.brobot.model.match.Match;
 
-// Initialize StateImage with ActionHistory for mock testing
+// OLD: Separate initialization method required
 @State
 @Getter
-public class LoginState {
+public class LegacyState {
     private final StateImage loginButton;
     
-    public LoginState() {
+    public LegacyState() {
         loginButton = new StateImage.Builder()
             .addPatterns("login/button")
             .setName("LoginButton")
             .build();
         
-        // Add historical data for realistic mocking
+        // Old approach: separate method
         initializeActionHistory();
     }
     
     private void initializeActionHistory() {
         ActionHistory history = new ActionHistory();
         
-        // Simulate 90% success rate with varying match scores
+        // Manual record creation
         for (int i = 0; i < 100; i++) {
-            boolean success = i < 90;  // 90% success rate
+            boolean success = i < 90;
             
             ActionRecord record = new ActionRecord.Builder()
                 .setActionConfig(new PatternFindOptions.Builder()
-                    .setStrategy(PatternFindOptions.Strategy.BEST)
                     .setSimilarity(0.85)
                     .build())
                 .addMatch(success ? new Match.Builder()
@@ -1572,13 +1868,16 @@ public class LoginState {
                     .setSimScore(0.85 + Math.random() * 0.1)
                     .build() : null)
                 .setActionSuccess(success)
-                .setDuration(success ? 200 + (long)(Math.random() * 300) : 5000)
+                .setDuration(success ? 200 : 5000)
                 .build();
             
             history.addSnapshot(record);
         }
         
-        loginButton.setActionHistory(history);
+        // Manual setting on each pattern
+        for (Pattern pattern : loginButton.getPatterns()) {
+            pattern.setMatchHistory(history);
+        }
     }
 }
 ```
@@ -2308,7 +2607,7 @@ Modern Brobot development emphasizes:
 - Dependency injection with Spring Boot
 - Fluent APIs and method chaining
 - **ConditionalActionChain for elegant UI interactions with proper sequential composition**
-- **ActionHistory for probabilistic mock testing and integration tests**
+- **ActionHistory for probabilistic mock testing - NOW WITH BUILDER INTEGRATION (v1.0.0+)**
 - **Screen-adaptive RegionBuilder with Position integration for resolution-independent automation**
 - **Integrated logging with DiagnosticLogger for comprehensive pattern matching diagnostics**
 - Direct access to state components
@@ -2317,5 +2616,36 @@ Modern Brobot development emphasizes:
 - Advanced color and motion detection capabilities
 - Flexible action chaining with nested/confirmed strategies
 - Comprehensive testing with historical action data
+
+### Quick Reference: New ActionHistory Builder Methods (v1.0.0+)
+
+```java
+// In StateImage.Builder - no separate initialization needed!
+StateImage image = new StateImage.Builder()
+    .addPatterns("pattern.png")
+    .withActionHistory(MockActionHistoryFactory.reliableButton(region))  // Factory method
+    .build();
+
+// Available factory methods:
+MockActionHistoryFactory.reliableButton(region)      // 98% success, quick response
+MockActionHistoryFactory.dynamicTextField(region)    // 85% success, variable content
+MockActionHistoryFactory.loadingIndicator(region)   // 60% success, appears/disappears
+MockActionHistoryFactory.menuItem(region)           // 90% success when visible
+MockActionHistoryFactory.modalDialog(region)        // 100% success when present
+MockActionHistoryFactory.lowerLeftElement(w, h)     // Common position helper
+MockActionHistoryFactory.forScreenPosition(pos, w, h) // Any screen position
+
+// Custom builder configuration:
+.withActionHistory(MockActionHistoryBuilder.builder()
+    .successRate(0.95).matchRegion(region).recordCount(20).build().build())
+
+// Presets:
+MockActionHistoryBuilder.Presets.alwaysFound(region)  // 100% success
+MockActionHistoryBuilder.Presets.reliable(region)     // 95% success
+MockActionHistoryBuilder.Presets.flaky(region)       // 70% success
+MockActionHistoryBuilder.Presets.neverFound()         // 0% success
+```
+
+**Remember**: ActionHistory is REQUIRED for mock mode finds to work!
 
 Follow these patterns for maintainable, professional Brobot applications.
