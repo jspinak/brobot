@@ -1,4 +1,5 @@
 package io.github.jspinak.brobot.action;
+import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -41,8 +42,7 @@ import java.util.function.Predicate;
     @JsonSubTypes.Type(value = io.github.jspinak.brobot.action.basic.mouse.MouseDownOptions.class, name = "MouseDownOptions"),
     @JsonSubTypes.Type(value = io.github.jspinak.brobot.action.basic.mouse.MouseUpOptions.class, name = "MouseUpOptions"),
     @JsonSubTypes.Type(value = io.github.jspinak.brobot.action.basic.type.KeyDownOptions.class, name = "KeyDownOptions"),
-    @JsonSubTypes.Type(value = io.github.jspinak.brobot.action.basic.type.KeyUpOptions.class, name = "KeyUpOptions"),
-    @JsonSubTypes.Type(value = io.github.jspinak.brobot.action.composite.repeat.ClickUntilOptions.class, name = "ClickUntilOptions")
+    @JsonSubTypes.Type(value = io.github.jspinak.brobot.action.basic.type.KeyUpOptions.class, name = "KeyUpOptions")
 })
 public abstract class ActionConfig {
 
@@ -63,7 +63,7 @@ public abstract class ActionConfig {
      * Enables streamlined success/failure logging without manual checks.
      */
     @Data
-    @lombok.Builder
+    @lombok.Builder(builderClassName = "LoggingOptionsBuilder")
     public static class LoggingOptions {
         private String beforeActionMessage;
         private String afterActionMessage;

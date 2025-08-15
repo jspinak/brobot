@@ -1,9 +1,6 @@
 package io.github.jspinak.brobot.config;
 
 import org.junit.jupiter.api.*;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import java.io.File;
 import java.io.IOException;
@@ -16,7 +13,6 @@ import static org.junit.jupiter.api.Assertions.*;
  * Comprehensive test suite for different deployment scenarios.
  * Tests the enhanced Brobot configuration system across various environments.
  */
-@SpringBootTest(classes = io.github.jspinak.brobot.test.TestConfiguration.class, classes = io.github.jspinak.brobot.test.TestConfiguration.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class DeploymentScenarioTest {
     

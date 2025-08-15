@@ -1,8 +1,8 @@
 package io.github.jspinak.brobot.action.internal.execution;
 
 import io.github.jspinak.brobot.action.ActionInterface;
-import io.github.jspinak.brobot.action.internal.options.ActionOptions;
-import static io.github.jspinak.brobot.action.internal.options.ActionOptions.Action.*;
+import io.github.jspinak.brobot.action.ActionType;
+import static io.github.jspinak.brobot.action.ActionType.*;
 import io.github.jspinak.brobot.action.basic.classify.Classify;
 import io.github.jspinak.brobot.action.basic.wait.WaitVanish;
 import io.github.jspinak.brobot.action.basic.click.Click;
@@ -35,7 +35,7 @@ public class BasicActionRegistry {
      * Registry mapping action types to their implementations.
      * Provides O(1) lookup for action resolution during execution.
      */
-    private final Map<ActionOptions.Action, ActionInterface> actions = new HashMap<>();
+    private final Map<ActionType, ActionInterface> actions = new HashMap<>();
 
     /**
      * Constructs the BasicAction registry with all available action implementations.
@@ -95,14 +95,14 @@ public class BasicActionRegistry {
      * allowing callers to handle missing actions gracefully.
      * <p>
      * This method supports the framework's ability to dynamically resolve and
-     * execute actions based on {@link ActionOptions} configuration.
+     * execute actions based on ActionConfig configuration.
      *
      * @param action The action type to retrieve
      * @return Optional containing the action implementation, or empty if not found
      * @see ActionInterface
-     * @see ActionOptions.Action
+     * @see ActionType
      */
-    public Optional<ActionInterface> getAction(ActionOptions.Action action) {
+    public Optional<ActionInterface> getAction(ActionType action) {
         return Optional.ofNullable(actions.get(action));
     }
 

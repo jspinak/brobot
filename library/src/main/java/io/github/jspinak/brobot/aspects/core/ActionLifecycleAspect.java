@@ -1,4 +1,5 @@
 package io.github.jspinak.brobot.aspects.core;
+import io.github.jspinak.brobot.action.ActionType;
 
 import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.ActionInterface;
@@ -117,14 +118,14 @@ public class ActionLifecycleAspect {
         }
         
         // Extract action options from ActionResult
-        Object actionOptions = actionResult != null ? actionResult.getActionConfig() : null;
-        if (actionOptions == null && actionResult != null) {
+        Object actionConfig = actionResult != null ? actionResult.getActionConfig() : null;
+        if (actionConfig == null && actionResult != null) {
             // Try legacy ActionOptions
-            actionOptions = actionResult.getActionOptions();
+            actionConfig = actionResult.getActionConfig();
         }
         
         // Create action context
-        ActionContext context = createActionContext(action, actionOptions, objectCollection);
+        ActionContext context = createActionContext(action, actionConfig, objectCollection);
         actionContext.set(context);
         
         // Set start time immediately  
@@ -245,15 +246,15 @@ public class ActionLifecycleAspect {
     /**
      * Create action context from method arguments
      */
-    private ActionContext createActionContext(ActionInterface action, Object actionOptions, ObjectCollection objectCollection) {
+    private ActionContext createActionContext(ActionInterface action, Object actionConfig, ObjectCollection objectCollection) {
         ActionContext context = new ActionContext();
         context.setActionId(UUID.randomUUID().toString());
         
         // Extract action type from ActionConfig if available
-        String actionType = extractActionType(actionOptions, action);
+        String actionType = extractActionType(actionConfig, action);
         context.setActionType(actionType);
         
-        context.setActionOptions(actionOptions);
+        context.setActionOptions(actionConfig);
         context.setObjectCollection(objectCollection);
         context.setThreadName(Thread.currentThread().getName());
         return context;
@@ -262,10 +263,10 @@ public class ActionLifecycleAspect {
     /**
      * Extract action type from ActionConfig or fallback to action class
      */
-    private String extractActionType(Object actionOptions, ActionInterface action) {
+    private String extractActionType(Object actionConfig, ActionInterface action) {
         // Check if it's an ActionConfig (base class for all action options)
-        if (actionOptions instanceof ActionConfig) {
-            ActionConfig config = (ActionConfig) actionOptions;
+        if (actionConfig instanceof ActionConfig) {
+            ActionConfig config = (ActionConfig) actionConfig;
             
             // Try to extract a meaningful action name from the config class
             String configClassName = config.getClass().getSimpleName();
@@ -283,10 +284,10 @@ public class ActionLifecycleAspect {
         }
         
         // Check if it's the legacy ActionOptions
-        if (actionOptions != null && actionOptions.getClass().getName().equals("io.github.jspinak.brobot.action.ActionOptions")) {
+        if (actionConfig != null && actionConfig.getClass().getName().equals("io.github.jspinak.brobot.action.ActionOptions")) {
             try {
                 // Use reflection to get the action enum value
-                Object actionEnum = actionOptions.getClass().getMethod("getAction").invoke(actionOptions);
+                Object actionEnum = actionConfig.getClass().getMethod("getAction").invoke(actionConfig);
                 if (actionEnum != null) {
                     return actionEnum.toString();
                 }
@@ -442,7 +443,7 @@ public class ActionLifecycleAspect {
     public static class ActionContext {
         private String actionId;
         private String actionType; // Using String since ActionInterface doesn't expose Type
-        private Object actionOptions;
+        private Object actionConfig;
         private ObjectCollection objectCollection;
         private String threadName;
         private Instant startTime;
@@ -459,8 +460,8 @@ public class ActionLifecycleAspect {
         public String getActionType() { return actionType; }
         public void setActionType(String actionType) { this.actionType = actionType; }
         
-        public Object getActionOptions() { return actionOptions; }
-        public void setActionOptions(Object actionOptions) { this.actionOptions = actionOptions; }
+        public Object getActionConfig() { return actionConfig; }
+        public void setActionOptions(Object actionConfig) { this.actionConfig = actionConfig; }
         
         public ObjectCollection getObjectCollection() { return objectCollection; }
         public void setObjectCollection(ObjectCollection objectCollection) { this.objectCollection = objectCollection; }

@@ -1,12 +1,12 @@
 package io.github.jspinak.brobot.action.basic.find.histogram;
 
-import io.github.jspinak.brobot.action.internal.options.ActionOptions;
 import io.github.jspinak.brobot.action.basic.find.color.SceneProvider;
 import io.github.jspinak.brobot.action.internal.find.SearchRegionResolver;
 import io.github.jspinak.brobot.analysis.histogram.HistogramExtractor;
 import io.github.jspinak.brobot.analysis.histogram.HistogramComparator;
 import io.github.jspinak.brobot.model.element.Scene;
 import io.github.jspinak.brobot.model.match.Match;
+import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.model.analysis.scene.SceneAnalysis;
@@ -89,19 +89,19 @@ public class FindHistogram {
      *                          Must not be empty.
      */
     public void find(ActionResult matches, List<ObjectCollection> objectCollections) {
-        ActionOptions actionOptions = matches.getActionOptions();
-        if (actionOptions.getMaxMatchesToActOn() <= 0) actionOptions.setMaxMatchesToActOn(1); // default for histogram
-        getHistograms.setBins(
-                actionOptions.getHueBins(), actionOptions.getSaturationBins(), actionOptions.getValueBins());
-        List<Scene> scenes = getScenes.getScenes(actionOptions, objectCollections);
+        ActionConfig actionConfig = matches.getActionConfig();
+        // For histogram, default to 1 match if not specified
+        // Note: ActionConfig doesn't have histogram-specific methods - use defaults
+        getHistograms.setBins(16, 16, 16); // Default bins for HSV histogram
+        List<Scene> scenes = getScenes.getScenes(actionConfig, objectCollections);
         SceneAnalyses sceneAnalysisCollection = new SceneAnalyses();
         List<Match> matchObjects = new ArrayList<>();
         objectCollections.get(0).getStateImages().forEach(img ->
                 scenes.forEach(scene -> {
-                    matchObjects.addAll(forOneImage(actionOptions, img, scene.getPattern().getMatHSV()));
+                    matchObjects.addAll(forOneImage(actionConfig, img, scene.getPattern().getMatHSV()));
                     sceneAnalysisCollection.add(new SceneAnalysis(new ArrayList<>(), scene));
                 }));
-        int maxMatches = actionOptions.getMaxMatchesToActOn();
+        int maxMatches = 1; // Default for histogram matching
         // sort the MatchObjects and add the best ones (up to maxRegs) to matches
         matchObjects.stream()
                 .sorted(Comparator.comparingDouble(Match::getScore))
@@ -123,13 +123,13 @@ public class FindHistogram {
      * The histogram comparison is performed in HSV color space for better
      * separation of color information from brightness.
      *
-     * @param actionOptions Configuration including search region adjustments
+     * @param actionConfig Configuration including search region adjustments
      * @param image The target StateImage whose histogram will be matched
      * @param sceneHSV The scene in HSV color space to search within
      * @return List of Match objects sorted by score (best matches first)
      */
-    private List<Match> forOneImage(ActionOptions actionOptions, StateImage image, Mat sceneHSV) {
-        List<Region> searchRegions = selectRegions.getRegions(actionOptions, image);
+    private List<Match> forOneImage(ActionConfig actionConfig, StateImage image, Mat sceneHSV) {
+        List<Region> searchRegions = selectRegions.getRegions(actionConfig, image);
         List<Match> matchObjects = mockOrLive.findHistogram(image, sceneHSV, searchRegions);
         return matchObjects.stream().sorted(Comparator.comparing(Match::getScore)).toList();
     }

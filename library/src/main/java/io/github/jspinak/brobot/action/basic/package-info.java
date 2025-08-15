@@ -79,3 +79,4 @@
  * @see io.github.jspinak.brobot.action.basic.type.TypeOptions
  */
 package io.github.jspinak.brobot.action.basic;
+import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;

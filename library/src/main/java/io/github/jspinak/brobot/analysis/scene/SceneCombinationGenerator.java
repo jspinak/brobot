@@ -1,6 +1,8 @@
 package io.github.jspinak.brobot.analysis.scene;
 
-import io.github.jspinak.brobot.action.internal.options.ActionOptions;
+import io.github.jspinak.brobot.action.ActionConfig;
+import io.github.jspinak.brobot.action.ActionType;
+import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
 import io.github.jspinak.brobot.action.basic.find.motion.FindDynamicPixelMatches;
 import io.github.jspinak.brobot.action.internal.factory.ActionResultFactory;
 import io.github.jspinak.brobot.model.analysis.scene.SceneCombination;
@@ -100,11 +102,11 @@ public class SceneCombinationGenerator {
         ObjectCollection objectCollection = new ObjectCollection.Builder()
                 .withScenes(scene1, scene2)
                 .build();
-        ActionOptions actionOptions = new ActionOptions.Builder()
-                .setAction(ActionOptions.Action.FIND)
-                .setFind(ActionOptions.Find.DYNAMIC_PIXELS)
+        // Use PatternFindOptions for dynamic pixel finding
+        ActionConfig actionConfig = new PatternFindOptions.Builder()
+                .setStrategy(PatternFindOptions.Strategy.ALL) // Find all dynamic pixels
                 .build();
-        ActionResult matches = matchesInitializer.init(actionOptions, "dynamic pixels for state creation", objectCollection);
+        ActionResult matches = matchesInitializer.init(actionConfig, "dynamic pixels for state creation", objectCollection);
         findDynamicPixelMatches.find(matches, List.of(objectCollection));
         return Optional.ofNullable(matches.getMask());
     }

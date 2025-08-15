@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.action.internal.mouse;
 
-import io.github.jspinak.brobot.action.internal.options.ActionOptions;
+import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.basic.mouse.ScrollOptions;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.config.FrameworkSettings;
@@ -70,12 +70,17 @@ public class MouseWheelV2 {
      * It delegates to the original MouseWheel implementation.
      * </p>
      * 
-     * @param actionOptions The legacy action options
+     * @param actionConfig The legacy action options
      * @return true if successful
      * @deprecated Use {@link #scroll(ScrollOptions)} instead
      */
     @Deprecated
-    public boolean scroll(ActionOptions actionOptions) {
-        return legacyWheel.scroll(actionOptions);
+    public boolean scroll(ActionConfig actionConfig) {
+        // Convert ActionConfig to ScrollOptions if possible
+        if (actionConfig instanceof ScrollOptions) {
+            return legacyWheel.scroll((ScrollOptions) actionConfig);
+        }
+        // Default scroll behavior for non-ScrollOptions
+        return false;
     }
 }

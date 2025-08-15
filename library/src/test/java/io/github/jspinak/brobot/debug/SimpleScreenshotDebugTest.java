@@ -4,9 +4,6 @@ import io.github.jspinak.brobot.config.ExecutionEnvironment;
 import io.github.jspinak.brobot.config.FrameworkSettings;
 import io.github.jspinak.brobot.util.image.core.BufferedImageUtilities;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.TestPropertySource;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -21,17 +18,11 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Simple test to debug screenshot capture issues.
  */
-@SpringBootTest(classes = io.github.jspinak.brobot.test.TestConfiguration.class, classes = io.github.jspinak.brobot.test.TestConfiguration.class)
-@TestPropertySource(properties = {
-    "brobot.screenshot.save-history=true",
-    "brobot.screenshot.history-path=test-history/",
-    "brobot.highlight.enabled=true",
-    "brobot.aspects.visual-feedback.enabled=true",
-    "brobot.framework.mock=false"
-})
+
+
 public class SimpleScreenshotDebugTest {
 
-    @Autowired
+    // @Autowired
     private BufferedImageUtilities bufferedImageUtilities;
 
     @Test

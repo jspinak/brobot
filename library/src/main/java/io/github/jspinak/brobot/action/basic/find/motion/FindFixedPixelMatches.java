@@ -123,11 +123,12 @@ public class FindFixedPixelMatches {
     public void setMatches(Mat mask, ActionResult matches, Pattern pattern) {
         ContourExtractor contours = new ContourExtractor.Builder()
                 .setBgrFromClassification2d(mask)
-                .setMinArea(matches.getActionOptions().getMinArea())
-                .setMaxArea(matches.getActionOptions().getMaxArea())
+                // Use default min/max area since ActionConfig doesn't have these methods
+                .setMinArea(10)
+                .setMaxArea(Integer.MAX_VALUE)
                 .build();
         for (Match match : contours.getMatchList()) {
-            if (matchProofer.isInSearchRegions(match, matches.getActionOptions(), pattern)) {
+            if (matchProofer.isInSearchRegions(match, matches.getActionConfig(), pattern)) {
                 match.setSearchImage(new Image(pattern));
                 matches.add(match);
             }

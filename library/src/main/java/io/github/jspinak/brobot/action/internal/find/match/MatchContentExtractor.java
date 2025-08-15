@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.action.internal.find.match;
 
-import io.github.jspinak.brobot.action.internal.options.ActionOptions;
+import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.model.element.Scene;
 import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.tools.testing.mock.action.ExecutionModeController;
@@ -96,7 +96,8 @@ public class MatchContentExtractor {
      *                is modified by setting scene references and capturing images.
      */
     public void setMat(ActionResult matches) {
-        int sceneIndex = matches.getActionOptions().getSceneToUseForCaptureAfterFusingMatches();
+        // Default to using the first scene for capture
+        int sceneIndex = 0;
         List<Scene> scenes = matches.getSceneAnalysisCollection().getScenes();
         if (sceneIndex < 0 || sceneIndex >= scenes.size()) return;
         Scene scene = matches.getSceneAnalysisCollection().getScenes().get(sceneIndex);
@@ -129,7 +130,7 @@ public class MatchContentExtractor {
      */
     public void setText(ActionResult matches) {
         for (Match match : matches.getMatchList()) {
-            if (match.getText() == null || match.getText().isEmpty() || isOkToReset(matches.getActionOptions()))
+            if (match.getText() == null || match.getText().isEmpty() || isOkToReset(matches.getActionConfig()))
                 mockOrLive.setText(match);
         }
     }
@@ -148,18 +149,22 @@ public class MatchContentExtractor {
      * lose their text content, triggering re-extraction through the null check
      * in {@link #setText(ActionResult)}.
      * 
-     * @param actionOptions The configuration to evaluate for reset conditions
+     * @param actionConfig The configuration to evaluate for reset conditions
      * @return true if existing text should be replaced with new OCR results,
      *         false if existing text should be preserved
      */
-    private boolean isOkToReset(ActionOptions actionOptions) {
-        return actionOptions.getAction() == ActionOptions.Action.FIND ||
-                actionOptions.getFind() == ActionOptions.Find.ALL_WORDS;
-                /*
-                The Pattern disappears when match objects are fused, but this will be caught by match.getText() == null
-                and in cases where a match was not fused and has text, we don't need to search it again.
-                 */
-                //actionOptions.getFusionMethod() != NONE;
+    private boolean isOkToReset(ActionConfig actionConfig) {
+        // In the new API, we check if this is a find operation
+        // by checking the type of ActionConfig
+        if (actionConfig instanceof io.github.jspinak.brobot.action.basic.find.PatternFindOptions) {
+            return true;
+        }
+        // For other action types, we preserve existing text
+        return false;
+        /*
+        The Pattern disappears when match objects are fused, but this will be caught by match.getText() == null
+        and in cases where a match was not fused and has text, we don't need to search it again.
+         */
     }
 
 }

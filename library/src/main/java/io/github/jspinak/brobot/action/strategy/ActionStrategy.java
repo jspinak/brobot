@@ -2,7 +2,7 @@ package io.github.jspinak.brobot.action.strategy;
 
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
-import io.github.jspinak.brobot.action.internal.options.ActionOptions;
+import io.github.jspinak.brobot.action.ActionConfig;
 
 /**
  * Strategy interface for action execution.
@@ -13,19 +13,19 @@ public interface ActionStrategy {
     /**
      * Execute an action with the given configuration and targets.
      * 
-     * @param actionOptions The action configuration options
+     * @param actionConfig The action configuration options
      * @param targets The target objects
      * @return The result of the action execution
      */
-    ActionResult execute(ActionOptions actionOptions, ObjectCollection targets);
+    ActionResult execute(ActionConfig actionConfig, ObjectCollection targets);
     
     /**
      * Check if this strategy can handle the given action configuration.
      * 
-     * @param actionOptions The action configuration options
+     * @param actionConfig The action configuration options
      * @return true if this strategy can handle the action
      */
-    boolean canHandle(ActionOptions actionOptions);
+    boolean canHandle(ActionConfig actionConfig);
     
     /**
      * Get the name of this strategy for logging/debugging.

@@ -1,6 +1,7 @@
 package io.github.jspinak.brobot.tools.testing.mock.scenario;
 
-import io.github.jspinak.brobot.action.internal.options.ActionOptions;
+import io.github.jspinak.brobot.action.ActionConfig;
+import io.github.jspinak.brobot.action.ActionType;
 import lombok.Builder;
 import lombok.Data;
 import lombok.Singular;
@@ -45,7 +46,7 @@ public class MockTestContext {
      * Count of actions by type for analysis and pattern detection.
      */
     @Singular("actionCount")
-    private final Map<ActionOptions.Action, AtomicInteger> actionCounts;
+    private final Map<ActionType, AtomicInteger> actionCounts;
     
     /**
      * Currently active states in the automation.
@@ -95,7 +96,7 @@ public class MockTestContext {
      * @param action the action type to increment
      * @return new count for this action type
      */
-    public int incrementActionCount(ActionOptions.Action action) {
+    public int incrementActionCount(ActionType action) {
         return actionCounts.computeIfAbsent(action, k -> new AtomicInteger(0))
             .incrementAndGet();
     }
@@ -106,7 +107,7 @@ public class MockTestContext {
      * @param action the action type to query
      * @return current count for this action type
      */
-    public int getActionCount(ActionOptions.Action action) {
+    public int getActionCount(ActionType action) {
         AtomicInteger count = actionCounts.get(action);
         return count != null ? count.get() : 0;
     }

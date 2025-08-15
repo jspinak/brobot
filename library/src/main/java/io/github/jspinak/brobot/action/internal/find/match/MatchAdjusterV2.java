@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.action.internal.find.match;
 
-import io.github.jspinak.brobot.action.internal.options.ActionOptions;
+import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.action.basic.find.MatchAdjustmentOptions;
@@ -145,12 +145,12 @@ public class MatchAdjusterV2 {
      * </p>
      * 
      * @param match The match to adjust
-     * @param actionOptions The legacy action options
+     * @param actionConfig The legacy action options
      * @deprecated Use {@link #adjust(Match, MatchAdjustmentOptions)} instead
      */
     @Deprecated
-    public void adjust(Match match, ActionOptions actionOptions) {
-        legacyAdjuster.adjust(match, actionOptions);
+    public void adjust(Match match, ActionConfig actionConfig) {
+        legacyAdjuster.adjust(match, actionConfig);
     }
     
     /**
@@ -161,12 +161,12 @@ public class MatchAdjusterV2 {
      * </p>
      * 
      * @param matches The matches to adjust
-     * @param actionOptions The legacy action options
+     * @param actionConfig The legacy action options
      * @deprecated Use {@link #adjustAll(ActionResult, MatchAdjustmentOptions)} instead
      */
     @Deprecated
-    public void adjustAll(ActionResult matches, ActionOptions actionOptions) {
-        legacyAdjuster.adjustAll(matches, actionOptions);
+    public void adjustAll(ActionResult matches, ActionConfig actionConfig) {
+        legacyAdjuster.adjustAll(matches, actionConfig);
     }
     
     /**

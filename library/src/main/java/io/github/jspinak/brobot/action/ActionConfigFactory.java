@@ -1,4 +1,5 @@
 package io.github.jspinak.brobot.action;
+import io.github.jspinak.brobot.action.ActionType;
 
 import io.github.jspinak.brobot.action.basic.click.ClickOptions;
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
@@ -15,7 +16,6 @@ import io.github.jspinak.brobot.action.basic.type.KeyUpOptions;
 import io.github.jspinak.brobot.action.basic.type.TypeOptions;
 import io.github.jspinak.brobot.action.basic.vanish.VanishOptions;
 import io.github.jspinak.brobot.action.composite.drag.DragOptions;
-import io.github.jspinak.brobot.action.composite.repeat.ClickUntilOptions;
 import io.github.jspinak.brobot.tools.logging.model.LogEventType;
 import org.springframework.stereotype.Component;
 
@@ -52,7 +52,7 @@ public class ActionConfigFactory {
                 Map.entry(ActionInterface.Type.KEY_DOWN, this::createKeyDownOptions),
                 Map.entry(ActionInterface.Type.KEY_UP, this::createKeyUpOptions),
                 Map.entry(ActionInterface.Type.CLASSIFY, this::createColorClassifyOptions),
-                Map.entry(ActionInterface.Type.CLICK_UNTIL, this::createClickUntilOptions),
+                // CLICK_UNTIL removed - use ClickOptions with success criteria instead
                 Map.entry(ActionInterface.Type.DEFINE, this::createDefineRegionOptions)
         );
     }
@@ -129,7 +129,7 @@ public class ActionConfigFactory {
             }
             return ActionInterface.Type.FIND; // Other color strategies map to FIND
         }
-        if (config instanceof ClickUntilOptions) return ActionInterface.Type.CLICK_UNTIL;
+        // ClickUntilOptions removed - use ClickOptions with success criteria
         if (config instanceof DefineRegionOptions) return ActionInterface.Type.DEFINE;
         
         throw new IllegalArgumentException("Unknown config type: " + config.getClass().getName());
@@ -239,8 +239,9 @@ public class ActionConfigFactory {
         return builder.build();
     }
 
-    private ClickUntilOptions createClickUntilOptions(Map<String, Object> overrides) {
-        ClickUntilOptions.Builder builder = new ClickUntilOptions.Builder();
+    // ClickUntilOptions removed - use ClickOptions with success criteria
+    private ClickOptions createClickUntilOptionsReplacement(Map<String, Object> overrides) {
+        ClickOptions.Builder builder = new ClickOptions.Builder();
         applyCommonOverrides(builder, overrides);
         return builder.build();
     }

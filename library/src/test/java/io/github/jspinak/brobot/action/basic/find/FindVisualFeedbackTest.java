@@ -54,7 +54,8 @@ public class FindVisualFeedbackTest {
             mock(io.github.jspinak.brobot.action.internal.region.DynamicRegionResolver.class),
             highlightManager,
             visualFeedbackConfig,
-            mock(io.github.jspinak.brobot.action.basic.find.FindStrategyRegistryV2.class)
+            mock(io.github.jspinak.brobot.action.basic.find.FindStrategyRegistryV2.class),
+            mock(io.github.jspinak.brobot.action.internal.utility.ActionSuccessCriteria.class)
         );
         
         // Inject mocked HighlightManager and VisualFeedbackConfig

@@ -27,7 +27,7 @@
  *   "name": "loginSequence",
  *   "steps": [
  *     {
- *       "actionOptions": {
+ *       "actionConfig": {
  *         "action": "CLICK"
  *       },
  *       "objectCollection": {
@@ -35,7 +35,7 @@
  *       }
  *     },
  *     {
- *       "actionOptions": {
+ *       "actionConfig": {
  *         "action": "TYPE",
  *         "typeString": "admin"
  *       },

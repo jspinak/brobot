@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.action.internal.text;
 
-import io.github.jspinak.brobot.action.internal.options.ActionOptions;
+import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.state.StateString;
 import io.github.jspinak.brobot.config.FrameworkSettings;
@@ -38,18 +38,27 @@ public class TypeTextWrapper {
      * returns 1 on success and 0 on failure, which this method converts to a boolean.
      * 
      * @param stateString Contains the text to be typed. Must not be null.
-     * @param actionOptions Configuration that may contain keyboard modifiers.
+     * @param actionConfig Configuration that may contain keyboard modifiers.
      *                      An empty string for modifiers results in plain text typing.
      * @return {@code true} if the typing operation was successful (or mocked),
      *         {@code false} if the Sikuli type operation failed in real mode.
      * 
      * @see Region#sikuli()
      */
-    public boolean type(StateString stateString, ActionOptions actionOptions) {
-        if (FrameworkSettings.mock) return mockType(stateString, actionOptions);
-        if (actionOptions.getModifiers().equals(""))
+    public boolean type(StateString stateString, ActionConfig actionConfig) {
+        if (FrameworkSettings.mock) return mockType(stateString, actionConfig);
+        
+        // Get modifiers from TypeOptions if available
+        String modifiers = "";
+        if (actionConfig instanceof io.github.jspinak.brobot.action.basic.type.TypeOptions) {
+            io.github.jspinak.brobot.action.basic.type.TypeOptions typeOptions = 
+                (io.github.jspinak.brobot.action.basic.type.TypeOptions) actionConfig;
+            modifiers = typeOptions.getModifiers();
+        }
+        
+        if (modifiers.equals(""))
             return new Region().sikuli().type(stateString.getString()) != 0;
-        else return new Region().sikuli().type(stateString.getString(), actionOptions.getModifiers()) != 0;
+        else return new Region().sikuli().type(stateString.getString(), modifiers) != 0;
     }
 
     /**
@@ -60,11 +69,16 @@ public class TypeTextWrapper {
      * the actual typing operation.
      * 
      * @param stateString Contains the text that would be typed
-     * @param actionOptions Contains any keyboard modifiers that would be applied
+     * @param actionConfig Contains any keyboard modifiers that would be applied
      * @return Always returns {@code true} to simulate successful typing
      */
-    private boolean mockType(StateString stateString, ActionOptions actionOptions) {
-        ConsoleReporter.print(actionOptions.getModifiers());
+    private boolean mockType(StateString stateString, ActionConfig actionConfig) {
+        // Get modifiers from TypeOptions if available
+        if (actionConfig instanceof io.github.jspinak.brobot.action.basic.type.TypeOptions) {
+            io.github.jspinak.brobot.action.basic.type.TypeOptions typeOptions = 
+                (io.github.jspinak.brobot.action.basic.type.TypeOptions) actionConfig;
+            ConsoleReporter.print(typeOptions.getModifiers());
+        }
         ConsoleReporter.print(stateString.getString());
         return true;
     }

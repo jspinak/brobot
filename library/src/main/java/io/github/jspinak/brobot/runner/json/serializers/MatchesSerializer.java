@@ -40,7 +40,7 @@ import java.util.List;
  *   <li><b>Match List:</b> Creates sanitized copies of Match objects that exclude
  *       problematic fields while preserving essential match data</li>
  *   <li><b>Excluded Fields:</b> Skips mask, sceneAnalysisCollection, actionLifecycle,
- *       and actionOptions to avoid serialization issues</li>
+ *       and actionConfig to avoid serialization issues</li>
  * </ul>
  * 
  * <p><b>Match Sanitization Process:</b></p>
@@ -107,7 +107,7 @@ public class MatchesSerializer extends JsonSerializer<ActionResult> {
      *   <li>{@code mask} - Contains image data that's too large for JSON</li>
      *   <li>{@code sceneAnalysisCollection} - Complex object with circular references</li>
      *   <li>{@code actionLifecycle} - Contains execution state that may reference parent objects</li>
-     *   <li>{@code actionOptions} - Has its own serializer to handle its complexity</li>
+     *   <li>{@code actionConfig} - Has its own serializer to handle its complexity</li>
      * </ul>
      * 
      * @param matches the ActionResult to serialize
@@ -158,7 +158,7 @@ public class MatchesSerializer extends JsonSerializer<ActionResult> {
         }
         gen.writeObjectField("matchList", sanitizedMatches);
 
-        // Skip problematic fields: mask, sceneAnalysisCollection, actionLifecycle, actionOptions
+        // Skip problematic fields: mask, sceneAnalysisCollection, actionLifecycle, actionConfig
         gen.writeEndObject();
     }
 }

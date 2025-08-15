@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.tools.testing.mock.action;
 
-import io.github.jspinak.brobot.action.internal.options.ActionOptions;
+import io.github.jspinak.brobot.action.ActionType;
 import io.github.jspinak.brobot.model.action.ActionRecord;
 import io.github.jspinak.brobot.model.element.Pattern;
 import io.github.jspinak.brobot.model.match.Match;
@@ -39,9 +39,9 @@ public class MockFind {
      * @return a list of match objects for a randomly selected collection of matching snapshots
      */
     public List<Match> getMatches(Pattern pattern) {
-        mockTime.wait(actionDurations.getFindDuration(ActionOptions.Find.ALL));
+        mockTime.wait(actionDurations.getActionDuration(ActionType.FIND));
         Optional<ActionRecord> optionalMatchSnapshot =
-                pattern.getMatchHistory().getRandomSnapshot(ActionOptions.Action.FIND, stateMemory.getActiveStates());
+                pattern.getMatchHistory().getRandomSnapshot(ActionType.FIND, stateMemory.getActiveStates());
         if (optionalMatchSnapshot.isEmpty()) return new ArrayList<>();
         return optionalMatchSnapshot.get().getMatchList();
     }
@@ -53,12 +53,12 @@ public class MockFind {
      * @return a list of Match objects for the corresponding states.
      */
     public List<Match> getWordMatches() {
-        mockTime.wait(actionDurations.getFindDuration(ActionOptions.Find.ALL_WORDS));
+        mockTime.wait(actionDurations.getActionDuration(ActionType.FIND));
         List<Match> allMatches = new ArrayList<>();
         for (Long stateId : stateMemory.getActiveStates()) {
             Optional<State> state = allStatesInProjectService.getState(stateId);
             state.ifPresent(st -> {
-                Optional<ActionRecord> snapshot = st.getMatchHistory().getRandomSnapshot(ActionOptions.Action.FIND, stateId);
+                Optional<ActionRecord> snapshot = st.getMatchHistory().getRandomSnapshot(ActionType.FIND, stateId);
                 snapshot.ifPresent(snap -> allMatches.addAll(snap.getMatchList()));
             });
         }

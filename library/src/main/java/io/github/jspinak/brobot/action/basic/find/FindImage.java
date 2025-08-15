@@ -3,7 +3,6 @@ package io.github.jspinak.brobot.action.basic.find;
 import io.github.jspinak.brobot.action.internal.execution.ActionLifecycleManagement;
 import io.github.jspinak.brobot.action.internal.find.IterativePatternFinder;
 import io.github.jspinak.brobot.action.internal.find.DefinedRegionConverter;
-import io.github.jspinak.brobot.action.internal.options.ActionOptions;
 import io.github.jspinak.brobot.action.basic.find.color.SceneProvider;
 import io.github.jspinak.brobot.model.element.Scene;
 import io.github.jspinak.brobot.model.match.Match;
@@ -33,7 +32,7 @@ import java.util.*;
  * <li>Lifecycle management for iterative searches (e.g., wait until vanish)</li>
  * </ul>
  * 
- * @see ActionOptions.Find
+ * @see PatternFindOptions
  * @see IterativePatternFinder
  * @see ActionLifecycleManagement
  * @see DefinedRegionConverter
@@ -147,20 +146,22 @@ public class FindImage {
      * <li>Increments repetition count after each search iteration</li>
      * </ul>
      * 
-     * @param matches Contains ActionOptions and accumulates all matches found.
+     * @param matches Contains ActionConfig and accumulates all matches found.
      *                This object is modified throughout the search process.
      * @param objectCollections Collections containing the images to search for
      */
     void getImageMatches(ActionResult matches, List<ObjectCollection> objectCollections) {
         if (objectCollections.isEmpty()) return; // no images to search for
         
-        // Check if we have ActionConfig first (new way), then fall back to ActionOptions (legacy)
         ActionConfig actionConfig = matches.getActionConfig();
-        ActionOptions actionOptions = matches.getActionOptions();
         
-        if (actionOptions.isUseDefinedRegion()) {
-            matches.addAllResults(useDefinedRegion.useRegion(matches, objectCollections.get(0)));
-            return;
+        // Check if we should use defined region based on config
+        if (actionConfig != null && actionConfig instanceof PatternFindOptions) {
+            PatternFindOptions findOptions = (PatternFindOptions) actionConfig;
+            if (findOptions.isUseDefinedRegion()) {
+                matches.addAllResults(useDefinedRegion.useRegion(matches, objectCollections.get(0)));
+                return;
+            }
         }
         /*
         Execute the find until the exit condition is achieved. For example, a Find.VANISH will execute until
@@ -171,12 +172,13 @@ public class FindImage {
         
         while (actionLifecycleManagement.isOkToContinueAction(matches, stateImages.size())) {
             List<Scene> scenes;
+            // Use ActionConfig if available, otherwise use default
             if (actionConfig != null) {
-                // Use ActionConfig if available (new way)
                 scenes = getScenes.getScenes(actionConfig, objectCollections, 1, 0);
             } else {
-                // Fall back to ActionOptions (legacy)
-                scenes = getScenes.getScenes(actionOptions, objectCollections, 1, 0);
+                // Use default PatternFindOptions if no config provided
+                PatternFindOptions defaultOptions = new PatternFindOptions.Builder().build();
+                scenes = getScenes.getScenes(defaultOptions, objectCollections, 1, 0);
             }
             log.debug("[FIND_IMAGE] Got {} scenes from SceneProvider", scenes.size());
             

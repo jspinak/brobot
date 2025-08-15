@@ -1,4 +1,5 @@
 package io.github.jspinak.brobot.logging.modular;
+import io.github.jspinak.brobot.action.ActionType;
 
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.model.state.StateImage;

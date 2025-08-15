@@ -2,7 +2,7 @@ package io.github.jspinak.brobot.model.state;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import io.github.jspinak.brobot.action.internal.options.ActionOptions;
+import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.model.analysis.color.ColorCluster;
 import io.github.jspinak.brobot.analysis.color.kmeans.KmeansProfilesAllSchemas;
@@ -166,9 +166,9 @@ public class StateImage implements StateObject {
         return matchSnapshots;
     }
 
-    public Optional<ActionRecord> getRandomSnapshot(ActionOptions actionOptions) {
+    public Optional<ActionRecord> getRandomSnapshot(ActionConfig actionConfig) {
         List<ActionRecord> snapshots = new ArrayList<>();
-        patterns.forEach(pattern -> snapshots.addAll(pattern.getMatchHistory().getSimilarSnapshots(actionOptions)));
+        patterns.forEach(pattern -> snapshots.addAll(pattern.getMatchHistory().getSimilarSnapshots(actionConfig)));
         if (snapshots.isEmpty()) return Optional.empty();
         return Optional.of(snapshots.get(new Random().nextInt(snapshots.size())));
     }

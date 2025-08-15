@@ -1,8 +1,8 @@
 package io.github.jspinak.brobot.action.internal.execution;
+import io.github.jspinak.brobot.action.ActionType;
 
 import io.github.jspinak.brobot.config.FrameworkSettings;
 import io.github.jspinak.brobot.action.ActionInterface;
-import io.github.jspinak.brobot.action.internal.options.ActionOptions;
 import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.internal.factory.ActionResultFactory;
 import io.github.jspinak.brobot.action.internal.find.SearchRegionResolver;
@@ -63,7 +63,7 @@ import java.util.List;
  *
  * @see ActionInterface
  * @see ActionLifecycleManagement
- * @see ActionOptions
+ * @see ActionConfig
  * @see ActionResult
  */
 @Component
@@ -136,7 +136,7 @@ public class ActionExecution {
      * <li>Initializes {@link ActionResult} with action parameters</li>
      * <li>Applies pre-action pause (if configured)</li>
      * <li>Executes action sequences via {@link ActionLifecycleManagement#isMoreSequencesAllowed}</li>
-     * <li>Determines success based on results and {@link ActionOptions} criteria</li>
+     * <li>Determines success based on results and {@link ActionConfig} criteria</li>
      * <li>Captures illustrated screenshots (if enabled)</li>
      * <li>Applies post-action pause (if configured)</li>
      * <li>Records duration and logs results</li>
@@ -155,7 +155,7 @@ public class ActionExecution {
      *
      * @param actionMethod The {@link ActionInterface} implementation containing action-specific logic
      * @param actionDescription Human-readable description of the action for logging and ML training
-     * @param actionOptions Configuration parameters controlling action behavior and success criteria
+     * @param actionConfig Configuration parameters controlling action behavior and success criteria
      * @param objectCollections Variable number of {@link ObjectCollection} containing target GUI elements.
      *                         The first collection (if present) is used for primary logging.
      * @return {@link ActionResult} containing matches found, success status, duration, and execution details
@@ -164,17 +164,20 @@ public class ActionExecution {
      * @see ActionLifecycleManagement
      * @see DatasetManager#addSetOfData
      */
-    public ActionResult perform(ActionInterface actionMethod, String actionDescription, ActionOptions actionOptions,
+    // Removed ActionOptions-based perform method - use ActionConfig version instead
+    // The ActionConfig version is available below
+    /*
+    public ActionResult perform(ActionInterface actionMethod, String actionDescription, ActionConfig actionConfig,
                            ObjectCollection... objectCollections) {
         String sessionId = automationSession.getCurrentSessionId();
-        printAction(actionOptions, objectCollections);
-        ActionResult matches = matchesInitializer.init(actionOptions, actionDescription, objectCollections);
+        printAction(actionConfig, objectCollections);
+        ActionResult matches = matchesInitializer.init(actionConfig, actionDescription, objectCollections);
         
         try {
             // Check pause point before starting
             checkPausePointSafely();
             
-            time.wait(actionOptions.getPauseBeforeBegin());
+            time.wait(actionConfig.getPauseBeforeBegin());
             
             while (actionLifecycleManagement.isMoreSequencesAllowed(matches)) {
                 // Check pause point before each sequence
@@ -184,11 +187,11 @@ public class ActionExecution {
                 actionLifecycleManagement.incrementCompletedSequences(matches);
             }
             
-            success.set(actionOptions, matches);
+            success.set(actionConfig, matches);
             illustrateScreenshot.illustrateWhenAllowed(matches,
-                    selectRegions.getRegionsForAllImages(actionOptions, objectCollections),
-                    actionOptions, objectCollections);
-            time.wait(actionOptions.getPauseAfterEnd());
+                    selectRegions.getRegionsForAllImages(actionConfig, objectCollections),
+                    actionConfig, objectCollections);
+            time.wait(actionConfig.getPauseAfterEnd());
             
         } catch (ExecutionStoppedException e) {
             log.info("Action execution stopped: {}", actionDescription);
@@ -201,13 +204,13 @@ public class ActionExecution {
         matches.setDuration(duration);
         if (FrameworkSettings.buildDataset) datasetManager.addSetOfData(matches);
         // Removed direct console output - logging is handled by ActionLifecycleAspect which respects QUIET mode
-        // ConsoleReporter.println(actionOptions.getAction() + " " + matches.getOutputText() + " " + matches.getSuccessSymbol());
+        // ConsoleReporter.println(actionConfig.getAction() + " " + matches.getOutputText() + " " + matches.getSuccessSymbol());
         if (objectCollections.length > 0) {
             LogData logData = actionLogger.logAction(sessionId, matches, objectCollections[0]);
         }
         if (!matches.isSuccess()) {
             //String screenshotPath = captureScreenshot.captureScreenshot("action_failed_" + sessionId);
-            //actionLogger.logError(sessionId, "Action failed: " + actionOptions.getAction(), screenshotPath);
+            //actionLogger.logError(sessionId, "Action failed: " + actionConfig.getAction(), screenshotPath);
         }
         
         // Automatically update state memory when patterns are found
@@ -218,6 +221,7 @@ public class ActionExecution {
         
         return matches;
     }
+    */
 
     /**
      * Prints action details to the report output for debugging and monitoring.
@@ -230,14 +234,17 @@ public class ActionExecution {
      * <p>
      * Example output: {@code |CLICK MainMenu.fileButton, MainMenu.editButton|}
      *
-     * @param actionOptions Contains the action type to be printed
+     * @param actionConfig Contains the action type to be printed
      * @param objectCollections Contains state images to be included in the output.
      *                         Only the first collection is processed if multiple are provided.
      */
-    private void printAction(ActionOptions actionOptions, ObjectCollection... objectCollections) {
+    // Removed ActionOptions-based printAction method
+    /*
+    private void printAction(ActionConfig actionConfig, ObjectCollection... objectCollections) {
         // Disabled direct console output - logging is handled by ActionLifecycleAspect which respects QUIET mode
         // Legacy direct console printing interferes with structured logging and QUIET mode
     }
+    */
 
     /**
      * Executes an action with complete lifecycle management using ActionConfig.

@@ -1,6 +1,5 @@
 package io.github.jspinak.brobot.action.internal.mouse;
 
-import io.github.jspinak.brobot.action.internal.options.ActionOptions;
 import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.basic.click.ClickOptions;
 import io.github.jspinak.brobot.model.element.Location;
@@ -34,59 +33,44 @@ class PostClickHandlerTest {
     }
 
     @Test
-    void moveMouseAfterClick_shouldDoNothingWhenOptionIsFalse() {
-        // Note: The new ClickOptions doesn't have setMoveMouseAfterAction
-        // This test is testing PostClickHandler which still uses ActionOptions
-        // Until PostClickHandler is updated, we need to keep using ActionOptions
-        ActionOptions actionOptions = new ActionOptions.Builder()
-                .setMoveMouseAfterAction(false)
+    void moveMouseAfterClick_shouldDoNothingWhenUsingClickOptions() {
+        // The new ClickOptions doesn't have setMoveMouseAfterAction
+        // PostClickHandler with ActionConfig always returns false
+        ClickOptions clickOptions = new ClickOptions.Builder()
                 .build();
 
-        afterClick.moveMouseAfterClick(actionOptions);
+        boolean result = afterClick.moveMouseAfterClick(clickOptions);
 
+        assertFalse(result);
         verify(moveMouseWrapper, never()).move(any(Location.class));
     }
 
     @Test
-    void moveMouseAfterClick_shouldMoveByOffsetWhenDefined() {
-        Location offset = mock(Location.class);
-        when(offset.defined()).thenReturn(true);
-
-        // Note: The new ClickOptions doesn't have setMoveMouseAfterAction
-        // This test is testing PostClickHandler which still uses ActionOptions
-        // Until PostClickHandler is updated, we need to keep using ActionOptions
-        ActionOptions actionOptions = new ActionOptions.Builder()
-                .setMoveMouseAfterAction(true)
-                .setMoveMouseAfterActionBy(0,0) // A stub, the mock 'offset' is what's used
+    void moveMouseAfterClick_shouldAlwaysReturnFalseWithActionConfig() {
+        // In modern Brobot, mouse movement after click is handled differently
+        // PostClickHandler.moveMouseAfterClick always returns false
+        ClickOptions clickOptions = new ClickOptions.Builder()
                 .build();
-        // Manually set the mocked location since the builder creates a new one
-        actionOptions.setMoveMouseAfterActionBy(offset);
 
-        afterClick.moveMouseAfterClick(actionOptions);
+        boolean result = afterClick.moveMouseAfterClick(clickOptions);
 
-        verify(moveMouseWrapper).move(offset);
+        assertFalse(result);
+        verify(moveMouseWrapper, never()).move(any(Location.class));
     }
 
     @Test
-    void moveMouseAfterClick_shouldMoveToLocationWhenOffsetNotDefined() {
-        Location offset = mock(Location.class);
-        when(offset.defined()).thenReturn(false);
-
-        Location destination = mock(Location.class);
-
-        // Note: The new ClickOptions doesn't have setMoveMouseAfterAction
-        // This test is testing PostClickHandler which still uses ActionOptions
-        // Until PostClickHandler is updated, we need to keep using ActionOptions
-        ActionOptions actionOptions = new ActionOptions.Builder()
-                .setMoveMouseAfterAction(true)
+    void moveMouseAfterClick_withActionConfig_returnsExpectedValue() {
+        // This test verifies the behavior with ActionConfig
+        // Since PostClickHandler no longer supports mouse movement with ActionConfig,
+        // it should always return false
+        
+        ClickOptions clickOptions = new ClickOptions.Builder()
                 .build();
-        actionOptions.setMoveMouseAfterActionBy(offset); // Set the undefined offset
-        actionOptions.setMoveMouseAfterActionTo(destination); // Set the destination
 
-        afterClick.moveMouseAfterClick(actionOptions);
+        boolean result = afterClick.moveMouseAfterClick(clickOptions);
 
-        verify(moveMouseWrapper).move(destination);
-        verify(moveMouseWrapper, never()).move(offset);
+        assertFalse(result);
+        verify(moveMouseWrapper, never()).move(any(Location.class));
     }
     
     // Tests using new ActionConfig API

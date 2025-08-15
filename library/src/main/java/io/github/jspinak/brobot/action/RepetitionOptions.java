@@ -16,7 +16,7 @@ import lombok.Getter;
  * @see ActionConfig
  */
 @Getter
-@Builder(toBuilder = true)
+@Builder(toBuilder = true, builderClassName = "RepetitionOptionsBuilder")
 public final class RepetitionOptions {
 
     /**

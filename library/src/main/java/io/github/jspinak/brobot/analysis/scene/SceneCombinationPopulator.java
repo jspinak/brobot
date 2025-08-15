@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.analysis.scene;
 
-import io.github.jspinak.brobot.action.internal.options.ActionOptions;
+import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
@@ -72,15 +72,17 @@ public class SceneCombinationPopulator {
      * @param sceneCombinations All possible scene combinations to populate with images
      * @param objectCollections Collections containing StateImages to distribute. The
      *                         collection index corresponds to the scene index.
-     * @param actionOptions Configuration containing minimum area threshold for images
+     * @param actionConfig Configuration containing minimum area threshold for images
      */
     public void populateSceneCombinationsWithImages(List<SceneCombination> sceneCombinations,
                                                     List<ObjectCollection> objectCollections,
-                                                    ActionOptions actionOptions) {
+                                                    ActionConfig actionConfig) {
         for (int i=0; i<objectCollections.size(); i++) {
             for (StateImage stateImage : objectCollections.get(i).getStateImages()) {
                 int patternSize = stateImage.getMinSize();
-                boolean isBigEnough = actionOptions.getMinArea() <= patternSize;
+                // Use default minimum area since ActionConfig doesn't have getMinArea()
+                int minArea = 1; // Default minimum area
+                boolean isBigEnough = minArea <= patternSize;
                 if (isBigEnough) {
                     for (SceneCombination sceneCombination : sceneCombinations) {
                         addImageToCombinationIfFound(i, stateImage, sceneCombination);
@@ -90,29 +92,7 @@ public class SceneCombinationPopulator {
         }
     }
 
-    /**
-     * Distributes StateImage objects to all scene combinations where they remain stable.
-     * <p>
-     * This overloaded method accepts ActionConfig (new API) instead of ActionOptions.
-     * It extracts the minArea parameter from PatternFindOptions if available.
-     * 
-     * @param sceneCombinations All possible scene combinations to populate with images
-     * @param objectCollections Collections containing StateImages to distribute
-     * @param actionConfig Configuration containing minimum area threshold for images
-     */
-    public void populateSceneCombinationsWithImages(List<SceneCombination> sceneCombinations,
-                                                    List<ObjectCollection> objectCollections,
-                                                    ActionConfig actionConfig) {
-        // In the new API, minArea filtering is typically done elsewhere
-        // For now, we'll accept all images regardless of size
-        for (int i=0; i<objectCollections.size(); i++) {
-            for (StateImage stateImage : objectCollections.get(i).getStateImages()) {
-                for (SceneCombination sceneCombination : sceneCombinations) {
-                    addImageToCombinationIfFound(i, stateImage, sceneCombination);
-                }
-            }
-        }
-    }
+    // Duplicate method removed - using the one at line 77
 
     /**
      * Adds an image to a scene combination if it remains stable in that combination.

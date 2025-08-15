@@ -1,6 +1,7 @@
 package io.github.jspinak.brobot.action.internal.find.match;
 
-import io.github.jspinak.brobot.action.internal.options.ActionOptions;
+import io.github.jspinak.brobot.action.ActionConfig;
+import io.github.jspinak.brobot.action.basic.find.BaseFindOptions;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.model.match.Match;
 
@@ -18,7 +19,7 @@ import java.util.List;
  * 
  * @see Match
  * @see ActionResult
- * @see ActionOptions
+ * @see ActionConfig
  */
 @Component
 public class MatchCollectionUtilities {
@@ -51,15 +52,19 @@ public class MatchCollectionUtilities {
      * 
      * @param matches The ActionResult containing matches to limit. Must be sorted
      *                with best matches first. This object is modified by the method.
-     * @param actionOptions Configuration specifying the maximum number of matches
-     *                      to retain via {@link ActionOptions#getMaxMatchesToActOn()}.
-     *                      If this value is 0 or negative, no limiting occurs.
+     * @param actionConfig Configuration specifying the maximum number of matches
+     *                      to retain. If this value is 0 or negative, no limiting occurs.
      */
-    public void limitNumberOfMatches(ActionResult matches, ActionOptions actionOptions) {
-        if (actionOptions.getMaxMatchesToActOn() <= 0) return;
-        if (matches.size() <= actionOptions.getMaxMatchesToActOn()) return;
+    public void limitNumberOfMatches(ActionResult matches, ActionConfig actionConfig) {
+        int maxMatches = 1; // default
+        if (actionConfig instanceof BaseFindOptions) {
+            BaseFindOptions findOptions = (BaseFindOptions) actionConfig;
+            maxMatches = findOptions.getMaxMatchesToActOn();
+        }
+        if (maxMatches <= 0) return;
+        if (matches.size() <= maxMatches) return;
         List<Match> matchList = matches.getMatchList();
-        matches.setMatchList(matchList.subList(0, actionOptions.getMaxMatchesToActOn()));
+        matches.setMatchList(matchList.subList(0, maxMatches));
     }
 
 }

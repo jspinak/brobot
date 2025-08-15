@@ -23,7 +23,7 @@ import io.github.jspinak.brobot.action.basic.type.TypeOptions;
 import io.github.jspinak.brobot.action.basic.vanish.VanishOptions;
 import io.github.jspinak.brobot.action.composite.PlaybackOptions;
 import io.github.jspinak.brobot.action.composite.drag.DragOptions;
-import io.github.jspinak.brobot.action.composite.repeat.ClickUntilOptions;
+// ClickUntilOptions removed - use ClickOptions with success criteria
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -65,7 +65,7 @@ public class ActionConfigDeserializer extends JsonDeserializer<ActionConfig> {
         
         // Composite action options
         TYPE_MAPPINGS.put("DragOptions", DragOptions.class);
-        TYPE_MAPPINGS.put("ClickUntilOptions", ClickUntilOptions.class);
+        // ClickUntilOptions removed - use ClickOptions with success criteria
         TYPE_MAPPINGS.put("PlaybackOptions", PlaybackOptions.class);
         
         // Add shortened versions for convenience
@@ -84,7 +84,7 @@ public class ActionConfigDeserializer extends JsonDeserializer<ActionConfig> {
         TYPE_MAPPINGS.put("define", DefineRegionOptions.class);
         TYPE_MAPPINGS.put("highlight", HighlightOptions.class);
         TYPE_MAPPINGS.put("drag", DragOptions.class);
-        TYPE_MAPPINGS.put("clickUntil", ClickUntilOptions.class);
+        // clickUntil removed - use click with success criteria
         TYPE_MAPPINGS.put("playback", PlaybackOptions.class);
     }
     

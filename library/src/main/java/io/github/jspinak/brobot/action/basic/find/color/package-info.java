@@ -47,7 +47,7 @@
  * // Detect a scene based on color profile
  * GetScenes getScenes = new GetScenes(...);
  * ActionOptions options = new ActionOptions.Builder()
- *     .setAction(ActionOptions.Action.FIND)
+ *     .setAction(ActionType.FIND)
  *     .setFind(Find.CUSTOM)
  *     .build();
  * 
