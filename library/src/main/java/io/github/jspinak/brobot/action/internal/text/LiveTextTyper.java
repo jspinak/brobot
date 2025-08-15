@@ -1,6 +1,7 @@
 package io.github.jspinak.brobot.action.internal.text;
 
-import io.github.jspinak.brobot.action.internal.options.ActionOptions;
+import io.github.jspinak.brobot.action.ActionConfig;
+import io.github.jspinak.brobot.action.basic.type.TypeOptions;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.state.StateString;
 import lombok.extern.slf4j.Slf4j;
@@ -19,20 +20,25 @@ import org.springframework.stereotype.Component;
 public class LiveTextTyper implements TextTyper {
     
     @Override
-    public boolean type(StateString stateString, ActionOptions actionOptions) {
+    public boolean type(StateString stateString, ActionConfig actionConfig) {
+        String modifiers = "";
+        if (actionConfig instanceof TypeOptions) {
+            modifiers = ((TypeOptions) actionConfig).getModifiers();
+        }
+        
         log.debug("Live typing: '{}' with modifiers: '{}'", 
-                  stateString.getString(), actionOptions.getModifiers());
+                  stateString.getString(), modifiers);
         
         try {
             Region region = new Region();
             
-            if (actionOptions.getModifiers().isEmpty()) {
+            if (modifiers.isEmpty()) {
                 // Type without modifiers
                 return region.sikuli().type(stateString.getString()) != 0;
             } else {
                 // Type with modifiers (e.g., ctrl+a, shift+tab)
                 return region.sikuli().type(stateString.getString(), 
-                                          actionOptions.getModifiers()) != 0;
+                                          modifiers) != 0;
             }
         } catch (Exception e) {
             log.error("Failed to type text: {}", stateString.getString(), e);

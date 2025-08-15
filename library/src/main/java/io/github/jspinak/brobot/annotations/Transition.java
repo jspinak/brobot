@@ -20,7 +20,7 @@ import java.lang.annotation.*;
  * @Slf4j
  * public class PromptToWorkingTransition {
  *     
- *     private final ActionOptions actionOptions;
+ *     private final ActionConfig actionConfig;
  *     
  *     public boolean execute() {
  *         log.info("Transitioning from Prompt to Working state");

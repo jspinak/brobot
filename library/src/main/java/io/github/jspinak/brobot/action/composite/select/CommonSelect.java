@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.action.composite.select;
 
-import io.github.jspinak.brobot.action.internal.options.ActionOptions;
+import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
 import io.github.jspinak.brobot.action.basic.click.ClickOptions;
@@ -60,9 +60,9 @@ public class CommonSelect {
      * @param images The target images to search for during swiping
      * @return The {@link SelectActionObject} containing the operation results and state
      */
-    public SelectActionObject select(Region swipeRegion, ActionOptions.Find findType, int clicksPerImage,
+    public SelectActionObject select(Region swipeRegion, PatternFindOptions.Strategy findStrategy, int clicksPerImage,
                                      Position swipeDirection, int maxSwipes, StateImage... images) {
-        return select(List.of(images), new ArrayList<>(), swipeRegion, findType, clicksPerImage,
+        return select(List.of(images), new ArrayList<>(), swipeRegion, findStrategy, clicksPerImage,
                 swipeDirection, maxSwipes);
     }
 
@@ -95,7 +95,7 @@ public class CommonSelect {
      *         success status and total swipes performed
      */
     public SelectActionObject select(List<StateImage> images, List<StateImage> confirmationImages,
-                                     Region swipeRegion, ActionOptions.Find findType, int clicksPerImage,
+                                     Region swipeRegion, PatternFindOptions.Strategy findStrategy, int clicksPerImage,
                                      Position swipeDirection, int maxSwipes) {
         Location swipeTo = new Location(swipeRegion, swipeDirection);
         Location swipeFrom = swipeTo.getOpposite();
@@ -105,37 +105,38 @@ public class CommonSelect {
         ObjectCollection swipeToObjColl = new ObjectCollection.Builder()
                 .withLocations(swipeTo)
                 .build();
-        ActionOptions swipeActionOptions = new ActionOptions.Builder()
-                .setAction(ActionOptions.Action.DRAG)
-                .setPauseBeforeMouseUp(.5)
+        DragOptions swipeActionOptions = new DragOptions.Builder()
+                .setMousePressOptions(MousePressOptions.builder()
+                        .pauseBeforeMouseUp(0.5)
+                        .build())
                 .build();
         ObjectCollection findObjectCollection = new ObjectCollection.Builder()
                 .withImages(images)
                 .build();
-        ActionOptions findActionOptions = new ActionOptions.Builder()
-                .setAction(ActionOptions.Action.FIND)
-                .setFind(findType)
+        PatternFindOptions findActionOptions = new PatternFindOptions.Builder()
+                .setStrategy(findStrategy)
                 .build();
-        ActionOptions clickActionOptions = new ActionOptions.Builder()
-                .setAction(ActionOptions.Action.CLICK)
-                .setTimesToRepeatIndividualAction(clicksPerImage)
-                .setPauseBetweenIndividualActions(.7)
+        ClickOptions clickActionOptions = new ClickOptions.Builder()
+                .setNumberOfClicks(clicksPerImage)
+                .setPressOptions(MousePressOptions.builder()
+                        .pauseAfterMouseUp(0.7)
+                        .build())
                 .build();
         ObjectCollection confirmationObjectCollection = new ObjectCollection.Builder()
                 .withImages(confirmationImages)
                 .build();
-        ActionOptions confirmActionOptions = new ActionOptions.Builder()
-                .setAction(ActionOptions.Action.FIND)
+        PatternFindOptions confirmActionOptions = new PatternFindOptions.Builder()
+                .setStrategy(PatternFindOptions.Strategy.FIRST)
                 .build();
         SelectActionObject selectActionObject = new SelectActionObject.Builder()
                 .setSwipeFromObjColl(swipeFromObjColl)
                 .setSwipeToObjColl(swipeToObjColl)
-                .setSwipeActionOptions(swipeActionOptions)
+                .setSwipeActionConfig(swipeActionOptions)
                 .setFindObjectCollection(findObjectCollection)
-                .setFindActionOptions(findActionOptions)
-                .setClickActionOptions(clickActionOptions)
+                .setFindActionConfig(findActionOptions)
+                .setClickActionConfig(clickActionOptions)
                 .setConfirmationObjectCollection(confirmationObjectCollection)
-                .setConfirmActionOptions(confirmActionOptions)
+                .setConfirmActionConfig(confirmActionOptions)
                 .setMaxSwipes(maxSwipes)
                 .build();
         select.select(selectActionObject);

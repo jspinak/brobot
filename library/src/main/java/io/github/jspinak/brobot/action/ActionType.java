@@ -1,4 +1,5 @@
 package io.github.jspinak.brobot.action;
+import io.github.jspinak.brobot.action.ActionType;
 
 /**
  * Enumerates all available action types in the Brobot framework.

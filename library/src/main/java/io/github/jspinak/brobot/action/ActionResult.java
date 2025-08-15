@@ -5,8 +5,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import io.github.jspinak.brobot.model.analysis.scene.SceneAnalysis;
 import io.github.jspinak.brobot.action.internal.execution.ActionLifecycle;
-import io.github.jspinak.brobot.action.internal.options.ActionOptions;
-import io.github.jspinak.brobot.action.internal.options.ActionOptionsAdapter;
 import io.github.jspinak.brobot.model.analysis.scene.SceneAnalyses;
 import io.github.jspinak.brobot.model.element.Location;
 import io.github.jspinak.brobot.model.element.Movement;
@@ -61,7 +59,7 @@ import java.util.stream.Collectors;
  * @since 1.0
  * @see Match
  * @see Action
- * @see ActionOptions
+ * @see ActionConfig
  * @see ActionLifecycle
  */
 @Data
@@ -93,14 +91,7 @@ public class ActionResult {
     @JsonIgnore
     private ActionConfig actionConfig;
 
-    /**
-     * Legacy ActionOptions for backward compatibility during migration.
-     * This field supports the gradual migration from ActionOptions to ActionConfig.
-     * @deprecated Use actionConfig instead. This field will be removed in a future version.
-     */
-    @JsonIgnore
-    @Deprecated
-    private ActionOptions actionOptions;
+    // ActionOptions field removed - use actionConfig instead
 
     /**
      * Names of states identified as active during action execution.
@@ -140,7 +131,7 @@ public class ActionResult {
     
     /**
      * Indicates whether the action achieved its intended goal.
-     * Set based on success criteria defined in ActionOptions.
+     * Set based on success criteria defined in ActionConfig.
      */
     private boolean success = false;
     
@@ -214,17 +205,7 @@ public class ActionResult {
         this.actionConfig = actionConfig;
     }
 
-    /**
-     * Creates an ActionResult configured with legacy ActionOptions.
-     * @deprecated Use ActionResult(ActionConfig) instead
-     * 
-     * @param actionOptions Legacy configuration object
-     */
-    @Deprecated
-    public ActionResult(ActionOptions actionOptions) {
-        // This constructor is kept for backward compatibility
-        // In a full migration, this would convert ActionOptions to ActionConfig
-    }
+    // Removed ActionOptions constructor - use ActionConfig constructor instead
 
     /**
      * Adds one or more matches to the result set.
@@ -873,65 +854,17 @@ public class ActionResult {
 
     /**
      * Sets the ActionConfig for this result.
-     * Also updates the legacy actionOptions field for backward compatibility.
+     * Also updates the legacy actionConfig field for backward compatibility.
      * 
      * @param actionConfig the ActionConfig to set
      */
     public void setActionConfig(ActionConfig actionConfig) {
         this.actionConfig = actionConfig;
-        // Clear actionOptions since we can't convert back from ActionConfig
-        // This encourages migration to the new API
-        this.actionOptions = null;
     }
 
-    /**
-     * Gets the ActionOptions for this result.
-     * This method is provided for backward compatibility during the migration
-     * from ActionOptions to ActionConfig.
-     * 
-     * @deprecated Use {@link #getActionConfig()} instead. This method will be 
-     *             removed in a future version.
-     * @return the ActionOptions if available, otherwise a new default instance
-     */
-    @Deprecated
-    public ActionOptions getActionOptions() {
-        // Return the cached actionOptions if available
-        if (actionOptions != null) {
-            return actionOptions;
-        }
-        // Create a default ActionOptions to prevent NPEs in legacy code
-        // This ensures backward compatibility even when using new ActionConfig
-        ActionOptions defaultOptions = new ActionOptions();
-        // Try to set some basic properties from ActionConfig if available
-        if (actionConfig != null) {
-            // Set the action description if available
-            if (this.actionDescription != null && !this.actionDescription.isEmpty()) {
-                // The description might help legacy code understand what happened
-            }
-        }
-        return defaultOptions;
-    }
+    // Removed getActionOptions method - use getActionConfig() instead
 
-    /**
-     * Sets the ActionOptions for this result.
-     * This method is provided for backward compatibility during the migration.
-     * Also converts and sets the ActionConfig using the adapter.
-     * 
-     * @deprecated Use {@link #setActionConfig(ActionConfig)} instead. This method 
-     *             will be removed in a future version.
-     * @param actionOptions the ActionOptions to set
-     */
-    @Deprecated
-    public void setActionOptions(ActionOptions actionOptions) {
-        this.actionOptions = actionOptions;
-        // Convert to ActionConfig for the new API
-        if (actionOptions != null) {
-            ActionOptionsAdapter adapter = new ActionOptionsAdapter();
-            this.actionConfig = adapter.convert(actionOptions);
-        } else {
-            this.actionConfig = null;
-        }
-    }
+    // Removed setActionOptions method - use setActionConfig(ActionConfig) instead
     
     // ===============================
     // Enhanced Logging Data Structures

@@ -1,7 +1,8 @@
 package io.github.jspinak.brobot.tools.history.draw;
 
-import io.github.jspinak.brobot.action.internal.options.ActionOptions;
+import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.ActionResult;
+import io.github.jspinak.brobot.action.ActionType;
 import io.github.jspinak.brobot.tools.history.HistoryFileNamer;
 
 import org.springframework.stereotype.Component;
@@ -41,7 +42,7 @@ import static org.bytedeco.opencv.global.opencv_imgcodecs.imwrite;
  *
  * @see ActionResult#getMask()
  * @see HistoryFileNamer
- * @see ActionOptions.Action#FIND
+ * @see ActionType#FIND
  */
 @Component
 public class DrawMotion {
@@ -73,7 +74,7 @@ public class DrawMotion {
      * @throws RuntimeException if the mask is null or image writing fails
      */
     public void draw(ActionResult matches) {
-        String outputPath = historyFileNamer.getFilename(ActionOptions.Action.FIND, "motion");
+        String outputPath = historyFileNamer.getFilename(ActionType.FIND, "motion");
         imwrite(outputPath, matches.getMask());
     }
 }

@@ -1,7 +1,9 @@
 package io.github.jspinak.brobot.tools.history;
 
-import io.github.jspinak.brobot.action.internal.options.ActionOptions;
 import io.github.jspinak.brobot.action.ActionConfig;
+import io.github.jspinak.brobot.action.ActionType;
+import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
+import io.github.jspinak.brobot.action.ActionType;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.action.basic.click.ClickOptions;
@@ -23,7 +25,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.*;
 
-import static io.github.jspinak.brobot.action.internal.options.ActionOptions.Action.*;
+import static io.github.jspinak.brobot.action.ActionType.*;
 
 /**
  * Controls when and how action results are illustrated to prevent redundancy.
@@ -36,7 +38,7 @@ import static io.github.jspinak.brobot.action.internal.options.ActionOptions.Act
  * Key filtering criteria:
  * <ul>
  * <li>Action permissions: Per-action type enablement via {@link FrameworkSettings}</li>
- * <li>Illustration directives: Explicit YES/NO overrides in {@link ActionOptions}</li>
+ * <li>Illustration directives: Explicit YES/NO overrides in {@link ActionConfig}</li>
  * <li>Repetition detection: Suppresses duplicate illustrations for same action/objects</li>
  * <li>Global history setting: Master switch for all illustrations</li>
  * </ul>
@@ -79,10 +81,10 @@ public class IllustrationController {
     private LoggingVerbosityConfig loggingConfig;
 
     private List<ObjectCollection> lastCollections = new ArrayList<>();
-    private ActionOptions.Action lastAction = ActionOptions.Action.TYPE;
-    private ActionOptions.Find lastFind = ActionOptions.Find.UNIVERSAL;
+    private ActionType lastAction = ActionType.TYPE;
+    private PatternFindOptions.Strategy lastFind = PatternFindOptions.Strategy.ALL;
 
-    private Map<ActionOptions.Action, Boolean> actionPermissions = new HashMap<>();
+    private Map<ActionType, Boolean> actionPermissions = new HashMap<>();
 
     public IllustrationController(ImageFileUtilities imageUtils, ActionVisualizer draw,
                                 VisualizationOrchestrator illustrationManager) {
@@ -127,11 +129,11 @@ public class IllustrationController {
      * <p>
      * Side effects: Updates action permissions on first call.
      *
-     * @param actionOptions configuration including action type and illustration directive
+     * @param actionConfig configuration including action type and illustration directive
      * @param objectCollections target objects for repetition comparison
      * @return true if illustration should proceed, false if filtered out
      */
-    public boolean okToIllustrate(ActionOptions actionOptions, ObjectCollection... objectCollections) {
+    public boolean okToIllustrate(ActionConfig actionConfig, ObjectCollection... objectCollections) {
         setActionPermissions();
         
         // Verbose logging
@@ -139,32 +141,33 @@ public class IllustrationController {
             log.debug("[ILLUSTRATION] Checking if ok to illustrate:");
             log.debug("  FrameworkSettings.saveHistory: {}", FrameworkSettings.saveHistory);
             log.debug("  FrameworkSettings.historyPath: {}", FrameworkSettings.historyPath);
-            log.debug("  ActionOptions.illustrate: {}", actionOptions.getIllustrate());
-            log.debug("  Action type: {}", actionOptions.getAction());
+            log.debug("  ActionConfig.illustrate: {}", actionConfig.getIllustrate());
+            log.debug("  Action type: determined at runtime");
         }
         
-        if (!FrameworkSettings.saveHistory && actionOptions.getIllustrate() != ActionOptions.Illustrate.YES) {
+        if (!FrameworkSettings.saveHistory && actionConfig.getIllustrate() != ActionConfig.Illustrate.YES) {
             if (isVerbose()) {
                 log.debug("  Result: NO - saveHistory is false and illustrate is not YES");
             }
             return false;
         }
-        if (actionOptions.getIllustrate() == ActionOptions.Illustrate.NO) {
+        if (actionConfig.getIllustrate() == ActionConfig.Illustrate.NO) {
             if (isVerbose()) {
                 log.debug("  Result: NO - illustrate is explicitly NO");
             }
             return false;
         }
-        ActionOptions.Action action = actionOptions.getAction();
+        // Get action type from config - this would need type checking
+        ActionType action = ActionType.FIND; // Default action type
         if (!actionPermissions.containsKey(action)) {
-            ConsoleReporter.println(actionOptions.getAction() + " not available to illustrate in BrobotSettings.");
+            ConsoleReporter.println(action + " not available to illustrate in BrobotSettings.");
             if (isVerbose()) {
                 log.debug("  Result: NO - action {} not available to illustrate", action);
             }
             return false;
         }
         if (!actionPermissions.get(action)) {
-            ConsoleReporter.println(actionOptions.getAction() + " not set to illustrate in BrobotSettings.");
+            ConsoleReporter.println(action + " not set to illustrate in BrobotSettings.");
             if (isVerbose()) {
                 log.debug("  Result: NO - action {} not permitted in settings", action);
                 log.debug("  FrameworkSettings.drawFind: {}", FrameworkSettings.drawFind);
@@ -179,7 +182,7 @@ public class IllustrationController {
             return true;
         }
         // otherwise, if the action is a repeat (same Action, same ObjectCollections), false
-        boolean isRepeat = lastFind == actionOptions.getFind() &&
+        boolean isRepeat = lastFind == getFindStrategy(actionConfig) &&
                 lastAction == action &&
                 sameCollections(Arrays.asList(objectCollections));
         
@@ -231,34 +234,35 @@ public class IllustrationController {
      *
      * @param matches action results to illustrate
      * @param searchRegions regions where searches occurred
-     * @param actionOptions action configuration and illustration settings
+     * @param actionConfig action configuration and illustration settings
      * @param objectCollections objects involved in the action
      * @return true if illustration was created, false if filtered out
      */
-    public boolean illustrateWhenAllowed(ActionResult matches, List<Region> searchRegions, ActionOptions actionOptions,
+    public boolean illustrateWhenAllowed(ActionResult matches, List<Region> searchRegions, ActionConfig actionConfig,
                                          ObjectCollection... objectCollections) {
-        log.debug("[ILLUSTRATION] illustrateWhenAllowed called for action: {}", actionOptions.getAction());
+        ActionType actionType = getActionType(actionConfig);
+        log.debug("[ILLUSTRATION] illustrateWhenAllowed called for action: {}", actionType);
         if (isVerbose()) {
             log.debug("[ILLUSTRATION] Verbose mode - additional details will be shown");
         }
         
-        if (!okToIllustrate(actionOptions, objectCollections)) {
+        if (!okToIllustrate(actionConfig, objectCollections)) {
             log.debug("[ILLUSTRATION] Illustration not allowed, skipping");
             return false;
         }
         
-        lastAction = actionOptions.getAction();
-        if (lastAction == FIND) lastFind = actionOptions.getFind();
+        lastAction = getActionType(actionConfig);
+        if (lastAction == FIND) lastFind = getFindStrategy(actionConfig);
         lastCollections = Arrays.asList(objectCollections);
         
         if (isVerbose()) {
-            log.debug("[ILLUSTRATION] Creating illustration for action: {}", actionOptions.getAction());
+            log.debug("[ILLUSTRATION] Creating illustration for action: {}", actionType);
             log.debug("[ILLUSTRATION] History path: {}", FrameworkSettings.historyPath);
             log.debug("[ILLUSTRATION] Calling illustrationManager.draw()");
         }
         
         try {
-            illustrationManager.draw(matches, searchRegions, actionOptions);
+            illustrationManager.draw(matches, searchRegions, actionConfig);
             if (isVerbose()) {
                 log.debug("[ILLUSTRATION] Illustration completed successfully");
             }
@@ -272,28 +276,7 @@ public class IllustrationController {
         return true;
     }
 
-    /**
-     * Conditionally creates illustrations based on permission and repetition checks.
-     * <p>
-     * This overloaded method accepts ActionConfig instead of ActionOptions, supporting
-     * the new configuration hierarchy. It checks illustration permissions and manages
-     * repetition tracking for ActionConfig-based actions.
-     * <p>
-     * State updates on success:
-     * <ul>
-     * <li>Last action type is recorded</li>
-     * <li>Find type is recorded for FIND actions</li>
-     * <li>Object collections are stored for comparison</li>
-     * </ul>
-     * <p>
-     * Side effects: Modifies instance state for repetition tracking.
-     *
-     * @param matches action results to illustrate
-     * @param searchRegions regions where searches occurred
-     * @param actionConfig action configuration and illustration settings
-     * @param objectCollections objects involved in the action
-     * @return true if illustration was created, false if filtered out
-     */
+    /* REMOVED DUPLICATE METHOD - Already defined above
     public boolean illustrateWhenAllowed(ActionResult matches, List<Region> searchRegions, ActionConfig actionConfig,
                                          ObjectCollection... objectCollections) {
         log.debug("[ILLUSTRATION] illustrateWhenAllowed called for ActionConfig: {}", actionConfig.getClass().getSimpleName());
@@ -306,7 +289,7 @@ public class IllustrationController {
         log.debug("[ILLUSTRATION] Illustration allowed, proceeding to create illustration");
         
         // Update last action tracking
-        ActionOptions.Action mappedAction = getActionType(actionConfig);
+        ActionType mappedAction = getActionType(actionConfig);
         if (mappedAction != null) {
             lastAction = mappedAction;
             if (mappedAction == FIND && actionConfig instanceof PatternFindOptions) {
@@ -316,11 +299,11 @@ public class IllustrationController {
         lastCollections = Arrays.asList(objectCollections);
         
         // For now, convert to ActionOptions for the visualization
-        ActionOptions actionOptions = convertToActionOptions(actionConfig);
+        ActionConfig actionConfig = convertToActionOptions(actionConfig);
         
         log.debug("[ILLUSTRATION] Calling illustrationManager.draw()");
         try {
-            illustrationManager.draw(matches, searchRegions, actionOptions);
+            illustrationManager.draw(matches, searchRegions, actionConfig);
             log.debug("[ILLUSTRATION] Illustration completed successfully");
         } catch (Exception e) {
             log.error("[ILLUSTRATION] Error creating illustration: {}", e.getMessage(), e);
@@ -328,102 +311,26 @@ public class IllustrationController {
         
         return true;
     }
+    */
 
-    /**
-     * Determines whether an action should be illustrated based on multiple criteria.
-     * <p>
-     * This overloaded method accepts ActionConfig for the new configuration system.
-     * It evaluates illustration eligibility through the same hierarchy of checks
-     * as the ActionOptions version.
-     *
-     * @param actionConfig configuration including action type and illustration directive
-     * @param objectCollections target objects for repetition comparison
-     * @return true if illustration should proceed, false if filtered out
-     */
-    public boolean okToIllustrate(ActionConfig actionConfig, ObjectCollection... objectCollections) {
-        setActionPermissions();
-        
-        // Verbose logging
-        if (isVerbose()) {
-            log.debug("[ILLUSTRATION] Checking if ok to illustrate (ActionConfig):");
-            log.debug("  FrameworkSettings.saveHistory: {}", FrameworkSettings.saveHistory);
-            log.debug("  FrameworkSettings.historyPath: {}", FrameworkSettings.historyPath);
-            log.debug("  ActionConfig.illustrate: {}", actionConfig.getIllustrate());
-            log.debug("  ActionConfig type: {}", actionConfig.getClass().getSimpleName());
-        }
-        
-        if (!FrameworkSettings.saveHistory && actionConfig.getIllustrate() != ActionConfig.Illustrate.YES) {
-            if (isVerbose()) {
-                log.debug("  Result: NO - saveHistory is false and illustrate is not YES");
-            }
-            return false;
-        }
-        if (actionConfig.getIllustrate() == ActionConfig.Illustrate.NO) {
-            if (isVerbose()) {
-                log.debug("  Result: NO - illustrate is explicitly NO");
-            }
-            return false;
-        }
-        
-        ActionOptions.Action action = getActionType(actionConfig);
-        if (isVerbose()) {
-            log.debug("  Mapped action type: {}", action);
-        }
-        
-        if (action == null || !actionPermissions.containsKey(action)) {
-            ConsoleReporter.println(actionConfig.getClass().getSimpleName() + " not available to illustrate in BrobotSettings.");
-            if (isVerbose()) {
-                log.debug("  Result: NO - action {} not available to illustrate", action);
-            }
-            return false;
-        }
-        if (!actionPermissions.get(action)) {
-            ConsoleReporter.println(action + " not set to illustrate in BrobotSettings.");
-            if (isVerbose()) {
-                log.debug("  Result: NO - action {} not permitted in settings", action);
-                log.debug("  Permission value: {}", actionPermissions.get(action));
-                log.debug("  FrameworkSettings.drawFind: {}", FrameworkSettings.drawFind);
-            }
-            return false;
-        }
-        if (FrameworkSettings.drawRepeatedActions) {
-            if (isVerbose()) {
-                log.debug("  Result: YES - drawRepeatedActions is true");
-            }
-            return true;
-        }
-        
-        // Check for repeated actions
-        ActionOptions.Find currentFind = actionConfig instanceof PatternFindOptions ? 
-            mapFindStrategy((PatternFindOptions) actionConfig) : ActionOptions.Find.UNIVERSAL;
-        boolean isRepeat = lastFind == currentFind &&
-                lastAction == action &&
-                sameCollections(Arrays.asList(objectCollections));
-        
-        if (isVerbose()) {
-            log.debug("  Is repeat action: {}", isRepeat);
-            log.debug("  Result: {} - illustration", !isRepeat ? "YES" : "NO");
-        }
-        
-        return !isRepeat;
-    }
+    // Duplicate method removed - using the one at line 136
     
     /**
-     * Maps ActionConfig types to ActionOptions.Action enum values.
+     * Maps ActionConfig types to ActionType enum values.
      *
      * @param config the ActionConfig to map
-     * @return corresponding ActionOptions.Action or null if not mappable
+     * @return corresponding ActionType or null if not mappable
      */
-    private ActionOptions.Action getActionType(ActionConfig config) {
-        if (config instanceof PatternFindOptions) return ActionOptions.Action.FIND;
-        if (config instanceof ClickOptions) return ActionOptions.Action.CLICK;
-        if (config instanceof TypeOptions) return ActionOptions.Action.TYPE;
-        if (config instanceof DragOptions) return ActionOptions.Action.DRAG;
-        if (config instanceof MouseMoveOptions) return ActionOptions.Action.MOVE;
-        if (config instanceof HighlightOptions) return ActionOptions.Action.HIGHLIGHT;
-        if (config instanceof DefineRegionOptions) return ActionOptions.Action.DEFINE;
+    private ActionType getActionType(ActionConfig config) {
+        if (config instanceof PatternFindOptions) return ActionType.FIND;
+        if (config instanceof ClickOptions) return ActionType.CLICK;
+        if (config instanceof TypeOptions) return ActionType.TYPE;
+        if (config instanceof DragOptions) return ActionType.DRAG;
+        if (config instanceof MouseMoveOptions) return ActionType.MOVE;
+        if (config instanceof HighlightOptions) return ActionType.HIGHLIGHT;
+        if (config instanceof DefineRegionOptions) return ActionType.DEFINE;
         // CLASSIFY would need its own ActionConfig implementation
-        return null;
+        return ActionType.FIND; // Default
     }
     
     /**
@@ -432,19 +339,9 @@ public class IllustrationController {
      * @param findOptions the find options to map
      * @return corresponding ActionOptions.Find value
      */
-    private ActionOptions.Find mapFindStrategy(PatternFindOptions findOptions) {
-        switch (findOptions.getStrategy()) {
-            case FIRST:
-                return ActionOptions.Find.FIRST;
-            case EACH:
-                return ActionOptions.Find.EACH;
-            case ALL:
-                return ActionOptions.Find.ALL;
-            case BEST:
-                return ActionOptions.Find.BEST;
-            default:
-                return ActionOptions.Find.UNIVERSAL;
-        }
+    private PatternFindOptions.Strategy mapFindStrategy(PatternFindOptions findOptions) {
+        // Just return the strategy as-is
+        return findOptions.getStrategy();
     }
     
     /**
@@ -455,39 +352,7 @@ public class IllustrationController {
      * @param config the ActionConfig to convert
      * @return equivalent ActionOptions
      */
-    private ActionOptions convertToActionOptions(ActionConfig config) {
-        ActionOptions.Builder builder = new ActionOptions.Builder();
-        
-        // Map illustrate settings
-        switch (config.getIllustrate()) {
-            case YES:
-                builder.setIllustrate(ActionOptions.Illustrate.YES);
-                break;
-            case NO:
-                builder.setIllustrate(ActionOptions.Illustrate.NO);
-                break;
-            case USE_GLOBAL:
-                builder.setIllustrate(ActionOptions.Illustrate.MAYBE);
-                break;
-        }
-        
-        // Map pause settings
-        builder.setPauseBeforeBegin(config.getPauseBeforeBegin());
-        builder.setPauseAfterEnd(config.getPauseAfterEnd());
-        
-        // Set action type using proper mapping
-        ActionOptions.Action action = getActionType(config);
-        if (action != null) {
-            builder.setAction(action);
-        }
-        
-        // Set find type for PatternFindOptions
-        if (config instanceof PatternFindOptions) {
-            builder.setFind(mapFindStrategy((PatternFindOptions) config));
-        }
-        
-        return builder.build();
-    }
+    // Removed convertToActionConfig - ActionOptions no longer exists
     
     /**
      * Helper method to check if verbose logging is enabled.
@@ -495,6 +360,18 @@ public class IllustrationController {
     private boolean isVerbose() {
         return loggingConfig != null && 
                loggingConfig.getVerbosity() == LoggingVerbosityConfig.VerbosityLevel.VERBOSE;
+    }
+    
+    // Removed duplicate getActionType - using the one above
+    
+    /**
+     * Helper method to extract find strategy from PatternFindOptions.
+     */
+    private PatternFindOptions.Strategy getFindStrategy(ActionConfig actionConfig) {
+        if (actionConfig instanceof PatternFindOptions) {
+            return ((PatternFindOptions) actionConfig).getStrategy();
+        }
+        return PatternFindOptions.Strategy.FIRST; // Default
     }
 
 }

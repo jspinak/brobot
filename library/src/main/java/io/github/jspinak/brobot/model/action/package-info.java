@@ -249,3 +249,4 @@
  * @see io.github.jspinak.brobot.ConsoleReporter.Report
  */
 package io.github.jspinak.brobot.model.action;
+import io.github.jspinak.brobot.action.ActionType;

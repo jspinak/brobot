@@ -232,7 +232,7 @@ class ActionStepSerializationTest {
         
         // OLD API (conceptual - would use ActionOptions):
         // ActionOptions oldOptions = new ActionOptions.Builder()
-        //     .setAction(ActionOptions.Action.CLICK)
+        //     .setAction(ActionType.CLICK)
         //     .setFind(ActionOptions.Find.ALL)
         //     .build();
         

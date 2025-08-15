@@ -1,7 +1,7 @@
 package io.github.jspinak.brobot.action.basic.click;
+import io.github.jspinak.brobot.action.ActionType;
 
 import io.github.jspinak.brobot.action.ActionInterface;
-import io.github.jspinak.brobot.action.internal.options.ActionOptions;
 import io.github.jspinak.brobot.action.basic.find.Find;
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
 import io.github.jspinak.brobot.action.internal.factory.ActionResultFactory;
@@ -49,7 +49,7 @@ import org.springframework.stereotype.Component;
  * an accurate model of the application state throughout execution.</p>
  * 
  * @see Find
- * @see ActionOptions
+ * @see ClickOptions
  * @see Location
  * @see PostClickHandler
  * @see SingleClickExecutor
@@ -83,7 +83,7 @@ public class Click implements ActionInterface {
      * <p>This method orchestrates the complete click process:
      * <ol>
      *   <li>Uses Find to locate target elements in the first ObjectCollection</li>
-     *   <li>Iterates through matches up to {@link ActionOptions#getMaxMatchesToActOn()}</li>
+     *   <li>Iterates through matches up to configured maximum</li>
      *   <li>Performs configured number of clicks on each match</li>
      *   <li>Applies pauses between clicking different matches</li>
      * </ol>
@@ -92,7 +92,7 @@ public class Click implements ActionInterface {
      * <p>The method modifies the Match objects by incrementing their "times acted on" counter,
      * which tracks interactions during this action execution.</p>
      * 
-     * @param matches The ActionResult containing ActionOptions and to which found matches
+     * @param matches The ActionResult containing configuration and to which found matches
      *                are added. The matches collection is populated by the Find operation.
      * @param objectCollections The collections containing objects to find and click. Only
      *                          the first collection is used for finding targets.
@@ -135,7 +135,7 @@ public class Click implements ActionInterface {
      * 
      * <p>This method handles the low-level click execution for a single match, including:
      * <ul>
-     *   <li>Repeating clicks based on {@link ActionOptions#getTimesToRepeatIndividualAction()}</li>
+     *   <li>Repeating clicks based on configuration</li>
      *   <li>Tracking click count on the match object</li>
      *   <li>Managing timing between repeated clicks</li>
      *   <li>Delegating post-click mouse movement to AfterClick when configured</li>
@@ -156,7 +156,7 @@ public class Click implements ActionInterface {
      * 
      * @param location The screen coordinates where clicks will be performed. This is the
      *                 final, adjusted location from the match's target.
-     * @param actionOptions Configuration containing:
+     * @param actionConfig Configuration containing:
      *                      - timesToRepeatIndividualAction: number of clicks per location
      *                      - pauseBetweenIndividualActions: delay between clicks (ms)
      *                      - moveMouseAfterAction: whether to move mouse after clicking

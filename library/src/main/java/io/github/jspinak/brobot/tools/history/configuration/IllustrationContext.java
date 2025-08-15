@@ -1,8 +1,8 @@
 package io.github.jspinak.brobot.tools.history.configuration;
 
-import io.github.jspinak.brobot.action.internal.options.ActionOptions;
-import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ActionConfig;
+import io.github.jspinak.brobot.action.ActionResult;
+import io.github.jspinak.brobot.action.ActionType;
 import lombok.Builder;
 import lombok.Data;
 
@@ -38,7 +38,7 @@ public class IllustrationContext {
     /**
      * The current action being executed.
      */
-    private final ActionOptions.Action currentAction;
+    private final ActionType currentAction;
     
     /**
      * Configuration for the current action (ActionConfig or ActionOptions).
@@ -129,8 +129,8 @@ public class IllustrationContext {
      * @param actions action types to check against
      * @return true if current action matches any of the specified types
      */
-    public boolean isAction(ActionOptions.Action... actions) {
-        for (ActionOptions.Action action : actions) {
+    public boolean isAction(ActionType... actions) {
+        for (ActionType action : actions) {
             if (action.equals(currentAction)) {
                 return true;
             }
@@ -215,7 +215,7 @@ public class IllustrationContext {
     @Data
     @Builder
     public static class ActionExecutionRecord {
-        private final ActionOptions.Action action;
+        private final ActionType action;
         private final LocalDateTime timestamp;
         private final boolean success;
         private final Duration executionTime;

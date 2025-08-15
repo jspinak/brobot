@@ -49,7 +49,7 @@
  * Classify classify = new Classify(...);
  * 
  * ActionOptions classifyOptions = new ActionOptions.Builder()
- *     .setAction(ActionOptions.Action.CLASSIFY)
+ *     .setAction(ActionType.CLASSIFY)
  *     .setConfidenceThreshold(0.8)  // Minimum 80% confidence
  *     .build();
  * 

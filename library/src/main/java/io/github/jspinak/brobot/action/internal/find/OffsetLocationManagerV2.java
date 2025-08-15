@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.action.internal.find;
 
-import io.github.jspinak.brobot.action.internal.options.ActionOptions;
+import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.action.basic.find.MatchAdjustmentOptions;
@@ -108,14 +108,14 @@ public class OffsetLocationManagerV2 {
      * 
      * @param objectCollections The collections being searched
      * @param matches The current match results
-     * @param actionOptions Legacy action options
+     * @param actionConfig Legacy action options
      * @deprecated Use methods that accept MatchAdjustmentOptions instead
      */
     @Deprecated
     public void addOffset(List<ObjectCollection> objectCollections, 
                          ActionResult matches, 
-                         ActionOptions actionOptions) {
-        legacyManager.addOffset(objectCollections, matches, actionOptions);
+                         ActionConfig actionConfig) {
+        legacyManager.addOffset(objectCollections, matches, actionConfig);
     }
     
     /**

@@ -1,7 +1,7 @@
 package io.github.jspinak.brobot.action;
 
-import io.github.jspinak.brobot.action.internal.options.ActionOptions;
 import io.github.jspinak.brobot.action.ActionConfig;
+import io.github.jspinak.brobot.action.ActionType;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.action.basic.click.ClickOptions;
@@ -41,8 +41,7 @@ class ActionTest {
     @Mock
     private StateImage stateImage; // Mock StateImage for testing find()
 
-    @Captor
-    private ArgumentCaptor<ActionOptions> actionOptionsCaptor;
+    // Removed ActionOptions captor - no longer needed
     
     @Captor
     private ArgumentCaptor<ActionConfig> actionConfigCaptor;
@@ -54,15 +53,14 @@ class ActionTest {
     void setUp() {
         MockitoAnnotations.openMocks(this);
         // Stub the mock ActionExecution to return a predictable Matches object for all perform calls
-        when(actionExecution.perform(any(ActionInterface.class), anyString(), any(ActionOptions.class), any(ObjectCollection[].class)))
-                .thenReturn(new ActionResult());
+        // Removed ActionOptions mock - using ActionConfig only
         when(actionExecution.perform(any(ActionInterface.class), anyString(), any(ActionConfig.class), any(ObjectCollection[].class)))
                 .thenReturn(new ActionResult());
     }
 
     @Test
     void perform_shouldCallActionExecutionWhenActionIsFound() {
-        ActionOptions options = new ActionOptions.Builder().setAction(ActionOptions.Action.CLICK).build();
+        ClickOptions options = new ClickOptions.Builder().build();
         ObjectCollection collection = new ObjectCollection.Builder().build();
         when(actionService.getAction(options)).thenReturn(Optional.of(actionInterface));
 
@@ -90,13 +88,13 @@ class ActionTest {
 
     @Test
     void perform_shouldReturnEmptyMatchesWhenActionIsNotFound() {
-        ActionOptions options = new ActionOptions.Builder().setAction(ActionOptions.Action.CLICK).build();
+        ClickOptions options = new ClickOptions.Builder().build();
         when(actionService.getAction(options)).thenReturn(Optional.empty());
 
         ActionResult result = action.perform("test click", options, new ObjectCollection.Builder().build());
 
         // Verify that execution was NOT called
-        verify(actionExecution, never()).perform(any(), anyString(), any(ActionOptions.class), any());
+        verify(actionExecution, never()).perform(any(), anyString(), any(ActionConfig.class), any());
         // Verify that the returned Matches object is empty and success is false
         assertTrue(result.getMatchList().isEmpty());
         assertFalse(result.isSuccess());
@@ -135,11 +133,11 @@ class ActionTest {
         Action spyAction = spy(action);
         Region region1 = new Region(10, 10, 10, 10);
         // Stub the perform(Action, ObjectCollection...) overload
-        doReturn(new ActionResult()).when(spyAction).perform(any(ActionOptions.Action.class), any(ObjectCollection.class));
+        doReturn(new ActionResult()).when(spyAction).perform(any(ActionType.class), any(ObjectCollection.class));
 
-        spyAction.perform(ActionOptions.Action.CLICK, region1);
+        spyAction.perform(ActionType.CLICK, region1);
 
-        verify(spyAction).perform(eq(ActionOptions.Action.CLICK), objectCollectionCaptor.capture());
+        verify(spyAction).perform(eq(ActionType.CLICK), objectCollectionCaptor.capture());
 
         ObjectCollection capturedCollection = objectCollectionCaptor.getValue();
         assertFalse(capturedCollection.getStateRegions().isEmpty());
@@ -152,11 +150,11 @@ class ActionTest {
     void perform_withActionAndStrings_shouldBuildCorrectObjectCollection() {
         Action spyAction = spy(action);
         // Stub the perform(Action, ObjectCollection...) overload
-        doReturn(new ActionResult()).when(spyAction).perform(any(ActionOptions.Action.class), any(ObjectCollection.class));
+        doReturn(new ActionResult()).when(spyAction).perform(any(ActionType.class), any(ObjectCollection.class));
 
-        spyAction.perform(ActionOptions.Action.TYPE, "hello", "world");
+        spyAction.perform(ActionType.TYPE, "hello", "world");
 
-        verify(spyAction).perform(eq(ActionOptions.Action.TYPE), objectCollectionCaptor.capture());
+        verify(spyAction).perform(eq(ActionType.TYPE), objectCollectionCaptor.capture());
 
         ObjectCollection capturedCollection = objectCollectionCaptor.getValue();
         assertFalse(capturedCollection.getStateStrings().isEmpty());

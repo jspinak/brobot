@@ -1,6 +1,7 @@
 package io.github.jspinak.brobot.action.composite.repeat;
 
-import io.github.jspinak.brobot.action.internal.options.ActionOptions;
+import io.github.jspinak.brobot.action.ActionConfig;
+import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import lombok.Getter;
@@ -47,15 +48,14 @@ import lombok.Getter;
  *     .build();
  * }</pre>
  * 
- * @see ClickUntil
  */
 @Getter
 public class RepeatUntilConfig {
 
     private ObjectCollection actionObjectCollection;
     private ObjectCollection conditionObjectCollection;
-    private ActionOptions doAction;
-    private ActionOptions untilAction;
+    private ActionConfig doAction;
+    private ActionConfig untilAction;
     private int maxActions = 3;
 
     //results
@@ -107,8 +107,8 @@ public class RepeatUntilConfig {
     public static class Builder {
         private ObjectCollection actionObjectCollection;
         private ObjectCollection conditionObjectCollection;
-        private ActionOptions doAction;
-        private ActionOptions untilAction;
+        private ActionConfig doAction;
+        private ActionConfig untilAction;
         private int maxActions = 3;
 
         public Builder() {
@@ -151,11 +151,11 @@ public class RepeatUntilConfig {
          * CLICK, TYPE, DRAG). It includes all timing, search, and behavior settings
          * for the repeated action.
          * 
-         * @param actionOptions The configuration for the primary action
+         * @param actionConfig The configuration for the primary action
          * @return This builder instance for method chaining
          */
-        public Builder setDoAction(ActionOptions actionOptions) {
-            this.doAction = actionOptions;
+        public Builder setDoAction(ActionConfig actionConfig) {
+            this.doAction = actionConfig;
             return this;
         }
 
@@ -166,11 +166,11 @@ public class RepeatUntilConfig {
          * FIND to wait for appearance, VANISH to wait for disappearance). The
          * success criteria in these options determine when the loop terminates.
          * 
-         * @param actionOptions The configuration for condition checking
+         * @param actionConfig The configuration for condition checking
          * @return This builder instance for method chaining
          */
-        public Builder setUntilAction(ActionOptions actionOptions) {
-            this.untilAction = actionOptions;
+        public Builder setUntilAction(ActionConfig actionConfig) {
+            this.untilAction = actionConfig;
             return this;
         }
 

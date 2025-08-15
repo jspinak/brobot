@@ -1,6 +1,7 @@
 package io.github.jspinak.brobot.tools.builder;
 
 import io.github.jspinak.brobot.action.Action;
+import io.github.jspinak.brobot.action.ActionType;
 import io.github.jspinak.brobot.model.state.State;
 import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.model.transition.StateTransitionStore;
@@ -12,8 +13,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static io.github.jspinak.brobot.action.internal.options.ActionOptions.Action.CLICK;
 
 /**
  * This class is meant mostly for testing state structures and state management,
@@ -56,7 +55,7 @@ public class StateStructureBuilder {
         stateImages.add(stateImage);
         JavaStateTransition javaStateTransition = new JavaStateTransition.Builder()
                 .addToActivate(stateTransitionedTo)
-                .setFunction(() -> action.perform(CLICK, stateImage).isSuccess())
+                .setFunction(() -> action.perform(ActionType.CLICK, stateImage).isSuccess())
                 .build();
         stateTransitions.addTransition(javaStateTransition);
         return this;

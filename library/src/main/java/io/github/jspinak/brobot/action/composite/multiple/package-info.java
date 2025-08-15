@@ -138,3 +138,4 @@
  * @see io.github.jspinak.brobot.action.composite.multiple.finds.MultipleFinds
  */
 package io.github.jspinak.brobot.action.composite.multiple;
+import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;

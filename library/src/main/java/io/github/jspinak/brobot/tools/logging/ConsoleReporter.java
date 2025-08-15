@@ -1,8 +1,7 @@
 package io.github.jspinak.brobot.tools.logging;
 
 import io.github.jspinak.brobot.action.ActionConfig;
-import io.github.jspinak.brobot.action.internal.options.ActionOptions;
-import io.github.jspinak.brobot.model.action.ActionConfigAdapter;
+import io.github.jspinak.brobot.action.ActionType;
 import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.model.state.StateObject;
 import io.github.jspinak.brobot.model.state.StateObjectMetadata;
@@ -138,29 +137,9 @@ public class ConsoleReporter {
         return outputLevels.get(level) <= outputLevels.get(outputLevel);
     }
 
-    /**
-     * Reports an action performed on a StateObject with match details.
-     * 
-     * @param match         the match result from the action
-     * @param stateObject   the state object being acted upon
-     * @param actionOptions the action options including action type
-     * @return always returns true for chaining
-     */
-    public static boolean print(Match match, StateObject stateObject, ActionOptions actionOptions) {
-        return print(match, stateObject.getName(), actionOptions.getAction().toString());
-    }
+    // Removed ActionOptions-based print method - use ActionConfig version instead
 
-    /**
-     * Reports an action performed on a StateObjectData with match details.
-     * 
-     * @param match         the match result from the action
-     * @param stateObject   the state object data being acted upon
-     * @param actionOptions the action options including action type
-     * @return always returns true for chaining
-     */
-    public static boolean print(Match match, StateObjectMetadata stateObject, ActionOptions actionOptions) {
-        return print(match, stateObject.getStateObjectName(), actionOptions.getAction().toString());
-    }
+    // Removed ActionOptions-based print method - use ActionConfig version instead
 
     /**
      * Reports an action performed on a StateObject with match details using modern ActionConfig.
@@ -171,11 +150,36 @@ public class ConsoleReporter {
      * @return always returns true for chaining
      */
     public static boolean print(Match match, StateObject stateObject, ActionConfig actionConfig) {
-        ActionConfigAdapter adapter = new ActionConfigAdapter();
-        String actionType = adapter.getActionType(actionConfig).toString();
+        String actionType = getActionTypeFromConfig(actionConfig);
         return print(match, stateObject.getName(), actionType);
     }
 
+    /**
+     * Helper method to extract action type from ActionConfig based on its class name.
+     * 
+     * @param actionConfig the configuration to extract action type from
+     * @return string representation of the action type
+     */
+    private static String getActionTypeFromConfig(ActionConfig actionConfig) {
+        String className = actionConfig.getClass().getSimpleName();
+        
+        // Map config class names to action types
+        if (className.contains("Click")) return "CLICK";
+        if (className.contains("Find") || className.contains("Pattern")) return "FIND";
+        if (className.contains("Type")) return "TYPE";
+        if (className.contains("Drag")) return "DRAG";
+        if (className.contains("Move") || className.contains("Mouse")) return "MOVE";
+        if (className.contains("Highlight")) return "HIGHLIGHT";
+        if (className.contains("Define")) return "DEFINE";
+        if (className.contains("Vanish")) return "VANISH";
+        if (className.contains("Scroll")) return "SCROLL";
+        if (className.contains("KeyDown")) return "KEY_DOWN";
+        if (className.contains("KeyUp")) return "KEY_UP";
+        
+        // Default to class name if no mapping found
+        return className.replace("Options", "").toUpperCase();
+    }
+    
     /**
      * Reports an action performed on a StateObjectData with match details using modern ActionConfig.
      * 
@@ -185,8 +189,7 @@ public class ConsoleReporter {
      * @return always returns true for chaining
      */
     public static boolean print(Match match, StateObjectMetadata stateObject, ActionConfig actionConfig) {
-        ActionConfigAdapter adapter = new ActionConfigAdapter();
-        String actionType = adapter.getActionType(actionConfig).toString();
+        String actionType = getActionTypeFromConfig(actionConfig);
         return print(match, stateObject.getStateObjectName(), actionType);
     }
 

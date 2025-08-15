@@ -1,7 +1,7 @@
 package io.github.jspinak.brobot.tools.history.configuration;
 
-import io.github.jspinak.brobot.action.internal.options.ActionOptions;
 import io.github.jspinak.brobot.action.ActionConfig;
+import io.github.jspinak.brobot.action.ActionType;
 import lombok.Builder;
 import lombok.Data;
 import lombok.Singular;
@@ -27,10 +27,10 @@ import java.util.function.Predicate;
  * <pre>{@code
  * IllustrationConfig config = IllustrationConfig.builder()
  *     .globalEnabled(true)
- *     .actionEnabled(ActionOptions.Action.FIND, true)
+ *     .actionEnabled(ActionType.FIND, true)
  *     .contextFilter("find_failures_only", (context) -> 
  *         context.getLastActionResult() != null && !context.getLastActionResult().isSuccess())
- *     .samplingRate(ActionOptions.Action.MOVE, 0.1) // Sample 10% of move actions
+ *     .samplingRate(ActionType.MOVE, 0.1) // Sample 10% of move actions
  *     .qualityThreshold(0.8) // Only illustrate high-quality matches
  *     .batchConfig(BatchConfig.builder()
  *         .maxBatchSize(50)
@@ -57,7 +57,7 @@ public class IllustrationConfig {
      * Per-action type enablement settings.
      */
     @Singular("actionEnabled")
-    private final Map<ActionOptions.Action, Boolean> actionEnabledMap;
+    private final Map<ActionType, Boolean> actionEnabledMap;
     
     /**
      * Context-based filters that determine illustration eligibility.
@@ -71,7 +71,7 @@ public class IllustrationConfig {
      * Used to reduce illustration volume while maintaining representative coverage.
      */
     @Singular("samplingRate")
-    private final Map<ActionOptions.Action, Double> samplingRates;
+    private final Map<ActionType, Double> samplingRates;
     
     /**
      * Minimum quality threshold for matches to be illustrated.
@@ -97,7 +97,7 @@ public class IllustrationConfig {
      * Actions that should never be illustrated, overriding all other settings.
      */
     @Singular("neverIllustrateAction")
-    private final Set<ActionOptions.Action> neverIllustrateActions;
+    private final Set<ActionType> neverIllustrateActions;
     
     /**
      * Configuration for batching illustrations to improve performance.
@@ -133,7 +133,7 @@ public class IllustrationConfig {
      * @param action the action type to check
      * @return true if illustrations are enabled for this action
      */
-    public boolean isActionEnabled(ActionOptions.Action action) {
+    public boolean isActionEnabled(ActionType action) {
         if (!globalEnabled || neverIllustrateActions.contains(action)) {
             return false;
         }
@@ -147,7 +147,7 @@ public class IllustrationConfig {
      * @param action the action type
      * @return sampling rate (0.0-1.0) or 1.0 if not configured
      */
-    public double getSamplingRate(ActionOptions.Action action) {
+    public double getSamplingRate(ActionType action) {
         return samplingRates.getOrDefault(action, 1.0);
     }
     

@@ -83,8 +83,10 @@ public class AnnotatedStateBuilder {
     private void setOwnerStateNameForComponents(StateComponentExtractor.StateComponents components, String stateName) {
         // Set owner state name for all StateImages
         for (io.github.jspinak.brobot.model.state.StateImage stateImage : components.getStateImages()) {
+            String previousOwner = stateImage.getOwnerStateName();
             stateImage.setOwnerStateName(stateName);
-            log.trace("Set owner state '{}' for StateImage '{}'", stateName, stateImage.getName());
+            log.info("Set owner state '{}' for StateImage '{}' (was: '{}')", 
+                    stateName, stateImage.getName(), previousOwner);
         }
         
         // Set owner state name for all StateStrings

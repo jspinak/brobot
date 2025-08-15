@@ -1,7 +1,8 @@
 package io.github.jspinak.brobot.tools.ml.dataset;
 
-import io.github.jspinak.brobot.action.internal.options.ActionOptions;
+import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.ActionResult;
+import io.github.jspinak.brobot.action.ActionType;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.tools.ml.dataset.encoding.ActionVectorTranslator;
 import io.github.jspinak.brobot.tools.ml.dataset.encoding.OneHotActionVectorEncoder;
@@ -52,13 +53,13 @@ public class DatasetManager {
     private final TrainingExampleWriter saveTrainingData;
     private final BufferedImageUtilities bufferedImageOps;
     private final ActionVectorTranslator actionVectorTranslation;
-    private Set<ActionOptions.Action> allowed = EnumSet.of(
-            ActionOptions.Action.CLICK,
-            ActionOptions.Action.DRAG,
-            ActionOptions.Action.MOVE,
-            ActionOptions.Action.TYPE,
-            ActionOptions.Action.SCROLL_MOUSE_WHEEL,
-            ActionOptions.Action.HIGHLIGHT);
+    private Set<ActionType> allowed = EnumSet.of(
+            ActionType.CLICK,
+            ActionType.DRAG,
+            ActionType.MOVE,
+            ActionType.TYPE,
+            ActionType.SCROLL_MOUSE_WHEEL,
+            ActionType.HIGHLIGHT);
 
     public DatasetManager(ImageFileUtilities imageUtils, TrainingExampleWriter saveTrainingData,
                           BufferedImageUtilities bufferedImageOps, OneHotActionVectorEncoder actionVectorTranslation) {
@@ -68,12 +69,28 @@ public class DatasetManager {
         this.actionVectorTranslation = actionVectorTranslation;
     }
 
-    private boolean isValidAction(ActionOptions actionOptions) {
-        if (actionOptions == null) {
-            System.out.println("ActionOptions is null");
+    private boolean isValidAction(ActionConfig actionConfig) {
+        if (actionConfig == null) {
+            System.out.println("ActionConfig is null");
             return false;
         }
-        return allowed.contains(actionOptions.getAction());
+        // Extract action type from the specific ActionConfig subclass
+        ActionType actionType = getActionTypeFromConfig(actionConfig);
+        return allowed.contains(actionType);
+    }
+    
+    private ActionType getActionTypeFromConfig(ActionConfig actionConfig) {
+        String className = actionConfig.getClass().getSimpleName();
+        if (className.contains("Click")) return ActionType.CLICK;
+        if (className.contains("Drag")) return ActionType.DRAG;
+        if (className.contains("Find") || className.contains("Pattern")) return ActionType.FIND;
+        if (className.contains("Type")) return ActionType.TYPE;
+        if (className.contains("Move") || className.contains("Mouse")) return ActionType.MOVE;
+        if (className.contains("Scroll")) return ActionType.SCROLL_MOUSE_WHEEL;
+        if (className.contains("Highlight")) return ActionType.HIGHLIGHT;
+        if (className.contains("Define")) return ActionType.DEFINE;
+        if (className.contains("Vanish")) return ActionType.VANISH;
+        return ActionType.FIND; // Default
     }
 
     /**
@@ -99,7 +116,7 @@ public class DatasetManager {
      * @return true if the data was successfully captured and saved, false otherwise
      */
     public boolean addSetOfData(ActionResult matches) {
-        if (!isValidAction(matches.getActionOptions())) {
+        if (!isValidAction(matches.getActionConfig())) {
             System.out.println("action is not valid for dataset");
             return false;
         }

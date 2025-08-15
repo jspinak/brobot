@@ -73,7 +73,7 @@
  * Highlight highlight = new Highlight(...);
  * 
  * ActionOptions highlightOptions = new ActionOptions.Builder()
- *     .setAction(ActionOptions.Action.HIGHLIGHT)
+ *     .setAction(ActionType.HIGHLIGHT)
  *     .setHighlightDuration(3.0)  // Show for 3 seconds
  *     .setHighlightColor("RED")
  *     .build();

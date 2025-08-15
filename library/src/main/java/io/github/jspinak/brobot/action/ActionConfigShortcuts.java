@@ -1,4 +1,5 @@
 package io.github.jspinak.brobot.action;
+import io.github.jspinak.brobot.action.ActionType;
 
 import io.github.jspinak.brobot.action.basic.click.ClickOptions;
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
@@ -266,5 +267,36 @@ public class ActionConfigShortcuts {
         return new VanishOptions.Builder()
                 .setTimeout(timeout)
                 .build();
+    }
+    
+    /**
+     * Creates a standard ActionConfig based on action type.
+     * <p>
+     * This method provides a generic way to create appropriate ActionConfig
+     * instances based on the ActionType. It's useful when the specific action
+     * type is determined at runtime.
+     * 
+     * @param actionType The type of action to create config for
+     * @param maxWait Maximum wait time in seconds (used for find/vanish actions)
+     * @return Appropriate ActionConfig for the specified action type
+     */
+    public ActionConfig standard(ActionType actionType, double maxWait) {
+        switch (actionType) {
+            case CLICK:
+                return click();
+            case FIND:
+                return new PatternFindOptions.Builder()
+                        .setSearchDuration(maxWait)
+                        .build();
+            case TYPE:
+                return type();
+            case VANISH:
+                return vanish(maxWait);
+            default:
+                // Default to find for unrecognized action types
+                return new PatternFindOptions.Builder()
+                        .setSearchDuration(maxWait)
+                        .build();
+        }
     }
 }

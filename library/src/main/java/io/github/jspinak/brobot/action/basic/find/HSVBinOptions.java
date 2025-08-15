@@ -4,7 +4,7 @@ import lombok.Builder;
 import lombok.Getter;
 
 @Getter
-@Builder(toBuilder = true)
+@Builder(toBuilder = true, builderClassName = "HSVBinOptionsBuilder")
 public final class HSVBinOptions {
     @Builder.Default
     private final int hueBins = 12;

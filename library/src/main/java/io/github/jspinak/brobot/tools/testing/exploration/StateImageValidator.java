@@ -1,7 +1,8 @@
 package io.github.jspinak.brobot.tools.testing.exploration;
 
 import io.github.jspinak.brobot.action.Action;
-import io.github.jspinak.brobot.action.internal.options.ActionOptions;
+import io.github.jspinak.brobot.action.ActionConfig;
+import io.github.jspinak.brobot.action.ActionType;
 import io.github.jspinak.brobot.model.state.State;
 import lombok.Getter;
 import lombok.Setter;
@@ -69,12 +70,12 @@ public class StateImageValidator {
      *              Must not be null and should contain at least one StateImage
      *              for meaningful testing.
      * @throws NullPointerException if state is null
-     * @see ActionOptions.Action#FIND for the action type used
+     * @see ActionType#FIND for the action type used
      * @see State#getStateImages() for accessing the state's visual elements
      */
     public void visitAllStateImages(State state) {
         state.getStateImages().forEach(stateImage -> {
-            action.perform(ActionOptions.Action.FIND, stateImage.asObjectCollection());
+            action.perform(ActionType.FIND, stateImage.asObjectCollection());
         });
     }
 }

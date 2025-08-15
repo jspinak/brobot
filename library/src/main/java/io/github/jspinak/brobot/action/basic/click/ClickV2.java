@@ -1,4 +1,5 @@
 package io.github.jspinak.brobot.action.basic.click;
+import io.github.jspinak.brobot.action.ActionType;
 
 import io.github.jspinak.brobot.action.ActionInterface;
 import io.github.jspinak.brobot.action.ActionResult;

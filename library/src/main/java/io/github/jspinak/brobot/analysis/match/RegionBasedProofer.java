@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.analysis.match;
 
-import io.github.jspinak.brobot.action.internal.options.ActionOptions;
+import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.internal.find.SearchRegionResolver;
 import io.github.jspinak.brobot.model.element.Pattern;
 import io.github.jspinak.brobot.model.element.Region;
@@ -43,14 +43,14 @@ public class RegionBasedProofer implements MatchProofer {
      * these regions. Since regions are unique, there's no risk of duplicate validation.
      * 
      * @param match The match to validate
-     * @param actionOptions Configuration that may specify search regions
+     * @param actionConfig Configuration that may specify search regions
      * @param pattern The pattern that may have its own search region constraints
      * @return true if the match is contained within at least one search region,
      *         false otherwise
      */
-    public boolean isInSearchRegions(Match match, ActionOptions actionOptions, Pattern pattern) {
+    public boolean isInSearchRegions(Match match, ActionConfig actionConfig, Pattern pattern) {
         // these are unique regions so there won't be any duplicate matches
-        List<Region> regions = selectRegions.getRegions(actionOptions, pattern);
+        List<Region> regions = selectRegions.getRegions(actionConfig, pattern);
         return isInSearchRegions(match, regions);
     }
 

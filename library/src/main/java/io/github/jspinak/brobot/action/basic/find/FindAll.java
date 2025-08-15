@@ -1,6 +1,7 @@
 package io.github.jspinak.brobot.action.basic.find;
+import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
 
-import io.github.jspinak.brobot.action.internal.options.ActionOptions;
+import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.internal.find.SearchRegionResolver;
 import io.github.jspinak.brobot.analysis.match.MatchProofer;
 import io.github.jspinak.brobot.model.element.Pattern;
@@ -24,15 +25,15 @@ import java.util.List;
  * of each pattern within StateImages. It serves as the foundation for both the ALL
  * and BEST find strategies in the Brobot framework:
  * <ul>
- *   <li>{@link ActionOptions.Find#ALL} - Returns all matches found</li>
- *   <li>{@link ActionOptions.Find#BEST} - Uses all matches to select the highest-scoring one</li>
+ *   <li>ALL - Returns all matches found</li>
+ *   <li>BEST - Uses all matches to select the highest-scoring one</li>
  * </ul>
  * 
  * <p>The component respects search region constraints and validates matches against
  * defined boundaries. Each match is enriched with metadata including pattern information,
  * anchors, position offsets, and state associations.</p>
  * 
- * @see ActionOptions.Find
+ * @see PatternFindOptions.Strategy
  * @see Match
  * @see StateImage
  * @see Pattern
@@ -79,20 +80,19 @@ public class FindAll {
      * 
      * @param stateImage The StateImage containing patterns to search for. Must not be null.
      * @param scene The scene (screenshot) to search within. Must not be null.
-     * @param actionOptions Configuration controlling search behavior, including target
+     * @param actionConfig Configuration controlling search behavior, including target
      *                      position/offset overrides and region constraints.
      * @return A list of all Match objects found for all patterns. Returns an empty list
      *         if no matches are found or all matches are filtered out by region constraints.
      */
-    public List<Match> find(StateImage stateImage, Scene scene, ActionOptions actionOptions) {
+    public List<Match> find(StateImage stateImage, Scene scene, ActionConfig actionConfig) {
         List<Match> allMatchObjects = new ArrayList<>();
         for (Pattern pattern : stateImage.getPatterns()) {
-            Position targetPosition = actionOptions.getTargetPosition() == null?
-                    pattern.getTargetPosition() : actionOptions.getTargetPosition();
-            Location xyOffset = actionOptions.getTargetOffset() == null?
-                    pattern.getTargetOffset() : actionOptions.getTargetOffset();
+            // Use pattern's target position and offset
+            Position targetPosition = pattern.getTargetPosition();
+            Location xyOffset = pattern.getTargetOffset();
             List<Match> matchList = mockOrLive.findAll(pattern, scene);
-            addMatchObjects(allMatchObjects, matchList, pattern, stateImage, actionOptions, scene, targetPosition, xyOffset);
+            addMatchObjects(allMatchObjects, matchList, pattern, stateImage, actionConfig, scene, targetPosition, xyOffset);
         }
         return allMatchObjects;
     }
@@ -131,19 +131,19 @@ public class FindAll {
      * @param matchList Raw matches from the pattern detection engine
      * @param pattern The pattern that was searched for
      * @param stateImage The StateImage containing the pattern
-     * @param actionOptions Configuration controlling search behavior and region constraints
+     * @param actionConfig Configuration controlling search behavior and region constraints
      * @param scene The scene where matches were found
      * @param target The target position to apply to matches
      * @param offset The offset to apply to match locations
      */
     private void addMatchObjects(List<Match> allMatchObjects, List<Match> matchList, Pattern pattern,
-                               StateImage stateImage, ActionOptions actionOptions, Scene scene,
+                               StateImage stateImage, ActionConfig actionConfig, Scene scene,
                                Position target, Location offset) {
         int i=0;
         String name = pattern.getName() != null && !pattern.getName().isEmpty() ?
                 pattern.getName() : scene.getPattern().getName();
         for (Match match : matchList) {
-            List<Region> regionsAllowedForMatch = selectRegions.getRegions(actionOptions, stateImage);
+            List<Region> regionsAllowedForMatch = selectRegions.getRegions(actionConfig, stateImage);
             if (matchProofer.isInSearchRegions(match, regionsAllowedForMatch)) {
                 Match newMatch = new Match.Builder()
                         .setMatch(match)
@@ -197,15 +197,15 @@ public class FindAll {
      * within the allowed search regions defined by the action options.
      * 
      * @param scene The scene to search for text within. Must not be null.
-     * @param actionOptions Configuration defining the search regions for filtering results.
+     * @param actionConfig Configuration defining the search regions for filtering results.
      *                      If no regions are specified, the entire scene is searched.
      * @return A list of Match objects representing detected words within the allowed regions.
      *         Each match contains the word's location and extracted text. Returns an empty
      *         list if no words are found or all words are outside the search regions.
      */
-    public List<Match> findWords(Scene scene, ActionOptions actionOptions) {
+    public List<Match> findWords(Scene scene, ActionConfig actionConfig) {
         List<Match> wordMatches = mockOrLive.findAllWords(scene);
-        List<Region> regions = selectRegions.getRegions(actionOptions);
+        List<Region> regions = selectRegions.getRegions(actionConfig);
         List<Match> matchesInRegion = new ArrayList<>();
         for (Match match : wordMatches) {
             if (matchProofer.isInSearchRegions(match, regions)) {

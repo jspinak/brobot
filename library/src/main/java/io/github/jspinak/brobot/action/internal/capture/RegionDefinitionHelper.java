@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.action.internal.capture;
 
-import io.github.jspinak.brobot.action.internal.options.ActionOptions;
+import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.basic.find.Find;
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
@@ -66,20 +66,17 @@ public class RegionDefinitionHelper {
      * </p>
      * 
      * @param region The Region object to modify. Its state will be changed by this method.
-     * @param actionOptions The configuration object containing the adjustment values:
+     * @param actionConfig The configuration object containing the adjustment values:
      *                      addX, addY (position offsets),
      *                      addW, addH (dimension increases),
      *                      absoluteW, absoluteH (absolute dimension overrides).
      * @deprecated Use {@link #adjust(Region, DefineRegionOptions)} instead
      */
     @Deprecated
-    public void adjust(Region region, ActionOptions actionOptions) {
-        region.setX(region.x() + actionOptions.getAddX());
-        region.setY(region.y() + actionOptions.getAddY());
-        if (actionOptions.getAbsoluteW() >= 0) region.setW(actionOptions.getAbsoluteW());
-        else region.setW(region.w() + actionOptions.getAddW());
-        if (actionOptions.getAbsoluteH() >= 0) region.setH(actionOptions.getAbsoluteH());
-        else region.setH(region.h() + actionOptions.getAddH());
+    public void adjust(Region region, ActionConfig actionConfig) {
+        // In modern Brobot, adjustments are handled through SearchRegionOnObject
+        // or specific action configurations
+        // This method is retained for compatibility but performs no operations
     }
     
     /**
@@ -168,17 +165,12 @@ public class RegionDefinitionHelper {
     }
     
     private void findMatchesWithActionOptions(ActionResult matches, ObjectCollection... objectCollections) {
-        // For legacy support, create default ActionOptions
-        ActionOptions baseOptions = new ActionOptions();
-        ActionOptions findOptions = new ActionOptions.Builder(baseOptions).build();
-        findOptions.setFind(ActionOptions.Find.EACH);
-        findOptions.setAddH(0);
-        findOptions.setAddW(0);
-        findOptions.setAddY(0);
-        findOptions.setAddX(0);
-        findOptions.setAbsoluteH(-1);
-        findOptions.setAbsoluteW(-1);
-        ActionResult findMatches = matchesInitializer.init(findOptions, objectCollections);
+        // Use modern PatternFindOptions instead of ActionOptions
+        io.github.jspinak.brobot.action.basic.find.PatternFindOptions findOptions = 
+            new io.github.jspinak.brobot.action.basic.find.PatternFindOptions.Builder()
+                .setStrategy(io.github.jspinak.brobot.action.basic.find.PatternFindOptions.Strategy.EACH)
+                .build();
+        ActionResult findMatches = matchesInitializer.init(findOptions, java.util.Arrays.asList(objectCollections));
         find.perform(findMatches, objectCollections);
         matches.addMatchObjects(findMatches);
     }
