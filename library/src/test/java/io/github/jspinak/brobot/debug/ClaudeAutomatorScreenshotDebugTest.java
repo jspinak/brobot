@@ -17,9 +17,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.opencv.core.Mat;
 import org.sikuli.basics.Settings;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.TestPropertySource;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -38,33 +35,23 @@ import static org.junit.jupiter.api.Assertions.*;
  * Debug test to understand why claude-automator produces black screenshots
  * while library tests produce correct screenshots.
  */
-@SpringBootTest(classes = io.github.jspinak.brobot.test.TestConfiguration.class, classes = io.github.jspinak.brobot.test.TestConfiguration.class)
-@TestPropertySource(properties = {
-    "brobot.screenshot.save-history=true",
-    "brobot.screenshot.history-path=test-history/",
-    "brobot.screenshot.save-snapshots=true",
-    "brobot.highlight.enabled=true",
-    "brobot.aspects.visual-feedback.enabled=true",
-    "brobot.illustration.draw-find=true",
-    "brobot.illustration.draw-highlight=true",
-    "brobot.framework.mock=false",
-    "brobot.core.headless=false"
-})
+
+
 public class ClaudeAutomatorScreenshotDebugTest {
 
-    @Autowired
+    // @Autowired
     private Find find;
     
-    @Autowired
+    // @Autowired
     private StateStore stateStore;
     
-    @Autowired
+    // @Autowired
     private BrobotProperties brobotProperties;
     
-    @Autowired
+    // @Autowired
     private VisualizationOrchestrator visualizationOrchestrator;
     
-    @Autowired
+    // @Autowired
     private ImageFileUtilities imageFileUtilities;
     
     private Path historyPath;

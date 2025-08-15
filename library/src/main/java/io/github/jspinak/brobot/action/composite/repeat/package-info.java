@@ -165,3 +165,4 @@
  * @see io.github.jspinak.brobot.action.internal.execution.ActionChainExecutor
  */
 package io.github.jspinak.brobot.action.composite.repeat;
+import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;

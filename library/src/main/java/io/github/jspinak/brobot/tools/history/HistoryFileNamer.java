@@ -1,6 +1,7 @@
 package io.github.jspinak.brobot.tools.history;
 
-import io.github.jspinak.brobot.action.internal.options.ActionOptions;
+import io.github.jspinak.brobot.action.ActionConfig;
+import io.github.jspinak.brobot.action.ActionType;
 import io.github.jspinak.brobot.model.analysis.scene.SceneAnalysis;
 import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.config.FrameworkSettings;
@@ -16,7 +17,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static io.github.jspinak.brobot.action.internal.options.ActionOptions.Action.FIND;
+import static io.github.jspinak.brobot.action.ActionType.FIND;
 
 /**
  * Generates unique filenames for Brobot's visual history illustrations.
@@ -86,13 +87,13 @@ public class HistoryFileNamer {
      * for each analysis to get individual filenames.
      *
      * @param matches action results containing search targets and analysis data
-     * @param actionOptions configuration including the action type
+     * @param actionConfig configuration including the action type
      * @return unique filename path for the illustration
      */
-    public String getSingleFilename(ActionResult matches, ActionOptions actionOptions) {
-        if (matches.getSceneAnalysisCollection().isEmpty()) return getFilenameFromMatchObjects(matches, actionOptions);
+    public String getSingleFilename(ActionResult matches, ActionConfig actionConfig) {
+        if (matches.getSceneAnalysisCollection().isEmpty()) return getFilenameFromMatchObjects(matches, actionConfig);
         SceneAnalysis sceneAnalysis = matches.getSceneAnalysisCollection().getSceneAnalyses().get(0);
-        return getFilenameFromSceneAnalysis(sceneAnalysis, actionOptions);
+        return getFilenameFromSceneAnalysis(sceneAnalysis, actionConfig);
     }
 
     /**
@@ -106,16 +107,16 @@ public class HistoryFileNamer {
      * filenames, making them more readable and preventing excessively long names.
      *
      * @param matches action results containing matched objects
-     * @param actionOptions configuration with action type information
+     * @param actionConfig configuration with action type information
      * @return unique filename path constructed from match data
      */
-    public String getFilenameFromMatchObjects(ActionResult matches, ActionOptions actionOptions) {
+    public String getFilenameFromMatchObjects(ActionResult matches, ActionConfig actionConfig) {
         String prefix = FrameworkSettings.historyPath + FrameworkSettings.historyFilename;
-        ActionOptions.Action action = actionOptions.getAction();
+        ActionType actionType = getActionTypeFromConfig(actionConfig);
         Set<String> imageNames = matches.getMatchList().stream().map(
                 m -> m.getStateObjectData().getStateObjectName()).collect(Collectors.toSet());
         String names = String.join("", imageNames);
-        String suffix = action.toString() + "_" + names;
+        String suffix = actionType.toString() + "_" + names;
         return filenameRepo.reserveFreePath(prefix, suffix);
     }
 
@@ -132,17 +133,17 @@ public class HistoryFileNamer {
      * classification results or "colorProfile" for color analysis.
      *
      * @param sceneAnalysis analysis results including scene and target information
-     * @param actionOptions configuration with action type
+     * @param actionConfig configuration with action type
      * @param additionalDescription optional descriptors appended to filename (e.g., "classes", "contours")
      * @return unique filename path with encoded analysis metadata
      */
-    public String getFilenameFromSceneAnalysis(SceneAnalysis sceneAnalysis, ActionOptions actionOptions, String... additionalDescription) {
+    public String getFilenameFromSceneAnalysis(SceneAnalysis sceneAnalysis, ActionConfig actionConfig, String... additionalDescription) {
         String prefix = FrameworkSettings.historyPath;
-        ActionOptions.Action action = actionOptions.getAction();
+        ActionType actionType = getActionTypeFromConfig(actionConfig);
         String sceneName = sceneAnalysis.getScene().getPattern().getName();
         String imageNames = sceneAnalysis.getImageNames();
         String names = String.join("_", imageNames);
-        String suffix = action.toString() + "_in-" + sceneName + "_" + names + String.join("_", additionalDescription);
+        String suffix = actionType.toString() + "_in-" + sceneName + "_" + names + String.join("_", additionalDescription);
         ConsoleReporter.println("Filename: " + prefix + suffix);
         return filenameRepo.reserveFreePath(prefix, suffix);
     }
@@ -158,8 +159,8 @@ public class HistoryFileNamer {
      * @param imageNames concatenated image names
      * @return complete filename with .png extension
      */
-    private String composeName(String freepath, ActionOptions.Action action, String imageNames) {
-        return freepath + "_" + action.toString() + "_" + imageNames + ".png";
+    private String composeName(String freepath, ActionType actionType, String imageNames) {
+        return freepath + "_" + actionType.toString() + "_" + imageNames + ".png";
     }
 
     /**
@@ -176,8 +177,8 @@ public class HistoryFileNamer {
      * @param imageNames concatenated image names
      * @return complete numbered filename with .png extension
      */
-    private String composeName(String path, String baseName, int number, ActionOptions.Action action, String imageNames) {
-        return path + baseName + number + "_" + action.toString() + "_" + imageNames + ".png";
+    private String composeName(String path, String baseName, int number, ActionType actionType, String imageNames) {
+        return path + baseName + number + "_" + actionType.toString() + "_" + imageNames + ".png";
     }
 
     /**
@@ -192,20 +193,25 @@ public class HistoryFileNamer {
      * for complex operations involving multiple state objects or when comparing
      * results across different object sets.
      *
-     * @param actionOptions configuration including action type and find options
+     * @param actionConfig configuration including action type and find options
      * @param objectCollections variable number of collections containing state images
      * @return unique filename incorporating all object collection data
      */
-    public String getFilename(ActionOptions actionOptions, ObjectCollection... objectCollections) {
+    public String getFilename(ActionConfig actionConfig, ObjectCollection... objectCollections) {
         String prefix = FrameworkSettings.historyPath + FrameworkSettings.historyFilename;
-        ActionOptions.Action action = actionOptions.getAction();
+        ActionType actionType = getActionTypeFromConfig(actionConfig);
         List<String> names = new ArrayList<>();
         for (ObjectCollection objectCollection : objectCollections) {
             names.addAll(objectCollection.getStateImages().stream().map(StateImage::getName).toList());
         }
         String allNames = String.join("", names);
-        String suffix = action.toString();
-        if (actionOptions.getAction() == FIND) suffix += "_" + actionOptions.getFind();
+        String suffix = actionType.toString();
+        // Add find strategy if applicable
+        if (actionType == FIND && actionConfig instanceof io.github.jspinak.brobot.action.basic.find.PatternFindOptions) {
+            io.github.jspinak.brobot.action.basic.find.PatternFindOptions findOptions = 
+                (io.github.jspinak.brobot.action.basic.find.PatternFindOptions) actionConfig;
+            suffix += "_" + findOptions.getStrategy();
+        }
         if (!allNames.isEmpty()) suffix += "_" + allNames;
         return filenameRepo.reserveFreePath(prefix, suffix);
     }
@@ -222,9 +228,25 @@ public class HistoryFileNamer {
      * @param name custom name component for the filename
      * @return unique filename with action and custom name
      */
-    public String getFilename(ActionOptions.Action action, String name) {
+    public String getFilename(ActionType actionType, String name) {
         String prefix = FrameworkSettings.historyPath + FrameworkSettings.historyFilename;
-        String suffix = action.toString() + "_" + name;
+        String suffix = actionType.toString() + "_" + name;
         return filenameRepo.reserveFreePath(prefix, suffix);
+    }
+    
+    /**
+     * Helper method to extract ActionType from ActionConfig.
+     */
+    private ActionType getActionTypeFromConfig(ActionConfig actionConfig) {
+        String className = actionConfig.getClass().getSimpleName();
+        if (className.contains("Click")) return ActionType.CLICK;
+        if (className.contains("Find") || className.contains("Pattern")) return ActionType.FIND;
+        if (className.contains("Type")) return ActionType.TYPE;
+        if (className.contains("Drag")) return ActionType.DRAG;
+        if (className.contains("Highlight")) return ActionType.HIGHLIGHT;
+        if (className.contains("Scroll")) return ActionType.SCROLL_MOUSE_WHEEL;
+        if (className.contains("Define")) return ActionType.DEFINE;
+        if (className.contains("Move")) return ActionType.MOVE;
+        return ActionType.FIND; // default
     }
 }

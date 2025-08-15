@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.analysis.match;
 
-import io.github.jspinak.brobot.action.internal.options.ActionOptions;
+import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.internal.find.SearchRegionResolver;
 import io.github.jspinak.brobot.model.element.Pattern;
 import io.github.jspinak.brobot.model.element.Region;
@@ -72,16 +72,16 @@ public interface MatchProofer {
      * <p>The region selection follows a priority hierarchy:
      * <ol>
      *   <li>Pattern's fixed regions (highest priority)</li>
-     *   <li>ActionOptions search regions</li>
+     *   <li>Configuration search regions</li>
      *   <li>Pattern's standard search regions</li>
      * </ol>
      * 
      * @param match The match to validate
-     * @param actionOptions Configuration that may override pattern regions
+     * @param actionConfig Configuration that may override pattern regions
      * @param pattern The pattern that may define its own search regions
      * @return true if the match is valid within the resolved search regions,
      *         false otherwise
-     * @see SearchRegionResolver#getRegions(ActionOptions, Pattern)
+     * @see SearchRegionResolver#getRegions(ActionConfig, Pattern)
      */
-    boolean isInSearchRegions(Match match, ActionOptions actionOptions, Pattern pattern);
+    boolean isInSearchRegions(Match match, ActionConfig actionConfig, Pattern pattern);
 }

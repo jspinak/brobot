@@ -1,6 +1,7 @@
 package io.github.jspinak.brobot.action.basic.find.color;
 
-import io.github.jspinak.brobot.action.internal.options.ActionOptions;
+import io.github.jspinak.brobot.action.ActionConfig;
+import io.github.jspinak.brobot.action.basic.find.BaseFindOptions;
 import io.github.jspinak.brobot.action.internal.find.pixel.PixelScoreCalculator;
 import io.github.jspinak.brobot.model.analysis.color.ColorCluster;
 import io.github.jspinak.brobot.model.analysis.color.PixelProfile;
@@ -32,7 +33,7 @@ import static org.bytedeco.opencv.global.opencv_core.min;
  * <ul>
  *   <li>Collects scores from all PixelAnalysis objects (one per color profile)</li>
  *   <li>Finds minimum scores at each pixel (best match wins)</li>
- *   <li>Applies similarity thresholds from ActionOptions</li>
+ *   <li>Applies similarity thresholds from configuration</li>
  *   <li>Generates distance-below-threshold metrics</li>
  * </ul>
  * 
@@ -101,15 +102,15 @@ public class GetPixelAnalysisCollectionScores {
      * </ul>
      * 
      * @param pixelAnalysisCollection the collection to update with scores
-     * @param actionOptions contains minSimilarity threshold configuration
+     * @param actionConfig contains minSimilarity threshold configuration
      */
-    public void setScores(PixelProfiles pixelAnalysisCollection, ActionOptions actionOptions) {
+    public void setScores(PixelProfiles pixelAnalysisCollection, ActionConfig actionConfig) {
         Mat scoresBGR = setScores(pixelAnalysisCollection, BGR);
         Mat scoresHSV = setScores(pixelAnalysisCollection, HSV);
         pixelAnalysisCollection.setAnalyses(SCORE, BGR, scoresBGR);
         pixelAnalysisCollection.setAnalyses(SCORE, HSV, scoresHSV);
-        Mat scoreDistBelowThresholdBGR = getPixelScores.getDistBelowThreshhold(scoresBGR, actionOptions);
-        Mat scoreDistBelowThresholdHSV = getPixelScores.getDistBelowThreshhold(scoresHSV, actionOptions);
+        Mat scoreDistBelowThresholdBGR = getPixelScores.getDistBelowThreshhold(scoresBGR, actionConfig);
+        Mat scoreDistBelowThresholdHSV = getPixelScores.getDistBelowThreshhold(scoresHSV, actionConfig);
         pixelAnalysisCollection.setAnalyses(SCORE_DIST_BELOW_THRESHHOLD, BGR, scoreDistBelowThresholdBGR);
         pixelAnalysisCollection.setAnalyses(SCORE_DIST_BELOW_THRESHHOLD, HSV, scoreDistBelowThresholdHSV);
     }

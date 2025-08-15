@@ -182,3 +182,4 @@
  * @see io.github.jspinak.brobot.model.action
  */
 package io.github.jspinak.brobot.tools.history.visual;
+import io.github.jspinak.brobot.action.ActionType;

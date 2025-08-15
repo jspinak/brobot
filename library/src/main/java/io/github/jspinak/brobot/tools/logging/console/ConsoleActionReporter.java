@@ -1,4 +1,5 @@
 package io.github.jspinak.brobot.tools.logging.console;
+import io.github.jspinak.brobot.action.ActionType;
 
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.logging.unified.BrobotLogger;

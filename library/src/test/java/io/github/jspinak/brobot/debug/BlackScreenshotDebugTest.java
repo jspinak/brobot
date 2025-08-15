@@ -15,9 +15,6 @@ import io.github.jspinak.brobot.model.state.StateStore;
 import io.github.jspinak.brobot.util.image.io.ImageFileUtilities;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.TestPropertySource;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -35,31 +32,20 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Debug test to understand why claude-automator produces black screenshots.
  */
-@SpringBootTest(classes = io.github.jspinak.brobot.test.TestConfiguration.class, classes = io.github.jspinak.brobot.test.TestConfiguration.class)
-@TestPropertySource(properties = {
-    "brobot.screenshot.save-history=true",
-    "brobot.screenshot.history-path=test-history/",
-    "brobot.screenshot.save-snapshots=true",
-    "brobot.highlight.enabled=true",
-    "brobot.aspects.visual-feedback.enabled=true",
-    "brobot.illustration.draw-find=true",
-    "brobot.illustration.draw-highlight=true",
-    "brobot.framework.mock=false",
-    "brobot.core.headless=false",
-    "brobot.aspects.action-lifecycle.enabled=true"
-})
+
+
 public class BlackScreenshotDebugTest {
 
-    @Autowired
+    // @Autowired
     private Find find;
     
-    @Autowired
+    // @Autowired
     private StateStore stateStore;
     
-    @Autowired
+    // @Autowired
     private BrobotProperties brobotProperties;
     
-    @Autowired
+    // @Autowired
     private ImageFileUtilities imageFileUtilities;
     
     

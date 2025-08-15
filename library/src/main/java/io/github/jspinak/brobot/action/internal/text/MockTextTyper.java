@@ -1,6 +1,7 @@
 package io.github.jspinak.brobot.action.internal.text;
 
-import io.github.jspinak.brobot.action.internal.options.ActionOptions;
+import io.github.jspinak.brobot.action.ActionConfig;
+import io.github.jspinak.brobot.action.basic.type.TypeOptions;
 import io.github.jspinak.brobot.model.state.StateString;
 import io.github.jspinak.brobot.config.FrameworkSettings;
 import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
@@ -20,12 +21,17 @@ import org.springframework.stereotype.Component;
 public class MockTextTyper implements TextTyper {
     
     @Override
-    public boolean type(StateString stateString, ActionOptions actionOptions) {
+    public boolean type(StateString stateString, ActionConfig actionConfig) {
+        String modifiers = "";
+        if (actionConfig instanceof TypeOptions) {
+            modifiers = ((TypeOptions) actionConfig).getModifiers();
+        }
+        
         log.debug("Mock typing: '{}' with modifiers: '{}'", 
-                  stateString.getString(), actionOptions.getModifiers());
+                  stateString.getString(), modifiers);
         
         // Log to console for visibility
-        ConsoleReporter.print(actionOptions.getModifiers());
+        ConsoleReporter.print(modifiers);
         ConsoleReporter.print(stateString.getString());
         
         // Simulate typing delay using click time (since there's no specific type time)

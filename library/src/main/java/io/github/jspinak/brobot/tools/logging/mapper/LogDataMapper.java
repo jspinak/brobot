@@ -1,4 +1,5 @@
 package io.github.jspinak.brobot.tools.logging.mapper;
+import io.github.jspinak.brobot.action.ActionType;
 
 import org.springframework.stereotype.Component;
 

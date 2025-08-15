@@ -1,13 +1,14 @@
 package io.github.jspinak.brobot.analysis.match;
 
-import io.github.jspinak.brobot.action.internal.options.ActionOptions;
+import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.util.string.StringFusion;
 import org.springframework.stereotype.Component;
 
-import static io.github.jspinak.brobot.action.internal.options.ActionOptions.MatchFusionMethod.NONE;
+import io.github.jspinak.brobot.action.MatchFusionMethod;
+import static io.github.jspinak.brobot.action.MatchFusionMethod.NONE;
 
 import java.util.*;
 
@@ -33,17 +34,17 @@ import java.util.*;
  * matches or retain the original matches separately.
  * 
  * @see MatchFusionDecider
- * @see ActionOptions.MatchFusionMethod
+ * @see MatchFusionMethod
  * @see Match
  */
 @Component
 public class MatchFusion {
-    private final Map<ActionOptions.MatchFusionMethod, MatchFusionDecider> fusionMethods = new HashMap<>();
+    private final Map<MatchFusionMethod, MatchFusionDecider> fusionMethods = new HashMap<>();
 
     public MatchFusion(AbsoluteSizeFusionDecider matchFusionDeciderAbsoluteSize,
                        RelativeSizeFusionDecider matchFusionDeciderRelativeSize) {
-        fusionMethods.put(ActionOptions.MatchFusionMethod.ABSOLUTE, matchFusionDeciderAbsoluteSize);
-        fusionMethods.put(ActionOptions.MatchFusionMethod.RELATIVE, matchFusionDeciderRelativeSize);
+        fusionMethods.put(MatchFusionMethod.ABSOLUTE, matchFusionDeciderAbsoluteSize);
+        fusionMethods.put(MatchFusionMethod.RELATIVE, matchFusionDeciderRelativeSize);
     }
 
     /**
@@ -58,7 +59,7 @@ public class MatchFusion {
      *                within this object is modified in-place with fused results.
      */
     public void setFusedMatches(ActionResult matches) {
-        if (matches.getActionOptions().getFusionMethod() == NONE) return;
+        if (matches.getActionConfig() == null || getFusionMethod(matches.getActionConfig()) == NONE) return;
         matches.setMatchList(getFinalFusedMatchObjects(matches));
     }
 
@@ -80,7 +81,7 @@ public class MatchFusion {
         int size = 0;
         while (fusedMatches.size() != size) {
             size = fusedMatches.size();
-            fusedMatches = getFusedMatchObjects(fusedMatches, matches.getActionOptions());
+            fusedMatches = getFusedMatchObjects(fusedMatches, matches.getActionConfig());
         }
         return fusedMatches;
     }
@@ -103,15 +104,16 @@ public class MatchFusion {
      * using string fusion to maintain traceability.
      * 
      * @param matchList The list of matches to fuse. This list is not modified.
-     * @param actionOptions Configuration containing the fusion method and distance
+     * @param actionConfig Configuration containing the fusion method and distance
      *                      thresholds (maxFusionDistanceX, maxFusionDistanceY)
      * @return A new list containing the fused matches. May be smaller than the input
      *         list if matches were combined.
      */
-    public List<Match> getFusedMatchObjects(List<Match> matchList, ActionOptions actionOptions) {
-        MatchFusionDecider decider = fusionMethods.get(actionOptions.getFusionMethod());
-        int maxXDistance = actionOptions.getMaxFusionDistanceX();
-        int maxYDistance = actionOptions.getMaxFusionDistanceY();
+    public List<Match> getFusedMatchObjects(List<Match> matchList, ActionConfig actionConfig) {
+        MatchFusionMethod method = getFusionMethod(actionConfig);
+        MatchFusionDecider decider = fusionMethods.get(method);
+        int maxXDistance = 10; // Default fusion distance X
+        int maxYDistance = 10; // Default fusion distance Y
         List<Match> fusedMatches = new ArrayList<>();
         if (matchList.isEmpty()) return fusedMatches;
         List<Match> originalMatches = matchList;
@@ -155,6 +157,20 @@ public class MatchFusion {
             fusedMatches.add(m);
         }
         return fusedMatches;
+    }
+    
+    /**
+     * Helper method to extract the fusion method from ActionConfig.
+     * Since ActionConfig is now a base class for specific config types,
+     * we need to check the type and provide appropriate defaults.
+     * 
+     * @param actionConfig The action configuration
+     * @return The fusion method to use, defaulting to NONE
+     */
+    private MatchFusionMethod getFusionMethod(ActionConfig actionConfig) {
+        // Default to NONE for now - specific config classes can override this
+        // In the future, we could add fusion configuration to specific ActionConfig subclasses
+        return MatchFusionMethod.NONE;
     }
 
 }

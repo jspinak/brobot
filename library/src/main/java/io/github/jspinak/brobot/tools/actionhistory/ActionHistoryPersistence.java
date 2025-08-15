@@ -7,7 +7,9 @@ import io.github.jspinak.brobot.model.action.ActionHistory;
 import io.github.jspinak.brobot.model.action.ActionRecord;
 import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.model.element.Pattern;
-import io.github.jspinak.brobot.tools.migration.ActionHistoryJsonConverter;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -40,11 +42,17 @@ import java.util.stream.Collectors;
  * @since 1.2.0
  */
 @Component
-@RequiredArgsConstructor
 @Slf4j
 public class ActionHistoryPersistence {
     
-    private final ActionHistoryJsonConverter jsonConverter;
+    private final ObjectMapper objectMapper;
+    
+    public ActionHistoryPersistence() {
+        this.objectMapper = new ObjectMapper();
+        this.objectMapper.registerModule(new JavaTimeModule());
+        this.objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
+        this.objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+    }
     private static final String DEFAULT_HISTORY_PATH = "src/test/resources/histories";
     private static final int AUTO_SAVE_INTERVAL = 100;
     
@@ -73,7 +81,7 @@ public class ActionHistoryPersistence {
         Files.createDirectories(path.getParent());
         
         try {
-            String json = jsonConverter.serialize(history);
+            String json = objectMapper.writeValueAsString(history);
             Files.writeString(path, json);
             log.info("Saved ActionHistory to {}", path);
         } catch (JsonProcessingException e) {
@@ -113,7 +121,7 @@ public class ActionHistoryPersistence {
         
         try {
             // Automatically migrates legacy ActionOptions format if needed
-            ActionHistory history = jsonConverter.deserialize(json);
+            ActionHistory history = objectMapper.readValue(json, ActionHistory.class);
             log.info("Loaded ActionHistory from {}", path);
             return history;
         } catch (JsonProcessingException e) {
@@ -242,7 +250,7 @@ public class ActionHistoryPersistence {
                 String name = path.getFileName().toString()
                     .replace(".json", "");
                 String json = Files.readString(path);
-                histories.put(name, jsonConverter.deserialize(json));
+                histories.put(name, objectMapper.readValue(json, ActionHistory.class));
                 log.debug("Loaded history: {}", name);
             } catch (IOException e) {
                 log.error("Failed to load {}: {}", path, e.getMessage());

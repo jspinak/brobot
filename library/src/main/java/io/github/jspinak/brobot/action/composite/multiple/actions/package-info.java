@@ -66,7 +66,7 @@
  * // Step 1: Find the search box
  * workflow.add(new ActionOptionsObjectCollectionPair(
  *     new ActionOptions.Builder()
- *         .setAction(ActionOptions.Action.FIND)
+ *         .setAction(ActionType.FIND)
  *         .setFind(Find.BEST)
  *         .build(),
  *     new ObjectCollection.Builder()
@@ -77,7 +77,7 @@
  * // Step 2: Click on it
  * workflow.add(new ActionOptionsObjectCollectionPair(
  *     new ActionOptions.Builder()
- *         .setAction(ActionOptions.Action.CLICK)
+ *         .setAction(ActionType.CLICK)
  *         .build(),
  *     new ObjectCollection.Builder()
  *         .withImages("search_box.png")
@@ -87,7 +87,7 @@
  * // Step 3: Type search query
  * workflow.add(new ActionOptionsObjectCollectionPair(
  *     new ActionOptions.Builder()
- *         .setAction(ActionOptions.Action.TYPE)
+ *         .setAction(ActionType.TYPE)
  *         .build(),
  *     new ObjectCollection.Builder()
  *         .withStrings("automation testing")
@@ -97,7 +97,7 @@
  * // Step 4: Press Enter
  * workflow.add(new ActionOptionsObjectCollectionPair(
  *     new ActionOptions.Builder()
- *         .setAction(ActionOptions.Action.TYPE)
+ *         .setAction(ActionType.TYPE)
  *         .build(),
  *     new ObjectCollection.Builder()
  *         .withStrings("{ENTER}")
@@ -107,7 +107,7 @@
  * // Step 5: Wait for results
  * workflow.add(new ActionOptionsObjectCollectionPair(
  *     new ActionOptions.Builder()
- *         .setAction(ActionOptions.Action.VANISH)
+ *         .setAction(ActionType.VANISH)
  *         .setMaxWait(5.0)
  *         .build(),
  *     new ObjectCollection.Builder()

@@ -1,6 +1,5 @@
 package io.github.jspinak.brobot.fluent;
 
-import io.github.jspinak.brobot.action.internal.options.ActionOptions;
 import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.model.state.StateString;
 import io.github.jspinak.brobot.runner.dsl.InstructionSet;
@@ -58,7 +57,7 @@ public class FluentApiExample {
             .find(searchButton)
             .thenClick()
             // .thenWait(2.0) // Wait for results to load - TODO: implement thenWait method
-            // .thenScroll(ActionOptions.ScrollDirection.DOWN, 3) // TODO: update to use ScrollOptions.Direction
+            // .thenScroll(ScrollOptions.Direction.DOWN, 3) // Uses ScrollOptions.Direction
             .find(resultItem)
             .thenHighlight(resultItem, 2.0)
             .build();

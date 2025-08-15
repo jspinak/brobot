@@ -66,7 +66,7 @@
  * SelectActionObject selection = new SelectActionObject.Builder()
  *     .when("login_button.png").then(
  *         new ActionOptions.Builder()
- *             .setAction(ActionOptions.Action.CLICK)
+ *             .setAction(ActionType.CLICK)
  *             .build(),
  *         new ObjectCollection.Builder()
  *             .withImages("login_button.png")
@@ -74,7 +74,7 @@
  *     )
  *     .when("logout_button.png").then(
  *         new ActionOptions.Builder()
- *             .setAction(ActionOptions.Action.CLICK)
+ *             .setAction(ActionType.CLICK)
  *             .build(),
  *         new ObjectCollection.Builder()
  *             .withImages("logout_button.png")
@@ -82,7 +82,7 @@
  *     )
  *     .otherwise(
  *         new ActionOptions.Builder()
- *             .setAction(ActionOptions.Action.TYPE)
+ *             .setAction(ActionType.TYPE)
  *             .build(),
  *         new ObjectCollection.Builder()
  *             .withStrings("{ESC}")

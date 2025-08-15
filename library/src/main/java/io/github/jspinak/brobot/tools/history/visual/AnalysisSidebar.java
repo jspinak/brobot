@@ -1,6 +1,7 @@
 package io.github.jspinak.brobot.tools.history.visual;
 
-import io.github.jspinak.brobot.action.internal.options.ActionOptions;
+import io.github.jspinak.brobot.action.ActionConfig;
+import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.util.image.visualization.MatBuilder;
 import io.github.jspinak.brobot.util.image.visualization.MatrixVisualizer;
@@ -130,10 +131,10 @@ public class AnalysisSidebar {
      *
      * @param illustrations container for visualization components; sidebar is set here
      * @param matches action results containing matches to display
-     * @param actionOptions determines special handling for motion/histogram matches
+     * @param actionConfig determines special handling for motion/histogram matches
      * @param matchList specific matches to display (may differ from matches.getMatchList())
      */
-    public void drawSidebars(Visualization illustrations, ActionResult matches, ActionOptions actionOptions, List<Match> matchList) {
+    public void drawSidebars(Visualization illustrations, ActionResult matches, ActionConfig actionConfig, List<Match> matchList) {
         log.debug("[SIDEBAR] drawSidebars called");
         
         if (illustrations.getScene() == null) {
@@ -144,7 +145,7 @@ public class AnalysisSidebar {
         log.debug("[SIDEBAR] Scene dimensions: {}x{}", 
                 illustrations.getScene().cols(), illustrations.getScene().rows());
         
-        List<Mat> sidebarEntries = getEntriesForSceneSidebar(illustrations, matches, actionOptions, matchList);
+        List<Mat> sidebarEntries = getEntriesForSceneSidebar(illustrations, matches, actionConfig, matchList);
         log.debug("[SIDEBAR] Number of sidebar entries: {}", sidebarEntries.size());
         
         Mat sidebar = getSidebar(illustrations.getScene(), sidebarEntries, matches, matchList);
@@ -281,23 +282,14 @@ public class AnalysisSidebar {
      *
      * @param illustrations source of scene data for extracting regions
      * @param matches complete action results
-     * @param actionOptions determines special visualization requirements
+     * @param actionConfig determines special visualization requirements
      * @param matchList specific matches to display (may be filtered)
      * @return list of prepared Mat entries ready for grid layout
      */
-    private List<Mat> getEntriesForSceneSidebar(Visualization illustrations, ActionResult matches, ActionOptions actionOptions, List<Match> matchList) {
+    private List<Mat> getEntriesForSceneSidebar(Visualization illustrations, ActionResult matches, ActionConfig actionConfig, List<Match> matchList) {
         List<Mat> sidebarEntries = new ArrayList<>();
-        if (actionOptions.getFind() == ActionOptions.Find.MOTION || actionOptions.getFind() == ActionOptions.Find.REGIONS_OF_MOTION) {
-            matchList.forEach(m -> sidebarEntries.add(getMatchForSidebar(illustrations, m)));
-            return sidebarEntries;
-        }
-        if (actionOptions.getFind() == ActionOptions.Find.HISTOGRAM) {
-            matches.getMatchList().forEach(mO -> {
-                Mat matchOnScene = getMatchForSidebar(illustrations, mO);
-                sidebarEntries.add(getMatchAndHistogram(matchOnScene, mO));
-            });
-            return sidebarEntries;
-        }
+        // For now, just show all matches without special handling
+        // Motion and histogram strategies would need separate handling based on config type
         matches.getMatchList().forEach(m -> sidebarEntries.add(getMatchForSidebar(illustrations, m)));
         return sidebarEntries;
     }

@@ -28,7 +28,7 @@
  * @RequiredArgsConstructor
  * @Slf4j
  * public class LoginToDashboardTransition {
- *     private final ActionOptions actionOptions;
+ *     private final ActionConfig actionConfig;
  *     
  *     public boolean execute() {
  *         // Transition logic here

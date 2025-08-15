@@ -1,7 +1,8 @@
 package io.github.jspinak.brobot.tools.testing.mock.verification;
 
-import io.github.jspinak.brobot.action.internal.options.ActionOptions;
+import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.ActionResult;
+import io.github.jspinak.brobot.action.ActionType;
 import io.github.jspinak.brobot.tools.testing.mock.scenario.MockTestContext;
 import lombok.Builder;
 import lombok.Data;
@@ -36,7 +37,7 @@ import java.util.function.Predicate;
  *     
  * // Verify action execution patterns
  * verifier.expectActionPattern("retry_pattern")
- *     .action(ActionOptions.Action.FIND)
+ *     .action(ActionType.FIND)
  *     .maxAttempts(3)
  *     .withBackoff(Duration.ofMillis(500))
  *     .verify();
@@ -80,7 +81,7 @@ public class MockBehaviorVerifier {
      * @param result the result of the action
      * @param context current test context
      */
-    public void recordAction(ActionOptions.Action action, ActionResult result, MockTestContext context) {
+    public void recordAction(ActionType action, ActionResult result, MockTestContext context) {
         ExecutionEvent event = ExecutionEvent.builder()
             .timestamp(LocalDateTime.now())
             .action(action)
@@ -200,7 +201,7 @@ public class MockBehaviorVerifier {
     @Builder
     public static class ExecutionEvent {
         private final LocalDateTime timestamp;
-        private final ActionOptions.Action action;
+        private final ActionType action;
         private final ActionResult result;
         private final String fromState;
         private final String toState;

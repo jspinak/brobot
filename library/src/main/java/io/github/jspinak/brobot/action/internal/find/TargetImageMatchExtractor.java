@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.action.internal.find;
 
-import io.github.jspinak.brobot.action.internal.options.ActionOptions;
+import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.model.analysis.color.PixelProfiles;
 import io.github.jspinak.brobot.analysis.compare.ContourExtractor;
 import io.github.jspinak.brobot.model.state.StateImage;
@@ -67,16 +67,16 @@ public class TargetImageMatchExtractor {
      * 
      * @param sceneAnalysisCollection contains classified scenes to search
      * @param targetImages the specific state images to find matches for
-     * @param actionOptions configuration including size and score constraints
+     * @param actionConfig configuration including size and score constraints
      * @return ActionResult containing all matches found across all scenes
      */
     public ActionResult getMatches(SceneAnalyses sceneAnalysisCollection, Set<StateImage> targetImages,
-                              ActionOptions actionOptions) {
+                              ActionConfig actionConfig) {
         ActionResult matches = new ActionResult();
         List<SceneAnalysis> sceneAnalyses = sceneAnalysisCollection.getSceneAnalyses();
         if (sceneAnalyses.isEmpty()) return matches;
         for (SceneAnalysis sceneAnalysis : sceneAnalyses) {
-            ActionResult matchesForScene = getMatchesForOneScene(sceneAnalysis, targetImages, actionOptions);
+            ActionResult matchesForScene = getMatchesForOneScene(sceneAnalysis, targetImages, actionConfig);
             matches.addAllResults(matchesForScene);
         }
         return matches;
@@ -98,14 +98,14 @@ public class TargetImageMatchExtractor {
      * 
      * @param sceneAnalysis the analyzed scene with classification results
      * @param targetImages the state images to find matches for
-     * @param actionOptions configuration for match extraction
+     * @param actionConfig configuration for match extraction
      * @return ActionResult containing matches for this scene
      */
     private ActionResult getMatchesForOneScene(SceneAnalysis sceneAnalysis, Set<StateImage> targetImages,
-                                          ActionOptions actionOptions) {
+                                          ActionConfig actionConfig) {
         ActionResult matches = new ActionResult();
         for (StateImage sio : targetImages) {
-            List<Region> searchRegions = selectRegions.getRegions(actionOptions, sio);
+            List<Region> searchRegions = selectRegions.getRegions(actionConfig, sio);
             Mat resultsInColor = sceneAnalysis.getAnalysis(BGR, BGR_FROM_INDICES_2D_TARGETS);
             Mat scoresMat = sceneAnalysis.getScoresMat(sio);
             Optional<PixelProfiles> pixelAnalysisCollection = sceneAnalysis.getPixelAnalysisCollection(sio);
@@ -114,8 +114,9 @@ public class TargetImageMatchExtractor {
                         .setScoreThresholdDist(pixelAnalysisCollection.get().getAnalysis(SCORE_DIST_BELOW_THRESHHOLD, BGR))
                         .setScores(scoresMat)
                         .setBgrFromClassification2d(resultsInColor)
-                        .setMinArea(actionOptions.getMinArea())
-                        .setMaxArea(actionOptions.getMaxArea())
+                        // Use default min/max area since ActionConfig doesn't have these methods
+                        .setMinArea(10)
+                        .setMaxArea(Integer.MAX_VALUE)
                         .setSearchRegions(searchRegions)
                         .build();
                 sceneAnalysis.setContours(contours);

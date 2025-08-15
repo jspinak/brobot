@@ -1,4 +1,5 @@
 package io.github.jspinak.brobot.action.basic.find;
+import io.github.jspinak.brobot.action.ActionType;
 
 import io.github.jspinak.brobot.action.ActionInterface;
 import io.github.jspinak.brobot.action.ActionResult;

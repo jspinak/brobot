@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.action.internal.find.pixel;
 
-import io.github.jspinak.brobot.action.internal.options.ActionOptions;
+import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.analysis.compare.ContourExtractor;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.internal.find.SearchRegionResolver;
@@ -77,17 +77,18 @@ public class PixelRegionExtractor {
      * trigger debug visualization if contours are found</p>
      *
      * @param sceneAnalysis contains classification results and scene data
-     * @param actionOptions configuration including size constraints
+     * @param actionConfig configuration including size constraints
      * @return ActionResult containing found matches
      */
-    public ActionResult find(SceneAnalysis sceneAnalysis, ActionOptions actionOptions) {
+    public ActionResult find(SceneAnalysis sceneAnalysis, ActionConfig actionConfig) {
         List<Region> searchRegions = new ArrayList<>();
-        sceneAnalysis.getStateImageObjects().forEach(sio -> searchRegions.addAll(selectRegions.getRegions(actionOptions, sio)));
+        sceneAnalysis.getStateImageObjects().forEach(sio -> searchRegions.addAll(selectRegions.getRegions(actionConfig, sio)));
         ContourExtractor contours = new ContourExtractor.Builder()
                 .setBgrFromClassification2d(sceneAnalysis.getAnalysis(BGR, BGR_FROM_INDICES_2D))
                 .setSearchRegions(searchRegions)
-                .setMinArea(actionOptions.getMinArea())
-                .setMaxArea(actionOptions.getMaxArea())
+                // Use default values since ActionConfig doesn't have these methods
+                .setMinArea(1)
+                .setMaxArea(-1)
                 .build();
         List<Match> matchList = contours.getMatchList();
         if (!contours.getContours().isEmpty()) showScoring(contours, sceneAnalysis);

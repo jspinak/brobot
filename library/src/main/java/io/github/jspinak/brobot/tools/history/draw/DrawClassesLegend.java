@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.tools.history.draw;
 
-import io.github.jspinak.brobot.action.internal.options.ActionOptions;
+import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.analysis.color.profiles.ProfileMatrixBuilder;
 import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.tools.history.VisualizationLayout;
@@ -106,13 +106,13 @@ public class DrawClassesLegend {
      * 
      * @param visualization container for all visualization components
      * @param imgs list of StateImage objects to include in the legend
-     * @param actionOptions configuration options affecting color profile display
+     * @param actionConfig configuration options affecting color profile display
      */
-    public void drawLegend(Visualization visualization, List<StateImage> imgs, ActionOptions actionOptions) {
+    public void drawLegend(Visualization visualization, List<StateImage> imgs, ActionConfig actionConfig) {
         if (visualization.getScene() == null) return;
         initSidebar(visualization.getScene(), imgs.size());
         List<Mat> imgEntries = getAllImageEntries(imgs);
-        List<Mat> kmeansEntries = getAllColorEntries(imgs, actionOptions);
+        List<Mat> kmeansEntries = getAllColorEntries(imgs, actionConfig);
         Mat legend = getImagesAndKmeansCentersColumns(imgEntries, kmeansEntries);
         visualization.setLegend(legend);
     }
@@ -208,13 +208,13 @@ public class DrawClassesLegend {
      * colors found through clustering analysis.</p>
      * 
      * @param imgs list of StateImage objects to process
-     * @param actionOptions configuration affecting color profile generation
+     * @param actionConfig configuration affecting color profile generation
      * @return list of matrices, each containing one StateImage's color centers
      */
-    private List<Mat> getAllColorEntries(List<StateImage> imgs, ActionOptions actionOptions) {
+    private List<Mat> getAllColorEntries(List<StateImage> imgs, ActionConfig actionConfig) {
         List<Mat> sidebarEntries = new ArrayList<>();
         for (StateImage img : imgs) {
-            Mat entry = getKmeansCenterEntry(img, actionOptions);
+            Mat entry = getKmeansCenterEntry(img, actionConfig);
             sidebarEntries.add(entry);
         }
         return sidebarEntries;
@@ -228,13 +228,13 @@ public class DrawClassesLegend {
      * arranged horizontally to show the color distribution.</p>
      * 
      * @param img StateImage containing color cluster data
-     * @param actionOptions configuration for profile visualization
+     * @param actionConfig configuration for profile visualization
      * @return matrix with horizontally arranged color center swatches
      */
-    private Mat getKmeansCenterEntry(StateImage img, ActionOptions actionOptions) {
+    private Mat getKmeansCenterEntry(StateImage img, ActionConfig actionConfig) {
         return new MatBuilder()
                 .setName("classes legend")
-                .addHorizontalSubmats(profileMatrixBuilder.getProfilesMat(img, actionOptions))
+                .addHorizontalSubmats(profileMatrixBuilder.getProfilesMat(img, actionConfig))
                 .setSpaceBetween(spacesBetweenEntries)
                 .build();
     }

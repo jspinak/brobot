@@ -19,8 +19,6 @@ import org.sikuli.basics.Settings;
 import org.sikuli.script.ImagePath;
 import org.sikuli.script.Region;
 import org.sikuli.script.Screen;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -37,19 +35,19 @@ import java.util.Optional;
  * 2. Make sure the image is visible on screen when running the test
  * 3. Run the test and check the console output for debugging information
  */
-@SpringBootTest(classes = io.github.jspinak.brobot.test.TestConfiguration.class, classes = io.github.jspinak.brobot.test.TestConfiguration.class)
+
 public class ImageMatchingDebugTest {
 
-    @Autowired
+    // @Autowired
     private FindImage findImage;
     
-    @Autowired
+    // @Autowired
     private ScreenshotCapture screenshotCapture;
     
-    @Autowired
+    // @Autowired
     private SaveToFile saveToFile;
     
-    @Autowired
+    // @Autowired
     private MatImageRecognition matImageRecognition;
     
     // Test image paths - update these to your actual image paths

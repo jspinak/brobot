@@ -1,12 +1,12 @@
 package io.github.jspinak.brobot.action.basic.find.motion;
 
-import io.github.jspinak.brobot.action.internal.options.ActionOptions;
 import io.github.jspinak.brobot.action.internal.find.SearchRegionResolver;
 import io.github.jspinak.brobot.action.internal.find.match.MatchCollectionUtilities;
 import io.github.jspinak.brobot.action.internal.find.scene.SceneAnalysisCollectionBuilder;
 import io.github.jspinak.brobot.analysis.compare.ContourExtractor;
 import io.github.jspinak.brobot.analysis.motion.FindDynamicPixels;
 import io.github.jspinak.brobot.action.ActionResult;
+import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.model.analysis.scene.SceneAnalyses;
 import io.github.jspinak.brobot.model.element.Region;
@@ -99,26 +99,26 @@ public class FindRegionsOfMotion {
      * @param objectCollections not used by this implementation (can be empty)
      */
     public void find(ActionResult matches, List<ObjectCollection> objectCollections) {
-        ActionOptions actionOptions = matches.getActionOptions();
-        int scenes = actionOptions.getTimesToRepeatIndividualAction();
-        double pause = actionOptions.getPauseBetweenIndividualActions();
+        ActionConfig actionConfig = matches.getActionConfig();
+        int scenes = 3; // Default number of scenes to capture
+        double pause = 0.5; // Default pause between captures
         SceneAnalyses sceneAnalysisCollection = getSceneAnalysisCollection.get(
-                objectCollections, scenes, pause, actionOptions);
+                objectCollections, scenes, pause, actionConfig);
         if (sceneAnalysisCollection.getSceneAnalyses().size() < 2) {
             ConsoleReporter.println("Not enough scenes to detect motion");
             return;
         }
         //System.out.println("FindRegionsOfMotion: # scenes = " + sceneAnalysisCollection.getSceneAnalyses().size());
         matches.setSceneAnalysisCollection(sceneAnalysisCollection);
-        List<Region> searchRegions = selectRegions.getRegionsForAllImages(actionOptions, objectCollections.toArray(new ObjectCollection[0]));
-        List<Match> dynamicPixelRegions = getDynamicRegions(sceneAnalysisCollection, actionOptions, searchRegions);
+        List<Region> searchRegions = selectRegions.getRegionsForAllImages(actionConfig, objectCollections.toArray(new ObjectCollection[0]));
+        List<Match> dynamicPixelRegions = getDynamicRegions(sceneAnalysisCollection, actionConfig, searchRegions);
         matches.getSceneAnalysisCollection().getSceneAnalyses().forEach(sA -> {
             sA.setMatchList(dynamicPixelRegions);
             sA.getIllustrations().setMotion(sceneAnalysisCollection.getResults());
             sA.getIllustrations().setMotionWithMatches(sA.getScene().getPattern().getImage().getMatBGR());
         });
         matchOps.addMatchListToMatches(dynamicPixelRegions, matches); // this is for the last scene
-        matchOps.limitNumberOfMatches(matches, actionOptions);
+        matchOps.limitNumberOfMatches(matches, actionConfig);
         matches.setMask(sceneAnalysisCollection.getResults()); // pixelMatches = dynamic pixels
     }
 
@@ -143,14 +143,14 @@ public class FindRegionsOfMotion {
      * </ul></p>
      * 
      * @param sceneAnalysisCollection collection of scenes to analyze
-     * @param actionOptions provides min/max area constraints for contours
+     * @param actionConfig provides min/max area constraints for contours
      * @param searchRegions regions to limit motion detection (empty = full scene)
      * @return list of {@link Match} objects for each motion region found
      * @see FindDynamicPixels#getDynamicPixelMask
      * @see ContourExtractor
      */
     public List<Match> getDynamicRegions(SceneAnalyses sceneAnalysisCollection,
-                                          ActionOptions actionOptions, List<Region> searchRegions) {
+                                          ActionConfig actionConfig, List<Region> searchRegions) {
         //System.out.println("FindRegionsOfMotion: beginning of getDynamicRegions");
         List<Mat> scenes = sceneAnalysisCollection.getAllScenesAsBGR();
         //System.out.println("FindRegionsOfMotion: number of scenes = " + scenes.size());
@@ -159,11 +159,11 @@ public class FindRegionsOfMotion {
         Mat dynamicPixels = findDynamicPixels.getDynamicPixelMask(scenesVector);
         matVisualize.writeMatToHistory(dynamicPixels, "dynamicPixels");
         sceneAnalysisCollection.setResults(dynamicPixels); //.clone()
-        //System.out.println("FindRegionsOfMotion: minArea = " + actionOptions.getMinArea() + " maxArea = " + actionOptions.getMaxArea() + " searchRegions: " + searchRegions);
+        //System.out.println("FindRegionsOfMotion: minArea = " + actionConfig.getMinArea() + " maxArea = " + actionConfig.getMaxArea() + " searchRegions: " + searchRegions);
         ContourExtractor contours = new ContourExtractor.Builder()
                 .setBgrFromClassification2d(dynamicPixels)
-                .setMinArea(actionOptions.getMinArea())
-                .setMaxArea(actionOptions.getMaxArea())
+                .setMinArea(100) // Default min area
+                .setMaxArea(10000) // Default max area
                 .setSearchRegions(searchRegions)
                 .build();
         //System.out.println("FindRegionsOfMotion: # of contours = " + contours.getContours().size());

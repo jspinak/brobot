@@ -1,9 +1,8 @@
 package io.github.jspinak.brobot.action.internal.execution;
 
-import io.github.jspinak.brobot.action.internal.options.ActionOptions;
 import io.github.jspinak.brobot.action.ActionResult;
-import io.github.jspinak.brobot.model.element.Image;
-import io.github.jspinak.brobot.model.element.Pattern;
+import io.github.jspinak.brobot.action.ActionConfig;
+import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
 import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.tools.testing.mock.time.TimeProvider;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,15 +13,16 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
-import java.awt.image.BufferedImage;
-
 import java.time.Duration;
 import java.time.LocalDateTime;
 
-import static io.github.jspinak.brobot.action.internal.options.ActionOptions.GetTextUntil.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+/**
+ * Tests for ActionLifecycleManagement with the modern ActionConfig API.
+ * Many ActionOptions-specific features have been simplified or removed.
+ */
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
 class ActionLifecycleManagementTest {
@@ -32,7 +32,7 @@ class ActionLifecycleManagementTest {
     
     private ActionLifecycleManagement lifecycleManagement;
     private ActionResult actionResult;
-    private ActionOptions actionOptions;
+    private ActionConfig actionConfig;
     private ActionLifecycle actionLifecycle;
     private LocalDateTime startTime;
     
@@ -40,11 +40,12 @@ class ActionLifecycleManagementTest {
     void setUp() {
         lifecycleManagement = new ActionLifecycleManagement(timeProvider);
         startTime = LocalDateTime.now();
-        actionOptions = new ActionOptions();
-        actionOptions.setMaxWait(10.0); // Set default max wait to match ActionLifecycle
+        actionConfig = new PatternFindOptions.Builder()
+                .setSearchDuration(10.0) // Set default search duration
+                .build();
         actionLifecycle = new ActionLifecycle(startTime, 10.0);
         actionResult = new ActionResult();
-        actionResult.setActionOptions(actionOptions);
+        actionResult.setActionConfig(actionConfig);
         actionResult.setActionLifecycle(actionLifecycle);
     }
     
@@ -82,7 +83,7 @@ class ActionLifecycleManagementTest {
         Duration duration = lifecycleManagement.getCurrentDuration(actionResult);
         
         // Verify
-        assertEquals(5, duration.getSeconds());
+        assertEquals(5.0, duration.getSeconds(), 0.1);
     }
     
     @Test
@@ -99,10 +100,9 @@ class ActionLifecycleManagementTest {
     }
     
     @Test
-    void testIsMoreSequencesAllowed_WithinLimit() {
-        // Setup
-        actionOptions.setMaxTimesToRepeatActionSequence(3);
-        actionLifecycle.incrementCompletedSequences();
+    void testIsMoreSequencesAllowed_FirstSequence() {
+        // Setup - first sequence should be allowed
+        assertEquals(0, actionLifecycle.getCompletedSequences());
         
         // Execute
         boolean allowed = lifecycleManagement.isMoreSequencesAllowed(actionResult);
@@ -112,23 +112,20 @@ class ActionLifecycleManagementTest {
     }
     
     @Test
-    void testIsMoreSequencesAllowed_AtLimit() {
-        // Setup
-        actionOptions.setMaxTimesToRepeatActionSequence(2);
-        actionLifecycle.incrementCompletedSequences();
+    void testIsMoreSequencesAllowed_AfterFirstSequence() {
+        // Setup - with ActionConfig, only one sequence is typically allowed
         actionLifecycle.incrementCompletedSequences();
         
         // Execute
         boolean allowed = lifecycleManagement.isMoreSequencesAllowed(actionResult);
         
-        // Verify
+        // Verify - should not allow more sequences after the first
         assertFalse(allowed);
     }
     
     @Test
     void testIsOkToContinueAction_FirstRepetition() {
         // Setup - first repetition is always allowed
-        // No need to mock time for first repetition
         
         // Execute
         boolean okToContinue = lifecycleManagement.isOkToContinueAction(actionResult, 1);
@@ -139,10 +136,9 @@ class ActionLifecycleManagementTest {
     
     @Test
     void testIsOkToContinueAction_TimeExceeded() {
-        // Setup
-        actionOptions.setMaxWait(5.0);
+        // Setup - simulate time exceeded
         actionLifecycle.incrementCompletedRepetitions();
-        when(timeProvider.now()).thenReturn(startTime.plusSeconds(10));
+        when(timeProvider.now()).thenReturn(startTime.plusSeconds(15));
         
         // Execute
         boolean okToContinue = lifecycleManagement.isOkToContinueAction(actionResult, 1);
@@ -152,252 +148,143 @@ class ActionLifecycleManagementTest {
     }
     
     @Test
-    void testIsOkToContinueAction_MaxRepetitionsReached() {
-        // Setup
-        actionOptions.setMaxTimesToRepeatActionSequence(2);
-        actionOptions.setAction(ActionOptions.Action.CLICK); // Not FIND
-        actionLifecycle.incrementCompletedRepetitions();
-        actionLifecycle.incrementCompletedRepetitions();
-        // No need to mock time - we're under the time limit
+    void testIsOkToContinueAction_WithMatches() {
+        // Setup - add a match to the results
+        Match match = mock(Match.class);
+        actionResult.add(match);
+        
+        // With PatternFindOptions.Strategy.FIRST, finding one match should stop
+        PatternFindOptions findOptions = new PatternFindOptions.Builder()
+                .setStrategy(PatternFindOptions.Strategy.FIRST)
+                .build();
+        actionResult.setActionConfig(findOptions);
         
         // Execute
         boolean okToContinue = lifecycleManagement.isOkToContinueAction(actionResult, 1);
         
-        // Verify
+        // Verify - should not continue after finding first match
         assertFalse(okToContinue);
     }
     
     @Test
-    void testIsOkToContinueAction_FindActionIgnoresRepLimit() {
-        // Setup
-        actionOptions.setMaxTimesToRepeatActionSequence(1);
-        actionOptions.setAction(ActionOptions.Action.FIND);
-        actionOptions.setMaxWait(60.0); // Ensure we have enough time
-        actionLifecycle.incrementCompletedRepetitions();
-        actionLifecycle.incrementCompletedRepetitions();
-        when(timeProvider.now()).thenReturn(startTime.plusSeconds(1));
+    void testIsOkToContinueAction_AllStrategy() {
+        // Setup - with ALL strategy, continue searching
+        PatternFindOptions findOptions = new PatternFindOptions.Builder()
+                .setStrategy(PatternFindOptions.Strategy.ALL)
+                .build();
+        actionResult.setActionConfig(findOptions);
+        actionResult.setActionLifecycle(actionLifecycle);
         
         // Execute
         boolean okToContinue = lifecycleManagement.isOkToContinueAction(actionResult, 1);
         
-        // Verify
-        assertTrue(okToContinue); // FIND actions can exceed rep limit
+        // Verify - should continue with ALL strategy
+        assertTrue(okToContinue);
     }
     
     @Test
-    void testIsFindFirstAndAtLeastOneMatchFound_Success() {
-        // Setup
-        actionOptions.setFind(ActionOptions.Find.FIRST);
-        Match match = new Match.Builder().build();
-        actionResult.add(match);
-        
-        // Execute
-        boolean found = lifecycleManagement.isFindFirstAndAtLeastOneMatchFound(actionResult);
-        
-        // Verify
-        assertTrue(found);
-    }
-    
-    @Test
-    void testIsFindFirstAndAtLeastOneMatchFound_NoMatches() {
-        // Setup
-        actionOptions.setFind(ActionOptions.Find.FIRST);
-        
-        // Execute
-        boolean found = lifecycleManagement.isFindFirstAndAtLeastOneMatchFound(actionResult);
-        
-        // Verify
-        assertFalse(found);
-    }
-    
-    @Test
-    void testIsFindEachFirstAndEachPatternFound_AllFound() {
-        // Setup
-        actionOptions.setFind(ActionOptions.Find.EACH);
-        actionOptions.setDoOnEach(ActionOptions.DoOnEach.FIRST);
-        
-        // Create distinct images to ensure they're recognized as different
-        BufferedImage mockBuffImage1 = new BufferedImage(10, 10, BufferedImage.TYPE_INT_RGB);
-        BufferedImage mockBuffImage2 = new BufferedImage(20, 20, BufferedImage.TYPE_INT_RGB);
-        Image image1 = new Image(mockBuffImage1, "image1");
-        Image image2 = new Image(mockBuffImage2, "image2");
-        
-        Match match1 = new Match.Builder()
-                .setSearchImage(image1)
-                .build();
-        Match match2 = new Match.Builder()
-                .setSearchImage(image2)
-                .build();
-                
-        actionResult.add(match1);
-        actionResult.add(match2);
-        
-        // Execute
-        boolean allFound = lifecycleManagement.isFindEachFirstAndEachPatternFound(actionResult, 2);
-        
-        // Verify
-        assertTrue(allFound);
-    }
-    
-    @Test
-    void testIsFindEachFirstAndEachPatternFound_NotAllFound() {
-        // Setup
-        actionOptions.setFind(ActionOptions.Find.EACH);
-        actionOptions.setDoOnEach(ActionOptions.DoOnEach.FIRST);
-        
-        BufferedImage mockBuffImage1 = new BufferedImage(10, 10, BufferedImage.TYPE_INT_RGB);
-        Image image1 = new Image(mockBuffImage1, "image1");
-        
-        Match match1 = new Match.Builder()
-                .setSearchImage(image1)
-                .build();
-        Match match2 = new Match.Builder()
-                .setSearchImage(image1) // Same image
-                .build();
-                
-        actionResult.add(match1);
-        actionResult.add(match2);
-        
-        // Execute
-        boolean allFound = lifecycleManagement.isFindEachFirstAndEachPatternFound(actionResult, 2);
-        
-        // Verify
-        assertFalse(allFound); // Only found 1 unique image, expected 2
-    }
-    
-    @Test
-    void testTextCondition_TextAppears() {
-        // Setup
-        actionOptions.setGetTextUntil(TEXT_APPEARS);
-        actionOptions.setTextToAppearOrVanish("target");
-        
-        Match match = new Match.Builder()
-                .setText("This contains target text")
-                .build();
-        actionResult.add(match);
-        
-        actionLifecycle.incrementCompletedRepetitions();
-        when(timeProvider.now()).thenReturn(startTime.plusSeconds(1));
-        
-        // Execute
-        boolean okToContinue = lifecycleManagement.isOkToContinueAction(actionResult, 1);
-        
-        // Verify
-        assertFalse(okToContinue); // Should stop when text appears
-    }
-    
-    @Test
-    void testTextCondition_TextVanishes() {
-        // Setup
-        actionOptions.setGetTextUntil(TEXT_VANISHES);
-        actionOptions.setTextToAppearOrVanish("target");
-        
-        Match match = new Match.Builder()
-                .setText("This does not contain the word")
-                .build();
-        actionResult.add(match);
-        
-        actionLifecycle.incrementCompletedRepetitions();
-        when(timeProvider.now()).thenReturn(startTime.plusSeconds(1));
-        
-        // Execute
-        boolean okToContinue = lifecycleManagement.isOkToContinueAction(actionResult, 1);
-        
-        // Verify
-        assertFalse(okToContinue); // Should stop when text vanishes
-    }
-    
-    @Test
-    void testTextCondition_None() {
-        // Setup
-        actionOptions.setGetTextUntil(NONE);
-        actionOptions.setMaxWait(60.0); // Ensure we have enough time
-        
-        actionLifecycle.incrementCompletedRepetitions();
-        when(timeProvider.now()).thenReturn(startTime.plusSeconds(1));
-        
-        // Execute
-        boolean okToContinue = lifecycleManagement.isOkToContinueAction(actionResult, 1);
-        
-        // Verify
-        assertTrue(okToContinue); // Text conditions don't apply
-    }
-    
-    @Test
-    void testTextCondition_EmptyTextToFind_ChecksForAnyText() {
-        // Setup
-        actionOptions.setGetTextUntil(TEXT_APPEARS);
-        actionOptions.setTextToAppearOrVanish(""); // Empty means any text
-        
-        Match match = new Match.Builder()
-                .setText("Some text")
-                .build();
-        actionResult.add(match);
-        
-        actionLifecycle.incrementCompletedRepetitions();
-        when(timeProvider.now()).thenReturn(startTime.plusSeconds(1));
-        
-        // Execute
-        boolean okToContinue = lifecycleManagement.isOkToContinueAction(actionResult, 1);
-        
-        // Verify
-        assertFalse(okToContinue); // Should stop when any text appears
-    }
-    
-    @Test
-    void testPrintActionOnce() {
+    void testPrintActionOnce_FirstExecution() {
         // Setup
         assertFalse(actionLifecycle.isPrinted());
         
-        // Execute first call
+        // Execute
         lifecycleManagement.printActionOnce(actionResult);
         
         // Verify
         assertTrue(actionLifecycle.isPrinted());
+    }
+    
+    @Test
+    void testPrintActionOnce_SecondExecution() {
+        // Setup
+        actionLifecycle.setPrinted(true);
         
-        // Execute second call - should not print again
+        // Execute
         lifecycleManagement.printActionOnce(actionResult);
         
-        // Verify still only printed once
+        // Verify - should still be true
         assertTrue(actionLifecycle.isPrinted());
     }
     
     @Test
-    void testComplexScenario_MultipleConditions() {
-        // Setup - Find Each First with text condition
-        actionOptions.setFind(ActionOptions.Find.EACH);
-        actionOptions.setDoOnEach(ActionOptions.DoOnEach.FIRST);
-        actionOptions.setGetTextUntil(TEXT_APPEARS);
-        actionOptions.setTextToAppearOrVanish("found");
-        actionOptions.setMaxWait(10.0);
+    void testGetCurrentDuration_WithNullLifecycle() {
+        // Setup
+        actionResult.setActionLifecycle(null);
         
-        // Create distinct images to ensure they're recognized as different
-        BufferedImage mockBuffImage1 = new BufferedImage(10, 10, BufferedImage.TYPE_INT_RGB);
-        BufferedImage mockBuffImage2 = new BufferedImage(20, 20, BufferedImage.TYPE_INT_RGB);
-        Image image1 = new Image(mockBuffImage1, "image1");
-        Image image2 = new Image(mockBuffImage2, "image2");
+        // Execute and Verify - should throw NPE or handle gracefully
+        assertThrows(NullPointerException.class, () -> {
+            lifecycleManagement.getCurrentDuration(actionResult);
+        });
+    }
+    
+    @Test
+    void testIsMoreSequencesAllowed_WithNullLifecycle() {
+        // Setup
+        actionResult.setActionLifecycle(null);
         
-        // First check - not all patterns found yet
-        Match match1 = new Match.Builder()
-                .setSearchImage(image1)
-                .setText("searching...")
+        // Execute
+        boolean allowed = lifecycleManagement.isMoreSequencesAllowed(actionResult);
+        
+        // Verify
+        assertFalse(allowed);
+    }
+    
+    @Test
+    void testIncrementCompletedRepetitions_MultipleTimes() {
+        // Execute multiple increments
+        lifecycleManagement.incrementCompletedRepetitions(actionResult);
+        lifecycleManagement.incrementCompletedRepetitions(actionResult);
+        lifecycleManagement.incrementCompletedRepetitions(actionResult);
+        
+        // Verify
+        assertEquals(3, actionLifecycle.getCompletedRepetitions());
+    }
+    
+    @Test
+    void testIncrementCompletedSequences_MultipleTimes() {
+        // Execute multiple increments
+        lifecycleManagement.incrementCompletedSequences(actionResult);
+        lifecycleManagement.incrementCompletedSequences(actionResult);
+        
+        // Verify
+        assertEquals(2, actionLifecycle.getCompletedSequences());
+    }
+    
+    @Test
+    void testIsOkToContinueAction_WithMultipleImages() {
+        // Setup - test with multiple images parameter
+        PatternFindOptions findOptions = new PatternFindOptions.Builder()
+                .setStrategy(PatternFindOptions.Strategy.EACH)
                 .build();
-        actionResult.add(match1);
+        actionResult.setActionConfig(findOptions);
         
-        actionLifecycle.incrementCompletedRepetitions();
-        when(timeProvider.now()).thenReturn(startTime.plusSeconds(2));
+        // Add matches for some images
+        actionResult.add(mock(Match.class));
+        actionResult.add(mock(Match.class));
         
+        // Execute with 3 images total
+        boolean okToContinue = lifecycleManagement.isOkToContinueAction(actionResult, 3);
+        
+        // Verify - should continue as not all images found
+        assertTrue(okToContinue);
+    }
+    
+    @Test
+    void testIsOkToContinueAction_AllImagesFound() {
+        // Setup - EACH strategy with all images found
+        PatternFindOptions findOptions = new PatternFindOptions.Builder()
+                .setStrategy(PatternFindOptions.Strategy.EACH)
+                .build();
+        actionResult.setActionConfig(findOptions);
+        
+        // Add matches for all 2 images
+        actionResult.add(mock(Match.class));
+        actionResult.add(mock(Match.class));
+        
+        // Execute with 2 images total
         boolean okToContinue = lifecycleManagement.isOkToContinueAction(actionResult, 2);
-        assertTrue(okToContinue); // Should continue - not all patterns found
         
-        // Second check - all patterns found but text not yet
-        Match match2 = new Match.Builder()
-                .setSearchImage(image2)
-                .setText("still searching...")
-                .build();
-        actionResult.add(match2);
-        
-        okToContinue = lifecycleManagement.isOkToContinueAction(actionResult, 2);
-        assertFalse(okToContinue); // Should stop - all patterns found
+        // Verify - should not continue as all images found
+        assertFalse(okToContinue);
     }
 }

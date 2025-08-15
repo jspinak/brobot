@@ -49,7 +49,7 @@
  * WaitVanish waitVanish = new WaitVanish(...);
  * 
  * ActionOptions vanishOptions = new ActionOptions.Builder()
- *     .setAction(ActionOptions.Action.VANISH)
+ *     .setAction(ActionType.VANISH)
  *     .setMaxWait(30.0)  // Wait up to 30 seconds
  *     .build();
  * 
@@ -67,7 +67,7 @@
  * OnChange onChange = new OnChange(...);
  * 
  * ActionOptions changeOptions = new ActionOptions.Builder()
- *     .setAction(ActionOptions.Action.ON_CHANGE)
+ *     .setAction(ActionType.ON_CHANGE)
  *     .setMaxWait(10.0)
  *     .setPollInterval(0.5)  // Check every 500ms
  *     .build();

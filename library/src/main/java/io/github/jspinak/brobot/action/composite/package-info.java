@@ -142,3 +142,4 @@
  * @see io.github.jspinak.brobot.action.composite.chains.ActionConfigFacade
  */
 package io.github.jspinak.brobot.action.composite;
+import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;

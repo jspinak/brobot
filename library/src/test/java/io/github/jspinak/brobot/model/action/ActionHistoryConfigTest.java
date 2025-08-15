@@ -1,10 +1,10 @@
 package io.github.jspinak.brobot.model.action;
 
 import io.github.jspinak.brobot.action.ActionConfig;
+import io.github.jspinak.brobot.action.ActionType;
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
 import io.github.jspinak.brobot.action.basic.click.ClickOptions;
 import io.github.jspinak.brobot.action.basic.vanish.VanishOptions;
-import io.github.jspinak.brobot.action.internal.options.ActionOptions;
 import io.github.jspinak.brobot.model.match.Match;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -147,17 +147,7 @@ class ActionHistoryConfigTest {
     }
 
     @Test
-    void backwardCompatibility_mixedActionOptionsAndActionConfig() {
-        // Create record with legacy ActionOptions
-        ActionOptions legacyOptions = new ActionOptions.Builder()
-                .setAction(ActionOptions.Action.FIND)
-                .build();
-        ActionRecord legacyRecord = new ActionRecord.Builder()
-                .setActionOptions(legacyOptions)
-                .addMatch(match)
-                .build();
-        history.addSnapshot(legacyRecord);
-
+    void actionHistory_worksWithActionConfig() {
         // Create record with modern ActionConfig
         ActionRecord modernRecord = new ActionRecord.Builder()
                 .setActionConfig(findConfig)
@@ -165,55 +155,52 @@ class ActionHistoryConfigTest {
                 .build();
         history.addSnapshot(modernRecord);
 
-        // Both should be accessible via ActionConfig methods
+        // Should be accessible via ActionConfig methods
         Optional<ActionRecord> result = history.getRandomSnapshot(findConfig);
         assertThat(result).isPresent();
         
-        // Both should be accessible via legacy ActionOptions methods
-        Optional<ActionRecord> legacyResult = history.getRandomSnapshot(ActionOptions.Action.FIND);
+        // Also accessible via deprecated ActionType methods
+        Optional<ActionRecord> legacyResult = history.getRandomSnapshot(ActionType.FIND);
         assertThat(legacyResult).isPresent();
         
-        assertThat(history.getTimesSearched()).isEqualTo(2);
-        assertThat(history.getTimesFound()).isEqualTo(2);
+        assertThat(history.getTimesSearched()).isEqualTo(1);
+        assertThat(history.getTimesFound()).isEqualTo(1);
     }
 
     @Test 
-    void actionRecord_storesBothActionConfigAndActionOptions() {
+    void actionRecord_storesActionConfig() {
         ActionRecord record = new ActionRecord.Builder()
                 .setActionConfig(findConfig)
                 .build();
 
         // Should have ActionConfig
         assertThat(record.getActionConfig()).isEqualTo(findConfig);
-        
-        // Should also have ActionOptions for backward compatibility
-        assertThat(record.getActionOptions()).isNotNull();
-        assertThat(record.getActionOptions().getAction()).isEqualTo(ActionOptions.Action.FIND);
+        assertThat(record.getActionConfig()).isInstanceOf(PatternFindOptions.class);
     }
 
     @Test
-    void actionConfigAdapter_correctlyMapsActionTypes() {
-        ActionConfigAdapter adapter = new ActionConfigAdapter();
-        
-        assertThat(adapter.getActionType(findConfig)).isEqualTo(ActionOptions.Action.FIND);
-        assertThat(adapter.getActionType(clickConfig)).isEqualTo(ActionOptions.Action.CLICK);
-        assertThat(adapter.getActionType(vanishConfig)).isEqualTo(ActionOptions.Action.VANISH);
-    }
-
-    @Test
-    void actionConfigAdapter_correctlyMapsFindStrategies() {
-        ActionConfigAdapter adapter = new ActionConfigAdapter();
-        
-        PatternFindOptions firstStrategy = new PatternFindOptions.Builder()
-                .setStrategy(PatternFindOptions.Strategy.FIRST)
+    void actionHistory_correctlyIdentifiesActionTypes() {
+        // Test that ActionHistory can correctly identify action types from ActionConfig
+        ActionRecord findRecord = new ActionRecord.Builder()
+                .setActionConfig(findConfig)
+                .addMatch(match)
                 .build();
-        PatternFindOptions allStrategy = new PatternFindOptions.Builder()
-                .setStrategy(PatternFindOptions.Strategy.ALL)
+        ActionRecord clickRecord = new ActionRecord.Builder()
+                .setActionConfig(clickConfig)
+                .addMatch(match)
+                .build();
+        ActionRecord vanishRecord = new ActionRecord.Builder()
+                .setActionConfig(vanishConfig)
                 .build();
                 
-        assertThat(adapter.getFindStrategy(firstStrategy)).isEqualTo(ActionOptions.Find.FIRST);
-        assertThat(adapter.getFindStrategy(allStrategy)).isEqualTo(ActionOptions.Find.ALL);
-        assertThat(adapter.getFindStrategy(clickConfig)).isEqualTo(ActionOptions.Find.UNIVERSAL);
+        history.addSnapshot(findRecord);
+        history.addSnapshot(clickRecord);
+        history.addSnapshot(vanishRecord);
+        
+        // Verify each can be retrieved by the correct ActionConfig
+        assertThat(history.getRandomSnapshot(findConfig)).isPresent();
+        assertThat(history.getRandomSnapshot(clickConfig)).isPresent();
+        assertThat(history.getRandomSnapshot(vanishConfig)).isPresent();
     }
 
     @Test

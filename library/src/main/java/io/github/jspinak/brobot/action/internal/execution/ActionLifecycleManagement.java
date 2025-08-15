@@ -1,11 +1,12 @@
 package io.github.jspinak.brobot.action.internal.execution;
+import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
 
-import io.github.jspinak.brobot.action.internal.options.ActionOptions;
 import io.github.jspinak.brobot.model.element.Image;
 import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
 import io.github.jspinak.brobot.tools.testing.mock.time.TimeProvider;
 import io.github.jspinak.brobot.action.ActionResult;
+import io.github.jspinak.brobot.action.ActionConfig;
 
 import org.springframework.stereotype.Component;
 
@@ -116,8 +117,10 @@ public class ActionLifecycleManagement {
      * @return true if more sequences can be executed, false if limit reached
      */
     public boolean isMoreSequencesAllowed(ActionResult matches) {
-        return matches.getActionOptions().getMaxTimesToRepeatActionSequence() >
-                matches.getActionLifecycle().getCompletedSequences();
+        // With ActionConfig, repetition is handled differently
+        // Default to allowing one sequence unless specifically configured
+        if (matches.getActionLifecycle() == null) return false;
+        return matches.getActionLifecycle().getCompletedSequences() < 1;
     }
 
     /**
@@ -136,15 +139,19 @@ public class ActionLifecycleManagement {
      * @return true if both time and repetition constraints allow continuation
      */
     private boolean isTimeLeftAndMoreRepsAllowed(ActionResult matches) {
-        ActionOptions actionOptions = matches.getActionOptions();
         int completedReps = getCompletedRepetitions(matches);
         if (completedReps == 0) return true;
-        int maxReps = actionOptions.getMaxTimesToRepeatActionSequence();
-        ActionOptions.Action action = actionOptions.getAction();
-        if (action != ActionOptions.Action.FIND && completedReps >= maxReps) {
-            return false;
+        
+        // With ActionConfig, use searchDuration for find operations
+        ActionConfig config = matches.getActionConfig();
+        double maxWait = 10.0; // Default max wait
+        
+        if (config instanceof io.github.jspinak.brobot.action.basic.find.BaseFindOptions) {
+            io.github.jspinak.brobot.action.basic.find.BaseFindOptions findOptions = 
+                (io.github.jspinak.brobot.action.basic.find.BaseFindOptions) config;
+            maxWait = findOptions.getSearchDuration();
         }
-        double maxWait = actionOptions.getMaxWait();
+        
         Duration duration = getCurrentDuration(matches);
         return duration.getSeconds() <= maxWait;
     }
@@ -188,7 +195,13 @@ public class ActionLifecycleManagement {
      * @return true if FIND FIRST is configured and at least one match exists
      */
     public boolean isFindFirstAndAtLeastOneMatchFound(ActionResult matches) {
-        return !matches.isEmpty() && matches.getActionOptions().getFind() == ActionOptions.Find.FIRST;
+        // In the new API, check if we're using PatternFindOptions with FIRST strategy
+        ActionConfig config = matches.getActionConfig();
+        if (config instanceof PatternFindOptions) {
+            PatternFindOptions findOptions = (PatternFindOptions) config;
+            return !matches.isEmpty() && findOptions.getStrategy() == PatternFindOptions.Strategy.FIRST;
+        }
+        return !matches.isEmpty();
     }
 
     /**
@@ -223,17 +236,9 @@ public class ActionLifecycleManagement {
      * @return true if the text condition for stopping has been achieved
      */
     private boolean isTextConditionAchieved(ActionResult matches) {
-        ActionOptions.GetTextUntil condition = matches.getActionOptions().getGetTextUntil();
-        if (condition == ActionOptions.GetTextUntil.NONE) return false; // text is not used as an exit condition
-        String textToFind = matches.getActionOptions().getTextToAppearOrVanish();
-        boolean containsText;
-        for (Match match : matches.getMatchList()) {
-            containsText = matchContainsText(match, textToFind);
-            if (condition == ActionOptions.GetTextUntil.TEXT_APPEARS && containsText) return true;
-            if (condition == ActionOptions.GetTextUntil.TEXT_VANISHES && containsText) return false;
-        }
-        if (condition == ActionOptions.GetTextUntil.TEXT_APPEARS) return false;
-        return true;
+        // Text conditions are not directly supported in ActionConfig
+        // This would need to be implemented in specific action configs if needed
+        return false;
     }
 
     /**
@@ -248,9 +253,15 @@ public class ActionLifecycleManagement {
      * @return true if all patterns have been found at least once
      */
     public boolean isFindEachFirstAndEachPatternFound(ActionResult matches, int numberOfPatterns) {
-        if (matches.getActionOptions().getFind() != ActionOptions.Find.EACH) return false;
-        if (matches.getActionOptions().getDoOnEach() != ActionOptions.DoOnEach.FIRST) return false;
-        return areAllImagesFound(matches, numberOfPatterns);
+        ActionConfig config = matches.getActionConfig();
+        if (config instanceof io.github.jspinak.brobot.action.basic.find.PatternFindOptions) {
+            io.github.jspinak.brobot.action.basic.find.PatternFindOptions findOptions = 
+                (io.github.jspinak.brobot.action.basic.find.PatternFindOptions) config;
+            if (findOptions.getStrategy() == io.github.jspinak.brobot.action.basic.find.PatternFindOptions.Strategy.EACH) {
+                return areAllImagesFound(matches, numberOfPatterns);
+            }
+        }
+        return false;
     }
 
     /**

@@ -1,6 +1,7 @@
 package io.github.jspinak.brobot.action.internal.find.pixel;
 
-import io.github.jspinak.brobot.action.internal.options.ActionOptions;
+import io.github.jspinak.brobot.action.ActionConfig;
+import io.github.jspinak.brobot.config.FrameworkSettings;
 import io.github.jspinak.brobot.model.analysis.color.ColorCluster;
 import io.github.jspinak.brobot.action.basic.find.color.GetPixelAnalysisCollectionScores;
 import io.github.jspinak.brobot.analysis.color.profiles.KmeansProfileBuilder;
@@ -90,15 +91,15 @@ public class ColorAnalysisOrchestrator {
      *
      * @param scene the scene containing pixels to analyze
      * @param stateImage the target state image with color profiles
-     * @param actionOptions configuration determining analysis type (k-means or mean)
+     * @param actionConfig configuration determining analysis type (k-means or mean)
      * @return PixelAnalysisCollection containing similarity scores for all pixels
      */
     public PixelProfiles getPixelAnalysisCollection(Scene scene, StateImage stateImage,
-                                                              ActionOptions actionOptions) {
-        List<ColorCluster> colorClusters = getColorProfiles(stateImage, actionOptions);
+                                                              ActionConfig actionConfig) {
+        List<ColorCluster> colorClusters = getColorProfiles(stateImage, actionConfig);
         PixelProfiles pixelAnalysisCollection = setPixelAnalyses(scene, colorClusters);
         pixelAnalysisCollection.setStateImage(stateImage);
-        getPixelAnalysisCollectionScores.setScores(pixelAnalysisCollection, actionOptions);
+        getPixelAnalysisCollectionScores.setScores(pixelAnalysisCollection, actionConfig);
         return pixelAnalysisCollection;
     }
 
@@ -116,16 +117,17 @@ public class ColorAnalysisOrchestrator {
      * derived from separate clustering operations in each color space.</p>
      * 
      * @param img state image containing pre-computed color profiles
-     * @param actionOptions determines profile extraction method
+     * @param actionConfig determines profile extraction method
      * @return list of color profiles (multiple for k-means, single for mean)
      */
-    private List<ColorCluster> getColorProfiles(StateImage img, ActionOptions actionOptions) {
-        if (actionOptions.getColor() == ActionOptions.Color.KMEANS ||
-                actionOptions.getAction() == ActionOptions.Action.CLASSIFY) {
-            int kMeans = actionOptions.getKmeans();
+    private List<ColorCluster> getColorProfiles(StateImage img, ActionConfig actionConfig) {
+        // Simplified logic - check config type to determine profile method
+        String configType = actionConfig.getClass().getSimpleName();
+        if (configType.contains("Classify") || configType.contains("Color")) {
+            int kMeans = FrameworkSettings.kMeansInProfile; // Use default k-means value
             return img.getKmeansProfilesAllSchemas().getColorProfiles(kMeans);
         }
-        else { // ActionOptions.Color.MU, or some other operation
+        else { // Default to mean color profile
             return Collections.singletonList(img.getColorCluster());
         }
     }
@@ -185,14 +187,14 @@ public class ColorAnalysisOrchestrator {
      * @param scene the scene to analyze
      * @param targetImgs primary images for focused analysis
      * @param allImgs complete set of images for classification
-     * @param actionOptions configuration including k-means settings
+     * @param actionConfig configuration including k-means settings
      * @return SceneAnalysis containing analyses for all state images
      */
     public SceneAnalysis getAnalysisForOneScene(Scene scene, Set<StateImage> targetImgs, Set<StateImage> allImgs,
-                                                ActionOptions actionOptions) {
-        setKMeansProfiles.addKMeansIfNeeded(allImgs, actionOptions.getKmeans());
+                                                ActionConfig actionConfig) {
+        setKMeansProfiles.addKMeansIfNeeded(allImgs, FrameworkSettings.kMeansInProfile);
         List<PixelProfiles> pixelAnalysisCollections = new ArrayList<>();
-        allImgs.forEach(img -> pixelAnalysisCollections.add(getPixelAnalysisCollection(scene, img, actionOptions)));
+        allImgs.forEach(img -> pixelAnalysisCollections.add(getPixelAnalysisCollection(scene, img, actionConfig)));
         SceneAnalysis sceneAnalysis = new SceneAnalysis(pixelAnalysisCollections, scene);
         getSceneAnalysisScores.setSceneAnalysisIndices(sceneAnalysis);
         if (!targetImgs.isEmpty()) getSceneAnalysisScores.setSceneAnalysisIndicesTargetsOnly(sceneAnalysis, targetImgs);

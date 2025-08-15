@@ -1,7 +1,7 @@
 package io.github.jspinak.brobot.action;
+import io.github.jspinak.brobot.action.ActionType;
 
 import io.github.jspinak.brobot.action.internal.execution.BasicActionRegistry;
-import io.github.jspinak.brobot.action.internal.execution.CompositeActionRegistry;
 
 /**
  * Core interface for all actions in the Brobot model-based GUI automation framework.
@@ -51,7 +51,6 @@ import io.github.jspinak.brobot.action.internal.execution.CompositeActionRegistr
  * @see ActionResult
  * @see ObjectCollection
  * @see BasicActionRegistry
- * @see CompositeActionRegistry
  */
 public interface ActionInterface {
 

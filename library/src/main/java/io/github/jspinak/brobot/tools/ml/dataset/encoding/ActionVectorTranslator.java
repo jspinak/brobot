@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.tools.ml.dataset.encoding;
 
-import io.github.jspinak.brobot.action.internal.options.ActionOptions;
+import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.tools.ml.dataset.model.ActionVector;
 
@@ -35,14 +35,14 @@ public interface ActionVectorTranslator {
     ActionVector toVector(ActionResult matches);
     
     /**
-     * Reconstructs ActionOptions from a numerical vector representation.
+     * Reconstructs ActionConfig from a numerical vector representation.
      * <p>
      * This method performs the inverse operation of toVector, reconstructing the
      * action configuration from its numerical representation. Note that some information
      * may be lost in the translation process depending on the encoding strategy used.
      *
      * @param actionVector The numerical vector representation of an action
-     * @return ActionOptions reconstructed from the vector
+     * @return ActionConfig reconstructed from the vector
      */
-    ActionOptions toActionOptions(ActionVector actionVector);
+    ActionConfig toActionConfig(ActionVector actionVector);
 }

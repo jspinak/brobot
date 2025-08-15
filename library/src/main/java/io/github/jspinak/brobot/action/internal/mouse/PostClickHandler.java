@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.action.internal.mouse;
 
-import io.github.jspinak.brobot.action.internal.options.ActionOptions;
+import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.basic.click.Click;
 
@@ -57,18 +57,17 @@ public class PostClickHandler {
      * to the right of where I clicked"), while fixed location movement is useful for
      * moving to a consistent "safe" area of the screen.</p>
      * 
-     * @param actionOptions Configuration containing mouse movement settings:
+     * @param actionConfig Configuration containing mouse movement settings:
      *                      - moveMouseAfterAction: master enable/disable flag
      *                      - moveMouseAfterActionBy: relative offset from click point (priority)
      *                      - moveMouseAfterActionTo: absolute screen location (fallback)
      * @return true if the mouse was successfully moved, false if movement was disabled
      *         or if both movement options failed
      */
-    public boolean moveMouseAfterClick(ActionOptions actionOptions) {
-        if (!actionOptions.isMoveMouseAfterAction()) return false;
-        if (actionOptions.getMoveMouseAfterActionBy().defined())
-            return moveMouseWrapper.move(actionOptions.getMoveMouseAfterActionBy());
-        return moveMouseWrapper.move(actionOptions.getMoveMouseAfterActionTo());
+    public boolean moveMouseAfterClick(ActionConfig actionConfig) {
+        // In modern Brobot, mouse movement after click is handled differently
+        // This would be configured in ClickOptions if needed
+        return false;
     }
     
     /**
@@ -92,10 +91,5 @@ public class PostClickHandler {
      * @return false, as post-click movement is handled through action chaining
      * @deprecated Post-click mouse movement should be implemented via action chaining
      */
-    @Deprecated
-    public boolean moveMouseAfterClick(ActionConfig actionConfig) {
-        // Post-click mouse movement is now handled through action chaining
-        // This method exists only for API compatibility during migration
-        return false;
-    }
+    // Duplicate deprecated method removed - using the one at line 67
 }

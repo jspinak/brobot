@@ -1,7 +1,6 @@
 package io.github.jspinak.brobot.action.composite.select;
 
 import io.github.jspinak.brobot.action.ActionConfig;
-import io.github.jspinak.brobot.action.internal.options.ActionOptions;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import lombok.Getter;
@@ -40,16 +39,12 @@ public class SelectActionObject {
     private int maxSwipes = 10;
     private ObjectCollection swipeFromObjColl;
     private ObjectCollection swipeToObjColl;
-    private ActionOptions swipeActionOptions;
     private ActionConfig swipeActionConfig;  // Modern API
     private ObjectCollection findObjectCollection;
-    private ActionOptions findActionOptions;
     private ActionConfig findActionConfig;  // Modern API
-    private ActionOptions clickActionOptions;
     private ActionConfig clickActionConfig;  // Modern API
     private ObjectCollection clickMatches; // defined after find operation
     private ObjectCollection confirmationObjectCollection; //when null don't confirm
-    private ActionOptions confirmActionOptions;
     private ActionConfig confirmActionConfig;  // Modern API
 
     //results
@@ -117,32 +112,32 @@ public class SelectActionObject {
      * Gets the swipe configuration, preferring ActionConfig if set.
      * @return ActionConfig if set, otherwise ActionOptions, or null if neither set
      */
-    public Object getSwipeConfiguration() {
-        return swipeActionConfig != null ? swipeActionConfig : swipeActionOptions;
+    public ActionConfig getSwipeConfiguration() {
+        return swipeActionConfig;
     }
     
     /**
      * Gets the find configuration, preferring ActionConfig if set.
      * @return ActionConfig if set, otherwise ActionOptions, or null if neither set
      */
-    public Object getFindConfiguration() {
-        return findActionConfig != null ? findActionConfig : findActionOptions;
+    public ActionConfig getFindConfiguration() {
+        return findActionConfig;
     }
     
     /**
      * Gets the click configuration, preferring ActionConfig if set.
      * @return ActionConfig if set, otherwise ActionOptions, or null if neither set
      */
-    public Object getClickConfiguration() {
-        return clickActionConfig != null ? clickActionConfig : clickActionOptions;
+    public ActionConfig getClickConfiguration() {
+        return clickActionConfig;
     }
     
     /**
      * Gets the confirmation configuration, preferring ActionConfig if set.
      * @return ActionConfig if set, otherwise ActionOptions, or null if neither set
      */
-    public Object getConfirmConfiguration() {
-        return confirmActionConfig != null ? confirmActionConfig : confirmActionOptions;
+    public ActionConfig getConfirmConfiguration() {
+        return confirmActionConfig;
     }
 
     /**
@@ -159,15 +154,11 @@ public class SelectActionObject {
         private int maxSwipes = 10;
         private ObjectCollection swipeFromObjColl;
         private ObjectCollection swipeToObjColl;
-        private ActionOptions swipeActionOptions;
         private ActionConfig swipeActionConfig;  // Modern API
         private ObjectCollection findObjectCollection;
-        private ActionOptions findActionOptions;
         private ActionConfig findActionConfig;  // Modern API
-        private ActionOptions clickActionOptions;
         private ActionConfig clickActionConfig;  // Modern API
         private ObjectCollection confirmationObjectCollection; //when null don't confirm
-        private ActionOptions confirmActionOptions;
         private ActionConfig confirmActionConfig;  // Modern API
 
         public Builder() {}
@@ -187,10 +178,7 @@ public class SelectActionObject {
             return this;
         }
 
-        public Builder setSwipeActionOptions(ActionOptions swipeActionOptions) {
-            this.swipeActionOptions = swipeActionOptions;
-            return this;
-        }
+        // Removed deprecated setSwipeActionOptions method
         
         /**
          * Sets the swipe configuration using ActionConfig (modern API).
@@ -207,10 +195,7 @@ public class SelectActionObject {
             return this;
         }
 
-        public Builder setFindActionOptions(ActionOptions findActionOptions) {
-            this.findActionOptions = findActionOptions;
-            return this;
-        }
+        // Removed deprecated setFindActionOptions method
         
         /**
          * Sets the find configuration using ActionConfig (modern API).
@@ -222,10 +207,7 @@ public class SelectActionObject {
             return this;
         }
 
-        public Builder setClickActionOptions(ActionOptions clickActionOptions) {
-            this.clickActionOptions = clickActionOptions;
-            return this;
-        }
+        // Removed deprecated setClickActionOptions method
         
         /**
          * Sets the click configuration using ActionConfig (modern API).
@@ -242,10 +224,7 @@ public class SelectActionObject {
             return this;
         }
 
-        public Builder setConfirmActionOptions(ActionOptions confirmActionOptions) {
-            this.confirmActionOptions = confirmActionOptions;
-            return this;
-        }
+        // Removed deprecated setConfirmActionOptions method
         
         /**
          * Sets the confirmation configuration using ActionConfig (modern API).
@@ -262,15 +241,11 @@ public class SelectActionObject {
             selectActionObject.maxSwipes = maxSwipes;
             selectActionObject.swipeFromObjColl = swipeFromObjColl;
             selectActionObject.swipeToObjColl = swipeToObjColl;
-            selectActionObject.swipeActionOptions = swipeActionOptions;
             selectActionObject.swipeActionConfig = swipeActionConfig;
             selectActionObject.findObjectCollection = findObjectCollection;
-            selectActionObject.findActionOptions = findActionOptions;
             selectActionObject.findActionConfig = findActionConfig;
-            selectActionObject.clickActionOptions = clickActionOptions;
             selectActionObject.clickActionConfig = clickActionConfig;
             selectActionObject.confirmationObjectCollection = confirmationObjectCollection;
-            selectActionObject.confirmActionOptions = confirmActionOptions;
             selectActionObject.confirmActionConfig = confirmActionConfig;
             return selectActionObject;
         }

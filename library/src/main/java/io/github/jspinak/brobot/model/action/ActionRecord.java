@@ -1,7 +1,8 @@
 package io.github.jspinak.brobot.model.action;
+import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
+import io.github.jspinak.brobot.action.ActionType;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import io.github.jspinak.brobot.action.internal.options.ActionOptions;
 import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.model.state.special.SpecialStateType;
@@ -15,7 +16,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Random;
 
-import static io.github.jspinak.brobot.action.internal.options.ActionOptions.Find.UNIVERSAL;
+// ActionOptions and UNIVERSAL find strategy have been removed
+// Use PatternFindOptions.Strategy instead
 
 /**
  * Records match results and context at a specific point in time for the Brobot framework.
@@ -28,7 +30,7 @@ import static io.github.jspinak.brobot.action.internal.options.ActionOptions.Fin
  * <p>Key components captured:
  * <ul>
  *   <li><b>Match Results</b>: List of matches found (empty for failed searches)</li>
- *   <li><b>Action Context</b>: The ActionOptions that produced this result</li>
+ *   <li><b>Action Context</b>: The ActionConfig that produced this result</li>
  *   <li><b>Timing Data</b>: Duration of the operation for performance analysis</li>
  *   <li><b>State Context</b>: Which state the match occurred in</li>
  *   <li><b>Success Indicators</b>: Both action success and result success flags</li>
@@ -75,26 +77,18 @@ import static io.github.jspinak.brobot.action.internal.options.ActionOptions.Fin
  * @since 1.0
  * @see ActionHistory
  * @see Match
- * @see ActionOptions
+ * @see ActionConfig
  * @see State
  */
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ActionRecord {
 
-    /**
-     * The ActionOptions can be queried to find which settings lead to success.
-     * @deprecated Use actionConfig instead
-     */
-    @Deprecated
-    private ActionOptions actionOptions = new ActionOptions.Builder()
-            .setAction(ActionOptions.Action.FIND)
-            .setFind(UNIVERSAL)
-            .build();
+    // ActionOptions field removed - use actionConfig instead
     
     /**
      * The ActionConfig can be queried to find which settings lead to success.
-     * This is the new API replacement for actionOptions.
+     * This is the new API replacement for actionConfig.
      */
     private ActionConfig actionConfig;
     private List<Match> matchList = new ArrayList<>();
@@ -141,14 +135,37 @@ public class ActionRecord {
     public void print() {
         System.out.print(timeStamp.format(DateTimeFormatter.ofPattern("MM-dd HH:mm:ss")));
         if (actionConfig != null) {
-            ActionConfigAdapter adapter = new ActionConfigAdapter();
-            System.out.format(" %s", adapter.getActionType(actionConfig));
-        } else {
-            System.out.format(" %s", actionOptions.getAction());
+            System.out.format(" %s", getActionTypeFromConfig(actionConfig));
         }
         matchList.forEach(match -> System.out.format(" %d.%d,%d.%d", match.x(), match.y(), match.w(), match.h()));
         System.out.format(" %s", text);
         System.out.println();
+    }
+    
+    /**
+     * Helper method to extract action type from ActionConfig based on its class name.
+     * 
+     * @param actionConfig the configuration to extract action type from
+     * @return string representation of the action type
+     */
+    private String getActionTypeFromConfig(ActionConfig actionConfig) {
+        String className = actionConfig.getClass().getSimpleName();
+        
+        // Map config class names to action types
+        if (className.contains("Click")) return "CLICK";
+        if (className.contains("Find") || className.contains("Pattern")) return "FIND";
+        if (className.contains("Type")) return "TYPE";
+        if (className.contains("Drag")) return "DRAG";
+        if (className.contains("Move") || className.contains("Mouse")) return "MOVE";
+        if (className.contains("Highlight")) return "HIGHLIGHT";
+        if (className.contains("Define")) return "DEFINE";
+        if (className.contains("Vanish")) return "VANISH";
+        if (className.contains("Scroll")) return "SCROLL";
+        if (className.contains("KeyDown")) return "KEY_DOWN";
+        if (className.contains("KeyUp")) return "KEY_UP";
+        
+        // Default to class name if no mapping found
+        return className.replace("Options", "").toUpperCase();
     }
 
     /**
@@ -192,7 +209,6 @@ public class ActionRecord {
         return Double.compare(that.duration, duration) == 0 &&
                 actionSuccess == that.actionSuccess &&
                 resultSuccess == that.resultSuccess &&
-                Objects.equals(actionOptions, that.actionOptions) &&
                 Objects.equals(actionConfig, that.actionConfig) &&
                 Objects.equals(matchList, that.matchList) &&
                 Objects.equals(text, that.text) &&
@@ -210,15 +226,14 @@ public class ActionRecord {
         java.time.LocalDateTime truncatedTimestamp = (timeStamp != null) ?
                 timeStamp.truncatedTo(java.time.temporal.ChronoUnit.SECONDS) : null;
 
-        return java.util.Objects.hash(actionOptions, actionConfig, matchList, text, duration, truncatedTimestamp,
+        return java.util.Objects.hash(actionConfig, matchList, text, duration, truncatedTimestamp,
                 actionSuccess, resultSuccess, stateName, stateId);
     }
 
     @Override
     public String toString() {
         return "ActionRecord{" +
-                "actionOptions=" + actionOptions +
-                ", actionConfig=" + actionConfig +
+                "actionConfig=" + actionConfig +
                 ", matchList=" + matchList +
                 ", text='" + text + '\'' +
                 ", duration=" + duration +
@@ -231,10 +246,6 @@ public class ActionRecord {
     }
 
     public static class Builder {
-        private ActionOptions actionOptions = new ActionOptions.Builder()
-                .setAction(ActionOptions.Action.FIND)
-                .setFind(UNIVERSAL)
-                .build();
         private ActionConfig actionConfig;
         private List<Match> matchList = new ArrayList<>();
         private String text = "";
@@ -251,43 +262,14 @@ public class ActionRecord {
          */
         public Builder setActionConfig(ActionConfig actionConfig) {
             this.actionConfig = actionConfig;
-            // For backward compatibility, also set ActionOptions
-            ActionConfigAdapter adapter = new ActionConfigAdapter();
-            this.actionOptions = adapter.createRecordBuilder(actionConfig).build().getActionOptions();
             return this;
         }
 
-        /**
-         * @deprecated Use setActionConfig(ActionConfig) instead
-         */
-        @Deprecated
-        public Builder setActionOptions(ActionOptions actionOptions) {
-            this.actionOptions = actionOptions;
-            return this;
-        }
+        // Removed setActionOptions - use setActionConfig instead
 
-        /**
-         * @deprecated Use setActionConfig(ActionConfig) instead
-         */
-        @Deprecated
-        public Builder setActionOptions(ActionOptions.Action action) {
-            this.actionOptions = new ActionOptions.Builder()
-                    .setAction(action)
-                    .build();
-            return this;
-        }
+        // Removed setActionOptions - use setActionConfig instead
 
-        /**
-         * @deprecated Use setActionConfig(ActionConfig) instead
-         */
-        @Deprecated
-        public Builder setActionOptions(ActionOptions.Find find) {
-            this.actionOptions = new ActionOptions.Builder()
-                    .setAction(ActionOptions.Action.FIND)
-                    .setFind(find)
-                    .build();
-            return this;
-        }
+        // Removed setActionOptions - use setActionConfig instead
 
         public Builder setMatchList(List<Match> matchList) {
             this.matchList = matchList;
@@ -346,7 +328,6 @@ public class ActionRecord {
 
         public ActionRecord build() {
             ActionRecord actionRecord = new ActionRecord();
-            actionRecord.actionOptions = actionOptions;
             actionRecord.actionConfig = actionConfig;
             actionRecord.text = text;
             actionRecord.matchList = matchList;

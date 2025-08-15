@@ -8,8 +8,8 @@ import io.github.jspinak.brobot.action.basic.type.TypeOptions;
 import io.github.jspinak.brobot.action.basic.vanish.VanishOptions;
 import io.github.jspinak.brobot.action.basic.mouse.MousePressOptions;
 import io.github.jspinak.brobot.action.composite.drag.DragOptions;
-import io.github.jspinak.brobot.action.composite.repeat.ClickUntilOptions;
 import io.github.jspinak.brobot.action.ActionChainOptions;
+import io.github.jspinak.brobot.action.RepetitionOptions;
 import io.github.jspinak.brobot.model.action.MouseButton;
 import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.model.element.Location;
@@ -245,12 +245,16 @@ public class ActionConfigFacade {
      * @return true if the images vanished, false if timeout reached
      */
     public boolean clickUntilVanished(double timeout, StateImage... stateImages) {
-        ClickUntilOptions clickUntil = new ClickUntilOptions.Builder()
-                .setCondition(ClickUntilOptions.Condition.OBJECTS_VANISH)
+        // Use ClickOptions with success criteria for vanishing
+        ClickOptions clickOptions = new ClickOptions.Builder()
+                .setSuccessCriteria(matches -> matches.isEmpty()) // Success when images vanish
                 .setPauseAfterEnd(0.5)
+                .setRepetition(RepetitionOptions.builder()
+                    .maxTimesToRepeatActionSequence(10) // Reasonable default
+                    .pauseBetweenActionSequences(0.5))
                 .build();
                 
-        return action.perform(clickUntil, new ObjectCollection.Builder()
+        return action.perform(clickOptions, new ObjectCollection.Builder()
                 .withImages(stateImages)
                 .build()).isSuccess();
     }

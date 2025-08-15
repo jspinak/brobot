@@ -1,7 +1,6 @@
 package io.github.jspinak.brobot.action.internal.factory;
 
 import io.github.jspinak.brobot.model.analysis.scene.SceneAnalyses;
-import io.github.jspinak.brobot.action.internal.options.ActionOptions;
 import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
@@ -59,36 +58,7 @@ public class ActionResultFactory {
         this.time = time;
     }
 
-    /**
-     * Creates a fully initialized ActionResult for a new action execution.
-     * <p>
-     * This method sets up all required components for action execution:
-     * <ul>
-     * <li>Creates a new ActionLifecycle with current time and max wait duration</li>
-     * <li>Stores the action configuration and description</li>
-     * <li>For COLOR find operations, pre-generates scene analysis data</li>
-     * </ul>
-     * <p>
-     * The initialized ActionResult serves as the accumulator for all data
-     * generated during action execution, from matches found to timing information.
-     *
-     * @param actionOptions Configuration controlling action behavior
-     * @param actionDescription Human-readable description for logging
-     * @param objectCollections Target objects for the action (images, regions, etc.)
-     * @return Fully initialized ActionResult ready for action execution
-     */
-    public ActionResult init(ActionOptions actionOptions, String actionDescription, ObjectCollection... objectCollections) {
-        ActionResult matches = new ActionResult();
-        matches.setActionLifecycle(new ActionLifecycle(time.now(), actionOptions.getMaxWait()));
-        // ActionResult no longer uses ActionOptions, it uses ActionConfig
-        // matches.setActionOptions(actionOptions);
-        matches.setActionDescription(actionDescription);
-        SceneAnalyses sceneAnalysisCollection = new SceneAnalyses();
-        if (actionOptions.getFind() == ActionOptions.Find.COLOR) sceneAnalysisCollection = getSceneAnalysisCollection.
-                get(Arrays.asList(objectCollections), 1, 0, actionOptions);
-        matches.setSceneAnalysisCollection(sceneAnalysisCollection);
-        return matches;
-    }
+    // Removed ActionOptions-based init method - use ActionConfig version instead
 
     /**
      * Creates a fully initialized ActionResult for a new action execution using ActionConfig.
@@ -112,33 +82,7 @@ public class ActionResultFactory {
         return matches;
     }
 
-    /**
-     * Initializes ActionResult with a list of object collections.
-     * <p>
-     * Convenience method that converts the list to varargs format.
-     * Uses an empty action description.
-     *
-     * @param actionOptions Configuration for the action
-     * @param objectCollections List of target object collections
-     * @return Initialized ActionResult
-     */
-    public ActionResult init(ActionOptions actionOptions, List<ObjectCollection> objectCollections) {
-        return init(actionOptions, "", objectCollections.toArray(new ObjectCollection[0]));
-    }
-
-    /**
-     * Initializes ActionResult without a description.
-     * <p>
-     * Simplified initialization for cases where action description
-     * is not needed for logging or reporting.
-     *
-     * @param actionOptions Configuration for the action
-     * @param objectCollections Target objects for the action
-     * @return Initialized ActionResult
-     */
-    public ActionResult init(ActionOptions actionOptions, ObjectCollection... objectCollections) {
-        return init(actionOptions, "", objectCollections);
-    }
+    // Removed ActionOptions-based init methods - use ActionConfig versions instead
     
     /**
      * Initializes ActionResult with ActionConfig and a list of object collections.

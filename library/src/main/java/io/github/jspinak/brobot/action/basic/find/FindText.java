@@ -88,7 +88,7 @@ public class FindText {
      */
     void findAllWordMatches(ActionResult matches, List<ObjectCollection> objectCollections) {
         while (actionLifecycleManagement.isOkToContinueAction(matches, objectCollections.get(0).getStateImages().size())) {
-            List<Scene> scenes = getScenes.getScenes(matches.getActionOptions(), objectCollections, 1, 0);
+            List<Scene> scenes = getScenes.getScenes(matches.getActionConfig(), objectCollections, 1, 0);
             findWordsSetSceneAnalyses(matches, scenes);
             actionLifecycleManagement.incrementCompletedRepetitions(matches);
         }
@@ -119,7 +119,7 @@ public class FindText {
     public void findWordsSetSceneAnalyses(ActionResult matches, List<Scene> scenes) {
         actionLifecycleManagement.printActionOnce(matches);
         for (Scene scene : scenes) {
-            List<Match> sceneMatches = findAll.findWords(scene, matches.getActionOptions());
+            List<Match> sceneMatches = findAll.findWords(scene, matches.getActionConfig());
             matches.addAll(sceneMatches); // holds all matches found
             SceneAnalysis sceneAnalysis = new SceneAnalysis(scene);
             sceneAnalysis.setMatchList(sceneMatches);

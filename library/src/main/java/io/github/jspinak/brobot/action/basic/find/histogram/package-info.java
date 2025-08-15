@@ -46,7 +46,7 @@
  * FindHistogram findHistogram = new FindHistogram(...);
  * 
  * ActionOptions options = new ActionOptions.Builder()
- *     .setAction(ActionOptions.Action.FIND)
+ *     .setAction(ActionType.FIND)
  *     .setFind(Find.HISTOGRAM)
  *     .setSimilarity(0.85)  // Histogram similarity threshold
  *     .build();

@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.analysis.match;
 
-import io.github.jspinak.brobot.action.internal.options.ActionOptions;
+import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.internal.find.SearchRegionResolver;
 import io.github.jspinak.brobot.model.element.Pattern;
 import io.github.jspinak.brobot.model.element.Location;
@@ -66,15 +66,15 @@ public class EdgeBasedProofer implements MatchProofer {
      * the edge-based validation logic.
      * 
      * @param match The match to validate
-     * @param actionOptions Configuration that may override pattern regions
+     * @param actionConfig Configuration that may override pattern regions
      * @param pattern The pattern that may define its own search regions
      * @return true if all four corners of the match fall within the resolved
      *         search regions, false otherwise
      */
     @Override
-    public boolean isInSearchRegions(Match match, ActionOptions actionOptions, Pattern pattern) {
+    public boolean isInSearchRegions(Match match, ActionConfig actionConfig, Pattern pattern) {
         // these are unique regions so there won't be any duplicate matches
-        List<Region> regions = selectRegions.getRegions(actionOptions, pattern);
+        List<Region> regions = selectRegions.getRegions(actionConfig, pattern);
         return isInSearchRegions(match, regions);
     }
 

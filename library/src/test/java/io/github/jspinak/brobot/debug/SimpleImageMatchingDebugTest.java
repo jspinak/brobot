@@ -10,8 +10,6 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import org.junit.jupiter.api.Test;
 import org.sikuli.basics.Settings;
 import org.sikuli.script.Screen;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -23,16 +21,16 @@ import java.util.Optional;
  * 
  * Update TEST_IMAGE_PATH to point to your actual image file.
  */
-@SpringBootTest(classes = io.github.jspinak.brobot.test.TestConfiguration.class, classes = io.github.jspinak.brobot.test.TestConfiguration.class)
+
 public class SimpleImageMatchingDebugTest {
 
-    @Autowired
+    // @Autowired
     private MatImageRecognition matImageRecognition;
     
-    @Autowired
+    // @Autowired
     private ScreenshotCapture screenshotCapture;
     
-    @Autowired
+    // @Autowired
     private SaveToFile saveToFile;
     
     // Update this to your actual image path

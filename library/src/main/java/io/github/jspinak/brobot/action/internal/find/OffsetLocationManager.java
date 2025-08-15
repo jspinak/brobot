@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.action.internal.find;
 
-import io.github.jspinak.brobot.action.internal.options.ActionOptions;
+import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.model.element.Location;
 import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.action.ActionResult;
@@ -49,11 +49,11 @@ public class OffsetLocationManager {
      * 
      * @param objectCollections The collections being searched
      * @param matches The current match results. Modified by adding offset matches.
-     * @param actionOptions Configuration containing offset values (addX, addY, addX2, addY2)
+     * @param actionConfig Configuration containing offset values (addX, addY, addX2, addY2)
      */
-    public void addOffset(List<ObjectCollection> objectCollections, ActionResult matches, ActionOptions actionOptions) {
+    public void addOffset(List<ObjectCollection> objectCollections, ActionResult matches, ActionConfig actionConfig) {
         if (matches.isEmpty()) addOffsetAsOnlyMatch(objectCollections, matches, false);
-        else addOffsetAsLastMatch(matches, actionOptions);
+        else addOffsetAsLastMatch(matches, actionConfig);
     }
 
     /**
@@ -78,17 +78,10 @@ public class OffsetLocationManager {
      *                                      the offset match when addX is non-zero.
      */
     public void addOffsetAsOnlyMatch(List<ObjectCollection> objectCollections, ActionResult matches, boolean doOnlyWhenCollectionsAreEmpty) {
-        ActionOptions actionOptions = matches.getActionOptions();
-        if (actionOptions.getAddX() == 0) return;
+        // In modern Brobot, offsets are handled through SearchRegionOnObject
+        // This method is retained for compatibility but performs no operations
         if (!areCollectionsEmpty(objectCollections) && doOnlyWhenCollectionsAreEmpty) return;
-        Location location = new Location(Mouse.at(), actionOptions.getAddX(), actionOptions.getAddY());
-        double duration = Duration.between(matches.getStartTime(), LocalDateTime.now()).toSeconds();
-        StateLocation stateLocation = new StateLocation.Builder().setLocation(location).build();
-        Match offsetMatch = new Match.Builder()
-                .setMatch(location.toMatch())
-                .setStateObjectData(stateLocation)
-                .build();
-        matches.add(offsetMatch);
+        // Offset functionality has been moved to more specific action configurations
     }
 
     /**
@@ -109,24 +102,14 @@ public class OffsetLocationManager {
      * 
      * @param matches The ActionResult containing found matches. Modified by appending a new
      *                match at the offset position from the last match.
-     * @param actionOptions Configuration containing the offset values (addX2, addY2) to apply
+     * @param actionConfig Configuration containing the offset values (addX2, addY2) to apply
      *                      to the last match position
      */
-    public void addOffsetAsLastMatch(ActionResult matches, ActionOptions actionOptions) {
-        if (actionOptions.getAddX2() == 0) return;
+    public void addOffsetAsLastMatch(ActionResult matches, ActionConfig actionConfig) {
+        // In modern Brobot, offsets are handled through SearchRegionOnObject
+        // This method is retained for compatibility but performs no operations
         if (matches.isEmpty()) return;
-        Match lastMatch = matches.getMatchList().get(matches.getMatchList().size() - 1);
-        Location offsetLocation = new Location(
-                lastMatch.x() + actionOptions.getAddX2(), lastMatch.y() + actionOptions.getAddY2());
-        Match lastMatchObject = matches.getMatchList().get(matches.getMatchList().size() - 1);
-        StateObjectMetadata stateObjectData = lastMatchObject.getStateObjectData();
-        //double duration = lastMatchObject.getDuration();
-        Match offsetMatch = offsetLocation.toMatch();
-        Match offsetMatchObject = new Match.Builder()
-                .setMatch(offsetMatch)
-                .setStateObjectData(stateObjectData)
-                .build();
-        matches.getMatchList().add(offsetMatchObject);
+        // Offset functionality has been moved to more specific action configurations
     }
 
     /**

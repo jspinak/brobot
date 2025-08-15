@@ -1,6 +1,7 @@
 package io.github.jspinak.brobot.tools.history.draw;
 
-import io.github.jspinak.brobot.action.internal.options.ActionOptions;
+import io.github.jspinak.brobot.action.ActionConfig;
+import io.github.jspinak.brobot.action.ActionType;
 import io.github.jspinak.brobot.model.analysis.color.ColorInfo;
 import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.tools.history.HistoryFileNamer;
@@ -123,7 +124,7 @@ public class DrawColorProfile {
      */
     public void drawImagesAndProfiles(List<StateImage> imgs) {
         Mat frame = getImagesAndProfileMat(imgs);
-        String savePath = illustrationFilename.getFilename(ActionOptions.Action.CLASSIFY,"colorProfiles");
+        String savePath = illustrationFilename.getFilename(ActionType.CLASSIFY,"colorProfiles");
         imwrite(savePath, frame);
     }
 

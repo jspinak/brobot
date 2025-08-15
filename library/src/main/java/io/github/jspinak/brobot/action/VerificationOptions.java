@@ -14,7 +14,7 @@ import lombok.Getter;
  * It is an immutable object designed to be composed within other {@code Options} classes.
  */
 @Getter
-@Builder(toBuilder = true)
+@Builder(toBuilder = true, builderClassName = "VerificationOptionsBuilder")
 public final class VerificationOptions {
 
     /**

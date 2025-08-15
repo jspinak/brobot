@@ -1,4 +1,5 @@
 package io.github.jspinak.brobot.action;
+import io.github.jspinak.brobot.action.ActionType;
 
 import io.github.jspinak.brobot.tools.logging.model.LogEventType;
 import java.util.ArrayList;

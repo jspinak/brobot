@@ -1,7 +1,7 @@
 package io.github.jspinak.brobot.analysis.color.profiles;
 
 import io.github.jspinak.brobot.config.FrameworkSettings;
-import io.github.jspinak.brobot.action.internal.options.ActionOptions;
+import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.model.element.Location;
 import io.github.jspinak.brobot.model.analysis.color.ColorInfo;
@@ -119,16 +119,16 @@ public class ProfileMatrixBuilder {
      * choosing the appropriate visualization type for different automation scenarios.</p>
      * 
      * @param img The state image to visualize
-     * @param actionOptions Options specifying the visualization type:
+     * @param actionConfig Options specifying the visualization type:
      *                      - kmeans < 0: Use default from BrobotSettings
      *                      - kmeans = 0: Show mean color profile only
      *                      - kmeans > 0: Show K-means clusters
      * @return A Mat containing the appropriate color profile visualization
      */
-    public Mat getProfilesMat(StateImage img, ActionOptions actionOptions) {
-        int kMeans = 0;
-        if (actionOptions.getKmeans() < 0) kMeans = FrameworkSettings.kMeansInProfile;
-        else kMeans = actionOptions.getKmeans();
+    public Mat getProfilesMat(StateImage img, ActionConfig actionConfig) {
+        // For now, use default k-means value from framework settings
+        // Different ActionConfig implementations could have different k-means settings
+        int kMeans = FrameworkSettings.kMeansInProfile;
         if (kMeans == 0) return getProfilesMat(img);
         return getKmeansProfilesMat(img, kMeans);
     }

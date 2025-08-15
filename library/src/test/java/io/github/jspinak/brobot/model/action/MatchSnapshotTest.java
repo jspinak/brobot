@@ -1,6 +1,9 @@
 package io.github.jspinak.brobot.model.action;
 
-import io.github.jspinak.brobot.action.internal.options.ActionOptions;
+import io.github.jspinak.brobot.action.ActionConfig;
+import io.github.jspinak.brobot.action.basic.click.ClickOptions;
+import io.github.jspinak.brobot.action.basic.type.TypeOptions;
+import io.github.jspinak.brobot.action.ActionType;
 import io.github.jspinak.brobot.model.match.Match;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,12 +25,12 @@ class MatchSnapshotTest {
 
     @Test
     void builder_shouldBuildCompleteSnapshot() {
-        ActionOptions options = new ActionOptions.Builder()
-                .setAction(ActionOptions.Action.CLICK)
+        ClickOptions options = new ClickOptions.Builder()
+                .setNumberOfClicks(1)
                 .build();
 
         ActionRecord snapshot = new ActionRecord.Builder()
-                .setActionOptions(options)
+                .setActionConfig(options)
                 .addMatch(match1)
                 .setText("found text")
                 .setDuration(1.23)
@@ -36,7 +39,7 @@ class MatchSnapshotTest {
                 .setState("TEST_STATE")
                 .build();
 
-        assertThat(snapshot.getActionOptions()).isEqualTo(options);
+        assertThat(snapshot.getActionConfig()).isEqualTo(options);
         assertThat(snapshot.getMatchList()).containsExactly(match1);
         assertThat(snapshot.getText()).isEqualTo("found text");
         assertThat(snapshot.getDuration()).isEqualTo(1.23);
@@ -120,10 +123,10 @@ class MatchSnapshotTest {
     @Test
     void equals_shouldCorrectlyCompareTimestampsWithSecondPrecision() {
         // 1. Arrange: Create a base snapshot
-        ActionOptions options = new ActionOptions.Builder().setAction(ActionOptions.Action.CLICK).build();
+        ClickOptions options = new ClickOptions.Builder().setNumberOfClicks(1).build();
         Match match = new Match.Builder().setRegion(0, 0, 10, 10).build();
         ActionRecord snapshot1 = new ActionRecord.Builder()
-                .setActionOptions(options)
+                .setActionConfig(options)
                 .addMatch(match)
                 .setText("test")
                 .setDuration(1.0)
@@ -132,7 +135,7 @@ class MatchSnapshotTest {
 
         // 2. Create a second snapshot with identical properties
         ActionRecord snapshot2 = new ActionRecord.Builder()
-                .setActionOptions(options)
+                .setActionConfig(options)
                 .addMatch(match)
                 .setText("test")
                 .setDuration(1.0)
@@ -152,50 +155,36 @@ class MatchSnapshotTest {
         assertThat(snapshot1).isNotEqualTo(snapshot2);
     }
     
-    // Tests documenting ActionRecord's current ActionOptions usage
+    // Tests documenting ActionRecord's current ActionConfig usage
     
     @Test
-    void actionRecord_currentlyRequiresActionOptions() {
+    void actionRecord_usesActionConfig() {
         // ActionRecord is a model class that stores historical action data
-        // It currently uses ActionOptions to maintain compatibility with existing stored data
+        // It now uses ActionConfig instead of the deprecated ActionOptions
         ActionRecord record = new ActionRecord();
         
-        // Default ActionOptions are automatically set
-        assertThat(record.getActionOptions()).isNotNull();
-        assertThat(record.getActionOptions().getAction()).isEqualTo(ActionOptions.Action.FIND);
-        
-        // Can be updated with specific ActionOptions
-        ActionOptions clickOptions = new ActionOptions.Builder()
-                .setAction(ActionOptions.Action.CLICK)
+        // Can be set with specific ActionConfig
+        ClickOptions clickOptions = new ClickOptions.Builder()
+                .setNumberOfClicks(2)
                 .build();
-        record.setActionOptions(clickOptions);
+        record.setActionConfig(clickOptions);
         
-        assertThat(record.getActionOptions().getAction()).isEqualTo(ActionOptions.Action.CLICK);
+        assertThat(record.getActionConfig()).isEqualTo(clickOptions);
     }
     
     @Test
-    void migrationConsiderations_forActionConfigSupport() {
-        // When ActionRecord is updated to support ActionConfig, considerations include:
-        // 1. Backward compatibility with existing stored ActionOptions data
-        // 2. Potential dual support for both ActionOptions and ActionConfig
-        // 3. Migration utilities for converting historical data
-        // 4. Versioning system for stored records
+    void actionConfig_supportNowAvailable() {
+        // ActionRecord now fully supports ActionConfig
+        // The migration from ActionOptions to ActionConfig is complete
         
-        // Current state - ActionOptions only
+        // Current state - ActionConfig support
         ActionRecord currentRecord = new ActionRecord.Builder()
-                .setActionOptions(new ActionOptions.Builder()
-                        .setAction(ActionOptions.Action.TYPE)
+                .setActionConfig(new TypeOptions.Builder()
                         .build())
                 .setText("typed text")
                 .build();
                 
-        // Future state might support ActionConfig:
-        // ActionRecord futureRecord = new ActionRecord.Builder()
-        //     .setActionConfig(new TypeOptions.Builder().build())
-        //     .setText("typed text")
-        //     .build();
-        
-        assertThat(currentRecord.getActionOptions()).isNotNull();
+        assertThat(currentRecord.getActionConfig()).isNotNull();
         assertThat(currentRecord.getText()).isEqualTo("typed text");
     }
 }

@@ -1,6 +1,7 @@
 package io.github.jspinak.brobot.tools.history.performance;
 
-import io.github.jspinak.brobot.action.internal.options.ActionOptions;
+import io.github.jspinak.brobot.action.ActionConfig;
+import io.github.jspinak.brobot.action.ActionType;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.tools.history.configuration.IllustrationConfig;
 import io.github.jspinak.brobot.tools.history.configuration.IllustrationContext;
@@ -38,7 +39,7 @@ import java.util.concurrent.atomic.AtomicLong;
 @Component
 public class IllustrationPerformanceOptimizer {
     
-    private final Map<ActionOptions.Action, ActionFrequencyTracker> frequencyTrackers = new ConcurrentHashMap<>();
+    private final Map<ActionType, ActionFrequencyTracker> frequencyTrackers = new ConcurrentHashMap<>();
     private final AtomicInteger illustrationsThisMinute = new AtomicInteger(0);
     private final AtomicLong lastMinuteReset = new AtomicLong(System.currentTimeMillis());
     private final Queue<IllustrationBatch> pendingBatches = new LinkedList<>();
@@ -105,7 +106,7 @@ public class IllustrationPerformanceOptimizer {
      * @param context the current context
      * @return sampling rate (0.0-1.0)
      */
-    private double calculateAdaptiveSamplingRate(ActionOptions.Action action, IllustrationContext context) {
+    private double calculateAdaptiveSamplingRate(ActionType action, IllustrationContext context) {
         double baseSamplingRate = config.getSamplingRate(action);
         
         if (!config.isAdaptiveSampling()) {

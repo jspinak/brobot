@@ -1,6 +1,7 @@
 package io.github.jspinak.brobot.tools.testing.mock.scenario;
 
-import io.github.jspinak.brobot.action.internal.options.ActionOptions;
+import io.github.jspinak.brobot.action.ActionConfig;
+import io.github.jspinak.brobot.action.ActionType;
 import lombok.Builder;
 import lombok.Data;
 import lombok.Singular;
@@ -26,7 +27,7 @@ import java.util.function.Predicate;
  * MockScenarioConfig config = MockScenarioConfig.builder()
  *     .scenarioName("login_network_issues")
  *     .stateAppearanceProbability("LOGIN_STATE", 0.8)
- *     .actionFailurePattern(ActionOptions.Action.FIND, 
+ *     .actionFailurePattern(ActionType.FIND, 
  *         FailurePattern.builder()
  *             .probabilityDecay(0.1)
  *             .maxConsecutiveFailures(3)
@@ -65,7 +66,7 @@ public class MockScenarioConfig {
      * of intermittent failures, cascading errors, and recovery scenarios.
      */
     @Singular("actionFailurePattern")
-    private final Map<ActionOptions.Action, FailurePattern> actionFailurePatterns;
+    private final Map<ActionType, FailurePattern> actionFailurePatterns;
     
     /**
      * Time-based conditions that affect mock behavior, such as
@@ -133,7 +134,7 @@ public class MockScenarioConfig {
      * @param action the action type to check
      * @return failure pattern or null if none configured
      */
-    public FailurePattern getFailurePattern(ActionOptions.Action action) {
+    public FailurePattern getFailurePattern(ActionType action) {
         return actionFailurePatterns.get(action);
     }
     

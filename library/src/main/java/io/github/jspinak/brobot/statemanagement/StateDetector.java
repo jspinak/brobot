@@ -204,7 +204,7 @@ public class StateDetector {
      *
      * @param stateName Name of the state to search for
      * @return true if the state was found on screen, false otherwise
-     * @see Action#perform(ActionOptions.Action, ObjectCollection)
+     * @see Action#perform(ActionType, ObjectCollection)
      */
     public boolean findState(String stateName) {
         log.debug("Searching for state: {}", stateName);
@@ -239,7 +239,7 @@ public class StateDetector {
      *
      * @param stateId ID of the state to search for
      * @return true if the state was found on screen, false otherwise
-     * @see Action#perform(ActionOptions.Action, ObjectCollection)
+     * @see Action#perform(ActionType, ObjectCollection)
      */
     public boolean findState(Long stateId) {
         String stateName = allStatesInProjectService.getStateName(stateId);

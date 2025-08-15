@@ -1,6 +1,7 @@
 package io.github.jspinak.brobot.tools.testing.mock.verification;
 
-import io.github.jspinak.brobot.action.internal.options.ActionOptions;
+import io.github.jspinak.brobot.action.ActionConfig;
+import io.github.jspinak.brobot.action.ActionType;
 import lombok.Data;
 
 import java.time.Duration;
@@ -27,7 +28,7 @@ import java.util.List;
 public class ActionPatternVerification {
     
     private final String verificationId;
-    private final ActionOptions.Action targetAction;
+    private final ActionType targetAction;
     private final int maxAttempts;
     private final Duration backoffDuration;
     private final double expectedSuccessRate;
@@ -38,7 +39,7 @@ public class ActionPatternVerification {
     private VerificationResult result = VerificationResult.IN_PROGRESS;
     private final List<String> errors = new ArrayList<>();
     
-    private ActionPatternVerification(String verificationId, ActionOptions.Action targetAction,
+    private ActionPatternVerification(String verificationId, ActionType targetAction,
                                      int maxAttempts, Duration backoffDuration, 
                                      double expectedSuccessRate, Duration verificationWindow) {
         this.verificationId = verificationId;
@@ -191,7 +192,7 @@ public class ActionPatternVerification {
     public static class Builder {
         private final String verificationId;
         private final MockBehaviorVerifier verifier;
-        private ActionOptions.Action targetAction;
+        private ActionType targetAction;
         private int maxAttempts = Integer.MAX_VALUE;
         private Duration backoffDuration;
         private double expectedSuccessRate = 0.0;
@@ -208,7 +209,7 @@ public class ActionPatternVerification {
          * @param action the action type
          * @return this builder
          */
-        public Builder action(ActionOptions.Action action) {
+        public Builder action(ActionType action) {
             this.targetAction = action;
             return this;
         }

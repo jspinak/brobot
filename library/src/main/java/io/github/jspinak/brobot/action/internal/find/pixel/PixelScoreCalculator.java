@@ -1,6 +1,7 @@
 package io.github.jspinak.brobot.action.internal.find.pixel;
 
-import io.github.jspinak.brobot.action.internal.options.ActionOptions;
+import io.github.jspinak.brobot.action.ActionConfig;
+import io.github.jspinak.brobot.action.basic.find.BaseFindOptions;
 import io.github.jspinak.brobot.model.analysis.color.ColorCluster;
 import io.github.jspinak.brobot.analysis.color.DistanceMatrixCalculator;
 import io.github.jspinak.brobot.model.analysis.color.PixelProfile;
@@ -27,7 +28,7 @@ import static org.python.modules.math.atanh;
  * <ul>
  *   <li>Combines multiple distance metrics into unified scores</li>
  *   <li>Applies penalties for out-of-range colors</li>
- *   <li>Converts between PixelAnalysis and ActionOptions score scales</li>
+ *   <li>Converts between PixelAnalysis and configuration score scales</li>
  *   <li>Supports threshold-based filtering</li>
  * </ul>
  * </p>
@@ -135,11 +136,11 @@ public class PixelScoreCalculator {
      * </ul>
      * </p>
      *
-     * @param actionOptionsScore similarity score (0-1, higher is better match)
+     * @param actionConfigScore similarity score (0-1, higher is better match)
      * @return pixel distance threshold (0-255, lower is better match)
      */
-    public double convertActionOptionsScoreToPixelAnalysisScoreWithTanh(double actionOptionsScore) {
-        double adjustedMinScore = actionOptionsScore * maxMinScoreForTanh; // minSimilarity is now between 0 and maxMinScoreForTanh
+    public double convertActionOptionsScoreToPixelAnalysisScoreWithTanh(double actionConfigScore) {
+        double adjustedMinScore = actionConfigScore * maxMinScoreForTanh; // minSimilarity is now between 0 and maxMinScoreForTanh
         double tanh = Math.tanh(adjustedMinScore); // tanh(1) = 0.7615941559557649, tanh(0) = 0
         double invertedTanh = 1 - tanh; // (1 - 0.7615941559557649) = 0.2384058440442351, 1 - 0 = 1
         double normalizedTanh = (invertedTanh - invMaxTanh) / (1 - invMaxTanh); // values between 0 and 1
@@ -154,14 +155,14 @@ public class PixelScoreCalculator {
      * 
      * <p>Side effects: Outputs debug information to Report</p>
      * 
-     * @param actionOptionsScore similarity score (0-1)
+     * @param actionConfigScore similarity score (0-1)
      * @return pixel distance score (0-255)
      */
-    public double convertActionOptionsScoreToPixelAnalysisScore(double actionOptionsScore) {
+    public double convertActionOptionsScoreToPixelAnalysisScore(double actionConfigScore) {
         ConsoleReporter.println("scoreRange: "+scoreRange);
-        ConsoleReporter.println("score" + actionOptionsScore);
+        ConsoleReporter.println("score" + actionConfigScore);
         ConsoleReporter.println("bestScore" + bestScore);
-        return (1 - actionOptionsScore) * scoreRange + bestScore;
+        return (1 - actionConfigScore) * scoreRange + bestScore;
     }
 
     /**
@@ -209,11 +210,16 @@ public class PixelScoreCalculator {
      * in the result indicate pixels that meet the similarity criteria.</p>
      *
      * @param scores the pixel score matrix
-     * @param actionOptions contains minSimilarity threshold
+     * @param actionConfig contains minSimilarity threshold
      * @return distance below threshold matrix (0 for non-matching pixels)
      */
-    public Mat getDistBelowThreshhold(Mat scores, ActionOptions actionOptions) {
-        double threshold = convertActionOptionsScoreToPixelAnalysisScoreWithTanh(actionOptions.getMinSimilarity());
+    public Mat getDistBelowThreshhold(Mat scores, ActionConfig actionConfig) {
+        double minSimilarity = 0.7; // default
+        if (actionConfig instanceof BaseFindOptions) {
+            BaseFindOptions findOptions = (BaseFindOptions) actionConfig;
+            minSimilarity = findOptions.getSimilarity();
+        }
+        double threshold = convertActionOptionsScoreToPixelAnalysisScoreWithTanh(minSimilarity);
         Mat binaryScores = new Mat(scores.size(), CV_8UC3);
         Mat thresholdMat = new Mat(scores.size(), CV_8UC3, Scalar.all(threshold));
         subtract(thresholdMat, scores, binaryScores, null, scores.type());

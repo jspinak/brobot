@@ -1,7 +1,8 @@
 package io.github.jspinak.brobot.examples;
 
 import io.github.jspinak.brobot.action.Action;
-import io.github.jspinak.brobot.action.internal.options.ActionOptions;
+import io.github.jspinak.brobot.action.basic.click.ClickOptions;
+import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.control.ExecutionStoppedException;
 import io.github.jspinak.brobot.navigation.monitoring.BaseAutomation;
 import io.github.jspinak.brobot.navigation.monitoring.StateHandler;
@@ -62,12 +63,14 @@ public class PausableAutomationExample extends BaseAutomation {
                 log.info("Processing item {}", i);
                 
                 // Perform some automation action
-                ActionOptions clickOptions = new ActionOptions.Builder()
-                    .setAction(ActionOptions.Action.CLICK)
+                ClickOptions clickOptions = new ClickOptions.Builder()
                     .build();
                 
                 // The action execution also checks pause points internally
-                action.perform(clickOptions, "button" + i);
+                // Create a mock button object (in real code, this would be an actual StateImage or Region)
+                ObjectCollection buttonCollection = new ObjectCollection.Builder()
+                    .build();
+                action.perform("Click button " + i, clickOptions, buttonCollection);
                 
                 // Simulate some work
                 Thread.sleep(1000);

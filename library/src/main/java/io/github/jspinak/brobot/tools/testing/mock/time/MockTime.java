@@ -1,6 +1,7 @@
 package io.github.jspinak.brobot.tools.testing.mock.time;
 
-import io.github.jspinak.brobot.action.internal.options.ActionOptions;
+import io.github.jspinak.brobot.action.ActionType;
+import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
 import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
 import io.github.jspinak.brobot.tools.testing.mock.MockStatus;
 
@@ -52,11 +53,14 @@ import java.time.LocalDateTime;
  * mockTime.wait(5.0); // Advances mock time by 5 seconds instantly
  * assertTrue(action.hasTimedOut());
  * 
- * // Test action duration
+ * // Test action duration (using ActionType - modern approach)
  * LocalDateTime before = mockTime.now();
- * mockTime.wait(ActionOptions.Action.CLICK);
+ * mockTime.wait(ActionType.CLICK);
  * LocalDateTime after = mockTime.now();
  * // Verify correct duration was applied
+ * 
+ * // Using ActionType enum
+ * mockTime.wait(ActionType.CLICK);
  * </pre>
  * </p>
  * 
@@ -86,7 +90,7 @@ import java.time.LocalDateTime;
  * @since 1.0
  * @see ActionDurations
  * @see MockStatus
- * @see ActionOptions
+ * @see ActionType
  */
 @Component
 public class MockTime {
@@ -113,12 +117,27 @@ public class MockTime {
         now = now.plusNanos(nanoTimeout);
     }
 
-    public void wait(ActionOptions.Action action) {
-        wait(actionDurations.getActionDuration(action));
+    // Removed deprecated wait methods for ActionType and ActionOptions.Find
+    // Use wait(ActionType) and wait(PatternFindOptions.Strategy) instead
+    
+    /**
+     * Waits for the mock duration of an action using ActionType.
+     * This is the modern approach using ActionType instead of ActionType.
+     *
+     * @param actionType the type of action to wait for
+     */
+    public void wait(ActionType actionType) {
+        wait(actionDurations.getActionDuration(actionType));
     }
-
-    public void wait(ActionOptions.Find find) {
-        wait(actionDurations.getFindDuration(find));
+    
+    /**
+     * Waits for the mock duration of a find strategy.
+     * This is the modern approach using PatternFindOptions.Strategy.
+     *
+     * @param strategy the find strategy to wait for
+     */
+    public void wait(PatternFindOptions.Strategy strategy) {
+        wait(actionDurations.getFindStrategyDuration(strategy));
     }
 
 }

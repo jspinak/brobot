@@ -1,7 +1,7 @@
 package io.github.jspinak.brobot.tools.testing.exploration;
 
 import io.github.jspinak.brobot.action.Action;
-import io.github.jspinak.brobot.action.internal.options.ActionOptions;
+import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.navigation.service.StateService;
@@ -220,17 +220,17 @@ public class ExplorationSessionRunner {
      * with the screenshot path included in error logs.</p>
      * 
      * @param sessionId the unique test session identifier for correlation
-     * @param actionOptions configuration for the action to perform (e.g., CLICK, FIND)
+     * @param actionConfig configuration for the action to perform (e.g., CLICK, FIND)
      * @param objectCollections the UI elements to perform the action on
      * @see Action#perform(ActionOptions, ObjectCollection...) for action execution
      * @see ActionLogger#logAction(String, ActionResult, ObjectCollection) for logging
      */
-    private void logAction(String sessionId, ActionOptions actionOptions, ObjectCollection... objectCollections) {
-        ActionResult results = performAction(actionOptions, objectCollections);
+    private void logAction(String sessionId, ActionConfig actionConfig, ObjectCollection... objectCollections) {
+        ActionResult results = performAction(actionConfig, objectCollections);
         actionLogger.logAction(sessionId, results, objectCollections[0]);
         if (!results.isSuccess()) {
             String screenshotPath = captureScreenshot.captureScreenshot("action_failed_" + sessionId);
-            actionLogger.logError(sessionId, "Action failed: " + actionOptions.getAction(), screenshotPath);
+            actionLogger.logError(sessionId, "Action failed: " + actionConfig.getClass().getSimpleName(), screenshotPath);
         }
     }
 
@@ -241,12 +241,12 @@ public class ExplorationSessionRunner {
      * UI interactions. It serves as a wrapper to maintain consistency
      * and potentially add additional logic in the future.</p>
      * 
-     * @param actionOptions the action configuration specifying what to do
+     * @param actionConfig the action configuration specifying what to do
      * @param objectCollections the target UI elements for the action
      * @return ActionResult containing success status and action details
      * @see Action#perform(ActionOptions, ObjectCollection...) for the underlying implementation
      */
-    private ActionResult performAction(ActionOptions actionOptions, ObjectCollection... objectCollections) {
-        return action.perform(actionOptions, objectCollections);
+    private ActionResult performAction(ActionConfig actionConfig, ObjectCollection... objectCollections) {
+        return action.perform(actionConfig, objectCollections);
     }
 }

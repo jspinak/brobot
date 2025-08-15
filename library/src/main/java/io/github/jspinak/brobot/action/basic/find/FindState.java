@@ -102,7 +102,7 @@ public class FindState {
     public void find(ActionResult matches, List<ObjectCollection> objectCollections) {
         List<SceneCombination> sceneCombinationList = getSceneCombinations.getAllSceneCombinations(objectCollections);
         populateSceneCombinations.populateSceneCombinationsWithImages(
-                sceneCombinationList, objectCollections, matches.getActionOptions());
+                sceneCombinationList, objectCollections, matches.getActionConfig());
         sceneCombinations.addSceneCombinations(sceneCombinationList);
         populateTempStateRepo.createAndAddStatesForSceneToStateRepo(objectCollections);
         tempStateRepo.getAllStateImages().forEach(stateImage -> {
@@ -114,7 +114,13 @@ public class FindState {
                 .setName(stateImage.getName())
                 .setSimScore(.99)
                 .build();
-            int minSize = matches.getActionOptions().getMinArea();
+            // Since ActionConfig doesn't have getMinArea(), we'll use a default
+            // or check if it's a specific type that has area filtering
+            int minSize = 1; // Default minimum area
+            if (matches.getActionConfig() instanceof BaseFindOptions) {
+                // For now, use default since BaseFindOptions doesn't have minArea
+                minSize = 1;
+            }
             if (minSize <= matchFromPattern.size()) matches.add(matchFromPattern);
         });
     }

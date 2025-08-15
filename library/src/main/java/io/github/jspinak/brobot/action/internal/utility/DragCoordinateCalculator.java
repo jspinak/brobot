@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.action.internal.utility;
 
-import io.github.jspinak.brobot.action.internal.options.ActionOptions;
+import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.composite.drag.DragOptions;
 import io.github.jspinak.brobot.model.element.Location;
@@ -102,25 +102,14 @@ public class DragCoordinateCalculator {
      * 
      * @param from The starting location for the drag. Must not be null.
      * @param to The destination location for the drag. Must not be null.
-     * @param actionOptions Configuration containing all timing parameters for the drag stages.
+     * @param actionConfig Configuration containing all timing parameters for the drag stages.
      * @return {@code true} if the drag completed successfully (or was mocked),
      *         {@code false} if the drag operation failed.
      *         
      * @implNote This method modifies global Sikuli settings. While these are set before
      *           each drag, be aware that they affect all Sikuli operations until changed.
      */
-    public boolean drag(Location from, Location to, ActionOptions actionOptions) {
-        ConsoleReporter.format(ConsoleReporter.OutputLevel.HIGH, "drag %d.%d to %d.%d ",
-                from.getCalculatedX(), from.getCalculatedY(), to.getCalculatedX(), to.getCalculatedY());
-        if (FrameworkSettings.mock) return mock.drag();
-        Settings.DelayBeforeMouseDown = actionOptions.getPauseBeforeMouseDown();
-        Settings.DelayBeforeDrag = actionOptions.getPauseAfterMouseDown();
-        Settings.MoveMouseDelay = actionOptions.getMoveMouseDelay();
-        Settings.DelayBeforeDrop = actionOptions.getPauseBeforeMouseUp();
-        if (!drag(from, to)) return false;
-        time.wait(actionOptions.getPauseAfterMouseUp());
-        return true;
-    }
+    // Removed duplicate drag(ActionConfig) method - use the one below that properly handles ActionConfig types
     
     /**
      * Executes a drag-and-drop operation using DragOptions configuration.

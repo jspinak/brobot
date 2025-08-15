@@ -145,3 +145,4 @@
  * @see io.github.jspinak.brobot.action.basic.mouse.MouseUp
  */
 package io.github.jspinak.brobot.action.composite.drag;
+import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;

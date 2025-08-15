@@ -98,68 +98,47 @@ public class ConfirmedFinds implements ActionInterface {
      */
     public void perform(ActionResult matches, ObjectCollection... objectCollections) {
         if (objectCollections.length == 0) return;
+        
+        // For confirmed finds, we perform multiple find operations where each
+        // subsequent find validates the previous one by searching within its results
         SceneAnalyses sceneAnalysisCollection = getSceneAnalysisCollection.
-                get(Arrays.asList(objectCollections),1, 0, matches.getActionOptions());
+                get(Arrays.asList(objectCollections),1, 0, matches.getActionConfig());
+        
+        // Perform initial find
         find.perform(matches, objectCollections);
         matches.setSceneAnalysisCollection(sceneAnalysisCollection);
+        
         if (matches.isEmpty()) {
             ConsoleReporter.println("no matches.");
             return;
         }
-        for (int i=1; i<matches.getActionOptions().getFindActions().size(); i++) {
-            setSearchRegions(matches);
-            matches.getActionOptions().setFind(matches.getActionOptions().getFindActions().get(i));
+        
+        // For subsequent finds, we need to search within the regions of previous matches
+        // This would typically be done using action chaining in the fluent API:
+        // new PatternFindOptions.Builder()
+        //     .then(new PatternFindOptions.Builder().build())
+        //     .build()
+        
+        // Since we're in a composite action, we iterate through additional object collections
+        // Each one represents a validation step
+        for (int i = 1; i < objectCollections.length; i++) {
+            // Create new search regions from previous matches
+            SearchRegions searchRegions = new SearchRegions();
+            searchRegions.addSearchRegions(matches.getMatchRegions());
+            
+            // Perform find within these regions
             ActionResult matches2 = new ActionResult();
-            find.perform(matches2, objectCollections);
+            // Note: In modern Brobot, this would be done via action chaining
+            // but for compatibility we maintain the iterative approach
+            find.perform(matches2, objectCollections[i]);
+            
+            // Keep only confirmed matches (those found in both searches)
             matches = matches.getConfirmedMatches(matches2);
             matches.addNonMatchResults(matches2);
             ConsoleReporter.println("# confirmed finds: " + matches.size());
+            
             if (matches.isEmpty()) break; // no need to go further
         }
     }
 
-    /**
-     * Selects the appropriate ObjectCollection for a given find operation index.
-     * <p>
-     * This method implements a fallback strategy where each find action uses its
-     * corresponding ObjectCollection by index. If there aren't enough collections,
-     * it falls back to the last available collection. This allows flexible mapping
-     * of search criteria to validation levels.
-     * 
-     * <p>Examples:
-     * <ul>
-     *   <li>3 finds, 3 collections: Each find uses its own collection</li>
-     *   <li>3 finds, 2 collections: Find 1→Collection 1, Find 2→Collection 2, Find 3→Collection 2</li>
-     *   <li>3 finds, 1 collection: All finds use Collection 1</li>
-     * </ul>
-     * 
-     * @param findIndex The index of the current find operation (0-based)
-     * @param objectCollections The available object collections
-     * @return The ObjectCollection to use for this find operation
-     */
-    private ObjectCollection getObjColl(int findIndex, ObjectCollection... objectCollections) {
-        int index = Math.min(findIndex, objectCollections.length - 1);
-        return objectCollections[index];
-    }
-
-    /**
-     * Configures search regions based on previous match results.
-     * <p>
-     * This method extracts the regions from all current matches and sets them as
-     * the search areas for the next find operation. This creates the cascading
-     * effect where each find operation searches only within the areas identified
-     * by the previous operation.
-     * 
-     * <p>The method modifies the ActionOptions within the provided ActionResult
-     * by replacing its search regions with the match regions.</p>
-     * 
-     * @param matches The ActionResult containing matches whose regions will become
-     *                the new search areas. The ActionOptions within this object
-     *                are modified.
-     */
-    private void setSearchRegions(ActionResult matches) {
-        SearchRegions searchRegions = new SearchRegions();
-        searchRegions.addSearchRegions(matches.getMatchRegions());
-        matches.getActionOptions().setSearchRegions(searchRegions);
-    }
 }

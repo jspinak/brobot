@@ -1,6 +1,8 @@
 package io.github.jspinak.brobot.tools.tuning.model;
 
-import io.github.jspinak.brobot.action.internal.options.ActionOptions;
+import io.github.jspinak.brobot.action.ActionConfig;
+import io.github.jspinak.brobot.action.basic.click.ClickOptions;
+import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
 import io.github.jspinak.brobot.tools.tuning.store.TuningExperimentStore;
 import lombok.Getter;
 import lombok.Setter;
@@ -40,7 +42,7 @@ import java.util.Random;
  *
  * @see TuningConstraints
  * @see TuningExperimentStore
- * @see ActionOptions
+ * @see ActionConfig
  */
 @Getter
 @Setter
@@ -125,9 +127,9 @@ public class TuningExperiment {
     }
 
     /**
-     * Creates a TuningExperiment from existing ActionOptions.
+     * Creates a TuningExperiment from existing ActionConfig.
      * <p>
-     * Extracts timing parameters from the provided ActionOptions to create a
+     * Extracts timing parameters from the provided ActionConfig to create a
      * collection that represents the current configuration. This constructor is
      * useful for:
      * <ul>
@@ -139,15 +141,28 @@ public class TuningExperiment {
      * Result fields are left uninitialized and should be populated based on
      * actual execution outcomes.
      *
-     * @param actionOptions The ActionOptions containing timing parameters to extract
+     * @param actionConfig The ActionConfig containing timing parameters to extract
      */
-    public TuningExperiment(ActionOptions actionOptions) {
-        //sets parameters to those in actionOptions
-        pauseBeforeMouseDown = actionOptions.getPauseBeforeMouseDown();
-        pauseAfterMouseDown = actionOptions.getPauseAfterMouseDown();
-        pauseAfterMouseUp = actionOptions.getPauseAfterMouseUp();
-        moveMouseDelay = actionOptions.getMoveMouseDelay();
-        maxWait = actionOptions.getMaxWait();
+    public TuningExperiment(ActionConfig actionConfig) {
+        // Extract parameters based on ActionConfig type
+        if (actionConfig instanceof ClickOptions) {
+            ClickOptions clickOptions = (ClickOptions) actionConfig;
+            // ClickOptions uses MousePressOptions for timing
+            // Set default values as ClickOptions doesn't directly expose these
+            pauseBeforeMouseDown = 0;
+            pauseAfterMouseDown = 0;
+            pauseAfterMouseUp = 0;
+        } else if (actionConfig instanceof PatternFindOptions) {
+            PatternFindOptions findOptions = (PatternFindOptions) actionConfig;
+            maxWait = findOptions.getSearchDuration();
+        } else {
+            // Default values for other ActionConfig types
+            pauseBeforeMouseDown = 0;
+            pauseAfterMouseDown = 0;
+            pauseAfterMouseUp = 0;
+            maxWait = 5.0; // Default max wait
+        }
+        moveMouseDelay = 0.5f; // Default move mouse delay
     }
 
 }

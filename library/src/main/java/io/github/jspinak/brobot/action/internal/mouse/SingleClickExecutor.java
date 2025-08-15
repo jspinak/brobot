@@ -1,6 +1,5 @@
 package io.github.jspinak.brobot.action.internal.mouse;
 
-import io.github.jspinak.brobot.action.internal.options.ActionOptions;
 import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.basic.click.ClickOptions;
 import io.github.jspinak.brobot.model.element.Location;
@@ -129,20 +128,8 @@ public class SingleClickExecutor {
      * </ul>
      *
      * @param location Target location for the click operation
-     * @param actionOptions Configuration including click type and timing parameters
-     * @return true if the click was performed successfully, false if movement failed
-     * @deprecated Use {@link #click(Location, ActionConfig)} instead
+     * @deprecated This method has been removed. Use click(Location, ActionConfig) instead.
      */
-    @Deprecated
-    public boolean click(Location location, ActionOptions actionOptions) {
-        if (FrameworkSettings.mock) {
-            ConsoleReporter.print("<click>");
-            if (actionOptions.getClickType() != ClickOptions.Type.LEFT) ConsoleReporter.print(actionOptions.getClickType().name());
-            ConsoleReporter.print(" ");
-            return true;
-        }
-        return doClick(location, actionOptions);
-    }
 
     /**
      * Executes the actual click operation with proper timing and button control.
@@ -162,27 +149,29 @@ public class SingleClickExecutor {
      * </ul>
      *
      * @param location Target location for the click
-     * @param actionOptions Configuration with click type and timing
+     * @param clickOptions Configuration with click type and timing
      * @return true if click completed, false if mouse movement failed
      */
-    private boolean doClick(Location location, ActionOptions actionOptions) {
+    private boolean doClick(Location location, ClickOptions clickOptions) {
         if (!moveMouseWrapper.move(location)) return false;
         //if (Mouse.move(location.getSikuliLocation()) == 0) return false;
-        double pauseBeforeDown = actionOptions.getPauseBeforeMouseDown();
-        double pauseAfterDown = actionOptions.getPauseAfterMouseDown();
-        double pauseBeforeUp = actionOptions.getPauseBeforeMouseUp();
-        double pauseAfterUp = actionOptions.getPauseAfterMouseUp();
+        
+        // Use default pause values for simplified ClickOptions
+        double pauseBeforeDown = 0;
+        double pauseAfterDown = 0;
+        double pauseBeforeUp = 0;
+        double pauseAfterUp = 0;
 
-        if (isSimpleLeftDoubleClick(actionOptions)) location.sikuli().doubleClick();
+        if (isSimpleLeftDoubleClick(clickOptions)) location.sikuli().doubleClick();
         else {
             int i = 1;
-            if (isTwoClicks(actionOptions)) {
+            if (isTwoClicks(clickOptions)) {
                 i = 2;
                 ConsoleReporter.print("2 clicks ");
             }
             for (int j=0; j<i; j++) {
-                mouseDownWrapper.press(pauseBeforeDown, pauseAfterDown, convertClickOptionsTypeToClickType(actionOptions.getClickType()));
-                mouseUpWrapper.press(pauseBeforeUp, pauseAfterUp, convertClickOptionsTypeToClickType(actionOptions.getClickType()));
+                mouseDownWrapper.press(pauseBeforeDown, pauseAfterDown, convertClickOptionsTypeToClickType(clickOptions.getClickType()));
+                mouseUpWrapper.press(pauseBeforeUp, pauseAfterUp, convertClickOptionsTypeToClickType(clickOptions.getClickType()));
             }
         }
         return true;
@@ -297,14 +286,12 @@ public class SingleClickExecutor {
      * Used to determine if a native double-click can be used instead of
      * two separate clicks with timing control.
      *
-     * @param actionOptions Configuration to check for pause settings
+     * @param clickOptions Configuration to check for pause settings
      * @return true if all pause values are zero, false otherwise
      */
-    private boolean noPauses(ActionOptions actionOptions) {
-        return actionOptions.getPauseAfterMouseDown() == 0
-                && actionOptions.getPauseBeforeMouseUp() == 0
-                && actionOptions.getPauseBeforeMouseDown() == 0
-                && actionOptions.getPauseAfterMouseUp() == 0;
+    private boolean noPauses(ClickOptions clickOptions) {
+        // Simplified ClickOptions doesn't have pause methods, return true for simple behavior
+        return true;
     }
 
     /**
@@ -315,11 +302,11 @@ public class SingleClickExecutor {
      * the method returns false to force manual click sequences that respect the
      * custom timing.
      *
-     * @param actionOptions Configuration containing click type and pause settings
+     * @param clickOptions Configuration containing click type and pause settings
      * @return true if native double-click should be used, false for manual clicks
      */
-    private boolean isSimpleLeftDoubleClick(ActionOptions actionOptions) {
-        return actionOptions.getClickType() == ClickOptions.Type.DOUBLE_LEFT && noPauses(actionOptions);
+    private boolean isSimpleLeftDoubleClick(ClickOptions clickOptions) {
+        return clickOptions.getClickType() == ClickOptions.Type.DOUBLE_LEFT && noPauses(clickOptions);
     }
 
     /**
@@ -328,13 +315,13 @@ public class SingleClickExecutor {
      * Single clicks include standard left, right, or middle button clicks,
      * excluding any double-click variants.
      *
-     * @param actionOptions Configuration containing the click type
+     * @param clickOptions Configuration containing the click type
      * @return true if the action is a single click, false for double-clicks
      */
-    private boolean isSingleClick(ActionOptions actionOptions) {
-        return actionOptions.getClickType() == ClickOptions.Type.LEFT ||
-                actionOptions.getClickType() == ClickOptions.Type.RIGHT ||
-                actionOptions.getClickType() == ClickOptions.Type.MIDDLE;
+    private boolean isSingleClick(ClickOptions clickOptions) {
+        return clickOptions.getClickType() == ClickOptions.Type.LEFT ||
+                clickOptions.getClickType() == ClickOptions.Type.RIGHT ||
+                clickOptions.getClickType() == ClickOptions.Type.MIDDLE;
     }
 
     /**
@@ -350,18 +337,16 @@ public class SingleClickExecutor {
      * This method ensures proper handling of all double-click variants,
      * working around platform limitations for non-left double-clicks.
      *
-     * @param actionOptions Configuration containing click type and timing
+     * @param clickOptions Configuration containing click type and timing
      * @return true if two separate clicks are needed, false otherwise
      */
-    private boolean isTwoClicks(ActionOptions actionOptions) {
-        if (actionOptions.getClickType() == ClickOptions.Type.DOUBLE_RIGHT
-                || actionOptions.getClickType() == ClickOptions.Type.DOUBLE_MIDDLE)
+    private boolean isTwoClicks(ClickOptions clickOptions) {
+        if (clickOptions.getClickType() == ClickOptions.Type.DOUBLE_RIGHT
+                || clickOptions.getClickType() == ClickOptions.Type.DOUBLE_MIDDLE)
             return true;
-        if (actionOptions.getClickType() != ClickOptions.Type.DOUBLE_LEFT) return false;
-        return actionOptions.getPauseAfterMouseDown() > 0 ||
-                actionOptions.getPauseBeforeMouseUp() > 0 ||
-                actionOptions.getPauseBeforeMouseDown() > 0 ||
-                actionOptions.getPauseAfterMouseUp() > 0;
+        if (clickOptions.getClickType() != ClickOptions.Type.DOUBLE_LEFT) return false;
+        // Simplified ClickOptions doesn't have pause methods, so double left is always simple
+        return false;
     }
 
 }

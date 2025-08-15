@@ -95,3 +95,4 @@
  * @see io.github.jspinak.brobot.model.Match
  */
 package io.github.jspinak.brobot.action.basic.find;
+import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;

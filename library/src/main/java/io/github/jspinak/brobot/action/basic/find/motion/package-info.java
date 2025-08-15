@@ -58,7 +58,7 @@
  * FindMotion findMotion = new FindMotion(...);
  * 
  * ActionOptions options = new ActionOptions.Builder()
- *     .setAction(ActionOptions.Action.FIND)
+ *     .setAction(ActionType.FIND)
  *     .setFind(Find.MOTION)
  *     .setMaxWait(5.0)  // Observe for 5 seconds
  *     .build();

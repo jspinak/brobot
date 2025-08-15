@@ -1,10 +1,11 @@
 package io.github.jspinak.brobot.action.internal.factory;
 
 import io.github.jspinak.brobot.action.ActionConfig;
-import io.github.jspinak.brobot.action.internal.options.ActionOptions;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.action.basic.click.ClickOptions;
+import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
+import io.github.jspinak.brobot.action.basic.find.color.ColorFindOptions;
 import io.github.jspinak.brobot.action.internal.find.scene.SceneAnalysisCollectionBuilder;
 import io.github.jspinak.brobot.model.analysis.scene.SceneAnalyses;
 import io.github.jspinak.brobot.tools.testing.mock.time.TimeProvider;
@@ -42,17 +43,16 @@ class ActionResultFactoryTest {
     }
     
     @Test
-    void testInit_WithActionOptions_BasicAction() {
+    void testInit_WithClickOptions() {
         // Setup
-        ActionOptions actionOptions = new ActionOptions();
-        actionOptions.setAction(ActionOptions.Action.CLICK);
-        actionOptions.setMaxWait(5.0);
+        ClickOptions clickOptions = new ClickOptions.Builder()
+                .build();
         
         String description = "Test click action";
         ObjectCollection collection = new ObjectCollection.Builder().build();
         
         // Execute
-        ActionResult result = factory.init(actionOptions, description, collection);
+        ActionResult result = factory.init(clickOptions, description, collection);
         
         // Verify
         assertNotNull(result);
@@ -62,26 +62,24 @@ class ActionResultFactoryTest {
         assertNotNull(result.getSceneAnalysisCollection());
         
         // Verify scene analysis not populated for non-COLOR actions
-        verify(sceneAnalysisCollectionBuilder, never()).get(any(), anyInt(), anyInt(), any());
+        verify(sceneAnalysisCollectionBuilder, never()).get(any(), anyInt(), anyDouble(), any());
     }
     
     @Test
-    void testInit_WithActionOptions_ColorFind() {
+    void testInit_WithColorFindOptions() {
         // Setup
-        ActionOptions actionOptions = new ActionOptions();
-        actionOptions.setAction(ActionOptions.Action.FIND);
-        actionOptions.setFind(ActionOptions.Find.COLOR);
-        actionOptions.setMaxWait(10.0);
+        ColorFindOptions colorFindOptions = new ColorFindOptions.Builder()
+                .build();
         
         ObjectCollection collection1 = new ObjectCollection.Builder().build();
         ObjectCollection collection2 = new ObjectCollection.Builder().build();
         
         SceneAnalyses mockAnalyses = new SceneAnalyses();
-        when(sceneAnalysisCollectionBuilder.get(anyList(), eq(1), eq(0.0), eq(actionOptions)))
+        when(sceneAnalysisCollectionBuilder.get(anyList(), eq(1), eq(0.0), eq(colorFindOptions)))
                 .thenReturn(mockAnalyses);
         
         // Execute
-        ActionResult result = factory.init(actionOptions, "Color find", collection1, collection2);
+        ActionResult result = factory.init(colorFindOptions, "Color find", collection1, collection2);
         
         // Verify
         assertNotNull(result);
@@ -92,7 +90,7 @@ class ActionResultFactoryTest {
                 argThat(list -> list.size() == 2),
                 eq(1),
                 eq(0.0),
-                eq(actionOptions)
+                eq(colorFindOptions)
         );
     }
     
@@ -116,14 +114,15 @@ class ActionResultFactoryTest {
     }
     
     @Test
-    void testInit_WithActionOptions_NoDescription() {
+    void testInit_WithPatternFindOptions_NoDescription() {
         // Setup
-        ActionOptions actionOptions = new ActionOptions();
-        actionOptions.setMaxWait(3.0);
+        PatternFindOptions findOptions = new PatternFindOptions.Builder()
+                .setSearchDuration(3.0)
+                .build();
         ObjectCollection collection = new ObjectCollection.Builder().build();
         
         // Execute
-        ActionResult result = factory.init(actionOptions, collection);
+        ActionResult result = factory.init(findOptions, "", collection);
         
         // Verify
         assertNotNull(result);
@@ -131,10 +130,11 @@ class ActionResultFactoryTest {
     }
     
     @Test
-    void testInit_WithActionOptions_ListOfCollections() {
+    void testInit_WithPatternFindOptions_ListOfCollections() {
         // Setup
-        ActionOptions actionOptions = new ActionOptions();
-        actionOptions.setMaxWait(7.0);
+        PatternFindOptions findOptions = new PatternFindOptions.Builder()
+                .setSearchDuration(7.0)
+                .build();
         
         List<ObjectCollection> collections = Arrays.asList(
                 new ObjectCollection.Builder().build(),
@@ -143,7 +143,7 @@ class ActionResultFactoryTest {
         );
         
         // Execute
-        ActionResult result = factory.init(actionOptions, collections);
+        ActionResult result = factory.init(findOptions, collections);
         
         // Verify
         assertNotNull(result);
@@ -152,17 +152,18 @@ class ActionResultFactoryTest {
     }
     
     @Test
-    void testInit_WithActionOptions_MultipleCollections() {
+    void testInit_WithPatternFindOptions_MultipleCollections() {
         // Setup
-        ActionOptions actionOptions = new ActionOptions();
-        actionOptions.setMaxWait(15.0);
+        PatternFindOptions findOptions = new PatternFindOptions.Builder()
+                .setSearchDuration(15.0)
+                .build();
         
         ObjectCollection collection1 = new ObjectCollection.Builder().build();
         ObjectCollection collection2 = new ObjectCollection.Builder().build();
         ObjectCollection collection3 = new ObjectCollection.Builder().build();
         
         // Execute
-        ActionResult result = factory.init(actionOptions, "Multi-collection action", 
+        ActionResult result = factory.init(findOptions, "Multi-collection action", 
                 collection1, collection2, collection3);
         
         // Verify
@@ -171,13 +172,14 @@ class ActionResultFactoryTest {
     }
     
     @Test
-    void testInit_WithActionOptions_EmptyCollections() {
+    void testInit_WithPatternFindOptions_EmptyCollections() {
         // Setup
-        ActionOptions actionOptions = new ActionOptions();
-        actionOptions.setMaxWait(2.0);
+        PatternFindOptions findOptions = new PatternFindOptions.Builder()
+                .setSearchDuration(2.0)
+                .build();
         
         // Execute - no collections
-        ActionResult result = factory.init(actionOptions, "Empty action");
+        ActionResult result = factory.init(findOptions, "Empty action");
         
         // Verify
         assertNotNull(result);
@@ -189,27 +191,27 @@ class ActionResultFactoryTest {
     @Test
     void testInit_ActionLifecycleMaxWait() {
         // Setup
-        ActionOptions actionOptions = new ActionOptions();
-        double maxWait = 25.5;
-        actionOptions.setMaxWait(maxWait);
+        double searchDuration = 25.5;
+        PatternFindOptions findOptions = new PatternFindOptions.Builder()
+                .setSearchDuration(searchDuration)
+                .build();
         
         ObjectCollection collection = new ObjectCollection.Builder().build();
         
         // Execute
-        ActionResult result = factory.init(actionOptions, collection);
+        ActionResult result = factory.init(findOptions, "", collection);
         
         // Verify - check that max wait is properly set in lifecycle
         assertNotNull(result.getActionLifecycle());
-        LocalDateTime expectedEndTime = testTime.plusNanos((long)(maxWait * 1_000_000_000));
+        LocalDateTime expectedEndTime = testTime.plusNanos((long)(searchDuration * 1_000_000_000));
         assertEquals(expectedEndTime, result.getActionLifecycle().getAllowedEndTime());
     }
     
     @Test
     void testInit_ColorFind_VerifySceneAnalysisArguments() {
         // Setup
-        ActionOptions actionOptions = new ActionOptions();
-        actionOptions.setAction(ActionOptions.Action.FIND);
-        actionOptions.setFind(ActionOptions.Find.COLOR);
+        ColorFindOptions colorFindOptions = new ColorFindOptions.Builder()
+                .build();
         
         ObjectCollection collection1 = new ObjectCollection.Builder().build();
         ObjectCollection collection2 = new ObjectCollection.Builder().build();
@@ -219,7 +221,7 @@ class ActionResultFactoryTest {
                 .thenReturn(mockAnalyses);
         
         // Execute
-        factory.init(actionOptions, collection1, collection2);
+        factory.init(colorFindOptions, "", collection1, collection2);
         
         // Verify the exact arguments passed to scene analysis builder
         verify(sceneAnalysisCollectionBuilder).get(
@@ -230,7 +232,7 @@ class ActionResultFactoryTest {
                 }),
                 eq(1),    // rows
                 eq(0.0),  // secondsBetweenCaptures
-                eq(actionOptions)
+                eq(colorFindOptions)
         );
     }
     

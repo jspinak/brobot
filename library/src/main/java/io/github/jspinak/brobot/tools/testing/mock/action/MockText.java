@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.tools.testing.mock.action;
 
-import io.github.jspinak.brobot.action.internal.options.ActionOptions;
+import io.github.jspinak.brobot.action.ActionType;
 import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.tools.testing.mock.time.MockTime;
 
@@ -22,7 +22,7 @@ public class MockText {
     }
 
     public String getString(Match match) {
-        mockTime.wait(ActionOptions.Action.FIND);
+        mockTime.wait(ActionType.FIND);
         return match.getText();
     }
 

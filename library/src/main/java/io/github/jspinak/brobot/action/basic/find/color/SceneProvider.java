@@ -1,6 +1,5 @@
 package io.github.jspinak.brobot.action.basic.find.color;
 
-import io.github.jspinak.brobot.action.internal.options.ActionOptions;
 import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.model.element.Image;
@@ -80,13 +79,13 @@ public class SceneProvider {
      * 
      * <p>Side effects: May capture screenshots and wait between captures</p>
      * 
-     * @param actionOptions configuration (currently unused but reserved)
+     * @param actionConfig configuration (currently unused but reserved)
      * @param objectCollections may contain scenes in first collection
      * @param scenesToCapture number of screenshots to take
      * @param secondsBetweenCaptures delay between multiple screenshots
      * @return list of scenes ready for analysis
      */
-    public List<Scene> getScenes(ActionOptions actionOptions, List<ObjectCollection> objectCollections,
+    public List<Scene> getScenes(ActionConfig actionConfig, List<ObjectCollection> objectCollections,
                                  int scenesToCapture, double secondsBetweenCaptures) {
         List<Scene> scenes = new ArrayList<>();
         boolean takeScreenshot = isOkToTakeScreenshot(objectCollections.toArray(new ObjectCollection[0]));
@@ -143,38 +142,6 @@ public class SceneProvider {
      * <p>Convenience method that captures one scene with no delay.
      * Delegates to the full getScenes method with scenesToCapture=1
      * and secondsBetweenCaptures=0.</p>
-     * 
-     * @param actionOptions configuration (currently unused but reserved)
-     * @param objectCollections may contain scenes as parameters
-     * @return list containing a single scene
-     */
-    public List<Scene> getScenes(ActionOptions actionOptions, List<ObjectCollection> objectCollections) {
-        return getScenes(actionOptions, objectCollections, 1, 0);
-    }
-    
-    /**
-     * Acquires scenes for analysis using ActionConfig.
-     * 
-     * <p>This overloaded method supports the new ActionConfig API. Currently delegates
-     * to the ActionOptions version with default parameters.</p>
-     * 
-     * @param actionConfig configuration (currently unused but reserved)
-     * @param objectCollections may contain scenes in first collection
-     * @param scenesToCapture number of screenshots to take
-     * @param secondsBetweenCaptures delay between multiple screenshots
-     * @return list of scenes ready for analysis
-     */
-    public List<Scene> getScenes(ActionConfig actionConfig, List<ObjectCollection> objectCollections,
-                                 int scenesToCapture, double secondsBetweenCaptures) {
-        // For now, delegate to ActionOptions version
-        ActionOptions actionOptions = new ActionOptions.Builder().build();
-        return getScenes(actionOptions, objectCollections, scenesToCapture, secondsBetweenCaptures);
-    }
-    
-    /**
-     * Acquires a single scene using ActionConfig.
-     * 
-     * <p>Convenience method that captures one scene with no delay.</p>
      * 
      * @param actionConfig configuration (currently unused but reserved)
      * @param objectCollections may contain scenes as parameters

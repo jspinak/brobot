@@ -1,10 +1,11 @@
 package io.github.jspinak.brobot.tools.history.draw;
 
-import io.github.jspinak.brobot.action.internal.options.ActionOptions;
 import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.model.state.StateObjectMetadata;
 import io.github.jspinak.brobot.config.FrameworkSettings;
 import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
+import io.github.jspinak.brobot.action.ActionConfig;
+import io.github.jspinak.brobot.action.basic.highlight.HighlightOptions;
 
 import org.sikuli.script.Region;
 import org.springframework.stereotype.Component;
@@ -25,8 +26,7 @@ import org.springframework.stereotype.Component;
  * for zero-dimension matches to make them visible when highlighted.
  * 
  * @see Match
- * @see ActionOptions#getHighlightColor()
- * @see ActionOptions#getHighlightSeconds()
+ * @see HighlightOptions
  * @see FrameworkSettings#mock
  */
 @Component
@@ -41,12 +41,17 @@ public class HighlightMatchedRegion {
      * 
      * @param match The match to highlight. Must not be null.
      * @param stateObject Additional state information for logging purposes in mock mode.
-     * @param actionOptions Configuration containing the highlight color to use.
+     * @param actionConfig Configuration containing the highlight color to use.
      */
-    public void turnOn(Match match, StateObjectMetadata stateObject, ActionOptions actionOptions) {
+    public void turnOn(Match match, StateObjectMetadata stateObject, ActionConfig actionConfig) {
+        String color = "red"; // default color
+        if (actionConfig instanceof HighlightOptions) {
+            HighlightOptions highlightOptions = (HighlightOptions) actionConfig;
+            color = highlightOptions.getColor();
+        }
         if (FrameworkSettings.mock && FrameworkSettings.screenshots.isEmpty())
-            ConsoleReporter.print(match, stateObject, actionOptions);
-        else match.sikuli().highlightOn(actionOptions.getHighlightColor());
+            ConsoleReporter.print(match, stateObject, actionConfig);
+        else match.sikuli().highlightOn(color);
     }
 
     /**
@@ -76,22 +81,30 @@ public class HighlightMatchedRegion {
      * @param match The match to highlight. Zero-dimension matches are expanded
      *              to 10x10 pixels for visibility.
      * @param stateObject Additional state information for logging in mock mode.
-     * @param actionOptions Configuration containing highlight duration (seconds)
+     * @param actionConfig Configuration containing highlight duration (seconds)
      *                      and color settings.
      * @return {@code true} if the highlight was displayed (or logged in mock mode),
      *         always returns {@code true} in current implementation.
      * 
      * @implNote This method logs the highlighted region dimensions for debugging purposes.
      */
-    public boolean highlight(Match match, StateObjectMetadata stateObject, ActionOptions actionOptions) {
+    public boolean highlight(Match match, StateObjectMetadata stateObject, ActionConfig actionConfig) {
         if (FrameworkSettings.mock && FrameworkSettings.screenshots.isEmpty())
-            return ConsoleReporter.print(match, stateObject, actionOptions);
+            return ConsoleReporter.print(match, stateObject, actionConfig);
         match.sikuli().highlight(1);
         Region highlightReg = match.getRegion().sikuli();
         if (match.w() == 0) highlightReg.w = 10;
         if (match.h() == 0) highlightReg.h = 10;
         ConsoleReporter.println("in HighlightRegion: "+highlightReg);
-        highlightReg.highlight(actionOptions.getHighlightSeconds(), actionOptions.getHighlightColor());
+        
+        double seconds = 2.0; // default
+        String color = "red"; // default
+        if (actionConfig instanceof HighlightOptions) {
+            HighlightOptions highlightOptions = (HighlightOptions) actionConfig;
+            seconds = highlightOptions.getHighlightSeconds();
+            color = highlightOptions.getColor();
+        }
+        highlightReg.highlight(seconds, color);
         return true;
     }
 

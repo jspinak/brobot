@@ -1,6 +1,7 @@
 package io.github.jspinak.brobot.tools.history;
 
-import io.github.jspinak.brobot.action.internal.options.ActionOptions;
+import io.github.jspinak.brobot.action.ActionConfig;
+import io.github.jspinak.brobot.action.ActionType;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.model.analysis.scene.SceneAnalysis;
 import io.github.jspinak.brobot.model.element.Region;
@@ -17,8 +18,6 @@ import org.bytedeco.opencv.opencv_core.Scalar;
 import org.springframework.stereotype.Component;
 import java.util.List;
 
-import static io.github.jspinak.brobot.action.internal.options.ActionOptions.Action.*;
-import static io.github.jspinak.brobot.action.internal.options.ActionOptions.Find.*;
 
 /**
  * Orchestrates the creation of comprehensive visual illustrations for action results.
@@ -108,14 +107,14 @@ public class VisualizationOrchestrator {
      *
      * @param matches action results containing scenes and matches to illustrate
      * @param searchRegions regions where searches were performed, shown in blue
-     * @param actionOptions configuration determining illustration style and content
+     * @param actionConfig configuration determining illustration style and content
      */
-    public void draw(ActionResult matches, List<Region> searchRegions, ActionOptions actionOptions) {
-        log.debug("[VISUALIZATION] draw() called with action: {}", actionOptions.getAction());
+    public void draw(ActionResult matches, List<Region> searchRegions, ActionConfig actionConfig) {
+        log.debug("[VISUALIZATION] draw() called with actionConfig: {}", actionConfig.getClass().getSimpleName());
         log.debug("[VISUALIZATION] Number of scenes to illustrate: {}", 
                 matches.getSceneAnalysisCollection().getSceneAnalyses().size());
         
-        drawIllustrations(matches, searchRegions, actionOptions);
+        drawIllustrations(matches, searchRegions, actionConfig);
         
         List<Visualization> illustrations = matches.getSceneAnalysisCollection().getAllIllustratedScenes();
         log.debug("[VISUALIZATION] Number of illustrated scenes: {}", illustrations.size());
@@ -147,12 +146,12 @@ public class VisualizationOrchestrator {
      *
      * @param matches action results with scenes to illustrate; modified with illustration data
      * @param searchRegions regions to highlight as search areas
-     * @param actionOptions determines which visual elements to include
+     * @param actionConfig determines which visual elements to include
      */
-    public void drawIllustrations(ActionResult matches, List<Region> searchRegions, ActionOptions actionOptions) {
+    public void drawIllustrations(ActionResult matches, List<Region> searchRegions, ActionConfig actionConfig) {
         for (SceneAnalysis sceneAnalysis : matches.getSceneAnalysisCollection().getSceneAnalyses()) {
             Visualization ill = sceneAnalysis.getIllustrations();
-            String filename = illustrationFilename.getFilenameFromSceneAnalysis(sceneAnalysis, actionOptions);
+            String filename = illustrationFilename.getFilenameFromSceneAnalysis(sceneAnalysis, actionConfig);
             ill.setFilenames(filename);
             /*
             Draw the search regions on the scenes before drawing the matches. These regions are displayed in blue,
@@ -161,17 +160,20 @@ public class VisualizationOrchestrator {
              */
             drawRect.drawRectAroundMatch(ill, searchRegions, new Scalar(235, 206, 135, 0)); // the search regions
             drawContours.draw(sceneAnalysis);
-            if (actionOptions.getFind() == MOTION || actionOptions.getFind() == REGIONS_OF_MOTION)
-                drawMatch.drawMatches(ill.getMatchesOnScene(), sceneAnalysis.getMatchList());
-            else drawMatch.drawMatches(ill, matches); // draw the matches on the scenes
-            if (actionOptions.getAction() == MOVE) draw.drawMove(ill, matches); // draw the move on the scenes
-            if (actionOptions.getAction() == DRAG) draw.drawDrag(ill, matches); // draw the drag on the scenes
-            if (actionOptions.getAction() == CLICK) draw.drawClick(ill, matches); // draw the click on the scenes
-            if (actionOptions.getAction() == DEFINE) draw.drawDefinedRegion(ill, matches);
-            sidebar.drawSidebars(ill, matches, actionOptions, sceneAnalysis.getMatchList()); // draw the sidebars
+            // For motion-based actions, would need specific handling based on config type
+            drawMatch.drawMatches(ill, matches); // draw the matches on the scenes
+            
+            // Draw action-specific visualizations based on config type
+            String configType = actionConfig.getClass().getSimpleName();
+            if (configType.contains("Move")) draw.drawMove(ill, matches);
+            if (configType.contains("Drag")) draw.drawDrag(ill, matches);
+            if (configType.contains("Click")) draw.drawClick(ill, matches);
+            if (configType.contains("Define")) draw.drawDefinedRegion(ill, matches);
+            
+            sidebar.drawSidebars(ill, matches, actionConfig, sceneAnalysis.getMatchList()); // draw the sidebars
             sidebar.mergeSceneAndSidebar(ill); // merge the scene and the sidebar
-            if (showClassesMat(actionOptions)) {
-                drawClassesLegend.drawLegend(ill, sceneAnalysis.getStateImageObjects(), actionOptions); // draw the legend
+            if (showClassesMat(actionConfig)) {
+                drawClassesLegend.drawLegend(ill, sceneAnalysis.getStateImageObjects(), actionConfig); // draw the legend
                 drawClassesLegend.mergeClassesAndLegend(ill); // merge the classes and the legend
             }
         }
@@ -188,15 +190,15 @@ public class VisualizationOrchestrator {
      * The method checks both the primary find type and any additional find
      * actions to ensure classification data is shown whenever relevant.
      *
-     * @param actionOptions configuration to check for classification-related actions
+     * @param actionConfig configuration to check for classification-related actions
      * @return true if classification visualizations should be included
      */
-    private boolean showClassesMat(ActionOptions actionOptions) {
-        return actionOptions.getAction() == CLASSIFY
-                || actionOptions.getFind() == HISTOGRAM
-                || actionOptions.getFind() == COLOR
-                || actionOptions.getFindActions().contains(COLOR)
-                || actionOptions.getFindActions().contains(HISTOGRAM);
+    private boolean showClassesMat(ActionConfig actionConfig) {
+        // Show classes mat for classification-related configs
+        String configType = actionConfig.getClass().getSimpleName();
+        return configType.contains("Classify") || 
+               configType.contains("Histogram") || 
+               configType.contains("Color");
     }
 
 }

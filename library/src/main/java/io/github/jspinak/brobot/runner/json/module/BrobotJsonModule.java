@@ -1,7 +1,6 @@
 package io.github.jspinak.brobot.runner.json.module;
 
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import io.github.jspinak.brobot.action.internal.options.ActionOptions;
 import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.model.element.Image;
 import io.github.jspinak.brobot.action.ActionResult;
@@ -22,7 +21,7 @@ import org.springframework.stereotype.Component;
  * <p>
  * Registered serializers:
  * <ul>
- * <li>{@link ActionOptions} - Serializes action configuration with proper handling of enums and nested objects</li>
+ * <li>{@link ActionConfig} - Handles polymorphic action configuration with proper handling of enums and nested objects</li>
  * <li>{@link ActionResult} - Serializes match results while avoiding circular references</li>
  * <li>{@link ObjectCollection} - Handles collections of Brobot objects with state management</li>
  * <li>{@link Mat} - Converts OpenCV Mat objects to/from base64 encoded strings</li>
@@ -53,7 +52,6 @@ public class BrobotJsonModule extends SimpleModule {
      * All serializers and deserializers are injected via Spring dependency injection,
      * ensuring they are properly configured and ready for use.
      *
-     * @param actionOptionsSerializer Handles serialization of action configuration options
      * @param matchesSerializer Handles serialization of action results and match objects
      * @param objectCollectionSerializer Handles serialization of object collections with state references
      * @param matSerializer Handles serialization of OpenCV Mat objects to base64
@@ -64,7 +62,6 @@ public class BrobotJsonModule extends SimpleModule {
      * @param matDeserializer Handles deserialization of OpenCV Mat objects
      */
     public BrobotJsonModule(
-            ActionOptionsSerializer actionOptionsSerializer,
             MatchesSerializer matchesSerializer,
             ObjectCollectionSerializer objectCollectionSerializer,
             MatSerializer matSerializer,
@@ -76,7 +73,6 @@ public class BrobotJsonModule extends SimpleModule {
     ) {
         super("BrobotJsonModule");
         configure(
-                actionOptionsSerializer,
                 matchesSerializer,
                 objectCollectionSerializer,
                 matSerializer,
@@ -96,7 +92,6 @@ public class BrobotJsonModule extends SimpleModule {
      * will look up the appropriate handler based on the exact class type during
      * serialization/deserialization.
      *
-     * @param actionOptionsSerializer Serializer for ActionOptions objects
      * @param matchesSerializer Serializer for ActionResult objects containing matches
      * @param objectCollectionSerializer Serializer for collections of Brobot objects
      * @param matSerializer Serializer for OpenCV Mat objects
@@ -107,7 +102,6 @@ public class BrobotJsonModule extends SimpleModule {
      * @param matDeserializer Deserializer for OpenCV Mat objects
      */
     private void configure(
-            ActionOptionsSerializer actionOptionsSerializer,
             MatchesSerializer matchesSerializer,
             ObjectCollectionSerializer objectCollectionSerializer,
             MatSerializer matSerializer,
@@ -118,7 +112,6 @@ public class BrobotJsonModule extends SimpleModule {
             MatDeserializer matDeserializer
     ) {
         // Register serializers
-        addSerializer(ActionOptions.class, actionOptionsSerializer);
         addSerializer(ActionResult.class, matchesSerializer);
         addSerializer(ObjectCollection.class, objectCollectionSerializer);
         addSerializer(Mat.class, matSerializer);

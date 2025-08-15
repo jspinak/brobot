@@ -100,3 +100,4 @@
  * @see io.github.jspinak.brobot.action.ObjectCollection
  */
 package io.github.jspinak.brobot.action;
+import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;

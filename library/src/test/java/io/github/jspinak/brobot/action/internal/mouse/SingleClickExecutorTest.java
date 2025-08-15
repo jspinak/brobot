@@ -1,7 +1,6 @@
 package io.github.jspinak.brobot.action.internal.mouse;
 
 import io.github.jspinak.brobot.config.FrameworkSettings;
-import io.github.jspinak.brobot.action.internal.options.ActionOptions;
 import io.github.jspinak.brobot.action.basic.click.ClickOptions;
 import io.github.jspinak.brobot.action.basic.mouse.MousePressOptions;
 import io.github.jspinak.brobot.action.internal.mouse.ClickType;
@@ -21,8 +20,7 @@ import static org.mockito.Mockito.*;
 /**
  * Test class for SingleClickExecutor.
  * 
- * This test demonstrates usage of both ActionOptions (for backward compatibility)
- * and the new ClickOptions API. SingleClickExecutor now supports both APIs.
+ * This test uses the modern ClickOptions API for configuring click operations.
  */
 class SingleClickExecutorTest {
 
@@ -65,13 +63,10 @@ class SingleClickExecutorTest {
     @Test
     void click_shouldJustPrintWhenMocked() {
         FrameworkSettings.mock = true;
-        // Using ActionOptions until SingleClickExecutor is updated
-        ActionOptions actionOptions = new ActionOptions.Builder()
-                .setAction(ActionOptions.Action.CLICK)
+        ClickOptions clickOptions = new ClickOptions.Builder()
                 .build();
-        // Future: Use new ClickOptions.Builder().build()
 
-        singleClickExecutor.click(location, actionOptions);
+        singleClickExecutor.click(location, clickOptions);
 
         // Verify no actual mouse actions were called
         verify(moveMouseWrapper, never()).move(any());
@@ -81,13 +76,10 @@ class SingleClickExecutorTest {
 
     @Test
     void click_shouldPerformSingleLeftClick() {
-        // Using ActionOptions for backward compatibility
-        ActionOptions actionOptions = new ActionOptions.Builder()
-                .setAction(ActionOptions.Action.CLICK)
-                .build();
-        // Compare with: new ClickOptions.Builder().build() (default is LEFT)
+        ClickOptions clickOptions = new ClickOptions.Builder()
+                .build(); // default is LEFT
 
-        singleClickExecutor.click(location, actionOptions);
+        singleClickExecutor.click(location, clickOptions);
 
         verify(moveMouseWrapper).move(location);
         verify(mouseDownWrapper).press(anyDouble(), anyDouble(), eq(ClickType.Type.LEFT));
@@ -96,37 +88,31 @@ class SingleClickExecutorTest {
 
     @Test
     void click_shouldPerformDoubleClickWithPausesAsTwoSeparateClicks() {
-        // Using ActionOptions for backward compatibility
-        ActionOptions actionOptions = new ActionOptions.Builder()
-                .setClickType(ClickOptions.Type.DOUBLE_LEFT)
-                .setPauseAfterMouseDown(0.1) // Adding a pause forces two separate clicks
+        ClickOptions clickOptions = new ClickOptions.Builder()
+                .setNumberOfClicks(2)
+                .setPressOptions(MousePressOptions.builder()
+                    .pauseAfterMouseDown(0.1) // Adding a pause forces two separate clicks
+                    .build())
                 .build();
-        // Compare with: new ClickOptions.Builder()
-        //     .setNumberOfClicks(2)
-        //     .setPressOptions(MousePressOptions.builder()
-        //         .setPauseAfterMouseDown(0.1))
-        //     .build()
 
         when(location.sikuli()).thenReturn(mock(org.sikuli.script.Location.class));
 
-        singleClickExecutor.click(location, actionOptions);
+        singleClickExecutor.click(location, clickOptions);
 
-        verify(mouseDownWrapper, times(2)).press(anyDouble(), anyDouble(), eq(ClickType.Type.DOUBLE_LEFT));
-        verify(mouseUpWrapper, times(2)).press(anyDouble(), anyDouble(), eq(ClickType.Type.DOUBLE_LEFT));
+        verify(mouseDownWrapper, times(2)).press(anyDouble(), anyDouble(), eq(ClickType.Type.LEFT));
+        verify(mouseUpWrapper, times(2)).press(anyDouble(), anyDouble(), eq(ClickType.Type.LEFT));
     }
 
     @Test
     void click_shouldPerformDoubleClickWithNoPauses() {
-        // Using ActionOptions for backward compatibility (double-click)
-        ActionOptions actionOptions = new ActionOptions.Builder()
-                .setClickType(ClickOptions.Type.DOUBLE_LEFT)
+        ClickOptions clickOptions = new ClickOptions.Builder()
+                .setNumberOfClicks(2)
                 .build();
-        // Compare with: new ClickOptions.Builder().setNumberOfClicks(2).build()
 
         org.sikuli.script.Location sikuliLocation = mock(org.sikuli.script.Location.class);
         when(location.sikuli()).thenReturn(sikuliLocation);
 
-        singleClickExecutor.click(location, actionOptions);
+        singleClickExecutor.click(location, clickOptions);
 
         // In this case, Sikuli's doubleClick() is called directly
         verify(sikuliLocation).doubleClick();
@@ -137,11 +123,9 @@ class SingleClickExecutorTest {
     @Test
     void click_shouldFailIfMoveFails() {
         when(moveMouseWrapper.move(location)).thenReturn(false);
-        // Using ActionOptions for backward compatibility
-        ActionOptions actionOptions = new ActionOptions.Builder().build();
-        // Compare with: new ClickOptions.Builder().build()
+        ClickOptions clickOptions = new ClickOptions.Builder().build();
 
-        singleClickExecutor.click(location, actionOptions);
+        singleClickExecutor.click(location, clickOptions);
 
         verify(moveMouseWrapper).move(location);
         verify(mouseDownWrapper, never()).press(anyDouble(), anyDouble(), any());
@@ -177,8 +161,8 @@ class SingleClickExecutorTest {
         singleClickExecutor.click(location, clickOptions);
         
         // Should perform two separate clicks due to custom pause
-        verify(mouseDownWrapper, times(2)).press(anyDouble(), anyDouble(), eq(ClickType.Type.DOUBLE_LEFT));
-        verify(mouseUpWrapper, times(2)).press(anyDouble(), anyDouble(), eq(ClickType.Type.DOUBLE_LEFT));
+        verify(mouseDownWrapper, times(2)).press(anyDouble(), anyDouble(), eq(ClickType.Type.LEFT));
+        verify(mouseUpWrapper, times(2)).press(anyDouble(), anyDouble(), eq(ClickType.Type.LEFT));
     }
     
     @Test

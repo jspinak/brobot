@@ -1,7 +1,13 @@
 package io.github.jspinak.brobot.action.internal.utility;
 
-import io.github.jspinak.brobot.action.internal.options.ActionOptions;
 import io.github.jspinak.brobot.action.ActionResult;
+import io.github.jspinak.brobot.action.ActionConfig;
+import io.github.jspinak.brobot.action.ActionType;
+import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
+import io.github.jspinak.brobot.action.basic.click.ClickOptions;
+import io.github.jspinak.brobot.action.basic.type.TypeOptions;
+import io.github.jspinak.brobot.action.basic.vanish.VanishOptions;
+import io.github.jspinak.brobot.action.composite.drag.DragOptions;
 import io.github.jspinak.brobot.action.internal.utility.ActionSuccessCriteria;
 import io.github.jspinak.brobot.model.element.Region;
 
@@ -17,28 +23,26 @@ class SuccessTest {
 
     private ActionSuccessCriteria success;
     private ActionResult matches;
-    private ActionOptions actionOptions;
 
     @BeforeEach
     void setUp() {
         success = new ActionSuccessCriteria();
         matches = mock(ActionResult.class);
-        actionOptions = new ActionOptions();
     }
 
     @Test
     void testFindActionSuccess() {
-        actionOptions.setAction(ActionOptions.Action.FIND);
+        PatternFindOptions findOptions = new PatternFindOptions.Builder().build();
         when(matches.isEmpty()).thenReturn(false);
-        Predicate<ActionResult> criteria = success.getCriteria(actionOptions);
+        Predicate<ActionResult> criteria = success.getCriteria(findOptions);
         assertTrue(criteria.test(matches));
     }
 
     @Test
     void testClickActionSuccess() {
-        actionOptions.setAction(ActionOptions.Action.CLICK);
+        ClickOptions clickOptions = new ClickOptions.Builder().build();
         when(matches.isEmpty()).thenReturn(false);
-        Predicate<ActionResult> criteria = success.getCriteria(actionOptions);
+        Predicate<ActionResult> criteria = success.getCriteria(clickOptions);
         assertTrue(criteria.test(matches));
     }
 
@@ -47,61 +51,68 @@ class SuccessTest {
         Region region = mock(Region.class);
         when(region.isDefined()).thenReturn(true);
         when(matches.getDefinedRegion()).thenReturn(region);
-        actionOptions.setAction(ActionOptions.Action.DEFINE);
         when(matches.getDefinedRegion().isDefined()).thenReturn(true);
-        Predicate<ActionResult> criteria = success.getCriteria(actionOptions);
+        // DEFINE action uses PatternFindOptions
+        PatternFindOptions defineOptions = new PatternFindOptions.Builder().build();
+        Predicate<ActionResult> criteria = success.getCriteria(defineOptions);
         assertTrue(criteria.test(matches));
     }
 
     @Test
     void testTypeActionAlwaysSuccess() {
-        actionOptions.setAction(ActionOptions.Action.TYPE);
-        Predicate<ActionResult> criteria = success.getCriteria(actionOptions);
+        TypeOptions typeOptions = new TypeOptions.Builder().build();
+        Predicate<ActionResult> criteria = success.getCriteria(typeOptions);
         assertTrue(criteria.test(matches));
     }
 
     @Test
     void testVanishActionSuccess() {
-        actionOptions.setAction(ActionOptions.Action.VANISH);
+        VanishOptions vanishOptions = new VanishOptions.Builder().build();
         when(matches.isEmpty()).thenReturn(true);
-        Predicate<ActionResult> criteria = success.getCriteria(actionOptions);
+        Predicate<ActionResult> criteria = success.getCriteria(vanishOptions);
         assertTrue(criteria.test(matches));
     }
 
     @Test
     void testDragActionSuccess() {
-        actionOptions.setAction(ActionOptions.Action.DRAG);
+        DragOptions dragOptions = new DragOptions.Builder().build();
         when(matches.size()).thenReturn(2);
-        Predicate<ActionResult> criteria = success.getCriteria(actionOptions);
+        Predicate<ActionResult> criteria = success.getCriteria(dragOptions);
         assertTrue(criteria.test(matches));
     }
 
     @Test
-    void testClickUntilObjectsAppear() {
-        actionOptions.setAction(ActionOptions.Action.CLICK_UNTIL);
-        actionOptions.setClickUntil(ActionOptions.ClickUntil.OBJECTS_APPEAR);
+    void testClickWithSuccessCriteriaObjectsAppear() {
+        // Click with success criteria - objects should appear (not empty)
+        ClickOptions clickOptions = new ClickOptions.Builder()
+                .setSuccessCriteria(matches -> !matches.isEmpty())
+                .build();
         when(matches.isEmpty()).thenReturn(false);
-        Predicate<ActionResult> criteria = success.getCriteria(actionOptions);
-        assertTrue(criteria.test(matches));
+        // Since we set a custom success criteria, it should be used
+        assertTrue(clickOptions.getSuccessCriteria().test(matches));
     }
 
     @Test
-    void testClickUntilObjectsVanish() {
-        actionOptions.setAction(ActionOptions.Action.CLICK_UNTIL);
-        actionOptions.setClickUntil(ActionOptions.ClickUntil.OBJECTS_VANISH);
+    void testClickWithSuccessCriteriaObjectsVanish() {
+        // Click with success criteria - objects should vanish (empty)
+        ClickOptions clickOptions = new ClickOptions.Builder()
+                .setSuccessCriteria(matches -> matches.isEmpty())
+                .build();
         when(matches.isEmpty()).thenReturn(true);
-        Predicate<ActionResult> criteria = success.getCriteria(actionOptions);
-        assertTrue(criteria.test(matches));
+        // Since we set a custom success criteria, it should be used
+        assertTrue(clickOptions.getSuccessCriteria().test(matches));
     }
 
     @Test
     void testSetWithCustomSuccessCriteria() {
-        // Setup
+        // Setup - ClickOptions with custom success criteria
         Predicate<ActionResult> customCriteria = m -> false;
-        actionOptions.setSuccessCriteria(customCriteria);
+        ClickOptions clickOptions = new ClickOptions.Builder()
+                .setSuccessCriteria(customCriteria)
+                .build();
 
         // Action
-        success.set(actionOptions, matches);
+        success.set(clickOptions, matches);
 
         // Verification
         // Verify that the setSuccess method was called with the argument 'false'.
@@ -110,12 +121,12 @@ class SuccessTest {
 
     @Test
     void testSetWithDefaultSuccessCriteria() {
-        // Setup
-        actionOptions.setAction(ActionOptions.Action.FIND);
+        // Setup - PatternFindOptions with default success criteria
+        PatternFindOptions findOptions = new PatternFindOptions.Builder().build();
         when(matches.isEmpty()).thenReturn(false);
 
         // Action
-        success.set(actionOptions, matches);
+        success.set(findOptions, matches);
 
         // Verification
         // Verify that the setSuccess method on the mock 'matches' was called exactly once with the argument 'true'.

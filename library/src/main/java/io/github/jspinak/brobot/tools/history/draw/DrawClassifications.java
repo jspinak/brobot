@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.tools.history.draw;
 
-import io.github.jspinak.brobot.action.internal.options.ActionOptions;
+import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.tools.history.HistoryFileNamer;
 import io.github.jspinak.brobot.tools.history.visual.ClassificationLegend;
 import io.github.jspinak.brobot.model.analysis.color.ColorCluster;
@@ -52,14 +52,14 @@ import static org.bytedeco.opencv.global.opencv_imgcodecs.imwrite;
  *   <li>Works with {@link SceneAnalysis} for classification data</li>
  *   <li>Uses {@link ClassificationLegend} to generate color legends</li>
  *   <li>Integrates with {@link HistoryFileNamer} for file naming</li>
- *   <li>Processes results from CLASSIFY {@link ActionOptions.Action}</li>
+ *   <li>Processes results from CLASSIFY {@link ActionType}</li>
  *   <li>Complements {@link DrawColorProfile} and {@link DrawClassesLegend}</li>
  * </ul>
  * 
  * @see SceneAnalysis
  * @see ClassificationLegend
  * @see HistoryFileNamer
- * @see ActionOptions.Action#CLASSIFY
+ * @see ActionType#CLASSIFY
  * @see DrawColorProfile
  * @see DrawClassesLegend
  */
@@ -90,12 +90,12 @@ public class DrawClassifications {
      * </ul>
      * 
      * @param matches ActionResult containing SceneAnalysisCollection with classification data
-     * @param actionOptions configuration options affecting filename generation
+     * @param actionConfig configuration options affecting filename generation
      */
-    public void paintClasses(ActionResult matches, ActionOptions actionOptions) {
+    public void paintClasses(ActionResult matches, ActionConfig actionConfig) {
         // CLASSIFY produces only one SceneAnalysisCollection, so we can use the first one
         matches.getSceneAnalysisCollection().getSceneAnalyses().forEach(sceneAnalysis -> {
-            String outputPath = illustrationFilename.getFilenameFromMatchObjects(matches, actionOptions);
+            String outputPath = illustrationFilename.getFilenameFromMatchObjects(matches, actionConfig);
             writeImage(outputPath, sceneAnalysis);
         });
     }

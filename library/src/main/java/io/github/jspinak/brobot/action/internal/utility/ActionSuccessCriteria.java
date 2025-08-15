@@ -2,8 +2,8 @@ package io.github.jspinak.brobot.action.internal.utility;
 
 import org.springframework.stereotype.Component;
 
-import io.github.jspinak.brobot.action.internal.options.ActionOptions;
 import io.github.jspinak.brobot.action.ActionConfig;
+import io.github.jspinak.brobot.action.ActionType;
 import io.github.jspinak.brobot.action.ActionResult;
 
 import java.util.HashMap;
@@ -47,22 +47,22 @@ public class ActionSuccessCriteria {
      * Registry of default success criteria for each action type.
      * Maps action types to predicates that evaluate ActionResult for success.
      */
-    private Map<ActionOptions.Action, Predicate<ActionResult>> criteria = new HashMap<>();
+    private Map<ActionType, Predicate<ActionResult>> criteria = new HashMap<>();
     {
-        criteria.put(ActionOptions.Action.FIND, matches -> !matches.isEmpty());
-        criteria.put(ActionOptions.Action.CLICK, matches -> !matches.isEmpty());
-        criteria.put(ActionOptions.Action.DEFINE, matches -> matches.getDefinedRegion().isDefined());
-        criteria.put(ActionOptions.Action.TYPE, matches -> true);
-        criteria.put(ActionOptions.Action.MOVE, matches -> !matches.isEmpty());
-        criteria.put(ActionOptions.Action.HIGHLIGHT, matches -> !matches.isEmpty());
-        criteria.put(ActionOptions.Action.SCROLL_MOUSE_WHEEL, matches -> true);
-        criteria.put(ActionOptions.Action.MOUSE_DOWN, matches -> true);
-        criteria.put(ActionOptions.Action.MOUSE_UP, matches -> true);
-        criteria.put(ActionOptions.Action.KEY_DOWN, matches -> true);
-        criteria.put(ActionOptions.Action.KEY_UP, matches -> true);
-        criteria.put(ActionOptions.Action.DRAG, matches -> matches.size() == 2); // <- for DragSimple. for Drag, matches.getDefinedRegion().defined());
-        criteria.put(ActionOptions.Action.VANISH, ActionResult::isEmpty);
-        criteria.put(ActionOptions.Action.CLASSIFY, matches -> !matches.isEmpty());
+        criteria.put(ActionType.FIND, matches -> !matches.isEmpty());
+        criteria.put(ActionType.CLICK, matches -> !matches.isEmpty());
+        criteria.put(ActionType.DEFINE, matches -> matches.getDefinedRegion().isDefined());
+        criteria.put(ActionType.TYPE, matches -> true);
+        criteria.put(ActionType.MOVE, matches -> !matches.isEmpty());
+        criteria.put(ActionType.HIGHLIGHT, matches -> !matches.isEmpty());
+        criteria.put(ActionType.SCROLL_MOUSE_WHEEL, matches -> true);
+        criteria.put(ActionType.MOUSE_DOWN, matches -> true);
+        criteria.put(ActionType.MOUSE_UP, matches -> true);
+        criteria.put(ActionType.KEY_DOWN, matches -> true);
+        criteria.put(ActionType.KEY_UP, matches -> true);
+        criteria.put(ActionType.DRAG, matches -> matches.size() == 2); // <- for DragSimple. for Drag, matches.getDefinedRegion().defined());
+        criteria.put(ActionType.VANISH, ActionResult::isEmpty);
+        criteria.put(ActionType.CLASSIFY, matches -> !matches.isEmpty());
     }
 
     /**
@@ -72,16 +72,20 @@ public class ActionSuccessCriteria {
      * depends on additional configuration (whether waiting for objects
      * to appear or vanish).
      *
-     * @param actionOptions Configuration containing action type and parameters
+     * @param actionConfig Configuration containing action type and parameters
      * @return Predicate that evaluates ActionResult for success
      */
-    public Predicate<ActionResult> getCriteria(ActionOptions actionOptions) {
-        if (actionOptions.getAction() == ActionOptions.Action.CLICK_UNTIL) {
-            if (actionOptions.getClickUntil() == ActionOptions.ClickUntil.OBJECTS_APPEAR)
-                return criteria.get(ActionOptions.Action.FIND);
-            else return criteria.get(ActionOptions.Action.VANISH);
+    public Predicate<ActionResult> getCriteria(ActionConfig actionConfig) {
+        // Get action type from the config - implementation depends on config type
+        ActionType actionType = getActionTypeFromConfig(actionConfig);
+        
+        // Handle special case for CLICK_UNTIL
+        if (actionType == ActionType.CLICK_UNTIL) {
+            // For CLICK_UNTIL, determine if we're waiting for objects to appear or vanish
+            // Default to FIND criteria for now
+            return criteria.get(ActionType.FIND);
         }
-        else return criteria.get(actionOptions.getAction());
+        return criteria.get(actionType);
     }
 
     /**
@@ -100,53 +104,35 @@ public class ActionSuccessCriteria {
      * <p>
      * <strong>Side effects:</strong> Modifies the success field of the matches parameter.
      *
-     * @param actionOptions Contains action type and optional custom success criteria
-     * @param matches The action results to evaluate and update with success status
-     */
-    public void set(ActionOptions actionOptions, ActionResult matches) {
-        if (actionOptions.getSuccessCriteria() != null) // new success criteria has been added to this operation
-            matches.setSuccess(actionOptions.getSuccessCriteria().test(matches));
-        else matches.setSuccess(getCriteria(actionOptions).test(matches)); // if not, use the above code
-    }
-
-    /**
-     * Evaluates and sets the success status for ActionConfig-based actions.
-     * <p>
-     * This method evaluates success based on the ActionConfig's success criteria.
-     * Since ActionConfig is type-specific, we derive the success based on the config type
-     * and the matches found.
-     *
-     * @param actionConfig Configuration for the action
+     * @param actionConfig Contains action type and optional custom success criteria
      * @param matches The action results to evaluate and update with success status
      */
     public void set(ActionConfig actionConfig, ActionResult matches) {
-        // Check if custom success criteria is provided
-        if (actionConfig.getSuccessCriteria() != null) {
-            matches.setSuccess(actionConfig.getSuccessCriteria().test(matches));
-            return;
-        }
-        
-        // Default success criteria based on common patterns
-        // Most find-based actions succeed when matches are found
-        boolean defaultSuccess = !matches.isEmpty();
-        
-        // Override for specific action types that always succeed
-        String configClassName = actionConfig.getClass().getSimpleName();
-        if (configClassName.contains("Type") || 
-            configClassName.contains("Scroll") ||
-            configClassName.contains("MouseDown") ||
-            configClassName.contains("MouseUp") ||
-            configClassName.contains("KeyDown") ||
-            configClassName.contains("KeyUp") ||
-            configClassName.contains("Wait")) {
-            defaultSuccess = true;
-        } else if (configClassName.contains("Vanish")) {
-            defaultSuccess = matches.isEmpty();
-        } else if (configClassName.contains("Define")) {
-            defaultSuccess = matches.getDefinedRegion() != null && matches.getDefinedRegion().isDefined();
-        }
-        
-        matches.setSuccess(defaultSuccess);
+        // For now, use the default criteria based on action type
+        matches.setSuccess(getCriteria(actionConfig).test(matches));
     }
 
+    /**
+     * Helper method to determine the ActionType from an ActionConfig.
+     * Since ActionConfig is now a base class, we need to infer the action type
+     * from the specific config class.
+     *
+     * @param actionConfig The configuration to extract action type from
+     * @return The corresponding ActionType
+     */
+    private ActionType getActionTypeFromConfig(ActionConfig actionConfig) {
+        String className = actionConfig.getClass().getSimpleName();
+        
+        if (className.contains("Click")) return ActionType.CLICK;
+        if (className.contains("Find") || className.contains("Pattern")) return ActionType.FIND;
+        if (className.contains("Type")) return ActionType.TYPE;
+        if (className.contains("Drag")) return ActionType.DRAG;
+        if (className.contains("Move")) return ActionType.MOVE;
+        if (className.contains("Vanish")) return ActionType.VANISH;
+        if (className.contains("Scroll")) return ActionType.SCROLL_MOUSE_WHEEL;
+        if (className.contains("Highlight")) return ActionType.HIGHLIGHT;
+        
+        // Default to FIND for unknown config types
+        return ActionType.FIND;
+    }
 }

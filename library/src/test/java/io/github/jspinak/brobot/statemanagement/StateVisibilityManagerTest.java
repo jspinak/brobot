@@ -62,7 +62,7 @@ class StateVisibilityManagerTest {
         assertTrue(result);
         verify(stateService).getState(stateToSetId);
         verify(stateMemory).getActiveStates();
-        verify(stateMemory, never()).removeInactiveState(any());
+        verify(stateMemory, never()).removeInactiveState(any(String.class));
     }
     
     @Test
@@ -146,7 +146,7 @@ class StateVisibilityManagerTest {
         
         // Verify
         assertTrue(result);
-        verify(stateMemory, never()).removeInactiveState(any());
+        verify(stateMemory, never()).removeInactiveState(any(String.class));
         assertTrue(newState.getHiddenStateIds().isEmpty());
     }
     
@@ -202,7 +202,7 @@ class StateVisibilityManagerTest {
         
         // Verify
         assertTrue(result);
-        verify(stateMemory, never()).removeInactiveState(any());
+        verify(stateMemory, never()).removeInactiveState(any(String.class));
         assertTrue(state.getHiddenStateIds().isEmpty());
     }
     

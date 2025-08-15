@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.action.internal.text;
 
-import io.github.jspinak.brobot.action.internal.options.ActionOptions;
+import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.basic.type.TypeOptions;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.state.StateString;
@@ -89,12 +89,12 @@ public class TypeTextWrapperV2 {
      * </p>
      * 
      * @param stateString The text to type
-     * @param actionOptions The legacy action options
+     * @param actionConfig The legacy action options
      * @return true if successful
      * @deprecated Use {@link #type(StateString, TypeOptions)} instead
      */
     @Deprecated
-    public boolean type(StateString stateString, ActionOptions actionOptions) {
-        return legacyWrapper.type(stateString, actionOptions);
+    public boolean type(StateString stateString, ActionConfig actionConfig) {
+        return legacyWrapper.type(stateString, actionConfig);
     }
 }
