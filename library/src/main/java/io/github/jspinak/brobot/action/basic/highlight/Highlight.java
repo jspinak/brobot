@@ -8,7 +8,7 @@ import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.action.basic.find.Find;
 import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.model.state.StateRegion;
-import io.github.jspinak.brobot.tools.history.draw.HighlightMatchedRegionV2;
+import io.github.jspinak.brobot.tools.history.draw.MatchHighlighter;
 import io.github.jspinak.brobot.tools.testing.mock.time.TimeProvider;
 
 import org.springframework.stereotype.Component;
@@ -61,7 +61,7 @@ import org.springframework.stereotype.Component;
  * @see Find
  * @see Match
  * @see HighlightOptions
- * @see HighlightMatchedRegionV2
+ * @see MatchHighlighter
  */
 @Component
 public class Highlight implements ActionInterface {
@@ -72,10 +72,10 @@ public class Highlight implements ActionInterface {
     }
 
     private final Find find;
-    private final HighlightMatchedRegionV2 highlightMatch;
+    private final MatchHighlighter highlightMatch;
     private final TimeProvider time;
 
-    public Highlight(Find find, HighlightMatchedRegionV2 highlightMatch, TimeProvider time) {
+    public Highlight(Find find, MatchHighlighter highlightMatch, TimeProvider time) {
         this.find = find;
         this.highlightMatch = highlightMatch;
         this.time = time;

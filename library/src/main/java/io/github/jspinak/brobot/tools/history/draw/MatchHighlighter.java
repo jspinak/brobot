@@ -33,13 +33,11 @@ import org.springframework.stereotype.Component;
  * @see FrameworkSettings#mock
  */
 @Component
-public class HighlightMatchedRegionV2 {
+public class MatchHighlighter {
 
-    private final HighlightMatchedRegion legacyHighlighter;
     private final BrobotLogger brobotLogger;
     
-    public HighlightMatchedRegionV2(HighlightMatchedRegion legacyHighlighter, BrobotLogger brobotLogger) {
-        this.legacyHighlighter = legacyHighlighter;
+    public MatchHighlighter(BrobotLogger brobotLogger) {
         this.brobotLogger = brobotLogger;
     }
 

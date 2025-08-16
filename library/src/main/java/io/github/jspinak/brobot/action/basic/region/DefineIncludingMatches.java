@@ -5,8 +5,7 @@ import io.github.jspinak.brobot.action.ActionInterface;
 import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
-import io.github.jspinak.brobot.action.internal.capture.RegionDefinitionHelper;
-import io.github.jspinak.brobot.action.internal.capture.RegionDefinitionHelperV2;
+import io.github.jspinak.brobot.action.internal.capture.RegionDefiner;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.match.Match;
 
@@ -48,12 +47,10 @@ public class DefineIncludingMatches implements ActionInterface {
         return Type.DEFINE;
     }
 
-    private final RegionDefinitionHelper defineHelper;
-    private final RegionDefinitionHelperV2 defineHelperV2;
+    private final RegionDefiner defineHelper;
 
-    public DefineIncludingMatches(RegionDefinitionHelper defineHelper, RegionDefinitionHelperV2 defineHelperV2) {
+    public DefineIncludingMatches(RegionDefiner defineHelper) {
         this.defineHelper = defineHelper;
-        this.defineHelperV2 = defineHelperV2;
     }
 
     /**
@@ -91,7 +88,7 @@ public class DefineIncludingMatches implements ActionInterface {
         
         // Apply adjustments using V2 helper if we have DefineRegionOptions
         if (defineOptions != null) {
-            defineHelperV2.adjust(region, defineOptions);
+            defineHelper.adjust(region, defineOptions);
         }
         
         matches.addDefinedRegion(region);

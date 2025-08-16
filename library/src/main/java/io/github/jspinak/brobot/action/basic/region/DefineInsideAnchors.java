@@ -6,8 +6,7 @@ import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.action.internal.capture.AnchorRegion;
-import io.github.jspinak.brobot.action.internal.capture.RegionDefinitionHelper;
-import io.github.jspinak.brobot.action.internal.capture.RegionDefinitionHelperV2;
+import io.github.jspinak.brobot.action.internal.capture.RegionDefiner;
 import io.github.jspinak.brobot.action.internal.capture.DefinedBorders;
 import io.github.jspinak.brobot.model.element.Region;
 
@@ -51,16 +50,14 @@ public class DefineInsideAnchors implements ActionInterface {
         return Type.DEFINE;
     }
 
-    private final RegionDefinitionHelper defineHelper;
-    private final RegionDefinitionHelperV2 defineHelperV2;
+    private final RegionDefiner defineHelper;
     private final AnchorRegion anchorRegion;
 
     private DefinedBorders definedBorders;
 
-    public DefineInsideAnchors(RegionDefinitionHelper defineHelper, RegionDefinitionHelperV2 defineHelperV2,
+    public DefineInsideAnchors(RegionDefiner defineHelper,
                               AnchorRegion anchorRegion) {
         this.defineHelper = defineHelper;
-        this.defineHelperV2 = defineHelperV2;
         this.anchorRegion = anchorRegion;
     }
 
@@ -108,7 +105,7 @@ public class DefineInsideAnchors implements ActionInterface {
         
         // Apply adjustments using V2 helper if we have DefineRegionOptions
         if (defineOptions != null) {
-            defineHelperV2.adjust(region, defineOptions);
+            defineHelper.adjust(region, defineOptions);
         }
         
         if (definedBorders.allBordersDefined()) {

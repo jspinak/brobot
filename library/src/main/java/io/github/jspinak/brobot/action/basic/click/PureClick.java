@@ -51,9 +51,9 @@ import java.util.logging.Logger;
  * @see ConditionalActionChain for chaining Find with Click
  */
 @Component("clickV2")
-public class ClickV2 implements ActionInterface {
+public class PureClick implements ActionInterface {
 
-    private static final Logger logger = Logger.getLogger(ClickV2.class.getName());
+    private static final Logger logger = Logger.getLogger(PureClick.class.getName());
 
     @Override
     public Type getActionType() {

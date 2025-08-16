@@ -9,7 +9,11 @@ import org.w3c.dom.Document;
 import io.github.jspinak.brobot.config.FrameworkSettings;
 
 import javax.imageio.ImageIO;
-import javax.xml.transform.*;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.File;
@@ -52,7 +56,7 @@ import java.util.Date;
  * <li>Uses Sikuli's Image class for compatibility</li>
  * <li>Leverages Apache Commons for file operations</li>
  * <li>XML transformation uses standard Java DOM APIs</li>
- * <li>TODO: Folder creation needs proper implementation</li>
+ * <li>Folder creation uses standard Java File.mkdirs()</li>
  * </ul>
  *
  * @see SaveToFile
@@ -76,17 +80,24 @@ public class RecorderSaveToFile implements SaveToFile {
     /**
      * Creates a folder at the specified location.
      * <p>
-     * Current implementation is a placeholder that returns a File object
-     * without actually creating directories. The original Sikuli Commons.asFolder
-     * method is not available in version 2.0.5.
+     * Creates the directory and all necessary parent directories if they don't exist.
+     * This replaces the original Sikuli Commons.asFolder method that is not available 
+     * in version 2.0.5.
      * <p>
-     * TODO: Implement proper folder creation with parent directory handling
+     * If the folder already exists, returns the existing folder.
+     * If folder creation fails, logs an error and returns the File object anyway.
      *
      * @param folder the folder to create
-     * @return File object for the folder path (not actually created)
+     * @return File object for the folder path (created if necessary)
      */
     public File createFolder(File folder) {
-        return new File(folder.getPath()); // todo: review quick replacement done bc not in Sikuli 2.0.5 -> //Commons.asFolder(folder.getPath());
+        if (!folder.exists()) {
+            boolean created = folder.mkdirs();
+            if (!created && !folder.exists()) {
+                Debug.error("Failed to create folder: " + folder.getAbsolutePath());
+            }
+        }
+        return folder;
     }
 
     /**

@@ -1,6 +1,5 @@
 package io.github.jspinak.brobot.action.internal.find;
 
-import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.action.basic.find.MatchAdjustmentOptions;
@@ -31,13 +30,9 @@ import java.util.List;
  * @since 2.0
  */
 @Component
-public class OffsetLocationManagerV2 {
+public class OffsetMatchCreator {
     
-    private final OffsetLocationManager legacyManager;
-    
-    public OffsetLocationManagerV2(OffsetLocationManager legacyManager) {
-        this.legacyManager = legacyManager;
-    }
+    // No longer needs legacy dependency - this class is now standalone
 
     /**
      * Creates a match at an offset position when no other matches exist.
@@ -58,7 +53,7 @@ public class OffsetLocationManagerV2 {
                                    ActionResult matches,
                                    MatchAdjustmentOptions adjustmentOptions,
                                    boolean doOnlyWhenCollectionsAreEmpty) {
-        if (adjustmentOptions == null || adjustmentOptions.getAddX() == 0) {
+        if (adjustmentOptions == null || (adjustmentOptions.getAddX() == 0 && adjustmentOptions.getAddY() == 0)) {
             return;
         }
         
@@ -97,43 +92,5 @@ public class OffsetLocationManagerV2 {
             if (!objColl.isEmpty()) return false;
         }
         return true;
-    }
-    
-    /**
-     * Legacy method that adds an offset match based on ActionOptions.
-     * <p>
-     * This method is provided for backward compatibility during migration.
-     * It delegates to the original OffsetLocationManager implementation.
-     * </p>
-     * 
-     * @param objectCollections The collections being searched
-     * @param matches The current match results
-     * @param actionConfig Legacy action options
-     * @deprecated Use methods that accept MatchAdjustmentOptions instead
-     */
-    @Deprecated
-    public void addOffset(List<ObjectCollection> objectCollections, 
-                         ActionResult matches, 
-                         ActionConfig actionConfig) {
-        legacyManager.addOffset(objectCollections, matches, actionConfig);
-    }
-    
-    /**
-     * Legacy method that adds an offset as the only match using ActionOptions.
-     * <p>
-     * This method is provided for backward compatibility during migration.
-     * It delegates to the original OffsetLocationManager implementation.
-     * </p>
-     * 
-     * @param objectCollections The collections being searched
-     * @param matches The current match results
-     * @param doOnlyWhenCollectionsAreEmpty Whether to only add when collections are empty
-     * @deprecated Use {@link #addOffsetAsOnlyMatch(List, ActionResult, MatchAdjustmentOptions, boolean)} instead
-     */
-    @Deprecated
-    public void addOffsetAsOnlyMatch(List<ObjectCollection> objectCollections,
-                                   ActionResult matches,
-                                   boolean doOnlyWhenCollectionsAreEmpty) {
-        legacyManager.addOffsetAsOnlyMatch(objectCollections, matches, doOnlyWhenCollectionsAreEmpty);
     }
 }
