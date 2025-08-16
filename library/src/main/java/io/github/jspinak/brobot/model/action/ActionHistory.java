@@ -139,26 +139,11 @@ public class ActionHistory {
 
     /**
      * Gets a random snapshot for the specified ActionConfig.
-     * This is the modern API replacement for getRandomSnapshot(ActionType).
      * @param actionConfig the ActionConfig used for the action
      * @return an Optional of a Snapshot
      */
     public Optional<ActionRecord> getRandomSnapshot(ActionConfig actionConfig) {
         ActionType action = getActionTypeFromConfig(actionConfig);
-        return getRandomSnapshot(action);
-    }
-
-    /**
-     * Useful for Action-specific operations such as GetText.
-     * @deprecated Use getRandomSnapshot(ActionConfig) instead
-     * @param action the Action taken
-     * @return an Optional of a Snapshot
-     */
-    @Deprecated
-    public Optional<ActionRecord> getRandomSnapshot(ActionType action) {
-        // Log deprecation usage
-        // Migration to ActionType completed
-        
         List<ActionRecord> selectedSnapshots = snapshots.stream()
                 .filter(snapshot -> getSnapshotActionType(snapshot) == action)
                 .collect(toList());
@@ -167,24 +152,12 @@ public class ActionHistory {
 
     /**
      * Gets a random snapshot for the specified ActionConfig and state.
-     * This is the modern API replacement for getRandomSnapshot(ActionType, Long).
      * @param actionConfig the ActionConfig used for the action
      * @param state the state ID
      * @return an Optional of a Snapshot
      */
     public Optional<ActionRecord> getRandomSnapshot(ActionConfig actionConfig, Long state) {
         ActionType action = getActionTypeFromConfig(actionConfig);
-        return getRandomSnapshot(action, state);
-    }
-
-    /**
-     * Brobot 1.0.7 uses Snapshots that record the action and the state.
-     * @deprecated Use getRandomSnapshot(ActionConfig, Long) instead
-     * @param action the Action taken
-     * @return an Optional of a Snapshot
-     */
-    @Deprecated
-    public Optional<ActionRecord> getRandomSnapshot(ActionType action, Long state) {
         List<ActionRecord> selectedSnapshots = snapshots.stream()
                 .filter(snapshot -> getSnapshotActionType(snapshot) == action && snapshot.getStateId().equals(state))
                 .collect(toList());
@@ -198,17 +171,8 @@ public class ActionHistory {
      * @return an Optional of a Snapshot
      */
     public Optional<ActionRecord> getRandomSnapshot(ActionConfig actionConfig, Long... states) {
-        ActionType action = getActionTypeFromConfig(actionConfig);
-        return getRandomSnapshot(action, states);
-    }
-    
-    /**
-     * @deprecated Use getRandomSnapshot(ActionConfig, Long...) instead
-     */
-    @Deprecated
-    public Optional<ActionRecord> getRandomSnapshot(ActionType action, Long... states) {
         for (Long state : states) {
-            Optional<ActionRecord> optMS = getRandomSnapshot(action, state);
+            Optional<ActionRecord> optMS = getRandomSnapshot(actionConfig, state);
             if (optMS.isPresent()) return optMS;
         }
         return Optional.empty();
@@ -222,14 +186,6 @@ public class ActionHistory {
      */
     public Optional<ActionRecord> getRandomSnapshot(ActionConfig actionConfig, Set<Long> states) {
         return getRandomSnapshot(actionConfig, states.toArray(new Long[0]));
-    }
-    
-    /**
-     * @deprecated Use getRandomSnapshot(ActionConfig, Set<Long>) instead
-     */
-    @Deprecated
-    public Optional<ActionRecord> getRandomSnapshot(ActionType action, Set<Long> states) {
-        return getRandomSnapshot(action, states.toArray(new Long[0]));
     }
 
     /**
@@ -273,13 +229,26 @@ public class ActionHistory {
 
     private List<ActionRecord> getSnapshotOfFindType(ActionConfig actionConfig,
                                                           List<ActionRecord> snapshots) {
-        PatternFindOptions.Strategy findType = getFindStrategyFromConfig(actionConfig);
-        return snapshots.stream().filter(snapshot -> {
-                    PatternFindOptions.Strategy snapshotFind = getSnapshotFindType(snapshot);
-                    // UNIVERSAL strategy removed - all matches are considered
-                    return snapshotFind == findType;
-                })
+        // First filter by ActionConfig class type
+        Class<? extends ActionConfig> configClass = actionConfig.getClass();
+        List<ActionRecord> sameTypeSnapshots = snapshots.stream()
+                .filter(snapshot -> snapshot.getActionConfig() != null 
+                        && snapshot.getActionConfig().getClass().equals(configClass))
                 .collect(toList());
+        
+        // For PatternFindOptions, also filter by strategy
+        if (actionConfig instanceof PatternFindOptions) {
+            PatternFindOptions.Strategy findType = getFindStrategyFromConfig(actionConfig);
+            return sameTypeSnapshots.stream().filter(snapshot -> {
+                        PatternFindOptions.Strategy snapshotFind = getSnapshotFindType(snapshot);
+                        // UNIVERSAL strategy removed - all matches are considered
+                        return snapshotFind == findType;
+                    })
+                    .collect(toList());
+        }
+        
+        // For other types, just return the same-type snapshots
+        return sameTypeSnapshots;
     }
     
     // Removed deprecated getSnapshotOfFindType(ActionOptions, List<ActionRecord>) method

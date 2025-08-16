@@ -69,7 +69,7 @@ public class RegionBuilder {
     
     // Anchor positioning using Position
     private Position anchorPosition = null;
-    private Positions.Name anchorName = TOPLEFT;
+    private Positions.Name anchorName = null;
     
     // Position-based placement
     private Position relativePosition = null;
@@ -101,6 +101,7 @@ public class RegionBuilder {
         this.y = y;
         this.width = width;
         this.height = height;
+        log.debug("withRegion set: x={}, y={}, width={}, height={}", x, y, width, height);
         return this;
     }
     
@@ -584,6 +585,8 @@ public class RegionBuilder {
         int finalWidth = calculateWidth();
         int finalHeight = calculateHeight();
         
+        log.debug("After calculate: x={}, y={}, w={}, h={}", finalX, finalY, finalWidth, finalHeight);
+        
         // Apply relative positioning if specified
         if (relativeToRegion != null && relativePosition != null) {
             finalX = (int) Math.round(relativeToRegion.getX() + 
@@ -598,8 +601,15 @@ public class RegionBuilder {
         finalWidth += widthAdjustment;
         finalHeight += heightAdjustment;
         
+        log.debug("After adjustments: x={}, y={}, w={}, h={}", finalX, finalY, finalWidth, finalHeight);
+        
         // Apply anchor positioning
-        applyAnchor(finalX, finalY, finalWidth, finalHeight);
+        int[] anchored = applyAnchor(finalX, finalY, finalWidth, finalHeight);
+        finalX = anchored[0];
+        finalY = anchored[1];
+        
+        log.debug("After anchor: x={}, y={}, w={}, h={}, anchorName={}, anchorPosition={}", 
+                 finalX, finalY, finalWidth, finalHeight, anchorName, anchorPosition);
         
         // Constrain to screen if needed
         if (constrainToScreen) {
@@ -620,6 +630,7 @@ public class RegionBuilder {
     }
     
     private int calculateX() {
+        log.debug("calculateX: xPercent={}, x={}", xPercent, x);
         if (xPercent != null) {
             return (int) Math.round(currentScreenWidth * xPercent);
         }
@@ -659,7 +670,12 @@ public class RegionBuilder {
         return 100;
     }
     
-    private void applyAnchor(int x, int y, int width, int height) {
+    private int[] applyAnchor(int x, int y, int width, int height) {
+        // Only apply anchor if it's explicitly set
+        if (anchorName == null && anchorPosition == null) {
+            return new int[]{x, y};
+        }
+        
         // Use Position-based anchoring
         Position anchor = anchorPosition != null ? anchorPosition : new Position(anchorName);
         
@@ -668,17 +684,10 @@ public class RegionBuilder {
         double anchorY = anchor.getPercentH();
         
         // Adjust position based on anchor point
-        this.x = (int) Math.round((currentScreenWidth - width) * anchorX);
-        this.y = (int) Math.round((currentScreenHeight - height) * anchorY);
+        int newX = (int) Math.round((currentScreenWidth - width) * anchorX);
+        int newY = (int) Math.round((currentScreenHeight - height) * anchorY);
         
-        // If we have explicit x/y values and not using percentage positioning,
-        // preserve them unless we're using named anchors
-        if (xPercent == null && this.x != null && anchorName == TOPLEFT && anchorPosition == null) {
-            this.x = x;
-        }
-        if (yPercent == null && this.y != null && anchorName == TOPLEFT && anchorPosition == null) {
-            this.y = y;
-        }
+        return new int[]{newX, newY};
     }
     
     private void detectCurrentScreenSize() {

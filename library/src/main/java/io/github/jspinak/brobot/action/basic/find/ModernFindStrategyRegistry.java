@@ -31,14 +31,14 @@ import java.util.function.BiConsumer;
  * 
  * @see FindStrategy
  * @see BaseFindOptions
- * @see FindImageV2
+ * @see ImageFinder
  * @see FindText
  * @see FindColor
  * @see FindMotion
  * @since 2.0
  */
 @Component
-public class FindStrategyRegistryV2 {
+public class ModernFindStrategyRegistry {
 
     private final Map<FindStrategy, BiConsumer<ActionResult, List<ObjectCollection>>>
             findFunction = new HashMap<>();
@@ -46,9 +46,9 @@ public class FindStrategyRegistryV2 {
     // Storage for custom find function
     private BiConsumer<ActionResult, List<ObjectCollection>> customFind;
 
-    public FindStrategyRegistryV2(FindHistogram findHistogram,
+    public ModernFindStrategyRegistry(FindHistogram findHistogram,
                          FindColor findColor, FindMotion findMotion, FindRegionsOfMotion findRegionsOfMotion,
-                         FindImageV2 findImageV2, FindText findText, FindSimilarImages findSimilarImages,
+                         ImageFinder findImageV2, FindText findText, FindSimilarImages findSimilarImages,
                          FindFixedPixelMatches findFixedPixelMatches, FindDynamicPixelMatches findDynamicPixelMatches) {
         findFunction.put(FindStrategy.FIRST, findImageV2::findBest);
         findFunction.put(FindStrategy.BEST, findImageV2::findBest);

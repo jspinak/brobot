@@ -210,7 +210,10 @@ public class ConfigurationDiagnostics {
         List<String> detectedIssues = new ArrayList<>();
         
         // Check for headless with screen capture
-        if (!environment.hasDisplay() && configuration.getCore().isAllowScreenCapture()) {
+        boolean hasDisplay = environment.hasDisplay();
+        boolean allowScreenCapture = configuration.getCore().isAllowScreenCapture();
+        log.debug("checkCommonIssues: hasDisplay={}, allowScreenCapture={}", hasDisplay, allowScreenCapture);
+        if (!hasDisplay && allowScreenCapture) {
             detectedIssues.add("Screen capture enabled but no display available");
         }
         

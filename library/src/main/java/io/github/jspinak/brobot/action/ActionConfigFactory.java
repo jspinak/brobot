@@ -52,7 +52,7 @@ public class ActionConfigFactory {
                 Map.entry(ActionInterface.Type.KEY_DOWN, this::createKeyDownOptions),
                 Map.entry(ActionInterface.Type.KEY_UP, this::createKeyUpOptions),
                 Map.entry(ActionInterface.Type.CLASSIFY, this::createColorClassifyOptions),
-                // CLICK_UNTIL removed - use ClickOptions with success criteria instead
+                Map.entry(ActionInterface.Type.CLICK_UNTIL, this::createClickUntilOptions), // Deprecated but supported for backward compatibility
                 Map.entry(ActionInterface.Type.DEFINE, this::createDefineRegionOptions)
         );
     }
@@ -239,10 +239,27 @@ public class ActionConfigFactory {
         return builder.build();
     }
 
-    // ClickUntilOptions removed - use ClickOptions with success criteria
-    private ClickOptions createClickUntilOptionsReplacement(Map<String, Object> overrides) {
+    /**
+     * Creates ClickOptions for CLICK_UNTIL action type.
+     * @deprecated Use ClickOptions with success criteria instead.
+     * See action/composite/repeat/CLICK_UNTIL_MIGRATION.md for migration guide.
+     */
+    @Deprecated
+    private ClickOptions createClickUntilOptions(Map<String, Object> overrides) {
         ClickOptions.Builder builder = new ClickOptions.Builder();
         applyCommonOverrides(builder, overrides);
+        
+        // Set a default success criteria that mimics old CLICK_UNTIL behavior
+        if (overrides == null || !overrides.containsKey("successCriteria")) {
+            // Default: stop when target vanishes (common CLICK_UNTIL use case)
+            builder.setSuccessCriteria(result -> result.getMatchList().isEmpty());
+        }
+        
+        // Set a reasonable max clicks to prevent infinite loops
+        if (overrides == null || !overrides.containsKey("numberOfClicks")) {
+            builder.setNumberOfClicks(10); // Default safety limit
+        }
+        
         return builder.build();
     }
 

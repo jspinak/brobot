@@ -128,6 +128,11 @@ public class BrobotConfiguration {
         private String profile = "development";
         
         /**
+         * Track if profile was explicitly set
+         */
+        private boolean profileExplicitlySet = false;
+        
+        /**
          * CI/CD specific settings
          */
         private boolean ciMode = false;
@@ -146,6 +151,14 @@ public class BrobotConfiguration {
          * Remote server URL
          */
         private String remoteServerUrl;
+        
+        /**
+         * Override setter to track explicit profile setting
+         */
+        public void setProfile(String profile) {
+            this.profile = profile;
+            this.profileExplicitlySet = true;
+        }
     }
     
     /**
@@ -216,7 +229,7 @@ public class BrobotConfiguration {
         log.info("Validating Brobot configuration...");
         
         // Auto-detect environment if not explicitly set
-        if (environment.getProfile().equals("development")) {
+        if (!environment.isProfileExplicitlySet()) {
             detectEnvironmentProfile();
         }
         
@@ -257,13 +270,16 @@ public class BrobotConfiguration {
     public void applyProfile(String profile) {
         log.info("Applying configuration profile: {}", profile);
         environment.setProfile(profile);
+        environment.setProfileExplicitlySet(true);
         applyEnvironmentDefaults();
     }
     
     private void detectEnvironmentProfile() {
-        // Check for CI environment
-        if (System.getenv("CI") != null || System.getenv("CONTINUOUS_INTEGRATION") != null) {
-            environment.setProfile("ci");
+        // Check for CI environment (both env variable and system property)
+        if (System.getenv("CI") != null || 
+            System.getenv("CONTINUOUS_INTEGRATION") != null ||
+            "true".equals(System.getProperty("CI"))) {
+            environment.profile = "ci";  // Use field directly to avoid setting the flag
             environment.setCiMode(true);
             log.info("Detected CI environment");
             return;
@@ -278,7 +294,7 @@ public class BrobotConfiguration {
         // Check for common test indicators
         String classPath = System.getProperty("java.class.path", "");
         if (classPath.contains("test-classes") || classPath.contains("junit")) {
-            environment.setProfile("testing");
+            environment.profile = "testing";  // Use field directly to avoid setting the flag
             log.info("Detected testing environment");
             return;
         }

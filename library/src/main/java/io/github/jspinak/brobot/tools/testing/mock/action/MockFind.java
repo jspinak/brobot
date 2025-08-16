@@ -1,6 +1,7 @@
 package io.github.jspinak.brobot.tools.testing.mock.action;
 
 import io.github.jspinak.brobot.action.ActionType;
+import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
 import io.github.jspinak.brobot.model.action.ActionRecord;
 import io.github.jspinak.brobot.model.element.Pattern;
 import io.github.jspinak.brobot.model.match.Match;
@@ -40,8 +41,10 @@ public class MockFind {
      */
     public List<Match> getMatches(Pattern pattern) {
         mockTime.wait(actionDurations.getActionDuration(ActionType.FIND));
+        // Use PatternFindOptions instead of ActionType for non-deprecated method
+        PatternFindOptions findOptions = new PatternFindOptions.Builder().build();
         Optional<ActionRecord> optionalMatchSnapshot =
-                pattern.getMatchHistory().getRandomSnapshot(ActionType.FIND, stateMemory.getActiveStates());
+                pattern.getMatchHistory().getRandomSnapshot(findOptions, stateMemory.getActiveStates());
         if (optionalMatchSnapshot.isEmpty()) return new ArrayList<>();
         return optionalMatchSnapshot.get().getMatchList();
     }
@@ -55,10 +58,12 @@ public class MockFind {
     public List<Match> getWordMatches() {
         mockTime.wait(actionDurations.getActionDuration(ActionType.FIND));
         List<Match> allMatches = new ArrayList<>();
+        // Use PatternFindOptions instead of ActionType for non-deprecated method
+        PatternFindOptions findOptions = new PatternFindOptions.Builder().build();
         for (Long stateId : stateMemory.getActiveStates()) {
             Optional<State> state = allStatesInProjectService.getState(stateId);
             state.ifPresent(st -> {
-                Optional<ActionRecord> snapshot = st.getMatchHistory().getRandomSnapshot(ActionType.FIND, stateId);
+                Optional<ActionRecord> snapshot = st.getMatchHistory().getRandomSnapshot(findOptions, stateId);
                 snapshot.ifPresent(snap -> allMatches.addAll(snap.getMatchList()));
             });
         }

@@ -134,7 +134,7 @@ public class ReactiveAutomator extends BaseAutomation {
             logger.warn("Automation already running");
             return;
         }
-        running = true;
+        super.start(); // Set the execution state to RUNNING
         
         // Use the monitoring service to run the automation loop
         // The task is the automationLoop, the condition is the 'running' flag.
@@ -180,7 +180,7 @@ public class ReactiveAutomator extends BaseAutomation {
      * </ol>
      */
     private void automationLoop() {
-        if (!running) return;
+        if (!isRunning()) return;
 
         try {
             // Find active states

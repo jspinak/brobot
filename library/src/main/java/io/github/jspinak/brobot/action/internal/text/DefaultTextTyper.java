@@ -1,11 +1,9 @@
 package io.github.jspinak.brobot.action.internal.text;
 
-import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.basic.type.TypeOptions;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.state.StateString;
 import io.github.jspinak.brobot.config.FrameworkSettings;
-
 import org.springframework.stereotype.Component;
 
 /**
@@ -27,13 +25,9 @@ import org.springframework.stereotype.Component;
  * @since 2.0
  */
 @Component
-public class TypeTextWrapperV2 {
+public class DefaultTextTyper {
     
-    private final TypeTextWrapper legacyWrapper;
-    
-    public TypeTextWrapperV2(TypeTextWrapper legacyWrapper) {
-        this.legacyWrapper = legacyWrapper;
-    }
+    // No longer needs legacy dependency - this class is now standalone
 
     /**
      * Types the specified text into the currently focused window or input field.
@@ -79,22 +73,5 @@ public class TypeTextWrapperV2 {
             System.out.println("Mock: type '" + stateString.getString() + "' with modifiers: " + modifierString);
         }
         return true;
-    }
-    
-    /**
-     * Legacy method that types text using ActionOptions.
-     * <p>
-     * This method is provided for backward compatibility during migration.
-     * It delegates to the original TypeTextWrapper implementation.
-     * </p>
-     * 
-     * @param stateString The text to type
-     * @param actionConfig The legacy action options
-     * @return true if successful
-     * @deprecated Use {@link #type(StateString, TypeOptions)} instead
-     */
-    @Deprecated
-    public boolean type(StateString stateString, ActionConfig actionConfig) {
-        return legacyWrapper.type(stateString, actionConfig);
     }
 }

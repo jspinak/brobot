@@ -135,7 +135,7 @@ public class FindMotion {
             sA.getIllustrations().setMotionWithMatches(sA.getScene().getPattern().getImage().getMatBGR());
         });
         matchOps.addMatchListToMatches(movingObjects.get(2), matches);
-        matches.sortByMatchScoreDecending();
+        matches.sortByMatchScoreDescending();
         matchOps.limitNumberOfMatches(matches, actionConfig);
     }
 

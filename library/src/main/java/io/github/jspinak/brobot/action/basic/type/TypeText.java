@@ -4,7 +4,7 @@ import io.github.jspinak.brobot.action.ActionType;
 import io.github.jspinak.brobot.action.ActionInterface;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
-import io.github.jspinak.brobot.action.internal.text.TypeTextWrapperV2;
+import io.github.jspinak.brobot.action.internal.text.DefaultTextTyper;
 import io.github.jspinak.brobot.model.state.StateString;
 import io.github.jspinak.brobot.tools.testing.mock.time.TimeProvider;
 
@@ -53,7 +53,7 @@ import java.util.List;
  * @since 1.0
  * @see StateString
  * @see TypeOptions
- * @see TypeTextWrapperV2
+ * @see DefaultTextTyper
  * @see Click
  */
 @Component
@@ -64,10 +64,10 @@ public class TypeText implements ActionInterface {
         return Type.TYPE;
     }
 
-    private final TypeTextWrapperV2 typeTextWrapper;
+    private final DefaultTextTyper typeTextWrapper;
     private final TimeProvider time;
 
-    public TypeText(TypeTextWrapperV2 typeTextWrapper, TimeProvider time) {
+    public TypeText(DefaultTextTyper typeTextWrapper, TimeProvider time) {
         this.typeTextWrapper = typeTextWrapper;
         this.time = time;
     }

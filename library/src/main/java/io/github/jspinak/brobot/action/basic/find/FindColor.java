@@ -102,7 +102,7 @@ public class FindColor {
         if (colorOptions.getDiameter() < 0) return;
         Set<StateImage> targetImages = getSceneAnalysisCollection.getTargetImages(objectCollections);
         
-        // TODO: Update getClassMatches to accept ColorFindOptions directly
+        // getClassMatches accepts ActionConfig which ColorFindOptions extends
         ActionResult classMatches = getClassMatches.getMatches(matches.getSceneAnalysisCollection(), targetImages, colorOptions);
         matches.addAllResults(classMatches);
         

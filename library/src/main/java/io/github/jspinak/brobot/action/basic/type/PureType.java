@@ -47,9 +47,9 @@ import java.util.logging.Logger;
  * @see ConditionalActionChain for chaining Find with Type
  */
 @Component("typeV2")
-public class TypeV2 implements ActionInterface {
+public class PureType implements ActionInterface {
 
-    private static final Logger logger = Logger.getLogger(TypeV2.class.getName());
+    private static final Logger logger = Logger.getLogger(PureType.class.getName());
     private Screen screen;
     private boolean headlessMode = false;
 

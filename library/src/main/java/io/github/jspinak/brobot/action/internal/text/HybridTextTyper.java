@@ -1,6 +1,7 @@
 package io.github.jspinak.brobot.action.internal.text;
 
 import io.github.jspinak.brobot.action.ActionConfig;
+import io.github.jspinak.brobot.action.basic.type.TypeOptions;
 import io.github.jspinak.brobot.config.FrameworkSettings;
 import io.github.jspinak.brobot.model.state.StateString;
 import lombok.extern.slf4j.Slf4j;
@@ -33,7 +34,7 @@ public class HybridTextTyper implements TextTyper {
     private LiveTextTyper liveTyper;
     
     @Autowired
-    private TypeTextWrapper legacyWrapper; // Fallback to legacy implementation
+    private DefaultTextTyper legacyWrapper; // Fallback to V2 implementation
     
     private volatile boolean useLegacyMode = false;
     
@@ -59,12 +60,22 @@ public class HybridTextTyper implements TextTyper {
         // Check if we should use legacy mode for mixed execution
         if (useLegacyMode || (mockTyper == null && liveTyper == null)) {
             log.trace("Using legacy runtime-check typer");
-            return legacyWrapper.type(stateString, actionConfig);
+            // Convert ActionConfig to TypeOptions if possible
+            if (actionConfig instanceof TypeOptions) {
+                return legacyWrapper.type(stateString, (TypeOptions) actionConfig);
+            } else {
+                // Fallback to default TypeOptions if not a TypeOptions instance
+                return legacyWrapper.type(stateString, new TypeOptions.Builder().build());
+            }
         }
         
         // This shouldn't happen, but provide a sensible default
         log.warn("No appropriate typer found, using legacy wrapper");
-        return legacyWrapper.type(stateString, actionConfig);
+        if (actionConfig instanceof TypeOptions) {
+            return legacyWrapper.type(stateString, (TypeOptions) actionConfig);
+        } else {
+            return legacyWrapper.type(stateString, new TypeOptions.Builder().build());
+        }
     }
     
     /**

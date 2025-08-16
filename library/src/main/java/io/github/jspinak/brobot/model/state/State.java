@@ -185,7 +185,7 @@ public class State {
             // if the image has a fixed location and has been found, add this location
             stateImage.getPatterns().forEach(pattern -> {
                         Region fixedRegion = pattern.getSearchRegions().getFixedRegion();
-                        if (fixedRegion.isDefined()) imageRegions.add(fixedRegion);
+                        if (fixedRegion != null && fixedRegion.isDefined()) imageRegions.add(fixedRegion);
                     });
             // otherwise, add the snapshot locations
             List<ActionRecord> snapshots = stateImage.getAllMatchSnapshots();

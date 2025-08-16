@@ -1,6 +1,5 @@
 package io.github.jspinak.brobot.action.internal.find.match;
 
-import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.action.basic.find.MatchAdjustmentOptions;
@@ -36,13 +35,9 @@ import java.util.List;
  * @since 2.0
  */
 @Component
-public class MatchAdjusterV2 {
+public class MatchRegionAdjuster {
     
-    private final MatchAdjuster legacyAdjuster;
-    
-    public MatchAdjusterV2(MatchAdjuster legacyAdjuster) {
-        this.legacyAdjuster = legacyAdjuster;
-    }
+    // No longer needs legacy dependency - this class is now standalone
 
     /**
      * Adjusts a single match's region based on the specified adjustment options.
@@ -135,38 +130,6 @@ public class MatchAdjusterV2 {
             return;
         }
         objectCollection.getMatches().forEach(matches -> adjustAll(matches, adjustmentOptions));
-    }
-    
-    /**
-     * Legacy method that adjusts a match using ActionOptions.
-     * <p>
-     * This method is provided for backward compatibility during migration.
-     * It delegates to the original MatchAdjuster implementation.
-     * </p>
-     * 
-     * @param match The match to adjust
-     * @param actionConfig The legacy action options
-     * @deprecated Use {@link #adjust(Match, MatchAdjustmentOptions)} instead
-     */
-    @Deprecated
-    public void adjust(Match match, ActionConfig actionConfig) {
-        legacyAdjuster.adjust(match, actionConfig);
-    }
-    
-    /**
-     * Legacy method that adjusts all matches using ActionOptions.
-     * <p>
-     * This method is provided for backward compatibility during migration.
-     * It delegates to the original MatchAdjuster implementation.
-     * </p>
-     * 
-     * @param matches The matches to adjust
-     * @param actionConfig The legacy action options
-     * @deprecated Use {@link #adjustAll(ActionResult, MatchAdjustmentOptions)} instead
-     */
-    @Deprecated
-    public void adjustAll(ActionResult matches, ActionConfig actionConfig) {
-        legacyAdjuster.adjustAll(matches, actionConfig);
     }
     
     /**

@@ -223,3 +223,6 @@ jreleaser {
         }
     }
 }
+
+// Apply coverage tasks
+apply from: 'gradle-coverage-tasks.gradle'

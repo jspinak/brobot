@@ -130,7 +130,7 @@ public abstract class ActionConfig {
      * .setStrategy(PatternFindOptions.Strategy.BEST)
      * .setPauseAfterEnd(0.5)
      * .then(new ClickOptions.Builder()
-     *     .setClickType(ClickOptions.Type.LEFT)
+     *     .setNumberOfClicks(1)
      *     .build())
      * .build();
      *

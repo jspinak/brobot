@@ -24,7 +24,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * <pre>
  * {@code
  * ClickOptions clickUntilTextAppears = new ClickOptions.Builder()
- * .setClickType(ClickOptions.Type.DOUBLE_LEFT)
+ * .setNumberOfClicks(2)
+ * .setPressOptions(MousePressOptions.builder()
+ *     .button(MouseButton.LEFT)
+ *     .build())
  * .setVerification(new VerificationOptions.Builder()
  * .setEvent(VerificationOptions.Event.TEXT_APPEARS)
  * .setText("Success")
@@ -41,36 +44,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonDeserialize(builder = ClickOptions.Builder.class)
 public final class ClickOptions extends ActionConfig {
 
-    /**
-     * Enumerates all supported mouse click types.
-     * @deprecated Use MouseButton with numberOfClicks instead. This enum
-     * violates Single Responsibility Principle by combining button selection
-     * with click count.
-     */
-    @Deprecated
-    public enum Type {
-        /** A single click with the primary mouse button (typically the left button). */
-        LEFT,
-        /** A single click with the secondary mouse button (typically the right button). */
-        RIGHT,
-        /** A single click with the middle mouse button (often the scroll wheel). */
-        MIDDLE,
-        /** A double-click with the primary mouse button. */
-        DOUBLE_LEFT,
-        /** A double-click with the secondary mouse button. */
-        DOUBLE_RIGHT,
-        /** A double-click with the middle mouse button. */
-        DOUBLE_MIDDLE
-    }
-
     private final int numberOfClicks;
     private final MousePressOptions mousePressOptions; // Parameters for mouse button and timing
     private final VerificationOptions verificationOptions; // Conditions for repeating the click
     private final RepetitionOptions repetitionOptions; // Parameters for repetition and timing
-    
-    // Deprecated field for backward compatibility
-    @Deprecated
-    private final Type clickType;
 
     private ClickOptions(Builder builder) {
         super(builder); // Initialize common ActionConfig fields
@@ -78,9 +55,6 @@ public final class ClickOptions extends ActionConfig {
         this.mousePressOptions = builder.mousePressOptions;
         this.verificationOptions = builder.verificationOptions.build(); // Build the composed object
         this.repetitionOptions = builder.repetitionOptions.build();
-        
-        // For backward compatibility
-        this.clickType = builder.clickType;
     }
     
     /**
@@ -113,11 +87,6 @@ public final class ClickOptions extends ActionConfig {
         private VerificationOptions.VerificationOptionsBuilder verificationOptions = VerificationOptions.builder(); // Default: no verification
         @JsonProperty("repetitionOptions")
         private RepetitionOptions.RepetitionOptionsBuilder repetitionOptions = RepetitionOptions.builder(); // Default: single repetition
-        
-        // Deprecated field for backward compatibility
-        @Deprecated
-        @JsonProperty("clickType")
-        private Type clickType = Type.LEFT;
 
         /**
          * Default constructor for creating a new ClickOptions configuration.
@@ -137,7 +106,6 @@ public final class ClickOptions extends ActionConfig {
             this.mousePressOptions = original.mousePressOptions.toBuilder().build();
             this.verificationOptions = original.verificationOptions.toBuilder();
             this.repetitionOptions = original.repetitionOptions.toBuilder();
-            this.clickType = original.clickType; // For backward compatibility
         }
 
         /**
@@ -147,46 +115,6 @@ public final class ClickOptions extends ActionConfig {
          */
         public Builder setNumberOfClicks(int numberOfClicks) {
             this.numberOfClicks = Math.max(1, numberOfClicks); // Ensure at least 1 click
-            return self();
-        }
-        
-        /**
-         * Sets the type of mouse click to perform.
-         * @deprecated Use setNumberOfClicks() and setPressOptions() instead
-         * @param clickType The click type (e.g., LEFT, DOUBLE_RIGHT).
-         * @return this Builder instance for chaining.
-         */
-        @Deprecated
-        public Builder setClickType(Type clickType) {
-            this.clickType = clickType;
-            // Also update numberOfClicks and button for compatibility
-            switch (clickType) {
-                case DOUBLE_LEFT:
-                    this.numberOfClicks = 2;
-                    this.mousePressOptions = this.mousePressOptions.toBuilder().button(io.github.jspinak.brobot.model.action.MouseButton.LEFT).build();
-                    break;
-                case DOUBLE_RIGHT:
-                    this.numberOfClicks = 2;
-                    this.mousePressOptions = this.mousePressOptions.toBuilder().button(io.github.jspinak.brobot.model.action.MouseButton.RIGHT).build();
-                    break;
-                case DOUBLE_MIDDLE:
-                    this.numberOfClicks = 2;
-                    this.mousePressOptions = this.mousePressOptions.toBuilder().button(io.github.jspinak.brobot.model.action.MouseButton.MIDDLE).build();
-                    break;
-                case RIGHT:
-                    this.numberOfClicks = 1;
-                    this.mousePressOptions = this.mousePressOptions.toBuilder().button(io.github.jspinak.brobot.model.action.MouseButton.RIGHT).build();
-                    break;
-                case MIDDLE:
-                    this.numberOfClicks = 1;
-                    this.mousePressOptions = this.mousePressOptions.toBuilder().button(io.github.jspinak.brobot.model.action.MouseButton.MIDDLE).build();
-                    break;
-                case LEFT:
-                default:
-                    this.numberOfClicks = 1;
-                    this.mousePressOptions = this.mousePressOptions.toBuilder().button(io.github.jspinak.brobot.model.action.MouseButton.LEFT).build();
-                    break;
-            }
             return self();
         }
 

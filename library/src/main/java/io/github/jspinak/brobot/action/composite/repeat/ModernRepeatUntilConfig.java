@@ -52,7 +52,7 @@ import lombok.Getter;
  * @see ClickUntil
  */
 @Getter
-public class RepeatUntilConfigV2 {
+public class ModernRepeatUntilConfig {
 
     private ObjectCollection actionObjectCollection;
     private ObjectCollection conditionObjectCollection;
@@ -233,8 +233,8 @@ public class RepeatUntilConfigV2 {
          * 
          * @return A new RepeatUntilConfigV2 with the configured settings
          */
-        public RepeatUntilConfigV2 build() {
-            RepeatUntilConfigV2 repeatUntilConfig = new RepeatUntilConfigV2();
+        public ModernRepeatUntilConfig build() {
+            ModernRepeatUntilConfig repeatUntilConfig = new ModernRepeatUntilConfig();
             repeatUntilConfig.actionObjectCollection = actionObjectCollection;
             repeatUntilConfig.conditionObjectCollection = conditionObjectCollection;
             repeatUntilConfig.doAction = doAction;

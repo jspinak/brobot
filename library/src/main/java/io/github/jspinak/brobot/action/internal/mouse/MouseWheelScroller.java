@@ -1,6 +1,5 @@
 package io.github.jspinak.brobot.action.internal.mouse;
 
-import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.basic.mouse.ScrollOptions;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.config.FrameworkSettings;
@@ -24,13 +23,9 @@ import org.springframework.stereotype.Component;
  * @since 2.0
  */
 @Component
-public class MouseWheelV2 {
+public class MouseWheelScroller {
     
-    private final MouseWheel legacyWheel;
-    
-    public MouseWheelV2(MouseWheel legacyWheel) {
-        this.legacyWheel = legacyWheel;
-    }
+    // No longer needs legacy dependency - this class is now standalone
 
     /**
      * Performs mouse wheel scrolling based on the provided scroll options.
@@ -61,26 +56,5 @@ public class MouseWheelV2 {
         
         new Region().sikuli().wheel(scrollDirection, scrollOptions.getScrollSteps());
         return true;
-    }
-    
-    /**
-     * Legacy method that scrolls using ActionOptions.
-     * <p>
-     * This method is provided for backward compatibility during migration.
-     * It delegates to the original MouseWheel implementation.
-     * </p>
-     * 
-     * @param actionConfig The legacy action options
-     * @return true if successful
-     * @deprecated Use {@link #scroll(ScrollOptions)} instead
-     */
-    @Deprecated
-    public boolean scroll(ActionConfig actionConfig) {
-        // Convert ActionConfig to ScrollOptions if possible
-        if (actionConfig instanceof ScrollOptions) {
-            return legacyWheel.scroll((ScrollOptions) actionConfig);
-        }
-        // Default scroll behavior for non-ScrollOptions
-        return false;
     }
 }

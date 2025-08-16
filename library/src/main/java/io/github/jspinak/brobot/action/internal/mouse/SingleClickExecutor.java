@@ -170,8 +170,9 @@ public class SingleClickExecutor {
                 ConsoleReporter.print("2 clicks ");
             }
             for (int j=0; j<i; j++) {
-                mouseDownWrapper.press(pauseBeforeDown, pauseAfterDown, convertClickOptionsTypeToClickType(clickOptions.getClickType()));
-                mouseUpWrapper.press(pauseBeforeUp, pauseAfterUp, convertClickOptionsTypeToClickType(clickOptions.getClickType()));
+                ClickType.Type clickType = convertMouseButtonToClickType(clickOptions.getMousePressOptions().getButton());
+                mouseDownWrapper.press(pauseBeforeDown, pauseAfterDown, clickType);
+                mouseUpWrapper.press(pauseBeforeUp, pauseAfterUp, clickType);
             }
         }
         return true;
@@ -268,14 +269,11 @@ public class SingleClickExecutor {
      * @param clickOptionsType The ClickOptions type
      * @return The corresponding ClickType.Type
      */
-    private ClickType.Type convertClickOptionsTypeToClickType(ClickOptions.Type clickOptionsType) {
-        switch (clickOptionsType) {
+    private ClickType.Type convertMouseButtonToClickType(MouseButton button) {
+        switch (button) {
             case LEFT: return ClickType.Type.LEFT;
             case RIGHT: return ClickType.Type.RIGHT;
             case MIDDLE: return ClickType.Type.MIDDLE;
-            case DOUBLE_LEFT: return ClickType.Type.DOUBLE_LEFT;
-            case DOUBLE_RIGHT: return ClickType.Type.DOUBLE_RIGHT;
-            case DOUBLE_MIDDLE: return ClickType.Type.DOUBLE_MIDDLE;
             default: return ClickType.Type.LEFT;
         }
     }
@@ -306,7 +304,9 @@ public class SingleClickExecutor {
      * @return true if native double-click should be used, false for manual clicks
      */
     private boolean isSimpleLeftDoubleClick(ClickOptions clickOptions) {
-        return clickOptions.getClickType() == ClickOptions.Type.DOUBLE_LEFT && noPauses(clickOptions);
+        return clickOptions.getNumberOfClicks() == 2 && 
+               clickOptions.getMousePressOptions().getButton() == MouseButton.LEFT && 
+               noPauses(clickOptions);
     }
 
     /**
@@ -319,9 +319,7 @@ public class SingleClickExecutor {
      * @return true if the action is a single click, false for double-clicks
      */
     private boolean isSingleClick(ClickOptions clickOptions) {
-        return clickOptions.getClickType() == ClickOptions.Type.LEFT ||
-                clickOptions.getClickType() == ClickOptions.Type.RIGHT ||
-                clickOptions.getClickType() == ClickOptions.Type.MIDDLE;
+        return clickOptions.getNumberOfClicks() == 1;
     }
 
     /**
@@ -341,12 +339,15 @@ public class SingleClickExecutor {
      * @return true if two separate clicks are needed, false otherwise
      */
     private boolean isTwoClicks(ClickOptions clickOptions) {
-        if (clickOptions.getClickType() == ClickOptions.Type.DOUBLE_RIGHT
-                || clickOptions.getClickType() == ClickOptions.Type.DOUBLE_MIDDLE)
+        if (clickOptions.getNumberOfClicks() != 2) return false;
+        
+        MouseButton button = clickOptions.getMousePressOptions().getButton();
+        // Two separate clicks needed for double right or middle (no native support)
+        if (button == MouseButton.RIGHT || button == MouseButton.MIDDLE) {
             return true;
-        if (clickOptions.getClickType() != ClickOptions.Type.DOUBLE_LEFT) return false;
-        // Simplified ClickOptions doesn't have pause methods, so double left is always simple
-        return false;
+        }
+        // For double left, use two clicks only if custom pauses are configured
+        return button == MouseButton.LEFT && !noPauses(clickOptions);
     }
 
 }

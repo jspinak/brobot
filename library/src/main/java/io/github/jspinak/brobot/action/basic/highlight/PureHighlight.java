@@ -47,9 +47,9 @@ import java.util.logging.Logger;
  * @see ConditionalActionChain for chaining Find with Highlight
  */
 @Component("highlightV2")
-public class HighlightV2 implements ActionInterface {
+public class PureHighlight implements ActionInterface {
 
-    private static final Logger logger = Logger.getLogger(HighlightV2.class.getName());
+    private static final Logger logger = Logger.getLogger(PureHighlight.class.getName());
 
     @Override
     public Type getActionType() {

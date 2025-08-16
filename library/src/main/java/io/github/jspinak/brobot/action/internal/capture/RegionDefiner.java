@@ -3,6 +3,7 @@ package io.github.jspinak.brobot.action.internal.capture;
 import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.basic.find.Find;
 import io.github.jspinak.brobot.action.basic.find.MatchAdjustmentOptions;
+import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
 import io.github.jspinak.brobot.action.basic.region.DefineRegionOptions;
 import io.github.jspinak.brobot.action.basic.region.DefineIncludingMatches;
 import io.github.jspinak.brobot.action.basic.region.DefineInsideAnchors;
@@ -41,17 +42,15 @@ import org.springframework.stereotype.Component;
  * @see MatchAdjustmentOptions
  */
 @Component
-public class RegionDefinitionHelperV2 {
+public class RegionDefiner {
 
     private final Find find;
     private final ActionResultFactory matchesInitializer;
-    private final RegionDefinitionHelper legacyHelper;
+    // No longer needs legacy dependency - merged implementation
 
-    public RegionDefinitionHelperV2(Find find, ActionResultFactory matchesInitializer,
-                                  RegionDefinitionHelper legacyHelper) {
+    public RegionDefiner(Find find, ActionResultFactory matchesInitializer) {
         this.find = find;
         this.matchesInitializer = matchesInitializer;
-        this.legacyHelper = legacyHelper;
     }
 
     /**
@@ -130,8 +129,16 @@ public class RegionDefinitionHelperV2 {
      * @param objectCollections The collections of objects to find on the screen.
      */
     public void findMatches(ActionResult matches, ObjectCollection... objectCollections) {
-        // TODO: Update when ActionResult is migrated to use ActionConfig
-        // For now, delegate to legacy implementation
-        legacyHelper.findMatches(matches, objectCollections);
+        // Check if we have DefineRegionOptions or generic ActionConfig
+        ActionConfig config = matches.getActionConfig();
+        
+        // Create PatternFindOptions for finding matches
+        PatternFindOptions findOptions = new PatternFindOptions.Builder()
+                .setStrategy(PatternFindOptions.Strategy.EACH)
+                .build();
+                
+        ActionResult findMatches = matchesInitializer.init(findOptions, "findMatches", objectCollections);
+        find.perform(findMatches, objectCollections);
+        matches.addMatchObjects(findMatches);
     }
 }
