@@ -62,17 +62,6 @@ import io.github.jspinak.brobot.control.ThreadSafeExecutionController;
  */
 public abstract class BaseAutomation implements AutomationScript {
 
-    /**
-     * Thread-safe flag tracking the automation's running state.
-     * <p>
-     * Uses volatile keyword to ensure visibility across threads.
-     * Protected access allows subclasses to check state in their
-     * automation loops.
-     * 
-     * @deprecated Use {@link #isRunning()} or {@link #getState()} instead
-     */
-    @Deprecated
-    protected volatile boolean running = false;
     
     /**
      * State handler for managing GUI state navigation.
@@ -130,7 +119,6 @@ public abstract class BaseAutomation implements AutomationScript {
     @Override
     public void start() {
         executionController.start();
-        running = true; // Maintain backward compatibility
     }
     
     /**
@@ -170,7 +158,6 @@ public abstract class BaseAutomation implements AutomationScript {
     @Override
     public void stop() {
         executionController.stop();
-        running = false; // Maintain backward compatibility
     }
     
     /**
@@ -238,6 +225,5 @@ public abstract class BaseAutomation implements AutomationScript {
     @Override
     public void reset() {
         executionController.reset();
-        running = false; // Maintain backward compatibility
     }
 }

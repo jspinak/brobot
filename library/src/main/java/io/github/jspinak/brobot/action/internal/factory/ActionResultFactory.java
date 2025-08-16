@@ -72,12 +72,34 @@ public class ActionResultFactory {
      */
     public ActionResult init(ActionConfig actionConfig, String actionDescription, ObjectCollection... objectCollections) {
         ActionResult matches = new ActionResult();
-        // For now, use a default max wait time until ActionConfig includes this
-        matches.setActionLifecycle(new ActionLifecycle(time.now(), 10.0));
+        
+        // Get search duration from the config if it's a find-based action
+        double maxWait = 10.0; // default
+        if (actionConfig instanceof io.github.jspinak.brobot.action.basic.find.BaseFindOptions) {
+            io.github.jspinak.brobot.action.basic.find.BaseFindOptions findOptions = 
+                (io.github.jspinak.brobot.action.basic.find.BaseFindOptions) actionConfig;
+            maxWait = findOptions.getSearchDuration();
+        }
+        
+        matches.setActionLifecycle(new ActionLifecycle(time.now(), maxWait));
         matches.setActionConfig(actionConfig);
         matches.setActionDescription(actionDescription);
-        SceneAnalyses sceneAnalysisCollection = new SceneAnalyses();
-        // Scene analysis collection will be handled differently with ActionConfig
+        
+        // For color find operations, create scene analysis
+        SceneAnalyses sceneAnalysisCollection;
+        if (actionConfig instanceof io.github.jspinak.brobot.action.basic.find.color.ColorFindOptions) {
+            io.github.jspinak.brobot.action.basic.find.color.ColorFindOptions colorOptions = 
+                (io.github.jspinak.brobot.action.basic.find.color.ColorFindOptions) actionConfig;
+            sceneAnalysisCollection = getSceneAnalysisCollection.get(
+                Arrays.asList(objectCollections), 
+                1, 
+                0.0, 
+                colorOptions
+            );
+        } else {
+            sceneAnalysisCollection = new SceneAnalyses();
+        }
+        
         matches.setSceneAnalysisCollection(sceneAnalysisCollection);
         return matches;
     }

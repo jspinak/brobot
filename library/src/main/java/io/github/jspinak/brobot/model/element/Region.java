@@ -401,14 +401,6 @@ public class Region implements Comparable<Region> {
         return RegionUtils.getRandomLocation(this);
     }
 
-    /**
-     * @deprecated Use toString() instead
-     */
-    @Deprecated
-    public void print() {
-        // Use toString() for string representation
-    }
-
     @JsonIgnore
     public ObjectCollection asObjectCollection() {
         return new ObjectCollection.Builder()

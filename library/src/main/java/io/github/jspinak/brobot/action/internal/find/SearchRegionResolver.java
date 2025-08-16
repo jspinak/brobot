@@ -102,6 +102,11 @@ public class SearchRegionResolver {
             regions.addAll(pattern.getRegionsForSearch());
         }
         
+        // If no regions found, use default full-screen region
+        if (regions.isEmpty()) {
+            regions.add(new Region());
+        }
+        
         // Only log if not full screen or if there are multiple regions
         if (regions.size() > 1 || (regions.size() == 1 && 
             (regions.get(0).w() != 1536 || regions.get(0).h() != 864))) {
@@ -183,8 +188,15 @@ public class SearchRegionResolver {
             }
         }
         for (ObjectCollection objColl : objectCollections) {
+            // Add regions from StateImages
             for (StateImage stateImage : objColl.getStateImages()) {
                 regions.addAll(stateImage.getAllSearchRegions());
+            }
+            // Also add direct regions from the ObjectCollection
+            if (objColl.getStateRegions() != null) {
+                for (var stateRegion : objColl.getStateRegions()) {
+                    regions.add(stateRegion.getSearchRegion());
+                }
             }
         }
         // Ensure at least one region is returned

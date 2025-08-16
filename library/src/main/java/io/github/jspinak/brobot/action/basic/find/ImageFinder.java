@@ -37,7 +37,7 @@ import java.util.*;
  * @see DefinedRegionConverter
  */
 @Component
-public class FindImageV2 {
+public class ImageFinder {
 
     private final DefinedRegionConverter useDefinedRegion;
     private final ActionLifecycleManagement actionLifecycleManagement;
@@ -45,7 +45,7 @@ public class FindImageV2 {
     private final IterativePatternFinder findPatternsIteration;
     private final FindImage legacyFindImage;
 
-    public FindImageV2(DefinedRegionConverter useDefinedRegion, ActionLifecycleManagement actionLifecycleManagement,
+    public ImageFinder(DefinedRegionConverter useDefinedRegion, ActionLifecycleManagement actionLifecycleManagement,
                        SceneProvider getScenes, IterativePatternFinder findPatternsIteration,
                        FindImage legacyFindImage) {
         this.useDefinedRegion = useDefinedRegion;

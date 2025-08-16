@@ -103,12 +103,13 @@ public class ImagePathManager {
      * Get all configured image paths
      */
     public List<String> getConfiguredPaths() {
-        List<String> paths = new ArrayList<>();
+        // Use a LinkedHashSet to maintain order while avoiding duplicates
+        Set<String> uniquePaths = new LinkedHashSet<>();
         if (primaryImagePath != null) {
-            paths.add(primaryImagePath.toString());
+            uniquePaths.add(primaryImagePath.toString());
         }
-        paths.addAll(configuredPaths);
-        return paths;
+        uniquePaths.addAll(configuredPaths);
+        return new ArrayList<>(uniquePaths);
     }
     
     /**

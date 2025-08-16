@@ -4,7 +4,7 @@ import io.github.jspinak.brobot.action.ActionType;
 import io.github.jspinak.brobot.action.ActionInterface;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
-import io.github.jspinak.brobot.action.internal.mouse.MouseWheelV2;
+import io.github.jspinak.brobot.action.internal.mouse.MouseWheelScroller;
 
 import org.springframework.stereotype.Component;
 
@@ -53,7 +53,7 @@ import org.springframework.stereotype.Component;
  * 
  * @since 1.0
  * @see ScrollOptions
- * @see MouseWheelV2
+ * @see MouseWheelScroller
  * @see MoveMouse
  * @see Click
  */
@@ -65,9 +65,9 @@ public class ScrollMouseWheel implements ActionInterface {
         return Type.SCROLL_MOUSE_WHEEL;
     }
 
-    private final MouseWheelV2 mouseWheel;
+    private final MouseWheelScroller mouseWheel;
 
-    public ScrollMouseWheel(MouseWheelV2 mouseWheel) {
+    public ScrollMouseWheel(MouseWheelScroller mouseWheel) {
         this.mouseWheel = mouseWheel;
     }
 

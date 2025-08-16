@@ -7,8 +7,7 @@ import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.action.internal.app.ApplicationWindowProvider;
-import io.github.jspinak.brobot.action.internal.capture.RegionDefinitionHelper;
-import io.github.jspinak.brobot.action.internal.capture.RegionDefinitionHelperV2;
+import io.github.jspinak.brobot.action.internal.capture.RegionDefiner;
 import io.github.jspinak.brobot.model.element.Region;
 
 import org.springframework.stereotype.Component;
@@ -47,14 +46,11 @@ public class DefineWithWindow implements ActionInterface {
     }
 
     private final ApplicationWindowProvider app;
-    private final RegionDefinitionHelper defineHelper;
-    private final RegionDefinitionHelperV2 defineHelperV2;
+    private final RegionDefiner defineHelper;
 
-    public DefineWithWindow(ApplicationWindowProvider app, RegionDefinitionHelper defineHelper,
-                           RegionDefinitionHelperV2 defineHelperV2) {
+    public DefineWithWindow(ApplicationWindowProvider app, RegionDefiner defineHelper) {
         this.app = app;
         this.defineHelper = defineHelper;
-        this.defineHelperV2 = defineHelperV2;
     }
 
     /**
@@ -95,7 +91,7 @@ public class DefineWithWindow implements ActionInterface {
             
             // Apply adjustments using V2 helper if we have DefineRegionOptions
             if (defineOptions != null) {
-                defineHelperV2.adjust(region, defineOptions);
+                defineHelper.adjust(region, defineOptions);
             }
             
             matches.addDefinedRegion(region);

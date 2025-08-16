@@ -108,8 +108,13 @@ public class ActionSuccessCriteria {
      * @param matches The action results to evaluate and update with success status
      */
     public void set(ActionConfig actionConfig, ActionResult matches) {
-        // For now, use the default criteria based on action type
-        matches.setSuccess(getCriteria(actionConfig).test(matches));
+        // Check if the config has custom success criteria
+        if (actionConfig.getSuccessCriteria() != null) {
+            matches.setSuccess(actionConfig.getSuccessCriteria().test(matches));
+        } else {
+            // Use the default criteria based on action type
+            matches.setSuccess(getCriteria(actionConfig).test(matches));
+        }
     }
 
     /**

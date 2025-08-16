@@ -3,8 +3,8 @@ package io.github.jspinak.brobot.action.basic.find;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.action.internal.find.NonImageObjectConverter;
-import io.github.jspinak.brobot.action.internal.find.OffsetLocationManagerV2;
-import io.github.jspinak.brobot.action.internal.find.match.MatchAdjusterV2;
+import io.github.jspinak.brobot.action.internal.find.OffsetMatchCreator;
+import io.github.jspinak.brobot.action.internal.find.match.MatchRegionAdjuster;
 import io.github.jspinak.brobot.action.internal.find.match.MatchContentExtractor;
 import io.github.jspinak.brobot.action.internal.region.DynamicRegionResolver;
 import io.github.jspinak.brobot.action.internal.utility.ActionSuccessCriteria;
@@ -55,9 +55,9 @@ import java.util.List;
 public class FindPipeline {
     
     private final ProfileSetBuilder profileSetBuilder;
-    private final OffsetLocationManagerV2 offsetLocationManager;
+    private final OffsetMatchCreator offsetLocationManager;
     private final MatchFusion matchFusion;
-    private final MatchAdjusterV2 matchAdjuster;
+    private final MatchRegionAdjuster matchAdjuster;
     private final MatchContentExtractor contentExtractor;
     private final NonImageObjectConverter nonImageObjectConverter;
     private final StateMemory stateMemory;
@@ -65,7 +65,7 @@ public class FindPipeline {
     private final DynamicRegionResolver dynamicRegionResolver;
     private final HighlightManager highlightManager;
     private final VisualFeedbackConfig visualFeedbackConfig;
-    private final FindStrategyRegistryV2 findStrategyRegistry;
+    private final ModernFindStrategyRegistry findStrategyRegistry;
     private final ActionSuccessCriteria actionSuccessCriteria;
     
     @Value("${brobot.highlighting.enabled:false}")
@@ -73,9 +73,9 @@ public class FindPipeline {
 
     @Autowired
     public FindPipeline(ProfileSetBuilder profileSetBuilder,
-                       OffsetLocationManagerV2 offsetLocationManager,
+                       OffsetMatchCreator offsetLocationManager,
                        MatchFusion matchFusion,
-                       MatchAdjusterV2 matchAdjuster,
+                       MatchRegionAdjuster matchAdjuster,
                        MatchContentExtractor contentExtractor,
                        NonImageObjectConverter nonImageObjectConverter,
                        StateMemory stateMemory,
@@ -83,7 +83,7 @@ public class FindPipeline {
                        DynamicRegionResolver dynamicRegionResolver,
                        HighlightManager highlightManager,
                        VisualFeedbackConfig visualFeedbackConfig,
-                       FindStrategyRegistryV2 findStrategyRegistry,
+                       ModernFindStrategyRegistry findStrategyRegistry,
                        ActionSuccessCriteria actionSuccessCriteria) {
         this.profileSetBuilder = profileSetBuilder;
         this.offsetLocationManager = offsetLocationManager;
