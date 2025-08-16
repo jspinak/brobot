@@ -53,10 +53,9 @@ We use the ALL_WORDS find strategy to extract all text from the defined region.
 
 ```java
 private String getIslandType() {
-    // Using modern PatternFindOptions with fluent API
-    PatternFindOptions findText = new PatternFindOptions.Builder()
-            .setDoOnEach(ActionOptions.Find.ALL_WORDS)
-            .setGetTextUntil(ActionOptions.GetTextUntil.TEXT_APPEARS)
+    // Using modern TextFindOptions with fluent API
+    TextFindOptions findText = new TextFindOptions.Builder()
+            .setFindWords(TextFindOptions.FindWords.ALL)
             .setSearchRegions(island.getIslandName().getSearchRegion())
             .setPauseBeforeBegin(3.0)
             .build();

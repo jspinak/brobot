@@ -14,7 +14,7 @@ This guide helps you migrate from Brobot's runtime delegation pattern (checking 
 Many Brobot components currently use runtime checks:
 
 ```java
-// Example from TypeTextWrapper.java
+// Example from legacy text typing implementation
 public boolean type(String text) {
     if (FrameworkSettings.mock) {
         return true;  // Mock execution
@@ -81,11 +81,11 @@ grep -r "FrameworkSettings\.mock\s*\?" --include="*.java"
 ```
 
 Common locations:
-- `TypeTextWrapper.java`
-- `SingleClickExecutor.java`
-- `MouseWheel.java`
-- `SceneProvider.java`
-- `DragCoordinateCalculator.java`
+- Text typing implementations
+- Click execution components  
+- Mouse wheel scrolling components
+- Scene provider components
+- Drag coordinate calculators
 
 ### Step 2: Extract Interfaces
 
@@ -185,14 +185,14 @@ For classes with multiple responsibilities, use composition:
 ```java
 // Complex class with multiple mock checks
 public class ActionExecutor {
-    public ActionResult execute(ActionOptions options, ObjectCollection targets) {
+    public ActionResult execute(ActionConfig config, ObjectCollection targets) {
         if (FrameworkSettings.mock) {
             // Mock: find
-            if (options instanceof FindOptions) {
+            if (config instanceof PatternFindOptions) {
                 return mockFind(targets);
             }
             // Mock: click
-            if (options instanceof ClickOptions) {
+            if (config instanceof ClickOptions) {
                 return mockClick(targets);
             }
         } else {
@@ -212,9 +212,9 @@ public class ActionExecutor {
         // Strategies are injected based on profile
     }
     
-    public ActionResult execute(ActionOptions options, ObjectCollection targets) {
-        ActionStrategy strategy = strategies.get(options.getClass());
-        return strategy.execute(options, targets);
+    public ActionResult execute(ActionConfig config, ObjectCollection targets) {
+        ActionStrategy strategy = strategies.get(config.getClass());
+        return strategy.execute(config, targets);
     }
 }
 ```
@@ -251,11 +251,11 @@ public class HybridExecutor {
 
 ## Migration Examples
 
-### Example 1: TypeTextWrapper Migration
+### Example 1: Text Typing Migration
 
 **Before:**
 ```java
-public class TypeTextWrapper {
+public class LegacyTextTyper {
     public boolean type(String text) {
         if (FrameworkSettings.mock) return true;
         return screen.type(text) == 1;

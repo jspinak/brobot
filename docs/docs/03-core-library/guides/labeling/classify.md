@@ -6,8 +6,8 @@ sidebar_position: 2
 
 _Classification requires version 1.0.5 or greater._  
 
-The CLASSIFY Action differs from Find.COLOR principally in that it finds the largest matches and not the 
-matches with the best scores. The largest matches usually correspond to semantic objects and the CLASSIFY Action 
+The CLASSIFY action (using ColorFindOptions with CLASSIFICATION strategy) differs from Find.COLOR principally in that it finds the largest matches and not the 
+matches with the best scores. The largest matches usually correspond to semantic objects and classification 
 is usually concerned with finding objects. 
 
 CLASSIFY saves two images to the _history_ folder. 
@@ -29,9 +29,9 @@ CLASSIFY with 1 target image, 1 background image, a k-means of 3, and 3 max matc
     BrobotSettings.mock = true;
     BrobotSettings.screenshot = "kobolds1.png";
 
-    ActionOptions findClass = new ActionOptions.Builder()
-        .setAction(ActionOptions.Action.CLASSIFY)
-        .setMaxMatchesToActOn(3)
+    ColorFindOptions findClass = new ColorFindOptions.Builder()
+        .setColorStrategy(ColorFindOptions.Color.CLASSIFICATION)
+        .setMaxMatches(3)
         .setKmeans(3)
         .build();
 
@@ -42,7 +42,7 @@ CLASSIFY with 1 target image, 1 background image, a k-means of 3, and 3 max matc
             .withImages(classifyState.getGrass())
             .build();
 
-    action.perform(findClass, target, additional);
+    action.perform(ActionType.CLASSIFY, findClass, target, additional);
 
 This configuration gives us the following results:
 
@@ -63,9 +63,9 @@ in this position while screenshots are taken, a large dataset can be built witho
 could be done to improve the accuracy of the matches, including specifying search regions, using more images
 for classification, and placing the game character in an area with only grass.   
 
-    ActionOptions findClass = new ActionOptions.Builder()
-        .setAction(ActionOptions.Action.CLASSIFY)
-        .setMaxMatchesToActOn(1)
+    ColorFindOptions findClass = new ColorFindOptions.Builder()
+        .setColorStrategy(ColorFindOptions.Color.CLASSIFICATION)
+        .setMaxMatches(1)
         .setKmeans(3)
         .build();
 

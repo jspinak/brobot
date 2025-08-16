@@ -21,13 +21,13 @@ Created foundational profile support:
 
 ### Phase 2: Component Refactoring ✅
 
-Demonstrated refactoring pattern with `TypeTextWrapper`:
+Demonstrated refactoring pattern with text typing:
 
 1. **Interface Extraction**: `TextTyper` interface
 2. **Profile Implementations**:
    - `MockTextTyper` - Test profile implementation
    - `LiveTextTyper` - Production profile implementation
-3. **Legacy Preservation**: Original `TypeTextWrapper` kept for compatibility
+3. **Default Implementation**: `DefaultTextTyper` - Main text typing implementation
 
 ### Phase 3: Hybrid Wrapper Pattern ✅
 
