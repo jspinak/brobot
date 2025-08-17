@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.action.internal.find;
 
+import io.github.jspinak.brobot.action.basic.find.MatchAdjustmentOptions;
+
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.ObjectCollection;
@@ -19,130 +21,165 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 /**
- * Tests for OffsetLocationManager.
- * Note: This class tests offset functionality that may not be fully supported
- * in the modern ActionConfig API. Tests use mocked ActionConfig to simulate
- * the expected behavior.
+ * Tests for ConfigurableOffsetManager.
+ * This class tests offset functionality in the modern ActionConfig API.
  */
 class OffsetLocationManagerTest {
 
-    private OffsetLocationManager offsetLocationManager;
+    private OffsetMatchCreator offsetLocationManager;
     
     @BeforeEach
     void setUp() {
-        offsetLocationManager = new OffsetLocationManager();
+        offsetLocationManager = new OffsetMatchCreator();
     }
     
     @Test
-    void testAddOffset_CallsCorrectMethods() {
-        // Setup - using a mock ActionConfig since offset methods don't exist in the base class
-        ActionConfig mockConfig = mock(ActionConfig.class);
-        
-        ActionResult matches = new ActionResult();
-        matches.setActionConfig(mockConfig);
-        
-        ObjectCollection collection = new ObjectCollection.Builder().build();
-        List<ObjectCollection> collections = Arrays.asList(collection);
-        
-        // Execute
-        offsetLocationManager.addOffset(collections, matches, mockConfig);
-        
-        // Verify the method completes without error
-        assertNotNull(matches);
-    }
-    
-    @Test
-    void testAddOffsetAsOnlyMatch_WithMockedConfig() {
+    void testAddOffsetAsOnlyMatch_WithEmptyCollections() {
         try (MockedStatic<Mouse> mouseMock = mockStatic(Mouse.class)) {
-            // Setup
-            Location mouseLocation = new Location(100, 100);
-            mouseMock.when(Mouse::at).thenReturn(mouseLocation.sikuli());
+            // Setup mouse at a known position
+            mouseMock.when(Mouse::at).thenReturn(new Location(50, 50).sikuli());
             
-            ActionConfig mockConfig = mock(ActionConfig.class);
+            MatchAdjustmentOptions adjustmentOptions = MatchAdjustmentOptions.builder()
+                .addX(10)
+                .addY(20)
+                .build();
             
             ActionResult matches = new ActionResult();
-            matches.setActionConfig(mockConfig);
-            
-            ObjectCollection collection = new ObjectCollection.Builder().build();
-            List<ObjectCollection> collections = Arrays.asList(collection);
+            ObjectCollection emptyCollection = new ObjectCollection.Builder().build();
+            List<ObjectCollection> collections = Arrays.asList(emptyCollection);
             
             // Execute
-            offsetLocationManager.addOffsetAsOnlyMatch(collections, matches, false);
+            offsetLocationManager.addOffsetAsOnlyMatch(collections, matches, adjustmentOptions, true);
             
-            // Verify the method completes
-            assertNotNull(matches);
+            // Verify - should add an offset match since collections are empty
+            assertEquals(1, matches.getMatchList().size());
+            Match offsetMatch = matches.getMatchList().get(0);
+            assertNotNull(offsetMatch.getRegion());
+            assertEquals(60, offsetMatch.getRegion().getX()); // 50 + 10
+            assertEquals(70, offsetMatch.getRegion().getY()); // 50 + 20
         }
     }
     
     @Test
-    void testAddOffsetAsLastMatch_WithExistingMatch() {
-        // Setup
-        ActionConfig mockConfig = mock(ActionConfig.class);
-        
-        ActionResult matches = new ActionResult();
-        
-        // Add existing match
-        Match existingMatch = new Match.Builder()
-                .setRegion(new Region(100, 100, 50, 50))
-                .setSimScore(0.9)
-                .setStateObjectData(new StateObjectMetadata())
+    void testAddOffsetAsOnlyMatch_WithMousePosition() {
+        try (MockedStatic<Mouse> mouseMock = mockStatic(Mouse.class)) {
+            // Setup mouse at specific position
+            Location mouseLocation = new Location(100, 100);
+            mouseMock.when(Mouse::at).thenReturn(mouseLocation.sikuli());
+            
+            MatchAdjustmentOptions adjustmentOptions = MatchAdjustmentOptions.builder()
+                .addX(50)
+                .addY(30)
                 .build();
-        matches.add(existingMatch);
-        
-        // Execute
-        offsetLocationManager.addOffsetAsLastMatch(matches, mockConfig);
-        
-        // Verify the method completes
-        assertNotNull(matches);
-        assertTrue(matches.getMatchList().size() >= 1);
+            
+            ActionResult matches = new ActionResult();
+            ObjectCollection collection = new ObjectCollection.Builder().build();
+            List<ObjectCollection> collections = Arrays.asList(collection);
+            
+            // Execute - should add offset from mouse position
+            offsetLocationManager.addOffsetAsOnlyMatch(collections, matches, adjustmentOptions, false);
+            
+            // Verify
+            assertEquals(1, matches.getMatchList().size());
+            Match offsetMatch = matches.getMatchList().get(0);
+            assertEquals(150, offsetMatch.getRegion().getX()); // 100 + 50
+            assertEquals(130, offsetMatch.getRegion().getY()); // 100 + 30
+        }
     }
     
     @Test
-    void testAddOffset_WithEmptyCollections() {
-        // Setup
-        ActionConfig mockConfig = mock(ActionConfig.class);
-        
-        ActionResult matches = new ActionResult();
-        matches.setActionConfig(mockConfig);
-        
-        List<ObjectCollection> emptyCollections = Arrays.asList();
-        
-        // Execute
-        offsetLocationManager.addOffset(emptyCollections, matches, mockConfig);
-        
-        // Verify the method handles empty collections
-        assertNotNull(matches);
+    void testAddOffsetAsOnlyMatch_WithNonEmptyCollections() {
+        try (MockedStatic<Mouse> mouseMock = mockStatic(Mouse.class)) {
+            // Setup mouse at a known position
+            mouseMock.when(Mouse::at).thenReturn(new Location(0, 0).sikuli());
+            
+            MatchAdjustmentOptions adjustmentOptions = MatchAdjustmentOptions.builder()
+                .addX(10)
+                .addY(20)
+                .build();
+            
+            ActionResult matches = new ActionResult();
+            
+            // Create non-empty collection
+            ObjectCollection nonEmptyCollection = new ObjectCollection.Builder()
+                .withStrings("test")
+                .build();
+            List<ObjectCollection> collections = Arrays.asList(nonEmptyCollection);
+            
+            // Execute with doOnlyWhenCollectionsAreEmpty = true
+            offsetLocationManager.addOffsetAsOnlyMatch(collections, matches, adjustmentOptions, true);
+            
+            // Verify - should NOT add offset match since collections are not empty
+            assertEquals(0, matches.getMatchList().size());
+            
+            // Execute with doOnlyWhenCollectionsAreEmpty = false
+            offsetLocationManager.addOffsetAsOnlyMatch(collections, matches, adjustmentOptions, false);
+            
+            // Verify - should add offset match regardless of collection content
+            assertEquals(1, matches.getMatchList().size());
+            assertEquals(10, matches.getMatchList().get(0).getRegion().getX());
+            assertEquals(20, matches.getMatchList().get(0).getRegion().getY());
+        }
     }
     
     @Test
-    void testAddOffsetAsOnlyMatch_DoOnlyWhenEmpty() {
+    void testAddOffsetAsOnlyMatch_WithNullAdjustmentOptions() {
         // Setup
-        ActionConfig mockConfig = mock(ActionConfig.class);
-        
         ActionResult matches = new ActionResult();
-        matches.setActionConfig(mockConfig);
-        
         ObjectCollection collection = new ObjectCollection.Builder().build();
         List<ObjectCollection> collections = Arrays.asList(collection);
         
-        // Execute with doOnlyWhenEmpty = true
-        offsetLocationManager.addOffsetAsOnlyMatch(collections, matches, true);
+        // Execute with null adjustment options
+        offsetLocationManager.addOffsetAsOnlyMatch(collections, matches, null, false);
         
-        // Verify the method completes
-        assertNotNull(matches);
+        // Verify - should not add any matches when adjustment options are null
+        assertEquals(0, matches.getMatchList().size());
     }
     
     @Test
-    void testAddOffsetAsLastMatch_NoExistingMatches() {
+    void testAddOffsetAsOnlyMatch_WithZeroOffset() {
         // Setup
-        ActionConfig mockConfig = mock(ActionConfig.class);
+        MatchAdjustmentOptions adjustmentOptions = MatchAdjustmentOptions.builder()
+            .addX(0)  // Zero offset should not create a match
+            .addY(0)
+            .build();
         
         ActionResult matches = new ActionResult();
+        ObjectCollection collection = new ObjectCollection.Builder().build();
+        List<ObjectCollection> collections = Arrays.asList(collection);
         
-        // Execute with no existing matches
-        offsetLocationManager.addOffsetAsLastMatch(matches, mockConfig);
+        // Execute
+        offsetLocationManager.addOffsetAsOnlyMatch(collections, matches, adjustmentOptions, false);
         
-        // Verify the method handles no matches gracefully
-        assertNotNull(matches);
+        // Verify - should not add match when offset is zero
+        assertEquals(0, matches.getMatchList().size());
+    }
+    
+    @Test
+    void testAddOffsetAsOnlyMatch_CreatesCorrectRegion() {
+        try (MockedStatic<Mouse> mouseMock = mockStatic(Mouse.class)) {
+            // Setup mouse at origin
+            mouseMock.when(Mouse::at).thenReturn(new Location(0, 0).sikuli());
+            
+            MatchAdjustmentOptions adjustmentOptions = MatchAdjustmentOptions.builder()
+                .addX(100)
+                .addY(200)
+                .build();
+            
+            ActionResult matches = new ActionResult();
+            List<ObjectCollection> collections = Arrays.asList(new ObjectCollection.Builder().build());
+            
+            // Execute
+            offsetLocationManager.addOffsetAsOnlyMatch(collections, matches, adjustmentOptions, false);
+            
+            // Verify the created region
+            assertEquals(1, matches.getMatchList().size());
+            Match match = matches.getMatchList().get(0);
+            Region region = match.getRegion();
+            assertEquals(100, region.getX());
+            assertEquals(200, region.getY());
+            assertEquals(1, region.getW());  // Offset matches have 1x1 size
+            assertEquals(1, region.getH());
+        }
     }
 }

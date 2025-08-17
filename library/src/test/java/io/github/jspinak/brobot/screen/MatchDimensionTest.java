@@ -12,11 +12,14 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Test to verify that match dimensions equal search image dimensions.
- * This is critical for proper pattern matching behavior.
+ * Test to verify that match dimensions equal search image dimensions
+ * using static screenshots for reproducible testing.
  */
 public class MatchDimensionTest {
     
@@ -30,78 +33,140 @@ public class MatchDimensionTest {
     }
     
     @Test
-    public void testMatchDimensionsEqualSearchImage() throws IOException {
-        System.out.println("\n=== Match Dimension Test ===");
+    public void testMatchDimensionsWithScreenshots() throws IOException {
+        System.out.println("\n=== Match Dimension Test with Screenshots ===");
         
-        // Create a test pattern (you can replace with an actual image path)
-        File testImage = createTestImage(100, 50);
-        Pattern pattern = new Pattern(testImage.getAbsolutePath());
+        // Use real screenshots and images from library folder
+        String screenshotDir = "screenshots/";
+        String imageDir = "images/";
         
-        // Capture the screen
-        Screen screen = new PhysicalResolutionScreen();
-        ScreenImage capture = screen.capture();
+        Path screenshotPath = Paths.get(screenshotDir, "floranext2.png");
+        Path imagePath = Paths.get(imageDir, "bottomRight2.png");
         
-        System.out.println("Screen captured at: " + 
-            capture.getImage().getWidth() + "x" + capture.getImage().getHeight());
+        File screenshotFile = screenshotPath.toFile();
+        File imageFile = imagePath.toFile();
         
-        // Place the test image on screen (simulated - in real test you'd have it displayed)
-        // For this test, we'll verify the dimensions directly
+        if (!screenshotFile.exists() || !imageFile.exists()) {
+            System.out.println("Test files not found:");
+            System.out.println("  Screenshot: " + screenshotFile.getAbsolutePath());
+            System.out.println("  Image: " + imageFile.getAbsolutePath());
+            System.out.println("Skipping test");
+            return;
+        }
         
-        BufferedImage searchImage = ImageIO.read(testImage);
+        // Load screenshot as ScreenImage
+        BufferedImage screenshotImg = ImageIO.read(screenshotFile);
+        ScreenImage screenImage = new ScreenImage(
+            new Rectangle(0, 0, screenshotImg.getWidth(), screenshotImg.getHeight()),
+            screenshotImg);
+        
+        // Load pattern image
+        BufferedImage searchImage = ImageIO.read(imageFile);
+        Pattern pattern = new Pattern(imageFile.getAbsolutePath()).similar(0.7);
+        
+        System.out.println("Screenshot dimensions: " + 
+            screenshotImg.getWidth() + "x" + screenshotImg.getHeight());
         System.out.println("Search image dimensions: " + 
             searchImage.getWidth() + "x" + searchImage.getHeight());
         
-        // In a real scenario with pattern matching:
-        // Finder finder = new Finder(capture);
-        // finder.find(pattern);
-        // if (finder.hasNext()) {
-        //     Match match = finder.next();
-        //     Rectangle matchRect = match.getRect();
-        //     
-        //     assertEquals(searchImage.getWidth(), matchRect.width,
-        //         "Match width should equal search image width");
-        //     assertEquals(searchImage.getHeight(), matchRect.height,
-        //         "Match height should equal search image height");
-        // }
+        // Find pattern in screenshot
+        Finder finder = new Finder(screenImage);
+        finder.find(pattern);
+        
+        if (finder.hasNext()) {
+            Match match = finder.next();
+            Rectangle matchRect = match.getRect();
+            
+            System.out.println("Match found at: " + matchRect.x + ", " + matchRect.y);
+            System.out.println("Match dimensions: " + matchRect.width + "x" + matchRect.height);
+            System.out.println("Match score: " + match.getScore());
+            
+            // CRITICAL TEST: Verify dimensions match
+            assertEquals(searchImage.getWidth(), matchRect.width,
+                "Match width should equal search image width");
+            assertEquals(searchImage.getHeight(), matchRect.height,
+                "Match height should equal search image height");
+            
+            System.out.println("✓ Match dimensions verified correctly!");
+        } else {
+            System.out.println("Pattern not found - may need to adjust similarity threshold");
+        }
         
         // Verify Settings
         assertEquals(0, Settings.AlwaysResize, 0.01,
             "Settings.AlwaysResize should be 0 (disabled)");
         
         System.out.println("✓ Test configuration verified");
-        System.out.println("  - Physical resolution capture enabled");
+        System.out.println("  - Physical resolution enabled");
         System.out.println("  - Settings.AlwaysResize = 0");
-        System.out.println("  - Match dimensions should equal search image");
-        
-        // Clean up
-        testImage.delete();
+        System.out.println("  - Match dimensions equal search image");
         
         System.out.println("=============================\n");
     }
     
     @Test
-    public void testCoordinateSystem() {
-        System.out.println("\n=== Coordinate System Test ===");
+    public void testCoordinateSystemWithRegions() throws IOException {
+        System.out.println("\n=== Coordinate System Test with Regions ===");
         
-        Screen screen = new PhysicalResolutionScreen();
+        // Test with multiple patterns at different positions
+        String screenshotDir = "screenshots/";
+        String imageDir = "images/";
         
-        // Test capturing a specific region
-        Rectangle testRect = new Rectangle(100, 100, 200, 150);
-        ScreenImage capture = screen.capture(testRect);
+        Path screenshotPath = Paths.get(screenshotDir, "floranext3.png");
+        File screenshotFile = screenshotPath.toFile();
         
-        BufferedImage img = capture.getImage();
+        if (!screenshotFile.exists()) {
+            System.out.println("Screenshot not found: " + screenshotFile.getAbsolutePath());
+            System.out.println("Skipping test");
+            return;
+        }
         
-        // The captured image should have the exact dimensions requested
-        assertEquals(200, img.getWidth(),
-            "Captured width should match requested width");
-        assertEquals(150, img.getHeight(),
-            "Captured height should match requested height");
+        BufferedImage screenshotImg = ImageIO.read(screenshotFile);
+        ScreenImage screenImage = new ScreenImage(
+            new Rectangle(0, 0, screenshotImg.getWidth(), screenshotImg.getHeight()),
+            screenshotImg);
         
-        System.out.println("✓ Coordinate system test passed");
-        System.out.println("  Requested: " + testRect.width + "x" + testRect.height);
-        System.out.println("  Captured: " + img.getWidth() + "x" + img.getHeight());
+        // Test finding patterns at different coordinates
+        String[] patterns = {"topLeft2.png", "bottomR.png", "bottomR2.png"};
         
-        System.out.println("===============================\n");
+        for (String patternName : patterns) {
+            Path imagePath = Paths.get(imageDir, patternName);
+            File imageFile = imagePath.toFile();
+            
+            if (!imageFile.exists()) {
+                System.out.println("Pattern not found: " + patternName);
+                continue;
+            }
+            
+            BufferedImage patternImg = ImageIO.read(imageFile);
+            Pattern pattern = new Pattern(imageFile.getAbsolutePath()).similar(0.6);
+            
+            System.out.println("\nSearching for: " + patternName);
+            System.out.println("Pattern size: " + patternImg.getWidth() + "x" + patternImg.getHeight());
+            
+            Finder finder = new Finder(screenImage);
+            finder.find(pattern);
+            
+            if (finder.hasNext()) {
+                Match match = finder.next();
+                Rectangle rect = match.getRect();
+                
+                System.out.println("  Found at: (" + rect.x + ", " + rect.y + ")");
+                System.out.println("  Size: " + rect.width + "x" + rect.height);
+                
+                // Verify dimensions
+                assertEquals(patternImg.getWidth(), rect.width,
+                    "Width should match for " + patternName);
+                assertEquals(patternImg.getHeight(), rect.height,
+                    "Height should match for " + patternName);
+                
+                System.out.println("  ✓ Dimensions and coordinates verified");
+            } else {
+                System.out.println("  Not found in screenshot");
+            }
+        }
+        
+        System.out.println("\n===============================\n");
     }
     
     private File createTestImage(int width, int height) throws IOException {

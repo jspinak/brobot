@@ -85,6 +85,8 @@ class ActionExecutionTest {
     void perform_shouldExecuteActionOnceWhenMoreSequencesNotAllowedAfterFirstRun() {
         // Setup with PatternFindOptions
         actionConfig = new PatternFindOptions.Builder()
+                .setPauseBeforeBegin(0.1)
+                .setPauseAfterEnd(0.2)
                 .build();
         when(actionLifecycleManagement.isMoreSequencesAllowed(matches)).thenReturn(true, false);
 

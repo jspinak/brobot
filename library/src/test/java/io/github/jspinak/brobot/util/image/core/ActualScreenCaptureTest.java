@@ -13,6 +13,7 @@ import java.io.File;
 import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.*;
 
 /**
  * Test that actually captures a screenshot and verifies it has content.
@@ -21,6 +22,17 @@ import static org.junit.jupiter.api.Assertions.*;
 public class ActualScreenCaptureTest {
 
     private static final String TEST_SCREENSHOT_PATH = "test-actual-screenshot.png";
+    
+    static boolean isHeadless() {
+        // Check if we're actually headless (not just having DISPLAY set)
+        try {
+            return GraphicsEnvironment.isHeadless() || 
+                   "true".equals(System.getProperty("java.awt.headless"));
+        } catch (Exception e) {
+            // If we can't determine, assume headless
+            return true;
+        }
+    }
 
     @BeforeAll
     public static void setupEnvironment() {
@@ -49,6 +61,14 @@ public class ActualScreenCaptureTest {
 
     @Test
     public void testScreenCaptureHasNonBlackPixels() throws IOException {
+        // Skip test if running in headless mode
+        assumeFalse(isHeadless(), "Skipping test in headless environment");
+        
+        // Also skip if in WSL or CI environment where screen capture might not work
+        assumeFalse(System.getenv("WSL_DISTRO_NAME") != null, "Skipping test in WSL environment");
+        assumeFalse(System.getenv("CI") != null, "Skipping test in CI environment");
+        assumeFalse(System.getenv("GITHUB_ACTIONS") != null, "Skipping test in GitHub Actions");
+        
         // First verify the environment is correctly configured
         GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
         ExecutionEnvironment env = ExecutionEnvironment.getInstance();
@@ -117,6 +137,13 @@ public class ActualScreenCaptureTest {
     
     @Test
     public void testStaticScreenCaptureMethod() throws IOException {
+        // Skip test if running in headless mode
+        assumeFalse(isHeadless(), "Skipping test in headless environment");
+        
+        // Also skip if in WSL or CI environment where screen capture might not work
+        assumeFalse(System.getenv("WSL_DISTRO_NAME") != null, "Skipping test in WSL environment");
+        assumeFalse(System.getenv("CI") != null, "Skipping test in CI environment");
+        assumeFalse(System.getenv("GITHUB_ACTIONS") != null, "Skipping test in GitHub Actions");
         // Test the static method as well
         Region fullScreen = new Region();
         BufferedImage screenshot = BufferedImageUtilities.getBufferedImageFromScreen(fullScreen);

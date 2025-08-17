@@ -6,6 +6,8 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.action.basic.click.ClickOptions;
+import io.github.jspinak.brobot.action.basic.mouse.MousePressOptions;
+import io.github.jspinak.brobot.model.action.MouseButton;
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
 import io.github.jspinak.brobot.model.element.Pattern;
 import io.github.jspinak.brobot.model.state.StateImage;
@@ -37,8 +39,10 @@ class ActionStepSerializationTest {
         
         // NEW API: Use ClickOptions instead of generic ActionOptions
         ClickOptions clickOptions = new ClickOptions.Builder()
-                .setClickType(ClickOptions.Type.LEFT)
                 .setNumberOfClicks(1)
+                .setPressOptions(MousePressOptions.builder()
+                    .button(MouseButton.LEFT)
+                    .build())
                 .build();
         actionStep.setActionConfig(clickOptions);
         
@@ -238,7 +242,10 @@ class ActionStepSerializationTest {
         
         // NEW API:
         ClickOptions newOptions = new ClickOptions.Builder()
-                .setClickType(ClickOptions.Type.LEFT)
+                .setNumberOfClicks(1)
+                .setPressOptions(MousePressOptions.builder()
+                    .button(MouseButton.LEFT)
+                    .build())
                 .build();
         
         ObjectCollection objectCollection = new ObjectCollection.Builder()

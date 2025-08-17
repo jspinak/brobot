@@ -180,8 +180,13 @@ public class Match {
         if (name != null && !name.isEmpty()) {
             nameText = "#" + name + "# ";
         }
-        stringBuilder.append(String.format("%sR[%d,%d %dx%d] simScore:%.1f", nameText,
-                getRegion().x(), getRegion().y(), getRegion().w(), getRegion().h(), score));
+        Region r = getRegion();
+        if (r != null) {
+            stringBuilder.append(String.format("%sR[%d,%d %dx%d] simScore:%.1f", nameText,
+                    r.x(), r.y(), r.w(), r.h(), score));
+        } else {
+            stringBuilder.append(String.format("%sR[null] simScore:%.1f", nameText, score));
+        }
         if (getText() != null && !getText().isEmpty()) stringBuilder.append(" text:").append(getText());
         stringBuilder.append("]");
         return stringBuilder.toString();

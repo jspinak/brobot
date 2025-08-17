@@ -3,8 +3,8 @@ package io.github.jspinak.brobot.action.basic.find;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.action.internal.find.NonImageObjectConverter;
-import io.github.jspinak.brobot.action.internal.find.OffsetLocationManagerV2;
-import io.github.jspinak.brobot.action.internal.find.match.MatchAdjusterV2;
+import io.github.jspinak.brobot.action.internal.find.OffsetMatchCreator;
+import io.github.jspinak.brobot.action.internal.find.match.MatchRegionAdjuster;
 import io.github.jspinak.brobot.action.internal.find.match.MatchContentExtractor;
 import io.github.jspinak.brobot.analysis.color.profiles.ProfileSetBuilder;
 import io.github.jspinak.brobot.analysis.match.MatchFusion;
@@ -36,12 +36,12 @@ import static org.mockito.Mockito.*;
 class FindTest {
 
     @Mock private FindPipeline findPipeline;
-    @Mock private FindStrategyRegistryV2 findStrategyRegistry;
+    @Mock private ModernFindStrategyRegistry findStrategyRegistry;
     @Mock private StateMemory stateMemory;
     @Mock private NonImageObjectConverter nonImageObjectConverter;
-    @Mock private MatchAdjusterV2 matchAdjuster;
+    @Mock private MatchRegionAdjuster matchAdjuster;
     @Mock private ProfileSetBuilder profileSetBuilder;
-    @Mock private OffsetLocationManagerV2 offsetLocationManager;
+    @Mock private OffsetMatchCreator offsetLocationManager;
     @Mock private MatchFusion matchFusion;
     @Mock private MatchContentExtractor matchContentExtractor;
     @Mock private TextSelector textSelector;

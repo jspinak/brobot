@@ -14,85 +14,89 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import static org.junit.jupiter.api.Assertions.*;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 /**
- * Simple test to debug screenshot capture issues.
+ * Test to verify screenshot handling and analysis.
  */
-
-
 public class SimpleScreenshotDebugTest {
 
     // @Autowired
     private BufferedImageUtilities bufferedImageUtilities;
 
     @Test
-    void debugScreenshotCapture() throws Exception {
-        System.out.println("\n=== SIMPLE SCREENSHOT DEBUG TEST ===");
+    void debugScreenshotAnalysis() throws Exception {
+        
+        System.out.println("\n=== SCREENSHOT ANALYSIS TEST ===");
         
         // 1. Check environment
         System.out.println("java.awt.headless: " + System.getProperty("java.awt.headless"));
         System.out.println("GraphicsEnvironment.isHeadless: " + GraphicsEnvironment.isHeadless());
-        System.out.println("ExecutionEnvironment.hasDisplay: " + ExecutionEnvironment.getInstance().hasDisplay());
-        System.out.println("ExecutionEnvironment.canCaptureScreen: " + ExecutionEnvironment.getInstance().canCaptureScreen());
         
-        // 2. Check FrameworkSettings
-        System.out.println("\n=== FRAMEWORK SETTINGS ===");
-        System.out.println("FrameworkSettings.saveHistory: " + FrameworkSettings.saveHistory);
-        System.out.println("FrameworkSettings.historyPath: " + FrameworkSettings.historyPath);
+        // 2. Load and analyze screenshots from library folder
+        System.out.println("\n=== ANALYZING SCREENSHOTS ===");
         
-        // Force enable
-        FrameworkSettings.saveHistory = true;
-        FrameworkSettings.historyPath = "test-history/";
+        String screenshotDir = "screenshots/";
+        String imageDir = "images/";
         
-        // Create directory
+        // Create test output directory
         Path historyPath = Paths.get("test-history");
         Files.createDirectories(historyPath);
         
-        // 3. Test different capture methods
-        System.out.println("\n=== TESTING CAPTURE METHODS ===");
+        // Method 1: Analyze existing screenshots
+        System.out.println("\nMethod 1: Screenshot Analysis");
+        Path screenshotPath = Paths.get(screenshotDir, "floranext0.png");
+        File screenshotFile = screenshotPath.toFile();
         
-        // Method 1: Direct Robot
-        System.out.println("\nMethod 1: Direct Java Robot");
-        try {
-            Robot robot = new Robot();
-            BufferedImage capture1 = robot.createScreenCapture(new Rectangle(0, 0, 200, 200));
-            File file1 = new File(historyPath.toFile(), "method1-robot.png");
-            ImageIO.write(capture1, "png", file1);
-            analyzeImage(file1, capture1);
-        } catch (Exception e) {
-            System.err.println("Robot capture failed: " + e.getMessage());
+        if (screenshotFile.exists()) {
+            BufferedImage screenshot = ImageIO.read(screenshotFile);
+            File outputFile = new File(historyPath.toFile(), "screenshot-analysis.png");
+            ImageIO.write(screenshot, "png", outputFile);
+            analyzeImage(outputFile, screenshot);
+        } else {
+            System.err.println("Screenshot not found: " + screenshotFile.getAbsolutePath());
         }
         
-        // Method 2: BufferedImageUtilities
-        System.out.println("\nMethod 2: BufferedImageUtilities");
-        try {
-            io.github.jspinak.brobot.model.element.Region region = 
-                new io.github.jspinak.brobot.model.element.Region(0, 0, 200, 200);
-            // TODO: Fix captureRegion method - may have been renamed
-            // BufferedImage capture2 = bufferedImageUtilities.captureRegion(region);
-            BufferedImage capture2 = null;
-            if (capture2 != null) {
-                File file2 = new File(historyPath.toFile(), "method2-utils.png");
-                ImageIO.write(capture2, "png", file2);
-                analyzeImage(file2, capture2);
-            } else {
-                System.err.println("BufferedImageUtilities returned null!");
+        // Method 2: Test pattern matching
+        System.out.println("\nMethod 2: Pattern Matching Test");
+        Path imagePath = Paths.get(imageDir, "topLeft.png");
+        File imageFile = imagePath.toFile();
+        
+        if (screenshotFile.exists() && imageFile.exists()) {
+            BufferedImage screenshot = ImageIO.read(screenshotFile);
+            BufferedImage pattern = ImageIO.read(imageFile);
+            
+            System.out.println("Screenshot: " + screenshot.getWidth() + "x" + screenshot.getHeight());
+            System.out.println("Pattern: " + pattern.getWidth() + "x" + pattern.getHeight());
+            
+            // Test if pattern could be found in screenshot
+            io.github.jspinak.brobot.model.element.Region searchRegion = 
+                new io.github.jspinak.brobot.model.element.Region(0, 0, 
+                    screenshot.getWidth(), screenshot.getHeight());
+            
+            System.out.println("Search region defined: " + searchRegion);
+            analyzeImage(imageFile, pattern);
+        } else {
+            System.err.println("Pattern or screenshot not found");
+        }
+        
+        // Method 3: Test multiple screenshots
+        System.out.println("\n=== MULTIPLE SCREENSHOT TEST ===");
+        String[] screenshots = {"floranext1.png", "floranext2.png", "floranext3.png"};
+        
+        for (String screenshotName : screenshots) {
+            Path path = Paths.get("screenshots/", screenshotName);
+            File file = path.toFile();
+            
+            if (file.exists()) {
+                BufferedImage img = ImageIO.read(file);
+                System.out.println("\n" + screenshotName + ": " + img.getWidth() + "x" + img.getHeight());
+                
+                // Sample analysis
+                int sampleSize = Math.min(100, img.getWidth() * img.getHeight() / 100);
+                analyzeImageSamples(img, sampleSize);
             }
-        } catch (Exception e) {
-            System.err.println("BufferedImageUtilities capture failed: " + e.getMessage());
-            e.printStackTrace();
-        }
-        
-        // Method 3: Check display configuration
-        System.out.println("\n=== DISPLAY CONFIGURATION ===");
-        GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-        GraphicsDevice[] devices = ge.getScreenDevices();
-        System.out.println("Number of screens: " + devices.length);
-        for (int i = 0; i < devices.length; i++) {
-            GraphicsDevice device = devices[i];
-            System.out.println("Screen " + i + ": " + device.getIDstring());
-            System.out.println("  Type: " + device.getType());
-            System.out.println("  Available: " + device.isDisplayChangeSupported());
         }
     }
     
@@ -115,18 +119,40 @@ public class SimpleScreenshotDebugTest {
         double blackPercentage = (blackCount * 100.0) / totalSamples;
         System.out.println("  Black pixels: " + blackPercentage + "%");
         
-        if (blackPercentage > 90) {
-            System.out.println("  ⚠️ WARNING: Image appears to be BLACK!");
-            
-            // Check specific pixels
-            System.out.println("  Sample pixels:");
-            for (int i = 0; i < 5; i++) {
-                int x = i * img.getWidth() / 5;
-                int y = i * img.getHeight() / 5;
-                System.out.printf("    (%d,%d): 0x%08X%n", x, y, img.getRGB(x, y));
-            }
-        } else {
-            System.out.println("  ✓ Image has content");
+        // Analyze color distribution
+        System.out.println("  Sample pixels:");
+        for (int i = 0; i < Math.min(5, totalSamples); i++) {
+            int x = (int)(Math.random() * img.getWidth());
+            int y = (int)(Math.random() * img.getHeight());
+            int rgb = img.getRGB(x, y);
+            System.out.printf("    (%d,%d): 0x%08X%n", x, y, rgb);
         }
+        
+        if (blackPercentage > 90) {
+            System.out.println("  ⚠️ Image is mostly black");
+        } else if (blackPercentage < 10) {
+            System.out.println("  ✓ Image has rich content");
+        } else {
+            System.out.println("  ✓ Image has mixed content");
+        }
+    }
+    
+    private void analyzeImageSamples(BufferedImage img, int sampleSize) {
+        int blackCount = 0;
+        int whiteCount = 0;
+        
+        for (int i = 0; i < sampleSize; i++) {
+            int x = (int)(Math.random() * img.getWidth());
+            int y = (int)(Math.random() * img.getHeight());
+            int rgb = img.getRGB(x, y);
+            
+            if (rgb == 0xFF000000) blackCount++;
+            if (rgb == 0xFFFFFFFF) whiteCount++;
+        }
+        
+        System.out.println("  Samples: " + sampleSize);
+        System.out.println("  Black: " + (blackCount * 100.0 / sampleSize) + "%");
+        System.out.println("  White: " + (whiteCount * 100.0 / sampleSize) + "%");
+        System.out.println("  Other: " + ((sampleSize - blackCount - whiteCount) * 100.0 / sampleSize) + "%");
     }
 }

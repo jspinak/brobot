@@ -1,0 +1,26 @@
+{
+  "automationFunctions": [
+    {
+      "name": "testFunction",
+      "description": "A test automation function",
+      "steps": [
+        {
+          "action": "click",
+          "target": "button1"
+        },
+        {
+          "action": "type",
+          "target": "input1",
+          "value": "test text"
+        }
+      ]
+    }
+  ],
+  "variables": {
+    "testVar": "testValue"
+  },
+  "settings": {
+    "executionDelay": 1000,
+    "retryCount": 3
+  }
+}

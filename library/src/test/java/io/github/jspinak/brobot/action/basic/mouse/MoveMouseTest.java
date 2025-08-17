@@ -60,6 +60,7 @@ class MoveMouseTest {
         Location location1 = new Location(100, 200);
         Location location2 = new Location(300, 400);
         
+        // When ObjectCollection has StateLocations, MoveMouse moves directly without calling find
         objectCollection = new ObjectCollection.Builder()
                 .withLocations(
                     new StateLocation.Builder().setLocation(location1).build(),
@@ -67,35 +68,20 @@ class MoveMouseTest {
                 )
                 .build();
 
-        // Mock Find to populate match locations
-        doAnswer(invocation -> {
-            ActionResult result = invocation.getArgument(0);
-            result.setSuccess(true);
-            // Create matches for the locations
-            Match match1 = new Match.Builder()
-                    .setRegion(new Region(location1.getX(), location1.getY(), 1, 1))
-                    .build();
-            Match match2 = new Match.Builder()
-                    .setRegion(new Region(location2.getX(), location2.getY(), 1, 1))
-                    .build();
-            result.add(match1, match2);
-            return null;
-        }).when(find).perform(any(ActionResult.class), any(ObjectCollection.class));
-
         // Act
         moveMouse.perform(actionResult, objectCollection);
 
-        // Assert
-        verify(find).perform(eq(actionResult), eq(objectCollection));
+        // Assert - find.perform() is NOT called when StateLocations are present
+        verify(find, never()).perform(any(ActionResult.class), any(ObjectCollection.class));
         ArgumentCaptor<Location> locationCaptor = ArgumentCaptor.forClass(Location.class);
         verify(moveMouseWrapper, times(2)).move(locationCaptor.capture());
         List<Location> capturedLocations = locationCaptor.getAllValues();
         assertEquals(2, capturedLocations.size());
-        // The locations will be the center of the 1x1 regions we created
+        // Verify the exact locations were moved to
         assertTrue(capturedLocations.stream().anyMatch(loc -> 
-            loc.getCalculatedX() == location1.getX() && loc.getCalculatedY() == location1.getY()));
+            loc.getX() == location1.getX() && loc.getY() == location1.getY()));
         assertTrue(capturedLocations.stream().anyMatch(loc -> 
-            loc.getCalculatedX() == location2.getX() && loc.getCalculatedY() == location2.getY()));
+            loc.getX() == location2.getX() && loc.getY() == location2.getY()));
         verifyNoInteractions(timeProvider); // No pause after last collection
     }
 
@@ -109,6 +95,7 @@ class MoveMouseTest {
         Location location1 = new Location(100, 100);
         Location location2 = new Location(200, 200);
         
+        // When ObjectCollection has StateLocations, MoveMouse moves directly without calling find
         ObjectCollection collection1 = new ObjectCollection.Builder()
                 .withLocations(new StateLocation.Builder().setLocation(location1).build())
                 .build();
@@ -117,41 +104,20 @@ class MoveMouseTest {
                 .withLocations(new StateLocation.Builder().setLocation(location2).build())
                 .build();
 
-        // Mock Find to populate match locations for each collection
-        doAnswer(invocation -> {
-            ActionResult result = invocation.getArgument(0);
-            ObjectCollection coll = invocation.getArgument(1);
-            // Clear previous matches
-            result.getMatchList().clear();
-            if (coll == collection1) {
-                Match match = new Match.Builder()
-                        .setRegion(new Region(location1.getX(), location1.getY(), 1, 1))
-                        .build();
-                result.add(match);
-            } else {
-                Match match = new Match.Builder()
-                        .setRegion(new Region(location2.getX(), location2.getY(), 1, 1))
-                        .build();
-                result.add(match);
-            }
-            return null;
-        }).when(find).perform(any(ActionResult.class), any(ObjectCollection.class));
-
         // Act
         moveMouse.perform(actionResult, collection1, collection2);
 
-        // Assert
-        verify(find).perform(eq(actionResult), eq(collection1));
-        verify(find).perform(eq(actionResult), eq(collection2));
+        // Assert - find.perform() is NOT called when StateLocations are present
+        verify(find, never()).perform(any(ActionResult.class), any(ObjectCollection.class));
         ArgumentCaptor<Location> locationCaptor = ArgumentCaptor.forClass(Location.class);
         verify(moveMouseWrapper, times(2)).move(locationCaptor.capture());
         List<Location> capturedLocations = locationCaptor.getAllValues();
         assertEquals(2, capturedLocations.size());
-        // The locations will be the center of the 1x1 regions we created
+        // Verify the exact locations were moved to
         assertTrue(capturedLocations.stream().anyMatch(loc -> 
-            loc.getCalculatedX() == location1.getX() && loc.getCalculatedY() == location1.getY()));
+            loc.getX() == location1.getX() && loc.getY() == location1.getY()));
         assertTrue(capturedLocations.stream().anyMatch(loc -> 
-            loc.getCalculatedX() == location2.getX() && loc.getCalculatedY() == location2.getY()));
+            loc.getX() == location2.getX() && loc.getY() == location2.getY()));
         verify(timeProvider).wait(0.5); // Pause between collections
     }
 

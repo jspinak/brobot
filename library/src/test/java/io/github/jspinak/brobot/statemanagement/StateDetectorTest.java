@@ -86,8 +86,9 @@ class StateDetectorTest {
         ActionResult notFoundResult = new ActionResult();
         notFoundResult.setSuccess(false);
         
-        when(action.perform(any(ActionConfig.class), 
-                any(ObjectCollection[].class))).thenReturn(foundResult, notFoundResult);
+        // Mock action.find() which is what StateDetector actually calls
+        when(action.find(any(ObjectCollection.class))).thenReturn(foundResult, notFoundResult);
+        when(action.find(any(ObjectCollection[].class))).thenReturn(foundResult, notFoundResult);
 
         // Act
         stateDetector.checkForActiveStates();
@@ -116,15 +117,17 @@ class StateDetectorTest {
         ActionResult notFoundResult = new ActionResult();
         notFoundResult.setSuccess(false);
         
-        when(action.perform(any(ActionConfig.class), 
-                any(ObjectCollection[].class))).thenReturn(notFoundResult);
+        // Mock action.find() which is what StateDetector actually calls
+        when(action.find(any(ObjectCollection.class))).thenReturn(notFoundResult);
+        when(action.find(any(ObjectCollection[].class))).thenReturn(notFoundResult);
 
         // Act
         stateDetector.rebuildActiveStates();
 
         // Assert
         verify(stateService).getAllStateNames();
-        verify(action, times(2)).perform(eq(ActionType.FIND), any(ObjectCollection[].class));
+        // Verify action.find() was called twice (once for each state)
+        verify(action, times(2)).find(any(ObjectCollection.class));
         verify(stateMemory).addActiveState(SpecialStateType.UNKNOWN.getId());
     }
 
@@ -142,8 +145,9 @@ class StateDetectorTest {
         ActionResult foundResult = new ActionResult();
         foundResult.setSuccess(true);
         
-        when(action.perform(any(ActionConfig.class), 
-                any(ObjectCollection[].class))).thenReturn(foundResult);
+        // Mock action.find() which is what StateDetector actually calls
+        when(action.find(any(ObjectCollection.class))).thenReturn(foundResult);
+        when(action.find(any(ObjectCollection[].class))).thenReturn(foundResult);
 
         // Act
         stateDetector.rebuildActiveStates();
@@ -172,14 +176,16 @@ class StateDetectorTest {
         ActionResult foundResult2 = new ActionResult();
         foundResult2.setSuccess(true);
         
-        when(action.perform(any(ActionConfig.class), 
-                any(ObjectCollection[].class))).thenReturn(foundResult1, foundResult2);
+        // Mock action.find() which is what StateDetector actually calls
+        when(action.find(any(ObjectCollection.class))).thenReturn(foundResult1, foundResult2);
+        when(action.find(any(ObjectCollection[].class))).thenReturn(foundResult1, foundResult2);
 
         // Act
         stateDetector.searchAllImagesForCurrentStates();
 
         // Assert
-        verify(action, times(2)).perform(eq(ActionType.FIND), any(ObjectCollection[].class));
+        // Verify action.find() was called twice (once for each state)
+        verify(action, times(2)).find(any(ObjectCollection.class));
     }
 
     @Test
@@ -194,8 +200,9 @@ class StateDetectorTest {
         ActionResult foundResult = new ActionResult();
         foundResult.setSuccess(true);
         
-        when(action.perform(any(ActionConfig.class), 
-                any(ObjectCollection[].class))).thenReturn(foundResult);
+        // Mock action.find() which is what StateDetector actually calls
+        when(action.find(any(ObjectCollection.class))).thenReturn(foundResult);
+        when(action.find(any(ObjectCollection[].class))).thenReturn(foundResult);
 
         // Act
         boolean result = stateDetector.findState(stateName);
@@ -216,8 +223,9 @@ class StateDetectorTest {
         ActionResult notFoundResult = new ActionResult();
         notFoundResult.setSuccess(false);
         
-        when(action.perform(any(ActionConfig.class), 
-                any(ObjectCollection[].class))).thenReturn(notFoundResult);
+        // Mock action.find() which is what StateDetector actually calls
+        when(action.find(any(ObjectCollection.class))).thenReturn(notFoundResult);
+        when(action.find(any(ObjectCollection[].class))).thenReturn(notFoundResult);
 
         // Act
         boolean result = stateDetector.findState(stateName);
@@ -237,7 +245,8 @@ class StateDetectorTest {
 
         // Assert
         assertFalse(result);
-        verify(action, never()).perform(any(ActionConfig.class), any(ObjectCollection[].class));
+        // Verify action.find() was never called
+        verify(action, never()).find(any(ObjectCollection.class));
     }
 
     @Test
@@ -253,8 +262,9 @@ class StateDetectorTest {
         ActionResult foundResult = new ActionResult();
         foundResult.setSuccess(true);
         
-        when(action.perform(any(ActionConfig.class), 
-                any(ObjectCollection[].class))).thenReturn(foundResult);
+        // Mock action.find() which is what StateDetector actually calls
+        when(action.find(any(ObjectCollection.class))).thenReturn(foundResult);
+        when(action.find(any(ObjectCollection[].class))).thenReturn(foundResult);
         
         Set<Long> returnedStates = new HashSet<>(Collections.singletonList(1L));
         when(stateMemory.getActiveStates()).thenReturn(returnedStates);
@@ -281,8 +291,9 @@ class StateDetectorTest {
         ActionResult foundResult = new ActionResult();
         foundResult.setSuccess(true);
         
-        when(action.perform(any(ActionConfig.class), 
-                any(ObjectCollection[].class))).thenReturn(foundResult);
+        // Mock action.find() which is what StateDetector actually calls
+        when(action.find(any(ObjectCollection.class))).thenReturn(foundResult);
+        when(action.find(any(ObjectCollection[].class))).thenReturn(foundResult);
 
         // Act
         boolean result = stateDetector.findState(stateId);
@@ -304,8 +315,9 @@ class StateDetectorTest {
         ActionResult notFoundResult = new ActionResult();
         notFoundResult.setSuccess(false);
         
-        when(action.perform(any(ActionConfig.class), 
-                any(ObjectCollection[].class))).thenReturn(notFoundResult);
+        // Mock action.find() which is what StateDetector actually calls
+        when(action.find(any(ObjectCollection.class))).thenReturn(notFoundResult);
+        when(action.find(any(ObjectCollection[].class))).thenReturn(notFoundResult);
 
         // Act
         boolean result = stateDetector.findState(stateId);
@@ -327,8 +339,9 @@ class StateDetectorTest {
         ActionResult foundResult = new ActionResult();
         foundResult.setSuccess(true);
         
-        when(action.perform(any(ActionConfig.class), 
-                any(ObjectCollection[].class))).thenReturn(foundResult);
+        // Mock action.find() which is what StateDetector actually calls
+        when(action.find(any(ObjectCollection.class))).thenReturn(foundResult);
+        when(action.find(any(ObjectCollection[].class))).thenReturn(foundResult);
 
         // Act
         stateDetector.searchAllImagesForCurrentStates();

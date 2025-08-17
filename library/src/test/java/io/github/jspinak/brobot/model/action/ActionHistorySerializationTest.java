@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
 import io.github.jspinak.brobot.action.basic.click.ClickOptions;
+import io.github.jspinak.brobot.action.basic.mouse.MousePressOptions;
+import io.github.jspinak.brobot.model.action.MouseButton;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.match.Match;
 import org.junit.jupiter.api.BeforeEach;
@@ -118,7 +120,10 @@ class ActionHistorySerializationTest {
         
         // Using new ClickOptions API
         ClickOptions clickOptions = new ClickOptions.Builder()
-                .setClickType(ClickOptions.Type.LEFT)
+                .setNumberOfClicks(1)
+                .setPressOptions(MousePressOptions.builder()
+                    .button(MouseButton.LEFT)
+                    .build())
                 .build();
         record.setActionConfig(clickOptions);
         
@@ -160,7 +165,10 @@ class ActionHistorySerializationTest {
         // Add Click action record with new API
         ActionRecord clickRecord = new ActionRecord();
         ClickOptions clickOptions = new ClickOptions.Builder()
-                .setClickType(ClickOptions.Type.LEFT)
+                .setNumberOfClicks(1)
+                .setPressOptions(MousePressOptions.builder()
+                    .button(MouseButton.LEFT)
+                    .build())
                 .build();
         clickRecord.setActionConfig(clickOptions);
         
@@ -205,7 +213,10 @@ class ActionHistorySerializationTest {
             } else {
                 // Click action with new API
                 ClickOptions clickOptions = new ClickOptions.Builder()
-                        .setClickType(ClickOptions.Type.RIGHT)
+                        .setNumberOfClicks(1)
+                        .setPressOptions(MousePressOptions.builder()
+                            .button(MouseButton.RIGHT)
+                            .build())
                         .build();
                 record.setActionConfig(clickOptions);
             }

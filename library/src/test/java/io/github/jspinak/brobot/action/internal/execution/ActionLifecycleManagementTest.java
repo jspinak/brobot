@@ -3,6 +3,7 @@ package io.github.jspinak.brobot.action.internal.execution;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
+import io.github.jspinak.brobot.model.element.Image;
 import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.tools.testing.mock.time.TimeProvider;
 import org.junit.jupiter.api.BeforeEach;
@@ -277,9 +278,19 @@ class ActionLifecycleManagementTest {
                 .build();
         actionResult.setActionConfig(findOptions);
         
+        // Create distinct images for the matches
+        Image image1 = mock(Image.class);
+        Image image2 = mock(Image.class);
+        
+        // Create matches with distinct search images
+        Match match1 = mock(Match.class);
+        when(match1.getSearchImage()).thenReturn(image1);
+        Match match2 = mock(Match.class);
+        when(match2.getSearchImage()).thenReturn(image2);
+        
         // Add matches for all 2 images
-        actionResult.add(mock(Match.class));
-        actionResult.add(mock(Match.class));
+        actionResult.add(match1);
+        actionResult.add(match2);
         
         // Execute with 2 images total
         boolean okToContinue = lifecycleManagement.isOkToContinueAction(actionResult, 2);

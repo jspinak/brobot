@@ -10,6 +10,7 @@ import java.awt.GraphicsEnvironment;
 import java.awt.image.BufferedImage;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.*;
 
 /**
  * Unit test for screen capture functionality.
@@ -83,6 +84,11 @@ public class ScreenCaptureTest {
 
     @Test
     public void testBufferedImageUtilitiesScreenCapture() {
+        // Skip test if running in environments where screen capture might not work
+        assumeFalse(GraphicsEnvironment.isHeadless(), "Skipping test in headless environment");
+        assumeFalse(System.getenv("WSL_DISTRO_NAME") != null, "Skipping test in WSL environment");
+        assumeFalse(System.getenv("CI") != null, "Skipping test in CI environment");
+        
         // Verify ExecutionEnvironment allows screen capture
         ExecutionEnvironment env = ExecutionEnvironment.getInstance();
         assertTrue(env.canCaptureScreen(), 

@@ -21,7 +21,7 @@ class ClickOptionsTest {
         assertNotNull(options.getMousePressOptions());
         assertNotNull(options.getVerificationOptions());
         assertNotNull(options.getRepetitionOptions());
-        assertEquals(ClickOptions.Type.LEFT, options.getClickType()); // Deprecated but still there
+        assertEquals(MouseButton.LEFT, options.getMousePressOptions().getButton()); // Check default button
         
         // Check convenience getters
         assertEquals(1, options.getTimesToRepeatIndividualAction());
@@ -89,27 +89,35 @@ class ClickOptionsTest {
     }
     
     @Test
-    @SuppressWarnings("deprecation")
-    void builder_shouldHandleDeprecatedClickType() {
-        // Test LEFT click
+    void builder_shouldHandleClickTypes() {
+        // Test single left click (default)
         ClickOptions leftClick = new ClickOptions.Builder()
-            .setClickType(ClickOptions.Type.LEFT)
+            .setNumberOfClicks(1)
+            .setPressOptions(MousePressOptions.builder()
+                .button(MouseButton.LEFT)
+                .build())
             .build();
         
         assertEquals(1, leftClick.getNumberOfClicks());
         assertEquals(MouseButton.LEFT, leftClick.getMousePressOptions().getButton());
         
-        // Test DOUBLE_RIGHT click
+        // Test double right click
         ClickOptions doubleRightClick = new ClickOptions.Builder()
-            .setClickType(ClickOptions.Type.DOUBLE_RIGHT)
+            .setNumberOfClicks(2)
+            .setPressOptions(MousePressOptions.builder()
+                .button(MouseButton.RIGHT)
+                .build())
             .build();
         
         assertEquals(2, doubleRightClick.getNumberOfClicks());
         assertEquals(MouseButton.RIGHT, doubleRightClick.getMousePressOptions().getButton());
         
-        // Test MIDDLE click
+        // Test single middle click
         ClickOptions middleClick = new ClickOptions.Builder()
-            .setClickType(ClickOptions.Type.MIDDLE)
+            .setNumberOfClicks(1)
+            .setPressOptions(MousePressOptions.builder()
+                .button(MouseButton.MIDDLE)
+                .build())
             .build();
         
         assertEquals(1, middleClick.getNumberOfClicks());

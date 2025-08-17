@@ -138,24 +138,52 @@ class MockTimeTest {
     }
     
     @Test
-    @org.junit.jupiter.api.Disabled("ActionOptions.Find no longer exists")
-    void testWait_WithFind() {
-        // This test relied on ActionOptions.Find enum which no longer exists
-        // The modern API uses specific find options classes instead
+    void testWait_WithFindAction() {
+        // Setup - using ActionType.FIND instead of ActionOptions.Find
+        when(actionDurations.getActionDuration(ActionType.FIND)).thenReturn(1.5);
+        
+        // Execute
+        mockTime.wait(ActionType.FIND);
+        
+        // Verify
+        verify(actionDurations).getActionDuration(ActionType.FIND);
+        LocalDateTime endTime = mockTime.now();
+        long nanosDiff = ChronoUnit.NANOS.between(startTime, endTime);
+        assertEquals(1_500_000_000L, nanosDiff);
     }
     
     @Test
-    @org.junit.jupiter.api.Disabled("ActionOptions.Find no longer exists")
-    void testWait_WithMultipleFinds() {
-        // This test relied on ActionOptions.Find enum which no longer exists
-        // The modern API uses specific find options classes instead
+    void testWait_WithMultipleFindActions() {
+        // Setup - using ActionType.FIND for different find scenarios
+        when(actionDurations.getActionDuration(ActionType.FIND)).thenReturn(0.8);
+        
+        // Execute multiple find operations
+        mockTime.wait(ActionType.FIND);
+        mockTime.wait(ActionType.FIND);
+        mockTime.wait(ActionType.FIND);
+        
+        // Verify cumulative time
+        LocalDateTime endTime = mockTime.now();
+        long nanosDiff = ChronoUnit.NANOS.between(startTime, endTime);
+        assertEquals(2_400_000_000L, nanosDiff); // 0.8 * 3 = 2.4 seconds
+        verify(actionDurations, times(3)).getActionDuration(ActionType.FIND);
     }
     
     @Test
-    @org.junit.jupiter.api.Disabled("reset() method may not exist in MockTime")
-    void testReset() {
-        // This test assumes a reset() method exists in MockTime
-        // If the method doesn't exist, this test should be removed or MockTime should be updated
+    void testTimeProgression() {
+        // Test that time progresses correctly through multiple operations
+        LocalDateTime time1 = mockTime.now();
+        
+        mockTime.wait(1.0);
+        LocalDateTime time2 = mockTime.now();
+        
+        mockTime.wait(2.0);
+        LocalDateTime time3 = mockTime.now();
+        
+        // Verify time progression
+        assertEquals(1_000_000_000L, ChronoUnit.NANOS.between(time1, time2));
+        assertEquals(2_000_000_000L, ChronoUnit.NANOS.between(time2, time3));
+        assertEquals(3_000_000_000L, ChronoUnit.NANOS.between(time1, time3));
     }
     
     @Test
@@ -168,7 +196,7 @@ class MockTimeTest {
         
         // Verify - should print at HIGH level
         String output = outputStream.toString();
-        assertTrue(output.contains("MockTime.wait"));
+        assertTrue(output.contains("wait-1.0"), "Expected 'wait-1.0' in output but got: " + output);
     }
     
     @Test
@@ -179,9 +207,9 @@ class MockTimeTest {
         // Execute
         mockTime.wait(1.0);
         
-        // Verify - should not print at LOW level
+        // Verify - should not print at LOW level since wait requires HIGH level
         String output = outputStream.toString();
-        assertFalse(output.contains("MockTime.wait"));
+        assertFalse(output.contains("wait"), "Expected no 'wait' in output but got: " + output);
     }
     
     @Test
