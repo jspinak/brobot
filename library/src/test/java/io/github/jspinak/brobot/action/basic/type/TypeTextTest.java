@@ -4,7 +4,7 @@ import io.github.jspinak.brobot.action.ActionInterface;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.action.basic.type.TypeOptions;
-import io.github.jspinak.brobot.action.internal.text.TypeTextWrapperV2;
+import io.github.jspinak.brobot.action.internal.text.DefaultTextTyper;
 import io.github.jspinak.brobot.model.state.StateString;
 import io.github.jspinak.brobot.tools.testing.mock.time.TimeProvider;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,7 +23,7 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class TypeTextTest {
 
-    @Mock private TypeTextWrapperV2 typeTextWrapper;
+    @Mock private DefaultTextTyper typeTextWrapper;
     @Mock private TimeProvider timeProvider;
     
     private TypeText typeText;

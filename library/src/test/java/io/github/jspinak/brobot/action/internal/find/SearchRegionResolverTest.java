@@ -48,10 +48,26 @@ class SearchRegionResolverTest {
     }
     
     @Test
-    @org.junit.jupiter.api.Disabled("SearchRegions functionality not available in PatternFindOptions")
     void testGetRegions_WithStateImage_ActionOptionsRegions() {
-        // This test relied on ActionOptions.getSearchRegions() which doesn't exist in PatternFindOptions
-        // The test is disabled as it tests functionality that no longer exists
+        // Setup - PatternFindOptions does have getSearchRegions()
+        SearchRegions searchRegions = new SearchRegions();
+        searchRegions.addSearchRegions(new Region(15, 15, 85, 85));
+        
+        PatternFindOptions findOptions = new PatternFindOptions.Builder()
+            .setSearchRegions(searchRegions)
+            .build();
+        
+        StateImage stateImage = new StateImage();
+        Pattern pattern = new Pattern();
+        // Don't set any search regions on the pattern
+        stateImage.addPatterns(pattern);
+        
+        // Execute
+        List<Region> regions = searchRegionResolver.getRegions(findOptions, stateImage);
+        
+        // Verify - should use action options regions when no fixed regions on patterns
+        assertEquals(1, regions.size());
+        assertEquals(new Region(15, 15, 85, 85), regions.get(0));
     }
     
     @Test
@@ -109,10 +125,24 @@ class SearchRegionResolverTest {
     }
     
     @Test
-    @org.junit.jupiter.api.Disabled("SearchRegions functionality not available in PatternFindOptions")
     void testGetRegions_WithPattern_ActionOptionsRegions() {
-        // This test relied on ActionOptions.getSearchRegions() which doesn't exist in PatternFindOptions
-        // The test is disabled as it tests functionality that no longer exists
+        // Setup - PatternFindOptions does have getSearchRegions()
+        SearchRegions searchRegions = new SearchRegions();
+        searchRegions.addSearchRegions(new Region(5, 5, 95, 95));
+        
+        PatternFindOptions findOptions = new PatternFindOptions.Builder()
+            .setSearchRegions(searchRegions)
+            .build();
+        
+        Pattern pattern = new Pattern();
+        // Don't set any search regions on the pattern itself
+        
+        // Execute
+        List<Region> regions = searchRegionResolver.getRegions(findOptions, pattern);
+        
+        // Verify - should use action options regions when pattern has no regions
+        assertEquals(1, regions.size());
+        assertEquals(new Region(5, 5, 95, 95), regions.get(0));
     }
     
     @Test

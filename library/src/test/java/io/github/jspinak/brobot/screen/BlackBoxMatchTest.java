@@ -14,17 +14,20 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Test that verifies pattern matching returns correct dimensions.
- * Works on WSL where screenshots are black, making it perfect for testing
- * exact dimension matching with simple black rectangles.
+ * Test that verifies pattern matching returns correct dimensions
+ * using static screenshots instead of live screen capture.
  */
 public class BlackBoxMatchTest {
     
     private static final String TEST_DIR = "target/test-images/";
+    private static final String SCREENSHOT_DIR = "screenshots/";
+    private static final String IMAGE_DIR = "images/";
     
     @BeforeAll
     public static void setup() {
@@ -140,31 +143,38 @@ public class BlackBoxMatchTest {
     }
     
     @Test
-    public void testScreenCaptureAndMatch() throws IOException {
-        System.out.println("\n=== Screen Capture and Match Test ===");
+    public void testScreenshotPatternMatch() throws IOException {
+        System.out.println("\n=== Screenshot Pattern Match Test ===");
         
-        // Create a test pattern
-        int patternWidth = 80;
-        int patternHeight = 40;
-        File patternFile = createBlackBox(patternWidth, patternHeight, "pattern");
+        // Use actual screenshots and images from library-test
+        Path screenshotPath = Paths.get(SCREENSHOT_DIR, "floranext0.png");
+        Path imagePath = Paths.get(IMAGE_DIR, "topLeft.png");
         
-        // Use actual screen capture (will be black on WSL)
-        PhysicalResolutionScreen screen = new PhysicalResolutionScreen();
-        ScreenImage capture = screen.capture();
+        // Check if files exist
+        File screenshotFile = screenshotPath.toFile();
+        File imageFile = imagePath.toFile();
         
-        BufferedImage captureImg = capture.getImage();
-        System.out.println("Screen captured at: " + 
-            captureImg.getWidth() + "x" + captureImg.getHeight());
+        if (!screenshotFile.exists() || !imageFile.exists()) {
+            System.out.println("Test files not found, skipping test");
+            System.out.println("Screenshot: " + screenshotFile.getAbsolutePath());
+            System.out.println("Image: " + imageFile.getAbsolutePath());
+            return;
+        }
         
-        // Save the capture for inspection
-        File captureFile = new File(TEST_DIR + "capture.png");
-        ImageIO.write(captureImg, "PNG", captureFile);
+        // Load the screenshot as a ScreenImage
+        BufferedImage screenshotImg = ImageIO.read(screenshotFile);
+        Rectangle screenRect = new Rectangle(0, 0, screenshotImg.getWidth(), screenshotImg.getHeight());
+        ScreenImage screenImage = new ScreenImage(screenRect, screenshotImg);
         
-        // Since WSL captures are black, we can test with our black pattern
-        Pattern pattern = new Pattern(patternFile.getAbsolutePath()).similar(0.95);
+        // Load the pattern image
+        BufferedImage patternImg = ImageIO.read(imageFile);
+        Pattern pattern = new Pattern(imageFile.getAbsolutePath()).similar(0.7);
         
-        // Try to find the pattern
-        Finder finder = new Finder(capture);
+        System.out.println("Screenshot size: " + screenshotImg.getWidth() + "x" + screenshotImg.getHeight());
+        System.out.println("Pattern size: " + patternImg.getWidth() + "x" + patternImg.getHeight());
+        
+        // Use Finder to find the pattern in the screenshot
+        Finder finder = new Finder(screenImage);
         finder.find(pattern);
         
         if (finder.hasNext()) {
@@ -173,20 +183,86 @@ public class BlackBoxMatchTest {
             
             System.out.println("Match found at: " + rect.x + ", " + rect.y);
             System.out.println("Match dimensions: " + rect.width + "x" + rect.height);
+            System.out.println("Match score: " + match.getScore());
             
-            // On a black screen, any black rectangle will match
-            // The important test is that dimensions are preserved
-            assertEquals(patternWidth, rect.width,
+            // Verify that match dimensions equal pattern dimensions
+            assertEquals(patternImg.getWidth(), rect.width,
                 "Match width should equal pattern width");
-            assertEquals(patternHeight, rect.height,
+            assertEquals(patternImg.getHeight(), rect.height,
                 "Match height should equal pattern height");
             
-            System.out.println("✓ Dimensions preserved in screen capture!");
+            System.out.println("✓ Pattern found with correct dimensions!");
         } else {
-            System.out.println("No match found (expected on non-black screen)");
+            System.out.println("Pattern not found in screenshot (may need to adjust similarity)");
         }
         
         System.out.println("=====================================\n");
+    }
+    
+    @Test
+    public void testMultiplePatternMatches() throws IOException {
+        System.out.println("\n=== Multiple Pattern Match Test ===");
+        
+        // Test finding multiple patterns in screenshots
+        String[] patterns = {"topLeft.png", "bottomRight.png"};
+        String screenshot = "floranext0.png";
+        
+        Path screenshotPath = Paths.get(SCREENSHOT_DIR, screenshot);
+        File screenshotFile = screenshotPath.toFile();
+        
+        if (!screenshotFile.exists()) {
+            System.out.println("Screenshot not found: " + screenshotFile.getAbsolutePath());
+            return;
+        }
+        
+        BufferedImage screenshotImg = ImageIO.read(screenshotFile);
+        ScreenImage screenImage = new ScreenImage(
+            new Rectangle(0, 0, screenshotImg.getWidth(), screenshotImg.getHeight()), 
+            screenshotImg);
+        
+        for (String patternName : patterns) {
+            Path imagePath = Paths.get(IMAGE_DIR, patternName);
+            File imageFile = imagePath.toFile();
+            
+            if (!imageFile.exists()) {
+                System.out.println("Pattern not found: " + imageFile.getAbsolutePath());
+                continue;
+            }
+            
+            BufferedImage patternImg = ImageIO.read(imageFile);
+            Pattern pattern = new Pattern(imageFile.getAbsolutePath()).similar(0.6);
+            
+            System.out.println("\nSearching for: " + patternName);
+            System.out.println("Pattern size: " + patternImg.getWidth() + "x" + patternImg.getHeight());
+            
+            Finder finder = new Finder(screenImage);
+            finder.find(pattern);
+            
+            int matchCount = 0;
+            while (finder.hasNext()) {
+                Match match = finder.next();
+                Rectangle rect = match.getRect();
+                matchCount++;
+                
+                System.out.println("  Match " + matchCount + " at: " + rect.x + ", " + rect.y);
+                System.out.println("  Dimensions: " + rect.width + "x" + rect.height);
+                System.out.println("  Score: " + match.getScore());
+                
+                // Verify dimensions
+                assertEquals(patternImg.getWidth(), rect.width,
+                    "Match width should equal pattern width for " + patternName);
+                assertEquals(patternImg.getHeight(), rect.height,
+                    "Match height should equal pattern height for " + patternName);
+            }
+            
+            if (matchCount > 0) {
+                System.out.println("  ✓ Found " + matchCount + " match(es)");
+            } else {
+                System.out.println("  No matches found");
+            }
+        }
+        
+        System.out.println("\n=====================================\n");
     }
     
     /**

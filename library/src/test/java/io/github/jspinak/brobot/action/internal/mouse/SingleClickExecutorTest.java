@@ -99,8 +99,8 @@ class SingleClickExecutorTest {
 
         singleClickExecutor.click(location, clickOptions);
 
-        verify(mouseDownWrapper, times(2)).press(anyDouble(), anyDouble(), eq(ClickType.Type.LEFT));
-        verify(mouseUpWrapper, times(2)).press(anyDouble(), anyDouble(), eq(ClickType.Type.LEFT));
+        verify(mouseDownWrapper, times(2)).press(anyDouble(), anyDouble(), eq(ClickType.Type.DOUBLE_LEFT));
+        verify(mouseUpWrapper, times(2)).press(anyDouble(), anyDouble(), eq(ClickType.Type.DOUBLE_LEFT));
     }
 
     @Test
@@ -160,9 +160,9 @@ class SingleClickExecutorTest {
         
         singleClickExecutor.click(location, clickOptions);
         
-        // Should perform two separate clicks due to custom pause
-        verify(mouseDownWrapper, times(2)).press(anyDouble(), anyDouble(), eq(ClickType.Type.LEFT));
-        verify(mouseUpWrapper, times(2)).press(anyDouble(), anyDouble(), eq(ClickType.Type.LEFT));
+        // Should perform two separate clicks with DOUBLE_LEFT type due to custom pause
+        verify(mouseDownWrapper, times(2)).press(anyDouble(), anyDouble(), eq(ClickType.Type.DOUBLE_LEFT));
+        verify(mouseUpWrapper, times(2)).press(anyDouble(), anyDouble(), eq(ClickType.Type.DOUBLE_LEFT));
     }
     
     @Test

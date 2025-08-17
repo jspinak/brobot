@@ -106,7 +106,7 @@ public class ImagePathManagerTest {
         List<String> paths = pathManager.getConfiguredPaths();
         assertEquals(2, paths.size());
         
-        // Test duplicate prevention
+        // Test duplicate prevention - adding primary path again should not increase count
         pathManager.addPath(path1.toString());
         assertEquals(2, pathManager.getConfiguredPaths().size());
     }

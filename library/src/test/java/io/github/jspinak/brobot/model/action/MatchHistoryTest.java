@@ -3,7 +3,6 @@ package io.github.jspinak.brobot.model.action;
 import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
 import io.github.jspinak.brobot.action.basic.vanish.VanishOptions;
-import io.github.jspinak.brobot.action.ActionType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -77,10 +76,10 @@ class MatchHistoryTest {
         ActionRecord findSnapshot = new ActionRecord.Builder().setActionConfig(findOptions).build();
         history.addSnapshot(findSnapshot);
 
-        Optional<ActionRecord> result = history.getRandomSnapshot(ActionType.FIND);
+        Optional<ActionRecord> result = history.getRandomSnapshot(findOptions);
         assertThat(result).isPresent().contains(findSnapshot);
 
-        Optional<ActionRecord> emptyResult = history.getRandomSnapshot(ActionType.VANISH);
+        Optional<ActionRecord> emptyResult = history.getRandomSnapshot(vanishOptions);
         assertThat(emptyResult).isEmpty();
     }
 
@@ -92,10 +91,10 @@ class MatchHistoryTest {
         snapshot.setStateId(101L);
         history.addSnapshot(snapshot);
 
-        Optional<ActionRecord> result = history.getRandomSnapshot(ActionType.FIND, 101L);
+        Optional<ActionRecord> result = history.getRandomSnapshot(findOptions, 101L);
         assertThat(result).isPresent().contains(snapshot);
 
-        Optional<ActionRecord> emptyResult = history.getRandomSnapshot(ActionType.FIND, 999L);
+        Optional<ActionRecord> emptyResult = history.getRandomSnapshot(findOptions, 999L);
         assertThat(emptyResult).isEmpty();
     }
 
@@ -185,8 +184,8 @@ class MatchHistoryTest {
         history.addSnapshot(vanishRecord);
         
         // Verify history tracks both action types correctly
-        assertThat(history.getRandomSnapshot(ActionType.FIND)).isPresent();
-        assertThat(history.getRandomSnapshot(ActionType.VANISH)).isPresent();
+        assertThat(history.getRandomSnapshot(findOptions)).isPresent();
+        assertThat(history.getRandomSnapshot(vanishOptions)).isPresent();
         assertThat(history.getTimesSearched()).isEqualTo(2);
         assertThat(history.getTimesFound()).isEqualTo(1); // Only find had a match
     }

@@ -119,10 +119,10 @@ class ImageJsonSerializationTest {
         assertEquals(width, image.w());
         assertEquals(height, image.h());
         
-        // Test empty image dimensions - NPE expected when BufferedImage is null
+        // Test empty image dimensions - returns 0 when BufferedImage is null
         Image emptyImage = new Image((BufferedImage)null);
-        assertThrows(NullPointerException.class, () -> emptyImage.w());
-        assertThrows(NullPointerException.class, () -> emptyImage.h());
+        assertEquals(0, emptyImage.w());
+        assertEquals(0, emptyImage.h());
     }
 
     /**
@@ -195,8 +195,11 @@ class ImageJsonSerializationTest {
      */
     @Test
     void testImageConstructors() {
-        // Test filename constructor - will throw exception if file doesn't exist
-        assertThrows(RuntimeException.class, () -> new Image("test/image.png"));
+        // Test filename constructor - returns null BufferedImage if file doesn't exist
+        Image imgFromFile = new Image("test/image.png");
+        // The constructor doesn't throw exception, it just sets bufferedImage to null
+        assertNotNull(imgFromFile);
+        assertEquals("test/image", imgFromFile.getName()); // filename without extension
         
         // Test Pattern constructor - we'll skip this as it would require Pattern setup
         

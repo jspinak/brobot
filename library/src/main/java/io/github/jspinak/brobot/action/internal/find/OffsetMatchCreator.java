@@ -62,16 +62,15 @@ public class OffsetMatchCreator {
         }
         
         // Create a location at the current mouse position plus offset
-        Location location = new Location(
-            Mouse.at().x + adjustmentOptions.getAddX(), 
-            Mouse.at().y + adjustmentOptions.getAddY()
-        );
+        int offsetX = Mouse.at().x + adjustmentOptions.getAddX();
+        int offsetY = Mouse.at().y + adjustmentOptions.getAddY();
         
         // Create the offset match with a 1x1 region at the location
         // Note: In the new architecture, offset matches don't need StateObjectMetadata
-        Region offsetRegion = new Region(location.getX(), location.getY(), 1, 1);
+        Region offsetRegion = new Region(offsetX, offsetY, 1, 1);
         Match offsetMatch = new Match(offsetRegion);
-        offsetMatch.setTarget(location);
+        // The Match constructor already creates a Location from the region,
+        // so we don't need to set it separately
         
         matches.add(offsetMatch);
     }

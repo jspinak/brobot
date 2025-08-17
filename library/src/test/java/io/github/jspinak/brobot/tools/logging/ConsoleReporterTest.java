@@ -4,6 +4,8 @@ import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
 import io.github.jspinak.brobot.action.basic.click.ClickOptions;
 import io.github.jspinak.brobot.action.basic.mouse.MouseMoveOptions;
+import io.github.jspinak.brobot.action.basic.mouse.MousePressOptions;
+import io.github.jspinak.brobot.model.action.MouseButton;
 import io.github.jspinak.brobot.action.basic.type.TypeOptions;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.match.Match;
@@ -160,7 +162,10 @@ class ConsoleReporterTest {
         when(match.toString()).thenReturn("[100,200,50,30]");
         
         ActionConfig clickConfig = new ClickOptions.Builder()
-            .setClickType(ClickOptions.Type.DOUBLE_LEFT)
+            .setNumberOfClicks(2)
+            .setPressOptions(MousePressOptions.builder()
+                .button(MouseButton.LEFT)
+                .build())
             .build();
         
         ConsoleReporter.outputLevel = ConsoleReporter.OutputLevel.HIGH;
@@ -175,7 +180,6 @@ class ConsoleReporterTest {
     }
     
     @Test
-    @org.junit.jupiter.api.Disabled("Depends on non-existent functionality")
     void testPrint_String() {
         // Test with HIGH level
         ConsoleReporter.outputLevel = ConsoleReporter.OutputLevel.HIGH;
@@ -190,7 +194,6 @@ class ConsoleReporterTest {
     }
     
     @Test
-    @org.junit.jupiter.api.Disabled("Depends on non-existent functionality")
     void testPrint_StringWithLevel() {
         ConsoleReporter.outputLevel = ConsoleReporter.OutputLevel.LOW;
         
@@ -205,7 +208,6 @@ class ConsoleReporterTest {
     }
     
     @Test
-    @org.junit.jupiter.api.Disabled("Depends on non-existent functionality")
     void testPrintln() {
         ConsoleReporter.outputLevel = ConsoleReporter.OutputLevel.HIGH;
         
@@ -220,7 +222,6 @@ class ConsoleReporterTest {
     }
     
     @Test
-    @org.junit.jupiter.api.Disabled("Depends on non-existent functionality")
     void testPrintln_WithLevel() {
         ConsoleReporter.outputLevel = ConsoleReporter.OutputLevel.LOW;
         
