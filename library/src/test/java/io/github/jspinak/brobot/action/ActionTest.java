@@ -132,14 +132,24 @@ class ActionTest {
     void perform_withActionAndRegions_shouldBuildCorrectObjectCollection() {
         Action spyAction = spy(action);
         Region region1 = new Region(10, 10, 10, 10);
-        // Stub the perform(Action, ObjectCollection...) overload
-        doReturn(new ActionResult()).when(spyAction).perform(any(ActionType.class), any(ObjectCollection.class));
+        // Stub the perform(ActionConfig, ObjectCollection) overload since that's what gets called
+        doReturn(new ActionResult()).when(spyAction).perform(any(ActionConfig.class), any(ObjectCollection.class));
 
+        // This calls perform(ActionType, Region) which internally calls perform(ActionConfig, ObjectCollection)
         spyAction.perform(ActionType.CLICK, region1);
 
-        verify(spyAction).perform(eq(ActionType.CLICK), objectCollectionCaptor.capture());
+        // Use ArgumentCaptor to capture both ActionConfig and ObjectCollection
+        ArgumentCaptor<ActionConfig> configCaptor = ArgumentCaptor.forClass(ActionConfig.class);
+        ArgumentCaptor<ObjectCollection> collectionCaptor = ArgumentCaptor.forClass(ObjectCollection.class);
+        verify(spyAction).perform(configCaptor.capture(), collectionCaptor.capture());
 
-        ObjectCollection capturedCollection = objectCollectionCaptor.getValue();
+        // Verify the config is for CLICK action
+        ActionConfig capturedConfig = configCaptor.getValue();
+        assertNotNull(capturedConfig);
+        
+        // Verify the collection contains our region
+        ObjectCollection capturedCollection = collectionCaptor.getValue();
+        assertNotNull(capturedCollection);
         assertFalse(capturedCollection.getStateRegions().isEmpty());
         assertEquals(1, capturedCollection.getStateRegions().size());
         // The region in the collection is a StateRegion, so we check its internal region

@@ -24,7 +24,7 @@ import static org.mockito.Mockito.*;
 public class FindVisualFeedbackTest {
     
     @Mock
-    private FindStrategyRegistryV2 findFunctions;
+    private ModernFindStrategyRegistry findStrategyRegistry;
     
     @Mock
     private HighlightManager highlightManager;
@@ -44,9 +44,9 @@ public class FindVisualFeedbackTest {
         // Create a minimal FindPipeline with mocked dependencies
         findPipeline = new FindPipeline(
             mock(io.github.jspinak.brobot.analysis.color.profiles.ProfileSetBuilder.class),
-            mock(io.github.jspinak.brobot.action.internal.find.OffsetLocationManagerV2.class),
+            mock(io.github.jspinak.brobot.action.internal.find.OffsetMatchCreator.class),
             mock(io.github.jspinak.brobot.analysis.match.MatchFusion.class),
-            mock(io.github.jspinak.brobot.action.internal.find.match.MatchAdjusterV2.class),
+            mock(io.github.jspinak.brobot.action.internal.find.match.MatchRegionAdjuster.class),
             mock(io.github.jspinak.brobot.action.internal.find.match.MatchContentExtractor.class),
             mock(io.github.jspinak.brobot.action.internal.find.NonImageObjectConverter.class),
             mock(io.github.jspinak.brobot.statemanagement.StateMemory.class),
@@ -54,7 +54,7 @@ public class FindVisualFeedbackTest {
             mock(io.github.jspinak.brobot.action.internal.region.DynamicRegionResolver.class),
             highlightManager,
             visualFeedbackConfig,
-            mock(io.github.jspinak.brobot.action.basic.find.FindStrategyRegistryV2.class),
+            findStrategyRegistry,
             mock(io.github.jspinak.brobot.action.internal.utility.ActionSuccessCriteria.class)
         );
         
@@ -65,7 +65,6 @@ public class FindVisualFeedbackTest {
     }
     
     @Test
-    @org.junit.jupiter.api.Disabled("Depends on non-existent functionality")
     public void testHighlightSearchRegionsBeforeFind() {
         // Arrange
         when(visualFeedbackConfig.isEnabled()).thenReturn(true);
@@ -83,22 +82,26 @@ public class FindVisualFeedbackTest {
         ActionResult result = new ActionResult();
         result.setActionConfig(options);
         
-        // Mock the find function
-        when(findFunctions.get(any(BaseFindOptions.class))).thenReturn((matches, collections) -> {
+        // Mock the find strategy
+        doAnswer(invocation -> {
             // Do nothing for this test
-        });
+            return null;
+        }).when(findStrategyRegistry).runFindStrategy(any(), any(), any());
         
         // Act
         findPipeline.execute(options, result, collection);
         
-        // Assert
-        verify(highlightManager).highlightSearchRegions(argThat(regions -> 
-            regions.size() == 1 && regions.get(0).equals(searchRegion)
-        ));
+        // Assert - FindPipeline calls highlightSearchRegionsWithContext instead of highlightSearchRegions
+        verify(highlightManager).highlightSearchRegionsWithContext(argThat(regionsWithContext -> {
+            if (regionsWithContext == null || regionsWithContext.isEmpty()) return false;
+            HighlightManager.RegionWithContext regionWithContext = regionsWithContext.get(0);
+            return regionWithContext != null && 
+                   regionWithContext.getRegion() != null &&
+                   regionWithContext.getRegion().equals(searchRegion);
+        }));
     }
     
     @Test
-    @org.junit.jupiter.api.Disabled("Depends on non-existent functionality")
     public void testHighlightMatchesAfterSuccessfulFind() {
         // Arrange
         when(visualFeedbackConfig.isEnabled()).thenReturn(true);
@@ -116,11 +119,13 @@ public class FindVisualFeedbackTest {
         match.setRegion(new Region(150, 150, 50, 50));
         match.setScore(0.95);
         
-        // Mock the find function to add a match
-        when(findFunctions.get(any(BaseFindOptions.class))).thenReturn((matches, collections) -> {
-            matches.getMatchList().add(match);
-            matches.setSuccess(true);
-        });
+        // Mock the find strategy to add a match
+        doAnswer(invocation -> {
+            ActionResult actionResult = invocation.getArgument(1);
+            actionResult.getMatchList().add(match);
+            actionResult.setSuccess(true);
+            return null;
+        }).when(findStrategyRegistry).runFindStrategy(any(), any(), any());
         
         // Act
         findPipeline.execute(options, result, collection);
@@ -132,7 +137,6 @@ public class FindVisualFeedbackTest {
     }
     
     @Test
-    @org.junit.jupiter.api.Disabled("Depends on non-existent functionality")
     public void testNoHighlightingWhenDisabled() {
         // Arrange
         when(visualFeedbackConfig.isEnabled()).thenReturn(false);
@@ -143,10 +147,11 @@ public class FindVisualFeedbackTest {
         ActionResult result = new ActionResult();
         result.setActionConfig(options);
         
-        // Mock the find function
-        when(findFunctions.get(any(BaseFindOptions.class))).thenReturn((matches, collections) -> {
+        // Mock the find strategy
+        doAnswer(invocation -> {
             // Do nothing
-        });
+            return null;
+        }).when(findStrategyRegistry).runFindStrategy(any(), any(), any());
         
         // Act
         findPipeline.execute(options, result, collection);

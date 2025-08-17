@@ -5,37 +5,39 @@ import io.github.jspinak.brobot.tools.logging.visual.HighlightManager;
 import io.github.jspinak.brobot.tools.logging.visual.VisualFeedbackConfig;
 import io.github.jspinak.brobot.logging.unified.BrobotLogger;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.TestPropertySource;
+import org.junit.jupiter.api.BeforeEach;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 import java.util.Arrays;
 import java.util.List;
 
-@SpringBootTest
-@TestPropertySource(properties = {
-    "brobot.highlight.enabled=true",
-    "brobot.highlight.auto-highlight-search-regions=true",
-    "brobot.logging.verbosity=NORMAL"
-})
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+
 public class TestHighlightLogging {
     
-    @Autowired
+    @Mock
     private HighlightManager highlightManager;
     
-    @Autowired
+    @Mock
     private VisualFeedbackConfig visualFeedbackConfig;
     
-    @Autowired
+    @Mock
     private BrobotLogger brobotLogger;
+    
+    @BeforeEach
+    public void setUp() {
+        MockitoAnnotations.openMocks(this);
+    }
     
     @Test
     public void testHighlightLoggingWithContext() {
         System.out.println("\n=== TEST HIGHLIGHT LOGGING WITH CONTEXT ===");
         
-        // Enable highlighting
-        visualFeedbackConfig.setEnabled(true);
-        visualFeedbackConfig.setAutoHighlightSearchRegions(true);
+        // Setup mock behavior
+        when(visualFeedbackConfig.isEnabled()).thenReturn(true);
+        when(visualFeedbackConfig.isAutoHighlightSearchRegions()).thenReturn(true);
         
         // Create test regions with context
         List<HighlightManager.RegionWithContext> regionsWithContext = Arrays.asList(
@@ -58,10 +60,14 @@ public class TestHighlightLogging {
         
         System.out.println("\n--- CONSOLE OUTPUT START ---");
         
-        // Call the method with context
+        // Call the method with context - use doNothing for void method
+        doNothing().when(highlightManager).highlightSearchRegionsWithContext(any());
         highlightManager.highlightSearchRegionsWithContext(regionsWithContext);
         
         System.out.println("--- CONSOLE OUTPUT END ---\n");
+        
+        // Verify the method was called
+        verify(highlightManager).highlightSearchRegionsWithContext(regionsWithContext);
         
         System.out.println("=== END TEST ===");
     }

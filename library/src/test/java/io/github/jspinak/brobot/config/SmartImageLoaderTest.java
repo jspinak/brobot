@@ -117,9 +117,10 @@ public class SmartImageLoaderTest {
         assertEquals(100, placeholder.getHeight());
         
         // Verify it's a placeholder pattern
-        int color1 = placeholder.getRGB(0, 0);
-        int color2 = placeholder.getRGB(10, 10);
-        assertNotEquals(color1, color2); // Should have pattern
+        // Check pixels that are in different pattern zones
+        int color1 = placeholder.getRGB(0, 0);    // (0+0) % 20 = 0 < 10 -> light
+        int color2 = placeholder.getRGB(15, 0);   // (15+0) % 20 = 15 >= 10 -> dark
+        assertNotEquals(color1, color2); // Should have different colors in pattern
     }
     
     @Test
@@ -190,7 +191,8 @@ public class SmartImageLoaderTest {
         org.sikuli.script.Image sikuliImage = imageLoader.loadSikuliImage(imagePath.toString());
         
         assertNotNull(sikuliImage);
-        assertEquals(imagePath.toString(), sikuliImage.getName());
+        // SikuliX Image prepends "__BufferedImage__" when created from BufferedImage
+        assertTrue(sikuliImage.getName().contains(imagePath.toString()));
         assertNotNull(sikuliImage.get()); // BufferedImage inside
     }
     

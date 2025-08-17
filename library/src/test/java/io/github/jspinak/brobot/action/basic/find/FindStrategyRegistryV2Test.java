@@ -23,7 +23,7 @@ import static org.mockito.Mockito.*;
  */
 class FindStrategyRegistryV2Test {
     
-    private FindStrategyRegistryV2 registry;
+    private ModernFindStrategyRegistry registry;
     
     @Mock
     private FindHistogram findHistogram;
@@ -38,7 +38,7 @@ class FindStrategyRegistryV2Test {
     private FindRegionsOfMotion findRegionsOfMotion;
     
     @Mock
-    private FindImageV2 findImageV2;
+    private ImageFinder findImageV2;
     
     @Mock
     private FindText findText;
@@ -56,7 +56,7 @@ class FindStrategyRegistryV2Test {
     void setUp() {
         MockitoAnnotations.openMocks(this);
         // Create registry with all 9 components
-        registry = new FindStrategyRegistryV2(
+        registry = new ModernFindStrategyRegistry(
             findHistogram, findColor, findMotion, findRegionsOfMotion,
             findImageV2, findText, findSimilarImages,
             findFixedPixelMatches, findDynamicPixelMatches

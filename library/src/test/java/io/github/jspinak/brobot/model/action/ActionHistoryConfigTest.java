@@ -1,10 +1,11 @@
 package io.github.jspinak.brobot.model.action;
 
 import io.github.jspinak.brobot.action.ActionConfig;
-import io.github.jspinak.brobot.action.ActionType;
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
 import io.github.jspinak.brobot.action.basic.click.ClickOptions;
 import io.github.jspinak.brobot.action.basic.vanish.VanishOptions;
+import io.github.jspinak.brobot.action.basic.mouse.MousePressOptions;
+import io.github.jspinak.brobot.model.action.MouseButton;
 import io.github.jspinak.brobot.model.match.Match;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,7 +37,10 @@ class ActionHistoryConfigTest {
                 .build();
                 
         clickConfig = new ClickOptions.Builder()
-                .setClickType(ClickOptions.Type.LEFT)
+                .setNumberOfClicks(1)
+                .setPressOptions(MousePressOptions.builder()
+                    .button(MouseButton.LEFT)
+                    .build())
                 .build();
                 
         vanishConfig = new VanishOptions.Builder()
@@ -159,9 +163,8 @@ class ActionHistoryConfigTest {
         Optional<ActionRecord> result = history.getRandomSnapshot(findConfig);
         assertThat(result).isPresent();
         
-        // Also accessible via deprecated ActionType methods
-        Optional<ActionRecord> legacyResult = history.getRandomSnapshot(ActionType.FIND);
-        assertThat(legacyResult).isPresent();
+        // Verify we got the correct record
+        assertThat(result.get()).isEqualTo(modernRecord);
         
         assertThat(history.getTimesSearched()).isEqualTo(1);
         assertThat(history.getTimesFound()).isEqualTo(1);

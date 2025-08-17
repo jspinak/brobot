@@ -63,7 +63,6 @@ class BaseAutomationTest {
         automationWithMockController.start();
         
         verify(mockExecutionController).start();
-        assertTrue(automationWithMockController.running); // Check backward compatibility
     }
     
     @Test
@@ -85,7 +84,6 @@ class BaseAutomationTest {
         automationWithMockController.stop();
         
         verify(mockExecutionController).stop();
-        assertFalse(automationWithMockController.running); // Check backward compatibility
     }
     
     @Test
@@ -150,27 +148,26 @@ class BaseAutomationTest {
         automationWithMockController.reset();
         
         verify(mockExecutionController).reset();
-        assertFalse(automationWithMockController.running); // Check backward compatibility
     }
     
     @Test
-    void testBackwardCompatibilityRunningFlag() throws Exception {
-        // Test that the deprecated running flag still works
-        assertFalse(automation.running);
+    void testExecutionStateTransitions() throws Exception {
+        // Test that execution state transitions work correctly
+        assertFalse(automation.isRunning());
         
         automation.start();
-        assertTrue(automation.running);
+        assertTrue(automation.isRunning());
         
         automation.stop();
         Thread.sleep(100); // Give time for state transition
-        assertFalse(automation.running);
+        assertFalse(automation.isRunning());
         
         automation.reset(); // Reset to IDLE before starting again
         automation.start();
-        assertTrue(automation.running);
+        assertTrue(automation.isRunning());
         
         automation.reset();
-        assertFalse(automation.running);
+        assertFalse(automation.isRunning());
     }
     
     @Test
@@ -182,7 +179,6 @@ class BaseAutomationTest {
         automation.start();
         assertEquals(ExecutionState.RUNNING, automation.getState());
         assertTrue(automation.isRunning());
-        assertTrue(automation.running); // backward compatibility
         
         automation.pause();
         assertEquals(ExecutionState.PAUSED, automation.getState());
@@ -195,7 +191,6 @@ class BaseAutomationTest {
         
         automation.stop();
         assertTrue(automation.isStopped());
-        assertFalse(automation.running); // backward compatibility
         
         automation.reset();
         assertEquals(ExecutionState.IDLE, automation.getState());

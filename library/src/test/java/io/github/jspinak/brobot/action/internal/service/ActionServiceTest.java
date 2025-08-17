@@ -120,15 +120,31 @@ class ActionServiceTest {
 
     @Test
     void getAction_whenActionNotFound_shouldReturnEmpty() {
-        // Use a mocked ActionConfig that won't be recognized
-        ActionConfig unknownConfig = mock(ActionConfig.class);
-        when(unknownConfig.getClass()).thenReturn((Class) ActionConfig.class);
-        when(unknownConfig.toString()).thenReturn("UnknownConfig");
+        // Create a test ActionConfig that won't be recognized
+        TestActionConfig unknownConfig = new TestActionConfig.Builder().build();
         
         // ActionService will return empty for unrecognized configs
         Optional<ActionInterface> result = actionService.getAction(unknownConfig);
 
         assertFalse(result.isPresent());
+    }
+    
+    // Test implementation of ActionConfig for testing unknown config types
+    private static class TestActionConfig extends ActionConfig {
+        public TestActionConfig(ActionConfig.Builder<?> builder) {
+            super(builder);
+        }
+        
+        public static class Builder extends ActionConfig.Builder<Builder> {
+            @Override
+            protected Builder self() {
+                return this;
+            }
+            
+            public TestActionConfig build() {
+                return new TestActionConfig(this);
+            }
+        }
     }
 
     @Test
