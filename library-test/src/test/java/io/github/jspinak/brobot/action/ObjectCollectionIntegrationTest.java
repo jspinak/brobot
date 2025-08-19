@@ -5,17 +5,39 @@ import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.state.State;
 import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.action.ObjectCollection;
+import io.github.jspinak.brobot.test.TestEnvironmentInitializer;
+import io.github.jspinak.brobot.test.mock.MockGuiAccessConfig;
+import io.github.jspinak.brobot.test.mock.MockGuiAccessMonitor;
+import io.github.jspinak.brobot.test.mock.MockScreenConfig;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.ContextConfiguration;
 
 import java.awt.image.BufferedImage;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-@SpringBootTest(classes = io.github.jspinak.brobot.BrobotTestApplication.class)
-@org.springframework.test.context.TestPropertySource(properties = {"java.awt.headless=false", "brobot.mock.enabled=true"})
+@SpringBootTest(classes = io.github.jspinak.brobot.BrobotTestApplication.class,
+    properties = {
+        "brobot.gui-access.continue-on-error=true",
+        "brobot.gui-access.check-on-startup=false",
+        "java.awt.headless=true",
+        "spring.main.allow-bean-definition-overriding=true",
+        "brobot.test.type=unit",
+        "brobot.capture.physical-resolution=false",
+        "brobot.mock.enabled=true"
+    })
+@Import({MockGuiAccessConfig.class, MockGuiAccessMonitor.class, MockScreenConfig.class})
+@ContextConfiguration(initializers = TestEnvironmentInitializer.class)
 public class ObjectCollectionIntegrationTest {
+    
+    @BeforeAll
+    static void setupHeadlessMode() {
+        System.setProperty("java.awt.headless", "true");
+    }
 
     private Pattern createTestPattern(String name) {
         BufferedImage dummyImage = new BufferedImage(10, 10, BufferedImage.TYPE_INT_RGB);

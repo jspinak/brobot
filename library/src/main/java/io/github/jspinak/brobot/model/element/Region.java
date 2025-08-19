@@ -167,7 +167,14 @@ public class Region implements Comparable<Region> {
             // Return null when SikuliX operations should be skipped
             return null;
         }
-        return new org.sikuli.script.Region(x, y, w, h);
+        
+        try {
+            return new org.sikuli.script.Region(x, y, w, h);
+        } catch (org.sikuli.script.SikuliXception e) {
+            // Handle headless environment gracefully
+            // This happens when tests run in CI/CD without display
+            return null;
+        }
     }
 
     public int x() {

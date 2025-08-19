@@ -7,16 +7,27 @@ import io.github.jspinak.brobot.runner.json.parsing.exception.ConfigurationExcep
 import io.github.jspinak.brobot.runner.json.utils.JsonUtils;
 import io.github.jspinak.brobot.runner.project.TaskButton;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.ContextConfiguration;
+import io.github.jspinak.brobot.test.TestEnvironmentInitializer;
+import io.github.jspinak.brobot.test.mock.MockGuiAccessConfig;
+import io.github.jspinak.brobot.test.mock.MockGuiAccessMonitor;
+import io.github.jspinak.brobot.test.mock.MockScreenConfig;
 import org.springframework.test.context.TestPropertySource;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
-@TestPropertySource(properties = {"java.awt.headless=false"})
 public class TaskButtonJsonParserTest {
+    
+    @BeforeAll
+    static void setupHeadlessMode() {
+        System.setProperty("java.awt.headless", "true");
+    }
 
     @Autowired
     private ConfigurationParser jsonParser;

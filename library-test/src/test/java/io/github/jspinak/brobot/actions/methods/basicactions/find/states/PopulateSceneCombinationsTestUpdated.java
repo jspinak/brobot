@@ -20,6 +20,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledIfSystemProperty;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.ContextConfiguration;
+import io.github.jspinak.brobot.test.TestEnvironmentInitializer;
+import io.github.jspinak.brobot.test.mock.MockGuiAccessConfig;
+import io.github.jspinak.brobot.test.mock.MockGuiAccessMonitor;
+import io.github.jspinak.brobot.test.mock.MockScreenConfig;
 
 import java.util.List;
 
@@ -27,11 +33,11 @@ import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Updated tests for scene combinations using new ActionConfig API.
- * Demonstrates migration from Object// ActionOptions.Action.FIND with Find.STATES
+ * Demonstrates migration from ObjectActionOptions.Action.FIND with Find.STATES
  * to using PatternFindOptions with state analysis.
  * 
  * Key changes:
- * - Uses PatternFindOptions instead of generic Object// ActionOptions
+ * - Uses PatternFindOptions instead of generic ObjectActionOptions
  * - ActionResult requires setActionConfig() before perform()
  * - Uses ActionService to get the appropriate action
  * - State finding is now handled through specific configurations
@@ -40,7 +46,18 @@ import static org.junit.jupiter.api.Assertions.*;
  * Since there's no specific StatesFindOptions class, we use PatternFindOptions
  * with appropriate settings for state detection.
  */
-@SpringBootTest(classes = BrobotTestApplication.class)
+@SpringBootTest(classes = io.github.jspinak.brobot.BrobotTestApplication.class,
+    properties = {
+        "brobot.gui-access.continue-on-error=true",
+        "brobot.gui-access.check-on-startup=false",
+        "java.awt.headless=true",
+        "spring.main.allow-bean-definition-overriding=true",
+        "brobot.test.type=unit",
+        "brobot.capture.physical-resolution=false",
+        "brobot.mock.enabled=true"
+    })
+@Import({MockGuiAccessConfig.class, MockGuiAccessMonitor.class, MockScreenConfig.class})
+@ContextConfiguration(initializers = TestEnvironmentInitializer.class)
 @DisabledIfSystemProperty(named = "brobot.tests.ocr.disable", matches = "true")
 class PopulateSceneCombinationsTestUpdated extends BrobotIntegrationTestBase {
 
@@ -230,9 +247,9 @@ class PopulateSceneCombinationsTestUpdated extends BrobotIntegrationTestBase {
         
         // OLD API (commented out):
         /*
-        Object// ActionOptions oldOptions = new ActionOptions.Builder()
-                .setAction(Object// ActionOptions.Action.FIND)
-                .setFind(Object// ActionOptions.Find.STATES)
+        ObjectActionOptions oldOptions = new ActionOptions.Builder()
+                .setAction(ObjectActionOptions.Action.FIND)
+                .setFind(ObjectActionOptions.Find.STATES)
                 .setMinArea(25)
                 .build();
         // Used with populateSceneCombinations

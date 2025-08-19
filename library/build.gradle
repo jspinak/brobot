@@ -67,6 +67,13 @@ test {
     // JVM settings for OpenCV/JavaCV on Linux
     jvmArgs '-Djava.library.path=/usr/lib:/usr/local/lib'
     jvmArgs '-Dorg.bytedeco.javacpp.logger.debug=true'
+    
+    // Enable JaCoCo coverage
+    jacoco {
+        enabled = true
+        destinationFile = file("$buildDir/jacoco/test.exec")
+        classDumpDir = file("$buildDir/jacoco/classpathdumps")
+    }
     // Don't force headless mode - let the ExecutionEnvironment handle this
     // systemProperty 'java.awt.headless', 'true'
     

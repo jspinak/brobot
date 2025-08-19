@@ -311,4 +311,4 @@ if (tracker.isStateActive("ErrorDialog")) {
 
 - [ActionResult Architecture](../architecture/actionresult-architecture.md) - Complete architectural documentation
 - [ActionResult Migration Guide](../migration/actionresult-refactoring.md) - Migration from v1.x to v2.0
-- [ActionConfig API](./01-actionconfig-api.md) - Action configuration documentation
+- [ActionConfig Overview](./01-overview.md) - Action configuration documentation

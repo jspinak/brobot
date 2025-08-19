@@ -2,7 +2,7 @@ package io.github.jspinak.brobot.persistence.provider;
 
 import io.github.jspinak.brobot.model.action.ActionHistory;
 import io.github.jspinak.brobot.model.action.ActionRecord;
-import io.github.jspinak.brobot.model.state.stateObject.StateObject;
+import io.github.jspinak.brobot.model.state.StateObject;
 import io.github.jspinak.brobot.persistence.config.PersistenceConfiguration;
 import lombok.extern.slf4j.Slf4j;
 

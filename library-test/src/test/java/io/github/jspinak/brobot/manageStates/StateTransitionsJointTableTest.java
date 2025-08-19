@@ -2,11 +2,18 @@ package io.github.jspinak.brobot.manageStates;
 
 import io.github.jspinak.brobot.model.state.State;
 import io.github.jspinak.brobot.model.transition.StateTransitionStore;
+import io.github.jspinak.brobot.navigation.service.StateService;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.ContextConfiguration;
+import io.github.jspinak.brobot.test.TestEnvironmentInitializer;
+import io.github.jspinak.brobot.test.mock.MockGuiAccessConfig;
+import io.github.jspinak.brobot.test.mock.MockGuiAccessMonitor;
+import io.github.jspinak.brobot.test.mock.MockScreenConfig;
 import io.github.jspinak.brobot.navigation.transition.StateTransitionsJointTable;
 import io.github.jspinak.brobot.navigation.transition.StateTransitions;
 import io.github.jspinak.brobot.navigation.transition.TaskSequenceStateTransition;
@@ -24,17 +31,20 @@ public class StateTransitionsJointTableTest {
     @Autowired
     private StateTransitionStore stateTransitionsRepository;
 
+    @Autowired
+    private StateService stateService;
+
     private StateTransitionsJointTable table;
 
     @BeforeEach
     void setUp() {
         stateTransitionsJointTable.emptyRepos();
-        table = new StateTransitionsJointTable();
+        table = new StateTransitionsJointTable(stateService);
     }
 
     @BeforeAll
     public static void setupHeadlessMode() {
-        System.setProperty("java.awt.headless", "false");
+        System.setProperty("java.awt.headless", "true");
     }
 
     @Test

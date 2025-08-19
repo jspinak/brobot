@@ -139,7 +139,7 @@ public class LocationUtils {
      * Check if location is defined
      */
     public static boolean isDefined(Location location) {
-        return !isDefinedByXY(location) || location.getCalculatedX() > 0 || location.getCalculatedY() > 0;
+        return !isDefinedByXY(location) || location.getCalculatedX() >= 0 || location.getCalculatedY() >= 0;
     }
 
     /**

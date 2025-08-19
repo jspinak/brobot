@@ -1,5 +1,8 @@
 package io.github.jspinak.brobot.action.basic.find;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import io.github.jspinak.brobot.model.element.Location;
 import io.github.jspinak.brobot.model.element.Position;
 import lombok.Builder;
@@ -15,7 +18,9 @@ import lombok.Getter;
  * It is an immutable object designed to be composed within other {@code Options} classes.
  */
 @Getter
-@Builder(toBuilder = true)
+@Builder(toBuilder = true, builderClassName = "Builder", builderMethodName = "builder", buildMethodName = "build")
+@JsonDeserialize(builder = MatchAdjustmentOptions.Builder.class)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public final class MatchAdjustmentOptions {
 
     /**
@@ -67,4 +72,14 @@ public final class MatchAdjustmentOptions {
      */
     @Builder.Default
     private final int addY = 0;
+
+    /**
+     * Builder class for MatchAdjustmentOptions.
+     * Annotated for Jackson deserialization support.
+     */
+    @JsonPOJOBuilder(withPrefix = "")
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class Builder {
+        // Lombok generates the implementation
+    }
 }

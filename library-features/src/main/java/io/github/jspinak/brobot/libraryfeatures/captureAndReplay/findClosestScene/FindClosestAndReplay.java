@@ -1,4 +1,4 @@
-package package io.github.jspinak.brobot.libraryfeatures.captureAndReplay.findClosestScene;
+package io.github.jspinak.brobot.libraryfeatures.captureAndReplay.findClosestScene;
 
 /**
  * This class has been disabled because it depends on ActionOptions

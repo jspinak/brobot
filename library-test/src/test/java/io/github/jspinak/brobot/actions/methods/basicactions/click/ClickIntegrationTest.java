@@ -18,6 +18,12 @@ import org.junit.jupiter.api.*;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.ContextConfiguration;
+import io.github.jspinak.brobot.test.TestEnvironmentInitializer;
+import io.github.jspinak.brobot.test.mock.MockGuiAccessConfig;
+import io.github.jspinak.brobot.test.mock.MockGuiAccessMonitor;
+import io.github.jspinak.brobot.test.mock.MockScreenConfig;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.test.context.TestPropertySource;
 
@@ -26,13 +32,18 @@ import java.util.List;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-@SpringBootTest(classes = BrobotTestApplication.class)
-@TestPropertySource(properties = {
-    "spring.main.lazy-initialization=true",
-    "brobot.mock.enabled=true",
-    "brobot.illustration.disabled=true",
-    "brobot.scene.analysis.disabled=true"
-})
+@SpringBootTest(classes = io.github.jspinak.brobot.BrobotTestApplication.class,
+    properties = {
+        "brobot.gui-access.continue-on-error=true",
+        "brobot.gui-access.check-on-startup=false",
+        "java.awt.headless=true",
+        "spring.main.allow-bean-definition-overriding=true",
+        "brobot.test.type=unit",
+        "brobot.capture.physical-resolution=false",
+        "brobot.mock.enabled=true"
+    })
+@Import({MockGuiAccessConfig.class, MockGuiAccessMonitor.class, MockScreenConfig.class})
+@ContextConfiguration(initializers = TestEnvironmentInitializer.class)
 class ClickIntegrationTest {
 
     @Autowired
@@ -54,7 +65,7 @@ class ClickIntegrationTest {
 
     @BeforeAll
     public static void setup() {
-        System.setProperty("java.awt.headless", "false");
+        System.setProperty("java.awt.headless", "true");
     }
 
     @BeforeEach

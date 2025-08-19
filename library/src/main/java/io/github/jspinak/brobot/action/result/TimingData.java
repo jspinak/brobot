@@ -127,7 +127,11 @@ public class TimingData {
      */
     public void merge(TimingData other) {
         if (other != null) {
-            totalDuration = totalDuration.plus(other.getElapsed());
+            // Use totalDuration directly if it has been set, otherwise use elapsed
+            Duration otherDuration = other.totalDuration != null && !other.totalDuration.isZero() 
+                ? other.totalDuration 
+                : other.getElapsed();
+            totalDuration = totalDuration.plus(otherDuration);
             segments.addAll(other.segments);
         }
     }
@@ -178,7 +182,9 @@ public class TimingData {
      */
     public String format() {
         StringBuilder sb = new StringBuilder();
-        sb.append("Duration: ").append(formatDuration(getElapsed()));
+        // Use totalDuration directly if it has been set, otherwise calculate elapsed
+        Duration duration = totalDuration != null && !totalDuration.isZero() ? totalDuration : getElapsed();
+        sb.append("Duration: ").append(formatDuration(duration));
         
         if (!segments.isEmpty()) {
             sb.append(" (");

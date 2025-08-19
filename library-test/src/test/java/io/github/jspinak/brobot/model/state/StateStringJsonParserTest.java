@@ -7,16 +7,27 @@ import io.github.jspinak.brobot.runner.json.parsing.exception.ConfigurationExcep
 import io.github.jspinak.brobot.runner.json.utils.JsonUtils;
 import io.github.jspinak.brobot.model.state.StateString;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.ContextConfiguration;
+import io.github.jspinak.brobot.test.TestEnvironmentInitializer;
+import io.github.jspinak.brobot.test.mock.MockGuiAccessConfig;
+import io.github.jspinak.brobot.test.mock.MockGuiAccessMonitor;
+import io.github.jspinak.brobot.test.mock.MockScreenConfig;
 import org.springframework.test.context.TestPropertySource;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
-@TestPropertySource(properties = {"java.awt.headless=false"})
 public class StateStringJsonParserTest {
+    
+    @BeforeAll
+    static void setupHeadlessMode() {
+        System.setProperty("java.awt.headless", "true");
+    }
 
     @Autowired
     private ConfigurationParser jsonParser;
@@ -33,7 +44,8 @@ public class StateStringJsonParserTest {
         StateString stateString = new StateString.Builder()
                 .setName("TestString")
                 .setOwnerStateName("TestState")
-                .build("Hello World");
+                .setString("Hello World")
+                .build();
 
         // Serialize to JSON
         String json = jsonUtils.toJsonSafe(stateString);
@@ -69,7 +81,8 @@ public class StateStringJsonParserTest {
                 .setName("RegionString")
                 .setOwnerStateName("RegionState")
                 .setSearchRegion(searchRegion)
-                .build("Search Region String");
+                .setString("Search Region String")
+                .build();
 
         // Verify search region was set
         assertNotNull(stateString.getSearchRegion());
@@ -109,7 +122,8 @@ public class StateStringJsonParserTest {
         // Create a StateString with a string value
         StateString definedString = new StateString.Builder()
                 .setName("DefinedString")
-                .build("Defined");
+                .setString("Defined")
+                .build();
 
         // Test defined method
         assertTrue(definedString.defined());
@@ -155,7 +169,8 @@ public class StateStringJsonParserTest {
         StateString stateString = new StateString.Builder()
                 .setName("IdString")
                 .setSearchRegion(new Region(10, 20, 30, 40))
-                .build("ID Test");
+                .setString("ID Test")
+                .build();
 
         // Get ID
         String id = stateString.getId();
@@ -169,7 +184,8 @@ public class StateStringJsonParserTest {
         StateString identicalString = new StateString.Builder()
                 .setName("IdString")
                 .setSearchRegion(new Region(10, 20, 30, 40))
-                .build("ID Test");
+                .setString("ID Test")
+                .build();
 
         // Verify IDs are equal
         assertEquals(id, identicalString.getId());
@@ -177,7 +193,8 @@ public class StateStringJsonParserTest {
         // Create a StateString with different properties
         StateString differentString = new StateString.Builder()
                 .setName("DifferentName")
-                .build("Different Text");
+                .setString("Different Text")
+                .build();
 
         // Verify IDs are different
         assertNotEquals(id, differentString.getId());
@@ -191,7 +208,8 @@ public class StateStringJsonParserTest {
         // Create a StateString
         StateString stateString = new StateString.Builder()
                 .setName("ActionString")
-                .build("Action Test");
+                .setString("Action Test")
+                .build();
 
         // Initial value should be 0
         assertEquals(0, stateString.getTimesActedOn());

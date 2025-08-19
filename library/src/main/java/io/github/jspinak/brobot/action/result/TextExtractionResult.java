@@ -46,7 +46,7 @@ public class TextExtractionResult {
      * @param text The extracted text
      */
     public void addMatchText(Match match, String text) {
-        if (match != null && text != null) {
+        if (match != null && text != null && !text.isEmpty()) {
             matchTextMap.put(match, text);
             addText(text);
         }
