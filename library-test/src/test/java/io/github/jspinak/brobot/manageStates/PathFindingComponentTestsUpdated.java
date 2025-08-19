@@ -22,6 +22,12 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.ContextConfiguration;
+import io.github.jspinak.brobot.test.TestEnvironmentInitializer;
+import io.github.jspinak.brobot.test.mock.MockGuiAccessConfig;
+import io.github.jspinak.brobot.test.mock.MockGuiAccessMonitor;
+import io.github.jspinak.brobot.test.mock.MockScreenConfig;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -61,7 +67,7 @@ public class PathFindingComponentTestsUpdated {
 
     @BeforeAll
     public static void setupHeadlessMode() {
-        System.setProperty("java.awt.headless", "false");
+        System.setProperty("java.awt.headless", "true");
     }
 
     @Test
@@ -171,7 +177,7 @@ public class PathFindingComponentTestsUpdated {
         
         // NEW API: Use ClickOptions
         ClickOptions clickOptions = new ClickOptions.Builder()
-                .setClickType(ClickOptions.Type.LEFT)
+                // .setClickType(ClickOptions.Type.LEFT) // ClickOptions.Type enum removed
                 .setNumberOfClicks(1)
                 .build();
                 
@@ -210,7 +216,7 @@ public class PathFindingComponentTestsUpdated {
         
         // Step 2: Click on the found match
         ClickOptions clickOptions = new ClickOptions.Builder()
-                .setClickType(ClickOptions.Type.LEFT)
+                // .setClickType(ClickOptions.Type.LEFT) // ClickOptions.Type enum removed
                 .setPauseAfterEnd(1.0)
                 .build();
                 
@@ -236,7 +242,7 @@ public class PathFindingComponentTestsUpdated {
         
         // NEW API: Use ClickOptions with DOUBLE type
         ClickOptions doubleClickOptions = new ClickOptions.Builder()
-                .setClickType(ClickOptions.Type.DOUBLE_LEFT)
+                // .setClickType(ClickOptions.Type.DOUBLE_LEFT) // ClickOptions.Type enum removed
                 .setNumberOfClicks(2)
                 .setPauseAfterEnd(0.5)
                 .build();

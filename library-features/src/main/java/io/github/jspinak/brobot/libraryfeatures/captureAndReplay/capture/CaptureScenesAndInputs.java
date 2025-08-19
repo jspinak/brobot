@@ -1,4 +1,4 @@
-package package io.github.jspinak.brobot.libraryfeatures.captureAndReplay.capture;
+package io.github.jspinak.brobot.libraryfeatures.captureAndReplay.capture;
 
 /**
  * This class has been disabled because it depends on ActionOptions

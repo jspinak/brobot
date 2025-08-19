@@ -15,6 +15,12 @@ import io.github.jspinak.brobot.config.ExecutionEnvironment;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.ContextConfiguration;
+import io.github.jspinak.brobot.test.TestEnvironmentInitializer;
+import io.github.jspinak.brobot.test.mock.MockGuiAccessConfig;
+import io.github.jspinak.brobot.test.mock.MockGuiAccessMonitor;
+import io.github.jspinak.brobot.test.mock.MockScreenConfig;
 import org.springframework.test.context.TestPropertySource;
 import io.github.jspinak.brobot.BrobotTestApplication;
 
@@ -26,13 +32,18 @@ import static org.junit.jupiter.api.Assertions.*;
  * Integration test demonstrating Brobot mocking functionality.
  * Shows how Brobot mocking differs from standard test mocking.
  */
-@SpringBootTest(classes = BrobotTestApplication.class)
-@TestPropertySource(properties = {
-    "spring.main.lazy-initialization=true",
-    "brobot.mock.enabled=true",
-    "brobot.illustration.disabled=true",
-    "brobot.scene.analysis.disabled=true"
-})
+@SpringBootTest(classes = io.github.jspinak.brobot.BrobotTestApplication.class,
+    properties = {
+        "brobot.gui-access.continue-on-error=true",
+        "brobot.gui-access.check-on-startup=false",
+        "java.awt.headless=true",
+        "spring.main.allow-bean-definition-overriding=true",
+        "brobot.test.type=unit",
+        "brobot.capture.physical-resolution=false",
+        "brobot.mock.enabled=true"
+    })
+@Import({MockGuiAccessConfig.class, MockGuiAccessMonitor.class, MockScreenConfig.class})
+@ContextConfiguration(initializers = TestEnvironmentInitializer.class)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class BrobotMockingIntegrationTest {
 

@@ -59,7 +59,7 @@ public class StateTracker {
     public void processMatch(Match match) {
         if (match != null && match.getStateObjectData() != null) {
             String stateName = match.getStateObjectData().getOwnerStateName();
-            if (stateName != null) {
+            if (stateName != null && !stateName.isEmpty()) {
                 recordStateMatch(stateName, match);
             }
         }

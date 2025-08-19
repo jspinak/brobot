@@ -14,9 +14,16 @@ import io.github.jspinak.brobot.runner.json.utils.JsonUtils;
 import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.model.state.State;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.ContextConfiguration;
+import io.github.jspinak.brobot.test.TestEnvironmentInitializer;
+import io.github.jspinak.brobot.test.mock.MockGuiAccessConfig;
+import io.github.jspinak.brobot.test.mock.MockGuiAccessMonitor;
+import io.github.jspinak.brobot.test.mock.MockScreenConfig;
 import io.github.jspinak.brobot.test.BrobotIntegrationTestBase;
 
 import java.io.IOException;
@@ -31,6 +38,11 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 @SpringBootTest
 public class StateCustomSerializerTest extends BrobotIntegrationTestBase {
+    
+    @BeforeAll
+    static void setupHeadlessMode() {
+        System.setProperty("java.awt.headless", "true");
+    }
 
     @Autowired
     private ConfigurationParser jsonParser;
@@ -183,7 +195,8 @@ public class StateCustomSerializerTest extends BrobotIntegrationTestBase {
         // Add a state string
         StateString string = new StateString.Builder()
                 .setName("CustomString")
-                .build("Custom Text Value");
+                .setString("Custom Text Value")
+                .build();
         state.addStateString(string);
 
         // Create custom ObjectMapper with our serializer

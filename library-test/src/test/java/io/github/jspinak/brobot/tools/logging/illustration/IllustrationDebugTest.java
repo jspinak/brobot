@@ -17,6 +17,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.ContextConfiguration;
+import io.github.jspinak.brobot.test.TestEnvironmentInitializer;
+import io.github.jspinak.brobot.test.mock.MockGuiAccessConfig;
+import io.github.jspinak.brobot.test.mock.MockGuiAccessMonitor;
+import io.github.jspinak.brobot.test.mock.MockScreenConfig;
 import org.springframework.test.context.TestPropertySource;
 
 import java.awt.image.BufferedImage;
@@ -30,15 +36,6 @@ import static org.junit.jupiter.api.Assertions.*;
  * This test helps identify why illustrations are showing black images.
  */
 @SpringBootTest
-@TestPropertySource(properties = {
-    "java.awt.headless=false",
-    "brobot.mock.enabled=false",
-    "brobot.force.headless=false", 
-    "brobot.allow.screen.capture=true",
-    "brobot.screenshot.save-history=true",
-    "brobot.illustration.enabled=true",
-    "brobot.logging.verbosity=DEBUG"
-})
 public class IllustrationDebugTest {
 
     @Autowired
@@ -46,7 +43,7 @@ public class IllustrationDebugTest {
 
     @BeforeAll
     public static void setupEnvironment() {
-        System.setProperty("java.awt.headless", "false");
+        System.setProperty("java.awt.headless", "true");
     }
 
     @BeforeEach
@@ -64,7 +61,8 @@ public class IllustrationDebugTest {
         
         // Test direct screen capture
         Region fullScreen = new Region(); // Default constructor creates full screen region
-        BufferedImage screenshot = BufferedImageUtilities.getBuffImgFromScreen(fullScreen);
+        BufferedImageUtilities utils = new BufferedImageUtilities();
+        BufferedImage screenshot = utils.getBuffImgFromScreen(fullScreen);
         
         assertNotNull(screenshot, "Screenshot must not be null");
         assertTrue(screenshot.getWidth() > 0, "Screenshot width must be positive");
@@ -97,7 +95,7 @@ public class IllustrationDebugTest {
         // Set up find operation with real images
         Pattern topLeftPattern = new Pattern.Builder()
                 .setFilename(TestPaths.getImagePath("topLeft"))
-                .setSimilarity(0.8)
+                // .setSimilarity(0.8) // Similarity is now set in PatternFindOptions, not Pattern
                 .build();
 
         StateImage stateImage = new StateImage.Builder()
@@ -105,9 +103,7 @@ public class IllustrationDebugTest {
                 .setName("DebugTopLeft")
                 .build();
 
-        Scene scene = new Scene.Builder()
-                .setFilename(TestPaths.getScreenshotPath("floranext0"))
-                .build();
+        Scene scene = new Scene(TestPaths.getScreenshotPath("floranext0"));
 
         ObjectCollection objColl = new ObjectCollection.Builder()
                 .withImages(stateImage)

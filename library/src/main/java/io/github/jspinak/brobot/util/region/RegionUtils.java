@@ -211,8 +211,13 @@ public class RegionUtils {
     // Grid & Raster Functions
     public static Optional<Integer> getGridNumber(Region region, Location location) {
         if (!contains(region, location)) return Optional.empty();
-        if (!region.sikuli().isRasterValid()) return Optional.of(-1);
-        Region firstCell = new Region(region.sikuli().getCell(0, 0));
+        org.sikuli.script.Region sikuliRegion = region.sikuli();
+        if (sikuliRegion == null) {
+            // In headless mode, we can't get grid number without raster info
+            return Optional.empty();
+        }
+        if (!sikuliRegion.isRasterValid()) return Optional.of(-1);
+        Region firstCell = new Region(sikuliRegion.getCell(0, 0));
         int row = gridNumber(firstCell.getH(), firstCell.getY(), location.getCalculatedY());
         int col = gridNumber(firstCell.getW(), firstCell.getX(), location.getCalculatedX());
         return Optional.of(toGridNumber(region, row, col));
@@ -220,8 +225,13 @@ public class RegionUtils {
 
     public static Optional<Integer> getGridNumber(Region region, org.sikuli.script.Location location) {
         if (!region.contains(location)) return Optional.empty();
-        if (!region.sikuli().isRasterValid()) return Optional.of(-1);
-        Region firstCell = new Region(region.sikuli().getCell(0, 0));
+        org.sikuli.script.Region sikuliRegion = region.sikuli();
+        if (sikuliRegion == null) {
+            // In headless mode, we can't get grid number without raster info
+            return Optional.empty();
+        }
+        if (!sikuliRegion.isRasterValid()) return Optional.of(-1);
+        Region firstCell = new Region(sikuliRegion.getCell(0, 0));
         int row = gridNumber(firstCell.getH(), firstCell.getY(), location.getY());
         int col = gridNumber(firstCell.getW(), firstCell.getX(), location.getX());
         return Optional.of(toGridNumber(region, row, col));
@@ -233,15 +243,30 @@ public class RegionUtils {
     }
 
     public static int toGridNumber(Region region, int row, int col) {
-        return row * region.sikuli().getCols() + col;
+        org.sikuli.script.Region sikuliRegion = region.sikuli();
+        if (sikuliRegion == null) {
+            // In headless mode, default to 3x3 grid
+            return row * 3 + col;
+        }
+        return row * sikuliRegion.getCols() + col;
     }
 
     public static int toRow(Region region, int gridNumber) {
-        return gridNumber / region.sikuli().getCols();
+        org.sikuli.script.Region sikuliRegion = region.sikuli();
+        if (sikuliRegion == null) {
+            // In headless mode, default to 3x3 grid
+            return gridNumber / 3;
+        }
+        return gridNumber / sikuliRegion.getCols();
     }
 
     public static int toCol(Region region, int gridNumber) {
-        return gridNumber % region.sikuli().getCols();
+        org.sikuli.script.Region sikuliRegion = region.sikuli();
+        if (sikuliRegion == null) {
+            // In headless mode, default to 3x3 grid
+            return gridNumber % 3;
+        }
+        return gridNumber % sikuliRegion.getCols();
     }
 
     // Spatial Transformations
@@ -304,7 +329,15 @@ public class RegionUtils {
     }
 
     public static Location getLocation(Region region) {
-        return new Location(region.sikuli().getTarget().x, region.sikuli().getTarget().y);
+        // In headless/mock mode, sikuli() returns null
+        // Return the center of the region
+        org.sikuli.script.Region sikuliRegion = region.sikuli();
+        if (sikuliRegion == null) {
+            int centerX = region.x() + region.w() / 2;
+            int centerY = region.y() + region.h() / 2;
+            return new Location(centerX, centerY);
+        }
+        return new Location(sikuliRegion.getTarget().x, sikuliRegion.getTarget().y);
     }
 
     /**
@@ -316,11 +349,26 @@ public class RegionUtils {
      * @return a list of regions (cells of the grid), added in order of left to right and then up to down
      */
     public static List<Region> getGridRegions(Region region, int rows, int columns) {
-        region.sikuli().setRaster(rows, columns); // SikuliX raster (setRaster) has a min cell size of 5x5
+        org.sikuli.script.Region sikuliRegion = region.sikuli();
+        if (sikuliRegion == null) {
+            // In headless mode, calculate grid regions manually
+            List<Region> gridRegions = new ArrayList<>();
+            int cellWidth = region.w() / columns;
+            int cellHeight = region.h() / rows;
+            for (int row = 0; row < rows; row++) {
+                for (int col = 0; col < columns; col++) {
+                    int x = region.x() + col * cellWidth;
+                    int y = region.y() + row * cellHeight;
+                    gridRegions.add(new Region(x, y, cellWidth, cellHeight));
+                }
+            }
+            return gridRegions;
+        }
+        sikuliRegion.setRaster(rows, columns); // SikuliX raster (setRaster) has a min cell size of 5x5
         List<Region> regions = new ArrayList<>();
         for (int i=0; i<rows; i++) {
             for (int j=0; j<columns; j++) {
-                regions.add(new Region(region.sikuli().getCell(i,j)));
+                regions.add(new Region(sikuliRegion.getCell(i,j)));
             }
         }
         return regions;

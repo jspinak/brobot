@@ -63,3 +63,54 @@ runner/data/brobot.mv.db
 runner/screenshots/# Gradle bin directory
 bin/
 **/bin/
+
+# Test-generated files
+library/src/test/resources/histories/
+library/test-history/
+library/test-static-screenshot.png
+library-test/src/test/resources/histories/
+
+# Temporary documentation and scripts
+/**/90-PERCENT-COVERAGE-PLAN.md
+/**/DEPRECATION_REMOVAL_SUMMARY.md
+/**/NON_V2_CLASSES_ANALYSIS.md
+/**/PHASE-1-FIND-OPERATIONS-TESTING.md
+/**/PHASE-1-TEST-IMPLEMENTATION-SUMMARY.md
+/**/PHASE-2-PROGRESS-SUMMARY.md
+/**/TEST_MIGRATION_GUIDE.md
+/**/TEST_MIGRATION_PROGRESS.md
+/**/TEST_MIGRATION_STATUS.md
+/**/V2_CLASS_RENAMING_PROPOSAL.md
+/**/V2_MIGRATION_ANALYSIS.md
+/**/fix-all-tests.sh
+/**/fix-headless-tests.py
+/**/fix-test-patterns.sh
+/**/fix_actionoptions.sh
+/**/run-transition-tests.sh
+library/BROBOT_TESTING_DEMO_SUMMARY.md
+library/CODE_COVERAGE_PLAN.md
+library/COMMON-TEST-FAILURES.md
+library/COVERAGE-IMPLEMENTATION-COMPLETE.md
+library/COVERAGE-IMPROVEMENT-STRATEGY.md
+library/COVERAGE-IMPROVEMENTS-SUMMARY.md
+library/COVERAGE_ANALYSIS_REPORT.md
+library/COVERAGE_IMPROVEMENT_RESULTS.md
+library/FINAL-TEST-FIXES-SUMMARY.md
+library/FINAL_TESTING_REPORT.md
+library/FIX-CLICK-UNTIL-ISSUE.md
+library/PACKAGE-COVERAGE-ANALYSIS.md
+library/TEST-FIXES-SUMMARY.md
+library/TEST-TEMPLATES.md
+library/TESTING_BEST_PRACTICES.md
+library/TESTING_CONTINUATION_SUMMARY.md
+library/TESTING_IMPLEMENTATION_SUMMARY.md
+library/TESTING_PROGRESS_REPORT.md
+library/TESTING_SESSION_SUMMARY.md
+library/TOP-10-CRITICAL-UNCOVERED-CLASSES.md
+library/gradle-coverage-tasks.gradle
+library/run-tests-with-coverage.sh
+library/show_coverage.sh
+runner/ACTION_RECORD_PERSISTENCE_PLAN.md
+
+# GitHub workflows (should be in root repo, not library)
+library/.github/

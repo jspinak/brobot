@@ -1,77 +1,81 @@
 package io.github.jspinak.brobot.action.internal.text;
 
+import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.basic.type.TypeOptions;
+import io.github.jspinak.brobot.config.FrameworkSettings;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.state.StateString;
-import io.github.jspinak.brobot.config.FrameworkSettings;
+import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
 /**
- * Provides text typing functionality with support for both real and mocked operations.
- * <p>
- * This is version 2 of the TypeTextWrapper, updated to work with the new ActionConfig
- * hierarchy and TypeOptions instead of ActionOptions.
- * </p>
- * <p>
- * This wrapper abstracts Sikuli's text typing operations and integrates with Brobot's
- * action system. It supports typing plain text as well as text with keyboard modifiers
- * (e.g., Ctrl, Alt, Shift combinations). In mock mode, the text and modifiers are
- * logged but not actually typed, useful for testing.
- * </p>
- * 
- * @see StateString
- * @see TypeOptions
- * @see FrameworkSettings#mock
- * @since 2.0
+ * Primary text typing implementation that handles both mock and live environments.
+ * Automatically switches between mock and live typing based on FrameworkSettings.mock.
  */
 @Component
-public class DefaultTextTyper {
+@Primary
+@Slf4j
+public class DefaultTextTyper implements TextTyper {
     
-    // No longer needs legacy dependency - this class is now standalone
-
-    /**
-     * Types the specified text into the currently focused window or input field.
-     * <p>
-     * This method handles both plain text typing and typing with keyboard modifiers.
-     * If modifiers are specified in the type options (e.g., ["ctrl", "shift"]), they will
-     * be held down while typing the text. The method creates a new {@link Region}
-     * at the current focus point for the typing operation.
-     * </p>
-     * <p>
-     * In mock mode, the operation is logged but not performed.
-     * </p>
-     * 
-     * @param stateString Contains the text to be typed. Must not be null.
-     * @param typeOptions Configuration that may contain keyboard modifiers and type delay.
-     * @return {@code true} if the typing operation was successful (or mocked),
-     *         {@code false} if the type operation failed in real mode.
-     */
-    public boolean type(StateString stateString, TypeOptions typeOptions) {
-        if (FrameworkSettings.mock) {
-            return mockType(stateString, typeOptions);
+    @Override
+    public boolean type(StateString stateString, ActionConfig actionConfig) {
+        // Extract modifiers from config if it's TypeOptions
+        String modifiers = "";
+        if (actionConfig instanceof TypeOptions) {
+            modifiers = ((TypeOptions) actionConfig).getModifiers();
         }
         
-        // Convert modifiers list to string for Sikuli
-        String modifierString = typeOptions.getModifiers().isEmpty() ? "" : 
-            String.join("+", typeOptions.getModifiers());
+        // Handle null or empty string
+        String textToType = stateString != null && stateString.getString() != null 
+                           ? stateString.getString() : "";
         
-        Region region = new Region();
-        if (modifierString.isEmpty()) {
-            return region.sikuli().type(stateString.getString()) == 1;
+        if (FrameworkSettings.mock) {
+            return mockType(textToType, modifiers);
         } else {
-            return region.sikuli().type(stateString.getString(), modifierString) == 1;
+            return liveType(textToType, modifiers);
         }
     }
     
-    private boolean mockType(StateString stateString, TypeOptions typeOptions) {
-        String modifierString = typeOptions.getModifiers().isEmpty() ? "" : 
-            String.join("+", typeOptions.getModifiers());
+    private boolean mockType(String text, String modifiers) {
+        log.debug("Mock typing: '{}' with modifiers: '{}'", text, modifiers);
         
-        if (modifierString.isEmpty()) {
-            System.out.println("Mock: type '" + stateString.getString() + "'");
-        } else {
-            System.out.println("Mock: type '" + stateString.getString() + "' with modifiers: " + modifierString);
+        // Log to console for visibility
+        if (modifiers != null && !modifiers.isEmpty()) {
+            ConsoleReporter.print(modifiers);
         }
-        return true;
+        ConsoleReporter.print(text);
+        
+        // Simulate typing delay
+        if (FrameworkSettings.mockTimeClick > 0) {
+            try {
+                Thread.sleep((long)(FrameworkSettings.mockTimeClick * 1000));
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                log.warn("Mock typing interrupted", e);
+            }
+        }
+        
+        return true; // Always successful in mock mode
+    }
+    
+    private boolean liveType(String text, String modifiers) {
+        log.debug("Live typing: '{}' with modifiers: '{}'", text, modifiers);
+        
+        try {
+            Region region = new Region();
+            
+            if (modifiers == null || modifiers.isEmpty()) {
+                // Type without modifiers
+                return region.sikuli().type(text) != 0;
+            } else {
+                // Type with modifiers (e.g., ctrl+a, shift+tab)
+                return region.sikuli().type(text, modifiers) != 0;
+            }
+        } catch (Exception e) {
+            log.error("Failed to type text: {}", text, e);
+            return false;
+        }
     }
 }

@@ -193,34 +193,11 @@ public class BrobotConfiguration {
         private boolean collectMetrics = false;
     }
     
-    /**
-     * Migration configuration for backwards compatibility
-     */
-    @Data
-    public static class MigrationConfig {
-        
-        /**
-         * Enable legacy property support
-         */
-        private boolean enableLegacySupport = true;
-        
-        /**
-         * Warn about deprecated properties
-         */
-        private boolean warnDeprecated = true;
-        
-        /**
-         * Property mappings from old to new
-         */
-        private Map<String, String> propertyMappings = new HashMap<>();
-    }
-    
     // Main configuration sections
     private CoreConfig core = new CoreConfig();
     private SikuliConfig sikuli = new SikuliConfig();
     private EnvironmentConfig environment = new EnvironmentConfig();
     private PerformanceConfig performance = new PerformanceConfig();
-    private MigrationConfig migration = new MigrationConfig();
     
     /**
      * Validate configuration after properties are bound

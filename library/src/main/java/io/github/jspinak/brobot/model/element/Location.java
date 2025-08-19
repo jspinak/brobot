@@ -152,7 +152,9 @@ public class Location {
 
     public Location(Match match) {
         if (match.getTarget().region != null) this.region = new Region(match.getRegion());
-        this.position = new Position(match.getTarget().getPosition());
+        if (match.getTarget().getPosition() != null) {
+            this.position = new Position(match.getTarget().getPosition());
+        }
         this.x = match.getTarget().x;
         this.y = match.getTarget().y;
         this.offsetX = match.getTarget().getOffsetX();

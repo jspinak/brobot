@@ -199,6 +199,11 @@ public class JsonUtils {
      */
     public void writeToFileSafe(Object object, Path filePath) throws ConfigurationException, IOException {
         String json = toPrettyJsonSafe(object);
+        // Create parent directories if they don't exist
+        Path parent = filePath.getParent();
+        if (parent != null && !Files.exists(parent)) {
+            Files.createDirectories(parent);
+        }
         Files.writeString(filePath, json);
     }
 

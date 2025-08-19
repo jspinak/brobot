@@ -61,9 +61,28 @@ public class OffsetMatchCreator {
             return;
         }
         
-        // Create a location at the current mouse position plus offset
-        int offsetX = Mouse.at().x + adjustmentOptions.getAddX();
-        int offsetY = Mouse.at().y + adjustmentOptions.getAddY();
+        // Get current mouse position with proper synchronization
+        int baseX = 0, baseY = 0;
+        boolean useMousePosition = false;
+        
+        try {
+            // Synchronize access to Mouse to avoid race conditions in tests
+            synchronized (Mouse.class) {
+                org.sikuli.script.Location mouseLoc = Mouse.at();
+                if (mouseLoc != null) {
+                    baseX = mouseLoc.x;
+                    baseY = mouseLoc.y;
+                    useMousePosition = true;
+                }
+            }
+        } catch (Exception e) {
+            // In headless mode or when Mouse is not available, use 0,0 as base
+            // This is expected in mock mode or headless environments
+        }
+        
+        // Calculate final position
+        int offsetX = baseX + adjustmentOptions.getAddX();
+        int offsetY = baseY + adjustmentOptions.getAddY();
         
         // Create the offset match with a 1x1 region at the location
         // Note: In the new architecture, offset matches don't need StateObjectMetadata

@@ -14,6 +14,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.ContextConfiguration;
+import io.github.jspinak.brobot.test.TestEnvironmentInitializer;
+import io.github.jspinak.brobot.test.mock.MockGuiAccessConfig;
+import io.github.jspinak.brobot.test.mock.MockGuiAccessMonitor;
+import io.github.jspinak.brobot.test.mock.MockScreenConfig;
 import org.springframework.test.context.TestPropertySource;
 import io.github.jspinak.brobot.BrobotTestApplication;
 
@@ -25,28 +31,33 @@ import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Integration tests for find actions using the Action class.
- * These tests run in mock mode to verify the integration of Object// ActionOptions,
+ * These tests run in mock mode to verify the integration of ObjectActionOptions,
  * ObjectCollections, and the Action execution flow without requiring
  * actual image recognition capabilities.
  * 
  * The tests validate:
- * - Proper configuration of Object// ActionOptions for different find types
+ * - Proper configuration of ObjectActionOptions for different find types
  * - Correct handling of ObjectCollections with StateImages and patterns
  * - Integration with the Spring context and autowired components
  * - Various find operation parameters (similarity, timeout, areas, etc.)
  */
-@SpringBootTest(classes = BrobotTestApplication.class)
-@TestPropertySource(properties = {
-    "spring.main.lazy-initialization=true",
-    "brobot.mock.enabled=true",
-    "brobot.illustration.disabled=true",
-    "brobot.scene.analysis.disabled=true"
-})
+@SpringBootTest(classes = io.github.jspinak.brobot.BrobotTestApplication.class,
+    properties = {
+        "brobot.gui-access.continue-on-error=true",
+        "brobot.gui-access.check-on-startup=false",
+        "java.awt.headless=true",
+        "spring.main.allow-bean-definition-overriding=true",
+        "brobot.test.type=unit",
+        "brobot.capture.physical-resolution=false",
+        "brobot.mock.enabled=true"
+    })
+@Import({MockGuiAccessConfig.class, MockGuiAccessMonitor.class, MockScreenConfig.class})
+@ContextConfiguration(initializers = TestEnvironmentInitializer.class)
 public class FindActionIntegrationTest {
 
     @BeforeAll
     public static void setupHeadlessMode() {
-        System.setProperty("java.awt.headless", "false");
+        System.setProperty("java.awt.headless", "true");
     }
 
     @BeforeEach

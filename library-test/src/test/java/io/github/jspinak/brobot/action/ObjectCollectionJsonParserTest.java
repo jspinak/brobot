@@ -19,8 +19,13 @@ import org.junit.jupiter.api.Test;
 import org.sikuli.script.ImagePath;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.TestPropertySource;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.ContextConfiguration;
 import io.github.jspinak.brobot.BrobotTestApplication;
+import io.github.jspinak.brobot.test.TestEnvironmentInitializer;
+import io.github.jspinak.brobot.test.mock.MockGuiAccessConfig;
+import io.github.jspinak.brobot.test.mock.MockGuiAccessMonitor;
+import io.github.jspinak.brobot.test.mock.MockScreenConfig;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -28,13 +33,21 @@ import static org.junit.jupiter.api.Assertions.*;
  * Tests for ObjectCollection JSON serialization with Spring context.
  * Uses Spring Boot's configured ObjectMapper with all necessary Jackson modules.
  */
-@SpringBootTest(classes = BrobotTestApplication.class)
-@TestPropertySource(properties = {
-    "spring.main.lazy-initialization=true",
-    "brobot.mock.enabled=true",
-    "brobot.illustration.disabled=true",
-    "brobot.scene.analysis.disabled=true"
-})
+@SpringBootTest(classes = BrobotTestApplication.class,
+    properties = {
+        "spring.main.lazy-initialization=true",
+        "brobot.mock.enabled=true",
+        "brobot.illustration.disabled=true",
+        "brobot.scene.analysis.disabled=true",
+        "brobot.gui-access.continue-on-error=true",
+        "brobot.gui-access.check-on-startup=false",
+        "java.awt.headless=true",
+        "spring.main.allow-bean-definition-overriding=true",
+        "brobot.test.type=unit",
+        "brobot.capture.physical-resolution=false"
+    })
+@Import({MockGuiAccessConfig.class, MockGuiAccessMonitor.class, MockScreenConfig.class})
+@ContextConfiguration(initializers = TestEnvironmentInitializer.class)
 class ObjectCollectionJsonParserTest {
 
     @Autowired
@@ -42,7 +55,7 @@ class ObjectCollectionJsonParserTest {
 
     @BeforeAll
     public static void setupHeadlessMode() {
-        System.setProperty("java.awt.headless", "false");
+        System.setProperty("java.awt.headless", "true");
         ImagePath.setBundlePath("images");
     }
 
@@ -169,7 +182,8 @@ class ObjectCollectionJsonParserTest {
                 .withStrings(new StateString.Builder()
                         .setOwnerStateName("StringState")
                         .setName("TestString")
-                        .build("Lorem ipsum"))
+                        .setString("Lorem ipsum")
+                        .build())
 
                 // Add patterns
                 .withPatterns(new Pattern(TestPaths.getImagePath("topLeft")))

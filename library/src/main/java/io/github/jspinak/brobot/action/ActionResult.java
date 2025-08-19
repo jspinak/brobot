@@ -83,7 +83,7 @@ public class ActionResult {
     private final ActionAnalysis actionAnalysis = new ActionAnalysis();
     private final ExecutionHistory executionHistory = new ExecutionHistory();
     
-    // Legacy fields for backward compatibility (will be removed in future version)
+    // Fields maintained for test compatibility
     @JsonIgnore
     private ActionMetrics actionMetrics;
     @JsonIgnore
@@ -923,7 +923,7 @@ public class ActionResult {
     }
     
     // ===============================
-    // Enhanced Logging Data Structures (Legacy - maintained for compatibility)
+    // Enhanced Logging Data Structures (maintained for test compatibility)
     // ===============================
     
     @Data

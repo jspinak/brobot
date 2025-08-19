@@ -10,9 +10,16 @@ import io.github.jspinak.brobot.runner.json.utils.JsonUtils;
 import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.model.state.State;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.ContextConfiguration;
+import io.github.jspinak.brobot.test.TestEnvironmentInitializer;
+import io.github.jspinak.brobot.test.mock.MockGuiAccessConfig;
+import io.github.jspinak.brobot.test.mock.MockGuiAccessMonitor;
+import io.github.jspinak.brobot.test.mock.MockScreenConfig;
 import io.github.jspinak.brobot.test.BrobotIntegrationTestBase;
 
 import java.util.HashSet;
@@ -23,6 +30,11 @@ import java.util.Set;
  */
 @SpringBootTest
 public class StateDiagnosticTest extends BrobotIntegrationTestBase {
+    
+    @BeforeAll
+    static void setupHeadlessMode() {
+        System.setProperty("java.awt.headless", "true");
+    }
 
     @Autowired
     private ConfigurationParser jsonParser;
@@ -69,7 +81,8 @@ public class StateDiagnosticTest extends BrobotIntegrationTestBase {
         StateString string = new StateString.Builder()
                 .setName("DiagnosticString")
                 .setOwnerStateName("DiagnosticState")
-                .build("Diagnostic Text");
+                .setString("Diagnostic Text")
+                .build();
         state.addStateString(string);
 
         // Verify objects were added (using direct getters)

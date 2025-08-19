@@ -133,9 +133,14 @@ public class ActionSuccessCriteria {
         if (className.contains("Type")) return ActionType.TYPE;
         if (className.contains("Drag")) return ActionType.DRAG;
         if (className.contains("Move")) return ActionType.MOVE;
+        if (className.contains("Define")) return ActionType.DEFINE;
         if (className.contains("Vanish")) return ActionType.VANISH;
         if (className.contains("Scroll")) return ActionType.SCROLL_MOUSE_WHEEL;
         if (className.contains("Highlight")) return ActionType.HIGHLIGHT;
+        if (className.contains("KeyDown")) return ActionType.KEY_DOWN;
+        if (className.contains("KeyUp")) return ActionType.KEY_UP;
+        if (className.contains("MouseDown")) return ActionType.MOUSE_DOWN;
+        if (className.contains("MouseUp")) return ActionType.MOUSE_UP;
         
         // Default to FIND for unknown config types
         return ActionType.FIND;

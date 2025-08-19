@@ -18,6 +18,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.ContextConfiguration;
+import io.github.jspinak.brobot.test.TestEnvironmentInitializer;
+import io.github.jspinak.brobot.test.mock.MockGuiAccessConfig;
+import io.github.jspinak.brobot.test.mock.MockGuiAccessMonitor;
+import io.github.jspinak.brobot.test.mock.MockScreenConfig;
 
 import java.io.File;
 
@@ -121,11 +127,11 @@ public class FindImageWithOffsetTest extends BrobotIntegrationTestBase {
     }
 
     /**
-     * Test that Position set in Object// ActionOptions overrides the Position in the Pattern.
-     * Verifies the priority of Object// ActionOptions settings over Pattern settings.
+     * Test that Position set in ObjectActionOptions overrides the Position in the Pattern.
+     * Verifies the priority of ObjectActionOptions settings over Pattern settings.
      */
     @Test
-    void findWithPositionAndOffsetInObject// ActionOptions() {
+    void findWithPositionAndOffsetInObjectActionOptions() {
         // Check if test images exist
         File screenshotFile = new File(TestPaths.getScreenshotPath("floranext0"));
         File patternFile = new File(TestPaths.getImagePath("topLeft"));
@@ -151,7 +157,7 @@ public class FindImageWithOffsetTest extends BrobotIntegrationTestBase {
                 .build();
         ActionResult matches = action.perform(new PatternFindOptions.Builder().build(), objColl);
         
-        // Test 2: Pattern with different position, but Object// ActionOptions overrides
+        // Test 2: Pattern with different position, but ObjectActionOptions overrides
         StateImage topLeft2 = new StateImage.Builder()
                 .addPattern(new Pattern.Builder()
                         .setFilename(TestPaths.getImagePath("topLeft"))
@@ -178,19 +184,19 @@ public class FindImageWithOffsetTest extends BrobotIntegrationTestBase {
         
         // Verify both finds succeeded
         assertFalse(matches.isEmpty(), "Should find pattern with position/offset in pattern");
-        assertFalse(matches2.isEmpty(), "Should find pattern with position/offset in Object// ActionOptions");
+        assertFalse(matches2.isEmpty(), "Should find pattern with position/offset in ObjectActionOptions");
         
         Location loc1 = matches.getMatchLocations().get(0);
         Location loc2 = matches2.getMatchLocations().get(0);
         
         System.out.println("Location from pattern settings: " + loc1);
-        System.out.println("Location from Object// ActionOptions override: " + loc2);
+        System.out.println("Location from ObjectActionOptions override: " + loc2);
         
         // Both should have the same effective position and offset
         assertEquals(loc1.getCalculatedX(), loc2.getCalculatedX(), 
-                    "Object// ActionOptions position should override pattern position");
+                    "ObjectActionOptions position should override pattern position");
         assertEquals(loc1.getCalculatedY(), loc2.getCalculatedY(), 
-                    "Object// ActionOptions position should override pattern position");
+                    "ObjectActionOptions position should override pattern position");
         
         // Verify the offset was applied
         // Note: The actual calculation depends on where the pattern is found

@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.github.jspinak.brobot.model.action.ActionHistory;
 import io.github.jspinak.brobot.model.action.ActionRecord;
-import io.github.jspinak.brobot.model.state.stateObject.StateObject;
+import io.github.jspinak.brobot.model.state.StateObject;
 import io.github.jspinak.brobot.persistence.PersistenceProvider;
 import io.github.jspinak.brobot.persistence.config.PersistenceConfiguration;
 import io.github.jspinak.brobot.persistence.model.SessionData;
@@ -321,7 +321,7 @@ public class FileBasedPersistenceProvider extends AbstractPersistenceProvider {
                     "", // State name would need to be passed
                     "", // Object name would need to be passed
                     record.getText(),
-                    record.getMatches() != null ? record.getMatches().size() : 0
+                    record.getMatchList() != null ? record.getMatchList().size() : 0
                 );
             }
         }

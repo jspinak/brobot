@@ -11,12 +11,17 @@ import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.statemanagement.StateMemory;
+import io.github.jspinak.brobot.test.mock.MockGuiAccessConfig;
+import io.github.jspinak.brobot.test.mock.MockGuiAccessMonitor;
+import io.github.jspinak.brobot.test.mock.MockScreenConfig;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.ContextConfiguration;
 
 import java.awt.image.BufferedImage;
 
@@ -25,7 +30,17 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Simple test to verify the API usage patterns
  */
-@SpringBootTest(classes = BrobotTestApplication.class)
+@SpringBootTest(classes = BrobotTestApplication.class, 
+    properties = {
+        "brobot.gui-access.continue-on-error=true",
+        "brobot.gui-access.check-on-startup=false",
+        "java.awt.headless=true",
+        "spring.main.allow-bean-definition-overriding=true",
+        "brobot.test.type=unit",
+        "brobot.capture.physical-resolution=false"
+    })
+@Import({MockGuiAccessConfig.class, MockGuiAccessMonitor.class, MockScreenConfig.class})
+@ContextConfiguration(initializers = TestEnvironmentInitializer.class)
 public class SimpleAPITest {
     
     @Autowired
@@ -43,14 +58,21 @@ public class SimpleAPITest {
     
     @Test
     void testPatternWithNameCreation() {
-        // Test Pattern creation with name
-        Pattern pattern = new Pattern.Builder()
-                .setName("TestPattern")
-                .setBufferedImage(new BufferedImage(100, 100, BufferedImage.TYPE_INT_RGB))
-                .build();
-                
-        assertNotNull(pattern);
-        assertEquals("TestPattern", pattern.getName());
+        try {
+            // Test Pattern creation with name
+            Pattern pattern = new Pattern.Builder()
+                    .setName("TestPattern")
+                    .setBufferedImage(new BufferedImage(100, 100, BufferedImage.TYPE_INT_RGB))
+                    .build();
+                    
+            assertNotNull(pattern);
+            assertEquals("TestPattern", pattern.getName());
+            System.out.println("testPatternWithNameCreation PASSED");
+        } catch (Exception e) {
+            System.err.println("testPatternWithNameCreation FAILED: " + e.getMessage());
+            e.printStackTrace();
+            throw e;
+        }
     }
     
     @Test

@@ -3,7 +3,7 @@ package io.github.jspinak.brobot.persistence.provider;
 import io.github.jspinak.brobot.model.action.ActionHistory;
 import io.github.jspinak.brobot.model.action.ActionRecord;
 import io.github.jspinak.brobot.model.match.Match;
-import io.github.jspinak.brobot.model.state.stateObject.StateObject;
+import io.github.jspinak.brobot.model.state.StateObject;
 import io.github.jspinak.brobot.persistence.config.PersistenceConfiguration;
 import io.github.jspinak.brobot.persistence.database.entity.ActionRecordEntity;
 import io.github.jspinak.brobot.persistence.database.entity.MatchEntity;
@@ -116,7 +116,7 @@ public class DatabasePersistenceProvider extends AbstractPersistenceProvider {
         entity.setSession(session);
         entity.setTimestamp(LocalDateTime.now());
         entity.setActionSuccess(record.isActionSuccess());
-        entity.setDuration(record.getDuration());
+        entity.setDuration((long) record.getDuration());
         entity.setText(record.getText());
         
         // Serialize action config
@@ -131,22 +131,21 @@ public class DatabasePersistenceProvider extends AbstractPersistenceProvider {
         
         // Add state context if available
         if (stateObject != null) {
-            entity.setStateName(stateObject.getName());
-            entity.setObjectName(stateObject.getObjectCollection() != null ? 
-                stateObject.getObjectCollection().toString() : null);
+            entity.setStateName(stateObject.getOwnerStateName());
+            entity.setObjectName(stateObject.getName());
         }
         
         // Convert matches
-        if (record.getMatches() != null && !record.getMatches().isEmpty()) {
-            Set<MatchEntity> matches = record.getMatches().stream()
+        if (record.getMatchList() != null && !record.getMatchList().isEmpty()) {
+            Set<MatchEntity> matches = record.getMatchList().stream()
                 .map(match -> {
                     MatchEntity matchEntity = new MatchEntity();
                     matchEntity.setActionRecord(entity);
-                    matchEntity.setX(match.getX());
-                    matchEntity.setY(match.getY());
-                    matchEntity.setWidth(match.getW());
-                    matchEntity.setHeight(match.getH());
-                    matchEntity.setSimScore(match.getSimScore());
+                    matchEntity.setX(match.x());
+                    matchEntity.setY(match.y());
+                    matchEntity.setWidth(match.w());
+                    matchEntity.setHeight(match.h());
+                    matchEntity.setSimScore(match.getScore());
                     return matchEntity;
                 })
                 .collect(Collectors.toSet());
@@ -253,7 +252,7 @@ public class DatabasePersistenceProvider extends AbstractPersistenceProvider {
             entity.setSession(session);
             entity.setTimestamp(LocalDateTime.now());
             entity.setActionSuccess(record.isActionSuccess());
-            entity.setDuration(record.getDuration());
+            entity.setDuration((long) record.getDuration());
             entity.setText(record.getText());
             
             if (record.getActionConfig() != null) {

@@ -251,6 +251,68 @@ public void testHighContrastVariation() {
 }
 ```
 
+## Base Test Configuration
+
+### Using BrobotTestBase
+
+All Brobot tests should extend `BrobotTestBase` to ensure proper mock mode configuration and consistent test behavior across different environments:
+
+```java
+import io.github.jspinak.brobot.test.BrobotTestBase;
+import org.junit.jupiter.api.Test;
+
+public class MyBrobotTest extends BrobotTestBase {
+    
+    @Test
+    public void testMyFeature() {
+        // Your test code here
+        // Mock mode is automatically enabled
+    }
+}
+```
+
+#### What BrobotTestBase Provides
+
+`BrobotTestBase` automatically configures the following for all tests:
+
+1. **Mock Mode Activation** - Sets `FrameworkSettings.mock = true` to prevent SikuliX headless exceptions
+2. **Fast Mock Timings** - Configures minimal delays for mock operations (0.01-0.04 seconds)
+3. **Mouse Settings** - Removes mouse pause delays for faster test execution
+4. **Screenshot Paths** - Sets up paths for mock screenshot operations
+5. **Per-Test Reset** - Ensures mock mode remains enabled between tests
+
+#### Key Benefits
+
+- **CI/CD Compatibility** - Tests run without requiring a display or GUI
+- **Consistent Behavior** - All tests use the same mock configuration
+- **Fast Execution** - Minimal mock delays speed up test suites
+- **Headless Support** - Prevents AWTException and HeadlessException errors
+
+#### Customizing Test Setup
+
+You can override `setupTest()` to add custom configuration:
+
+```java
+public class CustomTest extends BrobotTestBase {
+    
+    @Override
+    @BeforeEach
+    public void setupTest() {
+        super.setupTest(); // Important: call parent setup first
+        
+        // Add your custom setup
+        FrameworkSettings.mockTimeFindFirst = 0.05; // Custom timing
+        // Other custom configuration...
+    }
+}
+```
+
+#### When to Use BrobotTestBase
+
+- **Always** for unit tests that use Brobot APIs
+- **Always** for integration tests in headless environments
+- **Optional** for end-to-end tests that need real screen interaction (don't extend BrobotTestBase)
+
 ## Integration with Existing Tests
 
 ### Migrating from Basic Mocks

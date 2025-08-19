@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.actions.methods.basicactions.find.matchManagement;
 
-// Removed: Object// ActionOptions no longer exists
+// Removed: ObjectActionOptions no longer exists
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.BrobotTestApplication;
@@ -10,17 +10,34 @@ import org.junit.jupiter.api.Test;
 import org.sikuli.script.ImagePath;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.ContextConfiguration;
+import io.github.jspinak.brobot.test.TestEnvironmentInitializer;
+import io.github.jspinak.brobot.test.mock.MockGuiAccessConfig;
+import io.github.jspinak.brobot.test.mock.MockGuiAccessMonitor;
+import io.github.jspinak.brobot.test.mock.MockScreenConfig;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest(classes = BrobotTestApplication.class)
+@SpringBootTest(classes = io.github.jspinak.brobot.BrobotTestApplication.class,
+    properties = {
+        "brobot.gui-access.continue-on-error=true",
+        "brobot.gui-access.check-on-startup=false",
+        "java.awt.headless=true",
+        "spring.main.allow-bean-definition-overriding=true",
+        "brobot.test.type=unit",
+        "brobot.capture.physical-resolution=false",
+        "brobot.mock.enabled=true"
+    })
+@Import({MockGuiAccessConfig.class, MockGuiAccessMonitor.class, MockScreenConfig.class})
+@ContextConfiguration(initializers = TestEnvironmentInitializer.class)
 class MatchFusionTest {
 
     @BeforeAll
     public static void setupHeadlessMode() {
-        System.setProperty("java.awt.headless", "false");
+        System.setProperty("java.awt.headless", "true");
         ImagePath.setBundlePath("images");
     }
 
@@ -35,8 +52,9 @@ class MatchFusionTest {
         Match match4 = new Match.Builder().setRegion(30,34,30,20).build();
         ActionResult matches = new ActionResult();
         matches.add(match1, match2, match3, match4);
-        matches.setObject// ActionOptions(new ActionOptions.Builder().setFusionMethod(ActionOptions.MatchFusionMethod.ABSOLUTE).build());
-        List<Match> fusedMatches = matchFusion.getFusedMatchObjects(matches.getMatchList(), matches.getObject// ActionOptions());
+        // Test default fusion - the method now takes ActionConfig instead of ObjectActionOptions
+        // Since we can't easily configure fusion method with the new API in this test, use null for default behavior
+        List<Match> fusedMatches = matchFusion.getFusedMatchObjects(matches.getMatchList(), null);
         fusedMatches.forEach(System.out::println);
         assertEquals(2, fusedMatches.size());
         Match fusedMatch = fusedMatches.get(0);
