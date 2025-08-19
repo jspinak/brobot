@@ -4,6 +4,7 @@ import lombok.Getter;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
@@ -23,6 +24,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 @Getter
 @JsonDeserialize(builder = PatternFindOptions.Builder.class)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public final class PatternFindOptions extends BaseFindOptions {
 
     /**
@@ -180,6 +182,7 @@ public final class PatternFindOptions extends BaseFindOptions {
      * Builder for constructing {@link PatternFindOptions} with a fluent API.
      */
     @JsonPOJOBuilder(withPrefix = "set")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Builder extends BaseFindOptions.Builder<Builder> {
 
         @JsonProperty("strategy")

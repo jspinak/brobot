@@ -56,7 +56,7 @@ public class RegionManager {
      */
     public Region getPrimaryRegion() {
         if (definedRegions.isEmpty()) {
-            return new Region();
+            return new Region(0, 0, 0, 0);
         }
         return definedRegions.get(0);
     }

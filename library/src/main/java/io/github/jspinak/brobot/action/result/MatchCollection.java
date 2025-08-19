@@ -87,6 +87,15 @@ public class MatchCollection {
     }
     
     /**
+     * Gets the initial matches that were captured.
+     * 
+     * @return List of initial matches
+     */
+    public List<Match> getInitialMatches() {
+        return initialMatches != null ? new ArrayList<>(initialMatches) : new ArrayList<>();
+    }
+    
+    /**
      * Sorts matches using the specified strategy.
      * 
      * @param strategy The sorting strategy to apply
@@ -203,7 +212,7 @@ public class MatchCollection {
     public List<Match> getByStateObject(String stateObjectId) {
         return matches.stream()
                 .filter(m -> m.getStateObjectData() != null && 
-                           Objects.equals(m.getStateObjectData().getStateObjectId(), stateObjectId))
+                           Objects.equals(m.getStateObjectData().getStateObjectName(), stateObjectId))
                 .collect(Collectors.toList());
     }
     
@@ -299,7 +308,7 @@ public class MatchCollection {
      */
     public void clear() {
         matches.clear();
-        initialMatches.clear();
+        // Don't clear initialMatches - they should be preserved
     }
     
     /**

@@ -13,6 +13,12 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.ContextConfiguration;
+import io.github.jspinak.brobot.test.TestEnvironmentInitializer;
+import io.github.jspinak.brobot.test.mock.MockGuiAccessConfig;
+import io.github.jspinak.brobot.test.mock.MockGuiAccessMonitor;
+import io.github.jspinak.brobot.test.mock.MockScreenConfig;
 import io.github.jspinak.brobot.testutils.TestPaths;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -22,7 +28,7 @@ public class ClickMatchWithAddXYTest {
 
     @BeforeAll
     public static void setup() {
-        System.setProperty("java.awt.headless", "false");
+        System.setProperty("java.awt.headless", "true");
         FrameworkSettings.mock = true;
     }
 

@@ -14,6 +14,12 @@ import io.github.jspinak.brobot.config.FrameworkInitializer;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.ContextConfiguration;
+import io.github.jspinak.brobot.test.TestEnvironmentInitializer;
+import io.github.jspinak.brobot.test.mock.MockGuiAccessConfig;
+import io.github.jspinak.brobot.test.mock.MockGuiAccessMonitor;
+import io.github.jspinak.brobot.test.mock.MockScreenConfig;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.TestPropertySource;
 
@@ -28,18 +34,23 @@ import io.github.jspinak.brobot.BrobotTestApplication;
  * Integration tests for the Action execution system.
  * 
  * These tests verify the integration between:
- * - Object// ActionOptions API
+ * - ObjectActionOptions API
  * - Action class and its dependencies
  * - Spring context and dependency injection
  * - Action execution pipeline
  */
-@SpringBootTest(classes = BrobotTestApplication.class)
-@TestPropertySource(properties = {
-    "spring.main.lazy-initialization=true",
-    "brobot.mock.enabled=true",
-    "brobot.illustration.disabled=true",
-    "brobot.scene.analysis.disabled=true"
-})
+@SpringBootTest(classes = io.github.jspinak.brobot.BrobotTestApplication.class,
+    properties = {
+        "brobot.gui-access.continue-on-error=true",
+        "brobot.gui-access.check-on-startup=false",
+        "java.awt.headless=true",
+        "spring.main.allow-bean-definition-overriding=true",
+        "brobot.test.type=unit",
+        "brobot.capture.physical-resolution=false",
+        "brobot.mock.enabled=true"
+    })
+@Import({MockGuiAccessConfig.class, MockGuiAccessMonitor.class, MockScreenConfig.class})
+@ContextConfiguration(initializers = TestEnvironmentInitializer.class)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class ActionExecutionIntegrationTest {
 
@@ -68,7 +79,7 @@ class ActionExecutionIntegrationTest {
     @Test
     @Order(2)
     @Disabled("Spring configuration issue: multiple primary ExecutionController beans")
-    void testClickActionWithObject// ActionOptions() {
+    void testClickActionWithObjectActionOptions() {
         // Setup
         ObjectCollection objectCollection = new ObjectCollection.Builder()
             .withRegions(new Region(100, 100, 50, 50))
@@ -89,7 +100,7 @@ class ActionExecutionIntegrationTest {
     
     @Test
     @Order(3)
-    void testFindActionWithObject// ActionOptions() {
+    void testFindActionWithObjectActionOptions() {
         // Setup
         List<Region> searchRegions = List.of(
             new Region(0, 0, 100, 100),
@@ -116,7 +127,7 @@ class ActionExecutionIntegrationTest {
     
     @Test
     @Order(4)
-    void testDragActionWithObject// ActionOptions() {
+    void testDragActionWithObjectActionOptions() {
         // Setup
         Region fromRegion = new Region(50, 50, 20, 20);
         
@@ -149,8 +160,9 @@ class ActionExecutionIntegrationTest {
         // Test various specialized configuration classes
         ClickOptions clickOptions = new ClickOptions.Builder()
             .setNumberOfClicks(1)
-            .setPressOptions(new MousePressOptions.Builder()
-                .setButton(MouseButton.MIDDLE))
+            .setPressOptions(MousePressOptions.builder()
+                .button(MouseButton.MIDDLE)
+                .build())
             .build();
         
         PatternFindOptions findOptions = new PatternFindOptions.Builder()

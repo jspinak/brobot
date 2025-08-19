@@ -9,9 +9,16 @@ import io.github.jspinak.brobot.runner.json.utils.JsonUtils;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.element.SearchRegions;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.ContextConfiguration;
+import io.github.jspinak.brobot.test.TestEnvironmentInitializer;
+import io.github.jspinak.brobot.test.mock.MockGuiAccessConfig;
+import io.github.jspinak.brobot.test.mock.MockGuiAccessMonitor;
+import io.github.jspinak.brobot.test.mock.MockScreenConfig;
 import org.springframework.test.context.TestPropertySource;
 
 import java.util.List;
@@ -20,13 +27,24 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import io.github.jspinak.brobot.BrobotTestApplication;
 
-@SpringBootTest(classes = BrobotTestApplication.class)
-@TestPropertySource(properties = {
-    "java.awt.headless=false",
-    "spring.main.lazy-initialization=true",
-    "brobot.mock.enabled=true"
-})
+@SpringBootTest(classes = io.github.jspinak.brobot.BrobotTestApplication.class,
+    properties = {
+        "brobot.gui-access.continue-on-error=true",
+        "brobot.gui-access.check-on-startup=false",
+        "java.awt.headless=true",
+        "spring.main.allow-bean-definition-overriding=true",
+        "brobot.test.type=unit",
+        "brobot.capture.physical-resolution=false",
+        "brobot.mock.enabled=true"
+    })
+@Import({MockGuiAccessConfig.class, MockGuiAccessMonitor.class, MockScreenConfig.class})
+@ContextConfiguration(initializers = TestEnvironmentInitializer.class)
 public class SearchRegionsJsonParserTest {
+    
+    @BeforeAll
+    static void setupHeadlessMode() {
+        System.setProperty("java.awt.headless", "true");
+    }
 
     @Autowired
     private ConfigurationParser jsonParser;

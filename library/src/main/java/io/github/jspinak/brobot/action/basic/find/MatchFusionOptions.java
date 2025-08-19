@@ -1,5 +1,8 @@
 package io.github.jspinak.brobot.action.basic.find;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -26,7 +29,9 @@ import lombok.Getter;
  * @see PatternFindOptions
  */
 @Getter
-@Builder(toBuilder = true)
+@Builder(toBuilder = true, builderClassName = "Builder")
+@JsonDeserialize(builder = MatchFusionOptions.Builder.class)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public final class MatchFusionOptions {
 
     /**
@@ -53,4 +58,13 @@ public final class MatchFusionOptions {
     @Builder.Default
     private final int sceneToUseForCaptureAfterFusingMatches = 0;
 
+    /**
+     * Builder class for MatchFusionOptions.
+     * Annotated for Jackson deserialization support.
+     */
+    @JsonPOJOBuilder(withPrefix = "")
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class Builder {
+        // Lombok generates the implementation
+    }
 }

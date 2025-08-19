@@ -17,6 +17,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.ContextConfiguration;
+import io.github.jspinak.brobot.test.TestEnvironmentInitializer;
+import io.github.jspinak.brobot.test.mock.MockGuiAccessConfig;
+import io.github.jspinak.brobot.test.mock.MockGuiAccessMonitor;
+import io.github.jspinak.brobot.test.mock.MockScreenConfig;
 
 import java.io.File;
 import java.util.Optional;
@@ -25,15 +31,26 @@ import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Updated tests for double-click functionality using the new ActionConfig API.
- * Demonstrates migration from Object// ActionOptions to ClickOptions.
+ * Demonstrates migration from ObjectActionOptions to ClickOptions.
  * 
  * Key changes:
- * - Uses ClickOptions instead of generic Object// ActionOptions
+ * - Uses ClickOptions instead of generic ObjectActionOptions
  * - ActionResult requires setActionConfig() before perform()
  * - Uses ActionService to get the appropriate action
  * - ClickType.Type is now ClickOptions.Type
  */
-@SpringBootTest(classes = BrobotTestApplication.class)
+@SpringBootTest(classes = io.github.jspinak.brobot.BrobotTestApplication.class,
+    properties = {
+        "brobot.gui-access.continue-on-error=true",
+        "brobot.gui-access.check-on-startup=false",
+        "java.awt.headless=true",
+        "spring.main.allow-bean-definition-overriding=true",
+        "brobot.test.type=unit",
+        "brobot.capture.physical-resolution=false",
+        "brobot.mock.enabled=true"
+    })
+@Import({MockGuiAccessConfig.class, MockGuiAccessMonitor.class, MockScreenConfig.class})
+@ContextConfiguration(initializers = TestEnvironmentInitializer.class)
 public class DoubleClickTestUpdated extends BrobotIntegrationTestBase {
 
     @BeforeAll
@@ -92,7 +109,7 @@ public class DoubleClickTestUpdated extends BrobotIntegrationTestBase {
                 
         // NEW API: Configure double-click action using ClickOptions
         ClickOptions clickOptions = new ClickOptions.Builder()
-                .setClickType(ClickOptions.Type.DOUBLE_LEFT)
+                // .setClickType(ClickOptions.Type.DOUBLE_LEFT) // ClickOptions.Type enum removed
                 .setPauseBeforeBegin(2.0)
                 .build();
                 
@@ -120,7 +137,8 @@ public class DoubleClickTestUpdated extends BrobotIntegrationTestBase {
         // Verify the config is preserved
         assertNotNull(result.getActionConfig());
         assertTrue(result.getActionConfig() instanceof ClickOptions);
-        assertEquals(ClickOptions.Type.DOUBLE_LEFT, ((ClickOptions) result.getActionConfig()).getClickType());
+        // assertEquals(ClickOptions.Type.DOUBLE_LEFT, ((ClickOptions) result.getActionConfig()).getClickType()); // ClickOptions API changed - Type enum removed
+        assertEquals(2, ((ClickOptions) result.getActionConfig()).getNumberOfClicks()); // Check double-click by count
     }
 
     /**
@@ -153,7 +171,7 @@ public class DoubleClickTestUpdated extends BrobotIntegrationTestBase {
                 
         // NEW API: Configure double-click with custom pause
         ClickOptions clickOptions = new ClickOptions.Builder()
-                .setClickType(ClickOptions.Type.DOUBLE_LEFT)
+                .setNumberOfClicks(2) // Double-click: 2 clicks
                 .setPauseBeforeBegin(2.0)
                 .setPauseAfterEnd(0.5)
                 .build();
@@ -238,8 +256,8 @@ public class DoubleClickTestUpdated extends BrobotIntegrationTestBase {
         
         // OLD API (commented out):
         /*
-        Object// ActionOptions oldOptions = new ActionOptions.Builder()
-                .setAction(Object// ActionOptions.Action.CLICK)
+        ObjectActionOptions oldOptions = new ActionOptions.Builder()
+                .setAction(ObjectActionOptions.Action.CLICK)
                 .setClickType(ClickType.Type.DOUBLE_LEFT)
                 .setPauseBeforeMouseDown(2.0)
                 .build();
@@ -248,7 +266,7 @@ public class DoubleClickTestUpdated extends BrobotIntegrationTestBase {
         
         // NEW API:
         ClickOptions newOptions = new ClickOptions.Builder()
-                .setClickType(ClickOptions.Type.DOUBLE_LEFT)
+                .setNumberOfClicks(2) // Double-click: 2 clicks
                 .setPauseBeforeBegin(2.0)
                 .build();
         

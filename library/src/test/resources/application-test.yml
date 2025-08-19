@@ -4,7 +4,7 @@ brobot:
     image-path: src/test/resources/images
     find-timeout: 0.5
     action-pause: 0.0
-    mock-mode: false
+    mock-mode: true
     verbose-logging: true
     
   environment:

@@ -17,6 +17,8 @@ import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
  * <li>Normalizes by the longer string's length for consistent scoring</li>
  * <li>Case-insensitive comparison in edit distance calculation</li>
  * <li>Optimized space complexity implementation</li>
+ * <li><strong>Important:</strong> Character transpositions (e.g., "ab" → "ba") count as 
+ *     TWO edits (deletion + insertion), not one. This differs from Damerau-Levenshtein distance.</li>
  * </ul>
  * <p>
  * Similarity formula:
@@ -104,6 +106,12 @@ public class StringSimilarity {
      * The edit distance is the minimum number of single-character edits
      * (insertions, deletions, or substitutions) required to transform
      * one string into another.
+     * <p>
+     * <strong>Note on transpositions:</strong> This implementation uses standard
+     * Levenshtein distance, which counts character transpositions (swapping adjacent
+     * characters) as TWO edits. For example, "ab" → "ba" has an edit distance of 2
+     * (delete 'b', insert 'b'), not 1. Use Damerau-Levenshtein distance if you need
+     * transpositions to count as a single edit.
      * <p>
      * Implementation details:
      * <ul>

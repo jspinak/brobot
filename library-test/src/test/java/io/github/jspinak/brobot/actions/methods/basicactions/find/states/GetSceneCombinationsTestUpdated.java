@@ -17,6 +17,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledIfSystemProperty;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.ContextConfiguration;
+import io.github.jspinak.brobot.test.TestEnvironmentInitializer;
+import io.github.jspinak.brobot.test.mock.MockGuiAccessConfig;
+import io.github.jspinak.brobot.test.mock.MockGuiAccessMonitor;
+import io.github.jspinak.brobot.test.mock.MockScreenConfig;
 
 import java.util.List;
 
@@ -25,17 +31,28 @@ import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Updated tests for scene combinations using new ActionConfig API.
- * Demonstrates migration from Object// ActionOptions.Action.FIND with Find.ALL_WORDS
+ * Demonstrates migration from ObjectActionOptions.Action.FIND with Find.ALL_WORDS
  * to TextFindOptions.
  * 
  * Key changes:
- * - Uses TextFindOptions instead of generic Object// ActionOptions for OCR
+ * - Uses TextFindOptions instead of generic ObjectActionOptions for OCR
  * - ActionResult requires setActionConfig() before perform()
  * - Uses ActionService to get the appropriate action
  * - TextFindOptions automatically uses ALL_WORDS strategy
  * - Migrated to use TestDataUpdated
  */
-@SpringBootTest(classes = BrobotTestApplication.class)
+@SpringBootTest(classes = io.github.jspinak.brobot.BrobotTestApplication.class,
+    properties = {
+        "brobot.gui-access.continue-on-error=true",
+        "brobot.gui-access.check-on-startup=false",
+        "java.awt.headless=true",
+        "spring.main.allow-bean-definition-overriding=true",
+        "brobot.test.type=unit",
+        "brobot.capture.physical-resolution=false",
+        "brobot.mock.enabled=true"
+    })
+@Import({MockGuiAccessConfig.class, MockGuiAccessMonitor.class, MockScreenConfig.class})
+@ContextConfiguration(initializers = TestEnvironmentInitializer.class)
 @DisabledIfSystemProperty(named = "brobot.tests.ocr.disable", matches = "true")
 class GetSceneCombinationsTestUpdated {
 
@@ -162,9 +179,9 @@ class GetSceneCombinationsTestUpdated {
         
         // OLD API (commented out):
         /*
-        Object// ActionOptions oldOptions = new ActionOptions.Builder()
-                .setAction(Object// ActionOptions.Action.FIND)
-                .setFind(Object// ActionOptions.Find.ALL_WORDS)
+        ObjectActionOptions oldOptions = new ActionOptions.Builder()
+                .setAction(ObjectActionOptions.Action.FIND)
+                .setFind(ObjectActionOptions.Find.ALL_WORDS)
                 .build();
         ActionResult matches = action.perform(oldOptions, objColl);
         */
@@ -175,7 +192,7 @@ class GetSceneCombinationsTestUpdated {
                 .build();
         
         // The new API provides OCR-specific parameters
-        // that were not available in the generic Object// ActionOptions
+        // that were not available in the generic ObjectActionOptions
         assertNotNull(newOptions);
         
         // TextFindOptions automatically uses ALL_WORDS strategy for text finding

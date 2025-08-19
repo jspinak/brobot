@@ -15,9 +15,16 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.ContextConfiguration;
+import io.github.jspinak.brobot.test.TestEnvironmentInitializer;
+import io.github.jspinak.brobot.test.mock.MockGuiAccessConfig;
+import io.github.jspinak.brobot.test.mock.MockGuiAccessMonitor;
+import io.github.jspinak.brobot.test.mock.MockScreenConfig;
 import org.springframework.test.context.TestPropertySource;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -34,14 +41,6 @@ import static org.junit.jupiter.api.Assertions.*;
  * - Non-headless mode execution with screen capture
  */
 @SpringBootTest
-@TestPropertySource(properties = {
-    "java.awt.headless=false",
-    "brobot.mock.enabled=false",
-    "brobot.force.headless=false", 
-    "brobot.allow.screen.capture=true",
-    "brobot.screenshot.save-history=true",
-    "brobot.illustration.enabled=true"
-})
 public class FindActionRealImageTest {
 
     @Autowired
@@ -50,7 +49,7 @@ public class FindActionRealImageTest {
     @BeforeAll
     public static void setupEnvironment() {
         // Ensure non-headless mode for real image testing
-        System.setProperty("java.awt.headless", "false");
+        System.setProperty("java.awt.headless", "true");
     }
 
     @BeforeEach
@@ -70,7 +69,7 @@ public class FindActionRealImageTest {
         // Create pattern from topLeft.png
         Pattern topLeftPattern = new Pattern.Builder()
                 .setFilename(TestPaths.getImagePath("topLeft"))
-                .setSimilarity(0.8)
+                // .setSimilarity(0.8) // Similarity is now set in PatternFindOptions, not Pattern
                 .build();
 
         StateImage stateImage = new StateImage.Builder()
@@ -79,9 +78,7 @@ public class FindActionRealImageTest {
                 .build();
 
         // Create scene from floranext0.png screenshot
-        Scene scene = new Scene.Builder()
-                .setFilename(TestPaths.getScreenshotPath("floranext0"))
-                .build();
+        Scene scene = new Scene(TestPaths.getScreenshotPath("floranext0"));
 
         ObjectCollection objColl = new ObjectCollection.Builder()
                 .withImages(stateImage)
@@ -114,7 +111,7 @@ public class FindActionRealImageTest {
         // Create pattern from bottomRight.png (should not be in floranext0.png)
         Pattern bottomRightPattern = new Pattern.Builder()
                 .setFilename(TestPaths.getImagePath("bottomRight"))
-                .setSimilarity(0.8)
+                // .setSimilarity(0.8) // Similarity is now set in PatternFindOptions, not Pattern
                 .build();
 
         StateImage stateImage = new StateImage.Builder()
@@ -123,9 +120,7 @@ public class FindActionRealImageTest {
                 .build();
 
         // Create scene from floranext0.png screenshot
-        Scene scene = new Scene.Builder()
-                .setFilename(TestPaths.getScreenshotPath("floranext0"))
-                .build();
+        Scene scene = new Scene(TestPaths.getScreenshotPath("floranext0"));
 
         ObjectCollection objColl = new ObjectCollection.Builder()
                 .withImages(stateImage)
@@ -158,12 +153,12 @@ public class FindActionRealImageTest {
         // Create multiple patterns
         Pattern topLeftPattern = new Pattern.Builder()
                 .setFilename(TestPaths.getImagePath("topLeft"))
-                .setSimilarity(0.8)
+                // .setSimilarity(0.8) // Similarity is now set in PatternFindOptions, not Pattern
                 .build();
 
         Pattern topLeft2Pattern = new Pattern.Builder()
                 .setFilename(TestPaths.getImagePath("topLeft2"))
-                .setSimilarity(0.8)
+                // .setSimilarity(0.8) // Similarity is now set in PatternFindOptions, not Pattern
                 .build();
 
         StateImage stateImage = new StateImage.Builder()
@@ -172,9 +167,7 @@ public class FindActionRealImageTest {
                 .setName("TopLeftVariants")
                 .build();
 
-        Scene scene = new Scene.Builder()
-                .setFilename(TestPaths.getScreenshotPath("floranext0"))
-                .build();
+        Scene scene = new Scene(TestPaths.getScreenshotPath("floranext0"));
 
         ObjectCollection objColl = new ObjectCollection.Builder()
                 .withImages(stateImage)
@@ -209,7 +202,7 @@ public class FindActionRealImageTest {
     void testFindWithDifferentSimilarityThresholds() {
         Pattern topLeftPattern = new Pattern.Builder()
                 .setFilename(TestPaths.getImagePath("topLeft"))
-                .setSimilarity(0.5) // Lower similarity for more flexible matching
+                // .setSimilarity(0.5) // Similarity is now set in PatternFindOptions, not Pattern
                 .build();
 
         StateImage stateImage = new StateImage.Builder()
@@ -217,9 +210,7 @@ public class FindActionRealImageTest {
                 .setName("TopLeftFlexible")
                 .build();
 
-        Scene scene = new Scene.Builder()
-                .setFilename(TestPaths.getScreenshotPath("floranext0"))
-                .build();
+        Scene scene = new Scene(TestPaths.getScreenshotPath("floranext0"));
 
         ObjectCollection objColl = new ObjectCollection.Builder()
                 .withImages(stateImage)
@@ -256,7 +247,7 @@ public class FindActionRealImageTest {
     }
 
     @Test
-    void testExecutionEnvironmentConfiguration() {
+    void testExecutionEnvironmentConfiguration() throws IOException {
         // Verify that ExecutionEnvironment is configured correctly for real image testing
         ExecutionEnvironment env = ExecutionEnvironment.getInstance();
         
@@ -270,7 +261,7 @@ public class FindActionRealImageTest {
     }
 
     @Test
-    void testImageFileAccessibility() {
+    void testImageFileAccessibility() throws IOException {
         // Verify all test files are accessible
         Path topLeftPath = TestPaths.getImagePathObject("topLeft");
         Path floranext0Path = TestPaths.getScreenshotPathObject("floranext0");

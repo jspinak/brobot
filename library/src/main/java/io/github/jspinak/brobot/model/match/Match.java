@@ -1,5 +1,6 @@
 package io.github.jspinak.brobot.model.match;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.github.jspinak.brobot.model.element.Image;
 import io.github.jspinak.brobot.model.element.Pattern;
@@ -86,6 +87,7 @@ public class Match {
      */
     private Anchors anchors;
     private StateObjectMetadata stateObjectData;
+    @JsonIgnore
     private Mat histogram;
     private Scene scene;
     private LocalDateTime timeStamp;
@@ -99,19 +101,23 @@ public class Match {
     }
 
     public int x() {
-        return getRegion().x();
+        Region region = getRegion();
+        return region != null ? region.x() : 0;
     }
 
     public int y() {
-        return getRegion().y();
+        Region region = getRegion();
+        return region != null ? region.y() : 0;
     }
 
     public int w() {
-        return getRegion().w();
+        Region region = getRegion();
+        return region != null ? region.w() : 0;
     }
 
     public int h() {
-        return getRegion().h();
+        Region region = getRegion();
+        return region != null ? region.h() : 0;
     }
 
     public Region getRegion() {
@@ -126,8 +132,9 @@ public class Match {
         else target.setRegion(region);
     }
 
+    @com.fasterxml.jackson.annotation.JsonIgnore
     public Mat getMat() {
-        return image.getMatBGR();
+        return image != null ? image.getMatBGR() : null;
     }
 
     public double compareByScore(Match m) {

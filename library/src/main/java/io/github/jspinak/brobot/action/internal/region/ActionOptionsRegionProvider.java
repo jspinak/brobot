@@ -60,20 +60,18 @@ public class ActionOptionsRegionProvider {
      * Get regions specifically for pattern matching from ActionConfig
      */
     public List<Region> getPatternSearchRegions(ActionConfig actionConfig) {
-        if (actionConfig == null) {
-            return Collections.emptyList();
-        }
-        
         List<Region> regions = new ArrayList<>();
         
         if (actionConfig instanceof PatternFindOptions) {
             PatternFindOptions findOptions = (PatternFindOptions) actionConfig;
             if (findOptions.getSearchRegions() != null) {
                 regions.addAll(findOptions.getSearchRegions().getRegions(true));
-            } else {
-                // If no search region specified, use the whole screen
-                regions.add(new Region()); // Default full-screen region
             }
+        }
+        
+        // If no regions found, return default full-screen region
+        if (regions.isEmpty()) {
+            regions.add(new Region()); // Default full-screen region
         }
         
         return regions;
@@ -83,18 +81,8 @@ public class ActionOptionsRegionProvider {
      * Get regions specifically for StateImage searches from ActionConfig
      */
     public List<Region> getStateImageSearchRegions(ActionConfig actionConfig) {
-        if (actionConfig == null) {
-            return Collections.emptyList();
-        }
-        
-        List<Region> regions = getPatternSearchRegions(actionConfig);
-        
-        if (regions.isEmpty()) {
-            // Default to full screen if no regions specified
-            regions.add(new Region());
-        }
-        
-        return regions;
+        // Always use getPatternSearchRegions which handles null and provides defaults
+        return getPatternSearchRegions(actionConfig);
     }
     
     /**

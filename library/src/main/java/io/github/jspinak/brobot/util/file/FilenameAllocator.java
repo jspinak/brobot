@@ -135,12 +135,27 @@ public class FilenameAllocator {
      * @return unique filename that has been reserved for use
      */
     public String reserveFreePath(String prefix, String suffix) {
-        int i = indices.containsKey(prefix) ? indices.get(prefix) + 1 : 0;
-        String filename = prefix + suffix;
-        while (imageUtils.fileExists(filename) || filenameExists(filename)) {
+        // Start from the last used index + 1, or 0 if none exists
+        int i = indices.getOrDefault(prefix, -1);
+        String filename;
+        
+        // Try without index first if this is the first time
+        if (i == -1) {
+            filename = prefix + suffix;
+            if (!imageUtils.fileExists(filename) && !filenameExists(filename)) {
+                indices.put(prefix, 0);
+                filenames.add(filename);
+                return filename;
+            }
+            i = 0; // Start numbering from 1 (will be incremented below)
+        }
+        
+        // Try with incrementing indices
+        do {
             i++;
             filename = prefix + suffix + "_" + i;
-        }
+        } while (imageUtils.fileExists(filename) || filenameExists(filename));
+        
         indices.put(prefix, i);
         filenames.add(filename);
         return filename;

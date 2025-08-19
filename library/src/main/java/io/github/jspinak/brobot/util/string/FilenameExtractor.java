@@ -74,7 +74,43 @@ public class FilenameExtractor {
      */
     public static String getFilenameWithoutExtensionAndDirectory(String filename) {
         if (filename == null) return "";
-        File file = new File(filename); // Create a File object from the image path
-        return file.getName().replaceFirst("[.][^.]+$", "");
+        
+        // Normalize path separators - replace backslashes with forward slashes
+        String normalizedPath = filename.replace('\\', '/');
+        
+        // Handle trailing slashes (indicates directory, not file)
+        if (normalizedPath.endsWith("/")) {
+            return "";
+        }
+        
+        // Extract filename from path
+        int lastSeparator = normalizedPath.lastIndexOf('/');
+        String name = (lastSeparator >= 0) ? normalizedPath.substring(lastSeparator + 1) : normalizedPath;
+        
+        // Handle special dots-only names first
+        if (name.equals(".") || name.equals("..") || name.equals("...")) {
+            return name;
+        }
+        
+        // Handle trailing dots (but not for dots-only names)
+        if (name.endsWith(".") && !name.matches("^\\.+$")) {
+            return name.substring(0, name.length() - 1);
+        }
+        
+        // Remove extension using regex - matches last dot and everything after it
+        // But preserve hidden files that start with dot
+        if (name.startsWith(".")) {
+            // For hidden files, check if there's a second dot (which would be the extension)
+            int secondDot = name.indexOf('.', 1);
+            if (secondDot > 0) {
+                // Has extension after the hidden file dot - remove it
+                return name.replaceFirst("[.][^.]+$", "");
+            }
+            // No extension, return as-is (e.g., ".hidden")
+            return name;
+        }
+        
+        // For regular files, remove extension
+        return name.replaceFirst("[.][^.]+$", "");
     }
 }

@@ -15,7 +15,7 @@ If you're only consuming ActionResult, **no code changes are required**. All exi
 
 ### Architecture Changes
 - **v1.x**: Single 1113-line class handling all responsibilities
-- **v2.0**: Facade delegating to 12 focused components (each <300 lines)
+- **v2.0**: Facade delegating to 12 focused components (each less than 300 lines)
 
 ## Component Mapping
 

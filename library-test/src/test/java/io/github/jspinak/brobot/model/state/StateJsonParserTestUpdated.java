@@ -134,7 +134,8 @@ public class StateJsonParserTestUpdated {
         // Add a StateString
         StateString stateString = new StateString.Builder()
                 .setName("TestString")
-                .build("Sample Text String");
+                .setString("Sample Text String")
+                .build();
         state.addStateString(stateString);
 
         // Verify objects were added correctly before serialization
@@ -260,7 +261,8 @@ public class StateJsonParserTestUpdated {
         // Add a state string using addStateString
         StateString string = new StateString.Builder()
                 .setName("TestString")
-                .build("Test String Value");
+                .setString("Test String Value")
+                .build();
         state.addStateString(string);
 
         assertEquals(1, state.getStateStrings().size());
