@@ -62,7 +62,7 @@ public class DragBuilder {
         this.moveToSourceOptions = new MouseMoveOptions.Builder().build();
         this.mouseDownOptions = new MouseDownOptions.Builder()
             .setPressOptions(MousePressOptions.builder()
-                .button(MouseButton.LEFT)
+                .setButton(MouseButton.LEFT)
                 .build())
             .build();
         this.dragMoveOptions = new MouseMoveOptions.Builder()
@@ -70,7 +70,7 @@ public class DragBuilder {
             .build();
         this.mouseUpOptions = new MouseUpOptions.Builder()
             .setPressOptions(MousePressOptions.builder()
-                .button(MouseButton.LEFT)
+                .setButton(MouseButton.LEFT)
                 .build())
             .build();
     }
@@ -135,12 +135,12 @@ public class DragBuilder {
     public DragBuilder withButton(MouseButton button) {
         this.mouseDownOptions = new MouseDownOptions.Builder()
             .setPressOptions(MousePressOptions.builder()
-                .button(button)
+                .setButton(button)
                 .build())
             .build();
         this.mouseUpOptions = new MouseUpOptions.Builder()
             .setPressOptions(MousePressOptions.builder()
-                .button(button)
+                .setButton(button)
                 .build())
             .build();
         return this;
@@ -175,7 +175,7 @@ public class DragBuilder {
     public DragBuilder withDestinationOffset(int offsetX, int offsetY) {
         this.toOptions = new PatternFindOptions.Builder(toOptions)
             .setMatchAdjustment(MatchAdjustmentOptions.builder()
-                .targetOffset(new Location(offsetX, offsetY))
+                .setTargetOffset(new Location(offsetX, offsetY))
                 .build())
             .build();
         return this;
@@ -190,8 +190,8 @@ public class DragBuilder {
     public DragBuilder withMouseDownPauses(double pauseBefore, double pauseAfter) {
         this.mouseDownOptions = new MouseDownOptions.Builder(mouseDownOptions)
             .setPressOptions(MousePressOptions.builder()
-                .pauseBeforeMouseDown(pauseBefore)
-                .pauseAfterMouseDown(pauseAfter)
+                .setPauseBeforeMouseDown(pauseBefore)
+                .setPauseAfterMouseDown(pauseAfter)
                 .build())
             .build();
         return this;
@@ -206,8 +206,8 @@ public class DragBuilder {
     public DragBuilder withMouseUpPauses(double pauseBefore, double pauseAfter) {
         this.mouseUpOptions = new MouseUpOptions.Builder(mouseUpOptions)
             .setPressOptions(MousePressOptions.builder()
-                .pauseBeforeMouseUp(pauseBefore)
-                .pauseAfterMouseUp(pauseAfter)
+                .setPauseBeforeMouseUp(pauseBefore)
+                .setPauseAfterMouseUp(pauseAfter)
                 .build())
             .build();
         return this;

@@ -5,6 +5,7 @@ import org.sikuli.script.ImagePath;
 import org.springframework.stereotype.Component;
 
 import java.io.*;
+import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.*;
@@ -46,6 +47,11 @@ public class ImagePathManager {
      * Initialize the image path manager with the given base path
      */
     public synchronized void initialize(String basePath) {
+        // Validate input
+        if (basePath == null || basePath.isEmpty()) {
+            throw new IllegalStateException("Image path cannot be null or empty");
+        }
+        
         if (initialized && basePath.equals(primaryImagePath != null ? primaryImagePath.toString() : null)) {
             log.debug("ImagePathManager already initialized with path: {}", basePath);
             return;
@@ -70,6 +76,13 @@ public class ImagePathManager {
         
         primaryImagePath = resolvedPath.orElseThrow(() -> 
             new IllegalStateException("Failed to initialize image path: " + basePath));
+        
+        // Ensure the directory exists
+        try {
+            Files.createDirectories(primaryImagePath);
+        } catch (IOException e) {
+            log.warn("Could not create directory: {}", primaryImagePath, e);
+        }
         
         // Configure SikuliX if not in mock mode
         if (!ExecutionEnvironment.getInstance().shouldSkipSikuliX()) {
@@ -241,13 +254,16 @@ public class ImagePathManager {
     }
     
     private Optional<Path> createFallbackPath(String basePath) {
+        if (basePath == null || basePath.isEmpty()) {
+            return Optional.empty();
+        }
         try {
             // Create directory in temp if it doesn't exist
             Path fallback = Paths.get(System.getProperty("java.io.tmpdir"), "brobot-images", basePath);
             Files.createDirectories(fallback);
             log.info("Created fallback image directory: {}", fallback);
             return Optional.of(fallback);
-        } catch (IOException e) {
+        } catch (Exception e) {
             log.error("Failed to create fallback directory: {}", e.getMessage());
             return Optional.empty();
         }
@@ -265,9 +281,26 @@ public class ImagePathManager {
     private static class AbsolutePathResolver implements PathResolver {
         @Override
         public Optional<Path> resolve(String basePath) {
-            Path path = Paths.get(basePath);
-            if (path.isAbsolute() && Files.exists(path) && Files.isDirectory(path)) {
-                return Optional.of(path);
+            if (basePath == null || basePath.isEmpty()) {
+                return Optional.empty();
+            }
+            try {
+                Path path = Paths.get(basePath);
+                if (path.isAbsolute()) {
+                    // For absolute paths, we can try to create if it doesn't exist
+                    if (!Files.exists(path)) {
+                        try {
+                            Files.createDirectories(path);
+                            return Optional.of(path);
+                        } catch (IOException e) {
+                            // Could not create, fall through
+                        }
+                    } else if (Files.isDirectory(path)) {
+                        return Optional.of(path);
+                    }
+                }
+            } catch (Exception e) {
+                // Invalid path
             }
             return Optional.empty();
         }
@@ -281,10 +314,17 @@ public class ImagePathManager {
     private static class WorkingDirectoryResolver implements PathResolver {
         @Override
         public Optional<Path> resolve(String basePath) {
-            Path workingDir = Paths.get(System.getProperty("user.dir"));
-            Path resolved = workingDir.resolve(basePath);
-            if (Files.exists(resolved) && Files.isDirectory(resolved)) {
-                return Optional.of(resolved);
+            if (basePath == null || basePath.isEmpty()) {
+                return Optional.empty();
+            }
+            try {
+                Path workingDir = Paths.get(System.getProperty("user.dir"));
+                Path resolved = workingDir.resolve(basePath);
+                if (Files.exists(resolved) && Files.isDirectory(resolved)) {
+                    return Optional.of(resolved);
+                }
+            } catch (Exception e) {
+                // Invalid path
             }
             return Optional.empty();
         }
@@ -298,6 +338,9 @@ public class ImagePathManager {
     private static class ClasspathResolver implements PathResolver {
         @Override
         public Optional<Path> resolve(String basePath) {
+            if (basePath == null || basePath.isEmpty()) {
+                return Optional.empty();
+            }
             String resourcePath = basePath;
             if (basePath.startsWith("classpath:")) {
                 resourcePath = basePath.substring("classpath:".length());
@@ -326,6 +369,9 @@ public class ImagePathManager {
     private class JarRelativeResolver implements PathResolver {
         @Override
         public Optional<Path> resolve(String basePath) {
+            if (basePath == null || basePath.isEmpty()) {
+                return Optional.empty();
+            }
             try {
                 URL jarUrl = getClass().getProtectionDomain().getCodeSource().getLocation();
                 if (jarUrl.toString().endsWith(".jar")) {
@@ -367,6 +413,9 @@ public class ImagePathManager {
         
         @Override
         public Optional<Path> resolve(String basePath) {
+            if (basePath == null || basePath.isEmpty()) {
+                return Optional.empty();
+            }
             // First try the base path in common locations
             for (String location : commonLocations) {
                 Path candidate = Paths.get(location, basePath);

@@ -25,6 +25,7 @@ import java.util.List;
 @Setter
 public class SceneCombination {
 
+    @com.fasterxml.jackson.annotation.JsonIgnore
     private Mat dynamicPixels;
     private int scene1;
     private int scene2;

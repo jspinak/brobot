@@ -161,7 +161,7 @@ class ActionExecutionIntegrationTest {
         ClickOptions clickOptions = new ClickOptions.Builder()
             .setNumberOfClicks(1)
             .setPressOptions(MousePressOptions.builder()
-                .button(MouseButton.MIDDLE)
+                .setButton(MouseButton.MIDDLE)
                 .build())
             .build();
         

@@ -98,8 +98,8 @@ public class LocationUtils {
      */
     public static org.sikuli.script.Location getSikuliLocation(Location location) {
         if (isDefinedByXY(location)) {
-            return getSikuliLocationFromXY(location.getCalculatedX(), location.getCalculatedY(),
-                    location.getOffsetX(), location.getOffsetY());
+            // getCalculatedX/Y already includes offsets, so don't add them again
+            return new org.sikuli.script.Location(location.getCalculatedX(), location.getCalculatedY());
         }
         return getSikuliLocationFromRegion(location.getRegion(), location.getPosition(),
                 location.getOffsetX(), location.getOffsetY());

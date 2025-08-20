@@ -216,6 +216,8 @@ public class TransitionExecutor {
     private Set<Long> getStatesToActivate(TransitionFetcher transitions, Long to) {
         // initialize the States to activate with the States to activate in the FromTransition
         Set<Long> statesToActivate = new HashSet<>(transitions.getFromTransition().getActivate());
+        // Always include the target state
+        statesToActivate.add(to);
         // if the 'from' State exits, add its hidden States to the States to activate
         if (!transitions.getFromTransitions().stateStaysVisible(to))
             statesToActivate.addAll(transitions.getFromState().getHiddenStateIds());
