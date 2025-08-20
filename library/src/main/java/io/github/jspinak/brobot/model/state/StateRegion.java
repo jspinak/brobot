@@ -98,7 +98,7 @@ public class StateRegion implements StateObject {
     private DefineAs defineStrategy = DefineAs.OUTSIDE_ANCHORS;
 
     public String getIdAsString() {
-        return objectType.name() + name + searchRegion.getX() + searchRegion.getY() + searchRegion.getW() + searchRegion.getY();
+        return objectType.name() + name + searchRegion.x() + searchRegion.y() + searchRegion.w() + searchRegion.h();
     }
 
     public int x() {

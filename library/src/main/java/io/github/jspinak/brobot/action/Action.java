@@ -504,13 +504,13 @@ public class Action {
             case RIGHT_CLICK:
                 return new ClickOptions.Builder()
                     .setPressOptions(MousePressOptions.builder()
-                        .button(io.github.jspinak.brobot.model.action.MouseButton.RIGHT)
+                        .setButton(io.github.jspinak.brobot.model.action.MouseButton.RIGHT)
                         .build())
                     .build();
             case MIDDLE_CLICK:
                 return new ClickOptions.Builder()
                     .setPressOptions(MousePressOptions.builder()
-                        .button(io.github.jspinak.brobot.model.action.MouseButton.MIDDLE)
+                        .setButton(io.github.jspinak.brobot.model.action.MouseButton.MIDDLE)
                         .build())
                     .build();
             case HIGHLIGHT:

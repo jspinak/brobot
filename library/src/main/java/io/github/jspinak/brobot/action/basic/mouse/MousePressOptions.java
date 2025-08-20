@@ -17,7 +17,7 @@ import lombok.Getter;
  * It is an immutable object and must be constructed using its inner {@link Builder}.
  */
 @Getter
-@Builder(toBuilder = true)
+@Builder(toBuilder = true, setterPrefix = "set")
 public final class MousePressOptions {
 
     @Builder.Default

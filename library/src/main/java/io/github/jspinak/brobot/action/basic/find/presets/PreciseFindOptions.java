@@ -79,9 +79,9 @@ public final class PreciseFindOptions {
             .setSimilarity(DEFAULT_SIMILARITY)
             .setCaptureImage(true)
             .setMatchFusion(MatchFusionOptions.builder()
-                .fusionMethod(MatchFusionOptions.FusionMethod.ABSOLUTE)
-                .maxFusionDistanceX(DEFAULT_FUSION_DISTANCE)
-                .maxFusionDistanceY(DEFAULT_FUSION_DISTANCE)
+                .setFusionMethod(MatchFusionOptions.FusionMethod.ABSOLUTE)
+                .setMaxFusionDistanceX(DEFAULT_FUSION_DISTANCE)
+                .setMaxFusionDistanceY(DEFAULT_FUSION_DISTANCE)
                 .build());
     }
     

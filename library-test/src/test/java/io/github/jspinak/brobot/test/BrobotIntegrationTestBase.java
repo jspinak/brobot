@@ -9,6 +9,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
 import io.github.jspinak.brobot.test.TestEnvironmentInitializer;
 import io.github.jspinak.brobot.test.mock.MockGuiAccessConfig;
 import io.github.jspinak.brobot.test.mock.MockGuiAccessMonitor;
@@ -26,7 +27,10 @@ import io.github.jspinak.brobot.test.mock.MockScreenConfig;
  * Key principle: Integration tests should use real image processing but
  * handle headless environments gracefully.
  */
-@SpringBootTest
+@SpringBootTest(classes = io.github.jspinak.brobot.BrobotTestApplication.class)
+@TestPropertySource(properties = {
+    "spring.main.allow-bean-definition-overriding=true"
+})
 public abstract class BrobotIntegrationTestBase {
     
     private boolean originalMockState;

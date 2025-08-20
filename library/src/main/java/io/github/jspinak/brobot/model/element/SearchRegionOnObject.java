@@ -11,7 +11,7 @@ import lombok.Data;
  * the location of other objects, even from different states.
  */
 @Data
-@Builder(toBuilder = true)
+@Builder(toBuilder = true, setterPrefix = "set")
 public class SearchRegionOnObject {
     
     private StateObject.Type targetType;

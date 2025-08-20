@@ -554,22 +554,30 @@ public class BufferedImageUtilities {
     }
 
     public static byte[] toByteArray(BufferedImage bufferedImage) {
+        if (bufferedImage == null) {
+            return null;
+        }
         String format = "png";
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
             ImageIO.write(bufferedImage, format, baos);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            System.err.println("Error converting image to byte array: " + e.getMessage());
+            return null;
         }
         return baos.toByteArray();
     }
 
     public static BufferedImage fromByteArray(byte[] bytes) {
+        if (bytes == null || bytes.length == 0) {
+            return null;
+        }
         ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
         try {
             return ImageIO.read(bais);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            System.err.println("Error converting byte array to image: " + e.getMessage());
+            return null;
         }
     }
 
@@ -593,32 +601,47 @@ public class BufferedImageUtilities {
      * @return a Base64 String representing the BufferedImage
      */
     public static String bufferedImageToStringBase64(BufferedImage image) {
+        if (image == null) {
+            return null;
+        }
         try {
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
             ImageIO.write(image, "png", bos);
             byte[] imageBytes = bos.toByteArray();
             return Base64.getEncoder().encodeToString(imageBytes);
         } catch (IOException e) {
-            e.printStackTrace();
+            System.err.println("Error converting image to Base64: " + e.getMessage());
             return null;
         }
     }
 
     public static BufferedImage base64StringToImage(String base64String) {
-        byte[] imageBytes = Base64.getDecoder().decode(base64String); // Decode Base64 String to byte array
-        ByteArrayInputStream bis = new ByteArrayInputStream(imageBytes); // Create ByteArrayInputStream from the byte array
-        BufferedImage image = null; // Read image from ByteArrayInputStream and create BufferedImage
-        try {
-            image = ImageIO.read(bis);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        if (base64String == null || base64String.isEmpty()) {
+            return null;
         }
+        
         try {
-            bis.close(); // Close the ByteArrayInputStream
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+            byte[] imageBytes = Base64.getDecoder().decode(base64String); // Decode Base64 String to byte array
+            ByteArrayInputStream bis = new ByteArrayInputStream(imageBytes); // Create ByteArrayInputStream from the byte array
+            BufferedImage image = null; // Read image from ByteArrayInputStream and create BufferedImage
+            try {
+                image = ImageIO.read(bis);
+            } catch (IOException e) {
+                System.err.println("Error reading image from Base64: " + e.getMessage());
+                return null;
+            }
+            try {
+                bis.close(); // Close the ByteArrayInputStream
+            } catch (IOException e) {
+                // Log but don't fail - closing is not critical
+                System.err.println("Error closing stream: " + e.getMessage());
+            }
+            return image;
+        } catch (IllegalArgumentException e) {
+            // Handle invalid base64 string
+            System.err.println("Invalid Base64 string: " + e.getMessage());
+            return null;
         }
-        return image;
     }
 
     public static byte[] base64StringToByteArray(String base64String) {

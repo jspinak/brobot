@@ -107,7 +107,7 @@ public class CommonSelect {
                 .build();
         DragOptions swipeActionOptions = new DragOptions.Builder()
                 .setMousePressOptions(MousePressOptions.builder()
-                        .pauseBeforeMouseUp(0.5)
+                        .setPauseBeforeMouseUp(0.5)
                         .build())
                 .build();
         ObjectCollection findObjectCollection = new ObjectCollection.Builder()
@@ -119,7 +119,7 @@ public class CommonSelect {
         ClickOptions clickActionOptions = new ClickOptions.Builder()
                 .setNumberOfClicks(clicksPerImage)
                 .setPressOptions(MousePressOptions.builder()
-                        .pauseAfterMouseUp(0.7)
+                        .setPauseAfterMouseUp(0.7)
                         .build())
                 .build();
         ObjectCollection confirmationObjectCollection = new ObjectCollection.Builder()
@@ -198,7 +198,7 @@ public class CommonSelect {
         // Create DragOptions for swiping
         DragOptions swipeOptions = new DragOptions.Builder()
                 .setMousePressOptions(MousePressOptions.builder()
-                        .pauseBeforeMouseUp(0.5)
+                        .setPauseBeforeMouseUp(0.5)
                         .build())
                 .build();
         
@@ -214,7 +214,7 @@ public class CommonSelect {
         ClickOptions clickOptions = new ClickOptions.Builder()
                 .setNumberOfClicks(clicksPerImage)
                 .setPressOptions(MousePressOptions.builder()
-                        .pauseAfterMouseUp(0.7)
+                        .setPauseAfterMouseUp(0.7)
                         .build()) // Pause between clicks
                 .build();
         

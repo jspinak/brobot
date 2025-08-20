@@ -1,0 +1,522 @@
+package io.github.jspinak.brobot.model.element;
+
+import io.github.jspinak.brobot.model.match.Match;
+import io.github.jspinak.brobot.model.state.StateRegion;
+import io.github.jspinak.brobot.test.BrobotTestBase;
+import org.bytedeco.opencv.opencv_core.Rect;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+
+import java.awt.Rectangle;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+@DisplayName("Region Tests")
+public class RegionTest extends BrobotTestBase {
+    
+    @Mock
+    private Match mockMatch;
+    
+    @Mock
+    private org.sikuli.script.Region mockSikuliRegion;
+    
+    private Region region;
+    
+    @BeforeEach
+    @Override
+    public void setupTest() {
+        super.setupTest();
+        MockitoAnnotations.openMocks(this);
+        region = new Region();
+    }
+    
+    @Nested
+    @DisplayName("Constructors")
+    class Constructors {
+        
+        @Test
+        @DisplayName("Default constructor creates full screen region")
+        public void testDefaultConstructor() {
+            Region fullScreen = new Region();
+            
+            assertEquals(0, fullScreen.getX());
+            assertEquals(0, fullScreen.getY());
+            assertTrue(fullScreen.getW() > 0);
+            assertTrue(fullScreen.getH() > 0);
+        }
+        
+        @Test
+        @DisplayName("Constructor with x, y, w, h")
+        public void testConstructorWithDimensions() {
+            Region customRegion = new Region(10, 20, 300, 400);
+            
+            assertEquals(10, customRegion.getX());
+            assertEquals(20, customRegion.getY());
+            assertEquals(300, customRegion.getW());
+            assertEquals(400, customRegion.getH());
+        }
+        
+        @Test
+        @DisplayName("Constructor from coordinates")
+        public void testConstructorFromCoordinates() {
+            Region fromCoords = new Region(15, 25, 200, 150);
+            
+            assertEquals(15, fromCoords.getX());
+            assertEquals(25, fromCoords.getY());
+            assertEquals(200, fromCoords.getW());
+            assertEquals(150, fromCoords.getH());
+        }
+        
+        @Test
+        @DisplayName("Copy constructor")
+        public void testCopyConstructor() {
+            Region original = new Region(5, 10, 100, 200);
+            Region copy = new Region(original);
+            
+            assertEquals(original.getX(), copy.getX());
+            assertEquals(original.getY(), copy.getY());
+            assertEquals(original.getW(), copy.getW());
+            assertEquals(original.getH(), copy.getH());
+            
+            // Verify they are different objects
+            assertNotSame(original, copy);
+        }
+    }
+    
+    @Nested
+    @DisplayName("Coordinates and Dimensions")
+    class CoordinatesAndDimensions {
+        
+        @Test
+        @DisplayName("Get and set coordinates")
+        public void testGetSetCoordinates() {
+            region.setX(50);
+            region.setY(75);
+            region.setW(250);
+            region.setH(350);
+            
+            assertEquals(50, region.getX());
+            assertEquals(75, region.getY());
+            assertEquals(250, region.getW());
+            assertEquals(350, region.getH());
+        }
+        
+        @Test
+        @DisplayName("Calculate x2 and y2")
+        public void testX2Y2() {
+            region.setXYWH(10, 20, 100, 200);
+            
+            assertEquals(110, region.x2());
+            assertEquals(220, region.y2());
+        }
+        
+        @Test
+        @DisplayName("Get center location")
+        public void testGetCenter() {
+            region.setXYWH(100, 100, 200, 200);
+            // Region doesn't have getCenterLocation, use getCenter from SikuliX
+            org.sikuli.script.Location center = region.getCenter();
+            
+            assertEquals(200, center.x);
+            assertEquals(200, center.y);
+        }
+        
+        @Test
+        @DisplayName("setXYWH method")
+        public void testSetXYWH() {
+            region.setXYWH(25, 35, 125, 135);
+            
+            assertEquals(25, region.getX());
+            assertEquals(35, region.getY());
+            assertEquals(125, region.getW());
+            assertEquals(135, region.getH());
+        }
+    }
+    
+    @Nested
+    @DisplayName("Region Adjustments")
+    class RegionAdjustments {
+        
+        @Test
+        @DisplayName("Adjust x and y coordinates")
+        public void testAdjustCoordinates() {
+            region.setXYWH(50, 50, 100, 100);
+            
+            region.adjustX(60);
+            assertEquals(60, region.getX());
+            assertEquals(90, region.getW()); // Width should adjust
+            
+            region.adjustY(70);
+            assertEquals(70, region.getY());
+            assertEquals(80, region.getH()); // Height should adjust
+        }
+        
+        @Test
+        @DisplayName("Adjust x2 and y2")
+        public void testAdjustX2Y2() {
+            region.setXYWH(50, 50, 100, 100);
+            
+            region.adjustX2(200);
+            assertEquals(150, region.getW()); // Width increases
+            
+            region.adjustY2(250);
+            assertEquals(200, region.getH()); // Height increases
+        }
+        
+        @Test
+        @DisplayName("Adjust with offsets")
+        public void testAdjustWithOffsets() {
+            region.setXYWH(100, 100, 200, 200);
+            
+            region.adjust(10, 10, 180, 180);
+            
+            assertEquals(90, region.getX());
+            assertEquals(90, region.getY());
+            assertEquals(180, region.getW());
+            assertEquals(180, region.getH());
+        }
+        
+        @Test
+        @DisplayName("Grow region")
+        public void testGrow() {
+            region.setXYWH(100, 100, 100, 100);
+            Region grown = region.grow(10);
+            
+            assertEquals(90, grown.getX());
+            assertEquals(90, grown.getY());
+            assertEquals(120, grown.getW());
+            assertEquals(120, grown.getH());
+        }
+        
+        @Test
+        @DisplayName("Grow with x and y separately")
+        public void testGrowXY() {
+            region.setXYWH(100, 100, 100, 100);
+            Region grown = region.grow(10, 20);
+            
+            assertEquals(90, grown.getX());
+            assertEquals(80, grown.getY());
+            assertEquals(120, grown.getW());
+            assertEquals(140, grown.getH());
+        }
+    }
+    
+    @Nested
+    @DisplayName("Region Relationships")
+    class RegionRelationships {
+        
+        @Test
+        @DisplayName("Check if regions overlap")
+        public void testOverlaps() {
+            Region r1 = new Region(0, 0, 100, 100);
+            Region r2 = new Region(50, 50, 100, 100);
+            Region r3 = new Region(200, 200, 100, 100);
+            
+            assertTrue(r1.overlaps(r2));
+            assertTrue(r2.overlaps(r1));
+            assertFalse(r1.overlaps(r3));
+            assertFalse(r3.overlaps(r1));
+        }
+        
+        @Test
+        @DisplayName("Check if region contains another")
+        public void testContains() {
+            Region outer = new Region(0, 0, 200, 200);
+            Region inner = new Region(50, 50, 100, 100);
+            Region partial = new Region(150, 150, 100, 100);
+            
+            assertTrue(outer.contains(inner));
+            assertFalse(inner.contains(outer));
+            assertFalse(outer.contains(partial));
+        }
+        
+        @Test
+        @DisplayName("Check if region contains location")
+        public void testContainsLocation() {
+            region.setXYWH(100, 100, 200, 200);
+            
+            Location inside = new Location(150, 150);
+            Location outside = new Location(50, 50);
+            Location onBorder = new Location(100, 100);
+            
+            assertTrue(region.contains(inside));
+            assertFalse(region.contains(outside));
+            assertTrue(region.contains(onBorder));
+        }
+        
+        @Test
+        @DisplayName("Get intersection of regions")
+        public void testGetIntersection() {
+            Region r1 = new Region(0, 0, 100, 100);
+            Region r2 = new Region(50, 50, 100, 100);
+            
+            Region intersection = r1.getIntersection(r2);
+            
+            assertEquals(50, intersection.getX());
+            assertEquals(50, intersection.getY());
+            assertEquals(50, intersection.getW());
+            assertEquals(50, intersection.getH());
+        }
+        
+        @Test
+        @DisplayName("Get union of regions")
+        public void testGetUnion() {
+            Region r1 = new Region(0, 0, 100, 100);
+            Region r2 = new Region(50, 50, 100, 100);
+            
+            Region union = r1.getUnion(r2);
+            
+            assertEquals(0, union.getX());
+            assertEquals(0, union.getY());
+            assertEquals(150, union.getW());
+            assertEquals(150, union.getH());
+        }
+    }
+    
+    @Nested
+    @DisplayName("Region Validation")
+    class RegionValidation {
+        
+        @Test
+        @DisplayName("Check if region is defined")
+        public void testIsDefined() {
+            Region defined = new Region(10, 10, 100, 100);
+            Region undefined = new Region(0, 0, 0, 0);
+            Region negative = new Region(10, 10, -10, -10);
+            
+            assertTrue(defined.isDefined());
+            assertFalse(undefined.isDefined());
+            assertFalse(negative.isDefined());
+        }
+        
+        @Test
+        @DisplayName("Check if region is empty")
+        public void testIsEmpty() {
+            Region empty = new Region(10, 10, 0, 0);
+            Region nonEmpty = new Region(10, 10, 100, 100);
+            
+            assertTrue(empty.w() == 0 || empty.h() == 0);
+            assertFalse(nonEmpty.w() == 0 || nonEmpty.h() == 0);
+        }
+    }
+    
+    @Nested
+    @DisplayName("Conversions")
+    class Conversions {
+        
+        @Test
+        @DisplayName("Convert to Rectangle")
+        public void testToRectangle() {
+            region.setXYWH(25, 35, 150, 175);
+            Rectangle rect = region.getRectangle();
+            
+            assertEquals(25, rect.x);
+            assertEquals(35, rect.y);
+            assertEquals(150, rect.width);
+            assertEquals(175, rect.height);
+        }
+        
+        @Test
+        @DisplayName("Set from Match")
+        public void testSetFromMatch() {
+            when(mockMatch.x()).thenReturn(30);
+            when(mockMatch.y()).thenReturn(40);
+            when(mockMatch.w()).thenReturn(120);
+            when(mockMatch.h()).thenReturn(140);
+            
+            region.setTo(mockMatch);
+            
+            assertEquals(30, region.getX());
+            assertEquals(40, region.getY());
+            assertEquals(120, region.getW());
+            assertEquals(140, region.getH());
+        }
+        
+        @Test
+        @DisplayName("Set from SikuliX Region")
+        public void testSetFromSikuliRegion() {
+            mockSikuliRegion.x = 45;
+            mockSikuliRegion.y = 55;
+            mockSikuliRegion.w = 200;
+            mockSikuliRegion.h = 250;
+            
+            region.setTo(mockSikuliRegion);
+            
+            assertEquals(45, region.getX());
+            assertEquals(55, region.getY());
+            assertEquals(200, region.getW());
+            assertEquals(250, region.getH());
+        }
+        
+        @Test
+        @DisplayName("Create StateRegion in null state")
+        public void testInNullState() {
+            region.setXYWH(10, 20, 100, 200);
+            StateRegion stateRegion = region.inNullState();
+            
+            assertNotNull(stateRegion);
+            assertEquals("null", stateRegion.getOwnerStateName());
+            assertEquals(region, stateRegion.getSearchRegion());
+        }
+    }
+    
+    @Nested
+    @DisplayName("Comparison and Equality")
+    class ComparisonAndEquality {
+        
+        @Test
+        @DisplayName("Compare regions")
+        public void testCompareTo() {
+            Region r1 = new Region(0, 0, 100, 100);
+            Region r2 = new Region(50, 50, 100, 100);
+            Region r3 = new Region(0, 100, 100, 100);
+            
+            assertTrue(r1.compareTo(r2) < 0); // r1 comes before r2
+            assertTrue(r2.compareTo(r1) > 0); // r2 comes after r1
+            assertTrue(r1.compareTo(r3) < 0); // r1 above r3
+        }
+        
+        @Test
+        @DisplayName("Equals and hashCode")
+        public void testEqualsAndHashCode() {
+            Region r1 = new Region(10, 20, 100, 200);
+            Region r2 = new Region(10, 20, 100, 200);
+            Region r3 = new Region(10, 20, 100, 201);
+            
+            assertEquals(r1, r2);
+            assertNotEquals(r1, r3);
+            assertEquals(r1.hashCode(), r2.hashCode());
+        }
+    }
+    
+    @Nested
+    @DisplayName("Grid Operations")
+    class GridOperations {
+        
+        @Test
+        @DisplayName("Get grid of regions")
+        public void testGetGrid() {
+            region.setXYWH(0, 0, 100, 100);
+            List<List<Region>> grid = region.getGrid(2, 2);
+            
+            assertEquals(2, grid.size());
+            assertEquals(2, grid.get(0).size());
+            
+            // Check first cell
+            Region topLeft = grid.get(0).get(0);
+            assertEquals(0, topLeft.getX());
+            assertEquals(0, topLeft.getY());
+            assertEquals(50, topLeft.getW());
+            assertEquals(50, topLeft.getH());
+        }
+        
+        @Test
+        @DisplayName("Get grid cell at position")
+        public void testGetGridCellAtPosition() {
+            region.setXYWH(0, 0, 100, 100);
+            Region cell = region.getGridCell(2, 2, 1, 1);
+            
+            assertEquals(50, cell.getX());
+            assertEquals(50, cell.getY());
+            assertEquals(50, cell.getW());
+            assertEquals(50, cell.getH());
+        }
+        
+        @ParameterizedTest
+        @CsvSource({
+            "3, 3, 9",
+            "2, 4, 8",
+            "1, 1, 1"
+        })
+        @DisplayName("Grid with various dimensions")
+        public void testGridVariousDimensions(int rows, int cols, int expectedCells) {
+            region.setXYWH(0, 0, 300, 300);
+            List<List<Region>> grid = region.getGrid(rows, cols);
+            
+            int totalCells = 0;
+            for (List<Region> row : grid) {
+                totalCells += row.size();
+            }
+            
+            assertEquals(expectedCells, totalCells);
+        }
+    }
+    
+    @Nested
+    @DisplayName("Location Operations")
+    class LocationOperations {
+        
+        @Test
+        @DisplayName("Get location at position")
+        public void testGetLocationAtPosition() {
+            region.setXYWH(100, 100, 200, 200);
+            
+            Location topLeft = region.getLocation(Position.Name.TOPLEFT);
+            assertEquals(100, topLeft.getX());
+            assertEquals(100, topLeft.getY());
+            
+            Location center = region.getLocation(Position.Name.MIDDLEMIDDLE);
+            assertEquals(200, center.getX());
+            assertEquals(200, center.getY());
+            
+            Location bottomRight = region.getLocation(Position.Name.BOTTOMRIGHT);
+            assertEquals(300, bottomRight.getX());
+            assertEquals(300, bottomRight.getY());
+        }
+        
+        @Test
+        @DisplayName("Get location with offset")
+        public void testGetLocationWithOffset() {
+            region.setXYWH(100, 100, 200, 200);
+            Location offset = new Location(10, 20);
+            
+            Location withOffset = region.getLocation(Position.Name.TOPLEFT, offset);
+            
+            assertEquals(110, withOffset.getX());
+            assertEquals(120, withOffset.getY());
+        }
+    }
+    
+    @Nested
+    @DisplayName("Builder Pattern")
+    class BuilderPattern {
+        
+        @Test
+        @DisplayName("Build region with builder")
+        public void testBuilder() {
+            Region built = Region.builder()
+                .x(10)
+                .y(20)
+                .w(100)
+                .h(200)
+                .build();
+            
+            assertEquals(10, built.getX());
+            assertEquals(20, built.getY());
+            assertEquals(100, built.getW());
+            assertEquals(200, built.getH());
+        }
+        
+        @Test
+        @DisplayName("Builder with position")
+        public void testBuilderWithPosition() {
+            Region built = Region.builder()
+                .withPosition(Position.Name.TOPLEFT)
+                .withSize(100, 100)
+                .build();
+            
+            assertNotNull(built);
+            assertEquals(100, built.getW());
+            assertEquals(100, built.getH());
+        }
+    }
+}

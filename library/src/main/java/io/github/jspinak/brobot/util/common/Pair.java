@@ -104,18 +104,18 @@ public class Pair<U, V> {
 
         Pair<?, ?> pair = (Pair<?, ?>) o;
 
-        // call equals() method of the underlying objects
-        if (!first.equals(pair.first))
+        // call equals() method of the underlying objects with null safety
+        if (!java.util.Objects.equals(first, pair.first))
             return false;
-        return second.equals(pair.second);
+        return java.util.Objects.equals(second, pair.second);
     }
 
     @Override
     // Computes hash code for an object to support hash tables
     public int hashCode()
     {
-        // use hash codes of the underlying objects
-        return 31 * first.hashCode() + second.hashCode();
+        // use Objects.hash for better distribution and null safety
+        return java.util.Objects.hash(first, second);
     }
 
     @Override

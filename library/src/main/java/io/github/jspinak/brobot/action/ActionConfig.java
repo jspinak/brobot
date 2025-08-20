@@ -96,6 +96,7 @@ public abstract class ActionConfig {
 
     private final double pauseBeforeBegin;
     private final double pauseAfterEnd;
+    @com.fasterxml.jackson.annotation.JsonIgnore
     private final Predicate<ActionResult> successCriteria;
     private final Illustrate illustrate;
     private final List<ActionConfig> subsequentActions;
