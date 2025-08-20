@@ -110,7 +110,7 @@ public class ActionConfigShortcuts {
         return new ClickOptions.Builder()
                 .setNumberOfClicks(2)
                 .setPressOptions(MousePressOptions.builder()
-                        .pauseAfterMouseUp(pauseBetweenClicks)
+                        .setPauseAfterMouseUp(pauseBetweenClicks)
                         .build())
                 .build();
     }
@@ -123,7 +123,7 @@ public class ActionConfigShortcuts {
     public ClickOptions rightClick() {
         return new ClickOptions.Builder()
                 .setPressOptions(MousePressOptions.builder()
-                        .button(MouseButton.RIGHT)
+                        .setButton(MouseButton.RIGHT)
                         .build())
                 .build();
     }
@@ -140,7 +140,7 @@ public class ActionConfigShortcuts {
                 .setPauseBeforeBegin(pauseBeforeBegin)
                 .setPauseAfterEnd(pauseAfterEnd)
                 .setPressOptions(MousePressOptions.builder()
-                        .button(MouseButton.RIGHT)
+                        .setButton(MouseButton.RIGHT)
                         .build())
                 .build();
     }

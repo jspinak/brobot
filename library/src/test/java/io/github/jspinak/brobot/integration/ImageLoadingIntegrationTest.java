@@ -107,7 +107,7 @@ public class ImageLoadingIntegrationTest extends BrobotTestBase {
             
             // Step 4: Create Patterns using configured paths
             ExecutionEnvironment env = ExecutionEnvironment.getInstance();
-            ReflectionTestUtils.setField(env, "useRealFiles", false);
+            ReflectionTestUtils.setField(env, "mockMode", true);
             
             Pattern loginPattern = new Pattern("login-button.png");
             Pattern usernamePattern = new Pattern("username-field.png");
@@ -161,7 +161,7 @@ public class ImageLoadingIntegrationTest extends BrobotTestBase {
             
             // 5. Pattern creation
             ExecutionEnvironment env = ExecutionEnvironment.getInstance();
-            ReflectionTestUtils.setField(env, "useRealFiles", false);
+            ReflectionTestUtils.setField(env, "mockMode", true);
             
             Pattern pattern = new Pattern("test.png");
             
@@ -255,7 +255,7 @@ public class ImageLoadingIntegrationTest extends BrobotTestBase {
             imagePathManager.addPath(settingsDir.toString());
             
             ExecutionEnvironment env = ExecutionEnvironment.getInstance();
-            ReflectionTestUtils.setField(env, "useRealFiles", false);
+            ReflectionTestUtils.setField(env, "mockMode", true);
             
             // Create states with images
             State loginState = new State();
@@ -298,7 +298,7 @@ public class ImageLoadingIntegrationTest extends BrobotTestBase {
             imagePathManager.addPath(sharedDir.toString());
             
             ExecutionEnvironment env = ExecutionEnvironment.getInstance();
-            ReflectionTestUtils.setField(env, "useRealFiles", false);
+            ReflectionTestUtils.setField(env, "mockMode", true);
             
             // Create shared image
             StateImage sharedImage = new StateImage.Builder()
@@ -344,7 +344,7 @@ public class ImageLoadingIntegrationTest extends BrobotTestBase {
             imagePathManager.initialize(imagesDir.toString());
             
             ExecutionEnvironment env = ExecutionEnvironment.getInstance();
-            ReflectionTestUtils.setField(env, "useRealFiles", false);
+            ReflectionTestUtils.setField(env, "mockMode", true);
             
             // When - Create patterns concurrently
             ExecutorService executor = Executors.newFixedThreadPool(10);
@@ -427,7 +427,7 @@ public class ImageLoadingIntegrationTest extends BrobotTestBase {
                     .thenReturn(null); // Simulate failure to load
                 
                 ExecutionEnvironment env = ExecutionEnvironment.getInstance();
-                ReflectionTestUtils.setField(env, "useRealFiles", true);
+                ReflectionTestUtils.setField(env, "mockMode", false);
                 
                 // When/Then - Should throw with helpful message
                 assertThrows(IllegalStateException.class, () -> {
@@ -455,7 +455,7 @@ public class ImageLoadingIntegrationTest extends BrobotTestBase {
         void shouldValidateImageLoadingBeforeStateCreation() {
             // Given
             ExecutionEnvironment env = ExecutionEnvironment.getInstance();
-            ReflectionTestUtils.setField(env, "useRealFiles", false);
+            ReflectionTestUtils.setField(env, "mockMode", true);
             
             // When - Create state with multiple images
             State state = new State();

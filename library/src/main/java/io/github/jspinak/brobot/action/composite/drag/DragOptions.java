@@ -39,7 +39,7 @@ public final class DragOptions extends ActionConfig {
         
         @JsonProperty("mousePressOptions")
         private MousePressOptions mousePressOptions = MousePressOptions.builder()
-            .button(MouseButton.LEFT)
+            .setButton(MouseButton.LEFT)
             .build();
         @JsonProperty("delayBetweenMouseDownAndMove")
         private double delayBetweenMouseDownAndMove = 0.5;

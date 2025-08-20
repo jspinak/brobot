@@ -135,6 +135,14 @@ public class FilenameAllocator {
      * @return unique filename that has been reserved for use
      */
     public String reserveFreePath(String prefix, String suffix) {
+        // Handle null prefix and suffix
+        if (prefix == null) {
+            prefix = "";
+        }
+        if (suffix == null) {
+            suffix = "";
+        }
+        
         // Start from the last used index + 1, or 0 if none exists
         int i = indices.getOrDefault(prefix, -1);
         String filename;

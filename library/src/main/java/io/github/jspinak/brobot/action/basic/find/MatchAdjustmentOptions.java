@@ -18,7 +18,7 @@ import lombok.Getter;
  * It is an immutable object designed to be composed within other {@code Options} classes.
  */
 @Getter
-@Builder(toBuilder = true, builderClassName = "Builder", builderMethodName = "builder", buildMethodName = "build")
+@Builder(toBuilder = true, builderClassName = "Builder", builderMethodName = "builder", buildMethodName = "build", setterPrefix = "set")
 @JsonDeserialize(builder = MatchAdjustmentOptions.Builder.class)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public final class MatchAdjustmentOptions {

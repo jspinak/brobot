@@ -88,9 +88,9 @@ public final class AllMatchesFindOptions {
             .setCaptureImage(false)
             .setMaxMatchesToActOn(-1) // No limit
             .setMatchFusion(MatchFusionOptions.builder()
-                .fusionMethod(MatchFusionOptions.FusionMethod.ABSOLUTE)
-                .maxFusionDistanceX(DEFAULT_FUSION_DISTANCE)
-                .maxFusionDistanceY(DEFAULT_FUSION_DISTANCE)
+                .setFusionMethod(MatchFusionOptions.FusionMethod.ABSOLUTE)
+                .setMaxFusionDistanceX(DEFAULT_FUSION_DISTANCE)
+                .setMaxFusionDistanceY(DEFAULT_FUSION_DISTANCE)
                 .build());
     }
     

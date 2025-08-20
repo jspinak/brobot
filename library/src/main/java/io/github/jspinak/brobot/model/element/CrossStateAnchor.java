@@ -76,19 +76,19 @@ public class CrossStateAnchor extends Anchor {
         }
 
         public Builder adjustX(int x) {
-            anchor.adjustments = anchor.adjustments.toBuilder().addX(x).build();
+            anchor.adjustments = anchor.adjustments.toBuilder().setAddX(x).build();
             return this;
         }
 
         public Builder adjustY(int y) {
-            anchor.adjustments = anchor.adjustments.toBuilder().addY(y).build();
+            anchor.adjustments = anchor.adjustments.toBuilder().setAddY(y).build();
             return this;
         }
 
         public Builder adjustments(int x, int y) {
             anchor.adjustments = MatchAdjustmentOptions.builder()
-                .addX(x)
-                .addY(y)
+                .setAddX(x)
+                .setAddY(y)
                 .build();
             return this;
         }

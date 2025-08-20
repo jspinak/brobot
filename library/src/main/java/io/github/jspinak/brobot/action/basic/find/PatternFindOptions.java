@@ -141,9 +141,9 @@ public final class PatternFindOptions extends BaseFindOptions {
             .setSimilarity(0.9)
             .setCaptureImage(true)
             .setMatchFusion(MatchFusionOptions.builder()
-                .fusionMethod(MatchFusionOptions.FusionMethod.ABSOLUTE)
-                .maxFusionDistanceX(10)
-                .maxFusionDistanceY(10)
+                .setFusionMethod(MatchFusionOptions.FusionMethod.ABSOLUTE)
+                .setMaxFusionDistanceX(10)
+                .setMaxFusionDistanceY(10)
                 .build())
             .build();
     }
@@ -171,9 +171,9 @@ public final class PatternFindOptions extends BaseFindOptions {
             .setCaptureImage(false)
             .setMaxMatchesToActOn(-1)
             .setMatchFusion(MatchFusionOptions.builder()
-                .fusionMethod(MatchFusionOptions.FusionMethod.ABSOLUTE)
-                .maxFusionDistanceX(20)
-                .maxFusionDistanceY(20)
+                .setFusionMethod(MatchFusionOptions.FusionMethod.ABSOLUTE)
+                .setMaxFusionDistanceX(20)
+                .setMaxFusionDistanceY(20)
                 .build())
             .build();
     }

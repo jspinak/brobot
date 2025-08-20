@@ -114,8 +114,8 @@ public class ActionSequenceBuilder {
                 // Then: Right-click the image
                 .then(new ClickOptions.Builder()
                         .setPressOptions(MousePressOptions.builder()
-                                .button(MouseButton.RIGHT)
-                                .pauseBeforeMouseDown(pauseBeforeClick)
+                                .setButton(MouseButton.RIGHT)
+                                .setPauseBeforeMouseDown(pauseBeforeClick)
                                 .build())
                         .build())
                 .build();

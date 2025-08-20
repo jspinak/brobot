@@ -29,7 +29,7 @@ import lombok.Getter;
  * @see PatternFindOptions
  */
 @Getter
-@Builder(toBuilder = true, builderClassName = "Builder")
+@Builder(toBuilder = true, builderClassName = "Builder", setterPrefix = "set")
 @JsonDeserialize(builder = MatchFusionOptions.Builder.class)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public final class MatchFusionOptions {

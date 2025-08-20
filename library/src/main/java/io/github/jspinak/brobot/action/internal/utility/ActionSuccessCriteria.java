@@ -76,6 +76,11 @@ public class ActionSuccessCriteria {
      * @return Predicate that evaluates ActionResult for success
      */
     public Predicate<ActionResult> getCriteria(ActionConfig actionConfig) {
+        if (actionConfig == null) {
+            // Return a default criteria that always returns false
+            return result -> false;
+        }
+        
         // Get action type from the config - implementation depends on config type
         ActionType actionType = getActionTypeFromConfig(actionConfig);
         
@@ -85,7 +90,9 @@ public class ActionSuccessCriteria {
             // Default to FIND criteria for now
             return criteria.get(ActionType.FIND);
         }
-        return criteria.get(actionType);
+        
+        // Return criteria or default if not found
+        return criteria.getOrDefault(actionType, result -> false);
     }
 
     /**
@@ -108,6 +115,10 @@ public class ActionSuccessCriteria {
      * @param matches The action results to evaluate and update with success status
      */
     public void set(ActionConfig actionConfig, ActionResult matches) {
+        if (actionConfig == null || matches == null) {
+            return; // Handle null gracefully
+        }
+        
         // Check if the config has custom success criteria
         if (actionConfig.getSuccessCriteria() != null) {
             matches.setSuccess(actionConfig.getSuccessCriteria().test(matches));

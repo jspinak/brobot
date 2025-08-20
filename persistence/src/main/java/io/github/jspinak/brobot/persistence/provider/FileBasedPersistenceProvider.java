@@ -386,7 +386,7 @@ public class FileBasedPersistenceProvider extends AbstractPersistenceProvider {
                 // Basic CSV parsing - would need enhancement for full ActionRecord
                 ActionRecord record = new ActionRecord.Builder()
                     .setActionSuccess(Boolean.parseBoolean(csvRecord.get("Success")))
-                    .setDuration(Long.parseLong(csvRecord.get("Duration")))
+                    .setDuration(Double.parseDouble(csvRecord.get("Duration")))
                     .setText(csvRecord.get("Text"))
                     .build();
                 

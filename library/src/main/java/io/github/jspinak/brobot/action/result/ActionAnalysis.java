@@ -21,6 +21,7 @@ import java.util.Optional;
 @Data
 public class ActionAnalysis {
     private SceneAnalyses sceneAnalyses = new SceneAnalyses();
+    @com.fasterxml.jackson.annotation.JsonIgnore
     private Mat mask;
     private Map<String, Object> customAnalysis = new HashMap<>();
     

@@ -232,7 +232,7 @@ public class Location {
 
     @JsonIgnore
     public int getCalculatedX() {
-        if (region == null) {
+        if (region == null || position == null) {
             return x + offsetX;
         }
         return (int) (region.x() + (region.w() * position.getPercentW()) + offsetX);
@@ -240,7 +240,7 @@ public class Location {
 
     @JsonIgnore
     public int getCalculatedY() {
-        if (region == null) {
+        if (region == null || position == null) {
             return y + offsetY;
         }
         return (int) (region.y() + (region.h() * position.getPercentH()) + offsetY);

@@ -139,8 +139,9 @@ public class StateService {
      * @return true if only the unknown state exists
      */
     public boolean onlyTheUnknownStateExists() {
-        return stateStore.getAllStates().size() == 1 &&
-                stateStore.getAllStates().getFirst().getName().equals("unknown");
+        List<State> allStates = stateStore.getAllStates();
+        return allStates.size() == 1 &&
+                allStates.getFirst().getName().equals("unknown");
     }
 
     public List<Long> getAllStateIds() {
@@ -157,7 +158,9 @@ public class StateService {
 
     public Set<State> findSetById(Long... stateId) {
         Set<State> states = new HashSet<>();
-        Stream.of(stateId).forEach(name -> getState(name).ifPresent(states::add));
+        if (stateId != null) {
+            Stream.of(stateId).forEach(name -> getState(name).ifPresent(states::add));
+        }
         return states;
     }
 

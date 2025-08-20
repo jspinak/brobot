@@ -1,5 +1,6 @@
 package io.github.jspinak.brobot.action.result;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.github.jspinak.brobot.model.element.Text;
 import io.github.jspinak.brobot.model.match.Match;
 import lombok.Data;
@@ -21,6 +22,10 @@ import java.util.stream.Collectors;
 public class TextExtractionResult {
     private Text accumulatedText = new Text();
     private String selectedText = "";
+    
+    // Map<Match, String> cannot be properly serialized by Jackson since Match 
+    // doesn't have a suitable key serializer. Mark as ignored for JSON.
+    @JsonIgnore
     private Map<Match, String> matchTextMap = new HashMap<>();
     
     /**

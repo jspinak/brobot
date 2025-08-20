@@ -85,12 +85,18 @@ public class TypeText implements ActionInterface {
         Settings.TypeDelay = typeOptions.getTypeDelay();
         
         List<StateString> strings = objectCollections[0].getStateStrings();
+        if (strings == null || strings.isEmpty()) {
+            // Nothing to type, restore settings and return
+            Settings.TypeDelay = defaultTypeDelay;
+            return;
+        }
+        
         for (int i = 0; i < strings.size(); i++) {
             StateString str = strings.get(i);
             textTyper.type(str, typeOptions);
             
             // Pause between typing different strings (except after the last one)
-            if (i < strings.size() - 1) {
+            if (i < strings.size() - 1 && typeOptions.getPauseAfterEnd() > 0) {
                 time.wait(typeOptions.getPauseAfterEnd());
             }
         }

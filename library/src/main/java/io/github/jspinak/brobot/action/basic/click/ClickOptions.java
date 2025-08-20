@@ -114,7 +114,7 @@ public final class ClickOptions extends ActionConfig {
          * @return this Builder instance for chaining.
          */
         public Builder setNumberOfClicks(int numberOfClicks) {
-            this.numberOfClicks = Math.max(1, numberOfClicks); // Ensure at least 1 click
+            this.numberOfClicks = numberOfClicks;
             return self();
         }
 

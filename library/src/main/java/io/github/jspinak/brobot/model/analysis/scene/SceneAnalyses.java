@@ -52,7 +52,9 @@ public class SceneAnalyses {
      * The results of a multi-scene analysis are stored here.
      * This can be for actions such as motion analysis, or for aggregating matches across multiple scenes.
      */
+    @com.fasterxml.jackson.annotation.JsonIgnore
     private Mat results;
+    @com.fasterxml.jackson.annotation.JsonIgnore
     private ContourExtractor contours;
 
     /**

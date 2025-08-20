@@ -164,7 +164,7 @@ public class ActionConfigFacade {
     public boolean rightClick(double maxWait, StateImage... stateImages) {
         ClickOptions rightClickOptions = new ClickOptions.Builder()
                 .setPressOptions(MousePressOptions.builder()
-                        .button(MouseButton.RIGHT)
+                        .setButton(MouseButton.RIGHT)
                         .build())
                 .build();
                 
@@ -221,7 +221,7 @@ public class ActionConfigFacade {
                 
         ClickOptions rightClick = new ClickOptions.Builder()
                 .setPressOptions(MousePressOptions.builder()
-                        .button(MouseButton.RIGHT)
+                        .setButton(MouseButton.RIGHT)
                         .build())
                 .build();
         
@@ -250,8 +250,8 @@ public class ActionConfigFacade {
                 .setSuccessCriteria(matches -> matches.isEmpty()) // Success when images vanish
                 .setPauseAfterEnd(0.5)
                 .setRepetition(RepetitionOptions.builder()
-                    .maxTimesToRepeatActionSequence(10) // Reasonable default
-                    .pauseBetweenActionSequences(0.5))
+                    .setMaxTimesToRepeatActionSequence(10) // Reasonable default
+                    .setPauseBetweenActionSequences(0.5))
                 .build();
                 
         return action.perform(clickOptions, new ObjectCollection.Builder()
