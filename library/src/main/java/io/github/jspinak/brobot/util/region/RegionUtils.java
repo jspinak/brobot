@@ -213,20 +213,7 @@ public class RegionUtils {
         if (!contains(region, location)) return Optional.empty();
         org.sikuli.script.Region sikuliRegion = region.sikuli();
         if (sikuliRegion == null) {
-            // In mock/headless mode, calculate grid number using default grid
-            int rows = io.github.jspinak.brobot.tools.testing.mock.grid.MockGridConfig.getDefaultRows();
-            int cols = io.github.jspinak.brobot.tools.testing.mock.grid.MockGridConfig.getDefaultCols();
-            int cellWidth = region.getW() / cols;
-            int cellHeight = region.getH() / rows;
-            
-            // Calculate which cell the location falls into
-            int col = (location.getCalculatedX() - region.getX()) / cellWidth;
-            int row = (location.getCalculatedY() - region.getY()) / cellHeight;
-            
-            // Bounds checking
-            if (col >= 0 && col < cols && row >= 0 && row < rows) {
-                return Optional.of(row * cols + col);
-            }
+            // In headless mode, we can't get grid number without raster info
             return Optional.empty();
         }
         if (!sikuliRegion.isRasterValid()) return Optional.of(-1);
@@ -240,20 +227,7 @@ public class RegionUtils {
         if (!region.contains(location)) return Optional.empty();
         org.sikuli.script.Region sikuliRegion = region.sikuli();
         if (sikuliRegion == null) {
-            // In mock/headless mode, calculate grid number using default grid
-            int rows = io.github.jspinak.brobot.tools.testing.mock.grid.MockGridConfig.getDefaultRows();
-            int cols = io.github.jspinak.brobot.tools.testing.mock.grid.MockGridConfig.getDefaultCols();
-            int cellWidth = region.getW() / cols;
-            int cellHeight = region.getH() / rows;
-            
-            // Calculate which cell the location falls into
-            int col = (location.getX() - region.getX()) / cellWidth;
-            int row = (location.getY() - region.getY()) / cellHeight;
-            
-            // Bounds checking
-            if (col >= 0 && col < cols && row >= 0 && row < rows) {
-                return Optional.of(row * cols + col);
-            }
+            // In headless mode, we can't get grid number without raster info
             return Optional.empty();
         }
         if (!sikuliRegion.isRasterValid()) return Optional.of(-1);
@@ -271,9 +245,8 @@ public class RegionUtils {
     public static int toGridNumber(Region region, int row, int col) {
         org.sikuli.script.Region sikuliRegion = region.sikuli();
         if (sikuliRegion == null) {
-            // In headless mode, use configured grid dimensions
-            int cols = io.github.jspinak.brobot.tools.testing.mock.grid.MockGridConfig.getDefaultCols();
-            return row * cols + col;
+            // In headless mode, default to 3x3 grid
+            return row * 3 + col;
         }
         return row * sikuliRegion.getCols() + col;
     }
@@ -281,9 +254,8 @@ public class RegionUtils {
     public static int toRow(Region region, int gridNumber) {
         org.sikuli.script.Region sikuliRegion = region.sikuli();
         if (sikuliRegion == null) {
-            // In headless mode, use configured grid dimensions
-            int cols = io.github.jspinak.brobot.tools.testing.mock.grid.MockGridConfig.getDefaultCols();
-            return gridNumber / cols;
+            // In headless mode, default to 3x3 grid
+            return gridNumber / 3;
         }
         return gridNumber / sikuliRegion.getCols();
     }
@@ -291,9 +263,8 @@ public class RegionUtils {
     public static int toCol(Region region, int gridNumber) {
         org.sikuli.script.Region sikuliRegion = region.sikuli();
         if (sikuliRegion == null) {
-            // In headless mode, use configured grid dimensions
-            int cols = io.github.jspinak.brobot.tools.testing.mock.grid.MockGridConfig.getDefaultCols();
-            return gridNumber % cols;
+            // In headless mode, default to 3x3 grid
+            return gridNumber % 3;
         }
         return gridNumber % sikuliRegion.getCols();
     }
