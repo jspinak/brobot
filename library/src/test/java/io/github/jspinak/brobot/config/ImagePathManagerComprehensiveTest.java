@@ -256,7 +256,11 @@ public class ImagePathManagerComprehensiveTest extends BrobotTestBase {
             // Then - Verify internal state
             assertTrue((Boolean) ReflectionTestUtils.getField(imagePathManager, "initialized"));
             Set<String> configuredPaths = (Set<String>) ReflectionTestUtils.getField(imagePathManager, "configuredPaths");
-            assertTrue(configuredPaths.contains(path1.toString()));
+            // Primary path (path1) is stored separately in primaryImagePath, not in configuredPaths
+            Path primaryPath = (Path) ReflectionTestUtils.getField(imagePathManager, "primaryImagePath");
+            assertNotNull(primaryPath);
+            assertEquals(path1.toAbsolutePath().toString(), primaryPath.toAbsolutePath().toString());
+            // Only additional paths are in configuredPaths
             assertTrue(configuredPaths.contains(path2.toString()));
         }
     }

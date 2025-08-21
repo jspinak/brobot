@@ -1,0 +1,457 @@
+package io.github.jspinak.brobot.action.internal.find.scene;
+
+import io.github.jspinak.brobot.model.element.Pattern;
+import io.github.jspinak.brobot.model.element.Scene;
+import io.github.jspinak.brobot.model.match.Match;
+import io.github.jspinak.brobot.test.BrobotTestBase;
+import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockedConstruction;
+import org.mockito.MockitoAnnotations;
+import org.sikuli.script.Finder;
+
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+
+/**
+ * Test suite for BestMatchCapture class.
+ * Tests capturing and saving best matching regions for debugging pattern matching.
+ */
+@DisplayName("BestMatchCapture Tests")
+public class BestMatchCaptureTest extends BrobotTestBase {
+
+    @InjectMocks
+    private BestMatchCapture bestMatchCapture;
+    
+    @Mock
+    private ConsoleReporter consoleReporter;
+    
+    @Mock
+    private Pattern pattern;
+    
+    @Mock
+    private Scene scene;
+    
+    @Mock
+    private BufferedImage patternImage;
+    
+    @Mock
+    private BufferedImage sceneImage;
+    
+    @Mock
+    private Match match;
+    
+    private AutoCloseable mockCloseable;
+    private Path tempDirectory;
+    
+    @BeforeEach
+    @Override
+    public void setupTest() {
+        super.setupTest();
+        mockCloseable = MockitoAnnotations.openMocks(this);
+        bestMatchCapture = new BestMatchCapture();
+        
+        // Create temp directory for test captures
+        try {
+            tempDirectory = Files.createTempDirectory("test-captures");
+        } catch (IOException e) {
+            fail("Failed to create temp directory");
+        }
+    }
+    
+    @AfterEach
+    void tearDown() throws Exception {
+        if (mockCloseable != null) {
+            mockCloseable.close();
+        }
+        // Clean up temp directory
+        if (tempDirectory != null && Files.exists(tempDirectory)) {
+            Files.walk(tempDirectory)
+                .sorted((a, b) -> -a.compareTo(b))
+                .forEach(path -> {
+                    try {
+                        Files.delete(path);
+                    } catch (IOException e) {
+                        // Ignore cleanup errors
+                    }
+                });
+        }
+    }
+    
+    @Nested
+    @DisplayName("Capture Enablement")
+    class CaptureEnablement {
+        
+        @Test
+        @DisplayName("Should capture when enabled")
+        void shouldCaptureWhenEnabled() {
+            // Arrange
+            bestMatchCapture.setCaptureEnabled(true);
+            when(pattern.getImage()).thenReturn(patternImage);
+            when(scene.getImage()).thenReturn(sceneImage);
+            when(match.getScore()).thenReturn(0.6);
+            
+            // Act
+            bestMatchCapture.captureBestMatch(pattern, scene, match);
+            
+            // Assert
+            verify(match).getScore();
+        }
+        
+        @Test
+        @DisplayName("Should not capture when disabled")
+        void shouldNotCaptureWhenDisabled() {
+            // Arrange
+            bestMatchCapture.setCaptureEnabled(false);
+            
+            // Act
+            bestMatchCapture.captureBestMatch(pattern, scene, match);
+            
+            // Assert
+            verify(match, never()).getScore();
+        }
+        
+        @Test
+        @DisplayName("Should respect capture threshold")
+        void shouldRespectCaptureThreshold() {
+            // Arrange
+            bestMatchCapture.setCaptureEnabled(true);
+            bestMatchCapture.setCaptureThreshold(0.8);
+            when(match.getScore()).thenReturn(0.9); // Above threshold
+            
+            // Act
+            bestMatchCapture.captureBestMatch(pattern, scene, match);
+            
+            // Assert
+            // Should not capture when score is above threshold (good match)
+            verify(match).getScore();
+        }
+    }
+    
+    @Nested
+    @DisplayName("Best Match Finding")
+    class BestMatchFinding {
+        
+        @Test
+        @DisplayName("Should find best match in scene")
+        void shouldFindBestMatchInScene() {
+            // Arrange
+            when(pattern.getImage()).thenReturn(patternImage);
+            when(scene.getImage()).thenReturn(sceneImage);
+            
+            try (MockedConstruction<Finder> finderMock = mockConstruction(Finder.class,
+                (mock, context) -> {
+                    org.sikuli.script.Match sikuliMatch = mock(org.sikuli.script.Match.class);
+                    when(sikuliMatch.getScore()).thenReturn(0.85);
+                    when(mock.hasNext()).thenReturn(true, false);
+                    when(mock.next()).thenReturn(sikuliMatch);
+                })) {
+                
+                // Act
+                Match bestMatch = bestMatchCapture.findBestMatch(pattern, scene);
+                
+                // Assert
+                assertNotNull(bestMatch);
+            }
+        }
+        
+        @Test
+        @DisplayName("Should return null when no matches found")
+        void shouldReturnNullWhenNoMatchesFound() {
+            // Arrange
+            when(pattern.getImage()).thenReturn(patternImage);
+            when(scene.getImage()).thenReturn(sceneImage);
+            
+            try (MockedConstruction<Finder> finderMock = mockConstruction(Finder.class,
+                (mock, context) -> {
+                    when(mock.hasNext()).thenReturn(false);
+                })) {
+                
+                // Act
+                Match bestMatch = bestMatchCapture.findBestMatch(pattern, scene);
+                
+                // Assert
+                assertNull(bestMatch);
+            }
+        }
+        
+        @Test
+        @DisplayName("Should select highest scoring match")
+        void shouldSelectHighestScoringMatch() {
+            // Arrange
+            when(pattern.getImage()).thenReturn(patternImage);
+            when(scene.getImage()).thenReturn(sceneImage);
+            
+            try (MockedConstruction<Finder> finderMock = mockConstruction(Finder.class,
+                (mock, context) -> {
+                    org.sikuli.script.Match match1 = mock(org.sikuli.script.Match.class);
+                    org.sikuli.script.Match match2 = mock(org.sikuli.script.Match.class);
+                    org.sikuli.script.Match match3 = mock(org.sikuli.script.Match.class);
+                    when(match1.getScore()).thenReturn(0.7);
+                    when(match2.getScore()).thenReturn(0.9);
+                    when(match3.getScore()).thenReturn(0.8);
+                    when(mock.hasNext()).thenReturn(true, true, true, false);
+                    when(mock.next()).thenReturn(match1, match2, match3);
+                })) {
+                
+                // Act
+                Match bestMatch = bestMatchCapture.findBestMatch(pattern, scene);
+                
+                // Assert
+                assertNotNull(bestMatch);
+                assertEquals(0.9, bestMatch.getScore(), 0.01);
+            }
+        }
+    }
+    
+    @Nested
+    @DisplayName("File Saving")
+    class FileSaving {
+        
+        @Test
+        @DisplayName("Should save capture to file")
+        void shouldSaveCaptureToFile() {
+            // Arrange
+            bestMatchCapture.setCaptureDirectory(tempDirectory.toString());
+            BufferedImage captureImage = new BufferedImage(100, 100, BufferedImage.TYPE_INT_RGB);
+            
+            // Act
+            File savedFile = bestMatchCapture.saveImage(captureImage, "test-capture", 0.75);
+            
+            // Assert
+            assertNotNull(savedFile);
+            assertTrue(savedFile.exists());
+            assertTrue(savedFile.getName().contains("test-capture"));
+            assertTrue(savedFile.getName().contains("75"));
+        }
+        
+        @Test
+        @DisplayName("Should create directory if not exists")
+        void shouldCreateDirectoryIfNotExists() {
+            // Arrange
+            Path newDir = tempDirectory.resolve("new-subdirectory");
+            bestMatchCapture.setCaptureDirectory(newDir.toString());
+            BufferedImage image = new BufferedImage(50, 50, BufferedImage.TYPE_INT_RGB);
+            
+            // Act
+            File savedFile = bestMatchCapture.saveImage(image, "test", 0.5);
+            
+            // Assert
+            assertTrue(Files.exists(newDir));
+            assertNotNull(savedFile);
+        }
+        
+        @Test
+        @DisplayName("Should generate unique filename with timestamp")
+        void shouldGenerateUniqueFilenameWithTimestamp() {
+            // Arrange
+            bestMatchCapture.setCaptureDirectory(tempDirectory.toString());
+            BufferedImage image = new BufferedImage(10, 10, BufferedImage.TYPE_INT_RGB);
+            
+            // Act
+            File file1 = bestMatchCapture.saveImage(image, "capture", 0.8);
+            File file2 = bestMatchCapture.saveImage(image, "capture", 0.8);
+            
+            // Assert
+            assertNotEquals(file1.getName(), file2.getName());
+            assertTrue(file1.getName().contains(LocalDateTime.now().format(
+                DateTimeFormatter.ofPattern("yyyyMMdd")
+            )));
+        }
+    }
+    
+    @Nested
+    @DisplayName("Pattern Image Saving")
+    class PatternImageSaving {
+        
+        @Test
+        @DisplayName("Should save pattern image when enabled")
+        void shouldSavePatternImageWhenEnabled() {
+            // Arrange
+            bestMatchCapture.setCaptureEnabled(true);
+            bestMatchCapture.setSavePatternImage(true);
+            bestMatchCapture.setCaptureDirectory(tempDirectory.toString());
+            when(pattern.getImage()).thenReturn(patternImage);
+            when(pattern.getName()).thenReturn("test-pattern");
+            
+            // Act
+            bestMatchCapture.savePatternImage(pattern);
+            
+            // Assert
+            File[] files = tempDirectory.toFile().listFiles();
+            assertNotNull(files);
+            assertTrue(files.length > 0);
+        }
+        
+        @Test
+        @DisplayName("Should not save pattern when disabled")
+        void shouldNotSavePatternWhenDisabled() {
+            // Arrange
+            bestMatchCapture.setSavePatternImage(false);
+            
+            // Act
+            bestMatchCapture.savePatternImage(pattern);
+            
+            // Assert
+            File[] files = tempDirectory.toFile().listFiles();
+            assertTrue(files == null || files.length == 0);
+        }
+    }
+    
+    @Nested
+    @DisplayName("Region Extraction")
+    class RegionExtraction {
+        
+        @Test
+        @DisplayName("Should extract region from scene")
+        void shouldExtractRegionFromScene() {
+            // Arrange
+            when(scene.getImage()).thenReturn(sceneImage);
+            when(sceneImage.getWidth()).thenReturn(1000);
+            when(sceneImage.getHeight()).thenReturn(800);
+            when(match.getX()).thenReturn(100);
+            when(match.getY()).thenReturn(100);
+            when(match.getWidth()).thenReturn(200);
+            when(match.getHeight()).thenReturn(150);
+            
+            // Act
+            BufferedImage extracted = bestMatchCapture.extractRegion(scene, match);
+            
+            // Assert
+            assertNotNull(extracted);
+            assertEquals(200, extracted.getWidth());
+            assertEquals(150, extracted.getHeight());
+        }
+        
+        @Test
+        @DisplayName("Should handle region at scene boundary")
+        void shouldHandleRegionAtSceneBoundary() {
+            // Arrange
+            when(scene.getImage()).thenReturn(sceneImage);
+            when(sceneImage.getWidth()).thenReturn(500);
+            when(sceneImage.getHeight()).thenReturn(400);
+            when(match.getX()).thenReturn(450);
+            when(match.getY()).thenReturn(350);
+            when(match.getWidth()).thenReturn(100);
+            when(match.getHeight()).thenReturn(100);
+            
+            // Act
+            BufferedImage extracted = bestMatchCapture.extractRegion(scene, match);
+            
+            // Assert
+            assertNotNull(extracted);
+            // Should clip to scene boundaries
+            assertTrue(extracted.getWidth() <= 50);
+            assertTrue(extracted.getHeight() <= 50);
+        }
+    }
+    
+    @Nested
+    @DisplayName("Score Formatting")
+    class ScoreFormatting {
+        
+        @ParameterizedTest
+        @CsvSource({
+            "0.999, 99",
+            "0.875, 87",
+            "0.500, 50",
+            "0.123, 12",
+            "0.001, 00"
+        })
+        @DisplayName("Should format score for filename")
+        void shouldFormatScoreForFilename(double score, String expected) {
+            // Act
+            String formatted = bestMatchCapture.formatScoreForFilename(score);
+            
+            // Assert
+            assertEquals(expected, formatted);
+        }
+        
+        @Test
+        @DisplayName("Should handle edge score values")
+        void shouldHandleEdgeScoreValues() {
+            // Assert
+            assertEquals("100", bestMatchCapture.formatScoreForFilename(1.0));
+            assertEquals("00", bestMatchCapture.formatScoreForFilename(0.0));
+            assertEquals("00", bestMatchCapture.formatScoreForFilename(-0.1));
+            assertEquals("100", bestMatchCapture.formatScoreForFilename(1.1));
+        }
+    }
+    
+    @Nested
+    @DisplayName("Error Handling")
+    class ErrorHandling {
+        
+        @Test
+        @DisplayName("Should handle null pattern")
+        void shouldHandleNullPattern() {
+            // Act & Assert
+            assertDoesNotThrow(() -> 
+                bestMatchCapture.captureBestMatch(null, scene, match)
+            );
+        }
+        
+        @Test
+        @DisplayName("Should handle null scene")
+        void shouldHandleNullScene() {
+            // Act & Assert
+            assertDoesNotThrow(() -> 
+                bestMatchCapture.captureBestMatch(pattern, null, match)
+            );
+        }
+        
+        @Test
+        @DisplayName("Should handle IO exceptions gracefully")
+        void shouldHandleIoExceptionsGracefully() {
+            // Arrange
+            bestMatchCapture.setCaptureDirectory("/invalid/path/that/cannot/exist");
+            BufferedImage image = new BufferedImage(10, 10, BufferedImage.TYPE_INT_RGB);
+            
+            // Act & Assert
+            assertDoesNotThrow(() -> 
+                bestMatchCapture.saveImage(image, "test", 0.5)
+            );
+        }
+    }
+    
+    @Nested
+    @DisplayName("Performance")
+    class Performance {
+        
+        @Test
+        @DisplayName("Should capture quickly")
+        void shouldCaptureQuickly() {
+            // Arrange
+            bestMatchCapture.setCaptureEnabled(true);
+            bestMatchCapture.setCaptureDirectory(tempDirectory.toString());
+            when(pattern.getImage()).thenReturn(new BufferedImage(100, 100, BufferedImage.TYPE_INT_RGB));
+            when(scene.getImage()).thenReturn(new BufferedImage(1000, 1000, BufferedImage.TYPE_INT_RGB));
+            when(match.getScore()).thenReturn(0.5);
+            
+            // Act
+            long startTime = System.currentTimeMillis();
+            bestMatchCapture.captureBestMatch(pattern, scene, match);
+            long endTime = System.currentTimeMillis();
+            
+            // Assert
+            assertTrue(endTime - startTime < 500, "Capture should complete in less than 500ms");
+        }
+    }
+}
