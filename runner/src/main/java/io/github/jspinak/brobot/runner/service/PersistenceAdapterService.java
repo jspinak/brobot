@@ -2,7 +2,7 @@ package io.github.jspinak.brobot.runner.service;
 
 import io.github.jspinak.brobot.model.action.ActionHistory;
 import io.github.jspinak.brobot.model.action.ActionRecord;
-import io.github.jspinak.brobot.model.state.stateObject.StateObject;
+import io.github.jspinak.brobot.model.state.StateObject;
 import io.github.jspinak.brobot.persistence.PersistenceProvider;
 import io.github.jspinak.brobot.persistence.PersistenceProvider.SessionMetadata;
 import lombok.RequiredArgsConstructor;

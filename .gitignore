@@ -114,3 +114,4 @@ runner/ACTION_RECORD_PERSISTENCE_PLAN.md
 
 # GitHub workflows (should be in root repo, not library)
 library/.github/
+*.hprof

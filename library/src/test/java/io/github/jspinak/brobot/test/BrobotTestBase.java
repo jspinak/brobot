@@ -2,7 +2,6 @@ package io.github.jspinak.brobot.test;
 
 import io.github.jspinak.brobot.config.ExecutionEnvironment;
 import org.junit.jupiter.api.BeforeEach;
-import org.springframework.test.util.ReflectionTestUtils;
 
 /**
  * Base test class for all Brobot tests.
@@ -25,16 +24,23 @@ public abstract class BrobotTestBase {
      */
     @BeforeEach
     public void setupTest() {
-        // Configure ExecutionEnvironment for testing
-        ExecutionEnvironment testEnv = ExecutionEnvironment.builder()
-            .mockMode(true)  // Enable mock mode for testing
-            .forceHeadless(false)  // Allow display operations in mock mode
-            .allowScreenCapture(false)  // No real screen capture in tests
-            .build();
-        
-        ExecutionEnvironment.setInstance(testEnv);
-        
-        // Also set system property for compatibility
+        // Set system property for mock mode
         System.setProperty("brobot.mock.mode", "true");
+        
+        // Configure ExecutionEnvironment for mock mode
+        ExecutionEnvironment env = new ExecutionEnvironment.Builder()
+            .mockMode(true)
+            .forceHeadless(true)
+            .allowScreenCapture(false)
+            .build();
+        ExecutionEnvironment.setInstance(env);
+        
+        // Set FrameworkSettings.mock directly using reflection to avoid initialization issues
+        try {
+            Class<?> frameworkSettingsClass = Class.forName("io.github.jspinak.brobot.config.FrameworkSettings");
+            frameworkSettingsClass.getField("mock").set(null, true);
+        } catch (Exception e) {
+            // Ignore if FrameworkSettings is not available
+        }
     }
 }
