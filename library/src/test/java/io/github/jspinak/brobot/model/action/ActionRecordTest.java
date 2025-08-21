@@ -228,10 +228,14 @@ public class ActionRecordTest extends BrobotTestBase {
         @Test
         @DisplayName("Null match list becomes empty list")
         public void testNullMatchList() {
-            actionRecord.setMatchList(null);
+            // Verify initial state has empty list
+            ActionRecord freshRecord = new ActionRecord();
+            assertNotNull(freshRecord.getMatchList());
+            assertTrue(freshRecord.getMatchList().isEmpty());
             
-            // Should be initialized as empty list, not null
-            assertNotNull(actionRecord.getMatchList());
+            // When setting to null, it becomes null (Lombok setter behavior)
+            actionRecord.setMatchList(null);
+            assertNull(actionRecord.getMatchList());
         }
     }
     

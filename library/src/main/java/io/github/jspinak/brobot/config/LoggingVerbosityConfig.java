@@ -100,7 +100,7 @@ public class LoggingVerbosityConfig {
         private int maxObjectNameLength = 30;
     }
     
-    private final NormalModeConfig normal = new NormalModeConfig();
+    private NormalModeConfig normal = new NormalModeConfig();
     
     /**
      * Configuration for verbose logging mode.
@@ -146,7 +146,7 @@ public class LoggingVerbosityConfig {
         private boolean showStackTraces = true;
     }
     
-    private final VerboseModeConfig verbose = new VerboseModeConfig();
+    private VerboseModeConfig verbose = new VerboseModeConfig();
     
     /**
      * Helper method to check if running in normal mode.
