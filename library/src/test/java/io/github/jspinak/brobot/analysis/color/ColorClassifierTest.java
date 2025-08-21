@@ -7,6 +7,7 @@ import io.github.jspinak.brobot.model.element.Pattern;
 import io.github.jspinak.brobot.model.element.Image;
 import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.test.BrobotTestBase;
+import io.github.jspinak.brobot.tools.testing.mock.builders.MockSceneBuilder;
 import io.github.jspinak.brobot.util.image.core.ColorMatrixUtilities;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.junit.jupiter.api.*;
@@ -44,7 +45,7 @@ public class ColorClassifierTest extends BrobotTestBase {
     @Mock
     private Image image;
     
-    // StateImage can't be mocked, use real instance
+    @Mock
     private StateImage stateImage;
     
     @Mock
@@ -121,42 +122,41 @@ public class ColorClassifierTest extends BrobotTestBase {
     @Test
     @DisplayName("Should create SceneAnalysis with BGR and HSV indices")
     void shouldCreateSceneAnalysisWithIndices() {
-        PixelProfiles profiles = mock(PixelProfiles.class);
-        when(profiles.getStateImage()).thenReturn(stateImage);
-        when(stateImage.getIndex()).thenReturn(1);
+        // Use MockSceneBuilder for properly initialized data
+        PixelProfiles profiles = MockSceneBuilder.createMockPixelProfile(1);
         pixelAnalysisCollections.add(profiles);
         
         doNothing().when(matOps3d).minIndex(any(Mat.class), any(Mat.class), any(Mat.class), anyInt());
         
-        SceneAnalysis result = colorClassifier.getSceneAnalysis(pixelAnalysisCollections, scene);
+        Scene mockScene = MockSceneBuilder.createMockScene();
+        SceneAnalysis result = colorClassifier.getSceneAnalysis(pixelAnalysisCollections, mockScene);
         
         assertNotNull(result);
         assertEquals(pixelAnalysisCollections, result.getPixelAnalysisCollections());
-        assertEquals(scene, result.getScene());
+        assertEquals(mockScene, result.getScene());
         verify(matOps3d, atLeastOnce()).minIndex(any(Mat.class), any(Mat.class), any(Mat.class), eq(1));
     }
     
     @Test
     @DisplayName("Should handle multiple pixel profiles in scene analysis")
     void shouldHandleMultiplePixelProfiles() {
-        PixelProfiles profiles1 = mock(PixelProfiles.class);
-        PixelProfiles profiles2 = mock(PixelProfiles.class);
-        StateImage stateImage1 = mock(StateImage.class);
-        StateImage stateImage2 = mock(StateImage.class);
-        
-        when(profiles1.getStateImage()).thenReturn(stateImage1);
-        when(profiles2.getStateImage()).thenReturn(stateImage2);
-        when(stateImage1.getIndex()).thenReturn(1);
-        when(stateImage2.getIndex()).thenReturn(2);
+        // Use MockSceneBuilder to create properly initialized profiles
+        PixelProfiles profiles1 = MockSceneBuilder.createMockPixelProfile(1);
+        PixelProfiles profiles2 = MockSceneBuilder.createMockPixelProfile(2);
         
         pixelAnalysisCollections.add(profiles1);
         pixelAnalysisCollections.add(profiles2);
         
-        SceneAnalysis result = colorClassifier.getSceneAnalysis(pixelAnalysisCollections, scene);
+        // Use mock scene from builder
+        Scene mockScene = MockSceneBuilder.createMockScene();
+        
+        SceneAnalysis result = colorClassifier.getSceneAnalysis(pixelAnalysisCollections, mockScene);
         
         assertNotNull(result);
         assertEquals(2, result.size());
-        verify(matOps3d, times(2)).minIndex(any(Mat.class), any(Mat.class), any(Mat.class), anyInt());
+        // The minIndex is called once per profile in getImageIndices, 
+        // and once per color schema (BGR and HSV), so 2 profiles * 2 schemas = 4 calls
+        verify(matOps3d, times(4)).minIndex(any(Mat.class), any(Mat.class), any(Mat.class), anyInt());
     }
     
     @Test
@@ -173,11 +173,11 @@ public class ColorClassifierTest extends BrobotTestBase {
     @Test
     @DisplayName("Should process BGR color schema")
     void shouldProcessBGRColorSchema() {
-        PixelProfiles profiles = mock(PixelProfiles.class);
-        when(profiles.getStateImage()).thenReturn(stateImage);
-        when(stateImage.getIndex()).thenReturn(1);
-        
-        SceneAnalysis sceneAnalysis = new SceneAnalysis(Arrays.asList(profiles), scene);
+        // Use MockSceneBuilder for properly initialized data
+        SceneAnalysis sceneAnalysis = MockSceneBuilder.sceneAnalysis()
+            .withDefaultColorCluster()
+            .withPixelProfile(1)
+            .build();
         
         Mat result = colorClassifier.getImageIndices(sceneAnalysis, BGR);
         
@@ -187,11 +187,11 @@ public class ColorClassifierTest extends BrobotTestBase {
     @Test
     @DisplayName("Should process HSV color schema")
     void shouldProcessHSVColorSchema() {
-        PixelProfiles profiles = mock(PixelProfiles.class);
-        when(profiles.getStateImage()).thenReturn(stateImage);
-        when(stateImage.getIndex()).thenReturn(1);
-        
-        SceneAnalysis sceneAnalysis = new SceneAnalysis(Arrays.asList(profiles), scene);
+        // Use MockSceneBuilder for properly initialized data
+        SceneAnalysis sceneAnalysis = MockSceneBuilder.sceneAnalysis()
+            .withDefaultColorCluster()
+            .withPixelProfile(1)
+            .build();
         
         Mat result = colorClassifier.getImageIndices(sceneAnalysis, HSV);
         
@@ -201,27 +201,17 @@ public class ColorClassifierTest extends BrobotTestBase {
     @Test
     @DisplayName("Should handle state images with different indices")
     void shouldHandleStateImagesWithDifferentIndices() {
-        PixelProfiles profiles1 = mock(PixelProfiles.class);
-        PixelProfiles profiles2 = mock(PixelProfiles.class);
-        PixelProfiles profiles3 = mock(PixelProfiles.class);
-        
-        StateImage stateImage1 = mock(StateImage.class);
-        StateImage stateImage2 = mock(StateImage.class);
-        StateImage stateImage3 = mock(StateImage.class);
-        
-        when(profiles1.getStateImage()).thenReturn(stateImage1);
-        when(profiles2.getStateImage()).thenReturn(stateImage2);
-        when(profiles3.getStateImage()).thenReturn(stateImage3);
-        
-        when(stateImage1.getIndex()).thenReturn(0);
-        when(stateImage2.getIndex()).thenReturn(5);
-        when(stateImage3.getIndex()).thenReturn(10);
+        // Use MockSceneBuilder to create properly initialized profiles
+        PixelProfiles profiles1 = MockSceneBuilder.createMockPixelProfile(0);
+        PixelProfiles profiles2 = MockSceneBuilder.createMockPixelProfile(5);
+        PixelProfiles profiles3 = MockSceneBuilder.createMockPixelProfile(10);
         
         pixelAnalysisCollections.add(profiles1);
         pixelAnalysisCollections.add(profiles2);
         pixelAnalysisCollections.add(profiles3);
         
-        SceneAnalysis sceneAnalysis = new SceneAnalysis(pixelAnalysisCollections, scene);
+        Scene mockScene = MockSceneBuilder.createMockScene();
+        SceneAnalysis sceneAnalysis = new SceneAnalysis(pixelAnalysisCollections, mockScene);
         
         Mat result = colorClassifier.getImageIndices(sceneAnalysis, BGR);
         
@@ -234,18 +224,18 @@ public class ColorClassifierTest extends BrobotTestBase {
     @Test
     @DisplayName("Should create scene analysis with proper structure")
     void shouldCreateSceneAnalysisWithProperStructure() {
-        PixelProfiles profiles = mock(PixelProfiles.class);
-        when(profiles.getStateImage()).thenReturn(stateImage);
-        when(stateImage.getIndex()).thenReturn(1);
+        // Use MockSceneBuilder for properly initialized data
+        PixelProfiles profiles = MockSceneBuilder.createMockPixelProfile(1);
         pixelAnalysisCollections.add(profiles);
         
-        SceneAnalysis result = colorClassifier.getSceneAnalysis(pixelAnalysisCollections, scene);
+        Scene mockScene = MockSceneBuilder.createMockScene();
+        SceneAnalysis result = colorClassifier.getSceneAnalysis(pixelAnalysisCollections, mockScene);
         
         assertNotNull(result);
         assertNotNull(result.getPixelAnalysisCollections());
         assertEquals(1, result.getPixelAnalysisCollections().size());
         assertEquals(profiles, result.getPixelAnalysisCollection(0));
-        assertEquals(scene, result.getScene());
+        assertEquals(mockScene, result.getScene());
     }
     
     @Test

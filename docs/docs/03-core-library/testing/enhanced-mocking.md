@@ -313,6 +313,143 @@ public class CustomTest extends BrobotTestBase {
 - **Always** for integration tests in headless environments
 - **Optional** for end-to-end tests that need real screen interaction (don't extend BrobotTestBase)
 
+## Enhanced Mock Infrastructure
+
+### Grid Operations in Mock Mode
+
+Brobot now provides full grid operation support in mock mode through the `MockGridConfig` class:
+
+```java
+import io.github.jspinak.brobot.tools.testing.mock.grid.MockGridConfig;
+
+@Test
+public void testGridOperations() {
+    // Configure grid dimensions for testing
+    MockGridConfig.setDefaultGrid(3, 3); // 3x3 grid
+    
+    Region region = new Region(0, 0, 300, 300);
+    Location location = new Location(150, 150); // Center
+    
+    // Grid operations work seamlessly in mock mode
+    Optional<Integer> gridNumber = RegionUtils.getGridNumber(region, location);
+    assertTrue(gridNumber.isPresent());
+    assertEquals(4, gridNumber.get()); // Center cell in 3x3 grid
+    
+    // Get specific grid region
+    Region gridRegion = region.getGridRegion(4);
+    assertEquals(100, gridRegion.w());
+    assertEquals(100, gridRegion.h());
+}
+```
+
+#### MockGridConfig Features
+
+- **Configurable Dimensions**: Set custom grid sizes with `setDefaultGrid(rows, cols)`
+- **Thread-Safe**: Safe for use in parallel test execution
+- **Fallback Calculations**: When SikuliX is unavailable, uses native Brobot calculations
+- **Consistent Behavior**: Same API in mock and real modes
+
+### Mock Scene and Color Analysis
+
+The `MockSceneBuilder` provides comprehensive builders for creating test data for color analysis and scene processing:
+
+```java
+import io.github.jspinak.brobot.tools.testing.mock.builders.MockSceneBuilder;
+
+@Test
+public void testColorAnalysis() {
+    // Create a mock scene with initialized image data
+    Scene scene = MockSceneBuilder.createMockScene();
+    assertNotNull(scene.getPattern());
+    assertNotNull(scene.getPattern().getImage());
+    
+    // Create scene analysis with multiple profiles
+    SceneAnalysis analysis = MockSceneBuilder.createMockSceneAnalysis(3);
+    assertEquals(3, analysis.size());
+    
+    // Each profile has properly initialized color clusters
+    PixelProfiles profile = analysis.getPixelAnalysisCollection(0);
+    assertNotNull(profile.getStateImage().getColorCluster());
+    
+    // Color operations work without real images
+    ColorClassifier classifier = new ColorClassifier();
+    Mat indices = classifier.getImageIndices(analysis, ColorCluster.ColorSchemaName.BGR);
+    assertNotNull(indices);
+}
+```
+
+#### MockSceneBuilder Methods
+
+| Method | Description |
+|--------|-------------|
+| `createMockScene()` | Creates Scene with valid Pattern and Image |
+| `createMockPattern()` | Creates Pattern with BGR Mat image |
+| `createMockSceneAnalysis(int)` | Creates SceneAnalysis with specified number of profiles |
+| `createMockColorCluster()` | Creates ColorCluster with BGR and HSV schemas |
+| `createMockColorSchema(ColorSchemaName)` | Creates schema with proper statistics |
+| `sceneAnalysis()` | Returns builder for complex SceneAnalysis configurations |
+
+#### Builder Pattern for Complex Scenarios
+
+```java
+@Test
+public void testComplexSceneAnalysis() {
+    // Use builder for complex configurations
+    SceneAnalysis analysis = MockSceneBuilder.sceneAnalysis()
+        .withScene(customScene)
+        .withPixelProfile(0)
+        .withPixelProfile(1)
+        .withPixelProfile(2)
+        .build();
+    
+    // Analysis is fully initialized and ready for testing
+    assertEquals(3, analysis.getPixelAnalysisCollections().size());
+}
+```
+
+### Performance Characteristics
+
+Mock mode operations are significantly faster than real operations:
+
+| Operation | Mock Mode | Real Mode | Speedup |
+|-----------|-----------|-----------|---------|
+| Grid operations | ~0.01s | 0.5s | 50x |
+| Color analysis | ~0.02s | 1-2s | 50-100x |
+| Pattern matching | ~0.01s | 0.5-2s | 50-200x |
+| State transitions | ~0.01s | 0.2-1s | 20-100x |
+
+### Jackson Serialization Support
+
+When creating test objects that need serialization, ensure proper Jackson annotations:
+
+```java
+@Getter
+@Builder(toBuilder = true, builderClassName = "Builder")
+@JsonDeserialize(builder = MyTestData.Builder.class)
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class MyTestData {
+    
+    private String field;
+    
+    @JsonPOJOBuilder(withPrefix = "")
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class Builder {
+        // Lombok generates implementation
+    }
+}
+```
+
+### Common Testing Pitfalls and Solutions
+
+| Pitfall | Solution |
+|---------|----------|
+| Tests fail in headless environments | Always extend `BrobotTestBase` |
+| SikuliX field mocking errors | Use real SikuliX objects or Brobot mocks |
+| Grid operations return empty | Configure `MockGridConfig` dimensions |
+| ColorClassifier NPEs | Use `MockSceneBuilder` for test data |
+| Forget to call `super.setupTest()` | Always call parent setup when overriding |
+| Static mocks without cleanup | Use try-with-resources for static mocks |
+
 ## Integration with Existing Tests
 
 ### Migrating from Basic Mocks

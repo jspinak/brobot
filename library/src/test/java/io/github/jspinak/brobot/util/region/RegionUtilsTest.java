@@ -4,6 +4,7 @@ import io.github.jspinak.brobot.model.element.Location;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.test.BrobotTestBase;
+import io.github.jspinak.brobot.tools.testing.mock.grid.MockGridConfig;
 import org.bytedeco.opencv.opencv_core.Rect;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -403,13 +404,18 @@ public class RegionUtilsTest extends BrobotTestBase {
         @Test
         @DisplayName("Get grid number from location")
         public void testGetGridNumber() {
+            // Set up a 2x2 grid for testing
+            MockGridConfig.setDefaultGrid(2, 2);
+            
             Region grid = new Region(0, 0, 100, 100);
             Location loc = new Location(75, 25); // Top-right quadrant
             
             Optional<Integer> gridNumber = RegionUtils.getGridNumber(grid, loc);
             
-            // In mock mode this returns empty
-            assertTrue(gridNumber.isEmpty() || gridNumber.get() == -1);
+            // In mock mode with proper grid config, this should return grid index 1 (top-right in 2x2 grid)
+            // Grid layout for 2x2: [0,1] (top row), [2,3] (bottom row)
+            assertTrue(gridNumber.isPresent());
+            assertEquals(1, gridNumber.get());
         }
         
         @ParameterizedTest

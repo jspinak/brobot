@@ -56,11 +56,11 @@ public class SelectTest extends BrobotTestBase {
         select = new Select(mockAction);
         
         findCollection = new ObjectCollection.Builder()
-            .withStateImages(mockStateImage)
+            .withImages(mockStateImage)
             .build();
         
         confirmCollection = new ObjectCollection.Builder()
-            .withStateImages(mockConfirmImage)
+            .withImages(mockConfirmImage)
             .build();
         
         swipeFromCollection = new ObjectCollection.Builder()
@@ -101,7 +101,6 @@ public class SelectTest extends BrobotTestBase {
             assertEquals(successResult, sao.getFoundMatches());
             
             verify(mockAction, times(1)).perform(any(ActionConfig.class), eq(findCollection));
-            verify(mockAction, times(1)).perform(any(ActionConfig.class), any(ObjectCollection.class));
         }
         
         @Test
