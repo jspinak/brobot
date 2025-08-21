@@ -124,3 +124,6 @@ library/**/*.md
 # Ignore only root-level shell scripts and Markdown files
 /*.sh
 /*.md
+
+# Ignore root build directory
+/build/
