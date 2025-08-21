@@ -28,6 +28,21 @@ public class ConfigurationDiagnosticsTest extends BrobotTestBase {
         mockImageLoader = mock(SmartImageLoader.class);
         mockEnvironment = mock(ExecutionEnvironment.class);
         
+        // Setup default mock behavior for BrobotConfiguration
+        BrobotConfiguration.EnvironmentConfig envConfig = mock(BrobotConfiguration.EnvironmentConfig.class);
+        when(envConfig.getProfile()).thenReturn("test");
+        when(mockConfig.getEnvironment()).thenReturn(envConfig);
+        
+        BrobotConfiguration.CoreConfig coreConfig = mock(BrobotConfiguration.CoreConfig.class);
+        when(coreConfig.getImagePath()).thenReturn("images/");
+        // getPackageName doesn't exist, removed
+        when(mockConfig.getCore()).thenReturn(coreConfig);
+        
+        // MouseConfig doesn't exist - use SikuliConfig instead which has timing-related settings
+        BrobotConfiguration.SikuliConfig sikuliConfig = mock(BrobotConfiguration.SikuliConfig.class);
+        when(sikuliConfig.getWaitTime()).thenReturn(3.0);
+        when(mockConfig.getSikuli()).thenReturn(sikuliConfig);
+        
         diagnostics = new ConfigurationDiagnostics(
             mockConfig, mockPathManager, mockImageLoader, mockEnvironment
         );

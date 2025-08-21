@@ -87,6 +87,31 @@ public class DPIAwareCapture {
      * @return BufferedImage at logical resolution (scaled if necessary)
      */
     public BufferedImage captureDPIAware(int x, int y, int width, int height) {
+        // Validate dimensions
+        if (width <= 0 || height <= 0) {
+            throw new IllegalArgumentException("Width and height must be positive");
+        }
+        
+        // Check if in mock mode
+        boolean mockMode = false;
+        try {
+            Class<?> frameworkSettingsClass = Class.forName("io.github.jspinak.brobot.config.FrameworkSettings");
+            mockMode = frameworkSettingsClass.getField("mock").getBoolean(null);
+        } catch (Exception e) {
+            // FrameworkSettings not available or mock field not accessible
+        }
+        
+        if (mockMode) {
+            // In mock mode, return a dummy image
+            log.debug("Mock mode: returning dummy image for capture [{},{}] {}x{}", x, y, width, height);
+            BufferedImage mockImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+            Graphics2D g = mockImage.createGraphics();
+            g.setColor(Color.GRAY);
+            g.fillRect(0, 0, width, height);
+            g.dispose();
+            return mockImage;
+        }
+        
         double scaleFactor = getDisplayScaleFactor();
         
         try {
