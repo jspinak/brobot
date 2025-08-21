@@ -10,6 +10,7 @@ import io.github.jspinak.brobot.action.basic.vanish.VanishOptions;
 import io.github.jspinak.brobot.model.action.ActionRecord;
 import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.model.element.Region;
+import io.github.jspinak.brobot.model.element.Location;
 import io.github.jspinak.brobot.runner.persistence.entity.ActionRecordEntity;
 import io.github.jspinak.brobot.runner.persistence.entity.MatchEntity;
 import lombok.RequiredArgsConstructor;
@@ -49,9 +50,9 @@ public class ActionRecordMapper {
         
         // Map basic fields
         entity.setActionSuccess(record.isActionSuccess());
-        entity.setDuration(record.getDuration());
+        entity.setDuration((long)(record.getDuration() * 1000)); // Convert seconds to milliseconds
         entity.setText(record.getText());
-        entity.setStateId(record.getStateId());
+        // entity.setStateId(record.getStateName()); // TODO: Convert stateName to stateId
         
         // Map matches
         if (record.getMatchList() != null && !record.getMatchList().isEmpty()) {
@@ -87,9 +88,9 @@ public class ActionRecordMapper {
         
         // Map basic fields
         builder.setActionSuccess(entity.isActionSuccess());
-        builder.setDuration(entity.getDuration());
+        builder.setDuration(entity.getDuration() / 1000.0); // Convert milliseconds to seconds
         builder.setText(entity.getText());
-        builder.setStateId(entity.getStateId());
+        // builder.setStateName(entity.getStateId()); // TODO: Convert stateId to stateName
         
         // Map matches
         if (entity.getMatches() != null && !entity.getMatches().isEmpty()) {
@@ -113,21 +114,21 @@ public class ActionRecordMapper {
         entity.setY(region.getY());
         entity.setWidth(region.getW());
         entity.setHeight(region.getH());
-        entity.setSimScore(match.getSimScore());
+        entity.setSimScore(match.getScore());
         
-        // Set anchor points
-        entity.setAnchorX(match.getAnchor().getX());
-        entity.setAnchorY(match.getAnchor().getY());
+        // Set anchor points from target location
+        if (match.getTarget() != null) {
+            entity.setAnchorX(match.getTarget().getX());
+            entity.setAnchorY(match.getTarget().getY());
+        }
         
         // Set pattern name if available
         if (match.getName() != null) {
             entity.setPatternName(match.getName());
         }
         
-        // Set screenshot path if available
-        if (match.getScreenshot() != null && match.getScreenshot().getPath() != null) {
-            entity.setScreenshotPath(match.getScreenshot().getPath());
-        }
+        // Screenshot path not directly available in Match
+        // entity.setScreenshotPath(...);
         
         return entity;
     }
@@ -145,8 +146,8 @@ public class ActionRecordMapper {
         // Set similarity score
         builder.setSimScore(entity.getSimScore());
         
-        // Set anchor point
-        builder.setAnchor(entity.getAnchorX(), entity.getAnchorY());
+        // Set target location as anchor point
+        builder.setOffset(new Location(entity.getAnchorX(), entity.getAnchorY()));
         
         // Set name if available
         if (entity.getPatternName() != null) {

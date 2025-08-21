@@ -28,7 +28,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
         "spring.main.allow-bean-definition-overriding=true",
         "brobot.test.type=unit",
         "brobot.capture.physical-resolution=false",
-        "brobot.mock.enabled=true"
+        "brobot.mock.enabled=true",
+        "brobot.console.actions.level=QUIET"
     })
 @Import({MockGuiAccessConfig.class, MockGuiAccessMonitor.class, MockScreenConfig.class})
 @ContextConfiguration(initializers = TestEnvironmentInitializer.class)

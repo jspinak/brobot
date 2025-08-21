@@ -15,6 +15,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.sikuli.basics.Settings;
@@ -383,10 +384,13 @@ public class TypeTextTest extends BrobotTestBase {
             
             typeText.perform(mockActionResult, mockObjectCollection);
             
-            verify(mockTextTyper).type(username, options);
-            verify(mockTextTyper).type(password, options);
-            verify(mockTextTyper).type(confirmPassword, options);
-            verify(mockTimeProvider, times(2)).wait(0.3);
+            // Verify all three strings are typed in order
+            InOrder inOrder = inOrder(mockTextTyper, mockTimeProvider);
+            inOrder.verify(mockTextTyper).type(username, options);
+            inOrder.verify(mockTimeProvider).wait(0.3);
+            inOrder.verify(mockTextTyper).type(password, options);
+            inOrder.verify(mockTimeProvider).wait(0.3);
+            inOrder.verify(mockTextTyper).type(confirmPassword, options);
         }
         
         @Test

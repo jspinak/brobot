@@ -12,6 +12,7 @@
 .gradle
 /library/.gradle
 /**/build
+*.args
 
 # Maven Central
 /library/gradle.properties
@@ -114,3 +115,12 @@ runner/ACTION_RECORD_PERSISTENCE_PLAN.md
 
 # GitHub workflows (should be in root repo, not library)
 library/.github/
+*.hprof
+
+# Ignore all shell scripts and Markdown files in the library module
+library/**/*.sh
+library/**/*.md
+
+# Ignore only root-level shell scripts and Markdown files
+/*.sh
+/*.md

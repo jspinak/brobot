@@ -2,10 +2,10 @@ package io.github.jspinak.brobot.runner.listener;
 
 import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.ActionResult;
-import io.github.jspinak.brobot.events.ActionExecutedEvent;
+// import io.github.jspinak.brobot.events.ActionExecutedEvent; // TODO: This event doesn't exist yet
 import io.github.jspinak.brobot.model.action.ActionRecord;
-import io.github.jspinak.brobot.model.state.stateObject.StateImage;
-import io.github.jspinak.brobot.model.state.stateObject.StateObject;
+import io.github.jspinak.brobot.model.state.StateImage;
+import io.github.jspinak.brobot.model.state.StateObject;
 import io.github.jspinak.brobot.runner.service.ActionRecordingService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +27,7 @@ public class BrobotActionListener {
     /**
      * Handle action execution events from the brobot library
      */
+    /* TODO: Enable when ActionExecutedEvent is available
     @EventListener
     @Async
     public void onActionExecuted(ActionExecutedEvent event) {
@@ -60,6 +61,7 @@ public class BrobotActionListener {
             log.error("Error recording action from event: {}", e.getMessage(), e);
         }
     }
+    */
     
     /**
      * Create ActionRecord from ActionResult and ActionConfig
@@ -72,11 +74,14 @@ public class BrobotActionListener {
         
         // Set result data
         builder.setActionSuccess(result.isSuccess());
-        builder.setDuration(result.getDuration());
+        if (result.getDuration() != null) {
+            builder.setDuration(result.getDuration().toMillis() / 1000.0);
+        }
         
         // Add text if present
         if (result.getText() != null && !result.getText().isEmpty()) {
-            builder.setText(result.getText());
+            // Use the first string from the text collection
+            builder.setText(result.getText().get(0));
         }
         
         // Add matches
@@ -84,10 +89,10 @@ public class BrobotActionListener {
             result.getMatchList().forEach(builder::addMatch);
         }
         
-        // Set state ID if available
-        if (result.getStateId() != null) {
-            builder.setStateId(result.getStateId());
-        }
+        // Set state ID if available - ActionResult doesn't have getStateId
+        // if (result.getStateId() != null) {
+        //     builder.setStateId(result.getStateId());
+        // }
         
         return builder.build();
     }

@@ -3,6 +3,7 @@ package io.github.jspinak.brobot.test.mock;
 import io.github.jspinak.brobot.logging.unified.BrobotLogger;
 import io.github.jspinak.brobot.tools.logging.gui.GuiAccessConfig;
 import io.github.jspinak.brobot.tools.logging.gui.GuiAccessMonitor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @Primary
+@ConditionalOnMissingBean(name = "guiAccessMonitor")
 public class MockGuiAccessMonitor extends GuiAccessMonitor {
     
     public MockGuiAccessMonitor(BrobotLogger logger, GuiAccessConfig config) {
@@ -20,7 +22,7 @@ public class MockGuiAccessMonitor extends GuiAccessMonitor {
     
     @Override
     public boolean checkGuiAccess() {
-        // Always return true in test environment
-        return true;
+        // Always return false in test environment (no GUI access in tests)
+        return false;
     }
 }
