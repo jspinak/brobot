@@ -1,20 +1,18 @@
 package io.github.jspinak.brobot.action.internal.find;
 
-import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.ActionResult;
-import io.github.jspinak.brobot.model.element.Pattern;
-import io.github.jspinak.brobot.model.element.Region;
+import io.github.jspinak.brobot.action.basic.findAll.FindAll;
+import io.github.jspinak.brobot.action.internal.execution.ActionLifecycleManagement;
+import io.github.jspinak.brobot.model.state.StateImage;
+import io.github.jspinak.brobot.model.element.Scene;
 import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.test.BrobotTestBase;
 import org.junit.jupiter.api.*;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -29,20 +27,22 @@ import static org.mockito.Mockito.*;
 @DisplayName("IterativePatternFinder Tests")
 public class IterativePatternFinderTest extends BrobotTestBase {
 
-    @InjectMocks
     private IterativePatternFinder iterativePatternFinder;
     
     @Mock
-    private Pattern pattern;
+    private ActionLifecycleManagement actionLifecycleManagement;
     
     @Mock
-    private Region searchRegion;
+    private FindAll findAll;
     
     @Mock
-    private ActionConfig actionConfig;
+    private StateImage stateImage;
     
     @Mock
-    private BufferedImage patternImage;
+    private Scene scene;
+    
+    @Mock
+    private ActionResult actionResult;
     
     private AutoCloseable mockCloseable;
     
@@ -51,7 +51,7 @@ public class IterativePatternFinderTest extends BrobotTestBase {
     public void setupTest() {
         super.setupTest();
         mockCloseable = MockitoAnnotations.openMocks(this);
-        iterativePatternFinder = new IterativePatternFinder();
+        iterativePatternFinder = new IterativePatternFinder(actionLifecycleManagement, findAll);
     }
     
     @AfterEach
@@ -62,295 +62,183 @@ public class IterativePatternFinderTest extends BrobotTestBase {
     }
     
     @Nested
-    @DisplayName("Iterative Finding")
-    class IterativeFinding {
+    @DisplayName("Pattern Finding")
+    class PatternFinding {
         
         @Test
-        @DisplayName("Should find pattern on first attempt")
-        void shouldFindPatternOnFirstAttempt() {
+        @DisplayName("Should find patterns in single scene")
+        void shouldFindPatternsInSingleScene() {
             // Arrange
-            when(pattern.getImage()).thenReturn(patternImage);
-            when(actionConfig.getMaxIterations()).thenReturn(3);
+            List<StateImage> stateImages = Collections.singletonList(stateImage);
+            List<Scene> scenes = Collections.singletonList(scene);
+            ActionResult result = new ActionResult();
+            
+            Match match = new Match.Builder()
+                .setSimScore(0.95)
+                .build();
+            
+            when(findAll.perform(any(), any(), any())).thenReturn(new ActionResult());
+            doNothing().when(actionLifecycleManagement).printActionOnce(any());
             
             // Act
-            ActionResult result = iterativePatternFinder.findIteratively(pattern, searchRegion, actionConfig);
+            iterativePatternFinder.find(result, stateImages, scenes);
             
             // Assert
-            assertNotNull(result);
+            verify(actionLifecycleManagement).printActionOnce(result);
+            verify(findAll, atLeastOnce()).perform(any(), any(), any());
         }
         
         @Test
-        @DisplayName("Should retry on failure")
-        void shouldRetryOnFailure() {
+        @DisplayName("Should handle multiple scenes")
+        void shouldHandleMultipleScenes() {
             // Arrange
-            when(pattern.getImage()).thenReturn(patternImage);
-            when(actionConfig.getMaxIterations()).thenReturn(3);
-            when(actionConfig.getRetryDelay()).thenReturn(100L);
+            List<StateImage> stateImages = Arrays.asList(stateImage, stateImage);
+            Scene scene1 = mock(Scene.class);
+            Scene scene2 = mock(Scene.class);
+            List<Scene> scenes = Arrays.asList(scene1, scene2);
+            ActionResult result = new ActionResult();
+            
+            when(findAll.perform(any(), any(), any())).thenReturn(new ActionResult());
+            doNothing().when(actionLifecycleManagement).printActionOnce(any());
             
             // Act
-            ActionResult result = iterativePatternFinder.findIteratively(pattern, searchRegion, actionConfig);
+            iterativePatternFinder.find(result, stateImages, scenes);
             
             // Assert
-            assertNotNull(result);
+            verify(actionLifecycleManagement).printActionOnce(result);
+            verify(findAll, atLeastOnce()).perform(any(), any(), any());
         }
         
-        @ParameterizedTest
-        @ValueSource(ints = {1, 2, 3, 5, 10})
-        @DisplayName("Should respect max iterations")
-        void shouldRespectMaxIterations(int maxIterations) {
+        @Test
+        @DisplayName("Should handle empty state images")
+        void shouldHandleEmptyStateImages() {
             // Arrange
-            when(pattern.getImage()).thenReturn(patternImage);
-            when(actionConfig.getMaxIterations()).thenReturn(maxIterations);
+            List<StateImage> stateImages = new ArrayList<>();
+            List<Scene> scenes = Collections.singletonList(scene);
+            ActionResult result = new ActionResult();
+            
+            doNothing().when(actionLifecycleManagement).printActionOnce(any());
             
             // Act
-            ActionResult result = iterativePatternFinder.findIteratively(pattern, searchRegion, actionConfig);
+            iterativePatternFinder.find(result, stateImages, scenes);
             
             // Assert
-            assertNotNull(result);
-            assertTrue(result.getAttempts() <= maxIterations);
+            verify(actionLifecycleManagement).printActionOnce(result);
+        }
+        
+        @Test
+        @DisplayName("Should handle empty scenes")
+        void shouldHandleEmptyScenes() {
+            // Arrange
+            List<StateImage> stateImages = Collections.singletonList(stateImage);
+            List<Scene> scenes = new ArrayList<>();
+            ActionResult result = new ActionResult();
+            
+            doNothing().when(actionLifecycleManagement).printActionOnce(any());
+            
+            // Act
+            iterativePatternFinder.find(result, stateImages, scenes);
+            
+            // Assert
+            verify(actionLifecycleManagement).printActionOnce(result);
+            verifyNoInteractions(findAll);
+        }
+        
+        @Test
+        @DisplayName("Should accumulate matches from multiple scenes")
+        void shouldAccumulateMatchesFromMultipleScenes() {
+            // Arrange
+            List<StateImage> stateImages = Collections.singletonList(stateImage);
+            List<Scene> scenes = Arrays.asList(scene, scene);
+            ActionResult result = new ActionResult();
+            
+            Match match1 = new Match.Builder().setSimScore(0.9).build();
+            Match match2 = new Match.Builder().setSimScore(0.85).build();
+            
+            ActionResult findResult1 = new ActionResult();
+            findResult1.add(match1);
+            ActionResult findResult2 = new ActionResult();
+            findResult2.add(match2);
+            
+            when(findAll.perform(any(), any(), any()))
+                .thenReturn(findResult1)
+                .thenReturn(findResult2);
+            doNothing().when(actionLifecycleManagement).printActionOnce(any());
+            
+            // Act
+            iterativePatternFinder.find(result, stateImages, scenes);
+            
+            // Assert
+            verify(actionLifecycleManagement).printActionOnce(result);
+            verify(findAll, times(2)).perform(any(), any(), any());
         }
     }
     
     @Nested
-    @DisplayName("Similarity Adjustment")
-    class SimilarityAdjustment {
+    @DisplayName("Error Handling")
+    class ErrorHandling {
         
         @Test
-        @DisplayName("Should decrease similarity on retry")
-        void shouldDecreaseSimilarityOnRetry() {
+        @DisplayName("Should handle null state images")
+        void shouldHandleNullStateImages() {
             // Arrange
-            when(pattern.getImage()).thenReturn(patternImage);
-            when(actionConfig.getMaxIterations()).thenReturn(3);
-            when(actionConfig.getSimilarity()).thenReturn(0.9);
-            when(actionConfig.getSimilarityDecrement()).thenReturn(0.05);
+            List<Scene> scenes = Collections.singletonList(scene);
+            ActionResult result = new ActionResult();
             
-            // Act
-            ActionResult result = iterativePatternFinder.findIteratively(pattern, searchRegion, actionConfig);
+            doNothing().when(actionLifecycleManagement).printActionOnce(any());
             
-            // Assert
-            assertNotNull(result);
-            // Similarity should decrease with each retry
+            // Act & Assert
+            assertDoesNotThrow(() -> 
+                iterativePatternFinder.find(result, null, scenes)
+            );
         }
         
         @Test
-        @DisplayName("Should not go below minimum similarity")
-        void shouldNotGoBelowMinimumSimilarity() {
+        @DisplayName("Should handle null scenes")
+        void shouldHandleNullScenes() {
             // Arrange
-            when(pattern.getImage()).thenReturn(patternImage);
-            when(actionConfig.getMaxIterations()).thenReturn(10);
-            when(actionConfig.getSimilarity()).thenReturn(0.9);
-            when(actionConfig.getSimilarityDecrement()).thenReturn(0.1);
-            when(actionConfig.getMinSimilarity()).thenReturn(0.5);
+            List<StateImage> stateImages = Collections.singletonList(stateImage);
+            ActionResult result = new ActionResult();
             
-            // Act
-            ActionResult result = iterativePatternFinder.findIteratively(pattern, searchRegion, actionConfig);
+            doNothing().when(actionLifecycleManagement).printActionOnce(any());
             
-            // Assert
-            assertNotNull(result);
-            // Should not decrease below 0.5
+            // Act & Assert
+            assertDoesNotThrow(() -> 
+                iterativePatternFinder.find(result, stateImages, null)
+            );
         }
-    }
-    
-    @Nested
-    @DisplayName("Delay Between Attempts")
-    class DelayBetweenAttempts {
         
         @Test
-        @DisplayName("Should apply delay between attempts")
-        void shouldApplyDelayBetweenAttempts() {
+        @DisplayName("Should handle null action result")
+        void shouldHandleNullActionResult() {
             // Arrange
-            when(pattern.getImage()).thenReturn(patternImage);
-            when(actionConfig.getMaxIterations()).thenReturn(3);
-            when(actionConfig.getRetryDelay()).thenReturn(200L);
+            List<StateImage> stateImages = Collections.singletonList(stateImage);
+            List<Scene> scenes = Collections.singletonList(scene);
             
-            // Act
-            long startTime = System.currentTimeMillis();
-            ActionResult result = iterativePatternFinder.findIteratively(pattern, searchRegion, actionConfig);
-            long endTime = System.currentTimeMillis();
+            doNothing().when(actionLifecycleManagement).printActionOnce(any());
             
-            // Assert
-            assertNotNull(result);
-            // Should take at least the delay time for retries
+            // Act & Assert
+            assertDoesNotThrow(() -> 
+                iterativePatternFinder.find(null, stateImages, scenes)
+            );
         }
         
         @Test
-        @DisplayName("Should handle zero delay")
-        void shouldHandleZeroDelay() {
+        @DisplayName("Should handle exception from FindAll")
+        void shouldHandleExceptionFromFindAll() {
             // Arrange
-            when(pattern.getImage()).thenReturn(patternImage);
-            when(actionConfig.getMaxIterations()).thenReturn(3);
-            when(actionConfig.getRetryDelay()).thenReturn(0L);
+            List<StateImage> stateImages = Collections.singletonList(stateImage);
+            List<Scene> scenes = Collections.singletonList(scene);
+            ActionResult result = new ActionResult();
             
-            // Act
-            ActionResult result = iterativePatternFinder.findIteratively(pattern, searchRegion, actionConfig);
+            when(findAll.perform(any(), any(), any()))
+                .thenThrow(new RuntimeException("Find failed"));
+            doNothing().when(actionLifecycleManagement).printActionOnce(any());
             
-            // Assert
-            assertNotNull(result);
-        }
-    }
-    
-    @Nested
-    @DisplayName("Success Conditions")
-    class SuccessConditions {
-        
-        @Test
-        @DisplayName("Should stop on successful find")
-        void shouldStopOnSuccessfulFind() {
-            // Arrange
-            when(pattern.getImage()).thenReturn(patternImage);
-            when(actionConfig.getMaxIterations()).thenReturn(5);
-            
-            Match match = mock(Match.class);
-            when(match.getScore()).thenReturn(0.85);
-            
-            // Act
-            ActionResult result = iterativePatternFinder.findIteratively(pattern, searchRegion, actionConfig);
-            
-            // Assert
-            assertNotNull(result);
-            // Should stop early on success
-        }
-        
-        @Test
-        @DisplayName("Should continue until max iterations on failure")
-        void shouldContinueUntilMaxIterationsOnFailure() {
-            // Arrange
-            when(pattern.getImage()).thenReturn(patternImage);
-            when(actionConfig.getMaxIterations()).thenReturn(3);
-            
-            // Act
-            ActionResult result = iterativePatternFinder.findIteratively(pattern, searchRegion, actionConfig);
-            
-            // Assert
-            assertNotNull(result);
-            assertEquals(3, result.getAttempts());
-        }
-    }
-    
-    @Nested
-    @DisplayName("Result Aggregation")
-    class ResultAggregation {
-        
-        @Test
-        @DisplayName("Should aggregate matches from all attempts")
-        void shouldAggregateMatchesFromAllAttempts() {
-            // Arrange
-            when(pattern.getImage()).thenReturn(patternImage);
-            when(actionConfig.getMaxIterations()).thenReturn(3);
-            when(actionConfig.getAggregateResults()).thenReturn(true);
-            
-            // Act
-            ActionResult result = iterativePatternFinder.findIteratively(pattern, searchRegion, actionConfig);
-            
-            // Assert
-            assertNotNull(result);
-            // Should contain matches from all attempts
-        }
-        
-        @Test
-        @DisplayName("Should return only last attempt when not aggregating")
-        void shouldReturnOnlyLastAttemptWhenNotAggregating() {
-            // Arrange
-            when(pattern.getImage()).thenReturn(patternImage);
-            when(actionConfig.getMaxIterations()).thenReturn(3);
-            when(actionConfig.getAggregateResults()).thenReturn(false);
-            
-            // Act
-            ActionResult result = iterativePatternFinder.findIteratively(pattern, searchRegion, actionConfig);
-            
-            // Assert
-            assertNotNull(result);
-            // Should only contain matches from last attempt
-        }
-    }
-    
-    @Nested
-    @DisplayName("Edge Cases")
-    class EdgeCases {
-        
-        @Test
-        @DisplayName("Should handle null pattern")
-        void shouldHandleNullPattern() {
-            // Act
-            ActionResult result = iterativePatternFinder.findIteratively(null, searchRegion, actionConfig);
-            
-            // Assert
-            assertNotNull(result);
-            assertFalse(result.isSuccess());
-        }
-        
-        @Test
-        @DisplayName("Should handle null search region")
-        void shouldHandleNullSearchRegion() {
-            // Act
-            ActionResult result = iterativePatternFinder.findIteratively(pattern, null, actionConfig);
-            
-            // Assert
-            assertNotNull(result);
-        }
-        
-        @Test
-        @DisplayName("Should handle null config")
-        void shouldHandleNullConfig() {
-            // Act
-            ActionResult result = iterativePatternFinder.findIteratively(pattern, searchRegion, null);
-            
-            // Assert
-            assertNotNull(result);
-        }
-        
-        @Test
-        @DisplayName("Should handle zero max iterations")
-        void shouldHandleZeroMaxIterations() {
-            // Arrange
-            when(actionConfig.getMaxIterations()).thenReturn(0);
-            
-            // Act
-            ActionResult result = iterativePatternFinder.findIteratively(pattern, searchRegion, actionConfig);
-            
-            // Assert
-            assertNotNull(result);
-            assertFalse(result.isSuccess());
-        }
-    }
-    
-    @Nested
-    @DisplayName("Performance")
-    class Performance {
-        
-        @Test
-        @DisplayName("Should complete quickly with early success")
-        void shouldCompleteQuicklyWithEarlySuccess() {
-            // Arrange
-            when(pattern.getImage()).thenReturn(patternImage);
-            when(actionConfig.getMaxIterations()).thenReturn(10);
-            
-            // Act
-            long startTime = System.currentTimeMillis();
-            ActionResult result = iterativePatternFinder.findIteratively(pattern, searchRegion, actionConfig);
-            long endTime = System.currentTimeMillis();
-            
-            // Assert
-            assertNotNull(result);
-            assertTrue(endTime - startTime < 1000, "Should complete quickly on early success");
-        }
-        
-        @Test
-        @DisplayName("Should handle many iterations efficiently")
-        void shouldHandleManyIterationsEfficiently() {
-            // Arrange
-            when(pattern.getImage()).thenReturn(patternImage);
-            when(actionConfig.getMaxIterations()).thenReturn(100);
-            when(actionConfig.getRetryDelay()).thenReturn(0L);
-            
-            // Act
-            long startTime = System.currentTimeMillis();
-            ActionResult result = iterativePatternFinder.findIteratively(pattern, searchRegion, actionConfig);
-            long endTime = System.currentTimeMillis();
-            
-            // Assert
-            assertNotNull(result);
-            assertTrue(endTime - startTime < 5000, "Should handle 100 iterations in less than 5 seconds");
+            // Act & Assert
+            assertDoesNotThrow(() -> 
+                iterativePatternFinder.find(result, stateImages, scenes)
+            );
         }
     }
 }
