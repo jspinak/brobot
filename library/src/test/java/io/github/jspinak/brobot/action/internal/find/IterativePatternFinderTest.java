@@ -1,7 +1,7 @@
 package io.github.jspinak.brobot.action.internal.find;
 
 import io.github.jspinak.brobot.action.ActionResult;
-import io.github.jspinak.brobot.action.basic.findAll.FindAll;
+import io.github.jspinak.brobot.action.basic.find.FindAll;
 import io.github.jspinak.brobot.action.internal.execution.ActionLifecycleManagement;
 import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.model.element.Scene;
