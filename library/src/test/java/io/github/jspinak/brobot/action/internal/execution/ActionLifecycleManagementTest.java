@@ -292,7 +292,7 @@ public class ActionLifecycleManagementTest extends BrobotTestBase {
             testResult.setActionConfig(findOptions);
             
             Match match = mock(Match.class);
-            testResult.addMatch(match);
+            testResult.add(match);
             
             when(mockLifecycle.getCompletedRepetitions()).thenReturn(1);
             LocalDateTime start = LocalDateTime.now();
@@ -342,7 +342,7 @@ public class ActionLifecycleManagementTest extends BrobotTestBase {
             testResult.setActionConfig(findOptions);
             
             Match match = mock(Match.class);
-            testResult.addMatch(match);
+            testResult.add(match);
             
             // Act
             boolean result = lifecycleManagement.isFindFirstAndAtLeastOneMatchFound(testResult);
@@ -373,7 +373,7 @@ public class ActionLifecycleManagementTest extends BrobotTestBase {
             // Arrange
             testResult.setActionConfig(mockActionConfig);
             Match match = mock(Match.class);
-            testResult.addMatch(match);
+            testResult.add(match);
             
             // Act
             boolean result = lifecycleManagement.isFindFirstAndAtLeastOneMatchFound(testResult);
