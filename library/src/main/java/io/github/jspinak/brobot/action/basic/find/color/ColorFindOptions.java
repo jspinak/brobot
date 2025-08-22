@@ -67,7 +67,7 @@ public final class ColorFindOptions extends BaseFindOptions {
         this.diameter = builder.diameter;
         this.kmeans = builder.kmeans;
         this.areaFiltering = builder.areaFiltering; 
-        this.binOptions = builder.binOptions.build();
+        this.binOptions = builder.binOptions;
     }
 
     @Override
@@ -84,7 +84,7 @@ public final class ColorFindOptions extends BaseFindOptions {
         private int diameter = 5;
         private int kmeans = 2;
         private AreaFilteringOptions areaFiltering = AreaFilteringOptions.builder().build();
-        private HSVBinOptions.HSVBinOptionsBuilder binOptions = HSVBinOptions.builder();
+        private HSVBinOptions binOptions = HSVBinOptions.builder().build();
 
         /**
          * Default constructor for creating a new ColorFindOptions configuration.
@@ -103,7 +103,7 @@ public final class ColorFindOptions extends BaseFindOptions {
             this.diameter = original.diameter;
             this.kmeans = original.kmeans;
             this.areaFiltering = original.areaFiltering.toBuilder().build();
-            this.binOptions = original.binOptions.toBuilder();
+            this.binOptions = original.binOptions.toBuilder().build();
         }
 
         /**
@@ -151,8 +151,8 @@ public final class ColorFindOptions extends BaseFindOptions {
          * @param binOptionsBuilder A builder for hsv bins.
          * @return this Builder instance for chaining.
          */
-        public Builder setBinOptions(HSVBinOptions.HSVBinOptionsBuilder binOptionsBuilder) {
-            this.binOptions = binOptionsBuilder;
+        public Builder setBinOptions(HSVBinOptions binOptions) {
+            this.binOptions = binOptions;
             return self();
         }
         

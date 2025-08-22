@@ -235,7 +235,8 @@ public class ClickOptionsTest extends BrobotTestBase {
             ClickOptions options = builder
                 .setVerification(VerificationOptions.builder()
                     .setEvent(VerificationOptions.Event.TEXT_APPEARS)
-                    .setText("Success"))
+                    .setText("Success")
+                    .build())
                 .build();
             
             VerificationOptions verification = options.getVerificationOptions();
@@ -248,7 +249,8 @@ public class ClickOptionsTest extends BrobotTestBase {
         public void testClickUntilVanish() {
             ClickOptions options = builder
                 .setVerification(VerificationOptions.builder()
-                    .setEvent(VerificationOptions.Event.OBJECTS_VANISH))
+                    .setEvent(VerificationOptions.Event.OBJECTS_VANISH)
+                    .build())
                 .build();
             
             assertEquals(VerificationOptions.Event.OBJECTS_VANISH, 
@@ -261,7 +263,8 @@ public class ClickOptionsTest extends BrobotTestBase {
             // Using RepetitionOptions for pause configuration
             ClickOptions options = builder
                 .setRepetition(RepetitionOptions.builder()
-                    .setPauseBetweenIndividualActions(10.0))
+                    .setPauseBetweenIndividualActions(10.0)
+                    .build())
                 .build();
             
             assertEquals(10.0, options.getPauseBetweenIndividualActions());
@@ -274,7 +277,8 @@ public class ClickOptionsTest extends BrobotTestBase {
             // Using OBJECTS_APPEAR instead
             ClickOptions options = builder
                 .setVerification(VerificationOptions.builder()
-                    .setEvent(VerificationOptions.Event.OBJECTS_APPEAR))
+                    .setEvent(VerificationOptions.Event.OBJECTS_APPEAR)
+                    .build())
                 .build();
             
             VerificationOptions verification = options.getVerificationOptions();
@@ -291,7 +295,8 @@ public class ClickOptionsTest extends BrobotTestBase {
         public void testSingleRepetition() {
             ClickOptions options = builder
                 .setRepetition(RepetitionOptions.builder()
-                    .setTimesToRepeatIndividualAction(1))
+                    .setTimesToRepeatIndividualAction(1)
+                    .build())
                 .build();
             
             assertEquals(1, options.getTimesToRepeatIndividualAction());
@@ -303,7 +308,8 @@ public class ClickOptionsTest extends BrobotTestBase {
             ClickOptions options = builder
                 .setRepetition(RepetitionOptions.builder()
                     .setTimesToRepeatIndividualAction(5)
-                    .setPauseBetweenIndividualActions(0.5))
+                    .setPauseBetweenIndividualActions(0.5)
+                    .build())
                 .build();
             
             assertEquals(5, options.getTimesToRepeatIndividualAction());
@@ -322,7 +328,8 @@ public class ClickOptionsTest extends BrobotTestBase {
             ClickOptions options = builder
                 .setRepetition(RepetitionOptions.builder()
                     .setTimesToRepeatIndividualAction(times)
-                    .setPauseBetweenIndividualActions(pause))
+                    .setPauseBetweenIndividualActions(pause)
+                    .build())
                 .build();
             
             assertEquals(times, options.getTimesToRepeatIndividualAction());
@@ -378,7 +385,8 @@ public class ClickOptionsTest extends BrobotTestBase {
                 .setNumberOfClicks(2)
                 .setVerification(VerificationOptions.builder()
                     .setEvent(VerificationOptions.Event.TEXT_APPEARS)
-                    .setText("Item Selected"))
+                    .setText("Item Selected")
+                    .build())
                 .build();
             
             assertEquals(2, options.getNumberOfClicks());
@@ -407,9 +415,11 @@ public class ClickOptionsTest extends BrobotTestBase {
             ClickOptions options = builder
                 .setRepetition(RepetitionOptions.builder()
                     .setTimesToRepeatIndividualAction(10)
-                    .setPauseBetweenIndividualActions(1.0))
+                    .setPauseBetweenIndividualActions(1.0)
+                    .build())
                 .setVerification(VerificationOptions.builder()
-                    .setEvent(VerificationOptions.Event.OBJECTS_APPEAR))
+                    .setEvent(VerificationOptions.Event.OBJECTS_APPEAR)
+                    .build())
                 .build();
             
             assertEquals(10, options.getTimesToRepeatIndividualAction());
@@ -504,7 +514,8 @@ public class ClickOptionsTest extends BrobotTestBase {
             ClickOptions original = builder
                 .setNumberOfClicks(2)
                 .setRepetition(RepetitionOptions.builder()
-                    .setTimesToRepeatIndividualAction(5))
+                    .setTimesToRepeatIndividualAction(5)
+                    .build())
                 .build();
             
             String json = objectMapper.writeValueAsString(original);

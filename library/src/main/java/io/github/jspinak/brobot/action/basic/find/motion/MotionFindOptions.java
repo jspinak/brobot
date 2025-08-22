@@ -1,5 +1,8 @@
 package io.github.jspinak.brobot.action.basic.find.motion;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import io.github.jspinak.brobot.action.basic.find.BaseFindOptions;
 import io.github.jspinak.brobot.action.basic.find.FindStrategy;
 import lombok.Getter;
@@ -21,6 +24,8 @@ import lombok.Getter;
  * @see io.github.jspinak.brobot.action.basic.find.Find
  */
 @Getter
+@JsonDeserialize(builder = MotionFindOptions.Builder.class)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public final class MotionFindOptions extends BaseFindOptions {
 
     private final int maxMovement;
@@ -38,6 +43,8 @@ public final class MotionFindOptions extends BaseFindOptions {
     /**
      * Builder for constructing {@link MotionFindOptions} with a fluent API.
      */
+    @JsonPOJOBuilder(withPrefix = "set")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Builder extends BaseFindOptions.Builder<Builder> {
 
         private int maxMovement = 300;

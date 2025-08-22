@@ -251,7 +251,8 @@ public class ActionConfigFacade {
                 .setPauseAfterEnd(0.5)
                 .setRepetition(RepetitionOptions.builder()
                     .setMaxTimesToRepeatActionSequence(10) // Reasonable default
-                    .setPauseBetweenActionSequences(0.5))
+                    .setPauseBetweenActionSequences(0.5)
+                    .build())
                 .build();
                 
         return action.perform(clickOptions, new ObjectCollection.Builder()

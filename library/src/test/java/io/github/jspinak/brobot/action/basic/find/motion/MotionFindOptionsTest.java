@@ -208,8 +208,8 @@ public class MotionFindOptionsTest extends BrobotTestBase {
             assertEquals(0.5, options.getMatchAdjustmentOptions().getTargetPosition().getPercentW(), 0.001);
             assertEquals(0.5, options.getMatchAdjustmentOptions().getTargetPosition().getPercentH(), 0.001);
             assertNotNull(options.getMatchAdjustmentOptions().getTargetOffset());
-            assertEquals(10, options.getMatchAdjustmentOptions().getTargetOffset().getOffsetX());
-            assertEquals(10, options.getMatchAdjustmentOptions().getTargetOffset().getOffsetY());
+            assertEquals(10, options.getMatchAdjustmentOptions().getTargetOffset().getX());
+            assertEquals(10, options.getMatchAdjustmentOptions().getTargetOffset().getY());
             assertEquals(20, options.getMatchAdjustmentOptions().getAddW());
             assertEquals(20, options.getMatchAdjustmentOptions().getAddH());
         }
