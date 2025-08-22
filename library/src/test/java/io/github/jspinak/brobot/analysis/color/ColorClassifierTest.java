@@ -44,8 +44,8 @@ public class ColorClassifierTest extends BrobotTestBase {
     @Mock
     private Image image;
     
-    @Mock
-    private StateImage stateImage;
+    // StateImage can't be mocked due to bytecode instrumentation issues
+    // Will create real instances as needed in tests
     
     @Mock
     private PixelProfile pixelProfile;
@@ -65,53 +65,38 @@ public class ColorClassifierTest extends BrobotTestBase {
     @InjectMocks
     private ColorClassifier colorClassifier;
     
+    @Mock
     private Mat testMat;
+    
+    @Mock
     private Mat sceneBGR;
+    
+    @Mock
     private Mat sceneHSV;
+    
     private List<PixelProfiles> pixelAnalysisCollections;
     
     @BeforeEach
     public void setUp() {
         super.setupTest();
-        testMat = new Mat(100, 100, 16); // CV_8UC3
-        sceneBGR = new Mat(100, 100, 16); // CV_8UC3
-        sceneHSV = new Mat(100, 100, 16); // CV_8UC3
+        // Don't configure mock Mats here - they may not be initialized yet
+        
         pixelAnalysisCollections = new ArrayList<>();
         
-        // Setup scene mock hierarchy
+        // StateImage setup will be done in individual tests as needed
+    }
+    
+    // No need for cleanup with mock Mat objects
+    
+    @Test
+    @DisplayName("Should return empty SceneAnalysis for empty collections")
+    void shouldReturnEmptySceneAnalysisForEmptyCollections() {
+        // Setup scene mock hierarchy for SceneAnalysis constructor
         when(scene.getPattern()).thenReturn(pattern);
         when(pattern.getImage()).thenReturn(image);
         when(image.getMatBGR()).thenReturn(sceneBGR);
         when(image.getMatHSV()).thenReturn(sceneHSV);
         
-        // Create real StateImage and set up its color cluster
-        stateImage = new StateImage();
-        stateImage.setIndex(1);
-        stateImage.setColorCluster(colorCluster);
-        
-        when(colorCluster.getSchema(ColorCluster.ColorSchemaName.BGR)).thenReturn(colorSchemaBGR);
-        when(colorCluster.getSchema(ColorCluster.ColorSchemaName.HSV)).thenReturn(colorSchemaHSV);
-        when(colorSchemaBGR.getColorStatistics(any())).thenReturn(colorStatistics);
-        when(colorSchemaHSV.getColorStatistics(any())).thenReturn(colorStatistics);
-        when(colorStatistics.getStat(any())).thenReturn(100.0);
-    }
-    
-    @AfterEach
-    public void tearDown() {
-        if (testMat != null && !testMat.isNull()) {
-            testMat.release();
-        }
-        if (sceneBGR != null && !sceneBGR.isNull()) {
-            sceneBGR.release();
-        }
-        if (sceneHSV != null && !sceneHSV.isNull()) {
-            sceneHSV.release();
-        }
-    }
-    
-    @Test
-    @DisplayName("Should return empty SceneAnalysis for empty collections")
-    void shouldReturnEmptySceneAnalysisForEmptyCollections() {
         SceneAnalysis result = colorClassifier.getSceneAnalysis(new ArrayList<>(), scene);
         
         assertNotNull(result);
@@ -161,6 +146,12 @@ public class ColorClassifierTest extends BrobotTestBase {
     @Test
     @DisplayName("Should return empty Mat for empty analysis")
     void shouldReturnEmptyMatForEmptyAnalysis() {
+        // Setup scene mock hierarchy for SceneAnalysis constructor
+        when(scene.getPattern()).thenReturn(pattern);
+        when(pattern.getImage()).thenReturn(image);
+        when(image.getMatBGR()).thenReturn(sceneBGR);
+        when(image.getMatHSV()).thenReturn(sceneHSV);
+        
         SceneAnalysis sceneAnalysis = new SceneAnalysis(new ArrayList<>(), scene);
         
         Mat result = colorClassifier.getImageIndices(sceneAnalysis, ColorCluster.ColorSchemaName.BGR);

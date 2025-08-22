@@ -142,21 +142,20 @@ public class PerformanceMonitoringAspect {
         // Set recursion guard
         isMonitoring.set(true);
         
+        // Capture start metrics
+        long startTime = System.currentTimeMillis();
+        long startMemory = trackMemoryUsage ? getUsedMemory() : 0;
+        
         try {
-            // Capture start metrics
-            long startTime = System.currentTimeMillis();
-            long startMemory = trackMemoryUsage ? getUsedMemory() : 0;
+            // Execute the method
+            Object result = joinPoint.proceed();
             
-            try {
-                // Execute the method
-                Object result = joinPoint.proceed();
-                
-                // Capture end metrics
-                long executionTime = System.currentTimeMillis() - startTime;
-                long memoryDelta = trackMemoryUsage ? getUsedMemory() - startMemory : 0;
-                
-                // Record performance data
-                recordPerformanceData(methodSignature, executionTime, true, memoryDelta);
+            // Capture end metrics
+            long executionTime = System.currentTimeMillis() - startTime;
+            long memoryDelta = trackMemoryUsage ? getUsedMemory() - startMemory : 0;
+            
+            // Record performance data
+            recordPerformanceData(methodSignature, executionTime, true, memoryDelta);
             
             // Check for slow operations
             if (executionTime > alertThresholdMillis) {
@@ -170,7 +169,6 @@ public class PerformanceMonitoringAspect {
             long executionTime = System.currentTimeMillis() - startTime;
             recordPerformanceData(methodSignature, executionTime, false, 0);
             throw e;
-        }
         } finally {
             // Clear recursion guard
             isMonitoring.set(false);

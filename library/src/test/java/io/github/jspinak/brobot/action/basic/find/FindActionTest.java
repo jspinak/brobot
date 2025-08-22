@@ -398,6 +398,8 @@ public class FindActionTest extends BrobotTestBase {
                 .setName("test-image")
                 .setSearchRegionForAllPatterns(region1)
                 .build();
+            // Add a pattern so setSearchRegions has something to work on
+            stateImage.getPatterns().add(new Pattern.Builder().build());
             stateImage.setSearchRegions(region1, region2);
             
             objectCollection.getStateImages().add(stateImage);

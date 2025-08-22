@@ -244,9 +244,9 @@ public class SikuliInterceptionAspectTest extends BrobotTestBase {
         // Arrange
         Object[] args = new Object[]{"/path/to/image.png", 100, null};
         
-        // Act
+        // Act - Pass the array as a single parameter
         String sanitized = (String) ReflectionTestUtils.invokeMethod(
-            aspect, "sanitizeArgs", args);
+            aspect, "sanitizeArgs", (Object) args);
 
         // Assert
         assertNotNull(sanitized);

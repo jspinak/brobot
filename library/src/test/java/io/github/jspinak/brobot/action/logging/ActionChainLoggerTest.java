@@ -108,14 +108,19 @@ public class ActionChainLoggerTest extends BrobotTestBase {
             PatternFindOptions config = new PatternFindOptions.Builder().build();
             chainLogger.logStepTransition(chainId, "Step1", "Step2", config, failedResult);
             
+            // Setup mock for the failed step warning log
+            when(mockLogger.log()).thenReturn(mockLogBuilder);
+            
             // Act
             chainLogger.logChainEnd(chainId, false, "Chain failed with error");
             
             // Assert
             assertFalse(chainLogger.isChainActive(chainId));
-            verify(mockLogBuilder).metadata("success", false);
-            // Verify failed step is logged
+            verify(mockLogBuilder, atLeastOnce()).metadata("success", false);
+            // The failed step should trigger a WARNING level log
             verify(mockLogBuilder, atLeastOnce()).level(LogEvent.Level.WARNING);
+            // Verify the failed step message is logged
+            verify(mockLogBuilder, atLeastOnce()).message(contains("Failed Step"));
         }
         
         @Test

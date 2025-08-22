@@ -2,8 +2,10 @@ package io.github.jspinak.brobot.action;
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import io.github.jspinak.brobot.tools.logging.model.LogEventType;
 import lombok.Getter;
 import lombok.Data;

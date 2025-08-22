@@ -152,8 +152,8 @@ public class ActionLifecycleAspect {
             // The action modifies the ActionResult in-place
             if (actionResult != null) {
                 context.setSuccess(actionResult.isSuccess());
-                // Update duration in the ActionResult if not already set
-                if (actionResult.getDuration() == null || actionResult.getDuration().toMillis() == 0) {
+                // Update duration in the ActionResult if not already set with a meaningful value
+                if (actionResult.getDuration() == null || actionResult.getDuration().toMillis() <= 0) {
                     actionResult.setDuration(java.time.Duration.ofMillis(duration));
                 }
                 // Update execution context with final results
