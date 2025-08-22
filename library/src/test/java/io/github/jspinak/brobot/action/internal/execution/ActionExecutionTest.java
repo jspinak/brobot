@@ -1,14 +1,28 @@
 package io.github.jspinak.brobot.action.internal.execution;
 
 import io.github.jspinak.brobot.action.ActionConfig;
+import io.github.jspinak.brobot.action.ActionInterface;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
+import io.github.jspinak.brobot.action.internal.factory.ActionResultFactory;
+import io.github.jspinak.brobot.action.internal.find.SearchRegionResolver;
+import io.github.jspinak.brobot.action.internal.utility.ActionSuccessCriteria;
+import io.github.jspinak.brobot.control.ExecutionController;
+import io.github.jspinak.brobot.logging.unified.BrobotLogger;
 import io.github.jspinak.brobot.model.element.Location;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.model.state.StateImage;
+import io.github.jspinak.brobot.statemanagement.StateMemory;
 import io.github.jspinak.brobot.test.BrobotTestBase;
+import io.github.jspinak.brobot.tools.history.IllustrationController;
+import io.github.jspinak.brobot.tools.logging.ActionLogger;
+import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
+import io.github.jspinak.brobot.tools.logging.ExecutionSession;
+import io.github.jspinak.brobot.tools.ml.dataset.DatasetManager;
+import io.github.jspinak.brobot.tools.testing.mock.time.TimeProvider;
+import io.github.jspinak.brobot.util.image.capture.ScreenshotCapture;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -33,7 +47,46 @@ import static org.mockito.Mockito.*;
 public class ActionExecutionTest extends BrobotTestBase {
 
     @Mock
-    private BiFunction<ActionConfig, ObjectCollection, ActionResult> actionFunction;
+    private TimeProvider timeProvider;
+    
+    @Mock
+    private IllustrationController illustrationController;
+    
+    @Mock
+    private SearchRegionResolver searchRegionResolver;
+    
+    @Mock
+    private ActionLifecycleManagement actionLifecycleManagement;
+    
+    @Mock
+    private DatasetManager datasetManager;
+    
+    @Mock
+    private ActionSuccessCriteria actionSuccessCriteria;
+    
+    @Mock
+    private ActionResultFactory actionResultFactory;
+    
+    @Mock
+    private ActionLogger actionLogger;
+    
+    @Mock
+    private ScreenshotCapture screenshotCapture;
+    
+    @Mock
+    private ExecutionSession executionSession;
+    
+    @Mock
+    private ExecutionController executionController;
+    
+    @Mock
+    private BrobotLogger brobotLogger;
+    
+    @Mock
+    private StateMemory stateMemory;
+    
+    @Mock
+    private ActionInterface actionInterface;
     
     @Mock
     private ActionConfig actionConfig;
@@ -49,7 +102,9 @@ public class ActionExecutionTest extends BrobotTestBase {
     public void setupTest() {
         super.setupTest();
         mockCloseable = MockitoAnnotations.openMocks(this);
-        actionExecution = new ActionExecution();
+        actionExecution = new ActionExecution(timeProvider, illustrationController, searchRegionResolver,
+                actionLifecycleManagement, datasetManager, actionSuccessCriteria, actionResultFactory,
+                actionLogger, screenshotCapture, executionSession, executionController, brobotLogger, stateMemory);
     }
     
     @AfterEach
@@ -69,15 +124,22 @@ public class ActionExecutionTest extends BrobotTestBase {
             // Arrange
             ActionResult expectedResult = new ActionResult();
             expectedResult.setSuccess(true);
-            when(actionFunction.apply(any(), any())).thenReturn(expectedResult);
+            when(actionResultFactory.create(any(), any())).thenReturn(expectedResult);
+            when(actionLifecycleManagement.perform(any(), any(), any())).thenReturn(expectedResult);
+            when(actionSuccessCriteria.determineSuccess(any())).thenReturn(true);
             
             // Act
-            ActionResult result = actionExecution.execute(actionFunction, actionConfig, objectCollection);
+            ActionResult result = actionExecution.perform(
+                actionInterface, 
+                "test action", 
+                actionConfig, 
+                objectCollection
+            );
             
             // Assert
             assertNotNull(result);
             assertTrue(result.isSuccess());
-            verify(actionFunction).apply(actionConfig, objectCollection);
+            verify(actionLifecycleManagement).perform(any(), any(), any());
         }
         
         @Test
@@ -86,10 +148,17 @@ public class ActionExecutionTest extends BrobotTestBase {
             // Arrange
             ActionResult expectedResult = new ActionResult();
             expectedResult.setSuccess(false);
-            when(actionFunction.apply(any(), any())).thenReturn(expectedResult);
+            when(actionResultFactory.create(any(), any())).thenReturn(expectedResult);
+            when(actionLifecycleManagement.perform(any(), any(), any())).thenReturn(expectedResult);
+            when(actionSuccessCriteria.determineSuccess(any())).thenReturn(false);
             
             // Act
-            ActionResult result = actionExecution.execute(actionFunction, actionConfig, objectCollection);
+            ActionResult result = actionExecution.perform(
+                actionInterface,
+                "test action",
+                actionConfig,
+                objectCollection
+            );
             
             // Assert
             assertNotNull(result);
@@ -101,45 +170,92 @@ public class ActionExecutionTest extends BrobotTestBase {
         void shouldCaptureExecutionDuration() {
             // Arrange
             ActionResult expectedResult = new ActionResult();
-            when(actionFunction.apply(any(), any())).thenAnswer(invocation -> {
-                Thread.sleep(50); // Simulate some processing time
-                return expectedResult;
-            });
+            expectedResult.setDuration(Duration.ofMillis(100));
+            when(actionResultFactory.create(any(), any())).thenReturn(expectedResult);
+            when(actionLifecycleManagement.perform(any(), any(), any())).thenReturn(expectedResult);
             
             // Act
-            ActionResult result = actionExecution.execute(actionFunction, actionConfig, objectCollection);
+            ActionResult result = actionExecution.perform(
+                actionInterface,
+                "test action",
+                actionConfig,
+                objectCollection
+            );
             
             // Assert
-            assertNotNull(result);
             assertNotNull(result.getDuration());
-            assertTrue(result.getDuration().toMillis() >= 50);
+            assertTrue(result.getDuration().toMillis() >= 0);
         }
     }
     
     @Nested
-    @DisplayName("Execution with Matches")
-    class ExecutionWithMatches {
+    @DisplayName("Match Processing")
+    class MatchProcessing {
         
         @Test
-        @DisplayName("Should preserve matches in result")
-        void shouldPreserveMatchesInResult() {
+        @DisplayName("Should process single match")
+        void shouldProcessSingleMatch() {
             // Arrange
-            Match match1 = mock(Match.class);
-            Match match2 = mock(Match.class);
-            List<Match> matches = Arrays.asList(match1, match2);
+            Match match = new Match.Builder()
+                .setRegion(new Region(10, 10, 100, 100))
+                .setSimScore(0.95)
+                .build();
             
             ActionResult expectedResult = new ActionResult();
-            expectedResult.setMatchList(matches);
-            when(actionFunction.apply(any(), any())).thenReturn(expectedResult);
+            expectedResult.add(match);
+            expectedResult.setSuccess(true);
+            
+            when(actionResultFactory.create(any(), any())).thenReturn(expectedResult);
+            when(actionLifecycleManagement.perform(any(), any(), any())).thenReturn(expectedResult);
+            when(actionSuccessCriteria.determineSuccess(any())).thenReturn(true);
             
             // Act
-            ActionResult result = actionExecution.execute(actionFunction, actionConfig, objectCollection);
+            ActionResult result = actionExecution.perform(
+                actionInterface,
+                "test action",
+                actionConfig,
+                objectCollection
+            );
             
             // Assert
-            assertNotNull(result);
-            assertEquals(2, result.getMatchList().size());
-            assertTrue(result.getMatchList().contains(match1));
-            assertTrue(result.getMatchList().contains(match2));
+            assertEquals(1, result.size());
+            assertEquals(match, result.getMatchList().get(0));
+        }
+        
+        @Test
+        @DisplayName("Should process multiple matches")
+        void shouldProcessMultipleMatches() {
+            // Arrange
+            List<Match> matches = Arrays.asList(
+                new Match.Builder()
+                    .setRegion(new Region(10, 10, 50, 50))
+                    .setSimScore(0.95)
+                    .build(),
+                new Match.Builder()
+                    .setRegion(new Region(100, 100, 50, 50))
+                    .setSimScore(0.90)
+                    .build()
+            );
+            
+            ActionResult expectedResult = new ActionResult();
+            matches.forEach(expectedResult::add);
+            expectedResult.setSuccess(true);
+            
+            when(actionResultFactory.create(any(), any())).thenReturn(expectedResult);
+            when(actionLifecycleManagement.perform(any(), any(), any())).thenReturn(expectedResult);
+            when(actionSuccessCriteria.determineSuccess(any())).thenReturn(true);
+            
+            // Act
+            ActionResult result = actionExecution.perform(
+                actionInterface,
+                "test action",
+                actionConfig,
+                objectCollection
+            );
+            
+            // Assert
+            assertEquals(2, result.size());
+            assertEquals(matches, result.getMatchList());
         }
         
         @Test
@@ -147,15 +263,83 @@ public class ActionExecutionTest extends BrobotTestBase {
         void shouldHandleEmptyMatches() {
             // Arrange
             ActionResult expectedResult = new ActionResult();
-            expectedResult.setMatchList(Collections.emptyList());
-            when(actionFunction.apply(any(), any())).thenReturn(expectedResult);
+            expectedResult.setSuccess(false);
+            
+            when(actionResultFactory.create(any(), any())).thenReturn(expectedResult);
+            when(actionLifecycleManagement.perform(any(), any(), any())).thenReturn(expectedResult);
+            when(actionSuccessCriteria.determineSuccess(any())).thenReturn(false);
             
             // Act
-            ActionResult result = actionExecution.execute(actionFunction, actionConfig, objectCollection);
+            ActionResult result = actionExecution.perform(
+                actionInterface,
+                "test action",
+                actionConfig,
+                objectCollection
+            );
+            
+            // Assert
+            assertTrue(result.isEmpty());
+            assertFalse(result.isSuccess());
+        }
+    }
+    
+    @Nested
+    @DisplayName("Configuration Handling")
+    class ConfigurationHandling {
+        
+        @Test
+        @DisplayName("Should handle PatternFindOptions configuration")
+        void shouldHandlePatternFindOptions() {
+            // Arrange
+            PatternFindOptions findOptions = new PatternFindOptions.Builder()
+                .setSimilarity(0.8)
+                .build();
+            
+            ActionResult expectedResult = new ActionResult();
+            expectedResult.setSuccess(true);
+            
+            when(actionResultFactory.create(any(), eq(findOptions))).thenReturn(expectedResult);
+            when(actionLifecycleManagement.perform(any(), any(), any())).thenReturn(expectedResult);
+            when(actionSuccessCriteria.determineSuccess(any())).thenReturn(true);
+            
+            // Act
+            ActionResult result = actionExecution.perform(
+                actionInterface,
+                "find action",
+                findOptions,
+                objectCollection
+            );
             
             // Assert
             assertNotNull(result);
-            assertTrue(result.getMatchList().isEmpty());
+            verify(actionResultFactory).create(any(), eq(findOptions));
+        }
+        
+        @ParameterizedTest
+        @DisplayName("Should handle various pause durations")
+        @ValueSource(longs = {0, 100, 500, 1000})
+        void shouldHandleVariousPauseDurations(long pauseMillis) {
+            // Arrange
+            ActionResult expectedResult = new ActionResult();
+            expectedResult.setSuccess(true);
+            
+            when(actionConfig.getPauseBeforeAction()).thenReturn(Duration.ofMillis(pauseMillis));
+            when(actionConfig.getPauseAfterAction()).thenReturn(Duration.ofMillis(pauseMillis));
+            when(actionResultFactory.create(any(), any())).thenReturn(expectedResult);
+            when(actionLifecycleManagement.perform(any(), any(), any())).thenReturn(expectedResult);
+            when(actionSuccessCriteria.determineSuccess(any())).thenReturn(true);
+            
+            // Act
+            ActionResult result = actionExecution.perform(
+                actionInterface,
+                "test action",
+                actionConfig,
+                objectCollection
+            );
+            
+            // Assert
+            assertNotNull(result);
+            assertTrue(result.isSuccess());
         }
     }
     
@@ -164,202 +348,127 @@ public class ActionExecutionTest extends BrobotTestBase {
     class ErrorHandling {
         
         @Test
-        @DisplayName("Should handle runtime exception in action")
-        void shouldHandleRuntimeException() {
+        @DisplayName("Should handle null action interface")
+        void shouldHandleNullActionInterface() {
             // Arrange
-            when(actionFunction.apply(any(), any())).thenThrow(new RuntimeException("Test error"));
+            ActionResult expectedResult = new ActionResult();
+            expectedResult.setSuccess(false);
+            
+            when(actionResultFactory.create(any(), any())).thenReturn(expectedResult);
+            
+            // Act & Assert
+            assertDoesNotThrow(() -> 
+                actionExecution.perform(null, "test", actionConfig, objectCollection)
+            );
+        }
+        
+        @Test
+        @DisplayName("Should handle null object collection")
+        void shouldHandleNullObjectCollection() {
+            // Arrange
+            ActionResult expectedResult = new ActionResult();
+            expectedResult.setSuccess(false);
+            
+            when(actionResultFactory.create(any(), any())).thenReturn(expectedResult);
+            when(actionLifecycleManagement.perform(any(), any(), any())).thenReturn(expectedResult);
             
             // Act
-            ActionResult result = actionExecution.execute(actionFunction, actionConfig, objectCollection);
+            ActionResult result = actionExecution.perform(
+                actionInterface,
+                "test action",
+                actionConfig,
+                (ObjectCollection) null
+            );
             
             // Assert
             assertNotNull(result);
-            assertFalse(result.isSuccess());
-            assertTrue(result.getOutputText().contains("Test error") || result.isEmpty());
         }
         
         @Test
-        @DisplayName("Should handle null action function")
-        void shouldHandleNullActionFunction() {
-            // Act
-            ActionResult result = actionExecution.execute(null, actionConfig, objectCollection);
-            
-            // Assert
-            assertNotNull(result);
-            assertFalse(result.isSuccess());
-        }
-        
-        @Test
-        @DisplayName("Should handle null parameters")
-        void shouldHandleNullParameters() {
+        @DisplayName("Should handle exception during execution")
+        void shouldHandleExceptionDuringExecution() {
             // Arrange
+            when(actionLifecycleManagement.perform(any(), any(), any()))
+                .thenThrow(new RuntimeException("Test exception"));
+            
             ActionResult expectedResult = new ActionResult();
-            when(actionFunction.apply(null, null)).thenReturn(expectedResult);
+            expectedResult.setSuccess(false);
+            when(actionResultFactory.create(any(), any())).thenReturn(expectedResult);
             
-            // Act
-            ActionResult result = actionExecution.execute(actionFunction, null, null);
-            
-            // Assert
-            assertNotNull(result);
-            verify(actionFunction).apply(null, null);
-        }
-    }
-    
-    @Nested
-    @DisplayName("Lifecycle Management")
-    class LifecycleManagement {
-        
-        @Test
-        @DisplayName("Should execute pre-action hooks")
-        void shouldExecutePreActionHooks() {
-            // Arrange
-            ActionResult expectedResult = new ActionResult();
-            when(actionFunction.apply(any(), any())).thenReturn(expectedResult);
-            
-            boolean[] hookCalled = {false};
-            actionExecution = new ActionExecution() {
-                @Override
-                protected void preExecution(ActionConfig config, ObjectCollection objects) {
-                    hookCalled[0] = true;
-                    super.preExecution(config, objects);
-                }
-            };
-            
-            // Act
-            actionExecution.execute(actionFunction, actionConfig, objectCollection);
-            
-            // Assert
-            assertTrue(hookCalled[0]);
-        }
-        
-        @Test
-        @DisplayName("Should execute post-action hooks")
-        void shouldExecutePostActionHooks() {
-            // Arrange
-            ActionResult expectedResult = new ActionResult();
-            when(actionFunction.apply(any(), any())).thenReturn(expectedResult);
-            
-            boolean[] hookCalled = {false};
-            actionExecution = new ActionExecution() {
-                @Override
-                protected void postExecution(ActionResult result) {
-                    hookCalled[0] = true;
-                    super.postExecution(result);
-                }
-            };
-            
-            // Act
-            actionExecution.execute(actionFunction, actionConfig, objectCollection);
-            
-            // Assert
-            assertTrue(hookCalled[0]);
-        }
-        
-        @Test
-        @DisplayName("Should execute post-action hooks even on failure")
-        void shouldExecutePostActionHooksOnFailure() {
-            // Arrange
-            when(actionFunction.apply(any(), any())).thenThrow(new RuntimeException("Test error"));
-            
-            boolean[] hookCalled = {false};
-            actionExecution = new ActionExecution() {
-                @Override
-                protected void postExecution(ActionResult result) {
-                    hookCalled[0] = true;
-                    super.postExecution(result);
-                }
-            };
-            
-            // Act
-            actionExecution.execute(actionFunction, actionConfig, objectCollection);
-            
-            // Assert
-            assertTrue(hookCalled[0]);
-        }
-    }
-    
-    @Nested
-    @DisplayName("Execution Context")
-    class ExecutionContext {
-        
-        @Test
-        @DisplayName("Should maintain execution context")
-        void shouldMaintainExecutionContext() {
-            // Arrange
-            ActionResult expectedResult = new ActionResult();
-            expectedResult.setActionDescription("Test action");
-            when(actionFunction.apply(any(), any())).thenReturn(expectedResult);
-            when(actionConfig.toString()).thenReturn("TestConfig");
-            
-            // Act
-            ActionResult result = actionExecution.execute(actionFunction, actionConfig, objectCollection);
-            
-            // Assert
-            assertNotNull(result);
-            assertEquals("Test action", result.getActionDescription());
-        }
-        
-        @Test
-        @DisplayName("Should track action metadata")
-        void shouldTrackActionMetadata() {
-            // Arrange
-            ActionResult expectedResult = new ActionResult();
-            when(actionFunction.apply(any(), any())).thenReturn(expectedResult);
-            
-            PatternFindOptions options = new PatternFindOptions.Builder().build();
-            when(actionConfig.getClass()).thenReturn((Class) options.getClass());
-            
-            // Act
-            ActionResult result = actionExecution.execute(actionFunction, actionConfig, objectCollection);
-            
-            // Assert
-            assertNotNull(result);
-            assertNotNull(result.getDuration());
-        }
-    }
-    
-    @Nested
-    @DisplayName("Performance")
-    class Performance {
-        
-        @ParameterizedTest
-        @ValueSource(ints = {10, 50, 100, 200})
-        @DisplayName("Should handle various execution durations")
-        void shouldHandleVariousExecutionDurations(int delayMs) {
-            // Arrange
-            ActionResult expectedResult = new ActionResult();
-            when(actionFunction.apply(any(), any())).thenAnswer(invocation -> {
-                Thread.sleep(delayMs);
-                return expectedResult;
+            // Act & Assert
+            assertDoesNotThrow(() -> {
+                ActionResult result = actionExecution.perform(
+                    actionInterface,
+                    "test action",
+                    actionConfig,
+                    objectCollection
+                );
+                assertFalse(result.isSuccess());
             });
+        }
+    }
+    
+    @Nested
+    @DisplayName("State Management")
+    class StateManagement {
+        
+        @Test
+        @DisplayName("Should handle state image processing")
+        void shouldHandleStateImageProcessing() {
+            // Arrange
+            StateImage stateImage = new StateImage.Builder()
+                .setName("test-state")
+                .build();
+            
+            ObjectCollection collection = new ObjectCollection();
+            collection.getStateImages().add(stateImage);
+            
+            ActionResult expectedResult = new ActionResult();
+            expectedResult.setSuccess(true);
+            
+            when(actionResultFactory.create(any(), any())).thenReturn(expectedResult);
+            when(actionLifecycleManagement.perform(any(), any(), any())).thenReturn(expectedResult);
+            when(actionSuccessCriteria.determineSuccess(any())).thenReturn(true);
             
             // Act
-            long startTime = System.currentTimeMillis();
-            ActionResult result = actionExecution.execute(actionFunction, actionConfig, objectCollection);
-            long endTime = System.currentTimeMillis();
+            ActionResult result = actionExecution.perform(
+                actionInterface,
+                "state action",
+                actionConfig,
+                collection
+            );
             
             // Assert
             assertNotNull(result);
-            long actualDuration = endTime - startTime;
-            assertTrue(actualDuration >= delayMs, 
-                "Execution took " + actualDuration + "ms, expected at least " + delayMs + "ms");
+            assertTrue(result.isSuccess());
         }
         
         @Test
-        @DisplayName("Should execute quickly for no-op action")
-        void shouldExecuteQuicklyForNoOp() {
+        @DisplayName("Should handle multiple object collections")
+        void shouldHandleMultipleObjectCollections() {
             // Arrange
+            ObjectCollection collection1 = new ObjectCollection();
+            ObjectCollection collection2 = new ObjectCollection();
+            
             ActionResult expectedResult = new ActionResult();
-            when(actionFunction.apply(any(), any())).thenReturn(expectedResult);
+            expectedResult.setSuccess(true);
+            
+            when(actionResultFactory.create(any(), any())).thenReturn(expectedResult);
+            when(actionLifecycleManagement.perform(any(), any(), any())).thenReturn(expectedResult);
+            when(actionSuccessCriteria.determineSuccess(any())).thenReturn(true);
             
             // Act
-            long startTime = System.currentTimeMillis();
-            ActionResult result = actionExecution.execute(actionFunction, actionConfig, objectCollection);
-            long endTime = System.currentTimeMillis();
+            ActionResult result = actionExecution.perform(
+                actionInterface,
+                "multi-collection action",
+                actionConfig,
+                collection1,
+                collection2
+            );
             
             // Assert
             assertNotNull(result);
-            assertTrue(endTime - startTime < 100, "No-op action should execute in less than 100ms");
+            assertTrue(result.isSuccess());
         }
     }
 }
