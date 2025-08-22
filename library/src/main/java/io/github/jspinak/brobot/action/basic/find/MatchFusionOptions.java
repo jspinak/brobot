@@ -62,7 +62,7 @@ public final class MatchFusionOptions {
      * Builder class for MatchFusionOptions.
      * Annotated for Jackson deserialization support.
      */
-    @JsonPOJOBuilder(withPrefix = "")
+    @JsonPOJOBuilder(withPrefix = "set")
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Builder {
         // Lombok generates the implementation

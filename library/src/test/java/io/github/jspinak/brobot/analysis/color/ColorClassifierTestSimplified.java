@@ -27,20 +27,14 @@ public class ColorClassifierTestSimplified extends BrobotTestBase {
     @InjectMocks
     private ColorClassifier colorClassifier;
     
+    @Mock
     private Mat testMat;
     
     @BeforeEach
     @Override
     public void setupTest() {
         super.setupTest();
-        testMat = new Mat(100, 100, 16); // CV_8UC3
-    }
-    
-    @AfterEach
-    public void tearDown() {
-        if (testMat != null && !testMat.isNull()) {
-            testMat.release();
-        }
+        // Don't configure mock Mat here - configure in individual tests as needed
     }
     
     @Test
@@ -63,36 +57,33 @@ public class ColorClassifierTestSimplified extends BrobotTestBase {
     @Test
     @DisplayName("Should verify Mat operations are called")
     void shouldVerifyMatOperationsAreCalled() {
-        // Create a simple Mat operation test
-        Mat mockResult = new Mat(100, 100, 16);
+        // Use local mock Mat instead of field
+        Mat localTestMat = mock(Mat.class);
+        Mat mockResult = mock(Mat.class);
+        
         when(matOps3d.cOmpare(any(Mat.class), any(double[].class), anyInt()))
             .thenReturn(mockResult);
         
-        Mat result = matOps3d.cOmpare(testMat, new double[]{0, 0, 0}, 1);
+        Mat result = matOps3d.cOmpare(localTestMat, new double[]{0, 0, 0}, 1);
         
         assertNotNull(result);
         assertEquals(mockResult, result);
         verify(matOps3d).cOmpare(any(Mat.class), any(double[].class), eq(1));
-        
-        mockResult.release();
     }
     
     @Test
     @DisplayName("Should verify matrix utilities min index operation")
     void shouldVerifyMinIndexOperation() {
-        Mat minIndices = new Mat(1, 10, 5); // CV_32FC1
-        Mat bestScores = new Mat(1, 10, 5); // CV_32FC1
-        Mat challenger = new Mat(1, 10, 5); // CV_32FC1
+        // Use mock Mat objects instead of creating real ones
+        Mat minIndices = mock(Mat.class);
+        Mat bestScores = mock(Mat.class);
+        Mat challenger = mock(Mat.class);
         
         doNothing().when(matOps3d).minIndex(minIndices, bestScores, challenger, 1);
         
         matOps3d.minIndex(minIndices, bestScores, challenger, 1);
         
         verify(matOps3d).minIndex(minIndices, bestScores, challenger, 1);
-        
-        minIndices.release();
-        bestScores.release();
-        challenger.release();
     }
     
     @Test

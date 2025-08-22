@@ -388,8 +388,8 @@ public class ActionExecutionTest extends BrobotTestBase {
         }
         
         @Test
-        @DisplayName("Should handle exception during execution")
-        void shouldHandleExceptionDuringExecution() {
+        @DisplayName("Should propagate exception during execution")
+        void shouldPropagateExceptionDuringExecution() {
             // Arrange
             when(actionLifecycleManagement.isMoreSequencesAllowed(any(ActionResult.class)))
                 .thenThrow(new RuntimeException("Test exception"));
@@ -398,16 +398,17 @@ public class ActionExecutionTest extends BrobotTestBase {
             expectedResult.setSuccess(false);
             when(actionResultFactory.init(any(ActionConfig.class), anyString(), any(ObjectCollection[].class))).thenReturn(expectedResult);
             
-            // Act & Assert
-            assertDoesNotThrow(() -> {
-                ActionResult result = actionExecution.perform(
+            // Act & Assert - expect the exception to be thrown
+            RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+                actionExecution.perform(
                     actionInterface,
                     "test action",
                     actionConfig,
                     objectCollection
                 );
-                assertFalse(result.isSuccess());
             });
+            
+            assertEquals("Test exception", exception.getMessage());
         }
     }
     

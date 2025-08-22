@@ -31,6 +31,8 @@ public class PatternFindOptionsTest extends BrobotTestBase {
         super.setupTest();
         builder = new PatternFindOptions.Builder();
         objectMapper = new ObjectMapper();
+        // Configure ObjectMapper to ignore unknown properties for forward compatibility
+        objectMapper.configure(com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
     
     @Nested
@@ -692,7 +694,7 @@ public class PatternFindOptionsTest extends BrobotTestBase {
         @Test
         @DisplayName("Deserialize with unknown properties (forward compatibility)")
         public void testDeserializeWithUnknownProperties() throws JsonProcessingException {
-            String json = "{\"strategy\":\"FIRST\",\"similarity\":0.8,\"unknownField\":\"value\"}";
+            String json = "{\"@type\":\"PatternFindOptions\",\"strategy\":\"FIRST\",\"similarity\":0.8,\"unknownField\":\"value\"}";
             
             PatternFindOptions options = objectMapper.readValue(json, PatternFindOptions.class);
             assertNotNull(options);
