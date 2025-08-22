@@ -1,6 +1,7 @@
 package io.github.jspinak.brobot.analysis.motion;
 
 import io.github.jspinak.brobot.test.BrobotTestBase;
+import org.bytedeco.javacpp.DoublePointer;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.MatVector;
 import org.bytedeco.opencv.opencv_core.Scalar;
@@ -47,7 +48,7 @@ public class PixelChangeDetectorTest extends BrobotTestBase {
     
     private Mat createTestImage(int width, int height, int grayValue) {
         Mat image = new Mat(height, width, CV_8UC3);
-        image.setTo(new Scalar(grayValue, grayValue, grayValue, 0));
+        image.setTo(new Mat(new Scalar(grayValue, grayValue, grayValue, 0)));
         return image;
     }
     
@@ -455,10 +456,11 @@ public class PixelChangeDetectorTest extends BrobotTestBase {
                 
                 // Check absolute difference captures max range
                 Mat absDiff = detector.getAbsDiff();
-                double[] minMax = new double[2];
-                minMaxLoc(absDiff, minMax, null, null, null);
+                DoublePointer minVal = new DoublePointer(1);
+                DoublePointer maxVal = new DoublePointer(1);
+                minMaxLoc(absDiff, minVal, maxVal, null, null, null);
                 
-                assertEquals(maxDiff, minMax[1], 1.0,
+                assertEquals(maxDiff, maxVal.get(), 1.0,
                     "Should capture maximum difference across all images");
             } finally {
                 black.release();

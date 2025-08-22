@@ -60,7 +60,7 @@ public class DynamicPixelFinderTest extends BrobotTestBase {
     
     private Mat createTestImage(int width, int height, int grayValue) {
         Mat image = new Mat(height, width, CV_8UC3);
-        image.setTo(new Scalar(grayValue, grayValue, grayValue, 0));
+        image.setTo(new Mat(new Scalar(grayValue, grayValue, grayValue, 0)));
         return image;
     }
     
@@ -95,9 +95,9 @@ public class DynamicPixelFinderTest extends BrobotTestBase {
             Mat combinedMask = new Mat(100, 100, CV_8UC1);
             
             // Fill masks with test data
-            comparisonMask1.setTo(new Scalar(255)); // All pixels different
-            comparisonMask2.setTo(new Scalar(128)); // Some pixels different
-            combinedMask.setTo(new Scalar(255)); // Combined result
+            comparisonMask1.setTo(new Mat(new Scalar(255))); // All pixels different
+            comparisonMask2.setTo(new Mat(new Scalar(128))); // Some pixels different
+            combinedMask.setTo(new Mat(new Scalar(255))); // Combined result
             
             when(matOps3d.cOmpare(eq(testImage1), eq(testImage2), eq(CMP_NE)))
                 .thenReturn(comparisonMask1);
@@ -307,7 +307,7 @@ public class DynamicPixelFinderTest extends BrobotTestBase {
                 Mat src = invocation.getArgument(0);
                 Mat dst = invocation.getArgument(1);
                 dst.create(src.size(), src.type());
-                dst.setTo(new Scalar(127)); // Inverted value
+                dst.setTo(new Mat(new Scalar(127))); // Inverted value
                 return null;
             }).when(matOps3d).bItwise_not(any(Mat.class));
             

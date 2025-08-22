@@ -77,7 +77,7 @@ public class IterativePatternFinderTest extends BrobotTestBase {
                 .setSimScore(0.95)
                 .build();
             
-            when(findAll.perform(any(), any(), any())).thenReturn(new ActionResult());
+            when(findAll.find(any(StateImage.class), any(Scene.class), any())).thenReturn(Collections.singletonList(match));
             doNothing().when(actionLifecycleManagement).printActionOnce(any());
             
             // Act
@@ -85,7 +85,7 @@ public class IterativePatternFinderTest extends BrobotTestBase {
             
             // Assert
             verify(actionLifecycleManagement).printActionOnce(result);
-            verify(findAll, atLeastOnce()).perform(any(), any(), any());
+            verify(findAll, atLeastOnce()).find(any(StateImage.class), any(Scene.class), any());
         }
         
         @Test
@@ -98,7 +98,7 @@ public class IterativePatternFinderTest extends BrobotTestBase {
             List<Scene> scenes = Arrays.asList(scene1, scene2);
             ActionResult result = new ActionResult();
             
-            when(findAll.perform(any(), any(), any())).thenReturn(new ActionResult());
+            when(findAll.find(any(StateImage.class), any(Scene.class), any())).thenReturn(new ArrayList<>());
             doNothing().when(actionLifecycleManagement).printActionOnce(any());
             
             // Act
@@ -106,7 +106,7 @@ public class IterativePatternFinderTest extends BrobotTestBase {
             
             // Assert
             verify(actionLifecycleManagement).printActionOnce(result);
-            verify(findAll, atLeastOnce()).perform(any(), any(), any());
+            verify(findAll, atLeastOnce()).find(any(StateImage.class), any(Scene.class), any());
         }
         
         @Test
@@ -155,14 +155,9 @@ public class IterativePatternFinderTest extends BrobotTestBase {
             Match match1 = new Match.Builder().setSimScore(0.9).build();
             Match match2 = new Match.Builder().setSimScore(0.85).build();
             
-            ActionResult findResult1 = new ActionResult();
-            findResult1.add(match1);
-            ActionResult findResult2 = new ActionResult();
-            findResult2.add(match2);
-            
-            when(findAll.perform(any(), any(), any()))
-                .thenReturn(findResult1)
-                .thenReturn(findResult2);
+            when(findAll.find(any(StateImage.class), any(Scene.class), any()))
+                .thenReturn(Collections.singletonList(match1))
+                .thenReturn(Collections.singletonList(match2));
             doNothing().when(actionLifecycleManagement).printActionOnce(any());
             
             // Act
@@ -170,7 +165,7 @@ public class IterativePatternFinderTest extends BrobotTestBase {
             
             // Assert
             verify(actionLifecycleManagement).printActionOnce(result);
-            verify(findAll, times(2)).perform(any(), any(), any());
+            verify(findAll, times(2)).find(any(StateImage.class), any(Scene.class), any());
         }
     }
     
@@ -231,7 +226,7 @@ public class IterativePatternFinderTest extends BrobotTestBase {
             List<Scene> scenes = Collections.singletonList(scene);
             ActionResult result = new ActionResult();
             
-            when(findAll.perform(any(), any(), any()))
+            when(findAll.find(any(StateImage.class), any(Scene.class), any()))
                 .thenThrow(new RuntimeException("Find failed"));
             doNothing().when(actionLifecycleManagement).printActionOnce(any());
             
