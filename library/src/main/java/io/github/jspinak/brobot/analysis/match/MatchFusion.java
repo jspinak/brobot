@@ -111,7 +111,15 @@ public class MatchFusion {
      */
     public List<Match> getFusedMatchObjects(List<Match> matchList, ActionConfig actionConfig) {
         MatchFusionMethod method = getFusionMethod(actionConfig);
+        // If fusion method is NONE, return the original matches unchanged
+        if (method == NONE) {
+            return new ArrayList<>(matchList);
+        }
         MatchFusionDecider decider = fusionMethods.get(method);
+        // If no decider is found for the method, return the original matches
+        if (decider == null) {
+            return new ArrayList<>(matchList);
+        }
         int maxXDistance = 10; // Default fusion distance X
         int maxYDistance = 10; // Default fusion distance Y
         List<Match> fusedMatches = new ArrayList<>();
