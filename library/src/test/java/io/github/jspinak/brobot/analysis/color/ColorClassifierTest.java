@@ -65,15 +65,6 @@ public class ColorClassifierTest extends BrobotTestBase {
     @InjectMocks
     private ColorClassifier colorClassifier;
     
-    @Mock
-    private Mat testMat;
-    
-    @Mock
-    private Mat sceneBGR;
-    
-    @Mock
-    private Mat sceneHSV;
-    
     private List<PixelProfiles> pixelAnalysisCollections;
     
     @BeforeEach
@@ -91,13 +82,10 @@ public class ColorClassifierTest extends BrobotTestBase {
     @Test
     @DisplayName("Should return empty SceneAnalysis for empty collections")
     void shouldReturnEmptySceneAnalysisForEmptyCollections() {
-        // Setup scene mock hierarchy for SceneAnalysis constructor
-        when(scene.getPattern()).thenReturn(pattern);
-        when(pattern.getImage()).thenReturn(image);
-        when(image.getMatBGR()).thenReturn(sceneBGR);
-        when(image.getMatHSV()).thenReturn(sceneHSV);
+        // Use MockSceneBuilder to create a properly initialized scene
+        Scene mockScene = MockSceneBuilder.createMockScene();
         
-        SceneAnalysis result = colorClassifier.getSceneAnalysis(new ArrayList<>(), scene);
+        SceneAnalysis result = colorClassifier.getSceneAnalysis(new ArrayList<>(), mockScene);
         
         assertNotNull(result);
         assertEquals(0, result.size());
@@ -146,13 +134,10 @@ public class ColorClassifierTest extends BrobotTestBase {
     @Test
     @DisplayName("Should return empty Mat for empty analysis")
     void shouldReturnEmptyMatForEmptyAnalysis() {
-        // Setup scene mock hierarchy for SceneAnalysis constructor
-        when(scene.getPattern()).thenReturn(pattern);
-        when(pattern.getImage()).thenReturn(image);
-        when(image.getMatBGR()).thenReturn(sceneBGR);
-        when(image.getMatHSV()).thenReturn(sceneHSV);
+        // Use MockSceneBuilder to create a properly initialized scene
+        Scene mockScene = MockSceneBuilder.createMockScene();
         
-        SceneAnalysis sceneAnalysis = new SceneAnalysis(new ArrayList<>(), scene);
+        SceneAnalysis sceneAnalysis = new SceneAnalysis(new ArrayList<>(), mockScene);
         
         Mat result = colorClassifier.getImageIndices(sceneAnalysis, ColorCluster.ColorSchemaName.BGR);
         
