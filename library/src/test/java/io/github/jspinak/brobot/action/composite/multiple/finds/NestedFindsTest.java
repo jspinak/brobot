@@ -94,7 +94,7 @@ public class NestedFindsTest extends BrobotTestBase {
             
             nestedFinds.perform(result, windowCollection, dialogCollection);
             
-            verify(mockChainExecutor, atLeastOnce()).executeChain(any(), any());
+            verify(mockChainExecutor, atLeastOnce()).executeChain(any(), any(), any());
         }
         
         @Test
@@ -123,7 +123,7 @@ public class NestedFindsTest extends BrobotTestBase {
             
             nestedFinds.perform(result, windowCollection, dialogCollection, buttonCollection);
             
-            verify(mockChainExecutor, atLeastOnce()).executeChain(any(), any());
+            verify(mockChainExecutor, atLeastOnce()).executeChain(any(), any(), any());
         }
         
         @Test
@@ -134,7 +134,7 @@ public class NestedFindsTest extends BrobotTestBase {
             nestedFinds.perform(result);
             
             assertFalse(result.isSuccess());
-            verify(mockChainExecutor, never()).executeChain(any(), any());
+            verify(mockChainExecutor, never()).executeChain(any(), any(), any());
         }
         
         @Test
@@ -155,7 +155,7 @@ public class NestedFindsTest extends BrobotTestBase {
             
             nestedFinds.perform(result, collection);
             
-            verify(mockChainExecutor, atLeastOnce()).executeChain(any(), any());
+            verify(mockChainExecutor, atLeastOnce()).executeChain(any(), any(), any());
         }
     }
     
@@ -176,7 +176,7 @@ public class NestedFindsTest extends BrobotTestBase {
             
             nestedFinds.perform(result, collection);
             
-            verify(mockChainExecutor, atLeastOnce()).executeChain(any(), any());
+            verify(mockChainExecutor, atLeastOnce()).executeChain(any(), any(), any());
         }
         
         @Test
@@ -206,7 +206,7 @@ public class NestedFindsTest extends BrobotTestBase {
             
             nestedFinds.perform(result, collection1, collection2, collection3);
             
-            verify(mockChainExecutor, atLeastOnce()).executeChain(any(), any());
+            verify(mockChainExecutor, atLeastOnce()).executeChain(any(), any(), any());
         }
         
         @ParameterizedTest
@@ -230,7 +230,7 @@ public class NestedFindsTest extends BrobotTestBase {
             
             nestedFinds.perform(result, collection);
             
-            verify(mockChainExecutor, atLeastOnce()).executeChain(any(), any());
+            verify(mockChainExecutor, atLeastOnce()).executeChain(any(), any(), any());
         }
     }
     
@@ -270,7 +270,7 @@ public class NestedFindsTest extends BrobotTestBase {
             ArgumentCaptor<ActionChainOptions> chainOptionsCaptor = 
                 ArgumentCaptor.forClass(ActionChainOptions.class);
             
-            when(mockChainExecutor.executeChain(chainOptionsCaptor.capture(), any()))
+            when(mockChainExecutor.executeChain(chainOptionsCaptor.capture(), any(), any()))
                 .thenReturn(mockActionResult);
             
             nestedFinds.perform(result, collection1, collection2);
@@ -354,7 +354,7 @@ public class NestedFindsTest extends BrobotTestBase {
             
             nestedFinds.perform(result, validCollection, null);
             
-            verify(mockChainExecutor, atLeastOnce()).executeChain(any(), any());
+            verify(mockChainExecutor, atLeastOnce()).executeChain(any(), any(), any());
         }
         
         @Test
@@ -371,7 +371,7 @@ public class NestedFindsTest extends BrobotTestBase {
             
             result.setActionConfig(options);
             
-            when(mockChainExecutor.executeChain(any(), any()))
+            when(mockChainExecutor.executeChain(any(), any(), any()))
                 .thenThrow(new RuntimeException("Executor failure"));
             
             assertDoesNotThrow(() -> nestedFinds.perform(result, collection));
@@ -404,7 +404,7 @@ public class NestedFindsTest extends BrobotTestBase {
             
             nestedFinds.perform(result, collections.toArray(new ObjectCollection[0]));
             
-            verify(mockChainExecutor, atLeastOnce()).executeChain(any(), any());
+            verify(mockChainExecutor, atLeastOnce()).executeChain(any(), any(), any());
         }
         
         @Test
@@ -433,7 +433,7 @@ public class NestedFindsTest extends BrobotTestBase {
             
             nestedFinds.perform(result, mixedCollection1, mixedCollection2);
             
-            verify(mockChainExecutor, atLeastOnce()).executeChain(any(), any());
+            verify(mockChainExecutor, atLeastOnce()).executeChain(any(), any(), any());
         }
     }
 }

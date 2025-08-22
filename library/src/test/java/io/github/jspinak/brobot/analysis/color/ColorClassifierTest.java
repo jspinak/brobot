@@ -163,7 +163,7 @@ public class ColorClassifierTest extends BrobotTestBase {
     void shouldReturnEmptyMatForEmptyAnalysis() {
         SceneAnalysis sceneAnalysis = new SceneAnalysis(new ArrayList<>(), scene);
         
-        Mat result = colorClassifier.getImageIndices(sceneAnalysis, BGR);
+        Mat result = colorClassifier.getImageIndices(sceneAnalysis, ColorCluster.ColorSchemaName.BGR);
         
         assertNotNull(result);
         assertTrue(result.empty());
@@ -178,7 +178,7 @@ public class ColorClassifierTest extends BrobotTestBase {
             .withPixelProfile(1)
             .build();
         
-        Mat result = colorClassifier.getImageIndices(sceneAnalysis, BGR);
+        Mat result = colorClassifier.getImageIndices(sceneAnalysis, ColorCluster.ColorSchemaName.BGR);
         
         assertNotNull(result);
     }
@@ -192,7 +192,7 @@ public class ColorClassifierTest extends BrobotTestBase {
             .withPixelProfile(1)
             .build();
         
-        Mat result = colorClassifier.getImageIndices(sceneAnalysis, HSV);
+        Mat result = colorClassifier.getImageIndices(sceneAnalysis, ColorCluster.ColorSchemaName.HSV);
         
         assertNotNull(result);
     }
@@ -212,7 +212,7 @@ public class ColorClassifierTest extends BrobotTestBase {
         Scene mockScene = MockSceneBuilder.createMockScene();
         SceneAnalysis sceneAnalysis = new SceneAnalysis(pixelAnalysisCollections, mockScene);
         
-        Mat result = colorClassifier.getImageIndices(sceneAnalysis, BGR);
+        Mat result = colorClassifier.getImageIndices(sceneAnalysis, ColorCluster.ColorSchemaName.BGR);
         
         assertNotNull(result);
         verify(matOps3d).minIndex(any(Mat.class), any(Mat.class), any(Mat.class), eq(0));

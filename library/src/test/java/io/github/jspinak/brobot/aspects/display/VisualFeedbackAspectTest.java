@@ -32,6 +32,7 @@ import java.util.concurrent.TimeUnit;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.lenient;
 
 @ExtendWith(MockitoExtension.class)
 public class VisualFeedbackAspectTest extends BrobotTestBase {
@@ -73,23 +74,26 @@ public class VisualFeedbackAspectTest extends BrobotTestBase {
         ReflectionTestUtils.setField(aspect, "showActionFlow", true);
         ReflectionTestUtils.setField(aspect, "showConfidenceScores", true);
 
-        // Setup log builder chain
-        when(brobotLogger.log()).thenReturn(logBuilder);
-        when(logBuilder.type(any())).thenReturn(logBuilder);
-        when(logBuilder.level(any())).thenReturn(logBuilder);
-        when(logBuilder.action(anyString())).thenReturn(logBuilder);
-        when(logBuilder.metadata(anyString(), any())).thenReturn(logBuilder);
-        when(logBuilder.observation(anyString())).thenReturn(logBuilder);
+        // Setup log builder chain - use lenient() to avoid UnnecessaryStubbingException
+        lenient().when(brobotLogger.log()).thenReturn(logBuilder);
+        lenient().when(logBuilder.type(any())).thenReturn(logBuilder);
+        lenient().when(logBuilder.level(any())).thenReturn(logBuilder);
+        lenient().when(logBuilder.action(anyString())).thenReturn(logBuilder);
+        lenient().when(logBuilder.metadata(anyString(), any())).thenReturn(logBuilder);
+        lenient().when(logBuilder.observation(anyString())).thenReturn(logBuilder);
+        
+        // Mock the void log() method
+        lenient().doNothing().when(logBuilder).log();
 
         // Setup visual config
-        when(visualConfig.isEnabled()).thenReturn(true);
-        when(visualConfig.isAutoHighlightSearchRegions()).thenReturn(true);
+        lenient().when(visualConfig.isEnabled()).thenReturn(true);
+        lenient().when(visualConfig.isAutoHighlightSearchRegions()).thenReturn(true);
 
         // Setup monitor manager
-        when(monitorManager.getPrimaryMonitorIndex()).thenReturn(0);
+        lenient().when(monitorManager.getPrimaryMonitorIndex()).thenReturn(0);
         MonitorManager.MonitorInfo monitorInfo = new MonitorManager.MonitorInfo(
             0, new Rectangle(0, 0, 1920, 1080), "primary");
-        when(monitorManager.getMonitorInfo(0)).thenReturn(monitorInfo);
+        lenient().when(monitorManager.getMonitorInfo(0)).thenReturn(monitorInfo);
 
         aspect.init();
     }
