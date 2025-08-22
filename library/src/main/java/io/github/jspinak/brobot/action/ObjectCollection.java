@@ -80,6 +80,19 @@ public class ObjectCollection {
                 && matches.isEmpty()
                 && scenes.isEmpty();
     }
+    
+    // Explicit getters - Lombok should generate these but compilation fails without them
+    public List<StateRegion> getStateRegions() {
+        return stateRegions;
+    }
+    
+    public List<StateString> getStateStrings() {
+        return stateStrings;
+    }
+    
+    public List<ActionResult> getMatches() {
+        return matches;
+    }
 
     /**
      * Sets the timesActedOn variable to 0 for all objects, including those
