@@ -202,7 +202,7 @@ public class ActionHistoryPersistence {
             .setMatchList(result.getMatchList())
             .setText(textResult)
             .setActionSuccess(result.isSuccess())
-            .setDuration((long) result.getDuration().toMillis())
+            .setDuration(result.getDuration().toMillis())
             .build();
         
         // Add to history

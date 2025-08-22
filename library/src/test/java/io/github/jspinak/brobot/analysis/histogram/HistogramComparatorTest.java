@@ -317,4 +317,185 @@ public class HistogramComparatorTest extends BrobotTestBase {
         when(ellipse2.getHistogram()).thenReturn(testHistogram);
     }
     
+    @Nested
+    @DisplayName("Edge Cases and Error Handling")
+    class EdgeCasesAndErrorHandling {
+        
+        @Test
+        @DisplayName("Should handle null histogram regions")
+        void shouldHandleNullHistogramRegions() {
+            double result = histogramComparator.compare(null, null, indexedColumn);
+            
+            // Should return maximum distance or handle gracefully
+            assertTrue(result >= 0.0);
+        }
+        
+        @Test
+        @DisplayName("Should handle null histograms in regions")
+        void shouldHandleNullHistogramsInRegions() {
+            when(histRegions1.getTopLeft()).thenReturn(topLeft1);
+            when(histRegions2.getTopLeft()).thenReturn(topLeft2);
+            when(topLeft1.getHistogram()).thenReturn(null);
+            when(topLeft2.getHistogram()).thenReturn(testHistogram);
+            
+            // Other regions return valid histograms
+            when(histRegions1.getTopRight()).thenReturn(topRight1);
+            when(histRegions1.getBottomLeft()).thenReturn(bottomLeft1);
+            when(histRegions1.getBottomRight()).thenReturn(bottomRight1);
+            when(histRegions1.getEllipse()).thenReturn(ellipse1);
+            
+            when(histRegions2.getTopRight()).thenReturn(topRight2);
+            when(histRegions2.getBottomLeft()).thenReturn(bottomLeft2);
+            when(histRegions2.getBottomRight()).thenReturn(bottomRight2);
+            when(histRegions2.getEllipse()).thenReturn(ellipse2);
+            
+            when(topRight1.getHistogram()).thenReturn(testHistogram);
+            when(bottomLeft1.getHistogram()).thenReturn(testHistogram);
+            when(bottomRight1.getHistogram()).thenReturn(testHistogram);
+            when(ellipse1.getHistogram()).thenReturn(testHistogram);
+            
+            when(topRight2.getHistogram()).thenReturn(testHistogram);
+            when(bottomLeft2.getHistogram()).thenReturn(testHistogram);
+            when(bottomRight2.getHistogram()).thenReturn(testHistogram);
+            when(ellipse2.getHistogram()).thenReturn(testHistogram);
+            
+            double result = histogramComparator.compare(histRegions1, histRegions2, indexedColumn);
+            
+            // Should handle null histogram gracefully
+            assertTrue(result >= 0.0);
+        }
+        
+        @Test
+        @DisplayName("Should handle empty histogram Mat")
+        void shouldHandleEmptyHistogramMat() {
+            Mat emptyHistogram = new Mat();
+            
+            try {
+                when(histRegions1.getTopLeft()).thenReturn(topLeft1);
+                when(histRegions2.getTopLeft()).thenReturn(topLeft2);
+                when(topLeft1.getHistogram()).thenReturn(emptyHistogram);
+                when(topLeft2.getHistogram()).thenReturn(testHistogram);
+                
+                setupPartialMocks();
+                
+                double result = histogramComparator.compare(histRegions1, histRegions2, indexedColumn);
+                
+                // Should handle empty Mat gracefully
+                assertTrue(result >= 0.0);
+            } finally {
+                emptyHistogram.release();
+            }
+        }
+        
+        @Test
+        @DisplayName("Should handle mismatched histogram sizes")
+        void shouldHandleMismatchedHistogramSizes() {
+            Mat smallHistogram = new Mat(128, 1, CV_32F);
+            Mat largeHistogram = new Mat(512, 1, CV_32F);
+            
+            try {
+                // Fill histograms
+                for (int i = 0; i < 128; i++) {
+                    smallHistogram.ptr(i, 0).putFloat(i / 128.0f);
+                }
+                for (int i = 0; i < 512; i++) {
+                    largeHistogram.ptr(i, 0).putFloat(i / 512.0f);
+                }
+                
+                when(histRegions1.getTopLeft()).thenReturn(topLeft1);
+                when(histRegions2.getTopLeft()).thenReturn(topLeft2);
+                when(topLeft1.getHistogram()).thenReturn(smallHistogram);
+                when(topLeft2.getHistogram()).thenReturn(largeHistogram);
+                
+                setupPartialMocks();
+                
+                // Create appropriate indexed column for mismatched sizes
+                Mat customIndexedColumn = new Mat(128, 1, CV_32F);
+                for (int i = 0; i < 128; i++) {
+                    customIndexedColumn.ptr(i, 0).putFloat((float)i);
+                }
+                
+                try {
+                    double result = histogramComparator.compare(histRegions1, histRegions2, customIndexedColumn);
+                    
+                    // Should handle size mismatch
+                    assertTrue(result >= 0.0);
+                } finally {
+                    customIndexedColumn.release();
+                }
+            } finally {
+                smallHistogram.release();
+                largeHistogram.release();
+            }
+        }
+        
+        private void setupPartialMocks() {
+            when(histRegions1.getTopRight()).thenReturn(topRight1);
+            when(histRegions1.getBottomLeft()).thenReturn(bottomLeft1);
+            when(histRegions1.getBottomRight()).thenReturn(bottomRight1);
+            when(histRegions1.getEllipse()).thenReturn(ellipse1);
+            
+            when(histRegions2.getTopRight()).thenReturn(topRight2);
+            when(histRegions2.getBottomLeft()).thenReturn(bottomLeft2);
+            when(histRegions2.getBottomRight()).thenReturn(bottomRight2);
+            when(histRegions2.getEllipse()).thenReturn(ellipse2);
+            
+            when(topRight1.getHistogram()).thenReturn(testHistogram);
+            when(bottomLeft1.getHistogram()).thenReturn(testHistogram);
+            when(bottomRight1.getHistogram()).thenReturn(testHistogram);
+            when(ellipse1.getHistogram()).thenReturn(testHistogram);
+            
+            when(topRight2.getHistogram()).thenReturn(testHistogram);
+            when(bottomLeft2.getHistogram()).thenReturn(testHistogram);
+            when(bottomRight2.getHistogram()).thenReturn(testHistogram);
+            when(ellipse2.getHistogram()).thenReturn(testHistogram);
+        }
+    }
+    
+    @Nested
+    @DisplayName("Performance Considerations")
+    class PerformanceConsiderations {
+        
+        @Test
+        @DisplayName("Should handle large region lists efficiently")
+        void shouldHandleLargeRegionListsEfficiently() {
+            StateImage stateImage = mock(StateImage.class);
+            Mat sceneHSV = new Mat(1000, 1000, CV_8UC3);
+            List<Region> regions = new ArrayList<>();
+            
+            // Create 100 regions
+            for (int i = 0; i < 100; i++) {
+                Region region = mock(Region.class);
+                when(region.getJavaCVRect()).thenReturn(
+                    new org.bytedeco.opencv.opencv_core.Rect(i*10, i*10, 50, 50));
+                regions.add(region);
+            }
+            
+            when(histogramExtractor.getHistogramsHSV(stateImage)).thenReturn(histRegions1);
+            when(histogramExtractor.getHistogramFromRegion(any(Mat.class))).thenReturn(histRegions2);
+            when(histogramExtractor.getHueBins()).thenReturn(256);
+            
+            setupHistogramMocks();
+            
+            HistogramRegion combined = mock(HistogramRegion.class);
+            when(histRegions2.getCombined()).thenReturn(combined);
+            when(combined.getHistogram()).thenReturn(testHistogram);
+            
+            try {
+                long startTime = System.currentTimeMillis();
+                List<Match> matches = histogramComparator.compareAll(stateImage, regions, sceneHSV);
+                long endTime = System.currentTimeMillis();
+                
+                assertNotNull(matches);
+                assertEquals(100, matches.size());
+                
+                // Should complete in reasonable time (< 5 seconds for 100 regions)
+                assertTrue((endTime - startTime) < 5000, 
+                    "Processing 100 regions took too long: " + (endTime - startTime) + "ms");
+            } finally {
+                sceneHSV.release();
+            }
+        }
+    }
+    
 }

@@ -1,0 +1,8 @@
+\.txt$
+\.sh$
+\.args$
+\.hprof$
+\.patch$
+!!:s^brobot_parent-i3$
+!!:s^library/[^/]+\.md$
+!!:s^library/[^/]+\.java$
