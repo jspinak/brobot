@@ -239,7 +239,8 @@ public class ClickActionTest extends BrobotTestBase {
             // Arrange
             ClickOptions clickOptions = new ClickOptions.Builder()
                 .setRepetition(RepetitionOptions.builder()
-                    .setTimesToRepeatIndividualAction(3))
+                    .setTimesToRepeatIndividualAction(3)
+                    .build())
                 .build();
             ActionResult actionResult = new ActionResult();
             actionResult.setActionConfig(clickOptions);

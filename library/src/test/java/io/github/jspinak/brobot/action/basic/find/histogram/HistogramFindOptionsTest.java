@@ -3,7 +3,6 @@ package io.github.jspinak.brobot.action.basic.find.histogram;
 import io.github.jspinak.brobot.action.basic.find.FindStrategy;
 import io.github.jspinak.brobot.action.basic.find.HSVBinOptions;
 import io.github.jspinak.brobot.action.basic.find.MatchAdjustmentOptions;
-import io.github.jspinak.brobot.model.element.Location;
 import io.github.jspinak.brobot.model.element.Position;
 import io.github.jspinak.brobot.model.element.Positions;
 import io.github.jspinak.brobot.model.element.Region;
@@ -70,7 +69,8 @@ public class HistogramFindOptionsTest extends BrobotTestBase {
                 .setBinOptions(HSVBinOptions.builder()
                     .hueBins(180)
                     .saturationBins(256)
-                    .valueBins(256))
+                    .valueBins(256)
+                    .build())
                 .setSimilarity(0.85)
                 .setSearchDuration(5.0)
                 .setCaptureImage(false)
@@ -102,7 +102,8 @@ public class HistogramFindOptionsTest extends BrobotTestBase {
                 .setBinOptions(HSVBinOptions.builder()
                     .hueBins(90)
                     .saturationBins(128)
-                    .valueBins(64))
+                    .valueBins(64)
+                    .build())
                 .build();
             
             assertEquals(90, options.getBinOptions().getHueBins());
@@ -117,7 +118,8 @@ public class HistogramFindOptionsTest extends BrobotTestBase {
                 .setBinOptions(HSVBinOptions.builder()
                     .hueBins(1)
                     .saturationBins(1)
-                    .valueBins(1))
+                    .valueBins(1)
+                    .build())
                 .build();
             
             assertEquals(1, options.getBinOptions().getHueBins());
@@ -132,7 +134,8 @@ public class HistogramFindOptionsTest extends BrobotTestBase {
                 .setBinOptions(HSVBinOptions.builder()
                     .hueBins(360)  // Maximum hue degrees
                     .saturationBins(256)  // Maximum 8-bit value
-                    .valueBins(256))  // Maximum 8-bit value
+                    .valueBins(256)
+                    .build())  // Maximum 8-bit value
                 .build();
             
             assertEquals(360, options.getBinOptions().getHueBins());
@@ -249,7 +252,8 @@ public class HistogramFindOptionsTest extends BrobotTestBase {
                 .setBinOptions(HSVBinOptions.builder()
                     .hueBins(36)  // 10-degree hue resolution
                     .saturationBins(8)  // Moderate saturation resolution
-                    .valueBins(4))  // Low value resolution
+                    .valueBins(4)
+                    .build())  // Low value resolution
                 .setSimilarity(0.85)
                 .setSearchDuration(2.0)
                 .setSearchRegions(fullScreen)
@@ -270,7 +274,8 @@ public class HistogramFindOptionsTest extends BrobotTestBase {
                 .setBinOptions(HSVBinOptions.builder()
                     .hueBins(1)  // No hue information
                     .saturationBins(1)  // No saturation information
-                    .valueBins(256))  // Full value resolution for grayscale
+                    .valueBins(256)
+                    .build())  // Full value resolution for grayscale
                 .setSimilarity(0.9)
                 .setMaxMatchesToActOn(1)
                 .setSearchDuration(1.0)
@@ -293,7 +298,8 @@ public class HistogramFindOptionsTest extends BrobotTestBase {
                 .setBinOptions(HSVBinOptions.builder()
                     .hueBins(24)  // Good color discrimination
                     .saturationBins(4)  // Basic saturation levels
-                    .valueBins(2))  // Light/dark distinction
+                    .valueBins(2)
+                    .build())  // Light/dark distinction
                 .setSimilarity(0.95)  // High similarity for UI consistency
                 .setSearchRegions(uiArea)
                 .setCaptureImage(true)  // For debugging
@@ -313,7 +319,8 @@ public class HistogramFindOptionsTest extends BrobotTestBase {
                 .setBinOptions(HSVBinOptions.builder()
                     .hueBins(180)  // High hue resolution for skin tones
                     .saturationBins(32)  // Good saturation discrimination
-                    .valueBins(16))  // Moderate value resolution
+                    .valueBins(16)
+                    .build())  // Moderate value resolution
                 .setSimilarity(0.75)  // Allow for skin tone variations
                 .setSearchDuration(1.0)
                 .setMaxMatchesToActOn(20)  // Multiple skin regions
@@ -345,7 +352,8 @@ public class HistogramFindOptionsTest extends BrobotTestBase {
                 .setBinOptions(HSVBinOptions.builder()
                     .hueBins(18)
                     .saturationBins(3)
-                    .valueBins(2))
+                    .valueBins(2)
+                    .build())
                 .setSimilarity(0.88)
                 .setSearchDuration(1.5)
                 .setCaptureImage(true)
@@ -383,7 +391,8 @@ public class HistogramFindOptionsTest extends BrobotTestBase {
                 .setBinOptions(HSVBinOptions.builder()
                     .hueBins(1)
                     .saturationBins(1)
-                    .valueBins(1))
+                    .valueBins(1)
+                    .build())
                 .setSimilarity(1.0)
                 .build();
             assertEquals(FindStrategy.HISTOGRAM, customOptions.getFindStrategy());
@@ -406,7 +415,8 @@ public class HistogramFindOptionsTest extends BrobotTestBase {
                 .setBinOptions(HSVBinOptions.builder()
                     .hueBins(0)
                     .saturationBins(0)
-                    .valueBins(0))
+                    .valueBins(0)
+                    .build())
                 .build();
             
             assertNotNull(options.getBinOptions());

@@ -137,22 +137,6 @@ public class Match {
         return image != null ? image.getMatBGR() : null;
     }
 
-    public double getScore() {
-        return score;
-    }
-    
-    public void setScore(double score) {
-        this.score = score;
-    }
-    
-    public Location getTarget() {
-        return target;
-    }
-    
-    public void setTarget(Location target) {
-        this.target = target;
-    }
-    
     public double compareByScore(Match m) {
         return score - m.getScore();
     }
@@ -217,11 +201,6 @@ public class Match {
 
     public org.sikuli.script.Match sikuli() {
         return new org.sikuli.script.Match(getRegion().sikuli(), score);
-    }
-    
-    // Explicit getter for stateObjectData - Lombok should generate this but compilation fails without it
-    public StateObjectMetadata getStateObjectData() {
-        return stateObjectData;
     }
 
     public static class Builder {
