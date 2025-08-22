@@ -1,5 +1,7 @@
 package io.github.jspinak.brobot.action.basic.find;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.jspinak.brobot.model.element.SearchRegions;
 import io.github.jspinak.brobot.test.BrobotTestBase;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,19 +16,21 @@ import org.junit.jupiter.params.provider.EnumSource;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Comprehensive test suite for PatternFindOptions - configuration for find operations.
- * Tests builder pattern, find types, and search parameters.
+ * Comprehensive test suite for PatternFindOptions - configuration for pattern-matching find operations.
+ * Tests builder pattern, strategies, factory methods, JSON serialization, and edge cases.
  */
 @DisplayName("PatternFindOptions Tests")
 public class PatternFindOptionsTest extends BrobotTestBase {
     
     private PatternFindOptions.Builder builder;
+    private ObjectMapper objectMapper;
     
     @BeforeEach
     @Override
     public void setupTest() {
         super.setupTest();
         builder = new PatternFindOptions.Builder();
+        objectMapper = new ObjectMapper();
     }
     
     @Nested
@@ -45,11 +49,20 @@ public class PatternFindOptionsTest extends BrobotTestBase {
         }
         
         @Test
-        @DisplayName("Default find type is FIRST")
-        public void testDefaultFindType() {
+        @DisplayName("Default strategy is FIRST")
+        public void testDefaultStrategy() {
             PatternFindOptions options = builder.build();
             
             assertEquals(PatternFindOptions.Strategy.FIRST, options.getStrategy());
+            assertEquals(FindStrategy.FIRST, options.getFindStrategy());
+        }
+        
+        @Test
+        @DisplayName("Default DoOnEach is FIRST")
+        public void testDefaultDoOnEach() {
+            PatternFindOptions options = builder.build();
+            
+            assertEquals(PatternFindOptions.DoOnEach.FIRST, options.getDoOnEach());
         }
         
         @Test
@@ -61,67 +74,120 @@ public class PatternFindOptionsTest extends BrobotTestBase {
         }
         
         @Test
-        @DisplayName("Default timeout is reasonable")
-        public void testDefaultTimeout() {
+        @DisplayName("Default search duration is 3.0 seconds")
+        public void testDefaultSearchDuration() {
             PatternFindOptions options = builder.build();
             
-            assertTrue(options.getSearchDuration() >= 0);
+            assertEquals(3.0, options.getSearchDuration(), 0.01);
+        }
+        
+        @Test
+        @DisplayName("Default match fusion options are not null")
+        public void testDefaultMatchFusionOptions() {
+            PatternFindOptions options = builder.build();
+            
+            assertNotNull(options.getMatchFusionOptions());
+            assertEquals(MatchFusionOptions.FusionMethod.NONE, 
+                options.getMatchFusionOptions().getFusionMethod());
         }
     }
     
     @Nested
-    @DisplayName("Find Type Configuration")
-    class FindTypeConfiguration {
+    @DisplayName("Strategy Configuration")
+    class StrategyConfiguration {
         
         @Test
-        @DisplayName("Find first match")
-        public void testFindFirst() {
+        @DisplayName("Strategy FIRST maps to FindStrategy.FIRST")
+        public void testStrategyFirst() {
             PatternFindOptions options = builder
                 .setStrategy(PatternFindOptions.Strategy.FIRST)
                 .build();
             
             assertEquals(PatternFindOptions.Strategy.FIRST, options.getStrategy());
+            assertEquals(FindStrategy.FIRST, options.getFindStrategy());
         }
         
         @Test
-        @DisplayName("Find best match")
-        public void testFindBest() {
+        @DisplayName("Strategy BEST maps to FindStrategy.BEST")
+        public void testStrategyBest() {
             PatternFindOptions options = builder
                 .setStrategy(PatternFindOptions.Strategy.BEST)
                 .build();
             
             assertEquals(PatternFindOptions.Strategy.BEST, options.getStrategy());
+            assertEquals(FindStrategy.BEST, options.getFindStrategy());
         }
         
         @Test
-        @DisplayName("Find all matches")
-        public void testFindAll() {
+        @DisplayName("Strategy ALL maps to FindStrategy.ALL")
+        public void testStrategyAll() {
             PatternFindOptions options = builder
                 .setStrategy(PatternFindOptions.Strategy.ALL)
                 .build();
             
             assertEquals(PatternFindOptions.Strategy.ALL, options.getStrategy());
+            assertEquals(FindStrategy.ALL, options.getFindStrategy());
         }
         
         @Test
-        @DisplayName("Find each match type")
-        public void testFindEach() {
+        @DisplayName("Strategy EACH maps to FindStrategy.EACH")
+        public void testStrategyEach() {
             PatternFindOptions options = builder
+                .setStrategy(PatternFindOptions.Strategy.EACH)
+                .build();
+            
+            assertEquals(PatternFindOptions.Strategy.EACH, options.getStrategy());
+            assertEquals(FindStrategy.EACH, options.getFindStrategy());
+        }
+        
+        @Test
+        @DisplayName("DoOnEach.FIRST for first match per image")
+        public void testDoOnEachFirst() {
+            PatternFindOptions options = builder
+                .setStrategy(PatternFindOptions.Strategy.EACH)
                 .setDoOnEach(PatternFindOptions.DoOnEach.FIRST)
                 .build();
             
             assertEquals(PatternFindOptions.DoOnEach.FIRST, options.getDoOnEach());
         }
         
+        @Test
+        @DisplayName("DoOnEach.BEST for best match per image")
+        public void testDoOnEachBest() {
+            PatternFindOptions options = builder
+                .setStrategy(PatternFindOptions.Strategy.EACH)
+                .setDoOnEach(PatternFindOptions.DoOnEach.BEST)
+                .build();
+            
+            assertEquals(PatternFindOptions.DoOnEach.BEST, options.getDoOnEach());
+        }
+        
         @ParameterizedTest
         @EnumSource(PatternFindOptions.Strategy.class)
-        @DisplayName("All find types are supported")
-        public void testAllFindTypes(PatternFindOptions.Strategy strategy) {
+        @DisplayName("All strategies are supported and map correctly")
+        public void testAllStrategies(PatternFindOptions.Strategy strategy) {
             PatternFindOptions options = builder
                 .setStrategy(strategy)
                 .build();
             
             assertEquals(strategy, options.getStrategy());
+            assertNotNull(options.getFindStrategy());
+            
+            // Verify each maps to the correct FindStrategy
+            switch (strategy) {
+                case FIRST:
+                    assertEquals(FindStrategy.FIRST, options.getFindStrategy());
+                    break;
+                case ALL:
+                    assertEquals(FindStrategy.ALL, options.getFindStrategy());
+                    break;
+                case EACH:
+                    assertEquals(FindStrategy.EACH, options.getFindStrategy());
+                    break;
+                case BEST:
+                    assertEquals(FindStrategy.BEST, options.getFindStrategy());
+                    break;
+            }
         }
     }
     
@@ -174,49 +240,121 @@ public class PatternFindOptionsTest extends BrobotTestBase {
     }
     
     @Nested
-    @DisplayName("Timeout Configuration")
-    class TimeoutConfiguration {
+    @DisplayName("Factory Methods")
+    class FactoryMethods {
         
         @Test
-        @DisplayName("Set custom timeout")
-        public void testCustomTimeout() {
+        @DisplayName("forQuickSearch creates optimized configuration")
+        public void testForQuickSearch() {
+            PatternFindOptions options = PatternFindOptions.forQuickSearch();
+            
+            assertNotNull(options);
+            assertEquals(PatternFindOptions.Strategy.FIRST, options.getStrategy());
+            assertEquals(0.7, options.getSimilarity(), 0.01);
+            assertFalse(options.isCaptureImage());
+            assertEquals(1, options.getMaxMatchesToActOn());
+        }
+        
+        @Test
+        @DisplayName("forPreciseSearch creates high-accuracy configuration")
+        public void testForPreciseSearch() {
+            PatternFindOptions options = PatternFindOptions.forPreciseSearch();
+            
+            assertNotNull(options);
+            assertEquals(PatternFindOptions.Strategy.BEST, options.getStrategy());
+            assertEquals(0.9, options.getSimilarity(), 0.01);
+            assertTrue(options.isCaptureImage());
+            
+            // Check match fusion settings
+            MatchFusionOptions fusion = options.getMatchFusionOptions();
+            assertNotNull(fusion);
+            assertEquals(MatchFusionOptions.FusionMethod.ABSOLUTE, fusion.getFusionMethod());
+            assertEquals(10, fusion.getMaxFusionDistanceX());
+            assertEquals(10, fusion.getMaxFusionDistanceY());
+        }
+        
+        @Test
+        @DisplayName("forAllMatches creates configuration for finding all")
+        public void testForAllMatches() {
+            PatternFindOptions options = PatternFindOptions.forAllMatches();
+            
+            assertNotNull(options);
+            assertEquals(PatternFindOptions.Strategy.ALL, options.getStrategy());
+            assertEquals(0.8, options.getSimilarity(), 0.01);
+            assertFalse(options.isCaptureImage());
+            assertEquals(-1, options.getMaxMatchesToActOn());
+            
+            // Check match fusion settings
+            MatchFusionOptions fusion = options.getMatchFusionOptions();
+            assertNotNull(fusion);
+            assertEquals(MatchFusionOptions.FusionMethod.ABSOLUTE, fusion.getFusionMethod());
+            assertEquals(20, fusion.getMaxFusionDistanceX());
+            assertEquals(20, fusion.getMaxFusionDistanceY());
+        }
+        
+        @Test
+        @DisplayName("Factory methods produce distinct configurations")
+        public void testFactoryMethodsDistinct() {
+            PatternFindOptions quick = PatternFindOptions.forQuickSearch();
+            PatternFindOptions precise = PatternFindOptions.forPreciseSearch();
+            PatternFindOptions all = PatternFindOptions.forAllMatches();
+            
+            // Verify they have different strategies
+            assertNotEquals(quick.getStrategy(), precise.getStrategy());
+            assertNotEquals(quick.getStrategy(), all.getStrategy());
+            assertNotEquals(precise.getStrategy(), all.getStrategy());
+            
+            // Verify they have different similarities
+            assertNotEquals(quick.getSimilarity(), precise.getSimilarity());
+            assertNotEquals(quick.getSimilarity(), all.getSimilarity());
+            assertNotEquals(precise.getSimilarity(), all.getSimilarity());
+        }
+    }
+    
+    @Nested
+    @DisplayName("Search Duration Configuration")
+    class SearchDurationConfiguration {
+        
+        @Test
+        @DisplayName("Set custom search duration")
+        public void testCustomSearchDuration() {
             PatternFindOptions options = builder
                 .setSearchDuration(10.0)
                 .build();
             
-            assertEquals(10.0, options.getSearchDuration());
+            assertEquals(10.0, options.getSearchDuration(), 0.01);
         }
         
         @Test
-        @DisplayName("Set zero timeout for immediate return")
-        public void testZeroTimeout() {
+        @DisplayName("Set zero search duration for immediate return")
+        public void testZeroSearchDuration() {
             PatternFindOptions options = builder
                 .setSearchDuration(0.0)
                 .build();
             
-            assertEquals(0.0, options.getSearchDuration());
+            assertEquals(0.0, options.getSearchDuration(), 0.01);
         }
         
         @ParameterizedTest
         @ValueSource(doubles = {0.0, 0.5, 1.0, 5.0, 10.0, 30.0, 60.0})
-        @DisplayName("Various timeout values")
-        public void testVariousTimeouts(double timeout) {
+        @DisplayName("Various search duration values")
+        public void testVariousSearchDurations(double duration) {
             PatternFindOptions options = builder
-                .setSearchDuration(timeout)
+                .setSearchDuration(duration)
                 .build();
             
-            assertEquals(timeout, options.getSearchDuration());
+            assertEquals(duration, options.getSearchDuration(), 0.01);
         }
         
         @Test
-        @DisplayName("Negative timeout is allowed")
-        public void testNegativeTimeout() {
+        @DisplayName("Negative search duration is allowed")
+        public void testNegativeSearchDuration() {
             // Negative might mean infinite wait
             PatternFindOptions options = builder
                 .setSearchDuration(-1.0)
                 .build();
             
-            assertEquals(-1.0, options.getSearchDuration());
+            assertEquals(-1.0, options.getSearchDuration(), 0.01);
         }
     }
     
@@ -290,8 +428,8 @@ public class PatternFindOptionsTest extends BrobotTestBase {
     }
     
     @Nested
-    @DisplayName("Match Fusion Options")
-    class MatchFusionOptionsTests {
+    @DisplayName("Match Fusion Configuration")
+    class MatchFusionConfiguration {
         
         @Test
         @DisplayName("Configure match fusion")
@@ -312,16 +450,37 @@ public class PatternFindOptionsTest extends BrobotTestBase {
         }
         
         @Test
-        @DisplayName("No match fusion by default")
-        public void testNoMatchFusionByDefault() {
+        @DisplayName("Default match fusion is NONE")
+        public void testDefaultMatchFusion() {
             PatternFindOptions options = builder.build();
             
-            // Default might be null or have no fusion
             MatchFusionOptions fusion = options.getMatchFusionOptions();
-            if (fusion != null) {
-                assertEquals(MatchFusionOptions.FusionMethod.NONE, 
-                    fusion.getFusionMethod());
-            }
+            assertNotNull(fusion);
+            assertEquals(MatchFusionOptions.FusionMethod.NONE, fusion.getFusionMethod());
+            assertEquals(5, fusion.getMaxFusionDistanceX());
+            assertEquals(5, fusion.getMaxFusionDistanceY());
+        }
+        
+        @Test
+        @DisplayName("Configure relative match fusion")
+        public void testRelativeMatchFusion() {
+            MatchFusionOptions fusion = MatchFusionOptions.builder()
+                .setFusionMethod(MatchFusionOptions.FusionMethod.RELATIVE)
+                .setMaxFusionDistanceX(15)
+                .setMaxFusionDistanceY(15)
+                .setSceneToUseForCaptureAfterFusingMatches(1)
+                .build();
+            
+            PatternFindOptions options = builder
+                .setMatchFusion(fusion)
+                .build();
+            
+            MatchFusionOptions result = options.getMatchFusionOptions();
+            assertNotNull(result);
+            assertEquals(MatchFusionOptions.FusionMethod.RELATIVE, result.getFusionMethod());
+            assertEquals(15, result.getMaxFusionDistanceX());
+            assertEquals(15, result.getMaxFusionDistanceY());
+            assertEquals(1, result.getSceneToUseForCaptureAfterFusingMatches());
         }
     }
     
@@ -461,15 +620,15 @@ public class PatternFindOptionsTest extends BrobotTestBase {
         }
         
         @Test
-        @DisplayName("Null find type")
-        public void testNullFindType() {
+        @DisplayName("Null strategy defaults to FIRST")
+        public void testNullStrategy() {
             PatternFindOptions options = builder
                 .setStrategy(null)
                 .build();
             
-            // Should either use default or be null
-            // Just verify no exception
             assertNotNull(options);
+            // Should use default (FIRST) when null is provided
+            assertNull(options.getStrategy());
         }
         
         @Test
@@ -480,6 +639,185 @@ public class PatternFindOptionsTest extends BrobotTestBase {
             
             assertNotNull(options1);
             assertNotNull(options2);
+        }
+    }
+    
+    @Nested
+    @DisplayName("JSON Serialization")
+    class JsonSerialization {
+        
+        @Test
+        @DisplayName("Serialize and deserialize basic options")
+        public void testBasicSerialization() throws JsonProcessingException {
+            PatternFindOptions original = builder
+                .setStrategy(PatternFindOptions.Strategy.BEST)
+                .setSimilarity(0.85)
+                .setSearchDuration(5.0)
+                .build();
+            
+            String json = objectMapper.writeValueAsString(original);
+            assertNotNull(json);
+            assertTrue(json.contains("BEST"));
+            
+            PatternFindOptions deserialized = objectMapper.readValue(json, PatternFindOptions.class);
+            assertNotNull(deserialized);
+            assertEquals(original.getStrategy(), deserialized.getStrategy());
+            assertEquals(original.getSimilarity(), deserialized.getSimilarity(), 0.01);
+            assertEquals(original.getSearchDuration(), deserialized.getSearchDuration(), 0.01);
+        }
+        
+        @Test
+        @DisplayName("Serialize and deserialize with match fusion")
+        public void testSerializationWithMatchFusion() throws JsonProcessingException {
+            MatchFusionOptions fusion = MatchFusionOptions.builder()
+                .setFusionMethod(MatchFusionOptions.FusionMethod.ABSOLUTE)
+                .setMaxFusionDistanceX(20)
+                .setMaxFusionDistanceY(20)
+                .build();
+            
+            PatternFindOptions original = builder
+                .setStrategy(PatternFindOptions.Strategy.ALL)
+                .setMatchFusion(fusion)
+                .build();
+            
+            String json = objectMapper.writeValueAsString(original);
+            PatternFindOptions deserialized = objectMapper.readValue(json, PatternFindOptions.class);
+            
+            assertNotNull(deserialized.getMatchFusionOptions());
+            assertEquals(MatchFusionOptions.FusionMethod.ABSOLUTE, 
+                deserialized.getMatchFusionOptions().getFusionMethod());
+            assertEquals(20, deserialized.getMatchFusionOptions().getMaxFusionDistanceX());
+        }
+        
+        @Test
+        @DisplayName("Deserialize with unknown properties (forward compatibility)")
+        public void testDeserializeWithUnknownProperties() throws JsonProcessingException {
+            String json = "{\"strategy\":\"FIRST\",\"similarity\":0.8,\"unknownField\":\"value\"}";
+            
+            PatternFindOptions options = objectMapper.readValue(json, PatternFindOptions.class);
+            assertNotNull(options);
+            assertEquals(PatternFindOptions.Strategy.FIRST, options.getStrategy());
+            assertEquals(0.8, options.getSimilarity(), 0.01);
+        }
+        
+        @Test
+        @DisplayName("Serialize factory method results")
+        public void testSerializeFactoryMethods() throws JsonProcessingException {
+            PatternFindOptions quick = PatternFindOptions.forQuickSearch();
+            PatternFindOptions precise = PatternFindOptions.forPreciseSearch();
+            PatternFindOptions all = PatternFindOptions.forAllMatches();
+            
+            String quickJson = objectMapper.writeValueAsString(quick);
+            String preciseJson = objectMapper.writeValueAsString(precise);
+            String allJson = objectMapper.writeValueAsString(all);
+            
+            assertNotNull(quickJson);
+            assertNotNull(preciseJson);
+            assertNotNull(allJson);
+            
+            // Verify they can be deserialized back
+            PatternFindOptions quickDeserialized = objectMapper.readValue(quickJson, PatternFindOptions.class);
+            PatternFindOptions preciseDeserialized = objectMapper.readValue(preciseJson, PatternFindOptions.class);
+            PatternFindOptions allDeserialized = objectMapper.readValue(allJson, PatternFindOptions.class);
+            
+            assertEquals(quick.getStrategy(), quickDeserialized.getStrategy());
+            assertEquals(precise.getStrategy(), preciseDeserialized.getStrategy());
+            assertEquals(all.getStrategy(), allDeserialized.getStrategy());
+        }
+    }
+    
+    @Nested
+    @DisplayName("Integration Tests")
+    class IntegrationTests {
+        
+        @Test
+        @DisplayName("Builder chaining works correctly")
+        public void testBuilderChaining() {
+            PatternFindOptions options = new PatternFindOptions.Builder()
+                .setStrategy(PatternFindOptions.Strategy.ALL)
+                .setSimilarity(0.9)
+                .setSearchDuration(10.0)
+                .setCaptureImage(true)
+                .setUseDefinedRegion(false)
+                .setMaxMatchesToActOn(5)
+                .setDoOnEach(PatternFindOptions.DoOnEach.BEST)
+                .setMatchFusion(MatchFusionOptions.builder()
+                    .setFusionMethod(MatchFusionOptions.FusionMethod.RELATIVE)
+                    .build())
+                .setMatchAdjustment(MatchAdjustmentOptions.builder()
+                    .setAddW(10)
+                    .setAddH(10)
+                    .build())
+                .build();
+            
+            assertNotNull(options);
+            assertEquals(PatternFindOptions.Strategy.ALL, options.getStrategy());
+            assertEquals(0.9, options.getSimilarity(), 0.01);
+            assertEquals(10.0, options.getSearchDuration(), 0.01);
+            assertTrue(options.isCaptureImage());
+            assertFalse(options.isUseDefinedRegion());
+            assertEquals(5, options.getMaxMatchesToActOn());
+            assertEquals(PatternFindOptions.DoOnEach.BEST, options.getDoOnEach());
+            assertNotNull(options.getMatchFusionOptions());
+            assertNotNull(options.getMatchAdjustmentOptions());
+        }
+        
+        @Test
+        @DisplayName("Copy constructor preserves all fields")
+        public void testCopyConstructorCompleteness() {
+            MatchFusionOptions fusion = MatchFusionOptions.builder()
+                .setFusionMethod(MatchFusionOptions.FusionMethod.ABSOLUTE)
+                .setMaxFusionDistanceX(15)
+                .setMaxFusionDistanceY(15)
+                .build();
+            
+            PatternFindOptions original = builder
+                .setStrategy(PatternFindOptions.Strategy.EACH)
+                .setDoOnEach(PatternFindOptions.DoOnEach.BEST)
+                .setSimilarity(0.88)
+                .setSearchDuration(7.5)
+                .setMatchFusion(fusion)
+                .setCaptureImage(false)
+                .setMaxMatchesToActOn(3)
+                .build();
+            
+            PatternFindOptions copy = new PatternFindOptions.Builder(original).build();
+            
+            assertEquals(original.getStrategy(), copy.getStrategy());
+            assertEquals(original.getDoOnEach(), copy.getDoOnEach());
+            assertEquals(original.getSimilarity(), copy.getSimilarity(), 0.01);
+            assertEquals(original.getSearchDuration(), copy.getSearchDuration(), 0.01);
+            assertEquals(original.isCaptureImage(), copy.isCaptureImage());
+            assertEquals(original.getMaxMatchesToActOn(), copy.getMaxMatchesToActOn());
+            
+            // Verify match fusion was deep copied
+            assertNotNull(copy.getMatchFusionOptions());
+            assertEquals(original.getMatchFusionOptions().getFusionMethod(), 
+                copy.getMatchFusionOptions().getFusionMethod());
+            assertEquals(original.getMatchFusionOptions().getMaxFusionDistanceX(), 
+                copy.getMatchFusionOptions().getMaxFusionDistanceX());
+        }
+        
+        @Test
+        @DisplayName("Immutability - original unchanged after copy modification")
+        public void testImmutability() {
+            PatternFindOptions original = builder
+                .setStrategy(PatternFindOptions.Strategy.FIRST)
+                .setSimilarity(0.7)
+                .build();
+            
+            PatternFindOptions modified = new PatternFindOptions.Builder(original)
+                .setStrategy(PatternFindOptions.Strategy.ALL)
+                .setSimilarity(0.9)
+                .build();
+            
+            // Original should be unchanged
+            assertEquals(PatternFindOptions.Strategy.FIRST, original.getStrategy());
+            assertEquals(0.7, original.getSimilarity(), 0.01);
+            
+            // Modified should have new values
+            assertEquals(PatternFindOptions.Strategy.ALL, modified.getStrategy());
+            assertEquals(0.9, modified.getSimilarity(), 0.01);
         }
     }
 }
