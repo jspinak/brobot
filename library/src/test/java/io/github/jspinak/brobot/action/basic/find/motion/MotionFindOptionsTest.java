@@ -2,6 +2,9 @@ package io.github.jspinak.brobot.action.basic.find.motion;
 
 import io.github.jspinak.brobot.action.basic.find.FindStrategy;
 import io.github.jspinak.brobot.action.basic.find.MatchAdjustmentOptions;
+import io.github.jspinak.brobot.model.element.Location;
+import io.github.jspinak.brobot.model.element.Position;
+import io.github.jspinak.brobot.model.element.Positions;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.element.SearchRegions;
 import io.github.jspinak.brobot.test.BrobotTestBase;
@@ -9,13 +12,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
+import org.sikuli.basics.Settings;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Comprehensive test suite for MotionFindOptions.
- * Tests motion-based find configuration including maximum movement settings
- * and inheritance from BaseFindOptions.
+ * Test suite for MotionFindOptions following Brobot testing guidelines.
+ * All tests extend BrobotTestBase for proper mock mode and CI/CD compatibility.
  */
 @DisplayName("MotionFindOptions Tests")
 public class MotionFindOptionsTest extends BrobotTestBase {
@@ -29,15 +32,9 @@ public class MotionFindOptionsTest extends BrobotTestBase {
         builder = new MotionFindOptions.Builder();
     }
     
-    private SearchRegions createSearchRegions(int x, int y, int w, int h) {
-        SearchRegions searchRegions = new SearchRegions();
-        searchRegions.addSearchRegions(new Region(x, y, w, h));
-        return searchRegions;
-    }
-    
     @Nested
-    @DisplayName("Builder Construction")
-    class BuilderConstruction {
+    @DisplayName("Builder and Default Values")
+    class BuilderTests {
         
         @Test
         @DisplayName("Should create with default values")
@@ -47,31 +44,45 @@ public class MotionFindOptionsTest extends BrobotTestBase {
             assertNotNull(options);
             assertEquals(FindStrategy.MOTION, options.getFindStrategy());
             assertEquals(300, options.getMaxMovement());
+            assertEquals(Settings.MinSimilarity, options.getSimilarity(), 0.001);
+            assertEquals(3.0, options.getSearchDuration(), 0.001);
+            assertTrue(options.isCaptureImage());
+            assertFalse(options.isUseDefinedRegion());
+            assertEquals(-1, options.getMaxMatchesToActOn());
+            assertNotNull(options.getSearchRegions());
+            assertNotNull(options.getMatchAdjustmentOptions());
         }
         
         @Test
         @DisplayName("Should create from existing options")
         void shouldCreateFromExistingOptions() {
-            // Create original options
+            // Create original with custom values
+            SearchRegions searchRegions = new SearchRegions();
+            searchRegions.addSearchRegions(new Region(100, 100, 400, 400));
+            
             MotionFindOptions original = new MotionFindOptions.Builder()
                 .setMaxMovement(500)
                 .setSimilarity(0.85)
-                .setSearchRegions(createSearchRegions(100, 100, 400, 400))
+                .setSearchDuration(5.0)
+                .setCaptureImage(false)
+                .setSearchRegions(searchRegions)
                 .build();
             
-            // Create new builder from original
+            // Create copy using copy constructor
             MotionFindOptions copy = new MotionFindOptions.Builder(original).build();
             
             assertNotNull(copy);
             assertEquals(500, copy.getMaxMovement());
             assertEquals(0.85, copy.getSimilarity(), 0.001);
+            assertEquals(5.0, copy.getSearchDuration(), 0.001);
+            assertFalse(copy.isCaptureImage());
             assertNotNull(copy.getSearchRegions());
         }
     }
     
     @Nested
-    @DisplayName("Max Movement Configuration")
-    class MaxMovementConfiguration {
+    @DisplayName("MaxMovement Configuration")
+    class MaxMovementTests {
         
         @Test
         @DisplayName("Should set custom max movement")
@@ -84,43 +95,35 @@ public class MotionFindOptionsTest extends BrobotTestBase {
         }
         
         @Test
-        @DisplayName("Should handle small max movement values")
-        void shouldHandleSmallMaxMovement() {
-            MotionFindOptions options = builder
-                .setMaxMovement(10)
-                .build();
-            
-            assertEquals(10, options.getMaxMovement());
-        }
-        
-        @Test
-        @DisplayName("Should handle large max movement values")
-        void shouldHandleLargeMaxMovement() {
-            MotionFindOptions options = builder
-                .setMaxMovement(2000)
-                .build();
-            
-            assertEquals(2000, options.getMaxMovement());
-        }
-        
-        @Test
-        @DisplayName("Should handle zero max movement")
-        void shouldHandleZeroMaxMovement() {
-            MotionFindOptions options = builder
+        @DisplayName("Should handle edge case values")
+        void shouldHandleEdgeCaseValues() {
+            // Zero movement
+            MotionFindOptions zeroMovement = builder
                 .setMaxMovement(0)
                 .build();
+            assertEquals(0, zeroMovement.getMaxMovement());
             
-            assertEquals(0, options.getMaxMovement());
+            // Large movement
+            MotionFindOptions largeMovement = builder
+                .setMaxMovement(10000)
+                .build();
+            assertEquals(10000, largeMovement.getMaxMovement());
+            
+            // Negative movement (edge case - implementation dependent)
+            MotionFindOptions negativeMovement = builder
+                .setMaxMovement(-100)
+                .build();
+            assertEquals(-100, negativeMovement.getMaxMovement());
         }
     }
     
     @Nested
     @DisplayName("Inherited BaseFindOptions Features")
-    class InheritedFeatures {
+    class InheritedFeaturesTests {
         
         @Test
         @DisplayName("Should inherit similarity settings")
-        void shouldInheritSimilaritySettings() {
+        void shouldInheritSimilarity() {
             MotionFindOptions options = builder
                 .setSimilarity(0.95)
                 .build();
@@ -132,15 +135,15 @@ public class MotionFindOptionsTest extends BrobotTestBase {
         @DisplayName("Should inherit search duration")
         void shouldInheritSearchDuration() {
             MotionFindOptions options = builder
-                .setSearchDuration(5.0)
+                .setSearchDuration(10.0)
                 .build();
             
-            assertEquals(5.0, options.getSearchDuration(), 0.001);
+            assertEquals(10.0, options.getSearchDuration(), 0.001);
         }
         
         @Test
         @DisplayName("Should inherit capture image setting")
-        void shouldInheritCaptureImageSetting() {
+        void shouldInheritCaptureImage() {
             MotionFindOptions options = builder
                 .setCaptureImage(false)
                 .build();
@@ -151,8 +154,11 @@ public class MotionFindOptionsTest extends BrobotTestBase {
         @Test
         @DisplayName("Should inherit search regions")
         void shouldInheritSearchRegions() {
+            SearchRegions searchRegions = new SearchRegions();
+            searchRegions.addSearchRegions(new Region(50, 50, 300, 300));
+            
             MotionFindOptions options = builder
-                .setSearchRegions(createSearchRegions(50, 50, 300, 300))
+                .setSearchRegions(searchRegions)
                 .build();
             
             assertNotNull(options.getSearchRegions());
@@ -174,96 +180,134 @@ public class MotionFindOptionsTest extends BrobotTestBase {
         }
         
         @Test
+        @DisplayName("Should inherit use defined region setting")
+        void shouldInheritUseDefinedRegion() {
+            MotionFindOptions options = builder
+                .setUseDefinedRegion(true)
+                .build();
+            
+            assertTrue(options.isUseDefinedRegion());
+        }
+        
+        @Test
         @DisplayName("Should inherit match adjustment options")
         void shouldInheritMatchAdjustmentOptions() {
-            io.github.jspinak.brobot.model.element.Location offset = new io.github.jspinak.brobot.model.element.Location.Builder().setOffsetX(50).setOffsetY(50).build();
             MatchAdjustmentOptions matchAdjustment = MatchAdjustmentOptions.builder()
-                .setTargetOffset(offset)
+                .setTargetPosition(new Position(Positions.Name.MIDDLEMIDDLE))
+                .setTargetOffset(new Location(10, 10))
+                .setAddW(20)
+                .setAddH(20)
                 .build();
-                
+            
             MotionFindOptions options = builder
                 .setMatchAdjustment(matchAdjustment)
                 .build();
             
             assertNotNull(options.getMatchAdjustmentOptions());
+            assertNotNull(options.getMatchAdjustmentOptions().getTargetPosition());
+            assertEquals(0.5, options.getMatchAdjustmentOptions().getTargetPosition().getPercentW(), 0.001);
+            assertEquals(0.5, options.getMatchAdjustmentOptions().getTargetPosition().getPercentH(), 0.001);
             assertNotNull(options.getMatchAdjustmentOptions().getTargetOffset());
-            assertEquals(50, options.getMatchAdjustmentOptions().getTargetOffset().getOffsetX());
-            assertEquals(50, options.getMatchAdjustmentOptions().getTargetOffset().getOffsetY());
+            assertEquals(10, options.getMatchAdjustmentOptions().getTargetOffset().getOffsetX());
+            assertEquals(10, options.getMatchAdjustmentOptions().getTargetOffset().getOffsetY());
+            assertEquals(20, options.getMatchAdjustmentOptions().getAddW());
+            assertEquals(20, options.getMatchAdjustmentOptions().getAddH());
         }
     }
     
     @Nested
-    @DisplayName("Real-World Scenarios")
-    class RealWorldScenarios {
+    @DisplayName("Real-World Use Cases")
+    class UseCaseTests {
         
         @Test
         @DisplayName("Should configure for detecting button hover effects")
-        void shouldConfigureForButtonHoverDetection() {
+        void shouldConfigureForButtonHover() {
+            SearchRegions buttonArea = new SearchRegions();
+            buttonArea.addSearchRegions(new Region(400, 300, 200, 100));
+            
             MotionFindOptions options = new MotionFindOptions.Builder()
                 .setMaxMovement(5)  // Small movement for hover effects
                 .setSimilarity(0.98)  // High similarity for subtle changes
                 .setSearchDuration(0.5)  // Quick detection
-                .setSearchRegions(createSearchRegions(400, 300, 200, 100))  // Button area
+                .setSearchRegions(buttonArea)
+                .setCaptureImage(true)  // Capture for debugging
                 .build();
             
             assertEquals(5, options.getMaxMovement());
             assertEquals(0.98, options.getSimilarity(), 0.001);
             assertEquals(0.5, options.getSearchDuration(), 0.001);
             assertNotNull(options.getSearchRegions());
-        }
-        
-        @Test
-        @DisplayName("Should configure for detecting scrolling content")
-        void shouldConfigureForScrollingContent() {
-            MotionFindOptions options = new MotionFindOptions.Builder()
-                .setMaxMovement(500)  // Large movement for scrolling
-                .setSimilarity(0.8)  // Lower similarity for content variations
-                .setSearchDuration(2.0)  // Moderate detection time
-                .setSearchRegions(createSearchRegions(0, 0, 1920, 1080))  // Full screen
-                .setCaptureImage(true)  // Capture for debugging
-                .build();
-            
-            assertEquals(500, options.getMaxMovement());
-            assertEquals(0.8, options.getSimilarity(), 0.001);
-            assertNotNull(options.getSearchRegions());
             assertTrue(options.isCaptureImage());
         }
         
         @Test
-        @DisplayName("Should configure for detecting loading animations")
-        void shouldConfigureForLoadingAnimations() {
+        @DisplayName("Should configure for detecting scrolling content")
+        void shouldConfigureForScrolling() {
+            SearchRegions fullScreen = new SearchRegions();
+            fullScreen.addSearchRegions(new Region(0, 0, 1920, 1080));
+            
             MotionFindOptions options = new MotionFindOptions.Builder()
-                .setMaxMovement(50)  // Moderate movement for spinning animations
+                .setMaxMovement(500)  // Large movement for scrolling
+                .setSimilarity(0.8)  // Lower similarity for content variations
+                .setSearchDuration(2.0)  // Moderate detection time
+                .setSearchRegions(fullScreen)
+                .setMaxMatchesToActOn(10)  // Track multiple moving elements
+                .build();
+            
+            assertEquals(500, options.getMaxMovement());
+            assertEquals(0.8, options.getSimilarity(), 0.001);
+            assertEquals(2.0, options.getSearchDuration(), 0.001);
+            assertEquals(10, options.getMaxMatchesToActOn());
+        }
+        
+        @Test
+        @DisplayName("Should configure for detecting loading animations")
+        void shouldConfigureForLoadingAnimation() {
+            SearchRegions loadingArea = new SearchRegions();
+            loadingArea.addSearchRegions(new Region(860, 440, 200, 200));  // Center area
+            
+            MotionFindOptions options = new MotionFindOptions.Builder()
+                .setMaxMovement(50)  // Moderate movement for spinning
                 .setSimilarity(0.85)
                 .setSearchDuration(1.0)
-                .setSearchRegions(createSearchRegions(400, 300, 200, 200))  // Limited area
-                .setMaxMatchesToActOn(1)  // Only track one loading indicator
+                .setSearchRegions(loadingArea)
+                .setMaxMatchesToActOn(1)  // Only one loading indicator
+                .setUseDefinedRegion(false)  // Search for the pattern
                 .build();
             
             assertEquals(50, options.getMaxMovement());
-            assertEquals(200, options.getSearchRegions().getOneRegion().w());
-            assertEquals(200, options.getSearchRegions().getOneRegion().h());
+            assertEquals(0.85, options.getSimilarity(), 0.001);
             assertEquals(1, options.getMaxMatchesToActOn());
+            assertFalse(options.isUseDefinedRegion());
         }
     }
     
     @Nested
-    @DisplayName("Builder Chaining")
-    class BuilderChaining {
+    @DisplayName("Builder Fluency and Chaining")
+    class BuilderFluencyTests {
         
         @Test
         @DisplayName("Should support fluent builder pattern")
-        void shouldSupportFluentBuilderPattern() {
+        void shouldSupportFluentBuilder() {
+            SearchRegions searchRegions = new SearchRegions();
+            searchRegions.addSearchRegions(new Region(10, 10, 100, 100));
+            
+            MatchAdjustmentOptions matchAdjustment = MatchAdjustmentOptions.builder()
+                .setTargetPosition(new Position(Positions.Name.TOPLEFT))
+                .build();
+            
             MotionFindOptions options = new MotionFindOptions.Builder()
                 .setMaxMovement(100)
                 .setSimilarity(0.9)
                 .setSearchDuration(2.5)
                 .setCaptureImage(true)
                 .setMaxMatchesToActOn(3)
-                .setSearchRegions(createSearchRegions(10, 10, 100, 100))
+                .setSearchRegions(searchRegions)
                 .setUseDefinedRegion(false)
+                .setMatchAdjustment(matchAdjustment)
                 .build();
             
+            // Verify all settings were applied
             assertEquals(100, options.getMaxMovement());
             assertEquals(0.9, options.getSimilarity(), 0.001);
             assertEquals(2.5, options.getSearchDuration(), 0.001);
@@ -271,98 +315,34 @@ public class MotionFindOptionsTest extends BrobotTestBase {
             assertEquals(3, options.getMaxMatchesToActOn());
             assertNotNull(options.getSearchRegions());
             assertFalse(options.isUseDefinedRegion());
-        }
-    }
-    
-    @Nested
-    @DisplayName("Edge Cases")
-    class EdgeCases {
-        
-        @Test
-        @DisplayName("Should handle negative max movement as zero")
-        void shouldHandleNegativeMaxMovement() {
-            // Implementation note: Negative values may be treated as zero
-            // or throw an exception depending on validation logic
-            MotionFindOptions options = builder
-                .setMaxMovement(-10)
-                .build();
-            
-            // The actual behavior depends on implementation
-            assertTrue(options.getMaxMovement() >= -10);
-        }
-        
-        @Test
-        @DisplayName("Should maintain default search regions when not set")
-        void shouldMaintainDefaultSearchRegions() {
-            MotionFindOptions options = builder.build();
-            
-            assertNotNull(options.getSearchRegions());
-            // Default SearchRegions should be empty (searches entire screen)
-        }
-        
-        @Test
-        @DisplayName("Should handle empty search regions")
-        void shouldHandleEmptySearchRegions() {
-            MotionFindOptions options = builder
-                .setSearchRegions(new SearchRegions())
-                .build();
-            
-            assertNotNull(options.getSearchRegions());
+            assertNotNull(options.getMatchAdjustmentOptions());
+            assertNotNull(options.getMatchAdjustmentOptions().getTargetPosition());
+            assertEquals(0.0, options.getMatchAdjustmentOptions().getTargetPosition().getPercentW(), 0.001);
+            assertEquals(0.0, options.getMatchAdjustmentOptions().getTargetPosition().getPercentH(), 0.001);
         }
     }
     
     @Nested
     @DisplayName("Strategy Verification")
-    class StrategyVerification {
+    class StrategyTests {
         
         @Test
         @DisplayName("Should always return MOTION strategy")
         void shouldAlwaysReturnMotionStrategy() {
-            MotionFindOptions options = builder.build();
-            assertEquals(FindStrategy.MOTION, options.getFindStrategy());
+            // Default configuration
+            MotionFindOptions defaultOptions = builder.build();
+            assertEquals(FindStrategy.MOTION, defaultOptions.getFindStrategy());
             
-            // Even with different configurations
-            options = builder
+            // With custom configuration
+            MotionFindOptions customOptions = builder
                 .setMaxMovement(0)
-                .setSearchRegions(createSearchRegions(0, 0, 100, 100))
+                .setSimilarity(1.0)
                 .build();
-            assertEquals(FindStrategy.MOTION, options.getFindStrategy());
-        }
-    }
-    
-    @Nested
-    @DisplayName("Complex Configurations")
-    class ComplexConfigurations {
-        
-        @Test
-        @DisplayName("Should handle document scrolling detection")
-        void shouldHandleDocumentScrolling() {
-            MotionFindOptions options = new MotionFindOptions.Builder()
-                .setMaxMovement(1000)  // Large vertical movement
-                .setSimilarity(0.75)  // Lower similarity for text variations
-                .setSearchDuration(3.0)
-                .setSearchRegions(createSearchRegions(100, 100, 800, 600))  // Document area
-                .setCaptureImage(false)  // Performance optimization
-                .build();
+            assertEquals(FindStrategy.MOTION, customOptions.getFindStrategy());
             
-            assertNotNull(options.getSearchRegions());
-            assertEquals(800, options.getSearchRegions().getOneRegion().w());
-            assertEquals(1000, options.getMaxMovement());
-        }
-        
-        @Test
-        @DisplayName("Should handle video playback detection")
-        void shouldHandleVideoPlayback() {
-            MotionFindOptions options = new MotionFindOptions.Builder()
-                .setMaxMovement(50)  // Small movement between frames
-                .setSimilarity(0.6)  // Low similarity for frame differences
-                .setSearchDuration(0.1)  // Very quick detection
-                .setMaxMatchesToActOn(10)  // Track multiple regions
-                .build();
-            
-            assertEquals(50, options.getMaxMovement());
-            assertEquals(0.6, options.getSimilarity(), 0.001);
-            assertEquals(0.1, options.getSearchDuration(), 0.001);
+            // From copy constructor
+            MotionFindOptions copiedOptions = new MotionFindOptions.Builder(defaultOptions).build();
+            assertEquals(FindStrategy.MOTION, copiedOptions.getFindStrategy());
         }
     }
 }

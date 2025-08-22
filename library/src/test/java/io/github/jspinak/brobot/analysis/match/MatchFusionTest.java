@@ -62,7 +62,8 @@ public class MatchFusionTest extends BrobotTestBase {
         @DisplayName("Should not fuse when method is NONE")
         void shouldNotFuseWhenMethodIsNone() {
             List<Match> matches = createTestMatches();
-            ActionResult actionResult = new ActionResult(null, matches);
+            ActionResult actionResult = new ActionResult();
+            matches.forEach(actionResult::add);
             
             // When fusion method is NONE (default), no fusion should occur
             matchFusion.setFusedMatches(actionResult);
@@ -75,7 +76,8 @@ public class MatchFusionTest extends BrobotTestBase {
         @DisplayName("Should not fuse when ActionConfig is null")
         void shouldNotFuseWhenActionConfigIsNull() {
             List<Match> matches = createTestMatches();
-            ActionResult actionResult = new ActionResult(null, matches);
+            ActionResult actionResult = new ActionResult();
+            matches.forEach(actionResult::add);
             
             matchFusion.setFusedMatches(actionResult);
             
@@ -165,7 +167,8 @@ public class MatchFusionTest extends BrobotTestBase {
             Match match3 = createMatch(100, 0, 60, 60, "m3");
             List<Match> matches = Arrays.asList(match1, match2, match3);
             
-            ActionResult actionResult = new ActionResult(null, matches);
+            ActionResult actionResult = new ActionResult();
+            matches.forEach(actionResult::add);
             
             // Mock progressive fusion: first m1+m2, then result+m3
             when(absoluteSizeFusionDecider.isSameMatchGroup(any(Match.class), any(Match.class), 
@@ -192,7 +195,8 @@ public class MatchFusionTest extends BrobotTestBase {
                 matches.add(createMatch(i * 100, 0, 50, 50, "match" + i));
             }
             
-            ActionResult actionResult = new ActionResult(null, matches);
+            ActionResult actionResult = new ActionResult();
+            matches.forEach(actionResult::add);
             
             // No matches should fuse
             when(absoluteSizeFusionDecider.isSameMatchGroup(any(Match.class), any(Match.class), 
@@ -349,7 +353,8 @@ public class MatchFusionTest extends BrobotTestBase {
         void shouldModifyActionResultMatchesInPlace() {
             List<Match> originalMatches = createTestMatches();
             List<Match> matchesCopy = new ArrayList<>(originalMatches);
-            ActionResult actionResult = new ActionResult(null, matchesCopy);
+            ActionResult actionResult = new ActionResult();
+            matchesCopy.forEach(actionResult::add);
             
             // Store original reference
             List<Match> originalList = actionResult.getMatchList();

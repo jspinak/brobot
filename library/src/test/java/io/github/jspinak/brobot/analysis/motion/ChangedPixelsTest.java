@@ -56,7 +56,7 @@ public class ChangedPixelsTest extends BrobotTestBase {
     
     private Mat createTestImage(int width, int height, int grayValue) {
         Mat image = new Mat(height, width, CV_8UC3);
-        image.setTo(new Scalar(grayValue, grayValue, grayValue, 0));
+        image.setTo(new Mat(new Scalar(grayValue, grayValue, grayValue, 0)));
         return image;
     }
     

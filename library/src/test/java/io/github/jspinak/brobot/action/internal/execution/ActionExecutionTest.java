@@ -37,6 +37,8 @@ import java.util.function.BiFunction;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 /**
@@ -124,9 +126,9 @@ public class ActionExecutionTest extends BrobotTestBase {
             // Arrange
             ActionResult expectedResult = new ActionResult();
             expectedResult.setSuccess(true);
-            when(actionResultFactory.create(any(), any())).thenReturn(expectedResult);
-            when(actionLifecycleManagement.perform(any(), any(), any())).thenReturn(expectedResult);
-            when(actionSuccessCriteria.determineSuccess(any())).thenReturn(true);
+            when(actionResultFactory.init(any(ActionConfig.class), anyString(), any(ObjectCollection[].class))).thenReturn(expectedResult);
+            when(actionLifecycleManagement.isMoreSequencesAllowed(any(ActionResult.class))).thenReturn(true, false);
+            doNothing().when(actionSuccessCriteria).set(any(ActionConfig.class), any(ActionResult.class));
             
             // Act
             ActionResult result = actionExecution.perform(
@@ -139,7 +141,7 @@ public class ActionExecutionTest extends BrobotTestBase {
             // Assert
             assertNotNull(result);
             assertTrue(result.isSuccess());
-            verify(actionLifecycleManagement).perform(any(), any(), any());
+            verify(actionSuccessCriteria).set(any(ActionConfig.class), any(ActionResult.class));
         }
         
         @Test
@@ -148,9 +150,9 @@ public class ActionExecutionTest extends BrobotTestBase {
             // Arrange
             ActionResult expectedResult = new ActionResult();
             expectedResult.setSuccess(false);
-            when(actionResultFactory.create(any(), any())).thenReturn(expectedResult);
-            when(actionLifecycleManagement.perform(any(), any(), any())).thenReturn(expectedResult);
-            when(actionSuccessCriteria.determineSuccess(any())).thenReturn(false);
+            when(actionResultFactory.init(any(ActionConfig.class), anyString(), any(ObjectCollection[].class))).thenReturn(expectedResult);
+            when(actionLifecycleManagement.isMoreSequencesAllowed(any(ActionResult.class))).thenReturn(false);
+            doNothing().when(actionSuccessCriteria).set(any(ActionConfig.class), any(ActionResult.class));
             
             // Act
             ActionResult result = actionExecution.perform(
@@ -171,8 +173,9 @@ public class ActionExecutionTest extends BrobotTestBase {
             // Arrange
             ActionResult expectedResult = new ActionResult();
             expectedResult.setDuration(Duration.ofMillis(100));
-            when(actionResultFactory.create(any(), any())).thenReturn(expectedResult);
-            when(actionLifecycleManagement.perform(any(), any(), any())).thenReturn(expectedResult);
+            when(actionResultFactory.init(any(ActionConfig.class), anyString(), any(ObjectCollection[].class))).thenReturn(expectedResult);
+            when(actionLifecycleManagement.isMoreSequencesAllowed(any(ActionResult.class))).thenReturn(false);
+            when(actionLifecycleManagement.getCurrentDuration(any(ActionResult.class))).thenReturn(Duration.ofMillis(100));
             
             // Act
             ActionResult result = actionExecution.perform(
@@ -205,9 +208,9 @@ public class ActionExecutionTest extends BrobotTestBase {
             expectedResult.add(match);
             expectedResult.setSuccess(true);
             
-            when(actionResultFactory.create(any(), any())).thenReturn(expectedResult);
-            when(actionLifecycleManagement.perform(any(), any(), any())).thenReturn(expectedResult);
-            when(actionSuccessCriteria.determineSuccess(any())).thenReturn(true);
+            when(actionResultFactory.init(any(ActionConfig.class), anyString(), any(ObjectCollection[].class))).thenReturn(expectedResult);
+            when(actionLifecycleManagement.isMoreSequencesAllowed(any(ActionResult.class))).thenReturn(false);
+            doNothing().when(actionSuccessCriteria).set(any(ActionConfig.class), any(ActionResult.class));
             
             // Act
             ActionResult result = actionExecution.perform(
@@ -241,9 +244,9 @@ public class ActionExecutionTest extends BrobotTestBase {
             matches.forEach(expectedResult::add);
             expectedResult.setSuccess(true);
             
-            when(actionResultFactory.create(any(), any())).thenReturn(expectedResult);
-            when(actionLifecycleManagement.perform(any(), any(), any())).thenReturn(expectedResult);
-            when(actionSuccessCriteria.determineSuccess(any())).thenReturn(true);
+            when(actionResultFactory.init(any(ActionConfig.class), anyString(), any(ObjectCollection[].class))).thenReturn(expectedResult);
+            when(actionLifecycleManagement.isMoreSequencesAllowed(any(ActionResult.class))).thenReturn(false);
+            doNothing().when(actionSuccessCriteria).set(any(ActionConfig.class), any(ActionResult.class));
             
             // Act
             ActionResult result = actionExecution.perform(
@@ -265,9 +268,9 @@ public class ActionExecutionTest extends BrobotTestBase {
             ActionResult expectedResult = new ActionResult();
             expectedResult.setSuccess(false);
             
-            when(actionResultFactory.create(any(), any())).thenReturn(expectedResult);
-            when(actionLifecycleManagement.perform(any(), any(), any())).thenReturn(expectedResult);
-            when(actionSuccessCriteria.determineSuccess(any())).thenReturn(false);
+            when(actionResultFactory.init(any(ActionConfig.class), anyString(), any(ObjectCollection[].class))).thenReturn(expectedResult);
+            when(actionLifecycleManagement.isMoreSequencesAllowed(any(ActionResult.class))).thenReturn(false);
+            doNothing().when(actionSuccessCriteria).set(any(ActionConfig.class), any(ActionResult.class));
             
             // Act
             ActionResult result = actionExecution.perform(
@@ -298,9 +301,9 @@ public class ActionExecutionTest extends BrobotTestBase {
             ActionResult expectedResult = new ActionResult();
             expectedResult.setSuccess(true);
             
-            when(actionResultFactory.create(any(), eq(findOptions))).thenReturn(expectedResult);
-            when(actionLifecycleManagement.perform(any(), any(), any())).thenReturn(expectedResult);
-            when(actionSuccessCriteria.determineSuccess(any())).thenReturn(true);
+            when(actionResultFactory.init(eq(findOptions), anyString(), any(ObjectCollection[].class))).thenReturn(expectedResult);
+            when(actionLifecycleManagement.isMoreSequencesAllowed(any(ActionResult.class))).thenReturn(false);
+            doNothing().when(actionSuccessCriteria).set(any(ActionConfig.class), any(ActionResult.class));
             
             // Act
             ActionResult result = actionExecution.perform(
@@ -312,7 +315,7 @@ public class ActionExecutionTest extends BrobotTestBase {
             
             // Assert
             assertNotNull(result);
-            verify(actionResultFactory).create(any(), eq(findOptions));
+            verify(actionResultFactory).init(eq(findOptions), anyString(), any(ObjectCollection[].class));
         }
         
         @ParameterizedTest
@@ -323,11 +326,11 @@ public class ActionExecutionTest extends BrobotTestBase {
             ActionResult expectedResult = new ActionResult();
             expectedResult.setSuccess(true);
             
-            when(actionConfig.getPauseBeforeAction()).thenReturn(Duration.ofMillis(pauseMillis));
-            when(actionConfig.getPauseAfterAction()).thenReturn(Duration.ofMillis(pauseMillis));
-            when(actionResultFactory.create(any(), any())).thenReturn(expectedResult);
-            when(actionLifecycleManagement.perform(any(), any(), any())).thenReturn(expectedResult);
-            when(actionSuccessCriteria.determineSuccess(any())).thenReturn(true);
+            when(actionConfig.getPauseBeforeBegin()).thenReturn(pauseMillis / 1000.0);
+            when(actionConfig.getPauseAfterEnd()).thenReturn(pauseMillis / 1000.0);
+            when(actionResultFactory.init(any(ActionConfig.class), anyString(), any(ObjectCollection[].class))).thenReturn(expectedResult);
+            when(actionLifecycleManagement.isMoreSequencesAllowed(any(ActionResult.class))).thenReturn(false);
+            doNothing().when(actionSuccessCriteria).set(any(ActionConfig.class), any(ActionResult.class));
             
             // Act
             ActionResult result = actionExecution.perform(
@@ -354,7 +357,7 @@ public class ActionExecutionTest extends BrobotTestBase {
             ActionResult expectedResult = new ActionResult();
             expectedResult.setSuccess(false);
             
-            when(actionResultFactory.create(any(), any())).thenReturn(expectedResult);
+            when(actionResultFactory.init(any(ActionConfig.class), anyString(), any(ObjectCollection[].class))).thenReturn(expectedResult);
             
             // Act & Assert
             assertDoesNotThrow(() -> 
@@ -369,8 +372,8 @@ public class ActionExecutionTest extends BrobotTestBase {
             ActionResult expectedResult = new ActionResult();
             expectedResult.setSuccess(false);
             
-            when(actionResultFactory.create(any(), any())).thenReturn(expectedResult);
-            when(actionLifecycleManagement.perform(any(), any(), any())).thenReturn(expectedResult);
+            when(actionResultFactory.init(any(ActionConfig.class), anyString(), any(ObjectCollection[].class))).thenReturn(expectedResult);
+            when(actionLifecycleManagement.isMoreSequencesAllowed(any(ActionResult.class))).thenReturn(false);
             
             // Act
             ActionResult result = actionExecution.perform(
@@ -388,12 +391,12 @@ public class ActionExecutionTest extends BrobotTestBase {
         @DisplayName("Should handle exception during execution")
         void shouldHandleExceptionDuringExecution() {
             // Arrange
-            when(actionLifecycleManagement.perform(any(), any(), any()))
+            when(actionLifecycleManagement.isMoreSequencesAllowed(any(ActionResult.class)))
                 .thenThrow(new RuntimeException("Test exception"));
             
             ActionResult expectedResult = new ActionResult();
             expectedResult.setSuccess(false);
-            when(actionResultFactory.create(any(), any())).thenReturn(expectedResult);
+            when(actionResultFactory.init(any(ActionConfig.class), anyString(), any(ObjectCollection[].class))).thenReturn(expectedResult);
             
             // Act & Assert
             assertDoesNotThrow(() -> {
@@ -426,9 +429,9 @@ public class ActionExecutionTest extends BrobotTestBase {
             ActionResult expectedResult = new ActionResult();
             expectedResult.setSuccess(true);
             
-            when(actionResultFactory.create(any(), any())).thenReturn(expectedResult);
-            when(actionLifecycleManagement.perform(any(), any(), any())).thenReturn(expectedResult);
-            when(actionSuccessCriteria.determineSuccess(any())).thenReturn(true);
+            when(actionResultFactory.init(any(ActionConfig.class), anyString(), any(ObjectCollection[].class))).thenReturn(expectedResult);
+            when(actionLifecycleManagement.isMoreSequencesAllowed(any(ActionResult.class))).thenReturn(false);
+            doNothing().when(actionSuccessCriteria).set(any(ActionConfig.class), any(ActionResult.class));
             
             // Act
             ActionResult result = actionExecution.perform(
@@ -453,9 +456,9 @@ public class ActionExecutionTest extends BrobotTestBase {
             ActionResult expectedResult = new ActionResult();
             expectedResult.setSuccess(true);
             
-            when(actionResultFactory.create(any(), any())).thenReturn(expectedResult);
-            when(actionLifecycleManagement.perform(any(), any(), any())).thenReturn(expectedResult);
-            when(actionSuccessCriteria.determineSuccess(any())).thenReturn(true);
+            when(actionResultFactory.init(any(ActionConfig.class), anyString(), any(ObjectCollection[].class))).thenReturn(expectedResult);
+            when(actionLifecycleManagement.isMoreSequencesAllowed(any(ActionResult.class))).thenReturn(false);
+            doNothing().when(actionSuccessCriteria).set(any(ActionConfig.class), any(ActionResult.class));
             
             // Act
             ActionResult result = actionExecution.perform(

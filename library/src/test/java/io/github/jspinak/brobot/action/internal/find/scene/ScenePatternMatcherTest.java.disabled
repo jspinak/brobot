@@ -71,12 +71,12 @@ public class ScenePatternMatcherTest extends BrobotTestBase {
         @DisplayName("Should find pattern in scene")
         void shouldFindPatternInScene() {
             // Arrange
-            when(scene.getImage()).thenReturn(sceneImage);
-            when(pattern.getImage()).thenReturn(patternImage);
-            when(actionConfig.getSimilarity()).thenReturn(0.7);
+            when(scene.getPattern()).thenReturn(pattern);
+            when(pattern.getBImage()).thenReturn(sceneImage);
+            when(pattern.getBImage()).thenReturn(patternImage);
             
             // Act
-            List<Match> matches = scenePatternMatcher.findMatches(scene, pattern, actionConfig);
+            List<Match> matches = scenePatternMatcher.findAllInScene(pattern, scene);
             
             // Assert
             assertNotNull(matches);
@@ -86,12 +86,12 @@ public class ScenePatternMatcherTest extends BrobotTestBase {
         @DisplayName("Should return empty list when no matches")
         void shouldReturnEmptyListWhenNoMatches() {
             // Arrange
-            when(scene.getImage()).thenReturn(sceneImage);
-            when(pattern.getImage()).thenReturn(patternImage);
-            when(actionConfig.getSimilarity()).thenReturn(0.95);
+            when(scene.getPattern()).thenReturn(pattern);
+            when(pattern.getBImage()).thenReturn(sceneImage);
+            when(pattern.getBImage()).thenReturn(patternImage);
             
             // Act
-            List<Match> matches = scenePatternMatcher.findMatches(scene, pattern, actionConfig);
+            List<Match> matches = scenePatternMatcher.findAllInScene(pattern, scene);
             
             // Assert
             assertNotNull(matches);
@@ -102,13 +102,14 @@ public class ScenePatternMatcherTest extends BrobotTestBase {
         @DisplayName("Should find multiple matches")
         void shouldFindMultipleMatches() {
             // Arrange
-            when(scene.getImage()).thenReturn(sceneImage);
-            when(pattern.getImage()).thenReturn(patternImage);
-            when(actionConfig.getSimilarity()).thenReturn(0.6);
+            when(scene.getPattern()).thenReturn(pattern);
+            when(pattern.getBImage()).thenReturn(sceneImage);
+            // Similarity is not used in findAllInScene
+            // when(actionConfig.getSimilarity()).thenReturn(0.6);
             when(actionConfig.getMaxMatches()).thenReturn(5);
             
             // Act
-            List<Match> matches = scenePatternMatcher.findMatches(scene, pattern, actionConfig);
+            List<Match> matches = scenePatternMatcher.findAllInScene(pattern, scene);
             
             // Assert
             assertNotNull(matches);
@@ -124,12 +125,13 @@ public class ScenePatternMatcherTest extends BrobotTestBase {
         @DisplayName("Should respect similarity threshold")
         void shouldRespectSimilarityThreshold(double similarity) {
             // Arrange
-            when(scene.getImage()).thenReturn(sceneImage);
-            when(pattern.getImage()).thenReturn(patternImage);
-            when(actionConfig.getSimilarity()).thenReturn(similarity);
+            when(scene.getPattern()).thenReturn(pattern);
+            when(pattern.getBImage()).thenReturn(sceneImage);
+            // Similarity is not used in findAllInScene
+            // when(actionConfig.getSimilarity()).thenReturn(similarity);
             
             // Act
-            List<Match> matches = scenePatternMatcher.findMatches(scene, pattern, actionConfig);
+            List<Match> matches = scenePatternMatcher.findAllInScene(pattern, scene);
             
             // Assert
             assertNotNull(matches);
@@ -143,12 +145,13 @@ public class ScenePatternMatcherTest extends BrobotTestBase {
         @DisplayName("Should use default similarity when not specified")
         void shouldUseDefaultSimilarityWhenNotSpecified() {
             // Arrange
-            when(scene.getImage()).thenReturn(sceneImage);
-            when(pattern.getImage()).thenReturn(patternImage);
-            when(actionConfig.getSimilarity()).thenReturn(null);
+            when(scene.getPattern()).thenReturn(pattern);
+            when(pattern.getBImage()).thenReturn(sceneImage);
+            // Similarity is not used in findAllInScene
+            // when(actionConfig.getSimilarity()).thenReturn(null);
             
             // Act
-            List<Match> matches = scenePatternMatcher.findMatches(scene, pattern, actionConfig);
+            List<Match> matches = scenePatternMatcher.findAllInScene(pattern, scene);
             
             // Assert
             assertNotNull(matches);
@@ -164,12 +167,12 @@ public class ScenePatternMatcherTest extends BrobotTestBase {
         @DisplayName("Should limit number of matches")
         void shouldLimitNumberOfMatches() {
             // Arrange
-            when(scene.getImage()).thenReturn(sceneImage);
-            when(pattern.getImage()).thenReturn(patternImage);
+            when(scene.getPattern()).thenReturn(pattern);
+            when(pattern.getBImage()).thenReturn(sceneImage);
             when(actionConfig.getMaxMatches()).thenReturn(3);
             
             // Act
-            List<Match> matches = scenePatternMatcher.findMatches(scene, pattern, actionConfig);
+            List<Match> matches = scenePatternMatcher.findAllInScene(pattern, scene);
             
             // Assert
             assertNotNull(matches);
@@ -180,12 +183,12 @@ public class ScenePatternMatcherTest extends BrobotTestBase {
         @DisplayName("Should return all matches when no limit")
         void shouldReturnAllMatchesWhenNoLimit() {
             // Arrange
-            when(scene.getImage()).thenReturn(sceneImage);
-            when(pattern.getImage()).thenReturn(patternImage);
+            when(scene.getPattern()).thenReturn(pattern);
+            when(pattern.getBImage()).thenReturn(sceneImage);
             when(actionConfig.getMaxMatches()).thenReturn(0); // No limit
             
             // Act
-            List<Match> matches = scenePatternMatcher.findMatches(scene, pattern, actionConfig);
+            List<Match> matches = scenePatternMatcher.findAllInScene(pattern, scene);
             
             // Assert
             assertNotNull(matches);
@@ -195,12 +198,12 @@ public class ScenePatternMatcherTest extends BrobotTestBase {
         @DisplayName("Should return top matches by score")
         void shouldReturnTopMatchesByScore() {
             // Arrange
-            when(scene.getImage()).thenReturn(sceneImage);
-            when(pattern.getImage()).thenReturn(patternImage);
+            when(scene.getPattern()).thenReturn(pattern);
+            when(pattern.getBImage()).thenReturn(sceneImage);
             when(actionConfig.getMaxMatches()).thenReturn(1);
             
             // Act
-            List<Match> matches = scenePatternMatcher.findMatches(scene, pattern, actionConfig);
+            List<Match> matches = scenePatternMatcher.findAllInScene(pattern, scene);
             
             // Assert
             if (!matches.isEmpty()) {
@@ -218,7 +221,7 @@ public class ScenePatternMatcherTest extends BrobotTestBase {
         @DisplayName("Should handle null scene")
         void shouldHandleNullScene() {
             // Act
-            List<Match> matches = scenePatternMatcher.findMatches(null, pattern, actionConfig);
+            List<Match> matches = scenePatternMatcher.findAllInScene(pattern, null);
             
             // Assert
             assertNotNull(matches);
@@ -229,7 +232,7 @@ public class ScenePatternMatcherTest extends BrobotTestBase {
         @DisplayName("Should handle null pattern")
         void shouldHandleNullPattern() {
             // Act
-            List<Match> matches = scenePatternMatcher.findMatches(scene, null, actionConfig);
+            List<Match> matches = scenePatternMatcher.findAllInScene(null, scene);
             
             // Assert
             assertNotNull(matches);
@@ -240,11 +243,11 @@ public class ScenePatternMatcherTest extends BrobotTestBase {
         @DisplayName("Should handle null config")
         void shouldHandleNullConfig() {
             // Arrange
-            when(scene.getImage()).thenReturn(sceneImage);
-            when(pattern.getImage()).thenReturn(patternImage);
+            when(scene.getPattern()).thenReturn(pattern);
+            when(pattern.getBImage()).thenReturn(sceneImage);
             
             // Act
-            List<Match> matches = scenePatternMatcher.findMatches(scene, pattern, null);
+            List<Match> matches = scenePatternMatcher.findAllInScene(pattern, scene);
             
             // Assert
             assertNotNull(matches);
@@ -254,11 +257,12 @@ public class ScenePatternMatcherTest extends BrobotTestBase {
         @DisplayName("Should handle empty images")
         void shouldHandleEmptyImages() {
             // Arrange
-            when(scene.getImage()).thenReturn(new BufferedImage(1, 1, BufferedImage.TYPE_INT_RGB));
-            when(pattern.getImage()).thenReturn(new BufferedImage(1, 1, BufferedImage.TYPE_INT_RGB));
+            when(scene.getPattern()).thenReturn(pattern);
+            when(pattern.getBImage()).thenReturn(new BufferedImage(1, 1, BufferedImage.TYPE_INT_RGB));
+            when(pattern.getBImage()).thenReturn(new BufferedImage(1, 1, BufferedImage.TYPE_INT_RGB));
             
             // Act
-            List<Match> matches = scenePatternMatcher.findMatches(scene, pattern, actionConfig);
+            List<Match> matches = scenePatternMatcher.findAllInScene(pattern, scene);
             
             // Assert
             assertNotNull(matches);
@@ -273,13 +277,15 @@ public class ScenePatternMatcherTest extends BrobotTestBase {
         @DisplayName("Should complete matching quickly")
         void shouldCompleteMatchingQuickly() {
             // Arrange
-            when(scene.getImage()).thenReturn(new BufferedImage(1920, 1080, BufferedImage.TYPE_INT_RGB));
-            when(pattern.getImage()).thenReturn(new BufferedImage(100, 100, BufferedImage.TYPE_INT_RGB));
-            when(actionConfig.getSimilarity()).thenReturn(0.8);
+            when(scene.getPattern()).thenReturn(pattern);
+            when(pattern.getBImage()).thenReturn(new BufferedImage(1920, 1080, BufferedImage.TYPE_INT_RGB));
+            when(pattern.getBImage()).thenReturn(new BufferedImage(100, 100, BufferedImage.TYPE_INT_RGB));
+            // Similarity is not used in findAllInScene
+            // when(actionConfig.getSimilarity()).thenReturn(0.8);
             
             // Act
             long startTime = System.currentTimeMillis();
-            List<Match> matches = scenePatternMatcher.findMatches(scene, pattern, actionConfig);
+            List<Match> matches = scenePatternMatcher.findAllInScene(pattern, scene);
             long endTime = System.currentTimeMillis();
             
             // Assert

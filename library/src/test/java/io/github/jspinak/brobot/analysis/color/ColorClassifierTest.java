@@ -22,8 +22,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static io.github.jspinak.brobot.model.analysis.color.ColorCluster.ColorSchemaName.BGR;
-import static io.github.jspinak.brobot.model.analysis.color.ColorCluster.ColorSchemaName.HSV;
+// Using ColorCluster.ColorSchemaName directly in code instead of static imports
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
@@ -90,8 +89,8 @@ public class ColorClassifierTest extends BrobotTestBase {
         stateImage.setIndex(1);
         stateImage.setColorCluster(colorCluster);
         
-        when(colorCluster.getSchema(BGR)).thenReturn(colorSchemaBGR);
-        when(colorCluster.getSchema(HSV)).thenReturn(colorSchemaHSV);
+        when(colorCluster.getSchema(ColorCluster.ColorSchemaName.BGR)).thenReturn(colorSchemaBGR);
+        when(colorCluster.getSchema(ColorCluster.ColorSchemaName.HSV)).thenReturn(colorSchemaHSV);
         when(colorSchemaBGR.getColorStatistics(any())).thenReturn(colorStatistics);
         when(colorSchemaHSV.getColorStatistics(any())).thenReturn(colorStatistics);
         when(colorStatistics.getStat(any())).thenReturn(100.0);

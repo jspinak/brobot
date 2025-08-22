@@ -60,11 +60,7 @@ public class PixelScoreCalculatorTest extends BrobotTestBase {
     public void setupTest() {
         super.setupTest();
         mockCloseable = MockitoAnnotations.openMocks(this);
-        pixelScoreCalculator = new PixelScoreCalculator(
-            distanceMatrixCalculator,
-            matrixVisualizer,
-            consoleReporter
-        );
+        pixelScoreCalculator = new PixelScoreCalculator(matrixVisualizer);
     }
     
     @AfterEach
@@ -82,12 +78,12 @@ public class PixelScoreCalculatorTest extends BrobotTestBase {
         @DisplayName("Should calculate scores from distances")
         void shouldCalculateScoresFromDistances() {
             // Arrange
-            when(pixelProfile.getMat(PixelProfile.Analysis.DISTANCES)).thenReturn(distanceMatrix);
+            // Mock pixelProfile with distance matrix
             when(distanceMatrix.rows()).thenReturn(100);
             when(distanceMatrix.cols()).thenReturn(100);
             
             // Act
-            Mat scores = pixelScoreCalculator.calculateScores(pixelProfile, actionConfig);
+            Mat scores = pixelScoreCalculator.setScores(pixelProfile, ColorCluster.ColorSchemaName.BGR);
             
             // Assert
             assertNotNull(scores);
@@ -97,12 +93,12 @@ public class PixelScoreCalculatorTest extends BrobotTestBase {
         @DisplayName("Should handle empty distance matrix")
         void shouldHandleEmptyDistanceMatrix() {
             // Arrange
-            when(pixelProfile.getMat(PixelProfile.Analysis.DISTANCES)).thenReturn(distanceMatrix);
+            // Mock pixelProfile with distance matrix
             when(distanceMatrix.rows()).thenReturn(0);
             when(distanceMatrix.cols()).thenReturn(0);
             
             // Act
-            Mat scores = pixelScoreCalculator.calculateScores(pixelProfile, actionConfig);
+            Mat scores = pixelScoreCalculator.setScores(pixelProfile, ColorCluster.ColorSchemaName.BGR);
             
             // Assert
             assertNotNull(scores);
@@ -112,13 +108,13 @@ public class PixelScoreCalculatorTest extends BrobotTestBase {
         @DisplayName("Should apply similarity threshold")
         void shouldApplySimilarityThreshold() {
             // Arrange
-            when(pixelProfile.getMat(PixelProfile.Analysis.DISTANCES)).thenReturn(distanceMatrix);
+            // Mock pixelProfile with distance matrix
             when(actionConfig.getSimilarity()).thenReturn(0.8);
             when(distanceMatrix.rows()).thenReturn(10);
             when(distanceMatrix.cols()).thenReturn(10);
             
             // Act
-            Mat scores = pixelScoreCalculator.calculateScores(pixelProfile, actionConfig);
+            Mat scores = pixelScoreCalculator.setScores(pixelProfile, ColorCluster.ColorSchemaName.BGR);
             
             // Assert
             assertNotNull(scores);
@@ -237,7 +233,7 @@ public class PixelScoreCalculatorTest extends BrobotTestBase {
         @DisplayName("Should apply out-of-range penalty")
         void shouldApplyOutOfRangePenalty() {
             // Arrange
-            when(pixelProfile.getMat(PixelProfile.Analysis.DISTANCES)).thenReturn(distanceMatrix);
+            // Mock pixelProfile with distance matrix
             when(pixelProfile.getOutOfRangeMask()).thenReturn(new Mat(10, 10, CV_8U));
             
             // Act
@@ -360,7 +356,7 @@ public class PixelScoreCalculatorTest extends BrobotTestBase {
             
             // Act
             long startTime = System.currentTimeMillis();
-            Mat scores = pixelScoreCalculator.calculateScores(pixelProfile, actionConfig);
+            Mat scores = pixelScoreCalculator.setScores(pixelProfile, ColorCluster.ColorSchemaName.BGR);
             long endTime = System.currentTimeMillis();
             
             // Assert
@@ -377,7 +373,7 @@ public class PixelScoreCalculatorTest extends BrobotTestBase {
             when(pixelProfile.getMat(PixelProfile.Analysis.DISTANCES)).thenReturn(matrix);
             
             // Act
-            Mat scores = pixelScoreCalculator.calculateScores(pixelProfile, actionConfig);
+            Mat scores = pixelScoreCalculator.setScores(pixelProfile, ColorCluster.ColorSchemaName.BGR);
             
             // Assert
             assertNotNull(scores);
