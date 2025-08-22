@@ -28,6 +28,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.lenient;
 
 @ExtendWith(MockitoExtension.class)
 public class MultiMonitorRoutingAspectTest extends BrobotTestBase {
@@ -60,13 +61,16 @@ public class MultiMonitorRoutingAspectTest extends BrobotTestBase {
         ReflectionTestUtils.setField(aspect, "enableLoadBalancing", true);
         ReflectionTestUtils.setField(aspect, "enableFailover", true);
 
-        // Setup log builder chain
-        when(brobotLogger.log()).thenReturn(logBuilder);
-        when(logBuilder.type(any())).thenReturn(logBuilder);
-        when(logBuilder.level(any())).thenReturn(logBuilder);
-        when(logBuilder.action(anyString())).thenReturn(logBuilder);
-        when(logBuilder.metadata(anyString(), any())).thenReturn(logBuilder);
-        when(logBuilder.observation(anyString())).thenReturn(logBuilder);
+        // Setup log builder chain - use lenient() to avoid UnnecessaryStubbingException
+        lenient().when(brobotLogger.log()).thenReturn(logBuilder);
+        lenient().when(logBuilder.type(any())).thenReturn(logBuilder);
+        lenient().when(logBuilder.level(any())).thenReturn(logBuilder);
+        lenient().when(logBuilder.action(anyString())).thenReturn(logBuilder);
+        lenient().when(logBuilder.metadata(anyString(), any())).thenReturn(logBuilder);
+        lenient().when(logBuilder.observation(anyString())).thenReturn(logBuilder);
+        
+        // Mock the void log() method
+        lenient().doNothing().when(logBuilder).log();
 
         // Setup monitor manager
         when(monitorManager.getMonitorCount()).thenReturn(3);

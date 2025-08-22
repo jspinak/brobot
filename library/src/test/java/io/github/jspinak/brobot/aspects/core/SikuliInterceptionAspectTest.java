@@ -46,15 +46,18 @@ public class SikuliInterceptionAspectTest extends BrobotTestBase {
         aspect = new SikuliInterceptionAspect();
         ReflectionTestUtils.setField(aspect, "brobotLogger", brobotLogger);
         
-        // Setup log builder chain
-        when(brobotLogger.log()).thenReturn(logBuilder);
-        when(logBuilder.type(any())).thenReturn(logBuilder);
-        when(logBuilder.level(any())).thenReturn(logBuilder);
-        when(logBuilder.action(any())).thenReturn(logBuilder);
-        when(logBuilder.metadata(any(), any())).thenReturn(logBuilder);
-        when(logBuilder.success(anyBoolean())).thenReturn(logBuilder);
-        when(logBuilder.duration(anyLong())).thenReturn(logBuilder);
-        when(logBuilder.error(any())).thenReturn(logBuilder);
+        // Setup log builder chain - use lenient() to avoid UnnecessaryStubbingException
+        lenient().when(brobotLogger.log()).thenReturn(logBuilder);
+        lenient().when(logBuilder.type(any())).thenReturn(logBuilder);
+        lenient().when(logBuilder.level(any())).thenReturn(logBuilder);
+        lenient().when(logBuilder.action(any())).thenReturn(logBuilder);
+        lenient().when(logBuilder.metadata(any(), any())).thenReturn(logBuilder);
+        lenient().when(logBuilder.success(anyBoolean())).thenReturn(logBuilder);
+        lenient().when(logBuilder.duration(anyLong())).thenReturn(logBuilder);
+        lenient().when(logBuilder.error(any())).thenReturn(logBuilder);
+        
+        // Mock the void log() method
+        lenient().doNothing().when(logBuilder).log();
     }
 
     @Test

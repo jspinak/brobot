@@ -26,7 +26,7 @@ import org.springframework.context.annotation.Import;
  * @since 1.1.0
  */
 @AutoConfiguration
-@Import({BrobotConfig.class, BrobotDefaultsConfiguration.class})
+@Import({BrobotConfig.class, BrobotDefaultsConfiguration.class, DiagnosticsConfiguration.class})
 @EnableConfigurationProperties({BrobotProperties.class, GuiAccessConfig.class})
 public class BrobotAutoConfiguration {
     

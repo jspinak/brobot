@@ -31,6 +31,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.lenient;
 
 @ExtendWith(MockitoExtension.class)
 public class ActionLifecycleAspectTest extends BrobotTestBase {
@@ -85,7 +86,7 @@ public class ActionLifecycleAspectTest extends BrobotTestBase {
         assertNotNull(result);
         assertEquals(actionResult, result);
         assertTrue(actionResult.isSuccess());
-        verify(actionLoggingService).logAction(actionResult);
+        verify(actionLoggingService, times(1)).logAction(actionResult);
         
         // Verify execution context was populated
         ActionResult.ActionExecutionContext execContext = actionResult.getExecutionContext();
@@ -116,7 +117,7 @@ public class ActionLifecycleAspectTest extends BrobotTestBase {
         );
 
         // Verify logging was called even for failure
-        verify(actionLoggingService).logAction(actionResult);
+        verify(actionLoggingService, times(1)).logAction(actionResult);
         
         // Verify execution context was populated with error
         ActionResult.ActionExecutionContext execContext = actionResult.getExecutionContext();
@@ -283,7 +284,7 @@ public class ActionLifecycleAspectTest extends BrobotTestBase {
 
         // Assert
         assertNotNull(result);
-        verify(actionLoggingService).logAction(actionResult);
+        verify(actionLoggingService, times(1)).logAction(actionResult);
     }
 
     @Test

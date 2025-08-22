@@ -28,7 +28,7 @@ public abstract class BrobotTestBase {
         System.setProperty("brobot.mock.mode", "true");
         
         // Configure ExecutionEnvironment for mock mode
-        ExecutionEnvironment env = new ExecutionEnvironment.Builder()
+        ExecutionEnvironment env = ExecutionEnvironment.builder()
             .mockMode(true)
             .forceHeadless(true)
             .allowScreenCapture(false)
