@@ -99,9 +99,9 @@ public class MatchFusionTest extends BrobotTestBase {
             
             ActionConfig config = mock(ActionConfig.class);
             
-            // Mock the decider to say these matches should be fused
-            when(absoluteSizeFusionDecider.isSameMatchGroup(any(Match.class), any(Match.class), 
-                anyInt(), anyInt())).thenReturn(true);
+            // Note: When fusion is enabled in the future, this test will need to mock the decider:
+            // when(absoluteSizeFusionDecider.isSameMatchGroup(any(Match.class), any(Match.class), 
+            //     anyInt(), anyInt())).thenReturn(true);
             
             // Since getFusionMethod returns NONE, original matches are returned
             List<Match> fusedMatches = matchFusion.getFusedMatchObjects(matches, config);
@@ -120,9 +120,9 @@ public class MatchFusionTest extends BrobotTestBase {
             
             ActionConfig config = mock(ActionConfig.class);
             
-            // Mock the decider to say these matches should NOT be fused
-            when(absoluteSizeFusionDecider.isSameMatchGroup(any(Match.class), any(Match.class), 
-                anyInt(), anyInt())).thenReturn(false);
+            // Note: When fusion is enabled in the future, this test will need to mock the decider:
+            // when(absoluteSizeFusionDecider.isSameMatchGroup(any(Match.class), any(Match.class), 
+            //     anyInt(), anyInt())).thenReturn(false);
             
             List<Match> fusedMatches = matchFusion.getFusedMatchObjects(matches, config);
             
@@ -139,8 +139,9 @@ public class MatchFusionTest extends BrobotTestBase {
             
             ActionConfig config = mock(ActionConfig.class);
             
-            when(absoluteSizeFusionDecider.isSameMatchGroup(any(Match.class), any(Match.class), 
-                anyInt(), anyInt())).thenReturn(true);
+            // Note: When fusion is enabled in the future, this test will need to mock the decider:
+            // when(absoluteSizeFusionDecider.isSameMatchGroup(any(Match.class), any(Match.class), 
+            //     anyInt(), anyInt())).thenReturn(true);
             
             // Since getFusionMethod returns NONE, original matches are returned
             List<Match> fusedMatches = matchFusion.getFusedMatchObjects(matches, config);
@@ -169,15 +170,15 @@ public class MatchFusionTest extends BrobotTestBase {
             ActionResult actionResult = new ActionResult();
             matches.forEach(actionResult::add);
             
-            // Mock progressive fusion: first m1+m2, then result+m3
-            when(absoluteSizeFusionDecider.isSameMatchGroup(any(Match.class), any(Match.class), 
-                anyInt(), anyInt()))
-                .thenAnswer(invocation -> {
-                    Match m1 = invocation.getArgument(0);
-                    Match m2 = invocation.getArgument(1);
-                    // Check if matches are close enough
-                    return Math.abs(m1.getRegion().x() - m2.getRegion().x()) < 60;
-                });
+            // Note: When fusion is enabled in the future, this test will need to mock the decider:
+            // when(absoluteSizeFusionDecider.isSameMatchGroup(any(Match.class), any(Match.class), 
+            //     anyInt(), anyInt()))
+            //     .thenAnswer(invocation -> {
+            //         Match m1 = invocation.getArgument(0);
+            //         Match m2 = invocation.getArgument(1);
+            //         // Check if matches are close enough
+            //         return Math.abs(m1.getRegion().x() - m2.getRegion().x()) < 60;
+            //     });
             
             List<Match> finalFused = matchFusion.getFinalFusedMatchObjects(actionResult);
             
@@ -197,9 +198,9 @@ public class MatchFusionTest extends BrobotTestBase {
             ActionResult actionResult = new ActionResult();
             matches.forEach(actionResult::add);
             
-            // No matches should fuse
-            when(absoluteSizeFusionDecider.isSameMatchGroup(any(Match.class), any(Match.class), 
-                anyInt(), anyInt())).thenReturn(false);
+            // Note: When fusion is enabled in the future, this test will need to mock the decider:
+            // when(absoluteSizeFusionDecider.isSameMatchGroup(any(Match.class), any(Match.class), 
+            //     anyInt(), anyInt())).thenReturn(false);
             
             List<Match> finalFused = matchFusion.getFinalFusedMatchObjects(actionResult);
             
@@ -244,8 +245,9 @@ public class MatchFusionTest extends BrobotTestBase {
             List<Match> matches = Arrays.asList(validMatch);
             ActionConfig config = mock(ActionConfig.class);
             
-            when(absoluteSizeFusionDecider.isSameMatchGroup(any(Match.class), any(Match.class), 
-                anyInt(), anyInt())).thenReturn(false);
+            // Note: When fusion is enabled in the future, this test will need to mock the decider:
+            // when(absoluteSizeFusionDecider.isSameMatchGroup(any(Match.class), any(Match.class), 
+            //     anyInt(), anyInt())).thenReturn(false);
             
             // Since getFusionMethod returns NONE, original matches are returned
             List<Match> result = matchFusion.getFusedMatchObjects(matches, config);
@@ -264,9 +266,9 @@ public class MatchFusionTest extends BrobotTestBase {
             List<Match> matches = createTestMatches();
             ActionConfig config = mock(ActionConfig.class);
             
-            // Configure for absolute fusion
-            when(absoluteSizeFusionDecider.isSameMatchGroup(any(Match.class), any(Match.class), 
-                eq(10), eq(10))).thenReturn(true);
+            // Note: When fusion is enabled in the future, this test will need to mock the decider:
+            // when(absoluteSizeFusionDecider.isSameMatchGroup(any(Match.class), any(Match.class), 
+            //     eq(10), eq(10))).thenReturn(true);
             
             matchFusion.getFusedMatchObjects(matches, config);
             
@@ -307,8 +309,9 @@ public class MatchFusionTest extends BrobotTestBase {
             
             ActionConfig config = mock(ActionConfig.class);
             
-            when(absoluteSizeFusionDecider.isSameMatchGroup(any(Match.class), any(Match.class), 
-                anyInt(), anyInt())).thenReturn(true);
+            // Note: When fusion is enabled in the future, this test will need to mock the decider:
+            // when(absoluteSizeFusionDecider.isSameMatchGroup(any(Match.class), any(Match.class), 
+            //     anyInt(), anyInt())).thenReturn(true);
             
             // Since getFusionMethod returns NONE, original matches are returned
             List<Match> fusedMatches = matchFusion.getFusedMatchObjects(matches, config);
@@ -331,9 +334,9 @@ public class MatchFusionTest extends BrobotTestBase {
             
             ActionConfig config = mock(ActionConfig.class);
             
-            // Force fusion despite gap
-            when(absoluteSizeFusionDecider.isSameMatchGroup(any(Match.class), any(Match.class), 
-                anyInt(), anyInt())).thenReturn(true);
+            // Note: When fusion is enabled in the future, this test will need to mock the decider:
+            // when(absoluteSizeFusionDecider.isSameMatchGroup(any(Match.class), any(Match.class), 
+            //     anyInt(), anyInt())).thenReturn(true);
             
             // Since getFusionMethod returns NONE, original matches are returned
             List<Match> fusedMatches = matchFusion.getFusedMatchObjects(matches, config);

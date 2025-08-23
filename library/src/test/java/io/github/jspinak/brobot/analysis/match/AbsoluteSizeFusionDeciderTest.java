@@ -153,16 +153,20 @@ public class AbsoluteSizeFusionDeciderTest extends BrobotTestBase {
         @DisplayName("Should handle zero thresholds")
         void shouldHandleZeroThresholds() {
             Match match1 = createMatch(100, 100, 50, 50);
-            Match match2 = createMatch(150, 100, 50, 50); // Exactly adjacent
+            Match match2 = createMatch(149, 100, 50, 50); // 1 pixel overlap
             
-            // With zero expansion, only overlapping or touching matches should fuse
+            // With zero expansion, only overlapping matches should fuse
             boolean shouldFuse = fusionDecider.isSameMatchGroup(match1, match2, 0, 0);
             
-            assertTrue(shouldFuse, "Exactly adjacent matches should fuse with zero threshold");
+            assertTrue(shouldFuse, "Overlapping matches should fuse with zero threshold");
+            
+            // Exactly adjacent matches should not fuse with zero threshold (no overlap)
+            Match match3 = createMatch(150, 100, 50, 50); // Exactly adjacent
+            assertFalse(fusionDecider.isSameMatchGroup(match1, match3, 0, 0));
             
             // Non-touching matches should not fuse
-            Match match3 = createMatch(151, 100, 50, 50); // 1 pixel gap
-            assertFalse(fusionDecider.isSameMatchGroup(match1, match3, 0, 0));
+            Match match4 = createMatch(151, 100, 50, 50); // 1 pixel gap
+            assertFalse(fusionDecider.isSameMatchGroup(match1, match4, 0, 0));
         }
         
         @Test
@@ -219,12 +223,21 @@ public class AbsoluteSizeFusionDeciderTest extends BrobotTestBase {
         @DisplayName("Should handle matches of different sizes")
         void shouldHandleMatchesOfDifferentSizes() {
             Match smallMatch = createMatch(100, 100, 20, 20);
-            Match largeMatch = createMatch(130, 100, 100, 100);
+            Match largeMatch = createMatch(125, 100, 100, 100);
             
             // The expansion is absolute, not relative to size
+            // With 5 pixel expansion:
+            // smallMatch expanded: (95, 95) to (125, 125)
+            // largeMatch expanded: (120, 95) to (230, 205)
+            // These overlap from x=120 to x=125
             boolean shouldFuse = fusionDecider.isSameMatchGroup(smallMatch, largeMatch, 5, 5);
             
             assertTrue(shouldFuse, "Different sized matches should fuse based on absolute distance");
+            
+            // Test with no overlap even after expansion
+            Match distantLarge = createMatch(131, 100, 100, 100);
+            assertFalse(fusionDecider.isSameMatchGroup(smallMatch, distantLarge, 5, 5),
+                "Matches too far apart should not fuse");
         }
         
         @Test

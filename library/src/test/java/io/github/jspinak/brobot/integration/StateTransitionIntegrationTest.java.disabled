@@ -1,0 +1,483 @@
+package io.github.jspinak.brobot.integration;
+
+import io.github.jspinak.brobot.action.Action;
+import io.github.jspinak.brobot.action.ActionResult;
+import io.github.jspinak.brobot.model.element.Region;
+import io.github.jspinak.brobot.model.match.Match;
+import io.github.jspinak.brobot.model.state.State;
+import io.github.jspinak.brobot.model.state.StateImage;
+import io.github.jspinak.brobot.model.state.StateTransition;
+import io.github.jspinak.brobot.state.StateService;
+import io.github.jspinak.brobot.state.StateTransitions;
+import io.github.jspinak.brobot.test.BrobotTestBase;
+import io.github.jspinak.brobot.tools.testing.mock.builders.MockSceneBuilder;
+import org.junit.jupiter.api.*;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+
+import java.util.*;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+
+/**
+ * Integration tests for state transition workflows in Brobot.
+ * 
+ * These tests verify that state management and transitions work correctly,
+ * including state detection, transition execution, and state verification.
+ */
+@DisplayName("State Transition Integration Tests")
+public class StateTransitionIntegrationTest extends BrobotTestBase {
+
+    @Mock
+    private StateService stateService;
+    
+    @Mock
+    private StateTransitions stateTransitions;
+    
+    @Mock
+    private Action action;
+    
+    private Map<String, State> stateMap;
+    
+    @BeforeEach
+    public void setUp() {
+        super.setupTest();
+        MockitoAnnotations.openMocks(this);
+        stateMap = new HashMap<>();
+        initializeStates();
+    }
+    
+    private void initializeStates() {
+        // Create mock states for testing
+        State loginState = createState("LOGIN", 
+            Arrays.asList("login_button.png", "username_field.png"));
+        State homeState = createState("HOME", 
+            Arrays.asList("home_logo.png", "menu_bar.png"));
+        State settingsState = createState("SETTINGS", 
+            Arrays.asList("settings_header.png", "preferences.png"));
+        
+        stateMap.put("LOGIN", loginState);
+        stateMap.put("HOME", homeState);
+        stateMap.put("SETTINGS", settingsState);
+    }
+    
+    private State createState(String name, List<String> imageFiles) {
+        State state = new State();
+        state.setName(name);
+        
+        for (String imageFile : imageFiles) {
+            StateImage stateImage = MockSceneBuilder.createMockStateImage(imageFile);
+            stateImage.setOwnerStateName(name);
+            state.getStateImages().add(stateImage);
+        }
+        
+        return state;
+    }
+    
+    @Nested
+    @DisplayName("State Detection Tests")
+    class StateDetectionTests {
+        
+        @Test
+        @DisplayName("Should detect current state from visible elements")
+        void shouldDetectCurrentState() {
+            // Arrange
+            State homeState = stateMap.get("HOME");
+            StateImage homelogo = homeState.getStateImages().get(0);
+            
+            ActionResult findResult = new ActionResult();
+            findResult.setSuccess(true);
+            findResult.setMatchList(Arrays.asList(
+                MockSceneBuilder.createMockMatch(100, 50, 200, 100)
+            ));
+            
+            when(action.find(homelogo)).thenReturn(findResult);
+            when(stateService.getCurrentState()).thenReturn(Optional.of(homeState));
+            
+            // Act
+            Optional<State> currentState = detectCurrentState();
+            
+            // Assert
+            assertTrue(currentState.isPresent());
+            assertEquals("HOME", currentState.get().getName());
+        }
+        
+        @Test
+        @DisplayName("Should handle unknown state detection")
+        void shouldHandleUnknownState() {
+            // Arrange
+            when(action.find(any(StateImage.class))).thenReturn(new ActionResult());
+            when(stateService.getCurrentState()).thenReturn(Optional.empty());
+            
+            // Act
+            Optional<State> currentState = detectCurrentState();
+            
+            // Assert
+            assertFalse(currentState.isPresent());
+        }
+        
+        @Test
+        @DisplayName("Should detect state with multiple confirming elements")
+        void shouldDetectStateWithMultipleElements() {
+            // Arrange
+            State settingsState = stateMap.get("SETTINGS");
+            
+            // Both settings images are found
+            ActionResult foundResult = new ActionResult();
+            foundResult.setSuccess(true);
+            foundResult.setMatchList(Arrays.asList(
+                MockSceneBuilder.createMockMatch(100, 100, 50, 50)
+            ));
+            
+            when(action.find(any(StateImage.class))).thenReturn(foundResult);
+            when(stateService.getCurrentState()).thenReturn(Optional.of(settingsState));
+            
+            // Act
+            int confirmedElements = countConfirmedStateElements(settingsState);
+            
+            // Assert
+            assertEquals(2, confirmedElements); // Both settings images found
+        }
+    }
+    
+    @Nested
+    @DisplayName("State Transition Execution Tests")
+    class StateTransitionExecutionTests {
+        
+        @Test
+        @DisplayName("Should execute simple state transition")
+        void shouldExecuteSimpleTransition() {
+            // Arrange
+            State fromState = stateMap.get("LOGIN");
+            State toState = stateMap.get("HOME");
+            StateTransition transition = createTransition(fromState, toState, "login_button.png");
+            
+            ActionResult clickResult = new ActionResult();
+            clickResult.setSuccess(true);
+            
+            when(stateService.getCurrentState())
+                .thenReturn(Optional.of(fromState))
+                .thenReturn(Optional.of(toState));
+            when(action.click(any(StateImage.class))).thenReturn(clickResult);
+            when(stateTransitions.doTransition(any())).thenReturn(true);
+            
+            // Act
+            boolean transitionSuccess = executeTransition(transition);
+            
+            // Assert
+            assertTrue(transitionSuccess);
+            verify(action).click(any(StateImage.class));
+        }
+        
+        @Test
+        @DisplayName("Should handle failed transition")
+        void shouldHandleFailedTransition() {
+            // Arrange
+            State fromState = stateMap.get("HOME");
+            State toState = stateMap.get("SETTINGS");
+            StateTransition transition = createTransition(fromState, toState, "settings_button.png");
+            
+            when(stateService.getCurrentState()).thenReturn(Optional.of(fromState));
+            when(stateTransitions.doTransition(any())).thenReturn(false);
+            
+            // Act
+            boolean transitionSuccess = executeTransition(transition);
+            
+            // Assert
+            assertFalse(transitionSuccess);
+        }
+        
+        @Test
+        @DisplayName("Should verify state after transition")
+        void shouldVerifyStateAfterTransition() {
+            // Arrange
+            State fromState = stateMap.get("LOGIN");
+            State toState = stateMap.get("HOME");
+            StateTransition transition = createTransition(fromState, toState, "login_button.png");
+            
+            ActionResult successResult = new ActionResult();
+            successResult.setSuccess(true);
+            successResult.setMatchList(Arrays.asList(
+                MockSceneBuilder.createMockMatch(100, 100, 50, 50)
+            ));
+            
+            when(stateService.getCurrentState())
+                .thenReturn(Optional.of(fromState))
+                .thenReturn(Optional.of(toState));
+            when(action.click(any(StateImage.class))).thenReturn(successResult);
+            when(action.find(any(StateImage.class))).thenReturn(successResult);
+            when(stateTransitions.doTransition(any())).thenReturn(true);
+            
+            // Act
+            boolean transitionSuccess = executeAndVerifyTransition(transition);
+            
+            // Assert
+            assertTrue(transitionSuccess);
+            verify(action, atLeastOnce()).find(any(StateImage.class)); // Verification find
+        }
+    }
+    
+    @Nested
+    @DisplayName("Complex Workflow Tests")
+    class ComplexWorkflowTests {
+        
+        @Test
+        @DisplayName("Should execute multi-step workflow")
+        void shouldExecuteMultiStepWorkflow() {
+            // Arrange
+            List<StateTransition> workflow = Arrays.asList(
+                createTransition(stateMap.get("LOGIN"), stateMap.get("HOME"), "login_button.png"),
+                createTransition(stateMap.get("HOME"), stateMap.get("SETTINGS"), "settings_menu.png")
+            );
+            
+            ActionResult successResult = new ActionResult();
+            successResult.setSuccess(true);
+            
+            when(stateService.getCurrentState())
+                .thenReturn(Optional.of(stateMap.get("LOGIN")))
+                .thenReturn(Optional.of(stateMap.get("HOME")))
+                .thenReturn(Optional.of(stateMap.get("SETTINGS")));
+            when(action.click(any(StateImage.class))).thenReturn(successResult);
+            when(stateTransitions.doTransition(any())).thenReturn(true);
+            
+            // Act
+            boolean workflowSuccess = executeWorkflow(workflow);
+            
+            // Assert
+            assertTrue(workflowSuccess);
+            verify(stateTransitions, times(2)).doTransition(any());
+        }
+        
+        @Test
+        @DisplayName("Should handle workflow with recovery")
+        void shouldHandleWorkflowWithRecovery() {
+            // Arrange
+            State loginState = stateMap.get("LOGIN");
+            State homeState = stateMap.get("HOME");
+            
+            // First attempt fails, recovery succeeds
+            when(stateService.getCurrentState())
+                .thenReturn(Optional.of(loginState))
+                .thenReturn(Optional.of(loginState)) // Still in login after first failure
+                .thenReturn(Optional.of(homeState)); // Success after retry
+            
+            when(stateTransitions.doTransition(any()))
+                .thenReturn(false) // First attempt fails
+                .thenReturn(true);  // Retry succeeds
+            
+            // Act
+            boolean success = executeTransitionWithRecovery(
+                createTransition(loginState, homeState, "login_button.png"),
+                3 // max attempts
+            );
+            
+            // Assert
+            assertTrue(success);
+            verify(stateTransitions, times(2)).doTransition(any());
+        }
+        
+        @Test
+        @DisplayName("Should navigate through state graph")
+        void shouldNavigateThroughStateGraph() {
+            // Arrange
+            String startState = "LOGIN";
+            String targetState = "SETTINGS";
+            List<String> expectedPath = Arrays.asList("LOGIN", "HOME", "SETTINGS");
+            
+            when(stateService.getCurrentState())
+                .thenReturn(Optional.of(stateMap.get("LOGIN")))
+                .thenReturn(Optional.of(stateMap.get("HOME")))
+                .thenReturn(Optional.of(stateMap.get("SETTINGS")));
+            when(stateTransitions.doTransition(any())).thenReturn(true);
+            
+            // Act
+            List<String> actualPath = navigateToState(startState, targetState);
+            
+            // Assert
+            assertEquals(expectedPath, actualPath);
+        }
+    }
+    
+    @Nested
+    @DisplayName("State Verification Tests")
+    class StateVerificationTests {
+        
+        @Test
+        @DisplayName("Should verify state by required elements")
+        void shouldVerifyStateByRequiredElements() {
+            // Arrange
+            State homeState = stateMap.get("HOME");
+            
+            ActionResult foundResult = new ActionResult();
+            foundResult.setSuccess(true);
+            foundResult.setMatchList(Arrays.asList(
+                MockSceneBuilder.createMockMatch(100, 100, 50, 50)
+            ));
+            
+            when(action.find(any(StateImage.class))).thenReturn(foundResult);
+            
+            // Act
+            boolean isVerified = verifyState(homeState);
+            
+            // Assert
+            assertTrue(isVerified);
+            verify(action, atLeast(1)).find(any(StateImage.class));
+        }
+        
+        @Test
+        @DisplayName("Should fail verification when elements missing")
+        void shouldFailVerificationWhenElementsMissing() {
+            // Arrange
+            State settingsState = stateMap.get("SETTINGS");
+            
+            ActionResult notFoundResult = new ActionResult();
+            notFoundResult.setSuccess(false);
+            
+            when(action.find(any(StateImage.class))).thenReturn(notFoundResult);
+            
+            // Act
+            boolean isVerified = verifyState(settingsState);
+            
+            // Assert
+            assertFalse(isVerified);
+        }
+        
+        @Test
+        @DisplayName("Should wait for state to stabilize")
+        void shouldWaitForStateToStabilize() {
+            // Arrange
+            State targetState = stateMap.get("HOME");
+            
+            ActionResult notReady = new ActionResult();
+            notReady.setSuccess(false);
+            
+            ActionResult ready = new ActionResult();
+            ready.setSuccess(true);
+            ready.setMatchList(Arrays.asList(
+                MockSceneBuilder.createMockMatch(100, 100, 50, 50)
+            ));
+            
+            // First two attempts fail, third succeeds
+            when(action.find(any(StateImage.class)))
+                .thenReturn(notReady)
+                .thenReturn(notReady)
+                .thenReturn(ready);
+            
+            // Act
+            boolean stabilized = waitForState(targetState, 3000); // 3 second timeout
+            
+            // Assert
+            assertTrue(stabilized);
+            verify(action, times(3)).find(any(StateImage.class));
+        }
+    }
+    
+    // Helper methods
+    
+    private Optional<State> detectCurrentState() {
+        return stateService.getCurrentState();
+    }
+    
+    private int countConfirmedStateElements(State state) {
+        int count = 0;
+        for (StateImage image : state.getStateImages()) {
+            ActionResult result = action.find(image);
+            if (result.isSuccess()) {
+                count++;
+            }
+        }
+        return count;
+    }
+    
+    private StateTransition createTransition(State from, State to, String triggerImage) {
+        StateTransition transition = new StateTransition();
+        transition.setFrom(from.getName());
+        transition.setTo(to.getName());
+        
+        StateImage trigger = MockSceneBuilder.createMockStateImage(triggerImage);
+        transition.setStateImage(trigger);
+        
+        return transition;
+    }
+    
+    private boolean executeTransition(StateTransition transition) {
+        return stateTransitions.doTransition(transition);
+    }
+    
+    private boolean executeAndVerifyTransition(StateTransition transition) {
+        boolean executed = executeTransition(transition);
+        if (!executed) return false;
+        
+        // Verify we're in the target state
+        Optional<State> currentState = stateService.getCurrentState();
+        return currentState.isPresent() && 
+               currentState.get().getName().equals(transition.getTo());
+    }
+    
+    private boolean executeWorkflow(List<StateTransition> workflow) {
+        for (StateTransition transition : workflow) {
+            if (!executeTransition(transition)) {
+                return false;
+            }
+        }
+        return true;
+    }
+    
+    private boolean executeTransitionWithRecovery(StateTransition transition, int maxAttempts) {
+        for (int i = 0; i < maxAttempts; i++) {
+            if (executeTransition(transition)) {
+                return true;
+            }
+            try {
+                Thread.sleep(500); // Wait before retry
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                return false;
+            }
+        }
+        return false;
+    }
+    
+    private List<String> navigateToState(String start, String target) {
+        List<String> path = new ArrayList<>();
+        path.add(start);
+        
+        // Simplified navigation - in reality would use graph traversal
+        if (start.equals("LOGIN") && target.equals("SETTINGS")) {
+            path.add("HOME");
+            path.add("SETTINGS");
+        }
+        
+        return path;
+    }
+    
+    private boolean verifyState(State state) {
+        for (StateImage image : state.getStateImages()) {
+            ActionResult result = action.find(image);
+            if (result.isSuccess()) {
+                return true; // At least one identifying element found
+            }
+        }
+        return false;
+    }
+    
+    private boolean waitForState(State state, long timeoutMs) {
+        long startTime = System.currentTimeMillis();
+        
+        while (System.currentTimeMillis() - startTime < timeoutMs) {
+            if (verifyState(state)) {
+                return true;
+            }
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                return false;
+            }
+        }
+        
+        return false;
+    }
+}

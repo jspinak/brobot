@@ -56,10 +56,10 @@ public class ColorInfoTest extends BrobotTestBase {
         void shouldSetAllStatistics() {
             colorInfo.setAll(10.0, 200.0, 105.0, 45.5);
             
-            assertEquals(10.0, colorInfo.getStat(MIN), 0.001);
-            assertEquals(200.0, colorInfo.getStat(MAX), 0.001);
-            assertEquals(105.0, colorInfo.getStat(MEAN), 0.001);
-            assertEquals(45.5, colorInfo.getStat(STDDEV), 0.001);
+            assertEquals(10.0, colorInfo.getStat(ColorInfo.ColorStat.MIN), 0.001);
+            assertEquals(200.0, colorInfo.getStat(ColorInfo.ColorStat.MAX), 0.001);
+            assertEquals(105.0, colorInfo.getStat(ColorInfo.ColorStat.MEAN), 0.001);
+            assertEquals(45.5, colorInfo.getStat(ColorInfo.ColorStat.STDDEV), 0.001);
         }
         
         @Test
@@ -67,20 +67,20 @@ public class ColorInfoTest extends BrobotTestBase {
         void shouldRetrieveIndividualStatistics() {
             colorInfo.setAll(0.0, 255.0, 127.5, 30.0);
             
-            assertEquals(0.0, colorInfo.getStat(MIN));
-            assertEquals(255.0, colorInfo.getStat(MAX));
-            assertEquals(127.5, colorInfo.getStat(MEAN));
-            assertEquals(30.0, colorInfo.getStat(STDDEV));
+            assertEquals(0.0, colorInfo.getStat(ColorInfo.ColorStat.MIN));
+            assertEquals(255.0, colorInfo.getStat(ColorInfo.ColorStat.MAX));
+            assertEquals(127.5, colorInfo.getStat(ColorInfo.ColorStat.MEAN));
+            assertEquals(30.0, colorInfo.getStat(ColorInfo.ColorStat.STDDEV));
         }
         
         @Test
         @DisplayName("Should update individual statistics")
         void shouldUpdateIndividualStatistics() {
-            colorInfo.getStats().put(MIN, 50.0);
-            colorInfo.getStats().put(MAX, 200.0);
+            colorInfo.getStats().put(ColorInfo.ColorStat.MIN, 50.0);
+            colorInfo.getStats().put(ColorInfo.ColorStat.MAX, 200.0);
             
-            assertEquals(50.0, colorInfo.getStat(MIN), 0.001);
-            assertEquals(200.0, colorInfo.getStat(MAX), 0.001);
+            assertEquals(50.0, colorInfo.getStat(ColorInfo.ColorStat.MIN), 0.001);
+            assertEquals(200.0, colorInfo.getStat(ColorInfo.ColorStat.MAX), 0.001);
         }
         
         @ParameterizedTest
@@ -93,10 +93,10 @@ public class ColorInfoTest extends BrobotTestBase {
         void shouldHandleVariousValues(double min, double max, double mean, double stddev) {
             colorInfo.setAll(min, max, mean, stddev);
             
-            assertEquals(min, colorInfo.getStat(MIN), 0.001);
-            assertEquals(max, colorInfo.getStat(MAX), 0.001);
-            assertEquals(mean, colorInfo.getStat(MEAN), 0.001);
-            assertEquals(stddev, colorInfo.getStat(STDDEV), 0.001);
+            assertEquals(min, colorInfo.getStat(ColorInfo.ColorStat.MIN), 0.001);
+            assertEquals(max, colorInfo.getStat(ColorInfo.ColorStat.MAX), 0.001);
+            assertEquals(mean, colorInfo.getStat(ColorInfo.ColorStat.MEAN), 0.001);
+            assertEquals(stddev, colorInfo.getStat(ColorInfo.ColorStat.STDDEV), 0.001);
         }
     }
     
@@ -110,8 +110,8 @@ public class ColorInfoTest extends BrobotTestBase {
             ColorInfo blue = new ColorInfo(ColorSchema.ColorValue.BLUE);
             blue.setAll(0.0, 255.0, 128.0, 50.0);
             
-            assertTrue(blue.getStat(MIN) >= 0);
-            assertTrue(blue.getStat(MAX) <= 255);
+            assertTrue(blue.getStat(ColorInfo.ColorStat.MIN) >= 0);
+            assertTrue(blue.getStat(ColorInfo.ColorStat.MAX) <= 255);
         }
         
         @Test
@@ -120,7 +120,7 @@ public class ColorInfoTest extends BrobotTestBase {
             ColorInfo hue = new ColorInfo(ColorSchema.ColorValue.HUE);
             hue.setAll(0.0, 179.0, 90.0, 30.0);
             
-            assertTrue(hue.getStat(MAX) <= 179); // OpenCV HSV convention
+            assertTrue(hue.getStat(ColorInfo.ColorStat.MAX) <= 179); // OpenCV HSV convention
         }
         
         @Test
@@ -132,8 +132,8 @@ public class ColorInfoTest extends BrobotTestBase {
             ColorInfo value = new ColorInfo(ColorSchema.ColorValue.VALUE);
             value.setAll(0.0, 255.0, 180.0, 25.0);
             
-            assertTrue(saturation.getStat(MAX) <= 255);
-            assertTrue(value.getStat(MAX) <= 255);
+            assertTrue(saturation.getStat(ColorInfo.ColorStat.MAX) <= 255);
+            assertTrue(value.getStat(ColorInfo.ColorStat.MAX) <= 255);
         }
     }
     
@@ -146,8 +146,8 @@ public class ColorInfoTest extends BrobotTestBase {
         void shouldHandleUniformColor() {
             colorInfo.setAll(128.0, 128.0, 128.0, 0.0);
             
-            assertEquals(colorInfo.getStat(MIN), colorInfo.getStat(MAX));
-            assertEquals(0.0, colorInfo.getStat(STDDEV), 0.001);
+            assertEquals(colorInfo.getStat(ColorInfo.ColorStat.MIN), colorInfo.getStat(ColorInfo.ColorStat.MAX));
+            assertEquals(0.0, colorInfo.getStat(ColorInfo.ColorStat.STDDEV), 0.001);
         }
         
         @Test
@@ -155,10 +155,10 @@ public class ColorInfoTest extends BrobotTestBase {
         void shouldHandleZeroValues() {
             colorInfo.setAll(0.0, 0.0, 0.0, 0.0);
             
-            assertEquals(0.0, colorInfo.getStat(MIN), 0.001);
-            assertEquals(0.0, colorInfo.getStat(MAX), 0.001);
-            assertEquals(0.0, colorInfo.getStat(MEAN), 0.001);
-            assertEquals(0.0, colorInfo.getStat(STDDEV), 0.001);
+            assertEquals(0.0, colorInfo.getStat(ColorInfo.ColorStat.MIN), 0.001);
+            assertEquals(0.0, colorInfo.getStat(ColorInfo.ColorStat.MAX), 0.001);
+            assertEquals(0.0, colorInfo.getStat(ColorInfo.ColorStat.MEAN), 0.001);
+            assertEquals(0.0, colorInfo.getStat(ColorInfo.ColorStat.STDDEV), 0.001);
         }
         
         @Test
@@ -166,9 +166,9 @@ public class ColorInfoTest extends BrobotTestBase {
         void shouldHandleNegativeValues() {
             colorInfo.setAll(-50.0, -10.0, -30.0, 10.0);
             
-            assertEquals(-50.0, colorInfo.getStat(MIN), 0.001);
-            assertEquals(-10.0, colorInfo.getStat(MAX), 0.001);
-            assertEquals(-30.0, colorInfo.getStat(MEAN), 0.001);
+            assertEquals(-50.0, colorInfo.getStat(ColorInfo.ColorStat.MIN), 0.001);
+            assertEquals(-10.0, colorInfo.getStat(ColorInfo.ColorStat.MAX), 0.001);
+            assertEquals(-30.0, colorInfo.getStat(ColorInfo.ColorStat.MEAN), 0.001);
         }
     }
     
@@ -201,8 +201,8 @@ public class ColorInfoTest extends BrobotTestBase {
             ColorInfo red = new ColorInfo(ColorSchema.ColorValue.RED);
             red.setAll(200.0, 255.0, 230.0, 15.0);
             
-            assertTrue(red.getStat(MIN) >= 200);
-            assertTrue(red.getStat(MEAN) > 200);
+            assertTrue(red.getStat(ColorInfo.ColorStat.MIN) >= 200);
+            assertTrue(red.getStat(ColorInfo.ColorStat.MEAN) > 200);
         }
         
         @Test
@@ -211,9 +211,9 @@ public class ColorInfoTest extends BrobotTestBase {
             ColorInfo gray = new ColorInfo(ColorSchema.ColorValue.BLUE);
             gray.setAll(120.0, 130.0, 125.0, 3.0);
             
-            double range = gray.getStat(MAX) - gray.getStat(MIN);
+            double range = gray.getStat(ColorInfo.ColorStat.MAX) - gray.getStat(ColorInfo.ColorStat.MIN);
             assertTrue(range <= 10); // Small range for grayscale
-            assertTrue(gray.getStat(STDDEV) < 5); // Low variation
+            assertTrue(gray.getStat(ColorInfo.ColorStat.STDDEV) < 5); // Low variation
         }
     }
 }
