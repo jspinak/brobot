@@ -11,7 +11,7 @@ import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
 import io.github.jspinak.brobot.action.basic.type.TypeText;
 import io.github.jspinak.brobot.action.basic.type.TypeOptions;
 import io.github.jspinak.brobot.action.internal.execution.BasicActionRegistry;
-import io.github.jspinak.brobot.action.internal.execution.CompositeActionRegistry;
+// import io.github.jspinak.brobot.action.internal.execution.CompositeActionRegistry; // Class doesn't exist
 import io.github.jspinak.brobot.action.internal.service.ActionService;
 import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.test.BaseIntegrationTest;
@@ -42,15 +42,16 @@ class ActionServiceIntegrationTestUpdated extends BaseIntegrationTest {
     @Autowired
     private BasicActionRegistry basicActionRegistry;
     
-    @Autowired
-    private CompositeActionRegistry compositeActionRegistry;
+    // CompositeActionRegistry doesn't exist in current codebase
+    // @Autowired
+    // private CompositeActionRegistry compositeActionRegistry;
     
     @Test
     @Order(1)
     void testSpringContextLoads() {
         assertNotNull(actionService, "ActionService should be autowired");
         assertNotNull(basicActionRegistry, "BasicActionRegistry should be autowired");
-        assertNotNull(compositeActionRegistry, "CompositeActionRegistry should be autowired");
+        // assertNotNull(compositeActionRegistry, "CompositeActionRegistry should be autowired");
     }
     
     @Test

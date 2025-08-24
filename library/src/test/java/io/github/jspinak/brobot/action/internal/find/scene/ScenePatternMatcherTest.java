@@ -10,7 +10,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.sikuli.script.Finder;
 
 import java.awt.image.BufferedImage;
@@ -25,6 +26,7 @@ import static org.mockito.Mockito.*;
  * Test suite for ScenePatternMatcher class.
  * Tests pattern matching operations within scene images.
  */
+@ExtendWith(MockitoExtension.class)
 @DisplayName("ScenePatternMatcher Tests")
 public class ScenePatternMatcherTest extends BrobotTestBase {
 
@@ -46,21 +48,11 @@ public class ScenePatternMatcherTest extends BrobotTestBase {
     @Mock
     private BufferedImage patternImage;
     
-    private AutoCloseable mockCloseable;
-    
     @BeforeEach
     @Override
     public void setupTest() {
         super.setupTest();
-        mockCloseable = MockitoAnnotations.openMocks(this);
         scenePatternMatcher = new ScenePatternMatcher();
-    }
-    
-    @AfterEach
-    void tearDown() throws Exception {
-        if (mockCloseable != null) {
-            mockCloseable.close();
-        }
     }
     
     @Nested

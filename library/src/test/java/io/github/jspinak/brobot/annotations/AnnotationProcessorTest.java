@@ -24,11 +24,14 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 /**
  * Tests for AnnotationProcessor - processes @State and @Transition annotations.
  * Verifies automatic state registration and transition setup.
  */
+@ExtendWith(MockitoExtension.class)
 @DisplayName("AnnotationProcessor Tests")
 public class AnnotationProcessorTest extends BrobotTestBase {
     

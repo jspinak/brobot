@@ -10,7 +10,8 @@ import io.github.jspinak.brobot.model.state.*;
 import io.github.jspinak.brobot.test.BrobotTestBase;
 import org.junit.jupiter.api.*;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.*;
 
@@ -22,6 +23,7 @@ import static org.mockito.Mockito.*;
  * Test suite for DynamicRegionResolver.
  * Tests dynamic search region resolution based on cross-state references.
  */
+@ExtendWith(MockitoExtension.class)
 @DisplayName("DynamicRegionResolver Tests")
 public class DynamicRegionResolverTest extends BrobotTestBase {
     
@@ -35,21 +37,11 @@ public class DynamicRegionResolverTest extends BrobotTestBase {
     private ActionResult mockActionResult;
     
     private DynamicRegionResolver dynamicRegionResolver;
-    private AutoCloseable mockCloseable;
-    
     @BeforeEach
     @Override
     public void setupTest() {
         super.setupTest();
-        mockCloseable = MockitoAnnotations.openMocks(this);
         dynamicRegionResolver = new DynamicRegionResolver(mockStateStore, mockDependencyRegistry);
-    }
-    
-    @AfterEach
-    void tearDown() throws Exception {
-        if (mockCloseable != null) {
-            mockCloseable.close();
-        }
     }
     
     @Nested

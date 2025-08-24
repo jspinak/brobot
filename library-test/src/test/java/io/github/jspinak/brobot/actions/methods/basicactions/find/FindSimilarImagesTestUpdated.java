@@ -11,7 +11,7 @@ import io.github.jspinak.brobot.action.basic.find.FindSimilarImages;
 import io.github.jspinak.brobot.action.internal.factory.ActionResultFactory;
 import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.BrobotTestApplication;
-import io.github.jspinak.brobot.actions.methods.basicactions.TestData;
+import io.github.jspinak.brobot.actions.methods.basicactions.TestDataUpdated;
 import io.github.jspinak.brobot.test.BrobotIntegrationTestBase;
 import io.github.jspinak.brobot.testutils.TestPaths;
 import org.junit.jupiter.api.BeforeAll;
@@ -87,7 +87,7 @@ class FindSimilarImagesTestUpdated extends BrobotIntegrationTestBase {
             FrameworkSettings.screenshots.add(TestPaths.getScreenshotPath("floranext3"));
             FrameworkSettings.screenshots.add(TestPaths.getScreenshotPath("floranext4"));
             
-            TestData testData = new TestData();
+            TestDataUpdated testData = new TestData();
 
             // NEW API: Use PatternFindOptions with SIMILAR_IMAGES strategy
             PatternFindOptions findOptions = new PatternFindOptions.Builder()

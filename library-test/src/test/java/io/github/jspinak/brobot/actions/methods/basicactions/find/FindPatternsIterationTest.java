@@ -6,7 +6,7 @@ import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.basic.find.color.SceneProvider;
 import io.github.jspinak.brobot.BrobotTestApplication;
-import io.github.jspinak.brobot.actions.methods.basicactions.TestData;
+import io.github.jspinak.brobot.actions.methods.basicactions.TestDataUpdated;
 import io.github.jspinak.brobot.test.BrobotIntegrationTestBase;
 
 import org.junit.jupiter.api.BeforeAll;
@@ -46,7 +46,7 @@ class FindPatternsIterationTest extends BrobotIntegrationTestBase {
     @Test
     void find_() {
         try {
-            TestData testData = new TestData();
+            TestDataUpdated testData = new TestDataUpdated();
 
             List<Scene> scenes = getScenes.getScenes(testData.getDefineInsideAnchors(), 
                 List.of(testData.getInsideAnchorObjects()));

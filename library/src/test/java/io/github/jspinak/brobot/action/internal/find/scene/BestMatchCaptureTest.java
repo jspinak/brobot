@@ -12,7 +12,8 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedConstruction;
-import org.mockito.MockitoAnnotations;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.sikuli.script.Finder;
 
 import javax.imageio.ImageIO;
@@ -35,6 +36,7 @@ import static org.mockito.Mockito.*;
  * Test suite for BestMatchCapture class.
  * Tests capturing and saving best matching regions for debugging pattern matching.
  */
+@ExtendWith(MockitoExtension.class)
 @DisplayName("BestMatchCapture Tests")
 public class BestMatchCaptureTest extends BrobotTestBase {
 
@@ -59,14 +61,12 @@ public class BestMatchCaptureTest extends BrobotTestBase {
     @Mock
     private Match match;
     
-    private AutoCloseable mockCloseable;
     private Path tempDirectory;
     
     @BeforeEach
     @Override
     public void setupTest() {
         super.setupTest();
-        mockCloseable = MockitoAnnotations.openMocks(this);
         bestMatchCapture = new BestMatchCapture();
         
         // Create temp directory for test captures
@@ -79,9 +79,6 @@ public class BestMatchCaptureTest extends BrobotTestBase {
     
     @AfterEach
     void tearDown() throws Exception {
-        if (mockCloseable != null) {
-            mockCloseable.close();
-        }
         // Clean up temp directory
         if (tempDirectory != null && Files.exists(tempDirectory)) {
             Files.walk(tempDirectory)

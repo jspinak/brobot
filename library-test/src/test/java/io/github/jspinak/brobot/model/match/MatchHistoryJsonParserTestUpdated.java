@@ -1,6 +1,4 @@
 package io.github.jspinak.brobot.model.match;
-import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -340,14 +338,13 @@ public class MatchHistoryJsonParserTestUpdated {
         // This test demonstrates how to handle legacy ActionOptions if needed
         ActionHistory matchHistory = new ActionHistory();
 
-        // Create legacy snapshot with ActionOptions
-        ActionOptions legacyOptions = new ActionOptions.Builder()
-                .setAction(PatternFindOptions)
-                .setFind(PatternFindOptions.FindStrategy.FIRST)
+        // Create legacy snapshot with PatternFindOptions
+        PatternFindOptions legacyOptions = new PatternFindOptions.Builder()
+                .setStrategy(PatternFindOptions.Strategy.FIRST)
                 .build();
 
         ActionRecord legacySnapshot = new ActionRecord.Builder()
-                .setActionOptions(legacyOptions)
+                .setActionConfig(legacyOptions)
                 .addMatch(new Match.Builder().setName("LegacyMatch").build())
                 .build();
         matchHistory.addSnapshot(legacySnapshot);
@@ -355,8 +352,8 @@ public class MatchHistoryJsonParserTestUpdated {
         // Serialize
         String json = objectMapper.writeValueAsString(matchHistory);
         assertNotNull(json);
-        assertTrue(json.contains("\"action\""));
-        assertTrue(json.contains("\"FIND\""));
+        assertTrue(json.contains("\"strategy\""));
+        assertTrue(json.contains("\"FIRST\""));
 
         // Note: In production, you would migrate these to new ActionConfig format
     }

@@ -8,7 +8,7 @@ import io.github.jspinak.brobot.action.basic.find.text.TextFindOptions;
 import io.github.jspinak.brobot.action.internal.service.ActionService;
 import io.github.jspinak.brobot.model.element.Pattern;
 import io.github.jspinak.brobot.BrobotTestApplication;
-import io.github.jspinak.brobot.actions.methods.basicactions.TestData;
+import io.github.jspinak.brobot.actions.methods.basicactions.TestDataUpdated;
 import io.github.jspinak.brobot.analysis.scene.SceneCombinationGenerator;
 import io.github.jspinak.brobot.model.analysis.scene.SceneCombination;
 
