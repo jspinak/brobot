@@ -6,7 +6,7 @@ import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.action.basic.find.text.TextFindOptions;
 import io.github.jspinak.brobot.action.internal.service.ActionService;
-import io.github.jspinak.brobot.actions.methods.basicactions.TestData;
+import io.github.jspinak.brobot.actions.methods.basicactions.TestDataUpdated;
 import io.github.jspinak.brobot.model.element.Pattern;
 
 import java.util.List;
@@ -51,7 +51,7 @@ public class FindStatesDataUpdated {
     }
 
     public List<ObjectCollection> getStateObjectCollections(ActionService actionService) {
-        TestData testData = new TestData();
+        TestDataUpdated testData = new TestData();
         ObjectCollection stateColl1 = getStateObjectCollection(testData.getFloranext0(), actionService);
         ObjectCollection stateColl2 = getStateObjectCollection(testData.getFloranext1(), actionService);
         ObjectCollection stateColl3 = getStateObjectCollection(testData.getFloranext2(), actionService);

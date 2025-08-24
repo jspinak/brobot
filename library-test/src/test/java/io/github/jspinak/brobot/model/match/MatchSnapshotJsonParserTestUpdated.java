@@ -1,10 +1,7 @@
 package io.github.jspinak.brobot.model.match;
-import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import io.github.jspinak.brobot.action.ActionOptions;
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
 import io.github.jspinak.brobot.action.basic.click.ClickOptions;
 import io.github.jspinak.brobot.action.basic.mouse.MouseMoveOptions;
@@ -396,12 +393,11 @@ public class MatchSnapshotJsonParserTestUpdated {
     public void testMixedLegacyAndNewAPI() throws Exception {
         ActionRecord snapshot = new ActionRecord();
 
-        // Test that we can still use legacy ActionOptions if needed
-        ActionOptions legacyOptions = new ActionOptions.Builder()
-                .setAction(PatternFindOptions)
-                .setFind(PatternFindOptions.FindStrategy.ALL)
+        // Test that we can still use PatternFindOptions if needed
+        PatternFindOptions legacyOptions = new PatternFindOptions.Builder()
+                .setStrategy(PatternFindOptions.Strategy.ALL)
                 .build();
-        snapshot.setActionOptions(legacyOptions);
+        snapshot.setActionConfig(legacyOptions);
 
         // Add match
         snapshot.addMatch(new Match.Builder()
@@ -412,16 +408,14 @@ public class MatchSnapshotJsonParserTestUpdated {
         // Serialize
         String json = objectMapper.writeValueAsString(snapshot);
         assertNotNull(json);
-        assertTrue(json.contains("\"action\""));
-        assertTrue(json.contains("\"FIND\""));
-        assertTrue(json.contains("\"find\""));
+        assertTrue(json.contains("\"strategy\""));
         assertTrue(json.contains("\"ALL\""));
 
         // Deserialize
         ActionRecord deserialized = objectMapper.readValue(json, ActionRecord.class);
         assertNotNull(deserialized);
-        assertNotNull(deserialized.getActionOptions());
-        assertEquals(PatternFindOptions, deserialized.getActionOptions().getAction());
-        assertEquals(PatternFindOptions.FindStrategy.ALL, deserialized.getActionOptions().getFind());
+        assertNotNull(deserialized.getActionConfig());
+        assertTrue(deserialized.getActionConfig() instanceof PatternFindOptions);
+        assertEquals(PatternFindOptions.Strategy.ALL, ((PatternFindOptions)deserialized.getActionConfig()).getStrategy());
     }
 }

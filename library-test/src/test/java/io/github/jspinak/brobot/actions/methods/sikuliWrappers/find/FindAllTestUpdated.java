@@ -1,6 +1,4 @@
 package io.github.jspinak.brobot.actions.methods.sikuliWrappers.find;
-import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
-
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.action.basic.find.FindAll;
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;

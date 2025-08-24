@@ -19,7 +19,8 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -33,6 +34,7 @@ import static org.mockito.Mockito.*;
  * Test suite for PixelRegionExtractor class.
  * Tests extraction of match regions from pixel-level color analysis results.
  */
+@ExtendWith(MockitoExtension.class)
 @DisplayName("PixelRegionExtractor Tests")
 public class PixelRegionExtractorTest extends BrobotTestBase {
 
@@ -60,13 +62,11 @@ public class PixelRegionExtractorTest extends BrobotTestBase {
     @Mock
     private Mat mat;
     
-    private AutoCloseable mockCloseable;
     
     @BeforeEach
     @Override
     public void setupTest() {
         super.setupTest();
-        mockCloseable = MockitoAnnotations.openMocks(this);
         pixelRegionExtractor = new PixelRegionExtractor(
             contourExtractor, 
             searchRegionResolver, 
@@ -75,12 +75,6 @@ public class PixelRegionExtractorTest extends BrobotTestBase {
         );
     }
     
-    @AfterEach
-    void tearDown() throws Exception {
-        if (mockCloseable != null) {
-            mockCloseable.close();
-        }
-    }
     
     @Nested
     @DisplayName("Region Extraction")

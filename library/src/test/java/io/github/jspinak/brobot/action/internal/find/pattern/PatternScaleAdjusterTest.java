@@ -10,7 +10,8 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedConstruction;
-import org.mockito.MockitoAnnotations;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.sikuli.script.Finder;
 import org.sikuli.script.Match;
 
@@ -26,6 +27,7 @@ import static org.mockito.Mockito.*;
  * Test suite for PatternScaleAdjuster class.
  * Tests pattern scale adjustment for UI element matching at different scales.
  */
+@ExtendWith(MockitoExtension.class)
 @DisplayName("PatternScaleAdjuster Tests")
 public class PatternScaleAdjusterTest extends BrobotTestBase {
 
@@ -44,22 +46,14 @@ public class PatternScaleAdjusterTest extends BrobotTestBase {
     @Mock
     private BufferedImage sceneImage;
     
-    private AutoCloseable mockCloseable;
     
     @BeforeEach
     @Override
     public void setupTest() {
         super.setupTest();
-        mockCloseable = MockitoAnnotations.openMocks(this);
         patternScaleAdjuster = new PatternScaleAdjuster();
     }
     
-    @AfterEach
-    void tearDown() throws Exception {
-        if (mockCloseable != null) {
-            mockCloseable.close();
-        }
-    }
     
     @Nested
     @DisplayName("Basic Scale Finding")

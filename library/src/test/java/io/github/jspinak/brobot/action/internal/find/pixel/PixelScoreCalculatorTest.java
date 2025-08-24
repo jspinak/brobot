@@ -16,7 +16,8 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -26,6 +27,7 @@ import static org.mockito.Mockito.*;
  * Test suite for PixelScoreCalculator class.
  * Tests pixel-level matching score calculations from color distance analysis.
  */
+@ExtendWith(MockitoExtension.class)
 @DisplayName("PixelScoreCalculator Tests")
 public class PixelScoreCalculatorTest extends BrobotTestBase {
 
@@ -53,21 +55,11 @@ public class PixelScoreCalculatorTest extends BrobotTestBase {
     @Mock
     private Mat scoreMatrix;
     
-    private AutoCloseable mockCloseable;
-    
     @BeforeEach
     @Override
     public void setupTest() {
         super.setupTest();
-        mockCloseable = MockitoAnnotations.openMocks(this);
         pixelScoreCalculator = new PixelScoreCalculator(matrixVisualizer);
-    }
-    
-    @AfterEach
-    void tearDown() throws Exception {
-        if (mockCloseable != null) {
-            mockCloseable.close();
-        }
     }
     
     @Nested
