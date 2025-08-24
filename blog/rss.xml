@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+    <channel>
+        <title>Brobot Blog</title>
+        <link>https://jspinak.github.io/brobot/blog</link>
+        <description>Brobot Blog</description>
+        <lastBuildDate>Tue, 18 Jan 2022 00:00:00 GMT</lastBuildDate>
+        <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
+        <generator>https://github.com/jpmonette/feed</generator>
+        <language>en</language>
+        <item>
+            <title><![CDATA[Welcome]]></title>
+            <link>https://jspinak.github.io/brobot/blog/welcome</link>
+            <guid>https://jspinak.github.io/brobot/blog/welcome</guid>
+            <pubDate>Tue, 18 Jan 2022 00:00:00 GMT</pubDate>
+            <description><![CDATA[Brobot is now live!]]></description>
+            <content:encoded><![CDATA[<p>Brobot is now live!</p>
+<p>You can use StackOverflow for questions about how to use Brobot
+that are not answered in the documentation.</p>
+<p>To point out errors in the code base or areas for improvement, please open an issue on
+<a href="https://github.com/jspinak/brobot" target="_blank" rel="noopener noreferrer">GitHub</a>.</p>
+<p>You can also write to me directly at <a href="mailto:jspinak@hotmail.com" target="_blank" rel="noopener noreferrer">jspinak@hotmail.com</a>.</p>]]></content:encoded>
+            <category>hello</category>
+            <category>brobot</category>
+        </item>
+    </channel>
+</rss>

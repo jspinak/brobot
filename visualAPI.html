@@ -1,0 +1,457 @@
+<!doctype html>
+<html lang="en" dir="ltr" class="mdx-wrapper mdx-page plugin-pages plugin-id-default" data-has-hydrated="false">
+<head>
+<meta charset="UTF-8">
+<meta name="generator" content="Docusaurus v3.8.1">
+<title data-rh="true">The Visual API | Brobot</title><meta data-rh="true" name="viewport" content="width=device-width,initial-scale=1"><meta data-rh="true" name="twitter:card" content="summary_large_image"><meta data-rh="true" property="og:url" content="https://jspinak.github.io/brobot/visualAPI"><meta data-rh="true" property="og:locale" content="en"><meta data-rh="true" name="docusaurus_locale" content="en"><meta data-rh="true" name="docusaurus_tag" content="default"><meta data-rh="true" name="docsearch:language" content="en"><meta data-rh="true" name="docsearch:docusaurus_tag" content="default"><meta data-rh="true" property="og:title" content="The Visual API | Brobot"><meta data-rh="true" name="description" content="A new standard for state-based, testable, visual automation"><meta data-rh="true" property="og:description" content="A new standard for state-based, testable, visual automation"><link data-rh="true" rel="icon" href="/brobot/img/brobot-happy.ico"><link data-rh="true" rel="canonical" href="https://jspinak.github.io/brobot/visualAPI"><link data-rh="true" rel="alternate" href="https://jspinak.github.io/brobot/visualAPI" hreflang="en"><link data-rh="true" rel="alternate" href="https://jspinak.github.io/brobot/visualAPI" hreflang="x-default"><link rel="alternate" type="application/rss+xml" href="/brobot/blog/rss.xml" title="Brobot RSS Feed">
+<link rel="alternate" type="application/atom+xml" href="/brobot/blog/atom.xml" title="Brobot Atom Feed">
+
+
+
+
+<link rel="preconnect" href="https://www.google-analytics.com">
+<link rel="preconnect" href="https://www.googletagmanager.com">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-6WY1S6ZWEY"></script>
+<script>function gtag(){dataLayer.push(arguments)}window.dataLayer=window.dataLayer||[],gtag("js",new Date),gtag("config","G-6WY1S6ZWEY",{anonymize_ip:!0})</script>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css" integrity="sha384-GvrOXuhMATgEsSwCs4smul74iXGOixntILdUW9XmUC6+HX0sLNAK3q71HotJqlAn" crossorigin="anonymous"><link rel="stylesheet" href="/brobot/assets/css/styles.1b22d91f.css">
+<script src="/brobot/assets/js/runtime~main.86488505.js" defer="defer"></script>
+<script src="/brobot/assets/js/main.ab0b3e76.js" defer="defer"></script>
+</head>
+<body class="navigation-with-keyboard">
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;"><defs>
+<symbol id="theme-svg-external-link" viewBox="0 0 24 24"><path fill="currentColor" d="M21 13v10h-21v-19h12v2h-10v15h17v-8h2zm3-12h-10.988l4.035 4-6.977 7.07 2.828 2.828 6.977-7.07 4.125 4.172v-11z"/></symbol>
+</defs></svg>
+<script>!function(){var t="light";var e=function(){try{return new URLSearchParams(window.location.search).get("docusaurus-theme")}catch(t){}}()||function(){try{return window.localStorage.getItem("theme")}catch(t){}}();document.documentElement.setAttribute("data-theme",e||t),document.documentElement.setAttribute("data-theme-choice",e||t)}(),function(){try{const c=new URLSearchParams(window.location.search).entries();for(var[t,e]of c)if(t.startsWith("docusaurus-data-")){var a=t.replace("docusaurus-data-","data-");document.documentElement.setAttribute(a,e)}}catch(t){}}()</script><div id="__docusaurus"><div role="region" aria-label="Skip to main content"><a class="skipToContent_fXgn" href="#__docusaurus_skipToContent_fallback">Skip to main content</a></div><nav aria-label="Main" class="theme-layout-navbar navbar navbar--fixed-top"><div class="navbar__inner"><div class="theme-layout-navbar-left navbar__items"><button aria-label="Toggle navigation bar" aria-expanded="false" class="navbar__toggle clean-btn" type="button"><svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><path stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2" d="M4 7h22M4 15h22M4 23h22"></path></svg></button><a class="navbar__brand" href="/brobot/"><div class="navbar__logo"><img src="/brobot/img/brobot_logo/brobot-happy-text.svg" alt="Brobot Logo" class="themedComponent_mlkZ themedComponent--light_NVdE"><img src="/brobot/img/brobot_logo/brobot-happy-text.svg" alt="Brobot Logo" class="themedComponent_mlkZ themedComponent--dark_xIcU"></div><b class="navbar__title text--truncate">Brobot</b></a><a class="navbar__item navbar__link" href="/brobot/docs/getting-started/introduction">Documentation</a><a href="https://jspinak.github.io/brobot/api/" target="_blank" rel="noopener noreferrer" class="navbar__item navbar__link">API Reference<svg width="13.5" height="13.5" aria-hidden="true" class="iconExternalLink_nPIU"><use href="#theme-svg-external-link"></use></svg></a><a aria-current="page" class="navbar__item navbar__link navbar__link--active" href="/brobot/visualAPI">The Visual API</a><a class="navbar__item navbar__link" href="/brobot/blog">Blog</a></div><div class="theme-layout-navbar-right navbar__items navbar__items--right"><div class="navbar__item dropdown dropdown--hoverable dropdown--right"><a class="navbar__link" aria-haspopup="true" aria-expanded="false" role="button" href="/brobot/docs/getting-started/introduction">Latest</a><ul class="dropdown__menu"><li><a class="dropdown__link" href="/brobot/docs/getting-started/introduction">Latest</a></li><li><a class="dropdown__link" href="/brobot/docs/1.0.7/getting-started/introduction">1.0.7</a></li><li><a class="dropdown__link" href="/brobot/docs/1.0.6/introduction">1.0.6</a></li></ul></div><a href="https://github.com/jspinak/brobot" target="_blank" rel="noopener noreferrer" class="navbar__item navbar__link">GitHub<svg width="13.5" height="13.5" aria-hidden="true" class="iconExternalLink_nPIU"><use href="#theme-svg-external-link"></use></svg></a><div class="toggle_vylO colorModeToggle_DEke"><button class="clean-btn toggleButton_gllP toggleButtonDisabled_aARS" type="button" disabled="" title="system mode" aria-label="Switch between dark and light mode (currently system mode)"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP lightToggleIcon_pyhR"><path fill="currentColor" d="M12,9c1.65,0,3,1.35,3,3s-1.35,3-3,3s-3-1.35-3-3S10.35,9,12,9 M12,7c-2.76,0-5,2.24-5,5s2.24,5,5,5s5-2.24,5-5 S14.76,7,12,7L12,7z M2,13l2,0c0.55,0,1-0.45,1-1s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S1.45,13,2,13z M20,13l2,0c0.55,0,1-0.45,1-1 s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S19.45,13,20,13z M11,2v2c0,0.55,0.45,1,1,1s1-0.45,1-1V2c0-0.55-0.45-1-1-1S11,1.45,11,2z M11,20v2c0,0.55,0.45,1,1,1s1-0.45,1-1v-2c0-0.55-0.45-1-1-1C11.45,19,11,19.45,11,20z M5.99,4.58c-0.39-0.39-1.03-0.39-1.41,0 c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0s0.39-1.03,0-1.41L5.99,4.58z M18.36,16.95 c-0.39-0.39-1.03-0.39-1.41,0c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0c0.39-0.39,0.39-1.03,0-1.41 L18.36,16.95z M19.42,5.99c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06c-0.39,0.39-0.39,1.03,0,1.41 s1.03,0.39,1.41,0L19.42,5.99z M7.05,18.36c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06 c-0.39,0.39-0.39,1.03,0,1.41s1.03,0.39,1.41,0L7.05,18.36z"></path></svg><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP darkToggleIcon_wfgR"><path fill="currentColor" d="M9.37,5.51C9.19,6.15,9.1,6.82,9.1,7.5c0,4.08,3.32,7.4,7.4,7.4c0.68,0,1.35-0.09,1.99-0.27C17.45,17.19,14.93,19,12,19 c-3.86,0-7-3.14-7-7C5,9.07,6.81,6.55,9.37,5.51z M12,3c-4.97,0-9,4.03-9,9s4.03,9,9,9s9-4.03,9-9c0-0.46-0.04-0.92-0.1-1.36 c-0.98,1.37-2.58,2.26-4.4,2.26c-2.98,0-5.4-2.42-5.4-5.4c0-1.81,0.89-3.42,2.26-4.4C12.92,3.04,12.46,3,12,3L12,3z"></path></svg><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP systemToggleIcon_QzmC"><path fill="currentColor" d="m12 21c4.971 0 9-4.029 9-9s-4.029-9-9-9-9 4.029-9 9 4.029 9 9 9zm4.95-13.95c1.313 1.313 2.05 3.093 2.05 4.95s-0.738 3.637-2.05 4.95c-1.313 1.313-3.093 2.05-4.95 2.05v-14c1.857 0 3.637 0.737 4.95 2.05z"></path></svg></button></div><div class="navbarSearchContainer_Bca1"></div></div></div><div role="presentation" class="navbar-sidebar__backdrop"></div></nav><div id="__docusaurus_skipToContent_fallback" class="theme-layout-main main-wrapper mainWrapper_z2l0"><main class="container container--fluid margin-vert--lg"><div class="row mdxPageWrapper_j9I6"><div class="col col--8"><article><header><h1>The Visual API</h1></header>
+<span style="font-size:24px;font-style:italic;border-radius:2px;padding:0.2rem">A new standard for state-based, testable, visual automation</span>
+<br>
+<hr>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="abstract">Abstract<a href="#abstract" class="hash-link" aria-label="Direct link to Abstract" title="Direct link to Abstract">​</a></h2>
+<p>Large visual automation applications are rarely developed due to the complexity
+required for a robust application and the inability to test the codebase.
+This paper explores the reasons for the complexity and the inability to test,
+and in doing so, finds solutions to both. The concept of the visual API is
+proposed as a new standard for developing visual automation and a new
+open-source framework is introduced that streamlines the process of building a visual API.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="1-introduction">1 Introduction<a href="#1-introduction" class="hash-link" aria-label="Direct link to 1 Introduction" title="Direct link to 1 Introduction">​</a></h2>
+<p>Visual automation is difficult, and no source attests more clearly to this than
+the industry where it is used the most, the software testing industry. The market
+for software testing was estimated at
+<a href="https://www.gminsights.com/industry-analysis/software-testing-market" target="_blank" rel="noopener noreferrer">over $40 billion in 2020</a>.
+However, the vast
+majority of these revenues did not go to automated testing applications. Industry
+participants prefer to invest in manual testing, apparently due to the relative high
+costs of developing automation as compared to the cost of human testers. The
+decisions to use human testers, especially for use-cases that seem ideal for
+automation, are clear indications of how difficult it is to develop useful automation.</p>
+<p>There are two main problems with writing large visual automation applications:
+code complexity, and the inability to test the code. The solutions to both
+problems are somewhat codependent. As we explore the underlying causes of code
+complexity and the inability to test, the solutions to these problems should become
+apparent. The key to finding the solutions is to gain a deeper understanding of the
+automation task and to reframe how we view it.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="2-complexity">2 Complexity<a href="#2-complexity" class="hash-link" aria-label="Direct link to 2 Complexity" title="Direct link to 2 Complexity">​</a></h2>
+<p>Below is a simple process involving visual automation. We want our program to perform
+three actions, one after another: first A1, then A2, then A3.</p>
+<p align="center"></p><p><img decoding="async" loading="lazy" alt="graph1" src="/brobot/assets/images/basic1-d2f219684b509295abad50afc40ff055.png" width="50" height="225" class="img_ev3q"></p><p></p>
+<br>
+<p>The first issue we run into is the stochastic nature of actions A1, A2, and A3.
+Visual process automation is not guaranteed to succeed. For each action, there
+are many different potential outcomes. Taking the example of an action that
+attempts to find an image, potential outcomes include:</p>
+<ul>
+<li>The image on screen is the same as in the program, and it is found.</li>
+<li>The image is slightly different but found.</li>
+<li>The image is slightly different and not found.</li>
+<li>The image is covered by another image (an unexpected pop-up, for example), and
+the image is not found.</li>
+<li>The image does not exist (maybe the automation program is not where it expects it to be).</li>
+<li>A different image is found.</li>
+<li>The same image appears multiple times on the screen and the program finds the wrong one.</li>
+<li>The image will appear but takes longer than expected, and the operation times out.</li>
+</ul>
+<p align="center"></p><p><img decoding="async" loading="lazy" alt="graph1" src="/brobot/assets/images/graph1-7351118671cbf2d7446c3ec656fcc512.png" width="736" height="401" class="img_ev3q"></p><p></p>
+<br>
+<p>In reality the result frequency is a continuous variable since there could be
+an infinite number of different scenarios. You might portray the continuous
+variable as having a few different categories of results: found, not found,
+and found erroneously. What you do in these scenarios may differ depending
+on the scenario. If an image is not found because the image on the screen
+is slightly different from the image on file, you may want to adjust the
+sensitivity of your find operation. If the image is not found because your
+application thinks it’s somewhere else, then your solution will be to move
+to the correct environment.</p>
+<p align="center"></p><p><img decoding="async" loading="lazy" alt="dist" src="/brobot/assets/images/distribution2-a901524be886e85b53218b938d0db38f.png" width="793" height="416" class="img_ev3q"></p><p></p>
+<p>Stochasticity is especially dangerous for automation applications because of the
+interdependency of actions. If A1 fails then A2 and A3 are also likely to fail.
+If an automation program is a series of actions, the probability of the program
+failing will be related directly to the number of actions. If each action is
+given a probability p of succeeding, and there are n actions, we can calculate
+the overall probability of success as a function of n and p: <code>f(n,p) = p^n</code>.</p>
+<p><code>f(n,p)</code> looks like this when setting p to 90%: at just 7 actions the process
+is more likely to fail than succeed, and the chances of success with a large
+number of actions is extremely low.</p>
+<p><img decoding="async" loading="lazy" alt="compounding" src="/brobot/assets/images/compounding-83cf3c9b2209945c850e8a53c4765d1e.png" width="1041" height="386" class="img_ev3q"></p>
+<p>Given that failure is likely, a robust application must take this failure into
+account and provide alternate processes in order to reach its goals. Having
+alternate routes to the end goal will increase the overall probability of
+reaching this goal.</p>
+<p align="center"></p><p><img decoding="async" loading="lazy" alt="3 Processes" src="/brobot/assets/images/3processes-1b64b645e8afac863d097455f23ea045.png" width="180" height="291" class="img_ev3q"></p><p></p>
+<p>A process is a series of successive actions. A process follows a path through
+different environments and this environment may change as the result of a successful
+action. If there are 3 different processes, A, B, and C, that can reach a goal, and
+each action in {A1,A2,A3,B1,…,C3} has probability p of success, then the probability
+of success for each process is <code>p^3</code>.</p>
+<p>At first glance, it would seem that the probability of success for the entire algorithm is
+<code>1 - (1 - p^3)^3</code> because in order for the entire algorithm to fail, all 3 paths
+would need to fail. When p = 90%, the probability of a single process succeeding is
+72.9% and the probability of the entire algorithm succeeding is 98%. This is, however,
+incorrect. Since actions can change the environment, the only place where the
+additional paths would be available is at the start point. We only have backup
+processes at the start point, after which we have to follow the process we have
+chosen. In other words, if A1 fails we can try B1, but if B2 fails our algorithm
+has failed. In this diagram there is no path back to the start point. This gives
+us a success rate in the first layer of <code>p + p(1 - p) + p(1 - p)^2 = 3p - 3p^2 + p^3</code>, since there is a p chance of A1 succeeding, a p chance of B1
+succeeding in the event that A1 fails, and a p chance of C1 succeeding in the
+event that both A1 and B1 have failed. In the second and third layers the
+probability of success is just p. This gives an overall probability of success of
+<code>p * p * (3p - 3p^2 + p^3) = 3p^3 - 3p^4 + p^5</code>. With p = 90%, the overall
+probability of success is just ~80.9%.</p>
+<p>To keep the probability of success around 99% we would need to create
+alternate processes for each action, including the actions in processes
+B and C. If there were n original actions, the total number of actions in
+our more robust algorithm would be <code>3^n + 3^(n-1) + 3^(n-2) + ... + 3^1</code>.
+In this example, with n=3, we have 27 + 9 + 3 = 39 actions. The run-time
+complexity is still linear since only a small subset of all actions will
+be performed, but the programming-time complexity is exponential.
+Programming-time is even more valuable than run-time because your time
+is more valuable than your computer’s time! That is, after all, the whole
+point of automation. This programming-time complexity also can be described
+as <a href="https://en.wikipedia.org/wiki/NP-hardness" target="_blank" rel="noopener noreferrer">NP-hard</a>, or
+Not Programming this, this is too hard!</p>
+<p><img decoding="async" loading="lazy" alt="3 Layers" src="/brobot/assets/images/3layers-d6963d96036b6a6846cec90f2d852272.png" width="2132" height="1088" class="img_ev3q"></p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="3-reducing-complexity">3 Reducing Complexity<a href="#3-reducing-complexity" class="hash-link" aria-label="Direct link to 3 Reducing Complexity" title="Direct link to 3 Reducing Complexity">​</a></h2>
+<p>We need to simplify the application somehow to make it feasible to write larger
+programs and to be able to test them. In a given action tree, we’re likely to find
+duplicate actions that lead to the same expected outcomes. The actions in this tree
+with the same color represent duplicate actions. For an action to be considered a
+duplicate, it must have the same functionality but also the same expected results
+as another action. This is the case for actions F1 and R1, G1 and S1, and B3 and H2.
+In addition, actions that lead to the same set of duplicate actions, as in the case
+of B2 and H1, are also duplicates.</p>
+<p><img decoding="async" loading="lazy" alt="Repeating Processes" src="/brobot/assets/images/repeating_processes-0caed05b5fea2d8804f9ea8f3349b15b.png" width="2135" height="1092" class="img_ev3q"></p>
+<p>Duplicate actions such as B2 and H1 lead to the same environment, in which the same
+actions are available. Whether all details of the real environments after a successful
+B2 or H1 action are actually the same or not is not important to us. What’s important
+is how our application views the world it is in, and it views it in terms of potential
+actions and their outcomes. Despite being just a collection of processes, this program
+has an implicit model of the environments it moves around in. Duplicate actions are an
+indication of the implicit existence of repeating environments.</p>
+<p>Let’s start to include these environments explicitly in our graph. We’ll introduce
+the concept of a state, which in this context refers to an environment containing
+actions with expected results. The successful completion of actions B2 and H1 would
+take us to the same state (in figure 8, states 6 and 7 represent the same state and
+could be combined into one state). In figure 8, states are added as rectangles and
+processes remain as circles. The start and end points are changed to rectangles as
+they are states and not actions.</p>
+<p><img decoding="async" loading="lazy" alt="States" src="/brobot/assets/images/states-128b1de5d78012e941a7958474eade63.png" width="2138" height="1047" class="img_ev3q"></p>
+<p>In figure 9, I made some changes to our processes for illustrative purposes. The
+new graph shows how states can be shared at any level of the graph, and how states
+can coexist. I made the three actions in state 3 (C2, D1, E1) go directly to the
+end state and made them duplicates of N1, O1, and D2 in state 4. Finally, I added
+action M1 to state 4 so that state 4 and state 3 would not be duplicates, and made
+E2 and K1 duplicate actions.</p>
+<p><img decoding="async" loading="lazy" alt="States combined" src="/brobot/assets/images/states_combined-e7b79ba211925874f3f8e5bffa4442a6.png" width="2049" height="1042" class="img_ev3q"></p>
+<p>E2 and K1 are duplicate actions, but their environments have other actions that
+are not duplicates so we can’t combine the states currently representing these
+environments (states 5 and 8). Instead, we create a new state (10) and let it
+coexist with both state 5 and state 8. The same applies to states 3 and 4. State 4
+has an action that state 3 doesn’t, preventing us from treating these two states
+as duplicates. Instead, we group the 3 duplicate actions into one state (3),
+and let this state coexist with a new state (11). We replace state 4 with the
+set of states <!-- -->11<!-- -->.</p>
+<p><img decoding="async" loading="lazy" alt="NFA style" src="/brobot/assets/images/nfa_style-a59b6adb68a7406e15618a369dd9ccf9.png" width="1745" height="1034" class="img_ev3q"></p>
+<p>The graph can have cycles, and in fact a robust application will have many cycles.
+More paths available to reach the goal will increase the probability of reaching it.
+Adding states to a fully connected graph with many cycles will increase the available
+paths exponentially. A large application will have many goals, and optimally the
+states and transitions can be reused for these goals. An exponential growth in paths
+relative to a linear growth in states is what reduces the complexity of the code
+while maintaining the robustness of the automation application.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="4-modeling-the-environment">4 Modeling the Environment<a href="#4-modeling-the-environment" class="hash-link" aria-label="Direct link to 4 Modeling the Environment" title="Direct link to 4 Modeling the Environment">​</a></h2>
+<p>In figure 10, we moved the states down to group them with the actions they have
+available to them. This is a more intuitive way to view a graph of states and
+associated actions. In restructuring a graph of actions to a graph of states,
+we change the focus of our analysis from process to environment. Instead of
+considering what actions need to be taken, we think about the environments we
+need to pass through in order to reach our goal. This new graph resembles in
+some ways that of a non-deterministic finite automaton in that it has sets of
+states with transitions leading to other sets of states.</p>
+<p>Now that we have a model of the environment, we have a way to simulate actions in
+this environment. In restructuring our model, we have moved from programming a
+process flow to programming a model of our target environment. Our automation
+program is no longer a standalone application with a collection of processes,
+but a specific set of instructions to be run in our modelled environment. The
+model of our environment, composed of states and transitions between states, is
+referred to as the state structure.</p>
+<p align="center" width="350"></p><p><img decoding="async" loading="lazy" alt="state_structure" src="/brobot/assets/images/simple_state_structure-15c881fdee1d5c442282d0b460a54445.png" width="350" height="456" class="img_ev3q"></p><p></p>
+<p>Writing an automation as a series of processes makes assumptions about the
+environment that are implicit but not directly stated in the code. A program that
+gives the statement: click A and then click B gives an assumption that B will exist
+after A is clicked. The model of the environment, because it is conceptual and not
+explicitly stated, remains difficult to visualize and impossible to work with. It
+is also a reason why many automation applications written as process flows will fail:
+the model environment defined by the assumptions often contains inconsistencies not
+found in the real environment.</p>
+<div class="language-text codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-text codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#393A34"><span class="token plain">env^ ≠ env</span><br></span></code></pre></div></div>
+<p>In changing our focus from processes to environments we have changed our focus from
+writing an automation process to developing a model of the environment. A good model
+is a realistic representation of the real environment. Such a model usually requires
+2 components: a description of the state of the environment and a model of causality
+(the actions that are possible and the changes they produce in the environment).</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="5-causality">5 Causality<a href="#5-causality" class="hash-link" aria-label="Direct link to 5 Causality" title="Direct link to 5 Causality">​</a></h2>
+<p>Our model of causality looks at actions taken on objects and the results of
+these actions on the environment. The first component, actions taken on objects,
+is generalizable to all visual automation applications. The actions possible in a
+GUI (Graphical User Interface) are the same for every GUI. The second component,
+the results on the environment, are application-specific since the environments
+themselves are application-specific.</p>
+<p>The actions taken on objects are represented by real actions that can be performed
+in a GUI. They comprise functions such as clicking, searching for images, dragging,
+and typing, and are the same functions we would use to write the actions in our
+process-based automation applications. We take the base functionality for these
+actions from SikuliX, a library of commands for GUI manipulation that builds on
+OpenCV for image recognition, the Java Robot class for controlling the mouse and
+keyboard, and Tesseract for text recognition.</p>
+<p>We then imbed causality into these functions. Searching for an image can produce
+different results based on the image we are looking for and the environment we find
+ourselves in. There are a couple of assumptions we make to simplify the expression
+of causality. We assume that objects belong to states and define objects accordingly
+in our code. When the environment does not include an object’s state, the object does
+not exist and won’t be found. If the object’s state is active in our environment,
+the results of an action on the object will follow the object’s random variable
+associated with this action.</p>
+<p>For example, we are in the environment with state 1 and we want to execute action D1,
+which involves finding an image. If this image does not belong to state 1, it will
+not be found. If it does belong to state 1, we should expect to get a result
+corresponding to the distribution of results for this image with respect to a find
+operation.</p>
+<p align="center"></p><p><img decoding="async" loading="lazy" alt="action with results distribution" src="/brobot/assets/images/action_results_dist-69e0d0435a1c15273ccee5365b2b5ee7.png" width="1133" height="567" class="img_ev3q"></p><p></p>
+<p>If this process seems complex, it’s because it is complex. This complexity is
+part of the reason why it’s prohibitive to create a simulation of the environment
+in order to test an automation application. Random variables with different outcomes
+need to be designed for each possible action and for each object. The correct random
+variable then needs to be sampled by the action taken to give us a result, and this
+result needs to be incorporated into our simulation.</p>
+<p>Once again, this is complexity that can be simplified. All of these functions can
+be performed by a general algorithm, one that doesn’t know any specifics of our
+environment or our object and that receives information about the environment and
+the object as parameters. The entire process can be controlled by a framework and
+the only thing we would need to provide would be the state structure.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="6-the-framework">6 The Framework<a href="#6-the-framework" class="hash-link" aria-label="Direct link to 6 The Framework" title="Direct link to 6 The Framework">​</a></h2>
+<p>The next step is the development of a framework that can take a state structure as
+input and create a model of the environment that allows for simulation and
+manipulation of the environment. Given a transition from the state structure,
+it should be able to exit and enter states. Optimally, we will be able to find
+paths to a state dynamically as the program runs, and readjust our selected path
+when faced with unexpected changes in the environment. It is, after all, a
+stochastic process, and a robust application will need to deal with unlikely
+results as well as expected results. Not having to code this explicitly and
+letting the framework take care of it for us will make our job as the application
+developer much easier.</p>
+<p>Figure 10 shows all potential environments, or sets of states, that we can reach
+given the transitions available to us. With this view of the graph, it follows
+that we could find all potential paths to our goal by performing a search on the
+states and associated transitions. Since each process can fail with a variety of
+outcomes, we have to account for failure when moving through paths. If the process
+fails and the states have not changed, the next best path is tried. If an action
+in the path succeeds, the active states are updated and the next action in the
+path is tried. At this point, if the current action fails, new paths need to be
+searched for. The old paths are no longer valid since we find ourselves at a
+different environment than at the beginning of the path. For example, at state 1,
+the available paths are different than the paths available at state 6, after we
+successfully transitioned with action B2.</p>
+<p>Having a framework take care of path searching and movement from state to state
+makes our application much simpler, as now we just need to define states and the
+transitions between individual states. The compartmentalization of our code into
+states and transitions also adheres to the single responsibility principle and
+further simplifies the code. States hold the objects that define a certain
+environment and transitions contain methods that can act on these objects to
+change the environment.</p>
+<p>This framework, called Brobot, exists already as an open source repository
+and lives here. The part of Brobot that takes care of movement within the
+environment is referred to as the Brobot engine. The Brobot engine takes
+care of finding paths dynamically, traversing these paths, and keeping track
+of the active environment’s state composition.</p>
+<p>There are now 3 separate components to our automation program:</p>
+<ol>
+<li>The Brobot engine</li>
+<li>The state structure</li>
+<li>Automation instructions</li>
+</ol>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="7-the-visual-api">7 The Visual API<a href="#7-the-visual-api" class="hash-link" aria-label="Direct link to 7 The Visual API" title="Direct link to 7 The Visual API">​</a></h2>
+<p>API stands for Application Programming Interface. APIs are used to communicate with
+an external application, and are omnipresent in the software domain. Programs use
+APIs to call methods from 3rd party libraries and to run tasks that depend on other
+software applications. In artificial intelligence research, APIs are used to control
+games to test and train reinforcement learning algorithms. The board game Go and
+the RTS (Real Time Strategy) game Starcraft are two examples of games that use
+APIs to enable automation. The famous reinforcement learning program
+<a href="https://www.researchgate.net/publication/292074166_Mastering_the_game_of_Go_with_deep_neural_networks_and_tree_search" target="_blank" rel="noopener noreferrer">AlphaGo</a>
+updates the positions of all pieces on the board based on player decisions.
+The code that does this updating, even if it exists only as an internal class
+or as a few methods, acts as an API between the reinforcement learning algorithm
+and the game environment. In the more complex environment of StarCraft, the
+developers of the game provide an API to programmers and AI researchers. The
+<a href="https://news.blizzard.com/en-us/starcraft2/20944009/the-starcraft-ii-api-has-arrived" target="_blank" rel="noopener noreferrer">StarCraft API</a>
+provides detailed information about the pieces in the game and
+their positions, as well as allowing a program to manipulate these pieces
+according to the game rules. In both Go and StarCraft, <code>env^ = env</code> since
+the game environments are converted to a digital representation without information
+loss. Having such a realistic model of the environment allows the researchers to
+focus on the reinforcement learning algorithms and not worry about the accuracy
+of the game environment or the mechanics of manipulating it.</p>
+<p>The combination of the Brobot engine with the state structure produces a visual API.
+Similar to a traditional API, the visual API allows the developer to control an
+external application, which in the case of the visual API is the environment to
+be manipulated by the automation application. This allows the automation
+instructions to focus on business logic and ignore the details of manipulating
+the environment. The visual API differs from a traditional API in that its functions
+produce stochastic results. With a visual API, the model of the environment is not
+equal to the real environment <code>env^ ≠ env</code> but is an approximation of
+the real environment <code>env^ ≈ env</code>. An important objective when
+creating a visual API is to reduce the stochasticity of its functions. There are
+many ways to do this, and a comprehensive tutorial on building a visual API with
+Brobot can be found in
+<a href="https://www.youtube.com/watch?v=SmeIc06_GUg&amp;list=PLC2shVr9gxdneSx0AuEv_YXwQsvUd9DuX" target="_blank" rel="noopener noreferrer">this video series</a>.</p>
+<p align="center" width="200"></p><p><img decoding="async" loading="lazy" alt="visual API" src="/brobot/assets/images/visual_API-34b0d303e87b01dbc0d3aa108658f0cb.png" width="435" height="402" class="img_ev3q"></p><p></p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="8-testing">8 Testing<a href="#8-testing" class="hash-link" aria-label="Direct link to 8 Testing" title="Direct link to 8 Testing">​</a></h2>
+<p>Before diving into the problem of testing, I need to clarify what is meant by
+testing. Testing can refer to a number of different topics, particularly with
+respect to visual automation.</p>
+<p>Visual automation is often used to test new software. For example, an automation
+program will use the software and record the results of its actions. Visual
+automation is performed as a replacement for or supplement to manual testing,
+in which people try out software and report their observations to the company
+that developed it. This is not the type of testing we are interested in here.</p>
+<p>Software also gets tested during development to ensure that new functions work
+correctly and do not negatively impact other parts of the code. This is not a
+finished program that tests another independent piece of software, as in the
+previous example, but code written within a test module that accesses the methods
+and objects of the functional modules. This type of testing is an important part
+of software development, as any change to a codebase can potentially introduce
+bugs both locally and in interconnected modules. Maintaining a clean and usable
+codebase depends on frequent and comprehensive testing of the code.</p>
+<p>Testing code has two main flavors: unit tests and integration tests. Unit tests
+take a small part of the code and test its functionality under different scenarios.
+The same process applies to integration tests, but at a larger scale. Integration
+tests assess whether different parts of the program work well together. Normally,
+the application is complex and the tests are there to test this complexity in
+smaller pieces, whether unit tests or integration tests. These tests introduce
+different environments, represented by the inputs they provide to the algorithm,
+in order to see how the algorithm behaves in these environments.</p>
+<p>Visual automation programs are typically not tested. They are not tested because
+testing requires modeling the environment, which we saw introduces more complexity
+than exists in a process-based automation application.</p>
+<p>When we test visual automation, we are testing whether the automation will work in
+our target environment. If our simulated environment is a good approximation of the
+real environment, the tests should be useful. A failed test could mean that our
+automation application has issues. On the other hand, a failed test also could
+imply that our simulated environment is not realistic. In this case, the automation
+application would serve as a test of our model of the environment, as opposed to
+the simulated environment being a test of the application. It’s important to
+decide what our goal should be, whether we would rather develop a realistic
+simulation or whether we want to develop an effective automation application.
+The answer is, of course, both, because in the end we want to have a good
+automation application, but to achieve this we need a realistic simulation.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="9-simulation-vs-real-execution">9 Simulation vs Real Execution<a href="#9-simulation-vs-real-execution" class="hash-link" aria-label="Direct link to 9 Simulation vs Real Execution" title="Direct link to 9 Simulation vs Real Execution">​</a></h2>
+<p>Our visual API needs to be able to execute our automation instructions as
+real actions as well as simulated actions. Real execution depends on our
+model of the environment in the same way that simulated execution does.
+Recognizing states, finding and following paths, and moving between states
+all require the same underlying model of the environment. The difference
+between simulation and real execution is that the results of these processes
+will be determined either by simulated input from random variables or by real
+operations carried out with the screen’s input, the mouse, and the keyboard.
+The framework receives inputs from either simulation or real execution in the
+same format. It contains a layer of code that abstracts the execution of
+actions and makes the simulation agnostic to whether it is being simulated
+or not. This layer sits between the classes and external libraries that perform
+real or mock actions and the classes that process actions. The abstraction
+layer decides whether to perform a mock or a real action. The framework does
+not know, at any point above this abstraction layer, if the operation is being
+mocked or executed on the real environment.</p>
+<p align="center"></p><p><img decoding="async" loading="lazy" alt="wrapper structure" src="/brobot/assets/images/wrapper_structure-c273a79d437295ec8315b18fa2e5f351.png" width="1297" height="711" class="img_ev3q"></p><p></p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="10-simulation">10 Simulation<a href="#10-simulation" class="hash-link" aria-label="Direct link to 10 Simulation" title="Direct link to 10 Simulation">​</a></h2>
+<p>In order to capture the stochastic nature of real automation, objects are
+initialized with the historical results of different actions. The results
+can be either taken from screenshots of the environment, as is done by
+Brobot’s state structure builder, or coded by hand. These data act as
+the outcomes of a random variable and provides a discrete distribution
+of action-specific results from which to sample.</p>
+<p>Below is an example of an object in a mobile game and its random variable.
+The image shows a state with 5 objects. The first object, called name reg,
+is a region object. Its random variable describes the results of a text
+retrieval operation on the region, which can be Farms, Mines, Lakes,
+Mountains, Forest, or Castle. The categories of the random variable
+include additionally the entries Forms and Minez to simulate the imperfect
+retrieval of data during visual automation. This example is taken from the
+<a href="/brobot/docs/core-library/tutorials/tutorial-basics/intro">basic tutorial</a>, which shows how to automate
+the creation of a labeled image dataset.</p>
+<p align="center"></p><p><img decoding="async" loading="lazy" alt="DOT island" src="/brobot/assets/images/DOT_island-e4534ee148a1c8b2624b78f5ba6a924c.png" width="1499" height="589" class="img_ev3q"></p><p></p>
+<p align="center"></p><p><img decoding="async" loading="lazy" alt="results freq dot" src="/brobot/assets/images/results_freq_dot-8da8da13daa22aeede8ff40a245f21c5.png" width="1546" height="730" class="img_ev3q"></p><p></p>
+<p>The next example depicts a character fishing in a computer game. When the
+character begins to reel the fish in, a series of letters appears on the screen,
+which an automation program would need to press in order to catch the fish. A
+random variable describes the likelihood of the letter „W“ appearing in each of
+the 10 different spots. This is portrayed here as 10 different random variables,
+one for each spot. This example is taken from the
+<a href="https://www.youtube.com/watch?v=SmeIc06_GUg&amp;list=PLC2shVr9gxdneSx0AuEv_YXwQsvUd9DuX" target="_blank" rel="noopener noreferrer">video series</a> that shows how to
+use Brobot’s state structure builder to automate the creation of an environment’s
+state structure.</p>
+<p align="center"></p><p><img decoding="async" loading="lazy" alt="fishing side-by-side" src="/brobot/assets/images/fishing_side-by-side-34073f1bccaa59e96ae705e8cfa0231f.png" width="642" height="360" class="img_ev3q"></p><p></p>
+<p align="center"></p><p><img decoding="async" loading="lazy" alt="results freq bdo" src="/brobot/assets/images/results_freq_bdo-f9e59c2cb09b55d21d664621a1d92f15.png" width="1548" height="660" class="img_ev3q"></p><p></p>
+<p>In the state structure, all objects belonging to a state are defined inside of
+the state’s class. State objects conceptually have random variables associated
+with each action performed on them. These random variables materialize in the
+code as historical results, and are initialized with the object. The below example
+shows an object created with Brobot’s state structure builder. It is initialized
+with the results of Find.ALL operations on screenshots of the environment
+(a Find.ALL operation returns all matches for the given image), each result
+containing a variable number of matches and their locations. Empty matches
+could be provided to depict a failed find operation. A sample from this collection
+of results would be selected during a find operation in a simulation.</p>
+<p>private final StateImageObject W = new StateImageObject.Builder()
+.withImages(&quot;fishCatch-W2&quot;, &quot;fishCatch-W3&quot;, &quot;fishCatch-W_76,122,179,225_m_v&quot;)
+.isFixed(false)
+.withSearchRegion(787,388,371,60)
+.addSnapshot(new MatchSnapshot.Builder()
+.setActionOptions(ActionOptions.Find.ALL)
+.addMatch(856,392,25,43)
+.addMatch(782,392,25,43)
+.addMatch(930,392,25,43)
+.build())
+.addSnapshot(new MatchSnapshot.Builder()
+.setActionOptions(ActionOptions.Find.ALL)
+.addMatch(777,394,25,44)
+.build())
+.addSnapshot(new MatchSnapshot.Builder()
+.setActionOptions(ActionOptions.Find.ALL)
+.addMatch(779,395,25,44)
+.build())<br>
+<!-- -->.addSnapshot(new MatchSnapshot.Builder()
+.setActionOptions(ActionOptions.Find.ALL)
+.addMatch(791,393,25,44)
+.addMatch(828,393,25,44)
+.addMatch(865,393,25,44)
+.build())<br>
+<!-- -->.build();</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="11-discussion">11 Discussion<a href="#11-discussion" class="hash-link" aria-label="Direct link to 11 Discussion" title="Direct link to 11 Discussion">​</a></h2>
+<p>In the same way the API provides a way for applications to communicate with each
+other, a visual API allows an automation application to communicate with its
+environment. It’s my hope that the visual API will serve as a standard for the
+development of robust automation solutions, and that it will grow along with
+advancements in machine vision to provide reliable and comprehensive access to
+graphical environments.</p></article></div><div class="col col--2"><div class="tableOfContents_bqdL thin-scrollbar"><ul class="table-of-contents table-of-contents__left-border"><li><a href="#abstract" class="table-of-contents__link toc-highlight">Abstract</a></li><li><a href="#1-introduction" class="table-of-contents__link toc-highlight">1 Introduction</a></li><li><a href="#2-complexity" class="table-of-contents__link toc-highlight">2 Complexity</a></li><li><a href="#3-reducing-complexity" class="table-of-contents__link toc-highlight">3 Reducing Complexity</a></li><li><a href="#4-modeling-the-environment" class="table-of-contents__link toc-highlight">4 Modeling the Environment</a></li><li><a href="#5-causality" class="table-of-contents__link toc-highlight">5 Causality</a></li><li><a href="#6-the-framework" class="table-of-contents__link toc-highlight">6 The Framework</a></li><li><a href="#7-the-visual-api" class="table-of-contents__link toc-highlight">7 The Visual API</a></li><li><a href="#8-testing" class="table-of-contents__link toc-highlight">8 Testing</a></li><li><a href="#9-simulation-vs-real-execution" class="table-of-contents__link toc-highlight">9 Simulation vs Real Execution</a></li><li><a href="#10-simulation" class="table-of-contents__link toc-highlight">10 Simulation</a></li><li><a href="#11-discussion" class="table-of-contents__link toc-highlight">11 Discussion</a></li></ul></div></div></div></main></div><footer class="theme-layout-footer footer footer--dark"><div class="container container-fluid"><div class="row footer__links"><div class="theme-layout-footer-column col footer__col"><div class="footer__title">Docs</div><ul class="footer__items clean-list"><li class="footer__item"><a href="https://www.youtube.com/watch?v=aHnVQ8KmOVw" target="_blank" rel="noopener noreferrer" class="footer__link-item">Introductory Video</a></li><li class="footer__item"><a class="footer__link-item" href="/brobot/docs/getting-started/introduction">Get Started</a></li><li class="footer__item"><a class="footer__link-item" href="/brobot/visualAPI">The Visual API</a></li></ul></div><div class="theme-layout-footer-column col footer__col"><div class="footer__title">Community</div><ul class="footer__items clean-list"><li class="footer__item"><a href="https://stackoverflow.com/questions/tagged/brobot" target="_blank" rel="noopener noreferrer" class="footer__link-item">Stack Overflow<svg width="13.5" height="13.5" aria-hidden="true" class="iconExternalLink_nPIU"><use href="#theme-svg-external-link"></use></svg></a></li></ul></div><div class="theme-layout-footer-column col footer__col"><div class="footer__title">More</div><ul class="footer__items clean-list"><li class="footer__item"><a class="footer__link-item" href="/brobot/blog">Blog</a></li><li class="footer__item"><a href="https://github.com/jspinak/brobot" target="_blank" rel="noopener noreferrer" class="footer__link-item">GitHub<svg width="13.5" height="13.5" aria-hidden="true" class="iconExternalLink_nPIU"><use href="#theme-svg-external-link"></use></svg></a></li><li class="footer__item"><a href="https://www.youtube.com/channel/UCgRljq-lHkMLrzRzpJC4HNw" target="_blank" rel="noopener noreferrer" class="footer__link-item">YouTube<svg width="13.5" height="13.5" aria-hidden="true" class="iconExternalLink_nPIU"><use href="#theme-svg-external-link"></use></svg></a></li><li class="footer__item"><a href="https://search.maven.org/artifact/io.github.jspinak/brobot" target="_blank" rel="noopener noreferrer" class="footer__link-item">Maven Central<svg width="13.5" height="13.5" aria-hidden="true" class="iconExternalLink_nPIU"><use href="#theme-svg-external-link"></use></svg></a></li></ul></div></div><div class="footer__bottom text--center"><div class="footer__copyright">© 2025 Joshua Spinak · Free & Open Source</div></div></div></footer></div>
+</body>
+</html>

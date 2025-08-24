@@ -1,8 +1,0 @@
-rootProject.name = 'automatic-action-logging-fixed'
-
-// Use local Brobot library
-includeBuild('../../../../') {
-    dependencySubstitution {
-        substitute module('io.github.jspinak:brobot') using project(':library')
-    }
-}

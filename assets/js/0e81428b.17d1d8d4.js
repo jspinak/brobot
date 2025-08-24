@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkdocs=self.webpackChunkdocs||[]).push([[4559],{32697:s=>{s.exports=JSON.parse('{"authors":[{"name":"Joshua Spinak","title":"Brobot Overseer","url":"https://github.com/jspinak","imageURL":"https://github.com/jspinak.png","key":"josh","page":null,"count":1}]}')}}]);

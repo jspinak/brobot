@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkdocs=self.webpackChunkdocs||[]).push([[7472],{55513:e=>{e.exports=JSON.parse('{"title":"Recent posts","items":[{"title":"Welcome","permalink":"/brobot/blog/welcome","unlisted":false,"date":"2022-01-18T00:00:00.000Z"}]}')}}]);

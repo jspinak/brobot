@@ -1,8 +1,0 @@
-* text=auto
-*.sh text eol=lf
-*.java text
-*.xml text
-*.json text
-*.yml text
-*.png binary
-*.jpg binary

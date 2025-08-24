@@ -1,0 +1,312 @@
+<!doctype html>
+<html lang="en" dir="ltr" class="docs-wrapper plugin-docs plugin-id-default docs-version-1.0.6 docs-doc-page docs-doc-id-API/data-types/actionOptions" data-has-hydrated="false">
+<head>
+<meta charset="UTF-8">
+<meta name="generator" content="Docusaurus v3.8.1">
+<title data-rh="true">ActionOptions | Brobot</title><meta data-rh="true" name="viewport" content="width=device-width,initial-scale=1"><meta data-rh="true" name="twitter:card" content="summary_large_image"><meta data-rh="true" property="og:url" content="https://jspinak.github.io/brobot/docs/1.0.6/API/data-types/actionOptions"><meta data-rh="true" property="og:locale" content="en"><meta data-rh="true" name="docusaurus_locale" content="en"><meta data-rh="true" name="docsearch:language" content="en"><meta data-rh="true" name="docusaurus_version" content="1.0.6"><meta data-rh="true" name="docusaurus_tag" content="docs-default-1.0.6"><meta data-rh="true" name="docsearch:version" content="1.0.6"><meta data-rh="true" name="docsearch:docusaurus_tag" content="docs-default-1.0.6"><meta data-rh="true" property="og:title" content="ActionOptions | Brobot"><meta data-rh="true" name="description" content="ActionOptions provides options for configuring an action. It can be used"><meta data-rh="true" property="og:description" content="ActionOptions provides options for configuring an action. It can be used"><link data-rh="true" rel="icon" href="/brobot/img/brobot-happy.ico"><link data-rh="true" rel="canonical" href="https://jspinak.github.io/brobot/docs/1.0.6/API/data-types/actionOptions"><link data-rh="true" rel="alternate" href="https://jspinak.github.io/brobot/docs/1.0.6/API/data-types/actionOptions" hreflang="en"><link data-rh="true" rel="alternate" href="https://jspinak.github.io/brobot/docs/1.0.6/API/data-types/actionOptions" hreflang="x-default"><script data-rh="true" type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"ActionOptions","item":"https://jspinak.github.io/brobot/docs/1.0.6/API/data-types/actionOptions"}]}</script><link rel="alternate" type="application/rss+xml" href="/brobot/blog/rss.xml" title="Brobot RSS Feed">
+<link rel="alternate" type="application/atom+xml" href="/brobot/blog/atom.xml" title="Brobot Atom Feed">
+
+
+
+
+<link rel="preconnect" href="https://www.google-analytics.com">
+<link rel="preconnect" href="https://www.googletagmanager.com">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-6WY1S6ZWEY"></script>
+<script>function gtag(){dataLayer.push(arguments)}window.dataLayer=window.dataLayer||[],gtag("js",new Date),gtag("config","G-6WY1S6ZWEY",{anonymize_ip:!0})</script>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css" integrity="sha384-GvrOXuhMATgEsSwCs4smul74iXGOixntILdUW9XmUC6+HX0sLNAK3q71HotJqlAn" crossorigin="anonymous"><link rel="stylesheet" href="/brobot/assets/css/styles.1b22d91f.css">
+<script src="/brobot/assets/js/runtime~main.86488505.js" defer="defer"></script>
+<script src="/brobot/assets/js/main.ab0b3e76.js" defer="defer"></script>
+</head>
+<body class="navigation-with-keyboard">
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;"><defs>
+<symbol id="theme-svg-external-link" viewBox="0 0 24 24"><path fill="currentColor" d="M21 13v10h-21v-19h12v2h-10v15h17v-8h2zm3-12h-10.988l4.035 4-6.977 7.07 2.828 2.828 6.977-7.07 4.125 4.172v-11z"/></symbol>
+</defs></svg>
+<script>!function(){var t="light";var e=function(){try{return new URLSearchParams(window.location.search).get("docusaurus-theme")}catch(t){}}()||function(){try{return window.localStorage.getItem("theme")}catch(t){}}();document.documentElement.setAttribute("data-theme",e||t),document.documentElement.setAttribute("data-theme-choice",e||t)}(),function(){try{const c=new URLSearchParams(window.location.search).entries();for(var[t,e]of c)if(t.startsWith("docusaurus-data-")){var a=t.replace("docusaurus-data-","data-");document.documentElement.setAttribute(a,e)}}catch(t){}}()</script><div id="__docusaurus"><div role="region" aria-label="Skip to main content"><a class="skipToContent_fXgn" href="#__docusaurus_skipToContent_fallback">Skip to main content</a></div><nav aria-label="Main" class="theme-layout-navbar navbar navbar--fixed-top"><div class="navbar__inner"><div class="theme-layout-navbar-left navbar__items"><button aria-label="Toggle navigation bar" aria-expanded="false" class="navbar__toggle clean-btn" type="button"><svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><path stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2" d="M4 7h22M4 15h22M4 23h22"></path></svg></button><a class="navbar__brand" href="/brobot/"><div class="navbar__logo"><img src="/brobot/img/brobot_logo/brobot-happy-text.svg" alt="Brobot Logo" class="themedComponent_mlkZ themedComponent--light_NVdE"><img src="/brobot/img/brobot_logo/brobot-happy-text.svg" alt="Brobot Logo" class="themedComponent_mlkZ themedComponent--dark_xIcU"></div><b class="navbar__title text--truncate">Brobot</b></a><a aria-current="page" class="navbar__item navbar__link navbar__link--active" href="/brobot/docs/1.0.6/introduction">Documentation</a><a href="https://jspinak.github.io/brobot/api/" target="_blank" rel="noopener noreferrer" class="navbar__item navbar__link">API Reference<svg width="13.5" height="13.5" aria-hidden="true" class="iconExternalLink_nPIU"><use href="#theme-svg-external-link"></use></svg></a><a class="navbar__item navbar__link" href="/brobot/visualAPI">The Visual API</a><a class="navbar__item navbar__link" href="/brobot/blog">Blog</a></div><div class="theme-layout-navbar-right navbar__items navbar__items--right"><div class="navbar__item dropdown dropdown--hoverable dropdown--right"><a class="navbar__link" aria-haspopup="true" aria-expanded="false" role="button" href="/brobot/docs/1.0.6/API/data-types/actionOptions">1.0.6</a><ul class="dropdown__menu"><li><a class="dropdown__link" href="/brobot/docs/getting-started/introduction">Latest</a></li><li><a class="dropdown__link" href="/brobot/docs/1.0.7/getting-started/introduction">1.0.7</a></li><li><a aria-current="page" class="dropdown__link dropdown__link--active" href="/brobot/docs/1.0.6/API/data-types/actionOptions">1.0.6</a></li></ul></div><a href="https://github.com/jspinak/brobot" target="_blank" rel="noopener noreferrer" class="navbar__item navbar__link">GitHub<svg width="13.5" height="13.5" aria-hidden="true" class="iconExternalLink_nPIU"><use href="#theme-svg-external-link"></use></svg></a><div class="toggle_vylO colorModeToggle_DEke"><button class="clean-btn toggleButton_gllP toggleButtonDisabled_aARS" type="button" disabled="" title="system mode" aria-label="Switch between dark and light mode (currently system mode)"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP lightToggleIcon_pyhR"><path fill="currentColor" d="M12,9c1.65,0,3,1.35,3,3s-1.35,3-3,3s-3-1.35-3-3S10.35,9,12,9 M12,7c-2.76,0-5,2.24-5,5s2.24,5,5,5s5-2.24,5-5 S14.76,7,12,7L12,7z M2,13l2,0c0.55,0,1-0.45,1-1s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S1.45,13,2,13z M20,13l2,0c0.55,0,1-0.45,1-1 s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S19.45,13,20,13z M11,2v2c0,0.55,0.45,1,1,1s1-0.45,1-1V2c0-0.55-0.45-1-1-1S11,1.45,11,2z M11,20v2c0,0.55,0.45,1,1,1s1-0.45,1-1v-2c0-0.55-0.45-1-1-1C11.45,19,11,19.45,11,20z M5.99,4.58c-0.39-0.39-1.03-0.39-1.41,0 c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0s0.39-1.03,0-1.41L5.99,4.58z M18.36,16.95 c-0.39-0.39-1.03-0.39-1.41,0c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0c0.39-0.39,0.39-1.03,0-1.41 L18.36,16.95z M19.42,5.99c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06c-0.39,0.39-0.39,1.03,0,1.41 s1.03,0.39,1.41,0L19.42,5.99z M7.05,18.36c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06 c-0.39,0.39-0.39,1.03,0,1.41s1.03,0.39,1.41,0L7.05,18.36z"></path></svg><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP darkToggleIcon_wfgR"><path fill="currentColor" d="M9.37,5.51C9.19,6.15,9.1,6.82,9.1,7.5c0,4.08,3.32,7.4,7.4,7.4c0.68,0,1.35-0.09,1.99-0.27C17.45,17.19,14.93,19,12,19 c-3.86,0-7-3.14-7-7C5,9.07,6.81,6.55,9.37,5.51z M12,3c-4.97,0-9,4.03-9,9s4.03,9,9,9s9-4.03,9-9c0-0.46-0.04-0.92-0.1-1.36 c-0.98,1.37-2.58,2.26-4.4,2.26c-2.98,0-5.4-2.42-5.4-5.4c0-1.81,0.89-3.42,2.26-4.4C12.92,3.04,12.46,3,12,3L12,3z"></path></svg><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP systemToggleIcon_QzmC"><path fill="currentColor" d="m12 21c4.971 0 9-4.029 9-9s-4.029-9-9-9-9 4.029-9 9 4.029 9 9 9zm4.95-13.95c1.313 1.313 2.05 3.093 2.05 4.95s-0.738 3.637-2.05 4.95c-1.313 1.313-3.093 2.05-4.95 2.05v-14c1.857 0 3.637 0.737 4.95 2.05z"></path></svg></button></div><div class="navbarSearchContainer_Bca1"></div></div></div><div role="presentation" class="navbar-sidebar__backdrop"></div></nav><div id="__docusaurus_skipToContent_fallback" class="theme-layout-main main-wrapper mainWrapper_z2l0"><div class="docsWrapper_hBAB"><button aria-label="Scroll back to top" class="clean-btn theme-back-to-top-button backToTopButton_sjWU" type="button"></button><div class="docRoot_UBD9"><aside class="theme-doc-sidebar-container docSidebarContainer_YfHR"><div class="sidebarViewport_aRkj"><div class="sidebar_njMd"><nav aria-label="Docs sidebar" class="menu thin-scrollbar menu_SIkG"><ul class="theme-doc-sidebar-menu menu__list"><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="menu__link menu__link--sublist" href="/brobot/docs/1.0.6/introduction">Introduction</a><button aria-label="Expand sidebar category &#x27;Introduction&#x27;" aria-expanded="false" type="button" class="clean-btn menu__caret"></button></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/brobot/docs/1.0.6/labeling/labeling-intro">Labeling Images</a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/brobot/docs/1.0.6/tutorial-basics/intro">Tutorial: A Simple App</a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/brobot/docs/1.0.6/tutorial-state-structure-builder/intro">Tutorial: Building a Visual API</a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/brobot/docs/1.0.6/tutorial-using-the-latest-code-in-github/intro">Tutorial: Using the Latest Code in Github</a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/brobot/docs/1.0.6/tutorial-mrdoob/intro">Tutorial: Mr.doob</a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item"><div class="menu__list-item-collapsible"><a class="menu__link menu__link--sublist menu__link--sublist-caret menu__link--active" role="button" aria-expanded="true" href="/brobot/docs/1.0.6/API/overview">Documentation</a></div><ul class="menu__list"><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/brobot/docs/1.0.6/API/overview">Overview</a></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-2 menu__list-item"><div class="menu__list-item-collapsible"><a class="menu__link menu__link--sublist menu__link--sublist-caret menu__link--active" role="button" aria-expanded="true" tabindex="0" href="/brobot/docs/1.0.6/API/data-types/actionOptions">Action Objects</a></div><ul class="menu__list"><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-3 menu__list-item"><a class="menu__link menu__link--active" aria-current="page" tabindex="0" href="/brobot/docs/1.0.6/API/data-types/actionOptions">ActionOptions</a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-3 menu__list-item"><a class="menu__link" tabindex="0" href="/brobot/docs/1.0.6/API/data-types/objectCollection">ObjectCollection</a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-3 menu__list-item"><a class="menu__link" tabindex="0" href="/brobot/docs/1.0.6/API/data-types/matches">Matches</a></li></ul></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-2 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" tabindex="0" href="/brobot/docs/1.0.6/API/functions/basic-actions">Actions</a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-2 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" tabindex="0" href="/brobot/docs/1.0.6/API/state and state objects/state">State and State Objects</a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-2 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" tabindex="0" href="/brobot/docs/1.0.6/API/state structure/introduction">State Structure Builder</a></div></li></ul></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/brobot/docs/1.0.6/architecture-notes/overview">Architecture Notes</a></div></li></ul></nav></div></div></aside><main class="docMainContainer_TBSr"><div class="container padding-top--md padding-bottom--lg"><div class="row"><div class="col docItemCol_VOVn"><div class="theme-doc-version-banner alert alert--warning margin-bottom--md" role="alert"><div>This is documentation for <!-- -->Brobot<!-- --> <b>1.0.6</b>, which is no longer actively maintained.</div><div class="margin-top--md">For up-to-date documentation, see the <b><a href="/brobot/docs/getting-started/introduction">latest version</a></b> (<!-- -->Latest<!-- -->).</div></div><div class="docItemContainer_Djhp"><article><nav class="theme-doc-breadcrumbs breadcrumbsContainer_Z_bl" aria-label="Breadcrumbs"><ul class="breadcrumbs"><li class="breadcrumbs__item"><a aria-label="Home page" class="breadcrumbs__link" href="/brobot/"><svg viewBox="0 0 24 24" class="breadcrumbHomeIcon_YNFT"><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill="currentColor"></path></svg></a></li><li class="breadcrumbs__item"><span class="breadcrumbs__link">Documentation</span></li><li class="breadcrumbs__item"><span class="breadcrumbs__link">Action Objects</span></li><li class="breadcrumbs__item breadcrumbs__item--active"><span class="breadcrumbs__link">ActionOptions</span></li></ul></nav><span class="theme-doc-version-badge badge badge--secondary">Version: 1.0.6</span><div class="tocCollapsible_ETCw theme-doc-toc-mobile tocMobile_ITEo"><button type="button" class="clean-btn tocCollapsibleButton_TO0P">On this page</button></div><div class="theme-doc-markdown markdown"><header><h1>ActionOptions</h1></header>
+<p>ActionOptions provides options for configuring an action. It can be used
+for all standard Brobot Actions, which include all BasicActions and some
+CompositeActions. Every standard Action has a corresponding enum that can
+be selected in the Action field of ActionOptions.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="action">action<a href="#action" class="hash-link" aria-label="Direct link to action" title="Direct link to action">​</a></h2>
+<p>Type: <code>enum</code></p>
+<p>BasicActions:</p>
+<ul>
+<li>FIND</li>
+<li>CLICK</li>
+<li>DEFINE return a Region with a specific location and dimensions</li>
+<li>TYPE sends keyboard input</li>
+<li>MOVE moves the mouse</li>
+<li>VANISH is successful when an Image or State disappears</li>
+<li>GET_TEXT reads text from a Region</li>
+<li>HIGHLIGHT highlights a Match, Region, or Location</li>
+<li>SCROLL_MOUSE_WHEEL</li>
+<li>MOUSE_DOWN</li>
+<li>MOUSE_UP</li>
+<li>KEY_DOWN</li>
+<li>KEY_UP</li>
+</ul>
+<p>CompositeActions:</p>
+<ul>
+<li>CLICK_UNTIL clicks Matches, Regions, and/or Locations until a condition is fulfilled</li>
+<li>DRAG</li>
+</ul>
+<p>The default Action is FIND.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="find-options">FIND Options<a href="#find-options" class="hash-link" aria-label="Direct link to FIND Options" title="Direct link to FIND Options">​</a></h2>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="find">find<a href="#find" class="hash-link" aria-label="Direct link to find" title="Direct link to find">​</a></h3>
+<p>Type: <code>enum</code></p>
+<p>The Find enum specifies how a Find operation should be carried out.<br>
+<!-- -->Keep in mind that ObjectCollections can contain multiple Images, and
+Images can contain multiple Patterns (or image files).</p>
+<ul>
+<li>FIRST: first Match found</li>
+<li>EACH: one Match per Image</li>
+<li>ALL: all Matches for all Patterns in all Images</li>
+<li>BEST: the best match from all Patterns in all Images</li>
+<li>CUSTOM: user-defined.<br>
+<!-- -->Must be of type <code>BiFunction&lt;ActionOptions, List&lt;StateImageObject&gt;, Matches&gt;&gt;</code></li>
+</ul>
+<p>The options that return multiple Matches allow for overlapping Matches.<br>
+<!-- -->The default option is FIRST.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="tempfind">tempFind<a href="#tempfind" class="hash-link" aria-label="Direct link to tempFind" title="Direct link to tempFind">​</a></h3>
+<p>Type: <code>BiFunction&lt;ActionOptions, List&lt;StateImageObject&gt;, Matches&gt;</code></p>
+<p>A user-defined Find method to be used in a single operation.<br>
+<!-- -->Find.CUSTOM is for user-defined Find methods meant to be reused.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="similarity">similarity<a href="#similarity" class="hash-link" aria-label="Direct link to similarity" title="Direct link to similarity">​</a></h3>
+<p>Type: <code>double</code></p>
+<p>Specifies how similar the found Match must be to the original Image.
+See the Sikuli documentation for detailed information.<br>
+<!-- -->The default value is the Sikuli variable Settings.MinSimilarity.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="dooneach">doOnEach<a href="#dooneach" class="hash-link" aria-label="Direct link to doOnEach" title="Direct link to doOnEach">​</a></h3>
+<p>Type: <code>enum</code></p>
+<p>Images can contain multiple Patterns.<br>
+<!-- -->DoOnEach specifies how Find.EACH should approach individual Images.</p>
+<ul>
+<li>FIRST: first Match on each Image</li>
+<li>BEST: best Match on each Image</li>
+</ul>
+<p>The default value is FIRST.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="usedefinedregion">useDefinedRegion<a href="#usedefinedregion" class="hash-link" aria-label="Direct link to useDefinedRegion" title="Direct link to useDefinedRegion">​</a></h2>
+<p>Type: <code>boolean</code></p>
+<p>Instead of searching for a StateImageObject, use its defined Region to create a Match.
+This is either the first found region if the StateImageObject is fixed, or the first
+defined Region in SearchRegions.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="searchregions">searchRegions<a href="#searchregions" class="hash-link" aria-label="Direct link to searchRegions" title="Direct link to searchRegions">​</a></h2>
+<p>Type: <code>SearchRegions</code></p>
+<p>Sets temporary search regions that override the search regions of State objects
+during a Find operation.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="scrolldirection">scrollDirection<a href="#scrolldirection" class="hash-link" aria-label="Direct link to scrollDirection" title="Direct link to scrollDirection">​</a></h2>
+<p>Type: <code>enum</code></p>
+<ul>
+<li>UP</li>
+<li>DOWN</li>
+</ul>
+<p>For scrolling with the mouse wheel.<br>
+<!-- -->The default value is DOWN.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="gettextuntil">getTextUntil<a href="#gettextuntil" class="hash-link" aria-label="Direct link to getTextUntil" title="Direct link to getTextUntil">​</a></h2>
+<p>Type: <code>enum</code></p>
+<ul>
+<li>NONE: Text is searched for until the operation times out or the max number of iterations is reached.</li>
+<li>TEXT_APPEARS: Keep searching for text until all Match regions have text.</li>
+<li>TEXT_VANISHES: Keep searching for text until no Match regions have text.</li>
+</ul>
+<p>The default value is NONE.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="successevaluation">successEvaluation<a href="#successevaluation" class="hash-link" aria-label="Direct link to successEvaluation" title="Direct link to successEvaluation">​</a></h2>
+<p>Type: <code>Predicate&lt;Matches&gt;</code></p>
+<p>successEvaluation defines the success criteria for the Find operation.<br>
+<!-- -->The default value is <code>matches -&gt; !matches.isEmpty();</code></p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="pauses-and-delays">Pauses and Delays<a href="#pauses-and-delays" class="hash-link" aria-label="Direct link to Pauses and Delays" title="Direct link to Pauses and Delays">​</a></h2>
+<p>The order that the different pauses work is shown in the example of a Drag operation:</p>
+<ol>
+<li>pauseBeforeBegin</li>
+<li>moveMouseDelay (to go to the drag point)</li>
+<li>pauseBeforeMouseDown</li>
+<li>pauseAfterMouseDown</li>
+<li>moveMouseDelay (to go to the drop point)</li>
+<li>pauseBeforeMouseUp</li>
+<li>pauseAfterMouseUp</li>
+<li>pauseAfterEnd</li>
+</ol>
+<p>Pauses are always associated with actions: for example, pausing before clicking can increase
+the chance that the click will be successful. There are also BrobotSettings for these options
+that apply them to every action, but setting the pause options in ActionOptions
+gives more granular control.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="pausebeforebegin">pauseBeforeBegin<a href="#pausebeforebegin" class="hash-link" aria-label="Direct link to pauseBeforeBegin" title="Direct link to pauseBeforeBegin">​</a></h3>
+<p>Type: <code>double</code><br>
+<!-- -->The default value is 0.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="movemousedelay">moveMouseDelay<a href="#movemousedelay" class="hash-link" aria-label="Direct link to moveMouseDelay" title="Direct link to moveMouseDelay">​</a></h3>
+<p>Type: <code>float</code><br>
+<!-- -->Delays the mouse movement. When set to 0 the mouse cursor will jump from the current
+point to the target location.<br>
+<!-- -->The default value is the Sikuli variable Settings.MoveMouseDelay.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="pausebeforemousedown">pauseBeforeMouseDown<a href="#pausebeforemousedown" class="hash-link" aria-label="Direct link to pauseBeforeMouseDown" title="Direct link to pauseBeforeMouseDown">​</a></h3>
+<p>Type: <code>double</code><br>
+<!-- -->The default value is the Sikuli variable Settings.DelayBeforeMouseDown.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="pauseaftermousedown">pauseAfterMouseDown<a href="#pauseaftermousedown" class="hash-link" aria-label="Direct link to pauseAfterMouseDown" title="Direct link to pauseAfterMouseDown">​</a></h3>
+<p>Type <code>double</code><br>
+<!-- -->The default value is BrobotSettings.delayAfterMouseDown.<br>
+<!-- -->It replaces the Sikuli variable Settings.DelayBeforeDrag for Drag operations
+and Settings.ClickDelay for Click operations.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="pausebeforemouseup">pauseBeforeMouseUp<a href="#pausebeforemouseup" class="hash-link" aria-label="Direct link to pauseBeforeMouseUp" title="Direct link to pauseBeforeMouseUp">​</a></h3>
+<p>Type: <code>double</code><br>
+<!-- -->The default value is the Sikuli variable Settings.DelayBeforeDrop.<br>
+<!-- -->It replaces DelayBeforeDrop for Drag operations.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="pauseaftermouseup">pauseAfterMouseUp<a href="#pauseaftermouseup" class="hash-link" aria-label="Direct link to pauseAfterMouseUp" title="Direct link to pauseAfterMouseUp">​</a></h3>
+<p>Type: <code>double</code><br>
+<!-- -->The default value is 0.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="pauseafterend">pauseAfterEnd<a href="#pauseafterend" class="hash-link" aria-label="Direct link to pauseAfterEnd" title="Direct link to pauseAfterEnd">​</a></h3>
+<p>Type: <code>double</code><br>
+<!-- -->The default value is 0.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="dragtooffsetx--dragtooffsety">dragToOffsetX &amp; dragToOffsetY<a href="#dragtooffsetx--dragtooffsety" class="hash-link" aria-label="Direct link to dragToOffsetX &amp; dragToOffsetY" title="Direct link to dragToOffsetX &amp; dragToOffsetY">​</a></h2>
+<p>Type: <code>int</code></p>
+<p>These values provide an offset to the Match for the dragTo Location.
+To select the location to drag to, objects are chosen in this order:</p>
+<ol>
+<li>Objects in the 2nd ObjectCollection + offsets</li>
+<li>The dragFrom Location + offsets (when there is no 2nd ObjectCollection)</li>
+</ol>
+<p>Other variables are used to adjust the dragFrom Location</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="click-options">Click Options<a href="#click-options" class="hash-link" aria-label="Direct link to Click Options" title="Direct link to Click Options">​</a></h2>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="clicktype">clickType<a href="#clicktype" class="hash-link" aria-label="Direct link to clickType" title="Direct link to clickType">​</a></h3>
+<p>Type: <code>enum</code></p>
+<ul>
+<li>LEFT</li>
+<li>RIGHT</li>
+<li>MIDDLE</li>
+<li>DOUBLE_LEFT</li>
+<li>DOUBLE_RIGHT</li>
+<li>DOUBLE_MIDDLE</li>
+</ul>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="movemouseafterclick">moveMouseAfterClick<a href="#movemouseafterclick" class="hash-link" aria-label="Direct link to moveMouseAfterClick" title="Direct link to moveMouseAfterClick">​</a></h3>
+<p>Type: <code>boolean</code></p>
+<p>We have 2 options for moving the mouse after a click:</p>
+<ol>
+<li>To an offset of the click point</li>
+<li>To a fixed location</li>
+</ol>
+<p>If the offset is defined we move there; otherwise we move to the fixed location.
+These options are also used for drags, and can move the mouse once the drag is finished.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="locationafterclick">locationAfterClick<a href="#locationafterclick" class="hash-link" aria-label="Direct link to locationAfterClick" title="Direct link to locationAfterClick">​</a></h3>
+<p>Type: <code>Location</code></p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="offsetlocationby">offsetLocationBy<a href="#offsetlocationby" class="hash-link" aria-label="Direct link to offsetLocationBy" title="Direct link to offsetLocationBy">​</a></h3>
+<p>Type: <code>Location</code></p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="clickuntil">clickUntil<a href="#clickuntil" class="hash-link" aria-label="Direct link to clickUntil" title="Direct link to clickUntil">​</a></h3>
+<p>Type: <code>enum</code></p>
+<p>Specifies the condition to fulfill after a Click.<br>
+<!-- -->The Objects in the 1st ObjectCollection are acted on by the CLICK method.<br>
+<!-- -->If there is a 2nd ObjectCollection, it is acted on by the FIND method.<br>
+<!-- -->If there is only 1 ObjectCollection, the FIND method also uses these objects.<br>
+<em>1 ObjectCollection: Click this until it disappears.<br>
+<!-- -->2 ObjectCollections: Click #1 until #2 appears or disappears.</em></p>
+<ul>
+<li>OBJECTS_APPEAR</li>
+<li>OBJECTS_VANISH</li>
+</ul>
+<p>The default value is OBJECTS_APPEAR.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="maxwait">maxWait<a href="#maxwait" class="hash-link" aria-label="Direct link to maxWait" title="Direct link to maxWait">​</a></h2>
+<p>Type: <code>double</code></p>
+<p>maxWait gives the max number of seconds to perform an operation.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="individualactions--actionsequences">IndividualActions &amp; ActionSequences<a href="#individualactions--actionsequences" class="hash-link" aria-label="Direct link to IndividualActions &amp; ActionSequences" title="Direct link to IndividualActions &amp; ActionSequences">​</a></h2>
+<p>IndividualAction refers to individual activities, such as clicking on a single Match.
+When clicking a Match, timesToRepeatIndividualAction gives the number of consecutive clicks
+on this Match before moving on to the next Match.<br>
+<!-- -->An ActionSequence refers to all activities in one iteration of a BasicAction, such as:</p>
+<ul>
+<li>clicking on all Matches of an Image</li>
+<li>clicking on a Match for each Pattern in a set of Images contained in an ObjectCollection</li>
+</ul>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="timestorepeatindividualaction">timesToRepeatIndividualAction<a href="#timestorepeatindividualaction" class="hash-link" aria-label="Direct link to timesToRepeatIndividualAction" title="Direct link to timesToRepeatIndividualAction">​</a></h3>
+<p>Type: <code>int</code><br>
+<!-- -->Default value: 1</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="maxtimestorepeatactionsequence">maxTimesToRepeatActionSequence<a href="#maxtimestorepeatactionsequence" class="hash-link" aria-label="Direct link to maxTimesToRepeatActionSequence" title="Direct link to maxTimesToRepeatActionSequence">​</a></h3>
+<p>Type: <code>int</code><br>
+<!-- -->Default value: 1</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="pausebetweenindividualactions">pauseBetweenIndividualActions<a href="#pausebetweenindividualactions" class="hash-link" aria-label="Direct link to pauseBetweenIndividualActions" title="Direct link to pauseBetweenIndividualActions">​</a></h3>
+<p>Type: <code>double</code><br>
+<!-- -->Default value: 0</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="pausebetweenactionsequences">pauseBetweenActionSequences<a href="#pausebetweenactionsequences" class="hash-link" aria-label="Direct link to pauseBetweenActionSequences" title="Direct link to pauseBetweenActionSequences">​</a></h3>
+<p>Type: <code>double</code><br>
+<!-- -->Default value: 0</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="maxmatchestoacton">maxMatchesToActOn<a href="#maxmatchestoacton" class="hash-link" aria-label="Direct link to maxMatchesToActOn" title="Direct link to maxMatchesToActOn">​</a></h2>
+<p>Type: <code>int</code><br>
+<!-- -->Default value: 100</p>
+<p>maxMatchesToActOn limits the number of Matches used when working with Find.ALL, Find.EACH,
+Find.HISTOGRAM, and Find.COLOR. It is especially useful for working with HISTOGRAM and COLOR
+Find operations since there could be potentially hundreds of thousands of matches.</p>
+<p>When less than or equal to 0 it is not used.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="defineas">defineAs<a href="#defineas" class="hash-link" aria-label="Direct link to defineAs" title="Direct link to defineAs">​</a></h2>
+<p>Type: <code>enum</code><br>
+<!-- -->Default value: MATCH</p>
+<ul>
+<li>INSIDE_ANCHORS</li>
+<li>OUTSIDE_ANCHORS</li>
+<li>MATCH</li>
+<li>BELOW_MATCH</li>
+<li>ABOVE_MATCH</li>
+<li>LEFT_OF_MATCH</li>
+<li>RIGHT_OF_MATCH</li>
+<li>FOCUSED_WINDOW</li>
+</ul>
+<p>Anchors define Locations in Matches and specify how these Locations should be used
+to define a Region (see the Anchor class for more info).<br>
+<!-- -->INSIDE_ANCHORS defines the region as the smallest rectangle from the anchors found.<br>
+<!-- -->OUTSIDE_ANCHORS defines the region as the largest rectangle from the anchors found.<br>
+<!-- -->MATCH, BELOW_MATCH, ABOVE_MATCH, LEFT_OF_MATCH, RIGHT_OF_MATCH all define a Region
+around a single Match.<br>
+<!-- -->FOCUSED_WINDOW defines a Region around the active Window.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="adjust-action-results">Adjust Action Results<a href="#adjust-action-results" class="hash-link" aria-label="Direct link to Adjust Action Results" title="Direct link to Adjust Action Results">​</a></h2>
+<p>The following variables make adjustments to the final results of many actions.
+For example, a Region defined as x.y.w.h = 10.10.50.50 will be</p>
+<ul>
+<li>20.10.60.50 when addX = 10</li>
+<li>10.10.60.50 when addW = 10</li>
+<li>10.10.20.50 when absoluteW = 10
+AbsoluteW and AbsoluteH are not used when set to less than 0.
+When AbsoluteW is used, addW is not used. Same for H.</li>
+</ul>
+<p>With the Drag operation, these variables are used for the dragFrom Location
+but not for the dragTo Location.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="addw">addW<a href="#addw" class="hash-link" aria-label="Direct link to addW" title="Direct link to addW">​</a></h3>
+<p>Type: <code>int</code><br>
+<!-- -->Default: 0</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="addh">addH<a href="#addh" class="hash-link" aria-label="Direct link to addH" title="Direct link to addH">​</a></h3>
+<p>Type: <code>int</code><br>
+<!-- -->Default: 0</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="absolutew">absoluteW<a href="#absolutew" class="hash-link" aria-label="Direct link to absoluteW" title="Direct link to absoluteW">​</a></h3>
+<p>Type: <code>int</code><br>
+<!-- -->Default: -1</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="absoluteh">absoluteH<a href="#absoluteh" class="hash-link" aria-label="Direct link to absoluteH" title="Direct link to absoluteH">​</a></h3>
+<p>Type: <code>int</code><br>
+<!-- -->Default: -1</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="addx">addX<a href="#addx" class="hash-link" aria-label="Direct link to addX" title="Direct link to addX">​</a></h3>
+<p>Type: <code>int</code><br>
+<!-- -->Default: 0</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="addy">addY<a href="#addy" class="hash-link" aria-label="Direct link to addY" title="Direct link to addY">​</a></h3>
+<p>Type: <code>int</code><br>
+<!-- -->Default: 0</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="highlighting">Highlighting<a href="#highlighting" class="hash-link" aria-label="Direct link to Highlighting" title="Direct link to Highlighting">​</a></h2>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="highlightallatonce">highlightAllAtOnce<a href="#highlightallatonce" class="hash-link" aria-label="Direct link to highlightAllAtOnce" title="Direct link to highlightAllAtOnce">​</a></h3>
+<p>Type: <code>boolean</code><br>
+<!-- -->Default: false</p>
+<p>When set to true, all matches will be highlighted at once. When
+set to false, matches will be highlighted one at a time.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="highlightseconds">highlightSeconds<a href="#highlightseconds" class="hash-link" aria-label="Direct link to highlightSeconds" title="Direct link to highlightSeconds">​</a></h3>
+<p>Type: <code>double</code><br>
+<!-- -->Default: 1</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="highlightcolor">highlightColor<a href="#highlightcolor" class="hash-link" aria-label="Direct link to highlightColor" title="Direct link to highlightColor">​</a></h3>
+<p>Type: <code>String</code><br>
+<!-- -->Default: &quot;red&quot;</p>
+<p>See the Sikuli method <code>region.highlight()</code> for more info.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="typing">Typing<a href="#typing" class="hash-link" aria-label="Direct link to Typing" title="Direct link to Typing">​</a></h2>
+<p>The below options are for typing characters to the active window.
+Modifiers are used for key combinations such as &#x27;SHIFT a&#x27; or &#x27;CTRL ALT DEL&#x27;.
+For more information on modifiers, see the Sikuli documentation.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="typedelay">typeDelay<a href="#typedelay" class="hash-link" aria-label="Direct link to typeDelay" title="Direct link to typeDelay">​</a></h3>
+<p>Type: <code>double</code><br>
+<!-- -->Default: Settings.TypeDelay</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="modifiers">modifiers<a href="#modifiers" class="hash-link" aria-label="Direct link to modifiers" title="Direct link to modifiers">​</a></h3>
+<p>Type: <code>String</code><br>
+<!-- -->Default: &quot;&quot;<br>
+<!-- -->Not used when &quot;&quot;<br>
+<!-- -->Modifiers can be combined by adding them together.</p></div><footer class="theme-doc-footer docusaurus-mt-lg"><div class="row margin-top--sm theme-doc-footer-edit-meta-row"><div class="col"><a href="https://github.com/jspinak/brobot/edit/main/docs/versioned_docs/version-1.0.6/API/data-types/actionOptions.md" target="_blank" rel="noopener noreferrer" class="theme-edit-this-page"><svg fill="currentColor" height="20" width="20" viewBox="0 0 40 40" class="iconEdit_Z9Sw" aria-hidden="true"><g><path d="m34.5 11.7l-3 3.1-6.3-6.3 3.1-3q0.5-0.5 1.2-0.5t1.1 0.5l3.9 3.9q0.5 0.4 0.5 1.1t-0.5 1.2z m-29.5 17.1l18.4-18.5 6.3 6.3-18.4 18.4h-6.3v-6.2z"></path></g></svg>Edit this page</a></div><div class="col lastUpdated_JAkA"></div></div></footer></article><nav class="docusaurus-mt-lg pagination-nav" aria-label="Docs pages"><a class="pagination-nav__link pagination-nav__link--prev" href="/brobot/docs/1.0.6/API/overview"><div class="pagination-nav__sublabel">Previous</div><div class="pagination-nav__label">Overview</div></a><a class="pagination-nav__link pagination-nav__link--next" href="/brobot/docs/1.0.6/API/data-types/objectCollection"><div class="pagination-nav__sublabel">Next</div><div class="pagination-nav__label">ObjectCollection</div></a></nav></div></div><div class="col col--3"><div class="tableOfContents_bqdL thin-scrollbar theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a href="#action" class="table-of-contents__link toc-highlight">action</a></li><li><a href="#find-options" class="table-of-contents__link toc-highlight">FIND Options</a><ul><li><a href="#find" class="table-of-contents__link toc-highlight">find</a></li><li><a href="#tempfind" class="table-of-contents__link toc-highlight">tempFind</a></li><li><a href="#similarity" class="table-of-contents__link toc-highlight">similarity</a></li><li><a href="#dooneach" class="table-of-contents__link toc-highlight">doOnEach</a></li></ul></li><li><a href="#usedefinedregion" class="table-of-contents__link toc-highlight">useDefinedRegion</a></li><li><a href="#searchregions" class="table-of-contents__link toc-highlight">searchRegions</a></li><li><a href="#scrolldirection" class="table-of-contents__link toc-highlight">scrollDirection</a></li><li><a href="#gettextuntil" class="table-of-contents__link toc-highlight">getTextUntil</a></li><li><a href="#successevaluation" class="table-of-contents__link toc-highlight">successEvaluation</a></li><li><a href="#pauses-and-delays" class="table-of-contents__link toc-highlight">Pauses and Delays</a><ul><li><a href="#pausebeforebegin" class="table-of-contents__link toc-highlight">pauseBeforeBegin</a></li><li><a href="#movemousedelay" class="table-of-contents__link toc-highlight">moveMouseDelay</a></li><li><a href="#pausebeforemousedown" class="table-of-contents__link toc-highlight">pauseBeforeMouseDown</a></li><li><a href="#pauseaftermousedown" class="table-of-contents__link toc-highlight">pauseAfterMouseDown</a></li><li><a href="#pausebeforemouseup" class="table-of-contents__link toc-highlight">pauseBeforeMouseUp</a></li><li><a href="#pauseaftermouseup" class="table-of-contents__link toc-highlight">pauseAfterMouseUp</a></li><li><a href="#pauseafterend" class="table-of-contents__link toc-highlight">pauseAfterEnd</a></li></ul></li><li><a href="#dragtooffsetx--dragtooffsety" class="table-of-contents__link toc-highlight">dragToOffsetX &amp; dragToOffsetY</a></li><li><a href="#click-options" class="table-of-contents__link toc-highlight">Click Options</a><ul><li><a href="#clicktype" class="table-of-contents__link toc-highlight">clickType</a></li><li><a href="#movemouseafterclick" class="table-of-contents__link toc-highlight">moveMouseAfterClick</a></li><li><a href="#locationafterclick" class="table-of-contents__link toc-highlight">locationAfterClick</a></li><li><a href="#offsetlocationby" class="table-of-contents__link toc-highlight">offsetLocationBy</a></li><li><a href="#clickuntil" class="table-of-contents__link toc-highlight">clickUntil</a></li></ul></li><li><a href="#maxwait" class="table-of-contents__link toc-highlight">maxWait</a></li><li><a href="#individualactions--actionsequences" class="table-of-contents__link toc-highlight">IndividualActions &amp; ActionSequences</a><ul><li><a href="#timestorepeatindividualaction" class="table-of-contents__link toc-highlight">timesToRepeatIndividualAction</a></li><li><a href="#maxtimestorepeatactionsequence" class="table-of-contents__link toc-highlight">maxTimesToRepeatActionSequence</a></li><li><a href="#pausebetweenindividualactions" class="table-of-contents__link toc-highlight">pauseBetweenIndividualActions</a></li><li><a href="#pausebetweenactionsequences" class="table-of-contents__link toc-highlight">pauseBetweenActionSequences</a></li></ul></li><li><a href="#maxmatchestoacton" class="table-of-contents__link toc-highlight">maxMatchesToActOn</a></li><li><a href="#defineas" class="table-of-contents__link toc-highlight">defineAs</a></li><li><a href="#adjust-action-results" class="table-of-contents__link toc-highlight">Adjust Action Results</a><ul><li><a href="#addw" class="table-of-contents__link toc-highlight">addW</a></li><li><a href="#addh" class="table-of-contents__link toc-highlight">addH</a></li><li><a href="#absolutew" class="table-of-contents__link toc-highlight">absoluteW</a></li><li><a href="#absoluteh" class="table-of-contents__link toc-highlight">absoluteH</a></li><li><a href="#addx" class="table-of-contents__link toc-highlight">addX</a></li><li><a href="#addy" class="table-of-contents__link toc-highlight">addY</a></li></ul></li><li><a href="#highlighting" class="table-of-contents__link toc-highlight">Highlighting</a><ul><li><a href="#highlightallatonce" class="table-of-contents__link toc-highlight">highlightAllAtOnce</a></li><li><a href="#highlightseconds" class="table-of-contents__link toc-highlight">highlightSeconds</a></li><li><a href="#highlightcolor" class="table-of-contents__link toc-highlight">highlightColor</a></li></ul></li><li><a href="#typing" class="table-of-contents__link toc-highlight">Typing</a><ul><li><a href="#typedelay" class="table-of-contents__link toc-highlight">typeDelay</a></li><li><a href="#modifiers" class="table-of-contents__link toc-highlight">modifiers</a></li></ul></li></ul></div></div></div></div></main></div></div></div><footer class="theme-layout-footer footer footer--dark"><div class="container container-fluid"><div class="row footer__links"><div class="theme-layout-footer-column col footer__col"><div class="footer__title">Docs</div><ul class="footer__items clean-list"><li class="footer__item"><a href="https://www.youtube.com/watch?v=aHnVQ8KmOVw" target="_blank" rel="noopener noreferrer" class="footer__link-item">Introductory Video</a></li><li class="footer__item"><a class="footer__link-item" href="/brobot/docs/getting-started/introduction">Get Started</a></li><li class="footer__item"><a class="footer__link-item" href="/brobot/visualAPI">The Visual API</a></li></ul></div><div class="theme-layout-footer-column col footer__col"><div class="footer__title">Community</div><ul class="footer__items clean-list"><li class="footer__item"><a href="https://stackoverflow.com/questions/tagged/brobot" target="_blank" rel="noopener noreferrer" class="footer__link-item">Stack Overflow<svg width="13.5" height="13.5" aria-hidden="true" class="iconExternalLink_nPIU"><use href="#theme-svg-external-link"></use></svg></a></li></ul></div><div class="theme-layout-footer-column col footer__col"><div class="footer__title">More</div><ul class="footer__items clean-list"><li class="footer__item"><a class="footer__link-item" href="/brobot/blog">Blog</a></li><li class="footer__item"><a href="https://github.com/jspinak/brobot" target="_blank" rel="noopener noreferrer" class="footer__link-item">GitHub<svg width="13.5" height="13.5" aria-hidden="true" class="iconExternalLink_nPIU"><use href="#theme-svg-external-link"></use></svg></a></li><li class="footer__item"><a href="https://www.youtube.com/channel/UCgRljq-lHkMLrzRzpJC4HNw" target="_blank" rel="noopener noreferrer" class="footer__link-item">YouTube<svg width="13.5" height="13.5" aria-hidden="true" class="iconExternalLink_nPIU"><use href="#theme-svg-external-link"></use></svg></a></li><li class="footer__item"><a href="https://search.maven.org/artifact/io.github.jspinak/brobot" target="_blank" rel="noopener noreferrer" class="footer__link-item">Maven Central<svg width="13.5" height="13.5" aria-hidden="true" class="iconExternalLink_nPIU"><use href="#theme-svg-external-link"></use></svg></a></li></ul></div></div><div class="footer__bottom text--center"><div class="footer__copyright">© 2025 Joshua Spinak · Free & Open Source</div></div></div></footer></div>
+</body>
+</html>

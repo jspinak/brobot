@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+    <id>https://jspinak.github.io/brobot/blog</id>
+    <title>Brobot Blog</title>
+    <updated>2022-01-18T00:00:00.000Z</updated>
+    <generator>https://github.com/jpmonette/feed</generator>
+    <link rel="alternate" href="https://jspinak.github.io/brobot/blog"/>
+    <subtitle>Brobot Blog</subtitle>
+    <icon>https://jspinak.github.io/brobot/img/brobot-happy.ico</icon>
+    <entry>
+        <title type="html"><![CDATA[Welcome]]></title>
+        <id>https://jspinak.github.io/brobot/blog/welcome</id>
+        <link href="https://jspinak.github.io/brobot/blog/welcome"/>
+        <updated>2022-01-18T00:00:00.000Z</updated>
+        <summary type="html"><![CDATA[Brobot is now live!]]></summary>
+        <content type="html"><![CDATA[<p>Brobot is now live!</p>
+<p>You can use StackOverflow for questions about how to use Brobot
+that are not answered in the documentation.</p>
+<p>To point out errors in the code base or areas for improvement, please open an issue on
+<a href="https://github.com/jspinak/brobot" target="_blank" rel="noopener noreferrer">GitHub</a>.</p>
+<p>You can also write to me directly at <a href="mailto:jspinak@hotmail.com" target="_blank" rel="noopener noreferrer">jspinak@hotmail.com</a>.</p>]]></content>
+        <author>
+            <name>Joshua Spinak</name>
+            <uri>https://github.com/jspinak</uri>
+        </author>
+        <category label="hello" term="hello"/>
+        <category label="brobot" term="brobot"/>
+    </entry>
+</feed>

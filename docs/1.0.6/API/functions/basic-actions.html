@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="en" dir="ltr" class="docs-wrapper plugin-docs plugin-id-default docs-version-1.0.6 docs-doc-page docs-doc-id-API/functions/basic-actions" data-has-hydrated="false">
+<head>
+<meta charset="UTF-8">
+<meta name="generator" content="Docusaurus v3.8.1">
+<title data-rh="true">Basic Actions | Brobot</title><meta data-rh="true" name="viewport" content="width=device-width,initial-scale=1"><meta data-rh="true" name="twitter:card" content="summary_large_image"><meta data-rh="true" property="og:url" content="https://jspinak.github.io/brobot/docs/1.0.6/API/functions/basic-actions"><meta data-rh="true" property="og:locale" content="en"><meta data-rh="true" name="docusaurus_locale" content="en"><meta data-rh="true" name="docsearch:language" content="en"><meta data-rh="true" name="docusaurus_version" content="1.0.6"><meta data-rh="true" name="docusaurus_tag" content="docs-default-1.0.6"><meta data-rh="true" name="docsearch:version" content="1.0.6"><meta data-rh="true" name="docsearch:docusaurus_tag" content="docs-default-1.0.6"><meta data-rh="true" property="og:title" content="Basic Actions | Brobot"><meta data-rh="true" name="description" content="Basic Actions are simple processes that require a maximum of 1 Find operation."><meta data-rh="true" property="og:description" content="Basic Actions are simple processes that require a maximum of 1 Find operation."><link data-rh="true" rel="icon" href="/brobot/img/brobot-happy.ico"><link data-rh="true" rel="canonical" href="https://jspinak.github.io/brobot/docs/1.0.6/API/functions/basic-actions"><link data-rh="true" rel="alternate" href="https://jspinak.github.io/brobot/docs/1.0.6/API/functions/basic-actions" hreflang="en"><link data-rh="true" rel="alternate" href="https://jspinak.github.io/brobot/docs/1.0.6/API/functions/basic-actions" hreflang="x-default"><script data-rh="true" type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Basic Actions","item":"https://jspinak.github.io/brobot/docs/1.0.6/API/functions/basic-actions"}]}</script><link rel="alternate" type="application/rss+xml" href="/brobot/blog/rss.xml" title="Brobot RSS Feed">
+<link rel="alternate" type="application/atom+xml" href="/brobot/blog/atom.xml" title="Brobot Atom Feed">
+
+
+
+
+<link rel="preconnect" href="https://www.google-analytics.com">
+<link rel="preconnect" href="https://www.googletagmanager.com">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-6WY1S6ZWEY"></script>
+<script>function gtag(){dataLayer.push(arguments)}window.dataLayer=window.dataLayer||[],gtag("js",new Date),gtag("config","G-6WY1S6ZWEY",{anonymize_ip:!0})</script>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css" integrity="sha384-GvrOXuhMATgEsSwCs4smul74iXGOixntILdUW9XmUC6+HX0sLNAK3q71HotJqlAn" crossorigin="anonymous"><link rel="stylesheet" href="/brobot/assets/css/styles.1b22d91f.css">
+<script src="/brobot/assets/js/runtime~main.86488505.js" defer="defer"></script>
+<script src="/brobot/assets/js/main.ab0b3e76.js" defer="defer"></script>
+</head>
+<body class="navigation-with-keyboard">
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;"><defs>
+<symbol id="theme-svg-external-link" viewBox="0 0 24 24"><path fill="currentColor" d="M21 13v10h-21v-19h12v2h-10v15h17v-8h2zm3-12h-10.988l4.035 4-6.977 7.07 2.828 2.828 6.977-7.07 4.125 4.172v-11z"/></symbol>
+</defs></svg>
+<script>!function(){var t="light";var e=function(){try{return new URLSearchParams(window.location.search).get("docusaurus-theme")}catch(t){}}()||function(){try{return window.localStorage.getItem("theme")}catch(t){}}();document.documentElement.setAttribute("data-theme",e||t),document.documentElement.setAttribute("data-theme-choice",e||t)}(),function(){try{const c=new URLSearchParams(window.location.search).entries();for(var[t,e]of c)if(t.startsWith("docusaurus-data-")){var a=t.replace("docusaurus-data-","data-");document.documentElement.setAttribute(a,e)}}catch(t){}}()</script><div id="__docusaurus"><div role="region" aria-label="Skip to main content"><a class="skipToContent_fXgn" href="#__docusaurus_skipToContent_fallback">Skip to main content</a></div><nav aria-label="Main" class="theme-layout-navbar navbar navbar--fixed-top"><div class="navbar__inner"><div class="theme-layout-navbar-left navbar__items"><button aria-label="Toggle navigation bar" aria-expanded="false" class="navbar__toggle clean-btn" type="button"><svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><path stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2" d="M4 7h22M4 15h22M4 23h22"></path></svg></button><a class="navbar__brand" href="/brobot/"><div class="navbar__logo"><img src="/brobot/img/brobot_logo/brobot-happy-text.svg" alt="Brobot Logo" class="themedComponent_mlkZ themedComponent--light_NVdE"><img src="/brobot/img/brobot_logo/brobot-happy-text.svg" alt="Brobot Logo" class="themedComponent_mlkZ themedComponent--dark_xIcU"></div><b class="navbar__title text--truncate">Brobot</b></a><a aria-current="page" class="navbar__item navbar__link navbar__link--active" href="/brobot/docs/1.0.6/introduction">Documentation</a><a href="https://jspinak.github.io/brobot/api/" target="_blank" rel="noopener noreferrer" class="navbar__item navbar__link">API Reference<svg width="13.5" height="13.5" aria-hidden="true" class="iconExternalLink_nPIU"><use href="#theme-svg-external-link"></use></svg></a><a class="navbar__item navbar__link" href="/brobot/visualAPI">The Visual API</a><a class="navbar__item navbar__link" href="/brobot/blog">Blog</a></div><div class="theme-layout-navbar-right navbar__items navbar__items--right"><div class="navbar__item dropdown dropdown--hoverable dropdown--right"><a class="navbar__link" aria-haspopup="true" aria-expanded="false" role="button" href="/brobot/docs/1.0.6/API/functions/basic-actions">1.0.6</a><ul class="dropdown__menu"><li><a class="dropdown__link" href="/brobot/docs/getting-started/introduction">Latest</a></li><li><a class="dropdown__link" href="/brobot/docs/1.0.7/getting-started/introduction">1.0.7</a></li><li><a aria-current="page" class="dropdown__link dropdown__link--active" href="/brobot/docs/1.0.6/API/functions/basic-actions">1.0.6</a></li></ul></div><a href="https://github.com/jspinak/brobot" target="_blank" rel="noopener noreferrer" class="navbar__item navbar__link">GitHub<svg width="13.5" height="13.5" aria-hidden="true" class="iconExternalLink_nPIU"><use href="#theme-svg-external-link"></use></svg></a><div class="toggle_vylO colorModeToggle_DEke"><button class="clean-btn toggleButton_gllP toggleButtonDisabled_aARS" type="button" disabled="" title="system mode" aria-label="Switch between dark and light mode (currently system mode)"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP lightToggleIcon_pyhR"><path fill="currentColor" d="M12,9c1.65,0,3,1.35,3,3s-1.35,3-3,3s-3-1.35-3-3S10.35,9,12,9 M12,7c-2.76,0-5,2.24-5,5s2.24,5,5,5s5-2.24,5-5 S14.76,7,12,7L12,7z M2,13l2,0c0.55,0,1-0.45,1-1s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S1.45,13,2,13z M20,13l2,0c0.55,0,1-0.45,1-1 s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S19.45,13,20,13z M11,2v2c0,0.55,0.45,1,1,1s1-0.45,1-1V2c0-0.55-0.45-1-1-1S11,1.45,11,2z M11,20v2c0,0.55,0.45,1,1,1s1-0.45,1-1v-2c0-0.55-0.45-1-1-1C11.45,19,11,19.45,11,20z M5.99,4.58c-0.39-0.39-1.03-0.39-1.41,0 c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0s0.39-1.03,0-1.41L5.99,4.58z M18.36,16.95 c-0.39-0.39-1.03-0.39-1.41,0c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0c0.39-0.39,0.39-1.03,0-1.41 L18.36,16.95z M19.42,5.99c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06c-0.39,0.39-0.39,1.03,0,1.41 s1.03,0.39,1.41,0L19.42,5.99z M7.05,18.36c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06 c-0.39,0.39-0.39,1.03,0,1.41s1.03,0.39,1.41,0L7.05,18.36z"></path></svg><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP darkToggleIcon_wfgR"><path fill="currentColor" d="M9.37,5.51C9.19,6.15,9.1,6.82,9.1,7.5c0,4.08,3.32,7.4,7.4,7.4c0.68,0,1.35-0.09,1.99-0.27C17.45,17.19,14.93,19,12,19 c-3.86,0-7-3.14-7-7C5,9.07,6.81,6.55,9.37,5.51z M12,3c-4.97,0-9,4.03-9,9s4.03,9,9,9s9-4.03,9-9c0-0.46-0.04-0.92-0.1-1.36 c-0.98,1.37-2.58,2.26-4.4,2.26c-2.98,0-5.4-2.42-5.4-5.4c0-1.81,0.89-3.42,2.26-4.4C12.92,3.04,12.46,3,12,3L12,3z"></path></svg><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP systemToggleIcon_QzmC"><path fill="currentColor" d="m12 21c4.971 0 9-4.029 9-9s-4.029-9-9-9-9 4.029-9 9 4.029 9 9 9zm4.95-13.95c1.313 1.313 2.05 3.093 2.05 4.95s-0.738 3.637-2.05 4.95c-1.313 1.313-3.093 2.05-4.95 2.05v-14c1.857 0 3.637 0.737 4.95 2.05z"></path></svg></button></div><div class="navbarSearchContainer_Bca1"></div></div></div><div role="presentation" class="navbar-sidebar__backdrop"></div></nav><div id="__docusaurus_skipToContent_fallback" class="theme-layout-main main-wrapper mainWrapper_z2l0"><div class="docsWrapper_hBAB"><button aria-label="Scroll back to top" class="clean-btn theme-back-to-top-button backToTopButton_sjWU" type="button"></button><div class="docRoot_UBD9"><aside class="theme-doc-sidebar-container docSidebarContainer_YfHR"><div class="sidebarViewport_aRkj"><div class="sidebar_njMd"><nav aria-label="Docs sidebar" class="menu thin-scrollbar menu_SIkG"><ul class="theme-doc-sidebar-menu menu__list"><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="menu__link menu__link--sublist" href="/brobot/docs/1.0.6/introduction">Introduction</a><button aria-label="Expand sidebar category &#x27;Introduction&#x27;" aria-expanded="false" type="button" class="clean-btn menu__caret"></button></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/brobot/docs/1.0.6/labeling/labeling-intro">Labeling Images</a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/brobot/docs/1.0.6/tutorial-basics/intro">Tutorial: A Simple App</a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/brobot/docs/1.0.6/tutorial-state-structure-builder/intro">Tutorial: Building a Visual API</a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/brobot/docs/1.0.6/tutorial-using-the-latest-code-in-github/intro">Tutorial: Using the Latest Code in Github</a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/brobot/docs/1.0.6/tutorial-mrdoob/intro">Tutorial: Mr.doob</a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item"><div class="menu__list-item-collapsible"><a class="menu__link menu__link--sublist menu__link--sublist-caret menu__link--active" role="button" aria-expanded="true" href="/brobot/docs/1.0.6/API/overview">Documentation</a></div><ul class="menu__list"><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/brobot/docs/1.0.6/API/overview">Overview</a></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-2 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" tabindex="0" href="/brobot/docs/1.0.6/API/data-types/actionOptions">Action Objects</a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-2 menu__list-item"><div class="menu__list-item-collapsible"><a class="menu__link menu__link--sublist menu__link--sublist-caret menu__link--active" role="button" aria-expanded="true" tabindex="0" href="/brobot/docs/1.0.6/API/functions/basic-actions">Actions</a></div><ul class="menu__list"><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-3 menu__list-item"><a class="menu__link menu__link--active" aria-current="page" tabindex="0" href="/brobot/docs/1.0.6/API/functions/basic-actions">Basic Actions</a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-3 menu__list-item"><a class="menu__link" tabindex="0" href="/brobot/docs/1.0.6/API/functions/composite-actions">Composite Actions</a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-3 menu__list-item"><a class="menu__link" tabindex="0" href="/brobot/docs/1.0.6/API/functions/sikuli-wrappers">Wrappers</a></li></ul></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-2 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" tabindex="0" href="/brobot/docs/1.0.6/API/state and state objects/state">State and State Objects</a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-2 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" tabindex="0" href="/brobot/docs/1.0.6/API/state structure/introduction">State Structure Builder</a></div></li></ul></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/brobot/docs/1.0.6/architecture-notes/overview">Architecture Notes</a></div></li></ul></nav></div></div></aside><main class="docMainContainer_TBSr"><div class="container padding-top--md padding-bottom--lg"><div class="row"><div class="col docItemCol_VOVn"><div class="theme-doc-version-banner alert alert--warning margin-bottom--md" role="alert"><div>This is documentation for <!-- -->Brobot<!-- --> <b>1.0.6</b>, which is no longer actively maintained.</div><div class="margin-top--md">For up-to-date documentation, see the <b><a href="/brobot/docs/getting-started/introduction">latest version</a></b> (<!-- -->Latest<!-- -->).</div></div><div class="docItemContainer_Djhp"><article><nav class="theme-doc-breadcrumbs breadcrumbsContainer_Z_bl" aria-label="Breadcrumbs"><ul class="breadcrumbs"><li class="breadcrumbs__item"><a aria-label="Home page" class="breadcrumbs__link" href="/brobot/"><svg viewBox="0 0 24 24" class="breadcrumbHomeIcon_YNFT"><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill="currentColor"></path></svg></a></li><li class="breadcrumbs__item"><span class="breadcrumbs__link">Documentation</span></li><li class="breadcrumbs__item"><span class="breadcrumbs__link">Actions</span></li><li class="breadcrumbs__item breadcrumbs__item--active"><span class="breadcrumbs__link">Basic Actions</span></li></ul></nav><span class="theme-doc-version-badge badge badge--secondary">Version: 1.0.6</span><div class="tocCollapsible_ETCw theme-doc-toc-mobile tocMobile_ITEo"><button type="button" class="clean-btn tocCollapsibleButton_TO0P">On this page</button></div><div class="theme-doc-markdown markdown"><header><h1>Basic Actions</h1></header>
+<p>Basic Actions are simple processes that require a maximum of 1 Find operation.</p>
+<p>All Actions follow the ActionInterface:</p>
+<p>Matches perform(
+ActionOptions actionOptions,
+ObjectCollection... objectCollections);</p>
+<p>Actions are presented here with their class names followed by their Action enums in parentheses.<br>
+<!-- -->Unless specifically stated, methods use only the objects in the first ObjectCollection.</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="click-click">Click (CLICK)<a href="#click-click" class="hash-link" aria-label="Direct link to Click (CLICK)" title="Direct link to Click (CLICK)">​</a></h2>
+<p>Clicks on an Image Match, Region, or Location.</p>
+<p><a href="/brobot/docs/1.0.6/API/data-types/actionOptions#click-options">Click-specific options</a> include:</p>
+<ul>
+<li>ClickType</li>
+<li>MoveMouseAfterClick</li>
+<li>LocationAfterClick</li>
+<li>OffsetLocationsBy</li>
+</ul>
+<p>Example: Do a right mouse click, move the mouse after clicking to an
+offset of (30,50) from the click point, repeat the click 3 times, and
+pause for 1/2 second between clicks (between the mouse move and the next
+click).</p>
+<p>ActionOptions click = new ActionOptions.Builder()
+.setAction(ActionOptions.Action.CLICK)
+.setClickType(ClickType.Type.RIGHT)
+.setMoveMouseAfterClick(true)
+.setLocationAfterClickByOffset(30, 50)
+.setTimesToRepeatIndividualAction(3)
+.setPauseBetweenActions(.5)
+.build();</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="defineregion-define">DefineRegion (DEFINE)<a href="#defineregion-define" class="hash-link" aria-label="Direct link to DefineRegion (DEFINE)" title="Direct link to DefineRegion (DEFINE)">​</a></h2>
+<p>Defines a Region as specified in the ActionOptions.</p>
+<p><a href="/brobot/docs/1.0.6/API/data-types/actionOptions#defineas">Define-specific options</a> include:</p>
+<ul>
+<li>DefineAs: Provides various options for defining the region, including
+defining it around a match or as the smallest rectangle produced by a
+series of matches.</li>
+</ul>
+<p>Example: Define a new Region around the Match with a minimum similarity
+of 0.6, subtract (-5,-1) from the (x,y) of the Match and set the
+width and height of the Region to 296 and 255.</p>
+<p>ActionOptions defineRegion = new ActionOptions.Builder()
+.setAction(ActionOptions.Action.DEFINE)
+.setDefineAs(ActionOptions.DefineAs.MATCH)
+.setMinSimilarity(.6)
+.setAddX(-5)
+.setAddY(-1)
+.setAbsoluteWidthOfDefinedRegion(296)
+.setAbsoluteHeightOfDefinedRegion(255)
+.build();</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="find-find">Find (FIND)<a href="#find-find" class="hash-link" aria-label="Direct link to Find (FIND)" title="Direct link to Find (FIND)">​</a></h2>
+<p>Finds Images and creates Match objects directly from Regions, Locations, and Matches.</p>
+<p><a href="/brobot/docs/1.0.6/API/data-types/actionOptions#find-options">Options</a> include:</p>
+<ul>
+<li>Find: Specifies whether the first match, the best match, one match per Image, or
+all matches should be returned.</li>
+<li>TempFind: A user-defined find operation, meant to be used once, that could be added
+as a lambda.</li>
+<li>Similarity: The minimum similarity score that is required to produce a match.</li>
+<li>DoOnEach: Used with the Find option EACH, DoOnEach specifies whether individual
+Images should be searched for the first match or the best match.</li>
+</ul>
+<p>Example #1: Since Find is the default Action, the standard Find can be created
+without adding any options.</p>
+<p>ActionOptions find = new ActionOptions();</p>
+<p>The Action also can be called without an ActionOptions
+variable if using a standard Find: <code>action.perform(objectCollections);</code></p>
+<p>Example #2: Search for a match for each of the Images in the
+ObjectCollection, with a maximum of 5 matches. For each max,
+add a buffer on all sides of 10. Use a minimum similarity of 0.80
+when searching, and time out if the operation lasts longer than
+3 seconds.</p>
+<p>ActionOptions find = new ActionOptions.Builder()
+.setAction(ActionOptions.Action.FIND)
+.setFind(ActionOptions.Find.EACH)
+.setAddX(-10)
+.setAddY(-10)
+.setAddW(20)
+.setAddH(20)
+.setMaxWait(3)
+.setMaxMatchesToActOn(5)
+.setMinSimilarity(.8)
+.build();</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="mousedown-mouse_down">MouseDown (MOUSE_DOWN)<a href="#mousedown-mouse_down" class="hash-link" aria-label="Direct link to MouseDown (MOUSE_DOWN)" title="Direct link to MouseDown (MOUSE_DOWN)">​</a></h2>
+<p>Presses and holds a mouse button.</p>
+<p>The ObjectCollections are not used here.
+The options used are <a href="/brobot/docs/1.0.6/API/data-types/actionOptions#pauses-and-delays">pauses</a> and
+<a href="/brobot/docs/1.0.6/API/data-types/actionOptions#clicktype">click type</a>. An empty Matches object is returned
+and the operation is assumed to be successful.</p>
+<p>Example: Wait 0.3 seconds before pressing the left mouse button, and
+pause 0.5 seconds with the button down. The button remains down when
+the action is finished.</p>
+<p>ActionOptions mouseDown = new ActionOptions.Builder()
+.setAction(ActionOptions.Action.MOUSE_DOWN)
+.setPauseBeforeMouseDown(.3)
+.setPauseAfterMouseDown(.5)
+.build();</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="mouseup-mouse_up">MouseUp (MOUSE_UP)<a href="#mouseup-mouse_up" class="hash-link" aria-label="Direct link to MouseUp (MOUSE_UP)" title="Direct link to MouseUp (MOUSE_UP)">​</a></h2>
+<p>Releases a mouse button.</p>
+<p>The ObjectCollections are not used here.
+The options used are <a href="/brobot/docs/1.0.6/API/data-types/actionOptions#pauses-and-delays">pauses</a> and
+<a href="/brobot/docs/1.0.6/API/data-types/actionOptions#clicktype">click type</a>. An empty Matches object is returned
+and the operation is assumed to be successful.</p>
+<p>Example: Release the right mouse button and pause for 0.4 seconds. If the right
+mouse button was not held down the only effect will be a 0.4 second pause.</p>
+<p>ActionOptions mouseUp = new ActionOptions.Builder()
+.setAction(ActionOptions.Action.MOUSE_UP)
+.setClickType(ClickType.Type.RIGHT)
+.setPauseAfterMouseUp(.4)
+.build();</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="mousemove-move">MouseMove (MOVE)<a href="#mousemove-move" class="hash-link" aria-label="Direct link to MouseMove (MOVE)" title="Direct link to MouseMove (MOVE)">​</a></h2>
+<p>Moves the mouse to one or more locations.</p>
+<p>There can be multiple points per ObjectCollection if Find.EACH or Find.ALL is used.<br>
+<!-- -->There may be multiple ObjectCollections.<br>
+<!-- -->Points are visited in the following order:</p>
+<ul>
+<li>In the order the ObjectCollection appears</li>
+<li>Within an ObjectCollection, as recorded by the Find operation:</li>
+</ul>
+<ol>
+<li>Images 2) Matches 3) Regions 4) Locations</li>
+</ol>
+<p>Example: Move the cursor with a pause between moves of 0.2 seconds. The mouse
+will not jump from one position to another but will move with a delay of 0.1 seconds
+between points, which makes the total delay from one point to another of 0.3 seconds.
+Each Image in all ObjectCollections will be searched. For each Image, the best
+match for all Patterns will be used. The entire sequence will happen 2 times, meaning
+each point will be visited twice.</p>
+<p>ActionOptions move = new ActionOptions.Builder()
+.setAction(ActionOptions.Action.MOVE)
+.setPauseBetweenActions(.2)
+.setMoveMouseDelay(.1F)
+.setFind(ActionOptions.Find.EACH)
+.doOnEach(ActionOptions.DoOnEach.BEST)
+.setMaxTimesToRepeatActionSequence(2)
+.build();</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="scrollmousewheel-scroll_mouse_wheel">ScrollMouseWheel (SCROLL_MOUSE_WHEEL)<a href="#scrollmousewheel-scroll_mouse_wheel" class="hash-link" aria-label="Direct link to ScrollMouseWheel (SCROLL_MOUSE_WHEEL)" title="Direct link to ScrollMouseWheel (SCROLL_MOUSE_WHEEL)">​</a></h2>
+<p>Scrolls the mouse wheel up or down.</p>
+<p>Example: Scroll up.</p>
+<p>ActionOptions scroll = new ActionOptions.Builder()
+.setAction(ActionOptions.Action.SCROLL_MOUSE_WHEEL)
+.setScrollDirection(ActionOptions.ScrollDirection.UP)
+.build();</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="gettext-get_text">GetText (GET_TEXT)<a href="#gettext-get_text" class="hash-link" aria-label="Direct link to GetText (GET_TEXT)" title="Direct link to GetText (GET_TEXT)">​</a></h2>
+<p>Retrieves text from a Region.</p>
+<p><a href="/brobot/docs/1.0.6/API/data-types/actionOptions#gettextuntil">Options</a> include:</p>
+<ul>
+<li>Waiting for text to appear: the action terminates when all Match regions have text.</li>
+<li>Waiting for text to disappear: the action terminates when no Match regions have text.
+If one of these conditions is not set, GetText will continue to find and save Strings in
+its MatchObjects until it reaches the time or iteration limits set in ActionOptions.
+One String, stored in the field &#x27;selectedText&#x27;, is chosen by the class TextSelector,
+which makes decisions about which String most likely captures the real text.</li>
+</ul>
+<p>Example: The objects in ObjectCollections will be searched for or converted into
+MatchObjects. A minimum similarity of .75 will be used when searching for Images.
+For every MatchObject, its Match height will
+be extended by 20. The Match regions will then be searched for text, no more
+than five times, with a pause of 0.5 seconds in between text searches. The operation
+will not last more than 3 seconds, and will stop once text has been found in
+every Match region.</p>
+<p>ActionOptions getText = new ActionOptions.Builder()
+.setAction(ActionOptions.Action.GET_TEXT)
+.setGetTextUntil(ActionOptions.GetTextUntil.TEXT_APPEARS)
+.setTimesToRepeatIndividualAction(5)
+.setMaxWait(3)
+.setAddH(20)
+.setPauseBetweenActions(.5)
+.setMinSimilarity(.75)
+.build();</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="typetext-type">TypeText (TYPE)<a href="#typetext-type" class="hash-link" aria-label="Direct link to TypeText (TYPE)" title="Direct link to TypeText (TYPE)">​</a></h2>
+<p>Types text to the window in focus.</p>
+<p>Types all Strings in the first ObjectCollection.
+The option PauseBetweenIndividualActions gives the pause between typing Strings.
+<a href="/brobot/docs/1.0.6/API/data-types/actionOptions#typing">Type-specific options</a> include:</p>
+<ul>
+<li>TypeDelay sets the delay between characters.</li>
+<li>Modifiers are special keys such as CTRL and ALT that are held down during typing.
+They can be combined by adding them together.</li>
+</ul>
+<p>Example: With a delay between characters of 0.1 seconds, a pause between Strings
+of 0.2 seconds, type all Strings in the first ObjectCollection with the
+SHIFT key held down. Pause for 1 second when this is finished, and then do all
+of this again 1 more time.</p>
+<p>ActionOptions type = new ActionOptions.Builder()
+.setAction(ActionOptions.Action.TYPE)
+.setModifiers(Key.SHIFT)
+.setTypeDelay(.1)
+.setPauseBetweenActions(.2)
+.setPauseAfterEnd(1)
+.setMaxTimesToRepeatActionSequence(2)
+.build();</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="highlight-highlight">Highlight (HIGHLIGHT)<a href="#highlight-highlight" class="hash-link" aria-label="Direct link to Highlight (HIGHLIGHT)" title="Direct link to Highlight (HIGHLIGHT)">​</a></h2>
+<p>Highlights found Images and other objects in the first ObjectCollection.</p>
+<p><a href="/brobot/docs/1.0.6/API/data-types/actionOptions#highlighting">Highlight-specific options</a> include
+highlighting all at once or one at a time,
+highlight duration, and highlight color. Acceptable colors include
+black, blue, cyan, gray, green, magenta, orange, pink, red, white, yellow,
+lightGray, and darkGray. For more colors refer to the Sikuli documentation.</p>
+<p>Example: Highlight each Match one at a time in magenta for 2 seconds,
+with a 0.2 pause between highlights.</p>
+<p>ActionOptions highlight = new ActionOptions.Builder()
+.setAction(ActionOptions.Action.HIGHLIGHT)
+.setHighlightAllAtOnce(false)
+.setHighlightSeconds(2)
+.setHighlightColor(&quot;magenta&quot;)
+.setPauseBetweenActions(.2)
+.build();</p>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="waitvanish-vanish">WaitVanish (VANISH)<a href="#waitvanish-vanish" class="hash-link" aria-label="Direct link to WaitVanish (VANISH)" title="Direct link to WaitVanish (VANISH)">​</a></h2>
+<p>Waits for the Images to vanish.</p>
+<ul>
+<li>Returns a successful Matches object if at some point no objects are found.</li>
+<li>Returns an unsuccessful Matches object when at least one
+object exists for the entire wait period.</li>
+<li>The Matches object will contain a MatchObject for each Image
+found the last time Find was successful. Therefore, checking if the
+Matches object is empty will not give an indication of success or failure
+of the operation; as a rule, success should be ascertained with the
+isSuccess() method of the Matches object.</li>
+</ul>
+<p>Example: Searches the Images in the ObjectCollection with a minimum similarity of 0.9.
+The operation is unsuccessful when one of the Images is still found at the end of 3 seconds
+of searching. If at some point no Images are found, the operation is successful.</p>
+<p>ActionOptions vanish = new ActionOptions.Builder()
+.setAction(ActionOptions.Action.VANISH)
+.setMinSimilarity(.9)
+.setMaxWait(3)
+.build();</p></div><footer class="theme-doc-footer docusaurus-mt-lg"><div class="row margin-top--sm theme-doc-footer-edit-meta-row"><div class="col"><a href="https://github.com/jspinak/brobot/edit/main/docs/versioned_docs/version-1.0.6/API/functions/basic-actions.md" target="_blank" rel="noopener noreferrer" class="theme-edit-this-page"><svg fill="currentColor" height="20" width="20" viewBox="0 0 40 40" class="iconEdit_Z9Sw" aria-hidden="true"><g><path d="m34.5 11.7l-3 3.1-6.3-6.3 3.1-3q0.5-0.5 1.2-0.5t1.1 0.5l3.9 3.9q0.5 0.4 0.5 1.1t-0.5 1.2z m-29.5 17.1l18.4-18.5 6.3 6.3-18.4 18.4h-6.3v-6.2z"></path></g></svg>Edit this page</a></div><div class="col lastUpdated_JAkA"></div></div></footer></article><nav class="docusaurus-mt-lg pagination-nav" aria-label="Docs pages"><a class="pagination-nav__link pagination-nav__link--prev" href="/brobot/docs/1.0.6/API/data-types/matches"><div class="pagination-nav__sublabel">Previous</div><div class="pagination-nav__label">Matches</div></a><a class="pagination-nav__link pagination-nav__link--next" href="/brobot/docs/1.0.6/API/functions/composite-actions"><div class="pagination-nav__sublabel">Next</div><div class="pagination-nav__label">Composite Actions</div></a></nav></div></div><div class="col col--3"><div class="tableOfContents_bqdL thin-scrollbar theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a href="#click-click" class="table-of-contents__link toc-highlight">Click (CLICK)</a></li><li><a href="#defineregion-define" class="table-of-contents__link toc-highlight">DefineRegion (DEFINE)</a></li><li><a href="#find-find" class="table-of-contents__link toc-highlight">Find (FIND)</a></li><li><a href="#mousedown-mouse_down" class="table-of-contents__link toc-highlight">MouseDown (MOUSE_DOWN)</a></li><li><a href="#mouseup-mouse_up" class="table-of-contents__link toc-highlight">MouseUp (MOUSE_UP)</a></li><li><a href="#mousemove-move" class="table-of-contents__link toc-highlight">MouseMove (MOVE)</a></li><li><a href="#scrollmousewheel-scroll_mouse_wheel" class="table-of-contents__link toc-highlight">ScrollMouseWheel (SCROLL_MOUSE_WHEEL)</a></li><li><a href="#gettext-get_text" class="table-of-contents__link toc-highlight">GetText (GET_TEXT)</a></li><li><a href="#typetext-type" class="table-of-contents__link toc-highlight">TypeText (TYPE)</a></li><li><a href="#highlight-highlight" class="table-of-contents__link toc-highlight">Highlight (HIGHLIGHT)</a></li><li><a href="#waitvanish-vanish" class="table-of-contents__link toc-highlight">WaitVanish (VANISH)</a></li></ul></div></div></div></div></main></div></div></div><footer class="theme-layout-footer footer footer--dark"><div class="container container-fluid"><div class="row footer__links"><div class="theme-layout-footer-column col footer__col"><div class="footer__title">Docs</div><ul class="footer__items clean-list"><li class="footer__item"><a href="https://www.youtube.com/watch?v=aHnVQ8KmOVw" target="_blank" rel="noopener noreferrer" class="footer__link-item">Introductory Video</a></li><li class="footer__item"><a class="footer__link-item" href="/brobot/docs/getting-started/introduction">Get Started</a></li><li class="footer__item"><a class="footer__link-item" href="/brobot/visualAPI">The Visual API</a></li></ul></div><div class="theme-layout-footer-column col footer__col"><div class="footer__title">Community</div><ul class="footer__items clean-list"><li class="footer__item"><a href="https://stackoverflow.com/questions/tagged/brobot" target="_blank" rel="noopener noreferrer" class="footer__link-item">Stack Overflow<svg width="13.5" height="13.5" aria-hidden="true" class="iconExternalLink_nPIU"><use href="#theme-svg-external-link"></use></svg></a></li></ul></div><div class="theme-layout-footer-column col footer__col"><div class="footer__title">More</div><ul class="footer__items clean-list"><li class="footer__item"><a class="footer__link-item" href="/brobot/blog">Blog</a></li><li class="footer__item"><a href="https://github.com/jspinak/brobot" target="_blank" rel="noopener noreferrer" class="footer__link-item">GitHub<svg width="13.5" height="13.5" aria-hidden="true" class="iconExternalLink_nPIU"><use href="#theme-svg-external-link"></use></svg></a></li><li class="footer__item"><a href="https://www.youtube.com/channel/UCgRljq-lHkMLrzRzpJC4HNw" target="_blank" rel="noopener noreferrer" class="footer__link-item">YouTube<svg width="13.5" height="13.5" aria-hidden="true" class="iconExternalLink_nPIU"><use href="#theme-svg-external-link"></use></svg></a></li><li class="footer__item"><a href="https://search.maven.org/artifact/io.github.jspinak/brobot" target="_blank" rel="noopener noreferrer" class="footer__link-item">Maven Central<svg width="13.5" height="13.5" aria-hidden="true" class="iconExternalLink_nPIU"><use href="#theme-svg-external-link"></use></svg></a></li></ul></div></div><div class="footer__bottom text--center"><div class="footer__copyright">© 2025 Joshua Spinak · Free & Open Source</div></div></div></footer></div>
+</body>
+</html>

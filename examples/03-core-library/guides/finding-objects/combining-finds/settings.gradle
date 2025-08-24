@@ -1,8 +1,0 @@
-rootProject.name = 'combining-finds-example'
-
-// Use local Brobot library
-includeBuild('../../../../../') {
-    dependencySubstitution {
-        substitute module('io.github.jspinak:brobot') using project(':library')
-    }
-}
