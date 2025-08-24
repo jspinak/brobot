@@ -1,0 +1,401 @@
+package io.github.jspinak.brobot.util.geometry;
+
+import io.github.jspinak.brobot.model.element.Location;
+import io.github.jspinak.brobot.model.element.Region;
+import io.github.jspinak.brobot.test.BrobotTestBase;
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.Arrays;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+/**
+ * Unit tests for DistanceCalculator utility class.
+ * Tests distance calculations between points, regions, and collections.
+ */
+@ExtendWith(MockitoExtension.class)
+class DistanceCalculatorTest extends BrobotTestBase {
+    
+    private DistanceCalculator calculator;
+    
+    @BeforeEach
+    @Override
+    public void setupTest() {
+        super.setupTest();
+        calculator = new DistanceCalculator();
+    }
+    
+    @Nested
+    @DisplayName("Point-to-Point Distance Tests")
+    class PointToPointDistanceTests {
+        
+        @Test
+        @DisplayName("Should calculate Euclidean distance between two points")
+        void shouldCalculateEuclideanDistanceBetweenTwoPoints() {
+            // Given
+            Location point1 = new Location(0, 0);
+            Location point2 = new Location(3, 4);
+            
+            // When
+            double distance = calculator.euclidean(point1, point2);
+            
+            // Then
+            assertEquals(5.0, distance, 0.001); // 3-4-5 triangle
+        }
+        
+        @Test
+        @DisplayName("Should calculate Manhattan distance between two points")
+        void shouldCalculateManhattanDistanceBetweenTwoPoints() {
+            // Given
+            Location point1 = new Location(0, 0);
+            Location point2 = new Location(3, 4);
+            
+            // When
+            double distance = calculator.manhattanDistance(point1, point2);
+            
+            // Then
+            assertEquals(7.0, distance, 0.001); // |3-0| + |4-0| = 7
+        }
+        
+        @Test
+        @DisplayName("Should return zero distance for same point")
+        void shouldReturnZeroDistanceForSamePoint() {
+            // Given
+            Location point = new Location(10, 20);
+            
+            // When
+            double euclidean = calculator.euclideanDistance(point, point);
+            double manhattan = calculator.manhattanDistance(point, point);
+            
+            // Then
+            assertEquals(0.0, euclidean);
+            assertEquals(0.0, manhattan);
+        }
+        
+        @Test
+        @DisplayName("Should handle negative coordinates")
+        void shouldHandleNegativeCoordinates() {
+            // Given
+            Location point1 = new Location(-5, -10);
+            Location point2 = new Location(5, 10);
+            
+            // When
+            double distance = calculator.euclidean(point1, point2);
+            
+            // Then
+            double expected = Math.sqrt(100 + 400); // sqrt(10^2 + 20^2)
+            assertEquals(expected, distance, 0.001);
+        }
+    }
+    
+    @Nested
+    @DisplayName("Region Distance Tests")
+    class RegionDistanceTests {
+        
+        @Test
+        @DisplayName("Should calculate distance between region centers")
+        void shouldCalculateDistanceBetweenRegionCenters() {
+            // Given
+            Region region1 = new Region(0, 0, 10, 10); // center at (5, 5)
+            Region region2 = new Region(20, 20, 10, 10); // center at (25, 25)
+            
+            // When
+            double distance = calculator.regionCenterDistance(region1, region2);
+            
+            // Then
+            double expected = Math.sqrt(400 + 400); // sqrt((25-5)^2 + (25-5)^2)
+            assertEquals(expected, distance, 0.001);
+        }
+        
+        @Test
+        @DisplayName("Should calculate minimum distance between regions")
+        void shouldCalculateMinimumDistanceBetweenRegions() {
+            // Given
+            Region region1 = new Region(0, 0, 10, 10);
+            Region region2 = new Region(20, 0, 10, 10);
+            
+            // When
+            double distance = calculator.minimumRegionDistance(region1, region2);
+            
+            // Then
+            assertEquals(10.0, distance, 0.001); // Gap between regions
+        }
+        
+        @Test
+        @DisplayName("Should return zero for overlapping regions")
+        void shouldReturnZeroForOverlappingRegions() {
+            // Given
+            Region region1 = new Region(0, 0, 20, 20);
+            Region region2 = new Region(10, 10, 20, 20);
+            
+            // When
+            double distance = calculator.minimumRegionDistance(region1, region2);
+            
+            // Then
+            assertEquals(0.0, distance);
+        }
+        
+        @Test
+        @DisplayName("Should calculate distance from point to region")
+        void shouldCalculateDistanceFromPointToRegion() {
+            // Given
+            Location point = new Location(50, 50);
+            Region region = new Region(0, 0, 20, 20);
+            
+            // When
+            double distance = calculator.pointToRegionDistance(point, region);
+            
+            // Then
+            // Point is at (50,50), nearest corner of region is at (20,20)
+            double expected = Math.sqrt(900 + 900); // sqrt(30^2 + 30^2)
+            assertEquals(expected, distance, 0.001);
+        }
+    }
+    
+    @Nested
+    @DisplayName("Nearest Neighbor Tests")
+    class NearestNeighborTests {
+        
+        @Test
+        @DisplayName("Should find nearest point in collection")
+        void shouldFindNearestPointInCollection() {
+            // Given
+            Location target = new Location(0, 0);
+            List<Location> points = Arrays.asList(
+                new Location(10, 10),
+                new Location(5, 5),
+                new Location(20, 20)
+            );
+            
+            // When
+            Location nearest = calculator.findNearestPoint(target, points);
+            
+            // Then
+            assertEquals(new Location(5, 5), nearest);
+        }
+        
+        @Test
+        @DisplayName("Should find k nearest neighbors")
+        void shouldFindKNearestNeighbors() {
+            // Given
+            Location target = new Location(0, 0);
+            List<Location> points = Arrays.asList(
+                new Location(10, 10),
+                new Location(5, 5),
+                new Location(20, 20),
+                new Location(3, 3)
+            );
+            
+            // When
+            List<Location> nearest = calculator.findKNearestPoints(target, points, 2);
+            
+            // Then
+            assertEquals(2, nearest.size());
+            assertTrue(nearest.contains(new Location(3, 3)));
+            assertTrue(nearest.contains(new Location(5, 5)));
+        }
+        
+        @Test
+        @DisplayName("Should handle empty collection")
+        void shouldHandleEmptyCollection() {
+            // Given
+            Location target = new Location(0, 0);
+            List<Location> emptyList = Arrays.asList();
+            
+            // When
+            Location nearest = calculator.findNearestPoint(target, emptyList);
+            
+            // Then
+            assertNull(nearest);
+        }
+        
+        @Test
+        @DisplayName("Should find farthest point")
+        void shouldFindFarthestPoint() {
+            // Given
+            Location target = new Location(0, 0);
+            List<Location> points = Arrays.asList(
+                new Location(10, 10),
+                new Location(5, 5),
+                new Location(20, 20)
+            );
+            
+            // When
+            Location farthest = calculator.findFarthestPoint(target, points);
+            
+            // Then
+            assertEquals(new Location(20, 20), farthest);
+        }
+    }
+    
+    @Nested
+    @DisplayName("Distance Matrix Tests")
+    class DistanceMatrixTests {
+        
+        @Test
+        @DisplayName("Should compute distance matrix for points")
+        void shouldComputeDistanceMatrixForPoints() {
+            // Given
+            List<Location> points = Arrays.asList(
+                new Location(0, 0),
+                new Location(3, 4),
+                new Location(6, 8)
+            );
+            
+            // When
+            double[][] matrix = calculator.computeDistanceMatrix(points);
+            
+            // Then
+            assertEquals(3, matrix.length);
+            assertEquals(3, matrix[0].length);
+            
+            // Check diagonal is zero
+            assertEquals(0.0, matrix[0][0]);
+            assertEquals(0.0, matrix[1][1]);
+            assertEquals(0.0, matrix[2][2]);
+            
+            // Check symmetry
+            assertEquals(matrix[0][1], matrix[1][0]);
+            assertEquals(matrix[0][2], matrix[2][0]);
+            assertEquals(matrix[1][2], matrix[2][1]);
+            
+            // Check specific distances
+            assertEquals(5.0, matrix[0][1], 0.001); // Distance from (0,0) to (3,4)
+            assertEquals(10.0, matrix[0][2], 0.001); // Distance from (0,0) to (6,8)
+            assertEquals(5.0, matrix[1][2], 0.001); // Distance from (3,4) to (6,8)
+        }
+        
+        @Test
+        @DisplayName("Should find minimum spanning tree distances")
+        void shouldFindMinimumSpanningTreeDistances() {
+            // Given
+            List<Location> points = Arrays.asList(
+                new Location(0, 0),
+                new Location(1, 0),
+                new Location(0, 1),
+                new Location(1, 1)
+            );
+            
+            // When
+            double totalDistance = calculator.minimumSpanningTreeDistance(points);
+            
+            // Then
+            // MST for a square should have total distance of 3 edges of length 1
+            assertEquals(3.0, totalDistance, 0.001);
+        }
+    }
+    
+    @Nested
+    @DisplayName("Centroid and Center Tests")
+    class CentroidAndCenterTests {
+        
+        @Test
+        @DisplayName("Should calculate centroid of points")
+        void shouldCalculateCentroidOfPoints() {
+            // Given
+            List<Location> points = Arrays.asList(
+                new Location(0, 0),
+                new Location(10, 0),
+                new Location(10, 10),
+                new Location(0, 10)
+            );
+            
+            // When
+            Location centroid = calculator.calculateCentroid(points);
+            
+            // Then
+            assertEquals(5.0, centroid.getX(), 0.001);
+            assertEquals(5.0, centroid.getY(), 0.001);
+        }
+        
+        @Test
+        @DisplayName("Should find geometric median")
+        void shouldFindGeometricMedian() {
+            // Given
+            List<Location> points = Arrays.asList(
+                new Location(0, 0),
+                new Location(10, 0),
+                new Location(5, 5)
+            );
+            
+            // When
+            Location median = calculator.findGeometricMedian(points);
+            
+            // Then
+            // Geometric median minimizes sum of distances
+            assertNotNull(median);
+            // Should be somewhere near the center
+            assertTrue(median.getX() >= 0 && median.getX() <= 10);
+            assertTrue(median.getY() >= 0 && median.getY() <= 5);
+        }
+        
+        @Test
+        @DisplayName("Should calculate bounding box center")
+        void shouldCalculateBoundingBoxCenter() {
+            // Given
+            List<Location> points = Arrays.asList(
+                new Location(0, 0),
+                new Location(10, 5),
+                new Location(5, 10)
+            );
+            
+            // When
+            Location center = calculator.boundingBoxCenter(points);
+            
+            // Then
+            assertEquals(5.0, center.getX(), 0.001);
+            assertEquals(5.0, center.getY(), 0.001);
+        }
+    }
+    
+    @Nested
+    @DisplayName("Direction and Angle Tests")
+    class DirectionAndAngleTests {
+        
+        @Test
+        @DisplayName("Should calculate angle between points")
+        void shouldCalculateAngleBetweenPoints() {
+            // Given
+            Location origin = new Location(0, 0);
+            Location point = new Location(1, 1);
+            
+            // When
+            double angle = calculator.angleInRadians(origin, point);
+            
+            // Then
+            assertEquals(Math.PI / 4, angle, 0.001); // 45 degrees
+        }
+        
+        @Test
+        @DisplayName("Should calculate bearing")
+        void shouldCalculateBearing() {
+            // Given
+            Location from = new Location(0, 0);
+            Location to = new Location(0, 10);
+            
+            // When
+            double bearing = calculator.bearingInDegrees(from, to);
+            
+            // Then
+            assertEquals(0.0, bearing, 0.001); // North
+        }
+        
+        @Test
+        @DisplayName("Should detect point alignment")
+        void shouldDetectPointAlignment() {
+            // Given
+            Location p1 = new Location(0, 0);
+            Location p2 = new Location(5, 5);
+            Location p3 = new Location(10, 10);
+            
+            // When
+            boolean aligned = calculator.arePointsCollinear(p1, p2, p3);
+            
+            // Then
+            assertTrue(aligned);
+        }
+    }
+}

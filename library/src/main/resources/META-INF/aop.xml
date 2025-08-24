@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE aspectj PUBLIC "-//AspectJ//DTD//EN" "https://www.eclipse.org/aspectj/dtd/aspectj.dtd">
+<aspectj>
+    <!-- 
+    AspectJ Load-Time Weaving Configuration for Brobot
+    
+    This configuration file controls how AspectJ weaves aspects into the application
+    at load time. It can be used as an alternative to compile-time weaving or
+    Spring's proxy-based AOP.
+    
+    To enable load-time weaving, add the following JVM argument:
+    -javaagent:path/to/aspectjweaver.jar
+    -->
+    
+    <weaver options="-verbose -showWeaveInfo">
+        <!-- Define which packages to weave -->
+        <include within="io.github.jspinak.brobot..*"/>
+        <include within="org.sikuli.script..*"/>
+        
+        <!-- Exclude test classes from weaving -->
+        <exclude within="*..*Test"/>
+        <exclude within="*..*Tests"/>
+        <exclude within="*..*TestCase"/>
+        
+        <!-- Exclude Spring configuration classes -->
+        <exclude within="*..config..*"/>
+        <exclude within="*..*Config"/>
+        
+        <!-- Performance optimization: exclude classes that don't need weaving -->
+        <exclude within="io.github.jspinak.brobot.model..*"/>
+        <exclude within="io.github.jspinak.brobot.exception..*"/>
+    </weaver>
+    
+    <aspects>
+        <!-- Core Aspects -->
+        <aspect name="io.github.jspinak.brobot.aspects.core.SikuliInterceptionAspect"/>
+        <aspect name="io.github.jspinak.brobot.aspects.core.ActionLifecycleAspect"/>
+        
+        <!-- Monitoring Aspects -->
+        <aspect name="io.github.jspinak.brobot.aspects.monitoring.PerformanceMonitoringAspect"/>
+        <aspect name="io.github.jspinak.brobot.aspects.monitoring.StateTransitionAspect"/>
+        
+        <!-- Recovery Aspects -->
+        <aspect name="io.github.jspinak.brobot.aspects.recovery.ErrorRecoveryAspect"/>
+        
+        <!-- Data Collection Aspects -->
+        <aspect name="io.github.jspinak.brobot.aspects.data.DatasetCollectionAspect"/>
+        
+        <!-- Display Aspects -->
+        <aspect name="io.github.jspinak.brobot.aspects.display.MultiMonitorRoutingAspect"/>
+        <aspect name="io.github.jspinak.brobot.aspects.display.VisualFeedbackAspect"/>
+        
+        <!-- Legacy Support Aspects -->
+        <aspect name="io.github.jspinak.brobot.tools.logging.adapter.ConsoleReporterAspect"/>
+    </aspects>
+</aspectj>

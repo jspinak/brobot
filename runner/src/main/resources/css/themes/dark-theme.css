@@ -1,0 +1,352 @@
+/*** DARK THEME WITH WCAG COMPLIANCE ***/
+
+.root {
+    /* Override base colors for dark theme */
+    -fx-base: #0d1117;
+    -fx-background: #0d1117;
+    -fx-control-inner-background: #161b22;
+
+    /* Override text colors for dark theme - WCAG compliant contrast */
+    -fx-text-dark: #f0f6fc;  /* High contrast white */
+    -fx-text-medium: #e6edf3; /* Medium contrast light gray */
+    -fx-text-light: #8b949e;  /* For secondary text */
+
+    /* Adjust other colors for dark theme */
+    -fx-very-light-gray: #161b22;
+    -fx-light-gray: #30363d;
+    -fx-medium-gray: #8b949e;
+    -fx-dark-gray: #e6edf3;
+    -fx-white: #0d1117;
+    -fx-dark: #f0f6fc;
+
+    /* Primary and accent colors */
+    -fx-primary: #1f6feb;
+    -fx-primary-dark: #0969da;
+    -fx-accent: #238636;
+    
+    /* Adjust the shadow color for dark theme */
+    -fx-shadow-color: rgba(0, 0, 0, 0.6);
+
+    /* Adjust border color for dark theme */
+    -fx-border-color: #30363d;
+    -fx-hover-color: rgba(31, 111, 235, 0.2);
+}
+
+/* Override specific components for dark theme */
+
+/* Header */
+.app-header, .header-panel {
+    -fx-background-color: #010409;
+    -fx-border-color: transparent transparent #30363d transparent;
+    -fx-border-width: 0 0 1 0;
+}
+
+/* Text colors - force high contrast */
+.label, Label {
+    -fx-text-fill: #e6edf3 !important;
+}
+
+Text {
+    -fx-fill: #e6edf3 !important;
+}
+
+.header-title {
+    -fx-text-fill: #f0f6fc !important;
+    -fx-font-weight: bold;
+}
+
+/* Button styles with proper contrast */
+.button {
+    -fx-background-color: #21262d !important;
+    -fx-text-fill: #f0f6fc !important;
+    -fx-border-color: #30363d !important;
+    -fx-border-width: 1px;
+    -fx-border-radius: 6px;
+    -fx-background-radius: 6px;
+}
+
+.button:hover {
+    -fx-background-color: #30363d !important;
+    -fx-text-fill: #f0f6fc !important;
+    -fx-border-color: #8b949e !important;
+}
+
+/* Theme toggle button */
+.theme-toggle {
+    -fx-background-color: #1f6feb !important;
+    -fx-text-fill: #ffffff !important;
+    -fx-border-color: transparent !important;
+}
+
+.theme-toggle:hover {
+    -fx-background-color: #2d79f5 !important;
+}
+
+/* Primary button retains its color in dark mode */
+.button-primary {
+    -fx-background-color: -fx-primary;
+    -fx-text-fill: -fx-white;
+    -fx-border-color: -fx-primary-dark;
+}
+
+/* Secondary button retains its color in dark mode */
+.button-secondary {
+    -fx-background-color: -fx-secondary;
+    -fx-text-fill: -fx-white;
+    -fx-border-color: -fx-secondary-dark;
+}
+
+/* Text field with high contrast */
+.text-field, .text-area {
+    -fx-background-color: #0d1117 !important;
+    -fx-text-fill: #f0f6fc !important;
+    -fx-prompt-text-fill: #8b949e !important;
+    -fx-border-color: #30363d !important;
+    -fx-border-width: 1px;
+    -fx-border-radius: 6px;
+    -fx-background-radius: 6px;
+}
+
+.text-field:focused, .text-area:focused {
+    -fx-border-color: #58a6ff !important;
+}
+
+.text-area .content {
+    -fx-background-color: #0d1117 !important;
+}
+
+/* List view with better contrast */
+.list-view {
+    -fx-background-color: #0d1117 !important;
+    -fx-border-color: #30363d !important;
+}
+
+.list-cell {
+    -fx-background-color: transparent !important;
+    -fx-text-fill: #e6edf3 !important;
+}
+
+.list-cell:hover {
+    -fx-background-color: #161b22 !important;
+}
+
+.list-cell:selected {
+    -fx-background-color: #1f3c88 !important;
+    -fx-text-fill: #f0f6fc !important;
+}
+
+/* Table view */
+.table-view {
+    -fx-background-color: #303134;
+    -fx-border-color: #5f6368;
+}
+
+.table-view .column-header {
+    -fx-background-color: #202124;
+    -fx-border-color: #5f6368;
+}
+
+.table-view .table-cell {
+    -fx-text-fill: -fx-text-dark;
+}
+
+.table-row-cell {
+    -fx-background-color: #303134;
+    -fx-border-color: #5f6368;
+}
+
+.table-row-cell:odd {
+    -fx-background-color: #202124;
+}
+
+/* Tab pane with enhanced visibility */
+.tab-pane {
+    -fx-background-color: transparent !important;
+}
+
+.tab-header-area {
+    -fx-background-color: #010409 !important;
+    -fx-border-color: transparent transparent #30363d transparent !important;
+    -fx-border-width: 0 0 1 0 !important;
+}
+
+.tab {
+    -fx-background-color: transparent !important;
+    -fx-border-color: transparent !important;
+    -fx-padding: 8 16 8 16 !important;
+}
+
+.tab:hover {
+    -fx-background-color: #161b22 !important;
+}
+
+.tab:selected {
+    -fx-background-color: transparent !important;
+    -fx-border-color: transparent transparent #1f6feb transparent !important;
+    -fx-border-width: 0 0 3 0 !important;
+}
+
+.tab .tab-label {
+    -fx-text-fill: #8b949e !important;
+}
+
+.tab:hover .tab-label {
+    -fx-text-fill: #e6edf3 !important;
+}
+
+.tab:selected .tab-label {
+    -fx-text-fill: #f0f6fc !important;
+    -fx-font-weight: bold !important;
+}
+
+/* Card and panels with proper contrast */
+.card, .brobot-card {
+    -fx-background-color: #161b22 !important;
+    -fx-border-color: #30363d !important;
+    -fx-border-width: 1px;
+    -fx-border-radius: 6px;
+    -fx-background-radius: 6px;
+}
+
+/* Panel */
+.panel, .brobot-panel {
+    -fx-background-color: #161b22 !important;
+    -fx-border-color: #30363d !important;
+    -fx-border-width: 1px;
+    -fx-border-radius: 6px;
+    -fx-background-radius: 6px;
+}
+
+.panel-header {
+    -fx-background-color: #0d1117 !important;
+    -fx-border-color: transparent transparent #30363d transparent !important;
+    -fx-border-width: 0 0 1 0 !important;
+}
+
+/* Alert boxes */
+.alert-box {
+    -fx-background-color: #303134;
+    -fx-border-color: #5f6368;
+}
+
+/* Status bar */
+.status-bar {
+    -fx-background-color: #010409 !important;
+    -fx-border-color: #30363d transparent transparent transparent !important;
+    -fx-border-width: 1 0 0 0 !important;
+}
+
+.status-bar .label {
+    -fx-text-fill: #e6edf3 !important;
+}
+
+/* Online indicator */
+.online-indicator {
+    -fx-background-color: #238636 !important;
+    -fx-text-fill: #ffffff !important;
+    -fx-padding: 4 8 4 8 !important;
+    -fx-background-radius: 12px !important;
+}
+
+/* Sidebar */
+.sidebar {
+    -fx-background-color: #202124;
+}
+
+/* Breadcrumb */
+.breadcrumb-bar {
+    -fx-background-color: #202124;
+    -fx-border-color: #5f6368;
+}
+
+/* Checkbox and radio button */
+.check-box > .box, .radio-button > .radio {
+    -fx-background-color: #303134;
+    -fx-border-color: #5f6368;
+}
+
+/* Combo box with high contrast */
+.combo-box, .choice-box {
+    -fx-background-color: #0d1117 !important;
+    -fx-border-color: #30363d !important;
+    -fx-border-width: 1px;
+}
+
+.combo-box .list-cell,
+.choice-box .list-cell {
+    -fx-text-fill: #e6edf3 !important;
+    -fx-background-color: #0d1117 !important;
+}
+
+.combo-box:hover,
+.choice-box:hover {
+    -fx-border-color: #8b949e !important;
+}
+
+.combo-box-popup > .list-view {
+    -fx-background-color: #161b22 !important;
+    -fx-border-color: #30363d !important;
+}
+
+/* Tooltip with proper contrast */
+.tooltip {
+    -fx-background-color: #1c2128 !important;
+    -fx-text-fill: #f0f6fc !important;
+    -fx-border-color: #30363d !important;
+    -fx-border-width: 1px;
+    -fx-border-radius: 6px;
+    -fx-background-radius: 6px;
+    -fx-padding: 8 12 8 12;
+}
+
+/* Progress bar */
+.progress-bar {
+    -fx-background-color: #21262d !important;
+    -fx-border-color: #30363d !important;
+}
+
+.progress-bar .bar {
+    -fx-background-color: #1f6feb !important;
+}
+
+/* Force all backgrounds to be dark */
+.root, .app-container, .content-area {
+    -fx-background-color: #0d1117 !important;
+}
+
+/* Ensure spinner text is visible */
+.spinner {
+    -fx-background-color: #0d1117 !important;
+    -fx-border-color: #30363d !important;
+}
+
+.spinner .text-field {
+    -fx-text-fill: #f0f6fc !important;
+}
+
+/* Fix table contrast */
+.table-view {
+    -fx-background-color: #0d1117 !important;
+    -fx-border-color: #30363d !important;
+}
+
+.table-view .column-header {
+    -fx-background-color: #161b22 !important;
+    -fx-border-color: #30363d !important;
+}
+
+.table-view .column-header .label {
+    -fx-text-fill: #f0f6fc !important;
+    -fx-font-weight: bold !important;
+}
+
+.table-row-cell {
+    -fx-background-color: #0d1117 !important;
+    -fx-text-fill: #e6edf3 !important;
+    -fx-border-color: transparent transparent #21262d transparent !important;
+    -fx-border-width: 0 0 1 0 !important;
+}
+
+.table-cell {
+    -fx-text-fill: #e6edf3 !important;
+}

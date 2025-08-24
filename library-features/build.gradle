@@ -1,0 +1,19 @@
+// In brobot/library-features/build.gradle
+
+plugins {
+    // This module is a development-only module, not a published library.
+    id 'java'
+}
+
+dependencies {
+    // This makes the library code and its api dependencies (like SikuliX) available.
+    // Note: Spring context is now provided transitively by the library
+    implementation project(':library')
+
+    // Add any dependencies that are ONLY needed for your experimental features here.
+    implementation 'com.github.stephenc.monte:monte-screen-recorder:0.7.7.0'
+    implementation 'com.github.kwhat:jnativehook:2.2.2'
+
+    // For testing and CI configuration within this module.
+    implementation "org.mockito:mockito-junit-jupiter:5.11.0"
+}

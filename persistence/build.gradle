@@ -1,0 +1,84 @@
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+    id 'org.springframework.boot' version '3.2.4' apply false
+    id 'io.spring.dependency-management'
+}
+
+group = 'io.github.jspinak'
+version = '1.2.0'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // Core dependency
+    implementation project(':library')
+    
+    // Spring Boot (optional)
+    compileOnly 'org.springframework.boot:spring-boot-starter:3.1.5'
+    compileOnly 'org.springframework.boot:spring-boot-starter-data-jpa:3.1.5'
+    
+    // H2 Database (optional)
+    compileOnly 'com.h2database:h2:2.2.224'
+    
+    // Jackson for JSON
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.3'
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.3'
+    
+    // Apache Commons CSV
+    implementation 'org.apache.commons:commons-csv:1.10.0'
+    
+    // Lombok
+    compileOnly 'org.projectlombok:lombok:1.18.30'
+    annotationProcessor 'org.projectlombok:lombok:1.18.30'
+    
+    // Logging
+    implementation 'org.slf4j:slf4j-api:2.0.9'
+    
+    // Testing
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.0'
+    testImplementation 'org.mockito:mockito-core:5.5.0'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test:3.1.5'
+    testRuntimeOnly 'com.h2database:h2:2.2.224'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+// Publishing configuration for local Maven repository
+publishing {
+    publications {
+        maven(MavenPublication) {
+            from components.java
+            
+            pom {
+                name = 'Brobot Persistence Module'
+                description = 'Optional persistence module for Brobot library providing file and database persistence'
+            }
+        }
+    }
+    
+    repositories {
+        maven {
+            name = 'local'
+            url = layout.buildDirectory.dir('repo')
+        }
+    }
+}
+
+jar {
+    manifest {
+        attributes(
+            'Implementation-Title': 'Brobot Persistence',
+            'Implementation-Version': version
+        )
+    }
+}

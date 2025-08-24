@@ -1,0 +1,37 @@
+/*** LIGHT THEME WITH PROPER CONTRAST ***/
+
+/* Import enhanced light theme styles */
+@import url("light-theme-enhanced.css");
+
+/* Any additional overrides specific to this light theme */
+.root {
+    /* Ensure text is always visible */
+    -fx-text-fill: #24292f !important;
+}
+
+/* Force all labels and text to be dark */
+.label, Label, Text, .text {
+    -fx-text-fill: #24292f !important;
+    -fx-fill: #24292f !important;
+}
+
+/* Ensure buttons have visible text */
+.button {
+    -fx-text-fill: #24292f !important;
+}
+
+/* Fix any components that might have inherited dark mode styles */
+.text-field, .text-area, .combo-box, .choice-box {
+    -fx-text-fill: #24292f !important;
+    -fx-background-color: #ffffff !important;
+}
+
+/* Ensure table text is visible */
+.table-cell, .list-cell, .tree-cell {
+    -fx-text-fill: #24292f !important;
+}
+
+/* Fix spinner text visibility */
+.spinner .text-field {
+    -fx-text-fill: #24292f !important;
+}

@@ -1,0 +1,337 @@
+/**
+ * Brobot Animation Styles
+ * Smooth transitions and animations for UI components
+ */
+
+/* Global Transitions */
+* {
+    -fx-transition-duration: 0.2s;
+}
+
+/* Button Animations */
+.button {
+    transition: all 0.2s ease-in-out;
+}
+
+.button:hover {
+    transition: all 0.15s ease-out;
+}
+
+.button:pressed {
+    -fx-scale-x: 0.95;
+    -fx-scale-y: 0.95;
+    transition: all 0.1s ease-in;
+}
+
+/* Task Button Specific Animations */
+.task-button {
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.task-button:hover {
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 10, 0, 0, 2);
+    transition: all 0.2s ease-out;
+}
+
+/* Pulse Animation for Running Status */
+@keyframes pulse {
+    0% {
+        -fx-opacity: 1;
+    }
+    50% {
+        -fx-opacity: 0.6;
+    }
+    100% {
+        -fx-opacity: 1;
+    }
+}
+
+.status-label.running {
+    animation: pulse 2s ease-in-out infinite;
+}
+
+/* Fade In Animation */
+@keyframes fadeIn {
+    from {
+        -fx-opacity: 0;
+        -fx-translate-y: -10;
+    }
+    to {
+        -fx-opacity: 1;
+        -fx-translate-y: 0;
+    }
+}
+
+.fade-in {
+    animation: fadeIn 0.3s ease-out;
+}
+
+/* Slide In Animations */
+@keyframes slideInLeft {
+    from {
+        -fx-translate-x: -20;
+        -fx-opacity: 0;
+    }
+    to {
+        -fx-translate-x: 0;
+        -fx-opacity: 1;
+    }
+}
+
+@keyframes slideInRight {
+    from {
+        -fx-translate-x: 20;
+        -fx-opacity: 0;
+    }
+    to {
+        -fx-translate-x: 0;
+        -fx-opacity: 1;
+    }
+}
+
+.slide-in-left {
+    animation: slideInLeft 0.3s ease-out;
+}
+
+.slide-in-right {
+    animation: slideInRight 0.3s ease-out;
+}
+
+/* Category Box Animations */
+.category-box {
+    transition: all 0.3s ease-in-out;
+}
+
+.category-box:hover {
+    -fx-border-color: -color-accent-emphasis;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 8, 0, 0, 2);
+    transition: all 0.2s ease-out;
+}
+
+/* Loading Spinner */
+@keyframes spin {
+    from {
+        -fx-rotate: 0;
+    }
+    to {
+        -fx-rotate: 360;
+    }
+}
+
+.loading-spinner {
+    animation: spin 1s linear infinite;
+}
+
+/* Progress Bar Animation */
+.progress-bar > .bar {
+    transition: -fx-background-color 0.3s ease-in-out;
+}
+
+/* Tab Animation */
+.tab-pane .tab {
+    transition: all 0.2s ease-in-out;
+}
+
+.tab-pane .tab:selected {
+    -fx-scale-y: 1.05;
+    transition: all 0.15s ease-out;
+}
+
+/* Tooltip Animation */
+.tooltip {
+    -fx-opacity: 0;
+    transition: opacity 0.2s ease-in-out;
+}
+
+.tooltip.showing {
+    -fx-opacity: 1;
+}
+
+/* Focus Glow Animation */
+@keyframes focusGlow {
+    0% {
+        -fx-effect: dropshadow(gaussian, -color-accent-emphasis, 0, 0, 0, 0);
+    }
+    50% {
+        -fx-effect: dropshadow(gaussian, -color-accent-emphasis, 10, 0, 0, 0);
+    }
+    100% {
+        -fx-effect: dropshadow(gaussian, -color-accent-emphasis, 0, 0, 0, 0);
+    }
+}
+
+.button:focused {
+    animation: focusGlow 1.5s ease-in-out infinite;
+}
+
+/* Error Shake Animation */
+@keyframes shake {
+    0%, 100% {
+        -fx-translate-x: 0;
+    }
+    10%, 30%, 50%, 70%, 90% {
+        -fx-translate-x: -5;
+    }
+    20%, 40%, 60%, 80% {
+        -fx-translate-x: 5;
+    }
+}
+
+.error-shake {
+    animation: shake 0.5s ease-in-out;
+}
+
+/* Success Check Animation */
+@keyframes checkmark {
+    0% {
+        -fx-scale-x: 0;
+        -fx-scale-y: 0;
+        -fx-opacity: 0;
+    }
+    50% {
+        -fx-scale-x: 1.2;
+        -fx-scale-y: 1.2;
+    }
+    100% {
+        -fx-scale-x: 1;
+        -fx-scale-y: 1;
+        -fx-opacity: 1;
+    }
+}
+
+.success-check {
+    animation: checkmark 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Expand/Collapse Animation */
+@keyframes expand {
+    from {
+        -fx-max-height: 0;
+        -fx-opacity: 0;
+    }
+    to {
+        -fx-max-height: 500;
+        -fx-opacity: 1;
+    }
+}
+
+@keyframes collapse {
+    from {
+        -fx-max-height: 500;
+        -fx-opacity: 1;
+    }
+    to {
+        -fx-max-height: 0;
+        -fx-opacity: 0;
+    }
+}
+
+.expanding {
+    animation: expand 0.3s ease-out forwards;
+}
+
+.collapsing {
+    animation: collapse 0.3s ease-in forwards;
+}
+
+/* Notification Slide */
+@keyframes notificationSlide {
+    0% {
+        -fx-translate-y: -100%;
+        -fx-opacity: 0;
+    }
+    10% {
+        -fx-translate-y: 0;
+        -fx-opacity: 1;
+    }
+    90% {
+        -fx-translate-y: 0;
+        -fx-opacity: 1;
+    }
+    100% {
+        -fx-translate-y: -100%;
+        -fx-opacity: 0;
+    }
+}
+
+.notification {
+    animation: notificationSlide 3s ease-in-out;
+}
+
+/* Ripple Effect */
+@keyframes ripple {
+    0% {
+        -fx-scale-x: 0;
+        -fx-scale-y: 0;
+        -fx-opacity: 0.5;
+    }
+    100% {
+        -fx-scale-x: 1;
+        -fx-scale-y: 1;
+        -fx-opacity: 0;
+    }
+}
+
+.ripple {
+    animation: ripple 0.6s ease-out;
+}
+
+/* List/Tree Item Animation */
+.list-cell, .tree-cell {
+    transition: all 0.2s ease-in-out;
+}
+
+.list-cell:hover, .tree-cell:hover {
+    -fx-background-color: -color-bg-subtle;
+    -fx-translate-x: 2;
+    transition: all 0.15s ease-out;
+}
+
+/* Split Pane Divider Animation */
+.split-pane-divider {
+    transition: -fx-background-color 0.2s ease-in-out;
+}
+
+.split-pane-divider:hover {
+    -fx-background-color: -color-accent-emphasis;
+}
+
+/* Menu Animation */
+.context-menu {
+    -fx-opacity: 0;
+    -fx-scale-x: 0.95;
+    -fx-scale-y: 0.95;
+    transition: all 0.15s ease-out;
+}
+
+.context-menu.showing {
+    -fx-opacity: 1;
+    -fx-scale-x: 1;
+    -fx-scale-y: 1;
+}
+
+/* Smooth Scrolling */
+.scroll-pane {
+    -fx-smooth-scrolling: true;
+}
+
+/* Performance Optimization Classes */
+.no-animation {
+    transition: none !important;
+    animation: none !important;
+}
+
+.fast-animation {
+    transition-duration: 0.1s !important;
+    animation-duration: 0.1s !important;
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}

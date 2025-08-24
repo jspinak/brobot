@@ -1,0 +1,50 @@
+// build.gradle (Root Project: brobot)
+// This file configures settings shared across all modules in the project.
+
+plugins {
+    // Make the Spring Boot plugin version available to sub-projects without applying it to the root.
+    id 'org.springframework.boot' version '3.2.4' apply false
+
+    // This plugin is applied to the root to make it available to all sub-projects.
+    id 'io.freefair.lombok' version '8.11'
+    
+    // JReleaser for publishing to Maven Central
+    id 'org.jreleaser' version '1.15.0' apply false
+}
+
+allprojects {
+    group = 'io.github.jspinak.brobot'
+    version = '1.1.0'
+
+    repositories {
+        mavenCentral()
+    }
+}
+
+subprojects {
+    apply plugin: 'java'
+    apply plugin: 'io.freefair.lombok'
+    apply plugin: 'io.spring.dependency-management'
+
+    java {
+        // Use a toolchain to ensure a consistent JDK is used for compiling and running.
+        sourceCompatibility = JavaVersion.VERSION_21
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(21)
+        }
+    }
+
+    // Dependencies are managed at the module level
+    // Modules that depend on 'library' will get its API dependencies transitively
+
+    // Central dependency management for all sub-projects.
+    dependencyManagement {
+        imports {
+            mavenBom "org.springframework.boot:spring-boot-dependencies:3.2.4"
+        }
+    }
+
+    test {
+        useJUnitPlatform()
+    }
+}

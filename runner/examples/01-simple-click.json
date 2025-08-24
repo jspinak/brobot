@@ -1,0 +1,82 @@
+{
+  "name": "SimpleClickExample",
+  "version": "1.0.0",
+  "description": "A basic example that demonstrates clicking on a button",
+  "author": "Brobot Examples",
+  "tags": ["beginner", "click", "basic"],
+  
+  "settings": {
+    "execution": {
+      "speed": "normal",
+      "delay": 0.5,
+      "timeout": 30
+    },
+    "logging": {
+      "level": "info",
+      "console": true
+    }
+  },
+  
+  "states": [
+    {
+      "name": "MainScreen",
+      "description": "The main application screen",
+      "images": [
+        {
+          "name": "app_logo",
+          "path": "images/app_logo.png",
+          "similarity": 0.9,
+          "waitBefore": 1.0
+        }
+      ],
+      "actions": [
+        {
+          "type": "wait",
+          "duration": 2.0,
+          "description": "Wait for application to fully load"
+        },
+        {
+          "type": "click",
+          "target": "ok_button",
+          "button": "left",
+          "description": "Click the OK button"
+        }
+      ]
+    },
+    
+    {
+      "name": "ConfirmationDialog",
+      "description": "Confirmation dialog after clicking OK",
+      "images": [
+        {
+          "name": "ok_button",
+          "path": "images/ok_button.png",
+          "similarity": 0.95
+        },
+        {
+          "name": "confirm_dialog",
+          "path": "images/confirm_dialog.png",
+          "similarity": 0.9
+        }
+      ],
+      "actions": [
+        {
+          "type": "log",
+          "message": "Successfully clicked OK button and opened confirmation dialog"
+        }
+      ]
+    }
+  ],
+  
+  "transitions": [
+    {
+      "from": "MainScreen",
+      "to": "ConfirmationDialog",
+      "condition": {
+        "type": "imageAppears",
+        "target": "confirm_dialog",
+        "timeout": 5
+      }
+    }
+  ]
+}

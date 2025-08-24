@@ -1,0 +1,83 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.2.0'
+    id 'io.spring.dependency-management' version '1.1.0'
+}
+
+group = 'com.example'
+version = '1.0.0'
+sourceCompatibility = '21'
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+}
+
+dependencies {
+    // Brobot 1.1.0+ includes Spring, Lombok, SLF4J as transitive dependencies
+    implementation 'io.github.jspinak:brobot:1.1.0'
+    
+    // Only need annotation processor for Lombok
+    annotationProcessor 'org.projectlombok:lombok:1.18.32'
+    
+    // Testing dependencies
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testImplementation 'org.junit.jupiter:junit-jupiter-params'
+    testImplementation 'org.mockito:mockito-core'
+    testImplementation 'org.mockito:mockito-junit-jupiter'
+    testImplementation 'org.assertj:assertj-core'
+    testImplementation 'org.hamcrest:hamcrest'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+    
+    // Test configuration
+    testLogging {
+        events "passed", "skipped", "failed"
+        exceptionFormat "full"
+        showStandardStreams = false
+    }
+    
+    // Generate test reports
+    reports {
+        html.required = true
+        junitXml.required = true
+    }
+}
+
+// Task to run specific test suites
+task unitTests(type: Test) {
+    useJUnitPlatform {
+        excludeTags 'integration'
+    }
+}
+
+task integrationTests(type: Test) {
+    useJUnitPlatform {
+        includeTags 'integration'
+    }
+}
+
+// Task to run tests with coverage (JaCoCo plugin not included in this example)
+task testWithCoverage(type: Test) {
+    useJUnitPlatform()
+    testLogging {
+        events "passed", "skipped", "failed"
+    }
+}
+
+// Run all tests with verbose output
+task verboseTest(type: Test) {
+    testLogging {
+        events "started", "passed", "skipped", "failed", "standardOut", "standardError"
+        showStandardStreams = true
+    }
+}

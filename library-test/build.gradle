@@ -1,0 +1,190 @@
+// In brobot/library-test/build.gradle
+
+plugins {
+    // This applies the Spring Boot framework to your test module.
+    id 'org.springframework.boot'
+    // The 'java' plugin is included by the Spring Boot plugin automatically.
+}
+
+dependencies {
+    // This gives your tests access to the main 'library' code and its 'api' dependencies.
+    implementation project(':library')
+
+    // This single dependency provides JUnit 5, Mockito, AssertJ, and the Spring Test framework.
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+    // These dependencies are needed for your test code to compile.
+    testImplementation 'com.fasterxml.jackson.core:jackson-databind'
+    testImplementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+    testImplementation 'com.networknt:json-schema-validator:1.4.0'
+    testImplementation 'org.json:json:20240303'
+}
+
+// These tasks prevent Gradle from creating a runnable JAR for this module, which is correct.
+tasks.named('bootJar') {
+    enabled = false
+}
+tasks.named('jar') {
+    enabled = false
+}
+
+// ** THE FINAL FIX IS HERE **
+// This task explicitly finds the JARs containing native code and extracts them.
+tasks.register('copyTestNatives', Copy) {
+    dependsOn(project(':library').tasks.named('jar'))
+    from(configurations.testRuntimeClasspath.files.collect { file ->
+        file.isDirectory() ? file : zipTree(file).matching {
+            // Target common native library paths inside JARs
+            include "**/win32-x86-64/*.dll"
+            include "**/win32-x86/*.dll"
+            include "**/opencv/*.dll"
+        }
+    }) {
+        include "*.dll"
+    }
+    into layout.buildDirectory.dir("natives")
+}
+
+// The 'test' task will now depend on this new copy task.
+tasks.named('test', Test) {
+    dependsOn tasks.named('copyTestNatives')
+    useJUnitPlatform()
+
+    // This modifies the PATH environment variable for the test process.
+    // On Windows, this is the most reliable way to ensure native .dll files are found.
+    environment 'PATH', "${layout.buildDirectory.dir('natives').get().asFile.absolutePath};${System.getenv('PATH')}"
+    
+    // Disable OCR tests by default (for CI/CD environments)
+    systemProperty 'brobot.tests.ocr.disable', System.getProperty('brobot.tests.ocr.disable', 'true')
+    
+    // Configure JVM memory to avoid OutOfMemoryError with JavaCV/OpenCV
+    maxHeapSize = '6g'
+    jvmArgs '-XX:MaxRAMPercentage=80.0', '-XX:+UseG1GC', '-Dorg.bytedeco.javacpp.maxphysicalbytes=10G', '-Dorg.bytedeco.javacpp.maxbytes=0', '-Dorg.bytedeco.javacpp.cachedir=/tmp/javacpp-cache'
+    
+    // Configure test output
+    testLogging {
+        events "passed", "skipped", "failed"
+        exceptionFormat "full"
+    }
+}
+
+// Custom task for unit tests only
+tasks.register('unitTest', Test) {
+    useJUnitPlatform()
+    
+    systemProperty 'brobot.test.type', 'unit'
+    
+    // Configure JVM memory for unit tests
+    maxHeapSize = '2g'
+    jvmArgs '-XX:MaxRAMPercentage=75.0', '-XX:+UseG1GC', '-Dorg.bytedeco.javacpp.maxphysicalbytes=2G'
+    
+    testLogging {
+        events "passed", "skipped", "failed"
+        exceptionFormat "full"
+    }
+    
+    doFirst {
+        println "Running UNIT tests with mock data..."
+    }
+}
+
+// Custom task for integration tests only
+tasks.register('integrationTest', Test) {
+    dependsOn tasks.named('copyTestNatives')
+    useJUnitPlatform()
+    
+    systemProperty 'brobot.test.type', 'integration'
+    
+    // Ensure headless mode for WSL/CI
+    environment 'BROBOT_FORCE_HEADLESS', 'true'
+    environment 'BROBOT_ALLOW_SCREEN_CAPTURE', 'false'
+    environment 'PATH', "${layout.buildDirectory.dir('natives').get().asFile.absolutePath};${System.getenv('PATH')}"
+    
+    testLogging {
+        events "passed", "skipped", "failed"
+        exceptionFormat "full"
+        showStandardStreams = true // Show console output from tests
+    }
+    
+    doFirst {
+        println "Running INTEGRATION tests with real files in headless mode..."
+        println "Environment: BROBOT_FORCE_HEADLESS=true, BROBOT_ALLOW_SCREEN_CAPTURE=false"
+    }
+}
+
+// Custom task for tests without OCR
+tasks.register('testWithoutOcr', Test) {
+    dependsOn tasks.named('copyTestNatives')
+    useJUnitPlatform()
+    
+    // Disable OCR tests
+    systemProperty 'brobot.tests.ocr.disable', 'true'
+    
+    // Same environment as regular tests
+    environment 'PATH', "${layout.buildDirectory.dir('natives').get().asFile.absolutePath};${System.getenv('PATH')}"
+    
+    testLogging {
+        events "passed", "skipped", "failed"
+        exceptionFormat "full"
+    }
+    
+    doFirst {
+        println "Running tests with OCR disabled..."
+        println "OCR-dependent tests will be skipped"
+    }
+}
+
+// Custom task for OCR tests only
+tasks.register('ocrTest', Test) {
+    dependsOn tasks.named('copyTestNatives')
+    useJUnitPlatform()
+    
+    // Only run tests that require OCR
+    systemProperty 'brobot.tests.ocr.enable', 'true'
+    
+    environment 'PATH', "${layout.buildDirectory.dir('natives').get().asFile.absolutePath};${System.getenv('PATH')}"
+    
+    testLogging {
+        events "passed", "skipped", "failed"
+        exceptionFormat "full"
+        showStandardStreams = true
+    }
+    
+    doFirst {
+        println "Running OCR tests only..."
+        println "Non-OCR tests will be excluded"
+    }
+}
+
+// Custom task for local testing with OCR enabled (for WSL/Ubuntu)
+tasks.register('testLocal', Test) {
+    dependsOn tasks.named('copyTestNatives')
+    useJUnitPlatform()
+    
+    // Enable OCR tests for local development
+    systemProperty 'brobot.tests.ocr.disable', 'false'
+    
+    // Set Tesseract environment for WSL/Ubuntu
+    environment 'TESSDATA_PREFIX', '/usr/share/tesseract-ocr/4.00/tessdata'
+    environment 'PATH', "${layout.buildDirectory.dir('natives').get().asFile.absolutePath}:${System.getenv('PATH')}"
+    
+    // Configure JVM memory to avoid OutOfMemoryError with JavaCV/OpenCV
+    maxHeapSize = '6g'
+    jvmArgs '-XX:MaxRAMPercentage=80.0', '-XX:+UseG1GC', '-Dorg.bytedeco.javacpp.maxphysicalbytes=10G', '-Dorg.bytedeco.javacpp.maxbytes=0', '-Dorg.bytedeco.javacpp.cachedir=/tmp/javacpp-cache'
+    
+    testLogging {
+        events "passed", "skipped", "failed"
+        exceptionFormat "full"
+        showStandardStreams = true
+    }
+    
+    doFirst {
+        println "Running tests with OCR ENABLED for local development..."
+        println "TESSDATA_PREFIX set to: /usr/share/tesseract-ocr/4.00/tessdata"
+        println "Tesseract version check:"
+        exec {
+            commandLine 'tesseract', '--version'
+            ignoreExitValue = true
+        }
+    }
+}

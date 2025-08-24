@@ -1,0 +1,16 @@
+brobot:
+  core:
+    mock: true              # Use mock mode for demonstration
+    image-path: images/     # Path to image resources
+  screenshot:
+    save-history: false     # Don't save history for quick start
+    save-snapshots: false   # Don't save screenshots
+  mouse:
+    move-delay: 0.3         # Faster mouse for demo
+
+logging:
+  level:
+    com.example.quickstart: DEBUG
+    io.github.jspinak.brobot: INFO
+    
+# Note: For production use, you would set mock: false and provide actual screenshots

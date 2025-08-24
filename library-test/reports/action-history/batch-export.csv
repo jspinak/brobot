@@ -1,0 +1,6 @@
+Source,Timestamp,Action,Success,Duration(ms),Matches,Text
+Session1,2025-08-22T01:35:12.831318195,PatternFindOptions,true,150,1,"","(100,200,50x30)"
+Session1,2025-08-22T02:35:12.831375306,PatternFindOptions,false,500,0,"",""
+Session1,2025-08-22T03:05:12.831390953,ClickOptions,true,50,1,"","(200,300,40x40)"
+Session1,2025-08-22T03:20:12.831409189,TypeOptions,true,250,0,"test input",""
+Session2,2025-08-22T03:35:12.831681985,ClickOptions,true,75,0,"",""
