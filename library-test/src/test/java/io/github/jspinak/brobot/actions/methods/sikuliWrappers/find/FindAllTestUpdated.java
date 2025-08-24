@@ -1,7 +1,6 @@
 package io.github.jspinak.brobot.actions.methods.sikuliWrappers.find;
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
 
-import io.github.jspinak.brobot.action.ActionOptions;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.action.basic.find.FindAll;
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
@@ -82,10 +81,9 @@ class FindAllTestUpdated extends BrobotIntegrationTestBase {
                     .build();
             
             // Note: getScenes might need updating to accept DefineRegionOptions
-            // For now, using legacy ActionOptions for scene provider
-            ActionOptions legacyOptions = new ActionOptions.Builder()
-                    .setAction(ActionOptions.Action.DEFINE)
-                    .setDefineAs(ActionOptions.DefineAs.INSIDE_ANCHORS)
+            // For now, using legacy DefineRegionOptions for scene provider
+            DefineRegionOptions legacyOptions = new DefineRegionOptions.Builder()
+                    .setDefineAs(DefineRegionOptions.DefineAs.INSIDE_ANCHORS)
                     .build();
             List<Scene> scenes = getScenes.getScenes(legacyOptions, List.of(objectCollection));
 
@@ -146,11 +144,10 @@ class FindAllTestUpdated extends BrobotIntegrationTestBase {
                     .setMaxMatchesToActOn(10)
                     .build();
             
-            // For now, using legacy ActionOptions until findAll is updated
-            ActionOptions legacyOptions = new ActionOptions.Builder()
-                    .setAction(PatternFindOptions)
-                    .setFind(PatternFindOptions.FindStrategy.ALL)
-                    .setMinSimilarity(0.7)
+            // For now, using legacy PatternFindOptions until findAll is updated
+            PatternFindOptions legacyOptions = new PatternFindOptions.Builder()
+                    .setStrategy(PatternFindOptions.Strategy.ALL)
+                    .setSimilarity(0.7)
                     .build();
             
             List<Match> matches = findAll.find(stateImage, scene, legacyOptions);
@@ -195,11 +192,10 @@ class FindAllTestUpdated extends BrobotIntegrationTestBase {
                     .setSimilarity(0.6)
                     .build();
             
-            // For now, using legacy ActionOptions
-            ActionOptions legacyOptions = new ActionOptions.Builder()
-                    .setAction(PatternFindOptions)
-                    .setFind(PatternFindOptions.FindStrategy.BEST)
-                    .setMinSimilarity(0.6)
+            // For now, using legacy PatternFindOptions
+            PatternFindOptions legacyOptions = new PatternFindOptions.Builder()
+                    .setStrategy(PatternFindOptions.Strategy.BEST)
+                    .setSimilarity(0.6)
                     .build();
             
             List<Match> matches = findAll.find(stateImage, scene, legacyOptions);

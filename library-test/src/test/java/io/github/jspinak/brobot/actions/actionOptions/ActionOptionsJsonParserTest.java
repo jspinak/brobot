@@ -7,7 +7,6 @@ import io.github.jspinak.brobot.model.element.Position;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.runner.json.parsing.ConfigurationParser;
 import io.github.jspinak.brobot.runner.json.parsing.exception.ConfigurationException;
-import io.github.jspinak.brobot.action.ActionOptions;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -31,17 +30,11 @@ class ActionOptionsJsonParserTest {
 
     @Test
     void testSerializeAndDeserializeActionOptions() throws ConfigurationException {
-        // Create a test ActionOptions object
-        ActionOptions actionOptions = new ActionOptions.Builder()
-                .setAction(PatternFindOptions)
-                .setFind(PatternFindOptions.FindStrategy.FIRST)
-                .setMinSimilarity(0.8)
-                .setMoveMouseDelay(0.5f)
-                .setPauseBeforeBegin(0.3)
-                .setPauseAfterEnd(0.7)
+        // Create a test PatternFindOptions object
+        PatternFindOptions actionOptions = new PatternFindOptions.Builder()
+                .setStrategy(PatternFindOptions.Strategy.FIRST)
+                .setSimilarity(0.8)
                 .setMaxWait(10.0)
-                .setTargetOffset(15, 20)
-                .setTargetPosition(new Position(50, 50))
                 .build();
 
         // Serialize to JSON
@@ -54,45 +47,28 @@ class ActionOptionsJsonParserTest {
         System.out.println(json);
 
         // Verify JSON contains expected fields
-        assertTrue(json.contains("FIND"));
+        assertTrue(json.contains("strategy"));
         assertTrue(json.contains("FIRST"));
 
-        // Deserialize back to ActionOptions
-        ActionOptions deserializedOptions = jsonParser.convertJson(json, ActionOptions.class);
+        // Deserialize back to PatternFindOptions
+        PatternFindOptions deserializedOptions = jsonParser.convertJson(json, PatternFindOptions.class);
 
         // Verify the object was correctly deserialized
         assertNotNull(deserializedOptions);
-        assertEquals(PatternFindOptions, deserializedOptions.getAction());
-        assertEquals(PatternFindOptions.FindStrategy.FIRST, deserializedOptions.getFind());
+        assertEquals(PatternFindOptions.Strategy.FIRST, deserializedOptions.getStrategy());
         assertEquals(0.8, deserializedOptions.getSimilarity());
-        assertEquals(0.5f, deserializedOptions.getMoveMouseDelay());
-        assertEquals(0.3, deserializedOptions.getPauseBeforeBegin());
-        assertEquals(0.7, deserializedOptions.getPauseAfterEnd());
         assertEquals(10.0, deserializedOptions.getMaxWait());
 
-        // Compare target offset/position
-        assertNotNull(deserializedOptions.getTargetOffset());
-        assertEquals(15, deserializedOptions.getTargetOffset().getX());
-        assertEquals(20, deserializedOptions.getTargetOffset().getY());
-
-        assertNotNull(deserializedOptions.getTargetPosition());
-        assertEquals(.50, deserializedOptions.getTargetPosition().getPercentW());
-        assertEquals(.50, deserializedOptions.getTargetPosition().getPercentW());
+        // PatternFindOptions has simpler structure than ActionOptions
+        // Target offset/position functionality is handled differently in the new API
     }
 
     @Test
     void testSerializeComplexActionOptions() throws ConfigurationException {
-        // Create a more complex ActionOptions with search regions
-        ActionOptions actionOptions = new ActionOptions.Builder()
-                .setAction(ClickOptions)
-                .setFind(PatternFindOptions.FindStrategy.ALL)
-                .addSearchRegion(new Region(10, 20, 100, 100))
-                .setHighlightAllAtOnce(true)
-                .setHighlightSeconds(2.5)
-                .setHighlightColor("blue")
-                .setMoveMouseAfterAction(true)
-                .setMoveMouseAfterActionTo(new Location(500, 300))
-                .setMaxMatchesToActOn(5)
+        // Create a ClickOptions object
+        ClickOptions actionOptions = new ClickOptions.Builder()
+                .setClickType(ClickOptions.Type.LEFT)
+                .setNumberOfClicks(1)
                 .build();
 
         // Serialize to JSON
@@ -105,31 +81,18 @@ class ActionOptionsJsonParserTest {
         System.out.println(json);
 
         // Verify JSON contains expected fields
-        assertTrue(json.contains("CLICK"));
-        assertTrue(json.contains("ALL"));
-        assertTrue(json.contains("blue"));
+        assertTrue(json.contains("clickType"));
+        assertTrue(json.contains("LEFT"));
 
-        // Deserialize back to ActionOptions
-        ActionOptions deserializedOptions = jsonParser.convertJson(json, ActionOptions.class);
+        // Deserialize back to ClickOptions
+        ClickOptions deserializedOptions = jsonParser.convertJson(json, ClickOptions.class);
 
         // Verify the object was correctly deserialized
         assertNotNull(deserializedOptions);
-        assertEquals(ClickOptions, deserializedOptions.getAction());
-        assertEquals(PatternFindOptions.FindStrategy.ALL, deserializedOptions.getFind());
-        assertTrue(deserializedOptions.isHighlightAllAtOnce());
-        assertEquals(2.5, deserializedOptions.getHighlightSeconds());
-        assertEquals("blue", deserializedOptions.getHighlightColor());
-        assertTrue(deserializedOptions.isMoveMouseAfterAction());
-        assertNotNull(deserializedOptions.getMoveMouseAfterActionTo());
-        assertEquals(500, deserializedOptions.getMoveMouseAfterActionTo().getCalculatedX());
-        assertEquals(300, deserializedOptions.getMoveMouseAfterActionTo().getCalculatedY());
-        assertEquals(5, deserializedOptions.getMaxMatchesToActOn());
+        assertEquals(ClickOptions.Type.LEFT, deserializedOptions.getClickType());
+        assertEquals(1, deserializedOptions.getNumberOfClicks());
 
-        // Verify search regions
-        assertFalse(deserializedOptions.getSearchRegions().getStateObjects().isEmpty());
-        assertEquals(10, deserializedOptions.getSearchRegions().getStateObjects().getFirst().x());
-        assertEquals(20, deserializedOptions.getSearchRegions().getStateObjects().getFirst().y());
-        assertEquals(100, deserializedOptions.getSearchRegions().getStateObjects().getFirst().w());
-        assertEquals(100, deserializedOptions.getSearchRegions().getStateObjects().getFirst().h());
+        // ClickOptions has different structure than legacy ActionOptions
+        // Search regions and advanced options are handled by ActionConfig patterns
     }
 }
