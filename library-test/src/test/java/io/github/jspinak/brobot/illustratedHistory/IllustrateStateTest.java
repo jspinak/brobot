@@ -15,7 +15,7 @@ import io.github.jspinak.brobot.util.image.io.ImageFileUtilities;
 import io.github.jspinak.brobot.util.image.visualization.MatBuilder;
 import io.github.jspinak.brobot.BrobotTestApplication;
 import io.github.jspinak.brobot.config.FrameworkSettings;
-import io.github.jspinak.brobot.actions.methods.basicactions.find.states.FindStatesData;
+import io.github.jspinak.brobot.actions.methods.basicactions.find.states.FindStatesDataUpdated;
 import io.github.jspinak.brobot.test.HeadlessTestConfiguration;
 import io.github.jspinak.brobot.tools.history.StateLayoutVisualizer;
 
