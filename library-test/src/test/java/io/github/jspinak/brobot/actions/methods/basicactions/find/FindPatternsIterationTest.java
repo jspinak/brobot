@@ -6,19 +6,13 @@ import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.basic.find.color.SceneProvider;
 import io.github.jspinak.brobot.BrobotTestApplication;
-import io.github.jspinak.brobot.actions.methods.basicactions.TestDataUpdated;
+import io.github.jspinak.brobot.actions.methods.basicactions.TestData;
 import io.github.jspinak.brobot.test.BrobotIntegrationTestBase;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.context.ContextConfiguration;
-import io.github.jspinak.brobot.test.TestEnvironmentInitializer;
-import io.github.jspinak.brobot.test.mock.MockGuiAccessConfig;
-import io.github.jspinak.brobot.test.mock.MockGuiAccessMonitor;
-import io.github.jspinak.brobot.test.mock.MockScreenConfig;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,20 +25,8 @@ import io.github.jspinak.brobot.action.internal.find.IterativePatternFinder;
 /**
  * Tests for finding patterns through iteration.
  * Works in headless mode by using real image processing.
- * Migrated to use TestDataUpdated with new ActionConfig API.
  */
-@SpringBootTest(classes = io.github.jspinak.brobot.BrobotTestApplication.class,
-    properties = {
-        "brobot.gui-access.continue-on-error=true",
-        "brobot.gui-access.check-on-startup=false",
-        "java.awt.headless=true",
-        "spring.main.allow-bean-definition-overriding=true",
-        "brobot.test.type=unit",
-        "brobot.capture.physical-resolution=false",
-        "brobot.mock.enabled=true"
-    })
-@Import({MockGuiAccessConfig.class, MockGuiAccessMonitor.class, MockScreenConfig.class})
-@ContextConfiguration(initializers = TestEnvironmentInitializer.class)
+@SpringBootTest(classes = BrobotTestApplication.class)
 class FindPatternsIterationTest extends BrobotIntegrationTestBase {
 
     @BeforeAll
@@ -64,9 +46,8 @@ class FindPatternsIterationTest extends BrobotIntegrationTestBase {
     @Test
     void find_() {
         try {
-            TestDataUpdated testData = new TestDataUpdated();
+            TestData testData = new TestData();
 
-            // Use the new API overload for getScenes
             List<Scene> scenes = getScenes.getScenes(testData.getDefineInsideAnchors(), 
                 List.of(testData.getInsideAnchorObjects()));
             
@@ -74,9 +55,8 @@ class FindPatternsIterationTest extends BrobotIntegrationTestBase {
             stateImages.add(testData.getTopLeft());
             stateImages.add(testData.getBottomRight());
 
-            // Use the new API overload for init
             ActionResult matches = matchesInitializer.init(testData.getDefineInsideAnchors(), 
-                "find patterns iteration", testData.getInsideAnchorObjects());
+                testData.getInsideAnchorObjects());
 
             iterativePatternFinder.find(matches, stateImages, scenes);
             

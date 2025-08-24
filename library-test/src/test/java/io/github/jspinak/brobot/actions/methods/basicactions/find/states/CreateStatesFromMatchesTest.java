@@ -15,12 +15,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledIfSystemProperty;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.context.ContextConfiguration;
-import io.github.jspinak.brobot.test.TestEnvironmentInitializer;
-import io.github.jspinak.brobot.test.mock.MockGuiAccessConfig;
-import io.github.jspinak.brobot.test.mock.MockGuiAccessMonitor;
-import io.github.jspinak.brobot.test.mock.MockScreenConfig;
 
 import java.util.List;
 
@@ -30,20 +24,8 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Tests for creating states from visual matches.
  * Works in headless mode using real image processing.
- * Migrated to use FindStatesDataUpdated with new ActionConfig API.
  */
-@SpringBootTest(classes = io.github.jspinak.brobot.BrobotTestApplication.class,
-    properties = {
-        "brobot.gui-access.continue-on-error=true",
-        "brobot.gui-access.check-on-startup=false",
-        "java.awt.headless=true",
-        "spring.main.allow-bean-definition-overriding=true",
-        "brobot.test.type=unit",
-        "brobot.capture.physical-resolution=false",
-        "brobot.mock.enabled=true"
-    })
-@Import({MockGuiAccessConfig.class, MockGuiAccessMonitor.class, MockScreenConfig.class})
-@ContextConfiguration(initializers = TestEnvironmentInitializer.class)
+@SpringBootTest(classes = BrobotTestApplication.class)
 @DisabledIfSystemProperty(named = "brobot.tests.ocr.disable", matches = "true")
 class CreateStatesFromMatchesTest extends BrobotIntegrationTestBase {
 
@@ -66,8 +48,7 @@ class CreateStatesFromMatchesTest extends BrobotIntegrationTestBase {
 
     private List<State> createStates() throws Exception {
         try {
-            // Use FindStatesDataUpdated with new API
-            ActionResult matches = new FindStatesDataUpdated().getMatches(action, findStates, matchesInitializer, 100);
+            ActionResult matches = new FindStatesData().getMatches(action, findStates, matchesInitializer);
             return createStatesFromMatches.create(matches);
         } catch (Exception e) {
             // If test data is not available, return empty list

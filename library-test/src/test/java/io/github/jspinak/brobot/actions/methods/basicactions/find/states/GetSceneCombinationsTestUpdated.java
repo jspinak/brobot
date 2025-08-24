@@ -1,4 +1,5 @@
 package io.github.jspinak.brobot.actions.methods.basicactions.find.states;
+import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
 
 import io.github.jspinak.brobot.action.ActionInterface;
 import io.github.jspinak.brobot.action.ActionResult;
@@ -7,7 +8,7 @@ import io.github.jspinak.brobot.action.basic.find.text.TextFindOptions;
 import io.github.jspinak.brobot.action.internal.service.ActionService;
 import io.github.jspinak.brobot.model.element.Pattern;
 import io.github.jspinak.brobot.BrobotTestApplication;
-import io.github.jspinak.brobot.actions.methods.basicactions.TestDataUpdated;
+import io.github.jspinak.brobot.actions.methods.basicactions.TestData;
 import io.github.jspinak.brobot.analysis.scene.SceneCombinationGenerator;
 import io.github.jspinak.brobot.model.analysis.scene.SceneCombination;
 
@@ -17,12 +18,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledIfSystemProperty;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.context.ContextConfiguration;
-import io.github.jspinak.brobot.test.TestEnvironmentInitializer;
-import io.github.jspinak.brobot.test.mock.MockGuiAccessConfig;
-import io.github.jspinak.brobot.test.mock.MockGuiAccessMonitor;
-import io.github.jspinak.brobot.test.mock.MockScreenConfig;
 
 import java.util.List;
 
@@ -31,28 +26,16 @@ import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Updated tests for scene combinations using new ActionConfig API.
- * Demonstrates migration from ObjectActionOptions.Action.FIND with Find.ALL_WORDS
+ * Demonstrates migration from PatternFindOptions with Find.ActionOptions.Find.ActionOptions.Find.ALL
  * to TextFindOptions.
  * 
  * Key changes:
- * - Uses TextFindOptions instead of generic ObjectActionOptions for OCR
+ * - Uses TextFindOptions instead of generic ActionOptions for OCR
  * - ActionResult requires setActionConfig() before perform()
  * - Uses ActionService to get the appropriate action
- * - TextFindOptions automatically uses ALL_WORDS strategy
- * - Migrated to use TestDataUpdated
+ * - TextFindOptions automatically uses ActionOptions.Find.ActionOptions.Find.ALL strategy
  */
-@SpringBootTest(classes = io.github.jspinak.brobot.BrobotTestApplication.class,
-    properties = {
-        "brobot.gui-access.continue-on-error=true",
-        "brobot.gui-access.check-on-startup=false",
-        "java.awt.headless=true",
-        "spring.main.allow-bean-definition-overriding=true",
-        "brobot.test.type=unit",
-        "brobot.capture.physical-resolution=false",
-        "brobot.mock.enabled=true"
-    })
-@Import({MockGuiAccessConfig.class, MockGuiAccessMonitor.class, MockScreenConfig.class})
-@ContextConfiguration(initializers = TestEnvironmentInitializer.class)
+@SpringBootTest(classes = BrobotTestApplication.class)
 @DisabledIfSystemProperty(named = "brobot.tests.ocr.disable", matches = "true")
 class GetSceneCombinationsTestUpdated {
 
@@ -81,8 +64,8 @@ class GetSceneCombinationsTestUpdated {
             ActionResult matches = new ActionResult();
             matches.setActionConfig(textFindOptions);
             
-            actionService.getAction(textFindOptions)
-                    .ifPresent(action -> action.perform(matches, objColl));
+            ActionInterface findWordsAction = actionService.getAction(textFindOptions);
+            findWordsAction.perform(matches, objColl);
             
             return new ObjectCollection.Builder()
                     .withImages(matches.getMatchListAsStateImages())
@@ -98,7 +81,7 @@ class GetSceneCombinationsTestUpdated {
     }
 
     private List<ObjectCollection> getStateObjectCollections() {
-        TestDataUpdated testData = new TestDataUpdated();
+        TestData testData = new TestData();
         ObjectCollection stateColl1 = getStateObjectCollection(testData.getFloranext0());
         ObjectCollection stateColl2 = getStateObjectCollection(testData.getFloranext1());
         ObjectCollection stateColl3 = getStateObjectCollection(testData.getFloranext2());
@@ -158,18 +141,20 @@ class GetSceneCombinationsTestUpdated {
         
         // Advanced text finding with custom settings
         TextFindOptions advancedTextOptions = new TextFindOptions.Builder()
+                .setLanguage("eng")  // Specify language for OCR
                 .setMaxMatchRetries(5)
                 .setPauseBeforeBegin(1.0)
                 .setPauseAfterEnd(0.5)
                 .setSimilarity(0.8)  // Text similarity threshold
                 .build();
         
+        assertEquals("eng", advancedTextOptions.getLanguage());
         assertEquals(5, advancedTextOptions.getMaxMatchRetries());
         assertEquals(1.0, advancedTextOptions.getPauseBeforeBegin(), 0.001);
         assertEquals(0.5, advancedTextOptions.getPauseAfterEnd(), 0.001);
         assertEquals(0.8, advancedTextOptions.getSimilarity(), 0.001);
         
-        // TextFindOptions automatically uses ALL_WORDS strategy
+        // TextFindOptions automatically uses ActionOptions.Find.ActionOptions.Find.ALL strategy
         assertNotNull(advancedTextOptions.getFindStrategy());
     }
     
@@ -179,9 +164,9 @@ class GetSceneCombinationsTestUpdated {
         
         // OLD API (commented out):
         /*
-        ObjectActionOptions oldOptions = new ActionOptions.Builder()
-                .setAction(ObjectActionOptions.Action.FIND)
-                .setFind(ObjectActionOptions.Find.ALL_WORDS)
+        ActionOptions oldOptions = new ActionOptions.Builder()
+                .setAction(PatternFindOptions)
+                .setFind(PatternFindOptions.FindStrategy.ActionOptions.Find.ActionOptions.Find.ALL)
                 .build();
         ActionResult matches = action.perform(oldOptions, objColl);
         */
@@ -192,10 +177,10 @@ class GetSceneCombinationsTestUpdated {
                 .build();
         
         // The new API provides OCR-specific parameters
-        // that were not available in the generic ObjectActionOptions
+        // that were not available in the generic ActionOptions
         assertNotNull(newOptions);
         
-        // TextFindOptions automatically uses ALL_WORDS strategy for text finding
+        // TextFindOptions automatically uses ActionOptions.Find.ActionOptions.Find.ALL strategy for text finding
         assertNotNull(newOptions.getFindStrategy());
     }
 }
