@@ -30,11 +30,9 @@ public class HistogramRegionsTest extends BrobotTestBase {
         super.setupTest();
         
         // Create test images
-        testImage = new Mat(200, 300, CV_8UC3);
-        testImage.setTo(new Scalar(100, 150, 200, 255)); // BGR values
+        testImage = new Mat(200, 300, CV_8UC3, new Scalar(100, 150, 200, 0)); // BGR values
         
-        testImage2 = new Mat(150, 250, CV_8UC3);
-        testImage2.setTo(new Scalar(50, 100, 150, 255));
+        testImage2 = new Mat(150, 250, CV_8UC3, new Scalar(50, 100, 150, 0));
         
         testImages = new ArrayList<>();
         testImages.add(testImage);
@@ -145,7 +143,7 @@ public class HistogramRegionsTest extends BrobotTestBase {
             assertEquals(1, regions.getGrids().size());
             Grid grid = regions.getGrids().get(0);
             assertEquals(2, grid.getRows());
-            assertEquals(2, grid.getColumns());
+            assertEquals(2, grid.getCols());
             assertEquals(4, grid.getGridRegions().size());
         }
         

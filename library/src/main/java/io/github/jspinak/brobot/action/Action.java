@@ -333,6 +333,7 @@ public class Action {
      * @return ActionResult containing text matches and action outcomes
      * @deprecated Use specific ActionConfig implementations instead
      */
+    @Deprecated
     public ActionResult perform(ActionType action, String... strings) {
         ObjectCollection strColl = new ObjectCollection.Builder().withStrings(strings).build();
         return perform(action, strColl);
@@ -362,6 +363,7 @@ public class Action {
      * @return ActionResult containing regional matches and outcomes
      * @deprecated Use specific ActionConfig implementations instead
      */
+    @Deprecated
     public ActionResult perform(ActionType action, Region... regions) {
         ObjectCollection strColl = new ObjectCollection.Builder().withRegions(regions).build();
         return perform(action, strColl);

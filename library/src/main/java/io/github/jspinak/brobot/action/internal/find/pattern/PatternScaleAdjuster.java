@@ -169,12 +169,16 @@ public class PatternScaleAdjuster {
      * @return The scaled image
      */
     private BufferedImage scaleImage(BufferedImage source, double scale) {
+        if (source == null) {
+            return null;
+        }
+        
         if (Math.abs(scale - 1.0) < 0.01) {
             return source;
         }
         
-        int newWidth = (int)(source.getWidth() * scale);
-        int newHeight = (int)(source.getHeight() * scale);
+        int newWidth = Math.max(1, (int)(source.getWidth() * scale));
+        int newHeight = Math.max(1, (int)(source.getHeight() * scale));
         
         BufferedImage scaled = new BufferedImage(newWidth, newHeight, 
             source.getType() == 0 ? BufferedImage.TYPE_INT_RGB : source.getType());

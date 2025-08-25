@@ -128,7 +128,10 @@ public class HistogramRegions {
      * @param imageSize the dimensions of the image
      */
     private void setEllipticalMask(Region imageSize) {
-        Point ellipseCenter = new Point(imageSize.sikuli().getCenter().x, imageSize.sikuli().getCenter().y);
+        // Calculate center directly without using sikuli() to avoid null pointer in tests
+        int centerX = imageSize.x() + imageSize.w() / 2;
+        int centerY = imageSize.y() + imageSize.h() / 2;
+        Point ellipseCenter = new Point(centerX, centerY);
         int width = (int) ((imageSize.w() * .75) / 2);
         int height = (int) ((imageSize.h() * .75) / 2);
         Size axes = new Size(width, height);

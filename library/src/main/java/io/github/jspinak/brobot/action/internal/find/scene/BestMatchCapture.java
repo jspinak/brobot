@@ -97,7 +97,7 @@ public class BestMatchCapture {
             // Search at very low threshold to find any match
             org.sikuli.basics.Settings.MinSimilarity = 0.1;
             
-            Finder finder = new Finder(scene.getPattern().getImage().getBufferedImage());
+            Finder finder = new Finder(scene.getPattern().getBImage());
             org.sikuli.script.Pattern sikuliPattern = pattern.sikuli().similar(0.1);
             finder.findAll(sikuliPattern);
             

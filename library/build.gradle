@@ -2,6 +2,7 @@
 
 plugins {
     id 'java-library'
+    id 'org.springframework.boot' apply false  // Don't apply boot plugin to library
     id 'maven-publish'
     id 'signing'
     id 'org.jreleaser'
@@ -53,36 +54,60 @@ java {
     withSourcesJar()
 }
 
+// Handle duplicate files in jar tasks
+tasks.withType(Jar) {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+// Handle duplicate files in resource processing tasks
+processResources {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+processTestResources {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+// Ensure standard source sets configuration
+sourceSets {
+    main {
+        java {
+            srcDir 'src/main/java'
+        }
+        resources {
+            srcDir 'src/main/resources'
+        }
+    }
+    test {
+        java {
+            srcDir 'src/test/java'
+        }
+        resources {
+            srcDir 'src/test/resources'
+        }
+    }
+}
+
 test {
-    finalizedBy jacocoTestReport // report is always generated after tests run
+    // Standard Spring Boot test setup
+    useJUnitPlatform()
     
-    // Exclude tests that cause JVM crashes due to OpenCV native code
-    exclude '**/HistogramExtractorTest.class'
-    exclude '**/HistogramComparatorTest.class'
+    // Minimal excludes
     exclude '**/MotionDetectorTest.class'
     exclude '**/GridBasedClustererTest.class'
     
-    // JVM settings for OpenCV/JavaCV on Linux
-    jvmArgs '-Djava.library.path=/usr/lib:/usr/local/lib'
-    jvmArgs '-Dorg.bytedeco.javacpp.logger.debug=true'
-    
-    // Enable JaCoCo coverage
-    jacoco {
-        enabled = true
-        destinationFile = file("$buildDir/jacoco/test.exec")
-        classDumpDir = file("$buildDir/jacoco/classpathdumps")
-    }
-    // Don't force headless mode - let the ExecutionEnvironment handle this
-    // systemProperty 'java.awt.headless', 'true'
-    
-    // Increase memory for OpenCV operations
+    // Simple memory settings
     maxHeapSize = '2g'
     
-    // Test logging
+    // Standard test logging
     testLogging {
-        events "passed", "skipped", "failed", "standardOut", "standardError"
+        events "passed", "skipped", "failed"
         exceptionFormat "full"
+        showStandardStreams = false
     }
+    
+    // Ensure test classes can access main classes
+    classpath = sourceSets.test.runtimeClasspath
 }
 
 jacocoTestReport {

@@ -1,7 +1,10 @@
 package io.github.jspinak.brobot.analysis.histogram;
 
 import io.github.jspinak.brobot.test.BrobotTestBase;
+import org.bytedeco.javacpp.indexer.FloatIndexer;
+import org.bytedeco.javacpp.indexer.UByteRawIndexer;
 import org.bytedeco.opencv.opencv_core.Mat;
+import org.bytedeco.opencv.opencv_core.Scalar;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
@@ -34,41 +37,44 @@ public class HistogramRegionTest extends BrobotTestBase {
         histogramRegion = new HistogramRegion();
         
         // Create test masks (binary images)
-        testMask1 = new Mat(100, 100, CV_8UC1);
-        testMask1.ptr().put(new byte[10000]); // All zeros initially
+        testMask1 = new Mat(100, 100, CV_8UC1, Scalar.all(0)); // Initialize with zeros
         // Set some pixels to white (255) to create a mask
+        UByteRawIndexer indexer1 = testMask1.createIndexer();
         for (int i = 0; i < 50; i++) {
             for (int j = 0; j < 50; j++) {
-                testMask1.ptr(i, j).put((byte)255);
+                indexer1.put(i, j, 255);
             }
         }
         
-        testMask2 = new Mat(100, 100, CV_8UC1);
-        testMask2.ptr().put(new byte[10000]);
+        testMask2 = new Mat(100, 100, CV_8UC1, Scalar.all(0)); // Initialize with zeros
         // Different mask pattern
+        UByteRawIndexer indexer2 = testMask2.createIndexer();
         for (int i = 50; i < 100; i++) {
             for (int j = 50; j < 100; j++) {
-                testMask2.ptr(i, j).put((byte)255);
+                indexer2.put(i, j, 255);
             }
         }
         
         // Create test histograms
         testHistogram1 = new Mat(256, 1, CV_32F);
+        FloatIndexer histIndexer1 = testHistogram1.createIndexer();
         for (int i = 0; i < 256; i++) {
-            testHistogram1.ptr(i, 0).putFloat((float)i / 256.0f);
+            histIndexer1.put(i, 0, (float)i / 256.0f);
         }
         
         testHistogram2 = new Mat(256, 1, CV_32F);
+        FloatIndexer histIndexer2 = testHistogram2.createIndexer();
         for (int i = 0; i < 256; i++) {
-            testHistogram2.ptr(i, 0).putFloat((float)(255 - i) / 256.0f);
+            histIndexer2.put(i, 0, (float)(255 - i) / 256.0f);
         }
         
         // Create combined histogram
         combinedHistogram = new Mat(256, 1, CV_32F);
+        FloatIndexer combinedIndexer = combinedHistogram.createIndexer();
         for (int i = 0; i < 256; i++) {
-            float combined = (testHistogram1.ptr(i, 0).getFloat() + 
-                            testHistogram2.ptr(i, 0).getFloat()) / 2.0f;
-            combinedHistogram.ptr(i, 0).putFloat(combined);
+            float combined = (histIndexer1.get(i, 0) + 
+                            histIndexer2.get(i, 0)) / 2.0f;
+            combinedIndexer.put(i, 0, combined);
         }
     }
     
@@ -310,10 +316,13 @@ public class HistogramRegionTest extends BrobotTestBase {
         @DisplayName("Should represent top-left corner region")
         void shouldRepresentTopLeftCorner() {
             // Create mask for top-left corner (25% of image)
-            Mat topLeftMask = new Mat(100, 100, CV_8UC1, new opencv_core.Scalar(0));
+            Mat topLeftMask = new Mat(100, 100, CV_8UC1, Scalar.all(0));
+            
+            // Use indexer to set top-left quadrant to white
+            UByteRawIndexer indexer = topLeftMask.createIndexer();
             for (int i = 0; i < 50; i++) {
                 for (int j = 0; j < 50; j++) {
-                    topLeftMask.ptr(i, j).put((byte)255);
+                    indexer.put(i, j, 255);
                 }
             }
             
@@ -322,10 +331,11 @@ public class HistogramRegionTest extends BrobotTestBase {
                 
                 // Verify mask represents top-left region
                 Mat mask = histogramRegion.getMasks().get(0);
+                UByteRawIndexer maskIndexer = mask.createIndexer();
                 // Check top-left is white (255)
-                assertEquals((byte)255, mask.ptr(25, 25).get());
+                assertEquals(255, maskIndexer.get(25, 25));
                 // Check bottom-right is black (0)
-                assertEquals((byte)0, mask.ptr(75, 75).get());
+                assertEquals(0, maskIndexer.get(75, 75));
             } finally {
                 topLeftMask.release();
             }
@@ -335,19 +345,21 @@ public class HistogramRegionTest extends BrobotTestBase {
         @DisplayName("Should represent center ellipse region")
         void shouldRepresentCenterEllipse() {
             // Create a simple circular mask in center
-            Mat ellipseMask = new Mat(100, 100, CV_8UC1, new opencv_core.Scalar(0));
+            Mat ellipseMask = new Mat(100, 100, CV_8UC1, Scalar.all(0));
             
             // Simple circle approximation
             int centerX = 50;
             int centerY = 50;
             int radius = 30;
             
+            // Use indexer to create circular mask
+            UByteRawIndexer indexer = ellipseMask.createIndexer();
             for (int i = 0; i < 100; i++) {
                 for (int j = 0; j < 100; j++) {
                     int dx = i - centerX;
                     int dy = j - centerY;
                     if (dx * dx + dy * dy <= radius * radius) {
-                        ellipseMask.ptr(i, j).put((byte)255);
+                        indexer.put(i, j, 255);
                     }
                 }
             }
@@ -357,10 +369,11 @@ public class HistogramRegionTest extends BrobotTestBase {
                 
                 // Verify center is white
                 Mat mask = histogramRegion.getMasks().get(0);
-                assertEquals((byte)255, mask.ptr(50, 50).get());
+                UByteRawIndexer maskIndexer = mask.createIndexer();
+                assertEquals(255, maskIndexer.get(50, 50));
                 // Verify corners are black
-                assertEquals((byte)0, mask.ptr(0, 0).get());
-                assertEquals((byte)0, mask.ptr(99, 99).get());
+                assertEquals(0, maskIndexer.get(0, 0));
+                assertEquals(0, maskIndexer.get(99, 99));
             } finally {
                 ellipseMask.release();
             }

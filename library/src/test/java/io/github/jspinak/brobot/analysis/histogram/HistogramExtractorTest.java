@@ -60,7 +60,7 @@ public class HistogramExtractorTest extends BrobotTestBase {
         
         // Create test mask
         testMask = new Mat(200, 300, CV_8UC1);
-        testMask.setTo(new Scalar(255)); // All white (full mask)
+        testMask.put(new Scalar(255, 0, 0, 0)); // All white (full mask)
         
         testImages = new ArrayList<>();
         testImages.add(testImageHSV);
@@ -380,7 +380,7 @@ public class HistogramExtractorTest extends BrobotTestBase {
             // Create 5 large images
             for (int i = 0; i < 5; i++) {
                 Mat largeImage = new Mat(500, 500, CV_8UC3);
-                largeImage.setTo(new Scalar(90, 128, 200));
+                largeImage.put(new Scalar(90, 128, 200, 0));
                 largeImages.add(largeImage);
             }
             

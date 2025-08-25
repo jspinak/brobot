@@ -9,20 +9,53 @@ Integration testing in Brobot simulates the complete application environment and
 ## Overview
 
 Integration testing provides:
+- **Centralized mock mode management** via `MockModeManager`
 - **Full application simulation** without GUI interaction
 - **Stochastic modeling** of real-world variability
 - **State transition validation** across complex workflows
 - **Risk assessment** for automation reliability
 
+## Test Base Class
+
+All integration tests should extend `BrobotTestBase`:
+
+```java
+import io.github.jspinak.brobot.test.BrobotTestBase;
+
+public class WorkflowIntegrationTest extends BrobotTestBase {
+    // Mock mode is automatically enabled
+    // All mock settings are synchronized via MockModeManager
+}
+```
+
 ## Configuration
+
+### Automatic Mock Configuration
+
+When using `BrobotTestBase`, mock mode is automatically configured:
+
+```java
+public class IntegrationTest extends BrobotTestBase {
+    
+    @Test
+    public void testWorkflow() {
+        // Mock mode is enabled via MockModeManager
+        assertTrue(MockModeManager.isMockMode());
+        // Your test logic here
+    }
+}
+```
 
 ### Configuration via Properties
 
-Enable integration testing through configuration:
+Additional testing configuration:
 
 ```properties
-# Enable mock mode for integration testing
+# Mock mode is automatically enabled by BrobotTestBase
+# These properties are synchronized by MockModeManager:
+brobot.mock.mode=true
 brobot.core.mock=true
+brobot.framework.mock=true
 
 # Mock timing configuration
 brobot.mock.time-find-first=0.1
@@ -59,9 +92,16 @@ brobot:
 
 ```java
 @SpringBootTest
-@TestPropertySource(properties = "brobot.core.mock=true")
-public class IntegrationTestConfig {
-    // Configuration handled automatically by Spring Boot
+public class IntegrationTestConfig extends BrobotTestBase {
+    // Mock mode automatically enabled by BrobotTestBase
+    // Additional configuration handled by Spring Boot
+    
+    @BeforeEach
+    @Override
+    public void setupTest() {
+        super.setupTest(); // Ensures MockModeManager is configured
+        // Add any additional setup
+    }
 }
 ```  
 

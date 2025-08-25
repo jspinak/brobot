@@ -77,11 +77,9 @@ public class ImageFinderTest extends BrobotTestBase {
             // Arrange
             StateImage stateImage1 = new StateImage.Builder()
                 .setName("image1")
-                .addPattern("pattern1.png")
                 .build();
             StateImage stateImage2 = new StateImage.Builder()
                 .setName("image2")
-                .addPattern("pattern2.png")
                 .build();
             
             objectCollection.getStateImages().add(stateImage1);
@@ -139,7 +137,6 @@ public class ImageFinderTest extends BrobotTestBase {
             // Arrange
             StateImage stateImage = new StateImage.Builder()
                 .setName("image")
-                .addPattern("pattern.png")
                 .build();
             
             objectCollection.getStateImages().add(stateImage);

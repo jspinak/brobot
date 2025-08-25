@@ -1,6 +1,6 @@
 package io.github.jspinak.brobot.test;
 
-import io.github.jspinak.brobot.config.ExecutionEnvironment;
+import io.github.jspinak.brobot.config.MockModeManager;
 import org.junit.jupiter.api.BeforeEach;
 
 /**
@@ -24,23 +24,24 @@ public abstract class BrobotTestBase {
      */
     @BeforeEach
     public void setupTest() {
-        // Set system property for mock mode
-        System.setProperty("brobot.mock.mode", "true");
-        
-        // Configure ExecutionEnvironment for mock mode
-        ExecutionEnvironment env = ExecutionEnvironment.builder()
-            .mockMode(true)
-            .forceHeadless(true)
-            .allowScreenCapture(false)
-            .build();
-        ExecutionEnvironment.setInstance(env);
-        
-        // Set FrameworkSettings.mock directly using reflection to avoid initialization issues
-        try {
-            Class<?> frameworkSettingsClass = Class.forName("io.github.jspinak.brobot.config.FrameworkSettings");
-            frameworkSettingsClass.getField("mock").set(null, true);
-        } catch (Exception e) {
-            // Ignore if FrameworkSettings is not available
-        }
+        // Use the centralized MockModeManager for consistency
+        MockModeManager.setMockMode(true);
+    }
+    
+    /**
+     * Utility method to temporarily disable mock mode for specific test scenarios.
+     * Remember to re-enable it in a finally block or @AfterEach method.
+     */
+    protected void disableMockMode() {
+        MockModeManager.setMockMode(false);
+    }
+    
+    /**
+     * Checks if mock mode is currently enabled.
+     * 
+     * @return true if mock mode is enabled, false otherwise
+     */
+    protected boolean isMockMode() {
+        return MockModeManager.isMockMode();
     }
 }

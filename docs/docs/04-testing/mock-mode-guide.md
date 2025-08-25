@@ -18,7 +18,7 @@ Brobot's mock mode provides a powerful testing framework that simulates GUI auto
 
 ### What Mock Mode Does
 
-When `brobot.framework.mock=true`:
+When mock mode is enabled (via `MockModeManager.setMockMode(true)` or properties):
 
 1. **No screen capture** - Brobot doesn't capture actual screens
 2. **No real pattern matching** - Image patterns aren't matched against real screens
@@ -37,11 +37,40 @@ State probabilities determine how often a state's objects (images, regions, etc.
 
 ### Enabling Mock Mode
 
-Set in `application.properties`:
+#### Centralized Mock Mode Management (Recommended)
+
+Brobot now provides a centralized `MockModeManager` class that ensures consistency across all components:
+
+```java
+import io.github.jspinak.brobot.config.MockModeManager;
+
+// Enable mock mode globally
+MockModeManager.setMockMode(true);
+
+// Check if mock mode is enabled
+if (MockModeManager.isMockMode()) {
+    // Mock-specific logic
+}
+
+// Log current mock mode state across all components
+MockModeManager.logMockModeState();
+```
+
+The `MockModeManager` automatically synchronizes mock mode across:
+- System properties (`brobot.mock.mode`, `brobot.framework.mock`, `brobot.core.mock-mode`)
+- `ExecutionEnvironment` (for runtime behavior)
+- `FrameworkSettings.mock` (for SikuliX compatibility)
+
+#### Configuration via Properties
+
+You can also set mock mode in `application.properties`:
 
 ```properties
 # Enable mock mode
 brobot.framework.mock=true
+# Alternative properties (all synchronized by MockModeManager)
+brobot.mock.mode=true
+brobot.core.mock-mode=true
 ```
 
 ### Setting State Probabilities

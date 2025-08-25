@@ -8,8 +8,6 @@ import java.util.Map;
 
 import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
 
-import static io.github.jspinak.brobot.model.analysis.color.ColorInfo.ColorStat.*;
-
 /**
  * Statistical color channel information for pattern matching.
  * 
@@ -81,7 +79,7 @@ public class ColorInfo {
      */
     public void print() {
         ConsoleReporter.formatln("%s min.max.mean.stddev = %,.0f %,.0f %,.1f %,.1f",colorValue,
-                stats.get(MIN), stats.get(MAX), stats.get(MEAN), stats.get(STDDEV));
+                stats.get(ColorStat.MIN), stats.get(ColorStat.MAX), stats.get(ColorStat.MEAN), stats.get(ColorStat.STDDEV));
     }
 
     /**
@@ -96,10 +94,10 @@ public class ColorInfo {
      * @param stdDev standard deviation of color values
      */
     public void setAll(double min, double max, double mean, double stdDev) {
-        stats.put(MIN, min);
-        stats.put(MAX, max);
-        stats.put(MEAN, mean);
-        stats.put(STDDEV, stdDev);
+        stats.put(ColorStat.MIN, min);
+        stats.put(ColorStat.MAX, max);
+        stats.put(ColorStat.MEAN, mean);
+        stats.put(ColorStat.STDDEV, stdDev);
     }
 
     /**

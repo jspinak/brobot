@@ -434,4 +434,32 @@ public class FrameworkSettings {
      */
     public static String testScreenshotsPath = "screenshots/";
 
+    /**
+     * State Comparison Settings - Control state probability and comparison
+     */
+    
+    /**
+     * Minimum probability threshold for state transitions.
+     * <p>
+     * States with probability below this threshold are not considered valid
+     * for transitions. Range: 0.0 to 1.0, where 1.0 requires absolute certainty.
+     */
+    public static double minimumStateProbabilityThreshold = 0.7;
+    
+    /**
+     * Controls whether state comparison is performed during action execution.
+     * <p>
+     * When true, compares expected and actual states to verify successful transitions.
+     * Useful for debugging state management but adds overhead to execution.
+     */
+    public static boolean enableStateComparison = false;
+    
+    /**
+     * Controls whether state comparison results are logged.
+     * <p>
+     * When true, outputs detailed state comparison information to logs.
+     * Only effective when enableStateComparison is also true.
+     */
+    public static boolean logStateComparison = false;
+
 }

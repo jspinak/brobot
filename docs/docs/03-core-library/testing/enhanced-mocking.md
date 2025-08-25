@@ -17,19 +17,51 @@ Brobot's enhanced mock testing system provides sophisticated scenario-based test
 
 The enhanced mock system extends the basic mocking capabilities with:
 
+- **Centralized mock mode management** via `MockModeManager`
 - **Scenario-based configurations** for complex test conditions
 - **Advanced failure patterns** with temporal and cascading behaviors  
 - **Behavioral verification** beyond simple operation counting
 - **Structured test data builders** with variations and versioning
 - **Performance optimization** for large-scale test execution
 
+### Centralized Mock Mode Management
+
+Brobot now provides the `MockModeManager` class as a single source of truth for mock mode configuration:
+
+```java
+import io.github.jspinak.brobot.config.MockModeManager;
+
+// Enable mock mode across all components
+MockModeManager.setMockMode(true);
+
+// Check if mock mode is active
+if (MockModeManager.isMockMode()) {
+    // Execute mock-specific logic
+}
+
+// Debug mock mode state
+MockModeManager.logMockModeState();
+```
+
+This ensures consistency across:
+- System properties
+- ExecutionEnvironment
+- FrameworkSettings
+- All other mock-aware components
+
 ## Mock Scenario Configuration
 
 ### Basic Scenario Setup
 
+All test classes should extend `BrobotTestBase` for automatic mock mode configuration:
+
 ```java
-@Test
-public void testLoginUnderNetworkIssues() {
+import io.github.jspinak.brobot.test.BrobotTestBase;
+
+public class MyScenarioTest extends BrobotTestBase {
+    
+    @Test
+    public void testLoginUnderNetworkIssues() {
     MockScenarioConfig scenario = MockScenarioConfig.builder()
         .scenarioName("login_network_issues")
         .description("Simulate intermittent network connectivity during login")
