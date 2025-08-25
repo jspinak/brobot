@@ -235,7 +235,7 @@ public class VisualFeedbackOptionsTest extends BrobotTestBase {
     
     @Test
     public void testSettersAndGetters() {
-        VisualFeedbackOptions options = new VisualFeedbackOptions();
+        VisualFeedbackOptions options = VisualFeedbackOptions.builder().build();
         
         options.setHighlightEnabled(false);
         assertFalse(options.isHighlightEnabled());
