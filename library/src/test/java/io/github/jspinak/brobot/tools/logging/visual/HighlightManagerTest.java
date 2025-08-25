@@ -537,7 +537,7 @@ public class HighlightManagerTest extends BrobotTestBase {
         
         List<Match> matches = Arrays.asList(
             new Match.Builder()
-                .setRegion(null)  // Null region
+                // Null region - don't set region at all
                 .setSimScore(0.95)
                 .build(),
             new Match.Builder()
