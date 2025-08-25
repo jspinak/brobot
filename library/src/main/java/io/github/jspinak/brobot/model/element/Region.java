@@ -317,9 +317,9 @@ public class Region implements Comparable<Region> {
         if (gridNumber == -1) return this;
         org.sikuli.script.Region sikuliRegion = sikuli();
         if (sikuliRegion == null) {
-            // In headless mode, calculate grid region manually
-            int rows = 3; // default grid size
-            int cols = 3;
+            // In headless mode, calculate grid region manually using configured dimensions
+            int rows = io.github.jspinak.brobot.tools.testing.mock.grid.MockGridConfig.getDefaultRows();
+            int cols = io.github.jspinak.brobot.tools.testing.mock.grid.MockGridConfig.getDefaultCols();
             int cellWidth = w / cols;
             int cellHeight = h / rows;
             int row = RegionUtils.toRow(this, gridNumber);

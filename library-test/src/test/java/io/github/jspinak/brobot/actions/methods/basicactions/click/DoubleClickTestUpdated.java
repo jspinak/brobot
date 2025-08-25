@@ -9,7 +9,6 @@ import io.github.jspinak.brobot.action.internal.service.ActionService;
 import io.github.jspinak.brobot.config.ExecutionEnvironment;
 import io.github.jspinak.brobot.model.element.Location;
 import io.github.jspinak.brobot.model.state.StateImage;
-import io.github.jspinak.brobot.BrobotTestApplication;
 import io.github.jspinak.brobot.test.BrobotIntegrationTestBase;
 import io.github.jspinak.brobot.testutils.TestPaths;
 import org.junit.jupiter.api.BeforeAll;
@@ -17,40 +16,22 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.context.ContextConfiguration;
-import io.github.jspinak.brobot.test.TestEnvironmentInitializer;
-import io.github.jspinak.brobot.test.mock.MockGuiAccessConfig;
-import io.github.jspinak.brobot.test.mock.MockGuiAccessMonitor;
-import io.github.jspinak.brobot.test.mock.MockScreenConfig;
 
 import java.io.File;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Updated tests for double-click functionality using the new ActionConfig API.
- * Demonstrates migration from ObjectActionOptions to ClickOptions.
+ * Demonstrates migration from ActionOptions to ClickOptions.
  * 
  * Key changes:
- * - Uses ClickOptions instead of generic ObjectActionOptions
+ * - Uses ClickOptions instead of generic ActionOptions
  * - ActionResult requires setActionConfig() before perform()
  * - Uses ActionService to get the appropriate action
  * - ClickType.Type is now ClickOptions.Type
  */
-@SpringBootTest(classes = io.github.jspinak.brobot.BrobotTestApplication.class,
-    properties = {
-        "brobot.gui-access.continue-on-error=true",
-        "brobot.gui-access.check-on-startup=false",
-        "java.awt.headless=true",
-        "spring.main.allow-bean-definition-overriding=true",
-        "brobot.test.type=unit",
-        "brobot.capture.physical-resolution=false",
-        "brobot.mock.enabled=true"
-    })
-@Import({MockGuiAccessConfig.class, MockGuiAccessMonitor.class, MockScreenConfig.class})
-@ContextConfiguration(initializers = TestEnvironmentInitializer.class)
+@SpringBootTest
 public class DoubleClickTestUpdated extends BrobotIntegrationTestBase {
 
     @BeforeAll
@@ -73,7 +54,7 @@ public class DoubleClickTestUpdated extends BrobotIntegrationTestBase {
         FrameworkSettings.mock = true;
         
         // Clear any previous screenshots
-        FrameworkSettings.screenshots.clear();
+        FrameworkSettings.screenshots.clearAll();
     }
 
     @Autowired
@@ -109,7 +90,7 @@ public class DoubleClickTestUpdated extends BrobotIntegrationTestBase {
                 
         // NEW API: Configure double-click action using ClickOptions
         ClickOptions clickOptions = new ClickOptions.Builder()
-                // .setClickType(ClickOptions.Type.DOUBLE_LEFT) // ClickOptions.Type enum removed
+                .setClickType(ClickOptions.Type.DOUBLE_LEFT)
                 .setPauseBeforeBegin(2.0)
                 .build();
                 
@@ -118,11 +99,11 @@ public class DoubleClickTestUpdated extends BrobotIntegrationTestBase {
         result.setActionConfig(clickOptions);
         
         // Get the action from service
-        Optional<ActionInterface> clickAction = actionService.getAction(clickOptions);
-        assertTrue(clickAction.isPresent());
+        ActionInterface clickAction = actionService.getAction(clickOptions);
+        assertNotNull(clickAction);
         
         // Execute - find happens for real, click is mocked
-        clickAction.get().perform(result, objColl);
+        clickAction.perform(result, objColl);
         
         // Verify results
         assertFalse(result.isEmpty(), "Should find the topLeft pattern");
@@ -137,8 +118,7 @@ public class DoubleClickTestUpdated extends BrobotIntegrationTestBase {
         // Verify the config is preserved
         assertNotNull(result.getActionConfig());
         assertTrue(result.getActionConfig() instanceof ClickOptions);
-        // assertEquals(ClickOptions.Type.DOUBLE_LEFT, ((ClickOptions) result.getActionConfig()).getClickType()); // ClickOptions API changed - Type enum removed
-        assertEquals(2, ((ClickOptions) result.getActionConfig()).getNumberOfClicks()); // Check double-click by count
+        assertEquals(ClickOptions.Type.DOUBLE_LEFT, ((ClickOptions) result.getActionConfig()).getClickType());
     }
 
     /**
@@ -171,9 +151,10 @@ public class DoubleClickTestUpdated extends BrobotIntegrationTestBase {
                 
         // NEW API: Configure double-click with custom pause
         ClickOptions clickOptions = new ClickOptions.Builder()
-                .setNumberOfClicks(2) // Double-click: 2 clicks
-                .setPauseBeforeBegin(2.0)
-                .setPauseAfterEnd(0.5)
+                .setClickType(ClickOptions.Type.DOUBLE_LEFT)
+                .setPauseBeforeMouseDown(2.0)
+                .setPauseAfterMouseDown(0.1)
+                .setPauseAfterMouseUp(0.5)
                 .build();
                 
         // NEW API: Create ActionResult with config
@@ -181,11 +162,10 @@ public class DoubleClickTestUpdated extends BrobotIntegrationTestBase {
         result.setActionConfig(clickOptions);
         
         // Get the action from service
-        Optional<ActionInterface> clickAction = actionService.getAction(clickOptions);
-        assertTrue(clickAction.isPresent());
+        ActionInterface clickAction = actionService.getAction(clickOptions);
         
         // Execute
-        clickAction.get().perform(result, objColl);
+        clickAction.perform(result, objColl);
         
         // Verify results
         assertFalse(result.isEmpty(), "Should find the topLeft pattern");
@@ -199,8 +179,9 @@ public class DoubleClickTestUpdated extends BrobotIntegrationTestBase {
         
         // Verify timing settings are preserved
         ClickOptions resultOptions = (ClickOptions) result.getActionConfig();
-        assertEquals(2.0, resultOptions.getPauseBeforeBegin());
-        assertEquals(0.5, resultOptions.getPauseAfterEnd());
+        assertEquals(2.0, resultOptions.getPauseBeforeMouseDown());
+        assertEquals(0.1, resultOptions.getPauseAfterMouseDown());
+        assertEquals(0.5, resultOptions.getPauseAfterMouseUp());
     }
 
     @Test
@@ -225,22 +206,21 @@ public class DoubleClickTestUpdated extends BrobotIntegrationTestBase {
                 .withImages(topLeft)
                 .build();
                 
-        // NEW API: Configure multiple clicks (triple-click equivalent)
+        // NEW API: Configure triple-click
         ClickOptions clickOptions = new ClickOptions.Builder()
-                .setNumberOfClicks(3)
+                .setClickType(ClickOptions.Type.TRIPLE_LEFT)
                 .build();
                 
         ActionResult result = new ActionResult();
         result.setActionConfig(clickOptions);
         
-        Optional<ActionInterface> clickAction = actionService.getAction(clickOptions);
-        assertTrue(clickAction.isPresent());
-        clickAction.get().perform(result, objColl);
+        ActionInterface clickAction = actionService.getAction(clickOptions);
+        clickAction.perform(result, objColl);
         
         assertFalse(result.isEmpty(), "Should find the topLeft pattern");
         
-        // Verify number of clicks is preserved
-        assertEquals(3, ((ClickOptions) result.getActionConfig()).getNumberOfClicks());
+        // Verify click type is preserved
+        assertEquals(ClickOptions.Type.TRIPLE_LEFT, ((ClickOptions) result.getActionConfig()).getClickType());
     }
 
     @Test
@@ -256,9 +236,9 @@ public class DoubleClickTestUpdated extends BrobotIntegrationTestBase {
         
         // OLD API (commented out):
         /*
-        ObjectActionOptions oldOptions = new ActionOptions.Builder()
-                .setAction(ObjectActionOptions.Action.CLICK)
-                .setClickType(ClickType.Type.DOUBLE_LEFT)
+        ActionOptions oldOptions = new ActionOptions.Builder()
+                .setAction(ClickOptions)
+                .setClickType(ClickOptions.Type.DOUBLE_LEFT)
                 .setPauseBeforeMouseDown(2.0)
                 .build();
         ActionResult oldResult = action.perform(oldOptions, objColl);
@@ -266,16 +246,15 @@ public class DoubleClickTestUpdated extends BrobotIntegrationTestBase {
         
         // NEW API:
         ClickOptions newOptions = new ClickOptions.Builder()
-                .setNumberOfClicks(2) // Double-click: 2 clicks
-                .setPauseBeforeBegin(2.0)
+                .setClickType(ClickOptions.Type.DOUBLE_LEFT)
+                .setPauseBeforeMouseDown(2.0)
                 .build();
         
         ActionResult newResult = new ActionResult();
         newResult.setActionConfig(newOptions);
         
-        Optional<ActionInterface> clickAction = actionService.getAction(newOptions);
-        assertTrue(clickAction.isPresent());
-        clickAction.get().perform(newResult, objColl);
+        ActionInterface clickAction = actionService.getAction(newOptions);
+        clickAction.perform(newResult, objColl);
         
         // Both approaches achieve the same result, but new API is more type-safe
         assertNotNull(newResult);

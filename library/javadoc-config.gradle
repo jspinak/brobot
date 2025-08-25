@@ -1,0 +1,91 @@
+// JavaDoc configuration for Brobot library
+// This configuration ensures comprehensive API documentation with proper formatting
+
+javadoc {
+    options {
+        encoding = 'UTF-8'
+        author = true
+        version = true
+        use = true
+        windowTitle = "Brobot API Documentation"
+        docTitle = "Brobot - Model-Based GUI Automation Framework"
+        header = '<b>Brobot API</b>'
+        bottom = 'Copyright &#169; 2024. All Rights Reserved.'
+        
+        // Link to external documentation
+        links(
+            'https://docs.oracle.com/en/java/javase/11/docs/api/',
+            'https://junit.org/junit5/docs/current/api/',
+            'https://www.slf4j.org/apidocs/',
+            'https://javadoc.io/doc/org.projectlombok/lombok/latest/'
+        )
+        
+        // Custom tags for Brobot-specific documentation
+        tags(
+            'apiNote:a:API Note:',
+            'implNote:a:Implementation Note:',
+            'brobot.since:a:Brobot Version:',
+            'brobot.example:a:Example Usage:'
+        )
+        
+        // Add UML diagrams using PlantUML doclet if available
+        if (project.hasProperty('enableUmlDiagrams')) {
+            doclet = 'nl.talsmasoftware.umldoclet.UMLDoclet'
+            docletpath = configurations.umlDoclet
+        }
+    }
+    
+    // Include all packages except internal and test
+    include '**/io/github/jspinak/brobot/**'
+    exclude '**/internal/**'
+    exclude '**/test/**'
+    exclude '**/mock/**'
+    
+    // Fail on warning to ensure quality
+    failOnError = true
+}
+
+// Task to generate JavaDoc with examples
+task javadocWithExamples(type: Javadoc) {
+    source = sourceSets.main.allJava
+    classpath = sourceSets.main.runtimeClasspath
+    destinationDir = file("$buildDir/docs/javadoc-with-examples")
+    
+    options {
+        // Include example code from test sources
+        linksource = true
+        sourcepath = files(sourceSets.main.allJava.srcDirs, sourceSets.test.allJava.srcDirs)
+        
+        // Add example snippets
+        overview = 'src/main/javadoc/overview.html'
+        
+        // Generate method usage index
+        splitIndex = true
+        
+        // Add search functionality
+        addBooleanOption('html5', true)
+        addBooleanOption('Xdoclint:all,-missing', true)
+    }
+}
+
+// Task to validate JavaDoc completeness
+task validateJavadoc {
+    doLast {
+        def missingDocs = []
+        sourceSets.main.allJava.visit { file ->
+            if (file.name.endsWith('.java') && !file.name.contains('package-info')) {
+                def content = file.file.text
+                // Check for class-level JavaDoc
+                if (!content.contains('/**') || !content.matches('(?s).*\\/\\*\\*.*class\\s+\\w+.*')) {
+                    missingDocs.add(file.relativePath)
+                }
+            }
+        }
+        
+        if (!missingDocs.empty) {
+            logger.warn("Classes missing JavaDoc: ${missingDocs.join(', ')}")
+        }
+    }
+}
+
+build.dependsOn validateJavadoc

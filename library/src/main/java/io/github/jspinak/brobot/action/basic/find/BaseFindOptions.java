@@ -4,6 +4,8 @@ import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.model.element.SearchRegions;
 import lombok.Getter;
 import org.sikuli.basics.Settings;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 
 /**
  * Base configuration for all Find actions in the Brobot framework.

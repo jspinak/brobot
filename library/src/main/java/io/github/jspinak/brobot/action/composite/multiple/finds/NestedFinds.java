@@ -68,7 +68,12 @@ public class NestedFinds implements ActionInterface {
      */
     @Override
     public void perform(ActionResult matches, ObjectCollection... objectCollections) {
-        if (objectCollections.length == 0) {
+        // Handle null or empty cases
+        if (matches == null) {
+            return;
+        }
+        
+        if (objectCollections == null || objectCollections.length == 0) {
             matches.setSuccess(false);
             return;
         }
@@ -102,6 +107,12 @@ public class NestedFinds implements ActionInterface {
         // Execute the chain
         ActionChainOptions chainOptions = chainBuilder.build();
         ActionResult result = actionChainExecutor.executeChain(chainOptions, matches, objectCollections);
+        
+        // Handle null result
+        if (result == null) {
+            matches.setSuccess(false);
+            return;
+        }
         
         // Copy results back to matches
         matches.setSuccess(result.isSuccess());

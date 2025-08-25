@@ -53,8 +53,8 @@ public final class ClickOptions extends ActionConfig {
         super(builder); // Initialize common ActionConfig fields
         this.numberOfClicks = builder.numberOfClicks;
         this.mousePressOptions = builder.mousePressOptions;
-        this.verificationOptions = builder.verificationOptions.build(); // Build the composed object
-        this.repetitionOptions = builder.repetitionOptions.build();
+        this.verificationOptions = builder.verificationOptions; // Already built in the builder
+        this.repetitionOptions = builder.repetitionOptions; // Already built in the builder
     }
     
     /**
@@ -84,9 +84,9 @@ public final class ClickOptions extends ActionConfig {
         @JsonProperty("mousePressOptions")
         private MousePressOptions mousePressOptions = MousePressOptions.builder().build(); // Default: LEFT button with default timings
         @JsonProperty("verificationOptions")
-        private VerificationOptions.VerificationOptionsBuilder verificationOptions = VerificationOptions.builder(); // Default: no verification
+        private VerificationOptions verificationOptions = VerificationOptions.builder().build(); // Default: no verification
         @JsonProperty("repetitionOptions")
-        private RepetitionOptions.RepetitionOptionsBuilder repetitionOptions = RepetitionOptions.builder(); // Default: single repetition
+        private RepetitionOptions repetitionOptions = RepetitionOptions.builder().build(); // Default: single repetition
 
         /**
          * Default constructor for creating a new ClickOptions configuration.
@@ -104,8 +104,8 @@ public final class ClickOptions extends ActionConfig {
             super(original); // Call parent copy logic
             this.numberOfClicks = original.numberOfClicks;
             this.mousePressOptions = original.mousePressOptions.toBuilder().build();
-            this.verificationOptions = original.verificationOptions.toBuilder();
-            this.repetitionOptions = original.repetitionOptions.toBuilder();
+            this.verificationOptions = original.verificationOptions.toBuilder().build();
+            this.repetitionOptions = original.repetitionOptions.toBuilder().build();
         }
 
         /**
@@ -135,8 +135,8 @@ public final class ClickOptions extends ActionConfig {
          * @param verificationOptionsBuilder The builder for the verification options.
          * @return this Builder instance for chaining.
          */
-        public Builder setVerification(VerificationOptions.VerificationOptionsBuilder verificationOptionsBuilder) {
-            this.verificationOptions = verificationOptionsBuilder;
+        public Builder setVerification(VerificationOptions verificationOptions) {
+            this.verificationOptions = verificationOptions;
             return self();
         }
         
@@ -146,8 +146,8 @@ public final class ClickOptions extends ActionConfig {
          * @param repetitionOptionsBuilder The builder for the repetition options.
          * @return this Builder instance for chaining.
          */
-        public Builder setRepetition(RepetitionOptions.RepetitionOptionsBuilder repetitionOptionsBuilder) {
-            this.repetitionOptions = repetitionOptionsBuilder;
+        public Builder setRepetition(RepetitionOptions repetitionOptions) {
+            this.repetitionOptions = repetitionOptions;
             return self();
         }
 

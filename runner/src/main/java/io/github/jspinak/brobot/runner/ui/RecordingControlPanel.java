@@ -4,6 +4,7 @@ import io.github.jspinak.brobot.runner.event.ActionRecordedEvent;
 import io.github.jspinak.brobot.runner.event.RecordingStartedEvent;
 import io.github.jspinak.brobot.runner.event.RecordingStoppedEvent;
 import io.github.jspinak.brobot.persistence.PersistenceProvider.SessionMetadata;
+import io.github.jspinak.brobot.runner.persistence.entity.RecordingSessionEntity;
 import io.github.jspinak.brobot.runner.service.ActionHistoryExportService;
 import io.github.jspinak.brobot.runner.service.PersistenceAdapterService;
 import javafx.application.Platform;
@@ -220,12 +221,12 @@ public class RecordingControlPanel extends VBox {
         
         result.ifPresentOrElse(
             info -> {
-                RecordingSessionEntity session = recordingService.startRecording(
+                String sessionId = recordingService.startRecording(
                     info.name, info.application, info.description
                 );
                 
-                sessionName.set(session.getName());
-                sessionLabel.setText("Session: " + session.getName());
+                sessionName.set(info.name);
+                sessionLabel.setText("Session: " + info.name);
                 statusLabel.setText("Recording started");
                 exportButton.setDisable(false);
                 
@@ -233,7 +234,7 @@ public class RecordingControlPanel extends VBox {
                 recordingStartTime = LocalDateTime.now();
                 startDurationTimer();
                 
-                log.info("Started recording session: {}", session.getName());
+                log.info("Started recording session: {}", info.name);
             },
             () -> {
                 // User cancelled, reset toggle
@@ -243,10 +244,11 @@ public class RecordingControlPanel extends VBox {
     }
     
     private void stopRecording() {
-        RecordingSessionEntity session = recordingService.stopRecording();
+        String sessionId = recordingService.stopRecording();
         
-        if (session != null) {
-            statusLabel.setText("Recording stopped - " + session.getTotalActions() + " actions recorded");
+        if (sessionId != null) {
+            SessionMetadata metadata = recordingService.getSessionMetadata(sessionId);
+            statusLabel.setText("Recording stopped - " + metadata.getTotalActions() + " actions recorded");
             
             // Stop duration timer
             stopDurationTimer();
@@ -254,18 +256,16 @@ public class RecordingControlPanel extends VBox {
             // Show summary
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
             alert.setTitle("Recording Complete");
-            alert.setHeaderText("Session: " + session.getName());
+            alert.setHeaderText("Session: " + metadata.getName());
             alert.setContentText(String.format(
-                "Total Actions: %d\nSuccessful: %d\nFailed: %d\nSuccess Rate: %.1f%%\nDuration: %s",
-                session.getTotalActions(),
-                session.getSuccessfulActions(),
-                session.getFailedActions(),
-                session.getSuccessRate(),
-                formatDuration(session.getDuration())
+                "Total Actions: %d\nSuccessful: %d\nSuccess Rate: %.1f%%",
+                metadata.getTotalActions(),
+                metadata.getSuccessfulActions(),
+                metadata.getSuccessRate()
             ));
             alert.showAndWait();
             
-            log.info("Stopped recording session: {}", session.getName());
+            log.info("Stopped recording session: {}", metadata.getName());
         }
         
         // Reset UI
@@ -291,10 +291,12 @@ public class RecordingControlPanel extends VBox {
     }
     
     private void exportCurrentSession() {
-        recordingService.getActiveSession().ifPresent(session -> {
+        String currentSessionId = recordingService.getCurrentSessionId();
+        if (currentSessionId != null) {
+            SessionMetadata metadata = recordingService.getSessionMetadata(currentSessionId);
             FileChooser fileChooser = new FileChooser();
             fileChooser.setTitle("Export Session");
-            fileChooser.setInitialFileName(session.getName() + "_" + 
+            fileChooser.setInitialFileName(metadata.getName() + "_" + 
                 LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss")) + ".json");
             fileChooser.getExtensionFilters().addAll(
                 new FileChooser.ExtensionFilter("JSON Files", "*.json"),
@@ -308,7 +310,7 @@ public class RecordingControlPanel extends VBox {
                 try {
                     ActionHistoryExportService.ExportFormat format = 
                         determineFormat(file.getName());
-                    exportService.exportSessionToFile(session.getId(), file, format);
+                    exportService.exportSessionToFile(Long.parseLong(currentSessionId), file, format);
                     
                     statusLabel.setText("Exported to: " + file.getName());
                     
@@ -323,7 +325,7 @@ public class RecordingControlPanel extends VBox {
                     showError("Export failed: " + e.getMessage());
                 }
             }
-        });
+        }
     }
     
     private void importSession() {

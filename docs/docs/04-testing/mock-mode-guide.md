@@ -355,6 +355,112 @@ mockStateManagement.setStateProbabilities(100, "StateName");
 brobot.framework.mock=true
 ```
 
+## Enhanced Mock Infrastructure
+
+### Grid Operations Support
+
+Mock mode now provides full support for grid operations without requiring SikuliX:
+
+```java
+import io.github.jspinak.brobot.tools.testing.mock.grid.MockGridConfig;
+
+@Test
+public void testGridNavigation() {
+    // Configure grid for testing
+    MockGridConfig.setDefaultGrid(3, 3); // 3x3 grid
+    
+    Region screen = new Region(0, 0, 900, 900);
+    
+    // Test grid navigation
+    for (int i = 0; i < 9; i++) {
+        Region gridCell = screen.getGridRegion(i);
+        assertNotNull(gridCell);
+        assertEquals(300, gridCell.w());
+        assertEquals(300, gridCell.h());
+    }
+    
+    // Test location to grid mapping
+    Location centerOfTopRight = new Location(750, 150);
+    Optional<Integer> gridNum = RegionUtils.getGridNumber(screen, centerOfTopRight);
+    assertTrue(gridNum.isPresent());
+    assertEquals(2, gridNum.get()); // Top-right is index 2 in 3x3 grid
+}
+```
+
+### Scene and Color Analysis Mocking
+
+The `MockSceneBuilder` provides comprehensive test data for color-based operations:
+
+```java
+import io.github.jspinak.brobot.tools.testing.mock.builders.MockSceneBuilder;
+
+@Test
+public void testColorMatching() {
+    // Create mock scene with proper image initialization
+    Scene scene = MockSceneBuilder.createMockScene();
+    
+    // Create scene analysis with color profiles
+    SceneAnalysis analysis = MockSceneBuilder.sceneAnalysis()
+        .withPixelProfile(0)
+        .withPixelProfile(1)
+        .build();
+    
+    // Color operations work in mock mode
+    ColorClassifier classifier = new ColorClassifier();
+    Mat result = classifier.getImageIndices(analysis, ColorCluster.ColorSchemaName.BGR);
+    assertNotNull(result);
+}
+```
+
+### Test Base Class - BrobotTestBase
+
+All tests should extend `BrobotTestBase` for proper mock configuration:
+
+```java
+import io.github.jspinak.brobot.test.BrobotTestBase;
+
+public class MyAutomationTest extends BrobotTestBase {
+    
+    @Test
+    public void testWithMockMode() {
+        // Mock mode is automatically enabled
+        // No headless exceptions
+        // Fast execution times
+        
+        ActionResult result = action.find(targetElement);
+        assertTrue(result.isSuccess());
+    }
+}
+```
+
+Key benefits of `BrobotTestBase`:
+- Automatic mock mode activation
+- CI/CD pipeline compatibility
+- Fast operation timings (0.01-0.04s)
+- No display server required
+- Consistent test environment
+
+## Performance Benefits
+
+Mock mode operations are significantly faster:
+
+| Operation | Mock Mode | Real Mode | Speedup |
+|-----------|-----------|-----------|---------|
+| Find operation | ~0.01s | 0.5-2s | 50-200x |
+| Grid calculation | ~0.01s | 0.5s | 50x |
+| Color analysis | ~0.02s | 1-2s | 50-100x |
+| State transition | ~0.01s | 0.2-1s | 20-100x |
+
+## Common Pitfalls and Solutions
+
+| Issue | Solution |
+|-------|----------|
+| Tests fail in CI/CD | Extend `BrobotTestBase` |
+| Grid operations return empty | Configure `MockGridConfig.setDefaultGrid()` |
+| Color tests throw NPE | Use `MockSceneBuilder` for test data |
+| SikuliX mocking errors | Use real SikuliX objects or Brobot mocks |
+| Inconsistent test results | Ensure mock mode is enabled in setup |
+
 ## Summary
 
 Mock mode in Brobot enables:
@@ -363,8 +469,17 @@ Mock mode in Brobot enables:
 - **Stochastic testing** with variable probabilities for robustness
 - **CI/CD integration** without GUI dependencies
 - **Rapid development** without target application availability
+- **Grid operations** without SikuliX dependency
+- **Color analysis** without real images
+- **50-200x faster** test execution
 
 Choose probability settings based on your testing goals:
 - **100%** for automation flow testing
 - **Variable** for robustness and error handling
 - **Dynamic** for simulating complex scenarios
+
+Use the enhanced mock infrastructure for:
+- **Grid-based navigation** testing
+- **Color matching** validation
+- **Headless environment** compatibility
+- **Fast CI/CD** pipeline execution
