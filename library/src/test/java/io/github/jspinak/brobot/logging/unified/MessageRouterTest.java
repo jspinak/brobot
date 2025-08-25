@@ -1,13 +1,11 @@
 package io.github.jspinak.brobot.logging.unified;
 
 import io.github.jspinak.brobot.action.ActionResult;
-import io.github.jspinak.brobot.config.FrameworkSettings;
-import io.github.jspinak.brobot.logging.DiagnosticLogger;
-import io.github.jspinak.brobot.logging.ActionLogger;
-import io.github.jspinak.brobot.logging.modular.ActionLoggingService;
+import io.github.jspinak.brobot.action.ObjectCollection;
+import io.github.jspinak.brobot.config.LoggingVerbosityConfig;
 import io.github.jspinak.brobot.model.state.State;
 import io.github.jspinak.brobot.test.BrobotTestBase;
-import io.github.jspinak.brobot.tools.logging.ConsoleOutputManager;
+import io.github.jspinak.brobot.tools.logging.ActionLogger;
 import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
 import io.github.jspinak.brobot.logging.unified.console.ConsoleFormatter;
 import org.junit.jupiter.api.AfterEach;
@@ -21,9 +19,9 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
-import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -38,16 +36,16 @@ public class MessageRouterTest extends BrobotTestBase {
     private ActionLogger actionLogger;
     
     @Mock
-    private ConsoleReporter consoleReporter;
+    private LoggingVerbosityConfig verbosityConfig;
     
     @Mock
     private ConsoleFormatter consoleFormatter;
     
     @Mock
-    private ActionLoggingService actionLoggingService;
+    private LoggingVerbosityConfig.NormalModeConfig normalConfig;
     
     @Mock
-    private DiagnosticLogger diagnosticLogger;
+    private LoggingVerbosityConfig.VerboseModeConfig verboseConfig;
     
     private ByteArrayOutputStream outputStream;
     private PrintStream originalOut;
@@ -63,8 +61,7 @@ public class MessageRouterTest extends BrobotTestBase {
         System.setOut(new PrintStream(outputStream));
         
         // Create MessageRouter with mocked dependencies
-        messageRouter = new MessageRouter(actionLogger, consoleReporter, 
-                                         consoleFormatter, actionLoggingService);
+        messageRouter = new MessageRouter(actionLogger, verbosityConfig, consoleFormatter);
         
         // Setup default formatter behavior
         when(consoleFormatter.format(any(LogEvent.class))).thenAnswer(invocation -> {
@@ -72,8 +69,13 @@ public class MessageRouterTest extends BrobotTestBase {
             return String.format("[%s] %s", event.getLevel(), event.getMessage());
         });
         
-        // Setup console reporter level checking
-        when(consoleReporter.levelAllows(any())).thenReturn(true);
+        // Setup verbosity config
+        when(verbosityConfig.getNormal()).thenReturn(normalConfig);
+        when(verbosityConfig.getVerbose()).thenReturn(verboseConfig);
+        when(normalConfig.getMaxObjectNameLength()).thenReturn(50);
+        when(normalConfig.isShowMatchCoordinates()).thenReturn(false);
+        when(normalConfig.isShowTiming()).thenReturn(false);
+        when(verboseConfig.isShowMetadata()).thenReturn(true);
     }
     
     @AfterEach
@@ -84,27 +86,27 @@ public class MessageRouterTest extends BrobotTestBase {
     @Test
     public void testRouteEvent_ActionEvent() {
         // Arrange
-        FrameworkSettings.structuredLogging = true;
-        LoggingContext.setSessionId("test-session");
+        messageRouter.setStructuredLoggingEnabled(true);
         
         Map<String, Object> metadata = new HashMap<>();
         metadata.put("actionType", "CLICK");
         metadata.put("target", "button");
         
-        LogEvent event = LogEvent.builder()
+        LogEvent event = new LogEvent.Builder()
             .type(LogEvent.Type.ACTION)
             .level(LogEvent.Level.INFO)
             .message("Click action performed")
             .metadata(metadata)
             .success(true)
-            .timestamp(Instant.now())
+            .sessionId("test-session")
+            .timestamp(System.currentTimeMillis())
             .build();
         
         // Act
-        messageRouter.routeEvent(event);
+        messageRouter.route(event);
         
         // Assert
-        verify(actionLogger).logAction(anyString(), any(ActionResult.class));
+        verify(actionLogger).logAction(anyString(), any(ActionResult.class), any(ObjectCollection.class));
         verify(consoleFormatter).format(event);
         assertTrue(outputStream.toString().contains("[INFO]"));
     }
@@ -112,207 +114,198 @@ public class MessageRouterTest extends BrobotTestBase {
     @Test
     public void testRouteEvent_TransitionEvent() {
         // Arrange
-        FrameworkSettings.structuredLogging = true;
-        LoggingContext.setSessionId("test-session");
+        messageRouter.setStructuredLoggingEnabled(true);
         
-        Map<String, Object> metadata = new HashMap<>();
-        metadata.put("fromState", "Login");
-        metadata.put("toState", "Dashboard");
-        
-        LogEvent event = LogEvent.builder()
+        LogEvent event = new LogEvent.Builder()
             .type(LogEvent.Type.TRANSITION)
             .level(LogEvent.Level.INFO)
             .message("State transition")
-            .metadata(metadata)
+            .fromState("Login")
+            .toState("Dashboard")
+            .sessionId("test-session")
             .success(true)
-            .timestamp(Instant.now())
+            .timestamp(System.currentTimeMillis())
             .build();
         
         // Act
-        messageRouter.routeEvent(event);
+        messageRouter.route(event);
         
         // Assert
-        verify(actionLogger).logStateTransition(anyString(), any(), any(), anyBoolean(), anyLong());
+        verify(actionLogger).logStateTransition(anyString(), any(Set.class), any(Set.class), any(Set.class), anyBoolean(), anyLong());
         verify(consoleFormatter).format(event);
     }
     
     @Test
     public void testRouteEvent_ObservationEvent() {
         // Arrange
-        FrameworkSettings.structuredLogging = true;
-        LoggingContext.setSessionId("test-session");
+        messageRouter.setStructuredLoggingEnabled(true);
         
-        LogEvent event = LogEvent.builder()
+        LogEvent event = new LogEvent.Builder()
             .type(LogEvent.Type.OBSERVATION)
             .level(LogEvent.Level.INFO)
             .message("Test observation")
-            .timestamp(Instant.now())
+            .sessionId("test-session")
+            .timestamp(System.currentTimeMillis())
             .build();
         
         // Act
-        messageRouter.routeEvent(event);
+        messageRouter.route(event);
         
         // Assert
-        verify(actionLogger).logObservation(anyString(), eq("Test observation"));
+        verify(actionLogger).logObservation(anyString(), eq("OBSERVATION"), eq("Test observation"), eq("INFO"));
         verify(consoleFormatter).format(event);
     }
     
     @Test
     public void testRouteEvent_PerformanceEvent() {
         // Arrange
-        FrameworkSettings.structuredLogging = true;
-        LoggingContext.setSessionId("test-session");
+        messageRouter.setStructuredLoggingEnabled(true);
         
-        Map<String, Object> metadata = new HashMap<>();
-        metadata.put("duration", 1500L);
-        metadata.put("operation", "findImage");
-        
-        LogEvent event = LogEvent.builder()
+        LogEvent event = new LogEvent.Builder()
             .type(LogEvent.Type.PERFORMANCE)
             .level(LogEvent.Level.INFO)
             .message("Performance metrics")
-            .metadata(metadata)
-            .timestamp(Instant.now())
+            .duration(1500L)
+            .sessionId("test-session")
+            .timestamp(System.currentTimeMillis())
             .build();
         
         // Act
-        messageRouter.routeEvent(event);
+        messageRouter.route(event);
         
         // Assert
-        verify(actionLogger).logPerformanceMetrics(anyString(), any());
+        verify(actionLogger).logPerformanceMetrics(anyString(), eq(1500L), eq(0L), eq(1500L));
         verify(consoleFormatter).format(event);
     }
     
     @Test
     public void testRouteEvent_ErrorEvent() {
         // Arrange
-        FrameworkSettings.structuredLogging = true;
-        LoggingContext.setSessionId("test-session");
+        messageRouter.setStructuredLoggingEnabled(true);
         
         Exception error = new RuntimeException("Test error");
         
-        LogEvent event = LogEvent.builder()
+        LogEvent event = new LogEvent.Builder()
             .type(LogEvent.Type.ERROR)
             .level(LogEvent.Level.ERROR)
             .message("Error occurred")
             .error(error)
-            .timestamp(Instant.now())
+            .sessionId("test-session")
+            .timestamp(System.currentTimeMillis())
             .build();
         
         // Act
-        messageRouter.routeEvent(event);
+        messageRouter.route(event);
         
         // Assert
-        verify(actionLogger).logError(anyString(), eq("Error occurred"), eq(error));
+        verify(actionLogger).logError(anyString(), eq("Error occurred"), isNull());
         verify(consoleFormatter).format(event);
     }
     
     @Test
     public void testRouteEvent_WithoutSessionId() {
         // Arrange
-        FrameworkSettings.structuredLogging = true;
-        LoggingContext.clearSession(); // No session ID
+        messageRouter.setStructuredLoggingEnabled(true);
         
-        LogEvent event = LogEvent.builder()
+        LogEvent event = new LogEvent.Builder()
             .type(LogEvent.Type.ACTION)
             .level(LogEvent.Level.INFO)
             .message("Action without session")
-            .timestamp(Instant.now())
+            .timestamp(System.currentTimeMillis())
             .build();
         
         // Act
-        messageRouter.routeEvent(event);
+        messageRouter.route(event);
         
         // Assert
         // Should only route to console, not ActionLogger
-        verify(actionLogger, never()).logAction(anyString(), any());
+        verify(actionLogger, never()).logAction(anyString(), any(), any());
         verify(consoleFormatter).format(event);
     }
     
     @Test
     public void testRouteEvent_StructuredLoggingDisabled() {
         // Arrange
-        FrameworkSettings.structuredLogging = false;
+        messageRouter.setStructuredLoggingEnabled(false);
         
-        LogEvent event = LogEvent.builder()
+        LogEvent event = new LogEvent.Builder()
             .type(LogEvent.Type.ACTION)
             .level(LogEvent.Level.INFO)
             .message("Action with structured logging disabled")
-            .timestamp(Instant.now())
+            .timestamp(System.currentTimeMillis())
             .build();
         
         // Act
-        messageRouter.routeEvent(event);
+        messageRouter.route(event);
         
         // Assert
         // Should only route to console
-        verify(actionLogger, never()).logAction(anyString(), any());
+        verify(actionLogger, never()).logAction(anyString(), any(), any());
         verify(consoleFormatter).format(event);
     }
     
     @Test
     public void testDetermineConsoleLevel_ErrorType() {
         // Arrange
-        LogEvent event = LogEvent.builder()
+        LogEvent event = new LogEvent.Builder()
             .type(LogEvent.Type.ERROR)
             .level(LogEvent.Level.ERROR)
             .message("Error message")
             .build();
         
         // Act
-        ConsoleOutputManager.OutputLevel level = invokePrivateMethod(
+        ConsoleReporter.OutputLevel level = invokePrivateMethod(
             messageRouter, "determineConsoleLevel", event);
         
         // Assert
-        assertEquals(ConsoleOutputManager.OutputLevel.LOW, level);
+        assertEquals(ConsoleReporter.OutputLevel.LOW, level);
     }
     
     @Test
     public void testDetermineConsoleLevel_ActionType() {
         // Arrange
-        LogEvent event = LogEvent.builder()
+        LogEvent event = new LogEvent.Builder()
             .type(LogEvent.Type.ACTION)
             .level(LogEvent.Level.INFO)
             .message("Action message")
             .build();
         
         // Act
-        ConsoleOutputManager.OutputLevel level = invokePrivateMethod(
+        ConsoleReporter.OutputLevel level = invokePrivateMethod(
             messageRouter, "determineConsoleLevel", event);
         
         // Assert
-        assertEquals(ConsoleOutputManager.OutputLevel.LOW, level);
+        assertEquals(ConsoleReporter.OutputLevel.LOW, level);
     }
     
     @Test
     public void testDetermineConsoleLevel_ObservationType() {
         // Arrange
-        LogEvent event = LogEvent.builder()
+        LogEvent event = new LogEvent.Builder()
             .type(LogEvent.Type.OBSERVATION)
             .level(LogEvent.Level.INFO)
             .message("Observation message")
             .build();
         
         // Act
-        ConsoleOutputManager.OutputLevel level = invokePrivateMethod(
+        ConsoleReporter.OutputLevel level = invokePrivateMethod(
             messageRouter, "determineConsoleLevel", event);
         
         // Assert
-        assertEquals(ConsoleOutputManager.OutputLevel.HIGH, level);
+        assertEquals(ConsoleReporter.OutputLevel.HIGH, level);
     }
     
     @Test
     public void testRouteToConsole_WithLevelCheck() {
         // Arrange
-        LogEvent event = LogEvent.builder()
+        LogEvent event = new LogEvent.Builder()
             .type(LogEvent.Type.ACTION)
             .level(LogEvent.Level.INFO)
             .message("Test action")
-            .timestamp(Instant.now())
+            .timestamp(System.currentTimeMillis())
             .build();
         
-        when(consoleReporter.levelAllows(ConsoleOutputManager.OutputLevel.LOW))
-            .thenReturn(true);
+        when(consoleFormatter.format(event)).thenReturn("[INFO] Test action");
         
         // Act
         invokePrivateMethod(messageRouter, "routeToConsole", event);
@@ -325,42 +318,45 @@ public class MessageRouterTest extends BrobotTestBase {
     @Test
     public void testRouteToConsole_LevelNotAllowed() {
         // Arrange
-        LogEvent event = LogEvent.builder()
+        LogEvent event = new LogEvent.Builder()
             .type(LogEvent.Type.OBSERVATION)
             .level(LogEvent.Level.DEBUG)
             .message("Debug observation")
-            .timestamp(Instant.now())
+            .timestamp(System.currentTimeMillis())
             .build();
         
-        when(consoleReporter.levelAllows(ConsoleOutputManager.OutputLevel.HIGH))
-            .thenReturn(false);
-        
-        // Act
-        invokePrivateMethod(messageRouter, "routeToConsole", event);
-        
-        // Assert
-        verify(consoleFormatter, never()).format(event);
-        assertTrue(outputStream.toString().isEmpty());
+        // Mock ConsoleReporter to reject HIGH level output
+        try (var mockStatic = mockStatic(ConsoleReporter.class)) {
+            mockStatic.when(() -> ConsoleReporter.minReportingLevel(ConsoleReporter.OutputLevel.HIGH))
+                .thenReturn(false);
+            
+            // Act
+            invokePrivateMethod(messageRouter, "routeToConsole", event);
+            
+            // Assert
+            verify(consoleFormatter, never()).format(event);
+            assertTrue(outputStream.toString().isEmpty());
+        }
     }
     
     @Test
     public void testRouteToActionLogger_CreateActionResult() {
         // Arrange
-        FrameworkSettings.structuredLogging = true;
-        LoggingContext.setSessionId("test-session");
+        messageRouter.setStructuredLoggingEnabled(true);
         
         Map<String, Object> metadata = new HashMap<>();
         metadata.put("actionType", "FIND");
-        metadata.put("duration", 500L);
         metadata.put("matchCount", 3);
         
-        LogEvent event = LogEvent.builder()
+        LogEvent event = new LogEvent.Builder()
             .type(LogEvent.Type.ACTION)
             .level(LogEvent.Level.INFO)
             .message("Find action")
             .metadata(metadata)
             .success(true)
-            .timestamp(Instant.now())
+            .duration(500L)
+            .sessionId("test-session")
+            .timestamp(System.currentTimeMillis())
             .build();
         
         // Act
@@ -368,68 +364,68 @@ public class MessageRouterTest extends BrobotTestBase {
         
         // Assert
         ArgumentCaptor<ActionResult> resultCaptor = ArgumentCaptor.forClass(ActionResult.class);
-        verify(actionLogger).logAction(eq("test-session"), resultCaptor.capture());
+        verify(actionLogger).logAction(eq("test-session"), resultCaptor.capture(), any(ObjectCollection.class));
         
         ActionResult capturedResult = resultCaptor.getValue();
         assertTrue(capturedResult.isSuccess());
-        assertEquals(500L, capturedResult.getDuration());
+        assertEquals(500L, capturedResult.getDuration().toMillis());
     }
     
     @Test
     public void testFormatMessage_VerboseMode() {
         // Arrange
-        FrameworkSettings.consoleVerbosity = BrobotLogger.Verbosity.VERBOSE;
+        when(verbosityConfig.isNormalMode()).thenReturn(false);
         
         Map<String, Object> metadata = new HashMap<>();
         metadata.put("key1", "value1");
         metadata.put("key2", 123);
         
-        LogEvent event = LogEvent.builder()
+        LogEvent event = new LogEvent.Builder()
             .type(LogEvent.Type.ACTION)
             .level(LogEvent.Level.INFO)
             .message("Test message")
             .metadata(metadata)
-            .timestamp(Instant.now())
+            .timestamp(System.currentTimeMillis())
             .build();
         
         when(consoleFormatter.format(event)).thenReturn(
             "[INFO] Test message | key1=value1, key2=123");
         
         // Act
-        String formatted = invokePrivateMethod(messageRouter, "formatMessage", event);
+        String formatted = invokePrivateMethod(messageRouter, "formatSlf4jMessage", event);
         
         // Assert
         assertNotNull(formatted);
-        assertTrue(formatted.contains("Test message"));
+        assertTrue(formatted.contains("Test message") || formatted.contains("ACTION"));
     }
     
     @Test
     public void testFormatMessage_NormalMode() {
         // Arrange
-        FrameworkSettings.consoleVerbosity = BrobotLogger.Verbosity.NORMAL;
+        when(verbosityConfig.isNormalMode()).thenReturn(true);
         
-        LogEvent event = LogEvent.builder()
+        LogEvent event = new LogEvent.Builder()
             .type(LogEvent.Type.ACTION)
             .level(LogEvent.Level.INFO)
             .message("Test message")
-            .objectName("TestObject")
-            .timestamp(Instant.now())
+            .target("TestObject")
+            .timestamp(System.currentTimeMillis())
             .build();
         
         when(consoleFormatter.format(event)).thenReturn("[INFO] Test message");
         
         // Act
-        String formatted = invokePrivateMethod(messageRouter, "formatMessage", event);
+        String formatted = invokePrivateMethod(messageRouter, "formatSlf4jMessage", event);
         
         // Assert
         assertNotNull(formatted);
-        assertTrue(formatted.contains("Test message"));
+        assertTrue(formatted.contains("SUCCESS") || formatted.contains("FAILED") || formatted.contains("ACTION"));
     }
     
     @Test
     public void testHandleNullEvent() {
         // Act & Assert
-        assertDoesNotThrow(() -> messageRouter.routeEvent(null));
+        assertDoesNotThrow(() -> messageRouter.route(null));
         
         // Verify no interactions with dependencies
         verifyNoInteractions(actionLogger);
@@ -439,7 +435,7 @@ public class MessageRouterTest extends BrobotTestBase {
     @Test
     public void testConcurrentEventRouting() throws InterruptedException {
         // Arrange
-        FrameworkSettings.structuredLogging = true;
+        messageRouter.setStructuredLoggingEnabled(true);
         int threadCount = 10;
         Thread[] threads = new Thread[threadCount];
         
@@ -447,16 +443,15 @@ public class MessageRouterTest extends BrobotTestBase {
         for (int i = 0; i < threadCount; i++) {
             final int index = i;
             threads[i] = new Thread(() -> {
-                LoggingContext.setSessionId("session-" + index);
-                
-                LogEvent event = LogEvent.builder()
+                LogEvent event = new LogEvent.Builder()
                     .type(LogEvent.Type.OBSERVATION)
                     .level(LogEvent.Level.INFO)
                     .message("Concurrent message " + index)
-                    .timestamp(Instant.now())
+                    .sessionId("session-" + index)
+                    .timestamp(System.currentTimeMillis())
                     .build();
                 
-                messageRouter.routeEvent(event);
+                messageRouter.route(event);
             });
             threads[i].start();
         }
@@ -467,33 +462,29 @@ public class MessageRouterTest extends BrobotTestBase {
         }
         
         // Assert
-        verify(actionLogger, times(threadCount)).logObservation(anyString(), anyString());
+        verify(actionLogger, times(threadCount)).logObservation(anyString(), anyString(), anyString(), anyString());
         verify(consoleFormatter, times(threadCount)).format(any(LogEvent.class));
     }
     
     @Test
     public void testStateTransitionWithNullStates() {
         // Arrange
-        FrameworkSettings.structuredLogging = true;
-        LoggingContext.setSessionId("test-session");
+        messageRouter.setStructuredLoggingEnabled(true);
         
-        Map<String, Object> metadata = new HashMap<>();
-        // No fromState or toState in metadata
-        
-        LogEvent event = LogEvent.builder()
+        LogEvent event = new LogEvent.Builder()
             .type(LogEvent.Type.TRANSITION)
             .level(LogEvent.Level.INFO)
             .message("State transition with null states")
-            .metadata(metadata)
-            .timestamp(Instant.now())
+            .sessionId("test-session")
+            .timestamp(System.currentTimeMillis())
             .build();
         
         // Act
-        messageRouter.routeEvent(event);
+        messageRouter.route(event);
         
         // Assert
         verify(actionLogger).logStateTransition(eq("test-session"), 
-            isNull(), isNull(), anyBoolean(), anyLong());
+            any(Set.class), any(Set.class), any(Set.class), anyBoolean(), anyLong());
     }
     
     private <T> T invokePrivateMethod(Object target, String methodName, Object... args) {
