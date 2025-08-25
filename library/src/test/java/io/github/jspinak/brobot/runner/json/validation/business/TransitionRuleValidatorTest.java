@@ -60,19 +60,23 @@ public class TransitionRuleValidatorTest extends BrobotTestBase {
     
     private Map<String, Object> createTransition(int fromId, int toId) {
         Map<String, Object> transition = new HashMap<>();
-        transition.put("fromState", fromId);
-        transition.put("toState", toId);
+        transition.put("sourceStateId", fromId);
+        transition.put("statesToEnter", List.of(toId));
         return transition;
     }
     
     private Map<String, Object> createTransition(int fromId, int toId, String condition) {
-        Map<String, Object> transition = createTransition(fromId, toId);
+        Map<String, Object> transition = new HashMap<>();
+        transition.put("sourceStateId", fromId);
+        transition.put("statesToEnter", List.of(toId));
         transition.put("condition", condition);
         return transition;
     }
     
     private Map<String, Object> createTransitionWithProbability(int fromId, int toId, double probability) {
-        Map<String, Object> transition = createTransition(fromId, toId);
+        Map<String, Object> transition = new HashMap<>();
+        transition.put("sourceStateId", fromId);
+        transition.put("statesToEnter", List.of(toId));
         transition.put("probability", probability);
         return transition;
     }
