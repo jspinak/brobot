@@ -194,7 +194,7 @@ public class EventPublishingActionLogger implements ActionLogger, SessionLifecyc
     private void publishErrorForFailedAction(ActionResult matches, LogData logData) {
         ErrorEvent errorEvent = ErrorEvent.medium(
                 this,
-                "Action failed: " + matches.getActionOptions().getAction().toString() +
+                "Action failed: " + matches.getActionConfig().getClass().getSimpleName() +
                         " - " + matches.getOutputText(),
                 null,
                 "ActionExecution"

@@ -31,7 +31,6 @@ import io.github.jspinak.brobot.action.internal.find.IterativePatternFinder;
 /**
  * Tests for finding patterns through iteration.
  * Works in headless mode by using real image processing.
- * Migrated to use TestDataUpdated with new ActionConfig API.
  */
 @SpringBootTest(classes = io.github.jspinak.brobot.BrobotTestApplication.class,
     properties = {
@@ -66,7 +65,6 @@ class FindPatternsIterationTest extends BrobotIntegrationTestBase {
         try {
             TestDataUpdated testData = new TestDataUpdated();
 
-            // Use the new API overload for getScenes
             List<Scene> scenes = getScenes.getScenes(testData.getDefineInsideAnchors(), 
                 List.of(testData.getInsideAnchorObjects()));
             
@@ -74,9 +72,8 @@ class FindPatternsIterationTest extends BrobotIntegrationTestBase {
             stateImages.add(testData.getTopLeft());
             stateImages.add(testData.getBottomRight());
 
-            // Use the new API overload for init
             ActionResult matches = matchesInitializer.init(testData.getDefineInsideAnchors(), 
-                "find patterns iteration", testData.getInsideAnchorObjects());
+                testData.getInsideAnchorObjects());
 
             iterativePatternFinder.find(matches, stateImages, scenes);
             

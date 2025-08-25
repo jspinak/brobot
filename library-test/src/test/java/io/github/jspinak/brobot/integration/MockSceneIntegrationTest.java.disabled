@@ -1,0 +1,518 @@
+package io.github.jspinak.brobot.integration;
+
+import io.github.jspinak.brobot.action.Action;
+import io.github.jspinak.brobot.action.ActionType;
+import io.github.jspinak.brobot.action.ObjectCollection;
+import io.github.jspinak.brobot.tools.testing.mock.MockStatus;
+import io.github.jspinak.brobot.tools.testing.mock.MockMatchBuilder;
+import io.github.jspinak.brobot.tools.testing.mock.action.MockFind;
+import io.github.jspinak.brobot.model.element.Location;
+import io.github.jspinak.brobot.model.match.Match;
+import io.github.jspinak.brobot.model.element.Region;
+import io.github.jspinak.brobot.model.state.State;
+import io.github.jspinak.brobot.model.state.StateObject;
+import io.github.jspinak.brobot.model.state.StateImage;
+import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
+import io.github.jspinak.brobot.action.basic.click.ClickOptions;
+import io.github.jspinak.brobot.action.basic.type.TypeOptions;
+import io.github.jspinak.brobot.action.ActionResult;
+import io.github.jspinak.brobot.test.BrobotTestBase;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Nested;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+
+import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+/**
+ * Integration tests for mock scene interactions.
+ * Tests complex UI scenarios using mock objects to simulate real applications.
+ */
+@SpringBootTest
+public class MockSceneIntegrationTest extends BrobotTestBase {
+
+    @Autowired
+    private Action action;
+
+    private MockFind mockFind;
+    private MockMatchBuilder mockMatchBuilder;
+    private MockStatus mockStatus;
+
+    private State loginScreen;
+    private State mainMenu;
+    private State settingsScreen;
+    private StateImage usernameField;
+    private StateImage passwordField;
+    private StateImage loginButton;
+    private StateImage settingsButton;
+    private StateImage saveButton;
+
+    @BeforeEach
+    @Override
+    public void setupTest() {
+        super.setupTest();
+        mockFind = new MockFind();
+        mockMatchBuilder = new MockMatchBuilder();
+        mockStatus = new MockStatus();
+        setupMockStates();
+    }
+
+    private void setupMockStates() {
+        // Create login screen state
+        loginScreen = State.builder()
+                .withName("LoginScreen")
+                .build();
+
+        usernameField = StateImage.builder()
+                .withName("usernameField")
+                .withSearchRegion(Region.builder()
+                        .withX(100).withY(200).withW(200).withH(30)
+                        .build())
+                .build();
+
+        passwordField = StateImage.builder()
+                .withName("passwordField")
+                .withSearchRegion(Region.builder()
+                        .withX(100).withY(250).withW(200).withH(30)
+                        .build())
+                .build();
+
+        loginButton = StateImage.builder()
+                .withName("loginButton")
+                .withSearchRegion(Region.builder()
+                        .withX(150).withY(300).withW(100).withH(40)
+                        .build())
+                .build();
+
+        loginScreen.setStateImages(Arrays.asList(usernameField, passwordField, loginButton));
+
+        // Create main menu state
+        mainMenu = State.builder()
+                .withName("MainMenu")
+                .build();
+
+        settingsButton = StateImage.builder()
+                .withName("settingsButton")
+                .withSearchRegion(Region.builder()
+                        .withX(500).withY(100).withW(80).withH(30)
+                        .build())
+                .build();
+
+        mainMenu.setStateImages(Collections.singletonList(settingsButton));
+
+        // Create settings screen state
+        settingsScreen = State.builder()
+                .withName("SettingsScreen")
+                .build();
+
+        saveButton = StateImage.builder()
+                .withName("saveButton")
+                .withSearchRegion(Region.builder()
+                        .withX(400).withY(500).withW(100).withH(40)
+                        .build())
+                .build();
+
+        settingsScreen.setStateImages(Collections.singletonList(saveButton));
+    }
+
+
+    private Match createMatch(StateImage stateImage, int x, int y) {
+        Match match = new Match();
+        match.setStateObject(stateImage);
+        match.setLocation(new Location(x, y));
+        match.setScore(0.95);
+        match.setTimeStamp(LocalDateTime.now());
+        return match;
+    }
+
+    @Nested
+    class BasicMockInteractions {
+
+        @Test
+        public void testMockLoginWorkflow() {
+            // Simulate finding and interacting with login form
+            ObjectCollection loginForm = new ObjectCollection();
+            loginForm.setStateImage(usernameField);
+
+            ActionResult findUsername = action.find(loginForm);
+            assertTrue(findUsername.isSuccess(), "Should find username field in mock scene");
+            assertFalse(findUsername.getMatches().isEmpty(), "Should have matches for username field");
+
+            // Click on username field
+            ActionResult clickUsername = action.click(loginForm);
+            assertTrue(clickUsername.isSuccess(), "Should click username field successfully");
+
+            // Type username
+            loginForm.setText("testuser");
+            ActionResult typeUsername = action.type(loginForm);
+            assertTrue(typeUsername.isSuccess(), "Should type username successfully");
+
+            // Move to password field
+            loginForm.setStateImage(passwordField);
+            ActionResult clickPassword = action.click(loginForm);
+            assertTrue(clickPassword.isSuccess(), "Should click password field successfully");
+
+            // Type password
+            loginForm.setText("password123");
+            ActionResult typePassword = action.type(loginForm);
+            assertTrue(typePassword.isSuccess(), "Should type password successfully");
+
+            // Click login button
+            loginForm.setStateImage(loginButton);
+            ActionResult clickLogin = action.click(loginForm);
+            assertTrue(clickLogin.isSuccess(), "Should click login button successfully");
+        }
+
+        @Test
+        public void testMockNavigationBetweenScreens() {
+            // Start at login screen - verify login button is visible
+            ObjectCollection loginCheck = new ObjectCollection();
+            loginCheck.setStateImage(loginButton);
+            
+            ActionResult findLogin = action.find(loginCheck);
+            assertTrue(findLogin.isSuccess(), "Should find login button on login screen");
+
+            // Simulate successful login - now on main menu
+            // In real scenario, the state would transition
+            
+            ObjectCollection menuCheck = new ObjectCollection();
+            menuCheck.setStateImage(settingsButton);
+            
+            ActionResult findSettings = action.find(menuCheck);
+            assertTrue(findSettings.isSuccess(), "Should find settings button on main menu");
+
+            // Navigate to settings
+            ActionResult clickSettings = action.click(menuCheck);
+            assertTrue(clickSettings.isSuccess(), "Should click settings button");
+
+            // Verify on settings screen
+            // In real scenario, the state would transition
+            
+            ObjectCollection settingsCheck = new ObjectCollection();
+            settingsCheck.setStateImage(saveButton);
+            
+            ActionResult findSave = action.find(settingsCheck);
+            assertTrue(findSave.isSuccess(), "Should find save button on settings screen");
+        }
+    }
+
+    @Nested
+    class ComplexMockScenarios {
+
+        @Test
+        public void testConditionalWorkflowBasedOnMockState() {
+            // Create a conditional workflow that adapts based on current screen
+            ObjectCollection collection = new ObjectCollection();
+            
+            // Check if we're on login screen
+            collection.setStateImage(loginButton);
+            ActionResult loginCheck = action.find(collection);
+            
+            if (loginCheck.isSuccess()) {
+                // We're on login screen - perform login
+                collection.setStateImage(usernameField);
+                action.click(collection);
+                collection.setText("admin");
+                action.type(collection);
+                
+                collection.setStateImage(passwordField);
+                action.click(collection);
+                collection.setText("admin123");
+                action.type(collection);
+                
+                collection.setStateImage(loginButton);
+                ActionResult loginResult = action.click(collection);
+                assertTrue(loginResult.isSuccess(), "Login should succeed");
+                
+                // Transition to main menu
+                mockScenario.transitionToState(mainMenu);
+            }
+            
+            // Now check if we're on main menu
+            collection.setStateImage(settingsButton);
+            ActionResult menuCheck = action.find(collection);
+            
+            if (menuCheck.isSuccess()) {
+                // Navigate to settings
+                ActionResult settingsResult = action.click(collection);
+                assertTrue(settingsResult.isSuccess(), "Should navigate to settings");
+                
+                // Transition to settings screen
+                mockScenario.transitionToState(settingsScreen);
+            }
+            
+            // Verify we reached settings screen
+            collection.setStateImage(saveButton);
+            ActionResult finalCheck = action.find(collection);
+            assertTrue(finalCheck.isSuccess(), "Should reach settings screen");
+        }
+
+        @Test
+        public void testMockFormValidation() {
+            // Test form validation scenario with mock feedback
+            ObjectCollection form = new ObjectCollection();
+            
+            // Try to submit form without filling required fields
+            form.setStateImage(loginButton);
+            ActionResult emptySubmit = action.click(form);
+            assertTrue(emptySubmit.isSuccess(), "Click action should succeed");
+            
+            // Mock validation error - stay on same screen
+            assertTrue(mockScenario.getCurrentState() == loginScreen || 
+                      mockScenario.getCurrentState() == null,
+                      "Should remain on login screen due to validation error");
+            
+            // Fill username only
+            form.setStateImage(usernameField);
+            action.click(form);
+            form.setText("user");
+            action.type(form);
+            
+            // Try submit again
+            form.setStateImage(loginButton);
+            ActionResult partialSubmit = action.click(form);
+            assertTrue(partialSubmit.isSuccess(), "Click action should succeed");
+            
+            // Still on login screen - password required
+            assertTrue(mockScenario.getCurrentState() == loginScreen || 
+                      mockScenario.getCurrentState() == null,
+                      "Should remain on login screen - password missing");
+            
+            // Fill password
+            form.setStateImage(passwordField);
+            action.click(form);
+            form.setText("pass");
+            action.type(form);
+            
+            // Submit complete form
+            form.setStateImage(loginButton);
+            ActionResult completeSubmit = action.click(form);
+            assertTrue(completeSubmit.isSuccess(), "Should submit complete form");
+            
+            // Transition to next screen on successful validation
+            mockScenario.transitionToState(mainMenu);
+            assertEquals(mainMenu, mockScenario.getCurrentState(), 
+                        "Should transition to main menu after successful login");
+        }
+
+        @Test
+        public void testMockDynamicContentHandling() {
+            // Test handling of dynamic content that appears/disappears
+            ObjectCollection dynamic = new ObjectCollection();
+            
+            // Initially, popup is not visible
+            StateImage popup = StateImage.builder()
+                    .withName("dynamicPopup")
+                    .withSearchRegion(Region.builder()
+                            .withX(300).withY(250).withW(200).withH(100)
+                            .build())
+                    .build();
+            
+            dynamic.setStateImage(popup);
+            
+            // First check - popup not visible
+            mockScreen.setMockFinds(popup, null); // No match initially
+            ActionResult noPopup = action.find(dynamic);
+            assertFalse(noPopup.isSuccess(), "Popup should not be found initially");
+            
+            // Trigger action that shows popup
+            dynamic.setStateImage(settingsButton);
+            mockScreen.setMockFinds(settingsButton, createMatch(settingsButton, 540, 115));
+            action.click(dynamic);
+            
+            // Now popup appears
+            mockScreen.setMockFinds(popup, createMatch(popup, 400, 300));
+            dynamic.setStateImage(popup);
+            ActionResult popupVisible = action.find(dynamic);
+            assertTrue(popupVisible.isSuccess(), "Popup should be visible after trigger");
+            
+            // Interact with popup
+            ActionResult clickPopup = action.click(dynamic);
+            assertTrue(clickPopup.isSuccess(), "Should be able to click on popup");
+            
+            // Popup disappears after interaction
+            mockScreen.setMockFinds(popup, null);
+            ActionResult popupGone = action.find(dynamic);
+            assertFalse(popupGone.isSuccess(), "Popup should disappear after interaction");
+        }
+    }
+
+    @Nested
+    class MockErrorRecovery {
+
+        @Test
+        public void testRecoveryFromMockErrors() {
+            // Test error recovery in mock scenarios
+            ObjectCollection recovery = new ObjectCollection();
+            recovery.setStateImage(loginButton);
+            
+            // Simulate temporary unavailability
+            mockScreen.setMockFinds(loginButton, null);
+            ActionResult firstTry = action.find(recovery);
+            assertFalse(firstTry.isSuccess(), "First attempt should fail");
+            
+            // Recovery attempt 1 - still unavailable
+            ActionResult secondTry = action.find(recovery);
+            assertFalse(secondTry.isSuccess(), "Second attempt should fail");
+            
+            // Recovery attempt 2 - element becomes available
+            mockScreen.setMockFinds(loginButton, createMatch(loginButton, 200, 320));
+            ActionResult thirdTry = action.find(recovery);
+            assertTrue(thirdTry.isSuccess(), "Third attempt should succeed after recovery");
+            
+            // Verify we can interact after recovery
+            ActionResult clickAfterRecovery = action.click(recovery);
+            assertTrue(clickAfterRecovery.isSuccess(), "Should be able to click after recovery");
+        }
+
+        @Test
+        public void testMockTimeoutScenarios() {
+            // Test handling of timeouts in mock scenarios
+            ObjectCollection timeout = new ObjectCollection();
+            
+            StateImage slowLoadingElement = StateImage.builder()
+                    .withName("slowLoader")
+                    .withSearchRegion(Region.builder()
+                            .withX(200).withY(200).withW(100).withH(50)
+                            .build())
+                    .build();
+            
+            timeout.setStateImage(slowLoadingElement);
+            
+            // Element not immediately available
+            mockScreen.setMockFinds(slowLoadingElement, null);
+            
+            // Use find with timeout options
+            PatternFindOptions findOptions = new PatternFindOptions.Builder()
+                    .setMaxWait(2.0) // 2 second timeout
+                    .build();
+            timeout.setActionConfig(findOptions);
+            
+            // Start time
+            long startTime = System.currentTimeMillis();
+            
+            // This should wait and timeout
+            ActionResult timedOut = action.find(timeout);
+            
+            long duration = System.currentTimeMillis() - startTime;
+            
+            assertFalse(timedOut.isSuccess(), "Should timeout when element doesn't appear");
+            // In mock mode, timeouts are much faster
+            assertTrue(duration < 500, "Mock timeout should be fast (under 500ms)");
+        }
+
+        @Test
+        public void testMockStateRecoveryChain() {
+            // Test complex recovery chain using conditional actions
+            ObjectCollection chain = new ObjectCollection();
+            
+            // Build recovery chain: try login -> if fails, try reset -> if fails, try refresh
+            StateImage resetButton = StateImage.builder()
+                    .withName("resetButton")
+                    .withSearchRegion(Region.builder()
+                            .withX(50).withY(350).withW(80).withH(30)
+                            .build())
+                    .build();
+            
+            StateImage refreshButton = StateImage.builder()
+                    .withName("refreshButton")
+                    .withSearchRegion(Region.builder()
+                            .withX(50).withY(50).withW(60).withH(30)
+                            .build())
+                    .build();
+            
+            // Primary action fails
+            mockScreen.setMockFinds(loginButton, null);
+            chain.setStateImage(loginButton);
+            ActionResult primaryFail = action.find(chain);
+            assertFalse(primaryFail.isSuccess(), "Primary action should fail");
+            
+            // Try recovery option 1 - reset
+            mockScreen.setMockFinds(resetButton, createMatch(resetButton, 90, 365));
+            chain.setStateImage(resetButton);
+            ActionResult resetSuccess = action.find(chain);
+            assertTrue(resetSuccess.isSuccess(), "Reset button should be found");
+            
+            ActionResult clickReset = action.click(chain);
+            assertTrue(clickReset.isSuccess(), "Should click reset button");
+            
+            // After reset, login button becomes available
+            mockScreen.setMockFinds(loginButton, createMatch(loginButton, 200, 320));
+            chain.setStateImage(loginButton);
+            ActionResult afterReset = action.find(chain);
+            assertTrue(afterReset.isSuccess(), "Login button should be available after reset");
+        }
+    }
+
+    @Nested
+    class MockPerformanceScenarios {
+
+        @Test
+        public void testMockBulkOperations() {
+            // Test performance with bulk operations on mock elements
+            List<StateImage> bulkElements = Arrays.asList(
+                    usernameField,
+                    passwordField,
+                    loginButton
+            );
+            
+            long startTime = System.currentTimeMillis();
+            
+            for (StateImage element : bulkElements) {
+                ObjectCollection bulk = new ObjectCollection();
+                bulk.setStateImage(element);
+                
+                ActionResult findResult = action.find(bulk);
+                assertTrue(findResult.isSuccess(), 
+                          "Should find " + element.getName() + " in bulk operation");
+                
+                ActionResult clickResult = action.click(bulk);
+                assertTrue(clickResult.isSuccess(), 
+                          "Should click " + element.getName() + " in bulk operation");
+            }
+            
+            long duration = System.currentTimeMillis() - startTime;
+            
+            // In mock mode, all operations should be very fast
+            assertTrue(duration < 500, 
+                      "Bulk operations should complete quickly in mock mode (under 500ms)");
+        }
+
+        @Test
+        public void testMockParallelSearches() {
+            // Test parallel searches in mock environment
+            ObjectCollection search1 = new ObjectCollection();
+            search1.setStateImage(usernameField);
+            
+            ObjectCollection search2 = new ObjectCollection();
+            search2.setStateImage(passwordField);
+            
+            ObjectCollection search3 = new ObjectCollection();
+            search3.setStateImage(loginButton);
+            
+            // Execute searches (in real scenario these could be parallel)
+            long startTime = System.currentTimeMillis();
+            
+            ActionResult result1 = action.find(search1);
+            ActionResult result2 = action.find(search2);
+            ActionResult result3 = action.find(search3);
+            
+            long duration = System.currentTimeMillis() - startTime;
+            
+            // Verify all searches succeeded
+            assertTrue(result1.isSuccess(), "Search 1 should succeed");
+            assertTrue(result2.isSuccess(), "Search 2 should succeed");
+            assertTrue(result3.isSuccess(), "Search 3 should succeed");
+            
+            // Mock searches should be extremely fast
+            assertTrue(duration < 200, 
+                      "Parallel mock searches should complete very quickly (under 200ms)");
+        }
+    }
+}

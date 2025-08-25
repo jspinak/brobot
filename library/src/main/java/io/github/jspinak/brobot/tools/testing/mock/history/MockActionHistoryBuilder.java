@@ -30,7 +30,7 @@ import java.util.function.Supplier;
  *     .build();
  * }</pre>
  */
-@Builder
+@Builder(builderClassName = "Builder")
 @Accessors(chain = true)
 public class MockActionHistoryBuilder {
     

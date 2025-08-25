@@ -45,6 +45,7 @@ dependencies {
     // Other Utilities
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.4'
     implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.4'
+    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-csv:2.15.4'
     implementation 'jakarta.annotation:jakarta.annotation-api:2.1.1'
     // Note: javacv-platform and slf4j-api are now provided transitively by the library
     

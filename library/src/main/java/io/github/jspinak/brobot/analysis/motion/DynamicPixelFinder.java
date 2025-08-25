@@ -62,7 +62,7 @@ public class DynamicPixelFinder implements FindDynamicPixels {
      */
     public Mat getDynamicPixelMask(MatVector matVector) {
         int size = (int) matVector.size();
-        if (size == 1) return new Mat(); // nothing to compare
+        if (size <= 1) return new Mat(); // nothing to compare (empty or single image)
         MatVector masks = new MatVector();
         Mat firstMat = matVector.get(0);
         for (int i=1; i<size; i++) {

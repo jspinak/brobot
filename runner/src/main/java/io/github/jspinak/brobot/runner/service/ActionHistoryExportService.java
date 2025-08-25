@@ -1,5 +1,6 @@
 package io.github.jspinak.brobot.runner.service;
 
+import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
@@ -127,7 +128,7 @@ public class ActionHistoryExportService {
                 row.put("match_y", match.getRegion().getY());
                 row.put("match_width", match.getRegion().getW());
                 row.put("match_height", match.getRegion().getH());
-                row.put("similarity", match.getSimScore());
+                row.put("similarity", match.getScore());
             } else {
                 row.put("match_x", null);
                 row.put("match_y", null);
@@ -219,26 +220,27 @@ public class ActionHistoryExportService {
         var parser = csvMapper.readerFor(Map.class).with(schema);
         
         try (Reader reader = new FileReader(file)) {
-            Iterable<Map<String, String>> records = parser.readValues(reader);
+            MappingIterator<Map> iterator = parser.readValues(reader);
             
-            for (Map<String, String> row : records) {
+            while (iterator.hasNext()) {
+                Map<String, String> row = iterator.next();
                 // Reconstruct ActionRecord from CSV row
-                ActionRecord.Builder builder = new ActionRecord.Builder();
+                ActionRecord record = new ActionRecord();
                 
                 // Basic fields
-                builder.setActionSuccess(Boolean.parseBoolean(row.get("success")));
-                builder.setDuration(Long.parseLong(row.getOrDefault("duration_ms", "0")));
-                builder.setText(row.get("text"));
+                record.setActionSuccess(Boolean.parseBoolean(row.get("success")));
+                record.setDuration(Double.parseDouble(row.getOrDefault("duration_ms", "0")));
+                record.setText(row.get("text"));
                 
                 String stateIdStr = row.get("state_id");
                 if (stateIdStr != null && !stateIdStr.isEmpty()) {
-                    builder.setStateId(Long.parseLong(stateIdStr));
+                    record.setStateId(Long.parseLong(stateIdStr));
                 }
                 
                 // Note: ActionConfig cannot be fully reconstructed from CSV
                 // This is a limitation of CSV format
                 
-                history.addSnapshot(builder.build());
+                history.addSnapshot(record);
             }
         }
         

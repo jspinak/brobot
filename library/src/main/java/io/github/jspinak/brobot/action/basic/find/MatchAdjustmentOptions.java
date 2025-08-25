@@ -77,7 +77,7 @@ public final class MatchAdjustmentOptions {
      * Builder class for MatchAdjustmentOptions.
      * Annotated for Jackson deserialization support.
      */
-    @JsonPOJOBuilder(withPrefix = "")
+    @JsonPOJOBuilder(withPrefix = "set")
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Builder {
         // Lombok generates the implementation

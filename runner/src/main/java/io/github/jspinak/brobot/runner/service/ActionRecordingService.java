@@ -2,7 +2,7 @@ package io.github.jspinak.brobot.runner.service;
 
 import io.github.jspinak.brobot.model.action.ActionHistory;
 import io.github.jspinak.brobot.model.action.ActionRecord;
-import io.github.jspinak.brobot.model.state.stateObject.StateImage;
+import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.runner.event.ActionRecordedEvent;
 import io.github.jspinak.brobot.runner.event.RecordingStartedEvent;
 import io.github.jspinak.brobot.runner.event.RecordingStoppedEvent;

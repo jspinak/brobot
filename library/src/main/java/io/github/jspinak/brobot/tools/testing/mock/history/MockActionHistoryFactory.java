@@ -191,9 +191,9 @@ public class MockActionHistoryFactory {
      * @return ActionHistory with custom configuration
      */
     public static ActionHistory withConfig(
-            java.util.function.Function<MockActionHistoryBuilder.MockActionHistoryBuilderBuilder, 
-                                       MockActionHistoryBuilder.MockActionHistoryBuilderBuilder> configurator) {
-        MockActionHistoryBuilder.MockActionHistoryBuilderBuilder builder = 
+            java.util.function.Function<MockActionHistoryBuilder.Builder, 
+                                       MockActionHistoryBuilder.Builder> configurator) {
+        MockActionHistoryBuilder.Builder builder = 
             MockActionHistoryBuilder.builder();
         return configurator.apply(builder).build().build();
     }

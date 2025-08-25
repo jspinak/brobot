@@ -13,6 +13,7 @@ import javafx.collections.transformation.FilteredList;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.util.StringConverter;
 import javafx.scene.layout.*;
 import javafx.stage.FileChooser;
 import lombok.extern.slf4j.Slf4j;
