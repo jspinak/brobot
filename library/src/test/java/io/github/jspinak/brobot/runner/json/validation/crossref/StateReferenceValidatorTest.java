@@ -94,7 +94,9 @@ public class StateReferenceValidatorTest extends BrobotTestBase {
     }
     
     private Map<String, Object> createTransitionWithExit(int sourceId, List<Integer> enterIds, List<Integer> exitIds) {
-        Map<String, Object> transition = createTransition(sourceId, enterIds);
+        Map<String, Object> transition = new HashMap<>();
+        transition.put("sourceStateId", sourceId);
+        transition.put("statesToEnter", enterIds);
         transition.put("statesToExit", exitIds);
         return transition;
     }
@@ -108,15 +110,20 @@ public class StateReferenceValidatorTest extends BrobotTestBase {
     private Map<String, Object> createFunction(String name) {
         Map<String, Object> function = new HashMap<>();
         function.put("name", name);
-        function.put("steps", new ArrayList<>());
+        function.put("statements", new ArrayList<>());
         return function;
     }
     
     private Map<String, Object> createActionStep(String action, int stateId) {
         Map<String, Object> step = new HashMap<>();
-        step.put("type", "action");
-        step.put("action", action);
-        step.put("stateId", stateId);
+        step.put("statementType", "methodCall");
+        step.put("object", "stateTransitionsManagement");
+        step.put("method", "openState");
+        List<Map<String, Object>> args = new ArrayList<>();
+        Map<String, Object> arg = new HashMap<>();
+        arg.put("value", stateId);
+        args.add(arg);
+        step.put("arguments", args);
         return step;
     }
     
@@ -513,7 +520,7 @@ public class StateReferenceValidatorTest extends BrobotTestBase {
             
             Map<String, Object> dsl = createDSLModel();
             Map<String, Object> function = createFunction("TestFunc");
-            List<Map<String, Object>> steps = (List<Map<String, Object>>)function.get("steps");
+            List<Map<String, Object>> steps = (List<Map<String, Object>>)function.get("statements");
             steps.add(createActionStep("click", 1));
             steps.add(createActionStep("verify", 2));
             addFunction(dsl, function);
@@ -531,7 +538,7 @@ public class StateReferenceValidatorTest extends BrobotTestBase {
             
             Map<String, Object> dsl = createDSLModel();
             Map<String, Object> function = createFunction("TestFunc");
-            List<Map<String, Object>> steps = (List<Map<String, Object>>)function.get("steps");
+            List<Map<String, Object>> steps = (List<Map<String, Object>>)function.get("statements");
             steps.add(createActionStep("click", 99)); // State 99 doesn't exist
             addFunction(dsl, function);
             

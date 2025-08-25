@@ -58,34 +58,35 @@ public class FunctionRuleValidatorTest extends BrobotTestBase {
     
     private Map<String, Object> createStatement(String type) {
         Map<String, Object> statement = new HashMap<>();
-        statement.put("type", type);
+        statement.put("statementType", type);
         return statement;
     }
     
     private Map<String, Object> createActionCall(String action, String target) {
         Map<String, Object> actionCall = new HashMap<>();
-        actionCall.put("type", "action");
-        actionCall.put("action", action);
+        actionCall.put("statementType", "methodCall");
+        actionCall.put("object", "action");
+        actionCall.put("method", action);
         actionCall.put("target", target);
         return actionCall;
     }
     
     private Map<String, Object> createIfStatement(List<Map<String, Object>> thenBlock, List<Map<String, Object>> elseBlock) {
         Map<String, Object> ifStatement = new HashMap<>();
-        ifStatement.put("type", "if");
+        ifStatement.put("statementType", "if");
         ifStatement.put("condition", "someCondition");
-        ifStatement.put("then", thenBlock);
+        ifStatement.put("thenStatements", thenBlock);
         if (elseBlock != null) {
-            ifStatement.put("else", elseBlock);
+            ifStatement.put("elseStatements", elseBlock);
         }
         return ifStatement;
     }
     
     private Map<String, Object> createWhileLoop(List<Map<String, Object>> body) {
         Map<String, Object> whileLoop = new HashMap<>();
-        whileLoop.put("type", "while");
-        whileLoop.put("condition", "someCondition");
-        whileLoop.put("body", body);
+        whileLoop.put("statementType", "forEach");
+        whileLoop.put("collection", "someCollection");
+        whileLoop.put("statements", body);
         return whileLoop;
     }
     
@@ -406,7 +407,9 @@ public class FunctionRuleValidatorTest extends BrobotTestBase {
             
             List<Map<String, Object>> statements = new ArrayList<>();
             Map<String, Object> stateModification = new HashMap<>();
-            stateModification.put("type", "setState");
+            stateModification.put("statementType", "methodCall");
+            stateModification.put("object", "stateTransitionsManagement");
+            stateModification.put("method", "openState");
             stateModification.put("state", "newState");
             statements.add(stateModification);
             
@@ -429,13 +432,17 @@ public class FunctionRuleValidatorTest extends BrobotTestBase {
             
             // Check state before modification
             Map<String, Object> stateCheck = new HashMap<>();
-            stateCheck.put("type", "checkState");
+            stateCheck.put("statementType", "methodCall");
+            stateCheck.put("object", "stateTransitionsManagement");
+            stateCheck.put("method", "getCurrentState");
             stateCheck.put("state", "currentState");
             statements.add(stateCheck);
             
             // Modify state
             Map<String, Object> stateModification = new HashMap<>();
-            stateModification.put("type", "setState");
+            stateModification.put("statementType", "methodCall");
+            stateModification.put("object", "stateTransitionsManagement");
+            stateModification.put("method", "openState");
             stateModification.put("state", "newState");
             statements.add(stateModification);
             
@@ -474,7 +481,9 @@ public class FunctionRuleValidatorTest extends BrobotTestBase {
             List<Map<String, Object>> statements = new ArrayList<>();
             for (int i = 0; i < 3; i++) {
                 Map<String, Object> stateModification = new HashMap<>();
-                stateModification.put("type", "setState");
+                stateModification.put("statementType", "methodCall");
+                stateModification.put("object", "stateTransitionsManagement");
+                stateModification.put("method", "openState");
                 stateModification.put("state", "state" + i);
                 statements.add(stateModification);
             }
@@ -502,7 +511,15 @@ public class FunctionRuleValidatorTest extends BrobotTestBase {
             List<Map<String, Object>> statements = new ArrayList<>();
             // Search for the same image multiple times
             for (int i = 0; i < 3; i++) {
-                Map<String, Object> search = createActionCall("find", "sameImage.png");
+                Map<String, Object> search = new HashMap<>();
+                search.put("statementType", "methodCall");
+                search.put("object", "action");
+                search.put("method", "find");
+                List<Map<String, Object>> args = new ArrayList<>();
+                Map<String, Object> arg = new HashMap<>();
+                arg.put("value", "sameImage.png");
+                args.add(arg);
+                search.put("arguments", args);
                 statements.add(search);
             }
             
@@ -524,13 +541,22 @@ public class FunctionRuleValidatorTest extends BrobotTestBase {
             List<Map<String, Object>> statements = new ArrayList<>();
             
             // Add heavy operations
-            Map<String, Object> findAll = createActionCall("findAll", "pattern");
+            Map<String, Object> findAll = new HashMap<>();
+            findAll.put("statementType", "methodCall");
+            findAll.put("object", "action");
+            findAll.put("method", "findAll");
             statements.add(findAll);
             
-            Map<String, Object> findColor = createActionCall("findColor", "red");
+            Map<String, Object> findColor = new HashMap<>();
+            findColor.put("statementType", "methodCall");
+            findColor.put("object", "action");
+            findColor.put("method", "findColor");
             statements.add(findColor);
             
-            Map<String, Object> ocrSearch = createActionCall("findText", "fullScreen");
+            Map<String, Object> ocrSearch = new HashMap<>();
+            ocrSearch.put("statementType", "methodCall");
+            ocrSearch.put("object", "action");
+            ocrSearch.put("method", "findText");
             statements.add(ocrSearch);
             
             function.put("statements", statements);
@@ -553,7 +579,7 @@ public class FunctionRuleValidatorTest extends BrobotTestBase {
             // Add fixed waits
             for (int i = 0; i < 3; i++) {
                 Map<String, Object> wait = new HashMap<>();
-                wait.put("type", "wait");
+                wait.put("statementType", "wait");
                 wait.put("duration", 5000);
                 statements.add(wait);
             }
