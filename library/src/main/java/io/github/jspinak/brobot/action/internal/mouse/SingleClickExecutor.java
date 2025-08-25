@@ -151,7 +151,9 @@ public class SingleClickExecutor {
      * @param location Target location for the click
      * @param clickOptions Configuration with click type and timing
      * @return true if click completed, false if mouse movement failed
+     * @deprecated This method is not used anymore, replaced by performClick
      */
+    @Deprecated
     private boolean doClick(Location location, ClickOptions clickOptions) {
         if (!moveMouseWrapper.move(location)) return false;
         //if (Mouse.move(location.getSikuliLocation()) == 0) return false;

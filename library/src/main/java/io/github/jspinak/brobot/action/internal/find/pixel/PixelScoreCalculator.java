@@ -9,12 +9,13 @@ import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
 import io.github.jspinak.brobot.util.image.visualization.MatrixVisualizer;
 
 import org.bytedeco.opencv.opencv_core.Mat;
+import org.bytedeco.opencv.opencv_core.MatVector;
 import org.bytedeco.opencv.opencv_core.Scalar;
 import org.springframework.stereotype.Component;
 
 import static io.github.jspinak.brobot.model.analysis.color.PixelProfile.Analysis.SCORES;
 import static org.bytedeco.opencv.global.opencv_core.*;
-import static org.python.modules.math.atanh;
+// Remove incorrect atanh import - will use custom implementation
 
 /**
  * Calculates pixel-level matching scores from color distance analysis.
@@ -67,6 +68,21 @@ public class PixelScoreCalculator {
 
     public PixelScoreCalculator(MatrixVisualizer matVisualize) {
         this.matVisualize = matVisualize;
+    }
+    
+    /**
+     * Inverse hyperbolic tangent function.
+     * atanh(x) = 0.5 * ln((1 + x) / (1 - x))
+     * 
+     * @param x value between -1 and 1 (exclusive)
+     * @return inverse hyperbolic tangent of x
+     */
+    private double atanh(double x) {
+        if (Math.abs(x) >= 1.0) {
+            // Handle edge cases
+            return x > 0 ? Double.POSITIVE_INFINITY : Double.NEGATIVE_INFINITY;
+        }
+        return 0.5 * Math.log((1 + x) / (1 - x));
     }
 
     /**
@@ -140,6 +156,9 @@ public class PixelScoreCalculator {
      * @return pixel distance threshold (0-255, lower is better match)
      */
     public double convertActionOptionsScoreToPixelAnalysisScoreWithTanh(double actionConfigScore) {
+        // Clamp input to valid range [0, 1] to handle edge cases
+        actionConfigScore = Math.max(0, Math.min(1, actionConfigScore));
+        
         double adjustedMinScore = actionConfigScore * maxMinScoreForTanh; // minSimilarity is now between 0 and maxMinScoreForTanh
         double tanh = Math.tanh(adjustedMinScore); // tanh(1) = 0.7615941559557649, tanh(0) = 0
         double invertedTanh = 1 - tanh; // (1 - 0.7615941559557649) = 0.2384058440442351, 1 - 0 = 1
@@ -179,11 +198,34 @@ public class PixelScoreCalculator {
      * @return similarity score (0-1, higher is better)
      */
     public double convertPixelAnalysisScoreToActionOptionsScoreWithTanh(double pixelAnalysisScore) {
-        double normalized = (pixelAnalysisScore - worstScore) / scoreRange; // values between 0 and 1
-        double invertedTanh = normalized * (1 - invMaxTanh) + invMaxTanh; // values between invMaxTanh and 1
-        double tanh = 1 - invertedTanh; // [0, 1-invMaxTanh] lower pixel scores are better, higher similarity is better
+        // Clamp input to valid range
+        pixelAnalysisScore = Math.max(bestScore, Math.min(worstScore, pixelAnalysisScore));
+        
+        // Reverse the forward conversion exactly
+        // Forward: normalizedTanh * scoreRange + bestScore = pixelAnalysisScore
+        // So: normalizedTanh = (pixelAnalysisScore - bestScore) / scoreRange
+        double normalizedTanh = (pixelAnalysisScore - bestScore) / scoreRange; // values between 0 and 1
+        
+        // Forward: normalizedTanh = (invertedTanh - invMaxTanh) / (1 - invMaxTanh)
+        // So: invertedTanh = normalizedTanh * (1 - invMaxTanh) + invMaxTanh
+        double invertedTanh = normalizedTanh * (1 - invMaxTanh) + invMaxTanh; // values between invMaxTanh and 1
+        
+        // Forward: invertedTanh = 1 - tanh
+        // So: tanh = 1 - invertedTanh
+        double tanh = 1 - invertedTanh; // values between 0 and maxTanh
+        
+        // Ensure tanh value is within valid domain for atanh (-1, 1)
+        // Add small epsilon to avoid domain edges
+        double epsilon = 1e-10;
+        tanh = Math.max(-1 + epsilon, Math.min(1 - epsilon, tanh));
+        
+        // Forward: tanh = Math.tanh(adjustedMinScore)
+        // So: adjustedMinScore = atanh(tanh)
         double adjustedMinScore = atanh(tanh); // values between 0 and maxMinScoreForTanh
-        return adjustedMinScore / maxMinScoreForTanh; // values between 0 and 1
+        
+        // Forward: adjustedMinScore = actionConfigScore * maxMinScoreForTanh
+        // So: actionConfigScore = adjustedMinScore / maxMinScoreForTanh
+        return Math.max(0, Math.min(1, adjustedMinScore / maxMinScoreForTanh)); // clamp to [0, 1]
     }
 
     /**
@@ -220,9 +262,29 @@ public class PixelScoreCalculator {
             minSimilarity = findOptions.getSimilarity();
         }
         double threshold = convertActionOptionsScoreToPixelAnalysisScoreWithTanh(minSimilarity);
-        Mat binaryScores = new Mat(scores.size(), CV_8UC3);
-        Mat thresholdMat = new Mat(scores.size(), CV_8UC3, Scalar.all(threshold));
-        subtract(thresholdMat, scores, binaryScores, null, scores.type());
-        return binaryScores;
+        
+        // Create matrices with the same type as scores
+        Mat thresholdMat = new Mat(scores.size(), scores.type());
+        thresholdMat.put(Scalar.all(threshold));
+        
+        Mat distBelow = new Mat(scores.size(), scores.type());
+        subtract(thresholdMat, scores, distBelow);
+        
+        // Convert to 8UC3 for visualization if needed
+        Mat result = new Mat(scores.size(), CV_8UC3);
+        if (scores.type() == CV_32F) {
+            // Convert single channel float to 3-channel byte
+            Mat temp = new Mat();
+            distBelow.convertTo(temp, CV_8U);
+            MatVector channels = new MatVector(3);
+            for (int i = 0; i < 3; i++) {
+                channels.put(i, temp);
+            }
+            merge(channels, result);
+        } else {
+            distBelow.convertTo(result, CV_8UC3);
+        }
+        
+        return result;
     }
 }

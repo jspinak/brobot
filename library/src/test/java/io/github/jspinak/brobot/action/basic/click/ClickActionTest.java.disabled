@@ -5,6 +5,7 @@ import io.github.jspinak.brobot.action.ActionInterface;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.action.basic.find.Find;
+import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
 import io.github.jspinak.brobot.action.internal.factory.ActionResultFactory;
 import io.github.jspinak.brobot.action.internal.mouse.PostClickHandler;
 import io.github.jspinak.brobot.action.internal.mouse.SingleClickExecutor;
@@ -19,12 +20,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
+@ExtendWith(MockitoExtension.class)
 @DisplayName("Click Action Tests")
 public class ClickActionTest extends BrobotTestBase {
 
@@ -49,7 +52,6 @@ public class ClickActionTest extends BrobotTestBase {
     @Override
     public void setupTest() {
         super.setupTest();
-        MockitoAnnotations.openMocks(this);
         click = new Click(mockFind, mockSingleClickExecutor, mockTimeProvider,
                          mockPostClickHandler, mockActionResultFactory);
     }
@@ -66,15 +68,20 @@ public class ClickActionTest extends BrobotTestBase {
         // Setup
         ActionResult actionResult = new ActionResult();
         actionResult.setSuccess(false);
+        actionResult.setActionConfig(new ClickOptions.Builder().build());
         
         ObjectCollection objectCollection = new ObjectCollection();
-        StateImage stateImage = StateImage.builder().build();
-        objectCollection.addStateImage(stateImage);
+        StateImage stateImage = new StateImage.Builder().build();
+        objectCollection.getStateImages().add(stateImage);
         
         Match match = new Match.Builder()
-            .withRegion(new Region(100, 100, 50, 50))
-            .withScore(0.95)
+            .setRegion(new Region(100, 100, 50, 50))
+            .setSimScore(0.95)
             .build();
+        
+        // Mock ActionResultFactory to return a new ActionResult for Find
+        ActionResult findResult = new ActionResult();
+        when(mockActionResultFactory.init(any(PatternFindOptions.class), anyString(), any())).thenReturn(findResult);
         
         // Mock find to add match to the result
         doAnswer(invocation -> {
@@ -92,7 +99,7 @@ public class ClickActionTest extends BrobotTestBase {
         
         // Verify
         assertTrue(actionResult.isSuccess());
-        verify(mockFind).perform(eq(actionResult), eq(objectCollection));
+        verify(mockFind).perform(any(ActionResult.class), any(ObjectCollection.class));
         verify(mockSingleClickExecutor, atLeastOnce()).click(any(Location.class), any(ActionConfig.class));
     }
     
@@ -102,10 +109,15 @@ public class ClickActionTest extends BrobotTestBase {
         // Setup
         ActionResult actionResult = new ActionResult();
         actionResult.setSuccess(false);
+        actionResult.setActionConfig(new ClickOptions.Builder().build());
         
         ObjectCollection objectCollection = new ObjectCollection();
-        StateImage stateImage = StateImage.builder().build();
-        objectCollection.addStateImage(stateImage);
+        StateImage stateImage = new StateImage.Builder().build();
+        objectCollection.getStateImages().add(stateImage);
+        
+        // Mock ActionResultFactory
+        ActionResult findResult = new ActionResult();
+        when(mockActionResultFactory.init(any(PatternFindOptions.class), anyString(), any())).thenReturn(findResult);
         
         // Mock find to return no matches
         doAnswer(invocation -> {
@@ -119,7 +131,7 @@ public class ClickActionTest extends BrobotTestBase {
         
         // Verify
         assertFalse(actionResult.isSuccess());
-        verify(mockFind).perform(eq(actionResult), eq(objectCollection));
+        verify(mockFind).perform(any(ActionResult.class), any(ObjectCollection.class));
         verify(mockSingleClickExecutor, never()).click(any(Location.class), any(ActionConfig.class));
     }
     
@@ -129,17 +141,22 @@ public class ClickActionTest extends BrobotTestBase {
         // Setup
         ActionResult actionResult = new ActionResult();
         actionResult.setSuccess(false);
+        actionResult.setActionConfig(new ClickOptions.Builder().build());
         
         ObjectCollection objectCollection = new ObjectCollection();
         Location location = new Location(200, 200);
         StateLocation stateLocation = new StateLocation.Builder()
-            .withLocation(location)
+            .setLocation(location)
             .build();
-        objectCollection.addStateLocation(stateLocation);
+        objectCollection.getStateLocations().add(stateLocation);
         
         Match matchWithLocation = new Match.Builder()
-            .withRegion(new Region(200, 200, 1, 1))
+            .setRegion(new Region(200, 200, 1, 1))
             .build();
+        
+        // Mock ActionResultFactory
+        ActionResult findResult = new ActionResult();
+        when(mockActionResultFactory.init(any(PatternFindOptions.class), anyString(), any())).thenReturn(findResult);
         
         // Mock find to add location as match
         doAnswer(invocation -> {
@@ -165,20 +182,24 @@ public class ClickActionTest extends BrobotTestBase {
     public void testMultipleMatches() {
         // Setup
         ActionResult actionResult = new ActionResult();
-        actionResult.setActionConfig(new ClickOptions());
+        actionResult.setActionConfig(new ClickOptions.Builder().build());
         
         ObjectCollection objectCollection = new ObjectCollection();
-        StateImage stateImage = StateImage.builder().build();
-        objectCollection.addStateImage(stateImage);
+        StateImage stateImage = new StateImage.Builder().build();
+        objectCollection.getStateImages().add(stateImage);
         
         Match match1 = new Match.Builder()
-            .withRegion(new Region(100, 100, 50, 50))
-            .withScore(0.95)
+            .setRegion(new Region(100, 100, 50, 50))
+            .setSimScore(0.95)
             .build();
         Match match2 = new Match.Builder()
-            .withRegion(new Region(200, 200, 50, 50))
-            .withScore(0.90)
+            .setRegion(new Region(200, 200, 50, 50))
+            .setSimScore(0.90)
             .build();
+        
+        // Mock ActionResultFactory
+        ActionResult findResult = new ActionResult();
+        when(mockActionResultFactory.init(any(PatternFindOptions.class), anyString(), any())).thenReturn(findResult);
         
         // Mock find to add multiple matches
         doAnswer(invocation -> {

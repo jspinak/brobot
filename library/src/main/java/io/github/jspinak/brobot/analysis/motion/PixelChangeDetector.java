@@ -285,10 +285,43 @@ public class PixelChangeDetector {
          * @param mats list of images to compare
          */
         private void doAbsoluteDifference(List<Mat> mats) {
-            Mat min = MatrixUtilities.getNewMatWithPerCellMinsOrMaxes(mats, REDUCE_MIN);
-            Mat max = MatrixUtilities.getNewMatWithPerCellMinsOrMaxes(mats, REDUCE_MAX);
-            absdiff(min, max, absDiff);
-            absDiff = MatrixUtilities.getMinOrMaxPerCellAcrossChannels(absDiff, REDUCE_MAX);
+            if (mats == null || mats.isEmpty()) {
+                System.err.println("Warning: No mats provided for absolute difference");
+                absDiff = new Mat(); // Create empty Mat to prevent NPE later
+                return;
+            }
+            
+            // Validate input mats
+            for (Mat mat : mats) {
+                if (mat == null || mat.empty()) {
+                    System.err.println("Warning: Null or empty Mat in list, skipping absolute difference");
+                    absDiff = new Mat();
+                    return;
+                }
+            }
+            
+            try {
+                Mat min = MatrixUtilities.getNewMatWithPerCellMinsOrMaxes(mats, REDUCE_MIN);
+                Mat max = MatrixUtilities.getNewMatWithPerCellMinsOrMaxes(mats, REDUCE_MAX);
+                
+                if (min == null || min.empty() || max == null || max.empty()) {
+                    System.err.println("Warning: Failed to compute min/max mats");
+                    absDiff = new Mat();
+                    return;
+                }
+                
+                // Initialize absDiff if needed
+                if (absDiff == null) {
+                    absDiff = new Mat();
+                }
+                
+                absdiff(min, max, absDiff);
+                absDiff = MatrixUtilities.getMinOrMaxPerCellAcrossChannels(absDiff, REDUCE_MAX);
+            } catch (Exception e) {
+                System.err.println("Error computing absolute difference: " + e.getMessage());
+                e.printStackTrace();
+                absDiff = new Mat(); // Ensure absDiff is not null
+            }
         }
 
         private void doAbsoluteDifference() {
@@ -299,8 +332,35 @@ public class PixelChangeDetector {
 
         private void doDilation() {
             if (useDilation) {
-                Mat kernel = new Mat(Mat.ones(dilationRows, dilationCols, dilationType));
-                dilate(absDiff, dilation, kernel);
+                // Add defensive checks to prevent crash
+                if (absDiff == null || absDiff.empty()) {
+                    System.err.println("Warning: absDiff is null or empty, skipping dilation");
+                    return;
+                }
+                
+                // Initialize dilation Mat if needed
+                if (dilation == null || dilation.empty()) {
+                    dilation = new Mat();
+                }
+                
+                // Create kernel safely
+                Mat kernel = Mat.ones(dilationRows, dilationCols, dilationType).asMat();
+                if (kernel == null || kernel.empty()) {
+                    System.err.println("Warning: Failed to create dilation kernel");
+                    return;
+                }
+                
+                try {
+                    dilate(absDiff, dilation, kernel);
+                } catch (Exception e) {
+                    System.err.println("Error during dilation: " + e.getMessage());
+                    e.printStackTrace();
+                } finally {
+                    // Always release the kernel
+                    if (kernel != null && !kernel.isNull()) {
+                        kernel.release();
+                    }
+                }
             }
         }
 

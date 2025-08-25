@@ -9,19 +9,63 @@ Unit testing in Brobot ensures reproducible results by using static screenshots 
 ## Overview
 
 Brobot unit testing combines:
+- **Centralized mock mode management** via `MockModeManager`
 - **Real Find operations** on static screenshots
 - **Mocked actions** (click, drag, type, etc.) for safety and speed
 - **Deterministic results** for reliable test assertions
 
+## Base Test Class
+
+All Brobot unit tests should extend `BrobotTestBase` for automatic mock mode configuration:
+
+```java
+import io.github.jspinak.brobot.test.BrobotTestBase;
+import org.junit.jupiter.api.Test;
+
+public class MyUnitTest extends BrobotTestBase {
+    
+    @Test
+    public void testFeature() {
+        // Mock mode is automatically enabled
+        // Test runs safely in headless environments
+    }
+}
+```
+
+`BrobotTestBase` automatically:
+- Enables mock mode via `MockModeManager`
+- Configures fast mock timings (0.01-0.04s)
+- Ensures headless compatibility
+- Prevents AWTException errors
+
 ## Configuration
 
-### Configuration via Properties
+### Automatic Mock Mode Configuration
 
-Configure testing through `application.properties` or `application.yml`:
+When extending `BrobotTestBase`, mock mode is automatically configured via `MockModeManager`:
+
+```java
+public class LoginTest extends BrobotTestBase {
+    // No manual mock configuration needed!
+    
+    @Test
+    public void testLogin() {
+        // Mock mode is already enabled
+        assertTrue(MockModeManager.isMockMode());
+    }
+}
+```
+
+### Manual Configuration via Properties
+
+If not using `BrobotTestBase`, configure through `application.properties`:
 
 ```properties
 # Enable mock mode for unit testing
+brobot.mock.mode=true
+# These are automatically synchronized by MockModeManager:
 brobot.core.mock=true
+brobot.framework.mock=true
 
 # Screenshot configuration
 brobot.screenshot.path=screenshots/
@@ -48,18 +92,31 @@ brobot:
 
 ### Test Configuration
 
-Configure tests using Spring Boot's property system:
+For Spring Boot tests, extend `BrobotTestBase` and use property configuration:
 
 ```java
 @SpringBootTest
 @TestPropertySource(properties = {
-    "brobot.core.mock=true",
     "brobot.screenshot.path=src/test/resources/screenshots/"
 })
-class UnitTest {
-    // Configuration is handled automatically by Spring
+class UnitTest extends BrobotTestBase {
+    // Mock mode is automatically enabled by BrobotTestBase
+    // Additional properties are handled by Spring
 }
 ```
+
+For non-Spring tests:
+
+```java
+public class SimpleUnitTest extends BrobotTestBase {
+    
+    @BeforeEach
+    @Override
+    public void setupTest() {
+        super.setupTest(); // Enables mock mode via MockModeManager
+        // Add any additional setup
+    }
+}```
 
 ## Test Structure
 
@@ -68,15 +125,14 @@ class UnitTest {
 ```java
 @SpringBootTest
 @TestPropertySource(properties = {
-    "brobot.core.mock=true",
     "brobot.screenshot.test-path=src/test/resources/screenshots/"
 })
-class LoginAutomationTest {
+class LoginAutomationTest extends BrobotTestBase {
 
     @Autowired
     private Action action;
     
-    // No @BeforeEach needed - configuration handled by properties
+    // Mock mode is automatically enabled by BrobotTestBase
     
     @Test
     void testSuccessfulLogin() {

@@ -79,6 +79,11 @@ public class IterativePatternFinder {
      * @param scenes The list of scenes (screenshots) to search within. Must not be null or empty.
      */
     public void find(ActionResult matches, List<StateImage> stateImages, List<Scene> scenes) {
+        // Add null checks for defensive programming
+        if (matches == null || stateImages == null || scenes == null) {
+            return;
+        }
+        
         actionLifecycleManagement.printActionOnce(matches);
         for (Scene scene : scenes) {
             List<Match> singleSceneMatchList = new ArrayList<>(); // holds finds for a specific scene

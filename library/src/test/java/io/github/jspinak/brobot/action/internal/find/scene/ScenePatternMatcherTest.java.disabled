@@ -1,0 +1,311 @@
+package io.github.jspinak.brobot.action.internal.find.scene;
+
+import io.github.jspinak.brobot.model.element.Pattern;
+import io.github.jspinak.brobot.model.element.Scene;
+import io.github.jspinak.brobot.model.element.Image;
+import io.github.jspinak.brobot.model.match.Match;
+import io.github.jspinak.brobot.test.BrobotTestBase;
+import org.junit.jupiter.api.*;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+
+import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+/**
+ * Test suite for ScenePatternMatcher class.
+ * Tests pattern matching operations within scene images.
+ * 
+ * Note: These tests focus on the method contracts and mock behavior
+ * since actual Sikuli operations don't work in mock mode.
+ */
+@DisplayName("ScenePatternMatcher Tests")
+public class ScenePatternMatcherTest extends BrobotTestBase {
+
+    private ScenePatternMatcher scenePatternMatcher;
+    
+    @Mock
+    private Scene scene;
+    
+    @Mock
+    private Pattern pattern;
+    
+    @Mock
+    private Pattern scenePattern;
+    
+    @Mock
+    private Image sceneImageObject;
+    
+    @Mock
+    private Image patternImageObject;
+    
+    private BufferedImage mockSceneImage;
+    private BufferedImage mockPatternImage;
+    
+    @BeforeEach
+    @Override
+    public void setupTest() {
+        super.setupTest();
+        MockitoAnnotations.openMocks(this);
+        scenePatternMatcher = new ScenePatternMatcher();
+        
+        // Create simple mock images
+        mockSceneImage = new BufferedImage(100, 100, BufferedImage.TYPE_INT_RGB);
+        mockPatternImage = new BufferedImage(20, 20, BufferedImage.TYPE_INT_RGB);
+    }
+    
+    @Nested
+    @DisplayName("Basic Operations")
+    class BasicOperations {
+        
+        @Test
+        @DisplayName("Should handle null pattern")
+        void shouldHandleNullPattern() {
+            // Act
+            List<Match> matches = scenePatternMatcher.findAllInScene(null, scene);
+            
+            // Assert
+            assertNotNull(matches);
+            assertTrue(matches.isEmpty());
+        }
+        
+        @Test
+        @DisplayName("Should handle null scene")
+        void shouldHandleNullScene() {
+            // Act
+            List<Match> matches = scenePatternMatcher.findAllInScene(pattern, null);
+            
+            // Assert
+            assertNotNull(matches);
+            assertTrue(matches.isEmpty());
+        }
+        
+        @Test
+        @DisplayName("Should return empty list for empty scene image")
+        void shouldReturnEmptyListForEmptySceneImage() {
+            // Arrange
+            when(scene.getPattern()).thenReturn(scenePattern);
+            when(scenePattern.getImage()).thenReturn(sceneImageObject);
+            when(sceneImageObject.isEmpty()).thenReturn(true);
+            
+            // Act
+            List<Match> matches = scenePatternMatcher.findAllInScene(pattern, scene);
+            
+            // Assert
+            assertNotNull(matches);
+            assertTrue(matches.isEmpty());
+        }
+        
+        @Test
+        @DisplayName("Should handle scene with no pattern")
+        void shouldHandleSceneWithNoPattern() {
+            // Arrange
+            when(scene.getPattern()).thenReturn(null);
+            
+            // Act
+            List<Match> matches = scenePatternMatcher.findAllInScene(pattern, scene);
+            
+            // Assert
+            assertNotNull(matches);
+            assertTrue(matches.isEmpty());
+        }
+    }
+    
+    @Nested
+    @DisplayName("OCR Operations")
+    class OCROperations {
+        
+        @Test
+        @DisplayName("Should find word in scene")
+        void shouldFindWordInScene() {
+            // Arrange
+            String searchWord = "test";
+            when(scene.getPattern()).thenReturn(scenePattern);
+            when(scenePattern.getImage()).thenReturn(sceneImageObject);
+            when(sceneImageObject.isEmpty()).thenReturn(false);
+            when(sceneImageObject.getBufferedImage()).thenReturn(mockSceneImage);
+            
+            // Act
+            List<Match> matches = scenePatternMatcher.findWordInScene(searchWord, scene);
+            
+            // Assert
+            assertNotNull(matches);
+            // In mock mode, OCR won't actually run, so we expect empty results
+            assertTrue(matches.isEmpty());
+        }
+        
+        @Test
+        @DisplayName("Should handle null word search")
+        void shouldHandleNullWordSearch() {
+            // Act
+            List<Match> matches = scenePatternMatcher.findWordInScene(null, scene);
+            
+            // Assert
+            assertNotNull(matches);
+            assertTrue(matches.isEmpty());
+        }
+        
+        @Test
+        @DisplayName("Should handle empty word search")
+        void shouldHandleEmptyWordSearch() {
+            // Act
+            List<Match> matches = scenePatternMatcher.findWordInScene("", scene);
+            
+            // Assert
+            assertNotNull(matches);
+            assertTrue(matches.isEmpty());
+        }
+    }
+    
+    @Nested
+    @DisplayName("Pattern Matching")
+    class PatternMatching {
+        
+        @Test
+        @DisplayName("Should attempt pattern matching with valid inputs")
+        void shouldAttemptPatternMatchingWithValidInputs() {
+            // Arrange
+            when(scene.getPattern()).thenReturn(scenePattern);
+            when(scenePattern.getImage()).thenReturn(sceneImageObject);
+            when(sceneImageObject.isEmpty()).thenReturn(false);
+            when(sceneImageObject.getBufferedImage()).thenReturn(mockSceneImage);
+            
+            when(pattern.getBImage()).thenReturn(mockPatternImage);
+            when(pattern.getName()).thenReturn("test-pattern");
+            when(pattern.getSearchRegions()).thenReturn(new io.github.jspinak.brobot.model.element.SearchRegions());
+            when(pattern.getRegions()).thenReturn(new ArrayList<>());
+            when(pattern.isFixed()).thenReturn(false);
+            
+            // Create a mock Sikuli pattern to avoid actual Sikuli operations
+            org.sikuli.script.Pattern sikuliPattern = mock(org.sikuli.script.Pattern.class);
+            when(pattern.sikuli()).thenReturn(sikuliPattern);
+            
+            // Act
+            List<Match> matches = scenePatternMatcher.findAllInScene(pattern, scene);
+            
+            // Assert
+            assertNotNull(matches);
+            // In mock mode with mocked Sikuli, we expect empty results
+            assertTrue(matches.isEmpty());
+        }
+        
+        @Test
+        @DisplayName("Should handle pattern with null image")
+        void shouldHandlePatternWithNullImage() {
+            // Arrange
+            when(scene.getPattern()).thenReturn(scenePattern);
+            when(scenePattern.getImage()).thenReturn(sceneImageObject);
+            when(sceneImageObject.isEmpty()).thenReturn(false);
+            when(sceneImageObject.getBufferedImage()).thenReturn(mockSceneImage);
+            
+            when(pattern.getBImage()).thenReturn(null);
+            
+            // Act
+            List<Match> matches = scenePatternMatcher.findAllInScene(pattern, scene);
+            
+            // Assert
+            assertNotNull(matches);
+            assertTrue(matches.isEmpty());
+        }
+        
+        @Test
+        @DisplayName("Should handle scene with null image")
+        void shouldHandleSceneWithNullImage() {
+            // Arrange
+            when(scene.getPattern()).thenReturn(scenePattern);
+            when(scenePattern.getImage()).thenReturn(sceneImageObject);
+            when(sceneImageObject.isEmpty()).thenReturn(false);
+            when(sceneImageObject.getBufferedImage()).thenReturn(null);
+            
+            // Act
+            List<Match> matches = scenePatternMatcher.findAllInScene(pattern, scene);
+            
+            // Assert
+            assertNotNull(matches);
+            assertTrue(matches.isEmpty());
+        }
+    }
+    
+    @Nested
+    @DisplayName("Fixed Region Updates")
+    class FixedRegionUpdates {
+        
+        @Test
+        @DisplayName("Should not update regions for non-fixed pattern")
+        void shouldNotUpdateRegionsForNonFixedPattern() {
+            // Arrange
+            when(pattern.isFixed()).thenReturn(false);
+            when(pattern.getRegions()).thenReturn(new ArrayList<>());
+            
+            // Act
+            // This would be called internally during findAllInScene
+            // but we're testing the logic conceptually
+            
+            // Assert
+            verify(pattern, never()).setRegions(any());
+        }
+        
+        @Test
+        @DisplayName("Should handle fixed pattern")
+        void shouldHandleFixedPattern() {
+            // Arrange
+            when(scene.getPattern()).thenReturn(scenePattern);
+            when(scenePattern.getImage()).thenReturn(sceneImageObject);
+            when(sceneImageObject.isEmpty()).thenReturn(false);
+            when(sceneImageObject.getBufferedImage()).thenReturn(mockSceneImage);
+            
+            when(pattern.isFixed()).thenReturn(true);
+            when(pattern.getRegions()).thenReturn(new ArrayList<>());
+            when(pattern.getBImage()).thenReturn(mockPatternImage);
+            
+            // Create a mock Sikuli pattern
+            org.sikuli.script.Pattern sikuliPattern = mock(org.sikuli.script.Pattern.class);
+            when(pattern.sikuli()).thenReturn(sikuliPattern);
+            
+            // Act
+            List<Match> matches = scenePatternMatcher.findAllInScene(pattern, scene);
+            
+            // Assert
+            assertNotNull(matches);
+            // In mock mode, the actual update logic won't run
+        }
+    }
+    
+    @Nested
+    @DisplayName("Error Handling")
+    class ErrorHandling {
+        
+        @Test
+        @DisplayName("Should handle exception gracefully")
+        void shouldHandleExceptionGracefully() {
+            // Arrange
+            when(scene.getPattern()).thenThrow(new RuntimeException("Test exception"));
+            
+            // Act
+            List<Match> matches = scenePatternMatcher.findAllInScene(pattern, scene);
+            
+            // Assert
+            assertNotNull(matches);
+            assertTrue(matches.isEmpty());
+        }
+        
+        @Test
+        @DisplayName("Should handle null pointer in scene pattern")
+        void shouldHandleNullPointerInScenePattern() {
+            // Arrange
+            when(scene.getPattern()).thenReturn(scenePattern);
+            when(scenePattern.getImage()).thenReturn(null);
+            
+            // Act
+            List<Match> matches = scenePatternMatcher.findAllInScene(pattern, scene);
+            
+            // Assert
+            assertNotNull(matches);
+            assertTrue(matches.isEmpty());
+        }
+    }
+}

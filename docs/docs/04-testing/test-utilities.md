@@ -6,9 +6,120 @@ description: Common utilities and helpers for testing Brobot applications
 
 # Test Utilities
 
-The `BrobotTestUtils` class provides a comprehensive set of utilities for writing tests in Brobot applications. These utilities help reduce boilerplate code and ensure consistent test data creation across your test suite.
+Brobot provides comprehensive test utilities to help you write robust and maintainable tests. The framework includes base classes, utility methods, and centralized mock mode management.
 
-## Overview
+## BrobotTestBase - Base Test Class
+
+All Brobot tests should extend `BrobotTestBase` to ensure proper test configuration:
+
+```java
+import io.github.jspinak.brobot.test.BrobotTestBase;
+import org.junit.jupiter.api.Test;
+
+public class MyBrobotTest extends BrobotTestBase {
+    
+    @Test
+    public void testMyFeature() {
+        // Mock mode is automatically enabled
+        // Test will work in headless environments
+    }
+    
+    @Test
+    public void testWithRealMode() {
+        // Temporarily disable mock mode
+        disableMockMode();
+        try {
+            // Test with real screen capture
+        } finally {
+            // Re-enable mock mode
+            MockModeManager.setMockMode(true);
+        }
+    }
+}
+```
+
+### What BrobotTestBase Provides:
+- **Automatic mock mode activation** via `MockModeManager`
+- **Headless environment compatibility**
+- **Fast mock timings** (0.01-0.04 seconds for operations)
+- **CI/CD pipeline support**
+- **Prevention of AWTException and HeadlessException errors**
+
+## Test Utility Classes
+
+### BrobotTestUtils - Common Test Helpers
+
+Provides factory methods for creating test data:
+
+```java
+import io.github.jspinak.brobot.test.utils.BrobotTestUtils;
+
+// Create test objects
+State testState = BrobotTestUtils.createTestState("MyState");
+StateImage testImage = BrobotTestUtils.createTestStateImage("TestImage");
+Match testMatch = BrobotTestUtils.createTestMatch(100, 100, 50, 50, 0.95);
+
+// Create multiple test matches
+List<Match> matches = BrobotTestUtils.createTestMatches(5);
+
+// Create action results
+ActionResult success = BrobotTestUtils.createSuccessfulResult(3);
+ActionResult failure = BrobotTestUtils.createFailedResult();
+```
+
+### MatTestUtils - OpenCV Mat Testing Utilities
+
+Comprehensive utilities for safe OpenCV Mat operations in tests:
+
+```java
+import io.github.jspinak.brobot.test.utils.MatTestUtils;
+
+// Create safe, validated Mats
+Mat colorMat = MatTestUtils.createColorMat(100, 100, 255, 0, 0); // Red
+Mat grayMat = MatTestUtils.createGrayMat(100, 100, 128);
+
+// Create test patterns
+Mat checkerboard = MatTestUtils.createCheckerboardMat(200, 200, 25);
+Mat gradient = MatTestUtils.createGradientMat(100, 100, true);
+Mat circle = MatTestUtils.createShapeMat(100, 100, 1);
+
+// Validate Mats before operations
+MatTestUtils.validateMat(mat, "before processing");
+
+// Safe cleanup
+MatTestUtils.safeReleaseAll(mat1, mat2, mat3);
+```
+
+**Key Features:**
+- Prevents JVM crashes from invalid Mat operations
+- Provides validation and safe cleanup
+- Includes pattern generation for testing
+- Motion detection test helpers
+
+See [Mat Testing Utilities](mat-testing-utilities.md) for complete documentation.
+
+## MockModeManager - Centralized Mock Control
+
+The `MockModeManager` provides a single source of truth for mock mode configuration:
+
+```java
+import io.github.jspinak.brobot.config.MockModeManager;
+
+// Enable mock mode globally
+MockModeManager.setMockMode(true);
+
+// Check current mock mode
+boolean isMock = MockModeManager.isMockMode();
+
+// Debug mock mode state across all components
+MockModeManager.logMockModeState();
+```
+
+## BrobotTestUtils - Test Data Creation
+
+The `BrobotTestUtils` class provides utilities for creating test data:
+
+### Overview
 
 Located at `io.github.jspinak.brobot.test.utils.BrobotTestUtils`, this utility class provides:
 

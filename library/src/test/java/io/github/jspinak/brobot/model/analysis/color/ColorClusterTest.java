@@ -326,7 +326,8 @@ public class ColorClusterTest extends BrobotTestBase {
             colorCluster.setSchema(BGR, emptyBGR);
             
             assertNotNull(colorCluster.getSchema(BGR));
-            assertTrue(((ColorSchemaBGR) colorCluster.getSchema(BGR)).getColorInfos().isEmpty());
+            // ColorSchemaBGR constructor creates 3 ColorInfo objects (BLUE, GREEN, RED)
+            assertEquals(3, ((ColorSchemaBGR) colorCluster.getSchema(BGR)).getColorInfos().size());
         }
         
         @Test

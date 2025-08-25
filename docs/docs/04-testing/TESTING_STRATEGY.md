@@ -28,17 +28,22 @@ This document outlines the comprehensive testing strategy for the Brobot framewo
 All Brobot tests MUST extend `BrobotTestBase`:
 
 ```java
+import io.github.jspinak.brobot.test.BrobotTestBase;
+import io.github.jspinak.brobot.config.MockModeManager;
+
 public class MyTest extends BrobotTestBase {
     @Test
     public void testFeature() {
-        // Mock mode is automatically enabled
+        // Mock mode is automatically enabled via MockModeManager
+        assertTrue(MockModeManager.isMockMode());
         // Test runs in headless environment
     }
 }
 ```
 
 **Benefits:**
-- Automatic mock mode activation
+- Automatic mock mode activation via centralized `MockModeManager`
+- Synchronizes mock settings across all components (ExecutionEnvironment, FrameworkSettings, system properties)
 - Headless environment compatibility
 - Consistent test configuration
 - Fast execution (0.01-0.04s per operation)
@@ -135,8 +140,9 @@ public void testImmutability() {
 @Test
 @DisplayName("Action works in mock mode")
 public void testActionInMockMode() {
-    // Given - mock mode enabled by BrobotTestBase
-    assertTrue(FrameworkSettings.mock);
+    // Given - mock mode enabled by BrobotTestBase via MockModeManager
+    assertTrue(MockModeManager.isMockMode());
+    // This also ensures FrameworkSettings.mock is synchronized
     
     // When - perform action
     ActionResult result = action.perform(config, objectCollection);
@@ -372,6 +378,8 @@ jobs:
 ## Best Practices
 
 1. **Always use BrobotTestBase** for consistent behavior
+   - Automatically configures mock mode via `MockModeManager`
+   - Use `MockModeManager.isMockMode()` instead of checking individual flags
 2. **Use setXxx() naming** in all builder calls
 3. **Group related tests** with `@Nested` classes
 4. **Use descriptive names** with `@DisplayName`
