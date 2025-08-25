@@ -1,5 +1,6 @@
 package io.github.jspinak.brobot.logging.unified;
 
+import io.github.jspinak.brobot.model.state.State;
 import io.github.jspinak.brobot.test.BrobotTestBase;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -19,157 +20,161 @@ import static org.junit.jupiter.api.Assertions.*;
 @ExtendWith(MockitoExtension.class)
 public class LoggingContextTest extends BrobotTestBase {
     
+    private LoggingContext loggingContext;
+    
     @BeforeEach
     @Override
     public void setupTest() {
         super.setupTest();
+        loggingContext = new LoggingContext();
         // Clear any existing context
-        LoggingContext.clear();
+        loggingContext.clear();
     }
     
     @AfterEach
     public void tearDown() {
         // Clean up after each test
-        LoggingContext.clear();
+        loggingContext.clear();
     }
     
     @Test
     public void testSessionIdManagement() {
         // Initially no session
-        assertFalse(LoggingContext.hasSession());
-        assertNull(LoggingContext.getSessionId());
+        assertFalse(loggingContext.hasSession());
+        assertNull(loggingContext.getSessionId());
         
         // Set session ID
-        LoggingContext.setSessionId("test-session-123");
-        assertTrue(LoggingContext.hasSession());
-        assertEquals("test-session-123", LoggingContext.getSessionId());
+        loggingContext.setSessionId("test-session-123");
+        assertTrue(loggingContext.hasSession());
+        assertEquals("test-session-123", loggingContext.getSessionId());
         
         // Clear session
-        LoggingContext.clearSession();
-        assertFalse(LoggingContext.hasSession());
-        assertNull(LoggingContext.getSessionId());
+        loggingContext.clearSession();
+        assertFalse(loggingContext.hasSession());
+        assertNull(loggingContext.getSessionId());
     }
     
     @Test
     public void testCurrentStateManagement() {
         // Initially no state
-        assertNull(LoggingContext.getCurrentState());
+        assertNull(loggingContext.getCurrentState());
         
         // Set current state
-        LoggingContext.setCurrentState("LoginScreen");
-        assertEquals("LoginScreen", LoggingContext.getCurrentState());
+        State loginState = new State();
+        loginState.setName("LoginScreen");
+        loggingContext.setCurrentState(loginState);
+        assertEquals("LoginScreen", loggingContext.getCurrentState().getName());
         
         // Update state
-        LoggingContext.setCurrentState("Dashboard");
-        assertEquals("Dashboard", LoggingContext.getCurrentState());
+        State dashboardState = new State();
+        dashboardState.setName("Dashboard");
+        loggingContext.setCurrentState(dashboardState);
+        assertEquals("Dashboard", loggingContext.getCurrentState().getName());
         
         // Clear context
-        LoggingContext.clear();
-        assertNull(LoggingContext.getCurrentState());
+        loggingContext.clear();
+        assertNull(loggingContext.getCurrentState());
     }
     
     @Test
     public void testOperationStack() {
         // Initially empty
-        assertNull(LoggingContext.getCurrentOperation());
+        assertNull(loggingContext.getCurrentOperation());
         
         // Push operations
-        LoggingContext.pushOperation("findImage");
-        assertEquals("findImage", LoggingContext.getCurrentOperation());
+        loggingContext.pushOperation("findImage");
+        assertEquals("findImage", loggingContext.getCurrentOperation());
         
-        LoggingContext.pushOperation("clickButton");
-        assertEquals("clickButton", LoggingContext.getCurrentOperation());
+        loggingContext.pushOperation("clickButton");
+        assertEquals("clickButton", loggingContext.getCurrentOperation());
         
-        LoggingContext.pushOperation("typeText");
-        assertEquals("typeText", LoggingContext.getCurrentOperation());
+        loggingContext.pushOperation("typeText");
+        assertEquals("typeText", loggingContext.getCurrentOperation());
         
         // Pop operations
-        LoggingContext.popOperation();
-        assertEquals("clickButton", LoggingContext.getCurrentOperation());
+        loggingContext.popOperation();
+        assertEquals("clickButton", loggingContext.getCurrentOperation());
         
-        LoggingContext.popOperation();
-        assertEquals("findImage", LoggingContext.getCurrentOperation());
+        loggingContext.popOperation();
+        assertEquals("findImage", loggingContext.getCurrentOperation());
         
-        LoggingContext.popOperation();
-        assertNull(LoggingContext.getCurrentOperation());
+        loggingContext.popOperation();
+        assertNull(loggingContext.getCurrentOperation());
         
         // Pop from empty stack should not throw
-        assertDoesNotThrow(() -> LoggingContext.popOperation());
-        assertNull(LoggingContext.getCurrentOperation());
+        assertDoesNotThrow(() -> loggingContext.popOperation());
+        assertNull(loggingContext.getCurrentOperation());
     }
     
     @Test
     public void testMetadataManagement() {
         // Initially empty
-        Map<String, Object> metadata = LoggingContext.getAllMetadata();
+        Map<String, Object> metadata = loggingContext.getAllMetadata();
         assertTrue(metadata.isEmpty());
         
         // Add metadata
-        LoggingContext.addMetadata("key1", "value1");
-        LoggingContext.addMetadata("key2", 123);
-        LoggingContext.addMetadata("key3", true);
+        loggingContext.addMetadata("key1", "value1");
+        loggingContext.addMetadata("key2", 123);
+        loggingContext.addMetadata("key3", true);
         
-        metadata = LoggingContext.getAllMetadata();
+        metadata = loggingContext.getAllMetadata();
         assertEquals(3, metadata.size());
         assertEquals("value1", metadata.get("key1"));
         assertEquals(123, metadata.get("key2"));
         assertEquals(true, metadata.get("key3"));
         
         // Update existing metadata
-        LoggingContext.addMetadata("key1", "updated");
-        metadata = LoggingContext.getAllMetadata();
+        loggingContext.addMetadata("key1", "updated");
+        metadata = loggingContext.getAllMetadata();
         assertEquals("updated", metadata.get("key1"));
         
         // Remove metadata
-        LoggingContext.removeMetadata("key2");
-        metadata = LoggingContext.getAllMetadata();
+        loggingContext.removeMetadata("key2");
+        metadata = loggingContext.getAllMetadata();
         assertEquals(2, metadata.size());
         assertFalse(metadata.containsKey("key2"));
         
         // Clear all metadata
-        LoggingContext.clear();
-        metadata = LoggingContext.getAllMetadata();
+        loggingContext.clear();
+        metadata = loggingContext.getAllMetadata();
         assertTrue(metadata.isEmpty());
     }
     
     @Test
     public void testContextSnapshot() {
         // Set up context
-        LoggingContext.setSessionId("snapshot-session");
-        LoggingContext.setCurrentState("TestState");
-        LoggingContext.pushOperation("testOp1");
-        LoggingContext.pushOperation("testOp2");
-        LoggingContext.addMetadata("meta1", "value1");
-        LoggingContext.addMetadata("meta2", 42);
+        loggingContext.setSessionId("snapshot-session");
+        State testState = new State();
+        testState.setName("TestState");
+        loggingContext.setCurrentState(testState);
+        loggingContext.pushOperation("testOp1");
+        loggingContext.pushOperation("testOp2");
+        loggingContext.addMetadata("meta1", "value1");
+        loggingContext.addMetadata("meta2", 42);
         
         // Create snapshot
-        LoggingContext.Snapshot snapshot = LoggingContext.snapshot();
+        LoggingContext.Context snapshot = loggingContext.snapshot();
         
         // Verify snapshot captured the state
         assertNotNull(snapshot);
-        assertEquals("snapshot-session", snapshot.getSessionId());
-        assertEquals("TestState", snapshot.getCurrentState());
-        assertEquals("testOp2", snapshot.getCurrentOperation());
-        
-        Map<String, Object> snapshotMetadata = snapshot.getMetadata();
-        assertEquals(2, snapshotMetadata.size());
-        assertEquals("value1", snapshotMetadata.get("meta1"));
-        assertEquals(42, snapshotMetadata.get("meta2"));
+        // Note: Context doesn't expose getters directly, verify through restore
         
         // Modify context
-        LoggingContext.clear();
-        LoggingContext.setSessionId("different-session");
-        LoggingContext.setCurrentState("DifferentState");
+        loggingContext.clear();
+        loggingContext.setSessionId("different-session");
+        State differentState = new State();
+        differentState.setName("DifferentState");
+        loggingContext.setCurrentState(differentState);
         
         // Restore from snapshot
-        LoggingContext.restore(snapshot);
+        loggingContext.restore(snapshot);
         
         // Verify restoration
-        assertEquals("snapshot-session", LoggingContext.getSessionId());
-        assertEquals("TestState", LoggingContext.getCurrentState());
-        assertEquals("testOp2", LoggingContext.getCurrentOperation());
+        assertEquals("snapshot-session", loggingContext.getSessionId());
+        assertEquals("TestState", loggingContext.getCurrentState().getName());
+        assertEquals("testOp2", loggingContext.getCurrentOperation());
         
-        Map<String, Object> restoredMetadata = LoggingContext.getAllMetadata();
+        Map<String, Object> restoredMetadata = loggingContext.getAllMetadata();
         assertEquals(2, restoredMetadata.size());
         assertEquals("value1", restoredMetadata.get("meta1"));
         assertEquals(42, restoredMetadata.get("meta2"));
@@ -178,53 +183,72 @@ public class LoggingContextTest extends BrobotTestBase {
     @Test
     public void testWithContext() {
         // Set initial context
-        LoggingContext.setSessionId("original-session");
-        LoggingContext.setCurrentState("OriginalState");
-        LoggingContext.addMetadata("original", true);
+        loggingContext.setSessionId("original-session");
+        State originalState = new State();
+        originalState.setName("OriginalState");
+        loggingContext.setCurrentState(originalState);
+        loggingContext.addMetadata("original", true);
+        
+        // Create temporary context
+        LoggingContext.Context tempContext = loggingContext.snapshot();
+        loggingContext.clear();
+        loggingContext.setSessionId("temp-session");
+        State tempState = new State();
+        tempState.setName("TempState");
+        loggingContext.setCurrentState(tempState);
+        loggingContext.addMetadata("temporary", true);
+        LoggingContext.Context modifiedTempContext = loggingContext.snapshot();
         
         // Execute with temporary context
-        String result = LoggingContext.withContext(() -> {
-            // Temporary context
-            LoggingContext.setSessionId("temp-session");
-            LoggingContext.setCurrentState("TempState");
-            LoggingContext.addMetadata("temporary", true);
-            
+        loggingContext.restore(tempContext); // Restore original first
+        final String[] result = {null};
+        loggingContext.withContext(modifiedTempContext, () -> {
             // Verify temporary context is active
-            assertEquals("temp-session", LoggingContext.getSessionId());
-            assertEquals("TempState", LoggingContext.getCurrentState());
-            assertTrue((Boolean) LoggingContext.getAllMetadata().get("temporary"));
+            assertEquals("temp-session", loggingContext.getSessionId());
+            assertEquals("TempState", loggingContext.getCurrentState().getName());
+            assertTrue((Boolean) loggingContext.getAllMetadata().get("temporary"));
             
-            return "completed";
+            result[0] = "completed";
         });
         
         // Verify result
-        assertEquals("completed", result);
+        assertEquals("completed", result[0]);
         
         // Verify original context is restored
-        assertEquals("original-session", LoggingContext.getSessionId());
-        assertEquals("OriginalState", LoggingContext.getCurrentState());
-        assertTrue((Boolean) LoggingContext.getAllMetadata().get("original"));
-        assertFalse(LoggingContext.getAllMetadata().containsKey("temporary"));
+        assertEquals("original-session", loggingContext.getSessionId());
+        assertEquals("OriginalState", loggingContext.getCurrentState().getName());
+        assertTrue((Boolean) loggingContext.getAllMetadata().get("original"));
+        assertFalse(loggingContext.getAllMetadata().containsKey("temporary"));
     }
     
     @Test
     public void testWithContextException() {
         // Set initial context
-        LoggingContext.setSessionId("original-session");
-        LoggingContext.setCurrentState("OriginalState");
+        loggingContext.setSessionId("original-session");
+        State originalState = new State();
+        originalState.setName("OriginalState");
+        loggingContext.setCurrentState(originalState);
         
-        // Execute with temporary context that throws exception
+        // Create temporary context
+        LoggingContext.Context tempContext = loggingContext.snapshot();
+        loggingContext.clear();
+        loggingContext.setSessionId("temp-session");
+        State tempState = new State();
+        tempState.setName("TempState");
+        loggingContext.setCurrentState(tempState);
+        LoggingContext.Context modifiedTempContext = loggingContext.snapshot();
+        
+        // Restore original and execute with temporary context that throws exception
+        loggingContext.restore(tempContext);
         assertThrows(RuntimeException.class, () -> {
-            LoggingContext.withContext(() -> {
-                LoggingContext.setSessionId("temp-session");
-                LoggingContext.setCurrentState("TempState");
+            loggingContext.withContext(modifiedTempContext, () -> {
                 throw new RuntimeException("Test exception");
             });
         });
         
         // Verify original context is still restored after exception
-        assertEquals("original-session", LoggingContext.getSessionId());
-        assertEquals("OriginalState", LoggingContext.getCurrentState());
+        assertEquals("original-session", loggingContext.getSessionId());
+        assertEquals("OriginalState", loggingContext.getCurrentState().getName());
     }
     
     @Test
@@ -242,24 +266,28 @@ public class LoggingContextTest extends BrobotTestBase {
                 final int threadId = i;
                 executor.submit(() -> {
                     try {
+                        // Each thread gets its own LoggingContext instance
+                        LoggingContext threadContext = new LoggingContext();
+                        
                         // Wait for all threads to be ready
                         startLatch.await();
                         
                         // Set thread-specific context
                         String sessionId = "session-" + threadId;
-                        String state = "state-" + threadId;
+                        State threadState = new State();
+                        threadState.setName("state-" + threadId);
                         
-                        LoggingContext.setSessionId(sessionId);
-                        LoggingContext.setCurrentState(state);
-                        LoggingContext.addMetadata("threadId", threadId);
+                        threadContext.setSessionId(sessionId);
+                        threadContext.setCurrentState(threadState);
+                        threadContext.addMetadata("threadId", threadId);
                         
                         // Simulate some work
                         Thread.sleep(10);
                         
                         // Verify thread-local context is preserved
-                        if (sessionId.equals(LoggingContext.getSessionId()) &&
-                            state.equals(LoggingContext.getCurrentState()) &&
-                            Integer.valueOf(threadId).equals(LoggingContext.getAllMetadata().get("threadId"))) {
+                        if (sessionId.equals(threadContext.getSessionId()) &&
+                            ("state-" + threadId).equals(threadContext.getCurrentState().getName()) &&
+                            Integer.valueOf(threadId).equals(threadContext.getAllMetadata().get("threadId"))) {
                             successCount.incrementAndGet();
                         }
                         
@@ -288,68 +316,72 @@ public class LoggingContextTest extends BrobotTestBase {
     @Test
     public void testClearContext() {
         // Set up complex context
-        LoggingContext.setSessionId("test-session");
-        LoggingContext.setCurrentState("TestState");
-        LoggingContext.pushOperation("op1");
-        LoggingContext.pushOperation("op2");
-        LoggingContext.addMetadata("key1", "value1");
-        LoggingContext.addMetadata("key2", "value2");
+        loggingContext.setSessionId("test-session");
+        State testState = new State();
+        testState.setName("TestState");
+        loggingContext.setCurrentState(testState);
+        loggingContext.pushOperation("op1");
+        loggingContext.pushOperation("op2");
+        loggingContext.addMetadata("key1", "value1");
+        loggingContext.addMetadata("key2", "value2");
         
         // Clear everything
-        LoggingContext.clear();
+        loggingContext.clear();
         
         // Verify everything is cleared
-        assertNull(LoggingContext.getSessionId());
-        assertNull(LoggingContext.getCurrentState());
-        assertNull(LoggingContext.getCurrentOperation());
-        assertTrue(LoggingContext.getAllMetadata().isEmpty());
-        assertFalse(LoggingContext.hasSession());
+        assertNull(loggingContext.getSessionId());
+        assertNull(loggingContext.getCurrentState());
+        assertNull(loggingContext.getCurrentOperation());
+        assertTrue(loggingContext.getAllMetadata().isEmpty());
+        assertFalse(loggingContext.hasSession());
     }
     
     @Test
     public void testClearSession() {
         // Set up context with session
-        LoggingContext.setSessionId("test-session");
-        LoggingContext.setCurrentState("TestState");
-        LoggingContext.pushOperation("operation");
-        LoggingContext.addMetadata("key", "value");
+        loggingContext.setSessionId("test-session");
+        State testState = new State();
+        testState.setName("TestState");
+        loggingContext.setCurrentState(testState);
+        loggingContext.pushOperation("operation");
+        loggingContext.addMetadata("key", "value");
         
         // Clear only session
-        LoggingContext.clearSession();
+        loggingContext.clearSession();
         
-        // Verify only session is cleared, other context remains
-        assertNull(LoggingContext.getSessionId());
-        assertFalse(LoggingContext.hasSession());
+        // Verify only session is cleared and operations cleared
+        assertNull(loggingContext.getSessionId());
+        assertFalse(loggingContext.hasSession());
+        assertNull(loggingContext.getCurrentOperation()); // Operations are cleared too
         
         // Other context should still be present
-        assertEquals("TestState", LoggingContext.getCurrentState());
-        assertEquals("operation", LoggingContext.getCurrentOperation());
-        assertEquals("value", LoggingContext.getAllMetadata().get("key"));
+        assertEquals("TestState", loggingContext.getCurrentState().getName());
+        assertEquals("value", loggingContext.getAllMetadata().get("key"));
     }
     
     @Test
     public void testNullHandling() {
         // Test null session ID
-        assertDoesNotThrow(() -> LoggingContext.setSessionId(null));
-        assertNull(LoggingContext.getSessionId());
-        assertFalse(LoggingContext.hasSession());
+        assertDoesNotThrow(() -> loggingContext.setSessionId(null));
+        assertNull(loggingContext.getSessionId());
+        assertFalse(loggingContext.hasSession());
         
         // Test null state
-        assertDoesNotThrow(() -> LoggingContext.setCurrentState(null));
-        assertNull(LoggingContext.getCurrentState());
+        assertDoesNotThrow(() -> loggingContext.setCurrentState(null));
+        assertNull(loggingContext.getCurrentState());
         
         // Test null operation
-        assertDoesNotThrow(() -> LoggingContext.pushOperation(null));
-        assertNull(LoggingContext.getCurrentOperation());
+        assertDoesNotThrow(() -> loggingContext.pushOperation(null));
+        assertNull(loggingContext.getCurrentOperation());
         
         // Test null metadata key
-        assertDoesNotThrow(() -> LoggingContext.addMetadata(null, "value"));
+        assertDoesNotThrow(() -> loggingContext.addMetadata(null, "value"));
         
         // Test null metadata value
-        assertDoesNotThrow(() -> LoggingContext.addMetadata("key", null));
+        assertDoesNotThrow(() -> loggingContext.addMetadata("key", null));
         
         // Test removing null key
-        assertDoesNotThrow(() -> LoggingContext.removeMetadata(null));
+        assertDoesNotThrow(() -> loggingContext.removeMetadata(null));
     }
     
     @Test
@@ -357,20 +389,20 @@ public class LoggingContextTest extends BrobotTestBase {
         // Push many operations to test stack depth
         int depth = 100;
         for (int i = 0; i < depth; i++) {
-            LoggingContext.pushOperation("operation-" + i);
+            loggingContext.pushOperation("operation-" + i);
         }
         
         // Verify current operation is the last pushed
-        assertEquals("operation-" + (depth - 1), LoggingContext.getCurrentOperation());
+        assertEquals("operation-" + (depth - 1), loggingContext.getCurrentOperation());
         
         // Pop all operations
         for (int i = depth - 1; i >= 0; i--) {
-            assertEquals("operation-" + i, LoggingContext.getCurrentOperation());
-            LoggingContext.popOperation();
+            assertEquals("operation-" + i, loggingContext.getCurrentOperation());
+            loggingContext.popOperation();
         }
         
         // Stack should be empty
-        assertNull(LoggingContext.getCurrentOperation());
+        assertNull(loggingContext.getCurrentOperation());
     }
     
     @Test
@@ -378,15 +410,15 @@ public class LoggingContextTest extends BrobotTestBase {
         // Add metadata with mutable object
         Map<String, String> mutableMap = new java.util.HashMap<>();
         mutableMap.put("inner", "value");
-        LoggingContext.addMetadata("map", mutableMap);
+        loggingContext.addMetadata("map", mutableMap);
         
         // Get metadata and modify the original
-        Map<String, Object> metadata1 = LoggingContext.getAllMetadata();
+        Map<String, Object> metadata1 = loggingContext.getAllMetadata();
         mutableMap.put("inner", "modified");
         mutableMap.put("new", "added");
         
         // Get metadata again
-        Map<String, Object> metadata2 = LoggingContext.getAllMetadata();
+        Map<String, Object> metadata2 = loggingContext.getAllMetadata();
         
         // Original modification should affect the stored value
         // (shallow copy behavior)

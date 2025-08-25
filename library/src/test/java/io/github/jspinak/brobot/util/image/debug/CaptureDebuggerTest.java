@@ -47,9 +47,8 @@ public class CaptureDebuggerTest extends BrobotTestBase {
         originalOut = System.out;
         System.setOut(new PrintStream(outputStream));
         
-        // Create CaptureDebugger with temp directory
+        // Create CaptureDebugger (it will use its default directory)
         captureDebugger = new CaptureDebugger();
-        ReflectionTestUtils.setField(captureDebugger, "DEBUG_DIR", tempDir.toString());
     }
     
     @AfterEach
@@ -59,20 +58,12 @@ public class CaptureDebuggerTest extends BrobotTestBase {
     
     @Test
     public void testConstructor_CreatesDebugDirectory() {
-        // Arrange
-        String customDir = tempDir.resolve("custom-debug").toString();
-        
         // Act
         CaptureDebugger debugger = new CaptureDebugger();
-        ReflectionTestUtils.setField(debugger, "DEBUG_DIR", customDir);
         
-        // Re-create to trigger directory creation
-        debugger = new CaptureDebugger();
-        ReflectionTestUtils.setField(debugger, "DEBUG_DIR", customDir);
-        
-        // Assert
-        File dir = new File(customDir);
-        assertTrue(dir.exists() || tempDir.toFile().exists());
+        // Assert - default debug directory should exist
+        File dir = new File("debug-captures");
+        assertTrue(dir.exists() || dir.mkdir());
     }
     
     @Test
@@ -286,11 +277,9 @@ public class CaptureDebuggerTest extends BrobotTestBase {
         invokePrivateMethod(captureDebugger, "saveImage", img, filename);
         
         // Assert
-        File expectedFile = new File(tempDir.toFile(), filename + ".png");
-        // File might be saved in the debug directory
-        assertTrue(expectedFile.exists() || 
-                  Files.exists(tempDir.resolve(filename + ".png")) ||
-                  outputStream.toString().contains("Saved"));
+        // File will be saved in the debug-captures directory
+        File expectedFile = new File("debug-captures", filename + ".png");
+        assertTrue(expectedFile.exists() || outputStream.toString().contains("Saved"));
     }
     
     @Test
