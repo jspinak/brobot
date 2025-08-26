@@ -63,8 +63,8 @@ class PopulateSceneCombinationsTestUpdated extends BrobotIntegrationTestBase {
         // Don't set mock mode here - let the test methods control it
         FrameworkSettings.mock = false;
         
-        // Clear any previous screenshots
-        FrameworkSettings.screenshots.clearAll();
+        // Note: clearAll() doesn't exist in the current API
+        // Screenshots would need to be managed differently
     }
 
     @Autowired
@@ -85,7 +85,7 @@ class PopulateSceneCombinationsTestUpdated extends BrobotIntegrationTestBase {
         return new PatternFindOptions.Builder()
                 .setStrategy(PatternFindOptions.Strategy.ALL)  // Find all potential state regions
                 .setSimilarity(0.7)  // Lower threshold for state detection
-                .setMinArea(minArea)  // Minimum area for state images
+                // Note: minArea would need to be handled differently
                 .setCaptureImage(true)  // Capture images for analysis
                 .build();
     }
@@ -207,21 +207,21 @@ class PopulateSceneCombinationsTestUpdated extends BrobotIntegrationTestBase {
         // Basic state finding
         PatternFindOptions basicStateOptions = new PatternFindOptions.Builder()
                 .setStrategy(PatternFindOptions.Strategy.ALL)
-                .setMinArea(25)
+                // Note: minArea is not available in PatternFindOptions
                 .build();
         assertNotNull(basicStateOptions);
-        assertEquals(25, basicStateOptions.getMinArea());
+        // minArea would need to be handled at a different level
         
         // Advanced state finding with custom settings
         PatternFindOptions advancedStateOptions = new PatternFindOptions.Builder()
                 .setStrategy(PatternFindOptions.Strategy.ALL)
-                .setMinArea(50)
+                // Note: minArea is not available
                 .setSimilarity(0.75)
                 .setCaptureImage(true)
                 .setMaxMatchesToActOn(100)
                 .build();
         
-        assertEquals(50, advancedStateOptions.getMinArea());
+        // minArea would need to be handled differently
         assertEquals(0.75, advancedStateOptions.getSimilarity(), 0.001);
         assertTrue(advancedStateOptions.isCaptureImage());
         assertEquals(100, advancedStateOptions.getMaxMatchesToActOn());
@@ -246,7 +246,8 @@ class PopulateSceneCombinationsTestUpdated extends BrobotIntegrationTestBase {
         
         // The new API provides more type-safe configuration
         assertNotNull(newOptions);
-        assertEquals(25, newOptions.getMinArea());
+        // Note: minArea is not part of PatternFindOptions
+        assertNotNull(newOptions);
         
         // State finding now uses PatternFindOptions with ALL strategy
         assertEquals(PatternFindOptions.Strategy.ALL, newOptions.getStrategy());

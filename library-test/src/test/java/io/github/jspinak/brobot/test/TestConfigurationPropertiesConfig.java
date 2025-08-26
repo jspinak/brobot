@@ -14,18 +14,23 @@ import org.springframework.context.annotation.Primary;
 /**
  * Explicitly configures @ConfigurationProperties beans for tests.
  * This prevents Spring Boot from auto-creating duplicate beans.
+ * 
+ * Note: We don't include LoggingVerbosityConfig here as it's already
+ * enabled by ActionLoggingConfig which is imported via BrobotConfig.
  */
 @Configuration
 @EnableConfigurationProperties({
-    LoggingVerbosityConfig.class,
-    VisualFeedbackConfig.class,
+    // LoggingVerbosityConfig is enabled by ActionLoggingConfig
+    // VisualFeedbackConfig is enabled by ActionLoggingConfig
     BrobotConfiguration.class,
     BrobotProperties.class,
-    BrobotStartupConfiguration.class,
-    ConsoleActionConfig.class
+    BrobotStartupConfiguration.class
+    // ConsoleActionConfig is enabled by ActionLoggingConfig
     // GuiAccessConfig is handled by MockGuiAccessConfig
 })
 public class TestConfigurationPropertiesConfig {
+    
+    // LoggingVerbosityConfig is provided by TestLoggingConfig
     
     @Bean
     @Primary

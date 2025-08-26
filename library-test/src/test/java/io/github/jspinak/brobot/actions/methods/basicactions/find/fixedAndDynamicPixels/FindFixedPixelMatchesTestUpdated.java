@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -172,7 +173,9 @@ class FindFixedPixelMatchesTestUpdated {
         ActionResult matches = new ActionResult();
         matches.setActionConfig(fixedPixelsOptions);
         
-        ActionInterface fixedPixelsFindAction = actionService.getAction(fixedPixelsOptions);
+        Optional<ActionInterface> fixedPixelsFindActionOpt = actionService.getAction(fixedPixelsOptions);
+        assertTrue(fixedPixelsFindActionOpt.isPresent(), "Fixed pixels find action should be available");
+        ActionInterface fixedPixelsFindAction = fixedPixelsFindActionOpt.get();
         assertNotNull(fixedPixelsFindAction);
         
         fixedPixelsFindAction.perform(matches, objectCollection);

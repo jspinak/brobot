@@ -51,7 +51,7 @@ public class SearchRegionDependencyRegistry {
      * @param searchRegionConfig The configuration defining the dependency
      */
     public void registerDependency(StateObject dependent, SearchRegionOnObject searchRegionConfig) {
-        if (searchRegionConfig == null) {
+        if (searchRegionConfig == null || dependent == null) {
             return;
         }
         

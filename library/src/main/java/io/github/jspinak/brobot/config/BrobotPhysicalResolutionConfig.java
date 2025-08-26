@@ -5,8 +5,10 @@ import io.github.jspinak.brobot.startup.PhysicalResolutionInitializer;
 import org.sikuli.script.Screen;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import java.awt.GraphicsEnvironment;
 
 /**
  * Configuration that makes physical resolution capture the default for Brobot.
@@ -33,9 +35,11 @@ public class BrobotPhysicalResolutionConfig {
     /**
      * Provides a PhysicalResolutionScreen as the primary Screen implementation.
      * This will be used by default for all screen operations.
+     * Only created when not in headless mode.
      */
     @Bean
     @Primary
+    @Conditional(NotHeadlessCondition.class)
     public Screen physicalScreen() {
         System.out.println("=== Brobot Physical Resolution Mode ===");
         PhysicalResolutionScreen screen = new PhysicalResolutionScreen();

@@ -73,7 +73,7 @@ class FindPatternsIterationTest extends BrobotIntegrationTestBase {
             stateImages.add(testData.getBottomRight());
 
             ActionResult matches = matchesInitializer.init(testData.getDefineInsideAnchors(), 
-                testData.getInsideAnchorObjects());
+                List.of(testData.getInsideAnchorObjects()));
 
             iterativePatternFinder.find(matches, stateImages, scenes);
             

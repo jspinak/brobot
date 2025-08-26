@@ -18,9 +18,18 @@ public class PhysicalResolutionInitializer {
     /**
      * Forces physical resolution mode for the entire JVM.
      * Must be called before ANY AWT classes are loaded.
+     * Skips configuration in headless environments.
      */
     public static synchronized void initialize() {
         if (initialized) {
+            return;
+        }
+        
+        // Check if we're in headless mode
+        String headlessProperty = System.getProperty("java.awt.headless");
+        if ("true".equalsIgnoreCase(headlessProperty)) {
+            System.out.println("PhysicalResolutionInitializer: Skipping - running in headless mode");
+            initialized = true;
             return;
         }
         
@@ -45,8 +54,9 @@ public class PhysicalResolutionInitializer {
         System.setProperty("swing.bufferPerformance", "false");
         System.setProperty("awt.nativeDoubleBuffering", "false");
         
-        // Force physical pixels
-        System.setProperty("java.awt.headless", "false");
+        // Note: We do NOT force headless mode to false anymore
+        // This allows tests to run in headless mode
+        // System.setProperty("java.awt.headless", "false");  // REMOVED
         
         initialized = true;
         

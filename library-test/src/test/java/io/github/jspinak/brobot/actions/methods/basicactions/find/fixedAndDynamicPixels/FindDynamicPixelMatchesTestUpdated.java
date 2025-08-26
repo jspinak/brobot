@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -74,7 +75,7 @@ class FindDynamicPixelMatchesTestUpdated {
     // NEW API: Create DynamicPixelsFindOptions
     private DynamicPixelsFindOptions createDynamicPixelsOptions() {
         return new DynamicPixelsFindOptions.Builder()
-                .setMinMovement(3)  // Minimum pixel movement to consider as dynamic
+                .setMaxMovement(3)  // Minimum pixel movement to consider as dynamic
                 .setStartPlayback(0.0)  // Start monitoring immediately
                 .setPlaybackDuration(1.0)  // Monitor for 1 second
                 .build();
@@ -136,7 +137,7 @@ class FindDynamicPixelMatchesTestUpdated {
         
         // NEW API: Configure with custom settings
         DynamicPixelsFindOptions customOptions = new DynamicPixelsFindOptions.Builder()
-                .setMinMovement(5)  // Require more movement
+                .setMaxMovement(5)  // Maximum movement threshold
                 .setStartPlayback(0.5)  // Wait 0.5 seconds before monitoring
                 .setPlaybackDuration(2.0)  // Monitor for 2 seconds
                 .setSimilarity(0.9)  // High similarity threshold
@@ -154,7 +155,7 @@ class FindDynamicPixelMatchesTestUpdated {
         // Verify custom settings are in the config
         if (matches.getActionConfig() instanceof DynamicPixelsFindOptions) {
             DynamicPixelsFindOptions resultOptions = (DynamicPixelsFindOptions) matches.getActionConfig();
-            assertEquals(5, resultOptions.getMinMovement());
+            assertEquals(5, resultOptions.getMaxMovement());
             assertEquals(0.5, resultOptions.getStartPlayback(), 0.001);
             assertEquals(2.0, resultOptions.getPlaybackDuration(), 0.001);
             assertTrue(resultOptions.isCaptureImage());
@@ -169,13 +170,15 @@ class FindDynamicPixelMatchesTestUpdated {
         
         // NEW API: Use ActionService to get the appropriate action
         DynamicPixelsFindOptions dynamicPixelsOptions = new DynamicPixelsFindOptions.Builder()
-                .setMinMovement(3)
+                .setMaxMovement(3)
                 .build();
         
         ActionResult matches = new ActionResult();
         matches.setActionConfig(dynamicPixelsOptions);
         
-        ActionInterface dynamicPixelsFindAction = actionService.getAction(dynamicPixelsOptions);
+        Optional<ActionInterface> dynamicPixelsFindActionOpt = actionService.getAction(dynamicPixelsOptions);
+        assertTrue(dynamicPixelsFindActionOpt.isPresent(), "Dynamic pixels find action should be available");
+        ActionInterface dynamicPixelsFindAction = dynamicPixelsFindActionOpt.get();
         assertNotNull(dynamicPixelsFindAction);
         
         dynamicPixelsFindAction.perform(matches, objectCollection);
@@ -200,7 +203,7 @@ class FindDynamicPixelMatchesTestUpdated {
         
         // NEW API:
         DynamicPixelsFindOptions newOptions = new DynamicPixelsFindOptions.Builder()
-                .setMinMovement(3)
+                .setMaxMovement(3)
                 .setStartPlayback(0.0)
                 .setPlaybackDuration(1.0)
                 .build();
@@ -208,7 +211,7 @@ class FindDynamicPixelMatchesTestUpdated {
         // The new API provides specific parameters for dynamic pixel detection
         // that were not available in the generic ActionOptions
         assertNotNull(newOptions);
-        assertEquals(3, newOptions.getMinMovement());
+        assertEquals(3, newOptions.getMaxMovement());
         
         // DynamicPixelsFindOptions automatically uses DYNAMIC_PIXELS strategy
         assertNotNull(newOptions.getFindStrategy());

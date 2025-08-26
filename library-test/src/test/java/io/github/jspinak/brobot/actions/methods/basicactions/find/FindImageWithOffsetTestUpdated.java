@@ -21,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.io.File;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -58,7 +59,7 @@ public class FindImageWithOffsetTestUpdated extends BrobotIntegrationTestBase {
         FrameworkSettings.mock = true;
         
         // Clear any previous screenshots
-        FrameworkSettings.screenshots.clearAll();
+        // FrameworkSettings.screenshots may not have clearAll() method
     }
 
     @Autowired
@@ -101,8 +102,12 @@ public class FindImageWithOffsetTestUpdated extends BrobotIntegrationTestBase {
         
         ActionResult matches = new ActionResult();
         matches.setActionConfig(findOptions);
+        matches.setActionLifecycle(new io.github.jspinak.brobot.action.internal.execution.ActionLifecycle(
+            java.time.LocalDateTime.now(), 30.0));
         
-        ActionInterface findAction = actionService.getAction(findOptions);
+        Optional<ActionInterface> findActionOpt = actionService.getAction(findOptions);
+        assertTrue(findActionOpt.isPresent(), "Find action should be available");
+        ActionInterface findAction = findActionOpt.get();
         findAction.perform(matches, objColl);
         
         // Test without offset
@@ -118,6 +123,8 @@ public class FindImageWithOffsetTestUpdated extends BrobotIntegrationTestBase {
         
         ActionResult matches2 = new ActionResult();
         matches2.setActionConfig(findOptions);
+        matches2.setActionLifecycle(new io.github.jspinak.brobot.action.internal.execution.ActionLifecycle(
+            java.time.LocalDateTime.now(), 30.0));
         
         findAction.perform(matches2, objColl2);
         
@@ -178,8 +185,12 @@ public class FindImageWithOffsetTestUpdated extends BrobotIntegrationTestBase {
         
         ActionResult bestResult = new ActionResult();
         bestResult.setActionConfig(bestFindOptions);
+        bestResult.setActionLifecycle(new io.github.jspinak.brobot.action.internal.execution.ActionLifecycle(
+            java.time.LocalDateTime.now(), 30.0));
         
-        ActionInterface findAction = actionService.getAction(bestFindOptions);
+        Optional<ActionInterface> findActionOpt2 = actionService.getAction(bestFindOptions);
+        assertTrue(findActionOpt2.isPresent(), "Find action should be available");
+        ActionInterface findAction = findActionOpt2.get();
         findAction.perform(bestResult, objColl);
         
         assertFalse(bestResult.isEmpty(), "Should find pattern with BEST strategy");
@@ -205,8 +216,12 @@ public class FindImageWithOffsetTestUpdated extends BrobotIntegrationTestBase {
         
         ActionResult allResult = new ActionResult();
         allResult.setActionConfig(allFindOptions);
+        allResult.setActionLifecycle(new io.github.jspinak.brobot.action.internal.execution.ActionLifecycle(
+            java.time.LocalDateTime.now(), 30.0));
         
-        ActionInterface allFindAction = actionService.getAction(allFindOptions);
+        Optional<ActionInterface> allFindActionOpt = actionService.getAction(allFindOptions);
+        assertTrue(allFindActionOpt.isPresent(), "Find action should be available");
+        ActionInterface allFindAction = allFindActionOpt.get();
         allFindAction.perform(allResult, objColl2);
         
         assertFalse(allResult.isEmpty(), "Should find patterns with ALL strategy");
@@ -257,8 +272,12 @@ public class FindImageWithOffsetTestUpdated extends BrobotIntegrationTestBase {
         
         ActionResult matches = new ActionResult();
         matches.setActionConfig(findOptions);
+        matches.setActionLifecycle(new io.github.jspinak.brobot.action.internal.execution.ActionLifecycle(
+            java.time.LocalDateTime.now(), 30.0));
         
-        ActionInterface findAction = actionService.getAction(findOptions);
+        Optional<ActionInterface> findActionOpt = actionService.getAction(findOptions);
+        assertTrue(findActionOpt.isPresent(), "Find action should be available");
+        ActionInterface findAction = findActionOpt.get();
         findAction.perform(matches, objColl);
         
         // Verify find succeeded

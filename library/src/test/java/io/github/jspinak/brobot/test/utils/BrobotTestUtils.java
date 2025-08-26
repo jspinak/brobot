@@ -1,12 +1,13 @@
 package io.github.jspinak.brobot.test.utils;
 
-import io.github.jspinak.brobot.model.state.State;
-import io.github.jspinak.brobot.model.match.Match;
-import io.github.jspinak.brobot.model.element.Location;
-import io.github.jspinak.brobot.model.element.Region;
-import io.github.jspinak.brobot.model.state.StateImage;
+import io.github.jspinak.brobot.datatypes.state.state.State;
+import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
+import io.github.jspinak.brobot.datatypes.primitives.location.Location;
+import io.github.jspinak.brobot.datatypes.primitives.region.Region;
+import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
 import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.ActionResult;
+import io.github.jspinak.brobot.model.match.Match;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -34,7 +35,7 @@ public class BrobotTestUtils {
      */
     public static StateImage createTestStateImage(String name) {
         StateImage.Builder builder = new StateImage.Builder();
-        builder.setName(name);
+        builder.withName(name);
         return builder.build();
     }
     
@@ -42,10 +43,10 @@ public class BrobotTestUtils {
      * Create a test Match at a specific location.
      */
     public static Match createTestMatch(int x, int y, int width, int height, double score) {
-        Match.Builder builder = new Match.Builder();
-        builder.setRegion(new Region(x, y, width, height));
-        builder.setSimScore(score);
-        return builder.build();
+        Match match = new Match();
+        match.setRegion(new Region(x, y, width, height));
+        match.setScore(score);
+        return match;
     }
     
     /**
@@ -78,10 +79,12 @@ public class BrobotTestUtils {
     public static ActionResult createSuccessfulResult(int matchCount) {
         ActionResult result = new ActionResult();
         result.setSuccess(true);
+        Matches matches = new Matches();
         for (Match match : createTestMatches(matchCount)) {
-            result.add(match);
+            matches.add(match);
         }
-        result.setDuration(Duration.ofMillis(100 + random.nextInt(900)));
+        result.setMatches(matches);
+        result.setDuration(100.0 + random.nextInt(900));
         return result;
     }
     
@@ -91,7 +94,7 @@ public class BrobotTestUtils {
     public static ActionResult createFailedResult() {
         ActionResult result = new ActionResult();
         result.setSuccess(false);
-        result.setDuration(Duration.ofMillis(100 + random.nextInt(900)));
+        result.setDuration(100.0 + random.nextInt(900));
         return result;
     }
     
