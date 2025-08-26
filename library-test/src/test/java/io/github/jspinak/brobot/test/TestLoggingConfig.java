@@ -42,13 +42,8 @@ public class TestLoggingConfig {
         return config;
     }
     
-    @Bean
-    @Primary
-    public BrobotLogger testBrobotLogger(LoggingVerbosityConfig loggingVerbosityConfig) {
-        BrobotLogger logger = Mockito.mock(BrobotLogger.class);
-        // No need to call setVerbosityConfig on mock - it's already a mock
-        return logger;
-    }
+    // BrobotLogger is now provided by MockBrobotLoggerConfig with a real implementation
+    // instead of a mock to avoid NullPointerException issues
     
     @Bean
     @Primary

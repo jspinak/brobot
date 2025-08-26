@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.io.File;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -77,7 +78,9 @@ class WordMatchesTestsUpdated extends OcrTestBase {
             result.setActionConfig(findWordsOptions);
             
             // Get the action from service
-            ActionInterface findAction = actionService.getAction(findWordsOptions);
+            Optional<ActionInterface> findActionOpt = actionService.getAction(findWordsOptions);
+            assertTrue(findActionOpt.isPresent(), "Find action should be available");
+            ActionInterface findAction = findActionOpt.get();
             assertNotNull(findAction);
             
             // Perform the action
@@ -154,7 +157,9 @@ class WordMatchesTestsUpdated extends OcrTestBase {
             ActionResult result = new ActionResult();
             result.setActionConfig(findWordsOptions);
             
-            ActionInterface findAction = actionService.getAction(findWordsOptions);
+            Optional<ActionInterface> findActionOpt = actionService.getAction(findWordsOptions);
+            assertTrue(findActionOpt.isPresent(), "Find action should be available");
+            ActionInterface findAction = findActionOpt.get();
             findAction.perform(result, objColl);
             
             return result;
@@ -197,7 +202,9 @@ class WordMatchesTestsUpdated extends OcrTestBase {
         ActionResult newResult = new ActionResult();
         newResult.setActionConfig(newOptions);
         
-        ActionInterface findAction = actionService.getAction(newOptions);
+        Optional<ActionInterface> findActionOpt = actionService.getAction(newOptions);
+        assertTrue(findActionOpt.isPresent(), "Find action should be available");
+        ActionInterface findAction = findActionOpt.get();
         findAction.perform(newResult, objColl);
         
         // Both approaches achieve the same result, but new API is more type-safe
