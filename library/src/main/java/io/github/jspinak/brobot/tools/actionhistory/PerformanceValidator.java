@@ -326,6 +326,21 @@ public class PerformanceValidator {
             this.maxDurationMs = ms;
             return this;
         }
+        
+        public ValidationConfig withMinSamples(int samples) {
+            this.minSamples = samples;
+            return this;
+        }
+        
+        public ValidationConfig withMaxConsecutiveFailures(int failures) {
+            this.maxConsecutiveFailures = failures;
+            return this;
+        }
+        
+        public ValidationConfig withMaxDurationVariance(double variance) {
+            this.maxDurationVariance = variance;
+            return this;
+        }
     }
     
     /**

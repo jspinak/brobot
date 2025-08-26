@@ -157,8 +157,8 @@ public class IllustrationController {
             }
             return false;
         }
-        // Get action type from config - this would need type checking
-        ActionType action = ActionType.FIND; // Default action type
+        // Get action type from config
+        ActionType action = getActionType(actionConfig);
         if (!actionPermissions.containsKey(action)) {
             ConsoleReporter.println(action + " not available to illustrate in BrobotSettings.");
             if (isVerbose()) {
