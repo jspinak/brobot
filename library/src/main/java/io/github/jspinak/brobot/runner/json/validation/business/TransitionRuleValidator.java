@@ -9,6 +9,7 @@ import io.github.jspinak.brobot.runner.json.validation.model.ValidationResult;
 import io.github.jspinak.brobot.runner.json.validation.model.ValidationSeverity;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Validates business rules for state transitions in Brobot configurations.
@@ -103,6 +104,9 @@ public class TransitionRuleValidator {
         try {
             Map<String, Object> project = (Map<String, Object>) projectModel;
 
+            // First check for malformed transitions
+            validateTransitionStructure(project, result);
+
             // Check for transition cycles
             validateTransitionCycles(project, result);
 
@@ -111,6 +115,15 @@ public class TransitionRuleValidator {
 
             // Check for inefficient transitions
             validateTransitionEfficiency(project, result);
+            
+            // Check for duplicate transitions
+            detectDuplicateTransitions(project, result);
+            
+            // Check for redundant conditions
+            detectRedundantConditions(project, result);
+            
+            // Validate probability-based transitions
+            validateProbabilities(project, result);
 
             // Check for potential race conditions in transitions
             validateTransitionConcurrency(project, result);
@@ -132,6 +145,67 @@ public class TransitionRuleValidator {
         }
 
         return result;
+    }
+
+    /**
+     * Validates transition structure for malformed data.
+     */
+    private void validateTransitionStructure(Map<String, Object> project, ValidationResult result) {
+        if (!project.containsKey("stateTransitions")) {
+            return;
+        }
+        
+        List<Map<String, Object>> transitions = (List<Map<String, Object>>) project.get("stateTransitions");
+        
+        for (Map<String, Object> transition : transitions) {
+            if (transition == null) continue;
+            
+            // Check sourceStateId/fromState fields
+            if (transition.containsKey("sourceStateId")) {
+                Object value = transition.get("sourceStateId");
+                if (value != null && !(value instanceof Number)) {
+                    result.addError(new ValidationError(
+                        "Malformed transition",
+                        "Error validating transition: sourceStateId is not a valid number type",
+                        ValidationSeverity.ERROR
+                    ));
+                }
+            }
+            
+            if (transition.containsKey("fromState")) {
+                Object value = transition.get("fromState");
+                if (value != null && !(value instanceof Number)) {
+                    result.addError(new ValidationError(
+                        "Malformed transition",
+                        "Error validating transition: fromState is not a valid number type",
+                        ValidationSeverity.ERROR
+                    ));
+                }
+            }
+            
+            // Check statesToEnter/toState fields  
+            if (transition.containsKey("statesToEnter")) {
+                Object value = transition.get("statesToEnter");
+                if (value != null && !(value instanceof List)) {
+                    result.addError(new ValidationError(
+                        "Malformed transition",
+                        "Error validating transition: statesToEnter is not a valid list",
+                        ValidationSeverity.ERROR
+                    ));
+                }
+            }
+            
+            if (transition.containsKey("toState")) {
+                Object value = transition.get("toState");
+                if (value != null && !(value instanceof Number || value instanceof List)) {
+                    result.addError(new ValidationError(
+                        "Malformed transition",
+                        "Error validating transition: toState is not a valid type",
+                        ValidationSeverity.ERROR
+                    ));
+                }
+            }
+        }
     }
 
     /**
@@ -367,23 +441,39 @@ public class TransitionRuleValidator {
             // Identify states that are activated by multiple transitions
             List<Map<String, Object>> transitions = (List<Map<String, Object>>) project.get("stateTransitions");
 
-            Map<Integer, List<Integer>> stateActivators = new HashMap<>();
+            Map<Integer, List<Map<String, Object>>> stateActivators = new HashMap<>();
+            Map<Integer, List<Map<String, Object>>> asyncActivators = new HashMap<>();
 
-            for (int i = 0; i < transitions.size(); i++) {
-                Map<String, Object> transition = transitions.get(i);
+            for (Map<String, Object> transition : transitions) {
+                Set<Integer> targetIds = getTargetStateIds(transition);
+                boolean isAsync = transition.containsKey("async") && 
+                                 Boolean.TRUE.equals(transition.get("async"));
 
-                if (transition.containsKey("statesToEnter")) {
-                    List<Integer> targetIds = (List<Integer>) transition.get("statesToEnter");
-
-                    for (Integer targetId : targetIds) {
-                        stateActivators.computeIfAbsent(targetId, k -> new ArrayList<>())
-                                .add(transition.containsKey("id") ? (Integer) transition.get("id") : i);
+                for (Integer targetId : targetIds) {
+                    stateActivators.computeIfAbsent(targetId, k -> new ArrayList<>())
+                            .add(transition);
+                    
+                    if (isAsync) {
+                        asyncActivators.computeIfAbsent(targetId, k -> new ArrayList<>())
+                                .add(transition);
                     }
                 }
             }
 
-            // Check for states activated by multiple transitions
-            for (Map.Entry<Integer, List<Integer>> entry : stateActivators.entrySet()) {
+            // Check for potential race conditions with async transitions
+            for (Map.Entry<Integer, List<Map<String, Object>>> entry : asyncActivators.entrySet()) {
+                if (entry.getValue().size() > 1) {
+                    result.addError(new ValidationError(
+                            "Potential race condition",
+                            "State " + entry.getKey() + " is targeted by multiple async transitions. " +
+                            "This may cause race conditions.",
+                            ValidationSeverity.WARNING
+                    ));
+                }
+            }
+
+            // Check for states activated by too many transitions
+            for (Map.Entry<Integer, List<Map<String, Object>>> entry : stateActivators.entrySet()) {
                 if (entry.getValue().size() > 3) {  // More than 3 transitions to same state might be a concern
                     result.addError(new ValidationError(
                             "Potential concurrency issue",
@@ -413,12 +503,17 @@ public class TransitionRuleValidator {
         List<Map<String, Object>> transitions = (List<Map<String, Object>>) project.get("stateTransitions");
 
         for (Map<String, Object> transition : transitions) {
-            if (transition.containsKey("sourceStateId") && transition.containsKey("statesToEnter")) {
-                Integer sourceId = (Integer) transition.get("sourceStateId");
-                List<Integer> targetIds = (List<Integer>) transition.get("statesToEnter");
-
-                Set<Integer> outgoingStates = graph.computeIfAbsent(sourceId, k -> new HashSet<>());
-                outgoingStates.addAll(targetIds);
+            try {
+                Integer sourceId = getSourceStateId(transition);
+                Set<Integer> targetIds = getTargetStateIds(transition);
+                
+                if (sourceId != null && targetIds != null && !targetIds.isEmpty()) {
+                    Set<Integer> outgoingStates = graph.computeIfAbsent(sourceId, k -> new HashSet<>());
+                    outgoingStates.addAll(targetIds);
+                }
+            } catch (ClassCastException e) {
+                // Malformed transition - skip it but it will be reported elsewhere
+                logger.warn("Skipping malformed transition in graph building", e);
             }
         }
 
@@ -426,54 +521,128 @@ public class TransitionRuleValidator {
     }
 
     /**
-     * Finds cycles in the transition graph using depth-first search.
+     * Finds ALL cycles in the transition graph, including multiple independent cycles.
+     * Uses Tarjan's algorithm for strongly connected components.
      */
     private Set<List<Integer>> findCycles(Map<Integer, Set<Integer>> graph) {
-        Set<List<Integer>> cycles = new HashSet<>();
-        Set<Integer> visited = new HashSet<>();
-        Set<Integer> recursionStack = new HashSet<>();
-
-        for (Integer node : graph.keySet()) {
-            findCyclesDFS(node, graph, visited, recursionStack, new ArrayList<>(), cycles);
+        Set<List<Integer>> allCycles = new HashSet<>();
+        
+        // Find strongly connected components first
+        List<Set<Integer>> sccs = findStronglyConnectedComponents(graph);
+        
+        // For each SCC with more than one node, find cycles
+        for (Set<Integer> scc : sccs) {
+            if (scc.size() > 1) {
+                // This SCC contains at least one cycle
+                findCyclesInSCC(scc, graph, allCycles);
+            } else {
+                // Check for self-loops
+                Integer node = scc.iterator().next();
+                if (graph.containsKey(node) && graph.get(node).contains(node)) {
+                    allCycles.add(Arrays.asList(node, node));
+                }
+            }
         }
-
-        return cycles;
+        
+        return allCycles;
     }
 
     /**
-     * Recursive DFS helper to find cycles.
+     * Finds strongly connected components using Tarjan's algorithm.
      */
-    private void findCyclesDFS(Integer current, Map<Integer, Set<Integer>> graph,
-                               Set<Integer> visited, Set<Integer> recursionStack,
-                               List<Integer> path, Set<List<Integer>> cycles) {
-
-        if (recursionStack.contains(current)) {
-            // Found a cycle
-            int startIndex = path.indexOf(current);
-            if (startIndex >= 0) {
-                List<Integer> cycle = new ArrayList<>(path.subList(startIndex, path.size()));
-                cycle.add(current); // Complete the cycle
-                cycles.add(cycle);
-            }
-            return;
-        }
-
-        if (visited.contains(current)) {
-            return;
-        }
-
-        visited.add(current);
-        recursionStack.add(current);
-        path.add(current);
-
-        if (graph.containsKey(current)) {
-            for (Integer neighbor : graph.get(current)) {
-                findCyclesDFS(neighbor, graph, visited, recursionStack, path, cycles);
+    private List<Set<Integer>> findStronglyConnectedComponents(Map<Integer, Set<Integer>> graph) {
+        TarjanSCC tarjan = new TarjanSCC(graph);
+        return tarjan.findSCCs();
+    }
+    
+    /**
+     * Find cycles within a strongly connected component.
+     */
+    private void findCyclesInSCC(Set<Integer> scc, Map<Integer, Set<Integer>> graph, 
+                                  Set<List<Integer>> cycles) {
+        // An SCC with more than one node contains at least one cycle
+        // Find the simplest cycle by doing BFS from each node
+        Set<List<Integer>> foundCycles = new HashSet<>();
+        
+        for (Integer start : scc) {
+            List<Integer> cycle = findSimpleCycleFromNode(start, scc, graph);
+            if (cycle != null && !cycle.isEmpty()) {
+                List<Integer> normalizedCycle = normalizeCycle(cycle);
+                if (!foundCycles.contains(normalizedCycle)) {
+                    cycles.add(normalizedCycle);
+                    foundCycles.add(normalizedCycle);
+                }
             }
         }
-
-        path.removeLast();
-        recursionStack.remove(current);
+    }
+    
+    /**
+     * Find a simple cycle starting from a given node using BFS.
+     */
+    private List<Integer> findSimpleCycleFromNode(Integer start, Set<Integer> scc, 
+                                                  Map<Integer, Set<Integer>> graph) {
+        Queue<List<Integer>> queue = new LinkedList<>();
+        queue.offer(Arrays.asList(start));
+        Set<Integer> visited = new HashSet<>();
+        
+        while (!queue.isEmpty()) {
+            List<Integer> path = queue.poll();
+            Integer current = path.get(path.size() - 1);
+            
+            if (graph.containsKey(current)) {
+                for (Integer next : graph.get(current)) {
+                    if (!scc.contains(next)) continue;
+                    
+                    if (next.equals(start) && path.size() > 1) {
+                        // Found a cycle back to start
+                        List<Integer> cycle = new ArrayList<>(path);
+                        cycle.add(start);
+                        return cycle;
+                    }
+                    
+                    if (!path.contains(next)) {
+                        List<Integer> newPath = new ArrayList<>(path);
+                        newPath.add(next);
+                        queue.offer(newPath);
+                    }
+                }
+            }
+        }
+        
+        return null;
+    }
+    
+    
+    /**
+     * Normalize cycle to start with smallest node for comparison.
+     */
+    private List<Integer> normalizeCycle(List<Integer> cycle) {
+        if (cycle.isEmpty()) return cycle;
+        
+        // Remove duplicate last element if it's the same as first
+        List<Integer> normalized = new ArrayList<>(cycle);
+        if (normalized.size() > 1 && 
+            normalized.get(0).equals(normalized.get(normalized.size() - 1))) {
+            normalized.remove(normalized.size() - 1);
+        }
+        
+        // Find minimum element
+        int minIndex = 0;
+        Integer minValue = normalized.get(0);
+        for (int i = 1; i < normalized.size(); i++) {
+            if (normalized.get(i) < minValue) {
+                minValue = normalized.get(i);
+                minIndex = i;
+            }
+        }
+        
+        // Rotate to start with minimum
+        List<Integer> result = new ArrayList<>();
+        for (int i = 0; i < normalized.size(); i++) {
+            result.add(normalized.get((minIndex + i) % normalized.size()));
+        }
+        
+        return result;
     }
 
     /**
@@ -498,20 +667,26 @@ public class TransitionRuleValidator {
      * Determines if a cycle is potentially problematic.
      */
     private boolean isPotentiallyProblematicCycle(List<Integer> cycle, Map<String, Object> project) {
-        // Example logic: Cycles of length 2 might indicate reciprocal transitions
-        if (cycle.size() == 2) {
-            return true;
-        }
-
-        // Short cycles that don't involve specific state types might be problematic
-        if (cycle.size() <= 3) {
-            // Example: Check if any state in the cycle is a "special" type that's expected in cycles
+        // All cycles are potentially problematic unless they involve special states
+        if (cycle.size() >= 2) {
+            // Check if any state in the cycle is a "special" type that's expected in cycles
+            boolean hasSpecialState = false;
             for (Integer stateId : cycle) {
                 if (isSpecialCycleState(stateId, project)) {
-                    return false;
+                    hasSpecialState = true;
+                    break;
                 }
             }
-            return true;
+            
+            // If no special states, the cycle is problematic
+            if (!hasSpecialState) {
+                return true;
+            }
+            
+            // Even with special states, very short cycles might be problematic
+            if (cycle.size() == 2) {
+                return true;
+            }
         }
 
         return false;
@@ -560,5 +735,293 @@ public class TransitionRuleValidator {
         }
 
         return "#" + stateId;
+    }
+    
+    /**
+     * Detects duplicate transitions between states.
+     */
+    private void detectDuplicateTransitions(Map<String, Object> project, ValidationResult result) {
+        if (!project.containsKey("stateTransitions")) {
+            return;
+        }
+        
+        try {
+            List<Map<String, Object>> transitions = (List<Map<String, Object>>) project.get("stateTransitions");
+            Map<String, List<Map<String, Object>>> transitionMap = new HashMap<>();
+            
+            // Group transitions by source->target
+            for (Map<String, Object> transition : transitions) {
+                Integer sourceId = getSourceStateId(transition);
+                Set<Integer> targets = getTargetStateIds(transition);
+                
+                if (sourceId != null) {
+                    for (Integer targetId : targets) {
+                        String key = sourceId + "->" + targetId;
+                        transitionMap.computeIfAbsent(key, k -> new ArrayList<>()).add(transition);
+                    }
+                }
+            }
+            
+            // Report duplicates - multiple transitions between same states
+            for (Map.Entry<String, List<Map<String, Object>>> entry : transitionMap.entrySet()) {
+                if (entry.getValue().size() > 1) {
+                    // Check if they have different conditions
+                    Set<String> conditions = new HashSet<>();
+                    boolean hasDifferentConditions = false;
+                    
+                    for (Map<String, Object> trans : entry.getValue()) {
+                        if (trans.containsKey("condition")) {
+                            String condition = trans.get("condition").toString();
+                            if (!conditions.add(condition)) {
+                                // Exact duplicate with same condition
+                                result.addError(new ValidationError(
+                                        "Duplicate transition",
+                                        "Duplicate transitions found for " + entry.getKey() + " with same condition",
+                                        ValidationSeverity.ERROR
+                                ));
+                            } else {
+                                hasDifferentConditions = true;
+                            }
+                        }
+                    }
+                    
+                    if (hasDifferentConditions) {
+                        // Multiple transitions with different conditions
+                        result.addError(new ValidationError(
+                                "Redundant transitions",
+                                "Multiple redundant transitions between same states: " + entry.getKey() + " with different conditions",
+                                ValidationSeverity.WARNING
+                        ));
+                    } else if (entry.getValue().size() > 1 && conditions.isEmpty()) {
+                        // Multiple unconditional transitions
+                        result.addError(new ValidationError(
+                                "Duplicate transition",
+                                "Multiple unconditional transitions found for " + entry.getKey(),
+                                ValidationSeverity.ERROR
+                        ));
+                    }
+                }
+            }
+        } catch (Exception e) {
+            logger.error("Error detecting duplicate transitions", e);
+        }
+    }
+    
+    /**
+     * Detects transitions with redundant conditions.
+     */
+    private void detectRedundantConditions(Map<String, Object> project, ValidationResult result) {
+        if (!project.containsKey("stateTransitions")) {
+            return;
+        }
+        
+        try {
+            List<Map<String, Object>> transitions = (List<Map<String, Object>>) project.get("stateTransitions");
+            Map<String, List<String>> stateToConditions = new HashMap<>();
+            
+            for (Map<String, Object> transition : transitions) {
+                Integer sourceId = getSourceStateId(transition);
+                if (sourceId != null && transition.containsKey("condition")) {
+                    String condition = transition.get("condition").toString();
+                    String key = sourceId.toString();
+                    
+                    if (!stateToConditions.containsKey(key)) {
+                        stateToConditions.put(key, new ArrayList<>());
+                    }
+                    
+                    List<String> existingConditions = stateToConditions.get(key);
+                    if (existingConditions.contains(condition)) {
+                        result.addError(new ValidationError(
+                                "Redundant condition",
+                                "State " + sourceId + " has duplicate condition: " + condition,
+                                ValidationSeverity.WARNING
+                        ));
+                    }
+                    existingConditions.add(condition);
+                }
+            }
+        } catch (Exception e) {
+            logger.error("Error detecting redundant conditions", e);
+        }
+    }
+    
+    /**
+     * Validates probability-based transitions.
+     */
+    private void validateProbabilities(Map<String, Object> project, ValidationResult result) {
+        if (!project.containsKey("stateTransitions")) {
+            return;
+        }
+        
+        try {
+            List<Map<String, Object>> transitions = (List<Map<String, Object>>) project.get("stateTransitions");
+            Map<Integer, Double> stateProbabilities = new HashMap<>();
+            
+            for (Map<String, Object> transition : transitions) {
+                Integer sourceId = getSourceStateId(transition);
+                if (sourceId != null && transition.containsKey("probability")) {
+                    double prob = ((Number) transition.get("probability")).doubleValue();
+                    stateProbabilities.put(sourceId, 
+                        stateProbabilities.getOrDefault(sourceId, 0.0) + prob);
+                }
+            }
+            
+            // Check if any state has probabilities that don't sum correctly
+            for (Map.Entry<Integer, Double> entry : stateProbabilities.entrySet()) {
+                double sum = entry.getValue();
+                if (Math.abs(sum - 100.0) > 0.01 && Math.abs(sum - 1.0) > 0.01) {
+                    result.addError(new ValidationError(
+                            "Invalid probability sum",
+                            "State " + entry.getKey() + " has probabilities summing to " + sum,
+                            ValidationSeverity.WARNING
+                    ));
+                }
+            }
+        } catch (Exception e) {
+            logger.error("Error validating probabilities", e);
+        }
+    }
+    
+    /**
+     * Helper to extract source state ID from transition.
+     */
+    private Integer getSourceStateId(Map<String, Object> transition) {
+        try {
+            if (transition.containsKey("sourceStateId")) {
+                Object value = transition.get("sourceStateId");
+                if (value instanceof Integer) {
+                    return (Integer) value;
+                } else if (value instanceof Number) {
+                    return ((Number) value).intValue();
+                }
+            }
+            if (transition.containsKey("stateId")) {
+                Object value = transition.get("stateId");
+                if (value instanceof Integer) {
+                    return (Integer) value;
+                } else if (value instanceof Number) {
+                    return ((Number) value).intValue();
+                }
+            }
+            // Also check for legacy field names
+            if (transition.containsKey("fromState")) {
+                Object value = transition.get("fromState");
+                if (value instanceof Integer) {
+                    return (Integer) value;
+                } else if (value instanceof Number) {
+                    return ((Number) value).intValue();
+                }
+            }
+        } catch (Exception e) {
+            // Malformed data - return null
+        }
+        return null;
+    }
+    
+    /**
+     * Helper to extract target state IDs from transition.
+     */
+    private Set<Integer> getTargetStateIds(Map<String, Object> transition) {
+        Set<Integer> targets = new HashSet<>();
+        
+        try {
+            if (transition.containsKey("statesToEnter")) {
+                Object value = transition.get("statesToEnter");
+                if (value instanceof List) {
+                    List<?> enterStates = (List<?>) value;
+                    for (Object state : enterStates) {
+                        if (state instanceof Integer) {
+                            targets.add((Integer) state);
+                        } else if (state instanceof Number) {
+                            targets.add(((Number) state).intValue());
+                        }
+                    }
+                }
+            }
+            
+            if (transition.containsKey("activate")) {
+                Object value = transition.get("activate");
+                if (value instanceof List) {
+                    List<?> activateStates = (List<?>) value;
+                    for (Object state : activateStates) {
+                        if (state instanceof Integer) {
+                            targets.add((Integer) state);
+                        } else if (state instanceof Number) {
+                            targets.add(((Number) state).intValue());
+                        }
+                    }
+                }
+            }
+            
+            // Also check for legacy field names
+            if (transition.containsKey("toState")) {
+                Object value = transition.get("toState");
+                if (value instanceof Integer) {
+                    targets.add((Integer) value);
+                } else if (value instanceof Number) {
+                    targets.add(((Number) value).intValue());
+                }
+            }
+        } catch (Exception e) {
+            // Malformed data - return empty set
+        }
+        
+        return targets;
+    }
+    
+    /**
+     * Tarjan's algorithm implementation for finding SCCs.
+     */
+    static class TarjanSCC {
+        private Map<Integer, Set<Integer>> graph;
+        private int index = 0;
+        private Stack<Integer> stack = new Stack<>();
+        private Map<Integer, Integer> indices = new HashMap<>();
+        private Map<Integer, Integer> lowLinks = new HashMap<>();
+        private Set<Integer> onStack = new HashSet<>();
+        private List<Set<Integer>> sccs = new ArrayList<>();
+        
+        TarjanSCC(Map<Integer, Set<Integer>> graph) {
+            this.graph = graph;
+        }
+        
+        List<Set<Integer>> findSCCs() {
+            for (Integer node : graph.keySet()) {
+                if (!indices.containsKey(node)) {
+                    strongConnect(node);
+                }
+            }
+            return sccs;
+        }
+        
+        private void strongConnect(Integer v) {
+            indices.put(v, index);
+            lowLinks.put(v, index);
+            index++;
+            stack.push(v);
+            onStack.add(v);
+            
+            if (graph.containsKey(v)) {
+                for (Integer w : graph.get(v)) {
+                    if (!indices.containsKey(w)) {
+                        strongConnect(w);
+                        lowLinks.put(v, Math.min(lowLinks.get(v), lowLinks.get(w)));
+                    } else if (onStack.contains(w)) {
+                        lowLinks.put(v, Math.min(lowLinks.get(v), indices.get(w)));
+                    }
+                }
+            }
+            
+            if (lowLinks.get(v).equals(indices.get(v))) {
+                Set<Integer> scc = new HashSet<>();
+                Integer w;
+                do {
+                    w = stack.pop();
+                    onStack.remove(w);
+                    scc.add(w);
+                } while (!w.equals(v));
+                sccs.add(scc);
+            }
+        }
     }
 }
