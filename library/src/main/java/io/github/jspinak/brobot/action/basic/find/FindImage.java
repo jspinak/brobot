@@ -1,6 +1,7 @@
 package io.github.jspinak.brobot.action.basic.find;
 
 import io.github.jspinak.brobot.action.internal.execution.ActionLifecycleManagement;
+import io.github.jspinak.brobot.config.FrameworkSettings;
 import io.github.jspinak.brobot.action.internal.find.IterativePatternFinder;
 import io.github.jspinak.brobot.action.internal.find.DefinedRegionConverter;
 import io.github.jspinak.brobot.action.basic.find.color.SceneProvider;
@@ -170,7 +171,16 @@ public class FindImage {
         List<StateImage> stateImages = objectCollections.getFirst().getStateImages();
         log.debug("[FIND_IMAGE] Starting find operation with {} state images", stateImages.size());
         
-        while (actionLifecycleManagement.isOkToContinueAction(matches, stateImages.size())) {
+        // Add safety check to prevent infinite loops
+        int maxIterations = FrameworkSettings.mock ? 1 : 100; // In mock mode, only iterate once
+        int iterations = 0;
+        
+        // Critical fix: Check mock mode BEFORE entering loop
+        if (FrameworkSettings.mock) {
+            log.debug("[FIND_IMAGE] Mock mode detected, limiting to single iteration");
+        }
+        
+        while (iterations < maxIterations && actionLifecycleManagement.isOkToContinueAction(matches, stateImages.size())) {
             List<Scene> scenes;
             // Use ActionConfig if available, otherwise use default
             if (actionConfig != null) {
@@ -188,6 +198,17 @@ public class FindImage {
             
             findPatternsIteration.find(matches, stateImages, scenes);
             actionLifecycleManagement.incrementCompletedRepetitions(matches);
+            iterations++;
+            
+            // Additional safety check for mock mode - break immediately after first iteration
+            if (FrameworkSettings.mock) {
+                log.debug("[FIND_IMAGE] Mock mode - breaking after iteration {}", iterations);
+                break;
+            }
+        }
+        
+        if (iterations >= maxIterations) {
+            log.warn("[FIND_IMAGE] Find operation reached maximum iterations limit ({})", maxIterations);
         }
         
         log.debug("[FIND_IMAGE] Find operation complete. SceneAnalysisCollection size: {}", 

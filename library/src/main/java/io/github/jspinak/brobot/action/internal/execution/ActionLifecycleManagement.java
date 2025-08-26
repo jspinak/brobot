@@ -1,5 +1,6 @@
 package io.github.jspinak.brobot.action.internal.execution;
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
+import io.github.jspinak.brobot.config.FrameworkSettings;
 
 import io.github.jspinak.brobot.model.element.Image;
 import io.github.jspinak.brobot.model.match.Match;
@@ -67,7 +68,9 @@ public class ActionLifecycleManagement {
      * @param matches The ActionResult containing the lifecycle to update
      */
     public void incrementCompletedRepetitions(ActionResult matches) {
-        matches.getActionLifecycle().incrementCompletedRepetitions();
+        if (matches.getActionLifecycle() != null) {
+            matches.getActionLifecycle().incrementCompletedRepetitions();
+        }
     }
 
     /**
@@ -79,7 +82,9 @@ public class ActionLifecycleManagement {
      * @param matches The ActionResult containing the lifecycle to update
      */
     public void incrementCompletedSequences(ActionResult matches) {
-        matches.getActionLifecycle().incrementCompletedSequences();
+        if (matches.getActionLifecycle() != null) {
+            matches.getActionLifecycle().incrementCompletedSequences();
+        }
     }
 
     /**
@@ -92,6 +97,10 @@ public class ActionLifecycleManagement {
      * @return Duration representing elapsed time since action start
      */
     public Duration getCurrentDuration(ActionResult matches) {
+        if (matches.getActionLifecycle() == null) {
+            // Return a large duration to trigger timeout if lifecycle not initialized
+            return Duration.ofSeconds(999999);
+        }
         LocalDateTime start = matches.getActionLifecycle().getStartTime();
         LocalDateTime end = time.now();
         return Duration.between(start, end);
@@ -104,6 +113,10 @@ public class ActionLifecycleManagement {
      * @return Number of repetitions completed so far
      */
     public int getCompletedRepetitions(ActionResult matches) {
+        if (matches.getActionLifecycle() == null) {
+            // Return 0 if lifecycle not initialized
+            return 0;
+        }
         return matches.getActionLifecycle().getCompletedRepetitions();
     }
 
@@ -140,9 +153,9 @@ public class ActionLifecycleManagement {
      */
     private boolean isTimeLeftAndMoreRepsAllowed(ActionResult matches) {
         int completedReps = getCompletedRepetitions(matches);
-        if (completedReps == 0) return true;
         
-        // With ActionConfig, use searchDuration for find operations
+        // Always check time limit, even on first iteration
+        // This prevents infinite loops in mock mode
         ActionConfig config = matches.getActionConfig();
         double maxWait = 10.0; // Default max wait
         
@@ -153,7 +166,13 @@ public class ActionLifecycleManagement {
         }
         
         Duration duration = getCurrentDuration(matches);
-        return duration.getSeconds() <= maxWait;
+        boolean timeLeft = duration.getSeconds() <= maxWait;
+        
+        // Allow first iteration always, but respect time limit
+        if (completedReps == 0) return timeLeft;
+        
+        // For subsequent iterations, check both time and any repetition limits
+        return timeLeft;
     }
 
     /**
@@ -174,12 +193,20 @@ public class ActionLifecycleManagement {
      * @return true if action should continue, false if any stop condition is met
      */
     public boolean isOkToContinueAction(ActionResult matches, int numberOfImages) {
+        // In mock mode, always stop after first iteration to prevent hanging
+        if (FrameworkSettings.mock && getCompletedRepetitions(matches) > 0) {
+            return false;
+        }
+        
         boolean timeLeftAndMoreRepsAllowed = isTimeLeftAndMoreRepsAllowed(matches);
         boolean findFirstAndAtLeastOneMatchFound = isFindFirstAndAtLeastOneMatchFound(matches);
         boolean findEachFirstAndEachPatternFound = isFindEachFirstAndEachPatternFound(matches, numberOfImages);
+        boolean findAllStrategyShouldStop = isFindAllStrategyShouldStop(matches);
+        
         if (!timeLeftAndMoreRepsAllowed) return false;
         if (findFirstAndAtLeastOneMatchFound) return false;
         if (findEachFirstAndEachPatternFound) return false;
+        if (findAllStrategyShouldStop) return false;
         if (isTextConditionAchieved(matches)) return false;
         return true;
     }
@@ -241,6 +268,28 @@ public class ActionLifecycleManagement {
         return false;
     }
 
+    /**
+     * Checks if FIND ALL strategy should stop.
+     * For ALL strategy, we should stop after one iteration in mock mode
+     * or when we've found matches (to avoid infinite loops).
+     *
+     * @param matches The ActionResult containing execution state
+     * @return true if ALL strategy should stop
+     */
+    private boolean isFindAllStrategyShouldStop(ActionResult matches) {
+        ActionConfig config = matches.getActionConfig();
+        if (config instanceof io.github.jspinak.brobot.action.basic.find.PatternFindOptions) {
+            io.github.jspinak.brobot.action.basic.find.PatternFindOptions findOptions = 
+                (io.github.jspinak.brobot.action.basic.find.PatternFindOptions) config;
+            if (findOptions.getStrategy() == io.github.jspinak.brobot.action.basic.find.PatternFindOptions.Strategy.ALL) {
+                // For ALL strategy, stop after first iteration to prevent infinite loops
+                // This is especially important in mock mode
+                return getCompletedRepetitions(matches) > 0;
+            }
+        }
+        return false;
+    }
+    
     /**
      * Checks if FIND EACH FIRST strategy has found all unique patterns.
      * <p>

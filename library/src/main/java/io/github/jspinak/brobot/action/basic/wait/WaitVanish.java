@@ -9,6 +9,7 @@ import io.github.jspinak.brobot.action.internal.execution.ActionLifecycleManagem
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
 
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 /**
@@ -65,7 +66,7 @@ public class WaitVanish implements ActionInterface {
     private final Find find;
     private final ActionLifecycleManagement actionLifecycleManagement;
 
-    public WaitVanish(Find find, ActionLifecycleManagement actionLifecycleManagement) {
+    public WaitVanish(@Lazy Find find, ActionLifecycleManagement actionLifecycleManagement) {
         this.find = find;
         this.actionLifecycleManagement = actionLifecycleManagement;
     }

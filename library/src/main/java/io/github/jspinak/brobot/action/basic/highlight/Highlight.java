@@ -11,6 +11,7 @@ import io.github.jspinak.brobot.model.state.StateRegion;
 import io.github.jspinak.brobot.tools.history.draw.MatchHighlighter;
 import io.github.jspinak.brobot.tools.testing.mock.time.TimeProvider;
 
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 /**
@@ -75,7 +76,7 @@ public class Highlight implements ActionInterface {
     private final MatchHighlighter highlightMatch;
     private final TimeProvider time;
 
-    public Highlight(Find find, MatchHighlighter highlightMatch, TimeProvider time) {
+    public Highlight(@Lazy Find find, MatchHighlighter highlightMatch, TimeProvider time) {
         this.find = find;
         this.highlightMatch = highlightMatch;
         this.time = time;

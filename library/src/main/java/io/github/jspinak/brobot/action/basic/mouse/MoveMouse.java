@@ -11,6 +11,7 @@ import io.github.jspinak.brobot.model.element.Location;
 import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
 import io.github.jspinak.brobot.tools.testing.mock.time.TimeProvider;
 
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
@@ -78,7 +79,7 @@ public class MoveMouse implements ActionInterface {
     private final MoveMouseWrapper moveMouseWrapper;
     private final TimeProvider time;
 
-    public MoveMouse(Find find, MoveMouseWrapper moveMouseWrapper, TimeProvider time) {
+    public MoveMouse(@Lazy Find find, MoveMouseWrapper moveMouseWrapper, TimeProvider time) {
         this.find = find;
         this.moveMouseWrapper = moveMouseWrapper;
         this.time = time;
