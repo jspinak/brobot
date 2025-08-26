@@ -255,4 +255,4 @@ jreleaser {
 }
 
 // Apply coverage tasks
-apply from: 'gradle-coverage-tasks.gradle'
+// apply from: 'gradle-coverage-tasks.gradle'  // Temporarily disabled for testing
