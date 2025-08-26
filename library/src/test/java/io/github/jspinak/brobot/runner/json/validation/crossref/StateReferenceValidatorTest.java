@@ -560,14 +560,14 @@ public class StateReferenceValidatorTest extends BrobotTestBase {
             
             // Function 1: valid references
             Map<String, Object> func1 = createFunction("ValidFunc");
-            List<Map<String, Object>> steps1 = (List<Map<String, Object>>)func1.get("steps");
+            List<Map<String, Object>> steps1 = (List<Map<String, Object>>)func1.get("statements");
             steps1.add(createActionStep("click", 1));
             steps1.add(createActionStep("verify", 2));
             addFunction(dsl, func1);
             
             // Function 2: invalid reference
             Map<String, Object> func2 = createFunction("InvalidFunc");
-            List<Map<String, Object>> steps2 = (List<Map<String, Object>>)func2.get("steps");
+            List<Map<String, Object>> steps2 = (List<Map<String, Object>>)func2.get("statements");
             steps2.add(createActionStep("click", 3));
             steps2.add(createActionStep("verify", 99)); // Invalid
             addFunction(dsl, func2);

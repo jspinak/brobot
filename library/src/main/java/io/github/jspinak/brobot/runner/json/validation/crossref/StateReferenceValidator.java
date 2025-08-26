@@ -202,21 +202,9 @@ public class StateReferenceValidator {
             // Check state references in function statements
             if (dsl.containsKey("automationFunctions")) {
                 List<Map<String, Object>> functions = (List<Map<String, Object>>) dsl.get("automationFunctions");
-
-                for (Map<String, Object> function : functions) {
-                    String functionName = function.containsKey("name")
-                            ? (String) function.get("name")
-                            : "unknown";
-
-                    if (function.containsKey("statements")) {
-                        validateStatementsForStateReferences(
-                                (List<Map<String, Object>>) function.get("statements"),
-                                validStateIds,
-                                functionName,
-                                result
-                        );
-                    }
-                }
+                
+                // Use the improved validation that handles multiple functions
+                validateMultipleFunctionReferences(functions, validStateIds, result);
             }
 
         } catch (ClassCastException e) {
@@ -639,10 +627,17 @@ public class StateReferenceValidator {
         List<Map<String, Object>> states = (List<Map<String, Object>>) project.get("states");
 
         for (Map<String, Object> state : states) {
+            String stateName = (String) state.getOrDefault("name", "unknown");
+            
             if (state.containsKey("stateRegions")) {
                 List<Map<String, Object>> regions = (List<Map<String, Object>>) state.get("stateRegions");
 
                 for (Map<String, Object> region : regions) {
+                    // Always validate dimensions for all regions
+                    String regionName = (String) region.getOrDefault("name", "unnamed");
+                    validateRegionDimensions(region, stateName, regionName, result);
+                    
+                    // Track regions with IDs for reference validation
                     if (region.containsKey("id") && region.containsKey("name")) {
                         regionNames.put(
                                 (Integer) region.get("id"),
@@ -650,6 +645,9 @@ public class StateReferenceValidator {
                         );
                     }
                 }
+                
+                // Check for overlapping regions
+                checkOverlappingRegions(regions, stateName, result);
             }
         }
 
@@ -813,8 +811,253 @@ public class StateReferenceValidator {
                                 ValidationSeverity.ERROR
                         ));
                     }
+                    
+                    // Check for self-reference in canHide
+                    if (stateId.equals(state.get("id"))) {
+                        result.addError(new ValidationError(
+                                "Self-reference in canHide",
+                                String.format("State '%s' references itself in canHide list", stateName),
+                                ValidationSeverity.WARNING
+                        ));
+                    }
                 }
             }
+        }
+    }
+    
+    /**
+     * Validates StateRegion dimensions.
+     */
+    private void validateRegionDimensions(Map<String, Object> region, String stateName, 
+                                         String regionName, ValidationResult result) {
+        // Check for both "w"/"h" and "width"/"height" field names
+        boolean hasShortNames = region.containsKey("w") && region.containsKey("h");
+        boolean hasLongNames = region.containsKey("width") && region.containsKey("height");
+        
+        if (!hasShortNames && !hasLongNames) {
+            result.addError(new ValidationError(
+                    "Missing region dimensions",
+                    String.format("StateRegion '%s' in state '%s' is missing width or height",
+                            regionName, stateName),
+                    ValidationSeverity.ERROR
+            ));
+            return;
+        }
+        
+        try {
+            int width = hasShortNames ? 
+                ((Number) region.get("w")).intValue() : 
+                ((Number) region.get("width")).intValue();
+            int height = hasShortNames ? 
+                ((Number) region.get("h")).intValue() :
+                ((Number) region.get("height")).intValue();
+            
+            // Check for invalid dimensions
+            if (width <= 0 || height <= 0) {
+                result.addError(new ValidationError(
+                        "Invalid region dimensions",
+                        String.format("StateRegion '%s' in state '%s' has invalid dimensions: %dx%d",
+                                regionName, stateName, width, height),
+                        ValidationSeverity.ERROR
+                ));
+            }
+            
+            // Check for unreasonably large dimensions
+            if (width > 10000 || height > 10000) {
+                result.addError(new ValidationError(
+                        "Unreasonable region dimensions",
+                        String.format("StateRegion '%s' in state '%s' has unreasonably large dimensions: %dx%d",
+                                regionName, stateName, width, height),
+                        ValidationSeverity.WARNING
+                ));
+            }
+            
+            // Check extreme aspect ratio
+            double aspectRatio = (double) width / height;
+            if (aspectRatio < 0.01 || aspectRatio > 100) {
+                result.addError(new ValidationError(
+                        "Extreme aspect ratio",
+                        String.format("StateRegion '%s' in state '%s' has extreme aspect ratio: %.2f",
+                                regionName, stateName, aspectRatio),
+                        ValidationSeverity.WARNING
+                ));
+            }
+        } catch (Exception e) {
+            result.addError(new ValidationError(
+                    "Invalid region data",
+                    String.format("StateRegion '%s' in state '%s' has invalid dimension data",
+                            regionName, stateName),
+                    ValidationSeverity.ERROR
+            ));
+        }
+    }
+    
+    /**
+     * Validates state references in multiple functions.
+     */
+    private void validateMultipleFunctionReferences(List<Map<String, Object>> functions, 
+                                                   Set<Integer> validStateIds, 
+                                                   ValidationResult result) {
+        for (Map<String, Object> function : functions) {
+            String functionName = (String) function.getOrDefault("name", "unknown");
+            
+            // Check statements for state references
+            if (function.containsKey("statements")) {
+                List<Map<String, Object>> statements = 
+                    (List<Map<String, Object>>) function.get("statements");
+                
+                Set<Integer> referencedStates = extractStateReferences(statements);
+                
+                for (Integer stateId : referencedStates) {
+                    if (!validStateIds.contains(stateId)) {
+                        result.addError(new ValidationError(
+                                "Invalid state reference in function",
+                                String.format("Function '%s' references invalid state ID: %d", 
+                                            functionName, stateId),
+                                ValidationSeverity.ERROR
+                        ));
+                    }
+                }
+            }
+        }
+    }
+    
+    /**
+     * Extracts all state references from function statements.
+     */
+    private Set<Integer> extractStateReferences(List<Map<String, Object>> statements) {
+        Set<Integer> references = new HashSet<>();
+        
+        for (Map<String, Object> statement : statements) {
+            extractStateReferencesFromStatement(statement, references);
+        }
+        
+        return references;
+    }
+    
+    /**
+     * Recursively extracts state references from a statement.
+     */
+    private void extractStateReferencesFromStatement(Map<String, Object> statement, 
+                                                    Set<Integer> references) {
+        if (statement == null) return;
+        
+        // Check for direct state references
+        if (statement.containsKey("stateId")) {
+            try {
+                Integer stateId = (Integer) statement.get("stateId");
+                if (stateId != null) {
+                    references.add(stateId);
+                }
+            } catch (ClassCastException e) {
+                // Invalid type, skip
+            }
+        }
+        
+        // Check for state references in method calls
+        if (statement.containsKey("statementType") && 
+            "methodCall".equals(statement.get("statementType"))) {
+            
+            // Check if this is a state management method call
+            String object = (String) statement.getOrDefault("object", "");
+            String method = (String) statement.getOrDefault("method", "");
+            
+            if ((object.equals("stateTransitionsManagement") || object.equals("state")) &&
+                (method.equals("openState") || method.equals("isStateActive"))) {
+                
+                if (statement.containsKey("arguments")) {
+                    List<Object> args = (List<Object>) statement.get("arguments");
+                    for (Object arg : args) {
+                        if (arg instanceof Integer) {
+                            // Direct state ID
+                            references.add((Integer) arg);
+                        } else if (arg instanceof Map) {
+                            // Argument object with value field
+                            Map<String, Object> argMap = (Map<String, Object>) arg;
+                            if (argMap.containsKey("value")) {
+                                Object value = argMap.get("value");
+                                if (value instanceof Integer) {
+                                    references.add((Integer) value);
+                                }
+                            }
+                            // Also check recursively for nested references
+                            extractStateReferencesFromStatement(argMap, references);
+                        }
+                    }
+                }
+            }
+        }
+        
+        // Check nested statements (if, forEach, etc.)
+        if (statement.containsKey("thenStatements")) {
+            List<Map<String, Object>> thenStatements = 
+                (List<Map<String, Object>>) statement.get("thenStatements");
+            for (Map<String, Object> nested : thenStatements) {
+                extractStateReferencesFromStatement(nested, references);
+            }
+        }
+        
+        if (statement.containsKey("elseStatements")) {
+            List<Map<String, Object>> elseStatements = 
+                (List<Map<String, Object>>) statement.get("elseStatements");
+            for (Map<String, Object> nested : elseStatements) {
+                extractStateReferencesFromStatement(nested, references);
+            }
+        }
+        
+        if (statement.containsKey("statements")) {
+            List<Map<String, Object>> nestedStatements = 
+                (List<Map<String, Object>>) statement.get("statements");
+            for (Map<String, Object> nested : nestedStatements) {
+                extractStateReferencesFromStatement(nested, references);
+            }
+        }
+    }
+    
+    /**
+     * Checks if state regions overlap inappropriately.
+     */
+    private void checkOverlappingRegions(List<Map<String, Object>> regions, String stateName, 
+                                        ValidationResult result) {
+        for (int i = 0; i < regions.size(); i++) {
+            for (int j = i + 1; j < regions.size(); j++) {
+                Map<String, Object> region1 = regions.get(i);
+                Map<String, Object> region2 = regions.get(j);
+                
+                if (regionsOverlap(region1, region2)) {
+                    String name1 = (String) region1.getOrDefault("name", "Region" + i);
+                    String name2 = (String) region2.getOrDefault("name", "Region" + j);
+                    result.addError(new ValidationError(
+                            "Overlapping regions",
+                            String.format("In state '%s': %s overlaps with %s", 
+                                        stateName, name1, name2),
+                            ValidationSeverity.WARNING
+                    ));
+                }
+            }
+        }
+    }
+    
+    /**
+     * Check if two regions overlap.
+     */
+    private boolean regionsOverlap(Map<String, Object> r1, Map<String, Object> r2) {
+        try {
+            int x1 = ((Number) r1.get("x")).intValue();
+            int y1 = ((Number) r1.get("y")).intValue();
+            int w1 = ((Number) r1.get("w")).intValue();
+            int h1 = ((Number) r1.get("h")).intValue();
+            
+            int x2 = ((Number) r2.get("x")).intValue();
+            int y2 = ((Number) r2.get("y")).intValue();
+            int w2 = ((Number) r2.get("w")).intValue();
+            int h2 = ((Number) r2.get("h")).intValue();
+            
+            // Check if rectangles overlap
+            return !(x1 + w1 <= x2 || x2 + w2 <= x1 || 
+                    y1 + h1 <= y2 || y2 + h2 <= y1);
+        } catch (Exception e) {
+            return false;
         }
     }
 }
