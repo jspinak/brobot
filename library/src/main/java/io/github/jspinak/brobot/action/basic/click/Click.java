@@ -13,6 +13,7 @@ import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.tools.testing.mock.time.TimeProvider;
 
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 /**
@@ -63,7 +64,7 @@ public class Click implements ActionInterface {
     private final PostClickHandler afterClick;
     private final ActionResultFactory actionResultFactory;
 
-    public Click(Find find, SingleClickExecutor clickLocationOnce, TimeProvider time, 
+    public Click(@Lazy Find find, SingleClickExecutor clickLocationOnce, TimeProvider time, 
                  PostClickHandler afterClick, ActionResultFactory actionResultFactory) {
         this.find = find;
         this.clickLocationOnce = clickLocationOnce;

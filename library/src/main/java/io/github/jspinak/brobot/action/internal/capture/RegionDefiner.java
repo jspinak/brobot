@@ -15,6 +15,7 @@ import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.model.element.Region;
 
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 /**
@@ -48,7 +49,7 @@ public class RegionDefiner {
     private final ActionResultFactory matchesInitializer;
     // No longer needs legacy dependency - merged implementation
 
-    public RegionDefiner(Find find, ActionResultFactory matchesInitializer) {
+    public RegionDefiner(@Lazy Find find, ActionResultFactory matchesInitializer) {
         this.find = find;
         this.matchesInitializer = matchesInitializer;
     }

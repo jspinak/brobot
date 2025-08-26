@@ -9,6 +9,7 @@ import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
 import io.github.jspinak.brobot.model.analysis.scene.SceneAnalyses;
 import io.github.jspinak.brobot.model.element.SearchRegions;
 
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
@@ -56,7 +57,7 @@ public class ConfirmedFinds implements ActionInterface {
     private final Find find;
     private final SceneAnalysisCollectionBuilder getSceneAnalysisCollection;
 
-    public ConfirmedFinds(Find find, SceneAnalysisCollectionBuilder getSceneAnalysisCollection) {
+    public ConfirmedFinds(@Lazy Find find, SceneAnalysisCollectionBuilder getSceneAnalysisCollection) {
         this.find = find;
         this.getSceneAnalysisCollection = getSceneAnalysisCollection;
     }
