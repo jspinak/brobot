@@ -4,6 +4,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import jakarta.annotation.PostConstruct;
+import java.awt.GraphicsEnvironment;
+import java.awt.HeadlessException;
 
 /**
  * Ensures Brobot captures at physical resolution by default.
@@ -11,6 +13,9 @@ import jakarta.annotation.PostConstruct;
  * 
  * Makes Brobot behave like SikuliX IDE, capturing at full physical resolution
  * regardless of Windows DPI scaling settings.
+ * 
+ * In headless environments (tests, CI/CD), this configuration is skipped
+ * as there are no physical displays to configure.
  */
 @Configuration
 @Order(Ordered.HIGHEST_PRECEDENCE)
@@ -18,20 +23,55 @@ public class BrobotStartup {
     
     static {
         // Static initializer runs before Spring context
-        // Use the dedicated initializer to ensure it runs first
-        PhysicalResolutionInitializer.forceInitialization();
-        configurePhysicalResolution();
+        // Only configure physical resolution if not in headless mode
+        if (!isHeadlessEnvironment()) {
+            PhysicalResolutionInitializer.forceInitialization();
+            configurePhysicalResolution();
+        } else {
+            System.out.println("=== Brobot Running in Headless Mode ===");
+            System.out.println("Physical resolution configuration skipped - no display available");
+        }
     }
     
     @PostConstruct
     public void init() {
         // Verify configuration after Spring context loads
-        verifyPhysicalResolution();
+        // Skip verification in headless environments
+        if (!isHeadlessEnvironment()) {
+            verifyPhysicalResolution();
+        }
+    }
+    
+    /**
+     * Checks if the JVM is running in headless mode.
+     * This could be due to:
+     * - Explicit java.awt.headless=true property
+     * - No display available (CI/CD, Docker, etc.)
+     * - Test environment configuration
+     * 
+     * @return true if running in headless mode, false otherwise
+     */
+    private static boolean isHeadlessEnvironment() {
+        // First check if headless mode is explicitly set
+        String headlessProperty = System.getProperty("java.awt.headless");
+        if ("true".equalsIgnoreCase(headlessProperty)) {
+            return true;
+        }
+        
+        // Then check if GraphicsEnvironment reports headless
+        // This will be true even if the property isn't set but no display is available
+        try {
+            return GraphicsEnvironment.isHeadless();
+        } catch (Exception e) {
+            // If we can't even check, assume headless
+            return true;
+        }
     }
     
     /**
      * Configures JVM to capture at physical resolution.
      * This disables DPI awareness to match SikuliX IDE behavior.
+     * Only applies to non-headless environments with actual displays.
      */
     private static void configurePhysicalResolution() {
         System.out.println("=== Brobot Physical Resolution Configuration ===");
@@ -48,8 +88,9 @@ public class BrobotStartup {
         System.setProperty("sun.java2d.dpiaware.override", "false");
         System.setProperty("sun.java2d.win.uiScale.enabled", "false");
         
-        // Ensure we're not in headless mode
-        System.setProperty("java.awt.headless", "false");
+        // Note: We do NOT force headless mode to false anymore
+        // This allows tests and CI/CD to run in headless mode
+        // System.setProperty("java.awt.headless", "false");  // REMOVED
         
         // Force physical pixels for all operations
         System.setProperty("sun.java2d.noddraw", "false");
@@ -62,8 +103,15 @@ public class BrobotStartup {
     
     /**
      * Verifies that physical resolution capture is working.
+     * Safely handles headless environments where this verification cannot be performed.
      */
     private void verifyPhysicalResolution() {
+        // Double-check we're not in headless mode
+        if (isHeadlessEnvironment()) {
+            System.out.println("Resolution verification skipped - running in headless mode");
+            return;
+        }
+        
         try {
             java.awt.GraphicsDevice device = java.awt.GraphicsEnvironment
                 .getLocalGraphicsEnvironment()
@@ -96,7 +144,11 @@ public class BrobotStartup {
             }
             System.out.println("================================\n");
             
+        } catch (HeadlessException he) {
+            // This shouldn't happen since we check first, but just in case
+            System.out.println("Cannot verify resolution - display not available (headless environment)");
         } catch (Exception e) {
+            // Other unexpected errors
             System.err.println("Error verifying resolution: " + e.getMessage());
         }
     }

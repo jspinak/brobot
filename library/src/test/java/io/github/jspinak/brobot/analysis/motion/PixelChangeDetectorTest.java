@@ -383,19 +383,20 @@ public class PixelChangeDetectorTest extends BrobotTestBase {
     class DilationEffects {
         
         @Test
-        @Disabled("Causes JVM crash - OpenCV native memory issue")
         @DisplayName("Should expand changed regions with dilation")
         void shouldExpandChangedRegionsWithDilation() {
             // Create images with small isolated changes
             Mat img1 = createTestImage(100, 100, 100);
             Mat img2 = createTestImage(100, 100, 100);
-            // Add a small changed region
-            rectangle(img2, new org.bytedeco.opencv.opencv_core.Point(45, 45),
-                     new org.bytedeco.opencv.opencv_core.Point(55, 55),
-                     new Scalar(200, 200, 200, 0), -1, 8, 0);
-            MatVector vectorWithSmallChange = new MatVector(img1, img2);
+            MatVector vectorWithSmallChange = null;
             
             try {
+                // Add a small changed region
+                rectangle(img2, new org.bytedeco.opencv.opencv_core.Point(45, 45),
+                         new org.bytedeco.opencv.opencv_core.Point(55, 55),
+                         new Scalar(200, 200, 200, 0), -1, 8, 0);
+                vectorWithSmallChange = new MatVector(img1, img2);
+                
                 // Without dilation
                 PixelChangeDetector detectorNoDilation = new PixelChangeDetector.Builder()
                     .setMats(vectorWithSmallChange)
@@ -414,6 +415,10 @@ public class PixelChangeDetectorTest extends BrobotTestBase {
                 assertTrue(sumWithDilation > sumNoDilation,
                     "Dilation should expand changed regions");
             } finally {
+                // Properly release all native resources
+                if (vectorWithSmallChange != null) {
+                    vectorWithSmallChange.close();
+                }
                 MatTestUtils.safeReleaseAll(img1, img2);
             }
         }

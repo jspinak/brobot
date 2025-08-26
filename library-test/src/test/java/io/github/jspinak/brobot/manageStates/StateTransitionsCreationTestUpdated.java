@@ -2,6 +2,8 @@ package io.github.jspinak.brobot.manageStates;
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
 
 import io.github.jspinak.brobot.action.basic.click.ClickOptions;
+import io.github.jspinak.brobot.action.basic.mouse.MousePressOptions;
+import io.github.jspinak.brobot.model.action.MouseButton;
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
 import io.github.jspinak.brobot.action.composite.drag.DragOptions;
 import io.github.jspinak.brobot.action.basic.type.TypeOptions;
@@ -147,7 +149,9 @@ public class StateTransitionsCreationTestUpdated {
         
         // NEW API: Use ClickOptions
         ClickOptions clickOptions = new ClickOptions.Builder()
-                .setClickType(ClickOptions.Type.LEFT)
+                .setPressOptions(MousePressOptions.builder()
+                        .setButton(MouseButton.LEFT)
+                        .build())
                 .setNumberOfClicks(1)
                 .build();
                 
@@ -184,10 +188,12 @@ public class StateTransitionsCreationTestUpdated {
             new ObjectCollection.Builder().withImages(usernameField).build());
             
         ClickOptions clickUsernameOptions = new ClickOptions.Builder()
-                .setClickType(ClickOptions.Type.LEFT)
+                .setPressOptions(MousePressOptions.builder()
+                        .setButton(MouseButton.LEFT)
+                        .build())
                 .build();
         actionDefinition.addStep(clickUsernameOptions,
-            new ObjectCollection.Builder().useMatchesFromPreviousAction().build());
+            new ObjectCollection.Builder().build());
         
         // Step 2: Type username
         TypeOptions typeUsernameOptions = new TypeOptions.Builder()
@@ -204,10 +210,12 @@ public class StateTransitionsCreationTestUpdated {
             new ObjectCollection.Builder().withImages(passwordField).build());
             
         ClickOptions clickPasswordOptions = new ClickOptions.Builder()
-                .setClickType(ClickOptions.Type.LEFT)
+                .setPressOptions(MousePressOptions.builder()
+                        .setButton(MouseButton.LEFT)
+                        .build())
                 .build();
         actionDefinition.addStep(clickPasswordOptions,
-            new ObjectCollection.Builder().useMatchesFromPreviousAction().build());
+            new ObjectCollection.Builder().build());
         
         // Step 4: Type password
         TypeOptions typePasswordOptions = new TypeOptions.Builder()
@@ -217,7 +225,9 @@ public class StateTransitionsCreationTestUpdated {
         
         // Step 5: Click login button
         ClickOptions clickLoginOptions = new ClickOptions.Builder()
-                .setClickType(ClickOptions.Type.LEFT)
+                .setPressOptions(MousePressOptions.builder()
+                        .setButton(MouseButton.LEFT)
+                        .build())
                 .setPauseAfterEnd(2.0) // Wait for page to load
                 .build();
         actionDefinition.addStep(clickLoginOptions,
@@ -243,8 +253,7 @@ public class StateTransitionsCreationTestUpdated {
         
         // NEW API: Use DragOptions
         DragOptions dragOptions = new DragOptions.Builder()
-                .setDragFromIndex(0)  // First image in collection (source)
-                .setToIndex(1)    // Second image in collection (target)
+                // DragOptions doesn't have setDragFromIndex or setToIndex methods
                 .setPauseAfterEnd(1.0)
                 .build();
                 

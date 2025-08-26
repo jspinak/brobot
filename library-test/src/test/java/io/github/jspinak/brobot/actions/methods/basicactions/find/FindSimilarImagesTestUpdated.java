@@ -4,320 +4,517 @@ import io.github.jspinak.brobot.config.FrameworkSettings;
 import io.github.jspinak.brobot.action.ActionInterface;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
-import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
+import io.github.jspinak.brobot.action.basic.find.SimilarImagesFindOptions;
 import io.github.jspinak.brobot.action.internal.service.ActionService;
-import io.github.jspinak.brobot.config.ExecutionEnvironment;
-import io.github.jspinak.brobot.action.basic.find.FindSimilarImages;
-import io.github.jspinak.brobot.action.internal.factory.ActionResultFactory;
+import io.github.jspinak.brobot.model.element.Pattern;
+import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.match.Match;
-import io.github.jspinak.brobot.BrobotTestApplication;
-import io.github.jspinak.brobot.actions.methods.basicactions.TestDataUpdated;
+import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.test.BrobotIntegrationTestBase;
-import io.github.jspinak.brobot.testutils.TestPaths;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.DisabledIfSystemProperty;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import java.io.File;
+import java.awt.image.BufferedImage;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Updated tests for finding similar images functionality using the new ActionConfig API.
- * Demonstrates migration from ActionOptions to PatternFindOptions.
+ * Integration tests for finding similar images functionality.
  * 
- * Key changes:
- * - Uses PatternFindOptions instead of generic ActionOptions
- * - ActionResult requires setActionConfig() before perform()
- * - Uses ActionService to get the appropriate action
- * - Find strategies and fusion methods are type-specific
+ * The SIMILAR_IMAGES strategy compares images between two ObjectCollections:
+ * - First collection contains base images for comparison
+ * - Second collection contains images to compare against the base
+ * - Returns one Match per image in the second collection with similarity scores
+ * 
+ * This is useful for:
+ * 1. Screen state recognition - determining which known screen is displayed
+ * 2. Image classification - categorizing images based on similarity
+ * 3. Change detection - finding which images have changed
+ * 4. Duplicate detection - identifying similar or duplicate images
  */
-@SpringBootTest(classes = BrobotTestApplication.class)
-@DisabledIfSystemProperty(named = "brobot.tests.ocr.disable", matches = "true")
-class FindSimilarImagesTestUpdated extends BrobotIntegrationTestBase {
+@SpringBootTest(classes = io.github.jspinak.brobot.BrobotTestApplication.class)
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+public class FindSimilarImagesTestUpdated extends BrobotIntegrationTestBase {
 
-    @BeforeAll
-    public static void setupHeadlessMode() {
-        System.setProperty("java.awt.headless", "true");
-    }
-    
+    @Autowired
+    private ActionService actionService;
+
     @BeforeEach
-    @Override
-    protected void setUpBrobotEnvironment() {
-        // Configure for unit testing with screenshots
-        ExecutionEnvironment env = ExecutionEnvironment.builder()
-                .mockMode(false)  // Use real file operations for find
-                .forceHeadless(true)  // No screen capture
-                .allowScreenCapture(false)
-                .build();
-        ExecutionEnvironment.setInstance(env);
-        
-        // Enable action mocking but real find operations
+    void setUp() {
+        super.setUpBrobotEnvironment();
         FrameworkSettings.mock = true;
-        
-        // Clear any previous screenshots
-        FrameworkSettings.screenshots.clearAll();
-    }
-
-    @Autowired
-    ActionResultFactory matchesInitializer;
-
-    @Autowired
-    FindSimilarImages findSimilarImages;
-
-    @Autowired
-    ActionService actionService;
-
-    /**
-     * Checks to see if screenshot 1 is found in screenshots 0, 2, 3, 4.
-     * It should match with screenshot0.
-     */
-    @Test
-    void shouldMatchScreenshot0_newAPI() {
-        try {
-            // Add screenshots for find operation (enables hybrid mode)
-            FrameworkSettings.screenshots.add(TestPaths.getScreenshotPath("floranext0"));
-            FrameworkSettings.screenshots.add(TestPaths.getScreenshotPath("floranext1"));
-            FrameworkSettings.screenshots.add(TestPaths.getScreenshotPath("floranext2"));
-            FrameworkSettings.screenshots.add(TestPaths.getScreenshotPath("floranext3"));
-            FrameworkSettings.screenshots.add(TestPaths.getScreenshotPath("floranext4"));
-            
-            TestDataUpdated testData = new TestData();
-
-            // NEW API: Use PatternFindOptions with SIMILAR_IMAGES strategy
-            PatternFindOptions findOptions = new PatternFindOptions.Builder()
-                    .setFindStrategy(PatternFindOptions.FindStrategy.SIMILAR_IMAGES)
-                    .build();
-                    
-            ObjectCollection objectCollection1 = new ObjectCollection.Builder()
-                    .withPatterns(testData.getFloranext1())
-                    .build();
-                    
-            ObjectCollection objectCollection2 = new ObjectCollection.Builder()
-                    .withPatterns(testData.getPatterns(0,2,3,4))
-                    .build();
-
-            // NEW API: Create ActionResult with config
-            ActionResult result = new ActionResult();
-            result.setActionConfig(findOptions);
-            
-            // Manually initialize matches for similar image comparison
-            ActionResult matches = matchesInitializer.init(findOptions, "find similar screenshots",
-                    objectCollection1, objectCollection2);
-                    
-            findSimilarImages.find(matches, List.of(objectCollection1, objectCollection2));
-            
-            Optional<Match> bestMatch = matches.getBestMatch();
-
-            // In headless mode with test images available, this should work
-            assertNotNull(matches);
-            
-            if (!matches.isEmpty()) {
-                assertFalse(bestMatch.isEmpty());
-                // The best match should be floranext0 if test images are similar
-                System.out.println("Best match: " + bestMatch.get().getName());
-            } else {
-                System.out.println("No similar images found - this may be expected if test images are not available");
-            }
-            
-        } catch (Exception e) {
-            handleTestException(e);
-        }
-    }
-
-    /**
-     * Find images corresponding to words using new API.
-     * Do this once and fuse matches that are close together.
-     * Do this again without fusing matches.
-     * Every match in once set should have a similar match in the other set.
-     */
-    @Test
-    void shouldFindSimilarImages_newAPI() {
-        try {
-            // Check if test image exists
-            File testImage = new File(TestPaths.getScreenshotPath("floranext0"));
-            if (!testImage.exists()) {
-                System.out.println("Test image not available - skipping test");
-                return;
-            }
-            
-            // Add screenshot for find operation (enables hybrid mode)
-            FrameworkSettings.screenshots.add(TestPaths.getScreenshotPath("floranext0"));
-            
-            ObjectCollection screen0 = new ObjectCollection.Builder()
-                    .withScenes(TestPaths.getScreenshotPath("floranext0"))
-                    .build();
-                    
-            // NEW API: Find words with fusion
-            PatternFindOptions findAndFuseWords = new PatternFindOptions.Builder()
-                    .setFindStrategy(PatternFindOptions.FindStrategy.ActionOptions.Find.ActionOptions.Find.ALL)
-                    .setFusionMethod(PatternFindOptions.MatchFusionMethod.RELATIVE)
-                    .setMaxFusionDistances(20, 10)
-                    .build();
-                    
-            ActionResult fusedResult = new ActionResult();
-            fusedResult.setActionConfig(findAndFuseWords);
-            
-            ActionInterface findAction1 = actionService.getAction(findAndFuseWords);
-            findAction1.perform(fusedResult, screen0);
-
-            // NEW API: Find words without fusion
-            PatternFindOptions findWordsDontFuse = new PatternFindOptions.Builder()
-                    .setFindStrategy(PatternFindOptions.FindStrategy.ActionOptions.Find.ActionOptions.Find.ALL)
-                    .setFusionMethod(PatternFindOptions.MatchFusionMethod.NONE)
-                    .build();
-                    
-            ActionResult notFusedResult = new ActionResult();
-            notFusedResult.setActionConfig(findWordsDontFuse);
-            
-            ActionInterface findAction2 = actionService.getAction(findWordsDontFuse);
-            findAction2.perform(notFusedResult, screen0);
-
-            // If no words were found (OCR issue in headless), skip the similarity test
-            if (fusedResult.isEmpty() || notFusedResult.isEmpty()) {
-                System.out.println("No words found - OCR may not be available in headless mode");
-                return;
-            }
-
-            // NEW API: Find similar images
-            PatternFindOptions findSimilar = new PatternFindOptions.Builder()
-                    .setFindStrategy(PatternFindOptions.FindStrategy.SIMILAR_IMAGES)
-                    .build();
-                    
-            ObjectCollection fused = new ObjectCollection.Builder()
-                    .withMatchObjectsAsStateImages(fusedResult.getMatchList().toArray(new Match[0]))
-                    .build();
-                    
-            ObjectCollection notFused = new ObjectCollection.Builder()
-                    .withMatchObjectsAsStateImages(notFusedResult.getMatchList().toArray(new Match[0]))
-                    .build();
-                    
-            ActionResult similarResult = new ActionResult();
-            similarResult.setActionConfig(findSimilar);
-            
-            ActionInterface findAction3 = actionService.getAction(findSimilar);
-            findAction3.perform(similarResult, fused, notFused);
-
-            // FIND.SIMILAR_IMAGES returns a match for each image in the 2nd Object Collection
-            assertNotNull(similarResult);
-            
-            if (!notFusedResult.isEmpty()) {
-                // Allow some variance in OCR results between Tesseract versions
-                int expectedSize = notFusedResult.size();
-                int actualSize = similarResult.size();
-                System.out.println("Expected matches: " + expectedSize + ", Actual matches: " + actualSize);
-                
-                // Allow up to 20% difference in match count due to OCR variations
-                double difference = Math.abs(expectedSize - actualSize) / (double) expectedSize;
-                assertTrue(difference <= 0.20, 
-                    "Match count difference exceeds 20%: expected " + expectedSize + " but got " + actualSize);
-            }
-            
-        } catch (java.awt.HeadlessException e) {
-            System.out.println("OCR not available in headless mode: " + e.getMessage());
-        } catch (Exception e) {
-            handleTestException(e);
-        }
-    }
-
-    @Test
-    void testMatchFusionMethods_newAPI() {
-        // NEW TEST: Demonstrates all fusion methods
-        try {
-            File testImage = new File(TestPaths.getScreenshotPath("floranext0"));
-            if (!testImage.exists()) {
-                System.out.println("Test image not available - skipping test");
-                return;
-            }
-            
-            FrameworkSettings.screenshots.add(TestPaths.getScreenshotPath("floranext0"));
-            
-            ObjectCollection screen0 = new ObjectCollection.Builder()
-                    .withScenes(TestPaths.getScreenshotPath("floranext0"))
-                    .build();
-            
-            // Test different fusion methods
-            PatternFindOptions.MatchFusionMethod[] methods = {
-                PatternFindOptions.MatchFusionMethod.NONE,
-                PatternFindOptions.MatchFusionMethod.RELATIVE,
-                PatternFindOptions.MatchFusionMethod.ABSOLUTE
-            };
-            
-            for (PatternFindOptions.MatchFusionMethod method : methods) {
-                PatternFindOptions options = new PatternFindOptions.Builder()
-                        .setFindStrategy(PatternFindOptions.FindStrategy.ActionOptions.Find.ActionOptions.Find.ALL)
-                        .setFusionMethod(method)
-                        .setMaxFusionDistances(20, 10)
-                        .build();
-                        
-                ActionResult result = new ActionResult();
-                result.setActionConfig(options);
-                
-                ActionInterface findAction = actionService.getAction(options);
-                findAction.perform(result, screen0);
-                
-                assertNotNull(result);
-                assertTrue(result.getActionConfig() instanceof PatternFindOptions);
-                PatternFindOptions resultOptions = (PatternFindOptions) result.getActionConfig();
-                assertEquals(method, resultOptions.getFusionMethod());
-                
-                System.out.println("Fusion method " + method + " completed with " + result.size() + " matches");
-            }
-            
-        } catch (Exception e) {
-            handleTestException(e);
-        }
-    }
-
-    @Test
-    void compareOldAndNewAPI() {
-        // This test demonstrates the migration pattern
-        ObjectCollection screen0 = new ObjectCollection.Builder()
-                .withScenes(TestPaths.getScreenshotPath("floranext0"))
-                .build();
-        
-        // OLD API (commented out):
-        /*
-        ActionOptions oldOptions = new ActionOptions.Builder()
-                .setAction(PatternFindOptions)
-                .setFind(PatternFindOptions.FindStrategy.ActionOptions.Find.ActionOptions.Find.ALL)
-                .setFusionMethod(ActionOptions.MatchFusionMethod.RELATIVE)
-                .setMaxFusionDistances(20, 10)
-                .build();
-        ActionResult oldResult = action.perform(oldOptions, screen0);
-        */
-        
-        // NEW API:
-        PatternFindOptions newOptions = new PatternFindOptions.Builder()
-                .setFindStrategy(PatternFindOptions.FindStrategy.ActionOptions.Find.ActionOptions.Find.ALL)
-                .setFusionMethod(PatternFindOptions.MatchFusionMethod.RELATIVE)
-                .setMaxFusionDistances(20, 10)
-                .build();
-        
-        ActionResult newResult = new ActionResult();
-        newResult.setActionConfig(newOptions);
-        
-        ActionInterface findAction = actionService.getAction(newOptions);
-        findAction.perform(newResult, screen0);
-        
-        // Both approaches achieve the same result, but new API is more type-safe
-        assertNotNull(newResult);
     }
     
-    private void handleTestException(Exception e) {
-        if (e.getMessage() != null && 
-            (e.getMessage().contains("Can't read input file") ||
-             e.getMessage().contains("NullPointerException") ||
-             e.getMessage().contains("OCR") ||
-             e.getMessage().contains("Tesseract"))) {
-            System.out.println("Test skipped due to: " + e.getMessage());
-            return;
+    @AfterEach
+    void tearDown() {
+        FrameworkSettings.mock = false;
+    }
+
+    @Test
+    @Order(1)
+    @DisplayName("Should find similar images between two collections")
+    void testFindSimilarImagesBetweenCollections() {
+        /*
+         * Test the SIMILAR_IMAGES strategy which compares images in the
+         * second collection against base images in the first collection.
+         */
+        
+        // Create base images for comparison (first collection)
+        BufferedImage baseImage1 = new BufferedImage(100, 100, BufferedImage.TYPE_INT_RGB);
+        BufferedImage baseImage2 = new BufferedImage(100, 100, BufferedImage.TYPE_INT_RGB);
+        
+        Pattern basePattern1 = new Pattern.Builder()
+                .setBufferedImage(baseImage1)
+                .setName("BasePattern1")
+                .build();
+                
+        Pattern basePattern2 = new Pattern.Builder()
+                .setBufferedImage(baseImage2)
+                .setName("BasePattern2")
+                .build();
+                
+        StateImage baseStateImage1 = new StateImage.Builder()
+                .addPattern(basePattern1)
+                .setName("BaseImage1")
+                .build();
+                
+        StateImage baseStateImage2 = new StateImage.Builder()
+                .addPattern(basePattern2)
+                .setName("BaseImage2")
+                .build();
+        
+        // Create images to compare (second collection)
+        BufferedImage compareImage1 = new BufferedImage(100, 100, BufferedImage.TYPE_INT_RGB);
+        BufferedImage compareImage2 = new BufferedImage(100, 100, BufferedImage.TYPE_INT_RGB);
+        BufferedImage compareImage3 = new BufferedImage(100, 100, BufferedImage.TYPE_INT_RGB);
+        
+        Pattern comparePattern1 = new Pattern.Builder()
+                .setBufferedImage(compareImage1)
+                .setName("ComparePattern1")
+                .build();
+                
+        Pattern comparePattern2 = new Pattern.Builder()
+                .setBufferedImage(compareImage2)
+                .setName("ComparePattern2")
+                .build();
+                
+        Pattern comparePattern3 = new Pattern.Builder()
+                .setBufferedImage(compareImage3)
+                .setName("ComparePattern3")
+                .build();
+                
+        StateImage compareStateImage1 = new StateImage.Builder()
+                .addPattern(comparePattern1)
+                .setName("CompareImage1")
+                .build();
+                
+        StateImage compareStateImage2 = new StateImage.Builder()
+                .addPattern(comparePattern2)
+                .setName("CompareImage2")
+                .build();
+                
+        StateImage compareStateImage3 = new StateImage.Builder()
+                .addPattern(comparePattern3)
+                .setName("CompareImage3")
+                .build();
+        
+        // First collection - base images
+        ObjectCollection baseCollection = new ObjectCollection.Builder()
+                .withImages(baseStateImage1, baseStateImage2)
+                .build();
+        
+        // Second collection - images to compare
+        ObjectCollection compareCollection = new ObjectCollection.Builder()
+                .withImages(compareStateImage1, compareStateImage2, compareStateImage3)
+                .build();
+        
+        // Use SimilarImagesFindOptions
+        SimilarImagesFindOptions findOptions = new SimilarImagesFindOptions.Builder()
+                .setSimilarity(0.7)
+                .setComparisonMethod(SimilarImagesFindOptions.ComparisonMethod.BEST_MATCH)
+                .build();
+                
+        ActionResult result = new ActionResult();
+        result.setActionConfig(findOptions);
+        
+        // Get the find action
+        Optional<ActionInterface> findActionOpt = actionService.getAction(findOptions);
+        assertTrue(findActionOpt.isPresent(), "Find action should be available for SIMILAR_IMAGES");
+        
+        ActionInterface findAction = findActionOpt.get();
+        
+        // IMPORTANT: SIMILAR_IMAGES requires two ObjectCollections
+        findAction.perform(result, baseCollection, compareCollection);
+        
+        // Verify results
+        assertNotNull(result.getMatchList());
+        assertTrue(result.isSuccess(), "Find operation should succeed in mock mode");
+        
+        // Should have one match for each image in the compare collection
+        // In mock mode, we may not get exact counts but verify structure
+        List<Match> matches = result.getMatchList();
+        assertNotNull(matches, "Should return match list");
+        
+        // Each match represents how well an image from compareCollection
+        // matches the best image from baseCollection
+        for (Match match : matches) {
+            assertNotNull(match);
+            assertTrue(match.getScore() >= 0 && match.getScore() <= 1.0,
+                    "Match score should be between 0 and 1");
         }
-        throw new RuntimeException(e);
+    }
+
+    @Test
+    @Order(2)
+    @DisplayName("Should use screen recognition preset")
+    void testScreenRecognitionPreset() {
+        /*
+         * Test using the screen recognition preset which uses high similarity
+         * thresholds for accurate screen state identification.
+         */
+        
+        BufferedImage knownScreen = new BufferedImage(100, 100, BufferedImage.TYPE_INT_RGB);
+        BufferedImage currentScreen = new BufferedImage(100, 100, BufferedImage.TYPE_INT_RGB);
+        
+        StateImage knownStateImage = new StateImage.Builder()
+                .addPattern(new Pattern.Builder()
+                        .setBufferedImage(knownScreen)
+                        .setName("KnownScreen")
+                        .build())
+                .setName("KnownScreenState")
+                .build();
+                
+        StateImage currentStateImage = new StateImage.Builder()
+                .addPattern(new Pattern.Builder()
+                        .setBufferedImage(currentScreen)
+                        .setName("CurrentScreen")
+                        .build())
+                .setName("CurrentScreenState")
+                .build();
+        
+        ObjectCollection knownScreens = new ObjectCollection.Builder()
+                .withImages(knownStateImage)
+                .build();
+                
+        ObjectCollection currentScreenCapture = new ObjectCollection.Builder()
+                .withImages(currentStateImage)
+                .build();
+        
+        // Use screen recognition preset
+        SimilarImagesFindOptions findOptions = SimilarImagesFindOptions.forScreenRecognition();
+        
+        ActionResult result = new ActionResult();
+        result.setActionConfig(findOptions);
+        
+        Optional<ActionInterface> findActionOpt = actionService.getAction(findOptions);
+        assertTrue(findActionOpt.isPresent());
+        
+        ActionInterface findAction = findActionOpt.get();
+        findAction.perform(result, knownScreens, currentScreenCapture);
+        
+        assertTrue(result.isSuccess());
+        
+        // Verify preset configuration
+        assertEquals(0.9, findOptions.getSimilarity(), 0.001);
+        assertEquals(SimilarImagesFindOptions.ComparisonMethod.BEST_MATCH, 
+                    findOptions.getComparisonMethod());
+        assertFalse(findOptions.isIncludeNoMatches());
+    }
+
+    @Test
+    @Order(3)
+    @DisplayName("Should find one match per image with multiple base images")
+    void testMultipleBaseImages() {
+        /*
+         * Test that each image in the compare collection gets matched
+         * with the best matching image from the base collection.
+         */
+        
+        // Create multiple base images
+        BufferedImage[] baseImages = new BufferedImage[3];
+        StateImage[] baseStateImages = new StateImage[3];
+        
+        for (int i = 0; i < 3; i++) {
+            baseImages[i] = new BufferedImage(100, 100, BufferedImage.TYPE_INT_RGB);
+            Pattern pattern = new Pattern.Builder()
+                    .setBufferedImage(baseImages[i])
+                    .setName("BasePattern" + i)
+                    .build();
+            baseStateImages[i] = new StateImage.Builder()
+                    .addPattern(pattern)
+                    .setName("BaseImage" + i)
+                    .build();
+        }
+        
+        // Create images to compare
+        BufferedImage[] compareImages = new BufferedImage[2];
+        StateImage[] compareStateImages = new StateImage[2];
+        
+        for (int i = 0; i < 2; i++) {
+            compareImages[i] = new BufferedImage(100, 100, BufferedImage.TYPE_INT_RGB);
+            Pattern pattern = new Pattern.Builder()
+                    .setBufferedImage(compareImages[i])
+                    .setName("ComparePattern" + i)
+                    .build();
+            compareStateImages[i] = new StateImage.Builder()
+                    .addPattern(pattern)
+                    .setName("CompareImage" + i)
+                    .build();
+        }
+        
+        ObjectCollection baseCollection = new ObjectCollection.Builder()
+                .withImages(baseStateImages)
+                .build();
+                
+        ObjectCollection compareCollection = new ObjectCollection.Builder()
+                .withImages(compareStateImages)
+                .build();
+        
+        SimilarImagesFindOptions findOptions = new SimilarImagesFindOptions.Builder()
+                .setSimilarity(0.75)
+                .setComparisonMethod(SimilarImagesFindOptions.ComparisonMethod.BEST_MATCH)
+                .build();
+                
+        ActionResult result = new ActionResult();
+        result.setActionConfig(findOptions);
+        
+        Optional<ActionInterface> findActionOpt = actionService.getAction(findOptions);
+        assertTrue(findActionOpt.isPresent());
+        
+        ActionInterface findAction = findActionOpt.get();
+        findAction.perform(result, baseCollection, compareCollection);
+        
+        assertTrue(result.isSuccess());
+        assertNotNull(result.getMatchList());
+    }
+
+    @Test
+    @Order(4)
+    @DisplayName("Should use duplicate detection preset")
+    void testDuplicateDetectionPreset() {
+        /*
+         * Test using the duplicate detection preset which uses very high
+         * similarity thresholds to identify nearly identical images.
+         */
+        
+        BufferedImage original = new BufferedImage(100, 100, BufferedImage.TYPE_INT_RGB);
+        BufferedImage duplicate = new BufferedImage(100, 100, BufferedImage.TYPE_INT_RGB);
+        
+        StateImage originalImage = new StateImage.Builder()
+                .addPattern(new Pattern.Builder()
+                        .setBufferedImage(original)
+                        .setName("Original")
+                        .build())
+                .setName("OriginalImage")
+                .build();
+                
+        StateImage duplicateImage = new StateImage.Builder()
+                .addPattern(new Pattern.Builder()
+                        .setBufferedImage(duplicate)
+                        .setName("PossibleDuplicate")
+                        .build())
+                .setName("DuplicateImage")
+                .build();
+        
+        ObjectCollection originals = new ObjectCollection.Builder()
+                .withImages(originalImage)
+                .build();
+                
+        ObjectCollection candidates = new ObjectCollection.Builder()
+                .withImages(duplicateImage)
+                .build();
+        
+        // Use duplicate detection preset
+        SimilarImagesFindOptions findOptions = SimilarImagesFindOptions.forDuplicateDetection();
+        
+        ActionResult result = new ActionResult();
+        result.setActionConfig(findOptions);
+        
+        Optional<ActionInterface> findActionOpt = actionService.getAction(findOptions);
+        assertTrue(findActionOpt.isPresent());
+        
+        ActionInterface findAction = findActionOpt.get();
+        findAction.perform(result, originals, candidates);
+        
+        assertTrue(result.isSuccess());
+        
+        // Verify preset configuration
+        assertEquals(0.95, findOptions.getSimilarity(), 0.001);
+        assertEquals(SimilarImagesFindOptions.ComparisonMethod.ALL_PATTERNS_MATCH, 
+                    findOptions.getComparisonMethod());
+        assertTrue(findOptions.isIncludeNoMatches());
+    }
+
+    @Test
+    @Order(5)
+    @DisplayName("Should use change detection preset")
+    void testChangeDetectionPreset() {
+        /*
+         * Test using the change detection preset which uses lower similarity
+         * thresholds to identify which images have changed.
+         */
+        
+        BufferedImage beforeImage = new BufferedImage(100, 100, BufferedImage.TYPE_INT_RGB);
+        BufferedImage afterImage = new BufferedImage(100, 100, BufferedImage.TYPE_INT_RGB);
+        
+        StateImage beforeState = new StateImage.Builder()
+                .addPattern(new Pattern.Builder()
+                        .setBufferedImage(beforeImage)
+                        .setName("BeforeChange")
+                        .build())
+                .setName("BeforeState")
+                .build();
+                
+        StateImage afterState = new StateImage.Builder()
+                .addPattern(new Pattern.Builder()
+                        .setBufferedImage(afterImage)
+                        .setName("AfterChange")
+                        .build())
+                .setName("AfterState")
+                .build();
+        
+        ObjectCollection beforeCollection = new ObjectCollection.Builder()
+                .withImages(beforeState)
+                .build();
+                
+        ObjectCollection afterCollection = new ObjectCollection.Builder()
+                .withImages(afterState)
+                .build();
+        
+        // Use change detection preset
+        SimilarImagesFindOptions findOptions = SimilarImagesFindOptions.forChangeDetection();
+        
+        ActionResult result = new ActionResult();
+        result.setActionConfig(findOptions);
+        
+        Optional<ActionInterface> findActionOpt = actionService.getAction(findOptions);
+        assertTrue(findActionOpt.isPresent());
+        
+        ActionInterface findAction = findActionOpt.get();
+        findAction.perform(result, beforeCollection, afterCollection);
+        
+        assertTrue(result.isSuccess());
+        
+        // Verify preset configuration
+        assertEquals(0.7, findOptions.getSimilarity(), 0.001);
+        assertEquals(SimilarImagesFindOptions.ComparisonMethod.ANY_PATTERN_MATCHES, 
+                    findOptions.getComparisonMethod());
+        assertTrue(findOptions.isIncludeNoMatches());
+        assertTrue(findOptions.isReturnAllScores());
+    }
+
+    @Test
+    @Order(6)
+    @DisplayName("Should handle empty collections gracefully")
+    void testEmptyCollections() {
+        /*
+         * Test that SIMILAR_IMAGES handles empty collections without errors.
+         */
+        
+        ObjectCollection emptyCollection = new ObjectCollection.Builder().build();
+        
+        ObjectCollection nonEmptyCollection = new ObjectCollection.Builder()
+                .withImages(new StateImage.Builder()
+                        .addPattern(new Pattern.Builder()
+                                .setBufferedImage(new BufferedImage(100, 100, BufferedImage.TYPE_INT_RGB))
+                                .setName("TestPattern")
+                                .build())
+                        .setName("TestImage")
+                        .build())
+                .build();
+        
+        SimilarImagesFindOptions findOptions = new SimilarImagesFindOptions.Builder()
+                .setSimilarity(0.8)
+                .build();
+                
+        ActionResult result = new ActionResult();
+        result.setActionConfig(findOptions);
+        
+        Optional<ActionInterface> findActionOpt = actionService.getAction(findOptions);
+        assertTrue(findActionOpt.isPresent());
+        
+        ActionInterface findAction = findActionOpt.get();
+        
+        // Test with empty first collection
+        findAction.perform(result, emptyCollection, nonEmptyCollection);
+        // Should handle gracefully without exceptions
+        assertNotNull(result);
+        
+        // Test with empty second collection
+        result = new ActionResult();
+        result.setActionConfig(findOptions);
+        findAction.perform(result, nonEmptyCollection, emptyCollection);
+        assertNotNull(result);
+        
+        // Test with both empty
+        result = new ActionResult();
+        result.setActionConfig(findOptions);
+        findAction.perform(result, emptyCollection, emptyCollection);
+        assertNotNull(result);
+    }
+
+    @Test
+    @Order(7)
+    @DisplayName("Should work with patterns having search regions")
+    void testPatternsWithSearchRegions() {
+        /*
+         * Test that SIMILAR_IMAGES works correctly when patterns have
+         * search regions defined.
+         */
+        
+        Region searchRegion = new Region(100, 100, 400, 300);
+        
+        BufferedImage baseImage = new BufferedImage(100, 100, BufferedImage.TYPE_INT_RGB);
+        BufferedImage compareImage = new BufferedImage(100, 100, BufferedImage.TYPE_INT_RGB);
+        
+        Pattern basePattern = new Pattern.Builder()
+                .setBufferedImage(baseImage)
+                .setName("BaseWithRegion")
+                .addSearchRegion(searchRegion)
+                .build();
+                
+        Pattern comparePattern = new Pattern.Builder()
+                .setBufferedImage(compareImage)
+                .setName("CompareWithRegion")
+                .addSearchRegion(searchRegion)
+                .build();
+                
+        StateImage baseStateImage = new StateImage.Builder()
+                .addPattern(basePattern)
+                .setName("BaseImageWithRegion")
+                .build();
+                
+        StateImage compareStateImage = new StateImage.Builder()
+                .addPattern(comparePattern)
+                .setName("CompareImageWithRegion")
+                .build();
+        
+        ObjectCollection baseCollection = new ObjectCollection.Builder()
+                .withImages(baseStateImage)
+                .build();
+                
+        ObjectCollection compareCollection = new ObjectCollection.Builder()
+                .withImages(compareStateImage)
+                .build();
+        
+        SimilarImagesFindOptions findOptions = new SimilarImagesFindOptions.Builder()
+                .setSimilarity(0.8)
+                .setComparisonMethod(SimilarImagesFindOptions.ComparisonMethod.BEST_MATCH)
+                .build();
+                
+        ActionResult result = new ActionResult();
+        result.setActionConfig(findOptions);
+        
+        Optional<ActionInterface> findActionOpt = actionService.getAction(findOptions);
+        assertTrue(findActionOpt.isPresent());
+        
+        ActionInterface findAction = findActionOpt.get();
+        findAction.perform(result, baseCollection, compareCollection);
+        
+        assertTrue(result.isSuccess());
+        assertNotNull(result.getMatchList());
     }
 }

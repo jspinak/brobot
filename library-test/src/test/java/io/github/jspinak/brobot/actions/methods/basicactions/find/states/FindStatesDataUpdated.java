@@ -51,7 +51,7 @@ public class FindStatesDataUpdated {
     }
 
     public List<ObjectCollection> getStateObjectCollections(ActionService actionService) {
-        TestDataUpdated testData = new TestData();
+        TestDataUpdated testData = new TestDataUpdated();
         ObjectCollection stateColl1 = getStateObjectCollection(testData.getFloranext0(), actionService);
         ObjectCollection stateColl2 = getStateObjectCollection(testData.getFloranext1(), actionService);
         ObjectCollection stateColl3 = getStateObjectCollection(testData.getFloranext2(), actionService);

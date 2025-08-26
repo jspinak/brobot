@@ -94,6 +94,16 @@ public class ScenePatternMatcher {
      *           to the location of the best match found.
      */
     public List<Match> findAllInScene(Pattern pattern, Scene scene) {
+        // Add null checks
+        if (pattern == null || scene == null || scene.getPattern() == null) {
+            return new ArrayList<>();
+        }
+        
+        // Check if pattern has valid image data
+        if (pattern.getImage() == null || pattern.getImage().isEmpty()) {
+            return new ArrayList<>();
+        }
+        
         // Debug: log what regions the pattern thinks it should search
         ConsoleReporter.println("[REGION DEBUG] Pattern '" + pattern.getName() + "' search configuration:");
         ConsoleReporter.println("  - Is fixed: " + pattern.isFixed());
@@ -243,6 +253,9 @@ public class ScenePatternMatcher {
      */
     public List<Match> getWordMatches(Scene scene) {
         List<Match> wordMatches = new ArrayList<>();
+        if (scene == null || scene.getPattern() == null || scene.getPattern().getBImage() == null) {
+            return wordMatches;
+        }
         List<org.sikuli.script.Match> sikuliMatches = OCR.readWords(scene.getPattern().getBImage());
         String baseName = scene.getPattern().getName() == null ? "" : scene.getPattern().getName();
         int i=0;

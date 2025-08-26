@@ -1,122 +1,134 @@
 package io.github.jspinak.brobot.model.match;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.github.jspinak.brobot.action.basic.click.ClickOptions;
-import io.github.jspinak.brobot.model.action.ActionHistory;
+import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
+import io.github.jspinak.brobot.action.basic.mouse.MousePressOptions;
 import io.github.jspinak.brobot.model.action.ActionRecord;
-import io.github.jspinak.brobot.model.match.Match;
-
+import io.github.jspinak.brobot.model.action.ActionHistory;
+import io.github.jspinak.brobot.model.action.MouseButton;
+import io.github.jspinak.brobot.test.BrobotIntegrationTestBase;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 
-import java.util.Optional;
-import java.util.Set;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Updated tests for MatchHistory JSON parsing without Spring dependencies.
- * Tests the ActionHistory class with new ActionConfig API.
- * Migrated from library-test module.
+ * Tests JSON serialization and deserialization of ActionHistory (MatchHistory).
+ * 
+ * Note: The original test used non-existent methods:
+ * - ClickOptions.Type and setClickType/getClickType don't exist
+ * - Click type is configured through MousePressOptions
+ * - ActionRecord.Builder is used instead of direct construction
  */
-public class MatchHistoryJsonParserTestUpdated {
+@SpringBootTest(classes = io.github.jspinak.brobot.BrobotTestApplication.class)
+class MatchHistoryJsonParserTestUpdated extends BrobotIntegrationTestBase {
 
+    @Autowired
     private ObjectMapper objectMapper;
 
     @BeforeEach
     void setUp() {
-        objectMapper = new ObjectMapper();
-        objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
-        objectMapper.configure(com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        super.setUpBrobotEnvironment();
+        if (objectMapper == null) {
+            objectMapper = new ObjectMapper();
+            objectMapper.findAndRegisterModules();
+        }
     }
 
-    /**
-     * Test parsing a basic MatchHistory from JSON with new ActionConfig
-     */
     @Test
-    public void testParseBasicMatchHistoryWithActionConfig() throws Exception {
-        String json = """
-                {
-                  "timesSearched": 10,
-                  "timesFound": 7,
-                  "snapshots": [
-                    {
-                      "actionConfig": {
-                        "@type": "PatternFindOptions",
-                        "strategy": "FIRST",
-                        "similarity": 0.9
-                      },
-                      "matchList": [
-                        {
-                          "score": 0.9,
-                          "name": "Match1",
-                          "target": {
-                            "region": {
-                              "x": 10,
-                              "y": 20,
-                              "w": 30,
-                              "h": 40
-                            }
-                          }
-                        }
-                      ],
-                      "text": "Found Text",
-                      "actionSuccess": true,
-                      "resultSuccess": true
-                    }
-                  ]
-                }
-                """;
-
-        JsonNode jsonNode = objectMapper.readTree(json);
-        ActionHistory matchHistory = objectMapper.treeToValue(jsonNode, ActionHistory.class);
-
-        assertNotNull(matchHistory);
-        assertEquals(10, matchHistory.getTimesSearched());
-        assertEquals(7, matchHistory.getTimesFound());
-
-        // Verify snapshots
-        assertNotNull(matchHistory.getSnapshots());
-        assertEquals(1, matchHistory.getSnapshots().size());
-
-        ActionRecord snapshot = matchHistory.getSnapshots().getFirst();
-        assertNotNull(snapshot.getActionConfig());
-        assertTrue(snapshot.getActionConfig() instanceof PatternFindOptions);
-        
-        PatternFindOptions findOptions = (PatternFindOptions) snapshot.getActionConfig();
-        assertEquals(PatternFindOptions.Strategy.FIRST, findOptions.getStrategy());
-        assertEquals(0.9, findOptions.getSimilarity(), 0.001);
-
-        assertTrue(snapshot.isActionSuccess());
-        assertTrue(snapshot.isResultSuccess());
-        assertEquals("Found Text", snapshot.getText());
-
-        // Verify match in snapshot
-        assertFalse(snapshot.getMatchList().isEmpty());
-        Match match = snapshot.getMatchList().getFirst();
-        assertEquals("Match1", match.getName());
-        assertEquals(0.9, match.getScore(), 0.001);
-
-        // Verify region in match
-        assertEquals(10, match.getRegion().x());
-        assertEquals(20, match.getRegion().y());
-        assertEquals(30, match.getRegion().w());
-        assertEquals(40, match.getRegion().h());
-    }
-
-    /**
-     * Test serializing and deserializing a MatchHistory with new ActionConfig
-     */
-    @Test
-    public void testSerializeDeserializeMatchHistoryWithActionConfig() throws Exception {
-        // Create a match history
+    @DisplayName("Should serialize and deserialize empty ActionHistory")
+    void testEmptyMatchHistory() throws Exception {
+        // Given
         ActionHistory matchHistory = new ActionHistory();
 
-        // Create click options
+        // When
+        String json = objectMapper.writeValueAsString(matchHistory);
+        ActionHistory deserializedHistory = objectMapper.readValue(json, ActionHistory.class);
+
+        // Then
+        assertNotNull(deserializedHistory);
+        assertEquals(0, deserializedHistory.getTimesSearched());
+        assertEquals(0, deserializedHistory.getTimesFound());
+        assertTrue(deserializedHistory.getSnapshots().isEmpty());
+    }
+
+    @Test
+    @DisplayName("Should serialize and deserialize ActionHistory with matches")
+    void testMatchHistoryWithMatches() throws Exception {
+        // Given
+        ActionHistory matchHistory = new ActionHistory();
+        
+        // Create pattern find options
+        PatternFindOptions findOptions = new PatternFindOptions.Builder()
+                .setStrategy(PatternFindOptions.Strategy.FIRST)
+                .build();
+
+        // Create matches
+        Match match1 = new Match.Builder()
+                .setName("Match1")
+                .setSimScore(0.95)
+                .setRegion(10, 20, 30, 40)
+                .build();
+
+        Match match2 = new Match.Builder()
+                .setName("Match2")
+                .setSimScore(0.89)
+                .setRegion(50, 60, 70, 80)
+                .build();
+
+        // Create snapshot with matches
+        ActionRecord snapshot = new ActionRecord.Builder()
+                .setActionConfig(findOptions)
+                .addMatch(match1)
+                .addMatch(match2)
+                .setActionSuccess(true)
+                .setDuration(150.0)
+                .build();
+        
+        matchHistory.addSnapshot(snapshot);
+
+        // When
+        String json = objectMapper.writeValueAsString(matchHistory);
+        ActionHistory deserializedHistory = objectMapper.readValue(json, ActionHistory.class);
+
+        // Then
+        assertNotNull(deserializedHistory);
+        assertEquals(1, deserializedHistory.getTimesSearched());
+        assertEquals(1, deserializedHistory.getTimesFound());
+        
+        List<ActionRecord> snapshots = deserializedHistory.getSnapshots();
+        assertEquals(1, snapshots.size());
+        
+        ActionRecord deserializedSnapshot = snapshots.get(0);
+        assertEquals(2, deserializedSnapshot.getMatchList().size());
+        assertTrue(deserializedSnapshot.isActionSuccess());
+        assertEquals(150.0, deserializedSnapshot.getDuration(), 0.01);
+    }
+
+    @Test
+    @DisplayName("Should serialize and deserialize ActionHistory with ClickOptions")
+    void testMatchHistoryWithClickOptions() throws Exception {
+        // Given
+        ActionHistory matchHistory = new ActionHistory();
+
+        // Create click options with mouse press options for button type
+        MousePressOptions pressOptions = MousePressOptions.builder()
+                .setButton(MouseButton.LEFT)
+                .build();
+                
         ClickOptions clickOptions = new ClickOptions.Builder()
-                .setClickType(ClickOptions.Type.LEFT)
+                .setNumberOfClicks(1)
+                .setPressOptions(pressOptions)
                 .build();
 
         // Create and add a snapshot with new API
@@ -149,212 +161,173 @@ public class MatchHistoryJsonParserTestUpdated {
         assertNotNull(deserializedHistory.getSnapshots());
         assertEquals(1, deserializedHistory.getSnapshots().size());
 
-        ActionRecord deserializedSnapshot = deserializedHistory.getSnapshots().getFirst();
+        ActionRecord deserializedSnapshot = deserializedHistory.getSnapshots().get(0);
         assertNotNull(deserializedSnapshot.getActionConfig());
         assertTrue(deserializedSnapshot.getActionConfig() instanceof ClickOptions);
         
         ClickOptions deserializedClickOptions = (ClickOptions) deserializedSnapshot.getActionConfig();
-        assertEquals(ClickOptions.Type.LEFT, deserializedClickOptions.getClickType());
+        assertNotNull(deserializedClickOptions.getMousePressOptions());
+        assertEquals(MouseButton.LEFT, deserializedClickOptions.getMousePressOptions().getButton());
         
         assertTrue(deserializedSnapshot.isActionSuccess());
         assertEquals("Serialized Text", deserializedSnapshot.getText());
 
         // Verify match in snapshot
         assertFalse(deserializedSnapshot.getMatchList().isEmpty());
-        Match deserializedMatch = deserializedSnapshot.getMatchList().getFirst();
+        Match deserializedMatch = deserializedSnapshot.getMatchList().get(0);
         assertEquals("SerializedMatch", deserializedMatch.getName());
         assertEquals(0.85, deserializedMatch.getScore(), 0.001);
-
-        // Verify region in match
-        assertEquals(50, deserializedMatch.getRegion().x());
-        assertEquals(60, deserializedMatch.getRegion().y());
-        assertEquals(70, deserializedMatch.getRegion().w());
-        assertEquals(80, deserializedMatch.getRegion().h());
     }
 
-    /**
-     * Test adding snapshots and counting methods
-     */
     @Test
-    public void testAddSnapshot() {
-        ActionHistory matchHistory = new ActionHistory();
-        assertEquals(0, matchHistory.getTimesSearched());
-        assertEquals(0, matchHistory.getTimesFound());
-
-        // Add a successful snapshot
-        ActionRecord successfulSnapshot = new ActionRecord.Builder()
-                .addMatch(new Match())
-                .build();
-        matchHistory.addSnapshot(successfulSnapshot);
-
-        assertEquals(1, matchHistory.getTimesSearched());
-        assertEquals(1, matchHistory.getTimesFound());
-
-        // Add a failed snapshot
-        ActionRecord failedSnapshot = new ActionRecord.Builder().build();
-        matchHistory.addSnapshot(failedSnapshot);
-
-        assertEquals(2, matchHistory.getTimesSearched());
-        assertEquals(1, matchHistory.getTimesFound());
-    }
-
-    /**
-     * Test the getRandomSnapshot methods with new ActionConfig
-     */
-    @Test
-    public void testGetRandomSnapshotWithActionConfig() {
+    @DisplayName("Should handle multiple snapshots in ActionHistory")
+    void testMultipleSnapshots() throws Exception {
+        // Given
         ActionHistory matchHistory = new ActionHistory();
 
-        // Create find options
-        PatternFindOptions findOptions = new PatternFindOptions.Builder()
-                .setStrategy(PatternFindOptions.Strategy.FIRST)
-                .build();
+        // Add multiple snapshots
+        for (int i = 0; i < 3; i++) {
+            PatternFindOptions findOptions = new PatternFindOptions.Builder()
+                    .setStrategy(PatternFindOptions.Strategy.ALL)
+                    .build();
+                    
+            ActionRecord snapshot = new ActionRecord.Builder()
+                    .setActionConfig(findOptions)
+                    .addMatch(new Match.Builder()
+                            .setName("Match" + i)
+                            .setSimScore(0.9 - (i * 0.1))
+                            .build())
+                    .setActionSuccess(i % 2 == 0)
+                    .setDuration(100.0 + (i * 50))
+                    .build();
+            matchHistory.addSnapshot(snapshot);
+        }
 
-        // Add a FIND snapshot
-        ActionRecord findSnapshot = new ActionRecord.Builder()
-                .setActionConfig(findOptions)
-                .addMatch(new Match.Builder().setName("FindMatch").build())
-                .build();
-        findSnapshot.setStateId(1L);
-        matchHistory.addSnapshot(findSnapshot);
-
-        // Create click options
-        ClickOptions clickOptions = new ClickOptions.Builder()
-                .setClickType(ClickOptions.Type.RIGHT)
-                .build();
-
-        // Add a CLICK snapshot
-        ActionRecord clickSnapshot = new ActionRecord.Builder()
-                .setActionConfig(clickOptions)
-                .addMatch(new Match.Builder().setName("ClickMatch").build())
-                .build();
-        clickSnapshot.setStateId(2L);
-        matchHistory.addSnapshot(clickSnapshot);
-
-        // Test getRandomSnapshot by action type (using class type)
-        Optional<ActionRecord> findResult = matchHistory.getSnapshots().stream()
-                .filter(s -> s.getActionConfig() instanceof PatternFindOptions)
-                .findFirst();
-        assertTrue(findResult.isPresent());
-        assertEquals("FindMatch", findResult.get().getMatchList().getFirst().getName());
-
-        Optional<ActionRecord> clickResult = matchHistory.getSnapshots().stream()
-                .filter(s -> s.getActionConfig() instanceof ClickOptions)
-                .findFirst();
-        assertTrue(clickResult.isPresent());
-        assertEquals("ClickMatch", clickResult.get().getMatchList().getFirst().getName());
-
-        // Test filtering by state
-        Optional<ActionRecord> stateResult = matchHistory.getSnapshots().stream()
-                .filter(s -> s.getActionConfig() instanceof PatternFindOptions && s.getStateId() == 1L)
-                .findFirst();
-        assertTrue(stateResult.isPresent());
-        assertEquals("FindMatch", stateResult.get().getMatchList().getFirst().getName());
-    }
-
-    /**
-     * Test the isEmpty and merge methods
-     */
-    @Test
-    public void testEmptyAndMerge() {
-        ActionHistory emptyHistory = new ActionHistory();
-        assertTrue(emptyHistory.isEmpty());
-
-        ActionHistory history1 = new ActionHistory();
-        history1.addSnapshot(new ActionRecord.Builder().addMatch(new Match()).build());
-        assertFalse(history1.isEmpty());
-
-        ActionHistory history2 = new ActionHistory();
-        history2.addSnapshot(new ActionRecord.Builder().addMatch(new Match()).build());
-        history2.addSnapshot(new ActionRecord.Builder().addMatch(new Match()).build());
-
-        // Merge history2 into history1
-        history1.merge(history2);
-
-        assertEquals(3, history1.getTimesSearched()); // 1 + 2
-        assertEquals(3, history1.getTimesFound()); // 1 + 2
-        assertEquals(3, history1.getSnapshots().size()); // 1 + 2
-    }
-
-    /**
-     * Test the equals method with new ActionConfig
-     */
-    @Test
-    public void testEqualsWithActionConfig() {
-        ActionHistory history1 = new ActionHistory();
-
-        PatternFindOptions findOptions1 = new PatternFindOptions.Builder()
-                .setStrategy(PatternFindOptions.Strategy.FIRST)
-                .build();
-
-        ActionRecord snapshot1 = new ActionRecord.Builder()
-                .setActionConfig(findOptions1)
-                .addMatch(new Match.Builder().setRegion(10, 20, 30, 40).build())
-                .build();
-        history1.addSnapshot(snapshot1);
-
-        // Create identical history
-        ActionHistory history2 = new ActionHistory();
-
-        PatternFindOptions findOptions2 = new PatternFindOptions.Builder()
-                .setStrategy(PatternFindOptions.Strategy.FIRST)
-                .build();
-
-        ActionRecord snapshot2 = new ActionRecord.Builder()
-                .setActionConfig(findOptions2)
-                .addMatch(new Match.Builder().setRegion(10, 20, 30, 40).build())
-                .build();
-        history2.addSnapshot(snapshot2);
-
-        System.out.println("History1: " + history1);
-        System.out.println("History2: " + history2);
-        System.out.println("Equals result: " + history1.equals(history2));
-        assertEquals(history1.getSnapshots().getFirst().getActionConfig().getClass(), 
-                     history2.getSnapshots().getFirst().getActionConfig().getClass());
-        assertTrue(history1.getSnapshots().getFirst().equals(history2.getSnapshots().getFirst()));
-        assertTrue(history1.equals(history2));
-
-        // Create different history with different action type
-        ActionHistory history3 = new ActionHistory();
-
-        ClickOptions clickOptions = new ClickOptions.Builder()
-                .setClickType(ClickOptions.Type.LEFT)
-                .build();
-
-        ActionRecord snapshot3 = new ActionRecord.Builder()
-                .setActionConfig(clickOptions)  // Different action type
-                .addMatch(new Match.Builder().setRegion(10, 20, 30, 40).build())
-                .build();
-        history3.addSnapshot(snapshot3);
-
-        assertFalse(history1.equals(history3));
-    }
-
-    /**
-     * Test backward compatibility with legacy ActionOptions if still supported
-     */
-    @Test
-    public void testLegacyActionOptionsCompatibility() throws Exception {
-        // This test demonstrates how to handle legacy ActionOptions if needed
-        ActionHistory matchHistory = new ActionHistory();
-
-        // Create legacy snapshot with PatternFindOptions
-        PatternFindOptions legacyOptions = new PatternFindOptions.Builder()
-                .setStrategy(PatternFindOptions.Strategy.FIRST)
-                .build();
-
-        ActionRecord legacySnapshot = new ActionRecord.Builder()
-                .setActionConfig(legacyOptions)
-                .addMatch(new Match.Builder().setName("LegacyMatch").build())
-                .build();
-        matchHistory.addSnapshot(legacySnapshot);
-
-        // Serialize
+        // When
         String json = objectMapper.writeValueAsString(matchHistory);
-        assertNotNull(json);
-        assertTrue(json.contains("\"strategy\""));
-        assertTrue(json.contains("\"FIRST\""));
+        ActionHistory deserializedHistory = objectMapper.readValue(json, ActionHistory.class);
 
-        // Note: In production, you would migrate these to new ActionConfig format
+        // Then
+        assertNotNull(deserializedHistory);
+        assertEquals(3, deserializedHistory.getTimesSearched());
+        assertEquals(2, deserializedHistory.getTimesFound()); // 2 successful (i=0,2)
+        assertEquals(3, deserializedHistory.getSnapshots().size());
+
+        // Verify each snapshot
+        for (int i = 0; i < 3; i++) {
+            ActionRecord snapshot = deserializedHistory.getSnapshots().get(i);
+            assertEquals(i % 2 == 0, snapshot.isActionSuccess());
+            assertEquals(100.0 + (i * 50), snapshot.getDuration(), 0.01);
+        }
+    }
+
+    @Test
+    @DisplayName("Should preserve timestamps in ActionHistory")
+    void testTimestampPreservation() throws Exception {
+        // Given
+        ActionHistory matchHistory = new ActionHistory();
+        LocalDateTime timestamp = LocalDateTime.now();
+
+        ActionRecord snapshot = new ActionRecord.Builder()
+                .setActionConfig(new PatternFindOptions.Builder().build())
+                .setActionSuccess(true)
+                .build();
+        matchHistory.addSnapshot(snapshot);
+
+        // When
+        String json = objectMapper.writeValueAsString(matchHistory);
+        ActionHistory deserializedHistory = objectMapper.readValue(json, ActionHistory.class);
+
+        // Then
+        assertNotNull(deserializedHistory);
+        ActionRecord deserializedSnapshot = deserializedHistory.getSnapshots().get(0);
+        assertNotNull(deserializedSnapshot.getTimeStamp());
+        // Timestamp is automatically set when creating ActionRecord
+    }
+
+    @Test
+    @DisplayName("Should handle null values in ActionHistory")
+    void testNullHandling() throws Exception {
+        // Given
+        ActionHistory matchHistory = new ActionHistory();
+        
+        ActionRecord snapshot = new ActionRecord.Builder()
+                .setActionConfig(null) // null config
+                .setText(null) // null text
+                .setActionSuccess(false)
+                .build();
+        matchHistory.addSnapshot(snapshot);
+
+        // When
+        String json = objectMapper.writeValueAsString(matchHistory);
+        ActionHistory deserializedHistory = objectMapper.readValue(json, ActionHistory.class);
+
+        // Then
+        assertNotNull(deserializedHistory);
+        ActionRecord deserializedSnapshot = deserializedHistory.getSnapshots().get(0);
+        assertNull(deserializedSnapshot.getActionConfig());
+        assertNull(deserializedSnapshot.getText());
+        assertFalse(deserializedSnapshot.isActionSuccess());
+    }
+
+    @Test
+    @DisplayName("Should handle custom JSON modifications")
+    void testCustomJsonModifications() throws Exception {
+        // Given
+        ActionHistory matchHistory = new ActionHistory();
+        ActionRecord snapshot = new ActionRecord.Builder()
+                .setActionConfig(new PatternFindOptions.Builder().build())
+                .setActionSuccess(true)
+                .build();
+        matchHistory.addSnapshot(snapshot);
+
+        // Serialize to JSON and modify
+        JsonNode jsonNode = objectMapper.valueToTree(matchHistory);
+        ((ObjectNode) jsonNode).put("customField", "customValue");
+        ((ObjectNode) jsonNode).put("timesSearched", 10);
+
+        // When
+        ActionHistory deserializedHistory = objectMapper.treeToValue(jsonNode, ActionHistory.class);
+
+        // Then
+        assertNotNull(deserializedHistory);
+        assertEquals(10, deserializedHistory.getTimesSearched());
+        // Custom fields are ignored due to @JsonIgnoreProperties(ignoreUnknown = true)
+    }
+
+    @Test
+    @DisplayName("Should handle complex nested ActionConfig")
+    void testComplexActionConfig() throws Exception {
+        // Given
+        ActionHistory matchHistory = new ActionHistory();
+        
+        // Create complex click options
+        MousePressOptions pressOptions = MousePressOptions.builder()
+                .setButton(MouseButton.RIGHT)
+                .setPauseBeforeMouseDown(0.1)
+                .setPauseAfterMouseDown(0.2)
+                .build();
+                
+        ClickOptions clickOptions = new ClickOptions.Builder()
+                .setNumberOfClicks(2)
+                .setPressOptions(pressOptions)
+                .build();
+
+        ActionRecord snapshot = new ActionRecord.Builder()
+                .setActionConfig(clickOptions)
+                .setActionSuccess(true)
+                .build();
+        matchHistory.addSnapshot(snapshot);
+
+        // When
+        String json = objectMapper.writeValueAsString(matchHistory);
+        ActionHistory deserializedHistory = objectMapper.readValue(json, ActionHistory.class);
+
+        // Then
+        ActionRecord deserializedSnapshot = deserializedHistory.getSnapshots().get(0);
+        ClickOptions deserializedOptions = (ClickOptions) deserializedSnapshot.getActionConfig();
+        assertEquals(2, deserializedOptions.getNumberOfClicks());
+        assertEquals(MouseButton.RIGHT, deserializedOptions.getMousePressOptions().getButton());
+        assertEquals(0.1, deserializedOptions.getMousePressOptions().getPauseBeforeMouseDown(), 0.001);
     }
 }

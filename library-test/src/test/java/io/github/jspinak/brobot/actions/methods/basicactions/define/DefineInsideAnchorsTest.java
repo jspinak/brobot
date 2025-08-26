@@ -9,6 +9,7 @@ import io.github.jspinak.brobot.model.element.Region;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
@@ -51,11 +52,14 @@ class DefineInsideAnchorsTest extends BrobotIntegrationTestBase {
      * Apparently, images that are cut at the very right side of the screenshot are not findable.
      */
     @Test
+    @Timeout(5) // 5 second timeout
     void perform() {
         try {
             TestDataUpdated testData = new TestDataUpdated();
             ActionResult matches = new ActionResult();
             matches.setActionConfig(testData.getDefineInsideAnchors());
+            matches.setActionLifecycle(new io.github.jspinak.brobot.action.internal.execution.ActionLifecycle(
+                java.time.LocalDateTime.now(), 30.0));
             
             defineInsideAnchors.perform(matches, testData.getInsideAnchorObjects());
             

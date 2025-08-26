@@ -119,6 +119,7 @@ public class SearchRegionsDeserializer extends JsonDeserializer<SearchRegions> {
         if (node.has("fixedRegion")) {
             JsonNode fixedRegionNode = node.get("fixedRegion");
             if (!isEmptyRegion(fixedRegionNode)) {
+                // Safe to access fields since isEmptyRegion checks for nulls
                 int x = fixedRegionNode.get("x").asInt();
                 int y = fixedRegionNode.get("y").asInt();
                 int w = fixedRegionNode.get("w").asInt();
@@ -145,6 +146,7 @@ public class SearchRegionsDeserializer extends JsonDeserializer<SearchRegions> {
         for (JsonNode regionNode : regionsArray) {
             if (isEmptyRegion(regionNode)) continue;
 
+            // Safe to access fields since isEmptyRegion checks for nulls
             int x = regionNode.get("x").asInt();
             int y = regionNode.get("y").asInt();
             int w = regionNode.get("w").asInt();
@@ -172,11 +174,24 @@ public class SearchRegionsDeserializer extends JsonDeserializer<SearchRegions> {
      * @return true if the region should be filtered out, false if it's valid
      */
     private boolean isEmptyRegion(JsonNode regionNode) {
-        return regionNode.get("w").asInt() == 0 ||
-                regionNode.get("h").asInt() == 0 ||
-                (regionNode.get("x").asInt() == 0 &&
-                        regionNode.get("y").asInt() == 0 &&
-                        regionNode.get("w").asInt() == 1920 &&
-                        regionNode.get("h").asInt() == 1080);
+        if (regionNode == null) return true;
+        
+        JsonNode xNode = regionNode.get("x");
+        JsonNode yNode = regionNode.get("y");
+        JsonNode wNode = regionNode.get("w");
+        JsonNode hNode = regionNode.get("h");
+        
+        // If any required field is missing, consider it empty
+        if (xNode == null || yNode == null || wNode == null || hNode == null) {
+            return true;
+        }
+        
+        int x = xNode.asInt();
+        int y = yNode.asInt();
+        int w = wNode.asInt();
+        int h = hNode.asInt();
+        
+        return w == 0 || h == 0 ||
+                (x == 0 && y == 0 && w == 1920 && h == 1080);
     }
 }

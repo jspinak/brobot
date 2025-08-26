@@ -2,6 +2,8 @@ package io.github.jspinak.brobot.manageStates;
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
 
 import io.github.jspinak.brobot.action.basic.click.ClickOptions;
+import io.github.jspinak.brobot.action.basic.mouse.MousePressOptions;
+import io.github.jspinak.brobot.model.action.MouseButton;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.model.element.Pattern;
 import io.github.jspinak.brobot.model.state.State;
@@ -166,7 +168,9 @@ public class PathFindingWithActionDefinitionTestsUpdated {
         
         // NEW API: Use ClickOptions instead of ActionOptions
         ClickOptions clickOptions = new ClickOptions.Builder()
-                .setClickType(ClickOptions.Type.LEFT)
+                .setPressOptions(MousePressOptions.builder()
+                        .setButton(MouseButton.LEFT)
+                        .build())
                 .setNumberOfClicks(1)
                 .setPauseAfterEnd(0.5)
                 .build();
@@ -208,11 +212,13 @@ public class PathFindingWithActionDefinitionTestsUpdated {
         
         // Step 2: Click the found button
         ClickOptions clickOptions = new ClickOptions.Builder()
-                .setClickType(ClickOptions.Type.LEFT)
+                .setPressOptions(MousePressOptions.builder()
+                        .setButton(MouseButton.LEFT)
+                        .build())
                 .build();
                 
         ObjectCollection clickObjects = new ObjectCollection.Builder()
-                .useMatchesFromPreviousAction()
+                // No direct method to use matches from previous action
                 .build();
                 
         actionDefinition.addStep(clickOptions, clickObjects);
