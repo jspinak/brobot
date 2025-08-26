@@ -70,6 +70,7 @@ library/src/test/resources/histories/
 library/test-history/
 library/test-static-screenshot.png
 library-test/src/test/resources/histories/
+library/debug-captures/
 
 # Temporary documentation and scripts
 /**/90-PERCENT-COVERAGE-PLAN.md
