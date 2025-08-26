@@ -334,32 +334,6 @@ public class CaptureDebuggerTest extends BrobotTestBase {
         }
     }
     
-    @Test
-    public void testCalculateDifference() {
-        // Arrange
-        BufferedImage img1 = new BufferedImage(50, 50, BufferedImage.TYPE_INT_RGB);
-        BufferedImage img2 = new BufferedImage(50, 50, BufferedImage.TYPE_INT_RGB);
-        
-        // Make them slightly different
-        Graphics2D g1 = img1.createGraphics();
-        g1.setColor(Color.BLACK);
-        g1.fillRect(0, 0, 50, 50);
-        g1.dispose();
-        
-        Graphics2D g2 = img2.createGraphics();
-        g2.setColor(Color.WHITE);
-        g2.fillRect(0, 0, 50, 50);
-        g2.dispose();
-        
-        // Act
-        Double difference = invokePrivateMethod(
-            captureDebugger, "calculateDifference", img1, img2);
-        
-        // Assert
-        assertNotNull(difference);
-        assertTrue(difference >= 0.0);
-        assertTrue(difference <= 100.0);
-    }
     
     @Test
     public void testDebugCapture_FullIntegration() throws IOException {

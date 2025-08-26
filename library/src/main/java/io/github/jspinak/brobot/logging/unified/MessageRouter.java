@@ -67,6 +67,11 @@ public class MessageRouter {
      * @param event The log event to route
      */
     public void route(LogEvent event) {
+        // Handle null events gracefully
+        if (event == null) {
+            return;
+        }
+        
         // Only route to console to avoid duplication
         // SLF4J routing is disabled to prevent duplicate output
         // routeToSlf4j(event); // Commented out to prevent duplicate logging
