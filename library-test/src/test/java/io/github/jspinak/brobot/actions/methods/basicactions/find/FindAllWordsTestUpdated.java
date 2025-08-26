@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.io.File;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -80,7 +81,9 @@ public class FindAllWordsTestUpdated extends OcrTestBase {
             ActionResult result = new ActionResult();
             result.setActionConfig(textFindOptions);
             
-            ActionInterface textFindAction = actionService.getAction(textFindOptions);
+            Optional<ActionInterface> textFindActionOpt = actionService.getAction(textFindOptions);
+            assertTrue(textFindActionOpt.isPresent(), "Text find action should be available");
+            ActionInterface textFindAction = textFindActionOpt.get();
             textFindAction.perform(result, screens);
             
             return result;
@@ -111,8 +114,9 @@ public class FindAllWordsTestUpdated extends OcrTestBase {
             System.out.println("Found " + validMatches + " words with area >= " + minArea);
             
             // With TextFindOptions, we get structured text analysis
-            if (wordMatches.getTextAnalysis() != null && !wordMatches.getTextAnalysis().isEmpty()) {
-                System.out.println("Text analysis contains " + wordMatches.getTextAnalysis().size() + " scene analyses");
+            // getTextAnalysis() method may not exist in current API
+            if (wordMatches.getMatchList() != null && !wordMatches.getMatchList().isEmpty()) {
+                System.out.println("Match list contains " + wordMatches.getMatchList().size() + " matches");
             }
         } else {
             System.out.println("No words found in image (this may be normal for some test images)");
@@ -153,7 +157,9 @@ public class FindAllWordsTestUpdated extends OcrTestBase {
             ActionResult result = new ActionResult();
             result.setActionConfig(textFindOptions);
             
-            ActionInterface textFindAction = actionService.getAction(textFindOptions);
+            Optional<ActionInterface> textFindActionOpt = actionService.getAction(textFindOptions);
+            assertTrue(textFindActionOpt.isPresent(), "Text find action should be available");
+            ActionInterface textFindAction = textFindActionOpt.get();
             textFindAction.perform(result, screens);
             
             return result;

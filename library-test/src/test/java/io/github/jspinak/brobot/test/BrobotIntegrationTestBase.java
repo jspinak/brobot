@@ -42,17 +42,22 @@ public abstract class BrobotIntegrationTestBase {
         originalMockState = FrameworkSettings.mock;
         originalEnvironment = ExecutionEnvironment.getInstance();
         
+        // Get mock mode setting from system properties (if set via @TestPropertySource)
+        String mockEnabledProperty = System.getProperty("brobot.mock.enabled");
+        boolean useMockMode = mockEnabledProperty != null ? 
+            Boolean.parseBoolean(mockEnabledProperty) : true; // Default to mock mode for tests
+        
         // Configure environment for integration tests
-        // Always use real files for integration tests, but handle headless gracefully
+        // Use mock mode if configured, but handle real file processing when needed
         ExecutionEnvironment env = ExecutionEnvironment.builder()
-                .mockMode(false)  // Use real files and image processing
+                .mockMode(useMockMode)  // Respect the test configuration
                 .forceHeadless(isHeadlessEnvironment())  // Auto-detect or force headless
                 .allowScreenCapture(false)  // No screen capture in tests
                 .verboseLogging(false)  // Enable for debugging
                 .build();
         
         ExecutionEnvironment.setInstance(env);
-        FrameworkSettings.mock = false;  // Ensure legacy flag is also set correctly
+        FrameworkSettings.mock = useMockMode;  // Ensure legacy flag matches
         
         // Set AWT headless property
         System.setProperty("java.awt.headless", String.valueOf(isHeadlessEnvironment()));

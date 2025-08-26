@@ -45,6 +45,12 @@ public class ConsoleOutputCapture {
     public void startCapture() {
         if (!captureEnabled) return;
         
+        // Don't capture if we're in a test environment to avoid complexity
+        String testType = System.getProperty("brobot.test.type");
+        if ("unit".equals(testType)) {
+            return;
+        }
+        
         // Save original streams
         originalOut = System.out;
         originalErr = System.err;
@@ -113,6 +119,16 @@ public class ConsoleOutputCapture {
             // Prevent recursive logging
             if (isLogging.get()) {
                 // Write directly to original stream to avoid infinite recursion
+                if (isError && originalErr != null) {
+                    originalErr.println(line);
+                } else if (!isError && originalOut != null) {
+                    originalOut.println(line);
+                }
+                return;
+            }
+            
+            // If BrobotLogger is not available, write directly to original stream
+            if (brobotLogger == null) {
                 if (isError && originalErr != null) {
                     originalErr.println(line);
                 } else if (!isError && originalOut != null) {

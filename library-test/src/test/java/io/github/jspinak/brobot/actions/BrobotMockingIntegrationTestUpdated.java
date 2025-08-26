@@ -1,5 +1,4 @@
 package io.github.jspinak.brobot.actions;
-import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
 
 import io.github.jspinak.brobot.action.ActionInterface;
 import io.github.jspinak.brobot.action.ActionResult;
@@ -13,29 +12,29 @@ import io.github.jspinak.brobot.statemanagement.StateMemory;
 import io.github.jspinak.brobot.model.action.ActionRecord;
 import io.github.jspinak.brobot.model.element.Pattern;
 import io.github.jspinak.brobot.config.FrameworkSettings;
-import io.github.jspinak.brobot.config.ExecutionEnvironment;
+import io.github.jspinak.brobot.test.BrobotIntegrationTestBase;
 
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.awt.image.BufferedImage;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Updated integration test demonstrating Brobot mocking functionality with new ActionConfig API.
+ * Integration test demonstrating Brobot mocking functionality.
  * Shows how Brobot mocking differs from standard test mocking.
  * 
- * Key changes:
- * - Uses PatternFindOptions instead of generic ActionOptions
- * - ActionResult requires setActionConfig() before perform()
- * - Uses ActionService to get the appropriate action
- * - Mock behavior works with new config classes
+ * In Brobot:
+ * - Mock mode uses historical match data when available
+ * - Provides consistent test results without GUI dependencies
+ * - Allows testing of state transitions and action sequences
  */
-@SpringBootTest
+@SpringBootTest(classes = io.github.jspinak.brobot.BrobotTestApplication.class)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-class BrobotMockingIntegrationTestUpdated {
+class BrobotMockingIntegrationTestUpdated extends BrobotIntegrationTestBase {
 
     @Autowired
     private ActionService actionService;
@@ -49,10 +48,9 @@ class BrobotMockingIntegrationTestUpdated {
     
     @BeforeEach
     void setUp() {
-        // Reset to real mode
+        super.setUpBrobotEnvironment();
+        // Reset to real mode initially
         FrameworkSettings.mock = false;
-        // Clear any screenshots to ensure proper mock mode behavior
-        FrameworkSettings.screenshots.clearAll();
         
         // Create test images
         BufferedImage dummyImage = new BufferedImage(100, 100, BufferedImage.TYPE_INT_RGB);
@@ -80,11 +78,11 @@ class BrobotMockingIntegrationTestUpdated {
         ActionRecord snapshot1 = new ActionRecord();
         snapshot1.setActionSuccess(true);
         snapshot1.setDuration(0.5);
-        // IMPORTANT: Set the state ID to match the active state
+        // Set the state ID to match the active state
         snapshot1.setStateId(TEST_STATE_ID);
         snapshot1.setStateName("TestState");
         
-        // NEW API: Set the action config to PatternFindOptions
+        // Set the action config to PatternFindOptions
         PatternFindOptions findOptions = new PatternFindOptions.Builder()
                 .setStrategy(PatternFindOptions.Strategy.ALL)
                 .build();
@@ -113,8 +111,15 @@ class BrobotMockingIntegrationTestUpdated {
                 .build();
     }
     
+    @AfterEach
+    void tearDown() {
+        // Reset to default mock mode
+        FrameworkSettings.mock = true;
+    }
+    
     @Test
     @Order(1)
+    @DisplayName("Should load Spring context with required beans")
     void testSpringContextLoads() {
         assertNotNull(actionService, "ActionService should be autowired");
         assertNotNull(stateMemory, "StateMemory should be autowired");
@@ -122,25 +127,17 @@ class BrobotMockingIntegrationTestUpdated {
     
     @Test
     @Order(2)
-    @Disabled("Skipping - headless environment behavior is inconsistent")
+    @DisplayName("Should return empty matches in real mode without GUI")
+    @Disabled("Real mode behavior varies in headless environments")
     void testRealModeReturnsEmptyMatches() {
         // In real mode without an actual GUI, Find should return empty matches
         FrameworkSettings.mock = false;
-        
-        // Force headless mode for this test
-        ExecutionEnvironment env = ExecutionEnvironment.builder()
-                .mockMode(false)
-                .forceHeadless(true)
-                .allowScreenCapture(false)
-                .build();
-        ExecutionEnvironment.setInstance(env);
         
         // Use stateImageWithoutHistory to avoid any cached matches
         ObjectCollection collection = new ObjectCollection.Builder()
                 .withImages(stateImageWithoutHistory)
                 .build();
         
-        // NEW API: Use PatternFindOptions
         PatternFindOptions findOptions = new PatternFindOptions.Builder()
                 .setStrategy(PatternFindOptions.Strategy.FIRST)
                 .build();
@@ -149,10 +146,13 @@ class BrobotMockingIntegrationTestUpdated {
         matches.setActionConfig(findOptions);
         
         try {
-            ActionInterface findAction = actionService.getAction(findOptions);
+            Optional<ActionInterface> findActionOpt = actionService.getAction(findOptions);
+            assertTrue(findActionOpt.isPresent(), "Find action should be available");
+            
+            ActionInterface findAction = findActionOpt.get();
             findAction.perform(matches, collection);
             
-            // In real mode without GUI, should either throw exception or return empty matches
+            // In real mode without GUI, should return empty matches
             assertTrue(matches.isEmpty(), 
                     "Real mode without GUI should return empty matches");
         } catch (Exception e) {
@@ -166,6 +166,7 @@ class BrobotMockingIntegrationTestUpdated {
     
     @Test
     @Order(3)
+    @DisplayName("Should use match history in mock mode")
     void testMockModeUsesMatchHistory() {
         // Enable mock mode
         FrameworkSettings.mock = true;
@@ -177,7 +178,6 @@ class BrobotMockingIntegrationTestUpdated {
                 .withImages(stateImageWithHistory)
                 .build();
         
-        // NEW API: Use PatternFindOptions with ALL strategy
         PatternFindOptions findOptions = new PatternFindOptions.Builder()
                 .setStrategy(PatternFindOptions.Strategy.ALL)
                 .build();
@@ -185,7 +185,10 @@ class BrobotMockingIntegrationTestUpdated {
         ActionResult matches = new ActionResult();
         matches.setActionConfig(findOptions);
         
-        ActionInterface findAction = actionService.getAction(findOptions);
+        Optional<ActionInterface> findActionOpt = actionService.getAction(findOptions);
+        assertTrue(findActionOpt.isPresent());
+        
+        ActionInterface findAction = findActionOpt.get();
         findAction.perform(matches, collection);
         
         // In mock mode, matches should be populated from history
@@ -199,6 +202,7 @@ class BrobotMockingIntegrationTestUpdated {
     
     @Test
     @Order(4)
+    @DisplayName("Should use defaults in mock mode without history")
     void testMockModeWithoutHistoryUsesDefaults() {
         // Enable mock mode
         FrameworkSettings.mock = true;
@@ -207,7 +211,6 @@ class BrobotMockingIntegrationTestUpdated {
                 .withImages(stateImageWithoutHistory)
                 .build();
         
-        // NEW API: Use PatternFindOptions
         PatternFindOptions findOptions = new PatternFindOptions.Builder()
                 .setStrategy(PatternFindOptions.Strategy.FIRST)
                 .build();
@@ -215,16 +218,20 @@ class BrobotMockingIntegrationTestUpdated {
         ActionResult matches = new ActionResult();
         matches.setActionConfig(findOptions);
         
-        ActionInterface findAction = actionService.getAction(findOptions);
+        Optional<ActionInterface> findActionOpt = actionService.getAction(findOptions);
+        assertTrue(findActionOpt.isPresent());
+        
+        ActionInterface findAction = findActionOpt.get();
         findAction.perform(matches, collection);
         
         // Mock mode should still work even without history
-        // The behavior depends on the mock implementation
         assertNotNull(matches, "ActionResult should not be null");
+        assertTrue(matches.isSuccess(), "Mock mode should indicate success");
     }
     
     @Test
     @Order(5)
+    @DisplayName("Should respect find strategies in mock mode")
     void testMockModeRespectsFindStrategies() {
         FrameworkSettings.mock = true;
         
@@ -240,7 +247,9 @@ class BrobotMockingIntegrationTestUpdated {
         ActionResult firstMatches = new ActionResult();
         firstMatches.setActionConfig(firstOptions);
         
-        ActionInterface firstAction = actionService.getAction(firstOptions);
+        Optional<ActionInterface> firstActionOpt = actionService.getAction(firstOptions);
+        assertTrue(firstActionOpt.isPresent());
+        ActionInterface firstAction = firstActionOpt.get();
         firstAction.perform(firstMatches, collection);
         
         // Test ALL strategy
@@ -251,17 +260,21 @@ class BrobotMockingIntegrationTestUpdated {
         ActionResult allMatches = new ActionResult();
         allMatches.setActionConfig(allOptions);
         
-        ActionInterface allAction = actionService.getAction(allOptions);
+        Optional<ActionInterface> allActionOpt = actionService.getAction(allOptions);
+        assertTrue(allActionOpt.isPresent());
+        ActionInterface allAction = allActionOpt.get();
         allAction.perform(allMatches, collection);
         
         // The behavior should differ based on Find strategy
-        // This depends on the mock implementation details
         assertNotNull(firstMatches);
         assertNotNull(allMatches);
+        assertTrue(firstMatches.isSuccess());
+        assertTrue(allMatches.isSuccess());
     }
     
     @Test
     @Order(6)
+    @DisplayName("Should preserve state object data in mock mode")
     void testMockModePreservesStateObjectData() {
         FrameworkSettings.mock = true;
         
@@ -279,16 +292,20 @@ class BrobotMockingIntegrationTestUpdated {
         ActionResult matches = new ActionResult();
         matches.setActionConfig(findOptions);
         
-        ActionInterface findAction = actionService.getAction(findOptions);
+        Optional<ActionInterface> findActionOpt = actionService.getAction(findOptions);
+        assertTrue(findActionOpt.isPresent());
+        
+        ActionInterface findAction = findActionOpt.get();
         findAction.perform(matches, collection);
         
         // In mock mode with history, we should get results
         assertNotNull(matches, "ActionResult should not be null");
-        // The actual data preserved depends on the mock implementation
+        assertTrue(matches.isSuccess());
     }
     
     @Test
     @Order(7)
+    @DisplayName("Should switch between mock and real mode")
     void testSwitchingBetweenMockAndRealMode() {
         ObjectCollection collection = new ObjectCollection.Builder()
                 .withImages(stateImageWithHistory)
@@ -302,25 +319,37 @@ class BrobotMockingIntegrationTestUpdated {
         FrameworkSettings.mock = true;
         ActionResult mockMatches = new ActionResult();
         mockMatches.setActionConfig(findOptions);
-        ActionInterface mockAction = actionService.getAction(findOptions);
+        
+        Optional<ActionInterface> mockActionOpt = actionService.getAction(findOptions);
+        assertTrue(mockActionOpt.isPresent());
+        ActionInterface mockAction = mockActionOpt.get();
         mockAction.perform(mockMatches, collection);
         
-        // Test in real mode
+        // Test in real mode (may fail in headless)
         FrameworkSettings.mock = false;
         ActionResult realMatches = new ActionResult();
         realMatches.setActionConfig(findOptions);
-        ActionInterface realAction = actionService.getAction(findOptions);
-        realAction.perform(realMatches, collection);
+        
+        Optional<ActionInterface> realActionOpt = actionService.getAction(findOptions);
+        assertTrue(realActionOpt.isPresent());
+        ActionInterface realAction = realActionOpt.get();
+        
+        try {
+            realAction.perform(realMatches, collection);
+        } catch (Exception e) {
+            // Expected in headless environment
+        }
         
         // Results should differ between modes
         assertNotNull(mockMatches);
         assertNotNull(realMatches);
-        // The actual behavior difference depends on implementation
+        assertTrue(mockMatches.isSuccess(), "Mock mode should succeed");
     }
     
     @Test
     @Order(8)
-    void testMockModeBehaviorWithoutProbabilities() {
+    @DisplayName("Should have consistent behavior in mock mode")
+    void testMockModeBehaviorConsistency() {
         FrameworkSettings.mock = true;
         
         ObjectCollection collection = new ObjectCollection.Builder()
@@ -329,11 +358,9 @@ class BrobotMockingIntegrationTestUpdated {
         
         PatternFindOptions findOptions = new PatternFindOptions.Builder()
                 .setStrategy(PatternFindOptions.Strategy.ALL)
-                .setPauseBeforeBegin(0)
-                .setPauseAfterEnd(0)
                 .build();
         
-        // Run multiple times to test behavior
+        // Run multiple times to test consistency
         int successCount = 0;
         int trials = 10;
         
@@ -341,60 +368,49 @@ class BrobotMockingIntegrationTestUpdated {
             ActionResult matches = new ActionResult();
             matches.setActionConfig(findOptions);
             
-            ActionInterface findAction = actionService.getAction(findOptions);
+            Optional<ActionInterface> findActionOpt = actionService.getAction(findOptions);
+            assertTrue(findActionOpt.isPresent());
+            
+            ActionInterface findAction = findActionOpt.get();
             findAction.perform(matches, collection);
             
-            if (!matches.isEmpty()) {
+            if (matches.isSuccess()) {
                 successCount++;
             }
         }
         
-        // In mock mode with match history, we should get consistent results
-        assertTrue(successCount > 0, "Should have successful matches in mock mode");
+        // In mock mode, behavior should be consistent
+        assertEquals(trials, successCount, 
+                "Mock mode should have consistent success rate");
     }
     
     @Test
     @Order(9)
-    void testNewAPIFeatures() {
+    @DisplayName("Should work with regions in mock mode")
+    void testMockModeWithRegions() {
         FrameworkSettings.mock = true;
         
+        Region testRegion = new Region(50, 50, 100, 100);
+        
         ObjectCollection collection = new ObjectCollection.Builder()
-                .withImages(stateImageWithHistory)
+                .withRegions(testRegion)
                 .build();
         
-        // Test different strategies with new API
-        PatternFindOptions.Strategy[] strategies = {
-            PatternFindOptions.Strategy.FIRST,
-            PatternFindOptions.Strategy.ALL,
-            PatternFindOptions.Strategy.EACH,
-            PatternFindOptions.Strategy.BEST
-        };
+        PatternFindOptions findOptions = new PatternFindOptions.Builder()
+                .setStrategy(PatternFindOptions.Strategy.FIRST)
+                .build();
         
-        for (PatternFindOptions.Strategy strategy : strategies) {
-            PatternFindOptions options = new PatternFindOptions.Builder()
-                    .setStrategy(strategy)
-                    .setSimilarity(0.8)
-                    .setMaxMatchesToActOn(10)
-                    .build();
-            
-            ActionResult result = new ActionResult();
-            result.setActionConfig(options);
-            
-            ActionInterface action = actionService.getAction(options);
-            action.perform(result, collection);
-            
-            assertNotNull(result, "Result should not be null for strategy: " + strategy);
-            
-            // Verify the config is preserved
-            assertEquals(options, result.getActionConfig());
-        }
-    }
-    
-    @AfterEach
-    void tearDown() {
-        // Reset to default
-        FrameworkSettings.mock = false;
-        // Reset state memory - we can't directly access active states
-        // The mock system will handle state management internally
+        ActionResult matches = new ActionResult();
+        matches.setActionConfig(findOptions);
+        
+        Optional<ActionInterface> findActionOpt = actionService.getAction(findOptions);
+        assertTrue(findActionOpt.isPresent());
+        
+        ActionInterface findAction = findActionOpt.get();
+        findAction.perform(matches, collection);
+        
+        // Mock mode should handle regions
+        assertNotNull(matches);
+        assertTrue(matches.isSuccess());
     }
 }

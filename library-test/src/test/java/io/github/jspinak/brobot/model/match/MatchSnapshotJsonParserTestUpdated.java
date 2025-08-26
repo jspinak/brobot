@@ -107,7 +107,6 @@ public class MatchSnapshotJsonParserTestUpdated {
 
         // Set action config with new API
         ClickOptions clickOptions = new ClickOptions.Builder()
-                .setClickType(ClickOptions.Type.LEFT)
                 .setNumberOfClicks(1)
                 .build();
         snapshot.setActionConfig(clickOptions);
@@ -136,8 +135,7 @@ public class MatchSnapshotJsonParserTestUpdated {
         assertTrue(json.contains("\"actionConfig\""));
         assertTrue(json.contains("\"@type\""));
         assertTrue(json.contains("\"ClickOptions\""));
-        assertTrue(json.contains("\"clickType\""));
-        assertTrue(json.contains("\"LEFT\""));
+        assertTrue(json.contains("\"numberOfClicks\""));
 
         // Deserialize
         JsonNode jsonNode = objectMapper.readTree(json);
@@ -149,7 +147,6 @@ public class MatchSnapshotJsonParserTestUpdated {
         assertTrue(deserializedSnapshot.getActionConfig() instanceof ClickOptions);
         
         ClickOptions deserializedClickOptions = (ClickOptions) deserializedSnapshot.getActionConfig();
-        assertEquals(ClickOptions.Type.LEFT, deserializedClickOptions.getClickType());
         assertEquals(1, deserializedClickOptions.getNumberOfClicks());
         
         assertEquals("Serialized Text", deserializedSnapshot.getText());
@@ -181,7 +178,7 @@ public class MatchSnapshotJsonParserTestUpdated {
     public void testMatchSnapshotBuilderWithActionConfig() throws Exception {
         // Create move options
         MouseMoveOptions moveOptions = new MouseMoveOptions.Builder()
-                .setMoveType(MouseMoveOptions.Type.INSTANT)
+                .setMoveMouseDelay(0.0f)
                 .build();
 
         // Create a match snapshot with builder
@@ -213,7 +210,7 @@ public class MatchSnapshotJsonParserTestUpdated {
         assertTrue(deserializedSnapshot.getActionConfig() instanceof MouseMoveOptions);
         
         MouseMoveOptions deserializedMouseMoveOptions = (MouseMoveOptions) deserializedSnapshot.getActionConfig();
-        assertEquals(MouseMoveOptions.Type.INSTANT, deserializedMouseMoveOptions.getMoveType());
+        assertEquals(0.0f, deserializedMouseMoveOptions.getMoveMouseDelay(), 0.001);
         
         assertEquals("Builder Text", deserializedSnapshot.getText());
         assertEquals(3.5, deserializedSnapshot.getDuration(), 0.001);
@@ -360,7 +357,7 @@ public class MatchSnapshotJsonParserTestUpdated {
                 .build();
 
         ClickOptions clickOptions = new ClickOptions.Builder()
-                .setClickType(ClickOptions.Type.LEFT)
+                .setNumberOfClicks(1)
                 .build();
 
         // Create snapshot with different action type
