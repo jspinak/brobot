@@ -112,6 +112,11 @@ public class MonitoringService {
             return;
         }
         
+        if (executorService.isShutdown()) {
+            ConsoleReporter.println("ContinuousAutomation executor has been shutdown. Cannot start new tasks.");
+            return;
+        }
+        
         isRunning = true;
         consecutiveFailures = 0;
         
