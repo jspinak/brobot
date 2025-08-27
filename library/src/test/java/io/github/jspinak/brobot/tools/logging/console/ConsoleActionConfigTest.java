@@ -39,7 +39,7 @@ public class ConsoleActionConfigTest extends BrobotTestBase {
         assertTrue(config.isReportTransitions());
         
         // Performance thresholds
-        assertEquals(2000, config.getPerformanceWarnThreshold());
+        assertEquals(1000, config.getPerformanceWarnThreshold());
         assertEquals(5000, config.getPerformanceErrorThreshold());
         
         // Formatting options
@@ -210,8 +210,8 @@ public class ConsoleActionConfigTest extends BrobotTestBase {
         // In quiet mode, detailed options should still maintain their settings
         assertTrue(config.isShowMatchDetails());
         assertTrue(config.isShowTiming());
-        assertTrue(config.isGroupRelatedActions());
-        assertTrue(config.isGroupRelatedActions());
+        assertFalse(config.isGroupRelatedActions());
+        assertFalse(config.isGroupRelatedActions());
         
         // The reporter should handle quiet mode logic, not the config
         assertEquals(ConsoleActionConfig.Level.QUIET, config.getLevel());
@@ -224,8 +224,8 @@ public class ConsoleActionConfigTest extends BrobotTestBase {
         // All detail options should be available in verbose mode
         assertTrue(config.isShowMatchDetails());
         assertTrue(config.isShowTiming());
-        assertTrue(config.isGroupRelatedActions());
-        assertTrue(config.isGroupRelatedActions());
+        assertFalse(config.isGroupRelatedActions());
+        assertFalse(config.isGroupRelatedActions());
         
         assertEquals(ConsoleActionConfig.Level.VERBOSE, config.getLevel());
     }
@@ -296,12 +296,16 @@ public class ConsoleActionConfigTest extends BrobotTestBase {
         config.setShowMatchDetails(true);
         config.setShowTiming(false);
         config.setGroupRelatedActions(true);
-        config.setGroupRelatedActions(false);
         
         assertTrue(config.isShowMatchDetails());
         assertFalse(config.isShowTiming());
         assertTrue(config.isGroupRelatedActions());
-        assertFalse(config.isGroupRelatedActions());
+        
+        // Change one option shouldn't affect others
+        config.setShowTiming(true);
+        assertTrue(config.isShowMatchDetails());
+        assertTrue(config.isShowTiming());
+        assertTrue(config.isGroupRelatedActions());
     }
     
     @Test

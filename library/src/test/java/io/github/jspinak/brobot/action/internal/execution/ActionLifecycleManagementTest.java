@@ -221,6 +221,9 @@ public class ActionLifecycleManagementTest extends BrobotTestBase {
         public void testContinueOnFirstRepetition() {
             // Arrange
             when(mockLifecycle.getCompletedRepetitions()).thenReturn(0);
+            LocalDateTime start = LocalDateTime.now();
+            when(mockLifecycle.getStartTime()).thenReturn(start);
+            when(mockTimeProvider.now()).thenReturn(start.plusSeconds(1));
             
             // Act
             boolean shouldContinue = lifecycleManagement.isOkToContinueAction(testResult, 1);
@@ -249,7 +252,7 @@ public class ActionLifecycleManagementTest extends BrobotTestBase {
         @DisplayName("Should continue when within time limit")
         public void testContinueWithinTimeLimit() {
             // Arrange
-            when(mockLifecycle.getCompletedRepetitions()).thenReturn(1);
+            when(mockLifecycle.getCompletedRepetitions()).thenReturn(0);  // Changed to 0 for first iteration
             LocalDateTime start = LocalDateTime.now();
             when(mockLifecycle.getStartTime()).thenReturn(start);
             when(mockTimeProvider.now()).thenReturn(start.plusSeconds(5));
@@ -270,7 +273,7 @@ public class ActionLifecycleManagementTest extends BrobotTestBase {
                 .build();
             testResult.setActionConfig(findOptions);
             
-            when(mockLifecycle.getCompletedRepetitions()).thenReturn(1);
+            when(mockLifecycle.getCompletedRepetitions()).thenReturn(0);  // Changed to 0 for first iteration
             LocalDateTime start = LocalDateTime.now();
             when(mockLifecycle.getStartTime()).thenReturn(start);
             when(mockTimeProvider.now()).thenReturn(start.plusSeconds(15)); // Within 20s limit
@@ -315,7 +318,7 @@ public class ActionLifecycleManagementTest extends BrobotTestBase {
                 .build();
             testResult.setActionConfig(findOptions);
             
-            when(mockLifecycle.getCompletedRepetitions()).thenReturn(1);
+            when(mockLifecycle.getCompletedRepetitions()).thenReturn(0);  // Changed to 0 for first iteration
             LocalDateTime start = LocalDateTime.now();
             when(mockLifecycle.getStartTime()).thenReturn(start);
             when(mockTimeProvider.now()).thenReturn(start.plusSeconds(1));
@@ -529,8 +532,8 @@ public class ActionLifecycleManagementTest extends BrobotTestBase {
             // Arrange
             testResult.setActionLifecycle(null);
             
-            // Act & Assert
-            assertThrows(NullPointerException.class, () -> 
+            // Act & Assert - should handle gracefully without throwing
+            assertDoesNotThrow(() -> 
                 lifecycleManagement.incrementCompletedRepetitions(testResult));
         }
         

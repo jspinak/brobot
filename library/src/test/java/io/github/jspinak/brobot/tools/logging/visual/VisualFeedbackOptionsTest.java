@@ -29,16 +29,16 @@ public class VisualFeedbackOptionsTest extends BrobotTestBase {
     public void setupTest() {
         super.setupTest();
         
-        // Setup mock config
-        when(globalConfig.isEnabled()).thenReturn(true);
-        when(globalConfig.getFind()).thenReturn(findConfig);
-        when(globalConfig.getSearchRegion()).thenReturn(searchRegionConfig);
+        // Setup mock config with lenient stubs since not all tests use all mocks
+        lenient().when(globalConfig.isEnabled()).thenReturn(true);
+        lenient().when(globalConfig.getFind()).thenReturn(findConfig);
+        lenient().when(globalConfig.getSearchRegion()).thenReturn(searchRegionConfig);
         
-        when(findConfig.getColorObject()).thenReturn(Color.GREEN);
-        when(findConfig.getDuration()).thenReturn(2.0);
+        lenient().when(findConfig.getColorObject()).thenReturn(Color.GREEN);
+        lenient().when(findConfig.getDuration()).thenReturn(2.0);
         
-        when(searchRegionConfig.getColorObject()).thenReturn(Color.BLUE);
-        when(searchRegionConfig.getDuration()).thenReturn(1.0);
+        lenient().when(searchRegionConfig.getColorObject()).thenReturn(Color.BLUE);
+        lenient().when(searchRegionConfig.getDuration()).thenReturn(1.0);
     }
     
     @Test

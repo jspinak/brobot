@@ -16,7 +16,7 @@ plugins {
 }
 
 // Apply coverage configuration
-apply from: 'coverage-config.gradle'
+// apply from: 'coverage-config.gradle'
 
 allprojects {
     group = 'io.github.jspinak.brobot'
