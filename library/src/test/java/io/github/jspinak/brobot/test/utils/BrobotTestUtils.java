@@ -1,10 +1,9 @@
 package io.github.jspinak.brobot.test.utils;
 
-import io.github.jspinak.brobot.datatypes.state.state.State;
-import io.github.jspinak.brobot.datatypes.primitives.match.Matches;
-import io.github.jspinak.brobot.datatypes.primitives.location.Location;
-import io.github.jspinak.brobot.datatypes.primitives.region.Region;
-import io.github.jspinak.brobot.datatypes.state.stateObject.stateImage.StateImage;
+import io.github.jspinak.brobot.model.state.State;
+import io.github.jspinak.brobot.model.element.Location;
+import io.github.jspinak.brobot.model.element.Region;
+import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.model.match.Match;
@@ -35,7 +34,7 @@ public class BrobotTestUtils {
      */
     public static StateImage createTestStateImage(String name) {
         StateImage.Builder builder = new StateImage.Builder();
-        builder.withName(name);
+        builder.setName(name);
         return builder.build();
     }
     
@@ -79,12 +78,9 @@ public class BrobotTestUtils {
     public static ActionResult createSuccessfulResult(int matchCount) {
         ActionResult result = new ActionResult();
         result.setSuccess(true);
-        Matches matches = new Matches();
-        for (Match match : createTestMatches(matchCount)) {
-            matches.add(match);
-        }
-        result.setMatches(matches);
-        result.setDuration(100.0 + random.nextInt(900));
+        List<Match> matches = createTestMatches(matchCount);
+        result.setMatchList(matches);
+        result.setDuration(Duration.ofMillis(100 + random.nextInt(900)));
         return result;
     }
     
@@ -94,7 +90,7 @@ public class BrobotTestUtils {
     public static ActionResult createFailedResult() {
         ActionResult result = new ActionResult();
         result.setSuccess(false);
-        result.setDuration(100.0 + random.nextInt(900));
+        result.setDuration(Duration.ofMillis(100 + random.nextInt(900)));
         return result;
     }
     
