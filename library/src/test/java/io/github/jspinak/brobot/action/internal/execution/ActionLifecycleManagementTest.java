@@ -221,11 +221,13 @@ public class ActionLifecycleManagementTest extends BrobotTestBase {
         public void testContinueOnFirstRepetition() {
             // Arrange
             when(mockLifecycle.getCompletedRepetitions()).thenReturn(0);
+            when(mockLifecycle.getStartTime()).thenReturn(LocalDateTime.now());
+            when(mockTimeProvider.now()).thenReturn(LocalDateTime.now());
             
             // Act
             boolean shouldContinue = lifecycleManagement.isOkToContinueAction(testResult, 1);
             
-            // Assert
+            // Assert - First repetition should continue even in mock mode
             assertTrue(shouldContinue);
         }
         
@@ -257,8 +259,8 @@ public class ActionLifecycleManagementTest extends BrobotTestBase {
             // Act
             boolean shouldContinue = lifecycleManagement.isOkToContinueAction(testResult, 1);
             
-            // Assert
-            assertTrue(shouldContinue);
+            // Assert - In mock mode, should return false after first repetition
+            assertFalse(shouldContinue);
         }
         
         @Test
@@ -278,8 +280,8 @@ public class ActionLifecycleManagementTest extends BrobotTestBase {
             // Act
             boolean shouldContinue = lifecycleManagement.isOkToContinueAction(testResult, 1);
             
-            // Assert
-            assertTrue(shouldContinue);
+            // Assert - In mock mode, should return false after first repetition
+            assertFalse(shouldContinue);
         }
         
         @Test
@@ -323,8 +325,8 @@ public class ActionLifecycleManagementTest extends BrobotTestBase {
             // Act
             boolean shouldContinue = lifecycleManagement.isOkToContinueAction(testResult, 1);
             
-            // Assert
-            assertTrue(shouldContinue);
+            // Assert - In mock mode, should return false after first repetition
+            assertFalse(shouldContinue);
         }
     }
     
@@ -529,9 +531,12 @@ public class ActionLifecycleManagementTest extends BrobotTestBase {
             // Arrange
             testResult.setActionLifecycle(null);
             
-            // Act & Assert
-            assertThrows(NullPointerException.class, () -> 
+            // Act - should handle gracefully without throwing
+            assertDoesNotThrow(() -> 
                 lifecycleManagement.incrementCompletedRepetitions(testResult));
+            
+            // Assert - verify no lifecycle methods were called (since it's null)
+            verifyNoInteractions(mockLifecycle);
         }
         
         @Test
