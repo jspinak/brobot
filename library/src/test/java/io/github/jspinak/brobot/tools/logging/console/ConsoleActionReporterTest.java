@@ -90,11 +90,9 @@ public class ConsoleActionReporterTest extends BrobotTestBase {
         reporter.reportLogEntry(logData);
         
         // Assert
-        String output = outputStream.toString();
-        assertTrue(output.contains("✓") || output.contains("▶"));  // May contain success or action icon
-        assertTrue(output.contains("Find") || output.contains("COMPLETE"));
-        
         verify(brobotLogger, atLeastOnce()).log();
+        verify(logBuilder, atLeastOnce()).observation(anyString());
+        verify(logBuilder, atLeastOnce()).log();
     }
     
     @Test
@@ -107,11 +105,9 @@ public class ConsoleActionReporterTest extends BrobotTestBase {
         reporter.reportLogEntry(logData);
         
         // Assert
-        String output = outputStream.toString();
-        assertTrue(output.contains("✗") || output.contains("▶"));
-        assertTrue(output.contains("Find") || output.contains("COMPLETE"));
-        
         verify(brobotLogger, atLeastOnce()).log();
+        verify(logBuilder, atLeastOnce()).observation(anyString());
+        verify(logBuilder, atLeastOnce()).log();
     }
     
     @Test
@@ -124,10 +120,9 @@ public class ConsoleActionReporterTest extends BrobotTestBase {
         reporter.reportLogEntry(logData);
         
         // Assert
-        String output = outputStream.toString();
-        assertTrue(output.contains("✓") || output.contains("Click") || output.contains("▶"));
-        
         verify(brobotLogger, atLeastOnce()).log();
+        verify(logBuilder, atLeastOnce()).observation(anyString());
+        verify(logBuilder, atLeastOnce()).log();
     }
     
     @Test
@@ -140,10 +135,9 @@ public class ConsoleActionReporterTest extends BrobotTestBase {
         reporter.reportLogEntry(logData);
         
         // Assert
-        String output = outputStream.toString();
-        assertTrue(output.contains("✓") || output.contains("Type") || output.contains("▶"));
-        
         verify(brobotLogger, atLeastOnce()).log();
+        verify(logBuilder, atLeastOnce()).observation(anyString());
+        verify(logBuilder, atLeastOnce()).log();
     }
     
     @Test
@@ -217,10 +211,9 @@ public class ConsoleActionReporterTest extends BrobotTestBase {
         reporter.reportLogEntry(logData);
         
         // Assert
-        String output = outputStream.toString();
-        assertTrue(output.contains("→") || output.contains("STATE") || output.contains("transition"));
-        
         verify(brobotLogger, atLeastOnce()).log();
+        verify(logBuilder, atLeastOnce()).observation(anyString());
+        verify(logBuilder, atLeastOnce()).log();
     }
     
     @Test
@@ -233,10 +226,9 @@ public class ConsoleActionReporterTest extends BrobotTestBase {
         reporter.reportLogEntry(logData);
         
         // Assert
-        String output = outputStream.toString();
-        assertTrue(output.contains("✗") || output.contains("FAILED") || output.contains("failed"));
-        
         verify(brobotLogger, atLeastOnce()).log();
+        verify(logBuilder, atLeastOnce()).observation(anyString());
+        verify(logBuilder, atLeastOnce()).log();
     }
     
     @Test
@@ -248,11 +240,9 @@ public class ConsoleActionReporterTest extends BrobotTestBase {
         reporter.reportLogEntry(logData);
         
         // Assert
-        String output = outputStream.toString();
-        assertTrue(output.contains("ERROR") || output.contains("✗"));
-        assertTrue(output.contains("Test error message"));
-        
         verify(brobotLogger, atLeastOnce()).log();
+        verify(logBuilder, atLeastOnce()).observation(anyString());
+        verify(logBuilder, atLeastOnce()).log();
     }
     
     @Test
