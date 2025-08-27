@@ -69,12 +69,12 @@ class StateTransitionAdvancedTest extends BrobotTestBase {
         
         // Create transition implementations
         taskSequenceTransition = new TaskSequenceStateTransition();
-        taskSequenceTransition.setTaskSequence(mockTaskSequence);
+        taskSequenceTransition.setActionDefinition(mockTaskSequence);
         taskSequenceTransition.setActivate(Set.of(2L));
         
         javaTransition = new JavaStateTransition();
-        javaTransition.setFunction(mockTransitionFunction);
-        javaTransition.setActivateStates(Set.of("ToState"));
+        javaTransition.setTransitionFunction(mockTransitionFunction);
+        javaTransition.setActivateNames(Set.of("ToState"));
     }
     
     @Nested
@@ -132,10 +132,10 @@ class StateTransitionAdvancedTest extends BrobotTestBase {
         void testBooleanSupplierExecution() {
             // Arrange
             when(mockTransitionFunction.getAsBoolean()).thenReturn(true);
-            javaTransition.setFunction(mockTransitionFunction);
+            javaTransition.setTransitionFunction(mockTransitionFunction);
             
             // Act
-            boolean result = javaTransition.getFunction().getAsBoolean();
+            boolean result = javaTransition.getTransitionFunction().getAsBoolean();
             
             // Assert
             assertTrue(result);
@@ -147,10 +147,10 @@ class StateTransitionAdvancedTest extends BrobotTestBase {
         void testFunctionReturningFalse() {
             // Arrange
             when(mockTransitionFunction.getAsBoolean()).thenReturn(false);
-            javaTransition.setFunction(mockTransitionFunction);
+            javaTransition.setTransitionFunction(mockTransitionFunction);
             
             // Act
-            boolean result = javaTransition.getFunction().getAsBoolean();
+            boolean result = javaTransition.getTransitionFunction().getAsBoolean();
             
             // Assert
             assertFalse(result);
@@ -160,12 +160,12 @@ class StateTransitionAdvancedTest extends BrobotTestBase {
         @DisplayName("Should convert state names to IDs")
         void testStateNameToIdConversion() {
             // Arrange
-            javaTransition.setActivateStates(Set.of("State1", "State2", "State3"));
-            javaTransition.setExitStates(Set.of("State4"));
+            javaTransition.setActivateNames(Set.of("State1", "State2", "State3"));
+            javaTransition.setExitNames(Set.of("State4"));
             
             // Act & Assert
-            assertEquals(3, javaTransition.getActivateStates().size());
-            assertEquals(1, javaTransition.getExitStates().size());
+            assertEquals(3, javaTransition.getActivateNames().size());
+            assertEquals(1, javaTransition.getExitNames().size());
         }
     }
     
@@ -363,7 +363,7 @@ class StateTransitionAdvancedTest extends BrobotTestBase {
             TaskSequenceStateTransition incomplete = new TaskSequenceStateTransition();
             
             // Act & Assert
-            assertNull(incomplete.getTaskSequence());
+            assertNull(incomplete.getActionDefinition());
             assertTrue(incomplete.getActivate().isEmpty());
             assertEquals(0, incomplete.getScore());
         }
