@@ -54,8 +54,8 @@ tasks.named('test', Test) {
     // On Windows, this is the most reliable way to ensure native .dll files are found.
     environment 'PATH', "${layout.buildDirectory.dir('natives').get().asFile.absolutePath};${System.getenv('PATH')}"
     
-    // Disable OCR tests by default (for CI/CD environments)
-    systemProperty 'brobot.tests.ocr.disable', System.getProperty('brobot.tests.ocr.disable', 'true')
+    // OCR tests now use saved FloraNext screenshots and work in CI/CD
+    // No longer need to disable OCR tests
     
     // Configure JVM memory to avoid OutOfMemoryError with JavaCV/OpenCV
     maxHeapSize = '6g'
@@ -112,13 +112,13 @@ tasks.register('integrationTest', Test) {
     }
 }
 
-// Custom task for tests without OCR
+// Custom task for tests without live OCR (uses saved screenshots)
 tasks.register('testWithoutOcr', Test) {
     dependsOn tasks.named('copyTestNatives')
     useJUnitPlatform()
     
-    // Disable OCR tests
-    systemProperty 'brobot.tests.ocr.disable', 'true'
+    // Tests now use saved screenshots - no need to disable
+    // All OCR tests work with pre-saved FloraNext images
     
     // Same environment as regular tests
     environment 'PATH', "${layout.buildDirectory.dir('natives').get().asFile.absolutePath};${System.getenv('PATH')}"
@@ -129,8 +129,8 @@ tasks.register('testWithoutOcr', Test) {
     }
     
     doFirst {
-        println "Running tests with OCR disabled..."
-        println "OCR-dependent tests will be skipped"
+        println "Running tests with saved screenshots (no live OCR needed)..."
+        println "All tests use pre-saved FloraNext images"
     }
 }
 
@@ -161,8 +161,8 @@ tasks.register('testLocal', Test) {
     dependsOn tasks.named('copyTestNatives')
     useJUnitPlatform()
     
-    // Enable OCR tests for local development
-    systemProperty 'brobot.tests.ocr.disable', 'false'
+    // OCR tests work with saved screenshots in all environments
+    // No need to explicitly enable/disable
     
     // Set Tesseract environment for WSL/Ubuntu
     environment 'TESSDATA_PREFIX', '/usr/share/tesseract-ocr/4.00/tessdata'
