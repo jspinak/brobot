@@ -61,10 +61,24 @@ tasks.named('test', Test) {
     maxHeapSize = '6g'
     jvmArgs '-XX:MaxRAMPercentage=80.0', '-XX:+UseG1GC', '-Dorg.bytedeco.javacpp.maxphysicalbytes=10G', '-Dorg.bytedeco.javacpp.maxbytes=0', '-Dorg.bytedeco.javacpp.cachedir=/tmp/javacpp-cache'
     
+    // Increase timeout for integration tests (10 minutes per test)
+    timeout = Duration.ofMinutes(10)
+    
+    // Configure parallel test execution for better performance
+    maxParallelForks = Runtime.runtime.availableProcessors().intdiv(2) ?: 1
+    forkEvery = 20 // Fork new JVM every 20 tests to prevent memory issues
+    
     // Configure test output
     testLogging {
         events "passed", "skipped", "failed"
         exceptionFormat "full"
+        showStackTraces = true
+        showCauses = true
+    }
+    
+    // JaCoCo specific configuration for test task
+    jacoco {
+        excludes = ['**/test/**', '**/mock/**', '**/testutils/**']
     }
 }
 
@@ -100,10 +114,23 @@ tasks.register('integrationTest', Test) {
     environment 'BROBOT_ALLOW_SCREEN_CAPTURE', 'false'
     environment 'PATH', "${layout.buildDirectory.dir('natives').get().asFile.absolutePath};${System.getenv('PATH')}"
     
+    // Increase timeout for integration tests (15 minutes per test)
+    timeout = Duration.ofMinutes(15)
+    
+    // Configure JVM memory for integration tests
+    maxHeapSize = '8g'
+    jvmArgs '-XX:MaxRAMPercentage=85.0', '-XX:+UseG1GC', '-Dorg.bytedeco.javacpp.maxphysicalbytes=12G'
+    
+    // Limit parallel execution for integration tests
+    maxParallelForks = 2
+    forkEvery = 10
+    
     testLogging {
         events "passed", "skipped", "failed"
         exceptionFormat "full"
         showStandardStreams = true // Show console output from tests
+        showStackTraces = true
+        showCauses = true
     }
     
     doFirst {

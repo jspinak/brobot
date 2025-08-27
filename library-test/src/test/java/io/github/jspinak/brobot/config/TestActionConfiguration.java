@@ -5,7 +5,7 @@ import io.github.jspinak.brobot.action.basic.click.Click;
 import io.github.jspinak.brobot.action.basic.highlight.Highlight;
 import io.github.jspinak.brobot.action.basic.wait.WaitVanish;
 import io.github.jspinak.brobot.action.basic.mouse.MoveMouse;
-import io.github.jspinak.brobot.action.composite.multiple.finds.ConfirmedFinds;
+// import io.github.jspinak.brobot.action.composite.multiple.finds.ConfirmedFinds; // Class doesn't exist
 import io.github.jspinak.brobot.action.internal.capture.RegionDefiner;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
@@ -117,22 +117,23 @@ public class TestActionConfiguration {
         return mockMove;
     }
     
-    /**
-     * Provides a mocked ConfirmedFinds action to avoid circular dependencies.
-     */
-    @Bean("testConfirmedFinds")
-    @Primary
-    public ConfirmedFinds testConfirmedFinds() {
-        ConfirmedFinds mockFinds = Mockito.mock(ConfirmedFinds.class);
-        
-        doAnswer(invocation -> {
-            ActionResult matches = invocation.getArgument(0);
-            matches.setSuccess(true);
-            return null;
-        }).when(mockFinds).perform(any(ActionResult.class), any(ObjectCollection[].class));
-        
-        return mockFinds;
-    }
+    // Commented out as ConfirmedFinds class doesn't exist
+    // /**
+    //  * Provides a mocked ConfirmedFinds action to avoid circular dependencies.
+    //  */
+    // @Bean("testConfirmedFinds")
+    // @Primary
+    // public ConfirmedFinds testConfirmedFinds() {
+    //     ConfirmedFinds mockFinds = Mockito.mock(ConfirmedFinds.class);
+    //     
+    //     doAnswer(invocation -> {
+    //         ActionResult matches = invocation.getArgument(0);
+    //         matches.setSuccess(true);
+    //         return null;
+    //     }).when(mockFinds).perform(any(ActionResult.class), any(ObjectCollection[].class));
+    //     
+    //     return mockFinds;
+    // }
     
     /**
      * Provides a mocked RegionDefiner to avoid circular dependencies.

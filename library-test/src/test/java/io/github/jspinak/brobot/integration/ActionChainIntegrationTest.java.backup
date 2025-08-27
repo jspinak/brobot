@@ -188,7 +188,7 @@ public class ActionChainIntegrationTest extends BrobotTestBase {
                     
             ObjectCollection step1 = new ObjectCollection.Builder()
                     .withPatterns(pattern)
-                    .withActionConfig(findOptions)
+                    .withActionOptions(findOptions)
                     .build();
                     
             ActionResult step1Result = action.find(step1);
@@ -198,7 +198,7 @@ public class ActionChainIntegrationTest extends BrobotTestBase {
             if (step1Result.getMatchList() != null && !step1Result.getMatchList().isEmpty()) {
                 ObjectCollection step2 = new ObjectCollection.Builder()
                         .withMatches(step1Result.getMatchList().get(0))
-                        .withActionConfig(clickOptions)
+                        .withActionOptions(clickOptions)
                         .build();
                         
                 ActionResult step2Result = action.click(step2);
@@ -208,7 +208,7 @@ public class ActionChainIntegrationTest extends BrobotTestBase {
             // Step 3: Type text
             ObjectCollection step3 = new ObjectCollection.Builder()
                     .withStrings("workflow complete")
-                    .withActionConfig(typeOptions)
+                    .withActionOptions(typeOptions)
                     .build();
                     
             ActionResult step3Result = action.type(step3);
@@ -232,7 +232,7 @@ public class ActionChainIntegrationTest extends BrobotTestBase {
                     
             ObjectCollection findCollection = new ObjectCollection.Builder()
                     .withPatterns(nonExistentPattern)
-                    .withActionConfig(strictOptions)
+                    .withActionOptions(strictOptions)
                     .build();
             
             // Act
