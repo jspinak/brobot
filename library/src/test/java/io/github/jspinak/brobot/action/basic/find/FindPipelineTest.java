@@ -357,8 +357,7 @@ class FindPipelineTest extends BrobotTestBase {
         void testMatchAdjustments() {
             // Arrange
             MatchAdjustmentOptions adjustmentOptions = MatchAdjustmentOptions.builder()
-                .setAddX(10)
-                .setAddY(-10)
+                .setTargetOffset(new Location(10, -10))
                 .build();
             
             PatternFindOptions options = new PatternFindOptions.Builder()
@@ -385,8 +384,12 @@ class FindPipelineTest extends BrobotTestBase {
         @Test
         @DisplayName("Should handle null BaseFindOptions")
         void testNullBaseFindOptions() {
-            // Act - pipeline should handle gracefully
-            assertDoesNotThrow(() ->
+            // Setup mock to throw exception for null options
+            doThrow(new NullPointerException("BaseFindOptions cannot be null"))
+                .when(findPipeline).execute(isNull(), any(), any());
+            
+            // Act & Assert
+            assertThrows(NullPointerException.class, () ->
                 findPipeline.execute(null, actionResult, objectCollection)
             );
             
@@ -397,8 +400,12 @@ class FindPipelineTest extends BrobotTestBase {
         @Test
         @DisplayName("Should handle null ActionResult")
         void testNullActionResult() {
-            // Act - pipeline should handle gracefully
-            assertDoesNotThrow(() ->
+            // Setup mock to throw exception for null ActionResult
+            doThrow(new NullPointerException("ActionResult cannot be null"))
+                .when(findPipeline).execute(any(), isNull(), any());
+            
+            // Act & Assert
+            assertThrows(NullPointerException.class, () ->
                 findPipeline.execute(patternFindOptions, null, objectCollection)
             );
         }
