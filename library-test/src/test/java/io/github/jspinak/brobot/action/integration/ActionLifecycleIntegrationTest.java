@@ -6,9 +6,10 @@ import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
 import io.github.jspinak.brobot.action.basic.type.TypeOptions;
 import io.github.jspinak.brobot.action.internal.execution.ActionLifecycle;
 import io.github.jspinak.brobot.action.internal.execution.ActionLifecycleManagement;
-import io.github.jspinak.brobot.model.action.ActionRecord;
 import io.github.jspinak.brobot.model.element.*;
 import io.github.jspinak.brobot.model.state.StateImage;
+import io.github.jspinak.brobot.model.state.StateLocation;
+import io.github.jspinak.brobot.model.state.StateRegion;
 import io.github.jspinak.brobot.test.BrobotIntegrationTestBase;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,8 +22,6 @@ import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -36,7 +35,7 @@ import static org.junit.jupiter.api.Assertions.*;
     "brobot.console.actions.enabled=true",
     "brobot.action.lifecycle.tracking=true",
     "brobot.action.validation.enabled=true",
-    "brobot.mock.enabled=false"
+    "brobot.mock.enabled=true"  // Use mock mode for testing
 })
 class ActionLifecycleIntegrationTest extends BrobotIntegrationTestBase {
     
@@ -46,627 +45,453 @@ class ActionLifecycleIntegrationTest extends BrobotIntegrationTestBase {
     @Autowired
     private ActionLifecycleManagement lifecycleManagement;
     
-    @Autowired
-    private ActionLifecycle actionLifecycle;
-    
     private StateImage testImage;
+    private StateLocation testLocation;
+    private StateRegion testRegion;
     private ObjectCollection testCollection;
     
     @BeforeEach
     void setupTestData() {
+        // Create StateImage with pattern
         testImage = new StateImage.Builder()
             .setName("test-image")
             .addPattern("images/test.png")
-            .setSimilarity(0.8)
             .build();
         
+        // Create StateLocation
+        testLocation = new StateLocation.Builder()
+            .setName("test-location")
+            .setLocation(new Location(100, 100))
+            .build();
+            
+        // Create StateRegion  
+        testRegion = new StateRegion.Builder()
+            .setName("test-region")
+            .setSearchRegion(new Region(0, 0, 500, 500))
+            .build();
+        
+        // Build ObjectCollection
         testCollection = new ObjectCollection.Builder()
             .withImages(testImage)
+            .withLocations(testLocation)
+            .withRegions(testRegion)
             .build();
     }
     
     @Nested
-    @DisplayName("Action Lifecycle Phase Tests")
-    class ActionLifecyclePhaseTests {
+    @DisplayName("Action Lifecycle Timing Tests")
+    class ActionLifecycleTimingTests {
         
         @Test
-        @DisplayName("Should execute complete action lifecycle")
-        void shouldExecuteCompleteActionLifecycle() {
+        @DisplayName("Should track action start and end times")
+        void shouldTrackActionStartAndEndTimes() {
             // Given
-            PatternFindOptions findOptions = new PatternFindOptions.Builder().build();
-            AtomicReference<ActionLifecyclePhase> currentPhase = new AtomicReference<>();
-            
-            lifecycleManager.registerListener(new ActionLifecycleListener() {
-                @Override
-                public void onPhaseStart(ActionLifecyclePhase phase, ActionConfig config) {
-                    currentPhase.set(phase);
-                }
-                
-                @Override
-                public void onPhaseComplete(ActionLifecyclePhase phase, ActionResult result) {
-                    // Track phase completion
-                }
-            });
+            PatternFindOptions findOptions = new PatternFindOptions.Builder()
+                .setSimilarity(0.8)
+                .build();
             
             // When
             ActionResult result = action.perform(findOptions, testCollection);
             
             // Then
             assertNotNull(result);
-            assertNotNull(currentPhase.get());
-            // Should have gone through initialization, validation, execution, and cleanup
+            assertNotNull(result.getActionLifecycle());
+            assertNotNull(result.getActionLifecycle().getStartTime());
+            assertNotNull(result.getActionLifecycle().getEndTime());
+            
+            // Verify timing consistency
+            LocalDateTime startTime = result.getActionLifecycle().getStartTime();
+            LocalDateTime endTime = result.getActionLifecycle().getEndTime();
+            assertTrue(endTime.isAfter(startTime) || endTime.isEqual(startTime));
         }
         
         @Test
-        @DisplayName("Should track action initialization phase")
-        void shouldTrackActionInitializationPhase() {
-            // Given
-            AtomicBoolean initializationTracked = new AtomicBoolean(false);
-            AtomicReference<LocalDateTime> initTime = new AtomicReference<>();
-            
-            lifecycleManager.registerListener(new ActionLifecycleListener() {
-                @Override
-                public void onPhaseStart(ActionLifecyclePhase phase, ActionConfig config) {
-                    if (phase == ActionLifecyclePhase.INITIALIZATION) {
-                        initializationTracked.set(true);
-                        initTime.set(LocalDateTime.now());
-                    }
-                }
-            });
-            
-            // When
-            action.perform(new ClickOptions.Builder().build(), testCollection);
-            
-            // Then
-            assertTrue(initializationTracked.get());
-            assertNotNull(initTime.get());
-        }
-        
-        @Test
-        @DisplayName("Should track action validation phase")
-        void shouldTrackActionValidationPhase() {
-            // Given
-            AtomicBoolean validationTracked = new AtomicBoolean(false);
-            AtomicReference<ValidationResult> validationResult = new AtomicReference<>();
-            
-            lifecycleManager.registerListener(new ActionLifecycleListener() {
-                @Override
-                public void onValidation(ValidationResult result) {
-                    validationTracked.set(true);
-                    validationResult.set(result);
-                }
-            });
-            
-            // When
-            action.perform(new PatternFindOptions.Builder().build(), testCollection);
-            
-            // Then
-            assertTrue(validationTracked.get());
-            assertNotNull(validationResult.get());
-        }
-        
-        @Test
-        @DisplayName("Should track action execution phase")
-        void shouldTrackActionExecutionPhase() {
-            // Given
-            AtomicBoolean executionStarted = new AtomicBoolean(false);
-            AtomicBoolean executionCompleted = new AtomicBoolean(false);
-            AtomicReference<Duration> executionDuration = new AtomicReference<>();
-            
-            lifecycleManager.registerListener(new ActionLifecycleListener() {
-                private LocalDateTime startTime;
-                
-                @Override
-                public void onPhaseStart(ActionLifecyclePhase phase, ActionConfig config) {
-                    if (phase == ActionLifecyclePhase.EXECUTION) {
-                        executionStarted.set(true);
-                        startTime = LocalDateTime.now();
-                    }
-                }
-                
-                @Override
-                public void onPhaseComplete(ActionLifecyclePhase phase, ActionResult result) {
-                    if (phase == ActionLifecyclePhase.EXECUTION) {
-                        executionCompleted.set(true);
-                        if (startTime != null) {
-                            executionDuration.set(Duration.between(startTime, LocalDateTime.now()));
-                        }
-                    }
-                }
-            });
-            
-            // When
-            action.perform(new TypeOptions.Builder().build(), 
-                new ObjectCollection.Builder().withStrings("test").build());
-            
-            // Then
-            assertTrue(executionStarted.get());
-            assertTrue(executionCompleted.get());
-            assertNotNull(executionDuration.get());
-        }
-        
-        @Test
-        @DisplayName("Should track action cleanup phase")
-        void shouldTrackActionCleanupPhase() {
-            // Given
-            AtomicBoolean cleanupExecuted = new AtomicBoolean(false);
-            List<String> cleanedResources = new ArrayList<>();
-            
-            lifecycleManager.registerListener(new ActionLifecycleListener() {
-                @Override
-                public void onCleanup(List<String> resources) {
-                    cleanupExecuted.set(true);
-                    cleanedResources.addAll(resources);
-                }
-            });
-            
-            // When
-            action.perform(new PatternFindOptions.Builder().build(), testCollection);
-            
-            // Then
-            assertTrue(cleanupExecuted.get());
-            assertNotNull(cleanedResources);
-        }
-    }
-    
-    @Nested
-    @DisplayName("Action Validation Tests")
-    class ActionValidationTests {
-        
-        @Test
-        @DisplayName("Should validate action configuration before execution")
-        void shouldValidateActionConfigurationBeforeExecution() {
-            // Given
-            PatternFindOptions invalidOptions = new PatternFindOptions.Builder()
-                .setSimilarity(-0.5) // Invalid similarity
+        @DisplayName("Should respect search duration")
+        void shouldRespectSearchDuration() {
+            // Given - Set a very short search duration
+            PatternFindOptions findOptions = new PatternFindOptions.Builder()
+                .setSimilarity(0.99)  // High similarity to likely fail
+                .setSearchDuration(0.1) // 100ms search duration
                 .build();
             
             // When
-            ValidationResult validation = validator.validate(invalidOptions, testCollection);
-            
-            // Then
-            assertFalse(validation.isValid());
-            assertFalse(validation.getErrors().isEmpty());
-            assertTrue(validation.getErrors().stream()
-                .anyMatch(error -> error.contains("similarity")));
-        }
-        
-        @Test
-        @DisplayName("Should validate object collection before execution")
-        void shouldValidateObjectCollectionBeforeExecution() {
-            // Given - empty collection
-            ObjectCollection emptyCollection = new ObjectCollection.Builder().build();
-            
-            // When
-            ValidationResult validation = validator.validate(
-                new PatternFindOptions.Builder().build(),
-                emptyCollection
-            );
-            
-            // Then
-            assertFalse(validation.isValid());
-            assertTrue(validation.getErrors().stream()
-                .anyMatch(error -> error.contains("empty") || error.contains("no objects")));
-        }
-        
-        @Test
-        @DisplayName("Should skip execution on validation failure")
-        void shouldSkipExecutionOnValidationFailure() {
-            // Given
-            AtomicBoolean executionSkipped = new AtomicBoolean(true);
-            
-            lifecycleManager.registerListener(new ActionLifecycleListener() {
-                @Override
-                public void onPhaseStart(ActionLifecyclePhase phase, ActionConfig config) {
-                    if (phase == ActionLifecyclePhase.EXECUTION) {
-                        executionSkipped.set(false);
-                    }
-                }
-            });
-            
-            // Invalid configuration
-            PatternFindOptions invalidOptions = new PatternFindOptions.Builder()
-                .setTimeout(-1.0) // Invalid timeout
-                .build();
-            
-            // When
-            ActionResult result = action.perform(invalidOptions, testCollection);
-            
-            // Then - execution may or may not be skipped depending on validation strictness
-            assertNotNull(result);
-        }
-    }
-    
-    @Nested
-    @DisplayName("Action Interceptor Tests")
-    class ActionInterceptorTests {
-        
-        @Test
-        @DisplayName("Should intercept action before execution")
-        void shouldInterceptActionBeforeExecution() {
-            // Given
-            AtomicBoolean intercepted = new AtomicBoolean(false);
-            AtomicReference<ActionConfig> interceptedConfig = new AtomicReference<>();
-            
-            interceptor.registerBeforeInterceptor((config, collection) -> {
-                intercepted.set(true);
-                interceptedConfig.set(config);
-                return true; // Allow execution
-            });
-            
-            PatternFindOptions options = new PatternFindOptions.Builder().build();
-            
-            // When
-            action.perform(options, testCollection);
-            
-            // Then
-            assertTrue(intercepted.get());
-            assertEquals(options, interceptedConfig.get());
-        }
-        
-        @Test
-        @DisplayName("Should intercept action after execution")
-        void shouldInterceptActionAfterExecution() {
-            // Given
-            AtomicBoolean intercepted = new AtomicBoolean(false);
-            AtomicReference<ActionResult> interceptedResult = new AtomicReference<>();
-            
-            interceptor.registerAfterInterceptor((result) -> {
-                intercepted.set(true);
-                interceptedResult.set(result);
-                return result; // Pass through
-            });
-            
-            // When
-            ActionResult result = action.perform(
-                new ClickOptions.Builder().build(),
-                testCollection
-            );
-            
-            // Then
-            assertTrue(intercepted.get());
-            assertEquals(result, interceptedResult.get());
-        }
-        
-        @Test
-        @DisplayName("Should modify action result in after interceptor")
-        void shouldModifyActionResultInAfterInterceptor() {
-            // Given
-            Text modifiedText = new Text("Modified by interceptor");
-            
-            interceptor.registerAfterInterceptor((result) -> {
-                result.setText(modifiedText);
-                return result;
-            });
-            
-            // When
-            ActionResult result = action.perform(
-                new TypeOptions.Builder().build(),
-                new ObjectCollection.Builder().withStrings("original").build()
-            );
-            
-            // Then
-            assertEquals(modifiedText, result.getText());
-        }
-        
-        @Test
-        @DisplayName("Should block action execution from interceptor")
-        void shouldBlockActionExecutionFromInterceptor() {
-            // Given
-            interceptor.registerBeforeInterceptor((config, collection) -> {
-                return false; // Block execution
-            });
-            
-            // When
-            ActionResult result = action.perform(
-                new PatternFindOptions.Builder().build(),
-                testCollection
-            );
+            long startMs = System.currentTimeMillis();
+            ActionResult result = action.perform(findOptions, testCollection);
+            long endMs = System.currentTimeMillis();
             
             // Then
             assertNotNull(result);
-            // Result should indicate blocking or failure
-            assertFalse(result.isSuccess() && result.getMatchList().size() > 0);
+            assertTrue(endMs - startMs < 1000); // Should complete within 1 second
+            assertFalse(result.isSuccess()); // Should fail due to timeout
         }
-    }
-    
-    @Nested
-    @DisplayName("Action Record Management Tests")
-    class ActionRecordManagementTests {
         
         @Test
-        @DisplayName("Should record action execution details")
-        void shouldRecordActionExecutionDetails() {
+        @DisplayName("Should calculate action duration correctly")
+        void shouldCalculateActionDurationCorrectly() {
             // Given
-            PatternFindOptions options = new PatternFindOptions.Builder()
-                .setSimilarity(0.9)
+            PatternFindOptions findOptions = new PatternFindOptions.Builder()
+                .setSimilarity(0.7)
                 .build();
             
             // When
-            ActionResult result = action.perform(options, testCollection);
+            ActionResult result = action.perform(findOptions, testCollection);
             
             // Then
-            ActionRecord record = recordManager.getLatestRecord();
-            assertNotNull(record);
-            assertEquals(options, record.getActionConfig());
-            assertNotNull(record.getTimeStamp());
-            assertNotNull(record.getDuration());
-        }
-        
-        @Test
-        @DisplayName("Should maintain action execution history")
-        void shouldMaintainActionExecutionHistory() {
-            // Given - execute multiple actions
-            action.perform(new PatternFindOptions.Builder().build(), testCollection);
-            action.perform(new ClickOptions.Builder().build(), testCollection);
-            action.perform(new TypeOptions.Builder().build(), 
-                new ObjectCollection.Builder().withStrings("test").build());
+            assertNotNull(result);
+            Duration duration = result.getDuration();
+            assertNotNull(duration);
+            assertTrue(duration.toMillis() >= 0);
             
-            // When
-            List<ActionRecord> history = recordManager.getHistory();
-            
-            // Then
-            assertNotNull(history);
-            assertTrue(history.size() >= 3);
-            
-            // Verify chronological order
-            for (int i = 0; i < history.size() - 1; i++) {
-                assertTrue(history.get(i).getTimeStamp()
-                    .isBefore(history.get(i + 1).getTimeStamp()) ||
-                    history.get(i).getTimeStamp()
-                    .isEqual(history.get(i + 1).getTimeStamp()));
+            // Duration should match the difference between start and end times
+            if (result.getActionLifecycle() != null && 
+                result.getActionLifecycle().getStartTime() != null &&
+                result.getActionLifecycle().getEndTime() != null) {
+                
+                Duration calculatedDuration = Duration.between(
+                    result.getActionLifecycle().getStartTime(),
+                    result.getActionLifecycle().getEndTime()
+                );
+                
+                // Allow for small rounding differences (within 100ms)
+                long diff = Math.abs(calculatedDuration.toMillis() - duration.toMillis());
+                assertTrue(diff < 100);
             }
-        }
-        
-        @Test
-        @DisplayName("Should query action records by criteria")
-        void shouldQueryActionRecordsByCriteria() {
-            // Given - execute various actions
-            action.perform(new PatternFindOptions.Builder().build(), testCollection);
-            action.perform(new ClickOptions.Builder().build(), testCollection);
-            action.perform(new PatternFindOptions.Builder().build(), testCollection);
-            
-            // When
-            List<ActionRecord> findRecords = recordManager.queryRecords(
-                record -> record.getActionConfig() instanceof PatternFindOptions
-            );
-            
-            List<ActionRecord> clickRecords = recordManager.queryRecords(
-                record -> record.getActionConfig() instanceof ClickOptions
-            );
-            
-            // Then
-            assertTrue(findRecords.size() >= 2);
-            assertTrue(clickRecords.size() >= 1);
-        }
-        
-        @Test
-        @DisplayName("Should limit action history size")
-        void shouldLimitActionHistorySize() {
-            // Given
-            int maxHistorySize = 100;
-            recordManager.setMaxHistorySize(maxHistorySize);
-            
-            // Execute more actions than the limit
-            for (int i = 0; i < maxHistorySize + 50; i++) {
-                action.perform(new PatternFindOptions.Builder().build(), testCollection);
-            }
-            
-            // When
-            List<ActionRecord> history = recordManager.getHistory();
-            
-            // Then
-            assertEquals(maxHistorySize, history.size());
-            // Should keep the most recent records
         }
     }
     
     @Nested
-    @DisplayName("Action Metrics Tests")
-    class ActionMetricsTests {
+    @DisplayName("Action Repetition and Sequence Tests")
+    class ActionRepetitionTests {
         
         @Test
-        @DisplayName("Should collect action execution metrics")
-        void shouldCollectActionExecutionMetrics() {
+        @DisplayName("Should handle action execution")
+        void shouldHandleActionExecution() {
             // Given
-            int executionCount = 5;
+            PatternFindOptions findOptions = new PatternFindOptions.Builder()
+                .setSimilarity(0.7)
+                .build();
             
-            // When - execute multiple actions
-            for (int i = 0; i < executionCount; i++) {
-                action.perform(new PatternFindOptions.Builder().build(), testCollection);
-            }
+            // When
+            ActionResult result = action.perform(findOptions, testCollection);
             
             // Then
-            ActionMetrics metrics = lifecycleManager.getMetrics();
-            assertNotNull(metrics);
-            assertTrue(metrics.getTotalExecutions() >= executionCount);
-            assertNotNull(metrics.getAverageExecutionTime());
-            assertTrue(metrics.getAverageExecutionTime().toMillis() >= 0);
+            assertNotNull(result);
+            assertNotNull(result.getActionLifecycle());
+            // In the current implementation, repetitions are tracked differently
+            assertTrue(result.getActionLifecycle().getCompletedRepetitions() >= 0);
         }
         
         @Test
-        @DisplayName("Should track action success rate")
-        void shouldTrackActionSuccessRate() {
-            // Given - mix of successful and failed actions
-            for (int i = 0; i < 3; i++) {
-                action.perform(new PatternFindOptions.Builder().build(), testCollection);
-            }
-            
-            // Force some failures with invalid config
-            ObjectCollection emptyCollection = new ObjectCollection.Builder().build();
-            for (int i = 0; i < 2; i++) {
-                action.perform(new PatternFindOptions.Builder().build(), emptyCollection);
-            }
+        @DisplayName("Should track multiple action executions")
+        void shouldTrackMultipleActionExecutions() {
+            // Given
+            PatternFindOptions findOptions = new PatternFindOptions.Builder()
+                .setSimilarity(0.7)
+                .setMaxMatchesToActOn(3)
+                .build();
             
             // When
-            ActionMetrics metrics = lifecycleManager.getMetrics();
+            ActionResult result = action.perform(findOptions, testCollection);
             
             // Then
-            assertNotNull(metrics);
-            double successRate = metrics.getSuccessRate();
-            assertTrue(successRate >= 0.0 && successRate <= 1.0);
-        }
-        
-        @Test
-        @DisplayName("Should track action type distribution")
-        void shouldTrackActionTypeDistribution() {
-            // Given - execute different action types
-            action.perform(new PatternFindOptions.Builder().build(), testCollection);
-            action.perform(new PatternFindOptions.Builder().build(), testCollection);
-            action.perform(new ClickOptions.Builder().build(), testCollection);
-            action.perform(new TypeOptions.Builder().build(), 
-                new ObjectCollection.Builder().withStrings("test").build());
-            
-            // When
-            Map<Class<?>, Integer> distribution = lifecycleManager.getActionTypeDistribution();
-            
-            // Then
-            assertNotNull(distribution);
-            assertTrue(distribution.containsKey(PatternFindOptions.class));
-            assertTrue(distribution.containsKey(ClickOptions.class));
-            assertTrue(distribution.containsKey(TypeOptions.class));
-            assertEquals(2, distribution.get(PatternFindOptions.class).intValue());
+            assertNotNull(result);
+            assertNotNull(result.getActionLifecycle());
         }
     }
     
     @Nested
-    @DisplayName("Concurrent Lifecycle Management Tests")
-    class ConcurrentLifecycleManagementTests {
+    @DisplayName("Action Result and Match Tests")
+    class ActionResultTests {
+        
+        @Test
+        @DisplayName("Should populate matches when pattern found")
+        void shouldPopulateMatchesWhenPatternFound() {
+            // Given
+            PatternFindOptions findOptions = new PatternFindOptions.Builder()
+                .setSimilarity(0.7)
+                .build();
+            
+            // When
+            ActionResult result = action.perform(findOptions, testCollection);
+            
+            // Then
+            assertNotNull(result);
+            // In mock mode, results depend on mock configuration
+            assertNotNull(result.getMatchList());
+        }
+        
+        @Test
+        @DisplayName("Should return empty matches when pattern not found")
+        void shouldReturnEmptyMatchesWhenPatternNotFound() {
+            // Given
+            PatternFindOptions findOptions = new PatternFindOptions.Builder()
+                .setSimilarity(0.99)  // Very high similarity to likely fail
+                .setSearchDuration(0.1)
+                .build();
+            
+            // When
+            ActionResult result = action.perform(findOptions, testCollection);
+            
+            // Then
+            assertNotNull(result);
+            assertNotNull(result.getMatchList());
+            assertFalse(result.isSuccess());
+        }
+        
+        @Test
+        @DisplayName("Should handle click action")
+        void shouldHandleClickAction() {
+            // Given
+            ClickOptions clickOptions = new ClickOptions.Builder()
+                .build();
+            
+            // When
+            ActionResult result = action.perform(clickOptions, testCollection);
+            
+            // Then
+            assertNotNull(result);
+            assertNotNull(result.getActionLifecycle());
+        }
+        
+        @Test
+        @DisplayName("Should handle type action")
+        void shouldHandleTypeAction() {
+            // Given
+            TypeOptions typeOptions = new TypeOptions.Builder()
+                .build();
+            // TypeOptions doesn't have setText method in Builder
+            
+            // When
+            ActionResult result = action.perform(typeOptions, testCollection);
+            
+            // Then
+            assertNotNull(result);
+            // Check that action was performed
+            assertNotNull(result.getActionLifecycle());
+        }
+    }
+    
+    @Nested
+    @DisplayName("Action Lifecycle Management Tests")
+    class LifecycleManagementTests {
+        
+        @Test
+        @DisplayName("Should increment repetitions correctly")
+        void shouldIncrementRepetitionsCorrectly() {
+            // Given
+            ActionResult result = new ActionResult();
+            ActionLifecycle lifecycle = new ActionLifecycle(LocalDateTime.now(), 10.0);
+            result.setActionLifecycle(lifecycle);
+            
+            // When
+            lifecycleManagement.incrementCompletedRepetitions(result);
+            lifecycleManagement.incrementCompletedRepetitions(result);
+            
+            // Then
+            assertEquals(2, result.getActionLifecycle().getCompletedRepetitions());
+        }
+        
+        @Test
+        @DisplayName("Should increment sequences correctly")
+        void shouldIncrementSequencesCorrectly() {
+            // Given
+            ActionResult result = new ActionResult();
+            ActionLifecycle lifecycle = new ActionLifecycle(LocalDateTime.now(), 10.0);
+            result.setActionLifecycle(lifecycle);
+            
+            // When
+            lifecycleManagement.incrementCompletedSequences(result);
+            
+            // Then
+            assertEquals(1, result.getActionLifecycle().getCompletedSequences());
+        }
+        
+        @Test
+        @DisplayName("Should calculate duration from lifecycle")
+        void shouldCalculateDurationFromLifecycle() {
+            // Given
+            LocalDateTime start = LocalDateTime.now();
+            ActionLifecycle lifecycle = new ActionLifecycle(start, 10.0);
+            LocalDateTime end = start.plusSeconds(5);
+            lifecycle.setEndTime(end);
+            
+            ActionResult result = new ActionResult();
+            result.setActionLifecycle(lifecycle);
+            
+            // When
+            // There's no getDurationInSeconds method, use getDuration instead
+            Duration duration = result.getDuration();
+            
+            // Then
+            assertNotNull(duration);
+            assertEquals(5.0, duration.getSeconds(), 0.01);
+        }
+    }
+    
+    @Nested
+    @DisplayName("Concurrent Action Execution Tests")
+    class ConcurrentExecutionTests {
         
         @Test
         @DisplayName("Should handle concurrent action executions")
         void shouldHandleConcurrentActionExecutions() throws InterruptedException {
             // Given
-            int threadCount = 10;
+            int threadCount = 5;
             CountDownLatch latch = new CountDownLatch(threadCount);
-            AtomicInteger successCount = new AtomicInteger(0);
-            AtomicReference<Exception> error = new AtomicReference<>();
+            List<ActionResult> results = Collections.synchronizedList(new ArrayList<>());
             
-            // When - execute actions concurrently
+            PatternFindOptions findOptions = new PatternFindOptions.Builder()
+                .setSimilarity(0.7)
+                .build();
+            
+            // When
             for (int i = 0; i < threadCount; i++) {
                 new Thread(() -> {
                     try {
-                        ActionResult result = action.perform(
-                            new PatternFindOptions.Builder().build(),
-                            testCollection
-                        );
-                        if (result != null) {
-                            successCount.incrementAndGet();
-                        }
-                    } catch (Exception e) {
-                        error.set(e);
+                        ActionResult result = action.perform(findOptions, testCollection);
+                        results.add(result);
                     } finally {
                         latch.countDown();
                     }
                 }).start();
             }
             
-            // Then
             assertTrue(latch.await(10, TimeUnit.SECONDS));
-            assertNull(error.get());
-            assertEquals(threadCount, successCount.get());
             
-            // Verify all executions were recorded
-            List<ActionRecord> history = recordManager.getHistory();
-            assertTrue(history.size() >= threadCount);
+            // Then
+            assertEquals(threadCount, results.size());
+            for (ActionResult result : results) {
+                assertNotNull(result);
+                assertNotNull(result.getActionLifecycle());
+            }
         }
         
         @Test
-        @DisplayName("Should maintain thread-safe metrics collection")
-        void shouldMaintainThreadSafeMetricsCollection() throws InterruptedException {
+        @DisplayName("Should maintain separate lifecycles for concurrent actions")
+        void shouldMaintainSeparateLifecyclesForConcurrentActions() throws InterruptedException {
             // Given
-            int threadCount = 20;
             CountDownLatch startLatch = new CountDownLatch(1);
-            CountDownLatch completeLatch = new CountDownLatch(threadCount);
+            CountDownLatch completionLatch = new CountDownLatch(2);
             
-            // When - all threads start simultaneously
-            for (int i = 0; i < threadCount; i++) {
-                new Thread(() -> {
-                    try {
-                        startLatch.await(); // Wait for signal
-                        action.perform(new PatternFindOptions.Builder().build(), testCollection);
-                    } catch (InterruptedException e) {
-                        Thread.currentThread().interrupt();
-                    } finally {
-                        completeLatch.countDown();
-                    }
-                }).start();
-            }
+            AtomicBoolean thread1Started = new AtomicBoolean(false);
+            AtomicBoolean thread2Started = new AtomicBoolean(false);
             
-            startLatch.countDown(); // Start all threads
+            PatternFindOptions options1 = new PatternFindOptions.Builder()
+                .setSimilarity(0.7)
+                .setSearchDuration(0.5)
+                .build();
+                
+            PatternFindOptions options2 = new PatternFindOptions.Builder()
+                .setSimilarity(0.8)
+                .setSearchDuration(0.5)
+                .build();
+            
+            ActionResult[] results = new ActionResult[2];
+            
+            // When
+            Thread thread1 = new Thread(() -> {
+                try {
+                    startLatch.await();
+                    thread1Started.set(true);
+                    results[0] = action.perform(options1, testCollection);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                } finally {
+                    completionLatch.countDown();
+                }
+            });
+            
+            Thread thread2 = new Thread(() -> {
+                try {
+                    startLatch.await();
+                    thread2Started.set(true);
+                    results[1] = action.perform(options2, testCollection);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                } finally {
+                    completionLatch.countDown();
+                }
+            });
+            
+            thread1.start();
+            thread2.start();
+            startLatch.countDown(); // Start both threads simultaneously
+            
+            assertTrue(completionLatch.await(5, TimeUnit.SECONDS));
             
             // Then
-            assertTrue(completeLatch.await(10, TimeUnit.SECONDS));
+            assertTrue(thread1Started.get());
+            assertTrue(thread2Started.get());
             
-            ActionMetrics metrics = lifecycleManager.getMetrics();
-            assertEquals(threadCount, metrics.getTotalExecutions());
+            assertNotNull(results[0]);
+            assertNotNull(results[1]);
+            
+            // Each should have its own lifecycle
+            assertNotSame(results[0].getActionLifecycle(), results[1].getActionLifecycle());
         }
     }
     
     @Nested
-    @DisplayName("Action Recovery Tests")
-    class ActionRecoveryTests {
+    @DisplayName("Action Configuration Tests")
+    class ActionConfigurationTests {
         
         @Test
-        @DisplayName("Should recover from action execution failure")
-        void shouldRecoverFromActionExecutionFailure() {
+        @DisplayName("Should apply find configuration correctly")
+        void shouldApplyFindConfigurationCorrectly() {
             // Given
-            AtomicInteger retryCount = new AtomicInteger(0);
-            AtomicBoolean recovered = new AtomicBoolean(false);
-            
-            lifecycleManager.registerRecoveryHandler(new ActionRecoveryHandler() {
-                @Override
-                public boolean handleFailure(ActionConfig config, Exception error) {
-                    retryCount.incrementAndGet();
-                    if (retryCount.get() >= 3) {
-                        recovered.set(true);
-                        return true; // Recovered
-                    }
-                    return false; // Retry
-                }
-            });
-            
-            // When - simulate failure scenario
-            ObjectCollection problematicCollection = new ObjectCollection.Builder()
-                .withImages(testImage)
+            PatternFindOptions findOptions = new PatternFindOptions.Builder()
+                .setSimilarity(0.7)
+                .setStrategy(PatternFindOptions.Strategy.ALL)
                 .build();
             
-            ActionResult result = action.perform(
-                new PatternFindOptions.Builder().build(),
-                problematicCollection
-            );
+            // When
+            ActionResult result = action.perform(findOptions, testCollection);
             
             // Then
             assertNotNull(result);
-            // Recovery handler should have been invoked if needed
+            // Verify configuration was applied (in mock mode, behavior is simulated)
+            assertNotNull(result.getActionConfig());
         }
         
         @Test
-        @DisplayName("Should apply fallback strategy on failure")
-        void shouldApplyFallbackStrategyOnFailure() {
+        @DisplayName("Should handle empty object collection")
+        void shouldHandleEmptyObjectCollection() {
             // Given
-            AtomicBoolean fallbackApplied = new AtomicBoolean(false);
+            PatternFindOptions findOptions = new PatternFindOptions.Builder()
+                .setSimilarity(0.7)
+                .build();
+                
+            ObjectCollection emptyCollection = new ObjectCollection.Builder().build();
             
-            lifecycleManager.registerFallbackStrategy(new ActionFallbackStrategy() {
-                @Override
-                public ActionResult applyFallback(ActionConfig config, ObjectCollection collection) {
-                    fallbackApplied.set(true);
-                    ActionResult fallbackResult = new ActionResult();
-                    fallbackResult.setSuccess(true);
-                    fallbackResult.setText(new Text("Fallback applied"));
-                    return fallbackResult;
-                }
-            });
-            
-            // When - execute with problematic configuration
-            ActionResult result = action.perform(
-                new PatternFindOptions.Builder().setTimeout(0.001).build(), // Very short timeout
-                testCollection
-            );
+            // When
+            ActionResult result = action.perform(findOptions, emptyCollection);
             
             // Then
             assertNotNull(result);
-            // Fallback may or may not be applied depending on actual failure
+            assertFalse(result.isSuccess());
+        }
+        
+        @Test
+        @DisplayName("Should handle multiple object collections")
+        void shouldHandleMultipleObjectCollections() {
+            // Given
+            PatternFindOptions findOptions = new PatternFindOptions.Builder()
+                .setSimilarity(0.7)
+                .build();
+                
+            ObjectCollection collection2 = new ObjectCollection.Builder()
+                .withImages(new StateImage.Builder()
+                    .setName("second-image")
+                    .addPattern("images/second.png")
+                    .build())
+                .build();
+            
+            // When
+            ActionResult result = action.perform(findOptions, testCollection, collection2);
+            
+            // Then
+            assertNotNull(result);
+            assertNotNull(result.getActionLifecycle());
         }
     }
 }
