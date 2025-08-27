@@ -84,7 +84,7 @@ class ObjectCollectionJsonParserTest {
         assertTrue(deserializedCollection.getStateLocations().isEmpty());
         assertTrue(deserializedCollection.getStateRegions().isEmpty());
         assertTrue(deserializedCollection.getStateStrings().isEmpty());
-        assertTrue(deserializedCollection.getMatchList().isEmpty());
+        assertTrue(deserializedCollection.getMatches().isEmpty());
         assertTrue(deserializedCollection.getScenes().isEmpty());
     }
 
@@ -243,7 +243,7 @@ class ObjectCollectionJsonParserTest {
         assertEquals(1, deserializedCollection.getScenes().size());
         assertEquals(TestPaths.getImagePath("bottomR"), deserializedCollection.getScenes().getFirst().getPattern().getImgpath());
 
-        assertEquals(1, deserializedCollection.getMatchList().size());
+        assertEquals(1, deserializedCollection.getMatches().size());
     }
 
     @Test

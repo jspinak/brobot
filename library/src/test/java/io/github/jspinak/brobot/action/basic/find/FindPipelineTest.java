@@ -357,8 +357,8 @@ class FindPipelineTest extends BrobotTestBase {
         void testMatchAdjustments() {
             // Arrange
             MatchAdjustmentOptions adjustmentOptions = MatchAdjustmentOptions.builder()
-                .setAdjustX(10)
-                .setAdjustY(-10)
+                .setAddX(10)
+                .setAddY(-10)
                 .build();
             
             PatternFindOptions options = new PatternFindOptions.Builder()

@@ -1,5 +1,6 @@
 package io.github.jspinak.brobot.action.basic.click;
 import io.github.jspinak.brobot.action.ActionType;
+import io.github.jspinak.brobot.config.MockModeManager;
 
 import io.github.jspinak.brobot.action.ActionInterface;
 import io.github.jspinak.brobot.action.ActionResult;
@@ -120,7 +121,15 @@ public class Click implements ActionInterface {
      */
     private boolean performClick(Location location) {
         try {
-            // Perform the click
+            // In mock mode, simulate the click without actual SikuliX operations
+            if (MockModeManager.isMockMode()) {
+                logger.fine("[MOCK] Simulated click at location: " + location);
+                // Small simulated pause for consistency
+                Thread.sleep(10);
+                return true;
+            }
+            
+            // Perform the actual click in non-mock mode
             org.sikuli.script.Location sikuliLoc = location.sikuli();
             sikuliLoc.click();
 
