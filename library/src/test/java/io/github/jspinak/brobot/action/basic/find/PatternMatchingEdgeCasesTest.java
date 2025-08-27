@@ -186,8 +186,8 @@ class PatternMatchingEdgeCasesTest extends BrobotTestBase {
         void testOverlappingSearchRegions() {
             // Arrange
             SearchRegions searchRegions = new SearchRegions();
-            searchRegions.addRegion(new Region(0, 0, 500, 500));
-            searchRegions.addRegion(new Region(250, 250, 500, 500)); // Overlapping
+            searchRegions.addSearchRegions(new Region(0, 0, 500, 500));
+            searchRegions.addSearchRegions(new Region(250, 250, 500, 500)); // Overlapping
             
             PatternFindOptions options = new PatternFindOptions.Builder()
                 .setSearchRegions(searchRegions)
@@ -208,9 +208,9 @@ class PatternMatchingEdgeCasesTest extends BrobotTestBase {
         void testDisjointSearchRegions() {
             // Arrange
             SearchRegions searchRegions = new SearchRegions();
-            searchRegions.addRegion(new Region(0, 0, 100, 100));
-            searchRegions.addRegion(new Region(200, 200, 100, 100));
-            searchRegions.addRegion(new Region(400, 400, 100, 100));
+            searchRegions.addSearchRegions(new Region(0, 0, 100, 100));
+            searchRegions.addSearchRegions(new Region(200, 200, 100, 100));
+            searchRegions.addSearchRegions(new Region(400, 400, 100, 100));
             
             PatternFindOptions options = new PatternFindOptions.Builder()
                 .setSearchRegions(searchRegions)
@@ -230,9 +230,9 @@ class PatternMatchingEdgeCasesTest extends BrobotTestBase {
         void testNestedSearchRegions() {
             // Arrange
             SearchRegions searchRegions = new SearchRegions();
-            searchRegions.addRegion(new Region(0, 0, 1000, 1000)); // Outer
-            searchRegions.addRegion(new Region(100, 100, 800, 800)); // Middle
-            searchRegions.addRegion(new Region(200, 200, 600, 600)); // Inner
+            searchRegions.addSearchRegions(new Region(0, 0, 1000, 1000)); // Outer
+            searchRegions.addSearchRegions(new Region(100, 100, 800, 800)); // Middle
+            searchRegions.addSearchRegions(new Region(200, 200, 600, 600)); // Inner
             
             PatternFindOptions options = new PatternFindOptions.Builder()
                 .setSearchRegions(searchRegions)
