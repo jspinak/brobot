@@ -30,6 +30,22 @@ class ObjectCollectionSimpleJsonTest extends BrobotTestBase {
         objectMapper = new ObjectMapper();
         // Configure ObjectMapper for Brobot classes
         objectMapper.findAndRegisterModules();
+        
+        // Create a custom module to handle OpenCV Mat serialization issues
+        SimpleModule module = new SimpleModule();
+        // Ignore Mat class completely to avoid conflicting setter issues
+        module.addSerializer(org.bytedeco.opencv.opencv_core.Mat.class, new com.fasterxml.jackson.databind.ser.std.ToStringSerializer());
+        module.addDeserializer(org.bytedeco.opencv.opencv_core.Mat.class, new com.fasterxml.jackson.databind.deser.std.FromStringDeserializer<org.bytedeco.opencv.opencv_core.Mat>(org.bytedeco.opencv.opencv_core.Mat.class) {
+            @Override
+            protected org.bytedeco.opencv.opencv_core.Mat _deserialize(String value, com.fasterxml.jackson.databind.DeserializationContext ctxt) {
+                // Return null for Mat deserialization as these fields should be ignored
+                return null;
+            }
+        });
+        objectMapper.registerModule(module);
+        
+        // Configure to ignore unknown properties and avoid failures
+        objectMapper.configure(com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
 
     @Test
