@@ -33,9 +33,6 @@ public class PathFinderTest extends BrobotTestBase {
     @Mock
     private StateTransitionService stateTransitionService;
     
-    @Mock
-    private ConsoleReporter consoleReporter;
-    
     private PathFinder pathFinder;
     
     @BeforeEach
@@ -59,10 +56,9 @@ public class PathFinderTest extends BrobotTestBase {
             StateTransitions transitions = mock(StateTransitions.class);
             StateTransition directTransition = mock(StateTransition.class);
             
-            when(directTransition.getActivate()).thenReturn("Target");
-            when(transitions.getActivateTransitions()).thenReturn(Collections.singletonMap("Target", directTransition));
-            when(stateTransitionService.findByFromState(1L)).thenReturn(Optional.of(transitions));
-            when(stateTransitionsJointTable.getActivatedBy(2L)).thenReturn(new HashSet<>(Arrays.asList(1L)));
+            when(directTransition.getActivate()).thenReturn(new HashSet<>(Arrays.asList(2L)));
+            when(stateTransitionService.getTransition(1L, 2L)).thenReturn(Optional.of(directTransition));
+            when(stateTransitionsJointTable.getStatesWithTransitionsTo(2L)).thenReturn(new HashSet<>(Arrays.asList(1L)));
             
             when(stateService.getStateName(1L)).thenReturn("Start");
             when(stateService.getStateName(2L)).thenReturn("Target");
@@ -74,9 +70,9 @@ public class PathFinderTest extends BrobotTestBase {
             assertEquals(1, paths.getPaths().size());
             
             Path path = paths.getPaths().get(0);
-            assertEquals(2, path.getStateTransitions().size()); // Start -> Target
-            assertEquals(1L, path.getStateTransitions().get(0));
-            assertEquals(2L, path.getStateTransitions().get(1));
+            assertEquals(2, path.getStates().size()); // Start -> Target
+            assertEquals(1L, path.getStates().get(0));
+            assertEquals(2L, path.getStates().get(1));
         }
         
         @Test
@@ -86,7 +82,7 @@ public class PathFinderTest extends BrobotTestBase {
             State targetState = createMockState(2L, "Target");
             
             // No transitions from start to target
-            when(stateTransitionsJointTable.getActivatedBy(2L)).thenReturn(new HashSet<>());
+            when(stateTransitionsJointTable.getStatesWithTransitionsTo(2L)).thenReturn(new HashSet<>());
             when(stateService.getStateName(1L)).thenReturn("Start");
             when(stateService.getStateName(2L)).thenReturn("Target");
             
@@ -104,12 +100,11 @@ public class PathFinderTest extends BrobotTestBase {
             StateTransitions transitions = mock(StateTransitions.class);
             StateTransition selfTransition = mock(StateTransition.class);
             
-            when(selfTransition.getActivate()).thenReturn("SelfState");
-            when(transitions.getActivateTransitions()).thenReturn(Collections.singletonMap("SelfState", selfTransition));
-            when(stateTransitionService.findByFromState(1L)).thenReturn(Optional.of(transitions));
+            when(selfTransition.getActivate()).thenReturn(new HashSet<>(Arrays.asList(1L)));
+            when(stateTransitionService.getTransition(1L, 1L)).thenReturn(Optional.of(selfTransition));
             
             // State can transition to itself
-            when(stateTransitionsJointTable.getActivatedBy(1L)).thenReturn(new HashSet<>(Arrays.asList(1L)));
+            when(stateTransitionsJointTable.getStatesWithTransitionsTo(1L)).thenReturn(new HashSet<>(Arrays.asList(1L)));
             when(stateService.getStateName(1L)).thenReturn("SelfState");
             
             Paths paths = pathFinder.getPathsToState(Arrays.asList(state), state);
@@ -132,8 +127,8 @@ public class PathFinderTest extends BrobotTestBase {
             State targetState = createMockState(3L, "Target");
             
             // Setup transitions: Start -> Middle -> Target
-            when(stateTransitionsJointTable.getActivatedBy(2L)).thenReturn(new HashSet<>(Arrays.asList(1L)));
-            when(stateTransitionsJointTable.getActivatedBy(3L)).thenReturn(new HashSet<>(Arrays.asList(2L)));
+            when(stateTransitionsJointTable.getStatesWithTransitionsTo(2L)).thenReturn(new HashSet<>(Arrays.asList(1L)));
+            when(stateTransitionsJointTable.getStatesWithTransitionsTo(3L)).thenReturn(new HashSet<>(Arrays.asList(2L)));
             
             when(stateService.getStateName(1L)).thenReturn("Start");
             when(stateService.getStateName(2L)).thenReturn("Middle");
@@ -145,10 +140,10 @@ public class PathFinderTest extends BrobotTestBase {
             assertFalse(paths.getPaths().isEmpty());
             
             Path path = paths.getPaths().get(0);
-            assertEquals(3, path.getStateTransitions().size());
-            assertEquals(1L, path.getStateTransitions().get(0)); // Start
-            assertEquals(2L, path.getStateTransitions().get(1)); // Middle
-            assertEquals(3L, path.getStateTransitions().get(2)); // Target
+            assertEquals(3, path.getStates().size());
+            assertEquals(1L, path.getStates().get(0)); // Start
+            assertEquals(2L, path.getStates().get(1)); // Middle
+            assertEquals(3L, path.getStates().get(2)); // Target
         }
         
         @Test
@@ -161,10 +156,10 @@ public class PathFinderTest extends BrobotTestBase {
             State s5 = createMockState(5L, "S5");
             
             // Chain: S1 -> S2 -> S3 -> S4 -> S5
-            when(stateTransitionsJointTable.getActivatedBy(2L)).thenReturn(new HashSet<>(Arrays.asList(1L)));
-            when(stateTransitionsJointTable.getActivatedBy(3L)).thenReturn(new HashSet<>(Arrays.asList(2L)));
-            when(stateTransitionsJointTable.getActivatedBy(4L)).thenReturn(new HashSet<>(Arrays.asList(3L)));
-            when(stateTransitionsJointTable.getActivatedBy(5L)).thenReturn(new HashSet<>(Arrays.asList(4L)));
+            when(stateTransitionsJointTable.getStatesWithTransitionsTo(2L)).thenReturn(new HashSet<>(Arrays.asList(1L)));
+            when(stateTransitionsJointTable.getStatesWithTransitionsTo(3L)).thenReturn(new HashSet<>(Arrays.asList(2L)));
+            when(stateTransitionsJointTable.getStatesWithTransitionsTo(4L)).thenReturn(new HashSet<>(Arrays.asList(3L)));
+            when(stateTransitionsJointTable.getStatesWithTransitionsTo(5L)).thenReturn(new HashSet<>(Arrays.asList(4L)));
             
             when(stateService.getStateName(anyLong())).thenAnswer(invocation -> "S" + invocation.getArgument(0));
             
@@ -174,9 +169,9 @@ public class PathFinderTest extends BrobotTestBase {
             assertFalse(paths.getPaths().isEmpty());
             
             Path path = paths.getPaths().get(0);
-            assertEquals(5, path.getStateTransitions().size());
+            assertEquals(5, path.getStates().size());
             for (int i = 0; i < 5; i++) {
-                assertEquals(i + 1, path.getStateTransitions().get(i).longValue());
+                assertEquals(i + 1, path.getStates().get(i).longValue());
             }
         }
     }
@@ -194,9 +189,9 @@ public class PathFinderTest extends BrobotTestBase {
             State targetState = createMockState(4L, "Target");
             
             // Two paths: Start -> PathA -> Target and Start -> PathB -> Target
-            when(stateTransitionsJointTable.getActivatedBy(2L)).thenReturn(new HashSet<>(Arrays.asList(1L)));
-            when(stateTransitionsJointTable.getActivatedBy(3L)).thenReturn(new HashSet<>(Arrays.asList(1L)));
-            when(stateTransitionsJointTable.getActivatedBy(4L)).thenReturn(new HashSet<>(Arrays.asList(2L, 3L)));
+            when(stateTransitionsJointTable.getStatesWithTransitionsTo(2L)).thenReturn(new HashSet<>(Arrays.asList(1L)));
+            when(stateTransitionsJointTable.getStatesWithTransitionsTo(3L)).thenReturn(new HashSet<>(Arrays.asList(1L)));
+            when(stateTransitionsJointTable.getStatesWithTransitionsTo(4L)).thenReturn(new HashSet<>(Arrays.asList(2L, 3L)));
             
             when(stateService.getStateName(1L)).thenReturn("Start");
             when(stateService.getStateName(2L)).thenReturn("PathA");
@@ -213,10 +208,10 @@ public class PathFinderTest extends BrobotTestBase {
             boolean hasPathThroughB = false;
             
             for (Path path : paths.getPaths()) {
-                if (path.getStateTransitions().contains(2L)) {
+                if (path.getStates().contains(2L)) {
                     hasPathThroughA = true;
                 }
-                if (path.getStateTransitions().contains(3L)) {
+                if (path.getStates().contains(3L)) {
                     hasPathThroughB = true;
                 }
             }
@@ -240,14 +235,14 @@ public class PathFinderTest extends BrobotTestBase {
             longPath1.setPathScore(2);
             longPath2.setPathScore(2);
             
-            when(stateService.findById(2L)).thenReturn(Optional.of(shortPath));
-            when(stateService.findById(3L)).thenReturn(Optional.of(longPath1));
-            when(stateService.findById(4L)).thenReturn(Optional.of(longPath2));
+            when(stateService.getState(2L)).thenReturn(Optional.of(shortPath));
+            when(stateService.getState(3L)).thenReturn(Optional.of(longPath1));
+            when(stateService.getState(4L)).thenReturn(Optional.of(longPath2));
             
-            when(stateTransitionsJointTable.getActivatedBy(2L)).thenReturn(new HashSet<>(Arrays.asList(1L)));
-            when(stateTransitionsJointTable.getActivatedBy(3L)).thenReturn(new HashSet<>(Arrays.asList(1L)));
-            when(stateTransitionsJointTable.getActivatedBy(4L)).thenReturn(new HashSet<>(Arrays.asList(3L)));
-            when(stateTransitionsJointTable.getActivatedBy(5L)).thenReturn(new HashSet<>(Arrays.asList(2L, 4L)));
+            when(stateTransitionsJointTable.getStatesWithTransitionsTo(2L)).thenReturn(new HashSet<>(Arrays.asList(1L)));
+            when(stateTransitionsJointTable.getStatesWithTransitionsTo(3L)).thenReturn(new HashSet<>(Arrays.asList(1L)));
+            when(stateTransitionsJointTable.getStatesWithTransitionsTo(4L)).thenReturn(new HashSet<>(Arrays.asList(3L)));
+            when(stateTransitionsJointTable.getStatesWithTransitionsTo(5L)).thenReturn(new HashSet<>(Arrays.asList(2L, 4L)));
             
             when(stateService.getStateName(anyLong())).thenAnswer(invocation -> "State" + invocation.getArgument(0));
             
@@ -275,7 +270,7 @@ public class PathFinderTest extends BrobotTestBase {
             State targetState = createMockState(4L, "Target");
             
             // All start states can reach target
-            when(stateTransitionsJointTable.getActivatedBy(4L))
+            when(stateTransitionsJointTable.getStatesWithTransitionsTo(4L))
                 .thenReturn(new HashSet<>(Arrays.asList(1L, 2L, 3L)));
             
             when(stateService.getStateName(1L)).thenReturn("Start1");
@@ -291,7 +286,7 @@ public class PathFinderTest extends BrobotTestBase {
             // Verify paths from each start state
             Set<Long> foundStartStates = new HashSet<>();
             for (Path path : paths.getPaths()) {
-                foundStartStates.add(path.getStateTransitions().get(0));
+                foundStartStates.add(path.getStates().get(0));
             }
             
             assertTrue(foundStartStates.contains(1L));
@@ -308,7 +303,7 @@ public class PathFinderTest extends BrobotTestBase {
             State targetState = createMockState(4L, "Target");
             
             // Only states 1 and 2 can reach target
-            when(stateTransitionsJointTable.getActivatedBy(4L))
+            when(stateTransitionsJointTable.getStatesWithTransitionsTo(4L))
                 .thenReturn(new HashSet<>(Arrays.asList(1L, 2L)));
             
             when(stateService.getStateName(anyLong())).thenAnswer(invocation -> "State" + invocation.getArgument(0));
@@ -319,7 +314,7 @@ public class PathFinderTest extends BrobotTestBase {
             
             // Only paths from reachable states should be found
             for (Path path : paths.getPaths()) {
-                Long startState = path.getStateTransitions().get(0);
+                Long startState = path.getStates().get(0);
                 assertTrue(startState == 1L || startState == 2L);
                 assertNotEquals(3L, startState);
             }
@@ -340,10 +335,10 @@ public class PathFinderTest extends BrobotTestBase {
             
             // Create circular dependency: S1 -> S2 -> S3 -> S1
             // Plus path to target: S2 -> Target
-            when(stateTransitionsJointTable.getActivatedBy(2L)).thenReturn(new HashSet<>(Arrays.asList(1L, 3L)));
-            when(stateTransitionsJointTable.getActivatedBy(3L)).thenReturn(new HashSet<>(Arrays.asList(2L)));
-            when(stateTransitionsJointTable.getActivatedBy(1L)).thenReturn(new HashSet<>(Arrays.asList(3L)));
-            when(stateTransitionsJointTable.getActivatedBy(4L)).thenReturn(new HashSet<>(Arrays.asList(2L)));
+            when(stateTransitionsJointTable.getStatesWithTransitionsTo(2L)).thenReturn(new HashSet<>(Arrays.asList(1L, 3L)));
+            when(stateTransitionsJointTable.getStatesWithTransitionsTo(3L)).thenReturn(new HashSet<>(Arrays.asList(2L)));
+            when(stateTransitionsJointTable.getStatesWithTransitionsTo(1L)).thenReturn(new HashSet<>(Arrays.asList(3L)));
+            when(stateTransitionsJointTable.getStatesWithTransitionsTo(4L)).thenReturn(new HashSet<>(Arrays.asList(2L)));
             
             when(stateService.getStateName(anyLong())).thenAnswer(invocation -> "S" + invocation.getArgument(0));
             
@@ -354,8 +349,8 @@ public class PathFinderTest extends BrobotTestBase {
             // Should find path without getting stuck in cycle
             for (Path path : paths.getPaths()) {
                 // Path should not contain duplicates (no cycles)
-                Set<Long> uniqueStates = new HashSet<>(path.getStateTransitions());
-                assertEquals(uniqueStates.size(), path.getStateTransitions().size());
+                Set<Long> uniqueStates = new HashSet<>(path.getStates());
+                assertEquals(uniqueStates.size(), path.getStates().size());
             }
         }
         
@@ -371,11 +366,11 @@ public class PathFinderTest extends BrobotTestBase {
             State targetState = createMockState(6L, "Target");
             
             // Complex interconnections
-            when(stateTransitionsJointTable.getActivatedBy(2L)).thenReturn(new HashSet<>(Arrays.asList(1L, 3L, 4L)));
-            when(stateTransitionsJointTable.getActivatedBy(3L)).thenReturn(new HashSet<>(Arrays.asList(2L, 5L)));
-            when(stateTransitionsJointTable.getActivatedBy(4L)).thenReturn(new HashSet<>(Arrays.asList(2L, 5L)));
-            when(stateTransitionsJointTable.getActivatedBy(5L)).thenReturn(new HashSet<>(Arrays.asList(3L, 4L)));
-            when(stateTransitionsJointTable.getActivatedBy(6L)).thenReturn(new HashSet<>(Arrays.asList(2L, 3L, 4L, 5L)));
+            when(stateTransitionsJointTable.getStatesWithTransitionsTo(2L)).thenReturn(new HashSet<>(Arrays.asList(1L, 3L, 4L)));
+            when(stateTransitionsJointTable.getStatesWithTransitionsTo(3L)).thenReturn(new HashSet<>(Arrays.asList(2L, 5L)));
+            when(stateTransitionsJointTable.getStatesWithTransitionsTo(4L)).thenReturn(new HashSet<>(Arrays.asList(2L, 5L)));
+            when(stateTransitionsJointTable.getStatesWithTransitionsTo(5L)).thenReturn(new HashSet<>(Arrays.asList(3L, 4L)));
+            when(stateTransitionsJointTable.getStatesWithTransitionsTo(6L)).thenReturn(new HashSet<>(Arrays.asList(2L, 3L, 4L, 5L)));
             
             when(stateService.getStateName(anyLong())).thenAnswer(invocation -> "S" + invocation.getArgument(0));
             
@@ -386,7 +381,7 @@ public class PathFinderTest extends BrobotTestBase {
             // All paths should be valid without cycles
             for (Path path : paths.getPaths()) {
                 Set<Long> visitedStates = new HashSet<>();
-                for (Long stateId : path.getStateTransitions()) {
+                for (Long stateId : path.getStates()) {
                     assertFalse(visitedStates.contains(stateId), "Path contains cycle at state " + stateId);
                     visitedStates.add(stateId);
                 }
@@ -428,7 +423,7 @@ public class PathFinderTest extends BrobotTestBase {
             State isolated2 = createMockState(2L, "Isolated2");
             
             // No transitions between states
-            when(stateTransitionsJointTable.getActivatedBy(anyLong())).thenReturn(new HashSet<>());
+            when(stateTransitionsJointTable.getStatesWithTransitionsTo(anyLong())).thenReturn(new HashSet<>());
             
             when(stateService.getStateName(1L)).thenReturn("Isolated1");
             when(stateService.getStateName(2L)).thenReturn("Isolated2");
@@ -445,7 +440,7 @@ public class PathFinderTest extends BrobotTestBase {
             Set<Long> startStateIds = new HashSet<>(Arrays.asList(1L, 2L, 3L));
             Long targetStateId = 4L;
             
-            when(stateTransitionsJointTable.getActivatedBy(4L))
+            when(stateTransitionsJointTable.getStatesWithTransitionsTo(4L))
                 .thenReturn(new HashSet<>(Arrays.asList(1L, 2L, 3L)));
             
             when(stateService.getStateName(anyLong())).thenAnswer(invocation -> "State" + invocation.getArgument(0));
