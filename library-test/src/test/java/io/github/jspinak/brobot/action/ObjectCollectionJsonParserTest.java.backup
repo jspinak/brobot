@@ -67,7 +67,7 @@ class ObjectCollectionJsonParserTest {
     @Test
     void testSerializeAndDeserializeEmptyObjectCollection() throws Exception {
         // Create an empty ObjectCollection
-        ObjectCollection collection = new ObjectCollection.Builder().build();
+        ObjectCollection collection = new ObjectCollection();
 
         // Serialize to JSON
         String json = objectMapper.writeValueAsString(collection);
@@ -84,7 +84,7 @@ class ObjectCollectionJsonParserTest {
         assertTrue(deserializedCollection.getStateLocations().isEmpty());
         assertTrue(deserializedCollection.getStateRegions().isEmpty());
         assertTrue(deserializedCollection.getStateStrings().isEmpty());
-        assertTrue(deserializedCollection.getMatchList().isEmpty());
+        assertTrue(deserializedCollection.getMatches().isEmpty());
         assertTrue(deserializedCollection.getScenes().isEmpty());
     }
 
@@ -243,13 +243,13 @@ class ObjectCollectionJsonParserTest {
         assertEquals(1, deserializedCollection.getScenes().size());
         assertEquals(TestPaths.getImagePath("bottomR"), deserializedCollection.getScenes().getFirst().getPattern().getImgpath());
 
-        assertEquals(1, deserializedCollection.getMatchList().size());
+        assertEquals(1, deserializedCollection.getMatches().size());
     }
 
     @Test
     void testSerializeAndDeserializeWithNullFields() throws Exception {
         // Create ObjectCollection with some null fields
-        ObjectCollection collection = new ObjectCollection.Builder().build();
+        ObjectCollection collection = new ObjectCollection();
         collection.getStateImages().add(new StateImage());
         
         // Serialize

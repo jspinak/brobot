@@ -172,7 +172,7 @@ class ActionServiceIntegrationTest {
         PatternFindOptions options = new PatternFindOptions.Builder()
                 .build();
         
-        ObjectCollection emptyCollection = new ObjectCollection.Builder().build();
+        ObjectCollection emptyCollection = new ObjectCollection();
         
         ActionResult result = action.perform(options, emptyCollection);
         
