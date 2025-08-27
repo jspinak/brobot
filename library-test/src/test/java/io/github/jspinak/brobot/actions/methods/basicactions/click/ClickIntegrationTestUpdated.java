@@ -6,7 +6,6 @@ import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.action.basic.click.ClickOptions;
 import io.github.jspinak.brobot.action.basic.click.Click;
-import io.github.jspinak.brobot.action.basic.find.Find;
 import io.github.jspinak.brobot.action.basic.mouse.MousePressOptions;
 import io.github.jspinak.brobot.action.internal.mouse.MoveMouseWrapper;
 import io.github.jspinak.brobot.action.internal.mouse.MouseDownWrapper;
@@ -61,9 +60,6 @@ public class ClickIntegrationTestUpdated extends BrobotIntegrationTestBase {
     private Click click;
 
     @SpyBean
-    private Find find;
-
-    @SpyBean
     private MoveMouseWrapper moveMouseWrapper;
 
     @SpyBean
@@ -77,16 +73,7 @@ public class ClickIntegrationTestUpdated extends BrobotIntegrationTestBase {
         super.setUpBrobotEnvironment();
         FrameworkSettings.mock = true;
 
-        // Mock find to return a match
-        doAnswer(invocation -> {
-            ActionResult matches = invocation.getArgument(0);
-            matches.add(new Match.Builder()
-                    .setRegion(10, 10, 10, 10)
-                    .setSimScore(0.9)
-                    .build());
-            matches.setSuccess(true);
-            return null;
-        }).when(find).perform(any(ActionResult.class), any(ObjectCollection[].class));
+        // No need to mock Find anymore - pure Click doesn't use it
     }
     
     @AfterEach
