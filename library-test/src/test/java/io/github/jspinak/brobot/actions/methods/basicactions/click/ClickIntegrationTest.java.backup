@@ -97,7 +97,7 @@ class ClickIntegrationTest {
         // Setup
         ClickOptions clickOptions = new ClickOptions.Builder()
                 .build();
-        ObjectCollection objectCollection = new ObjectCollection.Builder().build();
+        ObjectCollection objectCollection = new ObjectCollection();
 
         // Action
         ActionResult result = action.perform(clickOptions, objectCollection);
@@ -119,7 +119,7 @@ class ClickIntegrationTest {
         ClickOptions clickOptions = new ClickOptions.Builder()
                 .setNumberOfClicks(2)
                 .build();
-        ObjectCollection objectCollection = new ObjectCollection.Builder().build();
+        ObjectCollection objectCollection = new ObjectCollection();
 
         // Action
         ActionResult result = action.perform(clickOptions, objectCollection);
@@ -142,7 +142,7 @@ class ClickIntegrationTest {
         ClickOptions clickOptions = new ClickOptions.Builder()
                 .build();
         // Note: Move after action is handled differently in the new API
-        ObjectCollection objectCollection = new ObjectCollection.Builder().build();
+        ObjectCollection objectCollection = new ObjectCollection();
 
         // Action
         ActionResult result = action.perform(clickOptions, objectCollection);
@@ -166,7 +166,7 @@ class ClickIntegrationTest {
         ClickOptions clickOptions = new ClickOptions.Builder()
                 .setNumberOfClicks(3)
                 .build();
-        ObjectCollection objectCollection = new ObjectCollection.Builder().build();
+        ObjectCollection objectCollection = new ObjectCollection();
 
         // Action
         ActionResult result = action.perform(clickOptions, objectCollection);

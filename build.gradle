@@ -10,7 +10,13 @@ plugins {
     
     // JReleaser for publishing to Maven Central
     id 'org.jreleaser' version '1.15.0' apply false
+    
+    // JaCoCo for code coverage reporting
+    id 'jacoco'
 }
+
+// Apply coverage configuration
+apply from: 'coverage-config.gradle'
 
 allprojects {
     group = 'io.github.jspinak.brobot'
@@ -25,6 +31,7 @@ subprojects {
     apply plugin: 'java'
     apply plugin: 'io.freefair.lombok'
     apply plugin: 'io.spring.dependency-management'
+    apply plugin: 'jacoco'
 
     java {
         // Use a toolchain to ensure a consistent JDK is used for compiling and running.
@@ -46,5 +53,50 @@ subprojects {
 
     test {
         useJUnitPlatform()
+        finalizedBy jacocoTestReport
+    }
+    
+    jacoco {
+        toolVersion = "0.8.11"
+    }
+
+    jacocoTestReport {
+        dependsOn test
+        reports {
+            xml.required = true
+            html.required = true
+            csv.required = true
+        }
+    }
+    
+    jacocoTestCoverageVerification {
+        violationRules {
+            rule {
+                limit {
+                    minimum = 0.60 // Start with 60% coverage requirement
+                }
+            }
+        }
+    }
+}
+
+// Aggregate JaCoCo coverage report from all subprojects
+task jacocoAggregatedReport(type: JacocoReport) {
+    dependsOn subprojects*.test
+    
+    additionalSourceDirs.from = files(subprojects.sourceSets.main.allSource.srcDirs)
+    sourceDirectories.from = files(subprojects.sourceSets.main.allSource.srcDirs)
+    classDirectories.from = files(subprojects.sourceSets.main.output)
+    executionData.from = files(subprojects.jacocoTestReport.executionData)
+    
+    reports {
+        xml.required = true
+        html.required = true
+        csv.required = true
+        html.outputLocation = layout.buildDirectory.dir('reports/jacoco/aggregate')
+    }
+    
+    doLast {
+        println "Aggregate coverage report generated at: ${layout.buildDirectory.dir('reports/jacoco/aggregate').get()}"
     }
 }
