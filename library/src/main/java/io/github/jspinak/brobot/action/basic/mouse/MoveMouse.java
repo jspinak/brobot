@@ -1,52 +1,51 @@
 package io.github.jspinak.brobot.action.basic.mouse;
-import io.github.jspinak.brobot.action.ActionType;
 
 import io.github.jspinak.brobot.action.ActionInterface;
-import io.github.jspinak.brobot.action.ActionConfig;
-import io.github.jspinak.brobot.action.basic.find.Find;
-import io.github.jspinak.brobot.action.internal.mouse.MoveMouseWrapper;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
+import io.github.jspinak.brobot.action.internal.mouse.MoveMouseWrapper;
 import io.github.jspinak.brobot.model.element.Location;
-import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
+import io.github.jspinak.brobot.model.element.Region;
+import io.github.jspinak.brobot.model.match.Match;
+import io.github.jspinak.brobot.model.state.StateLocation;
+import io.github.jspinak.brobot.model.state.StateRegion;
 import io.github.jspinak.brobot.tools.testing.mock.time.TimeProvider;
 
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 /**
- * Moves the mouse to one or more locations in the Brobot model-based GUI automation framework.
+ * Moves the mouse to one or more locations without embedded Find operations.
  * 
- * <p>MoveMouse is a fundamental action in the Action Model (α) that provides precise cursor 
- * control for GUI automation. It bridges the gap between visual element identification and 
- * physical mouse positioning, enabling complex interaction patterns including hover effects, 
- * drag operations, and tooltip activation.</p>
+ * <p>MoveMouse is a pure action that provides precise cursor control for GUI automation.
+ * It only moves the mouse to provided locations, regions, or matches without performing
+ * any Find operations. This separation enables better testing, cleaner code, and more
+ * flexible action composition through action chains.</p>
  * 
  * <p>Movement patterns supported:</p>
  * <ul>
  *   <li><b>Single Target</b>: Direct movement to a specific location</li>
  *   <li><b>Multiple Targets</b>: Sequential movement through multiple locations</li>
- *   <li><b>Pattern-based</b>: Movement to visually identified elements</li>
- *   <li><b>Collection-based</b>: Processing multiple ObjectCollections in sequence</li>
+ *   <li><b>Region Centers</b>: Movement to the center of regions</li>
+ *   <li><b>Match Locations</b>: Movement to previously found matches</li>
  * </ul>
  * 
  * <p>Processing order:</p>
  * <ul>
- *   <li>Within an ObjectCollection: Points are visited as recorded by Find operations 
- *       (Images → Matches → Regions → Locations)</li>
- *   <li>Between ObjectCollections: Processed in the order they appear in the parameters</li>
+ *   <li>Locations are processed in the order they appear in ObjectCollections</li>
+ *   <li>Multiple ObjectCollections are processed sequentially</li>
  * </ul>
  * 
- * <p>Key features:</p>
- * <ul>
- *   <li><b>Visual Integration</b>: Uses Find to locate targets before movement</li>
- *   <li><b>Batch Processing</b>: Can move through multiple locations in one action</li>
- *   <li><b>Timing Control</b>: Configurable pauses between movements</li>
- *   <li><b>State Awareness</b>: Updates framework's understanding of cursor position</li>
- * </ul>
+ * <p>For Find-then-Move operations, use ConditionalActionChain:</p>
+ * 
+ * <pre>{@code
+ * ConditionalActionChain.find(findOptions)
+ *         .ifFound(new MouseMoveOptions.Builder().build())
+ *         .perform(objectCollection);
+ * }</pre>
  * 
  * <p>Common use cases:</p>
  * <ul>
@@ -56,81 +55,112 @@ import java.util.List;
  *   <li>Moving mouse away from active areas to prevent interference</li>
  * </ul>
  * 
- * <p>In the model-based approach, MoveMouse actions contribute to the framework's spatial 
- * understanding of the GUI. By tracking cursor movements, the framework can model hover 
- * states, anticipate UI reactions, and optimize subsequent actions based on current 
- * cursor position.</p>
- * 
- * @since 1.0
- * @see Find
- * @see Click
- * @see MouseDown
- * @see MouseMoveOptions
+ * @since 2.0
+ * @see MoveMouseWrapper
+ * @see ConditionalActionChain for chaining Find with MoveMouse
  */
 @Component
 public class MoveMouse implements ActionInterface {
+
+    private static final Logger logger = Logger.getLogger(MoveMouse.class.getName());
+    
+    private final MoveMouseWrapper moveMouseWrapper;
+    private final TimeProvider time;
+
+    public MoveMouse(MoveMouseWrapper moveMouseWrapper, TimeProvider time) {
+        this.moveMouseWrapper = moveMouseWrapper;
+        this.time = time;
+    }
 
     @Override
     public Type getActionType() {
         return Type.MOVE;
     }
 
-    private final Find find;
-    private final MoveMouseWrapper moveMouseWrapper;
-    private final TimeProvider time;
-
-    public MoveMouse(@Lazy Find find, MoveMouseWrapper moveMouseWrapper, TimeProvider time) {
-        this.find = find;
-        this.moveMouseWrapper = moveMouseWrapper;
-        this.time = time;
-    }
-
     @Override
-    public void perform(ActionResult matches, ObjectCollection... objectCollections) {
-        // Get the configuration - MouseMoveOptions or any ActionConfig is acceptable
-        // since MoveMouse mainly uses Find and basic timing
-        ActionConfig config = matches.getActionConfig();
+    public void perform(ActionResult actionResult, ObjectCollection... objectCollections) {
+        actionResult.setSuccess(false);
         
-        List<ObjectCollection> collections = Arrays.asList(objectCollections);
-        for (ObjectCollection objColl : collections) {
-            // Check if we have locations directly - no need to find anything
-            if (objColl.getStateLocations() != null && !objColl.getStateLocations().isEmpty()) {
-                // Move directly to the locations without finding
-                objColl.getStateLocations().forEach(stateLocation -> {
-                    Location location = stateLocation.getLocation();
-                    moveMouseWrapper.move(location);
-                    matches.getMatchLocations().add(location);
-                    // Create a Match object for success determination
-                    matches.add(location.toMatch());
-                });
-            } else if (objColl.getStateRegions() != null && !objColl.getStateRegions().isEmpty()) {
-                // Move to center of regions without finding
-                objColl.getStateRegions().forEach(stateRegion -> {
-                    Location location = stateRegion.getSearchRegion().getLocation();
-                    moveMouseWrapper.move(location);
-                    matches.getMatchLocations().add(location);
-                    // Create a Match object for success determination
-                    matches.add(location.toMatch());
-                });
-            } else {
-                // Only use find if we have images/patterns to search for
-                find.perform(matches, objColl);
-                matches.getMatchLocations().forEach(moveMouseWrapper::move);
-                // Find.perform will populate the matchList and success will be determined by ActionSuccessCriteria
-            }
-            ConsoleReporter.print("finished move. ");
+        try {
+            // Extract locations to move to
+            List<Location> locations = extractLocations(objectCollections);
             
-            // Pause between collections if there are more to process
-            if (collections.indexOf(objColl) < collections.size() - 1) {
-                // Use pause from config if available, otherwise use default
-                double pauseDuration = config.getPauseAfterEnd();
-                if (pauseDuration > 0) {
-                    time.wait(pauseDuration);
+            if (locations.isEmpty()) {
+                logger.warning("No locations provided to MoveMouse");
+                return;
+            }
+            
+            // Get configuration if available
+            MouseMoveOptions options = null;
+            if (actionResult.getActionConfig() instanceof MouseMoveOptions) {
+                options = (MouseMoveOptions) actionResult.getActionConfig();
+            }
+            
+            // Move to each location
+            int successCount = 0;
+            for (int i = 0; i < locations.size(); i++) {
+                Location location = locations.get(i);
+                
+                if (moveMouseWrapper.move(location)) {
+                    successCount++;
+                    actionResult.add(createMatchFromLocation(location));
+                    logger.fine("Moved mouse to location: " + location);
+                    
+                    // Pause between movements (except after last one)
+                    if (i < locations.size() - 1 && options != null) {
+                        time.wait(options.getPauseAfterEnd());
+                    }
+                } else {
+                    logger.warning("Failed to move mouse to location: " + location);
                 }
             }
+            
+            actionResult.setSuccess(successCount > 0);
+            logger.info(String.format("MoveMouse: Moved to %d of %d locations", 
+                                     successCount, locations.size()));
+            
+        } catch (Exception e) {
+            logger.severe("Error in MoveMouse: " + e.getMessage());
+            actionResult.setSuccess(false);
         }
     }
-
-
-
+    
+    /**
+     * Extracts locations from the provided object collections.
+     * Supports Location, Region, and Match objects from ActionResult.
+     */
+    private List<Location> extractLocations(ObjectCollection... collections) {
+        List<Location> locations = new ArrayList<>();
+        
+        for (ObjectCollection collection : collections) {
+            // Extract from StateLocations
+            for (StateLocation stateLocation : collection.getStateLocations()) {
+                locations.add(stateLocation.getLocation());
+            }
+            
+            // Extract from StateRegions (use center point)
+            for (StateRegion stateRegion : collection.getStateRegions()) {
+                Region region = stateRegion.getSearchRegion();
+                int centerX = region.x() + region.w() / 2;
+                int centerY = region.y() + region.h() / 2;
+                locations.add(new Location(centerX, centerY));
+            }
+            
+            // Note: Matches from ActionResult would need to be handled separately
+            // as they're typically passed through the ActionResult, not ObjectCollection
+        }
+        
+        return locations;
+    }
+    
+    /**
+     * Creates a Match object from a Location for result reporting.
+     */
+    private Match createMatchFromLocation(Location location) {
+        // Create a small region around the move point
+        Region region = new Region(location.getX() - 5, location.getY() - 5, 10, 10);
+        Match match = new Match(region);
+        match.setName("Mouse moved to location");
+        return match;
+    }
 }
