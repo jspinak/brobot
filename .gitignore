@@ -113,6 +113,8 @@ library/gradle-coverage-tasks.gradle
 library/run-tests-with-coverage.sh
 library/show_coverage.sh
 runner/ACTION_RECORD_PERSISTENCE_PLAN.md
+library/check-coverage-improvement.py
+library-test/reports/
 hanging_tests.txt
 
 # GitHub workflows (should be in root repo, not library)

@@ -13,23 +13,29 @@ public class OcrTestCondition implements ExecutionCondition {
     
     @Override
     public ConditionEvaluationResult evaluateExecutionCondition(ExtensionContext context) {
-        // Check if this is an OCR-dependent test
-        boolean isOcrTest = context.getElement()
-            .map(element -> element.isAnnotationPresent(OcrTestSupport.RequiresOcr.class))
+        // Check if this is a screenshot-based test
+        boolean isScreenshotTest = context.getElement()
+            .map(element -> element.isAnnotationPresent(OcrTestSupport.RequiresScreenshots.class))
             .orElse(false);
         
-        if (!isOcrTest) {
-            // Not an OCR test, proceed normally
-            return ConditionEvaluationResult.enabled("Not an OCR-dependent test");
+        if (!isScreenshotTest) {
+            // Check for legacy live OCR tests
+            boolean isLiveOcrTest = context.getElement()
+                .map(element -> element.isAnnotationPresent(OcrTestSupport.RequiresLiveOcr.class))
+                .orElse(false);
+            
+            if (!isLiveOcrTest) {
+                // Not an OCR-related test, proceed normally
+                return ConditionEvaluationResult.enabled("Not an OCR-dependent test");
+            }
         }
         
-        // Check if OCR tests should be disabled
-        if (OcrTestSupport.shouldDisableOcrTests()) {
-            String reason = OcrTestSupport.getTesseractError();
-            if (reason == null) {
-                reason = "OCR tests disabled";
+        // For screenshot-based tests, only check if screenshots are available
+        if (isScreenshotTest) {
+            if (!OcrTestSupport.areScreenshotsAvailable()) {
+                return ConditionEvaluationResult.disabled("FloraNext screenshots not available");
             }
-            return ConditionEvaluationResult.disabled("OCR test disabled: " + reason);
+            return ConditionEvaluationResult.enabled("Screenshot-based test enabled");
         }
         
         // Check if Tesseract is available
