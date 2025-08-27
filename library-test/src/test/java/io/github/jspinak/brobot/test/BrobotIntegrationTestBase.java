@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import io.github.jspinak.brobot.test.TestEnvironmentInitializer;
+import io.github.jspinak.brobot.test.config.TestActionConfig;
 import io.github.jspinak.brobot.test.mock.MockGuiAccessConfig;
 import io.github.jspinak.brobot.test.mock.MockGuiAccessMonitor;
 import io.github.jspinak.brobot.test.mock.MockScreenConfig;
@@ -28,6 +29,7 @@ import io.github.jspinak.brobot.test.mock.MockScreenConfig;
  * handle headless environments gracefully.
  */
 @SpringBootTest(classes = io.github.jspinak.brobot.BrobotTestApplication.class)
+@Import(TestActionConfig.class)
 @TestPropertySource(properties = {
     "spring.main.allow-bean-definition-overriding=true"
 })
