@@ -7,6 +7,7 @@ import io.github.jspinak.brobot.action.basic.find.FindStrategyRegistry;
 import io.github.jspinak.brobot.action.internal.execution.BasicActionRegistry;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
+import io.github.jspinak.brobot.action.composite.drag.Drag;
 
 import org.springframework.stereotype.Component;
 
@@ -41,6 +42,7 @@ public class ActionService {
 
     private final BasicActionRegistry basicAction;
     private final FindStrategyRegistry findFunctions;
+    private final Drag dragAction;
 
     /**
      * Constructs the ActionService with required action registries.
@@ -49,9 +51,11 @@ public class ActionService {
      * @param findFunctions Service for custom find implementations
      */
     public ActionService(BasicActionRegistry basicAction,
-                         FindStrategyRegistry findFunctions) {
+                         FindStrategyRegistry findFunctions,
+                         Drag dragAction) {
         this.basicAction = basicAction;
         this.findFunctions = findFunctions;
+        this.dragAction = dragAction;
     }
 
     // Removed ActionOptions-based getAction method - use ActionConfig instead
@@ -159,7 +163,7 @@ public class ActionService {
         }
         // Composite operations
         else if (configClassName.contains("DragOptions")) {
-            return basicAction.getAction(ActionType.DRAG);
+            return Optional.of(dragAction);
         }
         // ClickUntilOptions no longer exists - handled by ClickOptions with success criteria
         else if (configClassName.contains("ClassifyOptions")) {
