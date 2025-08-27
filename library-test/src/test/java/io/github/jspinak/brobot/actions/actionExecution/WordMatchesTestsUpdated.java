@@ -32,7 +32,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * - TextFindOptions automatically uses ActionOptions.Find.ActionOptions.Find.ALL strategy
  */
 @SpringBootTest(classes = BrobotTestApplication.class)
-@OcrTestSupport.RequiresOcr
+@OcrTestSupport.RequiresScreenshots
 class WordMatchesTestsUpdated extends OcrTestBase {
 
     @BeforeAll
