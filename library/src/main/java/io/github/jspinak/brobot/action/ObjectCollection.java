@@ -98,7 +98,8 @@ public class ObjectCollection {
     public String getFirstObjectName() {
         if (!stateImages.isEmpty()) {
             if (!stateImages.get(0).getName().isEmpty()) return stateImages.get(0).getName();
-            else if (!stateImages.get(0).getPatterns().get(0).getImgpath().isEmpty())
+            else if (!stateImages.get(0).getPatterns().isEmpty() 
+                    && !stateImages.get(0).getPatterns().get(0).getImgpath().isEmpty())
                 return stateImages.get(0).getPatterns().get(0).getImgpath();
         }
         if (!stateLocations.isEmpty() && !stateLocations.get(0).getName().isEmpty())
