@@ -382,8 +382,8 @@ class PathFinderAdvancedTest extends BrobotTestBase {
         directTransition.setActivate(Set.of(10L));
         transitions.getTransitions().add(directTransition);
         
-        when(mockJointTable.getAllStatesWithTransitionsTo(10L)).thenReturn(Set.of(1L));
-        when(mockTransitionService.getStateTransitions(1L)).thenReturn(Optional.of(transitions));
+        when(mockJointTable.getStatesWithTransitionsTo(10L)).thenReturn(Set.of(1L));
+        when(mockTransitionService.getTransitions(1L)).thenReturn(Optional.of(transitions));
     }
     
     private void setupPathWithIntermediates() {
@@ -400,10 +400,10 @@ class PathFinderAdvancedTest extends BrobotTestBase {
         t2.setActivate(Set.of(10L));
         transitions5.getTransitions().add(t2);
         
-        when(mockJointTable.getAllStatesWithTransitionsTo(5L)).thenReturn(Set.of(1L));
-        when(mockJointTable.getAllStatesWithTransitionsTo(10L)).thenReturn(Set.of(5L));
-        when(mockTransitionService.getStateTransitions(1L)).thenReturn(Optional.of(transitions1));
-        when(mockTransitionService.getStateTransitions(5L)).thenReturn(Optional.of(transitions5));
+        when(mockJointTable.getStatesWithTransitionsTo(5L)).thenReturn(Set.of(1L));
+        when(mockJointTable.getStatesWithTransitionsTo(10L)).thenReturn(Set.of(5L));
+        when(mockTransitionService.getTransitions(1L)).thenReturn(Optional.of(transitions1));
+        when(mockTransitionService.getTransitions(5L)).thenReturn(Optional.of(transitions5));
     }
     
     private void setupMultiplePaths() {
@@ -422,9 +422,9 @@ class PathFinderAdvancedTest extends BrobotTestBase {
         t3.setActivate(Set.of(10L));
         transitions6.getTransitions().add(t3);
         
-        when(mockJointTable.getAllStatesWithTransitionsTo(6L)).thenReturn(Set.of(1L));
-        when(mockJointTable.getAllStatesWithTransitionsTo(10L)).thenReturn(Set.of(5L, 6L));
-        when(mockTransitionService.getStateTransitions(6L)).thenReturn(Optional.of(transitions6));
+        when(mockJointTable.getStatesWithTransitionsTo(6L)).thenReturn(Set.of(1L));
+        when(mockJointTable.getStatesWithTransitionsTo(10L)).thenReturn(Set.of(5L, 6L));
+        when(mockTransitionService.getTransitions(6L)).thenReturn(Optional.of(transitions6));
     }
     
     private void setupMultiplePathsWithScores() {
@@ -452,19 +452,19 @@ class PathFinderAdvancedTest extends BrobotTestBase {
         t3.setActivate(Set.of(5L, 10L)); // Cycle back to 5 and path to 10
         transitions6.getTransitions().add(t3);
         
-        when(mockJointTable.getAllStatesWithTransitionsTo(5L)).thenReturn(Set.of(1L, 6L));
-        when(mockJointTable.getAllStatesWithTransitionsTo(6L)).thenReturn(Set.of(5L));
-        when(mockJointTable.getAllStatesWithTransitionsTo(10L)).thenReturn(Set.of(6L));
-        when(mockTransitionService.getStateTransitions(1L)).thenReturn(Optional.of(transitions1));
-        when(mockTransitionService.getStateTransitions(5L)).thenReturn(Optional.of(transitions5));
-        when(mockTransitionService.getStateTransitions(6L)).thenReturn(Optional.of(transitions6));
+        when(mockJointTable.getStatesWithTransitionsTo(5L)).thenReturn(Set.of(1L, 6L));
+        when(mockJointTable.getStatesWithTransitionsTo(6L)).thenReturn(Set.of(5L));
+        when(mockJointTable.getStatesWithTransitionsTo(10L)).thenReturn(Set.of(6L));
+        when(mockTransitionService.getTransitions(1L)).thenReturn(Optional.of(transitions1));
+        when(mockTransitionService.getTransitions(5L)).thenReturn(Optional.of(transitions5));
+        when(mockTransitionService.getTransitions(6L)).thenReturn(Optional.of(transitions6));
     }
     
     private void setupDisconnectedGraph() {
         // Component 1: states 1, 2, 3
         // Component 2: states 10, 11, 12
         // No connections between components
-        when(mockJointTable.getAllStatesWithTransitionsTo(anyLong())).thenReturn(Collections.emptySet());
+        when(mockJointTable.getStatesWithTransitionsTo(anyLong())).thenReturn(Collections.emptySet());
     }
     
     private void setupLargeGraph(int size) {
@@ -479,8 +479,8 @@ class PathFinderAdvancedTest extends BrobotTestBase {
             t.setActivate(Set.of(toId));
             transitions.getTransitions().add(t);
             
-            when(mockJointTable.getAllStatesWithTransitionsTo(toId)).thenReturn(Set.of(fromId));
-            when(mockTransitionService.getStateTransitions(fromId)).thenReturn(Optional.of(transitions));
+            when(mockJointTable.getStatesWithTransitionsTo(toId)).thenReturn(Set.of(fromId));
+            when(mockTransitionService.getTransitions(fromId)).thenReturn(Optional.of(transitions));
             when(mockStateService.getStateName(fromId)).thenReturn("State" + fromId);
         }
         when(mockStateService.getStateName((long) size)).thenReturn("State" + size);
@@ -493,8 +493,8 @@ class PathFinderAdvancedTest extends BrobotTestBase {
         t.setActivate(Set.of(1L)); // Self-loop
         transitions.getTransitions().add(t);
         
-        when(mockJointTable.getAllStatesWithTransitionsTo(1L)).thenReturn(Set.of(1L));
-        when(mockTransitionService.getStateTransitions(1L)).thenReturn(Optional.of(transitions));
+        when(mockJointTable.getStatesWithTransitionsTo(1L)).thenReturn(Set.of(1L));
+        when(mockTransitionService.getTransitions(1L)).thenReturn(Optional.of(transitions));
     }
     
     private void setupBidirectionalPaths() {
@@ -511,9 +511,9 @@ class PathFinderAdvancedTest extends BrobotTestBase {
         t2.setActivate(Set.of(1L));
         transitions10.getTransitions().add(t2);
         
-        when(mockJointTable.getAllStatesWithTransitionsTo(1L)).thenReturn(Set.of(10L));
-        when(mockJointTable.getAllStatesWithTransitionsTo(10L)).thenReturn(Set.of(1L));
-        when(mockTransitionService.getStateTransitions(1L)).thenReturn(Optional.of(transitions1));
-        when(mockTransitionService.getStateTransitions(10L)).thenReturn(Optional.of(transitions10));
+        when(mockJointTable.getStatesWithTransitionsTo(1L)).thenReturn(Set.of(10L));
+        when(mockJointTable.getStatesWithTransitionsTo(10L)).thenReturn(Set.of(1L));
+        when(mockTransitionService.getTransitions(1L)).thenReturn(Optional.of(transitions1));
+        when(mockTransitionService.getTransitions(10L)).thenReturn(Optional.of(transitions10));
     }
 }

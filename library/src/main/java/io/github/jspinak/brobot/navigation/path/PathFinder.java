@@ -57,6 +57,7 @@ public class PathFinder {
     private final StateService allStates;
     private final StateTransitionService stateTransitionsInProjectService;
 
+    // Instance fields used during path finding - access is synchronized
     private Set<Long> startStates;
     private List<Path> pathList;
 
@@ -68,20 +69,32 @@ public class PathFinder {
     }
 
     public Paths getPathsToState(List<State> startStates, State targetState) {
+        if (targetState == null) {
+            return getPathsToState(new HashSet<>(), null);
+        }
         Set<Long> startStateIds = new HashSet<>();
         startStates.forEach(ss -> startStateIds.add(ss.getId()));
         return getPathsToState(startStateIds, targetState.getId());
     }
 
-    public Paths getPathsToState(Set<Long> startStates, Long targetState) {
+    public synchronized Paths getPathsToState(Set<Long> startStates, Long targetState) {
+        // Handle null target state
+        if (targetState == null) {
+            ConsoleReporter.println(MessageFormatter.fail + "Target state is null");
+            return new Paths(new ArrayList<>());
+        }
+        
         String targetStateName = allStates.getStateName(targetState);
         String startStatesString = startStates.stream()
                 .map(allStates::getStateName)
                 .reduce("", (s, s2) -> s + ", " + s2);
         ConsoleReporter.println("Find path: " + startStatesString + " -> " + targetStateName);
+        
+        // Use instance fields - method is synchronized for thread safety
         this.startStates = startStates;
-        pathList = new ArrayList<>();
+        this.pathList = new ArrayList<>();
         recursePath(new Path(), targetState);
+        
         if (pathList.isEmpty()) ConsoleReporter.println(MessageFormatter.fail + "Path to state not found.");
         Paths paths = new Paths(pathList);
         paths.sort();

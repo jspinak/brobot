@@ -3,6 +3,7 @@ package io.github.jspinak.brobot.statemanagement;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.model.state.State;
 import io.github.jspinak.brobot.model.match.Match;
+import io.github.jspinak.brobot.model.state.StateObjectMetadata;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.state.special.SpecialStateType;
 import io.github.jspinak.brobot.navigation.service.StateService;
@@ -348,8 +349,8 @@ class StateMemoryAdvancedTest extends BrobotTestBase {
             // Arrange
             Match match1 = mock(Match.class);
             Match match2 = mock(Match.class);
-            Match.StateObjectData stateData1 = mock(Match.StateObjectData.class);
-            Match.StateObjectData stateData2 = mock(Match.StateObjectData.class);
+            StateObjectMetadata stateData1 = mock(StateObjectMetadata.class);
+            StateObjectMetadata stateData2 = mock(StateObjectMetadata.class);
             
             when(stateData1.getOwnerStateId()).thenReturn(1L);
             when(stateData2.getOwnerStateId()).thenReturn(2L);
@@ -376,7 +377,7 @@ class StateMemoryAdvancedTest extends BrobotTestBase {
             when(matchWithoutData.getStateObjectData()).thenReturn(null);
             
             Match matchWithData = mock(Match.class);
-            Match.StateObjectData stateData = mock(Match.StateObjectData.class);
+            StateObjectMetadata stateData = mock(StateObjectMetadata.class);
             when(stateData.getOwnerStateId()).thenReturn(1L);
             when(matchWithData.getStateObjectData()).thenReturn(stateData);
             
