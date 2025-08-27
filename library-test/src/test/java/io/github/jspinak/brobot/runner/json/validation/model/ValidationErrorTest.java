@@ -1,4 +1,4 @@
-package io.github.jspinak.brobot.json.schemaValidation.model;
+package io.github.jspinak.brobot.runner.json.validation.model;
 
 import org.junit.jupiter.api.Test;
 
