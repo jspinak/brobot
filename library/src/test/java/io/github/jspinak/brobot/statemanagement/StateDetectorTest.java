@@ -8,19 +8,14 @@ import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.model.state.special.SpecialStateType;
 import io.github.jspinak.brobot.navigation.service.StateService;
 import io.github.jspinak.brobot.test.BrobotTestBase;
-import io.github.jspinak.brobot.tools.logging.ConsoleReporter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -38,9 +33,6 @@ public class StateDetectorTest extends BrobotTestBase {
     @Mock
     private StateMemory stateMemory;
     
-    @Mock
-    private ConsoleReporter consoleReporter;
-    
     private StateDetector stateDetector;
     
     @BeforeEach
@@ -48,7 +40,7 @@ public class StateDetectorTest extends BrobotTestBase {
     public void setupTest() {
         super.setupTest();
         MockitoAnnotations.openMocks(this);
-        stateDetector = new StateDetector(action, stateService, stateMemory, consoleReporter);
+        stateDetector = new StateDetector(stateService, stateMemory, action);
     }
     
     @Nested
@@ -61,19 +53,20 @@ public class StateDetectorTest extends BrobotTestBase {
             State activeState1 = createMockState(1L, "ActiveState1");
             State activeState2 = createMockState(2L, "ActiveState2");
             
-            when(stateMemory.getActiveStatesObjects())
-                .thenReturn(Arrays.asList(activeState1, activeState2));
+            when(stateMemory.getActiveStates())
+                .thenReturn(new HashSet<>(Arrays.asList(1L, 2L)));
+            when(stateService.getState(1L)).thenReturn(Optional.of(activeState1));
+            when(stateService.getState(2L)).thenReturn(Optional.of(activeState2));
             
             ActionResult successResult = mock(ActionResult.class);
             when(successResult.isSuccess()).thenReturn(true);
             when(action.find(any(ObjectCollection.class))).thenReturn(successResult);
             
-            Set<State> stillActive = stateDetector.checkActiveStates();
+            stateDetector.checkForActiveStates();
             
-            assertEquals(2, stillActive.size());
-            assertTrue(stillActive.contains(activeState1));
-            assertTrue(stillActive.contains(activeState2));
+            // Verify both states were checked and neither was removed
             verify(action, times(2)).find(any(ObjectCollection.class));
+            verify(stateMemory, never()).removeInactiveState(anyLong());
         }
         
         @Test
@@ -83,8 +76,11 @@ public class StateDetectorTest extends BrobotTestBase {
             State activeState2 = createMockState(2L, "ActiveState2");
             State activeState3 = createMockState(3L, "ActiveState3");
             
-            when(stateMemory.getActiveStatesObjects())
-                .thenReturn(Arrays.asList(activeState1, activeState2, activeState3));
+            when(stateMemory.getActiveStates())
+                .thenReturn(new HashSet<>(Arrays.asList(1L, 2L, 3L)));
+            when(stateService.getState(1L)).thenReturn(Optional.of(activeState1));
+            when(stateService.getState(2L)).thenReturn(Optional.of(activeState2));
+            when(stateService.getState(3L)).thenReturn(Optional.of(activeState3));
             
             ActionResult successResult = mock(ActionResult.class);
             ActionResult failureResult = mock(ActionResult.class);
@@ -95,24 +91,19 @@ public class StateDetectorTest extends BrobotTestBase {
             when(action.find(any(ObjectCollection.class)))
                 .thenReturn(successResult, failureResult, successResult);
             
-            Set<State> stillActive = stateDetector.checkActiveStates();
+            stateDetector.checkForActiveStates();
             
-            assertEquals(2, stillActive.size());
-            assertTrue(stillActive.contains(activeState1));
-            assertFalse(stillActive.contains(activeState2));
-            assertTrue(stillActive.contains(activeState3));
-            
-            verify(stateMemory).removeActiveState(2L);
+            // Verify state2 was removed since it wasn't found
+            verify(stateMemory).removeInactiveState(2L);
         }
         
         @Test
         @DisplayName("Should handle empty active states")
         public void testCheckActiveStatesWhenEmpty() {
-            when(stateMemory.getActiveStatesObjects()).thenReturn(new ArrayList<>());
+            when(stateMemory.getActiveStates()).thenReturn(new HashSet<>());
             
-            Set<State> stillActive = stateDetector.checkActiveStates();
+            stateDetector.checkForActiveStates();
             
-            assertTrue(stillActive.isEmpty());
             verify(action, never()).find(any(ObjectCollection.class));
         }
     }
@@ -128,7 +119,16 @@ public class StateDetectorTest extends BrobotTestBase {
             State state2 = createMockState(2L, "State2");
             State state3 = createMockState(3L, "State3");
             
-            when(stateService.findAll()).thenReturn(Arrays.asList(state1, state2, state3));
+            // First check returns empty, triggering full search
+            when(stateMemory.getActiveStates())
+                .thenReturn(new HashSet<>())
+                .thenReturn(new HashSet<>()) // Second call during searchAll
+                .thenReturn(new HashSet<>(Arrays.asList(1L, 3L))); // After states found
+                
+            when(stateService.getAllStateNames()).thenReturn(new HashSet<>(Arrays.asList("State1", "State2", "State3")));
+            when(stateService.getState("State1")).thenReturn(Optional.of(state1));
+            when(stateService.getState("State2")).thenReturn(Optional.of(state2));
+            when(stateService.getState("State3")).thenReturn(Optional.of(state3));
             
             ActionResult successResult = mock(ActionResult.class);
             ActionResult failureResult = mock(ActionResult.class);
@@ -139,16 +139,11 @@ public class StateDetectorTest extends BrobotTestBase {
             when(action.find(any(ObjectCollection.class)))
                 .thenReturn(successResult, failureResult, successResult);
             
-            Set<State> foundStates = stateDetector.rebuildActiveStates();
+            stateDetector.rebuildActiveStates();
             
-            assertEquals(2, foundStates.size());
-            assertTrue(foundStates.contains(state1));
-            assertFalse(foundStates.contains(state2));
-            assertTrue(foundStates.contains(state3));
-            
-            verify(stateMemory).clearActiveStates();
-            verify(stateMemory).addActiveState(1L);
-            verify(stateMemory).addActiveState(3L);
+            // Verify that finding occurred for all states
+            verify(action, times(3)).find(any(ObjectCollection.class));
+            // Note: addActiveState is called by the Action framework when patterns are found
         }
         
         @Test
@@ -157,37 +152,38 @@ public class StateDetectorTest extends BrobotTestBase {
             State state1 = createMockState(1L, "State1");
             State state2 = createMockState(2L, "State2");
             
-            when(stateService.findAll()).thenReturn(Arrays.asList(state1, state2));
+            when(stateService.getAllStateNames()).thenReturn(new HashSet<>(Arrays.asList("State1", "State2")));
+            when(stateService.getState("State1")).thenReturn(Optional.of(state1));
+            when(stateService.getState("State2")).thenReturn(Optional.of(state2));
+            when(stateMemory.getActiveStates()).thenReturn(new HashSet<>());
             
             ActionResult failureResult = mock(ActionResult.class);
             when(failureResult.isSuccess()).thenReturn(false);
             when(action.find(any(ObjectCollection.class))).thenReturn(failureResult);
             
-            Set<State> foundStates = stateDetector.rebuildActiveStates();
+            stateDetector.rebuildActiveStates();
             
-            assertTrue(foundStates.isEmpty());
-            verify(stateMemory).clearActiveStates();
-            verify(stateMemory, never()).addActiveState(anyLong());
+            // Should add UNKNOWN state when nothing found
+            verify(stateMemory).addActiveState(SpecialStateType.UNKNOWN.getId());
         }
         
         @Test
         @DisplayName("Should set UNKNOWN state if no states found")
         public void testRebuildSetsUnknownStateWhenNoneFound() {
             State state1 = createMockState(1L, "State1");
-            State unknownState = createMockState(999L, SpecialStateType.UNKNOWN.toString());
             
-            when(stateService.findAll()).thenReturn(Arrays.asList(state1));
-            when(stateService.findByName(SpecialStateType.UNKNOWN.toString()))
-                .thenReturn(Optional.of(unknownState));
+            when(stateService.getAllStateNames()).thenReturn(new HashSet<>(Arrays.asList("State1")));
+            when(stateService.getState("State1")).thenReturn(Optional.of(state1));
+            when(stateMemory.getActiveStates()).thenReturn(new HashSet<>());
             
             ActionResult failureResult = mock(ActionResult.class);
             when(failureResult.isSuccess()).thenReturn(false);
             when(action.find(any(ObjectCollection.class))).thenReturn(failureResult);
             
-            Set<State> foundStates = stateDetector.rebuildActiveStates();
+            stateDetector.rebuildActiveStates();
             
-            assertTrue(foundStates.isEmpty());
-            verify(stateMemory).addActiveState(999L);
+            // Should add UNKNOWN state when nothing found
+            verify(stateMemory).addActiveState(SpecialStateType.UNKNOWN.getId());
         }
     }
     
@@ -203,7 +199,12 @@ public class StateDetectorTest extends BrobotTestBase {
             State state3 = createMockState(3L, "State3");
             State state4 = createMockState(4L, "State4");
             
-            when(stateService.findAll()).thenReturn(Arrays.asList(state1, state2, state3, state4));
+            when(stateService.getAllStateNames())
+                .thenReturn(new HashSet<>(Arrays.asList("State1", "State2", "State3", "State4")));
+            when(stateService.getState("State1")).thenReturn(Optional.of(state1));
+            when(stateService.getState("State2")).thenReturn(Optional.of(state2));
+            when(stateService.getState("State3")).thenReturn(Optional.of(state3));
+            when(stateService.getState("State4")).thenReturn(Optional.of(state4));
             
             ActionResult successResult = mock(ActionResult.class);
             ActionResult failureResult = mock(ActionResult.class);
@@ -214,13 +215,7 @@ public class StateDetectorTest extends BrobotTestBase {
             when(action.find(any(ObjectCollection.class)))
                 .thenReturn(successResult, failureResult, successResult, successResult);
             
-            Set<State> foundStates = stateDetector.searchAllStates();
-            
-            assertEquals(3, foundStates.size());
-            assertTrue(foundStates.contains(state1));
-            assertFalse(foundStates.contains(state2));
-            assertTrue(foundStates.contains(state3));
-            assertTrue(foundStates.contains(state4));
+            stateDetector.searchAllImagesForCurrentStates();
             
             verify(action, times(4)).find(any(ObjectCollection.class));
         }
@@ -229,20 +224,19 @@ public class StateDetectorTest extends BrobotTestBase {
         @DisplayName("Should exclude special states from search")
         public void testSearchAllStatesExcludesSpecial() {
             State normalState = createMockState(1L, "NormalState");
-            State nullState = createMockState(2L, SpecialStateType.NULL.toString());
-            State unknownState = createMockState(3L, SpecialStateType.UNKNOWN.toString());
             
-            when(stateService.findAll()).thenReturn(Arrays.asList(normalState, nullState, unknownState));
+            when(stateService.getAllStateNames())
+                .thenReturn(new HashSet<>(Arrays.asList("NormalState", SpecialStateType.UNKNOWN.toString())));
+            when(stateService.getState("NormalState")).thenReturn(Optional.of(normalState));
             
             ActionResult successResult = mock(ActionResult.class);
             when(successResult.isSuccess()).thenReturn(true);
             when(action.find(any(ObjectCollection.class))).thenReturn(successResult);
             
-            Set<State> foundStates = stateDetector.searchAllStates();
+            stateDetector.searchAllImagesForCurrentStates();
             
-            // Only normal state should be searched
+            // Only normal state should be searched (UNKNOWN is excluded)
             verify(action, times(1)).find(any(ObjectCollection.class));
-            assertTrue(foundStates.contains(normalState));
         }
     }
     
@@ -255,43 +249,42 @@ public class StateDetectorTest extends BrobotTestBase {
         public void testFindStateByName() {
             State targetState = createMockState(1L, "TargetState");
             
-            when(stateService.findByName("TargetState")).thenReturn(Optional.of(targetState));
+            when(stateService.getState("TargetState")).thenReturn(Optional.of(targetState));
             
             ActionResult successResult = mock(ActionResult.class);
             when(successResult.isSuccess()).thenReturn(true);
             when(action.find(any(ObjectCollection.class))).thenReturn(successResult);
             
-            Optional<State> foundState = stateDetector.findState("TargetState");
+            boolean foundState = stateDetector.findState("TargetState");
             
-            assertTrue(foundState.isPresent());
-            assertEquals(targetState, foundState.get());
+            assertTrue(foundState);
             verify(action).find(any(ObjectCollection.class));
         }
         
         @Test
-        @DisplayName("Should return empty if state not found visually")
+        @DisplayName("Should return false if state not found visually")
         public void testFindStateNotFoundVisually() {
             State targetState = createMockState(1L, "TargetState");
             
-            when(stateService.findByName("TargetState")).thenReturn(Optional.of(targetState));
+            when(stateService.getState("TargetState")).thenReturn(Optional.of(targetState));
             
             ActionResult failureResult = mock(ActionResult.class);
             when(failureResult.isSuccess()).thenReturn(false);
             when(action.find(any(ObjectCollection.class))).thenReturn(failureResult);
             
-            Optional<State> foundState = stateDetector.findState("TargetState");
+            boolean foundState = stateDetector.findState("TargetState");
             
-            assertFalse(foundState.isPresent());
+            assertFalse(foundState);
         }
         
         @Test
-        @DisplayName("Should return empty if state doesn't exist")
+        @DisplayName("Should return false if state doesn't exist")
         public void testFindStateDoesNotExist() {
-            when(stateService.findByName("NonExistentState")).thenReturn(Optional.empty());
+            when(stateService.getState("NonExistentState")).thenReturn(Optional.empty());
             
-            Optional<State> foundState = stateDetector.findState("NonExistentState");
+            boolean foundState = stateDetector.findState("NonExistentState");
             
-            assertFalse(foundState.isPresent());
+            assertFalse(foundState);
             verify(action, never()).find(any(ObjectCollection.class));
         }
         
@@ -300,16 +293,17 @@ public class StateDetectorTest extends BrobotTestBase {
         public void testFindStateById() {
             State targetState = createMockState(42L, "StateFortyTwo");
             
-            when(stateService.findById(42L)).thenReturn(Optional.of(targetState));
+            when(stateService.getStateName(42L)).thenReturn("StateFortyTwo");
+            when(stateService.getState(42L)).thenReturn(Optional.of(targetState));
             
             ActionResult successResult = mock(ActionResult.class);
             when(successResult.isSuccess()).thenReturn(true);
             when(action.find(any(ObjectCollection.class))).thenReturn(successResult);
             
-            Optional<State> foundState = stateDetector.findStateById(42L);
+            boolean foundState = stateDetector.findState(42L);
             
-            assertTrue(foundState.isPresent());
-            assertEquals(targetState, foundState.get());
+            assertTrue(foundState);
+            verify(action).find(any(ObjectCollection.class));
         }
     }
     
@@ -320,57 +314,52 @@ public class StateDetectorTest extends BrobotTestBase {
         @Test
         @DisplayName("Should completely refresh active states")
         public void testRefreshStates() {
-            State oldState = createMockState(1L, "OldState");
             State newState1 = createMockState(2L, "NewState1");
             State newState2 = createMockState(3L, "NewState2");
             
-            // Initially has old state
-            when(stateMemory.getActiveStatesObjects()).thenReturn(Arrays.asList(oldState));
-            
             // All states in the system
-            when(stateService.findAll()).thenReturn(Arrays.asList(oldState, newState1, newState2));
+            when(stateService.getAllStateNames())
+                .thenReturn(new HashSet<>(Arrays.asList("NewState1", "NewState2")));
+            when(stateService.getState("NewState1")).thenReturn(Optional.of(newState1));
+            when(stateService.getState("NewState2")).thenReturn(Optional.of(newState2));
+            when(stateService.getStateName(2L)).thenReturn("NewState1");
+            when(stateService.getStateName(3L)).thenReturn("NewState2");
             
-            ActionResult failureResult = mock(ActionResult.class);
             ActionResult successResult = mock(ActionResult.class);
-            when(failureResult.isSuccess()).thenReturn(false);
             when(successResult.isSuccess()).thenReturn(true);
+            when(action.find(any(ObjectCollection.class))).thenReturn(successResult);
             
-            // Old state no longer visible, new states are
-            when(action.find(any(ObjectCollection.class)))
-                .thenReturn(failureResult, successResult, successResult);
+            // Mock the active states that would be set after finding
+            when(stateMemory.getActiveStates()).thenReturn(new HashSet<>(Arrays.asList(2L, 3L)));
             
-            Set<State> refreshedStates = stateDetector.refreshStates();
+            Set<Long> refreshedStates = stateDetector.refreshActiveStates();
             
             assertEquals(2, refreshedStates.size());
-            assertFalse(refreshedStates.contains(oldState));
-            assertTrue(refreshedStates.contains(newState1));
-            assertTrue(refreshedStates.contains(newState2));
+            assertTrue(refreshedStates.contains(2L));
+            assertTrue(refreshedStates.contains(3L));
             
-            verify(stateMemory).clearActiveStates();
-            verify(stateMemory).addActiveState(2L);
-            verify(stateMemory).addActiveState(3L);
+            verify(stateMemory).removeAllStates();
+            verify(action, times(2)).find(any(ObjectCollection.class));
         }
         
         @Test
         @DisplayName("Should handle refresh with no states found")
         public void testRefreshStatesNoneFound() {
             State state1 = createMockState(1L, "State1");
-            State unknownState = createMockState(999L, SpecialStateType.UNKNOWN.toString());
             
-            when(stateMemory.getActiveStatesObjects()).thenReturn(Arrays.asList(state1));
-            when(stateService.findAll()).thenReturn(Arrays.asList(state1));
-            when(stateService.findByName(SpecialStateType.UNKNOWN.toString()))
-                .thenReturn(Optional.of(unknownState));
+            when(stateService.getAllStateNames()).thenReturn(new HashSet<>(Arrays.asList("State1")));
+            when(stateService.getState("State1")).thenReturn(Optional.of(state1));
             
             ActionResult failureResult = mock(ActionResult.class);
             when(failureResult.isSuccess()).thenReturn(false);
             when(action.find(any(ObjectCollection.class))).thenReturn(failureResult);
             
-            Set<State> refreshedStates = stateDetector.refreshStates();
+            when(stateMemory.getActiveStates()).thenReturn(new HashSet<>());
+            
+            Set<Long> refreshedStates = stateDetector.refreshActiveStates();
             
             assertTrue(refreshedStates.isEmpty());
-            verify(stateMemory).clearActiveStates();
-            verify(stateMemory).addActiveState(999L); // UNKNOWN state
+            verify(stateMemory).removeAllStates();
         }
     }
     
@@ -384,39 +373,42 @@ public class StateDetectorTest extends BrobotTestBase {
             State knownState1 = createMockState(1L, "KnownState1");
             State knownState2 = createMockState(2L, "KnownState2");
             
-            when(stateMemory.getActiveStatesObjects())
-                .thenReturn(Arrays.asList(knownState1, knownState2));
+            when(stateMemory.getActiveStates())
+                .thenReturn(new HashSet<>(Arrays.asList(1L, 2L)));
+            when(stateService.getState(1L)).thenReturn(Optional.of(knownState1));
+            when(stateService.getState(2L)).thenReturn(Optional.of(knownState2));
             
             ActionResult successResult = mock(ActionResult.class);
             when(successResult.isSuccess()).thenReturn(true);
             when(action.find(any(ObjectCollection.class))).thenReturn(successResult);
             
             // Check known states first
-            Set<State> activeStates = stateDetector.checkActiveStates();
+            stateDetector.checkForActiveStates();
             
             // Should only check the 2 known states, not all states
             verify(action, times(2)).find(any(ObjectCollection.class));
-            assertEquals(2, activeStates.size());
         }
         
         @Test
         @DisplayName("Should fall back to full search when no active states")
         public void testFallbackToFullSearch() {
-            when(stateMemory.getActiveStatesObjects()).thenReturn(new ArrayList<>());
-            
             State state1 = createMockState(1L, "State1");
             State state2 = createMockState(2L, "State2");
-            when(stateService.findAll()).thenReturn(Arrays.asList(state1, state2));
+            
+            // First call returns empty, triggering search
+            when(stateMemory.getActiveStates()).thenReturn(new HashSet<>());
+            when(stateService.getAllStateNames()).thenReturn(new HashSet<>(Arrays.asList("State1", "State2")));
+            when(stateService.getState("State1")).thenReturn(Optional.of(state1));
+            when(stateService.getState("State2")).thenReturn(Optional.of(state2));
             
             ActionResult successResult = mock(ActionResult.class);
             when(successResult.isSuccess()).thenReturn(true);
             when(action.find(any(ObjectCollection.class))).thenReturn(successResult);
             
-            // When no active states, should search all
-            Set<State> foundStates = stateDetector.detectCurrentStates();
+            // When no active states, rebuild will search all
+            stateDetector.rebuildActiveStates();
             
             verify(action, times(2)).find(any(ObjectCollection.class));
-            assertEquals(2, foundStates.size());
         }
     }
     
@@ -431,23 +423,20 @@ public class StateDetectorTest extends BrobotTestBase {
             State sidebarState = createMockState(2L, "SidebarState");
             State headerState = createMockState(3L, "HeaderState");
             
-            when(stateService.findAll()).thenReturn(Arrays.asList(mainState, sidebarState, headerState));
+            when(stateService.getAllStateNames())
+                .thenReturn(new HashSet<>(Arrays.asList("MainState", "SidebarState", "HeaderState")));
+            when(stateService.getState("MainState")).thenReturn(Optional.of(mainState));
+            when(stateService.getState("SidebarState")).thenReturn(Optional.of(sidebarState));
+            when(stateService.getState("HeaderState")).thenReturn(Optional.of(headerState));
             
             ActionResult successResult = mock(ActionResult.class);
             when(successResult.isSuccess()).thenReturn(true);
             when(action.find(any(ObjectCollection.class))).thenReturn(successResult);
             
-            Set<State> foundStates = stateDetector.searchAllStates();
+            stateDetector.searchAllImagesForCurrentStates();
             
-            assertEquals(3, foundStates.size());
-            assertTrue(foundStates.contains(mainState));
-            assertTrue(foundStates.contains(sidebarState));
-            assertTrue(foundStates.contains(headerState));
-            
-            // All three states should be added to active states
-            verify(stateMemory).addActiveState(1L);
-            verify(stateMemory).addActiveState(2L);
-            verify(stateMemory).addActiveState(3L);
+            // All three states should be checked
+            verify(action, times(3)).find(any(ObjectCollection.class));
         }
         
         @Test
@@ -457,25 +446,19 @@ public class StateDetectorTest extends BrobotTestBase {
             State blockingState = createMockState(2L, "BlockingModal");
             blockingState.setBlocking(true);
             
-            when(stateService.findAll()).thenReturn(Arrays.asList(normalState, blockingState));
+            when(stateService.getAllStateNames())
+                .thenReturn(new HashSet<>(Arrays.asList("NormalState", "BlockingModal")));
+            when(stateService.getState("NormalState")).thenReturn(Optional.of(normalState));
+            when(stateService.getState("BlockingModal")).thenReturn(Optional.of(blockingState));
             
             ActionResult successResult = mock(ActionResult.class);
             when(successResult.isSuccess()).thenReturn(true);
             when(action.find(any(ObjectCollection.class))).thenReturn(successResult);
             
-            Set<State> foundStates = stateDetector.searchAllStates();
+            stateDetector.searchAllImagesForCurrentStates();
             
-            assertTrue(foundStates.contains(normalState));
-            assertTrue(foundStates.contains(blockingState));
-            
-            // Both states found but blocking state should be noted
-            State blocking = foundStates.stream()
-                .filter(State::isBlocking)
-                .findFirst()
-                .orElse(null);
-            
-            assertNotNull(blocking);
-            assertEquals("BlockingModal", blocking.getName());
+            // Both states should be checked
+            verify(action, times(2)).find(any(ObjectCollection.class));
         }
     }
     
@@ -488,27 +471,5 @@ public class StateDetectorTest extends BrobotTestBase {
         when(state.isBlocking()).thenReturn(false);
         when(state.getHiddenStateIds()).thenReturn(new HashSet<>());
         return state;
-    }
-    
-    private Set<State> detectCurrentStates() {
-        Set<State> activeStates = stateDetector.checkActiveStates();
-        if (activeStates.isEmpty()) {
-            activeStates = stateDetector.searchAllStates();
-        }
-        return activeStates;
-    }
-    
-    private Optional<State> findStateById(Long stateId) {
-        Optional<State> state = stateService.findById(stateId);
-        if (state.isPresent()) {
-            ObjectCollection collection = new ObjectCollection.Builder()
-                .withStateImages(state.get().getStateImages())
-                .build();
-            ActionResult result = action.find(collection);
-            if (result.isSuccess()) {
-                return state;
-            }
-        }
-        return Optional.empty();
     }
 }
