@@ -1,4 +1,4 @@
-package io.github.jspinak.brobot.json.schemaValidation.schema;
+package io.github.jspinak.brobot.runner.json.validation.schema;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -96,4 +96,56 @@ class AutomationDSLValidatorTest {
         assertTrue(result.getErrors().stream()
                 .anyMatch(e -> e.errorCode().equals("Duplicate function name")));
     }
+
+    @Test
+    void validate_whenNonVoidFunctionMissingReturn_shouldReturnError() {
+        // Using "int" which is valid in the schema enum
+        String functionMissingReturnJson = """
+        {
+            "automationFunctions": [
+                {
+                    "name": "getNumber",
+                    "returnType": "int",
+                    "statements": []
+                }
+            ]
+        }
+        """;
+
+        ValidationResult result = automationDSLValidator.validate(functionMissingReturnJson);
+
+        assertFalse(result.isValid());
+        assertTrue(result.getErrors().stream()
+                .anyMatch(e -> e.errorCode().equals("Missing return statement")));
+    }
+
+
+
+
+
+
+
+    @Test
+    void validate_whenFunctionHasNoName_shouldReturnError() {
+        // Schema requires name, so this will fail with critical error
+        String missingNameJson = """
+        {
+            "automationFunctions": [
+                {
+                    "returnType": "void",
+                    "statements": []
+                }
+            ]
+        }
+        """;
+
+        ValidationResult result = automationDSLValidator.validate(missingNameJson);
+
+        assertFalse(result.isValid());
+        assertTrue(result.hasCriticalErrors());
+        assertTrue(result.getErrors().stream()
+                .anyMatch(e -> e.errorCode().equals("Schema validation failed")));
+    }
+
+
 }
