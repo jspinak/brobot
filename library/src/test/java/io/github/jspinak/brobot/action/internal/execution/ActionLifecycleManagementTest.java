@@ -259,8 +259,8 @@ public class ActionLifecycleManagementTest extends BrobotTestBase {
             // Act
             boolean shouldContinue = lifecycleManagement.isOkToContinueAction(testResult, 1);
             
-            // Assert - In mock mode, should return false after first repetition
-            assertFalse(shouldContinue);
+            // Assert - With 0 completed repetitions, should continue
+            assertTrue(shouldContinue);
         }
         
         @Test
@@ -280,8 +280,8 @@ public class ActionLifecycleManagementTest extends BrobotTestBase {
             // Act
             boolean shouldContinue = lifecycleManagement.isOkToContinueAction(testResult, 1);
             
-            // Assert - In mock mode, should return false after first repetition
-            assertFalse(shouldContinue);
+            // Assert - With 0 completed repetitions, should continue
+            assertTrue(shouldContinue);
         }
         
         @Test
@@ -325,8 +325,8 @@ public class ActionLifecycleManagementTest extends BrobotTestBase {
             // Act
             boolean shouldContinue = lifecycleManagement.isOkToContinueAction(testResult, 1);
             
-            // Assert - In mock mode, should return false after first repetition
-            assertFalse(shouldContinue);
+            // Assert - With 0 completed repetitions, should continue
+            assertTrue(shouldContinue);
         }
     }
     
