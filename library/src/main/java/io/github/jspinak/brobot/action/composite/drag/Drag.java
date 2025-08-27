@@ -1,82 +1,82 @@
 package io.github.jspinak.brobot.action.composite.drag;
-import io.github.jspinak.brobot.action.ActionType;
 
 import io.github.jspinak.brobot.action.ActionInterface;
-import io.github.jspinak.brobot.action.ActionConfig;
-import io.github.jspinak.brobot.action.ActionChainOptions;
-import io.github.jspinak.brobot.action.internal.execution.ActionChainExecutor;
-import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
-import io.github.jspinak.brobot.action.basic.mouse.MouseMoveOptions;
-import io.github.jspinak.brobot.action.basic.mouse.MouseDownOptions;
-import io.github.jspinak.brobot.action.basic.mouse.MouseUpOptions;
-import io.github.jspinak.brobot.action.basic.mouse.MousePressOptions;
-import io.github.jspinak.brobot.model.element.Location;
-import io.github.jspinak.brobot.model.element.Movement;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
+import io.github.jspinak.brobot.action.ActionConfig;
+import io.github.jspinak.brobot.action.basic.mouse.MouseDown;
+import io.github.jspinak.brobot.action.basic.mouse.MouseUp;
+import io.github.jspinak.brobot.action.basic.mouse.MoveMouse;
+import io.github.jspinak.brobot.action.basic.mouse.MouseDownOptions;
+import io.github.jspinak.brobot.action.basic.mouse.MouseUpOptions;
+import io.github.jspinak.brobot.action.basic.mouse.MouseMoveOptions;
+import io.github.jspinak.brobot.model.element.Location;
+import io.github.jspinak.brobot.model.element.Movement;
+import io.github.jspinak.brobot.model.element.Region;
+import io.github.jspinak.brobot.model.match.Match;
+import io.github.jspinak.brobot.model.state.StateRegion;
+import io.github.jspinak.brobot.model.state.StateLocation;
 
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+import java.util.ArrayList;
 
 /**
- * Performs drag-and-drop operations between GUI elements in the Brobot model-based automation framework.
- * 
- * <p>Drag is a composite action in the Action Model (α) that combines multiple basic actions 
- * to implement complex drag-and-drop interactions. It seamlessly handles dragging between 
- * various target types including visually identified elements (Image Matches), screen areas 
- * (Regions), and specific coordinates (Locations), providing a unified interface for all 
- * drag operations.</p>
- * 
- * <p>Architecture:
- * <ul>
- *   <li><b>Composite Design</b>: Combines Find actions with platform-specific drag operations</li>
- *   <li><b>Two-phase Execution</b>: First finds the 'from' location, then the 'to' location</li>
- *   <li><b>Flexible Targeting</b>: Supports Image Matches, Regions, and Locations for both 
- *       source and destination</li>
- *   <li><b>Result Tracking</b>: Returns a defined region representing the drag path</li>
- * </ul>
+ * Pure implementation of drag-and-drop operations for GUI automation.
+ * <p>
+ * This class provides a pure drag action that performs mouse drag operations
+ * between provided locations. Unlike composite actions, it does NOT perform
+ * any Find operations - it expects the source and target locations to be
+ * provided directly through ObjectCollections.
  * </p>
  * 
- * <p>Supported drag patterns:
- * <ul>
- *   <li>Image to Image: Drag from one visual element to another</li>
- *   <li>Image to Region: Drag from a visual element to a screen area</li>
- *   <li>Location to Location: Precise coordinate-based dragging</li>
- *   <li>Any combination of Image Match, Region, or Location</li>
- * </ul>
- * </p>
+ * <p><b>Usage Pattern:</b></p>
+ * <pre>{@code
+ * // Option 1: Direct drag between known locations
+ * ObjectCollection source = new ObjectCollection.Builder()
+ *     .withLocations(new Location(100, 100))
+ *     .build();
+ * ObjectCollection target = new ObjectCollection.Builder()
+ *     .withLocations(new Location(300, 300))
+ *     .build();
  * 
- * <p>Common use cases:
- * <ul>
- *   <li>Moving files between folders in file managers</li>
- *   <li>Rearranging items in lists or grids</li>
- *   <li>Drawing or selecting areas in graphics applications</li>
- *   <li>Adjusting sliders or other draggable UI controls</li>
- *   <li>Drag-based gesture interactions in modern applications</li>
- * </ul>
- * </p>
+ * DragOptions options = new DragOptions.Builder().build();
+ * ActionResult result = action.perform(options, source, target);
  * 
- * <p>Implementation details:
- * <ul>
- *   <li>Uses ObjectCollection #1 for the 'from' location</li>
- *   <li>Uses ObjectCollection #2 for the 'to' location</li>
- *   <li>Returns matches for the 'to' location, not the 'from' location</li>
- *   <li>Adds a DefinedRegion to matches with drag path coordinates</li>
- *   <li>Supports offset adjustments for precise positioning</li>
- * </ul>
- * </p>
+ * // Option 2: Find elements first, then drag between them
+ * ActionResult sourceResult = action.find(sourceImage);
+ * ActionResult targetResult = action.find(targetImage);
  * 
- * <p>In the model-based approach, Drag actions represent high-level GUI interactions that 
- * would otherwise require multiple coordinated low-level actions. By encapsulating the 
- * complexity of drag-and-drop operations, the framework enables more natural and maintainable 
- * automation scripts that closely mirror human interactions with the GUI.</p>
+ * if (sourceResult.isSuccess() && targetResult.isSuccess()) {
+ *     ObjectCollection sourceCol = new ObjectCollection.Builder()
+ *         .withLocations(sourceResult.getMatchList().get(0).getTarget())
+ *         .build();
+ *     ObjectCollection targetCol = new ObjectCollection.Builder()
+ *         .withLocations(targetResult.getMatchList().get(0).getTarget())
+ *         .build();
+ *     
+ *     action.perform(dragOptions, sourceCol, targetCol);
+ * }
  * 
- * @since 1.0
- * @see Find
- * @see DragCoordinateCalculator
- * @see GetDragLocation
- * @see ActionOptions
- * @see ObjectCollection
+ * // Option 3: Use ActionChainOptions for find-then-drag workflow
+ * ActionChainOptions chain = new ActionChainOptions.Builder(
+ *     new PatternFindOptions.Builder().build())
+ *     .then(new PatternFindOptions.Builder().build())
+ *     .then(new DragOptions.Builder().build())
+ *     .build();
+ * }</pre>
+ * 
+ * <p>This pure implementation follows the Single Responsibility Principle:
+ * it only handles the drag operation itself, not the finding of elements.
+ * This design eliminates circular dependencies and makes the action more
+ * composable with other actions.</p>
+ * 
+ * @since 2.0
+ * @see MouseDown
+ * @see MoveMouse
+ * @see MouseUp
+ * @see DragOptions
  */
 @Component
 public class Drag implements ActionInterface {
@@ -86,128 +86,206 @@ public class Drag implements ActionInterface {
         return Type.DRAG;
     }
 
-    private final ActionChainExecutor actionChainExecutor;
+    private final MouseDown mouseDown;
+    private final MoveMouse moveMouse;
+    private final MouseUp mouseUp;
 
-    public Drag(ActionChainExecutor actionChainExecutor) {
-        this.actionChainExecutor = actionChainExecutor;
+    /**
+     * Constructs a Drag action with required mouse operation dependencies.
+     * 
+     * @param mouseDown Service for pressing mouse buttons
+     * @param moveMouse Service for moving the mouse cursor
+     * @param mouseUp Service for releasing mouse buttons
+     */
+    public Drag(MouseDown mouseDown, MoveMouse moveMouse, MouseUp mouseUp) {
+        this.mouseDown = mouseDown;
+        this.moveMouse = moveMouse;
+        this.mouseUp = mouseUp;
     }
 
     /**
-     * Executes a drag-and-drop operation between two GUI elements or locations.
+     * Executes a drag-and-drop operation between provided locations.
      * <p>
-     * This method orchestrates a complete drag operation by:
+     * This method performs a pure drag operation by:
      * <ol>
-     *   <li>Finding the source location from the first ObjectCollection</li>
-     *   <li>Finding the destination location from the second ObjectCollection</li>
-     *   <li>Applying any configured offsets to both locations</li>
-     *   <li>Performing the platform-specific drag operation</li>
-     *   <li>Recording the drag path as a DefinedRegion in the results</li>
+     *   <li>Extracting the source location from the first ObjectCollection</li>
+     *   <li>Extracting the target location from the second ObjectCollection</li>
+     *   <li>Moving to the source location</li>
+     *   <li>Pressing the mouse button</li>
+     *   <li>Moving to the target location (while holding the button)</li>
+     *   <li>Releasing the mouse button</li>
      * </ol>
      * 
      * <p><b>Important behaviors:</b>
      * <ul>
-     *   <li>Only matches from the 'to' location are returned in the ActionResult</li>
-     *   <li>The 'from' location matches are used internally but not returned</li>
-     *   <li>A DefinedRegion is added with the drag path coordinates:
-     *       <ul>
-     *         <li>x,y = drag start (from) location</li>
-     *         <li>width,height = delta to drag end (to) location</li>
-     *       </ul>
-     *   </li>
-     *   <li>If either location cannot be found, the operation silently fails</li>
+     *   <li>Requires exactly 2 ObjectCollections with at least one location each</li>
+     *   <li>Uses the first location from each collection</li>
+     *   <li>Records the drag path as a Movement in the results</li>
+     *   <li>Returns matches for both source and target locations</li>
      * </ul>
      * 
-     * <p><b>ActionOptions used:</b>
-     * <ul>
-     *   <li>Find options: similarity, search regions, offsets</li>
-     *   <li>Drag options: timing delays, drag speed</li>
-     *   <li>Offset adjustments: addX, addY for both locations</li>
-     * </ul>
-     * 
-     * @param matches The ActionResult containing configuration options. Modified with
-     *                results from the 'to' location and a DefinedRegion representing
-     *                the drag path.
+     * @param actionResult The ActionResult to populate with execution results
      * @param objectCollections Requires exactly 2 collections:
-     *                          [0] = source elements to drag from,
-     *                          [1] = destination elements to drag to
+     *                          [0] = source location to drag from,
+     *                          [1] = target location to drag to
      */
     @Override
-    public void perform(ActionResult matches, ObjectCollection... objectCollections) {
+    public void perform(ActionResult actionResult, ObjectCollection... objectCollections) {
         // Validate we have the required object collections
-        if (objectCollections.length < 2) {
-            matches.setSuccess(false);
+        if (objectCollections == null || objectCollections.length < 2) {
+            actionResult.setSuccess(false);
             return;
         }
         
-        // Get the configuration
-        ActionConfig config = matches.getActionConfig();
-        DragOptions dragOptions = (config instanceof DragOptions) ? 
-            (DragOptions) config : new DragOptions.Builder().build();
+        // Extract source and target locations
+        Location sourceLocation = extractFirstLocation(objectCollections[0]);
+        Location targetLocation = extractFirstLocation(objectCollections[1]);
         
-        // Extract source and target collections
-        ObjectCollection sourceCollection = objectCollections[0];
-        ObjectCollection targetCollection = objectCollections[1];
+        if (sourceLocation == null || targetLocation == null) {
+            actionResult.setSuccess(false);
+            return;
+        }
         
-        // Build the 6-action chain: Find source → Find target → MouseMove to source → 
-        // MouseDown → MouseMove to target → MouseUp
+        // Get drag configuration
+        DragOptions dragOptions = extractDragOptions(actionResult.getActionConfig());
         
-        // Step 1: Find source
-        PatternFindOptions findSourceOptions = new PatternFindOptions.Builder()
-            .setPauseAfterEnd(0.1)
-            .build();
-        
-        // Step 2: Find target (will store both results)
-        PatternFindOptions findTargetOptions = new PatternFindOptions.Builder()
-            .setPauseAfterEnd(0.1)
-            .build();
-        
-        // Step 3: Move to source
+        // Step 1: Move to source location
         MouseMoveOptions moveToSourceOptions = new MouseMoveOptions.Builder()
             .setPauseAfterEnd(0.1)
             .build();
         
-        // Step 4: Mouse down at source
+        ActionResult moveToSourceResult = new ActionResult();
+        moveToSourceResult.setActionConfig(moveToSourceOptions);
+        StateLocation sourceStateLocation = new StateLocation();
+        sourceStateLocation.setLocation(sourceLocation);
+        ObjectCollection sourceCol = new ObjectCollection.Builder()
+            .withLocations(sourceStateLocation)
+            .build();
+        moveMouse.perform(moveToSourceResult, sourceCol);
+        
+        if (!moveToSourceResult.isSuccess()) {
+            actionResult.setSuccess(false);
+            return;
+        }
+        
+        // Step 2: Press mouse button at source
         MouseDownOptions mouseDownOptions = new MouseDownOptions.Builder()
-            .setPressOptions(dragOptions.getMousePressOptions().toBuilder().build())
+            .setPressOptions(dragOptions.getMousePressOptions())
             .setPauseAfterEnd(dragOptions.getDelayBetweenMouseDownAndMove())
             .build();
         
-        // Step 5: Move to target (while holding mouse down)
+        ActionResult mouseDownResult = new ActionResult();
+        mouseDownResult.setActionConfig(mouseDownOptions);
+        mouseDown.perform(mouseDownResult, sourceCol);
+        
+        if (!mouseDownResult.isSuccess()) {
+            actionResult.setSuccess(false);
+            return;
+        }
+        
+        // Step 3: Move to target location (while holding mouse button)
         MouseMoveOptions moveToTargetOptions = new MouseMoveOptions.Builder()
             .setPauseAfterEnd(0.1)
             .build();
         
-        // Step 6: Mouse up at target
+        ActionResult moveToTargetResult = new ActionResult();
+        moveToTargetResult.setActionConfig(moveToTargetOptions);
+        StateLocation targetStateLocation = new StateLocation();
+        targetStateLocation.setLocation(targetLocation);
+        ObjectCollection targetCol = new ObjectCollection.Builder()
+            .withLocations(targetStateLocation)
+            .build();
+        moveMouse.perform(moveToTargetResult, targetCol);
+        
+        if (!moveToTargetResult.isSuccess()) {
+            // Try to release mouse button even if move failed
+            mouseUp.perform(new ActionResult(), new ObjectCollection.Builder().build());
+            actionResult.setSuccess(false);
+            return;
+        }
+        
+        // Step 4: Release mouse button at target
         MouseUpOptions mouseUpOptions = new MouseUpOptions.Builder()
-            .setPressOptions(dragOptions.getMousePressOptions().toBuilder().build())
+            .setPressOptions(dragOptions.getMousePressOptions())
             .setPauseAfterEnd(dragOptions.getDelayAfterDrag())
             .build();
         
-        // Create the action chain
-        ActionChainOptions chainOptions = new ActionChainOptions.Builder(findSourceOptions)
-            .setStrategy(ActionChainOptions.ChainingStrategy.NESTED)
-            .then(findTargetOptions)
-            .then(moveToSourceOptions)
-            .then(mouseDownOptions)
-            .then(moveToTargetOptions)
-            .then(mouseUpOptions)
-            .build();
+        ActionResult mouseUpResult = new ActionResult();
+        mouseUpResult.setActionConfig(mouseUpOptions);
+        mouseUp.perform(mouseUpResult, targetCol);
         
-        // Execute the chain
-        ActionResult result = actionChainExecutor.executeChain(chainOptions, matches, 
-            sourceCollection, targetCollection);
+        // Set overall success
+        actionResult.setSuccess(mouseUpResult.isSuccess());
         
-        // Copy results back to the provided matches object
-        matches.setMatchList(result.getMatchList());
-        matches.setSuccess(result.isSuccess());
-        matches.setDuration(result.getDuration());
-        
-        // Add the movement if successful
-        if (result.isSuccess() && result.getMatchList().size() >= 2) {
-            Location startLoc = result.getMatchList().get(0).getTarget();
-            Location endLoc = result.getMatchList().get(result.getMatchList().size() - 1).getTarget();
-            Movement dragMovement = new Movement(startLoc, endLoc);
-            matches.addMovement(dragMovement);
+        // Add matches for source and target locations
+        if (actionResult.isSuccess()) {
+            // Create matches for the locations
+            Match sourceMatch = new Match();
+            sourceMatch.setTarget(sourceLocation);
+            sourceMatch.setScore(1.0);
+            
+            Match targetMatch = new Match();
+            targetMatch.setTarget(targetLocation);
+            targetMatch.setScore(1.0);
+            
+            List<Match> matches = new ArrayList<>();
+            matches.add(sourceMatch);
+            matches.add(targetMatch);
+            actionResult.setMatchList(matches);
+            
+            // Record the drag movement
+            Movement dragMovement = new Movement(sourceLocation, targetLocation);
+            actionResult.addMovement(dragMovement);
         }
+    }
+    
+    /**
+     * Extracts the first location from an ObjectCollection.
+     * Checks StateLocations, then StateRegions, then matches.
+     * 
+     * @param collection The ObjectCollection to extract from
+     * @return The first location found, or null if none available
+     */
+    private Location extractFirstLocation(ObjectCollection collection) {
+        if (collection == null) {
+            return null;
+        }
+        
+        // Check for StateLocations
+        if (collection.getStateLocations() != null && !collection.getStateLocations().isEmpty()) {
+            return collection.getStateLocations().get(0).getLocation();
+        }
+        
+        // Check for StateRegions (use region's location)
+        if (collection.getStateRegions() != null && !collection.getStateRegions().isEmpty()) {
+            Region region = collection.getStateRegions().get(0).getSearchRegion();
+            // Get the center of the region
+            int centerX = region.getX() + region.getW() / 2;
+            int centerY = region.getY() + region.getH() / 2;
+            return new Location(centerX, centerY);
+        }
+        
+        // Check for matches (previous ActionResults)
+        if (collection.getMatches() != null && !collection.getMatches().isEmpty()) {
+            ActionResult firstMatch = collection.getMatches().get(0);
+            if (firstMatch.getMatchList() != null && !firstMatch.getMatchList().isEmpty()) {
+                return firstMatch.getMatchList().get(0).getTarget();
+            }
+        }
+        
+        return null;
+    }
+    
+    /**
+     * Extracts DragOptions from the ActionConfig, or creates default options.
+     * 
+     * @param config The ActionConfig from the ActionResult
+     * @return DragOptions to use for the operation
+     */
+    private DragOptions extractDragOptions(ActionConfig config) {
+        if (config instanceof DragOptions) {
+            return (DragOptions) config;
+        }
+        return new DragOptions.Builder().build();
     }
 }

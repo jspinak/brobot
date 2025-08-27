@@ -43,38 +43,13 @@ import org.springframework.context.annotation.PropertySource;
 @PropertySource(value = "classpath:brobot-logging-defaults.properties", ignoreResourceNotFound = true)
 public class ActionLoggingConfig {
     
-    /**
-     * Creates the console action reporter.
-     * Only created if console actions are enabled.
-     */
-    @Bean
-    @ConditionalOnProperty(
-        prefix = "brobot.console.actions",
-        name = "enabled",
-        havingValue = "true",
-        matchIfMissing = true
-    )
-    public ConsoleActionReporter consoleActionReporter(
-        BrobotLogger brobotLogger,
-        ConsoleActionConfig config
-    ) {
-        return new ConsoleActionReporter(brobotLogger, config);
-    }
+    // ConsoleActionReporter is already annotated with @Component, so it's automatically created by Spring
+    // The @ConditionalOnProperty should be moved to the ConsoleActionReporter class itself
     
     // HighlightManager is now created automatically as a @Component with lazy Action injection
     // to avoid circular dependency issues
     
-    /**
-     * Creates the GUI access monitor.
-     * Always created as it provides important diagnostics.
-     */
-    @Bean
-    public GuiAccessMonitor guiAccessMonitor(
-        BrobotLogger brobotLogger,
-        GuiAccessConfig config
-    ) {
-        return new GuiAccessMonitor(brobotLogger, config);
-    }
+    // GuiAccessMonitor is already annotated with @Component, so it's automatically created by Spring
     
     // Removed the enhanced action logger configuration as it was causing bean conflicts
     // The base ActionLoggerImpl is sufficient for now

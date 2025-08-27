@@ -35,7 +35,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * - Fusion and area filtering handled differently in new API
  */
 @SpringBootTest(classes = BrobotTestApplication.class)
-@OcrTestSupport.RequiresOcr
+@OcrTestSupport.RequiresScreenshots
 public class FindAllWordsTestUpdated extends OcrTestBase {
 
     @BeforeAll

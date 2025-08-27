@@ -16,7 +16,6 @@ import io.github.jspinak.brobot.action.basic.region.DefineRegion;
 import io.github.jspinak.brobot.action.basic.type.KeyDown;
 import io.github.jspinak.brobot.action.basic.type.KeyUp;
 import io.github.jspinak.brobot.action.basic.type.TypeText;
-import io.github.jspinak.brobot.action.composite.drag.Drag;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -73,8 +72,7 @@ public class BasicActionRegistry {
     public BasicActionRegistry(Find find, Click click,
                        MouseDown mouseDown, MouseUp mouseUp, DefineRegion defineRegion, TypeText typeText,
                        MoveMouse moveMouse, WaitVanish waitVanish, Highlight highlight,
-                       ScrollMouseWheel scrollMouseWheel, KeyDown keyDown, KeyUp keyUp, Classify classify,
-                       @Autowired(required = false) Drag drag) {
+                       ScrollMouseWheel scrollMouseWheel, KeyDown keyDown, KeyUp keyUp, Classify classify) {
         actions.put(FIND, find);
         actions.put(CLICK, click);
         actions.put(MOUSE_DOWN, mouseDown);
@@ -88,9 +86,6 @@ public class BasicActionRegistry {
         actions.put(KEY_DOWN, keyDown);
         actions.put(KEY_UP, keyUp);
         actions.put(CLASSIFY, classify);
-        if (drag != null) {
-            actions.put(DRAG, drag);
-        }
     }
 
     /**
