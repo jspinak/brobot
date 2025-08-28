@@ -118,7 +118,23 @@ public class Action {
      * @return an ActionResult containing all results from the action execution
      */
     public ActionResult perform(String actionDescription, ActionConfig actionConfig, ObjectCollection... objectCollections) {
-        for (ObjectCollection objColl : objectCollections) objColl.resetTimesActedOn();
+        // Handle null parameters gracefully
+        if (actionConfig == null) {
+            ActionResult result = new ActionResult();
+            result.setSuccess(false);
+            result.setActionDescription("Failed: ActionConfig is null");
+            return result;
+        }
+        
+        if (objectCollections == null) {
+            objectCollections = new ObjectCollection[0];
+        }
+        
+        for (ObjectCollection objColl : objectCollections) {
+            if (objColl != null) {
+                objColl.resetTimesActedOn();
+            }
+        }
         
         // Check if this config has subsequent actions chained
         if (!actionConfig.getSubsequentActions().isEmpty()) {

@@ -89,21 +89,37 @@ public class ComplexWorkflowIntegrationTest extends BrobotTestBase {
         @DisplayName("Should execute complete login workflow")
         @Timeout(value = 5, unit = TimeUnit.SECONDS)
         void shouldExecuteCompleteLoginWorkflow() {
-            // Given - login workflow collections
+            // Given - login workflow collections with locations
+            StateLocation loginLoc = new StateLocation.Builder()
+                .setLocation(new Location(100, 100))
+                .setName("login-button-loc")
+                .build();
             ObjectCollection loginButtonColl = new ObjectCollection.Builder()
-                .withImages(loginButton)
+                .withLocations(loginLoc)
                 .build();
             
+            StateLocation usernameLoc = new StateLocation.Builder()
+                .setLocation(new Location(200, 150))
+                .setName("username-loc")
+                .build();
             ObjectCollection usernameColl = new ObjectCollection.Builder()
-                .withImages(usernameField)
+                .withLocations(usernameLoc)
                 .build();
             
+            StateLocation passwordLoc = new StateLocation.Builder()
+                .setLocation(new Location(200, 200))
+                .setName("password-loc")
+                .build();
             ObjectCollection passwordColl = new ObjectCollection.Builder()
-                .withImages(passwordField)
+                .withLocations(passwordLoc)
                 .build();
             
+            StateLocation submitLoc = new StateLocation.Builder()
+                .setLocation(new Location(250, 250))
+                .setName("submit-loc")
+                .build();
             ObjectCollection submitColl = new ObjectCollection.Builder()
-                .withImages(submitButton)
+                .withLocations(submitLoc)
                 .build();
             
             // When - execute login workflow
@@ -152,8 +168,12 @@ public class ComplexWorkflowIntegrationTest extends BrobotTestBase {
         @Timeout(value = 5, unit = TimeUnit.SECONDS)
         void shouldHandleLoginWithMultipleAttempts() {
             // Given
+            StateLocation loginLoc = new StateLocation.Builder()
+                .setLocation(new Location(100, 100))
+                .setName("login-button-loc")
+                .build();
             ObjectCollection loginColl = new ObjectCollection.Builder()
-                .withImages(loginButton)
+                .withLocations(loginLoc)
                 .build();
             
             AtomicInteger attemptCount = new AtomicInteger(0);
@@ -190,15 +210,23 @@ public class ComplexWorkflowIntegrationTest extends BrobotTestBase {
             // Given
             ActionResult loginCheck = createMockSuccessResult(loginButton);
             
+            StateLocation dashboardLoc = new StateLocation.Builder()
+                .setLocation(new Location(400, 300))
+                .setName("dashboard-loc")
+                .build();
             ObjectCollection dashboardColl = new ObjectCollection.Builder()
-                .withImages(dashboard)
+                .withLocations(dashboardLoc)
                 .build();
             
             // When
             if (loginCheck.isSuccess()) {
                 // Login button found - perform login
+                StateLocation submitLoc = new StateLocation.Builder()
+                    .setLocation(new Location(250, 250))
+                    .setName("submit-loc")
+                    .build();
                 ObjectCollection submitColl = new ObjectCollection.Builder()
-                    .withImages(submitButton)
+                    .withLocations(submitLoc)
                     .build();
                 
                 ActionResult loginResult = new ActionResult();
@@ -225,12 +253,20 @@ public class ComplexWorkflowIntegrationTest extends BrobotTestBase {
             StateImage primaryButton = createStateImage("primary", "images/primary.png");
             StateImage fallbackButton = createStateImage("fallback", "images/fallback.png");
             
+            StateLocation primaryLoc = new StateLocation.Builder()
+                .setLocation(new Location(150, 150))
+                .setName("primary-loc")
+                .build();
             ObjectCollection primaryColl = new ObjectCollection.Builder()
-                .withImages(primaryButton)
+                .withLocations(primaryLoc)
                 .build();
             
+            StateLocation fallbackLoc = new StateLocation.Builder()
+                .setLocation(new Location(160, 160))
+                .setName("fallback-loc")
+                .build();
             ObjectCollection fallbackColl = new ObjectCollection.Builder()
-                .withImages(fallbackButton)
+                .withLocations(fallbackLoc)
                 .build();
             
             // When - try primary, then fallback
@@ -314,9 +350,15 @@ public class ComplexWorkflowIntegrationTest extends BrobotTestBase {
             AtomicInteger completedActions = new AtomicInteger(0);
             
             List<ObjectCollection> collections = List.of(
-                new ObjectCollection.Builder().withImages(loginButton).build(),
-                new ObjectCollection.Builder().withImages(usernameField).build(),
-                new ObjectCollection.Builder().withImages(passwordField).build()
+                new ObjectCollection.Builder().withLocations(
+                    new StateLocation.Builder().setLocation(new Location(100, 100)).setName("loc1").build()
+                ).build(),
+                new ObjectCollection.Builder().withLocations(
+                    new StateLocation.Builder().setLocation(new Location(200, 150)).setName("loc2").build()
+                ).build(),
+                new ObjectCollection.Builder().withLocations(
+                    new StateLocation.Builder().setLocation(new Location(200, 200)).setName("loc3").build()
+                ).build()
             );
             
             // When - execute in parallel
@@ -364,8 +406,12 @@ public class ComplexWorkflowIntegrationTest extends BrobotTestBase {
             dashboardState.getStateImages().add(dashboard);
             
             // When - navigate from login to dashboard
+            StateLocation submitLoc = new StateLocation.Builder()
+                .setLocation(new Location(250, 250))
+                .setName("submit-loc")
+                .build();
             ObjectCollection submitColl = new ObjectCollection.Builder()
-                .withImages(submitButton)
+                .withLocations(submitLoc)
                 .build();
             
             ActionResult transitionResult = new ActionResult();
@@ -430,8 +476,12 @@ public class ComplexWorkflowIntegrationTest extends BrobotTestBase {
         @Timeout(value = 5, unit = TimeUnit.SECONDS)
         void shouldRecoverFromFailures() {
             // Given
+            StateLocation targetLoc = new StateLocation.Builder()
+                .setLocation(new Location(100, 100))
+                .setName("target-loc")
+                .build();
             ObjectCollection targetColl = new ObjectCollection.Builder()
-                .withImages(loginButton)
+                .withLocations(targetLoc)
                 .build();
             
             AtomicInteger retryCount = new AtomicInteger(0);

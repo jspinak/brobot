@@ -132,3 +132,8 @@ library/**/*.md
 # Ignore root build directory
 /build/
 library/screenshots/null.png
+
+# Local gradle overrides and configs
+*-override.gradle
+coverage-config.gradle
+local-*.gradle

@@ -46,16 +46,16 @@ public final class MatchFusionOptions {
         RELATIVE
     }
 
-    @Builder.Default
+    @lombok.Builder.Default
     private final FusionMethod fusionMethod = FusionMethod.NONE;
     
-    @Builder.Default
+    @lombok.Builder.Default
     private final int maxFusionDistanceX = 5;
     
-    @Builder.Default
+    @lombok.Builder.Default
     private final int maxFusionDistanceY = 5;
     
-    @Builder.Default
+    @lombok.Builder.Default
     private final int sceneToUseForCaptureAfterFusingMatches = 0;
 
     /**
