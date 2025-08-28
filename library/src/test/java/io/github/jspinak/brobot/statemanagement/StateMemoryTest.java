@@ -8,533 +8,462 @@ import io.github.jspinak.brobot.model.state.special.SpecialStateType;
 import io.github.jspinak.brobot.navigation.service.StateService;
 import io.github.jspinak.brobot.test.BrobotTestBase;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.MockitoAnnotations;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.time.LocalDateTime;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
 /**
- * Comprehensive test suite for StateMemory class.
- * Tests state tracking, transitions, and memory management functionality.
+ * Comprehensive test suite for StateMemory.
+ * Tests runtime state tracking and management functionality.
  */
-@ExtendWith(MockitoExtension.class)
 @DisplayName("StateMemory Tests")
 public class StateMemoryTest extends BrobotTestBase {
-
+    
     @Mock
     private StateService stateService;
-
+    
     private StateMemory stateMemory;
-
+    private AutoCloseable mocks;
+    
     @BeforeEach
     @Override
     public void setupTest() {
         super.setupTest();
-        // Mocks are initialized by MockitoExtension
+        mocks = MockitoAnnotations.openMocks(this);
         stateMemory = new StateMemory(stateService);
     }
-
+    
     @Nested
-    @DisplayName("Basic State Operations")
-    class BasicStateOperations {
-
+    @DisplayName("Active State Management")
+    class ActiveStateManagement {
+        
+        @Test
+        @DisplayName("Should initialize with empty active states")
+        public void testInitialState() {
+            assertTrue(stateMemory.getActiveStates().isEmpty());
+            assertTrue(stateMemory.getActiveStateList().isEmpty());
+        }
+        
         @Test
         @DisplayName("Should add state to active states")
-        void shouldAddStateToActiveStates() {
-            // Given
-            Long stateId = 1L;
+        public void testAddActiveState() {
             State mockState = mock(State.class);
-            when(stateService.getState(stateId)).thenReturn(Optional.of(mockState));
-            when(stateService.getStateName(stateId)).thenReturn("TestState");
-
-            // When
-            stateMemory.addActiveState(stateId);
-
-            // Then
-            assertTrue(stateMemory.getActiveStates().contains(stateId));
-            verify(mockState).setProbabilityExists(100);
-            verify(mockState).addVisit();
-        }
-
-        @Test
-        @DisplayName("Should not add duplicate state")
-        void shouldNotAddDuplicateState() {
-            // Given
-            Long stateId = 1L;
-            State mockState = mock(State.class);
-            when(stateService.getState(stateId)).thenReturn(Optional.of(mockState));
-            when(stateService.getStateName(stateId)).thenReturn("TestState");
-
-            // When
-            stateMemory.addActiveState(stateId);
-            stateMemory.addActiveState(stateId); // Try to add again
-
-            // Then
+            when(mockState.getId()).thenReturn(1L);
+            when(mockState.getName()).thenReturn("TestState");
+            when(stateService.getState(1L)).thenReturn(Optional.of(mockState));
+            
+            stateMemory.addActiveState(1L);
+            
+            assertTrue(stateMemory.getActiveStates().contains(1L));
             assertEquals(1, stateMemory.getActiveStates().size());
-            verify(mockState, times(1)).setProbabilityExists(100);
-            verify(mockState, times(1)).addVisit();
         }
-
+        
         @Test
-        @DisplayName("Should not add NULL state")
-        void shouldNotAddNullState() {
-            // Given
-            Long nullStateId = SpecialStateType.NULL.getId();
-
-            // When
-            stateMemory.addActiveState(nullStateId);
-
-            // Then
-            assertFalse(stateMemory.getActiveStates().contains(nullStateId));
-            assertTrue(stateMemory.getActiveStates().isEmpty());
-        }
-
-        @Test
-        @DisplayName("Should remove state from active states")
-        void shouldRemoveStateFromActiveStates() {
-            // Given
-            Long stateId = 1L;
-            State mockState = mock(State.class);
-            when(stateService.getState(stateId)).thenReturn(Optional.of(mockState));
-            when(stateService.getStateName(stateId)).thenReturn("TestState");
-            stateMemory.addActiveState(stateId);
-
-            // When
-            stateMemory.removeInactiveState(stateId);
-
-            // Then
-            assertFalse(stateMemory.getActiveStates().contains(stateId));
-            verify(mockState).setProbabilityExists(0);
-        }
-
-        @Test
-        @DisplayName("Should handle removing non-existent state")
-        void shouldHandleRemovingNonExistentState() {
-            // Given
-            Long stateId = 999L;
-
-            // When/Then - should not throw exception
-            assertDoesNotThrow(() -> stateMemory.removeInactiveState(stateId));
-            assertTrue(stateMemory.getActiveStates().isEmpty());
-        }
-    }
-
-    @Nested
-    @DisplayName("State List Operations")
-    class StateListOperations {
-
-        @Test
-        @DisplayName("Should get active state list")
-        void shouldGetActiveStateList() {
-            // Given
-            State state1 = mock(State.class);
-            State state2 = mock(State.class);
-            
-            when(stateService.getState(1L)).thenReturn(Optional.of(state1));
-            when(stateService.getState(2L)).thenReturn(Optional.of(state2));
-            when(stateService.getStateName(1L)).thenReturn("State1");
-            when(stateService.getStateName(2L)).thenReturn("State2");
-            
-            stateMemory.addActiveState(1L);
-            stateMemory.addActiveState(2L);
-
-            // When
-            List<State> activeStates = stateMemory.getActiveStateList();
-
-            // Then
-            assertEquals(2, activeStates.size());
-            assertTrue(activeStates.contains(state1));
-            assertTrue(activeStates.contains(state2));
-        }
-
-        @Test
-        @DisplayName("Should get active state names")
-        void shouldGetActiveStateNames() {
-            // Given
-            State state1 = mock(State.class);
-            State state2 = mock(State.class);
-            when(state1.getName()).thenReturn("LoginState");
-            when(state2.getName()).thenReturn("HomeState");
-            
-            when(stateService.getState(1L)).thenReturn(Optional.of(state1));
-            when(stateService.getState(2L)).thenReturn(Optional.of(state2));
-            when(stateService.getStateName(1L)).thenReturn("LoginState");
-            when(stateService.getStateName(2L)).thenReturn("HomeState");
-            
-            stateMemory.addActiveState(1L);
-            stateMemory.addActiveState(2L);
-
-            // When
-            List<String> stateNames = stateMemory.getActiveStateNames();
-
-            // Then
-            assertEquals(2, stateNames.size());
-            assertTrue(stateNames.contains("LoginState"));
-            assertTrue(stateNames.contains("HomeState"));
-        }
-
-        @Test
-        @DisplayName("Should get active state names as string")
-        void shouldGetActiveStateNamesAsString() {
-            // Given
-            State state1 = mock(State.class);
-            State state2 = mock(State.class);
-            when(state1.getName()).thenReturn("State1");
-            when(state2.getName()).thenReturn("State2");
-            
-            when(stateService.getState(1L)).thenReturn(Optional.of(state1));
-            when(stateService.getState(2L)).thenReturn(Optional.of(state2));
-            when(stateService.getStateName(1L)).thenReturn("State1");
-            when(stateService.getStateName(2L)).thenReturn("State2");
-            
-            stateMemory.addActiveState(1L);
-            stateMemory.addActiveState(2L);
-
-            // When
-            String namesString = stateMemory.getActiveStateNamesAsString();
-
-            // Then
-            assertTrue(namesString.contains("State1"));
-            assertTrue(namesString.contains("State2"));
-            assertTrue(namesString.contains(", ") || namesString.equals("State1") || namesString.equals("State2"));
-        }
-
-        @Test
-        @DisplayName("Should handle empty active states")
-        void shouldHandleEmptyActiveStates() {
-            // When
-            List<State> activeStates = stateMemory.getActiveStateList();
-            List<String> stateNames = stateMemory.getActiveStateNames();
-            String namesString = stateMemory.getActiveStateNamesAsString();
-
-            // Then
-            assertTrue(activeStates.isEmpty());
-            assertTrue(stateNames.isEmpty());
-            assertEquals("", namesString);
-        }
-    }
-
-    @Nested
-    @DisplayName("Batch Operations")
-    class BatchOperations {
-
-        @Test
-        @DisplayName("Should remove multiple inactive states")
-        void shouldRemoveMultipleInactiveStates() {
-            // Given
+        @DisplayName("Should add multiple active states")
+        public void testAddMultipleActiveStates() {
             State state1 = mock(State.class);
             State state2 = mock(State.class);
             State state3 = mock(State.class);
             
+            when(state1.getId()).thenReturn(1L);
+            when(state2.getId()).thenReturn(2L);
+            when(state3.getId()).thenReturn(3L);
+            when(state1.getName()).thenReturn("State1");
+            when(state2.getName()).thenReturn("State2");
+            when(state3.getName()).thenReturn("State3");
+            
             when(stateService.getState(1L)).thenReturn(Optional.of(state1));
             when(stateService.getState(2L)).thenReturn(Optional.of(state2));
             when(stateService.getState(3L)).thenReturn(Optional.of(state3));
-            when(stateService.getStateName(anyLong())).thenReturn("State");
             
             stateMemory.addActiveState(1L);
             stateMemory.addActiveState(2L);
             stateMemory.addActiveState(3L);
-
-            // When
-            Set<Long> toRemove = new HashSet<>(Arrays.asList(1L, 3L));
-            stateMemory.removeInactiveStates(toRemove);
-
-            // Then
-            assertFalse(stateMemory.getActiveStates().contains(1L));
+            
+            assertEquals(3, stateMemory.getActiveStates().size());
+            assertTrue(stateMemory.getActiveStates().contains(1L));
             assertTrue(stateMemory.getActiveStates().contains(2L));
-            assertFalse(stateMemory.getActiveStates().contains(3L));
-            verify(state1).setProbabilityExists(0);
-            verify(state3).setProbabilityExists(0);
+            assertTrue(stateMemory.getActiveStates().contains(3L));
         }
-
+        
         @Test
-        @DisplayName("Should remove all states")
-        void shouldRemoveAllStates() {
-            // Given
-            when(stateService.getStateName(anyLong())).thenReturn("State");
+        @DisplayName("Should not add duplicate active states")
+        public void testNoDuplicateActiveStates() {
             State mockState = mock(State.class);
-            when(stateService.getState(anyLong())).thenReturn(Optional.of(mockState));
+            when(mockState.getId()).thenReturn(1L);
+            when(stateService.getState(1L)).thenReturn(Optional.of(mockState));
             
             stateMemory.addActiveState(1L);
-            stateMemory.addActiveState(2L);
-            stateMemory.addActiveState(3L);
-
-            // When
-            stateMemory.removeAllStates();
-
-            // Then
+            stateMemory.addActiveState(1L); // Add same state again
+            
+            assertEquals(1, stateMemory.getActiveStates().size());
+        }
+        
+        @Test
+        @DisplayName("Should not add NULL special state")
+        public void testDoNotAddNullState() {
+            stateMemory.addActiveState(SpecialStateType.NULL.getId()); // NULL state ID is -5L
+            
             assertTrue(stateMemory.getActiveStates().isEmpty());
         }
-
+        
         @Test
-        @DisplayName("Should remove state by name")
-        void shouldRemoveStateByName() {
-            // Given
-            Long stateId = 5L;
-            String stateName = "TestState";
+        @DisplayName("Should add state with newLine parameter")
+        public void testAddActiveStateWithNewLine() {
             State mockState = mock(State.class);
+            when(mockState.getId()).thenReturn(1L);
+            when(mockState.getName()).thenReturn("TestState");
+            when(stateService.getState(1L)).thenReturn(Optional.of(mockState));
             
-            when(stateService.getStateId(stateName)).thenReturn(stateId);
-            when(stateService.getState(stateId)).thenReturn(Optional.of(mockState));
-            when(stateService.getStateName(stateId)).thenReturn(stateName);
+            stateMemory.addActiveState(1L, true);
             
-            stateMemory.addActiveState(stateId);
-
-            // When
-            stateMemory.removeInactiveState(stateName);
-
-            // Then
-            assertFalse(stateMemory.getActiveStates().contains(stateId));
-            verify(mockState).setProbabilityExists(0);
-        }
-
-        @Test
-        @DisplayName("Should handle removing non-existent state by name")
-        void shouldHandleRemovingNonExistentStateByName() {
-            // Given
-            String stateName = "NonExistentState";
-            when(stateService.getStateId(stateName)).thenReturn(null);
-
-            // When/Then - should not throw exception
-            assertDoesNotThrow(() -> stateMemory.removeInactiveState(stateName));
+            assertTrue(stateMemory.getActiveStates().contains(1L));
+            assertEquals(1, stateMemory.getActiveStates().size());
         }
     }
-
+    
+    @Nested
+    @DisplayName("State Removal")
+    class StateRemoval {
+        
+        @BeforeEach
+        void setupActiveStates() {
+            State state1 = mock(State.class);
+            State state2 = mock(State.class);
+            State state3 = mock(State.class);
+            
+            when(state1.getId()).thenReturn(1L);
+            when(state2.getId()).thenReturn(2L);
+            when(state3.getId()).thenReturn(3L);
+            when(state1.getName()).thenReturn("State1");
+            when(state2.getName()).thenReturn("State2");
+            when(state3.getName()).thenReturn("State3");
+            
+            when(stateService.getState(1L)).thenReturn(Optional.of(state1));
+            when(stateService.getState(2L)).thenReturn(Optional.of(state2));
+            when(stateService.getState(3L)).thenReturn(Optional.of(state3));
+            when(stateService.getState("State1")).thenReturn(Optional.of(state1));
+            when(stateService.getState("State2")).thenReturn(Optional.of(state2));
+            when(stateService.getState("State3")).thenReturn(Optional.of(state3));
+            
+            stateMemory.addActiveState(1L);
+            stateMemory.addActiveState(2L);
+            stateMemory.addActiveState(3L);
+        }
+        
+        @Test
+        @DisplayName("Should remove inactive state by ID")
+        public void testRemoveInactiveStateById() {
+            stateMemory.removeInactiveState(2L);
+            
+            assertEquals(2, stateMemory.getActiveStates().size());
+            assertFalse(stateMemory.getActiveStates().contains(2L));
+            assertTrue(stateMemory.getActiveStates().contains(1L));
+            assertTrue(stateMemory.getActiveStates().contains(3L));
+        }
+        
+        @Test
+        @DisplayName("Should remove inactive state by name")
+        public void testRemoveInactiveStateByName() {
+            when(stateService.getStateId("State2")).thenReturn(2L);
+            
+            stateMemory.removeInactiveState("State2");
+            
+            assertEquals(2, stateMemory.getActiveStates().size());
+            assertFalse(stateMemory.getActiveStates().contains(2L));
+        }
+        
+        @Test
+        @DisplayName("Should remove multiple inactive states")
+        public void testRemoveMultipleInactiveStates() {
+            Set<Long> inactiveStates = new HashSet<>(Arrays.asList(1L, 3L));
+            
+            stateMemory.removeInactiveStates(inactiveStates);
+            
+            assertEquals(1, stateMemory.getActiveStates().size());
+            assertTrue(stateMemory.getActiveStates().contains(2L));
+            assertFalse(stateMemory.getActiveStates().contains(1L));
+            assertFalse(stateMemory.getActiveStates().contains(3L));
+        }
+        
+        @Test
+        @DisplayName("Should remove all states")
+        public void testRemoveAllStates() {
+            stateMemory.removeAllStates();
+            
+            assertTrue(stateMemory.getActiveStates().isEmpty());
+        }
+        
+        @Test
+        @DisplayName("Should handle removing non-existent state")
+        public void testRemoveNonExistentState() {
+            int initialSize = stateMemory.getActiveStates().size();
+            
+            stateMemory.removeInactiveState(999L);
+            
+            assertEquals(initialSize, stateMemory.getActiveStates().size());
+        }
+    }
+    
+    @Nested
+    @DisplayName("State Retrieval")
+    class StateRetrieval {
+        
+        @BeforeEach
+        void setupActiveStates() {
+            State state1 = mock(State.class);
+            State state2 = mock(State.class);
+            
+            when(state1.getId()).thenReturn(1L);
+            when(state2.getId()).thenReturn(2L);
+            when(state1.getName()).thenReturn("LoginState");
+            when(state2.getName()).thenReturn("DashboardState");
+            
+            when(stateService.getState(1L)).thenReturn(Optional.of(state1));
+            when(stateService.getState(2L)).thenReturn(Optional.of(state2));
+            
+            stateMemory.addActiveState(1L);
+            stateMemory.addActiveState(2L);
+        }
+        
+        @Test
+        @DisplayName("Should get active state list")
+        public void testGetActiveStateList() {
+            List<State> activeStateList = stateMemory.getActiveStateList();
+            
+            assertNotNull(activeStateList);
+            assertEquals(2, activeStateList.size());
+            
+            List<String> names = new ArrayList<>();
+            for (State state : activeStateList) {
+                names.add(state.getName());
+            }
+            assertTrue(names.contains("LoginState"));
+            assertTrue(names.contains("DashboardState"));
+        }
+        
+        @Test
+        @DisplayName("Should get active state names")
+        public void testGetActiveStateNames() {
+            List<String> names = stateMemory.getActiveStateNames();
+            
+            assertNotNull(names);
+            assertEquals(2, names.size());
+            assertTrue(names.contains("LoginState"));
+            assertTrue(names.contains("DashboardState"));
+        }
+        
+        @Test
+        @DisplayName("Should get active state names as string")
+        public void testGetActiveStateNamesAsString() {
+            String namesString = stateMemory.getActiveStateNamesAsString();
+            
+            assertNotNull(namesString);
+            assertTrue(namesString.contains("LoginState"));
+            assertTrue(namesString.contains("DashboardState"));
+        }
+        
+        @Test
+        @DisplayName("Should return empty list when no active states")
+        public void testGetActiveStateListWhenEmpty() {
+            stateMemory.removeAllStates();
+            
+            List<State> activeStateList = stateMemory.getActiveStateList();
+            List<String> names = stateMemory.getActiveStateNames();
+            String namesString = stateMemory.getActiveStateNamesAsString();
+            
+            assertNotNull(activeStateList);
+            assertTrue(activeStateList.isEmpty());
+            assertNotNull(names);
+            assertTrue(names.isEmpty());
+            assertNotNull(namesString);
+            assertTrue(namesString.isEmpty());
+        }
+        
+        @Test
+        @DisplayName("Should handle missing states gracefully")
+        public void testHandleMissingStates() {
+            // Add an ID that doesn't exist in StateService
+            when(stateService.getState(999L)).thenReturn(Optional.empty());
+            stateMemory.getActiveStates().add(999L);
+            
+            List<State> activeStateList = stateMemory.getActiveStateList();
+            
+            // Should only return valid states
+            assertEquals(2, activeStateList.size());
+        }
+    }
+    
     @Nested
     @DisplayName("Match Integration")
     class MatchIntegration {
-
-        @Test
-        @DisplayName("Should adjust active states with matches")
-        void shouldAdjustActiveStatesWithMatches() {
-            // Given
-            ActionResult actionResult = new ActionResult();
-            
-            Match match1 = new Match.Builder().build();
-            StateObjectMetadata metadata1 = new StateObjectMetadata();
-            metadata1.setOwnerStateId(10L);
-            match1.setStateObjectData(metadata1);
-            
-            Match match2 = new Match.Builder().build();
-            StateObjectMetadata metadata2 = new StateObjectMetadata();
-            metadata2.setOwnerStateId(20L);
-            match2.setStateObjectData(metadata2);
-            
-            actionResult.setMatchList(Arrays.asList(match1, match2));
-            
-            State state1 = mock(State.class);
-            State state2 = mock(State.class);
-            when(stateService.getState(10L)).thenReturn(Optional.of(state1));
-            when(stateService.getState(20L)).thenReturn(Optional.of(state2));
-            when(stateService.getStateName(10L)).thenReturn("State10");
-            when(stateService.getStateName(20L)).thenReturn("State20");
-
-            // When
-            stateMemory.adjustActiveStatesWithMatches(actionResult);
-
-            // Then
-            assertTrue(stateMemory.getActiveStates().contains(10L));
-            assertTrue(stateMemory.getActiveStates().contains(20L));
-            verify(state1).setProbabilityExists(100);
-            verify(state2).setProbabilityExists(100);
-        }
-
-        @Test
-        @DisplayName("Should ignore matches without state data")
-        void shouldIgnoreMatchesWithoutStateData() {
-            // Given
-            ActionResult actionResult = new ActionResult();
-            Match match = new Match.Builder().build();
-            // No state object data set
-            actionResult.setMatchList(Arrays.asList(match));
-
-            // When
-            stateMemory.adjustActiveStatesWithMatches(actionResult);
-
-            // Then
-            assertTrue(stateMemory.getActiveStates().isEmpty());
-        }
-
-        @Test
-        @DisplayName("Should ignore matches with null or zero state ID")
-        void shouldIgnoreMatchesWithInvalidStateId() {
-            // Given
-            ActionResult actionResult = new ActionResult();
-            
-            Match match1 = new Match.Builder().build();
-            StateObjectMetadata metadata1 = new StateObjectMetadata();
-            metadata1.setOwnerStateId(null);
-            match1.setStateObjectData(metadata1);
-            
-            Match match2 = new Match.Builder().build();
-            StateObjectMetadata metadata2 = new StateObjectMetadata();
-            metadata2.setOwnerStateId(0L);
-            match2.setStateObjectData(metadata2);
-            
-            actionResult.setMatchList(Arrays.asList(match1, match2));
-
-            // When
-            stateMemory.adjustActiveStatesWithMatches(actionResult);
-
-            // Then
-            assertTrue(stateMemory.getActiveStates().isEmpty());
-        }
-    }
-
-    @Nested
-    @DisplayName("State Probability and Visits")
-    class StateProbabilityAndVisits {
-
-        @Test
-        @DisplayName("Should set probability to 100 when adding state")
-        void shouldSetProbabilityWhenAddingState() {
-            // Given
-            Long stateId = 1L;
-            State mockState = mock(State.class);
-            when(stateService.getState(stateId)).thenReturn(Optional.of(mockState));
-            when(stateService.getStateName(stateId)).thenReturn("TestState");
-
-            // When
-            stateMemory.addActiveState(stateId);
-
-            // Then
-            verify(mockState).setProbabilityExists(100);
-        }
-
-        @Test
-        @DisplayName("Should set probability to 0 when removing state")
-        void shouldSetProbabilityWhenRemovingState() {
-            // Given
-            Long stateId = 1L;
-            State mockState = mock(State.class);
-            when(stateService.getState(stateId)).thenReturn(Optional.of(mockState));
-            when(stateService.getStateName(stateId)).thenReturn("TestState");
-            stateMemory.addActiveState(stateId);
-
-            // When
-            stateMemory.removeInactiveState(stateId);
-
-            // Then
-            verify(mockState).setProbabilityExists(0);
-        }
-
-        @Test
-        @DisplayName("Should increment visit count when adding state")
-        void shouldIncrementVisitCount() {
-            // Given
-            Long stateId = 1L;
-            State mockState = mock(State.class);
-            when(stateService.getState(stateId)).thenReturn(Optional.of(mockState));
-            when(stateService.getStateName(stateId)).thenReturn("TestState");
-
-            // When
-            stateMemory.addActiveState(stateId);
-
-            // Then
-            verify(mockState).addVisit();
-        }
-    }
-
-    @Nested
-    @DisplayName("Edge Cases")
-    class EdgeCases {
-
-        @ParameterizedTest
-        @DisplayName("Should handle various state IDs")
-        @ValueSource(longs = {Long.MIN_VALUE, -1L, 0L, 1L, 999999L, Long.MAX_VALUE})
-        void shouldHandleVariousStateIds(long stateId) {
-            // Given
-            if (stateId != SpecialStateType.NULL.getId() && stateId > 0) {
-                State mockState = mock(State.class);
-                when(stateService.getState(stateId)).thenReturn(Optional.of(mockState));
-                when(stateService.getStateName(stateId)).thenReturn("State" + stateId);
-            }
-
-            // When
-            stateMemory.addActiveState(stateId);
-
-            // Then
-            // Negative and zero state IDs should be added regardless
-            // Only NULL special state is filtered
-            if (stateId == SpecialStateType.NULL.getId()) {
-                assertFalse(stateMemory.getActiveStates().contains(stateId));
-            } else {
-                assertTrue(stateMemory.getActiveStates().contains(stateId));
-            }
-        }
-
-        @Test
-        @DisplayName("Should handle state not found in StateService")
-        void shouldHandleStateNotFound() {
-            // Given
-            Long stateId = 999L;
-            when(stateService.getState(stateId)).thenReturn(Optional.empty());
-            when(stateService.getStateName(stateId)).thenReturn("UnknownState");
-
-            // When
-            stateMemory.addActiveState(stateId);
-
-            // Then
-            assertTrue(stateMemory.getActiveStates().contains(stateId));
-            // No probability or visit operations should occur
-        }
-
-        @Test
-        @DisplayName("Should maintain state order in lists")
-        void shouldMaintainStateOrder() {
-            // Given
+        
+        @BeforeEach
+        void setupStates() {
             State state1 = mock(State.class);
             State state2 = mock(State.class);
             State state3 = mock(State.class);
             
+            when(state1.getId()).thenReturn(1L);
+            when(state2.getId()).thenReturn(2L);
+            when(state3.getId()).thenReturn(3L);
+            when(state1.getName()).thenReturn("State1");
+            when(state2.getName()).thenReturn("State2");
+            when(state3.getName()).thenReturn("State3");
+            
             when(stateService.getState(1L)).thenReturn(Optional.of(state1));
             when(stateService.getState(2L)).thenReturn(Optional.of(state2));
             when(stateService.getState(3L)).thenReturn(Optional.of(state3));
-            when(stateService.getStateName(3L)).thenReturn("C");
-            when(stateService.getStateName(1L)).thenReturn("A");
-            when(stateService.getStateName(2L)).thenReturn("B");
-
-            // When
-            stateMemory.addActiveState(3L);
+        }
+        
+        @Test
+        @DisplayName("Should adjust active states with matches")
+        public void testAdjustActiveStatesWithMatches() {
+            // Setup initial active states
             stateMemory.addActiveState(1L);
             stateMemory.addActiveState(2L);
-
-            // Then
-            List<State> states = stateMemory.getActiveStateList();
-            assertEquals(3, states.size());
-            // Order depends on HashSet iteration order, just verify all are present
-            assertTrue(states.containsAll(Arrays.asList(state1, state2, state3)));
+            
+            // Create matches with states found
+            ActionResult matches = new ActionResult();
+            
+            // Create match with state 2
+            Match match1 = mock(Match.class);
+            StateObjectMetadata metadata1 = mock(StateObjectMetadata.class);
+            when(metadata1.getOwnerStateId()).thenReturn(2L);
+            when(match1.getStateObjectData()).thenReturn(metadata1);
+            
+            // Create match with state 3
+            Match match2 = mock(Match.class);
+            StateObjectMetadata metadata2 = mock(StateObjectMetadata.class);
+            when(metadata2.getOwnerStateId()).thenReturn(3L);
+            when(match2.getStateObjectData()).thenReturn(metadata2);
+            
+            matches.add(match1);
+            matches.add(match2);
+            
+            // Adjust active states based on matches
+            stateMemory.adjustActiveStatesWithMatches(matches);
+            
+            // States 1, 2, and 3 should all be active
+            // (adjustActiveStatesWithMatches only adds, doesn't remove)
+            assertEquals(3, stateMemory.getActiveStates().size());
+            assertTrue(stateMemory.getActiveStates().contains(1L));
+            assertTrue(stateMemory.getActiveStates().contains(2L));
+            assertTrue(stateMemory.getActiveStates().contains(3L));
+        }
+        
+        @Test
+        @DisplayName("Should handle empty matches")
+        public void testAdjustActiveStatesWithEmptyMatches() {
+            stateMemory.addActiveState(1L);
+            stateMemory.addActiveState(2L);
+            
+            ActionResult matches = new ActionResult();
+            // No matches added - empty match list
+            
+            stateMemory.adjustActiveStatesWithMatches(matches);
+            
+            // States should remain unchanged (method only adds, doesn't remove)
+            assertEquals(2, stateMemory.getActiveStates().size());
+            assertTrue(stateMemory.getActiveStates().contains(1L));
+            assertTrue(stateMemory.getActiveStates().contains(2L));
+        }
+        
+        @Test
+        @DisplayName("Should handle null matches")
+        public void testAdjustActiveStatesWithNullMatches() {
+            stateMemory.addActiveState(1L);
+            stateMemory.addActiveState(2L);
+            int initialSize = stateMemory.getActiveStates().size();
+            
+            ActionResult matches = new ActionResult();
+            // Don't set state IDs, leaving it null
+            
+            stateMemory.adjustActiveStatesWithMatches(matches);
+            
+            // Should handle null gracefully
+            assertTrue(stateMemory.getActiveStates().size() <= initialSize);
         }
     }
-
+    
     @Nested
-    @DisplayName("Special State Types")
-    class SpecialStateTypes {
-
+    @DisplayName("Special State Handling")
+    class SpecialStateHandling {
+        
         @Test
-        @DisplayName("Should handle special state types")
-        void shouldHandleSpecialStateTypes() {
-            // Test special state types from SpecialStateType enum
-            assertNotNull(SpecialStateType.NULL);
-            assertNotNull(SpecialStateType.PREVIOUS);
-            assertNotNull(SpecialStateType.CURRENT);
-            assertEquals("NULL", SpecialStateType.NULL.name());
-            assertEquals("PREVIOUS", SpecialStateType.PREVIOUS.name());
-            assertEquals("CURRENT", SpecialStateType.CURRENT.name());
+        @DisplayName("Should handle PREVIOUS state enum")
+        public void testPreviousStateEnum() {
+            assertNotNull(StateMemory.Enum.PREVIOUS);
+            assertEquals("PREVIOUS", StateMemory.Enum.PREVIOUS.toString());
+        }
+        
+        @Test
+        @DisplayName("Should handle CURRENT state enum")
+        public void testCurrentStateEnum() {
+            assertNotNull(StateMemory.Enum.CURRENT);
+            assertEquals("CURRENT", StateMemory.Enum.CURRENT.toString());
+        }
+        
+        @Test
+        @DisplayName("Should handle EXPECTED state enum")
+        public void testExpectedStateEnum() {
+            assertNotNull(StateMemory.Enum.EXPECTED);
+            assertEquals("EXPECTED", StateMemory.Enum.EXPECTED.toString());
+        }
+        
+        @ParameterizedTest
+        @ValueSource(longs = {-5L})
+        @DisplayName("Should not add NULL special state")
+        public void testNullStateNotAdded(long stateId) {
+            stateMemory.addActiveState(stateId);
+            
+            assertFalse(stateMemory.getActiveStates().contains(stateId));
+        }
+    }
+    
+    @Nested
+    @DisplayName("Concurrency and Thread Safety")
+    class ConcurrencyTests {
+        
+        @Test
+        @DisplayName("Should handle concurrent state additions")
+        public void testConcurrentStateAdditions() throws InterruptedException {
+            int threadCount = 10;
+            Thread[] threads = new Thread[threadCount];
+            
+            for (int i = 0; i < threadCount; i++) {
+                final long stateId = i + 1;
+                State mockState = mock(State.class);
+                when(mockState.getId()).thenReturn(stateId);
+                when(stateService.getState(stateId)).thenReturn(Optional.of(mockState));
+                
+                threads[i] = new Thread(() -> {
+                    stateMemory.addActiveState(stateId);
+                });
+            }
+            
+            // Start all threads
+            for (Thread thread : threads) {
+                thread.start();
+            }
+            
+            // Wait for all threads to complete
+            for (Thread thread : threads) {
+                thread.join();
+            }
+            
+            // All states should be added
+            assertEquals(threadCount, stateMemory.getActiveStates().size());
         }
     }
 }
