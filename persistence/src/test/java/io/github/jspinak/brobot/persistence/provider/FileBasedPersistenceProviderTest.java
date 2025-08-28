@@ -9,6 +9,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -85,7 +86,7 @@ class FileBasedPersistenceProviderTest {
     }
     
     @Test
-    void testBuffering() {
+    void testBuffering() throws IOException {
         configuration.getPerformance().setBufferSize(3);
         provider = new FileBasedPersistenceProvider(configuration);
         
@@ -95,12 +96,14 @@ class FileBasedPersistenceProviderTest {
         for (int i = 0; i < 3; i++) {
             provider.recordAction(new ActionRecord.Builder()
                 .setText("Record " + i)
+                .setActionConfig(new PatternFindOptions.Builder().build())
                 .build(), null);
         }
         
         // One more should trigger flush
         provider.recordAction(new ActionRecord.Builder()
             .setText("Record 3")
+            .setActionConfig(new PatternFindOptions.Builder().build())
             .build(), null);
         
         provider.stopSession();
@@ -279,12 +282,13 @@ class FileBasedPersistenceProviderTest {
             sessionId = provider1.startSession("Persistent", "App", null);
             provider1.recordAction(new ActionRecord.Builder()
                 .setText("Persisted record")
+                .setActionConfig(new PatternFindOptions.Builder().build())
                 .build(), null);
             provider1.stopSession();
             provider1.shutdown();
         }
         
-        // Load with second instance
+        // Load with second instance using the SAME configuration (same temp dir)
         {
             FileBasedPersistenceProvider provider2 = new FileBasedPersistenceProvider(configuration);
             

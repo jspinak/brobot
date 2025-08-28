@@ -15,7 +15,7 @@ import io.github.jspinak.brobot.util.image.io.ImageFileUtilities;
 import io.github.jspinak.brobot.util.image.visualization.MatBuilder;
 import io.github.jspinak.brobot.BrobotTestApplication;
 import io.github.jspinak.brobot.config.FrameworkSettings;
-import io.github.jspinak.brobot.test.HeadlessTestConfiguration;
+import io.github.jspinak.brobot.test.config.TestApplicationConfiguration;
 import io.github.jspinak.brobot.tools.history.StateLayoutVisualizer;
 
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -39,7 +39,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 
 @SpringBootTest(classes = BrobotTestApplication.class)
-@Import(HeadlessTestConfiguration.class)
+@Import(TestApplicationConfiguration.class)
 class IllustrateStateTest {
 
     @BeforeAll
