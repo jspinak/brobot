@@ -5,13 +5,12 @@ import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.logging.unified.BrobotLogger;
 import io.github.jspinak.brobot.logging.unified.LogEvent;
-import io.github.jspinak.brobot.action.Action;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.action.basic.highlight.HighlightOptions;
+import io.github.jspinak.brobot.tools.testing.wrapper.HighlightWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import java.awt.*;
@@ -58,18 +57,18 @@ public class HighlightManager {
     
     private final VisualFeedbackConfig config;
     private final BrobotLogger brobotLogger;
-    
-    @Autowired
-    @Lazy
-    private Action action;
+    private final HighlightWrapper highlightWrapper;
     
     // Keep track of active highlight threads for cleanup
     private final List<CompletableFuture<Void>> activeHighlights = new ArrayList<>();
     
     @Autowired
-    public HighlightManager(VisualFeedbackConfig config, BrobotLogger brobotLogger) {
+    public HighlightManager(VisualFeedbackConfig config, 
+                          BrobotLogger brobotLogger,
+                          HighlightWrapper highlightWrapper) {
         this.config = config;
         this.brobotLogger = brobotLogger;
+        this.highlightWrapper = highlightWrapper;
     }
     
     /**
@@ -138,8 +137,8 @@ public class HighlightManager {
                 .withRegions(regions.toArray(new Region[0]))
                 .build();
             
-            // Perform highlight synchronously using Brobot's Action
-            if (action != null) {
+            // Perform highlight synchronously using Brobot's Action via wrapper
+            if (highlightWrapper != null && highlightWrapper.isAvailable()) {
                 log.debug("Highlighting {} search regions synchronously", regions.size());
                 brobotLogger.log()
                     .observation("Starting highlight action")
@@ -148,7 +147,7 @@ public class HighlightManager {
                     .metadata("duration", searchConfig.getDuration())
                     .log();
                     
-                ActionResult result = action.perform(highlightOptions, objectCollection);
+                ActionResult result = highlightWrapper.performHighlight(highlightOptions, objectCollection);
                 
                 brobotLogger.log()
                     .observation("Highlight action completed")
@@ -160,10 +159,10 @@ public class HighlightManager {
                     log.warn("Highlight action failed - no matches found for highlight regions");
                 }
             } else {
-                log.error("Action not available for highlighting - highlights will not appear on screen");
+                log.error("Highlight wrapper not available for highlighting - highlights will not appear on screen");
                 brobotLogger.log()
-                    .error(new IllegalStateException("Action bean not injected"))
-                    .message("Cannot display highlights - Action component not available")
+                    .error(new IllegalStateException("HighlightWrapper not available"))
+                    .message("Cannot display highlights - HighlightWrapper component not available")
                     .log();
             }
             
@@ -243,8 +242,8 @@ public class HighlightManager {
                 .withRegions(regions.toArray(new Region[0]))
                 .build();
             
-            // Perform highlight synchronously using Brobot's Action
-            if (action != null) {
+            // Perform highlight synchronously using Brobot's Action via wrapper
+            if (highlightWrapper != null && highlightWrapper.isAvailable()) {
                 log.debug("Highlighting {} search regions synchronously", regions.size());
                 brobotLogger.log()
                     .observation("Starting highlight action with context")
@@ -253,7 +252,7 @@ public class HighlightManager {
                     .metadata("duration", searchConfig.getDuration())
                     .log();
                     
-                ActionResult result = action.perform(highlightOptions, objectCollection);
+                ActionResult result = highlightWrapper.performHighlight(highlightOptions, objectCollection);
                 
                 brobotLogger.log()
                     .observation("Highlight action with context completed")
@@ -265,10 +264,10 @@ public class HighlightManager {
                     log.warn("Highlight action failed - no matches found for highlight regions");
                 }
             } else {
-                log.error("Action not available for highlighting - highlights will not appear on screen");
+                log.error("Highlight wrapper not available for highlighting - highlights will not appear on screen");
                 brobotLogger.log()
-                    .error(new IllegalStateException("Action bean not injected"))
-                    .message("Cannot display highlights - Action component not available")
+                    .error(new IllegalStateException("HighlightWrapper not available"))
+                    .message("Cannot display highlights - HighlightWrapper component not available")
                     .log();
             }
             
@@ -385,9 +384,13 @@ public class HighlightManager {
                         .withRegions(region)
                         .build();
                     
-                    // Use Brobot's Action system to perform the highlight
-                    // The action will handle the Find internally
-                    action.perform(highlightOptions, objectCollection);
+                    // Use Brobot's Action system to perform the highlight via wrapper
+                    // The wrapper will handle the Find internally
+                    if (highlightWrapper != null && highlightWrapper.isAvailable()) {
+                        highlightWrapper.performHighlight(highlightOptions, objectCollection);
+                    } else {
+                        log.warn("HighlightWrapper not available for async highlight");
+                    }
                     
                 } catch (Exception e) {
                     log.error("Error highlighting region: {}", e.getMessage(), e);

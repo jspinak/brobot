@@ -1,9 +1,9 @@
 package io.github.jspinak.brobot.tools.logging.visual;
 
-import io.github.jspinak.brobot.action.Action;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.action.basic.highlight.HighlightOptions;
+import io.github.jspinak.brobot.tools.testing.wrapper.HighlightWrapper;
 import io.github.jspinak.brobot.config.FrameworkSettings;
 import io.github.jspinak.brobot.logging.unified.BrobotLogger;
 import io.github.jspinak.brobot.logging.unified.LogBuilder;
@@ -42,7 +42,7 @@ public class HighlightManagerTest extends BrobotTestBase {
     private LogBuilder logBuilder;
     
     @Mock
-    private Action action;
+    private HighlightWrapper highlightWrapper;
     
     @Mock
     private VisualFeedbackConfig.FindHighlightConfig findConfig;
@@ -101,9 +101,10 @@ public class HighlightManagerTest extends BrobotTestBase {
         lenient().when(clickConfig.getRadius()).thenReturn(20);
         lenient().when(clickConfig.isRippleEffect()).thenReturn(false);
         
-        highlightManager = new HighlightManager(config, brobotLogger);
-        // Inject the action mock using reflection
-        ReflectionTestUtils.setField(highlightManager, "action", action);
+        highlightManager = new HighlightManager(config, brobotLogger, highlightWrapper);
+        
+        // Set up default wrapper behavior
+        lenient().when(highlightWrapper.isAvailable()).thenReturn(true);
     }
     
     @Test
@@ -124,7 +125,7 @@ public class HighlightManagerTest extends BrobotTestBase {
         
         ActionResult mockResult = new ActionResult();
         mockResult.setSuccess(true);
-        lenient().when(action.perform(any(HighlightOptions.class), any(ObjectCollection.class)))
+        lenient().when(highlightWrapper.performHighlight(any(HighlightOptions.class), any(ObjectCollection.class)))
             .thenReturn(mockResult);
         
         // Act
@@ -152,7 +153,7 @@ public class HighlightManagerTest extends BrobotTestBase {
         highlightManager.highlightMatches(matches);
         
         // Assert
-        verify(action, never()).perform(any(HighlightOptions.class), any(ObjectCollection.class));
+        verify(highlightWrapper, never()).performHighlight(any(HighlightOptions.class), any(ObjectCollection.class));
         verify(brobotLogger, never()).log();
     }
     
@@ -168,7 +169,7 @@ public class HighlightManagerTest extends BrobotTestBase {
         highlightManager.highlightMatches(matches);
         
         // Assert
-        verify(action, never()).perform(any(HighlightOptions.class), any(ObjectCollection.class));
+        verify(highlightWrapper, never()).performHighlight(any(HighlightOptions.class), any(ObjectCollection.class));
         verify(brobotLogger, never()).log();
     }
     
@@ -190,7 +191,7 @@ public class HighlightManagerTest extends BrobotTestBase {
         
         ActionResult mockResult = new ActionResult();
         mockResult.setSuccess(true);
-        lenient().when(action.perform(any(HighlightOptions.class), any(ObjectCollection.class)))
+        lenient().when(highlightWrapper.performHighlight(any(HighlightOptions.class), any(ObjectCollection.class)))
             .thenReturn(mockResult);
         
         // Act
@@ -199,8 +200,8 @@ public class HighlightManagerTest extends BrobotTestBase {
         // Assert
         verify(brobotLogger, atLeastOnce()).log();
         // Flash effect is async, so we just verify it was triggered
-        // In mock mode, action.perform is not called
-        verify(action, never()).perform(any(HighlightOptions.class), any(ObjectCollection.class));
+        // In mock mode, highlightWrapper.performHighlight is not called
+        verify(highlightWrapper, never()).performHighlight(any(HighlightOptions.class), any(ObjectCollection.class));
     }
     
     @Test
@@ -217,14 +218,14 @@ public class HighlightManagerTest extends BrobotTestBase {
         ActionResult mockResult = new ActionResult();
         mockResult.setSuccess(true);
         mockResult.setMatchList(new ArrayList<>());
-        when(action.perform(any(HighlightOptions.class), any(ObjectCollection.class)))
+        when(highlightWrapper.performHighlight(any(HighlightOptions.class), any(ObjectCollection.class)))
             .thenReturn(mockResult);
         
         // Act
         highlightManager.highlightSearchRegions(regions);
         
-        // Assert - highlightSearchRegions DOES call action.perform (no mock mode check)
-        verify(action).perform(any(HighlightOptions.class), any(ObjectCollection.class));
+        // Assert - highlightSearchRegions DOES call highlightWrapper.performHighlight (no mock mode check)
+        verify(highlightWrapper).performHighlight(any(HighlightOptions.class), any(ObjectCollection.class));
         
         // Verify logging happened
         verify(brobotLogger, atLeastOnce()).log();
@@ -245,7 +246,7 @@ public class HighlightManagerTest extends BrobotTestBase {
         highlightManager.highlightSearchRegions(regions);
         
         // Assert
-        verify(action, never()).perform(any(HighlightOptions.class), any(ObjectCollection.class));
+        verify(highlightWrapper, never()).performHighlight(any(HighlightOptions.class), any(ObjectCollection.class));
     }
     
     @Test
@@ -261,7 +262,7 @@ public class HighlightManagerTest extends BrobotTestBase {
         
         ActionResult mockResult = new ActionResult();
         mockResult.setSuccess(true);
-        lenient().when(action.perform(any(HighlightOptions.class), any(ObjectCollection.class)))
+        lenient().when(highlightWrapper.performHighlight(any(HighlightOptions.class), any(ObjectCollection.class)))
             .thenReturn(mockResult);
         
         // Act
@@ -276,7 +277,7 @@ public class HighlightManagerTest extends BrobotTestBase {
     @Test
     public void testHighlightSearchRegions_ActionNotAvailable() {
         // Arrange
-        ReflectionTestUtils.setField(highlightManager, "action", null);
+        ReflectionTestUtils.setField(highlightManager, "highlightWrapper", null);
         when(config.isEnabled()).thenReturn(true);
         when(config.isAutoHighlightSearchRegions()).thenReturn(true);
         
@@ -288,7 +289,7 @@ public class HighlightManagerTest extends BrobotTestBase {
         // Assert
         verify(brobotLogger, atLeastOnce()).log();
         verify(logBuilder).error(any(IllegalStateException.class));
-        verify(logBuilder).message("Cannot display highlights - Action component not available");
+        verify(logBuilder).message("Cannot display highlights - HighlightWrapper component not available");
     }
     
     @Test
@@ -306,15 +307,15 @@ public class HighlightManagerTest extends BrobotTestBase {
         
         ActionResult mockResult = new ActionResult();
         mockResult.setSuccess(true);
-        when(action.perform(any(HighlightOptions.class), any(ObjectCollection.class)))
+        when(highlightWrapper.performHighlight(any(HighlightOptions.class), any(ObjectCollection.class)))
             .thenReturn(mockResult);
         
         // Act
         highlightManager.highlightSearchRegionsWithContext(regionsWithContext);
         
         // Assert
-        // highlightSearchRegionsWithContext DOES call action.perform
-        verify(action).perform(any(HighlightOptions.class), any(ObjectCollection.class));
+        // highlightSearchRegionsWithContext DOES call highlightWrapper.performHighlight
+        verify(highlightWrapper).performHighlight(any(HighlightOptions.class), any(ObjectCollection.class));
         verify(brobotLogger, atLeastOnce()).log();
         verify(logBuilder, atLeastOnce()).observation(contains("Highlighting region for State1.Object1"));
         verify(logBuilder, atLeastOnce()).metadata("state", "State1");
@@ -331,7 +332,7 @@ public class HighlightManagerTest extends BrobotTestBase {
         
         ActionResult mockResult = new ActionResult();
         mockResult.setSuccess(true);
-        lenient().when(action.perform(any(HighlightOptions.class), any(ObjectCollection.class)))
+        lenient().when(highlightWrapper.performHighlight(any(HighlightOptions.class), any(ObjectCollection.class)))
             .thenReturn(mockResult);
         
         // Act
@@ -339,7 +340,7 @@ public class HighlightManagerTest extends BrobotTestBase {
         
         // Assert - in mock mode, action.perform is not called
         // Instead, only logging happens
-        verify(action, never()).perform(any(HighlightOptions.class), any(ObjectCollection.class));
+        verify(highlightWrapper, never()).performHighlight(any(HighlightOptions.class), any(ObjectCollection.class));
         verify(brobotLogger, atLeastOnce()).log();
         verify(logBuilder).observation("Mock highlight");
     }
@@ -353,7 +354,7 @@ public class HighlightManagerTest extends BrobotTestBase {
         highlightManager.highlightClick(100, 200);
         
         // Assert
-        verify(action, never()).perform(any(HighlightOptions.class), any(ObjectCollection.class));
+        verify(highlightWrapper, never()).performHighlight(any(HighlightOptions.class), any(ObjectCollection.class));
     }
     
     @Test
@@ -369,7 +370,7 @@ public class HighlightManagerTest extends BrobotTestBase {
         
         ActionResult mockResult = new ActionResult();
         mockResult.setSuccess(true);
-        lenient().when(action.perform(any(HighlightOptions.class), any(ObjectCollection.class)))
+        lenient().when(highlightWrapper.performHighlight(any(HighlightOptions.class), any(ObjectCollection.class)))
             .thenReturn(mockResult);
         
         // Act
@@ -383,8 +384,8 @@ public class HighlightManagerTest extends BrobotTestBase {
         }
         
         // Assert
-        // In mock mode, action.perform is not called but logging happens
-        verify(action, never()).perform(any(HighlightOptions.class), any(ObjectCollection.class));
+        // In mock mode, highlightWrapper.performHighlight is not called but logging happens
+        verify(highlightWrapper, never()).performHighlight(any(HighlightOptions.class), any(ObjectCollection.class));
         // Ripple effect creates multiple log calls (5 steps)
         verify(brobotLogger, atLeast(5)).log();
         verify(logBuilder, atLeast(5)).observation("Mock highlight");
@@ -402,15 +403,15 @@ public class HighlightManagerTest extends BrobotTestBase {
         
         ActionResult mockResult = new ActionResult();
         mockResult.setSuccess(true);
-        lenient().when(action.perform(any(HighlightOptions.class), any(ObjectCollection.class)))
+        lenient().when(highlightWrapper.performHighlight(any(HighlightOptions.class), any(ObjectCollection.class)))
             .thenReturn(mockResult);
         
         // Act
         highlightManager.highlightError(searchRegion);
         
         // Assert
-        // In mock mode, action.perform is not called
-        verify(action, never()).perform(any(HighlightOptions.class), any(ObjectCollection.class));
+        // In mock mode, highlightWrapper.performHighlight is not called
+        verify(highlightWrapper, never()).performHighlight(any(HighlightOptions.class), any(ObjectCollection.class));
         verify(brobotLogger, atLeastOnce()).log();
     }
     
@@ -428,7 +429,7 @@ public class HighlightManagerTest extends BrobotTestBase {
         
         ActionResult mockResult = new ActionResult();
         mockResult.setSuccess(true);
-        lenient().when(action.perform(any(HighlightOptions.class), any(ObjectCollection.class)))
+        lenient().when(highlightWrapper.performHighlight(any(HighlightOptions.class), any(ObjectCollection.class)))
             .thenReturn(mockResult);
         
         // Act
@@ -442,8 +443,8 @@ public class HighlightManagerTest extends BrobotTestBase {
         }
         
         // Assert
-        // In mock mode, action.perform is not called even with cross mark
-        verify(action, never()).perform(any(HighlightOptions.class), any(ObjectCollection.class));
+        // In mock mode, highlightWrapper.performHighlight is not called even with cross mark
+        verify(highlightWrapper, never()).performHighlight(any(HighlightOptions.class), any(ObjectCollection.class));
         verify(brobotLogger, atLeastOnce()).log();
         // Cross mark creates 3 highlights (main error + 2 diagonals)
         verify(logBuilder, times(3)).observation("Mock highlight");
@@ -460,7 +461,7 @@ public class HighlightManagerTest extends BrobotTestBase {
         highlightManager.highlightError(null);
         
         // Assert
-        verify(action, never()).perform(any(HighlightOptions.class), any(ObjectCollection.class));
+        verify(highlightWrapper, never()).performHighlight(any(HighlightOptions.class), any(ObjectCollection.class));
     }
     
     @Test
@@ -484,7 +485,7 @@ public class HighlightManagerTest extends BrobotTestBase {
         verify(brobotLogger, atLeastOnce()).log();
         verify(logBuilder).observation("Mock highlight");
         verify(logBuilder).metadata("type", "FIND");
-        verify(action, never()).perform(any(HighlightOptions.class), any(ObjectCollection.class));
+        verify(highlightWrapper, never()).performHighlight(any(HighlightOptions.class), any(ObjectCollection.class));
     }
     
     @Test
@@ -509,7 +510,7 @@ public class HighlightManagerTest extends BrobotTestBase {
     @Test
     public void testGetColorName_CommonColors() {
         // Use reflection to test private method
-        HighlightManager manager = new HighlightManager(config, brobotLogger);
+        HighlightManager manager = new HighlightManager(config, brobotLogger, highlightWrapper);
         
         assertEquals("red", invokeGetColorName(manager, Color.RED));
         assertEquals("green", invokeGetColorName(manager, Color.GREEN));
@@ -525,7 +526,7 @@ public class HighlightManagerTest extends BrobotTestBase {
     
     @Test
     public void testGetColorName_CustomColors() {
-        HighlightManager manager = new HighlightManager(config, brobotLogger);
+        HighlightManager manager = new HighlightManager(config, brobotLogger, highlightWrapper);
         
         // Test color approximation
         assertEquals("red", invokeGetColorName(manager, new Color(220, 50, 50)));
@@ -568,7 +569,7 @@ public class HighlightManagerTest extends BrobotTestBase {
         
         ActionResult mockResult = new ActionResult();
         mockResult.setSuccess(true);
-        lenient().when(action.perform(any(HighlightOptions.class), any(ObjectCollection.class)))
+        lenient().when(highlightWrapper.performHighlight(any(HighlightOptions.class), any(ObjectCollection.class)))
             .thenReturn(mockResult);
         
         // Act
@@ -590,7 +591,7 @@ public class HighlightManagerTest extends BrobotTestBase {
         
         ActionResult mockResult = new ActionResult();
         mockResult.setSuccess(false);  // Action fails
-        when(action.perform(any(HighlightOptions.class), any(ObjectCollection.class)))
+        when(highlightWrapper.performHighlight(any(HighlightOptions.class), any(ObjectCollection.class)))
             .thenReturn(mockResult);
         
         // Act
@@ -598,7 +599,7 @@ public class HighlightManagerTest extends BrobotTestBase {
         
         // Assert
         // highlightSearchRegions DOES call action.perform
-        verify(action).perform(any(HighlightOptions.class), any(ObjectCollection.class));
+        verify(highlightWrapper).performHighlight(any(HighlightOptions.class), any(ObjectCollection.class));
         verify(brobotLogger, atLeastOnce()).log();
         verify(logBuilder).observation("Highlight action completed");
         verify(logBuilder).metadata("success", false);
@@ -612,7 +613,7 @@ public class HighlightManagerTest extends BrobotTestBase {
         
         List<Region> regions = Arrays.asList(new Region(0, 0, 100, 100));
         
-        when(action.perform(any(HighlightOptions.class), any(ObjectCollection.class)))
+        when(highlightWrapper.performHighlight(any(HighlightOptions.class), any(ObjectCollection.class)))
             .thenThrow(new RuntimeException("Test exception"));
         
         // Act
