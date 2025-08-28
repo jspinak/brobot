@@ -28,8 +28,13 @@ The enhanced mock system extends the basic mocking capabilities with:
 
 Brobot now provides the `MockModeManager` class as a single source of truth for mock mode configuration:
 
+:::note Clean Test Configuration
+For Spring-based tests, see the [Test Logging Architecture](/docs/core-library/testing/test-logging-architecture) which provides factory-based configuration with clean dependencies.
+:::
+
 ```java
 import io.github.jspinak.brobot.config.MockModeManager;
+import io.github.jspinak.brobot.test.logging.TestLoggerFactory;
 
 // Enable mock mode across all components
 MockModeManager.setMockMode(true);

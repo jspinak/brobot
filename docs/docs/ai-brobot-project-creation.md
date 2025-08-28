@@ -1355,6 +1355,13 @@ public class MyAutomation implements ApplicationRunner {
 
 ### Mock Testing Support
 
+:::tip Clean Test Architecture
+For Spring-based integration tests, see the [Test Logging Architecture](/docs/core-library/testing/test-logging-architecture) which provides:
+- Factory-based logger creation with clean dependencies
+- Clean separation of concerns following SRP
+- Proper initialization order management
+:::
+
 #### Understanding Mock Mode
 
 Mock mode (`brobot.framework.mock=true`) enables testing automation logic without GUI interaction:

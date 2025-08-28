@@ -46,7 +46,13 @@ For advanced mock testing capabilities including scenario-based configurations a
 
 ### Modern Configuration System
 
-Brobot uses Spring Boot's configuration properties system:
+Brobot uses Spring Boot's configuration properties system with clean architectural patterns:
+
+:::info New Test Logging Architecture
+Brobot now includes a clean test logging architecture that follows Single Responsibility Principle and eliminates circular dependencies. See the [Test Logging Architecture](/docs/core-library/testing/test-logging-architecture) guide for details on using the TestLoggerFactory and related components.
+:::
+
+### Configuration Properties
 
 ```properties
 # Core testing settings

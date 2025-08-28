@@ -17,7 +17,9 @@ Integration testing provides:
 
 ## Test Base Class
 
-All integration tests should extend `BrobotTestBase`:
+### BrobotTestBase (Without Spring)
+
+For simple integration tests without Spring context, extend `BrobotTestBase`:
 
 ```java
 import io.github.jspinak.brobot.test.BrobotTestBase;
@@ -27,6 +29,30 @@ public class WorkflowIntegrationTest extends BrobotTestBase {
     // All mock settings are synchronized via MockModeManager
 }
 ```
+
+### BrobotIntegrationTestBase (With Spring)
+
+For integration tests requiring Spring context and dependency injection:
+
+```java
+import io.github.jspinak.brobot.test.BrobotIntegrationTestBase;
+
+@SpringBootTest(classes = BrobotTestApplication.class)
+@ContextConfiguration(initializers = TestConfigurationManager.class)
+@Import({TestActionConfig.class, MockBrobotLoggerConfig.class})
+public class SpringIntegrationTest extends BrobotIntegrationTestBase {
+    
+    @Autowired
+    private BrobotLogger logger;  // Automatically configured via factory pattern
+    
+    @Autowired
+    private Action action;  // Clean dependency injection
+}
+```
+
+:::tip Clean Architecture for Spring Tests
+The test configuration architecture uses factory patterns and proper initialization order to ensure clean dependencies. See [Test Logging Architecture](/docs/core-library/testing/test-logging-architecture) for details.
+:::
 
 ## Configuration
 
