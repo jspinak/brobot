@@ -32,7 +32,6 @@ import static org.junit.jupiter.api.Assertions.*;
  * - ActionResult now requires setActionConfig() before perform()
  * - ActionService.getAction() now takes ActionConfig parameter
  */
-@SpringBootTest(classes = io.github.jspinak.brobot.BrobotTestApplication.class)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class ActionServiceIntegrationTestUpdated extends BrobotIntegrationTestBase {
 

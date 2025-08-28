@@ -31,7 +31,15 @@ class ActionStepJsonParserTest extends BrobotTestBase {
         super.setupTest();
         objectMapper = new ObjectMapper();
         objectMapper.configure(com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        // Register modules to handle OpenCV Mat issues
+        objectMapper.registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());
+        // Ignore Mat-related properties that cause conflicts
+        objectMapper.addMixIn(org.bytedeco.opencv.opencv_core.Mat.class, MatIgnoreMixin.class);
     }
+    
+    // Mixin to ignore conflicting Mat properties
+    @com.fasterxml.jackson.annotation.JsonIgnoreProperties({"to", "t", "deallocator", "pointer"})
+    interface MatIgnoreMixin {}
 
     @Test
     @DisplayName("Should parse ActionStep with ClickOptions from JSON")

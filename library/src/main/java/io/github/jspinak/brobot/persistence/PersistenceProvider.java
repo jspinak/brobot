@@ -166,6 +166,7 @@ public interface PersistenceProvider {
         public String getMetadata() { return metadata; }
         public void setMetadata(String metadata) { this.metadata = metadata; }
         
+        @com.fasterxml.jackson.annotation.JsonIgnore
         public double getSuccessRate() {
             return totalActions > 0 ? (double) successfulActions / totalActions * 100 : 0;
         }
