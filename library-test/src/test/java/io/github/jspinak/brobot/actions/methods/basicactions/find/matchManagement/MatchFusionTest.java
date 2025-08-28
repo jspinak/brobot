@@ -31,7 +31,8 @@ import static org.junit.jupiter.api.Assertions.*;
         "brobot.capture.physical-resolution=false",
         "brobot.mock.enabled=true"
     })
-@Import({MockGuiAccessConfig.class, MockGuiAccessMonitor.class, MockScreenConfig.class})
+@Import({MockGuiAccessConfig.class, MockGuiAccessMonitor.class, MockScreenConfig.class,
+         io.github.jspinak.brobot.test.config.TestApplicationConfiguration.class})
 @ContextConfiguration(initializers = TestEnvironmentInitializer.class)
 class MatchFusionTest {
 
