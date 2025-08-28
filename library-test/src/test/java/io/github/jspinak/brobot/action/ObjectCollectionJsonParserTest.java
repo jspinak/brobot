@@ -46,7 +46,8 @@ import static org.junit.jupiter.api.Assertions.*;
         "brobot.test.type=unit",
         "brobot.capture.physical-resolution=false"
     })
-@Import({MockGuiAccessConfig.class, MockGuiAccessMonitor.class, MockScreenConfig.class})
+@Import({MockGuiAccessConfig.class, MockGuiAccessMonitor.class, MockScreenConfig.class,
+         io.github.jspinak.brobot.test.config.TestApplicationConfiguration.class})
 @ContextConfiguration(initializers = TestEnvironmentInitializer.class)
 class ObjectCollectionJsonParserTest {
 

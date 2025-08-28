@@ -386,6 +386,120 @@ public void testGridOperations() {
 - **Fallback Calculations**: When SikuliX is unavailable, uses native Brobot calculations
 - **Consistent Behavior**: Same API in mock and real modes
 
+### MockFind Intelligent Fallback Behavior
+
+The `MockFind` class provides intelligent fallback behavior to ensure robust testing even when match history is not configured:
+
+#### Automatic Match Generation
+
+When a pattern has no configured match history, MockFind automatically generates default successful matches:
+
+```java
+@Test
+public void testWithoutMatchHistory() {
+    // Create pattern without any match history
+    Pattern pattern = new Pattern.Builder()
+        .setName("TestPattern")
+        .build();
+    
+    // MockFind will still return a match in mock mode
+    MockFind mockFind = context.getBean(MockFind.class);
+    List<Match> matches = mockFind.getMatches(pattern);
+    
+    assertFalse(matches.isEmpty(), "MockFind provides default match");
+    assertEquals("TestPattern", matches.get(0).getName());
+}
+```
+
+#### Fallback Behavior Rules
+
+MockFind follows these rules for consistent testing behavior:
+
+1. **Check for existing history**: First checks if the pattern has any match history configured
+2. **Generate default match if empty**: If no history exists, generates a default successful match with:
+   - Region: 100, 100, 50, 50 (reasonable default location and size)
+   - Similarity score: 0.95 (high confidence match)
+   - Name: Uses pattern name if available, otherwise "MockMatch"
+3. **Respect configured history**: If history exists but has no matches for current state, returns empty list
+4. **State-aware matching**: When history exists, filters by active states
+
+#### Example: Testing Without Extensive Setup
+
+```java
+@Test
+public void testQuickMockSetup() {
+    // No need to configure match history for simple tests
+    StateImage quickTestImage = new StateImage.Builder()
+        .addPattern(new Pattern.Builder()
+            .setName("QuickTestPattern")
+            .build())
+        .build();
+    
+    ObjectCollection collection = new ObjectCollection.Builder()
+        .withImages(quickTestImage)
+        .build();
+    
+    // MockFind will provide default matches
+    ActionResult result = action.perform(new PatternFindOptions.Builder().build(), collection);
+    
+    assertTrue(result.isSuccess(), "Mock mode works without match history setup");
+}
+```
+
+#### When to Use Match History vs Fallback
+
+- **Use configured match history** when:
+  - Testing specific match locations or patterns
+  - Simulating test scenarios with varying success rates
+  - Testing state-specific behaviors
+  
+- **Rely on fallback behavior** when:
+  - Running quick smoke tests
+  - Testing flow logic rather than match specifics
+  - Prototyping new test scenarios
+  - Testing in CI/CD without complex setup
+
+#### Configuring Match History When Needed
+
+For tests requiring specific match behavior, configure match history explicitly:
+
+```java
+@Test
+public void testWithSpecificMatchHistory() {
+    Pattern pattern = new Pattern.Builder()
+        .setName("SpecificPattern")
+        .build();
+    
+    // Add specific match history
+    ActionRecord successfulFind = new ActionRecord.Builder()
+        .setActionConfig(new PatternFindOptions.Builder()
+            .setStrategy(PatternFindOptions.Strategy.FIRST)
+            .build())
+        .setActionSuccess(true)
+        .setState("TestState")
+        .setMatchList(Arrays.asList(
+            new Match.Builder()
+                .setRegion(new Region(200, 150, 100, 50))  // Specific location
+                .setSimScore(0.98)  // High confidence
+                .build()))
+        .build();
+    
+    pattern.getMatchHistory().addSnapshot(successfulFind);
+    
+    // Test will use configured history instead of fallback
+    MockFind mockFind = context.getBean(MockFind.class);
+    List<Match> matches = mockFind.getMatches(pattern);
+    
+    assertEquals(200, matches.get(0).getRegion().x());  // Uses configured location
+}
+```
+
+This intelligent fallback behavior ensures that:
+- Tests can run successfully without extensive mock setup
+- Quick prototyping and testing is possible
+- Tests remain maintainable with minimal configuration
+- Configured history is always respected when present
+
 ### Mock Scene and Color Analysis
 
 The `MockSceneBuilder` provides comprehensive builders for creating test data for color analysis and scene processing:
