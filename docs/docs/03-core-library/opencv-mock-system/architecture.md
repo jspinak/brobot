@@ -322,5 +322,3 @@ if (result.isMotionDetected()) {
 
 ## Related Documentation
 - [Motion Detection Testing Guide](../testing/motion-detection-testing.md)
-- [Mock Configuration Reference](../configuration/mock-configuration.md)
-- [OpenCV Integration Guide](../integration/opencv-integration.md)

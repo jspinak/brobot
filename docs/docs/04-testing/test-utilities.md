@@ -447,4 +447,5 @@ class TestDataBuilder {
 - [Unit Testing Guide](unit-testing.md)
 - [Integration Testing](integration-testing.md)
 - [Mock Mode Guide](mock-mode-guide.md)
-- [BrobotTestBase Class](enhanced-mocking.md)
+- [Enhanced Mock Testing System](../03-core-library/testing/enhanced-mocking.md)
+- [Test Logging Architecture](../03-core-library/testing/test-logging-architecture.md)

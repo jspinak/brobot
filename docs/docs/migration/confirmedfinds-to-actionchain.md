@@ -143,6 +143,6 @@ ConditionalActionChain.find(containerImage)
 
 ## Related Documentation
 
-- [Action Chains Guide](../03-core-library/action-config/action-chains.md)
+- [Action Chaining](../03-core-library/action-config/07-action-chaining.md)
 - [Pure Actions API](../03-core-library/action-config/14-pure-actions-api.md)
-- [ConditionalActionChain Reference](../03-core-library/action-config/conditional-chains.md)
+- [Conditional Chains Examples](../03-core-library/action-config/15-conditional-chains-examples.md)
