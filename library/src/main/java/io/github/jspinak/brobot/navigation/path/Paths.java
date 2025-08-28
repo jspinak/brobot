@@ -66,7 +66,7 @@ public class Paths {
 
     public Paths() {}
     public Paths(List<Path> pathList) {
-        paths = pathList;
+        paths = new ArrayList<>(pathList);  // Create mutable copy
     }
 
     public boolean isEmpty() {

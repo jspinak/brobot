@@ -1,16 +1,14 @@
 package io.github.jspinak.brobot.tools.testing.mock.action;
 
-import io.github.jspinak.brobot.action.internal.find.scene.ScenePatternMatcher;
-import io.github.jspinak.brobot.action.internal.text.GetTextWrapper;
-import io.github.jspinak.brobot.analysis.histogram.SingleRegionHistogramExtractor;
+import io.github.jspinak.brobot.tools.testing.wrapper.FindWrapper;
+import io.github.jspinak.brobot.tools.testing.wrapper.TextWrapper;
+import io.github.jspinak.brobot.tools.testing.wrapper.HistogramWrapper;
+import io.github.jspinak.brobot.tools.testing.wrapper.TimeWrapper;
 import io.github.jspinak.brobot.model.element.Pattern;
 import io.github.jspinak.brobot.model.element.Scene;
 import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.state.StateImage;
-import io.github.jspinak.brobot.config.ExecutionEnvironment;
-import io.github.jspinak.brobot.config.ExecutionMode;
-import io.github.jspinak.brobot.tools.testing.mock.time.MockTime;
 
 import lombok.extern.slf4j.Slf4j;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -106,43 +104,31 @@ import java.util.List;
 @Slf4j
 @Component
 public class ExecutionModeController {
-    private final ExecutionMode executionMode;
-    private final MockFind mockFind;
-    private final MockText mockText;
-    private final MockColor mockColor; 
-    private final MockHistogram mockHistogram;
-    private final MockTime mockTime;
-    private final ScenePatternMatcher findInScene;
-    private final GetTextWrapper getTextWrapper;
-    private final SingleRegionHistogramExtractor findHistogramsOneRegionOneImage;
+    private final FindWrapper findWrapper;
+    private final TextWrapper textWrapper;
+    private final HistogramWrapper histogramWrapper;
+    private final TimeWrapper timeWrapper;
 
     /**
-     * Constructs an ExecutionModeController with all required mock and live implementations.
+     * Constructs an ExecutionModeController with wrapper implementations.
      * 
-     * @param executionMode service determining current execution mode (mock vs live)
-     * @param mockFind mock implementation for pattern finding operations
-     * @param mockText mock implementation for text extraction operations
-     * @param mockColor mock implementation for color-based operations (TODO: implement)
-     * @param mockHistogram mock implementation for histogram analysis
-     * @param mockTime mock implementation for time operations
-     * @param findInScene live implementation for pattern finding
-     * @param getTextWrapper live implementation for text extraction
-     * @param findHistogramsOneRegionOneImage live implementation for histogram analysis
+     * The wrapper pattern eliminates circular dependencies by providing
+     * a stable interface layer between this controller and the mock/live
+     * implementations. Each wrapper handles the routing logic internally.
+     * 
+     * @param findWrapper wrapper for pattern finding operations
+     * @param textWrapper wrapper for text extraction operations  
+     * @param histogramWrapper wrapper for histogram analysis
+     * @param timeWrapper wrapper for time operations
      */
-    public ExecutionModeController(ExecutionMode executionMode,
-                      MockFind mockFind, MockText mockText, MockColor mockColor, MockHistogram mockHistogram,
-                      MockTime mockTime,
-                      ScenePatternMatcher findInScene, GetTextWrapper getTextWrapper,
-                      SingleRegionHistogramExtractor findHistogramsOneRegionOneImage) {
-        this.executionMode = executionMode;
-        this.mockFind = mockFind;
-        this.mockText = mockText;
-        this.mockColor = mockColor;
-        this.mockHistogram = mockHistogram;
-        this.mockTime = mockTime;
-        this.findInScene = findInScene;
-        this.getTextWrapper = getTextWrapper;
-        this.findHistogramsOneRegionOneImage = findHistogramsOneRegionOneImage;
+    public ExecutionModeController(FindWrapper findWrapper,
+                                  TextWrapper textWrapper,
+                                  HistogramWrapper histogramWrapper,
+                                  TimeWrapper timeWrapper) {
+        this.findWrapper = findWrapper;
+        this.textWrapper = textWrapper;
+        this.histogramWrapper = histogramWrapper;
+        this.timeWrapper = timeWrapper;
     }
 
     /**
@@ -176,8 +162,7 @@ public class ExecutionModeController {
      * @see ScenePatternMatcher#findAllInScene(Pattern, Scene)
      */
     public List<Match> findAll(Pattern pattern, Scene scene) {
-        if (executionMode.isMock()) return mockFind.getMatches(pattern);
-        return findInScene.findAllInScene(pattern, scene);
+        return findWrapper.findAll(pattern, scene);
     }
 
     /**
@@ -193,8 +178,7 @@ public class ExecutionModeController {
      * @see ScenePatternMatcher#getWordMatches(Scene)
      */
     public List<Match> findAllWords(Scene scene) {
-        if (executionMode.isMock()) return mockFind.getWordMatches();
-        return findInScene.getWordMatches(scene);
+        return findWrapper.findAllWords(scene);
     }
 
     /**
@@ -215,8 +199,7 @@ public class ExecutionModeController {
      * @see GetTextWrapper#setText(Match)
      */
     public void setText(Match match) {
-        if (executionMode.isMock()) match.setText(mockText.getString(match));
-        else getTextWrapper.setText(match);
+        textWrapper.setText(match);
     }
 
     /**
@@ -243,8 +226,7 @@ public class ExecutionModeController {
      * @see LocalDateTime#now()
      */
     public LocalDateTime now() {
-        if (executionMode.isMock()) return mockTime.now();
-        return LocalDateTime.now();
+        return timeWrapper.now();
     }
 
     /**
@@ -274,33 +256,7 @@ public class ExecutionModeController {
      * @see org.sikuli.script.Region#wait(double)
      */
     public void wait(double seconds) {
-        ExecutionEnvironment env = ExecutionEnvironment.getInstance();
-        
-        if (executionMode.isMock() || env.shouldSkipSikuliX()) {
-            mockTime.wait(seconds);
-        } else {
-            try {
-                org.sikuli.script.Region sikuliRegion = new Region().sikuli();
-                if (sikuliRegion != null) {
-                    sikuliRegion.wait(seconds);
-                } else {
-                    // Fallback to Thread.sleep when SikuliX not available
-                    try {
-                        Thread.sleep((long) (seconds * 1000));
-                    } catch (InterruptedException e) {
-                        Thread.currentThread().interrupt();
-                    }
-                }
-            } catch (org.sikuli.script.SikuliXception e) {
-                // SikuliX failed (likely headless environment) - fallback to thread sleep
-                log.warn("SikuliX failed in wait operation ({}), falling back to Thread.sleep", e.getMessage());
-                try {
-                    Thread.sleep((long) (seconds * 1000));
-                } catch (InterruptedException ie) {
-                    Thread.currentThread().interrupt();
-                }
-            }
-        }
+        timeWrapper.wait(seconds);
     }
 
     /**
@@ -326,8 +282,7 @@ public class ExecutionModeController {
      * @see SingleRegionHistogramExtractor#findAll(List, StateImage, Mat)
      */
     public List<Match> findHistogram(StateImage stateImage, Mat sceneHSV, List<Region> regions) {
-        if (executionMode.isMock()) return mockHistogram.getMockHistogramMatches(stateImage, regions);
-        return findHistogramsOneRegionOneImage.findAll(regions, stateImage, sceneHSV);
+        return histogramWrapper.findHistogram(stateImage, sceneHSV, regions);
     }
 
 }

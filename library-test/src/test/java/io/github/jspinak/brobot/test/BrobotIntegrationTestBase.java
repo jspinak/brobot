@@ -29,9 +29,12 @@ import io.github.jspinak.brobot.test.config.TestActionConfig;
 @SpringBootTest(classes = io.github.jspinak.brobot.BrobotTestApplication.class)
 @ContextConfiguration(initializers = TestConfigurationManager.class)
 @Import(TestActionConfig.class)
-@TestPropertySource(properties = {
-    "spring.main.allow-bean-definition-overriding=true"
-})
+@TestPropertySource(
+    locations = "classpath:application-test.properties",
+    properties = {
+        "spring.main.allow-bean-definition-overriding=true"
+    }
+)
 public abstract class BrobotIntegrationTestBase {
     
     private ExecutionEnvironment originalEnvironment;
@@ -68,7 +71,7 @@ public abstract class BrobotIntegrationTestBase {
      * Single responsibility: query environment state.
      */
     protected boolean isHeadlessEnvironment() {
-        return ExecutionEnvironment.getInstance().isHeadless();
+        return java.awt.GraphicsEnvironment.isHeadless();
     }
     
     /**
