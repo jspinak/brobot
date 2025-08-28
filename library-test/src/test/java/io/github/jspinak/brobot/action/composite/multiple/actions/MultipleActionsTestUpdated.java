@@ -37,6 +37,7 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 @SpringBootTest(classes = BrobotTestApplication.class,
     properties = {
+        "brobot.mock.enabled=true",
         "brobot.gui-access.continue-on-error=true",
         "brobot.gui-access.check-on-startup=false",
         "java.awt.headless=true",
@@ -44,7 +45,9 @@ import static org.junit.jupiter.api.Assertions.*;
         "brobot.test.type=unit",
         "brobot.capture.physical-resolution=false"
     })
-@Import({MockGuiAccessConfig.class, MockGuiAccessMonitor.class, MockScreenConfig.class})
+@Import({MockGuiAccessConfig.class, MockGuiAccessMonitor.class, MockScreenConfig.class, 
+         io.github.jspinak.brobot.test.config.TestApplicationConfiguration.class,
+         io.github.jspinak.brobot.test.config.TestActionConfig.class})
 @ContextConfiguration(initializers = TestEnvironmentInitializer.class)
 public class MultipleActionsTestUpdated extends BrobotIntegrationTestBase {
 
