@@ -469,5 +469,5 @@ RUN ./gradlew test --tests "*Motion*Test"
 
 ## Related Documentation
 - [OpenCV Mock System Architecture](../opencv-mock-system/architecture.md)
-- [Enhanced Mock Testing Documentation](../testing/enhanced-mocking.md)
-- [Brobot Test Base Guide](../testing/brobot-test-base.md)
+- [Enhanced Mock Testing Documentation](./enhanced-mocking.md)
+- [Test Logging Architecture](./test-logging-architecture.md)
