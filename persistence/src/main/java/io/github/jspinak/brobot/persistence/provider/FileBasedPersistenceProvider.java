@@ -79,8 +79,9 @@ public class FileBasedPersistenceProvider extends AbstractPersistenceProvider {
         Path sessionsPath = basePath.resolve(SESSIONS_DIR);
         
         try (Stream<Path> sessionDirs = Files.list(sessionsPath)) {
-            sessionDirs.filter(Files::isDirectory)
-                       .forEach(this::loadSessionMetadata);
+            List<Path> dirs = sessionDirs.filter(Files::isDirectory).collect(Collectors.toList());
+            log.debug("Found {} session directories to load", dirs.size());
+            dirs.forEach(this::loadSessionMetadata);
         } catch (IOException e) {
             log.error("Failed to load existing sessions", e);
         }
@@ -262,10 +263,11 @@ public class FileBasedPersistenceProvider extends AbstractPersistenceProvider {
         PersistenceConfiguration.FileFormat format = configuration.getFile().getFormat();
         String extension = format == PersistenceConfiguration.FileFormat.CSV ? "csv" : "json";
         
-        // Create filename with timestamp
-        String filename = String.format("%s_%s.%s",
+        // Create filename with timestamp and unique ID to avoid overwrites
+        String filename = String.format("%s_%s_%s.%s",
             RECORDS_FILE,
             LocalDateTime.now().format(TIMESTAMP_FORMAT),
+            UUID.randomUUID().toString().substring(0, 8),
             extension
         );
         
@@ -287,8 +289,9 @@ public class FileBasedPersistenceProvider extends AbstractPersistenceProvider {
                     log.warn("Unsupported format: {}", format);
             }
             
+            int recordCount = sessionData.getRecords().size();
             sessionData.getRecords().clear();
-            log.debug("Flushed {} records to {}", sessionData.getRecords().size(), recordsPath);
+            log.debug("Flushed {} records to {}", recordCount, recordsPath);
             
         } catch (IOException e) {
             log.error("Failed to flush records", e);

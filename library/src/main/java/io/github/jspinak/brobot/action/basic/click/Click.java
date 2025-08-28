@@ -59,6 +59,12 @@ public class Click implements ActionInterface {
 
     @Override
     public void perform(ActionResult actionResult, ObjectCollection... objectCollections) {
+        // Handle null ActionResult gracefully
+        if (actionResult == null) {
+            logger.warning("Click: ActionResult is null, cannot proceed");
+            return;
+        }
+        
         actionResult.setSuccess(false);
 
         try {
@@ -94,23 +100,38 @@ public class Click implements ActionInterface {
      */
     private List<Location> extractClickableLocations(ObjectCollection... collections) {
         List<Location> locations = new ArrayList<>();
+        
+        // Handle null or empty collections array
+        if (collections == null || collections.length == 0) {
+            return locations;
+        }
 
         for (ObjectCollection collection : collections) {
+            // Skip null collections
+            if (collection == null) {
+                continue;
+            }
+            
             // Extract from Locations
             for (StateLocation stateLoc : collection.getStateLocations()) {
-                locations.add(stateLoc.getLocation());
+                if (stateLoc != null && stateLoc.getLocation() != null) {
+                    locations.add(stateLoc.getLocation());
+                }
             }
 
             // Extract from StateRegions (use center point)
             for (StateRegion stateRegion : collection.getStateRegions()) {
-                Region region = stateRegion.getSearchRegion();
-                // Calculate center of region
-                int centerX = region.x() + region.w() / 2;
-                int centerY = region.y() + region.h() / 2;
-                locations.add(new Location(centerX, centerY));
+                if (stateRegion != null && stateRegion.getSearchRegion() != null) {
+                    Region region = stateRegion.getSearchRegion();
+                    // Calculate center of region
+                    int centerX = region.x() + region.w() / 2;
+                    int centerY = region.y() + region.h() / 2;
+                    locations.add(new Location(centerX, centerY));
+                }
             }
 
-            // Note: Matches would typically be passed through ActionResult
+            // Note: StateImages should be handled by Action class, not Click directly.
+            // Action performs Find first, then passes the found Matches/Locations to Click.
         }
 
         return locations;
@@ -120,6 +141,12 @@ public class Click implements ActionInterface {
      * Performs the actual click operation at the specified location.
      */
     private boolean performClick(Location location) {
+        // Handle null location
+        if (location == null) {
+            logger.warning("Cannot click null location");
+            return false;
+        }
+        
         try {
             // In mock mode, simulate the click without actual SikuliX operations
             if (MockModeManager.isMockMode()) {
