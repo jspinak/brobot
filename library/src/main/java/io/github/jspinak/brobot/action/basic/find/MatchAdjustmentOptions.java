@@ -38,39 +38,39 @@ public final class MatchAdjustmentOptions {
     /**
      * Number of pixels to add to the width of the match region.
      */
-    @Builder.Default
+    @lombok.Builder.Default
     private final int addW = 0;
     
     /**
      * Number of pixels to add to the height of the match region.
      */
-    @Builder.Default
+    @lombok.Builder.Default
     private final int addH = 0;
     
     /**
      * Absolute width of the match region, overriding its original width.
      * A value less than 0 disables this setting.
      */
-    @Builder.Default
+    @lombok.Builder.Default
     private final int absoluteW = -1;
     
     /**
      * Absolute height of the match region, overriding its original height.
      * A value less than 0 disables this setting.
      */
-    @Builder.Default
+    @lombok.Builder.Default
     private final int absoluteH = -1;
     
     /**
      * Number of pixels to add to the x-coordinate of the match region's origin.
      */
-    @Builder.Default
+    @lombok.Builder.Default
     private final int addX = 0;
     
     /**
      * Number of pixels to add to the y-coordinate of the match region's origin.
      */
-    @Builder.Default
+    @lombok.Builder.Default
     private final int addY = 0;
 
     /**

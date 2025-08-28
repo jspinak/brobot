@@ -36,31 +36,31 @@ public class MockActionHistoryBuilder {
     
     private static final Random random = new Random();
     
-    @Builder.Default
+    @lombok.Builder.Default
     private int recordCount = 10;
     
-    @Builder.Default
+    @lombok.Builder.Default
     private double successRate = 1.0;
     
-    @Builder.Default
+    @lombok.Builder.Default
     private Region matchRegion = new Region(0, 0, 100, 100);
     
-    @Builder.Default
+    @lombok.Builder.Default
     private double minSimilarity = 0.90;
     
-    @Builder.Default
+    @lombok.Builder.Default
     private double maxSimilarity = 1.0;
     
-    @Builder.Default
+    @lombok.Builder.Default
     private int minDuration = 50;
     
-    @Builder.Default
+    @lombok.Builder.Default
     private int maxDuration = 150;
     
-    @Builder.Default
+    @lombok.Builder.Default
     private PatternFindOptions.Strategy strategy = PatternFindOptions.Strategy.BEST;
     
-    @Builder.Default
+    @lombok.Builder.Default
     private double searchSimilarity = 0.85;
     
     @Setter

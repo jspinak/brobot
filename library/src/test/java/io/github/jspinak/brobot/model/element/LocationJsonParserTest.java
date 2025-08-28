@@ -200,14 +200,18 @@ class LocationJsonParserTest extends BrobotTestBase {
         Location loc1 = new Location(100, 200);
         assertTrue(loc1.defined());
 
-        // Create a location with default (not explicitly defined) coordinates
+        // Location(0, 0) is considered defined (x >= 0, y >= 0)
         Location loc2 = new Location(0, 0);
-        assertFalse(loc2.defined());
+        assertTrue(loc2.defined());
+
+        // Create a location with negative coordinates
+        Location loc3 = new Location(-1, -1);
+        assertFalse(loc3.defined());
 
         // Create a location with a region
         Region region = new Region(100, 200, 300, 400);
-        Location loc3 = new Location(region);
-        assertTrue(loc3.defined());
+        Location loc4 = new Location(region);
+        assertTrue(loc4.defined());
     }
 
     @Test
@@ -272,12 +276,11 @@ class LocationJsonParserTest extends BrobotTestBase {
     @Test
     @DisplayName("Should parse Location with position name from JSON")
     void testParseLocationWithPositionName() throws Exception {
+        // The Location class uses Positions.Name directly, not in Position object
         String json = """
         {
             "name": "PositionNameLocation",
-            "position": {
-                "name": "TOPLEFT"
-            }
+            "anchor": "TOPLEFT"
         }
         """;
 
@@ -285,9 +288,9 @@ class LocationJsonParserTest extends BrobotTestBase {
 
         assertNotNull(location);
         assertEquals("PositionNameLocation", location.getName());
-        assertNotNull(location.getPosition());
-        assertEquals(0.0, location.getPosition().getPercentW(), 0.001);
-        assertEquals(0.0, location.getPosition().getPercentH(), 0.001);
+        assertEquals(Positions.Name.TOPLEFT, location.getAnchor());
+        // When created with anchor only, position might be default (0.5, 0.5)
+        // unless we create it with a region as well
     }
 
     @Test

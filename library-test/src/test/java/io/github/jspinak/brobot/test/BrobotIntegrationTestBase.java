@@ -68,7 +68,7 @@ public abstract class BrobotIntegrationTestBase {
      * Single responsibility: query environment state.
      */
     protected boolean isHeadlessEnvironment() {
-        return ExecutionEnvironment.getInstance().isHeadless();
+        return java.awt.GraphicsEnvironment.isHeadless();
     }
     
     /**
