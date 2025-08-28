@@ -1,29 +1,35 @@
 package io.github.jspinak.brobot.tools.testing.mock.time;
 
+import io.github.jspinak.brobot.tools.testing.wrapper.TimeWrapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import io.github.jspinak.brobot.tools.testing.mock.action.ExecutionModeController;
-
 import java.time.LocalDateTime;
 
+/**
+ * TimeProvider delegates to TimeWrapper for all time operations.
+ * This class acts as a compatibility layer for existing code that uses TimeProvider.
+ * New code should directly use TimeWrapper instead.
+ * 
+ * @deprecated Use {@link TimeWrapper} directly
+ */
+@Deprecated
 @Component
 public class TimeProvider {
-    private final ExecutionModeController mockOrLive;
-
-    public TimeProvider(ExecutionModeController mockOrLive) {
-        this.mockOrLive = mockOrLive;
-    }
+    
+    @Autowired
+    private TimeWrapper timeWrapper;
 
     public LocalDateTime now() {
-        return mockOrLive.now();
+        return timeWrapper.now();
     }
 
     public void wait(double seconds) {
-        mockOrLive.wait(seconds);
+        timeWrapper.wait(seconds);
     }
 
     public void goBackInTime(double years, Object thingsYouWishYouCouldChange) {
-        LocalDateTime now = mockOrLive.now().minusYears((long)years);
+        // This is a fun method that doesn't actually do anything
+        LocalDateTime past = now().minusYears((long)years);
+        // If only we could actually go back in time...
     }
-
 }
