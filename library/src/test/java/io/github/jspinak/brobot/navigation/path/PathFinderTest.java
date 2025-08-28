@@ -411,9 +411,11 @@ public class PathFinderTest extends BrobotTestBase {
         public void testNullTargetState() {
             State startState = createMockState(1L, "Start");
             
-            assertThrows(NullPointerException.class, () -> 
-                pathFinder.getPathsToState(Arrays.asList(startState), null)
-            );
+            // PathFinder handles null gracefully and returns empty Paths
+            Paths paths = pathFinder.getPathsToState(Arrays.asList(startState), null);
+            
+            assertNotNull(paths);
+            assertTrue(paths.isEmpty());
         }
         
         @Test

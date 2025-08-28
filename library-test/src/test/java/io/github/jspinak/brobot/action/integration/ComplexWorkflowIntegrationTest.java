@@ -16,8 +16,10 @@ import io.github.jspinak.brobot.model.element.*;
 import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.model.state.*;
 import io.github.jspinak.brobot.model.transition.StateTransition;
-import io.github.jspinak.brobot.test.BrobotTestBase;
+import io.github.jspinak.brobot.test.BrobotIntegrationTestBase;
 import org.junit.jupiter.api.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -33,10 +35,24 @@ import static org.junit.jupiter.api.Assertions.*;
  * Integration tests for complex workflows.
  * Tests the interaction between multiple action components in realistic scenarios.
  */
+@SpringBootTest
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-class ComplexWorkflowIntegrationTest extends BrobotTestBase {
+class ComplexWorkflowIntegrationTest extends BrobotIntegrationTestBase {
     
+    @Autowired(required = false)
+    private Action action;
+    
+    @Autowired(required = false)
     private Click click;
+    
+    @Autowired(required = false)
+    private Drag drag;
+    
+    @Autowired(required = false)
+    private WaitVanish waitVanish;
+    
+    @Autowired(required = false)
+    private ActionChainExecutor chainExecutor;
     
     private StateImage loginButton;
     private StateImage usernameField;

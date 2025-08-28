@@ -47,7 +47,7 @@ tasks.register('copyTestNatives', Copy) {
 
 // The 'test' task will now depend on this new copy task.
 tasks.named('test', Test) {
-    dependsOn tasks.named('copyTestNatives')
+    // TEMPORARILY DISABLED: dependsOn tasks.named('copyTestNatives')
     useJUnitPlatform()
     
     // Exclude tests with compilation issues temporarily
@@ -70,12 +70,13 @@ tasks.named('test', Test) {
     maxHeapSize = '6g'
     jvmArgs '-XX:MaxRAMPercentage=80.0', '-XX:+UseG1GC', '-Dorg.bytedeco.javacpp.maxphysicalbytes=10G', '-Dorg.bytedeco.javacpp.maxbytes=0', '-Dorg.bytedeco.javacpp.cachedir=/tmp/javacpp-cache'
     
-    // Increase timeout for integration tests (10 minutes per test)
-    timeout = Duration.ofMinutes(10)
+    // Reduced timeout for debugging hanging issues
+    timeout = Duration.ofSeconds(30)
     
     // Configure parallel test execution for better performance
-    maxParallelForks = Runtime.runtime.availableProcessors().intdiv(2) ?: 1
-    forkEvery = 20 // Fork new JVM every 20 tests to prevent memory issues
+    // TEMPORARILY REDUCED FOR DEBUGGING
+    maxParallelForks = 1
+    forkEvery = 0 // Don't fork new JVMs
     
     // Configure test output
     testLogging {

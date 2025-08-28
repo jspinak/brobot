@@ -16,7 +16,8 @@ import org.springframework.boot.SpringApplication;
     HibernateJpaAutoConfiguration.class
 })
 @Import({BrobotConfig.class, TestLoggingConfig.class, TestConfigurationPropertiesConfig.class, MockBrobotLoggerConfig.class,
-        io.github.jspinak.brobot.test.config.MockScreenCaptureConfig.class})
+        io.github.jspinak.brobot.test.config.MockScreenCaptureConfig.class,
+        io.github.jspinak.brobot.test.config.StateNavigationTestConfig.class})
 @ComponentScan(basePackages = {"io.github.jspinak.brobot", "io.github.jspinak.brobot.test.mock"})
 public class BrobotTestApplication {
     public static void main(String[] args) {
