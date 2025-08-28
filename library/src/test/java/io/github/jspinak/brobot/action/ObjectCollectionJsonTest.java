@@ -31,19 +31,21 @@ class ObjectCollectionJsonTest extends BrobotTestBase {
         // Configure ObjectMapper for Brobot classes
         objectMapper.findAndRegisterModules();
         
-        // Configure to handle OpenCV/JavaCV classes
-        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        // Create a custom module to handle OpenCV Mat serialization issues
+        com.fasterxml.jackson.databind.module.SimpleModule module = new com.fasterxml.jackson.databind.module.SimpleModule();
+        // Ignore Mat class completely to avoid conflicting setter issues
+        module.addSerializer(org.bytedeco.opencv.opencv_core.Mat.class, new com.fasterxml.jackson.databind.ser.std.ToStringSerializer());
+        module.addDeserializer(org.bytedeco.opencv.opencv_core.Mat.class, new com.fasterxml.jackson.databind.deser.std.FromStringDeserializer<org.bytedeco.opencv.opencv_core.Mat>(org.bytedeco.opencv.opencv_core.Mat.class) {
+            @Override
+            protected org.bytedeco.opencv.opencv_core.Mat _deserialize(String value, com.fasterxml.jackson.databind.DeserializationContext ctxt) {
+                // Return null for Mat deserialization as these fields should be ignored
+                return null;
+            }
+        });
+        objectMapper.registerModule(module);
         
-        // Ignore problematic OpenCV types during deserialization
-        objectMapper.addMixIn(org.bytedeco.opencv.opencv_core.Mat.class, IgnoreMixin.class);
-        objectMapper.addMixIn(org.bytedeco.javacv.Frame.class, IgnoreMixin.class);
-    }
-    
-    // MixIn to ignore problematic classes
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    private static abstract class IgnoreMixin {
-        // This mixin tells Jackson to ignore this type completely
+        // Configure to ignore unknown properties and avoid failures
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
 
     @Test
