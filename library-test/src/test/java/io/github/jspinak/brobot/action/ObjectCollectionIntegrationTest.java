@@ -31,7 +31,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
         "brobot.mock.enabled=true",
         "brobot.console.actions.level=QUIET"
     })
-@Import({MockGuiAccessConfig.class, MockGuiAccessMonitor.class, MockScreenConfig.class})
+@Import({MockGuiAccessConfig.class, MockGuiAccessMonitor.class, MockScreenConfig.class,
+         io.github.jspinak.brobot.test.config.TestApplicationConfiguration.class})
 @ContextConfiguration(initializers = TestEnvironmentInitializer.class)
 public class ObjectCollectionIntegrationTest {
     
