@@ -71,14 +71,7 @@ public abstract class BrobotIntegrationTestBase {
      * Single responsibility: query environment state.
      */
     protected boolean isHeadlessEnvironment() {
-        // Check system property for headless mode
-        String headlessProp = System.getProperty("java.awt.headless");
-        if (headlessProp != null) {
-            return Boolean.parseBoolean(headlessProp);
-        }
-        // Check for CI environment
-        return System.getenv("CI") != null || 
-               System.getenv("GITHUB_ACTIONS") != null;
+        return java.awt.GraphicsEnvironment.isHeadless();
     }
     
     /**

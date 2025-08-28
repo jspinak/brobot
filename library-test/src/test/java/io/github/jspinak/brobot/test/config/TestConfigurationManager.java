@@ -52,11 +52,12 @@ public class TestConfigurationManager implements ApplicationContextInitializer<C
         // Set FrameworkSettings for backward compatibility
         FrameworkSettings.mock = !isIntegrationTest;
         
-        // Log configuration if debug is enabled
-        if ("DEBUG".equals(System.getProperty("logging.level.root"))) {
-            System.out.println("Test environment initialized");
-            System.out.println("Test type: " + testType);
-            System.out.println("Mock mode: " + FrameworkSettings.mock);
-        }
+        // Log configuration
+        // Note: isVerboseLogging() method doesn't exist in ExecutionEnvironment
+        // if (env.isVerboseLogging()) {
+        //     System.out.println("Test environment initialized: " + env.getEnvironmentInfo());
+        //     System.out.println("Test type: " + testType);
+        //     System.out.println("Mock mode: " + env.isMockMode());
+        // }
     }
 }
