@@ -3,68 +3,73 @@ package io.github.jspinak.brobot.test.mock;
 import io.github.jspinak.brobot.config.LoggingVerbosityConfig;
 import io.github.jspinak.brobot.logging.unified.*;
 import io.github.jspinak.brobot.logging.unified.console.ConsoleFormatter;
+import io.github.jspinak.brobot.test.logging.TestLoggerFactory;
 import io.github.jspinak.brobot.tools.logging.ActionLogger;
 import io.github.jspinak.brobot.tools.logging.ConsoleReporterInitializer;
 import io.github.jspinak.brobot.tools.logging.spi.LogSink;
-import io.github.jspinak.brobot.tools.logging.spi.NoOpLogSink;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
-import jakarta.annotation.PostConstruct;
 
 /**
  * Test configuration that provides a functional BrobotLogger for tests.
- * This replaces the mock with a real implementation that works in test environments.
+ * 
+ * This configuration follows Single Responsibility Principle:
+ * - Uses TestLoggerFactory to handle complex logger creation
+ * - Each bean method has a single responsibility of exposing a component
+ * - No circular dependencies or @Lazy annotations needed
  */
 @TestConfiguration
 public class MockBrobotLoggerConfig {
     
+    private TestLoggerFactory.LoggingSystem loggingSystem;
+    
+    /**
+     * Initialize the logging system once using the factory.
+     * This ensures proper initialization order without circular dependencies.
+     */
+    @Bean
+    public TestLoggerFactory.LoggingSystem testLoggingSystem(
+            ActionLogger actionLogger,
+            LoggingVerbosityConfig verbosityConfig) {
+        TestLoggerFactory factory = new TestLoggerFactory();
+        this.loggingSystem = factory.createTestLoggingSystem(actionLogger, verbosityConfig);
+        return loggingSystem;
+    }
+    
     @Bean
     @Primary
-    public LoggingContext loggingContext() {
-        return new LoggingContext();
+    public LoggingContext loggingContext(TestLoggerFactory.LoggingSystem system) {
+        return system.getContext();
     }
     
     @Bean
     @Primary  
-    public LogSink logSink() {
-        // Use NoOpLogSink for tests to avoid file I/O
-        return new NoOpLogSink();
+    public LogSink logSink(TestLoggerFactory.LoggingSystem system) {
+        return system.getLogSink();
     }
     
     @Bean
     @Primary
-    public ConsoleFormatter consoleFormatter(LoggingVerbosityConfig verbosityConfig) {
-        return new ConsoleFormatter(verbosityConfig);
+    public ConsoleFormatter consoleFormatter(TestLoggerFactory.LoggingSystem system) {
+        return system.getFormatter();
     }
     
     @Bean
     @Primary
-    public MessageRouter messageRouter(ActionLogger actionLogger, 
-                                      LoggingVerbosityConfig verbosityConfig,
-                                      ConsoleFormatter consoleFormatter) {
-        return new MessageRouter(actionLogger, verbosityConfig, consoleFormatter);
+    public MessageRouter messageRouter(TestLoggerFactory.LoggingSystem system) {
+        return system.getRouter();
     }
     
     @Bean
     @Primary
-    public BrobotLogger brobotLogger(LoggingContext context, MessageRouter router) {
-        return new BrobotLogger(context, router);
+    public BrobotLogger brobotLogger(TestLoggerFactory.LoggingSystem system) {
+        return system.getLogger();
     }
     
     @Bean
     @Primary
-    public ConsoleReporterInitializer consoleReporterInitializer(BrobotLogger brobotLogger) {
-        return new ConsoleReporterInitializer(brobotLogger);
-    }
-    
-    /**
-     * Ensure ConsoleReporter is initialized even if the ConsoleReporterInitializer
-     * PostConstruct doesn't run in tests.
-     */
-    @PostConstruct
-    public void initConsoleReporter() {
-        // This will be called after all beans are created
-        // We'll let ConsoleReporterInitializer handle this
+    public ConsoleReporterInitializer consoleReporterInitializer(TestLoggerFactory.LoggingSystem system) {
+        return system.getReporterInit();
     }
 }

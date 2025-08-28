@@ -1,0 +1,38 @@
+// Simplified build file for testing Spring context issues
+
+plugins {
+    id 'org.springframework.boot'
+}
+
+dependencies {
+    implementation project(':library')
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'com.fasterxml.jackson.core:jackson-databind'
+    testImplementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+}
+
+tasks.named('bootJar') {
+    enabled = false
+}
+
+tasks.named('jar') {
+    enabled = false
+}
+
+tasks.named('test', Test) {
+    useJUnitPlatform()
+    
+    // Simple configuration without native library dependencies
+    maxHeapSize = '2g'
+    
+    testLogging {
+        events "passed", "skipped", "failed", "standardOut", "standardError"
+        exceptionFormat "full"
+        showStackTraces = true
+        showCauses = true
+    }
+    
+    // Set mock mode
+    systemProperty 'brobot.mock.enabled', 'true'
+    systemProperty 'java.awt.headless', 'true'
+}

@@ -2,67 +2,49 @@ package io.github.jspinak.brobot.test;
 
 import io.github.jspinak.brobot.config.ExecutionEnvironment;
 import io.github.jspinak.brobot.config.FrameworkSettings;
+import io.github.jspinak.brobot.test.config.TestConfigurationManager;
 
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
-import io.github.jspinak.brobot.test.TestEnvironmentInitializer;
 import io.github.jspinak.brobot.test.config.TestActionConfig;
-import io.github.jspinak.brobot.test.mock.MockGuiAccessConfig;
-import io.github.jspinak.brobot.test.mock.MockGuiAccessMonitor;
-import io.github.jspinak.brobot.test.mock.MockScreenConfig;
 
 /**
- * Base class for Brobot integration tests that properly configures
- * the test environment to support real image processing in headless mode.
+ * Base class for Brobot integration tests with Spring context.
  * 
- * This base class ensures that:
- * - Integration tests can load and process real images from files
- * - Screen capture operations return appropriate dummy images
- * - Tests work consistently in both local and CI/CD environments
+ * Architectural improvements:
+ * - Uses TestConfigurationManager for early environment setup
+ * - No circular dependencies or @Lazy annotations
+ * - Clear separation of concerns
+ * - Follows Single Responsibility Principle
  * 
- * Key principle: Integration tests should use real image processing but
- * handle headless environments gracefully.
+ * Each component has a single responsibility:
+ * - TestConfigurationManager: Initialize environment before Spring
+ * - TestActionConfig: Provide action framework beans
+ * - This base class: Manage test lifecycle and state
  */
 @SpringBootTest(classes = io.github.jspinak.brobot.BrobotTestApplication.class)
+@ContextConfiguration(initializers = TestConfigurationManager.class)
 @Import(TestActionConfig.class)
 @TestPropertySource(properties = {
     "spring.main.allow-bean-definition-overriding=true"
 })
 public abstract class BrobotIntegrationTestBase {
     
-    private boolean originalMockState;
     private ExecutionEnvironment originalEnvironment;
+    private boolean originalMockState;
     
     @BeforeEach
     protected void setUpBrobotEnvironment() {
-        // Save original state
-        originalMockState = FrameworkSettings.mock;
+        // Save original state for restoration
         originalEnvironment = ExecutionEnvironment.getInstance();
+        originalMockState = FrameworkSettings.mock;
         
-        // Get mock mode setting from system properties (if set via @TestPropertySource)
-        String mockEnabledProperty = System.getProperty("brobot.mock.enabled");
-        boolean useMockMode = mockEnabledProperty != null ? 
-            Boolean.parseBoolean(mockEnabledProperty) : true; // Default to mock mode for tests
-        
-        // Configure environment for integration tests
-        // Use mock mode if configured, but handle real file processing when needed
-        ExecutionEnvironment env = ExecutionEnvironment.builder()
-                .mockMode(useMockMode)  // Respect the test configuration
-                .forceHeadless(isHeadlessEnvironment())  // Auto-detect or force headless
-                .allowScreenCapture(false)  // No screen capture in tests
-                .verboseLogging(false)  // Enable for debugging
-                .build();
-        
-        ExecutionEnvironment.setInstance(env);
-        FrameworkSettings.mock = useMockMode;  // Ensure legacy flag matches
-        
-        // Set AWT headless property
-        System.setProperty("java.awt.headless", String.valueOf(isHeadlessEnvironment()));
+        // Environment is already configured by TestConfigurationManager
+        // This method now has a single responsibility: save state for cleanup
         
         // Allow subclasses to add custom setup
         additionalSetup();
@@ -74,60 +56,48 @@ public abstract class BrobotIntegrationTestBase {
         additionalTearDown();
         
         // Restore original state
-        FrameworkSettings.mock = originalMockState;
+        // Single responsibility: restore original environment
         if (originalEnvironment != null) {
             ExecutionEnvironment.setInstance(originalEnvironment);
         }
+        FrameworkSettings.mock = originalMockState;
     }
     
     /**
-     * Determines if tests should run in headless mode.
-     * Can be overridden by subclasses for specific test requirements.
-     * 
-     * @return true if headless mode should be used
+     * Check if test environment is headless.
+     * Single responsibility: query environment state.
      */
     protected boolean isHeadlessEnvironment() {
-        // Check system property first
-        String headlessProp = System.getProperty("java.awt.headless");
-        if (headlessProp != null) {
-            return Boolean.parseBoolean(headlessProp);
-        }
-        
-        // Check for CI environment
-        return System.getenv("CI") != null || 
-               System.getenv("GITHUB_ACTIONS") != null ||
-               System.getenv("JENKINS_URL") != null;
+        return ExecutionEnvironment.getInstance().isHeadless();
     }
     
     /**
-     * Convenience method to check if the current test can capture screen.
-     * Useful for conditional test logic.
-     * 
-     * @return true if screen capture is available
+     * Check if screen capture is available.
+     * Single responsibility: query screen capture capability.
      */
     protected boolean canCaptureScreen() {
         return ExecutionEnvironment.getInstance().canCaptureScreen();
     }
     
     /**
-     * Convenience method to check if real files are being used.
-     * Should always return true for integration tests.
-     * 
-     * @return true if real file operations are enabled
+     * Check if using real files (not mocked).
+     * Single responsibility: query file processing mode.
      */
     protected boolean useRealFiles() {
         return ExecutionEnvironment.getInstance().useRealFiles();
     }
     
     /**
-     * Override this method to add additional setup logic
+     * Hook for subclasses to add setup logic.
+     * Single responsibility: provide extension point for setup.
      */
     protected void additionalSetup() {
         // Default: no additional setup
     }
     
     /**
-     * Override this method to add additional teardown logic
+     * Hook for subclasses to add teardown logic.
+     * Single responsibility: provide extension point for cleanup.
      */
     protected void additionalTearDown() {
         // Default: no additional teardown

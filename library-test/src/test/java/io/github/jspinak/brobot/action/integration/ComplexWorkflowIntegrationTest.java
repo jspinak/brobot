@@ -16,11 +16,8 @@ import io.github.jspinak.brobot.model.element.*;
 import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.model.state.*;
 import io.github.jspinak.brobot.model.transition.StateTransition;
-import io.github.jspinak.brobot.test.BrobotIntegrationTestBase;
+import io.github.jspinak.brobot.test.BrobotTestBase;
 import org.junit.jupiter.api.*;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.TestPropertySource;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -33,38 +30,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Integration tests for complex workflows using real Spring context.
+ * Integration tests for complex workflows.
  * Tests the interaction between multiple action components in realistic scenarios.
  */
-@TestPropertySource(properties = {
-    "brobot.logging.verbosity=VERBOSE",
-    "brobot.console.actions.enabled=true",
-    "brobot.execution.timeout=10",
-    "brobot.mock.enabled=true",  // Use mock mode for testing
-    "spring.main.allow-bean-definition-overriding=true"
-})
-class ComplexWorkflowIntegrationTest extends BrobotIntegrationTestBase {
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+class ComplexWorkflowIntegrationTest extends BrobotTestBase {
     
-    @Autowired
-    private Action action;
-    
-    @Autowired
-    private Find find;
-    
-    @Autowired
     private Click click;
-    
-    @Autowired
-    private TypeText typeText;
-    
-    @Autowired
-    private WaitVanish waitVanish;
-    
-    @Autowired
-    private Drag drag;
-    
-    @Autowired
-    private ActionChainExecutor chainExecutor;
     
     private StateImage loginButton;
     private StateImage usernameField;

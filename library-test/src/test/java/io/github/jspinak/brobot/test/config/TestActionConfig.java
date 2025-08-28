@@ -5,25 +5,33 @@ import io.github.jspinak.brobot.action.internal.execution.ActionExecution;
 import io.github.jspinak.brobot.action.internal.service.ActionService;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Primary;
 
 /**
- * Test configuration to resolve circular dependencies in the action framework.
+ * Test configuration for the action framework.
  * 
- * The circular dependency is:
- * ActionService -> BasicActionRegistry -> Drag -> ActionChainExecutor -> ActionService
+ * Note: The comment about circular dependency (ActionService -> BasicActionRegistry -> 
+ * Drag -> ActionChainExecutor -> ActionService) was incorrect. 
+ * Analysis shows Drag does NOT depend on ActionChainExecutor.
  * 
- * We break this cycle by using @Lazy injection for ActionService in ActionChainExecutor.
+ * This configuration now follows proper architecture without @Lazy:
+ * - ActionChainExecutor depends on ActionService (one-way dependency)
+ * - No circular dependencies exist in the action framework
  */
 @TestConfiguration
 public class TestActionConfig {
     
+    /**
+     * Provides ActionChainExecutor bean for tests.
+     * This is a clean one-way dependency with no cycles.
+     * 
+     * Single Responsibility: Wire ActionChainExecutor with its dependencies.
+     */
     @Bean
     @Primary
     public ActionChainExecutor actionChainExecutor(
             ActionExecution actionExecution,
-            @Lazy ActionService actionService) {
+            ActionService actionService) {
         return new ActionChainExecutor(actionExecution, actionService);
     }
 }
