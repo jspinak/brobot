@@ -43,12 +43,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * - ActionService.getAction() returns appropriate action implementation
  * - Mock mode configuration through FrameworkSettings and ExecutionEnvironment
  */
-@SpringBootTest
-@TestPropertySource(properties = {
-    "spring.main.lazy-initialization=true",
-    "brobot.mock.enabled=true",
-    "brobot.mock.mode=true"
-})
+@SpringBootTest(classes = io.github.jspinak.brobot.BrobotTestApplication.class)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class ActionExecutionIntegrationTestUpdated extends BrobotTestBase {
 

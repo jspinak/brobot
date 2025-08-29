@@ -1,5 +1,6 @@
 package io.github.jspinak.brobot.config;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -350,8 +351,10 @@ public class BrobotConfiguration {
     
     /**
      * Get a diagnostic report of the current configuration
+     * Method name doesn't follow getter convention to avoid Spring property binding
      */
-    public Map<String, Object> getDiagnostics() {
+    @JsonIgnore
+    public Map<String, Object> diagnosticReport() {
         Map<String, Object> diagnostics = new HashMap<>();
         diagnostics.put("profile", environment.getProfile());
         diagnostics.put("core", core);
