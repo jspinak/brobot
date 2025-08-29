@@ -8,7 +8,6 @@ import io.github.jspinak.brobot.statemanagement.StateDetector;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
 import java.util.Optional;
 import java.util.Set;
@@ -79,7 +78,6 @@ import java.util.Set;
  * @see StateHandler
  * @see StateTransitions
  */
-@Component
 public class ReactiveAutomator extends BaseAutomation {
     private static final Logger logger = LoggerFactory.getLogger(ReactiveAutomator.class);
     
