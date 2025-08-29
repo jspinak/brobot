@@ -382,9 +382,88 @@ FindPipeline.updateDependentSearchRegions()
 For Each Match:
     - Get Dependent Objects from Registry
     - Calculate New Search Region
+    - Check Existing Fixed Region (if any)
+    - Clear Fixed Region if Outside New Region
     - Update Dependent Object's Search Region
     ↓
 Next FIND Uses Updated Regions
+```
+
+## Fixed Regions and Declarative Regions
+
+### Interaction with Fixed Regions
+
+Fixed regions are automatically set when a StateImage with `fixed=true` is found for the first time. This optimization improves performance by limiting future searches to the exact location where the pattern was previously found.
+
+However, fixed regions can conflict with declarative regions when the UI layout changes. Brobot 1.1.0+ includes intelligent fixed region management:
+
+#### Automatic Fixed Region Clearing
+
+When a declarative region is calculated based on `SearchRegionOnObject`:
+
+1. **Fixed Region Check**: The system checks if there's an existing fixed region
+2. **Containment Test**: It verifies if the fixed region is within the new declarative region
+3. **Automatic Clearing**: If the fixed region is outside the declarative region, it's automatically cleared
+4. **Region Update**: The search region is updated to use the declarative region
+
+This ensures that declarative regions take precedence when the UI layout changes:
+
+```java
+// Example scenario:
+// 1. ClaudeIcon is found at (100, 200) and sets a fixed region
+// 2. User moves the window, ClaudePrompt is now at (500, 300)
+// 3. ClaudeIcon's declarative region is calculated as (503, 310, w+30, h+55)
+// 4. Fixed region (100, 200) is outside the new region → automatically cleared
+// 5. Next search uses the declarative region (503, 310, w+30, h+55)
+```
+
+#### Best Practices for Fixed Regions
+
+1. **Don't Set ActionHistory with Declarative Regions**:
+   ```java
+   // ❌ WRONG: ActionHistory creates a fixed region that conflicts
+   StateImage icon = new StateImage.Builder()
+       .addPatterns("icon.png")
+       .setSearchRegionOnObject(...)
+       .withActionHistory(MockActionHistoryBuilder.Presets.reliable(region))
+       .build();
+   
+   // ✅ CORRECT: Let declarative regions manage the search area
+   StateImage icon = new StateImage.Builder()
+       .addPatterns("icon.png")
+       .setSearchRegionOnObject(...)
+       .build();
+   ```
+
+2. **Use Fixed Regions for Static UI Elements**:
+   ```java
+   // Good for elements that never move
+   StateImage logo = new StateImage.Builder()
+       .addPatterns("company-logo.png")
+       .setFixed(true)  // Will lock to first found location
+       .build();
+   ```
+
+3. **Use Declarative Regions for Dynamic UI**:
+   ```java
+   // Good for elements that move relative to others
+   StateImage button = new StateImage.Builder()
+       .addPatterns("submit-button.png")
+       .setSearchRegionOnObject(...)  // Adapts to UI changes
+       .build();
+   ```
+
+#### Debugging Fixed Region Conflicts
+
+Enable debug logging to see when fixed regions are cleared:
+
+```properties
+logging.level.io.github.jspinak.brobot.action.internal.region.DynamicRegionResolver=DEBUG
+```
+
+Log output will show:
+```
+INFO: Fixed region R[100,200,50,50] for ClaudeIcon is outside new declarative region R[503,310,80,105], clearing fixed region
 ```
 
 ## Troubleshooting
@@ -412,6 +491,18 @@ Next FIND Uses Updated Regions
 - Check logs for "Registered search region dependency" messages
 - Ensure Spring component scanning includes brobot packages
 - Verify target object names match exactly (case-sensitive)
+
+### Fixed Region Overriding Declarative Region
+- Check if you're setting ActionHistory on the StateImage (remove it)
+- Enable debug logging to see if fixed region is being cleared
+- Verify the declarative region is being calculated correctly
+- Consider manually resetting the fixed region:
+  ```java
+  stateImage.getPatterns().forEach(pattern -> {
+      pattern.getSearchRegions().resetFixedRegion();
+      pattern.setFixed(false);
+  });
+  ```
 
 ### Performance Considerations
 - Region resolution happens on each search
