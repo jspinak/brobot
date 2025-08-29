@@ -1,5 +1,6 @@
 package io.github.jspinak.brobot.runner.ui.config.atlanta.services;
 
+import io.github.jspinak.brobot.runner.testutils.ImprovedJavaFXTestBase;
 import io.github.jspinak.brobot.runner.ui.components.BrobotButton;
 import io.github.jspinak.brobot.runner.ui.components.base.AtlantaCard;
 import javafx.application.Platform;
@@ -15,216 +16,256 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class AtlantaConfigUIFactoryTest {
+class AtlantaConfigUIFactoryTest extends ImprovedJavaFXTestBase {
     
     private AtlantaConfigUIFactory factory;
     
     @BeforeEach
     void setUp() {
         factory = new AtlantaConfigUIFactory();
-        
-        // Initialize JavaFX toolkit if needed
-        try {
-            Platform.startup(() -> {});
-        } catch (IllegalStateException e) {
-            // Already initialized
-        }
+        // JavaFX initialization is handled by ImprovedJavaFXTestBase
     }
     
     @Test
-    void testCreateActionBar() {
-        // When
-        HBox actionBar = factory.createActionBar();
+    void testCreateActionBar() throws InterruptedException {
+        final HBox[] actionBar = new HBox[1];
+        runAndWait(() -> {
+            // When
+            actionBar[0] = factory.createActionBar();
+        });
         
         // Then
-        assertNotNull(actionBar);
-        assertTrue(actionBar.getStyleClass().contains("action-bar"));
-        assertEquals(Pos.CENTER_LEFT, actionBar.getAlignment());
-        assertEquals(8, actionBar.getSpacing());
+        assertNotNull(actionBar[0]);
+        assertTrue(actionBar[0].getStyleClass().contains("action-bar"));
+        assertEquals(Pos.CENTER_LEFT, actionBar[0].getAlignment());
+        assertEquals(8, actionBar[0].getSpacing());
     }
     
     @Test
-    void testCreatePrimaryButton() {
-        // When
-        BrobotButton button = factory.createPrimaryButton("Test Button");
+    void testCreatePrimaryButton() throws InterruptedException {
+        final BrobotButton[] button = new BrobotButton[1];
+        runAndWait(() -> {
+            // When
+            button[0] = factory.createPrimaryButton("Test Button");
+        });
         
         // Then
-        assertNotNull(button);
-        assertEquals("Test Button", button.getText());
+        assertNotNull(button[0]);
+        assertEquals("Test Button", button[0].getText());
         // BrobotButton.primary() should add appropriate styles
     }
     
     @Test
-    void testCreateSecondaryButton() {
-        // When
-        BrobotButton button = factory.createSecondaryButton("Test Button");
+    void testCreateSecondaryButton() throws InterruptedException {
+        final BrobotButton[] button = new BrobotButton[1];
+        runAndWait(() -> {
+            // When
+            button[0] = factory.createSecondaryButton("Test Button");
+        });
         
         // Then
-        assertNotNull(button);
-        assertEquals("Test Button", button.getText());
+        assertNotNull(button[0]);
+        assertEquals("Test Button", button[0].getText());
         // BrobotButton.secondary() should add appropriate styles
     }
     
     @Test
-    void testCreateButton() {
-        // When
-        Button button = factory.createButton("Test", "custom", "style");
+    void testCreateButton() throws InterruptedException {
+        final Button[] button = new Button[1];
+        runAndWait(() -> {
+            // When
+            button[0] = factory.createButton("Test", "custom", "style");
+        });
         
         // Then
-        assertNotNull(button);
-        assertEquals("Test", button.getText());
-        assertTrue(button.getStyleClass().contains("custom"));
-        assertTrue(button.getStyleClass().contains("style"));
+        assertNotNull(button[0]);
+        assertEquals("Test", button[0].getText());
+        assertTrue(button[0].getStyleClass().contains("custom"));
+        assertTrue(button[0].getStyleClass().contains("style"));
     }
     
     @Test
-    void testCreateSplitLayout() {
-        // When
-        HBox splitLayout = factory.createSplitLayout();
+    void testCreateSplitLayout() throws InterruptedException {
+        final HBox[] splitLayout = new HBox[1];
+        runAndWait(() -> {
+            // When
+            splitLayout[0] = factory.createSplitLayout();
+        });
         
         // Then
-        assertNotNull(splitLayout);
-        assertTrue(splitLayout.getStyleClass().contains("split-layout"));
-        assertEquals(24, splitLayout.getSpacing());
+        assertNotNull(splitLayout[0]);
+        assertTrue(splitLayout[0].getStyleClass().contains("split-layout"));
+        assertEquals(24, splitLayout[0].getSpacing());
     }
     
     @Test
-    void testCreateCard() {
-        // When
-        AtlantaCard card = factory.createCard("Test Card", 500, "test-card");
+    void testCreateCard() throws InterruptedException {
+        final AtlantaCard[] card = new AtlantaCard[1];
+        runAndWait(() -> {
+            // When
+            card[0] = factory.createCard("Test Card", 500, "test-card");
+        });
         
         // Then
-        assertNotNull(card);
-        assertTrue(card.getStyleClass().contains("test-card"));
-        assertEquals(500, card.getMinWidth());
+        assertNotNull(card[0]);
+        assertTrue(card[0].getStyleClass().contains("test-card"));
+        assertEquals(500, card[0].getMinWidth());
         // Expand property is set via HBox.setHgrow, not a property on the card itself
-        assertEquals(Priority.ALWAYS, HBox.getHgrow(card));
+        assertEquals(Priority.ALWAYS, HBox.getHgrow(card[0]));
     }
     
     @Test
-    void testCreateSearchBar() {
-        // Given
-        TextField searchField = new TextField();
-        ComboBox<Integer> itemsPerPage = new ComboBox<>();
+    void testCreateSearchBar() throws InterruptedException {
+        final TextField[] searchField = new TextField[1];
+        final ComboBox<Integer>[] itemsPerPage = new ComboBox[1];
+        final HBox[] searchBar = new HBox[1];
         
-        // When
-        HBox searchBar = factory.createSearchBar(searchField, itemsPerPage);
+        runAndWait(() -> {
+            // Given
+            searchField[0] = new TextField();
+            itemsPerPage[0] = new ComboBox<>();
+            
+            // When
+            searchBar[0] = factory.createSearchBar(searchField[0], itemsPerPage[0]);
+        });
         
         // Then
-        assertNotNull(searchBar);
-        assertTrue(searchBar.getStyleClass().contains("search-bar"));
-        assertEquals(Pos.CENTER_LEFT, searchBar.getAlignment());
-        assertEquals(12, searchBar.getSpacing());
-        assertEquals(3, searchBar.getChildren().size());
+        assertNotNull(searchBar[0]);
+        assertTrue(searchBar[0].getStyleClass().contains("search-bar"));
+        assertEquals(Pos.CENTER_LEFT, searchBar[0].getAlignment());
+        assertEquals(12, searchBar[0].getSpacing());
+        assertEquals(3, searchBar[0].getChildren().size());
         
         // Verify search field configuration
-        assertTrue(searchField.getStyleClass().contains("search-input"));
-        assertEquals("Search configurations...", searchField.getPromptText());
-        assertEquals(Priority.ALWAYS, HBox.getHgrow(searchField));
+        assertTrue(searchField[0].getStyleClass().contains("search-input"));
+        assertEquals("Search configurations...", searchField[0].getPromptText());
+        assertEquals(Priority.ALWAYS, HBox.getHgrow(searchField[0]));
     }
     
     @Test
-    void testCreateTableContent() {
-        // When
-        VBox tableContent = factory.createTableContent();
+    void testCreateTableContent() throws InterruptedException {
+        final VBox[] tableContent = new VBox[1];
+        runAndWait(() -> {
+            // When
+            tableContent[0] = factory.createTableContent();
+        });
         
         // Then
-        assertNotNull(tableContent);
-        assertEquals(16, tableContent.getSpacing());
+        assertNotNull(tableContent[0]);
+        assertEquals(16, tableContent[0].getSpacing());
     }
     
     @Test
-    void testCreateSpacer() {
-        // When
-        Region spacer = factory.createSpacer();
+    void testCreateSpacer() throws InterruptedException {
+        final Region[] spacer = new Region[1];
+        runAndWait(() -> {
+            // When
+            spacer[0] = factory.createSpacer();
+        });
         
         // Then
-        assertNotNull(spacer);
-        assertEquals(Priority.ALWAYS, HBox.getHgrow(spacer));
+        assertNotNull(spacer[0]);
+        assertEquals(Priority.ALWAYS, HBox.getHgrow(spacer[0]));
     }
     
     @Test
-    void testCreateLabel() {
-        // When
-        Label label = factory.createLabel("Test Label", "style1", "style2");
+    void testCreateLabel() throws InterruptedException {
+        final Label[] label = new Label[1];
+        runAndWait(() -> {
+            // When
+            label[0] = factory.createLabel("Test Label", "style1", "style2");
+        });
         
         // Then
-        assertNotNull(label);
-        assertEquals("Test Label", label.getText());
-        assertTrue(label.getStyleClass().contains("style1"));
-        assertTrue(label.getStyleClass().contains("style2"));
+        assertNotNull(label[0]);
+        assertEquals("Test Label", label[0].getText());
+        assertTrue(label[0].getStyleClass().contains("style1"));
+        assertTrue(label[0].getStyleClass().contains("style2"));
     }
     
     @Test
-    void testCreateItemsPerPageCombo() {
-        // When
-        ComboBox<Integer> combo = factory.createItemsPerPageCombo();
+    void testCreateItemsPerPageCombo() throws InterruptedException {
+        final ComboBox<Integer>[] combo = new ComboBox[1];
+        runAndWait(() -> {
+            // When
+            combo[0] = factory.createItemsPerPageCombo();
+        });
         
         // Then
-        assertNotNull(combo);
-        assertTrue(combo.getStyleClass().contains("select"));
-        assertEquals(3, combo.getItems().size());
-        assertTrue(combo.getItems().contains(25));
-        assertTrue(combo.getItems().contains(50));
-        assertTrue(combo.getItems().contains(100));
-        assertEquals(25, combo.getValue());
+        assertNotNull(combo[0]);
+        assertTrue(combo[0].getStyleClass().contains("select"));
+        assertEquals(3, combo[0].getItems().size());
+        assertTrue(combo[0].getItems().contains(25));
+        assertTrue(combo[0].getItems().contains(50));
+        assertTrue(combo[0].getItems().contains(100));
+        assertEquals(25, combo[0].getValue());
     }
     
     @Test
-    void testCreateSearchField() {
-        // When
-        TextField searchField = factory.createSearchField();
+    void testCreateSearchField() throws InterruptedException {
+        final TextField[] searchField = new TextField[1];
+        runAndWait(() -> {
+            // When
+            searchField[0] = factory.createSearchField();
+        });
         
         // Then
-        assertNotNull(searchField);
-        assertTrue(searchField.getStyleClass().contains("search-input"));
-        assertEquals("Search configurations...", searchField.getPromptText());
-        assertEquals(300, searchField.getPrefWidth());
+        assertNotNull(searchField[0]);
+        assertTrue(searchField[0].getStyleClass().contains("search-input"));
+        assertEquals("Search configurations...", searchField[0].getPromptText());
+        assertEquals(300, searchField[0].getPrefWidth());
     }
     
     @Test
-    void testCreateActionBarComponents() {
-        // When
-        AtlantaConfigUIFactory.ActionBarComponents components = 
-            factory.createActionBarComponents("/test/config/path");
+    void testCreateActionBarComponents() throws InterruptedException {
+        final AtlantaConfigUIFactory.ActionBarComponents[] components = new AtlantaConfigUIFactory.ActionBarComponents[1];
+        runAndWait(() -> {
+            // When
+            components[0] = factory.createActionBarComponents("/test/config/path");
+        });
         
         // Then
-        assertNotNull(components);
-        assertNotNull(components.getNewConfigBtn());
-        assertNotNull(components.getImportBtn());
-        assertNotNull(components.getRefreshBtn());
-        assertNotNull(components.getConfigPathLabel());
-        assertNotNull(components.getChangePathBtn());
-        assertNotNull(components.getOpenFolderBtn());
-        assertNotNull(components.getImportConfigBtn());
+        assertNotNull(components[0]);
+        assertNotNull(components[0].getNewConfigBtn());
+        assertNotNull(components[0].getImportBtn());
+        assertNotNull(components[0].getRefreshBtn());
+        assertNotNull(components[0].getConfigPathLabel());
+        assertNotNull(components[0].getChangePathBtn());
+        assertNotNull(components[0].getOpenFolderBtn());
+        assertNotNull(components[0].getImportConfigBtn());
         
-        assertEquals("+ New Configuration", components.getNewConfigBtn().getText());
-        assertEquals("📁 Import", components.getImportBtn().getText());
-        assertEquals("🔄 Refresh", components.getRefreshBtn().getText());
-        assertEquals("Config Path: /test/config/path", components.getConfigPathLabel().getText());
-        assertEquals("🔧 Change...", components.getChangePathBtn().getText());
-        assertEquals("📂 Open Folder", components.getOpenFolderBtn().getText());
-        assertEquals("Import Config", components.getImportConfigBtn().getText());
+        assertEquals("+ New Configuration", components[0].getNewConfigBtn().getText());
+        assertEquals("📁 Import", components[0].getImportBtn().getText());
+        assertEquals("🔄 Refresh", components[0].getRefreshBtn().getText());
+        assertEquals("Config Path: /test/config/path", components[0].getConfigPathLabel().getText());
+        assertEquals("🔧 Change...", components[0].getChangePathBtn().getText());
+        assertEquals("📂 Open Folder", components[0].getOpenFolderBtn().getText());
+        assertEquals("Import Config", components[0].getImportConfigBtn().getText());
     }
     
     @Test
-    void testCustomConfiguration() {
-        // Given
-        AtlantaConfigUIFactory.UIConfiguration config = 
-            AtlantaConfigUIFactory.UIConfiguration.builder()
-                .searchFieldWidth(400)
-                .leftCardMinWidth(700)
-                .rightCardMinWidth(600)
-                .splitLayoutSpacing(30)
-                .build();
+    void testCustomConfiguration() throws InterruptedException {
+        final TextField[] searchField = new TextField[1];
+        final HBox[] splitLayout = new HBox[1];
         
-        factory.setConfiguration(config);
+        runAndWait(() -> {
+            // Given
+            AtlantaConfigUIFactory.UIConfiguration config = 
+                AtlantaConfigUIFactory.UIConfiguration.builder()
+                    .searchFieldWidth(400)
+                    .leftCardMinWidth(700)
+                    .rightCardMinWidth(600)
+                    .splitLayoutSpacing(30)
+                    .build();
+            
+            factory.setConfiguration(config);
+            
+            // When
+            searchField[0] = factory.createSearchField();
+            splitLayout[0] = factory.createSplitLayout();
+        });
         
-        // When
-        TextField searchField = factory.createSearchField();
-        assertEquals(400, searchField.getPrefWidth());
-        
-        HBox splitLayout = factory.createSplitLayout();
-        assertEquals(30, splitLayout.getSpacing());
+        assertEquals(400, searchField[0].getPrefWidth());
+        assertEquals(30, splitLayout[0].getSpacing());
     }
 }

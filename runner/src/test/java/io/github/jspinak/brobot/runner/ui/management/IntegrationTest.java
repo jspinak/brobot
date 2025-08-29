@@ -1,7 +1,7 @@
 package io.github.jspinak.brobot.runner.ui.management;
 
 import io.github.jspinak.brobot.runner.events.EventBus;
-import io.github.jspinak.brobot.runner.testutils.JavaFXTestBase;
+import io.github.jspinak.brobot.runner.testutils.ImprovedJavaFXTestBase;
 import io.github.jspinak.brobot.runner.testutils.TestHelper;
 import io.github.jspinak.brobot.runner.ui.panels.ExampleLabelManagedPanel;
 import io.github.jspinak.brobot.runner.ui.panels.RefactoredResourceMonitorPanel;
@@ -17,7 +17,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
+import org.junit.jupiter.api.TestInfo;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -33,8 +33,7 @@ import static org.mockito.Mockito.*;
  * Integration tests for LabelManager and UIUpdateManager working together
  * across multiple UI components.
  */
-@DisabledIfEnvironmentVariable(named = "CI", matches = "true", disabledReason = "JavaFX tests require display")
-class IntegrationTest extends JavaFXTestBase {
+class IntegrationTest extends ImprovedJavaFXTestBase {
     
     @Mock
     private EventBus eventBus;

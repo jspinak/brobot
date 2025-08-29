@@ -4,6 +4,7 @@ import io.github.jspinak.brobot.runner.project.AutomationProject;
 import io.github.jspinak.brobot.runner.project.AutomationProjectManager;
 import io.github.jspinak.brobot.runner.project.TaskButton;
 import io.github.jspinak.brobot.runner.project.RunnerInterface;
+import io.github.jspinak.brobot.runner.testutils.ImprovedJavaFXTestBase;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -13,6 +14,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Arrays;
@@ -24,8 +26,7 @@ import java.util.function.Consumer;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
-class TaskManagementServiceTest {
+class TaskManagementServiceTest extends ImprovedJavaFXTestBase {
     
     @Mock
     private AutomationProjectManager projectManager;
@@ -40,13 +41,9 @@ class TaskManagementServiceTest {
     
     @BeforeEach
     void setUp() {
+        MockitoAnnotations.openMocks(this);
         service = new TaskManagementService(projectManager);
-        // Initialize JavaFX toolkit if needed
-        try {
-            javafx.application.Platform.startup(() -> {});
-        } catch (IllegalStateException e) {
-            // Already initialized
-        }
+        // JavaFX initialization is handled by ImprovedJavaFXTestBase
     }
     
     @Test

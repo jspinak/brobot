@@ -1,8 +1,7 @@
 package io.github.jspinak.brobot.runner;
 
+import io.github.jspinak.brobot.runner.testutils.ImprovedJavaFXTestBase;
 import javafx.application.Platform;
-import javafx.embed.swing.JFXPanel;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.CountDownLatch;
@@ -13,13 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 /**
  * Basic test to verify JavaFX runtime is available and working
  */
-public class BasicJavaFxTest {
-
-    @BeforeAll
-    public static void initJavaFX() {
-        // Initialize JavaFX toolkit
-        new JFXPanel();
-    }
+public class BasicJavaFxTest extends ImprovedJavaFXTestBase {
 
     @Test
     public void testJavaFxPlatformIsAvailable() throws InterruptedException {

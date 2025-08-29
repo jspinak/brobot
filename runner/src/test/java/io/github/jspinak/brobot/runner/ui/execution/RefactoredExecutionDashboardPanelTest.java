@@ -4,7 +4,7 @@ import io.github.jspinak.brobot.runner.automation.AutomationOrchestrator;
 import io.github.jspinak.brobot.runner.events.*;
 import io.github.jspinak.brobot.runner.execution.ExecutionState;
 import io.github.jspinak.brobot.runner.execution.ExecutionStatus;
-import io.github.jspinak.brobot.runner.testutils.JavaFXTestBase;
+import io.github.jspinak.brobot.runner.testutils.ImprovedJavaFXTestBase;
 import io.github.jspinak.brobot.runner.testutils.TestHelper;
 import io.github.jspinak.brobot.runner.ui.management.LabelManager;
 import io.github.jspinak.brobot.runner.ui.management.UIUpdateManager;
@@ -12,7 +12,7 @@ import io.github.jspinak.brobot.model.transition.StateTransitionStore;
 import io.github.jspinak.brobot.navigation.service.StateService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
+import org.junit.jupiter.api.TestInfo;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -23,8 +23,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-@DisabledIfEnvironmentVariable(named = "CI", matches = "true", disabledReason = "JavaFX tests require display")
-class RefactoredExecutionDashboardPanelTest extends JavaFXTestBase {
+class RefactoredExecutionDashboardPanelTest extends ImprovedJavaFXTestBase {
     
     @Mock
     private EventBus eventBus;

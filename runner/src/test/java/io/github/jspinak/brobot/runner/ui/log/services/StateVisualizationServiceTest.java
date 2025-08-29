@@ -33,7 +33,7 @@ class StateVisualizationServiceTest extends ApplicationTest {
     void testCreateVisualizationPanel() {
         assertNotNull(panel);
         assertNotNull(panel.getCanvas());
-        assertEquals("State Visualization", panel.titleLabel.getText());
+        assertEquals("State Visualization", panel.getTitle().getText());
         assertTrue(panel.getCanvas() instanceof Pane);
     }
     
@@ -55,9 +55,9 @@ class StateVisualizationServiceTest extends ApplicationTest {
         
         // Then
         Platform.runLater(() -> {
-            assertTrue(panel.titleLabel.getText().contains("State Transition"));
-            assertTrue(panel.titleLabel.getText().contains("StateA"));
-            assertTrue(panel.titleLabel.getText().contains("StateC"));
+            assertTrue(panel.getTitle().getText().contains("State Transition"));
+            assertTrue(panel.getTitle().getText().contains("StateA"));
+            assertTrue(panel.getTitle().getText().contains("StateC"));
             assertFalse(panel.getCanvas().getChildren().isEmpty());
         });
     }
@@ -79,8 +79,8 @@ class StateVisualizationServiceTest extends ApplicationTest {
         
         // Then
         Platform.runLater(() -> {
-            assertTrue(panel.titleLabel.getText().contains("Current State"));
-            assertTrue(panel.titleLabel.getText().contains("ActiveState"));
+            assertTrue(panel.getTitle().getText().contains("Current State"));
+            assertTrue(panel.getTitle().getText().contains("ActiveState"));
             assertFalse(panel.getCanvas().getChildren().isEmpty());
         });
     }
@@ -106,7 +106,7 @@ class StateVisualizationServiceTest extends ApplicationTest {
         
         // Then
         Platform.runLater(() -> {
-            assertEquals("State Visualization", panel.titleLabel.getText());
+            assertEquals("State Visualization", panel.getTitle().getText());
             assertTrue(panel.getCanvas().getChildren().isEmpty());
         });
     }
@@ -119,7 +119,7 @@ class StateVisualizationServiceTest extends ApplicationTest {
              StateVisualizationService.VisualizationType.values()) {
             
             panel.setVisualizationType(type);
-            assertEquals(type, panel.visualizationType);
+            assertEquals(type, panel.getVisualizationType());
         }
     }
     
@@ -140,8 +140,8 @@ class StateVisualizationServiceTest extends ApplicationTest {
         panel.setTheme(customTheme);
         
         // Then
-        assertEquals(customTheme, panel.theme);
-        assertEquals(Color.GREEN, panel.titleLabel.getTextFill());
+        assertEquals(customTheme, panel.getTheme());
+        assertEquals(Color.GREEN, panel.getTitle().getTextFill());
     }
     
     @Test
@@ -182,7 +182,7 @@ class StateVisualizationServiceTest extends ApplicationTest {
         
         // Then - should not throw exception
         Platform.runLater(() -> {
-            assertTrue(panel.titleLabel.getText().contains("→"));
+            assertTrue(panel.getTitle().getText().contains("→"));
         });
     }
     
@@ -200,7 +200,7 @@ class StateVisualizationServiceTest extends ApplicationTest {
         
         // Then - should not throw exception
         Platform.runLater(() -> {
-            assertTrue(panel.titleLabel.getText().contains("null"));
+            assertTrue(panel.getTitle().getText().contains("null"));
         });
     }
     
