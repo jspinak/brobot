@@ -4,14 +4,14 @@ import io.github.jspinak.brobot.runner.cache.CacheManager;
 import io.github.jspinak.brobot.runner.resources.ImageResourceManager;
 import io.github.jspinak.brobot.runner.resources.ResourceManager;
 import io.github.jspinak.brobot.runner.session.SessionManager;
-import io.github.jspinak.brobot.runner.testutils.JavaFXTestBase;
+import io.github.jspinak.brobot.runner.testutils.ImprovedJavaFXTestBase;
 import io.github.jspinak.brobot.runner.ui.management.LabelManager;
 import io.github.jspinak.brobot.runner.ui.management.UIUpdateManager;
 import io.github.jspinak.brobot.runner.ui.services.ResourceMonitoringService;
 import javafx.scene.control.Label;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
+import org.junit.jupiter.api.TestInfo;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -23,8 +23,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-@DisabledIfEnvironmentVariable(named = "CI", matches = "true", disabledReason = "JavaFX tests require display")
-class RefactoredResourceMonitorPanelTest extends JavaFXTestBase {
+class RefactoredResourceMonitorPanelTest extends ImprovedJavaFXTestBase {
     
     @Mock
     private ResourceManager resourceManager;

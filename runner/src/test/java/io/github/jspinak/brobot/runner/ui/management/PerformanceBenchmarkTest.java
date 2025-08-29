@@ -1,11 +1,11 @@
 package io.github.jspinak.brobot.runner.ui.management;
 
-import io.github.jspinak.brobot.runner.testutils.JavaFXTestBase;
+import io.github.jspinak.brobot.runner.testutils.ImprovedJavaFXTestBase;
 import javafx.application.Platform;
 import javafx.scene.control.Label;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
+import org.junit.jupiter.api.TestInfo;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,8 +18,7 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Performance benchmark tests comparing the old approach vs new architecture.
  */
-@DisabledIfEnvironmentVariable(named = "CI", matches = "true", disabledReason = "JavaFX tests require display")
-class PerformanceBenchmarkTest extends JavaFXTestBase {
+class PerformanceBenchmarkTest extends ImprovedJavaFXTestBase {
     
     private LabelManager labelManager;
     private UIUpdateManager uiUpdateManager;
