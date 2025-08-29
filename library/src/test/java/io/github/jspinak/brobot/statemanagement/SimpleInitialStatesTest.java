@@ -110,7 +110,7 @@ public class SimpleInitialStatesTest extends BrobotTestBase {
         initialStates.addStateSet(100, state1);
         
         // Method has typo in actual implementation
-        initialStates.findIntialStates();
+        initialStates.findInitialStates();
         
         // Should have added a state in mock mode with two parameters
         verify(stateMemory, atLeastOnce()).addActiveState(eq(1L), eq(true));
@@ -124,7 +124,7 @@ public class SimpleInitialStatesTest extends BrobotTestBase {
         
         // No state sets added - potentialActiveStates is empty
         
-        initialStates.findIntialStates();
+        initialStates.findInitialStates();
         
         // In mock mode with empty potentialActiveStates, it just returns
         // without calling stateDetector or stateMemory

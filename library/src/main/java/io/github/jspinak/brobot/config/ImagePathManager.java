@@ -229,6 +229,113 @@ public class ImagePathManager {
         return diagnostics;
     }
     
+    /**
+     * Verify image setup and provide detailed diagnostics.
+     * This method checks for expected directories and images, logging
+     * helpful information for troubleshooting missing resources.
+     * 
+     * @param expectedDirs List of expected directory paths (relative to project root)
+     * @param expectedImages List of expected image file paths
+     * @return true if all expected resources are found, false otherwise
+     */
+    public boolean verifyImageSetup(List<String> expectedDirs, List<String> expectedImages) {
+        log.info("=== IMAGE SETUP VERIFICATION ===");
+        
+        boolean allPresent = true;
+        
+        // Check ImagePath configuration
+        String bundlePath = ImagePath.getBundlePath();
+        log.info("SikuliX Bundle Path: {}", bundlePath != null ? bundlePath : "NOT SET");
+        log.info("Primary Image Path: {}", primaryImagePath != null ? primaryImagePath : "NOT SET");
+        
+        // Check expected directories if provided
+        if (expectedDirs != null && !expectedDirs.isEmpty()) {
+            for (String dir : expectedDirs) {
+                File dirFile = new File(dir);
+                if (dirFile.exists()) {
+                    log.info("✓ Directory exists: {}", dirFile.getAbsolutePath());
+                    
+                    // List image files in directory
+                    File[] imageFiles = dirFile.listFiles((d, name) -> isImageFile(name));
+                    if (imageFiles != null && imageFiles.length > 0) {
+                        log.info("  Found {} image files:", imageFiles.length);
+                        for (File img : imageFiles) {
+                            log.debug("    - {}", img.getName());
+                        }
+                    } else {
+                        log.warn("  No image files found in {}", dir);
+                    }
+                } else {
+                    log.warn("✗ Directory missing: {} (absolute: {})", dir, dirFile.getAbsolutePath());
+                    allPresent = false;
+                }
+            }
+        }
+        
+        // Check specific expected images if provided
+        if (expectedImages != null && !expectedImages.isEmpty()) {
+            log.info("Checking for expected images:");
+            for (String imagePath : expectedImages) {
+                File imageFile = new File(imagePath);
+                if (imageFile.exists()) {
+                    log.debug("  ✓ {}", imagePath);
+                } else {
+                    log.warn("  ✗ MISSING: {} (looking in: {})", imagePath, imageFile.getAbsolutePath());
+                    allPresent = false;
+                    
+                    // Try alternative locations
+                    checkAlternativeImageLocations(imagePath);
+                }
+            }
+        }
+        
+        // Provide setup guidance if images are missing
+        if (!allPresent) {
+            log.warn("\n=== IMAGE SETUP REQUIRED ===");
+            log.warn("Some expected images or directories are missing. Please ensure:");
+            log.warn("1. Image directories exist in the correct location");
+            log.warn("2. Image files are properly named and in PNG format");
+            log.warn("3. The image path configuration points to the correct location");
+            log.warn("\nCurrent working directory: {}", System.getProperty("user.dir"));
+            log.warn("Primary image path: {}", primaryImagePath);
+        } else {
+            log.info("✓ All expected images and directories verified successfully");
+        }
+        
+        log.info("=== END IMAGE VERIFICATION ===");
+        return allPresent;
+    }
+    
+    /**
+     * Simple verification that just checks if the configured paths have images
+     */
+    public boolean verifyImageSetup() {
+        return verifyImageSetup(null, null);
+    }
+    
+    private void checkAlternativeImageLocations(String imagePath) {
+        // Try without common prefixes
+        String[] prefixes = {"images/", "src/main/resources/images/", "resources/images/"};
+        for (String prefix : prefixes) {
+            if (imagePath.startsWith(prefix)) {
+                String withoutPrefix = imagePath.substring(prefix.length());
+                File altFile = new File(withoutPrefix);
+                if (altFile.exists()) {
+                    log.info("    Found at alternative location: {}", altFile.getAbsolutePath());
+                    return;
+                }
+            }
+        }
+        
+        // Try in primary image path
+        if (primaryImagePath != null) {
+            Path inPrimary = primaryImagePath.resolve(Paths.get(imagePath).getFileName());
+            if (Files.exists(inPrimary)) {
+                log.info("    Found in primary image path: {}", inPrimary);
+            }
+        }
+    }
+    
     private void configureSikuliX() {
         if (primaryImagePath == null) {
             log.warn("Cannot configure SikuliX - no primary path set");

@@ -43,6 +43,7 @@ public class AnnotationProcessor {
     private final AnnotatedStateBuilder stateBuilder;
     private final StateRegistrationService registrationService;
     private final ApplicationEventPublisher eventPublisher;
+    private final Map<String, Integer> initialStatePriorities = new HashMap<>();
     
     public AnnotationProcessor(ApplicationContext applicationContext,
                              StateTransitionsJointTable jointTable,
@@ -113,21 +114,31 @@ public class AnnotationProcessor {
             
             stateMap.put(stateClass, stateBean);
             
-            // Track initial states
+            // Track initial states with profile awareness
             boolean isInitial = stateAnnotation.initial();
-            log.debug("State {} initial flag: {}", stateName, isInitial);
-            if (isInitial) {
+            String[] profiles = stateAnnotation.profiles();
+            int priority = stateAnnotation.priority();
+            
+            log.debug("State {} initial flag: {}, profiles: {}, priority: {}", 
+                     stateName, isInitial, profiles, priority);
+            
+            // Check if state should be initial in current profile
+            if (isInitial && isProfileActive(profiles)) {
                 initialStateNames.add(stateName);
-                log.info("Marked {} as initial state", stateName);
+                // Store with priority for weighted selection
+                initialStatePriorities.put(stateName, priority);
+                log.info("Marked {} as initial state with priority {}", stateName, priority);
             }
         }
         
-        // Register initial states
+        // Register initial states with priorities
         if (!initialStateNames.isEmpty()) {
             log.info("Registering {} initial states: {}", initialStateNames.size(), initialStateNames);
-            // Add all initial states with equal probability
+            // Add initial states with their configured priorities
             for (String stateName : initialStateNames) {
-                initialStates.addStateSet(100, stateName);
+                int priority = initialStatePriorities.getOrDefault(stateName, 100);
+                initialStates.addStateSet(priority, stateName);
+                log.debug("Added initial state {} with priority {}", stateName, priority);
             }
         } else {
             log.warn("No initial states found!");
@@ -230,5 +241,38 @@ public class AnnotationProcessor {
             return className.substring(0, className.length() - 5);
         }
         return className;
+    }
+    
+    /**
+     * Checks if the current Spring profile matches any of the specified profiles.
+     * If no profiles are specified (empty array), returns true (active in all profiles).
+     * 
+     * @param profiles Array of profile names to check
+     * @return true if current profile matches or no profiles specified
+     */
+    private boolean isProfileActive(String[] profiles) {
+        // Empty profiles array means active in all profiles
+        if (profiles == null || profiles.length == 0) {
+            return true;
+        }
+        
+        // Get active profiles from Spring environment
+        String[] activeProfiles = applicationContext.getEnvironment().getActiveProfiles();
+        
+        // If no active profiles, check default profiles
+        if (activeProfiles.length == 0) {
+            activeProfiles = applicationContext.getEnvironment().getDefaultProfiles();
+        }
+        
+        // Check if any active profile matches the specified profiles
+        for (String activeProfile : activeProfiles) {
+            for (String targetProfile : profiles) {
+                if (activeProfile.equals(targetProfile)) {
+                    return true;
+                }
+            }
+        }
+        
+        return false;
     }
 }
