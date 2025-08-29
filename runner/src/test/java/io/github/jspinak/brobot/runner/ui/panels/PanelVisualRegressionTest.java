@@ -20,7 +20,7 @@ import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import io.github.jspinak.brobot.runner.testutils.TestHelper;
-import io.github.jspinak.brobot.runner.testutils.JavaFXTestBase;
+import io.github.jspinak.brobot.runner.testutils.ImprovedJavaFXTestBase;
 
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
@@ -32,8 +32,7 @@ import static org.mockito.Mockito.when;
 /**
  * Visual regression tests for refactored UI panels.
  */
-@DisabledIfEnvironmentVariable(named = "CI", matches = "true", disabledReason = "Visual tests require display")
-class PanelVisualRegressionTest extends JavaFXTestBase {
+class PanelVisualRegressionTest extends ImprovedJavaFXTestBase {
     
     @Mock
     private EventBus eventBus;
@@ -80,18 +79,20 @@ class PanelVisualRegressionTest extends JavaFXTestBase {
             stage.show();
             
             // Wait for rendering
-            waitForAnimations();
+            // waitForFxEvents(); // Can't be called inside runAndWait
+            try { Thread.sleep(100); } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
             
-            // Capture and compare
-            boolean matches = captureAndCompare(panel, "example-label-managed-panel");
+            // Visual regression testing
+            boolean matches = VisualRegressionTest.captureAndCompare(panel, "example-label-managed-panel");
             assertTrue(matches, "Visual regression detected in ExampleLabelManagedPanel");
             
             // Test with different states
             labelManager.updateLabel(panel, "statusLabel", "Error");
             labelManager.updateLabel(panel, "progressLabel", "0%");
-            waitForAnimations();
+            // waitForFxEvents(); // Can't be called inside runAndWait
+            try { Thread.sleep(100); } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
             
-            matches = captureAndCompare(panel, "example-label-managed-panel-error");
+            matches = VisualRegressionTest.captureAndCompare(panel, "example-label-managed-panel-error");
             assertTrue(matches, "Visual regression detected in ExampleLabelManagedPanel error state");
             
             stage.close();
@@ -131,10 +132,11 @@ class PanelVisualRegressionTest extends JavaFXTestBase {
             stage.show();
             
             // Wait for rendering
-            waitForAnimations();
+            // waitForFxEvents(); // Can't be called inside runAndWait
+            try { Thread.sleep(100); } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
             
             // Capture and compare
-            boolean matches = captureAndCompare(panel, "resource-monitor-panel");
+            boolean matches = VisualRegressionTest.captureAndCompare(panel, "resource-monitor-panel");
             assertTrue(matches, "Visual regression detected in RefactoredResourceMonitorPanel");
             
             stage.close();
@@ -164,17 +166,19 @@ class PanelVisualRegressionTest extends JavaFXTestBase {
             stage.show();
             
             // Wait for rendering
-            waitForAnimations();
+            // waitForFxEvents(); // Can't be called inside runAndWait
+            try { Thread.sleep(100); } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
             
             // Capture and compare
-            boolean matches = captureAndCompare(panel, "config-details-panel");
+            boolean matches = VisualRegressionTest.captureAndCompare(panel, "config-details-panel");
             assertTrue(matches, "Visual regression detected in RefactoredConfigDetailsPanel");
             
             // Test empty state
             panel.clearConfiguration();
-            waitForAnimations();
+            // waitForFxEvents(); // Can't be called inside runAndWait
+            try { Thread.sleep(100); } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
             
-            matches = captureAndCompare(panel, "config-details-panel-empty");
+            matches = VisualRegressionTest.captureAndCompare(panel, "config-details-panel-empty");
             assertTrue(matches, "Visual regression detected in RefactoredConfigDetailsPanel empty state");
             
             stage.close();
@@ -214,10 +218,11 @@ class PanelVisualRegressionTest extends JavaFXTestBase {
             stage.show();
             
             // Wait for rendering
-            waitForAnimations();
+            // waitForFxEvents(); // Can't be called inside runAndWait
+            try { Thread.sleep(100); } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
             
             // Capture and compare
-            boolean matches = captureAndCompare(container, "panel-integration-layout");
+            boolean matches = VisualRegressionTest.captureAndCompare(container, "panel-integration-layout");
             assertTrue(matches, "Visual regression detected in panel integration layout");
             
             stage.close();
@@ -238,15 +243,17 @@ class PanelVisualRegressionTest extends JavaFXTestBase {
             
             // Test light theme
             scene.getRoot().getStyleClass().add("theme-light");
-            waitForAnimations();
-            boolean matches = captureAndCompare(panel, "example-panel-light-theme");
+            // waitForFxEvents(); // Can't be called inside runAndWait
+            try { Thread.sleep(100); } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
+            boolean matches = VisualRegressionTest.captureAndCompare(panel, "example-panel-light-theme");
             assertTrue(matches, "Visual regression in light theme");
             
             // Test dark theme
             scene.getRoot().getStyleClass().remove("theme-light");
             scene.getRoot().getStyleClass().add("theme-dark");
-            waitForAnimations();
-            matches = captureAndCompare(panel, "example-panel-dark-theme");
+            // waitForFxEvents(); // Can't be called inside runAndWait
+            try { Thread.sleep(100); } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
+            matches = VisualRegressionTest.captureAndCompare(panel, "example-panel-dark-theme");
             assertTrue(matches, "Visual regression in dark theme");
             
             stage.close();
@@ -275,22 +282,25 @@ class PanelVisualRegressionTest extends JavaFXTestBase {
             Scene smallScene = new Scene(panel, 400, 300);
             stage.setScene(smallScene);
             stage.show();
-            waitForAnimations();
-            boolean matches = captureAndCompare(panel, "config-panel-small");
+            // waitForFxEvents(); // Can't be called inside runAndWait
+            try { Thread.sleep(100); } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
+            boolean matches = VisualRegressionTest.captureAndCompare(panel, "config-panel-small");
             assertTrue(matches, "Visual regression in small layout");
             
             // Medium size
             stage.setWidth(600);
             stage.setHeight(400);
-            waitForAnimations();
-            matches = captureAndCompare(panel, "config-panel-medium");
+            // waitForFxEvents(); // Can't be called inside runAndWait
+            try { Thread.sleep(100); } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
+            matches = VisualRegressionTest.captureAndCompare(panel, "config-panel-medium");
             assertTrue(matches, "Visual regression in medium layout");
             
             // Large size
             stage.setWidth(1000);
             stage.setHeight(700);
-            waitForAnimations();
-            matches = captureAndCompare(panel, "config-panel-large");
+            // waitForFxEvents(); // Can't be called inside runAndWait
+            try { Thread.sleep(100); } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
+            matches = VisualRegressionTest.captureAndCompare(panel, "config-panel-large");
             assertTrue(matches, "Visual regression in large layout");
             
             stage.close();
@@ -303,7 +313,7 @@ class PanelVisualRegressionTest extends JavaFXTestBase {
      */
     // @Test
     void updateAllBaselineImages() {
-        updateAllBaselines();
-        generateReport();
+        VisualRegressionTest.updateAllBaselines();
+        VisualRegressionTest.generateReport();
     }
 }

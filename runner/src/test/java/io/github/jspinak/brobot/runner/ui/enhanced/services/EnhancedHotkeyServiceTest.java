@@ -2,6 +2,7 @@ package io.github.jspinak.brobot.runner.ui.enhanced.services;
 
 import io.github.jspinak.brobot.runner.hotkeys.HotkeyManager;
 import io.github.jspinak.brobot.runner.hotkeys.HotkeyManager.HotkeyAction;
+import io.github.jspinak.brobot.runner.testutils.ImprovedJavaFXTestBase;
 import io.github.jspinak.brobot.runner.ui.AutomationStatusPanel;
 import javafx.application.Platform;
 import javafx.scene.Scene;
@@ -11,6 +12,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -21,8 +23,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
-class EnhancedHotkeyServiceTest {
+class EnhancedHotkeyServiceTest extends ImprovedJavaFXTestBase {
     
     @Mock
     private HotkeyManager hotkeyManager;
@@ -34,14 +35,9 @@ class EnhancedHotkeyServiceTest {
     
     @BeforeEach
     void setUp() {
+        MockitoAnnotations.openMocks(this);
         service = new EnhancedHotkeyService(hotkeyManager);
-        
-        // Initialize JavaFX toolkit if needed
-        try {
-            Platform.startup(() -> {});
-        } catch (IllegalStateException e) {
-            // Already initialized
-        }
+        // JavaFX initialization is handled by ImprovedJavaFXTestBase
     }
     
     @Test

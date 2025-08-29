@@ -1,7 +1,7 @@
 package io.github.jspinak.brobot.runner.ui.config;
 
 import io.github.jspinak.brobot.runner.events.EventBus;
-import io.github.jspinak.brobot.runner.testutils.JavaFXTestBase;
+import io.github.jspinak.brobot.runner.testutils.ImprovedJavaFXTestBase;
 import io.github.jspinak.brobot.runner.testutils.TestHelper;
 import io.github.jspinak.brobot.runner.ui.management.LabelManager;
 import io.github.jspinak.brobot.runner.ui.management.UIUpdateManager;
@@ -10,7 +10,7 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
+import org.junit.jupiter.api.TestInfo;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -24,8 +24,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-@DisabledIfEnvironmentVariable(named = "CI", matches = "true", disabledReason = "JavaFX tests require display")
-class RefactoredConfigDetailsPanelTest extends JavaFXTestBase {
+class RefactoredConfigDetailsPanelTest extends ImprovedJavaFXTestBase {
     
     @Mock
     private EventBus eventBus;

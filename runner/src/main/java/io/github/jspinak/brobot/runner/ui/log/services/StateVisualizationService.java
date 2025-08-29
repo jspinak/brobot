@@ -176,6 +176,18 @@ public class StateVisualizationService {
         public void setTitle(String title) {
             titleLabel.setText(title);
         }
+        
+        public Label getTitle() {
+            return titleLabel;
+        }
+        
+        public VisualizationType getVisualizationType() {
+            return visualizationType;
+        }
+        
+        public VisualizationTheme getTheme() {
+            return theme;
+        }
     }
     
     /**

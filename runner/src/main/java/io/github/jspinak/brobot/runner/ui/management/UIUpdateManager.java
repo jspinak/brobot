@@ -175,6 +175,17 @@ public class UIUpdateManager {
     }
     
     /**
+     * Checks if a task is currently scheduled.
+     * 
+     * @param taskId The identifier of the task to check
+     * @return true if the task is scheduled, false otherwise
+     */
+    public boolean isTaskScheduled(String taskId) {
+        ScheduledFuture<?> future = scheduledTasks.get(taskId);
+        return future != null && !future.isDone() && !future.isCancelled();
+    }
+    
+    /**
      * Cancels a scheduled update.
      * 
      * @param taskId The task identifier

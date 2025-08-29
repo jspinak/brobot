@@ -72,22 +72,22 @@ dependencies {
 test {
     useJUnitPlatform()
     
-    // Temporary test exclusions due to API changes during refactoring
-    // TODO: Remove these exclusions after fixing test compilation issues
-    exclude '**/StateVisualizationServiceTest.class'
-    exclude '**/RefactoredExecutionDashboardPanelTest.class'
-    exclude '**/RefactoredConfigDetailsPanelTest.class'
-    exclude '**/AtlantaConfigUIFactoryTest.class'
-    exclude '**/ConfigFileOperationsServiceTest.class'
-    exclude '**/ConfigOperationsServiceTest.class'
-    exclude '**/TaskManagementServiceTest.class'
-    exclude '**/AutomationButtonServiceTest.class'
-    exclude '**/EnhancedButtonServiceTest.class'
-    exclude '**/EnhancedHotkeyServiceTest.class'
-    exclude '**/RefactoredAutomationPanelTest.class'
-    exclude '**/PanelVisualRegressionTest.class'
-    exclude '**/IntegrationTest.class'
-    exclude '**/PerformanceBenchmarkTest.class'
+    // ALL TEST EXCLUSIONS REMOVED - 2025-08-29
+    // All previously excluded tests have been fixed:
+    // - StateVisualizationServiceTest - Re-enabled (uses TestFX)
+    // - RefactoredExecutionDashboardPanelTest - FIXED (uses ImprovedJavaFXTestBase)
+    // - RefactoredConfigDetailsPanelTest - FIXED (uses ImprovedJavaFXTestBase)
+    // - AtlantaConfigUIFactoryTest - FIXED (uses ImprovedJavaFXTestBase)
+    // - ConfigFileOperationsServiceTest - FIXED (uses ImprovedJavaFXTestBase)
+    // - ConfigOperationsServiceTest - FIXED (no JavaFX needed)
+    // - TaskManagementServiceTest - FIXED (uses ImprovedJavaFXTestBase)
+    // - AutomationButtonServiceTest - FIXED (uses ImprovedJavaFXTestBase)
+    // - EnhancedButtonServiceTest - FIXED (uses ImprovedJavaFXTestBase)
+    // - EnhancedHotkeyServiceTest - FIXED (uses ImprovedJavaFXTestBase)
+    // - RefactoredAutomationPanelTest - Test doesn't exist (removed from exclusions)
+    // - PanelVisualRegressionTest - Re-enabled and FIXED (uses ImprovedJavaFXTestBase)
+    // - IntegrationTest - FIXED (uses ImprovedJavaFXTestBase)
+    // - PerformanceBenchmarkTest - FIXED (uses ImprovedJavaFXTestBase)
 
     // Configure system properties for headless testing
     // To run headless, execute: ./gradlew test -Dtestfx.headless=true
