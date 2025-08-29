@@ -3,6 +3,7 @@ package io.github.jspinak.brobot.runner.ui.config.atlanta.services;
 import io.github.jspinak.brobot.runner.config.BrobotRunnerProperties;
 import io.github.jspinak.brobot.runner.events.EventBus;
 import io.github.jspinak.brobot.runner.events.LogEvent;
+import io.github.jspinak.brobot.runner.testutils.ImprovedJavaFXTestBase;
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
@@ -12,6 +13,7 @@ import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.File;
@@ -21,8 +23,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
-class ConfigFileOperationsServiceTest {
+class ConfigFileOperationsServiceTest extends ImprovedJavaFXTestBase {
     
     @Mock
     private EventBus eventBus;
@@ -37,14 +38,9 @@ class ConfigFileOperationsServiceTest {
     
     @BeforeEach
     void setUp() {
+        MockitoAnnotations.openMocks(this);
         service = new ConfigFileOperationsService(eventBus, runnerProperties);
-        
-        // Initialize JavaFX toolkit if needed
-        try {
-            Platform.startup(() -> {});
-        } catch (IllegalStateException e) {
-            // Already initialized
-        }
+        // JavaFX initialization is handled by ImprovedJavaFXTestBase
     }
     
     @Test
