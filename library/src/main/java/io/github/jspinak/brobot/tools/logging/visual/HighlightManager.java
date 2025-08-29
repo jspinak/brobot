@@ -5,9 +5,6 @@ import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.logging.unified.BrobotLogger;
 import io.github.jspinak.brobot.logging.unified.LogEvent;
-import io.github.jspinak.brobot.action.ActionResult;
-import io.github.jspinak.brobot.action.ObjectCollection;
-import io.github.jspinak.brobot.action.basic.highlight.HighlightOptions;
 import io.github.jspinak.brobot.tools.testing.wrapper.HighlightWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -125,20 +122,8 @@ public class HighlightManager {
         
         // Perform synchronous highlighting for search regions so they appear in console
         try {
-            // Create highlight configuration
-            HighlightOptions highlightOptions = new HighlightOptions.Builder()
-                .setHighlightSeconds(searchConfig.getDuration())
-                .setHighlightColor(getColorName(searchConfig.getColorObject()))
-                .setHighlightAllAtOnce(true)  // Highlight all regions at once
-                .build();
-            
-            // Create object collection with all regions
-            ObjectCollection objectCollection = new ObjectCollection.Builder()
-                .withRegions(regions.toArray(new Region[0]))
-                .build();
-            
-            // Perform highlight synchronously using Brobot's Action via wrapper
-            if (highlightWrapper != null && highlightWrapper.isAvailable()) {
+            // Perform highlight synchronously using wrapper
+            if (highlightWrapper != null) {
                 log.debug("Highlighting {} search regions synchronously", regions.size());
                 brobotLogger.log()
                     .observation("Starting highlight action")
@@ -147,16 +132,20 @@ public class HighlightManager {
                     .metadata("duration", searchConfig.getDuration())
                     .log();
                     
-                ActionResult result = highlightWrapper.performHighlight(highlightOptions, objectCollection);
+                int successCount = highlightWrapper.highlightRegions(
+                    regions, 
+                    searchConfig.getDuration(), 
+                    getColorName(searchConfig.getColorObject())
+                );
                 
                 brobotLogger.log()
                     .observation("Highlight action completed")
-                    .metadata("success", result.isSuccess())
-                    .metadata("matchesFound", result.size())
+                    .metadata("success", successCount > 0)
+                    .metadata("highlightedCount", successCount)
                     .log();
                     
-                if (!result.isSuccess()) {
-                    log.warn("Highlight action failed - no matches found for highlight regions");
+                if (successCount == 0) {
+                    log.warn("Highlight action failed - no regions could be highlighted");
                 }
             } else {
                 log.error("Highlight wrapper not available for highlighting - highlights will not appear on screen");
@@ -225,25 +214,13 @@ public class HighlightManager {
         
         // Perform synchronous highlighting for search regions
         try {
-            // Create highlight configuration
-            HighlightOptions highlightOptions = new HighlightOptions.Builder()
-                .setHighlightSeconds(searchConfig.getDuration())
-                .setHighlightColor(getColorName(searchConfig.getColorObject()))
-                .setHighlightAllAtOnce(true)  // Highlight all regions at once
-                .build();
-            
             // Extract just the regions for highlighting
             List<Region> regions = regionsWithContext.stream()
                 .map(RegionWithContext::getRegion)
                 .toList();
             
-            // Create object collection with all regions
-            ObjectCollection objectCollection = new ObjectCollection.Builder()
-                .withRegions(regions.toArray(new Region[0]))
-                .build();
-            
-            // Perform highlight synchronously using Brobot's Action via wrapper
-            if (highlightWrapper != null && highlightWrapper.isAvailable()) {
+            // Perform highlight synchronously using wrapper
+            if (highlightWrapper != null) {
                 log.debug("Highlighting {} search regions synchronously", regions.size());
                 brobotLogger.log()
                     .observation("Starting highlight action with context")
@@ -252,16 +229,20 @@ public class HighlightManager {
                     .metadata("duration", searchConfig.getDuration())
                     .log();
                     
-                ActionResult result = highlightWrapper.performHighlight(highlightOptions, objectCollection);
+                int successCount = highlightWrapper.highlightRegions(
+                    regions, 
+                    searchConfig.getDuration(), 
+                    getColorName(searchConfig.getColorObject())
+                );
                 
                 brobotLogger.log()
                     .observation("Highlight action with context completed")
-                    .metadata("success", result.isSuccess())
-                    .metadata("matchesFound", result.size())
+                    .metadata("success", successCount > 0)
+                    .metadata("highlightedCount", successCount)
                     .log();
                     
-                if (!result.isSuccess()) {
-                    log.warn("Highlight action failed - no matches found for highlight regions");
+                if (successCount == 0) {
+                    log.warn("Highlight action failed - no regions could be highlighted");
                 }
             } else {
                 log.error("Highlight wrapper not available for highlighting - highlights will not appear on screen");
@@ -372,22 +353,9 @@ public class HighlightManager {
             // Use CompletableFuture for non-blocking highlight
             CompletableFuture<Void> highlightFuture = CompletableFuture.runAsync(() -> {
                 try {
-                    // Create highlight configuration using Brobot's HighlightOptions
-                    HighlightOptions highlightOptions = new HighlightOptions.Builder()
-                        .setHighlightSeconds(duration)
-                        .setHighlightColor(getColorName(color))
-                        .setHighlightAllAtOnce(false)  // Highlight one at a time
-                        .build();
-                    
-                    // Create object collection with the region to highlight
-                    ObjectCollection objectCollection = new ObjectCollection.Builder()
-                        .withRegions(region)
-                        .build();
-                    
-                    // Use Brobot's Action system to perform the highlight via wrapper
-                    // The wrapper will handle the Find internally
-                    if (highlightWrapper != null && highlightWrapper.isAvailable()) {
-                        highlightWrapper.performHighlight(highlightOptions, objectCollection);
+                    // Use wrapper to perform the highlight
+                    if (highlightWrapper != null) {
+                        highlightWrapper.highlightRegion(region, duration, getColorName(color));
                     } else {
                         log.warn("HighlightWrapper not available for async highlight");
                     }
