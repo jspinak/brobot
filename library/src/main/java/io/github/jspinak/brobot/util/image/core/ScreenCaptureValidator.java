@@ -150,7 +150,7 @@ public class ScreenCaptureValidator {
     /**
      * Check if running in WSL
      */
-    private boolean isRunningInWSL() {
+    protected boolean isRunningInWSL() {
         String osName = System.getProperty("os.name", "").toLowerCase();
         boolean isLinux = osName.contains("linux");
         
@@ -172,7 +172,7 @@ public class ScreenCaptureValidator {
     /**
      * Check if DISPLAY environment variable is set (for X11)
      */
-    private boolean hasDisplay() {
+    protected boolean hasDisplay() {
         String display = System.getenv("DISPLAY");
         return display != null && !display.isEmpty();
     }
@@ -180,7 +180,7 @@ public class ScreenCaptureValidator {
     /**
      * Capture a screen image
      */
-    private BufferedImage captureScreen() throws AWTException {
+    protected BufferedImage captureScreen() throws AWTException {
         Robot robot = new Robot();
         Rectangle screenRect = new Rectangle(Toolkit.getDefaultToolkit().getScreenSize());
         return robot.createScreenCapture(screenRect);

@@ -8,6 +8,7 @@ import io.github.jspinak.brobot.model.element.Region;
 import org.bytedeco.javacv.*;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.MatVector;
+import org.bytedeco.opencv.opencv_core.Rect;
 import org.sikuli.script.ImagePath;
 import org.springframework.stereotype.Component;
 
@@ -128,8 +129,11 @@ public class ImageLoader {
     }
 
     public Mat getHSV(Mat bgr) {
+        if (bgr == null || bgr.empty()) {
+            return new Mat(); // Return empty Mat for empty input
+        }
         Mat hsv = new Mat();
-        cvtColor(bgr, hsv, COLOR_BGR2HSV );
+        cvtColor(bgr, hsv, COLOR_BGR2HSV);
         return hsv;
     }
 
@@ -173,9 +177,27 @@ public class ImageLoader {
      */
     public Mat getMat(String imageName, List<Region> regions, ColorCluster.ColorSchemaName colorSchemaName) {
         Mat image = getMatFromBundlePath(imageName, colorSchemaName);
-        Mat mask = new Mat();
+        if (regions == null || regions.isEmpty()) {
+            return image;
+        }
+        
+        // Create a black mask the same size as the image
+        Mat mask = Mat.zeros(image.size(), image.type()).asMat();
+        
+        // Copy regions from the original image to the mask
         for (Region region : regions) {
-            add(mask, image, mask, new Mat(region.getJavaCVRect()), -1);
+            // Ensure region is within image bounds
+            int x = Math.max(0, Math.min(region.x(), image.cols() - 1));
+            int y = Math.max(0, Math.min(region.y(), image.rows() - 1));
+            int width = Math.min(region.w(), image.cols() - x);
+            int height = Math.min(region.h(), image.rows() - y);
+            
+            if (width > 0 && height > 0) {
+                Rect rect = new Rect(x, y, width, height);
+                Mat srcRegion = new Mat(image, rect);
+                Mat dstRegion = new Mat(mask, rect);
+                srcRegion.copyTo(dstRegion);
+            }
         }
         return mask;
     }
