@@ -1,106 +1,135 @@
 package io.github.jspinak.brobot.tools.testing.wrapper;
 
-import io.github.jspinak.brobot.action.Action;
-import io.github.jspinak.brobot.action.ActionResult;
-import io.github.jspinak.brobot.action.ObjectCollection;
-import io.github.jspinak.brobot.action.basic.highlight.HighlightOptions;
-import io.github.jspinak.brobot.config.FrameworkSettings;
+import io.github.jspinak.brobot.config.ExecutionMode;
+import io.github.jspinak.brobot.model.element.Region;
+import io.github.jspinak.brobot.tools.testing.mock.action.MockHighlight;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 /**
- * Wrapper for highlight operations that breaks circular dependency with Action.
+ * Wrapper for highlight operations that routes to mock or live implementation.
  * 
- * <p>This wrapper provides a stable interface for highlight operations while preventing
- * circular dependencies between HighlightManager and Action. The wrapper pattern allows
- * HighlightManager to depend on this wrapper instead of directly on Action, breaking
- * the circular dependency chain.</p>
+ * <p>This wrapper provides a low-level routing mechanism for highlight operations,
+ * directing execution to either mock or live implementations based on the current
+ * execution mode. It does not depend on high-level Action classes, preventing
+ * circular dependencies.</p>
  * 
- * <h2>Circular Dependency Resolution:</h2>
- * <p>Original circular dependency chain:
- * HighlightManager → Action → ActionExecution → ... → HighlightManager
- * 
- * With wrapper pattern:
- * HighlightManager → HighlightWrapper
- * Action → ActionExecution → ... → HighlightManager
- * HighlightWrapper → Action (no back reference)</p>
- * 
- * <h2>Design Benefits:</h2>
+ * <h2>Architecture Pattern:</h2>
+ * <p>The wrapper pattern follows these principles:
  * <ul>
- *   <li>Eliminates need for @Lazy annotation</li>
- *   <li>All dependencies resolved at startup</li>
- *   <li>Clear separation of concerns</li>
- *   <li>Testable in isolation</li>
+ *   <li>Wrappers are low-level directors that choose between mock and live implementations</li>
+ *   <li>They do not depend on high-level Action classes</li>
+ *   <li>Action classes delegate to specific implementation classes, which use wrappers</li>
+ *   <li>This prevents circular dependencies in the injection chain</li>
  * </ul>
+ * </p>
  * 
- * @see io.github.jspinak.brobot.tools.logging.visual.HighlightManager
- * @see Action
- * @since 1.0
+ * <h2>Dependency Flow:</h2>
+ * <pre>
+ * Action → ActionExecution → Highlight → HighlightManager → HighlightWrapper
+ *                                                                    ↓
+ *                                                      MockHighlight / Live Sikuli
+ * </pre>
+ * 
+ * @see MockHighlight for mock implementation
+ * @see ExecutionMode for execution mode detection
+ * @since 1.1.0
  */
 @Slf4j
 @Component
 public class HighlightWrapper {
     
-    private final Action action;
+    private final ExecutionMode executionMode;
+    private final MockHighlight mockHighlight;
     
     /**
-     * Constructs a HighlightWrapper with the Action dependency.
+     * Constructs a HighlightWrapper with required dependencies.
      * 
-     * Since this wrapper doesn't participate in any circular dependency chains,
-     * it can safely depend on Action without needing @Lazy annotation.
-     * 
-     * @param action the Action instance for performing highlight operations
+     * @param executionMode determines whether to use mock or live implementation
+     * @param mockHighlight mock implementation for testing scenarios
      */
     @Autowired
-    public HighlightWrapper(Action action) {
-        this.action = action;
+    public HighlightWrapper(ExecutionMode executionMode, MockHighlight mockHighlight) {
+        this.executionMode = executionMode;
+        this.mockHighlight = mockHighlight;
     }
     
     /**
-     * Performs a highlight action with the given options and regions.
+     * Highlights a single region, routing to mock or live implementation.
      * 
-     * <p>This method wraps the Action.perform call for highlight operations,
-     * providing a stable API that HighlightManager can depend on without
-     * creating circular dependencies.</p>
-     * 
-     * <h3>Mock Mode Behavior:</h3>
-     * <p>In mock mode (when FrameworkSettings.mock is true), highlight operations
-     * are simulated without actual screen interaction. The method returns a
-     * successful ActionResult to maintain consistent behavior in tests.</p>
-     * 
-     * <h3>Live Mode Behavior:</h3>
-     * <p>In live mode, this method performs actual screen highlighting using
-     * the provided options and regions. The highlight will be visible on screen
-     * for the specified duration.</p>
-     * 
-     * @param highlightOptions configuration for the highlight (color, duration, etc.)
-     * @param objectCollection collection containing regions to highlight
-     * @return ActionResult indicating success/failure of the highlight operation
+     * @param region the region to highlight
+     * @param duration highlight duration in seconds
+     * @param color highlight color (e.g., "red", "green", "blue")
+     * @return true if highlight was successful, false otherwise
      */
-    public ActionResult performHighlight(HighlightOptions highlightOptions, ObjectCollection objectCollection) {
-        if (FrameworkSettings.mock) {
-            log.debug("Mock mode: Simulating highlight for regions");
-            // In mock mode, return success without actual highlighting
-            ActionResult mockResult = new ActionResult();
-            mockResult.setSuccess(true);
-            return mockResult;
+    public boolean highlightRegion(Region region, double duration, String color) {
+        if (executionMode.isMock()) {
+            log.debug("Mock mode: simulating highlight for region");
+            return mockHighlight.highlightRegion(region, duration, color);
         }
         
-        log.debug("Performing highlight action for regions");
-        return action.perform(highlightOptions, objectCollection);
+        try {
+            log.debug("Live mode: performing actual highlight for region");
+            org.sikuli.script.Region sikuliRegion = region.sikuli();
+            
+            // Set color if specified
+            if (color != null && !color.isEmpty()) {
+                sikuliRegion.highlight(duration, color);
+            } else {
+                sikuliRegion.highlight(duration);
+            }
+            
+            return true;
+        } catch (Exception e) {
+            log.error("Failed to highlight region: {}", e.getMessage());
+            return false;
+        }
     }
     
     /**
-     * Checks if the Action component is available for highlighting.
+     * Highlights a single region with default settings.
      * 
-     * <p>This method allows HighlightManager to verify that highlighting
-     * capabilities are available before attempting to use them.</p>
-     * 
-     * @return true if Action is available, false otherwise
+     * @param region the region to highlight
+     * @return true if highlight was successful, false otherwise
      */
-    public boolean isAvailable() {
-        return action != null;
+    public boolean highlightRegion(Region region) {
+        return highlightRegion(region, 2.0, "red");
+    }
+    
+    /**
+     * Highlights multiple regions, routing to mock or live implementation.
+     * 
+     * @param regions the regions to highlight
+     * @param duration highlight duration in seconds
+     * @param color highlight color
+     * @return number of regions successfully highlighted
+     */
+    public int highlightRegions(List<Region> regions, double duration, String color) {
+        if (executionMode.isMock()) {
+            log.debug("Mock mode: simulating highlight for {} regions", regions.size());
+            return mockHighlight.highlightRegions(regions, duration, color);
+        }
+        
+        log.debug("Live mode: highlighting {} regions", regions.size());
+        int successCount = 0;
+        for (Region region : regions) {
+            if (highlightRegion(region, duration, color)) {
+                successCount++;
+            }
+        }
+        return successCount;
+    }
+    
+    /**
+     * Checks if the wrapper is in mock mode.
+     * 
+     * @return true if in mock mode, false for live mode
+     */
+    public boolean isMockMode() {
+        return executionMode.isMock();
     }
     
     /**
@@ -110,7 +139,7 @@ public class HighlightWrapper {
      */
     @Override
     public String toString() {
-        return String.format("HighlightWrapper[actionAvailable=%s, mockMode=%s]",
-            isAvailable(), FrameworkSettings.mock);
+        return String.format("HighlightWrapper[mode=%s]",
+            executionMode.isMock() ? "mock" : "live");
     }
 }
