@@ -177,7 +177,7 @@ public class InitialStatesTest extends BrobotTestBase {
             // Mock mode is enabled by BrobotTestBase
             assertTrue(FrameworkSettings.mock);
             
-            initialStates.findIntialStates();
+            initialStates.findInitialStates();
             
             // Should have selected one of the state sets
             verify(stateMemory, atLeastOnce()).addActiveState(anyLong(), anyBoolean());
@@ -196,7 +196,7 @@ public class InitialStatesTest extends BrobotTestBase {
             initialStates.addStateSet(90, highProbState);
             initialStates.addStateSet(10, lowProbState);
             
-            initialStates.findIntialStates();
+            initialStates.findInitialStates();
             
             // With 90% probability, should usually select state 1
             // Can't guarantee exact distribution in single test, but verify selection happens
@@ -208,7 +208,7 @@ public class InitialStatesTest extends BrobotTestBase {
         public void testMockModeNoStateSets() {
             // No state sets added
             
-            initialStates.findIntialStates();
+            initialStates.findInitialStates();
             
             // In mock mode with no state sets, nothing happens
             verify(stateMemory, never()).addActiveState(anyLong(), anyBoolean());
@@ -232,7 +232,7 @@ public class InitialStatesTest extends BrobotTestBase {
             
             when(stateMemory.getActiveStates()).thenReturn(new HashSet<>(Arrays.asList(1L)));
             
-            initialStates.findIntialStates();
+            initialStates.findInitialStates();
             
             verify(stateDetector, atLeastOnce()).findState(anyLong());
             
@@ -255,7 +255,7 @@ public class InitialStatesTest extends BrobotTestBase {
             when(stateMemory.getActiveStates()).thenReturn(new HashSet<>());
             when(stateService.getAllStateIds()).thenReturn(Arrays.asList(1L, 2L));
             
-            initialStates.findIntialStates();
+            initialStates.findInitialStates();
             
             // Should search for all states
             verify(stateDetector, atLeastOnce()).findState(anyLong());
@@ -274,7 +274,7 @@ public class InitialStatesTest extends BrobotTestBase {
             
             when(stateService.getAllStateIds()).thenReturn(Arrays.asList(1L, 2L, 3L));
             
-            initialStates.findIntialStates();
+            initialStates.findInitialStates();
             
             // Should search for all states when no initial sets defined
             verify(stateDetector, atLeastOnce()).findState(anyLong());
@@ -299,7 +299,7 @@ public class InitialStatesTest extends BrobotTestBase {
             
             initialStates.addStateSet(100, state1, state2);
             
-            initialStates.findIntialStates();
+            initialStates.findInitialStates();
             
             // In mock mode, should add selected states to memory
             verify(stateMemory, atLeast(1)).addActiveState(anyLong(), anyBoolean());
@@ -314,7 +314,7 @@ public class InitialStatesTest extends BrobotTestBase {
             
             initialStates.addStateSet(100, state);
             
-            initialStates.findIntialStates();
+            initialStates.findInitialStates();
             
             // In mock mode, state probability is set to base
             verify(state, atLeastOnce()).setProbabilityToBaseProbability();
@@ -360,7 +360,7 @@ public class InitialStatesTest extends BrobotTestBase {
             
             assertEquals(100, initialStates.sumOfProbabilities);
             
-            initialStates.findIntialStates();
+            initialStates.findInitialStates();
             
             // Should have selected one configuration
             verify(stateMemory, atLeastOnce()).addActiveState(anyLong(), anyBoolean());
@@ -382,7 +382,7 @@ public class InitialStatesTest extends BrobotTestBase {
             initialStates.addStateSet(45, homePage);
             initialStates.addStateSet(45, lastKnownGood);
             
-            initialStates.findIntialStates();
+            initialStates.findInitialStates();
             
             // New states should be added
             verify(stateMemory, atLeastOnce()).addActiveState(anyLong(), anyBoolean());
@@ -409,7 +409,7 @@ public class InitialStatesTest extends BrobotTestBase {
             
             assertEquals(100, initialStates.sumOfProbabilities);
             
-            initialStates.findIntialStates();
+            initialStates.findInitialStates();
             
             verify(stateMemory, atLeastOnce()).addActiveState(anyLong(), anyBoolean());
         }

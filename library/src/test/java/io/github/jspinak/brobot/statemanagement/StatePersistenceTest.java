@@ -380,7 +380,7 @@ public class StatePersistenceTest extends BrobotTestBase {
             
             // When no states active, find initial states
             if (mockMemory.getActiveStates().isEmpty()) {
-                initialStates.findIntialStates(); // Will use mock mode
+                initialStates.findInitialStates(); // Will use mock mode
             }
             
             // Should have activated initial state

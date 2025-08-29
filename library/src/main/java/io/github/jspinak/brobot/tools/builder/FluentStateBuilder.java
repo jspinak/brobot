@@ -42,6 +42,6 @@ public class FluentStateBuilder {
 
     public void build() {
         init.initializeStateStructure();
-        initialStates.findIntialStates();
+        initialStates.findInitialStates();
     }
 }

@@ -64,4 +64,27 @@ public @interface State {
      * @return the state description
      */
     String description() default "";
+    
+    /**
+     * Priority for initial state selection (higher values = higher priority).
+     * Used when multiple initial states are defined to influence selection probability.
+     * Default is 100 for equal probability among all initial states.
+     * Only applies when initial = true.
+     * 
+     * @return priority value for this initial state
+     * @since 1.2.0
+     */
+    int priority() default 100;
+    
+    /**
+     * Spring profiles where this state should be considered initial.
+     * Empty array means the state is initial in all profiles.
+     * Only applies when initial = true.
+     * 
+     * Example: @State(initial = true, profiles = {"test", "development"})
+     * 
+     * @return array of profile names where this state is initial
+     * @since 1.2.0
+     */
+    String[] profiles() default {};
 }

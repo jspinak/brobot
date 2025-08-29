@@ -23,6 +23,9 @@ public class BrobotDPIConfiguration {
     public void configureDPIScaling() {
         System.out.println("=== Brobot DPI Configuration ===");
         
+        // Check Java version for cross-version compatibility
+        configureJavaVersionCompatibility();
+        
         try {
             // Get the default screen device
             GraphicsDevice device = GraphicsEnvironment
@@ -125,5 +128,59 @@ public class BrobotDPIConfiguration {
         System.out.println("Manual DPI scaling set:");
         System.out.println("  Windows scaling: " + scalingPercentage + "%");
         System.out.println("  Settings.AlwaysResize: " + resizeFactor);
+    }
+    
+    /**
+     * Configure cross-version compatibility settings.
+     * Handles differences between Java 8 (often used in IDE) and Java 9+ (used in runtime).
+     * This ensures pattern matching works consistently across different Java versions.
+     */
+    private void configureJavaVersionCompatibility() {
+        String javaVersion = System.getProperty("java.version");
+        System.out.println("Running on Java: " + javaVersion);
+        
+        // Check if we're running on Java 9 or later
+        boolean isJava9Plus = false;
+        try {
+            String[] versionParts = javaVersion.split("\\.");
+            int majorVersion = Integer.parseInt(versionParts[0]);
+            
+            // Java 9+ uses version numbering like "11.0.1", "17.0.2", "21.0.1"
+            // Java 8 uses "1.8.0_xxx"
+            if (majorVersion >= 9 || (majorVersion == 1 && versionParts.length > 1 && 
+                Integer.parseInt(versionParts[1]) >= 9)) {
+                isJava9Plus = true;
+            }
+        } catch (Exception e) {
+            // Simple fallback check
+            isJava9Plus = javaVersion.startsWith("21") || javaVersion.startsWith("17") || 
+                         javaVersion.startsWith("11") || javaVersion.startsWith("9");
+        }
+        
+        if (isJava9Plus) {
+            System.out.println("Detected Java 9+ - Applying cross-version compatibility settings");
+            
+            // Lower similarity threshold slightly to account for Java version rendering differences
+            // (antialiasing, color management, font rendering)
+            Settings.MinSimilarity = 0.68;  // Slightly lower than default 0.7
+            
+            // Keep optimization for performance
+            Settings.CheckLastSeen = true;
+            
+            // Disable some Java 9+ specific image optimizations that might
+            // interfere with pattern matching
+            System.setProperty("sun.java2d.opengl", "false");
+            System.setProperty("sun.java2d.d3d", "false");
+            
+            // Use consistent color rendering across versions
+            System.setProperty("sun.java2d.cmm", "sun.java2d.cmm.kcms.KcmsServiceProvider");
+            
+            System.out.println("  Adjusted MinSimilarity to: " + Settings.MinSimilarity);
+            System.out.println("  Disabled hardware acceleration for consistent rendering");
+        } else {
+            System.out.println("Running on Java 8 - Using standard settings");
+            Settings.MinSimilarity = 0.7;
+            Settings.CheckLastSeen = true;
+        }
     }
 }

@@ -200,7 +200,7 @@ public class StateTraversalService {
         unvisitedStateSet = new HashSet<>(allStatesInProjectService.getAllStateIds());
         System.out.println("unvisited states = " + unvisitedStateSet);
         int failedAttempt = 0;
-        initialStates.findIntialStates();
+        initialStates.findInitialStates();
 
         // Record initial states
         stateMemory.getActiveStates().forEach(stateId -> {

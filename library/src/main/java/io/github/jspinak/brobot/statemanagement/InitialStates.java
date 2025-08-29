@@ -4,7 +4,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -190,7 +192,7 @@ public class InitialStates {
      * @see #mockInitialStates()
      * @see #searchForInitialStates()
      */
-    public void findIntialStates() {
+    public void findInitialStates() {
         ConsoleReporter.println("find initial states");
         if (FrameworkSettings.mock) {
             mockInitialStates();
@@ -279,6 +281,32 @@ public class InitialStates {
         Set<Long> allPotentialStates = new HashSet<>();
         potentialActiveStatesAndProbabilities.forEach((pot, prob) -> allPotentialStates.addAll(pot));
         allPotentialStates.forEach(stateFinder::findState);
+    }
+    
+    /**
+     * Gets the names of all states that have been registered as initial states.
+     * This includes states added via @State(initial = true) annotations.
+     *
+     * @return List of state names registered as initial states
+     */
+    public List<String> getRegisteredInitialStates() {
+        return potentialActiveStates.keySet().stream()
+            .flatMap(Set::stream)
+            .map(allStatesInProjectService::getState)
+            .filter(Optional::isPresent)
+            .map(Optional::get)
+            .map(io.github.jspinak.brobot.model.state.State::getName)
+            .distinct()
+            .collect(Collectors.toList());
+    }
+    
+    /**
+     * Checks if any initial states have been registered.
+     *
+     * @return true if initial states are registered, false otherwise
+     */
+    public boolean hasRegisteredInitialStates() {
+        return !potentialActiveStates.isEmpty();
     }
 
 }
