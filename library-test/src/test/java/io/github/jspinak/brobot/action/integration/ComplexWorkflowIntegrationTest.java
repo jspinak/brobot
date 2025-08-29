@@ -38,11 +38,9 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 @SpringBootTest
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-class ComplexWorkflowIntegrationTest extends BrobotIntegrationTestBase {
+class ComplexWorkflowIntegrationTest extends BrobotTestBase {
     
     @Autowired(required = false)
-    private Action action;
-    
     private Action action;
     private Click click;
     private WaitVanish waitVanish;
