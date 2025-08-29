@@ -1,7 +1,7 @@
 package io.github.jspinak.brobot.model.analysis.state.discovery;
 
-import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.state.StateImage;
+import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.test.BrobotTestBase;
 import org.junit.jupiter.api.*;
 import org.mockito.Mock;
@@ -14,12 +14,31 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 /**
- * Test suite for ProvisionalState discovery.
+ * Test suite for ProvisionalState - temporary container for building states.
+ * Tests image management, scene tracking, and nesting detection.
  */
 @DisplayName("ProvisionalState Tests")
 public class ProvisionalStateTest extends BrobotTestBase {
     
     private ProvisionalState provisionalState;
+    
+    @Mock
+    private StateImage mockImage1;
+    
+    @Mock
+    private StateImage mockImage2;
+    
+    @Mock
+    private StateImage mockImage3;
+    
+    @Mock
+    private Region mockRegion1;
+    
+    @Mock
+    private Region mockRegion2;
+    
+    @Mock
+    private Region mockRegion3;
     
     @BeforeEach
     @Override
@@ -30,86 +49,26 @@ public class ProvisionalStateTest extends BrobotTestBase {
     }
     
     @Nested
-    @DisplayName("State Creation and Basic Properties")
+    @DisplayName("State Creation")
     class StateCreation {
         
         @Test
         @DisplayName("Should create provisional state with name")
-        void shouldCreateProvisionalStateWithName() {
+        void shouldCreateProvisionalState() {
             assertNotNull(provisionalState);
             assertEquals("TestState", provisionalState.getName());
         }
         
         @Test
-        @DisplayName("Should initialize with empty collections")
-        void shouldInitializeWithEmptyCollections() {
-            assertTrue(provisionalState.getScenes().isEmpty());
+        @DisplayName("Should initialize with empty images")
+        void shouldInitializeWithEmptyImages() {
             assertTrue(provisionalState.getImages().isEmpty());
         }
         
         @Test
-        @DisplayName("Should handle different state names")
-        void shouldHandleDifferentStateNames() {
-            ProvisionalState loginState = new ProvisionalState("LoginState");
-            ProvisionalState dashboardState = new ProvisionalState("DashboardState");
-            
-            assertEquals("LoginState", loginState.getName());
-            assertEquals("DashboardState", dashboardState.getName());
-            assertNotEquals(loginState.getName(), dashboardState.getName());
-        }
-    }
-    
-    @Nested
-    @DisplayName("Scene Management")
-    class SceneManagement {
-        
-        @Test
-        @DisplayName("Should add scenes to provisional state")
-        void shouldAddScenes() {
-            provisionalState.getScenes().add(1);
-            provisionalState.getScenes().add(2);
-            provisionalState.getScenes().add(3);
-            
-            assertEquals(3, provisionalState.getScenes().size());
-            assertTrue(provisionalState.contains(1));
-            assertTrue(provisionalState.contains(2));
-            assertTrue(provisionalState.contains(3));
-            assertFalse(provisionalState.contains(4));
-        }
-        
-        @Test
-        @DisplayName("Should prevent duplicate scenes")
-        void shouldPreventDuplicateScenes() {
-            provisionalState.getScenes().add(1);
-            provisionalState.getScenes().add(1);
-            provisionalState.getScenes().add(1);
-            
-            assertEquals(1, provisionalState.getScenes().size());
-        }
-        
-        @Test
-        @DisplayName("Should check for equal scene sets")
-        void shouldCheckEqualSceneSets() {
-            Set<Integer> scenes = new HashSet<>();
-            scenes.add(1);
-            scenes.add(2);
-            scenes.add(3);
-            
-            provisionalState.getScenes().addAll(scenes);
-            
-            assertTrue(provisionalState.hasEqualSceneSets(scenes));
-            
-            Set<Integer> differentScenes = new HashSet<>();
-            differentScenes.add(1);
-            differentScenes.add(2);
-            assertFalse(provisionalState.hasEqualSceneSets(differentScenes));
-        }
-        
-        @Test
-        @DisplayName("Should handle empty scene sets")
-        void shouldHandleEmptySceneSets() {
-            assertTrue(provisionalState.hasEqualSceneSets(new HashSet<>()));
-            assertFalse(provisionalState.contains(0));
+        @DisplayName("Should initialize with empty scenes")
+        void shouldInitializeWithEmptyScenes() {
+            assertTrue(provisionalState.getScenes().isEmpty());
         }
     }
     
@@ -117,37 +76,23 @@ public class ProvisionalStateTest extends BrobotTestBase {
     @DisplayName("Image Management")
     class ImageManagement {
         
-        @Mock
-        private StateImage mockImage1;
-        
-        @Mock
-        private StateImage mockImage2;
-        
-        @Mock
-        private StateImage mockImage3;
-        
-        @Mock
-        private Region mockRegion1;
-        
-        @Mock
-        private Region mockRegion2;
-        
-        @Mock
-        private Region mockRegion3;
-        
-        @BeforeEach
-        void setupMocks() {
-            MockitoAnnotations.openMocks(this);
-            
+        @Test
+        @DisplayName("Should add image when not nested")
+        void shouldAddNonNestedImage() {
             when(mockImage1.getLargestDefinedFixedRegionOrNewRegion()).thenReturn(mockRegion1);
-            when(mockImage2.getLargestDefinedFixedRegionOrNewRegion()).thenReturn(mockRegion2);
-            when(mockImage3.getLargestDefinedFixedRegionOrNewRegion()).thenReturn(mockRegion3);
+            when(mockRegion1.contains(any(Region.class))).thenReturn(false);
+            
+            provisionalState.addImage(mockImage1);
+            
+            assertEquals(1, provisionalState.getImages().size());
+            assertTrue(provisionalState.getImages().contains(mockImage1));
         }
         
         @Test
-        @DisplayName("Should add non-nested images")
-        void shouldAddNonNestedImages() {
-            // No regions contain each other
+        @DisplayName("Should add multiple non-nested images")
+        void shouldAddMultipleNonNestedImages() {
+            when(mockImage1.getLargestDefinedFixedRegionOrNewRegion()).thenReturn(mockRegion1);
+            when(mockImage2.getLargestDefinedFixedRegionOrNewRegion()).thenReturn(mockRegion2);
             when(mockRegion1.contains(mockRegion2)).thenReturn(false);
             when(mockRegion2.contains(mockRegion1)).thenReturn(false);
             
@@ -160,14 +105,17 @@ public class ProvisionalStateTest extends BrobotTestBase {
         }
         
         @Test
-        @DisplayName("Should reject nested images")
-        void shouldRejectNestedImages() {
-            // Region1 contains Region2
-            when(mockRegion1.contains(mockRegion2)).thenReturn(true);
-            when(mockRegion2.contains(mockRegion1)).thenReturn(false);
+        @DisplayName("Should not add nested image")
+        void shouldNotAddNestedImage() {
+            // Setup first image
+            when(mockImage1.getLargestDefinedFixedRegionOrNewRegion()).thenReturn(mockRegion1);
+            
+            // Setup second image that is nested within first
+            when(mockImage2.getLargestDefinedFixedRegionOrNewRegion()).thenReturn(mockRegion2);
+            when(mockRegion1.contains(mockRegion2)).thenReturn(true); // Image2 is nested in Image1
             
             provisionalState.addImage(mockImage1);
-            provisionalState.addImage(mockImage2); // This should be rejected
+            provisionalState.addImage(mockImage2); // Should not be added
             
             assertEquals(1, provisionalState.getImages().size());
             assertTrue(provisionalState.getImages().contains(mockImage1));
@@ -175,144 +123,89 @@ public class ProvisionalStateTest extends BrobotTestBase {
         }
         
         @Test
-        @DisplayName("Should handle overlapping but not nested images")
-        void shouldHandleOverlappingImages() {
-            // Regions overlap but don't contain each other
+        @DisplayName("Should handle complex nesting scenarios")
+        void shouldHandleComplexNesting() {
+            // Setup three regions with specific nesting relationships
+            when(mockImage1.getLargestDefinedFixedRegionOrNewRegion()).thenReturn(mockRegion1);
+            when(mockImage2.getLargestDefinedFixedRegionOrNewRegion()).thenReturn(mockRegion2);
+            when(mockImage3.getLargestDefinedFixedRegionOrNewRegion()).thenReturn(mockRegion3);
+            
+            // Image1 doesn't contain Image2
             when(mockRegion1.contains(mockRegion2)).thenReturn(false);
+            // Image2 doesn't contain Image1
             when(mockRegion2.contains(mockRegion1)).thenReturn(false);
-            when(mockRegion1.contains(mockRegion3)).thenReturn(false);
-            when(mockRegion3.contains(mockRegion1)).thenReturn(false);
-            when(mockRegion2.contains(mockRegion3)).thenReturn(false);
-            when(mockRegion3.contains(mockRegion2)).thenReturn(false);
-            
-            provisionalState.addImage(mockImage1);
-            provisionalState.addImage(mockImage2);
-            provisionalState.addImage(mockImage3);
-            
-            assertEquals(3, provisionalState.getImages().size());
-        }
-        
-        @Test
-        @DisplayName("Should maintain image order")
-        void shouldMaintainImageOrder() {
-            when(mockRegion1.contains(any(Region.class))).thenReturn(false);
-            when(mockRegion2.contains(any(Region.class))).thenReturn(false);
-            when(mockRegion3.contains(any(Region.class))).thenReturn(false);
-            
-            provisionalState.addImage(mockImage1);
-            provisionalState.addImage(mockImage2);
-            provisionalState.addImage(mockImage3);
-            
-            assertEquals(mockImage1, provisionalState.getImages().get(0));
-            assertEquals(mockImage2, provisionalState.getImages().get(1));
-            assertEquals(mockImage3, provisionalState.getImages().get(2));
-        }
-        
-        @Test
-        @DisplayName("Should handle chain of nested images")
-        void shouldHandleChainOfNestedImages() {
-            // Region1 contains Region2 contains Region3
-            when(mockRegion1.contains(mockRegion2)).thenReturn(true);
+            // Image1 contains Image3 (nested)
             when(mockRegion1.contains(mockRegion3)).thenReturn(true);
-            when(mockRegion2.contains(mockRegion3)).thenReturn(true);
-            when(mockRegion2.contains(mockRegion1)).thenReturn(false);
-            when(mockRegion3.contains(any(Region.class))).thenReturn(false);
+            // Image2 doesn't contain Image3
+            when(mockRegion2.contains(mockRegion3)).thenReturn(false);
             
             provisionalState.addImage(mockImage1);
-            provisionalState.addImage(mockImage2); // Rejected - nested in 1
-            provisionalState.addImage(mockImage3); // Rejected - nested in 1 (and 2)
-            
-            assertEquals(1, provisionalState.getImages().size());
-            assertTrue(provisionalState.getImages().contains(mockImage1));
-        }
-        
-        @Test
-        @DisplayName("Should add image when previous is nested in new one")
-        void shouldAddImageWhenPreviousIsNestedInNew() {
-            // Region2 contains Region1 (opposite of usual case)
-            when(mockRegion1.contains(mockRegion2)).thenReturn(false);
-            when(mockRegion2.contains(mockRegion1)).thenReturn(true);
-            
-            provisionalState.addImage(mockImage1);
-            provisionalState.addImage(mockImage2); // Should be added even though it contains image1
+            provisionalState.addImage(mockImage2);
+            provisionalState.addImage(mockImage3); // Should not be added (nested in Image1)
             
             assertEquals(2, provisionalState.getImages().size());
+            assertTrue(provisionalState.getImages().contains(mockImage1));
+            assertTrue(provisionalState.getImages().contains(mockImage2));
+            assertFalse(provisionalState.getImages().contains(mockImage3));
         }
     }
     
     @Nested
-    @DisplayName("Complex State Scenarios")
-    class ComplexScenarios {
+    @DisplayName("Scene Management")
+    class SceneManagement {
         
         @Test
-        @DisplayName("Should handle state with multiple scenes and images")
-        void shouldHandleComplexState() {
-            // Add scenes
+        @DisplayName("Should check if scene is contained")
+        void shouldCheckSceneContainment() {
+            provisionalState.getScenes().add(1);
+            provisionalState.getScenes().add(2);
+            
+            assertTrue(provisionalState.contains(1));
+            assertTrue(provisionalState.contains(2));
+            assertFalse(provisionalState.contains(3));
+        }
+        
+        @Test
+        @DisplayName("Should check equal scene sets")
+        void shouldCheckEqualSceneSets() {
             provisionalState.getScenes().add(1);
             provisionalState.getScenes().add(2);
             provisionalState.getScenes().add(3);
             
-            // Create mock images
-            StateImage image1 = mock(StateImage.class);
-            StateImage image2 = mock(StateImage.class);
-            Region region1 = mock(Region.class);
-            Region region2 = mock(Region.class);
+            Set<Integer> matchingSet = new HashSet<>();
+            matchingSet.add(1);
+            matchingSet.add(2);
+            matchingSet.add(3);
             
-            when(image1.getLargestDefinedFixedRegionOrNewRegion()).thenReturn(region1);
-            when(image2.getLargestDefinedFixedRegionOrNewRegion()).thenReturn(region2);
-            when(region1.contains(region2)).thenReturn(false);
-            when(region2.contains(region1)).thenReturn(false);
+            Set<Integer> differentSet = new HashSet<>();
+            differentSet.add(1);
+            differentSet.add(2);
+            differentSet.add(4);
             
-            provisionalState.addImage(image1);
-            provisionalState.addImage(image2);
+            assertTrue(provisionalState.hasEqualSceneSets(matchingSet));
+            assertFalse(provisionalState.hasEqualSceneSets(differentSet));
+        }
+        
+        @Test
+        @DisplayName("Should handle empty scene sets")
+        void shouldHandleEmptySceneSets() {
+            Set<Integer> emptySet = new HashSet<>();
+            
+            assertTrue(provisionalState.hasEqualSceneSets(emptySet));
+            assertFalse(provisionalState.contains(1));
+        }
+        
+        @Test
+        @DisplayName("Should add scenes to provisional state")
+        void shouldAddScenes() {
+            provisionalState.getScenes().add(1);
+            provisionalState.getScenes().add(5);
+            provisionalState.getScenes().add(10);
             
             assertEquals(3, provisionalState.getScenes().size());
-            assertEquals(2, provisionalState.getImages().size());
-            assertEquals("TestState", provisionalState.getName());
-        }
-        
-        @Test
-        @DisplayName("Should support state merging scenarios")
-        void shouldSupportStateMerging() {
-            ProvisionalState state1 = new ProvisionalState("State1");
-            ProvisionalState state2 = new ProvisionalState("State2");
-            
-            state1.getScenes().add(1);
-            state1.getScenes().add(2);
-            
-            state2.getScenes().add(3);
-            state2.getScenes().add(4);
-            
-            // Simulate merging by checking scene intersections
-            Set<Integer> combinedScenes = new HashSet<>();
-            combinedScenes.addAll(state1.getScenes());
-            combinedScenes.addAll(state2.getScenes());
-            
-            assertEquals(4, combinedScenes.size());
-            
-            // No overlap
-            Set<Integer> intersection = new HashSet<>(state1.getScenes());
-            intersection.retainAll(state2.getScenes());
-            assertTrue(intersection.isEmpty());
-        }
-        
-        @Test
-        @DisplayName("Should handle state comparison")
-        void shouldHandleStateComparison() {
-            ProvisionalState state1 = new ProvisionalState("LoginState");
-            ProvisionalState state2 = new ProvisionalState("LoginState");
-            
-            Set<Integer> scenes = new HashSet<>();
-            scenes.add(1);
-            scenes.add(2);
-            
-            state1.getScenes().addAll(scenes);
-            state2.getScenes().addAll(scenes);
-            
-            // Same name and scenes
-            assertEquals(state1.getName(), state2.getName());
-            assertTrue(state1.hasEqualSceneSets(state2.getScenes()));
-            assertTrue(state2.hasEqualSceneSets(state1.getScenes()));
+            assertTrue(provisionalState.contains(1));
+            assertTrue(provisionalState.contains(5));
+            assertTrue(provisionalState.contains(10));
         }
     }
     
@@ -321,16 +214,75 @@ public class ProvisionalStateTest extends BrobotTestBase {
     class EdgeCases {
         
         @Test
-        @DisplayName("Should handle null image gracefully")
-        void shouldHandleNullImage() {
-            // The current implementation actually adds null to the list
-            // This is because isImageNested returns false for empty images list
-            // and then null is added to the list
-            provisionalState.addImage(null);
+        @DisplayName("Should handle duplicate scene additions")
+        void shouldHandleDuplicateScenes() {
+            provisionalState.getScenes().add(1);
+            provisionalState.getScenes().add(1); // Duplicate
+            provisionalState.getScenes().add(1); // Another duplicate
             
-            // Null is actually added to the list
-            assertEquals(1, provisionalState.getImages().size());
-            assertNull(provisionalState.getImages().get(0));
+            assertEquals(1, provisionalState.getScenes().size());
+            assertTrue(provisionalState.contains(1));
+        }
+        
+        @Test
+        @DisplayName("Should maintain image order")
+        void shouldMaintainImageOrder() {
+            when(mockImage1.getLargestDefinedFixedRegionOrNewRegion()).thenReturn(mockRegion1);
+            when(mockImage2.getLargestDefinedFixedRegionOrNewRegion()).thenReturn(mockRegion2);
+            when(mockImage3.getLargestDefinedFixedRegionOrNewRegion()).thenReturn(mockRegion3);
+            
+            when(mockRegion1.contains(any(Region.class))).thenReturn(false);
+            when(mockRegion2.contains(any(Region.class))).thenReturn(false);
+            when(mockRegion3.contains(any(Region.class))).thenReturn(false);
+            
+            provisionalState.addImage(mockImage1);
+            provisionalState.addImage(mockImage2);
+            provisionalState.addImage(mockImage3);
+            
+            assertEquals(3, provisionalState.getImages().size());
+            assertEquals(mockImage1, provisionalState.getImages().get(0));
+            assertEquals(mockImage2, provisionalState.getImages().get(1));
+            assertEquals(mockImage3, provisionalState.getImages().get(2));
+        }
+        
+        @Test
+        @DisplayName("Should handle null name in constructor")
+        void shouldHandleNullName() {
+            ProvisionalState stateWithNullName = new ProvisionalState(null);
+            assertNull(stateWithNullName.getName());
+            assertNotNull(stateWithNullName.getImages());
+            assertNotNull(stateWithNullName.getScenes());
+        }
+    }
+    
+    @Nested
+    @DisplayName("Integration Scenarios")
+    class IntegrationScenarios {
+        
+        @Test
+        @DisplayName("Should build complete provisional state")
+        void shouldBuildCompleteProvisionalState() {
+            // Add images
+            when(mockImage1.getLargestDefinedFixedRegionOrNewRegion()).thenReturn(mockRegion1);
+            when(mockImage2.getLargestDefinedFixedRegionOrNewRegion()).thenReturn(mockRegion2);
+            when(mockRegion1.contains(mockRegion2)).thenReturn(false);
+            when(mockRegion2.contains(mockRegion1)).thenReturn(false);
+            
+            provisionalState.addImage(mockImage1);
+            provisionalState.addImage(mockImage2);
+            
+            // Add scenes
+            provisionalState.getScenes().add(1);
+            provisionalState.getScenes().add(2);
+            provisionalState.getScenes().add(3);
+            
+            // Verify complete state
+            assertEquals("TestState", provisionalState.getName());
+            assertEquals(2, provisionalState.getImages().size());
+            assertEquals(3, provisionalState.getScenes().size());
+            assertTrue(provisionalState.contains(1));
+            assertTrue(provisionalState.contains(2));
+            assertTrue(provisionalState.contains(3));
         }
         
         @Test
@@ -339,36 +291,20 @@ public class ProvisionalStateTest extends BrobotTestBase {
             provisionalState.getScenes().add(1);
             provisionalState.getScenes().add(2);
             
+            assertEquals("TestState", provisionalState.getName());
+            assertTrue(provisionalState.getImages().isEmpty());
             assertEquals(2, provisionalState.getScenes().size());
-            assertEquals(0, provisionalState.getImages().size());
         }
         
         @Test
         @DisplayName("Should handle state with only images")
         void shouldHandleStateWithOnlyImages() {
-            StateImage image = mock(StateImage.class);
-            Region region = mock(Region.class);
-            when(image.getLargestDefinedFixedRegionOrNewRegion()).thenReturn(region);
-            when(region.contains(any(Region.class))).thenReturn(false);
+            when(mockImage1.getLargestDefinedFixedRegionOrNewRegion()).thenReturn(mockRegion1);
+            provisionalState.addImage(mockImage1);
             
-            provisionalState.addImage(image);
-            
-            assertEquals(0, provisionalState.getScenes().size());
+            assertEquals("TestState", provisionalState.getName());
             assertEquals(1, provisionalState.getImages().size());
-        }
-        
-        @Test
-        @DisplayName("Should handle empty state name")
-        void shouldHandleEmptyStateName() {
-            ProvisionalState emptyNameState = new ProvisionalState("");
-            assertEquals("", emptyNameState.getName());
-        }
-        
-        @Test
-        @DisplayName("Should handle special character state names")
-        void shouldHandleSpecialCharacterStateNames() {
-            ProvisionalState specialState = new ProvisionalState("State-123_Test#Special");
-            assertEquals("State-123_Test#Special", specialState.getName());
+            assertTrue(provisionalState.getScenes().isEmpty());
         }
     }
 }

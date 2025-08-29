@@ -2,6 +2,8 @@ package io.github.jspinak.brobot.model.state;
 
 import io.github.jspinak.brobot.model.action.ActionHistory;
 import io.github.jspinak.brobot.model.action.ActionRecord;
+import io.github.jspinak.brobot.model.element.Location;
+import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.test.BrobotTestBase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -53,6 +55,9 @@ public class StateStoreTest extends BrobotTestBase {
             .build();
             
         // Add StateImage
+        StateImage stateImage = new StateImage.Builder()
+            .setName("testImage")
+            .build();
         state.getStateImages().add(stateImage);
         // Add StateLocation
         StateLocation stateLocation = new StateLocation.Builder()
@@ -67,11 +72,7 @@ public class StateStoreTest extends BrobotTestBase {
             .build();
         state.getStateRegions().add(stateRegion);
         
-        // Then
-        assertEquals(3, stateStore.getAllStates().size());
-        assertTrue(stateStore.getAllStates().contains(testState1));
-        assertTrue(stateStore.getAllStates().contains(testState2));
-        assertTrue(stateStore.getAllStates().contains(testState3));
+        return state;
     }
 
     @Test
