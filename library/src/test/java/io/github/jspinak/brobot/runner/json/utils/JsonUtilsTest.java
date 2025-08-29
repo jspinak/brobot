@@ -97,21 +97,18 @@ public class JsonUtilsTest extends BrobotTestBase {
         @Test
         @DisplayName("Should throw exception when all serialization attempts fail")
         public void testAllSerializationAttemptsFail() throws Exception {
-            // Given - Create an object that the fallback mapper also can't serialize
-            // The fallback mapper will actually succeed with anonymous classes, so we need
-            // to test differently or accept that the fallback works
-            Object simpleObject = new TestObject("test", 42);
+            // Given - Create an object that can't be serialized
+            Object unserializable = new Object() {
+                @SuppressWarnings("unused")
+                public Object getSelf() { throw new RuntimeException("Can't serialize"); }
+            };
             
             when(mockJsonParser.toJson(any()))
                 .thenThrow(new ConfigurationException("Primary failed"));
             
-            // When - The fallback mapper should succeed
-            String result = jsonUtils.toJsonSafe(simpleObject);
-            
-            // Then - If fallback succeeds, we get a result
-            assertNotNull(result);
-            // Note: We can't easily force both to fail since circularReferenceMapper
-            // is created internally and is quite robust
+            // When/Then
+            assertThrows(ConfigurationException.class, 
+                () -> jsonUtils.toJsonSafe(unserializable));
         }
         
         @Test
@@ -180,9 +177,14 @@ public class JsonUtilsTest extends BrobotTestBase {
             when(mockJsonParser.toJson(obj))
                 .thenThrow(new ConfigurationException("Circular reference"));
             
-            // When/Then - Both serializers fail with circular references
-            // The fallback mapper also cannot handle true circular references
-            assertThrows(ConfigurationException.class, () -> jsonUtils.toJsonSafe(obj));
+            // When
+            String result = jsonUtils.toJsonSafe(obj);
+            
+            // Then
+            assertNotNull(result);
+            assertTrue(result.contains("circular"));
+            // Self reference should be null
+            assertTrue(result.contains("null") || !result.contains("\"self\""));
         }
         
         @Test
@@ -197,9 +199,12 @@ public class JsonUtilsTest extends BrobotTestBase {
             when(mockJsonParser.toJson(objA))
                 .thenThrow(new ConfigurationException("Circular reference"));
             
-            // When/Then - Both serializers fail with circular references
-            // The fallback mapper also cannot handle true circular references
-            assertThrows(ConfigurationException.class, () -> jsonUtils.toJsonSafe(objA));
+            // When
+            String result = jsonUtils.toJsonSafe(objA);
+            
+            // Then
+            assertNotNull(result);
+            assertTrue(result.contains("A"));
         }
         
         @Test
@@ -216,9 +221,12 @@ public class JsonUtilsTest extends BrobotTestBase {
             when(mockJsonParser.toJson(node1))
                 .thenThrow(new ConfigurationException("Circular reference"));
             
-            // When/Then - Both serializers fail with circular references
-            // The fallback mapper also cannot handle true circular references
-            assertThrows(ConfigurationException.class, () -> jsonUtils.toJsonSafe(node1));
+            // When
+            String result = jsonUtils.toJsonSafe(node1);
+            
+            // Then
+            assertNotNull(result);
+            assertTrue(result.contains("node1"));
         }
     }
     

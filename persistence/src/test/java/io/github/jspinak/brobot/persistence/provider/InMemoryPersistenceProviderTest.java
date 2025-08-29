@@ -5,6 +5,7 @@ import io.github.jspinak.brobot.model.action.ActionHistory;
 import io.github.jspinak.brobot.model.action.ActionRecord;
 import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.persistence.config.PersistenceConfiguration;
+import io.github.jspinak.brobot.test.BrobotTestBase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -15,13 +16,15 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Unit tests for InMemoryPersistenceProvider.
  */
-class InMemoryPersistenceProviderTest {
+class InMemoryPersistenceProviderTest extends BrobotTestBase {
     
     private InMemoryPersistenceProvider provider;
     private PersistenceConfiguration configuration;
     
     @BeforeEach
-    void setUp() {
+    @Override
+    public void setupTest() {
+        super.setupTest();
         configuration = PersistenceConfiguration.memoryDefault();
         configuration.getMemory().setMaxSessions(5);
         configuration.getMemory().setMaxRecordsPerSession(10);
