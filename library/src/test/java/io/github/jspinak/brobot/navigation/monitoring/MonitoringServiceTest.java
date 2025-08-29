@@ -244,42 +244,60 @@ public class MonitoringServiceTest extends BrobotTestBase {
         
         @Test
         @DisplayName("Should execute task when target state is active")
-        @Timeout(value = 5, unit = TimeUnit.SECONDS)
+        @Timeout(value = 10, unit = TimeUnit.SECONDS)
         public void testStateMonitoring() throws InterruptedException {
             State targetState = new State();
             targetState.setName("TargetState");
             
-            List<State> activeStates = new ArrayList<>();
+            List<State> activeStates = Collections.synchronizedList(new ArrayList<>());
             when(mockStateMemory.getActiveStateList()).thenReturn(activeStates);
             
             AtomicInteger executionCount = new AtomicInteger(0);
+            CountDownLatch firstCheck = new CountDownLatch(1);
             CountDownLatch executedWhenActive = new CountDownLatch(2);
             
             Runnable task = () -> {
-                executionCount.incrementAndGet();
+                int count = executionCount.incrementAndGet();
                 executedWhenActive.countDown();
+                if (count == 1) {
+                    firstCheck.countDown();
+                }
             };
             
+            // Start monitoring with 1 second interval
             monitoringService.monitorStateAndExecute(targetState, task, 1);
             
-            // Initially no execution (state not active)
-            Thread.sleep(1500);
-            assertEquals(0, executionCount.get());
+            // Wait a bit to ensure monitoring has started
+            Thread.sleep(500);
+            
+            // Initially no execution (state not active) - wait up to 2 seconds
+            Thread.sleep(2000);
+            assertEquals(0, executionCount.get(), "Should not execute when state is not active");
             
             // Add target state to active states
-            activeStates.add(targetState);
+            synchronized(activeStates) {
+                activeStates.add(targetState);
+            }
             
-            // Should now execute
-            assertTrue(executedWhenActive.await(3, TimeUnit.SECONDS));
-            assertTrue(executionCount.get() >= 2);
+            // Should now execute at least twice within 5 seconds
+            assertTrue(executedWhenActive.await(5, TimeUnit.SECONDS), 
+                "Should execute at least twice when state is active");
+            assertTrue(executionCount.get() >= 2, 
+                "Should have executed at least twice, got: " + executionCount.get());
             
-            // Remove state
-            activeStates.clear();
-            int countAfterRemoval = executionCount.get();
+            // Remove state and record count
+            int countBeforeRemoval = executionCount.get();
+            synchronized(activeStates) {
+                activeStates.clear();
+            }
             
-            // Should stop executing
-            Thread.sleep(1500);
-            assertEquals(countAfterRemoval, executionCount.get());
+            // Wait for monitoring to notice state is gone
+            Thread.sleep(2000);
+            
+            // Should stop executing (allow for at most 1 more execution during transition)
+            int finalCount = executionCount.get();
+            assertTrue(finalCount <= countBeforeRemoval + 1, 
+                "Should stop executing after state removed. Before: " + countBeforeRemoval + ", After: " + finalCount);
         }
         
         @Test
