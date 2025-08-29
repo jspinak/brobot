@@ -10,9 +10,12 @@ import io.github.jspinak.brobot.runner.json.parsing.ConfigurationParser;
 import io.github.jspinak.brobot.runner.json.parsing.exception.ConfigurationException;
 import io.github.jspinak.brobot.runner.json.utils.JsonUtils;
 import io.github.jspinak.brobot.runner.dsl.model.BuilderMethod;
+import io.github.jspinak.brobot.test.BrobotTestBase;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
 
 import java.util.ArrayList;
@@ -20,14 +23,21 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@SpringBootTest(classes = io.github.jspinak.brobot.BrobotTestApplication.class)
 @TestPropertySource(properties = {"java.awt.headless=false"})
-public class BuilderExpressionJsonParserTest {
+public class BuilderExpressionJsonParserTest extends BrobotTestBase {
 
     @Autowired
     private ConfigurationParser jsonParser;
 
     @Autowired
     private JsonUtils jsonUtils;
+    
+    @BeforeEach
+    @Override
+    public void setupTest() {
+        super.setupTest();
+    }
 
     /**
      * Test parsing a BuilderExpression for actionOptions from JSON

@@ -111,12 +111,12 @@ public class StateStoreTest extends BrobotTestBase {
         stateStore.save(testState2);
         
         // When
-        Optional<State> found = stateStore.getState("state1");
+        Optional<State> found = stateStore.getState("State1");
         
         // Then
         assertTrue(found.isPresent());
         assertEquals(testState1, found.get());
-        assertEquals("state1", found.get().getName());
+        assertEquals("State1", found.get().getName());
     }
 
     @Test
