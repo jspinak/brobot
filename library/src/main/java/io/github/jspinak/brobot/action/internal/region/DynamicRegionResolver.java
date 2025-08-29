@@ -4,6 +4,7 @@ import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.basic.find.MatchAdjustmentOptions;
 import io.github.jspinak.brobot.model.action.ActionRecord;
 import io.github.jspinak.brobot.model.element.Location;
+import io.github.jspinak.brobot.model.element.Pattern;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.element.SearchRegionOnObject;
 import io.github.jspinak.brobot.model.match.Match;
@@ -13,6 +14,7 @@ import io.github.jspinak.brobot.model.state.StateLocation;
 import io.github.jspinak.brobot.model.state.StateObject;
 import io.github.jspinak.brobot.model.state.StateRegion;
 import io.github.jspinak.brobot.model.state.StateStore;
+import io.github.jspinak.brobot.util.region.RegionUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -293,9 +295,45 @@ public class DynamicRegionResolver {
         
         // Update the target object's search region
         if (targetObject instanceof StateImage) {
-            ((StateImage) targetObject).setFixedSearchRegion(newRegion);
-            log.debug("Updated search region for {} based on {} to {}", 
-                     targetObject.getName(), sourceMatch.getStateObjectData().getStateObjectName(), newRegion);
+            StateImage stateImage = (StateImage) targetObject;
+            
+            // Check if there's an existing fixed region
+            boolean hasExistingFixed = false;
+            Region existingFixed = null;
+            if (!stateImage.getPatterns().isEmpty()) {
+                Pattern firstPattern = stateImage.getPatterns().get(0);
+                existingFixed = firstPattern.getSearchRegions().getFixedRegion();
+                hasExistingFixed = existingFixed != null && existingFixed.isDefined();
+            }
+            
+            // If there's an existing fixed region, check if it's within the new declarative region
+            if (hasExistingFixed && existingFixed != null) {
+                boolean isWithinNewRegion = RegionUtils.contains(newRegion, existingFixed);
+                
+                if (!isWithinNewRegion) {
+                    // The fixed region is outside the declarative search region, so clear it
+                    log.info("Fixed region {} for {} is outside new declarative region {}, clearing fixed region", 
+                            existingFixed, targetObject.getName(), newRegion);
+                    stateImage.getPatterns().forEach(pattern -> {
+                        pattern.getSearchRegions().resetFixedRegion();
+                        pattern.setFixed(false);
+                    });
+                    // Set the search regions to the new declarative region
+                    stateImage.getPatterns().forEach(pattern -> {
+                        pattern.getSearchRegions().setRegions(List.of(newRegion));
+                    });
+                } else {
+                    log.debug("Fixed region {} for {} is within new declarative region {}, keeping fixed region", 
+                            existingFixed, targetObject.getName(), newRegion);
+                }
+            } else {
+                // No existing fixed region, just set the search regions
+                stateImage.getPatterns().forEach(pattern -> {
+                    pattern.getSearchRegions().setRegions(List.of(newRegion));
+                });
+                log.debug("Set search regions for {} based on {} to {}", 
+                         targetObject.getName(), sourceMatch.getStateObjectData().getStateObjectName(), newRegion);
+            }
         } else if (targetObject instanceof StateLocation) {
             // For StateLocation, update the location based on the center of the region
             int centerX = newRegion.getX() + newRegion.getW() / 2;
