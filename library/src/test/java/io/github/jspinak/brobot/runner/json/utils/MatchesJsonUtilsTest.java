@@ -65,7 +65,7 @@ public class MatchesJsonUtilsTest extends BrobotTestBase {
             assertNotNull(map);
             assertFalse((Boolean) map.get("success"));
             assertNotNull(map.get("duration")); // Duration is likely a Duration object
-            assertEquals("", map.get("selectedText"));
+            assertNull(map.get("selectedText"));
             assertTrue(((List<?>) map.get("matchList")).isEmpty());
             assertTrue(((Set<?>) map.get("activeStates")).isEmpty());
         }
@@ -405,8 +405,8 @@ public class MatchesJsonUtilsTest extends BrobotTestBase {
             
             // Then
             assertNull(map.get("actionDescription"));
-            assertNotNull(map.get("text")); // Text is never null, always an empty Text object
-            assertEquals("", map.get("selectedText"));
+            assertNull(map.get("text"));
+            assertNull(map.get("selectedText"));
             assertNull(map.get("startTime"));
             assertNull(map.get("endTime"));
             assertNotNull(map.get("matchList")); // Should still have empty list
