@@ -4,6 +4,7 @@ import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
 import io.github.jspinak.brobot.model.action.ActionHistory;
 import io.github.jspinak.brobot.model.action.ActionRecord;
 import io.github.jspinak.brobot.persistence.config.PersistenceConfiguration;
+import io.github.jspinak.brobot.test.BrobotTestBase;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Unit tests for FileBasedPersistenceProvider.
  */
-class FileBasedPersistenceProviderTest {
+class FileBasedPersistenceProviderTest extends BrobotTestBase {
     
     @TempDir
     Path tempDir;
@@ -28,7 +29,9 @@ class FileBasedPersistenceProviderTest {
     private PersistenceConfiguration configuration;
     
     @BeforeEach
-    void setUp() {
+    @Override
+    public void setupTest() {
+        super.setupTest();
         configuration = PersistenceConfiguration.fileDefault();
         configuration.getFile().setBasePath(tempDir.toString());
         configuration.getFile().setPrettyPrint(false); // Faster for tests

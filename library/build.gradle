@@ -88,6 +88,20 @@ sourceSets {
     }
 }
 
+// Configuration to share test classes with other modules
+configurations {
+    testOutput
+}
+
+task testJar(type: Jar) {
+    archiveClassifier = 'tests'
+    from sourceSets.test.output
+}
+
+artifacts {
+    testOutput testJar
+}
+
 test {
     // Standard Spring Boot test setup
     useJUnitPlatform()
