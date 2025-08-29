@@ -56,7 +56,7 @@ public class StateStoreTest extends BrobotTestBase {
             
         // Add StateImage
         StateImage stateImage = new StateImage.Builder()
-            .setName("test-image")
+            .setName("testImage")
             .build();
         state.getStateImages().add(stateImage);
         
@@ -412,7 +412,6 @@ public class StateStoreTest extends BrobotTestBase {
         
         // When
         stateStore.save(unknownState);
-        
         // Then - First state gets ID 0
         assertEquals(0L, unknownState.getId());
         

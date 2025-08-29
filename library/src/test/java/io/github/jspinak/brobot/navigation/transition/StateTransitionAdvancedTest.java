@@ -278,6 +278,7 @@ class StateTransitionAdvancedTest extends BrobotTestBase {
             int threadCount = 10;
             CountDownLatch latch = new CountDownLatch(threadCount);
             ExecutorService executor = Executors.newFixedThreadPool(threadCount);
+            Set<Integer> addedIds = Collections.synchronizedSet(new HashSet<>());
             
             // Act
             for (int i = 0; i < threadCount; i++) {
@@ -286,7 +287,11 @@ class StateTransitionAdvancedTest extends BrobotTestBase {
                     try {
                         TaskSequenceStateTransition transition = new TaskSequenceStateTransition();
                         transition.setActivate(Set.of((long) threadId));
-                        stateTransitions.getTransitions().add(transition);
+                        // Synchronize the add operation since ArrayList is not thread-safe
+                        synchronized (stateTransitions) {
+                            stateTransitions.getTransitions().add(transition);
+                            addedIds.add(threadId);
+                        }
                     } finally {
                         latch.countDown();
                     }
@@ -295,6 +300,8 @@ class StateTransitionAdvancedTest extends BrobotTestBase {
             
             // Assert
             assertTrue(latch.await(5, TimeUnit.SECONDS));
+            // Verify all threads successfully added their transitions
+            assertEquals(threadCount, addedIds.size());
             assertEquals(threadCount, stateTransitions.getTransitions().size());
             executor.shutdown();
         }
