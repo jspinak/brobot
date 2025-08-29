@@ -79,11 +79,19 @@ public class ContourExtractor {
         screenAdjustedContours = new ArrayList<>();
         opencvContours = new MatVector();
         for (Region region : searchRegions) {
-            region.setW(Math.min(region.w(), bgrFromClassification2d.cols() - region.x())); // prevent out of bounds
-            region.setH(Math.min(region.h(), bgrFromClassification2d.rows() - region.y())); // prevent out of bounds
-            MatVector regionalContours = getRegionalContourMats(region);
+            // Clip region to image bounds
+            int clippedX = Math.max(0, region.x());
+            int clippedY = Math.max(0, region.y());
+            int clippedW = Math.min(region.w(), bgrFromClassification2d.cols() - clippedX);
+            int clippedH = Math.min(region.h(), bgrFromClassification2d.rows() - clippedY);
+            
+            // Skip regions that are completely outside the image
+            if (clippedW <= 0 || clippedH <= 0) continue;
+            
+            Region clippedRegion = new Region(clippedX, clippedY, clippedW, clippedH);
+            MatVector regionalContours = getRegionalContourMats(clippedRegion);
             opencvContours.put(regionalContours);
-            screenAdjustedContours.addAll(getScreenCoordinateRects(region, opencvContours));
+            screenAdjustedContours.addAll(getScreenCoordinateRects(clippedRegion, opencvContours));
         }
         contours = new ArrayList<>();
         screenAdjustedContours.forEach(rect -> contours.add(new Rect(rect)));
@@ -154,24 +162,27 @@ public class ContourExtractor {
             contours.add(rect);
             return contours;
         }
-        // the last contours may overlap with the next-to-last contours, but will not exceed the boundaries of the contour
+        
+        // Calculate the maximum side length based on the max area (assuming square partitions)
+        int maxSideLength = (int) Math.sqrt(maxArea);
+        
+        // Partition the rectangle into smaller rectangles
         int startX = rect.x();
         int startY = rect.y();
         int endX = rect.x() + rect.width();
         int endY = rect.y() + rect.height();
-        int x = startX;
-        int y = startY;
-        while (x < endX) {
-            int width = Math.min(maxArea, endX - x);
-            int height = Math.min(maxArea, endY - y);
-            Rect newRect = new Rect(x, y, width, height);
-            contours.add(newRect);
-            x += width;
-            if (x >= endX) {
-                x = startX;
-                y += height;
+        
+        for (int y = startY; y < endY; y += maxSideLength) {
+            for (int x = startX; x < endX; x += maxSideLength) {
+                int width = Math.min(maxSideLength, endX - x);
+                int height = Math.min(maxSideLength, endY - y);
+                
+                // Only add if the partition has meaningful area
+                if (width > 0 && height > 0) {
+                    Rect newRect = new Rect(x, y, width, height);
+                    contours.add(newRect);
+                }
             }
-            if (y >= endY) break;
         }
         return contours;
     }

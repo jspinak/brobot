@@ -8,9 +8,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.Optional;
 
-import static org.bytedeco.opencv.global.opencv_core.minMaxLoc;
-import static org.bytedeco.opencv.global.opencv_imgproc.TM_CCOEFF_NORMED;
-import static org.bytedeco.opencv.global.opencv_imgproc.matchTemplate;
+import static org.bytedeco.opencv.global.opencv_core.*;
+import static org.bytedeco.opencv.global.opencv_imgproc.*;
 
 /**
  * OpenCV-based template matching implementation for image recognition.
@@ -97,13 +96,38 @@ public class MatImageRecognition {
         if (template.rows() > searchImage.rows() || template.cols() > searchImage.cols())
             return Optional.empty();
 
+        // Convert images to compatible format if needed
+        Mat processedTemplate = ensureCompatibleFormat(template);
+        Mat processedSearchImage = ensureCompatibleFormat(searchImage);
+        
+        // Ensure both images have the same number of channels
+        if (processedTemplate.channels() != processedSearchImage.channels()) {
+            // Convert both to 3-channel BGR if they differ
+            if (processedTemplate.channels() == 1) {
+                Mat temp = new Mat();
+                cvtColor(processedTemplate, temp, COLOR_GRAY2BGR);
+                if (processedTemplate != template) {
+                    processedTemplate.release();
+                }
+                processedTemplate = temp;
+            }
+            if (processedSearchImage.channels() == 1) {
+                Mat temp = new Mat();
+                cvtColor(processedSearchImage, temp, COLOR_GRAY2BGR);
+                if (processedSearchImage != searchImage) {
+                    processedSearchImage.release();
+                }
+                processedSearchImage = temp;
+            }
+        }
+
         // Create a result Mat to store the correlation scores
         // Result dimensions: (searchImage.width - template.width + 1) x (searchImage.height - template.height + 1)
         Mat result = new Mat();
 
         // Perform template matching using normalized correlation coefficient
         // Each pixel in result contains the match score for template placed at that position
-        matchTemplate(searchImage, template, result, TM_CCOEFF_NORMED);
+        matchTemplate(processedSearchImage, processedTemplate, result, TM_CCOEFF_NORMED);
 
         // Find the location of the best match (highest correlation)
         double[] minVal = new double[1];  // Minimum correlation (ignored for TM_CCOEFF_NORMED)
@@ -111,6 +135,15 @@ public class MatImageRecognition {
         Point minLoc = new Point();       // Location of minimum (ignored)
         Point maxLoc = new Point();       // Location of maximum (best match position)
         minMaxLoc(result, minVal, maxVal, minLoc, maxLoc, null);
+
+        // Clean up temporary Mats if created
+        if (processedTemplate != template && !processedTemplate.isNull()) {
+            processedTemplate.release();
+        }
+        if (processedSearchImage != searchImage && !processedSearchImage.isNull()) {
+            processedSearchImage.release();
+        }
+        result.release();
 
         // Check if the best match exceeds the threshold
         if (maxVal[0] >= threshold) {
@@ -124,6 +157,24 @@ public class MatImageRecognition {
             // No match found above threshold
             return Optional.empty();
         }
+    }
+    
+    /**
+     * Ensures the image is in a compatible format for template matching.
+     * Converts 4-channel images (BGRA) to 3-channel (BGR).
+     * 
+     * @param image The image to process
+     * @return The processed image (may be the same object if no conversion needed)
+     */
+    private Mat ensureCompatibleFormat(Mat image) {
+        if (image.channels() == 4) {
+            // Convert BGRA to BGR
+            Mat converted = new Mat();
+            cvtColor(image, converted, COLOR_BGRA2BGR);
+            return converted;
+        }
+        // Return as-is for 1-channel (grayscale) or 3-channel (BGR) images
+        return image;
     }
 
 }

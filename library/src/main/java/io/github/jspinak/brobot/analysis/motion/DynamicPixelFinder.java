@@ -39,7 +39,7 @@ import static org.bytedeco.opencv.global.opencv_core.bitwise_not;
 public class DynamicPixelFinder implements FindDynamicPixels {
 
     private final ColorMatrixUtilities matOps3d;
-    private final ImageLoader getImage;
+    private final ImageLoader imageLoader;
 
     /**
      * Constructs a DynamicPixelFinder with the specified utilities.
@@ -47,9 +47,9 @@ public class DynamicPixelFinder implements FindDynamicPixels {
      * @param matOps3d utility for 3D matrix operations
      * @param getImage utility for capturing screen images
      */
-    public DynamicPixelFinder(ColorMatrixUtilities matOps3d, ImageLoader getImage) {
+    public DynamicPixelFinder(ColorMatrixUtilities matOps3d, ImageLoader imageLoader) {
         this.matOps3d = matOps3d;
-        this.getImage = getImage;
+        this.imageLoader = imageLoader;
     }
 
     /**
@@ -98,7 +98,7 @@ public class DynamicPixelFinder implements FindDynamicPixels {
      * @return binary mask of pixels that changed during the observation period
      */
     public Mat getDynamicPixelMask(Region region, double intervalSeconds, double totalSecondsToRun) {
-        MatVector matVector = getImage.getMatsFromScreen(region, intervalSeconds, totalSecondsToRun);
+        MatVector matVector = imageLoader.getMatsFromScreen(region, intervalSeconds, totalSecondsToRun);
         return getDynamicPixelMask(matVector);
     }
 
@@ -113,7 +113,7 @@ public class DynamicPixelFinder implements FindDynamicPixels {
      * @return binary mask of pixels that remained unchanged during observation
      */
     public Mat getFixedPixelMask(Region region, double intervalSeconds, double totalSecondsToRun) {
-        MatVector matVector = getImage.getMatsFromScreen(region, intervalSeconds, totalSecondsToRun);
+        MatVector matVector = imageLoader.getMatsFromScreen(region, intervalSeconds, totalSecondsToRun);
         Mat dynamic = getDynamicPixelMask(matVector);
         Mat fixed = new Mat();
         bitwise_not(dynamic, fixed);

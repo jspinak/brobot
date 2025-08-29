@@ -9,19 +9,20 @@ import org.bytedeco.opencv.opencv_core.MatVector;
 import org.bytedeco.opencv.opencv_core.Scalar;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.bytedeco.opencv.global.opencv_core.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-/**
- * Comprehensive test suite for DynamicPixelFinder.
- * Tests pixel-level change detection across image sequences.
- */
 @ExtendWith(MockitoExtension.class)
 @DisplayName("DynamicPixelFinder Tests")
 public class DynamicPixelFinderTest extends BrobotTestBase {
@@ -30,7 +31,7 @@ public class DynamicPixelFinderTest extends BrobotTestBase {
     private ColorMatrixUtilities matOps3d;
     
     @Mock
-    private ImageLoader getImage;
+    private ImageLoader imageLoader;
     
     @InjectMocks
     private DynamicPixelFinder dynamicPixelFinder;
@@ -51,7 +52,7 @@ public class DynamicPixelFinderTest extends BrobotTestBase {
     }
     
     @AfterEach
-    void tearDown() {
+    public void tearDown() {
         releaseIfNotNull(testMat1);
         releaseIfNotNull(testMat2);
         releaseIfNotNull(testMat3);
@@ -63,256 +64,250 @@ public class DynamicPixelFinderTest extends BrobotTestBase {
         }
     }
     
-    @Nested
-    @DisplayName("Dynamic Pixel Detection")
-    class DynamicPixelDetection {
+    @Test
+    @DisplayName("Should return empty Mat for single image")
+    void shouldReturnEmptyMatForSingleImage() {
+        MatVector singleImage = new MatVector(testMat1);
         
-        @Test
-        @DisplayName("Should return empty Mat for single image")
-        void shouldReturnEmptyMatForSingleImage() {
-            MatVector singleImage = new MatVector(testMat1);
-            
-            Mat result = dynamicPixelFinder.getDynamicPixelMask(singleImage);
-            
-            assertNotNull(result);
-            assertTrue(result.empty());
+        Mat result = dynamicPixelFinder.getDynamicPixelMask(singleImage);
+        
+        assertNotNull(result);
+        assertTrue(result.empty());
+    }
+    
+    @Test
+    @DisplayName("Should find dynamic pixels between two different images")
+    void shouldFindDynamicPixelsBetweenTwoImages() {
+        MatVector matVector = new MatVector(testMat1, testMat2);
+        Mat comparisonResult = new Mat(100, 100, CV_8UC3, new Scalar(255, 255, 255, 0));
+        
+        when(matOps3d.cOmpare(any(Mat.class), any(Mat.class), eq(CMP_NE)))
+            .thenReturn(comparisonResult);
+        when(matOps3d.bItwise_or(any(Mat.class), any(Mat.class)))
+            .thenReturn(comparisonResult);
+        
+        Mat result = dynamicPixelFinder.getDynamicPixelMask(matVector);
+        
+        assertNotNull(result);
+        assertEquals(comparisonResult, result);
+        
+        verify(matOps3d).cOmpare(any(Mat.class), any(Mat.class), eq(CMP_NE));
+        verify(matOps3d).bItwise_or(any(Mat.class), any(Mat.class));
+    }
+    
+    @Test
+    @DisplayName("Should combine multiple comparisons with bitwise OR")
+    void shouldCombineMultipleComparisons() {
+        MatVector matVector = new MatVector(testMat1, testMat2, testMat3);
+        
+        Mat comparison1 = new Mat(100, 100, CV_8UC3, new Scalar(255, 0, 0, 0));
+        Mat comparison2 = new Mat(100, 100, CV_8UC3, new Scalar(0, 255, 0, 0));
+        Mat combinedMask = new Mat(100, 100, CV_8UC3, new Scalar(255, 255, 0, 0));
+        
+        // Use lenient stubbing for multiple calls
+        when(matOps3d.cOmpare(any(Mat.class), any(Mat.class), eq(CMP_NE)))
+            .thenReturn(comparison1, comparison2);
+        when(matOps3d.bItwise_or(any(Mat.class), any(Mat.class)))
+            .thenReturn(combinedMask);
+        
+        Mat result = dynamicPixelFinder.getDynamicPixelMask(matVector);
+        
+        assertNotNull(result);
+        assertEquals(combinedMask, result);
+        
+        verify(matOps3d, times(2)).cOmpare(any(Mat.class), any(Mat.class), eq(CMP_NE));
+        verify(matOps3d, atLeast(2)).bItwise_or(any(Mat.class), any(Mat.class));
+    }
+    
+    @Test
+    @DisplayName("Should find fixed pixels (inverse of dynamic pixels)")
+    void shouldFindFixedPixels() {
+        MatVector matVector = new MatVector(testMat1, testMat2);
+        Mat dynamicMask = new Mat(100, 100, CV_8UC1, new Scalar(255));
+        Mat fixedMask = new Mat(100, 100, CV_8UC1, new Scalar(0));
+        
+        when(matOps3d.cOmpare(any(Mat.class), any(Mat.class), eq(CMP_NE)))
+            .thenReturn(dynamicMask);
+        when(matOps3d.bItwise_or(any(Mat.class), any(Mat.class)))
+            .thenReturn(dynamicMask);
+        when(matOps3d.bItwise_not(any(Mat.class)))
+            .thenReturn(fixedMask);
+        
+        Mat result = dynamicPixelFinder.getFixedPixelMask(matVector);
+        
+        assertNotNull(result);
+        assertEquals(fixedMask, result);
+        
+        verify(matOps3d).cOmpare(any(Mat.class), any(Mat.class), eq(CMP_NE));
+        verify(matOps3d).bItwise_not(dynamicMask);
+    }
+    
+    @Test
+    @DisplayName("Should capture images from region over time")
+    void shouldCaptureImagesFromRegionOverTime() {
+        Region region = mock(Region.class);
+        double intervalSeconds = 0.1;
+        double totalSeconds = 0.3;
+        
+        Mat capture1 = new Mat(50, 50, CV_8UC3, new Scalar(100, 100, 100, 0));
+        Mat capture2 = new Mat(50, 50, CV_8UC3, new Scalar(110, 110, 110, 0));
+        Mat capture3 = new Mat(50, 50, CV_8UC3, new Scalar(120, 120, 120, 0));
+        Mat comparisonResult = new Mat(50, 50, CV_8UC3, new Scalar(255, 255, 255, 0));
+        
+        MatVector matVector = new MatVector(capture1, capture2, capture3);
+        when(imageLoader.getMatsFromScreen(region, intervalSeconds, totalSeconds))
+            .thenReturn(matVector);
+        when(matOps3d.cOmpare(any(Mat.class), any(Mat.class), eq(CMP_NE)))
+            .thenReturn(comparisonResult);
+        when(matOps3d.bItwise_or(any(Mat.class), any(Mat.class)))
+            .thenReturn(comparisonResult);
+        
+        Mat result = dynamicPixelFinder.getDynamicPixelMask(region, intervalSeconds, totalSeconds);
+        
+        assertNotNull(result);
+        assertEquals(comparisonResult, result);
+        
+        verify(imageLoader).getMatsFromScreen(region, intervalSeconds, totalSeconds);
+        
+        // Clean up
+        capture1.release();
+        capture2.release();
+        capture3.release();
+    }
+    
+    @Test
+    @DisplayName("Should handle null region for captures")
+    void shouldHandleNullRegionForCaptures() {
+        MatVector emptyVector = new MatVector();
+        when(imageLoader.getMatsFromScreen(null, 0.1, 0.3))
+            .thenReturn(emptyVector);
+        
+        Mat result = dynamicPixelFinder.getDynamicPixelMask(null, 0.1, 0.3);
+        
+        assertNotNull(result);
+        assertTrue(result.empty());
+    }
+    
+    @Test
+    @DisplayName("Should handle zero duration capture")
+    void shouldHandleZeroDurationCapture() {
+        Region region = mock(Region.class);
+        MatVector emptyVector = new MatVector();
+        
+        when(imageLoader.getMatsFromScreen(region, 0.1, 0.0))
+            .thenReturn(emptyVector);
+        
+        Mat result = dynamicPixelFinder.getDynamicPixelMask(region, 0.1, 0.0);
+        
+        assertNotNull(result);
+        assertTrue(result.empty());
+        
+        verify(imageLoader).getMatsFromScreen(region, 0.1, 0.0);
+    }
+    
+    @Test
+    @DisplayName("Should handle negative duration capture")
+    void shouldHandleNegativeDurationCapture() {
+        Region region = mock(Region.class);
+        MatVector emptyVector = new MatVector();
+        
+        when(imageLoader.getMatsFromScreen(region, 0.1, -1.0))
+            .thenReturn(emptyVector);
+        
+        Mat result = dynamicPixelFinder.getDynamicPixelMask(region, 0.1, -1.0);
+        
+        assertNotNull(result);
+        assertTrue(result.empty());
+        
+        verify(imageLoader).getMatsFromScreen(region, 0.1, -1.0);
+    }
+    
+    @ParameterizedTest
+    @ValueSource(doubles = {0.1, 0.5, 1.0, 2.0})
+    @DisplayName("Should handle different capture intervals")
+    void shouldHandleDifferentCaptureIntervals(double intervalSeconds) {
+        Region region = mock(Region.class);
+        Mat capture1 = new Mat(50, 50, CV_8UC3);
+        Mat capture2 = new Mat(50, 50, CV_8UC3);
+        MatVector matVector = new MatVector(capture1, capture2);
+        Mat comparisonResult = new Mat(50, 50, CV_8UC3, new Scalar(255, 255, 255, 0));
+        
+        when(imageLoader.getMatsFromScreen(region, intervalSeconds, intervalSeconds * 2))
+            .thenReturn(matVector);
+        when(matOps3d.cOmpare(any(Mat.class), any(Mat.class), eq(CMP_NE)))
+            .thenReturn(comparisonResult);
+        when(matOps3d.bItwise_or(any(Mat.class), any(Mat.class)))
+            .thenReturn(comparisonResult);
+        
+        Mat result = dynamicPixelFinder.getDynamicPixelMask(region, intervalSeconds, intervalSeconds * 2);
+        
+        assertNotNull(result);
+        assertFalse(result.empty());
+        
+        verify(imageLoader).getMatsFromScreen(region, intervalSeconds, intervalSeconds * 2);
+        
+        capture1.release();
+        capture2.release();
+    }
+    
+    @Test
+    @DisplayName("Should detect no dynamic pixels for identical images")
+    void shouldDetectNoDynamicPixelsForIdenticalImages() {
+        MatVector matVector = new MatVector(testMat1, testMat1, testMat1);
+        Mat emptyComparison = new Mat(100, 100, CV_8UC3, new Scalar(0, 0, 0, 0));
+        
+        when(matOps3d.cOmpare(any(Mat.class), any(Mat.class), eq(CMP_NE)))
+            .thenReturn(emptyComparison);
+        when(matOps3d.bItwise_or(any(Mat.class), any(Mat.class)))
+            .thenReturn(emptyComparison);
+        
+        Mat result = dynamicPixelFinder.getDynamicPixelMask(matVector);
+        
+        assertNotNull(result);
+        assertEquals(emptyComparison, result);
+        
+        verify(matOps3d, times(2)).cOmpare(any(Mat.class), any(Mat.class), eq(CMP_NE));
+    }
+    
+    @Test
+    @DisplayName("Should handle large image collections")
+    void shouldHandleLargeImageCollections() {
+        MatVector largeVector = new MatVector();
+        for (int i = 0; i < 10; i++) {
+            largeVector.push_back(new Mat(100, 100, CV_8UC3, new Scalar(i * 20, i * 20, i * 20, 0)));
         }
         
-        @Test
-        @DisplayName("Should return empty Mat for no images")
-        void shouldReturnEmptyMatForNoImages() {
-            MatVector emptyVector = new MatVector();
-            
-            Mat result = dynamicPixelFinder.getDynamicPixelMask(emptyVector);
-            
-            assertNotNull(result);
-            assertTrue(result.empty());
-            
-            verify(matOps3d, never()).cOmpare(any(Mat.class), any(Mat.class), anyInt());
-        }
+        Mat comparisonResult = new Mat(100, 100, CV_8UC3, new Scalar(255, 255, 255, 0));
         
-        @Test
-        @DisplayName("Should find dynamic pixels between two different images")
-        void shouldFindDynamicPixelsBetweenTwoImages() {
-            MatVector matVector = new MatVector(testMat1, testMat2);
-            Mat comparisonResult = new Mat(100, 100, CV_8UC3, new Scalar(255, 255, 255, 0));
-            
-            when(matOps3d.cOmpare(any(Mat.class), any(Mat.class), eq(CMP_NE)))
-                .thenReturn(comparisonResult);
-            when(matOps3d.bItwise_or(any(Mat.class), any(Mat.class)))
-                .thenReturn(comparisonResult);
-            
-            Mat result = dynamicPixelFinder.getDynamicPixelMask(matVector);
-            
-            assertNotNull(result);
-            assertEquals(comparisonResult, result);
-            
-            verify(matOps3d).cOmpare(any(Mat.class), any(Mat.class), eq(CMP_NE));
-            verify(matOps3d).bItwise_or(any(Mat.class), any(Mat.class));
-        }
+        when(matOps3d.cOmpare(any(Mat.class), any(Mat.class), eq(CMP_NE)))
+            .thenReturn(comparisonResult);
+        when(matOps3d.bItwise_or(any(Mat.class), any(Mat.class)))
+            .thenReturn(comparisonResult);
         
-        @Test
-        @DisplayName("Should combine multiple comparisons with bitwise OR")
-        void shouldCombineMultipleComparisons() {
-            MatVector matVector = new MatVector(testMat1, testMat2, testMat3);
-            
-            Mat comparison1 = new Mat(100, 100, CV_8UC3, new Scalar(255, 0, 0, 0));
-            Mat comparison2 = new Mat(100, 100, CV_8UC3, new Scalar(0, 255, 0, 0));
-            Mat combinedMask = new Mat(100, 100, CV_8UC3, new Scalar(255, 255, 0, 0));
-            
-            when(matOps3d.cOmpare(any(Mat.class), any(Mat.class), eq(CMP_NE)))
-                .thenReturn(comparison1, comparison2);
-            when(matOps3d.bItwise_or(any(Mat.class), any(Mat.class)))
-                .thenReturn(combinedMask);
-            
-            Mat result = dynamicPixelFinder.getDynamicPixelMask(matVector);
-            
-            assertNotNull(result);
-            assertEquals(combinedMask, result);
-            
-            verify(matOps3d, times(2)).cOmpare(any(Mat.class), any(Mat.class), eq(CMP_NE));
-            verify(matOps3d, atLeast(2)).bItwise_or(any(Mat.class), any(Mat.class));
-        }
+        Mat result = dynamicPixelFinder.getDynamicPixelMask(largeVector);
         
-        @Test
-        @DisplayName("Should detect no dynamic pixels for identical images")
-        void shouldDetectNoDynamicPixelsForIdenticalImages() {
-            MatVector matVector = new MatVector(testMat1, testMat1, testMat1);
-            Mat emptyComparison = new Mat(100, 100, CV_8UC3, new Scalar(0, 0, 0, 0));
-            
-            when(matOps3d.cOmpare(any(Mat.class), any(Mat.class), eq(CMP_NE)))
-                .thenReturn(emptyComparison);
-            when(matOps3d.bItwise_or(any(Mat.class), any(Mat.class)))
-                .thenReturn(emptyComparison);
-            
-            Mat result = dynamicPixelFinder.getDynamicPixelMask(matVector);
-            
-            assertNotNull(result);
-            assertEquals(emptyComparison, result);
-            
-            verify(matOps3d, times(2)).cOmpare(any(Mat.class), any(Mat.class), eq(CMP_NE));
+        assertNotNull(result);
+        assertFalse(result.empty());
+        
+        // Should compare first image with all others
+        verify(matOps3d, times(9)).cOmpare(any(Mat.class), any(Mat.class), eq(CMP_NE));
+        
+        // Clean up
+        for (int i = 0; i < largeVector.size(); i++) {
+            largeVector.get(i).release();
         }
     }
     
-    @Nested
-    @DisplayName("Fixed Pixel Detection")
-    class FixedPixelDetection {
+    @Test
+    @DisplayName("Should handle empty MatVector")
+    void shouldHandleEmptyMatVector() {
+        MatVector emptyVector = new MatVector();
         
-        @Test
-        @DisplayName("Should find fixed pixels (inverse of dynamic pixels)")
-        void shouldFindFixedPixels() {
-            MatVector matVector = new MatVector(testMat1, testMat2);
-            Mat dynamicMask = new Mat(100, 100, CV_8UC1, new Scalar(255));
-            Mat fixedMask = new Mat(100, 100, CV_8UC1, new Scalar(0));
-            
-            when(matOps3d.cOmpare(any(Mat.class), any(Mat.class), eq(CMP_NE)))
-                .thenReturn(dynamicMask);
-            when(matOps3d.bItwise_or(any(Mat.class), any(Mat.class)))
-                .thenReturn(dynamicMask);
-            when(matOps3d.bItwise_not(dynamicMask))
-                .thenReturn(fixedMask);
-            
-            Mat result = dynamicPixelFinder.getFixedPixelMask(matVector);
-            
-            assertNotNull(result);
-            assertEquals(fixedMask, result);
-            
-            verify(matOps3d).cOmpare(any(Mat.class), any(Mat.class), eq(CMP_NE));
-            verify(matOps3d).bItwise_not(any(Mat.class));
-        }
-    }
-    
-    @Nested
-    @DisplayName("Time-based Capture")
-    class TimeBasedCapture {
+        Mat result = dynamicPixelFinder.getDynamicPixelMask(emptyVector);
         
-        @Test
-        @DisplayName("Should capture images from region over time for dynamic pixels")
-        void shouldCaptureImagesFromRegionForDynamicPixels() {
-            Region region = mock(Region.class);
-            double intervalSeconds = 0.5;
-            double totalSecondsToRun = 2.0;
-            
-            MatVector capturedMats = new MatVector();
-            capturedMats.push_back(testMat1);
-            capturedMats.push_back(testMat2);
-            capturedMats.push_back(testMat3);
-            
-            Mat dynamicMask = new Mat(100, 100, CV_8UC3, new Scalar(255, 255, 255, 0));
-            
-            when(getImage.getMatsFromScreen(region, intervalSeconds, totalSecondsToRun))
-                .thenReturn(capturedMats);
-            when(matOps3d.cOmpare(any(Mat.class), any(Mat.class), eq(CMP_NE)))
-                .thenReturn(dynamicMask);
-            when(matOps3d.bItwise_or(any(Mat.class), any(Mat.class)))
-                .thenReturn(dynamicMask);
-            
-            Mat result = dynamicPixelFinder.getDynamicPixelMask(region, intervalSeconds, totalSecondsToRun);
-            
-            assertNotNull(result);
-            assertEquals(dynamicMask, result);
-            
-            verify(getImage).getMatsFromScreen(region, intervalSeconds, totalSecondsToRun);
-            verify(matOps3d, atLeastOnce()).cOmpare(any(Mat.class), any(Mat.class), eq(CMP_NE));
-        }
+        assertNotNull(result);
+        assertTrue(result.empty());
         
-        @Test
-        @DisplayName("Should capture images from region over time for fixed pixels")
-        void shouldCaptureImagesFromRegionForFixedPixels() {
-            Region region = mock(Region.class);
-            double intervalSeconds = 0.5;
-            double totalSecondsToRun = 2.0;
-            
-            MatVector capturedMats = new MatVector();
-            capturedMats.push_back(testMat1);
-            capturedMats.push_back(testMat2);
-            
-            Mat dynamicMask = new Mat(100, 100, CV_8UC3, new Scalar(255, 255, 255, 0));
-            Mat fixedMask = new Mat(100, 100, CV_8UC3, new Scalar(0, 0, 0, 0));
-            
-            when(getImage.getMatsFromScreen(region, intervalSeconds, totalSecondsToRun))
-                .thenReturn(capturedMats);
-            when(matOps3d.cOmpare(any(Mat.class), any(Mat.class), eq(CMP_NE)))
-                .thenReturn(dynamicMask);
-            when(matOps3d.bItwise_or(any(Mat.class), any(Mat.class)))
-                .thenReturn(dynamicMask);
-            
-            // Mock for bitwise_not is not needed since it's a static method
-            // The production code uses static bitwise_not directly
-            
-            Mat result = dynamicPixelFinder.getFixedPixelMask(region, intervalSeconds, totalSecondsToRun);
-            
-            assertNotNull(result);
-            // We can't easily test the actual result since bitwise_not is static
-            // but we can verify the flow
-            
-            verify(getImage).getMatsFromScreen(region, intervalSeconds, totalSecondsToRun);
-            verify(matOps3d, atLeastOnce()).cOmpare(any(Mat.class), any(Mat.class), eq(CMP_NE));
-        }
-    }
-    
-    @Nested
-    @DisplayName("Large Collections")
-    class LargeCollections {
-        
-        @Test
-        @DisplayName("Should handle large image collections")
-        void shouldHandleLargeImageCollections() {
-            MatVector largeVector = new MatVector();
-            for (int i = 0; i < 10; i++) {
-                largeVector.push_back(new Mat(100, 100, CV_8UC3, new Scalar(i * 20, i * 20, i * 20, 0)));
-            }
-            
-            Mat comparisonResult = new Mat(100, 100, CV_8UC3, new Scalar(255, 255, 255, 0));
-            
-            when(matOps3d.cOmpare(any(Mat.class), any(Mat.class), eq(CMP_NE)))
-                .thenReturn(comparisonResult);
-            when(matOps3d.bItwise_or(any(Mat.class), any(Mat.class)))
-                .thenReturn(comparisonResult);
-            
-            Mat result = dynamicPixelFinder.getDynamicPixelMask(largeVector);
-            
-            assertNotNull(result);
-            assertFalse(result.empty());
-            
-            // Should compare first image with all others
-            verify(matOps3d, times(9)).cOmpare(any(Mat.class), any(Mat.class), eq(CMP_NE));
-            
-            // Clean up
-            for (int i = 0; i < largeVector.size(); i++) {
-                largeVector.get(i).release();
-            }
-        }
-    }
-    
-    @Nested
-    @DisplayName("Interface Implementation")
-    class InterfaceImplementation {
-        
-        @Test
-        @DisplayName("Should implement FindDynamicPixels interface")
-        void shouldImplementFindDynamicPixelsInterface() {
-            assertTrue(dynamicPixelFinder instanceof FindDynamicPixels);
-        }
-        
-        @Test
-        @DisplayName("Should provide getDynamicPixelMask method from interface")
-        void shouldProvideDynamicPixelMaskMethod() {
-            MatVector matVector = new MatVector(testMat1);
-            Mat result = dynamicPixelFinder.getDynamicPixelMask(matVector);
-            assertNotNull(result);
-        }
-        
-        @Test
-        @DisplayName("Should provide getFixedPixelMask method from interface")
-        void shouldProvideFixedPixelMaskMethod() {
-            MatVector matVector = new MatVector(testMat1);
-            // For single image, getDynamicPixelMask returns empty Mat
-            // and bItwise_not on empty should also return empty
-            when(matOps3d.bItwise_not(any(Mat.class))).thenReturn(new Mat());
-            
-            Mat result = dynamicPixelFinder.getFixedPixelMask(matVector);
-            assertNotNull(result);
-        }
+        verify(matOps3d, never()).cOmpare(any(Mat.class), any(Mat.class), anyInt());
     }
 }
