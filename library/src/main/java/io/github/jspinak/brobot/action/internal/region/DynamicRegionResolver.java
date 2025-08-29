@@ -325,13 +325,17 @@ public class DynamicRegionResolver {
                 } else {
                     log.debug("Fixed region {} for {} is within new declarative region {}, keeping fixed region", 
                             existingFixed, targetObject.getName(), newRegion);
+                    // Still update the search regions even if keeping the fixed region
+                    stateImage.getPatterns().forEach(pattern -> {
+                        pattern.getSearchRegions().setRegions(List.of(newRegion));
+                    });
                 }
             } else {
                 // No existing fixed region, just set the search regions
                 stateImage.getPatterns().forEach(pattern -> {
                     pattern.getSearchRegions().setRegions(List.of(newRegion));
                 });
-                log.debug("Set search regions for {} based on {} to {}", 
+                log.info("Set search regions for {} based on {} to {}", 
                          targetObject.getName(), sourceMatch.getStateObjectData().getStateObjectName(), newRegion);
             }
         } else if (targetObject instanceof StateLocation) {
