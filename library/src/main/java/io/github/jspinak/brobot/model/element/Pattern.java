@@ -15,7 +15,6 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.bytedeco.opencv.opencv_core.Mat;
 
-import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.List;
 
@@ -58,6 +57,7 @@ import java.util.List;
  * @see Anchors
  */
 @Data
+@Slf4j
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Pattern {
 
