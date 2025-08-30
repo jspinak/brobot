@@ -108,17 +108,23 @@ public class Pattern {
         
         ExecutionEnvironment env = ExecutionEnvironment.getInstance();
         
-        if (env.useRealFiles()) {
-            // Load real image - works in headless but not mock mode
-            BufferedImage bufferedImage = BufferedImageUtilities.getBuffImgFromFile(imgPath);
-            if (bufferedImage == null) {
-                throw new IllegalStateException("Failed to load image: " + imgPath + 
-                    ". Make sure the image exists in the configured image path and has .png extension.");
-            }
+        // Try to load the real image
+        BufferedImage bufferedImage = BufferedImageUtilities.getBuffImgFromFile(imgPath);
+        
+        if (bufferedImage != null) {
+            // Successfully loaded the image
             this.image = new Image(bufferedImage, name);
+        } else if (env.isMockMode()) {
+            // In mock mode, log warning but allow null image
+            // Tests should provide their own mock images through proper test setup
+            log.warn("Image '{}' not found in mock mode. Pattern '{}' will have null image. " +
+                    "Tests should provide mock images through MockSceneBuilder or similar test utilities.", 
+                    imgPath, name);
+            this.image = null;
         } else {
-            // Only create dummy in mock mode
-            this.image = new Image(new BufferedImage(100, 100, BufferedImage.TYPE_INT_RGB), name);
+            // In real mode, fail if image cannot be loaded
+            throw new IllegalStateException("Failed to load image: " + imgPath + 
+                ". Make sure the image exists in the configured image path and has .png extension.");
         }
     }
 
@@ -365,6 +371,10 @@ public class Pattern {
 
     @JsonIgnore
     public BufferedImage getBImage() {
+        if (image == null) {
+            log.debug("Pattern '{}' has null image", name);
+            return null;
+        }
         return image.getBufferedImage();
     }
 
