@@ -7,10 +7,12 @@ import io.github.jspinak.brobot.action.internal.find.OffsetMatchCreator;
 import io.github.jspinak.brobot.action.internal.find.match.MatchRegionAdjuster;
 import io.github.jspinak.brobot.action.internal.find.match.MatchContentExtractor;
 import io.github.jspinak.brobot.action.internal.region.DynamicRegionResolver;
+import io.github.jspinak.brobot.action.internal.region.SearchRegionDependencyRegistry;
 import io.github.jspinak.brobot.action.internal.utility.ActionSuccessCriteria;
 import io.github.jspinak.brobot.analysis.color.profiles.ProfileSetBuilder;
 import io.github.jspinak.brobot.analysis.match.MatchFusion;
 import io.github.jspinak.brobot.model.element.Region;
+import io.github.jspinak.brobot.model.element.SearchRegionOnObject;
 import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.model.state.StateObject;
 import io.github.jspinak.brobot.model.state.StateRegion;
@@ -120,6 +122,56 @@ public class FindPipeline {
         // Update search regions based on cross-state references
         dynamicRegionResolver.updateSearchRegionsForObjects(allObjects, matches);
     }
+    
+    /**
+     * Orders StateImages based on dependencies to ensure that images that other images
+     * depend on are searched first. This enables proper declarative region resolution.
+     * 
+     * @param stateImages The list of state images to order
+     * @return A new list with images ordered by dependencies
+     */
+    private List<StateImage> orderByDependencies(List<StateImage> stateImages) {
+        List<StateImage> ordered = new ArrayList<>();
+        List<StateImage> withDependencies = new ArrayList<>();
+        List<StateImage> noDependencies = new ArrayList<>();
+        
+        // Separate images with and without dependencies
+        for (StateImage image : stateImages) {
+            if (image.getSearchRegionOnObject() != null) {
+                withDependencies.add(image);
+            } else {
+                noDependencies.add(image);
+            }
+        }
+        
+        // Add images without dependencies first (they can be found anywhere)
+        ordered.addAll(noDependencies);
+        
+        // Then add images with dependencies
+        // For now, just add them after - a more sophisticated ordering could be implemented
+        // to handle complex dependency chains
+        ordered.addAll(withDependencies);
+        
+        log.debug("Ordered {} StateImages: {} without dependencies, {} with dependencies",
+                stateImages.size(), noDependencies.size(), withDependencies.size());
+        
+        // Log the order for debugging
+        if (log.isDebugEnabled()) {
+            for (int i = 0; i < ordered.size(); i++) {
+                StateImage img = ordered.get(i);
+                if (img.getSearchRegionOnObject() != null) {
+                    log.debug("  [{}] {} depends on {}.{}",
+                            i, img.getName(),
+                            img.getSearchRegionOnObject().getTargetStateName(),
+                            img.getSearchRegionOnObject().getTargetObjectName());
+                } else {
+                    log.debug("  [{}] {} (no dependencies)", i, img.getName());
+                }
+            }
+        }
+        
+        return ordered;
+    }
 
     /**
      * Executes the complete find pipeline with the provided options and collections.
@@ -129,6 +181,21 @@ public class FindPipeline {
      * @param objectCollections The collections of objects to search for
      */
     public void execute(BaseFindOptions findOptions, ActionResult matches, ObjectCollection... objectCollections) {
+        // CRITICAL: Order StateImages by dependencies BEFORE searching
+        // This ensures that images without dependencies are searched first,
+        // and their locations can be used to constrain searches for dependent images
+        for (ObjectCollection collection : objectCollections) {
+            List<StateImage> originalOrder = new ArrayList<>(collection.getStateImages());
+            List<StateImage> orderedImages = orderByDependencies(originalOrder);
+            
+            // Replace the collection's state images with the ordered list
+            collection.getStateImages().clear();
+            collection.getStateImages().addAll(orderedImages);
+            
+            log.debug("Reordered {} StateImages in collection for dependency resolution", 
+                    orderedImages.size());
+        }
+        
         // Note: Dependencies should be registered when states are built, not here
         // For now, we'll check if search regions need updating based on previous matches
         updateCrossStateSearchRegions(matches, objectCollections);
