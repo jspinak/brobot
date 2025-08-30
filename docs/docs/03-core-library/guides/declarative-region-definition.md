@@ -218,6 +218,59 @@ Example flow:
 // 3. Next search for ClaudeIcon uses this updated region
 ```
 
+## Immediate Search Region Updates
+
+Starting with Brobot 1.1.0, search regions are updated immediately when dependencies are found, ensuring that dependent objects always use the most current region information.
+
+### How Immediate Updates Work
+
+When using declarative regions with dependencies:
+
+1. **During Search**: StateImages are automatically ordered by dependencies
+   - Images without dependencies are searched first
+   - Dependent images are searched after their dependencies
+
+2. **On Match Found**: As soon as a match is found:
+   - All objects depending on the found object have their regions updated immediately
+   - Remaining objects in the current search batch are updated before being searched
+   - This ensures dependent objects always search in the correct location
+
+3. **Example Flow**:
+```java
+// Given this setup:
+StateImage prompt = new StateImage.Builder()
+    .addPatterns("prompt.png")
+    .setName("ClaudePrompt")
+    .build();
+
+StateImage icon = new StateImage.Builder()
+    .addPatterns("icon.png")
+    .setName("ClaudeIcon")
+    .setSearchRegionOnObject(SearchRegionOnObject.builder()
+        .targetType(StateObject.Type.IMAGE)
+        .targetStateName("Prompt")
+        .targetObjectName("ClaudePrompt")
+        .adjustments(MatchAdjustmentOptions.builder()
+            .addX(3).addY(10).addW(30).addH(55)
+            .build())
+        .build())
+    .build();
+
+// When searching for both:
+action.perform(findOptions, prompt, icon);
+
+// The execution order is:
+// 1. Search for ClaudePrompt (no dependencies)
+// 2. If ClaudePrompt found at (100, 200):
+//    - ClaudeIcon's search region immediately updated to (103, 210, w+30, h+55)
+// 3. Search for ClaudeIcon in the updated region
+```
+
+This immediate update mechanism ensures:
+- Dependent objects are always searched in the correct location
+- No wasted searches in incorrect regions
+- Better performance through targeted searching
+
 ## Integration with State-Aware Scheduling
 
 The declarative approach works seamlessly with StateAwareScheduler:
@@ -370,24 +423,30 @@ Registers Dependencies with DynamicRegionResolver
 System Ready for Dynamic Region Updates
 ```
 
-### Runtime Flow
+### Runtime Flow (Updated in 1.1.0+)
 
 ```
-FIND Operation Executes
+FIND Operation Starts
     ↓
-Matches Found
+FindPipeline Orders StateImages by Dependencies
     ↓
-FindPipeline.updateDependentSearchRegions()
+Search for Non-Dependent Images First
     ↓
-For Each Match:
-    - Get Dependent Objects from Registry
-    - Calculate New Search Region
-    - Check Existing Fixed Region (if any)
-    - Clear Fixed Region if Outside New Region
-    - Update Dependent Object's Search Region
+For Each Match Found:
+    - Immediately Update All Dependent Search Regions
+    - Clear Fixed Regions if Outside New Region
+    - Update Remaining Images in Current Batch
     ↓
-Next FIND Uses Updated Regions
+Continue Searching Dependent Images
+    ↓
+All Images Use Updated Regions
 ```
+
+Key changes in 1.1.0+:
+- **Dependency Ordering**: Images are sorted so dependencies are resolved first
+- **Immediate Updates**: Regions update as soon as dependencies are found
+- **Batch Processing**: Remaining images in a search batch are updated before being searched
+- **Fixed Region Management**: Fixed regions are cleared proactively, not reactively
 
 ## Fixed Regions and Declarative Regions
 
@@ -405,6 +464,8 @@ When a declarative region is calculated based on `SearchRegionOnObject`:
 2. **Containment Test**: It verifies if the fixed region is within the new declarative region
 3. **Automatic Clearing**: If the fixed region is outside the declarative region, it's automatically cleared
 4. **Region Update**: The search region is updated to use the declarative region
+
+**Important**: Fixed regions are cleared immediately when a declarative region is applied. This happens as soon as the dependency is found, not when the dependent object is searched.
 
 This ensures that declarative regions take precedence when the UI layout changes:
 
@@ -510,12 +571,92 @@ INFO: Fixed region R[100,200,50,50] for ClaudeIcon is outside new declarative re
 - Updates only occur when source objects are found
 - Consider using fixed regions for static layouts
 
+## Complete Example: Real-World Usage
+
+Here's a complete example showing all the new features working together:
+
+```java
+@State(initial = true)
+public class PromptState {
+    private final StateImage claudePrompt;
+    
+    public PromptState() {
+        claudePrompt = new StateImage.Builder()
+            .addPatterns("prompt/claude-prompt.png")
+            .setName("ClaudePrompt")
+            .build();
+    }
+}
+
+@State
+public class WorkingState {
+    private final StateImage claudeIcon;
+    
+    public WorkingState() {
+        // Icon depends on prompt location
+        claudeIcon = new StateImage.Builder()
+            .addPatterns("working/claude-icon-1.png",
+                        "working/claude-icon-2.png")
+            .setName("ClaudeIcon")
+            .setFixed(true)  // Will be cleared when prompt moves
+            .setSearchRegionOnObject(SearchRegionOnObject.builder()
+                .targetType(StateObject.Type.IMAGE)
+                .targetStateName("Prompt")
+                .targetObjectName("ClaudePrompt")
+                .adjustments(MatchAdjustmentOptions.builder()
+                    .addX(3).addY(10).addW(30).addH(55)
+                    .build())
+                .build())
+            .build();
+    }
+}
+
+// In your automation code:
+public class ClaudeAutomator {
+    @Autowired
+    private Action action;
+    
+    @Autowired
+    private PromptState promptState;
+    
+    @Autowired
+    private WorkingState workingState;
+    
+    public void findElements() {
+        // Search for both - dependency ordering happens automatically
+        ActionResult result = action.perform(
+            new PatternFindOptions.Builder().build(),
+            promptState.getClaudePrompt(),
+            workingState.getClaudeIcon()
+        );
+        
+        // What happens internally:
+        // 1. FindPipeline orders images: ClaudePrompt first (no dependencies)
+        // 2. ClaudePrompt is found at (100, 200)
+        // 3. ClaudeIcon's search region immediately updated to (103, 210, w+30, h+55)
+        // 4. ClaudeIcon's fixed region (if any) is cleared
+        // 5. ClaudeIcon is searched in the updated region
+        // 6. If found, ClaudeIcon sets a new fixed region at the found location
+    }
+}
+```
+
+## Key Benefits of the New Implementation
+
+1. **No Manual Region Management**: Dependencies are resolved automatically
+2. **Immediate Updates**: Search regions update as soon as dependencies are found
+3. **Intelligent Fixed Region Handling**: Fixed regions cleared when they conflict with declarative regions
+4. **Optimized Search Order**: Dependencies are searched in the correct order
+5. **Better Performance**: Fewer false matches due to targeted searching
+
 ## Summary
 
-Declarative region definition in Brobot 1.1.0 provides:
+Declarative region definition in Brobot 1.1.0+ provides:
 - Cleaner, more maintainable code
 - Dynamic adaptation to UI changes
 - Better separation of concerns
 - Seamless integration with state management
+- Immediate search region updates for optimal performance
+- Intelligent fixed region management
 
 By defining regions declaratively, you create more robust automation that adapts to UI variations while keeping your action code focused on business logic rather than region calculations.

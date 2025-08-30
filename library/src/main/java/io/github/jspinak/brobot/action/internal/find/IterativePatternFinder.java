@@ -2,11 +2,13 @@ package io.github.jspinak.brobot.action.internal.find;
 
 import io.github.jspinak.brobot.action.basic.find.FindAll;
 import io.github.jspinak.brobot.action.internal.execution.ActionLifecycleManagement;
+import io.github.jspinak.brobot.action.internal.region.DynamicRegionResolver;
 import io.github.jspinak.brobot.model.analysis.scene.SceneAnalysis;
 import io.github.jspinak.brobot.model.element.Scene;
 import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.action.ActionResult;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -32,21 +34,27 @@ import java.util.*;
  * @see ActionLifecycleManagement
  * @see SceneAnalysis
  */
+@Slf4j
 @Component
 public class IterativePatternFinder {
 
     private final ActionLifecycleManagement actionLifecycleManagement;
     private final FindAll findAll;
+    private final DynamicRegionResolver dynamicRegionResolver;
 
     /**
      * Creates a new IterativePatternFinder instance with required dependencies.
      * 
      * @param actionLifecycleManagement Service for managing action lifecycle and monitoring execution
      * @param findAll Service for performing exhaustive pattern matching
+     * @param dynamicRegionResolver Service for updating search regions based on found matches
      */
-    public IterativePatternFinder(ActionLifecycleManagement actionLifecycleManagement, FindAll findAll) {
+    public IterativePatternFinder(ActionLifecycleManagement actionLifecycleManagement, 
+                                 FindAll findAll,
+                                 DynamicRegionResolver dynamicRegionResolver) {
         this.actionLifecycleManagement = actionLifecycleManagement;
         this.findAll = findAll;
+        this.dynamicRegionResolver = dynamicRegionResolver;
     }
 
     /**
@@ -91,6 +99,26 @@ public class IterativePatternFinder {
                 List<Match> newMatches = findAll.find(stateImages.get(i), scene, matches.getActionConfig());
                 singleSceneMatchList.addAll(newMatches);
                 matches.addAll(newMatches); // holds all matches found
+                
+                // CRITICAL: Update dependent search regions immediately after finding matches
+                // This ensures that if ImageA is found, ImageB's search regions are updated
+                // before ImageB is searched for, enabling proper declarative region resolution
+                if (!newMatches.isEmpty()) {
+                    log.debug("Found {} matches for {}, updating dependent search regions", 
+                            newMatches.size(), stateImages.get(i).getName());
+                    dynamicRegionResolver.updateDependentSearchRegions(matches);
+                    
+                    // Also update search regions for remaining state images in this iteration
+                    // This ensures that if ImageA is found, ImageB (which might be later in the list)
+                    // gets its search regions updated before being searched
+                    List<StateImage> remainingImages = stateImages.subList(i + 1, stateImages.size());
+                    if (!remainingImages.isEmpty()) {
+                        log.debug("Updating search regions for {} remaining state images", remainingImages.size());
+                        dynamicRegionResolver.updateSearchRegionsForObjects(
+                            new ArrayList<>(remainingImages), matches);
+                    }
+                }
+                
                 if (!actionLifecycleManagement.isOkToContinueAction(matches, stateImages.size())) return;
             }
             SceneAnalysis sceneAnalysis = new SceneAnalysis(scene);
