@@ -1,0 +1,213 @@
+// Test task configurations for running categorized tests
+
+// Fast tests - for quick feedback
+task fastTests(type: Test) {
+    description = 'Run fast unit tests'
+    group = 'verification'
+    
+    useJUnitPlatform {
+        includeTags 'fast', 'unit'
+        excludeTags 'slow', 'integration', 'manual'
+    }
+    
+    maxHeapSize = '1024m'
+    maxParallelForks = 4
+    
+    testLogging {
+        events 'passed', 'failed', 'skipped'
+        showStandardStreams = false
+        exceptionFormat = 'short'
+    }
+}
+
+// Computer Vision tests
+task cvTests(type: Test) {
+    description = 'Run Computer Vision tests'
+    group = 'verification'
+    
+    useJUnitPlatform {
+        includeTags 'cv', 'image'
+        excludeTags 'manual'
+    }
+    
+    maxHeapSize = '2048m'
+    maxParallelForks = 1  // CV tests should run sequentially
+    
+    systemProperties = [
+        'java.awt.headless': 'true'
+    ]
+}
+
+// Integration tests
+task integrationTests(type: Test) {
+    description = 'Run integration tests'
+    group = 'verification'
+    
+    useJUnitPlatform {
+        includeTags 'integration', 'e2e'
+        excludeTags 'manual'
+    }
+    
+    maxHeapSize = '3072m'
+    maxParallelForks = 2
+    timeout = Duration.ofMinutes(30)
+}
+
+// CI-safe tests (for continuous integration)
+task ciTests(type: Test) {
+    description = 'Run CI-safe tests'
+    group = 'verification'
+    
+    useJUnitPlatform {
+        includeTags 'ci-safe'
+        excludeTags 'manual', 'requires-display', 'flaky'
+    }
+    
+    maxHeapSize = '2048m'
+    failFast = false  // Continue running all tests even if some fail
+    
+    systemProperties = [
+        'java.awt.headless': 'true',
+        'brobot.mock': 'true'
+    ]
+}
+
+// Smoke tests - minimal set for basic validation
+task smokeTests(type: Test) {
+    description = 'Run smoke tests'
+    group = 'verification'
+    
+    useJUnitPlatform {
+        includeTags 'smoke'
+        excludeTags 'manual'
+    }
+    
+    maxHeapSize = '512m'
+    failFast = true  // Stop on first failure for quick feedback
+}
+
+// Nightly comprehensive tests
+task nightlyTests(type: Test) {
+    description = 'Run comprehensive nightly test suite'
+    group = 'verification'
+    
+    useJUnitPlatform {
+        excludeTags 'manual'  // Run everything except manual tests
+    }
+    
+    maxHeapSize = '4096m'
+    maxParallelForks = 2
+    timeout = Duration.ofHours(2)
+    
+    testLogging {
+        events 'passed', 'failed', 'skipped', 'standard_out', 'standard_error'
+        showStandardStreams = true
+        exceptionFormat = 'full'
+    }
+}
+
+// Performance benchmark tests
+task benchmarkTests(type: Test) {
+    description = 'Run performance benchmark tests'
+    group = 'verification'
+    
+    useJUnitPlatform {
+        includeTags 'benchmark'
+    }
+    
+    maxHeapSize = '2048m'
+    maxParallelForks = 1  // Benchmarks should run sequentially for accurate results
+    
+    systemProperties = [
+        'benchmark.report': 'true',
+        'benchmark.warmup': '3'
+    ]
+    
+    doLast {
+        println "Benchmark results will be in: ${testResultsDir}/benchmark-report.html"
+    }
+}
+
+// Quarantined tests - tests that are temporarily disabled
+task quarantinedTests(type: Test) {
+    description = 'Run quarantined tests (known issues)'
+    group = 'verification'
+    
+    useJUnitPlatform {
+        includeTags 'quarantine', 'flaky'
+    }
+    
+    ignoreFailures = true  // Don't fail the build for quarantined tests
+    
+    maxHeapSize = '1024m'
+}
+
+// Test report aggregation
+task testReport(type: TestReport) {
+    description = 'Aggregate all test reports'
+    group = 'verification'
+    
+    destinationDir = file("${buildDir}/reports/all-tests")
+    reportOn test, fastTests, cvTests, integrationTests
+}
+
+// Configure all test tasks
+tasks.withType(Test) {
+    // Common configuration for all test tasks
+    useJUnitPlatform()
+    
+    // Enable test result caching
+    outputs.upToDateWhen { false }  // Always run tests
+    
+    // JVM arguments
+    jvmArgs = [
+        '-XX:+HeapDumpOnOutOfMemoryError',
+        '-XX:HeapDumpPath=' + file("${buildDir}/heap-dumps"),
+        '-Dfile.encoding=UTF-8'
+    ]
+    
+    // Test logging
+    testLogging {
+        lifecycle {
+            events 'failed'
+            exceptionFormat 'short'
+        }
+    }
+    
+    // Fail fast for CI environments
+    if (System.getenv('CI')) {
+        failFast = true
+        maxParallelForks = 2  // Limit parallelism in CI
+    }
+}
+
+// Task dependencies
+ciTests.dependsOn compileTestJava
+nightlyTests.dependsOn compileTestJava
+benchmarkTests.dependsOn compileTestJava
+
+// Helper task to list available test categories
+task listTestCategories {
+    description = 'List all available test categories'
+    group = 'help'
+    
+    doLast {
+        println """
+Available test categories:
+- fast: Quick unit tests (< 100ms)
+- slow: Slower tests (> 1s)
+- unit: Unit tests
+- integration: Integration tests
+- cv: Computer Vision tests
+- image: Image processing tests
+- ci-safe: Tests safe for CI environments
+- benchmark: Performance benchmark tests
+- smoke: Basic validation tests
+- nightly: Comprehensive nightly tests
+- quarantine: Temporarily disabled tests
+
+Run with: ./gradlew test -Dtest.tags="tag1,tag2"
+Or use predefined tasks: fastTests, cvTests, integrationTests, etc.
+"""
+    }
+}
