@@ -55,6 +55,9 @@ public class ImageComparer {
      *         valid comparisons could be made.
      */
     public Match compare(List<StateImage> imgs, StateImage img2) {
+        if (imgs == null || imgs.isEmpty() || img2 == null) {
+            return new EmptyMatch();
+        }
         Match bestScoringMatch = new EmptyMatch();
         for (StateImage img1 : imgs) {
             Match newMatch = compare(img1, img2);
@@ -80,6 +83,11 @@ public class ImageComparer {
      *         found across all Pattern combinations, or NoMatch if comparison fails.
      */
     public Match compare(StateImage img1, StateImage img2) {
+        if (img1 == null || img2 == null || 
+            img1.getPatterns() == null || img2.getPatterns() == null ||
+            img1.getPatterns().isEmpty() || img2.getPatterns().isEmpty()) {
+            return new EmptyMatch();
+        }
         Match bestScoringMatch = new EmptyMatch();
         for (Pattern p1 : img1.getPatterns()) {
             for (Pattern p2 : img2.getPatterns()) {

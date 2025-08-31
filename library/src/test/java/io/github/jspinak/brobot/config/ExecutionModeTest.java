@@ -1,6 +1,7 @@
 package io.github.jspinak.brobot.config;
 
 import io.github.jspinak.brobot.test.BrobotTestBase;
+import io.github.jspinak.brobot.test.TestCategories;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -14,6 +15,10 @@ import static org.junit.jupiter.api.Assertions.*;
  * Tests the execution permission logic for determining mock mode.
  */
 @DisplayName("ExecutionMode Tests")
+@Tag(TestCategories.UNIT)
+@Tag(TestCategories.FAST)
+@Tag(TestCategories.CONFIG)
+@Tag(TestCategories.CI_SAFE)
 public class ExecutionModeTest extends BrobotTestBase {
     
     private ExecutionMode executionMode;
