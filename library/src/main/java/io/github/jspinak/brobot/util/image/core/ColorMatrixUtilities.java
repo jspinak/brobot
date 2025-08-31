@@ -98,8 +98,9 @@ public class ColorMatrixUtilities {
     public Mat vConcatToSingleColumnPerChannel(List<Mat> mats) {
         if (mats.isEmpty()) return new Mat();
         MatVector columnMats = new MatVector(3);
+        // Initialize empty Mats for each channel
         for (int i=0; i<3; i++) {
-            columnMats.put(i, mats.get(0));
+            columnMats.put(i, new Mat());
         }
         for (int m=0; m<mats.size(); m++) {
             Mat colMat = mats.get(m).reshape(0, (int) mats.get(m).total());
@@ -112,7 +113,10 @@ public class ColorMatrixUtilities {
                 }
             }
         }
-        return mErge(columnMats);
+        // Horizontally concatenate the 3 single-channel columns
+        Mat result = new Mat();
+        hconcat(columnMats, result);
+        return result;
     }
 
     /**
@@ -350,12 +354,18 @@ public class ColorMatrixUtilities {
      */
     public MatVector mEanStdDev(Mat src, Mat mask) {
         MatVector meanStddev = new MatVector(2);
+        if (src.empty()) {
+            meanStddev.put(0, new Mat());
+            meanStddev.put(1, new Mat());
+            return meanStddev;
+        }
         Mat mean = new Mat(src.size(), src.type());
         Mat stddev = new Mat(src.size(), src.type());
         MatVector maskVector = sPlit(mask);
-        meanStdDev(src, mean, stddev, maskVector.get(0));
-        meanStdDev(src, mean, stddev, maskVector.get(1));
-        meanStdDev(src, mean, stddev, maskVector.get(2));
+        // Remove redundant meanStdDev calls that were overwriting results
+        // meanStdDev(src, mean, stddev, maskVector.get(0));
+        // meanStdDev(src, mean, stddev, maskVector.get(1));
+        // meanStdDev(src, mean, stddev, maskVector.get(2));
         MatVector srcVector = sPlit(src);
         MatVector meanVector = new MatVector(3);
         MatVector stddevVector = new MatVector(3);

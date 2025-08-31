@@ -93,8 +93,8 @@ public class EmptyMatch extends Match {
             return this;
         }
 
-        public Match build() {
-            Match match = new Match();
+        public EmptyMatch build() {
+            EmptyMatch match = new EmptyMatch();
             match.setName(name);
             match.setRegion(region);
             match.setSearchImage(searchImage);
