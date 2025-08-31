@@ -70,13 +70,13 @@ tasks.named('test', Test) {
     maxHeapSize = '6g'
     jvmArgs '-XX:MaxRAMPercentage=80.0', '-XX:+UseG1GC', '-Dorg.bytedeco.javacpp.maxphysicalbytes=10G', '-Dorg.bytedeco.javacpp.maxbytes=0', '-Dorg.bytedeco.javacpp.cachedir=/tmp/javacpp-cache'
     
-    // Reduced timeout for debugging hanging issues
-    timeout = Duration.ofSeconds(30)
+    // Increased timeout to prevent premature test failures
+    timeout = Duration.ofMinutes(10)
     
     // Configure parallel test execution for better performance
-    // TEMPORARILY REDUCED FOR DEBUGGING
-    maxParallelForks = 1
-    forkEvery = 0 // Don't fork new JVMs
+    // Use half of available CPU cores for optimal balance
+    maxParallelForks = Math.max(1, Runtime.runtime.availableProcessors().intdiv(2))
+    forkEvery = 20 // Fork new JVM after every 20 tests to prevent memory buildup
     
     // Configure test output
     testLogging {
@@ -124,16 +124,16 @@ tasks.register('integrationTest', Test) {
     environment 'BROBOT_ALLOW_SCREEN_CAPTURE', 'false'
     environment 'PATH', "${layout.buildDirectory.dir('natives').get().asFile.absolutePath};${System.getenv('PATH')}"
     
-    // Increase timeout for integration tests (15 minutes per test)
-    timeout = Duration.ofMinutes(15)
+    // Reasonable timeout for integration tests (20 minutes total)
+    timeout = Duration.ofMinutes(20)
     
     // Configure JVM memory for integration tests
-    maxHeapSize = '8g'
-    jvmArgs '-XX:MaxRAMPercentage=85.0', '-XX:+UseG1GC', '-Dorg.bytedeco.javacpp.maxphysicalbytes=12G'
+    maxHeapSize = '4g'
+    jvmArgs '-XX:MaxRAMPercentage=75.0', '-XX:+UseG1GC', '-Dorg.bytedeco.javacpp.maxphysicalbytes=8G', '-Dorg.bytedeco.javacpp.maxbytes=0', '-Dorg.bytedeco.javacpp.cachedir=/tmp/javacpp-cache'
     
-    // Limit parallel execution for integration tests
-    maxParallelForks = 2
-    forkEvery = 10
+    // Use optimal parallel execution for integration tests
+    maxParallelForks = Math.max(1, Runtime.runtime.availableProcessors().intdiv(3))
+    forkEvery = 5
     
     testLogging {
         events "passed", "skipped", "failed"
