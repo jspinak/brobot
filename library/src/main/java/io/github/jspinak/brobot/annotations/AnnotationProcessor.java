@@ -199,6 +199,19 @@ public class AnnotationProcessor {
         log.debug("Registering transition: {} -> {} (priority: {})", 
                  fromName, toName, priority);
         
+        // Get the state IDs
+        Optional<io.github.jspinak.brobot.model.state.State> fromStateOpt = stateService.getState(fromName);
+        Optional<io.github.jspinak.brobot.model.state.State> toStateOpt = stateService.getState(toName);
+        
+        if (fromStateOpt.isEmpty() || toStateOpt.isEmpty()) {
+            log.error("Cannot register transition: state not found. From: {} (found: {}), To: {} (found: {})", 
+                     fromName, fromStateOpt.isPresent(), toName, toStateOpt.isPresent());
+            return;
+        }
+        
+        Long fromStateId = fromStateOpt.get().getId();
+        Long toStateId = toStateOpt.get().getId();
+        
         // Create a JavaStateTransition that delegates to the annotated method
         JavaStateTransition javaTransition = new JavaStateTransition.Builder()
                 .setFunction(() -> {
@@ -217,16 +230,29 @@ public class AnnotationProcessor {
                         return false;
                     }
                 })
-                .addToActivate(toName)
+                .addToActivate(toName)  // Use state name, it will be converted to ID
                 .setScore(priority)
                 .build();
         
-        // Create StateTransitions container for the from state
-        StateTransitions stateTransitions = new StateTransitions.Builder(fromName)
-                .addTransition(javaTransition)
-                .build();
+        // Get existing transitions for this state or create new container
+        Optional<StateTransitions> existingTransitions = transitionService.getTransitions(fromStateId);
+        StateTransitions stateTransitions;
         
-        // Add to joint table
+        if (existingTransitions.isPresent()) {
+            stateTransitions = existingTransitions.get();
+            stateTransitions.addTransition(javaTransition);
+        } else {
+            // Create new StateTransitions container for the from state
+            stateTransitions = new StateTransitions.Builder(fromName)
+                    .addTransition(javaTransition)
+                    .build();
+            stateTransitions.setStateId(fromStateId);
+        }
+        
+        // Register with StateTransitionStore repository
+        transitionService.getStateTransitionsRepository().add(stateTransitions);
+        
+        // Also add to joint table for path finding
         jointTable.addToJointTable(stateTransitions);
     }
     
