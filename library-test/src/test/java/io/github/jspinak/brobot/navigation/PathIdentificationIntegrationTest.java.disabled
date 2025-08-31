@@ -1,0 +1,479 @@
+package io.github.jspinak.brobot.navigation;
+
+import io.github.jspinak.brobot.BrobotTestApplication;
+import io.github.jspinak.brobot.action.Action;
+import io.github.jspinak.brobot.action.ActionResult;
+import io.github.jspinak.brobot.model.state.State;
+import io.github.jspinak.brobot.model.transition.StateTransitionStore;
+import io.github.jspinak.brobot.navigation.path.Path;
+import io.github.jspinak.brobot.navigation.path.PathFinder;
+import io.github.jspinak.brobot.navigation.path.Paths;
+import io.github.jspinak.brobot.navigation.service.StateService;
+import io.github.jspinak.brobot.navigation.transition.JavaStateTransition;
+import io.github.jspinak.brobot.navigation.transition.StateTransitions;
+import io.github.jspinak.brobot.navigation.transition.StateTransitionsJointTable;
+import io.github.jspinak.brobot.statemanagement.StateMemory;
+import io.github.jspinak.brobot.tools.builder.StateStructureBuilder;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.TestPropertySource;
+
+import java.util.*;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+
+/**
+ * Integration tests for path identification and scoring.
+ * Tests the complete state structure setup and path finding.
+ */
+@SpringBootTest(classes = BrobotTestApplication.class)
+@TestPropertySource(properties = {
+    "brobot.logging.verbosity=QUIET",
+    "brobot.mock=true"
+})
+@DisplayName("Path Identification Integration Tests")
+class PathIdentificationIntegrationTest {
+    
+    @Autowired
+    private StateService stateService;
+    
+    @Autowired
+    private StateTransitionStore transitionStore;
+    
+    @Autowired
+    private StateTransitionsJointTable jointTable;
+    
+    @Autowired
+    private PathFinder pathFinder;
+    
+    @Autowired
+    private StateMemory stateMemory;
+    
+    @Autowired
+    private StateStructureBuilder stateStructureBuilder;
+    
+    @MockBean
+    private Action mockAction;
+    
+    @BeforeEach
+    void setup() {
+        // Clear any existing state
+        stateService.deleteAll();
+        transitionStore.emptyRepos();
+        jointTable.emptyRepos();
+        stateMemory.clear();
+        
+        // Setup default mock behavior
+        ActionResult successResult = mock(ActionResult.class);
+        when(successResult.isSuccess()).thenReturn(true);
+        when(mockAction.perform(any(), any())).thenReturn(successResult);
+    }
+    
+    @Nested
+    @DisplayName("Simple Linear Path")
+    class SimpleLinearPath {
+        
+        @Test
+        @DisplayName("Should identify linear path A -> B -> C")
+        void testLinearPath() {
+            // Setup states
+            State stateA = new State.Builder("StateA").build();
+            State stateB = new State.Builder("StateB").build();
+            State stateC = new State.Builder("StateC").build();
+            
+            stateService.save(stateA);
+            stateService.save(stateB);
+            stateService.save(stateC);
+            
+            // Setup transitions A -> B -> C
+            StateTransitions transitionsA = new StateTransitions.Builder("StateA")
+                .addTransition(() -> true, "StateB")
+                .build();
+            transitionsA.setStateId(stateA.getId());
+            
+            StateTransitions transitionsB = new StateTransitions.Builder("StateB")
+                .addTransition(() -> true, "StateC")
+                .build();
+            transitionsB.setStateId(stateB.getId());
+            
+            StateTransitions transitionsC = new StateTransitions.Builder("StateC")
+                .build();
+            transitionsC.setStateId(stateC.getId());
+            
+            transitionStore.add(transitionsA);
+            transitionStore.add(transitionsB);
+            transitionStore.add(transitionsC);
+            
+            // Build joint table
+            jointTable.addToJointTable(transitionsA);
+            jointTable.addToJointTable(transitionsB);
+            jointTable.addToJointTable(transitionsC);
+            
+            // Find path from A to C
+            Set<Long> fromStates = new HashSet<>(Arrays.asList(stateA.getId()));
+            Paths paths = pathFinder.getPathsToState(fromStates, stateC.getId());
+            
+            assertFalse(paths.isEmpty());
+            assertEquals(1, paths.size());
+            
+            Path path = paths.get(0);
+            assertEquals(3, path.size());
+            assertEquals(stateA.getId(), path.get(0));
+            assertEquals(stateB.getId(), path.get(1));
+            assertEquals(stateC.getId(), path.get(2));
+        }
+    }
+    
+    @Nested
+    @DisplayName("Multiple Paths with Scoring")
+    class MultiplePathsWithScoring {
+        
+        @Test
+        @DisplayName("Should identify multiple paths and apply scores")
+        void testMultiplePathsWithScores() {
+            // Create diamond pattern: A -> B,C -> D
+            State stateA = new State.Builder("StateA").build();
+            State stateB = new State.Builder("StateB").setScore(10).build();
+            State stateC = new State.Builder("StateC").setScore(5).build();
+            State stateD = new State.Builder("StateD").build();
+            
+            stateService.save(stateA);
+            stateService.save(stateB);
+            stateService.save(stateC);
+            stateService.save(stateD);
+            
+            // A can go to B or C
+            StateTransitions transitionsA = new StateTransitions.Builder("StateA")
+                .addTransition(() -> true, "StateB", "StateC")
+                .build();
+            transitionsA.setStateId(stateA.getId());
+            
+            // B goes to D
+            StateTransitions transitionsB = new StateTransitions.Builder("StateB")
+                .addTransition(() -> true, "StateD")
+                .build();
+            transitionsB.setStateId(stateB.getId());
+            
+            // C goes to D
+            StateTransitions transitionsC = new StateTransitions.Builder("StateC")
+                .addTransition(() -> true, "StateD")
+                .build();
+            transitionsC.setStateId(stateC.getId());
+            
+            StateTransitions transitionsD = new StateTransitions.Builder("StateD").build();
+            transitionsD.setStateId(stateD.getId());
+            
+            transitionStore.add(transitionsA);
+            transitionStore.add(transitionsB);
+            transitionStore.add(transitionsC);
+            transitionStore.add(transitionsD);
+            
+            // Build joint table
+            jointTable.addToJointTable(transitionsA);
+            jointTable.addToJointTable(transitionsB);
+            jointTable.addToJointTable(transitionsC);
+            jointTable.addToJointTable(transitionsD);
+            
+            // Find paths from A to D
+            Set<Long> fromStates = new HashSet<>(Arrays.asList(stateA.getId()));
+            Paths paths = pathFinder.getPathsToState(fromStates, stateD.getId());
+            
+            assertEquals(2, paths.size());
+            
+            // Path through B should have higher score (worse)
+            Path pathThroughB = paths.getAll().stream()
+                .filter(p -> p.contains(stateB.getId()))
+                .findFirst().orElseThrow();
+            
+            Path pathThroughC = paths.getAll().stream()
+                .filter(p -> p.contains(stateC.getId()))
+                .findFirst().orElseThrow();
+            
+            assertTrue(pathThroughB.getScore() > pathThroughC.getScore());
+            
+            // Best path should be through C (lower score)
+            Path bestPath = paths.getBestPath();
+            assertTrue(bestPath.contains(stateC.getId()));
+            assertFalse(bestPath.contains(stateB.getId()));
+        }
+    }
+    
+    @Nested
+    @DisplayName("Complex Graph Navigation")
+    class ComplexGraphNavigation {
+        
+        @Test
+        @DisplayName("Should handle complex graph with cycles and multiple paths")
+        void testComplexGraph() {
+            // Create complex graph
+            State home = new State.Builder("Home").build();
+            State menu = new State.Builder("Menu").setScore(2).build();
+            State settings = new State.Builder("Settings").setScore(5).build();
+            State profile = new State.Builder("Profile").setScore(3).build();
+            State help = new State.Builder("Help").setScore(4).build();
+            
+            stateService.save(home);
+            stateService.save(menu);
+            stateService.save(settings);
+            stateService.save(profile);
+            stateService.save(help);
+            
+            // Home -> Menu, Settings
+            StateTransitions homeTransitions = new StateTransitions.Builder("Home")
+                .addTransition(() -> true, "Menu", "Settings")
+                .build();
+            homeTransitions.setStateId(home.getId());
+            
+            // Menu -> Settings, Profile, Home (cycle)
+            StateTransitions menuTransitions = new StateTransitions.Builder("Menu")
+                .addTransition(() -> true, "Settings", "Profile", "Home")
+                .build();
+            menuTransitions.setStateId(menu.getId());
+            
+            // Settings -> Help, Profile
+            StateTransitions settingsTransitions = new StateTransitions.Builder("Settings")
+                .addTransition(() -> true, "Help", "Profile")
+                .build();
+            settingsTransitions.setStateId(settings.getId());
+            
+            // Profile -> Help
+            StateTransitions profileTransitions = new StateTransitions.Builder("Profile")
+                .addTransition(() -> true, "Help")
+                .build();
+            profileTransitions.setStateId(profile.getId());
+            
+            // Help is terminal
+            StateTransitions helpTransitions = new StateTransitions.Builder("Help").build();
+            helpTransitions.setStateId(help.getId());
+            
+            transitionStore.add(homeTransitions);
+            transitionStore.add(menuTransitions);
+            transitionStore.add(settingsTransitions);
+            transitionStore.add(profileTransitions);
+            transitionStore.add(helpTransitions);
+            
+            // Build joint table
+            jointTable.addToJointTable(homeTransitions);
+            jointTable.addToJointTable(menuTransitions);
+            jointTable.addToJointTable(settingsTransitions);
+            jointTable.addToJointTable(profileTransitions);
+            jointTable.addToJointTable(helpTransitions);
+            
+            // Find paths from Home to Help
+            Set<Long> fromStates = new HashSet<>(Arrays.asList(home.getId()));
+            Paths paths = pathFinder.getPathsToState(fromStates, help.getId());
+            
+            assertFalse(paths.isEmpty());
+            assertTrue(paths.size() >= 3); // Multiple paths exist
+            
+            // Best path should be shortest with lowest score
+            Path bestPath = paths.getBestPath();
+            assertNotNull(bestPath);
+            assertTrue(bestPath.contains(home.getId()));
+            assertTrue(bestPath.contains(help.getId()));
+        }
+    }
+    
+    @Nested
+    @DisplayName("State Structure Builder Integration")
+    class StateStructureBuilderIntegration {
+        
+        @Test
+        @DisplayName("Should build complete state structure with transitions")
+        void testStateStructureBuilder() {
+            // Use StateStructureBuilder to create states
+            stateStructureBuilder.init("LoginPage")
+                .addImage("logo.png")
+                .addTransitionImage("loginButton.png", "HomePage")
+                .build();
+            
+            stateStructureBuilder.init("HomePage")
+                .addImage("banner.png")
+                .addTransitionImage("profileButton.png", "ProfilePage")
+                .addTransitionImage("settingsButton.png", "SettingsPage")
+                .build();
+            
+            stateStructureBuilder.init("ProfilePage")
+                .addImage("avatar.png")
+                .addTransitionImage("backButton.png", "HomePage")
+                .build();
+            
+            stateStructureBuilder.init("SettingsPage")
+                .addImage("settings.png")
+                .build();
+            
+            // Verify states were created
+            State loginState = stateService.findByName("LoginPage").orElseThrow();
+            State homeState = stateService.findByName("HomePage").orElseThrow();
+            State profileState = stateService.findByName("ProfilePage").orElseThrow();
+            State settingsState = stateService.findByName("SettingsPage").orElseThrow();
+            
+            // Build joint table from transitions
+            transitionStore.getAll().forEach(jointTable::addToJointTable);
+            
+            // Find path from Login to Settings
+            Set<Long> fromStates = new HashSet<>(Arrays.asList(loginState.getId()));
+            Paths paths = pathFinder.getPathsToState(fromStates, settingsState.getId());
+            
+            assertFalse(paths.isEmpty());
+            
+            Path path = paths.getBestPath();
+            assertEquals(3, path.size());
+            assertEquals(loginState.getId(), path.get(0));
+            assertEquals(homeState.getId(), path.get(1));
+            assertEquals(settingsState.getId(), path.get(2));
+        }
+    }
+    
+    @Nested
+    @DisplayName("Hidden States and Visibility")
+    class HiddenStatesAndVisibility {
+        
+        @Test
+        @DisplayName("Should handle hidden states in path finding")
+        void testHiddenStates() {
+            // Create states where some hide others
+            State mainPage = new State.Builder("MainPage").build();
+            State modal = new State.Builder("Modal")
+                .withHiddenStateIds(mainPage.getId())
+                .build();
+            State subModal = new State.Builder("SubModal")
+                .withHiddenStateIds(modal.getId(), mainPage.getId())
+                .build();
+            
+            stateService.save(mainPage);
+            stateService.save(modal);
+            stateService.save(subModal);
+            
+            // Setup transitions
+            StateTransitions mainTransitions = new StateTransitions.Builder("MainPage")
+                .addTransition(() -> true, "Modal")
+                .build();
+            mainTransitions.setStateId(mainPage.getId());
+            
+            StateTransitions modalTransitions = new StateTransitions.Builder("Modal")
+                .addTransition(() -> true, "SubModal")
+                .setStaysVisibleAfterTransition(true) // Modal stays visible
+                .build();
+            modalTransitions.setStateId(modal.getId());
+            
+            StateTransitions subModalTransitions = new StateTransitions.Builder("SubModal")
+                .build();
+            subModalTransitions.setStateId(subModal.getId());
+            
+            transitionStore.add(mainTransitions);
+            transitionStore.add(modalTransitions);
+            transitionStore.add(subModalTransitions);
+            
+            // Build joint table
+            jointTable.addToJointTable(mainTransitions);
+            jointTable.addToJointTable(modalTransitions);
+            jointTable.addToJointTable(subModalTransitions);
+            
+            // When modal is active, it hides mainPage
+            jointTable.addTransitionsToHiddenStates(modal);
+            
+            // Find path from main to submodal
+            Set<Long> fromStates = new HashSet<>(Arrays.asList(mainPage.getId()));
+            Paths paths = pathFinder.getPathsToState(fromStates, subModal.getId());
+            
+            assertFalse(paths.isEmpty());
+            Path path = paths.getBestPath();
+            assertEquals(3, path.size());
+            assertTrue(path.contains(modal.getId()));
+        }
+    }
+    
+    @Nested
+    @DisplayName("Path Scoring Algorithms")
+    class PathScoringAlgorithms {
+        
+        @Test
+        @DisplayName("Should calculate path scores based on state weights")
+        void testPathScoring() {
+            // Create states with different scores
+            State start = new State.Builder("Start").setScore(0).build();
+            State expensive = new State.Builder("Expensive").setScore(100).build();
+            State cheap = new State.Builder("Cheap").setScore(10).build();
+            State medium = new State.Builder("Medium").setScore(50).build();
+            State end = new State.Builder("End").setScore(0).build();
+            
+            stateService.save(start);
+            stateService.save(expensive);
+            stateService.save(cheap);
+            stateService.save(medium);
+            stateService.save(end);
+            
+            // Create multiple paths to end
+            // Path 1: Start -> Expensive -> End (score: 100)
+            // Path 2: Start -> Cheap -> Medium -> End (score: 60)
+            // Path 3: Start -> Medium -> End (score: 50)
+            
+            StateTransitions startTransitions = new StateTransitions.Builder("Start")
+                .addTransition(() -> true, "Expensive", "Cheap", "Medium")
+                .build();
+            startTransitions.setStateId(start.getId());
+            
+            StateTransitions expensiveTransitions = new StateTransitions.Builder("Expensive")
+                .addTransition(() -> true, "End")
+                .build();
+            expensiveTransitions.setStateId(expensive.getId());
+            
+            StateTransitions cheapTransitions = new StateTransitions.Builder("Cheap")
+                .addTransition(() -> true, "Medium")
+                .build();
+            cheapTransitions.setStateId(cheap.getId());
+            
+            StateTransitions mediumTransitions = new StateTransitions.Builder("Medium")
+                .addTransition(() -> true, "End")
+                .build();
+            mediumTransitions.setStateId(medium.getId());
+            
+            StateTransitions endTransitions = new StateTransitions.Builder("End").build();
+            endTransitions.setStateId(end.getId());
+            
+            transitionStore.add(startTransitions);
+            transitionStore.add(expensiveTransitions);
+            transitionStore.add(cheapTransitions);
+            transitionStore.add(mediumTransitions);
+            transitionStore.add(endTransitions);
+            
+            // Build joint table
+            jointTable.addToJointTable(startTransitions);
+            jointTable.addToJointTable(expensiveTransitions);
+            jointTable.addToJointTable(cheapTransitions);
+            jointTable.addToJointTable(mediumTransitions);
+            jointTable.addToJointTable(endTransitions);
+            
+            // Find all paths
+            Set<Long> fromStates = new HashSet<>(Arrays.asList(start.getId()));
+            Paths paths = pathFinder.getPathsToState(fromStates, end.getId());
+            
+            assertEquals(3, paths.size());
+            
+            // Best path should be Start -> Medium -> End (lowest total score)
+            Path bestPath = paths.getBestPath();
+            assertEquals(3, bestPath.size());
+            assertTrue(bestPath.contains(medium.getId()));
+            assertFalse(bestPath.contains(expensive.getId()));
+            assertFalse(bestPath.contains(cheap.getId()));
+            
+            // Verify path scores are ordered correctly
+            List<Path> allPaths = paths.getAll();
+            allPaths.sort(Comparator.comparingInt(Path::getScore));
+            
+            Path lowestScore = allPaths.get(0);
+            Path highestScore = allPaths.get(allPaths.size() - 1);
+            
+            assertTrue(lowestScore.getScore() < highestScore.getScore());
+            assertTrue(highestScore.contains(expensive.getId()));
+        }
+    }
+}
