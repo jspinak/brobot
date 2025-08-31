@@ -6,7 +6,7 @@ import io.github.jspinak.brobot.navigation.service.StateTransitionService;
 import io.github.jspinak.brobot.statemanagement.InitialStates;
 import io.github.jspinak.brobot.test.BrobotTestBase;
 import io.github.jspinak.brobot.test.TestCategories;
-import io.github.jspinak.brobot.model.state.State;
+// Importing State model - using full class name to avoid conflicts with annotation
 import org.junit.jupiter.api.*;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -83,8 +83,8 @@ public class AnnotationProcessorTest extends BrobotTestBase {
     
     @BeforeEach
     @Override
-    public void setupTest(TestInfo testInfo) {
-        super.setupTest(testInfo);
+    public void setupTest() {
+        super.setupTest();
         mocks = MockitoAnnotations.openMocks(this);
         
         processor = new AnnotationProcessor(
@@ -118,7 +118,7 @@ public class AnnotationProcessorTest extends BrobotTestBase {
             TestState testStateBean = new TestState();
             stateBeans.put("testState", testStateBean);
             
-            State mockState = mock(State.class);
+            io.github.jspinak.brobot.model.state.State mockState = mock(io.github.jspinak.brobot.model.state.State.class);
             when(mockState.getName()).thenReturn("TestState");
             
             when(applicationContext.getBeansWithAnnotation(io.github.jspinak.brobot.annotations.State.class))
@@ -146,7 +146,7 @@ public class AnnotationProcessorTest extends BrobotTestBase {
             TestState testStateBean = new TestState();
             stateBeans.put("testState", testStateBean);
             
-            State mockState = mock(State.class);
+            io.github.jspinak.brobot.model.state.State mockState = mock(io.github.jspinak.brobot.model.state.State.class);
             when(mockState.getName()).thenReturn("TestState");
             
             when(applicationContext.getBeansWithAnnotation(io.github.jspinak.brobot.annotations.State.class))
@@ -172,7 +172,7 @@ public class AnnotationProcessorTest extends BrobotTestBase {
             ProfileState profileStateBean = new ProfileState();
             stateBeans.put("profileState", profileStateBean);
             
-            State mockState = mock(State.class);
+            io.github.jspinak.brobot.model.state.State mockState = mock(io.github.jspinak.brobot.model.state.State.class);
             when(mockState.getName()).thenReturn("ProfileState");
             
             when(applicationContext.getBeansWithAnnotation(io.github.jspinak.brobot.annotations.State.class))
@@ -209,9 +209,9 @@ public class AnnotationProcessorTest extends BrobotTestBase {
             TestTransition testTransition = new TestTransition();
             transitionBeans.put("testTransition", testTransition);
             
-            State mockState1 = mock(State.class);
+            io.github.jspinak.brobot.model.state.State mockState1 = mock(io.github.jspinak.brobot.model.state.State.class);
             when(mockState1.getName()).thenReturn("TestState");
-            State mockState2 = mock(State.class);
+            io.github.jspinak.brobot.model.state.State mockState2 = mock(io.github.jspinak.brobot.model.state.State.class);
             when(mockState2.getName()).thenReturn("SimpleState");
             
             when(applicationContext.getBeansWithAnnotation(io.github.jspinak.brobot.annotations.State.class))
@@ -254,7 +254,7 @@ public class AnnotationProcessorTest extends BrobotTestBase {
             Map<String, Object> stateBeans = new HashMap<>();
             stateBeans.put("testState", new TestState());
             
-            State mockState = mock(State.class);
+            io.github.jspinak.brobot.model.state.State mockState = mock(io.github.jspinak.brobot.model.state.State.class);
             when(mockState.getName()).thenReturn("TestState");
             
             when(applicationContext.getBeansWithAnnotation(io.github.jspinak.brobot.annotations.State.class))
@@ -311,7 +311,7 @@ public class AnnotationProcessorTest extends BrobotTestBase {
             Map<String, Object> stateBeans = new HashMap<>();
             stateBeans.put("testState", new TestState());
             
-            State mockState = mock(State.class);
+            io.github.jspinak.brobot.model.state.State mockState = mock(io.github.jspinak.brobot.model.state.State.class);
             when(mockState.getName()).thenReturn("TestState");
             
             when(applicationContext.getBeansWithAnnotation(io.github.jspinak.brobot.annotations.State.class))
@@ -342,7 +342,7 @@ public class AnnotationProcessorTest extends BrobotTestBase {
             TestState testStateBean = new TestState();
             stateBeans.put("testState", testStateBean);
             
-            State mockState = mock(State.class);
+            io.github.jspinak.brobot.model.state.State mockState = mock(io.github.jspinak.brobot.model.state.State.class);
             when(mockState.getName()).thenReturn("TestState");
             
             when(applicationContext.getBeansWithAnnotation(io.github.jspinak.brobot.annotations.State.class))
@@ -368,7 +368,7 @@ public class AnnotationProcessorTest extends BrobotTestBase {
             SimpleState simpleStateBean = new SimpleState();
             stateBeans.put("simpleState", simpleStateBean);
             
-            State mockState = mock(State.class);
+            io.github.jspinak.brobot.model.state.State mockState = mock(io.github.jspinak.brobot.model.state.State.class);
             when(mockState.getName()).thenReturn("Simple"); // "State" suffix removed
             
             when(applicationContext.getBeansWithAnnotation(io.github.jspinak.brobot.annotations.State.class))
