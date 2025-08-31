@@ -4,7 +4,7 @@ import io.github.jspinak.brobot.BrobotTestApplication;
 import io.github.jspinak.brobot.test.BrobotTestBase;
 import io.github.jspinak.brobot.annotations.State;
 import io.github.jspinak.brobot.navigation.service.StateService;
-import io.github.jspinak.brobot.navigation.service.StateDetector;
+import io.github.jspinak.brobot.statemanagement.StateDetector;
 import io.github.jspinak.brobot.statemanagement.StateMemory;
 import io.github.jspinak.brobot.action.Action;
 import io.github.jspinak.brobot.action.ActionResult;

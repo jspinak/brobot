@@ -7,6 +7,7 @@ import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.stereotype.Component;
 
 import java.lang.annotation.Annotation;
+import java.lang.annotation.Documented;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -74,8 +75,8 @@ public class TransitionAnnotationTest extends BrobotTestBase {
     
     @BeforeEach
     @Override
-    public void setupTest(TestInfo testInfo) {
-        super.setupTest(testInfo);
+    public void setupTest() {
+        super.setupTest();
     }
     
     @Nested
