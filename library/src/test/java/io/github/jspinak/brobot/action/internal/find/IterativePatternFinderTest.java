@@ -4,6 +4,7 @@ import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ActionConfig;
 import io.github.jspinak.brobot.action.basic.find.FindAll;
 import io.github.jspinak.brobot.action.internal.execution.ActionLifecycleManagement;
+import io.github.jspinak.brobot.action.internal.region.DynamicRegionResolver;
 import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.model.element.Scene;
 import io.github.jspinak.brobot.model.element.Pattern;
@@ -44,6 +45,9 @@ public class IterativePatternFinderTest extends BrobotTestBase {
     private FindAll findAll;
     
     @Mock
+    private DynamicRegionResolver dynamicRegionResolver;
+    
+    @Mock
     private StateImage stateImage;
     
     @Mock
@@ -66,7 +70,7 @@ public class IterativePatternFinderTest extends BrobotTestBase {
     public void setupTest() {
         super.setupTest();
         mockCloseable = MockitoAnnotations.openMocks(this);
-        iterativePatternFinder = new IterativePatternFinder(actionLifecycleManagement, findAll);
+        iterativePatternFinder = new IterativePatternFinder(actionLifecycleManagement, findAll, dynamicRegionResolver);
         
         // Create a real Mat for scene
         sceneMat = new Mat(100, 100, CV_8UC3);
