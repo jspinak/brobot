@@ -39,7 +39,7 @@ public class TestLoggerFactory {
         BrobotLogger logger = new BrobotLogger(context, router);
         
         // Step 4: Initialize console reporter
-        ConsoleReporterInitializer reporterInit = new ConsoleReporterInitializer(logger);
+        ConsoleReporterInitializer reporterInit = new ConsoleReporterInitializer(logger, verbosityConfig);
         
         return new LoggingSystem(context, logSink, formatter, router, logger, reporterInit);
     }
