@@ -5,7 +5,7 @@ import io.github.jspinak.brobot.test.BrobotTestBase;
 import io.github.jspinak.brobot.annotations.State;
 import io.github.jspinak.brobot.action.internal.region.SearchRegionDependencyRegistry;
 import io.github.jspinak.brobot.action.internal.region.DynamicRegionResolver;
-import io.github.jspinak.brobot.stateregistration.SearchRegionDependencyInitializer;
+import io.github.jspinak.brobot.statemanagement.SearchRegionDependencyInitializer;
 import io.github.jspinak.brobot.navigation.service.StateService;
 import io.github.jspinak.brobot.statemanagement.StateMemory;
 import io.github.jspinak.brobot.action.Action;

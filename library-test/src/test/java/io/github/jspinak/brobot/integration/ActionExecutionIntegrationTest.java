@@ -8,8 +8,8 @@ import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
 import io.github.jspinak.brobot.action.basic.find.FindStrategy;
 import io.github.jspinak.brobot.action.basic.click.ClickOptions;
 import io.github.jspinak.brobot.action.basic.type.TypeOptions;
-import io.github.jspinak.brobot.action.basic.drag.DragOptions;
-import io.github.jspinak.brobot.action.basic.move.MoveOptions;
+import io.github.jspinak.brobot.action.composite.drag.DragOptions;
+import io.github.jspinak.brobot.action.basic.mouse.MouseMoveOptions;
 import io.github.jspinak.brobot.action.basic.highlight.HighlightOptions;
 import io.github.jspinak.brobot.model.element.Location;
 import io.github.jspinak.brobot.model.element.Position;
@@ -75,10 +75,7 @@ public class ActionExecutionIntegrationTest extends BrobotTestBase {
         iconImage = new StateImage.Builder()
             .setName("TestIcon")
             .setDefinedRegion(Region.builder()
-                .withX(100)
-                .withY(100)
-                .withW(50)
-                .withH(50)
+                .withRegion(100, 100, 50, 50)
                 .build())
             .build();
             
@@ -183,7 +180,7 @@ public class ActionExecutionIntegrationTest extends BrobotTestBase {
         
         Location targetLocation = new Location(Positions.Name.MIDDLEMIDDLE);
         
-        MoveOptions moveOptions = new MoveOptions.Builder()
+        MouseMoveOptions moveOptions = new MouseMoveOptions.Builder()
             .setLocation(targetLocation)
             .build();
             
@@ -231,10 +228,7 @@ public class ActionExecutionIntegrationTest extends BrobotTestBase {
         log.info("=== TESTING ACTION WITH SEARCH REGION ===");
         
         Region searchRegion = Region.builder()
-            .withX(50)
-            .withY(50)
-            .withW(200)
-            .withH(200)
+            .withRegion(50, 50, 200, 200)
             .build();
         
         PatternFindOptions findInRegion = new PatternFindOptions.Builder()
