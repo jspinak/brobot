@@ -236,7 +236,8 @@ public class AnnotationProcessor {
         
         // CRITICAL FIX: Convert state names to IDs for the joint table
         // The joint table needs state IDs, not names
-        javaTransition.setActivate(Set.of(toStateId));
+        // Use HashSet to create a mutable set
+        javaTransition.setActivate(new HashSet<>(Set.of(toStateId)));
         
         // Get existing transitions for this state or create new container
         Optional<StateTransitions> existingTransitions = transitionService.getTransitions(fromStateId);

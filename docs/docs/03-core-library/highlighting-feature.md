@@ -1,7 +1,7 @@
-# Image Highlighting Feature for Claude Automator
+# Image Highlighting Feature
 
 ## Overview
-The claude-automator project now includes enhanced highlighting capabilities for found images. When Brobot finds patterns on the screen, it can visually highlight them to provide immediate feedback during automation.
+Brobot includes comprehensive highlighting capabilities for found images and UI elements. When patterns are found on the screen, they can be visually highlighted to provide immediate feedback during automation. The highlighting system now supports **custom colors per StateImage**, allowing different UI elements to be highlighted in different colors for better visual differentiation.
 
 ## Configuration
 
@@ -94,6 +94,12 @@ brobot.highlight.performance.max-concurrent-highlights=3
 - Red indicators for failed pattern matches
 - Cross-mark overlay for clear failure indication
 
+### 6. **Custom Color Per StateImage** (New Feature)
+- Each StateImage can have its own highlight color
+- Set via `StateImage.Builder.setHighlightColor()`
+- Allows visual differentiation between different UI elements
+- Falls back to default color if custom color is invalid
+
 ## Usage
 
 ### Activating Highlighting
@@ -118,6 +124,66 @@ Activate specific highlighting profiles:
 Override specific properties at runtime:
 ```bash
 ./gradlew bootRun -Dbrobot.highlight.find.duration=2.0 -Dbrobot.highlight.find.color=#FF00FF
+```
+
+### Setting Custom Colors for StateImages
+
+You can now specify custom highlight colors for individual StateImages using the builder pattern:
+
+```java
+// Create a StateImage with blue highlighting
+StateImage iconImage = new StateImage.Builder()
+    .addPatterns("icon-1.png", "icon-2.png")
+    .setName("MyIcon")
+    .setHighlightColor("#0000FF")  // Blue highlight
+    .build();
+
+// Create a StateImage with red highlighting
+StateImage errorImage = new StateImage.Builder()
+    .addPatterns("error-indicator.png")
+    .setName("ErrorIndicator")
+    .setHighlightColor("#FF0000")  // Red highlight
+    .build();
+
+// Create a StateImage with default highlighting (uses global config)
+StateImage normalImage = new StateImage.Builder()
+    .addPatterns("normal-element.png")
+    .setName("NormalElement")
+    // No setHighlightColor() - uses default from properties
+    .build();
+```
+
+#### Real-World Example: Claude Automator
+
+```java
+public class WorkingState {
+    private final StateImage claudeIcon;
+    
+    public WorkingState() {
+        claudeIcon = new StateImage.Builder()
+            .addPatterns("working/claude-icon-1", 
+                        "working/claude-icon-2", 
+                        "working/claude-icon-3", 
+                        "working/claude-icon-4")
+            .setName("ClaudeIcon")
+            .setHighlightColor("#0000FF")  // Blue for icon
+            .build();
+    }
+}
+
+public class PromptState {
+    private final StateImage claudePrompt;
+    
+    public PromptState() {
+        claudePrompt = new StateImage.Builder()
+            .addPatterns("prompt/claude-prompt-1",
+                        "prompt/claude-prompt-2",
+                        "prompt/claude-prompt-3")
+            .setName("ClaudePrompt")
+            // Uses default green color from properties
+            .build();
+    }
+}
 ```
 
 ### Testing Highlighting
