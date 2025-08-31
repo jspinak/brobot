@@ -41,8 +41,7 @@ public class DynamicPixelFinderTest extends BrobotTestBase {
     private Mat testMat3;
     
     @BeforeEach
-    @Override
-    public void setupTest() {
+    public void setUp() {
         super.setupTest();
         
         // Create test matrices with different values

@@ -10,7 +10,6 @@ import io.github.jspinak.brobot.action.Action;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
-import io.github.jspinak.brobot.action.basic.find.FindStrategy;
 import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.model.state.StateString;
 import io.github.jspinak.brobot.model.state.special.SpecialStateType;
@@ -236,6 +235,7 @@ public class StateDetectionIntegrationTest extends BrobotTestBase {
         DashboardState dashboard = applicationContext.getBean(DashboardState.class);
         
         PatternFindOptions findOptions = new PatternFindOptions.Builder()
+            .setStrategy(PatternFindOptions.Strategy.FIRST)
             .build();
         
         ObjectCollection objects = new ObjectCollection.Builder()
