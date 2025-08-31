@@ -66,25 +66,25 @@ public class AnnotationProcessorTest extends BrobotTestBase {
     private AutoCloseable mocks;
     
     // Test state classes
-    @State(name = "TestState", initial = true, priority = 200)
+    @io.github.jspinak.brobot.annotations.State(name = "TestState", initial = true)
     static class TestState {}
     
-    @State
+    @io.github.jspinak.brobot.annotations.State
     static class SimpleState {}
     
-    @State(profiles = {"test", "dev"})
+    @io.github.jspinak.brobot.annotations.State(profiles = {"test", "dev"})
     static class ProfileState {}
     
     // Test transition class
-    @Transition(from = TestState.class, to = SimpleState.class)
+    @io.github.jspinak.brobot.annotations.Transition(from = TestState.class, to = SimpleState.class)
     static class TestTransition {
         public boolean execute() { return true; }
     }
     
     @BeforeEach
     @Override
-    public void setupTest(TestInfo testInfo) {
-        super.setupTest(testInfo);
+    public void setupTest() {
+        super.setupTest();
         mocks = MockitoAnnotations.openMocks(this);
         
         processor = new AnnotationProcessor(
