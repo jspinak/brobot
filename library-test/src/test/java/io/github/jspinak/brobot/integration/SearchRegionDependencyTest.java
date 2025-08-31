@@ -4,7 +4,13 @@ import io.github.jspinak.brobot.BrobotTestApplication;
 import io.github.jspinak.brobot.test.BrobotTestBase;
 import io.github.jspinak.brobot.annotations.State;
 import io.github.jspinak.brobot.action.internal.region.SearchRegionDependencyRegistry;
+<<<<<<< HEAD
 import io.github.jspinak.brobot.action.internal.region.DynamicRegionResolver;
+<<<<<<< HEAD
+=======
+=======
+>>>>>>> coverage/agent-3
+>>>>>>> main
 import io.github.jspinak.brobot.statemanagement.SearchRegionDependencyInitializer;
 import io.github.jspinak.brobot.navigation.service.StateService;
 import io.github.jspinak.brobot.statemanagement.StateMemory;
@@ -30,6 +36,7 @@ import org.springframework.test.context.TestPropertySource;
 
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -61,9 +68,6 @@ public class SearchRegionDependencyTest extends BrobotTestBase {
     @Autowired
     private SearchRegionDependencyRegistry dependencyRegistry;
     
-    @Autowired
-    private DynamicRegionResolver regionResolver;
-    
     /**
      * Menu state with base elements
      */
@@ -78,11 +82,8 @@ public class SearchRegionDependencyTest extends BrobotTestBase {
             // Base menu button at fixed location
             menuButton = new StateImage.Builder()
                 .setName("MenuButton")
-                .setDefinedRegion(Region.builder()
-                    .setX(100)
-                    .setY(50)
-                    .setW(100)
-                    .setH(30)
+                .setSearchRegionForAllPatterns(Region.builder()
+                    .withRegion(100, 50, 100, 30)
                     .build())
                 .build();
             
@@ -117,11 +118,8 @@ public class SearchRegionDependencyTest extends BrobotTestBase {
             // Dialog title bar
             dialogTitle = new StateImage.Builder()
                 .setName("DialogTitle")
-                .setDefinedRegion(Region.builder()
-                    .setX(200)
-                    .setY(150)
-                    .setW(400)
-                    .setH(40)
+                .setSearchRegionForAllPatterns(Region.builder()
+                    .withRegion(200, 150, 400, 40)
                     .build())
                 .build();
             
@@ -177,24 +175,33 @@ public class SearchRegionDependencyTest extends BrobotTestBase {
         // Get the menu dropdown which depends on menu button
         MenuState menu = applicationContext.getBean(MenuState.class);
         
-        // Verify dependency is registered
-        String dependencyKey = "Menu.MenuDropdown";
-        assertTrue(dependencyRegistry.hasDependency(dependencyKey),
-                  "MenuDropdown should have registered dependency");
+<<<<<<< HEAD
+        // Verify dependency is registered - check if MenuButton has MenuDropdown as dependent
+        Set<SearchRegionDependencyRegistry.DependentObject> dependents = 
+            dependencyRegistry.getDependents("Menu", "MenuButton");
         
-        Optional<SearchRegionDependencyRegistry.Dependency> dependency = 
-            dependencyRegistry.getDependency(dependencyKey);
+        assertFalse(dependents.isEmpty(), "MenuButton should have dependent objects");
         
-        assertTrue(dependency.isPresent(), "Dependency should exist");
-        assertEquals("Menu", dependency.get().getTargetStateName(),
-                    "Target state should be Menu");
-        assertEquals("MenuButton", dependency.get().getTargetObjectName(),
-                    "Target object should be MenuButton");
+        // Find the MenuDropdown dependent
+        boolean foundDropdown = dependents.stream()
+            .anyMatch(dep -> dep.getStateObject().getName().equals("MenuDropdown"));
         
-        log.info("Dependency registered: {} depends on {}.{}", 
-                dependencyKey, 
-                dependency.get().getTargetStateName(),
-                dependency.get().getTargetObjectName());
+        assertTrue(foundDropdown, "MenuDropdown should be dependent on MenuButton");
+=======
+        // Verify dependency is registered by checking dependents
+        Set<SearchRegionDependencyRegistry.DependentObject> dependents = 
+            dependencyRegistry.getDependents("Menu", "MenuButton");
+        
+        assertFalse(dependents.isEmpty(), "MenuButton should have dependents");
+        
+        // Find the MenuDropdown dependent
+        boolean foundMenuDropdown = dependents.stream()
+            .anyMatch(dep -> "MenuDropdown".equals(dep.getStateObject().getName()));
+        
+        assertTrue(foundMenuDropdown, "MenuDropdown should be a dependent of MenuButton");
+>>>>>>> coverage/agent-3
+        
+        log.info("Dependency registered: MenuDropdown depends on Menu.MenuButton");
     }
     
     @Test
@@ -205,25 +212,38 @@ public class SearchRegionDependencyTest extends BrobotTestBase {
         io.github.jspinak.brobot.model.state.State dialogState = 
             stateService.getState("Dialog").orElseThrow();
         
-        // Check that multiple elements have dependencies
-        assertTrue(dependencyRegistry.hasDependency("Dialog.DialogCloseButton"),
-                  "DialogCloseButton should have dependency");
-        assertTrue(dependencyRegistry.hasDependency("Dialog.DialogContent"),
-                  "DialogContent should have dependency");
+<<<<<<< HEAD
+        // Check that DialogTitle has multiple dependents
+        Set<SearchRegionDependencyRegistry.DependentObject> titleDependents = 
+            dependencyRegistry.getDependents("Dialog", "DialogTitle");
         
-        // Both should depend on DialogTitle
-        Optional<SearchRegionDependencyRegistry.Dependency> closeDep = 
-            dependencyRegistry.getDependency("Dialog.DialogCloseButton");
-        Optional<SearchRegionDependencyRegistry.Dependency> contentDep = 
-            dependencyRegistry.getDependency("Dialog.DialogContent");
+        assertFalse(titleDependents.isEmpty(), "DialogTitle should have dependent objects");
         
-        assertTrue(closeDep.isPresent() && contentDep.isPresent(),
-                  "Both dependencies should exist");
+        // Check for both close button and content dependencies
+        boolean foundCloseButton = titleDependents.stream()
+            .anyMatch(dep -> dep.getStateObject().getName().equals("DialogCloseButton"));
+        boolean foundContent = titleDependents.stream()
+            .anyMatch(dep -> dep.getStateObject().getName().equals("DialogContent"));
         
-        assertEquals("DialogTitle", closeDep.get().getTargetObjectName(),
-                    "Close button should depend on title");
-        assertEquals("DialogTitle", contentDep.get().getTargetObjectName(),
-                    "Content should depend on title");
+        assertTrue(foundCloseButton, "DialogCloseButton should depend on DialogTitle");
+        assertTrue(foundContent, "DialogContent should depend on DialogTitle");
+=======
+        // Check that multiple elements have dependencies on DialogTitle
+        Set<SearchRegionDependencyRegistry.DependentObject> titleDependents = 
+            dependencyRegistry.getDependents("Dialog", "DialogTitle");
+        
+        assertFalse(titleDependents.isEmpty(), "DialogTitle should have dependents");
+        
+        // Both close button and content should depend on title
+        Set<String> dependentNames = titleDependents.stream()
+            .map(dep -> dep.getStateObject().getName())
+            .collect(Collectors.toSet());
+        
+        assertTrue(dependentNames.contains("DialogCloseButton"),
+                  "DialogCloseButton should depend on DialogTitle");
+        assertTrue(dependentNames.contains("DialogContent"),
+                  "DialogContent should depend on DialogTitle");
+>>>>>>> coverage/agent-3
         
         log.info("Multiple dependencies on same target verified");
     }
@@ -285,11 +305,8 @@ public class SearchRegionDependencyTest extends BrobotTestBase {
         // Create a chain of dependencies: A -> B -> C
         StateImage baseImage = new StateImage.Builder()
             .setName("BaseImage")
-            .setDefinedRegion(Region.builder()
-                .setX(50)
-                .setY(50)
-                .setW(100)
-                .setH(100)
+            .setSearchRegionForAllPatterns(Region.builder()
+                .withRegion(50, 50, 100, 100)
                 .build())
             .build();
         
@@ -363,10 +380,7 @@ public class SearchRegionDependencyTest extends BrobotTestBase {
         
         // Base region
         Region baseRegion = Region.builder()
-            .setX(100)
-            .setY(100)
-            .setW(200)
-            .setH(50)
+            .withRegion(100, 100, 200, 50)
             .build();
         
         // Test various adjustments

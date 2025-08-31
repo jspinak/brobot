@@ -5,7 +5,6 @@ import io.github.jspinak.brobot.test.BrobotTestBase;
 import io.github.jspinak.brobot.action.Action;
 import io.github.jspinak.brobot.action.ActionResult;
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
-import io.github.jspinak.brobot.action.basic.find.FindStrategy;
 import io.github.jspinak.brobot.action.basic.click.ClickOptions;
 import io.github.jspinak.brobot.action.basic.type.TypeOptions;
 import io.github.jspinak.brobot.action.basic.mouse.MousePressOptions;
@@ -15,7 +14,6 @@ import io.github.jspinak.brobot.model.element.Positions;
 import io.github.jspinak.brobot.model.element.Region;
 import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.model.state.StateImage;
-import io.github.jspinak.brobot.model.state.StateString;
 import io.github.jspinak.brobot.model.state.State;
 import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.navigation.service.StateService;
@@ -70,11 +68,8 @@ public class ActionExecutionTest extends BrobotTestBase {
             
         iconImage = new StateImage.Builder()
             .setName("TestIcon")
-            .setDefinedRegion(Region.builder()
-                .setX(100)
-                .setY(100)
-                .setW(50)
-                .setH(50)
+            .setSearchRegionForAllPatterns(Region.builder()
+                .withRegion(100, 100, 50, 50)
                 .build())
             .build();
         
@@ -92,7 +87,7 @@ public class ActionExecutionTest extends BrobotTestBase {
         log.info("=== TESTING BASIC FIND ACTION ===");
         
         PatternFindOptions findOptions = new PatternFindOptions.Builder()
-            .setFindStrategy(FindStrategy.BEST)
+            .setStrategy(PatternFindOptions.Strategy.BEST)
             .build();
         
         ObjectCollection objects = new ObjectCollection.Builder()
@@ -114,14 +109,23 @@ public class ActionExecutionTest extends BrobotTestBase {
     public void testClickAction() {
         log.info("=== TESTING CLICK ACTION ===");
         
+<<<<<<< HEAD
+        ClickOptions clickOptions = new ClickOptions.Builder()
+            .setNumberOfClicks(2)  // Double-click
+            .setPressOptions(MousePressOptions.builder()
+                .setButton(MouseButton.LEFT)
+                .setPauseAfterMouseDown(0.5)
+                .build())
+=======
         MousePressOptions mouseOptions = MousePressOptions.builder()
             .setButton(MouseButton.LEFT)
-            .setDelayAfterPress(0.5)
+            .setPauseAfterMouseUp(0.5)
             .build();
         
         ClickOptions clickOptions = new ClickOptions.Builder()
             .setNumberOfClicks(2)  // Double-click
-            .setMousePressOptions(mouseOptions)
+            .setPressOptions(mouseOptions)
+>>>>>>> coverage/agent-3
             .build();
         
         ObjectCollection objects = new ObjectCollection.Builder()
@@ -131,13 +135,13 @@ public class ActionExecutionTest extends BrobotTestBase {
         ActionResult result = action.perform(clickOptions, objects);
         
         assertTrue(result.isSuccess(), "Click action should succeed");
-        assertEquals(1, result.getMatchList().size(), "Should have one match for defined region");
+        assertEquals(1, result.getMatchList().size(), "Should have one match for search region");
         
         // Verify the click location
         Match match = result.getMatchList().get(0);
         Region clickRegion = match.getRegion();
-        assertEquals(100, clickRegion.getX(), "Click X should match defined region");
-        assertEquals(100, clickRegion.getY(), "Click Y should match defined region");
+        assertEquals(100, clickRegion.getX(), "Click X should match search region");
+        assertEquals(100, clickRegion.getY(), "Click Y should match search region");
     }
     
     @Test
@@ -147,13 +151,26 @@ public class ActionExecutionTest extends BrobotTestBase {
         String textToType = "Hello Brobot!";
         
         TypeOptions typeOptions = new TypeOptions.Builder()
-            .setTextToType(textToType)
-            .setDelayBeforeTyping(0.1)
-            .setDelayAfterTyping(0.1)
+<<<<<<< HEAD
             .build();
         
-        // Type action doesn't need objects in mock mode
-        ActionResult result = action.perform(typeOptions);
+        // Create ObjectCollection for type action
+        ObjectCollection typeObjects = new ObjectCollection.Builder().build();
+        ActionResult result = action.perform(typeOptions, typeObjects);
+        // Mock the typed text in result (would be done by framework)
+        // result.setText(textToType);
+=======
+            .setTypeDelay(0.1)
+            .setPauseBeforeBegin(0.1)
+            .setPauseAfterEnd(0.1)
+            .build();
+        
+        ObjectCollection objects = new ObjectCollection.Builder()
+            .withStrings(textToType)
+            .build();
+        
+        ActionResult result = action.perform(typeOptions, objects);
+>>>>>>> coverage/agent-3
         
         assertTrue(result.isSuccess(), "Type action should succeed");
         assertEquals(textToType, result.getText(), "Typed text should match input");
@@ -169,8 +186,8 @@ public class ActionExecutionTest extends BrobotTestBase {
             .build();
             
         PatternFindOptions findAllOptions = new PatternFindOptions.Builder()
-            .setFindStrategy(FindStrategy.ALL)
-            .setMaxMatches(5)
+            .setStrategy(PatternFindOptions.Strategy.ALL)
+            .setMaxMatchesToActOn(5)
             .build();
         
         ObjectCollection objects = new ObjectCollection.Builder()
@@ -189,19 +206,16 @@ public class ActionExecutionTest extends BrobotTestBase {
         log.info("=== TESTING ACTION WITH SEARCH REGION ===");
         
         Region searchRegion = Region.builder()
-            .setX(50)
-            .setY(50)
-            .setW(200)
-            .setH(200)
+            .withRegion(50, 50, 200, 200)
             .build();
         
         StateImage imageWithRegion = new StateImage.Builder()
             .setName("ImageInRegion")
-            .setSearchRegion(searchRegion)
+            .setSearchRegionForAllPatterns(searchRegion)
             .build();
         
         PatternFindOptions findInRegion = new PatternFindOptions.Builder()
-            .setFindStrategy(FindStrategy.FIRST)
+            .setStrategy(PatternFindOptions.Strategy.FIRST)
             .build();
         
         ObjectCollection objects = new ObjectCollection.Builder()
@@ -226,7 +240,7 @@ public class ActionExecutionTest extends BrobotTestBase {
         
         // Step 1: Find
         PatternFindOptions findOptions = new PatternFindOptions.Builder()
-            .setFindStrategy(FindStrategy.FIRST)
+            .setStrategy(PatternFindOptions.Strategy.FIRST)
             .build();
         
         ObjectCollection findObjects = new ObjectCollection.Builder()
@@ -250,10 +264,23 @@ public class ActionExecutionTest extends BrobotTestBase {
         
         // Step 3: Type
         TypeOptions typeOptions = new TypeOptions.Builder()
-            .setTextToType("Composite action test")
+<<<<<<< HEAD
             .build();
             
-        ActionResult typeResult = action.perform(typeOptions);
+        ObjectCollection typeObjects = new ObjectCollection.Builder().build();
+        ActionResult typeResult = action.perform(typeOptions, typeObjects);
+        // Mock the typed text (would be handled by framework)
+        // typeResult.setText("Composite action test");
+=======
+            .setTypeDelay(0.01)
+            .build();
+            
+        ObjectCollection typeObjects = new ObjectCollection.Builder()
+            .withStrings("Composite action test")
+            .build();
+            
+        ActionResult typeResult = action.perform(typeOptions, typeObjects);
+>>>>>>> coverage/agent-3
         assertTrue(typeResult.isSuccess(), "Type should succeed");
         
         log.info("Composite action sequence completed successfully");
@@ -264,8 +291,11 @@ public class ActionExecutionTest extends BrobotTestBase {
         log.info("=== TESTING ACTION WITH TIMEOUT ===");
         
         PatternFindOptions timeoutOptions = new PatternFindOptions.Builder()
-            .setFindStrategy(FindStrategy.BEST)
-            .setMaxWaitTime(2.0)  // 2 seconds timeout
+            .setStrategy(PatternFindOptions.Strategy.BEST)
+<<<<<<< HEAD
+=======
+            .setSearchDuration(2.0)  // 2 seconds timeout
+>>>>>>> coverage/agent-3
             .build();
         
         ObjectCollection objects = new ObjectCollection.Builder()
@@ -291,16 +321,18 @@ public class ActionExecutionTest extends BrobotTestBase {
         
         StateImage imageAtCenter = new StateImage.Builder()
             .setName("CenterImage")
-            .setDefinedRegion(Region.builder()
-                .setX((int)centerScreen.getX() - 25)
-                .setY((int)centerScreen.getY() - 25)
-                .setW(50)
-                .setH(50)
+            .setSearchRegionForAllPatterns(Region.builder()
+<<<<<<< HEAD
+                .withRegion((int)centerScreen.getX() - 25, 
+                           (int)centerScreen.getY() - 25, 50, 50)
+=======
+                .withRegion((int)centerScreen.getX() - 25, (int)centerScreen.getY() - 25, 50, 50)
+>>>>>>> coverage/agent-3
                 .build())
             .build();
         
         PatternFindOptions findOptions = new PatternFindOptions.Builder()
-            .setFindStrategy(FindStrategy.BEST)
+            .setStrategy(PatternFindOptions.Strategy.BEST)
             .build();
         
         ObjectCollection objects = new ObjectCollection.Builder()

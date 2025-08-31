@@ -234,6 +234,10 @@ public class AnnotationProcessor {
                 .setScore(priority)
                 .build();
         
+        // CRITICAL FIX: Convert state names to IDs for the joint table
+        // The joint table needs state IDs, not names
+        javaTransition.setActivate(Set.of(toStateId));
+        
         // Get existing transitions for this state or create new container
         Optional<StateTransitions> existingTransitions = transitionService.getTransitions(fromStateId);
         StateTransitions stateTransitions;
@@ -254,6 +258,14 @@ public class AnnotationProcessor {
         
         // Also add to joint table for path finding
         jointTable.addToJointTable(stateTransitions);
+        
+        // Log the successful registration
+        log.info("Registered transition: {} ({}) -> {} ({}), added to joint table", 
+                fromName, fromStateId, toName, toStateId);
+        
+        // Verify the joint table was populated correctly
+        Set<Long> parentsOfTarget = jointTable.getStatesWithTransitionsTo(toStateId);
+        log.debug("After registration, parents of {} are: {}", toName, parentsOfTarget);
     }
     
     private String getStateName(Class<?> stateClass, io.github.jspinak.brobot.annotations.State annotation) {

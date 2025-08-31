@@ -19,6 +19,14 @@ For advanced mock testing capabilities including scenario-based configurations a
 - **Stochastic modeling** of real-world variability and failure modes
 - **State transition validation** across complex application flows
 - **Performance and reliability assessment** for production readiness
+- **Optimized execution** with parallel testing and shared contexts
+
+**Performance Features**:
+- Parallel test execution using available CPU cores
+- Shared Spring contexts via `OptimizedIntegrationTestBase`
+- Ultra-fast mock timings (0.005-0.015s per operation)
+- Smart JVM forking to prevent memory issues
+- Test result caching for faster re-runs
 
 **Best for**: End-to-end workflow validation, reliability testing, CI/CD pipeline integration
 
@@ -230,5 +238,32 @@ class UnitTest {
 3. **Set up test screenshots** or mock data as needed
 4. **Implement test cases** using modern APIs
 5. **Validate and iterate** based on test results
+
+## Quick Performance Setup
+
+To enable optimized test execution for integration tests:
+
+1. **Add to `library-test/gradle.properties`**:
+```properties
+org.gradle.parallel=true
+org.gradle.caching=true
+systemProp.junit.jupiter.execution.parallel.enabled=true
+```
+
+2. **Update `library-test/build.gradle`**:
+```gradle
+test {
+    timeout = Duration.ofMinutes(10)
+    maxParallelForks = Runtime.runtime.availableProcessors().intdiv(2)
+    forkEvery = 20
+}
+```
+
+3. **Use optimized base class**:
+```java
+public class MyTest extends OptimizedIntegrationTestBase {
+    // Automatic performance optimizations
+}
+```
 
 For detailed examples and advanced patterns, see the specific testing type documentation.  

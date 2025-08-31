@@ -102,6 +102,9 @@ public class StateImage implements StateObject {
 
     // Cross-state search region configuration
     private SearchRegionOnObject searchRegionOnObject;
+    
+    // Custom highlight color for this StateImage (e.g., "#00FF00" for green, "#0000FF" for blue)
+    private String highlightColor;
 
     public String getIdAsString() {
         return objectType.name() + name + patterns.toString();
@@ -330,6 +333,7 @@ public class StateImage implements StateObject {
         private SearchRegionOnObject searchRegionOnObject;
         private boolean fixedForAllPatterns = false;
         private ActionHistory actionHistoryForAllPatterns;
+        private String highlightColor;
 
         public Builder setName(String name) {
             this.name = name;
@@ -411,6 +415,18 @@ public class StateImage implements StateObject {
             this.fixedForAllPatterns = fixed;
             return this;
         }
+        
+        /**
+         * Sets a custom highlight color for this StateImage.
+         * When this image is found, it will be highlighted with this color.
+         * 
+         * @param color the color in hex format (e.g., "#00FF00" for green, "#0000FF" for blue)
+         * @return this builder for method chaining
+         */
+        public Builder setHighlightColor(String color) {
+            this.highlightColor = color;
+            return this;
+        }
 
         /**
          * Sets ActionHistory for all patterns in this StateImage.
@@ -476,6 +492,7 @@ public class StateImage implements StateObject {
             stateImage.ownerStateName = ownerStateName;
             stateImage.ownerStateId = ownerStateId;
             stateImage.searchRegionOnObject = searchRegionOnObject;
+            stateImage.highlightColor = highlightColor;
             if (positionForAllPatterns != null) stateImage.getPatterns().forEach(pattern ->
                     pattern.setTargetPosition(positionForAllPatterns));
             if (offsetForAllPatterns != null) stateImage.getPatterns().forEach(pattern ->

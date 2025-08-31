@@ -550,6 +550,119 @@ public void testWithCustomMatchers() {
 }
 ```
 
+## Performance Optimization
+
+### Optimized Test Base Class
+
+For high-performance integration testing, use the `OptimizedIntegrationTestBase`:
+
+```java
+import io.github.jspinak.brobot.test.OptimizedIntegrationTestBase;
+
+@TestInstance(TestInstance.Lifecycle.PER_CLASS) // Share Spring context
+@Timeout(value = 5, unit = TimeUnit.MINUTES)     // Default timeout
+public class FastIntegrationTest extends OptimizedIntegrationTestBase {
+    
+    @Test
+    public void testWorkflow() {
+        // Benefits:
+        // - Shared Spring context reduces initialization overhead
+        // - Optimized mock timings (0.005-0.015s per operation)
+        // - Per-class lifecycle reduces test setup time
+    }
+}
+```
+
+### Gradle Configuration
+
+Configure `library-test/build.gradle` for optimal test execution:
+
+```gradle
+test {
+    // Increased timeout to prevent premature failures
+    timeout = Duration.ofMinutes(10)
+    
+    // Parallel execution using half of available cores
+    maxParallelForks = Math.max(1, Runtime.runtime.availableProcessors().intdiv(2))
+    
+    // Fork new JVM every 20 tests to prevent memory buildup
+    forkEvery = 20
+    
+    // Optimized memory settings
+    maxHeapSize = '4g'
+    jvmArgs '-XX:MaxRAMPercentage=75.0', 
+            '-XX:+UseG1GC',
+            '-Dorg.bytedeco.javacpp.maxphysicalbytes=8G'
+}
+```
+
+### Gradle Properties
+
+Add `library-test/gradle.properties` for test-specific optimizations:
+
+```properties
+# Enable parallel execution
+org.gradle.parallel=true
+org.gradle.caching=true
+
+# Configure JUnit 5 parallel execution
+systemProp.junit.jupiter.execution.parallel.enabled=true
+systemProp.junit.jupiter.execution.parallel.mode.default=concurrent
+systemProp.junit.jupiter.execution.parallel.config.strategy=dynamic
+systemProp.junit.jupiter.execution.parallel.config.dynamic.factor=0.5
+
+# Retry flaky tests
+systemProp.gradle.test.retry.maxRetries=2
+systemProp.gradle.test.retry.maxFailures=5
+```
+
+### Mock Timing Optimization
+
+Configure faster mock timings for test environments:
+
+```java
+@TestConfiguration
+public class OptimizedTestConfig implements BeforeAllCallback {
+    
+    @Override
+    public void beforeAll(ExtensionContext context) {
+        // Ultra-fast mock timings for tests
+        FrameworkSettings.mockTimeFindFirst = 0.005;
+        FrameworkSettings.mockTimeFindAll = 0.01;
+        FrameworkSettings.mockTimeClick = 0.005;
+        FrameworkSettings.mockTimeMove = 0.005;
+        FrameworkSettings.mockTimeDrag = 0.01;
+    }
+}
+```
+
+### Test Execution Strategies
+
+#### Running Specific Test Categories
+
+```bash
+# Run only fast integration tests
+./gradlew test --tests "*FastIntegrationTest*"
+
+# Run integration tests with optimized settings
+./gradlew integrationTest
+
+# Run tests in parallel with custom fork settings
+./gradlew test -PmaxParallelForks=4 -PforkEvery=10
+```
+
+#### CI/CD Optimization
+
+For CI/CD pipelines, use environment-specific configurations:
+
+```java
+protected double getTimeoutMultiplier() {
+    if (isCI()) return 2.0;           // Double timeout in CI
+    if (isHeadlessEnvironment()) return 1.5;  // 1.5x in headless
+    return 1.0;                       // Normal timeout locally
+}
+```
+
 ## Best Practices
 
 1. **Modern API Usage**
@@ -567,15 +680,18 @@ public void testWithCustomMatchers() {
    - Include error conditions and recovery paths
    - Validate state transitions and probabilities
 
-4. **Performance Considerations**
-   - Configure realistic mock timings via properties
-   - Test for performance regressions
-   - Monitor mock execution efficiency
+4. **Performance Optimization**
+   - Use `OptimizedIntegrationTestBase` for shared Spring context
+   - Configure parallel test execution via Gradle properties
+   - Optimize mock timings for test environments (0.005-0.015s)
+   - Fork JVMs strategically to prevent memory issues
+   - Enable test result caching for faster re-runs
 
 5. **Continuous Integration**
    - Run integration tests in CI/CD pipelines
    - Use deterministic random seeds for reproducible results
    - Archive test logs and reports for analysis
+   - Configure environment-specific timeouts and retries
 
 
 
