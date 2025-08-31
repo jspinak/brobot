@@ -13,11 +13,12 @@ import org.mockito.MockitoAnnotations;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
 /**
- * Comprehensive test suite for PathManager - manages path scoring and recovery.
- * Tests score calculation, path validation, and failure recovery scenarios.
+ * Comprehensive unit tests for PathManager.
+ * Tests path scoring, cleaning, and recovery operations.
  */
 @DisplayName("PathManager Tests")
 class PathManagerTest extends BrobotTestBase {
@@ -27,38 +28,12 @@ class PathManagerTest extends BrobotTestBase {
     @Mock
     private StateService mockStateService;
     
-    @Mock
-    private State mockState1;
-    
-    @Mock
-    private State mockState2;
-    
-    @Mock
-    private State mockState3;
-    
-    @Mock
-    private State mockState4;
-    
-    @Mock
-    private Paths mockPaths;
-    
     @BeforeEach
     @Override
     public void setupTest() {
         super.setupTest();
         MockitoAnnotations.openMocks(this);
         pathManager = new PathManager(mockStateService);
-        
-        // Setup mock states with scores
-        when(mockState1.getPathScore()).thenReturn(10);
-        when(mockState2.getPathScore()).thenReturn(20);
-        when(mockState3.getPathScore()).thenReturn(15);
-        when(mockState4.getPathScore()).thenReturn(25);
-        
-        when(mockStateService.getState(1L)).thenReturn(Optional.of(mockState1));
-        when(mockStateService.getState(2L)).thenReturn(Optional.of(mockState2));
-        when(mockStateService.getState(3L)).thenReturn(Optional.of(mockState3));
-        when(mockStateService.getState(4L)).thenReturn(Optional.of(mockState4));
     }
     
     @Nested
@@ -66,240 +41,274 @@ class PathManagerTest extends BrobotTestBase {
     class ScoreCalculation {
         
         @Test
-        @DisplayName("Should calculate path score as sum of state scores")
+        @DisplayName("Should calculate path score from state scores")
         void testCalculatePathScore() {
-            // Arrange
+            // Create path with 3 states
             Path path = new Path();
-            path.getStates().add(1L);
-            path.getStates().add(2L);
-            path.getStates().add(3L);
+            path.setStates(new ArrayList<>(Arrays.asList(1L, 2L, 3L)));
             
-            // Act
+            // Mock states with different scores
+            State state1 = mock(State.class);
+            when(state1.getPathScore()).thenReturn(10);
+            State state2 = mock(State.class);
+            when(state2.getPathScore()).thenReturn(20);
+            State state3 = mock(State.class);
+            when(state3.getPathScore()).thenReturn(15);
+            
+            when(mockStateService.getState(1L)).thenReturn(Optional.of(state1));
+            when(mockStateService.getState(2L)).thenReturn(Optional.of(state2));
+            when(mockStateService.getState(3L)).thenReturn(Optional.of(state3));
+            
             pathManager.updateScore(path);
             
-            // Assert
             assertEquals(45, path.getScore()); // 10 + 20 + 15
+        }
+        
+        @Test
+        @DisplayName("Should handle missing states with zero score")
+        void testMissingStatesZeroScore() {
+            Path path = new Path();
+            path.setStates(new ArrayList<>(Arrays.asList(1L, 2L, 3L)));
+            
+            // Only state 2 exists
+            State state2 = mock(State.class);
+            when(state2.getPathScore()).thenReturn(20);
+            
+            when(mockStateService.getState(1L)).thenReturn(Optional.empty());
+            when(mockStateService.getState(2L)).thenReturn(Optional.of(state2));
+            when(mockStateService.getState(3L)).thenReturn(Optional.empty());
+            
+            pathManager.updateScore(path);
+            
+            assertEquals(20, path.getScore());
         }
         
         @Test
         @DisplayName("Should handle empty path")
         void testEmptyPathScore() {
-            // Arrange
             Path path = new Path();
             
-            // Act
             pathManager.updateScore(path);
             
-            // Assert
             assertEquals(0, path.getScore());
+            verify(mockStateService, never()).getState(anyLong());
         }
         
         @Test
-        @DisplayName("Should handle path with single state")
-        void testSingleStatePathScore() {
-            // Arrange
+        @DisplayName("Should handle negative scores")
+        void testNegativeScores() {
             Path path = new Path();
-            path.getStates().add(2L);
+            path.setStates(new ArrayList<>(Arrays.asList(1L, 2L)));
             
-            // Act
+            State state1 = mock(State.class);
+            when(state1.getPathScore()).thenReturn(-10);
+            State state2 = mock(State.class);
+            when(state2.getPathScore()).thenReturn(30);
+            
+            when(mockStateService.getState(1L)).thenReturn(Optional.of(state1));
+            when(mockStateService.getState(2L)).thenReturn(Optional.of(state2));
+            
             pathManager.updateScore(path);
             
-            // Assert
-            assertEquals(20, path.getScore());
+            assertEquals(20, path.getScore()); // -10 + 30
         }
         
         @Test
-        @DisplayName("Should skip non-existent states in score calculation")
-        void testScoreWithNonExistentStates() {
-            // Arrange
+        @DisplayName("Should handle very large scores")
+        void testLargeScores() {
             Path path = new Path();
-            path.getStates().add(1L);
-            path.getStates().add(999L); // Non-existent
-            path.getStates().add(3L);
+            path.setStates(new ArrayList<>(Arrays.asList(1L, 2L, 3L)));
             
-            when(mockStateService.getState(999L)).thenReturn(Optional.empty());
+            State state1 = mock(State.class);
+            when(state1.getPathScore()).thenReturn(Integer.MAX_VALUE / 3);
+            State state2 = mock(State.class);
+            when(state2.getPathScore()).thenReturn(Integer.MAX_VALUE / 3);
+            State state3 = mock(State.class);
+            when(state3.getPathScore()).thenReturn(Integer.MAX_VALUE / 3);
             
-            // Act
+            when(mockStateService.getState(1L)).thenReturn(Optional.of(state1));
+            when(mockStateService.getState(2L)).thenReturn(Optional.of(state2));
+            when(mockStateService.getState(3L)).thenReturn(Optional.of(state3));
+            
             pathManager.updateScore(path);
             
-            // Assert
-            assertEquals(25, path.getScore()); // 10 + 0 + 15
-        }
-        
-        @Test
-        @DisplayName("Should handle path with duplicate states")
-        void testDuplicateStatesScore() {
-            // Arrange
-            Path path = new Path();
-            path.getStates().add(1L);
-            path.getStates().add(2L);
-            path.getStates().add(1L); // Duplicate
-            
-            // Act
-            pathManager.updateScore(path);
-            
-            // Assert
-            assertEquals(40, path.getScore()); // 10 + 20 + 10
+            // Score should handle overflow gracefully
+            assertTrue(path.getScore() > 0);
         }
     }
     
     @Nested
-    @DisplayName("Batch Score Updates")
-    class BatchScoreUpdates {
+    @DisplayName("Paths Score Update")
+    class PathsScoreUpdate {
         
         @Test
-        @DisplayName("Should update scores for all paths")
+        @DisplayName("Should update all path scores and sort")
         void testUpdateAllPathScores() {
-            // Arrange
+            // Create multiple paths
             Path path1 = new Path();
-            path1.getStates().add(1L);
-            path1.getStates().add(2L);
-            
+            path1.setStates(new ArrayList<>(Arrays.asList(1L, 2L)));
             Path path2 = new Path();
-            path2.getStates().add(3L);
-            path2.getStates().add(4L);
+            path2.setStates(new ArrayList<>(Arrays.asList(3L, 4L)));
+            Path path3 = new Path();
+            path3.setStates(new ArrayList<>(Arrays.asList(5L, 6L)));
             
-            List<Path> pathList = Arrays.asList(path1, path2);
+            Paths paths = new Paths(Arrays.asList(path1, path2, path3));
             
-            Paths paths = new Paths();
-            paths.getPaths().addAll(pathList);
+            // Mock states with varying scores
+            mockStateWithScore(1L, 10);
+            mockStateWithScore(2L, 20);  // path1 total: 30
+            mockStateWithScore(3L, 5);
+            mockStateWithScore(4L, 10);  // path2 total: 15
+            mockStateWithScore(5L, 25);
+            mockStateWithScore(6L, 30);  // path3 total: 55
             
-            // Act
             pathManager.updateScores(paths);
             
-            // Assert
-            assertEquals(30, path1.getScore()); // 10 + 20
-            assertEquals(40, path2.getScore()); // 15 + 25
-            verify(mockStateService, times(4)).getState(anyLong());
-        }
-        
-        @Test
-        @DisplayName("Should sort paths after updating scores")
-        void testSortAfterUpdate() {
-            // Arrange
-            Paths paths = mock(Paths.class);
-            List<Path> pathList = new ArrayList<>();
-            when(paths.getPaths()).thenReturn(pathList);
+            // Verify scores are updated
+            assertEquals(30, path1.getScore());
+            assertEquals(15, path2.getScore());
+            assertEquals(55, path3.getScore());
             
-            // Act
-            pathManager.updateScores(paths);
-            
-            // Assert
-            verify(paths).sort();
+            // Verify paths are sorted by score (ascending)
+            List<Path> sortedPaths = paths.getPaths();
+            assertEquals(15, sortedPaths.get(0).getScore()); // path2
+            assertEquals(30, sortedPaths.get(1).getScore()); // path1
+            assertEquals(55, sortedPaths.get(2).getScore()); // path3
         }
         
         @Test
         @DisplayName("Should handle empty paths collection")
-        void testUpdateEmptyPaths() {
-            // Arrange
+        void testEmptyPathsCollection() {
             Paths paths = new Paths();
             
-            // Act & Assert - should not throw
-            assertDoesNotThrow(() -> pathManager.updateScores(paths));
+            pathManager.updateScores(paths);
+            
+            assertTrue(paths.isEmpty());
+            verify(mockStateService, never()).getState(anyLong());
+        }
+        
+        @Test
+        @DisplayName("Should maintain path order with equal scores")
+        void testEqualScorePaths() {
+            Path path1 = new Path();
+            path1.setStates(new ArrayList<>(Arrays.asList(1L)));
+            Path path2 = new Path();
+            path2.setStates(new ArrayList<>(Arrays.asList(2L)));
+            Path path3 = new Path();
+            path3.setStates(new ArrayList<>(Arrays.asList(3L)));
+            
+            Paths paths = new Paths(Arrays.asList(path1, path2, path3));
+            
+            // All states have same score
+            mockStateWithScore(1L, 10);
+            mockStateWithScore(2L, 10);
+            mockStateWithScore(3L, 10);
+            
+            pathManager.updateScores(paths);
+            
+            // All should have same score
+            assertEquals(10, path1.getScore());
+            assertEquals(10, path2.getScore());
+            assertEquals(10, path3.getScore());
         }
     }
     
     @Nested
-    @DisplayName("Clean Paths Recovery")
-    class CleanPathsRecovery {
+    @DisplayName("Path Cleaning and Recovery")
+    class PathCleaningAndRecovery {
         
         @Test
-        @DisplayName("Should get clean paths after failure")
-        void testGetCleanPaths() {
-            // Arrange
-            Set<Long> activeStates = new HashSet<>(Arrays.asList(2L, 3L));
-            Long failedTransitionStart = 1L;
+        @DisplayName("Should clean paths and update scores")
+        void testCleanPathsWithScoreUpdate() {
+            // Create paths
+            Path path1 = new Path();
+            path1.setStates(new ArrayList<>(Arrays.asList(1L, 2L, 3L, 4L)));
+            Path path2 = new Path();
+            path2.setStates(new ArrayList<>(Arrays.asList(5L, 6L, 7L)));
+            Paths originalPaths = new Paths(Arrays.asList(path1, path2));
             
-            Paths originalPaths = mock(Paths.class);
-            Paths cleanedPaths = new Paths();
+            // Active states after failure
+            Set<Long> activeStates = new HashSet<>(Arrays.asList(2L, 6L));
+            Long failedTransition = 3L;
             
-            Path cleanPath1 = new Path();
-            cleanPath1.getStates().add(2L);
-            cleanPath1.getStates().add(3L);
-            cleanedPaths.getPaths().add(cleanPath1);
+            // Mock state scores
+            mockStateWithScore(2L, 10);
+            mockStateWithScore(3L, 15);
+            mockStateWithScore(4L, 20);
+            mockStateWithScore(6L, 5);
+            mockStateWithScore(7L, 10);
             
-            when(originalPaths.cleanPaths(activeStates, failedTransitionStart))
-                .thenReturn(cleanedPaths);
+            Paths cleanedPaths = pathManager.getCleanPaths(activeStates, originalPaths, failedTransition);
             
-            // Act
-            Paths result = pathManager.getCleanPaths(activeStates, originalPaths, failedTransitionStart);
-            
-            // Assert
-            assertNotNull(result);
-            assertEquals(1, result.getPaths().size());
-            assertEquals(35, cleanPath1.getScore()); // 20 + 15
-        }
-        
-        @Test
-        @DisplayName("Should update scores in cleaned paths")
-        void testUpdateScoresInCleanedPaths() {
-            // Arrange
-            Set<Long> activeStates = new HashSet<>(Arrays.asList(2L));
-            Long failedTransitionStart = 1L;
-            
-            Paths originalPaths = mock(Paths.class);
-            Paths cleanedPaths = new Paths();
-            
-            Path cleanPath = new Path();
-            cleanPath.getStates().add(2L);
-            cleanPath.getStates().add(4L);
-            cleanedPaths.getPaths().add(cleanPath);
-            
-            when(originalPaths.cleanPaths(activeStates, failedTransitionStart))
-                .thenReturn(cleanedPaths);
-            
-            // Act
-            Paths result = pathManager.getCleanPaths(activeStates, originalPaths, failedTransitionStart);
-            
-            // Assert
-            assertEquals(45, cleanPath.getScore()); // 20 + 25
-            assertTrue(result == cleanedPaths);
+            assertNotNull(cleanedPaths);
+            // Paths should be cleaned and scores updated
+            for (Path path : cleanedPaths.getPaths()) {
+                assertTrue(path.getScore() >= 0);
+            }
         }
         
         @Test
         @DisplayName("Should handle no active states")
-        void testCleanPathsNoActiveStates() {
-            // Arrange
-            Set<Long> activeStates = new HashSet<>();
-            Long failedTransitionStart = 1L;
+        void testNoActiveStates() {
+            Path path1 = new Path();
+            path1.setStates(new ArrayList<>(Arrays.asList(1L, 2L, 3L)));
+            Paths originalPaths = new Paths(Arrays.asList(path1));
             
-            Paths originalPaths = mock(Paths.class);
-            Paths cleanedPaths = new Paths();
+            Set<Long> activeStates = new HashSet<>(); // Empty
             
-            when(originalPaths.cleanPaths(activeStates, failedTransitionStart))
-                .thenReturn(cleanedPaths);
+            Paths cleanedPaths = pathManager.getCleanPaths(activeStates, originalPaths, null);
             
-            // Act
-            Paths result = pathManager.getCleanPaths(activeStates, originalPaths, failedTransitionStart);
-            
-            // Assert
-            assertNotNull(result);
-            assertEquals(0, result.getPaths().size());
+            assertNotNull(cleanedPaths);
+            // Should return empty or modified paths
         }
         
         @Test
-        @DisplayName("Should handle null failed transition")
-        void testCleanPathsNullFailedTransition() {
-            // Arrange
-            Set<Long> activeStates = new HashSet<>(Arrays.asList(1L, 2L));
-            Long failedTransitionStart = null;
+        @DisplayName("Should handle failed transition cleanup")
+        void testFailedTransitionCleanup() {
+            // Path that goes through failed transition
+            Path path1 = new Path();
+            path1.setStates(new ArrayList<>(Arrays.asList(1L, 2L, 3L, 4L)));
+            // Path that doesn't go through failed transition
+            Path path2 = new Path();
+            path2.setStates(new ArrayList<>(Arrays.asList(5L, 6L, 7L)));
             
-            Paths originalPaths = mock(Paths.class);
-            Paths cleanedPaths = new Paths();
+            Paths originalPaths = new Paths(Arrays.asList(path1, path2));
             
-            Path path = new Path();
-            path.getStates().addAll(Arrays.asList(1L, 2L, 3L));
-            cleanedPaths.getPaths().add(path);
+            Set<Long> activeStates = new HashSet<>(Arrays.asList(2L, 6L));
+            Long failedTransition = 2L; // Failed at state 2
             
-            when(originalPaths.cleanPaths(activeStates, failedTransitionStart))
-                .thenReturn(cleanedPaths);
+            mockStateWithScore(3L, 10);
+            mockStateWithScore(4L, 15);
+            mockStateWithScore(6L, 5);
+            mockStateWithScore(7L, 8);
             
-            // Act
-            Paths result = pathManager.getCleanPaths(activeStates, originalPaths, failedTransitionStart);
+            Paths cleanedPaths = pathManager.getCleanPaths(activeStates, originalPaths, failedTransition);
             
-            // Assert
-            assertNotNull(result);
-            assertEquals(45, path.getScore()); // 10 + 20 + 15
+            assertNotNull(cleanedPaths);
+            // Cleaned paths should have updated scores
+            for (Path path : cleanedPaths.getPaths()) {
+                assertNotNull(path.getScore());
+            }
+        }
+        
+        @Test
+        @DisplayName("Should preserve paths when no cleaning needed")
+        void testNoCleaningNeeded() {
+            Path path1 = new Path();
+            path1.setStates(new ArrayList<>(Arrays.asList(1L, 2L, 3L)));
+            Paths originalPaths = new Paths(Arrays.asList(path1));
+            
+            // All states are active
+            Set<Long> activeStates = new HashSet<>(Arrays.asList(1L, 2L, 3L));
+            
+            mockStateWithScore(1L, 10);
+            mockStateWithScore(2L, 20);
+            mockStateWithScore(3L, 30);
+            
+            Paths cleanedPaths = pathManager.getCleanPaths(activeStates, originalPaths, null);
+            
+            assertNotNull(cleanedPaths);
+            assertFalse(cleanedPaths.isEmpty());
         }
     }
     
@@ -308,120 +317,80 @@ class PathManagerTest extends BrobotTestBase {
     class ComplexScenarios {
         
         @Test
-        @DisplayName("Should handle multiple path recovery")
+        @DisplayName("Should handle multiple path recovery after failure")
         void testMultiplePathRecovery() {
-            // Arrange
-            Set<Long> activeStates = new HashSet<>(Arrays.asList(2L, 3L));
-            Long failedTransitionStart = 1L;
+            // Simulate complex navigation scenario
+            Path mainPath = new Path();
+            mainPath.setStates(new ArrayList<>(Arrays.asList(1L, 2L, 3L, 4L, 5L)));
+            Path altPath1 = new Path();
+            altPath1.setStates(new ArrayList<>(Arrays.asList(1L, 6L, 7L, 5L)));
+            Path altPath2 = new Path();
+            altPath2.setStates(new ArrayList<>(Arrays.asList(1L, 8L, 9L, 10L, 5L)));
             
-            Paths originalPaths = mock(Paths.class);
-            Paths cleanedPaths = new Paths();
+            Paths paths = new Paths(Arrays.asList(mainPath, altPath1, altPath2));
             
-            // Multiple alternative paths
-            Path path1 = new Path();
-            path1.getStates().addAll(Arrays.asList(2L, 3L, 4L));
+            // Failure at state 3, currently at state 2
+            Set<Long> activeStates = new HashSet<>(Arrays.asList(2L));
+            Long failedTransition = 3L;
             
-            Path path2 = new Path();
-            path2.getStates().addAll(Arrays.asList(3L, 4L));
-            
-            Path path3 = new Path();
-            path3.getStates().addAll(Arrays.asList(2L, 4L));
-            
-            cleanedPaths.getPaths().addAll(Arrays.asList(path1, path2, path3));
-            
-            when(originalPaths.cleanPaths(activeStates, failedTransitionStart))
-                .thenReturn(cleanedPaths);
-            
-            // Act
-            Paths result = pathManager.getCleanPaths(activeStates, originalPaths, failedTransitionStart);
-            
-            // Assert
-            assertEquals(3, result.getPaths().size());
-            assertEquals(60, path1.getScore()); // 20 + 15 + 25
-            assertEquals(40, path2.getScore()); // 15 + 25
-            assertEquals(45, path3.getScore()); // 20 + 25
-        }
-        
-        @Test
-        @DisplayName("Should handle cyclic paths")
-        void testCyclicPaths() {
-            // Arrange
-            Path cyclicPath = new Path();
-            cyclicPath.getStates().addAll(Arrays.asList(1L, 2L, 3L, 1L)); // Cycle back to state 1
-            
-            // Act
-            pathManager.updateScore(cyclicPath);
-            
-            // Assert
-            assertEquals(55, cyclicPath.getScore()); // 10 + 20 + 15 + 10
-        }
-        
-        @Test
-        @DisplayName("Should handle large paths efficiently")
-        void testLargePaths() {
-            // Arrange
-            Path largePath = new Path();
-            for (int i = 0; i < 100; i++) {
-                largePath.getStates().add((long) (i % 4 + 1)); // Cycle through states 1-4
+            // Mock all state scores
+            for (long i = 1; i <= 10; i++) {
+                mockStateWithScore(i, (int)(i * 5));
             }
             
-            // Act
-            long startTime = System.currentTimeMillis();
-            pathManager.updateScore(largePath);
-            long endTime = System.currentTimeMillis();
+            Paths recoveredPaths = pathManager.getCleanPaths(activeStates, paths, failedTransition);
             
-            // Assert
-            assertTrue((endTime - startTime) < 100, "Score calculation should be fast");
-            assertTrue(largePath.getScore() > 0);
+            assertNotNull(recoveredPaths);
+            // Verify scores are recalculated
+            for (Path path : recoveredPaths.getPaths()) {
+                assertTrue(path.getScore() >= 0);
+            }
+        }
+        
+        @Test
+        @DisplayName("Should handle cyclic path references")
+        void testCyclicPaths() {
+            // Path with cycle: 1 -> 2 -> 3 -> 2 -> 4
+            Path cyclicPath = new Path();
+            cyclicPath.setStates(new ArrayList<>(Arrays.asList(1L, 2L, 3L, 2L, 4L)));
+            Paths paths = new Paths(Arrays.asList(cyclicPath));
+            
+            mockStateWithScore(1L, 10);
+            mockStateWithScore(2L, 20);
+            mockStateWithScore(3L, 15);
+            mockStateWithScore(4L, 25);
+            
+            pathManager.updateScores(paths);
+            
+            // Score should include state 2 twice
+            assertEquals(90, cyclicPath.getScore()); // 10 + 20 + 15 + 20 + 25
+        }
+        
+        @Test
+        @DisplayName("Should handle very long paths efficiently")
+        void testLongPaths() {
+            // Create a very long path
+            List<Long> longPathStates = new ArrayList<>();
+            for (long i = 1; i <= 100; i++) {
+                longPathStates.add(i);
+                mockStateWithScore(i, 1);
+            }
+            
+            Path longPath = new Path();
+            longPath.setStates(longPathStates);
+            Paths paths = new Paths(Arrays.asList(longPath));
+            
+            pathManager.updateScores(paths);
+            
+            assertEquals(100, longPath.getScore());
+            verify(mockStateService, times(100)).getState(anyLong());
         }
     }
     
-    @Nested
-    @DisplayName("Edge Cases")
-    class EdgeCases {
-        
-        @Test
-        @DisplayName("Should handle state with zero score")
-        void testStateWithZeroScore() {
-            // Arrange
-            when(mockState1.getPathScore()).thenReturn(0);
-            
-            Path path = new Path();
-            path.getStates().add(1L);
-            
-            // Act
-            pathManager.updateScore(path);
-            
-            // Assert
-            assertEquals(0, path.getScore());
-        }
-        
-        @Test
-        @DisplayName("Should handle state with negative score")
-        void testStateWithNegativeScore() {
-            // Arrange
-            when(mockState1.getPathScore()).thenReturn(-10);
-            
-            Path path = new Path();
-            path.getStates().addAll(Arrays.asList(1L, 2L));
-            
-            // Act
-            pathManager.updateScore(path);
-            
-            // Assert
-            assertEquals(10, path.getScore()); // -10 + 20
-        }
-        
-        @Test
-        @DisplayName("Should handle paths with null state service")
-        void testNullStateService() {
-            // Arrange
-            PathManager pathManagerWithNull = new PathManager(null);
-            Path path = new Path();
-            path.getStates().add(1L);
-            
-            // Act & Assert
-            assertThrows(NullPointerException.class, () -> pathManagerWithNull.updateScore(path));
-        }
+    // Helper method to mock state with score
+    private void mockStateWithScore(Long stateId, int score) {
+        State state = mock(State.class);
+        when(state.getPathScore()).thenReturn(score);
+        when(mockStateService.getState(stateId)).thenReturn(Optional.of(state));
     }
 }

@@ -1,0 +1,461 @@
+package io.github.jspinak.brobot.navigation;
+
+import io.github.jspinak.brobot.BrobotTestApplication;
+import io.github.jspinak.brobot.model.state.State;
+import io.github.jspinak.brobot.model.state.special.SpecialStateType;
+import io.github.jspinak.brobot.model.transition.StateTransitionStore;
+import io.github.jspinak.brobot.navigation.path.Path;
+import io.github.jspinak.brobot.navigation.path.PathFinder;
+import io.github.jspinak.brobot.navigation.path.PathManager;
+import io.github.jspinak.brobot.navigation.path.Paths;
+import io.github.jspinak.brobot.navigation.service.StateService;
+import io.github.jspinak.brobot.navigation.transition.JavaStateTransition;
+import io.github.jspinak.brobot.navigation.transition.StateTransitions;
+import io.github.jspinak.brobot.navigation.transition.StateTransitionsJointTable;
+import io.github.jspinak.brobot.statemanagement.StateMemory;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.TestPropertySource;
+
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+/**
+ * Integration tests for state structure path map setup.
+ * Tests the complete flow of building state graphs and finding paths.
+ */
+@SpringBootTest(classes = BrobotTestApplication.class)
+@TestPropertySource(properties = {
+    "brobot.logging.verbosity=QUIET",
+    "brobot.mock=true"
+})
+@DisplayName("State Structure Path Map Integration Tests")
+class StateStructurePathMapIntegrationTest {
+    
+    @Autowired
+    private StateService stateService;
+    
+    @Autowired
+    private StateTransitionStore transitionStore;
+    
+    @Autowired
+    private StateTransitionsJointTable jointTable;
+    
+    @Autowired
+    private PathFinder pathFinder;
+    
+    @Autowired
+    private PathManager pathManager;
+    
+    @Autowired
+    private StateMemory stateMemory;
+    
+    @BeforeEach
+    void setup() {
+        // Clear all repositories
+        stateService.deleteAll();
+        transitionStore.emptyRepos();
+        jointTable.emptyRepos();
+        stateMemory.clear();
+    }
+    
+    @Nested
+    @DisplayName("Joint Table Construction")
+    class JointTableConstruction {
+        
+        @Test
+        @DisplayName("Should build complete joint table from state transitions")
+        void testJointTableConstruction() {
+            // Create a network of states
+            State s1 = createAndSaveState("State1");
+            State s2 = createAndSaveState("State2");
+            State s3 = createAndSaveState("State3");
+            State s4 = createAndSaveState("State4");
+            
+            // Create transitions: 1->2, 1->3, 2->4, 3->4
+            StateTransitions t1 = createTransitions(s1, "State2", "State3");
+            StateTransitions t2 = createTransitions(s2, "State4");
+            StateTransitions t3 = createTransitions(s3, "State4");
+            StateTransitions t4 = createTransitions(s4); // Terminal
+            
+            // Add to joint table
+            jointTable.addToJointTable(t1);
+            jointTable.addToJointTable(t2);
+            jointTable.addToJointTable(t3);
+            jointTable.addToJointTable(t4);
+            
+            // Verify incoming transitions
+            Set<Long> parentsOf4 = jointTable.getStatesWithTransitionsTo(s4.getId());
+            assertEquals(2, parentsOf4.size());
+            assertTrue(parentsOf4.contains(s2.getId()));
+            assertTrue(parentsOf4.contains(s3.getId()));
+            
+            // Verify outgoing transitions
+            Set<Long> childrenOf1 = jointTable.getStatesWithTransitionsFrom(s1.getId());
+            assertEquals(2, childrenOf1.size());
+            assertTrue(childrenOf1.contains(s2.getId()));
+            assertTrue(childrenOf1.contains(s3.getId()));
+        }
+        
+        @Test
+        @DisplayName("Should handle bidirectional transitions in joint table")
+        void testBidirectionalTransitions() {
+            State a = createAndSaveState("A");
+            State b = createAndSaveState("B");
+            
+            // A <-> B bidirectional
+            StateTransitions ta = createTransitions(a, "B");
+            StateTransitions tb = createTransitions(b, "A");
+            
+            jointTable.addToJointTable(ta);
+            jointTable.addToJointTable(tb);
+            
+            // Both should see each other
+            Set<Long> fromA = jointTable.getStatesWithTransitionsFrom(a.getId());
+            Set<Long> fromB = jointTable.getStatesWithTransitionsFrom(b.getId());
+            
+            assertTrue(fromA.contains(b.getId()));
+            assertTrue(fromB.contains(a.getId()));
+        }
+    }
+    
+    @Nested
+    @DisplayName("Path Map Generation")
+    class PathMapGeneration {
+        
+        @Test
+        @DisplayName("Should generate complete path map for all states")
+        void testCompletePathMapGeneration() {
+            // Create a more complex graph
+            State hub = createAndSaveState("Hub");
+            State nodeA = createAndSaveState("NodeA");
+            State nodeB = createAndSaveState("NodeB");
+            State nodeC = createAndSaveState("NodeC");
+            State leafA1 = createAndSaveState("LeafA1");
+            State leafA2 = createAndSaveState("LeafA2");
+            State leafB1 = createAndSaveState("LeafB1");
+            
+            // Hub connects to all nodes
+            StateTransitions hubTrans = createTransitions(hub, "NodeA", "NodeB", "NodeC");
+            
+            // NodeA has two leaves
+            StateTransitions nodeATrans = createTransitions(nodeA, "LeafA1", "LeafA2");
+            
+            // NodeB has one leaf and can go back to Hub
+            StateTransitions nodeBTrans = createTransitions(nodeB, "LeafB1", "Hub");
+            
+            // NodeC can go to NodeA
+            StateTransitions nodeCTrans = createTransitions(nodeC, "NodeA");
+            
+            // Leaves are terminal
+            StateTransitions leafA1Trans = createTransitions(leafA1);
+            StateTransitions leafA2Trans = createTransitions(leafA2);
+            StateTransitions leafB1Trans = createTransitions(leafB1);
+            
+            // Build joint table
+            Arrays.asList(hubTrans, nodeATrans, nodeBTrans, nodeCTrans, 
+                         leafA1Trans, leafA2Trans, leafB1Trans)
+                .forEach(jointTable::addToJointTable);
+            
+            // Find all paths from Hub
+            Set<Long> fromHub = new HashSet<>(Arrays.asList(hub.getId()));
+            
+            // To LeafA1 - should have two paths (Hub->NodeA->LeafA1 and Hub->NodeC->NodeA->LeafA1)
+            Paths pathsToLeafA1 = pathFinder.getPathsToState(fromHub, leafA1.getId());
+            assertEquals(2, pathsToLeafA1.size());
+            
+            // Verify shortest path is Hub->NodeA->LeafA1
+            Path shortestToLeafA1 = pathsToLeafA1.getBestPath();
+            assertEquals(3, shortestToLeafA1.size());
+            assertEquals(hub.getId(), shortestToLeafA1.get(0));
+            assertEquals(nodeA.getId(), shortestToLeafA1.get(1));
+            assertEquals(leafA1.getId(), shortestToLeafA1.get(2));
+        }
+    }
+    
+    @Nested
+    @DisplayName("Path Scoring and Selection")
+    class PathScoringAndSelection {
+        
+        @Test
+        @DisplayName("Should correctly score paths based on state weights")
+        void testPathScoringWithStateWeights() {
+            // Create states with specific scores
+            State start = new State.Builder("Start").setScore(0).build();
+            State slowRoute = new State.Builder("SlowRoute").setScore(50).build();
+            State fastRoute = new State.Builder("FastRoute").setScore(10).build();
+            State verySlowRoute = new State.Builder("VerySlowRoute").setScore(100).build();
+            State destination = new State.Builder("Destination").setScore(0).build();
+            
+            stateService.save(start);
+            stateService.save(slowRoute);
+            stateService.save(fastRoute);
+            stateService.save(verySlowRoute);
+            stateService.save(destination);
+            
+            // Create paths with different costs
+            StateTransitions startTrans = createTransitions(start, 
+                "SlowRoute", "FastRoute", "VerySlowRoute");
+            StateTransitions slowTrans = createTransitions(slowRoute, "Destination");
+            StateTransitions fastTrans = createTransitions(fastRoute, "Destination");
+            StateTransitions verySlowTrans = createTransitions(verySlowRoute, "Destination");
+            StateTransitions destTrans = createTransitions(destination);
+            
+            Arrays.asList(startTrans, slowTrans, fastTrans, verySlowTrans, destTrans)
+                .forEach(jointTable::addToJointTable);
+            
+            // Find all paths
+            Set<Long> fromStart = new HashSet<>(Arrays.asList(start.getId()));
+            Paths paths = pathFinder.getPathsToState(fromStart, destination.getId());
+            
+            assertEquals(3, paths.size());
+            
+            // Verify paths are scored correctly
+            Path bestPath = paths.getBestPath();
+            assertTrue(bestPath.contains(fastRoute.getId()));
+            assertEquals(10, bestPath.getScore()); // Fast route score
+            
+            // Get all paths sorted by score
+            List<Path> sortedPaths = paths.getAll().stream()
+                .sorted(Comparator.comparingInt(Path::getScore))
+                .collect(Collectors.toList());
+            
+            assertEquals(10, sortedPaths.get(0).getScore());  // Fast
+            assertEquals(50, sortedPaths.get(1).getScore());  // Slow
+            assertEquals(100, sortedPaths.get(2).getScore()); // Very slow
+        }
+        
+        @Test
+        @DisplayName("Should handle path scoring with transitions scores")
+        void testPathScoringWithTransitionScores() {
+            State s1 = createAndSaveState("S1");
+            State s2 = createAndSaveState("S2");
+            State s3 = createAndSaveState("S3");
+            
+            // Create transition with score
+            JavaStateTransition scoredTransition = new JavaStateTransition.Builder()
+                .addToActivate("S2")
+                .setScore(25)
+                .setFunction(() -> true)
+                .build();
+            
+            StateTransitions t1 = new StateTransitions.Builder("S1").build();
+            t1.setStateId(s1.getId());
+            t1.addTransition(scoredTransition);
+            
+            StateTransitions t2 = createTransitions(s2, "S3");
+            StateTransitions t3 = createTransitions(s3);
+            
+            Arrays.asList(t1, t2, t3).forEach(jointTable::addToJointTable);
+            
+            // Find path from S1 to S2
+            Set<Long> fromS1 = new HashSet<>(Arrays.asList(s1.getId()));
+            Paths paths = pathFinder.getPathsToState(fromS1, s2.getId());
+            
+            assertFalse(paths.isEmpty());
+            Path path = paths.getBestPath();
+            
+            // Path should include transition score
+            assertTrue(path.getScore() >= 25);
+        }
+    }
+    
+    @Nested
+    @DisplayName("Dynamic Path Updates")
+    class DynamicPathUpdates {
+        
+        @Test
+        @DisplayName("Should handle dynamic state additions to path map")
+        void testDynamicStateAdditions() {
+            // Initial simple path
+            State a = createAndSaveState("A");
+            State b = createAndSaveState("B");
+            
+            StateTransitions ta = createTransitions(a, "B");
+            StateTransitions tb = createTransitions(b);
+            
+            jointTable.addToJointTable(ta);
+            jointTable.addToJointTable(tb);
+            
+            // Verify initial path
+            Set<Long> fromA = new HashSet<>(Arrays.asList(a.getId()));
+            Paths initialPaths = pathFinder.getPathsToState(fromA, b.getId());
+            assertEquals(1, initialPaths.size());
+            
+            // Add new state and path
+            State c = createAndSaveState("C");
+            StateTransitions tc = createTransitions(c, "B");
+            jointTable.addToJointTable(tc);
+            
+            // Update A to also go to C
+            StateTransitions taUpdated = createTransitions(a, "B", "C");
+            jointTable.emptyRepos();
+            jointTable.addToJointTable(taUpdated);
+            jointTable.addToJointTable(tb);
+            jointTable.addToJointTable(tc);
+            
+            // Now should have two paths from A to B
+            Paths updatedPaths = pathFinder.getPathsToState(fromA, b.getId());
+            assertEquals(2, updatedPaths.size()); // Direct and through C
+        }
+        
+        @Test
+        @DisplayName("Should handle hidden state updates in path map")
+        void testHiddenStatePathUpdates() {
+            State main = createAndSaveState("Main");
+            State popup = new State.Builder("Popup")
+                .withHiddenStateIds(main.getId())
+                .build();
+            stateService.save(popup);
+            
+            State dialog = new State.Builder("Dialog")
+                .withHiddenStateIds(popup.getId(), main.getId())
+                .build();
+            stateService.save(dialog);
+            
+            // Setup transitions
+            StateTransitions mainTrans = createTransitions(main, "Popup");
+            StateTransitions popupTrans = createTransitions(popup, "Dialog");
+            StateTransitions dialogTrans = createTransitions(dialog);
+            
+            jointTable.addToJointTable(mainTrans);
+            jointTable.addToJointTable(popupTrans);
+            jointTable.addToJointTable(dialogTrans);
+            
+            // Simulate popup becoming active
+            jointTable.addTransitionsToHiddenStates(popup);
+            
+            // Main should now be accessible via PREVIOUS from popup
+            Set<Long> accessibleFromPrevious = jointTable.getIncomingTransitionsToPREVIOUS().get(main.getId());
+            assertNotNull(accessibleFromPrevious);
+            assertTrue(accessibleFromPrevious.contains(popup.getId()));
+            
+            // Simulate dialog becoming active
+            jointTable.addTransitionsToHiddenStates(dialog);
+            
+            // Both main and popup should be accessible via PREVIOUS
+            Set<Long> mainAccessible = jointTable.getIncomingTransitionsToPREVIOUS().get(main.getId());
+            Set<Long> popupAccessible = jointTable.getIncomingTransitionsToPREVIOUS().get(popup.getId());
+            
+            assertTrue(mainAccessible.contains(dialog.getId()));
+            assertTrue(popupAccessible.contains(dialog.getId()));
+        }
+    }
+    
+    @Nested
+    @DisplayName("Path Manager Integration")
+    class PathManagerIntegration {
+        
+        @Test
+        @DisplayName("Should clean paths based on active states")
+        void testPathCleaning() {
+            // Create states
+            State s1 = createAndSaveState("S1");
+            State s2 = createAndSaveState("S2");
+            State s3 = createAndSaveState("S3");
+            State s4 = createAndSaveState("S4");
+            
+            // Create transitions
+            StateTransitions t1 = createTransitions(s1, "S2");
+            StateTransitions t2 = createTransitions(s2, "S3");
+            StateTransitions t3 = createTransitions(s3, "S4");
+            StateTransitions t4 = createTransitions(s4);
+            
+            Arrays.asList(t1, t2, t3, t4).forEach(jointTable::addToJointTable);
+            
+            // Get paths from S1 to S4
+            Set<Long> fromS1 = new HashSet<>(Arrays.asList(s1.getId()));
+            Paths originalPaths = pathFinder.getPathsToState(fromS1, s4.getId());
+            
+            assertEquals(1, originalPaths.size());
+            Path originalPath = originalPaths.getBestPath();
+            assertEquals(4, originalPath.size());
+            
+            // Simulate S2 being active and S1->S2 transition failed
+            Set<Long> activeStates = new HashSet<>(Arrays.asList(s2.getId()));
+            Long failedTransitionStart = s1.getId();
+            
+            // Clean paths
+            Paths cleanedPaths = pathManager.getCleanPaths(activeStates, originalPaths, failedTransitionStart);
+            
+            // Should have trimmed path starting from S2
+            assertFalse(cleanedPaths.isEmpty());
+            Path cleanedPath = cleanedPaths.getBestPath();
+            assertEquals(3, cleanedPath.size());
+            assertEquals(s2.getId(), cleanedPath.get(0));
+            assertEquals(s4.getId(), cleanedPath.get(2));
+        }
+        
+        @Test
+        @DisplayName("Should find best path from multiple active states")
+        void testBestPathFromMultipleActiveStates() {
+            // Create graph where multiple states are active
+            State a = createAndSaveState("A");
+            State b = createAndSaveState("B");
+            State c = createAndSaveState("C");
+            State target = createAndSaveState("Target");
+            
+            // Different length paths to target
+            StateTransitions ta = createTransitions(a, "Target"); // Direct
+            StateTransitions tb = createTransitions(b, "C");
+            StateTransitions tc = createTransitions(c, "Target");
+            StateTransitions ttarget = createTransitions(target);
+            
+            Arrays.asList(ta, tb, tc, ttarget).forEach(jointTable::addToJointTable);
+            
+            // Both A and B are active
+            Set<Long> activeStates = new HashSet<>(Arrays.asList(a.getId(), b.getId()));
+            
+            Paths paths = pathFinder.getPathsToState(activeStates, target.getId());
+            
+            // Should find both paths
+            assertEquals(2, paths.size());
+            
+            // Best path should be direct from A
+            Path bestPath = paths.getBestPath();
+            assertEquals(2, bestPath.size());
+            assertEquals(a.getId(), bestPath.get(0));
+            assertEquals(target.getId(), bestPath.get(1));
+        }
+    }
+    
+    // Helper methods
+    
+    private State createAndSaveState(String name) {
+        State state = new State.Builder(name).build();
+        stateService.save(state);
+        return state;
+    }
+    
+    private StateTransitions createTransitions(State fromState, String... toStates) {
+        StateTransitions.Builder builder = new StateTransitions.Builder(fromState.getName());
+        
+        if (toStates.length > 0) {
+            builder.addTransition(() -> true, toStates);
+        }
+        
+        StateTransitions transitions = builder.build();
+        transitions.setStateId(fromState.getId());
+        
+        // Update state IDs in transitions
+        for (var transition : transitions.getTransitions()) {
+            if (transition instanceof JavaStateTransition) {
+                JavaStateTransition javaTrans = (JavaStateTransition) transition;
+                Set<Long> activateIds = new HashSet<>();
+                for (String stateName : javaTrans.getActivateNames()) {
+                    stateService.findByName(stateName).ifPresent(s -> activateIds.add(s.getId()));
+                }
+                javaTrans.setActivate(activateIds);
+            }
+        }
+        
+        transitionStore.add(transitions);
+        return transitions;
+    }
+}
