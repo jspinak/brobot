@@ -1,0 +1,200 @@
+package io.github.jspinak.brobot.test.example;
+
+import io.github.jspinak.brobot.config.ExecutionMode;
+import io.github.jspinak.brobot.config.FrameworkSettings;
+import io.github.jspinak.brobot.test.BrobotTestBase;
+import io.github.jspinak.brobot.test.TestCategories;
+import io.github.jspinak.brobot.test.benchmark.BenchmarkExtension;
+import io.github.jspinak.brobot.test.benchmark.PerformanceBenchmark;
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.extension.ExtendWith;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+/**
+ * Example test class demonstrating performance benchmarking capabilities.
+ */
+@DisplayName("Benchmark Example Tests")
+@ExtendWith(BenchmarkExtension.class)
+@Tag(TestCategories.UNIT)
+@Tag("benchmark")
+@Tag(TestCategories.CI_SAFE)
+public class BenchmarkExampleTest extends BrobotTestBase {
+    
+    private ExecutionMode executionMode;
+    
+    @BeforeEach
+    @Override
+    public void setupTest(TestInfo testInfo) {
+        super.setupTest(testInfo);
+        executionMode = new ExecutionMode();
+        
+        // Set performance thresholds
+        PerformanceBenchmark.setThreshold("mockModeCheck", 1, 10);
+        PerformanceBenchmark.setThreshold("listOperations", 100, 500);
+        PerformanceBenchmark.setThreshold("stringOperations", 50, 200);
+    }
+    
+    @AfterAll
+    public static void printBenchmarkSummary() {
+        PerformanceBenchmark.printSummary();
+    }
+    
+    @Test
+    @DisplayName("Benchmark mock mode checking")
+    @BenchmarkExtension.Benchmark(warningMs = 1, errorMs = 10)
+    void benchmarkMockModeCheck() {
+        // This test measures the performance of mock mode checking
+        for (int i = 0; i < 1000; i++) {
+            boolean isMock = executionMode.isMock();
+            assertNotNull(isMock);
+        }
+    }
+    
+    @Test
+    @DisplayName("Benchmark with manual measurement")
+    void benchmarkWithManualMeasurement() {
+        // Manual benchmark measurement
+        List<Integer> result = PerformanceBenchmark.measure("listOperations", () -> {
+            List<Integer> list = new ArrayList<>();
+            for (int i = 0; i < 10000; i++) {
+                list.add(i);
+            }
+            return list;
+        });
+        
+        assertEquals(10000, result.size());
+        
+        // Get statistics
+        PerformanceBenchmark.BenchmarkStatistics stats = 
+            PerformanceBenchmark.getStatistics("listOperations");
+        if (stats != null) {
+            System.out.println("List operations stats: " + stats);
+        }
+    }
+    
+    @Test
+    @DisplayName("Benchmark with warmup")
+    void benchmarkWithWarmup() {
+        // Benchmark with warmup runs
+        String result = PerformanceBenchmark.measureWithWarmup(
+            "stringOperations",
+            3,  // warmup runs
+            () -> {
+                StringBuilder sb = new StringBuilder();
+                for (int i = 0; i < 1000; i++) {
+                    sb.append("test").append(i);
+                }
+                return sb.toString();
+            }
+        );
+        
+        assertNotNull(result);
+        assertTrue(result.contains("test999"));
+    }
+    
+    @Test
+    @DisplayName("Benchmark framework settings access")
+    @BenchmarkExtension.Benchmark(name = "frameworkSettingsAccess", warningMs = 5)
+    void benchmarkFrameworkSettingsAccess() {
+        // Measure access to static framework settings
+        for (int i = 0; i < 1000; i++) {
+            boolean mock = FrameworkSettings.mock;
+            List<String> screenshots = FrameworkSettings.screenshots;
+            
+            // Simulate some work
+            if (i % 100 == 0) {
+                FrameworkSettings.screenshots.clear();
+            }
+        }
+    }
+    
+    @Test
+    @DisplayName("Benchmark nested operations")
+    void benchmarkNestedOperations() {
+        PerformanceBenchmark.measure("outerOperation", () -> {
+            for (int i = 0; i < 100; i++) {
+                final int index = i;
+                PerformanceBenchmark.measure("innerOperation_" + i % 10, () -> {
+                    // Simulate some work
+                    double result = Math.pow(index, 2) * Math.sqrt(index);
+                    return;
+                });
+            }
+        });
+        
+        // Check that we have statistics for inner operations
+        for (int i = 0; i < 10; i++) {
+            PerformanceBenchmark.BenchmarkStatistics stats = 
+                PerformanceBenchmark.getStatistics("innerOperation_" + i);
+            assertNotNull(stats, "Should have stats for innerOperation_" + i);
+        }
+    }
+    
+    @Test
+    @DisplayName("Benchmark comparison test")
+    @BenchmarkExtension.Benchmark(report = true)
+    void benchmarkComparison() {
+        // Compare two different implementations
+        Random random = new Random(42);
+        
+        // Implementation 1: ArrayList
+        List<Integer> arrayList = PerformanceBenchmark.measure("arrayListAdd", () -> {
+            List<Integer> list = new ArrayList<>();
+            for (int i = 0; i < 1000; i++) {
+                list.add(random.nextInt());
+            }
+            return list;
+        });
+        
+        // Implementation 2: Pre-sized ArrayList
+        List<Integer> preSizedList = PerformanceBenchmark.measure("preSizedArrayListAdd", () -> {
+            List<Integer> list = new ArrayList<>(1000);
+            for (int i = 0; i < 1000; i++) {
+                list.add(random.nextInt());
+            }
+            return list;
+        });
+        
+        assertEquals(arrayList.size(), preSizedList.size());
+        
+        // Print comparison
+        System.out.println("\nPerformance Comparison:");
+        System.out.println("Regular ArrayList: " + 
+            PerformanceBenchmark.getStatistics("arrayListAdd"));
+        System.out.println("Pre-sized ArrayList: " + 
+            PerformanceBenchmark.getStatistics("preSizedArrayListAdd"));
+    }
+    
+    @Nested
+    @DisplayName("Nested Benchmark Tests")
+    @BenchmarkExtension.Benchmark  // Apply to all tests in nested class
+    class NestedBenchmarks {
+        
+        @Test
+        @DisplayName("Nested test 1")
+        void nestedBenchmark1() throws InterruptedException {
+            // This will be automatically benchmarked
+            Thread.sleep(10);  // Simulate some work
+        }
+        
+        @Test
+        @DisplayName("Nested test 2")
+        void nestedBenchmark2() throws InterruptedException {
+            // This will also be automatically benchmarked
+            Thread.sleep(5);  // Simulate less work
+        }
+    }
+    
+    private void sleepMillis(int millis) {
+        try {
+            Thread.sleep(millis);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
+}

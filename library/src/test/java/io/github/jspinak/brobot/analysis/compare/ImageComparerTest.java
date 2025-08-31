@@ -7,6 +7,7 @@ import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.model.match.EmptyMatch;
 import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.test.BrobotTestBase;
+import io.github.jspinak.brobot.test.TestCategories;
 import io.github.jspinak.brobot.tools.testing.mock.action.ExecutionModeController;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,6 +35,11 @@ import static org.mockito.Mockito.*;
  */
 @ExtendWith(MockitoExtension.class)
 @DisplayName("ImageComparer Tests")
+@Tag(TestCategories.UNIT)
+@Tag(TestCategories.CV)
+@Tag(TestCategories.IMAGE)
+@Tag(TestCategories.FAST)
+@Tag(TestCategories.CI_SAFE)
 public class ImageComparerTest extends BrobotTestBase {
     
     @Mock
