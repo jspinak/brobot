@@ -4,23 +4,28 @@ import io.github.jspinak.brobot.BrobotTestApplication;
 import io.github.jspinak.brobot.test.BrobotTestBase;
 import io.github.jspinak.brobot.action.Action;
 import io.github.jspinak.brobot.action.ActionResult;
+import io.github.jspinak.brobot.action.ObjectCollection;
 import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
 import io.github.jspinak.brobot.action.basic.find.FindStrategy;
 import io.github.jspinak.brobot.action.basic.click.ClickOptions;
 import io.github.jspinak.brobot.action.basic.type.TypeOptions;
 import io.github.jspinak.brobot.action.composite.drag.DragOptions;
 import io.github.jspinak.brobot.action.basic.mouse.MouseMoveOptions;
+<<<<<<< HEAD:library-test/src/test/java/io/github/jspinak/brobot/integration/ActionExecutionIntegrationTest.java.bak
 <<<<<<< HEAD:library-test/src/test/java/io/github/jspinak/brobot/integration/ActionExecutionIntegrationTest.java
 import io.github.jspinak.brobot.action.basic.mouse.MousePressOptions;
 import io.github.jspinak.brobot.model.action.MouseButton;
 import io.github.jspinak.brobot.action.ObjectCollection;
 =======
 >>>>>>> coverage/agent-4:library-test/src/test/java/io/github/jspinak/brobot/integration/ActionExecutionIntegrationTest.java.bak
+=======
+>>>>>>> coverage/agent-3:library-test/src/test/java/io/github/jspinak/brobot/integration/ActionExecutionIntegrationTest.java
 import io.github.jspinak.brobot.action.basic.highlight.HighlightOptions;
 import io.github.jspinak.brobot.model.element.Location;
 import io.github.jspinak.brobot.model.element.Position;
 import io.github.jspinak.brobot.model.element.Positions;
 import io.github.jspinak.brobot.model.element.Region;
+import io.github.jspinak.brobot.model.element.SearchRegions;
 import io.github.jspinak.brobot.model.match.Match;
 import io.github.jspinak.brobot.model.state.StateImage;
 import io.github.jspinak.brobot.model.state.StateString;
@@ -108,7 +113,10 @@ public class ActionExecutionIntegrationTest extends BrobotTestBase {
             .setStrategy(PatternFindOptions.Strategy.BEST)
             .build();
             
-        ActionResult result = action.perform(findOptions, buttonImage);
+        ObjectCollection collection = new ObjectCollection.Builder()
+            .withImages(buttonImage)
+            .build();
+        ActionResult result = action.perform(findOptions, collection);
         
         assertNotNull(result, "ActionResult should not be null");
         assertTrue(result.isSuccess(), "Find action should succeed in mock mode");
@@ -125,13 +133,20 @@ public class ActionExecutionIntegrationTest extends BrobotTestBase {
         
         ClickOptions clickOptions = new ClickOptions.Builder()
             .setNumberOfClicks(2)  // Double-click
+<<<<<<< HEAD:library-test/src/test/java/io/github/jspinak/brobot/integration/ActionExecutionIntegrationTest.java.bak
             .setPressOptions(MousePressOptions.builder()
                 .setButton(MouseButton.LEFT)
                 .setPauseAfterMouseDown(0.5)
                 .build())
+=======
+            .setPauseAfterEnd(.5)
+>>>>>>> coverage/agent-3:library-test/src/test/java/io/github/jspinak/brobot/integration/ActionExecutionIntegrationTest.java
             .build();
             
-        ActionResult result = action.perform(clickOptions, iconImage);
+        ObjectCollection collection = new ObjectCollection.Builder()
+            .withImages(iconImage)
+            .build();
+        ActionResult result = action.perform(clickOptions, collection);
         
         assertTrue(result.isSuccess(), "Click action should succeed");
         assertEquals(1, result.getMatchList().size(), "Should have one match for defined region");
@@ -150,6 +165,7 @@ public class ActionExecutionIntegrationTest extends BrobotTestBase {
         String textToType = "Hello Brobot!";
         
         TypeOptions typeOptions = new TypeOptions.Builder()
+<<<<<<< HEAD:library-test/src/test/java/io/github/jspinak/brobot/integration/ActionExecutionIntegrationTest.java.bak
             .build();
             
         // Create ObjectCollection for type target
@@ -161,6 +177,16 @@ public class ActionExecutionIntegrationTest extends BrobotTestBase {
         // Mock the typed text in result
         // In mock mode, we need to manually set the result text
         // result.setText(textToType);  // This would be set by the mock framework
+=======
+            .setPauseBeforeBegin(0.1)
+            .setPauseAfterEnd(0.1)
+            .build();
+            
+        ObjectCollection collection = new ObjectCollection.Builder()
+            .withStrings(textToType)
+            .build();
+        ActionResult result = action.perform(typeOptions, collection);
+>>>>>>> coverage/agent-3:library-test/src/test/java/io/github/jspinak/brobot/integration/ActionExecutionIntegrationTest.java
         
         assertTrue(result.isSuccess(), "Type action should succeed");
         assertEquals(textToType, result.getText(), "Typed text should match input");
@@ -175,6 +201,7 @@ public class ActionExecutionIntegrationTest extends BrobotTestBase {
         Location toLocation = new Location(200, 200);
         
         DragOptions dragOptions = new DragOptions.Builder()
+<<<<<<< HEAD:library-test/src/test/java/io/github/jspinak/brobot/integration/ActionExecutionIntegrationTest.java.bak
             .setDelayBetweenMouseDownAndMove(0.5)
             .build();
             
@@ -184,6 +211,19 @@ public class ActionExecutionIntegrationTest extends BrobotTestBase {
             .build();
             
         ActionResult result = action.perform(dragOptions, dragObjects);
+=======
+            .setDelayBetweenMouseDownAndMove(0.1)
+            .setDelayAfterDrag(0.5)
+            .build();
+            
+        ObjectCollection fromCollection = new ObjectCollection.Builder()
+            .withLocations(fromLocation)
+            .build();
+        ObjectCollection toCollection = new ObjectCollection.Builder()
+            .withLocations(toLocation)
+            .build();
+        ActionResult result = action.perform(dragOptions, fromCollection, toCollection);
+>>>>>>> coverage/agent-3:library-test/src/test/java/io/github/jspinak/brobot/integration/ActionExecutionIntegrationTest.java
         
         assertTrue(result.isSuccess(), "Drag action should succeed");
         log.info("Dragged from {} to {}", fromLocation, toLocation);
@@ -196,6 +236,7 @@ public class ActionExecutionIntegrationTest extends BrobotTestBase {
         Location targetLocation = new Location(Positions.Name.MIDDLEMIDDLE);
         
         MouseMoveOptions moveOptions = new MouseMoveOptions.Builder()
+<<<<<<< HEAD:library-test/src/test/java/io/github/jspinak/brobot/integration/ActionExecutionIntegrationTest.java.bak
 <<<<<<< HEAD:library-test/src/test/java/io/github/jspinak/brobot/integration/ActionExecutionIntegrationTest.java
 =======
             .setLocation(targetLocation)
@@ -208,15 +249,27 @@ public class ActionExecutionIntegrationTest extends BrobotTestBase {
             .build();
             
         ActionResult result = action.perform(moveOptions, moveObjects);
+=======
+            .build();
+            
+        ObjectCollection collection = new ObjectCollection.Builder()
+            .withLocations(targetLocation)
+            .build();
+        ActionResult result = action.perform(moveOptions, collection);
+>>>>>>> coverage/agent-3:library-test/src/test/java/io/github/jspinak/brobot/integration/ActionExecutionIntegrationTest.java
         
         assertTrue(result.isSuccess(), "Move action should succeed");
         assertFalse(result.getMatchList().isEmpty(), "Should have a match for move location");
         
         Match moveMatch = result.getMatchList().get(0);
         assertNotNull(moveMatch.getRegion(), "Move should have a target region");
+<<<<<<< HEAD:library-test/src/test/java/io/github/jspinak/brobot/integration/ActionExecutionIntegrationTest.java.bak
         log.info("Moved to: ({}, {})", 
                 moveMatch.getRegion().getX() + moveMatch.getRegion().getW()/2,
                 moveMatch.getRegion().getY() + moveMatch.getRegion().getH()/2);
+=======
+        log.info("Moved to: {}", moveMatch.getRegion());
+>>>>>>> coverage/agent-3:library-test/src/test/java/io/github/jspinak/brobot/integration/ActionExecutionIntegrationTest.java
     }
     
     @Test
@@ -233,7 +286,10 @@ public class ActionExecutionIntegrationTest extends BrobotTestBase {
             .setMaxMatchesToActOn(5)
             .build();
             
-        ActionResult result = action.perform(findAllOptions, repeatingPattern);
+        ObjectCollection collection = new ObjectCollection.Builder()
+            .withImages(repeatingPattern)
+            .build();
+        ActionResult result = action.perform(findAllOptions, collection);
         
         assertTrue(result.isSuccess(), "Find all should succeed");
         assertFalse(result.getMatchList().isEmpty(), "Should find at least one match");
@@ -243,6 +299,7 @@ public class ActionExecutionIntegrationTest extends BrobotTestBase {
         if (result.getMatchList().size() > 1) {
             Match first = result.getMatchList().get(0);
             Match second = result.getMatchList().get(1);
+<<<<<<< HEAD:library-test/src/test/java/io/github/jspinak/brobot/integration/ActionExecutionIntegrationTest.java.bak
             // Compare centers manually since getCenter() doesn't exist
             double firstCenterX = first.getRegion().getX() + first.getRegion().getW()/2.0;
             double firstCenterY = first.getRegion().getY() + first.getRegion().getH()/2.0;
@@ -251,6 +308,10 @@ public class ActionExecutionIntegrationTest extends BrobotTestBase {
             
             assertFalse(firstCenterX == secondCenterX && firstCenterY == secondCenterY,
                       "Multiple matches should have different locations");
+=======
+            assertNotEquals(first.getRegion().getLocation(), second.getRegion().getLocation(),
+                          "Multiple matches should have different locations");
+>>>>>>> coverage/agent-3:library-test/src/test/java/io/github/jspinak/brobot/integration/ActionExecutionIntegrationTest.java
         }
     }
     
@@ -262,7 +323,11 @@ public class ActionExecutionIntegrationTest extends BrobotTestBase {
             .withRegion(50, 50, 200, 200)
             .build();
         
+        SearchRegions searchRegions = new SearchRegions();
+        searchRegions.addSearchRegions(searchRegion);
+        
         PatternFindOptions findInRegion = new PatternFindOptions.Builder()
+<<<<<<< HEAD:library-test/src/test/java/io/github/jspinak/brobot/integration/ActionExecutionIntegrationTest.java.bak
             .build();
         
         // Set search region on the image instead
@@ -273,6 +338,15 @@ public class ActionExecutionIntegrationTest extends BrobotTestBase {
             .build();
             
         ActionResult result = action.perform(findInRegion, searchImage);
+=======
+            .setSearchRegions(searchRegions)
+            .build();
+            
+        ObjectCollection buttonCollection = new ObjectCollection.Builder()
+            .withImages(buttonImage)
+            .build();
+        ActionResult result = action.perform(findInRegion, buttonCollection);
+>>>>>>> coverage/agent-3:library-test/src/test/java/io/github/jspinak/brobot/integration/ActionExecutionIntegrationTest.java
         
         assertTrue(result.isSuccess(), "Find in region should succeed");
         if (!result.getMatchList().isEmpty()) {
@@ -293,9 +367,17 @@ public class ActionExecutionIntegrationTest extends BrobotTestBase {
         log.info("=== TESTING HIGHLIGHT ACTION ===");
         
         HighlightOptions highlightOptions = new HighlightOptions.Builder()
+<<<<<<< HEAD:library-test/src/test/java/io/github/jspinak/brobot/integration/ActionExecutionIntegrationTest.java.bak
+=======
+            .setHighlightSeconds(1.0)
+            .setHighlightColor("RED")
+>>>>>>> coverage/agent-3:library-test/src/test/java/io/github/jspinak/brobot/integration/ActionExecutionIntegrationTest.java
             .build();
             
-        ActionResult result = action.perform(highlightOptions, iconImage);
+        ObjectCollection iconCollection = new ObjectCollection.Builder()
+            .withImages(iconImage)
+            .build();
+        ActionResult result = action.perform(highlightOptions, iconCollection);
         
         assertTrue(result.isSuccess(), "Highlight action should succeed");
         log.info("Highlighted {} for 1 second", iconImage.getName());
@@ -310,30 +392,53 @@ public class ActionExecutionIntegrationTest extends BrobotTestBase {
             .setStrategy(PatternFindOptions.Strategy.FIRST)
             .build();
             
+<<<<<<< HEAD:library-test/src/test/java/io/github/jspinak/brobot/integration/ActionExecutionIntegrationTest.java.bak
         // Find, then click, then type - using ObjectCollection
         ObjectCollection textFieldCollection = new ObjectCollection.Builder()
             .withStrings(textField)
             .build();
             
         ActionResult findResult = action.perform(findOptions, textFieldCollection);
+=======
+        ObjectCollection findCollection = new ObjectCollection.Builder()
+            .withStrings(textField)
+            .build();
+        ActionResult findResult = action.perform(findOptions, findCollection);
+>>>>>>> coverage/agent-3:library-test/src/test/java/io/github/jspinak/brobot/integration/ActionExecutionIntegrationTest.java
         assertTrue(findResult.isSuccess(), "Find should succeed");
         
         ClickOptions clickOptions = new ClickOptions.Builder()
             .setNumberOfClicks(1)
+<<<<<<< HEAD:library-test/src/test/java/io/github/jspinak/brobot/integration/ActionExecutionIntegrationTest.java.bak
             .setPressOptions(MousePressOptions.builder()
                 .setButton(MouseButton.LEFT)
                 .build())
             .build();
             
         ActionResult clickResult = action.perform(clickOptions, textFieldCollection);
+=======
+            .build();
+            
+        ObjectCollection clickCollection = new ObjectCollection.Builder()
+            .withStrings(textField)
+            .build();
+        ActionResult clickResult = action.perform(clickOptions, clickCollection);
+>>>>>>> coverage/agent-3:library-test/src/test/java/io/github/jspinak/brobot/integration/ActionExecutionIntegrationTest.java
         assertTrue(clickResult.isSuccess(), "Click should succeed");
         
         TypeOptions typeOptions = new TypeOptions.Builder()
             .build();
             
+<<<<<<< HEAD:library-test/src/test/java/io/github/jspinak/brobot/integration/ActionExecutionIntegrationTest.java.bak
         ObjectCollection typeObjects = new ObjectCollection.Builder().build();
         ActionResult typeResult = action.perform(typeOptions, typeObjects);
         // typeResult.setText("Composite action test");  // Would be set by mock framework
+=======
+        ObjectCollection typeCollection = new ObjectCollection.Builder()
+            .withStrings("Composite action test")
+            .build();
+        ActionResult typeResult = action.perform(typeOptions, typeCollection);
+>>>>>>> coverage/agent-3:library-test/src/test/java/io/github/jspinak/brobot/integration/ActionExecutionIntegrationTest.java
         assertTrue(typeResult.isSuccess(), "Type should succeed");
         
         log.info("Composite action sequence completed successfully");
@@ -344,10 +449,17 @@ public class ActionExecutionIntegrationTest extends BrobotTestBase {
         log.info("=== TESTING ACTION WITH TIMEOUT ===");
         
         PatternFindOptions timeoutOptions = new PatternFindOptions.Builder()
+<<<<<<< HEAD:library-test/src/test/java/io/github/jspinak/brobot/integration/ActionExecutionIntegrationTest.java.bak
+=======
+            .setPauseAfterEnd(2.0)  // 2 seconds wait
+>>>>>>> coverage/agent-3:library-test/src/test/java/io/github/jspinak/brobot/integration/ActionExecutionIntegrationTest.java
             .build();
             
         long startTime = System.currentTimeMillis();
-        ActionResult result = action.perform(timeoutOptions, buttonImage);
+        ObjectCollection buttonTimeoutCollection = new ObjectCollection.Builder()
+            .withImages(buttonImage)
+            .build();
+        ActionResult result = action.perform(timeoutOptions, buttonTimeoutCollection);
         long duration = System.currentTimeMillis() - startTime;
         
         assertTrue(result.isSuccess(), "Action should complete within timeout");

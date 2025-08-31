@@ -6,7 +6,10 @@ import io.github.jspinak.brobot.navigation.service.StateTransitionService;
 import io.github.jspinak.brobot.statemanagement.InitialStates;
 import io.github.jspinak.brobot.test.BrobotTestBase;
 import io.github.jspinak.brobot.test.TestCategories;
+<<<<<<< HEAD
 // Importing State model - using full class name to avoid conflicts with annotation
+=======
+>>>>>>> coverage/agent-3
 import org.junit.jupiter.api.*;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -18,6 +21,7 @@ import org.springframework.core.env.Environment;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -211,8 +215,13 @@ public class AnnotationProcessorTest extends BrobotTestBase {
             
             io.github.jspinak.brobot.model.state.State mockState1 = mock(io.github.jspinak.brobot.model.state.State.class);
             when(mockState1.getName()).thenReturn("TestState");
+<<<<<<< HEAD
+=======
+            when(mockState1.getId()).thenReturn(1L);
+>>>>>>> coverage/agent-3
             io.github.jspinak.brobot.model.state.State mockState2 = mock(io.github.jspinak.brobot.model.state.State.class);
             when(mockState2.getName()).thenReturn("SimpleState");
+            when(mockState2.getId()).thenReturn(2L);
             
             when(applicationContext.getBeansWithAnnotation(io.github.jspinak.brobot.annotations.State.class))
                 .thenReturn(stateBeans);
@@ -225,6 +234,16 @@ public class AnnotationProcessorTest extends BrobotTestBase {
                 .thenReturn(mockState2);
             when(registrationService.registerState(any())).thenReturn(true);
             when(registrationService.getRegisteredStateCount()).thenReturn(2);
+            
+            // Mock stateService to return the states when requested
+            when(stateService.getState("TestState")).thenReturn(Optional.of(mockState1));
+            when(stateService.getState("SimpleState")).thenReturn(Optional.of(mockState2));
+            when(stateService.getState("Test")).thenReturn(Optional.of(mockState1));
+            when(stateService.getState("Simple")).thenReturn(Optional.of(mockState2));
+            
+            // Mock transitionService
+            when(transitionService.getTransitions(anyLong())).thenReturn(Optional.empty());
+            when(transitionService.getStateTransitionsRepository()).thenReturn(mock(io.github.jspinak.brobot.model.transition.StateTransitionStore.class));
             
             // Execute
             processor.processAnnotations();
