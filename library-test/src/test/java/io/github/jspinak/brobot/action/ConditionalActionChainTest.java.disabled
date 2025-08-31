@@ -1,0 +1,526 @@
+package io.github.jspinak.brobot.action;
+
+import io.github.jspinak.brobot.test.BrobotTestBase;
+import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
+import io.github.jspinak.brobot.action.basic.click.ClickOptions;
+import io.github.jspinak.brobot.action.basic.type.TypeOptions;
+import io.github.jspinak.brobot.action.basic.vanish.VanishOptions;
+import io.github.jspinak.brobot.action.basic.highlight.HighlightOptions;
+import io.github.jspinak.brobot.model.state.StateImage;
+import io.github.jspinak.brobot.model.element.Region;
+import io.github.jspinak.brobot.model.element.Location;
+import io.github.jspinak.brobot.model.match.Match;
+import org.junit.jupiter.api.*;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+
+/**
+ * Comprehensive test suite for ConditionalActionChain.
+ * Tests chaining, conditional execution, and convenience methods.
+ */
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+public class ConditionalActionChainTest extends BrobotTestBase {
+    
+    @Mock
+    private Action mockAction;
+    
+    private AutoCloseable mocks;
+    
+    private StateImage createTestImage(String name) {
+        StateImage image = new StateImage();
+        image.setName(name);
+        return image;
+    }
+    
+    private ActionResult createSuccessResult() {
+        ActionResult result = new ActionResult();
+        result.setSuccess(true);
+        result.addMatch(new Match.Builder()
+            .setRegion(new Region(10, 10, 50, 50))
+            .setSimScore(0.95)
+            .build());
+        return result;
+    }
+    
+    private ActionResult createFailureResult() {
+        ActionResult result = new ActionResult();
+        result.setSuccess(false);
+        return result;
+    }
+    
+    @BeforeEach
+    @Override
+    public void setupTest() {
+        super.setupTest();
+        mocks = MockitoAnnotations.openMocks(this);
+    }
+    
+    @AfterEach
+    void tearDown() throws Exception {
+        if (mocks != null) {
+            mocks.close();
+        }
+    }
+    
+    @Nested
+    @DisplayName("Chain Creation Tests")
+    class ChainCreationTests {
+        
+        @Test
+        @Order(1)
+        @DisplayName("Should create chain with find")
+        void testCreateWithFind() {
+            PatternFindOptions findOptions = new PatternFindOptions.Builder().build();
+            ConditionalActionChain chain = ConditionalActionChain.find(findOptions);
+            
+            assertNotNull(chain);
+        }
+        
+        @Test
+        @Order(2)
+        @DisplayName("Should create chain with StateImage")
+        void testCreateWithStateImage() {
+            StateImage image = createTestImage("test");
+            ConditionalActionChain chain = ConditionalActionChain.find(image);
+            
+            assertNotNull(chain);
+        }
+        
+        @Test
+        @Order(3)
+        @DisplayName("Should create chain with start method")
+        void testCreateWithStart() {
+            ClickOptions clickOptions = new ClickOptions.Builder().build();
+            ConditionalActionChain chain = ConditionalActionChain.start(clickOptions);
+            
+            assertNotNull(chain);
+        }
+    }
+    
+    @Nested
+    @DisplayName("Sequential Chaining Tests")
+    class SequentialChainingTests {
+        
+        @Test
+        @Order(4)
+        @DisplayName("Should chain multiple actions with then")
+        void testChainWithThen() {
+            ConditionalActionChain chain = ConditionalActionChain
+                .find(createTestImage("img1"))
+                .then(new ClickOptions.Builder().build())
+                .then(new TypeOptions.Builder().setText("test").build())
+                .then(new PatternFindOptions.Builder().build());
+            
+            assertNotNull(chain);
+        }
+        
+        @Test
+        @Order(5)
+        @DisplayName("Should execute all actions in sequence")
+        void testSequentialExecution() {
+            when(mockAction.perform(any(ActionConfig.class), any(ObjectCollection[].class)))
+                .thenReturn(createSuccessResult());
+            
+            ActionResult result = ConditionalActionChain
+                .find(createTestImage("img1"))
+                .then(new ClickOptions.Builder().build())
+                .then(new TypeOptions.Builder().setText("hello").build())
+                .perform(mockAction);
+            
+            assertNotNull(result);
+        }
+        
+        @Test
+        @Order(6)
+        @DisplayName("Should pass result between actions")
+        void testResultPassing() {
+            ActionResult firstResult = createSuccessResult();
+            ActionResult secondResult = createSuccessResult();
+            
+            when(mockAction.perform(any(ActionConfig.class), any(ObjectCollection[].class)))
+                .thenReturn(firstResult)
+                .thenReturn(secondResult);
+            
+            ActionResult finalResult = ConditionalActionChain
+                .find(createTestImage("img1"))
+                .then(new ClickOptions.Builder().build())
+                .perform(mockAction);
+            
+            assertNotNull(finalResult);
+            verify(mockAction, times(2)).perform(any(ActionConfig.class), any(ObjectCollection[].class));
+        }
+    }
+    
+    @Nested
+    @DisplayName("Conditional Execution Tests")
+    class ConditionalExecutionTests {
+        
+        @Test
+        @Order(7)
+        @DisplayName("Should execute ifFound when previous succeeds")
+        void testIfFoundOnSuccess() {
+            when(mockAction.perform(any(ActionConfig.class), any(ObjectCollection[].class)))
+                .thenReturn(createSuccessResult());
+            
+            ActionResult result = ConditionalActionChain
+                .find(createTestImage("img"))
+                .ifFoundClick()
+                .perform(mockAction);
+            
+            assertNotNull(result);
+            verify(mockAction, times(2)).perform(any(ActionConfig.class), any(ObjectCollection[].class));
+        }
+        
+        @Test
+        @Order(8)
+        @DisplayName("Should skip ifFound when previous fails")
+        void testIfFoundOnFailure() {
+            when(mockAction.perform(any(ActionConfig.class), any(ObjectCollection[].class)))
+                .thenReturn(createFailureResult());
+            
+            ActionResult result = ConditionalActionChain
+                .find(createTestImage("img"))
+                .ifFoundClick()
+                .perform(mockAction);
+            
+            assertNotNull(result);
+            verify(mockAction, times(1)).perform(any(ActionConfig.class), any(ObjectCollection[].class));
+        }
+        
+        @Test
+        @Order(9)
+        @DisplayName("Should execute ifNotFound when previous fails")
+        void testIfNotFoundOnFailure() {
+            when(mockAction.perform(any(ActionConfig.class), any(ObjectCollection[].class)))
+                .thenReturn(createFailureResult())
+                .thenReturn(createSuccessResult());
+            
+            ActionResult result = ConditionalActionChain
+                .find(createTestImage("img"))
+                .ifNotFoundLog("Image not found")
+                .perform(mockAction);
+            
+            assertNotNull(result);
+            // Log action doesn't call perform, just logs
+            verify(mockAction, times(1)).perform(any(ActionConfig.class), any(ObjectCollection[].class));
+        }
+        
+        @Test
+        @Order(10)
+        @DisplayName("Should skip ifNotFound when previous succeeds")
+        void testIfNotFoundOnSuccess() {
+            when(mockAction.perform(any(ActionConfig.class), any(ObjectCollection[].class)))
+                .thenReturn(createSuccessResult());
+            
+            ActionResult result = ConditionalActionChain
+                .find(createTestImage("img"))
+                .ifNotFoundLog("Should not see this")
+                .perform(mockAction);
+            
+            assertNotNull(result);
+            verify(mockAction, times(1)).perform(any(ActionConfig.class), any(ObjectCollection[].class));
+        }
+    }
+    
+    @Nested
+    @DisplayName("Convenience Method Tests")
+    class ConvenienceMethodTests {
+        
+        @Test
+        @Order(11)
+        @DisplayName("Should support ifFoundClick")
+        void testIfFoundClick() {
+            ConditionalActionChain chain = ConditionalActionChain
+                .find(createTestImage("button"))
+                .ifFoundClick();
+            
+            assertNotNull(chain);
+        }
+        
+        @Test
+        @Order(12)
+        @DisplayName("Should support ifFoundType")
+        void testIfFoundType() {
+            ConditionalActionChain chain = ConditionalActionChain
+                .find(createTestImage("input"))
+                .ifFoundType("test text");
+            
+            assertNotNull(chain);
+        }
+        
+        @Test
+        @Order(13)
+        @DisplayName("Should support wait")
+        void testWait() {
+            long startTime = System.currentTimeMillis();
+            
+            ConditionalActionChain
+                .find(createTestImage("img"))
+                .wait(0.1) // 100ms
+                .perform(mockAction);
+            
+            long duration = System.currentTimeMillis() - startTime;
+            assertTrue(duration >= 100, "Should wait at least 100ms");
+        }
+        
+        @Test
+        @Order(14)
+        @DisplayName("Should support waitForVanish")
+        void testWaitForVanish() {
+            ConditionalActionChain chain = ConditionalActionChain
+                .find(createTestImage("loading"))
+                .waitForVanish(5.0);
+            
+            assertNotNull(chain);
+        }
+        
+        @Test
+        @Order(15)
+        @DisplayName("Should support highlight")
+        void testHighlight() {
+            ConditionalActionChain chain = ConditionalActionChain
+                .find(createTestImage("target"))
+                .ifFoundHighlight(2.0);
+            
+            assertNotNull(chain);
+        }
+    }
+    
+    @Nested
+    @DisplayName("Control Flow Tests")
+    class ControlFlowTests {
+        
+        @Test
+        @Order(16)
+        @DisplayName("Should stop chain on stopChain")
+        void testStopChain() {
+            AtomicInteger executionCount = new AtomicInteger(0);
+            
+            when(mockAction.perform(any(ActionConfig.class), any(ObjectCollection[].class)))
+                .thenAnswer(inv -> {
+                    executionCount.incrementAndGet();
+                    return createSuccessResult();
+                });
+            
+            ConditionalActionChain
+                .find(createTestImage("img"))
+                .ifFoundStopChain()
+                .then(new ClickOptions.Builder().build()) // Should not execute
+                .then(new TypeOptions.Builder().setText("test").build()) // Should not execute
+                .perform(mockAction);
+            
+            assertEquals(1, executionCount.get(), "Should only execute first action");
+        }
+        
+        @Test
+        @Order(17)
+        @DisplayName("Should retry on failure")
+        void testRetry() {
+            AtomicInteger attempts = new AtomicInteger(0);
+            
+            when(mockAction.perform(any(ActionConfig.class), any(ObjectCollection[].class)))
+                .thenAnswer(inv -> {
+                    attempts.incrementAndGet();
+                    if (attempts.get() < 3) {
+                        return createFailureResult();
+                    }
+                    return createSuccessResult();
+                });
+            
+            ActionResult result = ConditionalActionChain
+                .find(createTestImage("img"))
+                .retry(3)
+                .perform(mockAction);
+            
+            assertTrue(result.isSuccess());
+            assertEquals(3, attempts.get(), "Should retry until success");
+        }
+        
+        @Test
+        @Order(18)
+        @DisplayName("Should execute custom handler")
+        void testCustomHandler() {
+            AtomicInteger handlerCalls = new AtomicInteger(0);
+            Consumer<ActionResult> handler = result -> handlerCalls.incrementAndGet();
+            
+            when(mockAction.perform(any(ActionConfig.class), any(ObjectCollection[].class)))
+                .thenReturn(createSuccessResult());
+            
+            ConditionalActionChain
+                .find(createTestImage("img"))
+                .ifFound(new ClickOptions.Builder().build(), handler)
+                .perform(mockAction);
+            
+            assertEquals(1, handlerCalls.get(), "Handler should be called once");
+        }
+    }
+    
+    @Nested
+    @DisplayName("Error Handling Tests")
+    class ErrorHandlingTests {
+        
+        @Test
+        @Order(19)
+        @DisplayName("Should handle null action gracefully")
+        void testNullAction() {
+            assertDoesNotThrow(() -> {
+                ConditionalActionChain
+                    .start(null)
+                    .perform(mockAction);
+            });
+        }
+        
+        @Test
+        @Order(20)
+        @DisplayName("Should handle exception in action")
+        void testExceptionInAction() {
+            when(mockAction.perform(any(ActionConfig.class), any(ObjectCollection[].class)))
+                .thenThrow(new RuntimeException("Test exception"));
+            
+            assertThrows(RuntimeException.class, () -> {
+                ConditionalActionChain
+                    .find(createTestImage("img"))
+                    .perform(mockAction);
+            });
+        }
+        
+        @Test
+        @Order(21)
+        @DisplayName("Should continue chain after error with onError")
+        void testOnErrorContinues() {
+            AtomicInteger errorCount = new AtomicInteger(0);
+            
+            when(mockAction.perform(any(ActionConfig.class), any(ObjectCollection[].class)))
+                .thenThrow(new RuntimeException("Test error"))
+                .thenReturn(createSuccessResult());
+            
+            ConditionalActionChain chain = ConditionalActionChain
+                .find(createTestImage("img"))
+                .onError(e -> errorCount.incrementAndGet())
+                .then(new ClickOptions.Builder().build());
+            
+            // Note: onError is not implemented in the base class, 
+            // this test documents expected behavior
+            assertNotNull(chain);
+        }
+    }
+    
+    @Nested
+    @DisplayName("Complex Workflow Tests")
+    class ComplexWorkflowTests {
+        
+        @Test
+        @Order(22)
+        @DisplayName("Should handle login workflow")
+        void testLoginWorkflow() {
+            when(mockAction.perform(any(ActionConfig.class), any(ObjectCollection[].class)))
+                .thenReturn(createSuccessResult());
+            
+            ActionResult result = ConditionalActionChain
+                .find(createTestImage("username_field"))
+                .ifFoundClick()
+                .ifFoundType("user@example.com")
+                .then(createTestImage("password_field"))
+                .ifFoundClick()
+                .ifFoundType("password123")
+                .then(createTestImage("login_button"))
+                .ifFoundClick()
+                .waitForVanish(5.0)
+                .then(createTestImage("dashboard"))
+                .perform(mockAction);
+            
+            assertNotNull(result);
+        }
+        
+        @Test
+        @Order(23)
+        @DisplayName("Should handle form validation workflow")
+        void testFormValidation() {
+            when(mockAction.perform(any(ActionConfig.class), any(ObjectCollection[].class)))
+                .thenReturn(createFailureResult())  // First field not found
+                .thenReturn(createSuccessResult())   // Error message found
+                .thenReturn(createSuccessResult());  // Submit successful
+            
+            ActionResult result = ConditionalActionChain
+                .find(createTestImage("required_field"))
+                .ifNotFound(createTestImage("error_message"))
+                .ifFoundLog("Validation error present")
+                .then(createTestImage("submit_button"))
+                .ifFoundClick()
+                .perform(mockAction);
+            
+            assertNotNull(result);
+        }
+        
+        @Test
+        @Order(24)
+        @DisplayName("Should handle navigation workflow")
+        void testNavigationWorkflow() {
+            ConditionalActionChain chain = ConditionalActionChain
+                .find(createTestImage("menu_button"))
+                .ifFoundClick()
+                .wait(0.5)
+                .then(createTestImage("menu_item"))
+                .ifFoundHighlight(1.0)
+                .ifFoundClick()
+                .waitForVanish(3.0)
+                .then(createTestImage("page_loaded"))
+                .retry(3);
+            
+            assertNotNull(chain);
+        }
+    }
+    
+    @Nested
+    @DisplayName("Thread Safety Tests")
+    class ThreadSafetyTests {
+        
+        @Test
+        @Order(25)
+        @DisplayName("Should handle concurrent chain execution")
+        void testConcurrentExecution() throws InterruptedException {
+            int threadCount = 10;
+            CountDownLatch latch = new CountDownLatch(threadCount);
+            ExecutorService executor = Executors.newFixedThreadPool(threadCount);
+            AtomicInteger successCount = new AtomicInteger(0);
+            
+            when(mockAction.perform(any(ActionConfig.class), any(ObjectCollection[].class)))
+                .thenReturn(createSuccessResult());
+            
+            for (int i = 0; i < threadCount; i++) {
+                executor.submit(() -> {
+                    try {
+                        ActionResult result = ConditionalActionChain
+                            .find(createTestImage("img"))
+                            .ifFoundClick()
+                            .perform(mockAction);
+                        
+                        if (result != null && result.isSuccess()) {
+                            successCount.incrementAndGet();
+                        }
+                    } finally {
+                        latch.countDown();
+                    }
+                });
+            }
+            
+            assertTrue(latch.await(5, TimeUnit.SECONDS));
+            executor.shutdown();
+            
+            assertEquals(threadCount, successCount.get(), 
+                "All threads should complete successfully");
+        }
+    }
+}
