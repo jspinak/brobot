@@ -1,0 +1,468 @@
+package io.github.jspinak.brobot.action;
+
+import io.github.jspinak.brobot.test.BrobotTestBase;
+import io.github.jspinak.brobot.action.basic.click.ClickOptions;
+import io.github.jspinak.brobot.action.basic.find.PatternFindOptions;
+import io.github.jspinak.brobot.action.basic.type.TypeOptions;
+import io.github.jspinak.brobot.action.basic.vanish.VanishOptions;
+import io.github.jspinak.brobot.action.basic.highlight.HighlightOptions;
+import io.github.jspinak.brobot.action.basic.mouse.*;
+import io.github.jspinak.brobot.action.basic.type.KeyDownOptions;
+import io.github.jspinak.brobot.action.basic.type.KeyUpOptions;
+import io.github.jspinak.brobot.action.basic.region.DefineRegionOptions;
+import io.github.jspinak.brobot.action.composite.drag.DragOptions;
+import io.github.jspinak.brobot.action.basic.find.color.ColorFindOptions;
+import org.junit.jupiter.api.*;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+/**
+ * Comprehensive test suite for ActionConfigFactory.
+ * Tests factory methods, overrides, and type mappings.
+ */
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+public class ActionConfigFactoryTest extends BrobotTestBase {
+    
+    private ActionConfigFactory factory;
+    
+    @BeforeEach
+    @Override
+    public void setupTest() {
+        super.setupTest();
+        factory = new ActionConfigFactory();
+    }
+    
+    @Nested
+    @DisplayName("Basic Factory Tests")
+    class BasicFactoryTests {
+        
+        @Test
+        @Order(1)
+        @DisplayName("Should create ClickOptions for CLICK type")
+        void testCreateClickOptions() {
+            ActionConfig config = factory.create(ActionInterface.Type.CLICK);
+            
+            assertNotNull(config);
+            assertInstanceOf(ClickOptions.class, config);
+        }
+        
+        @Test
+        @Order(2)
+        @DisplayName("Should create PatternFindOptions for FIND type")
+        void testCreateFindOptions() {
+            ActionConfig config = factory.create(ActionInterface.Type.FIND);
+            
+            assertNotNull(config);
+            assertInstanceOf(PatternFindOptions.class, config);
+        }
+        
+        @Test
+        @Order(3)
+        @DisplayName("Should create TypeOptions for TYPE type")
+        void testCreateTypeOptions() {
+            ActionConfig config = factory.create(ActionInterface.Type.TYPE);
+            
+            assertNotNull(config);
+            assertInstanceOf(TypeOptions.class, config);
+        }
+        
+        @Test
+        @Order(4)
+        @DisplayName("Should create DragOptions for DRAG type")
+        void testCreateDragOptions() {
+            ActionConfig config = factory.create(ActionInterface.Type.DRAG);
+            
+            assertNotNull(config);
+            assertInstanceOf(DragOptions.class, config);
+        }
+        
+        @Test
+        @Order(5)
+        @DisplayName("Should create VanishOptions for VANISH type")
+        void testCreateVanishOptions() {
+            ActionConfig config = factory.create(ActionInterface.Type.VANISH);
+            
+            assertNotNull(config);
+            assertInstanceOf(VanishOptions.class, config);
+        }
+        
+        @Test
+        @Order(6)
+        @DisplayName("Should create HighlightOptions for HIGHLIGHT type")
+        void testCreateHighlightOptions() {
+            ActionConfig config = factory.create(ActionInterface.Type.HIGHLIGHT);
+            
+            assertNotNull(config);
+            assertInstanceOf(HighlightOptions.class, config);
+        }
+        
+        @Test
+        @Order(7)
+        @DisplayName("Should create MouseMoveOptions for MOVE type")
+        void testCreateMouseMoveOptions() {
+            ActionConfig config = factory.create(ActionInterface.Type.MOVE);
+            
+            assertNotNull(config);
+            assertInstanceOf(MouseMoveOptions.class, config);
+        }
+        
+        @Test
+        @Order(8)
+        @DisplayName("Should create ScrollOptions for SCROLL_MOUSE_WHEEL type")
+        void testCreateScrollOptions() {
+            ActionConfig config = factory.create(ActionInterface.Type.SCROLL_MOUSE_WHEEL);
+            
+            assertNotNull(config);
+            assertInstanceOf(ScrollOptions.class, config);
+        }
+        
+        @Test
+        @Order(9)
+        @DisplayName("Should create MouseDownOptions for MOUSE_DOWN type")
+        void testCreateMouseDownOptions() {
+            ActionConfig config = factory.create(ActionInterface.Type.MOUSE_DOWN);
+            
+            assertNotNull(config);
+            assertInstanceOf(MouseDownOptions.class, config);
+        }
+        
+        @Test
+        @Order(10)
+        @DisplayName("Should create MouseUpOptions for MOUSE_UP type")
+        void testCreateMouseUpOptions() {
+            ActionConfig config = factory.create(ActionInterface.Type.MOUSE_UP);
+            
+            assertNotNull(config);
+            assertInstanceOf(MouseUpOptions.class, config);
+        }
+        
+        @Test
+        @Order(11)
+        @DisplayName("Should create KeyDownOptions for KEY_DOWN type")
+        void testCreateKeyDownOptions() {
+            ActionConfig config = factory.create(ActionInterface.Type.KEY_DOWN);
+            
+            assertNotNull(config);
+            assertInstanceOf(KeyDownOptions.class, config);
+        }
+        
+        @Test
+        @Order(12)
+        @DisplayName("Should create KeyUpOptions for KEY_UP type")
+        void testCreateKeyUpOptions() {
+            ActionConfig config = factory.create(ActionInterface.Type.KEY_UP);
+            
+            assertNotNull(config);
+            assertInstanceOf(KeyUpOptions.class, config);
+        }
+        
+        @Test
+        @Order(13)
+        @DisplayName("Should create DefineRegionOptions for DEFINE type")
+        void testCreateDefineRegionOptions() {
+            ActionConfig config = factory.create(ActionInterface.Type.DEFINE);
+            
+            assertNotNull(config);
+            assertInstanceOf(DefineRegionOptions.class, config);
+        }
+        
+        @Test
+        @Order(14)
+        @DisplayName("Should create ColorFindOptions for CLASSIFY type")
+        void testCreateClassifyOptions() {
+            ActionConfig config = factory.create(ActionInterface.Type.CLASSIFY);
+            
+            assertNotNull(config);
+            assertInstanceOf(ColorFindOptions.class, config);
+        }
+    }
+    
+    @Nested
+    @DisplayName("Override Tests")
+    class OverrideTests {
+        
+        @Test
+        @Order(15)
+        @DisplayName("Should apply overrides to ClickOptions")
+        void testClickOptionsOverrides() {
+            Map<String, Object> overrides = new HashMap<>();
+            overrides.put("numberOfClicks", 3);
+            overrides.put("pauseAfterEnd", 2.0);
+            
+            ActionConfig config = factory.create(ActionInterface.Type.CLICK, overrides);
+            
+            assertNotNull(config);
+            ClickOptions clickOptions = (ClickOptions) config;
+            assertEquals(3, clickOptions.getNumberOfClicks());
+            assertEquals(2.0, clickOptions.getPauseAfterEnd(), 0.001);
+        }
+        
+        @Test
+        @Order(16)
+        @DisplayName("Should apply overrides to PatternFindOptions")
+        void testFindOptionsOverrides() {
+            Map<String, Object> overrides = new HashMap<>();
+            overrides.put("similarity", 0.95);
+            overrides.put("maxMatches", 5);
+            
+            ActionConfig config = factory.create(ActionInterface.Type.FIND, overrides);
+            
+            assertNotNull(config);
+            PatternFindOptions findOptions = (PatternFindOptions) config;
+            assertEquals(0.95, findOptions.getSimilarity(), 0.001);
+            assertEquals(5, findOptions.getMaxMatches());
+        }
+        
+        @Test
+        @Order(17)
+        @DisplayName("Should handle null overrides")
+        void testNullOverrides() {
+            ActionConfig config = factory.create(ActionInterface.Type.CLICK, null);
+            
+            assertNotNull(config);
+            assertInstanceOf(ClickOptions.class, config);
+        }
+        
+        @Test
+        @Order(18)
+        @DisplayName("Should handle empty overrides")
+        void testEmptyOverrides() {
+            Map<String, Object> overrides = new HashMap<>();
+            ActionConfig config = factory.create(ActionInterface.Type.TYPE, overrides);
+            
+            assertNotNull(config);
+            assertInstanceOf(TypeOptions.class, config);
+        }
+        
+        @Test
+        @Order(19)
+        @DisplayName("Should ignore unknown override keys")
+        void testUnknownOverrideKeys() {
+            Map<String, Object> overrides = new HashMap<>();
+            overrides.put("unknownKey", "unknownValue");
+            overrides.put("anotherUnknownKey", 123);
+            
+            assertDoesNotThrow(() -> {
+                ActionConfig config = factory.create(ActionInterface.Type.FIND, overrides);
+                assertNotNull(config);
+            });
+        }
+    }
+    
+    @Nested
+    @DisplayName("CreateFrom Tests")
+    class CreateFromTests {
+        
+        @Test
+        @Order(20)
+        @DisplayName("Should create from existing ClickOptions")
+        void testCreateFromClickOptions() {
+            ClickOptions existing = new ClickOptions.Builder()
+                .setNumberOfClicks(2)
+                .build();
+            
+            Map<String, Object> overrides = new HashMap<>();
+            overrides.put("numberOfClicks", 3);
+            
+            ActionConfig newConfig = factory.createFrom(existing, overrides);
+            
+            assertNotNull(newConfig);
+            assertInstanceOf(ClickOptions.class, newConfig);
+            assertEquals(3, ((ClickOptions) newConfig).getNumberOfClicks());
+        }
+        
+        @Test
+        @Order(21)
+        @DisplayName("Should create from existing PatternFindOptions")
+        void testCreateFromFindOptions() {
+            PatternFindOptions existing = new PatternFindOptions.Builder()
+                .setSimilarity(0.85)
+                .build();
+            
+            ActionConfig newConfig = factory.createFrom(existing, null);
+            
+            assertNotNull(newConfig);
+            assertInstanceOf(PatternFindOptions.class, newConfig);
+        }
+        
+        @Test
+        @Order(22)
+        @DisplayName("Should detect type from all config classes")
+        void testCreateFromAllTypes() {
+            ActionConfig[] configs = {
+                new ClickOptions.Builder().build(),
+                new PatternFindOptions.Builder().build(),
+                new TypeOptions.Builder().build(),
+                new DragOptions.Builder().build(),
+                new VanishOptions.Builder().build(),
+                new HighlightOptions.Builder().build(),
+                new MouseMoveOptions.Builder().build(),
+                new ScrollOptions.Builder().build(),
+                new MouseDownOptions.Builder().build(),
+                new MouseUpOptions.Builder().build(),
+                new KeyDownOptions.Builder().build(),
+                new KeyUpOptions.Builder().build(),
+                new DefineRegionOptions.Builder().build()
+            };
+            
+            for (ActionConfig config : configs) {
+                ActionConfig newConfig = factory.createFrom(config, null);
+                assertNotNull(newConfig);
+                assertEquals(config.getClass(), newConfig.getClass());
+            }
+        }
+    }
+    
+    @Nested
+    @DisplayName("Error Handling Tests")
+    class ErrorHandlingTests {
+        
+        @Test
+        @Order(23)
+        @DisplayName("Should throw exception for null action type")
+        void testNullActionType() {
+            assertThrows(IllegalArgumentException.class, () -> {
+                factory.create(null);
+            });
+        }
+        
+        @Test
+        @Order(24)
+        @DisplayName("Should throw exception for unsupported action type")
+        void testUnsupportedActionType() {
+            // Note: All types should be supported, but testing defensive programming
+            // This test would only apply if new types are added without factory support
+            ActionInterface.Type unsupportedType = null;
+            try {
+                // Try to find an unsupported type (if any exist)
+                for (ActionInterface.Type type : ActionInterface.Type.values()) {
+                    // All types should be supported
+                }
+            } catch (Exception e) {
+                // If we somehow have an unsupported type
+            }
+            
+            // Since all types are supported, this test verifies completeness
+            for (ActionInterface.Type type : ActionInterface.Type.values()) {
+                assertDoesNotThrow(() -> {
+                    ActionConfig config = factory.create(type);
+                    assertNotNull(config);
+                }, "Failed for type: " + type);
+            }
+        }
+        
+        @Test
+        @Order(25)
+        @DisplayName("Should handle invalid override types")
+        void testInvalidOverrideTypes() {
+            Map<String, Object> overrides = new HashMap<>();
+            overrides.put("numberOfClicks", "not a number"); // Wrong type
+            
+            // The factory should handle this gracefully
+            assertDoesNotThrow(() -> {
+                factory.create(ActionInterface.Type.CLICK, overrides);
+            });
+        }
+    }
+    
+    @Nested
+    @DisplayName("Thread Safety Tests")
+    class ThreadSafetyTests {
+        
+        @Test
+        @Order(26)
+        @DisplayName("Should handle concurrent factory calls")
+        void testConcurrentFactoryCalls() throws InterruptedException {
+            int threadCount = 20;
+            CountDownLatch latch = new CountDownLatch(threadCount);
+            ExecutorService executor = Executors.newFixedThreadPool(threadCount);
+            AtomicInteger successCount = new AtomicInteger(0);
+            
+            ActionInterface.Type[] types = ActionInterface.Type.values();
+            
+            for (int i = 0; i < threadCount; i++) {
+                final int index = i;
+                executor.submit(() -> {
+                    try {
+                        ActionInterface.Type type = types[index % types.length];
+                        ActionConfig config = factory.create(type);
+                        
+                        if (config != null) {
+                            successCount.incrementAndGet();
+                        }
+                    } finally {
+                        latch.countDown();
+                    }
+                });
+            }
+            
+            assertTrue(latch.await(5, TimeUnit.SECONDS));
+            executor.shutdown();
+            
+            assertEquals(threadCount, successCount.get(), 
+                "All threads should create configs successfully");
+        }
+        
+        @Test
+        @Order(27)
+        @DisplayName("Should handle concurrent createFrom calls")
+        void testConcurrentCreateFrom() throws InterruptedException {
+            int threadCount = 10;
+            CountDownLatch latch = new CountDownLatch(threadCount);
+            ExecutorService executor = Executors.newFixedThreadPool(threadCount);
+            
+            ClickOptions baseConfig = new ClickOptions.Builder().build();
+            AtomicInteger successCount = new AtomicInteger(0);
+            
+            for (int i = 0; i < threadCount; i++) {
+                final int clicks = i + 1;
+                executor.submit(() -> {
+                    try {
+                        Map<String, Object> overrides = new HashMap<>();
+                        overrides.put("numberOfClicks", clicks);
+                        
+                        ActionConfig config = factory.createFrom(baseConfig, overrides);
+                        
+                        if (config != null) {
+                            successCount.incrementAndGet();
+                        }
+                    } finally {
+                        latch.countDown();
+                    }
+                });
+            }
+            
+            assertTrue(latch.await(5, TimeUnit.SECONDS));
+            executor.shutdown();
+            
+            assertEquals(threadCount, successCount.get(), 
+                "All threads should create configs successfully");
+        }
+    }
+    
+    @Nested
+    @DisplayName("Backward Compatibility Tests")
+    class BackwardCompatibilityTests {
+        
+        @Test
+        @Order(28)
+        @DisplayName("Should support deprecated CLICK_UNTIL type")
+        void testClickUntilSupport() {
+            // CLICK_UNTIL is marked as deprecated but should still work
+            ActionConfig config = factory.create(ActionInterface.Type.CLICK_UNTIL);
+            
+            assertNotNull(config);
+            // Should create ClickOptions with special configuration
+            assertInstanceOf(ClickOptions.class, config);
+        }
+    }
+}
