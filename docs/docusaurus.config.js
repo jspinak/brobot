@@ -32,16 +32,8 @@ const config = {
       '@docusaurus/plugin-client-redirects',
       {
         redirects: [
-          {
-            from: '/docs/tutorial-basics/live-automation',
-            to: '/docs/core-library/tutorials/tutorial-basics/live-automation',
-          },
-          // Version 1.0.6 already has the page at the correct location
-          // Version 1.0.7 redirect
-          {
-            from: '/docs/1.0.7/tutorial-basics/live-automation',
-            to: '/docs/1.0.7/core-library/tutorials/tutorial-basics/live-automation',
-          },
+          // All live-automation pages are already in their correct locations
+          // No redirects needed
         ],
       },
     ],

@@ -141,8 +141,53 @@ public class ScenePatternMatcher {
                 scene.getPattern().w() + "x" + scene.getPattern().h());
         }
         
-        // Create Finder and execute search
-        Finder f = getFinder(scene.getPattern().getImage());
+        // OPTIMIZATION: If pattern has a single constrained search region, search only that region
+        List<io.github.jspinak.brobot.model.element.Region> searchRegions = pattern.getRegionsForSearch();
+        boolean hasConstrainedRegion = false;
+        io.github.jspinak.brobot.model.element.Region constrainedRegion = null;
+        
+        // Check if we have exactly one search region that's not full screen
+        if (searchRegions.size() == 1) {
+            constrainedRegion = searchRegions.get(0);
+            // Check if this is NOT a full-screen region
+            if (!(constrainedRegion.x() == 0 && constrainedRegion.y() == 0 && 
+                  constrainedRegion.w() >= scene.getPattern().w() && 
+                  constrainedRegion.h() >= scene.getPattern().h())) {
+                hasConstrainedRegion = true;
+                ConsoleReporter.println("[OPTIMIZED SEARCH] Constraining search to region: " + constrainedRegion);
+            }
+        }
+        
+        Finder f;
+        int regionOffsetX = 0;
+        int regionOffsetY = 0;
+        
+        if (hasConstrainedRegion && scene.getPattern().getBImage() != null) {
+            // Extract sub-image for the constrained region
+            BufferedImage sceneImage = scene.getPattern().getBImage();
+            int x = Math.max(0, constrainedRegion.x());
+            int y = Math.max(0, constrainedRegion.y());
+            int w = Math.min(constrainedRegion.w(), sceneImage.getWidth() - x);
+            int h = Math.min(constrainedRegion.h(), sceneImage.getHeight() - y);
+            
+            if (w > 0 && h > 0 && w >= pattern.w() && h >= pattern.h()) {
+                // Region is valid and large enough for the pattern
+                BufferedImage subImage = sceneImage.getSubimage(x, y, w, h);
+                f = new Finder(subImage);
+                regionOffsetX = x;
+                regionOffsetY = y;
+                ConsoleReporter.println("[CONSTRAINED] Searching in sub-region: " + x + "," + y + " " + w + "x" + h);
+            } else {
+                // Region too small for pattern - impossible to find a match
+                ConsoleReporter.println("[SKIP] Search region (" + w + "x" + h + 
+                    ") is smaller than pattern (" + pattern.w() + "x" + pattern.h() + ") - no matches possible");
+                return new ArrayList<>();  // Return empty list immediately
+            }
+        } else {
+            // No constrained region or no BufferedImage, search entire scene
+            f = getFinder(scene.getPattern().getImage());
+        }
+        
         ConsoleReporter.println("[FINDER] Searching with similarity threshold: " + sikuliPattern.getSimilar());
         f.findAll(sikuliPattern);
         ConsoleReporter.println("[FINDER] Search completed, checking for matches...");
@@ -160,6 +205,13 @@ public class ScenePatternMatcher {
         
         while (f.hasNext()) {
             org.sikuli.script.Match sikuliMatch = f.next();
+            
+            // If we searched a sub-region, adjust coordinates back to scene coordinates
+            if (hasConstrainedRegion) {
+                sikuliMatch.x += regionOffsetX;
+                sikuliMatch.y += regionOffsetY;
+            }
+            
             Match nextMatch = new Match.Builder()
                     .setSikuliMatch(sikuliMatch)
                     .setName(pattern.getName())

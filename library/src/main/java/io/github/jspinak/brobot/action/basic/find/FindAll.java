@@ -142,9 +142,23 @@ public class FindAll {
         int i=0;
         String name = pattern.getName() != null && !pattern.getName().isEmpty() ?
                 pattern.getName() : scene.getPattern().getName();
+        List<Region> regionsAllowedForMatch = selectRegions.getRegions(actionConfig, stateImage);
+        
+        // Debug logging
+        System.out.println("[FILTER DEBUG] Pattern '" + name + "' has " + matchList.size() + " raw matches");
+        System.out.println("[FILTER DEBUG] Allowed regions (" + regionsAllowedForMatch.size() + "): " + regionsAllowedForMatch);
+        if (!regionsAllowedForMatch.isEmpty()) {
+            Region first = regionsAllowedForMatch.get(0);
+            System.out.println("[FILTER DEBUG] First region details: x=" + first.x() + " y=" + first.y() + 
+                              " w=" + first.w() + " h=" + first.h());
+        }
+        
         for (Match match : matchList) {
-            List<Region> regionsAllowedForMatch = selectRegions.getRegions(actionConfig, stateImage);
-            if (matchProofer.isInSearchRegions(match, regionsAllowedForMatch)) {
+            boolean inRegion = matchProofer.isInSearchRegions(match, regionsAllowedForMatch);
+            System.out.println("[FILTER DEBUG] Match at " + match.getRegion() + " score=" + 
+                String.format("%.3f", match.getScore()) + " in region? " + inRegion);
+            
+            if (inRegion) {
                 Match newMatch = new Match.Builder()
                         .setMatch(match)
                         .setName(name+"-"+i)
@@ -159,6 +173,8 @@ public class FindAll {
                 i++;
             }
         }
+        
+        System.out.println("[FILTER DEBUG] After filtering: " + i + " matches remain");
     }
     
     /**
