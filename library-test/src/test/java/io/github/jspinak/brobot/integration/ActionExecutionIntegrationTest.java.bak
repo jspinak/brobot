@@ -10,9 +10,12 @@ import io.github.jspinak.brobot.action.basic.click.ClickOptions;
 import io.github.jspinak.brobot.action.basic.type.TypeOptions;
 import io.github.jspinak.brobot.action.composite.drag.DragOptions;
 import io.github.jspinak.brobot.action.basic.mouse.MouseMoveOptions;
+<<<<<<< HEAD:library-test/src/test/java/io/github/jspinak/brobot/integration/ActionExecutionIntegrationTest.java
 import io.github.jspinak.brobot.action.basic.mouse.MousePressOptions;
 import io.github.jspinak.brobot.model.action.MouseButton;
 import io.github.jspinak.brobot.action.ObjectCollection;
+=======
+>>>>>>> coverage/agent-4:library-test/src/test/java/io/github/jspinak/brobot/integration/ActionExecutionIntegrationTest.java.bak
 import io.github.jspinak.brobot.action.basic.highlight.HighlightOptions;
 import io.github.jspinak.brobot.model.element.Location;
 import io.github.jspinak.brobot.model.element.Position;
@@ -193,6 +196,10 @@ public class ActionExecutionIntegrationTest extends BrobotTestBase {
         Location targetLocation = new Location(Positions.Name.MIDDLEMIDDLE);
         
         MouseMoveOptions moveOptions = new MouseMoveOptions.Builder()
+<<<<<<< HEAD:library-test/src/test/java/io/github/jspinak/brobot/integration/ActionExecutionIntegrationTest.java
+=======
+            .setLocation(targetLocation)
+>>>>>>> coverage/agent-4:library-test/src/test/java/io/github/jspinak/brobot/integration/ActionExecutionIntegrationTest.java.bak
             .build();
             
         // Create ObjectCollection for move target
