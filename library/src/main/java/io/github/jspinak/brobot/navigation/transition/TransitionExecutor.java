@@ -180,11 +180,20 @@ public class TransitionExecutor {
      * @return true if transition completes successfully
      */
     private boolean doTransitions(Long from, Long to) {
-        if (!stateMemory.getActiveStates().contains(from)) return false; // the 'from' State is not active
+        if (!stateMemory.getActiveStates().contains(from)) {
+            System.out.println("=== TRANSITION DEBUG: 'from' state " + from + " is not active. Active states: " + stateMemory.getActiveStates());
+            return false; // the 'from' State is not active
+        }
         Optional<TransitionFetcher> transitionsOpt = transitionFetcher.getTransitions(from, to);
-        if (transitionsOpt.isEmpty()) return false; // couldn't find one of the needed Transitions
+        if (transitionsOpt.isEmpty()) {
+            System.out.println("=== TRANSITION DEBUG: No transitions found from " + from + " to " + to);
+            return false; // couldn't find one of the needed Transitions
+        }
         TransitionFetcher transitions = transitionsOpt.get();
-        if (!transitions.getFromTransitionFunction().getAsBoolean()) return false; // the FromTransition didn't succeed
+        System.out.println("=== TRANSITION DEBUG: Executing FromTransition from " + from + " to " + to);
+        boolean transitionSuccess = transitions.getFromTransitionFunction().getAsBoolean();
+        System.out.println("=== TRANSITION DEBUG: FromTransition result = " + transitionSuccess);
+        if (!transitionSuccess) return false; // the FromTransition didn't succeed
         Set<Long> statesToActivate = getStatesToActivate(transitions, to);
         statesToActivate.forEach(stateName ->
                 allStatesInProjectService.getState(stateName).ifPresent(State::setProbabilityToBaseProbability));

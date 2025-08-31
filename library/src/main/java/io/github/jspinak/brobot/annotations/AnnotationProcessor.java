@@ -216,17 +216,27 @@ public class AnnotationProcessor {
         JavaStateTransition javaTransition = new JavaStateTransition.Builder()
                 .setFunction(() -> {
                     try {
+                        log.debug("=== TRANSITION INVOCATION: Attempting transition from {} to {}", fromName, toName);
+                        log.debug("  - Transition bean: {}", transitionBean.getClass().getSimpleName());
+                        log.debug("  - Method: {}", transitionMethod.getName());
+                        
                         Object result = transitionMethod.invoke(transitionBean);
+                        
                         if (result instanceof Boolean) {
-                            return (Boolean) result;
+                            boolean success = (Boolean) result;
+                            log.debug("=== TRANSITION RESULT: {} -> {} = {}", fromName, toName, success);
+                            return success;
                         } else if (result instanceof StateTransition) {
                             // For now, we assume StateTransition results are handled elsewhere
                             // In a full implementation, we'd need to execute the transition
+                            log.debug("=== TRANSITION RESULT: {} -> {} returned StateTransition (treating as true)", fromName, toName);
                             return true;
                         }
+                        log.warn("=== TRANSITION RESULT: {} -> {} returned unexpected type: {}", fromName, toName, 
+                                result == null ? "null" : result.getClass());
                         return false;
                     } catch (Exception e) {
-                        log.error("Error executing transition from {} to {}", fromName, toName, e);
+                        log.error("=== TRANSITION ERROR: Exception executing transition from {} to {}", fromName, toName, e);
                         return false;
                     }
                 })
