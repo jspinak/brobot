@@ -61,7 +61,8 @@ public class BrobotAutoConfiguration {
             .allowScreenCapture(!properties.getCore().isMock())
             .build();
         ExecutionEnvironment.setInstance(env);
-        System.out.println("[BrobotAutoConfiguration] Configured and providing ExecutionEnvironment bean: " + env.getEnvironmentInfo());
+        String mode = properties.getCore().isMock() ? "mock" : (env.hasDisplay() ? "display" : "headless");
+        System.out.println("[Brobot] Mode: " + mode);
         return env;
     }
 }

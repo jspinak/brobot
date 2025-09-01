@@ -157,19 +157,12 @@ public class BufferedImageUtilities {
         boolean shouldLog = !loggedImages.contains(path);
         if (shouldLog) {
             loggedImages.add(path);
-            ConsoleReporter.println("[IMAGE LOAD] Loading: " + path);
-            
-            // Check if file exists and log absolute path
             File file = new File(path);
             if (!file.isAbsolute()) {
                 file = new File(System.getProperty("user.dir"), path);
             }
-            ConsoleReporter.println("  -> Absolute path: " + file.getAbsolutePath());
-            ConsoleReporter.println("  -> File exists: " + file.exists());
-            
-            if (file.exists()) {
-                ConsoleReporter.println("  -> File size: " + file.length() + " bytes");
-            }
+            String status = file.exists() ? "found" : "not found";
+            ConsoleReporter.println("[IMAGE] " + path + " (" + status + ")");
         }
         
         // Try SmartImageLoader first if available
@@ -179,15 +172,12 @@ public class BufferedImageUtilities {
                 if (result.isSuccess()) {
                     BufferedImage img = instance.smartImageLoader.getFromCache(path);
                     if (shouldLog) {
-                        ConsoleReporter.println("  -> SmartImageLoader: " + img.getWidth() + "x" + img.getHeight() + 
-                            " type=" + getImageTypeName(img.getType()));
+                        ConsoleReporter.println("  -> " + img.getWidth() + "x" + img.getHeight());
                     }
                     return img;
                 }
             } catch (Exception e) {
-                if (shouldLog) {
-                    ConsoleReporter.println("  -> SmartImageLoader failed: " + e.getMessage());
-                }
+                // SmartImageLoader failed, continue to fallback
             }
         }
         
