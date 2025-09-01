@@ -132,9 +132,10 @@ public class ExecutionEnvironment {
         cachedHasDisplay = result;
         lastDisplayCheckTime = currentTime;
         
-        // Log only on first check or when cache expires
-        log.debug("[DISPLAY_CHECK] Display availability: {} (cached for {} ms)", 
-                result, DISPLAY_CHECK_CACHE_DURATION);
+        // Log only on first check
+        if (lastDisplayCheckTime == currentTime) {
+            log.debug("[DISPLAY_CHECK] Display: {}", result ? "available" : "unavailable");
+        }
         
         return result;
     }
@@ -160,9 +161,9 @@ public class ExecutionEnvironment {
         String os = System.getProperty("os.name").toLowerCase();
         boolean isMac = os.contains("mac");
         
-        // Only log detailed checks on first run or after cache expiry
+        // Log OS only on first run
         if (cachedHasDisplay == null) {
-            log.debug("[DISPLAY_CHECK] Performing initial display check - OS: {}, isMac: {}", os, isMac);
+            log.debug("[DISPLAY_CHECK] OS: {}", os.replace(" ", "_"));
         }
         
         // If explicitly set to headless, return false
@@ -176,9 +177,6 @@ public class ExecutionEnvironment {
         // Check if java.awt.headless is explicitly set to false - this overrides detection
         String headlessProp = System.getProperty("java.awt.headless");
         if ("false".equalsIgnoreCase(headlessProp)) {
-            if (cachedHasDisplay == null) {
-                log.debug("[DISPLAY_CHECK] java.awt.headless explicitly set to false, assuming display available");
-            }
             return true;
         }
         

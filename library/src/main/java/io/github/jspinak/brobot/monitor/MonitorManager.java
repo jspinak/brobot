@@ -41,8 +41,7 @@ public class MonitorManager {
         GraphicsDevice defaultDevice = ge.getDefaultScreenDevice();
         for (int i = 0; i < devices.length; i++) {
             if (devices[i].equals(defaultDevice)) {
-                log.info("Primary monitor detected using default screen device: Monitor {}", i);
-                return i;
+                return i; // Primary monitor is default screen device
             }
         }
         
@@ -61,11 +60,7 @@ public class MonitorManager {
             }
         }
         
-        MonitorInfo primaryInfo = monitorCache.get(closestIndex);
-        log.info("Primary monitor detected at position ({},{}): Monitor {}", 
-                 primaryInfo.getX(), primaryInfo.getY(), closestIndex);
-        
-        return closestIndex;
+        return closestIndex; // Primary monitor is closest to (0,0)
     }
     
     /**
@@ -104,20 +99,18 @@ public class MonitorManager {
                 return;
             }
             
-            log.info("Detected {} monitor(s)", devices.length);
-            
-            // First pass: collect all monitor info
+            // Collect all monitor info
+            StringBuilder monitorSummary = new StringBuilder();
             for (int i = 0; i < devices.length; i++) {
                 GraphicsDevice device = devices[i];
                 Rectangle bounds = device.getDefaultConfiguration().getBounds();
                 MonitorInfo info = new MonitorInfo(i, bounds, device.getIDstring());
                 monitorCache.put(i, info);
                 
-                if (properties.getMonitor().isLogMonitorInfo()) {
-                    log.info("Monitor {}: {} - Bounds: x={}, y={}, width={}, height={}", 
-                        i, info.getDeviceId(), bounds.x, bounds.y, bounds.width, bounds.height);
-                }
+                if (monitorSummary.length() > 0) monitorSummary.append(", ");
+                monitorSummary.append(String.format("Monitor %d: %dx%d", i, bounds.width, bounds.height));
             }
+            log.info(monitorSummary.toString());
             
             // Second pass: determine the primary monitor
             primaryMonitorIndex = detectPrimaryMonitor(devices, ge);

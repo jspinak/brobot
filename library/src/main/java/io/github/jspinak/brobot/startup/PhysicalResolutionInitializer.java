@@ -28,13 +28,10 @@ public class PhysicalResolutionInitializer {
         // Check if we're in headless mode
         String headlessProperty = System.getProperty("java.awt.headless");
         if ("true".equalsIgnoreCase(headlessProperty)) {
-            System.out.println("PhysicalResolutionInitializer: Skipping - running in headless mode");
+            // Skip configuration in headless mode
             initialized = true;
             return;
         }
-        
-        System.out.println("\n=== Brobot Physical Resolution Initializer ===");
-        System.out.println("Setting JVM properties for physical resolution...");
         
         // CRITICAL: Disable DPI awareness completely
         // This makes modern Java behave like Java 8
@@ -60,10 +57,7 @@ public class PhysicalResolutionInitializer {
         
         initialized = true;
         
-        System.out.println("✓ DPI awareness disabled");
-        System.out.println("✓ All operations will use physical pixels");
-        System.out.println("✓ Pattern matching will work like SikuliX IDE");
-        System.out.println("===============================================\n");
+        System.out.println("[Brobot] Physical resolution mode enabled");
     }
     
     /**

@@ -585,7 +585,7 @@ public class RegionBuilder {
         int finalWidth = calculateWidth();
         int finalHeight = calculateHeight();
         
-        log.debug("After calculate: x={}, y={}, w={}, h={}", finalX, finalY, finalWidth, finalHeight);
+        // Calculated initial position and size
         
         // Apply relative positioning if specified
         if (relativeToRegion != null && relativePosition != null) {
@@ -601,15 +601,14 @@ public class RegionBuilder {
         finalWidth += widthAdjustment;
         finalHeight += heightAdjustment;
         
-        log.debug("After adjustments: x={}, y={}, w={}, h={}", finalX, finalY, finalWidth, finalHeight);
+        // Applied adjustments
         
         // Apply anchor positioning
         int[] anchored = applyAnchor(finalX, finalY, finalWidth, finalHeight);
         finalX = anchored[0];
         finalY = anchored[1];
         
-        log.debug("After anchor: x={}, y={}, w={}, h={}, anchorName={}, anchorPosition={}", 
-                 finalX, finalY, finalWidth, finalHeight, anchorName, anchorPosition);
+        // Applied anchor positioning
         
         // Constrain to screen if needed
         if (constrainToScreen) {
@@ -623,14 +622,13 @@ public class RegionBuilder {
         finalWidth = Math.max(1, finalWidth);
         finalHeight = Math.max(1, finalHeight);
         
-        log.debug("Built region: x={}, y={}, w={}, h={} (screen: {}x{})", 
-                 finalX, finalY, finalWidth, finalHeight, currentScreenWidth, currentScreenHeight);
+        log.debug("Region: [{},{} {}x{}]", finalX, finalY, finalWidth, finalHeight);
         
         return new Region(finalX, finalY, finalWidth, finalHeight);
     }
     
     private int calculateX() {
-        log.debug("calculateX: xPercent={}, x={}", xPercent, x);
+        // Calculate X position
         if (xPercent != null) {
             return (int) Math.round(currentScreenWidth * xPercent);
         }
