@@ -82,8 +82,15 @@ public class AnnotationProcessor {
         log.info("Total states in StateService: {}", stateService.getAllStates().size());
         
         // Publish event to signal that states are registered
-        eventPublisher.publishEvent(new StatesRegisteredEvent(this, stateMap.size(), transitionCount));
-        log.info("Published StatesRegisteredEvent");
+        try {
+            log.info("[EVENT DEBUG] About to publish StatesRegisteredEvent with {} states and {} transitions", 
+                    stateMap.size(), transitionCount);
+            StatesRegisteredEvent event = new StatesRegisteredEvent(this, stateMap.size(), transitionCount);
+            eventPublisher.publishEvent(event);
+            log.info("[EVENT DEBUG] Published StatesRegisteredEvent successfully");
+        } catch (Exception e) {
+            log.error("[EVENT DEBUG] Failed to publish StatesRegisteredEvent", e);
+        }
     }
     
     private Map<Class<?>, Object> processStates() {

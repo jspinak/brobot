@@ -8,6 +8,7 @@ import io.github.jspinak.brobot.annotations.StatesRegisteredEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
+import jakarta.annotation.PostConstruct;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,7 +29,12 @@ public class SearchRegionDependencyInitializer {
                                            DynamicRegionResolver dynamicRegionResolver) {
         this.stateStore = stateStore;
         this.dynamicRegionResolver = dynamicRegionResolver;
-        log.info("SearchRegionDependencyInitializer constructor called");
+        log.info("[INIT DEBUG] SearchRegionDependencyInitializer constructor called");
+    }
+    
+    @PostConstruct
+    public void init() {
+        log.info("[INIT DEBUG] SearchRegionDependencyInitializer @PostConstruct called - bean is active!");
     }
     
     /**
@@ -37,7 +43,7 @@ public class SearchRegionDependencyInitializer {
      */
     @EventListener(StatesRegisteredEvent.class)
     public void onStatesRegistered(StatesRegisteredEvent event) {
-        log.info("SearchRegionDependencyInitializer: Received StatesRegisteredEvent with {} states", 
+        log.info("[INIT DEBUG] SearchRegionDependencyInitializer: Received StatesRegisteredEvent with {} states", 
                 event.getStateCount());
         initializeDependencies();
     }
@@ -47,19 +53,22 @@ public class SearchRegionDependencyInitializer {
      * This method collects all state objects and registers their dependencies.
      */
     private void initializeDependencies() {
-        log.info("SearchRegionDependencyInitializer: Starting dependency registration");
+        log.info("[INIT DEBUG] SearchRegionDependencyInitializer: Starting dependency registration");
         
         List<StateObject> allObjects = new ArrayList<>();
         
         // Collect all state objects from all states
         for (State state : stateStore.getAllStates()) {
-            log.debug("Processing state: {}", state.getClass().getSimpleName());
+            log.info("[INIT DEBUG] Processing state: {}", state.getClass().getSimpleName());
             allObjects.addAll(state.getStateImages());
             allObjects.addAll(state.getStateLocations());
             allObjects.addAll(state.getStateRegions());
         }
         
-        log.info("Found {} state objects to process for dependencies", allObjects.size());
+        log.info("[INIT DEBUG] Found {} state objects to process for dependencies", allObjects.size());
+        for (StateObject obj : allObjects) {
+            log.info("[INIT DEBUG] Object: {} (owner: {})", obj.getName(), obj.getOwnerStateName());
+        }
         
         // Register dependencies with the resolver
         dynamicRegionResolver.registerDependencies(allObjects);

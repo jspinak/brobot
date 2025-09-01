@@ -207,14 +207,18 @@ public class DynamicRegionResolver {
      * This should be called when states are initialized.
      */
     public void registerDependencies(List<StateObject> objects) {
-        log.info("DynamicRegionResolver: Registering dependencies for {} objects", objects.size());
+        log.info("[DYNAMIC DEBUG] DynamicRegionResolver: Registering dependencies for {} objects", objects.size());
         int registeredCount = 0;
         
         for (StateObject obj : objects) {
             if (obj instanceof StateImage) {
                 StateImage stateImage = (StateImage) obj;
                 if (stateImage.getSearchRegionOnObject() != null) {
-                    log.debug("Registering dependency for StateImage: {}", stateImage.getName());
+                    log.info("[DYNAMIC DEBUG] Registering dependency for StateImage: {} (owner: {})", 
+                        stateImage.getName(), stateImage.getOwnerStateName());
+                    log.info("[DYNAMIC DEBUG] Depends on: {}:{}", 
+                        stateImage.getSearchRegionOnObject().getTargetStateName(),
+                        stateImage.getSearchRegionOnObject().getTargetObjectName());
                     dependencyRegistry.registerDependency(stateImage, stateImage.getSearchRegionOnObject());
                     registeredCount++;
                 }
@@ -238,25 +242,30 @@ public class DynamicRegionResolver {
      */
     public void updateDependentSearchRegions(ActionResult actionResult) {
         List<Match> matches = actionResult.getMatchList();
-        log.debug("updateDependentSearchRegions: Processing {} matches", matches.size());
+        log.info("[DYNAMIC DEBUG] updateDependentSearchRegions: Processing {} matches", matches.size());
         
         for (Match match : matches) {
             if (match.getStateObjectData() == null) {
-                log.debug("Match has no StateObjectData, skipping");
+                log.info("[DYNAMIC DEBUG] Match '{}' has no StateObjectData, skipping", match.getName());
                 continue;
             }
             
             String sourceName = match.getStateObjectData().getOwnerStateName();
             String sourceObject = match.getStateObjectData().getStateObjectName();
-            log.debug("Looking for dependents of {}:{}", sourceName, sourceObject);
+            log.info("[DYNAMIC DEBUG] Looking for dependents of {}:{} (match at {})", 
+                sourceName, sourceObject, match.getRegion());
             
             // Get all objects that depend on this match
             Set<SearchRegionDependencyRegistry.DependentObject> dependents = 
                 dependencyRegistry.getDependents(sourceName, sourceObject);
             
-            log.debug("Found {} dependents for {}:{}", dependents.size(), sourceName, sourceObject);
+            log.info("[DYNAMIC DEBUG] Found {} dependents for {}:{}", 
+                dependents.size(), sourceName, sourceObject);
             
             for (SearchRegionDependencyRegistry.DependentObject dependent : dependents) {
+                log.info("[DYNAMIC DEBUG] Updating dependent: {}:{}", 
+                    dependent.getStateObject().getOwnerStateName(), 
+                    dependent.getStateObject().getName());
                 updateDependentSearchRegion(dependent, match);
             }
         }

@@ -206,16 +206,28 @@ public class ScenePatternMatcher {
         while (f.hasNext()) {
             org.sikuli.script.Match sikuliMatch = f.next();
             
+            // Debug: Log raw match coordinates before adjustment
+            ConsoleReporter.println("[COORD DEBUG] Raw match from finder: x=" + sikuliMatch.x + 
+                " y=" + sikuliMatch.y + " w=" + sikuliMatch.w + " h=" + sikuliMatch.h);
+            
             // If we searched a sub-region, adjust coordinates back to scene coordinates
             if (hasConstrainedRegion) {
+                ConsoleReporter.println("[COORD DEBUG] Applying offsets: regionOffsetX=" + regionOffsetX + 
+                    " regionOffsetY=" + regionOffsetY);
                 sikuliMatch.x += regionOffsetX;
                 sikuliMatch.y += regionOffsetY;
+                ConsoleReporter.println("[COORD DEBUG] Adjusted match: x=" + sikuliMatch.x + 
+                    " y=" + sikuliMatch.y + " w=" + sikuliMatch.w + " h=" + sikuliMatch.h);
             }
             
             Match nextMatch = new Match.Builder()
                     .setSikuliMatch(sikuliMatch)
                     .setName(pattern.getName())
                     .build();
+            
+            // Debug: Log final Match coordinates
+            ConsoleReporter.println("[COORD DEBUG] Final Match region: " + nextMatch.getRegion());
+            
             matchList.add(nextMatch);
             
             if (sikuliMatch.getScore() > bestScore) {
@@ -265,7 +277,11 @@ public class ScenePatternMatcher {
         } else {
             // Update fixed region if needed
             if (bestMatch != null && pattern.isFixed()) {
+                ConsoleReporter.println("[FIXED DEBUG] Setting fixed region for pattern '" + pattern.getName() + 
+                    "' to: " + bestMatch.getRegion());
                 pattern.getSearchRegions().setFixedRegion(bestMatch.getRegion());
+                ConsoleReporter.println("[FIXED DEBUG] Fixed region now set. getRegionsForSearch() returns: " + 
+                    pattern.getRegionsForSearch());
             }
         }
         
