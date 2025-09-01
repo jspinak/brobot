@@ -274,15 +274,6 @@ public class ScenePatternMatcher {
             if (pattern.getName() != null && pattern.getName().toLowerCase().contains("prompt")) {
                 saveDebugImages(pattern, scene);
             }
-        } else {
-            // Update fixed region if needed
-            if (bestMatch != null && pattern.isFixed()) {
-                ConsoleReporter.println("[FIXED DEBUG] Setting fixed region for pattern '" + pattern.getName() + 
-                    "' to: " + bestMatch.getRegion());
-                pattern.getSearchRegions().setFixedRegion(bestMatch.getRegion());
-                ConsoleReporter.println("[FIXED DEBUG] Fixed region now set. getRegionsForSearch() returns: " + 
-                    pattern.getRegionsForSearch());
-            }
         }
         
         // Capture best match for debugging if enabled

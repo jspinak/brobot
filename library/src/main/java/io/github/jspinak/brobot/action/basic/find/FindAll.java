@@ -175,6 +175,29 @@ public class FindAll {
         }
         
         System.out.println("[FILTER DEBUG] After filtering: " + i + " matches remain");
+        
+        // Set fixed region for the pattern if it's marked as fixed and we have valid matches
+        if (pattern.isFixed() && !allMatchObjects.isEmpty()) {
+            // Find the best match among the filtered matches
+            Match bestMatch = null;
+            double bestScore = 0;
+            for (Match match : allMatchObjects) {
+                if (match.getScore() > bestScore) {
+                    bestScore = match.getScore();
+                    bestMatch = match;
+                }
+            }
+            
+            if (bestMatch != null && bestScore >= 0.7) { // Use default similarity threshold
+                System.out.println("[FIXED REGION] Setting fixed region for pattern '" + name + 
+                    "' to best match at " + bestMatch.getRegion() + " with score " + 
+                    String.format("%.3f", bestScore));
+                pattern.getSearchRegions().setFixedRegion(bestMatch.getRegion());
+            } else {
+                System.out.println("[FIXED REGION] Not setting fixed region - best score " + 
+                    String.format("%.3f", bestScore) + " below threshold");
+            }
+        }
     }
     
     /**
@@ -186,6 +209,8 @@ public class FindAll {
         int i=0;
         String name = pattern.getName() != null && !pattern.getName().isEmpty() ?
                 pattern.getName() : scene.getPattern().getName();
+        List<Match> validMatches = new ArrayList<>();
+        
         for (Match match : matchList) {
             List<Region> regionsAllowedForMatch = selectRegions.getRegions(findOptions, stateImage);
             if (matchProofer.isInSearchRegions(match, regionsAllowedForMatch)) {
@@ -200,7 +225,31 @@ public class FindAll {
                         .setScene(scene)
                         .build();
                 allMatchObjects.add(newMatch);
+                validMatches.add(newMatch);
                 i++;
+            }
+        }
+        
+        // Set fixed region for the pattern if it's marked as fixed and we have valid matches
+        if (pattern.isFixed() && !validMatches.isEmpty()) {
+            // Find the best match among the filtered matches
+            Match bestMatch = null;
+            double bestScore = 0;
+            for (Match match : validMatches) {
+                if (match.getScore() > bestScore) {
+                    bestScore = match.getScore();
+                    bestMatch = match;
+                }
+            }
+            
+            // Use the similarity from findOptions
+            double minSimilarity = findOptions.getSimilarity();
+            
+            if (bestMatch != null && bestScore >= minSimilarity) {
+                System.out.println("[FIXED REGION] Setting fixed region for pattern '" + name + 
+                    "' to best match at " + bestMatch.getRegion() + " with score " + 
+                    String.format("%.3f", bestScore));
+                pattern.getSearchRegions().setFixedRegion(bestMatch.getRegion());
             }
         }
     }
