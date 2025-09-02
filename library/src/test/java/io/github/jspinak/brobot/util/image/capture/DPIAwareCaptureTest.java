@@ -197,7 +197,7 @@ public class DPIAwareCaptureTest extends BrobotTestBase {
                 assertEquals(200, result.getHeight());
                 
                 Screen screen = screenMock.constructed().get(0);
-                verify(screen).capture(argThat(region -> 
+                verify(screen).capture(argThat((Region region) -> 
                     region.x == 10 && region.y == 20 && 
                     region.w == 200 && region.h == 200));
             }
@@ -250,7 +250,7 @@ public class DPIAwareCaptureTest extends BrobotTestBase {
                     "Height should be 200 (scaled) or 300 (original)");
                 
                 Screen screen = screenMock.constructed().get(0);
-                verify(screen).capture(argThat(region -> 
+                verify(screen).capture(argThat((Region region) -> 
                     region.x == 15 && region.y == 30 && 
                     region.w == 300 && region.h == 300)); // 1.5x scaling
             }

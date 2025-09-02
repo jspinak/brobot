@@ -7,7 +7,9 @@ import org.sikuli.script.Region;
 import org.sikuli.script.Button;
 import org.springframework.stereotype.Component;
 
+import java.awt.*;
 import java.awt.event.InputEvent;
+import java.awt.GraphicsEnvironment;
 
 /**
  * Sikuli-based implementation of the MouseController interface.
@@ -213,17 +215,19 @@ public class SikuliMouseController implements MouseController {
                 location = new Location(0, 0);
             }
             
+            // Create a small region at the mouse location for wheel operation
+            org.sikuli.script.Region region = new org.sikuli.script.Region(location.x, location.y, 1, 1);
+            
             // Sikuli wheel method: positive = down, negative = up
-            // Robot's mouseWheel: positive = down, negative = up
-            // So we negate to match Robot's behavior
-            int result = location.wheel(Button.WHEEL_DOWN, -wheelAmt);
-            if (result == 0) {
-                // Try alternative if wheel failed
-                result = Mouse.wheel(Button.WHEEL_DOWN, -wheelAmt);
-            }
+            // Robot's mouseWheel: positive = down, negative = up  
+            // Direction: -1 for up, 1 for down
+            int direction = wheelAmt > 0 ? 1 : -1;
+            int steps = Math.abs(wheelAmt);
+            
+            region.wheel(direction, steps);
             
             ConsoleReporter.println("[SikuliMouseController] Scrolled " + wheelAmt + " units");
-            return result != 0;
+            return true;
         } catch (Exception e) {
             ConsoleReporter.println("[SikuliMouseController] Error scrolling: " + e.getMessage());
             return false;

@@ -3,6 +3,10 @@ package io.github.jspinak.brobot.runner.ui.utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.sikuli.script.Screen;
+import org.sikuli.script.ScreenImage;
+import org.sikuli.script.Region;
+
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -16,8 +20,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Pure Java desktop screenshot utility that doesn't rely on native libraries.
- * Uses AWT Robot for cross-platform screenshot capture.
+ * Desktop screenshot utility using SikuliX Screen API.
+ * Uses SikuliX Screen for cross-platform screenshot capture.
  * Runs captures in separate threads to avoid UI freezing.
  */
 public class DesktopScreenshotUtil {
@@ -183,31 +187,44 @@ public class DesktopScreenshotUtil {
      */
     private static String captureRegionInternal(Rectangle region, String filename) {
         try {
-            // Create robot with the default screen device
-            GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-            GraphicsDevice defaultScreen = ge.getDefaultScreenDevice();
-            Robot robot = new Robot(defaultScreen);
+            // Create SikuliX screen instance
+            Screen screen = new Screen();
             
-            // Set robot auto-delay to ensure screen is ready
-            robot.setAutoDelay(50);
-            robot.setAutoWaitForIdle(true);
-            
-            // Wait a bit more to ensure screen content is rendered
+            // Wait to ensure screen content is rendered
             Thread.sleep(200);
             
             logger.info("Capturing region: x={}, y={}, width={}, height={}", 
                 region.x, region.y, region.width, region.height);
             
-            BufferedImage capture = robot.createScreenCapture(region);
+            BufferedImage capture;
+            if (region.x == 0 && region.y == 0 && 
+                region.width == Toolkit.getDefaultToolkit().getScreenSize().width &&
+                region.height == Toolkit.getDefaultToolkit().getScreenSize().height) {
+                // Full screen capture
+                ScreenImage screenImage = screen.capture();
+                capture = screenImage.getImage();
+            } else {
+                // Region capture
+                Region sikuliRegion = new Region(region.x, region.y, region.width, region.height);
+                ScreenImage screenImage = screen.capture(sikuliRegion);
+                capture = screenImage.getImage();
+            }
             
             // Check if image is valid
             if (isImageBlack(capture)) {
                 logger.warn("Captured image appears to be all black - retrying with different approach");
                 
-                // Try alternative capture method
-                robot = new Robot(); // Use default constructor
+                // Try alternative capture method - full screen
                 Thread.sleep(500); // Wait longer
-                capture = robot.createScreenCapture(region);
+                ScreenImage screenImage = screen.capture();
+                capture = screenImage.getImage();
+                
+                // If we needed a region, crop the full screen capture
+                if (!(region.x == 0 && region.y == 0 && 
+                      region.width == Toolkit.getDefaultToolkit().getScreenSize().width &&
+                      region.height == Toolkit.getDefaultToolkit().getScreenSize().height)) {
+                    capture = capture.getSubimage(region.x, region.y, region.width, region.height);
+                }
             }
             
             return saveImage(capture, filename);
@@ -319,13 +336,14 @@ public class DesktopScreenshotUtil {
         try {
             listMonitors();
             
-            // Try to create a robot to test permissions
-            Robot testRobot = new Robot();
-            logger.info("Robot created successfully - screen capture should work");
+            // Try to create a screen instance to test permissions
+            Screen testScreen = new Screen();
+            logger.info("SikuliX Screen created successfully - screen capture should work");
             
             // Test a small capture
-            Rectangle testRect = new Rectangle(0, 0, 10, 10);
-            BufferedImage testImage = testRobot.createScreenCapture(testRect);
+            Region testRegion = new Region(0, 0, 10, 10);
+            ScreenImage testScreenImage = testScreen.capture(testRegion);
+            BufferedImage testImage = testScreenImage.getImage();
             if (testImage != null) {
                 logger.info("Test capture successful");
                 return true;

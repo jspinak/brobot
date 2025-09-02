@@ -190,8 +190,11 @@ public class ScreenCaptureValidator {
         } catch (Exception e) {
             // Log error and return null
             if (logger != null) {
-                logger.logEvent(LogEvent.ERROR("Failed to capture screen using SikuliX")
-                    .setError(e));
+                logger.log()
+                    .level(LogEvent.Level.ERROR)
+                    .message("Failed to capture screen using SikuliX")
+                    .error(e)
+                    .log();
             }
             return null;
         }
